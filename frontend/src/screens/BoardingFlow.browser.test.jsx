@@ -88,19 +88,41 @@ function type(el, value) {
   el.dispatchEvent(new Event('input', { bubbles: true }))
 }
 
-async function renderFlow({ onComplete = vi.fn(), username = 'Tester', dryRun = false } = {}) {
+async function renderFlow({
+  onComplete = vi.fn(), username = 'Tester', dryRun = false,
+  onExit = undefined, onSignIn = undefined, guest = false,
+} = {}) {
   const screen = await render(
     <LangProvider>
       <BoardingFlow
         session={{ access_token: 'tok' }}
         initialProfile={{ username, level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
         onComplete={onComplete}
+        onExit={onExit}
+        onSignIn={onSignIn}
+        guest={guest}
         dryRun={dryRun}
       />
     </LangProvider>
   )
   await settle(120)
   return { screen, onComplete }
+}
+
+// Name → … → plan, by the shortest road: both scripts, N1, so the goal
+// stop drops out and every remaining answer is already the default.
+async function walkToPlan(screen) {
+  await passName(screen)
+  await click(screen, '[data-kana="both"]')
+  await settle()
+  await click(screen, '[data-level="N1"]')
+  await click(screen, '[data-action="continue"]')
+  await settle()
+  await click(screen, '[data-action="continue"]')
+  await settle()
+  await click(screen, '[data-action="continue"]')
+  await settle()
+  await passBuilding(screen)
 }
 
 // Name → why: the saved name is kept, so no write happens here.
@@ -146,7 +168,9 @@ describe('BoardingFlow', () => {
   it('walks name → why → kana (both) → level → goal → rhythm → time → building → plan → pass and POSTs the whole contract once', async () => {
     const { screen, onComplete } = await renderFlow()
 
-    // 1/7 on the web: no nudge stop. The first screen has no back.
+    // 1/7 on the web: no nudge stop. Back on the first screen leaves the
+    // flow, so with no `onExit` to leave for there is no button — the
+    // guest boarding always passes one (see its own tests below).
     expect(stepOf(screen)).toBe('name')
     expect(screen.container.querySelector('.brd__count').textContent).toBe('1/7')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
@@ -454,5 +478,76 @@ describe('BoardingFlow', () => {
     expect(onComplete).toHaveBeenCalledTimes(1)
     expect(apiJsonWithTimeout).not.toHaveBeenCalled()
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+  })
+
+  // ── 仮乗車券 — boarding without an account ──────────────────────
+  // The account moved from the door to the end of the line, and became
+  // refusable. Three things carry that: a way back out of the first
+  // question, a named way to an account you already have, and a last
+  // stop that takes no for an answer.
+
+  it('leaves for Welcome from the first question, where the sign-in is', async () => {
+    const onExit = vi.fn()
+    const { screen } = await renderFlow({ onExit })
+    expect(stepOf(screen)).toBe('name')
+    const back = screen.container.querySelector('button.brd__back')
+    expect(back).not.toBeNull()
+    back.click()
+    await settle(20)
+    expect(onExit).toHaveBeenCalledTimes(1)
+
+    // Once inside the flow, back is back again — leaving is only ever
+    // the first question's meaning of it.
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('why')
+    screen.container.querySelector('button.brd__back').click()
+    await settle()
+    expect(stepOf(screen)).toBe('name')
+    expect(onExit).toHaveBeenCalledTimes(1)
+  })
+
+  it('names the way to an account you already have, on the very first screen', async () => {
+    const onSignIn = vi.fn()
+    const { screen } = await renderFlow({ onSignIn })
+    await click(screen, '[data-action="sign-in"]')
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+  })
+
+  it('asks a guest for an account at the END, and takes no for an answer', async () => {
+    const onSignIn = vi.fn()
+    const { screen } = await renderFlow({ guest: true, onSignIn })
+    await walkToPlan(screen)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+
+    // The last stop before the pass, not the first before anything.
+    expect(stepOf(screen)).toBe('account')
+    expect(apiJsonWithTimeout).not.toHaveBeenCalled()
+    // Nothing is created from nothing here: no credentials, no way on
+    // through the gold button.
+    expect(q(screen, '[data-action="account-create"]').disabled).toBe(true)
+    // …and the account you already have is reachable from here too.
+    await click(screen, '[data-action="account-sign-in"]')
+    expect(onSignIn).toHaveBeenCalledTimes(1)
+
+    // The refusal is the point of the screen.
+    await click(screen, '[data-action="account-skip"]')
+    await settle()
+    expect(stepOf(screen)).toBe('pass')
+    await click(screen, '[data-action="enter"]')
+    await settle(80)
+    // Refusing the account changes nothing about the contract: the same
+    // single POST, on the same real account the guest has been filling
+    // in all along.
+    expect(apiJsonWithTimeout.mock.calls.filter(c => c[0] === '/api/onboarding/complete')).toHaveLength(1)
+  })
+
+  it('does not ask twice: a learner who already has credentials goes straight to the pass', async () => {
+    const { screen } = await renderFlow({ guest: false })
+    await walkToPlan(screen)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('pass')
   })
 })

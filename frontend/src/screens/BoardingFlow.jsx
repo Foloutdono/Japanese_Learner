@@ -22,14 +22,33 @@ import NudgeStep from '../components/boarding/NudgeStep'
 import Building from '../components/boarding/Building'
 import PlanStep from '../components/boarding/PlanStep'
 import PassStep from '../components/boarding/PassStep'
+import AccountStep from '../components/boarding/AccountStep'
 
 // ── 乗車 — the boarding (plan 075) ────────────────────────────────
 // The canvas's boarding, the owner's sketch drawn: name → why → the
 // kana check → (the reveal | the level) → goal → rhythm → the hour →
-// (the nudge, native only) → building → the plan → the pass. Welcome
-// is step zero, before the account exists (components/boarding/
-// Welcome.jsx, mounted by App.jsx in place of the old landing page);
-// the offer stays out while domain/credits.js's HAS_STORE is false.
+// (the nudge, native only) → building → the plan → (the account) →
+// the pass. Welcome is step zero (components/boarding/Welcome.jsx,
+// mounted by App.jsx in place of the old landing page); the offer
+// stays out while domain/credits.js's HAS_STORE is false.
+//
+// The account is asked for at the END, and refusably. Boarding starts
+// on a guest pass — a real Supabase user with no credentials on it, so
+// every question here writes to real server-side state (lib/guest.js
+// explains why that is a whole account rather than a local shadow) —
+// and `account` offers to put an email and a password onto the very
+// row the learner has been filling in. Nothing is migrated because
+// nothing moved. A learner who says no rides on exactly as they were.
+// The step is skipped for anyone who already has real credentials,
+// which is how an interrupted sign-up resumes without being asked
+// twice.
+//
+// `onExit` is the way back OUT of the first question: back on step one
+// has nowhere to go inside the flow, so it leaves for Welcome, where
+// the sign-in is. `onSignIn` is the same door named directly, offered
+// on the name screen and again at the account step, so a returning
+// learner who tapped Embarquer by mistake is one tap from where they
+// meant to be.
 //
 // The track at the head is the progress bar -- one stop per question,
 // the train where you are; the three arrival screens have no track and
@@ -72,7 +91,10 @@ function trackStops(answers) {
   ]
 }
 
-export default function BoardingFlow({ session, initialProfile, onComplete, dryRun = false }) {
+export default function BoardingFlow({
+  session, initialProfile, onComplete, onExit = null, onSignIn = null,
+  guest = false, dryRun = false,
+}) {
   const { t, lang } = useLang()
   const profile = { level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, username: '', ...(initialProfile ?? {}) }
 
@@ -259,6 +281,7 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
             value={answers.name}
             onChange={v => { set({ name: v }); setNameError(null) }}
             onContinue={continueName}
+            onSignIn={onSignIn}
             error={nameError}
             busy={busy}
           />
@@ -315,7 +338,15 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
             goal={answers.goal}
             figures={figures}
             now={now}
-            onContinue={() => go('pass')}
+            onContinue={() => go(guest ? 'account' : 'pass')}
+          />
+        )
+      case 'account':
+        return (
+          <AccountStep
+            onCreated={() => go('pass')}
+            onSkip={() => go('pass')}
+            onSignIn={onSignIn}
           />
         )
       case 'pass':
@@ -327,7 +358,7 @@ export default function BoardingFlow({ session, initialProfile, onComplete, dryR
 
   return (
     <main className="brd" id="main-content" data-step={step} ref={frameRef}>
-      {onTrack && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : null} />}
+      {onTrack && <BoardHead index={index} total={total} onBack={history.length > 0 ? back : onExit} />}
       <div className="brd__cars">
         {leaving && (
           <div className="brd__car brd__car--out" data-dir={leaving.dir} aria-hidden="true" inert>

@@ -1085,6 +1085,14 @@ const settings = {
   language:          'Langue',
   account:           'Compte',
   signOutDesc:       'Déconnectez votre compte sur cet appareil.',
+  // Un invité n'a pas de clé : se déconnecter efface le trajet pour
+  // de bon. La ligne le dit, plutôt que de le laisser découvrir.
+  signOutGuestDesc:  'Sans compte, votre progression ne vit que sur cet appareil : vous déconnecter l\u2019effacera définitivement.',
+  guestLabel:        'Compte invité',
+  guestCap:          'Aucune adresse',
+  guestClaimDesc:    'Votre progression est déjà là. Ajoutez une adresse et un mot de passe pour la garder — rien n\u2019est déplacé, c\u2019est le même compte.',
+  guestClaimConfirm: 'Presque : confirmez l\u2019adresse depuis le lien que nous venons de vous envoyer.',
+  guestClaimDone:    'Compte créé. Votre progression est gardée.',
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
@@ -1372,6 +1380,13 @@ const boarding = {
   brdTagline: 'En route vers la maîtrise.',
   brdBoard: 'Embarquer',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
+  // Dernier arrêt : le compte, proposé une fois tout vu — et
+  // refusable. « Garder » plutôt que « créer » : la progression
+  // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
+  brdAccountQ: 'Gardez votre progression.',
+  brdAccountHint: 'Votre parcours est déjà enregistré. Un compte vous permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
+  brdAccountCreate: 'Créer mon compte',
+  brdAccountSkip: 'Continuer sans compte',
   brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', listening: 'Écoute', reading: 'Lecture', kana: 'Kana', exam: 'Examen blanc' },
   brdDemoMeaning: { station: 'gare', toEat: 'manger', fillIn: 'À compléter', craft: 'métier', listen: 'Écoutez', readIt: 'Lisez', ticket: 'billet', mountain: 'montagne', kippu: 'ki · p · pu', timer: '24:18' },
   brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', ruleSentence: 'Règle → phrase', meaningKanji: 'Sens → kanji', soundMeaning: 'Son → sens', sentenceMeaning: 'Phrase → sens', kanjiReading: 'Kanji → lecture', kanaSound: 'Kana → son', timedPaper: 'Épreuve chronométrée' },
