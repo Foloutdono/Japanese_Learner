@@ -25,11 +25,17 @@ import { StageMark } from '../components/study/StageMark'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
+import { SOURCES } from '../components/analysis/sources'
+import { TextLinesIcon, CameraIcon, VideoIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
 const ANALYZER_COLOR = 'var(--line-kaiseki)'
+// A platform's glyph on the analyzer's door, keyed by the registry
+// (components/analysis/sources.js) so a fourth intake cannot get a
+// door with nothing drawn on it.
+const INTAKE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
 
 const LIMIT = 50
 
@@ -60,6 +66,15 @@ export default function DictionaryScreen({ session }) {
 	const navigate = useNavigate()
 	const station = stationFor('/dictionary')
 	const analyzerStation = stationFor('/dictionary/analyzer')
+
+	// The door, and its three intakes. `?intake=` is the analyzer's own
+	// deep link (screens/AnalyzerScreen.jsx reads it once, on mount):
+	// the platform is a mode of one screen, not a page of its own, so it
+	// travels as a query rather than a path.
+	function openAnalyzer(intake = null) {
+		playUi('click-screen-selection')
+		navigate(intake ? `/dictionary/analyzer?intake=${intake}` : '/dictionary/analyzer')
+	}
 	const CATEGORIES = categoriesFor(t)
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
@@ -331,18 +346,38 @@ export default function DictionaryScreen({ session }) {
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
 			    (plan 069, HAS_STORE). */}
-			<button type="button" className="anl-door" onClick={() => { playUi('click-screen-selection'); navigate('/dictionary/analyzer') }}>
-				<span className="wmap-roundel anl-door__roundel" style={{ '--line-color': ANALYZER_COLOR }} aria-hidden="true">{analyzerStation.code}</span>
-				<span className="anl-door__names">
-					<span className="anl-door__title">{t.analyzerTitle}</span>
-					<span className="anl-door__desc">{t.analyzerDoorSub}</span>
+			<div className="anl-door">
+				<button type="button" className="anl-door__open" onClick={() => openAnalyzer()}>
+					<span className="wmap-roundel anl-door__roundel" style={{ '--line-color': ANALYZER_COLOR }} aria-hidden="true">{analyzerStation.code}</span>
+					<span className="anl-door__names">
+						<span className="anl-door__title">{t.analyzerTitle}</span>
+						<span className="anl-door__desc">{t.analyzerDoorSub}</span>
+					</span>
+				</button>
+				{/* The three intakes are the doors they draw: a tap on the
+				    camera opens the analyzer standing on 写真, not on 文字
+				    with the camera one more tap away. Siblings of the
+				    door's own button, never inside it — a button in a
+				    button is invalid HTML, and browsers resolve it by
+				    dropping one of the two. */}
+				<span className="anl-door__intakes">
+					{SOURCES.map(source => {
+						const Glyph = INTAKE_GLYPHS[source.key]
+						return (
+							<button
+								key={source.key}
+								type="button"
+								className="anl-door__intake"
+								data-intake={source.key}
+								aria-label={t[source.label]}
+								onClick={() => openAnalyzer(source.key)}
+							>
+								<Glyph className="svg" />
+							</button>
+						)
+					})}
 				</span>
-				<span className="anl-door__intakes" aria-hidden="true">
-					<span className="anl-door__intake"><TextLinesIcon /></span>
-					<span className="anl-door__intake"><CameraIcon /></span>
-					<span className="anl-door__intake"><VideoIcon /></span>
-				</span>
-			</button>
+			</div>
 
 			{/* ── The console (canvas) ──
 			    The five collections as chips in their own line colours, the
@@ -447,17 +482,6 @@ export default function DictionaryScreen({ session }) {
 	)
 }
 
-// The three intakes on the analyzer's door (canvas): lines of text,
-// a camera, a video frame.
-function TextLinesIcon() {
-	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="16" y2="12" /><line x1="4" y1="18" x2="12" y2="18" /></svg>
-}
-function CameraIcon() {
-	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
-}
-function VideoIcon() {
-	return <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2" /><polygon points="16 10 21 7 21 17 16 14" /></svg>
-}
 
 // ── Radical picker grid ─────────────────────────────────────
 

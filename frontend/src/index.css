@@ -13434,6 +13434,15 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    as: the marks row, the reading over the headword, two readings and
    a door to the rest, the caption; then blocks divided by hairlines
    and no headings. Tokens only. */
+/* ── 解析 — the door, and the three doors on it ──
+   The row is the section's, and the three intakes drawn on its right
+   are the platforms behind it (components/analysis/sources.js): each
+   one opens the analyzer standing on that platform, so the row is four
+   ways in rather than one. That makes it a container of buttons, not a
+   button — the intakes cannot be children of the door's own <button>,
+   which is invalid HTML that browsers settle by dropping one of the
+   two. The surface, the edge and the radius stay on the row; the ink
+   and the reach belong to what you press. */
 .anl-door {
   --line-color: var(--line-kaiseki);
   display: flex;
@@ -13446,6 +13455,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.anl-door__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
   font: inherit;
   text-align: left;
 }
@@ -13481,9 +13504,17 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   justify-content: center;
   width: 36px;
   height: 36px;
+  padding: 0;
   border-radius: var(--r-pill);
   border: 1px solid var(--surface-line);
+  background: none;
   color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--text-primary));
+}
+.anl-door__intake:hover,
+.anl-door__intake:focus-visible {
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
+  color: var(--text-primary);
+  filter: none;
 }
 .anl-door__intake .svg { width: 17px; height: 17px; }
 

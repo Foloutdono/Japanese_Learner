@@ -212,6 +212,43 @@ export function SpeakerOffIcon({ size = 18, className }) {
 // button's own colour. `size = 16` because 16 is what three of the
 // four render; every site that has a CSS rule for the glyph still wins
 // over the attribute, so all three of those stayed pixel-identical.
+// ── 解析 — the three intakes ──
+// Lines of text, a camera, a video frame: the analyser's own platforms
+// (components/analysis/sources.js), drawn on the dictionary's door and
+// again on the intake tiles behind it. They were four hand-rolled
+// <svg> tags across two screens carrying no paint at all — no `fill`,
+// no `stroke` — so the browser's default filled every closed path
+// black and dropped every line: the door showed an empty ring, a black
+// blob and half a camcorder. Drawn here, once, on the same `base` as
+// the rest of the set.
+export function TextLinesIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="4" y1="12" x2="16" y2="12" />
+      <line x1="4" y1="18" x2="12" y2="18" />
+    </svg>
+  )
+}
+
+export function CameraIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 8h3l2-3h6l2 3h3v11H4z" />
+      <circle cx="12" cy="13" r="3.2" />
+    </svg>
+  )
+}
+
+export function VideoIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3" y="6" width="13" height="12" rx="2" />
+      <path d="M16 10.5 21 7.5v9l-5-3z" />
+    </svg>
+  )
+}
+
 export function SearchIcon({ size = 16, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

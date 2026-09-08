@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider, useLang } from '../LangContext'
 import '../index.css'
 
@@ -61,11 +61,19 @@ function Probe() {
   return null
 }
 
+// Where the router ended up, for the door's four ways in.
+let WHERE = null
+function Where() {
+  WHERE = useLocation()
+  return null
+}
+
 async function renderScreen() {
   const screen = await render(
     <LangProvider>
       <Probe />
       <MemoryRouter initialEntries={['/dictionary']}>
+        <Where />
         <Routes>
           <Route path="/dictionary" element={<DictionaryScreen session={{}} />} />
           <Route path="/dictionary/analyzer" element={<div className="probe-analyzer" />} />
@@ -105,6 +113,8 @@ describe('the dictionary screen', () => {
     expect(screen.container.querySelector('.bar__title').textContent).toBe(T.dictionaryTitle)
 
     // The door names the analyzer and its three intakes, and opens it.
+    // The row is a container of buttons, not a button: its three
+    // intakes each open a platform of their own (below).
     const door = screen.container.querySelector('.anl-door')
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
@@ -117,7 +127,7 @@ describe('the dictionary screen', () => {
     expect(chips[0].textContent).toBe(T.dictKanji)
     expect(lastQuery().get('category')).toBe('kanji')
 
-    door.click()
+    door.querySelector('.anl-door__open').click()
     await settle(30)
     expect(screen.container.querySelector('.probe-analyzer')).not.toBeNull()
   })
@@ -207,5 +217,38 @@ describe('the dictionary screen', () => {
     await settle(400)
     expect(screen.container.querySelector('.console__field').value).toBe('')
     expect(lastQuery().get('q')).toBe('')
+  })
+
+  // ── The analyzer's door, and the three doors on it ──
+  // The intakes were decorations inside the row's own button: three
+  // <svg> tags with no `fill` and no `stroke`, so the browser filled
+  // each closed path black and dropped every line — an empty ring, a
+  // black blob, half a camcorder. They are the platforms behind the
+  // door, so they are buttons that open it standing on one.
+  it('draws its three platforms as glyphs, and opens the analyzer plainly', async () => {
+    const screen = await renderScreen()
+    const door = screen.container.querySelector('.anl-door')
+    const intakes = [...door.querySelectorAll('.anl-door__intake')]
+    expect(intakes.map(b => b.dataset.intake)).toEqual(['text', 'photo', 'video'])
+    for (const intake of intakes) {
+      expect(intake.tagName).toBe('BUTTON')
+      expect(intake.getAttribute('aria-label').length).toBeGreaterThan(0)
+      // Stroked, never filled — the whole of the bug, in two attributes.
+      const glyph = intake.querySelector('svg')
+      expect(glyph.getAttribute('fill')).toBe('none')
+      expect(glyph.getAttribute('stroke')).toBe('currentColor')
+      expect(glyph.getBoundingClientRect().width).toBeGreaterThan(0)
+    }
+    // The row itself is still one press, to the analyzer as it opens.
+    door.querySelector('.anl-door__open').click()
+    await settle(60)
+    expect(WHERE.pathname + WHERE.search).toBe('/dictionary/analyzer')
+  })
+
+  it.each(['photo', 'video', 'text'])('opens the analyzer standing on %s', async key => {
+    const screen = await renderScreen()
+    screen.container.querySelector(`[data-intake="${key}"]`).click()
+    await settle(60)
+    expect(WHERE.pathname + WHERE.search).toBe(`/dictionary/analyzer?intake=${key}`)
   })
 })
