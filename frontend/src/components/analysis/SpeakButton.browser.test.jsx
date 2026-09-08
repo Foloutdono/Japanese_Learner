@@ -10,9 +10,23 @@ import { SpeakButton } from './SpeakButton'
 // rely on.
 
 const realDescriptor = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
+const realUtterance = Object.getOwnPropertyDescriptor(window, 'SpeechSynthesisUtterance')
+
+// speakJapanese now picks a voice OBJECT rather than setting `lang` and
+// hoping (lib/audio/speech.js: a device with no Japanese voice does not
+// report a failure, it reads the kana with whatever voice it has). A
+// real SpeechSynthesisUtterance refuses any `voice` that is not a real
+// SpeechSynthesisVoice, and a test can construct neither — so the
+// utterance is a recorder here, beside the synthesiser that is already
+// one.
+class FakeUtterance {
+  constructor(text) { this.text = text }
+}
 
 function installFake(voices) {
-  const speak = vi.fn()
+  // Calling onstart is what a device that actually speaks does, and
+  // what tells speech.js it need not fall back to the server clip.
+  const speak = vi.fn(utterance => utterance.onstart?.())
   Object.defineProperty(window, 'speechSynthesis', {
     configurable: true,
     value: {
@@ -23,11 +37,13 @@ function installFake(voices) {
       speak,
     },
   })
+  Object.defineProperty(window, 'SpeechSynthesisUtterance', { configurable: true, value: FakeUtterance })
   return { speak }
 }
 
 afterEach(() => {
   if (realDescriptor) Object.defineProperty(window, 'speechSynthesis', realDescriptor)
+  if (realUtterance) Object.defineProperty(window, 'SpeechSynthesisUtterance', realUtterance)
 })
 
 const t = { hearThis: 'Hear this' }

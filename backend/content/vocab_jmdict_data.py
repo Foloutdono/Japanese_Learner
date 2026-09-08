@@ -100,6 +100,21 @@ def vocab_jmdict_to_id(entry: dict, _level: str | None = None) -> str:
     return f"vocab_jmdict_{entry['id']}"
 
 
+def has_form(text: str) -> bool:
+    """Whether any entry in the pool is WRITTEN or READ exactly this way.
+
+    Two indexed key lookups (idx_entries_kana, idx_entries_kanji), not a
+    scan — study/word_tts.py asks this per request to decide whether a
+    string is something the app can be asked to pronounce, and the pool
+    is 292k rows.
+    """
+    conn = _conn()
+    return bool(
+        conn.execute("SELECT 1 FROM entries WHERE kana = ? LIMIT 1", (text,)).fetchone()
+        or conn.execute("SELECT 1 FROM entries WHERE kanji = ? LIMIT 1", (text,)).fetchone()
+    )
+
+
 def get_by_id(entry_id: int) -> dict | None:
     row = _conn().execute(
         "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries WHERE id = ?",

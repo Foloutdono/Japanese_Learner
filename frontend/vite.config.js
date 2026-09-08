@@ -149,6 +149,17 @@ export default defineConfig(({ mode }) => {
             options: { cacheName: 'exam-audio', rangeRequests: true,
                        expiration: { maxEntries: 40, maxAgeSeconds: 2592000 },
                        cacheableResponse: { statuses: [200] } } },
+          // Card-reading clips (/api/tts, backend/study/word_tts.py). Under
+          // /api but not learner state: the clip is a reading out of a
+          // shipped deck, the request carries no token, and the same text
+          // always returns the same bytes — so it caches like the audio it
+          // is rather than falling into the NetworkOnly rule below, which
+          // would put a round trip in front of every replay.
+          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/tts'),
+            handler: 'CacheFirst',
+            options: { cacheName: 'word-audio',
+                       expiration: { maxEntries: 400, maxAgeSeconds: 2592000 },
+                       cacheableResponse: { statuses: [200] } } },
           { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/translations/'),
             handler: 'StaleWhileRevalidate',
             options: { cacheName: 'translations', expiration: { maxEntries: 8, maxAgeSeconds: 604800 },
