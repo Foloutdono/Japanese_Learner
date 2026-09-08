@@ -62,7 +62,6 @@ const nav = {
   },
   // ── 回数券 — the credits (plan 069) ──
   creditsUnit:       'credits',
-  fareLabel:         'Fare',
   balanceLabel:      'Balance',
   balanceTitle:      'Balance',
   balanceOf:         (cap) => `of ${cap}`,

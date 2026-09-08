@@ -9,7 +9,7 @@ import { playAnnouncement } from '../../lib/audio'
 import { Loading } from '../ui/Loading'
 import { CheckIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
-import { fareFor, runFit, DAILY_REFILL } from '../../domain/credits'
+import { runFit, DAILY_REFILL } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -26,11 +26,10 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // read as a finished day. The wait is drawn (plan 067): the card's
 // name over the three dots until /api/today answers.
 //
-// The fare (plan 069): Fare · n credits · Balance, and when the
-// balance is short, how much of the fare it covers. The gate
-// only CLOSES (the button disabled at zero) under enforcement; in
-// shadow mode the line is information and the train leaves. A pass
-// prints no balance and no notice.
+// Credits (plan 069): nothing at all while the balance covers the run,
+// and when it does not, how much of it rides. The gate only CLOSES
+// (the button disabled at zero) under enforcement; in shadow mode the
+// line is information and the train leaves. A pass prints no notice.
 //
 // Departing: the ticket-gate cutscene (stores/departure) and then
 // /today/run, carrying the chosen lanes in the query — omitted when
@@ -45,35 +44,30 @@ function refillClock(iso, lang) {
   return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
 }
 
-function Fare({ due, credits, t, lang }) {
-  if (!credits) return null
-  const balance = credits.unlimited ? null : credits.balance
-  const fare = fareFor(due)
-  // `waits` is what makes the notice appear, not what it says: the
-  // learner needs the two numbers that do not match, and 189 is the
-  // subtraction they can do themselves.
+// ── 不足のしらせ — the only thing the gate says about credits ──
+// A fare line ran above this: Fare · n credits ———— Balance · n. The
+// fare was the count the card already prints in figures three times
+// its size, and the balance is on the HUD's pass, a thumb's width up
+// the same screen — a rule drawn between two numbers that were both
+// already on it. Owner's call.
+//
+// What is left says itself only when the two do not match, which is
+// the one moment either is worth reading. `waits` is what makes it
+// appear, not what it says.
+function Shortfall({ due, credits, t, lang }) {
+  const balance = credits && !credits.unlimited ? credits.balance : null
+  if (balance == null) return null
   const { rides, waits } = runFit(due, balance)
+  if (waits <= 0) return null
   return (
-    <>
-      <div className="gate-card__fare">
-        <span>{t.fareLabel}</span>
-        <b>{fare}</b>
-        <span>{t.creditsUnit}</span>
-        <span className="gate-card__fare-sep" aria-hidden="true" />
-        <span>{t.balanceLabel}</span>
-        <b className="fare-gold">{balance == null ? '∞' : balance}</b>
-      </div>
-      {balance != null && waits > 0 && (
-        <div className="gate-card__short" role="status">
-          <span className="gate-card__short-mark" aria-hidden="true">!</span>
-          <span>
-            {balance === 0
-              ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
-              : t.gateShort(rides, due)}
-          </span>
-        </div>
-      )}
-    </>
+    <div className="gate-card__short" role="status">
+      <span className="gate-card__short-mark" aria-hidden="true">!</span>
+      <span>
+        {balance === 0
+          ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
+          : t.gateShort(rides, due)}
+      </span>
+    </div>
   )
 }
 
@@ -194,7 +188,7 @@ export default function GateCard({ today, failed }) {
         })}
       </div>
 
-      <Fare due={due} credits={credits} t={t} lang={lang} />
+      <Shortfall due={due} credits={credits} t={t} lang={lang} />
 
       <button
         type="button"

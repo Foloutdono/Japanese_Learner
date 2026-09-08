@@ -39,15 +39,18 @@ function mount(today = TODAY) {
 
 beforeEach(() => { creditsRef.current = FREE })
 
+// A fare line stood over the notice — Fare · n credits · a hairline ·
+// Balance · the figure in gold — printing the count the card already
+// sets in figures three times the size, beside a balance the HUD's
+// pass carries a thumb's width up the same screen. Owner's call: the
+// gate says nothing about credits while the balance covers the run.
 describe('GateCard — the fare', () => {
-  it('prints the fare against the balance, in gold', async () => {
+  it('says nothing about credits while the balance covers the run', async () => {
     const screen = await mount()
-    const fare = screen.container.querySelector('.gate-card__fare')
-    expect(fare).toBeTruthy()
-    const figures = [...fare.querySelectorAll('b')].map(b => b.textContent)
-    expect(figures).toEqual(['24', '30'])
-    expect(fare.querySelector('.fare-gold').textContent).toBe('30')
+    expect(screen.container.querySelector('.gate-card__fare')).toBeNull()
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
+    // The count is still the card's own figure, and the gate is open.
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('24')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 
@@ -85,14 +88,14 @@ describe('GateCard — the fare', () => {
     expect(getComputedStyle(gate).opacity).toBe('0.45')
   })
 
-  it('prints ∞ and no notice on a pass', async () => {
+  it('prints no notice on a pass', async () => {
     creditsRef.current = { ...FREE, balance: null, unlimited: true }
     const screen = await mount()
-    expect(screen.container.querySelector('.fare-gold').textContent).toBe('∞')
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
+    expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 
-  it('a lane switched off comes out of the fare, and the notice follows (plan 070)', async () => {
+  it('a lane switched off comes out of the count, and the notice follows (plan 070)', async () => {
     creditsRef.current = { ...FREE, balance: 12 }
     const screen = await mount()
     expect(screen.container.querySelector('.gate-card__short')).toBeTruthy()
@@ -102,15 +105,15 @@ describe('GateCard — the fare', () => {
     kanji.click()
     await new Promise(r => setTimeout(r, 60))
     expect(kanji.getAttribute('aria-pressed')).toBe('false')
-    expect(screen.container.querySelector('.gate-card__fare b').textContent).toBe('10')
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
     // Ten ride on twelve credits: nothing waits any more.
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
   })
 
-  it('prints no fare line before the balance is known', async () => {
+  it('holds the notice back until the balance is known', async () => {
     creditsRef.current = null
     const screen = await mount()
-    expect(screen.container.querySelector('.gate-card__fare')).toBeNull()
+    expect(screen.container.querySelector('.gate-card__short')).toBeNull()
     expect(screen.container.querySelector('.btn-depart')).toBeTruthy()
   })
 })

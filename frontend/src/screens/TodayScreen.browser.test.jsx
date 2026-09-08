@@ -97,7 +97,7 @@ describe('TodayScreen — the gate', () => {
     expect(screen.container.querySelector('.hall-pace')).toBeTruthy()
   })
 
-  it('a lane switched off leaves the fare, and the run carries the choice', async () => {
+  it('a lane switched off leaves the count, and the run carries the choice', async () => {
     const screen = await mount()
     await settle()
     // The lanes are grouped by line, vocab before kanji: pick by name.
@@ -106,7 +106,6 @@ describe('TodayScreen — the gate', () => {
     await settle()
     expect(kanji.classList.contains('lane--off')).toBe(true)
     expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
-    expect(screen.container.querySelector('.gate-card__fare b').textContent).toBe('10')
 
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture).toHaveBeenCalledTimes(1)

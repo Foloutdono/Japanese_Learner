@@ -5657,26 +5657,12 @@ textarea:focus-visible {
   border-radius: var(--r-panel);
 }
 .gate-card--clear { gap: var(--sp-3); }
-/* ── The fare (plan 069) ──
-   Fare · n credits · a hairline · Balance · the figure in gold: the
-   gate prices the run against the balance before departure. Under it,
-   when the balance is short, a warning-edged notice says how many ride
-   today and how many wait for tomorrow's refill. */
-.gate-card__fare {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.gate-card__fare b {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.gate-card__fare .fare-gold { color: var(--accent2); }
-.gate-card__fare-sep { flex: 1; height: 1px; align-self: center; background: var(--surface-line); }
+/* ── The shortfall (plan 069) ──
+   A warning-edged notice, and only when the balance does not cover the
+   run. The fare line that stood above it — Fare · n credits · a
+   hairline · Balance · the figure in gold — printed the count the card
+   already sets in figures three times the size, beside a balance the
+   HUD's pass carries a thumb's width up the same screen. */
 .gate-card__short {
   display: flex;
   align-items: center;
