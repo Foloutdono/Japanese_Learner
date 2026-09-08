@@ -442,6 +442,35 @@ describe('AnalyzerScreen structure', () => {
       .toBe(true)
   })
 
+  // ── and without waiting on a frame for it ──
+  // The move used to be made inside a requestAnimationFrame, because
+  // folding the intake away is what mounts the region and the node does
+  // not exist until the commit after the effect that decides it. A
+  // frame is a promise the browser does not keep: rAF is throttled to
+  // nothing in a page that is not visible, so on a backgrounded tab the
+  // focus was dropped and a keyboard learner was left on the 解析
+  // button. It is also what made the case above fail about one full run
+  // in five — three test files in, this lane's page is not the visible
+  // one.
+  //
+  // Starving rAF is that page, deterministically. The case above proves
+  // the focus moves; this one proves nothing is waiting on a clock for
+  // it.
+  it('moves focus without a frame to do it in', async () => {
+    const frame = window.requestAnimationFrame
+    window.requestAnimationFrame = () => 0
+    try {
+      const screen = await renderScreen()
+      await analyze(screen)
+      const results = screen.container.querySelector('.anl-results')
+      expect(results).not.toBeNull()
+      expect(document.activeElement === results || results.contains(document.activeElement))
+        .toBe(true)
+    } finally {
+      window.requestAnimationFrame = frame
+    }
+  })
+
   // Assert on the actual computed result (no ancestor is hidden), not
   // on a class name -- the wave-5 audit recorded four a11y assertions
   // that kept passing after the fix they guarded had been silently

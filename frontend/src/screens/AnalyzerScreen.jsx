@@ -144,10 +144,19 @@ export default function AnalyzerScreen({ session }) {
   // that folds away, so hiding it blurs the document to <body> and a
   // keyboard user's next Tab restarts from the top of the page.
   const resultsRef = useRef(null)
+  // Raised when a Passage arrives, spent by the effect that focuses the
+  // result. See there for why it is a flag and not a frame.
+  const wantsResultFocus = useRef(false)
 
   const { passage, sentences, status, error, focusIndex, explaining, explainError } = analyzer
   const busy = status === 'working'
   const ready = status === 'ready' && Boolean(analyzer.focused)
+  // The page is the intake until a Passage is ready, and the result
+  // once one is: the canvas's AnalyzerResult, with ‹ Analyzer as the
+  // way back to the intake (the Passage survives the trip — the Resume
+  // row brings it back). Declared up here because the arrival effect
+  // below depends on it, not only the markup at the foot of the file.
+  const showResult = ready && !intakeOpen
 
   // The player needs an id, not a session: prefer the link the learner
   // has typed right now, fall back to whatever the session was created
@@ -232,20 +241,33 @@ export default function AnalyzerScreen({ session }) {
     // the point, and 追従 switched off by a hand-pick on the LAST
     // Passage is not a choice the learner made about this one.
     setFollowPlayback(true)
-    // Next frame: the results region does not exist in the DOM until
-    // this render commits, and focusing a node that is not there yet is
-    // a silent no-op.
-    const id = requestAnimationFrame(() => {
-      // Never pull focus out of an open dialog. Step 2a removes the one
-      // path that could leave one open across a new Passage, so this is
-      // belt-and-braces -- but a focus move that fights a focus trap is
-      // the kind of bug that is invisible until someone is navigating by
-      // keyboard, and the guard costs one query.
-      if (document.querySelector('[role="dialog"]')) return
-      resultsRef.current?.focus()
-    })
-    return () => cancelAnimationFrame(id)
+    wantsResultFocus.current = true
   }, [status, passage])
+
+  // The arrival takes focus into the result, but not in the render that
+  // decides it: folding the intake away is what MOUNTS the region, so
+  // the node does not exist until the commit after the effect above.
+  //
+  // This waited a frame for it — and a frame is a promise the browser
+  // does not keep. requestAnimationFrame is throttled to nothing in a
+  // page that is not visible, so on a backgrounded tab the focus move
+  // was simply dropped and a keyboard learner was left standing on the
+  // 解析 button with the result unannounced beside them. (It is also
+  // what made this screen's focus case fail about one full test run in
+  // five, and it reproduces every time with rAF starved.) The arrival
+  // raises a flag; this spends it on the render where the region is
+  // actually in the DOM, which React gives us with no clock at all.
+  useEffect(() => {
+    if (!showResult || !wantsResultFocus.current) return
+    wantsResultFocus.current = false
+    // Never pull focus out of an open dialog. Step 2a removes the one
+    // path that could leave one open across a new Passage, so this is
+    // belt-and-braces -- but a focus move that fights a focus trap is
+    // the kind of bug that is invisible until someone is navigating by
+    // keyboard, and the guard costs one query.
+    if (document.querySelector('[role="dialog"]')) return
+    resultsRef.current?.focus()
+  }, [showResult, passage])
 
   // ← / → step through the focused Sentence's Tokens, ↑ / ↓ walk the
   // Sentences themselves, Space drives the player — the map the kbd
@@ -550,11 +572,6 @@ export default function AnalyzerScreen({ session }) {
     : analyzer.lastDeleted ? t.entryDeleted
     : t[platform.lead]
 
-  // The page is the intake until a Passage is ready, and the result
-  // once one is: the canvas's AnalyzerResult, with ‹ Analyzer as the
-  // way back to the intake (the Passage survives the trip — the
-  // Resume row brings it back).
-  const showResult = ready && !intakeOpen
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
 
   return (
