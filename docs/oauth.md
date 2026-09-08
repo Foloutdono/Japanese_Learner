@@ -45,15 +45,29 @@ Enabled, with the client ID and secret from above.
 
 ### Supabase → Authentication → URL Configuration → Redirect URLs
 
-**This is the one that is easy to miss, and the round trip ends on Supabase's
-own error page without it.** Every `redirect_to` the app can send has to be
-listed:
+**This is the one that is easy to miss, and it does not fail loudly.** An
+unlisted `redirect_to` is not rejected — Supabase silently substitutes the
+**Site URL**, which on a new project is `http://localhost:3000`. On a phone
+that is a dev server that does not exist, so the symptom is a Chrome Custom
+Tab sitting on `localhost:3000` / `ERR_CONNECTION_REFUSED` after Google has
+already accepted the sign-in. Nothing in the app can see that: the deep link
+it is listening for never arrives, so closing the tab reads as "backed out".
+
+Every `redirect_to` the app can send has to be listed:
 
 ```
 https://japanese-learner-seven.vercel.app/**
 com.japaneselearner.app://**
 http://localhost:5173/**          ← only if you sign in from `npm run dev`
 ```
+
+### Supabase → Authentication → URL Configuration → Site URL
+
+Set it to `https://japanese-learner-seven.vercel.app`. The default,
+`http://localhost:3000`, is wrong for this project twice over: it is the
+fallback above, and it is also where every confirmation and password-recovery
+email points — so on the default a learner who signs up with an email address
+gets a link to a machine that is not theirs.
 
 ### Supabase → Authentication → Manual Linking
 
