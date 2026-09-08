@@ -10,7 +10,7 @@ import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/
 import { kanaSets } from '../domain/kanaSets'
 
 // ── かな — the station and the platforms (plan 071) ──────────
-// /learn/kana lists the four sets as the stops of the kana line, with
+// /learn/kana lists the sets as the stops of the kana line, with
 // how much of each is learned; /learn/kana/:set lists that set's
 // modes as platforms. Both under the chrome. Picking a mode boards
 // the train (the door cutscene) into /learn/kana/:set/:mode on the
@@ -39,7 +39,7 @@ export default function KanaScreen() {
   }
   if (set && !selectedSet) return <Navigate replace to="/learn/kana" />
 
-  // ── The station: the four sets ──
+  // ── The station: the sets ──
   if (!selectedSet) {
     const stops = SETS.map(s => {
       const item = stats?.items?.kana?.[s.slug]
@@ -57,7 +57,7 @@ export default function KanaScreen() {
       }
     })
     return (
-      <SelectionScreen title={t.kanaTitle} sub={t.kanaSetsSub}>
+      <SelectionScreen title={t.kanaTitle} sub={t.kanaSetsSub(SETS.length)}>
         <RouteStops stops={stops} onSelect={slug => navigate(`/learn/kana/${slug}`)} />
       </SelectionScreen>
     )

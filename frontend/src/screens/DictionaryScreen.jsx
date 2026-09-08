@@ -37,6 +37,8 @@ const ANALYZER_COLOR = 'var(--line-kaiseki)'
 const INTAKE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
 
 const LIMIT = 50
+// The whole of one syllabary, in one page. See fetchPage.
+const SYLLABARY_LIMIT = 200
 
 // The five collections, in their own line colours (canvas Dictionary).
 // "jmdict" is the full JMdict pool beyond the app's own curated deck
@@ -158,10 +160,14 @@ export default function DictionaryScreen({ session }) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
-		// Hiragana/katakana's basic set is small and fixed (~71 entries
-		// including voiced rows) — one page comfortably holds all of it,
-		// so the syllabary chart never needs to page or infinite-scroll.
-		const limit = (cat === 'hiragana' || cat === 'katakana') ? 100 : LIMIT
+		// A syllabary is small and fixed — 113 hiragana and 125 katakana,
+		// counting the voiced rows, the yōon, the long vowels and (in
+		// katakana) the borrowed sounds — so one page holds all of it and
+		// the chart never has to page or infinite-scroll. 200 is the most
+		// the endpoint will serve (routes/dictionary.py), and it is the
+		// number here so that adding a set to kana_data.py cannot quietly
+		// truncate the chart the way raising it past 100 once did.
+		const limit = (cat === 'hiragana' || cat === 'katakana') ? SYLLABARY_LIMIT : LIMIT
 		const params = new URLSearchParams({ q, page: p, limit, lang, category: cat })
 		if (rad != null) params.set('radical', rad)
 
@@ -736,12 +742,33 @@ function BlockMark({ jp, tally }) {
 
 // ── Syllabary chart (hiragana/katakana) ──────────────────
 // The classic gojūon table: rows are consonant groups, columns are
-// the five vowels a-i-u-e-o. Two stacked tables — the plain gojūon
-// (+ ん/ン standalone) and the voiced/semi-voiced (dakuten/handakuten)
-// rows — same layout real textbooks use rather than one merged block.
-const MAIN_ROWS   = ['vowels', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w']
-const VOICED_ROWS = ['g', 'z', 'd', 'b', 'p']
-const VOWEL_COLS  = ['a', 'i', 'u', 'e', 'o']
+// the five vowels a-i-u-e-o. Separate tables rather than one merged
+// block, the layout real textbooks use: 五十音, 濁音, 拗音, 長音, and
+// for katakana 外来音.
+//
+// The chart used to draw the first two and drop the rest on the floor
+// — the syllabary endpoint has always known きゃ and ファ, and now
+// knows えい too, so a third of what it served was unreachable from
+// the one screen built to show it.
+const MAIN_ROWS    = ['vowels', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w']
+const VOICED_ROWS  = ['g', 'z', 'd', 'b', 'p']
+// 拗音 — a full-size kana with a small や/ゆ/よ after it. Unvoiced rows
+// first, then the voiced ones, the same order 五十音 and 濁音 are in.
+const YOON_ROWS    = ['k_combo', 's_combo', 't_combo', 'n_combo', 'h_combo',
+                      'm_combo', 'r_combo', 'g_combo', 'z_combo', 'b_combo', 'p_combo']
+// 外来音 — katakana only, one row per base kana (backend/content/
+// kana_data.py groups them that way so they do not collide here).
+const FOREIGN_ROWS = ['f_foreign', 'ti_foreign', 'tu_foreign', 'di_foreign',
+                      'du_foreign', 'w_foreign', 'v_foreign']
+// 長音 in hiragana: a vowel held by a second kana. Row is the first,
+// column the second — えい is え's い. Most of that matrix does not
+// occur, and the holes are the lesson.
+const LONG_ROWS    = ['a_long', 'i_long', 'u_long', 'e_long', 'o_long']
+const VOWEL_COLS   = ['a', 'i', 'u', 'e', 'o']
+// The yōon chart has three columns, not five: や ゆ よ are the only
+// kana that follow. Their romaji is the syllable they make, not the
+// vowel the column is keyed on.
+const YOON_COLS    = [['a', 'ya'], ['u', 'yu'], ['o', 'yo']]
 
 // Column placement comes from the entry's own romaji rather than its
 // position within its row-group: y/w rows skip columns for sounds
@@ -752,45 +779,62 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, jp, title, byGroup, vowelHeads, tail, selected, setSelected }) {
+// 行 (gyō) — a gojūon row's name is its own あ-column kana plus 行: か行,
+// さ行, た行. Derived from the data rather than a lookup table, so it is
+// right for every row including や行 and わ行, which skip columns.
+function gyoHead(entries) {
+	const lead = entries.find(e => vowelOf(e.romaji) === 'a')?.kana
+	return lead ? `${lead}行` : null
+}
+
+// Every chart under the gojūon is read the other way round: the row is
+// the full-size kana each of its cells begins with (き for きゃ きゅ きょ,
+// テ for ティ, え for えい ええ) and the column is what follows it. So the
+// head is that first character, taken off the row's first cell — never a
+// 行, which these rows are not.
+function baseHead(entries) {
+	return entries[0]?.kana[0] ?? null
+}
+
+// A chart of a single row heads nothing: its own mark already did.
+const noHead = () => null
+
+function SyllabaryTable({ rows, cols, jp, title, byGroup, rowHead = gyoHead, narrow = false, tail, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
 			{/* The chart's mark, then the chart. The plain-language name
 			    stays as the grid's accessible label — read out, not
 			    printed, since the mark and the row heads say it. */}
 			<BlockMark jp={jp} />
-			<div className="syllabary-table" role="group" aria-label={title}>
+			<div
+				className={`syllabary-table${narrow ? ' syllabary-table--narrow' : ''}`}
+				role="group"
+				aria-label={title}
+			>
 				<div className="syllabary-gap" aria-hidden="true" />
 
-				{/* Columns are headed by the vowel *kana*, not by "a i u e o".
-				    They are the five sounds the chart is built on and the
+				{/* Columns are headed by the *kana*, not by "a i u e o".
+				    They are the sounds the chart is built on and the
 				    learner is here to read them — printing their romaji
 				    instead taught the wrong alphabet at the top of a chart
 				    about the right one. The romaji stays underneath, small,
 				    the way every cell below does it. */}
-				{VOWEL_COLS.map(v => {
-					const head = vowelHeads[v]
-					return (
-						<div key={`h-${v}`} className="syllabary-head syllabary-head--col">
-							<span className="syllabary-head__kana" lang="ja">{head ?? ''}</span>
-							<span className="syllabary-head__romaji">{v}</span>
-						</div>
-					)
-				})}
+				{cols.map(col => (
+					<div key={`h-${col.key}`} className="syllabary-head syllabary-head--col">
+						<span className="syllabary-head__kana" lang="ja">{col.kana ?? ''}</span>
+						<span className="syllabary-head__romaji">{col.romaji}</span>
+					</div>
+				))}
 
 				{rows.map(group => {
 					const entries = byGroup[group] ?? []
-					// 行 (gyō) — the row's name in Japanese is its own first
-					// kana plus 行: か行, さ行, た行. Derived from the data
-					// rather than a lookup table, so it is right for every
-					// row including や行 and わ行, which skip columns.
-					const lead = entries.find(e => vowelOf(e.romaji) === 'a')?.kana
+					const head = rowHead(entries)
 					return (
 						<Fragment key={group}>
 							<div className="syllabary-head syllabary-head--row">
-								{lead && <span className="syllabary-head__kana" lang="ja">{lead}行</span>}
+								{head && <span className="syllabary-head__kana" lang="ja">{head}</span>}
 							</div>
-							{VOWEL_COLS.map(v => {
+							{cols.map(({ key: v }) => {
 								const entry = entries.find(e => vowelOf(e.romaji) === v)
 								// A sound that does not exist (yi, ye, wi, wu, we)
 								// gets nothing at all. It used to get a dash,
@@ -850,48 +894,125 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 
 	// あ い う え お for the column heads, taken from the chart's own
 	// vowel row rather than written down a second time.
-	const vowelHeads = useMemo(() => {
-		const out = {}
+	const vowelCols = useMemo(() => {
+		const kana = {}
 		;(byGroup.vowels ?? []).forEach(e => {
 			const v = vowelOf(e.romaji)
-			if (v) out[v] = e.kana
+			if (v) kana[v] = e.kana
 		})
-		return out
+		return VOWEL_COLS.map(key => ({ key, kana: kana[key], romaji: key }))
 	}, [byGroup])
+
+	// ゃ ゅ ょ for the yōon chart, read off its own cells (きゃ → ゃ) the
+	// same way, so the katakana chart heads itself ャ ュ ョ without a
+	// second table of small kana written down in here.
+	const yoonCols = useMemo(() => {
+		const cells = YOON_ROWS.flatMap(g => byGroup[g] ?? [])
+		return YOON_COLS.map(([key, romaji]) => ({
+			key,
+			romaji,
+			kana: cells.find(e => vowelOf(e.romaji) === key)?.kana[1],
+		}))
+	}, [byGroup])
+
+	// 長音 is one chart in hiragana and a different one in katakana,
+	// because the two spell it differently. Hiragana holds the vowel
+	// with a second kana — えい, おう, ああ — so it needs the whole
+	// あ→お matrix and the holes in it. Katakana writes one bar however
+	// long the vowel and whatever it is (アー イー ウー エー オー), so it
+	// is a single row, and a row that is the whole chart needs no head.
+	const kataLong = Boolean(byGroup.long)
+	const longRows = kataLong ? ['long'] : LONG_ROWS
+	const hasYoon    = YOON_ROWS.some(g => byGroup[g]?.length)
+	const hasForeign = FOREIGN_ROWS.some(g => byGroup[g]?.length)
+	const hasLong    = longRows.some(g => byGroup[g]?.length)
 
 	if (loading) return <Loading />
 
 	return (
 		<div className="dict-layout">
 			<div className="dict-results-wrap">
-				{/* Two charts, side by side once there is room. A 五十音 table
-				    is five columns wide and no wider — stacked, it left two
-				    thirds of a desktop empty and pushed 濁音 below the fold,
-				    when the two are meant to be read against each other. */}
+				{/* Two columns of charts, side by side once there is room. A
+				    五十音 table is five columns wide and no wider — stacked,
+				    it left two thirds of a desktop empty and pushed 濁音
+				    below the fold, when the two are meant to be read
+				    against each other.
+
+				    Which chart goes in which column is settled by the order
+				    they stack in on a phone, where there is only one column
+				    and the order IS the teaching order: 五十音, then the
+				    long vowels it makes, then 濁音, 拗音 and the borrowed
+				    sounds that build on those. Hiragana comes out of that
+				    at sixteen rows a side; katakana's second column runs
+				    on past the first, because 外来音 is its alone and it
+				    has to sit after 拗音 rather than before it. Balancing
+				    that would mean two orders — one for the columns, one
+				    for the stack — and the phone's is the one that has to
+				    be right. */}
 				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
 					<div className="syllabary-col">
 						<SyllabaryTable
 							rows={MAIN_ROWS}
+							cols={vowelCols}
 							jp="五十音"
 							title={t.syllabaryMain}
 							byGroup={byGroup}
-							vowelHeads={vowelHeads}
 							tail={nSolo}
 							selected={selected}
 							setSelected={setSelected}
 						/>
+
+						{hasLong && (
+							<SyllabaryTable
+								rows={longRows}
+								cols={vowelCols}
+								jp="長音"
+								title={t.syllabaryLong}
+								byGroup={byGroup}
+								rowHead={kataLong ? noHead : baseHead}
+								selected={selected}
+								setSelected={setSelected}
+							/>
+						)}
 					</div>
 
 					<div className="syllabary-col">
 						<SyllabaryTable
 							rows={VOICED_ROWS}
+							cols={vowelCols}
 							jp="濁音"
 							title={t.syllabaryVoiced}
 							byGroup={byGroup}
-							vowelHeads={vowelHeads}
 							selected={selected}
 							setSelected={setSelected}
 						/>
+
+						{hasYoon && (
+							<SyllabaryTable
+								rows={YOON_ROWS}
+								cols={yoonCols}
+								narrow
+								jp="拗音"
+								title={t.syllabaryYoon}
+								byGroup={byGroup}
+								rowHead={baseHead}
+								selected={selected}
+								setSelected={setSelected}
+							/>
+						)}
+
+						{hasForeign && (
+							<SyllabaryTable
+								rows={FOREIGN_ROWS}
+								cols={vowelCols}
+								jp="外来音"
+								title={t.syllabaryForeign}
+								byGroup={byGroup}
+								rowHead={baseHead}
+								selected={selected}
+								setSelected={setSelected}
+							/>
+						)}
 					</div>
 				</div>
 			</div>

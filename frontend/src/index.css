@@ -13798,14 +13798,18 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .syllabary-chart-group {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px 56px;
+  gap: var(--sp-8) var(--sp-9);
   justify-content: start;
   align-items: start;
 }
 @media (min-width: 900px) {
   .syllabary-chart-group { grid-template-columns: auto auto; }
 }
-.syllabary-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* A column holds more than one chart now (五十音 + 長音 on the left,
+   濁音 + 拗音 + 外来音 on the right), so its gap is the block rhythm
+   between two charts — the same distance the two columns keep from
+   each other once they stack on a phone. */
+.syllabary-col { display: flex; flex-direction: column; gap: var(--sp-8); min-width: 0; }
 .syllabary-col .section-header { margin-top: 0; }
 .syllabary-table {
   grid-template-columns: 30px repeat(5, minmax(56px, 92px));
@@ -13867,10 +13871,14 @@ button.syllabary-cell:focus-visible {
    thing there is nothing to see. ん gets a labelled 撥音 row inside
    the table it belongs to. */
 .syllabary-table {
-  grid-template-columns: 46px repeat(5, minmax(52px, 76px));
+  grid-template-columns: 46px repeat(var(--syl-cols, 5), minmax(52px, 76px));
   gap: 5px;
   align-items: stretch;
 }
+/* 拗音 has three columns, not five — や ゆ よ are the only kana that
+   follow. The table sizes to them rather than stretching to the width
+   of the chart above it. */
+.syllabary-table--narrow { --syl-cols: 3; }
 
 /* Heads are type, not cells: no box, no fill, just the kana in the
    collection's colour with its romaji tucked under it. */
@@ -13913,7 +13921,11 @@ button.syllabary-cell:focus-visible {
 .syllabary-cell__char { font-size: 27px; line-height: 1.1; }
 
 @media (max-width: 560px) {
-  .syllabary-table { grid-template-columns: 34px repeat(5, minmax(44px, 1fr)); gap: 4px; }
+  .syllabary-table { grid-template-columns: 34px repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
+  /* The five-column charts fill the phone's width; three columns doing
+     the same would be three fat empty tiles, so 拗音 keeps a cell the
+     size it is on a desktop and sits to the left. */
+  .syllabary-table--narrow { grid-template-columns: 34px repeat(3, minmax(44px, 76px)); }
   .syllabary-head__kana { font-size: 0.7rem; }
   .syllabary-head--row { padding-right: 5px; }
   .syllabary-cell { min-height: 52px; }

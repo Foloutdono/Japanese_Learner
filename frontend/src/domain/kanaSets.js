@@ -1,4 +1,4 @@
-// ── The four kana sets ────────────────────────────────────────
+// ── The six kana sets ─────────────────────────────────────────
 // One definition, because three screens now need it: the kana section's
 // own picker, and the two surfaces of the daily queue (the home
 // concourse strip and the queue itself), which have to turn a stored
@@ -11,8 +11,10 @@ export function kanaSets(t) {
   return [
     { label: t.hiraganaBase,         slug: 'hiragana_basic',  sample: 'あ い う え お' },
     { label: t.hiraganaCombinations, slug: 'hiragana_combos', sample: 'きゃ きゅ きょ' },
+    { label: t.hiraganaLong,         slug: 'hiragana_long',   sample: 'えい おう あい' },
     { label: t.katakanaBase,         slug: 'katakana_basic',  sample: 'ア イ ウ エ オ' },
     { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ キョ' },
+    { label: t.katakanaLong,         slug: 'katakana_long',   sample: 'アー イー ウー' },
   ]
 }
 

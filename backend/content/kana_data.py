@@ -272,35 +272,110 @@ KATAKANA_COMBINATIONS = [
     {"kana": "ピャ", "romaji": "pya", "group": "p_combo"},
     {"kana": "ピュ", "romaji": "pyu", "group": "p_combo"},
     {"kana": "ピョ", "romaji": "pyo", "group": "p_combo"},
-    # Katakana-only foreign sound combinations
-    {"kana": "ファ", "romaji": "fa",  "group": "foreign"},
-    {"kana": "フィ", "romaji": "fi",  "group": "foreign"},
-    {"kana": "フェ", "romaji": "fe",  "group": "foreign"},
-    {"kana": "フォ", "romaji": "fo",  "group": "foreign"},
-    {"kana": "ティ", "romaji": "ti",  "group": "foreign"},
-    {"kana": "ディ", "romaji": "di",  "group": "foreign"},
-    {"kana": "トゥ", "romaji": "tu",  "group": "foreign"},
-    {"kana": "ドゥ", "romaji": "du",  "group": "foreign"},
-    {"kana": "ウィ", "romaji": "wi",  "group": "foreign"},
-    {"kana": "ウェ", "romaji": "we",  "group": "foreign"},
-    {"kana": "ウォ", "romaji": "wo",  "group": "foreign"},
-    {"kana": "ヴァ", "romaji": "va",  "group": "foreign"},
-    {"kana": "ヴィ", "romaji": "vi",  "group": "foreign"},
-    {"kana": "ヴ",   "romaji": "vu",  "group": "foreign"},
-    {"kana": "ヴェ", "romaji": "ve",  "group": "foreign"},
-    {"kana": "ヴォ", "romaji": "vo",  "group": "foreign"},
+    # 外来音 — the katakana-only sounds, borrowed with the words that
+    # needed them. Grouped by the BASE kana rather than all together in
+    # one "foreign" bucket: the chart lays a group out as a row and
+    # would keep only the first entry per column, so ファ フィ フェ フォ
+    # and ヴァ ヴィ ヴ ヴェ ヴォ collided into a single line of four.
+    # One group per base kana also makes the row名 honest — テ is the
+    # row ティ is in, ト the row トゥ is in — which is the whole lesson
+    # here: a full-size kana with a small vowel after it.
+    {"kana": "ファ", "romaji": "fa",  "group": "f_foreign"},
+    {"kana": "フィ", "romaji": "fi",  "group": "f_foreign"},
+    {"kana": "フェ", "romaji": "fe",  "group": "f_foreign"},
+    {"kana": "フォ", "romaji": "fo",  "group": "f_foreign"},
+    {"kana": "ティ", "romaji": "ti",  "group": "ti_foreign"},
+    {"kana": "トゥ", "romaji": "tu",  "group": "tu_foreign"},
+    {"kana": "ディ", "romaji": "di",  "group": "di_foreign"},
+    {"kana": "ドゥ", "romaji": "du",  "group": "du_foreign"},
+    {"kana": "ウィ", "romaji": "wi",  "group": "w_foreign"},
+    {"kana": "ウェ", "romaji": "we",  "group": "w_foreign"},
+    {"kana": "ウォ", "romaji": "wo",  "group": "w_foreign"},
+    {"kana": "ヴァ", "romaji": "va",  "group": "v_foreign"},
+    {"kana": "ヴィ", "romaji": "vi",  "group": "v_foreign"},
+    {"kana": "ヴ",   "romaji": "vu",  "group": "v_foreign"},
+    {"kana": "ヴェ", "romaji": "ve",  "group": "v_foreign"},
+    {"kana": "ヴォ", "romaji": "vo",  "group": "v_foreign"},
+]
+
+# ─────────────────────────────────────────────
+# 長音 — the vowel combinations
+# ─────────────────────────────────────────────
+# Two kana, one sound held twice as long — and the first thing a
+# learner meets that the gojūon chart does not explain: せんせい is not
+# "sen-se-i", とうきょう is not "to-u-kyo-u". They are read as ē and ō,
+# and the spelling is what has to be recognised.
+#
+# Grouped by the FIRST vowel, so the chart lays them out the way the
+# gojūon table already lays out everything else: the row is what the
+# pair starts with, the column is what it ends with (the frontend reads
+# the column off the romaji's last letter). Most of that matrix does
+# not occur in Japanese and stays empty, which is the useful half of
+# drawing it as a matrix.
+#
+# The nine below are the ones a beginner actually reads: the five
+# doubled vowels, the two long spellings that change kana (えい for ē,
+# おう for ō), and the two -i diphthongs every adjective ends in (たかい,
+# おおい). The romaji is the SPELLING, not the sound — "ou", not "ō" —
+# because the spelling is what the card is asking about, and it is
+# what a learner types.
+HIRAGANA_LONG = [
+    {"kana": "ああ", "romaji": "aa", "group": "a_long"},
+    {"kana": "あい", "romaji": "ai", "group": "a_long"},
+    {"kana": "いい", "romaji": "ii", "group": "i_long"},
+    {"kana": "うう", "romaji": "uu", "group": "u_long"},
+    {"kana": "えい", "romaji": "ei", "group": "e_long"},
+    {"kana": "ええ", "romaji": "ee", "group": "e_long"},
+    {"kana": "おい", "romaji": "oi", "group": "o_long"},
+    {"kana": "おう", "romaji": "ou", "group": "o_long"},
+    {"kana": "おお", "romaji": "oo", "group": "o_long"},
+]
+
+# Katakana spells every long vowel with one mark instead — 長音符, the
+# bar — so this is one row of five rather than a matrix, and the lesson
+# is the bar itself. The romaji doubles the vowel to match the
+# hiragana set above, and so the chart can read the column off it.
+KATAKANA_LONG = [
+    {"kana": "アー", "romaji": "aa", "group": "long"},
+    {"kana": "イー", "romaji": "ii", "group": "long"},
+    {"kana": "ウー", "romaji": "uu", "group": "long"},
+    {"kana": "エー", "romaji": "ee", "group": "long"},
+    {"kana": "オー", "romaji": "oo", "group": "long"},
 ]
 
 # ─────────────────────────────────────────────
 # Accessors
 # ─────────────────────────────────────────────
 
+# Every set the app knows, in teaching order per syllabary. A set added
+# here is a deck (routes/kana.py serves any key in this map), a page of
+# the dictionary's own chart (routes/dictionary.py walks the syllabary
+# through SYLLABARY_SETS below), and a card in the index
+# (study/card_index.py) — all three from this one entry.
 KANA_SETS = {
     "hiragana_basic":       HIRAGANA_BASIC,
     "hiragana_combos":      HIRAGANA_COMBINATIONS,
+    "hiragana_long":        HIRAGANA_LONG,
     "katakana_basic":       KATAKANA_BASIC,
     "katakana_combos":      KATAKANA_COMBINATIONS,
+    "katakana_long":        KATAKANA_LONG,
 }
+
+# The sets that make up one syllabary, in chart order. The dictionary
+# reads a whole syllabary through this rather than naming BASIC alone,
+# which is why きゃ and えい could not be looked up at all before.
+SYLLABARY_SETS = {
+    "hiragana": ("hiragana_basic", "hiragana_combos", "hiragana_long"),
+    "katakana": ("katakana_basic", "katakana_combos", "katakana_long"),
+}
+
+
+def get_syllabary(name: str) -> list[dict]:
+    """Every kana of one syllabary — basic, yōon, and the long vowels."""
+    out: list[dict] = []
+    for key in SYLLABARY_SETS.get(name, ()):
+        out.extend(KANA_SETS[key])
+    return out
 
 def get_all_kana() -> list[dict]:
     result = []

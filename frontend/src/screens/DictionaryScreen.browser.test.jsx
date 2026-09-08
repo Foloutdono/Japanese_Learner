@@ -41,6 +41,44 @@ const FILLER = Array.from({ length: 60 }, (_, i) => ({
 }))
 const RESULTS = [KANJI, VOCAB, NOCARD, ...FILLER]
 
+// ── A syllabary, as the endpoint serves one ──
+// `group` is what the chart lays out on (backend/content/kana_data.py):
+// the gojūon rows, the voiced rows, one group per yōon base kana, one
+// per borrowed-sound base kana, and the long vowels — by first vowel in
+// hiragana, all together in katakana, because the two spell length
+// differently.
+const kana = (group, pairs) =>
+  pairs.split(' ').map(p => {
+    const [k, romaji] = p.split('/')
+    return { type: 'hiragana', kana: k, romaji, meaning: '', level: 'N5', group }
+  })
+
+const HIRAGANA = [
+  ...kana('vowels', 'あ/a い/i う/u え/e お/o'),
+  ...kana('k', 'か/ka き/ki く/ku け/ke こ/ko'),
+  ...kana('n_solo', 'ん/n'),
+  ...kana('g', 'が/ga ぎ/gi ぐ/gu げ/ge ご/go'),
+  ...kana('k_combo', 'きゃ/kya きゅ/kyu きょ/kyo'),
+  ...kana('z_combo', 'じゃ/ja じゅ/ju じょ/jo'),
+  ...kana('a_long', 'ああ/aa あい/ai'),
+  ...kana('i_long', 'いい/ii'),
+  ...kana('u_long', 'うう/uu'),
+  ...kana('e_long', 'えい/ei ええ/ee'),
+  ...kana('o_long', 'おい/oi おう/ou おお/oo'),
+]
+
+const KATAKANA = [
+  ...kana('vowels', 'ア/a イ/i ウ/u エ/e オ/o'),
+  ...kana('k', 'カ/ka キ/ki ク/ku ケ/ke コ/ko'),
+  ...kana('n_solo', 'ン/n'),
+  ...kana('g', 'ガ/ga ギ/gi グ/gu ゲ/ge ゴ/go'),
+  ...kana('k_combo', 'キャ/kya キュ/kyu キョ/kyo'),
+  ...kana('f_foreign', 'ファ/fa フィ/fi フェ/fe フォ/fo'),
+  ...kana('ti_foreign', 'ティ/ti'),
+  ...kana('v_foreign', 'ヴァ/va ヴィ/vi ヴ/vu ヴェ/ve ヴォ/vo'),
+  ...kana('long', 'アー/aa イー/ii ウー/uu エー/ee オー/oo'),
+]
+
 vi.mock('../lib/api', () => ({
   apiFetch: vi.fn(), apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
@@ -85,6 +123,29 @@ async function renderScreen() {
   return screen
 }
 
+// ── Reading a chart back ──
+// The table is one flat grid: a corner, the column heads, then each row
+// as its head followed by one node per column (a cell or a hole).
+const chartsOf = screen => [...screen.container.querySelectorAll('.syllabary-table[role="group"]')]
+const marksOf = screen => [...screen.container.querySelectorAll('.dict-mark__jp')].map(m => m.textContent)
+const headsOf = (chart, kind) =>
+  [...chart.querySelectorAll(`.syllabary-head--${kind} .syllabary-head__kana`)]
+    .map(h => h.textContent).filter(Boolean)
+const cellsOf = chart => [...chart.querySelectorAll('.syllabary-cell')].map(c => c.textContent)
+const colCount = chart => chart.querySelectorAll('.syllabary-head--col').length
+/** One row of a chart, holes as null — `n` counting from the first. */
+const rowOf = (chart, n) => {
+  const cols = colCount(chart)
+  const from = (cols + 1) * (n + 1) + 1
+  return [...chart.children].slice(from, from + cols)
+    .map(el => (el.classList.contains('syllabary-gap') ? null : el.textContent))
+}
+
+async function openSyllabary(screen, label) {
+  ;[...screen.container.querySelectorAll('.chip')].find(c => c.textContent === label).click()
+  await settle(120)
+}
+
 const searches = () => apiFetch.mock.calls.map(([path]) => String(path)).filter(p => p.startsWith('/api/dictionary?'))
 const lastQuery = () => new URLSearchParams(searches().at(-1).split('?')[1])
 
@@ -101,7 +162,11 @@ beforeEach(() => {
     json: async () => {
       const p = String(path)
       if (p.startsWith('/api/dictionary/radicals')) return { groups: [] }
-      if (p.startsWith('/api/dictionary?')) return { results: RESULTS, total: RESULTS.length, has_more: false }
+      if (p.startsWith('/api/dictionary?')) {
+        const cat = new URLSearchParams(p.split('?')[1]).get('category')
+        const rows = cat === 'hiragana' ? HIRAGANA : cat === 'katakana' ? KATAKANA : RESULTS
+        return { results: rows, total: rows.length, has_more: false }
+      }
       return {}
     },
   }))
@@ -227,17 +292,75 @@ describe('the dictionary screen', () => {
   // the tally as data.
   it('marks the syllabary and the radical groups instead of heading them', async () => {
     const screen = await renderScreen()
-    // Hiragana: the chart, marked 五十音 / 濁音, no heading anywhere.
-    ;[...screen.container.querySelectorAll('.chip')]
-      .find(c => c.textContent === T.dictHiragana).click()
-    await settle(120)
+    // Hiragana: the charts, each marked, no heading anywhere.
+    await openSyllabary(screen, T.dictHiragana)
     expect(screen.container.querySelector('.section-header')).toBeNull()
-    const marks = [...screen.container.querySelectorAll('.dict-mark__jp')].map(m => m.textContent)
-    expect(marks).toEqual(['五十音', '濁音'])
+    expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音'])
     // The plain-language name is still there for a screen reader.
-    const charts = screen.container.querySelectorAll('.syllabary-table[role="group"]')
-    expect(charts).toHaveLength(2)
-    expect(charts[0].getAttribute('aria-label')).toBe(T.syllabaryMain)
+    const charts = chartsOf(screen)
+    expect(charts.map(c => c.getAttribute('aria-label')))
+      .toEqual([T.syllabaryMain, T.syllabaryLong, T.syllabaryVoiced, T.syllabaryYoon])
+  })
+
+  // ── The three charts the screen used to drop ──
+  // The endpoint has always served きゃ and ファ, and serves えい now
+  // too, but the chart laid out 五十音 and 濁音 and silently dropped
+  // every other group — a third of a syllabary reachable from nowhere
+  // on the one screen built to show it.
+  it('lays out the yōon, the long vowels and the borrowed sounds', async () => {
+    const screen = await renderScreen()
+    await openSyllabary(screen, T.dictKatakana)
+    // 外来音 is katakana's alone; hiragana's chart above has four.
+    expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音', '外来音'])
+
+    // 拗音 is three columns wide, not five, and heads them with the
+    // small kana its own cells end in — ャ ュ ョ here, ゃ ゅ ょ in the
+    // hiragana chart, neither of them written down in the screen.
+    const yoon = chartsOf(screen)[3]
+    expect(yoon.classList.contains('syllabary-table--narrow')).toBe(true)
+    expect(headsOf(yoon, 'col')).toEqual(['ャ', 'ュ', 'ョ'])
+    // A row is the full-size kana its cells begin with — キ, not キ行,
+    // and not the 行 derivation the gojūon rows use.
+    expect(headsOf(yoon, 'row')).toEqual(['キ'])
+
+    // 外来音 rows are one base kana each, so ファ and ヴァ cannot
+    // collide in the a column the way one "foreign" row made them.
+    const foreign = chartsOf(screen)[4]
+    expect(headsOf(foreign, 'row')).toEqual(['フ', 'テ', 'ヴ'])
+    expect(cellsOf(foreign)).toEqual(['ファfa', 'フィfi', 'フェfe', 'フォfo', 'ティti',
+                                      'ヴァva', 'ヴィvi', 'ヴvu', 'ヴェve', 'ヴォvo'])
+
+    // Katakana writes every long vowel with the one bar, so its 長音 is
+    // a single row — and a row that is the whole chart heads nothing.
+    const long = chartsOf(screen)[1]
+    expect(headsOf(long, 'row')).toEqual([])
+    expect(cellsOf(long)).toEqual(['アーaa', 'イーii', 'ウーuu', 'エーee', 'オーoo'])
+  })
+
+  // Hiragana holds a vowel with a second kana instead, so its 長音 is a
+  // matrix: the row is the first kana, the column the second. えい is
+  // え's い — the whole point of the chart, and the reason it is not a
+  // list.
+  it("puts each long vowel under the kana that spells it", async () => {
+    const screen = await renderScreen()
+    await openSyllabary(screen, T.dictHiragana)
+    const long = chartsOf(screen)[1]
+    expect(headsOf(long, 'col')).toEqual(['あ', 'い', 'う', 'え', 'お'])
+    expect(headsOf(long, 'row')).toEqual(['あ', 'い', 'う', 'え', 'お'])
+    // え's row: nothing in あ, えい under い, ええ under え, holes after.
+    expect(rowOf(long, 3)).toEqual([null, 'えいei', null, 'ええee', null])
+    expect(rowOf(long, 4)).toEqual([null, 'おいoi', 'おうou', null, 'おおoo'])
+  })
+
+  // Every new cell is an entry like any other: it opens the same dock.
+  it('opens a combination the way it opens あ', async () => {
+    const screen = await renderScreen()
+    await openSyllabary(screen, T.dictHiragana)
+    const kya = [...chartsOf(screen)[3].querySelectorAll('.syllabary-cell')]
+      .find(c => c.textContent.startsWith('きゃ'))
+    kya.click()
+    await settle(80)
+    expect(screen.container.querySelector('.dict-dock').textContent).toContain('きゃ')
   })
 
   // ── The analyzer's door, and the three doors on it ──

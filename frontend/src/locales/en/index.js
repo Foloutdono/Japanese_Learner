@@ -138,8 +138,10 @@ const quiz = {
   // Kana sets
   hiraganaBase:         'Hiragana (basic)',
   hiraganaCombinations: 'Hiragana (combinations)',
+  hiraganaLong:         'Hiragana (long vowels)',
   katakanaBase:         'Katakana (basic)',
   katakanaCombinations: 'Katakana (combinations)',
+  katakanaLong:         'Katakana (long vowels)',
 
   // Selection prompts
   selectLevel:       'Choose your JLPT level',
@@ -481,7 +483,7 @@ const stats = {
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
   examPart: (n) => `Part ${n}`,
-  kanaSetsSub:        'Four sets',
+  kanaSetsSub:        (n) => `${n} sets`,
   serviceName: {
     local:   'Local',
     rapid:   'Rapid',
@@ -913,6 +915,9 @@ const dictionary = {
   syllabaryMain:     'Main syllabary',
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Voiced sounds (dakuten / handakuten)',
+  syllabaryYoon:     'Contracted sounds (yōon)',
+  syllabaryForeign:  'Foreign sounds',
+  syllabaryLong:     'Long vowels',
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
   allReadings:       'All readings',

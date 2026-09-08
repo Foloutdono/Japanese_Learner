@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { kanaSets } from './domain/kanaSets'
 
 // ── Every path the app has ever had still lands somewhere (plan 068) ──
 // The chrome moved every section behind one of five gates, and the old
@@ -100,7 +101,10 @@ describe('the moved paths', () => {
     await settle()
     expect(document.querySelector('.tabbar')).toBeTruthy()
     expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
-    expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
+    // One stop per kana deck, counted from the decks themselves — the
+    // number has changed once already (the long vowels made it six) and
+    // a literal here only ever records how many there used to be.
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(kanaSets({}).length)
     screen.unmount()
   })
 

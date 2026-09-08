@@ -17,6 +17,7 @@ complete) own the request.
 from study import card_index
 from study.difficulty import LEVELS
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES_FOR_SOURCE
+from content.kana_data import SYLLABARY_SETS
 
 # The stops a level stands behind are JLPT stops. Kana is a different
 # door (the boarding's kana check, plan 075) and personal decks are
@@ -75,9 +76,13 @@ def known_batches(stops) -> list[tuple[str, str, list[str]]]:
 # syllabaries are then the first stop of the run.
 KANA_KNOWN = ("hiragana", "katakana", "both", "none")
 
+# Every set of the syllabary the answer names, kana_data's own order —
+# read from that registry rather than restated here, so a set added
+# there is marked known too rather than being the one page of the
+# script a "yes, I read hiragana" leaves untouched.
 _KANA_SETS_FOR = {
-    "hiragana": ("hiragana_basic", "hiragana_combos"),
-    "katakana": ("katakana_basic", "katakana_combos"),
+    "hiragana": SYLLABARY_SETS["hiragana"],
+    "katakana": SYLLABARY_SETS["katakana"],
 }
 _KANA_SETS_FOR["both"] = _KANA_SETS_FOR["hiragana"] + _KANA_SETS_FOR["katakana"]
 _KANA_SETS_FOR["none"] = ()
