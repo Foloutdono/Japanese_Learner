@@ -4482,7 +4482,7 @@ textarea:focus-visible {
      row is a straight line. */
   justify-content: flex-start;
   height: var(--tabbar-h);
-  padding: var(--sp-2) 0 0;
+  padding: var(--sp-1) 0 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
   text-decoration: none;
@@ -4490,15 +4490,16 @@ textarea:focus-visible {
 .tab--on { color: var(--text-on-panel); }
 .tab:hover,
 .tab:focus-visible { color: var(--text-on-panel); }
-/* A box of its own so the lit gate can be given a ground without the
-   glyph moving to make room for it: every gate reserves the lozenge,
-   only one is painted. */
+/* A box of its own so the lit gate can be given a ground AND a size
+   without the glyph moving to make room for either: every gate reserves
+   the lozenge at its full height, only one is painted, and the glyph
+   grows about its own centre inside it. */
 .tab__ico {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 44px;
-  height: 26px;
+  height: 30px;
   border-radius: var(--r-pill);
 }
 .tab--on .tab__ico { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
@@ -4513,6 +4514,10 @@ textarea:focus-visible {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
+  /* Its own leading, not the body's 1.6: a 50px bar holds the lozenge
+     and the word, and 1.6 spent six of those pixels on air inside the
+     caption's own line box. */
+  line-height: 1;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;

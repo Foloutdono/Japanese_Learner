@@ -206,6 +206,18 @@ describe('the tab bar', () => {
     expect(getComputedStyle(on, '::before').height).toBe('2px')
     const off = tabs[1]
     expect(getComputedStyle(off).color).not.toBe(getComputedStyle(bar).color)
+    // ── And its glyph is the bigger one ──
+    // Full ink, a ground, a rule and a word already; the size is the
+    // one that carries across the room. It grows about its own centre
+    // inside a lozenge every gate reserves at full height, so the row
+    // does not move to make space for it — pinned by the case below,
+    // which measures the centres across four screens.
+    const glyph = t => t.querySelector('.tab__ico svg').getBoundingClientRect().width
+    expect(glyph(on)).toBeGreaterThan(glyph(off))
+    expect(new Set(tabs.length && [...tabs].filter(t => t !== on).map(glyph)).size).toBe(1)
+    const box = t => t.querySelector('.tab__ico').getBoundingClientRect()
+    expect(Math.round(box(on).height)).toBe(Math.round(box(off).height))
+    expect(glyph(on)).toBeLessThanOrEqual(box(on).height)
   })
 
   // ── One word, on the gate you are on ──
