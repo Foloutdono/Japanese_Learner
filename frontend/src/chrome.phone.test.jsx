@@ -101,6 +101,27 @@ describe('the shell', () => {
     expect(getComputedStyle(content).paddingBottom).toBe(`${TABBAR_H}px`)
   })
 
+  // ── The screen begins under the chrome, not against it ──
+  // 8px of padding put the bar's roundel on the underside of the HUD,
+  // and 12px of block rhythm put the first panel on the bar's own rule:
+  // chrome, head and body read as one stack of type. 22 above the head
+  // and 16 under it — less under, because a head belongs to what it
+  // heads. Owner's call.
+  it('sets the screen down clear of the HUD, and its body under its head', async () => {
+    await mountShell('/learn', (
+      <main id="main-content" className="learn">
+        <Bar code="JP" title="Plan de ligne" sub="Quatre lignes" color="var(--accent2)" />
+        <div className="wmap" style={{ height: '120px' }} />
+      </main>
+    ))
+    // Past the `arrive` animation, which lifts the screen into place —
+    // measured during it, every distance here is 5px short.
+    await settle(420)
+    const box = s => document.querySelector(s).getBoundingClientRect()
+    expect(Math.round(box('.bar').top - box('.hud').bottom)).toBe(22)
+    expect(Math.round(box('.wmap').top - box('.bar__stripe').bottom)).toBe(16)
+  })
+
   it('leaves both bars on a stage and docks on the inset', async () => {
     await mountShell('/learn/kana')
     await settle()

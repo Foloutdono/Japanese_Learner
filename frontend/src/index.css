@@ -4236,7 +4236,10 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
-  padding-top: var(--sp-3);
+  /* The screen begins here, and it should look like it does: 8px put
+     the bar's roundel against the underside of the HUD, so the chrome
+     and the screen's own head read as one stack of type. */
+  padding-top: var(--sp-6);
   padding-bottom: var(--dock-bottom);
 }
 /* A screen that still mounts its own .screen shell (plans 070–074
@@ -4260,14 +4263,19 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .tier-picker__size .cap { flex: none; }
-/* The gates' pages: the canvas's gutter, the bar first. */
+/* The gates' pages: the canvas's gutter, the bar first. The block
+   rhythm is the page gutter turned on its side — the bar's rule to the
+   first panel measures what the panel measures to the screen's edge —
+   and it was 12px, which read as the board leaning on the bar. Less
+   than the 22px above the bar, because a head belongs to what is under
+   it. */
 .learn,
 .practice,
 .today,
 .dictionary {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
   padding: 0 var(--sp-5) var(--sp-6);
 }
 
@@ -4980,6 +4988,19 @@ textarea:focus-visible {
   letter-spacing: 0.02em;
   text-transform: none;
 }
+
+/* In a console the chips are the whole of a choice, so they take the
+   whole of the row: shrink-wrapped, they left a ragged hundred pixels
+   at the end of every wrapped line and read as a sentence that had run
+   out rather than as a set. Growing is per LINE — flex wraps on the
+   natural widths first, then stretches what landed on each — so the
+   set keeps the shape it wraps into. A lone chip is not a set and
+   keeps its own width. */
+.console__chips .chip {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+.console__chips .chip:only-child { flex: none; }
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
