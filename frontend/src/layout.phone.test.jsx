@@ -79,6 +79,34 @@ describe('the phone layout contract', () => {
     expect(getComputedStyle(head).marginBottom).toBe('12px')
   })
 
+  // ── Every tab screen stands in the same box ──
+  // .learn, .practice, .today and .dictionary were inset --sp-5 down
+  // each side with --sp-6 under the last block; the pass, the stamp
+  // book and the settings rows ran edge to edge, because the three
+  // pages behind the pass were the only screens the rule never
+  // reached. The pass then carried 44px under itself from when it
+  // stood alone, which the column's own gap added to: a 60px hole
+  // between the pass and the stamp book.
+  it('stands the profile, the statistics and the settings in the screen box', async () => {
+    const screen = await render(
+      <div>
+        <main className="learn" />
+        <main className="profile" />
+        <main className="stats" />
+        <main className="settings" />
+        <div className="pass" />
+      </div>
+    )
+    const box = sel => {
+      const c = getComputedStyle(screen.container.querySelector(sel))
+      return `${c.paddingLeft} ${c.paddingRight} ${c.paddingBottom}`
+    }
+    expect(box('.learn')).toBe('16px 16px 22px')
+    for (const page of ['.profile', '.stats', '.settings']) expect(box(page), page).toBe(box('.learn'))
+    // And a block in that column brings no margin of its own to it.
+    expect(getComputedStyle(screen.container.querySelector('.pass')).marginBottom).toBe('0px')
+  })
+
   // ── The segmented control is one instrument ──
   // Its segments are divided by hairlines, not gaps or boxes
   // (DESIGN.md, Controls). Every option is a <button>, and the bare

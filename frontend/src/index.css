@@ -5314,7 +5314,11 @@ textarea:focus-visible {
   flex-direction: column;
   gap: 26px;
   padding: 26px 28px 24px;
-  margin-bottom: 44px;
+  /* No margin of its own: the pass is a block in a column that owns
+     the space between its blocks (.profile above, .brd__stage in the
+     boarding). It carried 44px under it from when it stood alone,
+     which the column's own --sp-5 then added to — a 60px hole between
+     the pass and the stamp book, on the screen the pass opens. */
   background:
     linear-gradient(155deg,
       color-mix(in srgb, var(--pass-color) 38%, var(--bg-panel)) 0%,
@@ -15497,12 +15501,19 @@ html { scrollbar-gutter: stable; }
    the compounds below never precede the rules they override. */
 
 /* ── The three pages ── */
+/* The same box every other tab screen stands in (.learn, .practice,
+   .today, .dictionary above): --sp-5 down each side and --sp-6 under
+   the last block. These three were the only screens without it, so
+   the pass, the stamp book and the settings rows ran edge to edge
+   while every other screen's cards were inset — and nothing but the
+   dock's own clearance sat under the last of them. */
 .profile,
 .stats,
 .settings {
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
+  padding: 0 var(--sp-5) var(--sp-6);
 }
 .profile__stale { display: flex; align-items: center; gap: var(--sp-2); margin: 0; }
 .profile__stale-glyph { flex: none; color: var(--warning); }
