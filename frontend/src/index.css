@@ -4422,6 +4422,13 @@ textarea:focus-visible {
 .hud__pass--out .hud__pass-fig { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
+/* The bar is over the page, and has to look it. Its ground and the
+   page's are seven values apart in the dark theme (#100e13 on #17151a)
+   and a 1px hairline was the whole of the difference, so a card that
+   scrolled up to it read as continuing into it. The line stays and
+   takes a cast of the panel's own ink; under it the bar throws a
+   short, soft shadow UPWARD onto whatever is passing beneath. Content
+   sliding under a lit edge is what says the bar is not part of it. */
 .tabbar {
   position: fixed;
   left: 0;
@@ -4430,7 +4437,8 @@ textarea:focus-visible {
   z-index: 30;
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-top: 1px solid var(--burger-menu-border);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+  box-shadow: 0 -10px 24px -12px rgba(0, 0, 0, 0.75);
   padding-bottom: var(--safe-bottom);
 }
 /* ── One word, on the gate you are on ──
@@ -4439,14 +4447,17 @@ textarea:focus-visible {
    they are printed in ("DICTIONNAIRE" 94px in a 78px gate) and there
    was nothing to stop them: no nowrap, no clip, so each one printed
    over its neighbour. The row of words is a pictogram now and the
-   word appears only under the gate you are on — the one place there
-   is room for it, because that gate takes the room, and the four
-   others give it up in equal shares.
+   word appears only under the gate you are on.
 
-   Flex, not five equal columns, for exactly that: `1 1 0` shares what
-   the lit gate leaves. The lit one is `0 1 auto` — its width is its
-   word's — and its caption still says nowrap and clips, so a longer
-   word in some later language shortens rather than escapes. */
+   THE GLYPHS DO NOT MOVE. The lit gate used to take the width its own
+   word needed (`0 1 auto` and an inline pad) and the other four shared
+   what was left — so every navigation re-dealt the row: measured at
+   390px, a glyph travelled up to 35px, and the outer two slid toward
+   the edges whenever a far gate lit. Five equal fifths, always, and
+   the caption is taken OUT of the flow: absolutely placed, centred on
+   its own gate, free to be wider than the fifth it belongs to because
+   the space beside it is four unlit gates' worth of nothing. A row
+   that holds still is what makes the lit one read as lit. */
 .tabbar__inner { display: flex; }
 .tab {
   position: relative;
@@ -4456,42 +4467,50 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   /* Anchored from the top, not centred: the glyphs are a row and a
-     row is a straight line. Centring each gate's column would lift
-     the lit gate's glyph by half a caption and leave the other four
-     sitting lower than it. */
+     row is a straight line. */
   justify-content: flex-start;
-  gap: 2px;
   height: var(--tabbar-h);
   padding: var(--sp-2) 0 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
   text-decoration: none;
 }
-.tab--on {
-  flex: 0 1 auto;
-  padding-inline: var(--sp-4);
-  color: var(--text-on-panel);
-}
+.tab--on { color: var(--text-on-panel); }
 .tab:hover,
 .tab:focus-visible { color: var(--text-on-panel); }
-.tab__ico { display: inline-flex; }
+/* A box of its own so the lit gate can be given a ground without the
+   glyph moving to make room for it: every gate reserves the lozenge,
+   only one is painted. */
+.tab__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 26px;
+  border-radius: var(--r-pill);
+}
+.tab--on .tab__ico { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+/* Out of the flow entirely: it names the lit gate without setting a
+   single gate's width, and it may run past its own fifth because what
+   is beside it is an unlit gate's empty half-height. */
 .tab__cap {
-  max-width: 100%;
-  overflow: hidden;
+  position: absolute;
+  bottom: var(--sp-1);
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 .tab--on::before {
   content: '';
   position: absolute;
   top: -1px;
-  left: var(--sp-6);
-  right: var(--sp-6);
+  left: var(--sp-3);
+  right: var(--sp-3);
   height: 2px;
   background: var(--text-on-panel);
 }
@@ -4500,7 +4519,10 @@ textarea:focus-visible {
 .tab__due {
   position: absolute;
   top: var(--sp-1);
-  left: calc(50% + var(--sp-2));
+  /* On the shoulder of the glyph and inside its own gate: a fifth of
+     390px is 76px, and from 50% + --sp-2 the chip's own width put its
+     right edge a hair past that. */
+  left: calc(50% + var(--sp-1));
   display: inline-flex;
   align-items: baseline;
   padding: 0 var(--sp-1);
