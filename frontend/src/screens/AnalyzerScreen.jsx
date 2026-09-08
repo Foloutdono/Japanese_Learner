@@ -126,7 +126,7 @@ export default function AnalyzerScreen({ session }) {
   const [detail, setDetail] = useState(null) // { title, entry, stats }
   // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
   // effect (and steal focus) on every render of this screen while the
-  // detail sheet is open -- see ReadingScreen.jsx's closeDetail for the
+  // detail sheet is open -- see ReadingRun.jsx's closeDetail for the
   // same fix, and plans/README.md's plan-004 note for the bug class
   // this avoids.
   const closeDetail = useCallback(() => setDetail(null), [])

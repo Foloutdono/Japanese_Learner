@@ -1,14 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { board } from '../stores/boarding'
-import { Leave } from '../components/chrome/Bar'
-import { Seg } from '../components/chrome/Console'
-import LevelSelector from '../components/selection/LevelSelector'
-import ModeSelector from '../components/selection/ModeSelector'
-import TierSelector from '../components/selection/TierSelector'
-import SelectionScreen from '../components/selection/SelectionScreen'
+import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
@@ -16,36 +10,35 @@ import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon } from '../components/ui/Icons'
-import { tierLabelFor, DEFAULT_TIER_SIZE } from '../domain/tiers'
+import { tierLabelFor } from '../domain/tiers'
 
 const TRANSLATION_COLOR = 'var(--line-honyaku)'
 
 // NOTE ON TRANSLATION KEYS: reuses the same generic study-source keys
-// ReadingScreen.jsx does (t.byLevel/byLevelDesc, t.byFrequency/
+// ReadingRun.jsx does (t.byLevel/byLevelDesc, t.byFrequency/
 // byFrequencyDesc, t.byMastery/byMasteryDesc, t.selectStudySource,
 // t.selectLevel, t.selectDomain, t.selectTier, t.tierLabel, t.submit,
 // t.loadError, t.retry, t.score, t.correct, t.incorrect, t.yourAnswer).
 
-// Route: /practice/translation (plan 072: the pickers on the station
-// page, the session on the stage — the canvas's TranslationWrite and
-// Translation artboards: the prompt as a page, the field and Submit
-// docked in the foot; then the answer, the reference, the AI's
-// reading of it, and the rating bar docked).
-export default function TranslationScreen({ session }) {
+// Routes: /practice/translation/level/:level, /tier/:tier
+// (?size=&domain=) and /mastery — the session on the stage (the
+// canvas's TranslationWrite and Translation artboards: the prompt as a
+// page, the field and Submit docked in the foot; then the answer, the
+// reference, the AI's reading of it, and the rating bar docked). The
+// pickers are the station page above it, under the chrome
+// (screens/SentenceStation.jsx).
+const BASE = '/practice/translation'
+
+export default function TranslationRun({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const { level: levelParam, tier: tierParam } = useParams()
+  const { search } = useLocation()
 
-  const SOURCES = [
-    { key: 'level',     label: t.byLevel,     desc: t.byLevelDesc },
-    { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
-    { key: 'mastery',   label: t.byMastery,   desc: t.byMasteryDesc },
-  ]
-
-  const [source, setSource] = useState(null)       // 'level' | 'frequency' | 'mastery'
-  const [level, setLevel]   = useState(null)        // source === 'level'
-  const [domain, setDomain] = useState('vocab')     // source === 'frequency'
-  const [tier, setTier]     = useState(null)
-  const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
+  // 'level' | 'frequency' | 'mastery', and the ‹ back to the list it
+  // was chosen from. Null for a path the station could not produce.
+  const picked = runSource({ base: BASE, level: levelParam, tier: tierParam, search })
+  const { source, level, domain, tier, tierSize, back, backKey } = picked ?? {}
 
   // 'loading' | 'writing' | 'feedback' | 'error'
   const [stage, setStage]   = useState('loading')
@@ -70,7 +63,7 @@ export default function TranslationScreen({ session }) {
   // Monotonic counter stamped onto each shown phrase as `_uiKey` — used
   // as CardTransition's cardKey and to guard the analysis fetch against
   // a slow response landing after the learner has already moved on
-  // (mirrors ReadingScreen.jsx's phraseCounterRef/analysisPhraseRef,
+  // (mirrors ReadingRun.jsx's phraseCounterRef/analysisPhraseRef,
   // keyed here instead of by phrase text since the analysis depends on
   // the learner's answer too, not just which phrase is showing).
   const phraseCounterRef = useRef(0)
@@ -89,7 +82,7 @@ export default function TranslationScreen({ session }) {
 
   // Every sentence this session has already served, so the backend can
   // work through its curated bank rather than reshuffling the same
-  // handful. Same mechanism ReadingScreen uses -- both modes draw from
+  // handful. Same mechanism ReadingRun uses -- both modes draw from
   // the same picker (translation.py delegates to reading.py wholesale),
   // so both need to tell it what they have already shown.
   const seenRef = useRef([])
@@ -274,69 +267,14 @@ export default function TranslationScreen({ session }) {
     })
   }
 
-  function resetAll() {
-    setSource(null)
-    setLevel(null)
-    setTier(null)
+  // ‹ — back to the list the source was chosen from.
+  function leave() {
+    navigate(back)
   }
 
-  // ── Source selection (level / frequency / my cards) ──
-  if (!source) {
-    return (
-      <SelectionScreen
-        title={t.translationTitle}
-        sub={t.selectStudySource}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
-      >
-        <ModeSelector
-          modes={SOURCES}
-          onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
-        />
-      </SelectionScreen>
-    )
-  }
-
-  // ── Level source: pick a JLPT level ──
-  if (source === 'level' && !level) {
-    return (
-      <SelectionScreen
-        title={t.translationTitle}
-        sub={t.selectLevel}
-        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
-      >
-        <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
-      </SelectionScreen>
-    )
-  }
-
-  // ── Frequency source: the word list and the tier, on one page ──
-  if (source === 'frequency' && tier == null) {
-    return (
-      <SelectionScreen
-        title={t.translationTitle}
-        sub={t.selectTier}
-        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
-      >
-        <Seg
-          full
-          label={t.selectDomain}
-          value={domain}
-          onChange={setDomain}
-          options={[
-            { key: 'vocab', label: t.freqDomainDeck },
-            { key: 'vocab_jmdict', label: t.freqDomainJmdict },
-          ]}
-        />
-        <TierSelector
-          domain={domain}
-          session={session}
-          tierSize={tierSize}
-          onTierSize={setTierSize}
-          onSelect={tr => board(() => setTier(tr))}
-        />
-      </SelectionScreen>
-    )
-  }
+  // A hand-typed path the station could not have produced: back to it
+  // rather than a session with nothing to fetch.
+  if (!picked) return <Navigate replace to={BASE} />
 
   // ── Session (all sources land here once fully configured) ──
   return (
@@ -357,7 +295,8 @@ export default function TranslationScreen({ session }) {
       error={error}
       analysis={analysis}
       analysisLoading={analysisLoading}
-      onBack={resetAll}
+      onBack={leave}
+      backLabel={t[backKey]}
       onStart={startSession}
       submitAnswer={submitAnswer}
       gradeAnswer={gradeAnswer}
@@ -377,11 +316,12 @@ function Streak({ streak, t }) {
 }
 
 // Kicks off the session's first batch fetch exactly once, then renders
-// the stage machine. Split out for the same reason ReadingScreen.jsx
-// splits it: keeps the selection-screen early-returns above simple.
+// the stage machine. A component of its own for the same reason
+// ReadingRun.jsx splits it: the mount is the start, and the route above
+// is what decides there is a session to start.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
-  feedback, score, streak, error, analysis, analysisLoading,
+  feedback, score, streak, error, analysis, analysisLoading, backLabel,
   onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   const startedRef = useRef(false)
@@ -405,7 +345,7 @@ function SessionView({
     <StudyStage
       color={TRANSLATION_COLOR}
       onLeave={onBack}
-      leaveLabel={t.tabPractice}
+      leaveLabel={backLabel}
       where={t.translationTitle}
       sub={where}
       remaining={`${score.correct} / ${score.total}`}

@@ -8,9 +8,11 @@ import { ChevronIcon } from '../ui/Icons'
 // ── The compact header (plan 068) ─────────────────────────────
 // One row — roundel, title, sub, aside — and the section's pigment as
 // a rule under it. Every tab screen opens with one; the `register`
-// variant (Practice, the profile's halls) has no roundel and a
-// hairline instead of the pigment, for a screen that is not a place
-// on a line.
+// variant has no roundel and a hairline instead of the pigment, for a
+// screen that is not a place on a line at all. The five gates are not
+// that case — each wears a roundel and a colour, the concourse's gold
+// where it is not a line's own — so the variant is left to ScreenBar,
+// for a path with no section behind it.
 //
 // `as` picks the title's element. The bar is the screen's <h1> when
 // nothing else names the place; a screen with a station plate or a

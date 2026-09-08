@@ -821,7 +821,7 @@ const reading = {
   gradeCorrect:         'J\'ai eu juste',
   gradeIncorrect:       'Je n\'ai pas eu juste',
 
-  // Décomposition mot par mot + sa navigation (ReadingScreen.jsx) —
+  // Décomposition mot par mot + sa navigation (ReadingRun.jsx) —
   // affichée une fois la phrase corrigée.
   showBreakdown:        'Voir la décomposition',
   hideBreakdown:        'Masquer la décomposition',
@@ -848,7 +848,7 @@ const readingComprehension = {
 }
 
 // ── Translation mode ──────────────────────────────────────────────
-// TranslationScreen.jsx réutilise entièrement les clés existantes de
+// TranslationRun.jsx réutilise entièrement les clés existantes de
 // reading/quiz pour tout ce que les deux écrans partagent (byLevel*,
 // byFrequency*, byMastery*, selectStudySource, selectLevel,
 // selectDomain, selectTier, domainVocabDeck*/domainVocabJmdict*,

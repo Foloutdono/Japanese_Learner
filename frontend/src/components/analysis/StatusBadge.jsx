@@ -1,6 +1,6 @@
 import { STATUS_COLORS } from './status'
 
-// Merged from two copies that had already diverged: ReadingScreen.jsx's
+// Merged from two copies that had already diverged: ReadingRun.jsx's
 // translated the label via t.status_*, PhraseAnalyzerScreen.jsx's used
 // a hardcoded English STATUS_LABELS table instead — so a French learner
 // saw "Mastered" on one screen and "Maîtrisé" on the other, for the

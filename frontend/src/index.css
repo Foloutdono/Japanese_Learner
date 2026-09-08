@@ -4684,6 +4684,24 @@ textarea:focus-visible {
   gap: var(--sp-3);
   flex-shrink: 0;
 }
+
+/* ── A section's name is not an ellipsis ──
+   The canvas sets the title and the sub on one baseline, and it was
+   drawn on titles like かな and 辞書. On a phone at 390 px the row is
+   the roundel, both registers and the way out, and a section whose
+   name is a sentence -- "Entraînement à la lecture" over "Choisissez
+   une source", with ‹ Pratique in the aside -- had about 200 px for
+   all of it and printed "Entra…". A name cut to five letters names
+   nothing.
+
+   So below the canvas's own breakpoint the two registers stack: the
+   title takes the row's whole width and wraps if it must, the sub sits
+   under it, and the bar grows by a line only on the screens that need
+   one. Short names are one line and unchanged. */
+@media (max-width: 768px) {
+  .bar__names { flex-direction: column; align-items: flex-start; gap: 0; }
+  .bar__title { white-space: normal; overflow: visible; text-wrap: pretty; }
+}
 /* A text link in the bar's aside — the other way into a station
    ("By frequency", "JLPT instead"): the caption register, underlined. */
 .bar__link {

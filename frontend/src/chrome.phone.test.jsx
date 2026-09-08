@@ -207,6 +207,31 @@ describe('the bar', () => {
     expect(register.querySelector('.bar__roundel')).toBeNull()
     expect(getComputedStyle(register.querySelector('.bar__stripe')).height).toBe('1px')
   })
+
+  // The canvas sets both registers on one baseline, on titles like かな.
+  // A section whose name is a sentence, with a sub and a way out beside
+  // it, had ~200 px for all of it at 390 and printed "Entra…".
+  it('stacks the two registers on a phone, so a long name is not cut', async () => {
+    const screen = await render(
+      <LangProvider>
+        <Bar
+          code="DS"
+          title="Entraînement à la lecture"
+          sub="Choisissez votre source d'étude"
+          color="var(--line-reading)"
+          aside={<button type="button" className="bar__link">Pratique</button>}
+        />
+      </LangProvider>
+    )
+    const bar = screen.container.querySelector('.bar')
+    const title = bar.querySelector('.bar__title')
+    const sub = bar.querySelector('.bar__sub')
+    // The sub is under the title, not beside it.
+    expect(sub.getBoundingClientRect().top).toBeGreaterThanOrEqual(title.getBoundingClientRect().bottom - 2)
+    // And the whole name is drawn: nothing is clipped inside the title.
+    expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth + 1)
+    expect(title.textContent).toBe('Entraînement à la lecture')
+  })
 })
 
 describe('the sheet', () => {

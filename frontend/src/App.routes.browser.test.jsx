@@ -69,7 +69,9 @@ describe('the moved paths', () => {
     ['/decks', '/learn/decks'],
     ['/decks/d9', '/learn/decks/d9'],
     ['/decks/d9/study', '/learn/decks/d9/study'],
+    ['/reading', '/practice/reading'],
     ['/reading-comprehension', '/practice/comprehension'],
+    ['/translation', '/practice/translation'],
     ['/exam', '/practice/exam'],
     ['/exam/e1/results?attempt=7', '/practice/exam/e1/results?attempt=7'],
     ['/phrase-analyzer', '/dictionary/analyzer'],
@@ -99,6 +101,33 @@ describe('the moved paths', () => {
     expect(document.querySelector('.tabbar')).toBeTruthy()
     expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
     expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
+    screen.unmount()
+  })
+
+  // Practice's three sentence sections were each ONE route that began
+  // as a picker and became a session, and it was on the stage frame —
+  // so choosing a source happened with no HUD and no tab bar. The
+  // pickers are station pages now, and only the session is the run.
+  it('mounts the shell on a practice station', async () => {
+    window.history.replaceState(null, '', '/practice/reading')
+    const screen = await render(<App />)
+    await settle()
+    expect(document.querySelector('.hud')).toBeTruthy()
+    expect(document.querySelector('.tabbar')).toBeTruthy()
+    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('実践')
+    // The three sources, and the section's own roundel over them.
+    expect(document.querySelectorAll('.platform-card')).toHaveLength(3)
+    expect(document.querySelector('.bar__roundel').textContent).toBe('DS')
+    screen.unmount()
+  })
+
+  it('mounts the stage on a practice run', async () => {
+    window.history.replaceState(null, '', '/practice/reading/mastery')
+    const screen = await render(<App />)
+    await settle()
+    expect(document.querySelector('.tabbar')).toBeNull()
+    expect(document.querySelector('.hud')).toBeNull()
+    expect(document.documentElement.dataset.chrome).toBe('stage')
     screen.unmount()
   })
 

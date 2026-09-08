@@ -69,15 +69,15 @@ draw and readings faces keep their button under the widget).
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.bar--register`, `.platform-card--line` | the hub | `screens/PracticeScreen.jsx` (plan 068) |
-| `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingScreen.jsx`, `screens/ReadingComprehensionScreen.jsx` |
-| `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingScreen.jsx` |
-| `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingScreen.jsx`, `screens/TranslationScreen.jsx`, `ReadingComprehensionScreen.jsx` |
-| `.prompt-card--ask` | a flat, left-aligned question card | `ReadingComprehensionScreen.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
+| `.platform-card--line` | the hub | `screens/PracticeScreen.jsx` (plan 068) — its bar is the concourse's, the home roundel and the gold, as the Learn gate's is; it was `.bar--register` until that made it the one gate of five with neither roundel nor pigment |
+| `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingRun.jsx`, `screens/ComprehensionRun.jsx` |
+| `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingRun.jsx` |
+| `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingRun.jsx`, `screens/TranslationRun.jsx`, `ComprehensionRun.jsx` |
+| `.prompt-card--ask` | a flat, left-aligned question card | `ComprehensionRun.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
 | `.type-badge` | the outlined caption pill (its type's colour as a tint) | `QuestionTypeBadge` in `components/study/QuizComponents.jsx` |
-| `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ReadingComprehensionScreen.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
+| `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ComprehensionRun.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
 | `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
-| `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ReadingComprehensionScreen.jsx` |
+| `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ComprehensionRun.jsx` |
 | `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
 | `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
 | `.exam-mondai`, `.exam-mondai__part`, `.exam-mondai__text` | Part n · Show instructions | `ExamRunner.jsx` |
@@ -92,12 +92,25 @@ draw and readings faces keep their button under the widget).
 
 The practice pickers (source, level, word list + tier, the exam's level and
 papers) render on `SelectionScreen` — the station page's own bar, with the
-way back in its aside — the way every station does since plan 071. The
-sessions and the exam runner render on `StudyStage` / the stage frame with
-`‹ Practice` (`‹ Exam`) as the way out and no pocket pass: practice spends
-no credits. The reading and translation tier step is the vocab station's
-tiers page (a `Seg` for the word list over `TierSelector`), and the batch
-carries the chosen `tier_size`. The comprehension exercise commits a pick
+way back in its aside — the way every station does since plan 071. They are
+also *routed* like a station now: reading, comprehension and translation
+were each one route that began as a picker and became a session, and that
+route was on the stage frame, so choosing a source happened with no HUD and
+no tab bar. The pickers are their own routes under the shell
+(`screens/SentenceStation.jsx`, one screen for all three: they ask the same
+question) and the session is the run below them
+(`ReadingRun`/`ComprehensionRun`/`TranslationRun`), with the choice carried
+in the path — `/practice/reading` · `/levels` · `/tiers`, then
+`/level/N4`, `/tier/3?size=200&domain=jmdict`, `/mastery`; comprehension has
+one axis, so its root is the level list and its run is
+`/practice/comprehension/N4`. `domain/sentenceSource.js` is the one place
+that knows that shape, and a path the station could not have produced sends
+the learner back to it. The sessions and the exam runner render on
+`StudyStage` / the stage frame with the list they were chosen from as the
+way out (`‹ Sources`, `‹ Levels`, `‹ Tiers`; `‹ Exam`) and no pocket pass:
+practice spends no credits. The reading and translation tier step is the
+vocab station's tiers page (a `Seg` for the word list over `TierSelector`),
+and the batch carries the chosen `tier_size`. The comprehension exercise commits a pick
 with Next (the canvas), and re-reading the text pauses the clock. Held from
 the canvas: the "sat twice" line on a paper (the catalog carries no attempt
 count).

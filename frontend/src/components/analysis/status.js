@@ -1,6 +1,6 @@
 // Shared between every sentence-breakdown surface (phrase analyzer,
 // reading practice, and — once they land — photo/video input). Moved
-// here verbatim from PhraseAnalyzerScreen.jsx/ReadingScreen.jsx, where
+// here verbatim from PhraseAnalyzerScreen.jsx/ReadingRun.jsx, where
 // both screens defined byte-identical copies independently.
 export const STATUS_COLORS = {
   mastered:     'var(--success)',
