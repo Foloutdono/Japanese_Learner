@@ -16095,14 +16095,65 @@ html { scrollbar-gutter: stable; }
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
-  padding-top: calc(var(--sp-9) + var(--sp-8));
   overflow-y: auto;
 }
-.brd__body--top { padding-top: 0; }
-.brd__body--arrival { padding-top: var(--sp-9); }
-.brd__body--center { padding-top: 0; justify-content: center; }
-.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); margin-top: var(--sp-9); }
-.brd__body--center .brd__stage { margin-top: 0; }
+
+/* ── The air gives way before the body scrolls ──
+   The rhythm around a question -- (--sp-9 + --sp-8) over it, --sp-9
+   under it -- is the canvas's, and the canvas is an 844 px artboard
+   where `why`'s six motives land with nothing to spare. A real phone
+   is shorter: at 764 CSS px (a 6.1" Android, its two bars taking the
+   rest) the body overflowed by 66 px and cut the sixth motive in
+   half, while 164 px of nothing sat above the question. Dead space
+   is the failure, not unevenness -- DESIGN.md, the density contract.
+
+   So the rhythm is a MAXIMUM, not a fixed pad: both gaps are flex
+   SPACERS, and a flex item gives up its height when the room runs
+   out where a padding never does. They collapse together, in
+   proportion, and only once they are gone does the body scroll --
+   which is still the right answer on a screen too short for the
+   content itself.
+
+   Each spacer carries its rung as its own basis and cancels the one
+   flex gap it stands behind, so what is drawn at rest is exactly the
+   rung and what is left once a spacer is spent is the body's gap:
+   --sp-5 under the head, --sp-5 over the answers, never nothing.
+
+   The top spacer is a `::before` -- nothing can precede it. The one
+   under the question is markup (`.brd__air`, drawn by BoardQuestion):
+   a pseudo-element can only be a flex item at the two ends of a box,
+   and this one belongs in the middle. It is inert everywhere but as a
+   direct child of the body, so the question Building nests inside its
+   own stage does not grow one. */
+.brd__body::before {
+  content: "";
+  flex: 0 1 calc(var(--sp-9) + var(--sp-8));
+  min-height: var(--sp-5);
+  margin-bottom: calc(-1 * var(--sp-5));
+}
+.brd__body--top::before { content: none; }
+.brd__body--arrival::before { flex-basis: var(--sp-9); }
+.brd__air { display: none; }
+.brd__body > .brd__air {
+  display: block;
+  flex: 0 1 var(--sp-9);
+  margin-bottom: calc(-1 * var(--sp-5));
+}
+
+/* Centred with spacers rather than `justify-content: center`, for the
+   same reason: a centred line that outgrows its box spills off BOTH
+   ends, and no scroll can reach back over the top of it. A pair of
+   grow-only spacers centres the same content and simply vanishes when
+   the room runs out, leaving the overflow all at the bottom where the
+   scroll can follow it. */
+.brd__body--center::before,
+.brd__body--center::after {
+  content: "";
+  flex: 1 0 0;
+  min-height: 0;
+  margin-bottom: 0;
+}
+.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); }
 .brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
 .brd__back {
   display: inline-flex;

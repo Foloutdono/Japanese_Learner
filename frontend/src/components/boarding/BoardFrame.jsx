@@ -42,8 +42,19 @@ export function BoardQuestion({ children, hint = null, as: Tag = 'h1' }) {
     <>
       <Tag className="brd__q" tabIndex={-1}>{children}</Tag>
       {hint && <p className="brd__hint">{hint}</p>}
+      <BoardAir />
     </>
   )
+}
+
+/** The room between a question and its answers, drawn as a spacer
+    rather than a margin so that it can give way on a phone shorter
+    than the canvas's artboard (index.css, "The air gives way before
+    the body scrolls"). Rendered by BoardQuestion, so a screen only
+    ever asks for it directly when it writes its own question block
+    -- the pass does. */
+export function BoardAir() {
+  return <div className="brd__air" aria-hidden="true" />
 }
 
 /** The one filled action: gold, full width, docked. */

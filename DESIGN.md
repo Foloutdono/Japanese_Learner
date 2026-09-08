@@ -409,6 +409,16 @@ So:
   (meta, a figure, a status). If it has nothing to put there, it should be
   narrower or the grid should have more columns.
 - A grid of ≤5 short options is a grid, never a stack of full-width rows.
+- **Air gives way before content does.** A screen laid out at one phone's
+  height meets shorter ones, and a fixed pad cannot yield: it pushes the last
+  choice off the bottom while its own emptiness stays. Where a block rhythm
+  stands between a screen's parts, spend it as a flex spacer rather than a
+  padding or a margin — the rung is then a maximum, collapsing (never past the
+  container's own gap) until the room runs out, and only a screen genuinely
+  too short for its content scrolls. The boarding's frame is the worked
+  example (`.brd__body::before`, `.brd__air`), and centring a body that might
+  overflow takes a pair of grow-only spacers, never `justify-content: center`,
+  whose overflow spills off both ends with the top unreachable.
 
 ## Motion
 

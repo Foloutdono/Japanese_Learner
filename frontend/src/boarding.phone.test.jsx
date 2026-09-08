@@ -37,14 +37,26 @@ async function click(root, sel) {
   await settle(20)
 }
 
-async function mountFlow() {
+async function mountFlow(username = 'Tester') {
   const screen = await render(
     <LangProvider>
-      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username: 'Tester' }} onComplete={() => {}} dryRun />
+      <BoardingFlow session={{ access_token: 'tok' }} initialProfile={{ username }} onComplete={() => {}} dryRun />
     </LangProvider>
   )
   await settle(60)
   return screen
+}
+
+// The lane's 844 IS the canvas's artboard, and the frame is 100dvh, so
+// a shorter phone is drawn by shortening the frame: 764 px is a 6.1"
+// Android with its status and navigation bars taking the rest -- the
+// screen the sixth motive was falling off.
+async function atHeight(px, fn) {
+  const shorter = document.createElement('style')
+  shorter.textContent = `.brd { height: ${px}px; }`
+  document.head.append(shorter)
+  await settle(30)
+  try { await fn() } finally { shorter.remove() }
 }
 
 describe('the boarding at 390×844', () => {
@@ -100,6 +112,46 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(rows[0]).width)).toBeGreaterThanOrEqual(Math.round(rect(frame).width) - 2 * 20 - 4)
     expect(rect(rows[0]).right).toBeLessThanOrEqual(390)
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+  })
+
+  // ── The air gives way before the body scrolls ──
+  // The rhythm around a question was a fixed pad, so on any phone
+  // shorter than the artboard the six motives ran off the bottom while
+  // 164 px of nothing sat above the question. It is a maximum now: the
+  // two spacers collapse in proportion, and the body only scrolls once
+  // they are spent.
+  it('collapses the air rather than scroll the six motives off a shorter phone', async () => {
+    const screen = await mountFlow('SilentSamurai6323')
+    await click(screen.container, '[data-action="continue"]')
+    // Past the staggered arrival: the sixth row's brd-in is 200 ms of
+    // delay and 360 ms of travel, and a row still translated 6 px down
+    // is 6 px of scrollable overflow that says nothing about the rest
+    // state being measured here.
+    await settle(620)
+    const frame = screen.container.querySelector('.brd')
+    const live = sel => frame.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
+    const body = () => live('.brd__body')
+
+    // At rest, the canvas's own rhythm: --sp-9 + --sp-8 over the
+    // question, --sp-9 under it (the body's --sp-5 gap included).
+    expect(Math.round(rect(live('.brd__q')).top - rect(body()).top)).toBe(96)
+    expect(Math.round(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom)).toBe(68)
+    expect(body().scrollHeight).toBe(body().clientHeight)
+
+    for (const height of [800, 764, 700]) {
+      await atHeight(height, () => {
+        const rows = [...frame.querySelectorAll('.brd__car:not(.brd__car--out) .brd-opt')]
+        expect(rows).toHaveLength(6)
+        // Nothing scrolls, and the sixth motive clears the docked action.
+        expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
+        expect(rect(rows[5]).bottom).toBeLessThanOrEqual(rect(live('.brd__foot')).top)
+        // The air is spent from the top down, never past the body's own
+        // gap: the question keeps --sp-5 off the head and off the rows.
+        expect(rect(live('.brd__q')).top - rect(body()).top).toBeGreaterThanOrEqual(16)
+        expect(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom).toBeGreaterThanOrEqual(16)
+        expect(rect(live('.brd__q')).top - rect(body()).top).toBeLessThanOrEqual(96)
+      })
+    }
   })
 
   it('the kana answers are the foot of their screen, 56 px each, and the hour cells 76', async () => {

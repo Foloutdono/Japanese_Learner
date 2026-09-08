@@ -284,7 +284,7 @@ entries in `.stylelint-baseline.json` went in the same commit.
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.brd` (`--welcome`), `.brd__head`, `.brd__back` (`--void`), `.brd__track`, `.brd__done`, `.brd__train`, `.brd__count`, `.brd__body` (`--top`, `--arrival`, `--center`), `.brd__stage`, `.brd__q` (`.brd__q-em` for the canvas's `b`), `.brd__hint`, `.brd__error`, `.brd__foot`, `.brd__link`; `.brd__cars`, `.brd__car` (`--in`, `--out`, `[data-dir]`) | 乗車 — the frame and the train pull | `screens/BoardingFlow.jsx` (the state machine), `BoardHead`, `BoardQuestion`, `Continue`, `BoardLink` in `components/boarding/BoardFrame.jsx` |
+| `.brd` (`--welcome`), `.brd__head`, `.brd__back` (`--void`), `.brd__track`, `.brd__done`, `.brd__train`, `.brd__count`, `.brd__body` (`--top`, `--arrival`, `--center`), `.brd__stage`, `.brd__q` (`.brd__q-em` for the canvas's `b`), `.brd__hint`, `.brd__error`, `.brd__foot`, `.brd__link`; `.brd__cars`, `.brd__car` (`--in`, `--out`, `[data-dir]`); `.brd__air` (not the canvas's: the air under a question, drawn as a spacer so it can give way — see below) | 乗車 — the frame and the train pull | `screens/BoardingFlow.jsx` (the state machine), `BoardHead`, `BoardQuestion`, `BoardAir`, `Continue`, `BoardLink` in `components/boarding/BoardFrame.jsx` |
 | `.brd-hero`, `.brd-roll` (`__lane`, `--back`), `.brd-demo` (`__tag`, `__glyph`, `__t` `--sm`/`--cap`, `.cloze`, `__meaning`, `__foot`, `__draw`, `__wave`, `__bar`), `.brd-tagline` | Welcome: the sign, the rolling stock, the promise | `components/boarding/Welcome.jsx`, the cards in `demoCards.js` |
 | `.brd-field` (`--empty`) | the name | `NameStep.jsx` |
 | `.brd__opts`, `.brd-opt` (`--on`, `__icon`, `__code`, `__names`, `__label`, `__desc`, `__check`), `.brd-tag` | one row, one choice: why, the level, the goal | `BoardOption.jsx`, `WhyStep.jsx`, `LevelStep`/`GoalStep` in `LevelStep.jsx`, the motive glyphs in `icons.jsx` |
@@ -315,6 +315,16 @@ screen is skipped on the web; the tutorial is deferred. The motion sheet's
 pull, the +120 ms rule and the rest-state-only rule under reduced motion are
 pinned in `screens/BoardingFlow.browser.test.jsx`, its `.reduced` twin and
 `boarding.phone.test.jsx`.
+
+The canvas is an 844 px artboard and `why`'s six motives fill it exactly, so
+its rhythm around a question — `--sp-9 + --sp-8` over it, `--sp-9` under it —
+is a **maximum** here, not a fixed pad: both gaps are flex spacers
+(`.brd__body::before` and `.brd__air`) that collapse in proportion, down to the
+body's own `--sp-5`, before the body will scroll. `--center` bodies are centred
+by a pair of grow-only spacers for the same reason — a centred flex line that
+outgrows its box spills off both ends and no scroll reaches back over the top
+of it. Pinned in `boarding.phone.test.jsx`, which shortens the frame to the
+phones the artboard is not.
 
 ## What retired with it
 
