@@ -11148,6 +11148,17 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   background: var(--bg-card-hover);
   transform: translateY(-1px);
 }
+/* The same tile where there is nowhere for it to go — over a run's
+   own sheet the parts of a word are printed, not opened (the twin of
+   .dict-word--static). It keeps the plate; it loses the lift and the
+   pointer, because nothing happens when it is pressed. */
+.dict-part--static { cursor: default; }
+.dict-part--static:hover,
+.dict-part--static:focus-visible {
+  border-color: var(--surface-line);
+  background: var(--surface);
+  transform: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .dict-part:hover,
   .dict-part:focus-visible { transform: none; }

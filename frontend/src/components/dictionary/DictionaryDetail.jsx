@@ -460,14 +460,23 @@ function headwordSize(text) {
 }
 
 // ── Detail panel ──────────────────────────────────────────
-// Renders one entry's full detail. `onRadicalClick`/`onKanjiClick`/
-// `onVocabClick` are optional — DictionaryScreen passes real handlers
-// so its radical figure, kanji tiles and word rows can jump elsewhere
-// in the dictionary; a caller that can't offer that navigation (e.g. a
-// quiz flashcard, which has no dictionary screen underneath it to
-// jump around in) just omits them, and those blocks simply don't
-// render rather than rendering as dead buttons.
-export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
+// Renders one entry's full detail. The SAME detail everywhere it is
+// opened from — the catalogue, or the sheet a quiz card opens over a
+// run: an entry is one object and a reader who taps 駅 mid-review is
+// asking the same question as one who taps it in the dictionary.
+//
+// `onBack`/`onRadicalClick`/`onKanjiClick`/`onVocabClick` are optional
+// and decide only what is a DOOR, never what is printed. Where a
+// caller can offer the navigation, the radical figure, the kanji tiles
+// and the word rows open it; where it cannot, each prints in the inert
+// form it already has (Figure and WordRow have carried one all along)
+// — a fact of the entry, not a dead control.
+//
+// They were gated on the handlers themselves, so the sheet over a quiz
+// silently dropped the radical and the words a kanji appears in, and
+// with the radical went its cell in the form lattice: the same entry
+// was two different cards depending on where you had opened it from.
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -538,9 +547,9 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
   // column count divides its content (DESIGN.md, Surfaces): the sheet
   // spans every figure row beside it, and with no sheet the figures
   // take a column each.
-  const hasRadicalLink = isKanji && entry.radical != null && !!onRadicalClick
+  const hasRadical = isKanji && entry.radical != null
   const hasSheet = (isKanji || isKana) && !!entry.svg_url
-  const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0) + (hasRadicalLink ? 1 : 0)
+  const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0) + (hasRadical ? 1 : 0)
   const showForm = hasSheet || figureCount > 0
   const formStyle = {
     '--dict-form-cols': hasSheet ? (figureCount > 0 ? 2 : 1) : figureCount,
@@ -580,6 +589,20 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
       <header className="dict-plate">
         <div className="dict-plate__row">
           <div className="dict-plate__marks">
+            {/* Only where entries stack behind one another — the sheet
+                over a run, once a word row or a kanji tile has opened
+                another entry inside it. */}
+            {onBack && (
+              <button
+                type="button"
+                onClick={onBack}
+                className="dict-plate__btn dict-plate__back"
+                title={t.back}
+                aria-label={t.back}
+              >
+                <ChevronIcon direction="left" size={16} />
+              </button>
+            )}
             <StageMark stage={stage} inline />
             {jlpt && <span className="dict-plate__level">{jlpt}</span>}
           </div>
@@ -726,11 +749,11 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
               {(isKanji || isKana) && entry.stroke_count && (
                 <Figure value={entry.stroke_count} unit="画" unitLang="ja" label={t.strokes} />
               )}
-              {hasRadicalLink && (
+              {hasRadical && (
                 <Figure
                   value={`#${entry.radical}`}
                   label={t.radical}
-                  onClick={() => onRadicalClick(entry.radical)}
+                  onClick={onRadicalClick ? () => onRadicalClick(entry.radical) : undefined}
                 />
               )}
             </div>
@@ -747,7 +770,7 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
             complete grouping), a word links down to the kanji it is
             built from (a row of tiles, each the small plate of the
             entry it opens). */}
-        {onVocabClick && isKanji && entry.vocab_examples?.length > 0 && (
+        {isKanji && entry.vocab_examples?.length > 0 && (
           <section className="dict-block" aria-label={t.vocabExamples}>
             <div className="dict-words">
               {entry.vocab_examples.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={onVocabClick} />)}
@@ -755,19 +778,22 @@ export function DictionaryDetail({ entry, onClose, onRadicalClick, onKanjiClick,
           </section>
         )}
 
-        {onKanjiClick && composingKanji.length > 0 && (
+        {composingKanji.length > 0 && (
           <section className="dict-block" aria-label={t.composingKanji}>
             <div className="dict-parts">
-              {composingKanji.map(char => (
-                <button
-                  type="button"
-                  key={char}
-                  onClick={() => onKanjiClick(char)}
-                  className="dict-part"
-                  lang="ja"
-                >
-                  {char}
-                </button>
+              {composingKanji.map(char => (onKanjiClick
+                ? (
+                  <button
+                    type="button"
+                    key={char}
+                    onClick={() => onKanjiClick(char)}
+                    className="dict-part"
+                    lang="ja"
+                  >
+                    {char}
+                  </button>
+                )
+                : <span key={char} className="dict-part dict-part--static" lang="ja">{char}</span>
               ))}
             </div>
           </section>
@@ -871,15 +897,34 @@ function useDictionaryLookup(session, term, category, lang, active) {
 // there and wrong here — this is a portal over a quiz, with no
 // catalogue to sit next to, so it is always a sheet. On a phone it is
 // the whole screen, exactly as the dock is (see .dict-sheet).
+//
+// The entry's own doors work here too, and they open INTO the sheet:
+// the words a kanji appears in, and the kanji a word is built from,
+// stack on top of each other with ‹ back through them. The catalogue
+// answers those taps by moving itself, which this has nothing to move
+// — but the question a reader is asking when they tap 駅 under 駅前 is
+// the same one either way, and a run is exactly where it gets asked.
+// The radical is the one door with nowhere to go (it opens the
+// catalogue's own index), so it prints as the figure it is.
 export function DictionaryLookupSheet({ term, category, session, onClose }) {
   const { t, lang } = useLang()
-  const { entry, loading, error } = useDictionaryLookup(session, term, category, lang, true)
+  // The entries opened from one another, oldest first. The sheet shows
+  // the last; ‹ pops it. Reset by the caller remounting on a new term
+  // (the key it is opened with is the term itself).
+  const [stack, setStack] = useState([{ term, category }])
+  const here = stack[stack.length - 1]
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true)
   const dialogRef = useDialog(onClose)
+
+  const open = (nextTerm, nextCategory) => {
+    if (!nextTerm) return
+    setStack(s => [...s, { term: nextTerm, category: nextCategory }])
+  }
 
   return createPortal(
     <div onClick={onClose} className="dict-sheet__scrim">
       <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
-           role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${term}`}>
+           role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${here.term}`}>
         {loading && (
           <div className="quiz-loading">{t.loadingDictionary}</div>
         )}
@@ -892,7 +937,13 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
           </div>
         )}
         {!loading && entry && (
-          <DictionaryDetail entry={entry} onClose={onClose} />
+          <DictionaryDetail
+            entry={entry}
+            onClose={onClose}
+            onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
+            onKanjiClick={char => open(char, 'kanji')}
+            onVocabClick={(kanji, kana) => open(kanji || kana, 'vocab')}
+          />
         )}
       </div>
     </div>,
