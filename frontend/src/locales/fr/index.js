@@ -61,7 +61,6 @@ const nav = {
   },
   // ── 回数券 — les crédits (plan 069) ──
   creditsUnit:       'crédits',
-  fareLabel:         'Tarif',
   balanceLabel:      'Solde',
   balanceTitle:      'Solde',
   balanceOf:         (cap) => `sur ${cap}`,
@@ -358,8 +357,7 @@ const stats = {
   todayDesc:          'Toutes les révisions dues, toutes sections confondues, dans une file unique.',
   todayBoard:         "Aujourd'hui",
   todayPickHint:      'Choisissez votre service',
-  todaySelectAll:     'Tout sélectionner',
-  todaySelectNone:    'Tout désélectionner',
+  todayLines:         'Lignes du jour',
   todayPickSomething: 'Choisissez au moins une ligne',
   todayStart:         n => `Réviser ${n} carte${n === 1 ? '' : 's'}`,
   todayAllTypes:      'Toutes',

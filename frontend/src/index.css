@@ -4248,7 +4248,12 @@ textarea:focus-visible {
 .phone__content > main { flex: 1; }
 /* The station pages (plan 071): the choice under the bar, flush with
    it — the grid's own inset was the plate's, and the plate is gone. */
-.learn .platform-grid { padding: 0; gap: var(--sp-3); }
+/* On a gate page the grid owns no inset and no top run of its own: the
+   page's gutter is the gutter, and the bar above it sets the rhythm.
+   .practice was the one that never got this — its cards sat 14px
+   further in than the bar over them and 30px lower than Learn's. */
+.learn .platform-grid,
+.practice .platform-grid { padding: 0; gap: var(--sp-3); }
 .tier-picker,
 .theme-picker { display: flex; flex-direction: column; gap: var(--sp-4); }
 .tier-picker__size { display: flex; align-items: center; gap: var(--sp-4); }
@@ -4280,6 +4285,17 @@ textarea:focus-visible {
 }
 
 /* ── 運行案内 — the HUD. Sumi, two registers of ink, no line colour. ── */
+/* ── The two chrome bars share one edge ──
+   The HUD and the tab bar are the same object at two ends of the
+   screen: a panel the page passes under. Their ground and the page's
+   are seven values apart in the dark theme (#100e13 on #17151a), so
+   without an edge the page simply continued into them — and the HUD
+   had no edge at all. One line in a cast of the panel's own ink, and a
+   short soft shadow thrown at the content: down from the HUD, up from
+   the bar. Declared once so the two cannot drift apart. */
+.hud,
+.tabbar { --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border)); }
+
 .hud {
   position: sticky;
   top: 0;
@@ -4287,6 +4303,8 @@ textarea:focus-visible {
   flex: none;
   background: var(--bg-panel);
   color: var(--text-on-panel);
+  border-bottom: 1px solid var(--chrome-edge);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.75);
   padding-top: var(--safe-top);
 }
 .hud__inner {
@@ -4417,6 +4435,12 @@ textarea:focus-visible {
 .hud__pass--out .hud__pass-fig { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
+/* The bar is over the page, and has to look it. A 1px hairline was the
+   whole of the difference between its ground and the page's, so a card
+   that scrolled up to it read as continuing into it. The line takes the
+   chrome edge the HUD's rule declares, and under it the bar throws that
+   edge's shadow UPWARD onto whatever is passing beneath. Content
+   sliding under a lit edge is what says the bar is not part of it. */
 .tabbar {
   position: fixed;
   left: 0;
@@ -4425,7 +4449,8 @@ textarea:focus-visible {
   z-index: 30;
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-top: 1px solid var(--burger-menu-border);
+  border-top: 1px solid var(--chrome-edge);
+  box-shadow: 0 -10px 24px -12px rgba(0, 0, 0, 0.75);
   padding-bottom: var(--safe-bottom);
 }
 /* ── One word, on the gate you are on ──
@@ -4434,14 +4459,17 @@ textarea:focus-visible {
    they are printed in ("DICTIONNAIRE" 94px in a 78px gate) and there
    was nothing to stop them: no nowrap, no clip, so each one printed
    over its neighbour. The row of words is a pictogram now and the
-   word appears only under the gate you are on — the one place there
-   is room for it, because that gate takes the room, and the four
-   others give it up in equal shares.
+   word appears only under the gate you are on.
 
-   Flex, not five equal columns, for exactly that: `1 1 0` shares what
-   the lit gate leaves. The lit one is `0 1 auto` — its width is its
-   word's — and its caption still says nowrap and clips, so a longer
-   word in some later language shortens rather than escapes. */
+   THE GLYPHS DO NOT MOVE. The lit gate used to take the width its own
+   word needed (`0 1 auto` and an inline pad) and the other four shared
+   what was left — so every navigation re-dealt the row: measured at
+   390px, a glyph travelled up to 35px, and the outer two slid toward
+   the edges whenever a far gate lit. Five equal fifths, always, and
+   the caption is taken OUT of the flow: absolutely placed, centred on
+   its own gate, free to be wider than the fifth it belongs to because
+   the space beside it is four unlit gates' worth of nothing. A row
+   that holds still is what makes the lit one read as lit. */
 .tabbar__inner { display: flex; }
 .tab {
   position: relative;
@@ -4451,42 +4479,55 @@ textarea:focus-visible {
   flex-direction: column;
   align-items: center;
   /* Anchored from the top, not centred: the glyphs are a row and a
-     row is a straight line. Centring each gate's column would lift
-     the lit gate's glyph by half a caption and leave the other four
-     sitting lower than it. */
+     row is a straight line. */
   justify-content: flex-start;
-  gap: 2px;
   height: var(--tabbar-h);
-  padding: var(--sp-2) 0 0;
+  padding: var(--sp-1) 0 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
   text-decoration: none;
 }
-.tab--on {
-  flex: 0 1 auto;
-  padding-inline: var(--sp-4);
-  color: var(--text-on-panel);
-}
+.tab--on { color: var(--text-on-panel); }
 .tab:hover,
 .tab:focus-visible { color: var(--text-on-panel); }
-.tab__ico { display: inline-flex; }
+/* A box of its own so the lit gate can be given a ground AND a size
+   without the glyph moving to make room for either: every gate reserves
+   the lozenge at its full height, only one is painted, and the glyph
+   grows about its own centre inside it. */
+.tab__ico {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 30px;
+  border-radius: var(--r-pill);
+}
+.tab--on .tab__ico { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+/* Out of the flow entirely: it names the lit gate without setting a
+   single gate's width, and it may run past its own fifth because what
+   is beside it is an unlit gate's empty half-height. */
 .tab__cap {
-  max-width: 100%;
-  overflow: hidden;
+  position: absolute;
+  bottom: var(--sp-1);
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
+  /* Its own leading, not the body's 1.6: a 50px bar holds the lozenge
+     and the word, and 1.6 spent six of those pixels on air inside the
+     caption's own line box. */
+  line-height: 1;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   white-space: nowrap;
-  text-overflow: ellipsis;
 }
 .tab--on::before {
   content: '';
   position: absolute;
   top: -1px;
-  left: var(--sp-6);
-  right: var(--sp-6);
+  left: var(--sp-3);
+  right: var(--sp-3);
   height: 2px;
   background: var(--text-on-panel);
 }
@@ -4495,7 +4536,10 @@ textarea:focus-visible {
 .tab__due {
   position: absolute;
   top: var(--sp-1);
-  left: calc(50% + var(--sp-2));
+  /* On the shoulder of the glyph and inside its own gate: a fifth of
+     390px is 76px, and from 50% + --sp-2 the chip's own width put its
+     right edge a hair past that. */
+  left: calc(50% + var(--sp-1));
   display: inline-flex;
   align-items: baseline;
   padding: 0 var(--sp-1);
@@ -4638,12 +4682,17 @@ textarea:focus-visible {
 }
 
 /* ── the compact header: one row, a pigment rule under it ── */
+/* No inset of its own. Every screen that mounts a bar sits in a
+   container that already holds the page's gutter (.learn/.practice/
+   .today/.dictionary, .profile/.stats/.settings, and the two dev
+   previews' own), so --sp-5 here was a SECOND inset: the title, its
+   sub and the pigment rule all stood 16px inside everything under
+   them, which reads as a header belonging to a narrower page. */
 .bar {
   --line-color: var(--accent2);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  padding: 0 var(--sp-5);
 }
 .bar--register { --line-color: var(--text-secondary); }
 .bar__row {
@@ -4996,11 +5045,13 @@ textarea:focus-visible {
    natural widths first, then stretches what landed on each — so the
    set keeps the shape it wraps into. A lone chip is not a set and
    keeps its own width. */
-.console__chips .chip {
+.console__chips .chip,
+.gate-card__lines .chip {
   flex: 1 1 auto;
   justify-content: center;
 }
-.console__chips .chip:only-child { flex: none; }
+.console__chips .chip:only-child,
+.gate-card__lines .chip:only-child { flex: none; }
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
@@ -5657,26 +5708,12 @@ textarea:focus-visible {
   border-radius: var(--r-panel);
 }
 .gate-card--clear { gap: var(--sp-3); }
-/* ── The fare (plan 069) ──
-   Fare · n credits · a hairline · Balance · the figure in gold: the
-   gate prices the run against the balance before departure. Under it,
-   when the balance is short, a warning-edged notice says how many ride
-   today and how many wait for tomorrow's refill. */
-.gate-card__fare {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.gate-card__fare b {
-  font-family: var(--font-display);
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-}
-.gate-card__fare .fare-gold { color: var(--accent2); }
-.gate-card__fare-sep { flex: 1; height: 1px; align-self: center; background: var(--surface-line); }
+/* ── The shortfall (plan 069) ──
+   A warning-edged notice, and only when the balance does not cover the
+   run. The fare line that stood above it — Fare · n credits · a
+   hairline · Balance · the figure in gold — printed the count the card
+   already sets in figures three times the size, beside a balance the
+   HUD's pass carries a thumb's width up the same screen. */
 .gate-card__short {
   display: flex;
   align-items: center;
@@ -5742,36 +5779,33 @@ textarea:focus-visible {
    the day could not be narrowed on the one device it is read on.
 
    Bounded instead of folded. Twelve lanes is 594px of switch, which
-   put Depart 854px down an 844px screen; four rows and half of the
-   fifth is 216px, and the half is what says there is more. The cap
-   holds at every width because the frame is one phone-width column at
-   every width (.phone__content) — and because a gate that is the same
-   size on a two-lane day and a twenty-lane one is easier to aim at.
+   put Depart 854px down an 844px screen. The bound is a share of the
+   SCREEN rather than a count of rows: 216px showed four and a half on
+   every phone ever made, which on a tall one left the gate sitting in
+   a third of the space it had. 42dvh is six rows at 844px and eight at
+   1000, and still leaves the head, the lines, the notice and Depart
+   above the fold. Whatever it comes to, the row it cuts is visibly cut
+   — that is what says there is more.
+
    `scrollbar-gutter` keeps the due figures off a desktop scrollbar and
    reserves nothing where the scrollbar is an overlay. */
 .gate-card__lanes {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  max-height: 216px;
+  max-height: 30vh;
+  max-height: 30dvh;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
-.gate-card__pick {
-  align-self: flex-end;
-  padding: 0;
-  background: none;
-  border: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  cursor: pointer;
+
+/* 路線ごと — one switch per line over the lanes it is made of. The
+   figure rides the chip as data, the way a tally rides a mark. */
+.gate-card__lines { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.gate-card__linedue {
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, currentcolor 55%, transparent);
 }
-.gate-card__pick:hover,
-.gate-card__pick:focus-visible { color: var(--text-primary); filter: none; }
 .lane {
   display: flex;
   align-items: center;

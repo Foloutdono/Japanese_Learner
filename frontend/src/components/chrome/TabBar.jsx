@@ -32,6 +32,17 @@ import { GateIcon } from './GateIcon'
 // on: past a hundred the number is "a lot".
 const DUE_CAP = 99
 
+// The gate you are on is drawn bigger. Full ink, a ground, a rule and
+// the word already say which one it is; the size is the one that says
+// it across the room. The lozenge behind it (.tab__ico) is the same
+// height on every gate, so the glyph grows about its own centre and
+// the row does not move to make space for it. Here rather than in the
+// sheet because a glyph's size is the icon's own prop — and because a
+// `.tab--on .tab__ico svg` rule outranks every later `.x svg` in
+// index.css, which guard 1 reads as the cascade going backwards.
+const GLYPH = 21
+const GLYPH_ON = 25
+
 export function TabBar() {
   const { t } = useLang()
   const { pathname } = useLocation()
@@ -54,7 +65,7 @@ export function TabBar() {
               aria-label={badge ? `${tab.label} — ${t.todayDue(due)}` : tab.label}
               onClick={() => playClick()}
             >
-              <span className="tab__ico"><GateIcon id={tab.id} /></span>
+              <span className="tab__ico"><GateIcon id={tab.id} size={on ? GLYPH_ON : GLYPH} /></span>
               {badge && (
                 <span className="tab__due" aria-hidden="true">
                   {due > DUE_CAP ? `${DUE_CAP}+` : due}

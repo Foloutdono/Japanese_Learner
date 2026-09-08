@@ -84,11 +84,17 @@ beforeEach(() => {
 })
 
 describe('TodayScreen — the gate', () => {
-  it('opens on the bar, the gate with every lane on, and the strip', async () => {
+  it('opens on the bar, the strip, and the gate with every lane on', async () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.bar__roundel').textContent).toBe('HN')
     expect(screen.container.querySelector('h1.bar__title').textContent).toBe('Service du jour')
+    // The strip reads over the gate, not under it: a status line
+    // belongs above the object it is about, and it leaves the gate the
+    // last thing on the screen, free to take the rest of it.
+    const order = [...screen.container.querySelectorAll('.pass--strip, .gate-card')]
+      .map(el => (el.classList.contains('pass--strip') ? 'strip' : 'gate'))
+    expect(order).toEqual(['strip', 'gate'])
     const lanes = screen.container.querySelectorAll('.lane')
     expect(lanes).toHaveLength(3)
     expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
@@ -97,7 +103,7 @@ describe('TodayScreen — the gate', () => {
     expect(screen.container.querySelector('.hall-pace')).toBeTruthy()
   })
 
-  it('a lane switched off leaves the fare, and the run carries the choice', async () => {
+  it('a lane switched off leaves the count, and the run carries the choice', async () => {
     const screen = await mount()
     await settle()
     // The lanes are grouped by line, vocab before kanji: pick by name.
@@ -106,7 +112,6 @@ describe('TodayScreen — the gate', () => {
     await settle()
     expect(kanji.classList.contains('lane--off')).toBe(true)
     expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
-    expect(screen.container.querySelector('.gate-card__fare b').textContent).toBe('10')
 
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture).toHaveBeenCalledTimes(1)
@@ -120,8 +125,13 @@ describe('TodayScreen — the gate', () => {
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture.mock.calls[0][0].path).toBe('/today/run')
 
-    screen.container.querySelector('.gate-card__pick').click()
-    await settle()
+    // Every line switched off is the whole day off — the all/none link
+    // that used to do it in one tap is gone, and the line switches are
+    // what stands in for it.
+    for (const chip of screen.container.querySelectorAll('.gate-card__lines .chip')) {
+      if (chip.getAttribute('aria-pressed') === 'true') chip.click()
+      await settle()
+    }
     expect(screen.container.querySelectorAll('.lane--off')).toHaveLength(3)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })

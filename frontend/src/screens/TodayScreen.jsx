@@ -12,8 +12,8 @@ import Empty from '../components/ui/Empty'
 import { CheckIcon } from '../components/ui/Icons'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
-// The Today tab: the bar, the fare gate with the day's lanes as the
-// run's picker, and the pass at strip size under it. The run itself
+// The Today tab: the bar, the pass at strip size, and under it the
+// fare gate with the day's lanes as the run's picker. The run itself
 // is /today/run on the stage (screens/TodayRun.jsx); it comes back
 // here with what it cleared, and this screen prints the finish — the
 // canvas's RunComplete, under the chrome — until "Back to the
@@ -69,6 +69,11 @@ export default function TodayScreen() {
         />
       ) : (
         <>
+          {/* The strip first: a status line — the week, the streak, the
+              day's new items — reads over the object it is about, and
+              the gate under it is then the last thing on the screen and
+              can take the rest of it. Owner's call. */}
+          <PassStrip pace={today?.pace} />
           {failed && !today ? (
             <Empty
               tone="error"
@@ -79,7 +84,6 @@ export default function TodayScreen() {
           ) : (
             <GateCard today={today} failed={failed && !today} />
           )}
-          <PassStrip pace={today?.pace} />
         </>
       )}
     </main>

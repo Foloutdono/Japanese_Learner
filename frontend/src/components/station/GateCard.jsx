@@ -6,10 +6,11 @@ import { sectionFor } from '../../config/stations'
 import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
+import { Chip } from '../chrome/Console'
 import { Loading } from '../ui/Loading'
 import { CheckIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
-import { fareFor, runFit, DAILY_REFILL } from '../../domain/credits'
+import { runFit, DAILY_REFILL } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -18,7 +19,11 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // the home strip and the departure board; since plan 070 it is also
 // the run's picker — each lane is a switch, the run covers the lanes
 // that are on, and the fare counts them. Everything on is the
-// default, because the common case is "clear the day".
+// default, because the common case is "clear the day". Over the lanes,
+// one switch per LINE, for the days when the answer is "just the
+// kanji" and there are twenty lanes to say it in — which is also what
+// retired the all/none link that used to sit between the two: a row of
+// line switches IS the coarse control it was standing in for.
 //
 // Two manners carry over: nothing is rendered after the fetch failed
 // (the screen owns up instead), and a cleared queue does not blank
@@ -26,11 +31,10 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // read as a finished day. The wait is drawn (plan 067): the card's
 // name over the three dots until /api/today answers.
 //
-// The fare (plan 069): Fare · n credits · Balance, and when the
-// balance is short, how much of the fare it covers. The gate
-// only CLOSES (the button disabled at zero) under enforcement; in
-// shadow mode the line is information and the train leaves. A pass
-// prints no balance and no notice.
+// Credits (plan 069): nothing at all while the balance covers the run,
+// and when it does not, how much of it rides. The gate only CLOSES
+// (the button disabled at zero) under enforcement; in shadow mode the
+// line is information and the train leaves. A pass prints no notice.
 //
 // Departing: the ticket-gate cutscene (stores/departure) and then
 // /today/run, carrying the chosen lanes in the query — omitted when
@@ -45,35 +49,30 @@ function refillClock(iso, lang) {
   return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
 }
 
-function Fare({ due, credits, t, lang }) {
-  if (!credits) return null
-  const balance = credits.unlimited ? null : credits.balance
-  const fare = fareFor(due)
-  // `waits` is what makes the notice appear, not what it says: the
-  // learner needs the two numbers that do not match, and 189 is the
-  // subtraction they can do themselves.
+// ── 不足のしらせ — the only thing the gate says about credits ──
+// A fare line ran above this: Fare · n credits ———— Balance · n. The
+// fare was the count the card already prints in figures three times
+// its size, and the balance is on the HUD's pass, a thumb's width up
+// the same screen — a rule drawn between two numbers that were both
+// already on it. Owner's call.
+//
+// What is left says itself only when the two do not match, which is
+// the one moment either is worth reading. `waits` is what makes it
+// appear, not what it says.
+function Shortfall({ due, credits, t, lang }) {
+  const balance = credits && !credits.unlimited ? credits.balance : null
+  if (balance == null) return null
   const { rides, waits } = runFit(due, balance)
+  if (waits <= 0) return null
   return (
-    <>
-      <div className="gate-card__fare">
-        <span>{t.fareLabel}</span>
-        <b>{fare}</b>
-        <span>{t.creditsUnit}</span>
-        <span className="gate-card__fare-sep" aria-hidden="true" />
-        <span>{t.balanceLabel}</span>
-        <b className="fare-gold">{balance == null ? '∞' : balance}</b>
-      </div>
-      {balance != null && waits > 0 && (
-        <div className="gate-card__short" role="status">
-          <span className="gate-card__short-mark" aria-hidden="true">!</span>
-          <span>
-            {balance === 0
-              ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
-              : t.gateShort(rides, due)}
-          </span>
-        </div>
-      )}
-    </>
+    <div className="gate-card__short" role="status">
+      <span className="gate-card__short-mark" aria-hidden="true">!</span>
+      <span>
+        {balance === 0
+          ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
+          : t.gateShort(rides, due)}
+      </span>
+    </div>
   )
 }
 
@@ -84,6 +83,15 @@ const TYPE_ORDER = ['kana', 'vocab', 'kanji', 'grammar', 'personal']
 function orderLanes(lanes) {
   const rank = l => { const i = TYPE_ORDER.indexOf(laneTypeOf(l)); return i < 0 ? TYPE_ORDER.length : i }
   return [...lanes].sort((a, b) => rank(a) - rank(b))
+}
+
+// A line's own name, the same one its gate and its station carry.
+const LINE_TITLE = {
+  kana: t => t.kanaTitle,
+  vocab: t => t.vocabTitle,
+  kanji: t => t.kanjiTitle,
+  grammar: t => t.grammarTitle,
+  personal: t => t.decksTitle,
 }
 
 export default function GateCard({ today, failed }) {
@@ -124,8 +132,6 @@ export default function GateCard({ today, failed }) {
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id)
   const due = lanes.filter(isOn).reduce((n, l) => n + l.due, 0)
-  const allOn = lanes.every(isOn)
-
   function toggle(id) {
     setOff(prev => {
       const next = new Set(prev)
@@ -134,8 +140,30 @@ export default function GateCard({ today, failed }) {
       return next
     })
   }
-  function togglePick() {
-    setOff(allOn ? new Set(lanes.map(l => l.id)) : new Set())
+  // ── 路線ごと — the lines in today's queue, as switches ──
+  // Twenty lanes is five taps to say "just the kanji" and fifteen to
+  // say it the other way round. A line is the coarse choice the fine
+  // switches under it are made of, so it gets its own switch: lit when
+  // the WHOLE line rides, which makes the tap unambiguous both ways —
+  // lit switches the line off, unlit switches all of it on. The figure
+  // is what the line owes today, not what is chosen of it; the lit
+  // state is where the choice is read.
+  const lines = TYPE_ORDER
+    .map(type => {
+      const own = lanes.filter(l => laneTypeOf(l) === type)
+      return { type, lanes: own, due: own.reduce((n, l) => n + l.due, 0), on: own.length > 0 && own.every(isOn) }
+    })
+    .filter(line => line.lanes.length > 0)
+
+  function toggleLine(line) {
+    setOff(prev => {
+      const next = new Set(prev)
+      for (const l of line.lanes) {
+        if (line.on) next.add(l.id)
+        else next.delete(l.id)
+      }
+      return next
+    })
   }
 
   // Closed only under enforcement, and only at zero: the gate never
@@ -161,10 +189,20 @@ export default function GateCard({ today, failed }) {
         </span>
       </div>
 
-      {lanes.length > 1 && (
-        <button type="button" className="gate-card__pick" onClick={togglePick}>
-          {allOn ? t.todaySelectNone : t.todaySelectAll}
-        </button>
+      {lines.length > 1 && (
+        <div className="gate-card__lines" role="group" aria-label={t.todayLines}>
+          {lines.map(line => (
+            <Chip
+              key={line.type}
+              on={line.on}
+              color={LINE_COLOR[line.type]}
+              onClick={() => toggleLine(line)}
+            >
+              {LINE_TITLE[line.type]?.(t) ?? line.type}
+              <span className="gate-card__linedue">{line.due}</span>
+            </Chip>
+          ))}
+        </div>
       )}
 
       <div className="gate-card__lanes">
@@ -194,7 +232,7 @@ export default function GateCard({ today, failed }) {
         })}
       </div>
 
-      <Fare due={due} credits={credits} t={t} lang={lang} />
+      <Shortfall due={due} credits={credits} t={t} lang={lang} />
 
       <button
         type="button"

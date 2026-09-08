@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { LangProvider, useLang } from '../../LangContext'
+import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
 // ── 改札 — the day's switches, at 390px ───────────────────────
@@ -25,11 +25,6 @@ vi.mock('../../stores/credits', () => ({
 }))
 
 const { default: GateCard } = await import('./GateCard')
-
-// The locale's own strings, read from the provider rather than
-// imported, so the cases hold in whichever language the lane runs.
-let T
-function Probe() { T = useLang().t; return null }
 
 const lane = (source, deck, mode, due) => ({
   id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due,
@@ -59,7 +54,6 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 async function gate(lanes = LANES) {
   const screen = await render(
     <LangProvider>
-      <Probe />
       <main className="today" style={{ padding: '0 14px' }}>
         <GateCard today={{ ...TODAY, lanes, total: lanes.reduce((n, l) => n + l.due, 0) }} />
       </main>
@@ -106,6 +100,43 @@ describe('the fare gate at phone width', () => {
     }
   })
 
+  // ── 路線ごと — one switch per line ──
+  // Twenty lanes is five taps to say "just the kanji" and fifteen to
+  // say it the other way round. A chip is lit when the WHOLE line
+  // rides, which makes the tap unambiguous both ways: lit switches the
+  // line off, unlit switches all of it on.
+  it('switches a whole line, and lights only while all of it rides', async () => {
+    const screen = await gate()
+    const chips = () => [...screen.container.querySelectorAll('.gate-card__lines .chip')]
+    const count = () => Number(screen.container.querySelector('.gate-card__count').textContent)
+    const all = count()
+
+    // One per line in today's queue, in the lines' order, each carrying
+    // what its line owes.
+    expect(chips()).toHaveLength(5)
+    expect(chips().map(c => c.getAttribute('aria-pressed'))).toEqual(Array(5).fill('true'))
+    const kanaDue = LANES.filter(l => l.source === 'kana').reduce((n, l) => n + l.due, 0)
+    expect(chips()[0].textContent).toContain(String(kanaDue))
+
+    // Lit → the line comes out whole, and so does its share of the day.
+    chips()[0].click()
+    await settle()
+    expect(count()).toBe(all - kanaDue)
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    const off = [...screen.container.querySelectorAll('.lane--off')]
+    expect(off).toHaveLength(LANES.filter(l => l.source === 'kana').length)
+
+    // One of its lanes back on by hand: the line is not whole, so the
+    // chip stays unlit and its tap switches all of the line on.
+    screen.container.querySelector('.lane--off').click()
+    await settle()
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    chips()[0].click()
+    await settle()
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('true')
+    expect(count()).toBe(all)
+  })
+
   it('takes a lane out of the day, and the count with it', async () => {
     const screen = await gate()
     const count = () => Number(screen.container.querySelector('.gate-card__count').textContent)
@@ -118,16 +149,22 @@ describe('the fare gate at phone width', () => {
     expect(first.getAttribute('aria-pressed')).toBe('false')
     expect(count()).toBe(all - LANES[0].due)
 
-    // With one off, the all/none switch offers the day back.
-    const pick = screen.container.querySelector('.gate-card__pick')
-    expect(pick.textContent).toBe(T.todaySelectAll)
-    pick.click()
+    // The all/none link that used to sit here is gone: a row of line
+    // switches is the coarse control it was standing in for. Its own
+    // line reads half-chosen now, so its chip is unlit — one tap makes
+    // the line whole, a second takes it away, and the day with every
+    // line off is not a run.
+    expect(screen.container.querySelector('.gate-card__pick')).toBeNull()
+    const chips = () => [...screen.container.querySelectorAll('.gate-card__lines .chip')]
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    chips()[0].click()
     await settle()
     expect(count()).toBe(all)
 
-    // And from a full day it clears: nothing chosen is not a run.
-    expect(pick.textContent).toBe(T.todaySelectNone)
-    pick.click()
+    for (const chip of chips()) {
+      chip.click()
+      await settle(20)
+    }
     await settle()
     expect(count()).toBe(0)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)

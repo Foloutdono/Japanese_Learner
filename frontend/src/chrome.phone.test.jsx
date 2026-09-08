@@ -143,6 +143,23 @@ describe('the HUD', () => {
     const hud = document.querySelector('.hud')
     const inner = hud.querySelector('.hud__inner')
     expect(getComputedStyle(inner).height).toBe(`${HUD_H}px`)
+    // ── The chrome's edge, at both ends of the screen ──
+    // The HUD and the tab bar are the same object: a panel the page
+    // passes under. Their ground and the page's are seven values apart
+    // in the dark theme, so without an edge the page continued into
+    // them — and the HUD had no edge at all. One line in a cast of the
+    // panel's own ink, and a shadow thrown at the content: down from
+    // the HUD, up from the bar.
+    const bar = document.querySelector('.tabbar')
+    expect(getComputedStyle(hud).borderBottomWidth).toBe('1px')
+    expect(getComputedStyle(bar).borderTopWidth).toBe('1px')
+    // One declaration behind both, so they cannot drift apart.
+    expect(getComputedStyle(hud).borderBottomColor)
+      .toBe(getComputedStyle(bar).borderTopColor)
+    // Thrown in opposite directions — the offsets are one negation.
+    const off = cs => cs.boxShadow.match(/(-?\d+)px (-?\d+)px/)?.[2]
+    expect(off(getComputedStyle(hud))).toBe('10')
+    expect(off(getComputedStyle(bar))).toBe('-10')
     expect(getComputedStyle(hud).paddingTop).toBe('0px') // --safe-top is 0 in chromium
     expect(getComputedStyle(hud).position).toBe('sticky')
     const level = hud.querySelector('.hud__level')
@@ -189,6 +206,18 @@ describe('the tab bar', () => {
     expect(getComputedStyle(on, '::before').height).toBe('2px')
     const off = tabs[1]
     expect(getComputedStyle(off).color).not.toBe(getComputedStyle(bar).color)
+    // ── And its glyph is the bigger one ──
+    // Full ink, a ground, a rule and a word already; the size is the
+    // one that carries across the room. It grows about its own centre
+    // inside a lozenge every gate reserves at full height, so the row
+    // does not move to make space for it — pinned by the case below,
+    // which measures the centres across four screens.
+    const glyph = t => t.querySelector('.tab__ico svg').getBoundingClientRect().width
+    expect(glyph(on)).toBeGreaterThan(glyph(off))
+    expect(new Set(tabs.length && [...tabs].filter(t => t !== on).map(glyph)).size).toBe(1)
+    const box = t => t.querySelector('.tab__ico').getBoundingClientRect()
+    expect(Math.round(box(on).height)).toBe(Math.round(box(off).height))
+    expect(glyph(on)).toBeLessThanOrEqual(box(on).height)
   })
 
   // ── One word, on the gate you are on ──
@@ -198,7 +227,7 @@ describe('the tab bar', () => {
   // neighbours. The glyphs are drawn now, and only the lit gate is
   // captioned — it takes the width its word needs and the other four
   // share what is left.
-  it('captions the gate you are on and no other, and never overflows one', async () => {
+  it('captions the gate you are on and no other, without taking width for it', async () => {
     await mountShell('/learn')
     await settle()
     const bar = document.querySelector('.tabbar')
@@ -206,18 +235,59 @@ describe('the tab bar', () => {
     expect(caps).toHaveLength(1)
     expect(caps[0].closest('.tab').dataset.tab).toBe('learn')
     expect(caps[0].textContent.length).toBeGreaterThan(0)
-    // In flow, so the lit gate is as wide as its word — and clipped,
-    // so a longer word in a later language shortens instead of escaping.
-    expect(caps[0].scrollWidth).toBeLessThanOrEqual(caps[0].clientWidth)
+    // Out of the flow: the lit gate is a fifth like every other, and
+    // the word is centred on it — free to run past its own fifth,
+    // because what is beside it is an unlit gate's empty half-height.
+    expect(getComputedStyle(caps[0]).position).toBe('absolute')
     expect(getComputedStyle(caps[0]).whiteSpace).toBe('nowrap')
+    expect(caps[0].scrollWidth).toBeLessThanOrEqual(caps[0].clientWidth)
     const gates = [...bar.querySelectorAll('.tab')]
-    expect(gates.find(g => g.classList.contains('tab--on')).getBoundingClientRect().width)
-      .toBeGreaterThan(gates.find(g => !g.classList.contains('tab--on')).getBoundingClientRect().width)
+    const widths = gates.map(g => Math.round(g.getBoundingClientRect().width))
+    expect(new Set(widths).size).toBe(1)
     // Every gate keeps its word as its name, printed or not.
     for (const gate of gates) expect(gate.getAttribute('aria-label').length).toBeGreaterThan(0)
     // And the glyphs are a straight row: one line, whatever is lit.
     const tops = gates.map(g => Math.round(g.querySelector('.tab__ico').getBoundingClientRect().top))
     expect(new Set(tops).size).toBe(1)
+  })
+
+  // ── The row holds still ──
+  // The lit gate used to take the width its own word needed and the
+  // other four shared what was left, so every navigation re-dealt the
+  // row: a glyph travelled up to 35px at 390px, and the outer two slid
+  // toward the edges whenever a far gate lit. Nothing about that said
+  // WHICH gate was lit — it only made the bar move.
+  it('puts every glyph in the same place on every screen', async () => {
+    // The five screens at once, each in its own router: a tab bar is
+    // fixed to the viewport's edges, so where its glyphs sit across x
+    // is the same question whether it is alone on the page or fifth in
+    // a stack of them — and one render is one cleanup.
+    const PATHS = ['/today', '/learn', '/learn/decks', '/profile']
+    await render(
+      <LangProvider>
+        {PATHS.map(path => (
+          <MemoryRouter key={path} initialEntries={[path]}>
+            <Routes>
+              <Route element={<Shell />}>
+                {PATHS.map(p => <Route key={p} path={p} element={<main id="main-content">here</main>} />)}
+              </Route>
+            </Routes>
+          </MemoryRouter>
+        ))}
+      </LangProvider>
+    )
+    await settle()
+    const bars = [...document.querySelectorAll('.tabbar')]
+    expect(bars).toHaveLength(PATHS.length)
+    const centres = bars.map(bar => [...bar.querySelectorAll('.tab__ico')].map(ico => {
+      const r = ico.getBoundingClientRect()
+      return Math.round(r.left + r.width / 2)
+    }))
+    for (const row of centres) expect(row).toHaveLength(5)
+    // Each bar lights a different gate, and every glyph is where it was.
+    expect(new Set(bars.map(b => b.querySelector('.tab--on').dataset.tab)).size)
+      .toBeGreaterThan(1)
+    for (const row of centres) expect(JSON.stringify(row)).toBe(JSON.stringify(centres[0]))
   })
 
   it('carries the due count on the shoulder of Today\'s glyph, capped at 99+', async () => {
