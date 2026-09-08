@@ -1271,6 +1271,7 @@ const exam = {
   examStarHint:        "Quel élément va à la position marquée d'une étoile ?",
   examFullSentence:    'Phrase complète :',
   examAudioPending:    "Extrait audio pas encore généré pour cette question.",
+  examAudioUnavailable: "Extrait audio impossible à charger pour cette question.",
 
   // ── Résultat ──
   // Ne jamais appeler cela une note JLPT. La vraie est un 尺度得点

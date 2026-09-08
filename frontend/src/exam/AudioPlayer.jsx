@@ -31,6 +31,11 @@ export default function AudioPlayer({ src }) {
   const [elapsed, setElapsed] = useState(0)
   const [duration, setDuration] = useState(0)
   const [plays, setPlays] = useState(0)
+  // WHICH clip failed, not a bare "it failed": a failure is a fact about
+  // one src, and the next question carries a different one, so this
+  // resets itself on the swap with no effect to keep in step.
+  const [failedSrc, setFailedSrc] = useState(null)
+  const failed = Boolean(src) && failedSrc === src
 
   // Moving to the next question must stop the current clip. The native
   // player didn't: `CardTransition` swaps the question, React keeps the
@@ -43,11 +48,19 @@ export default function AudioPlayer({ src }) {
     }
   }, [src])
 
-  if (!src) {
+  // Two ways to have no audio, and they are not the same thing to a
+  // learner mid-exam. `!src` is a question whose clip was never made.
+  // `failed` is a clip the server has a URL for but could not serve —
+  // which is a real production failure mode (the backend's audio
+  // directory is not guaranteed to survive a deploy, see
+  // backend/study/exam_audio_repair.py), and it used to render as a
+  // working-looking player with a dead play button and a 0:00 clock.
+  // Say so instead.
+  if (!src || failed) {
     return (
       <div className="exam-audio-bar exam-audio-bar--pending">
         <SpeakerOffIcon size={16} />
-        <span>{t.examAudioPending}</span>
+        <span>{failed ? t.examAudioUnavailable : t.examAudioPending}</span>
       </div>
     )
   }
@@ -99,6 +112,7 @@ export default function AudioPlayer({ src }) {
         onEnded={() => setPlaying(false)}
         onTimeUpdate={e => setElapsed(e.currentTarget.currentTime)}
         onLoadedMetadata={e => setDuration(e.currentTarget.duration || 0)}
+        onError={() => setFailedSrc(src)}
       />
 
       <button
