@@ -90,7 +90,7 @@ describe('the moved paths', () => {
     await settle()
     expect(document.querySelector('.hud')).toBeTruthy()
     expect(document.querySelectorAll('.tab')).toHaveLength(5)
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
     screen.unmount()
   })
 
@@ -99,7 +99,7 @@ describe('the moved paths', () => {
     const screen = await render(<App />)
     await settle()
     expect(document.querySelector('.tabbar')).toBeTruthy()
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
     expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
     screen.unmount()
   })
@@ -114,7 +114,7 @@ describe('the moved paths', () => {
     await settle()
     expect(document.querySelector('.hud')).toBeTruthy()
     expect(document.querySelector('.tabbar')).toBeTruthy()
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('実践')
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('practice')
     // The three sources, and the section's own roundel over them.
     expect(document.querySelectorAll('.platform-card')).toHaveLength(3)
     expect(document.querySelector('.bar__roundel').textContent).toBe('DS')

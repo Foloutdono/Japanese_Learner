@@ -163,28 +163,80 @@ describe('the tab bar', () => {
     expect(getComputedStyle(tabs[0]).height).toBe(`${TABBAR_H}px`)
     const on = bar.querySelector('.tab--on')
     expect(on.getAttribute('aria-current')).toBe('page')
-    expect(on.querySelector('.tab__jp').textContent).toBe('学習')
+    expect(on.dataset.tab).toBe('learn')
     expect(getComputedStyle(on).color).toBe(getComputedStyle(bar).color)
     expect(getComputedStyle(on, '::before').height).toBe('2px')
     const off = tabs[1]
     expect(getComputedStyle(off).color).not.toBe(getComputedStyle(bar).color)
   })
 
-  it('carries the due count on Today, clear of the glyph', async () => {
+  // ── One word, on the gate you are on ──
+  // The bar set a kanji where a pictogram goes and printed the word
+  // under every gate. Five gates are 78px on this phone and
+  // "DICTIONNAIRE" is 94, so in French two captions printed over their
+  // neighbours. The glyphs are drawn now, and only the lit gate is
+  // captioned — it takes the width its word needs and the other four
+  // share what is left.
+  it('captions the gate you are on and no other, and never overflows one', async () => {
+    await mountShell('/learn')
+    await settle()
+    const bar = document.querySelector('.tabbar')
+    const caps = bar.querySelectorAll('.tab__cap')
+    expect(caps).toHaveLength(1)
+    expect(caps[0].closest('.tab').dataset.tab).toBe('learn')
+    expect(caps[0].textContent.length).toBeGreaterThan(0)
+    // In flow, so the lit gate is as wide as its word — and clipped,
+    // so a longer word in a later language shortens instead of escaping.
+    expect(caps[0].scrollWidth).toBeLessThanOrEqual(caps[0].clientWidth)
+    expect(getComputedStyle(caps[0]).whiteSpace).toBe('nowrap')
+    const gates = [...bar.querySelectorAll('.tab')]
+    expect(gates.find(g => g.classList.contains('tab--on')).getBoundingClientRect().width)
+      .toBeGreaterThan(gates.find(g => !g.classList.contains('tab--on')).getBoundingClientRect().width)
+    // Every gate keeps its word as its name, printed or not.
+    for (const gate of gates) expect(gate.getAttribute('aria-label').length).toBeGreaterThan(0)
+    // And the glyphs are a straight row: one line, whatever is lit.
+    const tops = gates.map(g => Math.round(g.querySelector('.tab__ico').getBoundingClientRect().top))
+    expect(new Set(tops).size).toBe(1)
+  })
+
+  it('carries the due count on the shoulder of Today\'s glyph, capped at 99+', async () => {
     await mountShell('/profile')
     await settle()
-    const today = [...document.querySelectorAll('.tab')].find(el => el.querySelector('.tab__jp').textContent === '本日')
+    const today = document.querySelector('[data-tab="today"]')
     const due = today.querySelector('.tab__due')
     expect(due.textContent).toBe('24')
-    const glyph = today.querySelector('.tab__jp').getBoundingClientRect()
+    const glyph = today.querySelector('.tab__ico').getBoundingClientRect()
     const badge = due.getBoundingClientRect()
-    expect(badge.left).toBeGreaterThanOrEqual(glyph.right - 2)
+    // On the glyph's right shoulder: past its centre, inside its gate.
+    expect(badge.left).toBeGreaterThan(glyph.left + glyph.width / 2)
+    expect(badge.right).toBeLessThanOrEqual(today.getBoundingClientRect().right)
+    // The count is in the gate's name, where the badge itself is not read.
+    expect(today.getAttribute('aria-label')).toMatch(/24/)
+  })
+
+  // Three figures are wider than the gate they sit on, and 239 due
+  // against 312 is not a difference anyone acts on.
+  it('says 99+ rather than a third figure', async () => {
+    const was = todayRef.current
+    todayRef.current = { ...was, total: 239 }
+    try {
+      await mountShell('/profile')
+      await settle()
+      const today = document.querySelector('[data-tab="today"]')
+      expect(today.querySelector('.tab__due').textContent).toBe('99+')
+      // The real figure survives where there is room for it.
+      expect(today.getAttribute('aria-label')).toMatch(/239/)
+      expect(today.querySelector('.tab__due').getBoundingClientRect().right)
+        .toBeLessThanOrEqual(today.getBoundingClientRect().right)
+    } finally {
+      todayRef.current = was
+    }
   })
 
   it('lights the gate a nested screen is behind', async () => {
     await mountShell('/learn/decks')
     await settle()
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
   })
 })
 

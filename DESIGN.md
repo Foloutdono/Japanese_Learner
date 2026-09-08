@@ -538,10 +538,10 @@ next.
 
 - **One chrome at every width.** The HUD across the top (level roundel ·
   goal-status panel · commuter pass), the five gates across the bottom
-  (学習 Learn · 実践 Practice · 本日 Today · 辞書 Dictionary · 定期券
-  Profile), the screen between them; on a wide screen the same frame is a
-  centred column of `--board-w`. There is no second chrome — the burger
-  drawer, the auto-hiding top bar and the concourse home retired with it.
+  (Learn · Practice · Today · Dictionary · Profile), the screen between
+  them; on a wide screen the same frame is a centred column of
+  `--board-w`. There is no second chrome — the burger drawer, the
+  auto-hiding top bar and the concourse home retired with it.
 - **Both bars are sumi with the two panel inks and no line colour.** The
   pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
   aside, and a 2px stripe in the section's colour under it. A screen that
@@ -549,9 +549,25 @@ next.
   `--register` bar: no roundel, a hairline.
 - **Japanese is content, not chrome.** The interface speaks the learner's
   language; a word, a sentence, a deck's name, a rank are Japanese. The
-  tab bar is the one place a kanji stands in for a pictogram, and the
   bilingual JP + Latin pairing the desktop chrome used does not apply to
-  the mobile chrome.
+  the mobile chrome — and, since this rule was written, not even to the
+  tab bar, which was its one exception: the gates were a kanji where a
+  pictogram goes, with the plain word under each.
+- **A gate is a pictogram, and only the gate you are on is captioned.**
+  *Owner's ruling, from a rendered comparison of six directions.* Five
+  gates are 78px on a 390px phone; `DICTIONNAIRE` is 94 and
+  `AUJOURD'HUI` 87, so in French two captions printed straight over
+  their neighbours — and no treatment of the type fixes that (tracked
+  out, the widest word is still 4px too long; the canvas got away with
+  it because it was drawn in English). So the row of words went. The
+  five glyphs are drawn to the shared icon convention
+  (`components/chrome/GateIcon.jsx`) and sit on one line; the lit gate
+  takes the width its word needs and the other four share what is left.
+  Every gate keeps its word as its accessible name, printed or not.
+  **A caption that only the selected item carries is the pattern to
+  reach for wherever a fixed row must hold a word in every language** —
+  the alternative is type small enough to be unreadable, or copy chosen
+  to fit rather than to be right.
 - **A run leaves the chrome.** Both bars go; the rating bar (or the field)
   docks on the bottom edge and `‹ Gate` in the stage head is the way out.
   Everything docked reads `--dock-bottom` — the tab bar plus the safe-area

@@ -20,7 +20,7 @@ used retires for the mobile chrome.
 |---|---|---|
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
-| `.tabbar`, `.tab`, `.tab__jp`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar | `components/chrome/TabBar.jsx`; the five gates in `config/tabs.js` |
+| `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
 | `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
@@ -35,6 +35,20 @@ it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
 `--dock-bottom`, which every docked object reads: the tab bar plus the
 safe-area inset under the shell (`:root[data-chrome="shell"]`, stamped by
 `components/chrome/useChrome.js`), the inset alone on a stage.
+
+**The gates are pictograms, and only the lit one is captioned.** The
+canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
+it, in English, where `DICTIONARY` fits a 78px gate. `DICTIONNAIRE` is
+94px and `AUJOURD'HUI` 87, and the caption had neither `nowrap` nor a
+clip, so in French two gates printed over their neighbours. Six
+directions were rendered against the real stylesheet and the owner took
+this one: five drawn glyphs on one line (`GateIcon.jsx`, the shared
+24×24 stroke convention), the word under the gate you are on only —
+that gate is `flex: 0 1 auto` and takes the width its word needs, the
+other four are `1 1 0` and share the rest. Every gate carries its word
+as its `aria-label` whether or not it is printed, so the bar reads the
+same to a screen reader as it did with five captions. The due count
+caps at `99+`: a third figure is wider than the gate.
 
 ## The run (plan 070)
 

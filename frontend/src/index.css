@@ -4423,61 +4423,77 @@ textarea:focus-visible {
   border-top: 1px solid var(--burger-menu-border);
   padding-bottom: var(--safe-bottom);
 }
-.tabbar__inner {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-/* The kanji is the icon, the plain word the label. Active: full ink
-   and a 2px rule; the rest in the soft panel ink. */
+/* ── One word, on the gate you are on ──
+   Five equal columns and a word under each is what the canvas drew,
+   in English. In French two of those words are wider than the column
+   they are printed in ("DICTIONNAIRE" 94px in a 78px gate) and there
+   was nothing to stop them: no nowrap, no clip, so each one printed
+   over its neighbour. The row of words is a pictogram now and the
+   word appears only under the gate you are on — the one place there
+   is room for it, because that gate takes the room, and the four
+   others give it up in equal shares.
+
+   Flex, not five equal columns, for exactly that: `1 1 0` shares what
+   the lit gate leaves. The lit one is `0 1 auto` — its width is its
+   word's — and its caption still says nowrap and clips, so a longer
+   word in some later language shortens rather than escapes. */
+.tabbar__inner { display: flex; }
 .tab {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Anchored from the top, not centred: the glyphs are a row and a
+     row is a straight line. Centring each gate's column would lift
+     the lit gate's glyph by half a caption and leave the other four
+     sitting lower than it. */
+  justify-content: flex-start;
   gap: 2px;
   height: var(--tabbar-h);
-  padding: 0;
+  padding: var(--sp-2) 0 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
   text-decoration: none;
 }
+.tab--on {
+  flex: 0 1 auto;
+  padding-inline: var(--sp-4);
+  color: var(--text-on-panel);
+}
 .tab:hover,
 .tab:focus-visible { color: var(--text-on-panel); }
-.tab__jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 1.05rem;
-  line-height: 1.15;
-  letter-spacing: 0.04em;
-}
+.tab__ico { display: inline-flex; }
 .tab__cap {
+  max-width: 100%;
+  overflow: hidden;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.tab--on { color: var(--text-on-panel); }
 .tab--on::before {
   content: '';
   position: absolute;
   top: -1px;
-  left: 22px;
-  right: 22px;
+  left: var(--sp-6);
+  right: var(--sp-6);
   height: 2px;
   background: var(--text-on-panel);
 }
-/* The due count rides Today as the map's own chip, set clear of the
-   glyph. */
-.tab--badged .tab__jp { transform: translateX(-10px); }
+/* The due count rides Today on the shoulder of its glyph — the map's
+   own chip, and the only colour in the bar. */
 .tab__due {
   position: absolute;
-  top: 3px;
-  left: calc(50% + 8px);
+  top: var(--sp-1);
+  left: calc(50% + var(--sp-2));
   display: inline-flex;
   align-items: baseline;
-  padding: 0 var(--sp-2);
+  padding: 0 var(--sp-1);
   border-radius: var(--r-pill);
   border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
   color: var(--warning);
