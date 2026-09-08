@@ -177,8 +177,14 @@ export default function GateCard({ today, failed }) {
               onClick={() => toggle(lane.id)}
             >
               <span className="lane__tick" aria-hidden="true">{on && <CheckIcon size={11} />}</span>
-              <span className="lane__where">{whereOf(lane, t, kanaSetLabel)}</span>
-              <span className="lane__mode">{modeLabel(t, lane.mode)}</span>
+              {/* Where over what, not beside it: at phone width
+                  "Hiragana (de base)" and "Kana → romaji" on one line
+                  ellipsised the mode away, and the mode is half of what
+                  tells two lanes of the same deck apart. */}
+              <span className="lane__names">
+                <span className="lane__where">{whereOf(lane, t, kanaSetLabel)}</span>
+                <span className="lane__mode">{modeLabel(t, lane.mode)}</span>
+              </span>
               <span className="lane__due">{lane.due}</span>
             </button>
           )

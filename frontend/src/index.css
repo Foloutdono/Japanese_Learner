@@ -5713,7 +5713,29 @@ textarea:focus-visible {
    not draw, the all/none toggle, is kept from the picker this
    replaces: a learner with sixteen lanes and ten minutes says "just
    the kanji" in two taps, not fifteen. */
-.gate-card__lanes { display: flex; flex-direction: column; gap: var(--sp-2); }
+/* The switches are the picker, so they are on the card at every width.
+   A phone block hid them behind a 内訳 disclosure — from when the lanes
+   were a BREAKDOWN, before plan 070 made them the choice — and the
+   toggle that opened it stopped being rendered somewhere along the
+   way: below 560px the gate printed "select none" over nothing, and
+   the day could not be narrowed on the one device it is read on.
+
+   Bounded instead of folded. Twelve lanes is 594px of switch, which
+   put Depart 854px down an 844px screen; four rows and half of the
+   fifth is 216px, and the half is what says there is more. The cap
+   holds at every width because the frame is one phone-width column at
+   every width (.phone__content) — and because a gate that is the same
+   size on a two-lane day and a twenty-lane one is easier to aim at.
+   `scrollbar-gutter` keeps the due figures off a desktop scrollbar and
+   reserves nothing where the scrollbar is an overlay. */
+.gate-card__lanes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  max-height: 216px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
 .gate-card__pick {
   align-self: flex-end;
   padding: 0;
@@ -5763,11 +5785,24 @@ textarea:focus-visible {
   background: var(--lane-color, var(--accent2));
   border-color: var(--lane-color, var(--accent2));
 }
+/* The deck over the mode. One line for both ellipsised the mode away
+   at phone width, and "N5 · Mot → sens" and "N5 · Mot → …" are the
+   same row to look at — the mode is half of what tells two lanes of
+   one deck apart. */
+.lane__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
 .lane__where {
   font-family: var(--font-display);
   font-weight: 700;
-  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
 }
 /* Toward the primary ink, not bare --text-secondary: the lane's 10%
    pigment tint is just enough ground for the secondary ink to miss
@@ -13144,9 +13179,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   /* The gate folds its breakdown behind the 内訳 disclosure, so the
      phone's first screen is card, count, button, map. */
   .gate-card { padding: var(--sp-5); gap: var(--sp-4); }
-  .gate-card__lanes { display: none; }
-  .gate-card__lanes--open { display: flex; }
-  .gate-card__toggle { display: flex; }
 
   /* The map strips already folded at 760px; nothing more to fold. */
 
