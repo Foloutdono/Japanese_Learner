@@ -3,7 +3,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
 import { DAILY_REFILL, CAP, SIGNUP_BONUS, showsCap } from '../../domain/credits'
-import { Continue } from './BoardFrame'
+import { BoardAir, Continue } from './BoardFrame'
 
 // ── The pass, issued (plan 075) ──────────────────────────────────
 // The last arrival screen: the printed commuter pass slides up and the
@@ -69,6 +69,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
           </h1>
           <p className="brd__hint">{t.brdEnjoy}</p>
         </div>
+        <BoardAir />
         <div className="brd__stage">
           <div className="brd-issue">
             <CommuterPass profile={{ ...profile, username: name }} t={t} footer={<PrintedBalance />} headingTag="span">

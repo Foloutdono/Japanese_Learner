@@ -20,7 +20,7 @@ used retires for the mobile chrome.
 |---|---|---|
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
-| `.tabbar`, `.tab`, `.tab__jp`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar | `components/chrome/TabBar.jsx`; the five gates in `config/tabs.js` |
+| `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
 | `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
@@ -35,6 +35,20 @@ it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
 `--dock-bottom`, which every docked object reads: the tab bar plus the
 safe-area inset under the shell (`:root[data-chrome="shell"]`, stamped by
 `components/chrome/useChrome.js`), the inset alone on a stage.
+
+**The gates are pictograms, and only the lit one is captioned.** The
+canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
+it, in English, where `DICTIONARY` fits a 78px gate. `DICTIONNAIRE` is
+94px and `AUJOURD'HUI` 87, and the caption had neither `nowrap` nor a
+clip, so in French two gates printed over their neighbours. Six
+directions were rendered against the real stylesheet and the owner took
+this one: five drawn glyphs on one line (`GateIcon.jsx`, the shared
+24×24 stroke convention), the word under the gate you are on only —
+that gate is `flex: 0 1 auto` and takes the width its word needs, the
+other four are `1 1 0` and share the rest. Every gate carries its word
+as its `aria-label` whether or not it is printed, so the bar reads the
+same to a screen reader as it did with five captions. The due count
+caps at `99+`: a third figure is wider than the gate.
 
 ## The run (plan 070)
 
@@ -69,15 +83,15 @@ draw and readings faces keep their button under the widget).
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.bar--register`, `.platform-card--line` | the hub | `screens/PracticeScreen.jsx` (plan 068) |
-| `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingScreen.jsx`, `screens/ReadingComprehensionScreen.jsx` |
-| `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingScreen.jsx` |
-| `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingScreen.jsx`, `screens/TranslationScreen.jsx`, `ReadingComprehensionScreen.jsx` |
-| `.prompt-card--ask` | a flat, left-aligned question card | `ReadingComprehensionScreen.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
+| `.platform-card--line` | the hub | `screens/PracticeScreen.jsx` (plan 068) — its bar is the concourse's, the home roundel and the gold, as the Learn gate's is; it was `.bar--register` until that made it the one gate of five with neither roundel nor pigment |
+| `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingRun.jsx`, `screens/ComprehensionRun.jsx` |
+| `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingRun.jsx` |
+| `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingRun.jsx`, `screens/TranslationRun.jsx`, `ComprehensionRun.jsx` |
+| `.prompt-card--ask` | a flat, left-aligned question card | `ComprehensionRun.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
 | `.type-badge` | the outlined caption pill (its type's colour as a tint) | `QuestionTypeBadge` in `components/study/QuizComponents.jsx` |
-| `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ReadingComprehensionScreen.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
+| `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ComprehensionRun.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
 | `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
-| `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ReadingComprehensionScreen.jsx` |
+| `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ComprehensionRun.jsx` |
 | `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
 | `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
 | `.exam-mondai`, `.exam-mondai__part`, `.exam-mondai__text` | Part n · Show instructions | `ExamRunner.jsx` |
@@ -92,12 +106,25 @@ draw and readings faces keep their button under the widget).
 
 The practice pickers (source, level, word list + tier, the exam's level and
 papers) render on `SelectionScreen` — the station page's own bar, with the
-way back in its aside — the way every station does since plan 071. The
-sessions and the exam runner render on `StudyStage` / the stage frame with
-`‹ Practice` (`‹ Exam`) as the way out and no pocket pass: practice spends
-no credits. The reading and translation tier step is the vocab station's
-tiers page (a `Seg` for the word list over `TierSelector`), and the batch
-carries the chosen `tier_size`. The comprehension exercise commits a pick
+way back in its aside — the way every station does since plan 071. They are
+also *routed* like a station now: reading, comprehension and translation
+were each one route that began as a picker and became a session, and that
+route was on the stage frame, so choosing a source happened with no HUD and
+no tab bar. The pickers are their own routes under the shell
+(`screens/SentenceStation.jsx`, one screen for all three: they ask the same
+question) and the session is the run below them
+(`ReadingRun`/`ComprehensionRun`/`TranslationRun`), with the choice carried
+in the path — `/practice/reading` · `/levels` · `/tiers`, then
+`/level/N4`, `/tier/3?size=200&domain=jmdict`, `/mastery`; comprehension has
+one axis, so its root is the level list and its run is
+`/practice/comprehension/N4`. `domain/sentenceSource.js` is the one place
+that knows that shape, and a path the station could not have produced sends
+the learner back to it. The sessions and the exam runner render on
+`StudyStage` / the stage frame with the list they were chosen from as the
+way out (`‹ Sources`, `‹ Levels`, `‹ Tiers`; `‹ Exam`) and no pocket pass:
+practice spends no credits. The reading and translation tier step is the
+vocab station's tiers page (a `Seg` for the word list over `TierSelector`),
+and the batch carries the chosen `tier_size`. The comprehension exercise commits a pick
 with Next (the canvas), and re-reading the text pauses the clock. Held from
 the canvas: the "sat twice" line on a paper (the catalog carries no attempt
 count).
@@ -230,7 +257,7 @@ entries went in the same commit.
 |---|---|---|
 | `.board`, `.wmap__lines`, `.wmap-line*`, `.wmap-track*`, `.wmap-due*`, `.wmap__group`, `.wmap-row*`, `.wmap-roundel` | 路線図 — the wall map (no masthead: the bar names the place) | `components/station/WallMap.jsx`, `screens/LearnScreen.jsx` |
 | `.bar__link` | a text link in the bar's aside (By frequency, JLPT instead) | the station screens |
-| `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
+| `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram; the rail is drawn per stop rather than once behind the list (so the ends cap at the first and last marker), and it and every marker are placed by their centre on one `left`, since a marker changes width when it is the stop you are at | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
 | `.platform-grid`, `.platform-card*` (`__service` in the learner's language, `__stops`, `__pip`) | the platform card | `components/selection/ModeSelector.jsx`, `TierSelector.jsx`, `ThemeSelector.jsx` |
 | `.seg--full`, `.console`, `.console__index` | the tier size, the theme filter | `Seg`, `ConsoleIndex` in `components/chrome/Console.jsx` |
 | `.deck-card__lead`, `__glyph`, `__due`, `__aside`, `__count` | the shelf's card | `screens/DecksScreen.jsx` |
@@ -284,7 +311,7 @@ entries in `.stylelint-baseline.json` went in the same commit.
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.brd` (`--welcome`), `.brd__head`, `.brd__back` (`--void`), `.brd__track`, `.brd__done`, `.brd__train`, `.brd__count`, `.brd__body` (`--top`, `--arrival`, `--center`), `.brd__stage`, `.brd__q` (`.brd__q-em` for the canvas's `b`), `.brd__hint`, `.brd__error`, `.brd__foot`, `.brd__link`; `.brd__cars`, `.brd__car` (`--in`, `--out`, `[data-dir]`) | 乗車 — the frame and the train pull | `screens/BoardingFlow.jsx` (the state machine), `BoardHead`, `BoardQuestion`, `Continue`, `BoardLink` in `components/boarding/BoardFrame.jsx` |
+| `.brd` (`--welcome`), `.brd__head`, `.brd__back` (`--void`), `.brd__track`, `.brd__done`, `.brd__train`, `.brd__count`, `.brd__body` (`--top`, `--arrival`, `--center`), `.brd__stage`, `.brd__q` (`.brd__q-em` for the canvas's `b`), `.brd__hint`, `.brd__error`, `.brd__foot`, `.brd__link`; `.brd__cars`, `.brd__car` (`--in`, `--out`, `[data-dir]`); `.brd__air` (not the canvas's: the air under a question, drawn as a spacer so it can give way — see below) | 乗車 — the frame and the train pull | `screens/BoardingFlow.jsx` (the state machine), `BoardHead`, `BoardQuestion`, `BoardAir`, `Continue`, `BoardLink` in `components/boarding/BoardFrame.jsx` |
 | `.brd-hero`, `.brd-roll` (`__lane`, `--back`), `.brd-demo` (`__tag`, `__glyph`, `__t` `--sm`/`--cap`, `.cloze`, `__meaning`, `__foot`, `__draw`, `__wave`, `__bar`), `.brd-tagline` | Welcome: the sign, the rolling stock, the promise | `components/boarding/Welcome.jsx`, the cards in `demoCards.js` |
 | `.brd-field` (`--empty`) | the name | `NameStep.jsx` |
 | `.brd__opts`, `.brd-opt` (`--on`, `__icon`, `__code`, `__names`, `__label`, `__desc`, `__check`), `.brd-tag` | one row, one choice: why, the level, the goal | `BoardOption.jsx`, `WhyStep.jsx`, `LevelStep`/`GoalStep` in `LevelStep.jsx`, the motive glyphs in `icons.jsx` |
@@ -315,6 +342,16 @@ screen is skipped on the web; the tutorial is deferred. The motion sheet's
 pull, the +120 ms rule and the rest-state-only rule under reduced motion are
 pinned in `screens/BoardingFlow.browser.test.jsx`, its `.reduced` twin and
 `boarding.phone.test.jsx`.
+
+The canvas is an 844 px artboard and `why`'s six motives fill it exactly, so
+its rhythm around a question — `--sp-9 + --sp-8` over it, `--sp-9` under it —
+is a **maximum** here, not a fixed pad: both gaps are flex spacers
+(`.brd__body::before` and `.brd__air`) that collapse in proportion, down to the
+body's own `--sp-5`, before the body will scroll. `--center` bodies are centred
+by a pair of grow-only spacers for the same reason — a centred flex line that
+outgrows its box spills off both ends and no scroll reaches back over the top
+of it. Pinned in `boarding.phone.test.jsx`, which shortens the frame to the
+phones the artboard is not.
 
 ## What retired with it
 

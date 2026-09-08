@@ -1,12 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { board } from '../stores/boarding'
 import { playUi } from '../lib/audio'
-import { Leave } from '../components/chrome/Bar'
-import LevelSelector from '../components/selection/LevelSelector'
-import SelectionScreen from '../components/selection/SelectionScreen'
+import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { QuestionTypeBadge } from '../components/study/QuizComponents'
@@ -26,17 +23,25 @@ const formatTime = secs => {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// Route: /practice/comprehension (plan 072: the level list on the
-// station page, then the whole exercise on the stage — the canvas's
-// Comprehension and ComprehensionResult artboards).
+// Route: /practice/comprehension/:level — the whole exercise on the
+// stage (the canvas's Comprehension and ComprehensionResult
+// artboards). The level list is the station page above it, under the
+// chrome (screens/SentenceStation.jsx).
 //
-// 'selecting' | 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
-export default function ReadingComprehensionScreen({ session }) {
+// 'loading' | 'reading' | 'questions' | 'submitting' | 'results' | 'error'
+const BASE = '/practice/comprehension'
+
+export default function ComprehensionRun({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const { level: levelParam } = useParams()
 
-  const [level, setLevel]       = useState(null)
-  const [stage, setStage]       = useState('selecting')
+  // The level list is this section's only picker, so its own root is
+  // where the ‹ goes back to. Null for a grade that is not one.
+  const route = runSource({ base: BASE, level: levelParam, levelsOnly: true })
+  const level = route?.level ?? null
+
+  const [stage, setStage]       = useState('loading')
   const [exercise, setExercise] = useState(null)   // { text, translation, questions, read_seconds }
   const [timeLeft, setTimeLeft] = useState(0)
   const [showTranslation, setShowTranslation] = useState(false)
@@ -55,7 +60,6 @@ export default function ReadingComprehensionScreen({ session }) {
   const timerRef = useRef(null)
 
   function startSession(lvl) {
-    setLevel(lvl)
     setStage('loading')
     setError(null)
     setShowTranslation(false)
@@ -162,28 +166,31 @@ export default function ReadingComprehensionScreen({ session }) {
       })
   }
 
+  // ‹ — back to the level list.
   function leave() {
     clearTimer()
-    setStage('selecting')
+    navigate(route.back)
   }
 
-  // ── Level selection ──
-  if (stage === 'selecting') {
-    return (
-      <SelectionScreen
-        title={t.comprehensionTitle}
-        sub={t.selectLevel}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
-      >
-        <LevelSelector onSelect={lvl => board(() => startSession(lvl))} />
-      </SelectionScreen>
-    )
-  }
+  // The mount IS the start: the route is what says there is an
+  // exercise to fetch, and which grade it is written to. Once only —
+  // a re-render must not throw away the text being read.
+  const startedRef = useRef(false)
+  useEffect(() => {
+    if (startedRef.current || !level) return
+    startedRef.current = true
+    startSession(level)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // A grade the level list could not have offered: back to it rather
+  // than an exercise nothing can be written for.
+  if (!route) return <Navigate replace to={BASE} />
 
   const total = exercise?.questions?.length ?? 0
 
-  // Everything after the level is on the stage: the same frame, the
-  // same way out, the sub saying where in the exercise you are.
+  // One frame for the whole exercise, one way out, and a sub that says
+  // where in it you are.
   const sub =
     stage === 'questions' || stage === 'submitting' ? `${level} · ${t.question} ${currentQ + 1} / ${total}` :
     stage === 'results' ? `${level} · ${t.practiceResult}` :
@@ -193,7 +200,7 @@ export default function ReadingComprehensionScreen({ session }) {
     <StudyStage
       color={RIKAI_COLOR}
       onLeave={leave}
-      leaveLabel={t.tabPractice}
+      leaveLabel={t[route.backKey]}
       where={t.comprehensionTitle}
       sub={sub}
       remaining={stage === 'questions' ? `${currentQ + 1} / ${total}` : undefined}

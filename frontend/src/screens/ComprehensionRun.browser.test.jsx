@@ -4,12 +4,15 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { TrainDoor } from '../components/station/TrainDoor'
 
-// ── Comprehension on the stage (plan 072) ───────────────────────
+// ── Comprehension: the station, then the stage (plan 072) ───────
 // The level list on the station page, then the whole exercise on the
 // stage: the text under the timer, one question at a time with lettered
 // rows and a Next that commits the pick, and the result as a lattice of
 // records over a surface of rows that say what was picked and what was
-// right. Pinned on the real screen with the API mocked at its boundary.
+// right. Two routes now, as the lines have had since plan 071 — the
+// list is a station page under the chrome and the exercise is the run —
+// so the flow is mounted through the router that joins them, with the
+// API mocked at its boundary.
 
 const apiFetch = vi.fn()
 
@@ -31,7 +34,8 @@ vi.mock('../lib/audio', async importOriginal => ({
 vi.mock('../stores/stats', () => ({ useStats: () => ({ data: null, failed: false }), refreshStats: vi.fn(), seedStats: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
-const { default: ReadingComprehensionScreen } = await import('./ReadingComprehensionScreen')
+const { default: ComprehensionRun } = await import('./ComprehensionRun')
+const { default: SentenceStation } = await import('./SentenceStation')
 
 const EXERCISE = {
   text: '駅で友達を待ちました。',
@@ -75,13 +79,17 @@ beforeEach(() => {
   })
 })
 
-describe('ReadingComprehensionScreen', () => {
+describe('ComprehensionRun', () => {
   it('reads, answers with Next, and prints the result lattice and rows', async () => {
     const screen = await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/practice/comprehension']}>
           <Routes>
-            <Route path="/practice/comprehension" element={<ReadingComprehensionScreen session={{ access_token: 'tok' }} />} />
+            <Route
+              path="/practice/comprehension"
+              element={<SentenceStation session={{ access_token: 'tok' }} base="/practice/comprehension" levelsOnly />}
+            />
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
           </Routes>
           <TrainDoor />
         </MemoryRouter>

@@ -137,8 +137,10 @@ const quiz = {
   // Kana sets
   hiraganaBase:         'Hiragana (de base)',
   hiraganaCombinations: 'Hiragana (combinaisons)',
+  hiraganaLong:         'Hiragana (voyelles longues)',
   katakanaBase:         'Katakana (de base)',
   katakanaCombinations: 'Katakana (combinaisons)',
+  katakanaLong:         'Katakana (voyelles longues)',
 
   // Selection prompts
   selectLevel:       'Choisissez un niveau JLPT',
@@ -462,7 +464,7 @@ const stats = {
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Vous · ${you} — correct · ${right}`,
   examPart: (n) => `Partie ${n}`,
-  kanaSetsSub:        'Quatre séries',
+  kanaSetsSub:        (n) => `${n} séries`,
   serviceName: {
     local:   'Omnibus',
     rapid:   'Rapide',
@@ -821,7 +823,7 @@ const reading = {
   gradeCorrect:         'J\'ai eu juste',
   gradeIncorrect:       'Je n\'ai pas eu juste',
 
-  // Décomposition mot par mot + sa navigation (ReadingScreen.jsx) —
+  // Décomposition mot par mot + sa navigation (ReadingRun.jsx) —
   // affichée une fois la phrase corrigée.
   showBreakdown:        'Voir la décomposition',
   hideBreakdown:        'Masquer la décomposition',
@@ -848,7 +850,7 @@ const readingComprehension = {
 }
 
 // ── Translation mode ──────────────────────────────────────────────
-// TranslationScreen.jsx réutilise entièrement les clés existantes de
+// TranslationRun.jsx réutilise entièrement les clés existantes de
 // reading/quiz pour tout ce que les deux écrans partagent (byLevel*,
 // byFrequency*, byMastery*, selectStudySource, selectLevel,
 // selectDomain, selectTier, domainVocabDeck*/domainVocabJmdict*,
@@ -900,6 +902,9 @@ const dictionary = {
   syllabaryMain:     'Syllabaire principal',
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Sons voisés (dakuten / handakuten)',
+  syllabaryYoon:     'Sons contractés (yōon)',
+  syllabaryForeign:  'Sons étrangers',
+  syllabaryLong:     'Voyelles longues',
   // Titre/aria-label de l'icône d'action "ouvrir le dictionnaire" sur
   // une carte révélée (RevealActions dans QuizComponents.jsx).
   openDictionary:    'Ouvrir la fiche du dictionnaire',

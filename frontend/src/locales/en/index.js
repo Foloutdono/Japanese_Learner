@@ -138,8 +138,10 @@ const quiz = {
   // Kana sets
   hiraganaBase:         'Hiragana (basic)',
   hiraganaCombinations: 'Hiragana (combinations)',
+  hiraganaLong:         'Hiragana (long vowels)',
   katakanaBase:         'Katakana (basic)',
   katakanaCombinations: 'Katakana (combinations)',
+  katakanaLong:         'Katakana (long vowels)',
 
   // Selection prompts
   selectLevel:       'Choose your JLPT level',
@@ -481,7 +483,7 @@ const stats = {
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
   examPart: (n) => `Part ${n}`,
-  kanaSetsSub:        'Four sets',
+  kanaSetsSub:        (n) => `${n} sets`,
   serviceName: {
     local:   'Local',
     rapid:   'Rapid',
@@ -842,7 +844,7 @@ const reading = {
   gradeIncorrect:       'I got it wrong',
 
   // Word-by-word breakdown toggle + its per-word navigation
-  // (ReadingScreen.jsx) — shown once a phrase has been graded.
+  // (ReadingRun.jsx) — shown once a phrase has been graded.
   showBreakdown:        'Show breakdown',
   hideBreakdown:        'Hide breakdown',
   preparingBreakdown:   'Preparing breakdown…',
@@ -867,7 +869,7 @@ const readingComprehension = {
   questionTypeInference: "Inference",
 }
 // ── Translation mode ──────────────────────────────────────────────
-// TranslationScreen.jsx reuses reading/quiz's existing keys wholesale
+// TranslationRun.jsx reuses reading/quiz's existing keys wholesale
 // for everything the two screens share (byLevel*, byFrequency*,
 // byMastery*, selectStudySource, selectLevel, selectDomain, selectTier,
 // domainVocabDeck*/domainVocabJmdict*, tierLabel, jumpToTier, submit,
@@ -913,6 +915,9 @@ const dictionary = {
   syllabaryMain:     'Main syllabary',
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Voiced sounds (dakuten / handakuten)',
+  syllabaryYoon:     'Contracted sounds (yōon)',
+  syllabaryForeign:  'Foreign sounds',
+  syllabaryLong:     'Long vowels',
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
   allReadings:       'All readings',

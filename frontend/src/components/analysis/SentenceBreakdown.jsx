@@ -190,7 +190,7 @@ export function Legend({ t }) {
 //               of a fourth near-copy drifting off on its own.
 //
 // `index`/`setIndex` are used by 'stepper'/'stage' and are owned by
-// the caller (see ReadingScreen.jsx) so they can be reset to 0
+// the caller (see ReadingRun.jsx) so they can be reset to 0
 // whenever a new phrase is shown. `controls`, `tokenView` and
 // `onJumpToToken` are only read by 'stage': tokenView chooses between
 // the carousel and the mockup's token table, and onJumpToToken is what

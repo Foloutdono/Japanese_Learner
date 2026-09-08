@@ -3,6 +3,7 @@ import { recognize, recognizeRemote } from '../../lib/ocr'
 import { isNative } from '../../lib/platform'
 import { loadImage, toBlob, MAX_UPLOAD_BYTES } from '../../lib/image'
 import { ImageCropper } from './ImageCropper'
+import { CameraIcon, ImageIcon } from '../ui/Icons'
 
 // Photo/camera input for the analyzer: pick or shoot an image, crop to
 // the part you care about, recognize it, and hand the text to the caller
@@ -134,7 +135,7 @@ export function ImageInput({ t, session, onTextReady }) {
           onClick={() => cameraRef.current?.click()}
           className="intake-btn"
         >
-          <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z" /><circle cx="12" cy="13" r="3.5" /></svg>
+          <CameraIcon className="svg" />
           {t.shootPhoto}
         </button>
         <button
@@ -142,7 +143,7 @@ export function ImageInput({ t, session, onTextReady }) {
           onClick={() => galleryRef.current?.click()}
           className="intake-btn"
         >
-          <svg className="svg" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2" /><circle cx="9" cy="10" r="2" /><path d="M21 16l-5-5-8 8" /></svg>
+          <ImageIcon className="svg" />
           {t.pickPhoto}
         </button>
       </div>

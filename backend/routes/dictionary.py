@@ -8,7 +8,7 @@ from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 import content.vocab_jmdict_data as jmdict_db
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content.vocab_extras import get_vocab_extras
-from content.kana_data import HIRAGANA_BASIC, KATAKANA_BASIC, kana_to_id
+from content.kana_data import get_syllabary, kana_to_id
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
@@ -197,8 +197,11 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 ):
                     matches.append(("vocab", level, w, meaning))
 
+    # The WHOLE syllabary, not the gojūon alone: きゃ and えい are kana a
+    # reader meets in their first week and could not look up here at
+    # all, because this walked the basic set and nothing else.
     if want_hiragana:
-        for k in HIRAGANA_BASIC:
+        for k in get_syllabary("hiragana"):
             if q == "" or (q in k["kana"] or q.lower() in k["romaji"].lower()):
                 # Reuses the tuple's "meaning" slot for romaji — it's
                 # what dict-entry-card__meaning and the detail panel's
@@ -206,7 +209,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 matches.append(("hiragana", "Hiragana", k, k["romaji"]))
 
     if want_katakana:
-        for k in KATAKANA_BASIC:
+        for k in get_syllabary("katakana"):
             if q == "" or (q in k["kana"] or q.lower() in k["romaji"].lower()):
                 matches.append(("katakana", "Katakana", k, k["romaji"]))
 
@@ -283,11 +286,17 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
             })
         else:  # hiragana or katakana
             raw_id = kana_to_id(entry)
-            # Yōon combos ("きゃ") aren't included here at all anymore (see
-            # the loops above), so every kana entry reaching this branch
-            # is always a single character — the codepoint below is always
-            # that one character's own stroke file, no ambiguity.
-            codepoint = hex(ord(entry["kana"]))[2:].zfill(5)
+            # A stroke file is one character's, and a kana here is not
+            # always one character: きゃ is two, and so is every long
+            # vowel. A pair gets no sheet rather than an arbitrary half
+            # of one — the panel simply draws the rest of the entry
+            # (DictionaryDetail's `hasSheet`).
+            kana = entry["kana"]
+            svg_url = (
+                f"/kanjivg/{hex(ord(kana))[2:].zfill(5)}.svg"
+                if len(kana) == 1
+                else None
+            )
             results.append({
                 "type":    kind,
                 "kana":    entry["kana"],
@@ -299,7 +308,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 # kana_data.py. The frontend's syllabary table groups by
                 # this field to lay out the classic a-i-u-e-o chart.
                 "group":   entry.get("group", ""),
-                "svg_url": f"/kanjivg/{codepoint}.svg",
+                "svg_url": svg_url,
                 "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
             })
 

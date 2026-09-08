@@ -1,5 +1,6 @@
 import { useLang } from '../LangContext'
 import { getSections } from '../config/tabs'
+import { HOME_STATION } from '../config/stations'
 import { beginDeparture } from '../stores/departure'
 import { playAnnouncement } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
@@ -7,12 +8,19 @@ import { Bar } from '../components/chrome/Bar'
 // ── 実践 — the Practice gate: four platforms (plan 068) ───────
 // Reading practice, reading comprehension, translation, the mock
 // exam — the sentence-level sections, which schedule words rather
-// than levels and so have no line on the map. A register bar (no
-// roundel: Practice is not a place on a line) over one platform card
-// per section, each in its own pigment; boarding one announces it and
-// departs through the gate, like any other section. The pass tags the
-// canvas draws on these cards stay out until a purchase flow exists
-// (plan 069, HAS_STORE).
+// than levels and so have no line on the map. The gate's own bar over
+// one platform card per section, each in its own pigment; boarding one
+// announces it and departs through the gate, like any other section.
+// The pass tags the canvas draws on these cards stay out until a
+// purchase flow exists (plan 069, HAS_STORE).
+//
+// The bar is the concourse's, not a line's: the home roundel and the
+// gold, exactly as the Learn gate wears them. It was the `register`
+// variant — no roundel, a grey hairline — on the reasoning that
+// Practice is not a place on a line, and that reading was right about
+// the map and wrong about the screen: it made the one gate of five
+// that carries no roundel and no pigment, which reads as unfinished
+// rather than as different.
 export default function PracticeScreen() {
   const { t } = useLang()
   const platforms = getSections('practice', t)
@@ -24,7 +32,7 @@ export default function PracticeScreen() {
 
   return (
     <main id="main-content" className="practice">
-      <Bar register title={t.tabPractice} sub={t.practiceSub} />
+      <Bar code={HOME_STATION.code} title={t.tabPractice} sub={t.practiceSub} color="var(--accent2)" />
       <div className="platform-grid">
         {platforms.map((section, i) => (
           <button

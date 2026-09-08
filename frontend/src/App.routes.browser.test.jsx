@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { kanaSets } from './domain/kanaSets'
 
 // ── Every path the app has ever had still lands somewhere (plan 068) ──
 // The chrome moved every section behind one of five gates, and the old
@@ -69,7 +70,9 @@ describe('the moved paths', () => {
     ['/decks', '/learn/decks'],
     ['/decks/d9', '/learn/decks/d9'],
     ['/decks/d9/study', '/learn/decks/d9/study'],
+    ['/reading', '/practice/reading'],
     ['/reading-comprehension', '/practice/comprehension'],
+    ['/translation', '/practice/translation'],
     ['/exam', '/practice/exam'],
     ['/exam/e1/results?attempt=7', '/practice/exam/e1/results?attempt=7'],
     ['/phrase-analyzer', '/dictionary/analyzer'],
@@ -88,7 +91,7 @@ describe('the moved paths', () => {
     await settle()
     expect(document.querySelector('.hud')).toBeTruthy()
     expect(document.querySelectorAll('.tab')).toHaveLength(5)
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
     screen.unmount()
   })
 
@@ -97,8 +100,38 @@ describe('the moved paths', () => {
     const screen = await render(<App />)
     await settle()
     expect(document.querySelector('.tabbar')).toBeTruthy()
-    expect(document.querySelector('.tab--on .tab__jp').textContent).toBe('学習')
-    expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('learn')
+    // One stop per kana deck, counted from the decks themselves — the
+    // number has changed once already (the long vowels made it six) and
+    // a literal here only ever records how many there used to be.
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(kanaSets({}).length)
+    screen.unmount()
+  })
+
+  // Practice's three sentence sections were each ONE route that began
+  // as a picker and became a session, and it was on the stage frame —
+  // so choosing a source happened with no HUD and no tab bar. The
+  // pickers are station pages now, and only the session is the run.
+  it('mounts the shell on a practice station', async () => {
+    window.history.replaceState(null, '', '/practice/reading')
+    const screen = await render(<App />)
+    await settle()
+    expect(document.querySelector('.hud')).toBeTruthy()
+    expect(document.querySelector('.tabbar')).toBeTruthy()
+    expect(document.querySelector('.tab--on').dataset.tab).toBe('practice')
+    // The three sources, and the section's own roundel over them.
+    expect(document.querySelectorAll('.platform-card')).toHaveLength(3)
+    expect(document.querySelector('.bar__roundel').textContent).toBe('DS')
+    screen.unmount()
+  })
+
+  it('mounts the stage on a practice run', async () => {
+    window.history.replaceState(null, '', '/practice/reading/mastery')
+    const screen = await render(<App />)
+    await settle()
+    expect(document.querySelector('.tabbar')).toBeNull()
+    expect(document.querySelector('.hud')).toBeNull()
+    expect(document.documentElement.dataset.chrome).toBe('stage')
     screen.unmount()
   })
 

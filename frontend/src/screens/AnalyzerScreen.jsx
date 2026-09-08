@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
@@ -57,11 +57,19 @@ export default function AnalyzerScreen({ session }) {
   // is no gate to board through any more — switching is a mode switch
   // (see boardPlatform), and the Passage a platform built stays behind
   // it while you are on it.
-  const [source, setSource] = useState(DEFAULT_SOURCE)
+  //
+  // ?intake= is the door's deep link: the dictionary draws the three
+  // platforms on the analyzer's row (screens/DictionaryScreen.jsx), and
+  // a tap on the camera there means "open standing on 写真", not "open
+  // on 文字 with the camera one tap further in". Read once, as the
+  // initial platform — the segmented control owns the mode from then
+  // on, and a key that is not one of the three is simply ignored.
+  const [sp] = useSearchParams()
+  const [source, setSource] = useState(() => (sourceFor(sp.get('intake')) ? sp.get('intake') : DEFAULT_SOURCE))
   // The last platform actually boarded — what boardPlatform compares
   // against to tell a mode SWITCH (clear the workbench) from a
   // same-mode press (keep it).
-  const lastBoardedRef = useRef(DEFAULT_SOURCE)
+  const lastBoardedRef = useRef(source)
 
   // The draft text, shared by the 文字 and 写真 platforms on purpose --
   // they were one field on one screen before the merge, and OCR output
@@ -126,7 +134,7 @@ export default function AnalyzerScreen({ session }) {
   const [detail, setDetail] = useState(null) // { title, entry, stats }
   // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
   // effect (and steal focus) on every render of this screen while the
-  // detail sheet is open -- see ReadingScreen.jsx's closeDetail for the
+  // detail sheet is open -- see ReadingRun.jsx's closeDetail for the
   // same fix, and plans/README.md's plan-004 note for the bug class
   // this avoids.
   const closeDetail = useCallback(() => setDetail(null), [])

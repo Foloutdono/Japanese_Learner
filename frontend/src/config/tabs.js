@@ -28,17 +28,24 @@
 export const TAB_IDS = ['learn', 'practice', 'today', 'dictionary', 'profile']
 
 /**
- * The five gates, in bar order. `jp` is the icon — the tab bar is the
- * one place a kanji stands in for a pictogram — and `label` is the
- * word in the learner's language.
+ * The five gates, in bar order. `label` is the word in the learner's
+ * language — the gate's name everywhere it is written out, and its
+ * accessible name in the bar. The glyph beside it is drawn from `id`
+ * (components/chrome/GateIcon.jsx).
+ *
+ * Each carried a kanji here too (学習 実践 本日 辞書 定期券), which
+ * the bar set where a pictogram goes. It printed both, and in French
+ * the words were wider than the gates: the bar draws the pictogram
+ * and captions only the gate you are on. Nothing else ever read the
+ * kanji, so the field went with the row of captions.
  */
 export function getTabs(t) {
   return [
-    { id: 'learn',      jp: '学習',   path: '/learn',      label: t.tabLearn },
-    { id: 'practice',   jp: '実践',   path: '/practice',   label: t.tabPractice },
-    { id: 'today',      jp: '本日',   path: '/today',      label: t.tabToday },
-    { id: 'dictionary', jp: '辞書',   path: '/dictionary', label: t.tabDictionary },
-    { id: 'profile',    jp: '定期券', path: '/profile',    label: t.tabProfile },
+    { id: 'learn',      path: '/learn',      label: t.tabLearn },
+    { id: 'practice',   path: '/practice',   label: t.tabPractice },
+    { id: 'today',      path: '/today',      label: t.tabToday },
+    { id: 'dictionary', path: '/dictionary', label: t.tabDictionary },
+    { id: 'profile',    path: '/profile',    label: t.tabProfile },
   ]
 }
 

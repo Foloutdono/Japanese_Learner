@@ -18,7 +18,7 @@ import { DeckPicker } from './DeckPicker'
 //
 // `mining` is a useMining(session) instance, shared by every mine
 // control on the screen -- undefined is a valid, deliberate value
-// (ReadingScreen.jsx doesn't create one), in which case this renders
+// (ReadingRun.jsx doesn't create one), in which case this renders
 // nothing at all rather than a broken control.
 export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t, className = '' }) {
   const [showPicker, setShowPicker] = useState(false)

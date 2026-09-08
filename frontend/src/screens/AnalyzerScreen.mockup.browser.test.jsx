@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { page } from '@vitest/browser/context'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import { SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 // Every case here asserts COMPUTED style — the whole point is pinning
 // what ships, not what the JSX intends.
 import '../index.css'
@@ -86,16 +87,22 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
 // The screen opens on the text intake at its own route (plan 073): the
 // three intakes are one segmented control over the page, text first.
-async function renderScreen() {
+async function renderScreen(entry = '/dictionary/analyzer') {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter initialEntries={['/dictionary/analyzer']}>
+      <MemoryRouter initialEntries={[entry]}>
         <AnalyzerScreen session={{}} />
       </MemoryRouter>
     </LangProvider>
   )
   await settle(30)
   return screen
+}
+
+/** Which of the three platforms is lit on the intake's own control. */
+function platform(screen) {
+  const opts = [...screen.container.querySelectorAll('.anl-sources .seg__opt')]
+  return SOURCES[opts.findIndex(o => o.classList.contains('seg__opt--on'))]?.key
 }
 
 function typeInto(el, text) {
@@ -511,5 +518,20 @@ describe('the history (canvas: a section head over a framed row list)', () => {
     expect(kept).not.toBeNull()
     expect(kept.scrollWidth).toBeLessThanOrEqual(kept.clientWidth + 1)
     expect(kept.scrollHeight).toBeLessThanOrEqual(kept.clientHeight + 1)
+  })
+
+  // ── ?intake= — the door's deep link ──
+  // The dictionary draws the three platforms on the analyzer's row, and
+  // a tap on the camera there means "open standing on 写真", not "open
+  // on 文字 with the camera one tap further in". A platform is a mode of
+  // this one screen, so it travels as a query, read once on mount.
+  it('opens on the platform the door sent it to, and on 文字 without one', async () => {
+    const screen = await renderScreen('/dictionary/analyzer?intake=video')
+    expect(platform(screen)).toBe('video')
+  })
+
+  it('ignores an intake that is not a platform', async () => {
+    const screen = await renderScreen('/dictionary/analyzer?intake=hovercraft')
+    expect(platform(screen)).toBe(DEFAULT_SOURCE)
   })
 })

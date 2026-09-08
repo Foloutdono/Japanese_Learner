@@ -204,7 +204,9 @@ def test_volumes_counts_items_not_cards(client):
     assert body["grammar"] == {lvl: 71 for lvl in ("N5", "N4", "N3", "N2", "N1")}
     assert body["vocab"]["N5"] == 667
     assert body["kanji"]["N1"] == 1232
-    assert body["kana"] == 224
+    # 238: the gojūon and the yōon of both scripts, and the fourteen
+    # long vowels the syllabary was missing (content/kana_data.py).
+    assert body["kana"] == 238
 
 
 # ── Which rating bar the learner grades with ──────────────────────
@@ -366,7 +368,9 @@ def test_kana_known_marks_the_named_scripts_known_and_only_them(kclient):
     hira_mode, hira = level_rule.kana_batch("hiragana")
     _, kata = level_rule.kana_batch("katakana")
     assert hira_mode == "kana.flashcard.f2b"
-    assert len(hira) == 104 and len(kata) == 120
+    # Every set of the script, kana_data's own registry — the gojūon,
+    # the yōon and the long vowels.
+    assert len(hira) == 113 and len(kata) == 125
 
     done = kclient.post("/api/onboarding/complete",
                         json={"jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "hiragana"})

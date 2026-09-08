@@ -397,13 +397,29 @@ describe('the body — blocks that name themselves', () => {
     expect(vocab.onKanjiClick).toHaveBeenCalledWith('食')
   })
 
-  it('renders no doors at all when the caller cannot navigate (the sheet over a quiz)', async () => {
-    const { root } = await renderEntry(KANJI, { onClose: vi.fn() })
-    expect(root.querySelector('.dict-word')).toBeNull()
+  // ── One entry, one card, wherever it was opened from ──
+  // The three blocks below used to be gated on the handlers that make
+  // them doors, so the sheet a run opens printed neither the radical
+  // nor the words the kanji appears in — and losing the radical took
+  // its cell out of the form lattice too. A caller that cannot
+  // navigate now costs the card its doors, never its facts.
+  it('prints every block for a caller that cannot navigate, as facts rather than doors', async () => {
+    const { root } = await renderEntry(KANJI, { onClose: vi.fn() })   // no navigation offered
+    const withDoors = await renderEntry(KANJI)
+    const blocks = r => [...r.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
+    expect(blocks(root)).toEqual(blocks(withDoors.root))
+    // The same two figures beside the sheet, and the same word rows.
+    expect(root.querySelectorAll('.dict-form .record')).toHaveLength(2)
+    expect(root.querySelectorAll('.dict-word')).toHaveLength(4)
+    // None of them is a control: nothing here pretends to be pressable.
     expect(root.querySelector('.record--door')).toBeNull()
-    // The stroke count stays: it is a fact, not a link.
-    expect(root.querySelector('.dict-form .record__value').textContent).toBe('4画')
-    expect(root.querySelector('.dict-form').querySelectorAll('.record')).toHaveLength(1)
+    for (const row of root.querySelectorAll('.dict-word')) expect(row.tagName).toBe('DIV')
+    await withDoors.screen.unmount()
+
+    const vocab = await renderEntry(VOCAB, { onClose: vi.fn() })
+    const tiles = vocab.root.querySelectorAll('.dict-part')
+    expect([...tiles].map(t => t.textContent)).toEqual(['食'])
+    expect(tiles[0].tagName).toBe('SPAN')
   })
 
   it('prints the reader\'s record two by two, the due note above it, and nothing for a card never reviewed', async () => {
@@ -542,11 +558,13 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // Above the lookup sheet, not beside it.
     expect(Number(getComputedStyle(document.querySelector('.dict-sheet__scrim--over')).zIndex))
       .toBeGreaterThan(Number(getComputedStyle(lookup.parentElement).zIndex))
-    // No dictionary underneath to jump around in: plain rows.
+    // The lookup sheet can open an entry of its own now, so the words
+    // in here are doors too — and taking one closes this sheet, since
+    // the entry it was listing the readings of is no longer the one
+    // underneath (the same rule as "closes when the entry changes").
     for (const r of sheet().querySelectorAll('.dict-word')) {
-      expect(r.tagName).toBe('DIV')
-      expect(r.classList.contains('dict-word--static')).toBe(true)
-      expect(r.querySelector('.dict-word__chev')).toBeNull()
+      expect(r.tagName).toBe('BUTTON')
+      expect(r.querySelector('.dict-word__chev')).toBeTruthy()
     }
     escape(); await settle()
     expect(sheet()).toBeNull()
@@ -726,15 +744,58 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
     // <body>, outside any station header.
     const stripe = dialog.querySelector('.dict-plate__stripe')
     expect(getComputedStyle(stripe).backgroundColor).toBe(probe('backgroundColor', 'var(--line-jisho)'))
-    // No dictionary underneath to jump around in: no doors.
-    expect(dialog.querySelector('.dict-word')).toBeNull()
+    // The entry is whole here — the same blocks the catalogue prints —
+    // and the doors that have somewhere to go open INTO the sheet. The
+    // radical's does not (it opens the catalogue's index), so it prints
+    // as the figure it is.
+    expect(dialog.querySelectorAll('.dict-word')).toHaveLength(4)
+    expect(dialog.querySelector('.dict-word').tagName).toBe('BUTTON')
+    expect(dialog.querySelectorAll('.dict-form .record')).toHaveLength(2)
     expect(dialog.querySelector('.record--door')).toBeNull()
+    // Nothing to go back to yet: one entry on the stack.
+    expect(dialog.querySelector('.dict-plate__back')).toBeNull()
     // The ✕ is present on a desktop, where a modal has no slab.
     expect(getComputedStyle(dialog.querySelector('.dict-entry__close')).display).toBe('none')
     expect(dialog.querySelectorAll('.dict-plate__btn')).toHaveLength(2)
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
     expect(onClose).toHaveBeenCalledTimes(1)
+    await screen.unmount()
+  })
+
+  // ── The doors open into the sheet ──
+  // A reader who taps 木曜日 under 木 mid-review is asking what a reader
+  // in the catalogue asks by tapping the same row. The catalogue
+  // answers by moving itself; this has nothing to move, so the entries
+  // stack inside it and ‹ walks back out.
+  it('opens a word row into itself, and walks back out of it', async () => {
+    const WORD = { ...VOCAB, kanji: '木曜日', kana: 'もくようび', meaning: 'Thursday', furigana: null }
+    vi.mocked(apiFetch).mockImplementation(async url => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [String(url).includes(encodeURIComponent('木曜日')) ? WORD : KANJI] }),
+    }))
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet term="木" category="kanji" session={{ access_token: 'tok' }} onClose={vi.fn()} />
+      </LangProvider>
+    )
+    await settle(120)
+    const dialog = () => document.querySelector('.dict-sheet[role="dialog"]')
+    const word = () => dialog().querySelector('.dict-plate__word').textContent
+    expect(word()).toBe('木')
+    expect(dialog().querySelector('.dict-plate__back')).toBeNull()
+
+    dialog().querySelector('.dict-word').click()
+    await settle(140)
+    expect(word()).toBe('木曜日')
+    // The entry underneath is still there to go back to.
+    const back = dialog().querySelector('.dict-plate__back')
+    expect(back).toBeTruthy()
+
+    back.click()
+    await settle(140)
+    expect(word()).toBe('木')
+    expect(dialog().querySelector('.dict-plate__back')).toBeNull()
     await screen.unmount()
   })
 

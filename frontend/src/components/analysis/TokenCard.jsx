@@ -17,7 +17,7 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // error), and any kanji it contains.
 //
 // Merged from PhraseAnalyzerScreen.jsx's WordCard (list layout) and
-// ReadingScreen.jsx's BreakdownWordCard (stepper layout). The two had
+// ReadingRun.jsx's BreakdownWordCard (stepper layout). The two had
 // one real behavioral difference, not just a naming drift: the
 // stepper's card omits the status pills to stay compact in a one-card-
 // at-a-time carousel. `compact` preserves that distinction rather than
@@ -25,9 +25,9 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 //
 // `mining` (a useMining(session) instance, see plan 017) is optional --
 // undefined for callers that don't offer it, in which case MineButton
-// renders nothing. ReadingScreen.jsx deliberately never passes one.
+// renders nothing. ReadingRun.jsx deliberately never passes one.
 // `sentenceText` is the Sentence's own full text -- needed (alongside
-// mining) to build a cloze card; also absent for ReadingScreen.jsx.
+// mining) to build a cloze card; also absent for ReadingRun.jsx.
 // `emphasize` marks the single unknown Token of an i+1 Sentence (see
 // SentenceBreakdown's isUnknownToken) -- that one word is the entire
 // reason the Sentence is worth studying, so its mine control stands out.

@@ -46,14 +46,15 @@ import DeckDetailScreen from './screens/DeckDetailScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 import AnalyzerScreen from './screens/AnalyzerScreen'
-import ReadingScreen from './screens/ReadingScreen'
-import ReadingComprehensionScreen from './screens/ReadingComprehensionScreen'
+import SentenceStation from './screens/SentenceStation'
+import ReadingRun from './screens/ReadingRun'
+import ComprehensionRun from './screens/ComprehensionRun'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamScreen from './screens/ExamScreen'
 import ExamRunner from './screens/ExamRunner'
 import ExamResult from './screens/ExamResult'
-import TranslationScreen from './screens/TranslationScreen'
+import TranslationRun from './screens/TranslationRun'
 import AppLoading from './screens/AppLoading'
 
 // Renders nothing — keeps <html lang> and document.title in step with
@@ -114,6 +115,19 @@ const MOVED = [
   // the profile's gamification; they go home to the pass they hung off.
   ['/daruma',                  '/profile'],
   ['/storehouse',              '/profile'],
+]
+
+// ── 実践 — the sentence sections, and their station pages ──
+// Reading, comprehension and translation are each a station (the
+// source, the grade, the tier — under the chrome) and a run (the
+// session — on the stage). One entry here draws that station's pages;
+// the run's own routes are spelled out below, since each names the
+// part of the choice it carries. Comprehension has one axis, so its
+// root is the level list and it has no source or tier page.
+const SENTENCE_SECTIONS = [
+  { base: '/practice/reading' },
+  { base: '/practice/translation' },
+  { base: '/practice/comprehension', levelsOnly: true },
 ]
 
 function Moved({ to }) {
@@ -333,6 +347,19 @@ export default function App() {
                 that only ever offered one choice. */}
             <Route path="/practice/exam"        element={<ExamScreen session={session} />} />
             <Route path="/practice/exam/:examId/results" element={<ExamResult session={session} />} />
+            {/* The three sentence sections are stations too: the
+                source, the grade and the tier are chosen under the
+                chrome, and only the session itself is on the stage
+                frame below (screens/SentenceStation.jsx). */}
+            {SENTENCE_SECTIONS.flatMap(({ base, levelsOnly = false }) =>
+              (levelsOnly ? [base] : [base, `${base}/levels`, `${base}/tiers`]).map(path => (
+                <Route
+                  key={path}
+                  path={path}
+                  element={<SentenceStation session={session} base={base} levelsOnly={levelsOnly} />}
+                />
+              ))
+            )}
             <Route path="/dictionary"           element={<DictionaryScreen session={session} />} />
             <Route path="/dictionary/analyzer"  element={<AnalyzerScreen session={session} />} />
             <Route path="/profile"              element={<ProfileScreen session={session} />} />
@@ -359,9 +386,13 @@ export default function App() {
             <Route path="/learn/kanji/:level/:mode"           element={<KanjiRun session={session} />} />
             <Route path="/learn/grammar/:level/:mode"         element={<GrammarRun session={session} />} />
             <Route path="/learn/decks/:deck_id/study/:mode"   element={<StudyRun session={session} />} />
-            <Route path="/practice/reading"           element={<ReadingScreen session={session} />} />
-            <Route path="/practice/comprehension"     element={<ReadingComprehensionScreen session={session} />} />
-            <Route path="/practice/translation"       element={<TranslationScreen session={session} />} />
+            <Route path="/practice/reading/level/:level"     element={<ReadingRun session={session} />} />
+            <Route path="/practice/reading/tier/:tier"       element={<ReadingRun session={session} />} />
+            <Route path="/practice/reading/mastery"          element={<ReadingRun session={session} />} />
+            <Route path="/practice/comprehension/:level"     element={<ComprehensionRun session={session} />} />
+            <Route path="/practice/translation/level/:level" element={<TranslationRun session={session} />} />
+            <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
+            <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />
             <Route path="/practice/exam/:examId"      element={<ExamRunner session={session} />} />
           </Route>
 

@@ -4423,61 +4423,77 @@ textarea:focus-visible {
   border-top: 1px solid var(--burger-menu-border);
   padding-bottom: var(--safe-bottom);
 }
-.tabbar__inner {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-}
-/* The kanji is the icon, the plain word the label. Active: full ink
-   and a 2px rule; the rest in the soft panel ink. */
+/* ── One word, on the gate you are on ──
+   Five equal columns and a word under each is what the canvas drew,
+   in English. In French two of those words are wider than the column
+   they are printed in ("DICTIONNAIRE" 94px in a 78px gate) and there
+   was nothing to stop them: no nowrap, no clip, so each one printed
+   over its neighbour. The row of words is a pictogram now and the
+   word appears only under the gate you are on — the one place there
+   is room for it, because that gate takes the room, and the four
+   others give it up in equal shares.
+
+   Flex, not five equal columns, for exactly that: `1 1 0` shares what
+   the lit gate leaves. The lit one is `0 1 auto` — its width is its
+   word's — and its caption still says nowrap and clips, so a longer
+   word in some later language shortens rather than escapes. */
+.tabbar__inner { display: flex; }
 .tab {
   position: relative;
+  flex: 1 1 0;
+  min-width: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  /* Anchored from the top, not centred: the glyphs are a row and a
+     row is a straight line. Centring each gate's column would lift
+     the lit gate's glyph by half a caption and leave the other four
+     sitting lower than it. */
+  justify-content: flex-start;
   gap: 2px;
   height: var(--tabbar-h);
-  padding: 0;
+  padding: var(--sp-2) 0 0;
   border-radius: 0;
   color: var(--text-on-panel-soft);
   text-decoration: none;
 }
+.tab--on {
+  flex: 0 1 auto;
+  padding-inline: var(--sp-4);
+  color: var(--text-on-panel);
+}
 .tab:hover,
 .tab:focus-visible { color: var(--text-on-panel); }
-.tab__jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 1.05rem;
-  line-height: 1.15;
-  letter-spacing: 0.04em;
-}
+.tab__ico { display: inline-flex; }
 .tab__cap {
+  max-width: 100%;
+  overflow: hidden;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
+  white-space: nowrap;
+  text-overflow: ellipsis;
 }
-.tab--on { color: var(--text-on-panel); }
 .tab--on::before {
   content: '';
   position: absolute;
   top: -1px;
-  left: 22px;
-  right: 22px;
+  left: var(--sp-6);
+  right: var(--sp-6);
   height: 2px;
   background: var(--text-on-panel);
 }
-/* The due count rides Today as the map's own chip, set clear of the
-   glyph. */
-.tab--badged .tab__jp { transform: translateX(-10px); }
+/* The due count rides Today on the shoulder of its glyph — the map's
+   own chip, and the only colour in the bar. */
 .tab__due {
   position: absolute;
-  top: 3px;
-  left: calc(50% + 8px);
+  top: var(--sp-1);
+  left: calc(50% + var(--sp-2));
   display: inline-flex;
   align-items: baseline;
-  padding: 0 var(--sp-2);
+  padding: 0 var(--sp-1);
   border-radius: var(--r-pill);
   border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
   color: var(--warning);
@@ -4683,6 +4699,24 @@ textarea:focus-visible {
   align-items: center;
   gap: var(--sp-3);
   flex-shrink: 0;
+}
+
+/* ── A section's name is not an ellipsis ──
+   The canvas sets the title and the sub on one baseline, and it was
+   drawn on titles like かな and 辞書. On a phone at 390 px the row is
+   the roundel, both registers and the way out, and a section whose
+   name is a sentence -- "Entraînement à la lecture" over "Choisissez
+   une source", with ‹ Pratique in the aside -- had about 200 px for
+   all of it and printed "Entra…". A name cut to five letters names
+   nothing.
+
+   So below the canvas's own breakpoint the two registers stack: the
+   title takes the row's whole width and wraps if it must, the sub sits
+   under it, and the bar grows by a line only on the screens that need
+   one. Short names are one line and unchanged. */
+@media (max-width: 768px) {
+  .bar__names { flex-direction: column; align-items: flex-start; gap: 0; }
+  .bar__title { white-space: normal; overflow: visible; text-wrap: pretty; }
 }
 /* A text link in the bar's aside — the other way into a station
    ("By frequency", "JLPT instead"): the caption register, underlined. */
@@ -5280,7 +5314,11 @@ textarea:focus-visible {
   flex-direction: column;
   gap: 26px;
   padding: 26px 28px 24px;
-  margin-bottom: 44px;
+  /* No margin of its own: the pass is a block in a column that owns
+     the space between its blocks (.profile above, .brd__stage in the
+     boarding). It carried 44px under it from when it stood alone,
+     which the column's own --sp-5 then added to — a 60px hole between
+     the pass and the stamp book, on the screen the pass opens. */
   background:
     linear-gradient(155deg,
       color-mix(in srgb, var(--pass-color) 38%, var(--bg-panel)) 0%,
@@ -5555,6 +5593,14 @@ textarea:focus-visible {
   background: transparent;
   border: 0;
   border-left: 1px solid var(--surface-line);
+  /* Square, against the bare `button` rule's --r-panel: the control is
+     ONE instrument whose segments are divided by hairlines, not a row
+     of little boxes (DESIGN.md, Controls). With 8px on each option the
+     selected one printed as a rounded rectangle inside the pill, and
+     what should read as a straight division read as a pair of curves
+     turning away from each other on either side of the hairline. The
+     ends are the container's own: `.seg` is the pill, and it clips. */
+  border-radius: 0;
   color: var(--text-secondary);
   font: inherit;
   cursor: pointer;
@@ -6363,18 +6409,35 @@ textarea:focus-visible {
   filter: none;
 }
 .route-stop--current { border-color: var(--line-color); }
-/* The rail, drawn per stop so the ends can be capped — a line that
+/* ── The line's axis ──
+   The rail and every marker stand on ONE line, and both are placed by
+   their centre (`translate(-50%)`) on the same `left`, because the two
+   are different widths and a marker changes width when it is the stop
+   you are at: any geometry that positions them by their edges has to
+   restate that arithmetic in four places, and the four drifted — the
+   rail was set from its left edge and ran 5.5 px to the right of the
+   markers, through the side of every dot.
+
+   -18.5px from a card's left edge is 11.5px from the route's own, the
+   canvas's rail: the widest thing on the axis is the current marker's
+   15px with its 3px ring, so 11.5px keeps all of it inside the 30px
+   the route reserves. The halves land on whole pixels — 3, 11 and 15
+   are odd — so nothing on the line is drawn soft. */
+.route-stop__rail,
+.route-stop__marker { left: -18.5px; }
+
+/* The rail is drawn per stop so the ends can be capped — a line that
    runs off the top of the first station reads as "there is more up
    there". It reaches past the card into the gap above and below so
    the line stays unbroken between them; the stretch behind the
    learner is the line's own colour. */
 .route-stop__rail {
   position: absolute;
-  left: -21px;
   top: calc(-1px - var(--route-gap));
   bottom: calc(-1px - var(--route-gap));
   width: 3px;
   border-radius: var(--r-pill);
+  transform: translateX(-50%);
   background: color-mix(in srgb, var(--line-color) 35%, transparent);
 }
 .route-stop--past .route-stop__rail { background: var(--line-color); }
@@ -6382,7 +6445,6 @@ textarea:focus-visible {
 .route-stop--last  .route-stop__rail { bottom: 50%; }
 .route-stop__marker {
   position: absolute;
-  left: -25px;
   top: 50%;
   width: 11px;
   height: 11px;
@@ -11086,6 +11148,17 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   background: var(--bg-card-hover);
   transform: translateY(-1px);
 }
+/* The same tile where there is nowhere for it to go — over a run's
+   own sheet the parts of a word are printed, not opened (the twin of
+   .dict-word--static). It keeps the plate; it loses the lift and the
+   pointer, because nothing happens when it is pressed. */
+.dict-part--static { cursor: default; }
+.dict-part--static:hover,
+.dict-part--static:focus-visible {
+  border-color: var(--surface-line);
+  background: var(--surface);
+  transform: none;
+}
 @media (prefers-reduced-motion: reduce) {
   .dict-part:hover,
   .dict-part:focus-visible { transform: none; }
@@ -13086,11 +13159,13 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
   .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
-  .route { --route-gap: 12px; padding: 30px 14px 24px; }
-  .route-stop { padding: 18px 0 18px 52px; gap: 12px; }
-  .route-stop__rail { left: 23px; }
-  .route-stop__marker { left: 17px; }
-  .route-stop__name { font-size: 1.3rem; }
+  /* The route diagram has no phone form of its own: the canvas's
+     geometry — the rail and the markers OUTSIDE the cards, in the
+     route's own left margin — is the same at every width. The block
+     that stood here was the pre-071 diagram (the rail inside a 52px
+     card indent, and a `.route-stop__name` the component stopped
+     rendering), and it was still overriding the real one below 560px:
+     every phone drew the rail 7.5px to the right of its own dots. */
 
   /* One card per row, and the lead cell gives up the width a phone
      needs for the title beside it. */
@@ -13382,6 +13457,15 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    as: the marks row, the reading over the headword, two readings and
    a door to the rest, the caption; then blocks divided by hairlines
    and no headings. Tokens only. */
+/* ── 解析 — the door, and the three doors on it ──
+   The row is the section's, and the three intakes drawn on its right
+   are the platforms behind it (components/analysis/sources.js): each
+   one opens the analyzer standing on that platform, so the row is four
+   ways in rather than one. That makes it a container of buttons, not a
+   button — the intakes cannot be children of the door's own <button>,
+   which is invalid HTML that browsers settle by dropping one of the
+   two. The surface, the edge and the radius stay on the row; the ink
+   and the reach belong to what you press. */
 .anl-door {
   --line-color: var(--line-kaiseki);
   display: flex;
@@ -13394,6 +13478,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   color: var(--text-primary);
+  font: inherit;
+  text-align: left;
+}
+.anl-door__open {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
   font: inherit;
   text-align: left;
 }
@@ -13429,9 +13527,17 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   justify-content: center;
   width: 36px;
   height: 36px;
+  padding: 0;
   border-radius: var(--r-pill);
   border: 1px solid var(--surface-line);
+  background: none;
   color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--text-primary));
+}
+.anl-door__intake:hover,
+.anl-door__intake:focus-visible {
+  border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line));
+  color: var(--text-primary);
+  filter: none;
 }
 .anl-door__intake .svg { width: 17px; height: 17px; }
 
@@ -13594,8 +13700,42 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .dict-radical-index { display: block; }
 .dict-radical-sheets { display: block; }
 .radical-sheet { scroll-margin-top: 76px; }
-.radical-sheet + .radical-sheet { margin-top: 12px; }
-.radical-sheet .section-header { margin-top: 34px; margin-bottom: 16px; }
+.radical-sheet + .radical-sheet { margin-top: var(--sp-6); }
+
+/* ── A block's own mark ──
+   The stamp book's 九月 in its margin, for the blocks in the
+   dictionary that used to carry a paired SectionHeader over an object
+   that already says what it is — the syllabary charts, whose rows read
+   あ行 か行 さ行, and the radical index's stroke groups, under a rail
+   that names every stroke count and lights the one being read. Both
+   printed the same term twice and in two languages, with a rule of
+   their own. What is left is the name and the hairline; the tally
+   rides it as data — tracked, tabular, quiet. */
+.dict-mark {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-1) var(--sp-2);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-mark__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 60%, var(--text-primary));
+}
+.dict-mark__tally {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.radical-sheet .dict-mark { margin-bottom: var(--sp-4); }
+.radical-sheet + .radical-sheet .dict-mark { margin-top: var(--sp-7); }
 
 /* Radicals as tiles, not lattice cells. The old grid drew its seams
    with a background showing through 1px gaps, which meant every
@@ -13658,14 +13798,18 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .syllabary-chart-group {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px 56px;
+  gap: var(--sp-8) var(--sp-9);
   justify-content: start;
   align-items: start;
 }
 @media (min-width: 900px) {
   .syllabary-chart-group { grid-template-columns: auto auto; }
 }
-.syllabary-col { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+/* A column holds more than one chart now (五十音 + 長音 on the left,
+   濁音 + 拗音 + 外来音 on the right), so its gap is the block rhythm
+   between two charts — the same distance the two columns keep from
+   each other once they stack on a phone. */
+.syllabary-col { display: flex; flex-direction: column; gap: var(--sp-8); min-width: 0; }
 .syllabary-col .section-header { margin-top: 0; }
 .syllabary-table {
   grid-template-columns: 30px repeat(5, minmax(56px, 92px));
@@ -13727,10 +13871,14 @@ button.syllabary-cell:focus-visible {
    thing there is nothing to see. ん gets a labelled 撥音 row inside
    the table it belongs to. */
 .syllabary-table {
-  grid-template-columns: 46px repeat(5, minmax(52px, 76px));
+  grid-template-columns: 46px repeat(var(--syl-cols, 5), minmax(52px, 76px));
   gap: 5px;
   align-items: stretch;
 }
+/* 拗音 has three columns, not five — や ゆ よ are the only kana that
+   follow. The table sizes to them rather than stretching to the width
+   of the chart above it. */
+.syllabary-table--narrow { --syl-cols: 3; }
 
 /* Heads are type, not cells: no box, no fill, just the kana in the
    collection's colour with its romaji tucked under it. */
@@ -13773,7 +13921,11 @@ button.syllabary-cell:focus-visible {
 .syllabary-cell__char { font-size: 27px; line-height: 1.1; }
 
 @media (max-width: 560px) {
-  .syllabary-table { grid-template-columns: 34px repeat(5, minmax(44px, 1fr)); gap: 4px; }
+  .syllabary-table { grid-template-columns: 34px repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
+  /* The five-column charts fill the phone's width; three columns doing
+     the same would be three fat empty tiles, so 拗音 keeps a cell the
+     size it is on a desktop and sits to the left. */
+  .syllabary-table--narrow { grid-template-columns: 34px repeat(3, minmax(44px, 76px)); }
   .syllabary-head__kana { font-size: 0.7rem; }
   .syllabary-head--row { padding-right: 5px; }
   .syllabary-cell { min-height: 52px; }
@@ -15406,12 +15558,19 @@ html { scrollbar-gutter: stable; }
    the compounds below never precede the rules they override. */
 
 /* ── The three pages ── */
+/* The same box every other tab screen stands in (.learn, .practice,
+   .today, .dictionary above): --sp-5 down each side and --sp-6 under
+   the last block. These three were the only screens without it, so
+   the pass, the stamp book and the settings rows ran edge to edge
+   while every other screen's cards were inset — and nothing but the
+   dock's own clearance sat under the last of them. */
 .profile,
 .stats,
 .settings {
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
+  padding: 0 var(--sp-5) var(--sp-6);
 }
 .profile__stale { display: flex; align-items: center; gap: var(--sp-2); margin: 0; }
 .profile__stale-glyph { flex: none; color: var(--warning); }
@@ -15668,7 +15827,12 @@ html { scrollbar-gutter: stable; }
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.cal__month { overflow: hidden; white-space: nowrap; }
+/* Ellipsis, not a hard cut: a month whose run is too short to print
+   its name is left unnamed upstream (domain/statsModel.js, MIN_MONTH_
+   SPAN), and this is the backstop for a narrower phone than the one
+   that number was measured on — "SEPT…" reads as a shortened word,
+   "SE" reads as a mistake. */
+.cal__month { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .cal__grid {
   display: grid;
   grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));
@@ -16095,14 +16259,65 @@ html { scrollbar-gutter: stable; }
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
-  padding-top: calc(var(--sp-9) + var(--sp-8));
   overflow-y: auto;
 }
-.brd__body--top { padding-top: 0; }
-.brd__body--arrival { padding-top: var(--sp-9); }
-.brd__body--center { padding-top: 0; justify-content: center; }
-.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); margin-top: var(--sp-9); }
-.brd__body--center .brd__stage { margin-top: 0; }
+
+/* ── The air gives way before the body scrolls ──
+   The rhythm around a question -- (--sp-9 + --sp-8) over it, --sp-9
+   under it -- is the canvas's, and the canvas is an 844 px artboard
+   where `why`'s six motives land with nothing to spare. A real phone
+   is shorter: at 764 CSS px (a 6.1" Android, its two bars taking the
+   rest) the body overflowed by 66 px and cut the sixth motive in
+   half, while 164 px of nothing sat above the question. Dead space
+   is the failure, not unevenness -- DESIGN.md, the density contract.
+
+   So the rhythm is a MAXIMUM, not a fixed pad: both gaps are flex
+   SPACERS, and a flex item gives up its height when the room runs
+   out where a padding never does. They collapse together, in
+   proportion, and only once they are gone does the body scroll --
+   which is still the right answer on a screen too short for the
+   content itself.
+
+   Each spacer carries its rung as its own basis and cancels the one
+   flex gap it stands behind, so what is drawn at rest is exactly the
+   rung and what is left once a spacer is spent is the body's gap:
+   --sp-5 under the head, --sp-5 over the answers, never nothing.
+
+   The top spacer is a `::before` -- nothing can precede it. The one
+   under the question is markup (`.brd__air`, drawn by BoardQuestion):
+   a pseudo-element can only be a flex item at the two ends of a box,
+   and this one belongs in the middle. It is inert everywhere but as a
+   direct child of the body, so the question Building nests inside its
+   own stage does not grow one. */
+.brd__body::before {
+  content: "";
+  flex: 0 1 calc(var(--sp-9) + var(--sp-8));
+  min-height: var(--sp-5);
+  margin-bottom: calc(-1 * var(--sp-5));
+}
+.brd__body--top::before { content: none; }
+.brd__body--arrival::before { flex-basis: var(--sp-9); }
+.brd__air { display: none; }
+.brd__body > .brd__air {
+  display: block;
+  flex: 0 1 var(--sp-9);
+  margin-bottom: calc(-1 * var(--sp-5));
+}
+
+/* Centred with spacers rather than `justify-content: center`, for the
+   same reason: a centred line that outgrows its box spills off BOTH
+   ends, and no scroll can reach back over the top of it. A pair of
+   grow-only spacers centres the same content and simply vanishes when
+   the room runs out, leaving the overflow all at the bottom where the
+   scroll can follow it. */
+.brd__body--center::before,
+.brd__body--center::after {
+  content: "";
+  flex: 1 0 0;
+  min-height: 0;
+  margin-bottom: 0;
+}
+.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); }
 .brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
 .brd__back {
   display: inline-flex;
@@ -16557,6 +16772,18 @@ html { scrollbar-gutter: stable; }
 .brd__car--out [class*="brd-"],
 .brd__car--out .brd__opts > * { animation: none; }
 .brd :focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+/* -- except the question, which is a programmatic focus target and not
+   a tab stop. The flow moves focus onto it at every step so that the
+   new question is what a screen reader reads; tabIndex is -1, so no
+   keyboard walk can land there by hand. Chrome still matches
+   :focus-visible on a scripted .focus() whenever the last interaction
+   happened to be a key press, though, so answering with Enter drew a
+   gold box around the next question and answering with a thumb drew
+   nothing -- a ring nobody had asked for and could not explain. The
+   same call as `.anl-stage` above, and the same caveat: restore it if
+   the question ever becomes reachable by hand. (Its own `outline:
+   none` cannot do this: one class loses to two.) */
+.brd .brd__q:focus-visible { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .brd [class*="brd"],
   .brd [class*="brd"]::before,

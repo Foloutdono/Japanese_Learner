@@ -1,14 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
-import { board } from '../stores/boarding'
-import { Leave } from '../components/chrome/Bar'
-import { Seg } from '../components/chrome/Console'
-import LevelSelector from '../components/selection/LevelSelector'
-import ModeSelector from '../components/selection/ModeSelector'
-import TierSelector from '../components/selection/TierSelector'
-import SelectionScreen from '../components/selection/SelectionScreen'
+import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
@@ -18,7 +12,7 @@ import RatingBar from '../components/study/RatingBar'
 import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
-import { tierLabelFor, DEFAULT_TIER_SIZE } from '../domain/tiers'
+import { tierLabelFor } from '../domain/tiers'
 
 const MOBILE_BREAKPOINT = 768
 const READING_COLOR = 'var(--line-reading)'
@@ -30,28 +24,24 @@ const READING_COLOR = 'var(--line-reading)'
 // t.appDefinition, t.cardStats, t.inThisPhrase) rather than inventing
 // reading-specific duplicates.
 
-// Route: /practice/reading (plan 072 puts the pickers on the station
-// page and the session on the stage — the canvas's Reading artboard:
-// the timer over the sentence, the field and Submit docked in the
-// foot, the rating bar docked once the answer is in).
-export default function ReadingScreen({ session }) {
+// Routes: /practice/reading/level/:level, /tier/:tier (?size=&domain=)
+// and /mastery — the session on the stage (the canvas's Reading
+// artboard: the timer over the sentence, the field and Submit docked
+// in the foot, the rating bar docked once the answer is in). What it
+// is a session OF is the path: the pickers are the station page above
+// it, under the chrome (screens/SentenceStation.jsx).
+const BASE = '/practice/reading'
+
+export default function ReadingRun({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const { level: levelParam, tier: tierParam } = useParams()
+  const { search } = useLocation()
 
-  const SOURCES = [
-    { key: 'level',     label: t.byLevel,     desc: t.byLevelDesc },
-    { key: 'frequency', label: t.byFrequency, desc: t.byFrequencyDesc },
-    { key: 'mastery',   label: t.byMastery,   desc: t.byMasteryDesc },
-  ]
-
-  const [source, setSource] = useState(null)       // 'level' | 'frequency' | 'mastery'
-  const [level, setLevel]   = useState(null)        // source === 'level'
-  // source === 'frequency': the word list is a segmented control over
-  // the tier list (the vocab station's own tiers page, plan 071),
-  // not a step of its own.
-  const [domain, setDomain] = useState('vocab')     // 'vocab' | 'vocab_jmdict'
-  const [tier, setTier]     = useState(null)
-  const [tierSize, setTierSize] = useState(DEFAULT_TIER_SIZE)
+  // 'level' | 'frequency' | 'mastery', and the ‹ back to the list it
+  // was chosen from. Null for a path the station could not produce.
+  const picked = runSource({ base: BASE, level: levelParam, tier: tierParam, search })
+  const { source, level, domain, tier, tierSize, back, backKey } = picked ?? {}
 
   // 'loading' | 'reading' | 'feedback' | 'error'
   //
@@ -361,73 +351,15 @@ export default function ReadingScreen({ session }) {
     })
   }
 
-  function resetAll() {
+  // ‹ — back to the list the source was chosen from.
+  function leave() {
     clearTimer()
-    setSource(null)
-    setLevel(null)
-    setTier(null)
+    navigate(back)
   }
 
-  // ── Source selection (level / frequency / my cards) ──
-  if (!source) {
-    return (
-      <SelectionScreen
-        title={t.readingTitle}
-        sub={t.selectStudySource}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
-      >
-        {/* 'mastery' needs no further choice, so choosing it is the
-            last step and boards straight away. The other two each
-            have one more list after this one. */}
-        <ModeSelector
-          modes={SOURCES}
-          onSelect={key => (key === 'mastery' ? board(() => setSource(key)) : setSource(key))}
-        />
-      </SelectionScreen>
-    )
-  }
-
-  // ── Level source: pick a JLPT level ──
-  if (source === 'level' && !level) {
-    return (
-      <SelectionScreen
-        title={t.readingTitle}
-        sub={t.selectLevel}
-        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
-      >
-        <LevelSelector onSelect={lvl => board(() => setLevel(lvl))} />
-      </SelectionScreen>
-    )
-  }
-
-  // ── Frequency source: the word list and the tier, on one page ──
-  if (source === 'frequency' && tier == null) {
-    return (
-      <SelectionScreen
-        title={t.readingTitle}
-        sub={t.selectTier}
-        aside={<Leave onClick={() => setSource(null)}>{t.leaveSources}</Leave>}
-      >
-        <Seg
-          full
-          label={t.selectDomain}
-          value={domain}
-          onChange={setDomain}
-          options={[
-            { key: 'vocab', label: t.freqDomainDeck },
-            { key: 'vocab_jmdict', label: t.freqDomainJmdict },
-          ]}
-        />
-        <TierSelector
-          domain={domain}
-          session={session}
-          tierSize={tierSize}
-          onTierSize={setTierSize}
-          onSelect={tr => board(() => setTier(tr))}
-        />
-      </SelectionScreen>
-    )
-  }
+  // A hand-typed path the station could not have produced: back to it
+  // rather than a session with nothing to fetch.
+  if (!picked) return <Navigate replace to={BASE} />
 
   // ── Session (all sources land here once fully configured) ──
   return (
@@ -455,7 +387,8 @@ export default function ReadingScreen({ session }) {
       setShowBreakdown={setShowBreakdown}
       breakdownIndex={breakdownIndex}
       setBreakdownIndex={setBreakdownIndex}
-      onBack={resetAll}
+      onBack={leave}
+      backLabel={t[backKey]}
       onStart={startSession}
       submitAnswer={submitAnswer}
       gradeAnswer={gradeAnswer}
@@ -480,12 +413,12 @@ function Streak({ streak, t }) {
 }
 
 // Kicks off the session's very first batch fetch exactly once, then
-// renders the same stage machine the single-screen version used to.
-// Split out mainly to keep the selection-screen early-returns above
-// simple (each of those is a plain "pick one thing" screen).
+// renders the stage machine. A component of its own so that the mount
+// IS the start: the run above it is the route, and the route is what
+// decides there is a session to start at all.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
-  feedback, score, streak, error, detail, isMobile, analysis, analysisLoading,
+  feedback, score, streak, error, detail, isMobile, analysis, analysisLoading, backLabel,
   showBreakdown, setShowBreakdown, breakdownIndex, setBreakdownIndex, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, openAnalysisWordDetail,
   openAnalysisKanjiDetail, closeDetail,
@@ -510,7 +443,7 @@ function SessionView({
     <StudyStage
       color={READING_COLOR}
       onLeave={onBack}
-      leaveLabel={t.tabPractice}
+      leaveLabel={backLabel}
       where={t.readingTitle}
       sub={where}
       remaining={`${score.correct} / ${score.total}`}
@@ -640,7 +573,7 @@ function SessionView({
 
           {feedback.correct === null ? (
             /* Six-way rating rather than the two buttons this used to
-               have, for the same reason TranslationScreen was changed:
+               have, for the same reason TranslationRun was changed:
                reading a sentence is rarely simply right or wrong, and
                the learner already knows how close they were -- the two
                buttons made them flatten that to a coin flip. RatingBar's
