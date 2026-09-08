@@ -14,6 +14,13 @@ import { Bar } from '../components/chrome/Bar'
 // The pass tags the canvas draws on these cards stay out until a
 // purchase flow exists (plan 069, HAS_STORE).
 //
+// Each title carried the section's own 読書 理解 翻訳 模試 after it, in a
+// smaller face. It was the second name of a thing already named, and at
+// phone width the pair ran past the card: 理解 broke between its two
+// characters, one to a line. The Japanese is still on the roundel of
+// every station these cards open, and on the gate the departure passes
+// through — this row is the one place it was a caption. Owner's call.
+//
 // The bar is the concourse's, not a line's: the home roundel and the
 // gold, exactly as the Learn gate wears them. It was the `register`
 // variant — no roundel, a grey hairline — on the reasoning that
@@ -46,10 +53,7 @@ export default function PracticeScreen() {
               <span className="platform-card__no">{i + 1}</span>
             </span>
             <span className="platform-card__body">
-              <span className="platform-card__title">
-                {section.title}
-                <span className="platform-card__title-jp" lang="ja">{section.icon}</span>
-              </span>
+              <span className="platform-card__title">{section.title}</span>
               <span className="platform-card__desc">{(section.desc ?? '').split('\n')[0]}</span>
             </span>
             <span className="platform-card__go" aria-hidden="true">▶</span>

@@ -97,7 +97,6 @@ export default function ExamScreen({ session }) {
           `${exam.questionCount} ${t.examQuestions}`,
           exam.generated ? null : t.examNotGeneratedYet,
         ].filter(Boolean).join(' · '),
-        sample: meta?.jp,
         // Only where there IS a paper to be different from. Asking for
         // a fresh one means excluding the revision on offer, which the
         // catalog entry carries for exactly this purpose — the server

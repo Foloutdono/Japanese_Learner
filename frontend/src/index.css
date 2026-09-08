@@ -3772,9 +3772,12 @@ button:focus-visible {
   color: color-mix(in srgb, var(--rail) 62%, var(--text-secondary));
 }
 
-/* A plain-language-first title with the Japanese name as its quiet
-   second register — the analyser's cards use this; every other caller
-   keeps the bare serif title. */
+/* A mode's title, set in the display face rather than the serif every
+   other platform card uses: these are choices in the learner's own
+   language, not destinations. It held a Japanese second name beside it
+   too, which is why it is a row — the second name is gone (a card
+   already named does not need naming twice), and the row stays because
+   the type is what it carries. */
 .platform-card__titlerow {
   display: flex;
   align-items: baseline;
@@ -3785,12 +3788,6 @@ button:focus-visible {
   font-weight: 700;
   font-size: var(--fs-title);
   letter-spacing: 0.02em;
-}
-.platform-card__titlejp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: var(--fs-body);
-  color: var(--text-secondary);
 }
 
 /* The right-hand column a wide card must earn (DESIGN.md's density
@@ -4986,14 +4983,6 @@ textarea:focus-visible {
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
-.platform-card__title-jp {
-  margin-left: var(--sp-2);
-  font-family: var(--font-jp);
-  font-weight: 500;
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
-}
 
 /* ── wide screens: the same frame, centred ── */
 @media (min-width: 769px) {
