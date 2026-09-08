@@ -6373,7 +6373,6 @@ textarea:focus-visible {
   flex-direction: column;
   gap: var(--route-gap);
   width: 100%;
-  padding-left: 30px;
 }
 .route-stop {
   position: relative;
@@ -6382,7 +6381,9 @@ textarea:focus-visible {
   gap: var(--sp-4);
   width: 100%;
   min-height: 56px;
-  padding: var(--sp-3) var(--sp-4);
+  /* The left pad is the axis's: the rail and its marker stand in it,
+     on the card. See "The line's axis" below. */
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-8);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -6407,13 +6408,18 @@ textarea:focus-visible {
    rail was set from its left edge and ran 5.5 px to the right of the
    markers, through the side of every dot.
 
-   -18.5px from a card's left edge is 11.5px from the route's own, the
-   canvas's rail: the widest thing on the axis is the current marker's
-   15px with its 3px ring, so 11.5px keeps all of it inside the 30px
-   the route reserves. The halves land on whole pixels — 3, 11 and 15
-   are odd — so nothing on the line is drawn soft. */
+   The axis runs INSIDE the card. It used to stand in a 30px margin the
+   route reserved to its left, which cost every row that width and drew
+   the line as something the stops were parked beside rather than
+   something they are on. 20.5px is the analyzer's own stop list
+   (.anl-stop, whose rail has always been inside at 20px) to the half
+   pixel, and --sp-8 of left padding is that list's 44px: two stop
+   lists, one geometry. The halves land on whole pixels — 3, 11 and 15
+   are odd widths — so nothing on the line is drawn soft, and the
+   widest mark on it (the current marker's 15px inside a 3px ring)
+   still clears the code beside it by 13px. */
 .route-stop__rail,
-.route-stop__marker { left: -18.5px; }
+.route-stop__marker { left: 20.5px; }
 
 /* The rail is drawn per stop so the ends can be capped — a line that
    runs off the top of the first station reads as "there is more up
@@ -6439,8 +6445,11 @@ textarea:focus-visible {
   height: 11px;
   border-radius: var(--r-pill);
   transform: translate(-50%, -50%);
-  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-main));
-  background: var(--bg-main);
+  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
+  /* The dot is hollow, and it is on the card now: it takes the card's
+     own ground rather than naming one, so it stays hollow through the
+     hover that lifts it. */
+  background: inherit;
 }
 .route-stop--past .route-stop__marker { background: var(--line-color); border-color: var(--line-color); }
 .route-stop--current .route-stop__marker {
@@ -6450,9 +6459,13 @@ textarea:focus-visible {
   border-color: var(--line-color);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
 }
+/* Wide enough for two kana — きゃ and キャ are stop codes, and a 34px
+   column broke them one character to a line — and never wrapping, so a
+   longer code pushes its own row rather than growing taller than it. */
 .route-stop__code {
   flex: none;
-  width: 34px;
+  min-width: 44px;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-lead);
@@ -13148,11 +13161,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
   .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
-  /* The route diagram has no phone form of its own: the canvas's
-     geometry — the rail and the markers OUTSIDE the cards, in the
-     route's own left margin — is the same at every width. The block
-     that stood here was the pre-071 diagram (the rail inside a 52px
-     card indent, and a `.route-stop__name` the component stopped
+  /* The route diagram has no phone form of its own: one geometry — the
+     rail and the markers on the cards, standing in the left pad — at
+     every width. The block that stood here was the pre-071 diagram (a
+     52px card indent and a `.route-stop__name` the component stopped
      rendering), and it was still overriding the real one below 560px:
      every phone drew the rail 7.5px to the right of its own dots. */
 

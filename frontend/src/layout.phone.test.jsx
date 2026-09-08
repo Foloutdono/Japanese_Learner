@@ -139,31 +139,52 @@ describe('the phone layout contract', () => {
       .toBe(Math.round(seg.getBoundingClientRect().height - 2))
   })
 
-  // ── 路線図 — the rail and its markers stand on one line ──
+  // ── 路線図 — the rail and its markers stand on one line, ON the card ──
   // A retired phone block (the pre-071 diagram, its rail inside a 52px
   // card indent) was still overriding the real one below 560px, and
   // the rail ran 7.5px to the right of its own dots on every level
   // list, kana list and exam list the app has.
-  it('stands the route rail on the axis of its markers, inside the route\'s margin', async () => {
+  //
+  // The axis is inside the card now. It stood in a 30px margin the
+  // route reserved to its left, which spent that width on every row
+  // and drew the line as something the stops were parked beside
+  // rather than something they are on. Owner's call.
+  it('stands the route rail on the axis of its markers, on the card', async () => {
     const screen = await render(
       <div className="route">
         <button type="button" className="route-stop route-stop--first route-stop--past">
           <span className="route-stop__rail" /><span className="route-stop__marker" />
+          <span className="route-stop__code">きゃ</span>
         </button>
         <button type="button" className="route-stop route-stop--current route-stop--last">
           <span className="route-stop__rail" /><span className="route-stop__marker" />
+          <span className="route-stop__code">キャ</span>
         </button>
       </div>
     )
     const route = screen.container.querySelector('.route').getBoundingClientRect()
     const mid = el => { const r = el.getBoundingClientRect(); return (r.left + r.right) / 2 }
     for (const stop of screen.container.querySelectorAll('.route-stop')) {
-      const marker = stop.querySelector('.route-stop__marker')
-      expect(mid(stop.querySelector('.route-stop__rail'))).toBeCloseTo(mid(marker), 1)
-      // Both stand in the room the route reserves for them, left of
-      // the cards — the current stop's 3px ring included.
-      expect(marker.getBoundingClientRect().left - route.left).toBeGreaterThanOrEqual(3)
-      expect(marker.getBoundingClientRect().right).toBeLessThanOrEqual(stop.getBoundingClientRect().left)
+      const card = stop.getBoundingClientRect()
+      const marker = stop.querySelector('.route-stop__marker').getBoundingClientRect()
+      const rail = stop.querySelector('.route-stop__rail')
+      expect(mid(rail)).toBeCloseTo(mid(stop.querySelector('.route-stop__marker')), 1)
+      // The card takes the whole width the route has, and the mark —
+      // the current stop's 3px ring included — stands on it.
+      expect(card.left).toBe(route.left)
+      expect(card.right).toBe(route.right)
+      expect(marker.left).toBeGreaterThan(card.left)
+      // Clear of the code beside it, which is what the left pad is for.
+      const code = stop.querySelector('.route-stop__code').getBoundingClientRect()
+      expect(marker.right).toBeLessThanOrEqual(code.left)
+      // Two kana fit the code column on one line — it was 34px wide and
+      // broke きゃ one character to a line.
+      expect(code.height).toBeLessThan(parseFloat(getComputedStyle(stop.querySelector('.route-stop__code')).fontSize) * 2)
+      // The rail bridges the gap to the next card, so the line the
+      // stops stand on is unbroken between them.
+      const r = rail.getBoundingClientRect()
+      if (!stop.classList.contains('route-stop--first')) expect(r.top).toBeLessThan(card.top)
+      if (!stop.classList.contains('route-stop--last')) expect(r.bottom).toBeGreaterThan(card.bottom)
     }
   })
 })
