@@ -243,7 +243,7 @@ entries went in the same commit.
 |---|---|---|
 | `.board`, `.wmap__lines`, `.wmap-line*`, `.wmap-track*`, `.wmap-due*`, `.wmap__group`, `.wmap-row*`, `.wmap-roundel` | 路線図 — the wall map (no masthead: the bar names the place) | `components/station/WallMap.jsx`, `screens/LearnScreen.jsx` |
 | `.bar__link` | a text link in the bar's aside (By frequency, JLPT instead) | the station screens |
-| `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
+| `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram; the rail is drawn per stop rather than once behind the list (so the ends cap at the first and last marker), and it and every marker are placed by their centre on one `left`, since a marker changes width when it is the stop you are at | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
 | `.platform-grid`, `.platform-card*` (`__service` in the learner's language, `__stops`, `__pip`) | the platform card | `components/selection/ModeSelector.jsx`, `TierSelector.jsx`, `ThemeSelector.jsx` |
 | `.seg--full`, `.console`, `.console__index` | the tier size, the theme filter | `Seg`, `ConsoleIndex` in `components/chrome/Console.jsx` |
 | `.deck-card__lead`, `__glyph`, `__due`, `__aside`, `__count` | the shelf's card | `screens/DecksScreen.jsx` |

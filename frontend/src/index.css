@@ -6381,18 +6381,35 @@ textarea:focus-visible {
   filter: none;
 }
 .route-stop--current { border-color: var(--line-color); }
-/* The rail, drawn per stop so the ends can be capped — a line that
+/* ── The line's axis ──
+   The rail and every marker stand on ONE line, and both are placed by
+   their centre (`translate(-50%)`) on the same `left`, because the two
+   are different widths and a marker changes width when it is the stop
+   you are at: any geometry that positions them by their edges has to
+   restate that arithmetic in four places, and the four drifted — the
+   rail was set from its left edge and ran 5.5 px to the right of the
+   markers, through the side of every dot.
+
+   -18.5px from a card's left edge is 11.5px from the route's own, the
+   canvas's rail: the widest thing on the axis is the current marker's
+   15px with its 3px ring, so 11.5px keeps all of it inside the 30px
+   the route reserves. The halves land on whole pixels — 3, 11 and 15
+   are odd — so nothing on the line is drawn soft. */
+.route-stop__rail,
+.route-stop__marker { left: -18.5px; }
+
+/* The rail is drawn per stop so the ends can be capped — a line that
    runs off the top of the first station reads as "there is more up
    there". It reaches past the card into the gap above and below so
    the line stays unbroken between them; the stretch behind the
    learner is the line's own colour. */
 .route-stop__rail {
   position: absolute;
-  left: -21px;
   top: calc(-1px - var(--route-gap));
   bottom: calc(-1px - var(--route-gap));
   width: 3px;
   border-radius: var(--r-pill);
+  transform: translateX(-50%);
   background: color-mix(in srgb, var(--line-color) 35%, transparent);
 }
 .route-stop--past .route-stop__rail { background: var(--line-color); }
@@ -6400,7 +6417,6 @@ textarea:focus-visible {
 .route-stop--last  .route-stop__rail { bottom: 50%; }
 .route-stop__marker {
   position: absolute;
-  left: -25px;
   top: 50%;
   width: 11px;
   height: 11px;
@@ -13104,11 +13120,13 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
   .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
-  .route { --route-gap: 12px; padding: 30px 14px 24px; }
-  .route-stop { padding: 18px 0 18px 52px; gap: 12px; }
-  .route-stop__rail { left: 23px; }
-  .route-stop__marker { left: 17px; }
-  .route-stop__name { font-size: 1.3rem; }
+  /* The route diagram has no phone form of its own: the canvas's
+     geometry — the rail and the markers OUTSIDE the cards, in the
+     route's own left margin — is the same at every width. The block
+     that stood here was the pre-071 diagram (the rail inside a 52px
+     card indent, and a `.route-stop__name` the component stopped
+     rendering), and it was still overriding the real one below 560px:
+     every phone drew the rail 7.5px to the right of its own dots. */
 
   /* One card per row, and the lead cell gives up the width a phone
      needs for the title beside it. */

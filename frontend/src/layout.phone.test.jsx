@@ -78,4 +78,32 @@ describe('the phone layout contract', () => {
     expect(getComputedStyle(head).marginTop).toBe('44px')
     expect(getComputedStyle(head).marginBottom).toBe('12px')
   })
+
+  // ── 路線図 — the rail and its markers stand on one line ──
+  // A retired phone block (the pre-071 diagram, its rail inside a 52px
+  // card indent) was still overriding the real one below 560px, and
+  // the rail ran 7.5px to the right of its own dots on every level
+  // list, kana list and exam list the app has.
+  it('stands the route rail on the axis of its markers, inside the route\'s margin', async () => {
+    const screen = await render(
+      <div className="route">
+        <button type="button" className="route-stop route-stop--first route-stop--past">
+          <span className="route-stop__rail" /><span className="route-stop__marker" />
+        </button>
+        <button type="button" className="route-stop route-stop--current route-stop--last">
+          <span className="route-stop__rail" /><span className="route-stop__marker" />
+        </button>
+      </div>
+    )
+    const route = screen.container.querySelector('.route').getBoundingClientRect()
+    const mid = el => { const r = el.getBoundingClientRect(); return (r.left + r.right) / 2 }
+    for (const stop of screen.container.querySelectorAll('.route-stop')) {
+      const marker = stop.querySelector('.route-stop__marker')
+      expect(mid(stop.querySelector('.route-stop__rail'))).toBeCloseTo(mid(marker), 1)
+      // Both stand in the room the route reserves for them, left of
+      // the cards — the current stop's 3px ring included.
+      expect(marker.getBoundingClientRect().left - route.left).toBeGreaterThanOrEqual(3)
+      expect(marker.getBoundingClientRect().right).toBeLessThanOrEqual(stop.getBoundingClientRect().left)
+    }
+  })
 })
