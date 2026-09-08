@@ -374,7 +374,20 @@ function toISO(d) {
 }
 
 /** Month boundaries for the calendar's top axis. */
-export function monthTicks(columns) {
+// A month is named where its run of weeks starts, and the name prints
+// into the columns that run owns (PracticeCalendar spans the label from
+// this tick to the next). One column is ~19px on a 390px phone and the
+// longest short month French sets is ~39px — "SEPT." at
+// --fs-caption-xs with --tr-caption — so a month owning a single week
+// has nowhere to print its name: the calendar's first and last months
+// are partial by construction, and both were clipped to two letters.
+// Two columns and the gap between them are 42px, which fits any of the
+// twelve in either language, so a shorter run goes unnamed. A label cut
+// to "SE" says less than no label at all, and the run it belongs to is
+// still drawn — this hides a word, never a week.
+const MIN_MONTH_SPAN = 2
+
+export function monthTicks(columns, minSpan = MIN_MONTH_SPAN) {
   const ticks = []
   let last = null
   columns.forEach((week, i) => {
@@ -385,7 +398,9 @@ export function monthTicks(columns) {
       last = month
     }
   })
-  return ticks
+  // The run is measured against the ticks as they were found, so
+  // dropping one only ever gives its neighbour more room to print in.
+  return ticks.filter((tick, i) => ((ticks[i + 1]?.index ?? columns.length) - tick.index) >= minSpan)
 }
 
 // ── The interval ladder ───────────────────────────────────

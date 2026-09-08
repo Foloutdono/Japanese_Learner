@@ -15770,7 +15770,12 @@ html { scrollbar-gutter: stable; }
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.cal__month { overflow: hidden; white-space: nowrap; }
+/* Ellipsis, not a hard cut: a month whose run is too short to print
+   its name is left unnamed upstream (domain/statsModel.js, MIN_MONTH_
+   SPAN), and this is the backstop for a narrower phone than the one
+   that number was measured on — "SEPT…" reads as a shortened word,
+   "SE" reads as a mistake. */
+.cal__month { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
 .cal__grid {
   display: grid;
   grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));

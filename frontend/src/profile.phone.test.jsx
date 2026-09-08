@@ -108,7 +108,7 @@ describe('the statistics at phone width', () => {
         </div>
         <div className="stat-cap"><span>Practice calendar</span><span>14 weeks · best day <b className="stat-cap__fig">88</b></span></div>
         <div className="cal cal--gold" style={{ '--weeks': 14 }}>
-          <div className="cal__months"><span className="cal__month" style={{ gridColumn: '1 / span 4' }}>Jun</span><span className="cal__month" style={{ gridColumn: '5 / span 10' }}>Jul</span></div>
+          <div className="cal__months"><span className="cal__month" style={{ gridColumn: '1 / span 2' }}>Sept.</span><span className="cal__month" style={{ gridColumn: '3 / span 12' }}>Oct.</span></div>
           <div className="cal__grid">{Array.from({ length: 98 }, (_, i) => <span key={i} className={`cal__cell${i % 5 ? ` cal__cell--${i % 5}` : ''}`} />)}</div>
           <div className="cal__foot"><span>One square a day</span><span className="cal__scale">less <span className="cal__cell" /><span className="cal__cell cal__cell--4" /> more</span></div>
         </div>
@@ -128,6 +128,13 @@ describe('the statistics at phone width', () => {
     const cells = grid.querySelectorAll('.cal__cell')
     const c = cells[0].getBoundingClientRect()
     expect(Math.abs(c.width - c.height)).toBeLessThan(1)
+    // A month is named into the columns its run owns, and the shortest
+    // run the calendar will name is two of them (domain/statsModel.js,
+    // MIN_MONTH_SPAN). The longest short month French sets has to print
+    // in that: "SEPT." was cut to "SE" at both ends of the calendar.
+    for (const month of screen.container.querySelectorAll('.cal__month')) {
+      expect(month.scrollWidth, month.textContent).toBeLessThanOrEqual(month.clientWidth + 1)
+    }
     // Column-major: the second cell sits under the first, the eighth beside it.
     const c1 = cells[1].getBoundingClientRect()
     const c7 = cells[7].getBoundingClientRect()
