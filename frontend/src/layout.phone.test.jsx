@@ -79,6 +79,38 @@ describe('the phone layout contract', () => {
     expect(getComputedStyle(head).marginBottom).toBe('12px')
   })
 
+  // ── The segmented control is one instrument ──
+  // Its segments are divided by hairlines, not gaps or boxes
+  // (DESIGN.md, Controls). Every option is a <button>, and the bare
+  // `button` rule gives one --r-panel of radius, so the selected
+  // segment printed as a rounded rectangle inside the pill: on either
+  // side of the hairline, two curves turning away from each other
+  // where a straight division belongs.
+  it('divides a segmented control with a straight hairline, and rounds only its ends', async () => {
+    const screen = await render(
+      <div className="seg seg--full">
+        <button type="button" className="seg__opt seg__opt--on"><span className="seg__opt-latin">Texte</span></button>
+        <button type="button" className="seg__opt"><span className="seg__opt-latin">Photo</span></button>
+        <button type="button" className="seg__opt"><span className="seg__opt-latin">Vidéo</span></button>
+      </div>
+    )
+    const seg = screen.container.querySelector('.seg')
+    const opts = [...seg.querySelectorAll('.seg__opt')]
+    // The pill and the clip are the container's, and only the container's.
+    expect(getComputedStyle(seg).overflow).toBe('hidden')
+    expect(parseFloat(getComputedStyle(seg).borderTopLeftRadius)).toBeGreaterThan(100)
+    for (const opt of opts) expect(getComputedStyle(opt).borderRadius).toBe('0px')
+    // One hairline between two segments, none before the first.
+    expect(getComputedStyle(opts[0]).borderLeftWidth).toBe('0px')
+    for (const opt of opts.slice(1)) {
+      expect(getComputedStyle(opt).borderLeftWidth).toBe('1px')
+      expect(getComputedStyle(opt).borderLeftStyle).toBe('solid')
+    }
+    // And the lit segment's fill runs the full height into it.
+    expect(Math.round(opts[0].getBoundingClientRect().height))
+      .toBe(Math.round(seg.getBoundingClientRect().height - 2))
+  })
+
   // ── 路線図 — the rail and its markers stand on one line ──
   // A retired phone block (the pre-071 diagram, its rail inside a 52px
   // card indent) was still overriding the real one below 560px, and

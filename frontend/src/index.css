@@ -5589,6 +5589,14 @@ textarea:focus-visible {
   background: transparent;
   border: 0;
   border-left: 1px solid var(--surface-line);
+  /* Square, against the bare `button` rule's --r-panel: the control is
+     ONE instrument whose segments are divided by hairlines, not a row
+     of little boxes (DESIGN.md, Controls). With 8px on each option the
+     selected one printed as a rounded rectangle inside the pill, and
+     what should read as a straight division read as a pair of curves
+     turning away from each other on either side of the hairline. The
+     ends are the container's own: `.seg` is the pill, and it clips. */
+  border-radius: 0;
   color: var(--text-secondary);
   font: inherit;
   cursor: pointer;
