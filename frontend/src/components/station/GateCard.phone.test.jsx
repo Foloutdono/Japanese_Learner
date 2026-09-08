@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { LangProvider, useLang } from '../../LangContext'
+import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
 // ── 改札 — the day's switches, at 390px ───────────────────────
@@ -25,11 +25,6 @@ vi.mock('../../stores/credits', () => ({
 }))
 
 const { default: GateCard } = await import('./GateCard')
-
-// The locale's own strings, read from the provider rather than
-// imported, so the cases hold in whichever language the lane runs.
-let T
-function Probe() { T = useLang().t; return null }
 
 const lane = (source, deck, mode, due) => ({
   id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due,
@@ -59,7 +54,6 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 async function gate(lanes = LANES) {
   const screen = await render(
     <LangProvider>
-      <Probe />
       <main className="today" style={{ padding: '0 14px' }}>
         <GateCard today={{ ...TODAY, lanes, total: lanes.reduce((n, l) => n + l.due, 0) }} />
       </main>
