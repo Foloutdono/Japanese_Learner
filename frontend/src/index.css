@@ -13714,19 +13714,31 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .dict-mark {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--sp-3);
   padding: 0 var(--sp-1) var(--sp-2);
   border-bottom: 1px solid var(--surface-line);
 }
 .dict-mark__jp {
   font-family: var(--font-jp);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-lead);
   font-weight: 700;
+  line-height: 1.1;
   letter-spacing: var(--tr-term);
-  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 72%, var(--text-primary));
+}
+/* The twin, tracked out under the same baseline — printed now, because
+   the charts under these marks no longer name their own rows and 五十音
+   alone tells a learner nothing they can act on. */
+.dict-mark__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 .dict-mark__tally {
+  margin-left: auto;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -13861,17 +13873,17 @@ button.syllabary-cell:focus-visible {
 /* ══ 五十音 — the chart, properly ═══════════════════════════
    It was a spreadsheet: A I U E O across the top in latin, K S T down
    the side in latin, a dash in every hole, and ん hanging underneath
-   as an orphan. All four are now what a Japanese chart actually does.
+   as an orphan.
 
-   Columns are headed by the vowel kana — they are the five sounds the
-   whole chart is built from, and printing their romaji taught the
-   wrong alphabet at the top of a chart about the right one. Rows are
-   headed 行 (gyō): か行, さ行, た行, which is their name. Holes are
-   empty, because a dash is a mark saying "look here" over the one
-   thing there is nothing to see. ん gets a labelled 撥音 row inside
-   the table it belongs to. */
+   It is cells now and nothing else. The heads went the way the dashes
+   did: あ行 down the side said what the row's first cell says, あ い う
+   え お across the top said what the first row says, and between them
+   they wrapped a column and a row of type around every chart on the
+   screen. Holes stay empty — a dash is a mark saying "look here" over
+   the one thing there is nothing to see — and ん sits on a last row of
+   its own inside the table it belongs to. */
 .syllabary-table {
-  grid-template-columns: 46px repeat(var(--syl-cols, 5), minmax(52px, 76px));
+  grid-template-columns: repeat(var(--syl-cols, 5), minmax(52px, 76px));
   gap: 5px;
   align-items: stretch;
 }
@@ -13879,37 +13891,6 @@ button.syllabary-cell:focus-visible {
    follow. The table sizes to them rather than stretching to the width
    of the chart above it. */
 .syllabary-table--narrow { --syl-cols: 3; }
-
-/* Heads are type, not cells: no box, no fill, just the kana in the
-   collection's colour with its romaji tucked under it. */
-.syllabary-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  background: none;
-  border: none;
-  padding: 0;
-  min-height: 0;
-}
-.syllabary-head--row { align-items: flex-end; padding-right: 8px; }
-.syllabary-head__kana {
-  font-family: var(--font-jp);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--syl-accent, var(--line-kana)) 65%, var(--text-primary));
-}
-.syllabary-head__romaji {
-  font-family: var(--font-display);
-  font-size: 0.54rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.syllabary-head--col { padding-bottom: 4px; }
 
 /* A sound that does not exist occupies its slot and says nothing. */
 .syllabary-gap { background: none; border: none; }
@@ -13921,13 +13902,11 @@ button.syllabary-cell:focus-visible {
 .syllabary-cell__char { font-size: 27px; line-height: 1.1; }
 
 @media (max-width: 560px) {
-  .syllabary-table { grid-template-columns: 34px repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
+  .syllabary-table { grid-template-columns: repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
   /* The five-column charts fill the phone's width; three columns doing
      the same would be three fat empty tiles, so 拗音 keeps a cell the
      size it is on a desktop and sits to the left. */
-  .syllabary-table--narrow { grid-template-columns: 34px repeat(3, minmax(44px, 76px)); }
-  .syllabary-head__kana { font-size: 0.7rem; }
-  .syllabary-head--row { padding-right: 5px; }
+  .syllabary-table--narrow { grid-template-columns: repeat(3, minmax(44px, 76px)); }
   .syllabary-cell { min-height: 52px; }
   .syllabary-cell__char { font-size: 22px; }
 }

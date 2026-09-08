@@ -562,7 +562,15 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 						ref={el => { sheetRefs.current.set(group.stroke_count, el) }}
 						className="radical-sheet"
 					>
-						<BlockMark jp={`${group.stroke_count}画`} tally={group.radicals.length} />
+						{/* 3画 · 3 TRAITS · 12 — the term, its twin, then how
+						    many radicals are in the group. The twin is the
+						    unit spelled out: 画 is the one word on this
+						    screen a beginner cannot guess. */}
+						<BlockMark
+							jp={`${group.stroke_count}画`}
+							name={`${group.stroke_count} ${group.stroke_count === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`}
+							tally={group.radicals.length}
+						/>
 						<div className="radical-sheet__list">
 							{group.radicals.map(r => (
 								<button
@@ -722,19 +730,21 @@ function ResultsSection({
 }
 
 // ── A block's own mark ────────────────────────────────────
-// The stamp book's 九月 in its margin, for the two blocks in here that
-// used to carry a SectionHeader: the syllabary charts and the radical
-// index's stroke groups. Both had a paired h2 — the Japanese term, its
-// French twin, a rule — over an object that already says what it is:
-// a 五十音表 whose rows read あ行 か行 さ行, and a stroke group under a
-// rail that names every stroke count and lights the one you are
-// reading. A block that needs a heading to be legible is not finished
-// (DESIGN.md, Say less); these two were finished. What is left is the
-// mark and the hairline: the name in Japanese, the tally as data.
-function BlockMark({ jp, tally }) {
+// The station sign, at the size a block gets: the Japanese term set
+// large in the collection's own ink, its plain-language twin tracked
+// out beside it, a rule under both, and the tally riding the far end as
+// data. For the two blocks in here that used to carry a SectionHeader —
+// the syllabary charts and the radical index's stroke groups.
+//
+// The rule the heading broke was its bulk, not its second language:
+// 五十音 alone tells a learner nothing they can act on, and the charts
+// under these marks no longer name their own rows. So the twin is
+// printed, not only read out. It is one line either way.
+function BlockMark({ jp, name, tally }) {
 	return (
 		<div className="dict-mark">
 			<span className="dict-mark__jp" lang="ja">{jp}</span>
+			{name && <span className="dict-mark__name">{name}</span>}
 			{tally != null && <span className="dict-mark__tally">{tally}</span>}
 		</div>
 	)
@@ -746,10 +756,12 @@ function BlockMark({ jp, tally }) {
 // block, the layout real textbooks use: 五十音, 濁音, 拗音, 長音, and
 // for katakana 外来音.
 //
-// The chart used to draw the first two and drop the rest on the floor
-// — the syllabary endpoint has always known きゃ and ファ, and now
-// knows えい too, so a third of what it served was unreachable from
-// the one screen built to show it.
+// The rows and columns are not labelled. They were — あ行 か行 さ行 down
+// the side, あ い う え お with their romaji across the top — and the
+// labels said what the first cell of each row and column already says,
+// in a second column and a second row of type wrapped around every
+// chart. The grid IS the label: か行 is the row that starts か. Owner's
+// call, this session.
 const MAIN_ROWS    = ['vowels', 'k', 's', 't', 'n', 'h', 'm', 'y', 'r', 'w']
 const VOICED_ROWS  = ['g', 'z', 'd', 'b', 'p']
 // 拗音 — a full-size kana with a small や/ゆ/よ after it. Unvoiced rows
@@ -765,10 +777,9 @@ const FOREIGN_ROWS = ['f_foreign', 'ti_foreign', 'tu_foreign', 'di_foreign',
 // occur, and the holes are the lesson.
 const LONG_ROWS    = ['a_long', 'i_long', 'u_long', 'e_long', 'o_long']
 const VOWEL_COLS   = ['a', 'i', 'u', 'e', 'o']
-// The yōon chart has three columns, not five: や ゆ よ are the only
-// kana that follow. Their romaji is the syllable they make, not the
-// vowel the column is keyed on.
-const YOON_COLS    = [['a', 'ya'], ['u', 'yu'], ['o', 'yo']]
+// The yōon chart is three columns, not five: や ゆ よ are the only kana
+// that follow, so there is no い or え column to leave empty.
+const YOON_COLS    = ['a', 'u', 'o']
 
 // Column placement comes from the entry's own romaji rather than its
 // position within its row-group: y/w rows skip columns for sounds
@@ -779,62 +790,23 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-// 行 (gyō) — a gojūon row's name is its own あ-column kana plus 行: か行,
-// さ行, た行. Derived from the data rather than a lookup table, so it is
-// right for every row including や行 and わ行, which skip columns.
-function gyoHead(entries) {
-	const lead = entries.find(e => vowelOf(e.romaji) === 'a')?.kana
-	return lead ? `${lead}行` : null
-}
-
-// Every chart under the gojūon is read the other way round: the row is
-// the full-size kana each of its cells begins with (き for きゃ きゅ きょ,
-// テ for ティ, え for えい ええ) and the column is what follows it. So the
-// head is that first character, taken off the row's first cell — never a
-// 行, which these rows are not.
-function baseHead(entries) {
-	return entries[0]?.kana[0] ?? null
-}
-
-// A chart of a single row heads nothing: its own mark already did.
-const noHead = () => null
-
-function SyllabaryTable({ rows, cols, jp, title, byGroup, rowHead = gyoHead, narrow = false, tail, selected, setSelected }) {
+function SyllabaryTable({ rows, cols, jp, title, byGroup, narrow = false, tail, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
-			{/* The chart's mark, then the chart. The plain-language name
-			    stays as the grid's accessible label — read out, not
-			    printed, since the mark and the row heads say it. */}
-			<BlockMark jp={jp} />
+			{/* The chart's mark, then the chart. The mark names it in both
+			    languages; the grid carries the same name for a screen
+			    reader, which reads the group rather than the sign. */}
+			<BlockMark jp={jp} name={title} />
 			<div
 				className={`syllabary-table${narrow ? ' syllabary-table--narrow' : ''}`}
 				role="group"
 				aria-label={title}
 			>
-				<div className="syllabary-gap" aria-hidden="true" />
-
-				{/* Columns are headed by the *kana*, not by "a i u e o".
-				    They are the sounds the chart is built on and the
-				    learner is here to read them — printing their romaji
-				    instead taught the wrong alphabet at the top of a chart
-				    about the right one. The romaji stays underneath, small,
-				    the way every cell below does it. */}
-				{cols.map(col => (
-					<div key={`h-${col.key}`} className="syllabary-head syllabary-head--col">
-						<span className="syllabary-head__kana" lang="ja">{col.kana ?? ''}</span>
-						<span className="syllabary-head__romaji">{col.romaji}</span>
-					</div>
-				))}
-
 				{rows.map(group => {
 					const entries = byGroup[group] ?? []
-					const head = rowHead(entries)
 					return (
 						<Fragment key={group}>
-							<div className="syllabary-head syllabary-head--row">
-								{head && <span className="syllabary-head__kana" lang="ja">{head}</span>}
-							</div>
-							{cols.map(({ key: v }) => {
+							{cols.map(v => {
 								const entry = entries.find(e => vowelOf(e.romaji) === v)
 								// A sound that does not exist (yi, ye, wi, wu, we)
 								// gets nothing at all. It used to get a dash,
@@ -861,22 +833,17 @@ function SyllabaryTable({ rows, cols, jp, title, byGroup, rowHead = gyoHead, nar
 				})}
 
 				{/* 撥音 — ん belongs to this chart and to no vowel column, so
-				    it gets its own labelled row at the foot of the table
-				    rather than floating underneath it as an orphan. */}
+				    it sits alone on a last row of its own rather than
+				    floating underneath the table as an orphan. */}
 				{tail && (
-					<>
-						<div className="syllabary-head syllabary-head--row">
-							<span className="syllabary-head__kana" lang="ja">撥音</span>
-						</div>
-						<button
-							type="button"
-							onClick={() => setSelected(tail)}
-							className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}`}
-						>
-							<span className="syllabary-cell__char">{tail.kana}</span>
-							<span className="syllabary-cell__romaji">{tail.romaji}</span>
-						</button>
-					</>
+					<button
+						type="button"
+						onClick={() => setSelected(tail)}
+						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}`}
+					>
+						<span className="syllabary-cell__char">{tail.kana}</span>
+						<span className="syllabary-cell__romaji">{tail.romaji}</span>
+					</button>
 				)}
 			</div>
 		</div>
@@ -891,29 +858,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 	}, [results])
 
 	const nSolo = byGroup.n_solo?.[0] ?? null
-
-	// あ い う え お for the column heads, taken from the chart's own
-	// vowel row rather than written down a second time.
-	const vowelCols = useMemo(() => {
-		const kana = {}
-		;(byGroup.vowels ?? []).forEach(e => {
-			const v = vowelOf(e.romaji)
-			if (v) kana[v] = e.kana
-		})
-		return VOWEL_COLS.map(key => ({ key, kana: kana[key], romaji: key }))
-	}, [byGroup])
-
-	// ゃ ゅ ょ for the yōon chart, read off its own cells (きゃ → ゃ) the
-	// same way, so the katakana chart heads itself ャ ュ ョ without a
-	// second table of small kana written down in here.
-	const yoonCols = useMemo(() => {
-		const cells = YOON_ROWS.flatMap(g => byGroup[g] ?? [])
-		return YOON_COLS.map(([key, romaji]) => ({
-			key,
-			romaji,
-			kana: cells.find(e => vowelOf(e.romaji) === key)?.kana[1],
-		}))
-	}, [byGroup])
 
 	// 長音 is one chart in hiragana and a different one in katakana,
 	// because the two spell it differently. Hiragana holds the vowel
@@ -953,7 +897,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 					<div className="syllabary-col">
 						<SyllabaryTable
 							rows={MAIN_ROWS}
-							cols={vowelCols}
+							cols={VOWEL_COLS}
 							jp="五十音"
 							title={t.syllabaryMain}
 							byGroup={byGroup}
@@ -965,11 +909,10 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						{hasLong && (
 							<SyllabaryTable
 								rows={longRows}
-								cols={vowelCols}
+								cols={VOWEL_COLS}
 								jp="長音"
 								title={t.syllabaryLong}
 								byGroup={byGroup}
-								rowHead={kataLong ? noHead : baseHead}
 								selected={selected}
 								setSelected={setSelected}
 							/>
@@ -979,7 +922,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 					<div className="syllabary-col">
 						<SyllabaryTable
 							rows={VOICED_ROWS}
-							cols={vowelCols}
+							cols={VOWEL_COLS}
 							jp="濁音"
 							title={t.syllabaryVoiced}
 							byGroup={byGroup}
@@ -990,12 +933,11 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						{hasYoon && (
 							<SyllabaryTable
 								rows={YOON_ROWS}
-								cols={yoonCols}
+								cols={YOON_COLS}
 								narrow
 								jp="拗音"
 								title={t.syllabaryYoon}
 								byGroup={byGroup}
-								rowHead={baseHead}
 								selected={selected}
 								setSelected={setSelected}
 							/>
@@ -1004,11 +946,10 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						{hasForeign && (
 							<SyllabaryTable
 								rows={FOREIGN_ROWS}
-								cols={vowelCols}
+								cols={VOWEL_COLS}
 								jp="外来音"
 								title={t.syllabaryForeign}
 								byGroup={byGroup}
-								rowHead={baseHead}
 								selected={selected}
 								setSelected={setSelected}
 							/>

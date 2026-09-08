@@ -352,21 +352,26 @@ KATAKANA_LONG = [
 # the dictionary's own chart (routes/dictionary.py walks the syllabary
 # through SYLLABARY_SETS below), and a card in the index
 # (study/card_index.py) — all three from this one entry.
+#
+# The long vowels ride WITH the combinations rather than standing as a
+# deck of their own. They are the same lesson — two kana, one sound,
+# read as a unit — and a nine-card deck beside a thirty-three-card one
+# is a stop on the line that is over before it starts. Owner's call.
+# The dictionary still charts them apart (拗音 and 長音 are different
+# tables) because a chart is a picture, not a sitting.
 KANA_SETS = {
     "hiragana_basic":       HIRAGANA_BASIC,
-    "hiragana_combos":      HIRAGANA_COMBINATIONS,
-    "hiragana_long":        HIRAGANA_LONG,
+    "hiragana_combos":      HIRAGANA_COMBINATIONS + HIRAGANA_LONG,
     "katakana_basic":       KATAKANA_BASIC,
-    "katakana_combos":      KATAKANA_COMBINATIONS,
-    "katakana_long":        KATAKANA_LONG,
+    "katakana_combos":      KATAKANA_COMBINATIONS + KATAKANA_LONG,
 }
 
 # The sets that make up one syllabary, in chart order. The dictionary
 # reads a whole syllabary through this rather than naming BASIC alone,
 # which is why きゃ and えい could not be looked up at all before.
 SYLLABARY_SETS = {
-    "hiragana": ("hiragana_basic", "hiragana_combos", "hiragana_long"),
-    "katakana": ("katakana_basic", "katakana_combos", "katakana_long"),
+    "hiragana": ("hiragana_basic", "hiragana_combos"),
+    "katakana": ("katakana_basic", "katakana_combos"),
 }
 
 
