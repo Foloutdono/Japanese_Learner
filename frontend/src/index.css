@@ -4285,6 +4285,17 @@ textarea:focus-visible {
 }
 
 /* ── 運行案内 — the HUD. Sumi, two registers of ink, no line colour. ── */
+/* ── The two chrome bars share one edge ──
+   The HUD and the tab bar are the same object at two ends of the
+   screen: a panel the page passes under. Their ground and the page's
+   are seven values apart in the dark theme (#100e13 on #17151a), so
+   without an edge the page simply continued into them — and the HUD
+   had no edge at all. One line in a cast of the panel's own ink, and a
+   short soft shadow thrown at the content: down from the HUD, up from
+   the bar. Declared once so the two cannot drift apart. */
+.hud,
+.tabbar { --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border)); }
+
 .hud {
   position: sticky;
   top: 0;
@@ -4292,6 +4303,8 @@ textarea:focus-visible {
   flex: none;
   background: var(--bg-panel);
   color: var(--text-on-panel);
+  border-bottom: 1px solid var(--chrome-edge);
+  box-shadow: 0 10px 24px -12px rgba(0, 0, 0, 0.75);
   padding-top: var(--safe-top);
 }
 .hud__inner {
@@ -4422,12 +4435,11 @@ textarea:focus-visible {
 .hud__pass--out .hud__pass-fig { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
 /* ── 改札口 — the tab bar. Sumi, docked, five gates. ── */
-/* The bar is over the page, and has to look it. Its ground and the
-   page's are seven values apart in the dark theme (#100e13 on #17151a)
-   and a 1px hairline was the whole of the difference, so a card that
-   scrolled up to it read as continuing into it. The line stays and
-   takes a cast of the panel's own ink; under it the bar throws a
-   short, soft shadow UPWARD onto whatever is passing beneath. Content
+/* The bar is over the page, and has to look it. A 1px hairline was the
+   whole of the difference between its ground and the page's, so a card
+   that scrolled up to it read as continuing into it. The line takes the
+   chrome edge the HUD's rule declares, and under it the bar throws that
+   edge's shadow UPWARD onto whatever is passing beneath. Content
    sliding under a lit edge is what says the bar is not part of it. */
 .tabbar {
   position: fixed;
@@ -4437,7 +4449,7 @@ textarea:focus-visible {
   z-index: 30;
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+  border-top: 1px solid var(--chrome-edge);
   box-shadow: 0 -10px 24px -12px rgba(0, 0, 0, 0.75);
   padding-bottom: var(--safe-bottom);
 }

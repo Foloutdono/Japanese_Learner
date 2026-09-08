@@ -143,6 +143,23 @@ describe('the HUD', () => {
     const hud = document.querySelector('.hud')
     const inner = hud.querySelector('.hud__inner')
     expect(getComputedStyle(inner).height).toBe(`${HUD_H}px`)
+    // ── The chrome's edge, at both ends of the screen ──
+    // The HUD and the tab bar are the same object: a panel the page
+    // passes under. Their ground and the page's are seven values apart
+    // in the dark theme, so without an edge the page continued into
+    // them — and the HUD had no edge at all. One line in a cast of the
+    // panel's own ink, and a shadow thrown at the content: down from
+    // the HUD, up from the bar.
+    const bar = document.querySelector('.tabbar')
+    expect(getComputedStyle(hud).borderBottomWidth).toBe('1px')
+    expect(getComputedStyle(bar).borderTopWidth).toBe('1px')
+    // One declaration behind both, so they cannot drift apart.
+    expect(getComputedStyle(hud).borderBottomColor)
+      .toBe(getComputedStyle(bar).borderTopColor)
+    // Thrown in opposite directions — the offsets are one negation.
+    const off = cs => cs.boxShadow.match(/(-?\d+)px (-?\d+)px/)?.[2]
+    expect(off(getComputedStyle(hud))).toBe('10')
+    expect(off(getComputedStyle(bar))).toBe('-10')
     expect(getComputedStyle(hud).paddingTop).toBe('0px') // --safe-top is 0 in chromium
     expect(getComputedStyle(hud).position).toBe('sticky')
     const level = hud.querySelector('.hud__level')
