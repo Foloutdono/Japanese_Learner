@@ -154,6 +154,33 @@ describe('the boarding at 390×844', () => {
     }
   })
 
+  // ── The question takes focus, and wears no ring for it ──
+  // The flow moves focus onto the new question at every step so a
+  // screen reader reads it. Chrome matches :focus-visible on a
+  // scripted .focus() whenever the last interaction was a key press,
+  // so answering with Enter drew a gold box around the next question
+  // (`.brd :focus-visible`, two classes, beating the heading's own
+  // `outline: none`) and answering with a thumb drew nothing.
+  it('rings the choices but never the question it moves focus to', async () => {
+    const screen = await mountFlow()
+    // A key press first: it is what puts Chrome in the mode that draws
+    // the ring at all, and so the premise of everything below.
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }))
+    await click(screen.container, '[data-action="continue"]')
+    await settle()
+    const frame = screen.container.querySelector('.brd')
+    const q = frame.querySelector('.brd__car:not(.brd__car--out) .brd__q')
+    expect(document.activeElement).toBe(q)
+    expect(q.matches(':focus-visible')).toBe(true)
+    expect(getComputedStyle(q).outlineStyle).toBe('none')
+    // The ring is intact for anything a hand can actually reach.
+    const opt = frame.querySelector('.brd__car:not(.brd__car--out) .brd-opt')
+    opt.focus()
+    await settle(20)
+    expect(getComputedStyle(opt).outlineStyle).toBe('solid')
+    expect(getComputedStyle(opt).outlineWidth).toBe('2px')
+  })
+
   it('the kana answers are the foot of their screen, 56 px each, and the hour cells 76', async () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')

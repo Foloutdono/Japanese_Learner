@@ -16608,6 +16608,18 @@ html { scrollbar-gutter: stable; }
 .brd__car--out [class*="brd-"],
 .brd__car--out .brd__opts > * { animation: none; }
 .brd :focus-visible { outline: 2px solid var(--accent2); outline-offset: 2px; }
+/* -- except the question, which is a programmatic focus target and not
+   a tab stop. The flow moves focus onto it at every step so that the
+   new question is what a screen reader reads; tabIndex is -1, so no
+   keyboard walk can land there by hand. Chrome still matches
+   :focus-visible on a scripted .focus() whenever the last interaction
+   happened to be a key press, though, so answering with Enter drew a
+   gold box around the next question and answering with a thumb drew
+   nothing -- a ring nobody had asked for and could not explain. The
+   same call as `.anl-stage` above, and the same caveat: restore it if
+   the question ever becomes reachable by hand. (Its own `outline:
+   none` cannot do this: one class loses to two.) */
+.brd .brd__q:focus-visible { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .brd [class*="brd"],
   .brd [class*="brd"]::before,
