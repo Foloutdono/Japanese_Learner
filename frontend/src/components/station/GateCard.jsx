@@ -27,7 +27,7 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // name over the three dots until /api/today answers.
 //
 // The fare (plan 069): Fare · n credits · Balance, and when the
-// balance is short, how many ride today and how many wait. The gate
+// balance is short, how much of the fare it covers. The gate
 // only CLOSES (the button disabled at zero) under enforcement; in
 // shadow mode the line is information and the train leaves. A pass
 // prints no balance and no notice.
@@ -49,6 +49,9 @@ function Fare({ due, credits, t, lang }) {
   if (!credits) return null
   const balance = credits.unlimited ? null : credits.balance
   const fare = fareFor(due)
+  // `waits` is what makes the notice appear, not what it says: the
+  // learner needs the two numbers that do not match, and 189 is the
+  // subtraction they can do themselves.
   const { rides, waits } = runFit(due, balance)
   return (
     <>
@@ -66,7 +69,7 @@ function Fare({ due, credits, t, lang }) {
           <span>
             {balance === 0
               ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
-              : t.gateShort(rides, due, waits)}
+              : t.gateShort(rides, due)}
           </span>
         </div>
       )}

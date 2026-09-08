@@ -67,7 +67,7 @@ const nav = {
   balanceOf:         (cap) => `sur ${cap}`,
   balanceRefillAt:   (at) => `par jour, à ${at}`,
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
-  gateShort:         (rides, due, waits) => `${rides} sur ${due} partent aujourd’hui — ${waits} attendent la recharge de demain`,
+  gateShort:         (rides, due) => `Seulement ${rides} sur les ${due} requis`,
   gateNoCredits:     (refill, at) => `Plus de crédits — +${refill} à ${at}`,
   runOutTitle:       'Plus de crédits',
   runOutCleared:     (n) => `${n} révisées`,
