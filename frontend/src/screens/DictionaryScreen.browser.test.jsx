@@ -219,6 +219,27 @@ describe('the dictionary screen', () => {
     expect(lastQuery().get('q')).toBe('')
   })
 
+  // ── Two blocks that name themselves ──
+  // The syllabary charts and the radical index's stroke groups each
+  // carried a paired SectionHeader — the Japanese term, its French
+  // twin, a rule — over an object that already says what it is. They
+  // carry the stamp book's kind of mark now: the name, a hairline, and
+  // the tally as data.
+  it('marks the syllabary and the radical groups instead of heading them', async () => {
+    const screen = await renderScreen()
+    // Hiragana: the chart, marked 五十音 / 濁音, no heading anywhere.
+    ;[...screen.container.querySelectorAll('.chip')]
+      .find(c => c.textContent === T.dictHiragana).click()
+    await settle(120)
+    expect(screen.container.querySelector('.section-header')).toBeNull()
+    const marks = [...screen.container.querySelectorAll('.dict-mark__jp')].map(m => m.textContent)
+    expect(marks).toEqual(['五十音', '濁音'])
+    // The plain-language name is still there for a screen reader.
+    const charts = screen.container.querySelectorAll('.syllabary-table[role="group"]')
+    expect(charts).toHaveLength(2)
+    expect(charts[0].getAttribute('aria-label')).toBe(T.syllabaryMain)
+  })
+
   // ── The analyzer's door, and the three doors on it ──
   // The intakes were decorations inside the row's own button: three
   // <svg> tags with no `fill` and no `stroke`, so the browser filled

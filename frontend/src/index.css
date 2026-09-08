@@ -13700,8 +13700,42 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .dict-radical-index { display: block; }
 .dict-radical-sheets { display: block; }
 .radical-sheet { scroll-margin-top: 76px; }
-.radical-sheet + .radical-sheet { margin-top: 12px; }
-.radical-sheet .section-header { margin-top: 34px; margin-bottom: 16px; }
+.radical-sheet + .radical-sheet { margin-top: var(--sp-6); }
+
+/* ── A block's own mark ──
+   The stamp book's 九月 in its margin, for the blocks in the
+   dictionary that used to carry a paired SectionHeader over an object
+   that already says what it is — the syllabary charts, whose rows read
+   あ行 か行 さ行, and the radical index's stroke groups, under a rail
+   that names every stroke count and lights the one being read. Both
+   printed the same term twice and in two languages, with a rule of
+   their own. What is left is the name and the hairline; the tally
+   rides it as data — tracked, tabular, quiet. */
+.dict-mark {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: 0 var(--sp-1) var(--sp-2);
+  border-bottom: 1px solid var(--surface-line);
+}
+.dict-mark__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 60%, var(--text-primary));
+}
+.dict-mark__tally {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+.radical-sheet .dict-mark { margin-bottom: var(--sp-4); }
+.radical-sheet + .radical-sheet .dict-mark { margin-top: var(--sp-7); }
 
 /* Radicals as tiles, not lattice cells. The old grid drew its seams
    with a background showing through 1px gaps, which meant every

@@ -20,7 +20,6 @@ function stageOf(status) {
 	return null
 }
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
-import { SectionHeader } from '../components/ui/SectionHeader'
 import { StageMark } from '../components/study/StageMark'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
@@ -557,11 +556,7 @@ function RadicalGrid({ groups, loading, onPick, t }) {
 						ref={el => { sheetRefs.current.set(group.stroke_count, el) }}
 						className="radical-sheet"
 					>
-						<SectionHeader
-							jp={`${group.stroke_count}画`}
-							title={`${group.stroke_count} ${group.stroke_count > 1 ? t.dictStrokesPlural : t.dictStrokeSingular}`}
-							count={group.radicals.length}
-						/>
+						<BlockMark jp={`${group.stroke_count}画`} tally={group.radicals.length} />
 						<div className="radical-sheet__list">
 							{group.radicals.map(r => (
 								<button
@@ -720,6 +715,25 @@ function ResultsSection({
 	)
 }
 
+// ── A block's own mark ────────────────────────────────────
+// The stamp book's 九月 in its margin, for the two blocks in here that
+// used to carry a SectionHeader: the syllabary charts and the radical
+// index's stroke groups. Both had a paired h2 — the Japanese term, its
+// French twin, a rule — over an object that already says what it is:
+// a 五十音表 whose rows read あ行 か行 さ行, and a stroke group under a
+// rail that names every stroke count and lights the one you are
+// reading. A block that needs a heading to be legible is not finished
+// (DESIGN.md, Say less); these two were finished. What is left is the
+// mark and the hairline: the name in Japanese, the tally as data.
+function BlockMark({ jp, tally }) {
+	return (
+		<div className="dict-mark">
+			<span className="dict-mark__jp" lang="ja">{jp}</span>
+			{tally != null && <span className="dict-mark__tally">{tally}</span>}
+		</div>
+	)
+}
+
 // ── Syllabary chart (hiragana/katakana) ──────────────────
 // The classic gojūon table: rows are consonant groups, columns are
 // the five vowels a-i-u-e-o. Two stacked tables — the plain gojūon
@@ -741,8 +755,11 @@ function vowelOf(romaji) {
 function SyllabaryTable({ rows, jp, title, byGroup, vowelHeads, tail, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
-			{title && <SectionHeader jp={jp} title={title} />}
-			<div className="syllabary-table">
+			{/* The chart's mark, then the chart. The plain-language name
+			    stays as the grid's accessible label — read out, not
+			    printed, since the mark and the row heads say it. */}
+			<BlockMark jp={jp} />
+			<div className="syllabary-table" role="group" aria-label={title}>
 				<div className="syllabary-gap" aria-hidden="true" />
 
 				{/* Columns are headed by the vowel *kana*, not by "a i u e o".
