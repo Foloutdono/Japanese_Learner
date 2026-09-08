@@ -3772,9 +3772,12 @@ button:focus-visible {
   color: color-mix(in srgb, var(--rail) 62%, var(--text-secondary));
 }
 
-/* A plain-language-first title with the Japanese name as its quiet
-   second register — the analyser's cards use this; every other caller
-   keeps the bare serif title. */
+/* A mode's title, set in the display face rather than the serif every
+   other platform card uses: these are choices in the learner's own
+   language, not destinations. It held a Japanese second name beside it
+   too, which is why it is a row — the second name is gone (a card
+   already named does not need naming twice), and the row stays because
+   the type is what it carries. */
 .platform-card__titlerow {
   display: flex;
   align-items: baseline;
@@ -3785,12 +3788,6 @@ button:focus-visible {
   font-weight: 700;
   font-size: var(--fs-title);
   letter-spacing: 0.02em;
-}
-.platform-card__titlejp {
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 600;
-  font-size: var(--fs-body);
-  color: var(--text-secondary);
 }
 
 /* The right-hand column a wide card must earn (DESIGN.md's density
@@ -4239,7 +4236,10 @@ textarea:focus-visible {
   display: flex;
   flex-direction: column;
   gap: var(--sp-4);
-  padding-top: var(--sp-3);
+  /* The screen begins here, and it should look like it does: 8px put
+     the bar's roundel against the underside of the HUD, so the chrome
+     and the screen's own head read as one stack of type. */
+  padding-top: var(--sp-6);
   padding-bottom: var(--dock-bottom);
 }
 /* A screen that still mounts its own .screen shell (plans 070–074
@@ -4263,14 +4263,19 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .tier-picker__size .cap { flex: none; }
-/* The gates' pages: the canvas's gutter, the bar first. */
+/* The gates' pages: the canvas's gutter, the bar first. The block
+   rhythm is the page gutter turned on its side — the bar's rule to the
+   first panel measures what the panel measures to the screen's edge —
+   and it was 12px, which read as the board leaning on the bar. Less
+   than the 22px above the bar, because a head belongs to what is under
+   it. */
 .learn,
 .practice,
 .today,
 .dictionary {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-4);
+  gap: var(--sp-5);
   padding: 0 var(--sp-5) var(--sp-6);
 }
 
@@ -4984,16 +4989,21 @@ textarea:focus-visible {
   text-transform: none;
 }
 
+/* In a console the chips are the whole of a choice, so they take the
+   whole of the row: shrink-wrapped, they left a ragged hundred pixels
+   at the end of every wrapped line and read as a sentence that had run
+   out rather than as a set. Growing is per LINE — flex wraps on the
+   natural widths first, then stretches what landed on each — so the
+   set keeps the shape it wraps into. A lone chip is not a set and
+   keeps its own width. */
+.console__chips .chip {
+  flex: 1 1 auto;
+  justify-content: center;
+}
+.console__chips .chip:only-child { flex: none; }
+
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
-.platform-card__title-jp {
-  margin-left: var(--sp-2);
-  font-family: var(--font-jp);
-  font-weight: 500;
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
-}
 
 /* ── wide screens: the same frame, centred ── */
 @media (min-width: 769px) {
@@ -5724,7 +5734,29 @@ textarea:focus-visible {
    not draw, the all/none toggle, is kept from the picker this
    replaces: a learner with sixteen lanes and ten minutes says "just
    the kanji" in two taps, not fifteen. */
-.gate-card__lanes { display: flex; flex-direction: column; gap: var(--sp-2); }
+/* The switches are the picker, so they are on the card at every width.
+   A phone block hid them behind a 内訳 disclosure — from when the lanes
+   were a BREAKDOWN, before plan 070 made them the choice — and the
+   toggle that opened it stopped being rendered somewhere along the
+   way: below 560px the gate printed "select none" over nothing, and
+   the day could not be narrowed on the one device it is read on.
+
+   Bounded instead of folded. Twelve lanes is 594px of switch, which
+   put Depart 854px down an 844px screen; four rows and half of the
+   fifth is 216px, and the half is what says there is more. The cap
+   holds at every width because the frame is one phone-width column at
+   every width (.phone__content) — and because a gate that is the same
+   size on a two-lane day and a twenty-lane one is easier to aim at.
+   `scrollbar-gutter` keeps the due figures off a desktop scrollbar and
+   reserves nothing where the scrollbar is an overlay. */
+.gate-card__lanes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  max-height: 216px;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
 .gate-card__pick {
   align-self: flex-end;
   padding: 0;
@@ -5774,11 +5806,24 @@ textarea:focus-visible {
   background: var(--lane-color, var(--accent2));
   border-color: var(--lane-color, var(--accent2));
 }
+/* The deck over the mode. One line for both ellipsised the mode away
+   at phone width, and "N5 · Mot → sens" and "N5 · Mot → …" are the
+   same row to look at — the mode is half of what tells two lanes of
+   one deck apart. */
+.lane__names {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  flex: 1;
+}
 .lane__where {
   font-family: var(--font-display);
   font-weight: 700;
-  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
+  color: color-mix(in srgb, var(--lane-color, var(--accent2)) 45%, var(--text-primary));
 }
 /* Toward the primary ink, not bare --text-secondary: the lane's 10%
    pigment tint is just enough ground for the secondary ink to miss
@@ -6384,7 +6429,6 @@ textarea:focus-visible {
   flex-direction: column;
   gap: var(--route-gap);
   width: 100%;
-  padding-left: 30px;
 }
 .route-stop {
   position: relative;
@@ -6393,7 +6437,9 @@ textarea:focus-visible {
   gap: var(--sp-4);
   width: 100%;
   min-height: 56px;
-  padding: var(--sp-3) var(--sp-4);
+  /* The left pad is the axis's: the rail and its marker stand in it,
+     on the card. See "The line's axis" below. */
+  padding: var(--sp-3) var(--sp-4) var(--sp-3) var(--sp-8);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -6418,13 +6464,18 @@ textarea:focus-visible {
    rail was set from its left edge and ran 5.5 px to the right of the
    markers, through the side of every dot.
 
-   -18.5px from a card's left edge is 11.5px from the route's own, the
-   canvas's rail: the widest thing on the axis is the current marker's
-   15px with its 3px ring, so 11.5px keeps all of it inside the 30px
-   the route reserves. The halves land on whole pixels — 3, 11 and 15
-   are odd — so nothing on the line is drawn soft. */
+   The axis runs INSIDE the card. It used to stand in a 30px margin the
+   route reserved to its left, which cost every row that width and drew
+   the line as something the stops were parked beside rather than
+   something they are on. 20.5px is the analyzer's own stop list
+   (.anl-stop, whose rail has always been inside at 20px) to the half
+   pixel, and --sp-8 of left padding is that list's 44px: two stop
+   lists, one geometry. The halves land on whole pixels — 3, 11 and 15
+   are odd widths — so nothing on the line is drawn soft, and the
+   widest mark on it (the current marker's 15px inside a 3px ring)
+   still clears the code beside it by 13px. */
 .route-stop__rail,
-.route-stop__marker { left: -18.5px; }
+.route-stop__marker { left: 20.5px; }
 
 /* The rail is drawn per stop so the ends can be capped — a line that
    runs off the top of the first station reads as "there is more up
@@ -6450,8 +6501,11 @@ textarea:focus-visible {
   height: 11px;
   border-radius: var(--r-pill);
   transform: translate(-50%, -50%);
-  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-main));
-  background: var(--bg-main);
+  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
+  /* The dot is hollow, and it is on the card now: it takes the card's
+     own ground rather than naming one, so it stays hollow through the
+     hover that lifts it. */
+  background: inherit;
 }
 .route-stop--past .route-stop__marker { background: var(--line-color); border-color: var(--line-color); }
 .route-stop--current .route-stop__marker {
@@ -6461,9 +6515,13 @@ textarea:focus-visible {
   border-color: var(--line-color);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
 }
+/* Wide enough for two kana — きゃ and キャ are stop codes, and a 34px
+   column broke them one character to a line — and never wrapping, so a
+   longer code pushes its own row rather than growing taller than it. */
 .route-stop__code {
   flex: none;
-  width: 34px;
+  min-width: 44px;
+  white-space: nowrap;
   font-family: var(--font-display);
   font-weight: 700;
   font-size: var(--fs-lead);
@@ -13142,9 +13200,6 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   /* The gate folds its breakdown behind the 内訳 disclosure, so the
      phone's first screen is card, count, button, map. */
   .gate-card { padding: var(--sp-5); gap: var(--sp-4); }
-  .gate-card__lanes { display: none; }
-  .gate-card__lanes--open { display: flex; }
-  .gate-card__toggle { display: flex; }
 
   /* The map strips already folded at 760px; nothing more to fold. */
 
@@ -13159,11 +13214,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
   .station-sign--sm .station-sign__stripe { margin: 0 -16px; }
   .station-sign__name { font-size: 2rem; }
-  /* The route diagram has no phone form of its own: the canvas's
-     geometry — the rail and the markers OUTSIDE the cards, in the
-     route's own left margin — is the same at every width. The block
-     that stood here was the pre-071 diagram (the rail inside a 52px
-     card indent, and a `.route-stop__name` the component stopped
+  /* The route diagram has no phone form of its own: one geometry — the
+     rail and the markers on the cards, standing in the left pad — at
+     every width. The block that stood here was the pre-071 diagram (a
+     52px card indent and a `.route-stop__name` the component stopped
      rendering), and it was still overriding the real one below 560px:
      every phone drew the rail 7.5px to the right of its own dots. */
 
@@ -13714,19 +13768,31 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .dict-mark {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
   gap: var(--sp-3);
   padding: 0 var(--sp-1) var(--sp-2);
   border-bottom: 1px solid var(--surface-line);
 }
 .dict-mark__jp {
   font-family: var(--font-jp);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-lead);
   font-weight: 700;
+  line-height: 1.1;
   letter-spacing: var(--tr-term);
-  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 60%, var(--text-primary));
+  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 72%, var(--text-primary));
+}
+/* The twin, tracked out under the same baseline — printed now, because
+   the charts under these marks no longer name their own rows and 五十音
+   alone tells a learner nothing they can act on. */
+.dict-mark__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 .dict-mark__tally {
+  margin-left: auto;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -13861,17 +13927,17 @@ button.syllabary-cell:focus-visible {
 /* ══ 五十音 — the chart, properly ═══════════════════════════
    It was a spreadsheet: A I U E O across the top in latin, K S T down
    the side in latin, a dash in every hole, and ん hanging underneath
-   as an orphan. All four are now what a Japanese chart actually does.
+   as an orphan.
 
-   Columns are headed by the vowel kana — they are the five sounds the
-   whole chart is built from, and printing their romaji taught the
-   wrong alphabet at the top of a chart about the right one. Rows are
-   headed 行 (gyō): か行, さ行, た行, which is their name. Holes are
-   empty, because a dash is a mark saying "look here" over the one
-   thing there is nothing to see. ん gets a labelled 撥音 row inside
-   the table it belongs to. */
+   It is cells now and nothing else. The heads went the way the dashes
+   did: あ行 down the side said what the row's first cell says, あ い う
+   え お across the top said what the first row says, and between them
+   they wrapped a column and a row of type around every chart on the
+   screen. Holes stay empty — a dash is a mark saying "look here" over
+   the one thing there is nothing to see — and ん sits on a last row of
+   its own inside the table it belongs to. */
 .syllabary-table {
-  grid-template-columns: 46px repeat(var(--syl-cols, 5), minmax(52px, 76px));
+  grid-template-columns: repeat(var(--syl-cols, 5), minmax(52px, 76px));
   gap: 5px;
   align-items: stretch;
 }
@@ -13879,37 +13945,6 @@ button.syllabary-cell:focus-visible {
    follow. The table sizes to them rather than stretching to the width
    of the chart above it. */
 .syllabary-table--narrow { --syl-cols: 3; }
-
-/* Heads are type, not cells: no box, no fill, just the kana in the
-   collection's colour with its romaji tucked under it. */
-.syllabary-head {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1px;
-  background: none;
-  border: none;
-  padding: 0;
-  min-height: 0;
-}
-.syllabary-head--row { align-items: flex-end; padding-right: 8px; }
-.syllabary-head__kana {
-  font-family: var(--font-jp);
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  color: color-mix(in srgb, var(--syl-accent, var(--line-kana)) 65%, var(--text-primary));
-}
-.syllabary-head__romaji {
-  font-family: var(--font-display);
-  font-size: 0.54rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.syllabary-head--col { padding-bottom: 4px; }
 
 /* A sound that does not exist occupies its slot and says nothing. */
 .syllabary-gap { background: none; border: none; }
@@ -13921,13 +13956,11 @@ button.syllabary-cell:focus-visible {
 .syllabary-cell__char { font-size: 27px; line-height: 1.1; }
 
 @media (max-width: 560px) {
-  .syllabary-table { grid-template-columns: 34px repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
+  .syllabary-table { grid-template-columns: repeat(var(--syl-cols, 5), minmax(44px, 1fr)); gap: 4px; }
   /* The five-column charts fill the phone's width; three columns doing
      the same would be three fat empty tiles, so 拗音 keeps a cell the
      size it is on a desktop and sits to the left. */
-  .syllabary-table--narrow { grid-template-columns: 34px repeat(3, minmax(44px, 76px)); }
-  .syllabary-head__kana { font-size: 0.7rem; }
-  .syllabary-head--row { padding-right: 5px; }
+  .syllabary-table--narrow { grid-template-columns: repeat(3, minmax(44px, 76px)); }
   .syllabary-cell { min-height: 52px; }
   .syllabary-cell__char { font-size: 22px; }
 }

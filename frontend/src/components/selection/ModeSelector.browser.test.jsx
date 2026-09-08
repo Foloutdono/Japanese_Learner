@@ -77,6 +77,32 @@ describe('ModeSelector — the cards in a row are one height', () => {
     }
   }, 30000)
 
+  // ── One name per card ──
+  // A mode card could print a Japanese second name beside its title,
+  // and `sample` prints a Japanese line under the description. The
+  // second name is gone — a card whose title is already in the reader's
+  // language does not need naming twice, and the exam picker was using
+  // it to set 語彙 under "Vocabulaire et kanji". `sample` stays for what
+  // it is for: the characters a set actually contains.
+  it('prints one name per card, and a sample only where there is one', async () => {
+    await page.viewport(390, 900)
+    const screen = await render(
+      <LangProvider>
+        <ModeSelector
+          modes={[
+            { key: 'a', label: 'Kana → romaji', desc: 'Short.', jp: '仮名' },
+            { key: 'b', label: 'Hiragana', desc: 'Short.', sample: 'あ い う え お' },
+          ]}
+          onSelect={() => {}}
+        />
+      </LangProvider>
+    )
+    const cards = [...screen.container.querySelectorAll('.platform-card')]
+    expect(cards[0].querySelector('[lang="ja"]')).toBeNull()
+    expect(cards[0].textContent).not.toContain('仮名')
+    expect(cards[1].querySelector('.platform-card__sample').textContent).toBe('あ い う え お')
+  })
+
   it('does not grow a card because its neighbour has a secondary action', async () => {
     // The exam picker's mix: only a paper you have already sat offers
     // a 別の問題 link. That link is a row under the card, so a slot

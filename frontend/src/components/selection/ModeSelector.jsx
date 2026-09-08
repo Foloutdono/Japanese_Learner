@@ -39,10 +39,12 @@ import { playUi } from '../../lib/audio'
  *
  * Props:
  *   modes    — array of { key, label, desc?, sample?, color?, action? }
- *     sample — optional Japanese specimen line (the characters a set
- *       actually contains, say), set in the Japanese face. It is the
- *       停車駅 strip under a destination: what this one actually stops
- *       at.
+ *     sample — optional Japanese specimen line: the characters a set
+ *       actually CONTAINS, set in the Japanese face. It is the 停車駅
+ *       strip under a destination — what this one actually stops at —
+ *       so a deck's あ い う え お belongs here and a second name for
+ *       the label above it does not (the exam picker printed 語彙 under
+ *       "Vocabulaire et kanji" until this session).
  *     action — optional { label, title?, onClick } secondary action for
  *       this one card. Rendered as a SIBLING of the card button, not
  *       inside it: the card is a <button>, and a button inside a button
@@ -54,9 +56,6 @@ import { playUi } from '../../lib/audio'
  *       exam picker (where only papers you have already sat get a
  *       別の問題 link) is precisely that mix.
  *   onSelect(key) — called when a card is chosen
- *     jp     — optional Japanese name set as a quiet accent beside the
- *       title (the analyser's cards lead with the plain-language name
- *       and keep 文字/写真/動画 as the secondary register).
  *     aside  — optional node for a right-hand column behind a
  *       hairline. DESIGN.md's density contract: a card wider than
  *       ~440px must EARN its width with a right-hand column (meta, a
@@ -104,7 +103,6 @@ export default function ModeSelector({ modes, onSelect }) {
             <span className="platform-card__body">
               <span className="platform-card__titlerow">
                 <span className="platform-card__title">{m.label}</span>
-                {m.jp && <span className="platform-card__titlejp" lang="ja">{m.jp}</span>}
               </span>
               {m.desc && <span className="platform-card__desc">{m.desc}</span>}
               {m.sample && (

@@ -1,4 +1,9 @@
-// ── The six kana sets ─────────────────────────────────────────
+// ── The four kana sets ────────────────────────────────────────
+// The long vowels ride in the combinations deck rather than standing
+// as a fifth and sixth stop of their own (backend/content/kana_data.py
+// says why), so the samples name one of each: きゃ for the yōon, えい
+// for the long vowels.
+//
 // One definition, because three screens now need it: the kana section's
 // own picker, and the two surfaces of the daily queue (the home
 // concourse strip and the queue itself), which have to turn a stored
@@ -10,11 +15,9 @@
 export function kanaSets(t) {
   return [
     { label: t.hiraganaBase,         slug: 'hiragana_basic',  sample: 'あ い う え お' },
-    { label: t.hiraganaCombinations, slug: 'hiragana_combos', sample: 'きゃ きゅ きょ' },
-    { label: t.hiraganaLong,         slug: 'hiragana_long',   sample: 'えい おう あい' },
+    { label: t.hiraganaCombinations, slug: 'hiragana_combos', sample: 'きゃ きゅ えい' },
     { label: t.katakanaBase,         slug: 'katakana_basic',  sample: 'ア イ ウ エ オ' },
-    { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ キョ' },
-    { label: t.katakanaLong,         slug: 'katakana_long',   sample: 'アー イー ウー' },
+    { label: t.katakanaCombinations, slug: 'katakana_combos', sample: 'キャ キュ アー' },
   ]
 }
 

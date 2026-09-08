@@ -59,8 +59,7 @@ def test_kana_batch_names_the_sets_a_script_covers():
     assert level_rule.kana_batch("none") == (mode, [])
     assert level_rule.kana_batch(None) == (mode, [])
     assert level_rule.kana_sets_for("both") == (
-        "hiragana_basic", "hiragana_combos", "hiragana_long",
-        "katakana_basic", "katakana_combos", "katakana_long")
+        "hiragana_basic", "hiragana_combos", "katakana_basic", "katakana_combos")
 
 
 def test_hold_above_keeps_the_stops_at_or_behind_the_level():

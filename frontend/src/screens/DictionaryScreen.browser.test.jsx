@@ -124,20 +124,18 @@ async function renderScreen() {
 }
 
 // ── Reading a chart back ──
-// The table is one flat grid: a corner, the column heads, then each row
-// as its head followed by one node per column (a cell or a hole).
+// The table is one flat grid of cells and holes — no heads down the
+// side, none across the top — so a row is `cols` nodes from the start.
 const chartsOf = screen => [...screen.container.querySelectorAll('.syllabary-table[role="group"]')]
 const marksOf = screen => [...screen.container.querySelectorAll('.dict-mark__jp')].map(m => m.textContent)
-const headsOf = (chart, kind) =>
-  [...chart.querySelectorAll(`.syllabary-head--${kind} .syllabary-head__kana`)]
-    .map(h => h.textContent).filter(Boolean)
+const namesOf = screen => [...screen.container.querySelectorAll('.dict-mark__name')].map(m => m.textContent)
 const cellsOf = chart => [...chart.querySelectorAll('.syllabary-cell')].map(c => c.textContent)
-const colCount = chart => chart.querySelectorAll('.syllabary-head--col').length
+const colCount = chart =>
+  chart.classList.contains('syllabary-table--narrow') ? 3 : 5
 /** One row of a chart, holes as null — `n` counting from the first. */
 const rowOf = (chart, n) => {
   const cols = colCount(chart)
-  const from = (cols + 1) * (n + 1) + 1
-  return [...chart.children].slice(from, from + cols)
+  return [...chart.children].slice(cols * n, cols * (n + 1))
     .map(el => (el.classList.contains('syllabary-gap') ? null : el.textContent))
 }
 
@@ -296,10 +294,29 @@ describe('the dictionary screen', () => {
     await openSyllabary(screen, T.dictHiragana)
     expect(screen.container.querySelector('.section-header')).toBeNull()
     expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音'])
-    // The plain-language name is still there for a screen reader.
+    // The term and its twin: 五十音 is not a name a learner can act on,
+    // so the mark prints both and the grid still answers to the twin.
+    expect(namesOf(screen))
+      .toEqual([T.syllabaryMain, T.syllabaryLong, T.syllabaryVoiced, T.syllabaryYoon])
     const charts = chartsOf(screen)
     expect(charts.map(c => c.getAttribute('aria-label')))
       .toEqual([T.syllabaryMain, T.syllabaryLong, T.syllabaryVoiced, T.syllabaryYoon])
+  })
+
+  // ── The rows and columns name themselves ──
+  // あ行 か行 さ行 ran down the side of every chart and あ い う え お
+  // across the top, each saying what the first cell of its row or
+  // column already says — a column and a row of type wrapped around
+  // every table on the screen.
+  it('draws the charts as cells alone, with no rows or columns named', async () => {
+    const screen = await renderScreen()
+    await openSyllabary(screen, T.dictHiragana)
+    expect(screen.container.querySelector('.syllabary-head')).toBeNull()
+    // The first row IS the vowels, in the columns the heads used to name.
+    expect(rowOf(chartsOf(screen)[0], 0)).toEqual(['あa', 'いi', 'うu', 'えe', 'おo'])
+    // ん belonged to no column and had a 撥音 row of its own; it is the
+    // last cell of the table now, still inside it.
+    expect(cellsOf(chartsOf(screen)[0]).at(-1)).toBe('んn')
   })
 
   // ── The three charts the screen used to drop ──
@@ -313,27 +330,23 @@ describe('the dictionary screen', () => {
     // 外来音 is katakana's alone; hiragana's chart above has four.
     expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音', '外来音'])
 
-    // 拗音 is three columns wide, not five, and heads them with the
-    // small kana its own cells end in — ャ ュ ョ here, ゃ ゅ ょ in the
-    // hiragana chart, neither of them written down in the screen.
+    // 拗音 is three columns wide, not five: や ゆ よ are the only kana
+    // that follow, so there is no い or え column to leave empty.
     const yoon = chartsOf(screen)[3]
     expect(yoon.classList.contains('syllabary-table--narrow')).toBe(true)
-    expect(headsOf(yoon, 'col')).toEqual(['ャ', 'ュ', 'ョ'])
-    // A row is the full-size kana its cells begin with — キ, not キ行,
-    // and not the 行 derivation the gojūon rows use.
-    expect(headsOf(yoon, 'row')).toEqual(['キ'])
+    expect(rowOf(yoon, 0)).toEqual(['キャkya', 'キュkyu', 'キョkyo'])
 
     // 外来音 rows are one base kana each, so ファ and ヴァ cannot
     // collide in the a column the way one "foreign" row made them.
     const foreign = chartsOf(screen)[4]
-    expect(headsOf(foreign, 'row')).toEqual(['フ', 'テ', 'ヴ'])
+    expect(rowOf(foreign, 0)).toEqual(['ファfa', 'フィfi', null, 'フェfe', 'フォfo'])
+    expect(rowOf(foreign, 1)).toEqual([null, 'ティti', null, null, null])
     expect(cellsOf(foreign)).toEqual(['ファfa', 'フィfi', 'フェfe', 'フォfo', 'ティti',
                                       'ヴァva', 'ヴィvi', 'ヴvu', 'ヴェve', 'ヴォvo'])
 
     // Katakana writes every long vowel with the one bar, so its 長音 is
-    // a single row — and a row that is the whole chart heads nothing.
+    // a single row of five.
     const long = chartsOf(screen)[1]
-    expect(headsOf(long, 'row')).toEqual([])
     expect(cellsOf(long)).toEqual(['アーaa', 'イーii', 'ウーuu', 'エーee', 'オーoo'])
   })
 
@@ -345,8 +358,6 @@ describe('the dictionary screen', () => {
     const screen = await renderScreen()
     await openSyllabary(screen, T.dictHiragana)
     const long = chartsOf(screen)[1]
-    expect(headsOf(long, 'col')).toEqual(['あ', 'い', 'う', 'え', 'お'])
-    expect(headsOf(long, 'row')).toEqual(['あ', 'い', 'う', 'え', 'お'])
     // え's row: nothing in あ, えい under い, ええ under え, holes after.
     expect(rowOf(long, 3)).toEqual([null, 'えいei', null, 'ええee', null])
     expect(rowOf(long, 4)).toEqual([null, 'おいoi', 'おうou', null, 'おおoo'])

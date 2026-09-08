@@ -51,7 +51,10 @@ describe('GateCard — the fare', () => {
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 
-  it('says how many ride and how many wait when the balance is short', async () => {
+  // It used to say the subtraction too — "12 of 42 ride today, 30 wait
+  // for tomorrow's refill" — which is a sentence and a half for two
+  // numbers that do not match. Owner's call: the two numbers.
+  it('says how much of the fare the balance covers when it is short', async () => {
     creditsRef.current = { ...FREE, balance: 12 }
     // The fare is the chosen lanes' due (plan 070), so the lanes carry
     // the 42, not `total`.
@@ -59,7 +62,9 @@ describe('GateCard — the fare', () => {
     const short = screen.container.querySelector('.gate-card__short')
     expect(short.textContent).toContain('12')
     expect(short.textContent).toContain('42')
-    expect(short.textContent).toContain('30')
+    // Not the remainder: it is 42 minus 12, and the line is shorter
+    // without it.
+    expect(short.textContent).not.toContain('30')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 

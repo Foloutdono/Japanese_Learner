@@ -67,7 +67,7 @@ const nav = {
   balanceOf:         (cap) => `sur ${cap}`,
   balanceRefillAt:   (at) => `par jour, à ${at}`,
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
-  gateShort:         (rides, due, waits) => `${rides} sur ${due} partent aujourd’hui — ${waits} attendent la recharge de demain`,
+  gateShort:         (rides, due) => `Seulement ${rides} sur les ${due} requis`,
   gateNoCredits:     (refill, at) => `Plus de crédits — +${refill} à ${at}`,
   runOutTitle:       'Plus de crédits',
   runOutCleared:     (n) => `${n} révisées`,
@@ -137,10 +137,8 @@ const quiz = {
   // Kana sets
   hiraganaBase:         'Hiragana (de base)',
   hiraganaCombinations: 'Hiragana (combinaisons)',
-  hiraganaLong:         'Hiragana (voyelles longues)',
   katakanaBase:         'Katakana (de base)',
   katakanaCombinations: 'Katakana (combinaisons)',
-  katakanaLong:         'Katakana (voyelles longues)',
 
   // Selection prompts
   selectLevel:       'Choisissez un niveau JLPT',
@@ -901,8 +899,8 @@ const dictionary = {
   dictStrokeIndex:   'Index par nombre de traits',
   syllabaryMain:     'Syllabaire principal',
   syllabaryNSolo:    'ん',
-  syllabaryVoiced:   'Sons voisés (dakuten / handakuten)',
-  syllabaryYoon:     'Sons contractés (yōon)',
+  syllabaryVoiced:   'Sons voisés',
+  syllabaryYoon:     'Sons contractés',
   syllabaryForeign:  'Sons étrangers',
   syllabaryLong:     'Voyelles longues',
   // Titre/aria-label de l'icône d'action "ouvrir le dictionnaire" sur

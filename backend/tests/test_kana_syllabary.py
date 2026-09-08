@@ -11,22 +11,28 @@ These pin the three halves of the fix — the registry, the decks it
 serves, and the dictionary reading the whole syllabary through it.
 """
 
-from content.kana_data import KANA_SETS, SYLLABARY_SETS, get_syllabary
+from content.kana_data import (
+    HIRAGANA_LONG, KANA_SETS, KATAKANA_LONG, SYLLABARY_SETS, get_syllabary,
+)
 
 
-def test_a_syllabary_is_its_gojuon_its_yoon_and_its_long_vowels():
+def test_a_syllabary_is_its_gojuon_and_its_combinations():
     for script in ("hiragana", "katakana"):
         sets = SYLLABARY_SETS[script]
-        assert sets == (f"{script}_basic", f"{script}_combos", f"{script}_long")
-        # get_syllabary is those three, in that order, and nothing else.
+        assert sets == (f"{script}_basic", f"{script}_combos")
+        # get_syllabary is those two, in that order, and nothing else.
         assert get_syllabary(script) == [
             entry for key in sets for entry in KANA_SETS[key]
         ]
     assert get_syllabary("klingon") == []
+    # Four decks, not six: the long vowels ride with the yōon rather
+    # than standing as a nine-card stop of their own.
+    assert list(KANA_SETS) == [
+        "hiragana_basic", "hiragana_combos", "katakana_basic", "katakana_combos"]
 
 
 def test_the_long_vowels_are_pairs_a_reader_meets():
-    hira = {e["kana"]: e["romaji"] for e in KANA_SETS["hiragana_long"]}
+    hira = {e["kana"]: e["romaji"] for e in HIRAGANA_LONG}
     # The five doubled vowels, the two long spellings that change kana,
     # and the two -i diphthongs every adjective ends in.
     assert hira == {
@@ -34,12 +40,16 @@ def test_the_long_vowels_are_pairs_a_reader_meets():
         "えい": "ei", "ええ": "ee", "おい": "oi", "おう": "ou", "おお": "oo",
     }
     # Katakana spells them all with the one bar instead.
-    assert {e["kana"] for e in KANA_SETS["katakana_long"]} == {"アー", "イー", "ウー", "エー", "オー"}
+    assert {e["kana"] for e in KATAKANA_LONG} == {"アー", "イー", "ウー", "エー", "オー"}
     # The romaji is the spelling, and its last letter is the column the
     # chart lays the pair in (frontend: vowelOf).
-    for entry in KANA_SETS["hiragana_long"] + KANA_SETS["katakana_long"]:
+    for entry in HIRAGANA_LONG + KATAKANA_LONG:
         assert len(entry["romaji"]) == 2
         assert entry["romaji"][-1] in "aiueo"
+    # And each rides in its script's combinations deck.
+    for long_set, key in ((HIRAGANA_LONG, "hiragana_combos"), (KATAKANA_LONG, "katakana_combos")):
+        deck = {e["kana"] for e in KANA_SETS[key]}
+        assert {e["kana"] for e in long_set} <= deck
 
 
 def test_the_borrowed_sounds_are_one_row_per_base_kana():
@@ -87,7 +97,7 @@ def test_no_two_kana_of_a_group_want_the_same_column():
 def test_every_set_is_a_deck_the_kana_route_serves(client):
     served = client.get("/api/kana/sets").json()["sets"]
     assert served == list(KANA_SETS)
-    for key in ("hiragana_long", "katakana_long"):
+    for key in served:
         cards = client.get(f"/api/kana/cards?set_name={key}&mode=kana.flashcard.f2b")
         assert cards.status_code == 200, cards.text
 

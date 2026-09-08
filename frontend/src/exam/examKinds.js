@@ -9,10 +9,10 @@ export const KIND_ORDER = ['vocab', 'grammar', 'reading', 'listening']
 
 export function kindMeta(t) {
   return {
-    vocab:     { label: t.examKindVocab,     jp: '語彙' },
-    grammar:   { label: t.examKindGrammar,   jp: '文法' },
-    reading:   { label: t.examKindReading,   jp: '読解' },
-    listening: { label: t.examKindListening, jp: '聴解' },
+    vocab:     { label: t.examKindVocab },
+    grammar:   { label: t.examKindGrammar },
+    reading:   { label: t.examKindReading },
+    listening: { label: t.examKindListening },
   }
 }
 
