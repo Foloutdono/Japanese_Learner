@@ -359,6 +359,7 @@ const stats = {
   todayPickHint:      'Choisissez votre service',
   todaySelectAll:     'Tout sélectionner',
   todaySelectNone:    'Tout désélectionner',
+  todayLines:         'Lignes du jour',
   todayPickSomething: 'Choisissez au moins une ligne',
   todayStart:         n => `Réviser ${n} carte${n === 1 ? '' : 's'}`,
   todayAllTypes:      'Toutes',

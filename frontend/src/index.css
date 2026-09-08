@@ -4996,11 +4996,13 @@ textarea:focus-visible {
    natural widths first, then stretches what landed on each — so the
    set keeps the shape it wraps into. A lone chip is not a set and
    keeps its own width. */
-.console__chips .chip {
+.console__chips .chip,
+.gate-card__lines .chip {
   flex: 1 1 auto;
   justify-content: center;
 }
-.console__chips .chip:only-child { flex: none; }
+.console__chips .chip:only-child,
+.gate-card__lines .chip:only-child { flex: none; }
 
 /* ── the platform card, on a line (the Practice gate) ── */
 .platform-card--line { --rail: var(--line-color); }
@@ -5728,20 +5730,32 @@ textarea:focus-visible {
    the day could not be narrowed on the one device it is read on.
 
    Bounded instead of folded. Twelve lanes is 594px of switch, which
-   put Depart 854px down an 844px screen; four rows and half of the
-   fifth is 216px, and the half is what says there is more. The cap
-   holds at every width because the frame is one phone-width column at
-   every width (.phone__content) — and because a gate that is the same
-   size on a two-lane day and a twenty-lane one is easier to aim at.
+   put Depart 854px down an 844px screen. The bound is a share of the
+   SCREEN rather than a count of rows: 216px showed four and a half on
+   every phone ever made, which on a tall one left the gate sitting in
+   a third of the space it had. 42dvh is six rows at 844px and eight at
+   1000, and still leaves the head, the lines, the notice and Depart
+   above the fold. Whatever it comes to, the row it cuts is visibly cut
+   — that is what says there is more.
+
    `scrollbar-gutter` keeps the due figures off a desktop scrollbar and
    reserves nothing where the scrollbar is an overlay. */
 .gate-card__lanes {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  max-height: 216px;
+  max-height: 30vh;
+  max-height: 30dvh;
   overflow-y: auto;
   scrollbar-gutter: stable;
+}
+
+/* 路線ごと — one switch per line over the lanes it is made of. The
+   figure rides the chip as data, the way a tally rides a mark. */
+.gate-card__lines { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.gate-card__linedue {
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, currentcolor 55%, transparent);
 }
 .gate-card__pick {
   align-self: flex-end;

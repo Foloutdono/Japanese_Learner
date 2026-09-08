@@ -106,6 +106,43 @@ describe('the fare gate at phone width', () => {
     }
   })
 
+  // ── 路線ごと — one switch per line ──
+  // Twenty lanes is five taps to say "just the kanji" and fifteen to
+  // say it the other way round. A chip is lit when the WHOLE line
+  // rides, which makes the tap unambiguous both ways: lit switches the
+  // line off, unlit switches all of it on.
+  it('switches a whole line, and lights only while all of it rides', async () => {
+    const screen = await gate()
+    const chips = () => [...screen.container.querySelectorAll('.gate-card__lines .chip')]
+    const count = () => Number(screen.container.querySelector('.gate-card__count').textContent)
+    const all = count()
+
+    // One per line in today's queue, in the lines' order, each carrying
+    // what its line owes.
+    expect(chips()).toHaveLength(5)
+    expect(chips().map(c => c.getAttribute('aria-pressed'))).toEqual(Array(5).fill('true'))
+    const kanaDue = LANES.filter(l => l.source === 'kana').reduce((n, l) => n + l.due, 0)
+    expect(chips()[0].textContent).toContain(String(kanaDue))
+
+    // Lit → the line comes out whole, and so does its share of the day.
+    chips()[0].click()
+    await settle()
+    expect(count()).toBe(all - kanaDue)
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    const off = [...screen.container.querySelectorAll('.lane--off')]
+    expect(off).toHaveLength(LANES.filter(l => l.source === 'kana').length)
+
+    // One of its lanes back on by hand: the line is not whole, so the
+    // chip stays unlit and its tap switches all of the line on.
+    screen.container.querySelector('.lane--off').click()
+    await settle()
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    chips()[0].click()
+    await settle()
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('true')
+    expect(count()).toBe(all)
+  })
+
   it('takes a lane out of the day, and the count with it', async () => {
     const screen = await gate()
     const count = () => Number(screen.container.querySelector('.gate-card__count').textContent)

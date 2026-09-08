@@ -84,11 +84,17 @@ beforeEach(() => {
 })
 
 describe('TodayScreen — the gate', () => {
-  it('opens on the bar, the gate with every lane on, and the strip', async () => {
+  it('opens on the bar, the strip, and the gate with every lane on', async () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.bar__roundel').textContent).toBe('HN')
     expect(screen.container.querySelector('h1.bar__title').textContent).toBe('Service du jour')
+    // The strip reads over the gate, not under it: a status line
+    // belongs above the object it is about, and it leaves the gate the
+    // last thing on the screen, free to take the rest of it.
+    const order = [...screen.container.querySelectorAll('.pass--strip, .gate-card')]
+      .map(el => (el.classList.contains('pass--strip') ? 'strip' : 'gate'))
+    expect(order).toEqual(['strip', 'gate'])
     const lanes = screen.container.querySelectorAll('.lane')
     expect(lanes).toHaveLength(3)
     expect([...lanes].every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
