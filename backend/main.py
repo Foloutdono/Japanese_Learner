@@ -25,6 +25,11 @@ from fastapi.responses import JSONResponse                                      
 from fastapi.middleware.cors import CORSMiddleware               # noqa: E402
 from fastapi.middleware.gzip import GZipMiddleware               # noqa: E402
 from fastapi.staticfiles import StaticFiles                      # noqa: E402
+from starlette.concurrency import run_in_threadpool               # noqa: E402
+from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
+
+from study.exam_tts import audio_dir                              # noqa: E402
+from study.exam_audio_repair import restore_clip                  # noqa: E402
 
 from routes.kana            import router as kana_router         # noqa: E402
 from routes.vocab           import router as vocab_router
@@ -48,6 +53,7 @@ from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
 from routes.account         import router as account_router
 from routes.credits         import router as credits_router
+from routes.tts             import router as tts_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
 
 logging.basicConfig(level=logging.INFO)
@@ -57,15 +63,46 @@ app = FastAPI()
 app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 
 # Server-synthesized listening-section audio (study/exam_tts.py) --
-# same mount pattern as kanjivg above. Directory is created on first
-# use by exam_tts.py itself (os.makedirs), so it may not exist yet on a
-# fresh checkout; check_dir=False lets StaticFiles mount successfully
-# regardless and just 404 individual files until something's written.
-app.mount(
-    "/exam-audio",
-    StaticFiles(directory=os.environ.get("EXAM_AUDIO_DIR") or "datas/exam_audio", check_dir=False),
-    name="exam-audio",
-)
+# same mount pattern as kanjivg above, with two differences this
+# directory has earned the hard way.
+#
+# The directory comes from exam_tts.audio_dir() rather than being read
+# out of the environment a second time here: it is the same resolution
+# the writer uses, fallbacks included, so files can never be served from
+# a place nothing writes to. (That split -- a __file__-relative writer
+# and a cwd-relative mount -- was the original bug; re-reading
+# EXAM_AUDIO_DIR here fixed it only until the writer started falling
+# back off an unwritable disk.)
+#
+# check_dir=False alone is NOT enough to survive a missing directory,
+# which is the trap this hit in production: it only silences the
+# constructor. StaticFiles.check_config() re-stats the directory on the
+# FIRST REQUEST and raises RuntimeError, which surfaces as a 500 on an
+# <audio> element -- so an unmounted disk turned every clip request into
+# a server error instead of a 404. Both are needed.
+class ExamAudioFiles(StaticFiles):
+    """A missing directory is a 404, and a missing FILE gets one chance
+    to be re-synthesized from the paper that references it (see
+    study/exam_audio_repair.py) before becoming one."""
+
+    async def check_config(self) -> None:
+        return
+
+    async def get_response(self, path: str, scope):
+        try:
+            return await super().get_response(path, scope)
+        except StarletteHTTPException as exc:
+            if exc.status_code != 404:
+                raise
+            # Synthesis is blocking network I/O, and this is an async
+            # method: off the event loop it goes, like every other
+            # blocking call FastAPI makes on our behalf.
+            if not await run_in_threadpool(restore_clip, path):
+                raise
+            return await super().get_response(path, scope)
+
+
+app.mount("/exam-audio", ExamAudioFiles(directory=audio_dir(), check_dir=False), name="exam-audio")
 
 # ── CORS ──────────────────────────────────────────────────────
 # The deployed frontend, plus anything CORS_ORIGINS adds — a
@@ -125,6 +162,7 @@ app.include_router(video_router)
 app.include_router(ocr_router)
 app.include_router(onboarding_router)
 app.include_router(credits_router)
+app.include_router(tts_router)
 
 
 # ── 402 — the fare gate's three refusals (plan 069) ──

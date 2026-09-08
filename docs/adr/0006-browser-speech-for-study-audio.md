@@ -1,6 +1,8 @@
 # 0006 — Study audio uses the browser's speech synthesis; edge-tts stays for exams
 
-- **Status**: accepted
+- **Status**: accepted; amended for card readings by
+  [0009](0009-card-readings-fall-back-to-server-audio.md), which adds a server
+  fallback for the phones this decision left silent
 - **Date**: 2026-08-25
 
 ## Context

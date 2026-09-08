@@ -1310,6 +1310,7 @@ const exam = {
   examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
   examAudioPending:    'Audio clip not generated yet for this question.',
+  examAudioUnavailable: 'Audio clip could not be loaded for this question.',
 
   // ── Result ──
   // Never call this a JLPT score. The real one is an IRT-scaled 尺度得点
