@@ -4248,7 +4248,12 @@ textarea:focus-visible {
 .phone__content > main { flex: 1; }
 /* The station pages (plan 071): the choice under the bar, flush with
    it — the grid's own inset was the plate's, and the plate is gone. */
-.learn .platform-grid { padding: 0; gap: var(--sp-3); }
+/* On a gate page the grid owns no inset and no top run of its own: the
+   page's gutter is the gutter, and the bar above it sets the rhythm.
+   .practice was the one that never got this — its cards sat 14px
+   further in than the bar over them and 30px lower than Learn's. */
+.learn .platform-grid,
+.practice .platform-grid { padding: 0; gap: var(--sp-3); }
 .tier-picker,
 .theme-picker { display: flex; flex-direction: column; gap: var(--sp-4); }
 .tier-picker__size { display: flex; align-items: center; gap: var(--sp-4); }
@@ -4638,12 +4643,17 @@ textarea:focus-visible {
 }
 
 /* ── the compact header: one row, a pigment rule under it ── */
+/* No inset of its own. Every screen that mounts a bar sits in a
+   container that already holds the page's gutter (.learn/.practice/
+   .today/.dictionary, .profile/.stats/.settings, and the two dev
+   previews' own), so --sp-5 here was a SECOND inset: the title, its
+   sub and the pigment rule all stood 16px inside everything under
+   them, which reads as a header belonging to a narrower page. */
 .bar {
   --line-color: var(--accent2);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  padding: 0 var(--sp-5);
 }
 .bar--register { --line-color: var(--text-secondary); }
 .bar__row {
@@ -5757,21 +5767,6 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   color: color-mix(in srgb, currentcolor 55%, transparent);
 }
-.gate-card__pick {
-  align-self: flex-end;
-  padding: 0;
-  background: none;
-  border: none;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.gate-card__pick:hover,
-.gate-card__pick:focus-visible { color: var(--text-primary); filter: none; }
 .lane {
   display: flex;
   align-items: center;

@@ -155,16 +155,22 @@ describe('the fare gate at phone width', () => {
     expect(first.getAttribute('aria-pressed')).toBe('false')
     expect(count()).toBe(all - LANES[0].due)
 
-    // With one off, the all/none switch offers the day back.
-    const pick = screen.container.querySelector('.gate-card__pick')
-    expect(pick.textContent).toBe(T.todaySelectAll)
-    pick.click()
+    // The all/none link that used to sit here is gone: a row of line
+    // switches is the coarse control it was standing in for. Its own
+    // line reads half-chosen now, so its chip is unlit — one tap makes
+    // the line whole, a second takes it away, and the day with every
+    // line off is not a run.
+    expect(screen.container.querySelector('.gate-card__pick')).toBeNull()
+    const chips = () => [...screen.container.querySelectorAll('.gate-card__lines .chip')]
+    expect(chips()[0].getAttribute('aria-pressed')).toBe('false')
+    chips()[0].click()
     await settle()
     expect(count()).toBe(all)
 
-    // And from a full day it clears: nothing chosen is not a run.
-    expect(pick.textContent).toBe(T.todaySelectNone)
-    pick.click()
+    for (const chip of chips()) {
+      chip.click()
+      await settle(20)
+    }
     await settle()
     expect(count()).toBe(0)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)

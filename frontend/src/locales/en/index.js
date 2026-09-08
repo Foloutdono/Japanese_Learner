@@ -376,8 +376,6 @@ const stats = {
   todayDesc:          'Every review due, across every section, in one queue.',
   todayBoard:         'Today',
   todayPickHint:      'Choose what to run',
-  todaySelectAll:     'Select all',
-  todaySelectNone:    'Select none',
   todayLines:         'Today’s lines',
   todayPickSomething: 'Pick at least one',
   todayStart:         n => `Run ${n} ${n === 1 ? 'card' : 'cards'}`,

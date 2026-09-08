@@ -125,8 +125,13 @@ describe('TodayScreen — the gate', () => {
     screen.container.querySelector('.btn-depart').click()
     expect(beginDeparture.mock.calls[0][0].path).toBe('/today/run')
 
-    screen.container.querySelector('.gate-card__pick').click()
-    await settle()
+    // Every line switched off is the whole day off — the all/none link
+    // that used to do it in one tap is gone, and the line switches are
+    // what stands in for it.
+    for (const chip of screen.container.querySelectorAll('.gate-card__lines .chip')) {
+      if (chip.getAttribute('aria-pressed') === 'true') chip.click()
+      await settle()
+    }
     expect(screen.container.querySelectorAll('.lane--off')).toHaveLength(3)
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })

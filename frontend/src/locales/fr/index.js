@@ -357,8 +357,6 @@ const stats = {
   todayDesc:          'Toutes les révisions dues, toutes sections confondues, dans une file unique.',
   todayBoard:         "Aujourd'hui",
   todayPickHint:      'Choisissez votre service',
-  todaySelectAll:     'Tout sélectionner',
-  todaySelectNone:    'Tout désélectionner',
   todayLines:         'Lignes du jour',
   todayPickSomething: 'Choisissez au moins une ligne',
   todayStart:         n => `Réviser ${n} carte${n === 1 ? '' : 's'}`,

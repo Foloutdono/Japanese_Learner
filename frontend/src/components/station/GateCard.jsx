@@ -21,7 +21,9 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // that are on, and the fare counts them. Everything on is the
 // default, because the common case is "clear the day". Over the lanes,
 // one switch per LINE, for the days when the answer is "just the
-// kanji" and there are twenty lanes to say it in.
+// kanji" and there are twenty lanes to say it in — which is also what
+// retired the all/none link that used to sit between the two: a row of
+// line switches IS the coarse control it was standing in for.
 //
 // Two manners carry over: nothing is rendered after the fetch failed
 // (the screen owns up instead), and a cleared queue does not blank
@@ -130,8 +132,6 @@ export default function GateCard({ today, failed }) {
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id)
   const due = lanes.filter(isOn).reduce((n, l) => n + l.due, 0)
-  const allOn = lanes.every(isOn)
-
   function toggle(id) {
     setOff(prev => {
       const next = new Set(prev)
@@ -140,10 +140,6 @@ export default function GateCard({ today, failed }) {
       return next
     })
   }
-  function togglePick() {
-    setOff(allOn ? new Set(lanes.map(l => l.id)) : new Set())
-  }
-
   // ── 路線ごと — the lines in today's queue, as switches ──
   // Twenty lanes is five taps to say "just the kanji" and fifteen to
   // say it the other way round. A line is the coarse choice the fine
@@ -207,12 +203,6 @@ export default function GateCard({ today, failed }) {
             </Chip>
           ))}
         </div>
-      )}
-
-      {lanes.length > 1 && (
-        <button type="button" className="gate-card__pick" onClick={togglePick}>
-          {allOn ? t.todaySelectNone : t.todaySelectAll}
-        </button>
       )}
 
       <div className="gate-card__lanes">
