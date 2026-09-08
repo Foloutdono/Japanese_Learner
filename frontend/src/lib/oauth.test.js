@@ -71,7 +71,8 @@ describe('on the web', () => {
 
   it('reports a refusal instead of pretending to have left', async () => {
     auth.signInWithOAuth.mockResolvedValue({ data: {}, error: { message: 'provider is not enabled' } })
-    expect(await connectProvider({})).toEqual({ ok: false, message: 'provider is not enabled' })
+    expect(await connectProvider({}))
+      .toEqual({ ok: false, reason: 'providerOff', message: 'provider is not enabled' })
   })
 })
 
@@ -130,7 +131,33 @@ describe('in the shell', () => {
   it('passes a failed exchange back rather than reporting success', async () => {
     openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?code=abc123')
     auth.exchangeCodeForSession.mockResolvedValue({ data: {}, error: { message: 'code expired' } })
-    expect(await connectProvider({})).toEqual({ ok: false, message: 'code expired' })
+    expect(await connectProvider({}))
+      .toEqual({ ok: false, reason: 'failed', message: 'code expired' })
+  })
+})
+
+// The learner never sees Supabase's wording, so every refusal has to
+// arrive as one of the handful of reasons the copy has a sentence for.
+// This is the case that actually happened: manual linking off, and
+// "Manual linking is disabled" printed in English under the password
+// field of a French boarding screen.
+describe('naming the refusal for the learner', () => {
+  it.each([
+    ['Manual linking is disabled', 'linkingOff'],
+    ['Unsupported provider: provider is not enabled', 'providerOff'],
+    ['Identity is already linked to another user', 'taken'],
+    ['User already registered', 'taken'],
+    ['something nobody has seen before', 'failed'],
+  ])('%s → %s', async (message, reason) => {
+    auth.signInWithOAuth.mockResolvedValue({ data: {}, error: { message } })
+    expect((await connectProvider({})).reason).toBe(reason)
+  })
+
+  it('reads the code when Supabase sends one', async () => {
+    auth.signInWithOAuth.mockResolvedValue({
+      data: {}, error: { code: 'manual_linking_disabled', message: '' },
+    })
+    expect((await connectProvider({})).reason).toBe('linkingOff')
   })
 })
 
@@ -147,7 +174,9 @@ describe('a guest keeping what they have', () => {
   it('reports manual linking being off, and never falls back to a sign-in', async () => {
     auth.linkIdentity.mockResolvedValue({ data: {}, error: { message: 'Manual linking is disabled' } })
     const r = await connectProvider({ link: true })
-    expect(r).toEqual({ ok: false, message: 'Manual linking is disabled' })
+    // The reason is what the UI translates; the message is Supabase's
+    // own words, kept for the console and never shown to a learner.
+    expect(r).toEqual({ ok: false, reason: 'linkingOff', message: 'Manual linking is disabled' })
     expect(auth.signInWithOAuth).not.toHaveBeenCalled()
   })
 })

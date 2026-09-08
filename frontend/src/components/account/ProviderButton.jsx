@@ -47,7 +47,12 @@ export function ProviderButton({
     setBusy(false)
     if (r.ok) { onDone?.(); return }
     // Backing out of the system browser is an answer, not a fault.
-    if (!r.cancelled) onError?.(r.message || t.genericError)
+    if (r.cancelled) return
+    // Supabase's own message is developer text about a dashboard
+    // setting; the learner gets a sentence in their own language and
+    // the console keeps the detail that actually names the cause.
+    if (r.message) console.warn('[oauth]', r.reason, r.message)
+    onError?.(t.authProviderError[r.reason] ?? t.authProviderError.failed)
   }
 
   return (

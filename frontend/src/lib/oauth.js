@@ -73,6 +73,21 @@ function credentialsFrom(url) {
   }
 }
 
+// Supabase's own wording, turned into something the UI can translate.
+// The raw message is developer text — "Manual linking is disabled" is
+// a dashboard setting a LEARNER cannot act on, and it reached a French
+// learner's screen in English on the first real sign-in attempt. It is
+// still returned alongside, for the console and for docs/oauth.md's
+// benefit; it is just never the thing shown to somebody trying to
+// study Japanese.
+function reasonFor(error) {
+  const said = `${error?.code ?? ''} ${error?.message ?? ''}`.toLowerCase()
+  if (said.includes('manual link') || said.includes('manual_link')) return 'linkingOff'
+  if (said.includes('not enabled') || said.includes('provider_disabled')) return 'providerOff'
+  if (said.includes('already') && (said.includes('registered') || said.includes('linked') || said.includes('exists'))) return 'taken'
+  return 'failed'
+}
+
 /**
  * Sign in with a provider, or — with `link` — put that provider onto
  * the account already signed in, which is how a guest keeps every
@@ -81,7 +96,9 @@ function credentialsFrom(url) {
  * -> { ok: true }            the shell finished the round trip here
  * -> { ok: true, redirecting: true }  the web is leaving; nothing after
  *                            this call will run
- * -> { ok: false, message }  anything else, already human-readable
+ * -> { ok: false, reason, message }  reason is for the learner (the UI
+ *                            translates it); message is Supabase's own
+ *                            words, for the console
  *
  * `link` needs manual linking enabled on the project. Where losing the
  * current account would be silent data loss the caller must NOT retry
@@ -101,7 +118,7 @@ export async function connectProvider({ provider = 'google', link = false } = {}
       ? supabase.auth.linkIdentity({ provider, options })
       : supabase.auth.signInWithOAuth({ provider, options })
     const { data, error } = await call
-    if (error) return { ok: false, message: error.message }
+    if (error) return { ok: false, reason: reasonFor(error), message: error.message }
 
     if (!inShell) {
       // supabase-js has already set window.location; this frame is
@@ -110,7 +127,7 @@ export async function connectProvider({ provider = 'google', link = false } = {}
       return { ok: true, redirecting: true }
     }
 
-    if (!data?.url) return { ok: false, message: 'no authorization url' }
+    if (!data?.url) return { ok: false, reason: 'failed', message: 'no authorization url' }
     const { openAuthTab } = await native()
     const back = await openAuthTab(data.url, `${NATIVE_REDIRECT.split('://')[0]}://`)
     if (!back) return { ok: false, cancelled: true }
@@ -118,13 +135,13 @@ export async function connectProvider({ provider = 'google', link = false } = {}
     const creds = credentialsFrom(back)
     // No code and no tokens means the callback carried a refusal (or
     // an error) — never a session, so never report one.
-    if (!creds) return { ok: false, message: 'no credentials on the callback' }
+    if (!creds) return { ok: false, reason: 'failed', message: 'no credentials on the callback' }
     const { error: sessionError } = creds.code
       ? await supabase.auth.exchangeCodeForSession(creds.code)
       : await supabase.auth.setSession(creds)
-    if (sessionError) return { ok: false, message: sessionError.message }
+    if (sessionError) return { ok: false, reason: reasonFor(sessionError), message: sessionError.message }
     return { ok: true }
   } catch (err) {
-    return { ok: false, message: err?.message }
+    return { ok: false, reason: 'failed', message: err?.message }
   }
 }

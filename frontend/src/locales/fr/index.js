@@ -1384,6 +1384,16 @@ const boarding = {
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
   orWithEmail: 'ou avec une adresse e-mail',
+  // Ce que voit l'apprenant quand Google refuse. Jamais le message de
+  // Supabase : « Manual linking is disabled » nomme un réglage de
+  // tableau de bord, en anglais, à quelqu'un qui veut juste apprendre
+  // le japonais. Chaque cas propose la porte d'à côté, qui marche.
+  authProviderError: {
+    failed:      'Impossible de continuer avec Google pour le moment. Réessayez, ou utilisez une adresse e-mail.',
+    providerOff: 'Google n\u2019est pas disponible ici. Utilisez une adresse e-mail.',
+    linkingOff:  'Google ne peut pas être ajouté à ce compte pour l\u2019instant. Utilisez une adresse e-mail ci-dessous — votre progression est gardée de la même façon.',
+    taken:       'Ce compte Google est déjà rattaché à un autre compte. Connectez-vous avec, ou utilisez une autre adresse.',
+  },
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).

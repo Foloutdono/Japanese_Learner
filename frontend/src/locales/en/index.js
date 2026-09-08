@@ -1412,6 +1412,16 @@ const boarding = {
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
   orWithEmail: 'or with an email address',
+  // What the learner sees when Google refuses. Never Supabase's own
+  // message: "Manual linking is disabled" names a dashboard setting, in
+  // English, to somebody who just wants to learn Japanese. Each case
+  // points at the door next to it, which works.
+  authProviderError: {
+    failed:      'Couldn\u2019t continue with Google right now. Try again, or use an email address.',
+    providerOff: 'Google isn\u2019t available here. Use an email address instead.',
+    linkingOff:  'Google can\u2019t be added to this account yet. Use an email address below — your progress is kept just the same.',
+    taken:       'That Google account is already attached to another account. Sign in with it, or use a different address.',
+  },
   // Last stop: the account, asked once everything has been seen — and
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).

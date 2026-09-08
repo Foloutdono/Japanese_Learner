@@ -57,10 +57,23 @@ http://localhost:5173/**          ← only if you sign in from `npm run dev`
 
 ### Supabase → Authentication → Manual Linking
 
-Required for the two places that *link* Google onto the account a guest
-already holds, rather than signing them into a new one: the last step of the
-boarding, and Settings › Account. With it off, both report the refusal and
-change nothing — no progress is lost either way, but neither offer works.
+**Required**, and the first thing to check when "Continuer avec Google" refuses
+at the end of the boarding. It is off by default, and without it Supabase
+answers `linkIdentity` with `Manual linking is disabled`.
+
+It is needed by the two places that *link* Google onto the account a guest
+already holds rather than signing them into a new one: the last step of the
+boarding, and Settings › Account. With it off both refuse and change nothing —
+no progress is lost either way, but neither offer works. The plain sign-in on
+the auth screen does **not** need it, so Google keeps working there
+(Welcome → "Déjà un compte ? Se connecter") while this is off.
+
+There is deliberately no fall-back to a plain sign-in when linking is
+unavailable. It would look like it worked and quietly cost the learner
+their account: the name they typed is already taken by the guest row they
+just abandoned, so they would arrive as `KeenSakura5522` with none of the
+credits they had. A refusal that names the working door is the better
+failure.
 
 ## Worth doing later: PKCE
 
