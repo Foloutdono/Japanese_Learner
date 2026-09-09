@@ -71,7 +71,7 @@ jobs:
       - name: Check ink/ground
         working-directory: frontend
         run: npm run lint:ink
-      # vitest runs four lanes; the three browser ones (including Guard 4)
+      # vitest runs five lanes; the four browser ones (including Guard 4)
       # need a real chromium, which npm ci does not fetch. Without this those
       # lanes silently do not run -- the step still fails, but only after
       # reporting "6 passed (34)", which reads like a pass at a glance.
