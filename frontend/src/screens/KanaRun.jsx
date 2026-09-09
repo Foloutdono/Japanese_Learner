@@ -383,7 +383,6 @@ export default function KanaRun({ session }) {
             {renderer === RENDER.DRAW && (
               <DrawingQuiz
                 kanji={card.kana}
-                meaning={card.romaji}
                 resetKey={card.card_id}
                 onValidate={onDrawValidate}
               />

@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState, useCallback } from 'react'
 import { useLang } from '../../LangContext'
 import { StrokeOrderAnimation } from './StrokeOrderAnimation'
 import { playClick } from '../../lib/audio'
@@ -13,11 +13,24 @@ const CANVAS_BOARD_COLOR = '#201d24'
 // index.css). Canvas takes numbers rather than custom properties, so
 // rather than keep a second palette in JavaScript — which is exactly
 // how the old hardcoded CANVAS_STROKE_COLOR drifted out of step with
-// --text-primary — the value is read back off the computed style at
+// the sheet — the value is read back off the computed style at
 // the moment it's needed. Resolved per stroke, not once at module
 // load, so a theme change mid-session takes effect on the very next
-// line without a remount.
-const FALLBACK_INK = '#ece5d8'
+// line without a remount. The literal below is only the last resort
+// when there is no computed style to read, and is --text-on-panel's
+// own value, the ink the sheet hands out for a sumi surface.
+const FALLBACK_INK = '#f3ecdf'
+
+// The board's backing store, and the units the brush is written in.
+// --brush-width: 5 is about 2% of a 260-unit board — near KanjiVG's
+// own 3/109 — so the store cannot simply be raised: 5 backing pixels
+// on a 640-unit board is a hairline. The board now runs to 440 CSS px
+// where a phone used to give it about 130, and 260 backing pixels
+// stretched that far is a visibly blocky line, so the store is raised
+// and every brush number scales with it.
+const BOARD_UNITS = 260
+const BOARD_PX    = 640
+const BOARD_SCALE = BOARD_PX / BOARD_UNITS
 
 function brush() {
   if (typeof window === 'undefined') return { ink: FALLBACK_INK, width: 5, blur: 0 }
@@ -37,14 +50,15 @@ function brush() {
 // ask the same function.
 function applyBrush(ctx) {
   const { ink, width, blur } = brush()
+  const scaled = width * BOARD_SCALE
   ctx.strokeStyle = ink
   ctx.fillStyle   = ink
-  ctx.lineWidth   = width
+  ctx.lineWidth   = scaled
   ctx.lineCap     = 'round'
   ctx.lineJoin    = 'round'
   // 滲み — ink bleeding into wet paper. The only brush that sets this.
-  ctx.filter = blur > 0 ? `blur(${blur}px)` : 'none'
-  return width
+  ctx.filter = blur > 0 ? `blur(${blur * BOARD_SCALE}px)` : 'none'
+  return scaled
 }
 
 // KanjiVG files are one per CHARACTER, so this takes a character, not a
@@ -54,8 +68,58 @@ function charToSvgUrl(char) {
   return api(`/kanjivg/${codepoint}.svg`)
 }
 
+// ── 朱書き — the correction, laid over the learner's own line ──
+// Not printed beside it: two glyphs are only comparable when they
+// share a frame, and a board the size of a thumbnail was the price of
+// the second panel. Faint enough that the learner's own ink stays the
+// reading. The animation is deliberately NOT here — it is one tap away
+// in the entry's own sheet (the 🔍 on the card above), which is where
+// a learner goes to be taught the order rather than checked on the
+// shape.
+//
+// One glyph per CHARACTER, for the same reason StrokeRef splits: 81 of
+// the 224 kana entries are two characters (きゃ, しゅ, ジョ), and
+// codePointAt(0) of the pair asks for the wrong file without erroring.
+function Ghost({ char }) {
+  const chars = [...(char ?? '')]
+  if (!chars.length) return null
+  return (
+    <div className="canvas-ghost" role="img" aria-label={char}>
+      {chars.map((c, i) => <GhostGlyph key={`${c}-${i}`} char={c} />)}
+    </div>
+  )
+}
+
+// Its own failure state, so one glyph KanjiVG has no file for doesn't
+// blank the other half of a combination. The fallback draws the
+// character itself as SVG text rather than as CSS type: it has to fill
+// whatever square the board turned out to be, and a font-size cannot.
+function GhostGlyph({ char }) {
+  const [failed, setFailed] = useState(false)
+  // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
+  const onError = useCallback(() => setFailed(true), [])
+
+  if (failed) {
+    return (
+      <svg className="canvas-ghost__glyph" viewBox="0 0 100 100" aria-hidden="true">
+        <text x="50" y="50" textAnchor="middle" dominantBaseline="central" fontSize="84">{char}</text>
+      </svg>
+    )
+  }
+  return (
+    <StrokeOrderAnimation
+      src={charToSvgUrl(char)}
+      still
+      className="canvas-ghost__glyph"
+      onError={onError}
+    />
+  )
+}
+
 // ── Shared canvas drawing logic ───────────────────────────
-function Canvas({ canvasRef, onClear, resetKey }) {
+// `ghost` is the character to lay over the board once the answer is
+// out — null while the learner is still answering.
+function Canvas({ canvasRef, onClear, resetKey, ghost }) {
   const { t } = useLang()
   const drawing = useRef(false)
   const lastPos = useRef(null)
@@ -135,13 +199,22 @@ function Canvas({ canvasRef, onClear, resetKey }) {
 
   return (
     <div className="canvas-wrap">
-      <canvas
-        ref={canvasRef}
-        width={260} height={260}
-        className="canvas-board"
-        onPointerDown={startDraw} onPointerMove={draw}
-        onPointerUp={stopDraw}    onPointerCancel={stopDraw}
-      />
+      {/* field → holder: the field is the room the board may grow
+          into (on a phone, whatever the stage has left), the holder is
+          the square it settles at, and the board and its correction
+          both fill the holder so the two glyphs share one frame. */}
+      <div className="canvas-field">
+        <div className="canvas-holder">
+          <canvas
+            ref={canvasRef}
+            width={BOARD_PX} height={BOARD_PX}
+            className="canvas-board"
+            onPointerDown={startDraw} onPointerMove={draw}
+            onPointerUp={stopDraw}    onPointerCancel={stopDraw}
+          />
+          {ghost && <Ghost char={ghost} />}
+        </div>
+      </div>
       <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
         <UndoIcon size={14} /> {t.eraseBtn}
       </button>
@@ -174,7 +247,11 @@ function StrokeGlyph({ char }) {
   )
 }
 
-function StrokeRef({ kanji, meaning, showMeaning = true }) {
+// The overlay's reference panel: the animation, the glyph, its
+// meaning. The quiz used to render this too, with the meaning
+// suppressed — .canvas-ghost replaced that call, so the switch went
+// with it.
+function StrokeRef({ kanji, meaning }) {
   const { t } = useLang()
 
   // ── One animation per character, not per string ──
@@ -195,12 +272,10 @@ function StrokeRef({ kanji, meaning, showMeaning = true }) {
       <div className={`stroke-ref__frame${chars.length > 1 ? ' stroke-ref__frame--multi' : ''}`}>
         {chars.map((c, i) => <StrokeGlyph key={`${c}-${i}`} char={c} />)}
       </div>
-      {showMeaning && (
-        <div className="stroke-ref__meaning-wrap">
-          <CharDisplay char={kanji} size={32} />
-          {meaning && <div className="stroke-ref__meaning">{meaning}</div>}
-        </div>
-      )}
+      <div className="stroke-ref__meaning-wrap">
+        <CharDisplay char={kanji} size={32} />
+        {meaning && <div className="stroke-ref__meaning">{meaning}</div>}
+      </div>
     </div>
   )
 }
@@ -240,9 +315,10 @@ export function DrawingOverlay({ kanji, meaning, onDone, resetKey }) {
 }
 
 // ── MODE 2: Inline quiz phase (phase 4) ──
-// Shows the prompt, user draws, clicks validate, sees correction, then rates.
-// onValidate() → parent shows RatingBar.
-export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
+// Shows the prompt, user draws, clicks validate, sees the correction
+// laid over their own line, then rates. onValidate() → parent shows
+// RatingBar.
+export function DrawingQuiz({ kanji, onValidate, resetKey }) {
   // A fresh card must snap back to the undrawn/unrevealed state —
   // without this, DrawingQuiz kept reusing the same component instance
   // across cards (React doesn't remount it just because the props
@@ -256,14 +332,13 @@ export function DrawingQuiz({ kanji, meaning, onValidate, resetKey }) {
     <DrawingQuizCard
       key={resetKey ?? kanji}
       kanji={kanji}
-      meaning={meaning}
       onValidate={onValidate}
       resetKey={resetKey}
     />
   )
 }
 
-function DrawingQuizCard({ kanji, meaning, onValidate, resetKey }) {
+function DrawingQuizCard({ kanji, onValidate, resetKey }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
@@ -279,31 +354,17 @@ function DrawingQuizCard({ kanji, meaning, onValidate, resetKey }) {
       {/* .prompt-card gives this the exact same elevated surface every
           other quiz interaction sits on — without it this floated
           straight on the page background, the one card-less screen in
-          the app. */}
+          the app. One panel now, not two: the board is the whole card,
+          and the correction arrives on it rather than beside it (see
+          Ghost above), which is what buys the board its size. No label
+          over it either — a sumi square with a brush on it is a
+          drawing surface, and DESIGN.md's second rule is to say less. */}
       <div className="prompt-card drawing-quiz__card">
-        <div className="drawing-quiz__panels">
-          {/* Drawing side */}
-          <div className="drawing-quiz__side">
-            <div className="stroke-ref__label">{t.yourDrawing}</div>
-            <Canvas canvasRef={canvasRef} resetKey={resetKey ?? kanji} />
-          </div>
-
-          {/* Correction side — a placeholder until validated. Carries
-              the state as a class so a phone can give the canvas the
-              whole width until there is a stroke order to show. */}
-          <div className={`drawing-quiz__correction${revealed ? '' : ' drawing-quiz__correction--waiting'}`}>
-            {!revealed ? (
-              <>
-                <div className="stroke-ref__label">{t.strokeOrder}</div>
-                <div className="drawing-quiz__placeholder">
-                  <span className="drawing-quiz__placeholder-mark">?</span>
-                </div>
-              </>
-            ) : (
-              <StrokeRef kanji={kanji} meaning={meaning} showMeaning={false} />
-            )}
-          </div>
-        </div>
+        <Canvas
+          canvasRef={canvasRef}
+          resetKey={resetKey ?? kanji}
+          ghost={revealed ? kanji : null}
+        />
       </div>
 
       {/* Validate button — only before revealed */}
