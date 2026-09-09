@@ -24,6 +24,11 @@ import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
 import { isNative } from './lib/platform'
 
+// The dead-bundle guard in index.html sets this before reloading; that
+// this module is running at all is the proof it worked, and clearing it
+// lets a later stale load in the same tab get its one retry too.
+try { sessionStorage.removeItem('jp-bundle-reload') } catch { /* private mode */ }
+
 // ── The service worker (plan 065) ──
 // Web build only. vite-plugin-pwa is disabled for the native mode (a
 // custom-scheme WebView has no worker, and the bundle IS the app) and
