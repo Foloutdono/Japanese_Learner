@@ -17,7 +17,7 @@
       "destination": "/privacy.html"
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ],
