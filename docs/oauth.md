@@ -20,7 +20,7 @@ app ──▶ <project>.supabase.co/auth/v1/authorize?provider=google
 | build | value |
 | --- | --- |
 | web (dev, Vercel) | `window.location.origin` + `/` |
-| shells (Capacitor) | `com.japaneselearner.app://auth-callback` |
+| shells (Capacitor) | `app.tsuji://auth-callback` |
 
 The shells cannot navigate: the WebView's origin *is* the bundle, so a page
 that leaves for Google can never come home. There the authorization page opens
@@ -94,7 +94,7 @@ listed:
 
 ```
 https://japanese-learner-seven.vercel.app/**
-com.japaneselearner.app://**
+app.tsuji://**
 http://localhost:5173/**          ← only if you sign in from `npm run dev`
 ```
 

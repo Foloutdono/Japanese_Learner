@@ -1,6 +1,6 @@
 {
-  "appId": "com.japaneselearner.app",
-  "appName": "Japanese Learner",
+  "appId": "app.tsuji",
+  "appName": "Tsuji",
   "webDir": "dist-native",
   "android": {
     "allowMixedContent": false,

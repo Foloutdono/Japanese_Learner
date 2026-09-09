@@ -1,6 +1,6 @@
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
-  appTitle:          '日本語',
+  appTitle:          '辻',
   learnJapanese:     'Learn Japanese',
   appDesc:           'Spaced repetition (SM-2) · Hiragana · Katakana · JLPT Vocabulary',
   login:             'Login',
@@ -85,7 +85,7 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  // ── 日本語駅 — the station ────────────────────────────────
+  // ── 辻駅 — the station ───────────────────────────────────
   // The home screen is the gate hall and every section is a line on
   // its wall map (see config/stations.js and WallMap.jsx). Station
   // and line names themselves are Japanese proper nouns and live in
@@ -1492,9 +1492,10 @@ const boarding = {
   brdDeparture: 'Departure',
   brdDayAria: 'Departure time',
   // The nudge (native only), and the notification as the app sends it.
-  // brdAppName is the store name: the owner's to set (plan 077).
+  // brdAppName is the store name, the one the notification header
+  // shows; keep it in step with capacitor.config.json's appName.
   brdNudgeQ: (time) => `A nudge at **${time}**?`,
-  brdAppName: 'Japanese Learner',
+  brdAppName: 'Tsuji',
   brdNotifNow: 'now',
   brdNotifTitle: (time) => `Your train leaves at ${time}`,
   brdNotifText: 'Your cards are waiting at the gate.',

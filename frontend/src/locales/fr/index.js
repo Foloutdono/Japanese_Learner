@@ -1,6 +1,6 @@
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
-  appTitle:          '日本語',
+  appTitle:          '辻',
   learnJapanese:     'Apprendre le japonais',
   appDesc:           'Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT',
   login:             'Connexion',
@@ -84,7 +84,7 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  // ── 日本語駅 — la gare ────────────────────────────────────
+  // ── 辻駅 — la gare ───────────────────────────────────────
   // L'accueil est le hall de la gare et chaque section une ligne sur
   // son plan mural (voir config/stations.js et WallMap.jsx). Les noms
   // de stations et de lignes sont des noms propres japonais et vivent
@@ -1459,10 +1459,10 @@ const boarding = {
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
   // Le rappel (natif seulement), et la notification telle que l’appli
-  // l’envoie. brdAppName est le nom sur les stores : au propriétaire
-  // de le fixer (plan 077).
+  // l’envoie. brdAppName est le nom sur les stores ; à garder en
+  // phase avec appName dans capacitor.config.json.
   brdNudgeQ: (time) => `Un rappel à **${time}** ?`,
-  brdAppName: 'Japanese Learner',
+  brdAppName: 'Tsuji',
   brdNotifNow: 'maintenant',
   brdNotifTitle: (time) => `Votre train part à ${time}`,
   brdNotifText: 'Vos cartes vous attendent au portillon.',

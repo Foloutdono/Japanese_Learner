@@ -636,8 +636,8 @@ const Fixture = () => (
       </div>
       <div className="brd-day"><span className="brd-day__tick ob-tick">06</span></div>
       <div className="brd-notif">
-        <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>JP</span>
-        <div className="brd-notif__head ob-notif-head"><span>Japanese Learner</span></div>
+        <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>辻</span>
+        <div className="brd-notif__head ob-notif-head"><span>Tsuji</span></div>
         <span className="brd-notif__text ob-notif-text">Your cards are waiting at the gate.</span>
       </div>
       <div className="brd-step brd-step--done"><span className="brd-step__val ob-step-val">N5 → N4</span></div>
