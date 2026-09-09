@@ -164,29 +164,51 @@ def count() -> int:
     return _conn().execute("SELECT COUNT(*) FROM entries").fetchone()[0]
 
 
+def count_matching(q: str) -> int:
+    """How many pool entries match `q` — the same predicate search()
+    pages through, without paying for a page of rows.
+
+    dictionary.py's merged vocabulary collection needs the pool's total
+    on every request (it is half the collection's count) but only needs
+    pool ROWS once a page runs past the curated deck.
+    """
+    if q == "":
+        return count()
+    like = f"%{q}%"
+    return _conn().execute(
+        "SELECT COUNT(*) FROM entries WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ?",
+        (like, like, like),
+    ).fetchone()[0]
+
+
 def search(q: str, limit: int, offset: int) -> tuple[list[dict], int]:
     """Substring search over kanji/kana/meaning, same semantics as the
     old `for w in VOCAB_JMDICT: if q in ... ` loop in dictionary.py, but
     as an indexed-where-possible SQL query instead of a 292k-row Python
-    scan. Returns (page_of_entries, total_matches)."""
+    scan. Returns (page_of_entries, total_matches).
+
+    Ordered by freq_rank, NOT by id. id is the word's position in the
+    JMdict dump — an arbitrary order that put 蒿雀 on page one and 事
+    tens of thousands of rows later. The dictionary serves this pool as
+    the tail of its vocabulary collection (routes/dictionary.py), where
+    "what comes first" is the whole question: the commonest word a
+    query matches is the one the reader almost certainly means.
+    idx_entries_freq_rank covers the ORDER BY, so paging never sorts.
+    """
+    total = count_matching(q)
     if q == "":
-        total = count()
         rows = _conn().execute(
             "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
-            "ORDER BY id LIMIT ? OFFSET ?",
+            "ORDER BY freq_rank LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
         return [_row_to_entry(r) for r in rows], total
 
     like = f"%{q}%"
-    total = _conn().execute(
-        "SELECT COUNT(*) FROM entries WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ?",
-        (like, like, like),
-    ).fetchone()[0]
     rows = _conn().execute(
         "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
         "WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ? "
-        "ORDER BY id LIMIT ? OFFSET ?",
+        "ORDER BY freq_rank LIMIT ? OFFSET ?",
         (like, like, like, limit, offset),
     ).fetchall()
     return [_row_to_entry(r) for r in rows], total

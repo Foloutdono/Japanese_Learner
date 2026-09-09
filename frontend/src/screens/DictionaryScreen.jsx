@@ -42,19 +42,21 @@ const LIMIT = 50
 // The whole of one syllabary, in one page. See fetchPage.
 const SYLLABARY_LIMIT = 200
 
-// The five collections, in their own line colours (canvas Dictionary).
-// "jmdict" is the full JMdict pool beyond the app's own curated deck
-// (see vocab_jmdict_data.py on the backend) — a separate collection
-// rather than folded into "vocab" so the default, curated ~8k-word
-// search experience doesn't get swamped by ~293k largely obscure
-// entries; someone who wants the full dictionary asks for it.
+// The four collections, in their own line colours (canvas Dictionary).
+// "vocab" is the whole vocabulary: the app's own curated JLPT deck
+// first, then the rest of JMdict by frequency (routes/dictionary.py).
+// The pool used to sit beside it as a fifth chip of its own, which
+// meant searching the vocabulary and finding nothing proved only that
+// you had looked in the smaller of two collections — you had to know
+// the other one existed before you could conclude the word was not in
+// the app. One collection, one search, and the levelled words a course
+// actually teaches still come first.
 function categoriesFor(t) {
 	return [
 		['kanji',    t.dictKanji,    'var(--line-kanji)'],
 		['vocab',    t.dictVocab,    'var(--line-vocab)'],
 		['hiragana', t.dictHiragana, 'var(--line-kana)'],
 		['katakana', t.dictKatakana, 'var(--line-rikai)'],
-		['jmdict',   t.dictJMdict,   'var(--line-jisho)'],
 	]
 }
 
@@ -82,7 +84,7 @@ export default function DictionaryScreen({ session }) {
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
-	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana' | 'jmdict'
+	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana'
 	const [results, setResults]       = useState([])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)

@@ -95,21 +95,160 @@ def get_radical_grid(all: bool = False):
     return {"groups": groups}
 
 
+# ── The vocabulary collection ────────────────────────────────────
+# ONE collection over two pools. The app's own curated JLPT deck
+# (vocab_data.py, 8,405 levelled words) used to be the "vocab" tab and
+# the rest of JMdict (vocab_jmdict_data.py, 212,460 entries) a separate
+# "jmdict" tab beside it, which meant a learner who searched the
+# vocabulary and found nothing had to know that a second, differently
+# named collection existed before they could conclude the word was not
+# in the app at all.
+#
+# The two pools are disjoint by construction — the JMdict pool is built
+# as "every term/reading pair NOT already in the deck" (verified: zero
+# of the deck's 8,405 words have a pool row) — so concatenating them
+# cannot show a word twice.
+#
+# Order is the deck entire, N5 → N1, then the pool by frequency rank.
+# The words a learner's own course teaches come before the ones it
+# doesn't, and past that the commonest reading of a query is the one
+# they almost certainly meant.
+
+
+def _deck_matches(q: str, lang: str) -> list[tuple[str, dict, str]]:
+    """(level, entry, display meaning) for every curated-deck word
+    matching `q`, in deck order — N5 first, N1 last."""
+    matches = []
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for w in vocab_list:
+            meaning = get_meaning(w, lang, VOCAB_FR_MAP)
+            if q == "" or (
+                q in w.get("kanji", "") or
+                q in w.get("kana", "") or
+                q.lower() in meaning.lower()
+            ):
+                matches.append((level, w, meaning))
+    return matches
+
+
+def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
+                  states: dict, user_id: str, raw_id: str) -> dict:
+    """One word as the catalogue serves it. Identical shape for a deck
+    word and a pool word — `level` is the only field that separates
+    them, and it is null for the pool (LevelBadge on the frontend
+    already renders nothing when it is falsy)."""
+    # lang is forwarded so tag chips (and the "tooltip" note text behind
+    # them) come back in whichever language the client is actually
+    # displaying — get_vocab_extras defaults to "fr" otherwise, which
+    # used to leak French labels into English sessions.
+    #
+    # The hint stays the entry's OWN English gloss rather than the
+    # translated `meaning`: _select_primary matches it against JMdict's
+    # English senses to decide which one the app's gloss refers to, so a
+    # French string would match nothing and lose the primary sense.
+    extras = get_vocab_extras(
+        entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""), lang,
+    )
+    return {
+        "type":     "vocab",
+        "kanji":    entry.get("kanji", ""),
+        "kana":     entry.get("kana", ""),
+        "meaning":  meaning,
+        "level":    level,
+        # Every JMdict sense (not just the app's own single gloss) —
+        # lets the detail panel show the fuller dictionary picture
+        # instead of only the one meaning.
+        "senses":   extras["senses"],
+        "examples": extras["examples"],
+        "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
+        "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
+    }
+
+
+def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str) -> dict:
+    """One page of the merged vocabulary collection.
+
+    Paginated at its two sources rather than by building one combined
+    list and slicing it: materializing every pool row matching `q` in
+    Python is exactly what moving that pool into SQLite exists to avoid
+    (see vocab_jmdict_data.py's memory note). The deck is small enough
+    to filter in memory and always sorts first, so a page is
+    `deck[start:start + limit]` topped up from the pool at whatever
+    offset is left once the deck is behind us.
+    """
+    deck       = _deck_matches(q, lang)
+    deck_total = len(deck)
+
+    start     = page * limit
+    deck_page = deck[start:start + limit]
+
+    if len(deck_page) < limit:
+        # This page runs past the deck (wholly or partly). The offset is
+        # into the POOL, not into the merged list: everything before
+        # deck_total belongs to the deck, so the pool starts counting
+        # from zero at that boundary.
+        pool_page, pool_total = jmdict_db.search(
+            q, limit=limit - len(deck_page), offset=max(0, start - deck_total),
+        )
+    else:
+        # A page entirely inside the deck still needs the pool's count
+        # for the collection total — but not a single one of its rows.
+        pool_page, pool_total = [], jmdict_db.count_matching(q)
+
+    total = deck_total + pool_total
+
+    # One bulk SRS fetch for the whole page, deck words and pool words
+    # alike; card_stats is then a cheap in-memory lookup per entry.
+    states = srs.get_user_states(user_id) if (deck_page or pool_page) else {}
+
+    results = [
+        _vocab_result(entry, level, meaning, lang, states, user_id,
+                      vocab_to_id(entry, level))
+        for level, entry, meaning in deck_page
+    ] + [
+        # The pool carries no French map (VOCAB_FR is the deck's own,
+        # keyed by kanji alone — a pool homograph would collect the
+        # deck word's translation), so its gloss is served as JMdict
+        # wrote it.
+        _vocab_result(entry, None, entry.get("meaning", ""), lang, states, user_id,
+                      vocab_jmdict_to_id(entry))
+        for entry in pool_page
+    ]
+
+    return {
+        "results":  results,
+        "total":    total,
+        "page":     page,
+        "limit":    limit,
+        "has_more": start + limit < total,
+    }
+
+
 @router.get("/api/dictionary")
 def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None,
                     user_id: str = Depends(get_user_id)):
     """
-    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana" | "jmdict"
+    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana"
     — lets the client avoid pulling in thousands of vocab entries when
     only kanji (or vice versa) are wanted.
 
-    "jmdict" is the full JMdict pool beyond the app's own curated JLPT
-    deck (see vocab_jmdict_data.py) — deliberately NOT included under
-    "all", so the default browse/search experience stays the curated
-    ~8k-word deck plus kanji/kana rather than getting swamped by
-    ~293k largely obscure entries. A client wanting full-dictionary
-    lookup asks for category="jmdict" explicitly.
+    "vocab" is the whole vocabulary: the app's curated JLPT deck first
+    (N5 → N1), then the rest of JMdict by frequency rank. See
+    _vocab_collection above for why the two are one collection and how
+    a page spans them.
+
+    "jmdict" is accepted as an alias of "vocab" — it used to be a
+    collection of its own, and a client still holding the old console
+    (or a bookmarked URL) should land on the merged list rather than on
+    an empty one.
+
+    "all" is the exception: it stays the curated cross-collection
+    browse — kanji + the JLPT deck + kana — because it merges its
+    sources in memory before slicing, which the 212k-row JMdict pool
+    cannot join without undoing the whole reason that pool lives in
+    SQLite. Nothing in the app asks for it; it is the parameter's
+    default and the shape a bare GET returns.
 
     radical: classical (Kangxi) radical number. When given, restricts
     results to kanji filed under that radical — vocab and kana don't
@@ -122,52 +261,23 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     if radical is not None and radical not in RADICAL_BY_NUMBER:
         return {"error": "Unknown radical"}
 
+    # The vocabulary collection is served whole, from its own branch:
+    # nothing else shares its page, so it can paginate at its two
+    # sources (see _vocab_collection) rather than joining the general
+    # matches-list-then-slice path below, which would mean holding
+    # every matching JMdict row in Python first. Radical browsing is
+    # kanji only, so a radical request never lands here.
+    if category in ("vocab", "jmdict") and radical is None:
+        return _vocab_collection(q, page, limit, lang, user_id)
+
     matches = []  # (kind, level, entry, meaning) — cheap, no SRS lookups yet
 
     want_kanji    = category in ("all", "kanji")    or radical is not None
-    want_vocab    = category in ("all", "vocab")    and radical is None
+    # "all" only — category="vocab" returned above, pool and all. What
+    # this path adds is the curated deck alone; see the docstring.
+    want_vocab    = category == "all"               and radical is None
     want_hiragana = category in ("all", "hiragana") and radical is None
     want_katakana = category in ("all", "katakana") and radical is None
-    want_jmdict   = category == "jmdict"            and radical is None
-
-    if want_jmdict:
-        # category="jmdict" is always its own standalone branch (never
-        # combined with kanji/vocab/kana — see want_* above), so this can
-        # paginate straight from the DB instead of joining the general
-        # matches-list-then-slice path below, which would otherwise mean
-        # materializing every JMdict row that matches `q` in Python first.
-        jmdict_page, jmdict_total = jmdict_db.search(q, limit=limit, offset=page * limit)
-        states = srs.get_user_states(user_id) if jmdict_page else {}
-        results = []
-        for entry in jmdict_page:
-            raw_id = vocab_jmdict_to_id(entry)
-            meaning = entry.get("meaning", "")
-            # Same extras lookup as a normal vocab word; get_vocab_extras'
-            # JMdict fallback (see vocab_extras.py) queries the same DB
-            # this search just came from.
-            extras = get_vocab_extras(
-                entry.get("kanji", ""), entry.get("kana", ""), meaning, lang,
-            )
-            results.append({
-                "type":     "vocab",
-                "kanji":    entry.get("kanji", ""),
-                "kana":     entry.get("kana", ""),
-                "meaning":  meaning,
-                # No JLPT level — LevelBadge on the frontend already
-                # renders nothing when level is falsy.
-                "level":    None,
-                "senses":   extras["senses"],
-                "examples": extras["examples"],
-                "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
-                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
-            })
-        return {
-            "results":  results,
-            "total":    jmdict_total,
-            "page":     page,
-            "limit":    limit,
-            "has_more": (page + 1) * limit < jmdict_total,
-        }
 
     if want_kanji:
         for level, kanji_list in KANJI_BY_LEVEL.items():
@@ -185,17 +295,8 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                     matches.append(("kanji", level, k, meaning))
 
     if want_vocab:
-        for level, vocab_list in VOCAB_BY_LEVEL.items():
-            for w in vocab_list:
-                meaning = get_meaning(w, lang, VOCAB_FR_MAP)
-                kanji_form = w.get("kanji", "")
-                kana_form  = w.get("kana", "")
-                if q == "" or (
-                    q in kanji_form or
-                    q in kana_form or
-                    q.lower() in meaning.lower()
-                ):
-                    matches.append(("vocab", level, w, meaning))
+        for level, w, meaning in _deck_matches(q, lang):
+            matches.append(("vocab", level, w, meaning))
 
     # The WHOLE syllabary, not the gojūon alone: きゃ and えい are kana a
     # reader meets in their first week and could not look up here at
@@ -266,29 +367,9 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 "readings":     words["readings"],
             })
         elif kind == "vocab":
-            raw_id = vocab_to_id(entry, level)
-            # lang is forwarded so tag chips (and the "tooltip" note
-            # text behind them) come back in whichever language the
-            # client is actually displaying — get_vocab_extras defaults
-            # to "fr" otherwise, which used to leak French labels into
-            # English sessions.
-            extras = get_vocab_extras(
-                entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""), lang,
-            )
-            results.append({
-                "type":     "vocab",
-                "kanji":    entry.get("kanji", ""),
-                "kana":     entry.get("kana", ""),
-                "meaning":  meaning,
-                "level":    level,
-                # Every JMdict sense (not just the app's own single
-                # gloss) — lets the detail panel show the fuller
-                # dictionary picture instead of only the one meaning.
-                "senses":   extras["senses"],
-                "examples": extras["examples"],
-                "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
-                "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
-            })
+            results.append(_vocab_result(
+                entry, level, meaning, lang, states, user_id, vocab_to_id(entry, level),
+            ))
         else:  # hiragana or katakana
             raw_id = kana_to_id(entry)
             # A stroke file is one character's, and a kana here is not

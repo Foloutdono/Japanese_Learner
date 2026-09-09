@@ -396,7 +396,6 @@ const stats = {
   reference:          'Référence',
   // ── Dictionnaire et analyseur (plan 073) ──
   allReadings:        'Toutes les lectures',
-  dictJMdict:         'JMdict',
   dictCollections:    'Collections',
   analyzerDoorSub:    'Texte, photo, vidéo',
   passagesCount: (n) => `${n} passage${n === 1 ? '' : 's'}`,
