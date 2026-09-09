@@ -6623,14 +6623,20 @@ textarea:focus-visible {
 .route-stop--past .route-stop__rail { background: var(--line-color); }
 .route-stop--first .route-stop__rail { top: 50%; }
 .route-stop--last  .route-stop__rail { bottom: 50%; }
+/* 18px, up from 11 (owner's call). The row grew to a share of the
+   screen when the route took the page, and a dot drawn for a 56px row
+   read as a pin-prick on a card three times that: the stop is what the
+   line is FOR, so it is the size of a station mark on a wall map now.
+   Still clear of the code beside it — 18px on the 20.5px axis ends at
+   29.5, and the content column starts at --sp-8. */
 .route-stop__marker {
   position: absolute;
   top: 50%;
-  width: 11px;
-  height: 11px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--r-pill);
   transform: translate(-50%, -50%);
-  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
+  border: 2.5px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
   /* The dot is hollow, and it is on the card now: it takes the card's
      own ground rather than naming one, so it stays hollow through the
      hover that lifts it. */
@@ -6638,8 +6644,8 @@ textarea:focus-visible {
 }
 .route-stop--past .route-stop__marker { background: var(--line-color); border-color: var(--line-color); }
 .route-stop--current .route-stop__marker {
-  width: 15px;
-  height: 15px;
+  width: 22px;
+  height: 22px;
   background: var(--line-color);
   border-color: var(--line-color);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
@@ -6686,31 +6692,11 @@ textarea:focus-visible {
 }
 .route-stop__fig b { color: var(--text-primary); }
 
-/* ── How far into this stop you are ──
-   The route says how far along the LINE you are; this says how much of
-   the stop itself is done, which is a percentage with no waypoints of
-   its own — the one thing DESIGN keeps a bar for. It is the card's own
-   bottom edge, the way the study stage rules its deck across the top:
-   3px, the line's pigment over its own faint track, and it exists only
-   where there is a figure to draw it from. */
-.route-stop__bar {
-  position: absolute;
-  /* The content column's own width, not the card's: the card's corners
-     are rounded and a rule that runs into them frays. It starts where
-     the code starts and ends where the figure does. */
-  left: var(--sp-8);
-  right: var(--sp-4);
-  bottom: var(--sp-3);
-  height: 3px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--line-color) 14%, transparent);
-}
-.route-stop__fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: var(--line-color);
-}
+/* The stop carried its own progress as a 3px rule along the bottom of
+   the card, under the figure it was drawn from. It is gone (owner's
+   call): the figure says the same thing in the register the row is
+   already read in, and a second drawing of it left every card with a
+   line under it that the eye had to sort from the rail beside it. */
 
 @media (max-width: 768px) {
   /* ── The line runs the height of the screen ──

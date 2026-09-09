@@ -205,7 +205,6 @@ describe('the phone layout contract', () => {
         <span className="route-stop__names"><span className="route-stop__jp">Niveau débutant</span></span>
         <span className="route-stop__fig"><b>120</b>/ 800</span>
         <span className="route-stop__go">▶</span>
-        <span className="route-stop__bar"><span className="route-stop__fill" style={{ width: '15%' }} /></span>
       </button>
     )
     const screen = await render(
@@ -245,12 +244,16 @@ describe('the phone layout contract', () => {
     expect(fig.bottom).toBeLessThanOrEqual(names.top)
     expect(names.top).toBeGreaterThanOrEqual(code.bottom)
     expect(names.right).toBeGreaterThan(fig.left)
-    // The stop's own progress runs inside the content column, clear of
-    // the card's rounded corners.
-    const bar = first.querySelector('.route-stop__bar').getBoundingClientRect()
-    expect(bar.left).toBeGreaterThan(first.getBoundingClientRect().left + 40)
-    expect(Math.round(first.querySelector('.route-stop__fill').getBoundingClientRect().width))
-      .toBe(Math.round(bar.width * 0.15))
+    // The stop's mark is a station mark, not a pin-prick: it was drawn
+    // for a 56px row and the row is a share of the screen now. Still
+    // clear of the code beside it, which is what the left pad is for.
+    const marker = first.querySelector('.route-stop__marker').getBoundingClientRect()
+    expect(marker.width).toBeGreaterThanOrEqual(16)
+    expect(marker.right).toBeLessThanOrEqual(code.left)
+    // Nothing draws the figure a second time: the row says it in
+    // numerals, and a rule under every card only competed with the rail
+    // beside it. Owner's call.
+    expect(first.querySelector('.route-stop__bar')).toBeNull()
   })
 
   // ── The run's foot is on the screen, not on its edge ──

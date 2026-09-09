@@ -64,13 +64,10 @@ describe('the sentence stations at phone width', () => {
     expect(stops.map(s => s.querySelector('.route-stop__fig')?.textContent.replace(/\s/g, '')))
       .toEqual(['120/800', '0/1500', '0/3700', '0/6000', '0/10000'])
 
-    // The figure, drawn: 120 of 800 is 15% of the row's own rule.
-    const bar = stops[0].querySelector('.route-stop__bar')
-    const run = bar.querySelector('.route-stop__fill')
-    expect(Math.round(run.getBoundingClientRect().width))
-      .toBe(Math.round(bar.getBoundingClientRect().width * 0.15))
-    // Nothing held at N4 draws nothing, rather than a stub of pigment.
-    expect(stops[1].querySelector('.route-stop__fill').getBoundingClientRect().width).toBe(0)
+    // The figure and nothing else: the stop drew it a second time as a
+    // rule along the bottom of its card, and that rule is gone (owner's
+    // call — it competed with the line's own rail).
+    for (const stop of stops) expect(stop.querySelector('.route-stop__bar')).toBeNull()
 
     // And the learner's own grade is still the one marked.
     expect(screen.container.querySelector('.route-stop--current .route-stop__code').textContent).toBe('N5')
