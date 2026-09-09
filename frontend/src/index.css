@@ -13118,7 +13118,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
 }
 
+/* Six levels, one band. The row is a SCALE — Tous, then N5 down to N1
+   — so its buttons share the width equally instead of ending ragged
+   two-thirds of the way across, the same growth the chip row and a
+   console's chips take. The inline padding comes in to --sp-3 so all
+   six fit one line at phone width; at 20px the row wrapped 4 + 2 and
+   the two on the second line each took a third of the menu. */
 .browse-level-row { margin-bottom: 14px; }
+.browse-level-row .study-level-btn {
+  flex: 1 1 0;
+  padding-inline: var(--sp-3);
+  text-align: center;
+}
 
 .browse-search-input { width: 100%; margin-bottom: 16px; box-sizing: border-box; }
 
