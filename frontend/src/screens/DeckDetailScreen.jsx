@@ -258,6 +258,8 @@ export default function DeckDetailScreen({ session }) {
   // deletion, which used to sit on the shelf's card.
   const [moreOpen, setMoreOpen] = useState(false)
   const [confirmingDeck, setConfirmingDeck] = useState(false)
+  // The hand-written card a remove is waiting on — see askRemove.
+  const [confirmingCard, setConfirmingCard] = useState(null)
   const today = useTodaySummary().data
   const dueToday = dueByDeck(today).get(String(deck_id)) ?? 0
 
@@ -336,12 +338,26 @@ export default function DeckDetailScreen({ session }) {
   // deleting the row you have open would leave the form saving to an
   // id the server no longer knows.
   function removeCard(card) {
+    playUi('click-screen-selection')
+    setConfirmingCard(null)
     if (card.origin === 'custom' && editing === card.id) {
       setAdding(false)
       setEditing(null)
       resetForm()
     }
     return deleteCard(card).then(fetchCards)
+  }
+
+  // What the trash does, and it depends on what the card is. A
+  // browsed-in card is a LINK: removing it loses nothing the app does
+  // not still hold, and Browse puts it back in two taps. A hand-written
+  // one is the learner's own text and there is no undo, so it asks
+  // first — in the sheet, named, the way the deck's own deletion asks
+  // eight lines below.
+  function askRemove(card) {
+    playUi('click-mode-selection')
+    if (card.origin === 'custom') setConfirmingCard(card)
+    else removeCard(card)
   }
 
   // The spec for THIS deck, or null until it arrives. A deck holds one
@@ -724,7 +740,7 @@ export default function DeckDetailScreen({ session }) {
                   {!selectMode && (
                     <button
                       type="button"
-                      onClick={() => removeCard(card)}
+                      onClick={() => askRemove(card)}
                       className="card-row__remove"
                       aria-label={t.delete}
                       title={t.delete}
@@ -763,6 +779,22 @@ export default function DeckDetailScreen({ session }) {
             <TrashIcon size={14} /> {t.deleteDeck}
           </button>
         )}
+      </Sheet>
+
+      {/* One card's deletion, asked the same way the deck's is: the
+          card named at the head of the sheet, so "this card" is not a
+          pronoun with nothing to point at. */}
+      <Sheet
+        open={confirmingCard != null}
+        onClose={() => setConfirmingCard(null)}
+        jp={confirmingCard?.front}
+        cap={t.delete}
+      >
+        <span className="sheet__q">{t.deleteCardConfirm}</span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={() => removeCard(confirmingCard)}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingCard(null)}>{t.cancel}</button>
       </Sheet>
 
       {showImport && (
