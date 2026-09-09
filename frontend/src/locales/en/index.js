@@ -1414,6 +1414,14 @@ const boarding = {
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
   orWithEmail: 'or with an email address',
+  // 改札 — a round trip that came back refused (lib/authRedirect.js).
+  // Both name what happened rather than "something went wrong": on the
+  // web these are read off the URL after the page has already been to
+  // Google and back, and a learner who has just done that is owed the
+  // reason, not a shrug.
+  oauthAlreadyLinked: 'That Google account already belongs to another pass.',
+  oauthSignInInstead: 'Sign in with that Google account',
+  oauthLinkingOff: 'Google cannot be added to this pass right now. An email address can.',
   // Last stop: the account, asked once everything has been seen — and
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).

@@ -4,6 +4,7 @@ import { useLang } from '../LangContext'
 import { Seg } from '../components/chrome/Console'
 import { BackChevron } from '../components/boarding/icons'
 import { ProviderButton } from '../components/account/ProviderButton'
+import { authRedirectError, authRedirectMessage } from '../lib/authRedirect'
 
 // ── Sign in (plan 075, canvas SignIn) ────────────────────────────
 // The sign over one card: Login / Sign up as a segmented control, the
@@ -24,7 +25,14 @@ export default function AuthScreen({ mode: initialMode = 'login', onBack } = {})
   const [mode, setMode]         = useState(initialMode) // 'login' | 'signup'
   const [email, setEmail]       = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError]       = useState(null)
+  // 改札 — a Google round trip that came back refused lands as a fresh
+  // page load with the reason on the URL, never as a returned value
+  // (lib/authRedirect.js), so this line starts on it. App opens this
+  // screen for it; without that the learner would be shown the sign-in
+  // form with nothing said, which is indistinguishable from a button
+  // that did nothing. Ordinary state from there on: the next attempt,
+  // or switching sides, replaces it.
+  const [error, setError]       = useState(() => authRedirectMessage(authRedirectError(), t))
   const [loading, setLoading]   = useState(false)
   const [success, setSuccess]   = useState(null)
 

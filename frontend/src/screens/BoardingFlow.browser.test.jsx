@@ -48,6 +48,14 @@ vi.mock('../lib/platform', () => ({
   canNudge: () => nudgeRef.current,
   requestNudgePermission: async () => nudgeRef.current,
 }))
+// 改札 — what the Google round trip came back with. Only the pending
+// refusal is faked: the message and the classification stay real, so a
+// renamed code or a missing string fails here too.
+const oauthRefusal = { current: null }
+vi.mock('../lib/authRedirect', async (importOriginal) => ({
+  ...(await importOriginal()),
+  authRedirectError: () => oauthRefusal.current,
+}))
 vi.mock('../lib/audio', async (importOriginal) => ({
   ...(await importOriginal()),
   playPlatformChime: vi.fn(),
@@ -64,6 +72,15 @@ const VOLUMES = {
   kanji: { N5: 103, N4: 166, N3: 367, N2: 367, N1: 1232 },
   grammar: { N5: 71, N4: 71, N3: 71, N2: 71, N1: 71 },
   kana: 224,
+}
+
+// The stash the web writes before leaving for Google, and the answers
+// it carries back — the shortest walk's, so the resumed flow can price
+// a plan and print a pass without being asked anything again.
+const STASH_KEY = 'jp-boarding-stash'
+const RESUMED = {
+  name: 'Tester', motive: 'trip', kana: 'both', levelChoice: 'N1', jlpt: 'N1',
+  goal: null, rhythm: 10, minute: 480, notifications: false,
 }
 
 // The pull is 260 ms; a settle clears it and the leaving car with it.
@@ -157,6 +174,8 @@ beforeEach(() => {
   apiFetch.mockClear()
   patchResponse.current = null
   nudgeRef.current = false
+  oauthRefusal.current = null
+  sessionStorage.removeItem(STASH_KEY)
   apiJson.mockImplementation(async path => (path === '/api/onboarding/volumes' ? VOLUMES : {}))
   apiJsonWithTimeout.mockImplementation(async path => {
     if (path === '/api/onboarding/complete') return { jlptLevel: 'N5', dailyNewTarget: 10, onboardedAt: 'x' }
@@ -549,5 +568,45 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')
     await settle()
     expect(stepOf(screen)).toBe('pass')
+  })
+
+  // ── 改札 — coming back from Google, on the web ──────────────────
+  // The web leaves the page for Google and returns as a FRESH load, so
+  // the account step is the one screen this flow can be re-entered on
+  // having already been answered. The button's own onDone never runs:
+  // the navigation unmounted the component that would have called it.
+  // Everything below is about what the learner is shown on that
+  // return, which — before this — was the same question again, with
+  // nothing said either way.
+
+  it('comes back from a Google sign-in onto the pass, not onto the offer it just answered', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    // No longer a guest: the round trip put credentials on the pass.
+    const { screen } = await renderFlow({ guest: false })
+    expect(stepOf(screen)).toBe('pass')
+  })
+
+  it('comes back from a refused round trip to the offer, with the reason on it', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    // Still a guest: nothing was linked, so the offer still stands.
+    oauthRefusal.current = {
+      error: 'server_error',
+      code: 'identity_already_exists',
+      description: 'Identity is already linked to another user',
+    }
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('account')
+    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
+    // That Google account is somebody's pass already — so it is
+    // offered as a sign-in beside the link that could not happen.
+    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
+  })
+
+  it('offers no second Google button for a refusal signing in cannot answer', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    oauthRefusal.current = { error: 'server_error', code: 'manual_linking_disabled', description: 'Manual linking is disabled' }
+    const { screen } = await renderFlow({ guest: true })
+    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
+    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(1)
   })
 })

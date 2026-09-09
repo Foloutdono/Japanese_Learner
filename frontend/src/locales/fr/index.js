@@ -1386,6 +1386,14 @@ const boarding = {
   // — un fournisseur ne distingue pas les deux, on arrive, c'est tout.
   continueWithGoogle: 'Continuer avec Google',
   orWithEmail: 'ou avec une adresse e-mail',
+  // 改札 — un aller-retour revenu refusé (lib/authRedirect.js). Les
+  // deux nomment ce qui s'est passé plutôt qu'« une erreur est
+  // survenue » : sur le web, on les lit dans l'URL une fois la page
+  // revenue de Google, et qui vient de faire ce trajet mérite la
+  // raison, pas un haussement d'épaules.
+  oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
+  oauthSignInInstead: 'Se connecter avec ce compte Google',
+  oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
