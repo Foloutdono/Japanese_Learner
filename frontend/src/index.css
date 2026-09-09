@@ -1153,10 +1153,16 @@
   border-radius: var(--surface-radius);
   overflow: hidden;
 }
+/* One row until the room runs out, then two. A phone cannot hold the
+   transport, the sound and 追従 side by side, and the honest answer is
+   a second line rather than a scrubber crushed to a sliver -- air
+   gives way before content does (DESIGN.md, the density contract). */
 .anl-player__bar {
   display: flex;
   align-items: center;
+  flex-wrap: wrap;
   gap: var(--sp-4);
+  row-gap: var(--sp-3);
   padding: var(--sp-3) var(--sp-4);
 }
 .anl-player__btn {
@@ -1181,7 +1187,10 @@
    nothing else. */
 .anl-player__track {
   flex: 1;
-  min-width: 0;
+  /* A floor, not the usual flex `min-width: 0`: a track free to shrink
+     to nothing never lets the bar wrap -- it just gives its own width
+     away to the controls until there is no scrubber left to grab. */
+  min-width: 96px;
   height: 4px;
   border-radius: 2px;
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
@@ -1201,6 +1210,33 @@
   font-variant-numeric: tabular-nums;
   letter-spacing: var(--tr-term);
   color: var(--text-on-panel-soft);
+}
+
+/* ── 音量 — the sound ──
+   The mute and its dial travel as ONE flex item, so a wrap can never
+   leave the speaker on one line and the slider on the next. Both live
+   here rather than in the iframe's own bar, which a learner has to
+   hover the video to reach and which leaves with its controls. */
+.anl-player__vol {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.anl-player__dial.dial {
+  /* Panel inks, and deliberately NOT 鶯色: that pigment is the video
+     source's own, spent on the data only this source has (the
+     timestamp chips, the playhead) and not on chrome every player in
+     the world already has. The compound selector is load bearing for
+     the same reason the exam scrubber's is -- .dial is declared later
+     in this file at equal specificity. */
+  --dial-rail: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  --dial-ink: var(--text-on-panel-soft);
+  --dial-ink-hover: var(--text-on-panel);
+  --dial-edge: var(--bg-panel);
+  /* the dial's own box, not a spacing rung -- as .anl-player__btn's
+     34px is the button's */
+  width: 84px;
+  flex: 0 0 auto;
 }
 
 /* 追従 — follow the clock. A toggle, so it states its own state rather

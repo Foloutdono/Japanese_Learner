@@ -50,10 +50,16 @@ vi.mock('../components/analysis/useMining', async importOriginal => ({
 vi.mock('../components/video/VideoPlayer', async () => {
   const { forwardRef, useImperativeHandle } = await import('react')
   const spies = { play: vi.fn(), pause: vi.fn(), seekTo: vi.fn() }
+  // The sound is a PROP, not a method (the real player applies it to
+  // the iframe), so the volume cases read what the screen last handed
+  // down rather than a call log.
+  const props = { last: null }
   return {
     __playerSpies: spies,
-    VideoPlayer: forwardRef(function MockVideoPlayer(props, ref) {
+    __playerProps: props,
+    VideoPlayer: forwardRef(function MockVideoPlayer(p, ref) {
       useImperativeHandle(ref, () => spies)
+      props.last = p
       return <div data-testid="player" />
     }),
   }
@@ -69,7 +75,7 @@ vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: AnalyzerScreen } = await import('./AnalyzerScreen')
-const { __playerSpies: playerSpies } = await import('../components/video/VideoPlayer')
+const { __playerSpies: playerSpies, __playerProps: playerProps } = await import('../components/video/VideoPlayer')
 
 // Renders on the text platform: the three intakes are one segmented
 // control over the page (plan 073), text first.
@@ -131,7 +137,25 @@ beforeEach(() => {
   playerSpies.play.mockReset()
   playerSpies.pause.mockReset()
   playerSpies.seekTo.mockReset()
+  playerProps.last = null
+  // The sound is persisted (lib/videoVolume), and the browser lane
+  // shares one origin across the whole file: without this, a case that
+  // mutes leaks a muted player into the next one.
+  window.localStorage.removeItem('jp-video-sound')
 })
+
+// A ready video session with a player: the payload the volume and
+// transport cases both start from.
+function videoSession() {
+  return {
+    status: 'ready', source: 'upload', sourceRef: 'x.srt',
+    videoId: 'dQw4w9WgXcQ', windowCapped: false, truncated: 0,
+    sentences: [
+      { text: '猫が好き', cue_start: 36, cue_end: 40, grammar: [], unknown_count: 0, available: true, tokens: [{ surface: '猫が好き', pos: 'noun' }] },
+      { text: '犬も好き', cue_start: 40, cue_end: 44, grammar: [], unknown_count: 0, available: true, tokens: [{ surface: '犬も好き', pos: 'noun' }] },
+    ],
+  }
+}
 
 describe('AnalyzerScreen polling', () => {
   it('does not crash while the session is still generating (HTTP 202)', async () => {
@@ -231,6 +255,78 @@ describe('AnalyzerScreen polling', () => {
     // jump, which is the visible glitch this exists to prevent.
     expect(playerSpies.seekTo.mock.invocationCallOrder[0])
       .toBeLessThan(playerSpies.play.mock.invocationCallOrder[0])
+  })
+
+  // ── 音量 — the transport bar's sound ──
+  // The dial and the mute are the analyser's, not the iframe's: reaching
+  // YouTube's own slider means hovering the video and waiting for its
+  // controls, over a player the learner is trying to read subtitles off.
+  it('hands the dial’s level to the player and keeps it', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    const dial = screen.container.querySelector('.anl-player__dial')
+    expect(dial).not.toBeNull()
+    // Full by default -- a player that opens quiet looks broken.
+    expect(playerProps.last.volume).toBe(100)
+    expect(playerProps.last.muted).toBe(false)
+
+    typeInto(dial, '35')
+    await settle(60)
+
+    expect(playerProps.last.volume).toBe(35)
+    // …and it survives the next video, which is the whole point of
+    // saving it (lib/videoVolume).
+    expect(JSON.parse(window.localStorage.getItem('jp-video-sound')).volume).toBe(35)
+  })
+
+  it('mutes from the bar, reads zero while muted, and comes back', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    // The mute is the second control on the bar wearing the play
+    // button's drawing; the play/pause proper is the first.
+    const mute = screen.container.querySelectorAll('.anl-player__btn')[1]
+    expect(mute).not.toBeNull()
+
+    mute.click()
+    await settle(60)
+    expect(playerProps.last.muted).toBe(true)
+    // A muted player reads zero, whatever level it is holding.
+    expect(screen.container.querySelector('.anl-player__dial').value).toBe('0')
+
+    mute.click()
+    await settle(60)
+    expect(playerProps.last.muted).toBe(false)
+    // Unmuting a dial at zero has to give the learner something to
+    // hear, or the button reads as dead.
+    expect(playerProps.last.volume).toBeGreaterThan(0)
+  })
+
+  it('treats dragging the dial to zero as a mute, and off zero as a request to hear it', async () => {
+    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
+    apiJson.mockResolvedValue(videoSession())
+
+    const screen = await renderScreen()
+    await startFromFile(screen)
+    await settle(2000)
+
+    const dial = screen.container.querySelector('.anl-player__dial')
+    typeInto(dial, '0')
+    await settle(60)
+    expect(playerProps.last.muted).toBe(true)
+
+    typeInto(dial, '20')
+    await settle(60)
+    expect(playerProps.last).toMatchObject({ volume: 20, muted: false })
   })
 
   // ── 字幕取り — the subtitle grab hash ──

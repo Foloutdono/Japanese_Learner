@@ -28,17 +28,42 @@ import { formatTimecode } from '../../lib/timecode'
 // siblings from overlapping.
 
 export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChange = true, kept, onKeep }) {
+  const lineRef = useRef(null)
   const activeRef = useRef(null)
   const stopRefs = useRef({})
 
   // Playback moves the active stop without a click, so the line has to
-  // follow. 'nearest' scrolls only the axis that actually overflows.
+  // follow -- INSIDE ITS OWN BOX, and nowhere else.
+  //
+  // This used to be one `el.scrollIntoView({ block: 'nearest' })`, and
+  // 'nearest' is honest about the AXIS but not about the SCROLLER:
+  // the call walks every scrollable ancestor up to the document, so
+  // after scrolling the rail it also scrolled the PAGE to bring the
+  // stop into the viewport. Below the 1100px split the rail stacks
+  // under the stage, which put the video at the top of what the page
+  // scrolled away -- every new cue took the thing being watched out of
+  // frame, four times a minute, for the whole track.
+  //
+  // So the 'nearest' adjustment is computed here and applied to the
+  // rail's own scroller (.anl-line carries overflow-y: auto at every
+  // width). If it does not overflow there is nothing to do, and the
+  // window is left exactly where the learner put it -- which is the
+  // whole point: the line follows the clock, the page follows nobody.
   useEffect(() => {
     if (!scrollOnChange) return
     const el = activeRef.current
-    if (!el) return
+    const box = lineRef.current
+    if (!el || !box) return
+    const stop = el.getBoundingClientRect()
+    const rail = box.getBoundingClientRect()
+    // Above the top edge scrolls up, below the bottom edge scrolls
+    // down, and a stop already inside the box does not move at all.
+    const delta = stop.top < rail.top
+      ? stop.top - rail.top
+      : (stop.bottom > rail.bottom ? stop.bottom - rail.bottom : 0)
+    if (!delta) return
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
-    el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: reduced ? 'auto' : 'smooth' })
+    box.scrollTo({ top: box.scrollTop + delta, behavior: reduced ? 'auto' : 'smooth' })
   }, [activeIndex, scrollOnChange])
 
   // Arrow keys move along the line AND select, which is what a route
@@ -68,6 +93,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
 
   return (
     <div
+      ref={lineRef}
       className="anl-line"
       // role="group", NOT role="list". A list wants role="listitem"
       // children, and putting that on a <button> OVERRIDES the button
