@@ -237,17 +237,21 @@ export default function BoardingFlow({
       .finally(() => setBusy(false))
   }
 
-  function afterLevel(jlpt) {
-    const ahead = stopsAhead(jlpt)
-    set({ jlpt, goal: ahead[0] ?? null })
+  // The learner's own CHOICE decides the goal list; the office stores
+  // the JLPT level it maps to. The two differ for exactly one answer —
+  // the novice, who is stored at N5 but has not passed it, so N5 is the
+  // first stop AHEAD of them rather than the one behind.
+  function afterLevel(choice) {
+    const ahead = stopsAhead(choice)
+    set({ levelChoice: choice, jlpt: jlptFor(choice), goal: ahead[0] ?? null })
     return ahead.length > 0 ? 'goal' : 'rhythm'
   }
 
   function answerKana(kana) {
-    const level = levelForKana(kana)
-    if (level) {
-      set({ kana, levelChoice: null })
-      afterLevel(level)
+    const choice = levelForKana(kana)
+    if (choice) {
+      set({ kana })
+      afterLevel(choice)
       go('reveal')
     } else {
       set({ kana })
@@ -256,11 +260,11 @@ export default function BoardingFlow({
   }
 
   function continueReveal() {
-    go(afterLevel(answers.jlpt ?? 'N5'))
+    go(afterLevel(answers.levelChoice ?? 'novice'))
   }
 
   function continueLevel() {
-    go(afterLevel(jlptFor(answers.levelChoice)))
+    go(afterLevel(answers.levelChoice))
   }
 
   function continueTime() {
@@ -275,6 +279,10 @@ export default function BoardingFlow({
 
   // ── The contract ─────────────────────────────────────────────
   const jlpt = answers.jlpt ?? 'N5'
+  // What the learner said they are, as they said it: the novice is
+  // stored at N5 and must not be printed as one — they are boarding
+  // before that stop, not at it.
+  const levelLabel = answers.levelChoice === 'novice' ? t.brdNovice : jlpt
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now)
   const time = minutesToTime(answers.minute)
@@ -347,7 +355,7 @@ export default function BoardingFlow({
       case 'level':
         return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
       case 'goal':
-        return <GoalStep volumes={volumes} level={jlpt} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('rhythm')} />
+        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('rhythm')} />
       case 'rhythm':
         return <RhythmStep value={answers.rhythm} onChange={v => set({ rhythm: v })} onContinue={() => go('time')} />
       case 'time':
@@ -370,7 +378,7 @@ export default function BoardingFlow({
             name={displayName}
             onDone={buildingDone}
             steps={[
-              { key: 'goal', label: t.brdBuildGoal, value: answers.goal ? `${jlpt} → ${answers.goal}` : jlpt },
+              { key: 'goal', label: t.brdBuildGoal, value: answers.goal ? `${levelLabel} → ${answers.goal}` : levelLabel },
               { key: 'lines', label: t.brdBuildLines, value: t.brdFourLines },
               { key: 'ride', label: t.brdBuildRide, value: `${answers.rhythm} min · ${time}` },
               {

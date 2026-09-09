@@ -1507,7 +1507,7 @@ const boarding = {
   brdOnTrackLine: 'On track for the whole line',
   brdPassQ: (name) => `Your pass is ready, **${name}**.`,
   brdEnjoy: 'Enjoy the ride.',
-  brdIssued: 'Issued',
+  brdCreditsGift: (n) => `+${n} credits, on the house`,
   brdEnter: 'Enter the station',
 }
 

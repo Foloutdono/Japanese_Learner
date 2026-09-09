@@ -55,13 +55,18 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
   )
 }
 
+// `level` is the learner's own choice, not the level the office
+// stores: the novice is stored at N5 and has not passed it, so N5 is
+// the first stop AHEAD of them. stopsAhead knows that; the hint has to
+// print the choice by its own name rather than the stored code.
 export function GoalStep({ volumes, level, value, onChange, onContinue }) {
   const { t, lang } = useLang()
   const ahead = stopsAhead(level)
+  const from = level === 'novice' ? t.brdNovice : level
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={t.brdGoalHint(level)}>{t.brdGoalQ}</BoardQuestion>
+        <BoardQuestion hint={t.brdGoalHint(from)}>{t.brdGoalQ}</BoardQuestion>
         <div className="brd__stage">
           <div className="brd__opts">
             {ahead.map((stop, i) => (

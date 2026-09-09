@@ -40,10 +40,16 @@ describe('the day track', () => {
 })
 
 describe('the kana check and the level', () => {
-  it('sets the level for one script or none, and asks for both', () => {
-    expect(levelForKana('hiragana')).toBe('N5')
-    expect(levelForKana('katakana')).toBe('N5')
-    expect(levelForKana('none')).toBe('N5')
+  // It answered 'N5' for a reader of one script or none, which put them
+  // AT the first stop: they never saw the level list, and their goal
+  // list opened at N4, so "reach N5" — the likeliest goal a beginner
+  // has — was the one thing they could not ask for (owner's report).
+  // One script or none is short of N5, which asks for both kana and
+  // ~100 kanji, so the answer is the novice.
+  it('boards one script or none as a novice, and asks the reader of both', () => {
+    expect(levelForKana('hiragana')).toBe('novice')
+    expect(levelForKana('katakana')).toBe('novice')
+    expect(levelForKana('none')).toBe('novice')
     expect(levelForKana('both')).toBeNull()
   })
   it('boards the novice at the first stop', () => {
@@ -54,6 +60,10 @@ describe('the kana check and the level', () => {
     expect(stopsAhead('N5')).toEqual(['N4', 'N3', 'N2', 'N1'])
     expect(stopsAhead('N2')).toEqual(['N1'])
     expect(stopsAhead('N1')).toEqual([])
+    // The novice has passed none of them: the whole line is ahead, N5
+    // first. It is why the goal list is asked for the CHOICE and not
+    // for the level the office stores (which is N5 for them both).
+    expect(stopsAhead('novice')).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
   })
   it('counts the kanji through a stop from the volumes', () => {
     expect(kanjiThrough(VOLUMES, 'N5')).toBe(103)

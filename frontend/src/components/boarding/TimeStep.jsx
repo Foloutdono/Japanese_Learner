@@ -1,4 +1,4 @@
-import { useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { DEPARTURES, DEPART_TIMES } from '../onboarding/departures'
 import {
@@ -23,16 +23,77 @@ const TICKS = [
   { label: '24', at: 1, mod: 'last' },
 ]
 
+// ── The board settles ────────────────────────────────────────────
+// A 発車標 does not arrive already showing the time: every drum is
+// spinning when the board lights, and they stop one after another from
+// the left, which is the sound the whole thing is remembered for. The
+// step's board did arrive already set, and only ever turned its last
+// digit.
+//
+// So the four drums spin on their own tick and stop on a stagger. The
+// aria-label carries the real time throughout — a screen reader is
+// told the hour, never the spin — and reduced motion gets the settled
+// board on the first frame.
+const SPIN_TICK_MS = 60
+const SPIN_STOP_MS = 260
+const SPIN_STAGGER_MS = 180
+
+function useSettling(digits) {
+  const still = prefersStill()
+  const [face, setFace] = useState(() => (still ? digits : digits.map(() => '0')))
+  // How many drums have stopped, left to right — the stops fire in
+  // order, so one counter says which are still turning and the count
+  // itself is what re-renders the row.
+  const [stopped, setStopped] = useState(still ? digits.length : 0)
+  const turning = useRef(digits.map(() => true))
+
+  useEffect(() => {
+    if (still) return undefined
+    const tick = setInterval(() => {
+      // The live flags, not the render's: an array read from inside an
+      // interval is the one the interval closed over on the frame it
+      // was created.
+      setFace(f => f.map((d, i) => (turning.current[i] ? String(Math.floor(Math.random() * 10)) : d)))
+    }, SPIN_TICK_MS)
+    const stops = digits.map((_, i) => setTimeout(() => {
+      turning.current[i] = false
+      setFace(f => f.map((d, j) => (j === i ? digits[j] : d)))
+      setStopped(n => n + 1)
+      if (turning.current.every(on => !on)) clearInterval(tick)
+    }, SPIN_STOP_MS + i * SPIN_STAGGER_MS))
+    return () => { clearInterval(tick); stops.forEach(clearTimeout) }
+    // Once, when the board lights. A later change to the hour turns its
+    // own drum (brd-flap--turn) rather than re-shuffling the whole board
+    // under the learner's finger, which is why `digits` is not a dep.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Settled, the board IS the time: a change to the hour shows on the
+  // next render rather than waiting for a tick that no longer runs.
+  const settled = stopped >= digits.length
+  return { face: settled ? digits : face, stopped }
+}
+
+function prefersStill() {
+  return typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+}
+
 function Flaps({ time }) {
   const [h1, h2, , m1, m2] = time.split('')
+  const { face, stopped } = useSettling([h1, h2, m1, m2])
+  // A drum still turning says so, so the board can be styled and read
+  // mid-spin. The label is the hour throughout: a screen reader is told
+  // the time, never the shuffle.
+  const drum = i => `brd-flap${i >= stopped ? ' brd-flap--spin' : ''}`
   // Keyed on the time so the last tile remounts, and flips once, per change.
   return (
     <div className="brd-board__flaps" aria-label={time}>
-      <span className="brd-flap">{h1}</span>
-      <span className="brd-flap">{h2}</span>
+      <span className={drum(0)}>{face[0]}</span>
+      <span className={drum(1)}>{face[1]}</span>
       <span className="brd-board__colon" aria-hidden="true">:</span>
-      <span className="brd-flap">{m1}</span>
-      <span key={time} className="brd-flap brd-flap--turn">{m2}</span>
+      <span className={drum(2)}>{face[2]}</span>
+      <span key={time} className={`${drum(3)} brd-flap--turn`}>{face[3]}</span>
     </div>
   )
 }
