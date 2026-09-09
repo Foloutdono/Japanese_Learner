@@ -75,9 +75,19 @@ jobs:
       # need a real chromium, which npm ci does not fetch. Without this those
       # lanes silently do not run -- the step still fails, but only after
       # reporting "6 passed (34)", which reads like a pass at a glance.
+      #
+      # No --with-deps, deliberately: it runs apt-get update, and the runner
+      # image's preinstalled Google Chrome apt source began serving a
+      # Packages.gz whose hash disagrees with its own InRelease (2026-09-09),
+      # so apt exits 100 and this step dies before a single test runs. The
+      # browser binary comes from Playwright's own CDN either way; the system
+      # libraries --with-deps would install are already on ubuntu-latest,
+      # which ships Chrome preinstalled. If a future runner image drops them,
+      # drop the broken repo rather than restoring --with-deps blind:
+      #   sudo rm -f /etc/apt/sources.list.d/google-chrome.list
       - name: Install Playwright chromium
         working-directory: frontend
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Test
         working-directory: frontend
         run: npm test
