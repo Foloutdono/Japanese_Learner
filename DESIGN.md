@@ -198,6 +198,20 @@ glyph is already 44px — a reading view cannot set it smaller than the card it
 came from. A word on that plate takes `--fs-display`, a long expression
 `--fs-heading`.
 
+The catalogue's own tile is the one place the word rung is a **ceiling
+rather than a size**. At 72px a 168px tile takes two characters to a line,
+so テープレコーダー printed one character per line over four of them and grew
+its whole row to 390px. The tile is a query container and its headword
+divides that width by its own character count (`--len`, set by the screen),
+clamped between `--fs-caption` and the word rung: a lone 駅 is the specimen
+it always was, エアコンディショナー lands near 15px, and nothing wraps. It is
+the one off-scale font size in the app that is not a literal to be
+harmonised away — the two ends of the clamp are rungs and the middle is a
+measurement of the tile — and it is allowlisted in `design-scale.json` as
+such. Reach for it only where the type must fit a box it cannot choose;
+everywhere else the nine rungs decide, and a headword too long for the floor
+ellipsises rather than shrinking further.
+
 ### Tracking runs inversely to size
 
 Small uppercase captions are set widest (`--tr-caption`), kana readings wider

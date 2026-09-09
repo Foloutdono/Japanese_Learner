@@ -683,7 +683,13 @@ function ResultsSection({
 										key={entryKey(entry)}
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
-										style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
+										// --len is how many characters the headword has: the
+										// tile divides its own width by it and sets the word to
+										// fit on one line (index.css, .dict-entry-card__char).
+										style={{
+											'--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)',
+											'--len': [...(entry.kanji || entry.kana || ' ')].length,
+										}}
 										className={[
 											'dict-entry-card',
 											stage ? `dict-entry-card--${stage}` : '',

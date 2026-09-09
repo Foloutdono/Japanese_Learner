@@ -35,8 +35,13 @@ describe('the dictionary at phone width', () => {
           </span>
         </button>
         <div className="dict-grid">
-          {[['駅', 'mastered'], ['電車', 'learning'], ['発', 'new'], ['車', 'learning']].map(([c, stage]) => (
-            <button key={c} type="button" className={`dict-entry-card dict-entry-card--${stage}`} style={{ '--level-color': 'var(--line-kanji)' }}>
+          {[['駅', 'mastered'], ['電車', 'learning'], ['テープレコーダー', 'new'], ['エアコンディショナー', 'learning']].map(([c, stage]) => (
+            <button
+              key={c}
+              type="button"
+              className={`dict-entry-card dict-entry-card--${stage}`}
+              style={{ '--level-color': 'var(--line-kanji)', '--len': [...c].length }}
+            >
               <span className="dict-level-badge">N5</span>
               <span className="sr-only">{stage}</span>
               <span className="dict-entry-card__kana">えき</span>
@@ -87,6 +92,48 @@ describe('the dictionary at phone width', () => {
     for (const sel of ['.dict-entry-card__kana', '.dict-entry-card__char', '.dict-entry-card__meaning']) {
       expect(mid(card.querySelector(sel).getBoundingClientRect())).toBeCloseTo(mid(cr), 0)
     }
+
+    // ── The headword is fitted to the tile it stands on ──
+    // The specimen rung is 72px, and at 72px a 168px tile takes two
+    // characters to a line: テープレコーダー printed one character per
+    // line over four of them and grew its row to 390px. The word
+    // divides the tile's width by its own length now, floors and
+    // ceilings on the scale, and the box it stands in is the same on
+    // every tile.
+    const chars = cards.map(el => el.querySelector('.dict-entry-card__char'))
+    const size = el => parseFloat(getComputedStyle(el).fontSize)
+    const rung = value => {
+      const probe = document.createElement('div')
+      probe.style.fontSize = value
+      document.body.append(probe)
+      const px = parseFloat(getComputedStyle(probe).fontSize)
+      probe.remove()
+      return px
+    }
+    // A word short enough for the tile is the specimen it always was —
+    // 駅 and 電車 both sit at the ceiling — and past that each longer
+    // headword is set smaller than the one before it.
+    expect(size(chars[0])).toBe(rung('var(--fs-specimen-word)'))
+    expect(size(chars[1])).toBe(rung('var(--fs-specimen-word)'))
+    expect(size(chars[2])).toBeLessThan(size(chars[1]))
+    expect(size(chars[3])).toBeLessThan(size(chars[2]))
+    expect(size(chars[3])).toBeGreaterThanOrEqual(rung('var(--fs-caption)'))
+    for (const char of chars) {
+      // One line, and it fits on it: nothing wraps, and the word is
+      // whole — no ellipsis at any of these lengths.
+      expect(getComputedStyle(char).whiteSpace).toBe('nowrap')
+      expect(char.scrollWidth).toBeLessThanOrEqual(char.clientWidth + 1)
+      // The box is the same on every tile, whatever it holds.
+      expect(char.getBoundingClientRect().height).toBeCloseTo(chars[0].getBoundingClientRect().height, 0)
+    }
+    // And the wall is even: one box on every tile, so the meaning under
+    // it prints at the same y whatever the word above it is.
+    for (const box of cards.map(el => el.getBoundingClientRect())) {
+      expect(box.height).toBeCloseTo(cards[0].getBoundingClientRect().height, 0)
+    }
+    const meanings = cards.map(el => el.querySelector('.dict-entry-card__meaning').getBoundingClientRect())
+    expect(meanings[1].top - cards[1].getBoundingClientRect().top)
+      .toBeCloseTo(meanings[2].top - cards[2].getBoundingClientRect().top, 0)
 
     // The edge says where the card is: the state's own ink, and the
     // card's plain hairline where the schedule has never seen it.

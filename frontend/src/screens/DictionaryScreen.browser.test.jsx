@@ -231,6 +231,12 @@ describe('the dictionary screen', () => {
     expect(cards[2].querySelector('.sr-only')).toBeNull()
     expect(cards[2].querySelector('.dict-level-badge')).toBeNull()
     expect(screen.container.querySelector('.console__count').textContent).toBe(T.dictionaryResults(RESULTS.length))
+    // Each tile measures its own headword, so the word can be set to
+    // fit the tile on one line (index.css, .dict-entry-card__char).
+    for (const card of cards) {
+      const headword = card.querySelector('.dict-entry-card__char').textContent
+      expect(card.style.getPropertyValue('--len')).toBe(String([...headword].length))
+    }
   })
 
   it('a card opens the entry on its plate; the readings door opens the sheet; ‹ closes the entry', async () => {

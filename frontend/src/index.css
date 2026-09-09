@@ -13864,6 +13864,11 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    reader. */
 .dict-entry-card {
   --plate: var(--level-color, var(--text-secondary));
+  /* The tile measures its own headword (see .dict-entry-card__char).
+     --len is the character count, from the screen; 1 is the reading for
+     a card that never got one, which is the specimen rung. */
+  --len: 1;
+  container-type: inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -13910,10 +13915,44 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 }
 .dict-entry-card--selected,
 .dict-entry-card--selected:hover { border-color: var(--plate); background: var(--bg-card-hover); }
+/* ── The headword, fitted to the tile it stands on ──
+   The specimen rung is 72px, and at 72px a 168px tile takes two
+   characters to a line: テープレコーダー printed one character per line
+   over four of them and grew its whole row to 390px, タイプ by タイプ.
+   Owner's ruling, from five rendered directions (the rung as it was, a
+   ladder by character count with and without this box, fitted with and
+   without it).
+
+   The word is now as large as its own tile allows and never wraps: the
+   card is the query container, the headword divides its width by how
+   many characters it has (--len, set by the screen), and the specimen
+   rung is the ceiling — so a lone 駅 is the specimen it always was and
+   エアコンディショナー lands at about 15px on one line. The floor is
+   --fs-caption, below which a headword no phone can set ellipsises the
+   way the meaning under it already does; nothing in the catalogue is
+   that long today.
+
+   96cqw rather than 100: the last character's own side bearing, so a
+   fitted word is not flush against the card's padding. */
 .dict-entry-card__char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* Two rungs of --sp-8 holds the 72px specimen at its own leading with
+     a little air: the box is the same on every tile, so the meaning
+     under it prints on one line across the whole wall however long the
+     words above it are. */
+  min-height: calc(var(--sp-8) * 2);
   font-family: var(--font-jp);
-  font-size: var(--fs-specimen-word);
+  font-size: clamp(
+    var(--fs-caption),
+    calc(96cqw / var(--len, 1)),
+    var(--fs-specimen-word));
   line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .dict-entry-card__kana {
   max-width: 100%;
