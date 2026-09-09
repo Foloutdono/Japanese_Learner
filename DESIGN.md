@@ -633,6 +633,16 @@ a learner who has just rated one card is already looking for the next.
   Same parts every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
+  Three rules the 進捗が主役 round settled on the pass's copy of it, and they
+  hold wherever the drawing goes: your train **rides above the rail and reaches
+  it on a stem**, so the x it claims is exact and it never covers a stop — a
+  floating car cannot say which side of a stop it stands on; a second mark that
+  stands against it (a promise, a target, where you *should* be) is a **dashed
+  marker across the rail**, never a second car on a second lane, because a line
+  has no width to collide with and so needs neither a lane nor a caption saying
+  which car is which; and where the two marks disagree, **hatch the stretch
+  between them** in the state's pigment — the shortfall as an area, not a
+  bracket the reader has to measure.
 - **A backward-looking screen stays backward-looking.** The profile is a
   record of what was done. It once carried a 今夜 list of what a session could
   still finish; that went with the goals and the badges it counted. A goal

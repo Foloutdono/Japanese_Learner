@@ -8,7 +8,9 @@ import {
   journeyItems,
   journeyLevels,
   journeyModel,
+  journeyPositions,
   minutesFor,
+  nextStop,
   requiredPerDay,
 } from './goalMath'
 
@@ -201,5 +203,65 @@ describe('journeyModel edge contracts', () => {
     expect(m.status).toBeNull()
     expect(m.hasGoal).toBe(false)
     expect(m.planned).toBeNull()
+  })
+})
+
+// ── Where the drawing puts its marks (進捗が主役 round) ─────────
+// The contract above is the worked case: 1,000 items signed 56 days
+// ago against a date 44 days out, so the promise's span is 100 days
+// and 56 of them are spent.
+describe('journeyPositions', () => {
+  it('puts you at progress and the promise at time elapsed, and prices the gap in items', () => {
+    const status = { ...CONTRACT, itemsDone: 112, actual14: 28 }
+    const p = journeyPositions(status, journeyModel(status, NOW), NOW)
+    expect(p.youF).toBeCloseTo(11.2, 5)
+    expect(p.planF).toBeCloseTo(56, 5)
+    // 560 items owed by today against 112 done: the backlog that
+    // reconciles "the pace looks fine" with "the date has moved".
+    expect(p.behind).toBe(448)
+  })
+
+  it('reads negative when the train is ahead of the promise', () => {
+    const status = { ...CONTRACT, itemsDone: 700, actual14: 140 }
+    const p = journeyPositions(status, journeyModel(status, NOW), NOW)
+    expect(p.behind).toBe(-140)
+  })
+
+  it('has no promise to stand against on a goal-less pass', () => {
+    const open = { plannedPerDay: 10, itemsTotal: 7013, itemsDone: 500, actual14: 140, days14: 14 }
+    const p = journeyPositions(open, journeyModel(open, NOW), NOW)
+    expect(p.planF).toBeNull()
+    expect(p.behind).toBeNull()
+    expect(p.youF).toBeCloseTo(7.1296, 3)
+  })
+
+  it('never runs a mark off either end of the rail', () => {
+    // A pass read long past its printed date, and a line finished early.
+    const late = { ...CONTRACT, itemsDone: 1200, actual14: 28 }
+    const p = journeyPositions(late, journeyModel(late, new Date('2027-09-02T00:00:00Z')), new Date('2027-09-02T00:00:00Z'))
+    expect(p.youF).toBe(100)
+    expect(p.planF).toBe(100)
+    const early = journeyPositions({ ...CONTRACT, itemsDone: 0, actual14: 0 },
+      journeyModel({ ...CONTRACT, itemsDone: 0, actual14: 0 }, NOW), new Date(CONTRACT.goalSetAt))
+    expect(early.planF).toBe(0)
+  })
+
+  it('reports nothing to draw before there is anything to price', () => {
+    expect(journeyPositions(null, null, NOW)).toEqual({ youF: 0, planF: null, behind: null })
+  })
+})
+
+describe('nextStop', () => {
+  const STOPS = [{ label: '発', pos: 0 }, { label: 'N5', pos: 25 }, { label: 'N4', pos: 46 }, { label: 'N3', pos: 100 }]
+
+  it('names the first stop the train has not reached', () => {
+    expect(nextStop(STOPS, 11.2).label).toBe('N5')
+    expect(nextStop(STOPS, 45.9).label).toBe('N4')
+    // Standing exactly at a stop, the next one is the one after it.
+    expect(nextStop(STOPS, 46).label).toBe('N3')
+  })
+
+  it('has no next stop at the terminus', () => {
+    expect(nextStop(STOPS, 100)).toBeNull()
   })
 })

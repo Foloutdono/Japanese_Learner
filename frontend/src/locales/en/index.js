@@ -429,10 +429,21 @@ const stats = {
   daysUnit:           'days',
   balanceRefillLine:  (n, at) => `+${n} at ${at}`,
   perDayUnit:         '/ day',
-  statusLast14:       'Last 14 days',
-  statusPromised:     'Promised',
-  statusAtThisPace:   'At this pace',
-  statusOnThePass:    'On the pass',
+  // ── The status sheet's head and its two comparison rows ──
+  // The four-figure lattice (Last 14 days / Promised / At this pace /
+  // On the pass) retired with the 進捗が主役 round: two of its cells
+  // were one comparison and two were another, and it left both
+  // subtractions to the reader. These say the same four numbers as
+  // two rows that carry their own difference.
+  statusPace:         'Pace',
+  statusArrival:      'Arrival',
+  statusPromisedPace: (p) => `promised ${p} / day · last 14 days`,
+  statusOnPassDate:   (d) => `on the pass, ${d}`,
+  statusDaysDelta:    (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} d`,
+  statusNextStop:     (stop) => `Next stop ${stop}`,
+  statusArrived:      'Line complete',
+  statusBehindPlan:   (n) => `${n} behind plan`,
+  statusAheadPlan:    (n) => `${n} ahead of plan`,
   longestNote:        n => `longest ${n}`,
   dueWeekNote:        n => `${n} this week`,
   masteredNote:       (m, total) => `${m.toLocaleString()} of ${total.toLocaleString()} cards`,
@@ -1062,11 +1073,12 @@ const profile = {
     slightlyBehind: 'Running behind',
     delayed:        'Delayed',
   },
-  jourYou:           'YOU',
-  jourPlan:          'PLAN',
+  // The track's YOU / PLAN caption tags and its day-bracket label
+  // retired with the two-lane drawing (see GhostTrack.jsx): the marks
+  // now say which is which by their own form, and the day count is a
+  // delta on the arrival row.
   jourYourLine:      'Your line',
   jourTurnOver:      'Turn over',
-  jourDays:          (n) => `${n} days`,
   jourFootOnTime:    (a, p, dest, date) =>
     `**${a} a day**, right on the promised **${p}**. ${dest} arrival holds at **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>

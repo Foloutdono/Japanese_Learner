@@ -410,10 +410,17 @@ const stats = {
   daysUnit:           'jours',
   balanceRefillLine:  (n, at) => `+${n} à ${at}`,
   perDayUnit:         '/ jour',
-  statusLast14:       '14 derniers jours',
-  statusPromised:     'Promis',
-  statusAtThisPace:   'À ce rythme',
-  statusOnThePass:    'Sur la carte',
+  // Voir en/index.js : le pavé de quatre chiffres a laissé la place à
+  // deux lignes qui portent leur propre écart.
+  statusPace:         'Rythme',
+  statusArrival:      'Arrivée',
+  statusPromisedPace: (p) => `promis ${p} / jour · 14 derniers jours`,
+  statusOnPassDate:   (d) => `sur la carte, le ${d}`,
+  statusDaysDelta:    (n) => `${n > 0 ? '+' : '−'}${Math.abs(n)} j`,
+  statusNextStop:     (stop) => `Prochain arrêt ${stop}`,
+  statusArrived:      'Ligne terminée',
+  statusBehindPlan:   (n) => `${n} de retard`,
+  statusAheadPlan:    (n) => `${n} d'avance`,
   longestNote:        n => `record ${n}`,
   dueWeekNote:        n => `${n} cette semaine`,
   masteredNote:       (m, total) => `${m.toLocaleString('fr')} cartes sur ${total.toLocaleString('fr')}`,
@@ -1044,11 +1051,10 @@ const profile = {
     slightlyBehind: 'Léger retard',
     delayed:        'En retard',
   },
-  jourYou:           'VOUS',
-  jourPlan:          'PLAN',
+  // Voir en/index.js : les étiquettes VOUS / PLAN et le crochet des
+  // jours sont partis avec le dessin à deux voies.
   jourYourLine:      'Votre ligne',
   jourTurnOver:      'Retourner',
-  jourDays:          (n) => `${n} jours`,
   jourFootOnTime:    (a, p, dest, date) =>
     `**${a} par jour**, pile sur les **${p}** promis. L'arrivée à ${dest} tient au **${date}**.`,
   jourFootAhead:     (a, p, dest, days, date) =>
