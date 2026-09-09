@@ -3,9 +3,8 @@ import { render } from 'vitest-browser-react'
 
 // ── The gates, on their own ─────────────────────────────────────
 // This is the one implementation now, so it is worth testing as one.
-// Two of the guarantees below existed on two screens out of six before
-// the extraction — the safety net and the level-up exemption from it —
-// and the third existed nowhere.
+// One of the guarantees below existed on two screens out of six before
+// the extraction — the safety net — and the rest existed nowhere.
 
 const applyXpGain = vi.fn()
 vi.mock('../stores/profileSummary', () => ({ applyXpGain: (...a) => applyXpGain(...a) }))
@@ -77,27 +76,11 @@ describe('useReviewGates', () => {
     expect(advance, 'a stuck gate must cost a skipped animation, not the session').toHaveBeenCalledTimes(1)
   }, 20000)
 
-  it('never forces a rank re-issue closed, because that one waits to be claimed', async () => {
-    // The exemption: XpToast's rank board waits indefinitely for the
-    // player to tap it, so an open gate there is the design and not a
-    // fault. Forcing it would snatch the moment away mid-claim. Level
-    // 6 is the first rank crossing (見習い → 浪人, see domain/levelTitle).
-    applyXpGain.mockReturnValue({ leveledUp: true, newLevel: 6 })
-    const advance = vi.fn()
-    await render(<Probe advance={advance} sessionKey="a" />)
-    api.review(XP, { cardKey: 'c1', quality: 5 })
-    await settle(4600)
-    expect(advance).not.toHaveBeenCalled()
-
-    api.toastDone()
-    await settle(30)
-    expect(advance).toHaveBeenCalledTimes(1)
-  }, 20000)
-
-  it('lets a plain level-up play over the next card', async () => {
-    // Level 4 → 5 stays inside 見習い: the board turns over on the
-    // in-car display while the next card is already in hand. Holding
-    // the queue for it was 2.9s of dead time per level.
+  it('lets a level-up play over the next card', async () => {
+    // The board turns over on the in-car display while the next card
+    // is already in hand. Holding the queue for it was 2.9s of dead
+    // time per level, and no reward holds it now: the rank re-issue,
+    // the one that waited to be claimed, went with the rank titles.
     applyXpGain.mockReturnValue({ leveledUp: true, newLevel: 5 })
     const advance = vi.fn()
     await render(<Probe advance={advance} sessionKey="a" />)
@@ -137,7 +120,7 @@ describe('useReviewGates', () => {
   })
 
   it('still advances when the XP payload is junk', async () => {
-    // A throw here would leave no toast to close the gate it opened.
+    // A throw mid-review must not strand the card it locked.
     applyXpGain.mockImplementation(() => { throw new Error('bad xp') })
     const advance = vi.fn()
     await render(<Probe advance={advance} sessionKey="a" />)

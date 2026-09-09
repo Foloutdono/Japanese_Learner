@@ -65,6 +65,3 @@ export function playArrival() { playVoice('arrival') }
 
 /** 到着ホーム — the platform sign landing, in the onboarding tour. */
 export function playPlatformChime() { playVoice('platform-chime') }
-
-/** 再発行 — the pass re-issued. The one that gets a melody. */
-export function playStationMelody() { playVoice('station-melody') }

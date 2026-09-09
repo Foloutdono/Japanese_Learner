@@ -507,7 +507,7 @@ progress legend back.
 ### Rewards
 
 Every card is rewarded, and none of it is a ceremony. Three moments, three
-objects, and only one of them ever waits to be dismissed:
+objects, and not one of them waits to be dismissed:
 
 - **The fare** (運賃) — the XP a review earns — is reported on the object it
   was paid into: the **level HUD**. The roundel in the top bar pulses gold
@@ -550,12 +550,15 @@ objects, and only one of them ever waits to be dismissed:
   bar beside the roundel on a desktop, the number on split-flap drums. On a
   clock, never gating — it leaves by itself while the next card is already
   in hand.
-- **The rank** (再発行) — the title changed, four times in the whole
-  progression — is the one that takes the screen and waits to be claimed.
 
-Only the rank holds the queue. Everything else plays over the next card,
-because a learner who has just rated one card is already looking for the
-next.
+There was a fourth, **the rank** (再発行): the level bands each carried a
+title (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued the
+pass in a board that took the whole screen and waited to be claimed. The
+titles are retired — a placeholder ladder saying nothing the level number
+did not — and the board went with them.
+
+So nothing holds the queue. Every reward plays over the next card, because
+a learner who has just rated one card is already looking for the next.
 
 ## Structure
 
@@ -573,7 +576,8 @@ next.
   is not a place on a line (Practice, the halls behind the pass) takes the
   `--register` bar: no roundel, a hairline.
 - **Japanese is content, not chrome.** The interface speaks the learner's
-  language; a word, a sentence, a deck's name, a rank are Japanese. The
+  language; a word, a sentence, a deck's name, a card's stage are
+  Japanese. The
   bilingual JP + Latin pairing the desktop chrome used does not apply to
   the mobile chrome — and, since this rule was written, not even to the
   tab bar, which was its one exception: the gates were a kanji where a

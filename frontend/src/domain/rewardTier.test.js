@@ -4,57 +4,46 @@ import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 import { rewardTier } from './rewardTier'
 
-// ── The tier decides whether the next card waits ────────────────
-// Every study screen gates its advance on the reward finishing, so
-// which tier a review lands in is not cosmetic: it is the difference
-// between the next card arriving now and arriving 2.2 seconds later
-// (1900ms hold + 260ms exit, measured). The overwhelming majority of
-// reviews are 'fare', and 'fare' must stay ungated.
+// ── The tier decides how big the moment is ──────────────────────
+// It used to decide something heavier: whether the next card waited.
+// The rank re-issue was the one tier that gated, and it went with the
+// rank titles, so nothing between two cards waits on an animation any
+// more. That is the property worth guarding here.
 
 describe('rewardTier', () => {
   it('calls an ordinary review a fare tick', () => {
-    // No level change: the common case, and the one that must not
-    // hold the next card.
+    // No level change: the common case, and the quietest.
     expect(rewardTier({ amount: 7, leveledUp: false })).toBe('fare')
     expect(rewardTier({ amount: 0 })).toBe('fare')
     expect(rewardTier(null)).toBe('fare')
   })
 
-  it('separates a level from a rank by the title, not a round number', () => {
-    // A level-up that stays inside its band is 'level'; one that
-    // changes the 称号 is 'rank'. Which is which comes from
-    // domain/levelTitle, so this pins the boundary behaviour rather
-    // than specific levels: whatever the bands are, crossing one must
-    // read as 'rank' and staying inside it as 'level'.
+  it('calls every level-up a level board, whatever the number', () => {
+    // There is no third tier. Levels used to sit in bands with a title
+    // each (見習い … 免許皆伝), and crossing one promoted the reward to
+    // a full-screen pass re-issue; now a level is a level.
     const tiers = Array.from({ length: 40 }, (_, i) =>
       rewardTier({ leveledUp: true, newLevel: i + 1 }))
-    expect(new Set(tiers)).toEqual(new Set(['level', 'rank']))
-    expect(tiers.filter(t => t === 'rank').length).toBeGreaterThan(0)
-    // Ranks are rare by design — "four times in the entire
-    // progression" — so they must not outnumber plain level-ups.
-    expect(tiers.filter(t => t === 'rank').length)
-      .toBeLessThan(tiers.filter(t => t === 'level').length)
+    expect(new Set(tiers)).toEqual(new Set(['level']))
   })
 
-  it('is never gated on by the study screens for a fare tick', () => {
-    // The regression this guards is silent: re-adding an unconditional
-    // `gates.add('toast')` puts the 2.2s delay back on every review
-    // and nothing fails. The screens must reach the gate through the
-    // tier, never straight.
+  it('is never gated on, by a screen or by the hook', () => {
+    // The regression this guards is silent: re-adding a
+    // `gates.add('toast')` puts a 2.2s delay back on every review and
+    // nothing fails. Nothing may open that gate now — the fare rides
+    // the level HUD and the level board plays over the next card.
     const here = dirname(fileURLToPath(import.meta.url))
-    const screens = join(here, '..', 'screens')
     const offenders = []
-    for (const f of readdirSync(screens).filter(n => n.endsWith('.jsx') && !n.includes('.test.'))) {
-      const src = readFileSync(join(screens, f), 'utf8')
-      for (const line of src.split('\n')) {
-        const t = line.trim()
-        // The gate may only be reached through the tier: a bare add,
-        // or any add on a line that never consults rewardTier, is the
-        // regression.
-        if (t.includes("gates.add('toast')") && !t.includes('rewardTier')) offenders.push(`${f}: ${t}`)
+    for (const dir of [join(here, '..', 'screens'), join(here, '..', 'hooks')]) {
+      for (const f of readdirSync(dir)) {
+        if (!/\.jsx?$/.test(f) || f.includes('.test.')) continue
+        const src = readFileSync(join(dir, f), 'utf8')
+        for (const line of src.split('\n')) {
+          if (line.includes("gates.add('toast')")) offenders.push(`${f}: ${line.trim()}`)
+        }
       }
     }
-    expect(offenders, `the 'toast' gate must be conditioned on rewardTier:\n${offenders.join('\n')}`)
+    expect(offenders, `no reward may hold the next card:\n${offenders.join('\n')}`)
       .toEqual([])
   })
 })

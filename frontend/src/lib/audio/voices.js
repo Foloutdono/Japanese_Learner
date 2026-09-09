@@ -340,38 +340,6 @@ const EVENTS = [
         ]) },
     ],
   },
-  {
-    key: 'station-melody', category: 'ui', family: 'station',
-    label: 'Departure melody', jp: '発車メロディ', where: 'The pass re-issued — four times in the whole progression',
-    variants: [
-      { key: 'yo-scale', label: 'Yo scale, rising', note: 'D-E-A-B-G. Climbs, then settles onto the fifth.',
-        play: (c, b) => tones(c, b, [
-          { freq: 587.3, at: 0, dur: 0.30, peak: 0.30 },
-          { freq: 659.3, at: 0.15, dur: 0.30, peak: 0.30 },
-          { freq: 880.0, at: 0.30, dur: 0.34, peak: 0.32 },
-          { freq: 987.8, at: 0.48, dur: 0.40, peak: 0.30 },
-          { freq: 783.99, at: 0.70, dur: 0.75, peak: 0.26 },
-        ]) },
-      { key: 'yo-falling', label: 'Yo scale, falling', note: 'The same five notes coming down. A last call rather than a fanfare.',
-        play: (c, b) => tones(c, b, [
-          { freq: 987.8, at: 0, dur: 0.28, peak: 0.28 },
-          { freq: 880.0, at: 0.15, dur: 0.28, peak: 0.28 },
-          { freq: 659.3, at: 0.30, dur: 0.32, peak: 0.30 },
-          { freq: 587.3, at: 0.48, dur: 0.36, peak: 0.28 },
-          { freq: 440.0, at: 0.68, dur: 0.80, peak: 0.26 },
-        ]) },
-      { key: 'two-bar', label: 'Two bars', note: 'Seven notes with a turn in the middle. The longest thing in the app.',
-        play: (c, b) => tones(c, b, [
-          { freq: 587.3, at: 0, dur: 0.26, peak: 0.28 },
-          { freq: 659.3, at: 0.14, dur: 0.26, peak: 0.28 },
-          { freq: 783.99, at: 0.28, dur: 0.28, peak: 0.30 },
-          { freq: 987.8, at: 0.44, dur: 0.30, peak: 0.30 },
-          { freq: 880.0, at: 0.62, dur: 0.26, peak: 0.28 },
-          { freq: 783.99, at: 0.78, dur: 0.28, peak: 0.28 },
-          { freq: 659.3, at: 0.96, dur: 0.80, peak: 0.26 },
-        ]) },
-    ],
-  },
 
   // ── Rewards ─────────────────────────────────────────────
   {

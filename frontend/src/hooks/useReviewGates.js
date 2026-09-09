@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { applyXpGain } from '../stores/profileSummary'
-import { rewardTier } from '../domain/rewardTier'
 
 // ── 出発合図 — when the next card is allowed to arrive ────────────
 // A rating does not advance the deck by itself. What the learner just
@@ -131,42 +130,33 @@ export function useReviewGates({ advance, sessionKey }) {
     gates.clear()
     advancedRef.current = false
     clearSafety()
-    // A rank re-issue never auto-dismisses (see XpToast — it waits
-    // indefinitely for the claim button), so the net below must never
-    // force it shut. That is the one case where an open gate is the
-    // design rather than a fault.
-    let safeToForce = true
 
     try {
       for (const name of hold) gates.add(name)
 
       try {
         if (preview) {
-          // Guard a non-numeric xp_earned: if applyXpGain or setXpToast
-          // threw on a bad value, no toast would render and nothing
-          // would be left to fire the animationend that closes the
-          // 'toast' gate. The gate is added AFTER the tier is known, so
-          // a throw before that leaves nothing open; the catch is the
-          // guarantee from the other side for the tiers that do gate.
+          // Guard a non-numeric xp_earned: a throw here would skip the
+          // stamp below, and with it the gate that stamp would have
+          // closed. Nothing the toast does opens a gate any more, so
+          // the catch only has to keep the rest of the review going.
           const amount = typeof preview.xp_earned === 'number' ? preview.xp_earned : 0
           // leveledUp/newLevel come from applyXpGain's running total,
           // not from preview.leveled_up — the latter is computed once
           // per batch fetch and cannot see XP earned from other cards
           // answered earlier in that same batch.
           const { leveledUp, newLevel } = applyXpGain({ amount })
-          // Only a rank re-issue holds the queue. The fare rides the
-          // level HUD and the level board is an announcement on the
-          // in-car display: both play over the next card, because a
-          // learner who has just rated one card is already looking for
-          // the next, and the redesign's whole point is that nothing
-          // between two cards waits on an animation. Gating the level
-          // board cost 2.9s measured per level, on top of the 2.2s the
-          // fare tick used to cost per review. The rank still waits to
-          // be dismissed by hand — four times in the whole progression.
-          if (rewardTier({ leveledUp, newLevel }) === 'rank') {
-            gates.add('toast')
-            safeToForce = false
-          }
+          // No reward holds the queue. The fare rides the level HUD and
+          // the level board is an announcement on the in-car display:
+          // both play over the next card, because a learner who has
+          // just rated one card is already looking for the next, and
+          // the redesign's whole point is that nothing between two
+          // cards waits on an animation. Gating the level board cost
+          // 2.9s measured per level, on top of the 2.2s the fare tick
+          // used to cost per review. The one reward that did wait to be
+          // dismissed by hand was the rank re-issue, and the ranks are
+          // gone (domain/rewardTier) — so is the exemption the safety
+          // net below used to need for it.
           setXpToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
 
           const to = preview.stage_up ?? preview.stage_down
@@ -176,11 +166,10 @@ export function useReviewGates({ advance, sessionKey }) {
           }
         }
       } catch (err) {
-        gates.delete('toast')
         console.error('XP toast setup failed', err)
       }
 
-      if (gates.size > 0 && safeToForce) {
+      if (gates.size > 0) {
         safetyRef.current = setTimeout(() => {
           safetyRef.current = null
           gates.clear()
