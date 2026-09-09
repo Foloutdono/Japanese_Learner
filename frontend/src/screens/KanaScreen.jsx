@@ -45,13 +45,9 @@ export default function KanaScreen() {
       const item = stats?.items?.kana?.[s.slug]
       return {
         key: s.slug,
-        // The set's first sign is its code — あ, きゃ, ア, キャ — the
-        // same glyphs the wall map labels its stops with.
-        code: s.sample.split(' ')[0],
+        code: s.code,
         codeLang: 'ja',
         name: s.label,
-        hint: s.sample,
-        hintLang: 'ja',
         learned: Number(item?.learned) || 0,
         total: Number(item?.total) || 0,
       }

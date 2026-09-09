@@ -6773,22 +6773,20 @@ textarea:focus-visible {
     row-gap: var(--sp-2);
   }
   /* A stop with the room of a stop reads at a stop's size: the code is
-     the sign it is written on, and the specimen under the name is set in
-     the Japanese face it is a specimen of (it is あいうえお, not a
-     caption). The name itself stays at body size — 実践's stations put
-     "Hiragana (combinaisons)" in that column and a lead-size line broke
-     its second word past the figure beside it. */
+     the sign it is written on. The name itself stays at body size —
+     実践's stations put "Hiragana (combinaisons)" in that column and a
+     lead-size line broke its second word past the figure beside it.
+     The hint keeps the caption size it has everywhere else: it was set
+     in the Japanese face at title size while the kana stops carried a
+     specimen (あ い う え お) under their names, and with that gone the
+     only hint left on a route is a theme band's word count — a caption
+     if anything ever was. */
   .learn > .route > .route-stop > .route-stop__code {
     grid-area: code;
     font-size: var(--fs-title);
   }
   .learn > .route > .route-stop > .route-stop__names { grid-area: names; }
   .learn > .route > .route-stop > .route-stop__go    { grid-area: go; }
-  .learn > .route > .route-stop .route-stop__hint {
-    font-family: var(--font-jp);
-    font-size: var(--fs-title);
-    letter-spacing: var(--tr-term);
-  }
   .learn > .route > .route-stop > .route-stop__fig {
     grid-area: fig;
     font-size: var(--fs-body);
