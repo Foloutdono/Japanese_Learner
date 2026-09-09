@@ -258,6 +258,8 @@ export default function DeckDetailScreen({ session }) {
   // deletion, which used to sit on the shelf's card.
   const [moreOpen, setMoreOpen] = useState(false)
   const [confirmingDeck, setConfirmingDeck] = useState(false)
+  // The hand-written card a remove is waiting on — see askRemove.
+  const [confirmingCard, setConfirmingCard] = useState(null)
   const today = useTodaySummary().data
   const dueToday = dueByDeck(today).get(String(deck_id)) ?? 0
 
@@ -330,6 +332,32 @@ export default function DeckDetailScreen({ session }) {
       return apiFetch(`/api/decks/${deck_id}/cards/app?${params.toString()}`, session, { method: 'DELETE' })
     }
     return apiFetch(`/api/decks/${deck_id}/cards/${card.id}`, session, { method: 'DELETE' })
+  }
+
+  // The row's own remove. The editor cannot outlive the card it edits:
+  // deleting the row you have open would leave the form saving to an
+  // id the server no longer knows.
+  function removeCard(card) {
+    playUi('click-screen-selection')
+    setConfirmingCard(null)
+    if (card.origin === 'custom' && editing === card.id) {
+      setAdding(false)
+      setEditing(null)
+      resetForm()
+    }
+    return deleteCard(card).then(fetchCards)
+  }
+
+  // What the trash does, and it depends on what the card is. A
+  // browsed-in card is a LINK: removing it loses nothing the app does
+  // not still hold, and Browse puts it back in two taps. A hand-written
+  // one is the learner's own text and there is no undo, so it asks
+  // first — in the sheet, named, the way the deck's own deletion asks
+  // eight lines below.
+  function askRemove(card) {
+    playUi('click-mode-selection')
+    if (card.origin === 'custom') setConfirmingCard(card)
+    else removeCard(card)
   }
 
   // The spec for THIS deck, or null until it arrives. A deck holds one
@@ -645,15 +673,20 @@ export default function DeckDetailScreen({ session }) {
             Japanese everywhere else, the reading under it, the meaning
             beside. A hand-written card opens its editor; a browsed-in
             one is read-only here (its SRS progress is shared with the
-            rest of the app) and carries its source and a remove. */}
+            rest of the app) and wears the level it was filed under.
+            Either can be taken out of the deck from its own row. */}
         {!loading && cards.length > 0 && (
           <div className="card-list">
             {cards.map(card => {
               const key   = cardKey(card)
               const isSel = selected.has(key)
+              // The row's BODY is what you press — its own tick in
+              // select mode, a hand-written card's editor otherwise —
+              // and the remove sits beside it rather than inside it,
+              // because a button cannot nest in a button.
               const opens = selectMode || card.origin === 'custom'
-              const Row = opens ? 'button' : 'div'
-              const rowProps = opens
+              const Body = opens ? 'button' : 'div'
+              const bodyProps = opens
                 ? {
                   type: 'button',
                   onClick: selectMode ? () => toggleSelect(key) : () => startEdit(card),
@@ -661,54 +694,61 @@ export default function DeckDetailScreen({ session }) {
                 }
                 : {}
               return (
-                <Row
-                  key={key}
-                  className={`card-row${isSel ? ' card-row--selected' : ''}`}
-                  {...rowProps}
-                >
-                  {selectMode && (
-                    <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
-                      {isSel && <CheckIcon size={11} />}
-                    </span>
-                  )}
-                  <span className="card-row__front">
-                    <span className="card-row__jp" lang="ja">{card.front}</span>
-                    {card.kana && <span className="card-row__kana" lang="ja">{card.kana}</span>}
-                  </span>
-                  <span className="card-row__back">
-                    {card.back}
-                    {(card.hint || card.notes) && (
-                      <span className="card-row__note">
-                        {card.hint && <><LightbulbIcon size={11} /> {card.hint}</>}
-                        {card.hint && card.notes ? ' · ' : ''}
-                        {card.notes}
+                <div key={key} className={`card-row${isSel ? ' card-row--selected' : ''}`}>
+                  <Body className="card-row__body" {...bodyProps}>
+                    {selectMode && (
+                      <span className={`card-row__tick${isSel ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+                        {isSel && <CheckIcon size={11} />}
                       </span>
                     )}
-                  </span>
-                  {card.origin === 'app' && (
-                    <span
-                      className="card-row__badge"
-                      style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
-                    >
-                      {{ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source}
-                      {card.level ? ` · ${card.level}` : ''}
+                    <span className="card-row__front">
+                      <span className="card-row__jp" lang="ja">{card.front}</span>
+                      {card.kana && <span className="card-row__kana" lang="ja">{card.kana}</span>}
                     </span>
-                  )}
-                  {!selectMode && card.origin === 'custom' && (
-                    <ChevronIcon direction="right" size={14} className="card-row__go" />
-                  )}
-                  {!selectMode && card.origin === 'app' && (
+                    <span className="card-row__back">
+                      {card.back}
+                      {(card.hint || card.notes) && (
+                        <span className="card-row__note">
+                          {card.hint && <><LightbulbIcon size={11} /> {card.hint}</>}
+                          {card.hint && card.notes ? ' · ' : ''}
+                          {card.notes}
+                        </span>
+                      )}
+                    </span>
+                    {/* The level alone. The source was printed beside it
+                        ("VOCABULARY · N5") until the badge was costing a
+                        third of the row on a phone — and saying what the
+                        deck's own type already says, in a deck that only
+                        accepts one source. The pigment still names it. */}
+                    {card.origin === 'app' && (
+                      <span
+                        className="card-row__badge"
+                        style={{ '--rail': SOURCE_COLOR[card.source] ?? 'var(--text-secondary)' }}
+                      >
+                        {card.level
+                          || ({ kanji: t.kanjiType, vocab: t.vocabType, grammar: t.grammarType }[card.source] ?? card.source)}
+                      </span>
+                    )}
+                    {!selectMode && card.origin === 'custom' && (
+                      <ChevronIcon direction="right" size={14} className="card-row__go" />
+                    )}
+                  </Body>
+                  {/* Every row, not just the browsed-in ones: taking one
+                      hand-written card out used to mean Select → tick →
+                      Delete → confirm, four steps for one row, and nothing
+                      on the row itself said it could go. */}
+                  {!selectMode && (
                     <button
                       type="button"
-                      onClick={() => deleteCard(card).then(fetchCards)}
+                      onClick={() => askRemove(card)}
                       className="card-row__remove"
                       aria-label={t.delete}
                       title={t.delete}
                     >
-                      <TrashIcon size={14} />
+                      <TrashIcon size={16} />
                     </button>
                   )}
-                </Row>
+                </div>
               )
             })}
           </div>
@@ -739,6 +779,22 @@ export default function DeckDetailScreen({ session }) {
             <TrashIcon size={14} /> {t.deleteDeck}
           </button>
         )}
+      </Sheet>
+
+      {/* One card's deletion, asked the same way the deck's is: the
+          card named at the head of the sheet, so "this card" is not a
+          pronoun with nothing to point at. */}
+      <Sheet
+        open={confirmingCard != null}
+        onClose={() => setConfirmingCard(null)}
+        jp={confirmingCard?.front}
+        cap={t.delete}
+      >
+        <span className="sheet__q">{t.deleteCardConfirm}</span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={() => removeCard(confirmingCard)}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingCard(null)}>{t.cancel}</button>
       </Sheet>
 
       {showImport && (

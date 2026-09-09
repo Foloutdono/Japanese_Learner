@@ -1137,6 +1137,7 @@ const decks = {
   // boîte confirm() du navigateur — courte, puisqu'elle est en ligne.
   deleteDeckConfirm: 'Supprimer ce deck ?',
   deleteCardsConfirm: 'Supprimer la sélection ?',
+  deleteCardConfirm: 'Supprimer cette carte ? C’est définitif.',
   study:             'Étudier',
   addCard:           '+ Ajouter',
   newCard:           'Nouvelle carte',
