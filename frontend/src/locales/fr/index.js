@@ -1,3 +1,5 @@
+import { welded } from '../frenchSpacing.js'
+
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
   appTitle:          '辻',
@@ -1654,7 +1656,11 @@ const onboarding = {
   settingsGoalDepartHint: "L'heure à laquelle vous comptez rouler — facultative, et jamais un rappel. Elle est imprimée sur la carte parce qu'une promesse avec une heure survit mieux à sa première semaine de pluie.",
 }
 
-export default {
+// La table, soudée : chaque espace devant : ; ! ? » (et derrière «)
+// devient insécable en sortant d'ici, y compris dans les phrases
+// assemblées à l'appel. Voir locales/frenchSpacing.js — c'est ce qui
+// empêche un deux-points de tomber seul en bout de ligne.
+export default welded({
   ...auth,
   ...landing,
   ...nav,
@@ -1676,4 +1682,4 @@ export default {
   ...exam,
   ...onboarding,
   ...boarding,
-}
+})

@@ -1659,7 +1659,7 @@ const onboarding = {
   installAppBtn: 'Install',
   installIosTitle: 'Add to your home screen',
   installIosStep1: 'Tap Share in Safari\'s toolbar.',
-  installIosStep2: 'Choose « Add to Home Screen », then Add.',
+  installIosStep2: 'Choose "Add to Home Screen", then Add.',
   installIosBody: 'iPhone and iPad install web apps from Safari\'s share sheet — there is no button for it.',
   settingsIssuedTo: 'Card issued to',
 

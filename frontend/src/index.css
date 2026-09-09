@@ -17169,7 +17169,12 @@ html { scrollbar-gutter: stable; }
 .brd-legend__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .brd-legend__swatch { width: 14px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
 .brd-legend__swatch--them { background: repeating-linear-gradient(90deg, var(--text-secondary) 0 4px, transparent 4px 7px); }
-.brd-lead { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); }
+/* The sentence that names the rhythm, the date and the motive. Its
+   punctuation is welded to its words upstream (locales/frenchSpacing.js),
+   so the ":" can no longer be cut off the end; `pretty` is the other
+   half of the same fix — it refuses to leave the last line a scrap,
+   the way `.brd__q` above already does. */
+.brd-lead { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .brd-lead__em { color: var(--text-primary); }
 .brd-bullets { display: flex; flex-direction: column; gap: var(--sp-2); }
 .brd-bullet { display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); animation: brd-in 360ms ease-out both; }
