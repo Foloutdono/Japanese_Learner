@@ -1556,9 +1556,18 @@ class SRSEngine:
         raw = "split_part(card_id, ':', 2)"
         cat = f"split_part({raw}, '_', 1)"
         lvl = f"split_part({raw}, '_', 2)"
-        scope = f"({cat} = ANY(%s) AND {lvl} = ANY(%s))"
+        # A ride to the novice's stop covers no level at all -- the kana
+        # are the whole promise -- so the level clause is dropped rather
+        # than asked with an empty list (routes/journey.py's
+        # _journey_levels answers [] for that destination).
+        clauses: list[str] = []
+        scope_params: tuple = ()
+        if levels:
+            clauses.append(f"({cat} = ANY(%s) AND {lvl} = ANY(%s))")
+            scope_params = (["vocab", "kanji", "grammar"], list(levels))
         if include_kana:
-            scope += f" OR {cat} = 'kana'"
+            clauses.append(f"{cat} = 'kana'")
+        scope = " OR ".join(clauses) or "FALSE"
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
@@ -1589,7 +1598,6 @@ class SRSEngine:
                 # window_days calendar days INCLUDING today's partial one
                 # — 13 full past days + today for the default 14, matching
                 # how the UTC day boundary makes "today" mean one thing.
-                scope_params = (["vocab", "kanji", "grammar"], list(levels))
                 params = (
                     (pattern,) + mode_params + scope_params
                     + (pattern,) + mode_params + scope_params

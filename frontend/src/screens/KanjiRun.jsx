@@ -464,7 +464,6 @@ export default function KanjiRun({ session }) {
                 // Without this the canvas keeps the previous card's ink:
                 // Canvas clears on resetKey changing, and nothing else.
                 resetKey={card.card_id}
-                meaning={formatGlossLine(card.meaning)}
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)

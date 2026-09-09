@@ -18,11 +18,20 @@ import { useEffect, useRef, useState } from 'react'
 // failure it calls `onError()` instead of rendering anything, so the
 // caller can show its own existing fallback markup exactly like the
 // old <img onError=...> did.
+//
+// `still` asks the same loader for the OTHER thing a KanjiVG file
+// holds: the finished glyph, no motion and no numbered order. The
+// numbers are the animation's own aid — they read as clutter on a
+// still shape and they are grey-on-grey wherever the glyph is not on
+// washi — and the strokes go `currentColor` so the caller's own ink
+// governs. This is what the drawing board lays over a learner's own
+// line (see DrawingCanvas.jsx); the animation stays what the
+// dictionary's sheet shows.
 const STROKE_DURATION_MS = 550   // how long one stroke takes to draw
 const STROKE_STAGGER_MS  = 450   // delay between successive strokes
 const LOOP_PAUSE_MS      = 900   // hold on the finished glyph before replaying
 
-export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, className, onError }) {
+export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, still = false, className, onError }) {
   const containerRef = useRef(null)
   const [svgText, setSvgText] = useState(svgTextProp ?? null)
 
@@ -68,6 +77,15 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     svgEl.style.height = '100%'
     svgEl.style.display = 'block'
 
+    // The still glyph: strip the stroke numbers, hand the strokes to
+    // the caller's `color`, and stop — every path is already drawn.
+    if (still) {
+      svgEl.querySelectorAll('[id^="kvg:StrokeNumbers"]').forEach(g => g.remove())
+      const strokes = svgEl.querySelector('[id^="kvg:StrokePaths"]')
+      if (strokes) strokes.style.stroke = 'currentColor'
+      return
+    }
+
     const paths = Array.from(svgEl.querySelectorAll('path'))
     let timers = []
     let cancelled = false
@@ -105,7 +123,7 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
       cancelled = true
       timers.forEach(id => { clearTimeout(id); cancelAnimationFrame(id) })
     }
-  }, [svgText, loop, onError])
+  }, [svgText, loop, still, onError])
 
   if (!svgText) return null
   return <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />

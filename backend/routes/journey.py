@@ -26,7 +26,7 @@ from pydantic import BaseModel, field_validator
 from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
-from core.user_level import LEVELS
+from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL
 from routes.onboarding import DEPARTURES, DEPART_TIMES, VOLUMES
 from routes.profile import ensure_profile_row
 
@@ -68,7 +68,12 @@ def _journey_row(user_id: str):
 def _journey_levels(start: str, goal: str | None) -> list[str]:
     """The levels a journey covers, boarding level included. No goal =
     the whole line ahead (start..N1), so the pace-only pass back still
-    reports against something real."""
+    reports against something real.
+
+    A ride to the novice's stop covers NO level: that stop is the kana
+    and nothing else, and the front-load below is the whole promise."""
+    if goal == NOVICE_GOAL:
+        return []
     a = LEVELS.index(start)
     b = LEVELS.index(goal) if goal else len(LEVELS) - 1
     return list(LEVELS[a:b + 1])
@@ -277,8 +282,10 @@ class GoalPayload(BaseModel):
     @field_validator("goalLevel")
     @classmethod
     def valid_goal_level(cls, v: str) -> str:
-        if v not in LEVELS:
-            raise ValueError(f"must be one of {', '.join(LEVELS)}")
+        # The novice's stop -- the kana — is issued from this counter
+        # like any other destination (core/user_level.py GOAL_LEVELS).
+        if v not in GOAL_LEVELS:
+            raise ValueError(f"must be one of {', '.join(GOAL_LEVELS)}")
         return v
 
     @field_validator("goalTargetDate")
@@ -311,7 +318,17 @@ def journey_goal(payload: GoalPayload, user_id: str = Depends(get_user_id)):
             status_code=422,
             detail="No boarding level — complete the office first",
         )
-    if LEVELS.index(payload.goalLevel) <= LEVELS.index(start):
+    # The kana stop sits before the first JLPT one, so it is a
+    # destination for exactly one boarding level -- the first. Anyone
+    # standing above N5 has the syllabaries behind them, and the same
+    # rule guards the office's own form (routes/onboarding.py).
+    if payload.goalLevel == NOVICE_GOAL:
+        if start != LEVELS[0]:
+            raise HTTPException(
+                status_code=422,
+                detail=f"the novice's stop is behind {start}",
+            )
+    elif LEVELS.index(payload.goalLevel) <= LEVELS.index(start):
         raise HTTPException(
             status_code=422,
             detail=f"goalLevel must be beyond {start}",

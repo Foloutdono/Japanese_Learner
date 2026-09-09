@@ -26,7 +26,7 @@ from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 from core.auth import get_user_id
 from core.db import db_conn
-from core.user_level import LEVELS, note_stored_level
+from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level
 from routes.profile import apply_kana_rule, apply_level_rule, ensure_profile_row
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
@@ -158,8 +158,11 @@ class CompletePayload(BaseModel):
     @field_validator("goalLevel")
     @classmethod
     def valid_goal_level(cls, v: str | None) -> str | None:
-        if v is not None and v not in LEVELS:
-            raise ValueError(f"must be one of {', '.join(LEVELS)}")
+        # GOAL_LEVELS, not LEVELS: the novice's stop -- the kana -- is a
+        # destination the office signs like any other, and the only one
+        # that is not a JLPT level (core/user_level.py).
+        if v is not None and v not in GOAL_LEVELS:
+            raise ValueError(f"must be one of {', '.join(GOAL_LEVELS)}")
         return v
 
     @field_validator("goalTargetDate")
@@ -183,8 +186,14 @@ class CompletePayload(BaseModel):
     @model_validator(mode="after")
     def goal_is_coherent(self):
         # LEVELS is journey-ordered (N5..N1), so index comparison is
-        # "further down the line".
-        if self.goalLevel is not None and LEVELS.index(self.goalLevel) <= LEVELS.index(self.jlptLevel):
+        # "further down the line". The kana stop sits BEFORE the first
+        # of them, so it is coherent for exactly one boarding level --
+        # the first: nobody standing above N5 is still riding to the
+        # syllabaries.
+        if self.goalLevel == NOVICE_GOAL:
+            if self.jlptLevel != LEVELS[0]:
+                raise ValueError(f"the novice's stop is behind {self.jlptLevel}")
+        elif self.goalLevel is not None and LEVELS.index(self.goalLevel) <= LEVELS.index(self.jlptLevel):
             raise ValueError("goalLevel must be beyond jlptLevel")
         if self.goalTargetDate is not None and self.goalLevel is None:
             raise ValueError("goalTargetDate needs a goalLevel — a date with no destination is not a goal")

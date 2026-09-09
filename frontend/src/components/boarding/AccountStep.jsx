@@ -43,8 +43,15 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
           <ProviderButton link onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={claim.setError} />
           {/* Said here rather than on the fields' own line below: this
               is what the button above did, and the one refusal with a
-              way out of it is answered immediately underneath. */}
-          {refused && (
+              way out of it is answered immediately underneath.
+              It stands only until the fields have news of their own.
+              A refusal read off the URL cannot expire on its own — it
+              is a fact about this page load — so a learner who took
+              the email road after Google turned them away was left
+              reading two red lines at once, the older of which was
+              about a road they had already left. The newer answer is
+              the one they asked for. */}
+          {refused && !claim.error && !claim.done && (
             <p className="auth-message auth-message--error" role="alert" data-oauth="refused">
               {authRedirectMessage(refused, t)}
             </p>

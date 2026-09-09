@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
+import fr from '../locales/fr/index.js'
 import '../index.css'
 
 // ── The boarding, walked end to end (plan 075) ─────────────────
@@ -33,11 +34,16 @@ vi.mock('../lib/api', () => ({
   apiUpload: vi.fn(),
   ApiError: class ApiError extends Error {},
 }))
+// The claim road: putting an address on the pass is one updateUser
+// call (lib/guest.js), and what it REFUSES with is the whole point of
+// one test below.
+const updateUser = vi.fn()
 vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: async () => ({ data: { session: { access_token: 'tok' } } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+      updateUser: (...a) => updateUser(...a),
     },
   },
 }))
@@ -175,6 +181,7 @@ beforeEach(() => {
   patchResponse.current = null
   nudgeRef.current = false
   oauthRefusal.current = null
+  updateUser.mockReset()
   sessionStorage.removeItem(STASH_KEY)
   apiJson.mockImplementation(async path => (path === '/api/onboarding/volumes' ? VOLUMES : {}))
   apiJsonWithTimeout.mockImplementation(async path => {
@@ -324,7 +331,7 @@ describe('BoardingFlow', () => {
   // level list AND their goal list opened at N4, so the goal they are
   // likeliest to have — reach N5 — was the one they could not pick
   // (owner's report). The office still stores N5 for them.
-  it('kana → one script → the reveal, then the goal open at N5, the stop they are heading for', async () => {
+  it('kana → one script → the reveal, then the whole line ahead, the novice’s stop at its head', async () => {
     const { screen } = await renderFlow()
     await passName(screen, 'fun')
     await click(screen, '[data-kana="hiragana"]')
@@ -337,13 +344,20 @@ describe('BoardingFlow', () => {
     await settle()
 
     // Never the level list: the answer is the level. But it boards them
-    // BEFORE N5, so the whole line is ahead of them.
+    // before the novice's own stop as well — that stop IS the kana, and
+    // they read one script — so the whole line is ahead of them with the
+    // kana at its head, and there is no stop behind them to name.
     expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint').textContent).toContain('Novice')
+    expect(q(screen, '.brd__hint').textContent).toBe('Tous les arrêts sont devant vous.')
     expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
-      .toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+      .toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(q(screen, '[data-goal="novice"] .brd-opt__code').textContent).toBe('—')
+    expect(q(screen, '[data-goal="novice"] .brd-tag')).not.toBeNull()
+    // The default is still the nearest JLPT stop: the kana are an offer,
+    // and taking them signs a pace and no destination.
     expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-goal="N5"] .brd-tag')).not.toBeNull()
+    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('false')
+    expect(q(screen, '[data-goal="N5"] .brd-tag')).toBeNull()
 
     // Back walks the visited path, answers intact.
     await click(screen, 'button.brd__back')
@@ -364,6 +378,59 @@ describe('BoardingFlow', () => {
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // No write happened: the name never changed.
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+  })
+
+  // ── The kana as a destination ──
+  // The novice's stop is one a beginner can ride TO, and the office
+  // signs it like any other: it goes onto the pass as goalLevel
+  // 'novice' with a date, priced at the syllabary. The plan promises
+  // signs rather than the word count and the motive's two lines, which
+  // three weeks of kana could not honour.
+  it('takes the novice’s own stop as the goal: the plan promises the kana, the office signs it', async () => {
+    const { screen } = await renderFlow()
+    await passName(screen, 'trip')
+    await click(screen, '[data-kana="none"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the reveal
+    await settle()
+
+    expect(stepOf(screen)).toBe('goal')
+    await click(screen, '[data-goal="novice"]')
+    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('false')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
+    await settle()
+
+    // The destination stands alone on the building screen: they are
+    // short of that stop, not standing on it, so no "Novice → Novice".
+    // The first line is stamped after one tick (600 ms).
+    expect(stepOf(screen)).toBe('building')
+    await settle(700)
+    expect(q(screen, '[data-build="goal"] .brd-step__val').textContent).toBe('Novice')
+    await passBuilding(screen)
+
+    // Three promises, none of them a word count or a motive's line.
+    const bullets = [...live(screen).querySelectorAll('.brd-bullet')].map(el => el.textContent)
+    expect(bullets).toHaveLength(3)
+    expect(bullets[0]).toContain('kana')
+    expect(bullets[2]).toBe('En route vers les kana')
+    expect(bullets.join(' ')).not.toContain('mots')
+    // The chart climbs to the signs on the ride, all 224 of them.
+    expect(q(screen, '.brd-chart__lbl').textContent).toBe('~224 kana · révisions quotidiennes')
+
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="enter"]')
+    await settle(80)
+    const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
+    expect(body.jlptLevel).toBe('N5')
+    expect(body.kanaKnown).toBe('none')
+    expect(body.goalLevel).toBe('novice')
+    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
   // ── The welcome, counted onto the pass ──
@@ -655,5 +722,48 @@ describe('BoardingFlow', () => {
     const { screen } = await renderFlow({ guest: true })
     expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
     expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(1)
+  })
+
+  // ── Google turned them away, so they took the email road ────────
+  // Both refusals at once is the state this screen was found in: the
+  // Google line cannot expire (it is a fact about the page load), and
+  // Supabase's own refusal on the claim quotes the address it was
+  // about to MAIL — which for a guest is empty. So the learner read
+  // `Email address "" is invalid` with their address filled in one
+  // line above it, under a sentence about a road they had already
+  // left. Neither half of that survives here.
+  it('answers the email road in its own words, and stands the Google line down', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    oauthRefusal.current = {
+      error: 'server_error',
+      code: 'identity_already_exists',
+      description: 'Identity is already linked to another user',
+    }
+    updateUser.mockResolvedValue({
+      data: {},
+      error: { code: 'email_address_invalid', message: 'Email address "" is invalid' },
+    })
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('account')
+    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
+
+    type(q(screen, 'input[type="email"]'), 'patou@gmail.com')
+    type(q(screen, 'input[type="password"]'), 'hunter22')
+    await settle(20)
+    // The address is a real one, so the gold button is a road again.
+    expect(q(screen, '[data-action="account-create"]').disabled).toBe(false)
+    await click(screen, '[data-action="account-create"]')
+    await settle(60)
+
+    const said = live(screen).textContent
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    expect(said).not.toContain('""')
+    expect(said).toContain(fr.claimEmailUnreachable)
+    // The older line steps aside rather than stacking under the new one…
+    expect(q(screen, '[data-oauth="refused"]')).toBeNull()
+    expect(said).not.toContain(fr.oauthAlreadyLinked)
+    // …while the way OUT of that refusal is still standing, because it
+    // is still true: that Google account is still somebody's pass.
+    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
   })
 })

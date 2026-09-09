@@ -41,7 +41,10 @@ function ClaimSlip() {
           manual linking is off on the project the error says so and
           nothing is lost. */}
       <ProviderButton link onError={claim.setError} />
-      {refused && (
+      {/* Only until the fields below have news of their own: a URL
+          refusal lasts the whole page load, and stacking it over the
+          claim's own answer reads as two faults where there is one. */}
+      {refused && !claim.error && !claim.done && (
         <p className="auth-message auth-message--error" role="alert">{authRedirectMessage(refused, t)}</p>
       )}
       <p className="auth-or">{t.orWithEmail}</p>

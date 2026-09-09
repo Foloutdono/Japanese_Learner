@@ -389,7 +389,6 @@ export default function StudyRun({ session }) {
                 // Without this the canvas keeps the previous card's ink:
                 // Canvas clears on resetKey changing, and nothing else.
                 resetKey={nc.card_id}
-                meaning={formatGlossLine(nc.meaning)}
                 onValidate={() => {
                   setAnswered(true)
                   setShowRating(true)

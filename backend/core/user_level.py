@@ -25,6 +25,23 @@ from study.difficulty import LEVELS
 
 DEFAULT_LEVEL = "N5"
 
+# ── 手前の駅 — the stop before N5 ──────────────────────────────────
+# The kana are a destination of their own. A learner who cannot read
+# the syllabaries is short of N5, which asks for both of them and ~100
+# kanji, and "read the kana, all of them" is the goal they are
+# likeliest to hold first -- so the pass can be issued to that stop
+# like any other (routes/journey.py, routes/onboarding.py).
+#
+# A GOAL, never a stored level: jlpt_level stays N5 for such a learner,
+# because N5 is the content they are served, and resolve_level() below
+# never answers with this. Only the goal columns and the journey's own
+# arithmetic know the stop exists.
+NOVICE_GOAL = "novice"
+
+# The line a destination is chosen from, in order: the kana stop, then
+# the five JLPT stops.
+GOAL_LEVELS = (NOVICE_GOAL, *LEVELS)
+
 # One entry per user: (level, expires_at). Only real levels are ever
 # cached — a user with no stored level costs one PK SELECT per call,
 # deliberately, so the moment onboarding completes the very next lookup

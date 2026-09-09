@@ -1,7 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
-  approx, axisLabel, bucketFor, clampDeparture, dayFraction, jlptFor, kanaKnownCount, kanjiThrough,
-  levelForKana, minuteAtFraction, minutesToTime, planFigures, stopsAhead, timeToMinutes,
+  approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
+  kanaKnownCount, kanjiThrough, levelForKana, minuteAtFraction, minutesToTime, planFigures,
+  stopsAhead, timeToMinutes,
 } from './boarding'
 
 const VOLUMES = {
@@ -65,6 +66,19 @@ describe('the kana check and the level', () => {
     // for the level the office stores (which is N5 for them both).
     expect(stopsAhead('novice')).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
   })
+  // The novice's own stop IS the kana: a learner who cannot read both
+  // scripts has not reached it, so it heads their goal list — "read the
+  // kana" is a destination, not a stop the flow assumes behind them.
+  it('opens the goal list with the novice’s own stop for a learner short of the kana', () => {
+    expect(goalStops('novice', 'hiragana')).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(goalStops('novice', 'katakana')).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(goalStops('novice', 'none')).toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    // A reader of both scripts stands on that stop already — the level
+    // list is where they said so — and rides on from it.
+    expect(goalStops('novice', 'both')).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(goalStops('N4', 'both')).toEqual(['N3', 'N2', 'N1'])
+    expect(goalStops('N1', 'both')).toEqual([])
+  })
   it('counts the kanji through a stop from the volumes', () => {
     expect(kanjiThrough(VOLUMES, 'N5')).toBe(103)
     expect(kanjiThrough(VOLUMES, 'N4')).toBe(269)
@@ -89,10 +103,32 @@ describe('the plan', () => {
     expect(f.items).toBe(667 + 634 + 103 + 166 + 71 + 71)
     expect(f.days).toBe(Math.ceil(f.items / 10))
     expect(f.date.getTime()).toBeGreaterThan(now.getTime())
+    expect(f.kana).toBe(0)
     const none = planFigures(VOLUMES, 'N5', 'N4', 10, 'none', now)
     expect(none.items).toBe(f.items + 224)
+    expect(none.kana).toBe(224)
     // Above N5 the kana never counted.
     expect(planFigures(VOLUMES, 'N3', 'N2', 10, 'none', now).items).toBe(1832 + 367 + 71 + 1796 + 367 + 71)
+  })
+  // No JLPT level lies behind the novice's stop, so a ride to it is the
+  // kana and nothing else — the plan screen promises signs rather than
+  // a word count it cannot honour in three weeks.
+  it('prices a ride to the novice’s own stop at the whole syllabary', () => {
+    const now = new Date('2026-09-07T00:00:00Z')
+    const f = planFigures(VOLUMES, 'N5', 'novice', 10, 'none', now)
+    expect(f.words).toBe(0)
+    expect(f.kanji).toBe(0)
+    expect(f.kana).toBe(224)
+    expect(f.items).toBe(224)
+    expect(f.days).toBe(Math.ceil(224 / 10))
+    // That destination is the signs MASTERED, so it prices every one of
+    // them — a script already read included. routes/journey.py counts
+    // the same total on the pass, and a promise the pass cannot pay
+    // would read as late from the first morning.
+    expect(planFigures(VOLUMES, 'N5', 'novice', 10, 'hiragana', now).items).toBe(224)
+    // Every other ride still carries the front-load net of what the
+    // kana check marked known.
+    expect(planFigures(VOLUMES, 'N5', 'N4', 10, 'hiragana', now).kana).toBe(112)
   })
   it('survives missing volumes with a ride of nothing', () => {
     const f = planFigures(null, 'N5', 'N4', 10, 'both')

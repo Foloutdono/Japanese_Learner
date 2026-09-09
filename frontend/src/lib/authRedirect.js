@@ -22,6 +22,8 @@
 // (`#access_token=…`, `?code=…`) are never touched: those are its to
 // read.
 
+import { authErrorMessage } from './authErrors'
+
 const ERROR_KEYS = ['error', 'error_code', 'error_description']
 
 // Backing out at Google is an answer, not a fault — the shell already
@@ -77,14 +79,13 @@ export function isAlreadyLinked(err) {
 /**
  * The sentence for a learner. Supabase's own `error_description` is
  * the fallback: it is English-only and written for developers, but a
- * true sentence beats a shrug, and the two refusals that actually
- * happen are named above it.
+ * true sentence beats a shrug, and the refusals that actually happen
+ * are named in lib/authErrors.js — the one table both refusal shapes
+ * read, so a code cannot mean one thing here and another to the
+ * fields underneath.
  */
 export function authRedirectMessage(err, t) {
-  if (!err) return null
-  if (isAlreadyLinked(err)) return t.oauthAlreadyLinked
-  if (err.code === 'manual_linking_disabled') return t.oauthLinkingOff
-  return err.description || t.genericError
+  return authErrorMessage(err, t, err?.description)
 }
 
 // The capture, once, at import.

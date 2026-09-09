@@ -411,7 +411,6 @@ export default function TodayRun({ session }) {
             {renderer === RENDER.DRAW && (
               <DrawingQuiz
                 kanji={structureKey === 'kana' ? nc.kana : nc.kanji}
-                meaning={structureKey === 'kana' ? nc.romaji : formatGlossLine(nc.meaning)}
                 // Without this the canvas keeps the previous card's ink:
                 // Canvas clears on resetKey changing, and nothing else.
                 resetKey={`${card.card_id}:${cardNonce}`}

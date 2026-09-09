@@ -5,7 +5,7 @@
 // React, no network -- the same layering as domain/goalMath.js, whose
 // item counts and dates this reuses so the boarding and the office in
 // Settings never disagree by a rounding rule.
-import { addDays, journeyItems, journeyLevels } from './goalMath'
+import { NOVICE_GOAL, addDays, journeyIncludesKana, journeyLevels } from './goalMath'
 import { levelItems } from './journeyProjection'
 
 export const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -76,7 +76,9 @@ export function bucketFor(min) {
  *  started at N4, because N5 was already behind them. A learner who
  *  reads hiragana alone could not say "I want to reach N5" — the one
  *  goal they are most likely to have. Novice keeps them off the JLPT
- *  line entirely, so `stopsAhead` opens with N5 (owner's report). */
+ *  line entirely, so their goal list holds the whole of it — and the
+ *  novice's own stop at its head, since the kana are still ahead of
+ *  them too (`goalStops`, owner's report). */
 export function levelForKana(answer) {
   return answer === 'both' ? null : 'novice'
 }
@@ -93,6 +95,22 @@ export function jlptFor(choice) {
  *  and an N5 learner gets N4 onward. */
 export function stopsAhead(level) {
   return LEVELS.slice(LEVELS.indexOf(level) + 1)
+}
+
+/** The goal list: the stops a learner can still ride TO. The novice's
+ *  own stop IS the kana, so a learner who cannot yet read both scripts
+ *  has not reached it -- it opens their list, and "read the kana"
+ *  becomes a destination they can name rather than a stop the flow
+ *  assumes behind them (owner's call). A reader of both scripts stands
+ *  there already -- the level list is where they said so -- and rides
+ *  on to the JLPT stops.
+ *
+ *  The office signs that stop like any other destination: it goes onto
+ *  the pass as goalLevel 'novice' with a date, and the ghost train
+ *  measures it in kana (backend core/user_level.py NOVICE_GOAL). */
+export function goalStops(choice, kanaAnswer) {
+  const ahead = stopsAhead(choice)
+  return choice === NOVICE_GOAL && kanaAnswer !== 'both' ? [NOVICE_GOAL, ...ahead] : ahead
 }
 
 /** ~n: the figure a promise wears, rounded to the nearest `to`. */
@@ -118,17 +136,33 @@ export function kanaKnownCount(volumes, kanaAnswer) {
 /**
  * The plan's figures, from the learner's own answers:
  *   words, kanji     the vocabulary and kanji from boarding to goal
- *   items            everything the ride covers, less the kana already read
+ *   kana             the signs still unread on this ride
+ *   items            everything the ride covers, kana included
  *   days, date       at `perDay` new items a day, from `now`
+ *
+ * A ride to the novice's own stop is the kana and nothing else: no
+ * JLPT level lies behind that stop (goalMath's journeyLevels answers
+ * none for it), so it promises signs rather than words.
  */
 export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new Date()) {
   const levels = journeyLevels(level, goal)
   const words = levels.reduce((sum, lvl) => sum + (volumes?.vocab?.[lvl] ?? 0), 0)
   const kanji = levels.reduce((sum, lvl) => sum + (volumes?.kanji?.[lvl] ?? 0), 0)
-  const total = volumes ? journeyItems(volumes, level, goal) : levels.reduce((s, l) => s + levelItems(volumes ?? {}, l), 0)
-  const items = Math.max(0, total - (level === 'N5' ? kanaKnownCount(volumes, kanaAnswer) : 0))
+  // The kana ride in front of everything else -- goalMath owns when it
+  // counts at all. A ride TO that stop prices EVERY sign, the ones the
+  // learner already reads included: the destination is the syllabaries
+  // mastered, a marked-known sign is still checked on the way, and
+  // routes/journey.py prices the pass at the same total -- a promise
+  // the pass cannot pay is worse than a slower one. Every other ride
+  // carries the front-load net of what the kana check marked known.
+  const kana = journeyIncludesKana(level)
+    ? (goal === NOVICE_GOAL
+      ? (volumes?.kana ?? 0)
+      : Math.max(0, (volumes?.kana ?? 0) - kanaKnownCount(volumes, kanaAnswer)))
+    : 0
+  const items = levels.reduce((sum, lvl) => sum + levelItems(volumes ?? {}, lvl), 0) + kana
   const days = Math.max(1, Math.ceil(items / Math.max(1, perDay)))
-  return { words, kanji, items, days, date: addDays(now, days) }
+  return { words, kanji, kana, items, days, date: addDays(now, days) }
 }
 
 // The chart is an illustration (the canvas says so on the card): two

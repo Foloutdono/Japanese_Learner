@@ -8346,7 +8346,12 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   margin-top: auto;
 }
 /* The way through a browse: two buttons on the stage's foot
-   (canvas RunBrowse), the filled one forward. */
+   (canvas RunBrowse), the filled one forward. The width is definite on
+   purpose: the auto margins that centre this row on a wide screen are
+   cross-axis margins of a flex item, and an auto margin there cancels
+   the stretch that would otherwise have sized it — without a width the
+   pair shrinks to fit its own labels in the middle of the stage. The
+   phone dock overrides it; see .stage > .stage__foot. */
 .browse-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -9747,20 +9752,98 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 
 /* ── Drawing canvas ───────────────────────────────────────── */
 .canvas-wrap {
+  /* Three things bound the board, and the smallest wins: the card it
+     sits in, half the window's height, and 440px — past which a
+     writing surface stops being a hand's worth of space (DESIGN.md,
+     the density contract, draws the same line). A phone adds a
+     fourth, .canvas-holder's max-height, which is the room the stage
+     actually has left after the card and the rating bar. */
+  --canvas-cap: min(100%, 52vh, 440px);
   display: flex;
   flex-direction: column;
   align-items: center;
   flex: 1;
+  gap: var(--sp-3);
+  width: 100%;
+  min-width: 0;
+}
+
+/* The room the board may grow into. Its height is content on a
+   desktop -- which is what makes the holder's `max-height: 100%` a
+   no-op there -- and the stage's own leftover on a phone, where the
+   flex chain in the <=768px block hands it down. */
+.canvas-field {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  min-width: 0;
+}
+
+/* The square: the board, and the correction laid over it. Sized by
+   whichever of width and height runs out first -- `aspect-ratio` with
+   `height: auto` carries a max-height clamp back into the width, so a
+   short screen shrinks the square instead of squashing it into a
+   rectangle and stretching the ink with it. */
+.canvas-holder {
+  position: relative;
+  width: 100%;
+  max-width: var(--canvas-cap);
+  height: auto;
+  max-height: 100%;
+  aspect-ratio: 1;
 }
 
 .canvas-board {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
   border-radius: 10px;
   border: 2px solid var(--border);
   touch-action: none;
   cursor: crosshair;
   display: block;
-  width: 100%;
-  max-width: 260px;
+}
+
+/* 朱書き — the correction, over the learner's own line rather than
+   beside it (DrawingCanvas.jsx, Ghost). The learner's ink is
+   --brush-ink at full strength, so the same ink at a third reads as
+   the reference and not as a second answer. It does not animate: the
+   order is a tap away in the entry's own sheet. */
+.canvas-ghost {
+  /* Named once and read by the fade below: `arrive-soft` ends at
+     opacity 1, and an animation's own end value wins over the rule's,
+     so borrowing it would have landed the correction at full strength
+     — a second answer over the learner's first. */
+  --ghost-ink: 0.34;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--sp-4);
+  pointer-events: none;
+  color: var(--brush-ink);
+  opacity: var(--ghost-ink);
+  animation: ghost-arrive 0.32s cubic-bezier(0.22, 0.68, 0.32, 1) both;
+}
+
+@keyframes ghost-arrive {
+  from { opacity: 0; }
+  to   { opacity: var(--ghost-ink); }
+}
+
+.canvas-ghost__glyph {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+}
+
+/* The fallback glyph, when KanjiVG has no file for the character: SVG
+   text, so it scales with the square the way a font-size cannot. */
+.canvas-ghost__glyph text {
+  font-family: var(--font-jp);
+  fill: currentcolor;
 }
 
 .canvas-clear-btn {
@@ -9768,9 +9851,8 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   border: 1px solid var(--border);
   color: var(--text-secondary);
   font-size: 12px;
-  margin-top: 8px;
   width: 100%;
-  max-width: 260px;
+  max-width: var(--canvas-cap);
 }
 
 .stroke-ref {
@@ -9856,82 +9938,42 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   margin-top: var(--sp-7);
 }
 
-.drawing-quiz { width: 100%; }
+.drawing-quiz {
+  width: 100%;
+  /* The card's own padding, read back out here so the phone block can
+     tighten both at once and the board still knows how much of the
+     stage it is allowed. */
+  --drawing-card-pad: var(--sp-7);
+}
 
 /* Same second reason as .readings-input above (max-height/overflow
-   compounding). WIDTH is different here rather than dissolved, though
-   -- plan 049 put every other .prompt-card on the universal --card-w
-   (640px), but this card's own panels (.drawing-quiz__panels below)
-   cap at 600px combined, and this rule's own padding (--card-pad-x,
-   28px on each side) takes 56px off the content box: 600 + 56 = 656px
-   is the floor a cap here must clear. At the universal 640 the content
-   box would be 640 - 56 = 584px, under that floor, and the panels
-   would wrap -- the drawing surface stacking above its stroke
-   reference instead of beside it, which is the whole point of this
-   layout. --card-w: 700px keeps headroom above the 656px floor without
-   drifting far past it. And the base .prompt-card clamp (max-height:
-   60vh) is well under what a 260px canvas plus its label plus the
-   stroke-order panel need on a phone — the card became an inner
-   scroll area, which is what was clipping the canvas against its own
-   rounded border. */
+   compounding). WIDTH is no longer different: this card carried
+   --card-w: 700px because it held TWO 260px panels side by side, the
+   board and a stroke-order reference, and 600px of panels plus 56px
+   of its own padding needed a 656px floor the universal 640 could not
+   clear. The reference moved onto the board itself (.canvas-ghost),
+   so there is one panel now, the exception has nothing left to buy,
+   and this card sits in the same column as every other -- which is
+   also what plan 049 wanted in the first place. The padding comes
+   down with it: 44px of frame around a single square was the two
+   panels' spacing, not the board's. */
 .prompt-card.drawing-quiz__card {
-  /* Was 26/22 -- tighter than every other quiz card's own padding
-     (44/24 base, 52-56 on vocab/grammar's boosted ones), so this read
-     as the one cramped surface in the app. Matched closer to the
-     boosted cards' own numbers instead -- x stays nearer their 32 than
-     the base's 24, y matches them outright. */
-  --card-pad-y: var(--sp-8);
-  --card-pad-x: var(--sp-7);
-  --card-pad-top: var(--sp-8);
-  --card-w: 700px;
+  --card-pad-y: var(--drawing-card-pad);
+  --card-pad-x: var(--drawing-card-pad);
+  --card-pad-top: var(--drawing-card-pad);
   margin: 0 auto;
   max-height: none;
   overflow: visible;
 }
 
-.drawing-quiz__panels {
-  display: flex;
-  gap: 32px;
-  justify-content: center;
-  align-items: flex-start;
-  flex-wrap: wrap;
-  width: 100%;
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.drawing-quiz__side {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  flex: 1;
-}
-
-.drawing-quiz__correction { flex: 1; }
-
-.drawing-quiz__placeholder {
-  width: 100%;
-  max-width: 260px;
-  aspect-ratio: 1;
-  background: var(--bg-card);
-  border-radius: 10px;
-  border: 2px dashed var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-self: center;
-}
-
-.drawing-quiz__placeholder-mark { color: var(--text-secondary); font-size: 13px; }
-
 /* The family's primary (see .btn-primary), so it wears the section's
    own pigment rather than 仮名's red on every screen. Only its place
-   is its own: matched to the card above it rather than to the panels
-   inside it, so the button reads as belonging to the card instead of
-   being a narrower, unrelated bar floating under one edge of it. */
+   is its own: matched to the card above it, so the button reads as
+   belonging to the card instead of being a narrower, unrelated bar
+   floating under one edge of it. */
 .drawing-quiz__validate {
   width: 100%;
-  max-width: 700px;
+  max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
 }
 
@@ -13270,8 +13312,46 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     bottom: var(--dock-bottom);
     z-index: 10;
     margin-inline: calc(-1 * var(--sp-5));
-    padding: var(--sp-3) var(--sp-5) var(--sp-5);
+    padding-block: var(--sp-3) var(--sp-5);
     background: var(--bg-main);
+    /* Edge to edge means auto, not 100%. A percentage resolves against
+       the stage's INNER box and knows nothing about the negative
+       margins above, so a foot carrying one (.browse-nav) kept the
+       348px of a 380px stage while sitting 16px left of where it
+       started — the browse's Next stopped 32px short of the card's
+       right edge, with the whole pair off its column. Auto width takes
+       the margins into account: the foot spans the stage, and its own
+       gutter puts the buttons back on the card's edges.
+
+       The clamp goes with it: a max-width sizes the BORDER box, so
+       .browse-nav's --card-w clamp was measuring the bled ground and
+       the gutters as if they were the buttons. The column below does
+       that job now, for every foot at once. */
+    width: auto;
+    max-width: none;
+    /* ── The gutter is the card's column, not the screen's ──
+       The ground under a docked foot runs edge to edge; the control on
+       it belongs over the card. Those are the same thing on a phone,
+       where the card fills the stage and the page's own gutter puts
+       both on the same edges. They part between --card-w and this
+       query's own ceiling: the card stops growing at 640 and centres
+       itself (.prompt-card, index.css:12702), while the foot kept
+       spanning the stage — on 768, a tablet held upright, the field and
+       the browse's pair sat 43px outside the card on each side, and the
+       screen read as two columns that disagree.
+
+       So the gutter is whatever centres the content on that column:
+       the page's own where the card fills the stage, and half of what
+       the card leaves once it stops. Every foot in this query holds a
+       control that pairs with a --card-w card above it (the browse's
+       two buttons, reading's and translation's field and Submit,
+       comprehension's pair), so one number serves all four.
+
+       This is the foot catching up with the instrument beside it, not
+       a new idea: the rating bar above already draws the same
+       division — its ground bleeds, while .rating-bar__buttons
+       (index.css:9554) holds the segments to the very same column. */
+    padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
   }
   /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
      edge, on the dock's edge, its own inset under it. */
@@ -13307,11 +13387,31 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   }
   .mcq-row + .mcq-row { margin-top: var(--sp-3); }
   .mcq-row__index { width: 28px; height: 28px; }
-  /* The drawing quiz: the canvas is the point, so until there is a
-     stroke order to show it has the whole width; the reference joins
-     it, wrapping underneath, once the answer is revealed. */
-  .drawing-quiz__correction--waiting { display: none; }
-  .drawing-quiz__panels { gap: var(--sp-5); }
+  /* The drawing quiz: the board IS the screen. The card above it
+     stops growing into the stage (the .stage rule below), the quiz
+     takes what that leaves, and the chain hands it down to
+     .canvas-field so the board's own max-height has a real number to
+     clamp against — the whole leftover, less the erase button. The
+     card's frame comes in to the stage's own rung too: 28px of margin
+     around a square is 56px the board could have been. */
+  .stage > .drawing-quiz {
+    --drawing-card-pad: var(--sp-5);
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawing-quiz > .prompt-card.drawing-quiz__card {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .drawing-quiz .canvas-wrap,
+  .drawing-quiz .canvas-field {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
   /* The kanji reveal stacks on a phone: the readings under the
      meaning, centred, never squeezed beside it. The sideways wipe
      that opens the desktop panel is replaced by a plain fade, since
@@ -13331,14 +13431,14 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     transition: opacity 0.3s ease;
   }
   .inline-reveal__panel-inner { width: auto; max-width: 100%; }
-  /* A sumi square with a brush is a drawing surface, and the stroke
-     order animates; neither needs a caption on a phone, where the
-     line they cost is the line the reveal button needs to stay above
-     the fold. The prompt above the canvas never changes face in this
-     mode, so the stage floor that keeps the other cards still is
-     dead height here. */
-  .drawing-quiz .stroke-ref__label { display: none; }
+  /* The prompt above the canvas never changes face in this mode, so
+     the stage floor that keeps the other cards still is dead height
+     here — and so is the growth every other card gets, which is the
+     whole reason a lone romaji prompt stood in a card taller than the
+     board it was asking for. The card takes its content; the board
+     takes the rest. */
   .stage:has(.drawing-quiz) .specimen-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  .stage:has(.drawing-quiz) > .quiz-card-stage { flex: 0 0 auto; }
 
   .dict-layout {
     display: block;
@@ -13568,9 +13668,18 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    The handwriting pad is a <canvas>, and canvas takes numbers, not
    custom properties. Rather than keep a second copy of the palette in
    JavaScript — which is exactly how CANVAS_STROKE_COLOR drifted from
-   --text-primary — the pad reads these back off the computed style at
-   the moment it draws (see DrawingCanvas.jsx). */
-:root { --brush-ink: var(--text-primary); --brush-width: 5; }
+   the sheet — the pad reads these back off the computed style at
+   the moment it draws (see DrawingCanvas.jsx).
+
+   --text-on-panel, not --text-primary. The board is a FIXED sumi slab
+   in both themes (CANVAS_BOARD_COLOR, #201d24) and --text-primary is
+   not fixed: in light it is #221d15, which is ink the same darkness as
+   the board it is drawn on. Every stroke a learner drew under the
+   light theme was invisible — and so, since it shares this ink, would
+   the correction laid over it be. --text-on-panel is the token for
+   exactly this ("text for use on sumi surfaces. Constant, because sumi
+   itself is dark enough in both themes"). */
+:root { --brush-ink: var(--text-on-panel); --brush-width: 5; }
 
 /* ══ 辞書 — the catalogue ═══════════════════════════════════
    At the end of the file on purpose: this block re-styles rules the

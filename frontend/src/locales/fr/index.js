@@ -1403,6 +1403,16 @@ const boarding = {
   oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
   oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
+  // 本乗車券 — mettre une adresse sur la carte (lib/guest.js). Même
+  // règle que les deux au-dessus : nommer ce qui s'est passé, et
+  // nommer la voie qui reste ouverte. Les phrases de Supabase sont
+  // celles d'un développeur, et sur cette demande l'une d'elles cite
+  // une adresse vide au lieu de celle du champ — voir
+  // lib/authErrors.js.
+  claimEmailTaken: 'Cette adresse a déjà une carte. Connectez-vous avec elle.',
+  claimEmailUnreachable: 'La confirmation n\u2019a pas pu être envoyée à cette adresse. Essayez-en une autre, ou gardez votre progression avec Google.',
+  claimWeakPassword: 'Ce mot de passe est trop facile à deviner. Essayez-en un plus long.',
+  claimTooSoon: 'Trop de tentatives pour le moment. Attendez une minute et réessayez.',
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
@@ -1437,6 +1447,9 @@ const boarding = {
   },
   brdGoalQ: 'Quel est votre objectif ?',
   brdGoalHint: (level) => `Les arrêts après ${level}.`,
+  // Personne n’a d’arrêt derrière soi avant les kana : la liste s’ouvre
+  // sur celui du novice et ne nomme donc aucun niveau (goalStops).
+  brdGoalHintStart: 'Tous les arrêts sont devant vous.',
   brdNextStop: 'Prochain arrêt',
   brdRhythmQ: 'Quel est votre rythme ?',
   brdMinADay: 'min par jour',
@@ -1469,6 +1482,10 @@ const boarding = {
   brdChartTitle: 'Votre projection',
   brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
   brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
+  // Le même graphique pour un trajet jusqu’à l’arrêt du novice, qui
+  // promet des signes et non des mots.
+  brdChartAriaKana: (kana) => `Kana retenus au fil du trajet : les révisions quotidiennes montent à environ ${kana} ; le bachotage plafonne tôt.`,
+  brdChartLabelKana: (kana) => `~${kana} kana · révisions quotidiennes`,
   brdChartCram: 'bachotage',
   brdLegendUs: (min) => `Révisions quotidiennes, ${min} min`,
   brdLegendThem: 'Bachotage',
@@ -1476,6 +1493,11 @@ const boarding = {
   brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
   brdFor: { studies: 'pour vos études', fun: 'pour le plaisir', trip: 'pour votre voyage', live: 'pour votre vie au Japon', friends: 'pour vos amis', other: 'pour vous' },
   brdBulletFigures: (words, kanji) => `~${words} mots et ~${kanji} kanji`,
+  // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
+  // attend derrière. Pas de compte de mots, et aucune promesse de
+  // motif — trois semaines de signes ne font pas un drama sans pause.
+  brdBulletKana: 'Les deux écritures kana, lues à vue',
+  brdBulletThenLine: 'Puis toute la ligne, arrêt par arrêt',
   // Deux promesses par motif (la note « boarding » de la maquette).
   brdPromise: {
     studies: ['Vos supports de cours', 'Les termes clés d’un cours'],
@@ -1487,6 +1509,7 @@ const boarding = {
   },
   brdOnTrack: (level) => `En route vers le JLPT ${level}`,
   brdOnTrackLine: 'En route sur toute la ligne',
+  brdOnTrackKana: 'En route vers les kana',
   brdPassQ: (name) => `Votre carte est prête, **${name}**.`,
   brdEnjoy: 'Bon voyage.',
   brdCreditsGift: (n) => `+${n} crédits offerts`,

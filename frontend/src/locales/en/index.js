@@ -1437,6 +1437,15 @@ const boarding = {
   oauthAlreadyLinked: 'That Google account already belongs to another pass.',
   oauthSignInInstead: 'Sign in with that Google account',
   oauthLinkingOff: 'Google cannot be added to this pass right now. An email address can.',
+  // 本乗車券 — putting an address on the pass (lib/guest.js). Same
+  // rule as the two above: name what happened, and name the road that
+  // is still open. Supabase's own sentences are developers' English,
+  // and on the claim one of them quotes an empty address instead of
+  // the one in the field — see lib/authErrors.js.
+  claimEmailTaken: 'That address already has a pass. Sign in with it instead.',
+  claimEmailUnreachable: 'The confirmation could not be sent to that address. Try another one, or keep your progress with Google.',
+  claimWeakPassword: 'That password is too easy to guess. Try a longer one.',
+  claimTooSoon: 'Too many attempts just now. Wait a minute and try again.',
   // Last stop: the account, asked once everything has been seen — and
   // refusable. "Keep" rather than "create": the progress already
   // exists, this only puts a key on it (lib/guest.js).
@@ -1471,6 +1480,9 @@ const boarding = {
   },
   brdGoalQ: 'What’s your goal?',
   brdGoalHint: (level) => `The stops ahead of ${level}.`,
+  // Nobody has a stop behind them before the kana: the list opens with
+  // the novice's own, so it names no level (domain/boarding.js goalStops).
+  brdGoalHintStart: 'Every stop is ahead of you.',
   brdNextStop: 'Next stop',
   brdRhythmQ: 'What’s your rhythm?',
   brdMinADay: 'min a day',
@@ -1502,6 +1514,10 @@ const boarding = {
   brdChartTitle: 'Your projection',
   brdChartAria: (words) => `Words remembered over the ride: daily reviews climb to about ${words}; cramming levels off early.`,
   brdChartLabel: (words) => `~${words} words · daily reviews`,
+  // The same chart for a ride to the novice's stop, which promises
+  // signs rather than words.
+  brdChartAriaKana: (kana) => `Kana remembered over the ride: daily reviews climb to about ${kana}; cramming levels off early.`,
+  brdChartLabelKana: (kana) => `~${kana} kana · daily reviews`,
   brdChartCram: 'cramming',
   brdLegendUs: (min) => `Daily reviews, ${min} min`,
   brdLegendThem: 'Cramming',
@@ -1509,6 +1525,11 @@ const boarding = {
   brdLead: (min, date, purpose) => `At **${min} min a day**, by **${date}**, ${purpose}:`,
   brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
   brdBulletFigures: (words, kanji) => `~${words} words and ~${kanji} kanji`,
+  // The novice's stop, taken as a goal: the kana, and the line that
+  // waits beyond them. No word count, and no motive line — three weeks
+  // of signs cannot promise a drama without pausing.
+  brdBulletKana: 'Both kana scripts, read on sight',
+  brdBulletThenLine: 'Then the whole line, stop by stop',
   // Two promise lines per motive (the canvas's boarding note).
   brdPromise: {
     studies: ['Your course material', 'A lecture’s key terms'],
@@ -1520,6 +1541,7 @@ const boarding = {
   },
   brdOnTrack: (level) => `On track for JLPT ${level}`,
   brdOnTrackLine: 'On track for the whole line',
+  brdOnTrackKana: 'On track for the kana',
   brdPassQ: (name) => `Your pass is ready, **${name}**.`,
   brdEnjoy: 'Enjoy the ride.',
   brdCreditsGift: (n) => `+${n} credits, on the house`,
