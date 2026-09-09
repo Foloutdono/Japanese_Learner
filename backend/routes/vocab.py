@@ -93,11 +93,14 @@ def _build_vocab_card(raw_id: str, word: dict, vocab_list: list[dict], m: Mode, 
     """
     # `meaning_of` exists for the theme router, whose pool mixes deck
     # words with JMdict-pool ones. The default lookup keys the French
-    # gloss table by surface form, and 44 theme entries share a surface
-    # with a deck word of a DIFFERENT sense -- 子 is "enfant" in the deck
-    # and "the Rat" in the zodiac theme. Letting the caller say how a
-    # meaning is resolved keeps that right for the prompt AND for the
-    # distractors, which a post-hoc correction of the payload could not.
+    # gloss table by surface form, so a pool word sharing a surface with
+    # a deck word of a DIFFERENT sense would collect the deck word's
+    # translation. One theme entry does today (潮 "tide" beside the
+    # deck's own 潮) -- it was 44 before the theme rebuild dropped the
+    # keyword-matched padding, and it is not zero. Letting the caller say
+    # how a meaning is resolved keeps that right for the prompt AND for
+    # the distractors, which a post-hoc correction of the payload could
+    # not.
     resolve_meaning = meaning_of or (lambda e: get_meaning(e, lang, FR_MAP))
     meaning = resolve_meaning(word)
 

@@ -7,10 +7,11 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import TierSelector from '../components/selection/TierSelector'
 import ThemeSelector from '../components/selection/ThemeSelector'
+import ThemeLevelSelector from '../components/selection/ThemeLevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { tierLabelFor } from '../domain/tiers'
-import { themeLabelFor } from '../domain/themes'
+import { themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -18,17 +19,19 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // /learn/vocab is the JLPT line as a route, with two other ways in on
 // the bar: by frequency (/learn/vocab/tiers — the JLPT deck's own
 // ranking, or every JMdict word beyond it with ?domain=jmdict) and by
-// theme (/learn/vocab/themes). /learn/vocab/:level, /tier/:tier
-// (?size=&domain=) and /theme/:theme list that stop's modes as
-// platforms; picking one boards the train into the run on the stage
-// frame (screens/VocabRun.jsx). The fast review exists on the JLPT
+// theme (/learn/vocab/themes). /learn/vocab/:level and /tier/:tier
+// (?size=&domain=) list that stop's modes as platforms; a theme has one
+// stop more, because it is itself a little line — /theme/:theme is its
+// four frequency bands (基本 → 達人) and /theme/:theme/level/:themeLevel
+// is where the platforms are. Picking a platform boards the train into
+// the run on the stage frame (screens/VocabRun.jsx). The fast review exists on the JLPT
 // path only. See KanaScreen.jsx for the deep-link shape the station
 // still accepts.
 export default function VocabScreen({ session }) {
   const { t } = useLang()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
-  const { level, tier, theme } = useParams()
+  const { level, tier, theme, themeLevel } = useParams()
   const [sp, setSp] = useSearchParams()
 
   const MODES = modePickerEntries(t, 'vocab')
@@ -46,6 +49,9 @@ export default function VocabScreen({ session }) {
     return <Navigate replace to={`/learn/vocab/${qLevel}/${qMode}`} />
   }
   if (level && !LEVELS.includes(level)) return <Navigate replace to="/learn/vocab" />
+  // A hand-typed or stale band falls back to the theme's own ladder
+  // rather than to a mode picker for a band that does not exist.
+  if (themeLevel && !isThemeLevel(themeLevel)) return <Navigate replace to={`/learn/vocab/theme/${theme}`} />
 
   // ── The station: the JLPT line ──
   if (station) {
@@ -102,14 +108,31 @@ export default function VocabScreen({ session }) {
     )
   }
 
+  // ── A theme's own line: its four frequency bands ──
+  if (theme && !themeLevel) {
+    return (
+      <SelectionScreen
+        title={t.vocabulary}
+        sub={themeLabelFor(t, theme)}
+        aside={<Leave onClick={() => navigate('/learn/vocab/themes')}>{t.leaveThemes}</Leave>}
+      >
+        <ThemeLevelSelector
+          session={session}
+          theme={theme}
+          onSelect={lvl => navigate(`/learn/vocab/theme/${theme}/level/${lvl}`)}
+        />
+      </SelectionScreen>
+    )
+  }
+
   // ── The platforms: a stop's modes ──
   const sub = level ? `${level} · ${t[`levelHint${level}`] ?? ''}`
-    : theme ? themeLabelFor(t, theme)
+    : theme ? `${themeLabelFor(t, theme)} · ${themeLevelLabel(t, themeLevel)}`
     : tierLabelFor(Number(tier), tierSize)
   const back = level ? '/learn/vocab'
-    : theme ? '/learn/vocab/themes'
+    : theme ? `/learn/vocab/theme/${theme}`
     : `/learn/vocab/tiers?size=${tierSize}${jmdict ? '&domain=jmdict' : ''}`
-  const backLabel = level ? t.leaveLevels : theme ? t.leaveThemes : t.leaveTiers
+  const backLabel = level ? t.leaveLevels : theme ? t.leaveThemeLevels : t.leaveTiers
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
   return (

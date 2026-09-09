@@ -144,3 +144,75 @@ def test_the_cross_collection_browse_stays_curated(client):
     vocab = [r for r in body["results"] if r["type"] == "vocab"]
     assert vocab
     assert all(r["level"] for r in vocab)
+
+
+# ------------------------------------------------- looking up an exact word
+#
+# A caller holding a card (the reveal button on a study screen) knows
+# precisely which entry it wants. `q` alone cannot say so, and got it wrong:
+# measured over 400 real theme words, ~1.5% opened a DIFFERENT entry.
+
+
+def _lookup(client, term, **extra):
+    """What the study screens' lookup sheet does: one page, then prefer an
+    exact match, else the first row."""
+    body = client.get("/api/dictionary", params={
+        "q": term, "page": 0, "limit": 10, "category": "vocab", **extra}).json()
+    results = body["results"]
+    kana = extra.get("kana")
+    return (
+        next((e for e in results if e["kanji"] == term and e["kana"] == kana), None)
+        or next((e for e in results if e["kanji"] == term or e["kana"] == term), None)
+        or (results[0] if results else None)
+    )
+
+
+def test_a_homograph_opens_the_reading_that_was_asked_for(client):
+    """Two words share a surface and differ only by reading. Without the
+    reading the commoner one wins whichever was wanted."""
+    for kanji, kana in [("国境", "くにざかい"), ("国境", "こっきょう"),
+                        ("工場", "こうば"), ("工場", "こうじょう"),
+                        ("入室", "にっしつ"), ("一寸", "いっすん")]:
+        got = _lookup(client, kanji, kana=kana)
+        assert (got["kanji"], got["kana"]) == (kanji, kana), (kanji, kana, got)
+
+
+def test_a_short_kana_word_is_not_swallowed_by_a_longer_one(client):
+    """The collection is ordered by frequency rank and a two-mora word is
+    a substring of dozens of commoner ones, so the wanted row is not on
+    the page at all — ラブ opened アラブ, ビア opened キャビア. No
+    client-side preference can pick a row that was never sent, which is
+    why this half of the fix has to be here."""
+    for kana in ["ラブ", "ビア", "ぶれ"]:
+        got = _lookup(client, kana, kana=kana)
+        assert got["kana"] == kana, (kana, got)
+
+
+def test_the_reading_disambiguates_but_never_filters(client):
+    """It reorders page 0 and nothing else: same collection, same totals,
+    same paging."""
+    plain = client.get("/api/dictionary", params={
+        "q": "国境", "limit": 10, "category": "vocab"}).json()
+    exact = client.get("/api/dictionary", params={
+        "q": "国境", "limit": 10, "category": "vocab", "kana": "くにざかい"}).json()
+    assert exact["total"] == plain["total"]
+    assert exact["has_more"] == plain["has_more"]
+    assert len(exact["results"]) == len(plain["results"])
+    assert {(r["kanji"], r["kana"]) for r in exact["results"]} \
+        >= {(r["kanji"], r["kana"]) for r in plain["results"][:len(plain["results"]) - 1]}
+
+
+def test_a_deck_word_with_two_readings_still_resolves(client):
+    """The deck packs alternates into one field ("まいげつ/まいつき"), so an
+    exact string compare on `kana` would miss it."""
+    got = _lookup(client, "毎月", kana="まいげつ")
+    assert got["kanji"] == "毎月"
+    assert "まいげつ" in got["kana"].split("/")
+
+
+def test_an_unknown_reading_falls_back_instead_of_emptying_the_page(client):
+    """A stale or wrong reading must degrade to the old behaviour, never
+    to no results."""
+    body = client.get("/api/dictionary", params={
+        "q": "水", "limit": 10, "category": "vocab", "kana": "not-a-reading"}).json()
+    assert body["results"]

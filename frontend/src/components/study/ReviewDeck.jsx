@@ -20,7 +20,10 @@ import { ChevronIcon, OpenBookIcon } from '../ui/Icons'
 //   loading      — true while the initial fetch is in flight
 //   t, session   — passed straight through to Flashcard/RevealActions
 //   renderFront/renderBack(card) — JSX for each face
-//   dictTerm(card), dictCategory — optional dictionary-lookup wiring
+//   dictTerm(card), dictKana(card), dictCategory — optional
+//     dictionary-lookup wiring. Both are per-card functions; pass
+//     dictKana wherever the cards have a reading, or the sheet can
+//     open a homograph instead of the card in hand.
 //   onReplaySound(card)          — optional sound-replay wiring
 //   onExit       — called from the empty state's back button (the
 //     screen's own TopBar already covers the non-empty case)
@@ -28,7 +31,7 @@ import { ChevronIcon, OpenBookIcon } from '../ui/Icons'
 //     card's footer strip prints it beside "Nothing is graded"
 export default function ReviewDeck({
   cards, loading, t, session,
-  renderFront, renderBack, dictTerm, dictCategory, onReplaySound,
+  renderFront, renderBack, dictTerm, dictKana, dictCategory, onReplaySound,
   onExit, foot,
 }) {
   const [index, setIndex] = useState(0)
@@ -62,6 +65,7 @@ export default function ReviewDeck({
             front={renderFront(card)}
             back={renderBack(card)}
             dictTerm={dictTerm ? dictTerm(card) : undefined}
+            dictKana={dictKana ? dictKana(card) : undefined}
             dictCategory={dictCategory}
             session={session}
             onReplaySound={onReplaySound ? () => onReplaySound(card) : undefined}

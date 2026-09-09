@@ -165,7 +165,48 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
     }
 
 
-def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str) -> dict:
+def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> dict | None:
+    """The one entry whose (kanji, kana) pair is exactly what the caller
+    asked for, or None.
+
+    A caller holding a card already knows precisely which word it wants;
+    searching by surface alone cannot express that, and gets it wrong.
+    Measured over 400 real theme words, ~1.5% resolved to a DIFFERENT
+    entry: homographs with another reading (国境/くにざかい opened
+    こっきょう, 工場/こうば opened こうじょう) and short kana terms that
+    substring-match a longer word (ラブ opened アラブ, ビア opened
+    キャビア). The second kind cannot be fixed on the client — the right
+    row is not on the page at all, because the collection is ordered by
+    frequency rank and a two-mora word is a substring of dozens of
+    commoner ones.
+
+    The caller sends `dictTerm` = kanji || kana, so for a kana-only word
+    both `q` and `kana` are the reading and the true pair is ("", kana);
+    that is the second candidate below.
+    """
+    if not kana:
+        return None
+    pairs = [(q, kana)]
+    if q == kana:
+        pairs.append(("", kana))
+
+    for kanji, reading in pairs:
+        for level, vocab_list in VOCAB_BY_LEVEL.items():
+            for w in vocab_list:
+                # A deck reading can pack several forms ("まいげつ/まいつき").
+                if w.get("kanji", "") == kanji and reading in w.get("kana", "").split("/"):
+                    return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
+                                         lang, states, user_id, vocab_to_id(w, level))
+    for kanji, reading in pairs:
+        entry = jmdict_db.get_by_key(kanji, reading)
+        if entry is not None:
+            return _vocab_result(entry, None, entry.get("meaning", ""), lang, states,
+                                 user_id, vocab_jmdict_to_id(entry))
+    return None
+
+
+def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str,
+                      kana: str = "") -> dict:
     """One page of the merged vocabulary collection.
 
     Paginated at its two sources rather than by building one combined
@@ -215,6 +256,16 @@ def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str) ->
         for entry in pool_page
     ]
 
+    # `kana` disambiguates rather than filters: the exact entry is moved
+    # to the front of the first page, never added to the collection and
+    # never removed from it, so `total`/`has_more` are untouched and
+    # paging past page 0 behaves exactly as before.
+    if kana and page == 0:
+        exact = _exact_vocab(q, kana, lang, states, user_id)
+        if exact is not None:
+            same = lambda r: (r["kanji"], r["kana"]) == (exact["kanji"], exact["kana"])
+            results = [exact] + [r for r in results if not same(r)][:limit - 1]
+
     return {
         "results":  results,
         "total":    total,
@@ -226,7 +277,7 @@ def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str) ->
 
 @router.get("/api/dictionary")
 def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
-                    category: str = "all", radical: int | None = None,
+                    category: str = "all", radical: int | None = None, kana: str = "",
                     user_id: str = Depends(get_user_id)):
     """
     category: "all" | "kanji" | "vocab" | "hiragana" | "katakana"
@@ -250,6 +301,13 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     SQLite. Nothing in the app asks for it; it is the parameter's
     default and the shape a bare GET returns.
 
+    kana: the exact reading of an entry the caller already has in hand —
+    a DISAMBIGUATOR, not a filter. Given it, the entry whose
+    (kanji, kana) pair matches exactly is moved to the front of page 0;
+    everything else about the response is unchanged. Vocabulary only:
+    a kanji or a kana character has no second key to disambiguate with.
+    See _exact_vocab for what it fixes.
+
     radical: classical (Kangxi) radical number. When given, restricts
     results to kanji filed under that radical — vocab and kana don't
     participate in radical browsing (a word can span several kanji, and
@@ -268,7 +326,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     # every matching JMdict row in Python first. Radical browsing is
     # kanji only, so a radical request never lands here.
     if category in ("vocab", "jmdict") and radical is None:
-        return _vocab_collection(q, page, limit, lang, user_id)
+        return _vocab_collection(q, page, limit, lang, user_id, kana)
 
     matches = []  # (kind, level, entry, meaning) — cheap, no SRS lookups yet
 

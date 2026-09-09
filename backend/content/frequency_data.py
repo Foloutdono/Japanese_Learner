@@ -177,12 +177,21 @@ def resolve(domain: str, key: str):
     return _DOMAIN_RESOLUTION[domain].get(key)
 
 
+def id_from_resolved(domain: str, resolved: tuple) -> str:
+    """Card id from an ALREADY-resolved (native_level, entry) pair — the
+    second half of to_id(), split out for callers that need the entry
+    itself as well and would otherwise resolve the same key twice. For
+    "vocab_jmdict" a resolve is a sqlite query, so a caller walking a few
+    hundred rows (theme_data.theme_entries) pays double for nothing."""
+    level, entry = resolved
+    return _DOMAIN_TO_ID[domain](entry, level)
+
+
 def to_id(domain: str, key: str) -> str | None:
     resolved = resolve(domain, key)
     if resolved is None:
         return None
-    level, entry = resolved
-    return _DOMAIN_TO_ID[domain](entry, level)
+    return id_from_resolved(domain, resolved)
 
 
 def standard_tier_of(domain: str, key: str, tier_size: int = DEFAULT_TIER_SIZE) -> int | None:

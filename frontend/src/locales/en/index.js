@@ -178,6 +178,16 @@ const quiz = {
   // term ("No results for {query}") rather than standing alone.
   themeNoResults:    'No themes match your filter',
 
+  // The four bands inside a theme, cut by frequency (see
+  // backend/content/theme_data.py). The Japanese half of each name lives
+  // in domain/themes.js — it is the same in every language.
+  themeLevelBasic:    'Basic',
+  themeLevelMedium:   'Medium',
+  themeLevelAdvanced: 'Advanced',
+  themeLevelExpert:   'Expert',
+  selectThemeLevel:   'Choose a level',
+  leaveThemeLevels:   'Levels',
+
   // Theme display labels — key is `theme_data.list_themes()`'s `key`
   // camelCased and prefixed with `theme` (see ThemeSelector.jsx's
   // _translationKey), so a theme added to build_theme_db.py only

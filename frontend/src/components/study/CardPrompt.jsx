@@ -244,7 +244,7 @@ export default function CardPrompt({
                 <div className="flashcard-reading" lang="ja">{c.kana}</div>
               </div>
             }
-            dictTerm={wordForm(c)} dictCategory="vocab" session={session}
+            dictTerm={wordForm(c)} dictKana={c.kana} dictCategory="vocab" session={session}
             onReplaySound={() => speakJapanese(c.kana)}
           />
         )}
@@ -266,7 +266,7 @@ export default function CardPrompt({
                   : <CharDisplay char={wordForm(c)} variant="word" />}
               />
             }
-            dictTerm={wordForm(c)} dictCategory="vocab" session={session}
+            dictTerm={wordForm(c)} dictKana={c.kana} dictCategory="vocab" session={session}
             onReplaySound={() => speakJapanese(c.kana)}
           />
         )}
@@ -281,7 +281,7 @@ export default function CardPrompt({
             />
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
-              dictTerm={wordForm(c)} dictCategory="vocab" session={session}
+              dictTerm={wordForm(c)} dictKana={c.kana} dictCategory="vocab" session={session}
               onReplaySound={() => speakJapanese(c.kana)}
             />
           </>
