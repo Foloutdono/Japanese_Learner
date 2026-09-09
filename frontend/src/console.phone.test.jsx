@@ -5,9 +5,9 @@ import './index.css'
 // ── The console's chips fill the row they wrap onto ──────────
 // Shrink-wrapped, a wrapped row of chips left a ragged hundred pixels
 // at its end — KANJI · VOCABULARY, then nothing, then HIRAGANA ·
-// KATAKANA · JMDICT, then nothing — and read as a sentence that had run
-// out rather than as a set of choices. They grow into their line now,
-// with the label centred in each. Owner's call.
+// KATAKANA · RADICAL, then nothing — and read as a sentence that had
+// run out rather than as a set of choices. They grow into their line
+// now, with the label centred in each. Owner's call.
 //
 // Growing is per LINE, not per set: flex wraps on the natural widths
 // first and stretches what landed on each line, so the set keeps the
@@ -16,7 +16,7 @@ import './index.css'
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn() }))
 const { Console, ConsoleTop, Chips, Chip, ConsoleIndex } = await import('./components/chrome/Console')
 
-const LABELS = ['Kanji', 'Vocabulaire', 'Hiragana', 'Katakana', 'JMdict', 'Radical']
+const LABELS = ['Kanji', 'Vocabulaire', 'Hiragana', 'Katakana', 'Radical']
 
 async function console_(labels = LABELS) {
   return render(

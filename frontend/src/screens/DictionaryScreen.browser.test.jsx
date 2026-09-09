@@ -30,8 +30,11 @@ const VOCAB = {
   furigana: [{ text: '電車', reading: 'でんしゃ' }],
   senses: [], examples: [{ jp: '電車で行く。', en: 'Go by train.', sense_number: null }],
 }
-// The JMdict pool: no card, no level.
-const NOCARD = { type: 'jmdict', kanji: '駅弁', kana: 'えきべん', meaning: 'station lunch box', level: null }
+// The JMdict pool that forms the tail of the vocabulary collection:
+// a vocab entry like any other, but with no card and no level — the
+// endpoint serves it as type "vocab" with level null
+// (routes/dictionary.py's _vocab_result).
+const NOCARD = { type: 'vocab', kanji: '駅弁', kana: 'えきべん', meaning: 'station lunch box', level: null }
 // A character that is a word on its own: the deck reads 山 as やま, and
 // routes/dictionary.py sends that reading beside the character's own
 // list (study/kanji_words.kanji_as_word).
@@ -51,7 +54,7 @@ const KANJI_ALONE = {
 // the query changes (before the debounced search), which is the screen
 // behaving as built for a full page, not what these cases pin.
 const FILLER = Array.from({ length: 60 }, (_, i) => ({
-  type: 'jmdict', kanji: `語${i}`, kana: `ご${i}`, meaning: `word ${i}`, level: null,
+  type: 'vocab', kanji: `語${i}`, kana: `ご${i}`, meaning: `word ${i}`, level: null,
 }))
 const RESULTS = [KANJI, VOCAB, NOCARD, KANJI_WORD, KANJI_ALONE, ...FILLER]
 
@@ -196,10 +199,10 @@ describe('the dictionary screen', () => {
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
-    // Five collections as chips, kanji on; the radical index is a sixth
+    // Four collections as chips, kanji on; the radical index is a fifth
     // chip that only exists under the kanji collection.
     const chips = [...screen.container.querySelectorAll('.console__chips .chip')]
-    expect(chips.length).toBe(6)
+    expect(chips.length).toBe(5)
     expect(chips[0].classList.contains('chip--on')).toBe(true)
     expect(chips[0].textContent).toBe(T.dictKanji)
     expect(lastQuery().get('category')).toBe('kanji')
@@ -215,7 +218,7 @@ describe('the dictionary screen', () => {
     chips()[1].click()
     await settle(80)
     expect(lastQuery().get('category')).toBe('vocab')
-    expect(chips().length).toBe(5)
+    expect(chips().length).toBe(4)
     expect(chips()[1].classList.contains('chip--on')).toBe(true)
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
   })

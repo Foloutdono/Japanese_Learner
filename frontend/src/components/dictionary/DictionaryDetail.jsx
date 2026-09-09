@@ -122,10 +122,10 @@ export function isKanaType(type) {
 // the character alone isn't a safe React key / selection identity.
 // `level` used to be enough of a tiebreaker for same-kanji homographs
 // (different readings of one surface form rarely shared a level), but
-// that assumption breaks down for the JMdict-wide pool (category
-// "jmdict"), where every entry has level: null and homographs are far
-// more common — so kana is always folded in too, not just used as a
-// fallback when kanji is absent.
+// that assumption breaks down over the JMdict pool that now forms the
+// tail of the vocabulary collection, where every entry has level: null
+// and homographs are far more common — so kana is always folded in
+// too, not just used as a fallback when kanji is absent.
 // eslint-disable-next-line react-refresh/only-export-components -- entryKey is a plain identity-string helper used by DictionaryScreen.jsx for React keys/selection comparisons; not a component.
 export function entryKey(entry) {
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
