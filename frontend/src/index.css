@@ -16694,6 +16694,21 @@ html { scrollbar-gutter: stable; }
 .brd__car--in[data-dir="back"] { animation-name: brd-pull-in-back; }
 .brd__car--out { position: absolute; inset: 0; pointer-events: none; animation: brd-pull-out 260ms ease-out forwards; }
 .brd__car--out[data-dir="back"] { animation-name: brd-pull-out-back; }
+/* The body is the part that scrolls, and a box that scrolls one axis
+   scrolls the other -- `overflow-y: auto` computes overflow-x to
+   `auto`, which is the spec, not a quirk -- so it clips sideways at
+   its own padding box. Every answer in the flow is the full width of
+   that box (the name field, the option rows), an outline is drawn
+   OUTSIDE the border box, and an outline never counts as scrollable
+   overflow: the focused name field's ring landed exactly on this clip
+   and lost both of its sides, keeping only the two corner arcs it
+   could reach. `.brd__cars` already reaches back into the frame's
+   gutter by the ring's reach for the same reason -- but the body is
+   the inner clip, so widening the outer one alone changed nothing.
+   Same trick here: pull out by the reach, hand it straight back as
+   padding, so the content stays exactly where it stood and the ring
+   stands inside the box. The welcome overrides both below -- its body
+   already carries the whole gutter as padding. */
 .brd__body {
   flex: 1;
   min-height: 0;
@@ -16701,6 +16716,8 @@ html { scrollbar-gutter: stable; }
   flex-direction: column;
   gap: var(--sp-5);
   overflow-y: auto;
+  margin-inline: calc(-1 * var(--sp-1));
+  padding-inline: var(--sp-1);
 }
 
 /* ── The air gives way before the body scrolls ──

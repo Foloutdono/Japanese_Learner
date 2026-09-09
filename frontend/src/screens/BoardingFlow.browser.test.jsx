@@ -640,6 +640,48 @@ describe('BoardingFlow', () => {
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
+  // ── the focus ring stands inside every box that clips ──
+  // The name field is the full width of the body, the body scrolls, and
+  // a box that scrolls one axis clips the other (`overflow-y: auto`
+  // computes overflow-x to `auto` — the spec, not a quirk). An outline
+  // is drawn OUTSIDE the border box and never counts as scrollable
+  // overflow, so the focused field's ring was sliced off flush with its
+  // own left and right edges: two corner arcs left hanging in the air,
+  // no sides. Measured rather than described, and walked up the whole
+  // chain — the frame's own clip had already been widened for this once
+  // and the body inside it went on cutting anyway.
+  it('keeps the focused name field’s ring clear of every clipping ancestor', async () => {
+    const { screen } = await renderFlow()
+    expect(stepOf(screen)).toBe('name')
+    const field = q(screen, '.brd-field')
+    field.focus()
+    expect(document.activeElement).toBe(field)
+
+    // A focused text input always matches :focus-visible, so this is
+    // the ring as drawn. Reading it (rather than assuming 4) is what
+    // keeps the gutters below honest if the ring is ever restyled.
+    const ink = getComputedStyle(field)
+    const reach = parseFloat(ink.outlineWidth) + parseFloat(ink.outlineOffset)
+    expect(reach).toBe(4)
+
+    const box = field.getBoundingClientRect()
+    const clips = []
+    for (let el = field.parentElement; el && el !== document.body; el = el.parentElement) {
+      const s = getComputedStyle(el)
+      if (s.overflowX === 'visible') continue
+      // Overflow clips at the padding box, not the border box.
+      const r = el.getBoundingClientRect()
+      const left = r.left + parseFloat(s.borderLeftWidth)
+      const right = r.right - parseFloat(s.borderRightWidth)
+      clips.push([el.className, left, right])
+      expect.soft(box.left - reach, `${el.className} cuts the ring on the left`).toBeGreaterThanOrEqual(left)
+      expect.soft(box.right + reach, `${el.className} cuts the ring on the right`).toBeLessThanOrEqual(right)
+    }
+    // The body is one of them: if it ever stops clipping, the gutter it
+    // carries for the ring is dead weight and this test proved nothing.
+    expect(clips.map(c => c[0])).toContain('brd__body')
+  })
+
   it('names the way to an account you already have, on the very first screen', async () => {
     const onSignIn = vi.fn()
     const { screen } = await renderFlow({ onSignIn })
