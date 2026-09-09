@@ -137,6 +137,37 @@ def test_complete_with_goal_stamps_the_contract(client):
         assert status["dailyDeparture"] == "am"
 
 
+def test_the_novice_can_ride_to_n5(client):
+    """The boarding's own list, and the one destination it was refused.
+
+    A learner who does not read BOTH scripts is a novice
+    (domain/boarding.js levelForKana), boards at N5 -- there is no JLPT
+    stop below it -- and is offered six destinations: the novice's own
+    stop and the whole line, N5 included, because N5 is still ahead of
+    someone who cannot read the kana (goalStops). Five of the six were
+    accepted here and the sixth, N5, was refused 422: the rule read the
+    STORED boarding level, where a novice and an N5 learner are the same
+    row. It was the likeliest destination a beginner picks, and the
+    boarding could not be finished at all with it -- seen 2026-09-09.
+    """
+    for goal in ("novice", "N5", "N4", "N3", "N2", "N1"):
+        with _clean_onboarding_state(DEV_USER_ID):
+            done = client.post("/api/onboarding/complete", json={
+                "jlptLevel": "N5", "dailyNewTarget": 10, "kanaKnown": "hiragana",
+                "goalLevel": goal, "goalTargetDate": "2030-01-01",
+            })
+            assert done.status_code == 200, f"the boarding offers {goal}"
+            assert done.json()["goalLevel"] == goal
+
+            # The ride is a real one: boarding level included, so N5 as a
+            # destination is the kana plus the whole of N5 rather than an
+            # empty promise (routes/journey.py's _journey_levels).
+            status = client.get("/api/journey/status").json()
+            assert status["goalLevel"] == goal
+            assert status["goalStartLevel"] == "N5"
+            assert status["itemsTotal"] > 0
+
+
 def test_goalless_replay_clears_a_previous_goal(client):
     # "Just ride" is a first-class answer — replaying the office without
     # a destination must not leave a stale contract behind.
@@ -156,11 +187,13 @@ def test_goalless_replay_clears_a_previous_goal(client):
 
 def test_complete_rejects_incoherent_goals(client):
     base = {"jlptLevel": "N3", "dailyNewTarget": 10}
-    # Destination behind (or at) the boarding level.
-    assert client.post("/api/onboarding/complete",
-                       json={**base, "goalLevel": "N3"}).status_code == 422
+    # A destination BEHIND the boarding level. Riding to the level you
+    # board at is not one of these -- that is the ordinary one-level
+    # ride, and the novice's own (test_the_novice_can_ride_to_n5).
     assert client.post("/api/onboarding/complete",
                        json={**base, "goalLevel": "N5"}).status_code == 422
+    assert client.post("/api/onboarding/complete",
+                       json={**base, "goalLevel": "N4"}).status_code == 422
     # A date with no destination is not a goal.
     assert client.post("/api/onboarding/complete",
                        json={**base, "goalTargetDate": "2030-01-01"}).status_code == 422

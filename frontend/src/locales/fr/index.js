@@ -1562,6 +1562,7 @@ const onboarding = {
   onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total} — nous vous recommandons de partir de ${level}.`,
   onbPaceRecommended: 'Recommandé',
   onbPassError: 'L’enregistrement a échoué — vérifiez votre connexion et réessayez.',
+  brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de votre connexion. Rien n’a été enregistré.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',

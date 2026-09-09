@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
 import fr from '../locales/fr/index.js'
+// The pass tells a refusal from a dead line by `instanceof`, so the
+// refusal test has to throw the very class the screen imports: this
+// is the one from the mock below, not a second declaration that
+// would make that test pass for the wrong reason.
+import { ApiError } from '../lib/api'
 import '../index.css'
 
 // ── The boarding, walked end to end (plan 075) ─────────────────
@@ -559,7 +564,42 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="enter"]')
     await settle(80)
     expect(stepOf(screen)).toBe('pass')
-    expect(q(screen, '.brd__error')).not.toBeNull()
+    expect(q(screen, '.brd__error')?.dataset.error).toBe('network')
+    expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
+    expect(onComplete).not.toHaveBeenCalled()
+  })
+
+  // A refusal is not a connection. The office answering 422 -- a
+  // contract it will not issue -- wore the same "check your connection"
+  // line as a dead network, which on the one screen with no other way
+  // forward sent the learner to look at a connection that was working
+  // (2026-09-09, the novice's own destination).
+  it('says the office refused when the office answered, not that the line is down', async () => {
+    apiJsonWithTimeout.mockRejectedValue(new ApiError('refused'))
+    const { screen, onComplete } = await renderFlow()
+    await passName(screen)
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-level="N4"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await passBuilding(screen)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="enter"]')
+    await settle(80)
+    const line = q(screen, '.brd__error')
+    expect(line?.dataset.error).toBe('refused')
+    expect(line.textContent).toBe(fr.brdPassRefused)
+    expect(line.textContent).not.toBe(fr.onbPassError)
+    // Still no dead end: the pass stays up and the action stays live.
+    expect(stepOf(screen)).toBe('pass')
     expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
     expect(onComplete).not.toHaveBeenCalled()
   })
