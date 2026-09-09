@@ -86,7 +86,7 @@ export default function ImportCardsMenu({ onImport, onClose }) {
           value={importText}
           onChange={e => setImportText(e.target.value)}
           placeholder={`Front, Back, Hint, Notes\n水, water, みず\n火, fire, ひ\n...`}
-          className="field field--multi import-textarea"
+          className="field field--multi field--page import-textarea"
         />
 
         {/* Separators */}
@@ -177,7 +177,7 @@ function SepGroup({ title, value, onChange, custom, onCustomChange, options }) {
             <input
               value={custom}
               onChange={e => onCustomChange(e.target.value)}
-              className="field import-sep-custom-input"
+              className="field field--page import-sep-custom-input"
               placeholder="..."
             />
           )}

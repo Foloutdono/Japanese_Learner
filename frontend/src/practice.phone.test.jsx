@@ -45,6 +45,41 @@ describe('the practice sessions at phone width', () => {
     expect(screen.container.querySelector('.btn-primary').getBoundingClientRect().width).toBeCloseTo(card.width, 0)
   })
 
+  it("the run's entry is a slip on the page, at the answer rung", async () => {
+    const screen = await render(
+      <main className="container stage" style={{ '--line-color': 'var(--line-reading)' }}>
+        <form className="stage__foot">
+          <input className="field field--page" placeholder="romaji" />
+          <button type="button" className="btn-primary">Submit</button>
+        </form>
+      </main>
+    )
+    const field = screen.container.querySelector('.field')
+    const style = getComputedStyle(field)
+    const page = getComputedStyle(document.documentElement).getPropertyValue('--bg-main').trim()
+
+    // The whole point: this field sits ON the page, so a well painted in
+    // the page's own ground is no field at all — which is exactly what
+    // it was, in both themes and at every width. Whatever the well is,
+    // it must not be the thing behind it. fields.browser.test.jsx holds
+    // that for every mount in the app; this is the run's own copy, at
+    // the width the entry was drawn for.
+    const paint = (c) => { const d = document.createElement('div'); d.style.color = c; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v }
+    expect(style.backgroundColor).not.toBe(paint(page))
+
+    // The entry asks for the answer rung (--fs-lead, .stage__foot
+    // .field). At phone width the field's own 16px floor takes it
+    // first — that rule is 0-3-1 and no class rule reaches it, which is
+    // the ruling and not an accident — so what is pinned here is that
+    // the entry is still above the 15.2px base, never below the
+    // threshold the floor exists to hold.
+    expect(parseFloat(style.fontSize)).toBe(16)
+
+    // Left-flush: a caret that walks back to the middle on every
+    // keystroke is a worse instrument than a still one.
+    expect(['start', 'left']).toContain(style.textAlign)
+  })
+
   it('the page card reads top-down and left-aligned; a question card is flat', async () => {
     const screen = await render(
       <main className="container stage">

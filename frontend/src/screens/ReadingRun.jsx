@@ -479,7 +479,17 @@ function SessionView({
 
           {/* The answer field is available the whole time the phrase is
               on screen, not only after the timer runs out — the reader
-              can start writing as soon as they're ready. */}
+              can start writing as soon as they're ready.
+
+              Nothing may rewrite what is typed here. Romaji is not a
+              word in any language the keyboard knows, so a phone's own
+              helpers treat every answer as a typo to be repaired:
+              autocapitalise puts a capital on it, autocorrect
+              substitutes the nearest real word, and this run is
+              self-graded — the learner compares what they wrote
+              against the reference and rates themselves on it. A
+              silently rewritten answer is therefore not a cosmetic
+              annoyance but a wrong verdict on their own recall. */}
           <form className="stage__foot" onSubmit={e => { e.preventDefault(); submitAnswer() }}>
             <input
               autoFocus
@@ -487,7 +497,12 @@ function SessionView({
               onChange={e => setAnswer(e.target.value)}
               placeholder={t.romajiPlaceholder}
               aria-label={t.writeWhatYouSaw}
-              className="field"
+              className="field field--page"
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="done"
             />
             <button type="submit" className="btn-primary" disabled={!answer.trim()}>
               {t.submit}
