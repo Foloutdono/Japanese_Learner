@@ -30,6 +30,49 @@ time. The scheme is registered in three places that must agree —
 `src/lib/oauth.js`'s `NATIVE_REDIRECT`,
 `android/app/src/main/AndroidManifest.xml`, and `ios/App/App/Info.plist`.
 
+## What comes back — the web's half
+
+The shell reads the answer in-process: the WebView never navigated, the promise
+in `lib/oauth.js` resolves, and the button that started the round trip is still
+mounted to be told. **The web has none of that.** The page left, and the answer
+arrives as a fresh load of the app at `redirect_to`. Two consequences, and
+both used to read to a learner as "the Google button does nothing":
+
+- **It worked.** `ProviderButton`'s `onDone` never runs — the navigation
+  unmounted it. The only trace is that the session is no longer a guest.
+  `screens/BoardingFlow.jsx` restores the stash and would land back on the
+  account step, re-asking someone to keep the progress they had just kept, so
+  a resumed `account` step is skipped when the learner is no longer a guest.
+- **It was refused.** Supabase sends the reason back on the URL and nothing
+  else — there is no error to catch, because there was no call in flight:
+
+  ```
+  https://…/#error=server_error
+            &error_code=identity_already_exists
+            &error_description=Identity+is+already+linked+to+another+user
+  ```
+
+  `src/lib/authRedirect.js` takes it off the URL at import time, before
+  `lib/supabase.js` builds the client (supabase-js reads the same URL, and an
+  error left on it makes its `initialize()` return early without recovering the
+  stored session). The screen that mounts prints it: the boarding's account
+  step, `AuthScreen` (which `App` opens for a refusal that arrives with nobody
+  signed in), or Settings › Account. Backing out at Google — `access_denied`
+  with no code — is an answer, not a fault, and says nothing.
+
+The refusals worth knowing by name:
+
+| `error_code` | what happened | what the app does |
+| --- | --- | --- |
+| `identity_already_exists` | that Google account is already on another user | says so, and offers to **sign in** with it instead — the guest is left behind, so it is never done automatically |
+| `manual_linking_disabled` | Manual Linking is off on the project (below) | says so and points at the email fields |
+| anything else | | prints Supabase's own `error_description` |
+
+Because `redirect_to` is the origin and not the current page, a refusal from
+Settings › Account lands the learner on `/today` rather than back on the slip.
+The reason is kept for that page load, so it appears if they walk back to
+Settings; it is not shown on the way past.
+
 ## Configuration — the parts that are not code
 
 ### Google Cloud → Credentials → OAuth 2.0 Client ID (Web)

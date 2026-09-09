@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { supabase } from '../../lib/supabase'
+import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 import { API_ORIGIN } from '../../lib/origin'
 import { isNative, openExternal } from '../../lib/platform'
 import { isGuest } from '../../lib/guest'
@@ -23,6 +24,14 @@ import { SettingsPage, Slip } from './SettingsPage'
 function ClaimSlip() {
   const { t } = useLang()
   const claim = useClaim()
+  // 改札 — linking from here leaves the page on the web and comes back
+  // to the app's ROOT, so a refusal arrives on the URL (read by
+  // lib/authRedirect.js) rather than through onError, and it lands the
+  // learner on /today rather than back on this slip. Saying it here is
+  // what makes it findable at all: a learner who wonders what happened
+  // comes back to the row they pressed. No fall-back to a plain
+  // sign-in is offered, for the reason the comment below gives.
+  const refused = authRedirectError()
   return (
     <Slip label={t.guestLabel} cap={t.guestCap}>
       <p className="slip__hint">{t.guestClaimDesc}</p>
@@ -32,6 +41,9 @@ function ClaimSlip() {
           manual linking is off on the project the error says so and
           nothing is lost. */}
       <ProviderButton link onError={claim.setError} />
+      {refused && (
+        <p className="auth-message auth-message--error" role="alert">{authRedirectMessage(refused, t)}</p>
+      )}
       <p className="auth-or">{t.orWithEmail}</p>
       <ClaimFields claim={claim} />
       {!claim.done && (

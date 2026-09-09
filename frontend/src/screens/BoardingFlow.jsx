@@ -147,7 +147,20 @@ export default function BoardingFlow({
     notifications: false,
     ...(resumed?.answers ?? {}),
   })
-  const [step, setStep] = useState(resumed?.step ?? 'name')
+  // The account step is the one the stash can come back to having
+  // ANSWERED: on the web the Google button leaves the page, and a round
+  // trip that worked returns a learner who is no longer a guest — the
+  // button's own onDone never runs, because the component that would
+  // have called it was unmounted by the navigation. Resuming onto
+  // "Keep your progress." after they just kept it reads as the sign-in
+  // having done nothing, which is exactly what it looked like. So the
+  // resumed step is honoured only while there is still something to
+  // offer; the same predicate the forward path uses (`plan` → account
+  // or pass).
+  const [step, setStep] = useState(() => {
+    const at = resumed?.step ?? 'name'
+    return at === 'account' && !guest ? 'pass' : at
+  })
   const [history, setHistory] = useState([])
   const [leaving, setLeaving] = useState(null)   // { step, dir } during a pull
   const [volumes, setVolumes] = useState(null)

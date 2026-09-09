@@ -21,6 +21,7 @@ import OnboardingPreview from './screens/OnboardingPreview'
 import SoundPalette from './screens/SoundPalette'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
+import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
 import { LangProvider, useLang } from './LangContext'
 
@@ -141,7 +142,13 @@ export default function App() {
   const [session, setSession] = useState(undefined)
   // Signed out: Welcome (the boarding's step zero) until Board or
   // "Have an account?" opens the sign-in on the matching side.
-  const [authMode, setAuthMode] = useState(null) // null | 'login' | 'signup'
+  //
+  // The exception is a load that came back from a REFUSED Google round
+  // trip with nobody signed in (lib/authRedirect.js): Welcome has no
+  // line to say why, so the learner would be returned to the poster as
+  // if they had never tapped anything. The sign-in screen has that
+  // line, and it prints the reason on its own mount.
+  const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
   // Embarquer mints a guest pass rather than asking for an account
   // (lib/guest.js): the boarding runs on a real user with no
   // credentials, and the account is offered at the END, refusably. The

@@ -1,5 +1,10 @@
 import { createClient } from '@supabase/supabase-js'
 import { authStorage } from './authStorage'
+// Side-effect import, and it must stay ABOVE createClient: the module
+// takes a refused OAuth callback off the URL as it loads, and ES
+// module order is the only thing that puts it there before supabase-js
+// reads the same URL in its own initialize(). See lib/authRedirect.js.
+import './authRedirect'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
