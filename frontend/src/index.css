@@ -15314,43 +15314,60 @@ html { scrollbar-gutter: stable; }
   color: var(--accent2);
 }
 
-/* ── The back face's head ────────────────────────────────────── */
-.jour-rev__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-4);
-  flex-wrap: wrap;
-}
-
-/* ── The two-lane track ──────────────────────────────────────
+/* ── The one-rail track (進捗が主役 round) ─────────────────────
    Positional geometry is deliberately numeric (nothing on the space
-   scale means "the rail sits 38px down a 132px drawing"); everything
+   scale means "the rail sits 13px down a 44px drawing"); everything
    typographic reads the token scales. The inner span insets the
-   coordinate system so edge stations and the bracket's hung label
-   stay inside the panel. */
-.jour-track { position: relative; height: 132px; }
+   coordinate system so edge stations stay inside the panel.
+
+   It was 132px and two lanes: your car above the rail with a YOU tag,
+   the promise's car below with a PLAN tag, and a bracket under both
+   measuring the delay in days. Three of those parts were a key the
+   reader had to learn before the drawing meant anything, and the
+   fourth measured a number the head above now prints in words. What is
+   left is one rail at 44px: your train reaching down to it, the
+   promise crossing it, and the stretch you owe hatched between them. */
+.jour-track { position: relative; height: 44px; }
 /* 20px, not the mockup's 14: the widest thing centred on an edge stop
-   is the tracked PLAN/YOU cap label (~38px), and the containment rule
-   must hold against the bare track box — the guarantee travels with
-   the component instead of leaning on whatever padding the panel
-   around it happens to have. */
+   is its own name, and the containment rule must hold against the bare
+   track box — the guarantee travels with the component instead of
+   leaning on whatever padding the panel around it happens to have. */
 .jour-track__span { position: absolute; inset: 0 20px; }
 .jour-track__rail {
   position: absolute;
-  left: 0; right: 0; top: 38px; height: 4px;
+  left: 0; right: 0; top: 13px; height: 3px;
   border-radius: var(--r-plate);
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
 }
 .jour-track__done {
   position: absolute;
-  left: 0; top: 38px; height: 4px;
+  left: 0; top: 13px; height: 3px;
   border-radius: var(--r-plate);
   background: var(--jour-st, var(--success));
   transition: width 0.25s ease;
 }
+/* 未達区間 — the stretch you owe the promise, or it owes you. Hatched
+   rather than washed: at 20% on sumi a flat tint is invisible, and
+   hatching is what a route diagram already uses for a stretch that is
+   not running normally. */
+.jour-track__owed {
+  position: absolute;
+  top: 10px; height: 9px;
+  background:
+    repeating-linear-gradient(45deg,
+      color-mix(in srgb, var(--jour-st, var(--warning)) 60%, transparent) 0 1px,
+      transparent 1px 5px),
+    color-mix(in srgb, var(--jour-st, var(--warning)) 16%, transparent);
+  transition: left 0.25s ease, width 0.25s ease;
+}
 .jour-track__station {
   position: absolute;
-  top: 34px;
+  /* 11, so the 7px dot centres on the 3px rail (13 + 1.5 - 3.5) AND its
+     top meets the car's bottom exactly: the two never share a pixel of
+     height, which is what keeps a stop visible when the train stands
+     within a car's width of it — 43.5% against a stop at 46.0% is 8px
+     apart on a phone, and the car is 20px wide. */
+  top: 11px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -15358,110 +15375,175 @@ html { scrollbar-gutter: stable; }
   gap: var(--sp-2);
 }
 .jour-track__station i {
-  width: 12px; height: 12px;
+  width: 7px; height: 7px;
   border-radius: var(--r-pill);
   background: var(--bg-panel);
-  border: 3px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent);
+  border: 2px solid color-mix(in srgb, var(--text-on-panel) 70%, transparent);
 }
 .jour-track__station-name {
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   color: var(--text-on-panel-soft);
   white-space: nowrap;
 }
-/* Two lanes: your train above the rail, the plan-car below — the
-   same x can never collide (the browser test holds this). */
-.jour-track__you,
-.jour-track__plan {
+/* Your train rides ABOVE the rail and reaches it on a stem: the x it
+   claims is exact, and no stop is ever hidden under it — at 43.5% with
+   a stop at 46.0% the old floating car could not say which side of the
+   stop you were on. */
+.jour-track__you {
   position: absolute;
+  top: 0;
   transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  /* The two cars are TRAINS: they pull away and settle rather than
-     sliding at a flat rate, which is the mockup's own easing for them
-     and the reason it gives the cars a different curve from the fill
-     and the bracket (those keep 0.25s ease, here and there). */
+  width: 20px; height: 11px;
+  border-radius: var(--r-plate);
+  background: var(--jour-st, var(--success));
+  /* The car is a TRAIN: it pulls away and settles rather than sliding
+     at a flat rate, which is the mockup's own easing for it and the
+     reason it keeps a different curve from the fill and the hatching
+     (those keep 0.25s ease). */
   transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
 }
-.jour-track__you  { top: 2px; }
-.jour-track__plan { top: 76px; }
-.jour-track__tag {
+.jour-track__you::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 11px;
+  width: 2px; height: 5px;
+  transform: translateX(-50%);
+  background: var(--jour-st, var(--success));
+}
+/* The promise is a timetable marker ACROSS the rail, not a second car
+   on a second lane: a line has no width to collide with, so the two
+   marks can stand at the same x with nothing to keep apart. */
+.jour-track__plan {
+  position: absolute;
+  top: 4px;
+  transform: translateX(-50%);
+  width: 0; height: 21px;
+  border-left: 2px dashed color-mix(in srgb, var(--text-on-panel) 55%, transparent);
+  transition: left 0.6s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+/* The moving parts of the drawing — the filled run behind you, the two
+   marks, and the hatching between them — all animate their position.
+   DESIGN.md: every transition needs a prefers-reduced-motion answer.
+   The positions are still correct with the motion off, which is the
+   whole point of answering with `none` rather than a shorter
+   duration. */
+@media (prefers-reduced-motion: reduce) {
+  .jour-track__done,
+  .jour-track__owed,
+  .jour-track__you,
+  .jour-track__plan { transition: none; }
+}
+
+/* ── 進捗 — the head: how far along the line you are ───────────
+   The count is the fact a learner can act on without arithmetic, and
+   it was the one fact the sheet never printed. */
+.jour-dist {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+}
+.jour-dist__count {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.jour-dist__of {
+  font-size: var(--fs-lead);
+  color: var(--text-on-panel-soft);
+}
+.jour-dist__pct {
+  margin-left: auto;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-heading);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--jour-st-ink, var(--text-on-panel));
+}
+.jour-dist__leg {
+  width: 100%;
+  font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
   color: var(--text-on-panel-soft);
-  white-space: nowrap;
-}
-.jour-track__you i {
-  width: 20px; height: 13px;
-  border-radius: var(--r-plate);
-  background: var(--jour-st, var(--success));
-}
-.jour-track__plan i {
-  width: 20px; height: 13px;
-  border-radius: var(--r-plate);
-  border: 2px dashed color-mix(in srgb, var(--text-on-panel) 50%, transparent);
-}
-.jour-track__gap {
-  position: absolute;
-  top: 114px;
-  height: 0;
-  border-top: 2px solid var(--jour-st, var(--warning));
-  transition: left 0.25s ease, width 0.25s ease;
-}
-/* The three moving parts of the drawing — the filled run behind you,
-   the two cars, and the bracket that measures the gap between them —
-   all animate their position. DESIGN.md: every transition needs a
-   prefers-reduced-motion answer, and these had none; the flip a few
-   rules up had one and the track it turns to reveal did not. The
-   positions are still correct with the motion off, which is the whole
-   point of answering with `none` rather than with a shorter duration. */
-@media (prefers-reduced-motion: reduce) {
-  .jour-track__done,
-  .jour-track__you,
-  .jour-track__plan,
-  .jour-track__gap { transition: none; }
 }
 
-.jour-track__gap::before,
-.jour-track__gap::after {
-  content: '';
-  position: absolute;
-  top: -5px;
-  width: 2px; height: 8px;
-  background: var(--jour-st, var(--warning));
+/* ── The two comparison rows ───────────────────────────────────
+   Each row is one comparison with its own subtraction already done:
+   what is happening on the first line, what the pass promised on the
+   second, and the difference in the state's ink at the right. Two
+   deterministic lines, never a value that wraps by accident. */
+.jour-cmps {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  background: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-card);
+  overflow: hidden;
 }
-.jour-track__gap::before { left: 0; }
-.jour-track__gap::after  { right: 0; }
-.jour-track__gap b {
-  position: absolute;
-  left: 50%; top: 4px;
-  transform: translateX(-50%);
+.jour-cmp {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr) auto;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-panel);
+}
+.jour-cmp__k {
+  grid-row: 1 / span 2;
+  font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.jour-cmp__v {
+  grid-column: 2;
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-lead);
+  line-height: 1;
   font-variant-numeric: tabular-nums;
-  color: var(--jour-st-ink, var(--warning));
-  background: var(--bg-panel);
-  padding: 0 var(--sp-2);
+  color: var(--text-on-panel);
   white-space: nowrap;
 }
-/* A narrow bracket can't hold its own label — hang it off the right
-   end, or off the LEFT end when the bracket rides near the right edge. */
-.jour-track__gap--tight b {
-  left: calc(100% + 4px);
-  transform: none;
-  top: -8px;
-  padding: 0;
+.jour-cmp__u {
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--text-on-panel-soft);
 }
-.jour-track__gap--left b {
-  left: auto;
-  right: calc(100% + 4px);
-  transform: none;
-  top: -8px;
-  padding: 0;
+.jour-cmp__d {
+  grid-column: 3;
+  grid-row: 1;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--jour-st-ink, var(--text-on-panel));
+  white-space: nowrap;
+}
+.jour-cmp__sub {
+  grid-column: 2 / span 2;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
 }
 .jour-rev__actions {
   display: flex;
@@ -15907,41 +15989,12 @@ html { scrollbar-gutter: stable; }
 }
 .leaderboard-row__gap { justify-content: center; color: var(--text-secondary); }
 
-/* ── The status sheet (canvas StatusSheet) ──
-   The pass's back as a sumi sheet: the station panel's own word, the
-   ghost track, four figures in a lattice, the two honest moves. */
-.status-sheet .jour-rev__head { align-items: center; }
-.jour-figs {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 1px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-.jour-fig { display: flex; flex-direction: column; gap: var(--sp-1); padding: var(--sp-4); background: var(--bg-panel); }
-.jour-fig__v {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-title);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-on-panel);
-}
-.jour-fig__v--st { color: var(--jour-st-ink, var(--text-on-panel)); }
-.jour-fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-on-panel-soft); }
-.jour-fig__l {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-}
+/* ── The status sheet (進捗が主役 round) ──
+   The pass's back as a sumi sheet: the distance travelled, the ghost
+   track under it as the proof, two comparison rows, the two honest
+   moves. The blocks it is built from (.jour-dist, .jour-track,
+   .jour-cmps) live with the rest of the 路線図の影 section above; only
+   the sheet's own loose ends are here. */
 .status-sheet__none { margin: 0; color: var(--text-on-panel-soft); }
 .status-sheet__office {
   padding: 0;

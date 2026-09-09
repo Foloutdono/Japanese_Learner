@@ -503,18 +503,23 @@ const Fixture = () => (
         <span className="pf-line__roundel pf-roundel-stats">TO</span>
       </button>
     </div>
-    {/* The status sheet (plan 074): sumi in both themes, pinned inline
-        like the board above. The figures' inks, the state-inked one,
-        the goal-less line and its link, the error line. */}
+    {/* The status sheet (進捗が主役 round): sumi in both themes, pinned
+        inline like the board above. The head's count, its percent in
+        the state's ink and its leg line; a comparison row's value,
+        unit, key, promise and state-inked delta; the goal-less line
+        and its link, the error line. */}
     <div className="status-sheet jour-st--slightlyBehind" style={{ background: 'var(--bg-panel)' }}>
-      <div className="jour-figs">
-        <div className="jour-fig">
-          <span className="jour-fig__v ss-fig-v">7.1<span className="jour-fig__u ss-fig-u">/ day</span></span>
-          <span className="jour-fig__l ss-fig-l">Last 14 days</span>
-        </div>
-        <div className="jour-fig">
-          <span className="jour-fig__v jour-fig__v--st ss-fig-st">23 Mar</span>
-          <span className="jour-fig__l">At this pace</span>
+      <div className="jour-dist">
+        <span className="jour-dist__count ss-dist-v">1,830<span className="jour-dist__of ss-dist-of">/ 4,206</span></span>
+        <span className="jour-dist__pct ss-dist-pct">43%</span>
+        <span className="jour-dist__leg ss-dist-leg">Next stop N4 · 474 behind plan</span>
+      </div>
+      <div className="jour-cmps">
+        <div className="jour-cmp">
+          <span className="jour-cmp__k ss-cmp-k">Pace</span>
+          <span className="jour-cmp__v ss-cmp-v">7.1<span className="jour-cmp__u ss-cmp-u">/ day</span></span>
+          <span className="jour-cmp__d ss-cmp-d">-1.5</span>
+          <span className="jour-cmp__sub ss-cmp-sub">promised 10 / day · last 14 days</span>
         </div>
       </div>
       <p className="hint status-sheet__none ss-none">
@@ -731,12 +736,16 @@ const Fixture = () => (
         <span className="jour-line__status"><b className="jr-status-b" lang="ja">遅延</b></span>
         <span className="jour-line__validity"><b className="jr-validity-b">2 sept. ’27</b></span>
       </div>
-      <div className="jour-track">
-        <span className="jour-track__span">
-          <span className="jour-track__gap" style={{ left: '10%', width: '40%' }}>
-            <b className="jr-gap-b">+400 jours</b>
-          </span>
-        </span>
+      {/* 遅延's ink is the mixed one (raw 臙脂 reads 2.6:1 on sumi), and
+          the delta on a comparison row is where it now lands as TEXT —
+          the day-bracket that used to carry it went with the two-lane
+          track. Measured under delayed on purpose: the sheet's other
+          fixture above wears slightlyBehind, whose 琥珀 carries itself. */}
+      <div className="jour-cmps">
+        <div className="jour-cmp">
+          <span className="jour-cmp__v">2 sept. 2027</span>
+          <span className="jour-cmp__d jr-delta-b">+400 j</span>
+        </div>
       </div>
     </div>
   </div>
@@ -885,7 +894,7 @@ const SITES = [
   ['.ob-auth-foot', 'sign-in foot (soft ink on page)'],
   ['.jr-status-b', 'pass footer status word (state ink on sumi)'],
   ['.jr-validity-b', 'pass footer 有効期限 (gold on sumi)'],
-  ['.jr-gap-b', 'ghost track day bracket (state ink on sumi)'],
+  ['.jr-delta-b', 'status sheet delta, delayed (state ink on sumi)'],
 
   // The 定期入れ profile — every one a mix on a mix (see the fixture).
   ['.pf-stamp', 'eki stamp day (lacquer ink on lacquer wash)'],
@@ -906,10 +915,15 @@ const SITES = [
 
   // Plan 074 — the status sheet, the pass footer, the statistics and
   // the settings (see the fixture).
-  ['.ss-fig-v', 'status sheet figure (sumi)'],
-  ['.ss-fig-u', 'status sheet figure unit (soft ink on sumi)'],
-  ['.ss-fig-l', 'status sheet figure label (soft ink on sumi)'],
-  ['.ss-fig-st', 'status sheet projected date (state ink on sumi)'],
+  ['.ss-dist-v', 'status sheet distance count (sumi)'],
+  ['.ss-dist-of', 'status sheet distance total (soft ink on sumi)'],
+  ['.ss-dist-pct', 'status sheet percent (state ink on sumi)'],
+  ['.ss-dist-leg', 'status sheet leg line (soft ink on sumi)'],
+  ['.ss-cmp-k', 'status sheet row key (soft ink on sumi)'],
+  ['.ss-cmp-v', 'status sheet row value (sumi)'],
+  ['.ss-cmp-u', 'status sheet row unit (soft ink on sumi)'],
+  ['.ss-cmp-d', 'status sheet row delta (state ink on sumi)'],
+  ['.ss-cmp-sub', 'status sheet row promise (soft ink on sumi)'],
   ['.ss-none', 'status sheet goal-less line (soft ink on sumi)'],
   ['.ss-office', 'status sheet office link (on sumi)'],
   ['.ss-error', 'status sheet error (state ink on sumi)'],

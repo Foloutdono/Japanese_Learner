@@ -4,21 +4,31 @@ import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
 import { playClick } from '../../lib/audio'
 import { Sheet } from '../chrome/Sheet'
-import { StatusChip } from '../chrome/Hud'
 import { useJourneyStatus, useVolumes, useStatusOpenedAt, closeStatus, refreshJourney } from '../../stores/journey'
 import { refreshSummary, useProfileSummary } from '../../stores/profileSummary'
-import { addDays, journeyModel } from '../../domain/goalMath'
+import { addDays, journeyModel, journeyPositions, nextStop } from '../../domain/goalMath'
 import { MAX_PACE } from '../onboarding/paces'
 import { GhostTrack } from './GhostTrack'
 import { journeyStations } from './stations'
 
-// ── 運行状況 — the status sheet (canvas StatusSheet, plan 074) ───
-// The pass's back, as a bottom sheet off the HUD's station panel: the
-// panel's own word at the top, the ghost track (your train above the
-// rail, the plan's car below it, the gap in days), four figures — the
-// last fortnight's pace, the promised one, the arrival at this pace
-// and the date on the pass — and, when behind, the two honest moves:
-// run faster and keep the date, or reprint the date at the pace kept.
+// ── 運行状況 — the status sheet (進捗が主役, chosen off a four-
+// direction mockup round; plan 074 drew the two-lane one it replaces) ─
+// The pass's back, as a bottom sheet off the HUD's station panel, and
+// it leads with DISTANCE: how far along the line you are (the count,
+// the percent, the stop you are heading for and the backlog in items),
+// then the ghost track directly under it as the proof, then two
+// comparison rows — pace and arrival, each against what the pass
+// promised, with the difference already worked out — and, when behind,
+// the two honest moves: run faster and keep the date, or reprint the
+// date at the pace kept.
+//
+// Why distance first: itemsDone/itemsTotal arrived on every payload,
+// placed the car as a percentage and was then thrown away, so the one
+// fact a learner can act on without arithmetic was the one fact the
+// sheet never printed. The four-figure lattice went with it — two of
+// its cells were one comparison and two were another, and it left both
+// subtractions to the reader.
+//
 // The judgement is domain/goalMath's journeyModel over the same facts
 // the HUD reads (stores/journey), so the sheet can never disagree with
 // the panel that opened it.
@@ -29,14 +39,19 @@ import { journeyStations } from './stations'
 
 const iso = d => d.toISOString().slice(0, 10)
 
-function Fig({ value, unit, label, state = false }) {
+// One comparison: what is happening, what was promised, and the
+// difference — which is the reader's subtraction, done for them and
+// inked in the state's own colour.
+function Cmp({ label, value, unit, promised, delta }) {
   return (
-    <div className="jour-fig">
-      <span className={`jour-fig__v${state ? ' jour-fig__v--st' : ''}`}>
+    <div className="jour-cmp">
+      <span className="jour-cmp__k">{label}</span>
+      <span className="jour-cmp__v">
         {value}
-        {unit && <span className="jour-fig__u">{unit}</span>}
+        {unit && <span className="jour-cmp__u">{unit}</span>}
       </span>
-      <span className="jour-fig__l">{label}</span>
+      {delta && <span className="jour-cmp__d">{delta}</span>}
+      <span className="jour-cmp__sub">{promised}</span>
     </div>
   )
 }
@@ -61,20 +76,36 @@ export function StatusSheet({ session }) {
   if (!open) return null
   if (!model || model.status == null) return null
 
-  const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short' })
-  const nf = new Intl.NumberFormat(lang === 'fr' ? 'fr' : 'en', { maximumFractionDigits: 1 })
+  const loc = lang === 'fr' ? 'fr' : 'en'
+  // The year rides on every date now. Without it a projection that
+  // crossed a year end printed "3 Jan" beside a promised "15 Feb" and
+  // read as EARLY, while the sheet's own word said late.
+  const fmt = new Intl.DateTimeFormat(loc, { day: 'numeric', month: 'short', year: 'numeric' })
+  const nf = new Intl.NumberFormat(loc, { maximumFractionDigits: 1 })
+  const signed = new Intl.NumberFormat(loc, { maximumFractionDigits: 1, signDisplay: 'always' })
+  const int = new Intl.NumberFormat(loc)
   const start = status.goalStartLevel ?? summary?.jlptLevel ?? null
   const stations = journeyStations(volumes, start, status.goalLevel, status.itemsTotal)
-  const youF = status.itemsTotal ? (status.itemsDone / status.itemsTotal) * 100 : 0
-  let planF = null
-  if (model.hasGoal && model.planned && status.goalSetAt) {
-    const setAt = new Date(status.goalSetAt).getTime()
-    const span = model.planned.getTime() - setAt
-    planF = span <= 0 ? 100 : Math.min(Math.max(((nowMs - setAt) / span) * 100, 0), 100)
-  }
+  const { youF, planF, behind: itemsBehind } = journeyPositions(status, model, new Date(nowMs))
   const behind = model.status === 'delayed' || model.status === 'slightlyBehind'
   const canRecover = behind && model.recovery != null && model.recovery <= MAX_PACE
-  const gapLabel = model.deltaDays == null ? null : t.jourDays(Math.abs(model.deltaDays))
+
+  // The head's second line: the stop the train is heading for, and how
+  // many items it stands behind the promise. Without stops (no volumes
+  // yet, no destination) there is no next stop to name.
+  const stop = stations.length > 1 ? nextStop(stations, youF) : null
+  const drift = itemsBehind == null || Math.abs(itemsBehind) < 1
+    ? null
+    : itemsBehind > 0
+      ? t.statusBehindPlan(int.format(itemsBehind))
+      : t.statusAheadPlan(int.format(-itemsBehind))
+  const leg = [
+    stop ? t.statusNextStop(stop.label) : stations.length > 1 ? t.statusArrived : null,
+    drift,
+  ].filter(Boolean).join(' · ')
+
+  const paceDelta = model.actualPerDay - model.plannedPerDay
+  const showPaceDelta = Math.abs(paceDelta) >= 0.05
 
   async function reprint(body) {
     if (busy) return
@@ -99,24 +130,47 @@ export function StatusSheet({ session }) {
   }
 
   return (
-    <Sheet open onClose={closeStatus} sumi className={`status-sheet jour-st--${model.status}`} label={t.hudStatusLabel}>
-      <div className="jour-rev__head"><StatusChip model={model} /></div>
+    <Sheet
+      open
+      onClose={closeStatus}
+      sumi
+      className={`status-sheet jour-st--${model.status}`}
+      /* The verdict is a word no longer printed on this sheet — the
+         state's ink and the two deltas carry it — so the sheet's own
+         name is where a screen reader still hears it. */
+      label={`${t.hudStatusLabel} — ${t.jourStatus[model.status]}`}
+    >
+      {status.itemsTotal > 0 && (
+        <div className="jour-dist">
+          <span className="jour-dist__count">
+            {int.format(status.itemsDone)}
+            <span className="jour-dist__of">/ {int.format(status.itemsTotal)}</span>
+          </span>
+          <span className="jour-dist__pct">
+            {new Intl.NumberFormat(loc, { style: 'percent' }).format(youF / 100)}
+          </span>
+          {leg && <span className="jour-dist__leg">{leg}</span>}
+        </div>
+      )}
 
-      <GhostTrack
-        stations={stations}
-        youF={youF}
-        planF={planF}
-        gapDeltaDays={model.deltaDays}
-        gapLabel={gapLabel}
-        youLabel={t.jourYou}
-        planLabel={t.jourPlan}
-      />
+      <GhostTrack stations={stations} youF={youF} planF={planF} />
 
-      <div className="jour-figs">
-        <Fig value={nf.format(model.actualPerDay)} unit={t.perDayUnit} label={t.statusLast14} />
-        <Fig value={model.plannedPerDay} unit={t.perDayUnit} label={t.statusPromised} />
-        <Fig value={model.projected ? fmt.format(model.projected) : '—'} label={t.statusAtThisPace} state />
-        <Fig value={model.planned ? fmt.format(model.planned) : '—'} label={t.statusOnThePass} />
+      <div className="jour-cmps">
+        <Cmp
+          label={t.statusPace}
+          value={nf.format(model.actualPerDay)}
+          unit={t.perDayUnit}
+          promised={t.statusPromisedPace(model.plannedPerDay)}
+          delta={showPaceDelta ? signed.format(paceDelta) : null}
+        />
+        {model.hasGoal && (
+          <Cmp
+            label={t.statusArrival}
+            value={model.projected ? fmt.format(model.projected) : '—'}
+            promised={model.planned ? t.statusOnPassDate(fmt.format(model.planned)) : null}
+            delta={model.deltaDays ? t.statusDaysDelta(model.deltaDays) : null}
+          />
+        )}
       </div>
 
       {model.hasGoal && (behind || model.status === 'suspended') && (

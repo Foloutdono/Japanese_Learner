@@ -71,15 +71,42 @@ describe('the profile at phone width', () => {
     expect(head.right - seg.right).toBeLessThan(head.width / 2)
   })
 
-  it('the status sheet: four figures two by two on sumi, the moves are targets', async () => {
+  it('the status sheet: distance, a 44px track, two rows, the moves are targets', async () => {
     const screen = await render(
       <div className="sheet sheet--sumi status-sheet jour-st--slightlyBehind" style={{ position: 'static' }}>
-        <div className="jour-rev__head"><span className="hud__status hud__status--slightlyBehind"><span className="hud__status-word">Late</span><span className="hud__status-delta">· 9d</span></span></div>
-        <div className="jour-figs">
-          <div className="jour-fig"><span className="jour-fig__v">7.1<span className="jour-fig__u">/ day</span></span><span className="jour-fig__l">Last 14 days</span></div>
-          <div className="jour-fig"><span className="jour-fig__v">10<span className="jour-fig__u">/ day</span></span><span className="jour-fig__l">Promised</span></div>
-          <div className="jour-fig"><span className="jour-fig__v jour-fig__v--st">23 Mar</span><span className="jour-fig__l">At this pace</span></div>
-          <div className="jour-fig"><span className="jour-fig__v">14 Mar</span><span className="jour-fig__l">On the pass</span></div>
+        <div className="jour-dist">
+          <span className="jour-dist__count">1,830<span className="jour-dist__of">/ 4,206</span></span>
+          <span className="jour-dist__pct">43%</span>
+          <span className="jour-dist__leg">Next stop N4 · 474 behind plan</span>
+        </div>
+        <div className="jour-track">
+          <span className="jour-track__span">
+            <span className="jour-track__rail" />
+            <span className="jour-track__done" style={{ width: '43.5%' }} />
+            <span className="jour-track__owed" style={{ left: '43.5%', width: '11.3%' }} />
+            <span className="jour-track__station" style={{ left: '0%' }}>
+              <i /><span className="jour-track__station-name">発</span>
+            </span>
+            <span className="jour-track__station" style={{ left: '46%' }}>
+              <i /><span className="jour-track__station-name">N4</span>
+            </span>
+            <span className="jour-track__plan" style={{ left: '54.8%' }} />
+            <span className="jour-track__you" style={{ left: '43.5%' }} />
+          </span>
+        </div>
+        <div className="jour-cmps">
+          <div className="jour-cmp">
+            <span className="jour-cmp__k">Pace</span>
+            <span className="jour-cmp__v">10.5<span className="jour-cmp__u">/ day</span></span>
+            <span className="jour-cmp__d">-1.5</span>
+            <span className="jour-cmp__sub">promised 12 / day · last 14 days</span>
+          </div>
+          <div className="jour-cmp">
+            <span className="jour-cmp__k">Arrival</span>
+            <span className="jour-cmp__v">23 Apr 2027</span>
+            <span className="jour-cmp__d">+67 d</span>
+            <span className="jour-cmp__sub">on the pass, 15 Feb 2027</span>
+          </div>
         </div>
         <div className="jour-rev__actions">
           <button type="button" className="jour-act"><strong>Run 15 a day</strong>keeps 14 Mar</button>
@@ -87,10 +114,26 @@ describe('the profile at phone width', () => {
         </div>
       </div>
     )
-    expect(columns(screen.container.querySelector('.jour-figs'))).toBe(2)
-    const figs = [...screen.container.querySelectorAll('.jour-fig')].map(f => f.getBoundingClientRect())
-    expect(figs[1].top).toBeCloseTo(figs[0].top, 0)
-    expect(figs[2].top).toBeGreaterThan(figs[0].bottom - 1)
+    // The head: count and percent share the first line, the percent on
+    // the right edge; the leg takes the line under them.
+    const count = screen.container.querySelector('.jour-dist__count').getBoundingClientRect()
+    const pct = screen.container.querySelector('.jour-dist__pct').getBoundingClientRect()
+    const leg = screen.container.querySelector('.jour-dist__leg').getBoundingClientRect()
+    const head = screen.container.querySelector('.jour-dist').getBoundingClientRect()
+    expect(pct.top).toBeCloseTo(count.top, 0)
+    expect(head.right - pct.right).toBeLessThan(1)
+    expect(leg.top).toBeGreaterThan(count.bottom - 1)
+    // The drawing costs 44px of a phone, not 132.
+    expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(44)
+    // Each row: value and delta on one line, the promise under them.
+    const rows = [...screen.container.querySelectorAll('.jour-cmp')].map(r => r.getBoundingClientRect())
+    expect(rows[1].top).toBeGreaterThan(rows[0].bottom - 1)
+    const v = screen.container.querySelector('.jour-cmp__v').getBoundingClientRect()
+    const d = screen.container.querySelector('.jour-cmp__d').getBoundingClientRect()
+    const sub = screen.container.querySelector('.jour-cmp__sub').getBoundingClientRect()
+    expect(d.top).toBeCloseTo(v.top, 0)
+    expect(d.left).toBeGreaterThan(v.right)
+    expect(sub.top).toBeGreaterThan(v.bottom - 1)
     for (const act of screen.container.querySelectorAll('.jour-act')) {
       expect(act.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }

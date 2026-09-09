@@ -30,6 +30,8 @@ const AHEAD_AT_OR_BELOW = -3
 const ON_TIME_WITHIN = 3
 const SLIGHTLY_BEHIND_UP_TO = 21
 
+const clampPct = f => Math.min(Math.max(f, 0), 100)
+
 export function addDays(d, n) {
   const x = new Date(d)
   x.setDate(x.getDate() + Math.round(n))
@@ -127,6 +129,48 @@ export function callingAt(volumes, startLevel, goalLevel, perDay, { now = new Da
  * arrival: at or above the promise is onTime, 70% of it is
  * slightlyBehind, below that delayed.
  */
+/**
+ * Where the drawing puts its two marks, and the backlog between them:
+ *
+ *   journeyPositions(status, model, now) -> { youF, planF, behind }
+ *
+ * `youF` is progress — items done over items promised. `planF` is
+ * TIME elapsed over the span the contract bought, which is what makes
+ * the ghost a promise rather than a second progress bar: a learner can
+ * keep the promised pace to the item and still stand behind it,
+ * because the backlog was lost earlier. `behind` is that backlog in
+ * ITEMS (negative when you are ahead of the promise) — the number that
+ * reconciles "the pace looks fine" with "the date has moved two
+ * months", which nothing on the pass used to say out loud.
+ *
+ * planF and behind are null without a dated goal: there is no promise
+ * to stand against, and the pass is judged on pace alone.
+ */
+export function journeyPositions(status, model, now = new Date()) {
+  const { itemsTotal = 0, itemsDone = 0, goalSetAt = null } = status ?? {}
+  const youF = itemsTotal > 0 ? clampPct((itemsDone / itemsTotal) * 100) : 0
+
+  let planF = null
+  if (model?.hasGoal && model.planned && goalSetAt) {
+    const setAt = new Date(goalSetAt).getTime()
+    const span = model.planned.getTime() - setAt
+    planF = span <= 0 ? 100 : clampPct(((now.getTime() - setAt) / span) * 100)
+  }
+
+  return {
+    youF,
+    planF,
+    behind: planF == null ? null : Math.round((itemsTotal * (planF - youF)) / 100),
+  }
+}
+
+/** The stop the train is heading for: the first one it has not reached
+ *  yet. Null once the line is behind you — there is no next stop from
+ *  the terminus. */
+export function nextStop(stations, youF) {
+  return stations.find(st => st.pos > youF) ?? null
+}
+
 export function journeyModel(status, now = new Date()) {
   const {
     goalLevel = null,

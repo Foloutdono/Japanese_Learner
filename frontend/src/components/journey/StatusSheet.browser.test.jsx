@@ -5,10 +5,10 @@ import { LangProvider } from '../../LangContext'
 import '../../index.css'
 import { addDays } from '../../domain/goalMath'
 
-// ── The status sheet (plan 074) ──────────────────────────────────
+// ── The status sheet (進捗が主役 round) ──────────────────────────
 // The pass's back, as a sheet off the HUD's station panel: the
-// panel's word, the ghost track, the four figures and the two honest
-// moves — and the round IV.1 detail that a reprint re-judges the
+// distance travelled, the ghost track, the two comparison rows and
+// the two honest moves — and the detail that a reprint re-judges the
 // pass the moment the fresh facts arrive.
 
 const apiJson = vi.fn()
@@ -94,16 +94,28 @@ describe('StatusSheet', () => {
     await settle()
     const sheet = dialog()
     expect(sheet).not.toBeNull()
-    // Sumi: the pass's own material.
+    // Sumi: the pass's own material, inked for a late train.
     expect(sheet.classList.contains('sheet--sumi')).toBe(true)
-    // The panel's word, inked for a late train, and the drift in days.
-    const chip = sheet.querySelector('.hud__status')
-    expect(chip.classList.contains('hud__status--delayed')).toBe(true)
-    expect(chip.querySelector('.hud__status-delta').textContent).toMatch(/\d/)
-    // The track carries the plan car, and the four figures are there.
+    expect(sheet.classList.contains('jour-st--delayed')).toBe(true)
+    // The verdict is no longer a word on the sheet, so it has to be in
+    // the sheet's own name for a screen reader. (This suite renders in
+    // the provider's own default language, so every assertion on copy
+    // below accepts either table.)
+    expect(sheet.getAttribute('aria-label')).toMatch(/En retard|Delayed/)
+    // Distance leads: the count, the percent, and the stop ahead. The
+    // group separator is the locale's, thin space included.
+    const count = sheet.querySelector('.jour-dist__count').textContent.replace(/[\s,]/g, '')
+    expect(count).toContain('112')
+    expect(count).toContain('1000')
+    expect(sheet.querySelector('.jour-dist__pct').textContent).toMatch(/11\s*%/)
+    expect(sheet.querySelector('.jour-dist__leg').textContent).toMatch(/retard|behind plan/)
+    // The track carries the promise, and both comparisons are there.
     expect(sheet.querySelector('.jour-track__plan')).not.toBeNull()
-    expect(sheet.querySelectorAll('.jour-fig').length).toBe(4)
-    expect(sheet.querySelectorAll('.jour-fig__v')[1].textContent).toContain('10')
+    expect(sheet.querySelectorAll('.jour-cmp').length).toBe(2)
+    expect(sheet.querySelector('.jour-cmp__sub').textContent).toContain('10')
+    // Every date carries its year: "3 Jan" beside "15 Feb" read as
+    // early when the projection crossed a year end.
+    expect(sheet.querySelectorAll('.jour-cmp__v')[1].textContent).toMatch(/20\d\d/)
 
     closeStatus()
     await settle(30)
@@ -136,7 +148,7 @@ describe('StatusSheet', () => {
     })
     // The store refetched: the sheet now judges the pass on the new pace.
     await vi.waitFor(() => {
-      expect(dialog().querySelectorAll('.jour-fig__v')[1].textContent).toContain('21')
+      expect(dialog().querySelector('.jour-cmp__sub').textContent).toContain('21')
     })
   })
 
@@ -164,7 +176,7 @@ describe('StatusSheet', () => {
     // The printed date now IS the projected one: on time again, and
     // the moves are gone.
     await vi.waitFor(() => {
-      expect(dialog().querySelector('.hud__status').classList.contains('hud__status--onTime')).toBe(true)
+      expect(dialog().classList.contains('jour-st--onTime')).toBe(true)
       expect(dialog().querySelectorAll('.jour-act').length).toBe(0)
     })
   })
@@ -180,8 +192,12 @@ describe('StatusSheet', () => {
     openStatus()
     await settle()
     const sheet = dialog()
-    expect(sheet.querySelector('.hud__status').classList.contains('hud__status--onTime')).toBe(true)
+    expect(sheet.classList.contains('jour-st--onTime')).toBe(true)
     expect(sheet.querySelector('.jour-track__plan')).toBeNull()
+    // No promise to stand against: no arrival row, and the head names
+    // no drift — the pace row is the whole judgement.
+    expect(sheet.querySelectorAll('.jour-cmp').length).toBe(1)
+    expect(sheet.querySelector('.jour-dist__leg').textContent).not.toMatch(/retard|avance|behind|ahead/)
     expect(sheet.querySelector('.jour-act')).toBeNull()
     const office = sheet.querySelector('.status-sheet__office')
     expect(office).not.toBeNull()
