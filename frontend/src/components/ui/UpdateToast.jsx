@@ -10,10 +10,12 @@ import { playClick } from '../../lib/audio'
 // waiting. Both mount beside <DocumentHead/> in App.jsx, inside the
 // router, so they survive navigation and can read the route.
 
-// ── ダイヤ改正 — a new build is waiting ──
-// registerType 'prompt' (vite.config.js) parks the new worker; the one
-// action here reloads into it at the learner's own moment. "Later"
-// parks the note; the worker activates on the next full load anyway.
+// ── ダイヤ改正 — a new build has arrived ──
+// The new worker has already taken over (pwa.workbox.js); the one
+// action here reloads this page into it at the learner's own moment.
+// "Later" dismisses the note and changes nothing else — the next full
+// load is on the new build regardless, which is what makes putting it
+// off safe.
 export function UpdateToast() {
   const { t } = useLang()
   const ready = useSwUpdate()

@@ -7,6 +7,7 @@ import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
 import { playwright } from '@vitest/browser-playwright';
+import { workbox } from './pwa.workbox.js';
 
 // One browser project per viewport, from one helper, so the two lanes
 // cannot drift apart in anything but the viewport they run at.
@@ -109,9 +110,12 @@ export default defineConfig(({ mode }) => {
     // iOS) has no service worker and its assets ARE the bundle, and a
     // dev server serving yesterday's cache is a debugging trap, so the
     // plugin is off everywhere but a production web build. `prompt`,
-    // not autoUpdate: a new worker waits until the learner taps the
-    // ダイヤ改正 note (components/ui/UpdateToast.jsx) — a reload behind
-    // their back mid-exam would race the exam draft.
+    // not autoUpdate: autoUpdate's registration reloads the page the
+    // moment a new worker takes control, and a reload behind their back
+    // mid-exam would race the exam draft. The worker itself no longer
+    // waits to be let in — it cannot, see pwa.workbox.js — so what
+    // 'prompt' still buys is that the RELOAD is the learner's, offered
+    // by the ダイヤ改正 note (components/ui/UpdateToast.jsx).
     VitePWA({
       disable: mode !== 'production',
       registerType: 'prompt',
@@ -143,58 +147,9 @@ export default defineConfig(({ mode }) => {
           { name: 'かな — Kana', short_name: 'かな', url: '/kana' },
         ],
       },
-      workbox: {
-        // The app shell: code, styles, icons, the Latin faces. Never
-        // public/sounds (4.8 MB), never the 716 KB streak sprite sheet,
-        // and never the ~240 Noto slices — all three arrive on demand
-        // and are kept by the runtime rules below.
-        globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],
-        globIgnores: ['**/noto-*.woff2', '**/sprites/**'],
-        maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-        // The SPA fallback must not swallow the proxied backend paths or
-        // the static policy page.
-        navigateFallbackDenylist: [/^\/api\//, /^\/kanjivg\//, /^\/exam-audio\//, /^\/privacy/],
-        runtimeCaching: [
-          // Closure-free functions: they are serialised into the worker.
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && (url.pathname.startsWith('/sounds/') || url.pathname.startsWith('/sprites/')),
-            handler: 'CacheFirst',
-            options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
-                       cacheableResponse: { statuses: [200] } } },
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.endsWith('.woff2'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'fonts', expiration: { maxEntries: 80, maxAgeSeconds: 31536000 },
-                       cacheableResponse: { statuses: [200] } } },
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/kanjivg/'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'kanjivg', expiration: { maxEntries: 500, maxAgeSeconds: 2592000 },
-                       cacheableResponse: { statuses: [200] } } },
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/exam-audio/'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'exam-audio', rangeRequests: true,
-                       expiration: { maxEntries: 40, maxAgeSeconds: 2592000 },
-                       cacheableResponse: { statuses: [200] } } },
-          // Card-reading clips (/api/tts, backend/study/word_tts.py). Under
-          // /api but not learner state: the clip is a reading out of a
-          // shipped deck, the request carries no token, and the same text
-          // always returns the same bytes — so it caches like the audio it
-          // is rather than falling into the NetworkOnly rule below, which
-          // would put a round trip in front of every replay.
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/tts'),
-            handler: 'CacheFirst',
-            options: { cacheName: 'word-audio',
-                       expiration: { maxEntries: 400, maxAgeSeconds: 2592000 },
-                       cacheableResponse: { statuses: [200] } } },
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/translations/'),
-            handler: 'StaleWhileRevalidate',
-            options: { cacheName: 'translations', expiration: { maxEntries: 8, maxAgeSeconds: 604800 },
-                       cacheableResponse: { statuses: [200] } } },
-          // Everything else under /api is the learner's own state behind
-          // a bearer token, and the worker's cache is not partitioned by
-          // user. Last, so the translations rule above wins.
-          { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/api/'),
-            handler: 'NetworkOnly' },
-        ],
-      },
+      // What the worker may serve, and how it hands over: pwa.workbox.js,
+      // which is where the 2026-09-09 black page is written up.
+      workbox,
     }),
   ],
   // The Noto slices are tiny and would be base64-inlined into the CSS
