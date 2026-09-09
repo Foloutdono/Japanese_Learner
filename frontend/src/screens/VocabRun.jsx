@@ -243,7 +243,6 @@ export default function VocabRun({ session }) {
         leaveLabel={t.vocabTitle}
         where={`${t.vocabulary} ${level}`}
         sub={t.modeReview}
-        pass={false}
       >
           <ReviewDeck
             foot={`${t.vocabulary} ${level}`}
