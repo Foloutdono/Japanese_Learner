@@ -56,6 +56,56 @@ docker exec -i jp-db psql -U postgres -c "CREATE DATABASE jp;"
 docker exec -i jp-db psql -U postgres -d jp < backend/srs/data_structure.sql
 ```
 
+### Database maintenance
+
+Four operator scripts, none of them on the request path. **All four report and
+change nothing without `--yes`**, so the first run of any of them is safe:
+
+```bash
+cd backend
+python -m scripts.purge_orphans        # rows whose Supabase auth user is gone
+python -m scripts.compact_review_log   # roll old review rows up, then trim
+python -m scripts.prune_logs           # cap the logs nothing reads past a point
+python -m scripts.drop_legacy_tables   # tables a removed feature left behind
+```
+
+Two things are worth knowing before reaching for any of them:
+
+- **`review_log` is not an audit log.** Lifetime XP, the level, total reviews,
+  the streak, the 番付 standing and the daily-new budget are every one of them
+  a `SUM`/`COUNT`/`MIN` over that table — there is no other copy. A plain
+  `DELETE ... WHERE reviewed_at < ...` is therefore a partial account reset,
+  not a retention policy. `compact_review_log.py` is the way to bound it: it
+  folds the rows into `review_daily` / `card_first_review` (declared in
+  `data_structure.sql`) *before* deleting them, and `srs.py`'s readers add the
+  two halves back together, so no figure the learner sees moves. Those tables
+  being empty is exactly today's behaviour, so nothing changes until the
+  script is run.
+- **Deleting a user outside the app does not delete their data.** Nothing can
+  foreign-key to `auth.users` here — the card tables scope rows by a
+  `"{user_id}:{card_id}"` string prefix rather than a column — so a deletion
+  from the Supabase dashboard leaves every app row standing.
+  `DELETE /api/account` is the path that erases properly; `purge_orphans.py`
+  is the repair for deletions that bypassed it. See
+  `docs/adr/0010-learner-rows-are-reconciled-with-auth-not-cascaded-from-it.md`.
+
+`prune_logs` and `compact_review_log` also run weekly from
+`.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
+button defaults to a dry run). It needs a `DATABASE_URL` repo secret, set to
+Supabase's **session**-mode pooler URI on port 5432: the transaction pooler
+(6543) cannot hold `compact_review_log`'s rollup in one transaction. The other
+two scripts are deliberately not scheduled — dropping tables is a one-shot, and
+`purge_orphans` needs the Supabase service key, which is too broad a secret to
+park in CI for an occasional job.
+
+For a one-time cleanup with nothing to install,
+`backend/scripts/sql/cleanup_orphans_and_legacy.sql` does the orphan purge and
+the legacy-table drop in the Supabase SQL Editor. It can find orphans by
+joining `auth.users` directly, which `purge_orphans.py` cannot — the editor
+runs as `postgres`, whereas the app's role is not assumed to see the `auth`
+schema. It reports before it deletes, skips tables that do not exist yet, and
+is a one-shot, so it cannot drift from the scripts.
+
 ### Frontend (`frontend/`)
 ```bash
 npm install
@@ -104,7 +154,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
 - `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences) as Python modules or JSON, built/refreshed by scripts in `scripts/`.
-- `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data). Not part of the request path.
+- `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.
 
 Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefixed`/`unprefixed`) so SRS state for the same content differs per learner in the same tables.

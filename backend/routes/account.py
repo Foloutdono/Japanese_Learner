@@ -16,6 +16,12 @@ the way test_wipe_srs.py does. The difference from the wipe: the wipe
 keeps identity and history (a wipe is "start over"); this keeps
 nothing, because after it there is no learner to keep it for.
 
+review_daily, card_first_review and review_compaction are review_log's
+rolled-up half (plan 078). They are the learner's history in a smaller
+shape, not a cache of it, so they go the same way and at the same time:
+leaving them would let a deleted learner's XP go on counting on the
+番付, which is exactly the leak this route exists to close.
+
 SHARED names the tables that hold no learner rows at all and must never
 appear in PLAN: exam papers are a pool other learners' attempts
 reference, the sentence cache is keyed by content, the grammar
@@ -62,6 +68,9 @@ logger = logging.getLogger(__name__)
 # can still sign in and try again.
 PLAN = [
     ("review_log",          "card_id LIKE %(prefix)s",  "review history: XP, level, streak, leaderboard standing"),
+    ("review_daily",        "user_id = %(user)s",       "the rolled-up half of that same history — XP and reviews per day"),
+    ("card_first_review",   "card_id LIKE %(prefix)s",  "when each card was first met, kept past its rolled-up rows"),
+    ("review_compaction",   "user_id = %(user)s",       "how far the rollup has run, and the best-run high-water mark"),
     ("card_modes",          "card_id LIKE %(prefix)s",  "per-(card, mode) scheduler state"),
     ("cards",               "id LIKE %(prefix)s",       "the card id registry — every id embeds the user's own id"),
     ("xp_ledger",           "user_id = %(user)s",       "XP awarded outside a review"),
@@ -91,7 +100,7 @@ SHARED = {
 }
 
 
-def _prefix_pattern(user_id: str) -> str:
+def prefix_pattern(user_id: str) -> str:
     # The same escaping SRSEngine applies to its own LIKE patterns: a
     # Supabase uuid carries none of these, but DEV_USER_ID is free
     # text and an underscore in it is a LIKE wildcard.
@@ -99,9 +108,43 @@ def _prefix_pattern(user_id: str) -> str:
     return f"{safe}:%"
 
 
+def user_ids_present(cur) -> set[str]:
+    """Every user id that still has a row anywhere in PLAN.
+
+    Derived from PLAN's own clauses rather than a hand-kept list, so a
+    table added to the deletion plan is discovered here too. Two shapes,
+    matching the two ways a row is tied to a learner:
+
+      card_id LIKE %(prefix)s   the id namespacing (core/auth.py) --
+                                the user id is the part before the colon
+      user_id = %(user)s        an ordinary column
+
+    video_session_jobs, the one entry scoped through a subquery, is
+    skipped: it cannot hold a user the parent video_sessions does not.
+
+    This is what makes scripts/purge_orphans.py able to answer "who is
+    in the database", which no single table can: a learner deleted
+    before they ever opened the profile screen has review rows and no
+    user_profiles row at all.
+    """
+    found: set[str] = set()
+    for table, clause, _why in PLAN:
+        if "%(prefix)s" in clause:
+            column = clause.split()[0]
+            cur.execute(
+                f'SELECT DISTINCT split_part("{column}", \':\', 1) FROM "{table}"'
+            )
+        elif clause.startswith("user_id = %(user)s"):
+            cur.execute(f'SELECT DISTINCT user_id FROM "{table}"')
+        else:
+            continue
+        found.update(row[0] for row in cur.fetchall() if row[0])
+    return found
+
+
 def delete_user_rows(cur, user_id: str) -> dict[str, int]:
     """Run PLAN on an open cursor; the caller owns the transaction."""
-    params = {"user": user_id, "prefix": _prefix_pattern(user_id)}
+    params = {"user": user_id, "prefix": prefix_pattern(user_id)}
     counts: dict[str, int] = {}
     for table, clause, _why in PLAN:
         cur.execute(f'DELETE FROM "{table}" WHERE {clause}', params)

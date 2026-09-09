@@ -217,6 +217,127 @@ class SRSEngine:
                 self._log_sql("create_xp_ledger_index", sql)
                 cur.execute(sql)
 
+                # ── The prefix indexes (plan 078) ────────────────────
+                # Every per-user read on these two tables is
+                # `card_id LIKE 'uuid:%'` — the card id namespacing from
+                # core/auth.py is the only thing that scopes a row to a
+                # learner. A plain btree cannot serve that: under any
+                # collation but C, LIKE 'x%' is not a range the default
+                # operator class can walk, so idx_review_log_card_id
+                # above is skipped and the planner reads the WHOLE table
+                # to answer "what is this learner's XP". Measured on
+                # 200k rows: seq scan 27ms, 196k rows discarded, and it
+                # grows with every OTHER learner's history.
+                #
+                # text_pattern_ops is the operator class that does index
+                # a prefix. Kept ALONGSIDE the plain index rather than
+                # replacing it: the plain one still serves the equality
+                # lookups (card_id = %s) that scripts/ and the id
+                # migration use, and text_pattern_ops does not.
+                sql = """
+                    CREATE INDEX IF NOT EXISTS idx_review_log_card_prefix
+                    ON review_log(card_id text_pattern_ops, reviewed_at)
+                """
+                self._log_sql("create_review_log_prefix_index", sql)
+                cur.execute(sql)
+
+                sql = """
+                    CREATE INDEX IF NOT EXISTS idx_card_modes_card_prefix
+                    ON card_modes(card_id text_pattern_ops)
+                """
+                self._log_sql("create_card_modes_prefix_index", sql)
+                cur.execute(sql)
+
+                # ── The rollup (plan 078) ───────────────────────────
+                # review_log is not an audit log: lifetime XP, level,
+                # total reviews, the streak, the 番付 standing and the
+                # daily-new budget are all SUM/COUNT/MIN over it, so
+                # trimming it by date would visibly reset every
+                # learner's profile. These three tables are what makes
+                # trimming safe — the old rows are FOLDED IN here
+                # before they are deleted, and the readers below add
+                # the two halves back together.
+                #
+                # Empty, they contribute nothing and every figure is
+                # exactly what it was: the compaction is opt-in, and
+                # runs only from scripts/compact_review_log.py.
+
+                # One row per (learner, UTC day, UTC hour): what
+                # get_lifetime_xp, get_total_reviews, _studied_days,
+                # get_daily_review_counts, get_review_hours,
+                # get_quality_mix and the two leaderboard sums each need
+                # from a compacted day. The hour is in the key because
+                # get_review_hours buckets by it; that still bounds the
+                # table at 24 rows per learner per day, against the
+                # hundreds of reviews a real day holds.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS review_daily (
+                        user_id TEXT NOT NULL,
+                        day DATE NOT NULL,
+                        hour SMALLINT NOT NULL,
+                        reviews INTEGER NOT NULL DEFAULT 0,
+                        xp INTEGER NOT NULL DEFAULT 0,
+                        q0 INTEGER NOT NULL DEFAULT 0,
+                        q1 INTEGER NOT NULL DEFAULT 0,
+                        q2 INTEGER NOT NULL DEFAULT 0,
+                        q3 INTEGER NOT NULL DEFAULT 0,
+                        q4 INTEGER NOT NULL DEFAULT 0,
+                        q5 INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY (user_id, day, hour)
+                    )
+                """
+                self._log_sql("create_review_daily_table", sql)
+                cur.execute(sql)
+
+                # The first time each (card, mode) was ever answered.
+                # get_new_items_today and get_journey_item_counts are
+                # MIN(reviewed_at) queries: without this, compacting a
+                # card's only review would make a card met two years ago
+                # count as NEW again — spending the learner's daily
+                # new-card allowance on cards they already know, and
+                # moving the journey's promised total. Kept per
+                # (card, mode) because both queries filter to servable
+                # modes BEFORE taking the minimum.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS card_first_review (
+                        card_id TEXT NOT NULL,
+                        mode TEXT NOT NULL,
+                        first_at TIMESTAMPTZ NOT NULL,
+                        PRIMARY KEY (card_id, mode)
+                    )
+                """
+                self._log_sql("create_card_first_review_table", sql)
+                cur.execute(sql)
+
+                sql = """
+                    CREATE INDEX IF NOT EXISTS idx_card_first_review_prefix
+                    ON card_first_review(card_id text_pattern_ops)
+                """
+                self._log_sql("create_card_first_review_index", sql)
+                cur.execute(sql)
+
+                # How far compaction has run per learner, plus the one
+                # figure that cannot be rebuilt from a daily rollup:
+                # get_best_quality_streak counts consecutive ROWS, so a
+                # run is only visible while the rows are. best_run is
+                # the longest run wholly inside compacted history and
+                # best_run_min the threshold it was measured at (the
+                # stored figure is ignored for any other threshold,
+                # rather than quietly answering the wrong question).
+                # A run STRADDLING the cut is counted as its two halves
+                # — the one documented loss, and only ever downward.
+                sql = """
+                    CREATE TABLE IF NOT EXISTS review_compaction (
+                        user_id TEXT PRIMARY KEY,
+                        compacted_through TIMESTAMPTZ NOT NULL,
+                        best_run INTEGER NOT NULL DEFAULT 0,
+                        best_run_min SMALLINT NOT NULL DEFAULT 4,
+                        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                    )
+                """
+                self._log_sql("create_review_compaction_table", sql)
+                cur.execute(sql)
+
 
     def _ensure_card(self, card_id: str) -> None:
         with self.storage.cursor() as cur:
@@ -413,13 +534,18 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
+                # Three sums, not two: review_daily carries the XP of
+                # every review whose row has since been compacted away.
+                # It is empty until scripts/compact_review_log.py runs,
+                # and adds 0 until then.
                 sql = """
                     SELECT
                         (SELECT COALESCE(SUM(xp_earned), 0) FROM review_log WHERE card_id LIKE %s)
+                      + (SELECT COALESCE(SUM(xp), 0) FROM review_daily WHERE user_id = %s)
                       + (SELECT COALESCE(SUM(xp), 0) FROM xp_ledger WHERE user_id = %s)
                 """
-                self._log_sql("get_lifetime_xp", sql, (pattern, user_id))
-                cur.execute(sql, (pattern, user_id))
+                self._log_sql("get_lifetime_xp", sql, (pattern, user_id, user_id))
+                cur.execute(sql, (pattern, user_id, user_id))
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
@@ -780,15 +906,24 @@ class SRSEngine:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = """
-                    SELECT date_trunc('day', reviewed_at)::date AS day, COUNT(*)
-                    FROM review_log
-                    WHERE card_id LIKE %s
-                      AND reviewed_at >= NOW() - (%s || ' days')::interval
+                    SELECT day, SUM(n)::bigint FROM (
+                        SELECT date_trunc('day', reviewed_at)::date AS day, COUNT(*) AS n
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                          AND reviewed_at >= NOW() - (%s || ' days')::interval
+                        GROUP BY 1
+                        UNION ALL
+                        SELECT day, SUM(reviews) AS n
+                        FROM review_daily
+                        WHERE user_id = %s
+                          AND day >= (NOW() - (%s || ' days')::interval)::date
+                        GROUP BY 1
+                    ) both_halves
                     GROUP BY day
                     ORDER BY day ASC
                 """
-                self._log_sql("get_daily_review_counts", sql, (pattern, days))
-                cur.execute(sql, (pattern, days))
+                self._log_sql("get_daily_review_counts", sql, (pattern, days, user_id, days))
+                cur.execute(sql, (pattern, days, user_id, days))
                 rows = cur.fetchall()
         return [{"date": day.isoformat(), "count": int(count)} for day, count in rows]
 
@@ -798,13 +933,18 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
+                # UNION (not UNION ALL): a day the learner studied is a
+                # day whether it is still a row, already a rollup, or —
+                # on the day compaction ran — both.
                 sql = """
                     SELECT DISTINCT date_trunc('day', reviewed_at)::date AS day
                     FROM review_log
                     WHERE card_id LIKE %s
+                    UNION
+                    SELECT day FROM review_daily WHERE user_id = %s
                 """
-                self._log_sql("studied_days", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                self._log_sql("studied_days", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 return {row[0] for row in cur.fetchall()}
 
     def get_streak(self, user_id: str) -> dict[str, int]:
@@ -879,30 +1019,40 @@ class SRSEngine:
         ]
 
     @staticmethod
-    def _xp_window(days: int | None) -> tuple[str, str, tuple]:
-        """WHERE fragments for review_log and xp_ledger, plus their
-        params, clipping an XP total to the last `days` days; all empty
-        for lifetime. The 番付's 今週 side is the same two sums the
-        lifetime board adds up, just windowed — never a third ledger
-        that could drift from them."""
+    def _xp_window(days: int | None) -> tuple[str, str, str, tuple]:
+        """WHERE fragments for review_log, review_daily and xp_ledger,
+        plus their params, clipping an XP total to the last `days` days;
+        all empty for lifetime. The 番付's 今週 side is the same sums the
+        lifetime board adds up, just windowed — never a separate ledger
+        that could drift from them.
+
+        The rollup clips by whole DAY where the other two clip by
+        timestamp. That cannot skew a board in practice: compaction only
+        ever folds away rows older than its retention window, which is
+        far longer than any window the board offers, so the rollup
+        contributes nothing at all to a windowed total.
+        """
         if days is None:
-            return "", "", ()
+            return "", "", "", ()
         return (
             " WHERE reviewed_at >= NOW() - (%s || ' days')::interval",
+            " WHERE day >= (NOW() - (%s || ' days')::interval)::date",
             " WHERE awarded_at >= NOW() - (%s || ' days')::interval",
-            (days, days),
+            (days, days, days),
         )
 
     def get_leaderboard(self, limit: int = 20, days: int | None = None) -> list[dict[str, Any]]:
         """Top users by XP — lifetime, or earned within the last `days`
         days. Returns raw user_id — profile.py joins this against
         user_profiles for display names."""
-        log_where, ledger_where, window = self._xp_window(days)
+        log_where, daily_where, ledger_where, window = self._xp_window(days)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = f"""
                     SELECT user_id, SUM(xp) AS xp FROM (
                         SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log{log_where}
+                        UNION ALL
+                        SELECT user_id, xp FROM review_daily{daily_where}
                         UNION ALL
                         SELECT user_id, xp FROM xp_ledger{ledger_where}
                     ) all_xp
@@ -921,13 +1071,15 @@ class SRSEngine:
         one review — lifetime, or within the last `days` days — used so
         the leaderboard can show "you're #47" even when only the top N
         are listed."""
-        log_where, ledger_where, window = self._xp_window(days)
+        log_where, daily_where, ledger_where, window = self._xp_window(days)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 sql = f"""
                     WITH totals AS (
                         SELECT user_id, SUM(xp) AS xp FROM (
                             SELECT split_part(card_id, ':', 1) AS user_id, xp_earned AS xp FROM review_log{log_where}
+                            UNION ALL
+                            SELECT user_id, xp FROM review_daily{daily_where}
                             UNION ALL
                             SELECT user_id, xp FROM xp_ledger{ledger_where}
                         ) all_xp
@@ -949,9 +1101,12 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
-                sql = "SELECT COUNT(*) FROM review_log WHERE card_id LIKE %s"
-                self._log_sql("get_total_reviews", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                sql = """
+                    SELECT (SELECT COUNT(*) FROM review_log WHERE card_id LIKE %s)
+                         + (SELECT COALESCE(SUM(reviews), 0) FROM review_daily WHERE user_id = %s)
+                """
+                self._log_sql("get_total_reviews", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
@@ -1071,6 +1226,12 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
+                # The one figure a daily rollup cannot rebuild: a run
+                # is consecutive ROWS, and compacted rows are gone. The
+                # best run measured inside compacted history is kept as
+                # a high-water mark instead, and only for the threshold
+                # it was measured at — GREATEST of the two halves, so a
+                # record already earned can never fall.
                 sql = """
                     WITH ordered AS (
                         SELECT
@@ -1079,13 +1240,19 @@ class SRSEngine:
                             ROW_NUMBER() OVER (PARTITION BY (quality >= %s) ORDER BY reviewed_at) AS grp
                         FROM review_log
                         WHERE card_id LIKE %s
-                    )
-                    SELECT COALESCE(MAX(cnt), 0) FROM (
+                    ),
+                    runs AS (
                         SELECT COUNT(*) AS cnt FROM ordered WHERE quality >= %s GROUP BY grp
-                    ) runs
+                    )
+                    SELECT GREATEST(
+                        (SELECT COALESCE(MAX(cnt), 0) FROM runs),
+                        (SELECT COALESCE(MAX(best_run), 0) FROM review_compaction
+                          WHERE user_id = %s AND best_run_min = %s)
+                    )
                 """
-                self._log_sql("get_best_quality_streak", sql, (min_quality, pattern, min_quality))
-                cur.execute(sql, (min_quality, pattern, min_quality))
+                params = (min_quality, pattern, min_quality, user_id, min_quality)
+                self._log_sql("get_best_quality_streak", sql, params)
+                cur.execute(sql, params)
                 row = cur.fetchone()
         return int(row[0]) if row else 0
 
@@ -1135,16 +1302,33 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
+                # The rollup half stores a UTC HOUR rather than a
+                # timestamp, so the same shift is arithmetic on the
+                # bucket: minutes east, wrapped into the day, back to an
+                # hour. Exact for every whole-hour zone; a half-hour zone
+                # (India, +5:30) can put a compacted hour in the
+                # neighbouring bucket, which is the documented cost of
+                # keeping 24 rows a day instead of hundreds.
                 sql = """
-                    SELECT
-                        EXTRACT(HOUR FROM reviewed_at + (%s || ' minutes')::interval)::int AS hour,
-                        COUNT(*)
-                    FROM review_log
-                    WHERE card_id LIKE %s
-                    GROUP BY 1
+                    SELECT hour, SUM(n)::bigint FROM (
+                        SELECT
+                            EXTRACT(HOUR FROM reviewed_at + (%s || ' minutes')::interval)::int AS hour,
+                            COUNT(*) AS n
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                        GROUP BY 1
+                        UNION ALL
+                        SELECT
+                            ((((hour::int * 60 + %s) %% 1440) + 1440) %% 1440) / 60 AS hour,
+                            SUM(reviews) AS n
+                        FROM review_daily
+                        WHERE user_id = %s
+                        GROUP BY 1
+                    ) both_halves
+                    GROUP BY hour
                 """
-                self._log_sql("get_review_hours", sql, (tz_offset, pattern))
-                cur.execute(sql, (tz_offset, pattern))
+                self._log_sql("get_review_hours", sql, (tz_offset, pattern, tz_offset, user_id))
+                cur.execute(sql, (tz_offset, pattern, tz_offset, user_id))
                 rows = cur.fetchall()
 
         hours = [0] * 24
@@ -1157,15 +1341,35 @@ class SRSEngine:
         pattern = self._user_prefix_pattern(user_id)
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
+                # The rollup keeps the six ratings as six columns;
+                # LATERAL VALUES turns them back into the (quality,
+                # count) rows the live half already produces.
                 sql = """
-                    SELECT quality, COUNT(*)
-                    FROM review_log
-                    WHERE card_id LIKE %s
-                    GROUP BY 1
-                    ORDER BY 1
+                    SELECT quality, SUM(n)::bigint FROM (
+                        SELECT quality::int AS quality, COUNT(*) AS n
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                        GROUP BY 1
+                        UNION ALL
+                        SELECT v.quality, SUM(v.n) AS n
+                        FROM review_daily d,
+                             LATERAL (VALUES (0, d.q0), (1, d.q1), (2, d.q2),
+                                             (3, d.q3), (4, d.q4), (5, d.q5)) AS v(quality, n)
+                        WHERE d.user_id = %s
+                        GROUP BY 1
+                    ) both_halves
+                    GROUP BY quality
+                    -- The rollup keeps a counter per rating whether or
+                    -- not it was ever given, and unpivoting those emits
+                    -- ratings with a count of zero. The live half never
+                    -- does, so neither may the union: a compacted
+                    -- learner would otherwise grow rating buckets they
+                    -- never earned.
+                    HAVING SUM(n) > 0
+                    ORDER BY quality
                 """
-                self._log_sql("get_quality_mix", sql, (pattern,))
-                cur.execute(sql, (pattern,))
+                self._log_sql("get_quality_mix", sql, (pattern, user_id))
+                cur.execute(sql, (pattern, user_id))
                 rows = cur.fetchall()
         return {str(int(quality)): int(count) for quality, count in rows}
 
@@ -1211,19 +1415,31 @@ class SRSEngine:
                 # makes a card's "first" mean its first review in a mode a
                 # deck actually serves -- so a word met first in a sentence
                 # still counts as new on the day its deck introduces it.
+                # card_first_review is unioned in BEFORE the minimum is
+                # taken, so a card whose only review has been compacted
+                # away still reports the day it was really met. Without
+                # it, an old card would read as new and spend today's
+                # allowance a second time.
                 mode_sql, mode_params = self._servable_filter()
                 sql = f"""
-                    WITH firsts AS (
-                        SELECT card_id, MIN(reviewed_at) AS first_at
+                    WITH events AS (
+                        SELECT card_id, reviewed_at AS at
                         FROM review_log
                         WHERE card_id LIKE %s{mode_sql}
-                        GROUP BY card_id
+                        UNION ALL
+                        SELECT card_id, first_at AS at
+                        FROM card_first_review
+                        WHERE card_id LIKE %s{mode_sql}
+                    ),
+                    firsts AS (
+                        SELECT card_id, MIN(at) AS first_at FROM events GROUP BY card_id
                     )
                     SELECT COUNT(*) FROM firsts
                     WHERE first_at >= date_trunc('day', NOW())
                 """
-                self._log_sql("get_new_items_today", sql, (pattern,) + mode_params)
-                cur.execute(sql, (pattern,) + mode_params)
+                params = (pattern,) + mode_params + (pattern,) + mode_params
+                self._log_sql("get_new_items_today", sql, params)
+                cur.execute(sql, params)
                 (count,) = cur.fetchone()
         return int(count)
 
@@ -1355,13 +1571,23 @@ class SRSEngine:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
+                # Same union as get_new_items_today, and for the same
+                # reason: the promised item total is counted from each
+                # card's FIRST sighting, which has to outlive the row.
                 sql = f"""
-                    WITH firsts AS (
-                        SELECT card_id, MIN(reviewed_at) AS first_at
+                    WITH events AS (
+                        SELECT card_id, reviewed_at AS at
                         FROM review_log
                         WHERE card_id LIKE %s{mode_sql}
                           AND ({scope})
-                        GROUP BY card_id
+                        UNION ALL
+                        SELECT card_id, first_at AS at
+                        FROM card_first_review
+                        WHERE card_id LIKE %s{mode_sql}
+                          AND ({scope})
+                    ),
+                    firsts AS (
+                        SELECT card_id, MIN(at) AS first_at FROM events GROUP BY card_id
                     )
                     SELECT
                       COUNT(*) FILTER (WHERE first_at >= COALESCE(%s, '-infinity'::timestamptz)),
@@ -1373,9 +1599,8 @@ class SRSEngine:
                 # — 13 full past days + today for the default 14, matching
                 # how the UTC day boundary makes "today" mean one thing.
                 params = (
-                    (pattern,)
-                    + mode_params
-                    + scope_params
+                    (pattern,) + mode_params + scope_params
+                    + (pattern,) + mode_params + scope_params
                     + (since, window_days - 1)
                 )
                 self._log_sql("get_journey_item_counts", sql, params)

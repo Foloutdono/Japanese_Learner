@@ -1,0 +1,95 @@
+# Weekly database maintenance: cap the logs that grow without bound.
+#
+# Runs the two RECURRING scripts. The other two are deliberately absent:
+#
+#   drop_legacy_tables  is a one-shot. Once the retired tables are gone
+#                       they stay gone, and a scheduled DROP TABLE is a
+#                       standing hazard for no benefit.
+#   purge_orphans       needs SUPABASE_SERVICE_KEY, which can create and
+#                       delete auth users. That is a much larger secret
+#                       to leave sitting in CI than a database URL, and
+#                       the job is occasional (only after someone deletes
+#                       a user outside the app). Run it by hand.
+#
+# Setup: add DATABASE_URL under Settings -> Secrets and variables ->
+# Actions. Use Supabase's SESSION-mode pooler URI (port 5432), not the
+# transaction pooler (6543) -- compact_review_log runs its whole rollup
+# in one transaction.
+#
+# The schedule only starts working once this file is on the default
+# branch; GitHub ignores cron in workflows that live only on a branch.
+name: Database maintenance
+
+on:
+  schedule:
+    # Mondays 04:00 UTC. GitHub's shared cron queue can run late by
+    # several minutes, which does not matter for retention work.
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Report only, change nothing'
+        type: boolean
+        default: true
+        required: false
+
+# Never let two runs prune the same database at once.
+concurrency:
+  group: db-maintenance
+  cancel-in-progress: false
+
+jobs:
+  maintain:
+    runs-on: ubuntu-latest
+    # A manual run defaults to a dry run, so the button is safe to press
+    # before trusting it. The schedule always applies.
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      APPLY: ${{ (github.event_name == 'schedule' || inputs.dry_run == false) && '--yes' || '' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fail early if the secret is missing
+        # Without this the scripts would fail deeper in with a confusing
+        # connection error, or -- worse on a future refactor -- quietly
+        # find nothing to do and report success.
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret is not set. Add it under" \
+                 "Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        working-directory: backend
+        # Deliberately NOT requirements.txt: that pulls fugashi,
+        # unidic-lite, pykakasi and edge-tts (a MeCab dictionary among
+        # them, minutes of build time) for a job that only opens a
+        # database connection. These five are everything the two scripts
+        # import, transitively -- routes/account.py brings in FastAPI and
+        # PyJWT through core/auth.py.
+        run: pip install psycopg2-binary python-dotenv fastapi httpx PyJWT
+
+      - name: Report what will change
+        working-directory: backend
+        run: |
+          python -m scripts.prune_logs
+          python -m scripts.compact_review_log
+
+      - name: Prune the capped logs
+        if: env.APPLY != ''
+        working-directory: backend
+        run: python -m scripts.prune_logs --yes
+
+      - name: Compact the review log
+        if: env.APPLY != ''
+        working-directory: backend
+        # Folds old rows into review_daily / card_first_review before
+        # deleting them, so XP, the level, the streak and the 番付 do not
+        # move. A no-op until there is history older than the retention
+        # window, which it says plainly.
+        run: python -m scripts.compact_review_log --yes

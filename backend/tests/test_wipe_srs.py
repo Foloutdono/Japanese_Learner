@@ -67,7 +67,7 @@ class WipePlanTests(unittest.TestCase):
         # card ids are "{user_id}:{raw_id}", so those tables scope by
         # prefix; the rest carry a user_id column. Mixing them up would
         # silently scope to nothing and delete nothing.
-        by_prefix = {"review_log", "card_modes", "cards"}
+        by_prefix = {"review_log", "card_modes", "cards", "card_first_review"}
         for table, clause, _why in PLAN + OPTIONAL:
             if table in by_prefix:
                 self.assertIn("%(prefix)s", clause, table)
