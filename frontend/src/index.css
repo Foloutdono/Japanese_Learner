@@ -4086,7 +4086,15 @@ textarea:focus-visible {
    viewport on a phone. 1rem is the scale's own base, not a new rung:
    on a phone a field sits exactly at the threshold that keeps the
    viewport still. Bare form controls that are not yet .field get the
-   same floor, for the same reason. */
+   same floor, for the same reason.
+
+   Note the weight: `input:not(…)` is 0-3-1, so this outranks any class
+   rule and a field asking for another rung gets 1rem here regardless.
+   That is the ruling and not an accident -- a phone field sits at the
+   threshold -- but it does mean a rung set on a variant reads as the
+   variant's on a desktop and as 1rem here. The run's entry is the one
+   that does (--fs-lead, .stage__foot .field); 1rem is already above
+   the base it would otherwise take, so the floor gives up nothing. */
 @media (max-width: 768px) {
   .field,
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
@@ -8431,6 +8439,40 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .browse-nav .btn-secondary,
 .browse-nav .btn-primary { width: 100%; }
+
+/* ── The run's entry ──
+   The other instrument this foot docks: the field a session is
+   answered into (reading's romaji, translation's Japanese), with the
+   one filled action under it.
+
+   It sits on the PAGE — the stage's ground, and the docked foot's own
+   (see .stage > .stage__foot in the phone query). .field's well IS the
+   page's ground, so here it painted --bg-main on --bg-main and the
+   entry was a line of placeholder text with no box around it at all:
+   the one place on a run where the learner is asked to do something
+   was the only object on the screen with no edges. Both themes, every
+   width, and invisible to the guards because nothing was wrong with
+   the colours — they were simply the same one twice.
+
+   The well works by being ONE STEP away from what surrounds it. On a
+   card that step is down, to the page showing through; on the page
+   there is nothing below to show, so it is up, to the app's own raised
+   surface. Same object, same filled-well idiom the specimens chose,
+   the one direction the stack leaves — not a box drawn on the page,
+   which is the specimen that idiom beat.
+
+   The rung is the answer register: --fs-lead is what .quiz-input
+   already writes an answer at, and what the learner types here is
+   their own work rather than a search string. On a phone the field's
+   own floor (the 1rem in .field's ≤768px block, at a weight no class
+   rule reaches) takes it first, which is the ruling there and still
+   above the base this would otherwise sit at. Left-flush, not centred
+   with the card above it — a caret that walks back to the middle after
+   every keystroke is a worse instrument than a still one. */
+.stage__foot .field {
+  --field-well: var(--surface);
+  font-size: var(--fs-lead);
+}
 
 /* ── The practice sessions (canvas Reading / Comprehension /
    Translation / ComprehensionResult, plan 072) ──

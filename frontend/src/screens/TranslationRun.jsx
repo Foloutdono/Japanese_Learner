@@ -376,6 +376,17 @@ function SessionView({
               aria-label={t.japanesePlaceholder}
               className="field"
               lang="ja"
+              /* The same rule as reading's romaji entry: nothing may
+                 rewrite the answer on its way in. Here the field is fed
+                 by an IME, whose candidate is already the learner's
+                 choice — a spellchecker underlining kana it does not
+                 know, or an autocorrect reaching past the IME, can only
+                 be wrong about it. */
+              autoComplete="off"
+              autoCorrect="off"
+              autoCapitalize="off"
+              spellCheck={false}
+              enterKeyHint="done"
             />
             <button type="submit" className="btn-primary" disabled={!answer.trim()}>
               {t.submit}

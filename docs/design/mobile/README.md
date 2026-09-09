@@ -91,7 +91,7 @@ draw and readings faces keep their button under the widget).
 | `.prompt-card--ask` | a flat, left-aligned question card | `ComprehensionRun.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
 | `.type-badge` | the outlined caption pill (its type's colour as a tint) | `QuestionTypeBadge` in `components/study/QuizComponents.jsx` |
 | `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ComprehensionRun.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
-| `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
+| `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.stage__foot .field` (the entry: the well steps UP to `--surface`, since a field docked here sits on the page and has nothing below it to be a hole through), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
 | `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ComprehensionRun.jsx` |
 | `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
 | `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
