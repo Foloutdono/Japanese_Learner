@@ -89,6 +89,23 @@ Two things are worth knowing before reaching for any of them:
   is the repair for deletions that bypassed it. See
   `docs/adr/0010-learner-rows-are-reconciled-with-auth-not-cascaded-from-it.md`.
 
+`prune_logs` and `compact_review_log` also run weekly from
+`.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
+button defaults to a dry run). It needs a `DATABASE_URL` repo secret, set to
+Supabase's **session**-mode pooler URI on port 5432: the transaction pooler
+(6543) cannot hold `compact_review_log`'s rollup in one transaction. The other
+two scripts are deliberately not scheduled — dropping tables is a one-shot, and
+`purge_orphans` needs the Supabase service key, which is too broad a secret to
+park in CI for an occasional job.
+
+For a one-time cleanup with nothing to install,
+`backend/scripts/sql/cleanup_orphans_and_legacy.sql` does the orphan purge and
+the legacy-table drop in the Supabase SQL Editor. It can find orphans by
+joining `auth.users` directly, which `purge_orphans.py` cannot — the editor
+runs as `postgres`, whereas the app's role is not assumed to see the `auth`
+schema. It reports before it deletes, skips tables that do not exist yet, and
+is a one-shot, so it cannot drift from the scripts.
+
 ### Frontend (`frontend/`)
 ```bash
 npm install
