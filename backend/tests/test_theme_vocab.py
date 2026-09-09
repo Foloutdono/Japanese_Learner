@@ -100,12 +100,26 @@ def test_a_theme_never_repeats_a_word_or_a_meaning(theme):
     """Two rows sharing a surface (鼠/ねずみ beside 鼠/ねず) or a gloss
     ("kitchen" nine times over in `rooms`) make the meaning->word
     direction unanswerable and collapse the MCQ distractors, which
-    study/mcq.py dedupes by meaning."""
+    study/mcq.py dedupes by meaning.
+
+    Checked through the BUILD's own key, not a plain lowercase compare:
+    an exact-string test passes happily on 劇場 "theatre" beside シアター
+    "theater", 靴 "shoe, shoes" beside シューズ "shoes", and 店舗 "shop,
+    store" beside 店 "store, shop" — all three of which shipped."""
+    from scripts.build_theme_db import gloss_keys
+
     rows = theme_data.theme_entries(theme)
     surfaces = [e["kanji"] or e["kana"] for e in rows]
-    meanings = [e["meaning"].split(",")[0].strip().lower() for e in rows]
     assert len(set(surfaces)) == len(surfaces)
-    assert len(set(meanings)) == len(meanings)
+
+    heads, key_sets = [], []
+    for e in rows:
+        head, keys = gloss_keys(e["meaning"])
+        heads.append(head)
+        key_sets.append(keys)
+    assert len(set(heads)) == len(heads), \
+        sorted(h for h in heads if heads.count(h) > 1)
+    assert len(set(key_sets)) == len(key_sets)
 
 
 @pytest.mark.parametrize("theme", THEMES)

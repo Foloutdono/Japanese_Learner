@@ -20,11 +20,20 @@
   },
   {
    "domain": "vocab",
+   "kana": "いぬ",
+   "kanji": "犬",
+   "level": "basic",
+   "meaning": "dog, canine",
+   "rank": 3,
+   "score": 1500
+  },
+  {
+   "domain": "vocab",
    "kana": "うし",
    "kanji": "牛",
    "level": "basic",
    "meaning": "cattle, cow",
-   "rank": 3,
+   "rank": 4,
    "score": 2500
   },
   {
@@ -33,7 +42,7 @@
    "kanji": "虎",
    "level": "basic",
    "meaning": "tiger",
-   "rank": 4,
+   "rank": 5,
    "score": 2500
   },
   {
@@ -42,7 +51,7 @@
    "kanji": "猫",
    "level": "basic",
    "meaning": "cat, feline",
-   "rank": 5,
+   "rank": 6,
    "score": 3500
   },
   {
@@ -51,16 +60,16 @@
    "kanji": "鹿",
    "level": "basic",
    "meaning": "deer, cervid",
-   "rank": 6,
+   "rank": 7,
    "score": 4500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "かめ",
    "kanji": "亀",
-   "level": "basic",
+   "level": "medium",
    "meaning": "tortoise, turtle",
-   "rank": 7,
+   "rank": 8,
    "score": 5500
   },
   {
@@ -69,7 +78,7 @@
    "kanji": "獅子",
    "level": "medium",
    "meaning": "lion",
-   "rank": 8,
+   "rank": 9,
    "score": 5500
   },
   {
@@ -78,7 +87,7 @@
    "kanji": "羊",
    "level": "medium",
    "meaning": "sheep",
-   "rank": 9,
+   "rank": 10,
    "score": 5500
   },
   {
@@ -87,7 +96,7 @@
    "kanji": "鴨",
    "level": "medium",
    "meaning": "duck",
-   "rank": 10,
+   "rank": 11,
    "score": 5500
   },
   {
@@ -96,7 +105,7 @@
    "kanji": "猿",
    "level": "medium",
    "meaning": "monkey, ape",
-   "rank": 11,
+   "rank": 12,
    "score": 6500
   },
   {
@@ -105,7 +114,7 @@
    "kanji": "熊",
    "level": "medium",
    "meaning": "bear",
-   "rank": 12,
+   "rank": 13,
    "score": 6500
   },
   {
@@ -114,7 +123,7 @@
    "kanji": "豚",
    "level": "medium",
    "meaning": "pig",
-   "rank": 13,
+   "rank": 14,
    "score": 6500
   },
   {
@@ -123,7 +132,7 @@
    "kanji": "鯨",
    "level": "medium",
    "meaning": "whale",
-   "rank": 14,
+   "rank": 15,
    "score": 6500
   },
   {
@@ -132,16 +141,16 @@
    "kanji": "鶏",
    "level": "medium",
    "meaning": "chicken, domestic chicken",
-   "rank": 15,
+   "rank": 16,
    "score": 6500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "へび",
    "kanji": "蛇",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "snake",
-   "rank": 16,
+   "rank": 17,
    "score": 7500
   },
   {
@@ -150,7 +159,7 @@
    "kanji": "狼",
    "level": "advanced",
    "meaning": "wolf",
-   "rank": 17,
+   "rank": 18,
    "score": 9500
   },
   {
@@ -159,7 +168,7 @@
    "kanji": "子牛",
    "level": "advanced",
    "meaning": "calf",
-   "rank": 18,
+   "rank": 19,
    "score": 11500
   },
   {
@@ -168,7 +177,7 @@
    "kanji": "狐",
    "level": "advanced",
    "meaning": "fox",
-   "rank": 19,
+   "rank": 20,
    "score": 11500
   },
   {
@@ -177,7 +186,7 @@
    "kanji": "兎",
    "level": "advanced",
    "meaning": "rabbit, hare",
-   "rank": 20,
+   "rank": 21,
    "score": 15500
   },
   {
@@ -186,7 +195,7 @@
    "kanji": "犀",
    "level": "advanced",
    "meaning": "rhinoceros",
-   "rank": 21,
+   "rank": 22,
    "score": 16500
   },
   {
@@ -195,7 +204,7 @@
    "kanji": "蛙",
    "level": "advanced",
    "meaning": "frog",
-   "rank": 22,
+   "rank": 23,
    "score": 16500
   },
   {
@@ -204,7 +213,7 @@
    "kanji": "子猫",
    "level": "advanced",
    "meaning": "kitten",
-   "rank": 23,
+   "rank": 24,
    "score": 17500
   },
   {
@@ -213,16 +222,16 @@
    "kanji": "鼠",
    "level": "advanced",
    "meaning": "mouse, rat",
-   "rank": 24,
+   "rank": 25,
    "score": 18500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "ほにゅうるい",
    "kanji": "哺乳類",
-   "level": "advanced",
+   "level": "expert",
    "meaning": "mammal, mammalian",
-   "rank": 25,
+   "rank": 26,
    "score": 21500
   },
   {
@@ -231,7 +240,7 @@
    "kanji": "豹",
    "level": "expert",
    "meaning": "leopard",
-   "rank": 26,
+   "rank": 27,
    "score": 21500
   },
   {
@@ -240,7 +249,7 @@
    "kanji": "象",
    "level": "expert",
    "meaning": "elephant",
-   "rank": 27,
+   "rank": 28,
    "score": 26000.0
   },
   {
@@ -249,7 +258,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "panda",
-   "rank": 28,
+   "rank": 29,
    "score": 26000.0
   },
   {
@@ -258,7 +267,7 @@
    "kanji": "麒麟",
    "level": "expert",
    "meaning": "giraffe",
-   "rank": 29,
+   "rank": 30,
    "score": 26000.0
   },
   {
@@ -267,7 +276,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "dolphin",
-   "rank": 30,
+   "rank": 31,
    "score": 30000.0
   },
   {
@@ -276,7 +285,7 @@
    "kanji": "子犬",
    "level": "expert",
    "meaning": "puppy",
-   "rank": 31,
+   "rank": 32,
    "score": 30000.0
   },
   {
@@ -285,7 +294,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "pet",
-   "rank": 32,
+   "rank": 33,
    "score": 34000.0
   },
   {
@@ -294,15 +303,6 @@
    "kanji": "",
    "level": "expert",
    "meaning": "kangaroo",
-   "rank": 33,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "キャメル",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "camel",
    "rank": 34,
    "score": 34000.0
   },
@@ -348,7 +348,7 @@
    "domain": "vocab",
    "kana": "つばさ",
    "kanji": "翼",
-   "level": "basic",
+   "level": "medium",
    "meaning": "wing",
    "rank": 4,
    "score": 4500
@@ -384,7 +384,7 @@
    "domain": "vocab_jmdict",
    "kana": "はくちょう",
    "kanji": "白鳥",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "swan",
    "rank": 8,
    "score": 7500
@@ -393,7 +393,7 @@
    "domain": "vocab_jmdict",
    "kana": "わし",
    "kanji": "鷲",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "eagle",
    "rank": 9,
    "score": 9500
@@ -429,7 +429,7 @@
    "domain": "vocab_jmdict",
    "kana": "はと",
    "kanji": "鳩",
-   "level": "advanced",
+   "level": "expert",
    "meaning": "pigeon, dove",
    "rank": 13,
    "score": 10500
@@ -438,19 +438,10 @@
    "domain": "vocab_jmdict",
    "kana": "はやぶさ",
    "kanji": "隼",
-   "level": "advanced",
+   "level": "expert",
    "meaning": "falcon",
    "rank": 14,
    "score": 11500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "たくぼく",
-   "kanji": "啄木",
-   "level": "expert",
-   "meaning": "woodpecker",
-   "rank": 15,
-   "score": 15500
   },
   {
    "domain": "vocab",
@@ -458,7 +449,7 @@
    "kanji": "嘴",
    "level": "expert",
    "meaning": "beak, bill",
-   "rank": 16,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -467,17 +458,8 @@
    "kanji": "玉子",
    "level": "expert",
    "meaning": "egg",
-   "rank": 17,
+   "rank": 16,
    "score": 30000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ナイチンゲール",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "nightingale",
-   "rank": 18,
-   "score": 34000.0
   },
   {
    "domain": "vocab_jmdict",
@@ -485,7 +467,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "penguin",
-   "rank": 19,
+   "rank": 17,
    "score": 34000.0
   }
  ],
@@ -617,21 +599,12 @@
    "score": 1500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "ぞうき",
-   "kanji": "臓器",
-   "level": "medium",
-   "meaning": "internal organs, viscera",
-   "rank": 15,
-   "score": 1500
-  },
-  {
    "domain": "vocab",
    "kana": "ゆび",
    "kanji": "指",
    "level": "medium",
    "meaning": "finger, toe",
-   "rank": 16,
+   "rank": 15,
    "score": 2500
   },
   {
@@ -640,7 +613,7 @@
    "kanji": "歯",
    "level": "medium",
    "meaning": "tooth, teeth",
-   "rank": 17,
+   "rank": 16,
    "score": 2500
   },
   {
@@ -649,7 +622,7 @@
    "kanji": "毛",
    "level": "medium",
    "meaning": "hair",
-   "rank": 18,
+   "rank": 17,
    "score": 2500
   },
   {
@@ -658,7 +631,7 @@
    "kanji": "神経",
    "level": "medium",
    "meaning": "nerve",
-   "rank": 19,
+   "rank": 18,
    "score": 2500
   },
   {
@@ -667,7 +640,7 @@
    "kanji": "肌",
    "level": "medium",
    "meaning": "skin",
-   "rank": 20,
+   "rank": 19,
    "score": 2500
   },
   {
@@ -676,7 +649,7 @@
    "kanji": "肺",
    "level": "medium",
    "meaning": "lung",
-   "rank": 21,
+   "rank": 20,
    "score": 2500
   },
   {
@@ -685,16 +658,7 @@
    "kanji": "腕",
    "level": "medium",
    "meaning": "arm",
-   "rank": 22,
-   "score": 2500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "めだま",
-   "kanji": "目玉",
-   "level": "medium",
-   "meaning": "eyeball",
-   "rank": 23,
+   "rank": 21,
    "score": 2500
   },
   {
@@ -703,7 +667,7 @@
    "kanji": "筋肉",
    "level": "medium",
    "meaning": "muscle",
-   "rank": 24,
+   "rank": 22,
    "score": 3500
   },
   {
@@ -712,34 +676,25 @@
    "kanji": "胃",
    "level": "medium",
    "meaning": "stomach",
-   "rank": 25,
+   "rank": 23,
    "score": 3500
   },
   {
    "domain": "vocab",
    "kana": "はな",
    "kanji": "鼻",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "nose",
-   "rank": 26,
-   "score": 3500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しゅちょう",
-   "kanji": "首長",
-   "level": "advanced",
-   "meaning": "head, chief",
-   "rank": 27,
+   "rank": 24,
    "score": 3500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "こっかく",
    "kanji": "骨格",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "skeleton, skeletal structure",
-   "rank": 28,
+   "rank": 25,
    "score": 3500
   },
   {
@@ -748,7 +703,7 @@
    "kanji": "舌",
    "level": "advanced",
    "meaning": "tongue",
-   "rank": 29,
+   "rank": 26,
    "score": 5500
   },
   {
@@ -757,7 +712,7 @@
    "kanji": "唇",
    "level": "advanced",
    "meaning": "lip, lips",
-   "rank": 30,
+   "rank": 27,
    "score": 6500
   },
   {
@@ -766,7 +721,7 @@
    "kanji": "腎臓",
    "level": "advanced",
    "meaning": "kidney",
-   "rank": 31,
+   "rank": 28,
    "score": 6500
   },
   {
@@ -775,8 +730,17 @@
    "kanji": "関節",
    "level": "advanced",
    "meaning": "joint",
-   "rank": 32,
+   "rank": 29,
    "score": 6500
+  },
+  {
+   "domain": "vocab",
+   "kana": "ないぞう",
+   "kanji": "内臓",
+   "level": "advanced",
+   "meaning": "internal organs, viscera",
+   "rank": 30,
+   "score": 7500
   },
   {
    "domain": "vocab",
@@ -784,7 +748,7 @@
    "kanji": "親指",
    "level": "advanced",
    "meaning": "thumb",
-   "rank": 33,
+   "rank": 31,
    "score": 7500
   },
   {
@@ -793,16 +757,7 @@
    "kanji": "手のひら",
    "level": "advanced",
    "meaning": "palm",
-   "rank": 34,
-   "score": 7500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "め",
-   "kanji": "眼",
-   "level": "advanced",
-   "meaning": "eye, eyeball",
-   "rank": 35,
+   "rank": 32,
    "score": 7500
   },
   {
@@ -811,7 +766,7 @@
    "kanji": "足首",
    "level": "advanced",
    "meaning": "ankle",
-   "rank": 36,
+   "rank": 33,
    "score": 7500
   },
   {
@@ -820,7 +775,7 @@
    "kanji": "動脈",
    "level": "advanced",
    "meaning": "artery",
-   "rank": 37,
+   "rank": 34,
    "score": 8500
   },
   {
@@ -829,7 +784,7 @@
    "kanji": "背筋",
    "level": "advanced",
    "meaning": "spine, line of the backbone",
-   "rank": 38,
+   "rank": 35,
    "score": 8500
   },
   {
@@ -838,7 +793,7 @@
    "kanji": "手首",
    "level": "advanced",
    "meaning": "wrist",
-   "rank": 39,
+   "rank": 36,
    "score": 9500
   },
   {
@@ -847,43 +802,34 @@
    "kanji": "脈",
    "level": "advanced",
    "meaning": "pulse",
-   "rank": 40,
+   "rank": 37,
    "score": 9500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "ちぶさ",
    "kanji": "乳房",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "breast, udder",
-   "rank": 41,
-   "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ふくつう",
-   "kanji": "腹痛",
-   "level": "expert",
-   "meaning": "stomach ache, abdominal pain",
-   "rank": 42,
+   "rank": 38,
    "score": 9500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "じょうみゃく",
    "kanji": "静脈",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "vein",
-   "rank": 43,
+   "rank": 39,
    "score": 9500
   },
   {
    "domain": "vocab",
    "kana": "まゆ",
    "kanji": "眉",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "eyebrow, eyebrows",
-   "rank": 44,
+   "rank": 40,
    "score": 10500
   },
   {
@@ -892,8 +838,17 @@
    "kanji": "膝",
    "level": "expert",
    "meaning": "knee",
-   "rank": 45,
+   "rank": 41,
    "score": 13500
+  },
+  {
+   "domain": "vocab",
+   "kana": "がんきゅう",
+   "kanji": "眼球",
+   "level": "expert",
+   "meaning": "eyeball",
+   "rank": 42,
+   "score": 14500
   },
   {
    "domain": "vocab",
@@ -901,7 +856,7 @@
    "kanji": "喉",
    "level": "expert",
    "meaning": "throat",
-   "rank": 46,
+   "rank": 43,
    "score": 15500
   },
   {
@@ -910,7 +865,7 @@
    "kanji": "頬",
    "level": "expert",
    "meaning": "cheek",
-   "rank": 47,
+   "rank": 44,
    "score": 15500
   },
   {
@@ -919,16 +874,7 @@
    "kanji": "顎",
    "level": "expert",
    "meaning": "jaw, chin",
-   "rank": 48,
-   "score": 18500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "だいたい",
-   "kanji": "大腿",
-   "level": "expert",
-   "meaning": "thigh",
-   "rank": 49,
+   "rank": 45,
    "score": 18500
   },
   {
@@ -937,7 +883,7 @@
    "kanji": "頭骨",
    "level": "expert",
    "meaning": "skull",
-   "rank": 50,
+   "rank": 46,
    "score": 18500
   },
   {
@@ -946,7 +892,7 @@
    "kanji": "瞼",
    "level": "expert",
    "meaning": "eyelid",
-   "rank": 51,
+   "rank": 47,
    "score": 21500
   },
   {
@@ -955,7 +901,16 @@
    "kanji": "お腹",
    "level": "expert",
    "meaning": "belly, abdomen",
-   "rank": 52,
+   "rank": 48,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "め",
+   "kanji": "目",
+   "level": "expert",
+   "meaning": "eye, eyeball",
+   "rank": 49,
    "score": 26000.0
   },
   {
@@ -964,7 +919,16 @@
    "kanji": "肘",
    "level": "expert",
    "meaning": "elbow",
-   "rank": 53,
+   "rank": 50,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "もも",
+   "kanji": "腿",
+   "level": "expert",
+   "meaning": "thigh",
+   "rank": 51,
    "score": 26000.0
   },
   {
@@ -973,7 +937,16 @@
    "kanji": "踵",
    "level": "expert",
    "meaning": "heel",
-   "rank": 54,
+   "rank": 52,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "あたま",
+   "kanji": "頭",
+   "level": "expert",
+   "meaning": "head",
+   "rank": 53,
    "score": 26000.0
   },
   {
@@ -982,7 +955,7 @@
    "kanji": "額",
    "level": "expert",
    "meaning": "forehead, brow",
-   "rank": 55,
+   "rank": 54,
    "score": 26000.0
   },
   {
@@ -991,17 +964,8 @@
    "kanji": "",
    "level": "expert",
    "meaning": "waist, waistline",
-   "rank": 56,
+   "rank": 55,
    "score": 26000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "リブ",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "rib",
-   "rank": 57,
-   "score": 34000.0
   }
  ],
  "buildings": [
@@ -1061,20 +1025,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "たく",
-   "kanji": "宅",
-   "level": "basic",
-   "meaning": "house, home",
-   "rank": 7,
-   "score": 1500
-  },
-  {
-   "domain": "vocab",
    "kana": "たてもの",
    "kanji": "建物",
    "level": "medium",
    "meaning": "building",
-   "rank": 8,
+   "rank": 7,
    "score": 1500
   },
   {
@@ -1083,7 +1038,7 @@
    "kanji": "図書館",
    "level": "medium",
    "meaning": "library",
-   "rank": 9,
+   "rank": 8,
    "score": 2500
   },
   {
@@ -1092,7 +1047,7 @@
    "kanji": "教会",
    "level": "medium",
    "meaning": "church, congregation",
-   "rank": 10,
+   "rank": 9,
    "score": 2500
   },
   {
@@ -1101,7 +1056,7 @@
    "kanji": "橋",
    "level": "medium",
    "meaning": "bridge",
-   "rank": 11,
+   "rank": 10,
    "score": 2500
   },
   {
@@ -1110,7 +1065,7 @@
    "kanji": "塔",
    "level": "medium",
    "meaning": "tower, steeple",
-   "rank": 12,
+   "rank": 11,
    "score": 3500
   },
   {
@@ -1119,7 +1074,7 @@
    "kanji": "宮殿",
    "level": "medium",
    "meaning": "palace",
-   "rank": 13,
+   "rank": 12,
    "score": 3500
   },
   {
@@ -1128,16 +1083,16 @@
    "kanji": "郵便局",
    "level": "medium",
    "meaning": "post office",
-   "rank": 14,
+   "rank": 13,
    "score": 3500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "けいむしょ",
    "kanji": "刑務所",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "prison, jail",
-   "rank": 15,
+   "rank": 14,
    "score": 3500
   },
   {
@@ -1146,7 +1101,7 @@
    "kanji": "城",
    "level": "advanced",
    "meaning": "castle",
-   "rank": 16,
+   "rank": 15,
    "score": 4500
   },
   {
@@ -1155,16 +1110,7 @@
    "kanji": "小屋",
    "level": "advanced",
    "meaning": "hut, cabin",
-   "rank": 17,
-   "score": 4500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "くら",
-   "kanji": "倉",
-   "level": "advanced",
-   "meaning": "warehouse, storehouse",
-   "rank": 18,
+   "rank": 16,
    "score": 4500
   },
   {
@@ -1173,7 +1119,7 @@
    "kanji": "温室",
    "level": "advanced",
    "meaning": "greenhouse, hothouse",
-   "rank": 19,
+   "rank": 17,
    "score": 6500
   },
   {
@@ -1182,7 +1128,7 @@
    "kanji": "警察署",
    "level": "advanced",
    "meaning": "police station",
-   "rank": 20,
+   "rank": 18,
    "score": 6500
   },
   {
@@ -1191,7 +1137,7 @@
    "kanji": "修道院",
    "level": "advanced",
    "meaning": "monastery, convent",
-   "rank": 21,
+   "rank": 19,
    "score": 10500
   },
   {
@@ -1200,7 +1146,7 @@
    "kanji": "灯台",
    "level": "advanced",
    "meaning": "lighthouse",
-   "rank": 22,
+   "rank": 20,
    "score": 11500
   },
   {
@@ -1209,16 +1155,16 @@
    "kanji": "納屋",
    "level": "advanced",
    "meaning": "barn, shed",
-   "rank": 23,
+   "rank": 21,
    "score": 15500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "まてんろう",
    "kanji": "摩天楼",
-   "level": "advanced",
+   "level": "expert",
    "meaning": "skyscraper",
-   "rank": 24,
+   "rank": 22,
    "score": 18500
   },
   {
@@ -1227,7 +1173,7 @@
    "kanji": "宿屋",
    "level": "expert",
    "meaning": "inn",
-   "rank": 25,
+   "rank": 23,
    "score": 20500
   },
   {
@@ -1236,6 +1182,24 @@
    "kanji": "",
    "level": "expert",
    "meaning": "hotel",
+   "rank": 24,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "いえ",
+   "kanji": "家",
+   "level": "expert",
+   "meaning": "house, residence",
+   "rank": 25,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "くら",
+   "kanji": "蔵",
+   "level": "expert",
+   "meaning": "warehouse, storehouse",
    "rank": 26,
    "score": 26000.0
   },
@@ -1259,56 +1223,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "カテドラル",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "cathedral",
-   "rank": 29,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "コテージ",
    "kanji": "",
    "level": "expert",
    "meaning": "cottage",
-   "rank": 30,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "シアター",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "theater, theatre",
-   "rank": 31,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "シネマ",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "cinema",
-   "rank": 32,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ステーション",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "station",
-   "rank": 33,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ファクトリー",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "factory",
-   "rank": 34,
+   "rank": 29,
    "score": 34000.0
   }
  ],
@@ -1323,21 +1242,12 @@
    "score": 1500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "タイ",
-   "kanji": "",
-   "level": "basic",
-   "meaning": "tie, necktie",
-   "rank": 2,
-   "score": 1500
-  },
-  {
    "domain": "vocab",
    "kana": "くつ",
    "kanji": "靴",
    "level": "basic",
    "meaning": "shoe, shoes",
-   "rank": 3,
+   "rank": 2,
    "score": 2500
   },
   {
@@ -1346,7 +1256,7 @@
    "kanji": "制服",
    "level": "basic",
    "meaning": "uniform",
-   "rank": 4,
+   "rank": 3,
    "score": 3500
   },
   {
@@ -1355,7 +1265,7 @@
    "kanji": "衣料",
    "level": "basic",
    "meaning": "clothing",
-   "rank": 5,
+   "rank": 4,
    "score": 3500
   },
   {
@@ -1364,7 +1274,7 @@
    "kanji": "帽子",
    "level": "basic",
    "meaning": "hat, cap",
-   "rank": 6,
+   "rank": 5,
    "score": 4500
   },
   {
@@ -1373,16 +1283,16 @@
    "kanji": "着物",
    "level": "basic",
    "meaning": "kimono, Japanese traditional clothing",
-   "rank": 7,
+   "rank": 6,
    "score": 4500
   },
   {
    "domain": "vocab",
    "kana": "したぎ",
    "kanji": "下着",
-   "level": "medium",
+   "level": "basic",
    "meaning": "underwear, undergarment",
-   "rank": 8,
+   "rank": 7,
    "score": 5500
   },
   {
@@ -1391,7 +1301,7 @@
    "kanji": "上着",
    "level": "medium",
    "meaning": "coat, jacket",
-   "rank": 9,
+   "rank": 8,
    "score": 8500
   },
   {
@@ -1400,7 +1310,7 @@
    "kanji": "手袋",
    "level": "medium",
    "meaning": "glove, mitten",
-   "rank": 10,
+   "rank": 9,
    "score": 8500
   },
   {
@@ -1409,7 +1319,7 @@
    "kanji": "襟",
    "level": "medium",
    "meaning": "collar, lapel",
-   "rank": 11,
+   "rank": 10,
    "score": 8500
   },
   {
@@ -1418,16 +1328,7 @@
    "kanji": "靴下",
    "level": "medium",
    "meaning": "socks, sock",
-   "rank": 12,
-   "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "よそおい",
-   "kanji": "装い",
-   "level": "medium",
-   "meaning": "dress, outfit",
-   "rank": 13,
+   "rank": 11,
    "score": 9500
   },
   {
@@ -1436,7 +1337,7 @@
    "kanji": "袖",
    "level": "medium",
    "meaning": "sleeve",
-   "rank": 14,
+   "rank": 12,
    "score": 12500
   },
   {
@@ -1445,7 +1346,7 @@
    "kanji": "短パン",
    "level": "medium",
    "meaning": "shorts, short pants",
-   "rank": 15,
+   "rank": 13,
    "score": 18500
   },
   {
@@ -1454,16 +1355,16 @@
    "kanji": "",
    "level": "medium",
    "meaning": "shirt, undershirt",
-   "rank": 16,
+   "rank": 14,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "スカート",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "skirt",
-   "rank": 17,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -1472,7 +1373,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "suit",
-   "rank": 18,
+   "rank": 16,
    "score": 26000.0
   },
   {
@@ -1481,7 +1382,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "trousers, pants",
-   "rank": 19,
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -1490,6 +1391,24 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "sweater, jumper",
+   "rank": 18,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ドレス",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "dress",
+   "rank": 19,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ネクタイ",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "tie, necktie",
    "rank": 20,
    "score": 26000.0
   },
@@ -1533,7 +1452,7 @@
    "domain": "vocab",
    "kana": "ポケット",
    "kanji": "",
-   "level": "advanced",
+   "level": "expert",
    "meaning": "pocket",
    "rank": 25,
    "score": 26000.0
@@ -1557,21 +1476,12 @@
    "score": 26000.0
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "シューズ",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "shoes",
-   "rank": 28,
-   "score": 26000.0
-  },
-  {
    "domain": "vocab",
    "kana": "エプロン",
    "kanji": "",
    "level": "expert",
    "meaning": "apron",
-   "rank": 29,
+   "rank": 28,
    "score": 34000.0
   },
   {
@@ -1580,7 +1490,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "jacket, blouson",
-   "rank": 30,
+   "rank": 29,
    "score": 34000.0
   },
   {
@@ -1589,7 +1499,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "jeans",
-   "rank": 31,
+   "rank": 30,
    "score": 34000.0
   },
   {
@@ -1598,7 +1508,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "boots, boot",
-   "rank": 32,
+   "rank": 31,
    "score": 34000.0
   },
   {
@@ -1607,7 +1517,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cardigan",
-   "rank": 33,
+   "rank": 32,
    "score": 34000.0
   },
   {
@@ -1616,7 +1526,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cap",
-   "rank": 34,
+   "rank": 33,
    "score": 34000.0
   },
   {
@@ -1625,7 +1535,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "hood",
-   "rank": 35,
+   "rank": 34,
    "score": 34000.0
   }
  ],
@@ -1712,21 +1622,12 @@
    "score": 5500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "あけ",
-   "kanji": "朱",
-   "level": "advanced",
-   "meaning": "red, vermilion",
-   "rank": 10,
-   "score": 5500
-  },
-  {
    "domain": "vocab",
    "kana": "はいいろ",
    "kanji": "灰色",
    "level": "advanced",
    "meaning": "grey, gray",
-   "rank": 11,
+   "rank": 10,
    "score": 6500
   },
   {
@@ -1735,6 +1636,15 @@
    "kanji": "茶色",
    "level": "advanced",
    "meaning": "brown, light brown",
+   "rank": 11,
+   "score": 7500
+  },
+  {
+   "domain": "vocab",
+   "kana": "あかい",
+   "kanji": "赤い",
+   "level": "advanced",
+   "meaning": "red, crimson",
    "rank": 12,
    "score": 7500
   },
@@ -1766,20 +1676,20 @@
    "score": 16500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "ももいろ",
-   "kanji": "桃色",
-   "level": "expert",
-   "meaning": "pink, peach",
-   "rank": 16,
-   "score": 19500
-  },
-  {
    "domain": "vocab",
    "kana": "オレンジ",
    "kanji": "",
    "level": "expert",
    "meaning": "orange",
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ピンク",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "pink",
    "rank": 17,
    "score": 26000.0
   },
@@ -1814,7 +1724,7 @@
  "dishes": [
   {
    "domain": "vocab",
-   "kana": "しょくじ",
+   "kana": "しょくじ・する",
    "kanji": "食事",
    "level": "basic",
    "meaning": "meal",
@@ -1841,20 +1751,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "しょくパン",
-   "kanji": "食パン",
-   "level": "basic",
-   "meaning": "bread, bread in a rectangular shape",
-   "rank": 4,
-   "score": 12500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "めん",
    "kanji": "麺",
    "level": "basic",
    "meaning": "noodles",
-   "rank": 5,
+   "rank": 4,
    "score": 13500
   },
   {
@@ -1863,7 +1764,7 @@
    "kanji": "煮込み",
    "level": "basic",
    "meaning": "stew, hodgepodge",
-   "rank": 6,
+   "rank": 5,
    "score": 14500
   },
   {
@@ -1872,17 +1773,8 @@
    "kanji": "寿司",
    "level": "medium",
    "meaning": "sushi, range of dishes made with vinegared rice combined with fish",
-   "rank": 7,
+   "rank": 6,
    "score": 17500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ばんさん",
-   "kanji": "晩餐",
-   "level": "medium",
-   "meaning": "dinner",
-   "rank": 8,
-   "score": 18500
   },
   {
    "domain": "vocab",
@@ -1890,7 +1782,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "udon",
-   "rank": 9,
+   "rank": 7,
    "score": 26000.0
   },
   {
@@ -1899,7 +1791,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "ice cream",
-   "rank": 10,
+   "rank": 8,
    "score": 26000.0
   },
   {
@@ -1908,7 +1800,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "curry",
-   "rank": 11,
+   "rank": 9,
    "score": 26000.0
   },
   {
@@ -1917,7 +1809,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "cake",
-   "rank": 12,
+   "rank": 10,
    "score": 26000.0
   },
   {
@@ -1926,16 +1818,16 @@
    "kanji": "",
    "level": "medium",
    "meaning": "salad",
-   "rank": 13,
+   "rank": 11,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "サンドイッチ",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "sandwich",
-   "rank": 14,
+   "rank": 12,
    "score": 26000.0
   },
   {
@@ -1944,7 +1836,16 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "dessert",
-   "rank": 15,
+   "rank": 13,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "パン",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "bread, pastry",
+   "rank": 14,
    "score": 26000.0
   },
   {
@@ -1953,7 +1854,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "chocolate",
-   "rank": 16,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -1962,7 +1863,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "hamburger, burger",
-   "rank": 17,
+   "rank": 16,
    "score": 26000.0
   },
   {
@@ -1971,7 +1872,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "ramen, Chinese-style noodles",
-   "rank": 18,
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -1980,7 +1881,7 @@
    "kanji": "すき焼き",
    "level": "advanced",
    "meaning": "sukiyaki, thin slices of beef",
-   "rank": 19,
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -1989,7 +1890,7 @@
    "kanji": "味噌汁",
    "level": "advanced",
    "meaning": "miso soup",
-   "rank": 20,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -1998,8 +1899,17 @@
    "kanji": "天ぷら",
    "level": "expert",
    "meaning": "tempura, deep-fried fish and vegetables in a light batter",
-   "rank": 21,
+   "rank": 20,
    "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ばんごはん",
+   "kanji": "晩御飯",
+   "level": "expert",
+   "meaning": "dinner, evening meal",
+   "rank": 21,
+   "score": 30000.0
   },
   {
    "domain": "vocab",
@@ -2039,20 +1949,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "ヌードル",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "noodle, noodles",
-   "rank": 26,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "ピザ",
    "kanji": "",
    "level": "expert",
    "meaning": "pizza",
-   "rank": 27,
+   "rank": 26,
    "score": 34000.0
   },
   {
@@ -2061,7 +1962,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "pudding",
-   "rank": 28,
+   "rank": 27,
    "score": 34000.0
   }
  ],
@@ -2113,29 +2014,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "いんりょう",
-   "kanji": "飲料",
-   "level": "medium",
-   "meaning": "beverage, drink",
-   "rank": 6,
-   "score": 3500
-  },
-  {
-   "domain": "vocab",
-   "kana": "しる",
-   "kanji": "汁",
-   "level": "medium",
-   "meaning": "juice, sap",
-   "rank": 7,
-   "score": 5500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "にほんしゅ",
    "kanji": "日本酒",
    "level": "medium",
    "meaning": "sake, saké",
-   "rank": 8,
+   "rank": 6,
    "score": 5500
   },
   {
@@ -2144,7 +2027,7 @@
    "kanji": "紅茶",
    "level": "medium",
    "meaning": "black tea",
-   "rank": 9,
+   "rank": 7,
    "score": 6500
   },
   {
@@ -2153,16 +2036,16 @@
    "kanji": "飲み物",
    "level": "medium",
    "meaning": "drink, beverage",
-   "rank": 10,
+   "rank": 8,
    "score": 9500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "りょくちゃ",
    "kanji": "緑茶",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "green tea, Japanese tea",
-   "rank": 11,
+   "rank": 9,
    "score": 11500
   },
   {
@@ -2171,7 +2054,7 @@
    "kanji": "清涼飲料水",
    "level": "advanced",
    "meaning": "soft drink",
-   "rank": 12,
+   "rank": 10,
    "score": 13500
   },
   {
@@ -2180,8 +2063,17 @@
    "kanji": "麦茶",
    "level": "advanced",
    "meaning": "barley tea",
-   "rank": 13,
+   "rank": 11,
    "score": 22500
+  },
+  {
+   "domain": "vocab",
+   "kana": "ジュース",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "juice",
+   "rank": 12,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -2189,7 +2081,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "beer",
-   "rank": 14,
+   "rank": 13,
    "score": 26000.0
   },
   {
@@ -2198,25 +2090,16 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "wine",
-   "rank": 15,
+   "rank": 14,
    "score": 26000.0
   },
   {
    "domain": "vocab_jmdict",
    "kana": "アイスコーヒー",
    "kanji": "",
-   "level": "advanced",
-   "meaning": "iced coffee",
-   "rank": 16,
-   "score": 26000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ウィスキー",
-   "kanji": "",
    "level": "expert",
-   "meaning": "whisky, whiskey",
-   "rank": 17,
+   "meaning": "iced coffee",
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -2225,8 +2108,17 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cola",
-   "rank": 18,
+   "rank": 16,
    "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ウイスキー",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "whisky, whiskey",
+   "rank": 17,
+   "score": 34000.0
   },
   {
    "domain": "vocab",
@@ -2234,7 +2126,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cocktail",
-   "rank": 19,
+   "rank": 18,
    "score": 34000.0
   },
   {
@@ -2243,7 +2135,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cocoa, hot chocolate",
-   "rank": 20,
+   "rank": 19,
    "score": 34000.0
   },
   {
@@ -2252,16 +2144,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "champagne",
-   "rank": 21,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "シュナップス",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "liquor",
-   "rank": 22,
+   "rank": 20,
    "score": 34000.0
   }
  ],
@@ -2286,29 +2169,20 @@
   },
   {
    "domain": "vocab",
-   "kana": "おそれ",
-   "kanji": "恐れ",
+   "kana": "あい",
+   "kanji": "愛",
    "level": "basic",
-   "meaning": "fear, horror",
+   "meaning": "love, affection",
    "rank": 3,
    "score": 500
   },
   {
    "domain": "vocab",
-   "kana": "あい",
-   "kanji": "愛",
+   "kana": "きもち",
+   "kanji": "気持ち",
    "level": "basic",
-   "meaning": "love, affection",
+   "meaning": "feeling, sensation",
    "rank": 4,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "かんじ",
-   "kanji": "感じ",
-   "level": "basic",
-   "meaning": "feeling, sense",
-   "rank": 5,
    "score": 500
   },
   {
@@ -2317,7 +2191,7 @@
    "kanji": "喜び",
    "level": "basic",
    "meaning": "joy, delight",
-   "rank": 6,
+   "rank": 5,
    "score": 1500
   },
   {
@@ -2326,16 +2200,16 @@
    "kanji": "怒り",
    "level": "basic",
    "meaning": "anger, rage",
-   "rank": 7,
+   "rank": 6,
    "score": 1500
   },
   {
    "domain": "vocab",
    "kana": "かんじょう",
    "kanji": "感情",
-   "level": "medium",
+   "level": "basic",
    "meaning": "emotion, feeling",
-   "rank": 8,
+   "rank": 7,
    "score": 1500
   },
   {
@@ -2344,6 +2218,15 @@
    "kanji": "得意",
    "level": "medium",
    "meaning": "satisfaction, pride",
+   "rank": 8,
+   "score": 2500
+  },
+  {
+   "domain": "vocab",
+   "kana": "きょうふ",
+   "kanji": "恐怖",
+   "level": "medium",
+   "meaning": "fear, dread",
    "rank": 9,
    "score": 2500
   },
@@ -2520,12 +2403,12 @@
   },
   {
    "domain": "vocab",
-   "kana": "なさけ",
-   "kanji": "情け",
+   "kana": "あわれ",
+   "kanji": "哀れ",
    "level": "expert",
-   "meaning": "pity, sympathy",
+   "meaning": "pity, sorrow",
    "rank": 29,
-   "score": 15500
+   "score": 16500
   },
   {
    "domain": "vocab",
@@ -2547,30 +2430,12 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "じょうあい",
-   "kanji": "情愛",
-   "level": "expert",
-   "meaning": "affection, love",
-   "rank": 32,
-   "score": 18500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "ほこらしい",
    "kanji": "誇らしい",
    "level": "expert",
    "meaning": "proud, haughty",
-   "rank": 33,
+   "rank": 32,
    "score": 19500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "たのしげ",
-   "kanji": "楽しげ",
-   "level": "expert",
-   "meaning": "happy, cheerful",
-   "rank": 34,
-   "score": 20500
   },
   {
    "domain": "vocab_jmdict",
@@ -2578,7 +2443,7 @@
    "kanji": "羨望",
    "level": "expert",
    "meaning": "envy",
-   "rank": 35,
+   "rank": 33,
    "score": 23500
   },
   {
@@ -2587,7 +2452,16 @@
    "kanji": "",
    "level": "expert",
    "meaning": "mood, atmosphere",
-   "rank": 36,
+   "rank": 34,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "うれしい",
+   "kanji": "嬉しい",
+   "level": "expert",
+   "meaning": "happy, glad",
+   "rank": 35,
    "score": 26000.0
   },
   {
@@ -2596,7 +2470,7 @@
    "kanji": "きまり悪い",
    "level": "expert",
    "meaning": "embarrassed, ashamed",
-   "rank": 37,
+   "rank": 36,
    "score": 26000.0
   }
  ],
@@ -2612,29 +2486,20 @@
   },
   {
    "domain": "vocab",
-   "kana": "ふじん",
-   "kanji": "夫人",
+   "kana": "むすめ",
+   "kanji": "娘",
    "level": "basic",
-   "meaning": "wife, Mrs",
+   "meaning": "daughter",
    "rank": 2,
    "score": 500
   },
   {
    "domain": "vocab",
-   "kana": "むすめ",
-   "kanji": "娘",
+   "kana": "こども",
+   "kanji": "子供",
    "level": "basic",
-   "meaning": "daughter",
+   "meaning": "child, children",
    "rank": 3,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "こ",
-   "kanji": "子",
-   "level": "basic",
-   "meaning": "child, kid",
-   "rank": 4,
    "score": 500
   },
   {
@@ -2643,43 +2508,16 @@
    "kanji": "家族",
    "level": "basic",
    "meaning": "family",
-   "rank": 5,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "ははおや",
-   "kanji": "母親",
-   "level": "basic",
-   "meaning": "mother",
-   "rank": 6,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "ちちおや",
-   "kanji": "父親",
-   "level": "medium",
-   "meaning": "father",
-   "rank": 7,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "おや",
-   "kanji": "親",
-   "level": "medium",
-   "meaning": "parent, parents",
-   "rank": 8,
+   "rank": 4,
    "score": 500
   },
   {
    "domain": "vocab",
    "kana": "りょうしん",
    "kanji": "両親",
-   "level": "medium",
+   "level": "basic",
    "meaning": "parents, both parents",
-   "rank": 9,
+   "rank": 5,
    "score": 1500
   },
   {
@@ -2688,7 +2526,7 @@
    "kanji": "児童",
    "level": "medium",
    "meaning": "children, juvenile",
-   "rank": 10,
+   "rank": 6,
    "score": 1500
   },
   {
@@ -2697,7 +2535,7 @@
    "kanji": "弟",
    "level": "medium",
    "meaning": "younger brother, little brother",
-   "rank": 11,
+   "rank": 7,
    "score": 1500
   },
   {
@@ -2706,8 +2544,17 @@
    "kanji": "息子",
    "level": "medium",
    "meaning": "son",
-   "rank": 12,
+   "rank": 8,
    "score": 1500
+  },
+  {
+   "domain": "vocab",
+   "kana": "おかあさん",
+   "kanji": "お母さん",
+   "level": "medium",
+   "meaning": "mother, mom",
+   "rank": 9,
+   "score": 2500
   },
   {
    "domain": "vocab",
@@ -2715,7 +2562,7 @@
    "kanji": "世帯",
    "level": "medium",
    "meaning": "household, family",
-   "rank": 13,
+   "rank": 10,
    "score": 2500
   },
   {
@@ -2724,25 +2571,25 @@
    "kanji": "妹",
    "level": "medium",
    "meaning": "younger sister",
-   "rank": 14,
+   "rank": 11,
    "score": 2500
   },
   {
    "domain": "vocab",
    "kana": "まご",
    "kanji": "孫",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "grandchild",
-   "rank": 15,
+   "rank": 12,
    "score": 2500
   },
   {
    "domain": "vocab",
-   "kana": "しんるい",
-   "kanji": "親類",
+   "kana": "おとうさん",
+   "kanji": "お父さん",
    "level": "advanced",
-   "meaning": "relative, relation",
-   "rank": 16,
+   "meaning": "father, dad",
+   "rank": 13,
    "score": 3500
   },
   {
@@ -2751,7 +2598,7 @@
    "kanji": "祖母",
    "level": "advanced",
    "meaning": "grandmother",
-   "rank": 17,
+   "rank": 14,
    "score": 4500
   },
   {
@@ -2760,7 +2607,7 @@
    "kanji": "祖父",
    "level": "advanced",
    "meaning": "grandfather",
-   "rank": 18,
+   "rank": 15,
    "score": 4500
   },
   {
@@ -2769,7 +2616,7 @@
    "kanji": "配偶者",
    "level": "advanced",
    "meaning": "spouse, wife",
-   "rank": 19,
+   "rank": 16,
    "score": 4500
   },
   {
@@ -2778,7 +2625,7 @@
    "kanji": "先祖",
    "level": "advanced",
    "meaning": "ancestor, forefather",
-   "rank": 20,
+   "rank": 17,
    "score": 5500
   },
   {
@@ -2787,25 +2634,16 @@
    "kanji": "子孫",
    "level": "advanced",
    "meaning": "descendant, progeny",
-   "rank": 21,
-   "score": 5500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "みうち",
-   "kanji": "身内",
-   "level": "advanced",
-   "meaning": "relatives, one's family",
-   "rank": 22,
+   "rank": 18,
    "score": 5500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "おじ",
    "kanji": "叔父",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "uncle",
-   "rank": 23,
+   "rank": 19,
    "score": 7500
   },
   {
@@ -2814,7 +2652,7 @@
    "kanji": "叔母",
    "level": "expert",
    "meaning": "aunt",
-   "rank": 24,
+   "rank": 20,
    "score": 9500
   },
   {
@@ -2823,8 +2661,17 @@
    "kanji": "兄貴",
    "level": "expert",
    "meaning": "elder brother",
-   "rank": 25,
+   "rank": 21,
    "score": 11500
+  },
+  {
+   "domain": "vocab",
+   "kana": "しんせき",
+   "kanji": "親戚",
+   "level": "expert",
+   "meaning": "relative, relation",
+   "rank": 22,
+   "score": 14500
   },
   {
    "domain": "vocab",
@@ -2832,7 +2679,7 @@
    "kanji": "姪",
    "level": "expert",
    "meaning": "niece",
-   "rank": 26,
+   "rank": 23,
    "score": 19500
   },
   {
@@ -2841,7 +2688,7 @@
    "kanji": "甥",
    "level": "expert",
    "meaning": "nephew",
-   "rank": 27,
+   "rank": 24,
    "score": 19500
   },
   {
@@ -2850,35 +2697,26 @@
    "kanji": "継母",
    "level": "expert",
    "meaning": "stepmother",
-   "rank": 28,
+   "rank": 25,
    "score": 19500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "じゅうけい",
-   "kanji": "従兄",
+   "domain": "vocab",
+   "kana": "おくさん",
+   "kanji": "奥さん",
+   "level": "expert",
+   "meaning": "wife, your wife",
+   "rank": 26,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "いとこ",
+   "kanji": "従兄弟",
    "level": "expert",
    "meaning": "cousin",
-   "rank": 29,
-   "score": 23500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "シスター",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "sister",
-   "rank": 30,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ツイン",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "twin",
-   "rank": 31,
-   "score": 34000.0
+   "rank": 27,
+   "score": 26000.0
   }
  ],
  "fruits": [
@@ -2911,20 +2749,29 @@
   },
   {
    "domain": "vocab_jmdict",
+   "kana": "くり",
+   "kanji": "栗",
+   "level": "basic",
+   "meaning": "Japanese chestnut",
+   "rank": 4,
+   "score": 8500
+  },
+  {
+   "domain": "vocab_jmdict",
    "kana": "くわ",
    "kanji": "桑",
    "level": "basic",
    "meaning": "mulberry",
-   "rank": 4,
+   "rank": 5,
    "score": 9500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "あんず",
    "kanji": "杏",
-   "level": "basic",
+   "level": "medium",
    "meaning": "apricot",
-   "rank": 5,
+   "rank": 6,
    "score": 11500
   },
   {
@@ -2933,7 +2780,7 @@
    "kanji": "果樹",
    "level": "medium",
    "meaning": "fruit tree",
-   "rank": 6,
+   "rank": 7,
    "score": 11500
   },
   {
@@ -2942,7 +2789,7 @@
    "kanji": "林檎",
    "level": "medium",
    "meaning": "apple",
-   "rank": 7,
+   "rank": 8,
    "score": 18500
   },
   {
@@ -2951,7 +2798,7 @@
    "kanji": "瓜",
    "level": "medium",
    "meaning": "melon, gourd",
-   "rank": 8,
+   "rank": 9,
    "score": 19500
   },
   {
@@ -2960,7 +2807,7 @@
    "kanji": "桜ん坊",
    "level": "medium",
    "meaning": "cherry",
-   "rank": 9,
+   "rank": 10,
    "score": 20500
   },
   {
@@ -2969,16 +2816,16 @@
    "kanji": "柑橘類",
    "level": "medium",
    "meaning": "citrus, citrus fruit",
-   "rank": 10,
+   "rank": 11,
    "score": 21500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "ゆず",
    "kanji": "柚",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "yuzu",
-   "rank": 11,
+   "rank": 12,
    "score": 21500
   },
   {
@@ -2987,7 +2834,7 @@
    "kanji": "葡萄",
    "level": "advanced",
    "meaning": "grape, grapevine",
-   "rank": 12,
+   "rank": 13,
    "score": 22500
   },
   {
@@ -2996,7 +2843,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "orange",
-   "rank": 13,
+   "rank": 14,
    "score": 26000.0
   },
   {
@@ -3005,7 +2852,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "banana",
-   "rank": 14,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -3014,7 +2861,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "pineapple",
-   "rank": 15,
+   "rank": 16,
    "score": 26000.0
   },
   {
@@ -3023,7 +2870,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "lemon",
-   "rank": 16,
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -3032,7 +2879,16 @@
    "kanji": "苺",
    "level": "advanced",
    "meaning": "strawberry",
-   "rank": 17,
+   "rank": 18,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab_jmdict",
+   "kana": "みかん",
+   "kanji": "蜜柑",
+   "level": "expert",
+   "meaning": "mandarin, mandarin orange",
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -3041,7 +2897,7 @@
    "kanji": "西瓜",
    "level": "expert",
    "meaning": "watermelon",
-   "rank": 18,
+   "rank": 20,
    "score": 26000.0
   },
   {
@@ -3050,7 +2906,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "papaya, pawpaw",
-   "rank": 19,
+   "rank": 21,
    "score": 30000.0
   },
   {
@@ -3059,7 +2915,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "kiwifruit, kiwi fruit",
-   "rank": 20,
+   "rank": 22,
    "score": 34000.0
   },
   {
@@ -3068,7 +2924,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "grapefruit",
-   "rank": 21,
+   "rank": 23,
    "score": 34000.0
   },
   {
@@ -3077,16 +2933,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "durian",
-   "rank": 22,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "マロン",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "chestnut",
-   "rank": 23,
+   "rank": 24,
    "score": 34000.0
   },
   {
@@ -3095,36 +2942,18 @@
    "kanji": "",
    "level": "expert",
    "meaning": "mango",
-   "rank": 24,
+   "rank": 25,
    "score": 34000.0
   }
  ],
  "furniture": [
   {
    "domain": "vocab",
-   "kana": "とばり",
-   "kanji": "幕",
-   "level": "basic",
-   "meaning": "curtain",
-   "rank": 1,
-   "score": 1500
-  },
-  {
-   "domain": "vocab",
-   "kana": "とこ",
-   "kanji": "床",
-   "level": "basic",
-   "meaning": "bed, bedding",
-   "rank": 2,
-   "score": 1500
-  },
-  {
-   "domain": "vocab",
    "kana": "かがみ",
    "kanji": "鏡",
    "level": "basic",
    "meaning": "mirror, looking-glass",
-   "rank": 3,
+   "rank": 1,
    "score": 2500
   },
   {
@@ -3133,34 +2962,25 @@
    "kanji": "家具",
    "level": "basic",
    "meaning": "furniture",
-   "rank": 4,
+   "rank": 2,
    "score": 3500
   },
   {
    "domain": "vocab",
    "kana": "つくえ",
    "kanji": "机",
-   "level": "medium",
+   "level": "basic",
    "meaning": "desk",
-   "rank": 5,
+   "rank": 3,
    "score": 3500
   },
   {
    "domain": "vocab",
    "kana": "ふとん",
    "kanji": "布団",
-   "level": "medium",
+   "level": "basic",
    "meaning": "futon",
-   "rank": 6,
-   "score": 4500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "たく",
-   "kanji": "卓",
-   "level": "medium",
-   "meaning": "table, desk",
-   "rank": 7,
+   "rank": 4,
    "score": 4500
   },
   {
@@ -3169,7 +2989,7 @@
    "kanji": "引き出し",
    "level": "medium",
    "meaning": "drawer",
-   "rank": 8,
+   "rank": 5,
    "score": 5500
   },
   {
@@ -3178,34 +2998,34 @@
    "kanji": "棚",
    "level": "medium",
    "meaning": "shelf, ledge",
-   "rank": 9,
+   "rank": 6,
    "score": 5500
   },
   {
    "domain": "vocab",
    "kana": "いす",
    "kanji": "椅子",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "chair, seat",
-   "rank": 10,
+   "rank": 7,
    "score": 10500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "しょだな",
    "kanji": "書棚",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "bookshelf",
-   "rank": 11,
+   "rank": 8,
    "score": 13500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "ふみだい",
    "kanji": "踏み台",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "stool, small stepladder",
-   "rank": 12,
+   "rank": 9,
    "score": 15500
   },
   {
@@ -3214,42 +3034,69 @@
    "kanji": "戸棚",
    "level": "advanced",
    "meaning": "cupboard, locker",
-   "rank": 13,
+   "rank": 10,
    "score": 19500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "えんだい",
-   "kanji": "縁台",
-   "level": "advanced",
-   "meaning": "bench",
-   "rank": 14,
-   "score": 21500
   },
   {
    "domain": "vocab",
    "kana": "たんす",
    "kanji": "箪笥",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "chest of drawers, bureau",
-   "rank": 15,
+   "rank": 11,
    "score": 22500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "しきもの",
-   "kanji": "敷物",
-   "level": "expert",
-   "meaning": "carpet, rug",
-   "rank": 16,
-   "score": 22500
+   "domain": "vocab",
+   "kana": "カーテン",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "curtain, curtains",
+   "rank": 12,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "カーペット",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "carpet",
+   "rank": 13,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "ソファー",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "sofa, couch",
+   "rank": 14,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "テーブル",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "table",
+   "rank": 15,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ベッド",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "bed",
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ベンチ",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "bench",
    "rank": 17,
    "score": 26000.0
   },
@@ -3385,19 +3232,10 @@
    "domain": "vocab",
    "kana": "こうがい",
    "kanji": "郊外",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "suburb, residential area on the outskirt of a city",
    "rank": 12,
    "score": 1500
-  },
-  {
-   "domain": "vocab",
-   "kana": "せけん",
-   "kanji": "世間",
-   "level": "advanced",
-   "meaning": "world, society",
-   "rank": 13,
-   "score": 2500
   },
   {
    "domain": "vocab",
@@ -3405,7 +3243,7 @@
    "kanji": "列島",
    "level": "advanced",
    "meaning": "archipelago, chain of islands",
-   "rank": 14,
+   "rank": 13,
    "score": 2500
   },
   {
@@ -3414,7 +3252,7 @@
    "kanji": "半島",
    "level": "advanced",
    "meaning": "peninsula",
-   "rank": 15,
+   "rank": 14,
    "score": 2500
   },
   {
@@ -3423,16 +3261,7 @@
    "kanji": "大陸",
    "level": "advanced",
    "meaning": "continent",
-   "rank": 16,
-   "score": 2500
-  },
-  {
-   "domain": "vocab",
-   "kana": "とかい",
-   "kanji": "都会",
-   "level": "advanced",
-   "meaning": "city",
-   "rank": 17,
+   "rank": 15,
    "score": 2500
   },
   {
@@ -3441,7 +3270,7 @@
    "kanji": "境",
    "level": "advanced",
    "meaning": "border, boundary",
-   "rank": 18,
+   "rank": 16,
    "score": 3500
   },
   {
@@ -3450,16 +3279,16 @@
    "kanji": "植民地",
    "level": "advanced",
    "meaning": "colony",
-   "rank": 19,
+   "rank": 17,
    "score": 3500
   },
   {
    "domain": "vocab",
    "kana": "ちり",
    "kanji": "地理",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "geography",
-   "rank": 20,
+   "rank": 18,
    "score": 4500
   },
   {
@@ -3468,7 +3297,7 @@
    "kanji": "赤道",
    "level": "expert",
    "meaning": "equator",
-   "rank": 21,
+   "rank": 19,
    "score": 8500
   },
   {
@@ -3477,7 +3306,7 @@
    "kanji": "緯度",
    "level": "expert",
    "meaning": "latitude",
-   "rank": 22,
+   "rank": 20,
    "score": 14500
   },
   {
@@ -3486,7 +3315,7 @@
    "kanji": "半球",
    "level": "expert",
    "meaning": "hemisphere",
-   "rank": 23,
+   "rank": 21,
    "score": 19500
   },
   {
@@ -3495,8 +3324,17 @@
    "kanji": "経度",
    "level": "expert",
    "meaning": "longitude",
-   "rank": 24,
+   "rank": 22,
    "score": 22500
+  },
+  {
+   "domain": "vocab",
+   "kana": "し",
+   "kanji": "市",
+   "level": "expert",
+   "meaning": "city",
+   "rank": 23,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -3504,17 +3342,8 @@
    "kanji": "県",
    "level": "expert",
    "meaning": "prefecture, county",
-   "rank": 25,
+   "rank": 24,
    "score": 26000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "アトラス",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "Atlas",
-   "rank": 26,
-   "score": 30000.0
   },
   {
    "domain": "vocab_jmdict",
@@ -3522,27 +3351,18 @@
    "kanji": "",
    "level": "expert",
    "meaning": "frontier",
-   "rank": 27,
+   "rank": 25,
    "score": 34000.0
   }
  ],
  "holidays_events": [
-  {
-   "domain": "vocab_jmdict",
-   "kana": "そうぎ",
-   "kanji": "葬儀",
-   "level": "basic",
-   "meaning": "funeral, funeral service",
-   "rank": 1,
-   "score": 500
-  },
   {
    "domain": "vocab",
    "kana": "きゅうか",
    "kanji": "休暇",
    "level": "basic",
    "meaning": "holiday, vacation",
-   "rank": 2,
+   "rank": 1,
    "score": 2500
   },
   {
@@ -3551,44 +3371,35 @@
    "kanji": "行事",
    "level": "basic",
    "meaning": "event, function",
-   "rank": 3,
-   "score": 2500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しきてん",
-   "kanji": "式典",
-   "level": "basic",
-   "meaning": "ceremony, rites",
-   "rank": 4,
+   "rank": 2,
    "score": 2500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "しょうがつ",
    "kanji": "正月",
-   "level": "medium",
+   "level": "basic",
    "meaning": "New Year",
-   "rank": 5,
-   "score": 2500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "まつり",
-   "kanji": "祭り",
-   "level": "medium",
-   "meaning": "festival, feast",
-   "rank": 6,
+   "rank": 3,
    "score": 2500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "がんじつ",
    "kanji": "元日",
-   "level": "medium",
+   "level": "basic",
    "meaning": "New Year's Day",
-   "rank": 7,
+   "rank": 4,
    "score": 3500
+  },
+  {
+   "domain": "vocab",
+   "kana": "ぎしき",
+   "kanji": "儀式",
+   "level": "medium",
+   "meaning": "ceremony, rite",
+   "rank": 5,
+   "score": 4500
   },
   {
    "domain": "vocab",
@@ -3596,7 +3407,7 @@
    "kanji": "祝日",
    "level": "medium",
    "meaning": "national holiday, public holiday",
-   "rank": 8,
+   "rank": 6,
    "score": 4500
   },
   {
@@ -3605,34 +3416,34 @@
    "kanji": "花火",
    "level": "medium",
    "meaning": "fireworks",
-   "rank": 9,
+   "rank": 7,
    "score": 4500
-  },
-  {
-   "domain": "vocab",
-   "kana": "えんかい",
-   "kanji": "宴会",
-   "level": "medium",
-   "meaning": "party, banquet",
-   "rank": 10,
-   "score": 5500
   },
   {
    "domain": "vocab",
    "kana": "しゅくが",
    "kanji": "祝賀",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "celebration, congratulations",
-   "rank": 11,
+   "rank": 8,
    "score": 5500
+  },
+  {
+   "domain": "vocab",
+   "kana": "そうしき",
+   "kanji": "葬式",
+   "level": "medium",
+   "meaning": "funeral",
+   "rank": 9,
+   "score": 6500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "じゅんれい",
    "kanji": "巡礼",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "pilgrimage, pilgrim",
-   "rank": 12,
+   "rank": 10,
    "score": 9500
   },
   {
@@ -3641,7 +3452,7 @@
    "kanji": "慰霊祭",
    "level": "advanced",
    "meaning": "memorial service",
-   "rank": 13,
+   "rank": 11,
    "score": 9500
   },
   {
@@ -3650,7 +3461,7 @@
    "kanji": "宴席",
    "level": "advanced",
    "meaning": "banquet, dinner party",
-   "rank": 14,
+   "rank": 12,
    "score": 12500
   },
   {
@@ -3659,7 +3470,7 @@
    "kanji": "夏祭り",
    "level": "advanced",
    "meaning": "summer festival, summer matsuri",
-   "rank": 15,
+   "rank": 13,
    "score": 14500
   },
   {
@@ -3668,24 +3479,42 @@
    "kanji": "年祭",
    "level": "advanced",
    "meaning": "anniversary",
-   "rank": 16,
+   "rank": 14,
    "score": 14500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "きょうえん",
    "kanji": "饗宴",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "feast, banquet",
-   "rank": 17,
+   "rank": 15,
    "score": 14500
   },
   {
    "domain": "vocab",
    "kana": "クリスマス",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "Christmas",
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "パーティー",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "party",
+   "rank": 17,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "まつり",
+   "kanji": "祭",
+   "level": "expert",
+   "meaning": "festival, feast",
    "rank": 18,
    "score": 26000.0
   },
@@ -3729,20 +3558,11 @@
  "household_items": [
   {
    "domain": "vocab",
-   "kana": "せたい",
-   "kanji": "世帯",
-   "level": "basic",
-   "meaning": "household, family",
-   "rank": 1,
-   "score": 2500
-  },
-  {
-   "domain": "vocab",
    "kana": "とけい",
    "kanji": "時計",
    "level": "basic",
    "meaning": "clock, watch",
-   "rank": 2,
+   "rank": 1,
    "score": 3500
   },
   {
@@ -3751,7 +3571,7 @@
    "kanji": "傘",
    "level": "basic",
    "meaning": "umbrella, parasol",
-   "rank": 3,
+   "rank": 2,
    "score": 5500
   },
   {
@@ -3760,7 +3580,7 @@
    "kanji": "洗剤",
    "level": "basic",
    "meaning": "detergent, cleanser",
-   "rank": 4,
+   "rank": 3,
    "score": 5500
   },
   {
@@ -3769,7 +3589,7 @@
    "kanji": "毛布",
    "level": "basic",
    "meaning": "blanket",
-   "rank": 5,
+   "rank": 4,
    "score": 6500
   },
   {
@@ -3778,16 +3598,16 @@
    "kanji": "洗濯機",
    "level": "basic",
    "meaning": "washing machine, washer",
-   "rank": 6,
+   "rank": 5,
    "score": 6500
   },
   {
    "domain": "vocab",
    "kana": "かぎ",
    "kanji": "鍵",
-   "level": "medium",
+   "level": "basic",
    "meaning": "key",
-   "rank": 7,
+   "rank": 6,
    "score": 8500
   },
   {
@@ -3796,7 +3616,7 @@
    "kanji": "浴槽",
    "level": "medium",
    "meaning": "bathtub",
-   "rank": 8,
+   "rank": 7,
    "score": 8500
   },
   {
@@ -3805,7 +3625,7 @@
    "kanji": "掃除機",
    "level": "medium",
    "meaning": "vacuum cleaner, vacuum",
-   "rank": 9,
+   "rank": 8,
    "score": 10500
   },
   {
@@ -3814,7 +3634,7 @@
    "kanji": "歯ブラシ",
    "level": "medium",
    "meaning": "toothbrush",
-   "rank": 10,
+   "rank": 9,
    "score": 10500
   },
   {
@@ -3823,16 +3643,7 @@
    "kanji": "枕",
    "level": "medium",
    "meaning": "pillow, bolster",
-   "rank": 11,
-   "score": 11500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "かご",
-   "kanji": "篭",
-   "level": "medium",
-   "meaning": "basket, hamper",
-   "rank": 12,
+   "rank": 10,
    "score": 11500
   },
   {
@@ -3841,7 +3652,7 @@
    "kanji": "櫛",
    "level": "medium",
    "meaning": "comb",
-   "rank": 13,
+   "rank": 11,
    "score": 13500
   },
   {
@@ -3850,44 +3661,26 @@
    "kanji": "懐中電灯",
    "level": "medium",
    "meaning": "torch, flashlight",
-   "rank": 14,
+   "rank": 12,
    "score": 13500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "もうひつ",
-   "kanji": "毛筆",
-   "level": "advanced",
-   "meaning": "brush",
-   "rank": 15,
-   "score": 13500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "てつぶん",
-   "kanji": "鉄分",
-   "level": "advanced",
-   "meaning": "iron",
-   "rank": 16,
-   "score": 14500
   },
   {
    "domain": "vocab",
    "kana": "せっけん",
    "kanji": "石鹸",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "soap",
-   "rank": 17,
+   "rank": 13,
    "score": 15500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "おけ",
-   "kanji": "桶",
+   "domain": "vocab",
+   "kana": "アイロン",
+   "kanji": "",
    "level": "advanced",
-   "meaning": "bucket, pail",
-   "rank": 18,
-   "score": 16500
+   "meaning": "iron",
+   "rank": 14,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -3895,7 +3688,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "sheet, bed sheet",
-   "rank": 19,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -3904,7 +3697,25 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "towel",
-   "rank": 20,
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "バケツ",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "bucket, pail",
+   "rank": 17,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ブラシ",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "brush",
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -3913,7 +3724,7 @@
    "kanji": "剃刀",
    "level": "advanced",
    "meaning": "razor",
-   "rank": 21,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -3922,16 +3733,25 @@
    "kanji": "埃",
    "level": "advanced",
    "meaning": "dust",
-   "rank": 22,
+   "rank": 20,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "ほうき",
    "kanji": "箒",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "broom",
-   "rank": 23,
+   "rank": 21,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "かご",
+   "kanji": "籠",
+   "level": "expert",
+   "meaning": "basket, hamper",
+   "rank": 22,
    "score": 26000.0
   },
   {
@@ -3940,7 +3760,7 @@
    "kanji": "蝋燭",
    "level": "expert",
    "meaning": "candle",
-   "rank": 24,
+   "rank": 23,
    "score": 26000.0
   },
   {
@@ -3949,7 +3769,7 @@
    "kanji": "ちり取り",
    "level": "expert",
    "meaning": "dustpan",
-   "rank": 25,
+   "rank": 24,
    "score": 26000.0
   },
   {
@@ -3958,7 +3778,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "rubbish, trash",
-   "rank": 26,
+   "rank": 25,
    "score": 30000.0
   },
   {
@@ -3967,7 +3787,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "hanger",
-   "rank": 27,
+   "rank": 26,
    "score": 34000.0
   },
   {
@@ -3976,7 +3796,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cushion",
-   "rank": 28,
+   "rank": 27,
    "score": 34000.0
   },
   {
@@ -3985,7 +3805,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "shampoo",
-   "rank": 29,
+   "rank": 28,
    "score": 34000.0
   },
   {
@@ -3994,7 +3814,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "sponge",
-   "rank": 30,
+   "rank": 29,
    "score": 34000.0
   }
  ],
@@ -4138,20 +3958,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "いし",
-   "kanji": "医師",
-   "level": "basic",
-   "meaning": "doctor, physician",
-   "rank": 2,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
    "kana": "ひしょ",
    "kanji": "秘書",
    "level": "basic",
    "meaning": "secretary",
-   "rank": 3,
+   "rank": 2,
    "score": 500
   },
   {
@@ -4160,7 +3971,7 @@
    "kanji": "記者",
    "level": "basic",
    "meaning": "reporter, journalist",
-   "rank": 4,
+   "rank": 3,
    "score": 500
   },
   {
@@ -4169,7 +3980,7 @@
    "kanji": "弁護士",
    "level": "basic",
    "meaning": "lawyer, attorney",
-   "rank": 5,
+   "rank": 4,
    "score": 500
   },
   {
@@ -4178,7 +3989,7 @@
    "kanji": "書記",
    "level": "basic",
    "meaning": "clerk, secretary",
-   "rank": 6,
+   "rank": 5,
    "score": 500
   },
   {
@@ -4187,7 +3998,7 @@
    "kanji": "俳優",
    "level": "basic",
    "meaning": "actor, actress",
-   "rank": 7,
+   "rank": 6,
    "score": 1500
   },
   {
@@ -4196,7 +4007,7 @@
    "kanji": "兵士",
    "level": "basic",
    "meaning": "soldier",
-   "rank": 8,
+   "rank": 7,
    "score": 1500
   },
   {
@@ -4205,7 +4016,7 @@
    "kanji": "女優",
    "level": "basic",
    "meaning": "actress, female actor",
-   "rank": 9,
+   "rank": 8,
    "score": 1500
   },
   {
@@ -4214,16 +4025,16 @@
    "kanji": "歌手",
    "level": "basic",
    "meaning": "singer",
-   "rank": 10,
+   "rank": 9,
    "score": 1500
   },
   {
    "domain": "vocab",
    "kana": "しょくぎょう",
    "kanji": "職業",
-   "level": "medium",
+   "level": "basic",
    "meaning": "occupation, profession",
-   "rank": 11,
+   "rank": 10,
    "score": 1500
   },
   {
@@ -4232,7 +4043,7 @@
    "kanji": "農家",
    "level": "medium",
    "meaning": "farmer, farming family",
-   "rank": 12,
+   "rank": 11,
    "score": 1500
   },
   {
@@ -4241,7 +4052,7 @@
    "kanji": "運転手",
    "level": "medium",
    "meaning": "driver, chauffeur",
-   "rank": 13,
+   "rank": 12,
    "score": 1500
   },
   {
@@ -4250,6 +4061,15 @@
    "kanji": "判事",
    "level": "medium",
    "meaning": "judge, judiciary",
+   "rank": 13,
+   "score": 2500
+  },
+  {
+   "domain": "vocab",
+   "kana": "いしゃ",
+   "kanji": "医者",
+   "level": "medium",
+   "meaning": "doctor, physician",
    "rank": 14,
    "score": 2500
   },
@@ -4263,22 +4083,22 @@
    "score": 2500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "ぎじゅつしゃ",
-   "kanji": "技術者",
-   "level": "medium",
-   "meaning": "engineer, technical expert",
-   "rank": 16,
-   "score": 2500
-  },
-  {
    "domain": "vocab",
    "kana": "だいく",
    "kanji": "大工",
    "level": "medium",
    "meaning": "carpenter",
-   "rank": 17,
+   "rank": 16,
    "score": 3500
+  },
+  {
+   "domain": "vocab",
+   "kana": "ぎし",
+   "kanji": "技師",
+   "level": "medium",
+   "meaning": "engineer, technical officer",
+   "rank": 17,
+   "score": 4500
   },
   {
    "domain": "vocab_jmdict",
@@ -4329,19 +4149,10 @@
    "domain": "vocab_jmdict",
    "kana": "じゅうい",
    "kanji": "獣医",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "veterinarian, veterinary surgeon",
    "rank": 23,
    "score": 6500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しかいし",
-   "kanji": "歯科医師",
-   "level": "advanced",
-   "meaning": "dentist",
-   "rank": 24,
-   "score": 7500
   },
   {
    "domain": "vocab_jmdict",
@@ -4349,7 +4160,7 @@
    "kanji": "外科医",
    "level": "advanced",
    "meaning": "surgeon",
-   "rank": 25,
+   "rank": 24,
    "score": 8500
   },
   {
@@ -4358,7 +4169,7 @@
    "kanji": "小説家",
    "level": "advanced",
    "meaning": "novelist, fiction writer",
-   "rank": 26,
+   "rank": 25,
    "score": 8500
   },
   {
@@ -4367,7 +4178,7 @@
    "kanji": "船員",
    "level": "advanced",
    "meaning": "sailor, seaman",
-   "rank": 27,
+   "rank": 26,
    "score": 8500
   },
   {
@@ -4376,7 +4187,7 @@
    "kanji": "薬剤師",
    "level": "advanced",
    "meaning": "pharmacist, chemist",
-   "rank": 28,
+   "rank": 27,
    "score": 8500
   },
   {
@@ -4385,35 +4196,8 @@
    "kanji": "訳者",
    "level": "advanced",
    "meaning": "translator",
-   "rank": 29,
+   "rank": 28,
    "score": 8500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ひこうし",
-   "kanji": "飛行士",
-   "level": "advanced",
-   "meaning": "pilot",
-   "rank": 30,
-   "score": 8500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "りょうりにん",
-   "kanji": "料理人",
-   "level": "advanced",
-   "meaning": "cook, chef",
-   "rank": 31,
-   "score": 13500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "いたまえ",
-   "kanji": "板前",
-   "level": "advanced",
-   "meaning": "chef, cook",
-   "rank": 32,
-   "score": 13500
   },
   {
    "domain": "vocab_jmdict",
@@ -4421,8 +4205,17 @@
    "kanji": "消防士",
    "level": "advanced",
    "meaning": "firefighter, fireman",
-   "rank": 33,
+   "rank": 29,
    "score": 13500
+  },
+  {
+   "domain": "vocab",
+   "kana": "はいしゃ",
+   "kanji": "歯医者",
+   "level": "advanced",
+   "meaning": "dentist",
+   "rank": 30,
+   "score": 15500
   },
   {
    "domain": "vocab_jmdict",
@@ -4430,7 +4223,7 @@
    "kanji": "司書",
    "level": "advanced",
    "meaning": "librarian",
-   "rank": 34,
+   "rank": 31,
    "score": 15500
   },
   {
@@ -4439,7 +4232,7 @@
    "kanji": "売り子",
    "level": "advanced",
    "meaning": "salesperson, shop assistant",
-   "rank": 35,
+   "rank": 32,
    "score": 17500
   },
   {
@@ -4448,43 +4241,34 @@
    "kanji": "会計士",
    "level": "advanced",
    "meaning": "accountant",
-   "rank": 36,
-   "score": 18500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "つとめにん",
-   "kanji": "勤め人",
-   "level": "advanced",
-   "meaning": "office worker, salaried worker",
-   "rank": 37,
+   "rank": 33,
    "score": 18500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "でんこう",
    "kanji": "電工",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "electrician",
-   "rank": 38,
+   "rank": 34,
    "score": 18500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "なかい",
    "kanji": "仲居",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "waitress, hostess",
-   "rank": 39,
+   "rank": 35,
    "score": 19500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "りようし",
    "kanji": "理容師",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "barber, hairdresser",
-   "rank": 40,
+   "rank": 36,
    "score": 19500
   },
   {
@@ -4493,7 +4277,7 @@
    "kanji": "髪結い",
    "level": "expert",
    "meaning": "hairdresser, hairdressing",
-   "rank": 41,
+   "rank": 37,
    "score": 21500
   },
   {
@@ -4502,7 +4286,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "part-time job, side job",
-   "rank": 42,
+   "rank": 38,
    "score": 26000.0
   },
   {
@@ -4511,7 +4295,25 @@
    "kanji": "",
    "level": "expert",
    "meaning": "photographer",
-   "rank": 43,
+   "rank": 39,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "コック",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "cook, chef",
+   "rank": 40,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "サラリーマン",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "office worker, company employee",
+   "rank": 41,
    "score": 26000.0
   },
   {
@@ -4520,7 +4322,16 @@
    "kanji": "",
    "level": "expert",
    "meaning": "journalist",
-   "rank": 44,
+   "rank": 42,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "パイロット",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "pilot",
+   "rank": 43,
    "score": 26000.0
   },
   {
@@ -4529,7 +4340,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "businessman",
-   "rank": 45,
+   "rank": 44,
    "score": 26000.0
   },
   {
@@ -4538,7 +4349,7 @@
    "kanji": "建築家",
    "level": "expert",
    "meaning": "architect",
-   "rank": 46,
+   "rank": 45,
    "score": 30000.0
   },
   {
@@ -4547,7 +4358,7 @@
    "kanji": "看護師",
    "level": "expert",
    "meaning": "nurse, registered nurse",
-   "rank": 47,
+   "rank": 46,
    "score": 30000.0
   },
   {
@@ -4556,16 +4367,16 @@
    "kanji": "音楽家",
    "level": "expert",
    "meaning": "musician",
-   "rank": 48,
+   "rank": 47,
    "score": 30000.0
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "ギャルソン",
+   "kana": "シェフ",
    "kanji": "",
    "level": "expert",
-   "meaning": "waiter",
-   "rank": 49,
+   "meaning": "chef",
+   "rank": 48,
    "score": 34000.0
   },
   {
@@ -4574,7 +4385,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "tailor",
-   "rank": 50,
+   "rank": 49,
    "score": 34000.0
   },
   {
@@ -4583,7 +4394,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "mechanic",
-   "rank": 51,
+   "rank": 50,
    "score": 34000.0
   }
  ],
@@ -4617,20 +4428,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "うつわ",
-   "kanji": "器",
-   "level": "basic",
-   "meaning": "bowl, vessel",
-   "rank": 4,
-   "score": 5500
-  },
-  {
-   "domain": "vocab",
    "kana": "きぐ",
    "kanji": "器具",
    "level": "medium",
    "meaning": "utensil, implement",
-   "rank": 5,
+   "rank": 4,
    "score": 5500
   },
   {
@@ -4639,7 +4441,7 @@
    "kanji": "鍋",
    "level": "medium",
    "meaning": "pan, pot",
-   "rank": 6,
+   "rank": 5,
    "score": 5500
   },
   {
@@ -4648,53 +4450,26 @@
    "kanji": "流し",
    "level": "medium",
    "meaning": "sink",
-   "rank": 7,
+   "rank": 6,
    "score": 6500
+  },
+  {
+   "domain": "vocab",
+   "kana": "はち",
+   "kanji": "鉢",
+   "level": "medium",
+   "meaning": "bowl, pot",
+   "rank": 7,
+   "score": 7500
   },
   {
    "domain": "vocab",
    "kana": "はし",
    "kanji": "箸",
-   "level": "medium",
+   "level": "advanced",
    "meaning": "chopsticks",
    "rank": 8,
    "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "つぼ",
-   "kanji": "壺",
-   "level": "advanced",
-   "meaning": "pot, jar",
-   "rank": 9,
-   "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "かま",
-   "kanji": "窯",
-   "level": "advanced",
-   "meaning": "stove, furnace",
-   "rank": 10,
-   "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "こがたな",
-   "kanji": "小刀",
-   "level": "advanced",
-   "meaning": "knife",
-   "rank": 11,
-   "score": 20500
-  },
-  {
-   "domain": "vocab",
-   "kana": "さじ",
-   "kanji": "匙",
-   "level": "advanced",
-   "meaning": "spoon",
-   "rank": 12,
-   "score": 21500
   },
   {
    "domain": "vocab",
@@ -4702,16 +4477,34 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "cup",
-   "rank": 13,
+   "rank": 9,
    "score": 26000.0
   },
   {
    "domain": "vocab",
-   "kana": "ガラス",
+   "kana": "コップ",
    "kanji": "",
-   "level": "expert",
-   "meaning": "glass, pane",
-   "rank": 14,
+   "level": "advanced",
+   "meaning": "glass, tumbler",
+   "rank": 10,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "スプーン",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "spoon",
+   "rank": 11,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ナイフ",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "knife",
+   "rank": 12,
    "score": 26000.0
   },
   {
@@ -4720,7 +4513,16 @@
    "kanji": "",
    "level": "expert",
    "meaning": "fork",
-   "rank": 15,
+   "rank": 13,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ポット",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "pot",
+   "rank": 14,
    "score": 26000.0
   },
   {
@@ -4729,7 +4531,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "apron",
-   "rank": 16,
+   "rank": 15,
    "score": 34000.0
   },
   {
@@ -4738,7 +4540,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "oven",
-   "rank": 17,
+   "rank": 16,
    "score": 34000.0
   },
   {
@@ -4747,7 +4549,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "tray",
-   "rank": 18,
+   "rank": 17,
    "score": 34000.0
   }
  ],
@@ -4835,20 +4637,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "おうごん",
-   "kanji": "黄金",
-   "level": "medium",
-   "meaning": "gold",
-   "rank": 10,
-   "score": 4500
-  },
-  {
-   "domain": "vocab",
    "kana": "きぬ",
    "kanji": "絹",
    "level": "medium",
    "meaning": "silk",
-   "rank": 11,
+   "rank": 10,
    "score": 5500
   },
   {
@@ -4857,7 +4650,7 @@
    "kanji": "段ボール",
    "level": "medium",
    "meaning": "cardboard",
-   "rank": 12,
+   "rank": 11,
    "score": 5500
   },
   {
@@ -4866,7 +4659,7 @@
    "kanji": "鉛",
    "level": "medium",
    "meaning": "lead",
-   "rank": 13,
+   "rank": 12,
    "score": 6500
   },
   {
@@ -4875,7 +4668,7 @@
    "kanji": "鋼",
    "level": "medium",
    "meaning": "steel",
-   "rank": 14,
+   "rank": 13,
    "score": 7500
   },
   {
@@ -4884,7 +4677,7 @@
    "kanji": "錫",
    "level": "medium",
    "meaning": "tin",
-   "rank": 15,
+   "rank": 14,
    "score": 8500
   },
   {
@@ -4893,7 +4686,7 @@
    "kanji": "粘土",
    "level": "medium",
    "meaning": "clay",
-   "rank": 16,
+   "rank": 15,
    "score": 9500
   },
   {
@@ -4902,7 +4695,7 @@
    "kanji": "木綿",
    "level": "advanced",
    "meaning": "cotton",
-   "rank": 17,
+   "rank": 16,
    "score": 10500
   },
   {
@@ -4911,7 +4704,7 @@
    "kanji": "材木",
    "level": "advanced",
    "meaning": "wood, lumber",
-   "rank": 18,
+   "rank": 17,
    "score": 10500
   },
   {
@@ -4920,25 +4713,7 @@
    "kanji": "大理石",
    "level": "advanced",
    "meaning": "marble",
-   "rank": 19,
-   "score": 10500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ぬのじ",
-   "kanji": "布地",
-   "level": "advanced",
-   "meaning": "fabric, cloth",
-   "rank": 20,
-   "score": 10500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "せきざい",
-   "kanji": "石材",
-   "level": "advanced",
-   "meaning": "stone",
-   "rank": 21,
+   "rank": 18,
    "score": 10500
   },
   {
@@ -4947,7 +4722,7 @@
    "kanji": "亜鉛",
    "level": "advanced",
    "meaning": "zinc",
-   "rank": 22,
+   "rank": 19,
    "score": 11500
   },
   {
@@ -4956,7 +4731,7 @@
    "kanji": "羊毛",
    "level": "advanced",
    "meaning": "wool",
-   "rank": 23,
+   "rank": 20,
    "score": 13500
   },
   {
@@ -4965,7 +4740,7 @@
    "kanji": "磁器",
    "level": "advanced",
    "meaning": "porcelain, china",
-   "rank": 24,
+   "rank": 21,
    "score": 14500
   },
   {
@@ -4974,25 +4749,25 @@
    "kanji": "青銅",
    "level": "advanced",
    "meaning": "bronze",
-   "rank": 25,
+   "rank": 22,
    "score": 15500
   },
   {
    "domain": "vocab",
    "kana": "アルミ",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "aluminum, aluminium",
-   "rank": 26,
+   "rank": 23,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "ガラス",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "glass, pane",
-   "rank": 27,
+   "rank": 24,
    "score": 26000.0
   },
   {
@@ -5001,7 +4776,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "concrete",
-   "rank": 28,
+   "rank": 25,
    "score": 26000.0
   },
   {
@@ -5010,7 +4785,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cement",
-   "rank": 29,
+   "rank": 26,
    "score": 26000.0
   },
   {
@@ -5019,7 +4794,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "nylon",
-   "rank": 30,
+   "rank": 27,
    "score": 26000.0
   },
   {
@@ -5028,7 +4803,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "plastic",
-   "rank": 31,
+   "rank": 28,
    "score": 26000.0
   },
   {
@@ -5037,16 +4812,25 @@
    "kanji": "煉瓦",
    "level": "expert",
    "meaning": "brick",
-   "rank": 32,
+   "rank": 29,
    "score": 26000.0
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "アルミニウム",
-   "kanji": "",
+   "domain": "vocab",
+   "kana": "いし",
+   "kanji": "石",
    "level": "expert",
-   "meaning": "aluminium, aluminum",
-   "rank": 33,
+   "meaning": "stone, rock",
+   "rank": 30,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "きん",
+   "kanji": "金",
+   "level": "expert",
+   "meaning": "gold",
+   "rank": 31,
    "score": 26000.0
   },
   {
@@ -5055,7 +4839,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "ceramic",
-   "rank": 34,
+   "rank": 32,
    "score": 34000.0
   },
   {
@@ -5064,27 +4848,18 @@
    "kanji": "",
    "level": "expert",
    "meaning": "platinum",
-   "rank": 35,
+   "rank": 33,
    "score": 34000.0
   }
  ],
  "medical": [
   {
    "domain": "vocab",
-   "kana": "いがく",
-   "kanji": "医学",
-   "level": "basic",
-   "meaning": "medicine, medical science",
-   "rank": 1,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
    "kana": "いりょう",
    "kanji": "医療",
    "level": "basic",
    "meaning": "medical treatment, medical care",
-   "rank": 2,
+   "rank": 1,
    "score": 500
   },
   {
@@ -5093,7 +4868,7 @@
    "kanji": "患者",
    "level": "basic",
    "meaning": "patient",
-   "rank": 3,
+   "rank": 2,
    "score": 500
   },
   {
@@ -5102,7 +4877,7 @@
    "kanji": "治療",
    "level": "basic",
    "meaning": "treatment, care",
-   "rank": 4,
+   "rank": 3,
    "score": 500
   },
   {
@@ -5111,7 +4886,7 @@
    "kanji": "病気",
    "level": "basic",
    "meaning": "illness, disease",
-   "rank": 5,
+   "rank": 4,
    "score": 500
   },
   {
@@ -5120,15 +4895,24 @@
    "kanji": "感染",
    "level": "basic",
    "meaning": "infection, contagion",
-   "rank": 6,
+   "rank": 5,
    "score": 1500
   },
   {
    "domain": "vocab",
    "kana": "しゅじゅつ",
    "kanji": "手術",
-   "level": "medium",
+   "level": "basic",
    "meaning": "surgery, operation",
+   "rank": 6,
+   "score": 1500
+  },
+  {
+   "domain": "vocab",
+   "kana": "くすり",
+   "kanji": "薬",
+   "level": "medium",
+   "meaning": "medicine, pharmaceuticals",
    "rank": 7,
    "score": 1500
   },
@@ -5151,21 +4935,12 @@
    "score": 2500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "しっかん",
-   "kanji": "疾患",
-   "level": "medium",
-   "meaning": "disease, illness",
-   "rank": 10,
-   "score": 3500
-  },
-  {
    "domain": "vocab",
    "kana": "ちゅうしゃ",
    "kanji": "注射",
    "level": "medium",
    "meaning": "injection, jab",
-   "rank": 11,
+   "rank": 10,
    "score": 4500
   },
   {
@@ -5174,16 +4949,7 @@
    "kanji": "風邪",
    "level": "medium",
    "meaning": "cold, influenza",
-   "rank": 12,
-   "score": 4500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しょうがい",
-   "kanji": "傷害",
-   "level": "medium",
-   "meaning": "injury, inflicting bodily injury",
-   "rank": 13,
+   "rank": 11,
    "score": 4500
   },
   {
@@ -5192,26 +4958,35 @@
    "kanji": "救急車",
    "level": "medium",
    "meaning": "ambulance",
-   "rank": 14,
+   "rank": 12,
    "score": 4500
   },
   {
    "domain": "vocab",
    "kana": "ずつう",
    "kanji": "頭痛",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "headache",
-   "rank": 15,
+   "rank": 13,
    "score": 5500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "げかい",
    "kanji": "外科医",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "surgeon",
-   "rank": 16,
+   "rank": 14,
    "score": 8500
+  },
+  {
+   "domain": "vocab",
+   "kana": "きがい",
+   "kanji": "危害",
+   "level": "advanced",
+   "meaning": "injury, harm",
+   "rank": 15,
+   "score": 10500
   },
   {
    "domain": "vocab",
@@ -5219,7 +4994,7 @@
    "kanji": "包帯",
    "level": "advanced",
    "meaning": "bandage, dressing",
-   "rank": 17,
+   "rank": 16,
    "score": 12500
   },
   {
@@ -5228,7 +5003,7 @@
    "kanji": "錠剤",
    "level": "advanced",
    "meaning": "pill, lozenge",
-   "rank": 18,
+   "rank": 17,
    "score": 12500
   },
   {
@@ -5237,7 +5012,7 @@
    "kanji": "処方",
    "level": "advanced",
    "meaning": "prescription, formula",
-   "rank": 19,
+   "rank": 18,
    "score": 13500
   },
   {
@@ -5246,7 +5021,7 @@
    "kanji": "車椅子",
    "level": "advanced",
    "meaning": "wheelchair",
-   "rank": 20,
+   "rank": 19,
    "score": 16500
   },
   {
@@ -5255,7 +5030,7 @@
    "kanji": "体温計",
    "level": "advanced",
    "meaning": "thermometer",
-   "rank": 21,
+   "rank": 20,
    "score": 18500
   },
   {
@@ -5264,7 +5039,7 @@
    "kanji": "咳",
    "level": "advanced",
    "meaning": "cough, coughing",
-   "rank": 22,
+   "rank": 21,
    "score": 19500
   },
   {
@@ -5273,7 +5048,7 @@
    "kanji": "聴診器",
    "level": "advanced",
    "meaning": "stethoscope",
-   "rank": 23,
+   "rank": 22,
    "score": 20500
   },
   {
@@ -5282,7 +5057,7 @@
    "kanji": "熱病",
    "level": "expert",
    "meaning": "fever, febrile disease",
-   "rank": 24,
+   "rank": 23,
    "score": 20500
   },
   {
@@ -5291,7 +5066,7 @@
    "kanji": "症候",
    "level": "expert",
    "meaning": "symptom",
-   "rank": 25,
+   "rank": 24,
    "score": 21500
   },
   {
@@ -5300,7 +5075,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "allergy",
-   "rank": 26,
+   "rank": 25,
    "score": 26000.0
   },
   {
@@ -5309,7 +5084,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "influenza, flu",
-   "rank": 27,
+   "rank": 26,
    "score": 26000.0
   },
   {
@@ -5318,7 +5093,7 @@
    "kanji": "診療所",
    "level": "expert",
    "meaning": "clinic, medical office",
-   "rank": 28,
+   "rank": 27,
    "score": 26000.0
   },
   {
@@ -5327,7 +5102,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "therapy",
-   "rank": 29,
+   "rank": 28,
    "score": 30000.0
   },
   {
@@ -5336,7 +5111,7 @@
    "kanji": "看護師",
    "level": "expert",
    "meaning": "nurse, registered nurse",
-   "rank": 30,
+   "rank": 29,
    "score": 30000.0
   },
   {
@@ -5345,7 +5120,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "syringe",
-   "rank": 31,
+   "rank": 30,
    "score": 34000.0
   },
   {
@@ -5354,7 +5129,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "vaccine",
-   "rank": 32,
+   "rank": 31,
    "score": 34000.0
   }
  ],
@@ -5460,20 +5235,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "かきょく",
-   "kanji": "歌曲",
-   "level": "medium",
-   "meaning": "melody, tune",
-   "rank": 12,
-   "score": 5500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "こっか",
    "kanji": "国歌",
    "level": "medium",
    "meaning": "national anthem",
-   "rank": 13,
+   "rank": 12,
    "score": 6500
   },
   {
@@ -5482,26 +5248,26 @@
    "kanji": "楽譜",
    "level": "medium",
    "meaning": "score, sheet music",
-   "rank": 14,
+   "rank": 13,
    "score": 7500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "がくだん",
-   "kanji": "楽団",
-   "level": "medium",
-   "meaning": "orchestra, band",
-   "rank": 15,
-   "score": 9500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "いっきょく",
    "kanji": "一曲",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "tune",
-   "rank": 16,
+   "rank": 14,
    "score": 11500
+  },
+  {
+   "domain": "vocab",
+   "kana": "オーケストラ",
+   "kanji": "",
+   "level": "medium",
+   "meaning": "orchestra",
+   "rank": 15,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -5509,7 +5275,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "guitar",
-   "rank": 17,
+   "rank": 16,
    "score": 26000.0
   },
   {
@@ -5518,7 +5284,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "concert",
-   "rank": 18,
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -5527,7 +5293,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "jazz",
-   "rank": 19,
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -5536,7 +5302,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "violin",
-   "rank": 20,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -5545,6 +5311,15 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "piano",
+   "rank": 20,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "メロディー",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "melody, tune",
    "rank": 21,
    "score": 26000.0
   },
@@ -5768,20 +5543,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "じょうくう",
-   "kanji": "上空",
-   "level": "medium",
-   "meaning": "sky, the skies",
-   "rank": 13,
-   "score": 2500
-  },
-  {
-   "domain": "vocab",
    "kana": "ほし",
    "kanji": "星",
    "level": "medium",
    "meaning": "star, planet",
-   "rank": 14,
+   "rank": 13,
    "score": 2500
   },
   {
@@ -5790,7 +5556,7 @@
    "kanji": "池",
    "level": "medium",
    "meaning": "pond",
-   "rank": 15,
+   "rank": 14,
    "score": 2500
   },
   {
@@ -5799,25 +5565,16 @@
    "kanji": "浜",
    "level": "medium",
    "meaning": "beach, seashore",
-   "rank": 16,
-   "score": 2500
-  },
-  {
-   "domain": "vocab",
-   "kana": "かいよう",
-   "kanji": "海洋",
-   "level": "advanced",
-   "meaning": "ocean, sea",
-   "rank": 17,
+   "rank": 15,
    "score": 2500
   },
   {
    "domain": "vocab",
    "kana": "すな",
    "kanji": "砂",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "sand, grit",
-   "rank": 18,
+   "rank": 16,
    "score": 2500
   },
   {
@@ -5826,7 +5583,7 @@
    "kanji": "砂漠",
    "level": "advanced",
    "meaning": "desert",
-   "rank": 19,
+   "rank": 17,
    "score": 2500
   },
   {
@@ -5835,7 +5592,7 @@
    "kanji": "小川",
    "level": "advanced",
    "meaning": "stream, brook",
-   "rank": 20,
+   "rank": 18,
    "score": 2500
   },
   {
@@ -5844,7 +5601,7 @@
    "kanji": "岩",
    "level": "advanced",
    "meaning": "rock, boulder",
-   "rank": 21,
+   "rank": 19,
    "score": 3500
   },
   {
@@ -5853,7 +5610,7 @@
    "kanji": "沿岸",
    "level": "advanced",
    "meaning": "coast, shore",
-   "rank": 22,
+   "rank": 20,
    "score": 3500
   },
   {
@@ -5862,7 +5619,7 @@
    "kanji": "湖",
    "level": "advanced",
    "meaning": "lake",
-   "rank": 23,
+   "rank": 21,
    "score": 3500
   },
   {
@@ -5871,7 +5628,7 @@
    "kanji": "土壌",
    "level": "advanced",
    "meaning": "soil",
-   "rank": 24,
+   "rank": 22,
    "score": 3500
   },
   {
@@ -5880,7 +5637,7 @@
    "kanji": "潮",
    "level": "advanced",
    "meaning": "tide, current",
-   "rank": 25,
+   "rank": 23,
    "score": 3500
   },
   {
@@ -5889,25 +5646,34 @@
    "kanji": "平野",
    "level": "advanced",
    "meaning": "plain, open field",
-   "rank": 26,
+   "rank": 24,
    "score": 4500
   },
   {
    "domain": "vocab",
    "kana": "ぬま",
    "kanji": "沼",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "marsh, swamp",
-   "rank": 27,
+   "rank": 25,
    "score": 4500
   },
   {
    "domain": "vocab",
    "kana": "たき",
    "kanji": "滝",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "waterfall",
-   "rank": 28,
+   "rank": 26,
+   "score": 4500
+  },
+  {
+   "domain": "vocab_jmdict",
+   "kana": "たいよう",
+   "kanji": "大洋",
+   "level": "expert",
+   "meaning": "ocean",
+   "rank": 27,
    "score": 4500
   },
   {
@@ -5916,7 +5682,7 @@
    "kanji": "岬",
    "level": "expert",
    "meaning": "cape",
-   "rank": 29,
+   "rank": 28,
    "score": 7500
   },
   {
@@ -5925,17 +5691,8 @@
    "kanji": "氷河",
    "level": "expert",
    "meaning": "glacier",
-   "rank": 30,
+   "rank": 29,
    "score": 9500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "せきざい",
-   "kanji": "石材",
-   "level": "expert",
-   "meaning": "stone",
-   "rank": 31,
-   "score": 10500
   },
   {
    "domain": "vocab_jmdict",
@@ -5943,7 +5700,7 @@
    "kanji": "岸辺",
    "level": "expert",
    "meaning": "shore, bank",
-   "rank": 32,
+   "rank": 30,
    "score": 11500
   },
   {
@@ -5952,7 +5709,7 @@
    "kanji": "地平線",
    "level": "expert",
    "meaning": "horizon",
-   "rank": 33,
+   "rank": 31,
    "score": 12500
   },
   {
@@ -5961,7 +5718,7 @@
    "kanji": "洞窟",
    "level": "expert",
    "meaning": "cave, cavern",
-   "rank": 34,
+   "rank": 32,
    "score": 14500
   },
   {
@@ -5970,7 +5727,7 @@
    "kanji": "崖",
    "level": "expert",
    "meaning": "cliff, precipice",
-   "rank": 35,
+   "rank": 33,
    "score": 15500
   },
   {
@@ -5979,6 +5736,24 @@
    "kanji": "月",
    "level": "expert",
    "meaning": "Moon",
+   "rank": 34,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "いし",
+   "kanji": "石",
+   "level": "expert",
+   "meaning": "stone, rock",
+   "rank": 35,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "そら",
+   "kanji": "空",
+   "level": "expert",
+   "meaning": "sky, the air",
    "rank": 36,
    "score": 26000.0
   }
@@ -6015,7 +5790,7 @@
    "domain": "vocab",
    "kana": "にっき",
    "kanji": "日記",
-   "level": "basic",
+   "level": "medium",
    "meaning": "diary, journal",
    "rank": 4,
    "score": 3500
@@ -6031,20 +5806,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "てちょう",
-   "kanji": "手帳",
-   "level": "medium",
-   "meaning": "notebook, memo pad",
-   "rank": 6,
-   "score": 4500
-  },
-  {
-   "domain": "vocab",
    "kana": "ふうとう",
    "kanji": "封筒",
    "level": "medium",
    "meaning": "envelope",
-   "rank": 7,
+   "rank": 6,
    "score": 5500
   },
   {
@@ -6053,7 +5819,7 @@
    "kanji": "消しゴム",
    "level": "medium",
    "meaning": "eraser, rubber",
-   "rank": 8,
+   "rank": 7,
    "score": 5500
   },
   {
@@ -6062,7 +5828,7 @@
    "kanji": "鉛筆",
    "level": "advanced",
    "meaning": "pencil",
-   "rank": 9,
+   "rank": 8,
    "score": 5500
   },
   {
@@ -6071,7 +5837,7 @@
    "kanji": "万年筆",
    "level": "advanced",
    "meaning": "fountain pen",
-   "rank": 10,
+   "rank": 9,
    "score": 9500
   },
   {
@@ -6080,7 +5846,7 @@
    "kanji": "物差し",
    "level": "advanced",
    "meaning": "ruler, measure",
-   "rank": 11,
+   "rank": 10,
    "score": 9500
   },
   {
@@ -6089,7 +5855,7 @@
    "kanji": "文房具",
    "level": "advanced",
    "meaning": "stationery",
-   "rank": 12,
+   "rank": 11,
    "score": 10500
   },
   {
@@ -6098,16 +5864,16 @@
    "kanji": "電卓",
    "level": "advanced",
    "meaning": "calculator, pocket calculator",
-   "rank": 13,
+   "rank": 12,
    "score": 11500
   },
   {
    "domain": "vocab",
-   "kana": "インキ",
+   "kana": "インク",
    "kanji": "",
    "level": "expert",
    "meaning": "ink",
-   "rank": 14,
+   "rank": 13,
    "score": 26000.0
   },
   {
@@ -6116,6 +5882,15 @@
    "kanji": "",
    "level": "expert",
    "meaning": "tape",
+   "rank": 14,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ノート",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "notebook, copy-book",
    "rank": 15,
    "score": 26000.0
   },
@@ -6135,15 +5910,6 @@
    "level": "expert",
    "meaning": "file",
    "rank": 17,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "グルー",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "glue",
-   "rank": 18,
    "score": 34000.0
   }
  ],
@@ -6249,29 +6015,20 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "しゅし",
-   "kanji": "種子",
-   "level": "medium",
-   "meaning": "seed, pit",
-   "rank": 12,
-   "score": 4500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "きく",
    "kanji": "菊",
    "level": "medium",
    "meaning": "chrysanthemum",
-   "rank": 13,
+   "rank": 12,
    "score": 4500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "ゆり",
    "kanji": "百合",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "lily",
-   "rank": 14,
+   "rank": 13,
    "score": 5500
   },
   {
@@ -6280,7 +6037,7 @@
    "kanji": "花粉",
    "level": "advanced",
    "meaning": "pollen",
-   "rank": 15,
+   "rank": 14,
    "score": 6500
   },
   {
@@ -6289,7 +6046,7 @@
    "kanji": "花びら",
    "level": "advanced",
    "meaning": "petal",
-   "rank": 16,
+   "rank": 15,
    "score": 8500
   },
   {
@@ -6298,7 +6055,7 @@
    "kanji": "雑草",
    "level": "advanced",
    "meaning": "weed",
-   "rank": 17,
+   "rank": 16,
    "score": 8500
   },
   {
@@ -6307,7 +6064,7 @@
    "kanji": "桜花",
    "level": "advanced",
    "meaning": "cherry blossom",
-   "rank": 18,
+   "rank": 17,
    "score": 12500
   },
   {
@@ -6316,7 +6073,7 @@
    "kanji": "蔦",
    "level": "advanced",
    "meaning": "ivy",
-   "rank": 19,
+   "rank": 18,
    "score": 12500
   },
   {
@@ -6325,7 +6082,7 @@
    "kanji": "薔薇",
    "level": "advanced",
    "meaning": "rose",
-   "rank": 20,
+   "rank": 19,
    "score": 13500
   },
   {
@@ -6334,16 +6091,16 @@
    "kanji": "低木",
    "level": "advanced",
    "meaning": "shrub, shrubbery",
-   "rank": 21,
+   "rank": 20,
    "score": 15500
   },
   {
    "domain": "vocab",
    "kana": "つぼみ",
    "kanji": "蕾",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "bud",
-   "rank": 22,
+   "rank": 21,
    "score": 17500
   },
   {
@@ -6352,7 +6109,7 @@
    "kanji": "椰子",
    "level": "expert",
    "meaning": "palm tree",
-   "rank": 23,
+   "rank": 22,
    "score": 20500
   },
   {
@@ -6361,8 +6118,17 @@
    "kanji": "苔",
    "level": "expert",
    "meaning": "moss",
-   "rank": 24,
+   "rank": 23,
    "score": 23500
+  },
+  {
+   "domain": "vocab",
+   "kana": "たね",
+   "kanji": "種",
+   "level": "expert",
+   "meaning": "seed, pip",
+   "rank": 24,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -6439,21 +6205,12 @@
    "score": 3500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "しょぼう",
-   "kanji": "書房",
-   "level": "basic",
-   "meaning": "study, library",
-   "rank": 4,
-   "score": 3500
-  },
-  {
    "domain": "vocab",
    "kana": "ろうか",
    "kanji": "廊下",
    "level": "medium",
    "meaning": "corridor, hallway",
-   "rank": 5,
+   "rank": 4,
    "score": 4500
   },
   {
@@ -6462,7 +6219,7 @@
    "kanji": "居間",
    "level": "medium",
    "meaning": "living room, sitting room",
-   "rank": 6,
+   "rank": 5,
    "score": 5500
   },
   {
@@ -6471,7 +6228,7 @@
    "kanji": "車庫",
    "level": "medium",
    "meaning": "garage, carport",
-   "rank": 7,
+   "rank": 6,
    "score": 5500
   },
   {
@@ -6480,7 +6237,7 @@
    "kanji": "客室",
    "level": "medium",
    "meaning": "guest room, guest cabin",
-   "rank": 8,
+   "rank": 7,
    "score": 6500
   },
   {
@@ -6489,7 +6246,7 @@
    "kanji": "寝室",
    "level": "advanced",
    "meaning": "bedroom",
-   "rank": 9,
+   "rank": 8,
    "score": 6500
   },
   {
@@ -6498,8 +6255,17 @@
    "kanji": "浴室",
    "level": "advanced",
    "meaning": "bathroom",
-   "rank": 10,
+   "rank": 9,
    "score": 7500
+  },
+  {
+   "domain": "vocab",
+   "kana": "しょさい",
+   "kanji": "書斎",
+   "level": "advanced",
+   "meaning": "study, library",
+   "rank": 10,
+   "score": 9500
   },
   {
    "domain": "vocab_jmdict",
@@ -6511,22 +6277,22 @@
    "score": 9500
   },
   {
-   "domain": "vocab",
-   "kana": "べんじょ",
-   "kanji": "便所",
-   "level": "advanced",
-   "meaning": "toilet, lavatory",
-   "rank": 12,
-   "score": 12500
-  },
-  {
    "domain": "vocab_jmdict",
    "kana": "やねうら",
    "kanji": "屋根裏",
    "level": "advanced",
    "meaning": "attic, loft",
-   "rank": 13,
+   "rank": 12,
    "score": 12500
+  },
+  {
+   "domain": "vocab",
+   "kana": "トイレ",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "toilet, restroom",
+   "rank": 13,
+   "score": 26000.0
   },
   {
    "domain": "vocab",
@@ -6562,15 +6328,6 @@
    "level": "expert",
    "meaning": "porch",
    "rank": 17,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ラバトリー",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "lavatory",
-   "rank": 18,
    "score": 34000.0
   }
  ],
@@ -6649,29 +6406,20 @@
   },
   {
    "domain": "vocab",
-   "kana": "こうえん",
-   "kanji": "講演",
-   "level": "medium",
-   "meaning": "lecture, address",
-   "rank": 9,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
-   "kana": "ちゅうがく",
-   "kanji": "中学",
+   "kana": "ちゅうがっこう",
+   "kanji": "中学校",
    "level": "medium",
    "meaning": "junior high school, middle school",
-   "rank": 10,
+   "rank": 9,
    "score": 1500
   },
   {
    "domain": "vocab",
-   "kana": "しゅっせき",
+   "kana": "しゅっせき・する",
    "kanji": "出席",
    "level": "medium",
    "meaning": "attendance, presence",
-   "rank": 11,
+   "rank": 10,
    "score": 1500
   },
   {
@@ -6680,7 +6428,7 @@
    "kanji": "卒業",
    "level": "medium",
    "meaning": "graduation, completion",
-   "rank": 12,
+   "rank": 11,
    "score": 1500
   },
   {
@@ -6689,16 +6437,16 @@
    "kanji": "教室",
    "level": "medium",
    "meaning": "classroom, lecture room",
-   "rank": 13,
+   "rank": 12,
    "score": 1500
   },
   {
    "domain": "vocab",
    "kana": "きょうかしょ",
    "kanji": "教科書",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "textbook, coursebook",
-   "rank": 14,
+   "rank": 13,
    "score": 1500
   },
   {
@@ -6707,7 +6455,7 @@
    "kanji": "小学",
    "level": "advanced",
    "meaning": "elementary school, primary school",
-   "rank": 15,
+   "rank": 14,
    "score": 2500
   },
   {
@@ -6716,17 +6464,17 @@
    "kanji": "幼稚園",
    "level": "advanced",
    "meaning": "kindergarten, preschool",
-   "rank": 16,
+   "rank": 15,
    "score": 3500
   },
   {
    "domain": "vocab",
-   "kana": "てちょう",
-   "kanji": "手帳",
+   "kana": "こうぎ",
+   "kanji": "講義",
    "level": "advanced",
-   "meaning": "notebook, memo pad",
-   "rank": 17,
-   "score": 4500
+   "meaning": "lecture",
+   "rank": 16,
+   "score": 3500
   },
   {
    "domain": "vocab",
@@ -6734,7 +6482,7 @@
    "kanji": "奨学金",
    "level": "advanced",
    "meaning": "scholarship, stipend",
-   "rank": 18,
+   "rank": 17,
    "score": 5500
   },
   {
@@ -6743,7 +6491,7 @@
    "kanji": "鉛筆",
    "level": "advanced",
    "meaning": "pencil",
-   "rank": 19,
+   "rank": 18,
    "score": 5500
   },
   {
@@ -6752,16 +6500,16 @@
    "kanji": "宿題",
    "level": "advanced",
    "meaning": "homework, assignment",
-   "rank": 20,
+   "rank": 19,
    "score": 6500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "がくひ",
    "kanji": "学費",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "tuition, school expenses",
-   "rank": 21,
+   "rank": 20,
    "score": 8500
   },
   {
@@ -6770,7 +6518,7 @@
    "kanji": "黒板",
    "level": "expert",
    "meaning": "blackboard",
-   "rank": 22,
+   "rank": 21,
    "score": 9500
   },
   {
@@ -6779,7 +6527,7 @@
    "kanji": "遠足",
    "level": "expert",
    "meaning": "school trip, field trip",
-   "rank": 23,
+   "rank": 22,
    "score": 12500
   },
   {
@@ -6788,7 +6536,7 @@
    "kanji": "通知表",
    "level": "expert",
    "meaning": "report card",
-   "rank": 24,
+   "rank": 23,
    "score": 13500
   },
   {
@@ -6797,6 +6545,15 @@
    "kanji": "",
    "level": "expert",
    "meaning": "chalk",
+   "rank": 24,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ノート",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "notebook, copy-book",
    "rank": 25,
    "score": 26000.0
   },
@@ -7139,29 +6896,20 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "えんかん",
-   "kanji": "円環",
-   "level": "advanced",
-   "meaning": "circle, ring",
-   "rank": 17,
-   "score": 18500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "らせん",
    "kanji": "螺旋",
    "level": "advanced",
    "meaning": "spiral, helix",
-   "rank": 18,
+   "rank": 17,
    "score": 18500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "はんえん",
    "kanji": "半円",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "semicircle",
-   "rank": 19,
+   "rank": 18,
    "score": 19500
   },
   {
@@ -7170,7 +6918,7 @@
    "kanji": "同心円",
    "level": "expert",
    "meaning": "concentric circles",
-   "rank": 20,
+   "rank": 19,
    "score": 19500
   },
   {
@@ -7179,7 +6927,7 @@
    "kanji": "立方体",
    "level": "expert",
    "meaning": "cube",
-   "rank": 21,
+   "rank": 20,
    "score": 19500
   },
   {
@@ -7188,7 +6936,7 @@
    "kanji": "金字塔",
    "level": "expert",
    "meaning": "pyramid",
-   "rank": 22,
+   "rank": 21,
    "score": 20500
   },
   {
@@ -7197,6 +6945,15 @@
    "kanji": "",
    "level": "expert",
    "meaning": "diamond",
+   "rank": 22,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "まる",
+   "kanji": "丸",
+   "level": "expert",
+   "meaning": "circle",
    "rank": 23,
    "score": 26000.0
   },
@@ -7321,65 +7078,38 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "さいむ",
-   "kanji": "債務",
+   "kana": "こきゃく",
+   "kanji": "顧客",
    "level": "medium",
-   "meaning": "debt, liabilities",
+   "meaning": "customer, client",
    "rank": 11,
    "score": 1500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "てんぽ",
-   "kanji": "店舗",
+   "domain": "vocab",
+   "kana": "しゃっきん",
+   "kanji": "借金",
    "level": "medium",
-   "meaning": "shop, store",
+   "meaning": "debt, loan",
    "rank": 12,
-   "score": 1500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しはらい",
-   "kanji": "支払い",
-   "level": "medium",
-   "meaning": "payment",
-   "rank": 13,
-   "score": 1500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ひゃっかてん",
-   "kanji": "百貨店",
-   "level": "medium",
-   "meaning": "department store",
-   "rank": 14,
-   "score": 1500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "こきゃく",
-   "kanji": "顧客",
-   "level": "advanced",
-   "meaning": "customer, client",
-   "rank": 15,
-   "score": 1500
+   "score": 2500
   },
   {
    "domain": "vocab",
    "kana": "ぜいきん",
    "kanji": "税金",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "tax, duty",
-   "rank": 16,
+   "rank": 13,
    "score": 2500
   },
   {
    "domain": "vocab",
    "kana": "きゅうりょう",
    "kanji": "給料",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "salary, wages",
-   "rank": 17,
+   "rank": 14,
    "score": 2500
   },
   {
@@ -7388,7 +7118,7 @@
    "kanji": "貯蓄",
    "level": "advanced",
    "meaning": "savings",
-   "rank": 18,
+   "rank": 15,
    "score": 2500
   },
   {
@@ -7397,17 +7127,8 @@
    "kanji": "買い物",
    "level": "advanced",
    "meaning": "shopping, purchased goods",
-   "rank": 19,
+   "rank": 16,
    "score": 2500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "かりいれきん",
-   "kanji": "借入金",
-   "level": "advanced",
-   "meaning": "loan, loan payable",
-   "rank": 20,
-   "score": 3500
   },
   {
    "domain": "vocab",
@@ -7415,7 +7136,7 @@
    "kanji": "割引",
    "level": "advanced",
    "meaning": "discount, reduction",
-   "rank": 21,
+   "rank": 17,
    "score": 4500
   },
   {
@@ -7424,43 +7145,61 @@
    "kanji": "財布",
    "level": "advanced",
    "meaning": "wallet, purse",
-   "rank": 22,
+   "rank": 18,
    "score": 4500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "じゅりょう",
-   "kanji": "受領",
-   "level": "advanced",
-   "meaning": "receipt, acceptance",
-   "rank": 23,
-   "score": 5500
   },
   {
    "domain": "vocab",
    "kana": "こうか",
    "kanji": "硬貨",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "coin",
-   "rank": 24,
+   "rank": 19,
    "score": 8500
+  },
+  {
+   "domain": "vocab",
+   "kana": "かし",
+   "kanji": "貸し",
+   "level": "advanced",
+   "meaning": "loan, lending",
+   "rank": 20,
+   "score": 9500
+  },
+  {
+   "domain": "vocab",
+   "kana": "りょうしゅう",
+   "kanji": "領収",
+   "level": "advanced",
+   "meaning": "receipt, receiving",
+   "rank": 21,
+   "score": 15500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "へんきん",
    "kanji": "返金",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "refund, repayment",
-   "rank": 25,
+   "rank": 22,
    "score": 19500
   },
   {
    "domain": "vocab",
-   "kana": "てん",
+   "kana": "デパート",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "department store",
+   "rank": 23,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "みせ",
    "kanji": "店",
    "level": "expert",
    "meaning": "store, shop",
-   "rank": 26,
+   "rank": 24,
    "score": 26000.0
   },
   {
@@ -7469,7 +7208,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "supermarket",
-   "rank": 27,
+   "rank": 25,
    "score": 26000.0
   },
   {
@@ -7478,8 +7217,17 @@
    "kanji": "",
    "level": "expert",
    "meaning": "bargain",
-   "rank": 28,
+   "rank": 26,
    "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "しはらい",
+   "kanji": "支払",
+   "level": "expert",
+   "meaning": "payment",
+   "rank": 27,
+   "score": 30000.0
   },
   {
    "domain": "vocab_jmdict",
@@ -7487,7 +7235,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "invoice",
-   "rank": 29,
+   "rank": 28,
    "score": 34000.0
   },
   {
@@ -7496,7 +7244,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "credit card",
-   "rank": 30,
+   "rank": 29,
    "score": 34000.0
   },
   {
@@ -7505,7 +7253,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "coupon, voucher",
-   "rank": 31,
+   "rank": 30,
    "score": 34000.0
   },
   {
@@ -7514,14 +7262,14 @@
    "kanji": "",
    "level": "expert",
    "meaning": "convenience store",
-   "rank": 32,
+   "rank": 31,
    "score": 34000.0
   }
  ],
  "sports": [
   {
    "domain": "vocab",
-   "kana": "れんしゅう",
+   "kana": "れんしゅうする",
    "kanji": "練習",
    "level": "basic",
    "meaning": "practice, training",
@@ -7611,39 +7359,12 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "しょうはい",
-   "kanji": "賞牌",
-   "level": "medium",
-   "meaning": "medal",
-   "rank": 11,
-   "score": 11500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ようきゅう",
-   "kanji": "洋弓",
-   "level": "medium",
-   "meaning": "archery",
-   "rank": 12,
-   "score": 15500
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "しっそう",
    "kanji": "疾走",
    "level": "medium",
    "meaning": "sprint, dash",
-   "rank": 13,
+   "rank": 11,
    "score": 15500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "ていきゅう",
-   "kanji": "庭球",
-   "level": "medium",
-   "meaning": "tennis",
-   "rank": 14,
-   "score": 19500
   },
   {
    "domain": "vocab",
@@ -7651,7 +7372,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "skiing",
-   "rank": 15,
+   "rank": 12,
    "score": 26000.0
   },
   {
@@ -7660,25 +7381,34 @@
    "kanji": "",
    "level": "medium",
    "meaning": "skating, skate",
-   "rank": 16,
+   "rank": 13,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "スポーツ",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "sport, sports",
-   "rank": 17,
+   "rank": 14,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "テニス",
+   "kanji": "",
+   "level": "medium",
+   "meaning": "tennis",
+   "rank": 15,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "マラソン",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "marathon",
-   "rank": 18,
+   "rank": 16,
    "score": 26000.0
   },
   {
@@ -7687,7 +7417,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "golf",
-   "rank": 19,
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -7696,7 +7426,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "soccer, football",
-   "rank": 20,
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -7705,7 +7435,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "champion",
-   "rank": 21,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -7714,7 +7444,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "basketball",
-   "rank": 22,
+   "rank": 20,
    "score": 26000.0
   },
   {
@@ -7723,7 +7453,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "volleyball",
-   "rank": 23,
+   "rank": 21,
    "score": 26000.0
   },
   {
@@ -7732,7 +7462,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "rugby",
-   "rank": 24,
+   "rank": 22,
    "score": 26000.0
   },
   {
@@ -7741,7 +7471,7 @@
    "kanji": "競技場",
    "level": "advanced",
    "meaning": "stadium, ground",
-   "rank": 25,
+   "rank": 23,
    "score": 30000.0
   },
   {
@@ -7750,16 +7480,25 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "ice hockey",
-   "rank": 26,
+   "rank": 24,
    "score": 34000.0
   },
   {
    "domain": "vocab_jmdict",
    "kana": "アスリート",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "athlete",
-   "rank": 27,
+   "rank": 25,
+   "score": 34000.0
+  },
+  {
+   "domain": "vocab_jmdict",
+   "kana": "アーチェリー",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "archery",
+   "rank": 26,
    "score": 34000.0
   },
   {
@@ -7768,7 +7507,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "climbing",
-   "rank": 28,
+   "rank": 27,
    "score": 34000.0
   },
   {
@@ -7777,7 +7516,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "cycling, bicycling",
-   "rank": 29,
+   "rank": 28,
    "score": 34000.0
   },
   {
@@ -7786,7 +7525,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "surfing, surfboarding",
-   "rank": 30,
+   "rank": 29,
    "score": 34000.0
   },
   {
@@ -7795,7 +7534,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "tournament",
-   "rank": 31,
+   "rank": 30,
    "score": 34000.0
   },
   {
@@ -7804,7 +7543,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "badminton",
-   "rank": 32,
+   "rank": 31,
    "score": 34000.0
   },
   {
@@ -7813,7 +7552,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "fencing",
-   "rank": 33,
+   "rank": 32,
    "score": 34000.0
   },
   {
@@ -7822,7 +7561,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "football",
-   "rank": 34,
+   "rank": 33,
    "score": 34000.0
   },
   {
@@ -7831,6 +7570,15 @@
    "kanji": "",
    "level": "expert",
    "meaning": "boxing",
+   "rank": 34,
+   "score": 34000.0
+  },
+  {
+   "domain": "vocab_jmdict",
+   "kana": "メダル",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "medal",
    "rank": 35,
    "score": 34000.0
   },
@@ -7900,39 +7648,21 @@
    "score": 1500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "がめん",
-   "kanji": "画面",
-   "level": "basic",
-   "meaning": "screen",
-   "rank": 6,
-   "score": 1500
-  },
-  {
    "domain": "vocab",
-   "kana": "むせん",
-   "kanji": "無線",
+   "kana": "かいろ",
+   "kanji": "回路",
    "level": "basic",
-   "meaning": "radio",
-   "rank": 7,
-   "score": 2500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "かいせん",
-   "kanji": "回線",
-   "level": "medium",
-   "meaning": "circuit, line",
-   "rank": 8,
-   "score": 3500
+   "meaning": "circuit",
+   "rank": 6,
+   "score": 5500
   },
   {
    "domain": "vocab",
    "kana": "でんち",
    "kanji": "電池",
-   "level": "medium",
+   "level": "basic",
    "meaning": "battery, cell",
-   "rank": 9,
+   "rank": 7,
    "score": 5500
   },
   {
@@ -7941,7 +7671,7 @@
    "kanji": "電話機",
    "level": "medium",
    "meaning": "telephone",
-   "rank": 10,
+   "rank": 8,
    "score": 6500
   },
   {
@@ -7950,17 +7680,8 @@
    "kanji": "合言葉",
    "level": "medium",
    "meaning": "password, watchword",
-   "rank": 11,
+   "rank": 9,
    "score": 7500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "でんしけいさんき",
-   "kanji": "電子計算機",
-   "level": "medium",
-   "meaning": "computer",
-   "rank": 12,
-   "score": 16500
   },
   {
    "domain": "vocab_jmdict",
@@ -7968,7 +7689,7 @@
    "kanji": "鍵盤",
    "level": "medium",
    "meaning": "keyboard",
-   "rank": 13,
+   "rank": 10,
    "score": 21500
   },
   {
@@ -7977,7 +7698,7 @@
    "kanji": "",
    "level": "medium",
    "meaning": "antenna",
-   "rank": 14,
+   "rank": 11,
    "score": 26000.0
   },
   {
@@ -7986,25 +7707,34 @@
    "kanji": "",
    "level": "medium",
    "meaning": "engine",
-   "rank": 15,
+   "rank": 12,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "カメラ",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "camera",
-   "rank": 16,
+   "rank": 13,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "コンピューター",
+   "kanji": "",
+   "level": "medium",
+   "meaning": "computer",
+   "rank": 14,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "スピーカー",
    "kanji": "",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "speaker",
-   "rank": 17,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -8013,7 +7743,16 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "television, TV",
-   "rank": 18,
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ラジオ",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "radio",
+   "rank": 17,
    "score": 26000.0
   },
   {
@@ -8022,7 +7761,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "network",
-   "rank": 19,
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -8031,7 +7770,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "hardware",
-   "rank": 20,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -8040,7 +7779,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "robot",
-   "rank": 21,
+   "rank": 20,
    "score": 26000.0
   },
   {
@@ -8049,7 +7788,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "Internet",
-   "rank": 22,
+   "rank": 21,
    "score": 30000.0
   },
   {
@@ -8058,8 +7797,17 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "smartphone, smart phone",
-   "rank": 23,
+   "rank": 22,
    "score": 30000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "スクリーン",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "screen",
+   "rank": 23,
+   "score": 34000.0
   },
   {
    "domain": "vocab",
@@ -8191,21 +7939,21 @@
   },
   {
    "domain": "vocab",
-   "kana": "つな",
-   "kanji": "綱",
+   "kana": "くさり",
+   "kanji": "鎖",
    "level": "basic",
-   "meaning": "rope, cord",
+   "meaning": "chain, chains",
    "rank": 4,
-   "score": 5500
+   "score": 9500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "れんさ",
-   "kanji": "連鎖",
+   "domain": "vocab",
+   "kana": "なわ",
+   "kanji": "縄",
    "level": "medium",
-   "meaning": "chain, series",
+   "meaning": "rope, cord",
    "rank": 5,
-   "score": 8500
+   "score": 10500
   },
   {
    "domain": "vocab_jmdict",
@@ -8235,21 +7983,12 @@
    "score": 17500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "つち",
-   "kanji": "槌",
-   "level": "medium",
-   "meaning": "hammer, mallet",
-   "rank": 9,
-   "score": 17500
-  },
-  {
    "domain": "vocab",
    "kana": "のこぎり",
    "kanji": "鋸",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "saw",
-   "rank": 10,
+   "rank": 9,
    "score": 19500
   },
   {
@@ -8258,7 +7997,7 @@
    "kanji": "鍬",
    "level": "advanced",
    "meaning": "hoe",
-   "rank": 11,
+   "rank": 10,
    "score": 19500
   },
   {
@@ -8267,7 +8006,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "screw",
-   "rank": 12,
+   "rank": 11,
    "score": 26000.0
   },
   {
@@ -8276,6 +8015,15 @@
    "kanji": "梯子",
    "level": "advanced",
    "meaning": "ladder",
+   "rank": 12,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "かなづち",
+   "kanji": "金槌",
+   "level": "advanced",
+   "meaning": "hammer",
    "rank": 13,
    "score": 26000.0
   },
@@ -8373,38 +8121,29 @@
   },
   {
    "domain": "vocab",
-   "kana": "かんこう",
-   "kanji": "観光",
-   "level": "basic",
-   "meaning": "sightseeing, tourism",
-   "rank": 3,
-   "score": 500
-  },
-  {
-   "domain": "vocab",
    "kana": "よやく",
    "kanji": "予約",
    "level": "basic",
    "meaning": "reservation, appointment",
-   "rank": 4,
+   "rank": 3,
    "score": 2500
   },
   {
    "domain": "vocab",
-   "kana": "しゅっぱつ",
+   "kana": "しゅっぱつ・する",
    "kanji": "出発",
    "level": "basic",
    "meaning": "departure, leaving",
-   "rank": 5,
+   "rank": 4,
    "score": 2500
   },
   {
    "domain": "vocab",
    "kana": "ちず",
    "kanji": "地図",
-   "level": "medium",
+   "level": "basic",
    "meaning": "map, atlas",
-   "rank": 6,
+   "rank": 5,
    "score": 2500
   },
   {
@@ -8413,7 +8152,7 @@
    "kanji": "温泉",
    "level": "medium",
    "meaning": "hot spring",
-   "rank": 7,
+   "rank": 6,
    "score": 2500
   },
   {
@@ -8422,7 +8161,7 @@
    "kanji": "到着",
    "level": "medium",
    "meaning": "arrival",
-   "rank": 8,
+   "rank": 7,
    "score": 3500
   },
   {
@@ -8431,7 +8170,7 @@
    "kanji": "切符",
    "level": "medium",
    "meaning": "ticket",
-   "rank": 9,
+   "rank": 8,
    "score": 4500
   },
   {
@@ -8440,7 +8179,7 @@
    "kanji": "航海",
    "level": "medium",
    "meaning": "voyage, navigation",
-   "rank": 10,
+   "rank": 9,
    "score": 4500
   },
   {
@@ -8449,25 +8188,25 @@
    "kanji": "荷物",
    "level": "medium",
    "meaning": "luggage, baggage",
-   "rank": 11,
+   "rank": 10,
    "score": 4500
   },
   {
    "domain": "vocab",
    "kana": "ぜいかん",
    "kanji": "税関",
-   "level": "advanced",
+   "level": "medium",
    "meaning": "customs, customs house",
-   "rank": 12,
+   "rank": 11,
    "score": 5500
   },
   {
    "domain": "vocab",
-   "kana": "りょけん",
-   "kanji": "旅券",
+   "kana": "けんぶつ",
+   "kanji": "見物",
    "level": "advanced",
-   "meaning": "passport",
-   "rank": 13,
+   "meaning": "sightseeing, watching",
+   "rank": 12,
    "score": 6500
   },
   {
@@ -8476,7 +8215,7 @@
    "kanji": "修学旅行",
    "level": "advanced",
    "meaning": "excursion, field trip",
-   "rank": 14,
+   "rank": 13,
    "score": 6500
   },
   {
@@ -8485,7 +8224,7 @@
    "kanji": "査証",
    "level": "advanced",
    "meaning": "visa",
-   "rank": 15,
+   "rank": 14,
    "score": 6500
   },
   {
@@ -8494,7 +8233,7 @@
    "kanji": "行程",
    "level": "advanced",
    "meaning": "journey, course",
-   "rank": 16,
+   "rank": 15,
    "score": 11500
   },
   {
@@ -8503,25 +8242,16 @@
    "kanji": "旅人",
    "level": "advanced",
    "meaning": "traveller, traveler",
-   "rank": 17,
+   "rank": 16,
    "score": 12500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "あんないしょ",
-   "kanji": "案内書",
-   "level": "expert",
-   "meaning": "guidebook, guide",
-   "rank": 18,
-   "score": 17500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "とおで",
    "kanji": "遠出",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "trip, excursion",
-   "rank": 19,
+   "rank": 17,
    "score": 18500
   },
   {
@@ -8530,7 +8260,7 @@
    "kanji": "周遊",
    "level": "expert",
    "meaning": "tour, round trip",
-   "rank": 20,
+   "rank": 18,
    "score": 19500
   },
   {
@@ -8539,7 +8269,7 @@
    "kanji": "野営",
    "level": "expert",
    "meaning": "camping, campground",
-   "rank": 21,
+   "rank": 19,
    "score": 19500
   },
   {
@@ -8548,8 +8278,17 @@
    "kanji": "旅程",
    "level": "expert",
    "meaning": "itinerary, travel plans",
-   "rank": 22,
+   "rank": 20,
    "score": 23500
+  },
+  {
+   "domain": "vocab",
+   "kana": "パスポート",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "passport",
+   "rank": 21,
+   "score": 26000.0
   },
   {
    "domain": "vocab_jmdict",
@@ -8557,8 +8296,17 @@
    "kanji": "観光客",
    "level": "expert",
    "meaning": "tourist",
-   "rank": 23,
+   "rank": 22,
    "score": 30000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ガイドブック",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "guidebook",
+   "rank": 23,
+   "score": 34000.0
   },
   {
    "domain": "vocab",
@@ -8771,20 +8519,11 @@
   },
   {
    "domain": "vocab_jmdict",
-   "kana": "リーク",
-   "kanji": "",
-   "level": "expert",
-   "meaning": "leek",
-   "rank": 23,
-   "score": 34000.0
-  },
-  {
-   "domain": "vocab_jmdict",
    "kana": "レタス",
    "kanji": "",
    "level": "expert",
    "meaning": "lettuce",
-   "rank": 24,
+   "rank": 23,
    "score": 34000.0
   }
  ],
@@ -8800,20 +8539,11 @@
   },
   {
    "domain": "vocab",
-   "kana": "れっしゃ",
-   "kanji": "列車",
-   "level": "basic",
-   "meaning": "train, railway train",
-   "rank": 2,
-   "score": 1500
-  },
-  {
-   "domain": "vocab",
    "kana": "じてんしゃ",
    "kanji": "自転車",
    "level": "basic",
    "meaning": "bicycle, bike",
-   "rank": 3,
+   "rank": 2,
    "score": 1500
   },
   {
@@ -8822,34 +8552,25 @@
    "kanji": "船",
    "level": "basic",
    "meaning": "ship, boat",
-   "rank": 4,
+   "rank": 3,
    "score": 1500
   },
   {
    "domain": "vocab",
-   "kana": "うんゆ",
-   "kanji": "運輸",
+   "kana": "でんしゃ",
+   "kanji": "電車",
    "level": "basic",
-   "meaning": "transportation",
-   "rank": 5,
+   "meaning": "train, electric train",
+   "rank": 4,
    "score": 1500
   },
   {
    "domain": "vocab_jmdict",
    "kana": "こうくうき",
    "kanji": "航空機",
-   "level": "medium",
+   "level": "basic",
    "meaning": "aircraft",
-   "rank": 6,
-   "score": 1500
-  },
-  {
-   "domain": "vocab_jmdict",
-   "kana": "しゃりょう",
-   "kanji": "車両",
-   "level": "medium",
-   "meaning": "vehicle, car",
-   "rank": 7,
+   "rank": 5,
    "score": 1500
   },
   {
@@ -8858,7 +8579,7 @@
    "kanji": "地下鉄",
    "level": "medium",
    "meaning": "subway, metro",
-   "rank": 8,
+   "rank": 6,
    "score": 2500
   },
   {
@@ -8867,7 +8588,7 @@
    "kanji": "飛行機",
    "level": "medium",
    "meaning": "airplane, aeroplane",
-   "rank": 9,
+   "rank": 7,
    "score": 2500
   },
   {
@@ -8876,7 +8597,7 @@
    "kanji": "救急車",
    "level": "medium",
    "meaning": "ambulance",
-   "rank": 10,
+   "rank": 8,
    "score": 4500
   },
   {
@@ -8885,26 +8606,26 @@
    "kanji": "潜水艦",
    "level": "medium",
    "meaning": "submarine",
-   "rank": 11,
+   "rank": 9,
    "score": 4500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "わたし",
-   "kanji": "渡し",
-   "level": "advanced",
-   "meaning": "ferry",
-   "rank": 12,
-   "score": 10500
+   "domain": "vocab",
+   "kana": "こうつうきかん",
+   "kanji": "交通機関",
+   "level": "medium",
+   "meaning": "transportation, transport",
+   "rank": 10,
+   "score": 8500
   },
   {
-   "domain": "vocab_jmdict",
-   "kana": "しゅうてい",
-   "kanji": "舟艇",
-   "level": "advanced",
-   "meaning": "boat, watercraft",
-   "rank": 13,
-   "score": 20500
+   "domain": "vocab",
+   "kana": "のりもの",
+   "kanji": "乗り物",
+   "level": "medium",
+   "meaning": "vehicle, conveyance",
+   "rank": 11,
+   "score": 9500
   },
   {
    "domain": "vocab",
@@ -8912,7 +8633,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "motorcycle, motorbike",
-   "rank": 14,
+   "rank": 12,
    "score": 26000.0
   },
   {
@@ -8921,7 +8642,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "taxi",
-   "rank": 15,
+   "rank": 13,
    "score": 26000.0
   },
   {
@@ -8930,7 +8651,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "truck, lorry",
-   "rank": 16,
+   "rank": 14,
    "score": 26000.0
   },
   {
@@ -8939,7 +8660,7 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "bus",
-   "rank": 17,
+   "rank": 15,
    "score": 26000.0
   },
   {
@@ -8948,16 +8669,25 @@
    "kanji": "",
    "level": "advanced",
    "meaning": "helicopter",
-   "rank": 18,
+   "rank": 16,
+   "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "ボート",
+   "kanji": "",
+   "level": "advanced",
+   "meaning": "boat",
+   "rank": 17,
    "score": 26000.0
   },
   {
    "domain": "vocab",
    "kana": "ヨット",
    "kanji": "",
-   "level": "expert",
+   "level": "advanced",
    "meaning": "yacht, sailing boat",
-   "rank": 19,
+   "rank": 18,
    "score": 26000.0
   },
   {
@@ -8966,7 +8696,7 @@
    "kanji": "",
    "level": "expert",
    "meaning": "rocket",
-   "rank": 20,
+   "rank": 19,
    "score": 26000.0
   },
   {
@@ -8975,8 +8705,17 @@
    "kanji": "消防車",
    "level": "expert",
    "meaning": "fire engine, fire truck",
-   "rank": 21,
+   "rank": 20,
    "score": 26000.0
+  },
+  {
+   "domain": "vocab",
+   "kana": "フェリー",
+   "kanji": "",
+   "level": "expert",
+   "meaning": "ferry",
+   "rank": 21,
+   "score": 34000.0
   },
   {
    "domain": "vocab_jmdict",

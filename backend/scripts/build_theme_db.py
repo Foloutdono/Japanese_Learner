@@ -161,45 +161,65 @@ FIELD_DENY: dict[str, set[str]] = {
 # of the category. Cheap to extend — it costs nothing at runtime.
 DENY_SURFACE: dict[str, set[str]] = {
     "fruits":     {"石灰", "実", "産物", "所産", "桃色", "種子", "皮", "殻", "果皮",
-                   "橙色", "オリーブ色"},   # colour words, not fruit
-    "vegetables": {"芽", "芽生え"},
+                   "橙色", "オリーブ色",    # colour words, not fruit
+                   "マロン"},               # a French loan; 栗 is the word
+    "vegetables": {"芽", "芽生え", "リーク"},              # ネギ is the word
     "colors":     {"赤字", "黒字", "日陰", "陰", "カラー", "傘", "藍", "顔料", "濃淡", "陰影"},
     "shapes":     {"格好", "世界", "分野", "範囲", "区域", "方面", "畑", "広場", "象", "玉",
                    "形態", "妻", "額", "台詞", "楽隊", "楽団", "要旨", "土俵", "先", "前",
                    "ダイヤ", "面", "表", "筋", "路線", "骨", "影", "趣旨", "欄", "類",
                    "方式", "大筋", "フォーム"},
     "animals":    {"寅", "午", "申", "巳", "未", "子", "丑", "辰", "酉", "戌", "亥", "卯",
-                   "動物性", "海馬", "馬頭", "ホース", "ズック", "剣山", "畜生"},
-    "birds":      {"羽根", "羽", "ウイング"},          # a shuttlecock, a counter, a duplicate
+                   "動物性", "海馬", "馬頭", "ホース", "ズック", "剣山", "畜生",
+                   "キャメル"},                          # ラクダ is the word (and has no priority tag)
+    "birds":      {"羽根", "羽", "ウイング",           # a shuttlecock, a counter, a duplicate
+                   "ナイチンゲール", "クレーン",           # 鶯 is the bird; クレーン is the machine
+                   "啄木"},                             # 啄木鳥 is the woodpecker
     "insects_bugs": {"クリケット"},                    # the sport
     "body_parts": {"首脳", "主席", "先頭", "面", "左", "右", "筋", "肝心",
-                   "所長", "麓", "節", "継ぎ目", "レバー", "主人"},
+                   "所長", "麓", "節", "継ぎ目", "レバー", "主人",
+                   "首長", "長", "腹痛",          # a chieftain, a chief; a symptom
+                   "建前", "面目",                       # a public stance; saving face
+                   "リブ"},                             # 肋骨 is the word,
     "emotions":   {"空気", "雰囲気", "緩和", "救援", "救済", "反省"},
     "nature":     {"一寸", "分野", "核", "天", "地味", "性"},
     "plants_trees": {"支部", "根本", "胴"},            # an organisation's branch, a torso
     "school":     {"入室", "元本", "白亜"},            # financial principal, the mineral
-    "rooms":      {"勉強", "学問"},                    # studying, not a study
-    "drinks":     {"生", "ビア", "水分"},
+    "rooms":      {"勉強", "学問",                     # studying, not a study
+                   "ラバトリー"},                       # トイレ is the word
+    "drinks":     {"生", "ビア", "水分", "シュナップス",
+                   "アルコール"},                       # 酒 is the word (the deck files it N4 vs N3)
     "dishes":     {"ランチ"},                          # gloss reads "launch, lunch"
-    "geography":  {"国境", "州", "様子", "状態", "世"},
-    "office_supplies": {"汗", "チョキ"},               # チョキ is the hand sign
-    "buildings":  {"工場", "詰め所"},
+    "geography":  {"国境", "州", "様子", "状態", "世", "世間", "アトラス", "ワールド"},
+    "office_supplies": {"汗", "チョキ", "グルー"},        # チョキ is the hand sign; 糊 is the word
+    "buildings":  {"工場", "詰め所",
+                   "ステーション", "ファクトリー", "シネマ", "カテドラル"},  # 駅/工場/映画館/大聖堂
     "technology": {"ぶれ", "機関", "応募", "申し込み", "講師", "適用", "演目",
-                   "願書", "番組", "鼠", "ネズミ"},
-    "furniture":  {"内閣", "議長", "画面", "閣内"},            # a cabinet of ministers, a chairman
-    "kitchen_items": {"盆", "分岐点", "分かれ目"},                 # a road fork
-    "materials":  {"林", "核", "資料", "生地"},
-    "medical":    {"試験", "運転", "扱い", "寒冷"},    # an exam, machine operation
-    "music":      {"調子", "器官"},                    # a bodily organ
-    "shopping_money": {"変化", "法案", "異動", "交替", "札", "金", "蓄え"},
-    "sports":     {"出馬", "走行", "研修", "中継", "馬車", "修行"},
-    "tools":      {"水準", "平準", "指針", "悪徳", "爪", "チョキ"},
+                   "願書", "番組", "鼠", "ネズミ",
+                   "仕掛け"},                           # a gimmick, not a device
+    "furniture":  {"内閣", "議長", "画面", "閣内",            # a cabinet of ministers, a chairman
+                   "幕"},                               # a stage curtain, not カーテン
+    "kitchen_items": {"盆", "分岐点", "分かれ目",             # a road fork
+                   "窯", "ガラス"},                     # a kiln; window pane, not a tumbler
+    "materials":  {"林", "核", "資料", "生地",
+                   "コップ"},                           # a drinking vessel, not a material
+    "medical":    {"試験", "運転", "扱い", "寒冷",     # an exam, machine operation
+                   "害"},                               # bare "harm", not an injury
+    "music":      {"調子", "器官", "車掌"},            # a bodily organ; a train conductor
+    "shopping_money": {"変化", "法案", "異動", "交替", "札", "金", "蓄え",
+                   "受領", "納入", "ショップ"},        # acceptance; a delivery; 店 already covers it
+    "sports":     {"出馬", "走行", "研修", "中継", "馬車", "修行",
+                   "賞牌", "洋弓", "記章"},              # メダル / アーチェリー are the words; 記章 is a badge
+    "tools":      {"水準", "平準", "指針", "悪徳", "爪", "チョキ",
+                   "連鎖"},                             # a chain of events, not 鎖
     "travel":     {"関税", "移民", "札", "着"},
     "vehicles":   {"熟し", "急先鋒"},                  # 急先鋒 is a vanguard
-    "jobs":       {"長官"},
+    "jobs":       {"長官", "ギャルソン"},                # an obscure French loan
     "clothing":   {"一律", "一様", "首輪", "毛並み", "口金"},
     "holidays_events": {"事件", "党"},                 # an incident, a political party
-    "household_items": {"鉄"},                         # the metal, not the appliance
+    "family":     {"シスター", "ツイン"},               # a nun; twin beds
+    "weather":    {"シャワー"},                        # the bathroom kind; 夕立 is the rain
+    "household_items": {"鉄", "鉄分", "世帯"},          # the metal; dietary iron; not an item
 }
 
 # theme_key -> the English glosses that name a member of the category.
@@ -221,6 +241,7 @@ KEYWORDS: dict[str, list[str]] = {
         "papaya", "raspberry", "blueberry", "cranberry", "pomegranate", "tangerine",
         "mandarin", "mandarin orange", "orange", "chestnut", "grape", "grapes",
         "loquat", "pomelo", "yuzu", "olive", "avocado", "lychee", "guava", "durian",
+        "japanese chestnut",   # 栗's own gloss, which plain "chestnut" misses
         "nectarine", "quince", "grapefruit", "blackberry", "mulberry", "japanese apricot",
     ],
     "vegetables": [
@@ -511,7 +532,26 @@ KEYWORDS: dict[str, list[str]] = {
 }
 
 
-_PAREN = re.compile(r"\([^)]*\)")
+# Innermost-first, applied until stable: JMdict nests them, and a single
+# pass of r"\([^)]*\)" stops at the FIRST ")" -- which turned 犬's gloss
+# "dog (Canis (lupus) familiaris)" into "dog familiaris)" and kept the
+# commonest animal word in the language out of the animals theme.
+_PAREN_INNER = re.compile(r"\([^()]*\)")
+
+
+class _Paren:
+    """Same .sub() surface as the compiled pattern it replaces."""
+    @staticmethod
+    def sub(repl: str, text: str) -> str:
+        for _ in range(8):          # depth guard; real glosses nest twice at most
+            stripped = _PAREN_INNER.sub(repl, text)
+            if stripped == text:
+                return text
+            text = stripped
+        return text
+
+
+_PAREN = _Paren
 _NEWS_BAND = re.compile(r"^news(\d+)k$")
 
 
@@ -525,13 +565,71 @@ def normalise(gloss: str) -> str:
     return re.sub(r"\s+", " ", _PAREN.sub(" ", gloss).lower()).strip(" .,;:")
 
 
-def head_gloss(meaning: str) -> str:
-    """The dedupe key: the first gloss, parentheticals removed FIRST so
-    the comma inside "(esp. the garden strawberry, Fragaria x ananassa)"
-    cannot split it. Splitting first leaves an unclosed parenthesis, the
-    key keeps the whole tail, and 苺 "strawberry (esp. …)" no longer
-    matches ストロベリー "strawberry" — which is how both survived."""
-    return normalise(_PAREN.sub(" ", meaning).split(",")[0])
+# Spelling variants that make one meaning look like two. Deliberately an
+# explicit list, not a clever rule: every regex for these families does
+# more harm than good on real glosses -- "our"->"or" turns tour into tor
+# and hour into hor, "re"->"er" turns care into caer, "ium"->"um" turns
+# stadium into stadum, and all four of those words are in these themes.
+# Each pair below was found in the shipped data.
+_SPELLING = {
+    "theatre": "theater", "centre": "center", "metre": "meter",
+    "fibre": "fiber", "litre": "liter", "colour": "color",
+    "flavour": "flavor", "harbour": "harbor", "neighbour": "neighbor",
+    "labour": "labor", "armour": "armor", "odour": "odor",
+    "aluminium": "aluminum", "aeroplane": "airplane", "pyjamas": "pajamas",
+    "grey": "gray", "plough": "plow", "mould": "mold", "storey": "story",
+}
+# A trailing plural, but never after "s" (glass, dress, grass) or "u"
+# (bus, gas) -- stripping there invents a word.
+_PLURAL = re.compile(r"(?<=[a-z]{3})(?<![su])s\b")
+
+
+def dedupe_key(gloss: str) -> str:
+    """One meaning, spelled one way.
+
+    normalise() alone cannot tell two words apart by sense, because
+    English gives the same meaning several spellings and both numbers.
+    Folding them is what stops a theme carrying a word and its katakana
+    twin: 劇場 "theatre" shipped beside シアター "theater", 靴 "shoe"
+    beside シューズ "shoes", アルミ "aluminum" beside アルミニウム
+    "aluminium".
+
+    Used ONLY for deduping. Matching still runs on normalise(), and must
+    -- loosening the matcher is exactly what the rebuild established
+    never to do."""
+    key = _PLURAL.sub("", normalise(gloss))
+    return " ".join(_SPELLING.get(w, w) for w in key.split())
+
+
+def gloss_keys(meaning: str) -> tuple[str, frozenset[str]]:
+    """(head key, all keys) for a meaning.
+
+    Parentheticals are stripped BEFORE the split on commas: splitting
+    first leaves an unclosed parenthesis, the key keeps the whole tail,
+    and 苺 "strawberry (esp. the garden strawberry, Fragaria x ananassa)"
+    stops matching ストロベリー "strawberry" — which is how both survived
+    the first pass."""
+    parts = [k for k in (dedupe_key(p) for p in _PAREN.sub(" ", meaning).split(",")) if k]
+    return (parts[0] if parts else ""), frozenset(parts)
+
+
+def _is_duplicate(head: str, keys: frozenset[str],
+                  seen_heads: set[str], seen_sets: set[frozenset[str]]) -> bool:
+    """Two words are the same word to a learner when the gloss they will
+    SEE is the same, or when their whole gloss sets agree.
+
+    Only those two. A shared gloss anywhere is far too blunt: it merges
+    手 "hand, arm" with 腕 "arm", 学生 "student" with 生徒 "pupil,
+    student", 感じ "feeling, sense" with 感情 "emotion, feeling" and
+    風邪 "cold, influenza" with インフルエンザ "influenza, flu" — all
+    pairs a learner needs both halves of. Measured: that rule cost 64
+    words and took `emotions` from 37 to 30.
+
+    Head equality catches the katakana twins (靴 "shoe, shoes" vs
+    シューズ "shoes", 劇場 "theatre" vs シアター "theater"); set equality
+    catches the same glosses in the other order (店舗 "shop, store" vs
+    店 "store, shop")."""
+    return head in seen_heads or keys in seen_sets
 
 
 def display_meaning(glosses: list[str], keep: int = 2) -> str:
@@ -594,7 +692,7 @@ def _candidates(conn: sqlite3.Connection) -> list[dict]:
     with open(_DECK_JSON, encoding="utf-8") as f:
         deck = json.load(f)
     seen_deck = set()
-    for level in ("N5", "N4", "N3", "N2", "N1"):
+    for rank, level in enumerate(("N5", "N4", "N3", "N2", "N1")):
         for word in deck.get(level, []):
             kanji, kana = word.get("kanji", ""), word.get("kana", "")
             if (kanji, kana) in seen_deck:
@@ -603,17 +701,18 @@ def _candidates(conn: sqlite3.Connection) -> list[dict]:
             blob = curated.get(f"{kanji}::{kana}")
             if not blob:
                 continue
-            out.append(_candidate("vocab", kanji, kana, word.get("meaning", ""), blob))
+            out.append(_candidate("vocab", kanji, kana, word.get("meaning", ""), blob, rank))
 
     for kanji, kana, meaning, blob in conn.execute(
         "SELECT e.kanji, e.kana, e.meaning, s.blob FROM entries e JOIN senses s ON s.id = e.id"
     ):
-        out.append(_candidate("vocab_jmdict", kanji, kana, meaning, blob))
+        out.append(_candidate("vocab_jmdict", kanji, kana, meaning, blob, len("N5N4N3N2N1") // 2))
 
     return [c for c in out if c is not None]
 
 
-def _candidate(domain: str, kanji: str, kana: str, meaning: str, blob: str) -> dict | None:
+def _candidate(domain: str, kanji: str, kana: str, meaning: str, blob: str,
+               jlpt: int) -> dict | None:
     senses = json.loads(blob)          # parsed once per word, not once per theme
     if not senses:
         return None
@@ -632,6 +731,7 @@ def _candidate(domain: str, kanji: str, kana: str, meaning: str, blob: str) -> d
         "domain": domain, "kanji": kanji, "kana": kana,
         "meaning": display_meaning(glossary) or meaning.strip(),
         "score": score, "tags": tags, "gloss1": normalise(glossary[0]),
+        "jlpt": jlpt,   # 0=N5 .. 4=N1; 5 for the pool, which has no level
     }
 
 
@@ -676,19 +776,38 @@ def build() -> dict[str, list[dict]]:
                 continue
             hits.append(c)
 
-        # Commonest first; a curated-deck word wins a tie because it
-        # carries a French gloss, a JLPT level and curated examples.
-        hits.sort(key=lambda c: (c["score"], c["domain"] != "vocab", c["kanji"], c["kana"]))
+        # Dedupe deck-first, then rank by frequency. Two passes, because
+        # the two orders answer different questions.
+        #
+        # WHICH of two words meaning the same thing survives is a
+        # curriculum question, and the app's own curated deck is the
+        # curriculum -- deck first, and within it the level the deck
+        # teaches the word at. Newspaper frequency answers neither: it
+        # ranks 頭部 "head, cranium" over 頭 "head" and 頭脳 "brains"
+        # over it again, so a score-ordered dedupe quietly drops the
+        # word every beginner learns first for the one a broadsheet
+        # prefers.
+        hits.sort(key=lambda c: (c["domain"] != "vocab", c["jlpt"], c["score"],
+                                 c["kanji"], c["kana"]))
 
-        rows, seen_surface, seen_gloss = [], set(), set()
+        # `hits` is already commonest-first, so the survivor of any
+        # collision is automatically the word a learner actually wants:
+        # 劇場 over シアター, 靴 over シューズ, 店 over 店舗.
+        rows = []
+        seen_surface, seen_heads, seen_sets = set(), set(), set()
         for c in hits:
             surface = c["kanji"] or c["kana"]
-            gloss = head_gloss(c["meaning"])
-            if surface in seen_surface or gloss in seen_gloss:
+            head, keys = gloss_keys(c["meaning"])
+            if surface in seen_surface or _is_duplicate(head, keys, seen_heads, seen_sets):
                 continue
             seen_surface.add(surface)
-            seen_gloss.add(gloss)
+            seen_heads.add(head)
+            seen_sets.add(keys)
             rows.append(c)
+
+        # ...and WHAT ORDER a learner meets the survivors in is the
+        # frequency question, which is the whole point of the bands.
+        rows.sort(key=lambda c: (c["score"], c["domain"] != "vocab", c["kanji"], c["kana"]))
 
         sizes = _cut(len(rows))
         out, i = [], 0
