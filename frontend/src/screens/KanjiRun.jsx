@@ -229,7 +229,6 @@ export default function KanjiRun({ session }) {
         leaveLabel={t.kanjiTitle}
         where={`${t.kanjiTitle} ${level}`}
         sub={t.modeReview}
-        pass={false}
       >
           <ReviewDeck
             foot={`${t.kanjiTitle} ${level}`}
