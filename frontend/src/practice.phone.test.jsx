@@ -34,8 +34,15 @@ describe('the practice sessions at phone width', () => {
     expect(getComputedStyle(foot).flexDirection).toBe('column')
     const field = screen.container.querySelector('.field')
     expect(parseFloat(getComputedStyle(field).minHeight)).toBe(44)
-    expect(field.getBoundingClientRect().width).toBeCloseTo(foot.getBoundingClientRect().width, 0)
-    expect(screen.container.querySelector('.btn-primary').getBoundingClientRect().width).toBeCloseTo(foot.getBoundingClientRect().width, 0)
+    // The foot is a dock now — edge to edge of the stage, with the
+    // page's own gutter given back inside it, so the action never sits
+    // flush against the bottom of the screen (layout.phone.test.jsx
+    // holds that end of it). So the row to fill is the foot's content
+    // column, which is the card's own width.
+    const card = screen.container.querySelector('.prompt-card').getBoundingClientRect()
+    expect(foot.getBoundingClientRect().width).toBeCloseTo(screen.container.querySelector('.stage').getBoundingClientRect().width, 0)
+    expect(field.getBoundingClientRect().width).toBeCloseTo(card.width, 0)
+    expect(screen.container.querySelector('.btn-primary').getBoundingClientRect().width).toBeCloseTo(card.width, 0)
   })
 
   it('the page card reads top-down and left-aligned; a question card is flat', async () => {

@@ -253,6 +253,63 @@ describe('the phone layout contract', () => {
       .toBe(Math.round(bar.width * 0.15))
   })
 
+  // ── The run's foot is on the screen, not on its edge ──
+  // The field and Submit of a reading run sat flush against the bottom
+  // of the screen: `margin-top: auto` pins the foot, and the stage's
+  // own bottom padding is --dock-bottom, which on a stage is the
+  // safe-area inset ALONE — 0 in a desktop window, on Android and in
+  // the preview. A browser's bar or a rounded corner then takes the
+  // last of the button, which is what the owner photographed.
+  it('docks a run\'s action clear of the screen\'s edge', async () => {
+    const screen = await render(
+      <div className="phone phone--stage">
+        <div className="screen">
+          <main className="container stage">
+            <div className="prompt-card">かな</div>
+            <div className="stage__foot">
+              <input className="field" readOnly />
+              <button type="button" className="btn-primary">Valider</button>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+    // The stage arrives 10px low; every distance here is to the edge.
+    await settle()
+    const btn = screen.container.querySelector('.btn-primary').getBoundingClientRect()
+    expect(window.innerHeight - btn.bottom).toBeGreaterThanOrEqual(12)
+    expect(btn.bottom).toBeLessThanOrEqual(window.innerHeight)
+  })
+
+  // And when the card is taller than the screen, the action stays on
+  // it: the foot docks on the dock's edge the way the rating bar and
+  // the exam's sheet bar do, with the card scrolling behind it.
+  it('keeps that action on the screen when the stage overflows', async () => {
+    const screen = await render(
+      <div className="phone phone--stage">
+        <div className="screen">
+          <main className="container stage">
+            <div className="prompt-card" style={{ height: '1400px', flex: 'none' }}>かな</div>
+            <div className="stage__foot">
+              <button type="button" className="btn-primary">Valider</button>
+            </div>
+          </main>
+        </div>
+      </div>
+    )
+    await settle()
+    const foot = screen.container.querySelector('.stage__foot')
+    const btn = screen.container.querySelector('.btn-primary').getBoundingClientRect()
+    expect(getComputedStyle(foot).position).toBe('sticky')
+    expect(btn.bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(window.innerHeight - btn.bottom).toBeGreaterThanOrEqual(12)
+    // Edge to edge of the stage — it cancels the page's own inset —
+    // so nothing shows past it at the sides while the card passes
+    // under.
+    const stageBox = screen.container.querySelector('.stage').getBoundingClientRect()
+    expect(Math.round(foot.getBoundingClientRect().width)).toBe(Math.round(stageBox.width))
+  })
+
   // ── 路線図 — the map is the wall, so it takes the wall ──
   it('gives the Learn gate\'s board the whole page too', async () => {
     const line = i => (

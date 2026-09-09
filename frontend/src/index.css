@@ -13255,6 +13255,31 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     background: var(--bg-panel);
   }
   .stage > .rating-bar .rating-bar__buttons { background: transparent; }
+  /* ── The run's foot docks too ──
+     The field and Submit (the canvas's Reading foot), the browse's two
+     buttons, comprehension's pair: one control at the bottom of a run,
+     pinned there by `margin-top: auto` and laid out to the LAST PIXEL
+     of the stage. --dock-bottom on a stage is the safe-area inset
+     alone, and the inset is 0 in a desktop window, on Android and in
+     the preview — so the filled action ended flush against the bottom
+     edge of the screen, with a browser's own bar, a rounded corner or
+     a gesture bar taking the last 30px of it (reported on 実践's
+     reading run: Submit cut in half).
+
+     It docks like every other instrument on this edge now — the rating
+     bar, the exam's sheet bar: stuck on the dock's edge, edge to edge,
+     its own ground under it. The ground is the page's, not the bars'
+     sumi: this is the screen's own foot, not a second console. A card
+     taller than the screen now scrolls behind it instead of pushing it
+     off, and the action keeps the page's own gutter under it. */
+  .stage > .stage__foot {
+    position: sticky;
+    bottom: var(--dock-bottom);
+    z-index: 10;
+    margin-inline: calc(-1 * var(--sp-5));
+    padding: var(--sp-3) var(--sp-5) var(--sp-5);
+    background: var(--bg-main);
+  }
   /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
      edge, on the dock's edge, its own inset under it. */
   .stage > .exam-sheetbar {
