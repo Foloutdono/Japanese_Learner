@@ -209,19 +209,36 @@ glyph is already 44px — a reading view cannot set it smaller than the card it
 came from. A word on that plate takes `--fs-display`, a long expression
 `--fs-heading`.
 
-The catalogue's own tile is the one place the word rung is a **ceiling
-rather than a size**. At 72px a 168px tile takes two characters to a line,
-so テープレコーダー printed one character per line over four of them and grew
-its whole row to 390px. The tile is a query container and its headword
-divides that width by its own character count (`--len`, set by the screen),
-clamped between `--fs-caption` and the word rung: a lone 駅 is the specimen
-it always was, エアコンディショナー lands near 15px, and nothing wraps. It is
-the one off-scale font size in the app that is not a literal to be
-harmonised away — the two ends of the clamp are rungs and the middle is a
-measurement of the tile — and it is allowlisted in `design-scale.json` as
-such. Reach for it only where the type must fit a box it cannot choose;
-everywhere else the nine rungs decide, and a headword too long for the floor
-ellipsises rather than shrinking further.
+**Both specimen rungs are ceilings rather than sizes**, in the two places
+the type has to fit a box it did not choose.
+
+The catalogue's tile was the first. At 72px a 168px tile takes two characters
+to a line, so テープレコーダー printed one character per line over four of
+them and grew its whole row to 390px. The tile is a query container and its
+headword divides that width by its own character count (`--len`, set by the
+screen), clamped between `--fs-caption` and the word rung: a lone 駅 is the
+specimen it always was, エアコンディショナー lands near 15px, and nothing
+wraps.
+
+The study card is the second, on the same instrument down to the 96cqw
+(`.char-display`, decided 2026-09-09). The rung had been a flat size there,
+and the specimen is one nowrap line, so a box sized to its own text simply
+grew past the card and spilled the word off both edges — とうもろこし is
+~440px against the 290px text column of a 390px phone, and printed with its
+head and its tail off the screen. It is now fitted the same way (46px there,
+28px for コンビニエンスストア) and the card is the query container. **Fitted,
+not wrapped**: the specimen box is a fixed multiple of its own rung tall so
+the card cannot resize under the learner on a flip, and a second line would
+leave that height the way the word left its width. Prose on a card is a
+different object and takes a different component — the meaning-first
+direction hands its gloss to `MeaningDisplay`, which wraps.
+
+These are the only off-scale font sizes in the app that are not literals to
+be harmonised away — the two ends of each clamp are rungs and the middle is a
+measurement of the box — and they are allowlisted in `design-scale.json` as
+such. Reach for the instrument only where the type must fit a box it cannot
+choose; everywhere else the nine rungs decide, and anything too long even for
+the floor is cut at the edge of its box rather than shrinking further.
 
 ### Tracking runs inversely to size
 

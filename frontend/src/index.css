@@ -7233,7 +7233,50 @@ textarea:focus-visible {
    be one. */
 .char-display {
   font-family: var(--char-font, var(--font-jp));
-  font-size: var(--char-size, 110px);
+  /* --char-size is a CEILING, not a size. The rung sets ONE NOWRAP
+     LINE, so this box's min-content width is the whole word -- and a
+     flex item is sized to fit its content, not to its parent, so in a
+     centred column (.vocab-card-boost .flashcard) a word too long for
+     the card does not clip: the BOX grows past the card and spills the
+     word evenly off both edges, which is also why the
+     `text-overflow: ellipsis` below never got to mark either cut. At
+     the word rung とうもろこし measures ~440px against the 290px text
+     column of a 390px phone's card, and printed with its head and its
+     tail off the screen. A prompt is the question; a prompt with its
+     ends cut off is unanswerable.
+
+     Fitted, not wrapped: the box is a fixed `--char-size * 1.15` tall
+     so the card cannot resize under the learner on a flip
+     (PromptCard.browser.test pins that within 40px), and a second line
+     would leave its own height the way the word left its width.
+
+     Same instrument as the dictionary tile's headword
+     (.dict-entry-card__char), down to the 96: the card is the query
+     container, the word divides its width by its own character count
+     (--len, from CharDisplay), and the rung is the ceiling -- so ねこ
+     and 大学 are the specimen they always were, とうもろこし lands at
+     46px and コンビニエンスストア at 28px, every one of them on one
+     line. 96cqw rather than 100 leaves the last character's side
+     bearing and the 0.02em of tracking each one carries.
+
+     The --fs-caption floor is the dictionary's too: below it nothing
+     is readable anyway, so a pathological string stops shrinking and
+     is cut instead. Only there is max-width load-bearing -- the fitted
+     word is inside the column by construction, and this is what a
+     floored one cannot cross. `100cqw + 2 * --card-pad-x` is the
+     card's own inner width, the same identity .vocab-card-boost
+     .flashcard is built on: the container is the card's TEXT COLUMN,
+     and the specimen may use the padding around it (it is centred, and
+     a glyph's advance runs a few percent over its em) but never the
+     card's edge. Outside a card the variable is unset, the cap is the
+     container, and nothing in the app renders a 20-character specimen
+     anyway -- the meaning-first direction hands its gloss to
+     MeaningDisplay, which wraps, for exactly this reason. */
+  font-size: clamp(
+    var(--fs-caption),
+    calc(96cqw / var(--len, 1)),
+    var(--char-size, 110px));
+  max-width: calc(100cqw + 2 * var(--card-pad-x, 0px));
   height: calc(var(--char-size, 110px) * 1.15);
   display: flex;
   align-items: center;
@@ -9552,6 +9595,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    down, after .vocab-card-boost .prompt-card -- see there for why. */
 .prompt-card__body {
   padding: var(--card-pad-top) var(--card-pad-x) var(--card-pad-y);
+  /* A container too, and the NEARER one on a footed card, which is the
+     point: the padding moved here, so .prompt-card's own content box is
+     the full card and a specimen fitted against it would sit flush to
+     the card's edges. Fitted against this one it stops at the padding,
+     the same margin the unfooted card gives it. */
+  container-type: inline-size;
 }
 
 .rating-bar {
@@ -12773,6 +12822,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      give .reveal-actions extra headroom on top without also padding
      the bottom/sides to match (see that query's own comment). */
   --card-pad-top: var(--card-pad-y);
+  /* The card is what the specimen measures itself against (see
+     .char-display, and .prompt-card__body for the footed card's
+     nearer container). Safe to contain: this element's own inline
+     size is `width: 100%` clamped by --card-w -- decided from the
+     outside, never from its contents -- which is the one thing
+     inline-size containment takes away. Nothing else in the card
+     minds: it is already `position: relative`, so being a containing
+     block for absolute descendants changes nothing, the reveal's
+     dictionary sheet is a portal to <body>, and the promotion stamp
+     is rendered OUTSIDE the card precisely so the card's own
+     `overflow: auto` cannot clip it (see .card-stamp-overlay). */
+  container-type: inline-size;
   position: relative;
   /* The card's own surface. It used to be supplied by the paper
      materials — every paper mixed its tint into --bg-card and the
