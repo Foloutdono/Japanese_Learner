@@ -44,38 +44,58 @@ function useIsCramped() {
 // CharDisplay is shared well beyond CardPrompt.jsx -- KanaScreen,
 // KanjiScreen and VocabScreen import it directly
 // with their own numeric `size` props, none of it plan 048's to touch.
-// `variant` is opt-in, not a new default, precisely so those callers
-// are byte-for-byte unaffected: no `variant` (the only shape they pass)
-// falls through to the exact old `size ?? 110` / `isLargeSize` behaviour
-// below. Only CardPrompt.jsx's specimen call sites pass `variant` now.
+// `variant` is opt-in, not a new default: it picks WHICH size, and no
+// `variant` (the only shape those callers pass) still means the same
+// `size ?? 110` it always did.
+//
+// What is no longer split between the two paths is what that size
+// MEANS. Both now hand it to --char-size and let the stylesheet do the
+// arithmetic, because the rung is a ceiling and the fit that enforces
+// it lives in CSS (see .char-display). A path that set font-size
+// inline would simply out-rank that fit -- which is how the same
+// overflow could have been fixed on CardPrompt's card and left
+// standing on VocabRun's.
 const SPECIMEN_SIZE = {
   glyph: 'var(--fs-specimen-glyph)',
   word: 'var(--fs-specimen-word)',
 }
 
 export function CharDisplay({ char, variant, size }) {
+  // How many characters have to share the box. The rung is a CEILING
+  // now, not a size (see .char-display), and this is the divisor that
+  // fits a long word under it -- the same --len the dictionary tile
+  // sets on its own headword, and for the same reason: at 72px
+  // とうもろこし is 440px of one nowrap line, which on a 390px phone
+  // printed off BOTH edges of the card.
+  //
+  // Spread, not .length: a surrogate pair is one character on screen
+  // and would otherwise count twice and halve the word.
+  const len = [...(char ?? '')].length || 1
+
   if (variant) {
     return (
       <div
         className="char-display"
-        style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)' }}
+        style={{ '--char-size': SPECIMEN_SIZE[variant], '--char-font': 'var(--font-jp)', '--len': len }}
       >
         {char}
       </div>
     )
   }
-  // `height` is set explicitly too, not left to the class's own
-  // `calc(var(--char-size, 110px) * 1.15)` -- this path never sets
-  // --char-size, so that calc() would silently fall back to 110px
-  // regardless of `s` (a real bug the first draft of this had: every
-  // non-variant caller's box height stopped tracking its font size).
-  // Same 1.15 multiplier as the class default, so a plain <CharDisplay
-  // size={N}/> box scales exactly like a variant one.
+  // --char-size, not a bare `fontSize`/`height` pair. This path used to
+  // set both inline -- it never set --char-size, so the class's own
+  // `calc(var(--char-size, 110px) * 1.15)` would have fallen back to
+  // 110px regardless of `s` (a real bug the first draft of this had).
+  // Setting the variable instead fixes that at the source AND lets the
+  // fit above reach this path: an inline font-size would have won over
+  // the class's clamp, leaving VocabRun's own size={72} specimen -- the
+  // very card the overflow was reported on -- running off the edges
+  // while CardPrompt's identical one behaved.
   const s = size ?? 110
   return (
     <div
       className="char-display"
-      style={{ fontSize: s, height: s * 1.15, fontFamily: s >= 60 ? 'var(--font-jp)' : 'inherit' }}
+      style={{ '--char-size': `${s}px`, '--len': len, fontFamily: s >= 60 ? 'var(--font-jp)' : 'inherit' }}
     >
       {char}
     </div>

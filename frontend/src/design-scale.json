@@ -126,6 +126,7 @@
       "9px",
       "calc(var(--flap-h) * 0.62)",
       "calc(var(--meaning-size, 28px) * 0.55)",
+      "clamp( var(--fs-caption), calc(96cqw / var(--len, 1)), var(--char-size, 110px))",
       "clamp( var(--fs-caption), calc(96cqw / var(--len, 1)), var(--fs-specimen-word))",
       "clamp(1.05rem, 0.9rem + 0.6vw, 1.35rem)",
       "clamp(1.35rem, 1.1rem + 1vw, 1.75rem)",
@@ -357,6 +358,7 @@
       "`${maxWidth}px`",
       "`${p.drift}px`",
       "`${p.size}px`",
+      "`${s}px`",
       "`${size}px`"
     ],
     "design-token": [
@@ -430,6 +432,6 @@
     "padding": 180,
     "design-token": 37,
     "custom-property-length": 20,
-    "js-inline-length": 10
+    "js-inline-length": 11
   }
 }
