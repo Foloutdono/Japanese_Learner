@@ -13275,7 +13275,7 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     bottom: var(--dock-bottom);
     z-index: 10;
     margin-inline: calc(-1 * var(--sp-5));
-    padding: var(--sp-3) var(--sp-5) var(--sp-5);
+    padding-block: var(--sp-3) var(--sp-5);
     background: var(--bg-main);
     /* Edge to edge means auto, not 100%. A percentage resolves against
        the stage's INNER box and knows nothing about the negative
@@ -13284,8 +13284,37 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
        started — the browse's Next stopped 32px short of the card's
        right edge, with the whole pair off its column. Auto width takes
        the margins into account: the foot spans the stage, and its own
-       gutter puts the buttons back on the card's edges. */
+       gutter puts the buttons back on the card's edges.
+
+       The clamp goes with it: a max-width sizes the BORDER box, so
+       .browse-nav's --card-w clamp was measuring the bled ground and
+       the gutters as if they were the buttons. The column below does
+       that job now, for every foot at once. */
     width: auto;
+    max-width: none;
+    /* ── The gutter is the card's column, not the screen's ──
+       The ground under a docked foot runs edge to edge; the control on
+       it belongs over the card. Those are the same thing on a phone,
+       where the card fills the stage and the page's own gutter puts
+       both on the same edges. They part between --card-w and this
+       query's own ceiling: the card stops growing at 640 and centres
+       itself (.prompt-card, index.css:12702), while the foot kept
+       spanning the stage — on 768, a tablet held upright, the field and
+       the browse's pair sat 43px outside the card on each side, and the
+       screen read as two columns that disagree.
+
+       So the gutter is whatever centres the content on that column:
+       the page's own where the card fills the stage, and half of what
+       the card leaves once it stops. Every foot in this query holds a
+       control that pairs with a --card-w card above it (the browse's
+       two buttons, reading's and translation's field and Submit,
+       comprehension's pair), so one number serves all four.
+
+       This is the foot catching up with the instrument beside it, not
+       a new idea: the rating bar above already draws the same
+       division — its ground bleeds, while .rating-bar__buttons
+       (index.css:9554) holds the segments to the very same column. */
+    padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
   }
   /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
      edge, on the dock's edge, its own inset under it. */
