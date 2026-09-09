@@ -21,6 +21,7 @@ function stageOf(status) {
 	return null
 }
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
+import { FuriganaParts } from '../components/study/Readings'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -624,6 +625,28 @@ function shortKana(kana, type) {
 		.join('・')
 }
 
+// ── The reading rides on the headword ────────────────────
+// The card printed its reading as a line ABOVE the word, which put a
+// second register over every tile — and over a kana-only entry it
+// printed the word twice (テープレコーダー over テープレコーダー). It is
+// furigana now, on the characters it belongs to:
+//
+//   a word   the backend's own per-kanji alignment (study/furigana.py,
+//            already on every catalogue row as `furigana`) — the same
+//            parts the entry's plate sets over its headword
+//   a kanji  its first two readings over the character, the pair
+//            shortKana already picks for this card
+//   kana     nothing: a reading over its own spelling says nothing
+//
+// Owner's call; the plate downstairs is unchanged.
+function cardFurigana(entry) {
+	if (entry.type === 'kanji') {
+		const reading = shortKana(entry.kana, entry.type)
+		return reading ? [{ text: entry.kanji, reading }] : null
+	}
+	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
+}
+
 // ── The detail dock ──────────────────────────────────────
 // One node, two presentations. On a wide screen it is a sticky column
 // standing beside the catalogue — you scan and read at the same time,
@@ -678,6 +701,7 @@ function ResultsSection({
 						<div className="dict-grid">
 							{results.map(entry => {
 								const stage = stageOf(entry.status?.status)
+								const furigana = cardFurigana(entry)
 								return (
 									<button
 										key={entryKey(entry)}
@@ -703,11 +727,10 @@ function ResultsSection({
 										    screen reader can still read it. The dictionary's own
 										    plate prints it in full. */}
 										{stage && <span className="sr-only">{t[stage]}</span>}
-										<span className="dict-entry-card__kana" lang="ja">
-											{shortKana(entry.kana, entry.type)}
-										</span>
 										<span className="dict-entry-card__char" lang="ja">
-											{entry.kanji || entry.kana}
+											{furigana
+												? <FuriganaParts parts={furigana} />
+												: (entry.kanji || entry.kana)}
 										</span>
 										<span className="dict-entry-card__meaning">
 											{shortMeaning(entry.meaning)}

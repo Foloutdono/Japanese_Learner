@@ -13954,14 +13954,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.dict-entry-card__kana {
-  max-width: 100%;
+/* The reading is furigana on the headword itself now (see
+   DictionaryScreen's cardFurigana), set exactly as the entry's own
+   plate sets it — one vocabulary for the same annotation in both
+   places. The line that used to carry it above the word is gone with
+   it: it was a second register on every tile, and on a kana-only entry
+   it printed the word twice. */
+.dict-entry-card__char ruby { ruby-position: over; }
+.dict-entry-card__char rt {
   font-family: var(--font-jp);
   font-size: var(--fs-caption);
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  user-select: none;
 }
 .dict-entry-card__meaning {
   width: 100%;

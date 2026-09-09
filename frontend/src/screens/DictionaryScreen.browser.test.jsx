@@ -215,8 +215,20 @@ describe('the dictionary screen', () => {
     const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
     expect(cards.length).toBe(RESULTS.length)
     expect(cards[0].querySelector('.dict-level-badge').textContent).toBe('N5')
-    expect(cards[0].querySelector('.dict-entry-card__char').textContent).toBe('駅')
-    expect(cards[1].querySelector('.dict-entry-card__kana').textContent).toBe('でんしゃ')
+    // The headword, and only the headword, in the specimen's slot — its
+    // readings ride over it as furigana (below), so the ruby's own base
+    // is what the eye reads.
+    expect(cards[0].querySelector('.dict-entry-card__char ruby').firstChild.textContent).toBe('駅')
+    // The reading rides ON the headword now, as furigana: the word's
+    // own per-kanji alignment, and a kanji's first two readings over the
+    // character. The line that printed it above the word is gone — on a
+    // kana-only entry it printed the word twice.
+    expect(screen.container.querySelector('.dict-entry-card__kana')).toBeNull()
+    expect(cards[0].querySelector('.dict-entry-card__char rt').textContent).toBe('エキ・えき')
+    expect(cards[1].querySelector('.dict-entry-card__char rt').textContent).toBe('でんしゃ')
+    expect(cards[1].querySelector('.dict-entry-card__char ruby').textContent).toBe('電車でんしゃ')
+    // Nothing to annotate, nothing annotated.
+    expect(cards[2].querySelector('rt')).toBeNull()
     // Nothing is printed over the specimen any more.
     expect(screen.container.querySelector('.dict-grid .stage-mark')).toBeNull()
     // The stage rides on the card itself, and on the word only a
@@ -234,8 +246,11 @@ describe('the dictionary screen', () => {
     // Each tile measures its own headword, so the word can be set to
     // fit the tile on one line (index.css, .dict-entry-card__char).
     for (const card of cards) {
-      const headword = card.querySelector('.dict-entry-card__char').textContent
-      expect(card.style.getPropertyValue('--len')).toBe(String([...headword].length))
+      // The headword's own characters, not its furigana: the ruby is
+      // set at a rung of its own and never enters the fit.
+      const word = card.querySelector('.dict-entry-card__char').cloneNode(true)
+      word.querySelectorAll('rt').forEach(rt => rt.remove())
+      expect(card.style.getPropertyValue('--len')).toBe(String([...word.textContent].length))
     }
   })
 

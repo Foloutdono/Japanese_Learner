@@ -44,8 +44,9 @@ describe('the dictionary at phone width', () => {
             >
               <span className="dict-level-badge">N5</span>
               <span className="sr-only">{stage}</span>
-              <span className="dict-entry-card__kana">えき</span>
-              <span className="dict-entry-card__char">{c}</span>
+              <span className="dict-entry-card__char">
+                <ruby>{c}<rt>えき</rt></ruby>
+              </span>
               <span className="dict-entry-card__meaning">station</span>
             </button>
           ))}
@@ -89,7 +90,7 @@ describe('the dictionary at phone width', () => {
     // Every register of the card stands on the card's own axis, with
     // nothing in the corner to push it off.
     const mid = r => (r.left + r.right) / 2
-    for (const sel of ['.dict-entry-card__kana', '.dict-entry-card__char', '.dict-entry-card__meaning']) {
+    for (const sel of ['.dict-entry-card__char', '.dict-entry-card__meaning']) {
       expect(mid(card.querySelector(sel).getBoundingClientRect())).toBeCloseTo(mid(cr), 0)
     }
 

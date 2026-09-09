@@ -224,8 +224,9 @@ const Fixture = () => (
     <div className="dict-grid">
       <button type="button" className="dict-entry-card" style={{ '--level-color': 'var(--line-kanji)' }}>
         <span className="dict-level-badge dc-level">N5</span>
-        <span className="dict-entry-card__kana dc-kana">えき</span>
-        <span className="dict-entry-card__char">駅</span>
+        <span className="dict-entry-card__char">
+          <ruby>駅<rt className="dc-kana">えき</rt></ruby>
+        </span>
         <span className="dict-entry-card__meaning dc-meaning">station</span>
       </button>
     </div>
@@ -767,7 +768,7 @@ const SITES = [
   ['.dc-desc', 'analyzer door description'],
   ['.dc-intake', 'analyzer door intake (kaiseki mixed toward the ink)'],
   ['.dc-level', 'catalogue card level (level pigment mixed toward the ink)'],
-  ['.dc-kana', 'catalogue card reading'],
+  ['.dc-kana', 'catalogue card furigana'],
   ['.dc-meaning', 'catalogue card meaning'],
   ['.an-count', 'stepper count'],
   ['.an-furi', 'furigana over the focused token (on its tint)'],
