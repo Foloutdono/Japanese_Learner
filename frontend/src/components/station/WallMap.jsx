@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
-import { TRACKED_LINES as TRACKED, lineStops, stopsTravelled } from '../../domain/lineProgress'
+import { TRACKED_LINES as TRACKED, lineMarks, lineStops, stopsTravelled } from '../../domain/lineProgress'
 
 // ── 路線図 — the wall map ────────────────────────────────────
 // The Learn gate's panel, on the board's own sumi material: the four
@@ -13,14 +13,23 @@ import { TRACKED_LINES as TRACKED, lineStops, stopsTravelled } from '../../domai
 // clock) retired with the chrome (plan 071): the bar above the panel
 // names the place now, and the practice and facility registers live
 // behind their own gates.
+//
+// What a station on these lines MEANS is domain/lineProgress' rule and
+// the pass's too: the leg behind it, finished. The line opens at 初,
+// the novice's stop, because a learner who has begun N5 has left that
+// stop and not yet reached N5's.
 
 function Track({ stops, travelled }) {
-  // ONE scale for the stops and the train: a stop marks where its leg
-  // BEGINS, so with n legs of work the rail is divided into n, the
-  // last stop sits one leg short of the end, and the rail past it is
-  // that last leg. `pos` and `x` are then the same function — the
-  // stops used to be spaced over n-1 while the train ran over n, so
-  // the two only agreed at the ends.
+  // ONE scale for the stations and the train, and a station stands at
+  // the END of the leg it names: with n legs of work the rail is
+  // divided into n, the novice's stop holds the origin and each level
+  // holds the point at which it is finished, so the last station is
+  // the end of the line rather than a mark one leg short of it.
+  // `pos` and `x` are the same function of stops travelled — which is
+  // what lets the train park dead on a platform the moment that
+  // level's last card is learned, and never before.
+  const marks = lineMarks(stops)
+  const terminus = marks.length - 1
   const x = i => 5 + (i / stops.length) * 90
   const pos = Math.min(95, x(travelled))
 
@@ -28,26 +37,22 @@ function Track({ stops, travelled }) {
     <span className="wmap-track" aria-hidden="true">
       <span className="wmap-track__rail" />
       <span className="wmap-track__done" style={{ width: `${pos}%` }} />
-      {stops.map((stop, i) => (
-        <span key={stop.key}>
-          {/* Filled when the TRAIN has passed it, not when the stop
-              itself is half done — one rule, one story. */}
+      {marks.map((mark, i) => (
+        <span key={mark.key}>
+          {/* One rule, one story: a station fills when the train has
+              reached it, which — the station being the leg's
+              completion — is the same sentence as "this level is
+              done". The novice's stop at i = 0 is always filled: you
+              are standing on it before you have done anything. */}
           <span
-            className={`wmap-track__stop${travelled >= i + 1 ? ' wmap-track__stop--past' : ''}`}
+            className={`wmap-track__stop${i === terminus ? ' wmap-track__stop--end' : ''}${travelled >= i ? ' wmap-track__stop--past' : ''}`}
             style={{ left: `${x(i)}%` }}
           />
-          <span className="wmap-track__label" style={{ left: `${x(i)}%` }} lang={stop.key.startsWith('N') ? undefined : 'ja'}>
-            {stop.label}
+          <span className="wmap-track__label" style={{ left: `${x(i)}%` }} lang={mark.jp ? 'ja' : undefined}>
+            {mark.label}
           </span>
         </span>
       ))}
-      {/* 終点 — the end of the line: the stops sit one leg apart with
-          the last leg's rail running past the final one, so without a
-          terminus the track just frays. */}
-      <span
-        className={`wmap-track__stop wmap-track__stop--end${travelled >= stops.length ? ' wmap-track__stop--past' : ''}`}
-        style={{ left: `${x(stops.length)}%` }}
-      />
       <span className="wmap-track__train" style={{ left: `${pos}%` }} />
     </span>
   )

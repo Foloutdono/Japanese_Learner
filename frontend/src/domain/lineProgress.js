@@ -24,8 +24,27 @@
 // A deck key the stats payload doesn't know scores 0 rather than
 // disappearing — the line's length is the section's real extent, not
 // the part of it the learner has data for.
+//
+// A stop is a LEG of the line — the work N4 is — and the station the
+// map draws for it stands at the END of that leg, which is what
+// `lineMarks` builds. Reaching N4's station therefore means N4 is
+// finished, the promise the pass's ghost track already makes
+// (components/journey/stations.js prices its stops the same way). It
+// used to mean the opposite: the stations sat at the leg's start, so a
+// learner who had answered no N5 card at all was drawn parked on N5's
+// platform, and the line claimed a level that had not been begun.
 
 export const LEVEL_STOPS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+// 初 — the novice's stop, at the origin of every line: the one
+// station that is not a leg's completion, because nothing lies behind
+// it. It exists so the line has a platform to stand on before its
+// first level is done — the boarding office signs the same stop
+// (domain/goalMath.js's NOVICE_GOAL, the ride that ends at kana). Not
+// the ghost track's 発: that glyph names a DEPARTURE, the place one
+// journey happened to start from, while a line's origin is a standing
+// — knowing none of it yet — and 初 (初級, 初心者) names that.
+export const ORIGIN_STOP = { key: 'novice', label: '初', jp: true }
 
 // The four sections that have a track at all, by route: the SRS lines
 // /api/stats aggregates. Shared by the wall map and the profile's ride
@@ -39,10 +58,10 @@ export const TRACKED_LINES = { '/learn/kana': 'kana', '/learn/vocab': 'vocab', '
 // for "HIRAGANA_COMBINATIONS". Same sets, same order as
 // domain/kanaSets.js; the slug is what joins them.
 export const KANA_STOPS = [
-  { key: 'hiragana_basic',  label: 'あ' },
-  { key: 'hiragana_combos', label: 'きゃ' },
-  { key: 'katakana_basic',  label: 'ア' },
-  { key: 'katakana_combos', label: 'キャ' },
+  { key: 'hiragana_basic',  label: 'あ',   jp: true },
+  { key: 'hiragana_combos', label: 'きゃ', jp: true },
+  { key: 'katakana_basic',  label: 'ア',   jp: true },
+  { key: 'katakana_combos', label: 'キャ', jp: true },
 ]
 
 /** One deck's `items` entry, defended against every shape that isn't
@@ -63,7 +82,7 @@ function deckItems(stats, source, deckKey) {
 function lineOrder(source) {
   return source === 'kana'
     ? KANA_STOPS
-    : LEVEL_STOPS.map(key => ({ key, label: key }))
+    : LEVEL_STOPS.map(key => ({ key, label: key, jp: false }))
 }
 
 /**
@@ -72,9 +91,14 @@ function lineOrder(source) {
  * must still draw the map, just with nobody on it yet).
  */
 export function lineStops(stats, source) {
-  return lineOrder(source).map(({ key, label }) => ({
+  return lineOrder(source).map(({ key, label, jp = false }) => ({
     key,
     label,
+    // Whether the label is a specimen glyph or a level code — carried
+    // from the stop vocabulary rather than sniffed off the key at the
+    // drawing end, so `lang="ja"` is a fact about the label and not a
+    // guess about its spelling.
+    jp,
     score: deckItems(stats, source, key).score,
   }))
 }
@@ -82,6 +106,23 @@ export function lineStops(stats, source) {
 /** Total distance travelled, in stops — the train marker's position. */
 export function stopsTravelled(stops) {
   return stops.reduce((sum, s) => sum + s.score, 0)
+}
+
+/**
+ * The stations one line draws, in order: the novice's stop at the
+ * origin, then one per leg AT THE POINT THAT LEG IS FINISHED. A
+ * station is therefore a completion — stand on N4's and N4 is done —
+ * and the last one is the end of the line.
+ *
+ * Mark k is reached at exactly k stops travelled, so `stopsTravelled`
+ * is the marker's index as well as its distance: the map fills a
+ * station when the train is on or past it, and that one rule says both
+ * "you have been here" and "this level is finished". The two used to
+ * be separate rules over two different positions, which is how the
+ * train came to sit on a platform of a level nobody had started.
+ */
+export function lineMarks(stops) {
+  return [ORIGIN_STOP, ...stops.map(({ key, label, jp = false }) => ({ key, label, jp }))]
 }
 
 /**

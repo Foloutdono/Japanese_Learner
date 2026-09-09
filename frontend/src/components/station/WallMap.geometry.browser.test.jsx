@@ -4,12 +4,17 @@ import { LangProvider } from '../../LangContext'
 import { MemoryRouter } from 'react-router-dom'
 import '../../index.css'
 
-// ── The train and the stations are on one scale ─────────────────
-// They were on two. Stops were spaced over (n-1) gaps while the train
-// ran over n legs of work, so the two only agreed at the ends: finish
-// three of five levels and the marker sat at 59% while the dot it had
-// just filled was at 72.5%. A route map whose train lags the stations
-// it has passed is worse than no map.
+// ── A station is the completion of the leg behind it ─────────────
+// The stations used to sit at the START of their leg, so a learner who
+// had answered no N5 card at all was drawn parked on N5's platform:
+// the map handed you a level for boarding the train. Now the line
+// opens at 初, the novice's stop, and N5's station is the point N5 is
+// finished — the same promise the pass's ghost track makes.
+//
+// The train and the stations are on one scale, which is what lets that
+// promise be exact. They were on two: stops were spaced over (n-1)
+// gaps while the train ran over n legs of work, so the two only agreed
+// at the ends.
 //
 // Measured off the DOM's own `left` values rather than recomputed from
 // the formula, which would only prove the test can do arithmetic.
@@ -53,16 +58,47 @@ function mapWith(scores) {
 
 const pctOf = el => parseFloat(el.style.left)
 
+/** The line as drawn: six stations — 初, then one per level — the
+ *  train, and which stations are filled. `marks` is in line order, so
+ *  `marks[k]` is the station reached at k levels done. */
 function geometry(container) {
+  const stops = [...container.querySelectorAll('.wmap-track__stop')]
   return {
-    stops: [...container.querySelectorAll('.wmap-track__stop:not(.wmap-track__stop--end)')].map(pctOf),
+    marks: stops.map(pctOf),
     end: pctOf(container.querySelector('.wmap-track__stop--end')),
     train: pctOf(container.querySelector('.wmap-track__train')),
-    past: [...container.querySelectorAll('.wmap-track__stop')].map(s => s.className.includes('--past')),
+    past: stops.map(s => s.className.includes('--past')),
+    labels: [...container.querySelectorAll('.wmap-track__label')].map(l => l.textContent),
   }
 }
 
 describe('WallMap — the train and the stations', () => {
+  it('opens the line at the novice’s stop and ends it on the last level', async () => {
+    // Six stations for five levels: the one you stand on having done
+    // nothing, then a station per level AT its completion. The last is
+    // the terminus, because finishing N1 finishes the line — there is
+    // no unnamed sixth mark past it any more.
+    const screen = await mapWith([0, 0, 0, 0, 0])
+    const g = geometry(screen.container)
+    expect(g.labels).toEqual(['初', ...LEVELS])
+    expect(g.marks).toHaveLength(6)
+    expect(g.end).toBeCloseTo(g.marks[5], 5)
+  })
+
+  it('leaves the novice’s stop the moment a level is begun, and reaches no level’s station early', async () => {
+    // The whole point of the round. Beginning N5 must not park the
+    // train on N5.
+    const screen = await mapWith([0, 0, 0, 0, 0])
+    const idle = geometry(screen.container)
+    expect(idle.train).toBeCloseTo(idle.marks[0], 5)
+
+    await screen.rerender(tree([0.5, 0, 0, 0, 0]))
+    const half = geometry(screen.container)
+    expect(half.train).toBeGreaterThan(half.marks[0])
+    expect(half.train).toBeLessThan(half.marks[1])
+    expect(half.train).toBeCloseTo((half.marks[0] + half.marks[1]) / 2, 5)
+  })
+
   it('parks the train exactly on a station for every whole level finished', async () => {
     // The heart of it: n levels done puts the marker on station n, to
     // the pixel, at every point along the line — not just at the ends.
@@ -70,36 +106,34 @@ describe('WallMap — the train and the stations', () => {
     for (let done = 0; done <= 5; done++) {
       await screen.rerender(tree(Array.from({ length: 5 }, (_, i) => (i < done ? 1 : 0))))
       const g = geometry(screen.container)
-      const target = done === 5 ? g.end : g.stops[done]
-      expect(g.train, `${done} level(s) done should sit on station ${done}`).toBeCloseTo(target, 5)
+      expect(g.train, `${done} level(s) done should sit on station ${done}`).toBeCloseTo(g.marks[done], 5)
     }
   })
 
-  it('puts a part-finished level between its station and the next', async () => {
+  it('puts a part-finished level between its own station and the one before', async () => {
     const screen = await mapWith([1, 0.5, 0, 0, 0])
     const g = geometry(screen.container)
-    expect(g.train).toBeGreaterThan(g.stops[1])
-    expect(g.train).toBeLessThan(g.stops[2])
-    // Halfway through the leg, so halfway between the two stations.
-    expect(g.train).toBeCloseTo((g.stops[1] + g.stops[2]) / 2, 5)
+    // N5 done, N4 half: past N5's station, short of N4's.
+    expect(g.train).toBeGreaterThan(g.marks[1])
+    expect(g.train).toBeLessThan(g.marks[2])
+    expect(g.train).toBeCloseTo((g.marks[1] + g.marks[2]) / 2, 5)
   })
 
-  it('fills a dot when the train has passed it, and not before', async () => {
+  it('fills a station when the train has reached it, and not before', async () => {
     // The old rule filled a dot at score >= 0.5, independently of where
     // the train was — so a half-done level showed as visited while the
     // marker was still short of it.
     const screen = await mapWith([1, 0.9, 0, 0, 0])
     const { past } = geometry(screen.container)
-    // N5 done -> the train is on N4's platform, so N5 is behind it.
-    expect(past.slice(0, 5)).toEqual([true, false, false, false, false])
+    // 初 is behind everyone; N5 done, so its station is reached; N4 is
+    // nine tenths done, which is not done.
+    expect(past).toEqual([true, true, false, false, false, false])
   })
 
-  it('draws a terminus past the last level, and only fills it when the line is done', async () => {
-    // The stations sit one leg apart now, so the last leg's rail runs
-    // past N1; without an end mark the track just frays.
+  it('only fills the terminus when the line is finished', async () => {
     const screen = await mapWith([1, 1, 1, 1, 0.5])
     const g1 = geometry(screen.container)
-    expect(g1.end).toBeGreaterThan(g1.stops[4])
+    expect(g1.end).toBeGreaterThan(g1.marks[4])
     expect(g1.past[5]).toBe(false)
 
     await screen.rerender(tree([1, 1, 1, 1, 1]))
@@ -111,7 +145,7 @@ describe('WallMap — the train and the stations', () => {
   it('keeps every mark inside the rail', async () => {
     const screen = await mapWith([1, 1, 1, 1, 1])
     const g = geometry(screen.container)
-    for (const p of [...g.stops, g.end, g.train]) {
+    for (const p of [...g.marks, g.train]) {
       expect(p).toBeGreaterThanOrEqual(0)
       expect(p).toBeLessThanOrEqual(100)
     }

@@ -685,6 +685,13 @@ a learner who has just rated one card is already looking for the next.
   Same parts every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
+  **A stop stands at the END of the leg it names, and the line opens at
+  初, the novice's stop** — so reaching a stop is finishing the thing it is
+  named for, never starting it, and a learner who has done nothing is drawn
+  standing at 初 rather than on the first level's platform. The wall map had it
+  the other way round once: N5's station sat at the START of N5's work, which
+  handed a learner that level for boarding the train and left the last stop one
+  leg short of the terminus.
   Three rules the 進捗が主役 round settled on the pass's copy of it, and they
   hold wherever the drawing goes: your train **rides above the rail and reaches
   it on a stem**, so the x it claims is exact and it never covers a stop — a

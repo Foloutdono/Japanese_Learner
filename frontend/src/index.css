@@ -6388,9 +6388,10 @@ textarea:focus-visible {
   text-overflow: ellipsis;
 }
 
-/* ── The track: stops, the travelled portion, the train ──────
-   Geometry mirrors the stop count (see WallMap's Track): first stop
-   at 5%, last at 95%. The rail is the line's pigment at rest, the
+/* ── The track: stations, the travelled portion, the train ──────
+   Geometry mirrors the leg count (see WallMap's Track): the novice's
+   stop at 5%, the terminus at 95%, and a level's station at the point
+   its leg is finished. The rail is the line's pigment at rest, the
    travelled portion is it raw, and the marker is it lifted toward
    the panel ink — colour as an edge and a marker, never a fill. */
 .wmap-track { position: relative; height: 30px; }
@@ -6418,12 +6419,11 @@ textarea:focus-visible {
   background: var(--line-color, var(--accent2));
   border-color: var(--line-color, var(--accent2));
 }
-/* 終点 — the terminus, drawn as a station because that is what it is:
-   the end of the line, one leg past the last level. Squared off rather
-   than round, the way a terminus is marked on a route map, so it reads
-   as a destination and not as a sixth level. */
+/* 終点 — the terminus: the last level's own station, since finishing
+   N1 (or キャ) is finishing the line. Squared off rather than round,
+   the way a terminus is marked on a route map, so the end of the line
+   reads as an end and not as one more stop with track beyond it. */
 .wmap-track__stop--end { border-radius: var(--r-plate); }
-.wmap-track__label--end { opacity: 0.45; }
 .wmap-track__label {
   position: absolute;
   top: 19px;
