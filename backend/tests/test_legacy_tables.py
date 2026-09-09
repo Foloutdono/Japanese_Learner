@@ -25,6 +25,14 @@ SCHEMA_FILE = BACKEND / "srs" / "data_structure.sql"
 
 NAMES = [table for table, _why in LEGACY]
 
+# The files whose whole job is to name these tables. Everything else
+# mentioning one means the feature is not as dead as this list claims.
+CLEANUP_TOOLS = {
+    "backend/scripts/drop_legacy_tables.py",
+    "backend/scripts/sql/cleanup_orphans_and_legacy.sql",
+    "backend/tests/test_legacy_tables.py",
+}
+
 
 def test_the_list_is_named_and_explained():
     assert NAMES, "nothing listed"
@@ -43,11 +51,7 @@ def test_no_legacy_table_is_referenced_anywhere():
              "backend", "frontend/src", "docs"],
             cwd=REPO, capture_output=True, text=True,
         ).stdout.split()
-        # The script and this test are allowed to name them; that is
-        # their whole job.
-        hits = [h for h in hits
-                if h not in ("backend/scripts/drop_legacy_tables.py",
-                             "backend/tests/test_legacy_tables.py")]
+        hits = [h for h in hits if h not in CLEANUP_TOOLS]
         assert hits == [], f"{table} is still referenced by {hits}"
 
 
