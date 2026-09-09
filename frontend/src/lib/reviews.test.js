@@ -41,6 +41,23 @@ describe('postReview', () => {
     expect(apiJson).toHaveBeenCalledWith('/api/kana/review', { access_token: 't' }, expect.objectContaining({ method: 'POST' }))
   })
 
+  it('charges nothing at all for a review on a free line', async () => {
+    // 無料 — a HUD figure that drops on a kana review and springs back
+    // when the response lands reads as a charge taken and refunded.
+    let seen
+    apiJson.mockImplementation(async () => {
+      seen = credits.peekBalance()
+      return { xp_earned: 4, credits: { balance: 10, unlimited: false } }
+    })
+    await postReview('/api/kana/review', {}, { card_id: 'x', mode: 'kana.flashcard.f2b', quality: 4 })
+    expect(seen).toBe(10)
+    expect(credits.peekBalance()).toBe(10)
+    // The mode is what says so, not the path: the same card met in the
+    // day's queue is the same free ride.
+    await postReview('/api/today/review', {}, { card_id: 'x', mode: 'kana.write_kana', quality: 4 })
+    expect(seen).toBe(10)
+  })
+
   it('raises the run-out sheet on a 402 out_of_credits and still rejects', async () => {
     apiJson.mockRejectedValue(new ApiError(402, { detail: 'out_of_credits', balance: 0, refillAt: '2026-09-07T00:00:00+00:00' }, '/api/today/review'))
     await expect(postReview('/api/today/review', {}, {}, { cleared: 12 })).rejects.toBeInstanceOf(ApiError)

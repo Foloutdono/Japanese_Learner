@@ -4779,6 +4779,19 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* 無料 — the line that is never charged (core/credits.py,
+   FREE_SOURCES). A sentence under the lattice rather than a third cell
+   in it: .balance__rows is a flush two-column grid, and a third cell
+   would leave half a row empty. */
+.balance__free {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  margin: 0;
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+.balance__free-jp { flex: none; font-weight: 700; color: var(--text-primary); }
 
 /* ── The fare slip, at the end of a run (plan 069) ── */
 .fare-slip {
@@ -5993,6 +6006,22 @@ textarea:focus-visible {
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--fs-caption);
+  color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary));
+}
+/* 無料 — the row rides free (core/credits.py, FREE_SOURCES). A caption
+   in the same ink as .lane__mode, not a pill: the row is already a
+   switch, and a bordered tag on it reads as a second control to press.
+   It sits between the names and the due figure — .lane__due keeps the
+   auto margin, so this packs against it rather than floating loose in
+   the middle of the row. Shown only while there is a fare to be free
+   OF (GateCard: never on a pass). */
+.lane__free {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
   color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary));
 }
 .lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }

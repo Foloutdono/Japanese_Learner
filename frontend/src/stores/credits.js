@@ -32,8 +32,10 @@ export function peekBalance() {
   return cur ? (cur.unlimited ? null : cur.balance) : undefined
 }
 
-/** The optimistic decrement, before the response. */
+/** The optimistic decrement, before the response. Nothing to apply on
+ *  a free line — see lib/reviews.js. */
 export function applySpend(n = 1) {
+  if (!(n > 0)) return
   const cur = store.peek()
   if (!cur || cur.unlimited || cur.balance == null) return
   store.seed({ ...cur, balance: Math.max(0, cur.balance - n) })

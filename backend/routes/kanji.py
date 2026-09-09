@@ -338,8 +338,10 @@ def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
-    # review (plan 069): a rejected review is not a ride.
-    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
+    # review (plan 069): a rejected review is not a ride. Priced by
+    # THIS router's source rather than by the client's mode key, so a
+    # `kana.*` posted here still pays (core/credits.py, FREE_SOURCES).
+    fare = credits.spend(user_id, credits.cost_of(KANJI), card_id)
     # No extra bulk-stats call needed at all now — review() returns
     # the post-review stage directly (it already has the updated
     # total_reviews/interval_days in hand from the save), and the

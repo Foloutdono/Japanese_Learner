@@ -1329,7 +1329,10 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
-    # review (plan 069): a rejected review is not a ride.
+    # review (plan 069): a rejected review is not a ride. Always the
+    # full fare: the free lines are section lines (core/credits.py,
+    # FREE_SOURCES), and no deck structure is a kana one
+    # (study/structures.py), so a personal card can never be one.
     fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
     return {
         "card_id":     payload.card_id,

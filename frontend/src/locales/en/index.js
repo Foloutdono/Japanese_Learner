@@ -67,6 +67,7 @@ const nav = {
   balanceOf:         (cap) => `of ${cap}`,
   balanceRefillAt:   (at) => `a day, at ${at}`,
   balanceHolds:      (cap) => `holds up to ${cap}`,
+  balanceKanaFree:   'Kana reviews cost nothing',
   gateShort:         (rides, due) => `Only ${rides} of the ${due} required`,
   gateNoCredits:     (refill, at) => `No credits left — +${refill} at ${at}`,
   runOutTitle:       'Out of credits',
@@ -74,6 +75,8 @@ const nav = {
   runOutWaiting:     (n) => `${n} wait for tomorrow`,
   runOutRefill:      'at midnight',
   runOutTomorrow:    'tomorrow',
+  // 無料 — a lane that costs nothing (domain/credits.js).
+  freeFare:          'free',
   fareReviews:       'reviews',
   fareFare:          'fare',
   fareCreditsLeft:   'credits left',
