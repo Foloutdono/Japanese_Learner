@@ -206,17 +206,29 @@ describe('the dictionary screen', () => {
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
   })
 
+  // The stage is the card's bottom edge now, not a word over the
+  // specimen (owner's ruling, from six rendered directions — see
+  // .dict-entry-card in index.css). The word stays where a screen
+  // reader can reach it, and the plate still prints it in full.
   it('the catalogue: a card per entry with its level and its stage, the count in the console', async () => {
     const screen = await renderScreen()
     const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
     expect(cards.length).toBe(RESULTS.length)
     expect(cards[0].querySelector('.dict-level-badge').textContent).toBe('N5')
-    expect(cards[0].querySelector('.stage-mark').textContent).toBe(T.mastered)
     expect(cards[0].querySelector('.dict-entry-card__char').textContent).toBe('駅')
-    expect(cards[1].querySelector('.stage-mark').textContent).toBe(T.new)
     expect(cards[1].querySelector('.dict-entry-card__kana').textContent).toBe('でんしゃ')
-    // No card and no level: the JMdict entry prints neither mark.
-    expect(cards[2].querySelector('.stage-mark')).toBeNull()
+    // Nothing is printed over the specimen any more.
+    expect(screen.container.querySelector('.dict-grid .stage-mark')).toBeNull()
+    // The stage rides on the card itself, and on the word only a
+    // reader hears.
+    expect(cards[0].classList.contains('dict-entry-card--mastered')).toBe(true)
+    expect(cards[0].querySelector('.sr-only').textContent).toBe(T.mastered)
+    expect(cards[1].classList.contains('dict-entry-card--new')).toBe(true)
+    expect(cards[1].querySelector('.sr-only').textContent).toBe(T.new)
+    // No card and no level: the JMdict entry prints neither mark, and
+    // its edge stays the card's own hairline.
+    expect([...cards[2].classList].some(c => c.startsWith('dict-entry-card--'))).toBe(false)
+    expect(cards[2].querySelector('.sr-only')).toBeNull()
     expect(cards[2].querySelector('.dict-level-badge')).toBeNull()
     expect(screen.container.querySelector('.console__count').textContent).toBe(T.dictionaryResults(RESULTS.length))
   })

@@ -19,7 +19,7 @@ function resolver() {
 }
 
 describe('the dictionary at phone width', () => {
-  it('the door is a row target and the catalogue is two columns of centred cards with the level and the stage in the corners', async () => {
+  it('the door is a row target and the catalogue is two columns of centred cards with the level in its corner and the stage on the edge', async () => {
     const screen = await render(
       <main className="dictionary" style={{ '--line-color': 'var(--line-jisho)' }}>
         <button type="button" className="anl-door">
@@ -35,10 +35,10 @@ describe('the dictionary at phone width', () => {
           </span>
         </button>
         <div className="dict-grid">
-          {['駅', '電車', '発', '車'].map(c => (
-            <button key={c} type="button" className="dict-entry-card" style={{ '--level-color': 'var(--line-kanji)' }}>
+          {[['駅', 'mastered'], ['電車', 'learning'], ['発', 'new'], ['車', 'learning']].map(([c, stage]) => (
+            <button key={c} type="button" className={`dict-entry-card dict-entry-card--${stage}`} style={{ '--level-color': 'var(--line-kanji)' }}>
               <span className="dict-level-badge">N5</span>
-              <span className="stage-mark stage-mark--mastered">Mastered</span>
+              <span className="sr-only">{stage}</span>
               <span className="dict-entry-card__kana">えき</span>
               <span className="dict-entry-card__char">{c}</span>
               <span className="dict-entry-card__meaning">station</span>
@@ -68,18 +68,41 @@ describe('the dictionary at phone width', () => {
     expect(cards[2].getBoundingClientRect().top).toBeGreaterThanOrEqual(cards[0].getBoundingClientRect().bottom)
     const card = cards[0]
     expect(getComputedStyle(card).textAlign).toBe('center')
-    // The level sits in the top-left corner, the stage in the top-right,
-    // and the glyph under both.
+    // The level sits in the top-left corner and the glyph under it.
+    // Nothing sits in the other one: the stage word printed there was a
+    // two-word phrase in the caption's tracking, it ran nearly the full
+    // width of a 168px tile, and it changed length card by card — so
+    // the stage moved onto the card's own bottom edge (owner's ruling,
+    // from six rendered directions).
     const cr = card.getBoundingClientRect()
     const level = card.querySelector('.dict-level-badge').getBoundingClientRect()
-    const mark = card.querySelector('.stage-mark').getBoundingClientRect()
+    expect(card.querySelector('.stage-mark')).toBeNull()
     expect(level.left - cr.left).toBeLessThan(cr.width / 2)
-    expect(cr.right - mark.right).toBeLessThan(cr.width / 2)
     expect(level.top - cr.top).toBeLessThan(20)
-    expect(mark.top - cr.top).toBeLessThan(20)
     const char = card.querySelector('.dict-entry-card__char').getBoundingClientRect()
     expect(char.top).toBeGreaterThan(level.top)
-    expect(char.top).toBeGreaterThan(mark.top)
+    // Every register of the card stands on the card's own axis, with
+    // nothing in the corner to push it off.
+    const mid = r => (r.left + r.right) / 2
+    for (const sel of ['.dict-entry-card__kana', '.dict-entry-card__char', '.dict-entry-card__meaning']) {
+      expect(mid(card.querySelector(sel).getBoundingClientRect())).toBeCloseTo(mid(cr), 0)
+    }
+
+    // The edge says where the card is: the state's own ink, and the
+    // card's plain hairline where the schedule has never seen it.
+    const ink = value => {
+      const probe = document.createElement('div')
+      probe.style.background = value
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return colour
+    }
+    const edge = el => getComputedStyle(el, '::after').backgroundColor
+    expect(edge(cards[0])).toBe(ink('var(--state-mastered)'))
+    expect(edge(cards[1])).toBe(ink('var(--state-learning)'))
+    expect(edge(cards[2])).toBe(ink('var(--surface-line)'))
+    expect(edge(cards[0])).not.toBe(edge(cards[1]))
   })
 
   it('the plate: the marks row is a target, the glyph is a specimen, the stripe bleeds to the edges; the blocks divide by hairlines, the word rows are targets, the records a lattice', async () => {

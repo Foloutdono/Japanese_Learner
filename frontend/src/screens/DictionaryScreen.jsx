@@ -10,9 +10,10 @@ import {
 	DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
 
-// The catalogue card's stage word: the SRS status folded onto the three
-// stages the mark knows. A due card is still in progress; an unknown
-// status prints nothing (StageMark returns null for it).
+// The catalogue card's stage: the SRS status folded onto the three
+// stages the card can draw. A due card is still in progress; an unknown
+// status draws no stage at all, and the card's edge stays its own
+// hairline (index.css, .dict-entry-card::after).
 function stageOf(status) {
 	if (status === 'mastered') return 'mastered'
 	if (status === 'learning' || status === 'due') return 'learning'
@@ -20,7 +21,6 @@ function stageOf(status) {
 	return null
 }
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
-import { StageMark } from '../components/study/StageMark'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -672,8 +672,8 @@ function ResultsSection({
 
 					{/* The catalogue (canvas): reading above, headword large,
 					    meaning below — the three registers a 駅名標 carries, in
-					    the order it carries them — with the level in one corner
-					    and the stage word in the other. */}
+					    the order it carries them — with the level in its corner
+					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
 						<div className="dict-grid">
 							{results.map(entry => {
@@ -684,10 +684,19 @@ function ResultsSection({
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
-										className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
+										className={[
+											'dict-entry-card',
+											stage ? `dict-entry-card--${stage}` : '',
+											selected && entryKey(selected) === entryKey(entry) ? 'dict-entry-card--selected' : '',
+										].filter(Boolean).join(' ')}
 									>
 										<LevelBadge level={entry.level} />
-										{stage && <StageMark stage={stage} />}
+										{/* The stage is the card's bottom edge now (index.css,
+										    .dict-entry-card::after) — but an edge is a colour, and
+										    a colour is not a word: the tile keeps the word where a
+										    screen reader can still read it. The dictionary's own
+										    plate prints it in full. */}
+										{stage && <span className="sr-only">{t[stage]}</span>}
 										<span className="dict-entry-card__kana" lang="ja">
 											{shortKana(entry.kana, entry.type)}
 										</span>

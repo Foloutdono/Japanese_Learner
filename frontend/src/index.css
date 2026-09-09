@@ -13845,9 +13845,23 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 @media (min-width: 560px) {
   .dict-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
 }
-/* One entry card: the level in one corner, the stage word in the
-   other, the three registers down the middle, the level's colour
-   along the bottom edge the way a station plate carries its line's. */
+/* One entry card: the level in its corner, the three registers down
+   the middle, and the card's own bottom edge carrying WHERE THE CARD
+   IS — new, in progress, mastered.
+   ── Why the edge and not a word (owner's ruling, from a rendered
+   comparison of six directions) ──
+   The stage was printed as its word in the opposite corner, and
+   "IN PROGRESS" is a two-word phrase set in the caption's wide
+   tracking: on a 168px tile it ran nearly the full width, pushed the
+   reading off centre, and changed length card by card, so the top of
+   every tile read differently and none of them read as the same
+   object. The card already had a 3px rule along its bottom — it
+   carried the JLPT level, which the badge in the corner also says —
+   so the rule now says the one thing nothing else on the tile does.
+   Nothing is printed over the specimen any more.
+   The word is not gone from the app: the dictionary's own plate still
+   prints it (StageMark, inline), and the tile keeps it for a screen
+   reader. */
 .dict-entry-card {
   --plate: var(--level-color, var(--text-secondary));
   position: relative;
@@ -13874,9 +13888,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   right: 0;
   bottom: 0;
   height: 3px;
-  background: var(--plate);
+  /* No stage known (a word the schedule has never seen) reads as the
+     card's own hairline, thickened: an empty gauge, not a state. */
+  background: var(--stage-edge, var(--surface-line));
   opacity: 0.85;
 }
+/* --state-new is the wash a not-started token wears (#1a1812 in the
+   dark theme); as a 3px rule on this card's ground it is invisible,
+   which is the right reading for it — a card nobody has opened has
+   nothing on its gauge. In progress and mastered are the state inks
+   themselves, vermillion and gold, the same two the study card's own
+   seal and the deck's progress rule wear. */
+.dict-entry-card--new       { --stage-edge: var(--surface-line); }
+.dict-entry-card--learning  { --stage-edge: var(--state-learning); }
+.dict-entry-card--mastered  { --stage-edge: var(--state-mastered); }
 .dict-entry-card:hover,
 .dict-entry-card:focus-visible {
   background: var(--bg-card-hover);

@@ -505,9 +505,20 @@ objects, and only one of them ever waits to be dismissed:
 - **The press** (落款) — a card climbing a stage — is the card being
   signed. Every card carries its stage as a **word** in its top corner
   (new · in progress · mastered, caption register, the stage's ink), not a
-  hanko. The dictionary's plate and its catalogue card carry the same
-  word (decided 2026-09-05; the hanko they wore is retired, so one
-  vocabulary says the same SRS state everywhere). On a promotion a 落款
+  hanko. The dictionary's plate carries the same word (decided
+  2026-09-05; the hanko it wore is retired, so one vocabulary says the
+  same SRS state everywhere it is written out). **The catalogue's tile
+  is the one place it is not written out**: at 168px "IN PROGRESS" ran
+  nearly the full width in the caption's tracking, pushed the reading
+  off centre, and changed length card by card, so no two tiles read as
+  the same object. The stage is that card's own bottom edge instead —
+  the state's ink, the card's plain hairline where the schedule has
+  never seen it — and the word stays for a screen reader. Owner's
+  ruling, from a rendered comparison of six directions; the JLPT level
+  the edge used to carry is read from the badge in the corner. A mark
+  that only a colour carries is the exception here, not the rule: it is
+  allowed on a wall of tiles where the word is one tap away, never
+  where the state is the only thing being said. On a promotion a 落款
   impression — the new stage's glyph at the specimen's size, framed as a
   seal — is pressed into the **lower** corner,
   clear of the work, where a signature seal sits on a finished piece; the
