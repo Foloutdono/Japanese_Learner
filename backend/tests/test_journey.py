@@ -304,6 +304,54 @@ def test_goal_issued_onto_a_passless_ride(jclient):
     )
 
 
+# ── 手前の駅 — the kana as a destination ──────────────────────────
+# The novice's own stop is a destination like any other: signed at the
+# office or from the counter, priced at the syllabaries and nothing
+# else, and moved by kana reviews alone.
+def test_the_kana_stop_is_priced_at_the_syllabaries(jclient):
+    _complete(jclient, goalLevel="novice", goalTargetDate="2030-01-01")
+    body = jclient.get("/api/journey/status").json()
+    assert body["goalLevel"] == "novice"
+    assert body["goalStartLevel"] == "N5"
+    # No JLPT level lies behind that stop: the front-load IS the promise.
+    assert body["itemsTotal"] == VOLUMES["kana"]
+
+    _backdate_goal(1)  # the contract must predate the backdated reviews
+    _seed_review("kana_a", 0.1)          # the destination itself
+    _seed_review("vocab_N5_0002", 0.1)   # beyond it: not on this ride
+    body = jclient.get("/api/journey/status").json()
+    assert body["itemsDone"] == 1
+    assert body["actual14"] == 1
+
+
+def test_the_kana_stop_is_issued_from_the_counter(jclient):
+    jclient.post("/api/onboarding/complete",
+                 json={"jlptLevel": "N5", "dailyNewTarget": 5})
+    target = (date.today() + timedelta(days=30)).isoformat()
+    body = jclient.post("/api/journey/goal", json={
+        "goalLevel": "novice", "goalTargetDate": target, "dailyNewTarget": 10,
+    }).json()
+    assert body["goalLevel"] == "novice"
+    assert body["goalTargetDate"] == target
+    assert body["goalStartLevel"] == "N5"
+    assert body["goalSetAt"] is not None
+    assert body["itemsTotal"] == VOLUMES["kana"]
+
+
+def test_the_kana_stop_is_behind_anyone_above_the_first(jclient):
+    # A learner standing at N4 has the syllabaries behind them; the
+    # office and the counter refuse the ticket the same way.
+    jclient.post("/api/onboarding/complete",
+                 json={"jlptLevel": "N4", "dailyNewTarget": 10})
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "novice"}).status_code == 422
+    assert jclient.post("/api/onboarding/complete", json={
+        "jlptLevel": "N4", "dailyNewTarget": 10, "goalLevel": "novice",
+    }).status_code == 422
+    # And nothing was written by either refusal.
+    assert jclient.get("/api/journey/status").json()["goalLevel"] is None
+
+
 def test_reissuing_a_destination_moves_the_anchor(jclient):
     _complete(jclient)  # N5 → N3
     _backdate_goal(30)

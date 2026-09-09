@@ -122,6 +122,34 @@ describe('StatusSheet', () => {
     expect(dialog()).toBeNull()
   })
 
+  // 手前の駅 — a pass bound for the kana stop. That destination is not
+  // a level: the track carries one station, and the distance counts
+  // against the syllabary itself (routes/journey.py prices it the same).
+  it('draws a pass bound for the kana stop', async () => {
+    seedJourneyStatus({
+      goalStartLevel: 'N5',
+      goalLevel: 'novice',
+      goalTargetDate: isoDate(addDays(NOW, 16)),
+      goalSetAt: addDays(NOW, -7).toISOString(),
+      dailyDeparture: null,
+      plannedPerDay: 10,
+      itemsTotal: 224,
+      itemsDone: 70,
+      actual14: 70,
+      days14: 14,
+    })
+    await renderSheet()
+    openStatus()
+    await settle()
+    const sheet = dialog()
+    expect([...sheet.querySelectorAll('.jour-track__station-name')].map(el => el.textContent))
+      .toEqual(['発', 'かな'])
+    const count = sheet.querySelector('.jour-dist__count').textContent.replace(/[\s,]/g, '')
+    expect(count).toContain('70')
+    expect(count).toContain('224')
+    expect(sheet.querySelector('.jour-dist__leg').textContent).toContain('かな')
+  })
+
   it('offers the two honest moves when behind, and a pace reprint adopts the recovery', async () => {
     seedJourneyStatus(behindStatus())
     apiJson.mockImplementation(async (path, _session, opts = {}) => {

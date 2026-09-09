@@ -6,6 +6,7 @@ import { playClick } from '../lib/audio'
 import { useVolumes, useMuted, DEFAULT_VOLUMES } from '../lib/audio'
 import { useProfileSummary } from '../stores/profileSummary'
 import { useJourneyStatus } from '../stores/journey'
+import { NOVICE_GOAL } from '../domain/goalMath'
 import { useThemeChoice } from '../stores/theme'
 import { Leave } from '../components/chrome/Bar'
 import { ChevronIcon } from '../components/ui/Icons'
@@ -62,8 +63,11 @@ function SettingsList({ session }) {
     ? `${summary.jlptLevel}${summary.dailyNewTarget ? ` · ${summary.dailyNewTarget} ${t.settingsPerDay}` : ''}`
     : ''
   const fmt = new Intl.DateTimeFormat(lang === 'fr' ? 'fr' : 'en', { day: 'numeric', month: 'short', year: 'numeric' })
+  // The kana stop wears no JLPT code, so the row prints its name
+  // (domain/goalMath.js NOVICE_GOAL).
+  const destName = journey?.goalLevel === NOVICE_GOAL ? t.brdNovice : journey?.goalLevel
   const destinationValue = journey?.goalLevel
-    ? `${journey.goalLevel}${journey.goalTargetDate ? ` · ${fmt.format(new Date(journey.goalTargetDate))}` : ''}`
+    ? `${destName}${journey.goalTargetDate ? ` · ${fmt.format(new Date(journey.goalTargetDate))}` : ''}`
     : (journey ? t.settingsGoalNoneShort : '')
   const email = session?.user?.email ?? ''
   const accountValue = email ? `${email.split('@')[0]}@…` : ''

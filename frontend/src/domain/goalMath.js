@@ -19,6 +19,15 @@
 import { levelItems } from './journeyProjection'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+// 手前の駅 — the kana stop: the one destination that is not a JLPT
+// level (backend core/user_level.py NOVICE_GOAL, which the office and
+// the settings counter both sign). A journey to it covers no level at
+// all — the kana front-load IS the whole promise, which is why
+// journeyLevels answers [] for it and journeyItems then prices the
+// syllabaries alone.
+export const NOVICE_GOAL = 'novice'
+
 export const DAYS_PER_MONTH = 30.4
 const MS_PER_DAY = 86400000
 
@@ -39,9 +48,10 @@ export function addDays(d, n) {
 }
 
 /** The levels a journey covers, boarding level included; no goal means
- *  the whole line ahead (start..N1), mirroring routes/journey.py's
- *  _journey_levels. */
+ *  the whole line ahead (start..N1), and the kana stop means none at
+ *  all — mirroring routes/journey.py's _journey_levels. */
 export function journeyLevels(startLevel, goalLevel = null) {
+  if (goalLevel === NOVICE_GOAL) return []
   const a = Math.max(0, LEVELS.indexOf(startLevel))
   const b = goalLevel != null ? LEVELS.indexOf(goalLevel) : LEVELS.length - 1
   return LEVELS.slice(a, b + 1)

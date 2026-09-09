@@ -331,7 +331,7 @@ describe('BoardingFlow', () => {
   // level list AND their goal list opened at N4, so the goal they are
   // likeliest to have — reach N5 — was the one they could not pick
   // (owner's report). The office still stores N5 for them.
-  it('kana → one script → the reveal, then the goal open at N5, the stop they are heading for', async () => {
+  it('kana → one script → the reveal, then the whole line ahead, the novice’s stop at its head', async () => {
     const { screen } = await renderFlow()
     await passName(screen, 'fun')
     await click(screen, '[data-kana="hiragana"]')
@@ -344,13 +344,20 @@ describe('BoardingFlow', () => {
     await settle()
 
     // Never the level list: the answer is the level. But it boards them
-    // BEFORE N5, so the whole line is ahead of them.
+    // before the novice's own stop as well — that stop IS the kana, and
+    // they read one script — so the whole line is ahead of them with the
+    // kana at its head, and there is no stop behind them to name.
     expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint').textContent).toContain('Novice')
+    expect(q(screen, '.brd__hint').textContent).toBe('Tous les arrêts sont devant vous.')
     expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
-      .toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+      .toEqual(['novice', 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(q(screen, '[data-goal="novice"] .brd-opt__code').textContent).toBe('—')
+    expect(q(screen, '[data-goal="novice"] .brd-tag')).not.toBeNull()
+    // The default is still the nearest JLPT stop: the kana are an offer,
+    // and taking them signs a pace and no destination.
     expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('true')
-    expect(q(screen, '[data-goal="N5"] .brd-tag')).not.toBeNull()
+    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('false')
+    expect(q(screen, '[data-goal="N5"] .brd-tag')).toBeNull()
 
     // Back walks the visited path, answers intact.
     await click(screen, 'button.brd__back')
@@ -371,6 +378,59 @@ describe('BoardingFlow', () => {
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // No write happened: the name never changed.
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+  })
+
+  // ── The kana as a destination ──
+  // The novice's stop is one a beginner can ride TO, and the office
+  // signs it like any other: it goes onto the pass as goalLevel
+  // 'novice' with a date, priced at the syllabary. The plan promises
+  // signs rather than the word count and the motive's two lines, which
+  // three weeks of kana could not honour.
+  it('takes the novice’s own stop as the goal: the plan promises the kana, the office signs it', async () => {
+    const { screen } = await renderFlow()
+    await passName(screen, 'trip')
+    await click(screen, '[data-kana="none"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the reveal
+    await settle()
+
+    expect(stepOf(screen)).toBe('goal')
+    await click(screen, '[data-goal="novice"]')
+    expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('false')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
+    await settle()
+
+    // The destination stands alone on the building screen: they are
+    // short of that stop, not standing on it, so no "Novice → Novice".
+    // The first line is stamped after one tick (600 ms).
+    expect(stepOf(screen)).toBe('building')
+    await settle(700)
+    expect(q(screen, '[data-build="goal"] .brd-step__val').textContent).toBe('Novice')
+    await passBuilding(screen)
+
+    // Three promises, none of them a word count or a motive's line.
+    const bullets = [...live(screen).querySelectorAll('.brd-bullet')].map(el => el.textContent)
+    expect(bullets).toHaveLength(3)
+    expect(bullets[0]).toContain('kana')
+    expect(bullets[2]).toBe('En route vers les kana')
+    expect(bullets.join(' ')).not.toContain('mots')
+    // The chart climbs to the signs on the ride, all 224 of them.
+    expect(q(screen, '.brd-chart__lbl').textContent).toBe('~224 kana · révisions quotidiennes')
+
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="enter"]')
+    await settle(80)
+    const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
+    expect(body.jlptLevel).toBe('N5')
+    expect(body.kanaKnown).toBe('none')
+    expect(body.goalLevel).toBe('novice')
+    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
   // ── The welcome, counted onto the pass ──

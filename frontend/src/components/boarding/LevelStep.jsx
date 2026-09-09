@@ -1,5 +1,5 @@
 import { useLang } from '../../LangContext'
-import { LEVELS, approx, kanjiThrough, stopsAhead } from '../../domain/boarding'
+import { LEVELS, approx, goalStops, kanjiThrough } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { BoardOption } from './BoardOption'
 
@@ -8,7 +8,9 @@ import { BoardOption } from './BoardOption'
 // stops, each with the kanji it stands on -- from the app's own
 // volumes (GET /api/onboarding/volumes), the canvas's round figures
 // standing in until they arrive. The goal offers only the stops ahead,
-// the next one marked and preselected.
+// the next one marked; for a learner still short of the kana that is
+// the novice's own stop, which heads their list (domain/boarding.js
+// goalStops).
 
 // The canvas's figures, for the beat before the volumes answer.
 const KANJI_SIGN = { N5: 100, N4: 300, N3: 650, N2: 1000, N1: 2000 }
@@ -57,16 +59,21 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
 
 // `level` is the learner's own choice, not the level the office
 // stores: the novice is stored at N5 and has not passed it, so N5 is
-// the first stop AHEAD of them. stopsAhead knows that; the hint has to
-// print the choice by its own name rather than the stored code.
-export function GoalStep({ volumes, level, value, onChange, onContinue }) {
+// the first stop AHEAD of them. goalStops knows that, and knows the
+// one case where the novice's OWN stop is still ahead -- a learner who
+// cannot read both scripts yet, whose destination may simply be the
+// kana. There is nothing behind such a learner to name, so the hint
+// says the line is whole rather than printing a stop they have not
+// reached.
+export function GoalStep({ volumes, level, kana, value, onChange, onContinue }) {
   const { t, lang } = useLang()
-  const ahead = stopsAhead(level)
+  const ahead = goalStops(level, kana)
+  const fromStart = ahead[0] === 'novice'
   const from = level === 'novice' ? t.brdNovice : level
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={t.brdGoalHint(from)}>{t.brdGoalQ}</BoardQuestion>
+        <BoardQuestion hint={fromStart ? t.brdGoalHintStart : t.brdGoalHint(from)}>{t.brdGoalQ}</BoardQuestion>
         <div className="brd__stage">
           <div className="brd__opts">
             {ahead.map((stop, i) => (
@@ -74,10 +81,10 @@ export function GoalStep({ volumes, level, value, onChange, onContinue }) {
                 key={stop}
                 on={value === stop}
                 onClick={() => onChange(stop)}
-                code={stop}
-                label={t.levelName[stop]}
+                code={stop === 'novice' ? '—' : stop}
+                label={stop === 'novice' ? t.brdNovice : t.levelName[stop]}
                 tag={i === 0 ? t.brdNextStop : null}
-                desc={t.brdLevelDesc[stop](kanjiFigure(volumes, stop, lang))}
+                desc={stop === 'novice' ? t.brdLevelDesc.novice : t.brdLevelDesc[stop](kanjiFigure(volumes, stop, lang))}
                 data-goal={stop}
               />
             ))}

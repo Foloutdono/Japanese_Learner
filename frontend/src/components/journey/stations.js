@@ -1,4 +1,4 @@
-import { journeyIncludesKana, journeyLevels } from '../../domain/goalMath'
+import { NOVICE_GOAL, journeyIncludesKana, journeyLevels } from '../../domain/goalMath'
 import { levelItems } from '../../domain/journeyProjection'
 
 // ── The stations under the ghost track ───────────────────────────
@@ -10,6 +10,11 @@ import { levelItems } from '../../domain/journeyProjection'
 // volumes the drawing degrades to departure + destination.
 export function journeyStations(volumes, startLevel, goalLevel, itemsTotal) {
   const base = [{ label: '発', jp: true, pos: 0 }]
+  // The kana stop is the whole line for the ride that names it: one
+  // station, at the end, drawn without volumes because there is
+  // nothing to price -- the syllabaries ARE the promise
+  // (routes/journey.py's _journey_levels answers no level for it).
+  if (goalLevel === NOVICE_GOAL) return [...base, { label: 'かな', jp: true, pos: 100 }]
   if (!volumes || !startLevel || !itemsTotal) {
     return goalLevel ? [...base, { label: goalLevel, pos: 100 }] : base
   }
