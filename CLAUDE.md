@@ -114,7 +114,7 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone and tablet lanes (see vite.config.js)
+npm test          # vitest: node, browser, phone, tablet and touch lanes (see vite.config.js)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # re-render brand/icon.html and regenerate the icon set in public/
 ```

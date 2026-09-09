@@ -2341,7 +2341,14 @@
   }
 }
 
-/* The stopping-pattern strip (plan 030's horizontal band above the
+/* This block asked for `scrollbar-width: thin` until the touch
+   scrollbar was gated (see "Themed scrollbar" above): under 1100px the
+   rail is nearly always under a thumb, and asking for any scrollbar
+   width there is what turns a fading overlay hint into a permanent
+   classic bar. The global rule already draws the thin one wherever
+   there is a cursor to use it.
+
+   The stopping-pattern strip (plan 030's horizontal band above the
    player) lived here until the mockup fidelity pass (2026-09-01)
    retired it: the mockup draws the Passage exactly one way — the
    vertical route map — at every width. Below the 1100px split the
@@ -2357,7 +2364,6 @@
     max-height: 170px;
     overflow-y: auto;
     overscroll-behavior: contain;
-    scrollbar-width: thin;
     padding-right: var(--sp-1);
   }
 }
@@ -3492,7 +3498,7 @@ button:focus-visible {
   outline-offset: 2px;
 }
 
-/* ── Themed scrollbar ──────────────────────────────────────
+/* ── Themed scrollbar — for a cursor, and only for a cursor ────
    Set globally (not on one-off containers) so every scrolling surface
    — the dictionary detail panel, side panels, dropdowns, wherever —
    picks up the same thin, ink-toned bar instead of each OS's default
@@ -3500,24 +3506,51 @@ button:focus-visible {
    ::-webkit-scrollbar pseudo-elements. The thumb uses a padding-box
    border trick to sit inset from the track rather than spanning its
    full width, which is what keeps a 10px bar reading as "thin" instead
-   of as a slab. */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border) transparent;
+   of as a slab.
+
+   Behind `pointer: fine`, because on a phone this rule WAS the slab it
+   is written to avoid. A touch browser draws overlay scrollbars:
+   nothing at rest, a hint that fades after the flick, and no width
+   taken out of the page. Styling a scrollbar at all opts out of that
+   theme — the webkit pseudo-elements have always done it, and
+   `scrollbar-width` / `scrollbar-color` do it too since Chromium
+   supported them — and what comes back is a classic bar: painted
+   permanently, whether or not anything is scrolling, and charged 10px
+   to the content rather than to the frame. Reported from an Android
+   install (2026-09-09) as a pale rail down the right of the welcome
+   and of every boarding question, with the choices ending 10px short
+   of the button under them.
+
+   What those bars were reporting took two more notes to answer — a
+   list 30px too tall for a short screen ("a short screen closes the
+   rows before it scrolls") and, on the screens that fit, four pixels
+   of nothing left behind by an entrance animation ("what a landed
+   animation leaves behind"). Neither would have been visible at all
+   if the bar had stayed the browser's: a classic bar prints four
+   pixels of nothing exactly as loudly as four pixels of a word, and
+   an overlay bar says nothing, which is the truth of it.
+
+   A finger has no hover and cannot catch a 10px thumb anyway — the
+   bar is a cursor's instrument, so it is drawn where there is one. */
+@media (pointer: fine) {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: var(--border);
+    background-clip: padding-box;
+    border: 2px solid transparent;
+    border-radius: 20px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: var(--accent2);
+    background-clip: padding-box;
+  }
+  ::-webkit-scrollbar-corner { background: transparent; }
 }
-::-webkit-scrollbar { width: 10px; height: 10px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background-color: var(--border);
-  background-clip: padding-box;
-  border: 2px solid transparent;
-  border-radius: 20px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background-color: var(--accent2);
-  background-clip: padding-box;
-}
-::-webkit-scrollbar-corner { background: transparent; }
 
 /* ── 入線 — arrival ────────────────────────────────────────
    See the note above .station-in / .platform-card for why the stagger
@@ -16690,7 +16723,7 @@ html { scrollbar-gutter: stable; }
   padding-inline: var(--sp-1);
 }
 .brd__car { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); }
-.brd__car--in { animation: brd-pull-in 260ms ease-out both; }
+.brd__car--in { animation: brd-pull-in 260ms ease-out backwards; }
 .brd__car--in[data-dir="back"] { animation-name: brd-pull-in-back; }
 .brd__car--out { position: absolute; inset: 0; pointer-events: none; animation: brd-pull-out 260ms ease-out forwards; }
 .brd__car--out[data-dir="back"] { animation-name: brd-pull-out-back; }
@@ -16817,7 +16850,7 @@ html { scrollbar-gutter: stable; }
   text-align: center;
   text-wrap: pretty;
   outline: none;
-  animation: brd-in 360ms ease-out both;
+  animation: brd-in 360ms ease-out backwards;
 }
 /* Gold text on paper reads at ~3.4:1 in light theme; the name in a
    question, a kana's meaning, are mixed toward the ambient ink (the
@@ -16846,7 +16879,7 @@ html { scrollbar-gutter: stable; }
 
 /* ── options: one row, one choice ── */
 .brd__opts { display: flex; flex-direction: column; gap: var(--sp-3); }
-.brd__opts > * { animation: brd-in 360ms ease-out both; }
+.brd__opts > * { animation: brd-in 360ms ease-out backwards; }
 .brd__opts > :nth-child(2) { animation-delay: 40ms; }
 .brd__opts > :nth-child(3) { animation-delay: 80ms; }
 .brd__opts > :nth-child(4) { animation-delay: 120ms; }
@@ -16944,7 +16977,7 @@ html { scrollbar-gutter: stable; }
    the welcome: every other step's body sits inside `.brd__cars`, which
    clips, and none of them has a bleeding child. */
 .brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); }
-.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out both; }
+.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out backwards; }
 .brd-roll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
@@ -16992,7 +17025,7 @@ html { scrollbar-gutter: stable; }
   background-repeat: no-repeat;
 }
 .brd-demo__draw svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-.brd-demo__draw path { fill: none; stroke: var(--text-primary); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; stroke-dashoffset: 0; animation: brd-draw-in 1.6s ease-out 600ms both; }
+.brd-demo__draw path { fill: none; stroke: var(--text-primary); stroke-width: 5; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 120; stroke-dashoffset: 0; animation: brd-draw-in 1.6s ease-out 600ms backwards; }
 .brd-demo__wave { flex: 1; display: flex; align-items: center; justify-content: center; gap: var(--sp-1); }
 .brd-demo__bar { width: 4px; height: 14px; border-radius: var(--r-pill); background: var(--line-color, var(--accent2)); animation: brd-wave 1.1s ease-in-out infinite alternate; }
 .brd-demo__bar:nth-child(2) { height: 26px; animation-delay: 120ms; }
@@ -17024,11 +17057,11 @@ html { scrollbar-gutter: stable; }
 .brd-field:focus-visible { border-color: var(--accent2); outline: none; }
 
 /* ── the kana card ── */
-.brd-kana { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); overflow: hidden; animation: brd-in 420ms ease-out both; }
+.brd-kana { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); overflow: hidden; animation: brd-in 420ms ease-out backwards; }
 .brd-kana__pane { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: var(--sp-3); min-height: 236px; padding: var(--sp-5) var(--sp-3); }
 .brd-kana__pane + .brd-kana__pane { border-left: 1px solid var(--surface-line); }
 .brd-kana__jp { font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1; color: var(--text-primary); }
-.brd-kana__read { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); animation: brd-rise 500ms ease-out 200ms both; }
+.brd-kana__read { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); animation: brd-rise 500ms ease-out 200ms backwards; }
 .brd-kana__read--second { animation-delay: 420ms; }
 .brd-kana__romaji { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-kana__en { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
@@ -17037,7 +17070,7 @@ html { scrollbar-gutter: stable; }
 /* ── the rhythm and the hours: cards in a lattice ── */
 .brd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
 .brd-grid--3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-.brd-grid > * { animation: brd-in 360ms ease-out both; }
+.brd-grid > * { animation: brd-in 360ms ease-out backwards; }
 .brd-grid > :nth-child(2) { animation-delay: 40ms; }
 .brd-grid > :nth-child(3) { animation-delay: 80ms; }
 .brd-grid > :nth-child(4) { animation-delay: 120ms; }
@@ -17069,7 +17102,7 @@ html { scrollbar-gutter: stable; }
 .brd-cell--sm { min-height: 76px; }
 
 /* ── the departure board and the day track ── */
-.brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out both; }
+.brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
 .brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .brd-board__flaps { display: flex; align-items: center; gap: var(--sp-1); perspective: 400px; }
 .brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); color: var(--text-on-panel-soft); }
@@ -17090,7 +17123,7 @@ html { scrollbar-gutter: stable; }
   font-variant-numeric: tabular-nums;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent);
 }
-.brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 both; }
+.brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 backwards; }
 /* A drum still spinning: the board lights with all four turning and
    they stop left to right (components/boarding/TimeStep.jsx). The face
    is changing on its own tick, so the tile only has to say it is not a
@@ -17128,7 +17161,7 @@ html { scrollbar-gutter: stable; }
 .brd-day__train::before { content: ''; position: absolute; inset: -11px; }
 
 /* ── the notification, as the app would send it ── */
-.brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
 .brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); }
 .brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
@@ -17151,7 +17184,7 @@ html { scrollbar-gutter: stable; }
 .brd-step__val { margin-left: auto; font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; }
 
 /* ── the plan: the projection and the promise ── */
-.brd-chart { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); animation: brd-in 420ms ease-out both; }
+.brd-chart { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
 .brd-chart__title { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .brd-chart__grid { stroke: var(--surface-line); stroke-width: 1; }
@@ -17159,8 +17192,8 @@ html { scrollbar-gutter: stable; }
 .brd-chart__lbl { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; fill: var(--text-primary); }
 .brd-chart__lbl--soft { fill: var(--text-secondary); }
 .brd-chart__line { fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-.brd-chart__line--us { stroke: var(--accent2); stroke-dasharray: 400; stroke-dashoffset: 0; animation: brd-draw-line 1.6s ease-out 300ms both; }
-.brd-chart__line--them { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 6 5; animation: brd-in 600ms ease-out 200ms both; }
+.brd-chart__line--us { stroke: var(--accent2); stroke-dasharray: 400; stroke-dashoffset: 0; animation: brd-draw-line 1.6s ease-out 300ms backwards; }
+.brd-chart__line--them { stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 6 5; animation: brd-in 600ms ease-out 200ms backwards; }
 .brd-chart__dot { stroke-width: 2; stroke: var(--surface); }
 .brd-chart__dot--us { fill: var(--accent2); }
 .brd-chart__dot--them { fill: var(--text-secondary); }
@@ -17177,7 +17210,7 @@ html { scrollbar-gutter: stable; }
 .brd-lead { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .brd-lead__em { color: var(--text-primary); }
 .brd-bullets { display: flex; flex-direction: column; gap: var(--sp-2); }
-.brd-bullet { display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); animation: brd-in 360ms ease-out both; }
+.brd-bullet { display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); animation: brd-in 360ms ease-out backwards; }
 .brd-bullet:nth-child(2) { animation-delay: 60ms; }
 .brd-bullet:nth-child(3) { animation-delay: 120ms; }
 .brd-bullet:nth-child(4) { animation-delay: 180ms; }
@@ -17185,7 +17218,7 @@ html { scrollbar-gutter: stable; }
 
 /* ── the pass, issued ── */
 .brd-offer { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
-.brd-issue { position: relative; margin-top: var(--sp-3); animation: brd-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+.brd-issue { position: relative; margin-top: var(--sp-3); animation: brd-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
 .brd-issue .balance-line { position: relative; }
 /* The 発行 seal that landed on the printed pass is gone (owner's
    call): the pass already says it is issued by being printed, and the
@@ -17252,6 +17285,65 @@ html { scrollbar-gutter: stable; }
   .brd-issue__shine { display: none; }
   .brd-gift { animation: none; }
 }
+
+/* ── 短い車内 — a short screen closes the rows before it scrolls ──
+   The air around a question already gives way first: both rungs are
+   flex spacers, not padding, and they collapse in proportion until
+   only the body's own gap is left ("The air gives way before the body
+   scrolls", above). What was missing is the step AFTER that. Once the
+   96px over the question and the 52px under it are spent there is
+   nothing else that yields, and the choices -- the one thing on the
+   screen a learner is there to read -- are what runs off the bottom.
+   Measured at 390x667 -- an iPhone SE with nothing above the page --
+   the level ran 30px past its box: six rows, each a code, a name and
+   a line of prose, with the sixth cut through its own word.
+
+   So under 740px the frame and the rows each close up by one rung.
+   `--sp-4` between the head, the question and the docked action;
+   `--sp-2` of padding inside a choice and `--sp-2` between choices;
+   and no 60px floor under a row whose own content already clears it
+   -- a motive comes to 46px, a level to 56px, both still over the
+   44px a thumb is entitled to. Nothing that carries meaning is made
+   smaller: no type steps down and no line is dropped. What goes is
+   the room around the content, which is the order the density
+   contract sets (DESIGN.md, "Air gives way before content does").
+
+   740px is the welcome's own short screen, where the second lane of
+   rolling stock steps aside (`.brd-roll__lane--back`) -- one definition
+   of "short" for the whole boarding rather than two.
+
+   The plan is the densest screen of the nine -- a chart, a lead and
+   four promises -- so it steps the same way in its own parts: the
+   chart's padding and the room between its pieces, and a promise
+   standing on its text rather than on a 30px floor. */
+@media (max-height: 739px) {
+  .brd { gap: var(--sp-4); }
+  .brd__car { gap: var(--sp-4); }
+  .brd__stage { gap: var(--sp-4); }
+  .brd__opts { gap: var(--sp-2); }
+  .brd-opt { min-height: 0; padding: var(--sp-2) var(--sp-4); }
+  .brd-chart { gap: var(--sp-2); padding: var(--sp-3); }
+  .brd-bullet { min-height: 0; }
+}
+
+/* ── What a landed animation leaves behind ──
+   `backwards`, not `both`, on every entrance in this section. Each of
+   them ends where its element already lives -- opacity 1, no
+   transform, the stroke drawn -- so `forwards` holds nothing the
+   element would not have had anyway, and holding it is not free: an
+   animation that has finished on a `to { transform: none }` leaves a
+   transform APPLIED, identity or not. Measured on the boarding's
+   six-row lists, that cost the body 4px of scrollable overflow with
+   nothing in it: the content ended exactly on the box's own edge and
+   the box still reported four more pixels to scroll through. On a
+   phone that printed a full-height bar down the side of a screen that
+   fits (see "Themed scrollbar"). `backwards` holds the FROM state
+   through the stagger's delay, which is the half these animations are
+   actually using it for, and lets go the moment one lands.
+
+   The two exceptions are the two that end somewhere their element does
+   not live: the pass's shine sweeps off the card and the gift note
+   rises away. Both keep `both`, or they snap back on landing. */
 
 /* ── the pull, and a screen's own movement after it ── */
 @keyframes brd-pull-in { from { transform: translateX(100%); } to { transform: none; } }

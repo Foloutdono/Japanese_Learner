@@ -61,7 +61,7 @@ const BROWSER_OPTIMIZE = {
   ],
 };
 
-function browserProject(name, include, viewport) {
+function browserProject(name, include, viewport, contextOptions) {
   return {
     optimizeDeps: BROWSER_OPTIMIZE,
     test: {
@@ -77,7 +77,7 @@ function browserProject(name, include, viewport) {
         // app had before that rule and pins French copy, so the lane
         // runs as the phone those tests describe. A test that wants
         // English switches the language, as a learner would.
-        provider: playwright({ contextOptions: { locale: 'fr-FR' } }),
+        provider: playwright({ contextOptions: { locale: 'fr-FR', ...contextOptions } }),
         instances: [{ browser: 'chromium', ...(viewport ? { viewport } : {}) }],
       },
     },
@@ -241,6 +241,7 @@ export default defineConfig(({ mode }) => {
             'src/**/*.browser.test.{js,jsx}',
             'src/**/*.phone.test.{js,jsx}',
             'src/**/*.tablet.test.{js,jsx}',
+            'src/**/*.touch.test.{js,jsx}',
           ],
         },
       },
@@ -266,6 +267,18 @@ export default defineConfig(({ mode }) => {
       // Same reason the phone lane starts at its own width rather than
       // resizing mid-test.
       browserProject('tablet', ['src/**/*.tablet.test.{js,jsx}'], { width: 768, height: 1024 }),
+      // The touch lane, 390x667. The three lanes above are all a
+      // POINTER: none of them passes `hasTouch`, so chromium reports
+      // `pointer: fine` and `hover: hover` in every one -- the phone
+      // lane is a narrow desktop window, not a phone, which is exactly
+      // why a rule that only misbehaves under a thumb could ship. This
+      // lane is the thumb: `hasTouch` flips `pointer` to coarse and
+      // `hover` to none, so `@media (pointer: fine)` is off, which is
+      // what a real handset does. 667px is the short end of it -- an
+      // iPhone SE with nothing above the page -- and the height the
+      // boarding's own short-screen step answers for (index.css,
+      // "a short screen closes the rows before it scrolls").
+      browserProject('touch', ['src/**/*.touch.test.{js,jsx}'], { width: 390, height: 667 }, { hasTouch: true }),
     ],
   },
   };
