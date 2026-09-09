@@ -134,6 +134,41 @@ def _buckets(char: str, lang: str) -> tuple[list[str], dict[str | None, list[dic
     return tokens, buckets
 
 
+def _build_single_kanji_words() -> dict[str, str]:
+    """The characters that are words on their own, and how each is read
+    as that word.
+
+    山 carries サン, セン and やま in the kanji deck; as a word it is
+    やま, and that is the one a catalogue tile means when it prints one
+    character. The character's own list of readings is what the entry's
+    plate is for.
+
+    Lowest level wins where the same character is two words -- 日 is ひ
+    at N4 and にち at N3 -- because the commoner word is the one a tile
+    of that character is most likely to be read as.
+    """
+    best: dict[str, tuple[int, str]] = {}
+    for level, words in VOCAB_BY_LEVEL.items():
+        rank = _level_rank(level)
+        for word in words:
+            kanji = word.get("kanji") or ""
+            kana = (word.get("kana") or "").split("/")[0].strip()
+            if len(kanji) != 1 or not is_kanji(kanji) or not kana:
+                continue
+            if kanji not in best or rank < best[kanji][0]:
+                best[kanji] = (rank, kana)
+    return {char: kana for char, (_, kana) in best.items()}
+
+
+_SINGLE_KANJI_WORDS = _build_single_kanji_words()
+
+
+def kanji_as_word(char: str) -> str | None:
+    """How `char` is read when it stands alone as a word, or None when
+    the deck does not know it as one."""
+    return _SINGLE_KANJI_WORDS.get(char)
+
+
 def kanji_words(char: str, lang: str) -> dict:
     """
     {"readings": [...], "examples": [...]} for one kanji.

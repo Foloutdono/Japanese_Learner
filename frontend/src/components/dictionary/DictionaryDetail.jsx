@@ -15,9 +15,13 @@ import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
-// The catalogue already draws every entry as a small 駅名標: reading
-// above, headword, meaning below, the level's colour along the bottom
-// edge. Opening one used to swap that plate for a different object — a
+// The catalogue already draws every entry as a small 駅名標: the
+// headword with its reading over it as furigana, the meaning below, the
+// stage's ink along the bottom edge (the tile's reading was a line of
+// its own above the word until the owner moved it onto the characters
+// it belongs to; the plate below still prints both registers, because
+// it has the room). Opening one used to swap that plate for a
+// different object — a
 // sumi stage with a tategaki watermark, a vermillion speaker and seven
 // uppercase section labels under it. This panel is the same plate the
 // reader just tapped, at reading size: the three registers a station

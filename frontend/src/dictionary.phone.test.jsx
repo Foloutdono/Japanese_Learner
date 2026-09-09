@@ -19,7 +19,7 @@ function resolver() {
 }
 
 describe('the dictionary at phone width', () => {
-  it('the door is a row target and the catalogue is two columns of centred cards with the level and the stage in the corners', async () => {
+  it('the door is a row target and the catalogue is two columns of centred cards with the level in its corner and the stage on the edge', async () => {
     const screen = await render(
       <main className="dictionary" style={{ '--line-color': 'var(--line-jisho)' }}>
         <button type="button" className="anl-door">
@@ -35,12 +35,18 @@ describe('the dictionary at phone width', () => {
           </span>
         </button>
         <div className="dict-grid">
-          {['駅', '電車', '発', '車'].map(c => (
-            <button key={c} type="button" className="dict-entry-card" style={{ '--level-color': 'var(--line-kanji)' }}>
+          {[['駅', 'mastered'], ['電車', 'learning'], ['テープレコーダー', 'new'], ['エアコンディショナー', 'learning']].map(([c, stage]) => (
+            <button
+              key={c}
+              type="button"
+              className={`dict-entry-card dict-entry-card--${stage}`}
+              style={{ '--level-color': 'var(--line-kanji)', '--len': [...c].length }}
+            >
               <span className="dict-level-badge">N5</span>
-              <span className="stage-mark stage-mark--mastered">Mastered</span>
-              <span className="dict-entry-card__kana">えき</span>
-              <span className="dict-entry-card__char">{c}</span>
+              <span className="sr-only">{stage}</span>
+              <span className="dict-entry-card__char">
+                <ruby>{c}<rt>えき</rt></ruby>
+              </span>
               <span className="dict-entry-card__meaning">station</span>
             </button>
           ))}
@@ -68,18 +74,99 @@ describe('the dictionary at phone width', () => {
     expect(cards[2].getBoundingClientRect().top).toBeGreaterThanOrEqual(cards[0].getBoundingClientRect().bottom)
     const card = cards[0]
     expect(getComputedStyle(card).textAlign).toBe('center')
-    // The level sits in the top-left corner, the stage in the top-right,
-    // and the glyph under both.
+    // The level sits in the top-left corner and the glyph under it.
+    // Nothing sits in the other one: the stage word printed there was a
+    // two-word phrase in the caption's tracking, it ran nearly the full
+    // width of a 168px tile, and it changed length card by card — so
+    // the stage moved onto the card's own bottom edge (owner's ruling,
+    // from six rendered directions).
     const cr = card.getBoundingClientRect()
     const level = card.querySelector('.dict-level-badge').getBoundingClientRect()
-    const mark = card.querySelector('.stage-mark').getBoundingClientRect()
+    expect(card.querySelector('.stage-mark')).toBeNull()
     expect(level.left - cr.left).toBeLessThan(cr.width / 2)
-    expect(cr.right - mark.right).toBeLessThan(cr.width / 2)
     expect(level.top - cr.top).toBeLessThan(20)
-    expect(mark.top - cr.top).toBeLessThan(20)
     const char = card.querySelector('.dict-entry-card__char').getBoundingClientRect()
     expect(char.top).toBeGreaterThan(level.top)
-    expect(char.top).toBeGreaterThan(mark.top)
+    // Every register of the card stands on the card's own axis, with
+    // nothing in the corner to push it off.
+    const mid = r => (r.left + r.right) / 2
+    for (const sel of ['.dict-entry-card__char', '.dict-entry-card__meaning']) {
+      expect(mid(card.querySelector(sel).getBoundingClientRect())).toBeCloseTo(mid(cr), 0)
+    }
+
+    // ── The headword is fitted to the tile it stands on ──
+    // The specimen rung is 72px, and at 72px a 168px tile takes two
+    // characters to a line: テープレコーダー printed one character per
+    // line over four of them and grew its row to 390px. The word
+    // divides the tile's width by its own length now, floors and
+    // ceilings on the scale, and the box it stands in is the same on
+    // every tile.
+    const chars = cards.map(el => el.querySelector('.dict-entry-card__char'))
+    const size = el => parseFloat(getComputedStyle(el).fontSize)
+    const rung = value => {
+      const probe = document.createElement('div')
+      probe.style.fontSize = value
+      document.body.append(probe)
+      const px = parseFloat(getComputedStyle(probe).fontSize)
+      probe.remove()
+      return px
+    }
+    // A word short enough for the tile is the specimen it always was —
+    // 駅 and 電車 both sit at the ceiling — and past that each longer
+    // headword is set smaller than the one before it.
+    expect(size(chars[0])).toBe(rung('var(--fs-specimen-word)'))
+    expect(size(chars[1])).toBe(rung('var(--fs-specimen-word)'))
+    expect(size(chars[2])).toBeLessThan(size(chars[1]))
+    expect(size(chars[3])).toBeLessThan(size(chars[2]))
+    expect(size(chars[3])).toBeGreaterThanOrEqual(rung('var(--fs-caption)'))
+    for (const char of chars) {
+      // One line, and it fits on it: nothing wraps, and the word is
+      // whole — no ellipsis at any of these lengths.
+      expect(getComputedStyle(char).whiteSpace).toBe('nowrap')
+      expect(char.scrollWidth).toBeLessThanOrEqual(char.clientWidth + 1)
+      // The box is the same on every tile, whatever it holds.
+      expect(char.getBoundingClientRect().height).toBeCloseTo(chars[0].getBoundingClientRect().height, 0)
+    }
+    // And the wall is even: one box on every tile, so the meaning under
+    // it prints at the same y whatever the word above it is.
+    for (const box of cards.map(el => el.getBoundingClientRect())) {
+      expect(box.height).toBeCloseTo(cards[0].getBoundingClientRect().height, 0)
+    }
+    const meanings = cards.map(el => el.querySelector('.dict-entry-card__meaning').getBoundingClientRect())
+    expect(meanings[1].top - cards[1].getBoundingClientRect().top)
+      .toBeCloseTo(meanings[2].top - cards[2].getBoundingClientRect().top, 0)
+
+    // ── The furigana stands off the character ──
+    // An annotation sits on the line above its base, so the room for a
+    // gap is inside that line: the reading is set in a line box of its
+    // own height and rides at the top of it. And it is CENTRED over the
+    // base rather than spread across it — the browser's default put
+    // やま over 山 as や    ま, the kanji's own width apart, which reads
+    // as two marks instead of one word.
+    const rt = card.querySelector('rt')
+    expect(getComputedStyle(card.querySelector('ruby')).rubyAlign).toBe('center')
+    const rtSize = parseFloat(getComputedStyle(rt).fontSize)
+    expect(parseFloat(getComputedStyle(rt).lineHeight)).toBeGreaterThan(rtSize * 2)
+    // The gap is real: the reading's own box ends well clear of the
+    // character under it.
+    expect(rt.getBoundingClientRect().bottom)
+      .toBeLessThan(card.querySelector('.dict-entry-card__char').getBoundingClientRect().bottom - rtSize)
+
+    // The edge says where the card is: the state's own ink, and the
+    // card's plain hairline where the schedule has never seen it.
+    const ink = value => {
+      const probe = document.createElement('div')
+      probe.style.background = value
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).backgroundColor
+      probe.remove()
+      return colour
+    }
+    const edge = el => getComputedStyle(el, '::after').backgroundColor
+    expect(edge(cards[0])).toBe(ink('var(--state-mastered)'))
+    expect(edge(cards[1])).toBe(ink('var(--state-learning)'))
+    expect(edge(cards[2])).toBe(ink('var(--surface-line)'))
+    expect(edge(cards[0])).not.toBe(edge(cards[1]))
   })
 
   it('the plate: the marks row is a target, the glyph is a specimen, the stripe bleeds to the edges; the blocks divide by hairlines, the word rows are targets, the records a lattice', async () => {

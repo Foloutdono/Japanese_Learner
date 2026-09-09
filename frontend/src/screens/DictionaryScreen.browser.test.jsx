@@ -32,6 +32,20 @@ const VOCAB = {
 }
 // The JMdict pool: no card, no level.
 const NOCARD = { type: 'jmdict', kanji: '駅弁', kana: 'えきべん', meaning: 'station lunch box', level: null }
+// A character that is a word on its own: the deck reads 山 as やま, and
+// routes/dictionary.py sends that reading beside the character's own
+// list (study/kanji_words.kanji_as_word).
+const KANJI_WORD = {
+  type: 'kanji', kanji: '山', kana: 'サン・セン・やま', word_reading: 'やま',
+  meaning: 'mountain', level: 'N5', status: { status: 'new' },
+}
+// One that is not: 土 keeps its readings, and the pair is one from each
+// register — the deck lists on readings first, so the first TWO are
+// both on'yomi and would never say つち.
+const KANJI_ALONE = {
+  type: 'kanji', kanji: '土', kana: 'ド・ト・つち', meaning: 'soil',
+  level: 'N5', status: { status: 'new' },
+}
 // A page of filler behind them, so the infinite-scroll sentinel sits
 // below the fold: with it in view, the observer would page the moment
 // the query changes (before the debounced search), which is the screen
@@ -39,7 +53,7 @@ const NOCARD = { type: 'jmdict', kanji: '駅弁', kana: 'えきべん', meaning:
 const FILLER = Array.from({ length: 60 }, (_, i) => ({
   type: 'jmdict', kanji: `語${i}`, kana: `ご${i}`, meaning: `word ${i}`, level: null,
 }))
-const RESULTS = [KANJI, VOCAB, NOCARD, ...FILLER]
+const RESULTS = [KANJI, VOCAB, NOCARD, KANJI_WORD, KANJI_ALONE, ...FILLER]
 
 // ── A syllabary, as the endpoint serves one ──
 // `group` is what the chart lays out on (backend/content/kana_data.py):
@@ -206,19 +220,58 @@ describe('the dictionary screen', () => {
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
   })
 
+  // The stage is the card's bottom edge now, not a word over the
+  // specimen (owner's ruling, from six rendered directions — see
+  // .dict-entry-card in index.css). The word stays where a screen
+  // reader can reach it, and the plate still prints it in full.
   it('the catalogue: a card per entry with its level and its stage, the count in the console', async () => {
     const screen = await renderScreen()
     const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
     expect(cards.length).toBe(RESULTS.length)
     expect(cards[0].querySelector('.dict-level-badge').textContent).toBe('N5')
-    expect(cards[0].querySelector('.stage-mark').textContent).toBe(T.mastered)
-    expect(cards[0].querySelector('.dict-entry-card__char').textContent).toBe('駅')
-    expect(cards[1].querySelector('.stage-mark').textContent).toBe(T.new)
-    expect(cards[1].querySelector('.dict-entry-card__kana').textContent).toBe('でんしゃ')
-    // No card and no level: the JMdict entry prints neither mark.
-    expect(cards[2].querySelector('.stage-mark')).toBeNull()
+    // The headword, and only the headword, in the specimen's slot — its
+    // readings ride over it as furigana (below), so the ruby's own base
+    // is what the eye reads.
+    expect(cards[0].querySelector('.dict-entry-card__char ruby').firstChild.textContent).toBe('駅')
+    // The reading rides ON the headword now, as furigana: the word's
+    // own per-kanji alignment, and a kanji's first two readings over the
+    // character. The line that printed it above the word is gone — on a
+    // kana-only entry it printed the word twice.
+    expect(screen.container.querySelector('.dict-entry-card__kana')).toBeNull()
+    expect(cards[0].querySelector('.dict-entry-card__char rt').textContent).toBe('エキ・えき')
+    expect(cards[1].querySelector('.dict-entry-card__char rt').textContent).toBe('でんしゃ')
+    expect(cards[1].querySelector('.dict-entry-card__char ruby').textContent).toBe('電車でんしゃ')
+    // Nothing to annotate, nothing annotated.
+    expect(cards[2].querySelector('rt')).toBeNull()
+    // A character that is a word is read as that word — not as its own
+    // list of readings.
+    expect(cards[3].querySelector('.dict-entry-card__char rt').textContent).toBe('やま')
+    // One that is not takes one reading from each register, never the
+    // first two of a list that starts with every on'yomi.
+    expect(cards[4].querySelector('.dict-entry-card__char rt').textContent).toBe('ド・つち')
+    // Nothing is printed over the specimen any more.
+    expect(screen.container.querySelector('.dict-grid .stage-mark')).toBeNull()
+    // The stage rides on the card itself, and on the word only a
+    // reader hears.
+    expect(cards[0].classList.contains('dict-entry-card--mastered')).toBe(true)
+    expect(cards[0].querySelector('.sr-only').textContent).toBe(T.mastered)
+    expect(cards[1].classList.contains('dict-entry-card--new')).toBe(true)
+    expect(cards[1].querySelector('.sr-only').textContent).toBe(T.new)
+    // No card and no level: the JMdict entry prints neither mark, and
+    // its edge stays the card's own hairline.
+    expect([...cards[2].classList].some(c => c.startsWith('dict-entry-card--'))).toBe(false)
+    expect(cards[2].querySelector('.sr-only')).toBeNull()
     expect(cards[2].querySelector('.dict-level-badge')).toBeNull()
     expect(screen.container.querySelector('.console__count').textContent).toBe(T.dictionaryResults(RESULTS.length))
+    // Each tile measures its own headword, so the word can be set to
+    // fit the tile on one line (index.css, .dict-entry-card__char).
+    for (const card of cards) {
+      // The headword's own characters, not its furigana: the ruby is
+      // set at a rung of its own and never enters the fit.
+      const word = card.querySelector('.dict-entry-card__char').cloneNode(true)
+      word.querySelectorAll('rt').forEach(rt => rt.remove())
+      expect(card.style.getPropertyValue('--len')).toBe(String([...word.textContent].length))
+    }
   })
 
   it('a card opens the entry on its plate; the readings door opens the sheet; ‹ closes the entry', async () => {

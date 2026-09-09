@@ -58,7 +58,14 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
     const run = lvl => navigate(levelsOnly ? `${base}/${lvl}` : `${base}/level/${lvl}`)
     return (
       <SelectionScreen sub={t.selectLevel} aside={levelsOnly ? leavePractice : leaveSources}>
-        <LevelSelector onSelect={lvl => board(() => run(lvl))} />
+        {/* The figures on these stops are the level's VOCABULARY: a
+            sentence at N4 is built from N4 words (backend's
+            reading._pick_words_level), so how many of them the learner
+            holds is exactly the readiness the grade is being picked
+            for. The three sentence sections asked the same question
+            with no figures at all, while every SRS station beside them
+            printed them. */}
+        <LevelSelector source="vocab" onSelect={lvl => board(() => run(lvl))} />
       </SelectionScreen>
     )
   }

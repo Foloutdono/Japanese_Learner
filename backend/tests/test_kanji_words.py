@@ -10,7 +10,7 @@ or geminating.
 """
 from content.kanji_data import KANJI_BY_LEVEL
 from study.furigana import reading_stem, reading_token_for
-from study.kanji_words import kanji_words, reading_tokens, MAX_WORDS
+from study.kanji_words import kanji_as_word, kanji_words, reading_tokens, MAX_WORDS
 
 
 class TestReadingTokenFor:
@@ -122,3 +122,35 @@ class TestKanjiWords:
         en = kanji_words("木", "en")["readings"][1]["words"][0]["meaning"]
         fr = kanji_words("木", "fr")["readings"][1]["words"][0]["meaning"]
         assert en and fr
+
+
+class TestKanjiAsWord:
+    """A character that is a word on its own, and how it is read as one.
+
+    The catalogue tile prints one reading as furigana over the
+    character, and 山's own list starts サン・セン: a tile that shows the
+    first of them says nothing about the word やま, which is what a
+    single character on a card usually means.
+    """
+
+    def test_reads_a_character_that_is_a_word(self):
+        assert kanji_as_word("山") == "やま"
+        assert kanji_as_word("水") == "みず"
+        assert kanji_as_word("駅") == "えき"
+
+    def test_none_for_a_character_the_deck_has_no_word_for(self):
+        # 食 is only ever part of a word in the deck (食べる, 食事).
+        assert kanji_as_word("食") is None
+        assert kanji_as_word("々") is None
+
+    def test_the_commoner_word_wins_where_a_character_is_two(self):
+        # 日 is ひ at N4 and にち at N3; the lower level is the commoner
+        # word, and the one a tile of 日 most likely means.
+        assert kanji_as_word("日") == "ひ"
+
+    def test_never_a_multi_character_word(self):
+        # The index is built from the vocab deck, where most entries are
+        # compounds — none of them may leak in under a single character.
+        from study.kanji_words import _SINGLE_KANJI_WORDS
+        assert all(len(char) == 1 for char in _SINGLE_KANJI_WORDS)
+        assert all(kana for kana in _SINGLE_KANJI_WORDS.values())

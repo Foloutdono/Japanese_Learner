@@ -3846,6 +3846,67 @@ button:focus-visible {
   transform: translateX(0);
 }
 
+/* ── 実践 — a platform, and where its trains go ──────────────
+   The Practice gate's card is the shared platform card with a second
+   register under it: the head opens the station, the grades under it
+   board the train (screens/PracticeScreen.jsx says why they are
+   there). It is a <div> with a button inside rather than one button,
+   because a chip inside a button is not markup — the head keeps the
+   card's own hover, and answers focus for it, so nothing is lost.
+
+   The rail is permanent here, where every other row reveals one on
+   hover: four platforms of the same shape have to be told apart at a
+   glance, and a 2.5px ring around a numeral was the only pigment on a
+   card 163px tall. An edge, which is what colour is allowed to be. */
+.platform-card--sign {
+  flex-direction: column;
+  align-items: stretch;
+}
+.platform-card--sign::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--rail);
+}
+.platform-card--sign:has(.platform-sign__head:focus-visible) {
+  background: var(--bg-card-hover);
+  border-color: var(--rail);
+  transform: translateY(-1px);
+}
+.platform-sign__head {
+  display: flex;
+  align-items: stretch;
+  flex: 1;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.platform-sign__head:hover { filter: none; }
+/* The shared card's own padding is a card's whole vertical rhythm —
+   28px over and under both cells — and this card has a second row
+   under it: at four to a phone the four stacked to 780px in a 640px
+   page. The head keeps the card's horizontal grammar and gives the
+   rhythm back to the row of grades. */
+.platform-card--sign .platform-card__lead { padding: var(--sp-4) var(--sp-2) var(--sp-4) var(--sp-5); }
+.platform-card--sign .platform-card__body { padding: var(--sp-4) var(--sp-5) var(--sp-4) var(--sp-4); }
+/* The console's two-row grammar: a hairline, then the row of choices.
+   Five grades share the width, so each is a third of a thumb wide
+   rather than a 50px pill with 100px of nothing beside it. */
+.platform-sign__dests {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+
 input {
   font-family: inherit;
   border-radius: 8px;
@@ -4254,6 +4315,17 @@ textarea:focus-visible {
    further in than the bar over them and 30px lower than Learn's. */
 .learn .platform-grid,
 .practice .platform-grid { padding: 0; gap: var(--sp-3); }
+/* The four platforms are the whole gate, so they take the whole gate:
+   the grid fills the room under the bar and its cards share it, which
+   is what gives each one the room to carry its departures. A phone's
+   rule — above 768px the grid is two columns of 500px cards and a
+   quarter-screen row would be 330px of card for two lines of type. */
+@media (max-width: 768px) {
+  .practice > .platform-grid {
+    flex: 1;
+    grid-auto-rows: 1fr;
+  }
+}
 .tier-picker,
 .theme-picker { display: flex; flex-direction: column; gap: var(--sp-4); }
 .tier-picker__size { display: flex; align-items: center; gap: var(--sp-4); }
@@ -4941,7 +5013,11 @@ textarea:focus-visible {
 }
 .chip:hover,
 .chip:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
-.chip--on {
+/* --on is a filter that is switched on; --here is the learner's own
+   grade on the practice gate's rows (aria-current='location', the same
+   word the route stops use). One look: this is the one that is yours. */
+.chip--on,
+.chip--here {
   color: color-mix(in srgb, var(--tab-color, var(--line-color)) 60%, var(--text-primary));
   border-color: color-mix(in srgb, var(--tab-color, var(--line-color)) 55%, transparent);
   background: color-mix(in srgb, var(--tab-color, var(--line-color)) 12%, transparent);
@@ -5045,6 +5121,11 @@ textarea:focus-visible {
    natural widths first, then stretches what landed on each — so the
    set keeps the shape it wraps into. A lone chip is not a set and
    keeps its own width. */
+.platform-sign__dests .chip {
+  flex: 1 1 0;
+  justify-content: center;
+  padding: 0;
+}
 .console__chips .chip,
 .gate-card__lines .chip {
   flex: 1 1 auto;
@@ -6403,6 +6484,23 @@ textarea:focus-visible {
   .wmap-line::before, .wmap-row::before { transition: none; }
 }
 
+@media (max-width: 768px) {
+  /* ── The map is the wall, so it takes the wall ──
+     The Learn gate is a bar and a map, and the map was drawn at its
+     rows' own height: on a 390x844 phone it ended 196px above the tab
+     bar, a panel floating in the middle of the screen with nothing under
+     it. The board takes the room the page has and its lines share it —
+     each line's identity, its due chip and its track then sit in a row
+     with air around them instead of the air pooling below the last. */
+  .learn > .board {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .learn > .board > .wmap__lines { flex: 1; }
+  .learn > .board > .wmap__lines > .wmap-line { flex: 1 1 auto; align-content: center; }
+}
+
 /* The halls you use rather than ride. Chips, labelled in the
    learner's own language — a tool's name is a label, not a place
    name; the roundel keeps the code and the pigment. */
@@ -6578,6 +6676,9 @@ textarea:focus-visible {
 }
 .route-stop__fig {
   display: flex;
+  /* Never squeezed: 0 / 10000 beside a name that wraps is what pushed
+     "(combinaisons)" through the figure at 390px. */
+  flex: none;
   align-items: baseline;
   gap: 3px;
   font-family: var(--font-display);
@@ -6587,6 +6688,87 @@ textarea:focus-visible {
   color: var(--text-secondary);
 }
 .route-stop__fig b { color: var(--text-primary); }
+
+/* ── How far into this stop you are ──
+   The route says how far along the LINE you are; this says how much of
+   the stop itself is done, which is a percentage with no waypoints of
+   its own — the one thing DESIGN keeps a bar for. It is the card's own
+   bottom edge, the way the study stage rules its deck across the top:
+   3px, the line's pigment over its own faint track, and it exists only
+   where there is a figure to draw it from. */
+.route-stop__bar {
+  position: absolute;
+  /* The content column's own width, not the card's: the card's corners
+     are rounded and a rule that runs into them frays. It starts where
+     the code starts and ends where the figure does. */
+  left: var(--sp-8);
+  right: var(--sp-4);
+  bottom: var(--sp-3);
+  height: 3px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--line-color) 14%, transparent);
+}
+.route-stop__fill {
+  display: block;
+  height: 100%;
+  border-radius: var(--r-pill);
+  background: var(--line-color);
+}
+
+@media (max-width: 768px) {
+  /* ── The line runs the height of the screen ──
+     A station page is a bar and a route, and the route was drawn at its
+     content's own height: four kana sets ended 360px above the tab bar,
+     five JLPT grades 324px, on a 746px screen. Half a phone of nothing
+     under a diagram whose whole subject is distance. The route takes the
+     room the page has and its stops share it — air into the rows, which
+     are also what a thumb has to hit, rather than pooled under the last
+     one. */
+  .learn > .route { flex: 1; }
+  /* With the room of a stop, the row stops being one line: the code and
+     the figure take the top of it, the name runs the full width under
+     them (Niveau intermédiaire and Hiragana (combinaisons) both broke
+     against the figure when the three shared one line), and the ▶ is
+     centred against the whole height, as a chevron terminating a row
+     always is. */
+  .learn > .route > .route-stop {
+    /* An equal share each, not an equal share of the SLACK: the stops
+       of a line are one thing repeated, and rows that differ by the
+       length of their own name read as a list that could not decide.
+       min-height below is the floor if a line ever has more stops than
+       the page can hold. */
+    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      'code  fig go'
+      'names names go';
+    align-content: center;
+    row-gap: var(--sp-2);
+  }
+  /* A stop with the room of a stop reads at a stop's size: the code is
+     the sign it is written on, and the specimen under the name is set in
+     the Japanese face it is a specimen of (it is あいうえお, not a
+     caption). The name itself stays at body size — 実践's stations put
+     "Hiragana (combinaisons)" in that column and a lead-size line broke
+     its second word past the figure beside it. */
+  .learn > .route > .route-stop > .route-stop__code {
+    grid-area: code;
+    font-size: var(--fs-title);
+  }
+  .learn > .route > .route-stop > .route-stop__names { grid-area: names; }
+  .learn > .route > .route-stop > .route-stop__go    { grid-area: go; }
+  .learn > .route > .route-stop .route-stop__hint {
+    font-family: var(--font-jp);
+    font-size: var(--fs-title);
+    letter-spacing: var(--tr-term);
+  }
+  .learn > .route > .route-stop > .route-stop__fig {
+    grid-area: fig;
+    font-size: var(--fs-body);
+  }
+}
+
 /* ── The primary button ───────────────────────────────────
    `.btn-primary` was referenced by TodayScreen for months with no rule
    anywhere in this file to answer it: the app's filled-action class
@@ -13073,6 +13255,31 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     background: var(--bg-panel);
   }
   .stage > .rating-bar .rating-bar__buttons { background: transparent; }
+  /* ── The run's foot docks too ──
+     The field and Submit (the canvas's Reading foot), the browse's two
+     buttons, comprehension's pair: one control at the bottom of a run,
+     pinned there by `margin-top: auto` and laid out to the LAST PIXEL
+     of the stage. --dock-bottom on a stage is the safe-area inset
+     alone, and the inset is 0 in a desktop window, on Android and in
+     the preview — so the filled action ended flush against the bottom
+     edge of the screen, with a browser's own bar, a rounded corner or
+     a gesture bar taking the last 30px of it (reported on 実践's
+     reading run: Submit cut in half).
+
+     It docks like every other instrument on this edge now — the rating
+     bar, the exam's sheet bar: stuck on the dock's edge, edge to edge,
+     its own ground under it. The ground is the page's, not the bars'
+     sumi: this is the screen's own foot, not a second console. A card
+     taller than the screen now scrolls behind it instead of pushing it
+     off, and the action keeps the page's own gutter under it. */
+  .stage > .stage__foot {
+    position: sticky;
+    bottom: var(--dock-bottom);
+    z-index: 10;
+    margin-inline: calc(-1 * var(--sp-5));
+    padding: var(--sp-3) var(--sp-5) var(--sp-5);
+    background: var(--bg-main);
+  }
   /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
      edge, on the dock's edge, its own inset under it. */
   .stage > .exam-sheetbar {
@@ -13638,11 +13845,30 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 @media (min-width: 560px) {
   .dict-grid { grid-template-columns: repeat(auto-fill, minmax(168px, 1fr)); }
 }
-/* One entry card: the level in one corner, the stage word in the
-   other, the three registers down the middle, the level's colour
-   along the bottom edge the way a station plate carries its line's. */
+/* One entry card: the level in its corner, the three registers down
+   the middle, and the card's own bottom edge carrying WHERE THE CARD
+   IS — new, in progress, mastered.
+   ── Why the edge and not a word (owner's ruling, from a rendered
+   comparison of six directions) ──
+   The stage was printed as its word in the opposite corner, and
+   "IN PROGRESS" is a two-word phrase set in the caption's wide
+   tracking: on a 168px tile it ran nearly the full width, pushed the
+   reading off centre, and changed length card by card, so the top of
+   every tile read differently and none of them read as the same
+   object. The card already had a 3px rule along its bottom — it
+   carried the JLPT level, which the badge in the corner also says —
+   so the rule now says the one thing nothing else on the tile does.
+   Nothing is printed over the specimen any more.
+   The word is not gone from the app: the dictionary's own plate still
+   prints it (StageMark, inline), and the tile keeps it for a screen
+   reader. */
 .dict-entry-card {
   --plate: var(--level-color, var(--text-secondary));
+  /* The tile measures its own headword (see .dict-entry-card__char).
+     --len is the character count, from the screen; 1 is the reading for
+     a card that never got one, which is the specimen rung. */
+  --len: 1;
+  container-type: inline-size;
   position: relative;
   display: flex;
   flex-direction: column;
@@ -13667,9 +13893,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   right: 0;
   bottom: 0;
   height: 3px;
-  background: var(--plate);
+  /* No stage known (a word the schedule has never seen) reads as the
+     card's own hairline, thickened: an empty gauge, not a state. */
+  background: var(--stage-edge, var(--surface-line));
   opacity: 0.85;
 }
+/* --state-new is the wash a not-started token wears (#1a1812 in the
+   dark theme); as a 3px rule on this card's ground it is invisible,
+   which is the right reading for it — a card nobody has opened has
+   nothing on its gauge. In progress and mastered are the state inks
+   themselves, vermillion and gold, the same two the study card's own
+   seal and the deck's progress rule wear. */
+.dict-entry-card--new       { --stage-edge: var(--surface-line); }
+.dict-entry-card--learning  { --stage-edge: var(--state-learning); }
+.dict-entry-card--mastered  { --stage-edge: var(--state-mastered); }
 .dict-entry-card:hover,
 .dict-entry-card:focus-visible {
   background: var(--bg-card-hover);
@@ -13678,19 +13915,72 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 }
 .dict-entry-card--selected,
 .dict-entry-card--selected:hover { border-color: var(--plate); background: var(--bg-card-hover); }
+/* ── The headword, fitted to the tile it stands on ──
+   The specimen rung is 72px, and at 72px a 168px tile takes two
+   characters to a line: テープレコーダー printed one character per line
+   over four of them and grew its whole row to 390px, タイプ by タイプ.
+   Owner's ruling, from five rendered directions (the rung as it was, a
+   ladder by character count with and without this box, fitted with and
+   without it).
+
+   The word is now as large as its own tile allows and never wraps: the
+   card is the query container, the headword divides its width by how
+   many characters it has (--len, set by the screen), and the specimen
+   rung is the ceiling — so a lone 駅 is the specimen it always was and
+   エアコンディショナー lands at about 15px on one line. The floor is
+   --fs-caption, below which a headword no phone can set ellipsises the
+   way the meaning under it already does; nothing in the catalogue is
+   that long today.
+
+   96cqw rather than 100: the last character's own side bearing, so a
+   fitted word is not flush against the card's padding. */
 .dict-entry-card__char {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  /* Two rungs of --sp-8 holds the 72px specimen at its own leading with
+     a little air: the box is the same on every tile, so the meaning
+     under it prints on one line across the whole wall however long the
+     words above it are. */
+  min-height: calc(var(--sp-8) * 2);
   font-family: var(--font-jp);
-  font-size: var(--fs-specimen-word);
+  font-size: clamp(
+    var(--fs-caption),
+    calc(96cqw / var(--len, 1)),
+    var(--fs-specimen-word));
   line-height: 1.1;
-}
-.dict-entry-card__kana {
-  max-width: 100%;
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+}
+/* The reading is furigana on the headword itself now (see
+   DictionaryScreen's cardFurigana), set exactly as the entry's own
+   plate sets it — one vocabulary for the same annotation in both
+   places. The line that used to carry it above the word is gone with
+   it: it was a second register on every tile, and on a kana-only entry
+   it printed the word twice. */
+.dict-entry-card__char ruby {
+  ruby-position: over;
+  /* Centred, not spread: the browser's default spaces an annotation
+     across its base, so やま over 山 printed as や    ま with the
+     kanji's own width between them and read as two marks rather than
+     one word. */
+  ruby-align: center;
+}
+.dict-entry-card__char rt {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  /* The gap over the character. An annotation sits on the line above
+     its base, so the only room to be had is inside that line: a taller
+     line box holds the same text higher off the kanji. 2.6 is a hair
+     under half the reading's own height between the two, which is what
+     stops the furigana reading as part of the character. */
+  line-height: 2.6;
+  letter-spacing: 0;
+  color: var(--text-secondary);
+  user-select: none;
 }
 .dict-entry-card__meaning {
   width: 100%;

@@ -10,9 +10,10 @@ import {
 	DictionaryDetail, LevelBadge,
 } from '../components/dictionary/DictionaryDetail'
 
-// The catalogue card's stage word: the SRS status folded onto the three
-// stages the mark knows. A due card is still in progress; an unknown
-// status prints nothing (StageMark returns null for it).
+// The catalogue card's stage: the SRS status folded onto the three
+// stages the card can draw. A due card is still in progress; an unknown
+// status draws no stage at all, and the card's edge stays its own
+// hairline (index.css, .dict-entry-card::after).
 function stageOf(status) {
 	if (status === 'mastered') return 'mastered'
 	if (status === 'learning' || status === 'due') return 'learning'
@@ -20,7 +21,8 @@ function stageOf(status) {
 	return null
 }
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
-import { StageMark } from '../components/study/StageMark'
+import { FuriganaParts } from '../components/study/Readings'
+import { pickPlateReadings } from '../domain/readingPick'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -608,20 +610,51 @@ function shortKana(kana, type) {
 	// at a fixed character count used to sever a reading mid-token and
 	// leave the separator dangling — 山 showed "サン・", 語 showed
 	// "ゴ・か" — because '・' and the following reading's first
-	// character both count as characters like any other. Splitting on
-	// the readings themselves (the same helper <Readings> uses, so the
-	// two can't disagree about what a token is) and taking the first two
-	// gives a card the on'yomi and kun'yomi whole: "サン・セン".
+	// character both count as characters like any other.
+	//
+	// The two are the PLATE's two: the first on'yomi and the first
+	// kun'yomi (domain/readingPick), not the first two of the list. The
+	// deck orders on readings before kun, so a slice off the front spent
+	// both slots in one register — 山 printed サン・セン and never said
+	// やま, 土 printed ド・ト and never said つち. One reading from each
+	// register says more about a character than two from one, which is
+	// the rule the entry's own plate already follows.
 	//
 	// The '.'/'~' okurigana markers KANJIDIC2 carries (かた.る — the る
 	// is a suffix, not part of the kanji's own reading) are dropped for
 	// the card: it's a glance at how the character sounds, and the
 	// detail panel's own reading list keeps them for anyone who wants
 	// the precise form.
-	return splitReadingTokens(kana)
-		.slice(0, 2)
+	return pickPlateReadings(splitReadingTokens(kana), 2)
 		.map(token => token.replace(/[.~]/g, ''))
 		.join('・')
+}
+
+// ── The reading rides on the headword ────────────────────
+// The card printed its reading as a line ABOVE the word, which put a
+// second register over every tile — and over a kana-only entry it
+// printed the word twice (テープレコーダー over テープレコーダー). It is
+// furigana now, on the characters it belongs to:
+//
+//   a word   the backend's own per-kanji alignment (study/furigana.py,
+//            already on every catalogue row as `furigana`) — the same
+//            parts the entry's plate sets over its headword
+//   a kanji  its first two readings over the character, the pair
+//            shortKana already picks for this card
+//   kana     nothing: a reading over its own spelling says nothing
+//
+// Owner's call; the plate downstairs is unchanged.
+function cardFurigana(entry) {
+	if (entry.type === 'kanji') {
+		// A character that is a word on its own is read as that word:
+		// 山 is やま here, not サン・やま (routes/dictionary.py sends
+		// `word_reading` from the deck — see study/kanji_words.py). A
+		// character that is not a word keeps its two readings, one from
+		// each register, and the plate prints the whole list either way.
+		const reading = entry.word_reading || shortKana(entry.kana, entry.type)
+		return reading ? [{ text: entry.kanji, reading }] : null
+	}
+	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
 }
 
 // ── The detail dock ──────────────────────────────────────
@@ -672,27 +705,42 @@ function ResultsSection({
 
 					{/* The catalogue (canvas): reading above, headword large,
 					    meaning below — the three registers a 駅名標 carries, in
-					    the order it carries them — with the level in one corner
-					    and the stage word in the other. */}
+					    the order it carries them — with the level in its corner
+					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
 						<div className="dict-grid">
 							{results.map(entry => {
 								const stage = stageOf(entry.status?.status)
+								const furigana = cardFurigana(entry)
 								return (
 									<button
 										key={entryKey(entry)}
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
-										style={{ '--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)' }}
-										className={`dict-entry-card${selected && entryKey(selected) === entryKey(entry) ? ' dict-entry-card--selected' : ''}`}
+										// --len is how many characters the headword has: the
+										// tile divides its own width by it and sets the word to
+										// fit on one line (index.css, .dict-entry-card__char).
+										style={{
+											'--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)',
+											'--len': [...(entry.kanji || entry.kana || ' ')].length,
+										}}
+										className={[
+											'dict-entry-card',
+											stage ? `dict-entry-card--${stage}` : '',
+											selected && entryKey(selected) === entryKey(entry) ? 'dict-entry-card--selected' : '',
+										].filter(Boolean).join(' ')}
 									>
 										<LevelBadge level={entry.level} />
-										{stage && <StageMark stage={stage} />}
-										<span className="dict-entry-card__kana" lang="ja">
-											{shortKana(entry.kana, entry.type)}
-										</span>
+										{/* The stage is the card's bottom edge now (index.css,
+										    .dict-entry-card::after) — but an edge is a colour, and
+										    a colour is not a word: the tile keeps the word where a
+										    screen reader can still read it. The dictionary's own
+										    plate prints it in full. */}
+										{stage && <span className="sr-only">{t[stage]}</span>}
 										<span className="dict-entry-card__char" lang="ja">
-											{entry.kanji || entry.kana}
+											{furigana
+												? <FuriganaParts parts={furigana} />
+												: (entry.kanji || entry.kana)}
 										</span>
 										<span className="dict-entry-card__meaning">
 											{shortMeaning(entry.meaning)}

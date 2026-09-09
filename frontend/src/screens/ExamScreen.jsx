@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { board } from '../stores/boarding'
@@ -10,6 +10,7 @@ import ModeSelector from '../components/selection/ModeSelector'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { listExams } from '../exam/examService'
+import { LEVELS } from '../domain/sentenceSource'
 import { KIND_ORDER, kindMeta } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
 
@@ -50,8 +51,13 @@ import { PageIcon } from '../components/ui/Icons'
 export default function ExamScreen({ session }) {
   const navigate = useNavigate()
   const { t } = useLang()
+  const [sp] = useSearchParams()
   const [exams, setExams] = useState(null)
-  const [level, setLevel] = useState(null)
+  // ?level=N4 arrives from the practice gate, whose platform rows carry
+  // the five grades (screens/PracticeScreen.jsx): the chip opens that
+  // grade's papers rather than the list of grades the learner just
+  // picked from. Anything that is not a grade is simply the list.
+  const [level, setLevel] = useState(() => (LEVELS.includes(sp.get('level')) ? sp.get('level') : null))
 
   useEffect(() => {
     let alive = true
