@@ -1,5 +1,3 @@
-import { levelTitle } from './levelTitle'
-
 // ── How much of a moment is this? ─────────────────────────
 // Every reward used to get the same treatment: a full kabuki mie with
 // wooden clappers, a kumadori burst and a line of stage footlights,
@@ -7,43 +5,27 @@ import { levelTitle } from './levelTitle'
 // happens after nearly every card cannot also be a ceremony — the
 // twentieth curtain call in an hour is an interruption, not a reward.
 //
-// So there are three, and the boundaries are not arbitrary multiples.
-// They come from the ranks the app already keeps (domain/levelTitle):
+// So there are two:
 //
-//   'fare'      XP, no level. The overwhelming majority. A tick, the
-//               way a gate deducts a fare — under a second, corner of
-//               the screen, no interaction.
-//   'level'     The level number changed. The 発車標 flap turns over.
-//               Still self-dismissing, still uninterrupted.
-//   'rank'      The *title* changed — 見習い to 浪人 to 侍 to 師範 to
-//               免許皆伝. Four times in the entire progression, so this
-//               is the one that can afford to stop everything and wait
-//               to be dismissed by hand.
+//   'fare'   XP, no level. The overwhelming majority. A tick, the way
+//            a gate deducts a fare — under a second, corner of the
+//            screen, no interaction.
+//   'level'  The level number changed. The 発車標 flap turns over.
+//            Self-dismissing, and it never holds the next card.
 //
-// The rank boundaries being real thresholds rather than "every 5" is
-// the point: the ceremony fires when something is genuinely different
-// about your pass, not when a counter happens to be round.
-export const TIERS = ['fare', 'level', 'rank']
+// There was a third, 'rank'. The level bands each carried a title
+// (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued
+// your 定期券 in a board that took the whole screen and waited to be
+// dismissed by hand. The titles are gone: a placeholder ladder that
+// said nothing the level number did not already say, and with them
+// goes the only reward that ever stopped a session. Nothing holds the
+// queue now — every tier plays over the next card.
+export const TIERS = ['fare', 'level']
 
 /**
- * @param {object} toast  { leveledUp, newLevel }
- * @returns {'fare'|'level'|'rank'}
+ * @param {object} toast  { leveledUp }
+ * @returns {'fare'|'level'}
  */
 export function rewardTier(toast) {
-  if (!toast?.leveledUp) return 'fare'
-
-  const level = toast.newLevel
-  if (typeof level !== 'number') return 'level'
-
-  // A level-up is +1, so the band it left is the one below it. If the
-  // title differs, the pass is being re-issued rather than reprinted.
-  const [, jpNow] = levelTitle(level)
-  const [, jpBefore] = levelTitle(Math.max(0, level - 1))
-  return jpNow === jpBefore ? 'level' : 'rank'
-}
-
-/** The rank a level belongs to, as { jp, latin }. */
-export function rankFor(level) {
-  const [, jp, latin] = levelTitle(level)
-  return { jp, latin }
+  return toast?.leveledUp ? 'level' : 'fare'
 }

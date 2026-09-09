@@ -1,14 +1,14 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { useLang } from '../../LangContext'
-import { playFareTick, playFlapClatter, playStationMelody } from '../../lib/audio'
-import { rewardTier, rankFor } from '../../domain/rewardTier'
+import { playFareTick, playFlapClatter } from '../../lib/audio'
+import { rewardTier } from '../../domain/rewardTier'
 import { SplitFlap } from './SplitFlap'
 
 // ── What happens when you earn something ──────────────────────
-// Three tiers, three sizes; see domain/rewardTier for where the
-// boundaries come from. What changed in the study-mode redesign is
-// WHERE each one lands, and that only one of them still interrupts:
+// Two tiers, two sizes; see domain/rewardTier. Neither interrupts —
+// the 再発行 board that did (a rank title crossing) went with the
+// titles themselves:
 //
 //   fare   XP, no level. Nearly every review. It is not a toast at
 //          all any more: the level HUD reports it in place — the
@@ -19,10 +19,7 @@ import { SplitFlap } from './SplitFlap'
 //   level  The level turned over. An announcement on the in-car
 //          display: a board docked at the top of the screen, the
 //          number flipping on its drums, gone on its own in a couple
-//          of seconds. It no longer holds the next card.
-//   rank   The title changed. Your 定期券 is re-issued, and that one
-//          still takes the screen and waits to be dismissed by hand,
-//          because it happens four times in the whole progression.
+//          of seconds. It does not hold the next card.
 //
 // Scenes are keyed on the toast id and kept until they finish on
 // their own, so a level board is never cut short by the fare of the
@@ -69,17 +66,15 @@ function RewardScene({ toast, onDone }) {
 
   useEffect(() => {
     // Each tier gets its own voice: a soft blip for the fare, the
-    // board's drums for a level, the platform melody for a rank.
+    // board's drums for a level.
     if (!sounded.current) {
       sounded.current = true
-      if (tier === 'rank') playStationMelody()
-      else if (tier === 'level') playFlapClatter()
+      if (tier === 'level') playFlapClatter()
       else playFareTick()
     }
 
-    // A promotion waits to be dismissed; the fare has no visual of
-    // its own here and just retires; the board is on a clock.
-    if (tier === 'rank') return
+    // The fare has no visual of its own here and just retires; the
+    // board is on a clock.
     if (tier === 'fare') {
       const id = setTimeout(() => onDone?.(), FARE_MS)
       return () => clearTimeout(id)
@@ -119,76 +114,28 @@ function RewardScene({ toast, onDone }) {
   }
 
   const level = toast.newLevel
-  const rank = rankFor(level)
 
   // ── level ──
-  if (tier === 'level') {
-    return createPortal(
-      <div
-        className={`levelup${leaving ? ' levelup--leaving' : ''}`}
-        aria-live="polite"
-        onAnimationEnd={onExitEnd('levelup-out')}
-      >
-        <div className="levelup__board">
-          <span className="levelup__mark">
-            <span className="levelup__jp" lang="ja">進級</span>
-            <span className="levelup__latin">{t.levelUp}</span>
-          </span>
-          {/* A figure and its label form a fixed pair: the drums, the
-              caps label beneath (DESIGN.md, Figures). */}
-          <span className="levelup__flaps">
-            <SplitFlap from={level - 1} to={level} label={`${t.level} ${level}`} />
-            <span className="levelup__unit">{t.level}</span>
-          </span>
-        </div>
-      </div>,
-      document.body,
-    )
-  }
-
-  // ── rank ──
-  const before = rankFor(Math.max(0, level - 1))
   return createPortal(
     <div
-      className={`reissue${leaving ? ' reissue--leaving' : ''}`}
+      className={`levelup${leaving ? ' levelup--leaving' : ''}`}
       aria-live="polite"
-      onAnimationEnd={onExitEnd('reissue-out')}
+      onAnimationEnd={onExitEnd('levelup-out')}
     >
-      <div className="reissue__scrim" aria-hidden="true" />
-
-      <div className="reissue__pass">
-        <div className="reissue__head">
-          <span className="reissue__brand" lang="ja">定期券</span>
-          <span className="reissue__issued" lang="ja">再発行</span>
-        </div>
-
-        <div className="reissue__flaps">
-          <span className="reissue__unit">{t.level}</span>
-          <SplitFlap from={level - 1} to={level} stagger={90} label={`${t.level} ${level}`} />
-        </div>
-
-        {/* The title is the reason this tier exists, so it turns over
-            on its own board under the number rather than just being
-            printed there. */}
-        <div className="reissue__rank" lang="ja">
-          <span className="reissue__rank-from">{before.jp}</span>
-          <span className="reissue__rank-arrow" aria-hidden="true">→</span>
-          <span className="reissue__rank-to">{rank.jp}</span>
-        </div>
-        <div className="reissue__rank-latin">{rank.latin}</div>
-
-        <div className="reissue__stripe" aria-hidden="true" />
-
-        <button
-          type="button"
-          className="reissue__claim"
-          onClick={() => setLeaving(true)}
-          disabled={leaving}
-        >
-          {t.claimBtn}
-        </button>
+      <div className="levelup__board">
+        <span className="levelup__mark">
+          <span className="levelup__jp" lang="ja">進級</span>
+          <span className="levelup__latin">{t.levelUp}</span>
+        </span>
+        {/* A figure and its label form a fixed pair: the drums, the
+            caps label beneath (DESIGN.md, Figures). */}
+        <span className="levelup__flaps">
+          <SplitFlap from={level - 1} to={level} label={`${t.level} ${level}`} />
+          <span className="levelup__unit">{t.level}</span>
+        </span>
       </div>
     </div>,
     document.body,
   )
 }
+

@@ -5473,8 +5473,8 @@ textarea:focus-visible {
 /* The diagonal light a plastic card catches — what replaced the
    magnetic stripe when the ground went dark: a charcoal stripe on a
    charcoal card said nothing, and a card's realism lives in its
-   sheen, not its stripe (the drawer stub and the reissue pass keep
-   theirs; their grounds still show it). The boarding's printed pass
+   sheen, not its stripe (the drawer stub keeps its own; its ground
+   still shows it). The boarding's printed pass
    (plan 075) is this same object on the same sumi ground, so it takes
    the same sheen. */
 .pass::after {
@@ -5609,31 +5609,6 @@ textarea:focus-visible {
   color: var(--text-on-panel);
 }
 
-/* The class printed on the pass: the level title, in the two registers
-   every name in the app is set in. Right of the holder on a desktop
-   card; on a phone it stacks under the name, left-flush (the 560px
-   query below), the way the concourse IC card prints it. */
-.pass__ranks {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: var(--sp-1);
-  text-align: right;
-}
-.pass__rank-jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.08em;
-}
-.pass__rank-latin {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--text-on-panel-soft);
-}
 /* The balance row: the bar climbing toward the next class on the
    left, the class printed large beside it — which is what made the
    old "next level" caption redundant (say less). */
@@ -5687,7 +5662,6 @@ textarea:focus-visible {
   .pass { padding: 20px 18px 18px; gap: 18px; }
   .pass__level-num { font-size: 1.9rem; }
   .pass__body { gap: 16px; }
-  .pass__ranks { align-items: flex-start; text-align: left; }
   .pass__avatar-wrap { width: 64px; height: 64px; }
   .pass__avatar { font-size: 1.4rem; inset: 8px; }
   /* A long username on a 390px card: a rung down, and allowed to break. */
@@ -9113,11 +9087,11 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    trap either way.
 
    XpToast.jsx drives its own timing off real animationend events —
-   it listens for fare-tick-out, level-board-out and reissue-out (see
-   onExitEnd there). Those exit animations are declared on the
+   it listens for fare-tick-out and level-board-out (see onExitEnd
+   there). Those exit animations are declared on the
    --leaving modifier classes further down this file, and the
    reduced-motion block near them sets animation-duration: 1ms on the
-   *base* classes (.fare-tick/.level-board/.reissue). Same specificity,
+   *base* classes (.fare-tick/.level-board). Same specificity,
    later in source order, so duration is overridden while
    animation-name survives from the --leaving shorthand: the animation
    still runs and still fires a real animationend with the right
@@ -15090,163 +15064,11 @@ html { scrollbar-gutter: stable; }
   }
 }
 
-/* ══ 再発行 — the pass re-issued ════════════════════════════
-   The rank changed. Four times in the whole progression, so this one
-   is allowed to take the screen and wait to be dismissed by hand. */
-.reissue {
-  position: fixed;
-  inset: 0;
-  z-index: 260;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  animation: reissue-in 300ms cubic-bezier(0.22, 0.68, 0.32, 1);
-}
-.reissue--leaving { animation: reissue-out 340ms ease-in forwards; }
-@keyframes reissue-in  { from { opacity: 0; } }
-@keyframes reissue-out { to   { opacity: 0; } }
-
-.reissue__scrim {
-  position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.62);
-  backdrop-filter: blur(2px);
-}
-
-/* The 定期券 itself, at full size — same object as the profile's and
-   the drawer's, which is the point: what changed is your pass. */
-.reissue__pass {
-  --flap-size: 62px;
-  --pass-color: var(--pass-ink, var(--accent9));
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  width: min(420px, 88vw);
-  padding: 26px 28px 24px;
-  background: linear-gradient(122deg,
-    color-mix(in srgb, var(--pass-color) 22%, var(--surface)) 0%,
-    var(--surface) 62%);
-  border: 1px solid var(--surface-line);
-  border-radius: 12px;
-  box-shadow: 0 26px 70px rgba(0, 0, 0, 0.5);
-  overflow: hidden;
-  animation: reissue-pass-in 460ms cubic-bezier(0.22, 0.72, 0.28, 1) backwards;
-}
-@keyframes reissue-pass-in {
-  from { opacity: 0; transform: translateY(26px) scale(0.94); }
-}
-
-.reissue__head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  width: 100%;
-}
-.reissue__brand {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.78rem;
-  letter-spacing: 0.2em;
-  color: var(--text-primary);
-}
-.reissue__issued {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: 0.62rem;
-  letter-spacing: 0.16em;
-  color: var(--accent);
-}
-
-.reissue__flaps {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 12px 0 4px;
-}
-.reissue__unit {
-  font-family: var(--font-display);
-  font-size: 0.62rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-/* The title crossing, which is the whole reason this tier exists. */
-.reissue__rank {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-top: 10px;
-  font-family: 'Noto Serif JP', serif;
-  font-weight: 700;
-  font-size: 1.4rem;
-}
-.reissue__rank-from {
-  color: var(--text-secondary);
-  opacity: 0.55;
-  text-decoration: line-through;
-  text-decoration-thickness: 1px;
-}
-.reissue__rank-arrow { color: var(--text-secondary); font-size: 0.9rem; }
-.reissue__rank-to {
-  color: var(--text-primary);
-  animation: reissue-rank-in 420ms cubic-bezier(0.2, 0.8, 0.3, 1) 620ms backwards;
-}
-@keyframes reissue-rank-in {
-  from { opacity: 0; transform: translateY(8px); }
-}
-.reissue__rank-latin {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.24em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.reissue__stripe {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 5px;
-  background: var(--pass-color);
-}
-
-.reissue__claim {
-  margin-top: 20px;
-  padding: 10px 26px;
-  border-radius: 999px;
-  border: none;
-  background: var(--accent);
-  color: var(--text-on-fill);
-  font-family: var(--font-display);
-  font-size: 0.74rem;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  animation: reissue-claim-in 300ms ease-out 900ms backwards;
-}
-@keyframes reissue-claim-in { from { opacity: 0; transform: translateY(6px); } }
-.reissue__claim:disabled { opacity: 0.5; }
-
-@media (max-width: 560px) {
-  .reissue__pass { --flap-size: 48px; padding: 22px 20px 20px; }
-  .reissue__rank { font-size: 1.15rem; gap: 8px; }
-}
-
 /* The flaps still turn — that is the content, not decoration — but
    nothing slides or scales around them. */
 @media (prefers-reduced-motion: reduce) {
   .stage { transition: none; }
-  .levelup,
-  .reissue,
-  .reissue__pass,
-  .reissue__rank-to,
-  .reissue__claim {
+  .levelup {
     animation-duration: 1ms;
   }
 }
@@ -15294,7 +15116,6 @@ html { scrollbar-gutter: stable; }
 }
 .preview-row__tier--fare  { background: color-mix(in srgb, var(--text-secondary) 22%, transparent); color: var(--text-secondary); }
 .preview-row__tier--level { background: color-mix(in srgb, var(--accent2) 24%, transparent); color: var(--accent2); }
-.preview-row__tier--rank  { background: color-mix(in srgb, var(--accent) 24%, transparent); color: var(--accent); }
 .preview-row__tier--stamp { background: color-mix(in srgb, var(--state-learning) 22%, transparent); color: color-mix(in srgb, var(--state-learning) 65%, var(--text-primary)); }
 /* The card the stamp rows strike: a study stage, but one that sits in
    the page's flow rather than filling the screen. */
@@ -15306,20 +15127,6 @@ html { scrollbar-gutter: stable; }
 .preview-row__body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .preview-row__label { font-weight: 600; }
 .preview-row__note { font-size: 0.76rem; color: var(--text-secondary); }
-.preview-table { display: flex; flex-direction: column; gap: 2px; }
-.preview-table__row {
-  display: grid;
-  grid-template-columns: 90px 70px 1fr;
-  gap: 12px;
-  align-items: center;
-  padding: 7px 16px;
-  background: var(--surface);
-  font-family: var(--font-display);
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-}
-.preview-table__rank { font-family: var(--font-jp); color: var(--text-primary); }
-
 /* ── 音色 — the sound palette (/dev/sounds) ────────────────
    The listening room for lib/audio/voices.js. Every sound the app
    makes, its alternatives beside it, one press to hear and pick.

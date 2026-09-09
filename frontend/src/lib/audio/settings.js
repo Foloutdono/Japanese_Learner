@@ -60,7 +60,6 @@ export const BASE_GAIN = {
   //   0.075  the door chime
   //   0.080  arriving
   //   0.100  the platform sign (onboarding only)
-  //   0.110  the departure melody -- four times in the whole game
   sfx: {
     'card-transition': 1.60,
     'door-slide':      1.10,
@@ -78,7 +77,6 @@ export const BASE_GAIN = {
     'door-chime':             0.45,
     'platform-chime':         0.74,
     arrival:                  0.64,
-    'station-melody':         0.77,
     // These two are levelled by PEAK, not by the window RMS the rest
     // use. Both are noise bursts a few milliseconds long, and the
     // 42ms window that measures a chime fairly under-reads a

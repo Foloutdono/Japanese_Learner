@@ -6,25 +6,23 @@ import { XpToast } from '../components/rewards/XpToast'
 import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import { CharDisplay } from '../components/study/QuizComponents'
-import { LEVEL_TITLES, levelTitle } from '../domain/levelTitle'
-import { rewardTier } from '../domain/rewardTier'
 import { seedSummary, applyXpGain } from '../stores/profileSummary'
 
 // ── 試写 — the reward preview ──────────────────────────────
 // Every reward in the app is gated behind actually earning it, which
-// makes the rare ones effectively unreviewable: a rank promotion
-// happens four times in the entire progression, so checking whether
-// the 免許皆伝 crossing looks right meant grinding a real account to
-// level 30 — or trusting it, which is how a thing nobody has ever
-// seen ships broken.
+// makes the rarer ones effectively unreviewable: checking whether a
+// level board looks right at three digits, or whether a demotion
+// stamp reads as a lapse, meant grinding a real account there — or
+// trusting it, which is how a thing nobody has ever seen ships broken.
 //
 // This fires any of them on demand. It is a development-only route:
 // App only registers it under import.meta.env.DEV, so it does not
 // exist in a production build at all — no flag to leave on by
 // accident, no dead screen shipped to users.
 //
-// The rows are generated from LEVEL_TITLES rather than hardcoded, so a
-// new rank appears here the moment it is added to the domain.
+// There used to be a fourth section here, the 再発行 pass re-issue,
+// which was the reason this workbench was written at all. It went with
+// the rank titles it announced (domain/rewardTier).
 const FARE_SAMPLES = [4, 12, 40, 150]
 
 // The level HUD (the roundel up top, the bar along the bottom of a
@@ -33,13 +31,6 @@ const FARE_SAMPLES = [4, 12, 40, 150]
 // a pass far from its next level, and each fare row pays into it the
 // way a real review would.
 const SEED = { level: 12, xp: 1450, xpPrevLevel: 1385, xpForNext: 4000, ratingScale: 'simple' }
-
-// The level *below* each rank threshold crosses into it. Level 0's
-// band has no crossing — you start there.
-const RANK_CROSSINGS = LEVEL_TITLES
-  .map(([min]) => min)
-  .filter(min => min > 0)
-  .sort((a, b) => a - b)
 
 const STAMPS = [
   { label: '新 → 習', note: 'the routine press: a faint vermillion 落款, ~0.9s', transition: { to: 'learning' } },
@@ -89,7 +80,7 @@ export default function RewardsPreview() {
         <SectionHeader jp="運賃" title="Fare" />
         <p className="preview-note">
           XP with no level change. Fires after nearly every review, so it is
-          the quietest of the three and lives on the level HUD itself: the
+          the quietest of them and lives on the level HUD itself: the
           roundel pulses and the amount rises off it; on a phone the bottom
           bar lights the span it gained. Nothing to dismiss, nothing held.
         </p>
@@ -139,10 +130,9 @@ export default function RewardsPreview() {
 
         <SectionHeader jp="進級" title="Level board" />
         <p className="preview-note">
-          The level number turned over, within the same rank. An
-          announcement on the in-car display — docked at the top of a
-          phone, under the top bar on a desktop. Self-dismissing, and it
-          no longer holds the next card.
+          The level number turned over. An announcement on the in-car
+          display — docked at the top of a phone, under the top bar on a
+          desktop. Self-dismissing, and it never holds the next card.
         </p>
         <div className="preview-rows">
           {[3, 9, 10, 25].map(lv => (
@@ -150,45 +140,9 @@ export default function RewardsPreview() {
               key={lv}
               tier="level"
               label={`Level ${lv - 1} → ${lv}`}
-              note={lv === 10 ? 'single digit to double — the drum count grows' : levelTitle(lv)[1]}
+              note={lv === 10 ? 'single digit to double — the drum count grows' : null}
               onClick={() => fire({ amount: 24, leveledUp: true, newLevel: lv, quality: 5 })}
             />
-          ))}
-        </div>
-
-        <SectionHeader jp="再発行" title="Pass re-issued" />
-        <p className="preview-note">
-          The rank title changed. {RANK_CROSSINGS.length} of these exist in the whole
-          progression, which is why this is the only one that waits to be dismissed.
-        </p>
-        <div className="preview-rows">
-          {RANK_CROSSINGS.map(lv => {
-            const [, fromJp] = levelTitle(lv - 1)
-            const [, toJp, toLatin] = levelTitle(lv)
-            return (
-              <Row
-                key={lv}
-                tier="rank"
-                label={`Level ${lv} — ${fromJp} → ${toJp}`}
-                note={toLatin}
-                onClick={() => fire({ amount: 60, leveledUp: true, newLevel: lv, quality: 5 })}
-              />
-            )
-          })}
-        </div>
-
-        {/* Proves the tier boundaries are what they claim to be, rather
-            than leaving the reader to trust the table above. */}
-        <SectionHeader jp="判定" title="Tier resolution" />
-        <div className="preview-table">
-          {[1, 5, 6, 7, 11, 12, 19, 20, 29, 30, 31].map(lv => (
-            <div key={lv} className="preview-table__row">
-              <span>level {lv}</span>
-              <span className={`preview-row__tier preview-row__tier--${rewardTier({ leveledUp: true, newLevel: lv })}`}>
-                {rewardTier({ leveledUp: true, newLevel: lv })}
-              </span>
-              <span className="preview-table__rank" lang="ja">{levelTitle(lv)[1]}</span>
-            </div>
           ))}
         </div>
       </main>

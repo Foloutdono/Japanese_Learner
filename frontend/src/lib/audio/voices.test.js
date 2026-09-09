@@ -37,7 +37,7 @@ describe('the voice registry', () => {
       'click', 'toggle',
       'click-menu', 'click-close-menu', 'click-mode-selection', 'click-screen-selection',
       'correct', 'wrong', 'card-transition',
-      'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival', 'station-melody',
+      'gate-chime', 'door-chime', 'door-slide', 'platform-chime', 'arrival',
       'fare-tick', 'flap-clatter',
     ]
     for (const key of required) {

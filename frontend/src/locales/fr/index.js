@@ -345,7 +345,6 @@ const quiz = {
   hideExamples:      'Masquer les exemples',
 
   // XpToast
-  claimBtn:         'Récupérer',
   levelUp:          'Niveau supérieur !',
 }
 

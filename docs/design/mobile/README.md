@@ -10,7 +10,8 @@ block carries the same token names, so a port is a copy with the literals
 checked against `frontend/src/design-scale.json`.
 
 The canvas's rule for the chrome: **the interface speaks the learner's
-language; Japanese is content** (a word, a sentence, a deck's name, a rank)
+language; Japanese is content** (a word, a sentence, a deck's name, a
+card's stage)
 and the tab bar's icons. The bilingual JP + Latin pairing the desktop chrome
 used retires for the mobile chrome.
 
@@ -64,7 +65,7 @@ caps at `99+`: a third figure is wider than the gate.
 | `.draw-prompt`, `.canvas-wrap`, `.canvas-clear-btn` | the draw face | `components/study/DrawingCanvas.jsx` |
 | `.readings-input*` | the readings face | `components/study/ReadingsInput.jsx` |
 | `.browse-nav` | the fast review's foot | `components/study/ReviewDeck.jsx` |
-| `.levelup*`, `.reissue*`, `.card-stamp*` | the boards over the stage | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
+| `.levelup*`, `.card-stamp*` | the boards over the stage; the canvas's `.reissue*` (the pass re-issued on a rank crossing) is retired with the rank titles | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
 | `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__lanes`, `.gate-card__pick`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
 | `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__due` | the lanes are the picker | `GateCard.jsx` |
 | `.pass--strip` (with `.stamp-rally*`, `.hall-pace*`) | the strip under the gate | `components/station/PassStrip.jsx` |

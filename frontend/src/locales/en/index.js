@@ -362,7 +362,6 @@ const quiz = {
   hideExamples:      'Hide examples',
 
   // XpToast
-  claimBtn:         'Claim',
   levelUp:          'Level up!',
   level:            'Level',
 
