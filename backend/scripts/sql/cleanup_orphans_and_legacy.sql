@@ -8,9 +8,8 @@
 --    B. drops the five tables the retired gamification features left
 --
 --  Run PART 1 on its own first and READ WHAT IT PRINTS. Only then run
---  PART 2, which is the part that deletes. They are separate on
---  purpose: part 1 cannot change anything, so there is no cost to
---  looking.
+--  PART 2, which is the part that deletes, and PART 3 to confirm.
+--  Highlight a part and press Run to execute just that part.
 --
 --  -- Why this file exists at all -------------------------------
 --  backend/scripts/purge_orphans.py is the maintained version of A and
@@ -24,8 +23,19 @@
 --  This is a one-shot, so the duplication cannot rot: run it once and
 --  the scripts take over.
 --
+--  -- No temp tables, on purpose --------------------------------
+--  An earlier version of this file built the doomed-id list in a
+--  CREATE TEMP TABLE and used it from a later statement. That works in
+--  psql, which holds one session for a whole file, and FAILS in the SQL
+--  Editor with `relation "doomed" does not exist`: a temp table belongs
+--  to one session and one transaction, and the editor does not
+--  guarantee the next statement gets either. So the whole purge is now
+--  a SINGLE self-contained DO block holding its ids in an array
+--  variable. One statement is one session and one transaction
+--  everywhere, so how the editor batches statements stops mattering.
+--
 --  -- Safety ---------------------------------------------------
---  * Part 2 is one transaction. It commits completely or not at all.
+--  * The DO block is one statement: it commits completely or not at all.
 --  * Deletion order is children-before-parents, mirroring
 --    routes/account.py's PLAN exactly, so the foreign keys hold at
 --    every step.
@@ -33,7 +43,10 @@
 --    the tables in PLAN (review_daily, card_first_review,
 --    review_compaction) are created by the backend on its next start,
 --    so this file works whether you run it before or after that deploy.
---  * The KEEP list at the top of part 2 spares any id you name.
+--  * A learner is matched exactly the way the app itself matches one:
+--    split_part(card_id, ':', 1), the id namespacing from core/auth.py.
+--    No LIKE, so no wildcard can widen the match.
+--  * KEEP_IDS at the top of part 2 spares any id you name.
 --
 --  ⚠ IF auth.users IS EMPTY, EVERY LEARNER IS AN ORPHAN and part 2
 --    erases all of them. That is the expected case here -- the users
@@ -73,20 +86,20 @@ WITH app_users AS (
 orphans AS (
     SELECT a.uid
       FROM app_users a
-      -- a.id::text, never a.uid::uuid: user_id is TEXT and may hold an
+      -- u.id::text, never a.uid::uuid: user_id is TEXT and may hold an
       -- id that is not a uuid at all (a DEV_USER_ID), which would make
       -- the cast throw instead of simply not matching.
      WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id::text = a.uid)
        AND a.uid <> ''
 )
 SELECT
-    o.uid                                            AS orphaned_user_id,
+    o.uid                                                     AS orphaned_user_id,
     p.username,
     (SELECT COUNT(*) FROM review_log r
-      WHERE r.card_id LIKE o.uid || ':%')            AS reviews,
+      WHERE split_part(r.card_id, ':', 1) = o.uid)            AS reviews,
     (SELECT COUNT(*) FROM card_modes c
-      WHERE c.card_id LIKE o.uid || ':%')            AS cards_in_progress,
-    (SELECT COUNT(*) FROM decks d  WHERE d.user_id = o.uid) AS decks,
+      WHERE split_part(c.card_id, ':', 1) = o.uid)            AS cards_in_progress,
+    (SELECT COUNT(*) FROM decks d WHERE d.user_id = o.uid)    AS decks,
     p.created_at
   FROM orphans o
   LEFT JOIN user_profiles p ON p.user_id = o.uid
@@ -102,54 +115,27 @@ SELECT
 
 -- ───────────────────────────────────────────────────────────────
 --  PART 2 — THE CLEANUP. This deletes. Run it after reading part 1.
+--  One statement. Highlight from DO to the $$; and Run.
 -- ───────────────────────────────────────────────────────────────
 
-BEGIN;
-
--- ── Edit this line to spare anyone ─────────────────────────────
--- Any id listed here is kept even though it has no auth user.
--- Leave it as the empty string to purge every orphan part 1 listed.
-CREATE TEMP TABLE keep_ids (uid TEXT) ON COMMIT DROP;
-INSERT INTO keep_ids (uid) VALUES ('');
--- e.g.  INSERT INTO keep_ids (uid) VALUES ('57a2cd3e-f61c-4d33-80c7-7c3e1f1b6448');
-
-CREATE TEMP TABLE doomed (uid TEXT PRIMARY KEY) ON COMMIT DROP;
-
-INSERT INTO doomed (uid)
-SELECT DISTINCT a.uid FROM (
-    SELECT split_part(card_id, ':', 1) AS uid FROM review_log
-    UNION SELECT split_part(card_id, ':', 1) FROM card_modes
-    UNION SELECT split_part(id,      ':', 1) FROM cards
-    UNION SELECT user_id FROM user_profiles
-    UNION SELECT user_id FROM xp_ledger
-    UNION SELECT user_id FROM credit_ledger
-    UNION SELECT user_id FROM decks
-    UNION SELECT user_id FROM custom_cards
-    UNION SELECT user_id FROM deck_cards
-    UNION SELECT user_id FROM video_sessions
-    UNION SELECT user_id FROM phrase_history
-    UNION SELECT user_id FROM reading_log
-    UNION SELECT user_id FROM comprehension_log
-    UNION SELECT user_id FROM translation_log
-    UNION SELECT user_id FROM exam_attempts
-    UNION SELECT user_id FROM frequency_overrides
-    UNION SELECT user_id FROM ocr_usage
-) a
-WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id::text = a.uid)
-  AND a.uid <> ''
-  AND a.uid NOT IN (SELECT uid FROM keep_ids);
-
--- ── A. Erase them, in routes/account.py's PLAN order ───────────
 DO $$
 DECLARE
-    step     RECORD;
-    n        BIGINT;
-    total    BIGINT := 0;
-    -- (table, how a row is scoped to a learner). Children before
-    -- parents: card_modes -> cards, custom_cards/deck_cards -> decks,
-    -- video_session_jobs -> video_sessions. Identity last, so a run
-    -- that somehow failed midway leaves an account that can still
-    -- sign in.
+    -- ── Edit this line to spare anyone ─────────────────────────
+    -- Any id listed here is kept even though it has no auth user.
+    -- Leave it empty to purge every orphan part 1 listed. e.g.
+    --   KEEP_IDS CONSTANT TEXT[] := ARRAY['57a2cd3e-f61c-4d33-80c7-7c3e1f1b6448'];
+    KEEP_IDS CONSTANT TEXT[] := ARRAY[]::TEXT[];
+
+    doomed  TEXT[];
+    n       BIGINT;
+    total   BIGINT := 0;
+    i       INT;
+
+    -- (table, how a row is scoped to a learner, column). Children
+    -- before parents: card_modes -> cards, custom_cards/deck_cards ->
+    -- decks, video_session_jobs -> video_sessions. Identity last, so a
+    -- run that somehow failed midway leaves an account that can still
+    -- sign in. Mirrors routes/account.py's PLAN.
     plan CONSTANT TEXT[][] := ARRAY[
         ['review_log',          'prefix',  'card_id'],
         ['review_daily',        'column',  'user_id'],
@@ -173,52 +159,87 @@ DECLARE
         ['credit_ledger',       'column',  'user_id'],
         ['user_profiles',       'column',  'user_id']
     ];
-    i INT;
 BEGIN
+    -- A plain table, not a temp one, and not passed between statements:
+    -- it is written here and read by PART 3, which then drops it. The
+    -- SQL Editor does not show RAISE NOTICE reliably, so this is how
+    -- the run reports what it did.
+    DROP TABLE IF EXISTS public.cleanup_report;
+    CREATE TABLE public.cleanup_report (
+        step INT, table_name TEXT, rows_deleted BIGINT
+    );
+
+    -- Who goes. Held in an array for the whole block, so nothing has to
+    -- survive between statements.
+    SELECT array_agg(DISTINCT a.uid) INTO doomed FROM (
+        SELECT split_part(card_id, ':', 1) AS uid FROM review_log
+        UNION SELECT split_part(card_id, ':', 1) FROM card_modes
+        UNION SELECT split_part(id,      ':', 1) FROM cards
+        UNION SELECT user_id FROM user_profiles
+        UNION SELECT user_id FROM xp_ledger
+        UNION SELECT user_id FROM credit_ledger
+        UNION SELECT user_id FROM decks
+        UNION SELECT user_id FROM custom_cards
+        UNION SELECT user_id FROM deck_cards
+        UNION SELECT user_id FROM video_sessions
+        UNION SELECT user_id FROM phrase_history
+        UNION SELECT user_id FROM reading_log
+        UNION SELECT user_id FROM comprehension_log
+        UNION SELECT user_id FROM translation_log
+        UNION SELECT user_id FROM exam_attempts
+        UNION SELECT user_id FROM frequency_overrides
+        UNION SELECT user_id FROM ocr_usage
+    ) a
+    WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id::text = a.uid)
+      AND a.uid <> ''
+      AND NOT (a.uid = ANY(KEEP_IDS));
+
+    IF doomed IS NULL OR cardinality(doomed) = 0 THEN
+        INSERT INTO public.cleanup_report VALUES (0, '(no orphans found)', 0);
+        RETURN;
+    END IF;
+
     FOR i IN 1 .. array_length(plan, 1) LOOP
         -- Skip a table this database does not have yet rather than
         -- failing: the three rollup tables arrive with the next deploy.
         IF to_regclass('public.' || plan[i][1]) IS NULL THEN
-            RAISE NOTICE 'skipped % (not in this database)', plan[i][1];
+            INSERT INTO public.cleanup_report
+                VALUES (i, plan[i][1] || ' (not in this database)', 0);
             CONTINUE;
         END IF;
 
         IF plan[i][2] = 'prefix' THEN
-            -- The same escaping the app applies to its own LIKE patterns:
-            -- a uuid carries none of these, but an id typed by hand can.
+            -- split_part, not LIKE: this is how the app itself reads a
+            -- learner out of a card id, and no wildcard in an id can
+            -- widen the match.
             EXECUTE format(
-                'DELETE FROM public.%I t USING doomed d
-                  WHERE t.%I LIKE replace(replace(replace(d.uid,
-                        %L, %L), %L, %L), %L, %L) || '':%%''',
-                plan[i][1], plan[i][3],
-                '\', '\\', '%', '\%', '_', '\_'
-            );
+                'DELETE FROM public.%I t WHERE split_part(t.%I, '':'', 1) = ANY($1)',
+                plan[i][1], plan[i][3]
+            ) USING doomed;
         ELSIF plan[i][2] = 'session' THEN
             EXECUTE format(
                 'DELETE FROM public.%I t
                   WHERE t.%I IN (SELECT v.id FROM public.video_sessions v
-                                   JOIN doomed d ON d.uid = v.user_id)',
+                                  WHERE v.user_id = ANY($1))',
                 plan[i][1], plan[i][3]
-            );
+            ) USING doomed;
         ELSE
             EXECUTE format(
-                'DELETE FROM public.%I t USING doomed d WHERE t.%I = d.uid',
+                'DELETE FROM public.%I t WHERE t.%I = ANY($1)',
                 plan[i][1], plan[i][3]
-            );
+            ) USING doomed;
         END IF;
 
         GET DIAGNOSTICS n = ROW_COUNT;
         total := total + n;
-        IF n > 0 THEN
-            RAISE NOTICE '% : % rows', plan[i][1], n;
-        END IF;
+        INSERT INTO public.cleanup_report VALUES (i, plan[i][1], n);
     END LOOP;
 
-    RAISE NOTICE '--- % rows erased across % users ---',
-        total, (SELECT COUNT(*) FROM doomed);
+    INSERT INTO public.cleanup_report
+        VALUES (99, format('TOTAL across %s users', cardinality(doomed)), total);
 END $$;
 
--- ── B. The tables a removed feature left behind ────────────────
+-- ── The tables a removed feature left behind ───────────────────
 -- Retired by commit 8f96f6b ("retire darumas, tonight, badges, mastery
 -- ranks and the storehouse"), which deleted routes/daruma.py,
 -- srs/daruma.py, routes/cosmetics.py and srs/cosmetics.py but could not
@@ -234,13 +255,17 @@ DROP TABLE IF EXISTS user_cosmetics;
 DROP TABLE IF EXISTS user_loadout;
 DROP TABLE IF EXISTS streak_mends;
 
-COMMIT;
-
 
 -- ───────────────────────────────────────────────────────────────
---  PART 3 — CONFIRM. Both counts should be 0.
+--  PART 3 — WHAT HAPPENED, then CONFIRM. Run last.
 -- ───────────────────────────────────────────────────────────────
 
+-- What part 2 deleted, per table.
+SELECT step, table_name, rows_deleted
+  FROM public.cleanup_report
+ ORDER BY step;
+
+-- Both of these must be 0.
 SELECT
     (SELECT COUNT(*) FROM user_profiles p
       WHERE NOT EXISTS (SELECT 1 FROM auth.users u WHERE u.id::text = p.user_id))
@@ -250,3 +275,6 @@ SELECT
         AND table_name IN ('daruma_state', 'daruma_goals', 'user_cosmetics',
                            'user_loadout', 'streak_mends'))
         AS legacy_tables_remaining;
+
+-- Tidy up the scratch table this script made.
+DROP TABLE IF EXISTS public.cleanup_report;
