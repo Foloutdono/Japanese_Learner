@@ -375,17 +375,21 @@ const Fixture = () => (
       </div>
     </div>
     <div className="card-list" style={{ '--line-color': 'var(--line-decks)' }}>
-      <button type="button" className="card-row">
-        <span className="card-row__front">
-          <span className="card-row__jp" lang="ja">駅</span>
-          <span className="card-row__kana dk-kana" lang="ja">えき</span>
-        </span>
-        <span className="card-row__back dk-back">station<span className="card-row__note dk-note">a note</span></span>
-        <span className="card-row__badge dk-badge" style={{ '--rail': 'var(--line-kanji)' }}>Kanji · N4</span>
-      </button>
       <div className="card-row">
-        <span className="card-row__front"><span className="card-row__jp" lang="ja">切符</span></span>
-        <span className="card-row__back">ticket</span>
+        <button type="button" className="card-row__body">
+          <span className="card-row__front">
+            <span className="card-row__jp" lang="ja">駅</span>
+            <span className="card-row__kana dk-kana" lang="ja">えき</span>
+          </span>
+          <span className="card-row__back dk-back">station<span className="card-row__note dk-note">a note</span></span>
+          <span className="card-row__badge dk-badge" style={{ '--rail': 'var(--line-kanji)' }}>N4</span>
+        </button>
+      </div>
+      <div className="card-row">
+        <div className="card-row__body">
+          <span className="card-row__front"><span className="card-row__jp" lang="ja">切符</span></span>
+          <span className="card-row__back">ticket</span>
+        </div>
         <button type="button" className="card-row__remove dk-remove" aria-label="delete">x</button>
       </div>
     </div>

@@ -131,7 +131,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
 
   return (
     <div className="import-overlay" onClick={onClose}>
-      <div ref={dialogRef} className="import-modal" onClick={e => e.stopPropagation()}
+      <div ref={dialogRef} className="import-modal browse-modal" onClick={e => e.stopPropagation()}
            role="dialog" aria-modal="true" aria-labelledby="browse-cards-title">
         <div className="import-header">
           <div className="import-header__title" id="browse-cards-title">{t.browseTitle}</div>

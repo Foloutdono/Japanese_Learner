@@ -8199,24 +8199,39 @@ textarea:focus-visible {
   border-radius: var(--r-card);
   overflow: hidden;
 }
+/* The row is the hairline and the seat; what you press is
+   .card-row__body inside it. The split exists because the remove at
+   the end is a button and the body is a button too on every row that
+   opens something -- a hand-written card's editor, or its own tick in
+   select mode -- and one button cannot sit inside the other. */
 .card-row {
   display: flex;
   align-items: center;
-  gap: var(--sp-4);
   width: 100%;
+  border-top: 1px solid var(--surface-line);
+  color: var(--text-primary);
+}
+.card-row:first-child { border-top: 0; }
+.card-row__body {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  flex: 1 1 auto;
+  min-width: 0;
   min-height: 56px;
   padding: var(--sp-3) var(--sp-4);
   background: none;
   border: none;
-  border-top: 1px solid var(--surface-line);
+  /* Against the bare `button` rule's --r-panel: a row spans the list
+     and its hover ground must reach the list's own edge. */
+  border-radius: var(--r-flat);
   font: inherit;
   text-align: left;
-  color: var(--text-primary);
+  color: inherit;
 }
-.card-row:first-child { border-top: 0; }
-button.card-row { cursor: pointer; }
-button.card-row:hover,
-button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; }
+button.card-row__body { cursor: pointer; }
+button.card-row__body:hover,
+button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: none; }
 .card-row--selected { background: color-mix(in srgb, var(--line-color) 10%, transparent); }
 .card-row__tick {
   flex: none;
@@ -8269,6 +8284,10 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   white-space: nowrap;
 }
 .card-row__go { flex: none; color: var(--text-secondary); }
+/* A square control, so it states its own box. The bare `button` rule
+   pads every button --sp-3/--sp-5, and inside a border-box 36px square
+   that leaves a 2px content box: the trash can rendered as a speck of
+   stroke in the middle of the ring. */
 .card-row__remove {
   flex: none;
   display: inline-flex;
@@ -8276,12 +8295,15 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   justify-content: center;
   width: 36px;
   height: 36px;
+  margin-inline-end: var(--sp-4);
+  padding: 0;
   border-radius: var(--r-pill);
   border: 1px solid var(--surface-line);
   background: none;
   color: var(--text-secondary);
   cursor: pointer;
 }
+.card-row__remove svg { flex: none; }
 .card-row__remove:hover,
 .card-row__remove:focus-visible { color: var(--danger); border-color: var(--danger); filter: none; }
 
@@ -8335,6 +8357,20 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .btn-primary--danger { background: color-mix(in srgb, var(--danger) 70%, var(--bg-panel)); }
 .btn-secondary--danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 45%, transparent); }
 .sheet__q { font-size: var(--fs-sm); color: var(--text-primary); }
+
+/* Like a console's chips, the deck's chip row is a SET — everything
+   the screen can do to the deck — so it takes the whole width rather
+   than ending ragged a hundred pixels short. Growth is per LINE: flex
+   wraps on the natural widths first, then stretches what landed on
+   each, so the set keeps the shape it wrapped into. The selection
+   toolbar's filled Delete grows with them; its count and its question
+   are labels and keep their own width. A lone chip is not a set, and
+   says so by not matching at all rather than by taking its own rule
+   back — .chip's own `flex: none` is already the answer. Written down
+   here, after both .chip and .btn-primary have said everything they
+   say, so neither of these selectors descends below one it follows. */
+.chip-row > .chip:not(:only-child),
+.chip-row > .btn-primary { flex: 1 1 auto; justify-content: center; }
 
 /* The stage's foot (canvas): the column's last row, pushed to the
    bottom edge of the stage. The stage's own inset pads under it. */
@@ -13035,6 +13071,14 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 .import-footer__submit--active { background: var(--deck-action); color: var(--text-on-panel); }
 .import-footer__submit--importing { opacity: 0.7; }
 
+/* On a phone the shell's own margins are the first thing to go: 40px
+   of overlay and 32px of modal padding is 144px of nothing, on the
+   axis that is already short. */
+@media (max-width: 560px) {
+  .import-overlay { padding: var(--sp-4) var(--sp-3); }
+  .import-modal { padding: var(--sp-5); }
+}
+
 @media (max-width: 900px) {
   .grid-4 { grid-template-columns: repeat(2, 1fr); }
   .grid-3 { grid-template-columns: repeat(2, 1fr); }
@@ -13080,8 +13124,32 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
 
 /* Taller than the import preview's own 200px: this is the working
    surface of the whole menu, not a preview of something already
-   decided, and four visible rows out of sixty is a keyhole. */
+   decided, and four visible rows out of sixty is a keyhole. A ceiling
+   only: inside .browse-modal the list takes whatever the shell has
+   left, which on a short viewport is less than this. */
 .browse-results__list { max-height: min(46vh, 420px); }
+
+/* The whole menu inside the viewport, at any height. The shell is a
+   column bounded by the overlay, and the results -- the one part of it
+   that is a list -- are what scroll; the note, the levels, the search
+   and the footer all stay put. Before this the menu was as tall as
+   sixty results made it, which on a phone put the footer below the
+   fold: the one button the menu exists for was the one you could not
+   reach. */
+.browse-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+}
+.browse-modal .import-header,
+.browse-modal .import-footer { flex: none; }
+.browse-modal .browse-results {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.browse-modal .browse-results__list { flex: 1 1 auto; min-height: 0; max-height: none; }
 
 /* ── A browsed entry ───────────────────────────────────────
    A GRID, not the five-column flex row this used to be. Every part
