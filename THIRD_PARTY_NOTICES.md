@@ -22,10 +22,15 @@ BY-SA 4.0). https://www.edrdg.org/edrdg/licence.html
 
 ## KANJIDIC2 / RADKFILE
 
-`backend/datas/kanji/kanji_readings.json`, `kanji_radicals.json`, and
-related kanji data are derived from KANJIDIC2 and RADKFILE, also property
-of the Electronic Dictionary Research and Development Group (EDRDG), used
-under the same license terms as JMdict above.
+`backend/datas/kanji/kanji.sqlite3` — the whole 13,108-character
+KANJIDIC2 dump, readings, meanings, radicals, stroke counts and dictionary
+index numbers, built by `backend/scripts/build_kanji_db.py` — along with
+`radicals.json` and `kanji_frequency.json` beside it, is derived from
+KANJIDIC2 and RADKFILE, also property of the Electronic Dictionary
+Research and Development Group (EDRDG), used under the same license terms
+as JMdict above. (It replaced a set of per-topic JSON files —
+`kanji_readings.json`, `kanji_radicals.json` and the rest — which the
+database now carries in full.)
 
 License: Creative Commons Attribution-ShareAlike 4.0 International (CC
 BY-SA 4.0). https://www.edrdg.org/edrdg/licence.html

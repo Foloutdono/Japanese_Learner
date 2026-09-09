@@ -10,15 +10,31 @@ study/modes.py's eligible_for, which asks for entry["radical"]).
 Shape:
     ALL_RADICALS       [{number, char, stroke_count, kanji_count}, ...]
     RADICAL_BY_NUMBER  {number: {...}}
-    KANJI_RADICALS     {kanji: {radical: int, stroke_count: int}}
+    KANJI_RADICALS     {kanji: {radical: int, stroke_count: int}} -- THE
+                       APP'S OWN DECK ONLY, see the memory note below.
+                       radical_for() is the accessor that answers for any
+                       character; reach for that unless you know the
+                       character is a deck one.
 
 `stroke_count` means two different things in the two files and that is
 not a mistake: on a radical it is the strokes in the RADICAL, on a kanji
 entry it is the strokes in the whole KANJI. Only the first is used to
 group radicals into distractor buckets.
+
+MEMORY NOTE (2026-09): KANJI_RADICALS used to be all 13,108 rows of
+kanji_radicals.json, loaded here AND again in routes/dictionary.py AND
+again in study/exam_kanji_gen.py — three copies of the same dump, despite
+this module's whole reason for owning it being to read it once. It is now
+the 2,212 deck characters, resolved in one query against
+datas/kanji/kanji.sqlite3, and radical_for() falls through to that same
+database for anything else. Callers see no change: every character
+KANJIDIC2 covers still resolves, it just isn't all held in RAM to do it.
 """
 import json
 import os
+
+import content.kanji_pool_data as _db
+from content.kanji_data import DECK_BY_CHAR
 
 _DATA_DIR = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "datas", "kanji"
@@ -31,7 +47,7 @@ def _load(name: str):
 
 
 ALL_RADICALS: list[dict] = _load("radicals.json")
-KANJI_RADICALS: dict[str, dict] = _load("kanji_radicals.json")
+KANJI_RADICALS: dict[str, dict] = _db.radicals_for(DECK_BY_CHAR)
 
 RADICAL_BY_NUMBER: dict[int, dict] = {r["number"]: r for r in ALL_RADICALS}
 
@@ -47,8 +63,18 @@ def radical_for(kanji: str) -> dict | None:
     """
     {number, char, stroke_count} for a kanji, or None when the KANJIDIC2
     dump doesn't cover it. stroke_count here is the RADICAL's.
+
+    Answers for ANY character, not just a deck one: the deck's 2,212 come
+    from the table above, everything else from the database. A personal
+    card written around an obscure character resolves its radical exactly
+    as it did when the whole dump was in memory.
     """
+    if not kanji:
+        return None
     info = KANJI_RADICALS.get(kanji)
+    if info is None:
+        row = _db.get(kanji)
+        info = {"radical": row["radical"]} if row and row["radical"] else None
     if info is None:
         return None
     r = RADICAL_BY_NUMBER.get(info["radical"])
