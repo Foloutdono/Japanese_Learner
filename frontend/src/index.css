@@ -8346,7 +8346,12 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
   margin-top: auto;
 }
 /* The way through a browse: two buttons on the stage's foot
-   (canvas RunBrowse), the filled one forward. */
+   (canvas RunBrowse), the filled one forward. The width is definite on
+   purpose: the auto margins that centre this row on a wide screen are
+   cross-axis margins of a flex item, and an auto margin there cancels
+   the stretch that would otherwise have sized it — without a width the
+   pair shrinks to fit its own labels in the middle of the stage. The
+   phone dock overrides it; see .stage > .stage__foot. */
 .browse-nav {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -13272,6 +13277,15 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
     margin-inline: calc(-1 * var(--sp-5));
     padding: var(--sp-3) var(--sp-5) var(--sp-5);
     background: var(--bg-main);
+    /* Edge to edge means auto, not 100%. A percentage resolves against
+       the stage's INNER box and knows nothing about the negative
+       margins above, so a foot carrying one (.browse-nav) kept the
+       348px of a 380px stage while sitting 16px left of where it
+       started — the browse's Next stopped 32px short of the card's
+       right edge, with the whole pair off its column. Auto width takes
+       the margins into account: the foot spans the stage, and its own
+       gutter puts the buttons back on the card's edges. */
+    width: auto;
   }
   /* The exam's sheet bar docks the same way (plan 072): sumi, edge to
      edge, on the dock's edge, its own inset under it. */
