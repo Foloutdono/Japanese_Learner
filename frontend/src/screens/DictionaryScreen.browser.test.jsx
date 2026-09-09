@@ -32,6 +32,20 @@ const VOCAB = {
 }
 // The JMdict pool: no card, no level.
 const NOCARD = { type: 'jmdict', kanji: '駅弁', kana: 'えきべん', meaning: 'station lunch box', level: null }
+// A character that is a word on its own: the deck reads 山 as やま, and
+// routes/dictionary.py sends that reading beside the character's own
+// list (study/kanji_words.kanji_as_word).
+const KANJI_WORD = {
+  type: 'kanji', kanji: '山', kana: 'サン・セン・やま', word_reading: 'やま',
+  meaning: 'mountain', level: 'N5', status: { status: 'new' },
+}
+// One that is not: 土 keeps its readings, and the pair is one from each
+// register — the deck lists on readings first, so the first TWO are
+// both on'yomi and would never say つち.
+const KANJI_ALONE = {
+  type: 'kanji', kanji: '土', kana: 'ド・ト・つち', meaning: 'soil',
+  level: 'N5', status: { status: 'new' },
+}
 // A page of filler behind them, so the infinite-scroll sentinel sits
 // below the fold: with it in view, the observer would page the moment
 // the query changes (before the debounced search), which is the screen
@@ -39,7 +53,7 @@ const NOCARD = { type: 'jmdict', kanji: '駅弁', kana: 'えきべん', meaning:
 const FILLER = Array.from({ length: 60 }, (_, i) => ({
   type: 'jmdict', kanji: `語${i}`, kana: `ご${i}`, meaning: `word ${i}`, level: null,
 }))
-const RESULTS = [KANJI, VOCAB, NOCARD, ...FILLER]
+const RESULTS = [KANJI, VOCAB, NOCARD, KANJI_WORD, KANJI_ALONE, ...FILLER]
 
 // ── A syllabary, as the endpoint serves one ──
 // `group` is what the chart lays out on (backend/content/kana_data.py):
@@ -229,6 +243,12 @@ describe('the dictionary screen', () => {
     expect(cards[1].querySelector('.dict-entry-card__char ruby').textContent).toBe('電車でんしゃ')
     // Nothing to annotate, nothing annotated.
     expect(cards[2].querySelector('rt')).toBeNull()
+    // A character that is a word is read as that word — not as its own
+    // list of readings.
+    expect(cards[3].querySelector('.dict-entry-card__char rt').textContent).toBe('やま')
+    // One that is not takes one reading from each register, never the
+    // first two of a list that starts with every on'yomi.
+    expect(cards[4].querySelector('.dict-entry-card__char rt').textContent).toBe('ド・つち')
     // Nothing is printed over the specimen any more.
     expect(screen.container.querySelector('.dict-grid .stage-mark')).toBeNull()
     // The stage rides on the card itself, and on the word only a

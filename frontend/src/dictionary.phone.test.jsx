@@ -136,6 +136,22 @@ describe('the dictionary at phone width', () => {
     expect(meanings[1].top - cards[1].getBoundingClientRect().top)
       .toBeCloseTo(meanings[2].top - cards[2].getBoundingClientRect().top, 0)
 
+    // ── The furigana stands off the character ──
+    // An annotation sits on the line above its base, so the room for a
+    // gap is inside that line: the reading is set in a line box of its
+    // own height and rides at the top of it. And it is CENTRED over the
+    // base rather than spread across it — the browser's default put
+    // やま over 山 as や    ま, the kanji's own width apart, which reads
+    // as two marks instead of one word.
+    const rt = card.querySelector('rt')
+    expect(getComputedStyle(card.querySelector('ruby')).rubyAlign).toBe('center')
+    const rtSize = parseFloat(getComputedStyle(rt).fontSize)
+    expect(parseFloat(getComputedStyle(rt).lineHeight)).toBeGreaterThan(rtSize * 2)
+    // The gap is real: the reading's own box ends well clear of the
+    // character under it.
+    expect(rt.getBoundingClientRect().bottom)
+      .toBeLessThan(card.querySelector('.dict-entry-card__char').getBoundingClientRect().bottom - rtSize)
+
     // The edge says where the card is: the state's own ink, and the
     // card's plain hairline where the schedule has never seen it.
     const ink = value => {

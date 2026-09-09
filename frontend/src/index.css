@@ -13960,11 +13960,24 @@ button.card-row:focus-visible { background: var(--bg-card-hover); filter: none; 
    places. The line that used to carry it above the word is gone with
    it: it was a second register on every tile, and on a kana-only entry
    it printed the word twice. */
-.dict-entry-card__char ruby { ruby-position: over; }
+.dict-entry-card__char ruby {
+  ruby-position: over;
+  /* Centred, not spread: the browser's default spaces an annotation
+     across its base, so やま over 山 printed as や    ま with the
+     kanji's own width between them and read as two marks rather than
+     one word. */
+  ruby-align: center;
+}
 .dict-entry-card__char rt {
   font-family: var(--font-jp);
   font-size: var(--fs-caption);
   font-weight: 400;
+  /* The gap over the character. An annotation sits on the line above
+     its base, so the only room to be had is inside that line: a taller
+     line box holds the same text higher off the kanji. 2.6 is a hair
+     under half the reading's own height between the two, which is what
+     stops the furigana reading as part of the character. */
+  line-height: 2.6;
   letter-spacing: 0;
   color: var(--text-secondary);
   user-select: none;

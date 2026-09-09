@@ -17,7 +17,7 @@ from core.srs_instance import srs
 from study.card_lookup import (
     card_stats, VOCAB_STATUS_MODES, KANJI_STATUS_MODES, KANA_STATUS_MODES,
 )
-from study.kanji_words import kanji_words, word_furigana
+from study.kanji_words import kanji_as_word, kanji_words, word_furigana
 
 router = APIRouter()
 
@@ -247,6 +247,11 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 "type":         "kanji",
                 "kanji":        entry["kanji"],
                 "kana":         entry.get("kana", ""),
+                # How the character is read when it IS a word (山 → やま).
+                # The catalogue tile prints its reading as furigana and
+                # a word's own reading is what that annotation means;
+                # the character's full list is the plate's business.
+                "word_reading": kanji_as_word(entry["kanji"]),
                 "meaning":      meaning,
                 # kanji_data.py entries don't carry their own stroke count —
                 # fall back to the value derived from KANJIDIC2.

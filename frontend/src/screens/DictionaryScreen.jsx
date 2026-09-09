@@ -22,6 +22,7 @@ function stageOf(status) {
 }
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { FuriganaParts } from '../components/study/Readings'
+import { pickPlateReadings } from '../domain/readingPick'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -609,18 +610,22 @@ function shortKana(kana, type) {
 	// at a fixed character count used to sever a reading mid-token and
 	// leave the separator dangling — 山 showed "サン・", 語 showed
 	// "ゴ・か" — because '・' and the following reading's first
-	// character both count as characters like any other. Splitting on
-	// the readings themselves (the same helper <Readings> uses, so the
-	// two can't disagree about what a token is) and taking the first two
-	// gives a card the on'yomi and kun'yomi whole: "サン・セン".
+	// character both count as characters like any other.
+	//
+	// The two are the PLATE's two: the first on'yomi and the first
+	// kun'yomi (domain/readingPick), not the first two of the list. The
+	// deck orders on readings before kun, so a slice off the front spent
+	// both slots in one register — 山 printed サン・セン and never said
+	// やま, 土 printed ド・ト and never said つち. One reading from each
+	// register says more about a character than two from one, which is
+	// the rule the entry's own plate already follows.
 	//
 	// The '.'/'~' okurigana markers KANJIDIC2 carries (かた.る — the る
 	// is a suffix, not part of the kanji's own reading) are dropped for
 	// the card: it's a glance at how the character sounds, and the
 	// detail panel's own reading list keeps them for anyone who wants
 	// the precise form.
-	return splitReadingTokens(kana)
-		.slice(0, 2)
+	return pickPlateReadings(splitReadingTokens(kana), 2)
 		.map(token => token.replace(/[.~]/g, ''))
 		.join('・')
 }
@@ -641,7 +646,12 @@ function shortKana(kana, type) {
 // Owner's call; the plate downstairs is unchanged.
 function cardFurigana(entry) {
 	if (entry.type === 'kanji') {
-		const reading = shortKana(entry.kana, entry.type)
+		// A character that is a word on its own is read as that word:
+		// 山 is やま here, not サン・やま (routes/dictionary.py sends
+		// `word_reading` from the deck — see study/kanji_words.py). A
+		// character that is not a word keeps its two readings, one from
+		// each register, and the plate prints the whole list either way.
+		const reading = entry.word_reading || shortKana(entry.kana, entry.type)
 		return reading ? [{ text: entry.kanji, reading }] : null
 	}
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
