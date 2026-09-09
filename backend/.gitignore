@@ -15,6 +15,21 @@ datas/vocab/vocab_jmdict.json
 datas/vocab/vocab_jmdict_meanings.json
 datas/vocab/vocab_jmdict_frequency.json
 datas/vocab/vocab_meanings.json
+# The KANJIDIC2 export, folded into datas/kanji/kanji.sqlite3 by
+# scripts/build_kanji_db.py. Same arrangement as the JMdict files above:
+# the built database is the shipped asset and these are the intermediate
+# it is built from, ~12 MB of JSON no runtime module opens any more. To
+# refresh from a newer KANJIDIC2, restore the export here and re-run the
+# builder. kanji_deck.json (the app's own hand-maintained JLPT deck),
+# radicals.json and kanji_frequency.json stay tracked -- they are small,
+# and the deck has no builder to regenerate it from.
+datas/kanji/kanji_basic.json
+datas/kanji/kanji_readings.json
+datas/kanji/kanji_meanings.json
+datas/kanji/kanji_radicals.json
+datas/kanji/kanji_dic_refs.json
+datas/kanji/kanji_query_codes.json
+datas/kanji/kanji_meta.json
 datas/jlpt/
 # Server-generated TTS output, not owned/tracked source data -- same
 # reasoning as datas/jlpt/ above, see study/exam_tts.py.

@@ -1,42 +1,35 @@
 """
-Retires translations/fr/kanji_fr.py and kanji_fr.json entirely.
+Kanji meanings, in every language KANJIDIC2 carries (en, fr, es, pt).
 
-Kanji meanings (all languages KANJIDIC2 carries — en, fr, es, pt) now
-come straight from kanji_meanings.json (datas/kanji/), the same
-KANJIDIC2 dump already backing kanji_data.py's radical lookups, instead
-of a separately hand-maintained French list. One source of truth instead
-of two datasets that can drift out of sync.
+Retired translations/fr/kanji_fr.py and kanji_fr.json: one source of
+truth instead of two datasets that can drift out of sync.
 
-    kanji_meanings.json shape:
-      { "土": {"en": ["earth", "soil", "ground", "Turkey"], "fr": [...]},
-        ... }
+MEMORY NOTE (2026-09): this module used to json.load the whole of
+kanji_meanings.json — 10,384 characters × four languages — into
+KANJI_MEANINGS at import, and then build KANJI_FR as a comprehension over
+all of it. Both are gone. The data lives in datas/kanji/kanji.sqlite3
+(content/kanji_pool_data.py) and is read on demand; KANJI_FR is now
+resolved for the app's own deck alone, in one bounded query.
 
-KANJI_FR below is a drop-in replacement for the old hardcoded
-translations/fr/kanji_fr.py's KANJI_FR: same shape (kanji -> single
-semicolon-joined string, matching the format kanji_data.py's own
-"meaning" field already uses), just computed from KANJIDIC2 instead of
-duplicated by hand. dictionary.py, kanji.py, and translations.py only
-need their import line changed, nothing else — get_meaning() in
-translations/__init__.py is untouched.
+That scoping is not a loss, it is a correction. Every one of KANJI_FR's
+callers passes it to translations.get_meaning() for a DECK entry
+(routes/kanji.py, decks.py, frequency.py, dictionary.py's deck branch),
+and routes/translations.py — which ships the map to the client — already
+built its ENGLISH counterpart from KANJI_BY_LEVEL alone. The French map
+was the odd one out at four times the size, for characters the client had
+no way to ask about. The dictionary's pool half gets its French straight
+from the database row instead (kanji_pool_data.meaning_of).
 
-CAVEAT (see get_meaning()'s fallback-to-English behavior): KANJIDIC2's
-French coverage is thinner than the old kanji_fr.json was. 220 of the
-app's 2211 deck kanji (mostly obscure/name-use characters like 蒼, 聡,
-鴻, 蓮, 那, 也) have no "fr" entries in KANJIDIC2 at all, vs. 25 missing
-under the old hand-maintained list — so more cards will silently render
-their English meaning instead of French now. English coverage is
-complete (KANJIDIC2's primary field), so this only affects lang="fr".
+CAVEAT (see get_meaning()'s fallback-to-English behaviour): KANJIDIC2's
+French coverage is thinner than the old hand-maintained kanji_fr.json
+was. 219 of the deck's 2,212 characters (mostly obscure/name-use ones
+like 蒼, 聡, 鴻, 蓮, 那, 也) have no "fr" entry at all, vs. 25 missing
+under the old list — so those cards render their English meaning. English
+coverage is KANJIDIC2's primary field. Outside the deck it is thinner
+still: 73 of the 10,896 pool characters have a French meaning.
 """
-import json
-import os
-
-# One level up: this module now lives in a package, and datas/
-# is still at the backend root.
-_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
-
-with open(os.path.join(_DATA_DIR, "kanji_meanings.json"), encoding="utf-8") as f:
-    KANJI_MEANINGS: dict[str, dict[str, list[str]]] = json.load(f)
+import content.kanji_pool_data as _db
+from content.kanji_data import DECK_BY_CHAR
 
 
 def get_kanji_meaning(kanji: str, lang: str = "en") -> str:
@@ -46,19 +39,17 @@ def get_kanji_meaning(kanji: str, lang: str = "en") -> str:
     own "meaning" field already uses.
 
     Falls back to English if the requested language has no entries for
-    this kanji (see the module docstring's coverage caveat for French),
-    then to "" if the kanji isn't in KANJIDIC2 at all — shouldn't happen
-    for anything in the app's own deck (checked: 0 missing), but nothing
-    else in this codebase guesses when data's absent, so this doesn't
-    either.
+    this kanji, then to "" if the kanji isn't in KANJIDIC2 at all —
+    shouldn't happen for anything in the app's own deck (checked: 0
+    missing), but nothing else in this codebase guesses when data's
+    absent, so this doesn't either.
     """
-    langs = KANJI_MEANINGS.get(kanji, {})
-    meanings = langs.get(lang) or langs.get("en") or []
-    return "; ".join(meanings)
+    row = _db.get(kanji)
+    return _db.meaning_of(row, lang) if row else ""
 
 
-KANJI_FR: dict[str, str] = {
-    char: "; ".join(langs["fr"])
-    for char, langs in KANJI_MEANINGS.items()
-    if langs.get("fr")
-}
+# The deck's French meanings, one query at import. Same shape the old
+# comprehension produced — {char: "a; b; c"}, absent where KANJIDIC2 has
+# no French — so translations.get_meaning()'s fallback still fires for
+# the 219 gaps exactly as before.
+KANJI_FR: dict[str, str] = _db.meanings_for(DECK_BY_CHAR, "fr")
