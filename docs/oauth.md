@@ -98,6 +98,36 @@ com.japaneselearner.app://**
 http://localhost:5173/**          ← only if you sign in from `npm run dev`
 ```
 
+### Supabase → Authentication → Providers → Email → Confirm email
+
+Not a Google setting, but it decides whether the *other* half of the account
+step works at all, so it belongs beside the rest. A guest is an anonymous
+Supabase user, and `claimAccount` (`src/lib/guest.js`) puts an address on it
+with one `updateUser({ email, password })`. Supabase's own code branches on
+this toggle:
+
+- **Off** (`Mailer.Autoconfirm`) — an anonymous user gets the auto-confirm
+  shortcut (`api/user.go`): the address lands immediately and the guest becomes
+  a real account on the spot.
+- **On** — the update takes the ordinary email-**change** road instead, and
+  `sendEmailChange` mails the confirmation to the user's *current* address
+  (`api/mail.go`: `sendEmail` falls back to `u.GetEmail()` when no recipient is
+  passed). A guest has no current address, so anything that goes wrong on that
+  road comes back as
+
+  ```
+  Email address "" is invalid          ← error_code: email_address_invalid
+  ```
+
+  quoting the empty field rather than the address the learner typed.
+
+The app no longer shows that sentence — `src/lib/authErrors.js` names the code
+and points at the roads that still work — but naming it is not the same as
+fixing it. If email claiming has to succeed for guests, that toggle is where it
+is decided, and the cost of turning it off is that no address on the project is
+verified any more (`AuthScreen`'s sign-up included). The project's Auth logs
+show which failure is really behind a given `email_address_invalid`.
+
 ### Supabase → Authentication → Manual Linking
 
 Required for the two places that *link* Google onto the account a guest

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
+import fr from '../locales/fr/index.js'
 import '../index.css'
 
 // ── The boarding, walked end to end (plan 075) ─────────────────
@@ -33,11 +34,16 @@ vi.mock('../lib/api', () => ({
   apiUpload: vi.fn(),
   ApiError: class ApiError extends Error {},
 }))
+// The claim road: putting an address on the pass is one updateUser
+// call (lib/guest.js), and what it REFUSES with is the whole point of
+// one test below.
+const updateUser = vi.fn()
 vi.mock('../lib/supabase', () => ({
   supabase: {
     auth: {
       getSession: async () => ({ data: { session: { access_token: 'tok' } } }),
       onAuthStateChange: () => ({ data: { subscription: { unsubscribe() {} } } }),
+      updateUser: (...a) => updateUser(...a),
     },
   },
 }))
@@ -175,6 +181,7 @@ beforeEach(() => {
   patchResponse.current = null
   nudgeRef.current = false
   oauthRefusal.current = null
+  updateUser.mockReset()
   sessionStorage.removeItem(STASH_KEY)
   apiJson.mockImplementation(async path => (path === '/api/onboarding/volumes' ? VOLUMES : {}))
   apiJsonWithTimeout.mockImplementation(async path => {
@@ -655,5 +662,48 @@ describe('BoardingFlow', () => {
     const { screen } = await renderFlow({ guest: true })
     expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
     expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(1)
+  })
+
+  // ── Google turned them away, so they took the email road ────────
+  // Both refusals at once is the state this screen was found in: the
+  // Google line cannot expire (it is a fact about the page load), and
+  // Supabase's own refusal on the claim quotes the address it was
+  // about to MAIL — which for a guest is empty. So the learner read
+  // `Email address "" is invalid` with their address filled in one
+  // line above it, under a sentence about a road they had already
+  // left. Neither half of that survives here.
+  it('answers the email road in its own words, and stands the Google line down', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    oauthRefusal.current = {
+      error: 'server_error',
+      code: 'identity_already_exists',
+      description: 'Identity is already linked to another user',
+    }
+    updateUser.mockResolvedValue({
+      data: {},
+      error: { code: 'email_address_invalid', message: 'Email address "" is invalid' },
+    })
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('account')
+    expect(q(screen, '[data-oauth="refused"]')).not.toBeNull()
+
+    type(q(screen, 'input[type="email"]'), 'patou@gmail.com')
+    type(q(screen, 'input[type="password"]'), 'hunter22')
+    await settle(20)
+    // The address is a real one, so the gold button is a road again.
+    expect(q(screen, '[data-action="account-create"]').disabled).toBe(false)
+    await click(screen, '[data-action="account-create"]')
+    await settle(60)
+
+    const said = live(screen).textContent
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    expect(said).not.toContain('""')
+    expect(said).toContain(fr.claimEmailUnreachable)
+    // The older line steps aside rather than stacking under the new one…
+    expect(q(screen, '[data-oauth="refused"]')).toBeNull()
+    expect(said).not.toContain(fr.oauthAlreadyLinked)
+    // …while the way OUT of that refusal is still standing, because it
+    // is still true: that Google account is still somebody's pass.
+    expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
   })
 })

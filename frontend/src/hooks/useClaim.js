@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLang } from '../LangContext'
 import { claimAccount } from '../lib/guest'
+import { authErrorMessage } from '../lib/authErrors'
 
 // ── 本乗車券 — putting credentials on the pass already held ───────
 // The state and the one call behind Settings › Account's guest slip
@@ -33,7 +34,11 @@ export function useClaim({ onDone } = {}) {
     setError(null)
     const r = await claimAccount({ email: email.trim(), password })
     setBusy(false)
-    if (!r.ok) { setError(r.message || t.genericError); return }
+    // Through the same table the provider button's refusals go through
+    // (lib/authErrors.js), and for the same reason: Supabase's own
+    // sentence is a developer's, and on this call it can quote an
+    // empty address instead of the one in the field above it.
+    if (!r.ok) { setError(authErrorMessage(r, t, r.message)); return }
     setDone(r.needsConfirmation ? t.guestClaimConfirm : t.guestClaimDone)
     onDone?.(r)
   }
