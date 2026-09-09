@@ -1112,6 +1112,13 @@ const settings = {
   guestClaimDesc:    'Votre progression est déjà là. Ajoutez une adresse et un mot de passe pour la garder — rien n\u2019est déplacé, c\u2019est le même compte.',
   guestClaimConfirm: 'Presque : confirmez l\u2019adresse depuis le lien que nous venons de vous envoyer.',
   guestClaimDone:    'Compte créé. Votre progression est gardée.',
+  // 相互乗り入れ — Google sur une carte qui a déjà une clé. Nommé
+  // simplement : la ligne doit répondre à la question avec laquelle
+  // on arrive — « pourquoi me connecter avec Google n’a pas ouvert
+  // mon compte ? ». Voir components/settings/AccountPage.jsx.
+  linkGoogleLabel:   'Google',
+  linkGoogleCap:     'Non connecté',
+  linkGoogleDesc:    'Connectez Google ici et « Continuer avec Google » ouvrira ce compte. Tant que ce n\u2019est pas fait, se connecter avec Google émet une deuxième carte, vide — votre trajet, lui, reste sur celle-ci.',
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
@@ -1436,6 +1443,13 @@ const boarding = {
   // Les questions.
   brdNameQ: 'Comment vous appelez-vous ?',
   brdNameAria: 'Votre nom',
+  // L’adresse à laquelle la carte est émise, dite dès la première
+  // question. L’embarquement ne tourne que sur un compte vierge :
+  // une adresse ici veut donc toujours dire une NOUVELLE carte pour
+  // cette adresse — la seule chose à dire à qui voulait retrouver
+  // l’ancienne, avant sept questions. Un invité n’a pas d’adresse et
+  // ne voit rien. « Ci-dessous » : le lien de connexion, en pied.
+  brdNameNewPass: email => `Une nouvelle carte, pour ${email}. Si votre trajet est sur un autre compte, connectez-vous ci-dessous.`,
   brdWhyQ: (name) => `Pourquoi apprenez-vous le japonais, **${name}** ?`,
   brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
   brdKanaQ: 'Pouvez-vous lire ceci ?',

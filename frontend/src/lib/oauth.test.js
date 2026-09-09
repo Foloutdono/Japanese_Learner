@@ -28,7 +28,7 @@ vi.mock('./supabase', () => ({ supabase: { auth } }))
 vi.mock('./platform', () => ({ isNative: () => isNative() }))
 vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
 
-const { connectProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
+const { connectProvider, hasProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
   for (const m of [auth.signInWithOAuth, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab]) m.mockReset()
@@ -149,5 +149,52 @@ describe('a guest keeping what they have', () => {
     const r = await connectProvider({ link: true })
     expect(r).toEqual({ ok: false, message: 'Manual linking is disabled' })
     expect(auth.signInWithOAuth).not.toHaveBeenCalled()
+  })
+})
+
+// ── 券面の名義 — which Google account ────────────────────────────
+// Google signs the browser's current account in without asking
+// whenever there is exactly one, and both roads out of this module
+// suffer for it: a sign-in lands on a pass nobody chose (and a Google
+// identity no pass carries is a NEW pass, boarding and all), a link
+// writes an address nobody chose onto the pass in hand. The chooser is
+// asked for by parameter, so it is pinned by parameter.
+describe('the account is chosen, never assumed', () => {
+  it('asks Google for the chooser when signing in', async () => {
+    await connectProvider({})
+    const [[args]] = auth.signInWithOAuth.mock.calls
+    expect(args.options.queryParams).toEqual({ prompt: 'select_account' })
+  })
+
+  it('asks for it when linking too, where the wrong pick is worse', async () => {
+    await connectProvider({ link: true })
+    const [[args]] = auth.linkIdentity.mock.calls
+    expect(args.options.queryParams).toEqual({ prompt: 'select_account' })
+  })
+})
+
+// Whether the offer to CONNECT Google is made at all (Settings ›
+// Account) hangs on this, and it is read from a session shape that
+// arrives two different ways: a token's own claims, and the fuller
+// user object a link or a refresh brings back.
+describe('reading the identities a pass carries', () => {
+  const session = user => ({ user })
+
+  it('reads the token claim', () => {
+    expect(hasProvider(session({ app_metadata: { providers: ['email', 'google'] } }))).toBe(true)
+    expect(hasProvider(session({ app_metadata: { providers: ['email'] } }))).toBe(false)
+  })
+
+  it('reads the identity list, which is where a fresh link lands', () => {
+    expect(hasProvider(session({ identities: [{ provider: 'google' }] }))).toBe(true)
+    expect(hasProvider(session({ identities: [{ provider: 'email' }] }))).toBe(false)
+  })
+
+  // The offer must not be made to nobody, and an anonymous pass is
+  // the guest's — it gets the whole account offer instead.
+  it('says no for a session that is not one, and for a guest', () => {
+    expect(hasProvider(null)).toBe(false)
+    expect(hasProvider({})).toBe(false)
+    expect(hasProvider(session({ app_metadata: { providers: ['anonymous'] } }))).toBe(false)
   })
 })

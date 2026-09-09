@@ -365,6 +365,9 @@ export default function BoardingFlow({
             onChange={v => { set({ name: v }); setNameError(null) }}
             onContinue={continueName}
             onSignIn={onSignIn}
+            // Whose pass this is, when it is anybody's: a guest has no
+            // address and the line stays off. See NameStep.
+            email={session?.user?.email ?? null}
             error={nameError}
             busy={busy}
           />

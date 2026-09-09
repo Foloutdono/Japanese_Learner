@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { supabase } from '../../lib/supabase'
 import { authRedirectError, authRedirectMessage } from '../../lib/authRedirect'
 import { API_ORIGIN } from '../../lib/origin'
 import { isNative, openExternal } from '../../lib/platform'
 import { isGuest } from '../../lib/guest'
+import { hasProvider } from '../../lib/oauth'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
@@ -63,9 +65,63 @@ function ClaimSlip() {
   )
 }
 
+// ── 相互乗り入れ — Google on a pass that already has a key ───────
+// The other half of the offer above, and the one whose absence sent
+// learners round a loop they could not see the shape of.
+//
+// "Continue with Google" on the sign-in screen is signInWithOAuth: it
+// opens the pass that carries that Google identity, and when NO pass
+// carries it, Supabase issues a new one. Supabase attaches a Google
+// identity to an existing account by itself only when that account's
+// address is confirmed and the account did not start out anonymous —
+// and the boarding starts every learner anonymous (lib/guest.js), so
+// the accounts this app makes are exactly the ones that do not
+// qualify. The learner presses Google, arrives on a second, empty
+// pass, and is handed the boarding from question one; pressing it
+// again does the same thing, because nothing about the second pass
+// changed. The way out is not on that road at all: it is HERE, from
+// inside the account they already hold, adding the identity that the
+// button will then find.
+//
+// So the offer is made to any pass without it, not only to a guest's.
+// `link`, never a plain sign-in, for the reason ClaimSlip gives: this
+// learner has real progress, and signing in as somebody else would
+// walk away from it silently.
+function LinkGoogleSlip() {
+  const { t } = useLang()
+  const [error, setError] = useState(null)
+  // Same rule as the slip above: a refusal read off the URL is a fact
+  // about this page load (lib/authRedirect.js), and it stands only
+  // until the button has news of its own.
+  const refused = authRedirectError()
+  return (
+    <Slip label={t.linkGoogleLabel} cap={t.linkGoogleCap}>
+      <p className="slip__hint">{t.linkGoogleDesc}</p>
+      {/* On the web this never resolves — the page has left for
+          Google and comes back as a new load, where the slip is
+          simply gone. In the shell it does resolve, and the session
+          in memory still says "no Google": refreshing it is what
+          takes the offer off the screen. */}
+      <ProviderButton
+        link
+        onDone={() => supabase.auth.refreshSession()}
+        onError={setError}
+      />
+      {(error || refused) && (
+        <p className="auth-message auth-message--error" role="alert">
+          {error ?? authRedirectMessage(refused, t)}
+        </p>
+      )}
+    </Slip>
+  )
+}
+
 export function AccountPage({ session }) {
   const { t } = useLang()
   const guest = isGuest(session)
+  // A guest is offered the whole account (ClaimSlip, Google included);
+  // anyone else is offered only the identity they are missing.
+  const offerGoogle = !guest && !!session && !hasProvider(session, 'google')
   return (
     <SettingsPage title={t.account}>
       {guest && <ClaimSlip />}
@@ -74,6 +130,9 @@ export function AccountPage({ session }) {
           <span className="slip__value">{session.user.email}</span>
         </Slip>
       )}
+      {/* Under the address, because it is about that address: this is
+          the second key to the same pass, not a second pass. */}
+      {offerGoogle && <LinkGoogleSlip />}
       <Slip label={t.privacyPolicy}>
         {/* In the shell the policy opens in the system browser at the web
             origin (plan 076): the bundled copy would open inside the
