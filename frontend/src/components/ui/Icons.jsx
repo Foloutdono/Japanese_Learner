@@ -203,6 +203,19 @@ export function SpeakerOffIcon({ size = 18, className }) {
   )
 }
 
+// The same cone as SpeakerOffIcon with the waves in place of the cross,
+// so a mute toggle swapping one for the other moves nothing but the
+// right-hand half.
+export function SpeakerIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <polygon points="4 9 8 9 12 5 12 19 8 15 4 15" fill="currentColor" stroke="none" />
+      <path d="M15.5 9.5a3.5 3.5 0 0 1 0 5" />
+      <path d="M18 7a7 7 0 0 1 0 10" />
+    </svg>
+  )
+}
+
 // Moved here from DictionaryDetail.jsx in plan 052. It had no props at
 // all and hardcoded `className="dict-index-bar__icon"` -- which only
 // one of its four call sites actually wanted. The other three were

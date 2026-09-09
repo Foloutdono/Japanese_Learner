@@ -365,4 +365,58 @@ describe('the analyzer at phone width', () => {
       expect(getComputedStyle(chip).borderTopLeftRadius).toBe('999px')
     }
   })
+
+  // The transport bar carries five things now -- play, the scrubber,
+  // the clock, the sound and 追従 -- and a phone has room for about
+  // three. It takes a second line rather than giving the scrubber's
+  // width away: a track free to shrink to nothing never wraps, it just
+  // becomes ungrabbable, and a learner watching a video with their
+  // thumb on the edge of the screen has nothing left to seek with.
+  it('the player: the transport wraps rather than crushing its scrubber, and nothing runs off the edge', async () => {
+    const screen = await render(
+      <main className="dictionary analyzer">
+        <div className="anl-player">
+          <div className="anl-player__bar">
+            <button type="button" className="anl-player__btn">▶</button>
+            <div className="anl-player__track"><span className="anl-player__fill" style={{ width: '30%' }} /></div>
+            <span className="anl-player__time">0:12 / 1:30</span>
+            <div className="anl-player__vol">
+              <button type="button" className="anl-player__btn">S</button>
+              <input type="range" className="dial anl-player__dial" min={0} max={100} defaultValue={70} readOnly />
+            </div>
+            <button type="button" className="anl-follow anl-follow--on">
+              <span className="anl-follow__label">Follow the video</span>
+            </button>
+          </div>
+        </div>
+      </main>
+    )
+    const bar = screen.container.querySelector('.anl-player__bar')
+    const track = screen.container.querySelector('.anl-player__track')
+    const play = screen.container.querySelector('.anl-player__btn')
+    const follow = screen.container.querySelector('.anl-follow')
+    const barBox = bar.getBoundingClientRect()
+
+    // Two rows, not one crushed one.
+    expect(getComputedStyle(bar).flexWrap).toBe('wrap')
+    expect(follow.getBoundingClientRect().top).toBeGreaterThan(play.getBoundingClientRect().top)
+
+    // Still grabbable, and still inside the panel.
+    expect(track.getBoundingClientRect().width).toBeGreaterThanOrEqual(96)
+    for (const el of bar.children) {
+      const r = el.getBoundingClientRect()
+      expect(r.right, el.className).toBeLessThanOrEqual(barBox.right + 0.5)
+      expect(r.left, el.className).toBeGreaterThanOrEqual(barBox.left - 0.5)
+    }
+
+    // The mute and its dial travel together: a wrap must never leave the
+    // speaker on one line and the slider on the next.
+    const vol = screen.container.querySelector('.anl-player__vol')
+    const mute = vol.querySelector('.anl-player__btn')
+    const dial = vol.querySelector('.anl-player__dial')
+    // Centres, not tops: the 18px dial and the 34px button share a row
+    // by sharing its middle.
+    const middle = el => { const r = el.getBoundingClientRect(); return r.top + r.height / 2 }
+    expect(middle(dial)).toBeCloseTo(middle(mute), 0)
+  })
 })

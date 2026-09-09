@@ -650,6 +650,10 @@ const phraseAnalyzer = {
   lastUsedCap:         'Last used',
   playVideo:           'Play',
   pauseVideo:          'Pause',
+  muteVideo:           'Mute the video',
+  unmuteVideo:         'Unmute the video',
+  videoVolume:         'Volume',
+  videoVolumePct:      pct => `${pct}%`,
   // The keyboard map under the stage.
   kbdToken:            'token',
   kbdSentence:         'sentence',

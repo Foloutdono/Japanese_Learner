@@ -630,6 +630,10 @@ const phraseAnalyzer = {
   lastUsedCap:         'Dernière fois',
   playVideo:           'Lecture',
   pauseVideo:          'Pause',
+  muteVideo:           'Couper le son de la vidéo',
+  unmuteVideo:         'Rétablir le son de la vidéo',
+  videoVolume:         'Volume',
+  videoVolumePct:      pct => `${pct}%`,
   // Le plan du clavier sous la scène.
   kbdToken:            'mot',
   kbdSentence:         'phrase',

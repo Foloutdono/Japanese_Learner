@@ -224,16 +224,64 @@ describe('PassageLine', () => {
     expect(screen.container.querySelectorAll('.anl-stop__done').length).toBe(0)
   })
 
+  // ── Following the clock must not move the PAGE ──
+  // The rail is a scroller of its own, and the stop the video is on has
+  // to come into it. What it must never do is scroll anything ELSE:
+  // below the 1100px split the rail stacks under the stage, so a page
+  // scroll here takes the video out of frame -- every new cue, for the
+  // whole track. scrollIntoView() cannot express that (it walks every
+  // scrollable ancestor up to the document), so its absence is part of
+  // the contract, asserted below alongside the scroll that does happen.
+  //
+  // The height is forced here because the rule that supplies it lives
+  // in a media query the browser lane does not run at.
+  function railWindow(screen) {
+    const line = screen.container.querySelector('.anl-line')
+    line.style.maxHeight = '60px'
+    line.style.overflowY = 'auto'
+    return line
+  }
+
+  const settle = async (ms = 500) => new Promise(r => setTimeout(r, ms))
+
+  it('scrolls the rail, and nothing but the rail, when the clock moves the stop', async () => {
+    const spy = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
+    const sentences = Array.from({ length: 12 }, (_, i) => sentenceFixture({ text: `文${i}` }))
+    const screen = await render(
+      <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} />
+    )
+    const line = railWindow(screen)
+    expect(line.scrollTop).toBe(0)
+
+    await screen.rerender(
+      <PassageLine sentences={sentences} activeIndex={11} onSelect={() => {}} t={T} />
+    )
+    // Smooth scrolling is animated, so this is a settle, not a tick.
+    await settle()
+
+    expect(line.scrollTop).toBeGreaterThan(0)
+    // The stop is inside the rail's window afterwards...
+    const stop = screen.container.querySelectorAll('.anl-stop')[11]
+    expect(stop.getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(line.getBoundingClientRect().bottom + 1)
+    // ...and the page was never asked to move to put it there.
+    expect(spy).not.toHaveBeenCalled()
+    spy.mockRestore()
+  })
+
   it('does not scroll when scrollOnChange is false', async () => {
     const spy = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => {})
-    const sentences = [sentenceFixture({ text: 'A' }), sentenceFixture({ text: 'B' })]
+    const sentences = Array.from({ length: 12 }, (_, i) => sentenceFixture({ text: `文${i}` }))
     const screen = await render(
       <PassageLine sentences={sentences} activeIndex={0} onSelect={() => {}} t={T} scrollOnChange={false} />
     )
+    const line = railWindow(screen)
     spy.mockClear()
     await screen.rerender(
-      <PassageLine sentences={sentences} activeIndex={1} onSelect={() => {}} t={T} scrollOnChange={false} />
+      <PassageLine sentences={sentences} activeIndex={11} onSelect={() => {}} t={T} scrollOnChange={false} />
     )
+    await settle()
+    expect(line.scrollTop).toBe(0)
     expect(spy).not.toHaveBeenCalled()
     spy.mockRestore()
   })

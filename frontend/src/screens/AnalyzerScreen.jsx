@@ -20,7 +20,8 @@ import { parseVideoId } from '../lib/youtube'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, CrossIcon } from '../components/ui/Icons'
+import { ChevronIcon, CrossIcon, SpeakerIcon, SpeakerOffIcon } from '../components/ui/Icons'
+import { readVideoSound, saveVideoSound, clampVolume, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
 // The stepper's dots: past this many stops the count alone says where
@@ -111,6 +112,10 @@ export default function AnalyzerScreen({ session }) {
   // re-renders while the video actually moves.
   const [playing, setPlaying] = useState(false)
   const [playTime, setPlayTime] = useState(0)
+  // 音量 — the player's sound. Read from storage on the first render
+  // rather than defaulted and corrected, so a learner who turned a
+  // loud track down never meets the next one at full (lib/videoVolume).
+  const [sound, setSound] = useState(readVideoSound)
   // The same clock as playTime, readable from closures that must not go
   // stale (the Space handler, the bar's play) without re-binding a
   // listener four times a second.
@@ -433,6 +438,35 @@ export default function AnalyzerScreen({ session }) {
     playerRef.current?.play()
   }
 
+  // ── 音量 ──────────────────────────────────────────────────
+  // One writer for the whole setting, so the dial, the mute and the
+  // player's own read-back can never persist half of it.
+  function changeSound(patch) {
+    const next = { ...sound, ...patch }
+    setSound(next)
+    saveVideoSound(next)
+  }
+
+  // Nothing is coming out of the player: an explicit mute, or a dial
+  // sitting at zero. One word for both, because they are one fact to
+  // the learner -- the icon, the dial's reading and the toggle's label
+  // all follow it.
+  const silent = sound.muted || sound.volume === 0
+
+  function toggleMute() {
+    // Unmuting a dial already at zero has to give the learner something
+    // to hear, or the button reads as dead.
+    if (silent) changeSound({ muted: false, volume: sound.volume || DEFAULT_VIDEO_SOUND.volume })
+    else changeSound({ muted: true })
+  }
+
+  function changeVolume(value) {
+    // Reaching for the dial is asking to hear it: moving off zero lifts
+    // a mute, rather than leaving a silent player reading 60%.
+    const volume = clampVolume(value)
+    changeSound({ volume, muted: volume === 0 })
+  }
+
   // Mouse convenience only (aria-hidden on the track): the route line
   // IS the accessible seek control, stop by stop, with real names.
   function seekFromTrack(e) {
@@ -742,8 +776,14 @@ export default function AnalyzerScreen({ session }) {
                 <VideoPlayer
                   ref={playerRef}
                   videoId={playerVideoId}
+                  volume={sound.volume}
+                  muted={sound.muted}
                   onTimeUpdate={handleTimeUpdate}
                   onPlayingChange={setPlaying}
+                  // The learner can reach YouTube's own volume slider
+                  // under the video; when they do, the bar follows the
+                  // player rather than showing a number nothing obeys.
+                  onVolumeChange={changeSound}
                 />
                 {/* The transport bar. Scaled to the Passage's own cue
                     window, and the track is a mouse convenience only
@@ -768,6 +808,41 @@ export default function AnalyzerScreen({ session }) {
                       </span>
                     </>
                   )}
+                  {/* 音量 — the mute and the dial, one object. Both are
+                      here rather than left to the iframe's own bar,
+                      which a learner has to hover the video to reach
+                      and which vanishes with its controls. The dial
+                      does nothing on iOS (the hardware buttons own
+                      playback volume there); the mute lands on every
+                      platform, which is why they are two controls. */}
+                  <div className="anl-player__vol">
+                    <button
+                      type="button"
+                      className="anl-player__btn"
+                      aria-pressed={silent}
+                      aria-label={silent ? t.unmuteVideo : t.muteVideo}
+                      title={silent ? t.unmuteVideo : t.muteVideo}
+                      onClick={toggleMute}
+                    >
+                      {silent ? <SpeakerOffIcon size={16} /> : <SpeakerIcon size={16} />}
+                    </button>
+                    <input
+                      type="range"
+                      className="dial anl-player__dial"
+                      min={0}
+                      max={100}
+                      step={5}
+                      // A muted player reads zero, whatever number the
+                      // dial would otherwise be holding for it.
+                      value={silent ? 0 : sound.volume}
+                      onChange={e => changeVolume(e.target.value)}
+                      aria-label={t.videoVolume}
+                      // Without this a screen reader announces a bare
+                      // number with no unit -- the same fix the exam
+                      // player's scrubber carries.
+                      aria-valuetext={t.videoVolumePct(silent ? 0 : sound.volume)}
+                    />
+                  </div>
                   <button
                     type="button"
                     className={`anl-follow${followPlayback ? ' anl-follow--on' : ''}`}
