@@ -241,6 +241,30 @@ JSX, never in CSS.
 A figure and its label form a fixed pair — large numeral, small unit inline,
 caps label beneath at `--fs-caption-xs`.
 
+### French punctuation does not start a line
+
+French sets a space before `:` `;` `!` `?` and inside `« »`, and that space is
+**insécable** — the mark belongs to the word in front of it and the line may
+not be cut between the two. Written as a plain space it is exactly a break
+opportunity, and on a phone the browser takes it. The arrival screen printed
+its lead as *"…, pour vous"* / *":"*, a colon alone on a line under the
+projection.
+
+So the French string table is welded on the way out
+(`locales/frenchSpacing.js`): every such space becomes U+00A0 as the table is
+exported, including inside sentences a screen assembles at call time — which
+is where this one came from. NBSP and space set the same width, so nothing
+moves; only the break disappears. `locales.test.js` holds the whole table to
+the rule, so new copy cannot bring the orphan back.
+
+Do not hand-type NBSPs into the tables — an invisible character no reviewer
+can see, in a file where the next writer will forget it. Write the plain
+space and let the weld do it.
+
+Paragraphs of copy take `text-wrap: pretty` (`.brd__q`, `.brd-lead`) so the
+last line is not left a scrap either. That is the other half: welding decides
+what may not be split, `pretty` decides where the sentence would rather break.
+
 ## Surfaces
 
 ### One card, everywhere

@@ -50,4 +50,42 @@ describe('locale parity (fr <-> en)', () => {
     }
     expect(unbalanced, `unclosed ** run in: ${unbalanced.join(', ')}`).toEqual([])
   })
+
+  // ── L'espace insécable ──────────────────────────────────
+  // French puts a space before : ; ! ? and inside « », and that space
+  // may not be broken across lines. A plain U+0020 there is exactly a
+  // line-break opportunity, and the arrival screen took it: the colon
+  // ending "… pour vous :" printed alone on the next line, under the
+  // chart. frenchSpacing.js welds the table on the way out, and this
+  // is what holds the whole table — nested groups and interpolated
+  // sentences included — to the rule, so a new string cannot bring
+  // the orphan back.
+  it('never leaves a breakable space against high punctuation', () => {
+    const loose = []
+    // Both tables: French because the space is its own, English
+    // because a guillemet that strays in brings the same break with it.
+    for (const [lang, table] of [['fr', fr], ['en', en]]) walk(table, lang, loose)
+    expect(loose, `breakable space before : ; ! ? » (or after «) in: ${loose.join(', ')}`).toEqual([])
+  })
 })
+
+// Every leaf of a table, as the learner receives it: a plain string, a
+// copy function's result, or the same again inside a nested group
+// (brdFor, brdPromise, onbTestKind…), which the key-parity tests above
+// do not descend into.
+function walk(value, path, out) {
+  if (typeof value === 'function') {
+    // The arguments only have to build a string, not be right.
+    let built
+    try { built = value(1, 2, 3, 4, 5) } catch { return }
+    return walk(built, `${path}()`, out)
+  }
+  if (typeof value === 'string') {
+    if (/ [:;!?»]|« /.test(value)) out.push(path)
+    return
+  }
+  if (Array.isArray(value)) return value.forEach((v, i) => walk(v, `${path}[${i}]`, out))
+  if (value && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) walk(v, `${path}.${k}`, out)
+  }
+}
