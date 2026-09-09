@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
+**Tsuji** (辻) — a Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
+
+The name is the glyph: 辻 is the masthead, the icon and the plate at the origin station (辻駅). `Tsuji` is the Latin half — the store name, the PWA `short_name` and the bundle id `app.tsuji`. See `DESIGN.md`, "The idea".
 
 ## Visual design
 

@@ -52,7 +52,7 @@ describe('where Supabase sends the learner back', () => {
     isNative.mockReturnValue(true)
     expect(redirectTarget()).toBe(NATIVE_REDIRECT)
     // The manifests are written against this exact string.
-    expect(NATIVE_REDIRECT).toBe('com.japaneselearner.app://auth-callback')
+    expect(NATIVE_REDIRECT).toBe('app.tsuji://auth-callback')
   })
 })
 
@@ -79,7 +79,7 @@ describe('in the shell', () => {
   beforeEach(() => { isNative.mockReturnValue(true) })
 
   it('keeps the WebView where it is and finishes the exchange itself', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?code=abc123')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?code=abc123')
     const r = await connectProvider({})
     expect(r).toEqual({ ok: true })
 
@@ -90,7 +90,7 @@ describe('in the shell', () => {
     expect(args.options.redirectTo).toBe(NATIVE_REDIRECT)
     // The authorization page goes to the system browser, and only a
     // deep link on our own scheme is listened for.
-    expect(openAuthTab).toHaveBeenCalledWith('https://accounts.google.test/o', 'com.japaneselearner.app://')
+    expect(openAuthTab).toHaveBeenCalledWith('https://accounts.google.test/o', 'app.tsuji://')
     expect(auth.exchangeCodeForSession).toHaveBeenCalledWith('abc123')
   })
 
@@ -106,7 +106,7 @@ describe('in the shell', () => {
   // was tested and silently did nothing on a phone.
   it('takes the session straight off the fragment under the implicit flow', async () => {
     openAuthTab.mockResolvedValue(
-      'com.japaneselearner.app://auth-callback#access_token=at1&refresh_token=rt1&token_type=bearer',
+      'app.tsuji://auth-callback#access_token=at1&refresh_token=rt1&token_type=bearer',
     )
     expect(await connectProvider({})).toEqual({ ok: true })
     expect(auth.setSession).toHaveBeenCalledWith({ access_token: 'at1', refresh_token: 'rt1' })
@@ -114,13 +114,13 @@ describe('in the shell', () => {
   })
 
   it('will not half-accept a fragment carrying only an access token', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback#access_token=at1')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback#access_token=at1')
     expect((await connectProvider({})).ok).toBe(false)
     expect(auth.setSession).not.toHaveBeenCalled()
   })
 
   it('does not invent a session when the callback carries a refusal', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?error=access_denied')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?error=access_denied')
     const r = await connectProvider({})
     expect(r.ok).toBe(false)
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled()
@@ -128,7 +128,7 @@ describe('in the shell', () => {
   })
 
   it('passes a failed exchange back rather than reporting success', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?code=abc123')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?code=abc123')
     auth.exchangeCodeForSession.mockResolvedValue({ data: {}, error: { message: 'code expired' } })
     expect(await connectProvider({})).toEqual({ ok: false, message: 'code expired' })
   })

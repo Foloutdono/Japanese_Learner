@@ -119,10 +119,13 @@ export default defineConfig(({ mode }) => {
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png'],
       manifest: {
         id: '/',
-        // The store name is the owner's to pick (plans/README.md, wave
-        // 14); until then the app's own masthead.
-        name: '日本語 — Apprendre le japonais',
-        short_name: '日本語',
+        // The store name, matching capacitor.config.json's appName and
+        // the brdAppName locale key. Latin here on purpose: this is the
+        // label the OS prints under the icon and the string a learner
+        // searches for — the 辻 glyph is the masthead, and it is what
+        // the icon itself carries (brand/icon.html).
+        name: 'Tsuji — Apprendre le japonais',
+        short_name: 'Tsuji',
         lang: 'fr',
         start_url: '/',
         scope: '/',

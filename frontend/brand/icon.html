@@ -2,8 +2,12 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
-<!-- The app icon's source (plan 065): 日本語 in the serif on the sumi
+<!-- The app icon's source (plan 065): 辻 in the serif on the sumi
      panel, a gold stripe under it — the masthead as a station sign.
+     One glyph, not the three 日本語 used to set, so the type is sized
+     up and the stripe pulled in to sit under it as an underline; the
+     letter-spacing is gone because on a lone glyph it only adds a
+     trailing gap and shifts the mark off centre.
      Rendered to brand/icon.png by scripts/render-icon.mjs with the same
      Noto Serif JP the app ships, then cut into every size by
      @vite-pwa/assets-generator (pwa-assets.config.js) and later by
@@ -22,16 +26,15 @@
   .glyphs {
     font-family: 'Noto Serif JP', serif;
     font-weight: 700;
-    font-size: 250px;
+    font-size: 620px;
     line-height: 1;
-    letter-spacing: 0.02em;
     color: #f3ecdf;
     white-space: nowrap;
   }
-  .stripe { width: 620px; height: 14px; background: #c99a3e; border-radius: 7px; }
+  .stripe { width: 520px; height: 14px; background: #c99a3e; border-radius: 7px; }
 </style>
 </head>
 <body>
-  <div class="icon"><div class="glyphs">日本語</div><div class="stripe"></div></div>
+  <div class="icon"><div class="glyphs">辻</div><div class="stripe"></div></div>
 </body>
 </html>

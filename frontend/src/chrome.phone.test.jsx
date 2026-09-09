@@ -110,7 +110,7 @@ describe('the shell', () => {
   it('sets the screen down clear of the HUD, and its body under its head', async () => {
     await mountShell('/learn', (
       <main id="main-content" className="learn">
-        <Bar code="JP" title="Plan de ligne" sub="Quatre lignes" color="var(--accent2)" />
+        <Bar code="TJ" title="Plan de ligne" sub="Quatre lignes" color="var(--accent2)" />
         <div className="wmap" style={{ height: '120px' }} />
       </main>
     ))

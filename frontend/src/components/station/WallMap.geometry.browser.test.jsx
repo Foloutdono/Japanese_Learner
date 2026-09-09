@@ -33,7 +33,7 @@ function tree(scores) {
         <WallMap
           sections={SECTIONS}
           station={{ code: 'KJ', kana: 'かんじ', latin: 'KANJI' }}
-          name="日本語駅"
+          name="辻駅"
           stats={{ items }}
           bySource={{}}
           onDepart={() => {}}

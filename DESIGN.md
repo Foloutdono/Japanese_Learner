@@ -20,6 +20,17 @@ that screen.
 
 ## The idea
 
+**The app is called 辻 — Tsuji.** A 辻 is a crossroads, which is exactly what
+the gate hall is: the point the five 改札口 meet. The name is also the mark —
+one glyph, five strokes, a 十 inside 辶 drawing the intersection it names — so
+the icon (`frontend/brand/icon.html`), the masthead (`appTitle`) and the plate
+at the origin station (辻駅, TJ, つじ) are one thing rather than three. It is a
+国字, a character invented in Japan and absent from Chinese dictionaries, with
+no on'yomi at all — a fair thing for an app about Japanese writing to be
+called. `Tsuji` is the Latin half, and it carries the places the OS and the
+stores print a name: the PWA `short_name`, the store listing, the bundle id
+`app.tsuji`, the notification header.
+
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
 your profile is a **commuter pass** (定期券) in its **holder** (定期入れ), and

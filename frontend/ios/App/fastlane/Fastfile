@@ -45,7 +45,7 @@ platform :ios do
       path: "App.xcodeproj",
       team_id: ENV.fetch("APPLE_TEAM_ID"),
       code_sign_identity: "Apple Distribution",
-      profile_name: ENV.fetch("sigh_com.japaneselearner.app_appstore_profile-name")
+      profile_name: ENV.fetch("sigh_app.tsuji_appstore_profile-name")
     )
 
     # Capacitor 8 wires its plugins through Swift Package Manager

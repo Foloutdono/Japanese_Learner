@@ -35,7 +35,7 @@ const native = () => import('./native')
 
 /** The shells' deep link. Registered in AndroidManifest.xml and
  *  Info.plist; anything else here has to change all three. */
-export const NATIVE_REDIRECT = 'com.japaneselearner.app://auth-callback'
+export const NATIVE_REDIRECT = 'app.tsuji://auth-callback'
 
 /** Where Supabase should send the learner back to. */
 export function redirectTarget() {
