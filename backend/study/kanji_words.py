@@ -63,10 +63,20 @@ _KANJI_READINGS = {
 }
 
 
-def reading_tokens(char: str) -> list[str]:
-    """The deck's readings for `char`, in the deck's own order -- on
-    readings first, then kun, markers kept (い.きる, ~び)."""
-    return [p.strip() for p in _KANJI_READINGS.get(char, "").split("・") if p.strip()]
+def reading_tokens(char: str, packed: str | None = None) -> list[str]:
+    """The readings for `char`, in the deck's own order -- on readings
+    first, then kun, markers kept (い.きる, ~び).
+
+    `packed` overrides the deck lookup with a ・-separated string in the
+    same format. The dictionary passes it for a character KANJIDIC2 knows
+    but the deck does not teach: 322 of those still appear inside deck
+    VOCABULARY words, so without it their "used in these words" ledger
+    would come back empty for words the app can perfectly well show.
+    Passing the string the caller already has in hand also keeps this a
+    pure function -- no query per row.
+    """
+    source = _KANJI_READINGS.get(char, "") if packed is None else packed
+    return [p.strip() for p in source.split("・") if p.strip()]
 
 
 def word_furigana(kanji: str, kana: str) -> list[dict]:
@@ -96,7 +106,7 @@ def reading_of(char: str, furigana: list[dict]) -> str | None:
     return None
 
 
-def _buckets(char: str, lang: str) -> tuple[list[str], dict[str | None, list[dict]]]:
+def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str], dict[str | None, list[dict]]]:
     """Every deck word containing `char`, filed under the reading it uses.
 
     Order inside a bucket is most-common level first, and multi-character
@@ -106,7 +116,7 @@ def _buckets(char: str, lang: str) -> tuple[list[str], dict[str | None, list[dic
     (see reading_token_for), with None for a word the aligner could not
     place.
     """
-    tokens = reading_tokens(char)
+    tokens = reading_tokens(char, packed)
     candidates = _KANJI_TO_VOCAB.get(char, [])
     compounds = sorted((c for c in candidates if len(c[1].get("kanji", "")) > 1), key=lambda c: _level_rank(c[0]))
     singles   = sorted((c for c in candidates if len(c[1].get("kanji", "")) <= 1), key=lambda c: _level_rank(c[0]))
@@ -169,7 +179,7 @@ def kanji_as_word(char: str) -> str | None:
     return _SINGLE_KANJI_WORDS.get(char)
 
 
-def kanji_words(char: str, lang: str) -> dict:
+def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
     """
     {"readings": [...], "examples": [...]} for one kanji.
 
@@ -191,7 +201,7 @@ def kanji_words(char: str, lang: str) -> dict:
                kanji with one reading is unaffected: one bucket, the same
                order it always had.
     """
-    tokens, buckets = _buckets(char, lang)
+    tokens, buckets = _buckets(char, lang, packed)
     readings = [{"reading": tok, "words": buckets[tok][:MAX_WORDS]} for tok in tokens]
 
     # One queue per stem, in the deck's order; a stem's queue is its

@@ -22,21 +22,11 @@
 # the time at N5) or an LLM, and this generator is scoped to need
 # neither. Carrier sentences are a natural upgrade for a later pass
 # once the reading generator (Phase 4) exists to reuse.
-import json
-import os
 import random
 
+import content.kanji_pool_data as _kanji_db
 from content.vocab_data import VOCAB_BY_LEVEL
 from study.exam_gen_utils import GenerationFailed, make_choices
-
-_BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-_KANJI_DATA_DIR = os.path.join(_BASE_DIR, "datas", "kanji")
-
-with open(os.path.join(_KANJI_DATA_DIR, "kanji_readings.json"), encoding="utf-8") as f:
-    KANJI_READINGS: dict[str, dict] = json.load(f)
-
-with open(os.path.join(_KANJI_DATA_DIR, "kanji_radicals.json"), encoding="utf-8") as f:
-    KANJI_RADICALS: dict[str, dict] = json.load(f)
 
 
 # ── Reverse indexes, built once at import ──────────────────────
@@ -49,6 +39,16 @@ def _deck_kanji_chars() -> set[str]:
 
 
 _DECK_CHARS = _deck_kanji_chars()
+
+# MEMORY NOTE (2026-09): these two used to be json.load()s of
+# kanji_readings.json (3.0 MB, 12,760 characters) and kanji_radicals.json
+# (0.76 MB, 13,108) — the third copy of the latter in the process. Every
+# use below is a lookup for a character in _DECK_CHARS, ~2,180 of them, so
+# the other eleven thousand rows were parsed at import to be ignored.
+# Two bounded queries against datas/kanji/kanji.sqlite3 instead; the
+# distractors that come out are identical.
+KANJI_READINGS: dict[str, dict] = _kanji_db.readings_for(_DECK_CHARS)
+KANJI_RADICALS: dict[str, dict] = _kanji_db.radicals_for(_DECK_CHARS)
 
 
 def _build_radical_index() -> dict[int, list[str]]:

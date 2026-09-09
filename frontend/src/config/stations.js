@@ -1,4 +1,4 @@
-// ── 日本語駅 — the station ─────────────────────────────────
+// ── 辻駅 — the station ────────────────────────────────────
 // The home screen is a railway platform, and every section of the app
 // is a train leaving it. That isn't decoration for its own sake: the
 // ambiance track playing behind this screen *is* a Japanese metro
@@ -25,8 +25,12 @@
 // every section — the one on the departure board. StationSign takes
 // that string directly from its caller (see `latin` there) instead of
 // this file inventing a second, less useful English label. The one
-// exception is 日本語駅 itself, which has no board row to borrow a
-// name from, so it keeps its own.
+// exception is 辻駅 itself, which has no board row to borrow a
+// name from, so it keeps its own — and it is the app's own name, so
+// the plate at the origin and the mark on the icon are one thing.
+// 辻 is a crossroads, which is what the gate hall is: the point the
+// five 改札口 meet. It was 日本語駅 (JP / にほんご) until the app took
+// a name of its own.
 
 import { getAllSections } from './tabs'
 import { serviceKeyFor } from '../domain/studyModes'
@@ -39,7 +43,7 @@ import { serviceKeyFor } from '../domain/studyModes'
 // path is under its tab's root, and the old top-level paths only
 // redirect there.
 const STATIONS = {
-  '/':                      { code: 'JP', kana: 'にほんご',   latin: 'NIHONGO' },
+  '/':                      { code: 'TJ', kana: 'つじ',       latin: 'TSUJI' },
   '/learn/kana':            { code: 'KN', kana: 'かな' },
   '/learn/vocab':           { code: 'TG', kana: 'たんご' },
   '/learn/kanji':           { code: 'KJ', kana: 'かんじ' },

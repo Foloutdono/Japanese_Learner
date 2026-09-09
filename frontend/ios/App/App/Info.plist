@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleDisplayName</key>
-        <string>Japanese Learner</string>
+        <string>Tsuji</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -21,10 +21,10 @@
 	<array>
 		<dict>
 			<key>CFBundleURLName</key>
-			<string>com.japaneselearner.app</string>
+			<string>app.tsuji</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.japaneselearner.app</string>
+				<string>app.tsuji</string>
 			</array>
 		</dict>
 	</array>

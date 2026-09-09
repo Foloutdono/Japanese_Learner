@@ -470,7 +470,7 @@ export default function App() {
             synchronously and renders nothing, per house rule. */}
         {onboarding === 'finishing' && (
           <TicketGate
-            section={{ icon: '日本語', title: HOME_STATION.latin }}
+            section={{ icon: '辻', title: HOME_STATION.latin }}
             station={HOME_STATION}
             onNavigate={() => {}}
             onDone={() => setOnboarding('done')}

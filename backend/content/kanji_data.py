@@ -36,6 +36,30 @@ with open(os.path.join(_DATA_DIR, "kanji_deck.json"), encoding="utf-8") as f:
     KANJI_BY_LEVEL: dict[str, list[dict]] = json.load(f)
 
 
+LEVELS = ("N5", "N4", "N3", "N2", "N1")
+
+
+def _build_deck_by_char() -> dict[str, tuple[str, dict]]:
+    """char -> (native level, entry), first occurrence wins, N5 -> N1.
+
+    The deck lists 2,235 entries over 2,212 characters: 23 sit on two
+    levels, and since kanji_to_id keys on the level those really are two
+    SRS cards. Anywhere that wants ONE row per character -- radical
+    browsing files a character once, not once per level it was taught at
+    -- needs a single answer, and the lowest level is it. Same rule
+    frequency_data.py's _build_kanji_resolution already applies for the
+    tier path.
+    """
+    resolved: dict[str, tuple[str, dict]] = {}
+    for level in LEVELS:
+        for entry in KANJI_BY_LEVEL.get(level, []):
+            resolved.setdefault(entry["kanji"], (level, entry))
+    return resolved
+
+
+DECK_BY_CHAR: dict[str, tuple[str, dict]] = _build_deck_by_char()
+
+
 def get_kanji_string(levels=("N5", "N4", "N3", "N2", "N1")) -> str:
     seen = set()
     result = []
