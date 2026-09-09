@@ -30,6 +30,26 @@ import { playwright } from '@vitest/browser-playwright';
 //
 // It only ever bit a COLD cache, so it was invisible locally after the
 // first run and permanent in CI, where every run is cold.
+//
+// `tesseract.js` is the same failure from the other end: no test imports
+// it, and nothing in any test's graph reaches it -- it is behind
+// `await import('tesseract.js')` in src/lib/ocr.js, which only the
+// analyzer's on-device OCR ever runs. But the scanner does not crawl the
+// test files alone: it walks the app's own entry too (that is why every
+// run logs a `virtual:pwa-register` pre-transform error from main.jsx),
+// and from there App.jsx reaches ImageInput and the dynamic import. So
+// the optimizer finds it on a cold cache at whatever moment the crawl
+// gets there -- mid-run -- and the reload lands on whichever file is
+// importing at the time:
+//
+//     dependency optimized: tesseract.js
+//     optimized dependencies changed. reloading
+//     Failed to fetch dynamically imported module: .../src/LangContext.jsx
+//
+// The victim moves around (CI lost PracticeScreen.phone and GateCard.phone
+// in one run, this machine lost PracticeScreen.phone alone in another),
+// which is what a race looks like. Naming it here is what vitest's own
+// message asks for and costs one pre-bundle of a dep the tests never call.
 const BROWSER_OPTIMIZE = {
   include: [
     'react',
@@ -37,6 +57,7 @@ const BROWSER_OPTIMIZE = {
     'react-dom/client',
     'react/jsx-dev-runtime',
     'vitest-browser-react',
+    'tesseract.js',
   ],
 };
 
