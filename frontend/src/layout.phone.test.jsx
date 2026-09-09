@@ -9,6 +9,10 @@ import { render } from 'vitest-browser-react'
 // chrome.phone.test.jsx.
 import './index.css'
 
+// Long enough for the shared `arrive` to finish: 0.32s of animation
+// behind a stagger that reaches 0.23s at the eighth row.
+const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
+
 describe('the phone layout contract', () => {
   it('runs at phone width', () => {
     expect(window.innerWidth).toBe(390)
@@ -186,5 +190,93 @@ describe('the phone layout contract', () => {
       if (!stop.classList.contains('route-stop--first')) expect(r.top).toBeLessThan(card.top)
       if (!stop.classList.contains('route-stop--last')) expect(r.bottom).toBeGreaterThan(card.bottom)
     }
+  })
+
+  // ── 路線図 — the line runs the height of the screen ──
+  // On the page it is actually drawn on, the route was its content's
+  // own height and no more: four kana sets ended 360px above the tab
+  // bar of a 746px screen, five JLPT grades 324px. Half a phone of
+  // nothing under a diagram whose subject is distance.
+  it('gives a station page\'s route the whole page, and its stops an equal share', async () => {
+    const stop = i => (
+      <button type="button" key={i} className={`route-stop${i === 0 ? ' route-stop--first' : ''}`}>
+        <span className="route-stop__rail" /><span className="route-stop__marker" />
+        <span className="route-stop__code">N5</span>
+        <span className="route-stop__names"><span className="route-stop__jp">Niveau débutant</span></span>
+        <span className="route-stop__fig"><b>120</b>/ 800</span>
+        <span className="route-stop__go">▶</span>
+        <span className="route-stop__bar"><span className="route-stop__fill" style={{ width: '15%' }} /></span>
+      </button>
+    )
+    const screen = await render(
+      <div className="phone">
+        <div className="phone__content">
+          <main className="learn">
+            <div className="bar"><div className="bar__row" /></div>
+            <div className="route">{[0, 1, 2, 3].map(stop)}</div>
+          </main>
+        </div>
+      </div>
+    )
+    // The arrive animation lands the last row 10px low while it runs
+    // (translateY(10px), the eighth child still delayed at 0.23s), and
+    // every distance here is measured against the page's foot.
+    await settle()
+    const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
+    const route = screen.container.querySelector('.route').getBoundingClientRect()
+    // The line reaches the foot of the page — nothing pooled under it.
+    expect(content.bottom - route.bottom).toBeLessThanOrEqual(24)
+    const stops = [...screen.container.querySelectorAll('.route-stop')].map(el => el.getBoundingClientRect())
+    for (const box of stops) {
+      // One share each, and each share is a thumb and then some.
+      expect(box.height).toBeCloseTo(stops[0].height, 0)
+      expect(box.height).toBeGreaterThan(88)
+    }
+    // The row stops being one line: code and figure on the first, the
+    // name across the full width under them — which is what stopped
+    // "Hiragana (combinaisons)" printing through the figure.
+    const first = screen.container.querySelector('.route-stop')
+    const code = first.querySelector('.route-stop__code').getBoundingClientRect()
+    const fig = first.querySelector('.route-stop__fig').getBoundingClientRect()
+    const names = first.querySelector('.route-stop__names').getBoundingClientRect()
+    // Both are grid items of the first row, centred in it: the same
+    // line, whatever their own type sizes.
+    expect((fig.top + fig.bottom) / 2).toBeCloseTo((code.top + code.bottom) / 2, 0)
+    expect(fig.bottom).toBeLessThanOrEqual(names.top)
+    expect(names.top).toBeGreaterThanOrEqual(code.bottom)
+    expect(names.right).toBeGreaterThan(fig.left)
+    // The stop's own progress runs inside the content column, clear of
+    // the card's rounded corners.
+    const bar = first.querySelector('.route-stop__bar').getBoundingClientRect()
+    expect(bar.left).toBeGreaterThan(first.getBoundingClientRect().left + 40)
+    expect(Math.round(first.querySelector('.route-stop__fill').getBoundingClientRect().width))
+      .toBe(Math.round(bar.width * 0.15))
+  })
+
+  // ── 路線図 — the map is the wall, so it takes the wall ──
+  it('gives the Learn gate\'s board the whole page too', async () => {
+    const line = i => (
+      <button type="button" key={i} className="wmap-line">
+        <span className="wmap-line__id"><span className="wmap-roundel">KN</span></span>
+        <span className="wmap-line__due" />
+        <span className="wmap-track" />
+      </button>
+    )
+    const screen = await render(
+      <div className="phone">
+        <div className="phone__content">
+          <main className="learn">
+            <div className="bar"><div className="bar__row" /></div>
+            <div className="board"><div className="wmap__lines">{[0, 1, 2, 3].map(line)}</div></div>
+          </main>
+        </div>
+      </div>
+    )
+    await settle()
+    const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
+    const board = screen.container.querySelector('.board').getBoundingClientRect()
+    expect(content.bottom - board.bottom).toBeLessThanOrEqual(24)
+    const lines = [...screen.container.querySelectorAll('.wmap-line')].map(el => el.getBoundingClientRect())
+    for (const box of lines) expect(box.height).toBeCloseTo(lines[0].height, 0)
   })
 })
