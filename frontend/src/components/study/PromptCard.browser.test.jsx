@@ -26,10 +26,12 @@ import '../../index.css'
 // widths: a plain flashcard and the readings-input card both settle to
 // the universal --card-w (640px — the readings-input override that used
 // to argue for staying full width is gone, since a UNIVERSAL cap
-// satisfies its actual objection); the drawing quiz keeps its own wider
-// --card-w (700px), because its two panels need 656px of content box
-// (600px of panel plus 2×28px padding) to sit side by side, which the
-// universal 640 does not clear. Written to fail against today's
+// satisfies its actual objection); so does the drawing quiz, which
+// held the last exception (--card-w: 700px) only for as long as it
+// printed a stroke-order panel BESIDE the board and needed 656px of
+// content box for the pair. The correction is on the board now
+// (.canvas-ghost), so one panel sits in the universal column with
+// everything else. Written to fail against today's
 // behaviour first, per plan convention — see CardPrompt.browser.test.jsx
 // (plan 048), which does the same for the specimen's font sizes.
 //
@@ -124,15 +126,19 @@ describe('the study card column (plan 049)', () => {
     ).toBe('640px')
   })
 
-  it('keeps the drawing quiz card at its own wider column (700px)', async () => {
+  // Was 700px, and that exception is gone: the card carried it to fit
+  // a board and a stroke-order panel side by side, and the correction
+  // moved onto the board itself, so one panel sits in the same column
+  // as every other card.
+  it('puts the drawing quiz card in the universal column too (640px)', async () => {
     expect(
       await promptCardWidth(
         <LangProvider>
-          <DrawingQuiz kanji="渡" meaning="to cross" onValidate={() => {}} resetKey="test" />
+          <DrawingQuiz kanji="渡" onValidate={() => {}} resetKey="test" />
         </LangProvider>,
         '.prompt-card.drawing-quiz__card'
       )
-    ).toBe('700px')
+    ).toBe('640px')
   })
 })
 
