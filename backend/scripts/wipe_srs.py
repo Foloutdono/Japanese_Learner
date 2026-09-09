@@ -63,6 +63,16 @@ logger = logging.getLogger("wipe-srs")
 PLAN = [
     ("review_log", "card_id LIKE %(prefix)s",
      "lifetime XP, level, streak, leaderboard"),
+    # review_log's rolled-up half (plan 078). A wipe that cleared only
+    # the rows would leave the compacted XP behind and "reset" a learner
+    # to a non-zero total — the same bug the reset endpoint had before
+    # it learned to clear review_log at all.
+    ("review_daily", "user_id = %(user)s",
+     "the same history, rolled up per day"),
+    ("card_first_review", "card_id LIKE %(prefix)s",
+     "first-sighting dates, which would otherwise outlive the wipe"),
+    ("review_compaction", "user_id = %(user)s",
+     "the rollup watermark and best-run mark"),
     ("card_modes", "card_id LIKE %(prefix)s",
      "per-(card, mode) scheduler state, under retired mode keys"),
     ("xp_ledger", "user_id = %(user)s",

@@ -50,6 +50,14 @@ CREATE TABLE card_modes (
 CREATE INDEX idx_due_reviews
 ON card_modes(mode, next_review);
 
+-- Created at runtime by srs/srs.py alongside idx_due_reviews; declared
+-- here late, so this file shows the same shape a running install has.
+-- (total_reviews in the middle: the new-card queue asks for a mode's
+-- never-reviewed rows, which is a range on next_review under an
+-- equality on the first two columns.)
+CREATE INDEX idx_due_lookup
+ON card_modes(mode, total_reviews, next_review);
+
 CREATE TABLE review_log (
     id BIGSERIAL PRIMARY KEY,
     card_id TEXT NOT NULL,
@@ -66,6 +74,87 @@ CREATE TABLE review_log (
 
 CREATE INDEX idx_review_log_card_id
 ON review_log(card_id, reviewed_at);
+
+-- Every per-user read of review_log and card_modes is
+-- `card_id LIKE 'uuid:%'` — the id namespacing in core/auth.py is the
+-- only thing scoping a row to a learner. Under any collation but C a
+-- plain btree cannot serve a LIKE prefix, so idx_review_log_card_id
+-- above is SKIPPED and "what is this learner's XP" reads the whole
+-- table (measured on 200k rows: 27ms, 196k rows discarded, growing
+-- with every other learner's history). text_pattern_ops is the
+-- operator class that does index a prefix. Both are kept: the plain
+-- index still serves the equality lookups in scripts/.
+CREATE INDEX idx_review_log_card_prefix
+ON review_log(card_id text_pattern_ops, reviewed_at);
+
+CREATE INDEX idx_card_modes_card_prefix
+ON card_modes(card_id text_pattern_ops);
+
+-- ── The review rollup (plan 078) ─────────────────────────────
+-- review_log is NOT an audit log that can be trimmed by date:
+-- lifetime XP, level, total reviews, the streak, the 番付 standing
+-- and the daily-new budget are all SUM/COUNT/MIN over it. These
+-- three tables are what makes trimming it safe — old rows are folded
+-- in here before they are deleted, and srs.py's readers add the two
+-- halves back together. Empty (the state until an operator runs
+-- scripts/compact_review_log.py --yes) they contribute nothing and
+-- every figure is exactly what it was.
+--
+-- Owned by srs/srs.py's _init_db, same self-migrating pattern as
+-- cards/card_modes/review_log above.
+
+-- One row per (learner, UTC day, UTC hour). The hour is in the key
+-- because get_review_hours buckets by it; that still bounds this at
+-- 24 rows per learner per day against the hundreds a real day holds.
+CREATE TABLE review_daily (
+    user_id TEXT NOT NULL,
+    day DATE NOT NULL,
+    hour SMALLINT NOT NULL,
+    reviews INTEGER NOT NULL DEFAULT 0,
+    xp INTEGER NOT NULL DEFAULT 0,
+    -- The six ratings kept as six counters rather than six rows;
+    -- get_quality_mix turns them back into rows with LATERAL VALUES.
+    q0 INTEGER NOT NULL DEFAULT 0,
+    q1 INTEGER NOT NULL DEFAULT 0,
+    q2 INTEGER NOT NULL DEFAULT 0,
+    q3 INTEGER NOT NULL DEFAULT 0,
+    q4 INTEGER NOT NULL DEFAULT 0,
+    q5 INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day, hour)
+);
+
+-- The first time each (card, mode) was ever answered. get_new_items_today
+-- and get_journey_item_counts are MIN(reviewed_at) queries: without this,
+-- compacting a card's only review would make a card met two years ago
+-- count as NEW again — spending the learner's daily new-card allowance on
+-- cards they already know, and moving the journey's promised total. Per
+-- (card, mode) because both queries filter to servable modes BEFORE
+-- taking the minimum.
+CREATE TABLE card_first_review (
+    card_id TEXT NOT NULL,
+    mode TEXT NOT NULL,
+    first_at TIMESTAMPTZ NOT NULL,
+    PRIMARY KEY (card_id, mode)
+);
+
+CREATE INDEX idx_card_first_review_prefix
+ON card_first_review(card_id text_pattern_ops);
+
+-- How far compaction has run per learner, plus the one figure a daily
+-- rollup cannot rebuild: get_best_quality_streak counts consecutive
+-- ROWS, so a run is only visible while the rows are. best_run is the
+-- longest run wholly inside compacted history and best_run_min the
+-- threshold it was measured at (the stored figure is ignored for any
+-- other threshold rather than quietly answering a different question).
+-- A run STRADDLING the cut is counted as its two halves — the one
+-- documented loss, and only ever downward.
+CREATE TABLE review_compaction (
+    user_id TEXT PRIMARY KEY,
+    compacted_through TIMESTAMPTZ NOT NULL,
+    best_run INTEGER NOT NULL DEFAULT 0,
+    best_run_min SMALLINT NOT NULL DEFAULT 4,
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 
 -- Display identity for the Profile screen / leaderboard. Deliberately
 -- separate from Supabase's own auth.users table rather than reading/
@@ -374,6 +463,11 @@ CREATE TABLE exam_attempts (
 CREATE INDEX idx_exam_attempts_user
 ON exam_attempts(user_id, created_at DESC);
 
+-- Likewise created at runtime, by study/exam_schema.py: the result
+-- screen re-fetches one learner's attempt at a specific paper revision.
+CREATE INDEX idx_exam_attempts_paper
+ON exam_attempts(exam_id, revision, user_id);
+
 CREATE TABLE exam_generation_jobs (
     exam_id     TEXT PRIMARY KEY,
     revision    INT NOT NULL DEFAULT 1,
@@ -461,6 +555,13 @@ CREATE TABLE translation_log (
     quality             SMALLINT,
     created_at          TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Created at runtime by routes/translation.py alongside the table --
+-- declared here late, so this file shows the same shape a running
+-- install actually has. (created_at ascending: a btree scans either
+-- way, so it serves /api/translation/history's ORDER BY ... DESC.)
+CREATE INDEX idx_translation_log_user
+ON translation_log(user_id, created_at);
 
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the

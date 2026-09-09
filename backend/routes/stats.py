@@ -300,6 +300,13 @@ def reset_stats(user_id: str = Depends(get_user_id), card_ids: list[str] | None 
             # failure cannot leave the schedule cleared while the history
             # that explains it survives.
             cur.execute("DELETE FROM review_log WHERE card_id LIKE %s", (prefix,))
+            # ...and its rolled-up half (plan 078), for the same reason
+            # review_log is here at all: clearing only the rows would
+            # report {"ok": true} while leaving the compacted XP, the
+            # streak days and the first-sighting dates standing.
+            cur.execute("DELETE FROM review_daily WHERE user_id = %s", (user_id,))
+            cur.execute("DELETE FROM card_first_review WHERE card_id LIKE %s", (prefix,))
+            cur.execute("DELETE FROM review_compaction WHERE user_id = %s", (user_id,))
             cur.execute("DELETE FROM xp_ledger WHERE user_id = %s", (user_id,))
             # credit_ledger stays: the balance is not progress (plan 069),
             # and a learner starting over keeps the credits they have.

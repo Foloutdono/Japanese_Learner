@@ -15,7 +15,7 @@ import core.auth as auth_mod
 import routes.account as account
 from core.db import db_conn
 from core.srs_instance import srs
-from routes.account import PLAN, SHARED, _prefix_pattern, delete_user_rows
+from routes.account import PLAN, SHARED, prefix_pattern, delete_user_rows
 
 SCHEMA_FILE = Path(__file__).resolve().parent.parent / "srs" / "data_structure.sql"
 # Anchored to a statement at the start of a line: the file's header
@@ -51,7 +51,7 @@ def test_plan_and_shared_never_overlap():
 
 
 def test_every_step_scopes_and_explains_itself():
-    by_prefix = {"review_log", "card_modes", "cards"}
+    by_prefix = {"review_log", "card_modes", "cards", "card_first_review"}
     for table, clause, why in PLAN:
         assert "%(" in clause, f"{table} has no user-scoping placeholder"
         assert why and len(why) > 10, f"{table} has no reason given"
@@ -74,10 +74,10 @@ def test_every_declared_table_is_classified():
     )
 
 
-def test_prefix_pattern_escapes_like_wildcards():
-    assert _prefix_pattern("abc") == "abc:%"
-    assert _prefix_pattern("dev_user") == r"dev\_user:%"
-    assert _prefix_pattern("50%") == r"50\%:%"
+def testprefix_pattern_escapes_like_wildcards():
+    assert prefix_pattern("abc") == "abc:%"
+    assert prefix_pattern("dev_user") == r"dev\_user:%"
+    assert prefix_pattern("50%") == r"50\%:%"
 
 
 # ── The deletion, on synthetic ids ───────────────────────────────
@@ -108,7 +108,7 @@ def _seed(uid):
 def _count(cur, table, clause, uid):
     cur.execute(
         f'SELECT COUNT(*) FROM "{table}" WHERE {clause}',
-        {"user": uid, "prefix": _prefix_pattern(uid)},
+        {"user": uid, "prefix": prefix_pattern(uid)},
     )
     return cur.fetchone()[0]
 
