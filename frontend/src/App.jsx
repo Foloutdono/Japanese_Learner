@@ -337,6 +337,7 @@ export default function App() {
             <Route path="/learn/vocab/themes"         element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/tier/:tier"     element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/theme/:theme"   element={<VocabScreen session={session} />} />
+            <Route path="/learn/vocab/theme/:theme/level/:themeLevel" element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/:level"         element={<VocabScreen session={session} />} />
             <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/tiers"          element={<KanjiScreen session={session} />} />
@@ -387,6 +388,10 @@ export default function App() {
             <Route path="/today/run"                          element={<TodayRun session={session} />} />
             <Route path="/learn/kana/:set/:mode"              element={<KanaRun session={session} />} />
             <Route path="/learn/vocab/tier/:tier/:mode"       element={<VocabRun session={session} />} />
+            {/* The literal `level/` segment keeps the four-segment band
+                run from colliding with the three-segment legacy one
+                below, which VocabRun redirects. */}
+            <Route path="/learn/vocab/theme/:theme/level/:themeLevel/:mode" element={<VocabRun session={session} />} />
             <Route path="/learn/vocab/theme/:theme/:mode"     element={<VocabRun session={session} />} />
             <Route path="/learn/vocab/:level/:mode"           element={<VocabRun session={session} />} />
             <Route path="/learn/kanji/tier/:tier/:mode"       element={<KanjiRun session={session} />} />

@@ -867,7 +867,18 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // result otherwise (mirrors DictionaryScreen's own jumpToKanji
 // auto-select logic). Only runs while `active` is true, so opening the
 // sheet is what triggers the fetch — not every card getting flipped.
-function useDictionaryLookup(session, term, category, lang, active) {
+//
+// `kana` is the reading of the entry the caller already has in hand,
+// and it is what makes the lookup land on the RIGHT word. A surface
+// alone cannot say which 国境 (くにざかい or こっきょう) or which 工場
+// (こうば or こうじょう) was meant, and a two-mora kana word is a
+// substring of dozens of commoner ones — ラブ used to open アラブ. It is
+// sent to the server as well as preferred here, because the second case
+// cannot be fixed on the client: the wanted row is not on the page at
+// all until the server puts it there (see dictionary.py's _exact_vocab).
+// Optional — kanji and kana categories have no second key to
+// disambiguate with and pass nothing.
+function useDictionaryLookup(session, term, category, lang, active, kana) {
   const [state, setState] = useState({ entry: null, loading: false, error: false })
 
   useEffect(() => {
@@ -877,18 +888,21 @@ function useDictionaryLookup(session, term, category, lang, active) {
     setState({ entry: null, loading: true, error: false })
 
     const params = new URLSearchParams({ q: term, page: 0, limit: 10, lang: lang ?? '', category })
+    if (kana) params.set('kana', kana)
     apiFetch(`/api/dictionary?${params.toString()}`, session)
       .then(r => r.json())
       .then(data => {
         if (cancelled) return
         const results = data.results || []
-        const match = results.find(e => e.kanji === term || e.kana === term) ?? results[0] ?? null
+        const match = (kana && results.find(e => e.kanji === term && e.kana === kana))
+          ?? results.find(e => e.kanji === term || e.kana === term)
+          ?? results[0] ?? null
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang])
+  }, [active, term, category, session, lang, kana])
 
   return state
 }
@@ -910,19 +924,19 @@ function useDictionaryLookup(session, term, category, lang, active) {
 // the same one either way, and a run is exactly where it gets asked.
 // The radical is the one door with nowhere to go (it opens the
 // catalogue's own index), so it prints as the figure it is.
-export function DictionaryLookupSheet({ term, category, session, onClose }) {
+export function DictionaryLookupSheet({ term, kana, category, session, onClose }) {
   const { t, lang } = useLang()
   // The entries opened from one another, oldest first. The sheet shows
   // the last; ‹ pops it. Reset by the caller remounting on a new term
   // (the key it is opened with is the term itself).
-  const [stack, setStack] = useState([{ term, category }])
+  const [stack, setStack] = useState([{ term, kana, category }])
   const here = stack[stack.length - 1]
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true)
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana)
   const dialogRef = useDialog(onClose)
 
-  const open = (nextTerm, nextCategory) => {
+  const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
-    setStack(s => [...s, { term: nextTerm, category: nextCategory }])
+    setStack(s => [...s, { term: nextTerm, kana: nextKana, category: nextCategory }])
   }
 
   return createPortal(
@@ -946,7 +960,10 @@ export function DictionaryLookupSheet({ term, category, session, onClose }) {
             onClose={onClose}
             onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
             onKanjiClick={char => open(char, 'kanji')}
-            onVocabClick={(kanji, kana) => open(kanji || kana, 'vocab')}
+            // onVocabClick already hands over both halves, so stepping from
+            // one entry to another inside the sheet gets the same exactness
+            // the card does.
+            onVocabClick={(k, r) => open(k || r, 'vocab', r)}
           />
         )}
       </div>

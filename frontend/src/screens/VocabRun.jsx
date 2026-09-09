@@ -26,7 +26,7 @@ import { speakJapanese, playUi } from '../lib/audio'
 import {
   MODES as STUDY_MODES, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
-import { themeLabelFor } from '../domain/themes'
+import { themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
 import { tierLabelFor } from '../domain/tiers'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
@@ -41,7 +41,7 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 export default function VocabRun({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
-  const { level, tier, theme, mode } = useParams()
+  const { level, tier, theme, themeLevel, mode } = useParams()
   const [sp] = useSearchParams()
 
   // Which pool the words come from — see the station for the three
@@ -56,10 +56,12 @@ export default function VocabRun({ session }) {
   const reviewing = mode === FAST_REVIEW
   // The browse exists for the JLPT path only (no theme/tier
   // review-cards endpoint yet).
-  const valid = Boolean(studyBy) && (reviewing ? studyBy === 'level' : STUDY_MODES[mode]?.source === 'vocab')
+  const valid = Boolean(studyBy)
+    && (reviewing ? studyBy === 'level' : STUDY_MODES[mode]?.source === 'vocab')
+    && (studyBy !== 'theme' || isThemeLevel(themeLevel))
   const platforms =
     level ? `/learn/vocab/${level}`
-    : theme ? `/learn/vocab/theme/${theme}`
+    : theme ? `/learn/vocab/theme/${theme}${isThemeLevel(themeLevel) ? `/level/${themeLevel}` : ''}`
     : `/learn/vocab/tier/${tier}?size=${tierSize}${freqDomain === 'vocab_jmdict' ? '&domain=jmdict' : ''}`
   const leave = () => navigate(platforms)
 
@@ -90,7 +92,7 @@ export default function VocabRun({ session }) {
   // mid-session re-translates in place (see the effect below).
   const storageKey = !valid || reviewing ? IDLE_KEY
     : studyBy === 'level' ? sessionKey('vocab', level, mode)
-    : studyBy === 'theme' ? sessionKey('vocab', 'theme', theme, mode)
+    : studyBy === 'theme' ? sessionKey('vocab', 'theme', theme, themeLevel, mode)
     : sessionKey('vocab', 'freq', freqDomain, tier, tierSize, mode)
 
   const paceCtl = usePace(storageKey)
@@ -105,7 +107,7 @@ export default function VocabRun({ session }) {
     const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valid, reviewing, studyBy, freqDomain, level, theme, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
+  }, [valid, reviewing, studyBy, freqDomain, level, theme, themeLevel, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
   // (lang deliberately excluded above: changing lang shouldn't change
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
@@ -170,18 +172,18 @@ export default function VocabRun({ session }) {
     const url = 'level' in source
       ? `/api/vocab/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
       : 'theme' in source
-      ? `/api/vocab/theme/${source.theme}/stats?mode=${m}`
+      ? `/api/vocab/theme/${source.theme}/stats?level=${source.themeLevel}&mode=${m}`
       : `/api/frequency/${freqDomain}/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
     apiFetch(url, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
       .catch(() => {})
   }
-  const source = studyBy === 'level' ? { level } : studyBy === 'theme' ? { theme } : { tier, tierSize }
+  const source = studyBy === 'level' ? { level } : studyBy === 'theme' ? { theme, themeLevel } : { tier, tierSize }
   useEffect(() => {
     if (valid && !reviewing) loadProgress(source, mode)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, theme, tier, tierSize, freqDomain, mode])
+  }, [level, theme, themeLevel, tier, tierSize, freqDomain, mode])
 
   // The browse: the full set of already-studied cards, fetched once —
   // see ReviewDeck for why this doesn't go through useCardSession.
@@ -251,6 +253,7 @@ export default function VocabRun({ session }) {
             session={session}
             dictCategory="vocab"
             dictTerm={c => wordForm(c)}
+            dictKana={c => c.kana}
             onReplaySound={c => speakJapanese(c.kana)}
             renderFront={c => <CharDisplay char={wordForm(c)} size={72} />}
             renderBack={c => (
@@ -288,7 +291,7 @@ export default function VocabRun({ session }) {
   const title = modeLabel(t, mode)
   const sourceLabel =
     studyBy === 'level' ? level
-    : studyBy === 'theme' ? themeLabel
+    : studyBy === 'theme' ? `${themeLabel} · ${themeLevelLabel(t, themeLevel)}`
     : tierLabel
 
   return (
@@ -351,6 +354,7 @@ export default function VocabRun({ session }) {
                       </div>
                     }
                     dictTerm={wordForm(card)}
+                    dictKana={card.kana}
                     dictCategory="vocab"
                     session={session}
                     onReplaySound={() => speakJapanese(card.kana)}
@@ -391,6 +395,7 @@ export default function VocabRun({ session }) {
                       />
                     }
                     dictTerm={wordForm(card)}
+                    dictKana={card.kana}
                     dictCategory="vocab"
                     session={session}
                     onReplaySound={() => speakJapanese(card.kana)}
@@ -416,6 +421,7 @@ export default function VocabRun({ session }) {
                       revealed={answered}
                       resetKey={card.card_id}
                       dictTerm={wordForm(card)}
+                      dictKana={card.kana}
                       dictCategory="vocab"
                       session={session}
                       onReplaySound={() => speakJapanese(card.kana)}

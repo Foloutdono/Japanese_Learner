@@ -165,6 +165,16 @@ const quiz = {
   filterThemes:      'Filtrer les thèmes…',
   themeNoResults:    'Aucun thème ne correspond à votre filtre',
 
+  // Les quatre paliers d'un thème, découpés par fréquence (voir
+  // backend/content/theme_data.py). La moitié japonaise de chaque nom est
+  // dans domain/themes.js — elle est identique dans toutes les langues.
+  themeLevelBasic:    'Base',
+  themeLevelMedium:   'Moyen',
+  themeLevelAdvanced: 'Avancé',
+  themeLevelExpert:   'Expert',
+  selectThemeLevel:   'Choisissez un palier',
+  leaveThemeLevels:   'Paliers',
+
   themeFruits:           'Fruits',
   themeVegetables:       'Légumes',
   themeBodyParts:        'Parties du corps',
