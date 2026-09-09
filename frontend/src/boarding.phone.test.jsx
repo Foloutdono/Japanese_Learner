@@ -181,6 +181,26 @@ describe('the boarding at 390×844', () => {
     expect(getComputedStyle(opt).outlineWidth).toBe('2px')
   })
 
+  // ── The ring on the name field is inside the clip ──
+  // The cars slide sideways, so `.brd__cars` clips them — and the name
+  // field is the full width of its car, with the ring every control
+  // wears drawn OUTSIDE its border box (2px at +2px offset). The clip
+  // took it off at both edges, which is what the owner photographed on
+  // the very first question.
+  it('leaves the name field its focus ring inside the frame that clips the cars', async () => {
+    const screen = await mountFlow()
+    const cars = screen.container.querySelector('.brd__cars')
+    const field = screen.container.querySelector('.brd-field')
+    expect(getComputedStyle(cars).overflow).toBe('hidden')
+    // The ring's own reach: 2px of outline at 2px of offset.
+    const ring = parseFloat(getComputedStyle(field).outlineOffset) + 2
+    expect(ring).toBe(4)
+    const clip = cars.getBoundingClientRect()
+    const box = field.getBoundingClientRect()
+    expect(box.left - clip.left).toBeGreaterThanOrEqual(ring)
+    expect(clip.right - box.right).toBeGreaterThanOrEqual(ring)
+  })
+
   it('the kana answers are the foot of their screen, 56 px each, and the hour cells 76', async () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
 import { CommuterPass } from '../profile/CommuterPass'
@@ -32,6 +33,49 @@ function PrintedHolder({ name }) {
   )
 }
 
+// ── The welcome, counted onto the pass ───────────────────────────
+// The balance a fresh account is given is the one number on this
+// screen the learner did not work for, and it printed like every other
+// figure: already there, in the same grey as the refill line under it.
+// It counts up now, from nothing to what the account holds, while a
+// gold note rises off the pass saying what it is — the pass's own
+// metal, the same the XP fare uses, for about a second (owner's call:
+// "transmitting the feeling that you are lucky to receive this").
+//
+// The count is the figure the store answers with, so a learner whose
+// account already holds something else sees THAT number climbed to,
+// never a promised one.
+const COUNT_MS = 900
+const COUNT_FROM_MS = 520
+
+function useCountUp(to, enabled) {
+  const [n, setN] = useState(0)
+
+  useEffect(() => {
+    if (!enabled || to == null) return undefined
+    let raf = 0
+    const start = performance.now() + COUNT_FROM_MS
+    const step = now => {
+      const p = Math.min(1, Math.max(0, (now - start) / COUNT_MS))
+      // Out-cubic: the figure sprints and lands rather than crawling in.
+      setN(Math.round(to * (1 - Math.pow(1 - p, 3))))
+      if (p < 1) raf = requestAnimationFrame(step)
+    }
+    raf = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(raf)
+  }, [to, enabled])
+
+  // Not counting — reduced motion, or no figure to count — is the
+  // figure itself, derived rather than written into state: an effect
+  // that sets state on the frame it runs is a cascading render.
+  return enabled && to != null ? n : to
+}
+
+function stillPreferred() {
+  return typeof window !== 'undefined'
+    && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches === true
+}
+
 // The balance line as the boarding prints it: the store's answer when
 // it has one, and the welcome -- what a fresh account holds -- until
 // then. Same classes as components/credits/BalanceLine.jsx, so
@@ -42,11 +86,18 @@ function PrintedBalance() {
   const cap = credits?.cap ?? CAP
   const refill = credits?.dailyRefill ?? DAILY_REFILL
   const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
+  const counting = balance != null && !stillPreferred()
+  const shown = useCountUp(balance, counting)
+  // The note says the balance was GIVEN, so it prints only when the
+  // balance is the welcome itself. A learner who already had an
+  // account (the boarding's sign-in road ends on this same pass) sees
+  // their own figure counted up, and is not told it is a present.
+  const gift = balance === SIGNUP_BONUS
   return (
     <div className="jour-line balance-line">
       <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
       <span className="jour-line__validity">
-        <b>{balance == null ? '∞' : balance}</b>
+        <b>{balance == null ? '∞' : shown}</b>
         {balance != null && (
           <span className="jour-cap">
             {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
@@ -54,6 +105,7 @@ function PrintedBalance() {
         )}
       </span>
       {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, '00:00')}</span>}
+      {gift && <span className="brd-gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}
     </div>
   )
 }
@@ -75,7 +127,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
             <CommuterPass profile={{ ...profile, username: name }} t={t} footer={<PrintedBalance />} headingTag="span">
               <PrintedHolder name={name} />
             </CommuterPass>
-            <span className="brd-issue__seal" lang="ja" role="img" aria-label={t.brdIssued}>発行</span>
+            <span className="brd-issue__shine" aria-hidden="true" />
           </div>
         </div>
       </div>

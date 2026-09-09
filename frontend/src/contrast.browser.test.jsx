@@ -640,7 +640,7 @@ const Fixture = () => (
       <p className="brd-lead ob-lead">At <strong className="brd-lead__em ob-lead-em">10 min a day</strong></p>
       <div className="brd-bullet ob-bullet">~1,300 words</div>
       <div className="brd-issue" style={{ background: 'var(--bg-panel)' }}>
-        <span className="brd-issue__seal ob-seal" lang="ja">発行</span>
+        <span className="brd-gift ob-gift">+200 credits</span>
       </div>
     </div>
     <main className="auth">
@@ -877,7 +877,7 @@ const SITES = [
   ['.ob-lead', 'plan lead (soft ink on page)'],
   ['.ob-lead-em', 'plan lead term (ink on page)'],
   ['.ob-bullet', 'plan promise (ink on page)'],
-  ['.ob-seal', 'the 発行 seal (stamp ink on sumi)'],
+  ['.ob-gift', 'the welcome on the printed pass (gold mixed toward the panel ink)'],
   ['.ob-auth-glyph', 'sign-in glyph (ink on page)'],
   ['.ob-auth-title', 'sign-in title (soft ink on page)'],
   ['.ob-auth-error', 'sign-in error (danger on surface)'],

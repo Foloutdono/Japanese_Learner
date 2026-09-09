@@ -6178,16 +6178,13 @@ textarea:focus-visible {
   color: var(--text-on-panel);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
-.board::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.022) 0 1px,
-    transparent 1px 3px);
-}
+/* The scanline is gone (owner's call). The panel wore a 1px-in-3
+   repeating gradient — the lit-board texture a 発車標 has — from when it
+   was a departure board a few rows tall. The map fills the phone now,
+   so the same texture covers most of a screen, and at that size it
+   stops reading as the grain of a lit panel and starts reading as
+   banding across the map's own empty space. The panel keeps its
+   gradient, its gold hairline and its shadow; the material is those. */
 
 /* The station's own name, at the head of its board. Left: who you
    are standing in front of, in the three registers a 駅名標 always
@@ -6600,14 +6597,20 @@ textarea:focus-visible {
 .route-stop--past .route-stop__rail { background: var(--line-color); }
 .route-stop--first .route-stop__rail { top: 50%; }
 .route-stop--last  .route-stop__rail { bottom: 50%; }
+/* 18px, up from 11 (owner's call). The row grew to a share of the
+   screen when the route took the page, and a dot drawn for a 56px row
+   read as a pin-prick on a card three times that: the stop is what the
+   line is FOR, so it is the size of a station mark on a wall map now.
+   Still clear of the code beside it — 18px on the 20.5px axis ends at
+   29.5, and the content column starts at --sp-8. */
 .route-stop__marker {
   position: absolute;
   top: 50%;
-  width: 11px;
-  height: 11px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--r-pill);
   transform: translate(-50%, -50%);
-  border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
+  border: 2.5px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
   /* The dot is hollow, and it is on the card now: it takes the card's
      own ground rather than naming one, so it stays hollow through the
      hover that lifts it. */
@@ -6615,8 +6618,8 @@ textarea:focus-visible {
 }
 .route-stop--past .route-stop__marker { background: var(--line-color); border-color: var(--line-color); }
 .route-stop--current .route-stop__marker {
-  width: 15px;
-  height: 15px;
+  width: 22px;
+  height: 22px;
   background: var(--line-color);
   border-color: var(--line-color);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
@@ -6663,31 +6666,11 @@ textarea:focus-visible {
 }
 .route-stop__fig b { color: var(--text-primary); }
 
-/* ── How far into this stop you are ──
-   The route says how far along the LINE you are; this says how much of
-   the stop itself is done, which is a percentage with no waypoints of
-   its own — the one thing DESIGN keeps a bar for. It is the card's own
-   bottom edge, the way the study stage rules its deck across the top:
-   3px, the line's pigment over its own faint track, and it exists only
-   where there is a figure to draw it from. */
-.route-stop__bar {
-  position: absolute;
-  /* The content column's own width, not the card's: the card's corners
-     are rounded and a rule that runs into them frays. It starts where
-     the code starts and ends where the figure does. */
-  left: var(--sp-8);
-  right: var(--sp-4);
-  bottom: var(--sp-3);
-  height: 3px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--line-color) 14%, transparent);
-}
-.route-stop__fill {
-  display: block;
-  height: 100%;
-  border-radius: var(--r-pill);
-  background: var(--line-color);
-}
+/* The stop carried its own progress as a 3px rule along the bottom of
+   the card, under the figure it was drawn from. It is gone (owner's
+   call): the figure says the same thing in the register the row is
+   already read in, and a second drawing of it left every card with a
+   line under it that the eye had to sort from the rail beside it. */
 
 @media (max-width: 768px) {
   /* ── The line runs the height of the screen ──
@@ -16411,7 +16394,24 @@ html { scrollbar-gutter: stable; }
   color: var(--text-primary);
 }
 .brd--welcome { gap: var(--sp-4); }
-.brd__cars { position: relative; flex: 1; min-height: 0; display: flex; overflow: hidden; }
+/* The cars slide sideways, so the frame clips them — and that clip
+   was taking the focus ring off the name field with them. A focused
+   input's ring is drawn OUTSIDE its border box (2px at +2px offset,
+   the ring every control in the app wears), the field is the full
+   width of the car, and the car is the full width of the frame: all
+   four sides of the ring landed on the clip. The frame reaches back
+   into the page's own gutter by the ring's reach and gives it back as
+   padding, so the cars still slide behind an edge and the ring stands
+   inside it. */
+.brd__cars {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  overflow: hidden;
+  margin-inline: calc(-1 * var(--sp-1));
+  padding-inline: var(--sp-1);
+}
 .brd__car { flex: 1; min-width: 0; min-height: 0; display: flex; flex-direction: column; gap: var(--sp-5); }
 .brd__car--in { animation: brd-pull-in 260ms ease-out both; }
 .brd__car--in[data-dir="back"] { animation-name: brd-pull-in-back; }
@@ -16797,6 +16797,22 @@ html { scrollbar-gutter: stable; }
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent);
 }
 .brd-flap--turn { animation: brd-flip 900ms ease-in-out 380ms 1 both; }
+/* A drum still spinning: the board lights with all four turning and
+   they stop left to right (components/boarding/TimeStep.jsx). The face
+   is changing on its own tick, so the tile only has to say it is not a
+   number to read yet — dimmer, and one drum's worth of blur. */
+.brd-flap--spin {
+  color: color-mix(in srgb, var(--text-on-panel) 55%, transparent);
+  animation: brd-spin 120ms linear infinite;
+}
+@keyframes brd-spin {
+  0%   { transform: translateY(-6%) scaleY(0.94); }
+  50%  { transform: translateY(6%) scaleY(1); }
+  100% { transform: translateY(-6%) scaleY(0.94); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brd-flap--spin { animation: none; }
+}
 .brd-day { position: relative; height: 48px; margin: 0 var(--sp-3); touch-action: none; }
 .brd-day__rail { position: absolute; left: 0; right: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 30%, transparent); }
 .brd-day__done { position: absolute; left: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
@@ -16871,27 +16887,71 @@ html { scrollbar-gutter: stable; }
 /* ── the pass, issued ── */
 .brd-offer { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
 .brd-issue { position: relative; margin-top: var(--sp-3); animation: brd-up 700ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
-.brd-issue__seal {
+.brd-issue .balance-line { position: relative; }
+/* The 発行 seal that landed on the printed pass is gone (owner's
+   call): the pass already says it is issued by being printed, and the
+   arrival's own moment is the welcome the account is given, which now
+   has that beat to itself.
+
+   ── The welcome ──
+   One pass of light across the printed card, once, as the balance
+   counts up under it (components/boarding/PassStep.jsx): the pass's
+   own metal caught for a moment, not a shower of confetti over a
+   station. It is the only thing on the screen that moves after the
+   card lands, so the eye is on the figure while the figure is
+   climbing. */
+.brd-issue__shine {
   position: absolute;
-  right: var(--sp-4);
-  bottom: var(--sp-3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  border: 3px solid var(--stamp-ink);
-  border-radius: var(--r-plate);
-  font-family: var(--font-serif);
+  inset: 0;
+  pointer-events: none;
+  border-radius: var(--r-identity);
+  overflow: hidden;
+}
+.brd-issue__shine::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  bottom: -20%;
+  width: 40%;
+  background: linear-gradient(
+    100deg,
+    transparent,
+    color-mix(in srgb, var(--accent2) 22%, transparent),
+    transparent);
+  animation: brd-shine 1100ms cubic-bezier(0.3, 0, 0.2, 1) 620ms both;
+}
+@keyframes brd-shine {
+  from { transform: translateX(-160%) skewX(-12deg); }
+  to   { transform: translateX(420%) skewX(-12deg); }
+}
+
+/* The figure's own note: what the count is FOR, in the metal it is
+   counted in, rising off the line and leaving. */
+.brd-gift {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
   font-weight: 700;
-  font-size: var(--fs-lead);
-  /* The ring keeps the stamp's own red; the glyph is mixed toward the
-     pass's ink so 発行 reads on sumi (raw stamp ink measures ~3:1). */
-  color: color-mix(in srgb, var(--stamp-ink) 55%, var(--text-on-panel));
-  background: color-mix(in srgb, var(--stamp-ink) 10%, transparent);
-  transform: rotate(-12deg);
-  opacity: 0.9;
-  animation: brd-stamp 500ms cubic-bezier(0.2, 0.8, 0.2, 1) 700ms both;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
+  color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel));
+  animation: brd-gift 1700ms ease-out 520ms both;
+}
+@keyframes brd-gift {
+  0%   { opacity: 0; transform: translateY(6px); }
+  18%  { opacity: 1; transform: none; }
+  72%  { opacity: 1; transform: none; }
+  100% { opacity: 0; transform: translateY(-10px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* The light does not sweep and the note does not rise; the note
+     still says what the balance is, and stays. */
+  .brd-issue__shine { display: none; }
+  .brd-gift { animation: none; }
 }
 
 /* ── the pull, and a screen's own movement after it ── */
@@ -16903,7 +16963,6 @@ html { scrollbar-gutter: stable; }
 @keyframes brd-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 @keyframes brd-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @keyframes brd-drop { from { opacity: 0; transform: translateY(-24px); } to { opacity: 1; transform: none; } }
-@keyframes brd-stamp { from { opacity: 0; transform: scale(1.5) rotate(-12deg); } to { opacity: 0.9; transform: scale(1) rotate(-12deg); } }
 @keyframes brd-roll { from { transform: translateX(0); } to { transform: translateX(calc(-50% - var(--sp-4) / 2)); } }
 @keyframes brd-draw-in { from { stroke-dashoffset: 120; } }
 @keyframes brd-draw-line { from { stroke-dashoffset: 400; } }

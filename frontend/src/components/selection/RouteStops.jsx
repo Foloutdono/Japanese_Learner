@@ -53,18 +53,6 @@ export function RouteStops({ stops, here = null, onSelect }) {
               <span className="route-stop__fig"><b>{stop.learned ?? 0}</b>/ {stop.total}</span>
             )}
             <span className="route-stop__go" aria-hidden="true">▶</span>
-            {/* How much of the stop itself is done — the figure beside
-                it, drawn. The row already says it in numerals, so the
-                bar is decoration for a screen reader and hidden from
-                it. */}
-            {stop.total > 0 && (
-              <span className="route-stop__bar" aria-hidden="true">
-                <span
-                  className="route-stop__fill"
-                  style={{ width: `${Math.min(100, Math.round(((stop.learned ?? 0) / stop.total) * 100))}%` }}
-                />
-              </span>
-            )}
           </button>
         )
       })}

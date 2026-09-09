@@ -1479,7 +1479,7 @@ const boarding = {
   brdOnTrackLine: 'En route sur toute la ligne',
   brdPassQ: (name) => `Votre carte est prête, **${name}**.`,
   brdEnjoy: 'Bon voyage.',
-  brdIssued: 'Émise',
+  brdCreditsGift: (n) => `+${n} crédits offerts`,
   brdEnter: 'Entrer en gare',
 }
 

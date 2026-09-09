@@ -249,6 +249,15 @@ describe('BoardingFlow', () => {
     expect(stepOf(screen)).toBe('time')
     expect(screen.container.querySelector('.brd__count').textContent).toBe('7/7')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('07:30')
+    // ── The board settles rather than arriving set ──
+    // A 発車標 lights with every drum turning and stops them one after
+    // another from the left. The label is the hour throughout, so a
+    // screen reader is told the time and never the shuffle.
+    expect(live(screen).querySelectorAll('.brd-flap--spin').length).toBeGreaterThan(0)
+    await settle(1100)
+    expect(live(screen).querySelectorAll('.brd-flap--spin')).toHaveLength(0)
+    expect([...live(screen).querySelectorAll('.brd-flap')].map(el => el.textContent).join(''))
+      .toBe('0730')
     expect(q(screen, '[data-hour="am"]').getAttribute('aria-pressed')).toBe('true')
     await click(screen, '[data-hour="pm"]')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('21:00')
@@ -279,11 +288,17 @@ describe('BoardingFlow', () => {
     const pass = q(screen, '.pass')
     expect(pass).not.toBeNull()
     expect(pass.textContent).toContain('Aiko')
-    expect(q(screen, '.brd-issue__seal').textContent).toBe('発行')
-    // The balance on the pass's foot: 30 of 50.
-    await settle(80)
+    // The 発行 seal that used to land on the card is gone (owner's
+    // call): the printed pass says it is issued by being printed.
+    expect(screen.container.querySelector('.brd-issue__seal')).toBeNull()
+    // The balance on the pass's foot: 30 of 50, counted up to rather
+    // than printed — the figure climbs for about a second.
+    await settle(1700)
     expect(q(screen, '.balance-line').textContent).toContain('30')
     expect(q(screen, '.balance-line').textContent).toContain('/ 50')
+    // This account already had those 30; only a welcome is announced as
+    // one, and this is not a welcome.
+    expect(screen.container.querySelector('.brd-gift')).toBeNull()
     expect(apiJsonWithTimeout).not.toHaveBeenCalled()
 
     await click(screen, '[data-action="enter"]')
@@ -305,7 +320,11 @@ describe('BoardingFlow', () => {
     expect(onComplete).toHaveBeenCalledTimes(1)
   })
 
-  it('kana → one script → the reveal, then the goal with the level set to N5; back keeps every answer', async () => {
+  // A reader of one script is a NOVICE, not an N5: they never saw the
+  // level list AND their goal list opened at N4, so the goal they are
+  // likeliest to have — reach N5 — was the one they could not pick
+  // (owner's report). The office still stores N5 for them.
+  it('kana → one script → the reveal, then the goal open at N5, the stop they are heading for', async () => {
     const { screen } = await renderFlow()
     await passName(screen, 'fun')
     await click(screen, '[data-kana="hiragana"]')
@@ -317,10 +336,14 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')
     await settle()
 
-    // Never the level list: a reader of one script boards at N5.
+    // Never the level list: the answer is the level. But it boards them
+    // BEFORE N5, so the whole line is ahead of them.
     expect(stepOf(screen)).toBe('goal')
-    expect(q(screen, '.brd__hint').textContent).toContain('N5')
-    expect(q(screen, '[data-goal="N4"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '.brd__hint').textContent).toContain('Novice')
+    expect([...live(screen).querySelectorAll('[data-goal]')].map(el => el.dataset.goal))
+      .toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('true')
+    expect(q(screen, '[data-goal="N5"] .brd-tag')).not.toBeNull()
 
     // Back walks the visited path, answers intact.
     await click(screen, 'button.brd__back')
@@ -341,6 +364,30 @@ describe('BoardingFlow', () => {
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     // No write happened: the name never changed.
     expect(apiFetch.mock.calls.filter(c => c[0] === '/api/profile')).toHaveLength(0)
+  })
+
+  // ── The welcome, counted onto the pass ──
+  // The balance a fresh account is given is the one figure on that
+  // screen the learner did not work for, and it printed like every
+  // other: already there, in the same grey as the refill line under
+  // it (owner's call — "transmitting the feeling that you are lucky to
+  // receive this").
+  it('counts the welcome onto a fresh pass, and says it is a gift', async () => {
+    const { seedCredits } = await import('../stores/credits')
+    seedCredits({ balance: 200, cap: 50, dailyRefill: 30, plan: 'free', unlimited: false })
+    const { screen } = await renderFlow()
+    await walkToPlan(screen)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    expect(stepOf(screen)).toBe('pass')
+
+    // The note names the gift while the figure climbs to it …
+    expect(q(screen, '.brd-gift').textContent).toContain('200')
+    expect(Number(q(screen, '.balance-line .jour-line__validity b').textContent)).toBeLessThan(200)
+    // … and the figure lands on what the account actually holds.
+    await settle(1700)
+    expect(q(screen, '.balance-line .jour-line__validity b').textContent).toBe('200')
+    seedCredits(CREDITS)
   })
 
   it('a reader of both scripts at N1 has no stop ahead: the goal is skipped and the track shortens', async () => {
@@ -400,7 +447,7 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')   // the reveal
     await settle()
-    await click(screen, '[data-action="continue"]')   // the goal (N4 preselected)
+    await click(screen, '[data-action="continue"]')   // the goal (N5 preselected: a novice)
     await settle()
     await click(screen, '[data-action="continue"]')   // the rhythm
     await settle()

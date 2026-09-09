@@ -67,10 +67,18 @@ export function bucketFor(min) {
   return 'pm'
 }
 
-/** The kana branch sets the level: a reader of one script or none boards
- *  at the first stop; both scripts read earn the level list. */
+/** The kana branch sets the level: a reader of both scripts earns the
+ *  level list; anyone else is a NOVICE — one script or none is short of
+ *  N5, which asks for both kana and ~100 kanji.
+ *
+ *  It answered 'N5' for those learners, which decided two things for
+ *  them at once: they never saw the level list, and their goal list
+ *  started at N4, because N5 was already behind them. A learner who
+ *  reads hiragana alone could not say "I want to reach N5" — the one
+ *  goal they are most likely to have. Novice keeps them off the JLPT
+ *  line entirely, so `stopsAhead` opens with N5 (owner's report). */
 export function levelForKana(answer) {
-  return answer === 'both' ? null : 'N5'
+  return answer === 'both' ? null : 'novice'
 }
 
 /** The JLPT level the office stores for a level-list choice: the
@@ -79,7 +87,10 @@ export function jlptFor(choice) {
   return choice === 'novice' ? 'N5' : choice
 }
 
-/** The stops ahead of a level, in line order; the next one is first. */
+/** The stops ahead of a level, in line order; the next one is first.
+ *  Called with the learner's own CHOICE rather than the level the
+ *  office stores, so a novice (indexOf -1) gets the whole line from N5
+ *  and an N5 learner gets N4 onward. */
 export function stopsAhead(level) {
   return LEVELS.slice(LEVELS.indexOf(level) + 1)
 }
