@@ -335,5 +335,10 @@ describe('the phone layout contract', () => {
     expect(content.bottom - board.bottom).toBeLessThanOrEqual(24)
     const lines = [...screen.container.querySelectorAll('.wmap-line')].map(el => el.getBoundingClientRect())
     for (const box of lines) expect(box.height).toBeCloseTo(lines[0].height, 0)
+    // And it carries no texture over that room: the panel wore a
+    // 1px-in-3 scanline from when it was a departure board a few rows
+    // tall, and at a screen's height the same grain reads as banding
+    // across the map's own empty space. Owner's call.
+    expect(getComputedStyle(screen.container.querySelector('.board'), '::after').content).toBe('none')
   })
 })

@@ -6204,16 +6204,13 @@ textarea:focus-visible {
   color: var(--text-on-panel);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
 }
-.board::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(255, 255, 255, 0.022) 0 1px,
-    transparent 1px 3px);
-}
+/* The scanline is gone (owner's call). The panel wore a 1px-in-3
+   repeating gradient — the lit-board texture a 発車標 has — from when it
+   was a departure board a few rows tall. The map fills the phone now,
+   so the same texture covers most of a screen, and at that size it
+   stops reading as the grain of a lit panel and starts reading as
+   banding across the map's own empty space. The panel keeps its
+   gradient, its gold hairline and its shadow; the material is those. */
 
 /* The station's own name, at the head of its board. Left: who you
    are standing in front of, in the three registers a 駅名標 always
