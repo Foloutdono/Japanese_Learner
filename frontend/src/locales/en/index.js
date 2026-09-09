@@ -1593,6 +1593,11 @@ const onboarding = {
   onbTestResult: (level, correct, total) => `${correct} of ${total} correct — we recommend boarding at ${level}.`,
   onbPaceRecommended: 'Recommended',
   onbPassError: 'Saving failed — check your connection and try again.',
+  // The other half of a failed save: the office ANSWERED and refused
+  // it. Sending the learner to check a connection that is plainly
+  // working is a wrong turn they cannot take -- and "try again" is a
+  // false promise, since the same contract earns the same refusal.
+  brdPassRefused: 'The office could not issue this pass — that is on our side, not your connection. Nothing was saved.',
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
   paceDoneTitle: 'Today’s target reached',

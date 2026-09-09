@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
-import { apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
+import { ApiError, apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, requestNudgePermission } from '../lib/platform'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
@@ -167,7 +167,8 @@ export default function BoardingFlow({
   const [savedName, setSavedName] = useState(resumed?.savedName ?? profile.username ?? '')
   const [nameError, setNameError] = useState(null)
   const [busy, setBusy] = useState(false)
-  const [saveError, setSaveError] = useState(false)
+  // null | 'network' | 'refused' -- which of the two the pass says.
+  const [saveError, setSaveError] = useState(null)
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
@@ -311,7 +312,7 @@ export default function BoardingFlow({
     if (busy) return
     if (dryRun) { onComplete(); return }
     setBusy(true)
-    setSaveError(false)
+    setSaveError(null)
     const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date())
     const body = {
       jlptLevel: jlpt,
@@ -343,9 +344,15 @@ export default function BoardingFlow({
         refreshCredits()
         onComplete()
       })
-      .catch(() => {
+      .catch(err => {
         setBusy(false)
-        setSaveError(true)
+        // An ApiError means the office ANSWERED and refused the
+        // contract; anything else -- a dead fetch, the timeout's own
+        // abort -- never reached it. The pass said "check your
+        // connection" for both, which on a 422 sent a learner to look
+        // at a connection that was plainly working, on the one screen
+        // that has no other way forward (2026-09-09).
+        setSaveError(err instanceof ApiError ? 'refused' : 'network')
       })
   }
 
