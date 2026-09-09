@@ -113,12 +113,12 @@ function type(el, value) {
 
 async function renderFlow({
   onComplete = vi.fn(), username = 'Tester', dryRun = false,
-  onExit = undefined, onSignIn = undefined, guest = false,
+  onExit = undefined, onSignIn = undefined, guest = false, email = null,
 } = {}) {
   const screen = await render(
     <LangProvider>
       <BoardingFlow
-        session={{ access_token: 'tok' }}
+        session={{ access_token: 'tok', ...(email ? { user: { email } } : {}) }}
         initialProfile={{ username, level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
         onComplete={onComplete}
         onExit={onExit}
@@ -645,6 +645,26 @@ describe('BoardingFlow', () => {
     const { screen } = await renderFlow({ onSignIn })
     await click(screen, '[data-action="sign-in"]')
     expect(onSignIn).toHaveBeenCalledTimes(1)
+  })
+
+  // The boarding only ever runs on an account with no journey on it,
+  // so an address on question one means a NEW pass for that address.
+  // It is written for the learner who pressed "Continue with Google",
+  // landed on a pass Supabase had just minted for an identity nobody
+  // carried, and was shown seven questions with no hint that their own
+  // journey was on another account — the sign-in link is right below.
+  it('names the pass when there is an address on it, and the way out beside it', async () => {
+    const { screen } = await renderFlow({ email: 'aiko@example.com', onSignIn: vi.fn() })
+    expect(stepOf(screen)).toBe('name')
+    const hint = q(screen, '.brd__hint')
+    expect(hint?.textContent).toBe(fr.brdNameNewPass('aiko@example.com'))
+    expect(q(screen, '[data-action="sign-in"]')).toBeTruthy()
+  })
+
+  it('says nothing of the sort on a guest pass, which has no address', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('name')
+    expect(q(screen, '.brd__hint')).toBeNull()
   })
 
   it('asks a guest for an account at the END, and takes no for an answer', async () => {

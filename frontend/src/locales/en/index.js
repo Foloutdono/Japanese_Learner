@@ -1139,6 +1139,13 @@ const settings = {
   guestClaimDesc:    'Your progress is already here. Add an address and a password to keep it — nothing moves, it is the same account.',
   guestClaimConfirm: 'Almost: confirm the address from the link we just sent you.',
   guestClaimDone:    'Account created. Your progress is kept.',
+  // 相互乗り入れ — Google on a pass that already has a key. Named
+  // plainly, because the row has to answer the question the learner
+  // arrives with: "why did signing in with Google not open my
+  // account?" See components/settings/AccountPage.jsx.
+  linkGoogleLabel:   'Google',
+  linkGoogleCap:     'Not connected',
+  linkGoogleDesc:    'Connect Google here and “Continue with Google” will open this account. Until it is, signing in with Google issues a second, empty pass instead — your journey stays on this one.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -1469,6 +1476,13 @@ const boarding = {
   // The questions.
   brdNameQ: 'What’s your name?',
   brdNameAria: 'Your name',
+  // The address the pass is being issued to, said on question one.
+  // The boarding only runs on an account with nothing on it, so an
+  // address here always means a NEW pass for that address — which is
+  // the one thing a learner who meant to reach an OLD one needs to be
+  // told before answering seven questions. A guest has no address and
+  // never sees this line. "Below" is the sign-in link in the foot.
+  brdNameNewPass: email => `A new pass, for ${email}. If your journey is on another account, sign in below instead.`,
   brdWhyQ: (name) => `Why are you learning Japanese, **${name}**?`,
   brdMotive: { studies: 'For my studies', fun: 'For fun', trip: 'For a trip to Japan', live: 'To live in Japan', friends: 'To make friends', other: 'Something else' },
   brdKanaQ: 'Can you read this?',
