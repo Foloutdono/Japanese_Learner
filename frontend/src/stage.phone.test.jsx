@@ -71,9 +71,12 @@ describe('the stage at phone width', () => {
     expect(ghost.boxShadow).toBe('none')
   })
 
-  it('the browse nav is two columns on the stage\'s foot', async () => {
+  it('the browse nav is two columns on the stage\'s foot, on the card\'s own column', async () => {
     const screen = await render(
       <main className="container stage">
+        <div className="quiz-card-stage">
+          <div className="prompt-card"><div className="prompt-card__body">駅</div></div>
+        </div>
         <div className="stage__foot browse-nav">
           <button type="button" className="btn-secondary">Previous</button>
           <button type="button" className="btn-primary">Next</button>
@@ -83,5 +86,18 @@ describe('the stage at phone width', () => {
     const nav = getComputedStyle(screen.container.querySelector('.browse-nav'))
     expect(nav.display).toBe('grid')
     expect(nav.gridTemplateColumns.split(' ')).toHaveLength(2)
+    // The pair runs the whole width of the card above it. The foot is
+    // docked here (bled to both edges on negative inline margins, then
+    // re-padded to the page's gutter), and a percentage width used to
+    // ignore those margins: the row sat 16px left of its column with
+    // Next 32px short of the card's right edge.
+    const edges = el => el.getBoundingClientRect()
+    const card = edges(screen.container.querySelector('.prompt-card'))
+    const prev = edges(screen.container.querySelector('.browse-nav .btn-secondary'))
+    const next = edges(screen.container.querySelector('.browse-nav .btn-primary'))
+    expect(prev.left).toBe(card.left)
+    expect(next.right).toBe(card.right)
+    // And they split it evenly, so neither action is the wider target.
+    expect(Math.round(prev.width)).toBe(Math.round(next.width))
   })
 })

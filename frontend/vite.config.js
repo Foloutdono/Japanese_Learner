@@ -234,7 +234,11 @@ export default defineConfig(({ mode }) => {
           environment: 'node',
           globals: false,
           include: ['src/**/*.test.{js,jsx}'],
-          exclude: ['src/**/*.browser.test.{js,jsx}', 'src/**/*.phone.test.{js,jsx}'],
+          exclude: [
+            'src/**/*.browser.test.{js,jsx}',
+            'src/**/*.phone.test.{js,jsx}',
+            'src/**/*.tablet.test.{js,jsx}',
+          ],
         },
       },
       browserProject('browser', ['src/**/*.browser.test.{js,jsx}']),
@@ -249,6 +253,16 @@ export default defineConfig(({ mode }) => {
       // (useMediaQuery.browser.test.jsx), so a page that STARTS at
       // 390px is the only honest setup.
       browserProject('phone', ['src/**/*.phone.test.{js,jsx}'], { width: 390, height: 844 }),
+      // The tablet lane, 768×1024: a tablet held upright, and the last
+      // width the phone stylesheet answers for (`width <= 768px`). It
+      // exists because the band between --card-w and that ceiling is
+      // where a rule can be right on both lanes and wrong in between —
+      // the card stops growing at 640 and centres, the screen keeps
+      // going, and anything that spans the stage instead of the card
+      // parts company with it (the docked foot did, by 43px a side).
+      // Same reason the phone lane starts at its own width rather than
+      // resizing mid-test.
+      browserProject('tablet', ['src/**/*.tablet.test.{js,jsx}'], { width: 768, height: 1024 }),
     ],
   },
   };
