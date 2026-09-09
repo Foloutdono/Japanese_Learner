@@ -11,6 +11,13 @@ import { CheckMark } from './icons'
 // the figures, two lines from the motive, the JLPT stop. Every figure
 // comes from the learner's own answers (domain/boarding.js
 // planFigures) and wears a ~.
+//
+// A ride to the novice's own stop is the exception, and the whole
+// screen answers to it: three weeks of kana promise no word count and
+// no JLPT stop, and the motive's two lines ("a drama without pausing")
+// would be a lie told over signs. So the kana are what the chart
+// climbs to and what the bullets promise -- the line beyond is named
+// as what comes next, not as what this ride buys.
 
 // The chart's box, the canvas's own: 326×150, the plot from x 28..304
 // and y 140 (nothing) to 10 (everything promised).
@@ -27,8 +34,7 @@ function monthLabel(date, lang, withYear = false) {
   return new Intl.DateTimeFormat(lang, opts).format(date).replace('.', '').toUpperCase()
 }
 
-function Chart({ words, from, to, minutes, lang, t }) {
-  const top = Math.max(300, approx(words, 100))
+function Chart({ top, label, aria, from, to, minutes, lang, t }) {
   const us = points(CHART_US)
   const them = points(CHART_THEM)
   const [uxEnd, uyEnd] = us.split(' ').at(-1).split(',')
@@ -36,7 +42,7 @@ function Chart({ words, from, to, minutes, lang, t }) {
   return (
     <div className="brd-chart">
       <span className="brd-chart__title">{t.brdChartTitle}</span>
-      <svg viewBox="0 0 326 150" role="img" aria-label={t.brdChartAria(top.toLocaleString(lang))}>
+      <svg viewBox="0 0 326 150" role="img" aria-label={aria}>
         {GRID.map(g => {
           const y = Math.round(Y0 - g * (Y0 - Y1))
           return <line key={g} className="brd-chart__grid" x1={X0} y1={y} x2={X1} y2={y} />
@@ -52,7 +58,7 @@ function Chart({ words, from, to, minutes, lang, t }) {
         <polyline className="brd-chart__line brd-chart__line--us" points={us} />
         <circle className="brd-chart__dot brd-chart__dot--them" cx={txEnd} cy={tyEnd} r="4" />
         <circle className="brd-chart__dot brd-chart__dot--us" cx={uxEnd} cy={uyEnd} r="4" />
-        <text className="brd-chart__lbl" x={X1 - 52} y={Y1 + 14} textAnchor="end">{t.brdChartLabel(top.toLocaleString(lang))}</text>
+        <text className="brd-chart__lbl" x={X1 - 52} y={Y1 + 14} textAnchor="end">{label}</text>
         <text className="brd-chart__lbl brd-chart__lbl--soft" x={X1 - 6} y={Number(tyEnd) + 16} textAnchor="end">{t.brdChartCram}</text>
       </svg>
       <div className="brd-legend">
@@ -67,13 +73,20 @@ function Chart({ words, from, to, minutes, lang, t }) {
 export default function PlanStep({ name, motive, rhythm, goal, figures, now, onContinue }) {
   const { t, lang } = useLang()
   const dateLabel = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(figures.date)
+  const toNovice = goal === 'novice'
   const [line1, line2] = t.brdPromise[motive] ?? t.brdPromise.other
-  const bullets = [
-    t.brdBulletFigures(approx(figures.words, 100).toLocaleString(lang), approx(figures.kanji, 50).toLocaleString(lang)),
-    line1,
-    line2,
-    goal ? t.brdOnTrack(goal) : t.brdOnTrackLine,
-  ]
+  const bullets = toNovice
+    ? [t.brdBulletKana, t.brdBulletThenLine, t.brdOnTrackKana]
+    : [
+      t.brdBulletFigures(approx(figures.words, 100).toLocaleString(lang), approx(figures.kanji, 50).toLocaleString(lang)),
+      line1,
+      line2,
+      goal ? t.brdOnTrack(goal) : t.brdOnTrackLine,
+    ]
+  // What the climbing line climbs to. The floors keep the axis honest
+  // on the beat before the volumes answer (and if they never do).
+  const top = toNovice ? Math.max(50, figures.kana) : Math.max(300, approx(figures.words, 100))
+  const topLabel = top.toLocaleString(lang)
   return (
     <>
       <div className="brd__body brd__body--arrival">
@@ -81,7 +94,16 @@ export default function PlanStep({ name, motive, rhythm, goal, figures, now, onC
           <Emphasized text={t.brdPlanQ(name)} strongClassName="brd__q-em" />
         </BoardQuestion>
         <div className="brd__stage">
-          <Chart words={figures.words} from={now} to={figures.date} minutes={rhythm} lang={lang} t={t} />
+          <Chart
+            top={top}
+            label={toNovice ? t.brdChartLabelKana(topLabel) : t.brdChartLabel(topLabel)}
+            aria={toNovice ? t.brdChartAriaKana(topLabel) : t.brdChartAria(topLabel)}
+            from={now}
+            to={figures.date}
+            minutes={rhythm}
+            lang={lang}
+            t={t}
+          />
           <p className="brd-lead">
             <Emphasized text={t.brdLead(rhythm, dateLabel, t.brdFor[motive] ?? t.brdFor.other)} strongClassName="brd-lead__em" />
           </p>

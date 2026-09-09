@@ -1437,6 +1437,9 @@ const boarding = {
   },
   brdGoalQ: 'Quel est votre objectif ?',
   brdGoalHint: (level) => `Les arrêts après ${level}.`,
+  // Personne n’a d’arrêt derrière soi avant les kana : la liste s’ouvre
+  // sur celui du novice et ne nomme donc aucun niveau (goalStops).
+  brdGoalHintStart: 'Tous les arrêts sont devant vous.',
   brdNextStop: 'Prochain arrêt',
   brdRhythmQ: 'Quel est votre rythme ?',
   brdMinADay: 'min par jour',
@@ -1469,6 +1472,10 @@ const boarding = {
   brdChartTitle: 'Votre projection',
   brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
   brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
+  // Le même graphique pour un trajet jusqu’à l’arrêt du novice, qui
+  // promet des signes et non des mots.
+  brdChartAriaKana: (kana) => `Kana retenus au fil du trajet : les révisions quotidiennes montent à environ ${kana} ; le bachotage plafonne tôt.`,
+  brdChartLabelKana: (kana) => `~${kana} kana · révisions quotidiennes`,
   brdChartCram: 'bachotage',
   brdLegendUs: (min) => `Révisions quotidiennes, ${min} min`,
   brdLegendThem: 'Bachotage',
@@ -1476,6 +1483,11 @@ const boarding = {
   brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
   brdFor: { studies: 'pour vos études', fun: 'pour le plaisir', trip: 'pour votre voyage', live: 'pour votre vie au Japon', friends: 'pour vos amis', other: 'pour vous' },
   brdBulletFigures: (words, kanji) => `~${words} mots et ~${kanji} kanji`,
+  // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
+  // attend derrière. Pas de compte de mots, et aucune promesse de
+  // motif — trois semaines de signes ne font pas un drama sans pause.
+  brdBulletKana: 'Les deux écritures kana, lues à vue',
+  brdBulletThenLine: 'Puis toute la ligne, arrêt par arrêt',
   // Deux promesses par motif (la note « boarding » de la maquette).
   brdPromise: {
     studies: ['Vos supports de cours', 'Les termes clés d’un cours'],
@@ -1487,6 +1499,7 @@ const boarding = {
   },
   brdOnTrack: (level) => `En route vers le JLPT ${level}`,
   brdOnTrackLine: 'En route sur toute la ligne',
+  brdOnTrackKana: 'En route vers les kana',
   brdPassQ: (name) => `Votre carte est prête, **${name}**.`,
   brdEnjoy: 'Bon voyage.',
   brdCreditsGift: (n) => `+${n} crédits offerts`,

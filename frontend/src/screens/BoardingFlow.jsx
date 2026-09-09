@@ -8,8 +8,8 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  RECOMMENDED_RHYTHM, bucketFor, itemsForRhythm, jlptFor, levelForKana,
-  minutesToTime, planFigures, stopsAhead, timeToMinutes,
+  RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor, jlptGoal,
+  levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import NameStep from '../components/boarding/NameStep'
@@ -240,10 +240,18 @@ export default function BoardingFlow({
   // The learner's own CHOICE decides the goal list; the office stores
   // the JLPT level it maps to. The two differ for exactly one answer —
   // the novice, who is stored at N5 but has not passed it, so N5 is the
-  // first stop AHEAD of them rather than the one behind.
-  function afterLevel(choice) {
-    const ahead = stopsAhead(choice)
-    set({ levelChoice: choice, jlpt: jlptFor(choice), goal: ahead[0] ?? null })
+  // first stop AHEAD of them rather than the one behind. The kana
+  // answer decides one more thing: a learner who cannot read both
+  // scripts has not reached the novice's stop either, so it heads
+  // their list as a destination they can take (goalStops).
+  //
+  // The default stays the nearest JLPT stop it has always been. The
+  // novice's stop is an offer, not a preselection: taking it signs a
+  // pace and no destination (jlptGoal), which is the learner's call to
+  // make rather than the flow's to make for them.
+  function afterLevel(choice, kana) {
+    const ahead = goalStops(choice, kana)
+    set({ levelChoice: choice, jlpt: jlptFor(choice), goal: ahead.find(stop => jlptGoal(stop)) ?? null })
     return ahead.length > 0 ? 'goal' : 'rhythm'
   }
 
@@ -251,7 +259,7 @@ export default function BoardingFlow({
     const choice = levelForKana(kana)
     if (choice) {
       set({ kana })
-      afterLevel(choice)
+      afterLevel(choice, kana)
       go('reveal')
     } else {
       set({ kana })
@@ -260,11 +268,11 @@ export default function BoardingFlow({
   }
 
   function continueReveal() {
-    go(afterLevel(answers.levelChoice ?? 'novice'))
+    go(afterLevel(answers.levelChoice ?? 'novice', answers.kana))
   }
 
   function continueLevel() {
-    go(afterLevel(answers.levelChoice))
+    go(afterLevel(answers.levelChoice, answers.kana))
   }
 
   function continueTime() {
@@ -283,6 +291,13 @@ export default function BoardingFlow({
   // stored at N5 and must not be printed as one — they are boarding
   // before that stop, not at it.
   const levelLabel = answers.levelChoice === 'novice' ? t.brdNovice : jlpt
+  // The ride, as the building screen prints it. The novice's stop taken
+  // as a GOAL is where the ride ENDS -- the learner is short of it, not
+  // standing on it -- so the destination stands alone rather than
+  // joining "Novice → Novice".
+  const goalLine = answers.goal === 'novice'
+    ? t.brdNovice
+    : answers.goal ? `${levelLabel} → ${answers.goal}` : levelLabel
   const perDay = itemsForRhythm(answers.rhythm)
   const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now)
   const time = minutesToTime(answers.minute)
@@ -293,11 +308,16 @@ export default function BoardingFlow({
     setBusy(true)
     setSaveError(false)
     const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date())
+    // The office signs JLPT destinations only: a ride to the novice's
+    // own stop is the kana, which wears no code, so it boards on a pace
+    // and no goal — the contract's own "just ride" (domain/boarding.js
+    // jlptGoal, routes/onboarding.py CompletePayload).
+    const goalLevel = jlptGoal(answers.goal)
     const body = {
       jlptLevel: jlpt,
       dailyNewTarget: perDay,
-      ...(answers.goal ? { goalLevel: answers.goal } : {}),
-      ...(answers.goal && volumes ? { goalTargetDate: fresh.date.toISOString().slice(0, 10) } : {}),
+      ...(goalLevel ? { goalLevel } : {}),
+      ...(goalLevel && volumes ? { goalTargetDate: fresh.date.toISOString().slice(0, 10) } : {}),
       dailyDeparture: bucketFor(answers.minute),
       motive: answers.motive,
       kanaKnown: answers.kana,
@@ -355,7 +375,7 @@ export default function BoardingFlow({
       case 'level':
         return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
       case 'goal':
-        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('rhythm')} />
+        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} kana={answers.kana} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('rhythm')} />
       case 'rhythm':
         return <RhythmStep value={answers.rhythm} onChange={v => set({ rhythm: v })} onContinue={() => go('time')} />
       case 'time':
@@ -378,7 +398,7 @@ export default function BoardingFlow({
             name={displayName}
             onDone={buildingDone}
             steps={[
-              { key: 'goal', label: t.brdBuildGoal, value: answers.goal ? `${levelLabel} → ${answers.goal}` : levelLabel },
+              { key: 'goal', label: t.brdBuildGoal, value: goalLine },
               { key: 'lines', label: t.brdBuildLines, value: t.brdFourLines },
               { key: 'ride', label: t.brdBuildRide, value: `${answers.rhythm} min · ${time}` },
               {
