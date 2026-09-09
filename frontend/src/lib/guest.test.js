@@ -95,7 +95,22 @@ describe('claiming the pass', () => {
   it('reports the address already in use rather than swallowing it', async () => {
     auth.updateUser.mockResolvedValue({ data: {}, error: { message: 'already registered' } })
     expect(await claimAccount({ email: 'a@b.co', password: 'hunter22' }))
-      .toEqual({ ok: false, message: 'already registered' })
+      .toEqual({ ok: false, code: undefined, message: 'already registered' })
+  })
+
+  // The message is a developer's English, and on this call it can name
+  // the wrong field entirely: for a guest — who has no current address
+  // — Supabase quotes the address it was about to MAIL, which is the
+  // empty one, and refuses `patou@gmail.com` as `""`. The code is the
+  // only part of the refusal that stays true, so it is what comes out
+  // of here (lib/authErrors.js turns it into a sentence).
+  it('carries the code out, not just the sentence', async () => {
+    auth.updateUser.mockResolvedValue({
+      data: {},
+      error: { code: 'email_address_invalid', message: 'Email address "" is invalid' },
+    })
+    expect(await claimAccount({ email: 'patou@gmail.com', password: 'hunter22' }))
+      .toEqual({ ok: false, code: 'email_address_invalid', message: 'Email address "" is invalid' })
   })
 
   it('sends exactly the credentials it was given', async () => {

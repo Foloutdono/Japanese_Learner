@@ -67,11 +67,39 @@ export async function startGuest() {
  * learner follows the emailed link. `needsConfirmation` says which
  * happened so the caller can print the right sentence instead of
  * promising more than took effect.
+ *
+ * ── The second project setting, and the sentence it produces ──────
+ * "Confirm email" (Authentication → Providers → Email) is not merely
+ * the difference between two success messages here: with it ON, this
+ * call can refuse a guest outright, and refuse them in words that
+ * blame the address they just typed. Supabase's own code, for a user
+ * who is still anonymous:
+ *
+ *   api/user.go   an anonymous user gets the auto-confirm shortcut
+ *                 ONLY when Mailer.Autoconfirm is set — which is
+ *                 "Confirm email" being OFF. Otherwise the update
+ *                 takes the ordinary email-CHANGE road.
+ *   api/mail.go   sendEmailChange() calls sendEmail() without a
+ *                 recipient, so it falls back to the user's CURRENT
+ *                 address … which a guest does not have.
+ *                 Any failure on that road is then reported as
+ *                 `Email address %q is invalid` with that empty
+ *                 field quoted, i.e.
+ *
+ *                     Email address "" is invalid
+ *
+ * So the message names nothing the learner wrote and nothing they can
+ * fix. `code` is carried out of here for exactly that reason:
+ * lib/authErrors.js turns `email_address_invalid` into a sentence
+ * that points at the routes which still work, rather than repeating
+ * a quoted blank back at someone with their address on screen.
  */
 export async function claimAccount({ email, password }) {
   try {
     const { data, error } = await supabase.auth.updateUser({ email, password })
-    if (error) return { ok: false, message: error.message }
+    // `code` is the part worth having: the message is English-only and
+    // sometimes describes the wrong field (see above).
+    if (error) return { ok: false, code: error.code, message: error.message }
     // A confirmed address arrives on the user straight away; a pending
     // one sits in new_email until the link is followed.
     const confirmed = !!data?.user?.email && data.user.email === email

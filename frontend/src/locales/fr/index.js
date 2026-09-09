@@ -1403,6 +1403,16 @@ const boarding = {
   oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
   oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
+  // 本乗車券 — mettre une adresse sur la carte (lib/guest.js). Même
+  // règle que les deux au-dessus : nommer ce qui s'est passé, et
+  // nommer la voie qui reste ouverte. Les phrases de Supabase sont
+  // celles d'un développeur, et sur cette demande l'une d'elles cite
+  // une adresse vide au lieu de celle du champ — voir
+  // lib/authErrors.js.
+  claimEmailTaken: 'Cette adresse a déjà une carte. Connectez-vous avec elle.',
+  claimEmailUnreachable: 'La confirmation n\u2019a pas pu être envoyée à cette adresse. Essayez-en une autre, ou gardez votre progression avec Google.',
+  claimWeakPassword: 'Ce mot de passe est trop facile à deviner. Essayez-en un plus long.',
+  claimTooSoon: 'Trop de tentatives pour le moment. Attendez une minute et réessayez.',
   // Dernier arrêt : le compte, proposé une fois tout vu — et
   // refusable. « Garder » plutôt que « créer » : la progression
   // existe déjà, on ne fait qu'y mettre une clé (lib/guest.js).
