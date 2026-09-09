@@ -13448,6 +13448,63 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     flex-direction: column;
     justify-content: center;
   }
+  /* ── The practice runs' card is the stage too ──
+     Reading, Translation and Comprehension hand their page straight to
+     the stage: no CardTransition, so no .quiz-card-stage for the chain
+     above to reach through, and the card kept its content's height with
+     the rest of the screen empty under it — 419px of nothing between
+     the reading feedback's card and the rating bar on an 844px phone,
+     measured. The stage's rule is the same here: the card grows into
+     whatever the docked instrument leaves.
+
+     `flex: 1 0 auto`, and the 60vh clamp off with it, for the reason
+     .prompt-card--footed .prompt-card__body records — grow into spare
+     height, never shrink. The clamp turned the card into an inner
+     scroll area the moment the breakdown opened: the word carousel was
+     cut in half and the card's own foot strip scrolled away inside it,
+     under 200px of empty stage. The page's own scroll, behind the
+     docked foot, is what this edge already does for every other run. */
+  .stage > .prompt-card--footed {
+    flex: 1 0 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  /* The block padding steps up to the card rung with it: 16px was the
+     page's own margin at content height, and on a card that is now the
+     whole screen it reads as text pinned to the edge. The inline rung
+     stays — 390px is short of measure already, and widening that
+     gutter buys air by taking the line. */
+  .stage > .prompt-card--footed > .prompt-card__body--prose {
+    padding-block: var(--sp-7);
+  }
+  /* And the room the card grew by is air around the page, not a hole
+     under it. A reading feedback is five registers and about 280px of
+     them; the card is now near 700, and top-aligning that reads as
+     text pinned to the ceiling of an empty box — the same dead space
+     the growth was meant to spend, moved inside the border.
+
+     Grow-only spacers, never `justify-content: center`, for the reason
+     .brd__body--center records: a centred column that outgrows its box
+     spills off BOTH ends and no scroll reaches back over the top. This
+     pair vanishes the moment the page needs the room — the breakdown
+     open, a long passage — leaving the page top-down and the overflow
+     all at the bottom, where the scroll can follow it.
+
+     `::before`/`::after` rather than markup: a pseudo-element can only
+     be a flex item at the two ends of a box, and these belong at
+     exactly those ends. Each cancels the one column gap it stands
+     behind, so a spent spacer leaves nothing at all rather than 8px. */
+  .stage > .prompt-card--footed > .prompt-card__body--prose::before,
+  .stage > .prompt-card--footed > .prompt-card__body--prose::after {
+    content: "";
+    flex: 1 0 0;
+  }
+  .stage > .prompt-card--footed > .prompt-card__body--prose::before {
+    margin-bottom: calc(-1 * var(--sp-3));
+  }
+  .stage > .prompt-card--footed > .prompt-card__body--prose::after {
+    margin-top: calc(-1 * var(--sp-3));
+  }
   /* The dock: sumi, edge to edge, and straight onto the HUD below it,
      so the two are one console at the bottom of the screen. The
      instrument inside it goes transparent and keeps only its hairline;
