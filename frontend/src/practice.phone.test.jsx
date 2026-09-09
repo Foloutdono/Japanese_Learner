@@ -49,7 +49,7 @@ describe('the practice sessions at phone width', () => {
     const screen = await render(
       <main className="container stage" style={{ '--line-color': 'var(--line-reading)' }}>
         <form className="stage__foot">
-          <input className="field" placeholder="romaji" />
+          <input className="field field--page" placeholder="romaji" />
           <button type="button" className="btn-primary">Submit</button>
         </form>
       </main>
@@ -61,7 +61,9 @@ describe('the practice sessions at phone width', () => {
     // The whole point: this field sits ON the page, so a well painted in
     // the page's own ground is no field at all — which is exactly what
     // it was, in both themes and at every width. Whatever the well is,
-    // it must not be the thing behind it.
+    // it must not be the thing behind it. fields.browser.test.jsx holds
+    // that for every mount in the app; this is the run's own copy, at
+    // the width the entry was drawn for.
     const paint = (c) => { const d = document.createElement('div'); d.style.color = c; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v }
     expect(style.backgroundColor).not.toBe(paint(page))
 

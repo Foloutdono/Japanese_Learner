@@ -374,7 +374,7 @@ function SessionView({
               onChange={e => setAnswer(e.target.value)}
               placeholder={t.japanesePlaceholder}
               aria-label={t.japanesePlaceholder}
-              className="field"
+              className="field field--page"
               lang="ja"
               /* The same rule as reading's romaji entry: nothing may
                  rewrite the answer on its way in. Here the field is fed

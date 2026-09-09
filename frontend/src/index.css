@@ -4113,6 +4113,33 @@ textarea:focus-visible {
   --field-edge: var(--accent2);
 }
 
+/* The third ground: the PAGE. The base well is --bg-main, which is the
+   page's own -- so a field mounted on anything raised reads as a step
+   down through it, and a field mounted on the page painted --bg-main
+   onto --bg-main and there was no field at all. A line of placeholder
+   text, no box, both themes, every width. Nothing was wrong with the
+   colours, which is why no guard could see it: they were simply the
+   same one twice.
+
+   The well works by being ONE STEP away from what surrounds it. On
+   something raised that step is down, to the page showing through; on
+   the page there is nothing below to show, so it is up, to the app's
+   own raised surface. Same object, same filled-well idiom the
+   specimens chose -- not a box drawn on the page, which is the
+   specimen that idiom beat, and not a resting hairline, which is how
+   .textarea and .brd-field each dodged this one field at a time.
+
+   Seven mounts, found by measuring every call site's real ancestors
+   against its own well (both themes): the two runs' entries, the
+   account page's claim fields, the import dialog's paste box and its
+   custom separator, the browse dialog's search, the analyzer's rail
+   head and its video URL. A field on a card, a sheet, a form, a
+   console or a notice keeps the base well and must NOT take this --
+   --surface on --surface is the same defect written the other way. */
+.field--page {
+  --field-well: var(--surface);
+}
+
 /* A field that sits INSIDE something which already draws the box -- the
    console's search line, the analyzer's writing slip. Giving those a well
    too would be a box inside a box, so the variant drops the ground, the
@@ -8443,34 +8470,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* ── The run's entry ──
    The other instrument this foot docks: the field a session is
    answered into (reading's romaji, translation's Japanese), with the
-   one filled action under it.
+   one filled action under it. It sits on the page — the stage's
+   ground, and the docked foot's own (see .stage > .stage__foot in the
+   phone query) — so the field itself carries .field--page, with the
+   rest of that story on the variant.
 
-   It sits on the PAGE — the stage's ground, and the docked foot's own
-   (see .stage > .stage__foot in the phone query). .field's well IS the
-   page's ground, so here it painted --bg-main on --bg-main and the
-   entry was a line of placeholder text with no box around it at all:
-   the one place on a run where the learner is asked to do something
-   was the only object on the screen with no edges. Both themes, every
-   width, and invisible to the guards because nothing was wrong with
-   the colours — they were simply the same one twice.
-
-   The well works by being ONE STEP away from what surrounds it. On a
-   card that step is down, to the page showing through; on the page
-   there is nothing below to show, so it is up, to the app's own raised
-   surface. Same object, same filled-well idiom the specimens chose,
-   the one direction the stack leaves — not a box drawn on the page,
-   which is the specimen that idiom beat.
-
-   The rung is the answer register: --fs-lead is what .quiz-input
-   already writes an answer at, and what the learner types here is
-   their own work rather than a search string. On a phone the field's
-   own floor (the 1rem in .field's ≤768px block, at a weight no class
-   rule reaches) takes it first, which is the ruling there and still
-   above the base this would otherwise sit at. Left-flush, not centred
-   with the card above it — a caret that walks back to the middle after
-   every keystroke is a worse instrument than a still one. */
+   What is the RUN's, and so lives here, is the rung: --fs-lead is the
+   answer register, the one .quiz-input already writes an answer at,
+   and what the learner types here is their own work rather than a
+   search string. On a phone the field's own floor (the 1rem in
+   .field's ≤768px block, at a weight no class rule reaches) takes it
+   first, which is the ruling there and still above the base this
+   would otherwise sit at. Left-flush, not centred with the card above
+   it — a caret that walks back to the middle after every keystroke is
+   a worse instrument than a still one. */
 .stage__foot .field {
-  --field-well: var(--surface);
   font-size: var(--fs-lead);
 }
 

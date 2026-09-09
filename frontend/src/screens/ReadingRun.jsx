@@ -497,7 +497,7 @@ function SessionView({
               onChange={e => setAnswer(e.target.value)}
               placeholder={t.romajiPlaceholder}
               aria-label={t.writeWhatYouSaw}
-              className="field"
+              className="field field--page"
               autoComplete="off"
               autoCorrect="off"
               autoCapitalize="off"

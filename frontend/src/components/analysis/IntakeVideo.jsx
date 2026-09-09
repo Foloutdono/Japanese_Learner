@@ -87,7 +87,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
         <span className="anl-window__label">{t.videoUrlOptional}</span>
         <input
           type="text"
-          className="field anl-field"
+          className="field field--page anl-field"
           value={url}
           onChange={e => onUrlChange(e.target.value)}
           placeholder="https://youtu.be/…"

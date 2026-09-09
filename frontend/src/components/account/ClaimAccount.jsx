@@ -8,14 +8,19 @@ import { useLang } from '../../LangContext'
 //
 // `variant` picks the host's own field object rather than dropping one
 // screen's into another's room. `.field` is drawn to sit in a surface
-// (its well is --bg-main, its border transparent), so on the
-// boarding's bare --bg-main page it would be an invisible box with
-// floating placeholder text; `.brd-field` is the object that page
-// already uses for the name, and it dims its border while empty the
-// same way NameStep's does. The messages are the same either way:
+// (its well is --bg-main, its border transparent), so on a bare
+// --bg-main page it would be an invisible box with floating
+// placeholder text. Two answers, and which one is right is the host's
+// to say: the boarding takes `.brd-field`, the object that page
+// already uses for the name, which dims its border while empty the
+// same way NameStep's does; the settings page takes `.field--page`,
+// which is the same field with its well stepped up to the surface —
+// this variant is mounted on `.settings`, which paints nothing, so
+// without it the claim's two fields were the invisible box the
+// paragraph above describes. The messages are the same either way:
 // `.auth-message` carries no assumption about what it stands on.
 const FIELDS = {
-  auth: () => 'field',
+  auth: () => 'field field--page',
   board: value => `brd-field${value ? '' : ' brd-field--empty'}`,
 }
 

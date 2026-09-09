@@ -982,7 +982,7 @@ export default function AnalyzerScreen({ session }) {
               <div className="anl-railhead">
                 <input
                   type="search"
-                  className="field anl-railhead__search"
+                  className="field field--page anl-railhead__search"
                   value={stopQuery}
                   onChange={e => setStopQuery(e.target.value)}
                   placeholder={t.searchPassage}
