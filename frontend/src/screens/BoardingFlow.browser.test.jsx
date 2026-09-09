@@ -374,12 +374,12 @@ describe('BoardingFlow', () => {
   })
 
   // ── The kana as a destination ──
-  // The novice's stop is one a beginner can ride TO. The office has no
-  // code for it — it is short of N5 — so the contract signs a pace and
-  // no destination, and the plan promises signs rather than the word
-  // count and the motive's two lines, which three weeks of kana could
-  // not honour.
-  it('takes the novice’s own stop as the goal: the plan promises the kana, the contract no destination', async () => {
+  // The novice's stop is one a beginner can ride TO, and the office
+  // signs it like any other: it goes onto the pass as goalLevel
+  // 'novice' with a date, priced at the syllabary. The plan promises
+  // signs rather than the word count and the motive's two lines, which
+  // three weeks of kana could not honour.
+  it('takes the novice’s own stop as the goal: the plan promises the kana, the office signs it', async () => {
     const { screen } = await renderFlow()
     await passName(screen, 'trip')
     await click(screen, '[data-kana="none"]')
@@ -422,8 +422,8 @@ describe('BoardingFlow', () => {
     const body = JSON.parse(apiJsonWithTimeout.mock.calls[0][2].body)
     expect(body.jlptLevel).toBe('N5')
     expect(body.kanaKnown).toBe('none')
-    expect(body).not.toHaveProperty('goalLevel')
-    expect(body).not.toHaveProperty('goalTargetDate')
+    expect(body.goalLevel).toBe('novice')
+    expect(body.goalTargetDate).toMatch(/^\d{4}-\d{2}-\d{2}$/)
   })
 
   // ── The welcome, counted onto the pass ──

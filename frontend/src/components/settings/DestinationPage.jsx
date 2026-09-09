@@ -4,13 +4,17 @@ import { apiJson } from '../../lib/api'
 import { playClick, playUi } from '../../lib/audio'
 import { refreshSummary, useProfileSummary } from '../../stores/profileSummary'
 import { useJourneyStatus, useVolumes, refreshJourney } from '../../stores/journey'
-import { journeyLevels, journeyModel } from '../../domain/goalMath'
+import { NOVICE_GOAL, journeyLevels, journeyModel } from '../../domain/goalMath'
 import { goalDerived } from '../onboarding/goalDerived'
 import { DEFAULT_PER_DAY, PACES } from '../onboarding/paces'
 import { DEPARTURES, DEPART_TIMES } from '../onboarding/departures'
 import { SettingsPage, Slip } from './SettingsPage'
 
 const iso = d => d.toISOString().slice(0, 10)
+
+// The first JLPT stop: the only boarding level the kana stop is still
+// ahead of (routes/journey.py refuses it from any other).
+const FIRST_STOP = 'N5'
 
 // ── Destination (canvas SettingsDestination, plan 074) ────────
 // The office signs the first contract at the boarding; this signs every
@@ -46,7 +50,14 @@ export function DestinationPage() {
   const [done, setDone] = useState(null) // 'issued' | 'dropped' | null
 
   const startLevel = summary?.jlptLevel ?? null
-  const options = startLevel ? journeyLevels(startLevel).slice(1) : []
+  // 行先 — the stops ahead. The kana stop rides at the head of the list
+  // for a learner still short of the syllabaries: the counter issues it
+  // like any other destination (routes/journey.py), and only from the
+  // first JLPT stop, since nobody standing above N5 is still on them.
+  const kanaAhead = startLevel === FIRST_STOP && summary?.kanaKnown !== 'both'
+  const options = startLevel
+    ? [...(kanaAhead ? [NOVICE_GOAL] : []), ...journeyLevels(startLevel).slice(1)]
+    : []
   const terminus = !!startLevel && options.length === 0
   const printedDest = status?.goalLevel ?? null
   const printedPace = status?.plannedPerDay ?? null
@@ -117,9 +128,10 @@ export function DestinationPage() {
               disabled={busy}
               className={`dest${chosenDest === level ? ' dest--on' : ''}`}
               onClick={() => { playClick(); setDest(level) }}
+              data-dest={level}
             >
-              <span className="dest__code">{level}</span>
-              <span className="dest__load">{t.levelName[level]}</span>
+              <span className="dest__code">{level === NOVICE_GOAL ? '—' : level}</span>
+              <span className="dest__load">{level === NOVICE_GOAL ? t.brdNovice : t.levelName[level]}</span>
             </button>
           ))}
         </div>

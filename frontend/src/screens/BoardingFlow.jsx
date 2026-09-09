@@ -8,7 +8,7 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor, jlptGoal,
+  RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor,
   levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
@@ -246,12 +246,17 @@ export default function BoardingFlow({
   // their list as a destination they can take (goalStops).
   //
   // The default stays the nearest JLPT stop it has always been. The
-  // novice's stop is an offer, not a preselection: taking it signs a
-  // pace and no destination (jlptGoal), which is the learner's call to
-  // make rather than the flow's to make for them.
+  // novice's stop is an offer rather than a preselection: it is a real
+  // destination (the office signs it, the pass measures it in kana),
+  // but which one to ride to is the learner's call to make rather than
+  // the flow's to make for them.
   function afterLevel(choice, kana) {
     const ahead = goalStops(choice, kana)
-    set({ levelChoice: choice, jlpt: jlptFor(choice), goal: ahead.find(stop => jlptGoal(stop)) ?? null })
+    set({
+      levelChoice: choice,
+      jlpt: jlptFor(choice),
+      goal: ahead.find(stop => stop !== 'novice') ?? null,
+    })
     return ahead.length > 0 ? 'goal' : 'rhythm'
   }
 
@@ -308,16 +313,14 @@ export default function BoardingFlow({
     setBusy(true)
     setSaveError(false)
     const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date())
-    // The office signs JLPT destinations only: a ride to the novice's
-    // own stop is the kana, which wears no code, so it boards on a pace
-    // and no goal — the contract's own "just ride" (domain/boarding.js
-    // jlptGoal, routes/onboarding.py CompletePayload).
-    const goalLevel = jlptGoal(answers.goal)
     const body = {
       jlptLevel: jlpt,
       dailyNewTarget: perDay,
-      ...(goalLevel ? { goalLevel } : {}),
-      ...(goalLevel && volumes ? { goalTargetDate: fresh.date.toISOString().slice(0, 10) } : {}),
+      // The novice's stop rides in this field like any JLPT one: the
+      // office stores it (routes/onboarding.py GOAL_LEVELS), and the
+      // pass then measures the promise in kana.
+      ...(answers.goal ? { goalLevel: answers.goal } : {}),
+      ...(answers.goal && volumes ? { goalTargetDate: fresh.date.toISOString().slice(0, 10) } : {}),
       dailyDeparture: bucketFor(answers.minute),
       motive: answers.motive,
       kanaKnown: answers.kana,

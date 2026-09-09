@@ -5,6 +5,7 @@ import {
   arrivalsFor,
   callingAt,
   journeyIncludesKana,
+  NOVICE_GOAL,
   journeyItems,
   journeyLevels,
   journeyModel,
@@ -37,6 +38,14 @@ describe('journeyLevels / journeyItems', () => {
 
   it('runs to the terminus when there is no destination', () => {
     expect(journeyLevels('N2')).toEqual(['N2', 'N1'])
+  })
+
+  // 手前の駅 — the kana stop: a destination that is not a level, so a
+  // ride to it covers none. routes/journey.py's _journey_levels answers
+  // the same [], and its itemsTotal is then the syllabary alone.
+  it('covers no level on a ride to the kana stop, and prices the syllabary', () => {
+    expect(journeyLevels('N5', NOVICE_GOAL)).toEqual([])
+    expect(journeyItems(VOLUMES, 'N5', NOVICE_GOAL)).toBe(224)
   })
 
   it('prices the journey with kana exactly when the line starts at N5', () => {

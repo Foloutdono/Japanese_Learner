@@ -68,6 +68,10 @@ const PROFILE = {
   // Served, so the grade cards are deterministic here rather than
   // reading whatever this browser's localStorage mirror happens to hold.
   ratingScale: 'simple',
+  // This learner reads both syllabaries, so the kana stop is behind
+  // them and the counter offers the JLPT stops alone (the case where it
+  // is still ahead has its own test below).
+  kanaKnown: 'both',
 }
 
 // Shapes, not the real content volumes — the page only needs numbers
@@ -355,6 +359,34 @@ describe('SettingsScreen — Destination', () => {
     // The pace travels with the contract: a date nobody can ride to is
     // not a promise.
     expect(body.dailyNewTarget).toBe(10)
+  })
+
+  // 手前の駅 — the kana as a destination, for a learner still short of
+  // the syllabaries. The counter issues it like any other stop; the
+  // office refuses it from any level above the first (routes/journey.py).
+  it('offers the kana stop to a learner who cannot read both scripts, and issues it', async () => {
+    profile = { ...PROFILE, kanaKnown: 'none' }
+    await refreshSummary()
+    const screen = await mount('/profile/settings/destination')
+    await settle()
+    const root = screen.container
+    const chips = [...root.querySelectorAll('.dest')]
+    expect(chips.map(c => c.querySelector('.dest__code').textContent)).toEqual(['—', 'N4', 'N3', 'N2', 'N1'])
+    expect(chips[0].querySelector('.dest__load').textContent).toBe(T.brdNovice)
+
+    chips[0].click()
+    await settle(30)
+    root.querySelector('[data-action="goal-reprint"]').click()
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/goal' && c[2]?.method === 'POST')
+    expect(call, 'the kana stop must be issuable like any other').toBeTruthy()
+    const body = JSON.parse(call[2].body)
+    expect(body.goalLevel).toBe('novice')
+    // Priced at the syllabary alone: 104 signs at 10 a day is a ride of
+    // days, not years, so the date is close rather than distant.
+    const days = (new Date(body.goalTargetDate) - Date.now()) / 86400000
+    expect(days).toBeGreaterThan(0)
+    expect(days).toBeLessThan(30)
   })
 
   it('opens on the contract already printed, and Hand it back returns it', async () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import {
-  approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor, jlptGoal,
+  approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
   kanaKnownCount, kanjiThrough, levelForKana, minuteAtFraction, minutesToTime, planFigures,
   stopsAhead, timeToMinutes,
 } from './boarding'
@@ -79,12 +79,6 @@ describe('the kana check and the level', () => {
     expect(goalStops('N4', 'both')).toEqual(['N3', 'N2', 'N1'])
     expect(goalStops('N1', 'both')).toEqual([])
   })
-  it('signs JLPT destinations only: the novice’s stop is a pace and no goal', () => {
-    expect(jlptGoal('N4')).toBe('N4')
-    expect(jlptGoal('N5')).toBe('N5')
-    expect(jlptGoal('novice')).toBeNull()
-    expect(jlptGoal(null)).toBeNull()
-  })
   it('counts the kanji through a stop from the volumes', () => {
     expect(kanjiThrough(VOLUMES, 'N5')).toBe(103)
     expect(kanjiThrough(VOLUMES, 'N4')).toBe(269)
@@ -117,18 +111,24 @@ describe('the plan', () => {
     expect(planFigures(VOLUMES, 'N3', 'N2', 10, 'none', now).items).toBe(1832 + 367 + 71 + 1796 + 367 + 71)
   })
   // No JLPT level lies behind the novice's stop, so a ride to it is the
-  // signs still unread and nothing else — the plan screen promises kana
-  // rather than a word count it cannot honour in three weeks.
-  it('prices a ride to the novice’s own stop as the kana still unread', () => {
+  // kana and nothing else — the plan screen promises signs rather than
+  // a word count it cannot honour in three weeks.
+  it('prices a ride to the novice’s own stop at the whole syllabary', () => {
     const now = new Date('2026-09-07T00:00:00Z')
-    const f = planFigures(VOLUMES, 'N5', 'novice', 10, 'hiragana', now)
+    const f = planFigures(VOLUMES, 'N5', 'novice', 10, 'none', now)
     expect(f.words).toBe(0)
     expect(f.kanji).toBe(0)
-    expect(f.kana).toBe(112)
-    expect(f.items).toBe(112)
-    expect(f.days).toBe(Math.ceil(112 / 10))
-    // Nothing read yet: every sign is on the ride.
-    expect(planFigures(VOLUMES, 'N5', 'novice', 10, 'none', now).items).toBe(224)
+    expect(f.kana).toBe(224)
+    expect(f.items).toBe(224)
+    expect(f.days).toBe(Math.ceil(224 / 10))
+    // That destination is the signs MASTERED, so it prices every one of
+    // them — a script already read included. routes/journey.py counts
+    // the same total on the pass, and a promise the pass cannot pay
+    // would read as late from the first morning.
+    expect(planFigures(VOLUMES, 'N5', 'novice', 10, 'hiragana', now).items).toBe(224)
+    // Every other ride still carries the front-load net of what the
+    // kana check marked known.
+    expect(planFigures(VOLUMES, 'N5', 'N4', 10, 'hiragana', now).kana).toBe(112)
   })
   it('survives missing volumes with a ride of nothing', () => {
     const f = planFigures(null, 'N5', 'N4', 10, 'both')

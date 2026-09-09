@@ -5,7 +5,7 @@
 // React, no network -- the same layering as domain/goalMath.js, whose
 // item counts and dates this reuses so the boarding and the office in
 // Settings never disagree by a rounding rule.
-import { addDays, journeyIncludesKana, journeyLevels } from './goalMath'
+import { NOVICE_GOAL, addDays, journeyIncludesKana, journeyLevels } from './goalMath'
 import { levelItems } from './journeyProjection'
 
 export const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -103,19 +103,14 @@ export function stopsAhead(level) {
  *  becomes a destination they can name rather than a stop the flow
  *  assumes behind them (owner's call). A reader of both scripts stands
  *  there already -- the level list is where they said so -- and rides
- *  on to the JLPT stops. */
+ *  on to the JLPT stops.
+ *
+ *  The office signs that stop like any other destination: it goes onto
+ *  the pass as goalLevel 'novice' with a date, and the ghost train
+ *  measures it in kana (backend core/user_level.py NOVICE_GOAL). */
 export function goalStops(choice, kanaAnswer) {
   const ahead = stopsAhead(choice)
-  return choice === 'novice' && kanaAnswer !== 'both' ? ['novice', ...ahead] : ahead
-}
-
-/** The destination the office can sign, from the stop the learner
- *  chose: the novice's is short of N5 and wears no JLPT code, so a
- *  ride to it stores a pace and no goal -- routes/onboarding.py takes
- *  goalLevel from LEVELS alone, and "just ride" is exactly the right
- *  contract for someone whose whole journey so far is the kana. */
-export function jlptGoal(goal) {
-  return LEVELS.includes(goal) ? goal : null
+  return choice === NOVICE_GOAL && kanaAnswer !== 'both' ? [NOVICE_GOAL, ...ahead] : ahead
 }
 
 /** ~n: the figure a promise wears, rounded to the nearest `to`. */
@@ -146,18 +141,24 @@ export function kanaKnownCount(volumes, kanaAnswer) {
  *   days, date       at `perDay` new items a day, from `now`
  *
  * A ride to the novice's own stop is the kana and nothing else: no
- * JLPT level lies behind that stop, so it promises signs rather than
- * words. Said out loud here -- journeyLevels answers the same by an
- * indexOf that happens to miss, which is not a rule anyone can read.
+ * JLPT level lies behind that stop (goalMath's journeyLevels answers
+ * none for it), so it promises signs rather than words.
  */
 export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new Date()) {
-  const levels = goal === 'novice' ? [] : journeyLevels(level, goal)
+  const levels = journeyLevels(level, goal)
   const words = levels.reduce((sum, lvl) => sum + (volumes?.vocab?.[lvl] ?? 0), 0)
   const kanji = levels.reduce((sum, lvl) => sum + (volumes?.kanji?.[lvl] ?? 0), 0)
-  // The kana ride in front of everything else, less the signs already
-  // read -- goalMath owns when it counts at all.
+  // The kana ride in front of everything else -- goalMath owns when it
+  // counts at all. A ride TO that stop prices EVERY sign, the ones the
+  // learner already reads included: the destination is the syllabaries
+  // mastered, a marked-known sign is still checked on the way, and
+  // routes/journey.py prices the pass at the same total -- a promise
+  // the pass cannot pay is worse than a slower one. Every other ride
+  // carries the front-load net of what the kana check marked known.
   const kana = journeyIncludesKana(level)
-    ? Math.max(0, (volumes?.kana ?? 0) - kanaKnownCount(volumes, kanaAnswer))
+    ? (goal === NOVICE_GOAL
+      ? (volumes?.kana ?? 0)
+      : Math.max(0, (volumes?.kana ?? 0) - kanaKnownCount(volumes, kanaAnswer)))
     : 0
   const items = levels.reduce((sum, lvl) => sum + levelItems(volumes ?? {}, lvl), 0) + kana
   const days = Math.max(1, Math.ceil(items / Math.max(1, perDay)))

@@ -1340,9 +1340,18 @@ class SRSEngine:
         raw = "split_part(card_id, ':', 2)"
         cat = f"split_part({raw}, '_', 1)"
         lvl = f"split_part({raw}, '_', 2)"
-        scope = f"({cat} = ANY(%s) AND {lvl} = ANY(%s))"
+        # A ride to the novice's stop covers no level at all -- the kana
+        # are the whole promise -- so the level clause is dropped rather
+        # than asked with an empty list (routes/journey.py's
+        # _journey_levels answers [] for that destination).
+        clauses: list[str] = []
+        scope_params: tuple = ()
+        if levels:
+            clauses.append(f"({cat} = ANY(%s) AND {lvl} = ANY(%s))")
+            scope_params = (["vocab", "kanji", "grammar"], list(levels))
         if include_kana:
-            scope += f" OR {cat} = 'kana'"
+            clauses.append(f"{cat} = 'kana'")
+        scope = " OR ".join(clauses) or "FALSE"
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 mode_sql, mode_params = self._servable_filter()
@@ -1366,7 +1375,8 @@ class SRSEngine:
                 params = (
                     (pattern,)
                     + mode_params
-                    + (["vocab", "kanji", "grammar"], list(levels), since, window_days - 1)
+                    + scope_params
+                    + (since, window_days - 1)
                 )
                 self._log_sql("get_journey_item_counts", sql, params)
                 cur.execute(sql, params)
