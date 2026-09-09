@@ -479,13 +479,18 @@ def get_decks(user_id: str = Depends(get_user_id)):
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT d.id, d.name, d.type, d.created_at,
-                       COUNT(DISTINCT c.id) AS custom_count,
-                       COUNT(DISTINCT dc.raw_id) AS app_count
+                       COALESCE(c.custom_count, 0) AS custom_count,
+                       COALESCE(dc.app_count, 0)   AS app_count
                 FROM decks d
-                LEFT JOIN custom_cards c  ON c.deck_id  = d.id
-                LEFT JOIN deck_cards   dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS custom_count
+                    FROM custom_cards GROUP BY deck_id
+                ) c  ON c.deck_id  = d.id
+                LEFT JOIN (
+                    SELECT deck_id, user_id, COUNT(*) AS app_count
+                    FROM deck_cards GROUP BY deck_id, user_id
+                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 WHERE d.user_id = %s
-                GROUP BY d.id
                 ORDER BY d.created_at DESC
             """, (user_id,))
             decks = [dict(row) for row in cur.fetchall()]
@@ -577,13 +582,18 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT d.id, d.name, d.type, d.created_at,
-                       COUNT(DISTINCT c.id) AS custom_count,
-                       COUNT(DISTINCT dc.raw_id) AS app_count
+                       COALESCE(c.custom_count, 0) AS custom_count,
+                       COALESCE(dc.app_count, 0)   AS app_count
                 FROM decks d
-                LEFT JOIN custom_cards c  ON c.deck_id  = d.id
-                LEFT JOIN deck_cards   dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS custom_count
+                    FROM custom_cards GROUP BY deck_id
+                ) c  ON c.deck_id  = d.id
+                LEFT JOIN (
+                    SELECT deck_id, user_id, COUNT(*) AS app_count
+                    FROM deck_cards GROUP BY deck_id, user_id
+                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
                 WHERE d.id = %s AND d.user_id = %s
-                GROUP BY d.id
             """, (deck_id, user_id))
             row = cur.fetchone()
             if not row:
