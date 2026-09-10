@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { track } from '../lib/track'
 
 // Once the queue drops to this many unreviewed cards, kick off a
 // background refill — small enough that a refill is rarely idle for
@@ -39,6 +40,19 @@ export function sessionKey(...parts) {
 
 /** The placeholder key used while a screen's selection is incomplete. */
 export const IDLE_KEY = 'idle'
+
+// 足跡 — which SORT of run this is, and nothing narrower.
+//
+// A storage key is `jp-session:v5:<kind>:<what>:<mode>`, and `<what>`
+// is a deck id or a theme slug -- content the learner named. So only
+// the kind is ever read out of it, against a closed list: a key shaped
+// unexpectedly answers 'other' rather than leaking the segment.
+const RUN_KINDS = new Set(['kana', 'vocab', 'kanji', 'grammar', 'today', 'deck'])
+
+function runKind(key) {
+  const kind = String(key).split(':')[2]
+  return RUN_KINDS.has(kind) ? kind : 'other'
+}
 
 // A cached entry has to be an array of card-shaped objects, and every
 // card has to belong to the mode we're about to render it in. Without
@@ -195,6 +209,47 @@ export function useCardSession({
 
   const activeKeyRef = useRef(storageKey)
 
+  // 足跡 — one run, from the first card to whatever ended it.
+  //
+  // Here rather than in the seven run screens because they all share
+  // this hook and none of them share anything else; a screen added
+  // later gets counted without its author having to know that counting
+  // is a thing that happens.
+  //
+  // `answered` is bumped in advance() below, which is the one call a
+  // screen makes per card. A run that unmounts with answers behind it
+  // and no `done` is an abandonment -- which is the number that
+  // matters, since a session nobody finishes is a mode nobody likes.
+  const runRef = useRef({ at: 0, answered: 0, done: false })
+
+  useEffect(() => {
+    if (storageKey === IDLE_KEY) return undefined
+    const run = { at: Date.now(), answered: 0, done: false }
+    runRef.current = run
+    const kind = runKind(storageKey)
+    track('run_start', { kind, mode })
+    return () => {
+      // Finished runs report themselves below; a run nobody answered a
+      // single card in is a screen someone glanced at, and screen_view
+      // already said so.
+      if (run.done || run.answered === 0) return
+      track('run_abandon', { kind, mode, done: run.answered })
+    }
+  }, [storageKey, mode])
+
+  useEffect(() => {
+    if (!done || storageKey === IDLE_KEY) return
+    const run = runRef.current
+    if (run.done) return
+    run.done = true
+    track('run_complete', {
+      kind: runKind(storageKey),
+      mode,
+      items: run.answered,
+      secs: Math.round((Date.now() - run.at) / 1000),
+    })
+  }, [done, storageKey, mode])
+
   const clearRetry = useCallback(() => {
     if (retryTimerRef.current) {
       clearTimeout(retryTimerRef.current)
@@ -323,6 +378,7 @@ export function useCardSession({
   // recorded (fire-and-forget, same as today) and the next card
   // should show. No fetch happens here; the card is already in hand.
   const advance = useCallback(() => {
+    runRef.current.answered += 1
     setQueue(q => {
       const next = q.slice(1)
       saveCache(storageKey, next)

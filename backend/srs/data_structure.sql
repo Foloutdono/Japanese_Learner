@@ -609,3 +609,43 @@ CREATE TABLE ocr_usage (
     count    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
+
+-- ── 足跡 — the trail of screens a learner walked ─────────────────────
+-- Owned by core/events.py, written by routes/events.py (a batch the
+-- client queues and flushes) and by core/credits.py (the fare gate's
+-- shadow-mode refusals, which used to reach stdout and nothing else).
+--
+-- Nothing a learner TYPED is ever in here. `props` carries enums,
+-- numbers and route PATTERNS -- never a path with a theme or deck name
+-- in it, never a dictation answer, never an analysed sentence. That is
+-- enforced by a closed name set and a per-name key allowlist in
+-- core/events.py, applied to whatever a browser posts rather than
+-- trusted to it. See docs/adr/0012.
+CREATE TABLE event_log (
+    id      BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    name    TEXT NOT NULL,
+    props   JSONB NOT NULL DEFAULT '{}'::jsonb,
+    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- (user_id, at) reads one learner's trail in order; (name, at) is what
+-- the weekly digest counts across everyone.
+CREATE INDEX idx_event_log_user_at ON event_log(user_id, at);
+CREATE INDEX idx_event_log_name_at ON event_log(name, at);
+
+-- The rolled-up half, on review_daily's model and for the same reason:
+-- screen_view is the volume driver and this database is shared with the
+-- review history. scripts/compact_events.py folds raw rows in here and
+-- then deletes them past thirty days, except the once-per-learner
+-- families (boarding, the fare gate) which a rollup cannot answer --
+-- "did the people who stopped at the level step ever come back" needs
+-- the rows, not the counts. Empty until that script is run, which is
+-- exactly today's behaviour.
+CREATE TABLE event_daily (
+    user_id TEXT NOT NULL,
+    day     DATE NOT NULL,
+    name    TEXT NOT NULL,
+    n       INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day, name)
+);

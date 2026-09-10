@@ -80,6 +80,15 @@ BY_AGE = [
      "a claim lock still standing a week after its last update is a dead run"),
     ("video_session_jobs", "updated_at", 7,
      "same, for transcript generation"),
+    # The outer bound only. compact_events.py is what actually keeps
+    # event_log small -- it folds rows into event_daily BEFORE deleting
+    # them, and spares the once-per-learner families. This cut is a year
+    # out and spares nothing, so it can only ever fire on rows that
+    # script has already rolled up, or on a database where it was never
+    # run. Same relationship prune_logs has always had with review_log,
+    # except that one is excluded outright because its rows ARE the XP.
+    ("event_log", "at", 365,
+     "足跡 past a year; scripts/compact_events.py is the real retention"),
 ]
 
 

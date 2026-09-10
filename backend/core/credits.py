@@ -345,6 +345,18 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                     raise OutOfCredits(have, next_refill_at(s["tz"], now).isoformat())
                 logger.info("credits: would have blocked user_id=%s balance=%d fare=%d ref=%s",
                             user_id, have, n, ref)
+                # ...and again where it can be counted. That log line
+                # goes to stdout, which on Render is not queryable and
+                # does not outlive the instance, so the one signal this
+                # whole shadow mode exists to produce -- who wants more
+                # than the free allowance gives -- was being thrown
+                # away. On `cur`, inside the transaction already open,
+                # so a fare and its refusal cannot disagree. `ref` is a
+                # card id and stays out of it: the question is how
+                # often and to whom, never which card.
+                from core import events
+                events.record(user_id, "fare_blocked",
+                              {"balance": have, "fare": n, "kind": "review"}, cur=cur)
             charge = min(n, have)
             if charge > 0:
                 _insert(cur, user_id, -charge, "review", ref)
@@ -397,26 +409,72 @@ def card_limit(user_id: str) -> int:
     return PASS_CARDS if entitlement(user_id) == "pass" else FREE_CARDS
 
 
+def _count(cur) -> int:
+    """The single number a COUNT query returned, whatever cursor ran it.
+
+    All three call sites in routes/decks.py hand these helpers a
+    RealDictCursor, on which `row[0]` raises KeyError instead of giving
+    the count. That was invisible for as long as the counts sat behind
+    `if not ENFORCE: return` -- they never ran. The first
+    CREDITS_ENFORCE=1 deploy would have met it on the first deck anyone
+    created, with a 500 where a 402 was meant.
+    """
+    row = cur.fetchone()
+    if row is None:
+        return 0
+    if isinstance(row, dict):
+        return int(next(iter(row.values())))
+    return int(row[0])
+
+
 def check_deck_limit(cur, user_id: str) -> None:
-    """Before INSERT INTO decks. A no-op until enforcement."""
-    if not ENFORCE:
-        return
+    """Before INSERT INTO decks. Refuses only under enforcement; in
+    shadow mode it still counts, and records the crossing."""
     limit = deck_limit(user_id)
     cur.execute("SELECT COUNT(*) FROM decks WHERE user_id = %s", (user_id,))
-    if cur.fetchone()[0] >= limit:
+    have = _count(cur)
+    if have < limit:
+        return
+    if ENFORCE:
         raise LimitReached("decks", limit)
+    _shadow_limit(cur, user_id, "decks", limit, have == limit)
+
+
+def _shadow_limit(cur, user_id: str, kind: str, limit: int, crossing: bool) -> None:
+    """Record a limit a free learner has just walked past, once.
+
+    Only on the crossing -- the deck that would have been the first one
+    refused -- because after it every further add is also past the limit
+    and would say the same thing again. One row per learner per limit is
+    the shape the question wants ("how many people want more than seven
+    decks"), and the alternative is a learner with three hundred cards
+    writing a hundred identical rows.
+
+    The count above used to sit behind `if not ENFORCE: return`, so
+    shadow mode never even looked. That made the pass's own value
+    proposition the one thing the app could not measure.
+    """
+    if not crossing:
+        return
+    from core import events
+    events.record(user_id, "limit_reached", {"kind": kind, "at": limit}, cur=cur)
 
 
 def check_card_limit(cur, user_id: str, adding: int = 1) -> None:
     """Before a card lands in any of the learner's decks — hand-written
-    or browsed in. A no-op until enforcement."""
-    if not ENFORCE:
-        return
+    or browsed in. Refuses only under enforcement; in shadow mode it
+    still counts, and records the crossing."""
     limit = card_limit(user_id)
     cur.execute(
         "SELECT (SELECT COUNT(*) FROM custom_cards WHERE user_id = %s)"
         " + (SELECT COUNT(*) FROM deck_cards WHERE user_id = %s)",
         (user_id, user_id),
     )
-    if cur.fetchone()[0] + adding > limit:
+    have = _count(cur)
+    if have + adding <= limit:
+        return
+    if ENFORCE:
         raise LimitReached("cards", limit)
+    # The crossing is the batch that takes them past it, so a learner
+    # already over the line does not re-report on every card after.
+    _shadow_limit(cur, user_id, "cards", limit, have <= limit)

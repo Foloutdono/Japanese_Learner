@@ -79,11 +79,22 @@ jobs:
         run: |
           python -m scripts.prune_logs
           python -m scripts.compact_review_log
+          python -m scripts.compact_events
 
       - name: Prune the capped logs
         if: env.APPLY != ''
         working-directory: backend
         run: python -m scripts.prune_logs --yes
+
+      - name: Compact the trail
+        if: env.APPLY != ''
+        working-directory: backend
+        # Folds event_log into event_daily before deleting the rows, so
+        # every count the weekly digest reads is unchanged and only the
+        # row count falls. Boarding and fare-gate rows are spared: they
+        # are a handful per account and the questions they answer are
+        # about order, which a rollup cannot reconstruct.
+        run: python -m scripts.compact_events --yes
 
       - name: Compact the review log
         if: env.APPLY != ''

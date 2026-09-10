@@ -7,7 +7,7 @@ import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
-import { getTabs } from './config/tabs'
+import { getTabs, tabFor } from './config/tabs'
 import { Shell, StageFrame } from './components/chrome/Shell'
 import { NativeBridge } from './components/chrome/NativeBridge'
 import { identityFor } from './config/identity'
@@ -23,6 +23,8 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
+import { track } from './lib/track'
+import { routePattern } from './lib/routePattern'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
@@ -80,6 +82,34 @@ function DocumentHead() {
     const screen = identity?.title ?? section?.title ?? tab?.label
     document.title = screen ? `${screen} — ${t.appTitle}` : t.appTitle
   }, [pathname, t])
+
+  return null
+}
+
+// 足跡 — renders nothing; records which screen was opened.
+//
+// Beside <Routes/> for exactly the reason DocumentHead is: the
+// alternative is every screen remembering to report itself, and the six
+// that forgot the theme snippet are on record for how that goes.
+//
+// The PATTERN, never the pathname. `/learn/vocab/theme/animaux/...`
+// names a theme the learner picked and `/learn/decks/:deck_id` a deck
+// they named, and neither belongs in a row that outlives the session.
+// routePattern() reduces the path to the route App.jsx declared; a path
+// that matches nothing is not recorded at all, because an unrecognised
+// path is precisely where a guess would leak something.
+//
+// Exported only so App.trail.browser.test.jsx can mount it against a
+// real router; DocumentHead beside it needs no such thing because a
+// document title is observable and a recorded event is not.
+export function Trail() {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const route = routePattern(pathname)
+    if (!route) return
+    track('screen_view', { route, tab: tabFor(pathname) })
+  }, [pathname])
 
   return null
 }
@@ -214,14 +244,37 @@ export default function App() {
       method: 'PATCH',
       body: JSON.stringify({ tzOffsetMin: -new Date().getTimezoneOffset() }),
     }).catch(() => {})
+    // This request IS the boot wait a learner sits through, so it is
+    // also the honest measure of it. render.yaml's `plan: starter` was
+    // taken to move this number; without it there is no way to tell
+    // whether it did, or how many people leave before it lands.
+    const startedAt = Date.now()
     apiJsonWithTimeout('/api/profile', session, { timeoutMs: 45000 })
       .then(p => {
         if (cancelled) return
+        track('app_open', {
+          boot_ms: Date.now() - startedAt,
+          // Over five seconds is a sleeping instance waking, not a
+          // network hop. Kept as a flag as well as the raw figure so
+          // "what share of visits were cold" needs no threshold
+          // agreed after the fact.
+          cold: Date.now() - startedAt > 5000,
+          platform: import.meta.env.MODE === 'native' ? 'native' : 'web',
+          standalone: typeof window !== 'undefined'
+            && window.matchMedia?.('(display-mode: standalone)').matches === true,
+        })
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
       })
       // FAIL OPEN. A flaky network must never lock someone out of an
       // app they already use; the flow re-offers itself next launch.
-      .catch(() => { if (!cancelled) setGate({ userId, state: 'done', profile: null }) })
+      .catch(() => {
+        // The 45 s ceiling reached, or the network gave out. Either way
+        // the learner watched a loading screen and got nothing, which
+        // is the worst first impression the app can make -- and until
+        // now, the one it could not count.
+        track('boot_timeout', { waited_ms: Date.now() - startedAt })
+        if (!cancelled) setGate({ userId, state: 'done', profile: null })
+      })
     return () => { cancelled = true }
   }, [session])
 
@@ -434,6 +487,7 @@ export default function App() {
         </Routes>
 
         <DocumentHead />
+        <Trail />
         {/* 車両 — the shell's habits (plan 076): Android's back button
             and the daily nudge. Inside the router for the history and
             the profile; nothing on the web. */}
