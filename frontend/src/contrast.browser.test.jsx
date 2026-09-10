@@ -542,8 +542,10 @@ const Fixture = () => (
         sumi — the word, the gold figure, the cap and the refill. */}
     <div className="pass" style={{ background: 'var(--bg-panel)' }}>
       <div className="jour-line balance-line">
-        <span className="jour-line__status"><b className="bl-word">Balance</b></span>
-        <span className="jour-line__validity"><b className="bl-fig">30</b><span className="jour-cap bl-cap">/ 50 credits</span></span>
+        <span className="balance-line__reading">
+          <span className="jour-line__status"><b className="bl-word">Balance</b></span>
+          <span className="jour-line__validity"><b className="bl-fig">30</b><span className="jour-cap bl-cap">/ 50 credits</span></span>
+        </span>
         <span className="jour-cap balance-line__refill bl-refill">+30 at 00:00</span>
       </div>
     </div>

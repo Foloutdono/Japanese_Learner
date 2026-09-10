@@ -103,14 +103,19 @@ function PrintedBalance() {
   const gift = balance === SIGNUP_BONUS
   return (
     <div className="jour-line balance-line">
-      <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
-      <span className="jour-line__validity">
-        <b>{balance == null ? '∞' : shown}</b>
-        {balance != null && (
-          <span className="jour-cap">
-            {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
-          </span>
-        )}
+      {/* The word and the figure are one part — see BalanceLine, whose
+          composition this repeats. (The gift note is absolute, so it
+          takes no part in the line's division.) */}
+      <span className="balance-line__reading">
+        <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
+        <span className="jour-line__validity">
+          <b>{balance == null ? '∞' : shown}</b>
+          {balance != null && (
+            <span className="jour-cap">
+              {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
+            </span>
+          )}
+        </span>
       </span>
       {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, '00:00')}</span>}
       {gift && <span className="brd-gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}

@@ -23,14 +23,19 @@ export function BalanceLine() {
   const at = refillClock(credits?.refillAt, lang) ?? '00:00'
   return (
     <div className="jour-line balance-line">
-      <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
-      <span className="jour-line__validity">
-        <b>{balance == null ? '∞' : balance}</b>
-        {balance != null && (
-          <span className="jour-cap">
-            {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
-          </span>
-        )}
+      {/* The word and the figure are ONE part of the line, not two, so
+          that a footer too narrow for the whole thing breaks between
+          the balance and the refill — the only place it reads. */}
+      <span className="balance-line__reading">
+        <span className="jour-line__status"><b className="balance-line__word">{t.balanceLabel}</b></span>
+        <span className="jour-line__validity">
+          <b>{balance == null ? '∞' : balance}</b>
+          {balance != null && (
+            <span className="jour-cap">
+              {showsCap(balance, cap) ? `/ ${cap} ` : ''}{t.creditsUnit}
+            </span>
+          )}
+        </span>
       </span>
       {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, at)}</span>}
     </div>

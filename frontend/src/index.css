@@ -6099,8 +6099,9 @@ textarea:focus-visible {
   .pass__body { gap: 16px; }
   .pass__avatar-wrap { width: 64px; height: 64px; }
   .pass__avatar { font-size: 1.4rem; inset: 8px; }
-  /* A long username on a 390px card: a rung down, and allowed to break. */
-  .pass__holder .profile-card__name { font-size: var(--fs-title); min-width: 0; overflow-wrap: anywhere; }
+  /* A long username on a 390px card: a rung down. It no longer breaks —
+     it ellipsises (.profile-card__name), so the card keeps its height. */
+  .pass__holder .profile-card__name { font-size: var(--fs-title); }
 }
 
 /* ══ 番付 — the ranking board ═══════════════════════════════ */
@@ -11354,11 +11355,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .trouble__lapses-unit { font-size: 9px; margin-left: 1px; opacity: 0.7; }
 .trouble__go { flex-shrink: 0; color: var(--text-secondary); opacity: 0.45; }
+/* A pass prints its holder on ONE line, because that is what a pass
+   does: the field is a fixed slot, and a name too long for it is
+   shortened, not run onto a second row. USERNAME_RE caps a name at 20
+   characters, which still overruns the 360px card — wrapping there put
+   the pencil at the mid-height of a two-line block and grew the card
+   under it. The whole name is a tap away in the field. */
 .profile-card__name {
   font-family: 'Noto Serif JP', serif;
   font-weight: 700;
   font-size: 1.6rem;
   color: var(--text-primary);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* The name doubles as the edit trigger — a plain reset button styled
@@ -11375,12 +11386,26 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   align-items: center;
   gap: 8px;
   cursor: pointer;
+  /* A <button>'s UA default is centred text. Left unreset, a name that
+     took two lines set its second line down the middle of the pass,
+     which reads as a title rather than as a name. */
+  text-align: left;
+}
+/* The span the editable name is printed in — the element that gives way
+   when the slot is too short for it (see .profile-card__name). */
+.profile-card__name-text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .profile-card__edit-glyph {
   font-size: 0.85rem;
   color: var(--text-secondary);
   opacity: 0;
   transition: opacity 0.15s ease;
+  /* Never the item that gives way: the name shortens, the pencil stays. */
+  flex: none;
 }
 .profile-card__name--editable:hover .profile-card__edit-glyph { opacity: 1; }
 
@@ -11402,7 +11427,14 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 700;
   font-size: 1.3rem;
   min-width: 0;
-  width: 12ch;
+  /* It takes the room the two buttons leave, rather than a fixed 12ch:
+     at 12ch a 20-character name did not fit its own field — it sat
+     scrolled to the left — while the holder had room going spare, and
+     on a narrower card the 12ch floor pushed the cancel button onto a
+     second row. Growing from zero, the field absorbs every width the
+     pass can be and the row stays one row. */
+  flex: 1 1 0;
+  width: auto;
 }
 .profile-card__name-save,
 .profile-card__name-cancel {
@@ -11414,6 +11446,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   background: var(--bg-card);
   color: var(--text-primary);
   cursor: pointer;
+  /* Squared off against the field they sit beside: .field stands 44px
+     (a hit target), and at their own 28px the pair floated in the
+     middle of it. */
+  flex: none;
+  align-self: stretch;
 }
 .profile-card__name-save { border-color: var(--accent9); color: var(--accent9); }
 .profile-card__name-cancel { padding: 5px 9px; }
@@ -16928,7 +16965,40 @@ html { scrollbar-gutter: stable; }
 /* ── The pass's ring, and the balance on its footer ── */
 .pass__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 5; }
 .pass__ring-fill { fill: none; stroke: var(--accent2); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
-.balance-line__refill { margin-left: auto; letter-spacing: var(--tr-term); text-transform: none; }
+/* The footer wants to be one line — the word, the gold figure, and the
+   refill out at the right edge — and below ~350px it cannot be. It used
+   to push the refill over with `margin-left: auto`, which survives the
+   wrap: the refill dropped to a row of its own and stayed jammed against
+   the right edge, reading as debris rather than as the second half of a
+   sentence. `space-between` buys the same right edge on a full line and
+   gives it up on a wrapped one, where a lone item falls back to the
+   start — so the two rows align down the pass's left edge. It takes two
+   children to divide, which is what .balance-line__reading is for. */
+.balance-line { justify-content: space-between; }
+.balance-line__reading { display: flex; align-items: baseline; gap: var(--sp-5); min-width: 0; }
+/* A cap is small print, and here it never was. `.jour-cap` carries no
+   rule of its own — it is dressed by context, and the two selectors
+   that do it (.jour-line__status .jour-cap, .dest-line .jour-cap) both
+   miss this line. So the unit and the refill fell through to the
+   inherited body size: 15.2px at weight 400 in full pass ink, against
+   the 13.1px gold figure they belong to. The caption was bigger than
+   the number, and no alignment could make that read right — which is
+   why the refill looked wrong at the edge AND wrapped underneath.
+   This is .jour-line__status's own cap treatment, applied where it was
+   missing rather than invented: the pass already prints LEVEL and
+   COMMUTER PASS this way. Small print costs width too, so the line now
+   fits on one row well below the sizes that used to break it. */
+.balance-line .jour-cap {
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-on-panel-soft);
+}
+/* The refill is a sentence, not a label — it keeps the cap's size and
+   ink and drops the uppercase. Two classes deep to outrank the cap rule
+   above, which is where the size and the ink come from. */
+.balance-line .balance-line__refill { letter-spacing: var(--tr-term); text-transform: none; }
 
 /* ── The stamp book (canvas Profile) ──
    Five whole weeks, a stamp a day: inked in the eki stamp's lacquer,
