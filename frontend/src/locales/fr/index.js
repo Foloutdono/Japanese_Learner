@@ -750,6 +750,8 @@ const video = {
   videoDesc:           "Étudiez les sous-titres japonais d'une vidéo\nEn direct, colorés selon ce que vous savez déjà\nUne photo du monde avec une bande-son",
   videoUrlOptional:    'Lien de la vidéo',
   videoUrlOptionalHint: 'Affiche la vidéo à côté des sous-titres, ouvre la bonne page pour le favori et préremplit DownSub.',
+  // Affiché seulement là où le serveur sait récupérer un lien seul.
+  analyzeThisLink:     'Récupérer les sous-titres',
   grabTitle:           'Les sous-titres en un geste',
   grabLead:            'Un favori spécial à installer une seule fois (une minute) : ensuite, sur n\'importe quelle vidéo YouTube, vous l\'ouvrez et les sous-titres japonais arrivent ici tout seuls — téléphone compris.',
   grabTutorialBtn:     'Tutoriel pas à pas',

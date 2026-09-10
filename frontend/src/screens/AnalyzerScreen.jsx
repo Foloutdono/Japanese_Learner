@@ -17,6 +17,7 @@ import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
 import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { board } from '../stores/boarding'
 import { parseVideoId } from '../lib/youtube'
+import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
@@ -65,6 +66,25 @@ export default function AnalyzerScreen({ session }) {
   // on 文字 with the camera one tap further in". Read once, as the
   // initial platform — the segmented control owns the mode from then
   // on, and a key that is not one of the three is simply ignored.
+  // ── Can this deployment fetch a link at all? ─────────────
+  // Asked, never assumed. The fetch removed in docs/adr/0003 spent a
+  // release cycle looking like the primary route while never working
+  // in production ("every link i try doesnt work"), and it is a paid
+  // proxy that decides -- so the server is the only thing that knows.
+  //
+  // False until proven otherwise, including when the probe itself
+  // fails: the two ingests that always work are already on screen, so
+  // the cost of guessing wrong in this direction is a hidden button
+  // rather than a broken promise.
+  const [linkFetch, setLinkFetch] = useState(false)
+  useEffect(() => {
+    let cancelled = false
+    apiJson('/api/video/capabilities', session)
+      .then(caps => { if (!cancelled) setLinkFetch(Boolean(caps?.linkFetch)) })
+      .catch(() => {})
+    return () => { cancelled = true }
+  }, [session])
+
   const [sp] = useSearchParams()
   const [source, setSource] = useState(() => (sourceFor(sp.get('intake')) ? sp.get('intake') : DEFAULT_SOURCE))
   // The last platform actually boarded — what boardPlatform compares
@@ -344,6 +364,11 @@ export default function AnalyzerScreen({ session }) {
   function startVideoFromFile(file, opts) {
     setDetail(null)
     analyzer.startVideoFromFile(file, opts)
+  }
+
+  function startVideoFromLink(url, opts) {
+    setDetail(null)
+    analyzer.startVideoFromLink(url, opts)
   }
 
   // Boarding a platform ALWAYS opens its intake, even when a result
@@ -698,6 +723,8 @@ export default function AnalyzerScreen({ session }) {
                 url={videoUrl}
                 onUrlChange={setVideoUrl}
                 onStartFromFile={startVideoFromFile}
+                onStartFromLink={startVideoFromLink}
+                linkFetch={linkFetch}
               />
             )}
           </div>

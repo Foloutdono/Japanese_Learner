@@ -33,6 +33,14 @@ pytest>=9.0
 # API and not a locally-hosted model. Free, no API key, no vendor
 # account.
 edge-tts>=7.0.0
+# study/captions.py's link ingest -- the ONLY dependency here that is
+# useless without a paid credential. It performs the InnerTube
+# handshake YouTube's own player makes; the addresses it makes it from
+# are what have to be bought (a rotating residential proxy), and with
+# none configured fetch_youtube_track refuses before importing this.
+# So an install without the credential is not broken, just dark.
+youtube-transcript-api>=1.2.4
+
 # main.py loads backend/.env through this. It arrives transitively
 # with uvicorn[standard] today, which is not something to rely on.
 python-dotenv
