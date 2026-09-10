@@ -1,0 +1,68 @@
+# 足跡 — the four numbers, pushed rather than waited for.
+#
+# A dashboard has to be remembered. This does not: it runs on Monday
+# and writes into the run's own summary page, so the numbers arrive
+# whether or not anyone thought to look. For a project with one
+# maintainer that is the whole difference between analytics that get
+# used and analytics that get built.
+#
+# Read-only. There is no --yes here and nothing to confirm, which is
+# why -- unlike db-maintenance.yml -- the manual button needs no dry-run
+# input.
+#
+# Setup: the same DATABASE_URL secret db-maintenance.yml already needs
+# (Settings -> Secrets and variables -> Actions). Supabase's
+# SESSION-mode pooler URI, port 5432.
+#
+# The schedule only starts working once this file is on the default
+# branch; GitHub ignores cron in workflows that live only on a branch.
+name: Weekly digest
+
+on:
+  schedule:
+    # Mondays 06:00 UTC -- after db-maintenance.yml's 04:00, so the
+    # digest reads a database that has already been compacted and the
+    # two never contend for the same rows.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+    inputs:
+      days:
+        description: 'Window in days'
+        type: string
+        default: '28'
+        required: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    env:
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      DAYS: ${{ inputs.days || '28' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Fail early if the secret is missing
+        run: |
+          if [ -z "$DATABASE_URL" ]; then
+            echo "::error::DATABASE_URL secret is not set. Add it under" \
+                 "Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        working-directory: backend
+        # Deliberately NOT requirements.txt, for the same reason
+        # db-maintenance.yml avoids it: that pulls a MeCab dictionary
+        # and edge-tts for a job that only opens a database connection.
+        run: pip install psycopg2-binary python-dotenv
+
+      - name: Write the digest
+        working-directory: backend
+        # Into the step summary, which is what turns a workflow run into
+        # something readable from the notification e-mail without
+        # opening a log.
+        run: python -m scripts.weekly_digest --days "$DAYS" >> "$GITHUB_STEP_SUMMARY"

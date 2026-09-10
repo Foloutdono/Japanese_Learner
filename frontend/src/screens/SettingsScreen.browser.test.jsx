@@ -158,7 +158,7 @@ describe('SettingsScreen — the list', () => {
 
     rows[4].click()
     await settle(30)
-    expect(screen.container.querySelector('.stg-head__jp').textContent).toBe(T.settingsData)
+    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.settingsData)
     // ‹ Settings brings the list back.
     screen.container.querySelector('.stage__leave').click()
     await settle(30)

@@ -2,6 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { LangProvider } from '../LangContext'
 import fr from '../locales/fr/index.js'
+// The pass tells a refusal from a dead line by `instanceof`, so the
+// refusal test has to throw the very class the screen imports: this
+// is the one from the mock below, not a second declaration that
+// would make that test pass for the wrong reason.
+import { ApiError } from '../lib/api'
 import '../index.css'
 
 // ── The boarding, walked end to end (plan 075) ─────────────────
@@ -113,12 +118,12 @@ function type(el, value) {
 
 async function renderFlow({
   onComplete = vi.fn(), username = 'Tester', dryRun = false,
-  onExit = undefined, onSignIn = undefined, guest = false,
+  onExit = undefined, onSignIn = undefined, guest = false, email = null,
 } = {}) {
   const screen = await render(
     <LangProvider>
       <BoardingFlow
-        session={{ access_token: 'tok' }}
+        session={{ access_token: 'tok', ...(email ? { user: { email } } : {}) }}
         initialProfile={{ username, level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 }}
         onComplete={onComplete}
         onExit={onExit}
@@ -559,7 +564,42 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="enter"]')
     await settle(80)
     expect(stepOf(screen)).toBe('pass')
-    expect(q(screen, '.brd__error')).not.toBeNull()
+    expect(q(screen, '.brd__error')?.dataset.error).toBe('network')
+    expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
+    expect(onComplete).not.toHaveBeenCalled()
+  })
+
+  // A refusal is not a connection. The office answering 422 -- a
+  // contract it will not issue -- wore the same "check your connection"
+  // line as a dead network, which on the one screen with no other way
+  // forward sent the learner to look at a connection that was working
+  // (2026-09-09, the novice's own destination).
+  it('says the office refused when the office answered, not that the line is down', async () => {
+    apiJsonWithTimeout.mockRejectedValue(new ApiError('refused'))
+    const { screen, onComplete } = await renderFlow()
+    await passName(screen)
+    await click(screen, '[data-kana="both"]')
+    await settle()
+    await click(screen, '[data-level="N4"]')
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await passBuilding(screen)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="enter"]')
+    await settle(80)
+    const line = q(screen, '.brd__error')
+    expect(line?.dataset.error).toBe('refused')
+    expect(line.textContent).toBe(fr.brdPassRefused)
+    expect(line.textContent).not.toBe(fr.onbPassError)
+    // Still no dead end: the pass stays up and the action stays live.
+    expect(stepOf(screen)).toBe('pass')
     expect(q(screen, '[data-action="enter"]').disabled).toBe(false)
     expect(onComplete).not.toHaveBeenCalled()
   })
@@ -640,11 +680,73 @@ describe('BoardingFlow', () => {
     expect(onExit).toHaveBeenCalledTimes(1)
   })
 
+  // ── the focus ring stands inside every box that clips ──
+  // The name field is the full width of the body, the body scrolls, and
+  // a box that scrolls one axis clips the other (`overflow-y: auto`
+  // computes overflow-x to `auto` — the spec, not a quirk). An outline
+  // is drawn OUTSIDE the border box and never counts as scrollable
+  // overflow, so the focused field's ring was sliced off flush with its
+  // own left and right edges: two corner arcs left hanging in the air,
+  // no sides. Measured rather than described, and walked up the whole
+  // chain — the frame's own clip had already been widened for this once
+  // and the body inside it went on cutting anyway.
+  it('keeps the focused name field’s ring clear of every clipping ancestor', async () => {
+    const { screen } = await renderFlow()
+    expect(stepOf(screen)).toBe('name')
+    const field = q(screen, '.brd-field')
+    field.focus()
+    expect(document.activeElement).toBe(field)
+
+    // A focused text input always matches :focus-visible, so this is
+    // the ring as drawn. Reading it (rather than assuming 4) is what
+    // keeps the gutters below honest if the ring is ever restyled.
+    const ink = getComputedStyle(field)
+    const reach = parseFloat(ink.outlineWidth) + parseFloat(ink.outlineOffset)
+    expect(reach).toBe(4)
+
+    const box = field.getBoundingClientRect()
+    const clips = []
+    for (let el = field.parentElement; el && el !== document.body; el = el.parentElement) {
+      const s = getComputedStyle(el)
+      if (s.overflowX === 'visible') continue
+      // Overflow clips at the padding box, not the border box.
+      const r = el.getBoundingClientRect()
+      const left = r.left + parseFloat(s.borderLeftWidth)
+      const right = r.right - parseFloat(s.borderRightWidth)
+      clips.push([el.className, left, right])
+      expect.soft(box.left - reach, `${el.className} cuts the ring on the left`).toBeGreaterThanOrEqual(left)
+      expect.soft(box.right + reach, `${el.className} cuts the ring on the right`).toBeLessThanOrEqual(right)
+    }
+    // The body is one of them: if it ever stops clipping, the gutter it
+    // carries for the ring is dead weight and this test proved nothing.
+    expect(clips.map(c => c[0])).toContain('brd__body')
+  })
+
   it('names the way to an account you already have, on the very first screen', async () => {
     const onSignIn = vi.fn()
     const { screen } = await renderFlow({ onSignIn })
     await click(screen, '[data-action="sign-in"]')
     expect(onSignIn).toHaveBeenCalledTimes(1)
+  })
+
+  // The boarding only ever runs on an account with no journey on it,
+  // so an address on question one means a NEW pass for that address.
+  // It is written for the learner who pressed "Continue with Google",
+  // landed on a pass Supabase had just minted for an identity nobody
+  // carried, and was shown seven questions with no hint that their own
+  // journey was on another account — the sign-in link is right below.
+  it('names the pass when there is an address on it, and the way out beside it', async () => {
+    const { screen } = await renderFlow({ email: 'aiko@example.com', onSignIn: vi.fn() })
+    expect(stepOf(screen)).toBe('name')
+    const hint = q(screen, '.brd__hint')
+    expect(hint?.textContent).toBe(fr.brdNameNewPass('aiko@example.com'))
+    expect(q(screen, '[data-action="sign-in"]')).toBeTruthy()
+  })
+
+  it('says nothing of the sort on a guest pass, which has no address', async () => {
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('name')
+    expect(q(screen, '.brd__hint')).toBeNull()
   })
 
   it('asks a guest for an account at the END, and takes no for an answer', async () => {

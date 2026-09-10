@@ -328,10 +328,14 @@ def journey_goal(payload: GoalPayload, user_id: str = Depends(get_user_id)):
                 status_code=422,
                 detail=f"the novice's stop is behind {start}",
             )
-    elif LEVELS.index(payload.goalLevel) <= LEVELS.index(start):
+    # Behind, not "not beyond" -- the same rule as the office's own form
+    # (routes/onboarding.py's goal_is_coherent, where the reasoning is),
+    # and it has to be the same one: a destination the boarding accepts
+    # must stay reprintable from Settings.
+    elif LEVELS.index(payload.goalLevel) < LEVELS.index(start):
         raise HTTPException(
             status_code=422,
-            detail=f"goalLevel must be beyond {start}",
+            detail=f"goalLevel must not be behind {start}",
         )
     sets = [
         "goal_start_level = %s",

@@ -22,7 +22,7 @@ used retires for the mobile chrome.
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
-| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
+| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__names--stacked`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
 | `.console`, `.console__top`, `.console__chips`, `.console__action`, `.console__index`, `.console__field`, `.console__clear`, `.console__count` | the console | `components/chrome/Console.jsx` (`Console`, `ConsoleTop`, `Chips`, `ConsoleAction`, `ConsoleIndex`) |
@@ -36,6 +36,37 @@ it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
 `--dock-bottom`, which every docked object reads: the tab bar plus the
 safe-area inset under the shell (`:root[data-chrome="shell"]`, stamped by
 `components/chrome/useChrome.js`), the inset alone on a stage.
+
+**The bar is a sign: the name at one end, its caption at the other.**
+The canvas drew `.bar__names` as two items a `--sp-3` gap apart, which on
+every real title left the rest of the row empty and read as one long
+string (`Practice Four platforms`) rather than as a platform sign. The app
+wraps that row and gives it `place-content: flex-end space-between`, so
+the title keeps the left and the sub sits against the right, both on the
+title's bottom edge. The wrap is what replaced the hard `≤768px` stack the
+long French names needed: a title too wide for the line keeps that line to
+itself — `space-between` leaves a lone item at the start — and the sub
+falls under it, so a short name gets its sign on a phone and a sentence
+still gets its two lines.
+
+The sign needs the right end free, and an aside is already standing on
+it. `Vocabulaire ... SOURCES [‹ Apprendre]` puts the caption against the
+button, near enough to read as the button's label rather than the name's,
+so a bar carrying both a sub and an aside stacks at every width:
+`Bar.jsx` adds `.bar__names--stacked`, which turns the row into a column
+and returns the caption to under the name it captions, leaving the aside
+the end to itself. A bar with only one of the two is unchanged.
+
+Stacking also brings the tracking rule into play (DESIGN.md, Tracking):
+a tracked caption on a left-flush axis takes an indent equal to its
+tracking, so `.bar__names--stacked .bar__sub` carries
+`text-indent: var(--tr-caption)` and `.bar__sub` on its own does not —
+in the sign layout the caption is flush *right*, where the same indent
+would push it off its own edge (the case `.dict-plate__cap` documents).
+It is an optical correction as much as a tracking one: flush by their
+boxes, `SOURCES` inked the box edge on most of its scanlines while
+`Vocabulary` inked it only at the tips of the serif V's top arms, so
+the caption read about 4px left of the name it captions.
 
 **The gates are pictograms, and only the lit one is captioned.** The
 canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
@@ -67,10 +98,10 @@ caps at `99+`: a third figure is wider than the gate.
 | `.browse-nav` | the fast review's foot | `components/study/ReviewDeck.jsx` |
 | `.levelup*`, `.card-stamp*` | the boards over the stage; the canvas's `.reissue*` (the pass re-issued on a rank crossing) is retired with the rank titles | `components/rewards/XpToast.jsx`, `components/study/CardStamp.jsx` |
 | `.gate-card`, `.gate-card__head`, `.gate-card__title`, `.gate-card__figure`, `.gate-card__count`, `.gate-card__unit`, `.gate-card__lanes`, `.gate-card__pick`, `.gate-card__fare*`, `.gate-card__short*`, `.btn-depart`, `.btn-depart--ghost` | 改札 — the fare gate | `components/station/GateCard.jsx` |
-| `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__due` | the lanes are the picker | `GateCard.jsx` |
+| `.lane`, `.lane--off`, `.lane__tick`, `.lane__where`, `.lane__mode`, `.lane__free`, `.lane__due` | the lanes are the picker; `__free` marks a lane that costs nothing (`core/credits.py`, `FREE_SOURCES` — 仮名 today), and is held back on a pass | `GateCard.jsx` |
 | `.pass--strip` (with `.stamp-rally*`, `.hall-pace*`) | the strip under the gate | `components/station/PassStrip.jsx` |
 | `.today-clear*`, `.fare-slip*` | the finish | `RunComplete` in `screens/TodayScreen.jsx`, `components/credits/FareSlip.jsx` |
-| `.balance*` | the balance sheet (plan 069) | `components/credits/BalanceSheet.jsx`, `RunOutSheet.jsx` |
+| `.balance*` (with `.balance__free*`, the free line said once under the lattice) | the balance sheet (plan 069) | `components/credits/BalanceSheet.jsx`, `RunOutSheet.jsx` |
 
 The run is `/today/run` on the stage frame, reached through the ticket
 gate from `/today`; the chosen lanes ride in the query (`?lanes=a,b`, absent
@@ -91,7 +122,7 @@ draw and readings faces keep their button under the widget).
 | `.prompt-card--ask` | a flat, left-aligned question card | `ComprehensionRun.jsx`, `screens/ExamRunner.jsx` (with `.exam-card`) |
 | `.type-badge` | the outlined caption pill (its type's colour as a tint) | `QuestionTypeBadge` in `components/study/QuizComponents.jsx` |
 | `.mcq-list`, `.mcq-row` (`--selected`, `--correct`, `--wrong`, `--filler`), `.mcq-row__index` (A–D), `.mcq-row__text--latin` | the choices | `ComprehensionRun.jsx`; the exam's rows are `exam/QuestionRenderer.jsx` |
-| `.stage__foot` (a `<form>` with `.field` + `.btn-primary`), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
+| `.stage__foot` (a `<form>` with `.field.field--page` + `.btn-primary`), `.stage__foot .field` (the answer rung), `.btn-row` | the field and the action docked in the foot; two actions side by side | the three sessions, `screens/ExamResult.jsx` |
 | `.result-lattice` (of `.record`s), `.surface`, `.qrows`, `.qrow-item`, `.qrow`, `.qrow__q`, `.qrow__note`, `.qrow__detail` | the comprehension result | `ComprehensionRun.jsx` |
 | `.paper-slot` | `.platform-slot__action` ("Different paper", under a sat paper) | `ModeSelector`'s `action` slot, from `screens/ExamScreen.jsx` |
 | `.exam-meta`, `.exam-meta__section`, `.exam-meta__jp`, `.exam-timer` (`--low`) | the runner's head row | `ExamRunner.jsx` |
@@ -154,6 +185,7 @@ baseline entries went in the same commit.
 | `.dict-entry`, `.dict-plate*`, `.dict-kind`, `.dict-block*`, `.dict-sense*`, `.dict-tag*`, `.dict-ex*`, `.dict-form*`, `.dict-word*`, `.dict-readings*`, `.dict-register*`, `.dict-reading*`, `.dict-sheet` (the readings sheet and the lookup sheet), `.record` | the entry plate and its body. Since `main`'s dictionary-detail redesign (PRs 21 and 22) was merged into this wave on 2026-09-07, that implementation owns the entry: the same canvas plate, with the readings in two registers, the backend's `study/kanji_words.py` grouping and its own 745-line suite. Plan 073's twin of it retired in the merge; the catalogue, the console and the analyzer above and below are plan 073's | `components/dictionary/DictionaryDetail.jsx` (`DictionaryDetail`, `DictionaryLookupSheet`) |
 | `.seg--full.seg--kaiseki` (`.anl-sources`), `.anl-panel` (`__lead`), `.anl-resume` | the three intakes | `screens/AnalyzerScreen.jsx` on `Seg` |
 | `.textarea`, `.anl-slip` (`__field`, `__count`), `.field--filled`, `.anl-action` | the writing slip | `components/analysis/WritingSlip.jsx` |
+| `.field--page` | a field mounted on the PAGE rather than on something raised — its well steps up to `--surface`, because there is nothing under the page to be a hole through. Seven mounts: both runs' entries, the account page's claim fields, the import dialog's paste box and separator, the browse dialog's search, the analyzer's rail head and video URL. `src/fields.browser.test.jsx` holds every mount to it | `index.css`, the `.field` family |
 | `.intake-pair`, `.intake-btn` | Shoot / Choose | `components/analysis/ImageInput.jsx` |
 | `.head2` (`__latin`, `__count`), `.anl-history`, `.anl-hist-list`, `.anl-hist-row`, `.anl-hist` (`__n`, `__body`, `__jp`, `__meta`, `__count`, `__when`, `__go`, `__delete`), `.anl-kept`, `.anl-undo*` | History | `components/analysis/AnalyzerHistory.jsx` |
 | `.stage__head.anl-head` (`.stage__where-jp`, `.anl-kept`), `.anl-clear` | the result's head: ‹ Analyzer, the first sentence, the count | `AnalyzerScreen.jsx` |
@@ -206,10 +238,10 @@ allowlist literal earlier retirements had left behind (the guard's
 | `.pf-ledger`, `.pf-line` (`__fig`, `__of`, `__track`, `__done`) | the ride ledger | `components/profile/LineLedger.jsx` |
 | `.banzuke`, `.bz__head`, `.bz__mark`, `.bz__jp`, `.bz__seg` (a `Seg`), `.leaderboard-row` (`--me`, `__rank` `--gold`/`--silver`/`--bronze`, `__name`, `__xp`, `__gap`) | the ranking | `components/profile/Banzuke.jsx` |
 | `.sheet--sumi.status-sheet` + `.jour-st--*`, `.jour-dist` (`__count`, `__of`, `__pct`, `__leg`), `.jour-track*` (`__rail`, `__done`, `__owed`, `__station`, `__you`, `__plan`), `.jour-cmps`, `.jour-cmp` (`__k`, `__v`, `__u`, `__d`, `__sub`), `.jour-rev__actions`, `.jour-act`, `.status-sheet__none`, `__office`, `__error` | the status sheet, off the HUD's station panel — distance first since the 進捗が主役 round, so the canvas's chip-over-two-lane-track-over-four-figures is history here | `components/journey/StatusSheet.jsx` (`GhostTrack.jsx`; the open state in `stores/journey.js`) |
-| `.bar` + `.stage__leave`, `.records--stats` (six `.record`s with `__note`s) | the statistics head and lattice | `screens/StatsScreen.jsx` |
+| `.bar` + `.stage__leave`, `.records--stats` (six `.record`s with `__note`s) | the statistics head and lattice — the bar wears TO, the plate the profile's door to it already draws, in the pass ink that door is painted in | `screens/StatsScreen.jsx` |
 | `.stat-cap` (`__fig`), `.cal.cal--gold` (`__months`, `__month`, `__grid`, `__cell` `--1`…`--4`/`--future`, `__foot`, `__scale`) | the practice calendar (fourteen weeks, whole) | `components/stats/PracticeCalendar.jsx` |
 | `.forecast.forecast--pass` (`__bars`, `__col`, `__v`, `__bar`, `__days`) | the week's forecast | `components/stats/Forecast.jsx` |
-| `.stg-headrow`, `.stg-head` (`__jp`), `.stg-list`, `.stg-row` (`__names`, `__jp`, `__value`, `__chev`), `.stg-signout` | the settings list | `screens/SettingsScreen.jsx` |
+| `.bar` + `.stage__leave`, `.stg-list`, `.stg-row` (`__names`, `__jp`, `__value`, `__chev`), `.stg-signout` | the settings list. It had its own head row (`.stg-headrow`, `.stg-head__jp`) — a near-copy of `.bar__row`/`.bar__title` with neither roundel nor rule, which left it and 統計 the two screens whose title did not look like the app's; the list and all six pages mount `Bar` now, with 設定's gear in the roundel (a pass has no line code — `config/identity.js`) | `screens/SettingsScreen.jsx`, `SettingsPage` in `components/settings/SettingsPage.jsx` |
 | `.slip` (`__label`, `__name`, `__hint`, `__act`, `__value`, `__confirm`), `.cap` | a page's slips | `SettingsPage`, `Slip` in `components/settings/SettingsPage.jsx` |
 | `.svc-grid` (`--2`), `.svc` (`--on`, `__jp`, `__pace`, `__star`, `__words`), `.grades`, `.hour-grid` | the service cards: theme, language, presets and mute, pace, grades, the daily hour | `components/settings/DisplayPage.jsx`, `SoundPage.jsx`, `LearningPage.jsx`, `DestinationPage.jsx` |
 | `.lvlstrip` (`__stop` `--on`, `__dot`, `__code`, `__jp`), `.lvl-note` (`__strong`) | the level strip and its note | `LearningPage.jsx` |
@@ -257,7 +289,7 @@ entries went in the same commit.
 | Canvas class | `index.css` block | Component |
 |---|---|---|
 | `.board`, `.wmap__lines`, `.wmap-line*`, `.wmap-track*`, `.wmap-due*`, `.wmap__group`, `.wmap-row*`, `.wmap-roundel` | 路線図 — the wall map (no masthead: the bar names the place) | `components/station/WallMap.jsx`, `screens/LearnScreen.jsx` |
-| `.bar__link` | a text link in the bar's aside (By frequency, JLPT instead) | the station screens |
+| `.bar__link` | a text link in the bar's aside. No screen uses one today — the sources it carried (By frequency, By theme, JLPT instead) became platform cards on the station's own source page — but the bar still offers it, and `chrome.phone.test.jsx` holds it to the row's layout | — |
 | `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram; the rail is drawn per stop rather than once behind the list (so the ends cap at the first and last marker), and it and every marker are placed by their centre on one `left`, since a marker changes width when it is the stop you are at | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
 | `.platform-grid`, `.platform-card*` (`__service` in the learner's language, `__stops`, `__pip`) | the platform card | `components/selection/ModeSelector.jsx`, `TierSelector.jsx`, `ThemeSelector.jsx` |
 | `.seg--full`, `.console`, `.console__index` | the tier size, the theme filter | `Seg`, `ConsoleIndex` in `components/chrome/Console.jsx` |
@@ -265,9 +297,12 @@ entries went in the same commit.
 | `.form`, `.form__label`, `.form__row`, `.type-list`, `.type-row*` | the create form, a card's form | `DecksScreen.jsx`, `screens/DeckDetailScreen.jsx` |
 | `.deck-identity*`, `.chip-row*`, `.card-list`, `.card-row*` | the deck page | `DeckDetailScreen.jsx` (the More sheet on `Sheet`) |
 
-The routes: `/learn` (the map), `/learn/<line>` (the station — a line's
-stops, or the kana sets), `/learn/<line>/tiers` and `/learn/vocab/themes`
-(the other ways in), `/learn/<line>/<stop>`, `/learn/<line>/tier/<n>?size=`,
+The routes: `/learn` (the map), `/learn/<line>` (the station — the SOURCES
+on vocab and kanji, which are ordered along more than one axis; the stops
+themselves on kana and grammar, which have only the one, exactly as
+comprehension has no source page beside reading's), `/learn/<line>/levels`,
+`/learn/<line>/tiers` and `/learn/vocab/themes` (a source's own list),
+`/learn/<line>/<stop>`, `/learn/<line>/tier/<n>?size=`,
 `/learn/vocab/theme/<key>` (the platforms), and the run on the stage frame
 under each of those with `/<mode>` appended; `/learn/decks`, `/learn/decks/<id>`,
 `/learn/decks/<id>/study` (the deck's platforms) and `/learn/decks/<id>/study/<mode>`.

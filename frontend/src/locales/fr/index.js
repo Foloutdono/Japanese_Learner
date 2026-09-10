@@ -1,6 +1,8 @@
+import { welded } from '../frenchSpacing.js'
+
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
-  appTitle:          '日本語',
+  appTitle:          '辻',
   learnJapanese:     'Apprendre le japonais',
   appDesc:           'Répétition espacée (SM-2) · Hiragana · Katakana · Vocabulaire JLPT',
   login:             'Connexion',
@@ -66,6 +68,7 @@ const nav = {
   balanceOf:         (cap) => `sur ${cap}`,
   balanceRefillAt:   (at) => `par jour, à ${at}`,
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
+  balanceKanaFree:   'Les révisions de kana ne coûtent rien',
   gateShort:         (rides, due) => `Seulement ${rides} sur les ${due} requis`,
   gateNoCredits:     (refill, at) => `Plus de crédits — +${refill} à ${at}`,
   runOutTitle:       'Plus de crédits',
@@ -73,6 +76,8 @@ const nav = {
   runOutWaiting:     (n) => `${n} attendent demain`,
   runOutRefill:      'à minuit',
   runOutTomorrow:    'demain',
+  // 無料 — a lane that costs nothing (domain/credits.js).
+  freeFare:          'gratuit',
   fareReviews:       'révisions',
   fareFare:          'tarif',
   fareCreditsLeft:   'crédits restants',
@@ -97,7 +102,7 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  // ── 日本語駅 — la gare ────────────────────────────────────
+  // ── 辻駅 — la gare ───────────────────────────────────────
   // L'accueil est le hall de la gare et chaque section une ligne sur
   // son plan mural (voir config/stations.js et WallMap.jsx). Les noms
   // de stations et de lignes sont des noms propres japonais et vivent
@@ -162,6 +167,10 @@ const quiz = {
   byLevelDesc:       'Les cinq grades de l\'examen, de N5 à N1',
   byFrequency:       'Fréquence des mots',
   byFrequencyDesc:   'Classés selon leur fréquence réelle à l\'écrit',
+  // Le même axe une ligne plus loin, où ce sont les caractères qui
+  // sont classés et non les mots (voir KanjiScreen.jsx).
+  byFrequencyKanji:     'Fréquence des kanji',
+  byFrequencyKanjiDesc: 'Classés selon leur fréquence réelle à l\'écrit',
   byMastery:         'Mes cartes',
   byMasteryDesc:     'Bâties uniquement sur des mots déjà rencontrés',
   byJmdict:          'Hors-JLPT',
@@ -177,6 +186,16 @@ const quiz = {
   selectTheme:       'Choisissez un thème',
   filterThemes:      'Filtrer les thèmes…',
   themeNoResults:    'Aucun thème ne correspond à votre filtre',
+
+  // Les quatre paliers d'un thème, découpés par fréquence (voir
+  // backend/content/theme_data.py). La moitié japonaise de chaque nom est
+  // dans domain/themes.js — elle est identique dans toutes les langues.
+  themeLevelBasic:    'Base',
+  themeLevelMedium:   'Moyen',
+  themeLevelAdvanced: 'Avancé',
+  themeLevelExpert:   'Expert',
+  selectThemeLevel:   'Choisissez un palier',
+  leaveThemeLevels:   'Paliers',
 
   themeFruits:           'Fruits',
   themeVegetables:       'Légumes',
@@ -392,9 +411,9 @@ const stats = {
   nothingGraded:      'Rien n’est noté',
   learnFourLines:     'Quatre lignes',
   stationJlpt:        'JLPT',
+  stationSources:     'Sources',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
-  jlptInstead:        'Plutôt JLPT',
   leaveLevels:        'Niveaux',
   leaveSets:          'Séries',
   leaveTiers:         'Paliers',
@@ -744,6 +763,8 @@ const video = {
   videoDesc:           "Étudiez les sous-titres japonais d'une vidéo\nEn direct, colorés selon ce que vous savez déjà\nUne photo du monde avec une bande-son",
   videoUrlOptional:    'Lien de la vidéo',
   videoUrlOptionalHint: 'Affiche la vidéo à côté des sous-titres, ouvre la bonne page pour le favori et préremplit DownSub.',
+  // Affiché seulement là où le serveur sait récupérer un lien seul.
+  analyzeThisLink:     'Récupérer les sous-titres',
   grabTitle:           'Les sous-titres en un geste',
   grabLead:            'Un favori spécial à installer une seule fois (une minute) : ensuite, sur n\'importe quelle vidéo YouTube, vous l\'ouvrez et les sous-titres japonais arrivent ici tout seuls — téléphone compris.',
   grabTutorialBtn:     'Tutoriel pas à pas',
@@ -884,6 +905,32 @@ const translationMode = {
   aiAnalysis:            'Analyse IA',
   analyzingTranslation:  'Analyse de votre traduction…',
   analysisUnavailable:   'Analyse indisponible — jugez par rapport à la référence ci-dessus.',
+}
+
+// ── 書取 — la dictée ──────────────────────────────────────────
+// DictationRun.jsx réutilise telles quelles les clés partagées
+// (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// translation/translationEnglish, nextPhrase, examAudioPause/
+// examAudioPending/examAudioUnavailable) — seules les clés vraiment
+// nouvelles vivent ici.
+//
+// Les quatre verdicts sont quatre à dessein : « faux » et « vous en
+// avez saisi la moitié » ne sont pas le même résultat pour une
+// oreille, et les réduire à une coche et une croix en dirait autant à
+// qui a presque tout transcrit qu'à qui n'a rien entendu.
+const dictationMode = {
+  dictationTitle:        'Dictée',
+  dictationDesc:         "Écrivez ce que vous entendez\nDeux écoutes, pas une de plus\nDu N5 au N1",
+  dictationFetchError:   "Impossible de charger un extrait. Veuillez réessayer.",
+  dictationCheckError:   "Impossible de corriger votre réponse. Veuillez réessayer.",
+  dictationPlaceholder:  'Écrivez ce que vous avez entendu…',
+  dictationPrompt:       'Écrivez en japonais ce que vous avez entendu',
+  dictationListen:       'Écouter',
+  dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
+  dictationPerfect:      'Mot pour mot',
+  dictationClose:        'Presque',
+  dictationPartial:      'La moitié',
+  dictationMissed:       'Manqué',
 }
 
 // ── Dictionary ────────────────────────────────────────────
@@ -1115,6 +1162,13 @@ const settings = {
   guestClaimDesc:    'Votre progression est déjà là. Ajoutez une adresse et un mot de passe pour la garder — rien n\u2019est déplacé, c\u2019est le même compte.',
   guestClaimConfirm: 'Presque : confirmez l\u2019adresse depuis le lien que nous venons de vous envoyer.',
   guestClaimDone:    'Compte créé. Votre progression est gardée.',
+  // 相互乗り入れ — Google sur une carte qui a déjà une clé. Nommé
+  // simplement : la ligne doit répondre à la question avec laquelle
+  // on arrive — « pourquoi me connecter avec Google n’a pas ouvert
+  // mon compte ? ». Voir components/settings/AccountPage.jsx.
+  linkGoogleLabel:   'Google',
+  linkGoogleCap:     'Non connecté',
+  linkGoogleDesc:    'Connectez Google ici et « Continuer avec Google » ouvrira ce compte. Tant que ce n\u2019est pas fait, se connecter avec Google émet une deuxième carte, vide — votre trajet, lui, reste sur celle-ci.',
 
   // N'apparaît que comme texte title/aria-label (NavControls.jsx) —
   // le bouton visible est déjà une vraie icône SVG IconSun/IconMoon.
@@ -1439,6 +1493,13 @@ const boarding = {
   // Les questions.
   brdNameQ: 'Comment vous appelez-vous ?',
   brdNameAria: 'Votre nom',
+  // L’adresse à laquelle la carte est émise, dite dès la première
+  // question. L’embarquement ne tourne que sur un compte vierge :
+  // une adresse ici veut donc toujours dire une NOUVELLE carte pour
+  // cette adresse — la seule chose à dire à qui voulait retrouver
+  // l’ancienne, avant sept questions. Un invité n’a pas d’adresse et
+  // ne voit rien. « Ci-dessous » : le lien de connexion, en pied.
+  brdNameNewPass: email => `Une nouvelle carte, pour ${email}. Si votre trajet est sur un autre compte, connectez-vous ci-dessous.`,
   brdWhyQ: (name) => `Pourquoi apprenez-vous le japonais, **${name}** ?`,
   brdMotive: { studies: 'Pour mes études', fun: 'Pour le plaisir', trip: 'Pour un voyage au Japon', live: 'Pour vivre au Japon', friends: 'Pour me faire des amis', other: 'Autre chose' },
   brdKanaQ: 'Pouvez-vous lire ceci ?',
@@ -1472,10 +1533,10 @@ const boarding = {
   brdDeparture: 'Départ',
   brdDayAria: 'Heure de départ',
   // Le rappel (natif seulement), et la notification telle que l’appli
-  // l’envoie. brdAppName est le nom sur les stores : au propriétaire
-  // de le fixer (plan 077).
+  // l’envoie. brdAppName est le nom sur les stores ; à garder en
+  // phase avec appName dans capacitor.config.json.
   brdNudgeQ: (time) => `Un rappel à **${time}** ?`,
-  brdAppName: 'Japanese Learner',
+  brdAppName: 'Tsuji',
   brdNotifNow: 'maintenant',
   brdNotifTitle: (time) => `Votre train part à ${time}`,
   brdNotifText: 'Vos cartes vous attendent au portillon.',
@@ -1549,6 +1610,7 @@ const onboarding = {
   onbTestResult: (level, correct, total) => `${correct} bonnes réponses sur ${total} — nous vous recommandons de partir de ${level}.`,
   onbPaceRecommended: 'Recommandé',
   onbPassError: 'L’enregistrement a échoué — vérifiez votre connexion et réessayez.',
+  brdPassRefused: 'Le guichet n’a pas pu émettre ce titre — cela vient de nous, pas de votre connexion. Rien n’a été enregistré.',
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',
@@ -1591,6 +1653,12 @@ const onboarding = {
   soundFullPreset: 'gare complète',
   volumeMaster: 'Volume principal',
   settingsPerDay: '/ jour',
+  settingsTrail: 'Statistiques d’usage',
+  settingsTrailHint: 'Quels écrans sont ouverts, et quand — pour améliorer l’application là où elle sert vraiment. Gardées sur notre propre serveur, jamais partagées, jamais publicitaires, et elles ne contiennent rien de ce que vous écrivez.',
+  settingsTrailOn: 'Compté',
+  settingsTrailOff: 'Non compté',
+  settingsTrailStop: 'Ne plus compter',
+  settingsTrailStart: 'Compter à nouveau',
   settingsExport: 'Exporter votre progression',
   settingsExportHint: 'Un fichier CSV — chaque carte, son échéance, ses révisions.',
   settingsExportBtn: 'Exporter',
@@ -1643,7 +1711,11 @@ const onboarding = {
   settingsGoalDepartHint: "L'heure à laquelle vous comptez rouler — facultative, et jamais un rappel. Elle est imprimée sur la carte parce qu'une promesse avec une heure survit mieux à sa première semaine de pluie.",
 }
 
-export default {
+// La table, soudée : chaque espace devant : ; ! ? » (et derrière «)
+// devient insécable en sortant d'ici, y compris dans les phrases
+// assemblées à l'appel. Voir locales/frenchSpacing.js — c'est ce qui
+// empêche un deux-points de tomber seul en bout de ligne.
+export default welded({
   ...auth,
   ...landing,
   ...nav,
@@ -1659,10 +1731,11 @@ export default {
   ...reading,
   ...readingComprehension,
   ...translationMode,
+  ...dictationMode,
   ...profile,
   ...settings,
   ...decks,
   ...exam,
   ...onboarding,
   ...boarding,
-}
+})

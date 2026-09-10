@@ -14,8 +14,8 @@ import '../../index.css'
 vi.mock('../../lib/supabase', () => ({
   supabase: { auth: { getSession: async () => ({ data: { session: null } }) } },
 }))
-const logEvent = vi.fn()
-vi.mock('../../lib/analytics', () => ({ logEvent: (...a) => logEvent(...a), flushEvents: vi.fn() }))
+const track = vi.fn()
+vi.mock('../../lib/track', () => ({ track: (...a) => track(...a), EVENTS: {} }))
 
 const credits = await import('../../stores/credits')
 const { PaywallSheet } = await import('./PaywallSheet')
@@ -28,7 +28,7 @@ beforeEach(() => {
   credits.closePaywall()
   credits.seedCredits({ balance: 12, cap: 50, dailyRefill: DAILY_REFILL, refillAt: null,
                         plan: 'free', unlimited: false, enforced: true })
-  logEvent.mockClear()
+  track.mockClear()
 })
 
 describe('PaywallSheet', () => {
@@ -70,7 +70,7 @@ describe('PaywallSheet', () => {
 
     const cta = document.querySelector('.pw__cta')
     expect(cta).not.toBeNull()
-    logEvent.mockClear()
+    track.mockClear()
     cta.click()
     await settle()
 
@@ -82,10 +82,10 @@ describe('PaywallSheet', () => {
     expect(thanks.getAttribute('role')).toBe('status')
     // Name, door, and the deliberation time that rides with it — the
     // gap between seeing the pass and asking to be told about it.
-    expect(logEvent.mock.calls).toHaveLength(1)
-    const [name, props] = logEvent.mock.calls[0]
-    expect(name).toBe('paywall_intent')
-    expect(props.source).toBe('runout')
+    expect(track.mock.calls).toHaveLength(1)
+    const [name, props] = track.mock.calls[0]
+    expect(name).toBe('offer_intent')
+    expect(props.where).toBe('runout')
     expect(Number.isInteger(props.ms)).toBe(true)
     expect(props.ms).toBeGreaterThanOrEqual(0)
   })
@@ -94,16 +94,16 @@ describe('PaywallSheet', () => {
     await mount()
     credits.openPaywall('profile')
     await settle()
-    logEvent.mockClear()
+    track.mockClear()
 
     ;[...document.querySelectorAll('.sheet button')]
       .find(b => b.classList.contains('btn-secondary')).click()
     await settle()
 
     expect(document.querySelector('.sheet')).toBeNull()
-    expect(logEvent.mock.calls).toHaveLength(1)
-    expect(logEvent.mock.calls[0][0]).toBe('paywall_dismiss')
-    expect(logEvent.mock.calls[0][1].source).toBe('profile')
-    expect(logEvent.mock.calls[0][1].ms).toBeGreaterThanOrEqual(0)
+    expect(track.mock.calls).toHaveLength(1)
+    expect(track.mock.calls[0][0]).toBe('offer_dismiss')
+    expect(track.mock.calls[0][1].where).toBe('profile')
+    expect(track.mock.calls[0][1].ms).toBeGreaterThanOrEqual(0)
   })
 })

@@ -4,10 +4,10 @@ import { MemoryRouter, useLocation } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import '../index.css'
 
-// ── 実践 — the gate's four platforms, at 390px ────────────────
+// ── 実践 — the gate's platforms, at 390px ────────────────────
 // Each title carried the section's own Japanese name after it — 読書
-// 理解 翻訳 模試 — a second name for a thing the line above already
-// named. At phone width the pair ran past the card and 理解 broke
+// 理解 翻訳 書取 模試 — a second name for a thing the line above
+// already named. At phone width the pair ran past the card and 理解 broke
 // between its two characters, one to a line. The Japanese lives on the
 // roundel of every station these cards open and on the gate the
 // departure passes through; this row was the one place it was a
@@ -31,6 +31,13 @@ vi.mock('../stores/profileSummary', () => ({ useProfileSummary: () => ({ jlptLev
 
 const { default: PracticeScreen } = await import('./PracticeScreen')
 const { getSections } = await import('../config/tabs')
+
+// How many platforms the gate has, asked of the registry rather than
+// written down: this file pinned the number 4 in four places, and every
+// one of them had to be edited the day 書取 was added. The CONTRACT is
+// that each platform gets a card, a full row of grades and an equal
+// share of the gate — not that there are four of them.
+const PLATFORMS = getSections('practice', {}).length
 
 // Long enough for the shared `arrive` to land: it starts the card
 // 10px low, and everything below measures against the page's foot.
@@ -76,7 +83,7 @@ describe('the practice gate at phone width', () => {
     expect(getSections('practice', {}).every(s => s.icon)).toBe(true)
 
     const titles = [...grid.querySelectorAll('.platform-card__title')]
-    expect(titles).toHaveLength(4)
+    expect(titles).toHaveLength(PLATFORMS)
     for (const title of titles) {
       // The title is the title: nothing appended, nothing nested.
       expect(title.children).toHaveLength(0)
@@ -91,13 +98,13 @@ describe('the practice gate at phone width', () => {
   // Four cards of a title and a line of description filled 528px of a
   // 746px screen and left 218 under them; the owner's word for the
   // screen was bland. The platforms take the room and share it.
-  it('gives the four platforms the whole gate, one share each', async () => {
+  it('gives every platform the whole gate, one share each', async () => {
     const screen = await gate()
     const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
     const grid = screen.container.querySelector('.platform-grid').getBoundingClientRect()
     expect(content.bottom - grid.bottom).toBeLessThanOrEqual(24)
     const cards = [...screen.container.querySelectorAll('.platform-card')].map(el => el.getBoundingClientRect())
-    expect(cards).toHaveLength(4)
+    expect(cards).toHaveLength(PLATFORMS)
     for (const box of cards) {
       expect(box.height).toBeCloseTo(cards[0].height, 0)
       expect(box.height).toBeGreaterThan(130)
@@ -108,7 +115,7 @@ describe('the practice gate at phone width', () => {
   it('carries the five grades on every platform, and marks the learner\'s own', async () => {
     const screen = await gate()
     const rows = [...screen.container.querySelectorAll('.platform-sign__dests')]
-    expect(rows).toHaveLength(4)
+    expect(rows).toHaveLength(PLATFORMS)
     for (const row of rows) {
       const chips = [...row.querySelectorAll('.chip')]
       expect(chips.map(c => c.textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
@@ -148,8 +155,13 @@ describe('the practice gate at phone width', () => {
     await settle(60)
     expect(here.path).toBe('/practice/translation/level/N1')
 
+    // 書取 — one axis like 理解, and the grade is the run.
+    chipAt(3, 'N4').click()
+    await settle(60)
+    expect(here.path).toBe('/practice/dictation/N4')
+
     // 模試 — not a run: that grade's papers (ExamScreen reads ?level=).
-    chipAt(3, 'N2').click()
+    chipAt(4, 'N2').click()
     await settle(60)
     expect(here.path).toBe('/practice/exam?level=N2')
   })

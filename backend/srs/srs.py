@@ -593,9 +593,19 @@ class SRSEngine:
                 rows = cur.fetchall()
         return [row[0] for row in rows]
 
-    def get_new_cards(self, mode: str, limit: int = 20, card_ids: list[str] | None = None) -> list[str]:
+    def get_new_cards(self, mode: str, limit: int = 20, card_ids: list[str] | None = None,
+                      ordered: bool = False) -> list[str]:
         """
         Cards in this mode the user has never actually reviewed.
+
+        `ordered` keeps the caller's own `card_ids` order instead of
+        shuffling. Off by default: for a level, a deck or a frequency
+        tier the pool is one undifferentiated bag and random is right.
+        It exists for themes, whose pool arrives sorted commonest-first
+        (content/theme_data.py) — `ORDER BY random()` was silently
+        discarding that, so opening "Fruits" drew マンゴー as readily as
+        りんご. Ignored when `card_ids` is None; that branch has no
+        caller order to preserve.
 
         When `card_ids` is given — which every production caller does, one
         per study endpoint — the caller's own deck list IS the universe, so
@@ -624,16 +634,16 @@ class SRSEngine:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:
                 if card_ids:
-                    sql = """
+                    sql = f"""
                         SELECT ids.id
-                        FROM unnest(%s::text[]) AS ids(id)
+                        FROM unnest(%s::text[]) WITH ORDINALITY AS ids(id, ord)
                         WHERE NOT EXISTS (
                             SELECT 1 FROM card_modes cm
                             WHERE cm.card_id = ids.id
                               AND cm.mode = %s
                               AND cm.total_reviews > 0
                         )
-                        ORDER BY random()
+                        ORDER BY {"ids.ord" if ordered else "random()"}
                     """
                     params: list[Any] = [card_ids, mode]
                 else:

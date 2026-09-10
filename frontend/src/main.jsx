@@ -24,16 +24,41 @@ import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
 import { isNative } from './lib/platform'
 
+// The dead-bundle guard in index.html sets this before reloading; that
+// this module is running at all is the proof it worked, and clearing it
+// lets a later stale load in the same tab get its one retry too.
+try { sessionStorage.removeItem('jp-bundle-reload') } catch { /* private mode */ }
+
 // ── The service worker (plan 065) ──
 // Web build only. vite-plugin-pwa is disabled for the native mode (a
 // custom-scheme WebView has no worker, and the bundle IS the app) and
 // for dev, and the virtual module is then a no-op — this guard is the
-// belt to that brace. `prompt`: the new worker waits until the learner
-// taps the ダイヤ改正 note (components/ui/UpdateToast.jsx).
+// belt to that brace.
+//
+// The worker no longer parks waiting to be let in (pwa.workbox.js): it
+// installs and takes over, because the code that used to let it in was
+// this file, and a worker serving a document whose bundle 404s is
+// holding shut the only door to itself. What the learner still chooses
+// is the RELOAD, offered by the ダイヤ改正 note
+// (components/ui/UpdateToast.jsx) — a reload behind their back mid-exam
+// would race the exam draft.
+//
+// Two signals, because either can be the one that arrives:
+//   onNeedRefresh — a worker is parked, and only a SKIP_WAITING message
+//     promotes it, which is what updateSW(true) sends. Ours does not
+//     park, but a generation that predates that change can.
+//   controllerchange — a new worker has claimed this page, and the
+//     running bundle is now the odd one out. A plain reload is the
+//     whole fix. Guarded on having been controlled already: the first
+//     visit's claim is the app arriving, not an update.
 if (import.meta.env.MODE !== 'native' && 'serviceWorker' in navigator) {
   const updateSW = registerSW({
     onNeedRefresh() { swUpdate.offer(() => updateSW(true)) },
     onRegisterError(err) { console.warn('[sw] registration failed', err) },
+  })
+  const wasControlled = Boolean(navigator.serviceWorker.controller)
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (wasControlled) swUpdate.offer(() => window.location.reload())
   })
 }
 

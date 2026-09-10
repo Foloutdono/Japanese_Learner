@@ -193,8 +193,20 @@ class CompletePayload(BaseModel):
         if self.goalLevel == NOVICE_GOAL:
             if self.jlptLevel != LEVELS[0]:
                 raise ValueError(f"the novice's stop is behind {self.jlptLevel}")
-        elif self.goalLevel is not None and LEVELS.index(self.goalLevel) <= LEVELS.index(self.jlptLevel):
-            raise ValueError("goalLevel must be beyond jlptLevel")
+        # BEHIND is the refusal, and not "anything short of beyond":
+        # the destination is the last level the ride COVERS (journey.py's
+        # _journey_levels slices start..goal inclusive), so boarding at a
+        # level and riding to it is the ordinary one-level ride rather
+        # than a contradiction. It is also the novice's own case, and why
+        # this stopped at "beyond" too soon: a learner who does not read
+        # both scripts boards at N5 -- there is no stop below it -- and
+        # N5 is then the destination they are likeliest to name. Stored,
+        # that learner and an N5 one are the same row, so this rule
+        # cannot tell them apart and must not try; refusing equality
+        # refused the beginner's own goal with a 422 the boarding could
+        # not get past at all (2026-09-09).
+        elif self.goalLevel is not None and LEVELS.index(self.goalLevel) < LEVELS.index(self.jlptLevel):
+            raise ValueError("goalLevel must not be behind jlptLevel")
         if self.goalTargetDate is not None and self.goalLevel is None:
             raise ValueError("goalTargetDate needs a goalLevel — a date with no destination is not a goal")
         return self

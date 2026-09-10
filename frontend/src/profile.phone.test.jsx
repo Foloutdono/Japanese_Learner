@@ -65,10 +65,15 @@ describe('the profile at phone width', () => {
     const rank = screen.container.querySelector('.leaderboard-row__rank')
     expect(rank.getBoundingClientRect().width).toBe(30)
     expect(getComputedStyle(rank).borderTopLeftRadius).toBe('999px')
-    // The board's toggle sits on the head's right edge.
+    // The board's toggle sits on the head's right edge — and on the
+    // title's OWN line, not a second one under it: at 390px the head
+    // used to wrap, which put the only control in the card on a line
+    // of its own (index.css, "The head holds ONE row").
+    const mark = screen.container.querySelector('.bz__mark').getBoundingClientRect()
     const head = screen.container.querySelector('.bz__head').getBoundingClientRect()
     const seg = screen.container.querySelector('.bz__seg').getBoundingClientRect()
     expect(head.right - seg.right).toBeLessThan(head.width / 2)
+    expect(seg.top).toBeLessThan(mark.bottom)
   })
 
   it('the status sheet: distance, a 44px track, two rows, the moves are targets', async () => {
@@ -195,7 +200,7 @@ describe('the settings at phone width', () => {
   it('the list rows are 60px targets divided by hairlines; the services three across, the stops five, the destinations four', async () => {
     const screen = await render(
       <main className="settings">
-        <div className="stg-headrow"><div className="stg-head"><h1 className="stg-head__jp">Settings</h1></div><button type="button" className="stage__leave">‹ Profile</button></div>
+        <div className="bar" style={{ '--line-color': 'var(--pass-ink)' }}><div className="bar__row"><span className="bar__roundel" aria-hidden="true">SG</span><span className="bar__names"><h1 className="bar__title">Settings</h1></span><span className="bar__aside"><button type="button" className="stage__leave">‹ Profile</button></span></div><div className="bar__stripe" aria-hidden="true" /></div>
         <div className="stg-list">
           {['Display & language', 'Sound', 'Learning'].map(l => (
             <button key={l} type="button" className="stg-row"><span className="stg-row__names"><span className="stg-row__jp">{l}</span></span><span className="stg-row__value">Dark · English</span></button>

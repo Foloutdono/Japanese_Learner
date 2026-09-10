@@ -35,7 +35,7 @@ const native = () => import('./native')
 
 /** The shells' deep link. Registered in AndroidManifest.xml and
  *  Info.plist; anything else here has to change all three. */
-export const NATIVE_REDIRECT = 'com.japaneselearner.app://auth-callback'
+export const NATIVE_REDIRECT = 'app.tsuji://auth-callback'
 
 /** Where Supabase should send the learner back to. */
 export function redirectTarget() {
@@ -94,6 +94,24 @@ export async function connectProvider({ provider = 'google', link = false } = {}
     // In the shell we want the URL, not a navigation: the WebView has
     // to stay exactly where it is.
     skipBrowserRedirect: inShell,
+    // 券面の名義 — WHICH Google account, asked every time.
+    //
+    // Without this, Google signs in whichever account the browser is
+    // already holding, silently, whenever there is exactly one. That
+    // is the wrong default for both halves of this call:
+    //
+    //   sign-in  a Google account no pass carries is a NEW pass, and
+    //            a new pass has no journey on it — so App.jsx reads
+    //            onboarded_at as null and starts the boarding from
+    //            question one. A learner whose journey is on their
+    //            OTHER address never sees a chooser, and cannot tell
+    //            why the app forgot them.
+    //   link     the address being written onto this pass is not one
+    //            the learner picked.
+    //
+    // `select_account` is the parameter Google reads for it; other
+    // providers ignore an unknown prompt rather than refusing.
+    queryParams: { prompt: 'select_account' },
   }
 
   try {
@@ -127,4 +145,29 @@ export async function connectProvider({ provider = 'google', link = false } = {}
   } catch (err) {
     return { ok: false, message: err?.message }
   }
+}
+
+/**
+ * Whether the account behind this session already carries an identity
+ * from `provider`.
+ *
+ * Two sources, because they fail in different places: `app_metadata
+ * .providers` is a claim on the token itself, so it is present the
+ * moment a session exists and is re-read on every refresh; `identities`
+ * is the fuller list on the user object, and is what a freshly linked
+ * identity lands in. Either saying yes is a yes.
+ *
+ * Used to decide whether to OFFER Google on an account that already
+ * has a key (Settings › Account): an account that has it needs no
+ * offer, and one that lacks it has no other way to be reached by the
+ * Google button on the sign-in screen — signing in there would make a
+ * second, empty account rather than opening this one.
+ */
+export function hasProvider(session, provider = 'google') {
+  const user = session?.user
+  if (!user) return false
+  const claimed = user.app_metadata?.providers
+  if (Array.isArray(claimed) && claimed.includes(provider)) return true
+  const identities = user.identities
+  return Array.isArray(identities) && identities.some(i => i?.provider === provider)
 }

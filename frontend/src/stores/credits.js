@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 import { createRemoteStore } from './remote'
-import { logEvent } from '../lib/analytics'
+import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 
 // ── 回数券 — the balance, as the chrome sees it (plan 069) ────
@@ -34,8 +34,10 @@ export function peekBalance() {
   return cur ? (cur.unlimited ? null : cur.balance) : undefined
 }
 
-/** The optimistic decrement, before the response. */
+/** The optimistic decrement, before the response. Nothing to apply on
+ *  a free line — see lib/reviews.js. */
 export function applySpend(n = 1) {
+  if (!(n > 0)) return
   const cur = store.peek()
   if (!cur || cur.unlimited || cur.balance == null) return
   store.seed({ ...cur, balance: Math.max(0, cur.balance - n) })
@@ -72,12 +74,12 @@ export function useBalanceOpen() {
 // of those are outside any screen that could hold the state.
 //
 // The funnel is recorded HERE rather than in the sheet, on purpose.
-// Every open must produce exactly one `paywall_view` and exactly one
-// of `paywall_intent` / `paywall_dismiss`, and the only way to
-// guarantee that across five call sites is to make the call sites
-// unable to get it wrong: they open, take and close, and the events
-// are a consequence. `source` rides along so the dashboard can say
-// which door converts.
+// Every open must produce exactly one `offer_view` and exactly one of
+// `offer_intent` / `offer_dismiss` (lib/track.js's closed set), and
+// the only way to guarantee that across five call sites is to make the
+// call sites unable to get it wrong: they open, take and close, and
+// the events are a consequence. The door rides along as `where`, so
+// the dashboard can say which of the five converts.
 let paywall = null   // { source, taken } or null
 // How long the offer has been in front of them. Started on open and
 // read once, on whichever of the two answers comes first — the gap
@@ -91,7 +93,7 @@ export function openPaywall(source) {
   paywall = { source, taken: false }
   dwell?.stop()
   dwell = stopwatch()
-  logEvent('paywall_view', { source })
+  track('offer_view', { where: source })
   emit()
 }
 
@@ -112,7 +114,7 @@ function spendDwell() {
 export function takePaywall() {
   if (!paywall || paywall.taken) return
   paywall = { ...paywall, taken: true }
-  logEvent('paywall_intent', { source: paywall.source, ...spendDwell() })
+  track('offer_intent', { where: paywall.source, ...spendDwell() })
   emit()
 }
 
@@ -122,7 +124,7 @@ export function closePaywall() {
   // leaving it running would carry one learner's deliberation into the
   // next open.
   if (paywall && !paywall.taken) {
-    logEvent('paywall_dismiss', { source: paywall.source, ...spendDwell() })
+    track('offer_dismiss', { where: paywall.source, ...spendDwell() })
   } else {
     spendDwell()
   }

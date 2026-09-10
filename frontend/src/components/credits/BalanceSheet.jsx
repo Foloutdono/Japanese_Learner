@@ -6,11 +6,14 @@ import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from './OfferButton'
 
 // ── 残高 — the balance sheet (plan 069) ───────────────────────
-// Off the HUD's pass: the balance as a figure over its track, and the
-// two facts of a free pass — the daily refill and the cap. The canvas
-// draws an offer block under them, and it is now drawn: the pass is
-// shown but not yet sold (domain/paywall.js, HAS_PAYWALL). Nothing
-// here says "unlimited" to a free learner who has not asked.
+// Off the HUD's pass: the balance as a figure over its track, the two
+// facts of a free pass — the daily refill and the cap — and the one
+// line that is never charged against either. The canvas draws an offer
+// block under them, and it is now drawn: the pass is SHOWN but not yet
+// sold (domain/paywall.js's HAS_PAYWALL, which is deliberately not
+// HAS_STORE). It sits under the free line, so what a learner already
+// has is stated before what they could buy, and nothing here says
+// "unlimited" to a free learner who has not asked.
 function refillClock(iso, lang) {
   if (!iso) return null
   const d = new Date(iso)
@@ -55,6 +58,17 @@ export function BalanceSheet() {
             <span className="balance__cap">{t.balanceHolds(cap)}</span>
           </div>
         </div>
+      )}
+      {/* 無料 — the one line the balance is never asked for
+          (domain/credits.js). Under the lattice, not a third cell in
+          it: the rows are a flush two-column grid and a third cell
+          would leave half a row empty. Only where there is a balance
+          to be spared — a pass has nothing to be free of. */}
+      {balance != null && (
+        <p className="balance__free">
+          <span className="balance__free-jp" lang="ja">無料</span>
+          {t.balanceKanaFree}
+        </p>
       )}
       <OfferButton source={SOURCES.BALANCE} className="btn-depart pw-open--wide" />
       <button type="button" className="btn-secondary" onClick={closeBalance}>{t.close}</button>

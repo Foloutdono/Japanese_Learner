@@ -313,9 +313,19 @@ def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
 def post_kana_review(payload: ReviewPayload, user_id: str = Depends(get_user_id)):
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
-    # The fare, charged only now that the scheduler has accepted the
-    # review (plan 069): a rejected review is not a ride.
-    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
+    # 無料 — the kana line rides free (core/credits.py), so the fare
+    # here is nothing at all. Priced through cost_of(KANA) rather than
+    # written as a literal 0: this line then says the same thing the
+    # other five review endpoints say, and which lines are free stays
+    # one table in the ledger instead of a fact five routers remember
+    # separately. The source is this router's own constant, never the
+    # client's mode key -- a free ride is not something a payload gets
+    # to ask for.
+    #
+    # spend() with a fare of 0 writes no ledger row and still answers
+    # with the balance, which is what the HUD reconciles against; the
+    # response shape is unchanged.
+    fare = credits.spend(user_id, credits.cost_of(KANA), card_id)
     # No extra bulk-stats call needed at all now — review() returns
     # the post-review stage directly (it already has the updated
     # total_reviews/interval_days in hand from the save), and the

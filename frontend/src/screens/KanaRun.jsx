@@ -195,7 +195,6 @@ export default function KanaRun({ session }) {
         leaveLabel={t.kanaTitle}
         where={selectedSet.label}
         sub={modeLabel(t, FAST_REVIEW)}
-        pass={false}
       >
           <ReviewDeck
             foot={selectedSet.label}

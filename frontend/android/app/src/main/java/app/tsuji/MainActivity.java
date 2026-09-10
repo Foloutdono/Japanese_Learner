@@ -1,4 +1,4 @@
-package com.japaneselearner.app;
+package app.tsuji;
 
 import com.getcapacitor.BridgeActivity;
 

@@ -563,6 +563,41 @@ CREATE TABLE translation_log (
 CREATE INDEX idx_translation_log_user
 ON translation_log(user_id, created_at);
 
+-- 書取 (dictation): one row per clip transcribed. Owned by
+-- routes/dictation.py, created there at import time.
+--
+-- Two columns the other practice logs do not have, because this is the
+-- one sentence mode the machine grades rather than the learner:
+-- `accuracy` is how close the transcription came, 0..100 (difflib's
+-- ratio over the normalized text -- see study/dictation.grade), and
+-- `correct` is derived from it at study/dictation.CLOSE and kept
+-- because that is the column every other reader of a practice log
+-- understands. `plays` is how many times the clip was heard, as the
+-- player reports it; the mode allows two.
+--
+-- clip_id is the audio's content key (study/dictation.clip_id), which
+-- is derived from the line's own text -- so a row survives the bank
+-- being reordered, and stops resolving rather than silently resolving
+-- to a DIFFERENT line if that line is ever reworded. `phrase` is stored
+-- beside it so the history reads without a lookup either way.
+CREATE TABLE dictation_log (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    level       TEXT NOT NULL DEFAULT '',
+    clip_id     TEXT NOT NULL,
+    phrase      TEXT NOT NULL,
+    answer      TEXT NOT NULL,
+    correct     BOOLEAN NOT NULL,
+    accuracy    SMALLINT NOT NULL,
+    plays       SMALLINT NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- created_at ascending: a btree scans either way, so it serves
+-- /api/dictation/history's ORDER BY ... DESC.
+CREATE INDEX idx_dictation_log_user
+ON dictation_log(user_id, created_at);
+
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
 -- free tier), so this bounds draw on the SHARED free quota that the
@@ -575,30 +610,42 @@ CREATE TABLE ocr_usage (
     PRIMARY KEY (user_id, day)
 );
 
--- Owned by routes/events.py -- the onboarding and paywall funnels.
--- The only table here that records what a learner was SHOWN rather
--- than something they produced: a paywall never opened and a paywall
--- opened and refused are indistinguishable from credit_ledger, and
--- the drop-off between two boarding questions is not written anywhere
--- else either.
+-- ── 足跡 — the trail of screens a learner walked ─────────────────────
+-- Owned by core/events.py, written by routes/events.py (a batch the
+-- client queues and flushes) and by core/credits.py (the fare gate's
+-- shadow-mode refusals, which used to reach stdout and nothing else).
 --
--- `name` is constrained by an allowlist in the route rather than by a
--- CHECK here, so adding a funnel step is a code change and not a
--- migration; the trade is that the constraint is not visible to a
--- reader of this file. The seven names live in routes/events.py's
--- ALLOWED. `props` is capped at 512 bytes and must be shallow, which
--- is what keeps this from becoming a general event warehouse.
---
--- Write-only through the API. Read by the dashboards, directly.
+-- Nothing a learner TYPED is ever in here. `props` carries enums,
+-- numbers and route PATTERNS -- never a path with a theme or deck name
+-- in it, never a dictation answer, never an analysed sentence. That is
+-- enforced by a closed name set and a per-name key allowlist in
+-- core/events.py, applied to whatever a browser posts rather than
+-- trusted to it. See docs/adr/0012.
 CREATE TABLE event_log (
     id      BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     name    TEXT NOT NULL,
     props   JSONB NOT NULL DEFAULT '{}'::jsonb,
-    at      TIMESTAMPTZ NOT NULL DEFAULT now()
+    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- The funnel is always read as "this event, over this window"; the
--- retention pass reads it by user.
-CREATE INDEX event_log_name_at_idx ON event_log (name, at);
-CREATE INDEX event_log_user_at_idx ON event_log (user_id, at);
+-- (user_id, at) reads one learner's trail in order; (name, at) is what
+-- the weekly digest counts across everyone.
+CREATE INDEX idx_event_log_user_at ON event_log(user_id, at);
+CREATE INDEX idx_event_log_name_at ON event_log(name, at);
+
+-- The rolled-up half, on review_daily's model and for the same reason:
+-- screen_view is the volume driver and this database is shared with the
+-- review history. scripts/compact_events.py folds raw rows in here and
+-- then deletes them past thirty days, except the once-per-learner
+-- families (boarding, the fare gate) which a rollup cannot answer --
+-- "did the people who stopped at the level step ever come back" needs
+-- the rows, not the counts. Empty until that script is run, which is
+-- exactly today's behaviour.
+CREATE TABLE event_daily (
+    user_id TEXT NOT NULL,
+    day     DATE NOT NULL,
+    name    TEXT NOT NULL,
+    n       INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day, name)
+);

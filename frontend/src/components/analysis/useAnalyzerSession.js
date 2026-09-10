@@ -252,6 +252,44 @@ export function useAnalyzerSession(session) {
     }
   }
 
+  // ── The link ingest ──────────────────────────────────────
+  // A URL and nothing else. The server fetches the Japanese track
+  // through a residential proxy, which is the one route that clears
+  // YouTube's datacenter block (docs/adr/0003, 2026-09-10) -- and it
+  // is off unless that proxy is paid for, which is why the screen
+  // asks /api/video/capabilities before offering this at all.
+  //
+  // Deliberately shaped like the two ingests above rather than shared
+  // with them: the only thing they have in common is the 202 they
+  // land on, and a single "start a video session somehow" helper
+  // taking a mode flag would hide which of them can fail on the
+  // network.
+  async function startVideoFromLink(url, { start, end } = {}) {
+    const trimmed = url?.trim()
+    if (!trimmed) return
+    const run = beginRun()
+    try {
+      const data = await apiJson('/api/video/session', session, {
+        method: 'POST',
+        body: JSON.stringify({
+          url: trimmed,
+          ...(start != null ? { start } : {}),
+          ...(end != null ? { end } : {}),
+        }),
+      })
+      if (run !== runIdRef.current) return
+      setVideoSessionId(data.sessionId)
+    } catch (e) {
+      if (run !== runIdRef.current) return
+      // The API's own sentence, always. A 400 here means this server
+      // cannot fetch, a 429 means the day's allowance is spent, and
+      // both of those name the file path as the way through -- which a
+      // generic "something went wrong" would throw away.
+      setError((e.body && e.body.detail) || e.message)
+      setStatus('failed')
+    }
+  }
+
   async function startVideoFromFile(file, { url, start, end }) {
     if (!file) return
     const run = beginRun()
@@ -466,6 +504,7 @@ export function useAnalyzerSession(session) {
     keepSentence,
     analyzeText,
     startVideoFromFile,
+    startVideoFromLink,
     startVideoFromTranscript,
     explain,
     loadHistoryEntry,

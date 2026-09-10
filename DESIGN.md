@@ -20,6 +20,17 @@ that screen.
 
 ## The idea
 
+**The app is called 辻 — Tsuji.** A 辻 is a crossroads, which is exactly what
+the gate hall is: the point the five 改札口 meet. The name is also the mark —
+one glyph, five strokes, a 十 inside 辶 drawing the intersection it names — so
+the icon (`frontend/brand/icon.html`), the masthead (`appTitle`) and the plate
+at the origin station (辻駅, TJ, つじ) are one thing rather than three. It is a
+国字, a character invented in Japan and absent from Chinese dictionaries, with
+no on'yomi at all — a fair thing for an app about Japanese writing to be
+called. `Tsuji` is the Latin half, and it carries the places the OS and the
+stores print a name: the PWA `short_name`, the store listing, the bundle id
+`app.tsuji`, the notification header.
+
 The app is a Japanese railway station. Learning is a journey: sections are
 **lines** (路線), screens are **stations**, choices are **platforms** (のりば),
 your profile is a **commuter pass** (定期券) in its **holder** (定期入れ), and
@@ -39,7 +50,7 @@ it. An insert is a stamp sheet, a lattice of records, a ledger of lines, a
 ranking board. It does not need a caption, which is what lets that screen
 print no section headings at all (see Structure).
 
-This is not decoration. It is the reason the app can show eleven subjects
+This is not decoration. It is the reason the app can show a dozen subjects
 without a menu that looks like a menu, and the reason a colour can mean
 something. Every visual decision should be answerable with "what would a
 station do?"
@@ -97,7 +108,7 @@ the screen.
 
 | Family | Tokens | Means |
 |---|---|---|
-| **Places** | `--line-kana`, `--line-vocab`, … (11) | which section you are in |
+| **Places** | `--line-kana`, `--line-vocab`, … (one per section) | which section you are in |
 | **People** | `--pass-ink` (消炭 charcoal) | this is *yours* — pass, IC card, stub |
 | **States** | `--success`, `--warning`, `--danger`, `--state-*` | correct, due, learning, mastered |
 
@@ -198,19 +209,36 @@ glyph is already 44px — a reading view cannot set it smaller than the card it
 came from. A word on that plate takes `--fs-display`, a long expression
 `--fs-heading`.
 
-The catalogue's own tile is the one place the word rung is a **ceiling
-rather than a size**. At 72px a 168px tile takes two characters to a line,
-so テープレコーダー printed one character per line over four of them and grew
-its whole row to 390px. The tile is a query container and its headword
-divides that width by its own character count (`--len`, set by the screen),
-clamped between `--fs-caption` and the word rung: a lone 駅 is the specimen
-it always was, エアコンディショナー lands near 15px, and nothing wraps. It is
-the one off-scale font size in the app that is not a literal to be
-harmonised away — the two ends of the clamp are rungs and the middle is a
-measurement of the tile — and it is allowlisted in `design-scale.json` as
-such. Reach for it only where the type must fit a box it cannot choose;
-everywhere else the nine rungs decide, and a headword too long for the floor
-ellipsises rather than shrinking further.
+**Both specimen rungs are ceilings rather than sizes**, in the two places
+the type has to fit a box it did not choose.
+
+The catalogue's tile was the first. At 72px a 168px tile takes two characters
+to a line, so テープレコーダー printed one character per line over four of
+them and grew its whole row to 390px. The tile is a query container and its
+headword divides that width by its own character count (`--len`, set by the
+screen), clamped between `--fs-caption` and the word rung: a lone 駅 is the
+specimen it always was, エアコンディショナー lands near 15px, and nothing
+wraps.
+
+The study card is the second, on the same instrument down to the 96cqw
+(`.char-display`, decided 2026-09-09). The rung had been a flat size there,
+and the specimen is one nowrap line, so a box sized to its own text simply
+grew past the card and spilled the word off both edges — とうもろこし is
+~440px against the 290px text column of a 390px phone, and printed with its
+head and its tail off the screen. It is now fitted the same way (46px there,
+28px for コンビニエンスストア) and the card is the query container. **Fitted,
+not wrapped**: the specimen box is a fixed multiple of its own rung tall so
+the card cannot resize under the learner on a flip, and a second line would
+leave that height the way the word left its width. Prose on a card is a
+different object and takes a different component — the meaning-first
+direction hands its gloss to `MeaningDisplay`, which wraps.
+
+These are the only off-scale font sizes in the app that are not literals to
+be harmonised away — the two ends of each clamp are rungs and the middle is a
+measurement of the box — and they are allowlisted in `design-scale.json` as
+such. Reach for the instrument only where the type must fit a box it cannot
+choose; everywhere else the nine rungs decide, and anything too long even for
+the floor is cut at the edge of its box rather than shrinking further.
 
 ### Tracking runs inversely to size
 
@@ -221,14 +249,71 @@ Japanese barely (`--tr-term`).
 Any tracked line on a left-flush or centred axis must also set `text-indent` to
 the same value, cancelling the space the last letter's tracking adds.
 
+**Unless the line is not the only ink in its box.** A chip opens with a roundel
+or an icon, so the ink's left edge is not the label's — an indent moves the
+label and leaves that edge where it was, and the pill still reads a half
+tracking off centre. There the trailing space comes off the box instead:
+`padding-inline-end: calc(<the pad> - <the tracking>)`, which centres both the
+chip that shrink-wraps and the chip that is stretched and centres its content.
+Where a rule zeroes its padding altogether (`.platform-sign__dests .chip`) the
+same half tracking is added as a *leading* pad, which moves centred content by
+half its own width.
+
+Measured, at 8x over four sub-pixel phases: the dictionary's 部 RADICAUX chip
+sat 1.16px left of centre, `.seg__opt-latin` 1.10px, `.card-row__badge` 1.02px.
+None of them is above half a pixel now.
+
 ### Figures
 
 Every numeral: `--font-display`, `700`, `line-height: 1`, and
 `font-variant-numeric: tabular-nums`. Formatting (`toLocaleString`) happens in
 JSX, never in CSS.
 
+**A figure centred in a roundel is the exception to the `line-height: 1`.** A
+roundel centres the LINE BOX, not the ink, so whatever leading the line box
+carries decides where the glyph lands — and neither of the two the app reaches
+for by habit is right. The sheet's inherited `1.6` set the figure 0.55px high
+in every 30px roundel; the figures' own `line-height: 1` set it 0.81px high in
+the HUD's level and 0.42px high on the platform card. A roundel takes
+`line-height: normal` — the font's own box, which is the box its ink was drawn
+in — which lands the HUD's figure within a tenth of a pixel and no roundel in
+the app further off its centre than half of one. The roundels that already
+inherited `normal` (anything inside a `<button>` that does not restate it, e.g.
+`.mcq-row__index`) measured true before the sweep, which is the same finding
+from the other side.
+
+A roundel holding a **Japanese** glyph takes `line-height: 1` instead: a CJK
+glyph is drawn to fill the em square, so the em box IS the ink box
+(`.chip__glyph`, `.stamp-rally__stamp`). Do not read this as a licence to tune
+leading by eye — those are the only two values, and which one applies is
+decided by the script in the roundel, not by taste.
+
 A figure and its label form a fixed pair — large numeral, small unit inline,
 caps label beneath at `--fs-caption-xs`.
+
+### French punctuation does not start a line
+
+French sets a space before `:` `;` `!` `?` and inside `« »`, and that space is
+**insécable** — the mark belongs to the word in front of it and the line may
+not be cut between the two. Written as a plain space it is exactly a break
+opportunity, and on a phone the browser takes it. The arrival screen printed
+its lead as *"…, pour vous"* / *":"*, a colon alone on a line under the
+projection.
+
+So the French string table is welded on the way out
+(`locales/frenchSpacing.js`): every such space becomes U+00A0 as the table is
+exported, including inside sentences a screen assembles at call time — which
+is where this one came from. NBSP and space set the same width, so nothing
+moves; only the break disappears. `locales.test.js` holds the whole table to
+the rule, so new copy cannot bring the orphan back.
+
+Do not hand-type NBSPs into the tables — an invisible character no reviewer
+can see, in a file where the next writer will forget it. Write the plain
+space and let the weld do it.
+
+Paragraphs of copy take `text-wrap: pretty` (`.brd__q`, `.brd-lead`) so the
+last line is not left a scrap either. That is the other half: welding decides
+what may not be split, `pretty` decides where the sentence would rather break.
 
 ## Surfaces
 
@@ -344,9 +429,10 @@ rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
 treatment.
 
 **The ink is chosen by the fill's lightness, not fixed.** At the 70/79
-deepening, **eleven of the twelve line pigments carry `--text-on-panel`** in both
+deepening, **every line pigment but one carries `--text-on-panel`** in both
 themes and both states; the worst of them, 黄丹 safflower, rests at 5.29:1 and
-hovers at 4.53:1.
+hovers at 4.53:1. A new pigment has to be measured against that pair before it
+is minted — 常磐 tokiwa, added with 書取, rests at 5.56:1 and hovers at 4.74:1.
 
 **山吹色 gold is the twelfth, and it is the exception.** It reaches only 3.90:1
 resting and 3.24:1 hovering in dark theme, and no deepening within this family
@@ -633,6 +719,13 @@ a learner who has just rated one card is already looking for the next.
   Same parts every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
+  **A stop stands at the END of the leg it names, and the line opens at
+  初, the novice's stop** — so reaching a stop is finishing the thing it is
+  named for, never starting it, and a learner who has done nothing is drawn
+  standing at 初 rather than on the first level's platform. The wall map had it
+  the other way round once: N5's station sat at the START of N5's work, which
+  handed a learner that level for boarding the train and left the last stop one
+  leg short of the terminus.
   Three rules the 進捗が主役 round settled on the pass's copy of it, and they
   hold wherever the drawing goes: your train **rides above the rail and reaches
   it on a stem**, so the x it claims is exact and it never covers a stop — a

@@ -157,7 +157,6 @@ export default function GrammarRun({ session }) {
         leaveLabel={t.grammarTitle}
         where={`${t.grammarTitle} ${level}`}
         sub={t.modeReview}
-        pass={false}
       >
           <ReviewDeck
             foot={`${t.grammarTitle} ${level}`}

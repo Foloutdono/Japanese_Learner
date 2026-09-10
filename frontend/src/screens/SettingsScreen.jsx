@@ -8,8 +8,8 @@ import { useProfileSummary } from '../stores/profileSummary'
 import { useJourneyStatus } from '../stores/journey'
 import { NOVICE_GOAL } from '../domain/goalMath'
 import { useThemeChoice } from '../stores/theme'
-import { Leave } from '../components/chrome/Bar'
-import { ChevronIcon } from '../components/ui/Icons'
+import { Bar, Leave } from '../components/chrome/Bar'
+import { ChevronIcon, GearIcon } from '../components/ui/Icons'
 import { useOfferable } from '../hooks/useOfferable'
 import { openPaywall } from '../stores/credits'
 import { SOURCES } from '../domain/paywall'
@@ -87,10 +87,12 @@ function SettingsList({ session }) {
 
   return (
     <main id="main-content" className="settings">
-      <div className="stg-headrow">
-        <div className="stg-head"><h1 className="stg-head__jp">{t.settings}</h1></div>
-        <Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>
-      </div>
+      <Bar
+        code={<GearIcon size={14} />}
+        title={t.settings}
+        color="var(--pass-ink)"
+        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+      />
 
       <div className="stg-list">
         {ROWS.map(row => (

@@ -372,10 +372,16 @@ def test_goal_refusals(jclient):
     # No boarding level yet — nothing to issue a ticket against.
     assert jclient.post("/api/journey/goal",
                         json={"goalLevel": "N3"}).status_code == 422
-    _complete(jclient)
-    # Not beyond the boarding level (LEVELS is journey-ordered).
+    # Boarding at N3, so there are stops behind as well as ahead.
+    _complete(jclient, jlptLevel="N3", goalLevel="N2")
+    # Behind the boarding level (LEVELS is journey-ordered). Riding to
+    # N3 itself is not refused -- the office accepts that destination,
+    # and Settings has to be able to reprint what the office issued
+    # (routes/journey.py, routes/onboarding.py's goal_is_coherent).
     assert jclient.post("/api/journey/goal",
                         json={"goalLevel": "N5"}).status_code == 422
+    assert jclient.post("/api/journey/goal",
+                        json={"goalLevel": "N4"}).status_code == 422
     # Not a level at all, and a date already expired.
     assert jclient.post("/api/journey/goal",
                         json={"goalLevel": "N9"}).status_code == 422
@@ -384,7 +390,12 @@ def test_goal_refusals(jclient):
                               "goalTargetDate": "2020-01-01"}).status_code == 422
     # None of them wrote: the pass still carries the original contract.
     body = jclient.get("/api/journey/status").json()
-    assert body["goalLevel"] == "N3"
+    assert body["goalLevel"] == "N2"
+
+    # And the destination the office does issue is reprintable here.
+    reprint = jclient.post("/api/journey/goal", json={"goalLevel": "N3"})
+    assert reprint.status_code == 200
+    assert reprint.json()["goalLevel"] == "N3"
 
 
 def test_cancelling_keeps_the_ride(jclient):

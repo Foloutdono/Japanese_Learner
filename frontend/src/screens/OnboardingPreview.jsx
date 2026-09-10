@@ -46,7 +46,7 @@ export default function OnboardingPreview() {
           covers everything either way. */}
       {phase === 'gate' && (
         <TicketGate
-          section={{ icon: '日本語', title: HOME_STATION.latin }}
+          section={{ icon: '辻', title: HOME_STATION.latin }}
           station={HOME_STATION}
           onNavigate={() => {}}
           onDone={() => setPhase('done')}

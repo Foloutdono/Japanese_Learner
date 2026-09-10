@@ -84,11 +84,13 @@ PLAN = [
     ("reading_log",         "user_id = %(user)s",       "reading practice history"),
     ("comprehension_log",   "user_id = %(user)s",       "reading comprehension history"),
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
+    ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
-    ("event_log",           "user_id = %(user)s",       "the onboarding and paywall funnel trail"),
+    ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
+    ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),
     ("user_profiles",       "user_id = %(user)s",       "identity: username, level, goal, preferences"),
 ]
 

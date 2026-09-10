@@ -68,12 +68,19 @@ this repository (`frontend/.gitignore` refuses `.jks`, `.keystore`, `.p8`,
 
 ## Before the first upload — the owner's list
 
-- The **store name** and the **bundle id**. Both are placeholders today:
-  `Japanese Learner` and `com.japaneselearner.app`, in
-  `frontend/capacitor.config.json`, the Android `strings.xml`, the iOS
-  `Info.plist`, `ios/App/fastlane/Appfile` and `Matchfile`, and the
-  `brdAppName` locale key (the notification's header). A bundle id cannot
-  change after the first upload.
+- The **store name** and the **bundle id** are set: `Tsuji` and
+  `app.tsuji`, in `frontend/capacitor.config.json`, the Android
+  `strings.xml` and `build.gradle`, the iOS `Info.plist` and
+  `project.pbxproj`, `ios/App/fastlane/Appfile`, `Matchfile` and
+  `Fastfile`, and the `brdAppName` locale key (the notification's
+  header). **A bundle id cannot change after the first upload** — this is
+  the last point at which `app.tsuji` is still free to move.
+- The deep link moved with it: `app.tsuji://auth-callback`
+  (`src/lib/oauth.js`, `AndroidManifest.xml`, `Info.plist`). It has to be
+  added to Supabase's **Redirect URLs** allowlist (Authentication → URL
+  Configuration) before a shell build can finish a Google sign-in, and
+  the old `com.japaneselearner.app://` entry can come out at the same
+  time. See `docs/oauth.md`.
 - The **icon** (`frontend/brand/icon.html` → `npm run icons` for the web
   set, `npm run assets:native` for the shells).
 - The **privacy policy** text (`frontend/public/privacy.html`, plan 066);

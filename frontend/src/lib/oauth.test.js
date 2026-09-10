@@ -28,7 +28,7 @@ vi.mock('./supabase', () => ({ supabase: { auth } }))
 vi.mock('./platform', () => ({ isNative: () => isNative() }))
 vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
 
-const { connectProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
+const { connectProvider, hasProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
   for (const m of [auth.signInWithOAuth, auth.linkIdentity, auth.exchangeCodeForSession, auth.setSession, openAuthTab]) m.mockReset()
@@ -52,7 +52,7 @@ describe('where Supabase sends the learner back', () => {
     isNative.mockReturnValue(true)
     expect(redirectTarget()).toBe(NATIVE_REDIRECT)
     // The manifests are written against this exact string.
-    expect(NATIVE_REDIRECT).toBe('com.japaneselearner.app://auth-callback')
+    expect(NATIVE_REDIRECT).toBe('app.tsuji://auth-callback')
   })
 })
 
@@ -79,7 +79,7 @@ describe('in the shell', () => {
   beforeEach(() => { isNative.mockReturnValue(true) })
 
   it('keeps the WebView where it is and finishes the exchange itself', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?code=abc123')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?code=abc123')
     const r = await connectProvider({})
     expect(r).toEqual({ ok: true })
 
@@ -90,7 +90,7 @@ describe('in the shell', () => {
     expect(args.options.redirectTo).toBe(NATIVE_REDIRECT)
     // The authorization page goes to the system browser, and only a
     // deep link on our own scheme is listened for.
-    expect(openAuthTab).toHaveBeenCalledWith('https://accounts.google.test/o', 'com.japaneselearner.app://')
+    expect(openAuthTab).toHaveBeenCalledWith('https://accounts.google.test/o', 'app.tsuji://')
     expect(auth.exchangeCodeForSession).toHaveBeenCalledWith('abc123')
   })
 
@@ -106,7 +106,7 @@ describe('in the shell', () => {
   // was tested and silently did nothing on a phone.
   it('takes the session straight off the fragment under the implicit flow', async () => {
     openAuthTab.mockResolvedValue(
-      'com.japaneselearner.app://auth-callback#access_token=at1&refresh_token=rt1&token_type=bearer',
+      'app.tsuji://auth-callback#access_token=at1&refresh_token=rt1&token_type=bearer',
     )
     expect(await connectProvider({})).toEqual({ ok: true })
     expect(auth.setSession).toHaveBeenCalledWith({ access_token: 'at1', refresh_token: 'rt1' })
@@ -114,13 +114,13 @@ describe('in the shell', () => {
   })
 
   it('will not half-accept a fragment carrying only an access token', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback#access_token=at1')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback#access_token=at1')
     expect((await connectProvider({})).ok).toBe(false)
     expect(auth.setSession).not.toHaveBeenCalled()
   })
 
   it('does not invent a session when the callback carries a refusal', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?error=access_denied')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?error=access_denied')
     const r = await connectProvider({})
     expect(r.ok).toBe(false)
     expect(auth.exchangeCodeForSession).not.toHaveBeenCalled()
@@ -128,7 +128,7 @@ describe('in the shell', () => {
   })
 
   it('passes a failed exchange back rather than reporting success', async () => {
-    openAuthTab.mockResolvedValue('com.japaneselearner.app://auth-callback?code=abc123')
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback?code=abc123')
     auth.exchangeCodeForSession.mockResolvedValue({ data: {}, error: { message: 'code expired' } })
     expect(await connectProvider({})).toEqual({ ok: false, message: 'code expired' })
   })
@@ -149,5 +149,52 @@ describe('a guest keeping what they have', () => {
     const r = await connectProvider({ link: true })
     expect(r).toEqual({ ok: false, message: 'Manual linking is disabled' })
     expect(auth.signInWithOAuth).not.toHaveBeenCalled()
+  })
+})
+
+// ── 券面の名義 — which Google account ────────────────────────────
+// Google signs the browser's current account in without asking
+// whenever there is exactly one, and both roads out of this module
+// suffer for it: a sign-in lands on a pass nobody chose (and a Google
+// identity no pass carries is a NEW pass, boarding and all), a link
+// writes an address nobody chose onto the pass in hand. The chooser is
+// asked for by parameter, so it is pinned by parameter.
+describe('the account is chosen, never assumed', () => {
+  it('asks Google for the chooser when signing in', async () => {
+    await connectProvider({})
+    const [[args]] = auth.signInWithOAuth.mock.calls
+    expect(args.options.queryParams).toEqual({ prompt: 'select_account' })
+  })
+
+  it('asks for it when linking too, where the wrong pick is worse', async () => {
+    await connectProvider({ link: true })
+    const [[args]] = auth.linkIdentity.mock.calls
+    expect(args.options.queryParams).toEqual({ prompt: 'select_account' })
+  })
+})
+
+// Whether the offer to CONNECT Google is made at all (Settings ›
+// Account) hangs on this, and it is read from a session shape that
+// arrives two different ways: a token's own claims, and the fuller
+// user object a link or a refresh brings back.
+describe('reading the identities a pass carries', () => {
+  const session = user => ({ user })
+
+  it('reads the token claim', () => {
+    expect(hasProvider(session({ app_metadata: { providers: ['email', 'google'] } }))).toBe(true)
+    expect(hasProvider(session({ app_metadata: { providers: ['email'] } }))).toBe(false)
+  })
+
+  it('reads the identity list, which is where a fresh link lands', () => {
+    expect(hasProvider(session({ identities: [{ provider: 'google' }] }))).toBe(true)
+    expect(hasProvider(session({ identities: [{ provider: 'email' }] }))).toBe(false)
+  })
+
+  // The offer must not be made to nobody, and an anonymous pass is
+  // the guest's — it gets the whole account offer instead.
+  it('says no for a session that is not one, and for a guest', () => {
+    expect(hasProvider(null)).toBe(false)
+    expect(hasProvider({})).toBe(false)
+    expect(hasProvider(session({ app_metadata: { providers: ['anonymous'] } }))).toBe(false)
   })
 })

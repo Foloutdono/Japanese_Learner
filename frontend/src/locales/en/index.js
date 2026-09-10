@@ -1,6 +1,6 @@
 // ── App / Auth ────────────────────────────────────────────
 const auth = {
-  appTitle:          '日本語',
+  appTitle:          '辻',
   learnJapanese:     'Learn Japanese',
   appDesc:           'Spaced repetition (SM-2) · Hiragana · Katakana · JLPT Vocabulary',
   login:             'Login',
@@ -67,6 +67,7 @@ const nav = {
   balanceOf:         (cap) => `of ${cap}`,
   balanceRefillAt:   (at) => `a day, at ${at}`,
   balanceHolds:      (cap) => `holds up to ${cap}`,
+  balanceKanaFree:   'Kana reviews cost nothing',
   gateShort:         (rides, due) => `Only ${rides} of the ${due} required`,
   gateNoCredits:     (refill, at) => `No credits left — +${refill} at ${at}`,
   runOutTitle:       'Out of credits',
@@ -74,6 +75,8 @@ const nav = {
   runOutWaiting:     (n) => `${n} wait for tomorrow`,
   runOutRefill:      'at midnight',
   runOutTomorrow:    'tomorrow',
+  // 無料 — a lane that costs nothing (domain/credits.js).
+  freeFare:          'free',
   fareReviews:       'reviews',
   fareFare:          'fare',
   fareCreditsLeft:   'credits left',
@@ -98,7 +101,7 @@ const nav = {
 
 // ── Home screen ───────────────────────────────────────────
 const home = {
-  // ── 日本語駅 — the station ────────────────────────────────
+  // ── 辻駅 — the station ───────────────────────────────────
   // The home screen is the gate hall and every section is a line on
   // its wall map (see config/stations.js and WallMap.jsx). Station
   // and line names themselves are Japanese proper nouns and live in
@@ -163,6 +166,10 @@ const quiz = {
   byLevelDesc:       'The exam\'s own five grades, N5 up to N1',
   byFrequency:       'Word frequency',
   byFrequencyDesc:   'Ranked by how often they actually appear in print',
+  // The same axis one line over, where what is ranked is the
+  // characters rather than the words (see KanjiScreen.jsx).
+  byFrequencyKanji:     'Kanji frequency',
+  byFrequencyKanjiDesc: 'Ranked by how often they appear in print',
   byMastery:         'My cards',
   byMasteryDesc:     'Built only from words you have already met',
   // Vocabulary's third study-source option — every JMdict word outside
@@ -190,6 +197,16 @@ const quiz = {
   // dictionary's `noResults` above, which is followed by the query
   // term ("No results for {query}") rather than standing alone.
   themeNoResults:    'No themes match your filter',
+
+  // The four bands inside a theme, cut by frequency (see
+  // backend/content/theme_data.py). The Japanese half of each name lives
+  // in domain/themes.js — it is the same in every language.
+  themeLevelBasic:    'Basic',
+  themeLevelMedium:   'Medium',
+  themeLevelAdvanced: 'Advanced',
+  themeLevelExpert:   'Expert',
+  selectThemeLevel:   'Choose a level',
+  leaveThemeLevels:   'Levels',
 
   // Theme display labels — key is `theme_data.list_themes()`'s `key`
   // camelCased and prefixed with `theme` (see ThemeSelector.jsx's
@@ -411,9 +428,14 @@ const stats = {
   nothingGraded:      'Nothing is graded',
   learnFourLines:     'Four lines',
   stationJlpt:        'JLPT',
+  // The sub over vocabulary's and kanji's source page. Terse, like
+  // every other sub on a station: it names the page you are on, and
+  // the cards under it do the asking. (The practice sections put the
+  // whole question up there instead -- selectStudySource -- because
+  // their bar carries no other sub to be consistent with.)
+  stationSources:     'Sources',
   byFrequencyShort:   'By frequency',
   byThemeShort:       'By theme',
-  jlptInstead:        'JLPT instead',
   leaveLevels:        'Levels',
   leaveSets:          'Sets',
   leaveTiers:         'Tiers',
@@ -768,6 +790,10 @@ const video = {
   videoDesc:           "Study a video's Japanese subtitles\nLive, colour-coded by what you already know\nA photo of the world with a soundtrack",
   videoUrlOptional:    'Video link',
   videoUrlOptionalHint: 'Shows the video next to the subtitles, opens the right page for the bookmark, and pre-fills DownSub.',
+  // Shown only where the server can fetch a link itself. It names the
+  // subtitles rather than the mechanism -- the learner does not need to
+  // know a proxy is involved, only what they get.
+  analyzeThisLink:     'Get the subtitles',
   grabTitle:           'Subtitles in one tap',
   grabLead:            'A special bookmark you set up once (about a minute): after that, open it on any YouTube video and the Japanese subtitles arrive here on their own — phones included.',
   grabTutorialBtn:     'Step-by-step tutorial',
@@ -907,6 +933,32 @@ const translationMode = {
   analyzingTranslation:  'Analyzing your translation…',
   analysisUnavailable:   'Analysis unavailable — judge against the reference above.',
 }
+// ── 書取 — dictation ──────────────────────────────────────────
+// DictationRun.jsx reuses the shared study/quiz keys wholesale
+// (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// translation/translationEnglish, nextPhrase, examAudioPause/
+// examAudioPending/examAudioUnavailable) — only the genuinely new
+// keys live here.
+//
+// The four verdicts are four on purpose: "wrong" and "you caught half
+// of it" are different results to a listener, and flattening them to a
+// tick and a cross would tell someone who transcribed most of a
+// sentence exactly as much as it tells someone who heard nothing.
+const dictationMode = {
+  dictationTitle:        'Dictation',
+  dictationDesc:         'Write down what you hear\nTwo listens, and no more\nN5 through N1',
+  dictationFetchError:   "Couldn't load a clip. Try again.",
+  dictationCheckError:   "Couldn't mark your answer. Try again.",
+  dictationPlaceholder:  'Write what you heard…',
+  dictationPrompt:       'Write what you heard, in Japanese',
+  dictationListen:       'Listen',
+  dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
+  dictationPerfect:      'Word for word',
+  dictationClose:        'Nearly',
+  dictationPartial:      'Half of it',
+  dictationMissed:       'Missed',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
@@ -1142,6 +1194,13 @@ const settings = {
   guestClaimDesc:    'Your progress is already here. Add an address and a password to keep it — nothing moves, it is the same account.',
   guestClaimConfirm: 'Almost: confirm the address from the link we just sent you.',
   guestClaimDone:    'Account created. Your progress is kept.',
+  // 相互乗り入れ — Google on a pass that already has a key. Named
+  // plainly, because the row has to answer the question the learner
+  // arrives with: "why did signing in with Google not open my
+  // account?" See components/settings/AccountPage.jsx.
+  linkGoogleLabel:   'Google',
+  linkGoogleCap:     'Not connected',
+  linkGoogleDesc:    'Connect Google here and “Continue with Google” will open this account. Until it is, signing in with Google issues a second, empty pass instead — your journey stays on this one.',
 
   // Only ever surfaces as title/aria-label text (NavControls.jsx) —
   // the visible toggle is already a real IconSun/IconMoon SVG.
@@ -1472,6 +1531,13 @@ const boarding = {
   // The questions.
   brdNameQ: 'What’s your name?',
   brdNameAria: 'Your name',
+  // The address the pass is being issued to, said on question one.
+  // The boarding only runs on an account with nothing on it, so an
+  // address here always means a NEW pass for that address — which is
+  // the one thing a learner who meant to reach an OLD one needs to be
+  // told before answering seven questions. A guest has no address and
+  // never sees this line. "Below" is the sign-in link in the foot.
+  brdNameNewPass: email => `A new pass, for ${email}. If your journey is on another account, sign in below instead.`,
   brdWhyQ: (name) => `Why are you learning Japanese, **${name}**?`,
   brdMotive: { studies: 'For my studies', fun: 'For fun', trip: 'For a trip to Japan', live: 'To live in Japan', friends: 'To make friends', other: 'Something else' },
   brdKanaQ: 'Can you read this?',
@@ -1505,9 +1571,10 @@ const boarding = {
   brdDeparture: 'Departure',
   brdDayAria: 'Departure time',
   // The nudge (native only), and the notification as the app sends it.
-  // brdAppName is the store name: the owner's to set (plan 077).
+  // brdAppName is the store name, the one the notification header
+  // shows; keep it in step with capacitor.config.json's appName.
   brdNudgeQ: (time) => `A nudge at **${time}**?`,
-  brdAppName: 'Japanese Learner',
+  brdAppName: 'Tsuji',
   brdNotifNow: 'now',
   brdNotifTitle: (time) => `Your train leaves at ${time}`,
   brdNotifText: 'Your cards are waiting at the gate.',
@@ -1581,6 +1648,11 @@ const onboarding = {
   onbTestResult: (level, correct, total) => `${correct} of ${total} correct — we recommend boarding at ${level}.`,
   onbPaceRecommended: 'Recommended',
   onbPassError: 'Saving failed — check your connection and try again.',
+  // The other half of a failed save: the office ANSWERED and refused
+  // it. Sending the learner to check a connection that is plainly
+  // working is a wrong turn they cannot take -- and "try again" is a
+  // false promise, since the same contract earns the same refusal.
+  brdPassRefused: 'The office could not issue this pass — that is on our side, not your connection. Nothing was saved.',
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
   paceDoneTitle: 'Today’s target reached',
@@ -1621,6 +1693,12 @@ const onboarding = {
   soundFullPreset: 'full station',
   volumeMaster: 'Master volume',
   settingsPerDay: '/ day',
+  settingsTrail: 'Usage statistics',
+  settingsTrailHint: 'Which screens are opened, and when — so the app can be improved where it is actually used. Kept on our own server, never shared, never advertising, and it holds nothing you have written.',
+  settingsTrailOn: 'Counted',
+  settingsTrailOff: 'Not counted',
+  settingsTrailStop: 'Stop counting',
+  settingsTrailStart: 'Count again',
   settingsExport: 'Export your progress',
   settingsExportHint: 'One CSV file — every card, its schedule, its review counts.',
   settingsExportBtn: 'Export',
@@ -1647,7 +1725,7 @@ const onboarding = {
   installAppBtn: 'Install',
   installIosTitle: 'Add to your home screen',
   installIosStep1: 'Tap Share in Safari\'s toolbar.',
-  installIosStep2: 'Choose « Add to Home Screen », then Add.',
+  installIosStep2: 'Choose "Add to Home Screen", then Add.',
   installIosBody: 'iPhone and iPad install web apps from Safari\'s share sheet — there is no button for it.',
   settingsIssuedTo: 'Card issued to',
 
@@ -1685,6 +1763,7 @@ export default {
   ...reading,
   ...readingComprehension,
   ...translationMode,
+  ...dictationMode,
   ...dictionary,
   ...comprehension,
   ...progress,

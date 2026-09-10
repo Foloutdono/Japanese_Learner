@@ -118,7 +118,7 @@ function PrintedBalance() {
   )
 }
 
-export default function PassStep({ name, profile, onEnter, busy = false, error = false }) {
+export default function PassStep({ name, profile, onEnter, busy = false, error = null }) {
   const { t } = useLang()
   return (
     <>
@@ -141,7 +141,15 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
       </div>
       <div className="brd__foot">
         <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
-        {error && <p className="brd__error" role="alert">{t.onbPassError}</p>}
+        {error && (
+          // 'refused' is the office answering and turning the contract
+          // down -- a wrong thing to blame on the connection, and the
+          // one case where trying again unchanged earns the same
+          // answer. 'network' is the line the app never got down.
+          <p className="brd__error" role="alert" data-error={error}>
+            {error === 'refused' ? t.brdPassRefused : t.onbPassError}
+          </p>
+        )}
         <Continue label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
       </div>
     </>

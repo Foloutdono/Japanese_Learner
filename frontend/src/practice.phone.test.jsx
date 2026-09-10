@@ -45,6 +45,41 @@ describe('the practice sessions at phone width', () => {
     expect(screen.container.querySelector('.btn-primary').getBoundingClientRect().width).toBeCloseTo(card.width, 0)
   })
 
+  it("the run's entry is a slip on the page, at the answer rung", async () => {
+    const screen = await render(
+      <main className="container stage" style={{ '--line-color': 'var(--line-reading)' }}>
+        <form className="stage__foot">
+          <input className="field field--page" placeholder="romaji" />
+          <button type="button" className="btn-primary">Submit</button>
+        </form>
+      </main>
+    )
+    const field = screen.container.querySelector('.field')
+    const style = getComputedStyle(field)
+    const page = getComputedStyle(document.documentElement).getPropertyValue('--bg-main').trim()
+
+    // The whole point: this field sits ON the page, so a well painted in
+    // the page's own ground is no field at all — which is exactly what
+    // it was, in both themes and at every width. Whatever the well is,
+    // it must not be the thing behind it. fields.browser.test.jsx holds
+    // that for every mount in the app; this is the run's own copy, at
+    // the width the entry was drawn for.
+    const paint = (c) => { const d = document.createElement('div'); d.style.color = c; document.body.appendChild(d); const v = getComputedStyle(d).color; d.remove(); return v }
+    expect(style.backgroundColor).not.toBe(paint(page))
+
+    // The entry asks for the answer rung (--fs-lead, .stage__foot
+    // .field). At phone width the field's own 16px floor takes it
+    // first — that rule is 0-3-1 and no class rule reaches it, which is
+    // the ruling and not an accident — so what is pinned here is that
+    // the entry is still above the 15.2px base, never below the
+    // threshold the floor exists to hold.
+    expect(parseFloat(style.fontSize)).toBe(16)
+
+    // Left-flush: a caret that walks back to the middle on every
+    // keystroke is a worse instrument than a still one.
+    expect(['start', 'left']).toContain(style.textAlign)
+  })
+
   it('the page card reads top-down and left-aligned; a question card is flat', async () => {
     const screen = await render(
       <main className="container stage">
@@ -75,6 +110,83 @@ describe('the practice sessions at phone width', () => {
     const badge = screen.container.querySelector('.type-badge')
     expect(badge.getBoundingClientRect().width).toBeLessThan(ask.getBoundingClientRect().width / 2)
     expect(badge.getBoundingClientRect().height).toBe(20)
+  })
+
+  // The three practice runs hand their page straight to the stage —
+  // no CardTransition, so none of .quiz-card-stage's growth chain
+  // reaches them (stage.phone.test.jsx holds that end). The stage's own
+  // rule has to apply here too, or the card sits at its content's
+  // height with the rest of the screen empty under it: 419px of nothing
+  // between the reading feedback and the rating bar, measured at 844.
+  // .screen is what gives the stage a height to spend, exactly as
+  // StudyStage renders it.
+  it('the page card is the stage: it grows to the docked instrument, and the page is centred in what it grew by', async () => {
+    const screen = await render(
+      <div className="screen">
+        <main className="container stage" style={{ '--line-color': 'var(--line-reading)' }}>
+          <div className="prompt-card prompt-card--footed">
+            <div className="prompt-card__body prompt-card__body--prose prose">
+              <span className="prose__jp" lang="ja">今日は来なくてもいいです。</span>
+              <span className="prose__rule" />
+              <span className="prose__label">Your answer</span>
+              <span className="prose__en">kyou wa konakutemo ii desu</span>
+            </div>
+            <div className="prompt-card__foot"><span>N5 · JLPT</span><span /></div>
+          </div>
+          <div className="rating-bar"><div className="rating-bar__buttons rating-bar__buttons--4" /></div>
+        </main>
+      </div>
+    )
+    const card = screen.container.querySelector('.prompt-card--footed')
+    const bar = screen.container.querySelector('.rating-bar')
+    // The 60vh clamp is off with the growth: it turned the card into an
+    // inner scroll area, which cut the breakdown's word carousel in half
+    // and scrolled the card's own foot strip away inside it.
+    expect(getComputedStyle(card).maxHeight).toBe('none')
+    expect(getComputedStyle(card).overflow).toBe('visible')
+    // The card runs to the docked instrument, one stage gap short of it.
+    expect(bar.getBoundingClientRect().top - card.getBoundingClientRect().bottom).toBeCloseTo(16, 0)
+
+    // The room it grew by is air around the page, not a hole under it:
+    // the grow-only spacers put as much above the first register as
+    // below the last, and the block padding is the card rung.
+    const body = screen.container.querySelector('.prompt-card__body--prose')
+    expect(getComputedStyle(body).paddingTop).toBe('28px')
+    const box = body.getBoundingClientRect()
+    const first = screen.container.querySelector('.prose__jp').getBoundingClientRect()
+    const last = screen.container.querySelector('.prose__en').getBoundingClientRect()
+    expect(first.top - box.top).toBeGreaterThan(28)
+    expect(first.top - box.top).toBeCloseTo(box.bottom - last.bottom, 0)
+  })
+
+  // The other half of the same rule: the spacers are grow-ONLY, so a
+  // page with more than the card's room reads top-down and spills all
+  // of it off the bottom, where the docked foot's own scroll reaches
+  // it — never centred, which would put the head of the page above the
+  // top of the box with no way back to it (DESIGN.md, .brd__body--center).
+  it('a page too tall for the card keeps its top and scrolls the page instead', async () => {
+    const screen = await render(
+      <div className="screen">
+        <main className="container stage">
+          <div className="prompt-card prompt-card--footed">
+            <div className="prompt-card__body prompt-card__body--prose prose">
+              <span className="prose__jp" lang="ja">今日は来なくてもいいです。</span>
+              <div className="prose__breakdown" style={{ height: '1400px' }} />
+            </div>
+            <div className="prompt-card__foot"><span>N5</span><span /></div>
+          </div>
+          <div className="stage__foot"><button type="button" className="btn-primary">Next phrase</button></div>
+        </main>
+      </div>
+    )
+    const body = screen.container.querySelector('.prompt-card__body--prose')
+    const first = screen.container.querySelector('.prose__jp').getBoundingClientRect()
+    // Nothing above the first register but the card's own padding.
+    expect(first.top - body.getBoundingClientRect().top).toBeCloseTo(28, 0)
+    // And it is the page that scrolls, not the card clipping its own foot.
+    const card = screen.container.querySelector('.prompt-card--footed')
+    expect(card.scrollHeight).toBe(card.clientHeight)
+    expect(document.documentElement.scrollHeight).toBeGreaterThan(window.innerHeight)
   })
 
   it('the choices: lettered roundels, the picked row filled; the result is a lattice and 44px rows', async () => {

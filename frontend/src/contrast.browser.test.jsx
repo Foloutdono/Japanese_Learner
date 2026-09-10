@@ -440,6 +440,13 @@ const Fixture = () => (
       <button type="button" className="exam-mondai pr-mondai">
         <span><b className="exam-mondai__part pr-part">Part 3</b> · Show instructions</span>
       </button>
+      {/* ReadingRun/TranslationRun -- the run's entry docked in the
+          foot. Its well is --surface here rather than the page (see
+          .stage__foot .field), which is a ground neither the contract
+          above nor any other site measures a field on. */}
+      <form className="stage__foot">
+        <input className="field pr-entry" placeholder="ex. konnichiwa" defaultValue="konnichiwa" />
+      </form>
       <div className="exam-nav"><button type="button" className="exam-flag exam-flag--on pr-flag">f</button></div>
       <div className="exam-sheetbar">
         <button type="button" className="exam-sheetbar__open">
@@ -636,8 +643,8 @@ const Fixture = () => (
       </div>
       <div className="brd-day"><span className="brd-day__tick ob-tick">06</span></div>
       <div className="brd-notif">
-        <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>JP</span>
-        <div className="brd-notif__head ob-notif-head"><span>Japanese Learner</span></div>
+        <span className="brd-notif__app ob-notif-app" style={{ background: 'var(--bg-panel)' }}>辻</span>
+        <div className="brd-notif__head ob-notif-head"><span>Tsuji</span></div>
         <span className="brd-notif__text ob-notif-text">Your cards are waiting at the gate.</span>
       </div>
       <div className="brd-step brd-step--done"><span className="brd-step__val ob-step-val">N5 → N4</span></div>
@@ -850,6 +857,8 @@ const SITES = [
   ['.pr-rjp', 'review row question line'],
   ['.pr-rblank', 'review row left blank'],
   ['.pr-slot', 'paper slot (Different paper)'],
+  ['.pr-entry', "the run's entry, what the learner typed (on the entry well)"],
+  ['.pr-entry::placeholder', "the run's entry placeholder (on the entry well)"],
 
   // Plan 055's deck shelf, merged in after the guards were written.
 

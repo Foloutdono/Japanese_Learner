@@ -14,9 +14,11 @@ import '../index.css'
 //   1. Every line is reachable — four tracked lines and the shelf of
 //      decks. A section silently dropped from the map is a screen you
 //      can never visit again.
-//   2. The map's arithmetic reaches the DOM: the stops the train has
-//      passed are painted, due counts ride as chips — the due figure
-//      from the shared today store the tab bar's badge reads.
+//   2. The map's arithmetic reaches the DOM: the stations the train
+//      has reached are painted — each one a level finished, the
+//      novice's stop at the origin included — and due counts ride as
+//      chips, the due figure from the shared today store the tab
+//      bar's badge reads.
 //   3. A line departs through the gate store, to its route behind the
 //      gate, with its announcement.
 //   4. A failed or foreign stats payload still draws the full map.
@@ -131,13 +133,18 @@ describe('LearnScreen — the route map', () => {
     expect(root.querySelector('h1.bar__title')).toBeTruthy()
   })
 
-  it('paints the travelled stops and carries the due chips from the shared store', async () => {
+  it('paints the stations reached and carries the due chips from the shared store', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
-    // vocab: N5 finished and N4 half done puts the train on N4's
-    // platform, so N5 alone is behind it.
-    expect(root.querySelectorAll('.wmap-track__stop--past')).toHaveLength(1)
+    // A station is the completion of the level behind it, and every
+    // line opens at 初, the novice's stop — so a line nobody has
+    // touched paints exactly one, the stop the learner stands on.
+    // vocab has N5 finished and N4 half done: 初 and N5 reached, N4's
+    // own platform still ahead.
+    const perLine = [...root.querySelectorAll('.wmap-line')]
+      .map(line => line.querySelectorAll('.wmap-track__stop--past').length)
+    expect(perLine).toEqual([1, 2, 1, 1])
     const chips = [...root.querySelectorAll('.wmap-due')].map(el => el.textContent)
     expect(chips.join(' ')).toContain('12')
     expect(chips.join(' ')).toContain('3')
@@ -160,6 +167,9 @@ describe('LearnScreen — the route map', () => {
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.wmap-line')).toHaveLength(4)
-    expect(root.querySelectorAll('.wmap-track__stop--past')).toHaveLength(0)
+    // Nobody has travelled, so the only filled station on each line is
+    // 初: with no figures at all the map still says where the learner
+    // is standing, which is at the start of every line.
+    expect(root.querySelectorAll('.wmap-track__stop--past')).toHaveLength(4)
   })
 })

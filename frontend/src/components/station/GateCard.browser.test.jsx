@@ -24,6 +24,10 @@ const LANES = [
   { id: 's~kanji~N4~kanji.flashcard.f2b', kind: 'section', source: 'kanji', deck: 'N4', mode: 'kanji.flashcard.f2b', due: 14 },
   { id: 's~vocab~N5~vocab.flashcard.f2b', kind: 'section', source: 'vocab', deck: 'N5', mode: 'vocab.flashcard.f2b', due: 10 },
 ]
+// 無料 — the kana line rides free (core/credits.py). The server says so
+// on the lane; the gate has to mark the row AND leave it out of what
+// the balance is asked to cover.
+const KANA_LANE = { id: 's~kana~hiragana_base~kana.flashcard.f2b', kind: 'section', source: 'kana', deck: 'hiragana_base', mode: 'kana.flashcard.f2b', due: 12, free: true }
 const TODAY = { total: 24, lanes: LANES, next_due: null }
 const FREE = { balance: 30, cap: 50, dailyRefill: 30, refillAt: '2026-09-07T22:00:00+00:00', plan: 'free', unlimited: false, enforced: false }
 
@@ -107,6 +111,56 @@ describe('GateCard — the fare', () => {
     expect(kanji.getAttribute('aria-pressed')).toBe('false')
     expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
     // Ten ride on twelve credits: nothing waits any more.
+    expect(screen.container.querySelector('.gate-card__short')).toBeNull()
+  })
+
+  it('marks a free lane and leaves it out of what the balance covers', async () => {
+    // 22 due, 12 of them free, 10 credits: the whole run rides.
+    creditsRef.current = { ...FREE, balance: 10 }
+    const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('22')
+    expect(screen.container.querySelector('.gate-card__short')).toBeNull()
+    const free = [...screen.container.querySelectorAll('.lane')]
+      .filter(l => l.querySelector('.lane__free'))
+    expect(free).toHaveLength(1)
+    expect(free[0].textContent).toContain('12')
+    expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
+  })
+
+  it('counts only the paid reviews against the balance when it is short', async () => {
+    // 22 due, 12 free, 4 credits: 16 ride, 6 vocab wait.
+    creditsRef.current = { ...FREE, balance: 4 }
+    const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
+    const short = screen.container.querySelector('.gate-card__short')
+    expect(short.textContent).toContain('16')
+    expect(short.textContent).toContain('22')
+  })
+
+  it('keeps the gate open at zero under enforcement while anything rides free', async () => {
+    creditsRef.current = { ...FREE, balance: 0, enforced: true }
+    const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
+    // The 12 kana still go; the notice says so rather than "no credits
+    // left" over a train that is about to leave.
+    const short = screen.container.querySelector('.gate-card__short')
+    expect(short.textContent).toContain('12')
+    expect(short.textContent).not.toContain('+30')
+    expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
+  })
+
+  it('closes again once the free lane is switched off', async () => {
+    creditsRef.current = { ...FREE, balance: 0, enforced: true }
+    const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
+    const kana = [...screen.container.querySelectorAll('.lane')].find(l => l.querySelector('.lane__free'))
+    kana.click()
+    await new Promise(r => setTimeout(r, 60))
+    expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+30')
+    expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
+  })
+
+  it('marks nothing free on a pass, where nothing costs anything', async () => {
+    creditsRef.current = { ...FREE, balance: null, unlimited: true }
+    const screen = await mount({ ...TODAY, total: 22, lanes: [LANES[1], KANA_LANE] })
+    expect(screen.container.querySelector('.lane__free')).toBeNull()
     expect(screen.container.querySelector('.gate-card__short')).toBeNull()
   })
 

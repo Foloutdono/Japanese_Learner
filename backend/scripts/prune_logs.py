@@ -19,6 +19,8 @@ from a guess about what looks old:
                      back has never been servable.
   translation_log    /api/translation/history, same ceiling, same
                      reasoning.
+  dictation_log      /api/dictation/history, ceiling 100 (Query(le=100)).
+                     Row 101 back has never been servable.
   phrase_history     /api/phrase/history, ceiling 200, ordered
                      `kept DESC, created_at DESC`. KEPT rows are the
                      learner's own pins (保存) and are never touched --
@@ -63,6 +65,7 @@ PER_USER = [
     ("comprehension_log", 50,  "", "written by the reading screen, read by no endpoint"),
     ("reading_log",       200, "", "/api/reading/history caps at 200"),
     ("translation_log",   200, "", "/api/translation/history caps at 200"),
+    ("dictation_log",     100, "", "/api/dictation/history caps at 100"),
     ("phrase_history",    200, " AND NOT kept",
      "/api/phrase/history caps at 200; pinned (保存) rows are never touched"),
     ("video_sessions",    100, "", "/api/video/sessions caps at 100; the heaviest rows here"),
@@ -77,6 +80,15 @@ BY_AGE = [
      "a claim lock still standing a week after its last update is a dead run"),
     ("video_session_jobs", "updated_at", 7,
      "same, for transcript generation"),
+    # The outer bound only. compact_events.py is what actually keeps
+    # event_log small -- it folds rows into event_daily BEFORE deleting
+    # them, and spares the once-per-learner families. This cut is a year
+    # out and spares nothing, so it can only ever fire on rows that
+    # script has already rolled up, or on a database where it was never
+    # run. Same relationship prune_logs has always had with review_log,
+    # except that one is excluded outright because its rows ARE the XP.
+    ("event_log", "at", 365,
+     "足跡 past a year; scripts/compact_events.py is the real retention"),
 ]
 
 

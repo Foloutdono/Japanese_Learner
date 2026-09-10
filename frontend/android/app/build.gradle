@@ -1,10 +1,10 @@
 apply plugin: 'com.android.application'
 
 android {
-    namespace = "com.japaneselearner.app"
+    namespace = "app.tsuji"
     compileSdk = rootProject.ext.compileSdkVersion
     defaultConfig {
-        applicationId "com.japaneselearner.app"
+        applicationId "app.tsuji"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         // The release workflow derives both from the git tag

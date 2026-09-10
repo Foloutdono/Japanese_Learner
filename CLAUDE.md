@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
+**Tsuji** (辻) — a Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
+
+The name is the glyph: 辻 is the masthead, the icon and the plate at the origin station (辻駅). `Tsuji` is the Latin half — the store name, the PWA `short_name` and the bundle id `app.tsuji`. See `DESIGN.md`, "The idea".
 
 ## Visual design
 
@@ -49,6 +51,21 @@ pytest                        # run all tests
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
+
+The one optional warm-up, and it needs no database:
+
+```bash
+python -m scripts.build_dictation_audio --check   # what is missing
+python -m scripts.build_dictation_audio           # synthesize it
+```
+
+書取 (dictation, `/practice/dictation`) plays a clip per line of
+`content/listening_clips.py`. Nothing depends on having run this — a missing
+clip is synthesized on the request that wants it, and again by
+`study/exam_audio_repair.py` if the file is later lost — but the first learner
+of the day otherwise pays for five round trips to edge-tts before the screen
+can show anything. Running it twice costs nothing: a clip that exists is
+skipped without a network call.
 Local Postgres (schema is `backend/srs/data_structure.sql` — a reference snapshot kept honest by `backend/tests/test_schema_declared.py`; the real source of truth is each module's own `CREATE TABLE IF NOT EXISTS` self-migration, run at import time):
 ```bash
 docker run -d --name jp-db -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16
@@ -65,8 +82,15 @@ change nothing without `--yes`**, so the first run of any of them is safe:
 cd backend
 python -m scripts.purge_orphans        # rows whose Supabase auth user is gone
 python -m scripts.compact_review_log   # roll old review rows up, then trim
+python -m scripts.compact_events       # same, for the 足跡 trail (event_log)
 python -m scripts.prune_logs           # cap the logs nothing reads past a point
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
+```
+
+One more is read-only and needs no flag, so it is safe to run at any time:
+
+```bash
+python -m scripts.weekly_digest        # the four numbers, as markdown
 ```
 
 Two things are worth knowing before reaching for any of them:
@@ -89,7 +113,7 @@ Two things are worth knowing before reaching for any of them:
   is the repair for deletions that bypassed it. See
   `docs/adr/0010-learner-rows-are-reconciled-with-auth-not-cascaded-from-it.md`.
 
-`prune_logs` and `compact_review_log` also run weekly from
+`prune_logs`, `compact_review_log` and `compact_events` also run weekly from
 `.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
 button defaults to a dry run). It needs a `DATABASE_URL` repo secret, set to
 Supabase's **session**-mode pooler URI on port 5432: the transaction pooler
@@ -106,13 +130,38 @@ runs as `postgres`, whereas the app's role is not assumed to see the `auth`
 schema. It reports before it deletes, skips tables that do not exist yet, and
 is a one-shot, so it cannot drift from the scripts.
 
+### Analytics (足跡)
+
+Behaviour is recorded **first-party or not at all** — there is no third-party
+SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
+of data" is a promise the design keeps rather than a line to amend. See
+`docs/adr/0012`.
+
+Two rules matter more than the rest:
+
+- **Never record anything a learner typed.** Not a dictation answer, not an
+  analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
+  closed set of event names, each with the property keys it may carry, and
+  applies it to whatever a browser posts. `frontend/src/lib/track.js` mirrors
+  that set, and `backend/tests/test_events.py` fails if the two drift.
+- **Never store a pathname.** `/learn/vocab/theme/animaux/…` names a theme the
+  learner chose and `/learn/decks/:deck_id` a deck they named.
+  `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
+  declared, and a path matching none is not recorded at all. Adding a screen
+  means adding its pattern to `ROUTES` there — a node-lane test fails otherwise.
+
+Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
+endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
+from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
+Metabase/the Supabase SQL editor pointed at the same database.
+
 ### Frontend (`frontend/`)
 ```bash
 npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone and tablet lanes (see vite.config.js)
+npm test          # vitest: node, browser, phone, tablet and touch lanes (see vite.config.js)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # re-render brand/icon.html and regenerate the icon set in public/
 ```
@@ -149,11 +198,11 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
-- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
-- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
+- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`), dictation (`dictation.py` — clip identity and the answer grader), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
+- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
 - `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.
 

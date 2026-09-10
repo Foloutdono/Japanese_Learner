@@ -65,13 +65,23 @@ function sections(t) {
     { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/learn/grammar', clip: 'grammar', color: 'var(--line-grammar)', tab: 'learn' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/learn/decks',   clip: 'decks', color: 'var(--line-decks)',   tab: 'learn' },
 
-    // ── 実践 — the four platforms ──
+    // ── 実践 — the five platforms ──
     { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice' },
     { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/practice/comprehension', clip: 'reading-comprehension', color: 'var(--line-rikai)', tab: 'practice' },
     // Translation mode: given a phrase in the UI's foreign language,
     // type the Japanese translation; the deck's reference translation
     // plus an LLM analysis help you judge your own attempt.
     { icon: '翻訳', title: t.translationTitle || 'Translation', desc: t.translationDesc || 'Translate into Japanese', path: '/practice/translation', clip: 'translation', color: 'var(--line-honyaku)', tab: 'practice' },
+    // 書取 — dictation: a clip is played (twice, and no more) and the
+    // learner writes down what was said. The one section on this tab
+    // whose prompt is not text, and so the one the machine grades
+    // rather than the learner — see screens/DictationRun.jsx.
+    //
+    // No `clip`: the announcements in public/sounds/announcements are
+    // recordings, and there is no 書取 one to play. playAnnouncement
+    // does nothing for a section without it, which is the same silence
+    // 統計 and 本日 depart in.
+    { icon: '書取', title: t.dictationTitle, desc: t.dictationDesc, path: '/practice/dictation', color: 'var(--line-kakitori)', tab: 'practice' },
     // Generated mock exams (vocab/grammar/reading/listening, built to
     // the official JLPT blueprint but never copied from a real past
     // paper) — see src/exam/.
@@ -94,8 +104,8 @@ function sections(t) {
     { icon: '統計', title: t.statistics, desc: t.statsDesc, path: '/profile/stats', color: 'var(--accent8)', tab: 'profile' },
 
     // ── 本日 — the daily queue (see screens/TodayScreen) ──
-    // --accent2 rather than a --line-* pigment: those eleven are all
-    // claimed by lines and platforms, and gold is what the gate has
+    // --accent2 rather than a --line-* pigment: every one of those is
+    // claimed by a line or a platform, and gold is what the gate has
     // always been painted in.
     { icon: '本日', title: t.todayTitle, desc: t.todayDesc, path: '/today', color: 'var(--accent2)', tab: 'today' },
   ]

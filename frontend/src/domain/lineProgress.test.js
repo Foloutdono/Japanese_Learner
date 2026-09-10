@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { lineStops, lineTotals, stopsTravelled, LEVEL_STOPS, KANA_STOPS } from './lineProgress'
+import { lineMarks, lineStops, lineTotals, stopsTravelled, ORIGIN_STOP, LEVEL_STOPS, KANA_STOPS } from './lineProgress'
 
 // The unit is CARDS, not (card x mode) drills, and it comes from
 // /api/stats' `items` block rather than being recomputed here out of
@@ -95,5 +95,46 @@ describe('lineTotals', () => {
 describe('stopsTravelled', () => {
   it('sums the stop scores into the marker position', () => {
     expect(stopsTravelled(lineStops(stats, 'vocab'))).toBeCloseTo(0.8)
+  })
+})
+
+describe('lineMarks', () => {
+  // A station is the completion of the leg behind it, so there is one
+  // more station than there is work: the novice's stop, which is where
+  // a learner who has done none of the line stands. Without it the map
+  // opened on N5's station with the train parked on it, handing out a
+  // level for having boarded.
+  it('opens the line at the novice’s stop, then names one station per leg', () => {
+    const marks = lineMarks(lineStops(stats, 'vocab'))
+    expect(marks.map(m => m.label)).toEqual([ORIGIN_STOP.label, ...LEVEL_STOPS])
+    expect(marks[0]).toEqual(ORIGIN_STOP)
+    expect(marks).toHaveLength(LEVEL_STOPS.length + 1)
+  })
+
+  it('does the same for the kana line, keeping the specimen order', () => {
+    const marks = lineMarks(lineStops(stats, 'kana'))
+    expect(marks.map(m => m.label)).toEqual([ORIGIN_STOP.label, ...KANA_STOPS.map(s => s.label)])
+  })
+
+  // The one that pins the promise: k stops travelled IS station k, so
+  // the marker never stands on a station whose level is unfinished.
+  it('reaches station k at exactly k stops travelled', () => {
+    const stops = lineStops(stats, 'vocab')
+    const marks = lineMarks(stops)
+    // N5 four fifths done in the fixture, nothing else touched: short
+    // of station 1, past station 0.
+    const travelled = stopsTravelled(stops)
+    expect(travelled).toBeGreaterThan(0)
+    expect(travelled).toBeLessThan(1)
+    expect(marks[1].label).toBe('N5')
+  })
+
+  // Every label the map prints is either a level code or a Japanese
+  // specimen, and it says which — the drawing reads the flag for
+  // lang="ja" rather than guessing from the key's spelling.
+  it('marks the Japanese labels as Japanese and the level codes as not', () => {
+    expect(lineMarks(lineStops(stats, 'kana')).every(m => m.jp)).toBe(true)
+    expect(lineMarks(lineStops(stats, 'vocab')).map(m => m.jp))
+      .toEqual([true, false, false, false, false, false])
   })
 })

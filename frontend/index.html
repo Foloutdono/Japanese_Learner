@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>日本語 — Apprendre le japonais</title>
+    <title>辻 Tsuji — Apprendre le japonais</title>
     <meta name="description" content="Apprendre le japonais — kana, vocabulaire, kanji, grammaire, lecture, répétition espacée. Learn Japanese, from kana to reading real text." />
     <!-- The installed app's chrome (plan 065). theme-color is written by
          the script below from the resolved theme and again by the theme
@@ -14,7 +14,7 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="日本語" />
+    <meta name="apple-mobile-web-app-title" content="Tsuji" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/pwa-64x64.png" type="image/png" sizes="64x64" />
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
@@ -40,6 +40,83 @@
              Falling through leaves the :root default (dark) in place, which
              is a working app, so there is nothing to recover here. */
         }
+      })()
+    </script>
+    <!-- Recovers from a stale copy of this file. An index.html held by a
+         tab opened before the last deployment -- or by the precache of a
+         service worker deliberately waiting for the learner to tap
+         ダイヤ改正 (registerType: 'prompt', vite.config.js) -- names an
+         /assets/index-<hash>.js the live deployment no longer has. The
+         module loader refuses what comes back, and then nothing under
+         src/ runs at all: no React, no index.css, no error UI, just an
+         empty #root on a black page. That is what a learner saw on
+         2026-09-09, mid-deploy, with only a MIME complaint in the
+         console. vercel.json now 404s the missing bundle instead of
+         answering it with this file at HTTP 200, but a stale HTML
+         outlives that change too, so the recovery lives here: reload
+         once without the worker, and if that did not help, say so in
+         the page rather than leave the rectangle blank. -->
+    <script>
+      (function () {
+        var KEY = 'jp-bundle-reload'
+        function tell() {
+          var light = document.documentElement.getAttribute('data-theme') === 'light'
+          // Inline by necessity: index.css is imported by the bundle that
+          // just failed, so no token, class or custom property exists yet.
+          // The two grounds mirror the theme script above -- keep in step.
+          document.body.setAttribute('style',
+            'margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;' +
+            'padding:24px;text-align:center;line-height:1.6;' +
+            'font-family:system-ui,-apple-system,sans-serif;' +
+            'background:' + (light ? '#f6f1e4' : '#17151a') + ';' +
+            'color:' + (light ? '#17151a' : '#f6f1e4'))
+          document.body.innerHTML =
+            '<div style="max-width:34rem">' +
+            '<p style="font-size:20px;margin:0 0 8px">運休 &mdash; cette version de l&rsquo;application n&rsquo;est plus en ligne.</p>' +
+            '<p style="opacity:.7;margin:0 0 20px">This build is no longer deployed.</p>' +
+            '<button id="jp-reboard" style="font:inherit;padding:10px 20px;cursor:pointer;' +
+            'border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit">' +
+            'Recharger &middot; Reload</button>' +
+            '</div>'
+          document.getElementById('jp-reboard').onclick = function () {
+            try { sessionStorage.removeItem(KEY) } catch (e) { /* private mode */ }
+            location.reload()
+          }
+        }
+        function recover() {
+          // The reload is only safe if we can remember having tried it.
+          // sessionStorage throws in private-mode/blocked-cookie contexts
+          // (the theme script above has the same caveat), and reloading
+          // without a record of it is an endless loop, so a store we
+          // cannot read means we go straight to saying so.
+          var store = null
+          try { store = window.sessionStorage } catch (e) { /* blocked */ }
+          if (!store) return tell()
+          var tried = null
+          try { tried = store.getItem(KEY) } catch (e) { return tell() }
+          if (tried) return tell()
+          try { store.setItem(KEY, '1') } catch (e) { return tell() }
+          // A plain reload would be handed the same stale copy by the
+          // worker, so retire it first. Only the worker goes: the runtime
+          // caches (media, fonts, kanjivg, exam-audio, word-audio) are
+          // keyed by name and the next worker re-attaches to them, so
+          // this costs the learner the HTML and nothing else.
+          var go = function () { location.reload() }
+          if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
+            navigator.serviceWorker.getRegistrations()
+              .then(function (rs) { return Promise.all(rs.map(function (r) { return r.unregister() })) })
+              .then(go, go)
+          } else {
+            go()
+          }
+        }
+        // Capture phase: a failing script fires `error` on the element and
+        // it does not bubble. Module scripts are deferred, so this listener
+        // is always installed before the bundle can fail.
+        window.addEventListener('error', function (e) {
+          var el = e.target
+          if (el && el.tagName === 'SCRIPT' && el.type === 'module' && el.src) recover()
+        }, true)
       })()
     </script>
   </head>

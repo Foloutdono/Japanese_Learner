@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
-import { apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
+import { ApiError, apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, requestNudgePermission } from '../lib/platform'
+import { track } from '../lib/track'
+import { stopwatch } from '../lib/dwell'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
-import { logEvent } from '../lib/analytics'
-import { stopwatch } from '../lib/dwell'
 import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
@@ -108,19 +108,6 @@ function clearStash() {
   try { sessionStorage.removeItem(STASH_KEY) } catch { /* private mode */ }
 }
 
-// ── The funnel's step index ──────────────────────────────────────
-// Every step the flow can stand on, in line order, including the three
-// arrival screens that trackStops() leaves out. The dashboard orders
-// the drop-off chart by this index, so it must stay a stable spelling
-// of the line rather than the branch a given learner walked: `reveal`
-// and `level` are alternatives, and both sit where the kana check
-// leads. Append here when the line grows; never renumber, or last
-// month's funnel silently compares different steps.
-const FUNNEL_STEPS = [
-  'name', 'why', 'kana', 'reveal', 'level', 'goal', 'rhythm', 'time',
-  'nudge', 'building', 'plan', 'account', 'pass',
-]
-
 const PULL_MS = 260
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
@@ -182,19 +169,19 @@ export default function BoardingFlow({
   const [savedName, setSavedName] = useState(resumed?.savedName ?? profile.username ?? '')
   const [nameError, setNameError] = useState(null)
   const [busy, setBusy] = useState(false)
-  const [saveError, setSaveError] = useState(false)
+  // null | 'network' | 'refused' -- which of the two the pass says.
+  const [saveError, setSaveError] = useState(null)
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
-  // Two stopwatches, both counting only time the tab was actually
-  // looked at (lib/dwell.js): one for the whole boarding, one lapped
-  // at every question. The per-question figure says WHICH question
-  // stalls people; the total says whether the line as a whole is too
-  // long. Built in the mount effect below rather than during render —
-  // each one attaches a listener, and a render is not allowed to have
-  // side effects (StrictMode would double it, and leak one).
-  const watches = useRef(null)
   const arrivalPlayed = useRef(REDUCED)
+  // Two stopwatches counting only time the tab was actually looked at
+  // (lib/dwell.js): one lapped at every question, one for the whole
+  // line. Wall-clock would say a boarding left open over lunch took an
+  // hour to choose a study rhythm, and a handful of those makes "which
+  // question stalls people" unanswerable. Built in an effect, not in
+  // render — each attaches a listener, and StrictMode would double it.
+  const watches = useRef(null)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
 
@@ -202,15 +189,10 @@ export default function BoardingFlow({
     document.title = `${t.brdDocumentTitle} — ${t.appTitle}`
   }, [t])
 
-  // Once per mount, carrying the step actually started from: a resumed
-  // OAuth round trip re-enters mid-line, and counting that as a fresh
-  // start at `name` would invent boardings that never happened.
   useEffect(() => {
     watches.current = { total: stopwatch(), step: stopwatch() }
-    if (!dryRun) logEvent('onboarding_start', { step, index: FUNNEL_STEPS.indexOf(step) })
     const w = watches.current
     return () => { w.total.stop(); w.step.stop(); watches.current = null }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   // The volumes price the level list and the plan; the canvas's round
@@ -239,24 +221,33 @@ export default function BoardingFlow({
     q?.focus({ preventScroll: true })
   }, [step])
 
-  // The funnel is recorded on the step being LEFT, not the one being
-  // arrived at: "answered `why`" is the fact worth counting, and the
-  // last event a learner who abandons produces is then the last
-  // question they actually got through. The dev workbench
-  // (/dev/onboarding, dryRun) writes nothing — it walks the whole
-  // flow repeatedly and would drown the real funnel.
-  function record(name, at = step, extra = null) {
-    if (dryRun) return
-    logEvent(name, { step: at, index: FUNNEL_STEPS.indexOf(at), ...(extra ?? {}) })
-  }
-
-  /** A question answered or walked back: its own dwell, then reset. */
-  function recordLeaving(name) {
-    record(name, step, { ms: watches.current?.step.lap() ?? 0 })
+  // 足跡 — every transition in the boarding runs through these two, so
+  // instrumenting them is the whole of it. Until now this flow wrote
+  // NOTHING until POST /api/onboarding/complete at the very end, which
+  // made the one thing worth knowing -- where people give up on the way
+  // in -- the one thing invisible. There is no "abandoned" event and
+  // there does not need to be: it is a boarding_step with no
+  // boarding_done after it.
+  //
+  // (`track` here is the analytics seam, lib/track.js. `trackStops`
+  // above is the railway kind. The collision is unfortunate and the
+  // metaphor is older, so the import keeps the shorter name.)
+  function mark(from, to, dir) {
+    track('boarding_step', {
+      step: from, to, dir,
+      // How long `from` actually held them, then reset for the next
+      // question. Read here because this is the one place that knows a
+      // question is being left.
+      ms: watches.current?.step.lap() ?? 0,
+      // trackStops() rather than the `stops` const below: this is
+      // called from a handler, and computing it here keeps the two
+      // independent of declaration order.
+      index: trackStops(answers).indexOf(from) + 1,
+    })
   }
 
   function go(next) {
-    recordLeaving('onboarding_step')
+    mark(step, next, 'fwd')
     setHistory(h => [...h, step])
     if (!REDUCED) setLeaving({ step, dir: 'fwd' })
     setStep(next)
@@ -265,7 +256,7 @@ export default function BoardingFlow({
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
-    recordLeaving('onboarding_back')
+    mark(step, prev, 'back')
     setHistory(h => h.slice(0, -1))
     if (!REDUCED) setLeaving({ step, dir: 'back' })
     setStep(prev)
@@ -363,7 +354,7 @@ export default function BoardingFlow({
     if (busy) return
     if (dryRun) { onComplete(); return }
     setBusy(true)
-    setSaveError(false)
+    setSaveError(null)
     const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date())
     const body = {
       jlptLevel: jlpt,
@@ -387,8 +378,21 @@ export default function BoardingFlow({
       body: JSON.stringify(body),
     })
       .then(() => {
-        record('onboarding_complete', 'pass', { ms: watches.current?.total.read() ?? 0 })
         clearStash()
+        // The far end of the funnel every boarding_step above measures.
+        // The answers, not the name or the hour: `motive` is the one
+        // field that says WHY someone is here, and it is the most
+        // useful thing the app knows about a learner it has just met.
+        track('boarding_done', {
+          motive: answers.motive,
+          kana_known: answers.kana,
+          level: jlpt,
+          pace: perDay,
+          notifications: answers.notifications,
+          // The same measure across the whole line: does the boarding
+          // as a whole ask for too much of someone's evening?
+          ms: watches.current?.total.read() ?? 0,
+        })
         // The gate reads the profile summary for the pass holder's
         // name and the HUD reads the balance -- refresh both before the
         // cutscene mounts. Fire-and-forget: both stores fail quietly.
@@ -396,9 +400,15 @@ export default function BoardingFlow({
         refreshCredits()
         onComplete()
       })
-      .catch(() => {
+      .catch(err => {
         setBusy(false)
-        setSaveError(true)
+        // An ApiError means the office ANSWERED and refused the
+        // contract; anything else -- a dead fetch, the timeout's own
+        // abort -- never reached it. The pass said "check your
+        // connection" for both, which on a 422 sent a learner to look
+        // at a connection that was plainly working, on the one screen
+        // that has no other way forward (2026-09-09).
+        setSaveError(err instanceof ApiError ? 'refused' : 'network')
       })
   }
 
@@ -418,6 +428,9 @@ export default function BoardingFlow({
             onChange={v => { set({ name: v }); setNameError(null) }}
             onContinue={continueName}
             onSignIn={onSignIn}
+            // Whose pass this is, when it is anybody's: a guest has no
+            // address and the line stays off. See NameStep.
+            email={session?.user?.email ?? null}
             error={nameError}
             busy={busy}
           />

@@ -4,22 +4,28 @@
 # downstream (study/cue_sentences.py, routes/video.py) can treat them
 # identically -- see docs/adr/0003-source-agnostic-caption-pipeline.md.
 #
-# BOTH ingests are purely local: a file the learner uploaded, or text
-# they pasted. Neither makes a network call, so both work identically
-# from a laptop and from a datacenter.
+# TWO of the three ingests are purely local: a file the learner
+# uploaded, or text they pasted. Neither makes a network call, so both
+# work identically from a laptop and from a datacenter, and both are
+# always available.
 #
-# There used to be a third -- fetching YouTube's own caption track --
-# removed 2026-08-26 after it proved unusable in production. YouTube
-# blocks datacenter IPs AND requires a proof-of-origin token its own
-# player generates, so a server cannot get captions for free by any
-# route. Measured, not assumed: the timedtext endpoint answers a
-# third-party browser with 200 and an EMPTY body, and answers Render
-# with RequestBlocked. See docs/adr/0003's 2026-08-26 amendment.
+# The THIRD is fetch_youtube_track, and it is the exception to
+# everything this module otherwise guarantees. It was removed
+# 2026-08-26 as unusable -- YouTube blocks datacenter IPs, so from
+# Render it failed totally -- and restored 2026-09-10 behind a
+# ROTATING RESIDENTIAL proxy, which is the one thing that clears that
+# wall. Nothing about YouTube changed; what changed is that we now pay
+# to stand outside it. It is OFF unless configured, and it refuses to
+# run rather than trying and failing. See docs/adr/0003 and the
+# section comment above fetch_youtube_track.
 #
-# parse_video_id survives because a URL is still useful for ONE thing:
-# naming which video to embed in the player. The player runs in the
-# learner's own browser and was never blocked.
+# parse_video_id serves both the fetch and the player. The player runs
+# in the learner's own browser and was never blocked -- so a session
+# can name a video with no fetch involved at all, which is what every
+# uploaded .srt does.
+
 import logging
+import os
 import re
 
 
@@ -30,6 +36,13 @@ class CaptionParseError(Exception):
     """A subtitle file could not be parsed. Carries what failed, since
     the caller (routes/video.py) shows this to the learner rather than
     guessing at what went wrong."""
+
+
+class CaptionFetchError(Exception):
+    """A caption fetch could not be completed. Deliberately NOT a
+    subclass of CaptionParseError: nothing was malformed, so telling
+    the learner their subtitles are broken would be a lie. The two are
+    caught together in routes/video.py and shown differently."""
 
 
 # ── Markup stripping ──────────────────────────────────────────────
@@ -234,10 +247,192 @@ def parse_track(content: str, filename: str) -> list[dict]:
     return _merge_duplicate_consecutive(cues)
 
 
-# ── Optional proxy (opt-in, off by default) ───────────────────────
-# YouTube blocks datacenter IPs, so from Render every caption fetch
-# fails -- see the module docstring and plans/026. A residential proxy
-# is the only thing that changes that.
+# ── The fetch: a link, and nothing for the learner to find ────────
+# Restored 2026-09-10, having been deleted 2026-08-26. Read
+# docs/adr/0003 before touching this -- the deletion was correct on
+# the evidence available then, and what reverses it is a price, not a
+# discovery.
+#
+# The wall this clears is the FIRST of the two that ADR records: the
+# datacenter IP block. Only a ROTATING RESIDENTIAL pool clears it, and
+# the distinction between proxy products is not a preference:
+#
+#   Proxy Server / datacenter   the same kind of address Render
+#                               already has. Blocked identically.
+#   Static Residential (ISP)    datacenter-hosted, merely REGISTERED
+#                               to an ISP. ASN-detectable, and a
+#                               flagged address stays flagged because
+#                               there is nothing to rotate to.
+#   Rotating Residential        real peer devices. The one that works.
+#
+# youtube-transcript-api's own README says in as many words not to buy
+# the first two. WebshareProxyConfig defaults to rotating residential,
+# which is why it is the configured path; YOUTUBE_HTTP_PROXY is the
+# escape hatch for a different provider, and carries no such default,
+# so whoever sets it owns that choice.
+#
+# The SECOND wall -- the proof-of-origin token that makes timedtext
+# answer a browser with 200 and an empty body -- is not cleared and
+# does not need to be. This library performs the same InnerTube
+# handshake the ADR measured working from the watch page; it was only
+# ever the address it came from that failed.
+#
+# THIS FUNCTION REFUSES TO RUN UNCONFIGURED, and refuses before it
+# imports the library, let alone opens a socket. That ordering is the
+# entire guard. The previous fetch looked like it worked in
+# development and failed only in production, which is how it wasted a
+# release cycle and why tests/test_video.py has carried an assertion
+# about it ever since; that test now asserts this refusal instead of
+# asserting the function is absent. Unconfigured, the dev-works /
+# prod-fails shape is unreachable rather than merely unlikely.
+
+_WEBSHARE_USER_ENV = "WEBSHARE_PROXY_USERNAME"
+_WEBSHARE_PASS_ENV = "WEBSHARE_PROXY_PASSWORD"
+_GENERIC_PROXY_ENV = "YOUTUBE_HTTP_PROXY"
+
+# The only language this app can teach. A track in anything else is
+# not a lesser result, it is the WRONG one: the pasted-transcript
+# ingest died of handing learners English translations of Japanese
+# videos (docs/adr/0003, 2026-09-01), and a fetch that fell back to
+# "whatever track exists" would walk straight back into that. Both
+# spellings, because YouTube labels tracks either way.
+_JAPANESE_LANGUAGE_CODES = ("ja", "ja-JP")
+
+
+def proxy_configured() -> bool:
+    """Whether a fetch can be attempted at all.
+
+    Read by routes/video.py both to gate the ingest and to answer the
+    capabilities probe, so the UI never offers a button this server
+    cannot honour -- offering one that always fails is the specific
+    mistake docs/adr/0003 is a monument to."""
+    if os.environ.get(_GENERIC_PROXY_ENV):
+        return True
+    return bool(
+        os.environ.get(_WEBSHARE_USER_ENV) and os.environ.get(_WEBSHARE_PASS_ENV)
+    )
+
+
+def _proxy_config():
+    """The library's ProxyConfig, or None when nothing is set.
+
+    Imports inside the function on purpose: `import study.captions`
+    must cost nothing while the feature is dark, which is its default
+    and, until someone buys a plan, its only state."""
+    username = os.environ.get(_WEBSHARE_USER_ENV)
+    password = os.environ.get(_WEBSHARE_PASS_ENV)
+    generic = os.environ.get(_GENERIC_PROXY_ENV)
+
+    if username and password:
+        from youtube_transcript_api.proxies import WebshareProxyConfig
+        # filter_ip_locations is deliberately left unset. A Japanese
+        # exit node is not required to read a Japanese caption track,
+        # and narrowing the pool shrinks the only thing being paid
+        # for -- the supply of addresses YouTube has not yet blocked.
+        return WebshareProxyConfig(proxy_username=username, proxy_password=password)
+
+    if generic:
+        from youtube_transcript_api.proxies import GenericProxyConfig
+        return GenericProxyConfig(http_url=generic, https_url=generic)
+
+    return None
+
+
+def fetch_youtube_track(video_id: str) -> list[dict]:
+    """A video's Japanese caption track, as a Track in exactly the
+    shape parse_track returns.
+
+    Everything downstream of Cue is therefore untouched by this
+    ingest's existence, which is the promise docs/adr/0003 made about
+    any new source and the reason deleting the last one cost nothing.
+
+    Every failure is a CaptionFetchError carrying a sentence meant for
+    the learner, including the unconfigured case -- which is what this
+    ships as.
+    """
+    proxy_config = _proxy_config()
+    if proxy_config is None:
+        raise CaptionFetchError(
+            "Fetching subtitles from a link is not enabled on this server."
+        )
+
+    from youtube_transcript_api import YouTubeTranscriptApi
+    from youtube_transcript_api import (
+        CouldNotRetrieveTranscript, NoTranscriptFound, TranscriptsDisabled,
+        VideoUnavailable,
+    )
+
+    api = YouTubeTranscriptApi(proxy_config=proxy_config)
+
+    try:
+        available = api.list(video_id)
+    except TranscriptsDisabled:
+        raise CaptionFetchError("This video has subtitles turned off.")
+    except VideoUnavailable:
+        raise CaptionFetchError("This video is unavailable.")
+    except CouldNotRetrieveTranscript as e:
+        # RequestBlocked and IpBlocked are both subclasses. Logged in
+        # full because a rising rate of these is the signal that the
+        # proxy tier has stopped being enough -- the learner just gets
+        # pointed back at the paths that always work.
+        logger.warning("Caption fetch blocked for %s: %s", video_id, e)
+        raise CaptionFetchError(
+            "YouTube refused the subtitle request for this video."
+        )
+    except Exception as e:  # pragma: no cover - defensive
+        logger.exception("Unexpected error listing captions for %s", video_id)
+        raise CaptionFetchError(f"Could not reach YouTube: {e}")
+
+    # Manual before generated. A human-written track is punctuated and
+    # segmented by someone deciding what belongs on screen together,
+    # which is exactly the unit cue_sentences.py turns into a Sentence
+    # (docs/adr/0003, 2026-08-27). An auto-caption is rougher, and
+    # still a usable study unit -- so it is the fallback, not a
+    # refusal.
+    try:
+        transcript = available.find_manually_created_transcript(_JAPANESE_LANGUAGE_CODES)
+    except NoTranscriptFound:
+        try:
+            transcript = available.find_generated_transcript(_JAPANESE_LANGUAGE_CODES)
+        except NoTranscriptFound:
+            raise CaptionFetchError(
+                "This video has no Japanese subtitles. Try another video, "
+                "or add a subtitle file yourself."
+            )
+
+    try:
+        fetched = transcript.fetch()
+    except CouldNotRetrieveTranscript as e:
+        logger.warning("Caption download blocked for %s: %s", video_id, e)
+        raise CaptionFetchError(
+            "YouTube refused the subtitle request for this video."
+        )
+    except Exception as e:  # pragma: no cover - defensive
+        logger.exception("Unexpected error fetching captions for %s", video_id)
+        raise CaptionFetchError(f"Could not read the subtitles: {e}")
+
+    cues = []
+    for snippet in fetched:
+        # Newlines inside a snippet are a line break on screen, not a
+        # cue boundary -- the same flattening _parse_srt does when it
+        # joins a block's text lines.
+        text = _strip_markup(snippet.text.replace("\n", " "))
+        if not text:
+            continue
+        start = float(snippet.start)
+        cues.append({
+            "start": start,
+            "end": start + float(snippet.duration),
+            "text": text,
+        })
+
+    if not cues:
+        raise CaptionFetchError("This video's Japanese subtitle track is empty.")
+
+    # Auto-captions render as a ROLLING WINDOW, repeating most of each
+    # neighbour's text. This is the function that exists for that; see
+    # its own docstring.
+    return _merge_duplicate_consecutive(cues)
 
 # ── YouTube URL parsing (for the PLAYER, not for fetching) ────────
 # `.search`, not `.match`, so m.youtube.com / music.youtube.com and a

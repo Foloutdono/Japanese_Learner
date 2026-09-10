@@ -23,8 +23,11 @@ import { sourcePaths } from '../domain/sentenceSource'
 // the JLPT grades, the frequency tiers, or the learner's own cards —
 // because they draw from the same bank (backend/routes/translation.py
 // delegates to reading.py wholesale). So they ask it with the same
-// screen rather than with two copies of it, and comprehension, which
-// has only the level to choose, is the same screen with one axis.
+// screen rather than with two copies of it, and comprehension and
+// dictation, which have only the level to choose, are the same screen
+// with one axis. Dictation's bank is its own (the clips in
+// backend/content/listening_clips.py, picked by grade), but the
+// QUESTION this screen asks is the same one, so it asks it here.
 //
 //   /practice/reading            the sources
 //   /practice/reading/levels     the JLPT grades
@@ -32,8 +35,9 @@ import { sourcePaths } from '../domain/sentenceSource'
 //   → /practice/reading/level/N4, /tier/3?size=200&domain=jmdict,
 //     /mastery — the run, on the stage (screens/ReadingRun.jsx)
 //
-// Comprehension has no source list, so its own root IS the level list
-// and the run is /practice/comprehension/N4.
+// Comprehension and dictation have no source list, so their own root
+// IS the level list and the run is /practice/comprehension/N4,
+// /practice/dictation/N4.
 // The title, the roundel and the pigment are the section's own and
 // come from the path (SelectionScreen asks the registry), so a station
 // only has to say WHICH lists it offers.
@@ -53,7 +57,8 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   const leaveSources = <Leave onClick={() => navigate(base)}>{t.leaveSources}</Leave>
 
   // ── The JLPT grades ──
-  // The only step for comprehension, the second one for the other two.
+  // The only step for comprehension and dictation, the second one
+  // for the other two.
   if (levelsPage || levelsOnly) {
     const run = lvl => navigate(levelsOnly ? `${base}/${lvl}` : `${base}/level/${lvl}`)
     return (
@@ -62,9 +67,9 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
             sentence at N4 is built from N4 words (backend's
             reading._pick_words_level), so how many of them the learner
             holds is exactly the readiness the grade is being picked
-            for. The three sentence sections asked the same question
-            with no figures at all, while every SRS station beside them
-            printed them. */}
+            for. The sentence sections asked the same question with no
+            figures at all, while every SRS station beside them printed
+            them. */}
         <LevelSelector source="vocab" onSelect={lvl => board(() => run(lvl))} />
       </SelectionScreen>
     )

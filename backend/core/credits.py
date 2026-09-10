@@ -1,12 +1,15 @@
 """
 回数券 — the credits ledger (plan 069).
 
-1 credit = 1 review. A new account is welcomed with SIGNUP_BONUS. After
-that a free pass refills by DAILY_REFILL at the learner's local midnight
-and tops up to at most CAP -- a balance still above CAP (a fresh welcome
-is) simply takes nothing until it has been spent down; the subscription
-pass is unlimited. The fare gate prices a run against the balance before
-departure, and a run longer than the balance stops at the balance.
+1 credit = 1 review, except on a line that rides free -- see
+FREE_SOURCES below, which today is 仮名 and nothing else. A new account
+is welcomed with SIGNUP_BONUS. After that a free pass refills by
+DAILY_REFILL at the learner's local midnight and tops up to at most CAP
+-- a balance still above CAP (a fresh welcome is) simply takes nothing
+until it has been spent down; the subscription pass is unlimited. The
+fare gate prices a run against the balance before departure, and a run
+longer than the balance stops at the balance -- at the balance's worth
+of PAID reviews, that is: the free ones ride on past it.
 
 -- The balance is a SUM, never a column ----------------------
 credit_ledger is append-only, modelled on xp_ledger: every refill, every
@@ -25,10 +28,11 @@ announcement (plans/README.md, wave 14); the 402 shapes below are what
 the client already knows how to read.
 
 -- What a pass entitles ---------------------------------------
-Free: the daily refill, the learning modes, the dictionary without the
-analyzer, today's run, the full profile, FREE_DECKS decks and
-FREE_CARDS cards. Pass: unlimited credits, the practice modes, the
-analyzer, PASS_DECKS and PASS_CARDS. Practice never spends credits.
+Free: the whole kana line at no fare at all, the daily refill, the
+learning modes, the dictionary without the analyzer, today's run, the
+full profile, FREE_DECKS decks and FREE_CARDS cards. Pass: unlimited
+credits, the practice modes, the analyzer, PASS_DECKS and PASS_CARDS.
+Practice never spends credits.
 There is no purchase flow yet (HAS_STORE in the frontend's
 domain/credits.js), so `plan` is only ever set by hand.
 
@@ -58,6 +62,27 @@ CAP = 50
 # balance is a SUM and the refill already tops up only to the cap.
 SIGNUP_BONUS = 200
 COST_PER_REVIEW = 1
+
+# ── 仮名は無料 — the lines that ride without a fare ────────────
+# Kana costs nothing. It is where every learner starts and the one
+# thing nothing else in the app is legible without: a vocab card, a
+# kanji reading, a grammar rule, the dictionary — none of them can be
+# read at all until the two syllabaries are. Metering the one door
+# everybody has to walk through prices the app out of being tried, so
+# the kana line rides free: its reviews are charged nothing, they are
+# counted out of the day's fare, and a balance at zero still opens the
+# gate onto them.
+#
+# Keyed by SOURCE — the first segment of a mode key, `<source>.<base>
+# [.<direction>]` (study/modes.py) — rather than by card id, because
+# it is the whole LINE that is free, met in its own section and in the
+# daily queue alike. A personal deck can carry a kanji, vocab or
+# grammar structure but never a kana one (study/structures.py), so
+# there is no free ride to be minted by hand; the callers that take a
+# mode key straight from a client check the card against the index
+# first (routes/today.py) rather than trusting the key alone.
+FREE_SOURCES = frozenset({"kana"})
+
 FREE_DECKS = 7
 FREE_CARDS = 200
 PASS_DECKS = 100
@@ -227,6 +252,32 @@ def _state(user_id: str, fresh: bool = False) -> dict:
     return state
 
 
+# ── The price of a review ─────────────────────────────────────
+
+def is_free(source_or_mode: str | None) -> bool:
+    """Whether a review on this line rides free (FREE_SOURCES above).
+
+    Takes either a bare source name ("kana") or a whole mode key
+    ("kana.flashcard.f2b"): the source is the key's first segment, so
+    one function answers for a section endpoint that knows its source
+    outright and for the daily queue, which carries the mode.
+    """
+    if not source_or_mode:
+        return False
+    return source_or_mode.split(".", 1)[0] in FREE_SOURCES
+
+
+def cost_of(source_or_mode: str | None) -> int:
+    """The fare for one review: nothing on a free line,
+    COST_PER_REVIEW everywhere else.
+
+    Every review endpoint prices itself through here, so "which lines
+    ride free" stays the one table above instead of a condition
+    repeated across routes/.
+    """
+    return 0 if is_free(source_or_mode) else COST_PER_REVIEW
+
+
 # ── The public surface ────────────────────────────────────────
 
 def summary(user_id: str) -> dict:
@@ -241,6 +292,11 @@ def summary(user_id: str) -> dict:
         "plan": s["plan"],
         "unlimited": s["unlimited"],
         "enforced": ENFORCE,
+        # What rides free, stated rather than mirrored: the client
+        # keeps its own copy for the figures it prints before the API
+        # has answered (frontend/src/domain/credits.js), and this is
+        # what that copy is checked against at runtime.
+        "freeSources": sorted(FREE_SOURCES),
     }
 
 
@@ -289,6 +345,18 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                     raise OutOfCredits(have, next_refill_at(s["tz"], now).isoformat())
                 logger.info("credits: would have blocked user_id=%s balance=%d fare=%d ref=%s",
                             user_id, have, n, ref)
+                # ...and again where it can be counted. That log line
+                # goes to stdout, which on Render is not queryable and
+                # does not outlive the instance, so the one signal this
+                # whole shadow mode exists to produce -- who wants more
+                # than the free allowance gives -- was being thrown
+                # away. On `cur`, inside the transaction already open,
+                # so a fare and its refusal cannot disagree. `ref` is a
+                # card id and stays out of it: the question is how
+                # often and to whom, never which card.
+                from core import events
+                events.record(user_id, "fare_blocked",
+                              {"balance": have, "fare": n, "kind": "review"}, cur=cur)
             charge = min(n, have)
             if charge > 0:
                 _insert(cur, user_id, -charge, "review", ref)
@@ -341,26 +409,72 @@ def card_limit(user_id: str) -> int:
     return PASS_CARDS if entitlement(user_id) == "pass" else FREE_CARDS
 
 
+def _count(cur) -> int:
+    """The single number a COUNT query returned, whatever cursor ran it.
+
+    All three call sites in routes/decks.py hand these helpers a
+    RealDictCursor, on which `row[0]` raises KeyError instead of giving
+    the count. That was invisible for as long as the counts sat behind
+    `if not ENFORCE: return` -- they never ran. The first
+    CREDITS_ENFORCE=1 deploy would have met it on the first deck anyone
+    created, with a 500 where a 402 was meant.
+    """
+    row = cur.fetchone()
+    if row is None:
+        return 0
+    if isinstance(row, dict):
+        return int(next(iter(row.values())))
+    return int(row[0])
+
+
 def check_deck_limit(cur, user_id: str) -> None:
-    """Before INSERT INTO decks. A no-op until enforcement."""
-    if not ENFORCE:
-        return
+    """Before INSERT INTO decks. Refuses only under enforcement; in
+    shadow mode it still counts, and records the crossing."""
     limit = deck_limit(user_id)
     cur.execute("SELECT COUNT(*) FROM decks WHERE user_id = %s", (user_id,))
-    if cur.fetchone()[0] >= limit:
+    have = _count(cur)
+    if have < limit:
+        return
+    if ENFORCE:
         raise LimitReached("decks", limit)
+    _shadow_limit(cur, user_id, "decks", limit, have == limit)
+
+
+def _shadow_limit(cur, user_id: str, kind: str, limit: int, crossing: bool) -> None:
+    """Record a limit a free learner has just walked past, once.
+
+    Only on the crossing -- the deck that would have been the first one
+    refused -- because after it every further add is also past the limit
+    and would say the same thing again. One row per learner per limit is
+    the shape the question wants ("how many people want more than seven
+    decks"), and the alternative is a learner with three hundred cards
+    writing a hundred identical rows.
+
+    The count above used to sit behind `if not ENFORCE: return`, so
+    shadow mode never even looked. That made the pass's own value
+    proposition the one thing the app could not measure.
+    """
+    if not crossing:
+        return
+    from core import events
+    events.record(user_id, "limit_reached", {"kind": kind, "at": limit}, cur=cur)
 
 
 def check_card_limit(cur, user_id: str, adding: int = 1) -> None:
     """Before a card lands in any of the learner's decks — hand-written
-    or browsed in. A no-op until enforcement."""
-    if not ENFORCE:
-        return
+    or browsed in. Refuses only under enforcement; in shadow mode it
+    still counts, and records the crossing."""
     limit = card_limit(user_id)
     cur.execute(
         "SELECT (SELECT COUNT(*) FROM custom_cards WHERE user_id = %s)"
         " + (SELECT COUNT(*) FROM deck_cards WHERE user_id = %s)",
         (user_id, user_id),
     )
-    if cur.fetchone()[0] + adding > limit:
+    have = _count(cur)
+    if have + adding <= limit:
+        return
+    if ENFORCE:
         raise LimitReached("cards", limit)
+    # The crossing is the batch that takes them past it, so a learner
+    # already over the line does not re-report on every card after.
+    _shadow_limit(cur, user_id, "cards", limit, have <= limit)
