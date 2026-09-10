@@ -450,16 +450,20 @@ export default function DeckDetailScreen({ session }) {
     })
   }
 
+  // `cards.length > 0` guards the empty deck, where "none selected" and
+  // "all selected" are the same number and the tick would open on.
+  const allSelected = cards.length > 0 && selected.size === cards.length
+
   function toggleSelectAll() {
-    setSelected(selected.size === cards.length ? new Set() : new Set(cards.map(cardKey)))
+    setSelected(allSelected ? new Set() : new Set(cards.map(cardKey)))
   }
 
   function exitSelectMode() { setSelectMode(false); setSelected(new Set()); setConfirmingDelete(false) }
 
   async function deleteSelected() {
-    // Asked inline in the toolbar (see confirmingDelete) rather than
-    // through the browser's confirm() dialog, which was the last
-    // OS-native surface in the app.
+    // Asked in the app's own sheet (see confirmingDelete), the same one
+    // a single card and the deck itself are asked in — never the
+    // browser's confirm(), which was the last OS-native surface here.
     playUi('click-screen-selection')
     setConfirmingDelete(false)
     for (const card of cards) {
@@ -514,8 +518,8 @@ export default function DeckDetailScreen({ session }) {
         </button>
       </div>
 
-      {/* The chip row: what you can do to the deck. Select turns the
-          row into the selection's own toolbar. */}
+      {/* The chip row: what you can do to the deck. Select swaps it
+          for the selection's own console (below). */}
       {!selectMode && (
         <div className="chip-row">
           {allowCustom && (
@@ -533,32 +537,56 @@ export default function DeckDetailScreen({ session }) {
         </div>
       )}
 
+      {/* ── The selection console ──────────────────────────────
+          The four controls used to be a bare .chip-row: a caption, a
+          chip, a filled Delete and a Cancel, all four different
+          shapes, wrapping into a ragged two lines on a phone with the
+          destructive one the largest object on the screen — and a
+          second FILLED button on a screen that already has ▶ Study,
+          which DESIGN.md allows exactly one of.
+
+          It is the console's own grammar instead (Decks, Dictionary,
+          Today): one panel, two rows on a hairline. Row 1 is the
+          choice — the tick that takes all of them, and how many are
+          held, pinned right as a figure. Row 2 is what you can do
+          with them, two chips sharing the width. The tick is the same
+          mark the rows below carry, so "all of them" and "this one"
+          are visibly the same act.
+
+          Delete is a ghost here and fills only in the sheet that asks
+          — the same escalation the deck's own deletion uses, and now
+          the same sheet-shaped question for all three of them. */}
       {selectMode && (
-        <div className="chip-row chip-row--select">
-          <span className="chip-row__count">{t.cardsCount(selected.size)}</span>
-          <Chip onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }}>
-            {selected.size === cards.length ? t.deselectAll : t.selectAll}
-          </Chip>
-          {confirmingDelete ? (
-            <>
-              <span className="chip-row__q">{t.deleteCardsConfirm}</span>
-              <button type="button" onClick={deleteSelected} className="btn-primary btn-primary--danger">
-                <TrashIcon size={14} /> {t.delete} ({selected.size})
-              </button>
-              <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(false) }}>{t.cancel}</Chip>
-            </>
-          ) : (
-            <>
-              <button
-                type="button"
-                onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
-                disabled={selected.size === 0}
-                className="btn-primary btn-primary--danger">
-                <TrashIcon size={14} /> {t.delete} ({selected.size})
-              </button>
-              <Chip onClick={() => { playUi('click-mode-selection'); exitSelectMode() }}><CrossIcon size={14} />{t.cancel}</Chip>
-            </>
-          )}
+        <div className="select-console" role="group" aria-label={t.select}>
+          <div className="select-console__top">
+            <button
+              type="button"
+              className="select-console__all"
+              aria-pressed={allSelected}
+              onClick={() => { playUi('click-mode-selection'); toggleSelectAll() }}
+            >
+              <span className={`card-row__tick${allSelected ? ' card-row__tick--on' : ''}`} aria-hidden="true">
+                {allSelected && <CheckIcon size={11} />}
+              </span>
+              {allSelected ? t.deselectAll : t.selectAll}
+            </button>
+            <span className="select-console__count">
+              <span className="select-console__fig">{selected.size}</span>
+              <span className="select-console__total">/ {cards.length}</span>
+            </span>
+          </div>
+          <div className="select-console__acts">
+            <Chip
+              className="chip--danger"
+              disabled={selected.size === 0}
+              onClick={() => { playUi('click-mode-selection'); setConfirmingDelete(true) }}
+            >
+              <TrashIcon size={14} />{t.delete}
+            </Chip>
+            <Chip onClick={() => { playUi('click-mode-selection'); exitSelectMode() }}>
+              <CrossIcon size={14} />{t.cancel}
+            </Chip>
+          </div>
         </div>
       )}
 
@@ -775,7 +803,12 @@ export default function DeckDetailScreen({ session }) {
             <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
           </>
         ) : (
-          <button type="button" className="btn-secondary btn-secondary--danger" onClick={() => setConfirmingDeck(true)}>
+          /* The sheet's own one action, so it is filled — the ghost it
+             was set raw --danger as TEXT, which is 2.11:1 on this
+             ground in dark and read as a warning label rather than a
+             button. Import and Export beside it stay ghosts; the
+             screen's filled ▶ Study is behind the scrim. */
+          <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
             <TrashIcon size={14} /> {t.deleteDeck}
           </button>
         )}
@@ -795,6 +828,24 @@ export default function DeckDetailScreen({ session }) {
           <TrashIcon size={14} /> {t.delete}
         </button>
         <button type="button" className="btn-secondary" onClick={() => setConfirmingCard(null)}>{t.cancel}</button>
+      </Sheet>
+
+      {/* The selection's deletion, asked in the same sheet — the count
+          stands where one card puts its own front, because that is
+          what is about to go. It was a question squeezed into the
+          toolbar between two chips, which is the one deletion of the
+          three the app asked a different way. */}
+      <Sheet
+        open={confirmingDelete}
+        onClose={() => setConfirmingDelete(false)}
+        jp={t.cardsCount(selected.size)}
+        cap={t.delete}
+      >
+        <span className="sheet__q">{t.deleteCardsConfirm}</span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteSelected}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingDelete(false)}>{t.cancel}</button>
       </Sheet>
 
       {showImport && (

@@ -51,6 +51,7 @@ from study.modes import (
     KANJI as MODE_KANJI,
     VOCAB as MODE_VOCAB,
     GRADED_FOR_SOURCE,
+    GRADED_ORDER_FOR_SOURCE,
     resolve_for_source,
 )
 import psycopg2.extras
@@ -995,7 +996,10 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
         conn.close()
 
     total = custom_count + sum(source_counts.values())
-    modes = sorted(GRADED_FOR_SOURCE[_registry_source(deck_type)]) if total else []
+    # In the registry's own order, which is the 種別 ladder — not
+    # sorted(), which is the alphabet and put b2f (recall) above f2b
+    # (recognition) on every deck in the app.
+    modes = list(GRADED_ORDER_FOR_SOURCE[_registry_source(deck_type)]) if total else []
 
     return {
         "modes": modes,

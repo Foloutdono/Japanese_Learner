@@ -126,7 +126,6 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
     }
   }
 
-  const sourceLabel = SOURCE_TABS.find(s => s.key === source)?.label ?? source
   const dialogRef = useDialog(onClose)
 
   return (
@@ -137,9 +136,14 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
           <div className="import-header__title" id="browse-cards-title">{t.browseTitle}</div>
           <button onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
         </div>
-        <div className="import-subtitle">{t.browseSubtitle}</div>
-
-        {tabs.length > 1 ? (
+        {/* Two lines of copy stood here — a subtitle restating the
+            title, and, on a restricted-type deck, a note saying which
+            source it accepts. DESIGN.md's second rule: say less. The
+            title already says what this is; a vocab deck's browse
+            offers vocabulary and nothing else, and every result on
+            screen is a word, which is the note said better. A deck
+            with one source now shows no tab row at all. */}
+        {tabs.length > 1 && (
           <div className="browse-source-tabs">
             {tabs.map(s => (
               <button
@@ -149,13 +153,6 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
                 {s.label}
               </button>
             ))}
-          </div>
-        ) : (
-          // A restricted-type deck (Kanji/Vocab/Grammar) has exactly
-          // one possible source — nothing to choose, so the tab bar
-          // is replaced by a plain note instead of a one-button row.
-          <div className="browse-only-note">
-            {t.browseOnlyAccepts.replace('{type}', sourceLabel)}
           </div>
         )}
 
