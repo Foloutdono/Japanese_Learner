@@ -159,6 +159,38 @@ class ModeRegistryTests(unittest.TestCase):
             self.assertIn(f"{source}.flashcard.f2b", keys)
             self.assertIn(f"{source}.flashcard.b2f", keys)
 
+    def test_graded_order_holds_the_same_keys_as_the_graded_set(self) -> None:
+        self.assertEqual(
+            set(modes.GRADED_ORDER_FOR_SOURCE),
+            set(modes.GRADED_FOR_SOURCE),
+        )
+        for source, keys in modes.GRADED_ORDER_FOR_SOURCE.items():
+            self.assertEqual(len(keys), len(set(keys)), f"{source} repeats a key")
+            self.assertEqual(set(keys), set(modes.GRADED_FOR_SOURCE[source]), source)
+
+    def test_graded_order_is_the_picker_order_without_the_browse(self) -> None:
+        # MODES_FOR_SOURCE is the same ladder with the ungraded browse
+        # appended, so the two cannot drift into two different orders.
+        for source, keys in modes.GRADED_ORDER_FOR_SOURCE.items():
+            self.assertEqual(keys, modes.MODES_FOR_SOURCE[source][:-1], source)
+
+    def test_recognition_comes_before_recall(self) -> None:
+        """
+        The defect GRADED_ORDER_FOR_SOURCE was minted for.
+
+        A caller holding only the frozenset reached for `sorted()`, and
+        the alphabet puts `.b2f` above `.f2b` — so every deck's picker
+        offered recall before recognition and ran its 種別 pips 2, 3, 2
+        down the screen. The ladder is a progression; assert it is one.
+        """
+        for source in modes.SOURCES:
+            keys = modes.GRADED_ORDER_FOR_SOURCE[source]
+            self.assertLess(
+                keys.index(f"{source}.flashcard.f2b"),
+                keys.index(f"{source}.flashcard.b2f"),
+                f"{source}: recognition must be offered before recall",
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

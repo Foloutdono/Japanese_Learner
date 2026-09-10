@@ -1284,7 +1284,6 @@ const decks = {
   // Browse existing cards (BrowseCardsMenu.jsx)
   browseBtn:              'Browse',
   browseTitle:            'Browse existing cards',
-  browseSubtitle:         'Add kanji, words, or grammar points already in the app to this deck.',
   browseTabKanji:         '漢字 Kanji',
   browseTabVocab:         '語彙 Vocabulary',
   browseTabGrammar:       '文法 Grammar',
@@ -1299,11 +1298,6 @@ const decks = {
   close:                  'Close',
   adding:                 'Adding...',
   addSelected:            'Add ({n})',
-  // Shown instead of the source tabs when a deck's type only accepts
-  // one kind of card (e.g. a Kanji-type deck) — there's nothing left
-  // to choose between, so the tabs are replaced by this instead.
-  browseOnlyAccepts:      'This deck only accepts {type} cards.',
-
   // Bulk select
   selectAll:         'Select all',
   deselectAll:       'Deselect all',

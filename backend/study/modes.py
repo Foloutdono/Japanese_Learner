@@ -189,9 +189,24 @@ SRS_MODES: frozenset[str] = frozenset(m.key for m in MODES.values() if m.graded)
 
 ALL_MODE_KEYS: tuple[str, ...] = tuple(MODES)
 
+# The same graded keys IN PICKER ORDER — the ladder _ORDERED declares,
+# which runs from the mode that holds your hand most to the one that
+# holds it least. Anything that SHOWS a source's modes to a learner
+# takes this; GRADED_FOR_SOURCE below is a set and answers "is this key
+# allowed", never "in what order".
+#
+# It exists because a caller that only had the set reached for
+# `sorted()` and got the alphabet: a deck's picker offered
+# vocab.flashcard.b2f before .f2b, so recall came before recognition
+# and the 種別 pips ran 2, 3, 2 down the screen. Sorting a set of keys
+# is never the ordering you want here.
+GRADED_ORDER_FOR_SOURCE: dict[str, tuple[str, ...]] = {
+    source: tuple(m.key for m in group) for source, group in _ORDERED.items()
+}
+
 # Graded keys per source, for validation in require_mode().
 GRADED_FOR_SOURCE: dict[str, frozenset[str]] = {
-    source: frozenset(m.key for m in group) for source, group in _ORDERED.items()
+    source: frozenset(keys) for source, keys in GRADED_ORDER_FOR_SOURCE.items()
 }
 
 

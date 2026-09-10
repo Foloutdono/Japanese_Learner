@@ -15,14 +15,18 @@ FR_LOCALE = (
 )
 
 
-def _frontend_keys() -> set[str]:
+def _frontend_key_order() -> list[str]:
     """
-    The keys declared in the frontend registry, read out of the source
-    rather than duplicated into a shared JSON file — one definition, no
-    third copy to drift.
+    The keys declared in the frontend registry, IN DECLARATION ORDER,
+    read out of the source rather than duplicated into a shared JSON
+    file — one definition, no third copy to drift.
     """
     src = FRONTEND_REGISTRY.read_text(encoding="utf-8")
-    return set(re.findall(r"^\s*mode\('([^']+)'", src, re.MULTILINE))
+    return re.findall(r"^\s*mode\('([^']+)'", src, re.MULTILINE)
+
+
+def _frontend_keys() -> set[str]:
+    return set(_frontend_key_order())
 
 
 def _locale_keys(path: Path) -> set[str]:
@@ -75,6 +79,23 @@ class ModeParityTests(unittest.TestCase):
             en, fr,
             f"\n  en only: {sorted(en - fr)}\n  fr only: {sorted(fr - en)}",
         )
+
+    def test_the_two_registries_declare_the_same_ORDER(self) -> None:
+        """
+        Both files declare a ladder, not just a set, and both say it is
+        the picker's order — the frontend spends it directly
+        (modePickerEntries), the backend serves it to the deck picker
+        (GRADED_ORDER_FOR_SOURCE, routes/decks.py). Two orders that
+        disagree means the same three modes are listed two ways in one
+        app, which is how alphabetising crept in unnoticed.
+        """
+        frontend = [k for k in _frontend_key_order() if k in modes.SRS_MODES]
+        backend = [
+            key
+            for source in modes.SOURCES
+            for key in modes.GRADED_ORDER_FOR_SOURCE[source]
+        ]
+        self.assertEqual(frontend, backend)
 
     def test_every_mode_has_a_service_badge(self) -> None:
         # config/stations.js used to hold its own SERVICE map, and an

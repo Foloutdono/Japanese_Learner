@@ -4027,7 +4027,6 @@ input {
   outline: none;
   transition: border-color 0.2s;
 }
-input:focus { border-color: var(--accent2); }
 
 /* The checkable controls are not text fields either: the rule above
    would paint a card-coloured ground behind a radio, and the UA would
@@ -4041,24 +4040,31 @@ input[type="checkbox"] {
   background: none;
 }
 
-/* Keep the border tint — it is a nice ambient cue on mouse focus —
-   but add the same ring every button gets, on :focus-visible only, so
-   keyboard focus is as legible on a field as it is on a control.
-   The outline suppression above is what made this necessary. */
-input:focus-visible {
-  outline: 2px solid var(--accent2);
-  outline-offset: 2px;
-}
+/* ── One mark for focus, and it is the ring ───────────────────
+   A focused field used to grow a coloured 1px border AND wear the
+   ring, in two different pigments, standing 2px apart: on .field the
+   inner one was --accent, the vermillion, so every field in the app
+   opened a red hairline inside a gold ring and read as a validation
+   error rather than a caret. One state gets one mark. The ring sits
+   FLUSH (offset 0) so it reads as the field's own edge lighting up
+   instead of a second box drawn around it.
 
+   :focus-visible rather than :focus, and that is not a keyboard-only
+   ring: a text field matches :focus-visible whenever it is focused
+   (CSS UI 4, "supports keyboard input"), so a click gets it too. What
+   it spares is the button wearing .field — the radical picker — which
+   should not ring on a pointer press. The `outline: none` above is
+   what makes any of this necessary. */
+input:focus-visible,
 textarea:focus-visible {
   outline: 2px solid var(--accent2);
-  outline-offset: 2px;
+  outline-offset: 0;
 }
 
 /* ── .field — the app's one text field ────────────────────────
    Chosen from side-by-side specimens: the "filled well". The field is
-   a step through the card rather than a box drawn on it, and it grows
-   an edge only when focused.
+   a step through the card rather than a box drawn on it, and focus is
+   the ring alone (see `input:focus-visible` above).
 
    WHY THIS EXISTS. The bare `input` rule above declares a border, a
    background and a radius and then says nothing about size, padding,
@@ -4089,7 +4095,6 @@ textarea:focus-visible {
   --field-ink:  var(--text-primary);
   --field-dim:  var(--text-secondary);
   --field-well: var(--bg-main);
-  --field-edge: var(--accent);
 
   display: block;
   width: 100%;
@@ -4114,11 +4119,13 @@ textarea:focus-visible {
   opacity: 1; /* Firefox dims placeholders by default; the token already is the dim register */
 }
 
-.field:focus { border-color: var(--field-edge); }
+/* Focus is the ring and nothing else — see the note over
+   `input:focus-visible` above for why the coloured border went. The
+   1px transparent border stays: it is what keeps the box from
+   shifting, and it is still what .field--bare turns off. */
 .field:focus-visible {
-  border-color: var(--field-edge);
   outline: 2px solid var(--accent2);
-  outline-offset: 2px;
+  outline-offset: 0;
 }
 .field:disabled { opacity: 0.45; }
 
@@ -4152,7 +4159,6 @@ textarea:focus-visible {
   --field-ink:  var(--text-on-panel);
   --field-dim:  var(--text-on-panel-soft);
   --field-well: rgba(0, 0, 0, 0.28);
-  --field-edge: var(--accent2);
 }
 
 /* The third ground: the PAGE. The base well is --bg-main, which is the
@@ -4195,7 +4201,6 @@ textarea:focus-visible {
   border-radius: 0;
   padding-inline: 0;
 }
-.field--bare:focus { border-color: transparent; }
 
 /* A textarea is the same field, told how tall to start. */
 .field--multi {
@@ -5401,6 +5406,35 @@ textarea:focus-visible {
   border-color: color-mix(in srgb, var(--tab-color, var(--line-color)) 55%, transparent);
   background: color-mix(in srgb, var(--tab-color, var(--line-color)) 12%, transparent);
 }
+/* --danger is the destructive one in a row of chips, and it is a ghost
+   on purpose: it ARMS a deletion, the sheet that follows fills. The
+   ink is --danger carried half-way to --text-primary, the mix 057
+   settled on for danger-as-TEXT — raw --danger reads 2.11:1 on
+   --surface in dark, which is a colour you can see and not a word you
+   can read. Hover takes it the rest of the way in, never a fill: a
+   chip that filled would be a second primary. */
+.chip--danger {
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+.chip--danger:hover,
+.chip--danger:focus-visible {
+  color: color-mix(in srgb, var(--danger) 35%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
+}
+/* The family's one disabled treatment (see .btn-primary:disabled far
+   below, which is where this belongs by rights). It is written HERE
+   instead because the growing-chip rules between the two are more
+   specific, and a 0-2-0 selector after them descends. Nothing it sets
+   collides with .chip--on / .chip--danger, so the earlier position
+   costs the chip nothing. */
+.chip:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  box-shadow: none;
+  transform: none;
+}
 .chip__glyph {
   display: inline-flex;
   align-items: center;
@@ -5516,8 +5550,11 @@ textarea:focus-visible {
      the trim buys in .chip. Measured 0.91px left of centre before. */
   padding-inline-start: var(--tr-caption);
 }
+/* .select-console__acts joins them: two chips are the whole of what
+   you can do with a selection, which is a set and takes the row. */
 .console__chips .chip,
-.gate-card__lines .chip {
+.gate-card__lines .chip,
+.select-console__acts .chip {
   flex: 1 1 auto;
   justify-content: center;
 }
@@ -8625,16 +8662,104 @@ textarea:focus-visible {
 .deck-identity__study { flex: none; }
 
 .chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
-.chip-row__count,
-.chip-row__q {
+
+/* ── The selection console ─────────────────────────────────────
+   Select mode's own object, in place of the chip row. It is the
+   console's construction (.console above) and not a second one: one
+   surface panel at --r-panel, two rows split by a --surface-line
+   hairline, the count pinned to the right of the first the way a
+   result count is. It is declared here rather than reusing .console
+   only because its second row holds two actions where the console's
+   holds a field; everything the two share is read off the same
+   tokens.
+
+   What it replaces was four differently shaped controls loose in a
+   flex-wrap — a caption, a chip, a filled Delete and a Cancel — which
+   at phone width wrapped 2 + 2 with the destructive one the largest
+   thing on the screen and, being filled, the second such button on a
+   screen DESIGN.md allows exactly one of. */
+.select-console {
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+.select-console__top {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  border-bottom: 1px solid var(--surface-line);
+}
+/* The tick and its word are ONE control: pressing either takes every
+   card, which is what the mark below it means on a single row. Bare of
+   the `button` rule's box, because the panel is already the box. */
+.select-console__all {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: var(--r-plate);
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  text-align: left;
   color: var(--text-secondary);
+  cursor: pointer;
 }
-.chip-row__q { color: var(--text-primary); }
+.select-console__all:hover,
+.select-console__all:focus-visible { color: var(--text-primary); filter: none; }
+/* A figure and its unit, set the way every figure in the app is
+   (DESIGN.md, Figures) — the caption "3 CARDS" it replaces said the
+   same thing without saying which of how many. */
+.select-console__count {
+  flex: none;
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.select-console__fig { font-size: var(--fs-lead); color: var(--text-primary); }
+.select-console__total { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* Two chips sharing the row — they grow with the console-chip family
+   declared far above, because the pair is a SET: everything you can
+   do with a selection, not a sentence that ran out. */
+.select-console__acts {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+}
+/* Off the phone the two rows are ONE. Stretched across a desktop the
+   pair reached 450px a chip, which is a chip that has stopped being
+   one, and the panel spent two rows saying what fits on a third of
+   the width. The count and the actions ride the right edge instead,
+   the way a console pins its own action. */
+@media (min-width: 769px) {
+  .select-console {
+    display: flex;
+    align-items: center;
+  }
+  .select-console__top {
+    flex: 1;
+    min-width: 0;
+    border-bottom: 0;
+  }
+  .select-console__acts {
+    flex: none;
+    padding-inline-start: 0;
+  }
+  .select-console__acts .chip { flex: none; }
+}
 
 .card-list {
   display: flex;
@@ -8650,6 +8775,7 @@ textarea:focus-visible {
    opens something -- a hand-written card's editor, or its own tick in
    select mode -- and one button cannot sit inside the other. */
 .card-row {
+  position: relative; /* the selected rail hangs off this */
   display: flex;
   align-items: center;
   width: 100%;
@@ -8677,19 +8803,57 @@ textarea:focus-visible {
 button.card-row__body { cursor: pointer; }
 button.card-row__body:hover,
 button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: none; }
+/* A rail and a wash, not a wash alone: 3px down the left of the row is
+   how this app says a row is picked out (DESIGN.md, "Colour is an
+   edge, a ring, or a numeral"), and at 10% the wash by itself was a
+   ground you had to compare against its neighbour to see.
+
+   A positioned pseudo-element rather than a border (which would step
+   the row's content 3px right as it is ticked) and rather than an
+   inset shadow (which paints under .card-row__body, so hovering a
+   selected row erased its own rail — the body's hover ground is
+   opaque and the row's background is behind it). */
 .card-row--selected { background: color-mix(in srgb, var(--line-color) 10%, transparent); }
+.card-row--selected::after {
+  content: '';
+  position: absolute;
+  inset-block: 0;
+  inset-inline-start: 0;
+  width: 3px;
+  background: var(--line-color);
+  pointer-events: none;
+}
+/* Hover on a selected row lifts its OWN wash. The neutral
+   --bg-card-hover is opaque, so without this the row went back to
+   looking unselected under the pointer — the one row you are about to
+   act on being the one that stops saying it is chosen. */
+.card-row--selected button.card-row__body:hover,
+.card-row--selected button.card-row__body:focus-visible {
+  background: color-mix(in srgb, var(--line-color) 14%, transparent);
+}
+/* The same mark at the head of a row and at the head of the console
+   above it, which is what makes "all of them" read as the same act as
+   "this one". */
 .card-row__tick {
   flex: none;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   border-radius: var(--r-plate);
   border: 1.5px solid color-mix(in srgb, var(--text-secondary) 60%, transparent);
-  color: var(--bg-main);
+  color: var(--text-on-panel);
 }
-.card-row__tick--on { background: var(--line-color); border-color: var(--line-color); }
+/* The filled-control pair, deepened 30% toward the panel ink exactly
+   as .btn-primary is — that is the mix every line pigment but gold was
+   measured to carry --text-on-panel on. The tick used to fill with the
+   RAW pigment and set the check in --bg-main, which is 3.07:1 on 蘇芳
+   in dark: a mark you can see rather than a tick you can read. */
+.card-row__tick--on {
+  background: color-mix(in srgb, var(--line-color) 70%, var(--bg-panel));
+  border-color: color-mix(in srgb, var(--line-color) 70%, var(--bg-panel));
+}
 .card-row__front { display: flex; flex-direction: column; min-width: 0; width: 96px; flex: none; }
 .card-row__jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-lead); line-height: 1.2; }
 .card-row__kana { font-family: var(--font-jp); font-size: var(--fs-caption); color: var(--text-secondary); letter-spacing: var(--tr-term); }
@@ -13781,24 +13945,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-on-panel-soft);
 }
 .browse-source-tab--active { background: var(--deck-action); color: var(--text-on-panel); }
-
-/* Shown instead of the source tabs when the deck's structure leaves
-   nothing to choose. It had no styling at all, so it rendered as a
-   full-size bold sentence directly under the subtitle — two headings
-   where the second is a footnote. A quiet rule-chip instead: it states
-   a constraint, which is what the tabs it replaces would have shown. */
-.browse-only-note {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 16px;
-  padding: 5px 11px;
-  border: 1px solid var(--surface-line);
-  border-radius: 999px;
-  background: var(--surface);
-  font-size: 12px;
-  color: var(--text-secondary);
-}
 
 /* Six levels, one band. The row is a SCALE — Tous, then N5 down to N1
    — so its buttons share the width equally instead of ending ragged

@@ -1242,7 +1242,6 @@ const decks = {
   // Parcourir les cartes existantes (BrowseCardsMenu.jsx)
   browseBtn:              'Parcourir',
   browseTitle:            'Parcourir les cartes existantes',
-  browseSubtitle:         "Ajoutez à ce deck des kanji, mots ou points de grammaire déjà présents dans l'application.",
   browseTabKanji:         '漢字 Kanji',
   browseTabVocab:         '語彙 Vocabulaire',
   browseTabGrammar:       '文法 Grammaire',
@@ -1254,12 +1253,6 @@ const decks = {
   alreadyAdded:           'déjà ajouté',
   adding:                 'Ajout...',
   addSelected:            'Ajouter ({n})',
-  // Affiché à la place des onglets de source quand le type d'un deck
-  // n'accepte qu'une seule sorte de carte (ex : un deck de type
-  // Kanji) — il n'y a alors rien à choisir, donc les onglets sont
-  // remplacés par ce message.
-  browseOnlyAccepts:      'Ce deck n\'accepte que les cartes de type {type}.',
-
   // Bulk select
   selectAll:         'Tout sélectionner',
   deselectAll:       'Tout désélectionner',
