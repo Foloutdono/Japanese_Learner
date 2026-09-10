@@ -49,8 +49,13 @@ EVENTS: dict[str, frozenset[str]] = {
     # Emitted from go()/back() in BoardingFlow.jsx, which is every
     # transition there is. Abandonment is the absence of boarding_done
     # after a boarding_step, so neither needs an "abandoned" event.
-    "boarding_step":  frozenset({"step", "to", "index", "dir"}),
-    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications"}),
+    # `ms` is ENGAGED time on the step being left, not wall-clock: the
+    # client stops counting while the tab is hidden
+    # (frontend/src/lib/dwell.js), so a boarding left open over lunch
+    # does not report an hour spent choosing a study rhythm. On
+    # boarding_done it is the same measure across the whole line.
+    "boarding_step":  frozenset({"step", "to", "index", "dir", "ms"}),
+    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "ms"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.
@@ -68,8 +73,20 @@ EVENTS: dict[str, frozenset[str]] = {
     # is a learner who wanted more than the free allowance gives.
     "fare_blocked":   frozenset({"balance", "fare", "kind"}),
     "limit_reached":  frozenset({"kind", "at"}),
-    # Dormant until HAS_STORE flips (frontend/src/domain/credits.js).
+    # ── 定期券 — the offer ───────────────────────────────────────
+    # No longer dormant: the pass is SHOWN from five doors and sold from
+    # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
+    # deliberately not HAS_STORE). `where` is which of the five.
+    #
+    # The three verbs are the whole point: a paywall nobody opens and a
+    # paywall opened and refused are indistinguishable from
+    # credit_ledger, and until a store exists offer_intent is the only
+    # willingness-to-pay signal there is. `ms` is the gap between seeing
+    # the pass and deciding — a door with a high intent rate and a
+    # one-second median is a mis-tap, not demand.
     "offer_view":     frozenset({"where"}),
+    "offer_intent":   frozenset({"where", "ms"}),
+    "offer_dismiss":  frozenset({"where", "ms"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
@@ -85,7 +102,7 @@ EVENTS: dict[str, frozenset[str]] = {
 # the level step ever come back" cannot be asked of a rollup.
 KEEP_LONG = frozenset({
     "boarding_step", "boarding_done", "account_claimed",
-    "fare_blocked", "limit_reached", "offer_view",
+    "fare_blocked", "limit_reached", "offer_view", "offer_intent", "offer_dismiss",
 })
 
 # A property value is a scalar or it is dropped. Strings are cut at 64

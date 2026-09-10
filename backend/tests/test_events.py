@@ -51,6 +51,54 @@ def rows():
         conn.close()
 
 
+# ── 定期券 — the offer, and the time it took ──────────────────────
+
+def test_the_offer_records_all_three_verbs_with_its_door(client):
+    # The pass is shown from five doors and sold from none, so these
+    # three are the only willingness-to-pay signal there is. A view with
+    # neither an intent nor a dismiss after it would mean a door that
+    # cannot be evaluated, which is why the pairing is enforced in the
+    # store rather than at the call sites (frontend/src/stores/credits.js).
+    r = client.post("/api/events", json={"events": [
+        {"name": "offer_view", "props": {"where": "runout"}},
+        {"name": "offer_intent", "props": {"where": "runout", "ms": 21400}},
+        {"name": "offer_dismiss", "props": {"where": "settings", "ms": 1800}},
+    ]})
+    assert r.status_code == 202
+    assert r.json()["kept"] == 3
+    assert [(name, props) for name, props, _ in rows()] == [
+        ("offer_view", {"where": "runout"}),
+        ("offer_intent", {"where": "runout", "ms": 21400}),
+        ("offer_dismiss", {"where": "settings", "ms": 1800}),
+    ]
+
+
+def test_a_boarding_step_carries_how_long_it_held_them(client):
+    # `ms` is ENGAGED time -- the client stops counting while the tab is
+    # hidden (frontend/src/lib/dwell.js) -- which is what makes "which
+    # question stalls people" answerable at all.
+    r = client.post("/api/events", json={"events": [
+        {"name": "boarding_step", "props": {"step": "name", "to": "why", "dir": "fwd", "index": 1, "ms": 23400}},
+        {"name": "boarding_done", "props": {"level": "N5", "ms": 204000}},
+    ]})
+    assert r.status_code == 202
+    kept = [props for _, props, _ in rows()]
+    assert kept[0]["ms"] == 23400
+    assert kept[1]["ms"] == 204000
+
+
+def test_the_offer_never_carries_a_door_it_was_not_opened_from(client):
+    # `where` is what every funnel query slices on, so a value the
+    # frontend does not have a door for is worth losing rather than
+    # silently becoming a sixth column on the dashboard.
+    client.post("/api/events", json={"events": [
+        {"name": "offer_intent", "props": {"where": "runout", "ms": 900, "price": "9.99"}},
+    ]})
+    # `price` is outside the allowlist for this name and is dropped; the
+    # event itself is kept, because losing the intent would be worse.
+    assert [props for _, props, _ in rows()] == [{"where": "runout", "ms": 900}]
+
+
 # ── The closed set ────────────────────────────────────────────────
 
 def test_a_name_outside_the_set_is_dropped_not_stored(client):

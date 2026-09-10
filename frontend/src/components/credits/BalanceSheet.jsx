@@ -2,14 +2,18 @@ import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { useCredits, useBalanceOpen, closeBalance } from '../../stores/credits'
 import { DAILY_REFILL, CAP } from '../../domain/credits'
+import { SOURCES } from '../../domain/paywall'
+import { OfferButton } from './OfferButton'
 
 // ── 残高 — the balance sheet (plan 069) ───────────────────────
 // Off the HUD's pass: the balance as a figure over its track, the two
 // facts of a free pass — the daily refill and the cap — and the one
 // line that is never charged against either. The canvas draws an offer
-// block under them; it stays out until a purchase flow exists
-// (domain/credits.js, HAS_STORE), and nothing here says "unlimited" to
-// a free learner.
+// block under them, and it is now drawn: the pass is SHOWN but not yet
+// sold (domain/paywall.js's HAS_PAYWALL, which is deliberately not
+// HAS_STORE). It sits under the free line, so what a learner already
+// has is stated before what they could buy, and nothing here says
+// "unlimited" to a free learner who has not asked.
 function refillClock(iso, lang) {
   if (!iso) return null
   const d = new Date(iso)
@@ -66,6 +70,7 @@ export function BalanceSheet() {
           {t.balanceKanaFree}
         </p>
       )}
+      <OfferButton source={SOURCES.BALANCE} className="btn-depart pw-open--wide" />
       <button type="button" className="btn-secondary" onClick={closeBalance}>{t.close}</button>
     </Sheet>
   )

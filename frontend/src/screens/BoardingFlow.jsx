@@ -3,6 +3,7 @@ import { useLang } from '../LangContext'
 import { ApiError, apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, requestNudgePermission } from '../lib/platform'
 import { track } from '../lib/track'
+import { stopwatch } from '../lib/dwell'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
 import { USERNAME_RE } from '../components/profile/EditableUsername'
@@ -174,12 +175,25 @@ export default function BoardingFlow({
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
   const arrivalPlayed = useRef(REDUCED)
+  // Two stopwatches counting only time the tab was actually looked at
+  // (lib/dwell.js): one lapped at every question, one for the whole
+  // line. Wall-clock would say a boarding left open over lunch took an
+  // hour to choose a study rhythm, and a handful of those makes "which
+  // question stalls people" unanswerable. Built in an effect, not in
+  // render — each attaches a listener, and StrictMode would double it.
+  const watches = useRef(null)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
 
   useEffect(() => {
     document.title = `${t.brdDocumentTitle} — ${t.appTitle}`
   }, [t])
+
+  useEffect(() => {
+    watches.current = { total: stopwatch(), step: stopwatch() }
+    const w = watches.current
+    return () => { w.total.stop(); w.step.stop(); watches.current = null }
+  }, [])
 
   // The volumes price the level list and the plan; the canvas's round
   // figures stand in until they arrive, and a failed fetch leaves the
@@ -221,6 +235,10 @@ export default function BoardingFlow({
   function mark(from, to, dir) {
     track('boarding_step', {
       step: from, to, dir,
+      // How long `from` actually held them, then reset for the next
+      // question. Read here because this is the one place that knows a
+      // question is being left.
+      ms: watches.current?.step.lap() ?? 0,
       // trackStops() rather than the `stops` const below: this is
       // called from a handler, and computing it here keeps the two
       // independent of declaration order.
@@ -371,6 +389,9 @@ export default function BoardingFlow({
           level: jlpt,
           pace: perDay,
           notifications: answers.notifications,
+          // The same measure across the whole line: does the boarding
+          // as a whole ask for too much of someone's evening?
+          ms: watches.current?.total.read() ?? 0,
         })
         // The gate reads the profile summary for the pass holder's
         // name and the HUD reads the balance -- refresh both before the

@@ -4882,6 +4882,112 @@ textarea:focus-visible {
 }
 .balance__free-jp { flex: none; font-weight: 700; color: var(--text-primary); }
 
+/* ── 定期券 — the offer (the paywall) ── */
+/* Shown from five doors, sold from none of them yet. The sheet is
+   `sumi`, so this is the pass turned over: charcoal ground, gold for
+   the side of the row the pass buys. No line colour anywhere here —
+   an object about the learner never wears one. */
+.pw__lede {
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--text-on-panel-soft);
+}
+.pw-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--pass-ink) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 35%, transparent);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+/* name | free → pass. The two figure columns are fixed and equal so
+   the arrows line up down the list however wide the names run. */
+.pw-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-panel);
+}
+.pw-row__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.pw-row__free,
+.pw-row__pass {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pw-row__free {
+  font-size: var(--fs-sm);
+  color: var(--text-on-panel-soft);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentcolor 45%, transparent);
+}
+.pw-row__arrow {
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+.pw-row__pass {
+  font-size: var(--fs-lead);
+  color: var(--accent2);
+}
+.pw__cta { width: 100%; }
+/* The answer lands where the button was, at the button's own height,
+   so taking the offer does not make the sheet jump. */
+.pw__thanks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--sp-9);
+  margin: 0;
+  padding: 0 var(--sp-4);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--accent2);
+}
+.pw__soon {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+
+/* ── The doors into it ── */
+.pw-open--wide { width: 100%; }
+/* The boarding's foot: a quiet line above "Enter the station", never
+   a second primary action competing with it. */
+.pw-open--quiet {
+  align-self: center;
+  border: 0;
+  background: none;
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.pw-open--quiet:hover,
+.pw-open--quiet:focus-visible { color: var(--accent2); }
+.profile__offer { width: 100%; }
+
 /* ── The fare slip, at the end of a run (plan 069) ── */
 .fare-slip {
   display: grid;
@@ -16994,6 +17100,11 @@ html { scrollbar-gutter: stable; }
   color: var(--text-secondary);
 }
 .stg-row__chev { flex: none; color: var(--text-secondary); }
+/* The pass row: the list's own furniture, with its value in the
+   pass's metal so it reads as an offer rather than another page.
+   Declared here, after .stg-row__value, so the modifier does not
+   descend in specificity (guard 2). */
+.stg-row--pass .stg-row__value { color: var(--accent2); }
 .stg-signout { align-self: stretch; }
 .slip { display: flex; flex-direction: column; gap: var(--sp-3); }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
