@@ -4906,10 +4906,29 @@ textarea:focus-visible {
   letter-spacing: 0.04em;
   line-height: 1;
 }
+/* ── The sign: the name at one end, its caption at the other ──
+   The two registers used to sit side by side, the caption a --sp-3 gap
+   after the last letter of the title, which left the rest of the row
+   empty and read as one long string rather than as a sign. They now
+   take the row's two ends -- 辻 Practice ......... FOUR PLATFORMS --
+   with the caption dropped to the title's bottom edge, the way a
+   platform sign carries its destination left and its notice right.
+
+   The wrap is what keeps a long name whole: a title wider than the
+   line keeps that line to itself (space-between leaves a lone item at
+   the start) and the caption falls under it, which is the stack the
+   768px block below used to impose on every phone-width bar. Hence the
+   0 row gap -- a wrapped caption sits directly under its title. */
 .bar__names {
   display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
+  flex-flow: row wrap;
+  /* place-content: <align-content> <justify-content> -- the lines packed
+     to the bottom, the two registers pushed to the row's two ends.
+     Written as the shorthand because stylelint's
+     declaration-block-no-redundant-longhand-properties asks for it. */
+  place-content: flex-end space-between;
+  align-items: flex-end;
+  gap: 0 var(--sp-3);
   min-width: 0;
   flex: 1;
 }
@@ -4953,12 +4972,14 @@ textarea:focus-visible {
    all of it and printed "Entra…". A name cut to five letters names
    nothing.
 
-   So below the canvas's own breakpoint the two registers stack: the
-   title takes the row's whole width and wraps if it must, the sub sits
-   under it, and the bar grows by a line only on the screens that need
-   one. Short names are one line and unchanged. */
+   That used to be a hard stack below the canvas's own breakpoint,
+   which cost every short name its sign: かな, Practice and Route map
+   all wore their caption underneath when they had room for it beside.
+   The wrap on .bar__names does the same job conditionally -- a title
+   wider than the line keeps the line to itself and drops the sub
+   below it -- so all that is left here is letting a title that owns
+   the whole line wrap inside it rather than ellipsing. */
 @media (max-width: 768px) {
-  .bar__names { flex-direction: column; align-items: flex-start; gap: 0; }
   .bar__title { white-space: normal; overflow: visible; text-wrap: pretty; }
 }
 /* A text link in the bar's aside — the other way into a station

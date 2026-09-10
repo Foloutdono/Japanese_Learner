@@ -22,7 +22,7 @@ used retires for the mobile chrome.
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
-| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
+| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
 | `.console`, `.console__top`, `.console__chips`, `.console__action`, `.console__index`, `.console__field`, `.console__clear`, `.console__count` | the console | `components/chrome/Console.jsx` (`Console`, `ConsoleTop`, `Chips`, `ConsoleAction`, `ConsoleIndex`) |
@@ -36,6 +36,18 @@ it was the retired phone level bar's 36px), `--tabbar-h` (50px), and
 `--dock-bottom`, which every docked object reads: the tab bar plus the
 safe-area inset under the shell (`:root[data-chrome="shell"]`, stamped by
 `components/chrome/useChrome.js`), the inset alone on a stage.
+
+**The bar is a sign: the name at one end, its caption at the other.**
+The canvas drew `.bar__names` as two items a `--sp-3` gap apart, which on
+every real title left the rest of the row empty and read as one long
+string (`Practice Four platforms`) rather than as a platform sign. The app
+wraps that row and gives it `place-content: flex-end space-between`, so
+the title keeps the left and the sub sits against the right, both on the
+title's bottom edge. The wrap is what replaced the hard `≤768px` stack the
+long French names needed: a title too wide for the line keeps that line to
+itself — `space-between` leaves a lone item at the start — and the sub
+falls under it, so a short name gets its sign on a phone and a sentence
+still gets its two lines.
 
 **The gates are pictograms, and only the lit one is captioned.** The
 canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
