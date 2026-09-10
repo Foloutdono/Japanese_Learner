@@ -8,11 +8,20 @@ services:
     # GET / is the smoke route (main.py); with it named here Render
     # restarts a wedged instance instead of routing to it.
     healthCheckPath: /
-    # Not `plan: starter` yet — a paid tier is the owner's call. On the
-    # free tier the instance sleeps after 15 idle minutes and a cold
-    # start takes 30–60 s, which on a phone is the first thing every
-    # visit feels; the frontend's boot wait says so honestly
-    # (AppLoading), but only a plan that stays up fixes it.
+    # Was deliberately absent for a long time, and the reason is worth
+    # keeping: on the free tier the instance sleeps after 15 idle
+    # minutes and a cold start takes 30–60 s, which on a phone is the
+    # first thing every visit feels. The frontend drew that wait
+    # honestly (AppLoading, and a 45 s gate in App.jsx rather than the
+    # 8 s default) but no amount of honesty makes it shorter — only a
+    # plan that stays up does. Taken in the analytics wave, because a
+    # boot that slow is the largest measurable leak above the funnel
+    # everything else here is trying to widen.
+    #
+    # `app_open.boot_ms` (lib/track.js, emitted from the gate call in
+    # App.jsx) is the figure this is meant to move. If it does not,
+    # this line is not what was wrong.
+    plan: starter
     disk:
       name: srs-data
       mountPath: /data

@@ -127,6 +127,24 @@ Bounded on purpose: analysis cost scales with it.
 
 ---
 
+## Measurement
+
+**足跡 (ashiato)** — the trail of screens a learner walked: which screen was
+opened and when, how far the boarding got, whether a run was finished or left.
+Recorded first-party (`frontend/src/lib/track.js` → `POST /api/events` →
+`event_log`), never by a third party, and it carries **nothing a learner
+typed** — no dictation answer, no analysed sentence, no deck or theme name.
+Paths are reduced to route patterns before they are stored
+(`lib/routePattern.js`), so `/learn/vocab/theme/animaux/…` is recorded as
+`/learn/vocab/theme/:theme/…`. See `docs/adr/0012`.
+
+> Not the same as *review history*. `review_log` is what a learner ANSWERED
+> and is load-bearing — the XP, the level and the 番付 are sums over it. 足跡
+> is what they DID, is read by nothing on the request path, and can be deleted
+> without moving a figure anyone sees.
+
+---
+
 ## Station and signage
 
 **発車標 (hassha-hyō)** — the departure board on the home screen. Lists every
