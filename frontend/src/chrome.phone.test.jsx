@@ -375,6 +375,73 @@ describe('the bar', () => {
     expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth + 1)
     expect(title.textContent).toBe('Entraînement à la lecture')
   })
+
+  // The sign wants the row's two ends, and the aside is already at one
+  // of them: `Vocabulaire ... SOURCES [‹ Apprendre]` read as a label on
+  // the button rather than a caption on the name.
+  it('drops the sub under the title when the bar carries a way out', async () => {
+    const screen = await render(
+      <LangProvider>
+        <div>
+          <Bar code="VC" title="Vocabulaire" sub="Sources" color="var(--line-vocab)" />
+          <Bar
+            code="VC"
+            title="Vocabulaire"
+            sub="Sources"
+            color="var(--line-vocab)"
+            aside={<button type="button" className="bar__link">Apprendre</button>}
+          />
+        </div>
+      </LangProvider>
+    )
+    const [plain, withAside] = screen.container.querySelectorAll('.bar')
+    // On its own the short name keeps its sign: both registers on one
+    // baseline, the caption against the right.
+    const beside = plain.querySelector('.bar__sub').getBoundingClientRect()
+    const besideTitle = plain.querySelector('.bar__title').getBoundingClientRect()
+    expect(beside.left).toBeGreaterThan(besideTitle.right)
+    // With a way out it stacks: under the title and flush with it.
+    const stacked = withAside.querySelector('.bar__sub').getBoundingClientRect()
+    const stackedTitle = withAside.querySelector('.bar__title').getBoundingClientRect()
+    expect(stacked.top).toBeGreaterThanOrEqual(stackedTitle.bottom - 2)
+    expect(Math.round(stacked.left)).toBe(Math.round(stackedTitle.left))
+    // And the button still has the end to itself.
+    const aside = withAside.querySelector('.bar__aside').getBoundingClientRect()
+    expect(aside.left).toBeGreaterThanOrEqual(stacked.right)
+  })
+
+  // Flush by their boxes is not flush to the eye: the serif V inks the
+  // box edge only at the tips of its top arms, so a caption whose S
+  // hugs that edge reads ~4px left of the name. The tracking rule's
+  // indent is what puts the caption back under it.
+  it('indents the stacked sub by its own tracking, and only there', async () => {
+    const screen = await render(
+      <LangProvider>
+        <div>
+          <Bar code="VC" title="Vocabulaire" sub="Sources" color="var(--line-vocab)" />
+          <Bar
+            code="VC"
+            title="Vocabulaire"
+            sub="Sources"
+            color="var(--line-vocab)"
+            aside={<button type="button" className="bar__link">Apprendre</button>}
+          />
+        </div>
+      </LangProvider>
+    )
+    const [plain, withAside] = screen.container.querySelectorAll('.bar')
+    // The sign's caption is flush right; an indent there would push it
+    // off its own edge, so it keeps none.
+    expect(getComputedStyle(plain.querySelector('.bar__sub')).textIndent).toBe('0px')
+    // The stacked one carries it, and it moves the ink, not the box.
+    const sub = withAside.querySelector('.bar__sub')
+    const indent = parseFloat(getComputedStyle(sub).textIndent)
+    expect(indent).toBeGreaterThan(1)
+    const ink = document.createRange()
+    ink.selectNodeContents(sub)
+    const box = sub.getBoundingClientRect()
+    expect(ink.getBoundingClientRect().left - box.left).toBeCloseTo(indent, 0)
+  })
 })
 
 describe('the sheet', () => {

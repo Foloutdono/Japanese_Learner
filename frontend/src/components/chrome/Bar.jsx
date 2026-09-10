@@ -14,17 +14,25 @@ import { ChevronIcon } from '../ui/Icons'
 // where it is not a line's own — so the variant is left to ScreenBar,
 // for a path with no section behind it.
 //
+// The sign puts the name at one end and its caption at the other, which
+// holds while the other end is free. An aside — ‹ Learn, + New deck —
+// takes that end, and the caption then sits wedged against the button,
+// reading as the button's label rather than as the title's. So a bar
+// carrying both stacks: the caption goes back under the name it belongs
+// to (.bar__names--stacked), and the aside keeps the end to itself.
+//
 // `as` picks the title's element. The bar is the screen's <h1> when
 // nothing else names the place; a screen with a station plate or a
 // pass (DESIGN.md, Structure: one <h1>, the object that names the
 // place) passes 'span'.
 export function Bar({ code, title, sub, aside, color, register = false, as: Title = 'h1', className = '' }) {
   const classes = ['bar', register ? 'bar--register' : '', className].filter(Boolean).join(' ')
+  const names = ['bar__names', sub && aside ? 'bar__names--stacked' : ''].filter(Boolean).join(' ')
   return (
     <div className={classes} style={color ? { '--line-color': color } : undefined}>
       <div className="bar__row">
         {code && <span className="bar__roundel" aria-hidden="true">{code}</span>}
-        <span className="bar__names">
+        <span className={names}>
           <Title className="bar__title">{title}</Title>
           {sub && <span className="bar__sub">{sub}</span>}
         </span>
