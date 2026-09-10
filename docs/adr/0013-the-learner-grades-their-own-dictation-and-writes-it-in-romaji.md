@@ -1,4 +1,4 @@
-# 0012 — The learner grades their own dictation, and writes it in romaji
+# 0013 — The learner grades their own dictation, and writes it in romaji
 
 - **Status**: accepted. Supersedes the grading half of
   [0011](0011-the-dictation-answer-never-leaves-the-server-early.md); the

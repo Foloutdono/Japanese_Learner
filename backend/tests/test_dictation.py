@@ -1,7 +1,7 @@
 """書取 — the measurement, the picker, and the API's two rules.
 
 The interesting half is the measurement. It is not a grade (the learner
-rates their own answer — docs/adr/0012), which is exactly what lets it
+rates their own answer — docs/adr/0013), which is exactly what lets it
 be forgiving: the tests below are mostly about the spellings it has to
 treat as the same sentence, because a figure that reads low for a right
 answer teaches a learner to distrust an ear that was correct.

@@ -50,7 +50,7 @@ const PREFETCH_THRESHOLD = 1
 // screen, with its furigana and its romaji beside their own line — and
 // romaji has more right spellings than a mark scheme can hold. So the
 // server measures and the learner grades, the same split reading and
-// translation practice use. See docs/adr/0012.
+// translation practice use. See docs/adr/0013.
 export default function DictationRun({ session }) {
   const { level: levelParam } = useParams()
   const route = runSource({ base: BASE, level: levelParam, levelsOnly: true })

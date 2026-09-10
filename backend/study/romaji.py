@@ -19,7 +19,7 @@ MORE forgiving than routes/reading.py's own normalize_romaji, which
 keeps exact spelling variants apart — that one was written when reading
 practice still auto-graded, and the note left where it was retired says
 the auto-grading was too brittle. Dictation does not repeat that
-mistake: the learner grades themselves (docs/adr/0012) and this only
+mistake: the learner grades themselves (docs/adr/0013) and this only
 produces the accuracy figure shown to help them. So where it is unsure
 it merges, because a figure that reads low for a right answer teaches a
 learner to distrust an ear that was correct.

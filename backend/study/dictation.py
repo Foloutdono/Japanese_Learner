@@ -9,11 +9,11 @@ Two jobs, and they are the whole mode:
      content key), so the mapping needs no database, no manifest and no
      id allocation: the same line always names the same file, in a fresh
      clone and on a server that has been up for a year.
-  2. THE ANSWER IS MEASURED — and, since docs/adr/0012, not GRADED.
+  2. THE ANSWER IS MEASURED — and, since docs/adr/0013, not GRADED.
      The learner rates their own transcription on the app's rating bar,
      the way every other sentence mode works; what this module produces
      is one number, how close the two texts came, to help them do it.
-     The distinction is the whole of 0012: a measurement can afford to
+     The distinction is the whole of 0013: a measurement can afford to
      be approximate, and a grade cannot.
 
 ── Three ways to write the same sentence, all of them right ──
@@ -173,7 +173,7 @@ def ensure_clip(jp: str) -> str | None:
 
 # ── The measurement ──────────────────────────────────────────────
 # One number: how much of the sentence the learner got down. NOT a
-# grade — the rating bar on the screen is the grade (docs/adr/0012) —
+# grade — the rating bar on the screen is the grade (docs/adr/0013) —
 # which is what lets this be forgiving where a mark scheme could not be.
 #
 # difflib's ratio, 2*matched/(len(a)+len(b)), so it is a proportion

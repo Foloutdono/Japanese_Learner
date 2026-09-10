@@ -17,7 +17,7 @@ import { LangProvider } from '../LangContext'
 //      stays there.
 //   3. the grade in the log is the LEARNER's. The reveal measures, the
 //      rating bar grades, and nothing is written until they have rated
-//      (docs/adr/0012).
+//      (docs/adr/0013).
 //
 // The run is mounted through the router that gives it its grade, with
 // the API mocked at its boundary.

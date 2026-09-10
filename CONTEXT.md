@@ -48,7 +48,7 @@ nothing is scheduled on it.
 **Dictation** (書取) — the practice mode where a Clip is played, at most
 twice, and the learner writes down what was said, in romaji. The one sentence
 mode whose prompt is not text; the learner grades their own answer as in every
-other one, and the server only *measures* it — see `docs/adr/0011` and `0012`.
+other one, and the server only *measures* it — see `docs/adr/0011` and `0013`.
 Say *dictation*, never "listening mode": the exam's 聴解 section is also
 listening and is a different thing.
 
