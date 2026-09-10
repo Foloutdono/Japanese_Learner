@@ -22,7 +22,7 @@ used retires for the mobile chrome.
 | `.phone`, `.phone__content` | 車内 — the mobile chrome | `components/chrome/Shell.jsx` (`Shell`, `StageFrame`) |
 | `.hud`, `.hud__level`, `.hud__status*`, `.hud__pass*`, `.hud-fare` | 運行案内 — the HUD | `components/chrome/Hud.jsx` (`Hud`, `HudPass`, `useXpGain`, `FareFigure`) |
 | `.tabbar`, `.tab`, `.tab__ico`, `.tab__cap`, `.tab__due`, `.tab--on`, `.tab--badged` | 改札口 — the tab bar; the canvas's `.tab__jp` (a kanji where the pictogram goes) and its row of captions are retired — see below | `components/chrome/TabBar.jsx`, `GateIcon.jsx`; the five gates in `config/tabs.js` |
-| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
+| `.bar`, `.bar__row`, `.bar__roundel`, `.bar__names`, `.bar__names--stacked`, `.bar__title`, `.bar__sub`, `.bar__aside`, `.bar__stripe`, `.bar--register` | the compact header; the canvas set the sub a gap after the title, the app sets the two registers at the row's two ends — see below | `components/chrome/Bar.jsx` (`Bar`; `ScreenBar` is the transitional adapter for screens plans 070–074 have not rebuilt) |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining` | the head of a run | `components/chrome/StageHead.jsx`, `Leave` in `Bar.jsx` |
 | `.scrim`, `.sheet`, `.sheet--sumi`, `.sheet__handle`, `.sheet__head`, `.sheet__jp`, `.sheet__cap` | bottom sheets | `components/chrome/Sheet.jsx` (modal behaviour from `hooks/useDialog`) |
 | `.console`, `.console__top`, `.console__chips`, `.console__action`, `.console__index`, `.console__field`, `.console__clear`, `.console__count` | the console | `components/chrome/Console.jsx` (`Console`, `ConsoleTop`, `Chips`, `ConsoleAction`, `ConsoleIndex`) |
@@ -48,6 +48,25 @@ long French names needed: a title too wide for the line keeps that line to
 itself — `space-between` leaves a lone item at the start — and the sub
 falls under it, so a short name gets its sign on a phone and a sentence
 still gets its two lines.
+
+The sign needs the right end free, and an aside is already standing on
+it. `Vocabulaire ... SOURCES [‹ Apprendre]` puts the caption against the
+button, near enough to read as the button's label rather than the name's,
+so a bar carrying both a sub and an aside stacks at every width:
+`Bar.jsx` adds `.bar__names--stacked`, which turns the row into a column
+and returns the caption to under the name it captions, leaving the aside
+the end to itself. A bar with only one of the two is unchanged.
+
+Stacking also brings the tracking rule into play (DESIGN.md, Tracking):
+a tracked caption on a left-flush axis takes an indent equal to its
+tracking, so `.bar__names--stacked .bar__sub` carries
+`text-indent: var(--tr-caption)` and `.bar__sub` on its own does not —
+in the sign layout the caption is flush *right*, where the same indent
+would push it off its own edge (the case `.dict-plate__cap` documents).
+It is an optical correction as much as a tracking one: flush by their
+boxes, `SOURCES` inked the box edge on most of its scanlines while
+`Vocabulary` inked it only at the tips of the serif V's top arms, so
+the caption read about 4px left of the name it captions.
 
 **The gates are pictograms, and only the lit one is captioned.** The
 canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
@@ -219,10 +238,10 @@ allowlist literal earlier retirements had left behind (the guard's
 | `.pf-ledger`, `.pf-line` (`__fig`, `__of`, `__track`, `__done`) | the ride ledger | `components/profile/LineLedger.jsx` |
 | `.banzuke`, `.bz__head`, `.bz__mark`, `.bz__jp`, `.bz__seg` (a `Seg`), `.leaderboard-row` (`--me`, `__rank` `--gold`/`--silver`/`--bronze`, `__name`, `__xp`, `__gap`) | the ranking | `components/profile/Banzuke.jsx` |
 | `.sheet--sumi.status-sheet` + `.jour-st--*`, `.jour-dist` (`__count`, `__of`, `__pct`, `__leg`), `.jour-track*` (`__rail`, `__done`, `__owed`, `__station`, `__you`, `__plan`), `.jour-cmps`, `.jour-cmp` (`__k`, `__v`, `__u`, `__d`, `__sub`), `.jour-rev__actions`, `.jour-act`, `.status-sheet__none`, `__office`, `__error` | the status sheet, off the HUD's station panel — distance first since the 進捗が主役 round, so the canvas's chip-over-two-lane-track-over-four-figures is history here | `components/journey/StatusSheet.jsx` (`GhostTrack.jsx`; the open state in `stores/journey.js`) |
-| `.bar` + `.stage__leave`, `.records--stats` (six `.record`s with `__note`s) | the statistics head and lattice | `screens/StatsScreen.jsx` |
+| `.bar` + `.stage__leave`, `.records--stats` (six `.record`s with `__note`s) | the statistics head and lattice — the bar wears TO, the plate the profile's door to it already draws, in the pass ink that door is painted in | `screens/StatsScreen.jsx` |
 | `.stat-cap` (`__fig`), `.cal.cal--gold` (`__months`, `__month`, `__grid`, `__cell` `--1`…`--4`/`--future`, `__foot`, `__scale`) | the practice calendar (fourteen weeks, whole) | `components/stats/PracticeCalendar.jsx` |
 | `.forecast.forecast--pass` (`__bars`, `__col`, `__v`, `__bar`, `__days`) | the week's forecast | `components/stats/Forecast.jsx` |
-| `.stg-headrow`, `.stg-head` (`__jp`), `.stg-list`, `.stg-row` (`__names`, `__jp`, `__value`, `__chev`), `.stg-signout` | the settings list | `screens/SettingsScreen.jsx` |
+| `.bar` + `.stage__leave`, `.stg-list`, `.stg-row` (`__names`, `__jp`, `__value`, `__chev`), `.stg-signout` | the settings list. It had its own head row (`.stg-headrow`, `.stg-head__jp`) — a near-copy of `.bar__row`/`.bar__title` with neither roundel nor rule, which left it and 統計 the two screens whose title did not look like the app's; the list and all six pages mount `Bar` now, with 設定's gear in the roundel (a pass has no line code — `config/identity.js`) | `screens/SettingsScreen.jsx`, `SettingsPage` in `components/settings/SettingsPage.jsx` |
 | `.slip` (`__label`, `__name`, `__hint`, `__act`, `__value`, `__confirm`), `.cap` | a page's slips | `SettingsPage`, `Slip` in `components/settings/SettingsPage.jsx` |
 | `.svc-grid` (`--2`), `.svc` (`--on`, `__jp`, `__pace`, `__star`, `__words`), `.grades`, `.hour-grid` | the service cards: theme, language, presets and mute, pace, grades, the daily hour | `components/settings/DisplayPage.jsx`, `SoundPage.jsx`, `LearningPage.jsx`, `DestinationPage.jsx` |
 | `.lvlstrip` (`__stop` `--on`, `__dot`, `__code`, `__jp`), `.lvl-note` (`__strong`) | the level strip and its note | `LearningPage.jsx` |

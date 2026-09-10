@@ -7,6 +7,8 @@ import { WarningIcon } from '../components/ui/Icons'
 import { CommuterPass } from '../components/profile/CommuterPass'
 import { PassHolder } from '../components/profile/PassHolder'
 import { BalanceLine } from '../components/credits/BalanceLine'
+import { OfferButton } from '../components/credits/OfferButton'
+import { SOURCES } from '../domain/paywall'
 import { StampBook, Records } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
@@ -137,6 +139,8 @@ export default function ProfileScreen({ session }) {
               t={t}
             />
           </CommuterPass>
+
+          <OfferButton source={SOURCES.PROFILE} className="btn-secondary profile__offer" />
 
           <StampBook
             calendar={profile.calendar ?? profile.week}

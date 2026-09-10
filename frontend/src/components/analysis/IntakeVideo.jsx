@@ -6,8 +6,16 @@ import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
-// Two ways in, in the order they should be tried:
+// Three ways in, in the order they should be tried:
 //
+//   0. The link alone — the server fetches the Japanese track through
+//      a residential proxy (docs/adr/0003, 2026-09-10). CONDITIONAL:
+//      it appears only where /api/video/capabilities says the proxy
+//      is configured, because it is a paid credential that decides,
+//      not the code. Where it is on, it is the only thing the learner
+//      has to do, and it is the one route that also works inside the
+//      native shell, where a bookmarklet has no bookmarks bar to live
+//      in.
 //   1. 字幕取り — the bookmarklet the app mints (lib/captionGrab.js,
 //      where the measurements live). It runs ON the YouTube page —
 //      the one origin where captions are still fetchable — grabs the
@@ -20,6 +28,9 @@ import { GrabTutorial } from './GrabTutorial'
 //      extension-only list greyed out every file on mobile — the
 //      "they don't let you use these types of files" report.
 //
+// 1 and 2 never move: they cost nothing, cannot be blocked, and are
+// what 0 degrades TO. Nothing here is gated behind the paid path.
+//
 // The transcript-paste ingest is GONE (owner-directed, 2026-09-01):
 // YouTube's transcript panel hands out a translation by default —
 // learners kept getting English for Japanese videos — and the panel
@@ -27,7 +38,7 @@ import { GrabTutorial } from './GrabTutorial'
 // DownSub, pre-filled with the pasted link, is the no-install
 // fallback for anything the bookmarklet cannot reach.
 
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
@@ -94,6 +105,22 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile }) {
         />
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
+
+      {/* The one filled action on this platform, and only where the
+          server said it can be honoured. No heading and no caption
+          above it: the link sits in the field directly above, and the
+          button says what it does — DESIGN.md, "Say less". */}
+      {linkFetch && parsedVideoId && (
+        <div className="anl-link">
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => onStartFromLink(url, { start: startSec, end: endSec })}
+          >
+            {t.analyzeThisLink}
+          </button>
+        </div>
+      )}
 
       {/* ── 字幕取り — the grab ──
           Web only: a bookmarklet needs a browser's bookmarks bar, which

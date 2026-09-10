@@ -88,8 +88,15 @@ change nothing without `--yes`**, so the first run of any of them is safe:
 cd backend
 python -m scripts.purge_orphans        # rows whose Supabase auth user is gone
 python -m scripts.compact_review_log   # roll old review rows up, then trim
+python -m scripts.compact_events       # same, for the 足跡 trail (event_log)
 python -m scripts.prune_logs           # cap the logs nothing reads past a point
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
+```
+
+One more is read-only and needs no flag, so it is safe to run at any time:
+
+```bash
+python -m scripts.weekly_digest        # the four numbers, as markdown
 ```
 
 Two things are worth knowing before reaching for any of them:
@@ -112,7 +119,7 @@ Two things are worth knowing before reaching for any of them:
   is the repair for deletions that bypassed it. See
   `docs/adr/0010-learner-rows-are-reconciled-with-auth-not-cascaded-from-it.md`.
 
-`prune_logs` and `compact_review_log` also run weekly from
+`prune_logs`, `compact_review_log` and `compact_events` also run weekly from
 `.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
 button defaults to a dry run). It needs a `DATABASE_URL` repo secret, set to
 Supabase's **session**-mode pooler URI on port 5432: the transaction pooler
@@ -128,6 +135,31 @@ joining `auth.users` directly, which `purge_orphans.py` cannot — the editor
 runs as `postgres`, whereas the app's role is not assumed to see the `auth`
 schema. It reports before it deletes, skips tables that do not exist yet, and
 is a one-shot, so it cannot drift from the scripts.
+
+### Analytics (足跡)
+
+Behaviour is recorded **first-party or not at all** — there is no third-party
+SDK, and `frontend/public/privacy.html`'s "No advertising, no trackers, no sale
+of data" is a promise the design keeps rather than a line to amend. See
+`docs/adr/0012`.
+
+Two rules matter more than the rest:
+
+- **Never record anything a learner typed.** Not a dictation answer, not an
+  analysed sentence, not a deck or theme name. `backend/core/events.py` holds a
+  closed set of event names, each with the property keys it may carry, and
+  applies it to whatever a browser posts. `frontend/src/lib/track.js` mirrors
+  that set, and `backend/tests/test_events.py` fails if the two drift.
+- **Never store a pathname.** `/learn/vocab/theme/animaux/…` names a theme the
+  learner chose and `/learn/decks/:deck_id` a deck they named.
+  `frontend/src/lib/routePattern.js` reduces a path to the route App.jsx
+  declared, and a path matching none is not recorded at all. Adding a screen
+  means adding its pattern to `ROUTES` there — a node-lane test fails otherwise.
+
+Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
+endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
+from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
+Metabase/the Supabase SQL editor pointed at the same database.
 
 ### Frontend (`frontend/`)
 ```bash

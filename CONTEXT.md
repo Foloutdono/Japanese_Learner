@@ -121,12 +121,33 @@ open so they always reflect current SRS state. See `docs/adr/0002`.
 The unit a subtitle *file* is made of. Cue boundaries are a display artifact
 and do **not** correspond to Sentence boundaries.
 
-**Track** — an ordered list of Cues from one source: a fetched YouTube
-caption track, or an uploaded `.srt` / `.vtt` / `.ass` file. The pipeline is
-source-agnostic; nothing downstream knows which it was. See `docs/adr/0003`.
+**Track** — an ordered list of Cues from one source. Three produce one: an
+uploaded `.srt` / `.vtt` / `.ass` file, the 字幕取り bookmarklet's grab, or a
+YouTube link the server fetches itself (which needs a residential proxy and is
+off unless one is configured). The pipeline is source-agnostic; nothing
+downstream knows which it was, which is why adding and removing that third
+source has twice cost nothing. See `docs/adr/0003`.
 
 **Window** — the bounded time range of a video a learner asks to analyze.
 Bounded on purpose: analysis cost scales with it.
+
+---
+
+## Measurement
+
+**足跡 (ashiato)** — the trail of screens a learner walked: which screen was
+opened and when, how far the boarding got, whether a run was finished or left.
+Recorded first-party (`frontend/src/lib/track.js` → `POST /api/events` →
+`event_log`), never by a third party, and it carries **nothing a learner
+typed** — no dictation answer, no analysed sentence, no deck or theme name.
+Paths are reduced to route patterns before they are stored
+(`lib/routePattern.js`), so `/learn/vocab/theme/animaux/…` is recorded as
+`/learn/vocab/theme/:theme/…`. See `docs/adr/0012`.
+
+> Not the same as *review history*. `review_log` is what a learner ANSWERED
+> and is load-bearing — the XP, the level and the 番付 are sums over it. 足跡
+> is what they DID, is read by nothing on the request path, and can be deleted
+> without moving a figure anyone sees.
 
 ---
 

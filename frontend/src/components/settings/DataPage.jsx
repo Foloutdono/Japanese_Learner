@@ -5,6 +5,7 @@ import { apiFetch, apiJson } from '../../lib/api'
 import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
+import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Data — the learner's data, theirs to take or erase ────────
@@ -18,6 +19,7 @@ import { SettingsPage, Slip } from './SettingsPage'
 // sign-out would be for a user that no longer exists.
 export function DataPage({ session }) {
   const { t } = useLang()
+  const optedOut = useOptedOut()
   const [exporting, setExporting] = useState(false)
   const [exportFailed, setExportFailed] = useState(false)
   const [arming, setArming] = useState(false)
@@ -67,6 +69,25 @@ export function DataPage({ session }) {
 
   return (
     <SettingsPage title={t.settingsData}>
+      {/* 足跡 — the trail, and the way out of it. First in the list
+          because it is the only thing on this page the learner did not
+          already choose: the export and the reset are theirs to run,
+          this one runs on its own until they say otherwise. Nothing
+          here is new CSS -- .slip__hint and .slip__act are the same
+          two the three panels below use. */}
+      <Slip label={t.settingsTrail} cap={optedOut ? t.settingsTrailOff : t.settingsTrailOn}>
+        <span className="slip__hint">{t.settingsTrailHint}</span>
+        <button
+          type="button"
+          className="btn-secondary slip__act"
+          data-action="trail"
+          aria-pressed={!optedOut}
+          onClick={() => { playClick(); setOptedOut(!optedOut) }}
+        >
+          {optedOut ? t.settingsTrailStart : t.settingsTrailStop}
+        </button>
+      </Slip>
+
       <Slip label={t.settingsExport}>
         <span className="slip__hint">{t.settingsExportHint}</span>
         <button type="button" className="btn-secondary slip__act" disabled={exporting} onClick={() => { playClick(); exportCsv() }}>

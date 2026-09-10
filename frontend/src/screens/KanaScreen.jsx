@@ -7,11 +7,15 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import { RouteStops } from '../components/selection/RouteStops'
 import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
-import { kanaSets } from '../domain/kanaSets'
+import { kanaSets, currentKanaSet } from '../domain/kanaSets'
 
 // ── かな — the station and the platforms (plan 071) ──────────
 // /learn/kana lists the sets as the stops of the kana line, with
-// how much of each is learned; /learn/kana/:set lists that set's
+// how much of each is learned and the one you are at ringed and
+// captioned — the same route the JLPT lines draw, on the same rows
+// (components/selection/RouteStops.jsx), only its "here" is read
+// off the figures rather than off a declared level, because kana
+// has none (domain/kanaSets.js); /learn/kana/:set lists that set's
 // modes as platforms. Both under the chrome. Picking a mode boards
 // the train (the door cutscene) into /learn/kana/:set/:mode on the
 // stage frame (screens/KanaRun.jsx). The fast review is a browse, not
@@ -48,13 +52,15 @@ export default function KanaScreen() {
         code: s.code,
         codeLang: 'ja',
         name: s.label,
+        hereLabel: t.levelCurrentMark,
         learned: Number(item?.learned) || 0,
         total: Number(item?.total) || 0,
       }
     })
+    const here = currentKanaSet(stats?.items?.kana)
     return (
       <SelectionScreen title={t.kanaTitle} sub={t.kanaSetsSub(SETS.length)}>
-        <RouteStops stops={stops} onSelect={slug => navigate(`/learn/kana/${slug}`)} />
+        <RouteStops stops={stops} here={here} onSelect={slug => navigate(`/learn/kana/${slug}`)} />
       </SelectionScreen>
     )
   }

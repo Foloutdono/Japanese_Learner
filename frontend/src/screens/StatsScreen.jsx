@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { Bar, Leave } from '../components/chrome/Bar'
+import { stationFor } from '../config/stations'
 import { Loading } from '../components/ui/Loading'
 import { flattenStats, sumRows } from '../domain/statsModel'
 import { PracticeCalendar } from '../components/stats/PracticeCalendar'
@@ -15,6 +16,13 @@ import { TroubleList } from '../components/stats/TroubleList'
 const TZ = -new Date().getTimezoneOffset()
 
 const CAL_WEEKS = 14
+
+// 統計 wears the plate the profile's door to it already draws (TO, in
+// LineMark) — the bar is the same mark, so the screen you land on is
+// visibly the one you tapped. Pass ink rather than the hall's own
+// pigment: a hall behind the pass is pass material, which is what the
+// door is painted in too.
+const STATION = stationFor('/profile/stats')
 
 // ── Statistics (canvas Statistics, plan 074) ──────────────────
 // The screen is four questions, in the order they get asked:
@@ -72,6 +80,7 @@ export default function StatsScreen({ session }) {
   return (
     <main id="main-content" className="stats" style={{ '--line-color': 'var(--pass-ink)' }}>
       <Bar
+        code={STATION.code}
         title={t.statistics}
         color="var(--pass-ink)"
         aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}

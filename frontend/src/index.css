@@ -1490,6 +1490,20 @@
 /* 動画 — 字幕取り, the grab block. The ingest tabs it replaces died
    with the transcript-paste path (2026-09-01): one primary road (the
    bookmarklet) and one fallback (the file drop) need no tablist. */
+/* ── The link, where the server can fetch one ──
+   Appears only when /api/video/capabilities reports the residential
+   proxy configured (docs/adr/0003, 2026-09-10), so the button cannot
+   promise what a deployment is not paying for. The grab block and the
+   drop zone below it are unchanged and unconditional: this is the fast
+   path, never the only one. */
+.anl-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-5);
+}
+
 .anl-grab {
   display: flex;
   flex-direction: column;
@@ -1574,6 +1588,9 @@
   font-weight: 700;
   color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
   font-variant-numeric: tabular-nums;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .anl-tut__body {
   flex: 1;
@@ -1830,6 +1847,7 @@
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
 }
 /* A section's head, outside its surface: the word, the count. */
@@ -2760,6 +2778,7 @@
   font-size: 0.62rem;
   font-weight: 700;
   letter-spacing: 0.08em;
+  text-indent: 0.08em;
   text-transform: uppercase;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
 }
@@ -3073,11 +3092,17 @@
   --fs-sentence-fluid: clamp(1.15rem, 1rem + 0.8vw, 1.5rem);
 
   /* ── 字間 — tracking ──────────────────────────────────────
-     Four values, assigned by register rather than by taste. Any line
-     using --tr-reading or --tr-caption on a left-flush or centred
-     axis must also set `text-indent` to the same value, to cancel the
-     trailing space the last letter's tracking adds — the file already
-     does this at .station-sign__kana and .board__romaji. */
+     Four values, assigned by register rather than by taste. ANY tracked
+     line on a left-flush or centred axis must also set `text-indent` to
+     the same value, to cancel the trailing space the last letter's
+     tracking adds — not only the two wide rungs: the narrowest of them
+     on a centred sentence (.sentence, --tr-term at --fs-heading) is
+     still 0.6px off the axis, and half a pixel is where this sheet has
+     already decided the eye starts to read a thing as crooked (see
+     .bar__sub's note). The one shape the indent cannot fix is a box
+     whose ink does NOT begin with the tracked line — a chip opens with
+     a roundel or an icon — and that case comes off the end padding
+     instead; see .chip, and DESIGN.md, Tracking. */
   --tr-term:        0.06em;    /* body-scale Japanese                        */
   --tr-name:        0.14em;    /* hero Japanese names                        */
   --tr-caption:     0.18em;    /* uppercase Latin captions                   */
@@ -3780,7 +3805,9 @@ button:focus-visible {
   font-family: var(--font-display);
   font-weight: 700;
   font-size: 1.05rem;
-  line-height: 1;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
   color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
   font-variant-numeric: tabular-nums;
   transition: background 0.16s ease, color 0.16s ease;
@@ -3796,6 +3823,7 @@ button:focus-visible {
   font-weight: 700;
   font-size: var(--fs-caption-xs);
   letter-spacing: 0.06em;
+  text-indent: 0.06em;
   text-transform: uppercase;
   line-height: 1.15;
   color: color-mix(in srgb, var(--rail) 65%, var(--text-primary));
@@ -4523,7 +4551,19 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: var(--fs-caption);
   font-variant-numeric: tabular-nums;
-  line-height: 1;
+  /* `normal`, against DESIGN.md's own rule that every figure takes
+     `line-height: 1` — and this is where that rule is stated to stop.
+     A roundel centres the LINE BOX, not the ink, so the leading decides
+     where the figure lands: at 1 this one printed 0.81px high in its
+     32px ring (rasterised at 8x, averaged over four sub-pixel phases,
+     every digit 0–9 and two-figure levels alike), and the sheet's
+     inherited 1.6 does the same thing by 0.55px in the 30px roundels
+     below. `normal` is the font's own box — the box the ink was drawn
+     in — and it lands the figure within a tenth of a pixel. Read the
+     roundels that were already true for the same finding from the
+     other side: they are the ones inside a <button>, which inherit
+     `normal` from the UA and never restate it. DESIGN.md, Figures. */
+  line-height: normal;
   color: var(--text-on-panel);
 }
 .hud__level:hover,
@@ -4842,6 +4882,112 @@ textarea:focus-visible {
 }
 .balance__free-jp { flex: none; font-weight: 700; color: var(--text-primary); }
 
+/* ── 定期券 — the offer (the paywall) ── */
+/* Shown from five doors, sold from none of them yet. The sheet is
+   `sumi`, so this is the pass turned over: charcoal ground, gold for
+   the side of the row the pass buys. No line colour anywhere here —
+   an object about the learner never wears one. */
+.pw__lede {
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--text-on-panel-soft);
+}
+.pw-list {
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: color-mix(in srgb, var(--pass-ink) 35%, transparent);
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 35%, transparent);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+/* name | free → pass. The two figure columns are fixed and equal so
+   the arrows line up down the list however wide the names run. */
+.pw-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto auto;
+  align-items: baseline;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--bg-panel);
+}
+.pw-row__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.pw-row__free,
+.pw-row__pass {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.pw-row__free {
+  font-size: var(--fs-sm);
+  color: var(--text-on-panel-soft);
+  text-decoration: line-through;
+  text-decoration-color: color-mix(in srgb, currentcolor 45%, transparent);
+}
+.pw-row__arrow {
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+.pw-row__pass {
+  font-size: var(--fs-lead);
+  color: var(--accent2);
+}
+.pw__cta { width: 100%; }
+/* The answer lands where the button was, at the button's own height,
+   so taking the offer does not make the sheet jump. */
+.pw__thanks {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--sp-9);
+  margin: 0;
+  padding: 0 var(--sp-4);
+  text-align: center;
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 700;
+  color: var(--accent2);
+}
+.pw__soon {
+  margin: 0;
+  text-align: center;
+  font-size: var(--fs-caption);
+  color: var(--text-on-panel-soft);
+}
+
+/* ── The doors into it ── */
+.pw-open--wide { width: 100%; }
+/* The boarding's foot: a quiet line above "Enter the station", never
+   a second primary action competing with it. */
+.pw-open--quiet {
+  align-self: center;
+  border: 0;
+  background: none;
+  padding: var(--sp-2) var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.pw-open--quiet:hover,
+.pw-open--quiet:focus-visible { color: var(--accent2); }
+.profile__offer { width: 100%; }
+
 /* ── The fare slip, at the end of a run (plan 069) ── */
 .fare-slip {
   display: grid;
@@ -4918,7 +5064,10 @@ textarea:focus-visible {
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: 0.04em;
-  line-height: 1;
+  text-indent: 0.04em;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 /* ── The sign: the name at one end, its caption at the other ──
    The two registers used to sit side by side, the caption a --sp-3 gap
@@ -4986,6 +5135,60 @@ textarea:focus-visible {
   gap: var(--sp-3);
   flex-shrink: 0;
 }
+
+/* ── A way out already holds the other end ──
+   The sign above wants the row's two ends, and gets them while the
+   right one is free. Where the bar carries an aside -- the ‹ Learn
+   out of a station's source page, the + New deck on the shelf -- the
+   caption is pushed up against that button instead, close enough to
+   read as its label: `Vocabulary ... SOURCES [‹ Learn]`. So a bar
+   with both stacks unconditionally, at every width: the caption drops
+   under the name it captions, and the button keeps the end alone.
+   Mounted by Bar.jsx only when there is both a sub and an aside -- a
+   lone title draws the same either way.
+
+   The title needs the bound the sub already carries (see above): a
+   column item at `align-items: flex-start` is sized by its content,
+   so without it a long name overflows .bar__names and runs under the
+   aside rather than ellipsing (or, at ≤768px, wrapping) inside it. */
+/* ── The caption's optical left, not its box's ──
+   Stacked, the two registers were flush by their BOXES and not by
+   their ink, which is the edge the eye reads. Rasterised at 8x and
+   scanned row by row: `Vocabulary` inks its box edge on 7 of 164
+   scanlines -- the tips of the serif V's top arms -- and its median
+   row starts 4.75px in, where the wedge has already fallen away.
+   `SOURCES` inks the edge on 33 of 59, the S's bowl hugging it. Over
+   the 23 title/sub pairs the app actually ships, in both languages,
+   the caption sat left of the name it captions in 21 of them, by
+   2.3px on average and 4.25px at Vocabulary / SOURCES.
+
+   The correction is the file's own tracking rule (DESIGN.md,
+   Tracking; the line .flashcard__hint and .dict-plate__title already
+   carry): a tracked caption on a left-flush axis takes an indent
+   equal to its tracking. It lands here rather than on .bar__sub
+   because the sign layout sets the caption flush RIGHT, where the
+   same indent pushes it off its own edge -- the case
+   .dict-plate__cap documents. Re-measured over the same 23 pairs it
+   halves the error, to 1.08px on average and 2.38px at worst; the
+   only two it moves the wrong way are Grammar/Grammaire + JLPT, a
+   round G against a hooked J, which were already the two nearest to
+   true. A larger nudge fixes the V at the cost of pushing those
+   visibly right, so the rule's own value is also the best one.
+
+   A title long enough to wrap its sub below it WITHOUT an aside keeps
+   the flush edge: no selector can tell that line from a side-by-side
+   one, and the sign layout is where the indent would do harm. */
+.bar__names--stacked .bar__sub { text-indent: var(--tr-caption); }
+.bar__names--stacked {
+  flex-flow: column nowrap;
+  /* Undoes the sign's `flex-end space-between`, which in a column reads
+     as the main axis and would push the two registers apart vertically
+     the moment the box had any height to spare. The 0 row gap of the
+     base rule is what keeps them on touching lines, as a wrapped sub. */
+  place-content: flex-start;
+  align-items: flex-start;
+}
+.bar__names--stacked .bar__title { max-width: 100%; }
 
 /* ── A section's name is not an ellipsis ──
    The canvas sets the title and the sub on one baseline, and it was
@@ -5161,6 +5364,20 @@ textarea:focus-visible {
   gap: var(--sp-2);
   height: 36px;
   padding: 0 var(--sp-4);
+  /* The end padding is short by exactly the label's tracking, because
+     the last letter's letter-spacing prints as empty space INSIDE the
+     pill. Padded evenly, a chip therefore sets its ink half a tracking
+     left of centre — 1.16px measured on the dictionary's 部 RADICAUX
+     chip at --fs-caption, rasterised at 8x over four sub-pixel phases.
+     DESIGN.md's instrument for this is `text-indent`, and it is the
+     right one wherever the tracked line is the ONLY ink in its box.
+     Here it is not: a chip opens with a roundel (.chip__glyph) or an
+     icon, so an indent moves the label and leaves the ink's left edge
+     exactly where it was. Trimming the trailing space off the box
+     instead centres both forms this pill takes — the lone chip, which
+     shrink-wraps, and the grown one (.console__chips .chip), which
+     centres its content in a stretched box. */
+  padding-inline-end: calc(var(--sp-4) - var(--tr-caption));
   flex: none;
   border: 1px solid var(--surface-line);
   border-radius: var(--r-pill);
@@ -5197,6 +5414,10 @@ textarea:focus-visible {
   font-weight: 700;
   letter-spacing: 0;
   color: color-mix(in srgb, var(--tab-color, var(--text-secondary)) 65%, var(--text-primary));
+  /* A CJK glyph is drawn to fill the em square, so here the em box IS
+     the ink box: a roundel holding Japanese takes 1 where one holding
+     Latin takes `normal` (.hud__level; DESIGN.md, Figures). */
+  line-height: 1;
 }
 .console__action {
   display: inline-flex;
@@ -5212,6 +5433,7 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.1em;
+  text-indent: 0.1em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -5287,6 +5509,12 @@ textarea:focus-visible {
   flex: 1 1 0;
   justify-content: center;
   padding: 0;
+  /* .chip trims the same trailing space off its END padding; this one
+     zeroes its padding, so there is nothing to trim and it takes a
+     LEADING pad instead. A start pad moves centred content by half its
+     own width, so a whole tracking here buys the half-tracking shift
+     the trim buys in .chip. Measured 0.91px left of centre before. */
+  padding-inline-start: var(--tr-caption);
 }
 .console__chips .chip,
 .gate-card__lines .chip {
@@ -5438,6 +5666,10 @@ textarea:focus-visible {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.04em;
+  text-indent: 0.04em;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 
 .station-sign__kana {
@@ -5699,6 +5931,10 @@ textarea:focus-visible {
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0.04em;
+  text-indent: 0.04em;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 
 /* A pass prints its class large beside the balance. */
@@ -5850,11 +6086,14 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--surface-line);
 }
 .bz__mark { display: flex; align-items: baseline; gap: var(--sp-3); }
+/* Untracked, despite the name: the mark prints the localised word
+   ("Ranking", "Classement"), never 番付, and --tr-name is assigned to
+   hero JAPANESE names (DESIGN.md, "Tracking runs inversely to size").
+   At 0.14em the Latin word read as a spaced-out caption at lead size. */
 .bz__jp {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-lead);
-  letter-spacing: var(--tr-name);
 }
 .seg {
   margin-left: auto;
@@ -5896,6 +6135,7 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: var(--fs-caption);
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
 }
 .seg__opt--on .seg__opt-latin { color: var(--text-primary); }
@@ -5904,7 +6144,22 @@ textarea:focus-visible {
 .seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
 
 @media (max-width: 560px) {
-  .bz__head { flex-wrap: wrap; gap: var(--sp-3); }
+  /* The head holds ONE row for as long as it can, the way it reads
+     above 560px: title left, toggle pinned right. Until now the pair
+     parted company at about 357px of layout width — which a 360px
+     window already is once `scrollbar-gutter: stable` takes its 15px —
+     and the toggle dropped to a line of its own, the only control in
+     the card that leaves the line it belongs to. Two rungs buy the row
+     back down to ~327px: the head's gap closes to --sp-2, which costs
+     nothing visually because the pill's `margin-left: auto` sets the
+     separation you actually see and the gap only bites once the row is
+     full; and this pill's options give up their side padding to the
+     same rung (scoped to .bz__seg — no other seg in the app moves).
+     `flex-wrap` stays as the valve: narrower than that and the toggle
+     still drops rather than the title being cut or the pill clipping
+     ALL TIME, which are both worse than a second line. */
+  .bz__head { flex-wrap: wrap; gap: var(--sp-2); }
+  .bz__seg .seg__opt { padding: var(--sp-1) var(--sp-2); }
   .seg { margin-left: 0; }
 }
 
@@ -6212,6 +6467,10 @@ textarea:focus-visible {
   color: color-mix(in srgb, var(--stamp-ink) 70%, var(--text-on-panel));
   background: color-mix(in srgb, var(--stamp-ink) 12%, transparent);
   transform: rotate(var(--stamp-tilt, 0deg));
+  /* A CJK glyph is drawn to fill the em square, so here the em box IS
+     the ink box: a roundel holding Japanese takes 1 where one holding
+     Latin takes `normal` (.hud__level; DESIGN.md, Figures). */
+  line-height: 1;
 }
 .stamp-rally__stamp--missed {
   border-style: dashed;
@@ -6466,6 +6725,9 @@ textarea:focus-visible {
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   transition: background 0.15s ease, color 0.15s ease;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .wmap-line:hover .wmap-roundel, .wmap-line:focus-visible .wmap-roundel,
 .wmap-row:hover .wmap-roundel,  .wmap-row:focus-visible .wmap-roundel,
@@ -8462,6 +8724,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
   color: color-mix(in srgb, var(--rail, var(--text-secondary)) 50%, var(--text-primary));
   white-space: nowrap;
@@ -8642,6 +8905,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   line-height: 1.7;
   letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
   text-align: center;
 }
 .sentence--left { font-size: var(--fs-title); text-align: left; }
@@ -11630,6 +11894,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
   text-align: center;
   color: var(--text-on-fill);
@@ -11812,6 +12077,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
   letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
   color: var(--text-secondary);
 }
 /* The sheet over a quiz has no dictionary underneath to jump around
@@ -15079,6 +15345,9 @@ button.syllabary-cell:focus-visible {
   font-family: var(--font-display);
   font-size: 10px;
   font-weight: 700;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .gate__dest {
   font-family: 'Noto Serif JP', serif;
@@ -15749,6 +16018,7 @@ html { scrollbar-gutter: stable; }
   font-size: 0.58rem;
   font-weight: 700;
   letter-spacing: 0.12em;
+  text-indent: 0.12em;
   text-transform: uppercase;
   text-align: center;
 }
@@ -15816,6 +16086,7 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
 }
 .sndp-event__bus--ui  { background: color-mix(in srgb, var(--accent2) 20%, transparent); color: var(--accent2); }
@@ -16290,6 +16561,9 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   transition: background 0.15s ease;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .pf-line:hover .pf-line__roundel,
 .pf-line:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
@@ -16484,11 +16758,11 @@ html { scrollbar-gutter: stable; }
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--surface-line);
 }
+/* Latin, so untracked — see .bz__jp above. */
 .sbook__title {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-title);
-  letter-spacing: var(--tr-name);
 }
 .sbook__dows,
 .sbook__grid {
@@ -16757,15 +17031,13 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
 }
 
 /* ── The settings list and its pages (canvas Settings, SettingsLearn,
    SettingsDestination, SettingsLevelUp / Down) ── */
-.stg-headrow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
-.stg-head { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.stg-head__jp { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); line-height: 1.2; }
 .stg-list {
   display: flex;
   flex-direction: column;
@@ -16799,6 +17071,11 @@ html { scrollbar-gutter: stable; }
   color: var(--text-secondary);
 }
 .stg-row__chev { flex: none; color: var(--text-secondary); }
+/* The pass row: the list's own furniture, with its value in the
+   pass's metal so it reads as an offer rather than another page.
+   Declared here, after .stg-row__value, so the modifier does not
+   descend in specificity (guard 2). */
+.stg-row--pass .stg-row__value { color: var(--accent2); }
 .stg-signout { align-self: stretch; }
 .slip { display: flex; flex-direction: column; gap: var(--sp-3); }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
@@ -17315,7 +17592,11 @@ html { scrollbar-gutter: stable; }
   font-weight: 700;
   font-size: var(--fs-caption);
   letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
   color: var(--text-secondary);
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .brd-opt--on .brd-opt__code { border-color: var(--accent2); color: var(--text-primary); }
 .brd-opt__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
@@ -17339,9 +17620,13 @@ html { scrollbar-gutter: stable; }
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-primary);
   white-space: nowrap;
+  /* Centred on its line box, not on its ink: the font's own box is the
+     one that lands the glyph in the middle — see .hud__level. */
+  line-height: normal;
 }
 .brd-kopt {
   display: flex;

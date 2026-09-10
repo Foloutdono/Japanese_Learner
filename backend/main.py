@@ -54,7 +54,9 @@ from routes.onboarding      import router as onboarding_router
 from routes.journey         import router as journey_router
 from routes.account         import router as account_router
 from routes.credits         import router as credits_router
+from routes.events          import router as events_router
 from routes.tts             import router as tts_router
+from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
 
 logging.basicConfig(level=logging.INFO)
@@ -164,6 +166,7 @@ app.include_router(video_router)
 app.include_router(ocr_router)
 app.include_router(onboarding_router)
 app.include_router(credits_router)
+app.include_router(events_router)
 app.include_router(tts_router)
 
 
@@ -190,6 +193,7 @@ async def _limit_reached(request, exc: LimitReached):
     })
 app.include_router(journey_router)
 app.include_router(account_router)
+app.include_router(events_router)
 
 @app.get("/")
 def root():

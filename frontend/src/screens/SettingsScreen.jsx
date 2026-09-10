@@ -8,8 +8,11 @@ import { useProfileSummary } from '../stores/profileSummary'
 import { useJourneyStatus } from '../stores/journey'
 import { NOVICE_GOAL } from '../domain/goalMath'
 import { useThemeChoice } from '../stores/theme'
-import { Leave } from '../components/chrome/Bar'
-import { ChevronIcon } from '../components/ui/Icons'
+import { Bar, Leave } from '../components/chrome/Bar'
+import { ChevronIcon, GearIcon } from '../components/ui/Icons'
+import { useOfferable } from '../hooks/useOfferable'
+import { openPaywall } from '../stores/credits'
+import { SOURCES } from '../domain/paywall'
 import { DisplayPage } from '../components/settings/DisplayPage'
 import { SoundPage } from '../components/settings/SoundPage'
 import { LearningPage } from '../components/settings/LearningPage'
@@ -71,6 +74,7 @@ function SettingsList({ session }) {
     : (journey ? t.settingsGoalNoneShort : '')
   const email = session?.user?.email ?? ''
   const accountValue = email ? `${email.split('@')[0]}@…` : ''
+  const offerable = useOfferable()
 
   const ROWS = [
     { id: 'display', label: t.settingsEnvironment, value: `${themeLabel} · ${langLabel}` },
@@ -83,10 +87,12 @@ function SettingsList({ session }) {
 
   return (
     <main id="main-content" className="settings">
-      <div className="stg-headrow">
-        <div className="stg-head"><h1 className="stg-head__jp">{t.settings}</h1></div>
-        <Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>
-      </div>
+      <Bar
+        code={<GearIcon size={14} />}
+        title={t.settings}
+        color="var(--pass-ink)"
+        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+      />
 
       <div className="stg-list">
         {ROWS.map(row => (
@@ -102,6 +108,23 @@ function SettingsList({ session }) {
             <ChevronIcon direction="right" size={16} className="stg-row__chev" />
           </button>
         ))}
+
+        {/* The pass. Not one of PAGES — it opens the offer sheet, so it
+            is drawn here rather than joining ROWS, and it leaves the
+            list entirely for a learner who already holds one. */}
+        {offerable && (
+          <button
+            type="button"
+            className="stg-row stg-row--pass"
+            data-page="pass"
+            data-action="paywall-open"
+            onClick={() => { playClick(); openPaywall(SOURCES.SETTINGS) }}
+          >
+            <span className="stg-row__names"><span className="stg-row__jp">{t.passLabel}</span></span>
+            <span className="stg-row__value">{t.paywallRowValue}</span>
+            <ChevronIcon direction="right" size={16} className="stg-row__chev" />
+          </button>
+        )}
       </div>
 
       <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>

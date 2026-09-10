@@ -1,6 +1,11 @@
 import unittest
+from types import SimpleNamespace
+from unittest import mock
 
-from study.captions import parse_track, parse_video_id, CaptionParseError
+from study.captions import (
+    parse_track, parse_video_id, fetch_youtube_track, proxy_configured,
+    CaptionParseError, CaptionFetchError,
+)
 
 
 class ParseTrackTests(unittest.TestCase):
@@ -127,6 +132,130 @@ class ParseVideoIdTests(unittest.TestCase):
 
     def test_garbage_returns_none_not_raise(self) -> None:
         self.assertIsNone(parse_video_id("not a url"))
+
+
+class FetchYouTubeTrackTests(unittest.TestCase):
+    """The link ingest. Every test here replaces the transcript API --
+    nothing reaches YouTube, and nothing needs a proxy credential to
+    prove the selection rules hold.
+
+    The rule under test throughout is the one the pasted-transcript
+    ingest died of (docs/adr/0003, 2026-09-01): learners kept getting
+    ENGLISH for Japanese videos, because YouTube's own transcript panel
+    defaults to a translation. A fetch that accepted "whatever track
+    exists" would reintroduce that silently, so a video with no
+    Japanese is an error naming the problem -- never a substitution.
+    """
+
+    PROXY_ENV = {
+        "WEBSHARE_PROXY_USERNAME": "test-user",
+        "WEBSHARE_PROXY_PASSWORD": "test-pass",
+    }
+
+    @staticmethod
+    def _snippets(*triples):
+        return [
+            SimpleNamespace(text=text, start=start, duration=duration)
+            for text, start, duration in triples
+        ]
+
+    def _api_returning(self, manual=None, generated=None):
+        """A stand-in for YouTubeTranscriptApi offering only the tracks
+        named. Absent tracks raise NoTranscriptFound, which is what the
+        real TranscriptList does."""
+        from youtube_transcript_api import NoTranscriptFound
+
+        class _TranscriptList:
+            def find_manually_created_transcript(self, codes):
+                if manual is None:
+                    raise NoTranscriptFound("vid", list(codes), None)
+                return SimpleNamespace(fetch=lambda: manual)
+
+            def find_generated_transcript(self, codes):
+                if generated is None:
+                    raise NoTranscriptFound("vid", list(codes), None)
+                return SimpleNamespace(fetch=lambda: generated)
+
+        class _Api:
+            def __init__(self, **kwargs):
+                pass
+
+            def list(self, video_id):
+                return _TranscriptList()
+
+        return _Api
+
+    def _fetch(self, **tracks):
+        import youtube_transcript_api
+        with mock.patch.dict("os.environ", self.PROXY_ENV, clear=False), \
+             mock.patch.object(
+                 youtube_transcript_api, "YouTubeTranscriptApi",
+                 self._api_returning(**tracks)):
+            return fetch_youtube_track("dQw4w9WgXcQ")
+
+    def test_a_manual_track_becomes_cues_in_the_parse_track_shape(self) -> None:
+        """Identical shape to an uploaded file's Track, which is what
+        keeps everything downstream of Cue ignorant of this ingest."""
+        cues = self._fetch(manual=self._snippets(
+            ("私は学生です。", 1.0, 3.0),
+            ("今日は暑い！", 5.0, 3.0),
+        ))
+        self.assertEqual(cues, [
+            {"start": 1.0, "end": 4.0, "text": "私は学生です。"},
+            {"start": 5.0, "end": 8.0, "text": "今日は暑い！"},
+        ])
+
+    def test_a_manual_track_wins_over_an_auto_generated_one(self) -> None:
+        """A human-written track is punctuated and segmented by someone
+        deciding what belongs on screen together -- exactly the unit
+        cue_sentences.py turns into a Sentence."""
+        cues = self._fetch(
+            manual=self._snippets(("手書きです。", 0.0, 2.0)),
+            generated=self._snippets(("じどうです", 0.0, 2.0)),
+        )
+        self.assertEqual([c["text"] for c in cues], ["手書きです。"])
+
+    def test_an_auto_generated_track_is_used_when_there_is_no_manual_one(self) -> None:
+        """Rougher, and still a usable study unit -- so it is the
+        fallback, not a refusal."""
+        cues = self._fetch(generated=self._snippets(("じどうです", 0.0, 2.0)))
+        self.assertEqual([c["text"] for c in cues], ["じどうです"])
+
+    def test_a_video_with_no_japanese_track_is_an_error_not_a_translation(self) -> None:
+        """The one that matters. No Japanese means no lesson; handing
+        back an English track would be the 2026-09-01 defect again."""
+        with self.assertRaises(CaptionFetchError) as caught:
+            self._fetch()
+        self.assertIn("japanese", str(caught.exception).lower())
+
+    def test_the_rolling_window_of_auto_captions_is_merged(self) -> None:
+        """Auto-captions repeat most of each neighbour's text, one or
+        two words advancing at a time. Un-merged, a video's actual
+        vocabulary would be counted three or four times over."""
+        cues = self._fetch(generated=self._snippets(
+            ("これは", 0.0, 1.0),
+            ("これはペン", 1.0, 1.0),
+            ("これはペンです", 2.0, 1.0),
+            ("ありがとう", 4.0, 1.0),
+        ))
+        self.assertEqual(
+            [c["text"] for c in cues], ["これはペンです", "ありがとう"]
+        )
+
+    def test_an_empty_track_is_an_error_rather_than_an_empty_session(self) -> None:
+        with self.assertRaises(CaptionFetchError):
+            self._fetch(manual=self._snippets(("   ", 0.0, 1.0)))
+
+    def test_unconfigured_is_the_shipped_state(self) -> None:
+        """No proxy anywhere means the ingest is off, and says so."""
+        cleared = {k: "" for k in (
+            "WEBSHARE_PROXY_USERNAME", "WEBSHARE_PROXY_PASSWORD",
+            "YOUTUBE_HTTP_PROXY",
+        )}
+        with mock.patch.dict("os.environ", cleared, clear=False):
+            self.assertFalse(proxy_configured())
+            with self.assertRaises(CaptionFetchError):
+                fetch_youtube_track("dQw4w9WgXcQ")
 
 
 if __name__ == "__main__":
