@@ -4973,6 +4973,32 @@ textarea:focus-visible {
   flex-shrink: 0;
 }
 
+/* ── A way out already holds the other end ──
+   The sign above wants the row's two ends, and gets them while the
+   right one is free. Where the bar carries an aside -- the ‹ Learn
+   out of a station's source page, the + New deck on the shelf -- the
+   caption is pushed up against that button instead, close enough to
+   read as its label: `Vocabulary ... SOURCES [‹ Learn]`. So a bar
+   with both stacks unconditionally, at every width: the caption drops
+   under the name it captions, and the button keeps the end alone.
+   Mounted by Bar.jsx only when there is both a sub and an aside -- a
+   lone title draws the same either way.
+
+   The title needs the bound the sub already carries (see above): a
+   column item at `align-items: flex-start` is sized by its content,
+   so without it a long name overflows .bar__names and runs under the
+   aside rather than ellipsing (or, at ≤768px, wrapping) inside it. */
+.bar__names--stacked {
+  flex-flow: column nowrap;
+  /* Undoes the sign's `flex-end space-between`, which in a column reads
+     as the main axis and would push the two registers apart vertically
+     the moment the box had any height to spare. The 0 row gap of the
+     base rule is what keeps them on touching lines, as a wrapped sub. */
+  place-content: flex-start;
+  align-items: flex-start;
+}
+.bar__names--stacked .bar__title { max-width: 100%; }
+
 /* ── A section's name is not an ellipsis ──
    The canvas sets the title and the sub on one baseline, and it was
    drawn on titles like かな and 辞書. On a phone at 390 px the row is

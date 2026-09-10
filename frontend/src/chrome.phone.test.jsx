@@ -375,6 +375,40 @@ describe('the bar', () => {
     expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth + 1)
     expect(title.textContent).toBe('Entraînement à la lecture')
   })
+
+  // The sign wants the row's two ends, and the aside is already at one
+  // of them: `Vocabulaire ... SOURCES [‹ Apprendre]` read as a label on
+  // the button rather than a caption on the name.
+  it('drops the sub under the title when the bar carries a way out', async () => {
+    const screen = await render(
+      <LangProvider>
+        <div>
+          <Bar code="VC" title="Vocabulaire" sub="Sources" color="var(--line-vocab)" />
+          <Bar
+            code="VC"
+            title="Vocabulaire"
+            sub="Sources"
+            color="var(--line-vocab)"
+            aside={<button type="button" className="bar__link">Apprendre</button>}
+          />
+        </div>
+      </LangProvider>
+    )
+    const [plain, withAside] = screen.container.querySelectorAll('.bar')
+    // On its own the short name keeps its sign: both registers on one
+    // baseline, the caption against the right.
+    const beside = plain.querySelector('.bar__sub').getBoundingClientRect()
+    const besideTitle = plain.querySelector('.bar__title').getBoundingClientRect()
+    expect(beside.left).toBeGreaterThan(besideTitle.right)
+    // With a way out it stacks: under the title and flush with it.
+    const stacked = withAside.querySelector('.bar__sub').getBoundingClientRect()
+    const stackedTitle = withAside.querySelector('.bar__title').getBoundingClientRect()
+    expect(stacked.top).toBeGreaterThanOrEqual(stackedTitle.bottom - 2)
+    expect(Math.round(stacked.left)).toBe(Math.round(stackedTitle.left))
+    // And the button still has the end to itself.
+    const aside = withAside.querySelector('.bar__aside').getBoundingClientRect()
+    expect(aside.left).toBeGreaterThanOrEqual(stacked.right)
+  })
 })
 
 describe('the sheet', () => {
