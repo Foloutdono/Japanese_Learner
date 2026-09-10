@@ -892,6 +892,32 @@ const translationMode = {
   analysisUnavailable:   'Analyse indisponible — jugez par rapport à la référence ci-dessus.',
 }
 
+// ── 書取 — la dictée ──────────────────────────────────────────
+// DictationRun.jsx réutilise telles quelles les clés partagées
+// (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// translation/translationEnglish, nextPhrase, examAudioPause/
+// examAudioPending/examAudioUnavailable) — seules les clés vraiment
+// nouvelles vivent ici.
+//
+// Les quatre verdicts sont quatre à dessein : « faux » et « vous en
+// avez saisi la moitié » ne sont pas le même résultat pour une
+// oreille, et les réduire à une coche et une croix en dirait autant à
+// qui a presque tout transcrit qu'à qui n'a rien entendu.
+const dictationMode = {
+  dictationTitle:        'Dictée',
+  dictationDesc:         "Écrivez ce que vous entendez\nDeux écoutes, pas une de plus\nDu N5 au N1",
+  dictationFetchError:   "Impossible de charger un extrait. Veuillez réessayer.",
+  dictationCheckError:   "Impossible de corriger votre réponse. Veuillez réessayer.",
+  dictationPlaceholder:  'Écrivez ce que vous avez entendu…',
+  dictationPrompt:       'Écrivez en japonais ce que vous avez entendu',
+  dictationListen:       'Écouter',
+  dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
+  dictationPerfect:      'Mot pour mot',
+  dictationClose:        'Presque',
+  dictationPartial:      'La moitié',
+  dictationMissed:       'Manqué',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Rechercher kanji, kana, ou sens...',
@@ -1684,6 +1710,7 @@ export default welded({
   ...reading,
   ...readingComprehension,
   ...translationMode,
+  ...dictationMode,
   ...profile,
   ...settings,
   ...decks,

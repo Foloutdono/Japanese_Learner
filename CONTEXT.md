@@ -39,6 +39,18 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
+**Clip** — one recorded line in the listening collection
+(`backend/content/listening_clips.py`), and the mp3 it resolves to. Its id IS
+the content key of that audio (`study/dictation.clip_id`), so the same line
+always names the same file and no manifest exists to drift. Not a *card*:
+nothing is scheduled on it.
+
+**Dictation** (書取) — the practice mode where a Clip is played, at most
+twice, and the learner writes down what was said. The one sentence mode the
+server marks rather than the learner, and the one whose prompt is not text —
+see `docs/adr/0011`. Say *dictation*, never "listening mode": the exam's
+聴解 section is also listening and is a different thing.
+
 **Pace** — the learner's chosen number of NEW items per day
 (`user_profiles.daily_new_target`), set at onboarding as a service type
 (各駅停車 5 / 快速 10 / 特急 20) and adjustable from Settings. Today it

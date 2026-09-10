@@ -3253,7 +3253,7 @@
      "--accent5 was the one pigment no other card had claimed yet",
      which is archaeology, not a system. Two consequences, both real:
 
-     1. THREE of the eleven were the app's *state* colours. Grammar was
+     1. THREE of them were the app's *state* colours. Grammar was
         --success, decks were --warning, the phrase analyser was
         --danger. Those mean correct / caution / wrong a few screens
         later — the MCQ list paints the right answer --success and the
@@ -3278,6 +3278,19 @@
   --line-jisho:     #c99a3e;  /* 山吹色   yamabuki,    kerria gold */
   --line-decks:     #9c4a5e;  /* 蘇芳     suou,        sappanwood  */
   --line-exam:      #8a6b4f;  /* 茶色     cha-iro,     tea brown   */
+  /* 常磐色 tokiwa — 書取, the dictation platform, added when that
+     section was. A twelfth section needs a twelfth pigment; borrowing
+     one is the drift this block was written to end. The green between
+     松葉 (88°) and 緑青 (176°) was the widest unclaimed stretch of the
+     wheel by a long way, and the 29° to 緑青 is the tightest pair here
+     — considered, and kept: 緑青 is a grey-teal at 23% saturation and
+     this is a green at 39%, so at roundel size one reads as verdigris
+     and the other as evergreen. Deepened 30% toward the panel (the
+     .btn-primary recipe) it carries --text-on-panel at 5.56:1 resting
+     and 4.74:1 hovering here, 6.59:1 and 5.90:1 for the light theme's
+     value below — clear of the 4.5 floor with more room than 黄丹, the
+     tightest pigment in this list, which sits at 5.29:1 and 4.53:1. */
+  --line-kakitori:  #3f8f63;  /* 常磐色   tokiwa-iro,  evergreen   */
   /* 鶯色 uguisu — no longer a board line (plan 027 merged 動画 into
      解析). Kept, and reserved for exactly one thing: the timestamp
      chips on video Sentences, the only data that exists for that
@@ -3371,8 +3384,8 @@
   --burger-menu-border: #605947;
   --level-up-overlay-before: rgba(234, 173, 50, 0.14);
 
-  /* Same twelve, deepened a shade so each still reads as text and as a
-     2.5px ring on paper rather than only as a fill on ink. */
+  /* The same set, deepened a shade so each still reads as text and as
+     a 2.5px ring on paper rather than only as a fill on ink. */
   --line-kana:      #b7402a;
   --line-vocab:     #375b78;
   --line-kanji:     #6f5d8f;
@@ -3384,6 +3397,7 @@
   --line-jisho:     #a97a25;
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
+  --line-kakitori:  #35784f;
   /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
   --pass-ink:       #4a4452;
@@ -8672,6 +8686,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
+/* A Japanese reading under its own line — the register .prose__romaji
+   holds for a Latin one, and the reason it could not simply be reused:
+   that rule is set in the display face, which has no kana. Tracked at
+   the body rung rather than --tr-reading, because this is a whole
+   sentence read out and not a name's reading over three characters;
+   text-indent cancels the space the last character's tracking adds,
+   per DESIGN.md's second half of that rule. */
+.prose__kana {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-term);
+  text-indent: var(--tr-term);
+  color: var(--text-secondary);
+}
 .prose__ai {
   font-size: var(--fs-sm);
   line-height: 1.55;
@@ -8694,6 +8722,173 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   align-items: stretch;
   gap: var(--sp-4);
+}
+
+/* ── 書取 — the dictation run (screens/DictationRun.jsx) ──
+   Two objects, and between them they are the whole mode: the clip you
+   are allowed to play twice, and the two texts laid over each other
+   afterwards.
+
+   Neither reuses the exam's listening player (.exam-audio-player).
+   That one is built for a mode where replay is unlimited and the play
+   count is only a record of how much help was taken; here the audio
+   running out IS the exercise, so the scrubber, the replay button and
+   the clock all had to go — see ClipPlayer.jsx for the argument
+   against each of the three. */
+/* The card is the stage's own (.prompt-card, footed), so this brings no
+   surface of its own — it is the card's CONTENT, the way a specimen is,
+   and it centres in whatever height the card was given. */
+.clip-player {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-7);
+  width: 100%;
+}
+.clip-player--dead {
+  flex-direction: row;
+  justify-content: center;
+  gap: var(--sp-3);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+/* The run's one control, and it is a RING rather than a fill: the
+   filled action on this screen is the docked Submit, and a screen with
+   two of them has misidentified which one is the action (DESIGN.md,
+   "The primary button"). So this is .station-sign__roundel's exact
+   construction at the size of something a thumb presses, and it fills
+   only while the clip is actually running — the active service lit up,
+   which is what the board already does with the same drawing. */
+.clip-player__play {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 92px;
+  height: 92px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2.5px solid var(--line-color, var(--accent));
+  background: transparent;
+  color: color-mix(in srgb, var(--line-color, var(--accent)) 65%, var(--text-primary));
+  transition: background 0.16s ease, color 0.16s ease;
+}
+/* The one disabled treatment in the app, and here it means the thing
+   the mode is about: there is no third listen. Declared before the
+   hover it is more specific than, so the sheet reads in specificity
+   order (stylelint's no-descending-specificity). */
+.clip-player__play:disabled { opacity: 0.45; }
+.clip-player__play:hover:not(:disabled),
+.clip-player__play:focus-visible:not(:disabled) {
+  background: var(--line-color, var(--accent));
+  color: var(--bg-main);
+}
+.clip-player__body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  max-width: 240px;
+}
+.clip-player__tickets {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+/* 改札 — the listens, punched as they are spent rather than counted
+   up. A fixed number of journeys on a ticket is a thing this station
+   already knows how to draw. */
+.clip-player__marks {
+  display: flex;
+  gap: var(--sp-2);
+}
+.clip-player__mark {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--line-color, var(--accent));
+}
+.clip-player__mark--spent { background: var(--line-color, var(--accent)); }
+.clip-player__left {
+  font-size: var(--fs-caption);
+  color: var(--text-secondary);
+}
+/* Running, not elapsed. A rail that fills says the clip is playing; a
+   clock beside it would say how much of the sentence is still to come,
+   which is the one hint this mode cannot give away. */
+.clip-player__rail {
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+.clip-player__fill {
+  display: block;
+  height: 100%;
+  background: var(--line-color, var(--accent));
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.1s linear;
+}
+
+/* The machine's mark. The figure pair every other number in this app
+   is set as (DESIGN.md, "Figures"), reusing the .record__* inner
+   classes rather than a private copy of them — .record itself is a
+   lattice cell and this is not in a lattice, which is the same split
+   the dictionary's .record__body already makes.
+
+   The word takes a STATE colour, which is exactly what that family is
+   for: this is correct/incorrect and nothing else. */
+.kaki-score {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+  width: 100%;
+}
+/* The word wears .record__label for its type and this for its ink: a
+   rule reaching back to .record__label itself would be a lower
+   specificity than the one that declares it further down the sheet,
+   which is exactly the ordering stylelint refuses. */
+.kaki-score--perfect .kaki-score__verdict,
+.kaki-score--close .kaki-score__verdict {
+  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
+}
+.kaki-score--partial .kaki-score__verdict {
+  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
+}
+.kaki-score--missed .kaki-score__verdict {
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+}
+
+/* What was written, over what was said: the `equal` and `missing` runs
+   together spell the line, and `extra` is what the ear invented.
+   Every mark is a colour AND a line, because a difference told only in
+   colour is no difference at all to a reader who cannot see it — and
+   this is the one place in the app that draws two texts at once. */
+.kaki-diff {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.8;
+  letter-spacing: var(--tr-term);
+}
+.kaki-diff__run--missing {
+  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
+  text-decoration: underline wavy;
+  text-underline-offset: 0.26em;
+}
+.kaki-diff__run--extra {
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+/* The rail's fill is the state, not the animation: under reduced
+   motion it still shows where the clip is, it just stops sliding
+   there. Same answer for the roundel's fill on hover. */
+@media (prefers-reduced-motion: reduce) {
+  .clip-player__fill,
+  .clip-player__play { transition: none; }
 }
 /* A question card: flat, left-aligned, its own height. */
 .prompt-card.prompt-card--ask {

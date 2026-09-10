@@ -84,6 +84,7 @@ PLAN = [
     ("reading_log",         "user_id = %(user)s",       "reading practice history"),
     ("comprehension_log",   "user_id = %(user)s",       "reading comprehension history"),
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
+    ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),

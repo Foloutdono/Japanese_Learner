@@ -15,6 +15,13 @@
 # file is re-synthesized on demand from the paper that references it --
 # free, idempotent, and needing no state that a deploy can wipe.
 #
+# The dictation collection (content/listening_clips.py) is restored the
+# same way and by the same rule, with one difference that makes it
+# easier: its scripts are shipped content rather than rows, so the
+# lookup is a dict rather than a scan of exam_papers and it answers even
+# when the database does not. That collection is why this module is no
+# longer only about exams.
+#
 # This is a repair path, not the normal path. A correctly mounted disk
 # means it never runs after the first deploy; an unmounted one means it
 # runs once per clip per deploy. Either way the learner gets audio.
@@ -24,6 +31,7 @@ import re
 import threading
 
 from core.db import db_conn
+from study import dictation
 from study.exam_tts import TTSFailed, audio_dir, content_key, synthesize_dialogue
 
 logger = logging.getLogger(__name__)
@@ -132,20 +140,26 @@ def restore_clip(filename: str) -> bool:
         if os.path.exists(os.path.join(audio_dir(), filename)):
             return True  # another request restored it while this one waited
 
-        try:
-            turns = _turns_for_clip(filename, key)
-        except Exception:
-            logger.exception("Could not look up the script for exam audio %s", filename)
-            return False
+        # The shipped dictation line first: it is a dict lookup keyed by
+        # the content key itself, so it is both free and self-verifying,
+        # and unlike the paper scan below it does not need the database
+        # to be reachable.
+        turns = dictation.turns_for_key(key)
         if turns is None:
-            logger.warning("No stored listening script matches exam audio %s", filename)
+            try:
+                turns = _turns_for_clip(filename, key)
+            except Exception:
+                logger.exception("Could not look up the script for audio %s", filename)
+                return False
+        if turns is None:
+            logger.warning("No shipped line and no stored script matches audio %s", filename)
             return False
 
         try:
             synthesize_dialogue(turns)
         except TTSFailed as e:
-            logger.warning("Could not re-synthesize exam audio %s: %s", filename, e)
+            logger.warning("Could not re-synthesize audio %s: %s", filename, e)
             return False
 
-    logger.info("Re-synthesized missing exam audio %s", filename)
+    logger.info("Re-synthesized missing audio %s", filename)
     return True
