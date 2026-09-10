@@ -8,7 +8,10 @@ import { readFileSync } from 'node:fs'
 function parse(name) {
   const text = readFileSync(new URL(`../${name}`, import.meta.url), 'utf8')
   const out = {}
-  for (const line of text.split('\n')) {
+  // Split on both endings: a Windows checkout has CRLF here (git normalises
+  // to LF in the repo, so CI never sees it), and `.` does not match \r — a
+  // plain \n split leaves one on every line, so /(.*)$/ matches no key at all.
+  for (const line of text.split(/\r?\n/)) {
     const m = line.match(/^([A-Z_]+)=(.*)$/)
     if (m) out[m[1]] = m[2]
   }
