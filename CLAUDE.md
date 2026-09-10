@@ -151,9 +151,16 @@ Two rules matter more than the rest:
   means adding its pattern to `ROUTES` there — a node-lane test fails otherwise.
 
 Call `track(name, props)` from `lib/track.js`; never `fetch` an analytics
-endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
-from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
-Metabase/the Supabase SQL editor pointed at the same database.
+endpoint from a screen.
+
+Reading the data has two halves. The **push** is `scripts/weekly_digest.py`,
+weekly from `.github/workflows/weekly-digest.yml` into the run's step summary —
+it arrives whether or not anyone remembers to look, which is the point. The
+**pull** is Metabase (self-hosted, free) or the Supabase SQL editor:
+`backend/scripts/sql/metabase_starter.sql` carries the connection notes, a
+read-only role to connect as, and the queries worth saving first — including
+several that work against the existing tables with no 足跡 rows at all. Edit
+the digest when a number is wrong; the SQL file is the exploration copy.
 
 ### Frontend (`frontend/`)
 ```bash
