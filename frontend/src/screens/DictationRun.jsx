@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
-import { apiJson } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
@@ -9,6 +9,8 @@ import PromptCard from '../components/study/PromptCard'
 import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
 import { FuriganaParts } from '../components/study/Readings'
+import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { WordDetail } from '../components/analysis/WordDetail'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -26,7 +28,7 @@ const PREFETCH_THRESHOLD = 1
 // ── What makes this mode different from the other three ──
 // Reading, translation and comprehension all put the sentence on the
 // screen and let the learner grade themselves against it. Here the
-// sentence IS the answer, so two things follow that nothing else on
+// sentence IS the answer, so three things follow that nothing else on
 // this tab does:
 //
 //   the batch carries no text   Only audio and an id. The words arrive
@@ -43,6 +45,14 @@ const PREFETCH_THRESHOLD = 1
 //                               all three forms — but the field asks
 //                               for the one a learner can actually
 //                               type, and the reveal answers in it.
+//   the breakdown starts late   Reading practice fires its word-by-word
+//                               analysis the instant the phrase goes up
+//                               and has the whole writing window to
+//                               resolve it. The client here does not
+//                               have the line until /check answers, so
+//                               the fetch begins at the reveal and the
+//                               learner reading and rating is the whole
+//                               of the window. See `analysis` below.
 //
 // The rating bar IS here, and once was not: the server graded, on the
 // reasoning that a learner who has not seen the sentence cannot judge
@@ -69,7 +79,7 @@ export default function DictationRun({ session }) {
 // 'loading' | 'listening' | 'checking' | 'feedback' | 'error'
 function Session({ session, level }) {
   const navigate = useNavigate()
-  const { t } = useLang()
+  const { t, lang } = useLang()
 
   const [stage, setStage]       = useState('loading')
   const [clip, setClip]         = useState(null)   // { id, level, audioSrc }
@@ -81,10 +91,48 @@ function Session({ session, level }) {
   const [rated, setRated]       = useState(false)
   const [error, setError]       = useState(null)
 
+  // ── The word-by-word breakdown (reading practice's, on this stage) ──
+  // The same LLM segmentation the 解析 screen runs, through the same
+  // POST /api/phrase/analyze with save=false, drawn by the same
+  // SentenceBreakdown in its 'stepper' layout. Third caller, no fourth
+  // copy: a near-copy of that carousel would have drifted inside two
+  // features (DESIGN.md, "What not to do").
+  //
+  // One thing here is not like reading practice, and it follows from
+  // the mode's own rule. Reading fires this the instant the phrase goes
+  // up, so the whole display-and-writing window is prefetch and the
+  // reader never waits. Here the client does not HAVE the sentence
+  // until /check answers -- that is the entire point of the batch being
+  // audio and an id (routes/dictation.py) -- so the fetch cannot start
+  // one moment sooner than the reveal, and the learner reading the line
+  // and rating themselves is the whole of the window. It is usually
+  // enough, and it costs nothing after the first learner of a given
+  // line: routes/phrase.py caches the analysis permanently by (phrase,
+  // lang), and this bank is ~20 fixed lines a grade.
+  //
+  // What that changes on screen is the button's states, below: both
+  // "preparing" and "unavailable" are reachable here, where reading's
+  // prefetch window hides them.
+  const [analysis, setAnalysis]               = useState(null)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [showBreakdown, setShowBreakdown]     = useState(false)
+  // Which card the carousel is on. Owned here, not by SentenceBreakdown,
+  // so a new clip starts at the first word of a fresh breakdown.
+  const [breakdownIndex, setBreakdownIndex]   = useState(0)
+  // The word or kanji the learner tapped, as a bottom sheet.
+  const [detail, setDetail] = useState(null)
+  // Stable, so WordDetail's useDialog does not re-run its focus effect
+  // (and steal focus) on every render while the sheet is open.
+  const closeDetail = useCallback(() => setDetail(null), [])
+
   const queueRef = useRef([])      // clips fetched ahead, never rendered
   const fetchingRef = useRef(false)
   const heardRef = useRef([])      // every clip id this session has played
   const startedRef = useRef(false)
+  // Which line the in-flight analysis belongs to, so a slow answer for
+  // a clip the learner has already moved past cannot overwrite the one
+  // on screen.
+  const analysisLineRef = useRef(null)
 
   function batchUrl(count) {
     const params = new URLSearchParams({ level, count })
@@ -114,7 +162,48 @@ function Session({ session, level }) {
     setAnswer('')
     setResult(null)
     setRated(false)
+    setAnalysis(null)
+    setAnalysisLoading(false)
+    setShowBreakdown(false)
+    setBreakdownIndex(0)
+    setDetail(null)
+    analysisLineRef.current = null
     setStage('listening')
+  }
+
+  // The breakdown for `jp`, started the moment the line exists on the
+  // client -- see the note on `analysis` above for why that moment is
+  // the reveal and cannot be earlier. `save: false` keeps dictation
+  // runs out of the analyzer's own history (routes/phrase.py's
+  // PhraseRequest.save).
+  function fetchAnalysis(jp) {
+    analysisLineRef.current = jp
+    setAnalysis(null)
+    setAnalysisLoading(true)
+    apiFetch('/api/phrase/analyze', session, {
+      method: 'POST',
+      body: JSON.stringify({ phrase: jp, save: false, deep: true, lang }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (analysisLineRef.current === jp) setAnalysis(d) })
+      .catch(() => { if (analysisLineRef.current === jp) setAnalysis(null) })
+      .finally(() => { if (analysisLineRef.current === jp) setAnalysisLoading(false) })
+  }
+
+  // The sheet wants {title, level, entry, stats}, which is the shape
+  // the breakdown's own word/kanji carry. Mirrors ReadingRun's pair.
+  function openWordDetail(word) {
+    if (!word.vocab_match) return
+    setDetail({
+      title: word.surface,
+      entry: word.vocab_match.entry,
+      stats: word.vocab_match.stats,
+      level: word.vocab_match.level,
+    })
+  }
+
+  function openKanjiDetail(k) {
+    setDetail({ title: k.kanji, entry: k.entry, stats: k.stats, level: k.level })
   }
 
   // Fetches, then either shows the head or says why it cannot. Takes no
@@ -178,6 +267,7 @@ function Session({ session, level }) {
       .then(data => {
         setResult(data)
         setStage('feedback')
+        return data
       })
       .catch(() => {
         // The answer is graded on the server and nowhere else, so a
@@ -185,7 +275,14 @@ function Session({ session, level }) {
         // kept, and the retry re-fetches rather than losing the run.
         setError(t.dictationCheckError)
         setStage('error')
+        return null
       })
+      // The breakdown is kicked off AFTER the reveal's own catch, and
+      // deliberately: inside the `.then` above it would sit within the
+      // chain that catch guards, and anything it threw would put the
+      // run on its error screen. A breakdown that cannot be fetched
+      // must cost the breakdown and nothing else.
+      .then(data => { if (data) fetchAnalysis(data.jp) })
   }
 
   // The learner's own grade, on the app's six-segment bar. `quality`
@@ -296,32 +393,89 @@ function Session({ session, level }) {
       {stage === 'feedback' && result && (
         <>
           <PromptCard prose foot={{ left: where, right: t.dictationTitle }}>
-            {/* The line, with its reading over the kanji that need one.
-                Built backend-side from the bank's own kana, so the ruby
-                over 九時 is くじ rather than a guess — see
-                study/dictation.reveal. The kana line this replaces said
-                the same thing twice, once detached from the writing it
-                belonged to. */}
-            <span className="prose__jp kaki-line" lang="ja">
-              <FuriganaParts parts={result.furigana} />
-            </span>
-            {/* Romaji rather than kana: it is the alphabet the learner
-                just answered in, so it is the line they can actually
-                check themselves against. */}
-            <span className="prose__romaji">{result.romaji}</span>
-            <span className="prose__label">
-              {result.translation_lang === 'en' ? t.translationEnglish : t.translation}
-            </span>
-            <span className="prose__en">{result.translation}</span>
-            <span className="prose__rule" />
-            {/* The measurement rides on the answer's own label rather
-                than standing over the card as a verdict: it is a hint
-                for the learner grading below, not the grade. */}
-            <span className="prose__label kaki-answer__label">
-              {t.yourAnswer}
-              <span className="kaki-accuracy">{t.dictationCaught(result.accuracy)}</span>
-            </span>
-            <span className="prose__en">{answer.trim() || '—'}</span>
+            {/* Opening the breakdown puts the registers away, exactly as
+                reading practice does: the card IS the stage on a phone,
+                and a carousel stacked under six rows of already-read
+                text gets what is left rather than what it needs. The
+                sentence is not lost with them — the breakdown's own
+                line, up top, is the same sentence as a word index. */}
+            {!showBreakdown && (
+              <>
+                {/* The line, with its reading over the kanji that need one.
+                    Built backend-side from the bank's own kana, so the ruby
+                    over 九時 is くじ rather than a guess — see
+                    study/dictation.reveal. The kana line this replaces said
+                    the same thing twice, once detached from the writing it
+                    belonged to. */}
+                <span className="prose__jp kaki-line" lang="ja">
+                  <FuriganaParts parts={result.furigana} />
+                </span>
+                {/* Romaji rather than kana: it is the alphabet the learner
+                    just answered in, so it is the line they can actually
+                    check themselves against. */}
+                <span className="prose__romaji">{result.romaji}</span>
+                <span className="prose__label">
+                  {result.translation_lang === 'en' ? t.translationEnglish : t.translation}
+                </span>
+                <span className="prose__en">{result.translation}</span>
+                <span className="prose__rule" />
+                {/* The measurement rides on the answer's own label rather
+                    than standing over the card as a verdict: it is a hint
+                    for the learner grading below, not the grade. */}
+                <span className="prose__label kaki-answer__label">
+                  {t.yourAnswer}
+                  <span className="kaki-accuracy">{t.dictationCaught(result.accuracy)}</span>
+                </span>
+                <span className="prose__en">{answer.trim() || '—'}</span>
+              </>
+            )}
+
+            {/* Only once the learner has rated. Before that the rating
+                bar is docked over this edge anyway, but the real reason
+                is the mode: the grade is theirs to give against what
+                they heard, and a word-by-word gloss offered first is an
+                answer key handed over mid-question. Reading practice
+                gates its own breakdown on the same moment. */}
+            {rated && (
+              <div className="prose__breakdown">
+                <button
+                  type="button"
+                  onClick={() => setShowBreakdown(s => !s)}
+                  /* Disabled until there IS one to show, and not merely
+                     until the fetch has settled — a press mid-flight
+                     would put the registers away and draw nothing in
+                     their place. Reading practice used to enable this
+                     while loading and got away with it, because its
+                     prefetch is long since done by the time the button
+                     exists; it gates on the same condition now, since
+                     "unlikely" was never the same as "cannot happen".
+                     Here the fetch starts at the reveal, so a press
+                     mid-flight is ordinary rather than a slow day. */
+                  disabled={!analysis}
+                  className="btn-secondary"
+                >
+                  {showBreakdown
+                    ? t.hideBreakdown
+                    : analysis
+                      ? t.showBreakdown
+                      : analysisLoading
+                        ? t.preparingBreakdown
+                        : t.breakdownUnavailable}
+                </button>
+
+                {showBreakdown && analysis && (
+                  <SentenceBreakdown
+                    analysis={analysis}
+                    layout="stepper"
+                    index={breakdownIndex}
+                    setIndex={setBreakdownIndex}
+                    t={t}
+                    onTokenClick={openWordDetail}
+                    onKanjiClick={openKanjiDetail}
+                  />
+                )}
+              </div>
+            )}
           </PromptCard>
 
           {rated ? (
@@ -336,6 +490,7 @@ function Session({ session, level }) {
         </>
       )}
 
+      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
     </StudyStage>
   )
 }

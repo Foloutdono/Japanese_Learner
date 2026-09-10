@@ -23,10 +23,15 @@ import { LangProvider } from '../LangContext'
 // the API mocked at its boundary.
 
 const apiJson = vi.fn()
+// The word-by-word breakdown goes out over apiFetch (POST
+// /api/phrase/analyze), so this one has to answer like the real thing
+// -- a bare vi.fn() returns undefined, and the screen would be reading
+// `.then` off it.
+const apiFetch = vi.fn()
 
 vi.mock('../lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(),
+  apiFetch: (...a) => apiFetch(...a),
   apiJson: (...a) => apiJson(...a),
   apiJsonWithTimeout: vi.fn(),
   apiUpload: vi.fn(),
@@ -90,6 +95,19 @@ const REVEAL = {
   matched: 'romaji',
 }
 
+// What POST /api/phrase/analyze answers with: the deep tier's shape as
+// SentenceBreakdown reads it (analysis.tokens ?? analysis.words).
+const ANALYSIS = {
+  text: LINE.jp,
+  tokens: [
+    { surface: '学校', reading: 'がっこう', meaning: 'school', pos: 'noun' },
+    { surface: 'は', reading: 'は', meaning: 'topic marker', pos: 'particle' },
+    { surface: '九時', reading: 'くじ', meaning: 'nine oclock', pos: 'noun' },
+    { surface: 'からです', reading: 'からです', meaning: 'starts from', pos: 'expression' },
+  ],
+  explanation: 'から marks the starting point in time.',
+}
+
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
 const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
@@ -128,7 +146,20 @@ beforeEach(() => {
     path.startsWith('/api/dictation/batch') ? Promise.resolve(BATCH)
       : path === '/api/dictation/check' ? Promise.resolve(REVEAL)
         : Promise.resolve({ correct: true }))
+  apiFetch.mockReset()
+  apiFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ANALYSIS })
 })
+
+/** The reveal, rated — where the breakdown lives. */
+async function graded(text = 'gakkou wa kuji desu') {
+  const root = await answered(text)
+  ;[...root.querySelectorAll('.rating-bar button')].at(-1).click()
+  await settle(140)
+  return root
+}
+
+const breakdownButton = root =>
+  [...root.querySelectorAll('.prose__breakdown button')][0]
 
 describe('DictationRun', () => {
   it('asks for its own grade and shows the clip', async () => {
@@ -282,6 +313,120 @@ describe('DictationRun', () => {
 
     expect(root.querySelectorAll('.clip-player__mark--spent')).toHaveLength(0)
     expect(root.textContent).toContain('2 écoutes restantes')
+  })
+
+  // ── 解析 — the word-by-word breakdown on the reveal ──
+  // Reading practice's carousel, on this stage, gated on the one moment
+  // the mode allows it: after the learner has graded themselves. What
+  // is worth pinning is the two rules it inherits from the mode -- the
+  // line is not asked about before it has been answered, and the gloss
+  // is not offered before the grade -- plus the failure, which this
+  // screen can actually reach where reading practice's prefetch hides
+  // it.
+  it('asks nothing about the line until the line has been answered', async () => {
+    const root = await run()
+    root.querySelector('.clip-player__play').click()
+    await settle(80)
+    expect(apiFetch.mock.calls).toHaveLength(0)
+
+    type(root.querySelector('input'), 'gakkou wa kuji desu')
+    await settle(20)
+    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(140)
+
+    const analyze = apiFetch.mock.calls.find(c => c[0] === '/api/phrase/analyze')
+    expect(analyze, 'the reveal starts the breakdown').toBeTruthy()
+    const body = JSON.parse(analyze[2].body)
+    expect(body.phrase).toBe(LINE.jp)
+    // Out of the analyzer's own history, and the deep tier, exactly as
+    // reading practice asks for it.
+    expect(body.save).toBe(false)
+    expect(body.deep).toBe(true)
+  })
+
+  it('offers no breakdown until the learner has graded themselves', async () => {
+    const root = await answered()
+    expect(root.querySelector('.prose__breakdown')).toBeNull()
+
+    ;[...root.querySelectorAll('.rating-bar button')].at(-1).click()
+    await settle(140)
+    expect(root.querySelector('.prose__breakdown')).toBeTruthy()
+  })
+
+  it('opens the words, and puts the read registers away while it is open', async () => {
+    const root = await graded()
+    const button = breakdownButton(root)
+    expect(button.disabled).toBe(false)
+    expect(button.textContent).toContain('Voir la décomposition')
+
+    button.click()
+    await settle(80)
+
+    // The carousel is drawn, and the sentence survives as its own word
+    // index rather than as the register that was put away.
+    expect(root.querySelector('.rdg-breakdown')).toBeTruthy()
+    expect(root.querySelector('.kaki-line')).toBeNull()
+    expect(root.textContent).not.toContain(LINE.romaji)
+    expect(root.querySelector('.rdg-breakdown-line').textContent).toContain('学校')
+
+    breakdownButton(root).click()
+    await settle(80)
+    expect(root.querySelector('.rdg-breakdown')).toBeNull()
+    expect(root.querySelector('.kaki-line')).toBeTruthy()
+  })
+
+  it('refuses the toggle while the breakdown is still being fetched', async () => {
+    // A press mid-flight would put the registers away with nothing to
+    // draw in their place. Reading practice used to leave the button
+    // live during its own fetch and got away with it -- its prefetch is
+    // long finished by the time the button exists -- and is now gated
+    // the same way (ReadingRun.browser.test.jsx pins it there). Here the
+    // fetch starts AT the reveal, so a press mid-flight is ordinary.
+    let release
+    apiFetch.mockReturnValue(new Promise(resolve => { release = resolve }))
+
+    const root = await graded()
+    const button = breakdownButton(root)
+    expect(button.disabled).toBe(true)
+    expect(button.textContent).toContain('Préparation')
+
+    button.click()
+    await settle(60)
+    expect(root.querySelector('.kaki-line'), 'the registers stayed put').toBeTruthy()
+
+    release({ ok: true, status: 200, json: async () => ANALYSIS })
+    await settle(120)
+    expect(breakdownButton(root).disabled).toBe(false)
+  })
+
+  it('costs the breakdown and nothing else when the analysis fails', async () => {
+    apiFetch.mockRejectedValue(new Error('model down'))
+    const root = await graded()
+
+    // The run is still on its reveal, with the line and the learner's
+    // own answer on it -- not on the error screen.
+    expect(root.querySelector('.empty--error')).toBeNull()
+    expect(root.querySelector('.kaki-line')).toBeTruthy()
+    expect(root.textContent).toContain('gakkou wa kuji desu')
+
+    const button = breakdownButton(root)
+    expect(button.disabled).toBe(true)
+    expect(button.textContent).toContain('indisponible')
+  })
+
+  it('starts the next clip with no breakdown of the last one', async () => {
+    const root = await graded()
+    breakdownButton(root).click()
+    await settle(80)
+    expect(root.querySelector('.rdg-breakdown')).toBeTruthy()
+
+    const nextBtn = [...root.querySelectorAll('button')].find(b => b.textContent.includes('Phrase suivante'))
+    nextBtn.click()
+    await settle(120)
+
+    expect(root.querySelector('.rdg-breakdown')).toBeNull()
+    expect(root.querySelector('.prose__breakdown')).toBeNull()
+    expect(root.querySelector('.clip-player')).toBeTruthy()
   })
 
   it('says so when a clip could not be loaded', async () => {

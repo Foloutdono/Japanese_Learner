@@ -862,11 +862,17 @@ const reading = {
   gradeCorrect:         'J\'ai eu juste',
   gradeIncorrect:       'Je n\'ai pas eu juste',
 
-  // Décomposition mot par mot + sa navigation (ReadingRun.jsx) —
-  // affichée une fois la phrase corrigée.
+  // Décomposition mot par mot + sa navigation (ReadingRun.jsx,
+  // DictationRun.jsx) — affichée une fois la phrase corrigée.
   showBreakdown:        'Voir la décomposition',
   hideBreakdown:        'Masquer la décomposition',
   preparingBreakdown:   'Préparation de la décomposition…',
+  // L'échec, une fois établi — 書取 peut vraiment l'atteindre : sa
+  // décomposition n'est demandée qu'à la révélation (la phrase n'existe
+  // pas côté client avant), donc un modèle en panne se voit ici alors
+  // que la longue fenêtre de préchargement de la lecture le masque. La
+  // lecture l'affiche aussi, pour l'appel lent ou réessayé que son
+  // préchargement ne devance pas.
   breakdownUnavailable: 'Décomposition indisponible',
   previousWord:         'Mot précédent',
   nextWord:             'Mot suivant',

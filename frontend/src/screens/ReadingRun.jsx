@@ -569,7 +569,10 @@ function SessionView({
                     rarely reached it, because fetchAnalysis fires the
                     instant the phrase is shown and the whole
                     display-and-writing window is prefetch, but a slow
-                    or retrying model call is all it takes. */}
+                    or retrying model call is all it takes. 書取 gates
+                    its own copy of this button on the same condition,
+                    and reaches the loading state routinely rather than
+                    rarely (DictationRun.jsx). */}
                 <button
                   type="button"
                   onClick={() => setShowBreakdown(s => !s)}
