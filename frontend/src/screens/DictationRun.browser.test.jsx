@@ -3,17 +3,21 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 
-// ── 書取 — the run, and the two rules that ARE the mode ────────
+// ── 書取 — the run, and the rules that ARE the mode ────────────
 // Everything else on the Practice tab shows the sentence and asks the
 // learner to grade themselves against it. This one hides the sentence
-// and limits the audio, so those two are the things worth pinning:
+// and limits the audio, so those are the things worth pinning:
 //
-//   1. the batch carries no words. A learner who opens devtools must
-//      find audio and an id, and no text — otherwise the mode is a
-//      listening exercise only for people who chose not to look.
+//   1. the batch carries no words, in any of the three ways the line
+//      can be written. A learner who opens devtools must find audio
+//      and an id — otherwise the mode is a listening exercise only for
+//      people who chose not to look.
 //   2. two listens, and the third is refused. Not "counted", refused:
 //      the play button goes to the app's one disabled treatment and
 //      stays there.
+//   3. the grade in the log is the LEARNER's. The reveal measures, the
+//      rating bar grades, and nothing is written until they have rated
+//      (docs/adr/0013).
 //
 // The run is mounted through the router that gives it its grade, with
 // the API mocked at its boundary.
@@ -53,6 +57,7 @@ const SILENCE = 'data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAgD4AAAB9A
 const LINE = {
   jp: '学校は九時からです。',
   kana: 'がっこうはくじからです。',
+  romaji: 'gakkou wa kuji kara desu',
   en: 'School starts at nine.',
 }
 const BATCH = {
@@ -63,23 +68,26 @@ const BATCH = {
     { id: 'clip-two', level: 'N5', audioSrc: SILENCE },
   ],
 }
-const GRADED = {
+const REVEAL = {
   id: 'clip-one',
   level: 'N5',
   jp: LINE.jp,
   kana: LINE.kana,
+  romaji: LINE.romaji,
+  // What study/dictation.reveal builds from the bank's own kana: one
+  // part per run, a reading only where furigana belongs.
+  furigana: [
+    { text: '学', reading: 'がっ' },
+    { text: '校', reading: 'こう' },
+    { text: 'は' },
+    { text: '九', reading: 'く' },
+    { text: '時', reading: 'じ' },
+    { text: 'からです。' },
+  ],
   translation: LINE.en,
   translation_lang: 'en',
   accuracy: 90,
-  verdict: 'close',
-  correct: true,
-  matched: 'kana',
-  target: 'がっこうはくじからです',
-  diff: [
-    { op: 'equal', text: 'がっこうはくじ' },
-    { op: 'missing', text: 'から' },
-    { op: 'equal', text: 'です' },
-  ],
+  matched: 'romaji',
 }
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -104,10 +112,22 @@ async function run(level = 'N5') {
   return screen.container
 }
 
+/** A run with one clip answered, sitting on the reveal. */
+async function answered(text = 'gakkou wa kuji desu') {
+  const root = await run()
+  type(root.querySelector('input'), text)
+  await settle(20)
+  root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  await settle(140)
+  return root
+}
+
 beforeEach(() => {
   apiJson.mockReset()
   apiJson.mockImplementation(path =>
-    path.startsWith('/api/dictation/batch') ? Promise.resolve(BATCH) : Promise.resolve(GRADED))
+    path.startsWith('/api/dictation/batch') ? Promise.resolve(BATCH)
+      : path === '/api/dictation/check' ? Promise.resolve(REVEAL)
+        : Promise.resolve({ correct: true }))
 })
 
 describe('DictationRun', () => {
@@ -120,9 +140,21 @@ describe('DictationRun', () => {
 
   it('puts no part of the sentence on the page before it is answered', async () => {
     const root = await run()
-    expect(root.textContent).not.toContain(LINE.jp)
-    expect(root.textContent).not.toContain(LINE.kana)
-    expect(root.textContent).not.toContain(LINE.en)
+    for (const form of [LINE.jp, LINE.kana, LINE.romaji, LINE.en]) {
+      expect(root.textContent).not.toContain(form)
+    }
+  })
+
+  it('asks for the answer in romaji, on a field nothing may rewrite', async () => {
+    const root = await run()
+    const field = root.querySelector('input')
+    // No lang="ja": the field holds Latin letters, and saying otherwise
+    // invites an IME onto a keyboard the learner does not have.
+    expect(field.getAttribute('lang')).toBeNull()
+    expect(field.getAttribute('autocorrect')).toBe('off')
+    expect(field.getAttribute('autocapitalize')).toBe('off')
+    expect(field.spellcheck).toBe(false)
+    expect(field.placeholder.toLowerCase()).toContain('romaji')
   })
 
   it('offers two listens and spends one per play', async () => {
@@ -154,12 +186,12 @@ describe('DictationRun', () => {
     expect(root.querySelectorAll('.clip-player__mark--spent')).toHaveLength(2)
   })
 
-  it('sends the answer with the number of listens taken', async () => {
+  it('sends the answer to be revealed against', async () => {
     const root = await run()
     root.querySelector('.clip-player__play').click()
     await settle(80)
 
-    type(root.querySelector('input'), 'がっこうはくじです')
+    type(root.querySelector('input'), 'gakkou wa kuji desu')
     await settle(20)
     root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
     await settle(120)
@@ -167,57 +199,81 @@ describe('DictationRun', () => {
     const check = apiJson.mock.calls.find(c => c[0] === '/api/dictation/check')
     expect(check).toBeTruthy()
     expect(JSON.parse(check[2].body)).toEqual({
-      clip_id: 'clip-one', answer: 'がっこうはくじです', plays: 1,
+      clip_id: 'clip-one', answer: 'gakkou wa kuji desu',
     })
   })
 
-  it('reveals the line, its reading and the gloss once answered', async () => {
-    const root = await run()
-    type(root.querySelector('input'), 'がっこうはくじです')
-    await settle(20)
-    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    await settle(140)
+  it('reveals the line with its furigana, its romaji and the gloss', async () => {
+    const root = await answered()
 
-    expect(root.querySelector('.prose__jp').textContent).toBe(LINE.jp)
-    expect(root.querySelector('.prose__kana').textContent).toBe(LINE.kana)
+    // The bases reconstruct the sentence — a part dropped in rendering
+    // would show a line that was never said. Read without the rt
+    // nodes, which textContent would otherwise interleave into it.
+    const line = root.querySelector('.kaki-line')
+    const bases = [...line.childNodes].map(node =>
+      node.tagName === 'RUBY'
+        ? [...node.childNodes].filter(c => c.tagName !== 'RT').map(c => c.textContent).join('')
+        : node.textContent)
+    expect(bases.join('')).toBe(LINE.jp)
+    expect([...line.querySelectorAll('rt')].map(rt => rt.textContent))
+      .toEqual(['がっ', 'こう', 'く', 'じ'])
+
+    // Romaji where the kana line used to be: the alphabet the learner
+    // just answered in is the one they can check themselves against.
+    expect(root.querySelector('.prose__romaji').textContent).toBe(LINE.romaji)
+    expect(root.querySelector('.prose__kana')).toBeNull()
     expect(root.textContent).toContain(LINE.en)
   })
 
-  it('marks the attempt run by run, and the runs spell the line', async () => {
-    const root = await run()
-    type(root.querySelector('input'), 'がっこうはくじです')
-    await settle(20)
-    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    await settle(140)
-
-    const runs = [...root.querySelectorAll('.kaki-diff__run')]
-    expect(runs.map(r => r.className.split('--')[1])).toEqual(['equal', 'missing', 'equal'])
-    const reference = runs
-      .filter(r => !r.className.includes('extra'))
-      .map(r => r.textContent).join('')
-    expect(reference).toBe(GRADED.target)
+  it('prints what was typed back, beside how much of it matched', async () => {
+    const root = await answered()
+    expect(root.textContent).toContain('gakkou wa kuji desu')
+    expect(root.querySelector('.kaki-accuracy').textContent).toContain('90')
   })
 
-  it('reports the grade as a figure and a word in the state ink', async () => {
-    const root = await run()
-    type(root.querySelector('input'), 'がっこうはくじです')
-    await settle(20)
-    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
-    await settle(140)
+  it('hands the grade to the learner, not to the server', async () => {
+    const root = await answered()
+    // The rating bar, not a verdict: nothing on this screen tells the
+    // learner whether they were right.
+    expect(root.querySelector('.rating-bar')).toBeTruthy()
+    expect(root.querySelector('.kaki-score')).toBeNull()
+    // And nothing is logged until they have rated.
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/dictation/result')).toBe(false)
+  })
 
-    expect(root.querySelector('.kaki-score--close')).toBeTruthy()
-    expect(root.querySelector('.record__value').textContent).toBe('90%')
-    expect(root.querySelector('.kaki-score__verdict').textContent.trim()).toBe('Presque')
+  it('logs the rating the learner gave, with the figure they saw', async () => {
+    const root = await answered()
+    const good = [...root.querySelectorAll('.rating-bar button')].at(-1)
+    good.click()
+    await settle(120)
+
+    const result = apiJson.mock.calls.find(c => c[0] === '/api/dictation/result')
+    expect(result, root.textContent.slice(0, 200)).toBeTruthy()
+    const body = JSON.parse(result[2].body)
+    expect(body.clip_id).toBe('clip-one')
+    expect(body.answer).toBe('gakkou wa kuji desu')
+    expect(body.accuracy).toBe(90)
+    expect(body.quality).toBeGreaterThan(2)
+  })
+
+  it('counts the run by the learner\'s own rating', async () => {
+    const root = await answered()
+    expect(root.textContent).toContain('0 / 0')
+    ;[...root.querySelectorAll('.rating-bar button')].at(-1).click()
+    await settle(120)
+    expect(root.textContent).toContain('1 / 1')
   })
 
   it('gives the next clip a fresh pair of listens', async () => {
     const root = await run()
     root.querySelector('.clip-player__play').click()
     await settle(80)
-    type(root.querySelector('input'), 'あ')
+    type(root.querySelector('input'), 'a')
     await settle(20)
     root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
     await settle(140)
+    ;[...root.querySelectorAll('.rating-bar button')].at(-1).click()
+    await settle(120)
 
     const nextBtn = [...root.querySelectorAll('button')].find(b => b.textContent.includes('Phrase suivante'))
     expect(nextBtn, root.textContent.slice(0, 200)).toBeTruthy()
@@ -232,7 +288,7 @@ describe('DictationRun', () => {
     apiJson.mockImplementation(path =>
       path.startsWith('/api/dictation/batch')
         ? Promise.reject(new Error('boom'))
-        : Promise.resolve(GRADED))
+        : Promise.resolve(REVEAL))
     const root = await run()
     expect(root.querySelector('.empty--error')).toBeTruthy()
   })

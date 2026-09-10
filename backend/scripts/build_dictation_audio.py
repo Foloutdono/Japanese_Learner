@@ -100,7 +100,10 @@ def main() -> int:
                 failed.append(f"{row['jp']} ({e})")
                 continue
         try:
-            synthesize_dialogue(dictation.clip_turns(row["jp"]))
+            # Through dictation's own rate, not the service default:
+            # the rate is part of the content key, so synthesizing
+            # without it writes a file the app never asks for.
+            synthesize_dialogue(dictation.clip_turns(row["jp"]), dictation.RATE)
         except TTSFailed as e:
             failed.append(f"{row['jp']} ({e})")
             continue

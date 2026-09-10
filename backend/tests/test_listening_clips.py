@@ -66,16 +66,24 @@ class ClipIdentityTests(unittest.TestCase):
     def test_the_url_names_the_file_the_repair_path_looks_up(self) -> None:
         """main.py serves /exam-audio/<key>.mp3 and, on a 404, hands the
         filename to study/exam_audio_repair.restore_clip, which strips
-        the key back off and asks dictation.turns_for_key for the
-        script. That round trip has to close."""
+        the key back off and asks dictation.restore to re-make it. That
+        round trip has to close, and the key it closes on has to be the
+        one the URL carried."""
         row = BY_LEVEL["N3"][0]
         key = dictation.clip_id(row["jp"])
         self.assertEqual(dictation.clip_url(row["jp"]), f"/exam-audio/{key}.mp3")
-        turns = dictation.turns_for_key(key)
-        self.assertEqual(turns, [{"speaker": dictation.SPEAKER, "textJp": row["jp"]}])
+
+        made = []
+        original = dictation.ensure_clip
+        dictation.ensure_clip = lambda jp: made.append(jp) or "/exam-audio/x.mp3"
+        try:
+            self.assertTrue(dictation.restore(key))
+        finally:
+            dictation.ensure_clip = original
+        self.assertEqual(made, [row["jp"]])
 
     def test_an_unknown_key_restores_nothing(self) -> None:
-        self.assertIsNone(dictation.turns_for_key("0" * 24))
+        self.assertFalse(dictation.restore("0" * 24))
         self.assertIsNone(dictation.entry_for("not-a-key"))
 
 

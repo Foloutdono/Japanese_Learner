@@ -5,7 +5,6 @@ import re
 import unicodedata
 from functools import lru_cache
 
-import pykakasi
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import require_pass
 from pydantic import BaseModel, Field
@@ -24,6 +23,7 @@ from content import vocab_extras
 from content import reading_sentences
 from study import difficulty
 from study.llm_shared import chat, llm_configured, LLMUnavailable
+from study.romaji import to_romaji
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
@@ -79,8 +79,6 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
 # duplication, and keeping three copies of the provider list would have
 # meant Reading Comprehension silently staying on the exhausted
 # OpenRouter account while everything else failed over.
-
-_kakasi = pykakasi.kakasi()
 
 # Display time scales with phrase length, clamped to a sane range. Tune freely.
 MIN_DISPLAY_SECONDS = 5
@@ -170,6 +168,11 @@ def _display_seconds(phrase: str) -> float:
 def phrase_to_romaji(text: str) -> str:
     """Deterministic JP -> Hepburn romaji conversion via pykakasi.
 
+    The conversion itself moved to study/romaji.py when 書取 needed it
+    too — one pykakasi instance for the process rather than two. This
+    name stays because it is what this module's own callers know it as,
+    and because the note below is about THIS caller's data.
+
     Previously (see git history) only ever called on an LLM-provided
     all-hiragana "reading" — the app deliberately never asked the LLM
     to spell romaji directly, because models are unreliable at
@@ -184,8 +187,7 @@ def phrase_to_romaji(text: str) -> str:
     occasional wrong reading in the *reference* romaji is a minor
     annoyance, not a grading bug, since nothing auto-compares against it.
     """
-    converted = _kakasi.convert(text)
-    return " ".join(item["hepburn"] for item in converted if item["hepburn"])
+    return to_romaji(text)
 
 
 def normalize_romaji(text: str) -> str:

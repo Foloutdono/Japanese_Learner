@@ -9,22 +9,24 @@ Two jobs, and they are the whole mode:
      content key), so the mapping needs no database, no manifest and no
      id allocation: the same line always names the same file, in a fresh
      clone and on a server that has been up for a year.
-  2. THE ANSWER IS GRADED. Unlike every other sentence mode in this app
-     (reading, translation), this one is NOT self-assessed. There is a
-     single right answer and it is text, so the machine can say how
-     close the learner got — and it must, because the learner cannot:
-     they have not seen the sentence, so they have nothing to compare
-     their own transcription against until it is revealed.
+  2. THE ANSWER IS MEASURED — and, since docs/adr/0013, not GRADED.
+     The learner rates their own transcription on the app's rating bar,
+     the way every other sentence mode works; what this module produces
+     is one number, how close the two texts came, to help them do it.
+     The distinction is the whole of 0013: a measurement can afford to
+     be approximate, and a grade cannot.
 
-── Why grading is generous about script ──────────────────────
-A learner who hears 「駅の前で友だちに会います」 correctly and writes
-えきのまえでともだちにあいます has done the exercise. They have not
-failed a listening test by not writing kanji — that is a different
-skill, taught on a different line of this app. So every line carries a
-kana reading beside its written form and the answer is graded against
-both, keeping whichever scores better. `matched` reports which, so the
-screen can show the diff against the form the learner was actually
-writing.
+── Three ways to write the same sentence, all of them right ──
+The learner may answer in kanji, in kana, or in romaji, and the last is
+the common case: a Japanese keyboard is a separate install on a laptop
+and a separate keyboard on a phone, and a beginner practising listening
+has not got that far. None of those is better hearing than the others,
+so the answer is measured against all three forms the line carries and
+the best score is the one reported. `matched` names the form that won.
+
+Romaji brings a second problem on top — shinbun or shimbun, chiisai or
+chisai, si or shi — which study/romaji.fold settles by collapsing every
+spelling choice and keeping every sound.
 
 ── Why the play limit is not enforced here ───────────────────
 The mode's rule is two listens. The clip is a static file behind
@@ -43,7 +45,9 @@ import unicodedata
 from functools import lru_cache
 
 from content.listening_clips import BY_LEVEL, LEVELS, all_clips
+from study import romaji as romaji_lib
 from study.exam_tts import TTSFailed, content_key, synthesize_dialogue
+from study.furigana import align_deck
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +61,18 @@ MAX_PLAYS = 2
 # turn), but it is part of the content key, so changing it renames every
 # file in the collection.
 SPEAKER = "narrator"
+
+# Slower than the service's default, and the reason is the exercise
+# rather than the language: a listener following a sentence keeps up
+# fine at full speed, but a listener TRANSCRIBING one is working at the
+# speed of their hand and loses the tail of the line while writing its
+# head. Two listens do not fix that; a slower reading does.
+#
+# It is part of the content key (study/exam_tts.content_key), so
+# changing this number renames every clip in the collection and the next
+# request re-synthesizes it at the new speed. That is the intended
+# behaviour and the reason the rate is keyed at all.
+RATE = "-10%"
 
 # What a transcription may differ by without being a different answer:
 # spacing of any kind, and the marks a listener has no way to hear.
@@ -104,7 +120,7 @@ def clip_id(jp: str) -> str:
     things at once on purpose — the id the client sends back on submit,
     and the name of the file on disk — so a clip can never be addressed
     by an id whose audio belongs to different text."""
-    return content_key(clip_turns(jp))
+    return content_key(clip_turns(jp), RATE)
 
 
 def clip_url(jp: str) -> str:
@@ -123,16 +139,21 @@ def entry_for(clip: str) -> dict | None:
     return _index().get(clip)
 
 
-def turns_for_key(key: str) -> list[dict] | None:
-    """The script behind a clip file, for study/exam_audio_repair.py.
+def restore(key: str) -> bool:
+    """Re-make the clip file `key` names, if it is one of this
+    collection's. False if the key is not ours or could not be made.
 
-    The repair path's other source is a stored exam paper, found by
-    scanning exam_papers; this one is a dict lookup over shipped
-    content, so it is both cheaper and available when the database is
-    not. See that module for why a missing file is re-synthesized at all.
-    """
+    A function rather than the turns themselves, which is what
+    study/exam_audio_repair.py asked for at first: the turns alone lose
+    RATE, and synthesizing them without it writes a DIFFERENT file — the
+    rate is part of the content key. The repair would then have made a
+    clip nothing ever asks for and left the missing one missing, on
+    every request, forever. So the rate stays with the code that owns
+    it and the repair path calls in rather than reaching in."""
     row = _index().get(key)
-    return clip_turns(row["jp"]) if row else None
+    if row is None:
+        return False
+    return ensure_clip(row["jp"]) is not None
 
 
 def ensure_clip(jp: str) -> str | None:
@@ -144,102 +165,72 @@ def ensure_clip(jp: str) -> str | None:
     there, which after scripts/build_dictation_audio.py has run is every
     line in the collection."""
     try:
-        return synthesize_dialogue(clip_turns(jp))
+        return synthesize_dialogue(clip_turns(jp), RATE)
     except TTSFailed as e:
         logger.warning("Could not synthesize dictation audio for %r: %s", jp, e)
         return None
 
 
-# ── The grade ────────────────────────────────────────────────────
-# Where a transcription stops being the same sentence. A dictation is
-# not marked out of ten by a human, so these thresholds ARE the mark
-# scheme and they are stated once, here.
+# ── The measurement ──────────────────────────────────────────────
+# One number: how much of the sentence the learner got down. NOT a
+# grade — the rating bar on the screen is the grade (docs/adr/0013) —
+# which is what lets this be forgiving where a mark scheme could not be.
 #
-# The score is difflib's ratio, 2*matched/(len(a)+len(b)), so these are
-# proportions rather than counts and a longer line tolerates more
-# absolute error -- which is right: one mora out of forty IS closer than
-# one out of eleven.
-#
-# 100 is exact after normalization, the only score that means "you wrote
-# the sentence". 90 is about a particle out on a short N5 line (one mora
-# substituted there scores 91, one dropped 95) -- the sentence was
-# heard. Below 60 the learner has caught words rather than the line,
-# which is a different result from having missed it entirely and worth
-# saying so on the screen.
-PERFECT = 100
-CLOSE = 90
-PARTIAL = 60
+# difflib's ratio, 2*matched/(len(a)+len(b)), so it is a proportion
+# rather than a count and a longer line tolerates more absolute error.
+# That is right for the thing being measured: one mora out of forty IS
+# closer than one out of eleven.
 
 
-def verdict_for(accuracy: int) -> str:
-    if accuracy >= PERFECT:
-        return "perfect"
-    if accuracy >= CLOSE:
-        return "close"
-    if accuracy >= PARTIAL:
-        return "partial"
-    return "missed"
+def _ratio(target: str, answer: str) -> float:
+    return difflib.SequenceMatcher(None, target, answer).ratio()
 
 
-def _diff(target: str, answer: str) -> list[dict]:
-    """The reference line marked up against what was written, as runs:
-    `equal` came through, `missing` was not written, `extra` was written
-    and is not in the line.
+def measure(answer: str, row: dict) -> dict:
+    """How close `answer` came to the line in `row`, and which of the
+    three ways of writing it the learner was using.
 
-    Character-level, which is the right grain for Japanese: there are no
-    spaces to split on, and a listener's error is a mora — a dropped っ,
-    a short vowel heard long — not a word."""
-    runs: list[dict] = []
-
-    def add(op: str, text: str) -> None:
-        if not text:
-            return
-        if runs and runs[-1]["op"] == op:
-            runs[-1]["text"] += text
-        else:
-            runs.append({"op": op, "text": text})
-
-    for tag, i1, i2, j1, j2 in difflib.SequenceMatcher(None, target, answer).get_opcodes():
-        if tag == "equal":
-            add("equal", target[i1:i2])
-        elif tag == "delete":
-            add("missing", target[i1:i2])
-        elif tag == "insert":
-            add("extra", answer[j1:j2])
-        else:  # replace — both halves, the reference first
-            add("missing", target[i1:i2])
-            add("extra", answer[j1:j2])
-    return runs
-
-
-def grade(answer: str, row: dict) -> dict:
-    """How close `answer` came to the line in `row`.
-
-    Graded against the written form AND the reading, keeping the better
-    of the two: see this module's own header on why script is not part
-    of what a dictation tests. `matched` names the form that won, so the
-    diff the learner is shown is against the one they were writing.
+    Every form is tried and the best score wins, so nothing has to
+    detect what the learner typed: an answer in romaji simply scores
+    near zero against the kana and near one against the romaji. The one
+    thing that does need deciding is which normalizer to compare under,
+    and that is per-form rather than per-answer — the Latin forms fold
+    (study/romaji), the Japanese ones normalize.
     """
-    written = normalize(answer)
+    japanese = normalize(answer)
+    latin = romaji_lib.fold(answer)
 
-    best_form, best_target = "written", normalize(row["jp"])
-    best_ratio = difflib.SequenceMatcher(None, best_target, written).ratio()
-    reading = normalize(row["kana"])
-    reading_ratio = difflib.SequenceMatcher(None, reading, written).ratio()
-    if reading_ratio > best_ratio:
-        best_form, best_target, best_ratio = "kana", reading, reading_ratio
+    scores = {
+        "written": _ratio(normalize(row["jp"]), japanese),
+        "kana": _ratio(normalize(row["kana"]), japanese),
+        "romaji": _ratio(romaji_lib.fold(row["romaji"]), latin),
+    }
+    matched = max(scores, key=scores.get)
+    return {"accuracy": round(scores[matched] * 100), "matched": matched}
 
-    accuracy = round(best_ratio * 100)
+
+def reveal(row: dict) -> dict:
+    """Everything the screen shows once the answer is in: the line, its
+    reading, its romaji, its gloss — and the furigana, which is the one
+    part that is computed rather than stored.
+
+    Built from the bank's own kana rather than from a guessed reading,
+    so study/furigana has exact data to divide and the ruby over 九時 is
+    くじ and not きゅうじ. A run it cannot divide comes back carrying the
+    whole reading, which is that module's own rule: a coarse furigana is
+    honest, a wrong one is not."""
     return {
-        "accuracy": accuracy,
-        "verdict": verdict_for(accuracy),
-        # The pass/fail the score row and the log record. A dictation
-        # that is a particle out was heard, and calling it wrong would
-        # teach the learner to distrust their own ear over a typo.
-        "correct": accuracy >= CLOSE,
-        "matched": best_form,
-        "target": best_target,
-        "diff": _diff(best_target, written),
+        "jp": row["jp"],
+        "kana": row["kana"],
+        "romaji": row["romaji"],
+        "furigana": align_deck(row["jp"], row["kana"]),
+        "translation": row["en"],
+        # English regardless of the UI language, exactly as reading
+        # practice reports its own: this app has no translation layer
+        # for its sentence data, and the screen labels what it shows
+        # rather than implying it is in the learner's language. See
+        # routes/reading.py's get_reading_batch docstring.
+        "translation_lang": "en",
     }
 
 
@@ -263,6 +254,6 @@ def pick(level: str, count: int, exclude: set[str], rng=random) -> list[dict]:
 
 
 __all__ = [
-    "LEVELS", "MAX_PLAYS", "clip_id", "clip_url", "ensure_clip", "entry_for",
-    "grade", "normalize", "pick", "turns_for_key", "verdict_for",
+    "LEVELS", "MAX_PLAYS", "RATE", "clip_id", "clip_url", "ensure_clip",
+    "entry_for", "measure", "normalize", "pick", "restore", "reveal",
 ]

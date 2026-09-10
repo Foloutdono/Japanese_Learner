@@ -1,6 +1,13 @@
 # 0011 — The dictation answer never leaves the server early, and the server marks it
 
-- **Status**: accepted
+- **Status**: accepted in part. The first decision below — the batch
+  carries no text — stands. The second and third (the server marks the
+  answer; there is no rating bar) were superseded within the day by
+  [0013](0013-the-learner-grades-their-own-dictation-and-writes-it-in-romaji.md),
+  after the first real session showed a correctly heard sentence scored
+  0% because it was written in romaji. Left as written rather than
+  edited: the reasoning is why the mistake was made, and 0013's case
+  only reads against it.
 - **Date**: 2026-09-10
 
 ## Context
@@ -41,14 +48,16 @@ clip is `{id, level, audioSrc}`. The words arrive from
 `POST /api/dictation/check`, in the same response that grades them — after the
 learner's own transcription has been sent.
 
-**The server marks the answer.** `study/dictation.grade` normalizes both texts
+**The server marks the answer.** *(Superseded by 0013: it measures, and
+the learner grades.)* `study/dictation.grade` normalizes both texts
 (NFKC, katakana folded to hiragana, spacing and the marks a listener cannot
 hear removed), scores them with `difflib`'s ratio, and returns an accuracy out
 of 100, a verdict, and a character-level diff the screen prints over the
 reference. There is no rating bar on this screen.
 
 **The answer is graded against the written form and the reading, keeping the
-better of the two.** A learner who hears 「駅の前で友だちに会います」 and writes
+better of the two.** *(0013 adds romaji as a third form and makes the
+result a measurement rather than a grade.)* A learner who hears 「駅の前で友だちに会います」 and writes
 えきのまえでともだちにあいます has done the exercise; writing kanji is a
 different skill, taught on a different line of this app. Every line in
 `content/listening_clips.py` therefore carries a kana reading beside its

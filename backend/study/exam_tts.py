@@ -155,10 +155,15 @@ def voice_for_speaker(speaker_index: int) -> str:
     return voices[speaker_index % len(voices)]
 
 
-def synthesize(text: str, voice_name: str) -> bytes:
+def synthesize(text: str, voice_name: str, rate: str = "") -> bytes:
+    """`rate` is edge-tts's own percentage ("-10%"), empty for the
+    service's default. Passed through rather than interpreted: the one
+    caller that sets it is study/dictation.py, which slows its clips
+    down because a learner transcribing a sentence is working at the
+    speed of their hand, not their ear."""
     async def _synth():
         chunks = []
-        communicate = edge_tts.Communicate(text, voice_name)
+        communicate = edge_tts.Communicate(text, voice_name, **({"rate": rate} if rate else {}))
         async for chunk in communicate.stream():
             if chunk["type"] == "audio":
                 chunks.append(chunk["data"])
@@ -173,7 +178,7 @@ def synthesize(text: str, voice_name: str) -> bytes:
     return audio
 
 
-def content_key(turns: list[dict]) -> str:
+def content_key(turns: list[dict], rate: str = "") -> str:
     # Keyed by the turns' own content, not by exam_id/question_id: no
     # generator today gets its own exam_id passed down (routes/exams.py
     # calls every generator as generate(seed), exam_id stays private to
@@ -183,11 +188,19 @@ def content_key(turns: list[dict]) -> str:
     # free (same script -> same audio file, even across different
     # exam_ids/regenerations) instead of ever re-synthesizing text this
     # function has already produced audio for.
+    # `rate` joins the key because it changes the AUDIO: two clips of
+    # the same script at different speeds are different files, and a
+    # key that ignored it would serve one where the other was asked
+    # for. Empty appends nothing at all, so every clip synthesized
+    # before this argument existed keeps the name it already has on
+    # disk and in its stored paper.
     raw = json.dumps([[t["speaker"], t["textJp"]] for t in turns], ensure_ascii=False)
+    if rate:
+        raw += f"@rate={rate}"
     return hashlib.sha256(raw.encode("utf-8")).hexdigest()[:24]
 
 
-def synthesize_dialogue(turns: list[dict]) -> str:
+def synthesize_dialogue(turns: list[dict], rate: str = "") -> str:
     """turns: [{"speaker": <any hashable label>, "textJp": "..."}], read
     in order onto ONE combined audio clip -- QuestionRenderer.jsx's
     existing ListeningBlock expects a single question.audioSrc, not one
@@ -214,7 +227,7 @@ def synthesize_dialogue(turns: list[dict]) -> str:
     earlier, otherwise-discarded attempt already produced.
     """
     directory = audio_dir()
-    key = content_key(turns)
+    key = content_key(turns, rate)
     filename = f"{key}.mp3"
     path = os.path.join(directory, filename)
     url = f"/exam-audio/{filename}"
@@ -228,7 +241,7 @@ def synthesize_dialogue(turns: list[dict]) -> str:
         if speaker not in seen_speakers:
             seen_speakers.append(speaker)
         voice = voice_for_speaker(seen_speakers.index(speaker))
-        chunks.append(synthesize(turn["textJp"], voice))
+        chunks.append(synthesize(turn["textJp"], voice, rate))
 
     # Written to a neighbouring temp file and renamed into place, rather
     # than opened at `path` directly. os.replace is atomic, which the
