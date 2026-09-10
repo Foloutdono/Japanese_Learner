@@ -103,9 +103,12 @@ open so they always reflect current SRS state. See `docs/adr/0002`.
 The unit a subtitle *file* is made of. Cue boundaries are a display artifact
 and do **not** correspond to Sentence boundaries.
 
-**Track** — an ordered list of Cues from one source: a fetched YouTube
-caption track, or an uploaded `.srt` / `.vtt` / `.ass` file. The pipeline is
-source-agnostic; nothing downstream knows which it was. See `docs/adr/0003`.
+**Track** — an ordered list of Cues from one source. Three produce one: an
+uploaded `.srt` / `.vtt` / `.ass` file, the 字幕取り bookmarklet's grab, or a
+YouTube link the server fetches itself (which needs a residential proxy and is
+off unless one is configured). The pipeline is source-agnostic; nothing
+downstream knows which it was, which is why adding and removing that third
+source has twice cost nothing. See `docs/adr/0003`.
 
 **Window** — the bounded time range of a video a learner asks to analyze.
 Bounded on purpose: analysis cost scales with it.

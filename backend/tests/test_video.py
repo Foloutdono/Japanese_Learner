@@ -3,6 +3,8 @@
 # this suite's usual unittest.TestCase style.
 import time
 
+import pytest
+
 import routes.video as video_module
 from core.db import db_conn
 
@@ -22,17 +24,68 @@ def _poll_until_settled(client, session_id, timeout=10.0):
     raise AssertionError(f"session {session_id} never left 'generating' within {timeout}s")
 
 
-def test_no_caption_fetch_exists_at_all() -> None:
-    """The YouTube caption fetch was removed 2026-08-26: a server cannot
-    get captions from YouTube (datacenter IPs are blocked AND the
-    endpoint needs a player-generated token). Both remaining ingests are
-    purely local. This guards against it being reintroduced, since a
-    reintroduced fetch would look like it works in dev and fail only in
-    production -- which is exactly how it wasted a release cycle."""
+_PROXY_ENV = (
+    "WEBSHARE_PROXY_USERNAME", "WEBSHARE_PROXY_PASSWORD", "YOUTUBE_HTTP_PROXY",
+)
+
+
+def _no_proxy(monkeypatch) -> None:
+    """The shipped state: no residential proxy configured anywhere."""
+    for var in _PROXY_ENV:
+        monkeypatch.delenv(var, raising=False)
+
+
+def _a_proxy(monkeypatch) -> None:
+    """Credentials good enough to pass proxy_configured(). They reach no
+    network in any test here -- every one of them replaces either
+    fetch_youtube_track or the transcript API itself."""
+    monkeypatch.setenv("WEBSHARE_PROXY_USERNAME", "test-user")
+    monkeypatch.setenv("WEBSHARE_PROXY_PASSWORD", "test-pass")
+    monkeypatch.delenv("YOUTUBE_HTTP_PROXY", raising=False)
+
+
+def test_the_fetch_refuses_before_it_reaches_the_network(monkeypatch) -> None:
+    """This assertion used to be that the fetch did not EXIST, the fetch
+    having been deleted 2026-08-26. It exists again (2026-09-10, behind
+    a paid residential proxy), so what it guards has MOVED rather than
+    gone -- and the thing it guards is the same defect either way.
+
+    That defect: a fetch that works from a laptop and fails from every
+    datacenter looks correct right up until it is deployed, which is how
+    the last one wasted a release cycle and earned the report "every
+    link i try doesnt work". Refusing while unconfigured is not enough
+    on its own -- refusing BEFORE constructing a client is what makes
+    the dev-works/prod-fails shape unreachable rather than unlikely, so
+    that ordering is asserted, not just the exception."""
+    import youtube_transcript_api
     import study.captions as captions_module
-    assert not hasattr(captions_module, "fetch_youtube_track")
-    assert not hasattr(video_module, "fetch_youtube_track")
-    assert not hasattr(captions_module, "_PROXY_CONFIG")
+    _no_proxy(monkeypatch)
+
+    built = []
+    monkeypatch.setattr(
+        youtube_transcript_api, "YouTubeTranscriptApi",
+        lambda **kwargs: built.append(kwargs),
+    )
+
+    assert captions_module.proxy_configured() is False
+    with pytest.raises(captions_module.CaptionFetchError):
+        captions_module.fetch_youtube_track("dQw4w9WgXcQ")
+    assert built == [], "the fetch built a client before checking for a proxy"
+
+
+def test_capabilities_reports_the_link_ingest_dark_by_default(client, monkeypatch):
+    """The intake screen asks before it offers a button. An unconfigured
+    server must say so rather than letting the UI advertise a route it
+    cannot serve."""
+    _no_proxy(monkeypatch)
+    assert client.get("/api/video/capabilities").json()["linkFetch"] is False
+
+
+def test_capabilities_flips_when_a_proxy_is_configured(client, monkeypatch):
+    """No deploy required: the answer follows the environment, which is
+    what lets the feature turn on the moment a plan is paid for."""
+    _a_proxy(monkeypatch)
+    assert client.get("/api/video/capabilities").json()["linkFetch"] is True
 
 
 def test_upload_produces_a_ready_transcript(client):
@@ -115,16 +168,98 @@ def test_one_bound_on_its_own_is_a_valid_window(client):
     assert final.json()["windowEnd"] is None
 
 
-def test_a_bare_url_with_no_transcript_is_rejected(client):
-    """A URL alone used to mean "fetch the captions yourself". It cannot
-    any more, so asking for that is a 400 with a message naming what to
-    do instead -- not a session that fails minutes later."""
+def test_a_bare_url_is_refused_up_front_when_the_server_cannot_fetch(client, monkeypatch):
+    """A URL alone means "fetch the captions yourself" again, but only
+    where that is possible. Unconfigured it is a 400 naming what to do
+    instead -- refused at the door, never a session that spends thirty
+    seconds to say the same thing."""
+    _no_proxy(monkeypatch)
     response = client.post(
         "/api/video/session",
         json={"url": "https://youtu.be/dQw4w9WgXcQ", "start": 0, "end": 30},
     )
     assert response.status_code == 400
-    assert "transcript" in response.json()["detail"].lower()
+    assert "subtitle file" in response.json()["detail"].lower()
+
+
+def test_a_bare_url_becomes_a_session_when_a_proxy_is_configured(client, monkeypatch):
+    """The whole point of the feature: a link, and nothing for the
+    learner to find. The fetch itself is replaced -- what is under test
+    is that a bare URL now reaches it and lands as a normal ready
+    session, indistinguishable downstream from an uploaded file."""
+    _a_proxy(monkeypatch)
+
+    def _fake_fetch(video_id):
+        assert video_id == "dQw4w9WgXcQ"
+        return [
+            {"start": 1.0, "end": 4.0, "text": "私は学生です。"},
+            {"start": 5.0, "end": 8.0, "text": "今日は暑い！"},
+        ]
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _fake_fetch)
+
+    response = client.post(
+        "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
+    )
+    assert response.status_code == 202
+
+    body = _poll_until_settled(client, response.json()["sessionId"]).json()
+    assert body["status"] == "ready"
+    assert len(body["sentences"]) == 2
+    assert body["sentences"][0]["text"] == "私は学生です。"
+    assert body["sentences"][0]["cue_start"] == 1.0
+    # The player still works, because the id was parsed from the link
+    # the same way an uploaded .srt names its video.
+    assert body["videoId"] == "dQw4w9WgXcQ"
+
+
+def test_a_failed_fetch_does_not_call_the_learner_s_subtitles_broken(client, monkeypatch):
+    """A CaptionFetchError is not a CaptionParseError and must not be
+    reported as one: nothing the learner supplied was wrong. The
+    message they get is the one the fetch wrote, which always names a
+    way forward."""
+    _a_proxy(monkeypatch)
+
+    import study.captions as captions_module
+
+    def _blocked(video_id):
+        raise captions_module.CaptionFetchError(
+            "This video has no Japanese subtitles. Try another video, "
+            "or add a subtitle file yourself."
+        )
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _blocked)
+
+    response = client.post(
+        "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
+    )
+    assert response.status_code == 202
+
+    final = _poll_until_settled(client, response.json()["sessionId"])
+    assert final.status_code == 503
+    body = final.json()
+    assert body["status"] == "failed"
+    assert "subtitle file" in body["error"].lower()
+    assert body["isYoutube"] is True
+
+
+def test_the_daily_cap_refuses_instead_of_spending(client, monkeypatch):
+    """Bandwidth on a rotating residential pool is metered, so an
+    unbounded retry is a bill rather than an outage. The cap refuses at
+    the door, and the refusal names the ingests that cost nothing."""
+    _a_proxy(monkeypatch)
+    monkeypatch.setattr(video_module, "_FETCH_DAILY_CAP_PER_USER", 0)
+
+    def _must_not_run(video_id):  # pragma: no cover - asserts it isn't reached
+        raise AssertionError("a capped request still spent a fetch")
+
+    monkeypatch.setattr(video_module, "fetch_youtube_track", _must_not_run)
+
+    response = client.post(
+        "/api/video/session", json={"url": "https://youtu.be/dQw4w9WgXcQ"},
+    )
+    assert response.status_code == 429
+    assert "subtitle file" in response.json()["detail"].lower()
 
 
 def test_non_youtube_url_returns_400(client):

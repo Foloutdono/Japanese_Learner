@@ -268,3 +268,106 @@ the same standing the paste ingest had ("copying their own screen",
 first amendment). Our servers still never contact YouTube. The
 bookmarklet degrades the way the paste did: visibly, on the learner's
 side, with the file path always open.
+
+---
+
+## Amendment, 2026-09-10 — the fetch returns, and what reverses it is a price
+
+The URL ingest is back. `fetch_youtube_track` exists again in
+`study/captions.py`, a bare link is an ingest again in `routes/video.py`, and
+`youtube-transcript-api` is a dependency again.
+
+**Nothing above is withdrawn.** Every wall this file records was re-checked and
+every one of them still stands. What changed is not a discovery — it is that we
+now pay to stand outside the first one.
+
+### What the money buys, precisely
+
+Of the two walls in the 2026-08-26 amendment, this clears **only the first**:
+
+1. **Datacenter IPs are blocked.** Cleared, by routing the fetch through a
+   **rotating residential** proxy. Not cleared for free, and not cleared by any
+   Render plan: the block is on the kind of address, so every instance type
+   from Free to Pro Ultra ($450/mo) is refused identically, and Render's own
+   Dedicated IPs add-on ($100/mo) buys *stable* datacenter addresses — the same
+   refusal, held still.
+2. **The endpoint needs a player-generated token.** Not cleared, and not
+   needing to be. The library performs the same ANDROID-client InnerTube
+   handshake the 2026-09-01 amendment measured working from the watch page. It
+   was only ever the address the handshake came from that failed.
+
+**The proxy product is not a preference, and two of the three on offer are
+useless here.** Measured against what the library's own README states:
+
+| Product | What it is | Result |
+| --- | --- | --- |
+| Proxy Server (datacenter) | the kind of address Render already has | blocked identically |
+| Static Residential (ISP) | datacenter-hosted, merely *registered* to an ISP | ASN-detectable; a flagged address stays flagged, with nothing to rotate to |
+| **Rotating Residential** | real peer devices | **the one that works** |
+
+The cheap-per-GB tiers are the trap: bandwidth is cheap when the addresses do
+not work. What is being bought is the supply of addresses YouTube has not
+blocked yet, and only the third sells that.
+
+### The cost, and why the cap is part of the design
+
+A fetch pulls the watch page plus the cue track — about **0.4 MB**, the watch
+page dominating. On a 1 GB tier at $3.50 that is roughly **2,500 analyses a
+month**, or ~$0.0014 each, against ~$0.0057 from a transcript-API vendor
+reselling the same thing.
+
+`routes/video.py` caps fetches per day, globally and per learner. That is not
+only thrift. **Credits stop when they run out; gigabytes keep billing**, so an
+unbounded retry is a bill rather than an outage. The cap is also what makes the
+cheapest tier the correct one to buy — 60/day is ~720 MB/month — and it lives
+in code rather than the provider dashboard, where hitting it would take the
+feature down without explaining itself.
+
+### The guard moved rather than went
+
+`tests/test_video.py` has asserted since 2026-08-26 that the fetch does not
+exist. It now asserts that the fetch **refuses while unconfigured, before
+constructing a client** — the same defect guarded a different way. The defect
+is worth restating because it is what cost a release cycle: a fetch that works
+from a laptop and fails from every datacenter looks correct right up until it
+is deployed, and the report it earns is *"Every link i try doesnt work."*
+Ordering is what makes that unreachable rather than unlikely, so the test
+asserts the ordering, not just the exception.
+
+`/api/video/capabilities` is the same guard facing the other way: the intake
+screen asks before it draws a button, so no deployment can advertise a route it
+is not paying for. The answer follows the environment, so the feature turns on
+when the credential is set, with no deploy.
+
+### What did not change
+
+- **Both local ingests are untouched and unconditional.** A subtitle file and a
+  pasted transcript cost nothing, cannot be blocked, and are what the link path
+  degrades *to*. Nothing is gated behind the paid path, and the intake screen
+  keeps the bookmarklet and the drop zone on screen even when the fetch is live.
+- **Nothing downstream of `Cue` knows this happened** — again. `fetch_youtube_track`
+  returns exactly what `parse_track` returns. That is the third time this ADR's
+  central decision has paid for itself, and the reason deleting the last fetch
+  cost nothing either.
+- **Self-hosted ASR and YouTube cookies stay rejected**, for the reasons already
+  recorded.
+
+### Standing, restated honestly
+
+The 2026-09-01 amendment claimed clean standing on the grounds that *the learner
+fetches their own screen from their own IP* and *our servers never contact
+YouTube*. **Neither sentence is true of this ingest.** This is server-side
+automated access, from addresses chosen to avoid a block — which is the thing
+the original "Note on terms of service" flagged as outside what YouTube's API is
+for, now done deliberately rather than incidentally.
+
+That is the trade being made, and it is the owner's to make: convenience for a
+learner who cannot install a bookmarklet, against standing that the file and
+bookmarklet paths have and this one does not. It is recorded here rather than
+argued away, and it is the reason the two clean ingests remain first-class
+rather than becoming fallbacks.
+
+Note also that the residential pool is itself a third party in the path — exit
+nodes are strangers' devices, typically sourced from consumer SDK installs. The
+traffic is a public watch-page fetch, so the stakes are low, but "no third party
+involved" is not a claim this ingest can make either.

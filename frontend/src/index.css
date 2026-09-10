@@ -1490,6 +1490,20 @@
 /* 動画 — 字幕取り, the grab block. The ingest tabs it replaces died
    with the transcript-paste path (2026-09-01): one primary road (the
    bookmarklet) and one fallback (the file drop) need no tablist. */
+/* ── The link, where the server can fetch one ──
+   Appears only when /api/video/capabilities reports the residential
+   proxy configured (docs/adr/0003, 2026-09-10), so the button cannot
+   promise what a deployment is not paying for. The grab block and the
+   drop zone below it are unchanged and unconditional: this is the fast
+   path, never the only one. */
+.anl-link {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-5);
+}
+
 .anl-grab {
   display: flex;
   flex-direction: column;

@@ -17,6 +17,7 @@
 # the same on purpose, for the next reader who already knows it.
 import json
 import logging
+import os
 import threading
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -29,7 +30,8 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 from study.analysis import analyze_local, attach_user_state
 from study.captions import (
-    parse_track, parse_pasted_transcript, parse_video_id, CaptionParseError,
+    parse_track, parse_pasted_transcript, parse_video_id, fetch_youtube_track,
+    proxy_configured, CaptionParseError, CaptionFetchError,
 )
 from study.cue_sentences import sentences_from_cues
 from study.sentences import MAX_SENTENCES
@@ -61,6 +63,27 @@ _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
 # would cost more than the duplication (see plan 019's own scope notes).
 _FAILED_COOLDOWN_SECONDS = 300
 _STALE_RUNNING_SECONDS = 900
+
+# ── The fetch budget ───────────────────────────────────────────
+# The link ingest is the one path here that spends METERED money: a
+# rotating residential proxy bills by the gigabyte, and the tier this
+# is sized for is 1 GB/month. A fetch pulls the watch page plus the
+# cue track -- call it 0.4 MB -- so 60 a day is ~24 MB/day, ~720 MB a
+# month, inside that tier with room left.
+#
+# This is not only thrift. Credits stop when they run out; gigabytes
+# just keep billing, so a retry storm or a loop is a bill rather than
+# an outage. The cap is what makes the cheapest tier the correct one
+# to buy, and it is why the ceiling exists in code rather than in the
+# provider dashboard, where hitting it would take the feature down
+# without explaining itself.
+#
+# Both are per DAY and counted from the sessions themselves, so there
+# is no counter to keep in sync with reality. Overriding them upward
+# is a spending decision, which is why they read from the environment
+# rather than being constants someone edits in a hurry.
+_FETCH_DAILY_CAP = int(os.environ.get("YOUTUBE_FETCH_DAILY_CAP", "60"))
+_FETCH_DAILY_CAP_PER_USER = int(os.environ.get("YOUTUBE_FETCH_DAILY_CAP_PER_USER", "10"))
 
 
 
@@ -134,6 +157,42 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("video schema could not be initialised")
 
 
+# ── The fetch budget, enforced ─────────────────────────────────
+def _fetch_refusal(user_id: str) -> str | None:
+    """None when a link fetch is within budget, else the sentence to
+    refuse with. Refusing is not the same as failing: every caller of
+    this points the learner back at the two ingests that are always
+    free and always work, so a spent budget costs a convenience rather
+    than the feature."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT COUNT(*) FILTER (WHERE user_id = %s), COUNT(*)
+                  FROM video_sessions
+                 WHERE source = 'youtube'
+                   AND created_at > NOW() - INTERVAL '1 day'
+                """,
+                (user_id,),
+            )
+            mine, everyone = cur.fetchone()
+    finally:
+        conn.close()
+
+    if mine >= _FETCH_DAILY_CAP_PER_USER:
+        return (
+            "You have used today's link allowance. Add a subtitle file, "
+            "or come back tomorrow."
+        )
+    if everyone >= _FETCH_DAILY_CAP:
+        return (
+            "Today's link allowance for the whole app is used up. Add a "
+            "subtitle file, or come back tomorrow."
+        )
+    return None
+
+
 # ── The worker ─────────────────────────────────────────────────
 def _fail_session(session_id: int, message: str) -> None:
     conn = db_conn()
@@ -165,14 +224,26 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
     see docs/adr/0001), and materializes the result. Owns the job row
     from 'running' through to either deleted (success) or 'failed'."""
     try:
-        # Both ingests are purely local -- no request leaves this server
-        # while building a Track. The YouTube fetch that used to be the
-        # third branch was removed 2026-08-26; see study/captions.py's
-        # module docstring for the measurements behind that.
-        if source == "paste":
+        # Two of these are purely local -- no request leaves this
+        # server while building a Track, so they behave identically on
+        # a laptop and on Render. The third does leave, and is the only
+        # thing in this file that can be blocked by someone else: it
+        # goes out through a paid residential proxy and refuses
+        # outright when none is configured. See study/captions.py.
+        if source == "youtube":
+            cues = fetch_youtube_track(source_ref)
+        elif source == "paste":
             cues = parse_pasted_transcript(content or "")
         else:
             cues = parse_track(content, filename or "upload.srt")
+    except CaptionFetchError as e:
+        # Not a parse failure and not phrased as one: nothing the
+        # learner supplied was wrong. The message already names what to
+        # do instead, because every one of these is recoverable by
+        # adding a file.
+        logger.warning("Caption fetch failed for session %s: %s", session_id, e)
+        _fail_session(session_id, str(e))
+        return
     except CaptionParseError as e:
         logger.warning("Subtitle parse failed for session %s: %s", session_id, e)
         _fail_session(session_id, str(e))
@@ -233,14 +304,30 @@ def _start_worker(session_id: int, source: str, source_ref: str, content: str | 
     ).start()
 
 
+# ── What this server can actually do ───────────────────────────
+@router.get("/api/video/capabilities")
+def video_capabilities(user_id: str = Depends(get_user_id)):
+    """Whether the link ingest is available here.
+
+    Exists so the intake screen can hide a button this deployment
+    cannot honour. That is not cosmetic: the fetch removed in
+    docs/adr/0003 spent a release cycle looking like the primary route
+    while never once working in production, and the learner's report
+    was "every link i try doesnt work". A UI that asks the server
+    first cannot repeat it -- and the answer flips the moment the
+    proxy credentials are set, with no deploy.
+    """
+    return {"linkFetch": proxy_configured()}
+
+
 # ── Session creation ───────────────────────────────────────────
 @router.post("/api/video/session")
 async def create_video_session(request: Request, user_id: str = Depends(get_user_id)):
-    """Accepts EITHER a JSON body {url, start, end} (YouTube) or a
-    multipart upload {file, start, end} (a subtitle file) -- the one
-    request shape the plan calls for, so this reads the raw Request
-    rather than declaring a single Pydantic body (FastAPI cannot mix a
-    JSON model and File/Form fields on one route)."""
+    """Accepts EITHER a JSON body ({url} to fetch, or {transcript, url}
+    to paste) or a multipart upload {file, start, end} (a subtitle
+    file) -- one route for all three ingests, so this reads the raw
+    Request rather than declaring a single Pydantic body (FastAPI
+    cannot mix a JSON model and File/Form fields on one route)."""
     content_type = request.headers.get("content-type", "")
 
     if content_type.startswith("multipart/form-data"):
@@ -271,25 +358,51 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
             body = await request.json()
         except Exception:
             raise HTTPException(status_code=400, detail="Expected a JSON body or a multipart upload")
-        # JSON means "a pasted transcript". The transcript is the
-        # REQUIRED part; `url` is optional and is used for exactly one
-        # thing -- naming a video to embed alongside it. Nothing is ever
-        # fetched from it. (Until 2026-08-26 a bare URL meant "fetch the
-        # captions yourself"; that path is gone, because a server cannot
-        # get them -- see study/captions.py's module docstring.)
+        # JSON means one of two things, and which one depends on what
+        # is in the body rather than on a mode flag:
+        #
+        #   transcript present  -> a pasted transcript; `url` merely
+        #                          names a video to embed beside it.
+        #   url alone           -> FETCH it (restored 2026-09-10).
+        #
+        # A bare URL was a 400 between 2026-08-26 and 2026-09-10,
+        # because no server could get captions at any price. One can
+        # now, for a price, and only through a residential proxy -- so
+        # unconfigured this is still a 400, and still says so up front
+        # rather than opening a session that dies minutes later.
         pasted = (body.get("transcript") or "").strip()
-        if not pasted:
-            raise HTTPException(
-                status_code=400,
-                detail="A pasted transcript is required. Upload a subtitle file instead if you have one.",
-            )
         url = body.get("url") or ""
         video_id = parse_video_id(url)
         if url and video_id is None:
             raise HTTPException(status_code=400, detail="Not a recognized YouTube URL")
-        source = "paste"
-        content = pasted
-        source_ref = video_id or "paste"
+
+        if pasted:
+            source = "paste"
+            content = pasted
+            source_ref = video_id or "paste"
+        elif video_id:
+            if not proxy_configured():
+                raise HTTPException(
+                    status_code=400,
+                    detail=(
+                        "This server cannot fetch subtitles from a link. Use the "
+                        "grab bookmarklet, or add a subtitle file."
+                    ),
+                )
+            # Budget checked HERE rather than in the worker: a refusal
+            # the learner can act on immediately beats a session that
+            # spends thirty seconds to tell them the same thing.
+            refusal = _fetch_refusal(user_id)
+            if refusal:
+                raise HTTPException(status_code=429, detail=refusal)
+            source = "youtube"
+            content = None
+            source_ref = video_id
+        else:
+            raise HTTPException(
+                status_code=400,
+                detail="A YouTube link or a subtitle file is required.",
+            )
         filename = None
         try:
             window_start = _optional_seconds(body.get("start"), "start")

@@ -765,6 +765,10 @@ const video = {
   videoDesc:           "Study a video's Japanese subtitles\nLive, colour-coded by what you already know\nA photo of the world with a soundtrack",
   videoUrlOptional:    'Video link',
   videoUrlOptionalHint: 'Shows the video next to the subtitles, opens the right page for the bookmark, and pre-fills DownSub.',
+  // Shown only where the server can fetch a link itself. It names the
+  // subtitles rather than the mechanism -- the learner does not need to
+  // know a proxy is involved, only what they get.
+  analyzeThisLink:     'Get the subtitles',
   grabTitle:           'Subtitles in one tap',
   grabLead:            'A special bookmark you set up once (about a minute): after that, open it on any YouTube video and the Japanese subtitles arrive here on their own — phones included.',
   grabTutorialBtn:     'Step-by-step tutorial',
