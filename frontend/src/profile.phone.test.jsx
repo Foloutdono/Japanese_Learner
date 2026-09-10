@@ -200,7 +200,7 @@ describe('the settings at phone width', () => {
   it('the list rows are 60px targets divided by hairlines; the services three across, the stops five, the destinations four', async () => {
     const screen = await render(
       <main className="settings">
-        <div className="stg-headrow"><div className="stg-head"><h1 className="stg-head__jp">Settings</h1></div><button type="button" className="stage__leave">‹ Profile</button></div>
+        <div className="bar" style={{ '--line-color': 'var(--pass-ink)' }}><div className="bar__row"><span className="bar__roundel" aria-hidden="true">SG</span><span className="bar__names"><h1 className="bar__title">Settings</h1></span><span className="bar__aside"><button type="button" className="stage__leave">‹ Profile</button></span></div><div className="bar__stripe" aria-hidden="true" /></div>
         <div className="stg-list">
           {['Display & language', 'Sound', 'Learning'].map(l => (
             <button key={l} type="button" className="stg-row"><span className="stg-row__names"><span className="stg-row__jp">{l}</span></span><span className="stg-row__value">Dark · English</span></button>
