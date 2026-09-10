@@ -11,9 +11,14 @@ import { playUi } from '../../lib/audio'
 // kana sets walk the order the app teaches them.
 //
 // Props:
-//   stops — [{ key, code, name, hint?, learned?, total?, codeLang? }]
+//   stops — [{ key, code, name, hint?, hereLabel?, learned?, total?,
+//            codeLang? }] — `hereLabel` is the caption the stop the
+//            learner is at wears in place of its hint
 //   here  — the key of the learner's own stop (a landmark, never a
-//           lock: every stop stays a plain button — docs/adr/0005)
+//           lock: every stop stays a plain button — docs/adr/0005).
+//           Where it comes from is the caller's business: a declared
+//           JLPT level for the graded lines, the figures themselves
+//           for kana, which has no such thing.
 //   onSelect(key)
 export function RouteStops({ stops, here = null, onSelect }) {
   const hereIndex = stops.findIndex(s => s.key === here)
