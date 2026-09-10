@@ -5975,7 +5975,22 @@ textarea:focus-visible {
 .seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
 
 @media (max-width: 560px) {
-  .bz__head { flex-wrap: wrap; gap: var(--sp-3); }
+  /* The head holds ONE row for as long as it can, the way it reads
+     above 560px: title left, toggle pinned right. Until now the pair
+     parted company at about 357px of layout width — which a 360px
+     window already is once `scrollbar-gutter: stable` takes its 15px —
+     and the toggle dropped to a line of its own, the only control in
+     the card that leaves the line it belongs to. Two rungs buy the row
+     back down to ~327px: the head's gap closes to --sp-2, which costs
+     nothing visually because the pill's `margin-left: auto` sets the
+     separation you actually see and the gap only bites once the row is
+     full; and this pill's options give up their side padding to the
+     same rung (scoped to .bz__seg — no other seg in the app moves).
+     `flex-wrap` stays as the valve: narrower than that and the toggle
+     still drops rather than the title being cut or the pill clipping
+     ALL TIME, which are both worse than a second line. */
+  .bz__head { flex-wrap: wrap; gap: var(--sp-2); }
+  .bz__seg .seg__opt { padding: var(--sp-1) var(--sp-2); }
   .seg { margin-left: 0; }
 }
 
