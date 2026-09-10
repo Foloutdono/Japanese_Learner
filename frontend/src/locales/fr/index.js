@@ -151,6 +151,10 @@ const quiz = {
   byLevelDesc:       'Les cinq grades de l\'examen, de N5 à N1',
   byFrequency:       'Fréquence des mots',
   byFrequencyDesc:   'Classés selon leur fréquence réelle à l\'écrit',
+  // Le même axe une ligne plus loin, où ce sont les caractères qui
+  // sont classés et non les mots (voir KanjiScreen.jsx).
+  byFrequencyKanji:     'Fréquence des kanji',
+  byFrequencyKanjiDesc: 'Classés selon leur fréquence réelle à l\'écrit',
   byMastery:         'Mes cartes',
   byMasteryDesc:     'Bâties uniquement sur des mots déjà rencontrés',
   byJmdict:          'Hors-JLPT',
@@ -391,9 +395,9 @@ const stats = {
   nothingGraded:      'Rien n’est noté',
   learnFourLines:     'Quatre lignes',
   stationJlpt:        'JLPT',
+  stationSources:     'Sources',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
-  jlptInstead:        'Plutôt JLPT',
   leaveLevels:        'Niveaux',
   leaveSets:          'Séries',
   leaveTiers:         'Paliers',
