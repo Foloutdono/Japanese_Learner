@@ -5918,11 +5918,14 @@ textarea:focus-visible {
   border-bottom: 1px solid var(--surface-line);
 }
 .bz__mark { display: flex; align-items: baseline; gap: var(--sp-3); }
+/* Untracked, despite the name: the mark prints the localised word
+   ("Ranking", "Classement"), never 番付, and --tr-name is assigned to
+   hero JAPANESE names (DESIGN.md, "Tracking runs inversely to size").
+   At 0.14em the Latin word read as a spaced-out caption at lead size. */
 .bz__jp {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-lead);
-  letter-spacing: var(--tr-name);
 }
 .seg {
   margin-left: auto;
@@ -16581,11 +16584,11 @@ html { scrollbar-gutter: stable; }
   padding-bottom: var(--sp-2);
   border-bottom: 1px solid var(--surface-line);
 }
+/* Latin, so untracked — see .bz__jp above. */
 .sbook__title {
   font-family: var(--font-serif);
   font-weight: 700;
   font-size: var(--fs-title);
-  letter-spacing: var(--tr-name);
 }
 .sbook__dows,
 .sbook__grid {
