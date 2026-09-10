@@ -288,7 +288,7 @@ describe('DictationRun', () => {
     apiJson.mockImplementation(path =>
       path.startsWith('/api/dictation/batch')
         ? Promise.reject(new Error('boom'))
-        : Promise.resolve(GRADED))
+        : Promise.resolve(REVEAL))
     const root = await run()
     expect(root.querySelector('.empty--error')).toBeTruthy()
   })
