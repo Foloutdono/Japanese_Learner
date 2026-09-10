@@ -65,10 +65,15 @@ describe('the profile at phone width', () => {
     const rank = screen.container.querySelector('.leaderboard-row__rank')
     expect(rank.getBoundingClientRect().width).toBe(30)
     expect(getComputedStyle(rank).borderTopLeftRadius).toBe('999px')
-    // The board's toggle sits on the head's right edge.
+    // The board's toggle sits on the head's right edge — and on the
+    // title's OWN line, not a second one under it: at 390px the head
+    // used to wrap, which put the only control in the card on a line
+    // of its own (index.css, "The head holds ONE row").
+    const mark = screen.container.querySelector('.bz__mark').getBoundingClientRect()
     const head = screen.container.querySelector('.bz__head').getBoundingClientRect()
     const seg = screen.container.querySelector('.bz__seg').getBoundingClientRect()
     expect(head.right - seg.right).toBeLessThan(head.width / 2)
+    expect(seg.top).toBeLessThan(mark.bottom)
   })
 
   it('the status sheet: distance, a 44px track, two rows, the moves are targets', async () => {
