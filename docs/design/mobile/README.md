@@ -57,6 +57,17 @@ so a bar carrying both a sub and an aside stacks at every width:
 and returns the caption to under the name it captions, leaving the aside
 the end to itself. A bar with only one of the two is unchanged.
 
+Stacking also brings the tracking rule into play (DESIGN.md, Tracking):
+a tracked caption on a left-flush axis takes an indent equal to its
+tracking, so `.bar__names--stacked .bar__sub` carries
+`text-indent: var(--tr-caption)` and `.bar__sub` on its own does not —
+in the sign layout the caption is flush *right*, where the same indent
+would push it off its own edge (the case `.dict-plate__cap` documents).
+It is an optical correction as much as a tracking one: flush by their
+boxes, `SOURCES` inked the box edge on most of its scanlines while
+`Vocabulary` inked it only at the tips of the serif V's top arms, so
+the caption read about 4px left of the name it captions.
+
 **The gates are pictograms, and only the lit one is captioned.** The
 canvas drew each gate as a kanji (`.tab__jp`) with the plain word under
 it, in English, where `DICTIONARY` fits a 78px gate. `DICTIONNAIRE` is

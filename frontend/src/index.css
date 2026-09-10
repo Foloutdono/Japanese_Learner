@@ -4988,6 +4988,34 @@ textarea:focus-visible {
    column item at `align-items: flex-start` is sized by its content,
    so without it a long name overflows .bar__names and runs under the
    aside rather than ellipsing (or, at ≤768px, wrapping) inside it. */
+/* ── The caption's optical left, not its box's ──
+   Stacked, the two registers were flush by their BOXES and not by
+   their ink, which is the edge the eye reads. Rasterised at 8x and
+   scanned row by row: `Vocabulary` inks its box edge on 7 of 164
+   scanlines -- the tips of the serif V's top arms -- and its median
+   row starts 4.75px in, where the wedge has already fallen away.
+   `SOURCES` inks the edge on 33 of 59, the S's bowl hugging it. Over
+   the 23 title/sub pairs the app actually ships, in both languages,
+   the caption sat left of the name it captions in 21 of them, by
+   2.3px on average and 4.25px at Vocabulary / SOURCES.
+
+   The correction is the file's own tracking rule (DESIGN.md,
+   Tracking; the line .flashcard__hint and .dict-plate__title already
+   carry): a tracked caption on a left-flush axis takes an indent
+   equal to its tracking. It lands here rather than on .bar__sub
+   because the sign layout sets the caption flush RIGHT, where the
+   same indent pushes it off its own edge -- the case
+   .dict-plate__cap documents. Re-measured over the same 23 pairs it
+   halves the error, to 1.08px on average and 2.38px at worst; the
+   only two it moves the wrong way are Grammar/Grammaire + JLPT, a
+   round G against a hooked J, which were already the two nearest to
+   true. A larger nudge fixes the V at the cost of pushing those
+   visibly right, so the rule's own value is also the best one.
+
+   A title long enough to wrap its sub below it WITHOUT an aside keeps
+   the flush edge: no selector can tell that line from a side-by-side
+   one, and the sign layout is where the indent would do harm. */
+.bar__names--stacked .bar__sub { text-indent: var(--tr-caption); }
 .bar__names--stacked {
   flex-flow: column nowrap;
   /* Undoes the sign's `flex-end space-between`, which in a column reads
