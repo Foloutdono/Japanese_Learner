@@ -327,12 +327,18 @@ export default function App() {
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
             <Route path="/learn"                element={<LearnScreen session={session} />} />
-            {/* The stations and the platforms (plan 071): a line's stops,
-                then a stop's modes, under the chrome; the run itself is
-                on the stage frame below. */}
+            {/* The stations and the platforms (plan 071): the sources,
+                then a line's stops, then a stop's modes, under the
+                chrome; the run itself is on the stage frame below.
+                Kana and grammar have one source and so no source
+                page, exactly as comprehension has none. */}
             <Route path="/learn/kana"                 element={<KanaScreen />} />
             <Route path="/learn/kana/:set"            element={<KanaScreen />} />
             <Route path="/learn/vocab"                element={<VocabScreen session={session} />} />
+            {/* The sources, then a source's own list. `levels` and
+                `tiers` are static segments, so they outrank the
+                `:level` route below whatever the order here. */}
+            <Route path="/learn/vocab/levels"         element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/tiers"          element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/themes"         element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/tier/:tier"     element={<VocabScreen session={session} />} />
@@ -340,6 +346,7 @@ export default function App() {
             <Route path="/learn/vocab/theme/:theme/level/:themeLevel" element={<VocabScreen session={session} />} />
             <Route path="/learn/vocab/:level"         element={<VocabScreen session={session} />} />
             <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/levels"         element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/tiers"          element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/tier/:tier"     element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />

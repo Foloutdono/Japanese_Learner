@@ -270,7 +270,7 @@ entries went in the same commit.
 | Canvas class | `index.css` block | Component |
 |---|---|---|
 | `.board`, `.wmap__lines`, `.wmap-line*`, `.wmap-track*`, `.wmap-due*`, `.wmap__group`, `.wmap-row*`, `.wmap-roundel` | 路線図 — the wall map (no masthead: the bar names the place) | `components/station/WallMap.jsx`, `screens/LearnScreen.jsx` |
-| `.bar__link` | a text link in the bar's aside (By frequency, JLPT instead) | the station screens |
+| `.bar__link` | a text link in the bar's aside. No screen uses one today — the sources it carried (By frequency, By theme, JLPT instead) became platform cards on the station's own source page — but the bar still offers it, and `chrome.phone.test.jsx` holds it to the row's layout | — |
 | `.route`, `.route-stop*` (`--past`, `--current`, `__rail`, `__marker`, `__code`, `__names`, `__jp`, `__hint`, `__here`, `__fig`, `__go`) | 路線図 — the route diagram; the rail is drawn per stop rather than once behind the list (so the ends cap at the first and last marker), and it and every marker are placed by their centre on one `left`, since a marker changes width when it is the stop you are at | `components/selection/RouteStops.jsx`, `LevelSelector.jsx` |
 | `.platform-grid`, `.platform-card*` (`__service` in the learner's language, `__stops`, `__pip`) | the platform card | `components/selection/ModeSelector.jsx`, `TierSelector.jsx`, `ThemeSelector.jsx` |
 | `.seg--full`, `.console`, `.console__index` | the tier size, the theme filter | `Seg`, `ConsoleIndex` in `components/chrome/Console.jsx` |
@@ -278,9 +278,12 @@ entries went in the same commit.
 | `.form`, `.form__label`, `.form__row`, `.type-list`, `.type-row*` | the create form, a card's form | `DecksScreen.jsx`, `screens/DeckDetailScreen.jsx` |
 | `.deck-identity*`, `.chip-row*`, `.card-list`, `.card-row*` | the deck page | `DeckDetailScreen.jsx` (the More sheet on `Sheet`) |
 
-The routes: `/learn` (the map), `/learn/<line>` (the station — a line's
-stops, or the kana sets), `/learn/<line>/tiers` and `/learn/vocab/themes`
-(the other ways in), `/learn/<line>/<stop>`, `/learn/<line>/tier/<n>?size=`,
+The routes: `/learn` (the map), `/learn/<line>` (the station — the SOURCES
+on vocab and kanji, which are ordered along more than one axis; the stops
+themselves on kana and grammar, which have only the one, exactly as
+comprehension has no source page beside reading's), `/learn/<line>/levels`,
+`/learn/<line>/tiers` and `/learn/vocab/themes` (a source's own list),
+`/learn/<line>/<stop>`, `/learn/<line>/tier/<n>?size=`,
 `/learn/vocab/theme/<key>` (the platforms), and the run on the stage frame
 under each of those with `/<mode>` appended; `/learn/decks`, `/learn/decks/<id>`,
 `/learn/decks/<id>/study` (the deck's platforms) and `/learn/decks/<id>/study/<mode>`.

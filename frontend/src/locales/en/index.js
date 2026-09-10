@@ -153,6 +153,10 @@ const quiz = {
   byLevelDesc:       'The exam\'s own five grades, N5 up to N1',
   byFrequency:       'Word frequency',
   byFrequencyDesc:   'Ranked by how often they actually appear in print',
+  // The same axis one line over, where what is ranked is the
+  // characters rather than the words (see KanjiScreen.jsx).
+  byFrequencyKanji:     'Kanji frequency',
+  byFrequencyKanjiDesc: 'Ranked by how often they appear in print',
   byMastery:         'My cards',
   byMasteryDesc:     'Built only from words you have already met',
   // Vocabulary's third study-source option — every JMdict word outside
@@ -411,9 +415,14 @@ const stats = {
   nothingGraded:      'Nothing is graded',
   learnFourLines:     'Four lines',
   stationJlpt:        'JLPT',
+  // The sub over vocabulary's and kanji's source page. Terse, like
+  // every other sub on a station: it names the page you are on, and
+  // the cards under it do the asking. (The practice sections put the
+  // whole question up there instead -- selectStudySource -- because
+  // their bar carries no other sub to be consistent with.)
+  stationSources:     'Sources',
   byFrequencyShort:   'By frequency',
   byThemeShort:       'By theme',
-  jlptInstead:        'JLPT instead',
   leaveLevels:        'Levels',
   leaveSets:          'Sets',
   leaveTiers:         'Tiers',

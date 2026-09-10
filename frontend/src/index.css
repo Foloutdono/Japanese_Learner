@@ -4946,6 +4946,16 @@ textarea:focus-visible {
 }
 .bar__sub {
   min-width: 0;
+  /* The ellipsis above needs a box to be too small for, and in the
+     stacked phone layout below there is none: a column flex item at
+     `align-items: flex-start` is sized by its own content, so a sub
+     longer than the row simply ran on under the aside's leave button.
+     `.bar__names` is already the row minus the roundel and the aside,
+     so bounding the sub by it is the whole fix. Visible on the two
+     Learn stations whose source page pairs a one-word title with the
+     "Choose your study source" sub -- the practice sections hid it by
+     having titles long enough to wrap the aside out of the way. */
+  max-width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: var(--font-display);
