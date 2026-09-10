@@ -10,10 +10,10 @@ import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { LEVELS } from '../domain/sentenceSource'
 
-// ── 実践 — the Practice gate: four platforms (plan 068) ───────
-// Reading practice, reading comprehension, translation, the mock
-// exam — the sentence-level sections, which schedule words rather
-// than levels and so have no line on the map. The gate's own bar over
+// ── 実践 — the Practice gate: five platforms (plan 068) ───────
+// Reading practice, reading comprehension, translation, dictation,
+// the mock exam — the sentence-level sections, which schedule words
+// rather than levels and so have no line on the map. The gate's own bar over
 // one platform card per section, each in its own pigment; boarding one
 // announces it and departs through the gate, like any other section.
 // The pass tags the canvas draws on these cards stay out until a
@@ -38,9 +38,10 @@ import { LEVELS } from '../domain/sentenceSource'
 // Four cards of a title and a line of description filled 528px of a
 // 746px screen and said nothing the tab bar had not already said; the
 // owner's word for it was bland. What was missing is what a platform
-// sign is FOR: where the trains go. Every one of these four is chosen
-// by JLPT grade first — the two sentence sections offer it as one of
-// three sources, comprehension and the exam have no other axis — so
+// sign is FOR: where the trains go. Every one of them is chosen by
+// JLPT grade first — the two sentence sections offer it as one of
+// three sources, comprehension, dictation and the exam have no other
+// axis — so
 // the grades ride on the card itself and a learner reaches the train
 // in one tap instead of three. The card's own body still opens the
 // station, where 頻度 and 自分のカード live.
@@ -48,6 +49,9 @@ const LEVEL_PATH = {
   '/practice/reading':       lvl => `/practice/reading/level/${lvl}`,
   '/practice/comprehension': lvl => `/practice/comprehension/${lvl}`,
   '/practice/translation':   lvl => `/practice/translation/level/${lvl}`,
+  // One axis, like comprehension: a dictation line is picked by grade
+  // and by nothing else, so the grade IS the run's path.
+  '/practice/dictation':     lvl => `/practice/dictation/${lvl}`,
   // The one that is not a run: the exam's grades open that grade's
   // papers (screens/ExamScreen reads the same ?level=), so there is no
   // train to board yet.

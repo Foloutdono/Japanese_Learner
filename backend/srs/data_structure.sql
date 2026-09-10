@@ -563,6 +563,41 @@ CREATE TABLE translation_log (
 CREATE INDEX idx_translation_log_user
 ON translation_log(user_id, created_at);
 
+-- 書取 (dictation): one row per clip transcribed. Owned by
+-- routes/dictation.py, created there at import time.
+--
+-- Two columns the other practice logs do not have, because this is the
+-- one sentence mode the machine grades rather than the learner:
+-- `accuracy` is how close the transcription came, 0..100 (difflib's
+-- ratio over the normalized text -- see study/dictation.grade), and
+-- `correct` is derived from it at study/dictation.CLOSE and kept
+-- because that is the column every other reader of a practice log
+-- understands. `plays` is how many times the clip was heard, as the
+-- player reports it; the mode allows two.
+--
+-- clip_id is the audio's content key (study/dictation.clip_id), which
+-- is derived from the line's own text -- so a row survives the bank
+-- being reordered, and stops resolving rather than silently resolving
+-- to a DIFFERENT line if that line is ever reworded. `phrase` is stored
+-- beside it so the history reads without a lookup either way.
+CREATE TABLE dictation_log (
+    id          BIGSERIAL PRIMARY KEY,
+    user_id     TEXT NOT NULL,
+    level       TEXT NOT NULL DEFAULT '',
+    clip_id     TEXT NOT NULL,
+    phrase      TEXT NOT NULL,
+    answer      TEXT NOT NULL,
+    correct     BOOLEAN NOT NULL,
+    accuracy    SMALLINT NOT NULL,
+    plays       SMALLINT NOT NULL DEFAULT 0,
+    created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- created_at ascending: a btree scans either way, so it serves
+-- /api/dictation/history's ORDER BY ... DESC.
+CREATE INDEX idx_dictation_log_user
+ON dictation_log(user_id, created_at);
+
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
 -- free tier), so this bounds draw on the SHARED free quota that the

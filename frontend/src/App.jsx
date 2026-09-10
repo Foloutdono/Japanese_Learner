@@ -50,6 +50,7 @@ import AnalyzerScreen from './screens/AnalyzerScreen'
 import SentenceStation from './screens/SentenceStation'
 import ReadingRun from './screens/ReadingRun'
 import ComprehensionRun from './screens/ComprehensionRun'
+import DictationRun from './screens/DictationRun'
 import ProfileScreen from './screens/ProfileScreen'
 import SettingsScreen from './screens/SettingsScreen'
 import ExamScreen from './screens/ExamScreen'
@@ -119,16 +120,18 @@ const MOVED = [
 ]
 
 // ── 実践 — the sentence sections, and their station pages ──
-// Reading, comprehension and translation are each a station (the
-// source, the grade, the tier — under the chrome) and a run (the
+// Reading, comprehension, translation and dictation are each a station
+// (the source, the grade, the tier — under the chrome) and a run (the
 // session — on the stage). One entry here draws that station's pages;
 // the run's own routes are spelled out below, since each names the
-// part of the choice it carries. Comprehension has one axis, so its
-// root is the level list and it has no source or tier page.
+// part of the choice it carries. Comprehension and dictation have one
+// axis each, so their root IS the level list and neither has a source
+// or tier page.
 const SENTENCE_SECTIONS = [
   { base: '/practice/reading' },
   { base: '/practice/translation' },
   { base: '/practice/comprehension', levelsOnly: true },
+  { base: '/practice/dictation', levelsOnly: true },
 ]
 
 function Moved({ to }) {
@@ -402,6 +405,7 @@ export default function App() {
             <Route path="/practice/reading/tier/:tier"       element={<ReadingRun session={session} />} />
             <Route path="/practice/reading/mastery"          element={<ReadingRun session={session} />} />
             <Route path="/practice/comprehension/:level"     element={<ComprehensionRun session={session} />} />
+            <Route path="/practice/dictation/:level"          element={<DictationRun session={session} />} />
             <Route path="/practice/translation/level/:level" element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />

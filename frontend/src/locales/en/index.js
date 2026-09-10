@@ -907,6 +907,32 @@ const translationMode = {
   analyzingTranslation:  'Analyzing your translation…',
   analysisUnavailable:   'Analysis unavailable — judge against the reference above.',
 }
+// ── 書取 — dictation ──────────────────────────────────────────
+// DictationRun.jsx reuses the shared study/quiz keys wholesale
+// (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// translation/translationEnglish, nextPhrase, examAudioPause/
+// examAudioPending/examAudioUnavailable) — only the genuinely new
+// keys live here.
+//
+// The four verdicts are four on purpose: "wrong" and "you caught half
+// of it" are different results to a listener, and flattening them to a
+// tick and a cross would tell someone who transcribed most of a
+// sentence exactly as much as it tells someone who heard nothing.
+const dictationMode = {
+  dictationTitle:        'Dictation',
+  dictationDesc:         'Write down what you hear\nTwo listens, and no more\nN5 through N1',
+  dictationFetchError:   "Couldn't load a clip. Try again.",
+  dictationCheckError:   "Couldn't mark your answer. Try again.",
+  dictationPlaceholder:  'Write what you heard…',
+  dictationPrompt:       'Write what you heard, in Japanese',
+  dictationListen:       'Listen',
+  dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
+  dictationPerfect:      'Word for word',
+  dictationClose:        'Nearly',
+  dictationPartial:      'Half of it',
+  dictationMissed:       'Missed',
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
@@ -1705,6 +1731,7 @@ export default {
   ...reading,
   ...readingComprehension,
   ...translationMode,
+  ...dictationMode,
   ...dictionary,
   ...comprehension,
   ...progress,

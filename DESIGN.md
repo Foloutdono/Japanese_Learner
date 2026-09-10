@@ -50,7 +50,7 @@ it. An insert is a stamp sheet, a lattice of records, a ledger of lines, a
 ranking board. It does not need a caption, which is what lets that screen
 print no section headings at all (see Structure).
 
-This is not decoration. It is the reason the app can show eleven subjects
+This is not decoration. It is the reason the app can show a dozen subjects
 without a menu that looks like a menu, and the reason a colour can mean
 something. Every visual decision should be answerable with "what would a
 station do?"
@@ -108,7 +108,7 @@ the screen.
 
 | Family | Tokens | Means |
 |---|---|---|
-| **Places** | `--line-kana`, `--line-vocab`, … (11) | which section you are in |
+| **Places** | `--line-kana`, `--line-vocab`, … (one per section) | which section you are in |
 | **People** | `--pass-ink` (消炭 charcoal) | this is *yours* — pass, IC card, stub |
 | **States** | `--success`, `--warning`, `--danger`, `--state-*` | correct, due, learning, mastered |
 
@@ -396,9 +396,10 @@ rule supplies one. Disabled is `opacity: 0.45`, and there is only one disabled
 treatment.
 
 **The ink is chosen by the fill's lightness, not fixed.** At the 70/79
-deepening, **eleven of the twelve line pigments carry `--text-on-panel`** in both
+deepening, **every line pigment but one carries `--text-on-panel`** in both
 themes and both states; the worst of them, 黄丹 safflower, rests at 5.29:1 and
-hovers at 4.53:1.
+hovers at 4.53:1. A new pigment has to be measured against that pair before it
+is minted — 常磐 tokiwa, added with 書取, rests at 5.56:1 and hovers at 4.74:1.
 
 **山吹色 gold is the twelfth, and it is the exception.** It reaches only 3.90:1
 resting and 3.24:1 hovering in dark theme, and no deepening within this family

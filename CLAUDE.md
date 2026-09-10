@@ -51,6 +51,21 @@ pytest                        # run all tests
 pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
+
+The one optional warm-up, and it needs no database:
+
+```bash
+python -m scripts.build_dictation_audio --check   # what is missing
+python -m scripts.build_dictation_audio           # synthesize it
+```
+
+書取 (dictation, `/practice/dictation`) plays a clip per line of
+`content/listening_clips.py`. Nothing depends on having run this — a missing
+clip is synthesized on the request that wants it, and again by
+`study/exam_audio_repair.py` if the file is later lost — but the first learner
+of the day otherwise pays for five round trips to edge-tts before the screen
+can show anything. Running it twice costs nothing: a clip that exists is
+skipped without a network call.
 Local Postgres (schema is `backend/srs/data_structure.sql` — a reference snapshot kept honest by `backend/tests/test_schema_declared.py`; the real source of truth is each module's own `CREATE TABLE IF NOT EXISTS` self-migration, run at import time):
 ```bash
 docker run -d --name jp-db -e POSTGRES_PASSWORD=dev -p 5432:5432 postgres:16
@@ -151,11 +166,11 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
-- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
-- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
+- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`), dictation (`dictation.py` — clip identity and the answer grader), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
+- `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
 - `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.
 
