@@ -558,17 +558,31 @@ function SessionView({
 
             {feedback.correct !== null && (
               <div className="prose__breakdown">
+                {/* Live only when there is something to show. Gating
+                    on `!analysis && !analysisLoading` instead left the
+                    button pressable for the whole of an in-flight
+                    fetch, and pressing it hid the registers above
+                    (they are behind `!showBreakdown`) without the
+                    breakdown below being able to take their place (it
+                    is behind `showBreakdown && analysis`) — an empty
+                    card until the response landed. Reading practice
+                    rarely reached it, because fetchAnalysis fires the
+                    instant the phrase is shown and the whole
+                    display-and-writing window is prefetch, but a slow
+                    or retrying model call is all it takes. */}
                 <button
                   type="button"
                   onClick={() => setShowBreakdown(s => !s)}
-                  disabled={!analysis && !analysisLoading}
+                  disabled={!analysis}
                   className="btn-secondary"
                 >
                   {showBreakdown
                     ? t.hideBreakdown
                     : analysis
                       ? t.showBreakdown
-                      : t.preparingBreakdown}
+                      : analysisLoading
+                        ? t.preparingBreakdown
+                        : t.breakdownUnavailable}
                 </button>
 
                 {showBreakdown && analysis && (

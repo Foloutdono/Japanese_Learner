@@ -896,6 +896,7 @@ const reading = {
   showBreakdown:        'Show breakdown',
   hideBreakdown:        'Hide breakdown',
   preparingBreakdown:   'Preparing breakdown…',
+  breakdownUnavailable: 'Breakdown unavailable',
   previousWord:         'Previous word',
   nextWord:             'Next word',
   jumpToTokenNamed:      s => `Go to ${s}`,

@@ -867,6 +867,7 @@ const reading = {
   showBreakdown:        'Voir la décomposition',
   hideBreakdown:        'Masquer la décomposition',
   preparingBreakdown:   'Préparation de la décomposition…',
+  breakdownUnavailable: 'Décomposition indisponible',
   previousWord:         'Mot précédent',
   nextWord:             'Mot suivant',
   jumpToTokenNamed:      s => `Aller à ${s}`,
