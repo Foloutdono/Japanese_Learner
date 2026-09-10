@@ -60,7 +60,16 @@ describe('Trail', () => {
     expect(track).toHaveBeenCalledTimes(1)
 
     await screen.getByRole('button', { name: 'go' }).click()
-    expect(track).toHaveBeenCalledTimes(2)
+    // click() resolves when the click is dispatched -- React has still to
+    // commit the navigation and flush Trail's effect, and on a loaded machine
+    // neither has happened by the next line. That is this file's flake on CI,
+    // and it fails as `expected 2, got 1`: a count read one beat early, which
+    // reads exactly like the per-render bug this test pins.
+    //
+    // Waiting on the pathname instead is not enough -- measured here, the DOM
+    // can already say /practice while the effect is still queued. The effect
+    // is the thing being counted, so it is the thing to wait for.
+    await vi.waitFor(() => expect(track).toHaveBeenCalledTimes(2))
     expect(track.mock.calls[1]).toEqual(['screen_view', { route: '/practice', tab: 'practice' }])
   })
 
