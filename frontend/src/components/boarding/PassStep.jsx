@@ -5,6 +5,8 @@ import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
 import { DAILY_REFILL, CAP, SIGNUP_BONUS, showsCap } from '../../domain/credits'
 import { BoardAir, Continue } from './BoardFrame'
+import { SOURCES } from '../../domain/paywall'
+import { OfferButton } from '../credits/OfferButton'
 
 // ── The pass, issued (plan 075) ──────────────────────────────────
 // The last arrival screen: the printed commuter pass slides up and the
@@ -15,6 +17,12 @@ import { BoardAir, Continue } from './BoardFrame'
 // the line prints the figure without one (domain/credits' showsCap).
 // "Enter the station" posts the whole contract; the gate then opens
 // (App.jsx's TicketGate finale).
+//
+// The offer sits above that button as a quiet line, never as the
+// primary action: the last thing a learner does before their first
+// lesson must be starting it. It is shown here because this is the
+// screen where the balance is explained, which is the only place the
+// pass means anything yet.
 
 function PrintedHolder({ name }) {
   const r = 42
@@ -132,6 +140,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
         </div>
       </div>
       <div className="brd__foot">
+        <OfferButton source={SOURCES.ONBOARDING} className="pw-open--quiet" />
         {error && <p className="brd__error" role="alert">{t.onbPassError}</p>}
         <Continue label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
       </div>

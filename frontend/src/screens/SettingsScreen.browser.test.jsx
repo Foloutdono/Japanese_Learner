@@ -2,11 +2,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider, useLang } from '../LangContext'
+import * as credits from '../stores/credits'
 import '../index.css'
 
 // ── Settings (plan 074) ───────────────────────────────────────────
-// The list and its six pages. Pinned here: the parts that fail
-// quietly —
+// The list, its six pages, and the pass row that opens the offer.
+// Pinned here: the parts that fail quietly —
 //   1. every row is reachable and prints its value;
 //   2. the level strip WRITES — through the confirm sheet, whose
 //      figures come from the preview — and Stay writes nothing;
@@ -143,12 +144,14 @@ beforeEach(async () => {
 })
 
 describe('SettingsScreen — the list', () => {
-  it('prints six rows with their values, each a door to its page', async () => {
+  it('prints six page rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
     const rows = [...screen.container.querySelectorAll('.stg-row')]
-    expect(rows).toHaveLength(6)
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account'])
+    // Six doors to pages, then the pass — which opens the offer sheet
+    // rather than navigating, so it is last and is not one of PAGES.
+    expect(rows).toHaveLength(7)
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account', 'pass'])
     expect(rows[2].querySelector('.stg-row__value').textContent).toContain('N5 · 10')
     expect(rows[3].querySelector('.stg-row__value').textContent).toBe(T.settingsGoalNoneShort)
     expect(rows[5].querySelector('.stg-row__value').textContent).toBe('dev@…')
@@ -159,13 +162,44 @@ describe('SettingsScreen — the list', () => {
     // ‹ Settings brings the list back.
     screen.container.querySelector('.stage__leave').click()
     await settle(30)
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
   })
 
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+  })
+
+  // ── The pass row (the paywall's settings door) ──────────────────
+  it('opens the offer from the pass row, and records which door it was', async () => {
+    const screen = await mount()
+    await settle()
+    const pass = screen.container.querySelector('.stg-row[data-page="pass"]')
+    expect(pass).not.toBeNull()
+    expect(credits.peekPaywall()).toBe(null)
+
+    pass.click()
+    await settle(30)
+    // The source is what the whole funnel slices on, so it is pinned.
+    expect(credits.peekPaywall()).toEqual({ source: 'settings', taken: false })
+
+    credits.closePaywall()
+  })
+
+  it('offers no pass to a learner who already holds one', async () => {
+    // A pass holder must never be sold a pass; the row leaves the list
+    // entirely rather than rendering disabled.
+    credits.seedCredits({ balance: null, unlimited: true, plan: 'pass' })
+    const screen = await mount()
+    await settle()
+    expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
     expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+
+    // The credits store is module state: leave it as the rest of this
+    // file expects to find it, or the pass row vanishes from every
+    // later describe for no visible reason.
+    credits.seedCredits({ balance: 30, unlimited: false, plan: 'free' })
   })
 })
 

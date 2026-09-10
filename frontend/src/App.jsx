@@ -5,6 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
+import { PaywallSheet } from './components/credits/PaywallSheet'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
 import { getTabs } from './config/tabs'
@@ -259,6 +260,11 @@ export default function App() {
             <Route path="/dev/onboarding" element={<OnboardingPreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
           </Routes>
+          {/* The workbench replays the real boarding, so it needs the
+              real offer too — otherwise the one tool for polishing
+              that screen is the one place its last control does
+              nothing. */}
+          <PaywallSheet />
         </BrowserRouter>
       </LangProvider>
     )
@@ -313,6 +319,14 @@ export default function App() {
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
         />
+        {/* 定期券 — the offer, for the last boarding screen's door to
+            open. This branch returns BEFORE the router, so the copy
+            mounted beside <Routes/> is not in the tree here: without
+            this one, the pass line on PassStep would be exactly the
+            dead control domain/paywall.js argues against. Portals to
+            document.body and uses no router hook, so it is at home
+            outside the BrowserRouter. */}
+        <PaywallSheet />
       </LangProvider>
     )
   }
@@ -436,6 +450,7 @@ export default function App() {
             second is raised by a review the screen fired and forgot. */}
         <BalanceSheet />
         <RunOutSheet />
+        <PaywallSheet />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

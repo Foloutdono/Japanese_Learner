@@ -574,3 +574,31 @@ CREATE TABLE ocr_usage (
     count    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
 );
+
+-- Owned by routes/events.py -- the onboarding and paywall funnels.
+-- The only table here that records what a learner was SHOWN rather
+-- than something they produced: a paywall never opened and a paywall
+-- opened and refused are indistinguishable from credit_ledger, and
+-- the drop-off between two boarding questions is not written anywhere
+-- else either.
+--
+-- `name` is constrained by an allowlist in the route rather than by a
+-- CHECK here, so adding a funnel step is a code change and not a
+-- migration; the trade is that the constraint is not visible to a
+-- reader of this file. The seven names live in routes/events.py's
+-- ALLOWED. `props` is capped at 512 bytes and must be shallow, which
+-- is what keeps this from becoming a general event warehouse.
+--
+-- Write-only through the API. Read by the dashboards, directly.
+CREATE TABLE event_log (
+    id      BIGSERIAL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    name    TEXT NOT NULL,
+    props   JSONB NOT NULL DEFAULT '{}'::jsonb,
+    at      TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+-- The funnel is always read as "this event, over this window"; the
+-- retention pass reads it by user.
+CREATE INDEX event_log_name_at_idx ON event_log (name, at);
+CREATE INDEX event_log_user_at_idx ON event_log (user_id, at);

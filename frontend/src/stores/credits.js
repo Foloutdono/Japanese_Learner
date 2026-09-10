@@ -1,5 +1,7 @@
 import { useSyncExternalStore } from 'react'
 import { createRemoteStore } from './remote'
+import { logEvent } from '../lib/analytics'
+import { stopwatch } from '../lib/dwell'
 
 // ── 回数券 — the balance, as the chrome sees it (plan 069) ────
 // One cached answer from GET /api/credits, printed on the HUD's pass
@@ -61,6 +63,76 @@ export function openBalance() { balanceOpen = true; emit() }
 export function closeBalance() { balanceOpen = false; emit() }
 export function useBalanceOpen() {
   return useSyncExternalStore(subscribe, () => balanceOpen, () => false)
+}
+
+// ── 定期券 — the offer (the paywall) ────────────────────────────
+// Module state for the same reason the balance sheet is: it opens from
+// five unrelated places — the last boarding screen, the balance sheet,
+// the profile, the settings list, and a run that hit zero — and three
+// of those are outside any screen that could hold the state.
+//
+// The funnel is recorded HERE rather than in the sheet, on purpose.
+// Every open must produce exactly one `paywall_view` and exactly one
+// of `paywall_intent` / `paywall_dismiss`, and the only way to
+// guarantee that across five call sites is to make the call sites
+// unable to get it wrong: they open, take and close, and the events
+// are a consequence. `source` rides along so the dashboard can say
+// which door converts.
+let paywall = null   // { source, taken } or null
+// How long the offer has been in front of them. Started on open and
+// read once, on whichever of the two answers comes first — the gap
+// between seeing the pass and deciding about it is the difference
+// between a glance and an actual consideration, and a door with a high
+// intent rate but a one-second median is a mis-tap, not demand.
+let dwell = null
+
+/** Open the offer from one of domain/paywall.js's SOURCES. */
+export function openPaywall(source) {
+  paywall = { source, taken: false }
+  dwell?.stop()
+  dwell = stopwatch()
+  logEvent('paywall_view', { source })
+  emit()
+}
+
+/** Engaged ms since the sheet opened, and the stopwatch spent. */
+function spendDwell() {
+  if (!dwell) return {}
+  const ms = dwell.read()
+  dwell.stop()
+  dwell = null
+  return { ms }
+}
+
+/**
+ * "Prévenez-moi" taken. Recorded once per open — a second tap is the
+ * same answer, and counting it twice would inflate the only number
+ * this whole feature exists to produce.
+ */
+export function takePaywall() {
+  if (!paywall || paywall.taken) return
+  paywall = { ...paywall, taken: true }
+  logEvent('paywall_intent', { source: paywall.source, ...spendDwell() })
+  emit()
+}
+
+/** Close it. A close that follows an intent is not a dismissal. */
+export function closePaywall() {
+  // The stopwatch is spent either way: an intent already read it, and
+  // leaving it running would carry one learner's deliberation into the
+  // next open.
+  if (paywall && !paywall.taken) {
+    logEvent('paywall_dismiss', { source: paywall.source, ...spendDwell() })
+  } else {
+    spendDwell()
+  }
+  paywall = null
+  emit()
+}
+
+export function peekPaywall() { return paywall }
+export function usePaywall() {
+  return useSyncExternalStore(subscribe, () => paywall, () => null)
 }
 
 /** A 402 out_of_credits mid-run: the run stops at the balance and says so. */

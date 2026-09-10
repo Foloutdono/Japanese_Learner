@@ -4,6 +4,8 @@ import { apiFetch, apiJson, apiJsonWithTimeout } from '../lib/api'
 import { canNudge, requestNudgePermission } from '../lib/platform'
 import { refreshSummary } from '../stores/profileSummary'
 import { refreshCredits } from '../stores/credits'
+import { logEvent } from '../lib/analytics'
+import { stopwatch } from '../lib/dwell'
 import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
@@ -106,6 +108,19 @@ function clearStash() {
   try { sessionStorage.removeItem(STASH_KEY) } catch { /* private mode */ }
 }
 
+// ── The funnel's step index ──────────────────────────────────────
+// Every step the flow can stand on, in line order, including the three
+// arrival screens that trackStops() leaves out. The dashboard orders
+// the drop-off chart by this index, so it must stay a stable spelling
+// of the line rather than the branch a given learner walked: `reveal`
+// and `level` are alternatives, and both sit where the kana check
+// leads. Append here when the line grows; never renumber, or last
+// month's funnel silently compares different steps.
+const FUNNEL_STEPS = [
+  'name', 'why', 'kana', 'reveal', 'level', 'goal', 'rhythm', 'time',
+  'nudge', 'building', 'plan', 'account', 'pass',
+]
+
 const PULL_MS = 260
 const REDUCED = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 const DEFAULT_TIME = DEPART_TIMES.am
@@ -171,6 +186,14 @@ export default function BoardingFlow({
   const [arrival, setArrival] = useState(false)
   const [now] = useState(() => new Date())
   const frameRef = useRef(null)
+  // Two stopwatches, both counting only time the tab was actually
+  // looked at (lib/dwell.js): one for the whole boarding, one lapped
+  // at every question. The per-question figure says WHICH question
+  // stalls people; the total says whether the line as a whole is too
+  // long. Built in the mount effect below rather than during render —
+  // each one attaches a listener, and a render is not allowed to have
+  // side effects (StrictMode would double it, and leak one).
+  const watches = useRef(null)
   const arrivalPlayed = useRef(REDUCED)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
@@ -178,6 +201,17 @@ export default function BoardingFlow({
   useEffect(() => {
     document.title = `${t.brdDocumentTitle} — ${t.appTitle}`
   }, [t])
+
+  // Once per mount, carrying the step actually started from: a resumed
+  // OAuth round trip re-enters mid-line, and counting that as a fresh
+  // start at `name` would invent boardings that never happened.
+  useEffect(() => {
+    watches.current = { total: stopwatch(), step: stopwatch() }
+    if (!dryRun) logEvent('onboarding_start', { step, index: FUNNEL_STEPS.indexOf(step) })
+    const w = watches.current
+    return () => { w.total.stop(); w.step.stop(); watches.current = null }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // The volumes price the level list and the plan; the canvas's round
   // figures stand in until they arrive, and a failed fetch leaves the
@@ -205,7 +239,24 @@ export default function BoardingFlow({
     q?.focus({ preventScroll: true })
   }, [step])
 
+  // The funnel is recorded on the step being LEFT, not the one being
+  // arrived at: "answered `why`" is the fact worth counting, and the
+  // last event a learner who abandons produces is then the last
+  // question they actually got through. The dev workbench
+  // (/dev/onboarding, dryRun) writes nothing — it walks the whole
+  // flow repeatedly and would drown the real funnel.
+  function record(name, at = step, extra = null) {
+    if (dryRun) return
+    logEvent(name, { step: at, index: FUNNEL_STEPS.indexOf(at), ...(extra ?? {}) })
+  }
+
+  /** A question answered or walked back: its own dwell, then reset. */
+  function recordLeaving(name) {
+    record(name, step, { ms: watches.current?.step.lap() ?? 0 })
+  }
+
   function go(next) {
+    recordLeaving('onboarding_step')
     setHistory(h => [...h, step])
     if (!REDUCED) setLeaving({ step, dir: 'fwd' })
     setStep(next)
@@ -214,6 +265,7 @@ export default function BoardingFlow({
   function back() {
     if (history.length === 0) return
     const prev = history[history.length - 1]
+    recordLeaving('onboarding_back')
     setHistory(h => h.slice(0, -1))
     if (!REDUCED) setLeaving({ step, dir: 'back' })
     setStep(prev)
@@ -335,6 +387,7 @@ export default function BoardingFlow({
       body: JSON.stringify(body),
     })
       .then(() => {
+        record('onboarding_complete', 'pass', { ms: watches.current?.total.read() ?? 0 })
         clearStash()
         // The gate reads the profile summary for the pass holder's
         // name and the HUD reads the balance -- refresh both before the
