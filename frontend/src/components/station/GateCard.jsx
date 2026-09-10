@@ -10,7 +10,7 @@ import { Chip } from '../chrome/Console'
 import { Loading } from '../ui/Loading'
 import { CheckIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
-import { runFit, DAILY_REFILL } from '../../domain/credits'
+import { runFit, isFreeLane, DAILY_REFILL } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -36,6 +36,12 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // (the button disabled at zero) under enforcement; in shadow mode the
 // line is information and the train leaves. A pass prints no notice.
 //
+// 無料 — the kana lanes ride free (domain/credits.js), which the card
+// has to be right about twice: they are marked on the row, and they
+// are counted out of what the balance has to cover. A gate closed on
+// a day of nothing but kana would be charging for the one line that
+// does not cost anything.
+//
 // Departing: the ticket-gate cutscene (stores/departure) and then
 // /today/run, carrying the chosen lanes in the query — omitted when
 // every lane is on, since an empty `lanes` already means the whole
@@ -59,16 +65,21 @@ function refillClock(iso, lang) {
 // What is left says itself only when the two do not match, which is
 // the one moment either is worth reading. `waits` is what makes it
 // appear, not what it says.
-function Shortfall({ due, credits, t, lang }) {
+function Shortfall({ due, free, credits, t, lang }) {
   const balance = credits && !credits.unlimited ? credits.balance : null
   if (balance == null) return null
-  const { rides, waits } = runFit(due, balance)
+  const { rides, waits } = runFit(due, balance, free)
   if (waits <= 0) return null
   return (
     <div className="gate-card__short" role="status">
       <span className="gate-card__short-mark" aria-hidden="true">!</span>
       <span>
-        {balance === 0
+        {/* On what RIDES, not on the balance: an empty balance with
+            kana in the run still departs, and "no credits left" over a
+            train that is about to leave with twelve cards on it is the
+            wrong sentence. The two figures are the right one whenever
+            anything at all is riding. */}
+        {rides === 0
           ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
           : t.gateShort(rides, due)}
       </span>
@@ -132,6 +143,11 @@ export default function GateCard({ today, failed }) {
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id)
   const due = lanes.filter(isOn).reduce((n, l) => n + l.due, 0)
+  // Of the chosen reviews, the ones that cost nothing. A pass is not
+  // asked: nothing costs anything on one, so nothing is worth marking
+  // free either — the tag would be on every row and say nothing.
+  const metered = Boolean(credits && !credits.unlimited)
+  const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + l.due, 0) : 0
   function toggle(id) {
     setOff(prev => {
       const next = new Set(prev)
@@ -166,9 +182,11 @@ export default function GateCard({ today, failed }) {
     })
   }
 
-  // Closed only under enforcement, and only at zero: the gate never
-  // blocks in shadow mode (plan 069). Nothing chosen is not a run.
-  const closed = Boolean(credits?.enforced && !credits.unlimited && credits.balance === 0)
+  // Closed only under enforcement, and only at zero WITH nothing free
+  // in the run: the gate never blocks in shadow mode (plan 069), and
+  // it must never block a run the balance is not being asked to pay
+  // for. Nothing chosen is not a run.
+  const closed = Boolean(credits?.enforced && !credits.unlimited && credits.balance === 0 && free === 0)
 
   // Same tap the board rows used to make: the announcement, then the
   // gate. /today has no clip in public/sounds/announcements, so
@@ -226,13 +244,16 @@ export default function GateCard({ today, failed }) {
                 <span className="lane__where">{whereOf(lane, t, kanaSetLabel)}</span>
                 <span className="lane__mode">{modeLabel(t, lane.mode)}</span>
               </span>
+              {metered && isFreeLane(lane) && (
+                <span className="lane__free">{t.freeFare}</span>
+              )}
               <span className="lane__due">{lane.due}</span>
             </button>
           )
         })}
       </div>
 
-      <Shortfall due={due} credits={credits} t={t} lang={lang} />
+      <Shortfall due={due} free={free} credits={credits} t={t} lang={lang} />
 
       <button
         type="button"

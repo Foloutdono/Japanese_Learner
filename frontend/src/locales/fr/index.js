@@ -68,6 +68,7 @@ const nav = {
   balanceOf:         (cap) => `sur ${cap}`,
   balanceRefillAt:   (at) => `par jour, à ${at}`,
   balanceHolds:      (cap) => `jusqu’à ${cap}`,
+  balanceKanaFree:   'Les révisions de kana ne coûtent rien',
   gateShort:         (rides, due) => `Seulement ${rides} sur les ${due} requis`,
   gateNoCredits:     (refill, at) => `Plus de crédits — +${refill} à ${at}`,
   runOutTitle:       'Plus de crédits',
@@ -75,6 +76,8 @@ const nav = {
   runOutWaiting:     (n) => `${n} attendent demain`,
   runOutRefill:      'à minuit',
   runOutTomorrow:    'demain',
+  // 無料 — a lane that costs nothing (domain/credits.js).
+  freeFare:          'gratuit',
   fareReviews:       'révisions',
   fareFare:          'tarif',
   fareCreditsLeft:   'crédits restants',

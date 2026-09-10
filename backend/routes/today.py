@@ -90,6 +90,71 @@ _SECTION_BUILDERS = {
 }
 
 
+# ── 運賃 — what a queued review costs (core/credits.py) ────────
+# Since the kana line rides free, the length of a run and its fare are
+# no longer the same number, and both of them have to be right: the
+# gate prints the count AND prices it, and under enforcement the queue
+# has to stop serving the paid cards while going on serving the free
+# ones. Two callers, two shapes of the same question, so both are
+# answered here beside each other rather than inline at either site.
+
+def _lane_cost(key: tuple) -> int:
+    """One card's fare in this lane. A section lane rides free when its
+    SOURCE does; a personal lane never does, because no deck structure
+    is a kana one (study/structures.py)."""
+    if key[0] == daily_queue.SECTION:
+        return credits.cost_of(key[1])
+    return credits.COST_PER_REVIEW
+
+
+def _review_cost(raw_id: str, mode: str) -> int:
+    """One posted review's fare.
+
+    Priced on the card, not on the mode key alone. Every other review
+    endpoint knows its own source outright; this one is mixed and has
+    to read the mode off the payload, so pricing on that key by itself
+    would sell a free ride to anything at all posted under `kana.*`.
+    card_index.locate answers the real question -- which source this
+    (card, mode) pair actually belongs to -- with the same lookup the
+    queue used to put the card in a lane in the first place.
+
+    Nothing it cannot place pays the full fare: a personal card, or
+    content removed since it was last reviewed. Failing closed is the
+    only safe direction for a price.
+    """
+    loc = card_index.locate(raw_id, mode)
+    return credits.cost_of(loc[0]) if loc else credits.COST_PER_REVIEW
+
+
+def _affordable(user_id: str, picked: list[tuple]) -> list[tuple]:
+    """Under enforcement, the paid cards a balance cannot cover, dropped
+    from a batch (plan 069). Free cards ride regardless.
+
+    This trims the BATCH where it used to shorten the requested count.
+    A count clamped to the balance was right while every card cost the
+    same; now a batch is mixed, and `count = min(count, 0)` would end a
+    run of ten kana -- which cost nothing -- because the vocab beside
+    them could not be paid for. Order is the interleaved order, so what
+    gets dropped is the paid cards PAST the balance rather than
+    whichever ones happened to sort late.
+
+    Nothing is dropped in shadow mode, or on a pass.
+    """
+    if not credits.ENFORCE:
+        return picked
+    have = credits.balance(user_id)
+    if have is None:
+        return picked
+    kept = []
+    for key, raw_id in picked:
+        cost = _lane_cost(key)
+        if cost > have:
+            continue
+        have -= cost
+        kept.append((key, raw_id))
+    return kept
+
+
 def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
     """One card, built by its own section's builder.
 
@@ -180,6 +245,12 @@ def get_today(user_id: str = Depends(get_user_id)):
     for key, ids in lanes.items():
         lane = daily_queue.label(key)
         lane["due"] = len(ids)
+        # 無料 — this lane costs nothing (core/credits.py). Stated on
+        # the lane rather than left for the gate to derive from a
+        # mirrored source list: the economy is the server's to declare,
+        # and the gate has to both mark the row and leave it out of its
+        # own arithmetic.
+        lane["free"] = _lane_cost(key) == 0
         breakdown.append(lane)
         by_source["personal" if key[0] == daily_queue.PERSONAL else key[1]] += len(ids)
 
@@ -194,6 +265,11 @@ def get_today(user_id: str = Depends(get_user_id)):
     # the badge insisted something was still due. Both are served, and
     # the badge is the number the session will actually clear.
     total = sum(len(ids) for ids in lanes.values())
+    # The fare is what the run COSTS, which is no longer the same
+    # number as what it CLEARS: the kana lanes are counted into `total`
+    # -- they are reviews the run really will get through -- and out of
+    # this (core/credits.py).
+    fare = sum(_lane_cost(key) * len(ids) for key, ids in lanes.items())
     # The engine restricts this to servable MODES (see
     # SRSEngine._servable_filter), which is what keeps the sentence
     # screens' own tracks -- scheduled under a mode with no lane behind
@@ -214,9 +290,10 @@ def get_today(user_id: str = Depends(get_user_id)):
     pace = resolve_pace(user_id)
     return {
         # The fare gate prices the run against the balance (plan 069):
-        # one credit a review, so the fare IS the total, and the balance
-        # rides beside it. Reading it settles the day's refill.
-        "fare": total,
+        # one credit a paid review, and the balance rides beside it.
+        # It used to be `total` outright, back when every review cost
+        # the same. Reading it settles the day's refill.
+        "fare": fare,
         "credits": credits.summary(user_id),
         # Counted from the lanes rather than from len(due_rows): rows
         # naming content that no longer exists are dropped above, and
@@ -253,15 +330,6 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     the separator because neither a card id nor a registry mode key can
     contain one.
     """
-    # Under enforcement a run longer than the balance stops at the
-    # balance (plan 069); a pass has no balance to stop at. In shadow
-    # mode the queue is untouched.
-    if credits.ENFORCE:
-        have = credits.balance(user_id)
-        if have is not None:
-            count = min(count, have)
-            if count == 0:
-                return {"cards": []}
     count = max(1, min(count, MAX_BATCH))
 
     due_rows = srs.get_due_rows(user_id)
@@ -273,7 +341,12 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         daily_queue.parse_lane_ids(lanes),
     )
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
-    picked = daily_queue.interleave(chosen, count)
+    # Under enforcement a run stops at the balance -- at its worth of
+    # PAID cards (plan 069, and _affordable above): the free lanes go
+    # on being served, so an empty balance ends the run only once the
+    # kana in it is cleared too. A pass has no balance to stop at, and
+    # in shadow mode the queue is untouched.
+    picked = _affordable(user_id, daily_queue.interleave(chosen, count))
     if not picked:
         return {"cards": []}
 
@@ -355,8 +428,11 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
-    # review (plan 069): a rejected review is not a ride.
-    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
+    # review (plan 069): a rejected review is not a ride. Nothing at
+    # all when the card is on a free line -- see _review_cost, which
+    # is careful to price the CARD and not the mode key the client
+    # chose to send.
+    fare = credits.spend(user_id, _review_cost(payload.card_id, payload.mode), card_id)
     return {
         "card_id": payload.card_id,
         "interval": s["interval"],

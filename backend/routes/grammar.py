@@ -346,8 +346,10 @@ def post_grammar_review(payload: ReviewPayload,
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
-    # review (plan 069): a rejected review is not a ride.
-    fare = credits.spend(user_id, credits.COST_PER_REVIEW, card_id)
+    # review (plan 069): a rejected review is not a ride. Priced by
+    # THIS router's source rather than by the client's mode key, so a
+    # `kana.*` posted here still pays (core/credits.py, FREE_SOURCES).
+    fare = credits.spend(user_id, credits.cost_of(GRAMMAR), card_id)
     # xp_earned/leveled_up/new_level were already being computed by
     # srs.review() (same engine kana/vocab/kanji use) but previously
     # dropped on the floor here — grammar reviews were earning XP with

@@ -8,10 +8,11 @@ welcomed with the signup bonus, which sits above the cap and is spent
 down before the daily refill has anything to do; the refill is taken
 once per local day
 and never past the cap; a fare is charged only after the scheduler
-accepted the review; shadow mode records what there is and never
-blocks; enforcement refuses with the 402 shapes; a pass never spends;
-the free tier's deck count; the day boundary follows the learner's
-clock; and the ledger is in the account's deletion plan.
+accepted the review; the kana line is charged nothing at all; shadow
+mode records what there is and never blocks; enforcement refuses with
+the 402 shapes; a pass never spends; the free tier's deck count; the
+day boundary follows the learner's clock; and the ledger is in the
+account's deletion plan.
 """
 import uuid
 from datetime import date, datetime, timedelta, timezone
@@ -144,7 +145,9 @@ def test_the_day_boundary_is_the_learners_midnight():
 def test_a_review_costs_one_credit_after_the_scheduler_accepts_it(client):
     user = auth.DEV_USER_ID
     before = credits.refill_if_due(user)["balance"]
-    r = client.post("/api/kana/review", json={"card_id": "probe_credit_card", "mode": "kana.mcq.reading", "quality": 4})
+    # Vocab, not kana: the kana line rides free now, so it is no longer
+    # a witness for "a review costs a credit" (see below for its own).
+    r = client.post("/api/vocab/review", json={"card_id": "probe_credit_card", "mode": "vocab.flashcard.f2b", "quality": 4})
     assert r.status_code == 200
     body = r.json()
     assert body["credits"] == {"balance": before - 1, "unlimited": False}
@@ -155,11 +158,86 @@ def test_a_review_costs_one_credit_after_the_scheduler_accepts_it(client):
     assert r.status_code == 400
     assert credits.refill_if_due(user)["balance"] == before - 1
     # The fare is in every review response, and the summary beside the
-    # run's total.
+    # run's total -- at most it, never past it: the free lanes count
+    # into what the run CLEARS and out of what it COSTS.
     today = client.get("/api/today").json()
-    assert today["fare"] == today["total"]
+    assert 0 <= today["fare"] <= today["total"]
     assert today["credits"]["balance"] == before - 1
     assert client.get("/api/credits").json()["balance"] == before - 1
+
+
+# ── 無料 — the kana line ───────────────────────────────────────
+
+def test_the_kana_line_is_priced_at_nothing():
+    # The rule itself: one table, read by every review endpoint.
+    assert credits.FREE_SOURCES == frozenset({"kana"})
+    assert credits.cost_of("kana") == 0
+    assert credits.cost_of("kana.flashcard.f2b") == 0
+    assert credits.cost_of("kana.write_kana") == 0
+    for paid in ("vocab.flashcard.f2b", "kanji.readings", "grammar.fill_in",
+                 "standard.flashcard.f2b", "vocab", "kanji", "grammar"):
+        assert credits.cost_of(paid) == credits.COST_PER_REVIEW, paid
+    # A source is matched whole, and a missing one is not a free ride.
+    assert not credits.is_free("kanamoji.flashcard.f2b")
+    assert credits.cost_of(None) == credits.COST_PER_REVIEW
+    assert credits.cost_of("") == credits.COST_PER_REVIEW
+    # And the client is told rather than left to mirror it in the dark
+    # (frontend/src/domain/credits.js).
+    assert credits.summary(auth.DEV_USER_ID)["freeSources"] == ["kana"]
+
+
+def test_a_kana_review_is_charged_nothing_and_writes_no_row(client):
+    user = auth.DEV_USER_ID
+    before = credits.refill_if_due(user)["balance"]
+    rows = len(_rows(user))
+    body = {"card_id": "kana_\u3042", "mode": "kana.flashcard.f2b", "quality": 4}
+    r = client.post("/api/kana/review", json=body)
+    assert r.status_code == 200
+    # The response still carries the balance -- the HUD reconciles
+    # against it either way -- and the balance has not moved.
+    assert r.json()["credits"] == {"balance": before, "unlimited": False}
+    assert credits.refill_if_due(user)["balance"] == before
+    # A fare of nothing is not a ledger row of zero.
+    assert len(_rows(user)) == rows
+    # Nor met in the daily queue, which prices the same card the same.
+    r = client.post("/api/today/review", json=body)
+    assert r.status_code == 200
+    assert r.json()["credits"] == {"balance": before, "unlimited": False}
+    assert credits.refill_if_due(user)["balance"] == before
+    assert len(_rows(user)) == rows
+
+
+def test_the_queue_prices_the_card_and_not_the_mode_key_it_is_sent(client):
+    # A free ride is not something a payload gets to ask for. The mixed
+    # queue is the one endpoint that must read the mode off the client,
+    # so it prices the CARD -- card_index answers which source a
+    # (card, mode) pair really belongs to -- and anything it cannot
+    # place pays the full fare.
+    from routes.today import _review_cost
+    assert _review_cost("kana_\u3042", "kana.flashcard.f2b") == 0
+    assert _review_cost("probe_not_a_card", "kana.flashcard.f2b") == credits.COST_PER_REVIEW
+    assert _review_cost("custom_1_abc", "kana.flashcard.f2b") == credits.COST_PER_REVIEW
+    # And through the route, on the dev user's own balance.
+    user = auth.DEV_USER_ID
+    before = credits.refill_if_due(user)["balance"]
+    r = client.post("/api/today/review", json={"card_id": "probe_not_a_card", "mode": "kana.flashcard.f2b", "quality": 4})
+    assert r.status_code == 200
+    assert credits.refill_if_due(user)["balance"] == before - 1
+
+
+def test_enforcement_never_refuses_a_free_review(uid, monkeypatch):
+    monkeypatch.setattr(credits, "ENFORCE", True)
+    credits.summary(uid)
+    credits.grant(uid, -credits.SIGNUP_BONUS, "test")  # 0
+    # The paid fare is refused at zero -- the rule the 402 exists for...
+    with pytest.raises(credits.OutOfCredits):
+        credits.spend(uid, credits.cost_of("vocab.flashcard.f2b"), "c1")
+    # ...and the free one is not a fare at all, so there is nothing to
+    # refuse: an empty balance still rides the kana line.
+    assert credits.spend(uid, credits.cost_of("kana.flashcard.f2b"), "c2") == {
+        "balance": 0, "unlimited": False,
+    }
+    assert [r[1] for r in _rows(uid)] == ["grant", "grant"]
 
 
 def test_shadow_mode_records_what_there_is_and_never_blocks(uid, caplog):
