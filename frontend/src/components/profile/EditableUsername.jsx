@@ -56,7 +56,11 @@ export function EditableUsername({ username, session, onChange, t, ground = 'pan
   if (!editing) {
     return (
       <button type="button" className="profile-card__name profile-card__name--editable" onClick={startEdit}>
-        {username}
+        {/* The name is its own element so it can be the thing that
+            shortens: a pass prints its holder on one line, and a
+            20-character name on a 360px card would otherwise wrap
+            under the pencil and grow the card. */}
+        <span className="profile-card__name-text">{username}</span>
         <PencilIcon size={13} className="profile-card__edit-glyph" />
       </button>
     )

@@ -417,7 +417,12 @@ export default function DictionaryScreen({ session }) {
 				</ConsoleTop>
 				{/* Hidden while browsing the plain radical grid, shown again
 				    once a radical is picked (to narrow further), and hidden for
-				    the syllabary categories (nothing to search on a fixed chart). */}
+				    the syllabary categories (nothing to search on a fixed chart).
+				    The count slot holds a figure, not a wait: while a search is in
+				    flight it says nothing rather than running three gold dots
+				    beside the placeholder, where they read as a stray second
+				    loader. The one wait for this moment is ResultsSection's
+				    <Loading /> under the console. */}
 				{!showingRadicalGrid && !isSyllabary && (
 					<ConsoleIndex
 						inputRef={searchRef}
@@ -427,7 +432,7 @@ export default function DictionaryScreen({ session }) {
 						placeholder={mode === 'radical' ? t.dictionaryPlaceholderRadical : t.dictionaryPlaceholder}
 						autoFocus={mode === 'search'}
 						clearLabel={t.close}
-						count={loading ? <Loading inline /> : t.dictionaryResults(total)}
+						count={loading ? null : t.dictionaryResults(total)}
 					/>
 				)}
 			</Console>
