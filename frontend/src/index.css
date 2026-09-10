@@ -8686,20 +8686,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-/* A Japanese reading under its own line — the register .prose__romaji
-   holds for a Latin one, and the reason it could not simply be reused:
-   that rule is set in the display face, which has no kana. Tracked at
-   the body rung rather than --tr-reading, because this is a whole
-   sentence read out and not a name's reading over three characters;
-   text-indent cancels the space the last character's tracking adds,
-   per DESIGN.md's second half of that rule. */
-.prose__kana {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tr-term);
-  text-indent: var(--tr-term);
-  color: var(--text-secondary);
-}
 .prose__ai {
   font-size: var(--fs-sm);
   line-height: 1.55;
@@ -8832,57 +8818,42 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transition: transform 0.1s linear;
 }
 
-/* The machine's mark. The figure pair every other number in this app
-   is set as (DESIGN.md, "Figures"), reusing the .record__* inner
-   classes rather than a private copy of them — .record itself is a
-   lattice cell and this is not in a lattice, which is the same split
-   the dictionary's .record__body already makes.
-
-   The word takes a STATE colour, which is exactly what that family is
-   for: this is correct/incorrect and nothing else. */
-.kaki-score {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-2);
-  width: 100%;
+/* The line in the reveal, carrying its reading as ruby. The reading
+   needs room above the text and .prose's own row gap cannot give it —
+   a ruby annotation is drawn outside the line box, so without this the
+   kana sits on the sentence above. */
+.kaki-line {
+  line-height: 2.2;
 }
-/* The word wears .record__label for its type and this for its ink: a
-   rule reaching back to .record__label itself would be a lower
-   specificity than the one that declares it further down the sheet,
-   which is exactly the ordering stylelint refuses. */
-.kaki-score--perfect .kaki-score__verdict,
-.kaki-score--close .kaki-score__verdict {
-  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
-}
-.kaki-score--partial .kaki-score__verdict {
-  color: color-mix(in srgb, var(--warning) 60%, var(--text-primary));
-}
-.kaki-score--missed .kaki-score__verdict {
-  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
-}
-
-/* What was written, over what was said: the `equal` and `missing` runs
-   together spell the line, and `extra` is what the ear invented.
-   Every mark is a colour AND a line, because a difference told only in
-   colour is no difference at all to a reader who cannot see it — and
-   this is the one place in the app that draws two texts at once. */
-.kaki-diff {
-  font-family: var(--font-jp);
-  font-size: var(--fs-lead);
-  font-weight: 600;
-  line-height: 1.8;
-  letter-spacing: var(--tr-term);
-}
-.kaki-diff__run--missing {
-  color: color-mix(in srgb, var(--danger) 60%, var(--text-primary));
-  text-decoration: underline wavy;
-  text-underline-offset: 0.26em;
-}
-.kaki-diff__run--extra {
+/* `.kaki-line rt` and not `.kaki-line ruby > rt`: the dictionary's own
+   rt rules are plain descendants declared further down the sheet, and
+   the child combinator put this one above them in specificity while
+   sitting above them in the file — which is exactly the ordering
+   stylelint refuses. Equal specificity, earlier, is fine. */
+.kaki-line rt {
+  font-size: var(--fs-caption);
+  font-weight: 500;
   color: var(--text-secondary);
-  text-decoration: line-through;
 }
+/* The answer's label carries the measurement on its own right: how
+   much of the line the server matched, beside the line it matched
+   against. Not a verdict and deliberately not drawn as one — the
+   verdict is the rating bar under the card, and it is the learner's. */
+.kaki-answer__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.kaki-accuracy {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-secondary);
+}
+
 /* The rail's fill is the state, not the animation: under reduced
    motion it still shows where the clip is, it just stops sliding
    there. Same answer for the roundel's fill on hover. */

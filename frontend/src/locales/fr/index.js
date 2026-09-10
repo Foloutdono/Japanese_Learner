@@ -899,23 +899,25 @@ const translationMode = {
 // examAudioPending/examAudioUnavailable) — seules les clés vraiment
 // nouvelles vivent ici.
 //
-// Les quatre verdicts sont quatre à dessein : « faux » et « vous en
-// avez saisi la moitié » ne sont pas le même résultat pour une
-// oreille, et les réduire à une coche et une croix en dirait autant à
-// qui a presque tout transcrit qu'à qui n'a rien entendu.
+// La réponse s'écrit en romaji, et la copie le dit partout où elle en
+// demande une : un clavier japonais est une installation à part sur un
+// ordinateur et un clavier à part sur un téléphone, donc « en japonais »
+// demandait à la plupart des apprenants ce qu'ils ne peuvent pas taper.
+// Le kana et les kanji comptent toujours autant — le serveur essaie les
+// trois formes — le champ nomme simplement celle qu'ils ont.
 const dictationMode = {
   dictationTitle:        'Dictée',
-  dictationDesc:         "Écrivez ce que vous entendez\nDeux écoutes, pas une de plus\nDu N5 au N1",
+  dictationDesc:         "Écrivez en romaji ce que vous entendez\nDeux écoutes, pas une de plus\nDu N5 au N1",
   dictationFetchError:   "Impossible de charger un extrait. Veuillez réessayer.",
   dictationCheckError:   "Impossible de corriger votre réponse. Veuillez réessayer.",
-  dictationPlaceholder:  'Écrivez ce que vous avez entendu…',
-  dictationPrompt:       'Écrivez en japonais ce que vous avez entendu',
+  dictationPlaceholder:  'Écrivez en romaji ce que vous avez entendu…',
+  dictationPrompt:       'Écrivez en romaji ce que vous avez entendu',
   dictationListen:       'Écouter',
   dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
-  dictationPerfect:      'Mot pour mot',
-  dictationClose:        'Presque',
-  dictationPartial:      'La moitié',
-  dictationMissed:       'Manqué',
+  // La part de la phrase retrouvée par le serveur, imprimée à côté de
+  // la réponse de l'apprenant. Une mesure, pas un verdict — le verdict,
+  // c'est la barre de notation sous la carte, et elle lui appartient.
+  dictationCaught:       n => `${n}% retrouvé`,
 }
 
 // ── Dictionary ────────────────────────────────────────────

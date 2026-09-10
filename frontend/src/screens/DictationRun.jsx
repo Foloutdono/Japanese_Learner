@@ -6,7 +6,9 @@ import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
+import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
+import { FuriganaParts } from '../components/study/Readings'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -32,13 +34,23 @@ const PREFETCH_THRESHOLD = 1
 //                               answer has been sent — see
 //                               backend/routes/dictation.py for why
 //                               shipping them early would end the mode.
-//   the grade is the server's   There is no rating bar. The learner has
-//                               not seen the line, so they cannot judge
-//                               their own transcription; the backend
-//                               compares the two texts and says how
-//                               close it was. The rating bar would be
-//                               asking someone to mark an exam they
-//                               have not been given the paper for.
+//   the answer is romaji        Not by preference: a Japanese keyboard
+//                               is a separate install on a laptop and a
+//                               separate keyboard on a phone, and a
+//                               beginner practising listening has not
+//                               got that far. Kana and kanji answers
+//                               still measure full — the backend tries
+//                               all three forms — but the field asks
+//                               for the one a learner can actually
+//                               type, and the reveal answers in it.
+//
+// The rating bar IS here, and once was not: the server graded, on the
+// reasoning that a learner who has not seen the sentence cannot judge
+// their own transcription. They can — they have just read it, on this
+// screen, with its furigana and its romaji beside their own line — and
+// romaji has more right spellings than a mark scheme can hold. So the
+// server measures and the learner grades, the same split reading and
+// translation practice use. See docs/adr/0012.
 export default function DictationRun({ session }) {
   const { level: levelParam } = useParams()
   const route = runSource({ base: BASE, level: levelParam, levelsOnly: true })
@@ -66,6 +78,7 @@ function Session({ session, level }) {
   const [answer, setAnswer]     = useState('')
   const [result, setResult]     = useState(null)   // the graded reveal
   const [score, setScore]       = useState({ correct: 0, total: 0 })
+  const [rated, setRated]       = useState(false)
   const [error, setError]       = useState(null)
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
@@ -100,6 +113,7 @@ function Session({ session, level }) {
     setPlays(0)
     setAnswer('')
     setResult(null)
+    setRated(false)
     setStage('listening')
   }
 
@@ -157,11 +171,12 @@ function Session({ session, level }) {
     setStage('checking')
     apiJson('/api/dictation/check', session, {
       method: 'POST',
-      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim(), plays }),
+      // No `plays` here: the reveal does not write a row, so the
+      // listen count travels with the grade instead (see grade()).
+      body: JSON.stringify({ clip_id: clip.id, answer: answer.trim() }),
     })
       .then(data => {
         setResult(data)
-        setScore(s => ({ correct: s.correct + (data.correct ? 1 : 0), total: s.total + 1 }))
         setStage('feedback')
       })
       .catch(() => {
@@ -171,6 +186,30 @@ function Session({ session, level }) {
         setError(t.dictationCheckError)
         setStage('error')
       })
+  }
+
+  // The learner's own grade, on the app's six-segment bar. `quality`
+  // is 0..5 worst-to-best as RatingBar emits it, and q > 2 is the pass
+  // — the same line the bar itself draws between its two sounds.
+  //
+  // The accuracy goes back with it: it is the figure the learner was
+  // looking at when they rated, which is the only version of it worth
+  // keeping beside the rating. A failed write costs a history row and
+  // nothing else, so the run does not wait on it.
+  function grade(quality) {
+    if (rated) return
+    setRated(true)
+    setScore(s => ({ correct: s.correct + (quality > 2 ? 1 : 0), total: s.total + 1 }))
+    apiJson('/api/dictation/result', session, {
+      method: 'POST',
+      body: JSON.stringify({
+        clip_id: clip.id,
+        answer: answer.trim(),
+        quality,
+        accuracy: result.accuracy,
+        plays,
+      }),
+    }).catch(() => {})
   }
 
   const where = `${level} · ${t.stationJlpt}`
@@ -220,16 +259,22 @@ function Session({ session, level }) {
             />
           </PromptCard>
 
-          {/* Japanese, so a phone's own helpers are a smaller hazard
-              here than on the romaji field in reading practice — the
-              IME is the input method. Spellcheck still goes: it
-              underlines every Japanese sentence, and a red squiggle
-              under a correct transcription is a lie the learner has no
-              way to check. */}
+          {/* Nothing may rewrite what is typed here, and the reason is
+              reading practice's word for word: romaji is not a word in
+              any language the keyboard knows, so a phone's own helpers
+              treat every answer as a typo to be repaired —
+              autocapitalise puts a capital on it, autocorrect
+              substitutes the nearest real word, spellcheck underlines
+              all of it. The learner grades this line against the
+              reveal; a silently rewritten answer is not a cosmetic
+              annoyance but a wrong verdict on their own hearing.
+
+              No lang="ja" either, for the same reason: the field holds
+              Latin letters now, and telling the browser otherwise
+              invites an IME onto a keyboard the learner does not have. */}
           <form className="stage__foot" onSubmit={e => { e.preventDefault(); submit() }}>
             <input
               autoFocus
-              lang="ja"
               value={answer}
               onChange={e => setAnswer(e.target.value)}
               placeholder={t.dictationPlaceholder}
@@ -237,6 +282,7 @@ function Session({ session, level }) {
               className="field field--page"
               autoComplete="off"
               autoCorrect="off"
+              autoCapitalize="off"
               spellCheck={false}
               enterKeyHint="done"
             />
@@ -249,66 +295,47 @@ function Session({ session, level }) {
 
       {stage === 'feedback' && result && (
         <>
-          <Verdict result={result} t={t} />
-
           <PromptCard prose foot={{ left: where, right: t.dictationTitle }}>
-            <span className="prose__jp" lang="ja">{result.jp}</span>
-            <span className="prose__kana" lang="ja">{result.kana}</span>
+            {/* The line, with its reading over the kanji that need one.
+                Built backend-side from the bank's own kana, so the ruby
+                over 九時 is くじ rather than a guess — see
+                study/dictation.reveal. The kana line this replaces said
+                the same thing twice, once detached from the writing it
+                belonged to. */}
+            <span className="prose__jp kaki-line" lang="ja">
+              <FuriganaParts parts={result.furigana} />
+            </span>
+            {/* Romaji rather than kana: it is the alphabet the learner
+                just answered in, so it is the line they can actually
+                check themselves against. */}
+            <span className="prose__romaji">{result.romaji}</span>
             <span className="prose__label">
               {result.translation_lang === 'en' ? t.translationEnglish : t.translation}
             </span>
             <span className="prose__en">{result.translation}</span>
             <span className="prose__rule" />
-            <span className="prose__label">{t.yourAnswer}</span>
-            <Attempt diff={result.diff} t={t} />
+            {/* The measurement rides on the answer's own label rather
+                than standing over the card as a verdict: it is a hint
+                for the learner grading below, not the grade. */}
+            <span className="prose__label kaki-answer__label">
+              {t.yourAnswer}
+              <span className="kaki-accuracy">{t.dictationCaught(result.accuracy)}</span>
+            </span>
+            <span className="prose__en">{answer.trim() || '—'}</span>
           </PromptCard>
 
-          <div className="stage__foot">
-            <button type="button" className="btn-primary" onClick={next}>{t.nextPhrase}</button>
-          </div>
+          {rated ? (
+            <div className="stage__foot">
+              <button type="button" className="btn-primary" onClick={next}>{t.nextPhrase}</button>
+            </div>
+          ) : (
+            /* Docked on the stage's bottom edge (index.css, .stage),
+               like every other run's. */
+            <RatingBar active onRate={grade} />
+          )}
         </>
       )}
+
     </StudyStage>
-  )
-}
-
-// The machine's mark, set as the app sets any other number: the figure
-// with its unit inline and the word beneath it (DESIGN.md, "Figures").
-// The word carries a STATE colour — this is correct/incorrect, which is
-// what that family is for — and there are four of them because "wrong"
-// and "you caught half of it" are not the same result to a listener.
-const VERDICT_KEY = {
-  perfect: 'dictationPerfect',
-  close:   'dictationClose',
-  partial: 'dictationPartial',
-  missed:  'dictationMissed',
-}
-
-function Verdict({ result, t }) {
-  return (
-    <div className={`kaki-score kaki-score--${result.verdict}`}>
-      <span className="record__value">
-        {result.accuracy}<span className="record__unit">%</span>
-      </span>
-      <span className="record__label kaki-score__verdict">
-        {t[VERDICT_KEY[result.verdict]] ?? t.dictationMissed}
-      </span>
-    </div>
-  )
-}
-
-// What was written, against what was said. The `equal` and `missing`
-// runs together spell the line; `extra` is what the ear invented. Each
-// mark is a colour AND a line — an underline for a miss, a strike for
-// an addition — because a difference told only in colour is no
-// difference at all to a share of the people on this screen.
-function Attempt({ diff, t }) {
-  if (!diff?.length) return <span className="prose__en">—</span>
-  return (
-    <span className="kaki-diff" lang="ja" aria-label={t.yourAnswer}>
-      {diff.map((run, i) => (
-        <span key={i} className={`kaki-diff__run kaki-diff__run--${run.op}`}>{run.text}</span>
-      ))}
-    </span>
   )
 }

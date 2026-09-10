@@ -140,17 +140,24 @@ def restore_clip(filename: str) -> bool:
         if os.path.exists(os.path.join(audio_dir(), filename)):
             return True  # another request restored it while this one waited
 
-        # The shipped dictation line first: it is a dict lookup keyed by
-        # the content key itself, so it is both free and self-verifying,
-        # and unlike the paper scan below it does not need the database
-        # to be reachable.
-        turns = dictation.turns_for_key(key)
-        if turns is None:
-            try:
-                turns = _turns_for_clip(filename, key)
-            except Exception:
-                logger.exception("Could not look up the script for audio %s", filename)
-                return False
+        # The shipped dictation collection first: it is a dict lookup
+        # keyed by the content key itself, so it is both free and
+        # self-verifying, and unlike the paper scan below it does not
+        # need the database to be reachable.
+        #
+        # It re-synthesizes for itself rather than handing back turns,
+        # because its clips carry a speaking rate that is part of their
+        # key: synthesized from turns alone they would land under a
+        # different name, leaving the missing file missing.
+        if dictation.restore(key):
+            logger.info("Re-synthesized missing audio %s", filename)
+            return True
+
+        try:
+            turns = _turns_for_clip(filename, key)
+        except Exception:
+            logger.exception("Could not look up the script for audio %s", filename)
+            return False
         if turns is None:
             logger.warning("No shipped line and no stored script matches audio %s", filename)
             return False

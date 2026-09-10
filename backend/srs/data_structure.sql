@@ -566,14 +566,15 @@ ON translation_log(user_id, created_at);
 -- 書取 (dictation): one row per clip transcribed. Owned by
 -- routes/dictation.py, created there at import time.
 --
--- Two columns the other practice logs do not have, because this is the
--- one sentence mode the machine grades rather than the learner:
--- `accuracy` is how close the transcription came, 0..100 (difflib's
--- ratio over the normalized text -- see study/dictation.grade), and
--- `correct` is derived from it at study/dictation.CLOSE and kept
--- because that is the column every other reader of a practice log
--- understands. `plays` is how many times the clip was heard, as the
--- player reports it; the mode allows two.
+-- Two columns the other practice logs do not have. `accuracy` is the
+-- SERVER's measurement of the transcription, 0..100 (difflib's ratio
+-- over the folded text -- see study/dictation.measure), and it sits
+-- beside `quality`, the learner's own rating, rather than instead of
+-- it: one is measured and one is an opinion, they are different facts,
+-- and the interesting question over a month is where they disagree.
+-- `correct` is derived from `quality` (q > 2 is a pass), the way every
+-- other practice log derives it. `plays` is how many times the clip was
+-- heard, as the player reports it; the mode allows two.
 --
 -- clip_id is the audio's content key (study/dictation.clip_id), which
 -- is derived from the line's own text -- so a row survives the bank
@@ -589,6 +590,10 @@ CREATE TABLE dictation_log (
     answer      TEXT NOT NULL,
     correct     BOOLEAN NOT NULL,
     accuracy    SMALLINT NOT NULL,
+    -- The rating the learner gave on the bar, 0..5 worst to best.
+    -- NULL on a row written while the server was the grader, which
+    -- means "graded by the machine alone", not a score of zero.
+    quality     SMALLINT,
     plays       SMALLINT NOT NULL DEFAULT 0,
     created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );

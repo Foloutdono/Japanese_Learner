@@ -46,10 +46,16 @@ always names the same file and no manifest exists to drift. Not a *card*:
 nothing is scheduled on it.
 
 **Dictation** (書取) — the practice mode where a Clip is played, at most
-twice, and the learner writes down what was said. The one sentence mode the
-server marks rather than the learner, and the one whose prompt is not text —
-see `docs/adr/0011`. Say *dictation*, never "listening mode": the exam's
-聴解 section is also listening and is a different thing.
+twice, and the learner writes down what was said, in romaji. The one sentence
+mode whose prompt is not text; the learner grades their own answer as in every
+other one, and the server only *measures* it — see `docs/adr/0011` and `0012`.
+Say *dictation*, never "listening mode": the exam's 聴解 section is also
+listening and is a different thing.
+
+**Accuracy** — the server's measurement of a transcription, 0–100, stored in
+`dictation_log.accuracy`. Not a **grade**: the grade is the learner's own
+rating (`quality`, 0–5, as everywhere else). The two sit side by side and are
+never merged — one is measured, one is an opinion.
 
 **Pace** — the learner's chosen number of NEW items per day
 (`user_profiles.daily_new_target`), set at onboarding as a service type

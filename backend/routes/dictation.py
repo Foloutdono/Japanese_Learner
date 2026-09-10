@@ -1,12 +1,23 @@
 """
 書取 — the dictation platform's API.
 
-Three endpoints and one rule between them: the learner never receives
+Four endpoints and one rule between them: the learner never receives
 the sentence before they have written theirs down.
 
     GET  /api/dictation/batch   the clips to play — audio, and nothing else
-    POST /api/dictation/check   the answer, graded; the sentence comes back here
+    POST /api/dictation/check   the sentence, revealed, with a measure of
+                                how close the learner's own came
+    POST /api/dictation/result  the grade the learner gave themselves
     GET  /api/dictation/history what this learner has transcribed
+
+check and result are two calls rather than one because they answer to
+two different people. The measurement is the server's and arrives with
+the reveal; the GRADE is the learner's, and it does not exist until they
+have read the sentence and pressed a segment on the rating bar. Folding
+them together would mean either logging a row before the learner has
+graded it, or holding the reveal back until they had — and the reveal is
+the thing they are waiting for. Reading and translation practice split
+the same way, for the same reason.
 
 That split is the whole reason the batch response is so thin. Every
 other sentence mode in this app ships the answer with the question and
@@ -50,13 +61,15 @@ MAX_BATCH = 20
 # Shaped like the other practice logs (user/level/answer/correct/
 # created_at) with the two columns this mode has that they do not:
 #
-#   accuracy  how close the transcription was, 0..100. The other modes
-#             self-assess with the rating bar and store a `quality`;
-#             this one is machine-graded, so what is worth keeping is
-#             the measurement rather than an opinion. `correct` is
-#             derived from it (study/dictation.CLOSE) and kept because
-#             every existing reader of a practice log understands that
-#             column and nothing understands accuracy yet.
+#   accuracy  how close the transcription was, 0..100 — the server's
+#             measurement, kept BESIDE the learner's own rating rather
+#             than instead of it. The two are different facts and must
+#             never be merged: one is measured, the other is an opinion,
+#             and the interesting question over a month is where they
+#             disagree. `quality` is the rating, 0..5 worst-to-best
+#             exactly as RatingBar emits it, and `correct` is derived
+#             from it (q > 2 is a pass) the way every other practice log
+#             derives it.
 #   plays     how many times the clip was heard, as the player reports
 #             it. The mode's rule is two; a row saying 2 is a learner
 #             who used their second listen, not a rule violation, and
@@ -83,10 +96,23 @@ def _init_db() -> None:
                     answer TEXT NOT NULL,
                     correct BOOLEAN NOT NULL,
                     accuracy SMALLINT NOT NULL,
+                    quality SMALLINT,
                     plays SMALLINT NOT NULL DEFAULT 0,
                     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
                 )
                 """
+            )
+            # For an install whose table predates the learner grading
+            # their own answer: the create above only fires when the
+            # table is absent, so it never revisits one that exists.
+            # Same pattern as translation.py's own `quality`.
+            #
+            # NULLable on purpose. A row written while the server was
+            # the grader genuinely has no rating, and a default would
+            # invent one; a reader has to treat NULL as "graded by the
+            # machine alone", not as a score of zero.
+            cur.execute(
+                "ALTER TABLE dictation_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
             )
             cur.execute(
                 """
@@ -145,28 +171,62 @@ def get_dictation_batch(
     return {"level": level, "max_plays": dictation.MAX_PLAYS, "clips": clips}
 
 
-# ── The answer ───────────────────────────────────────────────────────
+# ── The reveal ───────────────────────────────────────────────────────
 class CheckPayload(BaseModel):
     clip_id: str = Field(min_length=1, max_length=64)
     # Empty is a legitimate answer: it is a learner saying they caught
-    # nothing, and it scores 0 rather than being rejected.
+    # nothing, and it measures 0 rather than being rejected.
     answer: str = Field(default="", max_length=400)
-    plays: int = Field(default=0, ge=0, le=99)
 
 
 @router.post("/api/dictation/check")
 def check_dictation(payload: CheckPayload, user_id: str = Depends(get_user_id)):
+    """The sentence, revealed, plus how close the learner's own came.
+
+    Writes nothing: the row is written by /result, once the learner has
+    read this and graded themselves. So a learner who abandons the run
+    here leaves no half-graded attempt behind."""
     row = dictation.entry_for(payload.clip_id)
     if row is None:
         raise HTTPException(status_code=404, detail="unknown clip")
 
-    result = dictation.grade(payload.answer, row)
+    return {
+        "id": payload.clip_id,
+        "level": row.get("level", ""),
+        **dictation.reveal(row),
+        **dictation.measure(payload.answer, row),
+    }
 
-    # Logged here rather than from a second call by the screen: the
-    # grade is produced on this request and nowhere else, so a separate
-    # /result endpoint would be the client handing the server back a
-    # number the server just computed, and any failure of that second
-    # call would drop the attempt silently.
+
+# ── The grade, which is the learner's ────────────────────────────────
+class ResultPayload(BaseModel):
+    clip_id: str = Field(min_length=1, max_length=64)
+    answer: str = Field(default="", max_length=400)
+    # 0..5 worst-to-best, exactly as RatingBar emits it.
+    quality: int = Field(ge=0, le=5)
+    accuracy: int = Field(default=0, ge=0, le=100)
+    plays: int = Field(default=0, ge=0, le=99)
+
+
+@router.post("/api/dictation/result")
+def post_dictation_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
+    """One row per graded attempt.
+
+    `accuracy` comes back from the client rather than being recomputed:
+    it is the figure the learner was actually looking at when they
+    rated, which is the only version of it worth keeping beside the
+    rating. Recomputing would silently rewrite history the day the fold
+    in study/romaji.py changes. It is bounded 0..100 by the model above,
+    so a client cannot store anything a reader would have to defend
+    against."""
+    row = dictation.entry_for(payload.clip_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="unknown clip")
+
+    # q > 2 is a pass — the same line RatingBar itself draws between
+    # playCorrect and playWrong, and the same one reading and
+    # translation practice record.
+    correct = payload.quality > 2
     try:
         conn = db_conn()
         try:
@@ -174,37 +234,26 @@ def check_dictation(payload: CheckPayload, user_id: str = Depends(get_user_id)):
                 cur.execute(
                     """
                     INSERT INTO dictation_log
-                        (user_id, level, clip_id, phrase, answer, correct, accuracy, plays)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                        (user_id, level, clip_id, phrase, answer,
+                         correct, accuracy, quality, plays)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         user_id, row.get("level", ""), payload.clip_id, row["jp"],
-                        payload.answer.strip(), result["correct"], result["accuracy"],
-                        payload.plays,
+                        payload.answer.strip(), correct, payload.accuracy,
+                        payload.quality, payload.plays,
                     ),
                 )
             conn.commit()
         finally:
             conn.close()
     except Exception:
-        # A history row is worth less than the grade the learner is
-        # waiting for. Reported, never raised.
+        # A history row is worth less than the run the learner is in the
+        # middle of. Reported, never raised — the screen has already
+        # moved on to the next clip.
         logger.exception("Could not log a dictation attempt for %s", payload.clip_id)
 
-    return {
-        "id": payload.clip_id,
-        "level": row.get("level", ""),
-        "jp": row["jp"],
-        "kana": row["kana"],
-        "translation": row["en"],
-        # English regardless of the UI language, exactly as reading
-        # practice reports its own: this app has no translation layer
-        # for its sentence data, and the screen labels what it shows
-        # rather than implying it is in the learner's language. See
-        # routes/reading.py's get_reading_batch docstring.
-        "translation_lang": "en",
-        **result,
-    }
+    return {"correct": correct}
 
 
 # ── The history ──────────────────────────────────────────────────────
@@ -218,7 +267,7 @@ def dictation_history(
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT level, phrase, answer, correct, accuracy, plays, created_at
+                SELECT level, phrase, answer, correct, accuracy, quality, plays, created_at
                 FROM dictation_log
                 WHERE user_id = %s
                 ORDER BY created_at DESC
@@ -234,9 +283,9 @@ def dictation_history(
         "entries": [
             {
                 "level": level, "phrase": phrase, "answer": answer,
-                "correct": correct, "accuracy": accuracy, "plays": plays,
-                "created_at": created_at.isoformat(),
+                "correct": correct, "accuracy": accuracy, "quality": quality,
+                "plays": plays, "created_at": created_at.isoformat(),
             }
-            for level, phrase, answer, correct, accuracy, plays, created_at in rows
+            for level, phrase, answer, correct, accuracy, quality, plays, created_at in rows
         ]
     }

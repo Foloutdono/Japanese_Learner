@@ -923,23 +923,25 @@ const translationMode = {
 // examAudioPending/examAudioUnavailable) — only the genuinely new
 // keys live here.
 //
-// The four verdicts are four on purpose: "wrong" and "you caught half
-// of it" are different results to a listener, and flattening them to a
-// tick and a cross would tell someone who transcribed most of a
-// sentence exactly as much as it tells someone who heard nothing.
+// The answer is written in romaji, and the copy says so everywhere it
+// asks for one: a Japanese keyboard is a separate install on a laptop
+// and a separate keyboard on a phone, so "in Japanese" was asking most
+// learners for something they cannot type. Kana and kanji answers still
+// measure full — the backend tries all three forms — the field just
+// names the one they have.
 const dictationMode = {
   dictationTitle:        'Dictation',
-  dictationDesc:         'Write down what you hear\nTwo listens, and no more\nN5 through N1',
+  dictationDesc:         'Write down what you hear, in romaji\nTwo listens, and no more\nN5 through N1',
   dictationFetchError:   "Couldn't load a clip. Try again.",
   dictationCheckError:   "Couldn't mark your answer. Try again.",
-  dictationPlaceholder:  'Write what you heard…',
-  dictationPrompt:       'Write what you heard, in Japanese',
+  dictationPlaceholder:  'Write what you heard, in romaji…',
+  dictationPrompt:       'Write what you heard, in romaji',
   dictationListen:       'Listen',
   dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
-  dictationPerfect:      'Word for word',
-  dictationClose:        'Nearly',
-  dictationPartial:      'Half of it',
-  dictationMissed:       'Missed',
+  // How much of the line the server matched, printed beside the
+  // learner's own answer. A measurement, not a verdict — the verdict is
+  // the rating bar under the card, and it is theirs.
+  dictationCaught:       n => `${n}% matched`,
 }
 
 // ── Dictionary ────────────────────────────────────────────
