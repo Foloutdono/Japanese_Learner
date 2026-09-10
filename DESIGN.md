@@ -249,11 +249,44 @@ Japanese barely (`--tr-term`).
 Any tracked line on a left-flush or centred axis must also set `text-indent` to
 the same value, cancelling the space the last letter's tracking adds.
 
+**Unless the line is not the only ink in its box.** A chip opens with a roundel
+or an icon, so the ink's left edge is not the label's — an indent moves the
+label and leaves that edge where it was, and the pill still reads a half
+tracking off centre. There the trailing space comes off the box instead:
+`padding-inline-end: calc(<the pad> - <the tracking>)`, which centres both the
+chip that shrink-wraps and the chip that is stretched and centres its content.
+Where a rule zeroes its padding altogether (`.platform-sign__dests .chip`) the
+same half tracking is added as a *leading* pad, which moves centred content by
+half its own width.
+
+Measured, at 8x over four sub-pixel phases: the dictionary's 部 RADICAUX chip
+sat 1.16px left of centre, `.seg__opt-latin` 1.10px, `.card-row__badge` 1.02px.
+None of them is above half a pixel now.
+
 ### Figures
 
 Every numeral: `--font-display`, `700`, `line-height: 1`, and
 `font-variant-numeric: tabular-nums`. Formatting (`toLocaleString`) happens in
 JSX, never in CSS.
+
+**A figure centred in a roundel is the exception to the `line-height: 1`.** A
+roundel centres the LINE BOX, not the ink, so whatever leading the line box
+carries decides where the glyph lands — and neither of the two the app reaches
+for by habit is right. The sheet's inherited `1.6` set the figure 0.55px high
+in every 30px roundel; the figures' own `line-height: 1` set it 0.81px high in
+the HUD's level and 0.42px high on the platform card. A roundel takes
+`line-height: normal` — the font's own box, which is the box its ink was drawn
+in — which lands the HUD's figure within a tenth of a pixel and no roundel in
+the app further off its centre than half of one. The roundels that already
+inherited `normal` (anything inside a `<button>` that does not restate it, e.g.
+`.mcq-row__index`) measured true before the sweep, which is the same finding
+from the other side.
+
+A roundel holding a **Japanese** glyph takes `line-height: 1` instead: a CJK
+glyph is drawn to fill the em square, so the em box IS the ink box
+(`.chip__glyph`, `.stamp-rally__stamp`). Do not read this as a licence to tune
+leading by eye — those are the only two values, and which one applies is
+decided by the script in the roundel, not by taste.
 
 A figure and its label form a fixed pair — large numeral, small unit inline,
 caps label beneath at `--fs-caption-xs`.
