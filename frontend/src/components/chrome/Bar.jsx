@@ -21,6 +21,12 @@ import { ChevronIcon } from '../ui/Icons'
 // carrying both stacks: the caption goes back under the name it belongs
 // to (.bar__names--stacked), and the aside keeps the end to itself.
 //
+// `code` is the mark in the roundel — a line code (KN, TG, JS…) for a
+// station, or an icon for a place that is not one: 設定 wears the gear
+// its door on the profile is drawn with, because a pass and its pages
+// have no code to print (config/identity.js). Either way it is the
+// same mark at both ends of the tap, which is the point.
+//
 // `as` picks the title's element. The bar is the screen's <h1> when
 // nothing else names the place; a screen with a station plate or a
 // pass (DESIGN.md, Structure: one <h1>, the object that names the

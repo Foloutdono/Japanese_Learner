@@ -16860,9 +16860,6 @@ html { scrollbar-gutter: stable; }
 
 /* ── The settings list and its pages (canvas Settings, SettingsLearn,
    SettingsDestination, SettingsLevelUp / Down) ── */
-.stg-headrow { display: flex; align-items: center; justify-content: space-between; gap: var(--sp-4); }
-.stg-head { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
-.stg-head__jp { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); line-height: 1.2; }
 .stg-list {
   display: flex;
   flex-direction: column;

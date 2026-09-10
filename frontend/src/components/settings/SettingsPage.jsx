@@ -1,20 +1,25 @@
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { Leave } from '../chrome/Bar'
+import { Bar, Leave } from '../chrome/Bar'
+import { GearIcon } from '../ui/Icons'
 
 // ── A settings page (canvas Settings*, plan 074) ──────────────
-// The head row — the page's name and ‹ Settings — over the slips.
-// `back` names where ‹ goes when a page is reached from somewhere
-// other than the list (the status sheet lands on Destination).
+// The bar — the page's name and ‹ Settings — over the slips. It is the
+// same header the list wears, gear roundel and all, because a page is
+// not a second place: you are still in 設定. `back` names where ‹ goes
+// when a page is reached from somewhere other than the list (the
+// status sheet lands on Destination).
 export function SettingsPage({ title, children, back = '/profile/settings', backLabel = null }) {
   const { t } = useLang()
   const navigate = useNavigate()
   return (
     <main id="main-content" className="settings">
-      <div className="stg-headrow">
-        <div className="stg-head"><h1 className="stg-head__jp">{title}</h1></div>
-        <Leave onClick={() => navigate(back)}>{backLabel ?? t.settings}</Leave>
-      </div>
+      <Bar
+        code={<GearIcon size={14} />}
+        title={title}
+        color="var(--pass-ink)"
+        aside={<Leave onClick={() => navigate(back)}>{backLabel ?? t.settings}</Leave>}
+      />
       {children}
     </main>
   )
