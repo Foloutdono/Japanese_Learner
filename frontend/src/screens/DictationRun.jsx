@@ -442,12 +442,15 @@ function Session({ session, level }) {
                   type="button"
                   onClick={() => setShowBreakdown(s => !s)}
                   /* Disabled until there IS one to show, and not merely
-                     until the fetch has settled: reading practice enables
-                     this while loading, which it gets away with because
-                     its prefetch is long since done by the time the
-                     button exists. Here the fetch starts at the reveal,
-                     so a press mid-flight is likely — and it would put
-                     the registers away and draw nothing in their place. */
+                     until the fetch has settled — a press mid-flight
+                     would put the registers away and draw nothing in
+                     their place. Reading practice used to enable this
+                     while loading and got away with it, because its
+                     prefetch is long since done by the time the button
+                     exists; it gates on the same condition now, since
+                     "unlikely" was never the same as "cannot happen".
+                     Here the fetch starts at the reveal, so a press
+                     mid-flight is ordinary rather than a slow day. */
                   disabled={!analysis}
                   className="btn-secondary"
                 >

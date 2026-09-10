@@ -376,11 +376,12 @@ describe('DictationRun', () => {
   })
 
   it('refuses the toggle while the breakdown is still being fetched', async () => {
-    // Reading practice leaves this button live during the fetch and
-    // gets away with it -- its prefetch is long finished by the time
-    // the button exists. Here the fetch starts AT the reveal, so a
-    // press mid-flight is ordinary, and it would put the registers
-    // away with nothing to draw in their place.
+    // A press mid-flight would put the registers away with nothing to
+    // draw in their place. Reading practice used to leave the button
+    // live during its own fetch and got away with it -- its prefetch is
+    // long finished by the time the button exists -- and is now gated
+    // the same way (ReadingRun.browser.test.jsx pins it there). Here the
+    // fetch starts AT the reveal, so a press mid-flight is ordinary.
     let release
     apiFetch.mockReturnValue(new Promise(resolve => { release = resolve }))
 

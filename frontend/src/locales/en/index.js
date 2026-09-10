@@ -900,7 +900,8 @@ const reading = {
   // The settled failure, which 書取 can actually reach: its breakdown
   // is only asked for at the reveal (the sentence does not exist on
   // the client before that), so a dead model is visible here in a way
-  // reading practice's own long prefetch window hides.
+  // reading practice's own long prefetch window hides. 読解 shows it
+  // too, for the slow or retrying call its prefetch does not outrun.
   breakdownUnavailable: 'Breakdown unavailable',
   previousWord:         'Previous word',
   nextWord:             'Next word',
