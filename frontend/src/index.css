@@ -9075,11 +9075,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .sentence--left { font-size: var(--fs-title); text-align: left; }
 .sentence--covered { color: var(--text-secondary); }
 /* The card as a page: labels, a line of English, a line of Japanese,
-   its romaji, a rule between registers. */
+   its romaji, a rule between registers.
+
+   ── The row gap is the BINDING gap, not the page's rhythm ──
+   Every register used to sit --sp-3 from the next one, and a page of
+   evenly spaced lines carries no grouping at all: the reveal read as
+   seven unrelated rows rather than three registers of two. Worse, the
+   even gap was even only on the boxes. Half-leading is not, so the
+   pair that belongs closest together came out furthest apart — 書取's
+   sentence and its romaji measured 23.6px of ink between them against
+   ~15px everywhere else, because the line above carries 2.2 of leading
+   for its ruby (see .kaki-line) and eleven of those pixels are empty.
+
+   So the gap here is the smallest one on the page: what holds a label
+   to the line it names, and a line of Japanese to its own romaji. The
+   breaks are declared, below, and only where a break is meant. */
 .prose {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-1);
   width: 100%;
   text-align: left;
 }
@@ -9137,6 +9151,28 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   align-items: stretch;
   gap: var(--sp-4);
 }
+/* ── The breaks ──
+   Declared after the whole .prose__* family, not beside the container
+   they belong to: each of these ends in a compound the family declares
+   plainly further down, and a compound selector above its plain
+   counterpart is the descending specificity stylelint refuses.
+
+   A new register opens at a label — a label is the head of the group
+   under it, never the tail of the one above — and at the breakdown,
+   which is a block of controls rather than a line of the page. */
+.prose > * + .prose__label,
+.prose > * + .prose__breakdown { margin-top: var(--sp-6); }
+/* And the rule is the stronger break, so it owns the rung on BOTH its
+   sides rather than being crowded from below by whatever follows.
+
+   Its own margin, not `.prose__rule + *`: that selector ends in the
+   universal, which then has to come before every other `> *` in the
+   sheet — .prompt-card__foot's, the boarding's two — and no-descending
+   -specificity is right to refuse it. The label below is what would
+   double the break, and it is named out of it directly. */
+.prose > * + .prose__rule { margin-top: var(--sp-6); }
+.prose > .prose__rule { margin-bottom: var(--sp-6); }
+.prose > .prose__rule + .prose__label { margin-top: 0; }
 
 /* ── 書取 — the dictation run (screens/DictationRun.jsx) ──
    Two objects, and between them they are the whole mode: the clip you
@@ -9249,9 +9285,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The line in the reveal, carrying its reading as ruby. The reading
    needs room above the text and .prose's own row gap cannot give it —
    a ruby annotation is drawn outside the line box, so without this the
-   kana sits on the sentence above. */
+   kana sits on the sentence above.
+
+   Leading is symmetric and the ruby is not: the same ~11.7px opens
+   under the sentence, where nothing is drawn, and it fell between this
+   line and the romaji that reads it — the one pair on the page that
+   should be tightest. The margin gives back most of what the ruby does
+   not use, so the sentence and its romaji sit at the binding gap the
+   rest of the page uses (measured: 23.6px of ink before, 11.6px after,
+   against 11.5px under a label). */
 .kaki-line {
   line-height: 2.2;
+  margin-bottom: calc(-1 * var(--sp-3));
 }
 /* `.kaki-line rt` and not `.kaki-line ruby > rt`: the dictionary's own
    rt rules are plain descendants declared further down the sheet, and
@@ -14185,17 +14230,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      `::before`/`::after` rather than markup: a pseudo-element can only
      be a flex item at the two ends of a box, and these belong at
      exactly those ends. Each cancels the one column gap it stands
-     behind, so a spent spacer leaves nothing at all rather than 8px. */
+     behind (.prose's binding rung), so a spent spacer leaves nothing at
+     all rather than a stray row gap. */
   .stage > .prompt-card--footed > .prompt-card__body--prose::before,
   .stage > .prompt-card--footed > .prompt-card__body--prose::after {
     content: "";
     flex: 1 0 0;
   }
   .stage > .prompt-card--footed > .prompt-card__body--prose::before {
-    margin-bottom: calc(-1 * var(--sp-3));
+    margin-bottom: calc(-1 * var(--sp-1));
   }
   .stage > .prompt-card--footed > .prompt-card__body--prose::after {
-    margin-top: calc(-1 * var(--sp-3));
+    margin-top: calc(-1 * var(--sp-1));
   }
   /* The dock: sumi, edge to edge, and straight onto the HUD below it,
      so the two are one console at the bottom of the screen. The
