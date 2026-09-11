@@ -84,11 +84,29 @@ def _item_stats(best: dict[str, tuple[float, int]], total: int) -> dict:
     furthest in}; cards never reviewed are simply absent, and score
     zero. `total` is every card the deck holds, so a deck nobody has
     opened scores 0 rather than dividing by nothing.
+
+    Three figures, because a deck is three questions:
+
+      started  how many of its cards you have met at all
+      learned  how many have reached the 21-day mark
+      score    how far the whole deck has come, 0..1, partial credit
+
+    `started` is free — `best` holds exactly the cards with a review
+    behind them, keyed once each — and it exists because the other two
+    move too slowly to be feedback. A level's stop on the station page
+    prints `learned`, so a week of first passes leaves every row of the
+    route reading 0 / 665: nothing on screen answers the work. `score`
+    is continuous but deliberately small early (a card in the learning
+    steps is worth at most a tenth of itself), so twenty fresh words of
+    665 round to 1 and the row still reads dead. The count of cards MET
+    moves on the first review, and overstates nothing as long as it is
+    labelled as what it is.
     """
     learned = sum(1 for _, days in best.values() if days >= MASTERED_DAYS)
     scored = sum(score for score, _ in best.values())
     return {
         "total": total,
+        "started": len(best),
         "learned": learned,
         "score": round(scored / total, 4) if total else 0.0,
     }
@@ -133,6 +151,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
     #   score   = how far its best mode has come toward 21 days, with
     #             the learning steps carrying LEARNING_SHARE of that
     #   learned = that best mode's interval has reached 21 days
+    #   started = it has been reviewed at all, in any mode
     #
     # Continuous on purpose. The buckets' three states put every card at
     # 0, a flat half, or 1, so one pass over a deck — every card reviewed

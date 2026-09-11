@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useStats } from '../../stores/stats'
+import { deckItems } from '../../domain/lineProgress'
 import { RouteStops } from './RouteStops'
 
 /**
@@ -11,6 +12,13 @@ import { RouteStops } from './RouteStops'
  * name, and how much of it is learned — the same figures the route
  * map's train position is computed from (/api/stats' `items`, through
  * the shared store), so the station and the map cannot disagree.
+ *
+ * Two figures, not one. `learned` is the 21-day mastery count and the
+ * number the row is read for; on its own it left every stop of every
+ * line reading 0 / 665 for a learner's first fortnight, because that
+ * is how long the threshold takes. `started` — cards met at all — is
+ * the one that answers today's work, so it rides under the figure as
+ * its caption and RouteStops drops it once the two agree.
  *
  * The learner's own level (user_profiles.jlpt_level via /api/profile)
  * is the stop marked "You are here", and the stops behind it are
@@ -33,14 +41,18 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
   const HINTS = { N5: t.levelHintN5, N4: t.levelHintN4, N3: t.levelHintN3, N2: t.levelHintN2, N1: t.levelHintN1 }
 
   const stops = levels.map(level => {
-    const item = source ? stats?.items?.[source]?.[level] : null
+    // A missing `source` is a level list with no figures to print
+    // (deckItems answers zeros, and a stop with no total prints none).
+    const { learned, total, started } = deckItems(stats, source, level)
     return {
       key: level,
       code: level,
       name: HINTS[level] ?? level,
       hereLabel: t.levelCurrentMark,
-      learned: Number(item?.learned) || 0,
-      total: Number(item?.total) || 0,
+      learned,
+      total,
+      started,
+      startedLabel: t.startedNote(started),
     }
   })
 

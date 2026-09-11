@@ -169,12 +169,35 @@ def test_a_row_with_no_reviews_behind_it_is_not_progress(client):
     a = card_index.item_ids(SOURCE, DECK)[0]
     _seed([(a, READ, 30, 0)])
     got = _items(client)
-    assert (got["learned"], got["score"]) == (0, 0.0)
+    assert (got["learned"], got["score"], got["started"]) == (0, 0.0, 0)
+
+
+def test_a_card_met_once_is_started_before_it_is_anything_else(client):
+    # The figure the station's rows are FOR: the other two are honest
+    # and nearly motionless early, so a first pass over twenty words
+    # printed 0 / 665 and then, with partial credit, 1 / 665. `started`
+    # is what moves the moment the work is done.
+    ids = card_index.item_ids(SOURCE, DECK)[:20]
+    _seed([(raw, READ, 0, 1, 0) for raw in ids])       # each met once
+    got = _items(client)
+    assert got["started"] == 20
+    assert got["learned"] == 0
+    assert round(got["score"] * got["total"]) <= 1
+
+
+def test_a_card_met_in_two_modes_is_one_card_started(client):
+    # Counted once, like everything else in this block: reading a kanji
+    # and writing it are two drills and one kanji.
+    a = card_index.item_ids(SOURCE, DECK)[0]
+    _seed([(a, READ, 40, 6), (a, WRITE, 1, 1)])
+    got = _items(client)
+    assert (got["started"], got["learned"]) == (1, 1)
 
 
 def test_an_untouched_deck_scores_zero_without_dividing_by_nothing(client):
     got = _items(client)
     assert got["learned"] == 0
+    assert got["started"] == 0
     assert got["score"] == 0.0
     assert got["total"] > 0
 

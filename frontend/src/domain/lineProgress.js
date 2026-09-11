@@ -66,14 +66,25 @@ export const KANA_STOPS = [
 
 /** One deck's `items` entry, defended against every shape that isn't
  *  one: a failed fetch, an older backend that predates the block, a
- *  test's today-shaped mock. The map must still draw. */
-function deckItems(stats, source, deckKey) {
+ *  test's today-shaped mock. The map must still draw.
+ *
+ *  Exported because the station pages read the same entry to print the
+ *  same figures (components/selection/LevelSelector.jsx,
+ *  screens/KanaScreen.jsx): three copies of `Number(x) || 0` over one
+ *  payload is three chances to disagree about what a missing field
+ *  means. `started` is the backend's own count of cards met at all —
+ *  never below `learned`, since a mastered card was met — and it is
+ *  the figure that moves before the 21-day mark does (routes/stats.py's
+ *  `_item_stats`). */
+export function deckItems(stats, source, deckKey) {
   const entry = stats?.items?.[source]?.[deckKey]
-  if (!entry || typeof entry !== 'object') return { score: 0, learned: 0, total: 0 }
+  if (!entry || typeof entry !== 'object') return { score: 0, started: 0, learned: 0, total: 0 }
   const total = Number(entry.total) || 0
+  const learned = Math.min(total, Math.max(0, Number(entry.learned) || 0))
   return {
     score: Math.min(1, Math.max(0, Number(entry.score) || 0)),
-    learned: Math.min(total, Math.max(0, Number(entry.learned) || 0)),
+    started: Math.min(total, Math.max(learned, Number(entry.started) || 0)),
+    learned,
     total,
   }
 }
