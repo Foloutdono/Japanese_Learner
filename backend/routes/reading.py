@@ -801,11 +801,18 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
 # what the reading card holds WITHOUT scrolling on the smallest phone
 # the app is drawn for (390x667 — .prose__jp--passage at --fs-body over
 # a 309px column is ~20 characters a line, and the card's body is 433px
-# of 26.6px lines there). 320 overflows it. The card scrolls rather
-# than spilling either way (index.css, .prompt-card--passage), but a
-# passage the reader takes in at a glance is the one this band buys.
+# of 26.6px lines there). The card scrolls rather than spilling when a
+# text runs past it (index.css, .prompt-card--passage), but a passage
+# the reader takes in at a glance is the one this band buys.
 # frontend/src/screens/ComprehensionRun.touch.test.jsx measures the
 # ceiling against the real card and fails if it stops fitting.
+#
+# ~20 a line is the WORST case on purpose: how many characters a line
+# holds depends on the Japanese font the device has, and a machine
+# without one packs appreciably more (CI's headless Linux runner fits a
+# text a fifth longer than this band's ceiling, which is why that test
+# only ever asserts the fit and never the overflow). Measure on
+# something with real fonts before touching this number.
 #
 # The floor is the paper's: below ~220 characters there is not enough
 # text to ask 8-12 non-overlapping questions of four different kinds

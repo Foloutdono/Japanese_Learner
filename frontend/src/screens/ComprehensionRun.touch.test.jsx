@@ -16,6 +16,17 @@ import '../index.css'
 // (What happens when a model overshoots the band anyway is the phone
 // lane's business: the card scrolls inside itself rather than spilling.
 // See ComprehensionRun.phone.test.jsx.)
+//
+// ONE DIRECTION ONLY, and deliberately. This asserts that the ceiling
+// fits; it does not assert that a character more would not. Where the
+// line actually breaks depends on the Japanese font the machine has,
+// and CI has none — a headless Linux runner falls back to a narrower
+// glyph and packs noticeably more per line than any real device does
+// (a text of CEILING + 80 overflows on a developer machine and fits in
+// CI, which is what retired the assertion that used to be here). The
+// fit is therefore measured where the metrics are worst and asserted
+// where they can only be better: a pass in CI is weaker evidence than
+// a pass locally, and a FAILURE anywhere is real.
 
 // The ceiling of COMPREHENSION_CHARS. Written here as a number because
 // the two halves of the app do not share a language; the backend test
@@ -96,15 +107,5 @@ describe('the comprehension band at 390×667', () => {
     // one screen, not the first screenful of it.
     const doc = document.documentElement
     expect(doc.scrollHeight).toBeLessThanOrEqual(doc.clientHeight + 1)
-  })
-
-  it('is the ceiling, not a floor: one rung up already needs the scroll', async () => {
-    // The margin left over at CEILING is real but small, and this is
-    // what says so. If this stops failing to fit, the band could be
-    // raised — after re-measuring, never on the strength of a bigger
-    // phone.
-    const root = await reading(passage(CEILING + 80))
-    const body = root.querySelector('.prompt-card--passage .prompt-card__body')
-    expect(body.scrollHeight).toBeGreaterThan(body.clientHeight)
   })
 })
