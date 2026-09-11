@@ -431,7 +431,14 @@ def check_deck_limit(cur, user_id: str) -> None:
     """Before INSERT INTO decks. Refuses only under enforcement; in
     shadow mode it still counts, and records the crossing."""
     limit = deck_limit(user_id)
-    cur.execute("SELECT COUNT(*) FROM decks WHERE user_id = %s", (user_id,))
+    # withdrawn_at IS NULL: a deck the author deleted while other
+    # learners followed it is kept alive for them alone (see
+    # routes/decks.delete_deck). It has left this shelf, so it must not
+    # go on occupying a slot on it.
+    cur.execute(
+        "SELECT COUNT(*) FROM decks WHERE user_id = %s AND withdrawn_at IS NULL",
+        (user_id,),
+    )
     have = _count(cur)
     if have < limit:
         return

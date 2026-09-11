@@ -12982,6 +12982,149 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .deck-card__aside { min-width: 70px; }
 .deck-card__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 
+/* ── The library (.lib-*) ──────────────────────────────────────
+   Decks other learners published: the block under 教材's own grid,
+   the library screen, and the page you read before following one.
+
+   Almost nothing new is drawn here. A published deck is still a deck,
+   so it wears `.platform-card .deck-card` and these rules only add the
+   two figures a public deck has that a private one does not — who
+   wrote it, and how many people follow it. Giving the library a card
+   shape of its own would say the decks in it were a different kind of
+   thing. */
+
+.lib-shelf {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+
+/* The one way out of a short shelf, and out of a long one: the same
+   quiet full-width row in both places, so "see all" and "show more"
+   are visibly the same gesture. Not a .btn-secondary — this is
+   navigation, not an action on the screen's object. */
+.lib-shelf__more {
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+/* Declared lowest-specificity first (:disabled and :focus-visible
+   before :hover:not(:disabled)), which stylelint's
+   no-descending-specificity asks for and the ratchet enforces. The
+   hover and the focus ring say the same thing in two rules rather than
+   one selector list, because that is what keeping the order costs. */
+.lib-shelf__more:disabled { opacity: 0.45; cursor: default; }
+.lib-shelf__more:focus-visible {
+  border-color: var(--line-color);
+  color: var(--text-primary);
+}
+.lib-shelf__more:hover:not(:disabled) {
+  border-color: var(--line-color);
+  color: var(--text-primary);
+}
+
+/* Attribution rides in the card's own description line, one register
+   quieter than the deck type beside it: whose deck it is matters, but
+   not as much as what the deck is. */
+.lib-card__author { color: var(--text-secondary); }
+
+.lib-card__blurb {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  margin-top: var(--sp-1);
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.45;
+}
+
+/* Under the card count, in the aside the density contract asks a wide
+   card to earn its width with. */
+.lib-card__follows {
+  display: block;
+  margin-top: var(--sp-1);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-align: center;
+}
+
+/* The library screen's one row of controls: the ordering on the left,
+   the tally on the right. Not a Console -- a console's second row is a
+   search field, and there is nothing to search here yet. */
+.lib-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.lib-controls__count {
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-caption);
+}
+
+/* The author's own description, on the deck's public page. Prose, so
+   the unplated prose measure. */
+.lib-blurb {
+  max-width: 720px;
+  margin: 0;
+  color: var(--text-primary);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+}
+
+/* The quiet line that explains what following actually does -- the one
+   thing about this feature a learner cannot guess. */
+.lib-note {
+  max-width: 720px;
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--fs-caption);
+  line-height: 1.55;
+}
+
+/* Warn, then vanish. A state, so a state colour and not a line
+   pigment: the deck's author has deleted it and it is here on borrowed
+   time. A left rule rather than a fill -- colour is an edge in this
+   app, never a background. */
+.lib-warning {
+  margin: 0;
+  padding: var(--sp-3) var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  color: var(--text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.55;
+}
+.lib-warning__lead {
+  color: color-mix(in srgb, var(--warning) 55%, var(--text-primary));
+  font-weight: 700;
+}
+
+/* The preview list is the card list, read-only: no row opens, nothing
+   is removable, so the rows lose the pointer they would otherwise
+   claim. */
+.lib-preview__row { cursor: default; }
+.lib-preview__row:hover { background: none; }
+
+.lib-foot { margin-top: var(--sp-4); }
+
 /* DESIGN.md's figure rule, and the first consumer --fs-heading has
    had: display face, 700, line-height 1, tabular figures. */
 /* The caption half of the fixed pair. No text-indent: the rule that

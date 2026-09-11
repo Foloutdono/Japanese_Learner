@@ -88,6 +88,23 @@ EVENTS: dict[str, frozenset[str]] = {
     "offer_intent":   frozenset({"where", "ms"}),
     "offer_dismiss":  frozenset({"where", "ms"}),
 
+    # ── The library ──────────────────────────────────────────────
+    # Whether learners give each other decks at all, and whether a
+    # follow survives contact with the deck.
+    #
+    # NOT A DECK NAME, and not a description: both are learner-typed,
+    # which is the rule this whole module exists to keep. `structure` is
+    # the deck's type (one of four), `cards` is a count, `where` is
+    # which surface the follow came from (the shelf block or the library
+    # screen), and `sort` is which ordering was showing. A deck id is
+    # not carried either -- it would make the trail say who follows
+    # whom, which is more than "is the library used" needs to know.
+    "deck_publish":   frozenset({"structure", "cards"}),
+    "deck_unpublish": frozenset({"structure", "followers"}),
+    "deck_subscribe": frozenset({"structure", "cards", "where"}),
+    "deck_detach":    frozenset({"structure", "cards", "withdrawn"}),
+    "library_view":   frozenset({"sort", "results"}),
+
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
     # response body is ever carried.
@@ -103,6 +120,11 @@ EVENTS: dict[str, frozenset[str]] = {
 KEEP_LONG = frozenset({
     "boarding_step", "boarding_done", "account_claimed",
     "fare_blocked", "limit_reached", "offer_view", "offer_intent", "offer_dismiss",
+    # Publishing is a once-or-twice-ever act, and "did the people who
+    # published a deck keep doing it" is a question about a whole
+    # account. deck_subscribe and library_view are not here: those are
+    # per-visit and belong in the rollup.
+    "deck_publish", "deck_detach",
 })
 
 # A property value is a scalar or it is dropped. Strings are cut at 64

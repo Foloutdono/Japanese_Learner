@@ -430,6 +430,35 @@ still use (the dial, `.onb-test*`, `.onb-action`/`.onb-link`/
 the `landing*` and unused `onb*` locale keys, and `config/tabs.js`'s
 `getShowcase`. Their baseline entries went in the same commit.
 
+## The library (`.lib-*`, plans 079-083)
+
+Decks other learners published. Not on the canvas — it postdates it — so this
+is the class map rather than a port note.
+
+| Class | Where | What |
+|---|---|---|
+| `.lib-shelf` | `components/decks/LibraryShelf.jsx` | The block under 教材's own grid on `/learn/decks`. Prints nothing at all while the library is empty |
+| `.lib-shelf__more` | both shelves | "See all" / "Show more" — a quiet full-width row, not a `.btn-secondary`: this is navigation, not an action on the screen's object |
+| `.lib-card` + `__author` `__blurb` `__follows` | `components/decks/LibraryCard.jsx` | A published deck. It wears `.platform-card .deck-card` and adds only the two figures a public deck has that a private one does not |
+| `.lib-controls` `__count` | `screens/LibraryScreen.jsx` | The ordering (a `Seg`, not chips) and the tally. **Not a `Console`** — a console's second row is a search field, and there is nothing to search here yet |
+| `.lib-blurb` `.lib-note` | `screens/PublicDeckScreen.jsx` | The author's description, and the quiet line that says what following actually does |
+| `.lib-warning` `__lead` | `screens/DeckDetailScreen.jsx` | Warn, then vanish: the author has deleted this deck. A state colour on a left rule, never a fill |
+| `.lib-preview` `__row` `.lib-foot` | `screens/PublicDeckScreen.jsx` | The read-only card list, and the report control under it |
+
+Two things worth knowing before touching it:
+
+- **The heading is "Library", with no Japanese pair.** Owner-directed, recorded
+  in `DESIGN.md` beside the analyzer's Latin-first exception. The 蘇芳
+  `--line-decks` pigment stays — a line colour is not a name.
+- **The library needs no registry entry.** `config/stations.js`'s
+  `stationFor()` falls back to the longest matching prefix, so
+  `/learn/decks/library` already inherits 教材's KZ roundel, きょうざい and its
+  pigment. It is a place under the deck station, not a twelfth line.
+
+Pinned by `LibraryCard.phone.test.jsx` (390 px: no overflow, one thumb target,
+the description clamped and measured), `LibraryScreen.browser.test.jsx` and
+`DeckDetailScreen.roles.browser.test.jsx`.
+
 ## Still to port
 
 `.offer*`, `.pass-tag`, `.brd-offer__*`, `.brd-perks*`, `.brd-plan*` (with the

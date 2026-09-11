@@ -310,8 +310,9 @@ CREATE TABLE frequency_overrides (
 CREATE INDEX idx_frequency_overrides_user_domain
 ON frequency_overrides(user_id, domain);
 
--- decks, custom_cards, and deck_cards — the whole custom-deck
--- feature's schema — are self-migrated by decks.py at import time
+-- decks, custom_cards, deck_cards, deck_subscriptions and
+-- deck_reports — the whole custom-deck and library schema — are
+-- self-migrated by decks.py at import time
 -- (_ensure_deck_schema), same pattern SRSEngine uses for cards/
 -- card_modes/review_log. Listed here for reference, not a migration
 -- you need to run by hand. (Earlier versions of this file assumed
@@ -320,16 +321,37 @@ ON frequency_overrides(user_id, domain);
 -- with UndefinedTable. All three are created together now, in
 -- dependency order, so decks.py is fully self-contained.)
 
+-- `visibility` and `description` are the library (publish a deck,
+-- follow someone else's). Publication lives here rather than in a side
+-- table because it is 1:1 with a deck and every deck query already
+-- selects from this one.
+--
+-- `withdrawn_at` is a different question and deliberately a different
+-- column: it is set when an author DELETES a deck other learners
+-- follow. The deck then leaves the author's shelf and their deck limit
+-- (core/credits.check_deck_limit) and survives only so its followers
+-- can still copy it, until scripts/prune_withdrawn.py collects it.
+-- Unpublishing, by contrast, only delists — it changes nothing for the
+-- people already following.
 CREATE TABLE decks (
     id BIGSERIAL PRIMARY KEY,
     user_id TEXT NOT NULL,
     name TEXT NOT NULL,
-    type TEXT NOT NULL DEFAULT 'mixed',
+    type TEXT NOT NULL DEFAULT 'standard',
+    description TEXT NOT NULL DEFAULT '',
+    visibility TEXT NOT NULL DEFAULT 'private',   -- 'private' | 'public'
+    published_at TIMESTAMPTZ,
+    withdrawn_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX idx_decks_user
 ON decks(user_id);
+
+-- Partial: published decks are a small minority of the table, and the
+-- library's only ordering is by publication date.
+CREATE INDEX idx_decks_public
+ON decks(published_at DESC) WHERE visibility = 'public';
 
 -- The user's own hand-authored cards. deck_cards below only ever
 -- holds *references* into the read-only app decks — never a copy of
@@ -377,6 +399,41 @@ CREATE TABLE deck_cards (
 
 CREATE INDEX idx_deck_cards_deck
 ON deck_cards(deck_id, user_id);
+
+-- Who follows whose deck. A subscription is a LINK, never a copy: the
+-- deck, its custom_cards and its deck_cards all stay the author's, and
+-- a follower's own SRS state is keyed on the same deck-scoped raw id
+-- ("custom_{deck_id}_{card_id}") under their own user prefix — so two
+-- followers of one deck never share progress, and neither shares the
+-- author's. POST /api/decks/{id}/detach is what turns a link into a
+-- real copy, carrying the follower's progress across the new ids.
+CREATE TABLE deck_subscriptions (
+    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (deck_id, user_id)
+);
+
+-- The PK already indexes (deck_id, ...); this is the other direction --
+-- "which decks does this learner follow" -- asked by GET /api/decks and
+-- by routes/today.py on every queue build.
+CREATE INDEX idx_deck_subscriptions_user
+ON deck_subscriptions(user_id);
+
+-- Moderation is a queue, not a mechanism: a report records that someone
+-- objected and nothing is hidden automatically. UNIQUE(deck_id,
+-- user_id) makes reporting idempotent. `reason` is a closed enum
+-- (routes/decks.REPORT_REASONS), never free text -- a free-text field
+-- here would be learner-typed content on a path with no way to refuse
+-- it.
+CREATE TABLE deck_reports (
+    id BIGSERIAL PRIMARY KEY,
+    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+    user_id TEXT NOT NULL,
+    reason TEXT NOT NULL,
+    reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    UNIQUE (deck_id, user_id)
+);
 
 -- One row per video/subtitle analysis request. `sentences` holds the
 -- LOCAL tier only (study/analysis.py's analyze_local, no per-user

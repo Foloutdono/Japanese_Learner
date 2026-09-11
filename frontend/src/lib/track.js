@@ -43,6 +43,14 @@ export const EVENTS = {
   offer_view: ['where'],
   offer_intent: ['where', 'ms'],
   offer_dismiss: ['where', 'ms'],
+  // The library. Never a deck name or description — both are
+  // learner-typed, and no deck id either: the trail should say whether
+  // learners give each other decks, not who follows whom.
+  deck_publish: ['structure', 'cards'],
+  deck_unpublish: ['structure', 'followers'],
+  deck_subscribe: ['structure', 'cards', 'where'],
+  deck_detach: ['structure', 'cards', 'withdrawn'],
+  library_view: ['sort', 'results'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }

@@ -87,6 +87,17 @@ or filtering sentences should not need vocabulary to operate the tool that
 teaches it. Owner-directed in the analyzer mockup round. Do not cite it as
 precedent for other stations without the same argument.
 
+**A second standing exception (2026-09-11): the Library is "Library" alone.**
+Its block under 教材's grid, its own screen and the public deck page print the
+learner's word and no Japanese heading at all. This is not the rule above
+being broken but the rule above being applied — a library of decks other
+learners wrote has no Japanese term in the app's own vocabulary, and 書庫 /
+文庫 / 貸出 were all names that would have had to be invented for it. The
+蘇芳 pigment stays, because a line colour is not a name: it is what keeps the
+library reading as part of 教材 rather than a twelfth line. `SectionHeader`'s
+own unpaired form is what draws the heading. Owner-directed. Same caveat as
+above — this is one section's argument, not a licence to drop pairs elsewhere.
+
 There is a second top-level rule, below, that outranks this one where they
 collide — see "Say less."
 

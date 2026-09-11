@@ -207,7 +207,16 @@ def _profile_row(user_id: str) -> tuple:
     return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False)
 
 
-def _usernames_for(user_ids: list[str]) -> dict[str, str]:
+def usernames_for(user_ids: list[str]) -> dict[str, str]:
+    """
+    The display name for each of these user ids, in one round trip.
+
+    Public, and deliberately so: it is the seam any surface that names
+    OTHER learners goes through — the leaderboard below, and the deck
+    library's attribution (routes/decks.py). Every user has a username
+    from first sight (ensure_profile_row), so a missing key here means a
+    row that is genuinely gone, not one that was never written.
+    """
     if not user_ids:
         return {}
     conn = db_conn()
@@ -569,7 +578,7 @@ def get_leaderboard(
 ):
     days = 7 if period == "week" else None
     top = srs.get_leaderboard(limit=limit, days=days)
-    names = _usernames_for([e["user_id"] for e in top])
+    names = usernames_for([e["user_id"] for e in top])
 
     entries = [
         {

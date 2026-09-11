@@ -3,6 +3,7 @@ import logging
 import csv
 import io
 import random
+from dataclasses import dataclass
 from urllib.parse import quote
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Query, Response
 from pydantic import BaseModel
@@ -34,6 +35,11 @@ from study.furigana import align_deck as align_furigana, align_sentence
 from routes.kanji import _build_kanji_card
 from routes.vocab import _build_vocab_card
 from routes.grammar import _build_grammar_card
+# The library attributes a deck to its author by display name. Reused
+# rather than re-queried: this is the same bulk lookup the leaderboard
+# goes through, which is also the precedent for showing one learner
+# another learner's username at all.
+from routes.profile import usernames_for
 from study.structures import (
     ALL_KEYS as STRUCTURE_KEYS,
     decode_readings,
@@ -290,6 +296,195 @@ def _linked_entry(source: str, level: str, raw_id: str) -> dict | None:
     return entry
 
 
+# ── WHO MAY SEE WHAT ──────────────────────────────────────
+#
+# Until the library, every deck query in this file was `WHERE
+# user_id = %s` and viewer == owner was a safe assumption. It no
+# longer is: a FOLLOWED deck's content belongs to its author while
+# the SRS progress over that content belongs to the reader. Those
+# are two different user ids in the same request, and mixing them
+# up is the one mistake in this feature that silently corrupts
+# data rather than erroring.
+#
+# So the pair is resolved once, into a DeckAccess, and every helper
+# takes that object rather than two loose strings — passing the
+# viewer where the owner was meant should be unspellable, not
+# merely discouraged.
+
+OWNER  = "owner"   # a write: the content is the author's to change
+READER = "reader"  # a read:  the author or someone following the deck
+PUBLIC = "public"  # a read:  the above, or anyone at all if published
+
+VISIBILITIES = ("private", "public")
+
+# How long a deck the author deleted stays readable for the people who
+# follow it, so they can make it theirs before it goes. Collected by
+# scripts/prune_withdrawn.py.
+WITHDRAWN_GRACE_DAYS = 30
+
+# What a report can say. Closed, and deliberately coarse: a free-text
+# field here would be learner-typed content on a moderation path.
+REPORT_REASONS = ("spam", "offensive", "wrong", "copyright", "other")
+
+
+@dataclass(frozen=True)
+class DeckAccess:
+    """Who owns a deck's rows, and who is reading them."""
+
+    deck_id:     int   # COERCED — never the raw path string. See _deck_pk.
+    owner_id:    str   # whose decks/custom_cards/deck_cards rows to read
+    viewer_id:   str   # whose SRS state to read and write
+    name:        str
+    type:        str   # the structure
+    description: str
+    visibility:  str   # one of VISIBILITIES
+    withdrawn:   bool  # the author deleted it; it lives for followers only
+    role:        str   # 'owner' | 'follower' | 'visitor'
+
+    @property
+    def owned(self) -> bool:
+        return self.role == "owner"
+
+
+def _deck_pk(deck_id) -> int:
+    """
+    The path segment as the bigint `decks.id` actually is.
+
+    Two bugs live at this seam, and coercing here closes both.
+
+    A non-numeric id used to reach Postgres unconverted and raise out
+    of the driver as a 500 rather than the 404 it plainly is — which
+    also meant any literal route segment declared in the wrong order
+    (see get_structures) failed loudly instead of harmlessly.
+
+    Worse, Postgres happily casts '042' to 42, so `/api/decks/042/...`
+    found the right deck while _build_pool went on building its raw
+    ids — `custom_042_7` — from the *string*. That is a whole second,
+    invisible SRS track for the same deck, reachable by typing a
+    leading zero. Everything downstream now reads DeckAccess.deck_id,
+    which is an int, so there is only one spelling of a deck again.
+    """
+    try:
+        return int(str(deck_id).strip())
+    except (TypeError, ValueError):
+        raise HTTPException(status_code=404, detail="Deck not found")
+
+
+def deck_access(conn, deck_id, viewer_id: str, need: str = READER) -> DeckAccess:
+    """
+    Resolve a deck for this viewer, or raise.
+
+    Takes the caller's connection, the same contract _listed_cards has,
+    so an endpoint that goes on to read cards does both on one.
+
+    404, not 403, for a deck the viewer may not see at all: whether a
+    private deck exists is itself the author's business. A FOLLOWER
+    attempting a write is the one case that gets 403 — they can see the
+    deck, so 404 would be a lie, and the UI needs to tell them to make
+    it theirs first rather than that it is gone.
+    """
+    pk = _deck_pk(deck_id)
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("""
+            SELECT d.id, d.user_id AS owner_id, d.name, d.type,
+                   d.description, d.visibility,
+                   (d.withdrawn_at IS NOT NULL) AS withdrawn,
+                   (s.user_id IS NOT NULL) AS followed
+            FROM decks d
+            LEFT JOIN deck_subscriptions s
+                   ON s.deck_id = d.id AND s.user_id = %s
+            WHERE d.id = %s
+        """, (viewer_id, pk))
+        row = cur.fetchone()
+
+    if row is None:
+        raise HTTPException(status_code=404, detail="Deck not found")
+
+    # A withdrawn deck is one its author has already deleted: it is gone
+    # for them and for the library, and exists only so the people who
+    # follow it can copy it before it is collected.
+    if row["owner_id"] == viewer_id and not row["withdrawn"]:
+        role = "owner"
+    elif row["followed"]:
+        role = "follower"
+    elif row["visibility"] == "public" and not row["withdrawn"]:
+        role = "visitor"
+    else:
+        raise HTTPException(status_code=404, detail="Deck not found")
+
+    if need == OWNER and role != "owner":
+        raise HTTPException(status_code=403, detail="This deck belongs to someone else")
+    if need == READER and role == "visitor":
+        # Browsing the library is not studying from it; following is the
+        # act that puts a deck on your shelf.
+        raise HTTPException(status_code=404, detail="Deck not found")
+
+    return DeckAccess(
+        deck_id=row["id"], owner_id=row["owner_id"], viewer_id=viewer_id,
+        name=row["name"], type=row["type"], description=row["description"],
+        visibility=row["visibility"], withdrawn=row["withdrawn"], role=role,
+    )
+
+
+def resolve_deck(deck_id, viewer_id: str, need: str = READER) -> DeckAccess:
+    """deck_access for the handlers that have no connection of their own."""
+    conn = db_conn()
+    try:
+        return deck_access(conn, deck_id, viewer_id, need)
+    finally:
+        conn.close()
+
+
+# Owned ∪ followed — the shelf, and the same definition routes/today.py
+# needs when it builds the day's queue. Declared once here rather than
+# written twice: the two drifting apart would mean a followed deck whose
+# cards are due but which the shelf does not show, or the reverse.
+VISIBLE_DECKS_CTE = """
+    SELECT id AS deck_id, 'owner'::text AS role
+      FROM decks WHERE user_id = %(me)s AND withdrawn_at IS NULL
+    UNION ALL
+    SELECT deck_id, 'follower'::text FROM deck_subscriptions WHERE user_id = %(me)s
+"""
+
+
+def _deck_payload(conn, access: DeckAccess) -> dict:
+    """
+    One deck as every screen that shows a deck wants it: the identity
+    from the access object, the figures from the author's rows.
+
+    `author` is None for your own deck — the shelf already knows whose
+    that is, and the name would only be noise on it.
+    """
+    with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+        cur.execute("""
+            SELECT
+              d.created_at,
+              d.published_at,
+              (SELECT COUNT(*) FROM custom_cards WHERE deck_id = d.id) AS custom_count,
+              (SELECT COUNT(*) FROM deck_cards
+                WHERE deck_id = d.id AND user_id = d.user_id)          AS app_count,
+              (SELECT COUNT(*) FROM deck_subscriptions WHERE deck_id = d.id) AS followers
+            FROM decks d WHERE d.id = %s
+        """, (access.deck_id,))
+        row = dict(cur.fetchone())
+
+    return {
+        "id":           access.deck_id,
+        "name":         access.name,
+        "type":         access.type,
+        "description":  access.description,
+        "visibility":   access.visibility,
+        "withdrawn":    access.withdrawn,
+        "role":         access.role,
+        "created_at":   row["created_at"],
+        "published_at": row["published_at"],
+        "card_count":   row["custom_count"] + row["app_count"],
+        "followers":    row["followers"],
+        "author":       None if access.owned
+                        else usernames_for([access.owner_id]).get(access.owner_id),
+    }
+
+
 def _ensure_deck_schema() -> None:
     """
     Self-migrating, same pattern SRSEngine._init_db uses. This used to
@@ -413,6 +608,83 @@ def _ensure_deck_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_deck_cards_deck
                 ON deck_cards(deck_id, user_id)
             """)
+            # ── The library: publication, and who follows what ──
+            #
+            # Publication is COLUMNS ON decks, not a side table: it is
+            # 1:1 with a deck, has no lifetime of its own, and every
+            # deck endpoint already selects from `decks` — a side table
+            # would add a LEFT JOIN to all of them to answer a
+            # three-field question. Additive and idempotent, like every
+            # ALTER above it.
+            #
+            # `visibility` is 'private' | 'public' and is what the
+            # AUTHOR chose. There is no CHECK constraint on purpose: the
+            # enum is validated in Python against VISIBILITIES, the same
+            # way DECK_TYPES is — one place to read, and a migration
+            # never fights a constraint.
+            #
+            # `withdrawn_at` is a different question and must not be
+            # folded into the same column: it is set when the author
+            # DELETES a deck other learners follow. The deck then leaves
+            # the author's shelf and their limits, survives only for its
+            # followers (so "make it mine" still has something to copy),
+            # and is collected for real by scripts/prune_withdrawn.py
+            # after the grace period. Unpublishing, by contrast, changes
+            # nothing for existing followers — it only delists.
+            cur.execute("""
+                ALTER TABLE decks
+                    ADD COLUMN IF NOT EXISTS visibility   TEXT NOT NULL DEFAULT 'private',
+                    ADD COLUMN IF NOT EXISTS description  TEXT NOT NULL DEFAULT '',
+                    ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ,
+                    ADD COLUMN IF NOT EXISTS withdrawn_at TIMESTAMPTZ
+            """)
+            # Partial: published decks are a small minority of the
+            # table, and the library's only ordering is by publication
+            # date.
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_decks_public
+                ON decks(published_at DESC) WHERE visibility = 'public'
+            """)
+            # A subscription is a LINK, never a copy. The deck, its
+            # custom_cards and its deck_cards all stay the author's; the
+            # follower's own SRS state is keyed on the same deck-scoped
+            # raw id under their own user prefix (core/auth.prefixed),
+            # so two followers of one deck never share progress and
+            # neither shares the author's. POST /{id}/detach is what
+            # turns a link into a real copy.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS deck_subscriptions (
+                    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+                    user_id TEXT NOT NULL,
+                    subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (deck_id, user_id)
+                )
+            """)
+            # The PK already indexes (deck_id, ...); this is the other
+            # direction — "which decks does this learner follow" — asked
+            # by GET /api/decks and by routes/today.py on every queue
+            # build.
+            cur.execute("""
+                CREATE INDEX IF NOT EXISTS idx_deck_subscriptions_user
+                ON deck_subscriptions(user_id)
+            """)
+            # Moderation is a queue, not a mechanism: a report records
+            # that someone objected, and nothing is hidden automatically.
+            # UNIQUE(deck_id, user_id) makes reporting idempotent —
+            # tapping it twice is not two reports. `reason` is a closed
+            # enum (REPORT_REASONS), never free text: a free-text field
+            # here would be learner-typed content on a moderation path
+            # with no way to refuse it.
+            cur.execute("""
+                CREATE TABLE IF NOT EXISTS deck_reports (
+                    id BIGSERIAL PRIMARY KEY,
+                    deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
+                    user_id TEXT NOT NULL,
+                    reason TEXT NOT NULL,
+                    reported_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    UNIQUE (deck_id, user_id)
+                )
+            """)
         conn.commit()
     finally:
         conn.close()
@@ -475,14 +747,26 @@ DECK_TYPES = STRUCTURES
 
 @router.get("/api/decks")
 def get_decks(user_id: str = Depends(get_user_id)):
+    """
+    The shelf: decks this learner owns, plus every deck they follow from
+    the library. `role` tells the two apart, and a followed deck carries
+    its `author` so the shelf can say whose it is.
+
+    The counts are the AUTHOR's rows in both cases — a followed deck is a
+    link, not a copy, so there is only ever one set of cards to count.
+    """
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
-                SELECT d.id, d.name, d.type, d.created_at,
+            cur.execute(f"""
+                WITH mine AS ({VISIBLE_DECKS_CTE})
+                SELECT d.id, d.name, d.type, d.created_at, d.description,
+                       d.visibility, d.user_id AS owner_id, m.role,
+                       (d.withdrawn_at IS NOT NULL) AS withdrawn,
                        COALESCE(c.custom_count, 0) AS custom_count,
                        COALESCE(dc.app_count, 0)   AS app_count
-                FROM decks d
+                FROM mine m
+                JOIN decks d ON d.id = m.deck_id
                 LEFT JOIN (
                     SELECT deck_id, COUNT(*) AS custom_count
                     FROM custom_cards GROUP BY deck_id
@@ -491,12 +775,14 @@ def get_decks(user_id: str = Depends(get_user_id)):
                     SELECT deck_id, user_id, COUNT(*) AS app_count
                     FROM deck_cards GROUP BY deck_id, user_id
                 ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                WHERE d.user_id = %s
                 ORDER BY d.created_at DESC
-            """, (user_id,))
+            """, {"me": user_id})
             decks = [dict(row) for row in cur.fetchall()]
+
+        authors = usernames_for([d["owner_id"] for d in decks if d["role"] != "owner"])
         for d in decks:
             d["card_count"] = d.pop("custom_count") + d.pop("app_count")
+            d["author"] = authors.get(d.pop("owner_id"))
         return {"decks": decks}
     finally:
         conn.close()
@@ -568,6 +854,489 @@ def get_structures():
     return {"structures": describe_structures()}
 
 
+# ── THE LIBRARY ───────────────────────────────────────────
+#
+# Publishing a deck does not copy it anywhere. A follower gets a LINK:
+# the deck, its cards and every later edit to them stay the author's,
+# and what the follower owns is their own progress over that content.
+# POST /{id}/detach is the one door out of that arrangement, and it
+# makes a real copy.
+#
+# Both library routes are declared HERE, beside get_structures and
+# BEFORE every /api/decks/{deck_id} route, for the reason written
+# there: FastAPI matches in declaration order, so "library" would
+# otherwise be read as a deck id.
+
+LIBRARY_LIMIT = 24
+LIBRARY_PREVIEW = 20
+DESCRIPTION_MAX = 280
+
+# Ordering the library offers. A dict rather than an interpolated
+# parameter: this text is concatenated into SQL, so the set of things it
+# can be has to be closed here rather than checked at the call site.
+LIBRARY_SORTS = {
+    "new":      "d.published_at DESC NULLS LAST, d.id DESC",
+    "followed": "followers DESC, d.published_at DESC NULLS LAST, d.id DESC",
+}
+
+
+class DeckEditPayload(BaseModel):
+    name: str | None = None
+    description: str | None = None
+
+
+class ReportPayload(BaseModel):
+    reason: str
+
+
+@router.get("/api/decks/library")
+def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
+                sort: str = "new", user_id: str = Depends(get_user_id)):
+    """
+    Published decks, newest or most-followed first.
+
+    Same page/limit/total/has_more envelope the dictionary uses, so the
+    frontend pages it the way it already pages everything else.
+
+    Your own decks are excluded, and so are the ones you already follow:
+    both are on the shelf directly above this, and listing a deck twice
+    on one screen — once as yours, once as something to discover — is
+    the kind of noise a short library cannot afford.
+    """
+    order = LIBRARY_SORTS.get(sort)
+    if order is None:
+        raise HTTPException(status_code=400, detail="Unknown sort")
+
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT COUNT(*) AS n FROM decks d
+                WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
+                  AND d.user_id <> %(me)s
+                  AND NOT EXISTS (
+                      SELECT 1 FROM deck_subscriptions s
+                      WHERE s.deck_id = d.id AND s.user_id = %(me)s
+                  )
+            """, {"me": user_id})
+            total = cur.fetchone()["n"]
+
+            cur.execute(f"""
+                SELECT d.id, d.name, d.description, d.type, d.published_at,
+                       d.user_id AS owner_id,
+                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
+                       COALESCE(f.followers, 0) AS followers,
+                       (mine.user_id IS NOT NULL) AS followed
+                FROM decks d
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS custom_count
+                    FROM custom_cards GROUP BY deck_id
+                ) c  ON c.deck_id = d.id
+                LEFT JOIN (
+                    SELECT deck_id, user_id, COUNT(*) AS app_count
+                    FROM deck_cards GROUP BY deck_id, user_id
+                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS followers
+                    FROM deck_subscriptions GROUP BY deck_id
+                ) f  ON f.deck_id = d.id
+                LEFT JOIN deck_subscriptions mine
+                       ON mine.deck_id = d.id AND mine.user_id = %(me)s
+                WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
+                  AND d.user_id <> %(me)s
+                  AND mine.user_id IS NULL
+                ORDER BY {order}
+                LIMIT %(limit)s OFFSET %(offset)s
+            """, {"me": user_id, "limit": limit, "offset": page * limit})
+            rows = [dict(r) for r in cur.fetchall()]
+    finally:
+        conn.close()
+
+    authors = usernames_for([r["owner_id"] for r in rows])
+    for r in rows:
+        r["author"] = authors.get(r.pop("owner_id"))
+
+    return {
+        "results":  rows,
+        "total":    total,
+        "page":     page,
+        "limit":    limit,
+        "has_more": page * limit + limit < total,
+    }
+
+
+@router.get("/api/decks/library/{deck_id}")
+def get_library_deck(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """
+    One published deck, with enough of its cards to judge it by.
+
+    PUBLIC: this is the page you read BEFORE deciding to follow, so it
+    answers to anyone while the deck is published — and goes on
+    answering to the people already following it once it is not.
+    """
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=PUBLIC)
+        payload = _deck_payload(conn, access)
+        payload["followed"] = access.role == "follower"
+        # Sliced from the same listing the deck screen uses rather than
+        # a second query shaped differently: a preview that disagreed
+        # with the deck you then followed would be the worst kind of
+        # wrong.
+        payload["preview"] = _listed_cards(conn, access, lang)[:LIBRARY_PREVIEW]
+        return payload
+    finally:
+        conn.close()
+
+
+@router.patch("/api/decks/{deck_id}")
+def edit_deck(deck_id: str, payload: DeckEditPayload,
+              user_id: str = Depends(get_user_id)):
+    """
+    Rename a deck, or write the description the library shows.
+
+    A deck could not be renamed at all before the library — it was
+    create-and-delete — which was survivable while a deck name was
+    private and is not once other people read it.
+    """
+    access = resolve_deck(deck_id, user_id, need=OWNER)
+
+    sets, params = [], []
+    if payload.name is not None:
+        name = payload.name.strip()
+        if not name:
+            raise HTTPException(status_code=400, detail="A deck needs a name")
+        sets.append("name = %s")
+        params.append(name)
+    if payload.description is not None:
+        sets.append("description = %s")
+        params.append(payload.description.strip()[:DESCRIPTION_MAX])
+    if not sets:
+        raise HTTPException(status_code=400, detail="Nothing to change")
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                f"UPDATE decks SET {', '.join(sets)} WHERE id = %s AND user_id = %s",
+                (*params, access.deck_id, access.owner_id),
+            )
+        conn.commit()
+        return _deck_payload(conn, deck_access(conn, deck_id, user_id, need=PUBLIC))
+    finally:
+        conn.close()
+
+
+@router.post("/api/decks/{deck_id}/publish")
+def publish_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    Put a deck in the library.
+
+    An empty deck is refused: it costs every browser of the library a
+    tap to find out there is nothing in it, and the author loses
+    nothing by publishing once they have written a card.
+    """
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT (SELECT COUNT(*) FROM custom_cards WHERE deck_id = %(d)s)
+                     + (SELECT COUNT(*) FROM deck_cards
+                         WHERE deck_id = %(d)s AND user_id = %(o)s) AS n
+            """, {"d": access.deck_id, "o": access.owner_id})
+            if cur.fetchone()["n"] == 0:
+                raise HTTPException(status_code=400,
+                                    detail="An empty deck cannot be published")
+            # published_at is set once and kept: it is the library's
+            # ordering, and re-publishing a deck should not jump it back
+            # to the top of the shelf.
+            cur.execute("""
+                UPDATE decks
+                   SET visibility = 'public',
+                       published_at = COALESCE(published_at, NOW())
+                 WHERE id = %s AND user_id = %s
+            """, (access.deck_id, access.owner_id))
+        conn.commit()
+        return _deck_payload(conn, deck_access(conn, deck_id, user_id, need=PUBLIC))
+    finally:
+        conn.close()
+
+
+@router.delete("/api/decks/{deck_id}/publish")
+def unpublish_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    Take a deck back out of the library.
+
+    This DELISTS and nothing more: people already following it keep
+    their link and notice nothing. Removing it from under them is what
+    deleting the deck does, and that has its own warning and its own
+    grace period — see delete_deck.
+    """
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("UPDATE decks SET visibility = 'private' WHERE id = %s AND user_id = %s",
+                        (access.deck_id, access.owner_id))
+            cur.execute("SELECT COUNT(*) AS n FROM deck_subscriptions WHERE deck_id = %s",
+                        (access.deck_id,))
+            followers = cur.fetchone()["n"]
+        conn.commit()
+        return {"ok": True, "followers": followers}
+    finally:
+        conn.close()
+
+
+@router.post("/api/decks/{deck_id}/subscribe")
+def follow_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """Follow a published deck: it joins the shelf and the daily queue."""
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=PUBLIC)
+        if access.owned:
+            # Not 400: following your own deck is not a malformed
+            # request, it is one the shelf would answer by listing the
+            # deck twice.
+            raise HTTPException(status_code=409, detail="This deck is already yours")
+        if access.role == "follower":
+            return {"ok": True, "followed": True}
+        if access.visibility != "public" or access.withdrawn:
+            raise HTTPException(status_code=404, detail="Deck not found")
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO deck_subscriptions (deck_id, user_id) VALUES (%s, %s)
+                ON CONFLICT (deck_id, user_id) DO NOTHING
+            """, (access.deck_id, user_id))
+        conn.commit()
+        return {"ok": True, "followed": True}
+    finally:
+        conn.close()
+
+
+@router.delete("/api/decks/{deck_id}/subscribe")
+def unfollow_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    Stop following a deck.
+
+    The scheduler rows are KEPT on purpose. They are this learner's own
+    work, they are keyed on a raw id nothing else can collide with, and
+    following the deck again restores every one of them — which is the
+    kinder answer to a mis-tap than starting the deck over. They are
+    unreachable meanwhile: the daily queue only lists cards of decks on
+    the shelf (routes/today.py), so nothing counts them as due.
+    """
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id)
+        if access.owned:
+            raise HTTPException(status_code=409, detail="This deck is your own")
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM deck_subscriptions WHERE deck_id = %s AND user_id = %s",
+                        (access.deck_id, user_id))
+        conn.commit()
+        return {"ok": True, "followed": False}
+    finally:
+        conn.close()
+
+
+@router.post("/api/decks/{deck_id}/report")
+def report_deck(deck_id: str, payload: ReportPayload,
+                user_id: str = Depends(get_user_id)):
+    """
+    Flag a published deck.
+
+    Nothing is hidden automatically and nothing is counted toward a
+    threshold: the row is a queue for a person to read. Reporting twice
+    is one report — the UNIQUE makes that structural rather than a rule
+    the client has to remember.
+    """
+    if payload.reason not in REPORT_REASONS:
+        raise HTTPException(status_code=400, detail="Unknown reason")
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id, need=PUBLIC)
+        if access.owned:
+            raise HTTPException(status_code=400, detail="This deck is your own")
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO deck_reports (deck_id, user_id, reason) VALUES (%s, %s, %s)
+                ON CONFLICT (deck_id, user_id)
+                DO UPDATE SET reason = EXCLUDED.reason, reported_at = NOW()
+            """, (access.deck_id, user_id, payload.reason))
+        conn.commit()
+        return {"ok": True}
+    finally:
+        conn.close()
+
+
+@router.post("/api/decks/{deck_id}/detach")
+def detach_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    "Make it mine" — turn a followed deck into a private copy.
+
+    The copy carries the learner's PROGRESS, not just the cards. A
+    personal card's raw id embeds its deck (`custom_{deck}_{card}`), so
+    copying the rows alone would silently reset every card in the deck
+    to new; the scheduler rows are re-keyed to the new ids here instead.
+
+    Three things are deliberately not done:
+
+    * review_log is NOT copied. Lifetime XP, the level and the streak
+      are all SUM/COUNT over it, so a copy would pay the learner twice
+      for one history. The old rows stay where they are — they still
+      carry this learner's own prefix, so nothing about their totals
+      moves — and only the SCHEDULER moves to the new ids.
+    * card_first_review IS copied, and it is the non-obvious one:
+      get_new_items_today takes MIN over review_log ∪ card_first_review
+      per card, so without it every copied card counts as met today and
+      spends a slot of the day's new-card pace on a card seen months
+      ago.
+    * None of it goes through srs.*. core/db and srs/storage are
+      separate pools with separate transactions, so a call into the
+      engine here would commit half this work independently; a crash
+      between the halves would leave a deck with no progress, or
+      progress with no deck.
+    """
+    conn = db_conn()
+    try:
+        access = deck_access(conn, deck_id, user_id)
+        if access.owned:
+            raise HTTPException(status_code=400, detail="This deck is already yours")
+
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # The lock, and the double-tap guard: the second caller
+            # blocks here and then finds no subscription at all.
+            cur.execute("""
+                SELECT 1 FROM deck_subscriptions
+                WHERE deck_id = %s AND user_id = %s FOR UPDATE
+            """, (access.deck_id, user_id))
+            if cur.fetchone() is None:
+                raise HTTPException(status_code=404, detail="Deck not found")
+
+            cur.execute("""
+                SELECT (SELECT COUNT(*) FROM custom_cards
+                         WHERE deck_id = %(d)s AND user_id = %(o)s)
+                     + (SELECT COUNT(*) FROM deck_cards
+                         WHERE deck_id = %(d)s AND user_id = %(o)s) AS n
+            """, {"d": access.deck_id, "o": access.owner_id})
+            # Read before the limit checks, not after: they run their
+            # own queries on this same cursor and would consume the
+            # result set out from under the fetch.
+            incoming = cur.fetchone()["n"]
+            # Both limits BEFORE the first insert, against the whole
+            # batch: a free learner detaching a 400-card deck should be
+            # refused cleanly, not land half a deck. (The CSV import is
+            # per-row on purpose; this is not a file being salvaged.)
+            credits.check_deck_limit(cur, user_id)
+            credits.check_card_limit(cur, user_id, adding=incoming)
+
+            cur.execute("""
+                INSERT INTO decks (user_id, name, type, description)
+                SELECT %s, d.name, d.type, d.description FROM decks d WHERE d.id = %s
+                RETURNING id
+            """, (user_id, access.deck_id))
+            new_deck = cur.fetchone()["id"]
+
+            # INSERT..SELECT..RETURNING cannot return a column of its
+            # source, so the new ids are drawn from the sequence first
+            # and the map read back out of the same CTE. AS MATERIALIZED
+            # is load-bearing: it is what guarantees nextval runs once
+            # per row and that the insert and the final SELECT see the
+            # same values. `ins` is unreferenced by the outer query and
+            # runs anyway — a data-modifying CTE always does.
+            cur.execute("""
+                WITH src AS MATERIALIZED (
+                    SELECT id AS old_id, structure, fields, notes, created_at,
+                           nextval(pg_get_serial_sequence('custom_cards', 'id')) AS new_id
+                    FROM custom_cards
+                    WHERE deck_id = %(src)s AND user_id = %(owner)s
+                ),
+                ins AS (
+                    INSERT INTO custom_cards
+                        (id, deck_id, user_id, structure, fields, notes, created_at)
+                    SELECT new_id, %(new_deck)s, %(me)s, structure, fields, notes, created_at
+                    FROM src
+                )
+                SELECT old_id, new_id FROM src
+            """, {"src": access.deck_id, "owner": access.owner_id,
+                  "new_deck": new_deck, "me": user_id})
+            pairs = [(r["old_id"], r["new_id"]) for r in cur.fetchall()]
+
+            # App-sourced links need no remap at all: their raw ids are
+            # the app's own, so the progress is already shared and stays
+            # exactly where it is.
+            cur.execute("""
+                INSERT INTO deck_cards (deck_id, user_id, source, level, raw_id, added_at)
+                SELECT %s, %s, source, level, raw_id, added_at
+                FROM deck_cards WHERE deck_id = %s AND user_id = %s
+                ON CONFLICT (deck_id, source, raw_id) DO NOTHING
+            """, (new_deck, user_id, access.deck_id, access.owner_id))
+
+            if pairs:
+                old_ids = [f"{user_id}:custom_{access.deck_id}_{o}" for o, _ in pairs]
+                new_ids = [f"{user_id}:custom_{new_deck}_{n}" for _, n in pairs]
+                ids = {"old": old_ids, "new": new_ids}
+
+                # card_modes FKs to cards(id), so the registry first.
+                cur.execute("""
+                    INSERT INTO cards (id) SELECT x FROM unnest(%(new)s::text[]) AS t(x)
+                    ON CONFLICT (id) DO NOTHING
+                """, ids)
+                cur.execute("""
+                    WITH m AS (
+                        SELECT * FROM unnest(%(old)s::text[], %(new)s::text[])
+                        AS t(old_id, new_id)
+                    )
+                    INSERT INTO card_modes
+                        (card_id, mode, difficulty, stability, interval_days,
+                         repetitions, lapses, learning_step, is_learning,
+                         next_review, total_reviews, correct_reviews, last_quality)
+                    SELECT m.new_id, cm.mode, cm.difficulty, cm.stability, cm.interval_days,
+                           cm.repetitions, cm.lapses, cm.learning_step, cm.is_learning,
+                           cm.next_review, cm.total_reviews, cm.correct_reviews, cm.last_quality
+                    FROM card_modes cm JOIN m ON m.old_id = cm.card_id
+                    ON CONFLICT (card_id, mode) DO NOTHING
+                """, ids)
+                cur.execute("""
+                    WITH m AS (
+                        SELECT * FROM unnest(%(old)s::text[], %(new)s::text[])
+                        AS t(old_id, new_id)
+                    ),
+                    firsts AS (
+                        SELECT m.new_id, e.mode, MIN(e.at) AS first_at
+                        FROM m JOIN (
+                            SELECT card_id, mode, reviewed_at AS at FROM review_log
+                             WHERE card_id = ANY(%(old)s::text[])
+                            UNION ALL
+                            SELECT card_id, mode, first_at AS at FROM card_first_review
+                             WHERE card_id = ANY(%(old)s::text[])
+                        ) e ON e.card_id = m.old_id
+                        GROUP BY m.new_id, e.mode
+                    )
+                    INSERT INTO card_first_review (card_id, mode, first_at)
+                    SELECT new_id, mode, first_at FROM firsts
+                    ON CONFLICT (card_id, mode)
+                    DO UPDATE SET first_at = LEAST(card_first_review.first_at,
+                                                   EXCLUDED.first_at)
+                """, ids)
+
+                # Retire the old ids. review_log rows under them stay:
+                # they are the learner's real history and their XP, and
+                # they name a card no deck resolves — already true of
+                # every card delete_card has ever removed.
+                cur.execute("DELETE FROM card_modes WHERE card_id = ANY(%(old)s::text[])", ids)
+                cur.execute("DELETE FROM card_first_review WHERE card_id = ANY(%(old)s::text[])", ids)
+                cur.execute("DELETE FROM cards WHERE id = ANY(%(old)s::text[])", ids)
+
+            cur.execute("DELETE FROM deck_subscriptions WHERE deck_id = %s AND user_id = %s",
+                        (access.deck_id, user_id))
+        conn.commit()
+        return _deck_payload(conn, deck_access(conn, new_deck, user_id, need=OWNER))
+    finally:
+        conn.close()
+
+
 @router.get("/api/decks/{deck_id}")
 def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
     """
@@ -577,31 +1346,14 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
     they're opened without the router `state` that normally carries
     the deck object (a page refresh, a direct link, ...), instead of
     silently falling back to "no restriction" in that case.
+
+    PUBLIC, not READER: this is also the pre-follow preview, so a
+    published deck answers to anyone. `role` is what the screen reads to
+    decide whether to offer editing, following, or neither.
     """
     conn = db_conn()
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
-                SELECT d.id, d.name, d.type, d.created_at,
-                       COALESCE(c.custom_count, 0) AS custom_count,
-                       COALESCE(dc.app_count, 0)   AS app_count
-                FROM decks d
-                LEFT JOIN (
-                    SELECT deck_id, COUNT(*) AS custom_count
-                    FROM custom_cards GROUP BY deck_id
-                ) c  ON c.deck_id  = d.id
-                LEFT JOIN (
-                    SELECT deck_id, user_id, COUNT(*) AS app_count
-                    FROM deck_cards GROUP BY deck_id, user_id
-                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
-                WHERE d.id = %s AND d.user_id = %s
-            """, (deck_id, user_id))
-            row = cur.fetchone()
-            if not row:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            deck = dict(row)
-        deck["card_count"] = deck.pop("custom_count") + deck.pop("app_count")
-        return deck
+        return _deck_payload(conn, deck_access(conn, deck_id, user_id, need=PUBLIC))
     finally:
         conn.close()
 
@@ -630,16 +1382,52 @@ def create_deck(payload: DeckPayload, user_id: str = Depends(get_user_id)):
 
 @router.delete("/api/decks/{deck_id}")
 def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
+    """
+    Delete a deck — unless other learners follow it, in which case it is
+    WITHDRAWN instead.
+
+    Withdrawing is the "warn, then vanish" half of the library contract.
+    The deck leaves the author's shelf and their limits immediately and
+    their own progress on it is deleted, exactly as a delete would; what
+    survives is the content, so the people following it can still read
+    the warning and make it theirs before it goes.
+    scripts/prune_withdrawn.py collects it for real after
+    WITHDRAWN_GRACE_DAYS.
+
+    The one path that does not get this courtesy is account deletion
+    (routes/account.py), which erases everything at once on purpose —
+    the deck holds the author's own typed text, and ADR 0010's "delete
+    means delete" outranks a follower's convenience.
+    """
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id FROM custom_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
-            custom_keys = [f"{user_id}:custom_{deck_id}_{row['id']}" for row in cur.fetchall()]
+            cur.execute("SELECT id FROM custom_cards WHERE deck_id = %s AND user_id = %s",
+                        (access.deck_id, access.owner_id))
+            custom_keys = [f"{user_id}:custom_{access.deck_id}_{row['id']}"
+                           for row in cur.fetchall()]
+            # Read the followers BEFORE anything is deleted:
+            # deck_subscriptions FKs to decks ON DELETE CASCADE, so after
+            # the DELETE below there is nobody left to ask.
+            cur.execute("SELECT user_id FROM deck_subscriptions WHERE deck_id = %s",
+                        (access.deck_id,))
+            followers = [row["user_id"] for row in cur.fetchall()]
+
+        if followers:
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE decks SET visibility = 'private', withdrawn_at = NOW()
+                    WHERE id = %s AND user_id = %s
+                """, (access.deck_id, access.owner_id))
+            conn.commit()
+            srs.delete_cards(custom_keys)
+            return {"ok": True, "withdrawn": True, "followers": len(followers)}
 
         with conn.cursor() as cur:
             cur.execute(
                 "DELETE FROM decks WHERE id = %s AND user_id = %s",
-                (deck_id, user_id)
+                (access.deck_id, access.owner_id)
             )
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Deck not found")
@@ -655,17 +1443,39 @@ def delete_deck(deck_id: str, user_id: str = Depends(get_user_id)):
             # their SRS state — that's shared with the Kanji/Vocab/
             # Grammar screens and any other deck referencing the same
             # card.
-            cur.execute("DELETE FROM deck_cards WHERE deck_id = %s AND user_id = %s", (deck_id, user_id))
+            cur.execute("DELETE FROM deck_cards WHERE deck_id = %s AND user_id = %s",
+                        (access.deck_id, access.owner_id))
         conn.commit()
         srs.delete_cards(custom_keys)
-        return {"ok": True}
+        return {"ok": True, "withdrawn": False}
     finally:
         conn.close()
 
 
 # ── CARD CRUD (custom cards) ──────────────────────────────
 
-def _listed_cards(conn, deck_id: str, user_id: str, lang: str = "fr") -> list[dict]:
+def _srs_keys_for_readers(conn, deck_id: int, owner_id: str, card_ids) -> list[str]:
+    """
+    Every learner's SRS key for these personal cards — the author's and
+    each follower's.
+
+    A personal card's raw id is deck-scoped but not owner-scoped
+    (`custom_{deck}_{card}`), so one card has as many SRS keys as there
+    are people reading the deck. Deleting the card must retire all of
+    them; deleting only the author's is what leaves followers with rows
+    that no deck will ever resolve again.
+
+    Call this BEFORE the delete when the deck row itself is going:
+    deck_subscriptions cascades with it, and afterwards there is nobody
+    left to ask.
+    """
+    with conn.cursor() as cur:
+        cur.execute("SELECT user_id FROM deck_subscriptions WHERE deck_id = %s", (deck_id,))
+        readers = [owner_id] + [row[0] for row in cur.fetchall()]
+    return [f"{uid}:custom_{deck_id}_{cid}" for uid in readers for cid in card_ids]
+
+
+def _listed_cards(conn, access: DeckAccess, lang: str = "fr") -> list[dict]:
     """
     Every card in a deck, custom and app-linked alike, normalised to the
     same front/back/kana shape and in one stable order (custom by
@@ -678,8 +1488,13 @@ def _listed_cards(conn, deck_id: str, user_id: str, lang: str = "fr") -> list[di
     from `_meaning_preview` instead — three sources of "the Japanese side
     and the meaning side" that an exporter re-deriving them would have to
     copy and then keep in step. It takes the caller's connection so the
-    listing and any ownership check the caller has already done share
-    one.
+    listing and the access check the caller has already done share one.
+
+    It takes a DeckAccess rather than a deck id and a user id because
+    the user id it wants is the deck's OWNER — a followed deck's cards
+    are the author's rows — while almost every other user id in this
+    file is the viewer. Two strings would let those be swapped silently;
+    the object cannot be.
     """
     with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
         cur.execute("""
@@ -687,14 +1502,14 @@ def _listed_cards(conn, deck_id: str, user_id: str, lang: str = "fr") -> list[di
             FROM custom_cards
             WHERE deck_id = %s AND user_id = %s
             ORDER BY created_at ASC
-        """, (deck_id, user_id))
+        """, (access.deck_id, access.owner_id))
         custom = [_with_display(dict(row)) for row in cur.fetchall()]
         cur.execute("""
             SELECT source, level, raw_id, added_at
             FROM deck_cards
             WHERE deck_id = %s AND user_id = %s
             ORDER BY added_at ASC
-        """, (deck_id, user_id))
+        """, (access.deck_id, access.owner_id))
         app_links = [dict(row) for row in cur.fetchall()]
     cards = [{"origin": "custom", **c} for c in custom]
 
@@ -718,10 +1533,14 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
     cards plus every app-sourced card (kanji/vocab/grammar) that's
     been added via /browse + /cards/app, tagged with `origin` so the
     frontend can tell an editable custom card apart from a linked one
-    (which has no front/back to edit — just a remove action)."""
+    (which has no front/back to edit — just a remove action).
+
+    READER: a followed deck lists the author's cards, and the screen
+    reads `role` from GET /api/decks/{id} to know they are not editable.
+    """
     conn = db_conn()
     try:
-        return {"cards": _listed_cards(conn, deck_id, user_id, lang)}
+        return {"cards": _listed_cards(conn, deck_access(conn, deck_id, user_id), lang)}
     finally:
         conn.close()
 
@@ -730,17 +1549,14 @@ def get_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user_id
 def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            if not _allows_custom(deck["type"]):
+            if not _allows_custom(access.type):
                 raise HTTPException(status_code=400, detail="This deck does not accept written cards")
             # The card takes the DECK's structure -- a deck holds one
             # shape, so there is nothing for the caller to choose and
             # nothing to disagree about.
-            structure = deck["type"] if deck["type"] in STRUCTURE_KEYS else "standard"
+            structure = access.type if access.type in STRUCTURE_KEYS else "standard"
             fields = normalise_fields(structure, payload.resolved())
             missing = missing_required(structure, fields)
             if missing:
@@ -754,8 +1570,8 @@ def add_card(deck_id: str, payload: CardPayload, user_id: str = Depends(get_user
                 INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                 VALUES (%s, %s, %s, %s, %s)
                 RETURNING id, structure, fields, notes, created_at
-            """, (deck_id, user_id, structure, json.dumps(fields, ensure_ascii=False),
-                  payload.notes))
+            """, (access.deck_id, access.owner_id, structure,
+                  json.dumps(fields, ensure_ascii=False), payload.notes))
             card = _with_display(dict(cur.fetchone()))
         conn.commit()
         card["origin"] = "custom"
@@ -783,11 +1599,12 @@ def remove_app_card(deck_id: str, source: str, raw_id: str, user_id: str = Depen
     # failure, since the crash never made it to a clean JSON response.
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor() as cur:
             cur.execute("""
                 DELETE FROM deck_cards
                 WHERE deck_id = %s AND user_id = %s AND source = %s AND raw_id = %s
-            """, (deck_id, user_id, source, raw_id))
+            """, (access.deck_id, access.owner_id, source, raw_id))
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Card not found in deck")
         conn.commit()
@@ -801,11 +1618,12 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
                 user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT structure FROM custom_cards
                 WHERE id = %s AND deck_id = %s AND user_id = %s
-            """, (card_id, deck_id, user_id))
+            """, (card_id, access.deck_id, access.owner_id))
             existing = cur.fetchone()
             if not existing:
                 raise HTTPException(status_code=404, detail="Card not found")
@@ -817,13 +1635,20 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
                     status_code=400,
                     detail=f"A {structure} card needs: {', '.join(missing)}",
                 )
+            # Editing does NOT reset anyone's scheduler state, the
+            # author's or a follower's: the raw id is unchanged, so a
+            # mature card quietly starts asking a different question.
+            # That is the live-link promise working as designed — an
+            # author's corrections reach the people following the deck —
+            # and it is written down here so it is read rather than
+            # discovered.
             cur.execute("""
                 UPDATE custom_cards
                 SET fields = %s, notes = %s
                 WHERE id = %s AND deck_id = %s AND user_id = %s
                 RETURNING id, structure, fields, notes
             """, (json.dumps(fields, ensure_ascii=False), payload.notes,
-                  card_id, deck_id, user_id))
+                  card_id, access.deck_id, access.owner_id))
             card = _with_display(dict(cur.fetchone()))
         conn.commit()
         return dict(card)
@@ -835,16 +1660,19 @@ def update_card(deck_id: str, card_id: str, payload: CardPayload,
 def delete_card(deck_id: str, card_id: str, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
+        # Collected before the delete, and for every reader rather than
+        # just the author — see _srs_keys_for_readers.
+        keys = _srs_keys_for_readers(conn, access.deck_id, access.owner_id, [card_id])
         with conn.cursor() as cur:
             cur.execute("""
                 DELETE FROM custom_cards
                 WHERE id = %s AND deck_id = %s AND user_id = %s
-            """, (card_id, deck_id, user_id))
+            """, (card_id, access.deck_id, access.owner_id))
             if cur.rowcount == 0:
                 raise HTTPException(status_code=404, detail="Card not found")
         conn.commit()
-        key = f"{user_id}:custom_{deck_id}_{card_id}"
-        srs.delete_cards([key])
+        srs.delete_cards(keys)
         return {"ok": True}
     finally:
         conn.close()
@@ -872,20 +1700,18 @@ def browse_app_cards(deck_id: str, source: str, level: str = "", query: str = ""
 
     conn = db_conn()
     try:
+        # OWNER: this is the add-picker, not a reading surface.
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            if source not in _allowed_sources(deck["type"]):
+            if source not in _allowed_sources(access.type):
                 raise HTTPException(
                     status_code=400,
-                    detail=f"This deck only accepts {deck['type']} cards",
+                    detail=f"This deck only accepts {access.type} cards",
                 )
             cur.execute("""
                 SELECT raw_id FROM deck_cards
                 WHERE deck_id = %s AND user_id = %s AND source = %s
-            """, (deck_id, user_id, source))
+            """, (access.deck_id, access.owner_id, source))
             already = {row["raw_id"] for row in cur.fetchall()}
     finally:
         conn.close()
@@ -919,12 +1745,9 @@ def browse_app_cards(deck_id: str, source: str, level: str = "", query: str = ""
 def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depends(get_user_id)):
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id, need=OWNER)
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT id, type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            allowed = _allowed_sources(deck["type"])
+            allowed = _allowed_sources(access.type)
             # The whole batch counts against the free tier's cards
             # (plan 069); a no-op until enforcement.
             credits.check_card_limit(cur, user_id, adding=len(payload.cards))
@@ -949,7 +1772,7 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
                         INSERT INTO deck_cards (deck_id, user_id, source, level, raw_id)
                         VALUES (%s, %s, %s, %s, %s)
                         ON CONFLICT (deck_id, source, raw_id) DO NOTHING
-                    """, (deck_id, user_id, c.source, c.level, c.raw_id))
+                    """, (access.deck_id, access.owner_id, c.source, c.level, c.raw_id))
                     added += write_cur.rowcount
         conn.commit()
         return {"added": added}
@@ -975,22 +1798,19 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
     """
     conn = db_conn()
     try:
+        access = deck_access(conn, deck_id, user_id)
+        deck_type = access.type
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s", (deck_id, user_id))
-            row = cur.fetchone()
-            if not row:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            deck_type = row["type"]
             cur.execute(
                 "SELECT COUNT(*) AS n FROM custom_cards WHERE deck_id = %s AND user_id = %s",
-                (deck_id, user_id),
+                (access.deck_id, access.owner_id),
             )
             custom_count = cur.fetchone()["n"]
             cur.execute("""
                 SELECT source, COUNT(*) AS n FROM deck_cards
                 WHERE deck_id = %s AND user_id = %s
                 GROUP BY source
-            """, (deck_id, user_id))
+            """, (access.deck_id, access.owner_id))
             source_counts = {row["source"]: row["n"] for row in cur.fetchall()}
     finally:
         conn.close()
@@ -1058,7 +1878,7 @@ def build_personal_card(row: dict, raw_id: str, mode: str,
     }
 
 
-def _build_pool(deck_id: str, user_id: str) -> list[dict]:
+def _build_pool(access: DeckAccess) -> list[dict]:
     """Every card belonging to this deck — custom and app-sourced
     alike — as a flat pool ready to be filtered/picked from. App-
     sourced raw ids are NOT deck-scoped (they're the same
@@ -1066,19 +1886,26 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     Grammar screens themselves), so studying a card here and studying
     it from its own screen share one SRS progress — same behaviour the
     old mix_levels parameter used to give, now backed by persisted
-    membership instead of "whole JLPT level, recomputed every time"."""
+    membership instead of "whole JLPT level, recomputed every time".
+
+    That last point is the one surprise a FOLLOWED deck carries:
+    following a kanji deck does not open a private track for those
+    kanji, because their ids are the app's own. Only the deck's written
+    cards are deck-scoped, and those a follower does keep to themselves
+    — `custom_{deck}_{card}` under their own prefix, never the
+    author's."""
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
             cur.execute("""
                 SELECT id, structure, fields, notes
                 FROM custom_cards WHERE deck_id = %s AND user_id = %s
-            """, (deck_id, user_id))
+            """, (access.deck_id, access.owner_id))
             custom = [dict(row) for row in cur.fetchall()]
             cur.execute("""
                 SELECT source, level, raw_id FROM deck_cards
                 WHERE deck_id = %s AND user_id = %s
-            """, (deck_id, user_id))
+            """, (access.deck_id, access.owner_id))
             app_links = [dict(row) for row in cur.fetchall()]
     finally:
         conn.close()
@@ -1086,7 +1913,7 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
     pool = []
     for c in custom:
         pool.append({
-            "raw_id": f"custom_{deck_id}_{c['id']}",
+            "raw_id": f"custom_{access.deck_id}_{c['id']}",
             "source": "custom", "level": None, "entry": c,
         })
 
@@ -1100,19 +1927,6 @@ def _build_pool(deck_id: str, user_id: str) -> list[dict]:
         })
 
     return pool
-
-
-def _deck_type(deck_id: str, user_id: str) -> str | None:
-    """The deck's structure, or None when it is not this user's deck."""
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
-                        (deck_id, user_id))
-            row = cur.fetchone()
-            return row[0] if row else None
-    finally:
-        conn.close()
 
 
 # What each mode base needs from a personal card, beyond the front/back
@@ -1266,20 +2080,28 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
     filled the same way it does for the built-in decks instead of
     fetching one card at a time. `beyond_target` is the 臨時列車: new
     cards past today's pace, on explicit request (core/pace.py).
+
+    The content comes from the deck's owner and the scheduling from the
+    caller: on a followed deck those are two different people, which is
+    the whole of what makes a subscription a link rather than a copy.
     """
-    deck_type = _deck_type(deck_id, user_id)
-    if deck_type is None:
-        raise HTTPException(status_code=404, detail="Deck not found")
+    access = resolve_deck(deck_id, user_id)
 
     pace = resolve_pace(user_id)
-    pool = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
+    pool = [p for p in _build_pool(access) if _eligible(p, mode, access.type)]
     if not pool:
         return {"cards": [], "pace": pace.payload() if pace else None}
 
     by_raw    = {p["raw_id"]: p for p in pool}
     raw_ids   = list(by_raw.keys())
+    # prefixed() with the VIEWER, deliberately: a follower's progress on
+    # the author's card is the follower's. Everything from here down —
+    # the batch cache, the exclude set, the unprefix on the way out — is
+    # keyed on them too, and must stay that way. Keying the cache on the
+    # owner would have two followers of one deck drawing from each
+    # other's picks.
     card_ids  = prefixed(raw_ids, user_id)
-    cache_key = batch_key("user", user_id, "deck", deck_id, mode)
+    cache_key = batch_key("user", user_id, "deck", access.deck_id, mode)
     # No pre-materialisation. get_new_cards selects over the ids passed
     # here rather than joining `cards`, so nothing has to exist in
     # card_modes before a card can be served — a scheduler row is written
@@ -1328,8 +2150,8 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
             cards.append(card)
 
     logger.info(
-        "deck study request deck_id=%s mode=%s user_id=%s pool=%d due=%d picked=%d",
-        deck_id, mode, user_id, len(pool), len(due), len(cards),
+        "deck study request deck_id=%s role=%s mode=%s user_id=%s pool=%d due=%d picked=%d",
+        access.deck_id, access.role, mode, user_id, len(pool), len(due), len(cards),
     )
     return {"cards": cards, "pace": pace.payload() if pace else None}
 
@@ -1337,6 +2159,12 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
 @router.post("/api/decks/{deck_id}/review")
 def review_deck_card(deck_id: str, payload: ReviewPayload,
                      user_id: str = Depends(get_user_id)):
+    # The path segment used to be decorative here — the card id carries
+    # its own user prefix, so a review could only ever write the
+    # caller's own state whatever deck it named. It is checked now
+    # because the library makes "which deck" a real question: a deck you
+    # do not own and do not follow should not be a study surface.
+    resolve_deck(deck_id, user_id)
     card_id = f"{user_id}:{payload.card_id}"
     s = srs.review(card_id, payload.mode, payload.quality)
     # The fare, charged only now that the scheduler has accepted the
@@ -1361,10 +2189,8 @@ def review_deck_card(deck_id: str, payload: ReviewPayload,
 @router.get("/api/decks/{deck_id}/stats")
 def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
                    user_id: str = Depends(get_user_id)):
-    deck_type = _deck_type(deck_id, user_id)
-    if deck_type is None:
-        raise HTTPException(status_code=404, detail="Deck not found")
-    pool     = [p for p in _build_pool(deck_id, user_id) if _eligible(p, mode, deck_type)]
+    access   = resolve_deck(deck_id, user_id)
+    pool     = [p for p in _build_pool(access) if _eligible(p, mode, access.type)]
     card_ids = prefixed([p["raw_id"] for p in pool], user_id)
 
     if not card_ids:
@@ -1384,21 +2210,12 @@ def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
 @router.post("/api/decks/{deck_id}/import")
 async def import_cards(deck_id: str, file: UploadFile = File(...),
                        user_id: str = Depends(get_user_id)):
-    conn = db_conn()
-    try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT type FROM decks WHERE id = %s AND user_id = %s",
-                       (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
-                raise HTTPException(status_code=404, detail="Deck not found")
-            if not _allows_custom(deck["type"]):
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"This deck only accepts {deck['type']} cards — browse and add some instead",
-                )
-    finally:
-        conn.close()
+    access = resolve_deck(deck_id, user_id, need=OWNER)
+    if not _allows_custom(access.type):
+        raise HTTPException(
+            status_code=400,
+            detail=f"This deck only accepts {access.type} cards — browse and add some instead",
+        )
 
     content = await file.read()
     try:
@@ -1437,7 +2254,7 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
                 cur.execute("""
                     INSERT INTO custom_cards (deck_id, user_id, structure, fields, notes)
                     VALUES (%s, %s, 'standard', %s, %s)
-                """, (deck_id, user_id,
+                """, (access.deck_id, access.owner_id,
                       json.dumps({"front": front, "back": back}, ensure_ascii=False),
                       row.get('notes', '').strip()))
                 inserted += 1
@@ -1506,20 +2323,22 @@ def export_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user
     produce a file the other half of the pair cannot read, which is the
     one thing this endpoint must not do.
 
-    Ownership is checked explicitly rather than left to the per-user
-    WHERE clauses inside _listed_cards: those would return an empty list
-    for someone else's deck, and a silent empty CSV is a worse answer
-    than a 404 — it is indistinguishable from an empty deck of your own.
+    Access is checked explicitly rather than left to the WHERE clauses
+    inside _listed_cards: those would return an empty list for a deck
+    the caller cannot see, and a silent empty CSV is a worse answer than
+    a 404 — it is indistinguishable from an empty deck of your own.
+
+    READER, so a follower may export: the deck is already open to them
+    card by card on the screen, and refusing the file would only be
+    theatre. Note that this is a copy of someone else's deck that skips
+    /detach — the lossy format is what keeps that from being the easy
+    path, since a structured deck loses its readings and notes on the
+    way out.
     """
     conn = db_conn()
     try:
-        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("SELECT name, type FROM decks WHERE id = %s AND user_id = %s",
-                        (deck_id, user_id))
-            deck = cur.fetchone()
-            if not deck:
-                raise HTTPException(status_code=404, detail="Deck not found")
-        cards = _listed_cards(conn, deck_id, user_id, lang)
+        access = deck_access(conn, deck_id, user_id)
+        cards = _listed_cards(conn, access, lang)
     finally:
         conn.close()
 
@@ -1536,7 +2355,7 @@ def export_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user
     # BOM, so writing one costs nothing on the round trip.
     body = ("\ufeff" + buf.getvalue()).encode("utf-8")
 
-    ascii_name, utf8_name = _export_filename(deck["name"], deck_id)
+    ascii_name, utf8_name = _export_filename(access.name, access.deck_id)
     disposition = (
         f'attachment; filename="{ascii_name}"; '
         f"filename*=UTF-8''{quote(utf8_name, safe='')}"

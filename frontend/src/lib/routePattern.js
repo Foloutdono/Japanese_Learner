@@ -52,6 +52,8 @@ export const ROUTES = [
   '/learn/grammar/:level',
   '/learn/grammar/:level/:mode',
   '/learn/decks',
+  '/learn/decks/library',
+  '/learn/decks/library/:deck_id',
   '/learn/decks/:deck_id',
   '/learn/decks/:deck_id/study',
   '/learn/decks/:deck_id/study/:mode',

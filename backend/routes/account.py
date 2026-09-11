@@ -62,10 +62,19 @@ from core.user_level import forget_stored_level
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# Children before parents: card_modes -> cards; custom_cards and
-# deck_cards -> decks; video_session_jobs -> video_sessions.
-# user_profiles last, so a run that fails midway leaves an account that
-# can still sign in and try again.
+# Children before parents: card_modes -> cards; custom_cards,
+# deck_cards, deck_subscriptions and deck_reports -> decks;
+# video_session_jobs -> video_sessions. user_profiles last, so a run
+# that fails midway leaves an account that can still sign in and try
+# again.
+#
+# Deleting an account deletes its published decks OUTRIGHT, with none
+# of the grace period routes/decks.delete_deck gives a withdrawn deck:
+# a deck holds this learner's own typed text, and ADR 0010's "delete
+# means delete" outranks a follower's convenience. Note that the
+# `decks` step therefore also cascades away OTHER learners'
+# deck_subscriptions rows, which the deck_subscriptions count above
+# does not include — it counts only what this learner followed.
 PLAN = [
     ("review_log",          "card_id LIKE %(prefix)s",  "review history: XP, level, streak, leaderboard standing"),
     ("review_daily",        "user_id = %(user)s",       "the rolled-up half of that same history — XP and reviews per day"),
@@ -76,6 +85,8 @@ PLAN = [
     ("xp_ledger",           "user_id = %(user)s",       "XP awarded outside a review"),
     ("custom_cards",        "user_id = %(user)s",       "hand-written personal cards"),
     ("deck_cards",          "user_id = %(user)s",       "app cards attached to a personal deck"),
+    ("deck_reports",        "user_id = %(user)s",       "library decks this learner reported"),
+    ("deck_subscriptions",  "user_id = %(user)s",       "published decks this learner follows from the library"),
     ("decks",               "user_id = %(user)s",       "the personal decks themselves"),
     ("video_session_jobs",  "session_id IN (SELECT id FROM video_sessions WHERE user_id = %(user)s)",
                                                         "claim locks of this learner's transcript jobs"),
