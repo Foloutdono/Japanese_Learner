@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-**Tsuji** (辻) — a Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
+**Tsuji** (辻) — a Japanese-learning web app (kana, vocab, kanji, grammar, reading, listening, SRS review, mock exams, and a library of decks learners publish to each other). FastAPI backend + React/Vite frontend, Postgres storage, Supabase for auth.
 
 The name is the glyph: 辻 is the masthead, the icon and the plate at the origin station (辻駅). `Tsuji` is the Latin half — the store name, the PWA `short_name` and the bundle id `app.tsuji`. See `DESIGN.md`, "The idea".
 
@@ -35,10 +35,14 @@ runtime purpose. Two consequences worth knowing:
 - **Plan numbers are cited in source comments** (e.g. "Plan 034" in
   `PassageLine.browser.test.jsx`), so they must never be reused.
 - **`git ls-tree HEAD plans/` under-reports which numbers are taken**, because
-  earlier plan files were lost to a working-tree cleanup. Numbers **001–077**
-  are used (wave 14, the mobile release, spends 064–077). When starting a new
-  wave, begin at **078** or higher, and check `plans/README.md` — its wave
-  index is the only authority on which numbers are spent.
+  earlier plan files were lost to a working-tree cleanup. Numbers **001–083**
+  are used: wave 14 (the mobile release) spends 064–077, the review rollup
+  spends **078** — cited in `srs/srs.py`, `srs/data_structure.sql`,
+  `routes/account.py`, `routes/stats.py` and `scripts/wipe_srs.py`, and for a
+  while missing from the index here — and wave 15 (the library) spends
+  079–083. When starting a new wave, begin at **084** or higher, and check
+  `plans/README.md`. Its wave index is the authority, but it has been behind
+  reality before: grep the source for `plan 0NN` before claiming a number.
 
 ## Commands
 
@@ -81,8 +85,9 @@ docker exec -i jp-db psql -U postgres -d jp < backend/srs/data_structure.sql
 
 ### Database maintenance
 
-Four operator scripts, none of them on the request path. **All four report and
-change nothing without `--yes`**, so the first run of any of them is safe:
+Five operator scripts, none of them on the request path (six with
+`prune_withdrawn`). **All of them report and change nothing without `--yes`**,
+so the first run of any of them is safe:
 
 ```bash
 cd backend
@@ -90,6 +95,7 @@ python -m scripts.purge_orphans        # rows whose Supabase auth user is gone
 python -m scripts.compact_review_log   # roll old review rows up, then trim
 python -m scripts.compact_events       # same, for the 足跡 trail (event_log)
 python -m scripts.prune_logs           # cap the logs nothing reads past a point
+python -m scripts.prune_withdrawn      # decks an author deleted, past their grace
 python -m scripts.drop_legacy_tables   # tables a removed feature left behind
 ```
 
@@ -119,8 +125,17 @@ Two things are worth knowing before reaching for any of them:
   is the repair for deletions that bypassed it. See
   `docs/adr/0010-learner-rows-are-reconciled-with-auth-not-cascaded-from-it.md`.
 
-`prune_logs`, `compact_review_log` and `compact_events` also run weekly from
-`.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
+- **A withdrawn deck is not a deleted one yet.** Deleting a deck other
+  learners follow does not delete it: `routes/decks.delete_deck` sets
+  `withdrawn_at` instead, so the deck leaves the author's shelf and their deck
+  limit but stays readable for its followers, who are shown a warning and can
+  take a copy. `prune_withdrawn.py` is what finally collects it. Without that
+  script the grace period is not a grace period — it is content an author asked
+  to delete, kept forever because somebody once followed it. See
+  `docs/adr/0014-a-published-deck-is-a-link-not-a-copy.md`.
+
+`prune_logs`, `compact_review_log`, `compact_events` and `prune_withdrawn` also
+run weekly from `.github/workflows/db-maintenance.yml` (and on demand — the workflow's Run
 button defaults to a dry run). It needs a `DATABASE_URL` repo secret, set to
 Supabase's **session**-mode pooler URI on port 5432: the transaction pooler
 (6543) cannot hold `compact_review_log`'s rollup in one transaction. The other
