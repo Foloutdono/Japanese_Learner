@@ -8211,9 +8211,10 @@ textarea:focus-visible {
 
 /* ── fill_in: the sentence, shown intact ───────────────────
    Large enough to read as the PROMPT rather than as a supporting
-   example, because in this mode it is the question. No translation is
-   rendered here at all -- the learner names the rule from the Japanese,
-   which is the whole exercise. */
+   example, because in this mode it is the question. What it does NOT
+   carry while the question is open is the translation — the learner
+   names the rule from the Japanese, and "only" in "I drank only water"
+   is だけ spelled out in English. */
 .grammar-fill-sentence {
   font-family: var(--font-jp);
   font-size: 26px;
@@ -8221,6 +8222,23 @@ textarea:focus-visible {
   text-align: center;
   color: var(--text-primary);
   padding: 4px 0 10px;
+}
+/* Doubled leading is headroom for the furigana: a ruby annotation is
+   drawn outside the line box, and at 1.7 the readings of a wrapped
+   second line land on the line above. Ruby never breaks mid-word; the
+   kana runs between them still break wherever they like. */
+.grammar-fill-sentence__jp { line-height: 2; }
+.grammar-fill-sentence ruby {
+  ruby-position: over;
+  white-space: nowrap;
+}
+/* Small enough to stay a reading rather than a second sentence — the
+   rule under it is the ink the eye should land on. */
+.grammar-fill-sentence rt {
+  font-size: var(--fs-caption);
+  font-weight: 400;
+  color: var(--text-secondary);
+  user-select: none;
 }
 
 /* The same sentence carried onto the back of the card, stepped back so
@@ -8234,6 +8252,22 @@ textarea:focus-visible {
   padding-bottom: 16px;
   margin-bottom: 4px;
   border-bottom: 1px solid var(--border);
+}
+/* The ruby steps down with the sentence it sits on, or a reading that
+   held its size against a smaller line would read as the louder half
+   of the pair. */
+.grammar-fill-sentence--echo rt { font-size: var(--fs-caption-xs); }
+
+/* The translation, printed only once the answer is out (see
+   GrammarFillSentence). Latin, so --font-display; a caption, so it
+   reads as the gloss under the sentence and never competes with the
+   rule — which is what the learner came to this card for. */
+.grammar-fill-sentence__en {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  margin-top: var(--sp-3);
 }
 
 .grammar-structure {

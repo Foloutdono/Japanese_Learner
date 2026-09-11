@@ -2,7 +2,7 @@ import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from './QuizComponents'
 import { FuriganaWord } from './Readings'
-import { GrammarRule, GrammarAnswer } from './GrammarPieces'
+import { GrammarRule, GrammarAnswer, GrammarFillSentence } from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
 import PromptCard from './PromptCard'
 import { speakJapanese, playKana } from '../../lib/audio'
@@ -304,7 +304,7 @@ export default function CardPrompt({
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
             front={
               isFill
-                ? <div className="grammar-fill-sentence" lang="ja">{c.fill_sentence?.jp}</div>
+                ? <GrammarFillSentence card={c} />
                 : isF2B
                   ? (
                     <>
@@ -320,9 +320,7 @@ export default function CardPrompt({
                   /* The sentence stays on the back, dimmed: the answer
                      is which rule is at work IN IT. */
                   <>
-                    <div className="grammar-fill-sentence grammar-fill-sentence--echo" lang="ja">
-                      {c.fill_sentence?.jp}
-                    </div>
+                    <GrammarFillSentence card={c} echo revealed />
                     <GrammarAnswer card={c} size={40} />
                   </>
                 )
@@ -344,7 +342,7 @@ export default function CardPrompt({
              out next to it. */
           <>
             {isFill
-              ? <div className="grammar-fill-sentence" lang="ja">{c.fill_sentence?.jp}</div>
+              ? <GrammarFillSentence card={c} revealed={answered} />
               : isF2B
                 ? (
                   <>

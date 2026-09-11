@@ -9,7 +9,7 @@ import {
   Flashcard, MeaningDisplay,
 } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
-import { GrammarRule, GrammarAnswer } from '../components/study/GrammarPieces'
+import { GrammarRule, GrammarAnswer, GrammarFillSentence } from '../components/study/GrammarPieces'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
@@ -254,7 +254,7 @@ export default function GrammarRun({ session }) {
                     onReveal={onFlashcardReveal}
                     front={
                       isFill
-                        ? <div className="grammar-fill-sentence" lang="ja">{card.fill_sentence?.jp}</div>
+                        ? <GrammarFillSentence card={card} />
                         : isB2F
                           ? <MeaningDisplay meaning={card.meaning} size={34} />
                           : (
@@ -275,9 +275,7 @@ export default function GrammarRun({ session }) {
                              makes it a bare fact instead of an
                              observation about the sentence. */
                           <>
-                            <div className="grammar-fill-sentence grammar-fill-sentence--echo" lang="ja">
-                              {card.fill_sentence?.jp}
-                            </div>
+                            <GrammarFillSentence card={card} echo revealed />
                             <GrammarAnswer card={card} size={40} />
                           </>
                         )
@@ -301,7 +299,7 @@ export default function GrammarRun({ session }) {
                      worth seeing spelled out next to it. */
                   <>
                     {isFill
-                      ? <div className="grammar-fill-sentence" lang="ja">{card.fill_sentence?.jp}</div>
+                      ? <GrammarFillSentence card={card} revealed={answered} />
                       : isB2F
                         ? <MeaningDisplay meaning={card.meaning} size={34} />
                         : (

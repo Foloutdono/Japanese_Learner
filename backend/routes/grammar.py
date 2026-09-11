@@ -12,6 +12,7 @@ from study.modes import (
     GRAMMAR, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_SENTENCES,
     Mode, eligible_for, require_mode,
 )
+from study.furigana import align_sentence
 from study.grammar_match import verifiable
 from study.mcq import pick_distractors
 from pydantic import BaseModel
@@ -181,11 +182,25 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         payload["hints"][INDICE_SENTENCES] = sentences
 
     if m.base == "fill_in":
-        # Shown INTACT, with no translation. Blanking the rule out has no
-        # unique answer -- 食べて＿＿＿ takes いる, から, もいい and はいけない
-        # alike -- so the question is "which rule is at work here", which
-        # always has exactly one right answer.
-        payload["fill_sentence"] = {"jp": sentences[0]["jp"], "en": sentences[0]["en"]}
+        # Shown INTACT. Blanking the rule out has no unique answer --
+        # 食べて＿＿＿ takes いる, から, もいい and はいけない alike -- so the
+        # question is "which rule is at work here", which always has
+        # exactly one right answer.
+        #
+        # Furigana so the question stays a grammar question: a learner who
+        # cannot yet read 飲 is being asked the wrong thing otherwise. It
+        # gives nothing away -- a reading names no rule.
+        #
+        # The translation travels with the sentence and the CLIENT holds it
+        # back until the answer is out, the same shape indice_2's own
+        # sentences have. It cannot be shown alongside the question: "only"
+        # in "I drank only water" IS だけ, so the front would print its own
+        # answer in English.
+        payload["fill_sentence"] = {
+            "jp": sentences[0]["jp"],
+            "en": sentences[0]["en"],
+            "furigana": align_sentence(sentences[0]["jp"]),
+        }
 
     return payload
 
