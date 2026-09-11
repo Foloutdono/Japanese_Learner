@@ -201,14 +201,18 @@ export default defineConfig(({ mode }) => {
         },
       },
       browserProject('browser', ['src/**/*.browser.test.{js,jsx}']),
-      // The phone lane. The browser lane runs at chromium's default
-      // viewport and deliberately asserts no LAYOUT (see
-      // AnalyzerScreen.responsive.browser.test.jsx); a file named
-      // `*.phone.test.jsx` runs here instead, at 390×844 from the first
-      // paint, so a rule under a max-width query can be read back with
-      // getComputedStyle and a screen can be checked for horizontal
-      // overflow. Config-level, not page.viewport() mid-test: a CDP
-      // metrics change does not fire matchMedia's `change`
+      // The phone lane. The browser lane above sets no viewport of its
+      // own and deliberately asserts no LAYOUT (see
+      // AnalyzerScreen.responsive.browser.test.jsx) -- worth knowing
+      // that "no viewport" is NOT chromium's 1280 there: tests run in
+      // the runner's iframe, which measures 414px wide, so every
+      // max-width rule in the sheet is already on. A file that needs a
+      // width has to say so. A file named `*.phone.test.jsx` runs in
+      // this lane instead, at 390×844 from the first paint, so a rule
+      // under a max-width query can be read back with getComputedStyle
+      // and a screen can be checked for horizontal overflow.
+      // Config-level, not page.viewport() mid-test: a CDP metrics
+      // change does not fire matchMedia's `change`
       // (useMediaQuery.browser.test.jsx), so a page that STARTS at
       // 390px is the only honest setup.
       browserProject('phone', ['src/**/*.phone.test.{js,jsx}'], { width: 390, height: 844 }),

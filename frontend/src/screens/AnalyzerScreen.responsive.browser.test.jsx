@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from '@vitest/browser/context'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 // The smart-furigana cases assert COMPUTED display, and components do
@@ -152,7 +153,15 @@ async function startFromFile(screen) {
   await settle(2000)
 }
 
-beforeEach(() => {
+beforeEach(async () => {
+  // The lane's iframe is 414px wide by default — a phone, in effect —
+  // and since 2026-09-11 the working rail is built at 1100px and up
+  // only (AnalyzerScreen's `wide`). This file's subject is the screen
+  // with its rail, so it declares the width that has one instead of
+  // inheriting whatever the previous FILE left behind: page.viewport
+  // is a browser-level setting and does leak across files. What a
+  // handset actually gets is pinned in AnalyzerScreen.phone.test.jsx.
+  await page.viewport(1280, 900)
   apiJson.mockReset()
   apiJson.mockResolvedValue({ sentences: SENTENCES, truncated: 0 })
   apiUpload.mockReset()
@@ -398,6 +407,63 @@ describe('AnalyzerScreen structure', () => {
 
     expect(screen.container.querySelectorAll('.anl-keep--on').length).toBe(1)
     expect(screen.container.querySelector('.anl-railfoot .anl-ghost').disabled).toBe(true)
+  })
+
+  // ── 保存, on the stage head ──
+  // The head's Kept mark became the control when the rail stopped
+  // being built below 1100px (2026-09-11). It acts on the stop the
+  // STAGE is showing, which is what makes it a replacement for a pin
+  // out on the line rather than a second, differently-scoped button.
+  it('keeps the stop the stage is on from the head, and lets it go again', async () => {
+    // The same stateful server the bulk case needs, and for the same
+    // reason: keepSentence's `finally` rebuilds the kept set from
+    // 運行履歴, so a history that forgets clobbers the keep.
+    const keptRows = []
+    apiJson.mockImplementation(async (url, _session, opts) => {
+      if (url === '/api/phrase/keep') {
+        const body = JSON.parse(opts.body)
+        keptRows.push({
+          id: keptRows.length + 1, phrase: body.sentence,
+          source: body.source, created_at: new Date().toISOString(), kept: true,
+        })
+        return {}
+      }
+      return { sentences: SENTENCES, truncated: 0 }
+    })
+    apiFetch.mockImplementation(async (url, _session, opts) => {
+      if (opts?.method === 'DELETE') {
+        const id = Number(String(url).split('/').pop())
+        const at = keptRows.findIndex(r => r.id === id)
+        if (at >= 0) keptRows.splice(at, 1)
+        return { ok: true, status: 200, json: async () => ({}) }
+      }
+      return {
+        ok: true, status: 200,
+        json: async () => (url === '/api/phrase/history' ? keptRows : []),
+      }
+    })
+
+    const screen = await renderScreen()
+    await analyze(screen)
+    const keep = () => screen.container.querySelector('.anl-head__keep')
+    expect(keep().getAttribute('aria-pressed')).toBe('false')
+
+    // Walk to the second stop first: what gets kept is where you are,
+    // not where the Passage starts.
+    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    await settle(60)
+
+    keep().click()
+    await settle(200)
+    expect(keep().getAttribute('aria-pressed')).toBe('true')
+    expect(keptRows.map(r => r.phrase)).toEqual(['犬も好き'])
+    // The rail's pin, fed by the same set, agrees with the head.
+    expect(screen.container.querySelectorAll('.anl-keep--on').length).toBe(1)
+
+    keep().click()
+    await settle(200)
+    expect(keep().getAttribute('aria-pressed')).toBe('false')
+    expect(keptRows).toEqual([])
   })
 
   it('draws every stop as a button with exactly one current', async () => {
