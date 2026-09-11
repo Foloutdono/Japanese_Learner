@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { formatTimecode } from '../../lib/timecode'
+import { PlusIcon, CheckIcon } from '../ui/Icons'
 
 // ── 路線図 — the Passage as a line ────────────────────────
 // Every Sentence in the Passage is a stop, in order, threaded by one
@@ -208,9 +209,13 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
             {onKeep && (
               // + / ✓ rather than the 保存 it used to print: the pin is
               // navigation, and the workbench's controls went
-              // plain-language-first with the mockup round. The glyphs
+              // plain-language-first with the mockup round. The marks
               // need no language at all; the localized aria-label and
-              // title still carry the words.
+              // title still carry the words. Drawn from the icon set
+              // rather than typed as text since 2026-09-11 — the
+              // typographic "+" is a 9px hairline in a 28px box, and
+              // it reads as a broken button next to any real icon
+              // (the result head's × made that plain).
               <button
                 type="button"
                 className={`anl-keep${isKept ? ' anl-keep--on' : ''}`}
@@ -219,7 +224,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
                 title={isKept ? t.unkeepSentence : t.keepSentence}
                 onClick={() => onKeep(i)}
               >
-                <span aria-hidden="true">{isKept ? '✓' : '+'}</span>
+                {isKept ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
               </button>
             )}
           </div>

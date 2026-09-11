@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from '@vitest/browser/context'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 
@@ -131,7 +132,15 @@ async function startFromFile(screen) {
 
 const settle = async (ms = 60) => new Promise(r => setTimeout(r, ms))
 
-beforeEach(() => {
+beforeEach(async () => {
+  // The lane's iframe is 414px wide by default — a phone, in effect —
+  // and since 2026-09-11 the working rail is built at 1100px and up
+  // only (AnalyzerScreen's `wide`). This file's subject is the screen
+  // with its rail, so it declares the width that has one instead of
+  // inheriting whatever the previous FILE left behind: page.viewport
+  // is a browser-level setting and does leak across files. What a
+  // handset actually gets is pinned in AnalyzerScreen.phone.test.jsx.
+  await page.viewport(1280, 900)
   apiJson.mockReset()
   apiUpload.mockReset()
   playerSpies.play.mockReset()
@@ -585,9 +594,15 @@ describe('AnalyzerScreen polling', () => {
     // Locale-agnostic: this environment's LangProvider defaults to
     // French, not English. The control stays present after an
     // explanation exists (it used to vanish, gated on
-    // `!focused.explanation`), and its hint switches to "explained".
+    // `!focused.explanation`), and the row says nothing beside it --
+    // the hint speaks only for an error now.
     expect(screen.container.querySelector('.anl-explain')).not.toBeNull()
     expect(screen.container.querySelector('.anl-explain__btn')).not.toBeNull()
     expect(screen.container.querySelector('.anl-explain__hint--bad')).toBeNull()
+    // Nothing at all beside the button: the row carried a caption in
+    // both states until 2026-09-11 ("…notes for this sentence", then
+    // "Explained"), and the explanation printed above it says the
+    // second better than the word did.
+    expect(screen.container.querySelector('.anl-explain__hint')).toBeNull()
   })
 })

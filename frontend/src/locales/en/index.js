@@ -687,7 +687,10 @@ const phraseAnalyzer = {
   tableState:          'State',
   furiganaLabel:       'Furigana',
   furiganaAll:         'All',
-  furiganaUnknown:     'Unknown only',
+  // "only" is what makes the three exclusive, and being one of three
+  // segments already says that. The word cost 60px of a 271px control
+  // on a phone -- enough to break the dial onto two lines.
+  furiganaUnknown:     'Unknown',
   furiganaNone:        'None',
   tokensCount:         n => `${n} ${n === 1 ? 'token' : 'tokens'}`,
   // The concourse cards' record column, and the player's transport.
@@ -746,8 +749,6 @@ const phraseAnalyzer = {
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
   explaining:          'Explaining…',
-  noExplanationYet:    'Word meanings and grammar notes for this sentence',
-  explanationBought:   'Explained',
   explainFailed:       'The explanation did not come through. Try again.',
   explainUnavailable:  'Explanations are unavailable right now. Try again shortly.',
   passageTruncated:    n => `Only the first ${n} ${n === 1 ? 'sentence was' : 'sentences were'} analyzed.`,
@@ -760,6 +761,11 @@ const phraseAnalyzer = {
   clozeCreated:        'Cloze card created',
   mineFailed:          "Couldn't add this card. Try again.",
   cannotMineOffDeck:   'Not in the app deck',
+  // The same fact at legend length. The key sits beside MASTERED,
+  // LEARNING and NEW and has to read as one of them; the sentence
+  // above stays where it explains a dead control (MineButton's
+  // title), which is the one place it earns its words.
+  offDeckKey:          'Not in a deck',
   takePhoto:           'Take a photo',
   chooseImage:         'Choose an image',
   ocrRecognizing:      'Reading the image…',

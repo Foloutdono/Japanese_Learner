@@ -1305,8 +1305,10 @@
 }
 .anl-stop:hover { background: var(--overlay-hover); color: var(--text-primary); }
 
-/* 保存 — the pin. A 24px target sitting beside the stop rather than
-   inside it (see the component comment on why it cannot nest). */
+/* 保存 — the pin. A 28px target sitting beside the stop rather than
+   inside it (see the component comment on why it cannot nest). The
+   + / ✓ inside it are drawn (components/ui/Icons), so the box holds
+   no type and needs no face or size of its own. */
 .anl-keep {
   flex-shrink: 0;
   display: flex;
@@ -1319,11 +1321,6 @@
   border: 1px solid var(--surface-line);
   border-radius: var(--surface-radius);
   color: var(--text-secondary);
-  /* + / ✓ glyphs since the plain-language pass — figures, so the
-     display face, at a size the 28px box centres comfortably. */
-  font-family: var(--font-display);
-  font-size: var(--fs-sm);
-  line-height: 1;
   transition: background 0.14s ease, color 0.14s ease, border-color 0.14s ease;
 }
 .anl-keep:hover { background: var(--overlay-hover); color: var(--text-primary); }
@@ -1448,14 +1445,19 @@
   flex-direction: column;
   gap: var(--sp-4);
 }
+/* The control is alone in this row until something fails, so the row
+   ends at the button rather than starting at it -- `space-between`
+   with one child puts that child at the LEFT, which is where the
+   button jumped when the caption was retired. The error, when there
+   is one, takes the space back with its own auto margin. */
 .anl-explain {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
 }
-.anl-explain__hint { font-size: 0.82rem; color: var(--text-secondary); }
+.anl-explain__hint { margin-right: auto; font-size: 0.82rem; color: var(--text-secondary); }
 .anl-explain__hint--bad { color: var(--danger); }
 /* The bought explanation, above the control that bought it — the
    mockup's explain__body: body ink, a 3px rule of the station's
@@ -1832,6 +1834,36 @@
   background: transparent;
   color: var(--text-secondary);
 }
+/* 保存 — the result head's keep toggle (2026-09-11).
+   The Kept stamp below is still the history row's read-only mark; on
+   the head it became a control, because the rail that carried the pin
+   is gone below 1100px and the stage is where the Sentence is. The
+   same 44px round target as .anl-clear next to it, wearing the rail
+   pin's own + / ✓ — one pin, one pair of glyphs, wherever it sits.
+   Pressed, it spends the seal's ink exactly as the stamp does. */
+.anl-head__keep {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+.anl-head__keep:hover,
+.anl-head__keep:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); }
+.anl-head__keep--on {
+  border-color: color-mix(in srgb, var(--stamp-ink) 55%, transparent);
+  color: color-mix(in srgb, var(--stamp-ink) 65%, var(--text-primary));
+}
+@media (prefers-reduced-motion: reduce) {
+  .anl-head__keep { transition: none; }
+}
 /* The Kept stamp: the seal's ink, as a caption pill. */
 .anl-kept {
   flex: none;
@@ -2027,6 +2059,12 @@
 }
 .anl-stepper__count {
   flex: none;
+  /* The dots and the count say the same thing, so they sit together
+     between the two chevrons rather than one drifting left of centre
+     and the other pinning right. Auto margins, not justify-content:
+     they take the free space BEFORE it is distributed, which centres
+     the pair as one object at every width. */
+  margin-right: auto;
   font-family: var(--font-display);
   font-size: var(--fs-caption);
   font-weight: 700;
@@ -2037,11 +2075,12 @@
 }
 .anl-stepper__i1 { font-style: normal; text-transform: none; }
 .anl-stops {
-  flex: 1;
+  flex: none;
   display: flex;
-  justify-content: center;
+  align-items: center;
   flex-wrap: wrap;
   gap: var(--sp-1);
+  margin-left: auto;   /* see .anl-stepper__count */
 }
 .anl-stops__dot {
   width: 8px;
@@ -2221,20 +2260,96 @@
   font-weight: 700;
   color: var(--text-primary);
 }
-/* The dials: a caption and a segmented control on one row. */
+/* The dials: a caption and a segmented control on one row, and the
+   two rows share one grid so the captions line up in a column of
+   their own -- FURIGANA is 65px and VUE is 24, and as two separate
+   flex rows their controls started at two different places.
+   `display: contents` on the dial is what lets one grid hold both
+   rows without a wrapper per column; it also means the two-up band
+   below is a change of column count and nothing else. */
 .anl-dials {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.anl-dial {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
-  gap: var(--sp-4);
+  gap: var(--sp-3) var(--sp-4);
 }
-.anl-dial__cap { flex: none; }
+.anl-dial { display: contents; }
+/* An empty kanji row still takes a gap in a column foot, and a Token
+   with no kanji is the common case (a particle, a kana word). */
+.token-card__kanji:empty { display: none; }
+
+/* ── The result on a phone (2026-09-11) ───────────────────
+   Below 768px the viewport IS the stage, the same ruling the study
+   screens are built on (DESIGN.md, "The study stage on a phone"). The
+   result used to end 200px short of the bottom of a 390×844 handset
+   with every row left-aligned and ragged on the right, which is the
+   density contract's own failure: dead space, not unevenness.
+
+   So the slack goes to the card -- the object carrying the word being
+   studied -- and its two auto margins put the word in the middle of it
+   and the deck action on its floor, where a thumb is. Everything that
+   was a row of a label beside a squeezed control becomes a full-width
+   control under its label. */
 @media (max-width: 768px) {
   .anl-kbd { display: none; }
+
+  /* The growth chain, one growing child per level, so all of the
+     slack lands on the card. `1 0 auto`, never `1` (= 1 1 0%): the
+     card must not be shrunk below its own content when the Passage
+     is long enough to scroll. */
+  .anl-results,
+  .anl-stage,
+  .anl-stagebd,
+  .anl-stagebd__card,
+  .token-card { flex: 1 0 auto; }
+  /* CardTransition's box: a flex column so the card inside it can
+     take the height. Its own height transition goes quiet here --
+     the box no longer changes height between Tokens, which is the
+     point of the animation, so there is nothing left to animate. */
+  .anl-stagebd__card { display: flex; flex-direction: column; }
+  /* Two auto margins, so the free height falls either side of the
+     word: it sits off the card's ceiling and the action stays on its
+     floor -- the study card's own arrangement (DESIGN.md again). */
+  .token-card__head { margin-top: auto; }
+  /* One action, the width of the card. `align-items: stretch` rather
+     than a width on the button: the button is a flex item here, and
+     the compound that would set its width belongs 14,000 lines away
+     in the overrides block. */
+  .token-card__foot {
+    margin-top: auto;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .anl-explain {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-3);
+  }
+
+}
+
+/* Four keys, two by two, instead of three on one line and the long
+   one alone under them. Only this narrow: by 600px the four fit on
+   one row, and a two-column grid there would be spending width to
+   make the legend taller. */
+@media (max-width: 560px) {
+  .anl-legend {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-2) var(--sp-3);
+  }
+}
+
+/* Between the phone and the split there is no rail and the whole
+   1040px column is the stage, so the two dials sit side by side
+   rather than stacking a second near-empty row. Not above 1100: the
+   rail takes its third back and a half-column dial would squeeze the
+   three furigana options again. */
+@media (min-width: 769px) and (max-width: 1099px) {
+  .anl-dials {
+    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
+    column-gap: var(--sp-5);
+  }
 }
 /* ── The deck picker (canvas DeckPickerSheet) ── */
 .picker {
@@ -2359,32 +2474,23 @@
   }
 }
 
-/* This block asked for `scrollbar-width: thin` until the touch
-   scrollbar was gated (see "Themed scrollbar" above): under 1100px the
-   rail is nearly always under a thumb, and asking for any scrollbar
-   width there is what turns a fading overlay hint into a permanent
-   classic bar. The global rule already draws the thin one wherever
-   there is a cursor to use it.
+/* There is no rule for the rail under 1100px because there is no rail
+   under 1100px (2026-09-11). It used to stack above the stage as a
+   170px WINDOW — about three stops of a Passage the stepper already
+   walks, over a search field, four filter chips and a bulk pin, in the
+   room a phone needs for the sentence itself. AnalyzerScreen's `wide`
+   gate now keeps the whole .anl-railcol out of the document at those
+   widths, so a rule here would have nothing to style; keeping the stop
+   you are on moved to the head (.anl-head__keep).
 
-   The stopping-pattern strip (plan 030's horizontal band above the
-   player) lived here until the mockup fidelity pass (2026-09-01)
-   retired it: the mockup draws the Passage exactly one way — the
-   vertical route map — at every width. Below the 1100px split the
-   rail column stacks above the stage, and with only one sticky
-   element left the measured --anl-strip-h offset machinery went too.
-
-   On a phone the line is a WINDOW, not a wall: about three stops
-   tall (a fourth peeking to say there is more), the rest scrolling
-   inside it — a 47-cue track must not bury the stage under 47 rows
-   of rail. */
-@media (max-width: 1099px) {
-  .anl-line {
-    max-height: 170px;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: var(--sp-1);
-  }
-}
+   Two things that block knew, kept here because they are still true of
+   any scroller this narrow: it must NOT ask for `scrollbar-width:
+   thin` (see "Themed scrollbar" above — under a thumb, asking for any
+   width turns a fading overlay hint into a permanent classic bar), and
+   the Passage is drawn exactly one way, the vertical route map. The
+   stopping-pattern strip (plan 030's horizontal band above the player)
+   was the other answer, and the mockup fidelity pass (2026-09-01)
+   retired it along with the measured --anl-strip-h offset machinery. */
 
 /* ── Mining controls (2026-08-27) ──────────────────────────
    One plain action plus a disclosure, replacing the two jargon buttons
@@ -16919,6 +17025,40 @@ html { scrollbar-gutter: stable; }
 .dict-form .record { padding: var(--sp-3) var(--sp-4); }
 .record--door:hover .record__chev,
 .record--door:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
+
+/* The analyser's card, taking the room the phone's stage hands it
+   (see "The result on a phone" in the analyzer block). CardTransition
+   puts two boxes between the stage and the card, so the growth has to
+   be passed down through both -- the same chain, for the same reason,
+   as `.stage > .quiz-card-stage` above, and the study stage's own
+   ruling that a card grows into whatever the instrument under it
+   leaves. Declared here because each of these shares its last
+   compound with a rule of CardTransition's own, 6,000 lines below the
+   analyzer's block. */
+/* The dial's control is CHIP size (DESIGN.md, Controls: "a segmented
+   toggle is the rating bar's construction at chip size"), which is
+   .chip's own 36px -- `seg--full`'s 40px bar, full width and stacked
+   twice, was the heaviest thing on the phone's stage after the card.
+   Its options size to their words and share only the slack: at an
+   equal third each "Inconnus seulement" gets 116px on a phone and
+   wraps, and inside a fixed height a wrap is clipped, which is why
+   the height gives way here instead. */
+.anl-dial .seg--full .seg__opt {
+  flex: 1 1 auto;
+  height: auto;
+  min-height: 36px;
+  padding-inline: var(--sp-3);
+}
+
+@media (max-width: 768px) {
+  .anl-stagebd__card > .card-transition,
+  .anl-stagebd__card .card-transition-live {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .anl-stagebd__card .token-card { flex: 1 1 auto; }
+}
 
 @media (max-width: 999px) {
   .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }

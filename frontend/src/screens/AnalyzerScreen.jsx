@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
+import { useMediaQuery } from '../hooks/useMediaQuery'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -21,12 +22,13 @@ import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, CrossIcon, SpeakerIcon, SpeakerOffIcon } from '../components/ui/Icons'
+import { ChevronIcon, CrossIcon, PlusIcon, CheckIcon, SpeakerIcon, SpeakerOffIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, clampVolume, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
 // The stepper's dots: past this many stops the count alone says where
-// you are, and the route map below the stage carries every stop.
+// you are. (It used to add "and the route map carries every stop" --
+// true only beside the stage now, at 1100px and up.)
 const MAX_STOP_DOTS = 12
 
 // ── 解析駅 — one station, three platforms ─────────────────
@@ -148,6 +150,17 @@ export default function AnalyzerScreen({ session }) {
   // exactly the input these exist for.
   const [stopFilter, setStopFilter] = useState('all')
   const [stopQuery, setStopQuery] = useState('')
+  // ...and whether there is a column to put it in. The rail is a
+  // DESKTOP instrument (2026-09-11): below the split it used to stack
+  // above the stage as a 170px window -- three stops of a Passage the
+  // stepper already walks, a search field, four filter chips and a
+  // bulk pin, all in the room a phone needed for the sentence itself.
+  // Not hidden in CSS: a control the learner cannot see should not be
+  // in the document, and PassageLine's scroll effect should not run
+  // for a rail nobody can read. The query is the same 1100px split
+  // index.css draws the two-column layout at, and the two must move
+  // together.
+  const wide = useMediaQuery('(min-width: 1100px)')
   // The stage's token view: one at a time (the carousel) or every
   // Token at once (SentenceBreakdown's own 'list' layout).
   const [view, setView] = useState('stepper')
@@ -632,6 +645,7 @@ export default function AnalyzerScreen({ session }) {
     : t[platform.lead]
 
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
+  const isKept = !!focused && analyzer.kept.has(focused.text)
 
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
@@ -649,7 +663,34 @@ export default function AnalyzerScreen({ session }) {
               {focused.level ? ` · ${focused.level}` : ''}
             </span>
           </span>
-          {analyzer.kept.has(focused.text) && <span className="anl-kept">{t.keptTitle}</span>}
+          {/* 保存 — the stamp is the control (2026-09-11). It used to
+              be a read-only mark, with the pin living out on the rail;
+              on a phone there is no rail any more, so the act comes to
+              the one Sentence the stage is showing. It keeps the same
+              seal ink it had as a badge, and it is here at every width
+              rather than only under the split: one control that moves
+              with the stop you are on, and a single-Sentence Passage --
+              which never had a rail at any width -- can be kept at last.
+
+              + / ✓ rather than a word, the rail pin's own marks: the
+              pin says the same thing in the same shapes wherever it
+              is, and a head with four controls on a 390px screen has
+              no room for a fifth word. DRAWN, not typed — at 14px
+              beside the 14px CrossIcon, because a text "+" next to a
+              stroked × puts a 9px hairline speck beside a 14px mark
+              in two identical circles, which reads as a defect and
+              was reported as one. The icons are aria-hidden; the
+              whole sentence is the name, as on the rail's pin. */}
+          <button
+            type="button"
+            className={`anl-head__keep${isKept ? ' anl-head__keep--on' : ''}`}
+            aria-pressed={isKept}
+            aria-label={isKept ? t.unkeepSentence : t.keepSentence}
+            title={isKept ? t.unkeepSentence : t.keepSentence}
+            onClick={() => analyzer.keepSentence(focusIndex)}
+          >
+            {isKept ? <CheckIcon size={14} /> : <PlusIcon size={14} />}
+          </button>
           <button type="button" className="anl-clear" onClick={clearPassage} aria-label={t.clearPassage} title={t.clearPassageHint}>
             <CrossIcon size={14} />
           </button>
@@ -963,13 +1004,22 @@ export default function AnalyzerScreen({ session }) {
                     <p className="anl-explain__body">{focused.explanation}</p>
                   )}
                   <div className="anl-explain">
-                    <span className={`hint anl-explain__hint${explainError[focusIndex] ? ' anl-explain__hint--bad' : ''}`}>
-                      {explainError[focusIndex]
-                        ? explainError[focusIndex]
-                        : focused.explanation
-                          ? t.explanationBought
-                          : t.noExplanationYet}
-                    </span>
+                    {/* Only a failure speaks here. The line used to
+                        caption the button in either state -- "Word
+                        meanings and grammar notes for this sentence"
+                        before, "Explained" after -- and both are what
+                        DESIGN.md's second rule forbids: a button whose
+                        action is obvious from where it sits does not
+                        need labelling, and once an explanation is
+                        bought it is printed directly above this row,
+                        which says "explained" better than the word
+                        does. An error is the one thing the row cannot
+                        show by itself. */}
+                    {explainError[focusIndex] && (
+                      <span className="hint anl-explain__hint anl-explain__hint--bad">
+                        {explainError[focusIndex]}
+                      </span>
+                    )}
                     <button
                       type="button"
                       onClick={() => analyzer.explain(focusIndex)}
@@ -997,9 +1047,12 @@ export default function AnalyzerScreen({ session }) {
           </div>
 
           {/* A route diagram of one stop is a joke at the reader's
-              expense -- below the threshold the stage takes the column
-              on its own. */}
-          {sentences.length > 1 && (
+              expense; a route diagram of fifty, on a phone, is worth
+              less than the screen the sentence needs (see `wide`). The
+              stage takes the column on its own in both cases -- the
+              stepper is the way along the Passage there, and the head
+              is the way to keep a stop. */}
+          {wide && sentences.length > 1 && (
             <div className="anl-railcol">
               {/* ── The working rail head ──
                   Search and filters over the stops, with the count

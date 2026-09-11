@@ -440,11 +440,12 @@ describe('the stage rhythm, the stepper and the dials', () => {
   })
 })
 
-describe('the route line (the working rail keeps the vertical line)', () => {
-  it('never lies down as a horizontal strip — any width, the vertical route map', async () => {
-    // Explicitly NARROW: the strip was exactly the narrow-viewport
-    // rendering, so this is the width where its absence means something.
-    await page.viewport(500, 900)
+describe('the route line (the working rail, and the widths it answers for)', () => {
+  it('never lies down as a horizontal strip — beside the stage, the vertical route map', async () => {
+    // Explicitly WIDE: since 2026-09-11 the rail is built at 1100px and
+    // up only, and the strip was the other answer to the same question,
+    // so this is now the width where its absence means something.
+    await page.viewport(1280, 900)
     const screen = await renderScreen()
     await analyze(screen)
 
@@ -456,9 +457,12 @@ describe('the route line (the working rail keeps the vertical line)', () => {
     expect(screen.container.querySelectorAll('.anl-keep').length).toBe(2)
   })
 
-  it('shows about three stops on a phone and scrolls the rest inside the line', async () => {
+  it('is not built at all below the split — the stepper walks, the head keeps', async () => {
+    // The rail used to stack above the stage here as a ~170px window.
+    // A long Passage is the case that made it wrong: eight stops of
+    // scroller, a search field and a bulk pin standing between the
+    // learner and the sentence they opened the screen for.
     await page.viewport(500, 900)
-    // A long Passage: eight stops, so the cap has something to cap.
     apiJson.mockResolvedValue({
       truncated: 0,
       sentences: Array.from({ length: 8 }, (_, i) => ({
@@ -470,11 +474,21 @@ describe('the route line (the working rail keeps the vertical line)', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const line = screen.container.querySelector('.anl-line')
-    expect(screen.container.querySelectorAll('.anl-stop').length).toBe(8)
-    expect(line.clientHeight, `line is ${line.clientHeight}px tall`).toBeLessThanOrEqual(240)
-    expect(line.scrollHeight).toBeGreaterThan(line.clientHeight)
-    expect(getComputedStyle(line).overflowY).toBe('auto')
+    // Not hidden — absent. A control the learner cannot see has no
+    // business in the tab order or the accessibility tree.
+    expect(screen.container.querySelector('.anl-railcol')).toBeNull()
+    expect(screen.container.querySelector('.anl-line')).toBeNull()
+    expect(screen.container.querySelectorAll('.anl-stop').length).toBe(0)
+    expect(screen.container.querySelectorAll('.anl-keep').length).toBe(0)
+
+    // What the rail was doing is done by two things that stay: the
+    // stepper walks the eight stops...
+    expect(screen.container.querySelector('.anl-stepper__count').textContent).toContain('1 / 8')
+    // ...and 保存, the one act only the rail could perform, is on the
+    // head, at the size a thumb needs.
+    const keep = screen.container.querySelector('.anl-head__keep')
+    expect(keep).not.toBeNull()
+    expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
   })
 })
 

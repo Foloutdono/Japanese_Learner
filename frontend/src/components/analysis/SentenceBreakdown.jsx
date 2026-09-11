@@ -236,7 +236,7 @@ export function SentenceBreakdown({
           <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--mastered" />{t.status_mastered}</span>
           <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--learning" />{t.status_learning}</span>
           <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--unknown" />{t.status_new}</span>
-          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--offdeck" />{t.cannotMineOffDeck}</span>
+          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--offdeck" />{t.offDeckKey}</span>
         </div>
 
         {controls}
