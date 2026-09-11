@@ -786,33 +786,97 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
 
 # ── Reading Comprehension ─────────────────────────────────────────────────────
 
-# Text length and question count scale with JLPT level difficulty.
-COMPREHENSION_SPECS = {
-    "N5": {"chars": "150-220",  "questions": 6},
-    "N4": {"chars": "220-320",  "questions": 7},
-    "N3": {"chars": "320-450",  "questions": 8},
-    "N2": {"chars": "450-600",  "questions": 9},
-    "N1": {"chars": "600-800",  "questions": 10},
-}
-DEFAULT_COMPREHENSION_SPEC = {"chars": "300-400", "questions": 8}
+# ── One length, every level ──────────────────────────────────────────
+#
+# (floor, ceiling) in Japanese characters, and the SAME pair at N5 and
+# at N1 (owner-directed, 2026-09-11). The ladder used to run 150-220 up
+# to 600-800, which made the top grades a test of stamina: an N1 paper
+# was four times the reading of an N5 one, and the thing that actually
+# separates the two — how hard the Japanese is to decode — was left to
+# the kanji gate and one line of the prompt. What a level changes is
+# now stated where it belongs, in DIFFICULTY_BY_LEVEL below, and the
+# amount of Japanese is a constant.
+#
+# The ceiling is a measurement, not a preference: 280 characters is
+# what the reading card holds WITHOUT scrolling on the smallest phone
+# the app is drawn for (390x667 — .prose__jp--passage at --fs-body over
+# a 309px column is ~20 characters a line, and the card's body is 433px
+# of 26.6px lines there). 320 overflows it. The card scrolls rather
+# than spilling either way (index.css, .prompt-card--passage), but a
+# passage the reader takes in at a glance is the one this band buys.
+# frontend/src/screens/ComprehensionRun.touch.test.jsx measures the
+# ceiling against the real card and fails if it stops fitting.
+#
+# The floor is the paper's: below ~220 characters there is not enough
+# text to ask 8-12 non-overlapping questions of four different kinds
+# about. Both ends are stated to the model with the reason for each,
+# because neither holds on its own — asked as a bare range it answered
+# a 150-220 brief with 98 characters, and given a floor alone it wrote
+# 380 (both live, 2026-09-11).
+COMPREHENSION_CHARS = (220, 280)
 
-# Reading window in seconds, scaled per level alongside text length; users
-# can stop early regardless.
+# What the level actually changes. Question count is a paper's DENSITY
+# over that one fixed text, not its length — the same passage examined
+# harder, which is the only sense in which a higher grade should mean
+# more work here.
+#
+# Every count gained two on 2026-09-11 (owner-directed): a six-question
+# N5 paper was over before the text it was written about had settled,
+# and the four question types below only cover a text properly once
+# there are at least two of each. Eight is the floor everywhere; the
+# screen draws its own progress ("3 / 8") from the list that comes
+# back, so a spec that slipped would shorten the exercise silently.
+COMPREHENSION_SPECS = {
+    "N5": {"questions": 8},
+    "N4": {"questions": 9},
+    "N3": {"questions": 10},
+    "N2": {"questions": 11},
+    "N1": {"questions": 12},
+}
+DEFAULT_COMPREHENSION_SPEC = {"questions": 10}
+
+# The brief for the ONE thing a level changes. The kanji gate
+# (_allowed_kanji_for_level) already bounds the writing; this bounds
+# the grammar, the register and the reading itself, which the gate
+# cannot see. Kept short on purpose: these are constraints handed to a
+# model, and a paragraph of them reads as a topic list it then tries to
+# satisfy all of at once.
+DIFFICULTY_BY_LEVEL = {
+    "N5": "Short sentences, one idea each, almost all in the polite present or past. Basic particles (は が を に で へ と も), て-form only for joining two actions. Everyday concrete subjects: a day at school, shopping, the weather, a family. The answer to every question is stated outright somewhere in the text.",
+    "N4": "Sentences that join two or three clauses with て-forms, から, ので, たら, と. Plain forms inside a sentence, potential and volitional, giving and receiving, comparison. A concrete subject with a small complication in it — a plan that changes, an outing that goes wrong.",
+    "N3": "Compound sentences with subordinate clauses. Passive, causative, conditional pairs, ようだ/らしい/そうだ, conjunctions of cause, contrast and condition. The subject is often left unsaid and has to be tracked. Explanation or opinion rather than diary: how something works, why someone decided something.",
+    "N2": "Written register, including formal connectives (にもかかわらず, 一方で, に対して, とはいえ). Nominalisation, humble and honorific forms, longer noun phrases. An abstract or public subject: work, a service, a change in a town, a piece of research. Some of what the text means is carried by its structure rather than its words.",
+    "N1": "Essay or editorial register, dense noun phrases, nuance carried in hedging and word choice. Idiomatic and literary turns, irony, a line of argument rather than a sequence of facts. An abstract subject treated critically. At least one question should only be answerable by reading between the lines.",
+}
+DEFAULT_DIFFICULTY = DIFFICULTY_BY_LEVEL["N3"]
+
+# Reading window in seconds. It used to scale with the text, which no
+# longer varies — so this is now what it should always have been: the
+# time the SAME amount of Japanese takes to decode at each level. A
+# ladder, because an N1 paragraph is genuinely slower per character
+# than an N5 one, but a gentle one rather than the 4x the old lengths
+# forced. Learners can stop early regardless, and most do.
 READ_SECONDS_BY_LEVEL = {
     "N5": 240,   # 4 min
-    "N4": 300,   # 5 min
-    "N3": 420,   # 7 min
-    "N2": 540,   # 9 min
-    "N1": 600,   # 10 min
+    "N4": 270,
+    "N3": 300,   # 5 min
+    "N2": 330,
+    "N1": 360,   # 6 min
 }
-DEFAULT_READ_SECONDS = 420
+DEFAULT_READ_SECONDS = 300
 
 # Same allowed-kanji restriction as the phrase-reading mode (see
 # SYSTEM_PROMPT_TEMPLATE above) — a comprehension text full of kanji the
 # user has never studied defeats the point of leveling it by JLPT level.
 COMPREHENSION_PROMPT_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
 
-Write a self-contained Japanese text ({chars} characters) using vocabulary and grammar appropriate for JLPT {level}. Then write {questions} multiple-choice questions ABOUT THE TEXT, mixing different question types so the exercise tests more than just plot recall.
+Write a self-contained Japanese text of about {target_chars} Japanese characters — never fewer than {min_chars} and never more than {max_chars} — in vocabulary and grammar appropriate for JLPT {level}.
+
+That length is the same at EVERY level. What JLPT {level} changes is how hard the Japanese is, never how much of it there is: a harder level means denser grammar, a less concrete subject and more that has to be worked out — in the same number of characters. At JLPT {level} specifically:
+
+{difficulty}
+
+Then write {questions} multiple-choice questions ABOUT THE TEXT, mixing different question types so the exercise tests more than just plot recall. Finally, break the text down one sentence at a time, so the learner can go back over it afterwards and see exactly where their reading went wrong.
 
 When writing the text:
 
@@ -821,6 +885,7 @@ When writing the text:
 {allowed_kanji}
 - Any other kanji outside this list is forbidden.
 - If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
+- But DO write a word in the kanji it is normally written in whenever those kanji are on the list. A passage spelled out entirely in hiragana is not Japanese anyone reads, and at JLPT {level} the kanji on that list are exactly the ones the learner is being taught to read.
 
 Question types to mix across the {questions} questions (use a good variety — don't make them all "comprehension"):
 - "comprehension": tests understanding of what happened, who/what/when/where, or the main idea of a specific passage in the text.
@@ -831,7 +896,6 @@ Question types to mix across the {questions} questions (use a good variety — d
 Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
 {{
   "text": "...",
-  "translation": "...",
   "questions": [
     {{
       "type": "comprehension",
@@ -839,21 +903,40 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
       "options": ["...", "...", "...", "..."],
       "correct": 0
     }}
+  ],
+  "breakdown": [
+    {{
+      "jp": "...",
+      "translation": "...",
+      "note": "..."
+    }}
   ]
 }}
 
 Rules:
-- "text" must be natural, coherent Japanese with a clear topic (a short story, announcement, letter, description, etc), long enough to support questions of every type above.
-- "translation" is a faithful {lang_name} translation of "text".
+- EVERY value in this object is a plain JSON string: it opens with the " character and closes with it, and with nothing else. Never open a value with «, “ or 「.
+- Where you quote Japanese INSIDE a value — a question, an option, a note — open it with 「 and close it with 」, and use no other mark for it — never « », never quotes, never italics marks, and never one of those paired with a corner bracket.
+- "text" must be natural, coherent Japanese with a clear topic (a short story, announcement, letter, description, etc).
+- "text" must be between {min_chars} and {max_chars} Japanese characters long, and {target_chars} is what to aim for. Count them before you answer: this is the rule most often broken, and a text of 170 characters where {target_chars} was asked for is a failed exercise. Both ends are real — under {min_chars} the text cannot carry {questions} questions of four different kinds, and over {max_chars} it does not fit on the screen it is read from. Do not write a longer text because the level is high: write a harder one.
 - "type" must be exactly one of: "comprehension", "vocabulary", "grammar", "inference".
-- Each "question" is written in {lang_name} (quoting the relevant Japanese word/phrase from the text in italics-style quotes where relevant) and must be answerable using only the text provided.
+- Each "question" is written in {lang_name} (quoting the relevant Japanese word or phrase from the text in 「 」 where that helps) and must be answerable using only the text provided.
 - "options" must contain exactly 4 choices in {lang_name}. All options must be plausible — avoid obviously wrong distractors.
 - "correct" is the 0-based index of the only correct option.
 - Generate exactly {questions} questions, with at least one of each type if {questions} >= 4, and a roughly even mix overall.
+- "breakdown" has ONE entry per sentence of "text", in the order the sentences appear. Splitting on 。！？, every sentence of the text must appear exactly once and nothing that is not in the text may appear at all: concatenating every "jp" in order must reproduce "text" exactly, punctuation included.
+- "jp" is the sentence copied verbatim from "text" — never re-written, re-spelled or given kanji the text does not use.
+- "translation" is a faithful {lang_name} translation of that ONE sentence.
+- "note" is one short {lang_name} sentence on how that sentence is built — the particle, verb form, construction or word a JLPT {level} learner is most likely to trip on in it. Name the Japanese you are talking about, in 「 」. Never restate the translation; if a sentence really has nothing worth noting, use an empty string.
+- A "note" must BEGIN with a word of {lang_name} — "The particle 「は」 marks...", never "「は」 marks...". Starting one on a bracket is how the opening " of the JSON string goes missing, and that one character costs the whole exercise.
 """
 
 
 VALID_QUESTION_TYPES = {"comprehension", "vocabulary", "grammar", "inference"}
+
+# How many times one exercise is asked for before the screen is told no.
+# See the loop in _call_llm_comprehension for what the second attempt
+# actually buys.
+_COMPREHENSION_ATTEMPTS = 2
 
 class ComprehensionAnswersPayload(BaseModel):
     level: str
@@ -861,6 +944,52 @@ class ComprehensionAnswersPayload(BaseModel):
     translation: str
     questions: list[dict]
     answers: list[int]  # user's chosen option index per question, in order
+    # The sentence-by-sentence breakdown the exercise was served with,
+    # echoed back the way `questions` is. Optional: comprehension_log
+    # has no column for it (nothing reads that table — see
+    # scripts/prune_logs.py), so this is accepted and dropped rather
+    # than stored, and an older client that never sends it still posts
+    # a valid payload.
+    breakdown: list[dict] | None = None
+
+
+def _text_field(part: dict, key: str) -> str:
+    """One string out of a model-written object, or ''. A model that
+    answers a text field with a number or a list is answering badly,
+    not fatally — every caller here treats a blank as "nothing to
+    print", and str() on a list would print the brackets."""
+    value = part.get(key)
+    return value.strip() if isinstance(value, str) else ""
+
+
+def _clean_breakdown(raw) -> list[dict]:
+    """The breakdown as the screen reads it: {jp, translation, note} per
+    sentence, in order, nothing else.
+
+    Lenient on purpose, and only in the directions that cannot mislead a
+    learner. A sentence with no `jp` is dropped (there is nothing to
+    show it against); a missing or non-string `note` becomes '' (the
+    prompt itself allows an empty one, and the card simply omits the
+    line); a missing translation is kept as '' rather than dropping the
+    sentence, because the Japanese is still the passage and losing a
+    line of it would silently rewrite the text the learner just read.
+    """
+    if not isinstance(raw, list):
+        return []
+
+    cleaned = []
+    for part in raw:
+        if not isinstance(part, dict):
+            continue
+        jp = _text_field(part, "jp")
+        if not jp:
+            continue
+        cleaned.append({
+            "jp": jp,
+            "translation": _text_field(part, "translation"),
+            "note": _text_field(part, "note"),
+        })
+    return cleaned
 
 
 def _call_llm_comprehension(level: str, lang: str) -> dict:
@@ -871,27 +1000,103 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
     lang_name = LANG_NAMES.get(lang, lang)
     allowed_kanji = _allowed_kanji_for_level(level)
 
+    min_chars, max_chars = COMPREHENSION_CHARS
     prompt = COMPREHENSION_PROMPT_TEMPLATE.format(
         level=level,
-        chars=spec["chars"],
+        min_chars=min_chars,
+        max_chars=max_chars,
+        # A target, not just a band. Asked for a range the model aims
+        # under it — a 220-280 brief came back at 173 (live,
+        # 2026-09-11) — and asked for one number it lands on it.
+        target_chars=(min_chars + max_chars) // 2,
+        difficulty=DIFFICULTY_BY_LEVEL.get(level, DEFAULT_DIFFICULTY),
         questions=spec["questions"],
         allowed_kanji=allowed_kanji,
         lang=lang,
         lang_name=lang_name,
     )
 
-    content = _chat([
-        {"role": "system", "content": prompt},
-        {"role": "user", "content": "Generate the reading comprehension exercise."},
-    ])
+    # Asked twice before giving up, and this is not belt-and-braces:
+    # one blob carries the passage, the paper AND the breakdown, so a
+    # single malformed value costs the learner the whole exercise — a
+    # 502 they read as "Couldn't load a text". That is not
+    # hypothetical, it is the shape that prompted this, live on
+    # 2026-09-11: a French note that OPENED on a guillemet instead of
+    # the JSON quote, which is a parse error two thousand characters
+    # into an otherwise perfect answer. The quoting rules in the prompt
+    # are the fix; this is what a model that ignores them costs. The
+    # exam generator makes the same bargain for the same reason
+    # (exam_reading_gen._build_one_passage).
+    #
+    # 502 only. A 503 is llm_shared saying every provider is gone, and
+    # asking it again is a request not worth sending.
+    last = None
+    for attempt in range(_COMPREHENSION_ATTEMPTS):
+        # max_tokens above the shared 3000 default, and the timeout
+        # with it: this one call now writes the passage, a dozen
+        # four-option questions AND a translated, annotated entry per
+        # sentence, roughly twice the JSON the flat whole-text
+        # translation it replaced came to. A cap that cuts the blob
+        # mid-array costs the whole exercise, so it is set for the
+        # longest paper the specs above can ask for — N1: 800
+        # characters, 12 questions, ~15 sentences.
+        content = _chat([
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": "Generate the reading comprehension exercise."},
+        ], timeout=120, max_tokens=8000)
+        try:
+            return _parse_comprehension(content)
+        except HTTPException as e:
+            if e.status_code != 502:
+                raise
+            last = e
+            logger.warning(
+                "Comprehension attempt %d/%d unusable (%s)",
+                attempt + 1, _COMPREHENSION_ATTEMPTS, e.detail,
+            )
+
+    raise last
+
+
+# A value that begins with anything but the JSON quote — the one
+# malformation this endpoint actually sees, and it sees it often.
+# The shape, live twice on 2026-09-11:
+#
+#     "note": 「見て」 links テレビを見る and 寝ました。"
+#
+# The model opens the string on the Japanese quotation mark it was
+# asked to quote Japanese with, and never writes the " — so the value
+# is unterminated and two thousand characters of otherwise perfect
+# answer are unparseable. The prompt now tells it to start a note on a
+# word rather than on a bracket, which is the real fix; this is the
+# net under it.
+#
+# Only ever applied to input `json.loads` has ALREADY refused, so it
+# cannot change the meaning of a well-formed answer: a value that does
+# not open on a quote is not valid JSON under any reading. The closing
+# quote is the one the model did write.
+_UNOPENED_VALUE = re.compile(r'("(?:jp|translation|note|question)":[ \t]*)(?=[^"\s\[{])')
+
+
+def _parse_comprehension(content: str) -> dict:
+    """One model answer to the prompt above, checked and normalized, or
+    a 502 naming what was wrong with it — which the caller reads as
+    "ask again"."""
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
         data = json.loads(cleaned)
     except json.JSONDecodeError:
-        logger.error("Failed to parse comprehension LLM response: %r", content)
-        raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
+        repaired, fixes = _UNOPENED_VALUE.subn(r'\1"', cleaned)
+        try:
+            data = json.loads(repaired) if fixes else None
+        except json.JSONDecodeError:
+            data = None
+        if data is None:
+            logger.error("Failed to parse comprehension LLM response: %r", content)
+            raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
+        logger.warning("Comprehension response repaired: %d value(s) opened on the wrong quote", fixes)
 
-    for field in ("text", "translation", "questions"):
+    for field in ("text", "questions", "breakdown"):
         if field not in data:
             raise HTTPException(status_code=502, detail=f"LLM response missing field: {field}")
 
@@ -905,6 +1110,17 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
         if q.get("type") not in VALID_QUESTION_TYPES:
             q["type"] = "comprehension"
 
+    data["breakdown"] = _clean_breakdown(data["breakdown"])
+    if not data["breakdown"]:
+        raise HTTPException(status_code=502, detail="LLM response carried no usable breakdown")
+
+    # The whole-text translation is no longer asked for: it is the
+    # breakdown read end to end, which is the same text by construction
+    # and one fewer thing for the model to get out of step with itself.
+    # It still exists because comprehension_log.translation is NOT NULL
+    # and because the screen posts back what it was served.
+    data["translation"] = " ".join(part["translation"] for part in data["breakdown"] if part["translation"])
+
     return data
 
 
@@ -917,6 +1133,7 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
         "level": level,
         "text": data["text"],
         "translation": data["translation"],
+        "breakdown": data["breakdown"],
         "questions": data["questions"],
         "read_seconds": READ_SECONDS_BY_LEVEL.get(level, DEFAULT_READ_SECONDS),
         "question_count": spec["questions"],
