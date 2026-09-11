@@ -587,6 +587,15 @@ scrolls away:
   home bar, with its space reserved from the first paint so revealing a card
   never moves it. `--hud-h` is the one number every docked thing clears by.
 
+A card taller than the screen scrolls the page behind that docked edge —
+except for **a card that is a page of prose**, which is bounded to the screen
+and scrolls inside itself. Reading comprehension's passage is the case that
+named it (`.prompt-card--passage`, 2026-09-11): a card that is always taller
+than the phone read as a sentence cut in half by the foot's own ground, with
+the card's bottom edge somewhere off the page. The scroll is the **body's**,
+never the card's — the foot strip is what names the card, and it has to stay
+on screen. A prompt keeps the ordinary ruling; only a passage is bounded.
+
 Above 768px the column is the centred `--card-w` it always was, with the
 progress legend back.
 

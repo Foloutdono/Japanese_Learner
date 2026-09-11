@@ -994,7 +994,6 @@ const comprehension = {
   showTranslation:          'Afficher la traduction',
   hideTranslation:          'Masquer la traduction',
   timeRemaining:           'Temps restant',
-  originalText:            'Texte original',
   tryAgain:                'Réessayer',
   changeLevel:             'Changer de niveau',
   score:                   'Score',

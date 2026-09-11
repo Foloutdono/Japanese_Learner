@@ -42,9 +42,8 @@ export default function ComprehensionRun({ session }) {
   const level = route?.level ?? null
 
   const [stage, setStage]       = useState('loading')
-  const [exercise, setExercise] = useState(null)   // { text, translation, questions, read_seconds }
+  const [exercise, setExercise] = useState(null)   // { text, breakdown, questions, read_seconds }
   const [timeLeft, setTimeLeft] = useState(0)
-  const [showTranslation, setShowTranslation] = useState(false)
   // Re-reading the text from the questions pauses the clock: the
   // reading window was for the first read, and coming back to check
   // a detail is what the paper allows.
@@ -53,7 +52,7 @@ export default function ComprehensionRun({ session }) {
   const [answers, setAnswers]   = useState([])     // chosen option index per question
   const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
   const [results, setResults]   = useState(null)   // final { score, total, results[] }
-  const [showOriginal, setShowOriginal] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
   const [openRow, setOpenRow]   = useState(null)   // which result row is opened on its question
   const [error, setError]       = useState(null)
 
@@ -62,9 +61,8 @@ export default function ComprehensionRun({ session }) {
   function startSession(lvl) {
     setStage('loading')
     setError(null)
-    setShowTranslation(false)
     setRereading(false)
-    setShowOriginal(false)
+    setShowBreakdown(false)
     setOpenRow(null)
     setPicked(null)
 
@@ -148,6 +146,7 @@ export default function ComprehensionRun({ session }) {
         level,
         text: exercise.text,
         translation: exercise.translation,
+        breakdown: exercise.breakdown,
         questions: exercise.questions,
         answers: finalAnswers,
       }),
@@ -189,6 +188,14 @@ export default function ComprehensionRun({ session }) {
 
   const total = exercise?.questions?.length ?? 0
 
+  // The passage cut into its sentences, as the exercise was served.
+  // A backend that does not send one yet (the two deploy separately —
+  // Vercel and Render) degrades to exactly what the toggle used to
+  // open: the whole text over its whole translation, as one entry.
+  const breakdown = exercise?.breakdown?.length
+    ? exercise.breakdown
+    : [{ jp: exercise?.text ?? '', translation: exercise?.translation ?? '', note: '' }]
+
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
   const sub =
@@ -205,6 +212,10 @@ export default function ComprehensionRun({ session }) {
       sub={sub}
       remaining={stage === 'questions' ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
+      // The reading stage is the one that holds a page: it is bounded
+      // to the screen so the passage scrolls in its own card rather
+      // than taking the stage with it (index.css, .prompt-card--passage).
+      className={stage === 'reading' ? 'stage--passage' : ''}
     >
       {/* A long wait (the text is written on demand) owes a sentence;
           the dots carry it (plan 067). */}
@@ -229,21 +240,18 @@ export default function ComprehensionRun({ session }) {
             </div>
           )}
 
-          <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
+          {/* The text, and nothing else to do with it. The translation
+              used to be a button away right here, which made the
+              reading window optional: the fastest way through the
+              paper was to read that and answer from it. It is
+              now the breakdown on the result (below) — the same
+              sentences, in the same order, but bought AFTER the
+              answers are in rather than instead of them. */}
+          <PromptCard prose className="prompt-card--passage" foot={{ left: level, right: t.comprehensionTitle }}>
             <span className="prose__jp prose__jp--passage" lang="ja">{exercise.text}</span>
-            {showTranslation && (
-              <>
-                <span className="prose__rule" />
-                <span className="prose__label">{t.translation}</span>
-                <span className="prose__en">{exercise.translation}</span>
-              </>
-            )}
           </PromptCard>
 
           <div className="stage__foot btn-row">
-            <button type="button" className="btn-secondary" onClick={() => setShowTranslation(s => !s)}>
-              {showTranslation ? t.hideTranslation : t.showTranslation}
-            </button>
             <button type="button" className="btn-primary" onClick={finishReading}>
               {rereading ? t.compBackToQuestions : t.doneReading}
             </button>
@@ -362,14 +370,26 @@ export default function ComprehensionRun({ session }) {
             })}
           </div>
 
-          <button type="button" className="btn-secondary" onClick={() => setShowOriginal(s => !s)} aria-expanded={showOriginal}>
-            {t.originalText}
+          {/* 一文ずつ — the text again, one sentence at a time, each
+              with its translation and a line on what it is built from
+              (reading.py's breakdown). This is where the passage is
+              finally read in the learner's own language, and it is
+              the whole text: every sentence, in order, so the card is
+              the original too. */}
+          <button type="button" className="btn-secondary" onClick={() => setShowBreakdown(s => !s)} aria-expanded={showBreakdown}>
+            {showBreakdown ? t.hideBreakdown : t.showBreakdown}
           </button>
-          {showOriginal && (
+          {showBreakdown && (
             <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
-              <span className="prose__jp prose__jp--passage" lang="ja">{exercise.text}</span>
-              <span className="prose__rule" />
-              <span className="prose__en">{exercise.translation}</span>
+              <div className="cbd">
+                {breakdown.map((part, i) => (
+                  <div key={i} className="cbd__item">
+                    <span className="prose__jp" lang="ja">{part.jp}</span>
+                    {part.translation && <span className="cbd__en">{part.translation}</span>}
+                    {part.note && <span className="prose__ai">{part.note}</span>}
+                  </div>
+                ))}
+              </div>
             </PromptCard>
           )}
 

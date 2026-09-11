@@ -9296,9 +9296,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 600;
   line-height: 1.6;
 }
+/* A passage is not a prompt. The sentence register (--fs-lead, from
+   .prose__jp above) is written for ONE line a card holds whole; a
+   grade's text is 150-800 characters of it, and at that rung an N5
+   passage ran about a screen and a half on a 390px phone — the reader
+   met it already scrolling, and the half they could see told them
+   nothing about how much was left. One rung down is the reading
+   register (--fs-body, the same the card's own prose takes), and it
+   is worth roughly a quarter more text in the same box. The leading
+   comes in with it: 1.9 is generous for a line you read once, and
+   this is a page. */
 .prose__jp--passage {
+  font-size: var(--fs-body);
   font-weight: 500;
-  line-height: 1.9;
+  line-height: 1.75;
   white-space: pre-line;
 }
 .prose__romaji {
@@ -9587,6 +9598,40 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
+}
+/* ── 一文ずつ — the passage, sentence by sentence (ComprehensionRun) ──
+   Three registers, descending, and the order is the pairing rule's
+   (DESIGN.md): the Japanese sentence is the heading (.prose__jp, the
+   sentence rung), its translation is the caption under it, and the
+   note on how the sentence is built is the quietest of the three —
+   the register the app already gives a model's own words
+   (.prose__ai). The translation at .prose__en's rung was LOUDER than
+   the Japanese it captions, which is the pairing rule read backwards.
+
+   Beyond that this owns only the unit: a sentence, its translation
+   and its note read as ONE thing, and a hairline says where the next
+   one starts. No heading and no numbering — the order is the text's
+   own. */
+.cbd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+  width: 100%;
+}
+.cbd__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.cbd__item + .cbd__item {
+  border-top: 1px solid var(--border);
+  padding-top: var(--sp-6);
+}
+.cbd__en {
+  font-family: var(--font-display);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  line-height: 1.5;
 }
 /* Two actions side by side, the filled one forward: equal columns,
    as the browse foot's pair is drawn (a flex split keeps the two
@@ -13990,6 +14035,36 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: var(--sp-5);
 }
 
+/* ── The passage is read inside its own box (ComprehensionRun) ──
+   Every other footed card on a stage is a prompt: it is as tall as
+   what it says, and where it says too much the page scrolls it behind
+   the docked foot (see .stage > .stage__foot in the ≤768px query,
+   which is the ruling for a card taller than the screen). A reading
+   passage is the one card that is ALWAYS taller than the screen, and
+   that ruling reads wrong on it — the text runs under the foot's own
+   ground and the card ends off the bottom of the page, so the reader
+   sees a sentence cut in half and no edge saying whether that is the
+   end of it. The complaint that started this (2026-09-11): "the text
+   goes outside the screen".
+
+   So this card is bounded and scrolls inside itself. The scroll is
+   the BODY's, not the card's: .prompt-card's own `overflow: auto`
+   would take the foot strip down with the text, and the strip is what
+   names the card (N5 · Reading comprehension) — the one part of it
+   that has to stay on screen. The body keeps the card's whole
+   remaining height, which is what makes the card's own bottom edge the
+   end of the page rather than a place the text happens to stop. */
+.prompt-card--footed.prompt-card--passage {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.prompt-card--footed.prompt-card--passage > .prompt-card__body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+
 /* The flashcard is the body's whole height, not just its face. The
    body centres its children in whatever height the card has -- the
    220px floor on a desktop, the whole stage on a phone, where the card
@@ -14419,6 +14494,27 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     flex: 1 0 auto;
     max-height: none;
     overflow: visible;
+  }
+  /* Except the passage, which is bounded — see
+     .prompt-card--passage for why it and nothing else is. The stage
+     is what bounds it: .screen carries `min-height: 100dvh`, so a
+     stage whose content is taller simply grows and takes the page
+     with it, and a card can only scroll inside a box that has stopped
+     growing. Capped at the stage's own height, the card's `flex: 1 1
+     auto` (below) shrinks it into whatever the head, the timer and
+     the docked foot leave, and the passage scrolls in there. */
+  .stage--passage { max-height: 100dvh; }
+  /* And the card is what gives the room back. Every item in a flex
+     column shrinks by default, so the head and the timer each gave up
+     a couple of pixels to a passage long enough to need the scroll —
+     the head's own rows squeezed to buy space the card was going to
+     scroll anyway. The card is the only thing here that can yield. */
+  .stage--passage > .stage__head,
+  .stage--passage > .timer { flex: none; }
+  .stage > .prompt-card--passage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
   }
   /* The block padding steps up to the card rung with it: 16px was the
      page's own margin at content height, and on a card that is now the

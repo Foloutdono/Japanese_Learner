@@ -38,8 +38,12 @@ const { default: ComprehensionRun } = await import('./ComprehensionRun')
 const { default: SentenceStation } = await import('./SentenceStation')
 
 const EXERCISE = {
-  text: '駅で友達を待ちました。',
-  translation: 'I waited for a friend at the station.',
+  text: '駅で友達を待ちました。電車は遅れました。',
+  translation: 'I waited for a friend at the station. The train was late.',
+  breakdown: [
+    { jp: '駅で友達を待ちました。', translation: 'I waited for a friend at the station.', note: 'で marks where an action happens.' },
+    { jp: '電車は遅れました。', translation: 'The train was late.', note: '' },
+  ],
   read_seconds: 60,
   questions: [
     { type: 'comprehension', question: 'Where did they wait?', options: ['At home', 'At the station'], correct: 1 },
@@ -109,7 +113,11 @@ describe('ComprehensionRun', () => {
     expect(root.querySelector('.bar')).toBeNull()
     expect(root.querySelector('.timer__label')).toBeTruthy()
     expect(root.querySelector('.prose__jp--passage').textContent).toBe(EXERCISE.text)
-    expect(root.querySelector('.stage__foot .btn-secondary')).toBeTruthy()
+    // The passage is read in its own bounded card: nothing beside the
+    // way on, and no translation to answer the paper from.
+    expect(root.querySelector('.prompt-card--passage')).toBeTruthy()
+    expect(root.querySelector('.stage__foot .btn-secondary')).toBeNull()
+    expect(root.textContent).not.toContain(EXERCISE.breakdown[0].translation)
     root.querySelector('.stage__foot .btn-primary').click()   // done reading
     await settle()
 
@@ -138,6 +146,7 @@ describe('ComprehensionRun', () => {
     const post = apiFetch.mock.calls.find(c => String(c[0]).startsWith('/api/reading/comprehension/result'))
     expect(post, 'the answers were posted').toBeTruthy()
     expect(JSON.parse(post[2].body).answers).toEqual([1, 0])
+    expect(JSON.parse(post[2].body).breakdown).toHaveLength(2)
 
     // The result: the lattice, one row per question, the missed one noted.
     const values = root.querySelectorAll('.result-lattice .record__value')
@@ -154,5 +163,64 @@ describe('ComprehensionRun', () => {
     expect(root.querySelector('.qrow__detail .mcq-row--wrong')).toBeTruthy()
     expect(root.querySelector('.qrow__detail .mcq-row--correct')).toBeTruthy()
     expect(root.querySelector('.stage__foot .btn-primary').textContent).toBeTruthy()
+
+    // And the passage, one sentence at a time, is what the result
+    // opens onto: every sentence in order, each with its translation
+    // and the note under it. Bought here, not during the reading.
+    expect(root.querySelector('.cbd')).toBeNull()
+    // By role, not by label: the lane's language is the machine's.
+    root.querySelector('.btn-secondary[aria-expanded]').click()
+    await settle()
+    const items = root.querySelectorAll('.cbd__item')
+    expect(items).toHaveLength(2)
+    expect([...items].map(el => el.querySelector('.prose__jp').textContent))
+      .toEqual(EXERCISE.breakdown.map(p => p.jp))
+    expect(items[0].querySelector('.cbd__en').textContent).toBe(EXERCISE.breakdown[0].translation)
+    expect(items[0].querySelector('.prose__ai').textContent).toBe(EXERCISE.breakdown[0].note)
+    // A sentence with nothing worth noting prints no note line.
+    expect(items[1].querySelector('.prose__ai')).toBeNull()
+  })
+
+  // The two halves deploy separately (Vercel and Render), so the
+  // screen has to survive a backend that has not shipped the
+  // breakdown yet: the toggle opens what it always opened rather than
+  // an empty card.
+  it('falls back to the whole text when the exercise carries no breakdown', async () => {
+    const flat = { ...EXERCISE, breakdown: undefined }
+    apiFetch.mockImplementation(async url => {
+      if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
+      if (String(url).startsWith('/api/reading/comprehension')) return ok(flat)
+      return ok({})
+    })
+
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
+          <Routes>
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const root = screen.container
+
+    root.querySelector('.stage__foot .btn-primary').click()   // done reading
+    await settle()
+    for (let i = 0; i < EXERCISE.questions.length; i++) {
+      root.querySelectorAll('.mcq-row')[0].click()
+      await settle()
+      root.querySelector('.stage__foot .btn-primary').click()
+      await settle()
+    }
+    await settle(150)
+
+    // By role, not by label: the lane's language is the machine's.
+    root.querySelector('.btn-secondary[aria-expanded]').click()
+    await settle()
+    const items = root.querySelectorAll('.cbd__item')
+    expect(items).toHaveLength(1)
+    expect(items[0].querySelector('.prose__jp').textContent).toBe(EXERCISE.text)
+    expect(items[0].querySelector('.cbd__en').textContent).toBe(EXERCISE.translation)
   })
 })

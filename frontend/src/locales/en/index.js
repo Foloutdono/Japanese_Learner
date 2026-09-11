@@ -1027,7 +1027,6 @@ const comprehension = {
   showTranslation:          'Show translation',
   hideTranslation:          'Hide translation',
   timeRemaining:           'Time remaining',
-  originalText:            'Original text',
   tryAgain:                'Try again',
   changeLevel:             'Change level',
   score:                   'Score',
