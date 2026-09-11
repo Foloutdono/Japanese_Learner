@@ -172,8 +172,19 @@ describe('the analyser result on a phone', () => {
     expect(keep.querySelector('svg[aria-hidden="true"]')).not.toBeNull()
     expect(keep.textContent).toBe('')
     const box = keep.getBoundingClientRect()
-    expect(box.height, `the keep is ${box.height}px tall`).toBeGreaterThanOrEqual(44)
-    expect(box.width, `the keep is ${box.width}px wide`).toBeGreaterThanOrEqual(44)
+    // Measured to within a hair of 44, not to 44 exactly. The keep is
+    // the one thumb target here DECLARED at 44px square (index.css,
+    // .anl-head__keep) rather than reaching 44 through its padding, so
+    // it alone sits on the boundary where the runner's own
+    // rasterisation decides the assertion: CI has measured
+    // 43.999996185302734px on a commit that touched nothing on this
+    // screen, and the same run passed elsewhere. A touch target is a
+    // physical thing and four millionths of a pixel is not a
+    // regression; anything that actually shrank this control misses by
+    // a whole pixel or more, which this still catches.
+    const HAIR = 0.01
+    expect(box.height, `the keep is ${box.height}px tall`).toBeGreaterThanOrEqual(44 - HAIR)
+    expect(box.width, `the keep is ${box.width}px wide`).toBeGreaterThanOrEqual(44 - HAIR)
   })
 
   it('keeps the stop the stage is on, and lets it go again', async () => {
