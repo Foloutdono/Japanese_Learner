@@ -7256,6 +7256,43 @@ textarea:focus-visible {
    already read in, and a second drawing of it left every card with a
    line under it that the eye had to sort from the rail beside it. */
 
+/* ── The captions under the name ──
+   A stop says at most two things under its name, and they are the
+   same register — small caps, one rung under the name — so they share
+   one line rather than taking one each: the landmark ("you are here")
+   and the figure's note (how many of this stop's cards have been met
+   at all). Two lines is what the row cannot spare. The note started
+   life stacked under the FIGURE, as DESIGN.md's figure-and-label
+   pair, and the pair was the wrong reading of it: a label names the
+   figure above it, while this is a second quantity, and stacking it
+   there put a fourth staggered line in a row that already alternates
+   left and right. Under the name it is one more caption on the line
+   the row already has for captions.
+
+   Wrapping is the phone's business (COMMENCÉES is nine characters
+   longer than STARTED); the separator rides on the second child, so a
+   wrapped line begins with a word rather than a lone middot only when
+   the first child is what wrapped — which is the order these are in. */
+.route-stop__caption {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-2);
+}
+.route-stop__caption > * + *::before {
+  content: '·';
+  margin-inline-end: var(--sp-2);
+}
+.route-stop__started {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   /* ── The line runs the height of the screen ──
      A station page is a bar and a route, and the route was drawn at its

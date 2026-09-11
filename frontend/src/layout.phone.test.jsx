@@ -202,7 +202,17 @@ describe('the phone layout contract', () => {
       <button type="button" key={i} className={`route-stop${i === 0 ? ' route-stop--first' : ''}`}>
         <span className="route-stop__rail" /><span className="route-stop__marker" />
         <span className="route-stop__code">N5</span>
-        <span className="route-stop__names"><span className="route-stop__jp">Niveau débutant</span></span>
+        <span className="route-stop__names">
+          <span className="route-stop__jp">Niveau débutant</span>
+          {/* The deepest a stop's left column goes (see RouteStops.jsx):
+              the name, then its caption line carrying both the landmark
+              and the figure's note. The row has to hold three lines
+              without the name wrapping against the figure. */}
+          <span className="route-stop__caption">
+            <span className="route-stop__here">Vous êtes ici</span>
+            {i === 0 && <span className="route-stop__started">260 commencées</span>}
+          </span>
+        </span>
         <span className="route-stop__fig"><b>120</b>/ 800</span>
         <span className="route-stop__go">▶</span>
       </button>

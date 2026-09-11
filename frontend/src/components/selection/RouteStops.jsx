@@ -12,8 +12,15 @@ import { playUi } from '../../lib/audio'
 //
 // Props:
 //   stops — [{ key, code, name, hint?, hereLabel?, learned?, total?,
-//            codeLang? }] — `hereLabel` is the caption the stop the
-//            learner is at wears in place of its hint
+//            started?, startedLabel?, codeLang? }] — `hereLabel` is the
+//            caption the stop the learner is at wears in place of its
+//            hint, and `startedLabel` a second one beside it: how many
+//            of the stop's cards have been met at all, which is the
+//            figure the row's own (mastery) figure cannot move fast
+//            enough to be. The caller formats both — this draws a
+//            route, it does not speak a language — and the rule for
+//            when the note shows is below, once, rather than in each
+//            caller.
 //   here  — the key of the learner's own stop (a landmark, never a
 //           lock: every stop stays a plain button — docs/adr/0005).
 //           Where it comes from is the caller's business: a declared
@@ -27,6 +34,12 @@ export function RouteStops({ stops, here = null, onSelect }) {
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here
+        // The stop the learner is at wears its landmark in place of a
+        // hint; every other stop wears the hint, if it has one.
+        const caption = current
+          ? <span className="route-stop__here">{stop.hereLabel}</span>
+          : stop.hint ? <span className="route-stop__hint" lang={stop.hintLang}>{stop.hint}</span> : null
+        const started = stop.startedLabel && (stop.started ?? 0) > (stop.learned ?? 0)
         const classes = [
           'route-stop',
           i === 0 ? 'route-stop--first' : '',
@@ -50,9 +63,19 @@ export function RouteStops({ stops, here = null, onSelect }) {
             <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>
             <span className="route-stop__names">
               <span className="route-stop__jp">{stop.name}</span>
-              {current
-                ? <span className="route-stop__here">{stop.hereLabel}</span>
-                : stop.hint && <span className="route-stop__hint" lang={stop.hintLang}>{stop.hint}</span>}
+              {(caption || started) && (
+                <span className="route-stop__caption">
+                  {caption}
+                  {/* Mastery takes three weeks to show, so the figure
+                      at the end of the row reads 0 / 665 through a
+                      fortnight of real work. This is what moves in the
+                      meantime — and only while it has something of its
+                      own to say: a stop nobody has opened, and one
+                      whose every started card is mastered, both print
+                      the figure and no note. */}
+                  {started && <span className="route-stop__started">{stop.startedLabel}</span>}
+                </span>
+              )}
             </span>
             {stop.total > 0 && (
               <span className="route-stop__fig"><b>{stop.learned ?? 0}</b>/ {stop.total}</span>

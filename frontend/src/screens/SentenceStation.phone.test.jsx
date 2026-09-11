@@ -32,14 +32,18 @@ const { seedStats } = await import('../stores/stats')
 
 const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
 
+// N5 is a grade under way — 260 words met, 120 of them held. N4 is the
+// case the caption exists for: work done, nothing mastered yet, which
+// is every learner's first fortnight on a level. N3 down to N1 are
+// untouched, and print a figure and nothing else.
 seedStats({
   items: {
     vocab: {
-      N5: { learned: 120, total: 800 },
-      N4: { learned: 0, total: 1500 },
-      N3: { learned: 0, total: 3700 },
-      N2: { learned: 0, total: 6000 },
-      N1: { learned: 0, total: 10000 },
+      N5: { learned: 120, started: 260, total: 800 },
+      N4: { learned: 0, started: 40, total: 1500 },
+      N3: { learned: 0, started: 0, total: 3700 },
+      N2: { learned: 0, started: 0, total: 6000 },
+      N1: { learned: 0, started: 0, total: 10000 },
     },
   },
 })
@@ -64,10 +68,36 @@ describe('the sentence stations at phone width', () => {
     expect(stops.map(s => s.querySelector('.route-stop__fig')?.textContent.replace(/\s/g, '')))
       .toEqual(['120/800', '0/1500', '0/3700', '0/6000', '0/10000'])
 
-    // The figure and nothing else: the stop drew it a second time as a
-    // rule along the bottom of its card, and that rule is gone (owner's
-    // call — it competed with the line's own rail).
+    // No second DRAWING of it: the stop drew the figure again as a rule
+    // along the bottom of its card, and that rule is gone (owner's call
+    // — it competed with the line's own rail).
     for (const stop of stops) expect(stop.querySelector('.route-stop__bar')).toBeNull()
+
+    // A second NUMBER, though, under the figure and only where it says
+    // something the figure cannot: mastery is a 21-day interval, so
+    // without this N4 reads 0 / 1500 through a fortnight of real work.
+    // The count, not the word around it — this lane's language is the
+    // browser's, and the caption's copy is the string table's business.
+    const notes = stops.map(s => s.querySelector('.route-stop__started')?.textContent ?? null)
+    expect(notes.map(n => n?.match(/\d+/)?.[0] ?? null))
+      .toEqual(['260', '40', null, null, null])
+
+    // And it is a caption on the row's caption line, not a second
+    // figure: under the NAME, ranged left with it, sharing that line
+    // with the landmark rather than taking one of its own. Stacked
+    // under the figure instead, it put a fourth staggered line in a
+    // row that already alternates left and right, and it ran wider
+    // than the figure it was supposed to be a note on.
+    const box = sel => stops[0].querySelector(sel).getBoundingClientRect()
+    const [name, here, note, fig] =
+      ['.route-stop__jp', '.route-stop__here', '.route-stop__started', '.route-stop__fig'].map(box)
+    expect(note.left).toBeGreaterThanOrEqual(name.left)
+    expect(note.top).toBeGreaterThanOrEqual(name.bottom)
+    expect(note.top).toBeCloseTo(here.top, 0)          // one line, not two
+    expect(note.height).toBeLessThan(fig.height)
+    // The row is three lines and the figure sits on the first of them,
+    // level with the code — the right-hand column stays one line deep.
+    expect(fig.bottom).toBeLessThanOrEqual(name.top)
 
     // And the learner's own grade is still the one marked.
     expect(screen.container.querySelector('.route-stop--current .route-stop__code').textContent).toBe('N5')

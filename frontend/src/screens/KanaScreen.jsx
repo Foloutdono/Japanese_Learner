@@ -8,6 +8,7 @@ import { RouteStops } from '../components/selection/RouteStops'
 import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { kanaSets, currentKanaSet } from '../domain/kanaSets'
+import { deckItems } from '../domain/lineProgress'
 
 // ── かな — the station and the platforms (plan 071) ──────────
 // /learn/kana lists the sets as the stops of the kana line, with
@@ -46,15 +47,17 @@ export default function KanaScreen() {
   // ── The station: the sets ──
   if (!selectedSet) {
     const stops = SETS.map(s => {
-      const item = stats?.items?.kana?.[s.slug]
+      const { learned, total, started } = deckItems(stats, 'kana', s.slug)
       return {
         key: s.slug,
         code: s.code,
         codeLang: 'ja',
         name: s.label,
         hereLabel: t.levelCurrentMark,
-        learned: Number(item?.learned) || 0,
-        total: Number(item?.total) || 0,
+        learned,
+        total,
+        started,
+        startedLabel: t.startedNote(started),
       }
     })
     const here = currentKanaSet(stats?.items?.kana)
