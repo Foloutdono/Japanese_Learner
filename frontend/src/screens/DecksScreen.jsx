@@ -9,6 +9,7 @@ import { Console, ConsoleTop, Chips, Chip, ConsoleAction, ConsoleIndex } from '.
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
+import { LibraryShelf } from '../components/decks/LibraryShelf'
 import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
 
@@ -220,6 +221,11 @@ export default function DecksScreen({ session }) {
                   <span className="platform-card__title">{deck.name}</span>
                   <span className="platform-card__desc">
                     {dt.label}
+                    {/* A followed deck looks exactly like one of your
+                        own on this shelf otherwise, and the difference
+                        matters: you cannot edit it, and its cards can
+                        change under you. */}
+                    {deck.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
                     {n > 0 && <> · <span className="deck-card__due">{t.todayDue(n)}</span></>}
                   </span>
                 </span>
@@ -232,6 +238,11 @@ export default function DecksScreen({ session }) {
           })}
         </div>
       )}
+
+      {/* The library, below your own decks — which is where it was
+          asked for. It prints nothing at all while empty, so a learner
+          with no decks still meets one empty state and not two. */}
+      <LibraryShelf session={session} t={t} />
     </main>
   )
 }

@@ -47,6 +47,8 @@ import StatsScreen from './screens/StatsScreen'
 import DictionaryScreen from './screens/DictionaryScreen'
 import DecksScreen      from './screens/DecksScreen'
 import DeckDetailScreen from './screens/DeckDetailScreen'
+import LibraryScreen    from './screens/LibraryScreen'
+import PublicDeckScreen from './screens/PublicDeckScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 import AnalyzerScreen from './screens/AnalyzerScreen'
@@ -80,7 +82,15 @@ function DocumentHead() {
     const identity = identityFor(pathname, t)
     const section = identity ? null : sectionFor(pathname, t)
     const tab = identity || section ? null : getTabs(t).find(x => x.path === pathname)
-    const screen = identity?.title ?? section?.title ?? tab?.label
+    // The library is the one place that is not a section of its own but
+    // still has its own name. sectionFor's longest-prefix fallback is
+    // right about everything else on /learn/decks/* -- the pigment, the
+    // roundel, the kana -- and wrong only here, where it would title a
+    // screen headed "Bibliothèque" as "Mes Decks". Answered here rather
+    // than by an effect in the screen: this one runs on every pathname
+    // change, and a second writer would race it.
+    const library = pathname.startsWith('/learn/decks/library') ? t.library : null
+    const screen = identity?.title ?? library ?? section?.title ?? tab?.label
     document.title = screen ? `${screen} — ${t.appTitle}` : t.appTitle
   }, [pathname, t])
 
@@ -423,6 +433,13 @@ export default function App() {
             <Route path="/learn/grammar"              element={<GrammarScreen />} />
             <Route path="/learn/grammar/:level"       element={<GrammarScreen />} />
             <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
+            {/* Declared before /learn/decks/:deck_id. React Router ranks a
+                static segment above a dynamic one either way, but the
+                order is also what routePattern's scoring reads, and the
+                backend's twin routes have to be ordered by hand — so the
+                two files say the same thing in the same order. */}
+            <Route path="/learn/decks/library"          element={<LibraryScreen session={session} />} />
+            <Route path="/learn/decks/library/:deck_id" element={<PublicDeckScreen session={session} />} />
             <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice"             element={<PracticeScreen />} />

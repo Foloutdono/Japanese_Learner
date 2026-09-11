@@ -4,6 +4,7 @@ import { apiFetch } from '../lib/api'
 import { saveBlob } from '../lib/platform'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
+import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
@@ -14,7 +15,7 @@ import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
-import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon } from '../components/ui/Icons'
+import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -224,8 +225,7 @@ export default function DeckDetailScreen({ session }) {
   // whenever state happens to be missing.
   const [deck, setDeck] = useState(state?.deck ?? null)
 
-  useEffect(() => {
-    if (deck) return
+  const loadDeck = useCallback(() => {
     apiFetch(`/api/decks/${deck_id}`, session)
       .then(r => r.json())
       .then(d => { if (!d?.error) setDeck(d) })
@@ -233,8 +233,38 @@ export default function DeckDetailScreen({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck_id])
 
-  const allowedSources = allowedSourcesFor(deck?.type)
-  const allowCustom    = allowsCustomFor(deck?.type)
+  useEffect(() => {
+    // Keyed on deck_id, and it has to CLEAR before it loads.
+    //
+    // This screen does not unmount when one deck id becomes another —
+    // same route, different param — so whatever was in state stays on
+    // screen under the new id until the fetch lands. Nothing used to
+    // navigate deck-to-deck, so nothing noticed; "make it mine" does it
+    // on every use, and showed the followed deck's author, its
+    // withdrawn warning and its follower chips over the fresh copy.
+    //
+    // The router state is trusted only when it is about THIS deck and
+    // carries a role: the shelf passes the row it already has (no
+    // flash, no round trip), a refresh or a direct link passes nothing.
+    const carried = state?.deck
+    const usable = carried && String(carried.id) === String(deck_id) && carried.role
+      ? carried
+      : null
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- adopting or clearing the deck IS the synchronisation with the route param, not a derived-state reset.
+    setDeck(usable)
+    if (!usable) loadDeck()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deck_id])
+
+  // A followed deck is READ-ONLY here. The server enforces it (403 on
+  // every write), and the screen must not offer what the server will
+  // refuse — "Make it mine" is the door, and it is the one thing the
+  // chip row offers instead.
+  const isFollower = deck?.role === 'follower'
+  const withdrawn  = Boolean(deck?.withdrawn)
+
+  const allowedSources = isFollower ? [] : allowedSourcesFor(deck?.type)
+  const allowCustom    = !isFollower && allowsCustomFor(deck?.type)
   const dt             = deckTypeOf(deck?.type, t)
 
   const [cards, setCards]           = useState([])
@@ -258,6 +288,9 @@ export default function DeckDetailScreen({ session }) {
   // deletion, which used to sit on the shelf's card.
   const [moreOpen, setMoreOpen] = useState(false)
   const [confirmingDeck, setConfirmingDeck] = useState(false)
+  // The follower's two irreversibles, each behind its own ask.
+  const [confirmingUnfollow, setConfirmingUnfollow] = useState(false)
+  const [confirmingMine, setConfirmingMine] = useState(false)
   // The hand-written card a remove is waiting on — see askRemove.
   const [confirmingCard, setConfirmingCard] = useState(null)
   const today = useTodaySummary().data
@@ -270,8 +303,84 @@ export default function DeckDetailScreen({ session }) {
       .catch(() => setConfirmingDeck(false))
   }
 
+  // ── The library, from the deck's own page ───────────────────
+  const [busy, setBusy] = useState(false)
 
-  useEffect(() => { fetchCards() }, [])
+  function publish(on) {
+    if (busy) return
+    setBusy(true)
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}/publish`, session, { method: on ? 'POST' : 'DELETE' })
+      .then(r => r.json())
+      .then(body => {
+        track(on ? 'deck_publish' : 'deck_unpublish', on
+          ? { structure: deck?.type, cards: cards.length }
+          : { structure: deck?.type, followers: body?.followers ?? 0 })
+        setMoreOpen(false)
+        setBusy(false)
+        loadDeck()
+      })
+      .catch(() => { setBusy(false); setMoreOpen(false) })
+  }
+
+  function unfollow() {
+    if (busy) return
+    setBusy(true)
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}/subscribe`, session, { method: 'DELETE' })
+      .then(() => navigate('/learn/decks'))
+      .catch(() => { setBusy(false); setConfirmingUnfollow(false) })
+  }
+
+  function makeItMine() {
+    if (busy) return
+    setBusy(true)
+    playUi('click-screen-selection')
+    apiFetch(`/api/decks/${deck_id}/detach`, session, { method: 'POST' })
+      .then(r => r.json())
+      .then(copy => {
+        if (!copy?.id) throw new Error('detach failed')
+        track('deck_detach', {
+          structure: deck?.type, cards: cards.length, withdrawn,
+        })
+        navigate(`/learn/decks/${copy.id}`, { replace: true, state: { deck: copy } })
+      })
+      .catch(() => { setBusy(false); setConfirmingMine(false) })
+  }
+
+  // Everything transient, cleared when one deck id becomes another.
+  //
+  // The deck and its cards are reloaded above; this is the rest of the
+  // screen — which sheet is open, what is selected, whether a request
+  // is in flight. None of it ever mattered before, because nothing
+  // navigated from one deck to another without unmounting. "Make it
+  // mine" does, and it left `busy` true and its own confirm sheet
+  // standing over the fresh copy: the next action on that screen —
+  // publishing it — returned at `if (busy)` and looked like a dead
+  // button.
+  useEffect(() => {
+    /* eslint-disable react-hooks/set-state-in-effect -- this IS the route param's synchronisation; see the deck effect above. */
+    setBusy(false)
+    setMoreOpen(false)
+    setConfirmingDeck(false)
+    setConfirmingMine(false)
+    setConfirmingUnfollow(false)
+    setConfirmingCard(null)
+    setConfirmingDelete(false)
+    setSelectMode(false)
+    setSelected(new Set())
+    setAdding(false)
+    setEditing(null)
+    setImportResult(null)
+    setExportError(false)
+    /* eslint-enable react-hooks/set-state-in-effect */
+  }, [deck_id])
+
+
+  // [deck_id], not []: see the deck effect above — the cards belong to
+  // a deck id, and this screen outlives a change of one.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { fetchCards() }, [deck_id])
 
   // Stable identities so ImportCardsMenu/BrowseCardsMenu's useDialog
   // doesn't re-run its focus-on-open effect (and steal focus) on every
@@ -506,6 +615,11 @@ export default function DeckDetailScreen({ session }) {
           <h2 className="deck-identity__name">{deck?.name ?? t.deckFallbackTitle}</h2>
           <span className="deck-identity__meta">
             {dt.label} · {t.cardsCount(cards.length)}
+            {/* Whose deck this is, on the page you study it from and not
+                only on the card you found it by. A followed deck's
+                content is someone else's, and that is worth saying
+                where its cards are. */}
+            {deck?.author && <> · <span className="lib-card__author">{t.libraryBy(deck.author)}</span></>}
             {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
         </span>
@@ -518,9 +632,38 @@ export default function DeckDetailScreen({ session }) {
         </button>
       </div>
 
+      {/* Warn, then vanish. The author has deleted this deck; it is
+          still here only so the people following it can take a copy
+          before it is collected. Study still works — that is the whole
+          point of the grace period. */}
+      {withdrawn && (
+        <p className="lib-warning" role="status">
+          <span className="lib-warning__lead">{t.libraryWithdrawn}</span>
+          {t.libraryWithdrawnHint}
+        </p>
+      )}
+
       {/* The chip row: what you can do to the deck. Select swaps it
           for the selection's own console (below). */}
-      {!selectMode && (
+      {!selectMode && isFollower && (
+        <div className="chip-row">
+          <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingMine(true) }}
+            aria-haspopup="dialog" disabled={busy}>
+            <PlusIcon size={14} />{t.libraryMakeMine}
+          </Chip>
+          <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingUnfollow(true) }}
+            aria-haspopup="dialog" disabled={busy}>
+            <CrossIcon size={14} />{withdrawn ? t.libraryRemove : t.libraryUnfollow}
+          </Chip>
+          {cards.length > 0 && (
+            <Chip onClick={() => { playUi('click-mode-selection'); exportDeck() }} disabled={exporting}>
+              <ExportIcon size={14} />{t.export}
+            </Chip>
+          )}
+        </div>
+      )}
+
+      {!selectMode && !isFollower && (
         <div className="chip-row">
           {allowCustom && (
             <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
@@ -712,7 +855,11 @@ export default function DeckDetailScreen({ session }) {
               // select mode, a hand-written card's editor otherwise —
               // and the remove sits beside it rather than inside it,
               // because a button cannot nest in a button.
-              const opens = selectMode || card.origin === 'custom'
+              // A followed deck's rows open nothing: the editor behind
+              // them writes to the author's card, which the server
+              // refuses. Offering it and then failing is worse than not
+              // offering it.
+              const opens = !isFollower && (selectMode || card.origin === 'custom')
               const Body = opens ? 'button' : 'div'
               const bodyProps = opens
                 ? {
@@ -765,7 +912,7 @@ export default function DeckDetailScreen({ session }) {
                       hand-written card out used to mean Select → tick →
                       Delete → confirm, four steps for one row, and nothing
                       on the row itself said it could go. */}
-                  {!selectMode && (
+                  {!selectMode && !isFollower && (
                     <button
                       type="button"
                       onClick={() => askRemove(card)}
@@ -783,6 +930,32 @@ export default function DeckDetailScreen({ session }) {
         )}
 
       {/* The More sheet: what the shelf's card used to carry. */}
+      <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine}>
+        <span className="sheet__q">{t.libraryMakeMineConfirm}</span>
+        <button type="button" className="btn-primary" disabled={busy} onClick={makeItMine}>
+          {t.libraryMakeMine}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingMine(false)}>
+          {t.cancel}
+        </button>
+      </Sheet>
+
+      <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
+        jp={deck?.name ?? t.deckFallbackTitle}
+        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow}>
+        <span className="sheet__q">
+          {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
+        </span>
+        <button type="button" className="btn-primary btn-primary--danger" disabled={busy}
+          onClick={unfollow}>
+          {withdrawn ? t.libraryRemove : t.libraryUnfollow}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingUnfollow(false)}>
+          {t.cancel}
+        </button>
+      </Sheet>
+
       <Sheet open={moreOpen} onClose={() => { setMoreOpen(false); setConfirmingDeck(false) }} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
         {allowCustom && (
           <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
@@ -794,9 +967,34 @@ export default function DeckDetailScreen({ session }) {
             <ExportIcon size={14} /> {t.export}
           </button>
         )}
+        {/* The library, from the deck that goes into it. Publishing is
+            not an action on the shelf card — the card is one whole
+            button into the deck — and it is not a chip either: the chip
+            row is what you do to the CARDS. */}
+        {cards.length > 0 && deck?.visibility !== 'public' && (
+          <button type="button" className="btn-secondary" disabled={busy}
+            onClick={() => publish(true)}>
+            <BooksIcon size={14} /> {t.libraryPublish}
+          </button>
+        )}
+        {deck?.visibility === 'public' && (
+          <>
+            {/* A statement, not a question: .sheet__q is what the
+                sheet ASKS, and there is nothing to answer here. */}
+            <span className="lib-note">{t.libraryPublished}</span>
+            <button type="button" className="btn-secondary" disabled={busy}
+              onClick={() => publish(false)}>
+              <CrossIcon size={14} /> {t.libraryUnpublish}
+            </button>
+          </>
+        )}
         {confirmingDeck ? (
           <>
-            <span className="sheet__q">{t.deleteDeckConfirm}</span>
+            <span className="sheet__q">
+              {deck?.followers > 0
+                ? t.libraryDeleteFollowed(deck.followers)
+                : t.deleteDeckConfirm}
+            </span>
             <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
               <TrashIcon size={14} /> {t.delete}
             </button>

@@ -155,6 +155,32 @@ const Fixture = () => (
       </div>
     </div>
 
+    {/* LibraryCard.jsx / DeckDetailScreen.jsx -- the library's own
+        inks on --surface: the attribution beside the deck type, the
+        clamped description, the follower tally in the aside, and the
+        withdrawn warning's lead, which is a STATE colour mixed toward
+        the text ink rather than the raw --warning that reads as a
+        label. */}
+    <div className="platform-card deck-card lib-card" style={{ '--rail': 'var(--line-vocab)', '--line-color': 'var(--line-vocab)' }}>
+      <span className="platform-card__body">
+        <span className="platform-card__title lib-title">Verbes N3</span>
+        <span className="platform-card__desc lib-desc">
+          Vocabulaire · <span className="lib-card__author lib-by">par SwiftKitsune4821</span>
+        </span>
+        <span className="lib-card__blurb lib-blurb-ink">Les verbes irréguliers</span>
+      </span>
+      <span className="platform-card__aside deck-card__aside">
+        <span className="lib-card__follows lib-follows">12 abonnés</span>
+      </span>
+    </div>
+    <p className="lib-warning">
+      <span className="lib-warning__lead lib-warn-lead">Retiré.</span>
+      <span className="lib-warn-body"> Son auteur a supprimé ce paquet.</span>
+    </p>
+    <div className="lib-controls">
+      <span className="lib-controls__count lib-count">2 paquets</span>
+    </div>
+
     {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
         the gold depart action (the wall-map redesign's one fill) */}
     <div className="gate-card">

@@ -67,7 +67,7 @@ from routes.kana import _build_kana_card              # noqa: E402
 from routes.kanji import _build_kanji_card            # noqa: E402
 from routes.vocab import _build_vocab_card            # noqa: E402
 from routes.grammar import _build_grammar_card        # noqa: E402
-from routes.decks import build_personal_card          # noqa: E402
+from routes.decks import build_personal_card, VISIBLE_DECKS_CTE   # noqa: E402
 
 
 # One adapter per section, each closing over that builder's own argument
@@ -192,25 +192,43 @@ def _build_section_card(source, deck_key, raw_id, mode, lang, stage, preview):
 def _personal_rows(user_id: str) -> dict:
     """
     (raw_id -> {deck_id, deck_name, structure, card}) for every personal
-    card this user owns.
+    card on this learner's shelf — their own decks and the ones they
+    follow from the library alike.
 
     Looked up rather than parsed out of the id: a personal card's raw id
     is "custom_{deck_id}_{card_id}" and a deck id is free to contain an
     underscore, so splitting it is a guess. One query is cheaper than
-    being wrong.
+    being wrong. That same raw id is what makes a followed deck cost
+    nothing extra here: it is deck-scoped but not owner-scoped, so the
+    follower's scheduler rows are already filed under it.
+
+    The shelf is VISIBLE_DECKS_CTE, shared with GET /api/decks rather
+    than written twice — the two drifting apart would mean a followed
+    deck whose cards are due but which the shelf never shows, or the
+    reverse.
     """
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            # Driven FROM the visible decks, not `WHERE ... OR EXISTS`:
+            # the OR form can flip the planner off
+            # idx_custom_cards_deck(deck_id, user_id) and onto a seq scan
+            # of custom_cards, and this runs on every /api/today.
+            #
+            # The join stays `d.user_id = c.user_id` — a deck's cards are
+            # its author's whoever is reading — and it is still what
+            # keeps a stray custom_cards row whose user_id disagrees with
+            # its deck out of the queue.
             cur.execute(
-                """
+                f"""
+                WITH visible AS ({VISIBLE_DECKS_CTE})
                 SELECT c.id, c.deck_id, c.structure, c.fields, c.notes,
                        d.name AS deck_name, d.type AS deck_type
-                FROM custom_cards c
-                JOIN decks d ON d.id = c.deck_id AND d.user_id = c.user_id
-                WHERE c.user_id = %s
+                FROM visible v
+                JOIN decks d        ON d.id = v.deck_id
+                JOIN custom_cards c ON c.deck_id = d.id AND c.user_id = d.user_id
                 """,
-                (user_id,),
+                {"me": user_id},
             )
             rows = [dict(r) for r in cur.fetchall()]
     finally:

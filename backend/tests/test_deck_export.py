@@ -89,14 +89,14 @@ def test_export_names_the_download(client, deck):
 
 
 def test_export_of_an_unknown_deck_is_404(client):
-    # A numeric id, because `decks.id` is a bigint. A NON-numeric id
-    # returns 500 rather than 404 here -- but that is pre-existing and
-    # app-wide, not this endpoint's doing: GET /api/decks/not-a-number
-    # and .../cards both do the same today. Asserting 500 would enshrine
-    # it, so this covers the case that is actually reachable from the UI.
     missing = client.get("/api/decks/999999999/export")
     assert missing.status_code == 404
     assert "detail" in missing.json()
+    # A non-numeric id used to be a 500 here, and app-wide: the path
+    # segment went straight to a bigint column and raised out of the
+    # driver. Every deck endpoint resolves through DeckAccess now, which
+    # coerces the id first -- see tests/test_deck_access.py.
+    assert client.get("/api/decks/not-a-number/export").status_code == 404
 
 
 # ── The filename, which is user-authored and goes into a header ──

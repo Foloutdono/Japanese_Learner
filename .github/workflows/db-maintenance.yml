@@ -80,6 +80,7 @@ jobs:
           python -m scripts.prune_logs
           python -m scripts.compact_review_log
           python -m scripts.compact_events
+          python -m scripts.prune_withdrawn
 
       - name: Prune the capped logs
         if: env.APPLY != ''
@@ -95,6 +96,16 @@ jobs:
         # are a handful per account and the questions they answer are
         # about order, which a rollup cannot reconstruct.
         run: python -m scripts.compact_events --yes
+
+      - name: Collect withdrawn decks
+        if: env.APPLY != ''
+        working-directory: backend
+        # A deck its author deleted while other learners followed it is
+        # kept alive for them, so they can copy it before it goes
+        # (routes/decks.delete_deck). This is the other half of that
+        # promise: without it the grace period is not a grace period,
+        # it is content an author asked to delete, kept forever.
+        run: python -m scripts.prune_withdrawn --yes
 
       - name: Compact the review log
         if: env.APPLY != ''

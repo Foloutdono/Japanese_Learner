@@ -1343,6 +1343,50 @@ const decks = {
   studyPhase1:       'Phase 1 — K+K→S',
   studyPhase2:       'Phase 2 — K→S',
   studyPhase3:       'Phase 3 — S→K',
+
+  // ── The library ───────────────────────────────────────────
+  // "Library" alone, with no Japanese pair: owner's call, and the one
+  // section in the app that reads Latin-only by design. See DESIGN.md.
+  library:               'Library',
+  librarySeeAll:         'See all',
+  libraryMore:           'Show more',
+  librarySort:           'Order',
+  librarySortNew:        'Newest',
+  librarySortFollowed:   'Most followed',
+  libraryBy:             name => `by ${name}`,
+  libraryFollowers:      n => (n === 1 ? '1 follower' : `${n} followers`),
+  libraryAndMore:        n => (n === 1 ? 'and 1 more card' : `and ${n} more cards`),
+  libraryEmpty:          'Nothing published yet',
+  libraryEmptyHint:      'When other learners publish a deck, it appears here.',
+  libraryFailed:         'The library could not be reached',
+  libraryFailedHint:     'Check your connection and try again.',
+  libraryGone:           'This deck is no longer available',
+  libraryGoneHint:       'Its author may have taken it down.',
+  libraryOpen:           'Open',
+  libraryFollow:         'Follow this deck',
+  libraryLinkNote:       'Following links to the author’s deck: their later changes reach you, and your own progress stays yours. You can make your own copy at any time.',
+  libraryPublish:        'Publish to the library',
+  libraryPublished:      'This deck is in the library.',
+  libraryUnpublish:      'Remove from the library',
+  libraryMakeMine:       'Make it mine',
+  libraryMakeMineConfirm: 'This makes your own editable copy of the deck, keeping the progress you have already made. You stop following the original.',
+  libraryUnfollow:       'Unfollow',
+  libraryUnfollowConfirm: 'The deck leaves your shelf. Your progress on it is kept, so following again picks up where you left off.',
+  libraryRemove:         'Remove',
+  libraryRemoveConfirm:  'The deck leaves your shelf for good. Make your own copy first if you want to keep it.',
+  libraryWithdrawn:      'Withdrawn.',
+  libraryWithdrawnHint:  ' Its author has deleted this deck. You can still study it and make your own copy, for a while.',
+  libraryDeleteFollowed: n => (n === 1
+    ? '1 learner follows this deck. Deleting it takes it off their shelf too — they will be told, and given a while to copy it.'
+    : `${n} learners follow this deck. Deleting it takes it off their shelves too — they will be told, and given a while to copy it.`),
+  libraryReport:         'Report',
+  libraryReported:       'Reported',
+  libraryReportNote:     'This flags the deck for review. Nothing is hidden automatically.',
+  libraryReasonSpam:      'Spam or advertising',
+  libraryReasonOffensive: 'Offensive content',
+  libraryReasonWrong:     'Incorrect Japanese',
+  libraryReasonCopyright: 'Copied without permission',
+  libraryReasonOther:     'Something else',
 }
 
 // ── Mock exam ─────────────────────────────────────────────
