@@ -262,4 +262,45 @@ def align_deck(text: str, reading: str) -> list[dict]:
     return align(text, reading, _DECK_READINGS.get)
 
 
+def align_sentence(text: str) -> list[dict]:
+    """align_deck() over a whole sentence, one morpheme at a time.
+
+    A sentence has no single flat reading to align against -- the deck
+    stores one per WORD -- so the readings come from the tokenizer, which
+    is also the only thing that gets them right in context: 上 is うえ
+    standing alone and のぼ inside 上る, and no per-character table can
+    say which (see study/morphology.py). Each morpheme's surface and its
+    INFLECTED reading then go through the same per-kanji splitter a
+    flashcard's furigana uses, so the ruby over 飲み divides の|み here
+    exactly as it does there.
+
+    Consecutive parts with no reading are merged back into one: a run of
+    kana and punctuation is one text node rather than five, and breaks
+    where the browser would break it anyway.
+
+    Degrades to a single unreadinged part when the tokenizer is not
+    installed (morphology.py's GRACEFUL DEGRADATION), which renders as
+    the bare sentence -- what every caller showed before furigana.
+    """
+    # Imported here, not at module scope: everything else in this file is
+    # pure content data, and MeCab is a 250MB optional dependency that a
+    # caller aligning a word it already has the reading for never needs.
+    from study import morphology
+
+    if not text:
+        return []
+    morphemes = morphology.tokenize(text)
+    if morphemes is None:
+        return [{"text": text}]
+
+    parts: list[dict] = []
+    for m in morphemes:
+        for part in align_deck(m.surface, m.reading):
+            if part.get("reading") is None and parts and parts[-1].get("reading") is None:
+                parts[-1] = {"text": parts[-1]["text"] + part["text"]}
+            else:
+                parts.append(part)
+    return parts
+
+
 _DECK_READINGS: dict[str, str] | None = None

@@ -1,6 +1,7 @@
 import unittest
 
-from study.furigana import align, align_deck, is_kanji
+from study import morphology
+from study.furigana import align, align_deck, align_sentence, is_kanji
 
 
 # A tiny stand-in deck, so the alignment rules are tested against known
@@ -131,6 +132,63 @@ class DeckAlignmentTests(unittest.TestCase):
                 self.assertEqual(rebuilt, kana, f"{word} / {kana} -> {parts}")
                 checked += 1
         self.assertGreater(checked, 5000, "guard would pass vacuously")
+
+
+class SentenceAlignmentTests(unittest.TestCase):
+    """
+    A sentence has no flat reading to align against, so align_sentence
+    gets one per morpheme from the tokenizer and aligns each -- the only
+    way a kanji's reading IN CONTEXT is right (see study/morphology.py).
+    """
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
+    def test_a_sentence_reads_per_kanji(self) -> None:
+        self.assertEqual(
+            _flat(align_sentence("水だけ飲みました。")),
+            [("水", "みず"), ("だけ", None), ("飲", "の"), ("みました。", None)],
+        )
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
+    def test_readingless_parts_merge(self) -> None:
+        # 少し だけ あり ます 。 is five morphemes and one text node: a
+        # run of kana breaks where the browser would break it anyway,
+        # and five spans give it nothing an unsplit one does not.
+        parts = align_sentence("時間が少しだけあります。")
+        self.assertEqual(
+            _flat(parts),
+            [("時", "じ"), ("間", "かん"), ("が", None), ("少", "すこ"), ("しだけあります。", None)],
+        )
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
+    def test_the_sentence_survives_intact(self) -> None:
+        # The parts are what gets rendered, so anything dropped between
+        # them is a sentence the learner never sees in full.
+        for sentence in (
+            "水だけ飲みました。",
+            "あの人は日本語の先生です。",
+            "ひらがなだけです。",
+            "コーヒーを飲みませんか。",
+        ):
+            parts = align_sentence(sentence)
+            self.assertEqual("".join(p["text"] for p in parts), sentence, sentence)
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs fugashi/unidic-lite")
+    def test_a_kana_only_sentence_gets_no_furigana(self) -> None:
+        self.assertEqual(_flat(align_sentence("ひらがなだけです。")), [("ひらがなだけです。", None)])
+
+    def test_empty_input(self) -> None:
+        self.assertEqual(align_sentence(""), [])
+
+    def test_without_a_tokenizer_the_sentence_comes_back_bare(self) -> None:
+        # morphology.py's GRACEFUL DEGRADATION: a deploy without fugashi
+        # renders the plain sentence, which is what every caller showed
+        # before furigana. Never a crash, and never a guessed reading.
+        original = morphology.tokenize
+        morphology.tokenize = lambda text: None
+        try:
+            self.assertEqual(align_sentence("水だけ飲みました。"), [{"text": "水だけ飲みました。"}])
+        finally:
+            morphology.tokenize = original
 
 
 if __name__ == "__main__":

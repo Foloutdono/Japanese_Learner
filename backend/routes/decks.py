@@ -23,7 +23,7 @@ from content.kanji_meanings import KANJI_FR
 from content.radical_data import RADICAL_BY_NUMBER, siblings_by_stroke
 from content.kanji_readings import display_reading
 from study import card_index
-from study.furigana import align_deck as align_furigana
+from study.furigana import align_deck as align_furigana, align_sentence
 
 # Reuse the exact same MCQ/choice-building + review-preview logic the
 # Kanji/Vocab/Grammar screens use, instead of a second copy living
@@ -1188,7 +1188,14 @@ def _custom_card_extras(spec, fields: dict, mode) -> dict:
         # random pick among them, same as _build_grammar_card's own.
         sentences = usable_sentences(fields)
         if sentences:
-            out["fill_sentence"] = {"jp": random.choice(sentences)}
+            # Furigana for the same reason the app's own grammar cards
+            # carry it (routes/grammar.py): the question is which rule is
+            # at work, and a kanji the learner cannot read turns it into a
+            # different question. A personal sentence has no translation
+            # to pair with it -- the learner wrote the sentence, not a
+            # gloss for it -- so the client simply renders none.
+            jp = random.choice(sentences)
+            out["fill_sentence"] = {"jp": jp, "furigana": align_sentence(jp)}
 
     return out
 
