@@ -228,6 +228,8 @@ function Canvas({ canvasRef, onClear, resetKey, ghost }) {
 function StrokeGlyph({ char }) {
   const { t } = useLang()
   const [failed, setFailed] = useState(false)
+  // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
+  const onError = useCallback(() => setFailed(true), [])
 
   // No reset effect needed: the caller (StrokeRef below) already keys
   // each StrokeGlyph by `${c}-${i}`, which embeds the character itself
@@ -242,7 +244,7 @@ function StrokeGlyph({ char }) {
       src={charToSvgUrl(char)}
       loop
       className="stroke-ref__img"
-      onError={() => setFailed(true)}
+      onError={onError}
     />
   )
 }

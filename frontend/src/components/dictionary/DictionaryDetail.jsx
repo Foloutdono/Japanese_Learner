@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
@@ -303,6 +303,8 @@ export function TagChip({ tag }) {
 // effect needed since a fresh mount already starts from `failed: false`.
 function StrokeSheet({ src, notAvailableLabel }) {
   const [failed, setFailed] = useState(false)
+  // Stable, or StrokeOrderAnimation's parse effect re-runs every render.
+  const onError = useCallback(() => setFailed(true), [])
   return (
     <div className="dict-form__sheet">
       {!failed && (
@@ -310,7 +312,7 @@ function StrokeSheet({ src, notAvailableLabel }) {
           src={src}
           loop
           className="dict-form__glyph"
-          onError={() => setFailed(true)}
+          onError={onError}
         />
       )}
       {failed && (
