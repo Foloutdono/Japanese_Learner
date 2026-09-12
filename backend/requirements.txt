@@ -1,10 +1,20 @@
-pydantic>=2.0
-fastapi>=0.100
+# >=2.4.0: fixes CVE-2024-3772, a regex-based denial-of-service.
+pydantic>=2.4.0
+# >=0.109.1: fixes CVE-2024-24762, a ReDoS in the Content-Type header parsing
+# for form data.
+fastapi>=0.109.1
 # Not a direct import -- fastapi's own dependency -- but pinned here as a
 # floor anyway: CVE-2026-48710 ("BadHost", Starlette <=1.0.0) is a Host-header
 # auth-bypass bug, and fastapi's own floor (>=0.46.0) is too low to rule it
 # out on its own if a future constraint elsewhere ever pulls an old resolve.
-starlette>=1.0.1
+# >=1.3.1 also closes four more: CVE-2026-2280/2281 (an HTTPEndpoint
+# method-lookup bug, and a Windows UNC-path SSRF in StaticFiles that leaks
+# NTLMv2 credentials -- both fixed in 1.1.0), CVE-2026-54282 (request.url
+# host/path reconstruction can be spoofed, fixed in 1.3.0), and
+# CVE-2026-54283 (request.form()'s max_fields/max_part_size limits are
+# silently ignored for urlencoded bodies -- an unauthenticated DoS, fixed in
+# 1.3.1).
+starlette>=1.3.1
 uvicorn[standard]
 psycopg2-binary
 # >=2.13.0: fixes CVE-2026-48526, a JWK/HMAC algorithm-confusion bug that
@@ -23,10 +33,19 @@ aiofiles
 # which this app doesn't set -- pinned as a floor regardless).
 python-multipart>=0.0.32
 pykakasi
-requests>=2.31.0
+# >=2.33.0: fixes CVE-2024-35195 (TLS verification can silently stay
+# disabled on a Session after an initial verify=False request),
+# CVE-2024-47081 (.netrc credentials can leak to a crafted URL's host), and
+# CVE-2026-25645 (predictable temp-file reuse in extract_zipped_paths --
+# not reachable here since nothing in this app calls it, pinned as a floor
+# regardless).
+requests>=2.33.0
 fugashi
 unidic-lite
-pytest>=9.0
+# >=9.0.3: fixes CVE-2025-71176, a predictable /tmp/pytest-of-{user}
+# directory name (local-only, and pytest never runs outside CI/dev here,
+# but pinned as a floor regardless).
+pytest>=9.0.3
 # study/exam_tts.py's listening-audio synthesis -- a thin async client
 # for Microsoft Edge's free consumer "Read Aloud" service (the same
 # free voices freetts.org's own /api/tts widget proxies), not a paid
