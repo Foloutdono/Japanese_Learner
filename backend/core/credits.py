@@ -112,6 +112,27 @@ def next_refill_at(tz_offset_min: int | None, now: datetime | None = None) -> da
 _CACHE_TTL_S = 60.0
 _cache: dict[str, tuple[dict, float]] = {}
 
+# A user who is never read again leaves a stale entry behind forever --
+# forget() only fires on a write BY that user, and eviction-on-expiry
+# only happens to a key that gets looked up again. Swept every N
+# insertions rather than on every one: the cache is read far more than
+# it is refilled, so this is cheap over the process's life and still
+# keeps a long-running worker's dict bounded by recently-active users
+# rather than by every user it has ever seen.
+_SWEEP_EVERY = 200
+_writes_since_sweep = 0
+
+
+def _sweep_cache(now: float) -> None:
+    global _writes_since_sweep
+    _writes_since_sweep += 1
+    if _writes_since_sweep < _SWEEP_EVERY:
+        return
+    _writes_since_sweep = 0
+    expired = [uid for uid, (_, expires_at) in _cache.items() if expires_at <= now]
+    for uid in expired:
+        _cache.pop(uid, None)
+
 
 def forget(user_id: str) -> None:
     _cache.pop(user_id, None)
@@ -224,6 +245,7 @@ def _state(user_id: str, fresh: bool = False) -> dict:
     finally:
         conn.close()
     _cache[user_id] = (state, now + _CACHE_TTL_S)
+    _sweep_cache(now)
     return state
 
 
