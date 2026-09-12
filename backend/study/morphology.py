@@ -151,6 +151,14 @@ class Morpheme:
     lemma: str
     reading: str        # hiragana reading of `surface`, as inflected
     lemma_reading: str  # hiragana reading of `lemma` (dictionary form)
+    kana: str           # `surface` spelled out in katakana AS WRITTEN,
+    # long vowels included -- unlike `reading`, which is the sound
+    # (kata_to_hira's ー resolves to the row's usual vowel), this keeps
+    # each word's own real spelling: 大きい keeps オオキイ (おお, a native-
+    # word exception to that usual row) where 学校 keeps ガッコウ (おう).
+    # study/romaji.py romanizes off this rather than `reading` for
+    # exactly that reason; card-matching callers want the sound, not the
+    # spelling, so they stay on `reading`/`lemma_reading`.
     pos: str
     auxiliary_use: bool  # True when UniDic marks this token's usage as
     # grammaticalized/non-independent (pos2 == 非自立可能) — e.g. 居る
@@ -164,6 +172,13 @@ class Morpheme:
     # this flag lets callers stay conservative there while still
     # trusting reading-based matches for words actually being used on
     # their own (あなた, 上る/上れ, etc., which are pos2 "*"/"一般").
+    conjunctive: bool  # True for a 接続助詞 -- a particle that joins a verb
+    # or adjective onto what follows it (て/で in 読んで, 大きくて) rather
+    # than marking a noun's role in the sentence, which is the SAME
+    # surface text tagged differently (で is 格助詞 "by train" in 電車で,
+    # 接続助詞 in 読んで). study/romaji.py glues one of these onto the
+    # word before it when building a word-spaced reading; a case particle
+    # stays its own word either way.
 
 
 def _clean_lemma(raw: str, fallback: str) -> str:
@@ -206,8 +221,10 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 lemma=lemma,
                 reading=kata_to_hira(pron) or surface,
                 lemma_reading=kata_to_hira(lform) or lemma,
+                kana=getattr(feat, "kana", None) or surface,
                 pos=_POS_MAP.get(pos1, "other"),
                 auxiliary_use=(pos2 == "非自立可能"),
+                conjunctive=(pos2 == "接続助詞"),
             ))
         return morphemes
     except Exception:  # pragma: no cover - defensive only
