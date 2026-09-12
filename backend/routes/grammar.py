@@ -424,14 +424,16 @@ def get_grammar_stats(user_id: str = Depends(get_user_id)):
     result = {}
     for level, grammar_list in GRAMMAR_BY_LEVEL.items():
         raw_ids = [grammar_to_id(g, level) for g in grammar_list]
-        result[level] = {
-            mode: {
-                "total":    len(raw_ids),
-                "new":      sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "new"),
-                "learning": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "learning"),
-                "mastered": sum(1 for s in srs.get_bulk_stats(prefixed(raw_ids, user_id), mode).values() if s == "mastered"),
-                "due_now":  sum(1 for cid in prefixed(raw_ids, user_id) if cid in set(srs.get_due_cards(mode))),
+        card_ids = prefixed(raw_ids, user_id)
+        result[level] = {}
+        for mode in sorted(GRADED_FOR_SOURCE[GRAMMAR]):
+            states = srs.get_bulk_stats(card_ids, mode)
+            due = srs.get_due_cards(mode, limit=len(card_ids), card_ids=card_ids)
+            result[level][mode] = {
+                "total":    len(card_ids),
+                "new":      sum(1 for s in states.values() if s == "new"),
+                "learning": sum(1 for s in states.values() if s == "learning"),
+                "mastered": sum(1 for s in states.values() if s == "mastered"),
+                "due_now":  len(due),
             }
-            for mode in sorted(GRADED_FOR_SOURCE[GRAMMAR])
-        }
     return result
