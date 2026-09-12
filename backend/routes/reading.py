@@ -23,7 +23,7 @@ from content import vocab_extras
 from content import reading_sentences
 from study import difficulty
 from study.llm_shared import chat, llm_configured, LLMUnavailable
-from study.romaji import to_romaji
+from study.romaji import sentence_romaji
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
 
@@ -166,28 +166,30 @@ def _display_seconds(phrase: str) -> float:
 
 
 def phrase_to_romaji(text: str) -> str:
-    """Deterministic JP -> Hepburn romaji conversion via pykakasi.
+    """JP -> Hepburn romaji, via study/romaji.sentence_romaji.
 
-    The conversion itself moved to study/romaji.py when 書取 needed it
-    too — one pykakasi instance for the process rather than two. This
-    name stays because it is what this module's own callers know it as,
-    and because the note below is about THIS caller's data.
+    The conversion itself lives in study/romaji.py, shared with 書取 —
+    one pykakasi instance for the process rather than two. This name
+    stays because it is what this module's own callers know it as, and
+    because the note below is about THIS caller's data.
 
     Previously (see git history) only ever called on an LLM-provided
     all-hiragana "reading" — the app deliberately never asked the LLM
     to spell romaji directly, because models are unreliable at
     inventing Hepburn spelling on the fly. Real example sentences carry
-    no such pre-resolved reading, so this now runs directly on the
-    sentence's own mixed kanji/kana text: pykakasi has its own
-    dictionary-based kanji reading, which is NOT context-aware and can
-    occasionally pick the wrong reading for an ambiguous kanji. Accepted
-    trade-off, not an oversight — correctness here was already soft
-    before this change (post_reading_result: "Correctness is now
-    self-assessed by the user after seeing the reveal"), so an
-    occasional wrong reading in the *reference* romaji is a minor
-    annoyance, not a grading bug, since nothing auto-compares against it.
+    no such pre-resolved reading, so this runs directly on the
+    sentence's own mixed kanji/kana text: sentence_romaji reads it with
+    a real morphological tokenizer rather than pykakasi's own context-
+    blind kanji dictionary, so most of the ambiguous-kanji misreads that
+    used to land here (六時に as "roku tokini" instead of "rokuji ni")
+    are gone, but that tokenizer is not infallible either, and
+    correctness here was already soft before any of this (see
+    post_reading_result: "Correctness is now self-assessed by the user
+    after seeing the reveal") — an occasional wrong reading in the
+    *reference* romaji is a minor annoyance, not a grading bug, since
+    nothing auto-compares against it.
     """
-    return to_romaji(text)
+    return sentence_romaji(text)
 
 
 def normalize_romaji(text: str) -> str:

@@ -40,6 +40,15 @@ import pykakasi
 _kakasi = pykakasi.kakasi()
 
 
+# pykakasi hands back Japanese punctuation as its own token —
+# 。「」！ become . ( ) ! — so joining every token with a plain space
+# put a space in front of every full stop, comma and closing bracket
+# ("dema shita ." instead of "dema shita."). These glue onto the
+# neighbour they punctuate rather than standing apart as their own word.
+_NO_SPACE_BEFORE = set(".,!?)")
+_NO_SPACE_AFTER = set("(")
+
+
 def to_romaji(text: str) -> str:
     """Deterministic Japanese -> Hepburn, space-separated by word.
 
@@ -50,7 +59,127 @@ def to_romaji(text: str) -> str:
     — and handing it kana removes that guess entirely. (reading.py has
     no kana for a corpus sentence and accepts the guess; see its note.)
     """
-    return " ".join(item["hepburn"] for item in _kakasi.convert(text) if item["hepburn"])
+    words = []
+    for item in _kakasi.convert(text):
+        h = item["hepburn"]
+        if not h:
+            continue
+        if words and (h[0] in _NO_SPACE_BEFORE or words[-1][-1] in _NO_SPACE_AFTER):
+            words[-1] += h
+        else:
+            words.append(h)
+    return " ".join(words)
+
+
+# は/へ/を read aloud as わ/え/お (see the bigger _PARTICLE table below,
+# which corrects the same three once they have already become romaji
+# letters). sentence_romaji corrects them a stage earlier, in kana,
+# because it sources its spelling from UniDic's own `kana` field rather
+# than the sound -- see that function's docstring for why.
+_SAID_KANA = {"は": "ワ", "へ": "エ", "を": "オ"}
+
+
+def sentence_romaji(text: str) -> str:
+    """Context-aware Japanese -> Hepburn for a whole sentence, via the
+    same morphological tokenizer the furigana/card-lookup code already
+    uses (study/morphology.py) rather than pykakasi's own dictionary
+    lookup. to_romaji()'s own docstring names the failure mode this
+    fixes -- 十時 as "totoki" -- and reading practice hits the same one
+    on hand-written N5 sentences it cannot afford to get wrong: 六時に
+    ("at six o'clock") came back "roku tokini" because pykakasi's kanji
+    dictionary has no notion that 時 after a number is the hour counter
+    (じ), not the noun "time" (とき). MeCab/UniDic resolves it correctly
+    because it looks at what is actually next to the kanji.
+
+    Falls back to to_romaji() when the tokenizer is unavailable or fails
+    on this input -- the same graceful-degradation contract every other
+    morphology.py caller in this app already follows -- so this is safe
+    to call unconditionally.
+
+    Romanizes off each morpheme's `kana` (spelling) rather than its
+    `reading` (sound): the two differ on exactly the words a learner
+    needs written right. `reading` collapses every long vowel to one
+    mark, so a native-word exception -- 大きい is おおきい, not おうきい,
+    the same family as 十/遠い/通る/氷 -- comes back wrong as often as it
+    comes back right (this was tried; "oukii" started showing up for
+    "ookii" everywhere). `kana` keeps each word's real spelling, so
+    pykakasi (still doing the actual kana -> Hepburn letters, which was
+    never the problem) sees オオキイ where it should and オウ nowhere it
+    should not. The trade is `kana` also spells は/へ/を as WRITTEN
+    rather than SAID (ハ, not the ワ a listener hears) -- _SAID_KANA
+    above corrects exactly those three, the same particle-only case
+    to_romaji's own _PARTICLE table exists for, and a second, narrower
+    one below corrects 日 after よう/曜 (日曜日, and 土よう日 where a
+    level cap has swapped 曜 for hiragana): the tokenizer does not treat
+    either spelling of a weekday name as one word, so it reads a
+    trailing bare 日 standalone (ひ) rather than with the rendaku a real
+    〜曜日 always takes (び).
+
+    Word spacing does not come from pykakasi either -- handed a bare
+    kana string it cannot space words at all (see
+    content/listening_clips.py's note on why ITS romaji is hand-written
+    rather than generated from `kana` for exactly this reason) -- but
+    from the morphemes' own grammar, grouped before any of it reaches
+    pykakasi:
+      * an auxiliary or suffix (ました, 十本の本) glues onto the word
+        before it
+      * a 接続助詞 -- a particle joining a verb/adjective onto what
+        follows (て/で in 読んで, 大きくて) -- glues the same way; a
+        case particle spelled identically (電車で "by train") does not,
+        because UniDic tags the two differently
+      * a number glues onto the counter right after it (六 + 時 ->
+        "rokuji"), and so does anything else that glues two nouns into
+        one written word
+      * a trailing っ/ッ is never left to end a group on its own, since
+        it geminates whatever comes next (行っ + て read apart would
+        give "itsu te" instead of "itte")
+    Everything else starts a new word, which is what a case particle,
+    an unrelated noun or a fresh verb should do anyway.
+    """
+    from study import morphology  # see furigana.py's own note: MeCab is
+    # a 250MB optional dependency callers who already have the reading
+    # (dictation, which hand-writes it) never need to pay for.
+
+    morphemes = morphology.tokenize(text)
+    if morphemes is None:
+        return to_romaji(text)
+
+    groups: list[list[tuple]] = []
+    force_glue = False
+    for m in morphemes:
+        kana = m.kana
+        if m.pos == "particle" and m.surface in _SAID_KANA:
+            kana = _SAID_KANA[m.surface]
+        elif (
+            m.surface == "日" and kana == "ヒ"
+            and groups and groups[-1][-1][1].endswith("ヨウ")
+        ):
+            kana = "ビ"
+
+        glue = force_glue or (
+            bool(groups) and (
+                m.pos in ("auxiliary", "suffix")
+                or m.conjunctive
+                or (groups[-1][-1][0].pos == "noun" and m.pos == "noun")
+            )
+        )
+        if glue:
+            groups[-1].append((m, kana))
+        else:
+            groups.append([(m, kana)])
+        force_glue = kana[-1:] in ("っ", "ッ")
+
+    words: list[str] = []
+    for g in groups:
+        chunk = "".join(kana for _, kana in g)
+        h = "".join(item["hepburn"] for item in _kakasi.convert(chunk) if item["hepburn"])
+        if not h:
+            continue
+        if words and (h[0] in _NO_SPACE_BEFORE or words[-1][-1] in _NO_SPACE_AFTER):
+            words[-1] += h
+        else:
+            words.append(h)
+    return " ".join(words)
 
 
 # ── The particles, which are spelled one way and said another ──
