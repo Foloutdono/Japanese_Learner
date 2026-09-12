@@ -40,6 +40,15 @@ import pykakasi
 _kakasi = pykakasi.kakasi()
 
 
+# pykakasi hands back Japanese punctuation as its own token —
+# 。「」！ become . ( ) ! — so joining every token with a plain space
+# put a space in front of every full stop, comma and closing bracket
+# ("dema shita ." instead of "dema shita."). These glue onto the
+# neighbour they punctuate rather than standing apart as their own word.
+_NO_SPACE_BEFORE = set(".,!?)")
+_NO_SPACE_AFTER = set("(")
+
+
 def to_romaji(text: str) -> str:
     """Deterministic Japanese -> Hepburn, space-separated by word.
 
@@ -50,7 +59,16 @@ def to_romaji(text: str) -> str:
     — and handing it kana removes that guess entirely. (reading.py has
     no kana for a corpus sentence and accepts the guess; see its note.)
     """
-    return " ".join(item["hepburn"] for item in _kakasi.convert(text) if item["hepburn"])
+    words = []
+    for item in _kakasi.convert(text):
+        h = item["hepburn"]
+        if not h:
+            continue
+        if words and (h[0] in _NO_SPACE_BEFORE or words[-1][-1] in _NO_SPACE_AFTER):
+            words[-1] += h
+        else:
+            words.append(h)
+    return " ".join(words)
 
 
 # ── The particles, which are spelled one way and said another ──
