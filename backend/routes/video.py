@@ -248,9 +248,15 @@ def _video_worker(session_id: int, source: str, source_ref: str, content: str | 
         logger.warning("Subtitle parse failed for session %s: %s", session_id, e)
         _fail_session(session_id, str(e))
         return
-    except Exception as e:  # pragma: no cover - defensive
+    except Exception:  # pragma: no cover - defensive
+        # The exception text is deliberately NOT stored: get_video_session
+        # hands `error` straight back to the client, and the two branches
+        # above put a sentence there that was written to be read. An
+        # arbitrary exception's str() is not that -- it can carry a driver
+        # repr or a path. The traceback is logged instead, which is where a
+        # diagnosis actually comes from.
         logger.exception("Unexpected error building track for session %s", session_id)
-        _fail_session(session_id, f"unexpected error: {e}")
+        _fail_session(session_id, "Something went wrong reading this transcript. Please try again.")
         return
 
     all_sentences = sentences_from_cues(cues, window_start, window_end)

@@ -300,12 +300,17 @@ def _generation_worker(exam_id: str, revision: int) -> None:
         logger.error("Exam generation failed for %s: %s", exam_id, e)
         _mark_job_failed(exam_id, str(e), _FAILED_COOLDOWN_SECONDS)
         return
-    except Exception as e:  # pragma: no cover - defensive
+    except Exception:  # pragma: no cover - defensive
         # Nothing else is going to catch this: an uncaught exception on
         # a worker thread would leave the job row 'running' until the
         # stale reaper picks it up, i.e. the screen spins for 15 minutes.
+        #
+        # The exception text is deliberately NOT stored. The cooldown
+        # response hands `error` to the client on the promise that it is
+        # "the generator's own, safe to show" (see get_exam) -- true of the
+        # two branches above, and not of an arbitrary exception's str().
         logger.exception("Unexpected error generating %s", exam_id)
-        _mark_job_failed(exam_id, f"unexpected error: {e}", _FAILED_COOLDOWN_SECONDS)
+        _mark_job_failed(exam_id, "Generation failed unexpectedly.", _FAILED_COOLDOWN_SECONDS)
         return
 
     conn = db_conn()

@@ -199,9 +199,10 @@ class GrammarIdTests(unittest.TestCase):
         # that one, because moving them onto this catalogue changes every
         # grammar card id and so has to land with the SRS wipe, not before.
         #
-        # grammar_data.py cannot simply be edited to remove its copy:
-        # scripts/scrape.py regenerates the whole file including that
-        # function. So the two coexist, and the thing to guarantee is that
+        # grammar_data.py keeps its copy: the file is a generated artifact
+        # that nothing regenerates any more (the scraper that wrote it is
+        # gone), so it is left exactly as it was rather than hand-edited.
+        # The two coexist, and the thing to guarantee is that
         # handing one an entry from the other raises instead of quietly
         # producing an id like "grammar_N3_None" that would look valid,
         # write a real card_modes row, and never match anything again.
