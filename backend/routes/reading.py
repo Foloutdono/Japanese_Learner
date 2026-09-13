@@ -275,10 +275,6 @@ def _sentence_fits_level(jp: str, level: str) -> bool:
     return difficulty.fits_loosely(jp, level)
 
 
-def _is_kanji(c: str) -> bool:
-    return "\u4e00" <= c <= "\u9fff"
-
-
 def _pick_example_within_level(kanji: str, kana: str, level: str) -> dict | None:
     """Like vocab_extras.pick_random_example, but only considers
     examples whose sentence fits entirely within the target level's

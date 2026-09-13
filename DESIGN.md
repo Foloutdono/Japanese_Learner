@@ -791,7 +791,7 @@ a learner who has just rated one card is already looking for the next.
 ## The test
 
 A new screen belongs not by imitating these specs but by **reusing the
-components that already encode them**. `StationSign` is the same component at
-both ends of a journey; the platform card is shared by modes, tiers, themes,
-decks and exam papers; one contactless mark renders at three scales. The
-repetition *is* the design.
+components that already encode them**. `Bar` is the same masthead on every
+tab screen; the platform card is shared by modes, tiers, themes, decks and
+exam papers; one contactless mark renders at three scales. The repetition
+*is* the design.

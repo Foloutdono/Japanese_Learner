@@ -46,10 +46,6 @@ def take_batch(cache_key: str, fetch_fn, count: int, limit: int = 10) -> list[st
     items (possibly zero) once the underlying pool is exhausted —
     callers should treat a short result as "no more new cards to hand
     out", not retry.
-
-    Shares its underlying storage with `take_next`, so the two can be
-    called against the same cache_key without ever handing out the
-    same id twice.
     """
     if count <= 0:
         return []
@@ -69,11 +65,6 @@ def take_batch(cache_key: str, fetch_fn, count: int, limit: int = 10) -> list[st
         del batch[:take]
 
     return result
-
-
-def take_next(cache_key: str, fetch_fn, limit: int = 10) -> str | None:
-    result = take_batch(cache_key, fetch_fn, count=1, limit=limit)
-    return result[0] if result else None
 
 
 def pick_ids(cache_key: str, due_ids: list[str], new_fetch_fn, count: int,

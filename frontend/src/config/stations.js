@@ -22,9 +22,9 @@
 // There's deliberately no romaji field: a literal transliteration of
 // 解析 ("KAISEKI") tells a non-reader nothing a real station name
 // wouldn't either, and the app already has a plain-language name for
-// every section — the one on the departure board. StationSign takes
-// that string directly from its caller (see `latin` there) instead of
-// this file inventing a second, less useful English label. The one
+// every section — the one on the departure board. Screens take that
+// string directly from their own caller instead of this file
+// inventing a second, less useful English label. The one
 // exception is 辻駅 itself, which has no board row to borrow a
 // name from, so it keeps its own — and it is the app's own name, so
 // the plate at the origin and the mark on the icon are one thing.
@@ -119,7 +119,7 @@ export function sectionFor(path, t) {
   // Every section regardless of tab -- getSections/getProfileHalls
   // are deliberately narrower lists (what one gate renders), but a
   // path needs its colour and title wherever this function is asked
-  // for one (StationHeader, the bar, the gate, the door).
+  // for one (the bar, the gate, the door).
   const all = getAllSections(t)
   const exact = all.find(s => s.path === path)
   if (exact) return exact

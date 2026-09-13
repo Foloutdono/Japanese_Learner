@@ -5938,38 +5938,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* The board's clock, in this line's colour rather than the board's
-   amber — the panel it's sitting on is the section's, not the
-   station's. Qualified by .station-sign because .board-clock sets the
-   amber at the same specificity and wins on source order otherwise,
-   which is how a red 仮名 plate ended up with a gold clock. */
-.station-sign .station-sign__clock {
-  background: none;
-  padding: 0;
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  color: var(--text-secondary);
-}
-.station-sign .board-clock__colon { padding: 0 1px; }
-
-/* The plate on a screen that isn't a selection screen. Same object,
-   same spacing under it — see .platform-grid's 52px top padding, which
-   is the pause this is matching. */
-.station-header {
-  margin-bottom: 44px;
-  animation: arrive 0.34s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
-}
-/* Missed by the shared arrive->arrive-soft block near the top of the
-   file — that block only lists the screens sharing the exact same
-   arrive rule, and this header (used on screens outside that list)
-   was never added to it. Same fix: drop the translateY, keep the
-   fade so the header still announces itself as newly arrived. */
-@media (prefers-reduced-motion: reduce) {
-  .station-header { animation: arrive-soft 0.2s linear backwards; }
-}
-.station-header .station-sign--sm { padding: 0; }
-.station-header .station-sign__stripe { margin: 0; }
 
 
 /* ══ 定期券 — the commuter pass ═════════════════════════════
@@ -6778,31 +6746,6 @@ textarea:focus-visible {
 .board__stripe {
   height: 4px;
   background: var(--accent2);
-}
-
-/* The clock. Only the colon ticks — the digits change once a minute,
-   which is when the component re-renders. */
-.board-clock {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.06em;
-  /* Same lift as .board__roundel and .board__label -- the board is sumi
-     in both themes, --accent2 is not. The colon inherits this. */
-  color: color-mix(in srgb, var(--accent2) 85%, var(--text-on-panel));
-  font-variant-numeric: tabular-nums;
-}
-.board-clock__colon {
-  padding: 0 1px;
-  animation: board-tick 2s steps(1, end) infinite;
-}
-@keyframes board-tick { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0.15; } }
-/* A blinking colon is decoration, not the clock's content (the digits
-   themselves change on their own re-render cadence). Dropping the
-   blink leaves it steady at full opacity — no base opacity is set
-   outside the animation, so it settles fully visible, not half-dim. */
-@media (prefers-reduced-motion: reduce) {
-  .board-clock__colon { animation: none; }
 }
 
 /* ── 路線図 — the lines on the wall map ──────────────────────
@@ -15547,12 +15490,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    own, and the count drops below the field. Nothing is hidden: a
    count you cannot read is the same as no count, but so is a count
    welded to the placeholder. */
-@media (max-width: 560px) {
-
-
-  .station-header { margin-bottom: 20px;}
-}
-
 /* ══ 部首索引 — the radical index ═══════════════════════════
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and a media query adds none. */

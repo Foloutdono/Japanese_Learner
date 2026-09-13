@@ -676,24 +676,6 @@ class SRSEngine:
                 self._log_sql("delete_cards_rows", sql_cards, (card_ids,))
                 cur.execute(sql_cards, (card_ids,))
 
-    def get_card_stats(self, card_id: str, mode: str) -> dict[str, Any]:
-        state = self._load_state(card_id, mode)
-        return {
-            "card_id": card_id,
-            "mode": mode,
-            "total_reviews": state.total_reviews,
-            "correct_reviews": state.correct_reviews,
-            "interval": state.interval_days,
-            "next_review": state.next_review.isoformat() if state.next_review else None,
-            "is_learning": state.is_learning,
-            "learning_step": state.learning_step,
-            "lapses": state.lapses,
-            "repetitions": state.repetitions,
-            "difficulty": state.difficulty,
-            "stability": state.stability,
-            "last_quality": state.last_quality,
-        }
-
     def get_deck_stats(self, mode: str) -> dict[str, Any]:
         with self.storage.connection() as conn:
             with conn.cursor() as cur:

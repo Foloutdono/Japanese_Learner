@@ -209,11 +209,3 @@ LEVEL_BLUEPRINT = {
         ],
     },
 }
-
-
-def mondai_spec(level: str, mondai_id: str) -> dict | None:
-    for section in LEVEL_BLUEPRINT[level]["sections"]:
-        for mondai in section["mondai"]:
-            if mondai["id"] == mondai_id:
-                return mondai
-    return None

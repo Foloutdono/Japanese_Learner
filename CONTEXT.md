@@ -156,8 +156,10 @@ Paths are reduced to route patterns before they are stored
 **発車標 (hassha-hyō)** — the departure board on the home screen. Lists every
 section as a service leaving from its own platform. `components/station/DepartureBoard.jsx`.
 
-**駅名標 (ekimei-hyō)** — the station plate that heads a screen: the hanging
-sign giving the screen's name in Japanese and Latin. `components/station/StationSign.jsx`.
+**駅名標 (ekimei-hyō)** — the station plate that used to head a screen: the
+hanging sign giving the screen's name in Japanese and Latin. Retired with the
+mobile chrome (plan 068) in favour of the compact `components/chrome/Bar.jsx`
+header that now opens every tab screen.
 
 **のりば (noriba)** — the platform-count register on a plate, naming how many
 choices (platforms) a screen offers. `components/selection/SelectionScreen.jsx`.
