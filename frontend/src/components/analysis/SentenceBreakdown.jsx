@@ -9,31 +9,7 @@ import { SpeakButton } from './SpeakButton'
 import { StatusBadge } from './StatusBadge'
 import { DeckPicker } from './DeckPicker'
 import { StageCard } from './StageCard'
-
-// Real stroke-based chevron rather than `‹`/`›` text glyphs, whose
-// optical centering varies by font/OS. `display: block` avoids the few
-// px of inline descender space an <svg> gets by default, so it sits
-// dead-center in the round nav button regardless.
-function ChevronIcon({ direction = 'left' }) {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="18"
-      height="18"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-      style={{ display: 'block' }}
-    >
-      {direction === 'left'
-        ? <polyline points="15 5 8 12 15 19" />
-        : <polyline points="9 5 16 12 9 19" />}
-    </svg>
-  )
-}
+import { rowsOf } from './rows'
 
 // Mirrors study/analysis.py's _CONTENT_POS + unknown_count predicate
 // exactly, so "the single unknown Token" identified here for i+1
@@ -169,17 +145,97 @@ export function Legend({ t }) {
   )
 }
 
+// ── The rows (plan 084) ───────────────────────────────────────
+// The word-by-word breakdown as the practice modes show it: the
+// sentence as a ruby line, its translation, then one row per WORD --
+// surface, reading, what it does here, its level -- and the note last.
+// The grouping of morphemes into words is rows.js's rowsOf.
+
+// The sentence as its tokens, the reading over each kanji, the SRS
+// speaking through the 2px rule under a word (tokState's classes, the
+// analyzer's own convention). A deck word is a door to its entry; a
+// particle is text. Without an analysis the sentence prints plain,
+// exactly as the card would have printed it -- never a blank.
+export function SentenceLine({ analysis, text, t, onTokenClick }) {
+  const tokens = analysis?.tokens ?? analysis?.words ?? []
+  if (analysis?.available === false || !tokens.length) {
+    return <span className="prose__jp" lang="ja">{text ?? analysis?.text ?? ''}</span>
+  }
+  return (
+    <div className="bkd-line" lang="ja" role="group" aria-label={analysis.text ?? text}>
+      {tokens.map((w, i) => {
+        const cls = `bkd-tok bkd-tok--${tokState(w)}`
+        const parts = w.furigana ?? [{ text: w.surface }]
+        return w.vocab_match && onTokenClick ? (
+          <button
+            key={i}
+            type="button"
+            className={`${cls} bkd-tok--door`}
+            onClick={() => onTokenClick(w)}
+            aria-label={t.detailsForToken(w.surface)}
+          >
+            <FuriganaParts parts={parts} />
+          </button>
+        ) : (
+          <span key={i} className={cls}><FuriganaParts parts={parts} /></span>
+        )
+      })}
+    </div>
+  )
+}
+
+// One row per word. The reading is the run's own kana and is left out
+// when it would only repeat the word (は, ともだち); the gloss is the
+// model's contextual one where it was bought or came with the text,
+// else the deck's own -- a learner should not need a model to know
+// what 電車 means. The level is the deck's, as a plain badge.
+export function WordRows({ analysis, t, onTokenClick }) {
+  const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
+  if (!rows.length) return null
+  return (
+    <div className="bkd-rows">
+      {rows.map((row, i) => {
+        const head = row.head
+        const state = tokState(head)
+        const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? ''
+        const reading = row.reading !== row.surface ? row.reading : ''
+        return (
+          <div key={i} className="bkd-row">
+            {head.vocab_match && onTokenClick ? (
+              <button
+                type="button"
+                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door`}
+                lang="ja"
+                onClick={() => onTokenClick(head)}
+                aria-label={t.detailsForToken(row.surface)}
+              >
+                {row.surface}
+              </button>
+            ) : (
+              <span className={`bkd-row__word bkd-tok bkd-tok--${state}`} lang="ja">{row.surface}</span>
+            )}
+            {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
+            <span className="bkd-row__meaning">{meaning}</span>
+            {head.vocab_match?.level && (
+              <span className="type-badge bkd-row__lvl">{head.vocab_match.level}</span>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 // The sentence breakdown, in one of three layouts:
 //
 //   'list'    — every Token as a scrolling list of cards (the phrase
-//               analyzer's shape): a colour-coded phrase line up top,
-//               the explanation, a status legend, then one TokenCard
-//               per Token.
-//   'stepper' — one Token at a time in a carousel (reading practice's
-//               shape): the same colour-coded phrase line doubles as a
-//               jump-to-word index, prev/next arrows step through
-//               Tokens, no legend (reading practice's own screen
-//               explains status colour elsewhere).
+//               analyzer's original shape): a colour-coded phrase line
+//               up top, the explanation, a status legend, then one
+//               TokenCard per Token. No screen draws it today; the
+//               analyzer moved to 'stage' (plan 073) and the practice
+//               modes to 'rows' (plan 084), which retired the
+//               one-card-at-a-time 'stepper' the practice modes used
+//               to share.
 //   'stage'   — the analyser's control-room shape (the mockup round):
 //               the sentence as its own surface panel where status is
 //               an UNDERLINE rather than an ink colour, then the
@@ -188,19 +244,39 @@ export function Legend({ t }) {
 //               Lives here beside its siblings so the three shapes
 //               share TokenCard, FuriganaParts and the badges instead
 //               of a fourth near-copy drifting off on its own.
+//   'rows'    — the practice modes' shape (plan 084): the ruby line,
+//               the sentence's `translation`, one row per word, the
+//               grammar spotted, and the `note` (else the deep tier's
+//               explanation) last and quiet. `sentenceText` is what
+//               prints when there is no analysis to draw from.
 //
-// `index`/`setIndex` are used by 'stepper'/'stage' and are owned by
-// the caller (see ReadingRun.jsx) so they can be reset to 0
-// whenever a new phrase is shown. `controls`, `tokenView` and
-// `onJumpToToken` are only read by 'stage': tokenView chooses between
-// the carousel and the mockup's token table, and onJumpToToken is what
-// a table row's surface does (focus that token AND switch back to the
-// stepper — the mockup's own behaviour).
+// `index`/`setIndex` are used by 'stage' and are owned by the caller
+// (AnalyzerScreen) so they can be reset to 0 whenever a new sentence
+// is focused. `controls`, `tokenView` and `onJumpToToken` are only
+// read by 'stage': tokenView chooses between the carousel and the
+// mockup's token table, and onJumpToToken is what a table row's
+// surface does (focus that token AND switch back to the carousel —
+// the mockup's own behaviour).
 export function SentenceBreakdown({
   analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
   speakable = false, controls = null, tokenView = 'stepper', onJumpToToken,
+  translation, note, sentenceText,
 }) {
-  const tokens = analysis.tokens ?? analysis.words ?? []
+  const tokens = analysis?.tokens ?? analysis?.words ?? []
+
+  if (layout === 'rows') {
+    const available = analysis?.available !== false && tokens.length > 0
+    const noteText = note ?? analysis?.explanation ?? ''
+    return (
+      <div className="bkd">
+        <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} />
+        {translation && <span className="bkd__en">{translation}</span>}
+        {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} />}
+        {available && <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} />}
+        {noteText && <span className="prose__ai">{noteText}</span>}
+      </div>
+    )
+  }
 
   if (layout === 'stage') {
     // Same both-ways clamp as the stepper below, same reason: a
@@ -261,106 +337,6 @@ export function SentenceBreakdown({
               />
             )}
           </CardTransition>
-        )}
-      </div>
-    )
-  }
-
-  if (layout === 'stepper') {
-    // Clamped BOTH ways. With no tokens at all, `tokens.length - 1` is
-    // -1 and Math.min hands back tokens[-1] === undefined, which TokenCard
-    // then dereferences and takes the whole screen down with it. A
-    // Sentence can legitimately have no tokens (an unavailable analysis,
-    // a line of pure punctuation), and that must render as "nothing to
-    // step through", not as a white screen. Same failure class as the
-    // 202 crash in plans/README.md: a stale/out-of-range index read.
-    const current = tokens.length ? tokens[Math.min(index, tokens.length - 1)] : null
-    const canPrev = index > 0
-    const canNext = index < tokens.length - 1
-
-    return (
-      <div className="rdg-breakdown">
-        <div className="phrase-line rdg-breakdown-line">
-          {tokens.map((w, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setIndex(i)}
-              className={`word-span rdg-breakdown-line__word${i === index ? ' rdg-breakdown-line__word--active' : ''}`}
-              style={{ '--word-color': wordColor(w) }}
-              // The line doubles as a jump-to-Token index, so each entry
-              // says WHICH Token it goes to rather than repeating one
-              // generic tooltip N times.
-              aria-label={t.jumpToTokenNamed(w.surface)}
-              // The pressed one is the Token on the stage. aria-pressed,
-              // not aria-current: these are toggles into a single
-              // selection, not steps along a route -- the route is
-              // PassageLine, one level up.
-              aria-pressed={i === index}
-              lang="ja"
-            >
-              <FuriganaParts parts={w.furigana ?? [{ text: w.surface }]} />
-            </button>
-          ))}
-        </div>
-
-        <div className="rdg-breakdown-badges">
-          <LevelBadge
-            level={analysis.level}
-            unknownCount={analysis.unknown_count}
-            offDeckCount={analysis.off_deck_count}
-            t={t}
-          />
-          {speakable && (
-            <SpeakButton text={analysis.text} label={t.hearSentence} size="md" t={t} />
-          )}
-        </div>
-        <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
-
-        {analysis.explanation && (
-          <div className="phrase-explanation rdg-breakdown-explanation">
-            {analysis.explanation}
-          </div>
-        )}
-
-        <div className="rdg-breakdown-card-row">
-          <button
-            onClick={() => setIndex(i => Math.max(0, i - 1))}
-            disabled={!canPrev}
-            className="rdg-breakdown-nav rdg-breakdown-nav--prev"
-            aria-label={t.previousWord ?? 'Previous word'}
-          >
-            <ChevronIcon direction="left" />
-          </button>
-
-          <CardTransition cardKey={index} className="rdg-breakdown-card-stage">
-            {current && <TokenCard
-              word={current}
-              t={t}
-              compact
-              extraClassName="rdg-breakdown-card"
-              onWordClick={onTokenClick}
-              onKanjiClick={onKanjiClick}
-              mining={mining}
-              sentenceText={analysis.text}
-              speakable={speakable}
-            />}
-          </CardTransition>
-
-          <button
-            onClick={() => setIndex(i => Math.min(tokens.length - 1, i + 1))}
-            disabled={!canNext}
-            className="rdg-breakdown-nav rdg-breakdown-nav--next"
-            aria-label={t.nextWord ?? 'Next word'}
-          >
-            <ChevronIcon direction="right" />
-          </button>
-        </div>
-
-        {tokens.length > 0 && (
-          <div className="rdg-breakdown-counter">
-            {index + 1} / {tokens.length}
-          </div>
         )}
       </div>
     )

@@ -280,7 +280,13 @@ CREATE TABLE comprehension_log (
     answers JSONB NOT NULL,
     score INTEGER NOT NULL,
     total INTEGER NOT NULL,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The grammar points the exercise was written around, as a JSON
+    -- list of catalogue patterns (plan 084). NULL on every row before
+    -- the seeds existed. Added at runtime by routes/reading.py's
+    -- _migrate_reading_log_schema, read back so the next exercise is
+    -- written around points the learner has not just seen.
+    grammar JSONB
 );
 
 CREATE INDEX idx_comprehension_log_user

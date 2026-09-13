@@ -1,6 +1,6 @@
 import unittest
 
-from study.analysis import analyze_local, attach_user_state
+from study.analysis import analyze_local, attach_user_state, merge_deep, analyze_with_glosses
 from study import morphology
 
 
@@ -117,6 +117,62 @@ class AttachUserStateTests(unittest.TestCase):
         self.assertEqual(ga["pos"], "particle")
         # Only ピカチュウ should have contributed to off_deck_count.
         self.assertEqual(out["off_deck_count"], 1)
+
+
+class MergeDeepTests(unittest.TestCase):
+    """merge_deep folds a model's per-word glosses onto the local tier's
+    Tokens. The tokenizer stays the authority on segmentation; a gloss
+    may bind to a RUN of Tokens whose surfaces concatenate to the
+    model's word, because a model cuts words the way a dictionary does
+    (会いました) and MeCab cuts morphemes (会い / まし / た)."""
+
+    def test_a_single_token_word_binds_as_before(self) -> None:
+        r = analyze_local("駅で会いました。")
+        out = merge_deep(r, [{"surface": "駅", "meaning": "station"}], "x")
+        eki = next(t for t in out["tokens"] if t["surface"] == "駅")
+        self.assertEqual(eki["meaning"], "station")
+        self.assertNotIn("span_end", eki)
+        self.assertEqual(out["deep_dropped"], 0)
+        self.assertEqual(out["explanation"], "x")
+
+    def test_a_dictionary_word_binds_to_the_run_of_its_morphemes(self) -> None:
+        r = analyze_local("駅で会いました。")
+        surfaces = [t["surface"] for t in r["tokens"]]
+        self.assertEqual(surfaces[2:5], ["会い", "まし", "た"])
+        out = merge_deep(r, [{"surface": "会いました", "meaning": "met"}], "")
+        head = out["tokens"][2]
+        self.assertEqual(head["meaning"], "met")
+        self.assertEqual(head["span_end"], 4)
+        self.assertNotIn("meaning", out["tokens"][3])
+        self.assertEqual(out["deep_dropped"], 0)
+
+    def test_a_word_matching_nothing_is_dropped_and_counted(self) -> None:
+        r = analyze_local("駅で会いました。")
+        before = [dict(t) for t in r["tokens"]]
+        out = merge_deep(r, [{"surface": "図書館", "meaning": "library"}], "")
+        self.assertEqual(out["deep_dropped"], 1)
+        self.assertEqual(r["tokens"], before)          # the input is never mutated
+        self.assertFalse(any("meaning" in t for t in out["tokens"]))
+
+    def test_repeated_words_bind_in_order(self) -> None:
+        r = analyze_local("私は学生です。彼は先生です。")
+        out = merge_deep(r, [
+            {"surface": "は", "meaning": "topic 1"},
+            {"surface": "は", "meaning": "topic 2"},
+        ], "")
+        glossed = [t["meaning"] for t in out["tokens"] if t["surface"] == "は"]
+        self.assertEqual(glossed, ["topic 1", "topic 2"])
+
+    def test_analyze_with_glosses_is_the_local_tier_plus_meanings(self) -> None:
+        out = analyze_with_glosses("駅で会いました。", [{"surface": "駅", "meaning": "station"}], "N5")
+        self.assertTrue(out["available"])
+        self.assertEqual(out["explanation"], "")
+        eki = next(t for t in out["tokens"] if t["surface"] == "駅")
+        self.assertEqual(eki["meaning"], "station")
+        self.assertEqual(eki["furigana"][0]["reading"], "えき")
+        # No words at all is a plain local analysis.
+        bare = analyze_with_glosses("駅で会いました。", None)
+        self.assertEqual(bare["deep_dropped"], 0)
 
 
 if __name__ == "__main__":

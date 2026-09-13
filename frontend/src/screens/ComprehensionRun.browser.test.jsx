@@ -37,12 +37,37 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: ComprehensionRun } = await import('./ComprehensionRun')
 const { default: SentenceStation } = await import('./SentenceStation')
 
+// The first sentence's analysis, as reading.py serves it (plan 084):
+// the analyzer's local tier with the model's glosses folded on. 待ち /
+// まし / た is one word to the model and three morphemes to the
+// tokenizer -- the gloss sits on the first with the run's extent.
+const deck = (kanji, kana, meaning, status = 'not_started') => ({
+  level: 'N5', raw_id: `vocab_N5_${kanji}_${kana}`, entry: { kanji, kana, meaning }, stats: { status },
+})
+const ANALYSIS_1 = {
+  text: '駅で友達を待ちました。', available: true, level: 'N5', unknown_count: 2, off_deck_count: 0,
+  grammar: [{ pattern: '〜ました／〜ませんでした', level: 'N5', raw_id: 'grammar_N5_〜ました／〜ませんでした', start: 6, end: 9, stats: { status: 'not_started' } }],
+  tokens: [
+    { surface: '駅', reading: 'えき', pos: 'noun', furigana: [{ text: '駅', reading: 'えき' }], meaning: 'station', vocab_match: deck('駅', 'えき', 'station'), kanji_matches: [] },
+    { surface: 'で', reading: 'で', pos: 'particle', furigana: [{ text: 'で' }], meaning: 'at (place of action)', vocab_match: null, kanji_matches: [] },
+    { surface: '友達', reading: 'ともだち', pos: 'noun', furigana: [{ text: '友', reading: 'とも' }, { text: '達', reading: 'だち' }], vocab_match: deck('友達', 'ともだち', 'friend', 'learning'), kanji_matches: [] },
+    { surface: 'を', reading: 'を', pos: 'particle', furigana: [{ text: 'を' }], vocab_match: null, kanji_matches: [] },
+    { surface: '待ち', reading: 'まち', pos: 'verb', furigana: [{ text: '待', reading: 'ま' }, { text: 'ち' }], meaning: 'waited for', span_end: 6, vocab_match: deck('待つ', 'まつ', 'to wait'), kanji_matches: [] },
+    { surface: 'まし', reading: 'まし', pos: 'auxiliary', furigana: [{ text: 'まし' }], vocab_match: null, kanji_matches: [] },
+    { surface: 'た', reading: 'た', pos: 'auxiliary', furigana: [{ text: 'た' }], vocab_match: null, kanji_matches: [] },
+    { surface: '。', reading: '。', pos: 'symbol', furigana: [{ text: '。' }], vocab_match: null, kanji_matches: [] },
+  ],
+}
 const EXERCISE = {
   text: '駅で友達を待ちました。電車は遅れました。',
   translation: 'I waited for a friend at the station. The train was late.',
   breakdown: [
-    { jp: '駅で友達を待ちました。', translation: 'I waited for a friend at the station.', note: 'で marks where an action happens.' },
+    { jp: '駅で友達を待ちました。', translation: 'I waited for a friend at the station.', note: 'で marks where an action happens.', analysis: ANALYSIS_1 },
+    // The second, as an older backend serves it: no analysis at all.
     { jp: '電車は遅れました。', translation: 'The train was late.', note: '' },
+  ],
+  grammar_points: [
+    { pattern: '〜ました／〜ませんでした', structure: 'verb stem + ました', meaning: 'polite past', level: 'N5', raw_id: 'grammar_N5_〜ました／〜ませんでした' },
   ],
   read_seconds: 60,
   questions: [
@@ -164,21 +189,56 @@ describe('ComprehensionRun', () => {
     expect(root.querySelector('.qrow__detail .mcq-row--correct')).toBeTruthy()
     expect(root.querySelector('.stage__foot .btn-primary').textContent).toBeTruthy()
 
-    // And the passage, one sentence at a time, is what the result
-    // opens onto: every sentence in order, each with its translation
-    // and the note under it. Bought here, not during the reading.
-    expect(root.querySelector('.cbd')).toBeNull()
+    // And the passage, sentence by sentence, is what the result opens
+    // onto: every sentence in order over its translation, the first
+    // open on its words and its note (plan 084). Bought here, not
+    // during the reading.
+    expect(root.querySelector('.bkd-passage')).toBeNull()
     // By role, not by label: the lane's language is the machine's.
     root.querySelector('.btn-secondary[aria-expanded]').click()
     await settle()
-    const items = root.querySelectorAll('.cbd__item')
+
+    // The grammar the text was written around, captioned, over the
+    // passage. (The open sentence carries its own chips under its rows
+    // -- the same point, where it occurs -- so the row is read on its
+    // own, not the page.)
+    const seeded = root.querySelector('.analysis-grammar-chips')
+    expect(seeded.querySelector('.cap').textContent).toBeTruthy()
+    expect([...seeded.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent))
+      .toEqual(EXERCISE.grammar_points.map(g => g.pattern))
+
+    const items = root.querySelectorAll('.bkd-passage__item')
     expect(items).toHaveLength(2)
-    expect([...items].map(el => el.querySelector('.prose__jp').textContent))
-      .toEqual(EXERCISE.breakdown.map(p => p.jp))
-    expect(items[0].querySelector('.cbd__en').textContent).toBe(EXERCISE.breakdown[0].translation)
+    // The first is open: the ruby line, one row per WORD (待ちました is
+    // one row), the translation and the note.
+    expect(items[0].classList.contains('bkd-passage__item--open')).toBe(true)
+    expect(items[0].querySelector('.bkd-line').textContent).toContain('駅')
+    expect([...items[0].querySelectorAll('.bkd-row__word')].map(el => el.textContent))
+      .toEqual(['駅', 'で', '友達', 'を', '待ちました'])
+    expect(items[0].querySelector('.bkd__en').textContent).toBe(EXERCISE.breakdown[0].translation)
     expect(items[0].querySelector('.prose__ai').textContent).toBe(EXERCISE.breakdown[0].note)
-    // A sentence with nothing worth noting prints no note line.
+    // The second is closed -- its sentence over its translation -- and
+    // with no analysis and nothing worth noting it has nothing to open
+    // and no note line.
+    expect(items[1].querySelector('.prose__jp').textContent).toBe(EXERCISE.breakdown[1].jp)
+    expect(items[1].querySelector('.bkd__en').textContent).toBe(EXERCISE.breakdown[1].translation)
     expect(items[1].querySelector('.prose__ai')).toBeNull()
+    expect(items[1].querySelector('.bkd-passage__chev')).toBeNull()
+
+    // A word opens its entry as a sheet.
+    items[0].querySelector('.bkd-row .bkd-tok--door').click()
+    await settle()
+    expect(document.querySelector('.word-detail')).toBeTruthy()
+    expect(document.body.textContent).toContain('station')
+
+    // What was posted back: the breakdown without its analyses, and
+    // the points the text was written around.
+    const posted = apiFetch.mock.calls.find(c => String(c[0]).startsWith('/api/reading/comprehension/result'))
+    const body = JSON.parse(posted[2].body)
+    expect(body.breakdown).toHaveLength(2)
+    expect(body.breakdown[0].analysis).toBeUndefined()
+    expect(body.breakdown[0].jp).toBe(EXERCISE.breakdown[0].jp)
+    expect(body.grammar_points).toEqual(EXERCISE.grammar_points.map(g => g.pattern))
   })
 
   // The two halves deploy separately (Vercel and Render), so the
@@ -186,7 +246,7 @@ describe('ComprehensionRun', () => {
   // breakdown yet: the toggle opens what it always opened rather than
   // an empty card.
   it('falls back to the whole text when the exercise carries no breakdown', async () => {
-    const flat = { ...EXERCISE, breakdown: undefined }
+    const flat = { ...EXERCISE, breakdown: undefined, grammar_points: undefined }
     apiFetch.mockImplementation(async url => {
       if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
       if (String(url).startsWith('/api/reading/comprehension')) return ok(flat)
@@ -218,9 +278,12 @@ describe('ComprehensionRun', () => {
     // By role, not by label: the lane's language is the machine's.
     root.querySelector('.btn-secondary[aria-expanded]').click()
     await settle()
-    const items = root.querySelectorAll('.cbd__item')
+    const items = root.querySelectorAll('.bkd-passage__item')
     expect(items).toHaveLength(1)
     expect(items[0].querySelector('.prose__jp').textContent).toBe(EXERCISE.text)
-    expect(items[0].querySelector('.cbd__en').textContent).toBe(EXERCISE.translation)
+    expect(items[0].querySelector('.bkd__en').textContent).toBe(EXERCISE.translation)
+    // Nothing to open, so no control that would open nothing.
+    expect(items[0].querySelector('.bkd-passage__chev')).toBeNull()
+    expect(root.querySelector('.analysis-grammar-chips')).toBeNull()
   })
 })

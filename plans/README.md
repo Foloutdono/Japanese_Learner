@@ -190,6 +190,23 @@ Thirteen waves live in this file:
   browser-not-the-app warning, and a troubleshooting section that
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
+
+- **Wave 16 — 読解, the level-mix gate and the rows breakdown** (plan 084,
+  2026-09-13, DONE). Owner-directed: a generated text may not carry more
+  than one word in twenty above its level; comprehension texts are written
+  around three grammar points and six words of the level, drawn at random
+  and kept clear of the learner's last five exercises; every practice mode
+  but the exam draws one word-by-word breakdown (the ruby line, the
+  translation, one row per WORD, the note last), and the comprehension
+  passage is a stacked list of them, one open at a time. The model
+  proposes, the code decides: `study/level_mix.py` measures the text,
+  `routes/reading.py` retries with the failure fed back, softens
+  out-of-level kanji to kana and refuses only on vocabulary; the exam
+  passage generator takes the same measurement as a soft error. The
+  one-card carousel and its pre-token CSS are retired. Plan file
+  `084-level-mix-seeds-and-the-rows-breakdown.md`; the decision is
+  `docs/adr/0015-generated-text-is-gated-on-its-level-mix.md`. Backend
+  1236 + 35 new, frontend 993 (136 files), guards clean.
 - **Wave 13 — 行先, destination goals + the five-scene office** (plan 063,
   ALL PHASES DONE 2026-09-02). The onboarding redesigned end to end and
   the goal feature it exists to sell: a destination + validity date printed

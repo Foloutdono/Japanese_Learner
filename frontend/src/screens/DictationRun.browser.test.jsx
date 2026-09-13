@@ -362,16 +362,20 @@ describe('DictationRun', () => {
     button.click()
     await settle(80)
 
-    // The carousel is drawn, and the sentence survives as its own word
-    // index rather than as the register that was put away.
-    expect(root.querySelector('.rdg-breakdown')).toBeTruthy()
+    // The rows are drawn, and the sentence survives as the breakdown's
+    // own line, over its translation, rather than as the registers
+    // that were put away.
+    expect(root.querySelector('.bkd')).toBeTruthy()
     expect(root.querySelector('.kaki-line')).toBeNull()
     expect(root.textContent).not.toContain(LINE.romaji)
-    expect(root.querySelector('.rdg-breakdown-line').textContent).toContain('学校')
+    expect(root.querySelector('.bkd-line').textContent).toContain('学校')
+    expect(root.querySelector('.bkd__en').textContent).toBe(LINE.en)
+    expect(root.querySelectorAll('.bkd-row')).toHaveLength(ANALYSIS.tokens.length)
+    expect(root.querySelector('.bkd .prose__ai').textContent).toBe(ANALYSIS.explanation)
 
     breakdownButton(root).click()
     await settle(80)
-    expect(root.querySelector('.rdg-breakdown')).toBeNull()
+    expect(root.querySelector('.bkd')).toBeNull()
     expect(root.querySelector('.kaki-line')).toBeTruthy()
   })
 
@@ -417,13 +421,13 @@ describe('DictationRun', () => {
     const root = await graded()
     breakdownButton(root).click()
     await settle(80)
-    expect(root.querySelector('.rdg-breakdown')).toBeTruthy()
+    expect(root.querySelector('.bkd')).toBeTruthy()
 
     const nextBtn = [...root.querySelectorAll('button')].find(b => b.textContent.includes('Phrase suivante'))
     nextBtn.click()
     await settle(120)
 
-    expect(root.querySelector('.rdg-breakdown')).toBeNull()
+    expect(root.querySelector('.bkd')).toBeNull()
     expect(root.querySelector('.prose__breakdown')).toBeNull()
     expect(root.querySelector('.clip-player')).toBeTruthy()
   })

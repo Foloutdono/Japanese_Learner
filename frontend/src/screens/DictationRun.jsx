@@ -94,9 +94,9 @@ function Session({ session, level }) {
   // ── The word-by-word breakdown (reading practice's, on this stage) ──
   // The same LLM segmentation the 解析 screen runs, through the same
   // POST /api/phrase/analyze with save=false, drawn by the same
-  // SentenceBreakdown in its 'stepper' layout. Third caller, no fourth
-  // copy: a near-copy of that carousel would have drifted inside two
-  // features (DESIGN.md, "What not to do").
+  // SentenceBreakdown in its 'rows' layout. Third caller, no fourth
+  // copy: a near-copy of it would have drifted inside two features
+  // (DESIGN.md, "What not to do").
   //
   // One thing here is not like reading practice, and it follows from
   // the mode's own rule. Reading fires this the instant the phrase goes
@@ -116,10 +116,7 @@ function Session({ session, level }) {
   const [analysis, setAnalysis]               = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown]     = useState(false)
-  // Which card the carousel is on. Owned here, not by SentenceBreakdown,
-  // so a new clip starts at the first word of a fresh breakdown.
-  const [breakdownIndex, setBreakdownIndex]   = useState(0)
-  // The word or kanji the learner tapped, as a bottom sheet.
+  // The word the learner tapped, as a bottom sheet.
   const [detail, setDetail] = useState(null)
   // Stable, so WordDetail's useDialog does not re-run its focus effect
   // (and steal focus) on every render while the sheet is open.
@@ -165,7 +162,6 @@ function Session({ session, level }) {
     setAnalysis(null)
     setAnalysisLoading(false)
     setShowBreakdown(false)
-    setBreakdownIndex(0)
     setDetail(null)
     analysisLineRef.current = null
     setStage('listening')
@@ -200,10 +196,6 @@ function Session({ session, level }) {
       stats: word.vocab_match.stats,
       level: word.vocab_match.level,
     })
-  }
-
-  function openKanjiDetail(k) {
-    setDetail({ title: k.kanji, entry: k.entry, stats: k.stats, level: k.level })
   }
 
   // Fetches, then either shows the head or says why it cannot. Takes no
@@ -395,10 +387,10 @@ function Session({ session, level }) {
           <PromptCard prose foot={{ left: where, right: t.dictationTitle }}>
             {/* Opening the breakdown puts the registers away, exactly as
                 reading practice does: the card IS the stage on a phone,
-                and a carousel stacked under six rows of already-read
-                text gets what is left rather than what it needs. The
-                sentence is not lost with them — the breakdown's own
-                line, up top, is the same sentence as a word index. */}
+                and rows stacked under six lines of already-read text
+                get what is left rather than what they need. Nothing is
+                lost with them — the breakdown's own line and its
+                translation, up top, are the same sentence and gloss. */}
             {!showBreakdown && (
               <>
                 {/* The line, with its reading over the kanji that need one.
@@ -463,12 +455,11 @@ function Session({ session, level }) {
                 {showBreakdown && analysis && (
                   <SentenceBreakdown
                     analysis={analysis}
-                    layout="stepper"
-                    index={breakdownIndex}
-                    setIndex={setBreakdownIndex}
+                    layout="rows"
+                    translation={result.translation}
+                    sentenceText={result.jp}
                     t={t}
                     onTokenClick={openWordDetail}
-                    onKanjiClick={openKanjiDetail}
                   />
                 )}
               </div>

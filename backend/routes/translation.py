@@ -1,3 +1,4 @@
+import json
 import logging
 import re
 
@@ -150,7 +151,19 @@ class AnalyzePayload(BaseModel):
     grammar: str = ""
 
 
-ANALYSIS_PROMPT_TEMPLATE = """You are a friendly, encouraging Japanese teacher helping a learner self-assess their own translation attempt.
+# ── The review, as a shape (2026-09-13, owner-directed) ──
+# The tutor used to answer in a paragraph: five sentences, one colour,
+# the praise and the error in the same breath. A learner on a phone
+# read none of it. The review is now a fixed shape the screen can draw
+# as a verdict, a line, and rows a learner tells apart at a glance:
+# what worked (+), what to fix (- with the fix under it), and their
+# own sentence corrected. The model proposes the shape; _parse_review
+# decides what of it is usable, and a reply that is not the shape at
+# all is served as the prose it is rather than lost.
+VERDICTS = ("correct", "acceptable", "partial", "incorrect")
+_MAX_ITEMS = 3
+
+ANALYSIS_PROMPT_TEMPLATE = """You are a Japanese teacher reviewing a learner's translation attempt. The learner reads your review at a glance on a phone, so it is a SHAPE, not a paragraph.
 
 The learner was asked to translate this {lang_name} sentence into Japanese:
 "{translation_prompt}"
@@ -160,13 +173,78 @@ A reference Japanese translation is:
 
 The learner's own attempt was:
 {user_answer}
-
-Write a short analysis (3-5 sentences, in {lang_name}) that helps the learner judge for themselves whether their attempt was good enough. Do NOT simply announce "correct" or "incorrect" as a verdict — instead:
-- Point out what their attempt got right (grammar, vocabulary, nuance).
-- Note any meaningful differences from the reference (wrong particle, wrong verb form/conjugation, missing or added nuance, unnatural phrasing, wrong word/kanji choice) — but a DIFFERENT phrasing that is still natural and correct Japanese is not a mistake, say so explicitly if that's the case.
-- Say whether a native speaker would understand what they meant, even if imperfect.
 {grammar_note}
-Be specific and reference actual words from their attempt rather than speaking in generalities. Keep the tone encouraging but honest. Respond with plain text only — no markdown formatting, no JSON, no preamble like "Here's my analysis"."""
+Respond with ONLY a JSON object (no markdown fences, no commentary) matching exactly this schema:
+{{
+  "verdict": "correct",
+  "summary": "...",
+  "good": ["..."],
+  "fix": [{{"issue": "...", "fix": "..."}}],
+  "grammar_used": null,
+  "better": ""
+}}
+
+Rules:
+- "verdict" is exactly one of: "correct" (the meaning is right and the Japanese is natural -- a phrasing that differs from the reference but is still correct, natural Japanese is "correct", never a mistake), "acceptable" (the meaning is right and a native speaker would understand it, but something is slightly unnatural), "partial" (understood, but with a real error: a wrong particle, a wrong verb form, a wrong word or kanji), "incorrect" (the meaning is lost or changed).
+- "summary" is ONE short {lang_name} sentence saying why that verdict. No greeting, no "your translation", no restating the sentence.
+- "good" lists what the attempt got right: at most {max_items} items, each a short {lang_name} phrase that NAMES the Japanese it praises in 「 」 (for example: 「を」 marks the object correctly). May be empty.
+- "fix" lists what is wrong: at most {max_items} items, the most important first. Each has "issue" (a short {lang_name} phrase naming the Japanese in 「 」 and what is wrong with it) and "fix" (what to write instead, the Japanese in 「 」). A phrasing that merely differs from the reference is NOT an issue. Empty means nothing to fix.
+- "grammar_used": {grammar_used_rule}
+- "better" is the learner's OWN sentence with the fixes applied, in Japanese, when "fix" is not empty; the empty string when it is. Keep their wording wherever it was fine: this is their sentence corrected, not the reference copied.
+- Every value is a plain JSON string, list, boolean or null, and a string opens with the " character and closes with it. Quote Japanese INSIDE a value with 「 」 only, never with quotes.
+- Short over complete. The learner should see the verdict, the good items and the fix items and know in three seconds where they stand."""
+
+
+def _short(value, limit: int = 240) -> str:
+    return value.strip()[:limit] if isinstance(value, str) else ""
+
+
+def _parse_review(content: str) -> dict | None:
+    """The model's answer as the shape the screen draws, or None when it
+    is not that shape at all -- in which case the caller serves the
+    prose. Lenient inside the shape: a bad verdict becomes "partial", a
+    list too long is cut to its first items, an item that is not text
+    is dropped."""
+    cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+    try:
+        data = json.loads(cleaned)
+    except json.JSONDecodeError:
+        return None
+    if not isinstance(data, dict) or "verdict" not in data:
+        return None
+
+    verdict = data.get("verdict") if data.get("verdict") in VERDICTS else "partial"
+    good = []
+    if isinstance(data.get("good"), list):
+        good = [_short(item) for item in data["good"] if _short(item)][:_MAX_ITEMS]
+    fix = []
+    if isinstance(data.get("fix"), list):
+        for item in data["fix"]:
+            if isinstance(item, dict) and _short(item.get("issue")):
+                fix.append({"issue": _short(item.get("issue")), "fix": _short(item.get("fix"))})
+            elif _short(item):
+                fix.append({"issue": _short(item), "fix": ""})
+    fix = fix[:_MAX_ITEMS]
+    grammar_used = data.get("grammar_used")
+    return {
+        "verdict": verdict,
+        "summary": _short(data.get("summary")),
+        "good": good,
+        "fix": fix,
+        "grammar_used": grammar_used if isinstance(grammar_used, bool) else None,
+        "better": _short(data.get("better")) if fix else "",
+    }
+
+
+def _review_as_text(review: dict) -> str:
+    """The shape read out as lines -- what an older client prints, and
+    what the log shows."""
+    lines = [review["summary"]] if review["summary"] else []
+    lines += [f"+ {item}" for item in review["good"]]
+    lines += [f"- {item['issue']}" + (f" -> {item['fix']}" if item["fix"] else "") for item in review["fix"]]
+    if review["better"]:
+        lines.append(review["better"])
+    return "\n".join(lines)
 
 
 @router.post("/api/translation/analyze")
@@ -181,22 +259,25 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     # that the reference sentence alone does not say: WHY this sentence
     # was chosen. A curated sentence exists to demonstrate one grammar
     # point (content/reading_sentences.py names it, and a test proves the
-    # sentence contains it), so the analysis can tell the learner whether
-    # they reached for that construction or worked around it -- which is
-    # the difference between "you were understood" and "you practised the
+    # sentence contains it), so the review can say whether they reached
+    # for that construction or worked around it -- which is the
+    # difference between "you were understood" and "you practised the
     # thing this exercise was for".
     #
     # Only added when the phrase actually carries a point. A guess about
     # what a Tatoeba sentence is "for" would be exactly the kind of
     # confident-but-unfounded instruction this app avoids elsewhere.
-    grammar_note = ""
-    if payload.grammar.strip():
-        grammar_note = (
-            "- This sentence was chosen to practise the grammar point "
-            f"{payload.grammar.strip()}. Say whether the learner used it, and if "
-            "they expressed the same idea another way, show them how the "
-            "sentence would look using it.\n"
+    grammar = payload.grammar.strip()
+    if grammar:
+        grammar_note = f"\nThis sentence was chosen to practise the grammar point {grammar}.\n"
+        grammar_used_rule = (
+            f"true if the attempt uses {grammar}, false if it expresses the idea another way. "
+            f"When false, add ONE \"fix\" item showing how their sentence would read with {grammar} "
+            f"-- as the point of the exercise, not as an error -- even if the verdict is \"correct\"."
         )
+    else:
+        grammar_note = ""
+        grammar_used_rule = "always null: no grammar point was named for this sentence."
     prompt = ANALYSIS_PROMPT_TEMPLATE.format(
         lang_name=lang_name,
         translation_prompt=payload.translation_prompt,
@@ -204,21 +285,26 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         target_romaji=payload.target_romaji,
         user_answer=payload.user_answer,
         grammar_note=grammar_note,
+        grammar_used_rule=grammar_used_rule,
+        max_items=_MAX_ITEMS,
     )
 
     # reading._chat already handles the multi-model fallback chain and
-    # raises HTTPException(503, ...) if every provider fails — nothing
+    # raises HTTPException(503, ...) if every provider fails -- nothing
     # to add here.
     content = reading._chat([
         {"role": "system", "content": prompt},
-        {"role": "user", "content": "Analyze my translation attempt."},
+        {"role": "user", "content": "Review my translation attempt."},
     ])
-    # Not JSON here (plain prose is simpler for a short free-text
-    # analysis and there's no structured field the client needs to
-    # parse out), but strip stray code fences defensively in case a
-    # model wraps its answer in one anyway.
-    cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    return {"analysis": cleaned}
+    review = _parse_review(content)
+    if review is None:
+        # Not the shape. The prose is still a review, so it is served as
+        # one rather than costing the learner a second call; the screen
+        # prints `analysis` when `review` is missing.
+        logger.warning("translation review was not the shape; served as prose")
+        cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
+        return {"review": None, "analysis": cleaned}
+    return {"review": review, "analysis": _review_as_text(review)}
 
 
 # ── Scheduling ───────────────────────────────────────────────────────

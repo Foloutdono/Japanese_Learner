@@ -98,6 +98,48 @@ class PassageRetryTests(unittest.TestCase):
         self.assertNotIn("色", [c["textJp"] for c in passage["questions"][0]["choices"]])
 
 
+class VocabularyMixTests(unittest.TestCase):
+    """A passage whose words sit above the level (study/level_mix, plan
+    084) is fed back like any other failure, and on the last attempt is
+    accepted with a log line rather than dropped: a paper that does not
+    exist costs more than one that leans on a few hard words."""
+
+    # 人生 is filed at N3; 人, 生 and 長 are all N5 kanji, and 68
+    # characters sits inside the 40-120 band for an 80-character passage.
+    # "あ" runs tokenize as symbols, so 人生 is one of two content words.
+    _HARD_WORD = "あ" * 60 + "人生は長いです。"
+
+    def _build(self, responses):
+        calls = []
+
+        def fake_call(prompt, _user_message="x"):
+            calls.append(prompt)
+            return responses[min(len(calls) - 1, len(responses) - 1)]
+
+        with mock.patch.object(reading, "call_llm_json", side_effect=fake_call):
+            try:
+                passage = reading._build_one_passage(
+                    "N5", "内容理解", 80, 1, "STYLE", "a library flyer", "p1", 1)
+            except GenerationFailed as e:
+                return None, calls, str(e)
+        return passage, calls, None
+
+    def test_vocabulary_above_the_level_is_fed_back(self):
+        passage, calls, err = self._build([_response(self._HARD_WORD), _response(_GOOD)])
+        self.assertIsNone(err)
+        self.assertEqual(len(calls), 2)
+        self.assertIn("REJECTED", calls[1])
+        self.assertIn("vocabulary above N5", calls[1])
+        self.assertIn("人生", calls[1])
+        self.assertEqual(passage["textJp"], _GOOD)
+
+    def test_a_vocabulary_only_failure_never_drops_the_passage(self):
+        passage, calls, err = self._build([_response(self._HARD_WORD)])
+        self.assertIsNone(err)
+        self.assertEqual(len(calls), reading._PASSAGE_ATTEMPTS)
+        self.assertEqual(passage["textJp"], self._HARD_WORD)
+
+
 class TopicAssignmentTests(unittest.TestCase):
     def test_each_passage_in_a_mondai_gets_its_own_topic(self):
         import random
