@@ -10,7 +10,6 @@
   "no-descending-specificity::Expected selector \"button:focus-visible\" to come before selector \".onb-preview-bar button:hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".platform-card\" to come before selector \".platform-card:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".section-header__count\" to come before selector \".section-header--paired .section-header__count\", at line N": 1,
-  "no-descending-specificity::Expected selector \".board-clock__colon\" to come before selector \".station-sign .board-clock__colon\", at line N": 1,
   "no-descending-specificity::Expected selector \".wmap-line\" to come before selector \".wmap-line:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".wmap-row\" to come before selector \".wmap-row:hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".route-stop\" to come before selector \".route-stop:nth-child(1)\", at line N": 1,

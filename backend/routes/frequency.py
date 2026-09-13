@@ -54,45 +54,6 @@ logger = logging.getLogger(__name__)
 
 MAX_BATCH = 25
 
-# Card stage promotions worth a visual "stamp" on the frontend — same
-# table as kanji.py/vocab.py.
-STAGE_PROMOTIONS = {
-    ("new", "learning"): "learning",
-    ("learning", "mastered"): "mastered",
-}
-
-
-def _stage_promotion(prev_stage, new_stage):
-    if not prev_stage or not new_stage:
-        return None
-    return STAGE_PROMOTIONS.get((prev_stage, new_stage))
-
-# See kanji.py's own copy of this pair for the full reasoning.
-STAGE_DEMOTIONS = {
-    ("mastered", "learning"): "learning",
-}
-
-
-def _stage_demotion(prev_stage, new_stage):
-    if not prev_stage or not new_stage:
-        return None
-    return STAGE_DEMOTIONS.get((prev_stage, new_stage))
-
-
-def _build_review_preview(stage, preview):
-    if not preview:
-        return None
-    return {
-        str(quality): {
-            "xp_earned": p["xp_earned"],
-            "leveled_up": p["leveled_up"],
-            "new_level": p["new_level"],
-            "stage_up": _stage_promotion(stage, p["stage"]),
-            "stage_down": _stage_demotion(stage, p["stage"]),
-        }
-        for quality, p in preview.items()
-    }
-
 
 def _require_domain(domain: str) -> None:
     if domain not in freq.VALID_DOMAINS:

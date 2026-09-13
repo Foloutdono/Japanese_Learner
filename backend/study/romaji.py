@@ -260,18 +260,3 @@ def fold(text: str) -> str:
     for spelling, vowel in _LONG:
         letters = letters.replace(spelling, vowel)
     return letters
-
-
-def is_latin(text: str) -> bool:
-    """Did the learner answer in the alphabet rather than in kana? True
-    when there is at least one Latin letter and no Japanese script at
-    all — a mixed answer counts as Japanese, since the kana in it is the
-    part worth comparing."""
-    if not text:
-        return False
-    has_latin = any("a" <= c <= "z" for c in text.lower())
-    has_japanese = any(
-        "ぁ" <= c <= "ゟ" or "ァ" <= c <= "ヿ" or "一" <= c <= "鿿"
-        for c in text
-    )
-    return has_latin and not has_japanese

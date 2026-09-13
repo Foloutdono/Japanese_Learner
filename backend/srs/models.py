@@ -24,20 +24,3 @@ class CardState:
     correct_reviews: int = 0
 
     last_quality: int = -1
-
-
-@dataclass
-class ReviewResult:
-    card_id: str
-    mode: str
-
-    next_review: datetime
-
-    interval_days: int
-
-    difficulty: float
-    stability: float
-
-    is_learning: bool
-
-    accuracy: float
