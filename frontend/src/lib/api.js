@@ -19,7 +19,7 @@ import { supabase } from './supabase'
 // native`); vite.config.js refuses any other build that carries it,
 // which is what keeps a dashboard leftover from doing this again.
 //
-// Bundled assets (/sounds, /sprites) never pass through here: in the
+// Bundled assets (/sounds) never pass through here: in the
 // shell they live inside the app and resolving them against the web
 // origin would fetch them over the network instead.
 //

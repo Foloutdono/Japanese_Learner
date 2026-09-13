@@ -56,11 +56,15 @@ export const navigation = {
 
 export const workbox = {
   // The app shell: code, styles, icons, the Latin faces. Never
-  // public/sounds (4.8 MB), never the 716 KB streak sprite sheet,
-  // and never the ~240 Noto slices — all three arrive on demand
-  // and are kept by the runtime rules below.
+  // public/sounds (4.8 MB) and never the ~240 Noto slices — both
+  // arrive on demand and are kept by the runtime rules below.
+  //
+  // public/sprites was a third exclusion until its only file, an
+  // unreferenced 716 KB streak sprite sheet, was deleted; re-add
+  // `'**/sprites/**'` here and the /sprites/ arm of the media rule
+  // below if a sprite sheet ever comes back.
   globPatterns: ['**/*.{js,css,html,ico,svg,png,woff2}'],
-  globIgnores: ['**/noto-*.woff2', '**/sprites/**'],
+  globIgnores: ['**/noto-*.woff2'],
   maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
   // Off, deliberately: see the header. The plugin defaults it to
   // 'index.html', which registers a NavigationRoute served straight out
@@ -85,7 +89,7 @@ export const workbox = {
     // First: the document, before anything path-shaped can claim it.
     navigation,
     // Closure-free functions: they are serialised into the worker.
-    { urlPattern: ({ url, sameOrigin }) => sameOrigin && (url.pathname.startsWith('/sounds/') || url.pathname.startsWith('/sprites/')),
+    { urlPattern: ({ url, sameOrigin }) => sameOrigin && url.pathname.startsWith('/sounds/'),
       handler: 'CacheFirst',
       options: { cacheName: 'media', expiration: { maxEntries: 200, maxAgeSeconds: 31536000 },
                  cacheableResponse: { statuses: [200] } } },
