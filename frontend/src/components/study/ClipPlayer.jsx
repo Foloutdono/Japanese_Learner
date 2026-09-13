@@ -39,6 +39,9 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
+  // Mirrors atStart(audioRef.current) as state, since the disabled prop
+  // below is computed at render time and a ref cannot be read there.
+  const [start, setStart] = useState(true)
   // WHICH src failed, not a bare "it failed": the next clip carries a
   // different one, so this resets itself on the swap with no effect to
   // keep in step. (Same reasoning as exam/AudioPlayer's failedSrc.)
@@ -69,6 +72,16 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
     )
   }
 
+  // A clip played to the end sits at its duration rather than at 0, and
+  // pressing play there is the commonest way to take the next listen —
+  // checking currentTime alone misses exactly that one. Paused anywhere
+  // else in between is a listen still in progress, not a fresh one: the
+  // button must stay usable there even once `spent` is true, or the last
+  // allowed listen can never be resumed after a pause to think.
+  function atStart(el) {
+    return !el || el.currentTime === 0 || el.ended
+  }
+
   function toggle() {
     const el = audioRef.current
     if (!el) return
@@ -76,15 +89,12 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
       el.pause()
       return
     }
-    // A clip played to the end sits at its duration rather than at 0,
-    // and pressing play there is the commonest way to take the second
-    // listen — checking currentTime alone misses exactly that one.
-    const fresh = el.currentTime === 0 || el.ended
-    if (fresh) {
+    if (atStart(el)) {
       if (spent) return
       el.currentTime = 0
       onPlay()
     }
+    setStart(false)
     el.play().catch(() => setPlaying(false))
   }
 
@@ -101,7 +111,7 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
         preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}
-        onEnded={() => { setPlaying(false); setProgress(1) }}
+        onEnded={() => { setPlaying(false); setProgress(1); setStart(true) }}
         onTimeUpdate={e => {
           const el = e.currentTarget
           setProgress(el.duration ? el.currentTime / el.duration : 0)
@@ -113,7 +123,7 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
         type="button"
         className="clip-player__play"
         onClick={toggle}
-        disabled={spent && !playing}
+        disabled={spent && !playing && start}
         aria-label={playing ? t.examAudioPause : t.dictationListen}
       >
         {playing ? <PauseIcon size={26} /> : <PlayIcon size={26} />}

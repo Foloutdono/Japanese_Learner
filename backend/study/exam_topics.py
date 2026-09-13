@@ -159,7 +159,7 @@ def pick_topics(pool: list[str], n: int, rng: random.Random) -> list[str]:
     (routes/exams.py's _seed_for, which now varies per revision) — two
     revisions of the same exam id draw different topics, and the same
     revision always draws the same ones."""
-    if n <= 0:
+    if n <= 0 or not pool:
         return []
     picked: list[str] = []
     while len(picked) < n:
