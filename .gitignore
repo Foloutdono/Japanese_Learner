@@ -31,3 +31,76 @@ plans/*.md
 # snapshot of a learner's SRS state, and they are how the migration is
 # undone — worth keeping on the machine that ran it, never in the repo.
 rescale-restore-*.csv
+
+# ── Repo-wide artifact guards ─────────────────────────────────
+#
+# backend/.gitignore and frontend/.gitignore already cover their own
+# trees thoroughly, and they remain the place to put anything specific
+# to one stack. What was missing was the ROOT: a pattern written as
+# `.pytest_cache/` inside backend/ only matches under backend/, so
+# running pytest from the repo root, or creating a virtualenv beside
+# the two package directories, produced artifacts nothing ignored.
+# Everything below is written without a leading slash so it matches at
+# any depth — defence in depth for the two stack directories, and the
+# only cover for the root, docs/ and .github/.
+#
+# Verified against `git ls-files` when added: no tracked file matches
+# any of these patterns, so none of them shadows a file already in the
+# repository.
+
+# Python bytecode and tool caches. `__pycache__` appears wherever a
+# module is imported from, which includes scripts/ invoked at the root.
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Virtualenvs. The backend README installs with a bare `pip install`,
+# so the environment is wherever the developer put it — cover the four
+# conventional names rather than guess one.
+.venv/
+venv/
+env/
+ENV/
+
+# Coverage output. The frontend carries @vitest/coverage-v8 and the
+# backend runs pytest; both write here, neither is worth committing.
+.coverage
+.coverage.*
+coverage/
+htmlcov/
+*.lcov
+
+# Playwright's run output. CI installs chromium (ci.yml) and the
+# vitest browser lane drives it, so a local run leaves both of these.
+test-results/
+playwright-report/
+
+# Node. Only frontend/ has a package.json today, but an `npm install`
+# fired from the root creates a second tree that nothing caught.
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs, at any depth.
+*.log
+
+# Conflict and patch leftovers. `git merge` and `git apply --reject`
+# write these next to the file they failed on, which is inside the
+# source tree — exactly where they are easiest to commit by accident.
+*.orig
+*.rej
+*.bak
+*~
+
+# Editor and OS droppings. frontend/.gitignore already has .DS_Store
+# for its own tree; these catch the root, backend/ and docs/.
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
