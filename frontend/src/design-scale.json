@@ -189,7 +189,6 @@
       "3px",
       "48px",
       "4px",
-      "4px 10px",
       "4px 12px",
       "5px",
       "6px",
@@ -268,7 +267,6 @@
       "2px 0",
       "2px 0 0",
       "2px 4px",
-      "2px 5px",
       "2px 6px",
       "2px 7px",
       "2px 8px",
@@ -289,7 +287,6 @@
       "48px 24px 88px",
       "4px 0",
       "4px 0 10px",
-      "4px 10px",
       "4px 14px",
       "4px 8px",
       "52px 22px 32px",
@@ -315,7 +312,6 @@
       "8px 10px",
       "8px 14px",
       "8px 16px",
-      "8px 18px",
       "8px 20px",
       "8px 4px",
       "9px 20px",
@@ -358,8 +354,8 @@
       "`${maxWidth}px`",
       "`${p.drift}px`",
       "`${p.size}px`",
-      "`${s}px`",
-      "`${size}px`"
+      "`${size}px`",
+      "`${s}px`"
     ],
     "design-token": [
       "-3px",
@@ -426,12 +422,12 @@
     "card-stamp-strike-center"
   ],
   "counts": {
-    "font-size": 379,
-    "border-radius": 128,
-    "gap": 234,
-    "padding": 180,
+    "font-size": 293,
+    "border-radius": 102,
+    "gap": 176,
+    "padding": 128,
     "design-token": 37,
-    "custom-property-length": 20,
+    "custom-property-length": 9,
     "js-inline-length": 11
   }
 }

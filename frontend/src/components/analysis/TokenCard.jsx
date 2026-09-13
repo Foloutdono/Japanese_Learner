@@ -3,7 +3,6 @@ import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
 import { MineControls } from './MineControls'
 import { buildCloze } from './useMining'
-import { SpeakButton } from './SpeakButton'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
 // so the "can't mine, not in the app deck" control shows up on exactly
@@ -17,26 +16,20 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // error), and any kanji it contains.
 //
 // Merged from PhraseAnalyzerScreen.jsx's WordCard (list layout) and
-// ReadingRun.jsx's BreakdownWordCard (stepper layout). The two had
-// one real behavioral difference, not just a naming drift: the
-// stepper's card omits the status pills to stay compact in a one-card-
-// at-a-time carousel. `compact` preserves that distinction rather than
-// silently changing either screen's look.
+// ReadingRun.jsx's BreakdownWordCard (the stepper layout, retired in
+// plan 084 with the `compact`/`speakable` variants only it used).
 //
 // `mining` (a useMining(session) instance, see plan 017) is optional --
 // undefined for callers that don't offer it, in which case MineButton
-// renders nothing. ReadingRun.jsx deliberately never passes one.
-// `sentenceText` is the Sentence's own full text -- needed (alongside
-// mining) to build a cloze card; also absent for ReadingRun.jsx.
-// `emphasize` marks the single unknown Token of an i+1 Sentence (see
-// SentenceBreakdown's isUnknownToken) -- that one word is the entire
-// reason the Sentence is worth studying, so its mine control stands out.
-// The analyser's own card on the stage is StageCard.jsx (plan 073);
-// this one is the list and stepper layouts' — reading practice's
-// carousel.
+// renders nothing. `sentenceText` is the Sentence's own full text --
+// needed (alongside mining) to build a cloze card. `emphasize` marks
+// the single unknown Token of an i+1 Sentence (see SentenceBreakdown's
+// isUnknownToken) -- that one word is the entire reason the Sentence
+// is worth studying, so its mine control stands out. The analyser's
+// own card on the stage is StageCard.jsx (plan 073); this one is the
+// list layout's.
 export function TokenCard({
-  word, t, compact = false, extraClassName = '', onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
-  speakable = false,
+  word, t, onWordClick, onKanjiClick, mining, sentenceText, emphasize = false,
 }) {
   const showVocabMine = word.vocab_match || CONTENT_POS.has(word.pos)
 
@@ -68,7 +61,7 @@ export function TokenCard({
 
   return (
     <div
-      className={`card phrase-word-card${extraClassName ? ' ' + extraClassName : ''}${emphasize ? ' phrase-word-card--i-plus-one' : ''}`}
+      className={`card phrase-word-card${emphasize ? ' phrase-word-card--i-plus-one' : ''}`}
     >
       {emphasize && (
         <div className="phrase-word-card__i-plus-one-flag">{t.iPlusOne ?? 'One step beyond you'}</div>
@@ -86,10 +79,7 @@ export function TokenCard({
         ) : (
           <div className="phrase-word-card__surface-wrap">{surfaceContent}</div>
         )}
-        {!compact && word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
-        {speakable && (
-          <SpeakButton text={word.surface} label={t.hearToken(word.surface)} size="sm" t={t} />
-        )}
+        {word.vocab_match && <StatusBadge status={word.vocab_match.stats.status} t={t} />}
         {showVocabMine && (
           <MineControls
             mining={mining}
@@ -126,7 +116,7 @@ export function TokenCard({
                   {k.kanji}
                 </button>
                 <span className="phrase-kanji-chip__level">{k.level}</span>
-                {!compact && <StatusBadge status={k.stats.status} small t={t} />}
+                <StatusBadge status={k.stats.status} small t={t} />
                 <MineButton
                   mining={mining}
                   kind="kanji"

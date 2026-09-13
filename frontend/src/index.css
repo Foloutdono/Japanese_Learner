@@ -6761,8 +6761,8 @@ textarea:focus-visible {
 }
 .wmap-line {
   position: relative;
-  display: grid;
-  grid-template-columns: 150px minmax(0, 1fr) 56px;
+  display: flex;
+  flex-wrap: wrap;
   gap: var(--sp-5);
   align-items: center;
   width: 100%;
@@ -6820,7 +6820,7 @@ textarea:focus-visible {
 .wmap-row:hover .wmap-roundel,  .wmap-row:focus-visible .wmap-roundel,
 .wmap-roundel--sm { width: 24px; height: 24px; }
 
-.wmap-line__id { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; }
+.wmap-line__id { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; flex: 1 1 auto; }
 .wmap-line__names,
 .wmap-row__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
 /* The line's name, in the learner's language (Japanese is content,
@@ -6852,7 +6852,7 @@ textarea:focus-visible {
    its leg is finished. The rail is the line's pigment at rest, the
    travelled portion is it raw, and the marker is it lifted toward
    the panel ink — colour as an edge and a marker, never a fill. */
-.wmap-track { position: relative; height: 30px; }
+.wmap-track { position: relative; height: 30px; flex: 1 1 100%; order: 3; }
 .wmap-track__rail,
 .wmap-track__done {
   position: absolute;
@@ -7033,10 +7033,8 @@ textarea:focus-visible {
    full width — the same fold the 560px query used to hold, moved up
    to where it is actually needed. */
 @media (max-width: 760px) {
-  .wmap-line { display: flex; flex-wrap: wrap; gap: var(--sp-3) var(--sp-4); }
-  .wmap-line__id { flex: 1 1 auto; }
   .wmap-line__due { order: 2; }
-  .wmap-line .wmap-track { flex: 1 1 100%; order: 3; }
+  .wmap-line { flex: 1 1 100%; order: 3; }
   /* 備考 goes with the fold, exactly as it did on the board: the
      destination is what you are scanning for. */
   .wmap-row { grid-template-columns: 30px minmax(0, 1fr) 22px; }
@@ -9542,40 +9540,237 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-3);
   padding: 0 var(--sp-4) var(--sp-4);
 }
-/* ── 一文ずつ — the passage, sentence by sentence (ComprehensionRun) ──
-   Three registers, descending, and the order is the pairing rule's
-   (DESIGN.md): the Japanese sentence is the heading (.prose__jp, the
-   sentence rung), its translation is the caption under it, and the
-   note on how the sentence is built is the quietest of the three —
-   the register the app already gives a model's own words
-   (.prose__ai). The translation at .prose__en's rung was LOUDER than
-   the Japanese it captions, which is the pairing rule read backwards.
+/* ── 解析 — the word-by-word breakdown, as rows (plan 084) ──
+   One shape for every practice mode (SentenceBreakdown's 'rows'
+   layout; the comprehension passage is a list of them,
+   PassageBreakdown). Four registers, descending, and the order is the
+   pairing rule's (DESIGN.md): the Japanese sentence is the heading
+   (the sentence rung, as a ruby line), its translation is the caption
+   under it, the rows are the body, and the note on how the sentence
+   is built is the quietest — the register the app already gives a
+   model's own words (.prose__ai).
 
-   Beyond that this owns only the unit: a sentence, its translation
-   and its note read as ONE thing, and a hairline says where the next
-   one starts. No heading and no numbering — the order is the text's
-   own. */
-.cbd {
+   The line is the analyzer's own convention (.tok-line): the reading
+   over each kanji, the SRS as a 2px rule under the word in the
+   state's ink, never an ink change on the word. A deck word is a
+   door, and its hover is the line pigment on that rule. */
+.bkd {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-6);
+  gap: var(--sp-4);
   width: 100%;
+  text-align: left;
 }
-.cbd__item {
+.bkd-line {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-2);
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.9;
 }
-.cbd__item + .cbd__item {
-  border-top: 1px solid var(--border);
-  padding-top: var(--sp-6);
+.bkd-tok {
+  --tok: transparent;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-bottom: 2px solid var(--tok);
+  border-radius: var(--r-flat);
+  background: none;
+  font: inherit;
+  color: var(--text-primary);
+  text-align: left;
 }
-.cbd__en {
+.bkd-tok--mastered { --tok: var(--state-mastered); }
+.bkd-tok--learning { --tok: var(--state-learning); }
+.bkd-tok--unknown { --tok: var(--state-new); }
+.bkd-tok--offdeck { border-bottom: 2px dashed var(--text-secondary); }
+.bkd-tok--particle { color: var(--text-secondary); }
+.bkd-tok--door { cursor: pointer; }
+.bkd-tok--door:hover,
+.bkd-tok--door:focus-visible { border-bottom-color: var(--line-color, var(--accent)); }
+.bkd-line rt,
+.bkd-row__word rt {
+  font-size: var(--fs-caption-xs);
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.bkd__en {
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 500;
   line-height: 1.5;
 }
+/* The rows: word | reading | meaning | level, one line each where the
+   column is wide enough, and on a phone the meaning drops under the
+   word so a long gloss wraps in the room the word left rather than
+   squeezing beside it. A hairline between rows, never a card each. */
+.bkd-rows {
+  display: flex;
+  flex-direction: column;
+}
+.bkd-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas:
+    "word reading lvl"
+    "meaning meaning lvl";
+  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--surface-line);
+}
+.bkd-row:first-child { border-top: 0; }
+.bkd-row__word {
+  grid-area: word;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.5;
+}
+.bkd-row__reading {
+  grid-area: reading;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.bkd-row__meaning {
+  grid-area: meaning;
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.bkd-row__lvl {
+  grid-area: lvl;
+  align-self: center;
+}
+@media (min-width: 768px) {
+  .bkd-row {
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "word reading meaning lvl";
+  }
+}
+/* The passage: the sentences stacked, a hairline between them, the
+   open one marked by the line's rail on its left edge. The head is a
+   row (the open line holds word buttons); the chevron is the control. */
+.bkd-passage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.bkd-passage__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  padding: var(--sp-4) 0;
+}
+.bkd-passage__item + .bkd-passage__item { border-top: 1px solid var(--border); }
+.bkd-passage__item--open {
+  padding-left: var(--sp-3);
+  box-shadow: inset 3px 0 0 var(--line-color, var(--accent));
+}
+.bkd-passage__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-3);
+}
+.bkd-passage__head--door { cursor: pointer; }
+.bkd-passage__text {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.bkd-passage__chev {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--text-secondary);
+}
+.bkd-passage__chev:hover,
+.bkd-passage__chev:focus-visible { color: var(--text-primary); }
+.bkd-passage__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+}
+/* ── 翻訳 — the tutor's review of an attempt (TranslationRun) ──
+   One verdict, one line, then the good and the bad as rows a learner
+   can tell apart at a glance: a mark in the state's pigment, the item
+   in the body register, the fix under it in the quiet one. The
+   paragraph this replaces said all of it, in one breath, in the same
+   colour. */
+.rvw {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.rvw__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+}
+.rvw__summary {
+  font-size: var(--fs-body);
+  line-height: 1.5;
+}
+.rvw__list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+}
+.rvw__row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+}
+.rvw__mark {
+  --mark: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--r-pill);
+  color: var(--mark);
+  border: 1px solid color-mix(in srgb, var(--mark) 55%, transparent);
+}
+.rvw__mark--ok { --mark: color-mix(in srgb, var(--success) 60%, var(--text-primary)); }
+.rvw__mark--x { --mark: color-mix(in srgb, var(--danger) 60%, var(--text-primary)); }
+.rvw__item {
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+.rvw__fix {
+  grid-column: 2;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+  color: var(--text-secondary);
+}
+.rvw__better {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+  line-height: 1.6;
+}
+.rvw__verdict--correct { --badge-color: var(--success); }
+.rvw__verdict--acceptable { --badge-color: var(--success); }
+.rvw__verdict--partial { --badge-color: var(--warning); }
+.rvw__verdict--incorrect { --badge-color: var(--danger); }
 /* Two actions side by side, the filled one forward: equal columns,
    as the browse foot's pair is drawn (a flex split keeps the two
    buttons' border difference). On the stage's foot (a flex column)
@@ -10202,20 +10397,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    for the same reason documented there: an auto inline margin on a
    flex item suppresses stretch, so without it this shrink-wraps.
 
-   The two exclusions are named rather than pattern-matched because
-   CardTransition appends a caller's className to this one, and two
-   callers pass a stage that is deliberately NOT the study-card
+   The exclusion is named rather than pattern-matched because
+   CardTransition appends a caller's className to this one, and one
+   caller passes a stage that is deliberately NOT the study-card
    column: .exam-card-stage (its card sets its own --card-w and is
-   already centred by .container) and .rdg-breakdown-card-stage (a
-   380px flex item inside a 480px row -- an auto inline margin there
-   would push the sentence breakdown's prev/next arrows back out to
-   the row's edges, the exact regression the comment on
-   .rdg-breakdown-card-row records fixing). Those two keep the bare
-   `position: relative` they already had. */
+   already centred by .container). It keeps the bare `position:
+   relative` it already had. (Reading practice's carousel stage was
+   the second exclusion until plan 084 retired the carousel.) */
 .quiz-card-stage {
   position: relative;
 }
-.quiz-card-stage:not(.exam-card-stage, .rdg-breakdown-card-stage) {
+.quiz-card-stage:not(.exam-card-stage) {
   width: 100%;
   max-width: var(--card-w);
   margin-inline: auto;
@@ -13413,8 +13605,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    conversion buys. */
 .word-span,
 .phrase-word-card__surface-wrap,
-.phrase-kanji-chip__char,
-.rdg-breakdown-line__word {
+.phrase-kanji-chip__char {
   background: none;
   border: none;
   padding: 0;
@@ -13452,30 +13643,37 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 600;
 }
 
-.analysis-grammar-chips { margin: 10px 0; }
-.analysis-grammar-chips__label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
+/* The grammar chips (GrammarChips.jsx): the pattern and its level as
+   a hairline pill, the caption over the row where one is asked for.
+   Re-cut on the tokens in plan 084; the list layout's status pill and
+   deck action still sit inside the same pill. */
+.analysis-grammar-chips {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
 }
 .analysis-grammar-chips__row {
   display: flex;
-  gap: 8px;
+  gap: var(--sp-2);
   flex-wrap: wrap;
 }
 .analysis-grammar-chip {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 4px 10px;
-  font-size: 13px;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
 }
-.analysis-grammar-chip__pattern { font-family: var(--font-jp); }
+.analysis-grammar-chip__pattern {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+}
 .analysis-grammar-chip__level {
-  font-size: 11px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
   color: var(--text-secondary);
 }
 
@@ -13756,95 +13954,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 
-/* AI breakdown panel (see ReadingScreen.jsx's AnalysisBreakdown) —
-   layered on top of .phrase-line/.phrase-word-card/.phrase-explanation
-   (the phrase-analyzer screen's own classes) so the two screens read
-   as the same feature rather than two different UIs. Shown one
-   word/kanji card at a time with prev/next arrows, instead of a
-   scrolling list — the overview line above doubles as a jump-to-word
-   index. */
-.rdg-breakdown-wrap { margin-top: 18px; text-align: left; }
-.rdg-breakdown-toggle {
-  display: block;
-  margin: 0 auto;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 18px;
-  font-size: 14px;
-  transition: background 0.15s ease;
-}
-.rdg-breakdown-toggle:not(:disabled):hover { background: var(--border); }
-.rdg-breakdown-toggle:disabled { opacity: 0.6; cursor: default; }
-
-.rdg-breakdown { margin-top: 14px; }
-
-.rdg-breakdown-line { justify-content: center; margin-bottom: 12px; gap: 4px 10px; }
+/* The level badge and the speak button on one row (the list layout's
+   .rdg-breakdown-badges). The one-card-at-a-time carousel this class
+   family drew for reading practice was retired in plan 084 -- the
+   practice modes draw .bkd rows now -- and this is the rule the list
+   layout still reads. */
 .rdg-breakdown-badges { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.rdg-breakdown-line__word {
-  cursor: pointer;
-  border-radius: 6px;
-  padding: 2px 5px;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-.rdg-breakdown-line__word:hover { background: var(--bg-panel);  color: var(--text-on-panel);}
-.rdg-breakdown-line__word:active { transform: scale(0.95); }
-.rdg-breakdown-line__word--active {
-  background: var(--bg-panel);
-  box-shadow: inset 0 -2px 0 var(--word-color, var(--accent));
-  font-weight: 700;
-  color: var(--text-on-panel);
-}
-
-.rdg-breakdown-explanation { text-align: center; margin-bottom: 16px; }
-
-.rdg-breakdown-card-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-}
-.rdg-breakdown-card-stage { flex: 0 1 380px; min-width: 0; }
-.rdg-breakdown-card { text-align: left; }
-
-/* Fix: the arrows used to sit at the far edges of the whole panel
-   (flex:1 on the card stage pushed them apart) instead of reading as a
-   pair framing the card. Now the row itself is width-capped and
-   centered, so the buttons sit close to the card and stay vertically
-   centered against it regardless of how many lines the card wraps to. */
-.rdg-breakdown-nav {
-  flex-shrink: 0;
-  align-self: center;
-  width: 40px;
-  height: 40px;
-  padding: 0; /* the global `button` rule's 10px 20px padding, combined
-                 with border-box sizing, was eating the entire content
-                 box at this fixed 40px size — squeezing/off-centering
-                 whatever sat inside. Icon needs the full box. */
-  border-radius: 50%;
-  background: var(--bg-panel);
-  color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
-}
-.rdg-breakdown-nav:not(:disabled):hover { background: var(--border); border-color: var(--accent); }
-.rdg-breakdown-nav:not(:disabled):active { transform: scale(0.92); }
-.rdg-breakdown-nav:disabled { opacity: 0.3; cursor: default; }
-
-.rdg-breakdown-counter {
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-secondary);
-  margin-top: 10px;
-}
 
 
 /* .trn-feedback-card carries no styles of its own — it exists purely
@@ -15021,11 +15136,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     flex: 1;
     overflow: hidden; /* prevent scrolling */
   }
-
-  .rdg-breakdown-card-stage { max-width: 100%; }
-  .rdg-breakdown-nav { width: 34px; height: 34px; }
-  .rdg-breakdown-nav svg { width: 16px; height: 16px; }
-
 }
 
 /* ── 筆 — the brush ───────────────────────────────────────────

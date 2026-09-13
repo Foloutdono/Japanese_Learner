@@ -35,6 +35,8 @@ logger = logging.getLogger(__name__)
 # particles and auxiliaries are grammar scaffolding, not vocabulary a
 # learner is expected to have "learned" as a card.
 _CONTENT_POS = frozenset({"noun", "verb", "adjective", "adverb"})
+# The public name, for study/level_mix.py -- one definition, not three.
+CONTENT_POS = _CONTENT_POS
 
 
 def _grammar_entries(sentence: str) -> list[dict]:
@@ -199,6 +201,17 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
     word (e.g. two occurrences of は) binds to occurrences in order
     rather than every occurrence binding to the first match.
 
+    A word may bind to a RUN of consecutive Tokens whose surfaces
+    concatenate to it. A model cuts words the way a dictionary does
+    (会いました) where the tokenizer cuts morphemes (会い / まし / た),
+    and matching exact surfaces alone dropped the gloss of every
+    conjugated verb and adjective -- the words a learner most needs
+    glossed. The run's first Token carries the meaning and a `span_end`
+    (the index of the run's last Token) so a renderer can show the run
+    as the one word it is; the segmentation itself is still the
+    tokenizer's, and every other field on every Token in the run is
+    untouched.
+
     Returns a NEW dict; does not mutate `analysis` -- the local analysis
     is cacheable and may be shared with a caller that never buys the
     deep tier.
@@ -210,16 +223,17 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
     for word in llm_words:
         surface = word.get("surface", "")
         meaning = word.get("meaning")
-        matched = False
-        for i, tok in enumerate(tokens):
-            if not used[i] and tok["surface"] == surface:
-                if meaning:
-                    tok["meaning"] = meaning
-                used[i] = True
-                matched = True
-                break
-        if not matched:
+        span = _find_run(tokens, used, surface) if surface else None
+        if span is None:
             dropped += 1
+            continue
+        start, end = span
+        if meaning:
+            tokens[start]["meaning"] = meaning
+        if end > start:
+            tokens[start]["span_end"] = end
+        for i in range(start, end + 1):
+            used[i] = True
 
     return {
         **analysis,
@@ -227,3 +241,30 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
         "explanation": explanation,
         "deep_dropped": dropped,
     }
+
+
+def _find_run(tokens: list[dict], used: list[bool], surface: str) -> tuple[int, int] | None:
+    """(start, end) of the first unused run of Tokens whose surfaces
+    concatenate to `surface`, or None. Forward, first match wins, so
+    repeated words bind in order."""
+    for start in range(len(tokens)):
+        if used[start]:
+            continue
+        built = ""
+        for end in range(start, len(tokens)):
+            if used[end]:
+                break
+            built += tokens[end]["surface"]
+            if built == surface:
+                return start, end
+            if not surface.startswith(built):
+                break
+    return None
+
+
+def analyze_with_glosses(text: str, words: list[dict] | None, level: str | None = None) -> dict:
+    """analyze_local(text, level) with a model's per-word glosses folded
+    on, and no prose explanation. Pure, like both halves: the reading
+    comprehension generator has the glosses in hand from the same call
+    that wrote the text, so no second model call is bought for them."""
+    return merge_deep(analyze_local(text, level), words or [], "")

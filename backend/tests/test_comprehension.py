@@ -19,22 +19,60 @@
 #      than a preference (see COMPREHENSION_CHARS, and the touch-lane
 #      test named there).
 #
+# And a fourth, on 2026-09-13 (plan 084): the model proposes and the
+# code decides. The text is written around grammar points and words of
+# the level, measured afterwards (study/level_mix), and asked for again
+# with the failure fed back — see "Asked again, and told why" below.
+#
 # No database and no model: _call_llm_comprehension is exercised with
 # its one network call stubbed, which is the only part of it that is
-# not pure.
+# not pure. The endpoint, which needs the SRS, is test_comprehension_log.py.
 
 import json
+import random
 
 import pytest
 from fastapi import HTTPException
 
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
 from routes import reading
+
+# All-N5 on every gate — kanji, vocabulary, grammar — and it uses the
+# N5 point 〜ました. The sentence it replaced (駅で友達を待ちました。
+# 電車は遅れました。) fails two of the gates it never used to meet:
+# 達/待/遅 are outside N5's kanji, and 遅れ is filed above it.
+SENTENCE_1 = "駅で友だちに会いました。"
+SENTENCE_2 = "電車は新しいです。"
+TEXT = SENTENCE_1 + SENTENCE_2
+
+WORDS_1 = [
+    {"surface": "駅", "meaning": "station"},
+    {"surface": "で", "meaning": "at (place of action)"},
+    {"surface": "友だち", "meaning": "friend"},
+    {"surface": "に", "meaning": "marks who was met"},
+    {"surface": "会いました", "meaning": "met"},
+]
+WORDS_2 = [
+    {"surface": "電車", "meaning": "train"},
+    {"surface": "は", "meaning": "topic marker"},
+    {"surface": "新しい", "meaning": "new"},
+    {"surface": "です", "meaning": "polite copula"},
+]
+
+
+def _point(pattern: str) -> dict:
+    return next(p for p in GRAMMAR_POINTS_BY_LEVEL["N5"] if p["pattern"] == pattern)
+
+
+MASHITA = _point("〜ました／〜ませんでした")   # in TEXT
+KUDASAI = _point("〜てください")              # not in TEXT
+TAI = _point("〜たいです")                    # not in TEXT
 
 
 def _reply(**over):
     """A well-formed model answer, as the JSON string _chat returns."""
     body = {
-        "text": "駅で友達を待ちました。電車は遅れました。",
+        "text": TEXT,
         "questions": [
             {
                 "type": "comprehension",
@@ -45,9 +83,9 @@ def _reply(**over):
             for i in range(8)
         ],
         "breakdown": [
-            {"jp": "駅で友達を待ちました。", "translation": "I waited for a friend at the station.",
-             "note": "で marks where an action happens."},
-            {"jp": "電車は遅れました。", "translation": "The train was late.", "note": ""},
+            {"jp": SENTENCE_1, "translation": "I met a friend at the station.",
+             "note": "に marks who was met.", "words": WORDS_1},
+            {"jp": SENTENCE_2, "translation": "The train is new.", "note": "", "words": WORDS_2},
         ],
     }
     body.update(over)
@@ -61,11 +99,16 @@ def _reply(**over):
 @pytest.fixture
 def answered(monkeypatch):
     """Point the generator's network call at canned replies — one per
-    attempt, in order, so a retry can be watched. Returns the list the
-    messages sent are recorded in."""
+    attempt, in order, so a retry can be watched — and pin the seeds,
+    so a test finds exactly the points it meant to. Returns the list
+    the messages sent are recorded in.
+
+    The seeds default to NONE: an empty list can never be missing from
+    a text, so every test that is not about the seeds keeps its call
+    count regardless of what the fixture text happens to contain."""
     calls = []
 
-    def use(*replies):
+    def use(*replies, grammar=(), words=()):
         queue = list(replies)
 
         def chat(messages, *a, **kw):
@@ -74,8 +117,14 @@ def answered(monkeypatch):
 
         monkeypatch.setattr(reading, "llm_configured", lambda: True)
         monkeypatch.setattr(reading, "_chat", chat)
+        monkeypatch.setattr(reading, "_pick_grammar_seeds", lambda *a, **kw: list(grammar))
+        monkeypatch.setattr(reading, "_pick_word_seeds", lambda *a, **kw: list(words))
         return calls
     return use
+
+
+def _prompt(calls, i=0) -> str:
+    return calls[i][0]["content"]
 
 
 # ── The paper ────────────────────────────────────────────────────────
@@ -134,7 +183,7 @@ def test_the_prompt_carries_this_level_s_difficulty_and_the_one_length(answered,
     calls = answered(_reply())
     reading._call_llm_comprehension(level, "en")
 
-    sent = calls[0][0]["content"]
+    sent = _prompt(calls)
     floor, ceiling = reading.COMPREHENSION_CHARS
     # Both ends and the target between them, whatever sentence they are
     # currently phrased in.
@@ -146,17 +195,185 @@ def test_the_prompt_carries_this_level_s_difficulty_and_the_one_length(answered,
     assert reading.DIFFICULTY_BY_LEVEL[other] not in sent
 
 
+def test_length_outside_the_band_is_feedback_not_a_gate(answered):
+    """The fixture is 20 characters against a 220 floor. A text the
+    wrong length is told so on its next attempt, if there is one, and
+    is never the reason for one: the paper still works, and the
+    learner has waited long enough."""
+    calls = answered(_reply())
+    data = reading._call_llm_comprehension("N5", "en")
+    assert len(calls) == 1
+    assert data["text"] == TEXT
+
+
+# ── The seeds ────────────────────────────────────────────────────────
+
+def test_the_prompt_carries_the_grammar_seeds_and_the_words(answered):
+    words = [
+        {"kanji": "電車", "kana": "でんしゃ", "meaning": "train"},
+        {"kanji": "", "kana": "バス/ばす", "meaning": "bus"},
+    ]
+    calls = answered(_reply(), grammar=[MASHITA, KUDASAI, TAI], words=words)
+    reading._call_llm_comprehension("N5", "en")
+
+    sent = _prompt(calls)
+    for point in (MASHITA, KUDASAI, TAI):
+        assert point["pattern"] in sent
+        assert point["structure"] in sent
+        assert point["meaning"] in sent
+    assert "電車 (でんしゃ)" in sent
+    # A kana-only entry shows its first reading as the word.
+    assert "バス (バス)" in sent
+    assert "REJECTED" not in sent
+
+
+def test_seeds_are_drawn_from_the_level_s_checkable_points():
+    rng = random.Random(7)
+    seeds = reading._pick_grammar_seeds("N5", rng)
+    assert len(seeds) == reading._GRAMMAR_SEEDS
+    pool = reading._grammar_pool("N5")
+    assert all(s in pool for s in seeds)
+    # A bare particle cannot be asked for: finding 「は」 proves nothing.
+    assert not any(s["pattern"] in ("は", "が", "を") for s in pool)
+    assert len(reading._pick_word_seeds("N5", rng)) == reading._WORD_SEEDS
+
+
+def test_seeds_keep_clear_of_the_learner_s_recent_points():
+    pool = reading._grammar_pool("N5")
+    wanted = {p["pattern"] for p in pool[:3]}
+    avoid = {p["pattern"] for p in pool} - wanted
+    seeds = reading._pick_grammar_seeds("N5", random.Random(1), avoid)
+    assert {s["pattern"] for s in seeds} == wanted
+    # When the learner has seen everything, the pool is the pool.
+    seeds = reading._pick_grammar_seeds("N5", random.Random(1), {p["pattern"] for p in pool})
+    assert len(seeds) == reading._GRAMMAR_SEEDS
+
+
+def test_a_seed_the_text_does_not_use_is_asked_for_again(answered):
+    calls = answered(_reply(), grammar=[KUDASAI])
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert len(calls) == reading._COMPREHENSION_ATTEMPTS
+    assert "REJECTED" in _prompt(calls, 1)
+    assert "〜てください" in _prompt(calls, 1)
+    # Never claimed: the code decides what the text contains.
+    assert data["grammar_points"] == []
+
+
+def test_grammar_points_claims_only_what_was_found(answered):
+    answered(_reply(), grammar=[MASHITA, KUDASAI])
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert [p["pattern"] for p in data["grammar_points"]] == ["〜ました／〜ませんでした"]
+    found = data["grammar_points"][0]
+    assert found["level"] == "N5"
+    assert found["raw_id"] == grammar_to_id(MASHITA, "N5")
+    assert found["meaning"] == MASHITA["meaning"]
+
+
+# ── Asked again, and told why ────────────────────────────────────────
+
+def test_a_breakdown_that_does_not_reproduce_the_text_is_asked_again(answered):
+    drifting = _reply(text=TEXT + "駅は大きいです。")
+    calls = answered(drifting, _reply())
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert len(calls) == 2
+    assert "REJECTED" in _prompt(calls, 1)
+    assert "does not reproduce" in _prompt(calls, 1)
+    assert data["text"] == TEXT
+
+
+def test_a_drifting_breakdown_is_repaired_on_the_last_attempt(answered):
+    """The breakdown is what the learner opens, and every sentence of
+    it is analysed as written: when the model will not make the two
+    agree, the breakdown wins."""
+    calls = answered(_reply(text=TEXT + "駅は大きいです。"))
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert len(calls) == reading._COMPREHENSION_ATTEMPTS
+    assert data["text"] == TEXT
+
+
+HARD = "人生は長いです。"      # 人生 is filed at N3, in N5 kanji
+
+
+def _hard_reply():
+    return _reply(text=SENTENCE_1 + HARD, breakdown=[
+        {"jp": SENTENCE_1, "translation": "I met a friend at the station.", "note": "", "words": WORDS_1},
+        {"jp": HARD, "translation": "Life is long.", "note": "", "words": []},
+    ])
+
+
+def test_vocabulary_above_the_level_is_asked_again_and_named(answered):
+    calls = answered(_hard_reply(), _reply())
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert len(calls) == 2
+    assert "REJECTED" in _prompt(calls, 1)
+    assert "人生" in _prompt(calls, 1) and "N3" in _prompt(calls, 1)
+    assert data["text"] == TEXT
+
+
+def test_vocabulary_above_the_level_costs_the_exercise_after_the_last_attempt(answered):
+    """The one hard gate. A text the learner cannot read is worse than
+    no text, and the screen's retry is one press away."""
+    calls = answered(_hard_reply())
+    with pytest.raises(HTTPException) as caught:
+        reading._call_llm_comprehension("N5", "en")
+
+    assert caught.value.status_code == 502
+    assert "too hard" in caught.value.detail
+    assert len(calls) == reading._COMPREHENSION_ATTEMPTS
+
+
+def test_out_of_level_kanji_alone_is_softened_not_asked_again(answered):
+    """達 is outside N5. A kanji the learner has not met is rewritten in
+    kana — what a real N5 text does — with the text, the breakdown and
+    the word list kept in step; it never costs a second call."""
+    with_tatsu = SENTENCE_1.replace("友だち", "友達")
+    words = [dict(w, surface="友達") if w["surface"] == "友だち" else w for w in WORDS_1]
+    calls = answered(_reply(text=with_tatsu + SENTENCE_2, breakdown=[
+        {"jp": with_tatsu, "translation": "I met a friend at the station.", "note": "", "words": words},
+        {"jp": SENTENCE_2, "translation": "The train is new.", "note": "", "words": WORDS_2},
+    ]))
+    data = reading._call_llm_comprehension("N5", "en")
+
+    assert len(calls) == 1
+    assert data["text"] == "駅でともだちに会いました。" + SENTENCE_2
+    assert data["breakdown"][0]["jp"] == "駅でともだちに会いました。"
+    assert {"surface": "ともだち", "meaning": "friend"} in data["breakdown"][0]["words"]
+
+
+def test_kanji_feedback_rides_along_when_something_else_is_asked_again(answered):
+    with_tatsu = SENTENCE_1.replace("友だち", "友達")
+    calls = answered(_reply(text=with_tatsu + SENTENCE_2, breakdown=[
+        {"jp": with_tatsu, "translation": "", "note": "", "words": []},
+        {"jp": SENTENCE_2, "translation": "", "note": "", "words": []},
+    ]), _reply(), grammar=[KUDASAI])
+    reading._call_llm_comprehension("N5", "en")
+
+    # The seed is what sends the prompt back (and keeps sending it: the
+    # second reply lacks it too); the kanji line rides on the first
+    # feedback because it was there to say.
+    assert len(calls) == reading._COMPREHENSION_ATTEMPTS
+    assert "kanji above N5: 達" in _prompt(calls, 1)
+    assert "kanji above" not in _prompt(calls, 2)
+
+
 # ── The breakdown ────────────────────────────────────────────────────
 
 def test_breakdown_survives_the_round_trip_in_order(answered):
     answered(_reply())
     data = reading._call_llm_comprehension("N5", "en")
 
-    assert [p["jp"] for p in data["breakdown"]] == ["駅で友達を待ちました。", "電車は遅れました。"]
-    assert data["breakdown"][0]["note"].startswith("で marks")
+    assert [p["jp"] for p in data["breakdown"]] == [SENTENCE_1, SENTENCE_2]
+    assert data["breakdown"][0]["note"].startswith("に marks")
     # A sentence with nothing worth noting keeps its blank rather than
     # being dropped — the Japanese is still part of the passage.
     assert data["breakdown"][1]["note"] == ""
+    # And the word list rides with its sentence.
+    assert data["breakdown"][0]["words"] == WORDS_1
 
 
 def test_translation_is_the_breakdown_read_end_to_end(answered):
@@ -164,7 +381,7 @@ def test_translation_is_the_breakdown_read_end_to_end(answered):
     data = reading._call_llm_comprehension("N5", "en")
 
     assert data["translation"] == (
-        "I waited for a friend at the station. The train was late."
+        "I met a friend at the station. The train is new."
     )
 
 
@@ -185,16 +402,21 @@ def test_an_empty_breakdown_is_a_bad_gateway(answered):
 @pytest.mark.parametrize("raw,expected", [
     (None, []),
     ("not a list", []),
-    ([{"jp": "駅。"}], [{"jp": "駅。", "translation": "", "note": ""}]),
+    ([{"jp": "駅。"}], [{"jp": "駅。", "translation": "", "note": "", "words": []}]),
     # A model that answers a text field with something that is not text
     # is answering badly, not fatally: the line prints without it.
-    ([{"jp": "駅。", "translation": 42, "note": ["a"]}],
-     [{"jp": "駅。", "translation": "", "note": ""}]),
+    ([{"jp": "駅。", "translation": 42, "note": ["a"], "words": "駅"}],
+     [{"jp": "駅。", "translation": "", "note": "", "words": []}]),
     # Nothing to show a sentence against — dropped, order kept.
     ([{"translation": "orphan"}, {"jp": "駅。", "translation": "Station."}],
-     [{"jp": "駅。", "translation": "Station.", "note": ""}]),
+     [{"jp": "駅。", "translation": "Station.", "note": "", "words": []}]),
     ([{"jp": "  駅。  ", "translation": "  Station.  ", "note": ""}],
-     [{"jp": "駅。", "translation": "Station.", "note": ""}]),
+     [{"jp": "駅。", "translation": "Station.", "note": "", "words": []}]),
+    # A word without a surface is nothing to gloss; a word without a
+    # meaning is still a word.
+    ([{"jp": "駅。", "words": [{"meaning": "x"}, {"surface": " 駅 "}, 7, {"surface": "。", "meaning": 3}]}],
+     [{"jp": "駅。", "translation": "", "note": "",
+       "words": [{"surface": "駅", "meaning": ""}, {"surface": "。", "meaning": ""}]}]),
 ])
 def test_clean_breakdown(raw, expected):
     assert reading._clean_breakdown(raw) == expected
@@ -209,8 +431,8 @@ def test_clean_breakdown(raw, expected):
 
 # The same shape in an otherwise perfect answer. The closing quote is
 # there — that is what makes it repairable.
-BAD_NOTE = '"note": 「で」 marks where an action happens."'
-GOOD_NOTE = '"note": "で marks where an action happens."'
+BAD_NOTE = '"note": 「に」 marks who was met."'
+GOOD_NOTE = '"note": "に marks who was met."'
 
 # And a wreck no repair can reach: nothing closes the value either.
 BEYOND_REPAIR = (
@@ -231,7 +453,19 @@ def test_a_value_that_opened_on_the_wrong_quote_is_repaired(answered):
     data = reading._call_llm_comprehension("N5", "en")
 
     assert len(calls) == 1
-    assert data["breakdown"][0]["note"] == "「で」 marks where an action happens."
+    assert data["breakdown"][0]["note"] == "「に」 marks who was met."
+
+
+def test_a_word_that_opened_on_the_wrong_quote_is_repaired_too(answered):
+    """The word lists open the same door: a surface IS Japanese."""
+    reply = _reply()
+    good = '"surface": "駅"'
+    assert good in reply
+    calls = answered(reply.replace(good, '"surface": 駅"', 1))
+
+    data = reading._call_llm_comprehension("N5", "en")
+    assert len(calls) == 1
+    assert data["breakdown"][0]["words"][0] == {"surface": "駅", "meaning": "station"}
 
 
 def test_repair_is_never_applied_to_an_answer_that_parses(answered):
@@ -240,7 +474,8 @@ def test_repair_is_never_applied_to_an_answer_that_parses(answered):
     notice if that ever stopped being true."""
     quoted = 'She asked "note": what time is it, and left.'
     answered(_reply(breakdown=[
-        {"jp": "駅で友達を待ちました。", "translation": quoted, "note": ""},
+        {"jp": SENTENCE_1, "translation": quoted, "note": ""},
+        {"jp": SENTENCE_2, "translation": "The train is new.", "note": ""},
     ]))
 
     data = reading._call_llm_comprehension("N5", "en")

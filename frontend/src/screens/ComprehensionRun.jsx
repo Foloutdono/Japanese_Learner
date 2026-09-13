@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -7,6 +7,9 @@ import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import PromptCard from '../components/study/PromptCard'
 import { QuestionTypeBadge } from '../components/study/QuizComponents'
+import { PassageBreakdown } from '../components/analysis/PassageBreakdown'
+import { GrammarChips } from '../components/analysis/GrammarChips'
+import { WordDetail } from '../components/analysis/WordDetail'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
@@ -53,6 +56,14 @@ export default function ComprehensionRun({ session }) {
   const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
   const [results, setResults]   = useState(null)   // final { score, total, results[] }
   const [showBreakdown, setShowBreakdown] = useState(false)
+  // Which sentence of the breakdown is open on its rows (plan 084).
+  // The first, to begin with: the learner pressed "Show breakdown",
+  // and a list of closed sentences would be the old list with one
+  // more tap in front of it.
+  const [openIndex, setOpenIndex] = useState(0)
+  // The word the learner tapped in a sentence, as a bottom sheet.
+  const [detail, setDetail]     = useState(null)
+  const closeDetail = useCallback(() => setDetail(null), [])
   const [openRow, setOpenRow]   = useState(null)   // which result row is opened on its question
   const [error, setError]       = useState(null)
 
@@ -63,6 +74,8 @@ export default function ComprehensionRun({ session }) {
     setError(null)
     setRereading(false)
     setShowBreakdown(false)
+    setOpenIndex(0)
+    setDetail(null)
     setOpenRow(null)
     setPicked(null)
 
@@ -121,6 +134,18 @@ export default function ComprehensionRun({ session }) {
     setStage('reading')
   }
 
+  // The sheet wants {title, level, entry, stats}, which is the shape
+  // the breakdown's own words carry. Mirrors ReadingRun's.
+  function openWordDetail(word) {
+    if (!word.vocab_match) return
+    setDetail({
+      title: word.surface,
+      entry: word.vocab_match.entry,
+      stats: word.vocab_match.stats,
+      level: word.vocab_match.level,
+    })
+  }
+
   // Next commits the pick (the canvas: choose a row, then Next) and
   // submits on the last question.
   function commitAnswer() {
@@ -146,7 +171,18 @@ export default function ComprehensionRun({ session }) {
         level,
         text: exercise.text,
         translation: exercise.translation,
-        breakdown: exercise.breakdown,
+        // Without each sentence's analysis: a dozen token lists with
+        // deck entries and SRS stats is not a payload to post over 4G
+        // to be dropped (reading.py accepts the breakdown and stores
+        // nothing of it).
+        breakdown: exercise.breakdown?.map(part => {
+          const copy = { ...part }
+          delete copy.analysis
+          return copy
+        }),
+        // The points the text was written around, so the next
+        // exercise can keep clear of them.
+        grammar_points: (exercise.grammar_points ?? []).map(g => g.pattern),
         questions: exercise.questions,
         answers: finalAnswers,
       }),
@@ -194,7 +230,7 @@ export default function ComprehensionRun({ session }) {
   // open: the whole text over its whole translation, as one entry.
   const breakdown = exercise?.breakdown?.length
     ? exercise.breakdown
-    : [{ jp: exercise?.text ?? '', translation: exercise?.translation ?? '', note: '' }]
+    : [{ jp: exercise?.text ?? '', translation: exercise?.translation ?? '', note: '', analysis: null }]
 
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
@@ -370,26 +406,29 @@ export default function ComprehensionRun({ session }) {
             })}
           </div>
 
-          {/* 一文ずつ — the text again, one sentence at a time, each
-              with its translation and a line on what it is built from
-              (reading.py's breakdown). This is where the passage is
-              finally read in the learner's own language, and it is
-              the whole text: every sentence, in order, so the card is
-              the original too. */}
+          {/* 一文ずつ — the text again, sentence by sentence, each over
+              its translation, and one at a time open on its words, its
+              grammar and a line on what it is built from (reading.py's
+              breakdown, analysed). This is where the passage is finally
+              read in the learner's own language, and it is the whole
+              text: every sentence, in order, so the card is the
+              original too. Over it, the grammar points the text was
+              written around (plan 084). */}
           <button type="button" className="btn-secondary" onClick={() => setShowBreakdown(s => !s)} aria-expanded={showBreakdown}>
             {showBreakdown ? t.hideBreakdown : t.showBreakdown}
           </button>
           {showBreakdown && (
             <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
-              <div className="cbd">
-                {breakdown.map((part, i) => (
-                  <div key={i} className="cbd__item">
-                    <span className="prose__jp" lang="ja">{part.jp}</span>
-                    {part.translation && <span className="cbd__en">{part.translation}</span>}
-                    {part.note && <span className="prose__ai">{part.note}</span>}
-                  </div>
-                ))}
-              </div>
+              {exercise?.grammar_points?.length > 0 && (
+                <GrammarChips grammar={exercise.grammar_points} t={t} quiet label={t.grammarInText} />
+              )}
+              <PassageBreakdown
+                sentences={breakdown}
+                t={t}
+                openIndex={openIndex}
+                setOpenIndex={setOpenIndex}
+                onTokenClick={openWordDetail}
+              />
             </PromptCard>
           )}
 
@@ -403,6 +442,8 @@ export default function ComprehensionRun({ session }) {
           </div>
         </>
       )}
+
+      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
     </StudyStage>
   )
 }

@@ -909,8 +909,12 @@ const reading = {
   // reading practice's own long prefetch window hides. 読解 shows it
   // too, for the slow or retrying call its prefetch does not outrun.
   breakdownUnavailable: 'Breakdown unavailable',
-  previousWord:         'Previous word',
-  nextWord:             'Next word',
+  // The comprehension passage, sentence by sentence (PassageBreakdown):
+  // the chevron's name, and the caption over the points the text was
+  // written around.
+  openSentence:         'Open this sentence',
+  closeSentence:        'Close this sentence',
+  grammarInText:        'Grammar in this text',
   jumpToTokenNamed:      s => `Go to ${s}`,
   detailsForToken:       s => `Details for ${s}`,
   detailsForKanji:       k => `Details for the kanji ${k}`,
@@ -943,6 +947,16 @@ const translationMode = {
   translationFetchError: "Couldn't load a phrase. Try again.",
   japanesePlaceholder:   'Write it in Japanese…',
   aiAnalysis:            'AI analysis',
+  // The tutor's review as a shape, not a paragraph (routes/translation.py).
+  reviewCorrect:         'Correct',
+  reviewAcceptable:      'Acceptable',
+  reviewPartial:         'Partly right',
+  reviewIncorrect:       'Not right',
+  reviewGood:            'What worked',
+  reviewFix:             'To fix',
+  reviewBetter:          'Corrected',
+  reviewGrammarUsed:     'used',
+  reviewGrammarMissed:   'not used',
   analyzingTranslation:  'Analyzing your translation…',
   analysisUnavailable:   'Analysis unavailable — judge against the reference above.',
 }

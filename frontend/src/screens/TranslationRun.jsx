@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -9,7 +9,9 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
-import { FireIcon } from '../components/ui/Icons'
+import { FireIcon, CheckIcon, CrossIcon } from '../components/ui/Icons'
+import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { WordDetail } from '../components/analysis/WordDetail'
 import { tierLabelFor } from '../domain/tiers'
 
 const TRANSLATION_COLOR = 'var(--line-honyaku)'
@@ -57,6 +59,26 @@ export default function TranslationRun({ session }) {
   // this mode, not a supplementary extra.
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
+
+  // ── The word-by-word breakdown of the REFERENCE (plan 084) ──
+  // Distinct from `analysis` above, which is the tutor's reading of
+  // the learner's own attempt. This is reading practice's breakdown
+  // of the reference sentence -- the same POST /api/phrase/analyze
+  // with save=false, the same SentenceBreakdown rows -- and it can be
+  // prefetched exactly as reading practice does: the reference is on
+  // the client from the moment the prompt goes up, so the whole
+  // writing window is its prefetch. Shown once the learner has graded
+  // themselves, like every other mode's.
+  const [breakdown, setBreakdown] = useState(null)
+  const [breakdownLoading, setBreakdownLoading] = useState(false)
+  const [showBreakdown, setShowBreakdown] = useState(false)
+  // The word the learner tapped in the rows, as a bottom sheet.
+  const [detail, setDetail] = useState(null)
+  const closeDetail = useCallback(() => setDetail(null), [])
+  // Which reference the in-flight breakdown belongs to, so a slow
+  // answer for a phrase the learner has already left cannot overwrite
+  // the one on screen (ReadingRun's analysisPhraseRef).
+  const breakdownPhraseRef = useRef(null)
 
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
   const queueRef = useRef([])       // upcoming phrases, prefetched (not rendered, so a ref is fine)
@@ -141,7 +163,39 @@ export default function TranslationRun({ session }) {
     setFeedback(null)
     setAnalysis(null)
     setAnalysisLoading(false)
+    setShowBreakdown(false)
+    setDetail(null)
     setStage('writing')
+    fetchBreakdown(phraseData.phrase)
+  }
+
+  // The breakdown of the reference, started the moment it is on the
+  // client. `save: false` keeps translation runs out of the analyzer's
+  // own history (routes/phrase.py's PhraseRequest.save).
+  function fetchBreakdown(phraseText) {
+    breakdownPhraseRef.current = phraseText
+    setBreakdown(null)
+    setBreakdownLoading(true)
+    apiFetch('/api/phrase/analyze', session, {
+      method: 'POST',
+      body: JSON.stringify({ phrase: phraseText, save: false, deep: true, lang }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (breakdownPhraseRef.current === phraseText) setBreakdown(d) })
+      .catch(() => { if (breakdownPhraseRef.current === phraseText) setBreakdown(null) })
+      .finally(() => { if (breakdownPhraseRef.current === phraseText) setBreakdownLoading(false) })
+  }
+
+  // The sheet wants {title, level, entry, stats}, which is the shape
+  // the breakdown's own words carry. Mirrors ReadingRun's.
+  function openWordDetail(word) {
+    if (!word.vocab_match) return
+    setDetail({
+      title: word.surface,
+      entry: word.vocab_match.entry,
+      stats: word.vocab_match.stats,
+      level: word.vocab_match.level,
+    })
   }
 
   function next() {
@@ -199,7 +253,9 @@ export default function TranslationRun({ session }) {
       .then(r => (r.ok ? r.json() : null))
       .then(d => {
         if (analysisKeyRef.current !== uiKey) return // learner already moved on
-        setAnalysis(d ? d.analysis : null)
+        // {review, analysis}: the shaped review when the model gave
+        // one, the prose it fell back to otherwise (routes/translation.py).
+        setAnalysis(d && (d.review || d.analysis) ? d : null)
       })
       .catch(() => {
         if (analysisKeyRef.current === uiKey) setAnalysis(null)
@@ -295,6 +351,13 @@ export default function TranslationRun({ session }) {
       error={error}
       analysis={analysis}
       analysisLoading={analysisLoading}
+      breakdown={breakdown}
+      breakdownLoading={breakdownLoading}
+      showBreakdown={showBreakdown}
+      setShowBreakdown={setShowBreakdown}
+      detail={detail}
+      openWordDetail={openWordDetail}
+      closeDetail={closeDetail}
       onBack={leave}
       backLabel={t[backKey]}
       onStart={startSession}
@@ -303,6 +366,63 @@ export default function TranslationRun({ session }) {
       next={next}
       retry={retry}
     />
+  )
+}
+
+// ── The tutor's review, at a glance ──
+// A verdict, one line, then what worked and what to fix as rows a
+// learner can tell apart without reading: a ✓ in the success pigment,
+// a ✕ in the danger one, the fix under its issue in the quiet
+// register, and the corrected sentence last when there is one. The
+// shape is routes/translation.py's; this only draws it.
+const VERDICT_KEY = {
+  correct: 'reviewCorrect', acceptable: 'reviewAcceptable',
+  partial: 'reviewPartial', incorrect: 'reviewIncorrect',
+}
+
+function Review({ review, grammar, t }) {
+  const verdict = VERDICT_KEY[review.verdict] ? review.verdict : 'partial'
+  const good = review.good ?? []
+  const fix = review.fix ?? []
+  return (
+    <div className="rvw">
+      <div className="rvw__head">
+        <span className={`type-badge rvw__verdict rvw__verdict--${verdict}`}>{t[VERDICT_KEY[verdict]]}</span>
+        {grammar && typeof review.grammar_used === 'boolean' && (
+          <span className="type-badge">
+            <span lang="ja">{grammar}</span> · {review.grammar_used ? t.reviewGrammarUsed : t.reviewGrammarMissed}
+          </span>
+        )}
+        {review.summary && <span className="rvw__summary">{review.summary}</span>}
+      </div>
+      {good.length > 0 && (
+        <div className="rvw__list" aria-label={t.reviewGood}>
+          {good.map((item, i) => (
+            <div key={i} className="rvw__row">
+              <span className="rvw__mark rvw__mark--ok" aria-hidden="true"><CheckIcon size={11} /></span>
+              <span className="rvw__item">{item}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {fix.length > 0 && (
+        <div className="rvw__list" aria-label={t.reviewFix}>
+          {fix.map((item, i) => (
+            <div key={i} className="rvw__row">
+              <span className="rvw__mark rvw__mark--x" aria-hidden="true"><CrossIcon size={11} /></span>
+              <span className="rvw__item">{item.issue}</span>
+              {item.fix && <span className="rvw__fix">{item.fix}</span>}
+            </div>
+          ))}
+        </div>
+      )}
+      {review.better && (
+        <>
+          <span className="prose__label">{t.reviewBetter}</span>
+          <span className="rvw__better" lang="ja">{review.better}</span>
+        </>
+      )}
+    </div>
   )
 }
 
@@ -322,6 +442,7 @@ function Streak({ streak, t }) {
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, error, analysis, analysisLoading, backLabel,
+  breakdown, breakdownLoading, showBreakdown, setShowBreakdown, detail, openWordDetail, closeDetail,
   onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   const startedRef = useRef(false)
@@ -336,10 +457,10 @@ function SessionView({
     source === 'frequency' ? `${domain === 'vocab_jmdict' ? t.freqDomainJmdict : t.freqDomainDeck} · ${tierLabelFor(tier, tierSize)}` :
     t.byMastery
 
-  // Real example sentences only carry an English gloss regardless of
-  // UI language — see reading.py's translation_lang note — labelled
-  // explicitly rather than implying it's already in the UI language.
-  const promptLabel = data?.translation_lang === 'en' ? t.translationEnglish : t.translation
+  // The prompt carries no "EN" caption (owner-directed, 2026-09-13):
+  // the sentence to translate is self-evidently the one in the
+  // learner's own alphabet, and a label over it said what the eye
+  // already knew (DESIGN.md, "say less").
 
   return (
     <StudyStage
@@ -362,7 +483,6 @@ function SessionView({
         <>
           <CardTransition cardKey={data._uiKey}>
             <PromptCard prose foot={{ left: where, right: t.translationTitle }}>
-              <span className="prose__label">{promptLabel}</span>
               <span className="prose__en prose__en--lead">{data.translation}</span>
             </PromptCard>
           </CardTransition>
@@ -410,19 +530,68 @@ function SessionView({
                 : t.translationTitle,
             }}
           >
-            <span className="prose__label">{promptLabel}</span>
-            <span className="prose__en">{data.translation}</span>
-            <span className="prose__rule" />
+            {/* Opening the breakdown puts the prompt and the reference
+                away -- its rows print the sentence and its translation
+                themselves -- and keeps the learner's answer and the
+                tutor's reading of it, which are the point of this mode. */}
+            {!showBreakdown && (
+              <>
+                <span className="prose__en">{data.translation}</span>
+                <span className="prose__rule" />
+              </>
+            )}
             <span className="prose__label">{t.yourAnswer}</span>
             <span className="prose__jp" lang="ja">{answer}</span>
-            <span className="prose__label">{t.reference}</span>
-            <span className="prose__jp" lang="ja">{data.phrase}</span>
-            <span className="prose__romaji">{data.romaji}</span>
+            {!showBreakdown && (
+              <>
+                <span className="prose__label">{t.reference}</span>
+                <span className="prose__jp" lang="ja">{data.phrase}</span>
+                <span className="prose__romaji">{data.romaji}</span>
+              </>
+            )}
             <span className="prose__rule" />
             <span className="prose__label">{t.aiAnalysis}</span>
             {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
-            {!analysisLoading && analysis && <span className="prose__ai">{analysis}</span>}
+            {!analysisLoading && analysis?.review && (
+              <Review review={analysis.review} grammar={data.grammar} t={t} />
+            )}
+            {!analysisLoading && analysis && !analysis.review && (
+              <span className="prose__ai">{analysis.analysis}</span>
+            )}
             {!analysisLoading && !analysis && <span className="prose__ai">{t.analysisUnavailable}</span>}
+
+            {/* The reference, word by word, once the learner has
+                graded themselves -- the same gate and the same button
+                states as dictation's (DictationRun.jsx). */}
+            {feedback.correct !== null && (
+              <div className="prose__breakdown">
+                <button
+                  type="button"
+                  onClick={() => setShowBreakdown(s => !s)}
+                  disabled={!breakdown}
+                  className="btn-secondary"
+                >
+                  {showBreakdown
+                    ? t.hideBreakdown
+                    : breakdown
+                      ? t.showBreakdown
+                      : breakdownLoading
+                        ? t.preparingBreakdown
+                        : t.breakdownUnavailable}
+                </button>
+
+                {showBreakdown && breakdown && (
+                  <SentenceBreakdown
+                    analysis={breakdown}
+                    layout="rows"
+                    translation={data.translation}
+                    sentenceText={data.phrase}
+                    t={t}
+                    onTokenClick={openWordDetail}
+                  />
+                )}
+              </div>
+            )}
           </PromptCard>
 
           {feedback.correct === null ? (
@@ -443,6 +612,8 @@ function SessionView({
           )}
         </>
       )}
+
+      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
     </StudyStage>
   )
 }

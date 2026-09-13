@@ -77,11 +77,6 @@ export default function ReadingRun({ session }) {
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  // Which word/kanji card the single-card breakdown carousel is
-  // currently showing — see SentenceBreakdown's 'stepper' layout. Reset
-  // to 0 every time a new phrase is shown (showPhrase) so the reader
-  // always starts at the first word of a fresh breakdown.
-  const [breakdownIndex, setBreakdownIndex] = useState(0)
 
   const [isMobile, setIsMobile] = useState(
     typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
@@ -108,10 +103,6 @@ export default function ReadingRun({ session }) {
       stats: word.vocab_match.stats,
       level: word.vocab_match.level,
     })
-  }
-
-  function openAnalysisKanjiDetail(k) {
-    setDetail({ title: k.kanji, entry: k.entry, stats: k.stats, level: k.level })
   }
 
   const timerRef = useRef(null)
@@ -232,7 +223,6 @@ export default function ReadingRun({ session }) {
     setFeedback(null)
     setDetail(null)
     setShowBreakdown(false)
-    setBreakdownIndex(0)
     setStage('reading')
     setTimeLeft(phraseData.display_seconds)
     fetchAnalysis(phraseData.phrase)
@@ -385,8 +375,6 @@ export default function ReadingRun({ session }) {
       analysisLoading={analysisLoading}
       showBreakdown={showBreakdown}
       setShowBreakdown={setShowBreakdown}
-      breakdownIndex={breakdownIndex}
-      setBreakdownIndex={setBreakdownIndex}
       onBack={leave}
       backLabel={t[backKey]}
       onStart={startSession}
@@ -395,7 +383,6 @@ export default function ReadingRun({ session }) {
       next={next}
       retry={retry}
       openAnalysisWordDetail={openAnalysisWordDetail}
-      openAnalysisKanjiDetail={openAnalysisKanjiDetail}
       closeDetail={closeDetail}
     />
   )
@@ -419,9 +406,8 @@ function Streak({ streak, t }) {
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
   feedback, score, streak, error, detail, isMobile, analysis, analysisLoading, backLabel,
-  showBreakdown, setShowBreakdown, breakdownIndex, setBreakdownIndex, onBack, onStart, submitAnswer,
-  gradeAnswer, next, retry, openAnalysisWordDetail,
-  openAnalysisKanjiDetail, closeDetail,
+  showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
+  gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail,
 }) {
   const startedRef = useRef(false)
   useEffect(() => {
@@ -528,9 +514,10 @@ function SessionView({
             }}
           >
             {/* Pushing "show breakdown" hides everything above the toggle
-                (phrase/romaji/translation/your answer) so the single-card
-                breakdown below gets the room instead of being squeezed
-                under a wall of already-read text. */}
+                (phrase/romaji/translation/your answer): the rows below
+                print the sentence and its translation themselves, so
+                the registers would only say it twice, over the room
+                the rows need. */}
             {!showBreakdown && (
               <>
                 <span className="prose__jp" lang="ja">{data.phrase}</span>
@@ -591,12 +578,11 @@ function SessionView({
                 {showBreakdown && analysis && (
                   <SentenceBreakdown
                     analysis={analysis}
-                    layout="stepper"
-                    index={breakdownIndex}
-                    setIndex={setBreakdownIndex}
+                    layout="rows"
+                    translation={data.translation}
+                    sentenceText={data.phrase}
                     t={t}
                     onTokenClick={openAnalysisWordDetail}
-                    onKanjiClick={openAnalysisKanjiDetail}
                   />
                 )}
               </div>

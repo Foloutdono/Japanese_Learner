@@ -189,6 +189,65 @@ describe('the practice sessions at phone width', () => {
     expect(document.documentElement.scrollHeight).toBeGreaterThan(window.innerHeight)
   })
 
+  // The word-by-word rows (plan 084) inside the page card at 390px: a
+  // long gloss drops under its word rather than squeezing beside it,
+  // the level badge stays on the word's line, and nothing widens the
+  // page sideways.
+  it('the breakdown rows fit the phone: the gloss wraps under the word, the level on its line', async () => {
+    const long = 'to wait for someone or something over a long stretch of time, patiently'
+    const screen = await render(
+      <main className="container stage" style={{ '--line-color': 'var(--line-reading)' }}>
+        <div className="prompt-card prompt-card--footed">
+          <div className="prompt-card__body prompt-card__body--prose prose">
+            <div className="prose__breakdown">
+              <div className="bkd">
+                <div className="bkd-line" lang="ja">
+                  <button type="button" className="bkd-tok bkd-tok--unknown bkd-tok--door"><ruby>駅<rt>えき</rt></ruby></button>
+                  <span className="bkd-tok bkd-tok--particle">で</span>
+                  <button type="button" className="bkd-tok bkd-tok--learning bkd-tok--door"><ruby>待<rt>ま</rt></ruby>ち</button>
+                  <span className="bkd-tok bkd-tok--particle">ました</span>
+                </div>
+                <span className="bkd__en">I waited at the station.</span>
+                <div className="bkd-rows">
+                  <div className="bkd-row">
+                    <button type="button" className="bkd-row__word bkd-tok bkd-tok--unknown bkd-tok--door" lang="ja">駅</button>
+                    <span className="bkd-row__reading" lang="ja">えき</span>
+                    <span className="bkd-row__meaning">station</span>
+                    <span className="type-badge bkd-row__lvl">N5</span>
+                  </div>
+                  <div className="bkd-row">
+                    <button type="button" className="bkd-row__word bkd-tok bkd-tok--learning bkd-tok--door" lang="ja">待ちました</button>
+                    <span className="bkd-row__reading" lang="ja">まちました</span>
+                    <span className="bkd-row__meaning">{long}</span>
+                    <span className="type-badge bkd-row__lvl">N5</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="prompt-card__foot"><span>N5</span><span /></div>
+        </div>
+      </main>
+    )
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    const rows = screen.container.querySelectorAll('.bkd-row')
+    const word = rows[1].querySelector('.bkd-row__word').getBoundingClientRect()
+    const meaning = rows[1].querySelector('.bkd-row__meaning').getBoundingClientRect()
+    const level = rows[1].querySelector('.bkd-row__lvl').getBoundingClientRect()
+    // The gloss sits under the word, starting at the word's left edge,
+    // and the badge is on the word's line, at the row's right.
+    expect(meaning.top).toBeGreaterThanOrEqual(word.bottom - 1)
+    expect(meaning.left).toBeCloseTo(word.left, 0)
+    expect(level.top).toBeLessThan(word.bottom)
+    expect(level.right).toBeGreaterThan(meaning.right)
+    // The row's rule is a hairline on the surface's own line, and the
+    // word keeps the sentence rung.
+    expect(getComputedStyle(rows[1]).borderTopWidth).toBe('1px')
+    expect(getComputedStyle(rows[0]).borderTopWidth).toBe('0px')
+    expect(getComputedStyle(rows[1].querySelector('.bkd-row__word')).fontSize)
+      .toBe(getComputedStyle(screen.container.querySelector('.bkd-line')).fontSize)
+  })
+
   it('the choices: lettered roundels, the picked row filled; the result is a lattice and 44px rows', async () => {
     const screen = await render(
       <main className="container stage" style={{ '--line-color': 'var(--line-rikai)' }}>

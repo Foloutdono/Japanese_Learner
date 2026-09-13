@@ -873,8 +873,12 @@ const reading = {
   // lecture l'affiche aussi, pour l'appel lent ou réessayé que son
   // préchargement ne devance pas.
   breakdownUnavailable: 'Décomposition indisponible',
-  previousWord:         'Mot précédent',
-  nextWord:             'Mot suivant',
+  // Le texte phrase par phrase (PassageBreakdown) : le nom du chevron,
+  // et la légende au-dessus des points autour desquels le texte a été
+  // écrit.
+  openSentence:         'Ouvrir cette phrase',
+  closeSentence:        'Fermer cette phrase',
+  grammarInText:        'Grammaire du texte',
   jumpToTokenNamed:      s => `Aller à ${s}`,
   detailsForToken:       s => `Détails de ${s}`,
   detailsForKanji:       k => `Détails du kanji ${k}`,
@@ -909,6 +913,16 @@ const translationMode = {
   translationFetchError: "Impossible de charger une phrase. Veuillez réessayer.",
   japanesePlaceholder:   'Écrivez-la en japonais…',
   aiAnalysis:            'Analyse IA',
+  // L'avis du tuteur en forme fixe, pas en paragraphe (routes/translation.py).
+  reviewCorrect:         'Correct',
+  reviewAcceptable:      'Acceptable',
+  reviewPartial:         'En partie',
+  reviewIncorrect:       'À revoir',
+  reviewGood:            'Ce qui va',
+  reviewFix:             'À corriger',
+  reviewBetter:          'Version corrigée',
+  reviewGrammarUsed:     'utilisé',
+  reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de votre traduction…',
   analysisUnavailable:   'Analyse indisponible — jugez par rapport à la référence ci-dessus.',
 }

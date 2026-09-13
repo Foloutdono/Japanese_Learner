@@ -3,6 +3,7 @@ import logging
 import random
 import re
 import unicodedata
+from dataclasses import dataclass, field
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Query
@@ -17,12 +18,16 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.kanji_data import get_kanji_string
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
 from study import difficulty
-from study.llm_shared import chat, llm_configured, LLMUnavailable
+from study.analysis import analyze_with_glosses, attach_user_state
+from study.exam_gen_utils import kanji_instruction
+from study.grammar_match import contains_pattern, verifiable
+from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
+from study.llm_shared import chat, llm_configured, LLMUnavailable, soften_kanji
 from study.romaji import sentence_romaji
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
@@ -54,12 +59,21 @@ logger = logging.getLogger(__name__)
 # NULLable on purpose: every row logged before this column existed
 # genuinely has no rating, and a default would invent one. A reader has
 # to treat NULL as "graded, resolution unknown" rather than as a score.
+#
+# comprehension_log.grammar (plan 084): the grammar points an exercise
+# was written around, as a JSON list of catalogue patterns. NULLable for
+# the same reason -- every exercise before this had no seeds -- and read
+# back by _recent_grammar_patterns so the next exercise is written
+# around points the learner has not just seen.
 def _migrate_reading_log_schema() -> None:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
+            )
+            cur.execute(
+                "ALTER TABLE comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB"
             )
         conn.commit()
     finally:
@@ -99,20 +113,6 @@ LANG_NAMES = {
     "pt": "Portuguese",
 }
 
-# A level's allowed kanji pool includes every level at or below it, since
-# JLPT levels are cumulative. Still used by Reading Comprehension below
-# (constrains the LLM's kanji choice) — the phrase mode below doesn't
-# need this anymore: real example sentences aren't generated against an
-# allow-list, they just come from whatever level/tier/mastery pool the
-# learner picked.
-LEVEL_HIERARCHY = {
-    "N5": ("N5",),
-    "N4": ("N5", "N4"),
-    "N3": ("N5", "N4", "N3"),
-    "N2": ("N5", "N4", "N3", "N2"),
-    "N1": ("N5", "N4", "N3", "N2", "N1"),
-}
-
 MIN_BATCH = 1
 MAX_BATCH = 10
 DEFAULT_BATCH = 5
@@ -134,13 +134,6 @@ class ResultPayload(BaseModel):
     # rating can reach that word's schedule. Optional: an older client
     # does not send it, and an uncurated sentence has none.
     source_word: dict | None = None
-
-
-def _allowed_kanji_for_level(level: str) -> str:
-    allowed_levels = LEVEL_HIERARCHY.get(level)
-    if not allowed_levels:
-        raise HTTPException(status_code=400, detail="Unknown JLPT level")
-    return get_kanji_string(allowed_levels)
 
 
 def _chat(messages, timeout=60, max_tokens=3000):
@@ -841,7 +834,8 @@ COMPREHENSION_SPECS = {
 DEFAULT_COMPREHENSION_SPEC = {"questions": 10}
 
 # The brief for the ONE thing a level changes. The kanji gate
-# (_allowed_kanji_for_level) already bounds the writing; this bounds
+# (kanji_instruction, measured after the fact by study/level_mix)
+# already bounds the writing; this bounds
 # the grammar, the register and the reading itself, which the gate
 # cannot see. Kept short on purpose: these are constraints handed to a
 # model, and a paragraph of them reads as a topic list it then tries to
@@ -870,9 +864,29 @@ READ_SECONDS_BY_LEVEL = {
 }
 DEFAULT_READ_SECONDS = 300
 
-# Same allowed-kanji restriction as the phrase-reading mode (see
-# SYSTEM_PROMPT_TEMPLATE above) — a comprehension text full of kanji the
-# user has never studied defeats the point of leveling it by JLPT level.
+# ── What bounds the writing, and how it is checked (plan 084, ADR 0015) ──
+# The model proposes, the code decides:
+#
+#   - the text is written AROUND three grammar points of the level and
+#     six of its words, drawn at random per request (a point the learner
+#     met in their last few exercises is avoided when the pool allows).
+#     A verifiable point the text does not use is asked for again with
+#     the omission fed back, and only the points actually found are
+#     claimed on the response. Without this the texts revolved around
+#     は and the て-form at every level, and the other seventy points a
+#     level teaches were never practised here.
+#   - the kanji list is the exam's (exam_gen_utils.kanji_instruction:
+#     the literal list at N5-N3, a sentence at N2-N1), and study/
+#     level_mix measures the text AFTERWARDS. Out-of-level kanji are
+#     rewritten in kana (llm_shared.soften_kanji) rather than asked for
+#     again: at N5 no natural paragraph passes a kanji gate first time,
+#     and a retry here is a two-minute call under a spinner.
+#   - vocabulary above the level is the ONE thing that can cost the
+#     exercise: more than one word in twenty (level_mix.MAX_RATIO) is
+#     fed back and asked for again, and on the last attempt is a 502.
+#   - the breakdown must reproduce the text. A drift is fed back; on
+#     the last attempt the breakdown wins, because it is what the
+#     learner opens.
 COMPREHENSION_PROMPT_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
 
 Write a self-contained Japanese text of about {target_chars} Japanese characters — never fewer than {min_chars} and never more than {max_chars} — in vocabulary and grammar appropriate for JLPT {level}.
@@ -881,15 +895,21 @@ That length is the same at EVERY level. What JLPT {level} changes is how hard th
 
 {difficulty}
 
+Build the text around these grammar points. Use EACH of them at least once, as the natural shape of a sentence — never as a list of examples — and write at least one "grammar" question about each:
+{grammar_block}
+
+Use these words somewhere in the text, inflected as the sentence needs:
+{words_block}
+
 Then write {questions} multiple-choice questions ABOUT THE TEXT, mixing different question types so the exercise tests more than just plot recall. Finally, break the text down one sentence at a time, so the learner can go back over it afterwards and see exactly where their reading went wrong.
 
 When writing the text:
 
 - You MAY use hiragana, katakana and punctuation freely.
-- If you use any kanji, you may use only the following kanji::
+- Vocabulary: use words a JLPT {level} learner has studied. The text is checked after you answer, and it is rejected when more than one word in twenty is above {level}. If you need a harder word, write around it.
+- If you use any kanji, you may use only the following kanji:
 {allowed_kanji}
-- Any other kanji outside this list is forbidden.
-- If a word normally contains a disallowed kanji, replace that kanji with its hiragana reading instead.
+- Any other kanji is forbidden. If a word normally contains a kanji outside this list, write THAT character in hiragana and keep the rest of the word in kanji (友だち, not 友達); this applies to names too. The text is checked character by character.
 - But DO write a word in the kanji it is normally written in whenever those kanji are on the list. A passage spelled out entirely in hiragana is not Japanese anyone reads, and at JLPT {level} the kanji on that list are exactly the ones the learner is being taught to read.
 
 Question types to mix across the {questions} questions (use a good variety — don't make them all "comprehension"):
@@ -913,7 +933,10 @@ Respond with ONLY a JSON object (no markdown fences, no commentary) matching exa
     {{
       "jp": "...",
       "translation": "...",
-      "note": "..."
+      "note": "...",
+      "words": [
+        {{"surface": "...", "meaning": "..."}}
+      ]
     }}
   ]
 }}
@@ -933,15 +956,35 @@ Rules:
 - "translation" is a faithful {lang_name} translation of that ONE sentence.
 - "note" is one short {lang_name} sentence on how that sentence is built — the particle, verb form, construction or word a JLPT {level} learner is most likely to trip on in it. Name the Japanese you are talking about, in 「 」. Never restate the translation; if a sentence really has nothing worth noting, use an empty string.
 - A "note" must BEGIN with a word of {lang_name} — "The particle 「は」 marks...", never "「は」 marks...". Starting one on a bracket is how the opening " of the JSON string goes missing, and that one character costs the whole exercise.
+- "words" lists EVERY word of that sentence, in order, particles and endings included, cut the way a dictionary would: a verb or adjective with its ending is one word (待ちました, not 待ち + ました), a particle is its own word, punctuation is left out. "surface" is the word exactly as it is spelled in "jp". "meaning" is a short {lang_name} gloss of what the word does IN THIS SENTENCE — two or three words, never a sentence; for a particle, its role here ("marks where the action happens").
+- When a sentence uses one of the grammar points listed above, "note" names that point in 「 」 and says what it does in this sentence.
+{feedback}
 """
 
 
 VALID_QUESTION_TYPES = {"comprehension", "vocabulary", "grammar", "inference"}
 
-# How many times one exercise is asked for before the screen is told no.
-# See the loop in _call_llm_comprehension for what the second attempt
-# actually buys.
-_COMPREHENSION_ATTEMPTS = 2
+# How many times one exercise is asked for before the screen is told no,
+# and what each attempt is told. The loop in _call_llm_comprehension is
+# exam_reading_gen._build_one_passage's, for the reason that module
+# gives: asking the same prompt again carries no information, and a
+# model told exactly what was wrong with its last answer fixes it.
+_COMPREHENSION_ATTEMPTS = 3
+
+# How many grammar points and words an exercise is written around, and
+# how many of the learner's past exercises a new one keeps clear of.
+# Three points is what a 250-character text can carry as the natural
+# shape of its sentences rather than as a list; six words is enough to
+# steer the vocabulary without dictating the subject.
+_GRAMMAR_SEEDS = 3
+_WORD_SEEDS = 6
+_RECENT_EXERCISES = 5
+
+_FEEDBACK_HEADER = (
+    "\nYour previous attempt was REJECTED for the following reasons. "
+    "Fix them exactly; everything else about it was fine.\n"
+)
+
 
 class ComprehensionAnswersPayload(BaseModel):
     level: str
@@ -951,25 +994,49 @@ class ComprehensionAnswersPayload(BaseModel):
     answers: list[int]  # user's chosen option index per question, in order
     # The sentence-by-sentence breakdown the exercise was served with,
     # echoed back the way `questions` is. Optional: comprehension_log
-    # has no column for it (nothing reads that table — see
+    # has no column for it (nothing reads that table -- see
     # scripts/prune_logs.py), so this is accepted and dropped rather
     # than stored, and an older client that never sends it still posts
-    # a valid payload.
+    # a valid payload. The client strips each entry's `analysis` before
+    # posting -- a dozen token lists with deck entries and SRS stats is
+    # not a payload to send over 4G to be discarded.
     breakdown: list[dict] | None = None
+    # The grammar points the exercise was written around, as catalogue
+    # patterns (plan 084). Stored, so the next exercise can be written
+    # around points the learner has not just seen. Optional for the
+    # same reason as `breakdown`.
+    grammar_points: list[str] | None = None
 
 
 def _text_field(part: dict, key: str) -> str:
     """One string out of a model-written object, or ''. A model that
     answers a text field with a number or a list is answering badly,
-    not fatally — every caller here treats a blank as "nothing to
+    not fatally -- every caller here treats a blank as "nothing to
     print", and str() on a list would print the brackets."""
     value = part.get(key)
     return value.strip() if isinstance(value, str) else ""
 
 
+def _clean_words(raw) -> list[dict]:
+    """The model's word list for one sentence: {surface, meaning} per
+    word, surfaces non-empty, nothing else. Not a segmentation the
+    screen trusts -- study/analysis.merge_deep binds each one onto the
+    tokenizer's own Tokens and drops what it cannot place."""
+    if not isinstance(raw, list):
+        return []
+    words = []
+    for word in raw:
+        if not isinstance(word, dict):
+            continue
+        surface = _text_field(word, "surface")
+        if surface:
+            words.append({"surface": surface, "meaning": _text_field(word, "meaning")})
+    return words
+
+
 def _clean_breakdown(raw) -> list[dict]:
-    """The breakdown as the screen reads it: {jp, translation, note} per
-    sentence, in order, nothing else.
+    """The breakdown as the screen reads it: {jp, translation, note,
+    words} per sentence, in order, nothing else.
 
     Lenient on purpose, and only in the directions that cannot mislead a
     learner. A sentence with no `jp` is dropped (there is nothing to
@@ -977,7 +1044,8 @@ def _clean_breakdown(raw) -> list[dict]:
     prompt itself allows an empty one, and the card simply omits the
     line); a missing translation is kept as '' rather than dropping the
     sentence, because the Japanese is still the passage and losing a
-    line of it would silently rewrite the text the learner just read.
+    line of it would silently rewrite the text the learner just read;
+    a missing word list is [] (the deck's own glosses still print).
     """
     if not isinstance(raw, list):
         return []
@@ -993,64 +1061,300 @@ def _clean_breakdown(raw) -> list[dict]:
             "jp": jp,
             "translation": _text_field(part, "translation"),
             "note": _text_field(part, "note"),
+            "words": _clean_words(part.get("words")),
         })
     return cleaned
 
 
-def _call_llm_comprehension(level: str, lang: str) -> dict:
-    if not llm_configured():
-        raise HTTPException(status_code=500, detail="No LLM provider is configured")
+# ── The seeds ────────────────────────────────────────────────────────
 
+def _grammar_pool(level: str) -> list[dict]:
+    """The level's catalogue points a substring test can honestly find
+    in a text -- grammar_match.verifiable's line, one step further out
+    (difficulty.GATE_BLIND). A point that cannot be checked cannot be
+    asked for: the model's word that it used 「は」 is worth nothing,
+    and 「は」 is in every text regardless."""
+    return [
+        p for p in GRAMMAR_POINTS_BY_LEVEL.get(level, [])
+        if p.get("pattern") and verifiable(p["pattern"]) and p["pattern"] not in difficulty.GATE_BLIND
+    ]
+
+
+def _pick_grammar_seeds(level: str, rng: random.Random, avoid=frozenset(), k: int = _GRAMMAR_SEEDS) -> list[dict]:
+    """k points of the level, at random, keeping clear of `avoid` (the
+    patterns the learner's last few exercises were written around) when
+    the pool is big enough to afford it. All from the level itself: an
+    N3 text written around an N5 point is not N3 practice."""
+    pool = _grammar_pool(level)
+    fresh = [p for p in pool if p["pattern"] not in avoid]
+    candidates = fresh if len(fresh) >= k else pool
+    if len(candidates) <= k:
+        return list(candidates)
+    return rng.sample(candidates, k)
+
+
+def _pick_word_seeds(level: str, rng: random.Random, k: int = _WORD_SEEDS) -> list[dict]:
+    pool = VOCAB_BY_LEVEL.get(level, [])
+    if len(pool) <= k:
+        return list(pool)
+    return rng.sample(pool, k)
+
+
+def _grammar_block(points: list[dict]) -> str:
+    # exam_grammar_gen._points_block's shape, so a model sees the same
+    # thing here and on the exam.
+    if not points:
+        return "(none)"
+    return "\n".join(
+        f"{i + 1}. {p['pattern']} ({p.get('structure', '')}) -- meaning: {p.get('meaning', '')}"
+        for i, p in enumerate(points)
+    )
+
+
+def _words_block(words: list[dict]) -> str:
+    # exam_vocab_gen._words_block's shape. The reading is the first of a
+    # packed "a/b" kana field; the display is the kanji where the entry
+    # has one, else that reading.
+    if not words:
+        return "(none)"
+
+    def reading(w: dict) -> str:
+        return (w.get("kana") or "").split("/")[0].strip()
+
+    return "\n".join(
+        f"{i + 1}. {w.get('kanji') or reading(w)} ({reading(w)}) -- meaning: \"{w.get('meaning', '')}\""
+        for i, w in enumerate(words)
+    )
+
+
+def _recent_grammar_patterns(user_id: str, limit: int = _RECENT_EXERCISES) -> set[str]:
+    """The patterns the learner's last `limit` exercises were written
+    around, so the next one can keep clear of them. Any failure here is
+    an empty set and a warning: a database hiccup must not cost the
+    exercise, and a repeat seed costs nothing."""
+    try:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    SELECT grammar FROM comprehension_log
+                    WHERE user_id = %s AND grammar IS NOT NULL
+                    ORDER BY created_at DESC
+                    LIMIT %s
+                    """,
+                    (user_id, limit),
+                )
+                rows = cur.fetchall()
+        finally:
+            conn.close()
+    except Exception:
+        logger.warning("comprehension: could not read the recent grammar seeds", exc_info=True)
+        return set()
+    out: set[str] = set()
+    for (grammar,) in rows:
+        if isinstance(grammar, list):
+            out.update(str(p) for p in grammar)
+    return out
+
+
+def _comprehension_prompt(level: str, lang: str, grammar_seeds: list[dict],
+                          word_seeds: list[dict], feedback: str = "") -> str:
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
-    lang_name = LANG_NAMES.get(lang, lang)
-    allowed_kanji = _allowed_kanji_for_level(level)
-
     min_chars, max_chars = COMPREHENSION_CHARS
-    prompt = COMPREHENSION_PROMPT_TEMPLATE.format(
+    return COMPREHENSION_PROMPT_TEMPLATE.format(
         level=level,
         min_chars=min_chars,
         max_chars=max_chars,
         # A target, not just a band. Asked for a range the model aims
-        # under it — a 220-280 brief came back at 173 (live,
-        # 2026-09-11) — and asked for one number it lands on it.
+        # under it -- a 220-280 brief came back at 173 (live,
+        # 2026-09-11) -- and asked for one number it lands on it.
         target_chars=(min_chars + max_chars) // 2,
         difficulty=DIFFICULTY_BY_LEVEL.get(level, DEFAULT_DIFFICULTY),
         questions=spec["questions"],
-        allowed_kanji=allowed_kanji,
+        grammar_block=_grammar_block(grammar_seeds),
+        words_block=_words_block(word_seeds),
+        allowed_kanji=kanji_instruction(level),
         lang=lang,
-        lang_name=lang_name,
+        lang_name=LANG_NAMES.get(lang, lang),
+        feedback=feedback,
     )
 
-    # Asked twice before giving up, and this is not belt-and-braces:
-    # one blob carries the passage, the paper AND the breakdown, so a
-    # single malformed value costs the learner the whole exercise — a
-    # 502 they read as "Couldn't load a text". That is not
-    # hypothetical, it is the shape that prompted this, live on
-    # 2026-09-11: a French note that OPENED on a guillemet instead of
-    # the JSON quote, which is a parse error two thousand characters
-    # into an otherwise perfect answer. The quoting rules in the prompt
-    # are the fix; this is what a model that ignores them costs. The
-    # exam generator makes the same bargain for the same reason
-    # (exam_reading_gen._build_one_passage).
+
+# ── The checks ───────────────────────────────────────────────────────
+
+def _squash(s: str) -> str:
+    return re.sub(r"\s+", "", s or "")
+
+
+@dataclass
+class _Verdict:
+    """Everything wrong with one answer, sorted by what it costs. The
+    three lists that can send the prompt back (repro, vocab,
+    seeds_missing) are kept apart from the three that only ride along
+    as feedback (kanji, grammar_over, length) -- see _call_llm_comprehension
+    for what each one does on the last attempt."""
+    repro: list = field(default_factory=list)
+    vocab: list = field(default_factory=list)
+    kanji: list = field(default_factory=list)
+    seeds_missing: list = field(default_factory=list)
+    grammar_over: list = field(default_factory=list)
+    length: list = field(default_factory=list)
+    summary: str = ""
+
+    @property
+    def retry(self) -> bool:
+        return bool(self.repro or self.vocab or self.seeds_missing)
+
+    def feedback(self) -> str:
+        seeds = [
+            f"The grammar point {p['pattern']} ({p.get('meaning', '')}) does not appear in the text. "
+            f"Use it in at least one sentence, in its natural conjugated form."
+            for p in self.seeds_missing
+        ]
+        lines = self.repro + self.vocab + self.kanji + seeds + self.grammar_over + self.length
+        return _FEEDBACK_HEADER + "".join(f"- {line}\n" for line in lines)
+
+
+def _check_comprehension(data: dict, level: str, seeds: list[dict]) -> _Verdict:
+    """One parsed answer measured against the level and the seeds. Pure:
+    reads the answer, changes nothing."""
+    verdict = _Verdict()
+    text = data["text"]
+    parts = data["breakdown"]
+
+    # The breakdown must reproduce the text -- it is what the learner
+    # opens, and every sentence of it is analysed as written.
+    squashed = _squash(text)
+    if _squash("".join(p["jp"] for p in parts)) != squashed:
+        drifted = next((p["jp"] for p in parts if _squash(p["jp"]) not in squashed), None)
+        if drifted:
+            verdict.repro.append(
+                f'"breakdown" does not reproduce "text": the entry 「{drifted}」 is not a sentence '
+                f'of the text. Copy every sentence verbatim from "text", in order, and include every one of them.'
+            )
+        else:
+            verdict.repro.append(
+                '"breakdown" does not reproduce "text": a sentence of the text has no entry. '
+                'Concatenating every "jp" in order must give the text exactly; include every sentence, in order.'
+            )
+
+    seed_chars = "".join(p.get("pattern", "") for p in seeds)
+    mix = level_mix(text, level, allow_kanji=seed_chars)
+    verdict.vocab = validate_vocab_mix(text, level, mix=mix)
+    verdict.kanji = validate_kanji_mix(text, level, allow_kanji=seed_chars, mix=mix)
+    verdict.seeds_missing = [
+        p for p in seeds
+        if verifiable(p.get("pattern", "")) and not contains_pattern(text, p["pattern"])
+    ]
+    verdict.grammar_over = [
+        f"grammar above {level}: {pattern} ({point_level}) -- rewrite that sentence with grammar "
+        f"a JLPT {level} learner knows."
+        for pattern, point_level in mix["grammar_over"]
+    ]
+
+    lo, hi = COMPREHENSION_CHARS
+    n = len(squashed)
+    if n < lo:
+        verdict.length.append(
+            f"Your text was {n} characters, which is too SHORT -- write more. It must be between {lo} and {hi} characters."
+        )
+    elif n > hi:
+        verdict.length.append(
+            f"Your text was {n} characters, which is too LONG -- write less. It must be between {lo} and {hi} characters."
+        )
+
+    verdict.summary = (
+        f"len {n}, vocab {mix['vocab_over_count']}/{mix['content_tokens']} "
+        f"({round(mix['vocab_ratio'] * 100)}%), kanji {mix['kanji_over_count']}/{mix['kanji_total']} "
+        f"({round(mix['kanji_ratio'] * 100)}%), seeds {len(seeds) - len(verdict.seeds_missing)}/{len(seeds)} found, "
+        f"repro {'ok' if not verdict.repro else 'drift'}"
+    )
+    return verdict
+
+
+def _soften_exercise(data: dict, level: str) -> bool:
+    """Out-of-level kanji rewritten in kana, sentence by sentence, with
+    the text and the word surfaces kept in step so the breakdown still
+    reproduces the text and the glosses still bind. False when a
+    sentence cannot be softened reliably (llm_shared.soften_kanji's
+    None), in which case nothing has been changed that matters: the
+    caller rejects the answer."""
+    text = data["text"]
+    for part in data["breakdown"]:
+        original = part["jp"]
+        softened = soften_kanji(original, level)
+        if softened is None:
+            return False
+        if softened != original:
+            part["jp"] = softened
+            text = text.replace(original, softened, 1)
+        for word in part.get("words", []):
+            soft_word = soften_kanji(word["surface"], level)
+            if soft_word:
+                word["surface"] = soft_word
+    joined = "".join(p["jp"] for p in data["breakdown"])
+    data["text"] = text if _squash(text) == _squash(joined) else joined
+    return True
+
+
+def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] | None = None,
+                            word_seeds: list[dict] | None = None) -> dict:
+    """One exercise -- text, paper, breakdown and the grammar points it
+    was found to use -- or the HTTPException that explains why not.
+
+    Seeds not handed in are drawn here (the endpoint hands them in, so
+    it can keep clear of the learner's recent ones); the tests hand in
+    exactly the ones they mean to find."""
+    if not llm_configured():
+        raise HTTPException(status_code=500, detail="No LLM provider is configured")
+    if level not in COMPREHENSION_SPECS:
+        raise HTTPException(status_code=400, detail="Unknown JLPT level")
+    if grammar_seeds is None or word_seeds is None:
+        rng = random.Random()
+        if grammar_seeds is None:
+            grammar_seeds = _pick_grammar_seeds(level, rng)
+        if word_seeds is None:
+            word_seeds = _pick_word_seeds(level, rng)
+
+    # Three attempts, each told what was wrong with the last. One blob
+    # carries the passage, the paper AND the breakdown, so a single
+    # malformed value costs the learner the whole exercise -- a 502 they
+    # read as "Couldn't load a text". The 「-quote repair in
+    # _parse_comprehension is the net under the commonest malformation;
+    # the feedback is what turns the other attempts from a coin flip
+    # into a correction.
     #
-    # 502 only. A 503 is llm_shared saying every provider is gone, and
-    # asking it again is a request not worth sending.
-    last = None
+    # What each check does on the LAST attempt, when there is no next
+    # prompt to send it to:
+    #   repro          the breakdown wins -- the text is rebuilt from it
+    #   vocab          the exercise is refused (502): the one hard gate
+    #   kanji          softened to kana, as on any attempt
+    #   seeds          accepted; only the points found are claimed
+    #   grammar_over   feedback only, never a verdict
+    #   length         feedback only, logged
+    #
+    # 502 from the parser only. A 503 is llm_shared saying every
+    # provider is gone, and asking it again is a request not worth
+    # sending.
+    feedback = ""
+    last: HTTPException | None = None
     for attempt in range(_COMPREHENSION_ATTEMPTS):
-        # max_tokens above the shared 3000 default, and the timeout
-        # with it: this one call now writes the passage, a dozen
-        # four-option questions AND a translated, annotated entry per
-        # sentence, roughly twice the JSON the flat whole-text
-        # translation it replaced came to. A cap that cuts the blob
-        # mid-array costs the whole exercise, so it is set for the
-        # longest paper the specs above can ask for — N1: 800
-        # characters, 12 questions, ~15 sentences.
+        last_attempt = attempt == _COMPREHENSION_ATTEMPTS - 1
+        prompt = _comprehension_prompt(level, lang, grammar_seeds, word_seeds, feedback)
+        # max_tokens above the shared 3000 default, and the timeout with
+        # it: this one call writes the passage, a dozen four-option
+        # questions, a translated and annotated entry per sentence AND
+        # a glossed word list per sentence -- and on the NVIDIA-style
+        # endpoints the reasoning trace shares this budget
+        # (exam_gen_utils documents the crowding). A cap that cuts the
+        # blob mid-array costs the attempt.
         content = _chat([
             {"role": "system", "content": prompt},
             {"role": "user", "content": "Generate the reading comprehension exercise."},
-        ], timeout=120, max_tokens=8000)
+        ], timeout=150, max_tokens=12000)
         try:
-            return _parse_comprehension(content)
+            data = _parse_comprehension(content)
         except HTTPException as e:
             if e.status_code != 502:
                 raise
@@ -1059,33 +1363,71 @@ def _call_llm_comprehension(level: str, lang: str) -> dict:
                 "Comprehension attempt %d/%d unusable (%s)",
                 attempt + 1, _COMPREHENSION_ATTEMPTS, e.detail,
             )
+            continue
+
+        verdict = _check_comprehension(data, level, grammar_seeds)
+        logger.info("comprehension %s attempt %d/%d: %s", level, attempt + 1, _COMPREHENSION_ATTEMPTS, verdict.summary)
+
+        if verdict.retry and not last_attempt:
+            last = HTTPException(status_code=502, detail="; ".join(
+                verdict.repro + verdict.vocab + [f"missing {p['pattern']}" for p in verdict.seeds_missing]
+            ))
+            feedback = verdict.feedback()
+            continue
+
+        if verdict.repro:
+            logger.warning("comprehension %s: the breakdown does not reproduce the text after %d attempt(s); the breakdown wins",
+                           level, attempt + 1)
+            data["text"] = "".join(p["jp"] for p in data["breakdown"])
+        if verdict.vocab:
+            raise HTTPException(status_code=502, detail=f"text too hard for {level}: {verdict.vocab[0]}")
+        if verdict.kanji and not _soften_exercise(data, level):
+            raise HTTPException(status_code=502, detail="out-of-level kanji could not be rewritten in kana")
+        if verdict.seeds_missing:
+            logger.info("comprehension %s: accepted without %s", level,
+                        ", ".join(p["pattern"] for p in verdict.seeds_missing))
+
+        found = [p for p in grammar_seeds if p not in verdict.seeds_missing]
+        data["grammar_points"] = [
+            {
+                "pattern": p["pattern"],
+                "structure": p.get("structure", ""),
+                "meaning": p.get("meaning", ""),
+                "level": level,
+                "raw_id": grammar_to_id(p, level),
+            }
+            for p in found
+        ]
+        return data
 
     raise last
 
 
-# A value that begins with anything but the JSON quote — the one
+# A value that begins with anything but the JSON quote -- the one
 # malformation this endpoint actually sees, and it sees it often.
 # The shape, live twice on 2026-09-11:
 #
 #     "note": 「見て」 links テレビを見る and 寝ました。"
 #
 # The model opens the string on the Japanese quotation mark it was
-# asked to quote Japanese with, and never writes the " — so the value
+# asked to quote Japanese with, and never writes the " -- so the value
 # is unterminated and two thousand characters of otherwise perfect
 # answer are unparseable. The prompt now tells it to start a note on a
 # word rather than on a bracket, which is the real fix; this is the
-# net under it.
+# net under it. The word lists (plan 084) open the same door twice
+# more -- a "surface" IS Japanese, and a "meaning" may quote some --
+# so both keys are named here too.
 #
 # Only ever applied to input `json.loads` has ALREADY refused, so it
 # cannot change the meaning of a well-formed answer: a value that does
 # not open on a quote is not valid JSON under any reading. The closing
 # quote is the one the model did write.
-_UNOPENED_VALUE = re.compile(r'("(?:jp|translation|note|question)":[ \t]*)(?=[^"\s\[{])')
+_UNOPENED_VALUE = re.compile(r'("(?:jp|translation|note|question|surface|meaning)":[ \t]*)(?=[^"\s\[{])')
 
 
 def _parse_comprehension(content: str) -> dict:
     """One model answer to the prompt above, checked and normalized, or
-    a 502 naming what was wrong with it — which the caller reads as
+    a 502 naming what was wrong with it -- which the caller reads as
     "ask again"."""
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
@@ -1101,16 +1443,22 @@ def _parse_comprehension(content: str) -> dict:
             raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
         logger.warning("Comprehension response repaired: %d value(s) opened on the wrong quote", fixes)
 
-    for field in ("text", "questions", "breakdown"):
-        if field not in data:
-            raise HTTPException(status_code=502, detail=f"LLM response missing field: {field}")
+    if not isinstance(data, dict):
+        raise HTTPException(status_code=502, detail="LLM response is not an object")
+    for key in ("text", "questions", "breakdown"):
+        if key not in data:
+            raise HTTPException(status_code=502, detail=f"LLM response missing field: {key}")
+    if not isinstance(data["text"], str) or not data["text"].strip():
+        raise HTTPException(status_code=502, detail="LLM response carried no text")
+    if not isinstance(data["questions"], list):
+        raise HTTPException(status_code=502, detail="LLM response questions are not a list")
 
     for i, q in enumerate(data["questions"]):
-        if not all(k in q for k in ("question", "options", "correct")):
+        if not isinstance(q, dict) or not all(k in q for k in ("question", "options", "correct")):
             raise HTTPException(status_code=502, detail=f"Question {i} missing required fields")
-        if len(q["options"]) != 4:
+        if not isinstance(q["options"], list) or len(q["options"]) != 4:
             raise HTTPException(status_code=502, detail=f"Question {i} must have exactly 4 options")
-        # Be lenient on "type" — default rather than reject, since it's
+        # Be lenient on "type" -- default rather than reject, since it's
         # metadata for display, not something correctness depends on.
         if q.get("type") not in VALID_QUESTION_TYPES:
             q["type"] = "comprehension"
@@ -1127,12 +1475,28 @@ def _parse_comprehension(content: str) -> dict:
     data["translation"] = " ".join(part["translation"] for part in data["breakdown"] if part["translation"])
 
     return data
-
-
 @router.get("/api/reading/comprehension")
 def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
     level = resolve_level(user_id, level)
-    data = _call_llm_comprehension(level, lang)
+    rng = random.Random()
+    data = _call_llm_comprehension(
+        level, lang,
+        grammar_seeds=_pick_grammar_seeds(level, rng, _recent_grammar_patterns(user_id)),
+        word_seeds=_pick_word_seeds(level, rng),
+    )
+
+    # 一文ずつ, analysed: each sentence of the breakdown through the
+    # analyzer's local tier (tokens, readings, furigana, deck matches,
+    # grammar points) with the model's own glosses folded on and the
+    # learner's SRS state attached -- the same shape POST /api/phrase/
+    # analyze returns for one sentence, so the screen draws it with the
+    # same component. No second model call: the glosses came with the
+    # text. The raw word lists are not sent; the analysis carries them.
+    states = srs.get_user_states(user_id)
+    for part in data["breakdown"]:
+        local = analyze_with_glosses(part["jp"], part.pop("words", None), level)
+        part["analysis"] = attach_user_state(local, states, user_id)
+
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
     return {
         "level": level,
@@ -1140,6 +1504,7 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
         "translation": data["translation"],
         "breakdown": data["breakdown"],
         "questions": data["questions"],
+        "grammar_points": data.get("grammar_points", []),
         "read_seconds": READ_SECONDS_BY_LEVEL.get(level, DEFAULT_READ_SECONDS),
         "question_count": spec["questions"],
     }
@@ -1158,6 +1523,7 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
         if i < len(answers) and answers[i] == q.get("correct")
     )
     total = len(questions)
+    grammar = json.dumps(payload.grammar_points) if payload.grammar_points is not None else None
 
     conn = db_conn()
     try:
@@ -1165,13 +1531,13 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
             cur.execute(
                 """
                 INSERT INTO comprehension_log
-                    (user_id, level, text, translation, questions, answers, score, total)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                    (user_id, level, text, translation, questions, answers, score, total, grammar)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 RETURNING id, created_at
                 """,
                 (
                     user_id, payload.level, payload.text, payload.translation,
-                    json.dumps(questions), json.dumps(answers), score, total,
+                    json.dumps(questions), json.dumps(answers), score, total, grammar,
                 ),
             )
             row_id, created_at = cur.fetchone()

@@ -162,7 +162,7 @@ describe('ReadingRun — the breakdown toggle', () => {
     await settle(60)
 
     expect(registersShowing(root)).toBe(true)
-    expect(root.querySelector('.rdg-breakdown')).toBeFalsy()
+    expect(root.querySelector('.bkd')).toBeFalsy()
 
     // And when it does land, the same button performs the trade.
     inFlight.release(res(ANALYSIS))
@@ -174,7 +174,7 @@ describe('ReadingRun — the breakdown toggle', () => {
     toggle(root).click()
     await settle(120)
 
-    expect(root.querySelector('.rdg-breakdown')).toBeTruthy()
+    expect(root.querySelector('.bkd')).toBeTruthy()
     expect(registersShowing(root)).toBe(false)
     expect(toggle(root).textContent).toBe(translations.fr.hideBreakdown)
   })
@@ -194,6 +194,6 @@ describe('ReadingRun — the breakdown toggle', () => {
     await settle(60)
 
     expect(registersShowing(root)).toBe(true)
-    expect(root.querySelector('.rdg-breakdown')).toBeFalsy()
+    expect(root.querySelector('.bkd')).toBeFalsy()
   })
 })

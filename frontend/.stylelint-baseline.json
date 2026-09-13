@@ -25,8 +25,6 @@
   "no-descending-specificity::Expected selector \".profile-card__name--editable:hover .profile-card__edit-glyph\" to come before selector \".pass__holder .profile-card__name:hover .profile-card__edit-glyph\", at line N": 1,
   "no-descending-specificity::Expected selector \".grammar-rule\" to come before selector \".grammar-answer .grammar-rule\", at line N": 1,
   "no-descending-specificity::Expected selector \".phrase-word-card__surface\" to come before selector \".phrase-word-card__surface-wrap--clickable .phrase-word-card__surface\", at line N": 1,
-  "no-descending-specificity::Expected selector \".rdg-breakdown-toggle:disabled\" to come before selector \".rdg-breakdown-toggle:not(:disabled):hover\", at line N": 1,
-  "no-descending-specificity::Expected selector \".rdg-breakdown-nav:disabled\" to come before selector \".rdg-breakdown-nav:not(:disabled):hover\", at line N": 1,
   "no-descending-specificity::Expected selector \".study-drawing-toggle--active\" to come before selector \":root[data-theme=\"light\"] .study-drawing-toggle--active\", at line N": 1,
   "no-descending-specificity::Expected selector \".study-topbar-drawing-toggle--active\" to come before selector \":root[data-theme=\"light\"] .study-topbar-drawing-toggle--active\", at line N": 1,
   "no-descending-specificity::Expected selector \".gate__wave span\" to come before selector \".pass__wave span:nth-child(1)\", at line N": 1,

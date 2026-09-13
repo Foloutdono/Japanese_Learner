@@ -34,6 +34,7 @@ from study.exam_validation import (
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json
 from study.exam_pipeline import generate_paper
 from study.llm_shared import llm_configured, soften_kanji
+from study.level_mix import validate_vocab_mix
 
 logger = logging.getLogger(__name__)
 
@@ -236,13 +237,23 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
         # reading, which is exactly what a real low-level JLPT passage
         # does with a word whose kanji the learner hasn't met yet. A
         # length or shape failure has no such repair.
+        # Vocabulary is the third kind (plan 084): a passage whose words
+        # sit above the level by more than study/level_mix's one-in-
+        # twenty is fed back like any other failure, and on the last
+        # attempt is ACCEPTED with a log line. Never a GenerationFailed:
+        # a paper is generated once and served for a revision, and a
+        # paper that does not exist costs more than one that leans on a
+        # few hard words. Reading practice, which can afford to refuse,
+        # treats the same measurement as a gate (routes/reading.py).
         hard_errors: list[str] = []
         kanji_errors: list[str] = []
+        soft_errors: list[str] = []
         if not isinstance(text, str) or not text.strip():
             hard_errors.append("missing textJp")
         else:
             hard_errors.extend(validate_passage_length(text, chars))
             kanji_errors.extend(validate_kanji_gate(text, level))
+            soft_errors.extend(validate_vocab_mix(text, level))
         if not isinstance(questions_raw, list) or len(questions_raw) != question_count:
             got = len(questions_raw) if isinstance(questions_raw, list) else "n/a"
             hard_errors.append(f"expected {question_count} questions, got {got}")
@@ -253,7 +264,11 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
                 logger.info("Passage %s: softened out-of-level kanji rather than dropping it", passage_id)
                 text, kanji_errors = softened, []
 
-        if not hard_errors and not kanji_errors:
+        if soft_errors and last_attempt:
+            logger.info("Passage %s: accepted over its vocabulary mix (%s)", passage_id, "; ".join(soft_errors))
+            soft_errors = []
+
+        if not hard_errors and not kanji_errors and not soft_errors:
             try:
                 questions = _build_questions(questions_raw, level, passage_id, start_number)
             except GenerationFailed as e:
@@ -262,7 +277,7 @@ def _build_one_passage(level: str, mondai_name: str, chars: int, question_count:
                 continue
             return {"id": passage_id, "textJp": text, "questions": questions}
 
-        last_errors = hard_errors + kanji_errors
+        last_errors = hard_errors + kanji_errors + soft_errors
         feedback = _FEEDBACK_HEADER + "".join(
             f"- {_as_feedback(e, text, chars)}\n" for e in last_errors
         )
