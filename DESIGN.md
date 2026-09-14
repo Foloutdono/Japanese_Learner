@@ -615,13 +615,19 @@ progress legend back.
 Every card is rewarded, and none of it is a ceremony. Three moments, three
 objects, and not one of them waits to be dismissed:
 
-- **The fare** (運賃) — the XP a review earns — is reported on the object it
-  was paid into: the **level HUD**. The roundel in the top bar pulses gold
-  once and the amount rises off it; on a phone the bottom bar lights the span
-  it gained and the figure rises off the XP count. There is no toast, no
-  panel and nothing to dismiss; the figure is gold because XP is the pass's
-  balance, never a state colour. `XpToast` still sounds the tick and tells a
-  screen reader.
+- **The fare** (運賃) — the XP an answer earns — is reported on the object it
+  was paid into: the **level HUD** on a tab screen, where the roundel pulses
+  gold once and the amount rises off it, and the **level bar** on a run
+  (`components/chrome/LevelBar.jsx`), docked on the bottom edge under the
+  rating bar, where the span it gained lights gold and the figure rises off
+  the XP count. There is no toast, no panel and nothing to dismiss; the
+  figure is gold because XP is the pass's balance, never a state colour.
+  `XpToast` still sounds the tick and tells a screen reader. Every play mode
+  pays: a card review through the scheduler, and a practice answer —
+  reading, translation, comprehension, dictation, the exam — at a review's
+  base rate through `srs.award_practice`, into the ledger rather than the
+  review log, so the level and the 番付 move and nothing that counts
+  reviews does.
 - **The press** (落款) — a card climbing a stage — is the card being
   signed. Every card carries its stage as a **word** in its top corner
   (new · in progress · mastered, caption register, the stage's ink), not a
@@ -703,11 +709,12 @@ a learner who has just rated one card is already looking for the next.
   reach for wherever a fixed row must hold a word in every language** —
   the alternative is type small enough to be unreadable, or copy chosen
   to fit rather than to be right.
-- **A run leaves the chrome.** Both bars go; the rating bar (or the field)
-  docks on the bottom edge and `‹ Gate` in the stage head is the way out.
-  Everything docked reads `--dock-bottom` — the tab bar plus the safe-area
-  inset under the shell, the inset alone on a stage — never a number of its
-  own.
+- **A run leaves the chrome.** Both bars go; the level bar takes the bottom
+  edge (sumi, the level, the gold track, the XP figure — the fare's home once
+  the HUD has left), the rating bar (or the field) docks on top of it and
+  `‹ Gate` in the stage head is the way out. Everything docked reads
+  `--dock-bottom` — the tab bar plus the safe-area inset under the shell, the
+  level bar plus the inset on a stage — never a number of its own.
 - **One filled action per screen**, gold, 52px, docked at the foot and
   rising with the keyboard; a selection is a gold ring; disabled is
   `opacity: 0.45` and nothing else; loading is three gold dots, never a

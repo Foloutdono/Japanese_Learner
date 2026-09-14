@@ -399,6 +399,7 @@ const quiz = {
   // XpToast
   levelUp:          'Level up!',
   level:            'Level',
+  levelShort:       'Lv',
 
 }
 

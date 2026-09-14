@@ -5,6 +5,8 @@ import { playUi } from '../lib/audio'
 import { Leave } from '../components/chrome/Bar'
 import { Sheet } from '../components/chrome/Sheet'
 import { StudyStage } from '../components/study/StudyStage'
+import { LevelBar } from '../components/chrome/LevelBar'
+import { applyXpGain } from '../stores/profileSummary'
 import { CardTransition } from '../components/study/CardTransition'
 import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
 import Empty from '../components/ui/Empty'
@@ -415,6 +417,10 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       // before the POST resolved would destroy the one copy of a
       // finished exam whenever the request failed.
       clearDraft(examId, exam.revision)
+      // The paper's fare (xp_earned, top-level on the attempt): into
+      // the running total now, so the level the results screen's HUD
+      // shows is the one the paper just paid into.
+      if (typeof summary.xp_earned === 'number') applyXpGain({ amount: summary.xp_earned })
       // attempt id in the URL (not just router state) is what makes a
       // reloaded result page recoverable — see ExamResult.
       navigate(`/practice/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
@@ -531,6 +537,9 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           busy={submitState === 'sending'}
         />
       </main>
+      {/* The same level bar every run docks (StudyStage); the exam
+          draws its own stage, so it mounts it itself. */}
+      <LevelBar />
 
       {/* The grid, in a sheet the bar opens. Jumping closes it: the
           question is what the learner asked for. */}

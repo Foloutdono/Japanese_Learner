@@ -88,6 +88,8 @@ caps at `99+`: a third figure is wider than the gate.
 |---|---|---|
 | `.stage` (the frame), `.stage__foot` | the study stage — the ≤768px block docks the rating bar and grows the card | `components/study/StudyStage.jsx`; the six study screens render inside it |
 | `.stage__head`, `.stage__leave`, `.stage__where*`, `.today-remaining`, `.stage__head .hud__pass` | the head of a run | `components/chrome/StageHead.jsx` |
+| `.lvlbar` (`__level`, `__level-num`, `__track`, `__fill`, `__gain`, `__xp`, `__unit`), `.hud-fare--bar` | the level bar docked on a run's bottom edge — the fare's home once the HUD has left; `--dock-bottom` on a stage is its height | `components/chrome/LevelBar.jsx`, mounted by `StudyStage` and by the exam runner |
+| `.rating-bar__btn--best` | the rating bar's best answer, the one tile filled gold (2026-09: the segments became tiles) | `components/study/RatingBar.jsx` |
 | `.deck-progress`, `.deck-progress__bar`, `.deck-progress__segment` | the hairline (the legend hides on a phone) | `DeckProgress` in `components/study/QuizComponents.jsx`; the run's own bar in `screens/TodayRun.jsx` |
 | `.study-assist`, `.study-assist__toggle`, `--on` | the assist toggles | `components/study/HintBar.jsx` |
 | `.prompt-card`, `.prompt-card__body`, `.prompt-card__foot`, `.stage-mark*`, `.char-display*`, `.flashcard*` | the card | `components/study/PromptCard.jsx`, `CardPrompt.jsx`, `StageMark.jsx`, `QuizComponents.jsx` |
@@ -154,7 +156,10 @@ that knows that shape, and a path the station could not have produced sends
 the learner back to it. The sessions and the exam runner render on
 `StudyStage` / the stage frame with the list they were chosen from as the
 way out (`‹ Sources`, `‹ Levels`, `‹ Tiers`; `‹ Exam`) and no pocket pass:
-practice spends no credits. The reading and translation tier step is the
+practice spends no credits. They do pay the fare: every graded answer comes
+back with `xp_earned` (`srs.award_practice`, into the ledger), and
+`hooks/usePracticeXp.js` moves the docked level bar and sounds the tick the
+way `useReviewGates` does on a card run. The reading and translation tier step is the
 vocab station's tiers page (a `Seg` for the word list over `TierSelector`),
 and the batch carries the chosen `tier_size`. The comprehension exercise commits a pick
 with Next (the canvas), and re-reading the text pauses the clock. Held from

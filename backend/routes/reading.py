@@ -732,7 +732,19 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
                 "new_level": state.get("new_level"),
             }
 
+    # The fare. A rating that scheduled a card was paid by that review;
+    # one that scheduled nothing -- no card behind the sentence, or an
+    # older client sending no quality -- is paid here at the practice
+    # rate (srs.award_practice), so the run's level bar moves either
+    # way. Top-level on purpose: every run reads the same three keys.
+    if scheduled:
+        fare = {k: scheduled[k] for k in ("xp_earned", "leveled_up", "new_level")}
+    else:
+        quality = payload.quality if payload.quality is not None else (4 if payload.correct else 1)
+        fare = srs.award_practice(user_id, "reading", payload.source, [quality])
+
     return {
+        **fare,
         "correct": payload.correct,
         "romaji": payload.romaji,
         "quality": payload.quality,
@@ -1545,7 +1557,16 @@ def post_comprehension_result(payload: ComprehensionAnswersPayload, user_id: str
     finally:
         conn.close()
 
+    # The fare for the exercise: one ledger row for the submission, a
+    # correct question at a card's correct rate and a wrong one at its
+    # wrong rate (srs.award_practice), keyed on the log row.
+    fare = srs.award_practice(
+        user_id, "comprehension", str(row_id),
+        [4 if i < len(answers) and answers[i] == q.get("correct") else 1 for i, q in enumerate(questions)],
+    )
+
     return {
+        **fare,
         "id": row_id,
         "score": score,
         "total": total,
