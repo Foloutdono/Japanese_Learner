@@ -80,7 +80,12 @@ export function WallMap({ sections, stats, bySource, onDepart, decks = null }) {
 
   return (
     <div className="board">
-      <div className="wmap__lines">
+      {/* --rows is the lane count, and the phone's map reads it to give
+          every row on the wall — lanes and the deck shelf alike — an
+          equal share of the room going spare (index.css, "The map is
+          the wall"). Set here rather than hardcoded in the sheet so a
+          fifth tracked line cannot silently unbalance the split. */}
+      <div className="wmap__lines" style={{ '--rows': tracked.length }}>
         {tracked.map(section => {
           const code = stationFor(section.path).code
           const source = TRACKED[section.path]

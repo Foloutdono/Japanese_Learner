@@ -55,9 +55,7 @@ const SYLLABARY_LIMIT = 200
 //
 // "grammar" is the 文法 line's 355 points as entries (routes/dictionary.py's
 // _grammar_collection), between the content collections and the two
-// kana charts, in the line's own pine. It is the one collection with a
-// second row of chips: the JLPT levels (LEVELS below), shown under it
-// the way the 部 chip shows under kanji.
+// kana charts, in the line's own pine.
 function categoriesFor(t) {
 	return [
 		['kanji',    t.dictKanji,    'var(--line-kanji)'],
@@ -69,6 +67,20 @@ function categoriesFor(t) {
 }
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
+
+// The collections filed on the JLPT level, which get the console's
+// second row of chips (the way the 部 chip shows under kanji). The two
+// syllabary charts are fixed sets and have no level to be on.
+//
+// For kanji and vocabulary a level means THE APP'S OWN DECK at that
+// level: the KANJIDIC and JMdict pools behind those collections carry
+// no level at all — that is why their tiles draw no badge — so picking
+// one narrows 13,131 characters to the 103 the course teaches at N5,
+// and 220,865 words to its 667. Which is the point: an unlevelled
+// collection answers "does this word exist", a levelled one answers
+// "is this word on my next exam", and only the second is a shelf you
+// can read end to end.
+const LEVELLED = ['kanji', 'vocab', 'grammar']
 
 // Route: /dictionary — under the shell (plan 073: the canvas's
 // Dictionary). The bar, the analyzer's door, the console with the
@@ -99,7 +111,7 @@ export default function DictionaryScreen({ session }) {
 	// learner moves between chips. Anything unrecognised is the default.
 	const [sp] = useSearchParams()
 	const initialCategory = CATEGORIES.some(([key]) => key === sp.get('category')) ? sp.get('category') : 'kanji'
-	const initialLevel = initialCategory === 'grammar' && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
+	const initialLevel = LEVELLED.includes(initialCategory) && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
 
 	// The plate's add-to-deck roundel (a grammar entry's one action)
 	// writes through the same mining the analyzer uses; one instance
@@ -117,6 +129,9 @@ export default function DictionaryScreen({ session }) {
 	const [page, setPage]             = useState(0)
 	const [hasMore, setHasMore]       = useState(true)
 	const [total, setTotal]           = useState(0)
+	// The spelling the answer is actually for, when a query that found
+	// nothing was retried against the nearest word the catalogue holds.
+	const [corrected, setCorrected]   = useState(null)
 	const [selected, setSelected]     = useState(null)
 
 	// Radical browsing
@@ -186,9 +201,9 @@ export default function DictionaryScreen({ session }) {
 			&& window.matchMedia('(min-width: 1100px)').matches
 	}
 
-	// `lvl` is the grammar collection's level — the state's value unless
-	// the caller is changing it in the same breath (switchLevel, the
-	// mount), since a setState is not readable until the next render.
+	// `lvl` is the collection's JLPT level — the state's value unless the
+	// caller is changing it in the same breath (switchLevel, the mount),
+	// since a setState is not readable until the next render.
 	function fetchPage(p, q, cat, rad, autoSelectChar, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
@@ -203,7 +218,12 @@ export default function DictionaryScreen({ session }) {
 		const limit = (cat === 'hiragana' || cat === 'katakana') ? SYLLABARY_LIMIT : LIMIT
 		const params = new URLSearchParams({ q, page: p, limit, lang, category: cat })
 		if (rad != null) params.set('radical', rad)
-		if (cat === 'grammar' && lvl) params.set('level', lvl)
+		// Not while browsing by radical: that index is served whole, deck
+		// and pool together in stroke order (routes/dictionary.py), and a
+		// level would have to cut the pool half out of a list whose whole
+		// point is that it is the complete one. The chips are hidden in
+		// that mode for the same reason.
+		if (LEVELLED.includes(cat) && lvl && rad == null) params.set('level', lvl)
 
 		apiFetch(`/api/dictionary?${params.toString()}`, session)
 			.then(r => r.json())
@@ -213,6 +233,10 @@ export default function DictionaryScreen({ session }) {
 				else setResults(prev => [...prev, ...newResults])
 				setTotal(data.total)
 				setHasMore(data.has_more)
+				// The word the backend answered with when the one typed
+				// found nothing (routes/dictionary.py's `corrected`). Null
+				// on every other request, which is all of them but a typo.
+				setCorrected(data.corrected || null)
 				setPage(p)
 				setLoading(false)
 				setLoadingMore(false)
@@ -284,15 +308,18 @@ export default function DictionaryScreen({ session }) {
 			setMode('search')
 			setSelectedRadical(null)
 		}
-		// The level row exists under grammar alone; a level left behind
-		// would narrow nothing visible, and would narrow again on return.
+		// A level is cleared on every move between collections. N5 in the
+		// vocabulary and N5 in the kanji are different shelves, and a level
+		// carried across silently narrows a collection the learner has
+		// only just arrived at — or, under a syllabary, narrows nothing
+		// visible and then narrows again on the way back.
 		setLevel(null)
 		fetchPage(0, isSyl ? '' : query, cat, null, undefined, null)
 	}
 
-	// The grammar collection's second row: one JLPT level, or all of
-	// them. The query stays — a learner narrowing "〜て" to N4 is still
-	// looking for "〜て".
+	// The console's second row: one JLPT level, or all of them. The query
+	// stays — a learner narrowing "〜て" to N4 is still looking for "〜て",
+	// and one narrowing "water" to N5 still wants water.
 	function switchLevel(lvl) {
 		if (lvl === level) return
 		playUi('click-mode-selection')
@@ -300,7 +327,7 @@ export default function DictionaryScreen({ session }) {
 		setSelected(null)
 		setPage(0)
 		setHasMore(true)
-		fetchPage(0, query, 'grammar', null, undefined, lvl)
+		fetchPage(0, query, category, null, undefined, lvl)
 	}
 
 	function switchToSearchMode() {
@@ -320,6 +347,10 @@ export default function DictionaryScreen({ session }) {
 		setSelectedRadical(null)
 		setSelected(null)
 		setResults([])
+		// The radical index is the complete one, in stroke order, and a
+		// level cannot be applied to it (see fetchPage). Dropped rather
+		// than ignored, so the chips and the list agree.
+		setLevel(null)
 		if (!radicalGroups) loadRadicalGrid()
 	}
 
@@ -443,7 +474,7 @@ export default function DictionaryScreen({ session }) {
 			    it exists (plan 067). */}
 			<Console>
 				<ConsoleTop>
-					<Chips label={t.dictCollections}>
+					<Chips label={t.dictCollections} className="dict-collections">
 						{CATEGORIES.map(([key, label, color]) => (
 							<Chip key={key} on={category === key} color={color} onClick={() => switchCategory(key)}>
 								{label}
@@ -460,12 +491,23 @@ export default function DictionaryScreen({ session }) {
 							</Chip>
 						)}
 					</Chips>
-					{/* The levels, under the grammar collection alone — 355
-					    points is a long wall, and the JLPT level is the one
-					    axis the catalogue is already filed on. A second row of
-					    the same chips, not a second control: each level in its
-					    own tint (the catalogue cards' badge), "all" in 辞書's. */}
-					{category === 'grammar' && (
+					{/* The levels, under the three collections filed on them
+					    (LEVELLED). The JLPT level is the axis the whole
+					    catalogue is already ordered by, and every one of the
+					    three is a long wall without it: 355 grammar points,
+					    13,131 characters, 220,865 words. A second row of the
+					    same chips, not a second control: each level in its own
+					    tint (the catalogue cards' badge), "all" in 辞書's.
+
+					    Not anywhere in the radical MODE, grid or results:
+					    that index is the complete one, deck and pool in stroke
+					    order, and it is not a thing a level can cut (see
+					    fetchPage). Hidden rather than shown-and-inert — a chip
+					    that narrowed nothing would be the smaller problem; the
+					    larger one is that switchLevel refetches without a
+					    radical, so a level picked over a radical's results
+					    would silently drop the radical. */}
+					{LEVELLED.includes(category) && mode !== 'radical' && (
 						<Chips label={t.dictLevels} className="dict-levels">
 							<Chip on={level == null} color={DICTIONARY_COLOR} onClick={() => switchLevel(null)}>
 								{t.dictLevelAll}
@@ -485,7 +527,14 @@ export default function DictionaryScreen({ session }) {
 				    flight it says nothing rather than running three gold dots
 				    beside the placeholder, where they read as a stray second
 				    loader. The one wait for this moment is ResultsSection's
-				    <Loading /> under the console. */}
+				    <Loading /> under the console.
+
+				    No autoFocus: the field used to take focus on arrival, and
+				    on a phone that opens the keyboard over the catalogue the
+				    learner came to look at. The screen is a shelf to browse at
+				    least as often as a box to type in, so the one thing it did
+				    on arrival was hide itself. Both ways in are unchanged — tap
+				    the field, or press "/" (the keyboard effect above). */}
 				{!showingRadicalGrid && !isSyllabary && (
 					<ConsoleIndex
 						inputRef={searchRef}
@@ -495,12 +544,26 @@ export default function DictionaryScreen({ session }) {
 						placeholder={mode === 'radical' ? t.dictionaryPlaceholderRadical
 							: category === 'grammar' ? t.dictionaryPlaceholderGrammar
 							: t.dictionaryPlaceholder}
-						autoFocus={mode === 'search'}
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
 					/>
 				)}
 			</Console>
+
+			{/* もしかして — the search answered a question the learner did
+			    not quite ask: what they typed found nothing, so it was
+			    retried against the nearest word this catalogue holds
+			    (backend study/search_match.py). Saying so is not optional.
+			    A page of results for a word nobody typed, with no line to
+			    explain it, is a dictionary that looks like it cannot spell.
+			    One line, the corrected word in ink, and no "did you mean?"
+			    — the correction has already happened; offering it as a
+			    question would be asking about something already done. */}
+			{corrected && !loading && (
+				<p className="dict-corrected" role="status">
+					{t.dictCorrectedFor} <b>{corrected}</b>
+				</p>
+			)}
 
 			{/* Selected-radical header */}
 			{mode === 'radical' && selectedRadical != null && (

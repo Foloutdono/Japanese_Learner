@@ -76,7 +76,7 @@ describe('the profile at phone width', () => {
     expect(seg.top).toBeLessThan(mark.bottom)
   })
 
-  it('the status sheet: distance, a 44px track, two rows, the moves are targets', async () => {
+  it('the status sheet: distance, a 52px track, two rows, the moves side by side', async () => {
     const screen = await render(
       <div className="sheet sheet--sumi status-sheet jour-st--slightlyBehind" style={{ position: 'static' }}>
         <div className="jour-dist">
@@ -114,8 +114,8 @@ describe('the profile at phone width', () => {
           </div>
         </div>
         <div className="jour-rev__actions">
-          <button type="button" className="jour-act"><strong>Run 15 a day</strong>keeps 14 Mar</button>
-          <button type="button" className="jour-act"><strong>Reprint at 7.1 a day</strong>arrive 23 Mar</button>
+          <button type="button" className="jour-act"><strong>Run 15 a day</strong>arrive 15 Feb 2027</button>
+          <button type="button" className="jour-act"><strong>Reprint the pass</strong>arrive 23 Apr 2027</button>
         </div>
       </div>
     )
@@ -128,8 +128,11 @@ describe('the profile at phone width', () => {
     expect(pct.top).toBeCloseTo(count.top, 0)
     expect(head.right - pct.right).toBeLessThan(1)
     expect(leg.top).toBeGreaterThan(count.bottom - 1)
-    // The drawing costs 44px of a phone, not 132.
-    expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(44)
+    // The drawing costs 52px of a phone, not 132. It was 44 until the
+    // rail moved 8px down the box to put air between the train and the
+    // line it rides: at a 2px gap the car read as a lozenge stuck to
+    // the rail rather than a train standing above it.
+    expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(52)
     // Each row: value and delta on one line, the promise under them.
     const rows = [...screen.container.querySelectorAll('.jour-cmp')].map(r => r.getBoundingClientRect())
     expect(rows[1].top).toBeGreaterThan(rows[0].bottom - 1)
@@ -139,8 +142,17 @@ describe('the profile at phone width', () => {
     expect(d.top).toBeCloseTo(v.top, 0)
     expect(d.left).toBeGreaterThan(v.right)
     expect(sub.top).toBeGreaterThan(v.bottom - 1)
-    for (const act of screen.container.querySelectorAll('.jour-act')) {
-      expect(act.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // The two moves are ONE choice with two answers, so they stand side
+    // by side and split the row — a choice stacked in a column reads as
+    // a list of suggestions to work through. Still thumb-sized at 390px,
+    // which is the width that decides whether the pair fits at all.
+    const acts = [...screen.container.querySelectorAll('.jour-act')].map(a => a.getBoundingClientRect())
+    expect(acts).toHaveLength(2)
+    expect(acts[1].top).toBeCloseTo(acts[0].top, 0)
+    expect(acts[1].left).toBeGreaterThan(acts[0].right)
+    expect(acts[0].width).toBeCloseTo(acts[1].width, 0)
+    for (const act of acts) {
+      expect(act.height).toBeGreaterThanOrEqual(44)
     }
   })
 })

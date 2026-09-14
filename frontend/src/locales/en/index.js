@@ -1011,6 +1011,9 @@ const dictionary = {
   dictGrammar:       'Grammar',
   dictLevels:        'Levels',
   dictLevelAll:      'All',
+  // The search was retried against a word the catalogue holds, because
+  // what was typed found nothing. A statement, not a question.
+  dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
   formation:         'Formation',
   browseGrammarPoints: 'Browse the points',
@@ -1193,14 +1196,22 @@ const profile = {
     `No study in 14 days against a promise of **${p} a day**. The line waits — the gate opens with one card.`,
   jourNoDest:        'No destination on this pass.',
   jourNoDestLink:    'Set one at the office',
-  jourActRecover:    (pace) => `Run ${pace} a day`,
-  jourActRecoverSub: (date) => `keeps ${date}`,
-  jourActReprint:    (date) => `Reprint — arrive ${date}`,
-  jourActReprintSub: (a) => `at ${a} a day; the date moves in ink`,
+  // The two moves are ONE choice, so they are written as one: the
+  // first line is what you change, the second is the same sentence on
+  // both — the date you then arrive. A reader compares two dates and
+  // two paces, with no prose in between to hold the difference in.
+  // The pace carries perDayUnit's own "/ day", which is what the PACE
+  // row above these buttons already prints: the button and the figure
+  // it is offering to change say the unit the same way, and it is two
+  // characters rather than six on a 165px button.
+  jourActRecover:    (pace) => `Run ${pace} / day`,
+  jourActRecoverSub: (date) => `arrive ${date}`,
+  jourActReprint:    'Reprint the pass',
+  jourActReprintSub: (date) => `arrive ${date}`,
   jourActResume:     'Resume the line',
-  jourActResumeSub:  'the gate opens with one card',
-  jourActSlow:       (pace) => `Reprint at ${pace} a day`,
-  jourActSlowSub:    (date) => `a slower promise beats a broken one — arrive ${date}`,
+  jourActResumeSub:  'the pass is unchanged',
+  jourActSlow:       (pace) => `Reprint at ${pace} / day`,
+  jourActSlowSub:    (date) => `arrive ${date}`,
   jourReprintError:  "Couldn't reprint — try again.",
 
   // Offline fallback content shown only when /api/profile is

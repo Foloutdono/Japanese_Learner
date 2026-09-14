@@ -70,56 +70,70 @@ def meaning_of(entry: dict, lang: str = "en") -> str:
 
 
 # ── The search predicate ──────────────────────────────────────
-# Deliberately the same three fields routes/dictionary.py already matches
-# a DECK kanji on — the character, its readings, its meaning — so the two
+# Deliberately the same fields routes/dictionary.py already matches a
+# DECK kanji on — the character, its readings, its meanings — so the two
 # halves of one collection answer a query the same way and the seam
 # between them is invisible.
 #
-# "its meaning" is the one the caller is being SHOWN, not every column we
-# happen to store: the deck matches against get_meaning()'s output, which
-# is the French where there is one and the English otherwise. Searching
-# both columns unconditionally would make a French-only term find pool
-# characters in an English session and no deck ones, which is exactly the
-# kind of half-answer merging the collections was meant to end. COALESCE
-# over NULLIF reproduces that fallback in SQL.
+# BOTH app languages, not the one being shown. It used to be the shown
+# one alone (COALESCE(NULLIF(meaning_fr, ''), meaning_en), mirroring
+# get_meaning's fallback), on the reasoning that a French-only term
+# finding pool characters but no deck ones was a half-answer. The deck
+# half answers in both languages now: a learner thinks vocabulary in
+# whichever language taught it to them, and being made to guess which
+# one the app filed a character under is a worse half-answer than the
+# one that reasoning avoided. es/pt are not searched — the app has two
+# string tables (frontend/src/locales), and those columns are data
+# KANJIDIC shipped, not a language anybody reads the app in.
+#
+# `kana_forms` are the kana a ROMAJI query spells (search_match.to_kana
+# gives both scripts, so "mizu" arrives as ("みず", "ミズ")) and are empty
+# for every other query. Each form is matched only where it could
+# possibly be: this table has zero rows with an ASCII letter in char or
+# readings, and its glosses hold no CJK, so the other pairings buy a
+# scan that cannot match.
 #
 # LIKE is case-insensitive for ASCII in SQLite, which is what
 # `q.lower() in meaning.lower()` does in Python.
-_LANGS = ("en", "fr", "es", "pt")
+_MEANINGS = "(meaning_en LIKE ? OR meaning_fr LIKE ?)"
+_JAPANESE = "(char = ? OR readings LIKE ?)"
 
 
-def _shown_meaning(lang: str) -> str:
-    if lang not in _LANGS or lang == "en":
-        return "meaning_en"
-    return f"COALESCE(NULLIF(meaning_{lang}, ''), meaning_en)"
+def _match(q: str, kana_forms: tuple[str, ...] = ()) -> tuple[str, tuple]:
+    """(SQL predicate, parameters) for one query in all its forms."""
+    clauses, params = [], []
+    if q:
+        if q.isascii():
+            clauses.append(_MEANINGS)
+            params += [f"%{q}%", f"%{q}%"]
+        else:
+            clauses.append(_JAPANESE)
+            params += [q, f"%{q}%"]
+    for form in kana_forms:
+        clauses.append(_JAPANESE)
+        params += [form, f"%{form}%"]
+    return " OR ".join(clauses), tuple(params)
 
 
-def _match(lang: str) -> str:
-    return f"(char = ? OR readings LIKE ? OR {_shown_meaning(lang)} LIKE ?)"
-
-
-def _match_params(q: str) -> tuple:
-    like = f"%{q}%"
-    return (q, like, like)
-
-
-def count_matching(q: str, lang: str = "en") -> int:
-    """How many POOL characters match `q`, without paying for a page.
+def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = ()) -> int:
+    """How many POOL characters match, without paying for a page.
 
     The dictionary needs the pool's total on every request (it is most of
     the collection's count) but only needs pool ROWS once a page runs past
-    the deck.
+    the deck. `lang` is accepted and ignored — both languages are searched
+    now — and kept so the call sites read the same either way.
     """
-    if q == "":
+    where, params = _match(q, kana_forms)
+    if not where:
         return _conn().execute(
             "SELECT COUNT(*) FROM kanji WHERE in_deck = 0").fetchone()[0]
     return _conn().execute(
-        f"SELECT COUNT(*) FROM kanji WHERE in_deck = 0 AND {_match(lang)}",
-        _match_params(q),
+        f"SELECT COUNT(*) FROM kanji WHERE in_deck = 0 AND ({where})", params,
     ).fetchone()[0]
 
 
-def search(q: str, limit: int, offset: int, lang: str = "en") -> tuple[list[dict], int]:
+def search(q: str, limit: int, offset: int, lang: str = "en",
+           kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """One page of the pool, ordered by sort_rank. Returns (rows, total).
 
     sort_rank is computed offline (see build_kanji_db.py's _sort_key): the
@@ -128,22 +142,30 @@ def search(q: str, limit: int, offset: int, lang: str = "en") -> tuple[list[dict
     than computed so idx_kanji_pool_sort covers the ORDER BY and paging
     never sorts.
     """
-    total = count_matching(q, lang)
-    if q == "":
+    return (page(q, limit, offset, kana_forms),
+            count_matching(q, lang, kana_forms))
+
+
+def page(q: str, limit: int, offset: int,
+         kana_forms: tuple[str, ...] = ()) -> list[dict]:
+    """search()'s rows without its count — see vocab_jmdict_data.page."""
+    where, params = _match(q, kana_forms)
+    if not where:
         rows = _conn().execute(
             f"{_SELECT} WHERE in_deck = 0 ORDER BY sort_rank LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
     else:
         rows = _conn().execute(
-            f"{_SELECT} WHERE in_deck = 0 AND {_match(lang)} ORDER BY sort_rank LIMIT ? OFFSET ?",
-            (*_match_params(q), limit, offset),
+            f"{_SELECT} WHERE in_deck = 0 AND ({where}) ORDER BY sort_rank LIMIT ? OFFSET ?",
+            (*params, limit, offset),
         ).fetchall()
-    return [_row(r) for r in rows], total
+    return [_row(r) for r in rows]
 
 
 def by_radical(radical: int, q: str, limit: int, offset: int,
-               lang: str = "en") -> tuple[list[dict], int]:
+               lang: str = "en",
+               kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """One page of EVERY character filed under `radical`, deck and pool
     together, in stroke order — the order a paper 漢和辞典 uses.
 
@@ -155,9 +177,10 @@ def by_radical(radical: int, q: str, limit: int, offset: int,
     """
     where = "radical = ?"
     params: tuple = (radical,)
-    if q != "":
-        where += f" AND {_match(lang)}"
-        params += _match_params(q)
+    match, match_params = _match(q, kana_forms)
+    if match:
+        where += f" AND ({match})"
+        params += match_params
     total = _conn().execute(
         f"SELECT COUNT(*) FROM kanji WHERE {where}", params).fetchone()[0]
     rows = _conn().execute(

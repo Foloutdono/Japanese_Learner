@@ -164,24 +164,59 @@ def count() -> int:
     return _conn().execute("SELECT COUNT(*) FROM entries").fetchone()[0]
 
 
-def count_matching(q: str) -> int:
-    """How many pool entries match `q` — the same predicate search()
-    pages through, without paying for a page of rows.
+# ── The search predicate ──────────────────────────────────────
+# `q` is the term as the learner typed it; `kana_forms` are the kana a
+# ROMAJI query spells (study/search_match.to_kana gives both scripts, so
+# "mizu" arrives here as ("みず", "ミズ")) and are empty for every other
+# query. Each form is matched only against columns that could hold it:
+# this table has zero rows with an ASCII letter in kanji or kana, and
+# zero with a CJK character in meaning, so the other pairings are a
+# full-table LIKE that cannot match. A `%…%` LIKE scans 212k rows, so
+# that routing is the difference between a romaji search costing what an
+# English one does and costing three times as much.
+
+
+def _match(q: str, kana_forms: tuple[str, ...]) -> tuple[str, tuple]:
+    """(SQL predicate, parameters) for one query in all its forms."""
+    clauses, params = [], []
+    if q:
+        if q.isascii():
+            clauses.append("meaning LIKE ?")
+            params.append(f"%{q}%")
+        else:
+            clauses.append("(kanji LIKE ? OR kana LIKE ?)")
+            params += [f"%{q}%", f"%{q}%"]
+    for form in kana_forms:
+        # The READING column alone. A kana form is a reading, and the
+        # kana column carries every entry's in full — a word written
+        # with kanji has its reading here too, so matching the kanji
+        # column as well finds nothing the kana column has not already
+        # found, at the price of a second scan of 212k rows. That is the
+        # whole difference between a romaji search costing what an
+        # English one does and costing half again.
+        clauses.append("kana LIKE ?")
+        params.append(f"%{form}%")
+    return " OR ".join(clauses), tuple(params)
+
+
+def count_matching(q: str, kana_forms: tuple[str, ...] = ()) -> int:
+    """How many pool entries match — the same predicate search() pages
+    through, without paying for a page of rows.
 
     dictionary.py's merged vocabulary collection needs the pool's total
     on every request (it is half the collection's count) but only needs
     pool ROWS once a page runs past the curated deck.
     """
-    if q == "":
+    where, params = _match(q, kana_forms)
+    if not where:
         return count()
-    like = f"%{q}%"
     return _conn().execute(
-        "SELECT COUNT(*) FROM entries WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ?",
-        (like, like, like),
+        f"SELECT COUNT(*) FROM entries WHERE {where}", params,
     ).fetchone()[0]
 
 
-def search(q: str, limit: int, offset: int) -> tuple[list[dict], int]:
+def search(q: str, limit: int, offset: int,
+           kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
     """Substring search over kanji/kana/meaning, same semantics as the
     old `for w in VOCAB_JMDICT: if q in ... ` loop in dictionary.py, but
     as an indexed-where-possible SQL query instead of a 292k-row Python
@@ -195,23 +230,28 @@ def search(q: str, limit: int, offset: int) -> tuple[list[dict], int]:
     query matches is the one the reader almost certainly means.
     idx_entries_freq_rank covers the ORDER BY, so paging never sorts.
     """
-    total = count_matching(q)
-    if q == "":
-        rows = _conn().execute(
-            "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
-            "ORDER BY freq_rank LIMIT ? OFFSET ?",
-            (limit, offset),
-        ).fetchall()
-        return [_row_to_entry(r) for r in rows], total
+    return page(q, limit, offset, kana_forms), count_matching(q, kana_forms)
 
-    like = f"%{q}%"
-    rows = _conn().execute(
-        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
-        "WHERE kanji LIKE ? OR kana LIKE ? OR meaning LIKE ? "
-        "ORDER BY freq_rank LIMIT ? OFFSET ?",
-        (like, like, like, limit, offset),
-    ).fetchall()
-    return [_row_to_entry(r) for r in rows], total
+
+def page(q: str, limit: int, offset: int,
+         kana_forms: tuple[str, ...] = ()) -> list[dict]:
+    """search()'s rows without its count.
+
+    A `%…%` LIKE over 212k rows is a full scan, and the count is one of
+    those scans. The dictionary needs the total on every request but the
+    rows only when a page runs past the curated deck (routes/dictionary.py),
+    so the two halves are separable and the caller that needs one should
+    not pay for both.
+    """
+    where, params = _match(q, kana_forms)
+    sql = "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
+    if where:
+        sql += f"WHERE {where} "
+        args: tuple = (*params, limit, offset)
+    else:
+        args = (limit, offset)
+    rows = _conn().execute(sql + "ORDER BY freq_rank LIMIT ? OFFSET ?", args).fetchall()
+    return [_row_to_entry(r) for r in rows]
 
 
 def get_senses(kanji: str, kana: str) -> list[dict] | None:
