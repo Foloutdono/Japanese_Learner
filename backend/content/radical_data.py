@@ -117,3 +117,78 @@ def siblings_by_stroke(number: int, want: int = 3) -> list[int]:
         if len(out) >= want:
             break
     return out
+
+
+# ── Study by radical (plan 086) ─────────────────────────────
+# The inverse of KANJI_RADICALS: for each radical number, the course's
+# own kanji filed under it, one row per character at its native level
+# (DECK_BY_CHAR's rule — 23 characters sit on two levels and a family
+# lists a character once), ordered N5 → N1 and then by stroke count so
+# a learner meeting the family reads it easy-first and the drill serves
+# it in that order (routes/kanji.py passes ordered=True). Radicals with
+# no deck kanji are simply absent: twenty of the 214 (爿 牙 瓜 …) file
+# nothing the course teaches, and a lesson with no family is not a
+# lesson.
+from content.kanji_data import LEVELS as _LEVELS
+from content.radical_info import RADICAL_INFO
+
+_LEVEL_RANK = {lv: i for i, lv in enumerate(_LEVELS)}
+
+
+def _build_deck_by_radical() -> dict[int, list[tuple[str, dict]]]:
+    out: dict[int, list[tuple[str, dict]]] = {}
+    for char, info in KANJI_RADICALS.items():
+        native = DECK_BY_CHAR.get(char)
+        if native is None:
+            continue
+        out.setdefault(info["radical"], []).append(native)
+    # The deck's own entries carry no stroke count; KANJI_RADICALS does
+    # (the whole kanji's, from the database).
+    def _rank(row):
+        level, entry = row
+        strokes = KANJI_RADICALS[entry["kanji"]].get("stroke_count") or 0
+        return (_LEVEL_RANK[level], strokes, entry["kanji"])
+    for rows in out.values():
+        rows.sort(key=_rank)
+    return out
+
+
+DECK_BY_RADICAL: dict[int, list[tuple[str, dict]]] = _build_deck_by_radical()
+
+
+def deck_kanji_for(number: int) -> list[tuple[str, dict]]:
+    """[(native level, deck entry), ...] filed under `number`, easy-first.
+    Empty for a radical the course never reaches, and for an unknown
+    number — callers that need to tell those apart check
+    RADICAL_BY_NUMBER first."""
+    return DECK_BY_RADICAL.get(number, [])
+
+
+def info_for(number: int, lang: str = "fr") -> dict | None:
+    """The radical as a lesson knows it: the index row merged with the
+    authored table (content/radical_info.py).
+
+        {number, char, stroke_count, glyph, forms, meaning, names_ja,
+         position}
+
+    `char` is still the index's identity (what the dictionary browses
+    by and the radical mode answers with); `glyph` is the form the
+    study screens print large — the first of `forms`, which is how the
+    learner meets it. They differ for the two dozen radicals KANJIDIC2
+    files under a form nobody writes (才 for hand, 邗 for city).
+    `meaning` is in the learner's language, English unless French is
+    asked for — the two the table is written in."""
+    r = RADICAL_BY_NUMBER.get(number)
+    if r is None:
+        return None
+    meaning_en, meaning_fr, names_ja, forms, position = RADICAL_INFO[number]
+    return {
+        "number": r["number"],
+        "char": r["char"],
+        "stroke_count": r["stroke_count"],
+        "glyph": forms[0],
+        "forms": list(forms),
+        "meaning": meaning_fr if lang == "fr" else meaning_en,
+        "names_ja": list(names_ja),
+        "position": position,
+    }

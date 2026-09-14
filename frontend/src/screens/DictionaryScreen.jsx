@@ -30,6 +30,7 @@ import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
 import { TextLinesIcon, CameraIcon, VideoIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
+import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
@@ -626,115 +627,9 @@ export default function DictionaryScreen({ session }) {
 }
 
 
-// ── 部首索引 — the radical index ──────────────────────────
-// One stroke count at a time. The index used to lay all 214 radicals
-// out in one long sheet under a sticky rail of eighteen pills, and on
-// a phone the rail wrapped to three lines and the sheet ran for a
-// dozen screens. A learner opening this index is nearly always looking
-// at a kanji and can count the strokes of its radical, so the stroke
-// count is the page they want, not a place to scroll past on the way
-// to it: the rail is one scrolling line of numerals now, and the sheet
-// under it is the picked group alone. Nothing scrolls past a screen.
-//
-// Within a group, the six most-used radicals come first and larger,
-// their counts in the line's ink — 氵 files 656 characters and 夂 four,
-// and on a page of 37 the big ones are what the eye should land on.
-// The rest keep the index's own order, by radical number.
-function StrokeStrip({ groups, active, onPick, t }) {
-	const tabRefs = useRef(new Map())
-	useEffect(() => {
-		tabRefs.current.get(active)?.scrollIntoView({ inline: 'center', block: 'nearest' })
-	}, [active])
-	return (
-		<nav className="stroke-strip" aria-label={t.dictStrokeIndex}>
-			{groups.map(g => (
-				<button
-					key={g.stroke_count}
-					type="button"
-					ref={el => { tabRefs.current.set(g.stroke_count, el) }}
-					onClick={() => onPick(g.stroke_count)}
-					aria-current={active === g.stroke_count ? 'true' : undefined}
-					className={`stroke-strip__tab${active === g.stroke_count ? ' stroke-strip__tab--active' : ''}`}
-				>
-					<span className="stroke-strip__n">{g.stroke_count}</span>
-					<span className="stroke-strip__unit" lang="ja">画</span>
-				</button>
-			))}
-		</nav>
-	)
-}
-
-const LEAD_COUNT = 6
-
-function RadicalTile({ radical, lead, onPick }) {
-	return (
-		<button
-			type="button"
-			onClick={() => onPick(radical.number)}
-			title={`${radical.kanji_count} kanji`}
-			className={`radical-tile${lead ? ' radical-tile--lead' : ''}`}
-		>
-			<span className="radical-tile__char" lang="ja">{radical.char}</span>
-			<span className="radical-tile__count">{radical.kanji_count}</span>
-		</button>
-	)
-}
-
-function RadicalGrid({ groups, loading, onPick, t }) {
-	const [stroke, setStroke] = useState(null)
-
-	if (loading || !groups) {
-		return <Loading />
-	}
-	if (!groups.length) return null
-
-	const index = Math.max(0, groups.findIndex(g => g.stroke_count === stroke))
-	const group = groups[index]
-	const prev = groups[index - 1]
-	const next = groups[index + 1]
-
-	// The lead six by how many characters they file; the rest as the
-	// index orders them. A group of six or fewer is all lead.
-	const ranked = [...group.radicals].sort((a, b) => b.kanji_count - a.kanji_count)
-	const leadSet = new Set(ranked.slice(0, LEAD_COUNT).map(r => r.number))
-	const lead = ranked.slice(0, LEAD_COUNT)
-	const rest = group.radicals.filter(r => !leadSet.has(r.number))
-
-	const unit = n => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
-
-	return (
-		<div className="dict-radical-index">
-			<StrokeStrip groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
-
-			<section className="radical-page" data-stroke={group.stroke_count} aria-label={unit(group.stroke_count)}>
-				<BlockMark jp={`${group.stroke_count}画`} name={unit(group.stroke_count)} tally={group.radicals.length} />
-				<div className="radical-page__lead">
-					{lead.map(r => <RadicalTile key={r.number} radical={r} lead onPick={onPick} />)}
-				</div>
-				{rest.length > 0 && (
-					<div className="radical-page__rest">
-						{rest.map(r => <RadicalTile key={r.number} radical={r} onPick={onPick} />)}
-					</div>
-				)}
-				{/* The neighbouring pages, named — the strip above scrolls
-				    the far counts out of view, and a page should say what
-				    is either side of it. */}
-				<div className="radical-page__pager">
-					{prev && (
-						<button type="button" className="radical-page__turn" onClick={() => setStroke(prev.stroke_count)}>
-							‹ <span lang="ja">{prev.stroke_count}画</span> · {prev.radicals.length}
-						</button>
-					)}
-					{next && (
-						<button type="button" className="radical-page__turn radical-page__turn--next" onClick={() => setStroke(next.stroke_count)}>
-							<span lang="ja">{next.stroke_count}画</span> · {next.radicals.length} ›
-						</button>
-					)}
-				</div>
-			</section>
-		</div>
-	)
-}
+// The radical index (StrokeStrip, RadicalTile, RadicalGrid) lives in
+// components/dictionary/RadicalIndex.jsx since plan 086, when the kanji
+// station started asking the same question as a study source.
 
 // ── Results grid + detail panel (shared by search mode and radical results) ──
 
@@ -936,26 +831,7 @@ function ResultsSection({
 	)
 }
 
-// ── A block's own mark ────────────────────────────────────
-// The station sign, at the size a block gets: the Japanese term set
-// large in the collection's own ink, its plain-language twin tracked
-// out beside it, a rule under both, and the tally riding the far end as
-// data. For the two blocks in here that used to carry a SectionHeader —
-// the syllabary charts and the radical index's stroke groups.
-//
-// The rule the heading broke was its bulk, not its second language:
-// 五十音 alone tells a learner nothing they can act on, and the charts
-// under these marks no longer name their own rows. So the twin is
-// printed, not only read out. It is one line either way.
-function BlockMark({ jp, name, tally }) {
-	return (
-		<div className="dict-mark">
-			<span className="dict-mark__jp" lang="ja">{jp}</span>
-			{name && <span className="dict-mark__name">{name}</span>}
-			{tally != null && <span className="dict-mark__tally">{tally}</span>}
-		</div>
-	)
-}
+// BlockMark: components/dictionary/RadicalIndex.jsx (plan 086).
 
 // ── Syllabary chart (hiragana/katakana) ──────────────────
 // The classic gojūon table: rows are consonant groups, columns are

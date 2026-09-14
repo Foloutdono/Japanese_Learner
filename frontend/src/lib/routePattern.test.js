@@ -38,6 +38,9 @@ describe('routePattern', () => {
     expect(routePattern('/learn/vocab/N5')).toBe('/learn/vocab/:level')
     expect(routePattern('/learn/kanji/tiers')).toBe('/learn/kanji/tiers')
     expect(routePattern('/learn/kanji/tier/3')).toBe('/learn/kanji/tier/:tier')
+    expect(routePattern('/learn/kanji/radicals')).toBe('/learn/kanji/radicals')
+    expect(routePattern('/learn/kanji/radical/85')).toBe('/learn/kanji/radical/:radical')
+    expect(routePattern('/learn/kanji/radical/85/kanji.readings?g=水')).toBe('/learn/kanji/radical/:radical/:mode')
   })
 
   it('drops the query and the hash', () => {

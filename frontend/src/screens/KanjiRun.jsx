@@ -35,8 +35,9 @@ import { RadicalAnswer } from '../components/study/RadicalPieces'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 
 // ── 漢字 — the run (plan 071) ─────────────────────────────────
-// /learn/kanji/:level/:mode and /learn/kanji/tier/:tier/:mode (with
-// ?size=) on the stage frame. Where the kanji come from is the path —
+// /learn/kanji/:level/:mode, /learn/kanji/tier/:tier/:mode (with
+// ?size=) and /learn/kanji/radical/:radical/:mode (with ?g=, the glyph
+// for the bar — plan 086) on the stage frame. Where the kanji come from is the path —
 // the station and the platforms (screens/KanjiScreen.jsx) are the
 // screens before it, and ‹ Kanji is the way back. See KanaRun.jsx for
 // the shape every run shares.
@@ -44,21 +45,31 @@ import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer
 export default function KanjiRun({ session }) {
   const navigate    = useNavigate()
   const { t, lang } = useLang()
-  const { level, tier, mode } = useParams()
+  const { level, tier, radical, mode } = useParams()
   const [sp] = useSearchParams()
 
-  // 'level' (JLPT N5…N1) or 'frequency' (Top 200 / 201-400 / …, see
-  // frequency.py). The tier size the chosen tier was built at rides in
-  // the query: the same tier NUMBER means a different rank range at a
-  // different size, so it travels into every /api/frequency call.
-  const studyBy = level ? 'level' : tier ? 'frequency' : null
+  // 'level' (JLPT N5…N1), 'frequency' (Top 200 / 201-400 / …, see
+  // frequency.py) or 'radical' (one family, plan 086). The tier size
+  // the chosen tier was built at rides in the query: the same tier
+  // NUMBER means a different rank range at a different size, so it
+  // travels into every /api/frequency call. A radical's glyph rides
+  // the same way (?g=), for the bar only.
+  const studyBy = level ? 'level' : tier ? 'frequency' : radical ? 'radical' : null
   const tierSize = Number(sp.get('size')) || 200
   const tierLabel = tier ? tierLabelFor(Number(tier), tierSize) : null
+  const radicalGlyph = sp.get('g') || ''
+  const radicalLabel = radical ? `部首 ${radicalGlyph || `#${radical}`}` : null
   const reviewing = mode === FAST_REVIEW
-  // The browse exists for the JLPT path only (no tier review-cards
-  // endpoint yet).
-  const valid = Boolean(studyBy) && (reviewing ? studyBy === 'level' : STUDY_MODES[mode]?.source === 'kanji')
-  const platforms = level ? `/learn/kanji/${level}` : `/learn/kanji/tier/${tier}?size=${tierSize}`
+  // The browse exists for the JLPT and radical paths (no tier
+  // review-cards endpoint yet). The radical drill is not offered over
+  // a family: every answer would be the one radical it is.
+  const valid = Boolean(studyBy) && (
+    reviewing ? studyBy !== 'frequency'
+    : STUDY_MODES[mode]?.source === 'kanji' && !(studyBy === 'radical' && STUDY_MODES[mode]?.base === 'radical')
+  )
+  const platforms = level ? `/learn/kanji/${level}`
+    : tier ? `/learn/kanji/tier/${tier}?size=${tierSize}`
+    : `/learn/kanji/radical/${radical}`
   const leave = () => navigate(platforms)
 
   const [answered, setAnswered]       = useState(false)
@@ -89,6 +100,7 @@ export default function KanjiRun({ session }) {
   // mid-session re-translates in place (see the effect below).
   const storageKey = !valid || reviewing ? IDLE_KEY
     : studyBy === 'level' ? sessionKey('kanji', level, mode)
+    : studyBy === 'radical' ? sessionKey('kanji', 'radical', radical, mode)
     : sessionKey('kanji', 'freq', tier, tierSize, mode)
 
   const paceCtl = usePace(storageKey)
@@ -97,11 +109,13 @@ export default function KanjiRun({ session }) {
     if (!valid || reviewing) return []
     const url = studyBy === 'level'
       ? `/api/kanji/cards?level=${level}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
-      : `/api/frequency/kanji/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+      : studyBy === 'radical'
+        ? `/api/kanji/cards?radical=${radical}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
+        : `/api/frequency/kanji/cards?tier=${tier}&tier_size=${tierSize}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}`
     const data = paceCtl.capture(await apiJson(url + paceCtl.query, session, { signal }))
     return (data.cards ?? []).map(c => ({ ...c, lang }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [valid, reviewing, studyBy, level, tier, tierSize, mode, session, paceCtl.query, paceCtl.capture])
+  }, [valid, reviewing, studyBy, level, tier, tierSize, radical, mode, session, paceCtl.query, paceCtl.capture])
 
   const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
@@ -155,17 +169,19 @@ export default function KanjiRun({ session }) {
   function loadProgress(source, m) {
     const url = 'level' in source
       ? `/api/kanji/stats?level=${encodeURIComponent(source.level)}&mode=${m}`
-      : `/api/frequency/kanji/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
+      : 'radical' in source
+        ? `/api/kanji/stats?radical=${source.radical}&mode=${m}`
+        : `/api/frequency/kanji/stats?tier=${source.tier}&tier_size=${source.tierSize}&mode=${m}`
     apiFetch(url, session)
       .then(r => r.json())
       .then(data => setProgress(data?.error ? null : data))
       .catch(() => {})
   }
-  const source = studyBy === 'level' ? { level } : { tier, tierSize }
+  const source = studyBy === 'level' ? { level } : studyBy === 'radical' ? { radical } : { tier, tierSize }
   useEffect(() => {
     if (valid && !reviewing) loadProgress(source, mode)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, tier, tierSize, mode])
+  }, [level, tier, tierSize, radical, mode])
 
   // The browse: the full set of already-studied cards, fetched once —
   // see ReviewDeck for why this doesn't go through useCardSession.
@@ -174,14 +190,15 @@ export default function KanjiRun({ session }) {
     let live = true
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch state that must land with the fetch it announces; not an id-keyed reset.
     setReviewLoading(true)
-    apiFetch(`/api/kanji/review-cards?level=${level}&lang=${lang}`, session)
+    const scope = studyBy === 'radical' ? `radical=${radical}` : `level=${level}`
+    apiFetch(`/api/kanji/review-cards?${scope}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => { if (live) setReviewCards(data.cards ?? []) })
       .catch(() => { if (live) setReviewCards([]) })
       .finally(() => { if (live) setReviewLoading(false) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, reviewing, lang])
+  }, [level, radical, reviewing, lang])
 
   function postReview(quality) {
     // Struggling to recall the kanji from its meaning is exactly when a
@@ -227,11 +244,11 @@ export default function KanjiRun({ session }) {
         color="var(--line-kanji)"
         onLeave={leave}
         leaveLabel={t.kanjiTitle}
-        where={`${t.kanjiTitle} ${level}`}
+        where={`${t.kanjiTitle} ${level ?? radicalLabel}`}
         sub={t.modeReview}
       >
           <ReviewDeck
-            foot={`${t.kanjiTitle} ${level}`}
+            foot={`${t.kanjiTitle} ${level ?? radicalLabel}`}
             cards={reviewCards}
             loading={reviewLoading}
             t={t}
@@ -258,8 +275,8 @@ export default function KanjiRun({ session }) {
 
   const title = modeLabel(t, mode)
   // Study.dc.html's footer strip.
-  const cardFoot = { left: level ? `${level} 漢字` : '漢字', right: title }
-  const sourceLabel = studyBy === 'level' ? level : tierLabel
+  const cardFoot = { left: level ? `${level} 漢字` : radical ? radicalLabel : '漢字', right: title }
+  const sourceLabel = studyBy === 'level' ? level : studyBy === 'radical' ? radicalLabel : tierLabel
   // Which UI this mode needs, from the registry rather than a string
   // comparison against one key ('write') that used to stand in for it.
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD

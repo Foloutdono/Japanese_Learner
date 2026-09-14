@@ -191,6 +191,15 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 18 — 部首, study by radical** (plan 086, 2026-09-14, DONE).
+  Owner-directed: a third source on the kanji station. The dictionary's
+  radical index, dressed with the course's own counts and the learner's
+  figures; a lesson per radical (KanjiVG strokes, the 部首名, the meaning,
+  the forms, where it sits) over its family of course kanji by level; the
+  same five drills over that family alone, easy-first, wrong answers from
+  inside the family. The invariant is the themes': a radical is a grouping
+  of the same cards, never a copy. 214 rows written by hand in
+  `content/radical_info.py`. Plan file `086-study-by-radical.md`.
 - **Wave 17 — 統計, the service record** (plan 085, 2026-09-14, DONE).
   Owner-directed rework of the statistics screen, features and design,
   mobile first. The screen was 90% duplicate of the profile and the fare
