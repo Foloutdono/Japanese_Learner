@@ -23,7 +23,11 @@ import { GrammarChips } from './GrammarChips'
 // A sentence with nothing to open (no analysis and no note -- the
 // fallback for a backend that has not shipped the analysis yet) is
 // the two lines and nothing else: no chevron that opens nothing.
-export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onTokenClick }) {
+//
+// `onGrammarOpen` makes a sentence's grammar chips doors to their
+// dictionary entries (see GrammarChips); the chip stops its own click,
+// so opening an entry never closes the sentence it sits in.
+export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onTokenClick, onGrammarOpen }) {
   if (!sentences?.length) return null
   return (
     <div className="bkd-passage">
@@ -64,7 +68,7 @@ export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onToke
                 {sentence.analysis?.available && (
                   <>
                     <WordRows analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} />
-                    <GrammarChips grammar={sentence.analysis.grammar} t={t} quiet label={null} />
+                    <GrammarChips grammar={sentence.analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />
                   </>
                 )}
                 {sentence.note && <span className="prose__ai">{sentence.note}</span>}

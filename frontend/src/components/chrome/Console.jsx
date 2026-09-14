@@ -22,8 +22,12 @@ export function ConsoleTop({ children }) {
   return <div className="console__top">{children}</div>
 }
 
-export function Chips({ children, label }) {
-  return <div className="console__chips" role={label ? 'group' : undefined} aria-label={label}>{children}</div>
+// `className` is for a second row of chips under the first (the
+// dictionary's JLPT levels under its collections): ConsoleTop wraps and
+// every Chips takes the full row, so two of them already stack — the
+// class only draws the hairline between them.
+export function Chips({ children, label, className = '' }) {
+  return <div className={`console__chips ${className}`.trim()} role={label ? 'group' : undefined} aria-label={label}>{children}</div>
 }
 
 // A chip is a choice, so it says whether it is chosen (aria-pressed).

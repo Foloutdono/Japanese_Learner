@@ -83,6 +83,14 @@ const RESULT = {
   ],
 }
 
+// The seeded point as the dictionary serves it (routes/dictionary.py's
+// _grammar_result): what the sheet opens when a chip is pressed.
+const GRAMMAR_ENTRY = {
+  type: 'grammar', raw_id: 'grammar_N5_〜ました／〜ませんでした', level: 'N5',
+  pattern: '〜ました／〜ませんでした', structure: 'verb stem + ました', meaning: 'polite past',
+  examples: [], status: { status: 'not_started', total_reviews: 0 },
+}
+
 const ok = body => ({ ok: true, status: 200, json: async () => body })
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -104,6 +112,8 @@ beforeEach(() => {
   apiFetch.mockImplementation(async url => {
     if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
     if (String(url).startsWith('/api/reading/comprehension')) return ok(EXERCISE)
+    // The dictionary, asked for the point a chip opens (by its id).
+    if (String(url).startsWith('/api/dictionary?')) return ok({ results: [GRAMMAR_ENTRY], total: 1, has_more: false })
     return ok({})
   })
 })
@@ -230,6 +240,23 @@ describe('ComprehensionRun', () => {
     await settle()
     expect(document.querySelector('.word-detail')).toBeTruthy()
     expect(document.body.textContent).toContain('station')
+
+    // A grammar chip — the seeded one over the passage — opens the
+    // point's dictionary entry by its card id, as a sheet of its own.
+    seeded.querySelector('.analysis-grammar-chip__door').click()
+    await settle(150)
+    const lookup = apiFetch.mock.calls.map(c => String(c[0])).find(u => u.startsWith('/api/dictionary?'))
+    expect(lookup).toBeTruthy()
+    const q = new URLSearchParams(lookup.split('?')[1])
+    expect(q.get('category')).toBe('grammar')
+    expect(q.get('id')).toBe(GRAMMAR_ENTRY.raw_id)
+    const sheet = document.querySelector('.dict-sheet[role="dialog"]')
+    expect(sheet).toBeTruthy()
+    expect(sheet.querySelector('.dict-plate__word').textContent).toBe(GRAMMAR_ENTRY.pattern)
+    expect(sheet.querySelector('.dict-plate__structure').textContent).toBe(GRAMMAR_ENTRY.structure)
+    sheet.querySelector('.dict-plate__btn[aria-label]').click()
+    await settle()
+    expect(document.querySelector('.dict-sheet[role="dialog"]')).toBeNull()
 
     // What was posted back: the breakdown without its analyses, and
     // the points the text was written around.

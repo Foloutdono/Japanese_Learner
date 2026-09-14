@@ -40,10 +40,17 @@ const SENTENCES = [
   { jp: '駅は大きいです。', translation: 'The station is big.', note: '', analysis: null },
 ]
 
-function Host({ sentences = SENTENCES, onTokenClick = () => {} }) {
+function Host({ sentences = SENTENCES, onTokenClick = () => {}, onGrammarOpen }) {
   const [openIndex, setOpenIndex] = useState(0)
-  return <PassageBreakdown sentences={sentences} t={T} openIndex={openIndex} setOpenIndex={setOpenIndex} onTokenClick={onTokenClick} />
+  return <PassageBreakdown sentences={sentences} t={T} openIndex={openIndex} setOpenIndex={setOpenIndex} onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen} />
 }
+
+// The first sentence with a grammar point spotted in it, so its open
+// rows carry a chip.
+const WITH_GRAMMAR = [
+  { ...SENTENCES[0], analysis: { ...SENTENCES[0].analysis, grammar: [{ pattern: '〜ました', level: 'N5', raw_id: 'grammar_N5_〜ました', start: 3, end: 7 }] } },
+  ...SENTENCES.slice(1),
+]
 
 const settle = (ms = 30) => new Promise(r => setTimeout(r, ms))
 const items = () => document.querySelectorAll('.bkd-passage__item')
@@ -124,6 +131,25 @@ describe('PassageBreakdown', () => {
     await settle()
     expect(onTokenClick).toHaveBeenCalledTimes(2)
     expect(items()[0].classList.contains('bkd-passage__item--open')).toBe(true)
+  })
+
+  it("a grammar chip's door opens the point and does not close the sentence", async () => {
+    const onGrammarOpen = vi.fn()
+    await render(<Host sentences={WITH_GRAMMAR} onGrammarOpen={onGrammarOpen} />)
+    const door = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip__door')
+    expect(door.tagName).toBe('BUTTON')
+    door.click()
+    await settle()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_〜ました')
+    expect(items()[0].classList.contains('bkd-passage__item--open')).toBe(true)
+  })
+
+  it('with nowhere to open, the chip is the pattern as a word', async () => {
+    await render(<Host sentences={WITH_GRAMMAR} />)
+    const chip = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip')
+    expect(chip.querySelector('.analysis-grammar-chip__pattern').tagName).toBe('SPAN')
+    expect(chip.querySelector('button')).toBeNull()
   })
 
   it('a sentence with nothing to open is its two lines and no control', async () => {

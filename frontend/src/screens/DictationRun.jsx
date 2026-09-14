@@ -11,6 +11,7 @@ import ClipPlayer from '../components/study/ClipPlayer'
 import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -121,6 +122,9 @@ function Session({ session, level }) {
   // Stable, so WordDetail's useDialog does not re-run its focus effect
   // (and steal focus) on every render while the sheet is open.
   const closeDetail = useCallback(() => setDetail(null), [])
+  // A grammar chip in the rows opens the point's dictionary entry.
+  const [grammarId, setGrammarId] = useState(null)
+  const closeGrammar = useCallback(() => setGrammarId(null), [])
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -463,6 +467,7 @@ function Session({ session, level }) {
                     sentenceText={result.jp}
                     t={t}
                     onTokenClick={openWordDetail}
+                    onGrammarOpen={g => setGrammarId(g.raw_id)}
                   />
                 )}
               </div>
@@ -482,6 +487,9 @@ function Session({ session, level }) {
       )}
 
       {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
+      {grammarId && (
+        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      )}
     </StudyStage>
   )
 }

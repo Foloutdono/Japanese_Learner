@@ -833,3 +833,139 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
     await screen.unmount()
   })
 })
+
+// ── 文法 — a grammar point on the plate ──────────────────────
+// The same plate, read differently: the formation in the reading's
+// place, the pattern as the headword, the gloss whole as the caption;
+// no speaker, an add roundel where a screen can offer one; a body of
+// formation, meaning and the two sentences; nothing drawn. And the
+// sheet opens it by its card id, insisting on the exact row.
+const GRAMMAR = {
+  type: 'grammar', raw_id: 'grammar_N5_〜てから', level: 'N5',
+  pattern: '〜てから', structure: 'verb て-form + から', meaning: 'after doing',
+  examples: [
+    { jp: '手を洗ってから食べます。', en: 'I eat after washing my hands.',
+      furigana: [{ text: '手', reading: 'て' }, { text: 'を' }, { text: '洗', reading: 'あら' }, { text: 'ってから' }, { text: '食', reading: 'た' }, { text: 'べます。' }] },
+    { jp: '宿題をしてから寝ました。', en: 'I went to bed after doing my homework.',
+      furigana: [{ text: '宿題', reading: 'しゅくだい' }, { text: 'をしてから' }, { text: '寝', reading: 'ね' }, { text: 'ました。' }] },
+  ],
+  status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
+}
+const MINING = () => ({
+  loaded: true,
+  decksFor: () => [{ id: 7, type: 'grammar', name: '文法' }],
+  targetFor: () => ({ id: 7, type: 'grammar', name: '文法' }),
+  ensureDeck: vi.fn(),
+  mineApp: vi.fn(async () => 1),
+  mineCloze: vi.fn(),
+  rememberTarget: vi.fn(),
+  lastOutcome: null,
+})
+
+describe('the plate — a grammar point', () => {
+  it('sets the formation over the pattern over the whole gloss, with no speaker and no readings', async () => {
+    const { root } = await renderEntry(GRAMMAR)
+    const plate = root.querySelector('.dict-plate')
+    const structure = plate.querySelector('.dict-plate__structure')
+    const word = plate.querySelector('.dict-plate__word')
+    const caption = plate.querySelector('.dict-plate__caption')
+    expect(structure.textContent).toBe('verb て-form + から')
+    expect(word.textContent).toBe('〜てから')
+    expect(caption.textContent).toBe('after doing')
+    // Formation, then the pattern, then the gloss — top to bottom.
+    expect(structure.getBoundingClientRect().bottom).toBeLessThanOrEqual(word.getBoundingClientRect().top + 1)
+    expect(word.getBoundingClientRect().bottom).toBeLessThanOrEqual(caption.getBoundingClientRect().top + 1)
+    // The formation is the reading's register, in the secondary ink.
+    expect(getComputedStyle(structure).fontSize).toBe(probe('fontSize', 'var(--fs-sm)'))
+    expect(getComputedStyle(structure).color).toBe(probe('color', 'var(--text-secondary)'))
+    // A four-character pattern is a word, at the display rung.
+    expect(word.classList.contains('dict-plate__word--word')).toBe(true)
+    expect(plate.querySelector('.dict-plate__yomi')).toBeNull()
+    expect(plate.querySelector('.dict-plate__level').textContent).toBe('N5')
+    // No speaker: the ✕ alone when nothing can add.
+    expect(plate.querySelector('[aria-label="Listen"]')).toBeNull()
+    expect(plate.querySelectorAll('.dict-plate__btn')).toHaveLength(1)
+    expect(plate.querySelector('.dict-plate__btn').getAttribute('aria-label')).toBe('Close')
+    // The stripe is still 辞書's.
+    expect(getComputedStyle(plate.querySelector('.dict-plate__stripe')).backgroundColor).toBe(probe('backgroundColor', 'var(--line-jisho)'))
+  })
+
+  it('offers the add roundel where a screen can mine, as a ghost that adds to the remembered deck and says so', async () => {
+    const mining = MINING()
+    const { root } = await renderEntry(GRAMMAR, { ...NAV(), mining })
+    const plate = root.querySelector('.dict-plate')
+    const btns = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(btns.map(b => b.getAttribute('aria-label'))).toEqual(['Mine', 'Close'])
+    const add = btns[0]
+    // A glyph, not words: the roundel is the plate's ghost.
+    expect(add.querySelector('svg')).toBeTruthy()
+    expect(add.textContent.trim()).toBe('')
+    expect(getComputedStyle(add).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    add.click()
+    await settle(60)
+    expect(mining.mineApp).toHaveBeenCalledWith({ deckId: 7, source: 'grammar', level: 'N5', rawId: 'grammar_N5_〜てから', kind: 'grammar' })
+    expect(plate.querySelector('.analysis-mine-status').textContent).toBe('In deck')
+    // The roundel stays, and its name moves on.
+    expect(add.getAttribute('aria-label')).toBe('Add to another deck')
+    expect(getComputedStyle(plate.querySelector('.analysis-mine-status')).fontSize).toBe(probe('fontSize', 'var(--fs-caption-xs)'))
+  })
+
+  it('prints formation, meaning and the two sentences as blocks that name themselves, and draws nothing', async () => {
+    const { root } = await renderEntry(GRAMMAR)
+    const blocks = [...root.querySelectorAll('.dict-block')]
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Examples'])
+    expect(root.querySelector('h3, h4, .section-header')).toBeNull()
+    expect(blocks[0].querySelector('.dict-formation').textContent).toBe('verb て-form + から')
+    expect(blocks[1].querySelector('.dict-gloss').textContent).toBe('after doing')
+    const exs = [...blocks[2].querySelectorAll('.dict-ex')]
+    expect(exs).toHaveLength(2)
+    expect(baseText(exs[0].querySelector('.dict-ex__jp'))).toBe('手を洗ってから食べます。')
+    expect(exs[0].querySelector('rt').textContent).toBe('て')
+    expect(exs[0].querySelector('.dict-ex__tr').textContent).toBe('I eat after washing my hands.')
+    expect(root.querySelector('.dict-form')).toBeNull()
+    expect(root.querySelector('.dict-parts')).toBeNull()
+    expect(root.querySelector('.dict-words')).toBeNull()
+    // Never reviewed: no record.
+    expect(root.querySelector('.records')).toBeNull()
+  })
+})
+
+describe('the lookup sheet — a grammar point by its card id', () => {
+  it('asks the collection for the id and insists on that row', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ ok: true, status: 200, json: async () => ({ results: [GRAMMAR, { ...GRAMMAR, raw_id: 'grammar_N5_other', pattern: 'ほか' }] }) })
+    const onClose = vi.fn()
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet id="grammar_N5_〜てから" category="grammar" session={{ access_token: 'tok' }} onClose={onClose} />
+      </LangProvider>
+    )
+    await settle(120)
+    const url = String(vi.mocked(apiFetch).mock.calls.at(-1)[0])
+    const q = new URLSearchParams(url.split('?')[1])
+    expect(q.get('category')).toBe('grammar')
+    expect(q.get('id')).toBe('grammar_N5_〜てから')
+    expect(q.get('q')).toBe('')
+    const dialog = document.querySelector('.dict-sheet[role="dialog"]')
+    // Named by the pattern, not the id it was asked for.
+    expect(dialog.getAttribute('aria-label')).toBe('Dictionary: 〜てから')
+    expect(dialog.querySelector('.dict-plate__word').textContent).toBe('〜てから')
+    expect(dialog.querySelector('.dict-plate__structure')).toBeTruthy()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    expect(onClose).toHaveBeenCalledTimes(1)
+    await screen.unmount()
+  })
+
+  it('says so when the page comes back without that id, rather than opening whatever is first', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ ok: true, status: 200, json: async () => ({ results: [{ ...GRAMMAR, raw_id: 'grammar_N5_other', pattern: 'ほか' }] }) })
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet id="grammar_N5_nope" category="grammar" session={{ access_token: 'tok' }} onClose={() => {}} />
+      </LangProvider>
+    )
+    await settle(120)
+    const dialog = document.querySelector('.dict-sheet[role="dialog"]')
+    expect(dialog.textContent).toContain('Not available')
+    expect(dialog.querySelector('.dict-plate__word')).toBeNull()
+    await screen.unmount()
+  })
+})

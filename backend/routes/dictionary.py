@@ -1,8 +1,11 @@
 from collections import defaultdict
+from functools import lru_cache
 
 from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, DECK_BY_CHAR, kanji_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_sentences_data import get_sentences
 import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
 from content.vocab_jmdict_data import vocab_jmdict_to_id
@@ -21,7 +24,9 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 from study.card_lookup import (
     card_stats, VOCAB_STATUS_MODES, KANJI_STATUS_MODES, KANA_STATUS_MODES,
+    GRAMMAR_STATUS_MODES,
 )
+from study.furigana import align_sentence
 from study.kanji_words import kanji_as_word, kanji_words, word_furigana
 
 router = APIRouter()
@@ -463,14 +468,138 @@ def _vocab_collection(q: str, page: int, limit: int, lang: str, user_id: str,
     }
 
 
+# ── The grammar collection ──────────────────────────────────
+# The 355 curated points (content/grammar_points.json), N5 → N1 in the
+# catalogue's own order. One pool, small enough to filter and slice in
+# memory — there is no JMdict behind it — so it takes the deck path the
+# vocabulary collection reserves for its first 8,405 rows. A point's
+# gloss is English only: the catalogue carries no French map (see
+# routes/decks._meaning_preview), and the entry prints what the 文法
+# line's own cards print.
+
+_LEVELS = ("N5", "N4", "N3", "N2", "N1")
+
+
+@lru_cache(maxsize=1024)
+def _sentence_furigana(jp: str) -> tuple:
+    """align_sentence over one of the 710 hand-written example sentences.
+
+    Cached because the sentences never change and tokenising them is the
+    only real cost of a grammar page; a tuple so the cache can hold it.
+    """
+    return tuple(align_sentence(jp))
+
+
+def _grammar_matches(q: str, level: str | None) -> list[tuple[str, dict]]:
+    """(level, entry) for every point matching `q`, catalogue order.
+
+    The pattern is matched as typed (〜, ／ and all); the structure and
+    the gloss case-folded, as _deck_matches folds a word's meaning. An
+    unknown `level` is no level at all — the whole catalogue — rather
+    than an empty page, the way an unknown `kana` falls back to the plain
+    page: the client narrowed, it did not ask a trick question.
+    """
+    levels = (level,) if level in _LEVELS else _LEVELS
+    ql = q.lower()
+    out = []
+    for lvl in levels:
+        for entry in GRAMMAR_POINTS_BY_LEVEL.get(lvl, []):
+            if (not q
+                    or q in entry["pattern"]
+                    or ql in entry.get("structure", "").lower()
+                    or ql in entry.get("meaning", "").lower()):
+                out.append((lvl, entry))
+    return out
+
+
+def _grammar_result(entry: dict, level: str, states: dict, user_id: str) -> dict:
+    raw_id = grammar_to_id(entry, level)
+    return {
+        "type":      "grammar",
+        "raw_id":    raw_id,
+        "level":     level,
+        "pattern":   entry["pattern"],
+        "structure": entry.get("structure", ""),
+        "meaning":   entry.get("meaning", ""),
+        "examples":  [
+            {"jp": s["jp"], "en": s["en"], "furigana": list(_sentence_furigana(s["jp"]))}
+            for s in get_sentences(level, entry["pattern"])
+        ],
+        "status":    card_stats(states, user_id, raw_id, GRAMMAR_STATUS_MODES),
+    }
+
+
+def _exact_grammar(raw_id: str) -> tuple[str, dict] | None:
+    """The one point whose card id is `raw_id`, or None.
+
+    A scan of 355 rows comparing grammar_to_id, so that function stays
+    the only thing that knows what a grammar id looks like (an id embeds
+    the raw pattern, 〜 and ／ included — see grammar_to_id's docstring).
+    """
+    for lvl in _LEVELS:
+        for entry in GRAMMAR_POINTS_BY_LEVEL.get(lvl, []):
+            if grammar_to_id(entry, lvl) == raw_id:
+                return lvl, entry
+    return None
+
+
+def _grammar_collection(q: str, page: int, limit: int, level: str | None,
+                        grammar_id: str, user_id: str) -> dict:
+    """One page of the grammar collection.
+
+    `grammar_id` disambiguates rather than filters, exactly as `kana`
+    does for a word: the point it names is moved to the front of page 0
+    — whether or not `q` or `level` would have found it — and nothing
+    else about the response changes, so `total` / `has_more` and every
+    later page are what they would be without it. An id that names
+    nothing leaves the page alone; the client that asked for an exact
+    entry can see it is not on the page (see useDictionaryLookup).
+    """
+    matches = _grammar_matches(q, level)
+    total   = len(matches)
+    start   = page * limit
+    page_matches = matches[start:start + limit]
+
+    exact = _exact_grammar(grammar_id) if (grammar_id and page == 0) else None
+
+    states = srs.get_user_states(user_id) if (page_matches or exact) else {}
+
+    results = [_grammar_result(entry, lvl, states, user_id) for lvl, entry in page_matches]
+
+    if exact is not None:
+        lvl, entry = exact
+        first = _grammar_result(entry, lvl, states, user_id)
+        results = [first] + [r for r in results if r["raw_id"] != first["raw_id"]][:limit - 1]
+
+    return {
+        "results":  results,
+        "total":    total,
+        "page":     page,
+        "limit":    limit,
+        "has_more": start + limit < total,
+    }
+
+
 @router.get("/api/dictionary")
 def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None, kana: str = "",
+                    level: str | None = None, id: str = "",
                     user_id: str = Depends(get_user_id)):
     """
-    category: "all" | "kanji" | "vocab" | "hiragana" | "katakana"
+    category: "all" | "kanji" | "vocab" | "grammar" | "hiragana" | "katakana"
     — lets the client avoid pulling in thousands of vocab entries when
     only kanji (or vice versa) are wanted.
+
+    "grammar" is the 355-point catalogue the 文法 line studies
+    (content/grammar_points.json), N5 → N1, each with its two example
+    sentences. Two parameters are its alone and ignored elsewhere:
+    `level` narrows to one JLPT level (anything else means all), and
+    `id` is a grammar card id to move to the front of page 0 — the
+    same disambiguator `kana` is for a word. It travels as a query
+    parameter and never as a path segment, because a grammar id embeds
+    the pattern itself, ／ and 〜 included (routes/decks.py says the
+    same of the ids it deletes by). `lang` is accepted but the gloss is
+    English only, as the line's own cards print it.
 
     "vocab" is the whole vocabulary: the app's curated JLPT deck first
     (N5 → N1), then the rest of JMdict by frequency rank. See
@@ -515,6 +644,11 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     # kanji only, so a radical request never lands here.
     if category in ("vocab", "jmdict") and radical is None:
         return _vocab_collection(q, page, limit, lang, user_id, kana)
+
+    # Grammar has one pool and it is in memory; its branch exists so the
+    # `level` / `id` parameters have somewhere to go, not for paging.
+    if category == "grammar" and radical is None:
+        return _grammar_collection(q, page, limit, level, id, user_id)
 
     # Same escape for kanji, and a radical request comes here too: radical
     # browsing is kanji-only by nature, and _kanji_collection serves it
