@@ -195,6 +195,11 @@ design.
 
 ## Format notes
 
+**Provenance.** The announcement clips are synthesized with VOICEVOX
+(春日部つむぎ/Kasukabe Tsumugi voice), not recorded — see
+`THIRD_PARTY_NOTICES.md` at the repo root for the required credit and
+license terms before adding or replacing any of them.
+
 **mp3 for everything new.** The eleven announcements are `.wav` and
 uncompressed — `kanji.wav` alone is 118KB for two seconds. Converting
 those to mp3 would save more bandwidth than the entire ticket gate
