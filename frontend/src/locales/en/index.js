@@ -1332,6 +1332,7 @@ const decks = {
   close:                  'Close',
   adding:                 'Adding...',
   addSelected:            'Add ({n})',
+  browseAddFailed:        "These cards weren't added. Try again.",
   // Bulk select
   selectAll:         'Select all',
   deselectAll:       'Deselect all',

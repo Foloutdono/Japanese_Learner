@@ -14570,7 +14570,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex-direction: column;
   max-height: 100%;
 }
+
+/* A refused add, said out loud. The POST has three ways to be turned
+   down — the deck deleted in another tab, a deck that is not yours,
+   the card ceiling — and the menu used to answer all three by clearing
+   the selection and refetching the list, which is precisely what a
+   SUCCESSFUL add looks like. */
+.browse-add-error {
+  margin-top: var(--sp-4);
+  font-size: var(--fs-sm);
+  color: color-mix(in srgb, var(--danger) 55%, var(--text-primary));
+}
+
 .browse-modal .import-header,
+.browse-modal .browse-add-error,
 .browse-modal .import-footer { flex: none; }
 .browse-modal .browse-results {
   display: flex;

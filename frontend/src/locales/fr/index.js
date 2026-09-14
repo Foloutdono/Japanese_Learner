@@ -1280,6 +1280,7 @@ const decks = {
   alreadyAdded:           'déjà ajouté',
   adding:                 'Ajout...',
   addSelected:            'Ajouter ({n})',
+  browseAddFailed:        "Ces cartes n'ont pas été ajoutées. Réessayez.",
   // Bulk select
   selectAll:         'Tout sélectionner',
   deselectAll:       'Tout désélectionner',
