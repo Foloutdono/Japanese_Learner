@@ -1,7 +1,7 @@
 import logging
 import random
-from fastapi import APIRouter, Depends, Query
-from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from fastapi import APIRouter, Depends, HTTPException, Query
+from content.kanji_data import KANJI_BY_LEVEL, LEVELS, kanji_to_id
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
@@ -15,7 +15,11 @@ from study.modes import (
 )
 from study.mcq import pick_distractors
 from content.kanji_readings import split_readings, display_reading
-from content.radical_data import radical_for, siblings_by_stroke, RADICAL_BY_NUMBER
+from content.radical_data import (
+    radical_for, siblings_by_stroke, RADICAL_BY_NUMBER,
+    DECK_BY_RADICAL, deck_kanji_for, info_for,
+)
+import content.kanji_pool_data as kanji_db
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -186,17 +190,81 @@ def _build_kanji_card(raw_id: str, entry: dict, kanji_list: list[dict], m: Mode,
     return payload
 
 
-def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
-                  new_limit: int | None = None):
+# ── 部首 — the second axis (plan 086) ─────────────────────────
+# A radical is a GROUPING of the same cards, never a second copy: 海
+# studied under 氵 and under N4 has to be one SRS row, or a learner's
+# progress forks in two. So a radical pool is built from the same
+# entries at their native level and the same kanji_to_id, and the only
+# thing that differs is which entries are in it and in what order. Same
+# invariant theme_vocab.py holds for the vocabulary's themes.
+
+
+def _require_radical(number: int) -> None:
+    """A radical the index does not know is a 404, not a 200 carrying
+    {"error": ...} — lib/api.js only treats a non-ok RESPONSE as an
+    error, so a 200 with an error body reaches the run as "deck
+    exhausted" and fires the completion fanfare (theme_vocab.py's
+    _require_theme documents the same trap). A KNOWN radical with no
+    course kanji under it is an empty pool, which is a different
+    answer: the lesson prints an empty family, the drill is done at
+    once."""
+    if number not in RADICAL_BY_NUMBER:
+        raise HTTPException(status_code=404, detail=f"Unknown radical: {number}")
+
+
+def _rows_for(level: str | None, radical: int | None) -> list[tuple[str, dict]] | None:
+    """The pool as (level, entry) rows, or None for an unknown level.
+    The radical axis wins when both are given — the run never sends
+    both, and a radical is the more specific ask."""
+    if radical is not None:
+        _require_radical(radical)
+        return deck_kanji_for(radical)
+    kanji_list = KANJI_BY_LEVEL.get(level or "")
+    if not kanji_list:
+        return None
+    return [(level, k) for k in kanji_list]
+
+
+def _scope(level: str | None, radical: int | None) -> str:
+    """The batch-cache scope: a radical's new-card batch must not be
+    served to a level, nor one radical's to another (the theme key in
+    theme_vocab.py, for the same reason)."""
+    return f"radical:{radical}" if radical is not None else str(level)
+
+
+def _distractor_pool(rows: list[tuple[str, dict]], radical: int | None) -> list[dict]:
+    """Where a card's wrong answers come from. A level is its own pool,
+    as ever. A radical family is a BETTER pool than a level while it is
+    big enough — 泳 against 洗, 池 and 湖 is a discrimination inside the
+    family, which is the whole thing the learner came to learn — but a
+    family of three cannot fill a four-slot grid, so a small one is
+    widened with the whole course. Not just the card's own level: the
+    build takes one list for the whole batch."""
+    entries = [e for _, e in rows]
+    if radical is None or len(entries) >= 8:
+        return entries
+    seen = {e["kanji"] for e in entries}
+    for level in LEVELS:
+        for e in KANJI_BY_LEVEL.get(level, []):
+            if e["kanji"] not in seen:
+                seen.add(e["kanji"])
+                entries.append(e)
+    return entries
+
+
+def _select_cards(level: str | None, m: Mode, lang: str, count: int, exclude_ids: set[str], user_id: str,
+                  new_limit: int | None = None, radical: int | None = None):
     """
     Shared by /api/kanji/card and /api/kanji/cards. Returns
     (kanji_list, cards) — kanji_list is None for an unknown level or
     invalid mode (callers re-check which, to keep the exact original
-    error messages).
+    error messages). `radical` scopes the pool to one radical's family
+    instead of a level (see _rows_for); an unknown radical raises 404.
     """
-    kanji_list = KANJI_BY_LEVEL.get(level)
-    if not kanji_list:
+    rows = _rows_for(level, radical)
+    if rows is None:
         return None, None
+    kanji_list = _distractor_pool(rows, radical)
     # Mode validity is settled upstream by require_mode, so the only
     # remaining failure here is an unknown level.
     mode = m.key
@@ -207,13 +275,14 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     # skipping at build time matters: an ineligible entry left in the pool
     # is still selectable, still counts toward the deck total, and comes
     # back as a silently missing card that reads as "deck exhausted".
-    pool = [k for k in kanji_list if eligible_for(m, {**k, "radical": _radical_number(k)})]
+    pool = [(lv, k) for lv, k in rows if eligible_for(m, {**k, "radical": _radical_number(k)})]
     if not pool:
         return kanji_list, []
 
-    raw_ids   = [kanji_to_id(k, level) for k in pool]
+    raw_ids   = [kanji_to_id(k, lv) for lv, k in pool]
+    by_raw_id = dict(zip(raw_ids, (k for _, k in pool)))
     card_ids  = prefixed(raw_ids, user_id)
-    cache_key = batch_key("user", user_id, mode, level)
+    cache_key = batch_key("user", user_id, mode, _scope(level, radical))
     # No pre-materialisation. get_new_cards selects over the ids passed
     # here rather than joining `cards`, so nothing has to exist in
     # card_modes before a card can be served — a scheduler row is written
@@ -223,7 +292,10 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     due = srs.get_due_cards(mode, card_ids=card_ids)
     picked = pick_ids(
         cache_key, due,
-        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids),
+        # A family is served easy-first (N5 before N1 — see
+        # radical_data.DECK_BY_RADICAL's order); a level keeps its
+        # shuffle.
+        lambda limit: srs.get_new_cards(mode, limit=limit, card_ids=card_ids, ordered=radical is not None),
         count, exclude_ids, new_limit=new_limit,
     )
 
@@ -241,23 +313,23 @@ def _select_cards(level: str, m: Mode, lang: str, count: int, exclude_ids: set[s
     cards = []
     for card_id in picked:
         raw_id = unprefixed(card_id, user_id)
-        entry = next((k for k in pool if kanji_to_id(k, level) == raw_id), None)
+        entry = by_raw_id.get(raw_id)
         if entry is not None:
             cards.append(_build_kanji_card(raw_id, entry, kanji_list, m, lang, states.get(card_id), previews.get(card_id)))
 
     logger.info(
-        "kanji study request level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
-        level, mode, user_id, count, len(due), len(cards),
+        "kanji study request scope=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
+        _scope(level, radical), mode, user_id, count, len(due), len(cards),
     )
     return kanji_list, cards
 
 
 @router.get("/api/kanji/card")
-def get_kanji_card(level: str, lang: str = "fr",
+def get_kanji_card(level: str | None = None, lang: str = "fr", radical: int | None = None,
                    m: Mode = Depends(require_mode(KANJI)),
                    user_id: str = Depends(get_user_id)):
     mode = m.key
-    kanji_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id)
+    kanji_list, cards = _select_cards(level, m, lang, count=1, exclude_ids=set(), user_id=user_id, radical=radical)
     if kanji_list is None:
         return {"error": "Unknown level"}
     if not cards:
@@ -267,8 +339,8 @@ def get_kanji_card(level: str, lang: str = "fr",
 
 
 @router.get("/api/kanji/cards")
-def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
-                    beyond_target: bool = Query(False),
+def get_kanji_cards(level: str | None = None, lang: str = "fr", count: int = Query(10, ge=1, le=100), exclude: str = "",
+                    beyond_target: bool = Query(False), radical: int | None = None,
                     m: Mode = Depends(require_mode(KANJI)),
                     user_id: str = Depends(get_user_id)):
     """
@@ -278,6 +350,8 @@ def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, l
     of raw (unprefixed) card ids the client already has queued but
     hasn't reviewed yet. `beyond_target` is the 臨時列車: the learner
     explicitly asking for new cards past today's pace (core/pace.py).
+    `radical` scopes the batch to one radical's family instead of a
+    level (plan 086).
     """
     pace = resolve_pace(user_id)
     kanji_list, cards = _select_cards(
@@ -286,6 +360,7 @@ def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, l
         exclude_ids={f"{user_id}:{cid}" for cid in exclude.split(",") if cid},
         user_id=user_id,
         new_limit=new_card_limit(pace, beyond_target),
+        radical=radical,
     )
     if kanji_list is None:
         return {"error": "Unknown level"}
@@ -293,32 +368,34 @@ def get_kanji_cards(level: str, lang: str = "fr", count: int = Query(10, ge=1, l
 
 
 @router.get("/api/kanji/review-cards")
-def get_kanji_review_cards(level: str, lang: str = "fr", user_id: str = Depends(get_user_id)):
+def get_kanji_review_cards(level: str | None = None, lang: str = "fr", radical: int | None = None,
+                           user_id: str = Depends(get_user_id)):
     """
     Every card in this level the user has already studied, in ANY mode
     (qcm/flashcard either direction, or write) — not just due ones —
     for a self-paced, ungraded browse of "kanji I already know"
     instead of an SRS-driven session. `stage` is the most advanced
     stage reached across those modes — see kana.py's own review-cards
-    endpoint for the full rationale (mirrored here).
+    endpoint for the full rationale (mirrored here). `radical` browses
+    one radical's family instead (plan 086).
     """
-    kanji_list = KANJI_BY_LEVEL.get(level)
-    if not kanji_list:
+    rows = _rows_for(level, radical)
+    if rows is None:
         return {"error": "Unknown level"}
 
-    raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
+    raw_ids  = [kanji_to_id(k, lv) for lv, k in rows]
     card_ids = prefixed(raw_ids, user_id)
     graded = sorted(GRADED_FOR_SOURCE[KANJI])
     per_mode_states = {m: srs.get_bulk_stats(card_ids, m) for m in graded}
 
     cards = []
-    for entry, card_id in zip(kanji_list, card_ids):
+    for (lv, entry), raw_id, card_id in zip(rows, raw_ids, card_ids):
         stages = [per_mode_states[m].get(card_id, "new") for m in graded]
         stage = "mastered" if "mastered" in stages else "learning" if "learning" in stages else "new"
         if stage == "new":
             continue
         cards.append({
-            "card_id":      kanji_to_id(entry, level),
+            "card_id":      raw_id,
             "kanji":        entry.get("kanji", ""),
             "kana":         entry.get("kana", ""),
             "meaning":      get_meaning(entry, lang, FR_MAP),
@@ -327,8 +404,8 @@ def get_kanji_review_cards(level: str, lang: str = "fr", user_id: str = Depends(
         })
 
     logger.info(
-        "kanji review request level=%s user_id=%s studied=%d/%d",
-        level, user_id, len(cards), len(kanji_list),
+        "kanji review request scope=%s user_id=%s studied=%d/%d",
+        _scope(level, radical), user_id, len(cards), len(rows),
     )
     return {"cards": cards}
 
@@ -362,20 +439,21 @@ def post_kanji_review(payload: ReviewPayload, user_id: str = Depends(get_user_id
 
 
 @router.get("/api/kanji/stats")
-def get_kanji_stats(level: str, m: Mode = Depends(require_mode(KANJI)),
+def get_kanji_stats(level: str | None = None, radical: int | None = None,
+                     m: Mode = Depends(require_mode(KANJI)),
                      user_id: str = Depends(get_user_id)):
     """
     Lightweight, per-level/mode progress (à apprendre / en cours / maîtrisé).
     Scoped to a single level+mode (unlike /api/stats, which recomputes
     every category for the whole user) so it's cheap enough to call after
-    every review.
+    every review. `radical` scopes it to one family instead (plan 086).
     """
-    kanji_list = KANJI_BY_LEVEL.get(level)
-    if not kanji_list:
+    rows = _rows_for(level, radical)
+    if rows is None:
         return {"error": "Unknown level"}
     mode = m.key
 
-    raw_ids  = [kanji_to_id(k, level) for k in kanji_list]
+    raw_ids  = [kanji_to_id(k, lv) for lv, k in rows]
     card_ids = prefixed(raw_ids, user_id)
 
     states  = srs.get_bulk_stats(card_ids, mode)
@@ -387,4 +465,118 @@ def get_kanji_stats(level: str, m: Mode = Depends(require_mode(KANJI)),
         "learning": sum(1 for s in states.values() if s == "learning"),
         "mastered": sum(1 for s in states.values() if s == "mastered"),
         "due_now":  len(due),
+    }
+
+# ── 部首 — the index and the lesson (plan 086) ───────────────
+# Two reads for the study-by-radical screens. Both count the COURSE's
+# kanji, not KANJIDIC2's: /api/dictionary/radicals says 氵 files 656
+# characters, which is true of the language and useless as a
+# denominator — the course teaches 123 of them, and 123 is the number
+# a learner can finish. Progress is per character, best mode wins, the
+# same three figures /api/stats prints on a level's stop (started,
+# learned, total; routes/stats.py's _item_stats), so the radical index
+# and the JLPT line cannot disagree about what "learned" means.
+
+# The day-count an interval has to reach to be "learned" — the same
+# threshold routes/stats.py names for the level stops. Imported rather
+# than re-declared, so the two figures cannot drift.
+from routes.stats import MASTERED_DAYS  # noqa: E402
+
+_GRADED_KANJI_MODES = sorted(GRADED_FOR_SOURCE[KANJI])
+
+
+def _family_progress(cache: dict, user_id: str, raw_ids: list[str]) -> tuple[dict[str, str], int, int]:
+    """(stage per raw id, started, learned) over one get_user_states()
+    read. A card's stage is the best it has reached in any graded mode;
+    `started` counts cards reviewed at all, `learned` those whose best
+    interval has reached MASTERED_DAYS."""
+    stages: dict[str, str] = {}
+    started = learned = 0
+    for raw_id in raw_ids:
+        best_stage = "new"
+        best_days = 0
+        reviewed = False
+        for mode in _GRADED_KANJI_MODES:
+            item = cache.get((f"{user_id}:{raw_id}", mode))
+            if item is None or item["total_reviews"] == 0:
+                continue
+            reviewed = True
+            if item["state"] == "mastered" or (item["state"] == "learning" and best_stage != "mastered"):
+                best_stage = item["state"]
+            best_days = max(best_days, item["interval_days"] or 0)
+        stages[raw_id] = best_stage
+        if reviewed:
+            started += 1
+        if best_days >= MASTERED_DAYS:
+            learned += 1
+    return stages, started, learned
+
+
+@router.get("/api/kanji/radicals")
+def get_kanji_radicals(lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """The radical index as a study source: every radical the course
+    reaches, grouped by stroke count, each with its meaning, how many
+    course kanji it files and how many of those the learner has met
+    and learned. Radicals filing nothing the course teaches are left
+    out — twenty of the 214."""
+    cache = srs.get_user_states(user_id)
+    groups: dict[int, list[dict]] = {}
+    for number, rows in DECK_BY_RADICAL.items():
+        info = info_for(number, lang)
+        raw_ids = [kanji_to_id(k, lv) for lv, k in rows]
+        _, started, learned = _family_progress(cache, user_id, raw_ids)
+        groups.setdefault(info["stroke_count"], []).append({
+            "number":       info["number"],
+            "char":         info["char"],
+            "glyph":        info["glyph"],
+            "stroke_count": info["stroke_count"],
+            "meaning":      info["meaning"],
+            "count":        len(rows),
+            "started":      started,
+            "learned":      learned,
+        })
+    return {
+        "groups": [
+            {"stroke_count": n, "radicals": sorted(groups[n], key=lambda r: r["number"])}
+            for n in sorted(groups)
+        ],
+    }
+
+
+@router.get("/api/kanji/radical/{number}")
+def get_kanji_radical(number: int, lang: str = "fr", user_id: str = Depends(get_user_id)):
+    """One radical as a lesson: what it means, what it is called, the
+    forms it takes and where it sits, then its family — the course's
+    kanji filed under it, grouped by level, each with the learner's own
+    stage on it. The stroke diagram is the glyph's KanjiVG file — every
+    glyph the table chooses has one (the index's own U+FA5D for 艹 does
+    not, which is one more reason the lesson prints `glyph` and not
+    `char`); the None branch is kept for a rebuilt database."""
+    _require_radical(number)
+    info = info_for(number, lang)
+    rows = deck_kanji_for(number)
+    raw_ids = [kanji_to_id(k, lv) for lv, k in rows]
+    cache = srs.get_user_states(user_id)
+    stages, started, learned = _family_progress(cache, user_id, raw_ids)
+
+    levels: dict[str, list[dict]] = {}
+    for (lv, entry), raw_id in zip(rows, raw_ids):
+        row = kanji_db.get(entry["kanji"])
+        levels.setdefault(lv, []).append({
+            "card_id":      raw_id,
+            "kanji":        entry["kanji"],
+            "kana":         entry.get("kana", ""),
+            "meaning":      get_meaning(entry, lang, FR_MAP),
+            "stroke_count": row["stroke_count"] if row else None,
+            "stage":        stages[raw_id],
+        })
+
+    glyph_row = kanji_db.get(info["glyph"])
+    return {
+        **info,
+        "svg_url": f"/kanjivg/{glyph_row['codepoint']}.svg" if glyph_row and glyph_row["has_svg"] else None,
+        "total":   len(rows),
+        "started": started,
+        "learned": learned,
+        "levels":  [{"level": lv, "kanji": levels[lv]} for lv in LEVELS if lv in levels],
     }

@@ -170,6 +170,11 @@ const quiz = {
   // characters rather than the words (see KanjiScreen.jsx).
   byFrequencyKanji:     'Kanji frequency',
   byFrequencyKanjiDesc: 'Ranked by how often they appear in print',
+  // Kanji's third study source (plan 086): the 214 Kangxi radicals as
+  // a way in — a lesson on the radical, then its family of kanji. See
+  // KanjiScreen.jsx / RadicalLesson.jsx.
+  byRadical:            'Radicals',
+  byRadicalDesc:        'The building blocks — a radical, then every kanji built on it',
   byMastery:         'My cards',
   byMasteryDesc:     'Built only from words you have already met',
   // Vocabulary's third study-source option — every JMdict word outside
@@ -436,7 +441,29 @@ const stats = {
   stationSources:     'Sources',
   byFrequencyShort:   'By frequency',
   byThemeShort:       'By theme',
+  byRadicalShort:     'By radical',
   leaveLevels:        'Levels',
+  leaveRadicals:      'Radicals',
+  // ── The radical lesson (plan 086) ──
+  radLesson:          'The radical',
+  radFamily:          'Kanji built on this radical',
+  radForms:           'Forms',
+  // Where the component usually sits in a character, by the seven
+  // traditional positions (backend/content/radical_info.py).
+  radPosition: {
+    hen:     'on the left',
+    tsukuri: 'on the right',
+    kanmuri: 'across the top',
+    ashi:    'along the bottom',
+    kamae:   'around the outside',
+    tare:    'over the top and down the left',
+    nyou:    'down the left and along the bottom',
+  },
+  radPositionJp: { hen: '偏', tsukuri: '旁', kanmuri: '冠', ashi: '脚', kamae: '構', tare: '垂', nyou: '繞' },
+  radPositionNote:    where => `As a component it usually sits ${where} of a kanji`,
+  radNoPositionNote:  'As a component it has no fixed place in a kanji.',
+  radFamilyNote:      n => `The course builds ${n} kanji on it, listed below.`,
+  radNoKanji:         'The course teaches no kanji built on it yet.',
   leaveSets:          'Sets',
   leaveTiers:         'Tiers',
   leaveThemes:        'Themes',

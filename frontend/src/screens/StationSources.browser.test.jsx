@@ -51,7 +51,9 @@ const KANJI = [
   '/learn/kanji',
   '/learn/kanji/levels',
   '/learn/kanji/tiers',
+  '/learn/kanji/radicals',
   '/learn/kanji/tier/:tier',
+  '/learn/kanji/radical/:radical',
   '/learn/kanji/:level',
 ]
 const VOCAB = [
@@ -115,9 +117,9 @@ beforeEach(() => {
 afterEach(() => { globalThis.fetch = originalFetch })
 
 describe('the station asks for a source first', () => {
-  it('kanji: two sources, both as cards, neither in the bar', async () => {
+  it('kanji: three sources, all as cards, none in the bar', async () => {
     const s = await station('/learn/kanji')
-    expect(s.titles()).toEqual([fr.byLevel, fr.byFrequencyKanji])
+    expect(s.titles()).toEqual([fr.byLevel, fr.byFrequencyKanji, fr.byRadical])
     expect(s.links(), 'a source is a platform card now, not a bar link').toHaveLength(0)
     // Every card says where it goes, which is the whole reason the
     // bar link was the wrong home for it.
@@ -134,6 +136,7 @@ describe('the station asks for a source first', () => {
     for (const [at, index, to] of [
       ['/learn/kanji', 0, '/learn/kanji/levels'],
       ['/learn/kanji', 1, '/learn/kanji/tiers'],
+      ['/learn/kanji', 2, '/learn/kanji/radicals'],
       ['/learn/vocab', 2, '/learn/vocab/themes'],
     ]) {
       const s = await station(at)
@@ -145,7 +148,7 @@ describe('the station asks for a source first', () => {
 
 describe('the way back out', () => {
   it('a source list leaves to the sources, not to the other source', async () => {
-    for (const at of ['/learn/kanji/levels', '/learn/vocab/themes']) {
+    for (const at of ['/learn/kanji/levels', '/learn/kanji/radicals', '/learn/vocab/themes']) {
       const s = await station(at)
       expect(s.leave().textContent).toBe(fr.leaveSources)
       s.leave().click()

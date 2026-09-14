@@ -15287,21 +15287,29 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    three: eighteen numerals that scroll sideways, the read one
    underlined in 辞書's gold and kept in view. Under it, one stroke
    count at a time (see RadicalGrid) — a page, not a sheet. */
+/* No bar under the strip on any pointer, and no scrollbar rule to say
+   so: the rail scrolls inside a clip that hides its bottom edge, where
+   a bar — overlay or classic — is drawn. Asking for `scrollbar-width`
+   here would put this rule under the (pointer: fine) guard below and
+   leave a phone its overlay bar, which on a rail this short reads as
+   a control. The clue that there is more is the fade the numerals run
+   into, on the side there is more (see StrokeStrip's data-edge), and
+   the page under it naming its neighbours. */
+/* No hairline under it either: the active tab's underline is the only
+   rule the rail draws, and the page's own mark rules the block below. */
+.stroke-strip__clip { overflow: hidden; }
 .stroke-strip {
   display: flex;
   gap: var(--sp-1);
   overflow-x: auto;
-  border-bottom: 1px solid var(--surface-line);
+  /* Room for the bar, then that room clipped by the wrapper. */
+  padding-bottom: var(--sp-6);
+  margin-bottom: calc(-1 * var(--sp-6));
   mask-image: linear-gradient(90deg, #000 88%, transparent);
 }
-/* No bar under the strip on a cursor — the numerals are the scroll
-   affordance. Behind (pointer: fine) like every scrollbar declaration
-   (index.scrollbar.browser.test.jsx): a touch screen's bar is an
-   overlay already, and styling it at all would summon a classic one. */
-@media (pointer: fine) {
-  .stroke-strip { scrollbar-width: none; }
-  .stroke-strip::-webkit-scrollbar { display: none; }
-}
+.stroke-strip[data-edge="none"] { mask-image: none; }
+.stroke-strip[data-edge="mid"] { mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.stroke-strip[data-edge="end"] { mask-image: linear-gradient(90deg, transparent, #000 12%); }
 .stroke-strip__tab {
   display: inline-flex;
   align-items: baseline;
@@ -15310,7 +15318,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   flex: none;
   min-width: 44px;
   padding: var(--sp-4) var(--sp-2);
-  margin-bottom: -1px;
   border-bottom: 2px solid transparent;
   color: var(--text-secondary);
   transition: color 0.16s ease, border-color 0.16s ease;
@@ -15325,7 +15332,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .stroke-strip__unit { font-family: var(--font-jp); font-size: var(--fs-caption-xs); opacity: 0.7; }
 .stroke-strip__tab--active {
   color: var(--text-primary);
-  border-bottom-color: var(--line-jisho);
+  border-bottom-color: var(--line-color, var(--line-jisho));
 }
 
 .dict-radical-index { display: block; }
@@ -15363,7 +15370,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .radical-tile:hover,
 .radical-tile:focus-visible {
   background: var(--bg-card-hover);
-  border-color: var(--line-jisho);
+  border-color: var(--line-color, var(--line-jisho));
   transform: translateY(-2px);
   filter: none;
 }
@@ -15385,7 +15392,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
 }
 .radical-tile--lead .radical-tile__count,
-.radical-tile:hover .radical-tile__count { color: var(--line-jisho); }
+.radical-tile--started .radical-tile__count,
+.radical-tile:hover .radical-tile__count { color: var(--line-color, var(--line-jisho)); }
 
 /* The page turns: the neighbouring stroke counts, named, either side. */
 .radical-page__pager {
@@ -15429,7 +15437,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: var(--tr-term);
-  color: color-mix(in srgb, var(--syl-accent, var(--line-jisho)) 72%, var(--text-primary));
+  color: color-mix(in srgb, var(--syl-accent, var(--line-color, var(--line-jisho))) 72%, var(--text-primary));
 }
 /* The twin, tracked out under the same baseline — printed now, because
    the charts under these marks no longer name their own rows and 五十音
@@ -18613,3 +18621,227 @@ a.slip__act { text-decoration: none; }
   .brd__car { animation: none; }
   .brd__done, .brd__train, .brd-build__done, .brd-build__train { transition: none; }
 }
+
+
+/* ══ 部首 — study by radical (plan 086) ═══════════════════════
+   The kanji station's third source. The index is the dictionary's
+   own — .stroke-strip, .radical-page, .radical-tile, lifted into
+   components/dictionary/RadicalIndex.jsx — read under the station's
+   ink now that those rules take `--line-color` (辞書's gold where the
+   dictionary sets it, 漢字's ink under the station). What is new is
+   what a tile SAYS (a meaning, a figure) and the lesson under it. */
+
+/* The tile's second line: the meaning, one line, cut at the edge. */
+.radical-tile__sub {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+}
+/* The lead six carry their figure in the line's ink by size; a
+   radical the learner has actually opened (.radical-tile--started)
+   carries it by work — declared beside the lead rule above. */
+
+.rad {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6);
+}
+
+/* ── The plate ──
+   A 漢和辞典's first line: the glyph drawn stroke by stroke on the
+   left, and beside it the names a teacher uses, the meaning, the
+   number and count, the forms, where it sits. One card, sumi ink and
+   two registers of text; the line's pigment is the 3px stripe along
+   the bottom edge (the dictionary's entry plate wears its gold the
+   same way) and the ring on the form the learner meets first. */
+.rad-plate {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-5) var(--sp-6);
+  align-items: start;
+  padding: var(--sp-6);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-bottom: 3px solid var(--line-color);
+  border-radius: var(--r-card);
+}
+@media (max-width: 560px) {
+  .rad-plate {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    text-align: center;
+  }
+  .rad-plate__meta,
+  .rad-plate__forms,
+  .rad-plate__fig { justify-content: center; }
+}
+.rad-plate__glyph {
+  width: 140px;
+  height: 140px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-primary);
+}
+.rad-plate__strokes { width: 100%; height: 100%; }
+/* Only where KanjiVG has no file for the glyph — none today, see
+   tests/test_kanji_radicals.py — the character as type. */
+.rad-plate__char {
+  font-family: var(--font-jp);
+  font-size: var(--fs-display-fluid);
+  line-height: 1;
+}
+.rad-plate__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+/* The 部首名, tracked as a reading is, in the line's ink mixed toward
+   the ambient text (the dictionary's own 60% rule). */
+.rad-plate__names {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  text-indent: var(--tr-reading);
+  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+}
+.rad-plate__meaning {
+  font-family: var(--font-display);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.rad-plate__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.rad-plate__forms {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.rad-plate__form {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  line-height: 1.1;
+}
+.rad-plate__form:first-child { border-color: var(--line-color); }
+.rad-plate__note {
+  margin: 0;
+  max-width: 60ch;
+  font-size: var(--fs-body);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.rad-plate__pos {
+  font-family: var(--font-jp);
+  color: var(--text-primary);
+}
+/* The same two figures the route stop prints: learned over total,
+   and started while the two disagree. */
+.rad-plate__fig {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-4);
+  font-family: var(--font-display);
+  font-variant-numeric: tabular-nums;
+}
+.rad-plate__learned {
+  font-size: var(--fs-lead);
+  color: var(--text-secondary);
+}
+.rad-plate__learned b {
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.rad-plate__started {
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+
+/* ── The family ──
+   The course's kanji built on the radical, by level, each level under
+   its own mark. A tile is a door to the dictionary entry; its stage
+   is a dot in the corner in the state inks the statistics use. */
+.rad-family {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.rad-family .dict-mark { margin-top: var(--sp-4); }
+.rad-family__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+  gap: var(--sp-2);
+}
+.rad-kanji {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.rad-kanji:hover,
+.rad-kanji:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--line-color);
+  transform: translateY(-2px);
+  filter: none;
+}
+.rad-kanji__char {
+  font-family: var(--font-jp);
+  font-size: var(--fs-heading);
+  line-height: 1.1;
+}
+.rad-kanji__meaning {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  color: var(--text-secondary);
+}
+.rad-kanji::after {
+  content: '';
+  position: absolute;
+  top: var(--sp-2);
+  right: var(--sp-2);
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: transparent;
+}
+.rad-kanji--learning::after { background: var(--state-learning); }
+.rad-kanji--mastered::after { background: var(--state-mastered); }

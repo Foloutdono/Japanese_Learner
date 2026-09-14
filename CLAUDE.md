@@ -35,7 +35,7 @@ runtime purpose. Two consequences worth knowing:
 - **Plan numbers are cited in source comments** (e.g. "Plan 034" in
   `PassageLine.browser.test.jsx`), so they must never be reused.
 - **`git ls-tree HEAD plans/` under-reports which numbers are taken**, because
-  earlier plan files were lost to a working-tree cleanup. Numbers **001–085**
+  earlier plan files were lost to a working-tree cleanup. Numbers **001–086**
   are used: wave 14 (the mobile release) spends 064–077, the review rollup
   spends **078** — cited in `srs/srs.py`, `srs/data_structure.sql`,
   `routes/account.py`, `routes/stats.py` and `scripts/wipe_srs.py`, and for a
@@ -44,7 +44,9 @@ runtime purpose. Two consequences worth knowing:
   in `routes/reading.py`, `study/level_mix.py` and `components/analysis/`;
   ADR 0015), and **085** is the statistics rework (cited in
   `routes/stats.py`, `srs/srs.py`, `domain/statsModel.js` and
-  `components/stats/`). When starting a new wave, begin at **086** or higher, and check
+  `components/stats/`), and **086** is study by radical (cited in
+  `content/radical_info.py`, `routes/kanji.py`, `components/dictionary/RadicalIndex.jsx`
+  and `components/selection/RadicalLesson.jsx`). When starting a new wave, begin at **087** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

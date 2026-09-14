@@ -171,6 +171,10 @@ const quiz = {
   // sont classés et non les mots (voir KanjiScreen.jsx).
   byFrequencyKanji:     'Fréquence des kanji',
   byFrequencyKanjiDesc: 'Classés selon leur fréquence réelle à l\'écrit',
+  // Troisième source des kanji (plan 086) : les 214 clés comme porte
+  // d'entrée — une leçon sur la clé, puis sa famille de kanji.
+  byRadical:            'Clés',
+  byRadicalDesc:        'Les briques des kanji — une clé, puis tous les kanji bâtis dessus',
   byMastery:         'Mes cartes',
   byMasteryDesc:     'Bâties uniquement sur des mots déjà rencontrés',
   byJmdict:          'Hors-JLPT',
@@ -414,7 +418,27 @@ const stats = {
   stationSources:     'Sources',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
+  byRadicalShort:     'Par clé',
   leaveLevels:        'Niveaux',
+  leaveRadicals:      'Clés',
+  // ── La leçon sur une clé (plan 086) ──
+  radLesson:          'La clé',
+  radFamily:          'Kanji bâtis sur cette clé',
+  radForms:           'Formes',
+  radPosition: {
+    hen:     'à gauche',
+    tsukuri: 'à droite',
+    kanmuri: 'en haut',
+    ashi:    'en bas',
+    kamae:   'tout autour',
+    tare:    'en haut et le long du bord gauche',
+    nyou:    'le long du bord gauche et en bas',
+  },
+  radPositionJp: { hen: '偏', tsukuri: '旁', kanmuri: '冠', ashi: '脚', kamae: '構', tare: '垂', nyou: '繞' },
+  radPositionNote:    where => `Comme composant, elle se place le plus souvent ${where} d'un kanji`,
+  radNoPositionNote:  'Comme composant, elle n\'a pas de place fixe dans un kanji.',
+  radFamilyNote:      n => `Le cours bâtit ${n} kanji dessus, listés plus bas.`,
+  radNoKanji:         'Le cours n\'enseigne encore aucun kanji bâti dessus.',
   leaveSets:          'Séries',
   leaveTiers:         'Paliers',
   leaveThemes:        'Thèmes',

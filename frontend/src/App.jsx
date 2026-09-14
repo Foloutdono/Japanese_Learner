@@ -428,7 +428,9 @@ export default function App() {
             <Route path="/learn/kanji"                element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/levels"         element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/tiers"          element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/radicals"       element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/tier/:tier"     element={<KanjiScreen session={session} />} />
+            <Route path="/learn/kanji/radical/:radical" element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />
             <Route path="/learn/grammar"              element={<GrammarScreen />} />
             <Route path="/learn/grammar/:level"       element={<GrammarScreen />} />
@@ -489,6 +491,7 @@ export default function App() {
             <Route path="/learn/vocab/theme/:theme/:mode"     element={<VocabRun session={session} />} />
             <Route path="/learn/vocab/:level/:mode"           element={<VocabRun session={session} />} />
             <Route path="/learn/kanji/tier/:tier/:mode"       element={<KanjiRun session={session} />} />
+            <Route path="/learn/kanji/radical/:radical/:mode" element={<KanjiRun session={session} />} />
             <Route path="/learn/kanji/:level/:mode"           element={<KanjiRun session={session} />} />
             <Route path="/learn/grammar/:level/:mode"         element={<GrammarRun session={session} />} />
             <Route path="/learn/decks/:deck_id/study/:mode"   element={<StudyRun session={session} />} />

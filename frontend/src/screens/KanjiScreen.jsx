@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
@@ -6,6 +7,8 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
+import RadicalSelector from '../components/selection/RadicalSelector'
+import RadicalLesson from '../components/selection/RadicalLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { tierLabelFor } from '../domain/tiers'
 
@@ -31,13 +34,24 @@ const BASE = '/learn/kanji'
 // chrome rather than as content. It is a source, so it is a platform
 // card like every other source in the app.
 //
+// The third source (plan 086) is 部首: /learn/kanji/radicals is the
+// index — the dictionary's own, dressed with the course's counts and
+// the learner's figures (RadicalSelector) — and /learn/kanji/radical/:n
+// is a LESSON before it is a list of platforms: the radical taught
+// (RadicalLesson), the platforms under it, then its family. The run
+// under it is the same KanjiRun over that family alone; the radical
+// drill is not offered there, since every answer would be the one
+// radical the learner just read about.
+//
 // See KanaScreen.jsx for the deep-link shape the station still accepts.
 export default function KanjiScreen({ session }) {
   const { t } = useLang()
   const navigate = useNavigate()
   const { pathname, search } = useLocation()
-  const { level, tier } = useParams()
+  const { level, tier, radical } = useParams()
   const [sp, setSp] = useSearchParams()
+  // The lesson reports its radical up, so the bar can name it.
+  const [lesson, setLesson] = useState(null)
 
   const MODES = modePickerEntries(t, 'kanji')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'kanji'
@@ -49,7 +63,9 @@ export default function KanjiScreen({ session }) {
   const page = pathname.replace(/\/$/, '').slice(BASE.length + 1)
   const levelsPage = page === 'levels'
   const tiersPage = page === 'tiers'
+  const radicalsPage = page === 'radicals'
   const tierSize = Number(sp.get('size')) || 200
+  const strokePage = Number(sp.get('stroke')) || null
 
   const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
 
@@ -65,6 +81,7 @@ export default function KanjiScreen({ session }) {
     const SOURCES = [
       { key: 'levels', label: t.byLevel,          desc: t.byLevelDesc },
       { key: 'tiers',  label: t.byFrequencyKanji, desc: t.byFrequencyKanjiDesc },
+      { key: 'radicals', label: t.byRadical,      desc: t.byRadicalDesc },
     ]
     return (
       <SelectionScreen
@@ -96,6 +113,56 @@ export default function KanjiScreen({ session }) {
           tierSize={tierSize}
           onTierSize={size => setSp({ size: String(size) }, { replace: true })}
           onSelect={(tr, label, ts) => navigate(`${BASE}/tier/${tr}?size=${ts}`)}
+        />
+      </SelectionScreen>
+    )
+  }
+
+  // ── The radicals: the index ──
+  if (radicalsPage) {
+    return (
+      <SelectionScreen title={t.kanjiTitle} sub={t.byRadicalShort} aside={leaveSources}>
+        <RadicalSelector
+          session={session}
+          stroke={strokePage}
+          onStroke={n => setSp({ stroke: String(n) }, { replace: true })}
+          onSelect={n => navigate(`${BASE}/radical/${n}`)}
+        />
+      </SelectionScreen>
+    )
+  }
+
+  // ── A radical: the lesson, then its platforms ──
+  if (radical) {
+    const number = Number(radical)
+    const index = `${BASE}/radicals`
+    if (!Number.isInteger(number) || number < 1) return <Navigate replace to={index} />
+    // Every drill but the radical one: with one family on the stage,
+    // "which radical?" has one answer, and the learner has just read it.
+    const modes = MODES.filter(m => STUDY_MODES[m.key]?.base !== 'radical')
+    // The lesson's glyph rides into the run's own bar as ?g=, so the
+    // stage can say 部首 水 without a second fetch. A glyph, never
+    // anything the learner typed (lib/routePattern.js drops the query
+    // before anything is recorded).
+    const run = m => navigate(`${pathname}/${m}?g=${encodeURIComponent(lesson?.glyph ?? '')}`)
+    const here = lesson && lesson.number === number ? lesson : null
+    const sub = here ? `${t.byRadicalShort} · ${here.glyph} ${here.meaning}` : t.byRadicalShort
+    // Back to the page of the index this radical is on, not to its
+    // first page: the index carries the page in its URL for this.
+    const leave = here ? `${index}?stroke=${here.stroke_count}` : index
+    return (
+      <SelectionScreen
+        title={t.kanjiTitle}
+        sub={sub}
+        aside={<Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>}
+      >
+        <RadicalLesson
+          key={number}
+          number={number}
+          session={session}
+          back={index}
+          onLoaded={setLesson}
+          platforms={<ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />}
         />
       </SelectionScreen>
     )
