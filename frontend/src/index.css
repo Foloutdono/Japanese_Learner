@@ -15291,11 +15291,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: flex;
   gap: var(--sp-1);
   overflow-x: auto;
-  scrollbar-width: none;
   border-bottom: 1px solid var(--surface-line);
   mask-image: linear-gradient(90deg, #000 88%, transparent);
 }
-.stroke-strip::-webkit-scrollbar { display: none; }
+/* No bar under the strip on a cursor — the numerals are the scroll
+   affordance. Behind (pointer: fine) like every scrollbar declaration
+   (index.scrollbar.browser.test.jsx): a touch screen's bar is an
+   overlay already, and styling it at all would summon a classic one. */
+@media (pointer: fine) {
+  .stroke-strip { scrollbar-width: none; }
+  .stroke-strip::-webkit-scrollbar { display: none; }
+}
 .stroke-strip__tab {
   display: inline-flex;
   align-items: baseline;
