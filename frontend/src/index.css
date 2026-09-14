@@ -11519,52 +11519,52 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .dict-corrected b { color: var(--text-primary); font-weight: 700; }
 
 /* ── Selected-radical header ───────────────────────────────
-   The radical glyph reuses the home screen's hanko-stamp box (a
-   rotated hairline square around a seal-red character) — the app's
-   own signature applied here instead of a plain rounded chip. */
-/* Back button, stamp, label. It never wrapped, so on a phone the three
-   ran edge to edge with the label pressed against the viewport — the
-   button alone is most of a 390px line. */
+   One rail: the way back, the radical in the line's ink, its number
+   and stroke count tracked out as a caption, the kanji it files at
+   the far end as a tabular figure, and one hairline under all of it —
+   the same vocabulary as .dict-mark, with the leave button riding the
+   rail rather than sitting over it. The glyph is set a step above a
+   caption's size but under a heading's: it has to be recognised as
+   the one that was tapped, not read as a headword. On a narrow phone
+   the mark — glyph, caption, tally — drops under the button as ONE
+   unit, so the caption never wraps away from its glyph, and the
+   tally keeps the right edge on either line. */
 .dict-radical-header {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 14px 18px;
-  margin-bottom: 28px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid var(--border);
+  gap: var(--sp-3) var(--sp-4);
+  margin-bottom: var(--sp-5);
+  padding-bottom: var(--sp-3);
+  border-bottom: 1px solid var(--surface-line);
 }
-@media (max-width: 560px) {
-  .dict-radical-header { gap: 12px 14px; margin-bottom: 22px; padding-bottom: 16px; }
-}
-
-.dict-radical-char {
-  position: relative;
-  display: inline-flex;
+.dict-radical-header__mark {
+  display: flex;
   align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
+  flex: 1 1 auto;
+  gap: var(--sp-3);
+  min-width: 0;
+}
+.dict-radical-header__glyph {
   font-family: var(--font-jp);
-  font-size: 26px;
-  color: var(--accent);
+  font-size: var(--fs-heading);
+  font-weight: 700;
+  line-height: 1;
+  color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 72%, var(--text-primary));
 }
-/* The stamp around the glyph. `inset: -6px 0` gave it -6px top and
-   bottom but 0 left and right, so the "square" was 48 wide by 60 tall
-   — a tall rectangle, and the 3° rotation turned it into a skewed
-   slab with a small dash floating inside. Uniform inset and the same
-   rounded corner .hanko-stamp uses, so it reads as the seal it is
-   meant to be. */
-.dict-radical-char::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border: 1.5px solid var(--accent);
-  border-radius: 6px;
-  transform: rotate(-2deg);
-  opacity: 0.65;
+.dict-radical-header__cap,
+.dict-radical-header__tally {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
-.dict-radical-label { color: var(--text-secondary); font-size: 13px; }
+.dict-radical-header__tally {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── Syllabary chart (hiragana/katakana) ──────────────────
    Classic gojūon table — same flush shoji-lattice language as the
@@ -15336,7 +15336,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 
 .dict-radical-index { display: block; }
-.radical-page { display: block; }
+.radical-page { display: block; margin-top: var(--sp-4); }
 
 /* The lead six, larger, and the rest at tile size. Tiles with their
    own edges: a ragged last row needs no filler, so neither grid pads. */
@@ -15459,7 +15459,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-.radical-page .dict-mark { margin: var(--sp-4) 0 var(--sp-3); }
 
 /* ══ 五十音 — the syllabary ═════════════════════════════════
    The gojūon table is the one chart every learner already has a

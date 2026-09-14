@@ -145,9 +145,14 @@ export default function DictionaryScreen({ session }) {
 	const sentinelRef = useRef(null)
 	const searchRef   = useRef(null)
 
-	const radicalCharByNumber = useMemo(() => {
+	// The picker's rows, by Kangxi number: the glyph, the stroke count
+	// of the group it sat in, and how many kanji it files — what the
+	// selected-radical mark prints.
+	const radicalByNumber = useMemo(() => {
 		const map = {}
-		;(radicalGroups || []).forEach(g => g.radicals.forEach(r => { map[r.number] = r.char }))
+		;(radicalGroups || []).forEach(g => g.radicals.forEach(r => {
+			map[r.number] = { char: r.char, strokes: g.stroke_count, count: r.kanji_count }
+		}))
 		return map
 	}, [radicalGroups])
 
@@ -566,18 +571,26 @@ export default function DictionaryScreen({ session }) {
 				</p>
 			)}
 
-			{/* Selected-radical header */}
-			{mode === 'radical' && selectedRadical != null && (
-				<div className="dict-radical-header">
-					<Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
-					<div className="dict-radical-char" lang="ja">
-						{radicalCharByNumber[selectedRadical] ?? '?'}
+			{/* Selected-radical header — one rail: the way back, the radical
+			    itself in the line's ink, its number and stroke count as the
+			    tracked caption, the kanji it files at the far end, one
+			    hairline under all of it. No title of its own; the glyph is
+			    the name (DESIGN.md, "a body that names itself"). */}
+			{mode === 'radical' && selectedRadical != null && (() => {
+				const r = radicalByNumber[selectedRadical]
+				const strokes = r ? `${r.strokes} ${r.strokes === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}` : null
+				const number = t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`
+				return (
+					<div className="dict-radical-header">
+						<Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
+						<span className="dict-radical-header__mark">
+							<span className="dict-radical-header__glyph" lang="ja">{r?.char ?? '?'}</span>
+							<span className="dict-radical-header__cap">{strokes ? `${number} · ${strokes}` : number}</span>
+							{r && <span className="dict-radical-header__tally">{r.count}</span>}
+						</span>
 					</div>
-					<span className="dict-radical-label">
-						{t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`}
-					</span>
-				</div>
-			)}
+				)
+			})()}
 
 			{/* Radical picker grid */}
 			{showingRadicalGrid && (

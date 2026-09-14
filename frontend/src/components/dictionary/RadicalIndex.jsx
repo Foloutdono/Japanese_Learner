@@ -172,7 +172,9 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
       <StrokeStrip groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
 
       <section className="radical-page" data-stroke={group.stroke_count} aria-label={unit(group.stroke_count)}>
-        <BlockMark jp={`${group.stroke_count}画`} name={unit(group.stroke_count)} tally={group.radicals.length} />
+        {/* No mark over the page: the strip above already names the
+            stroke count and lights the one being read, and the
+            section's aria-label says it for a reader. */}
         <div className="radical-page__lead">
           {lead.map(r => draw(r, true))}
         </div>
