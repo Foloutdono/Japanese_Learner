@@ -14653,13 +14653,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     display: block;
   }
 
-  /* Original tile was 56px; PC gets a full 1.6x bump above (90px) but
-     that reads oversized on a phone screen, so mobile gets a smaller,
-     more modest increase instead. */
-  .dict-radical-sheets {
-    --radical-tile: 64px;
-    --radical-gap: 1px;
-  }
 }
 
 /* Third tier between 768px tablet and 560px phone, for the board-row /
@@ -15290,51 +15283,123 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and a media query adds none. */
 
-/* The thumb rail off a printed radical index, laid across the top
-   where one hand can reach it and it stays in view. It also reports
-   where you are — an index that only jumps is half an index. */
-.stroke-rail {
-  position: sticky;
-  top: 0;
-  z-index: 5;
+/* The thumb rail off a printed radical index, one line now instead of
+   three: eighteen numerals that scroll sideways, the read one
+   underlined in 辞書's gold and kept in view. Under it, one stroke
+   count at a time (see RadicalGrid) — a page, not a sheet. */
+.stroke-strip {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  padding: 12px 0 14px;
-  margin-bottom: 4px;
-  background: linear-gradient(180deg,
-    var(--bg-main) 0%, var(--bg-main) 72%, transparent 100%);
+  gap: var(--sp-1);
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-bottom: 1px solid var(--surface-line);
+  mask-image: linear-gradient(90deg, #000 88%, transparent);
 }
-.stroke-rail__tab {
+.stroke-strip::-webkit-scrollbar { display: none; }
+.stroke-strip__tab {
   display: inline-flex;
   align-items: baseline;
-  gap: 3px;
-  padding: 6px 12px;
-  border: 1px solid var(--surface-line);
-  border-radius: 999px;
-  background: var(--surface);
+  justify-content: center;
+  gap: var(--sp-1);
+  flex: none;
+  min-width: 44px;
+  padding: var(--sp-4) var(--sp-2);
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
   color: var(--text-secondary);
-  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease;
 }
-.stroke-rail__tab:hover { border-color: var(--line-jisho); color: var(--text-primary); }
-.stroke-rail__n {
+.stroke-strip__tab:hover { color: var(--text-primary); }
+.stroke-strip__n {
   font-family: var(--font-display);
-  font-size: 0.86rem;
+  font-size: var(--fs-body);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
 }
-.stroke-rail__unit { font-family: var(--font-jp); font-size: 0.62rem; opacity: 0.7; }
-.stroke-rail__tab--active {
-  background: var(--line-jisho);
-  border-color: var(--line-jisho);
-  color: var(--bg-main);
+.stroke-strip__unit { font-family: var(--font-jp); font-size: var(--fs-caption-xs); opacity: 0.7; }
+.stroke-strip__tab--active {
+  color: var(--text-primary);
+  border-bottom-color: var(--line-jisho);
 }
-.stroke-rail__tab--active .stroke-rail__unit { opacity: 0.85; }
 
 .dict-radical-index { display: block; }
-.dict-radical-sheets { display: block; }
-.radical-sheet { scroll-margin-top: 76px; }
-.radical-sheet + .radical-sheet { margin-top: var(--sp-6); }
+.radical-page { display: block; }
+
+/* The lead six, larger, and the rest at tile size. Tiles with their
+   own edges: a ragged last row needs no filler, so neither grid pads. */
+.radical-page__lead,
+.radical-page__rest {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.radical-page__rest { margin-top: var(--sp-2); }
+/* On a wide screen six columns stretch a radical to a 250px card
+   with one character in it. The tiles keep a tile's width there and
+   pack from the left, sixteen to a row — an index, not a gallery. */
+@media (min-width: 769px) {
+  .radical-page__lead { grid-template-columns: repeat(auto-fill, 112px); }
+  .radical-page__rest { grid-template-columns: repeat(auto-fill, 88px); }
+}
+.radical-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-1);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-primary);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+.radical-tile:hover,
+.radical-tile:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--line-jisho);
+  transform: translateY(-2px);
+  filter: none;
+}
+.radical-tile__char {
+  font-family: var(--font-jp);
+  font-size: var(--fs-title);
+  line-height: 1.1;
+}
+.radical-tile--lead { padding: var(--sp-4) var(--sp-1); }
+.radical-tile--lead .radical-tile__char { font-size: var(--fs-heading); }
+/* How many kanji use it — the number you are actually choosing on,
+   in the line's ink on the six it matters most for. */
+.radical-tile__count {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.radical-tile--lead .radical-tile__count,
+.radical-tile:hover .radical-tile__count { color: var(--line-jisho); }
+
+/* The page turns: the neighbouring stroke counts, named, either side. */
+.radical-page__pager {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  margin-top: var(--sp-4);
+}
+.radical-page__turn {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+  padding: var(--sp-3) 0;
+}
+.radical-page__turn:hover { color: var(--text-primary); }
+.radical-page__turn--next { margin-left: auto; }
 
 /* ── A block's own mark ──
    The stamp book's 九月 in its margin, for the blocks in the
@@ -15380,55 +15445,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-.radical-sheet .dict-mark { margin-bottom: var(--sp-4); }
-.radical-sheet + .radical-sheet .dict-mark { margin-top: var(--sp-7); }
-
-/* Radicals as tiles, not lattice cells. The old grid drew its seams
-   with a background showing through 1px gaps, which meant every
-   ragged last row had to be padded with ghost 部 glyphs to stop it
-   showing as a bare slab — nine filler tiles on a five-radical group.
-   Tiles with their own edges need no filler, so the fillers and the
-   column-measuring hook that fed them are both gone. */
-.radical-sheet__list {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(62px, 1fr));
-  gap: 8px;
-}
-.radical-tile {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 2px;
-  padding: 10px 4px 8px;
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  color: var(--text-primary);
-  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
-}
-.radical-tile:hover,
-.radical-tile:focus-visible {
-  background: var(--bg-card-hover);
-  border-color: var(--line-jisho);
-  transform: translateY(-2px);
-  filter: none;
-}
-.radical-tile__char {
-  font-family: var(--font-jp);
-  font-size: 26px;
-  line-height: 1.1;
-}
-/* How many kanji use it — the number you are actually choosing on. */
-.radical-tile__count {
-  font-family: var(--font-display);
-  font-size: 0.6rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
-}
-.radical-tile:hover .radical-tile__count { color: var(--line-jisho); }
+.radical-page .dict-mark { margin: var(--sp-4) 0 var(--sp-3); }
 
 /* ══ 五十音 — the syllabary ═════════════════════════════════
    The gojūon table is the one chart every learner already has a
@@ -15496,10 +15513,6 @@ button.syllabary-cell:focus-visible {
 .syllabary-cell--selected .syllabary-cell__romaji { color: var(--syl-accent, var(--line-kana)); }
 
 @media (max-width: 560px) {
-  .radical-sheet__list { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); gap: 6px; }
-  .radical-tile__char { font-size: 22px; }
-  .stroke-rail { gap: 4px; padding: 10px 0 12px; }
-  .stroke-rail__tab { padding: 5px 9px; }
   .syllabary-table { grid-template-columns: 22px repeat(5, minmax(48px, 1fr)); gap: 4px; }
   .syllabary-cell__char { font-size: 21px; }
 }

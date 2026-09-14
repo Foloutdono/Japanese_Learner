@@ -626,105 +626,112 @@ export default function DictionaryScreen({ session }) {
 }
 
 
-// ── Radical picker grid ─────────────────────────────────────
-
 // ── 部首索引 — the radical index ──────────────────────────
-// A printed radical index has a thumb rail down the fore-edge so you
-// can land on a stroke count without turning every page. This is that
-// rail, laid across the top where it can be reached with one hand and
-// stay in view: 一画, 二画, 三画 …
+// One stroke count at a time. The index used to lay all 214 radicals
+// out in one long sheet under a sticky rail of eighteen pills, and on
+// a phone the rail wrapped to three lines and the sheet ran for a
+// dozen screens. A learner opening this index is nearly always looking
+// at a kanji and can count the strokes of its radical, so the stroke
+// count is the page they want, not a place to scroll past on the way
+// to it: the rail is one scrolling line of numerals now, and the sheet
+// under it is the picked group alone. Nothing scrolls past a screen.
 //
-// It also tracks where you are. An index that only jumps is half an
-// index — the other half is telling you which section you are looking
-// at, which an IntersectionObserver answers for free.
-function StrokeRail({ groups, active, onJump, t }) {
+// Within a group, the six most-used radicals come first and larger,
+// their counts in the line's ink — 氵 files 656 characters and 夂 four,
+// and on a page of 37 the big ones are what the eye should land on.
+// The rest keep the index's own order, by radical number.
+function StrokeStrip({ groups, active, onPick, t }) {
+	const tabRefs = useRef(new Map())
+	useEffect(() => {
+		tabRefs.current.get(active)?.scrollIntoView({ inline: 'center', block: 'nearest' })
+	}, [active])
 	return (
-		<nav className="stroke-rail" aria-label={t.dictStrokeIndex}>
+		<nav className="stroke-strip" aria-label={t.dictStrokeIndex}>
 			{groups.map(g => (
 				<button
 					key={g.stroke_count}
 					type="button"
-					onClick={() => onJump(g.stroke_count)}
+					ref={el => { tabRefs.current.set(g.stroke_count, el) }}
+					onClick={() => onPick(g.stroke_count)}
 					aria-current={active === g.stroke_count ? 'true' : undefined}
-					className={`stroke-rail__tab${active === g.stroke_count ? ' stroke-rail__tab--active' : ''}`}
+					className={`stroke-strip__tab${active === g.stroke_count ? ' stroke-strip__tab--active' : ''}`}
 				>
-					<span className="stroke-rail__n">{g.stroke_count}</span>
-					<span className="stroke-rail__unit" lang="ja">画</span>
+					<span className="stroke-strip__n">{g.stroke_count}</span>
+					<span className="stroke-strip__unit" lang="ja">画</span>
 				</button>
 			))}
 		</nav>
 	)
 }
 
+const LEAD_COUNT = 6
+
+function RadicalTile({ radical, lead, onPick }) {
+	return (
+		<button
+			type="button"
+			onClick={() => onPick(radical.number)}
+			title={`${radical.kanji_count} kanji`}
+			className={`radical-tile${lead ? ' radical-tile--lead' : ''}`}
+		>
+			<span className="radical-tile__char" lang="ja">{radical.char}</span>
+			<span className="radical-tile__count">{radical.kanji_count}</span>
+		</button>
+	)
+}
+
 function RadicalGrid({ groups, loading, onPick, t }) {
-	const [active, setActive] = useState(null)
-	const sheetRefs = useRef(new Map())
-
-	// Which stroke group is currently under the rail. rootMargin pulls
-	// the observation band up to just below the sticky rail so the
-	// section you are actually reading is the one that lights up, not
-	// the one scrolled off behind it.
-	useEffect(() => {
-		if (!groups?.length) return
-		const io = new IntersectionObserver(
-			entries => {
-				const visible = entries
-					.filter(e => e.isIntersecting)
-					.sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0]
-				if (visible) setActive(Number(visible.target.dataset.stroke))
-			},
-			{ rootMargin: '-140px 0px -60% 0px', threshold: 0 },
-		)
-		sheetRefs.current.forEach(el => el && io.observe(el))
-		return () => io.disconnect()
-	}, [groups])
-
-	function jump(count) {
-		sheetRefs.current.get(count)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-		setActive(count)
-	}
+	const [stroke, setStroke] = useState(null)
 
 	if (loading || !groups) {
 		return <Loading />
 	}
+	if (!groups.length) return null
+
+	const index = Math.max(0, groups.findIndex(g => g.stroke_count === stroke))
+	const group = groups[index]
+	const prev = groups[index - 1]
+	const next = groups[index + 1]
+
+	// The lead six by how many characters they file; the rest as the
+	// index orders them. A group of six or fewer is all lead.
+	const ranked = [...group.radicals].sort((a, b) => b.kanji_count - a.kanji_count)
+	const leadSet = new Set(ranked.slice(0, LEAD_COUNT).map(r => r.number))
+	const lead = ranked.slice(0, LEAD_COUNT)
+	const rest = group.radicals.filter(r => !leadSet.has(r.number))
+
+	const unit = n => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
 
 	return (
 		<div className="dict-radical-index">
-			<StrokeRail groups={groups} active={active ?? groups[0]?.stroke_count} onJump={jump} t={t} />
+			<StrokeStrip groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
 
-			<div className="dict-radical-sheets">
-				{groups.map(group => (
-					<section
-						key={group.stroke_count}
-						data-stroke={group.stroke_count}
-						ref={el => { sheetRefs.current.set(group.stroke_count, el) }}
-						className="radical-sheet"
-					>
-						{/* 3画 · 3 TRAITS · 12 — the term, its twin, then how
-						    many radicals are in the group. The twin is the
-						    unit spelled out: 画 is the one word on this
-						    screen a beginner cannot guess. */}
-						<BlockMark
-							jp={`${group.stroke_count}画`}
-							name={`${group.stroke_count} ${group.stroke_count === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`}
-							tally={group.radicals.length}
-						/>
-						<div className="radical-sheet__list">
-							{group.radicals.map(r => (
-								<button
-									key={r.number}
-									onClick={() => onPick(r.number)}
-									title={`${r.kanji_count} kanji`}
-									className="radical-tile"
-								>
-									<span className="radical-tile__char" lang="ja">{r.char}</span>
-									<span className="radical-tile__count">{r.kanji_count}</span>
-								</button>
-							))}
-						</div>
-					</section>
-				))}
-			</div>
+			<section className="radical-page" data-stroke={group.stroke_count} aria-label={unit(group.stroke_count)}>
+				<BlockMark jp={`${group.stroke_count}画`} name={unit(group.stroke_count)} tally={group.radicals.length} />
+				<div className="radical-page__lead">
+					{lead.map(r => <RadicalTile key={r.number} radical={r} lead onPick={onPick} />)}
+				</div>
+				{rest.length > 0 && (
+					<div className="radical-page__rest">
+						{rest.map(r => <RadicalTile key={r.number} radical={r} onPick={onPick} />)}
+					</div>
+				)}
+				{/* The neighbouring pages, named — the strip above scrolls
+				    the far counts out of view, and a page should say what
+				    is either side of it. */}
+				<div className="radical-page__pager">
+					{prev && (
+						<button type="button" className="radical-page__turn" onClick={() => setStroke(prev.stroke_count)}>
+							‹ <span lang="ja">{prev.stroke_count}画</span> · {prev.radicals.length}
+						</button>
+					)}
+					{next && (
+						<button type="button" className="radical-page__turn radical-page__turn--next" onClick={() => setStroke(next.stroke_count)}>
+							<span lang="ja">{next.stroke_count}画</span> · {next.radicals.length} ›
+						</button>
+					)}
+				</div>
+			</section>
 		</div>
 	)
 }
