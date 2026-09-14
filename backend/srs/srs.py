@@ -569,6 +569,25 @@ class SRSEngine:
             "new_level": new_level,
         }
 
+    def award_practice(self, user_id: str, source: str, ref: str, qualities: list[int]) -> dict[str, Any]:
+        """The fare for a practice answer — reading, translation,
+        comprehension, dictation, the mock exam — which is graded but
+        schedules no card. One ledger row for the run's event (a rated
+        sentence, a submitted exercise, a finished paper) at the base
+        rate per quality of a card review (xp.BASE_XP_BY_QUALITY: a
+        correct answer pays 7, a wrong one 1) and none of a review's
+        bonuses: the daily multiplier and the streak bonus are counted
+        off review_log, which these rows never enter, so a practice
+        answer would otherwise pay the day's-first rate every time.
+
+        Returns review()'s {xp_earned, leveled_up, new_level} shape, so
+        every run turns it into the same fare and level board. A run
+        with nothing gradable awards nothing and writes no row."""
+        xp = sum(xp_math.BASE_XP_BY_QUALITY.get(q, 0) for q in qualities)
+        if xp <= 0:
+            return {"xp_earned": 0, "leveled_up": False, "new_level": xp_math.level_from_xp(self.get_lifetime_xp(user_id))}
+        return self.award_xp(user_id, source, ref, xp)
+
     def get_due_cards(self, mode: str, limit: int | None = None, card_ids: list[str] | None = None) -> list[str]:
         now = datetime.now(timezone.utc)
         with self.storage.connection() as conn:

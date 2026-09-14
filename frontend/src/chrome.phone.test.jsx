@@ -122,16 +122,19 @@ describe('the shell', () => {
     expect(Math.round(box('.wmap').top - box('.bar__stripe').bottom)).toBe(16)
   })
 
-  it('leaves both bars on a stage and docks on the inset', async () => {
+  it('leaves both bars on a stage and docks over the level bar', async () => {
     await mountShell('/learn/kana')
     await settle()
     expect(document.documentElement.dataset.chrome).toBe('stage')
     expect(document.querySelector('.hud')).toBeNull()
     expect(document.querySelector('.tabbar')).toBeNull()
+    // The dock's floor on a stage is the level bar every run docks
+    // (--lvlbar-h, components/chrome/LevelBar.jsx) over the (zero, in
+    // chromium) inset — the rating bar and the field sit on top of it.
     const note = document.createElement('div')
     note.className = 'dock-note'
     document.body.appendChild(note)
-    expect(getComputedStyle(note).bottom).toBe('0px')
+    expect(getComputedStyle(note).bottom).toBe('36px')
     note.remove()
   })
 })

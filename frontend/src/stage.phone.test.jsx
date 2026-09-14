@@ -31,6 +31,52 @@ describe('the stage at phone width', () => {
     expect(getComputedStyle(screen.container.querySelector('.today-remaining')).borderRadius).toBe('999px')
   })
 
+  it('docks the level bar on the bottom edge and the rating bar on top of it', async () => {
+    // The stage frame stamps this on <html> (useChrome); the fixture
+    // does it by hand so --dock-bottom resolves the way it does on a run.
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      const screen = await render(
+        <div className="screen">
+          <main className="container stage">
+            <div className="prompt-card"><div className="prompt-card__body">駅</div></div>
+            <div className="rating-bar">
+              <div className="rating-bar__buttons rating-bar__buttons--4">
+                <button type="button" className="rating-bar__btn rating-bar__btn--q1"><span className="rating-bar__btn-ring" /><span className="rating-bar__btn-label">Wrong</span></button>
+                <button type="button" className="rating-bar__btn rating-bar__btn--q4 rating-bar__btn--best"><span className="rating-bar__btn-label">Correct</span></button>
+              </div>
+            </div>
+          </main>
+          <div className="lvlbar">
+            <span className="lvlbar__level">Lv<b className="lvlbar__level-num">12</b></span>
+            <span className="lvlbar__track"><span className="lvlbar__fill" style={{ width: '40%' }} /></span>
+            <span className="lvlbar__xp">200 / 500<span className="lvlbar__unit">xp</span></span>
+          </div>
+        </div>
+      )
+      const lvl = screen.container.querySelector('.lvlbar')
+      const lvlStyle = getComputedStyle(lvl)
+      expect(lvlStyle.position).toBe('sticky')
+      expect(lvlStyle.bottom).toBe('0px')
+      expect(lvl.getBoundingClientRect().height).toBe(36)
+      // The rating bar docks over the level bar's height, not on the inset.
+      const bar = screen.container.querySelector('.rating-bar')
+      expect(getComputedStyle(bar).bottom).toBe('36px')
+      // Tiles a gap apart, and the best answer filled in the pass's gold
+      // with the panel's ink on it; the plain tile keeps the panel ink.
+      expect(getComputedStyle(screen.container.querySelector('.rating-bar__buttons')).columnGap).toBe('8px')
+      const [plain, best] = screen.container.querySelectorAll('.rating-bar__btn')
+      const gold = getComputedStyle(document.documentElement).getPropertyValue('--accent2').trim()
+      const hex = gold.replace('#', '').match(/../g).map(h => parseInt(h, 16))
+      expect(getComputedStyle(best).backgroundColor).toBe(`rgb(${hex.join(', ')})`)
+      expect(getComputedStyle(best).color).toBe(getComputedStyle(lvl).backgroundColor)
+      expect(getComputedStyle(plain).color).toBe(getComputedStyle(lvl).color)
+      expect(getComputedStyle(plain).borderRadius).toBe('6px')
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
   it('the lanes are 44px switches, off at the disabled opacity', async () => {
     const screen = await render(
       <div className="gate-card">

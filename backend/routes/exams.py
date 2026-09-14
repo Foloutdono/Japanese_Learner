@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 
 from core.db import db_conn
+from core.srs_instance import srs
 from core.auth import get_user_id
 from study.exam_schema import ensure_exam_schema
 from study.exam_scoring import flatten_questions, score_attempt
@@ -598,7 +599,16 @@ def submit_attempt(exam_id: str, payload: SubmitAttemptPayload, user_id: str = D
     finally:
         conn.close()
 
+    # The fare for the paper: one ledger row for the attempt, each item
+    # at a card's correct or wrong rate (srs.award_practice). The one
+    # practice mode whose score the server computed itself.
+    fare = srs.award_practice(
+        user_id, "exam", str(attempt_id),
+        [4] * summary["correct"] + [1] * (summary["total"] - summary["correct"]),
+    )
+
     return {
+        **fare,
         "attemptId": attempt_id,
         "examId": exam_id,
         "revision": revision,

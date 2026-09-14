@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
+import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
 import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
@@ -89,6 +90,8 @@ function Session({ session, level }) {
   const [answer, setAnswer]     = useState('')
   const [result, setResult]     = useState(null)   // the graded reveal
   const [score, setScore]       = useState({ correct: 0, total: 0 })
+  // The fare per graded clip, from the result's own response.
+  const fare = usePracticeXp()
   const [rated, setRated]       = useState(false)
   const [error, setError]       = useState(null)
 
@@ -302,7 +305,11 @@ function Session({ session, level }) {
         accuracy: result.accuracy,
         plays,
       }),
-    }).catch(() => {})
+    })
+      // The fare rides the response (xp_earned, top-level); a failed
+      // post costs the fare and nothing else.
+      .then(res => fare.pay(res, quality))
+      .catch(() => {})
   }
 
   const where = `${level} · ${t.stationJlpt}`
@@ -316,6 +323,8 @@ function Session({ session, level }) {
       sub={where}
       remaining={`${score.correct} / ${score.total}`}
       pass={false}
+      toast={fare.toast}
+      onToastDone={fare.toastDone}
     >
       {(stage === 'loading' || stage === 'checking') && <Loading />}
 

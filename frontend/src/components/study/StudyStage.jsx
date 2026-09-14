@@ -1,4 +1,5 @@
 import { StageHead } from '../chrome/StageHead'
+import { LevelBar } from '../chrome/LevelBar'
 import { XpToast } from '../rewards/XpToast'
 import { openBalance } from '../../stores/credits'
 
@@ -18,7 +19,7 @@ import { openBalance } from '../../stores/credits'
 // Study leave to their mode picker; Today leaves to the gate.
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
-  toast, onToastDone, className = '', children,
+  toast, onToastDone, className = '', levelBar = true, children,
 }) {
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
   return (
@@ -32,6 +33,12 @@ export function StudyStage({
         />
         {children}
       </main>
+      {/* The level bar, docked under whatever the stage docks (the
+          rating bar, the field): the fare's home on a run, since the
+          stage frame took the HUD away. See components/chrome/LevelBar.jsx.
+          `levelBar={false}` is for the one phase that is bounded to the
+          screen and can pay nothing — the comprehension passage. */}
+      {levelBar && <LevelBar />}
     </div>
   )
 }

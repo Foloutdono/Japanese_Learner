@@ -946,6 +946,7 @@ const dictionary = {
   meaning:           'Sens',
   examples:          'Exemples',
   level:             'Niveau',
+  levelShort:        'Niv',
   listen:            'Écouter',
   displayedKanji:    'kanji affichés',
   radical:           'Radical',

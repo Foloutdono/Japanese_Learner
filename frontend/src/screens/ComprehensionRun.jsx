@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
+import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
 import { QuestionTypeBadge } from '../components/study/QuizComponents'
 import { PassageBreakdown } from '../components/analysis/PassageBreakdown'
@@ -56,6 +57,8 @@ export default function ComprehensionRun({ session }) {
   const [answers, setAnswers]   = useState([])     // chosen option index per question
   const [picked, setPicked]     = useState(null)   // the current question's choice, until Next commits it
   const [results, setResults]   = useState(null)   // final { score, total, results[] }
+  // The fare for the exercise, once, off the submission's response.
+  const fare = usePracticeXp()
   const [showBreakdown, setShowBreakdown] = useState(false)
   // Which sentence of the breakdown is open on its rows (plan 084).
   // The first, to begin with: the learner pressed "Show breakdown",
@@ -202,6 +205,7 @@ export default function ComprehensionRun({ session }) {
       .then(data => {
         setResults(data)
         setStage('results')
+        fare.pay(data)
       })
       .catch(() => {
         setError(t.comprehensionSubmitError)
@@ -256,6 +260,12 @@ export default function ComprehensionRun({ session }) {
       sub={sub}
       remaining={stage === 'questions' ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
+      toast={fare.toast}
+      onToastDone={fare.toastDone}
+      // The level bar steps off while the text is up: the passage band
+      // is measured against the whole screen (index.css,
+      // .stage--passage) and nothing is graded until the questions.
+      levelBar={stage !== 'reading'}
       // The reading stage is the one that holds a page: it is bounded
       // to the screen so the passage scrolls in its own card rather
       // than taking the stage with it (index.css, .prompt-card--passage).

@@ -4,6 +4,7 @@ import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
+import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
@@ -56,6 +57,8 @@ export default function ReadingRun({ session }) {
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState(null) // { correct, romaji }
   const [score, setScore]   = useState({ correct: 0, total: 0 })
+  // The fare per rated sentence, from the result's own response.
+  const fare = usePracticeXp()
   // Consecutive correct grades — purely a lightweight gaming touch (no
   // XP/SRS backing here, reading practice isn't a card mode), reset on
   // any incorrect grade.
@@ -323,9 +326,15 @@ export default function ReadingRun({ session }) {
         // something, rather than only being written down.
         source_word: data.source_word ?? null,
       }),
-    }).catch(() => {
-      // Logging failure shouldn't block the user from continuing.
     })
+      // The fare rides the response (xp_earned, top-level): the level
+      // bar moves once the rating is on the server, and a failed post
+      // costs the fare and nothing else.
+      .then(r => (r.ok ? r.json() : null))
+      .then(res => fare.pay(res, quality))
+      .catch(() => {
+        // Logging failure shouldn't block the user from continuing.
+      })
   }
 
   function retry() {
@@ -369,6 +378,7 @@ export default function ReadingRun({ session }) {
       feedback={feedback}
       score={score}
       streak={streak}
+      fare={fare}
       error={error}
       detail={detail}
       isMobile={isMobile}
@@ -407,7 +417,7 @@ function Streak({ streak, t }) {
 // decides there is a session to start at all.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
-  feedback, score, streak, error, detail, isMobile, analysis, analysisLoading, backLabel,
+  feedback, score, streak, fare, error, detail, isMobile, analysis, analysisLoading, backLabel,
   showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail, session,
 }) {
@@ -441,6 +451,8 @@ function SessionView({
       remaining={`${score.correct} / ${score.total}`}
       pass={false}
       aside={<Streak streak={streak} t={t} />}
+      toast={fare.toast}
+      onToastDone={fare.toastDone}
     >
       {stage === 'loading' && <Loading />}
 

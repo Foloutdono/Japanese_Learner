@@ -404,7 +404,19 @@ def post_translation_result(payload: ResultPayload, user_id: str = Depends(get_u
                 "new_level": state.get("new_level"),
             }
 
+    # The fare. A rating that scheduled a card was paid by that review;
+    # one that scheduled nothing -- no card behind the sentence, or an
+    # older client sending no quality -- is paid here at the practice
+    # rate (srs.award_practice), so the run's level bar moves either
+    # way. Top-level on purpose: every run reads the same three keys.
+    if scheduled:
+        fare = {k: scheduled[k] for k in ("xp_earned", "leveled_up", "new_level")}
+    else:
+        quality = payload.quality if payload.quality is not None else (4 if payload.correct else 1)
+        fare = srs.award_practice(user_id, "translation", payload.source, [quality])
+
     return {
+        **fare,
         "correct": payload.correct,
         "quality": payload.quality,
         # None when the rating scheduled nothing -- no quality given, or

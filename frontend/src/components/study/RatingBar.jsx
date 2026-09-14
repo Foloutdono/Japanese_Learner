@@ -95,7 +95,11 @@ export default function RatingBar({ onRate, active, scale }) {
             key={q}
             type="button"
             onClick={() => handleRate(q)}
-            className={`rating-bar__btn rating-bar__btn--q${q}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
+            /* The best answer the bar offers is the one tile filled
+               gold (index.css, .rating-bar__btn--best): the press most
+               taken, drawn as the one to reach for. Best-first, so it
+               is QUALITY_BTNS[0] on every scale. */
+            className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
             /* The digits are deliberately NOT drawn (numeric indices are
                noise on a control this size) and are deliberately NOT in
                display order: QUALITY_BTNS is best-first, so "1" is the
@@ -110,7 +114,7 @@ export default function RatingBar({ onRate, active, scale }) {
                 filled when this rating is the one chosen. Marked hidden
                 because it says nothing the label does not -- it is the
                 seal, and the word beside it is the name. */}
-            <span className="rating-bar__btn-ring" aria-hidden="true" />
+            {q !== QUALITY_BTNS[0].q && <span className="rating-bar__btn-ring" aria-hidden="true" />}
             <span className="rating-bar__btn-label">{label}</span>
           </button>
         ))}

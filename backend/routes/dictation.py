@@ -37,6 +37,7 @@ from pydantic import BaseModel, Field
 from core.auth import get_user_id
 from core.credits import require_pass
 from core.db import db_conn
+from core.srs_instance import srs
 from study import dictation
 
 # A pass feature, like the other practice platforms (plan 069): every
@@ -253,7 +254,16 @@ def post_dictation_result(payload: ResultPayload, user_id: str = Depends(get_use
         # moved on to the next clip.
         logger.exception("Could not log a dictation attempt for %s", payload.clip_id)
 
-    return {"correct": correct}
+    # The fare, at the practice rate — one row in the ledger per graded
+    # clip, keyed on the clip. Reported like the log above: the run has
+    # moved on, and a lost fare is worth less than a frozen screen.
+    fare: dict = {}
+    try:
+        fare = srs.award_practice(user_id, "dictation", payload.clip_id, [payload.quality])
+    except Exception:
+        logger.exception("Could not award the fare for a dictation attempt on %s", payload.clip_id)
+
+    return {"correct": correct, **fare}
 
 
 # ── The history ──────────────────────────────────────────────────────

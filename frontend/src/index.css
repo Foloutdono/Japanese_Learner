@@ -3122,6 +3122,10 @@
      left, it is the inset alone. */
   --hud-h:          48px;
   --tabbar-h:       50px;
+  /* The level bar a run docks on its bottom edge (components/chrome/
+     LevelBar.jsx): the dock's floor on a stage, the way the tab bar is
+     the floor under the shell. */
+  --lvlbar-h:       36px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -4534,10 +4538,15 @@ textarea:focus-visible {
    see docs/design/mobile/README.md for the map. */
 
 /* Under the shell the bottom edge is the tab bar; on a stage (both
-   bars gone) it is the screen's own foot. Stamped on <html> by
-   components/chrome/useChrome.js. */
+   bars gone) it is the level bar, docked where the tab bar was
+   (.lvlbar) — everything else docked on a run (the rating bar, the
+   field, the exam's sheet bar) sits on top of it. Stamped on <html>
+   by components/chrome/useChrome.js. */
 :root[data-chrome="shell"] {
   --dock-bottom: calc(var(--tabbar-h) + var(--safe-bottom));
+}
+:root[data-chrome="stage"] {
+  --dock-bottom: calc(var(--lvlbar-h) + var(--safe-bottom));
 }
 
 /* ── the frame ── */
@@ -5341,6 +5350,105 @@ textarea:focus-visible {
 .bar__stripe { height: 2px; background: var(--line-color); }
 .bar--register .bar__stripe { height: 1px; background: var(--surface-line); }
 
+/* ── 運賃表示 — the level bar on a run ──────────────────────
+   components/chrome/LevelBar.jsx. The stage frame takes the HUD away,
+   so a run docks this on its bottom edge instead: the level in the
+   caption register, the pass's gold climbing toward the next one, and
+   the XP figure the fare rises off. Sumi like the rating bar above it,
+   so the bottom of the screen stays one console; the last flex child
+   of .screen and stuck to the inset, so it holds the edge while the
+   card scrolls, and --dock-bottom on a stage is its height (see
+   :root[data-chrome="stage"]). The gutter is the foot's rule: the
+   page's own where the card fills the stage, half of what the card
+   leaves once it stops at --card-w. */
+.lvlbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 11;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  height: calc(var(--lvlbar-h) + var(--safe-bottom));
+  padding-inline: max(var(--sp-5), calc((100% - var(--card-w)) / 2 + var(--sp-5)));
+  padding-bottom: var(--safe-bottom);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  user-select: none;
+}
+.lvlbar__level {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+  white-space: nowrap;
+}
+.lvlbar__level-num {
+  font-size: var(--fs-sm);
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--text-on-panel);
+  font-variant-numeric: tabular-nums;
+}
+/* The pass's own track and metal (.pass__track / .pass__fill): the
+   level is the pass's balance, and the bar climbs in its gold. */
+.lvlbar__track {
+  position: relative;
+  flex: 1;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+  overflow: hidden;
+}
+.lvlbar__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  background: var(--accent2);
+  border-radius: var(--r-pill);
+  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+/* The span just climbed, lit brighter than the fill with a halo, over
+   the exact from/to the gain reports; it leaves with the fare (the
+   figure's animationend unmounts both), so it only has to fade. */
+.lvlbar__gain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: color-mix(in srgb, var(--accent2) 55%, var(--text-on-panel));
+  box-shadow: 0 0 6px 1px var(--accent2);
+  border-radius: var(--r-pill);
+  animation: lvlbar-gain 1000ms ease both;
+}
+@keyframes lvlbar-gain {
+  0%, 60% { opacity: 1; }
+  100%    { opacity: 0; }
+}
+.lvlbar__xp {
+  position: relative;
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.lvlbar__unit {
+  margin-left: var(--sp-1);
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+@media (prefers-reduced-motion: reduce) {
+  .lvlbar__fill { transition: none; }
+  .lvlbar__gain { animation: none; }
+}
+
 /* ── the head of a run (plan 070 mounts it) ── */
 .stage__head {
   display: flex;
@@ -5773,6 +5881,17 @@ textarea:focus-visible {
   18%  { opacity: 1; transform: translateY(-50%); }
   70%  { opacity: 1; transform: translateY(calc(-50% - 10px)); }
   100% { opacity: 0; transform: translateY(calc(-50% - 16px)); }
+}
+/* On the run's level bar (.lvlbar) the fare rises off the XP figure's
+   LEFT end, over the track's end, on the same keyframes (they move
+   about the figure's vertical centre, which is where this anchors it
+   too — and FareFigure clears the gain off the animation's own name).
+   After .hud-fare, whose `left: 100%` it undoes. */
+.hud-fare--bar {
+  left: auto;
+  right: 100%;
+  margin-left: 0;
+  margin-right: var(--sp-2);
 }
 @media (prefers-reduced-motion: reduce) {
   .hud__level--gain { animation: none; }
@@ -10834,13 +10953,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
       desktop it is a sumi panel under the card. The ramp is a 6px dot
       above each word, three-quarters strength at rest, full with a
       halo on press. Sumi is dark in both themes, so the pair below is
-      closed: the words never take an ambient ink. */
+      closed: the words never take an ambient ink.
+
+   4. TILES, AND THE BEST ONE IS GOLD (2026-09, chosen from a drawn
+      comparison alongside the run's level bar). The one instrument
+      with hairlines between its segments became a row of tiles a gap
+      apart, each on its own sumi (a wash of the panel ink where the
+      bar docks on sumi), and the best answer the bar offers — Correct
+      on the four- and two-button bars, Perfect on six — is filled in
+      the pass's gold with sumi type on it: the press most taken,
+      drawn as the one to reach for, and the same metal the level bar
+      under it climbs in. The dot stays on the other tiles. */
 .rating-bar__buttons {
   display: flex;
-  background: var(--bg-panel);
-  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  border-radius: var(--r-panel);
-  overflow: hidden;
+  gap: var(--sp-3);
   max-width: 640px;
   margin: 0 auto;
 }
@@ -10857,20 +10983,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   gap: var(--sp-2);
   min-height: 56px; /* a hit target, not a spacing rung -- the one literal this block keeps */
   padding: var(--sp-3) var(--sp-1);
-  background: none;
-  border: none;
-  border-left: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
-  /* The bare `button` rule gives every button 8px. Inherited here it
-     bent each segment's 1px hairline at all four corners, so the
-     dividers read as curved rather than as ruled lines -- most visible
-     once the bar wraps and the grid has interior corners. The container
-     keeps its own radius; the cells inside it are square. */
-  border-radius: 0;
+  background: var(--bg-panel);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-card);
   color: var(--text-on-panel);
   text-align: center;
   transition: background 0.15s ease;
 }
-.rating-bar__btn:first-child { border-left: none; }
 
 .rating-bar__btn:hover,
 .rating-bar__btn:focus-visible {
@@ -10907,6 +11026,23 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .rating-bar__btn.rating-bar__btn--pressed .rating-bar__btn-ring {
   opacity: 1;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--rating-color, transparent) 30%, transparent);
+}
+
+/* The best answer: gold, with sumi type (山吹色 reaches 3.9:1 against
+   the panel ink as text, but as a ground under sumi it clears 7:1).
+   Its hover, focus and press wash it toward the ink and halo it, at
+   the plain tile's own specificity in each state, so the two never
+   fight over the same button. RatingBar.jsx leaves the dot off it. */
+.rating-bar__btn.rating-bar__btn--best {
+  background: var(--accent2);
+  border-color: transparent;
+  color: var(--bg-panel);
+}
+.rating-bar__btn.rating-bar__btn--best:hover,
+.rating-bar__btn.rating-bar__btn--best:focus-visible,
+.rating-bar__btn.rating-bar__btn--best.rating-bar__btn--pressed {
+  background: color-mix(in srgb, var(--accent2) 82%, var(--text-on-panel));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent2) 30%, transparent);
 }
 
 .rating-bar__btn-label {
@@ -10980,20 +11116,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      then both sets of hairlines — because an :nth-child override has
      to come after every plain selector it outranks (the
      no-descending-specificity guard). */
-  .rating-bar__buttons--6 .rating-bar__btn { flex: 0 0 33.333%; }
+  .rating-bar__buttons--6 .rating-bar__btn { flex: 1 1 calc(33.333% - var(--sp-3)); }
   /* Written out rather than left to the base rule's `flex: 1 1 0`,
      which produces the same single row: every count the bar can have
      says what it does here, so a missing one reads as an omission
      rather than as an answer. */
   .rating-bar__buttons--4 .rating-bar__btn { flex: 1 1 0; }
   .rating-bar__buttons--2 .rating-bar__btn { flex: 1 1 0; }
-
-  /* The first of each row has no rule to its left; the second row
-     gains one above it. */
-  .rating-bar__buttons--6 .rating-bar__btn:nth-child(3n + 1) { border-left: none; }
-  .rating-bar__buttons--6 .rating-bar__btn:nth-child(n + 4) {
-    border-top: 1px solid var(--surface-line);
-  }
 }
 
 .app-loading__sign {
@@ -14394,6 +14523,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     /* Matched to .levelup's slide, so the page moves with the board. */
     transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
+  /* On the stage frame the foot is the level bar itself: it sits under
+     the stage (.lvlbar, the next flex child of .screen), carries the
+     inset, and whatever the stage docks sticks straight onto it. The
+     dock's height as padding here put exactly that height of page
+     between the rating bar and the bar it docks on. */
+  :root[data-chrome="stage"] .stage { padding-bottom: 0; }
   .stage > .quiz-done,
   .stage > .loading,
   .stage > .empty { margin-block: auto; }
@@ -14446,7 +14581,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      with it, and a card can only scroll inside a box that has stopped
      growing. Capped at the stage's own height, the card's `flex: 1 1
      auto` (below) shrinks it into whatever the head, the timer and
-     the docked foot leave, and the passage scrolls in there. */
+     the docked foot leave, and the passage scrolls in there. The whole
+     screen, because the level bar steps off for the passage
+     (ComprehensionRun passes StudyStage `levelBar={false}` while the
+     text is up): the band's ceiling is measured against this height
+     on the smallest phone (ComprehensionRun.touch.test.jsx), and no
+     fare can land while the learner is only reading. */
   .stage--passage { max-height: 100dvh; }
   /* And the card is what gives the room back. Every item in a flex
      column shrinks by default, so the head and the timer each gave up
@@ -14511,7 +14651,8 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     padding-inline: var(--sp-5);
     background: var(--bg-panel);
   }
-  .stage > .rating-bar .rating-bar__buttons { background: transparent; }
+  .stage > .rating-bar .rating-bar__btn { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
+  .stage > .rating-bar .rating-bar__btn.rating-bar__btn--best { background: var(--accent2); }
   /* ── The run's foot docks too ──
      The field and Submit (the canvas's Reading foot), the browse's two
      buttons, comprehension's pair: one control at the bottom of a run,
