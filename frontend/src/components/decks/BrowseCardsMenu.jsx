@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { apiFetch } from '../../lib/api'
+import { apiFetch, apiJson } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
@@ -72,6 +72,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
   const [loading, setLoading]   = useState(false)
   const [selected, setSelected] = useState(new Set())
   const [adding, setAdding]     = useState(false)
+  const [addFailed, setAddFailed] = useState(false)
 
   // Selection is per (source, raw_id) — cleared whenever the source
   // tab changes, since raw ids from different sources aren't
@@ -107,20 +108,31 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
     })
   }
 
+  // apiJson, not apiFetch: apiFetch hands back the raw Response without
+  // looking at its status, so every way this POST can be refused — the
+  // deck deleted in another tab (404), a deck that is not yours (403),
+  // the free tier's card ceiling (402 limit_reached) — used to run the
+  // success path. The selection cleared and the list refetched as
+  // though the cards had gone in, and nothing on screen admitted
+  // otherwise. A refusal now keeps the selection, so the button the
+  // learner already has their hand on is the retry.
   async function addSelected() {
     if (selected.size === 0 || adding) return
     setAdding(true)
+    setAddFailed(false)
     const cards = results
       .filter(r => selected.has(r.raw_id))
       .map(r => ({ source: r.source, level: r.level, raw_id: r.raw_id }))
     try {
-      await apiFetch(`/api/decks/${deckId}/cards/app`, session, {
+      await apiJson(`/api/decks/${deckId}/cards/app`, session, {
         method: 'POST',
         body: JSON.stringify({ cards }),
       })
       onAdded?.()
       setSelected(new Set())
       runSearch() // refresh in_deck flags so added items grey out
+    } catch {
+      setAddFailed(true)
     } finally {
       setAdding(false)
     }
@@ -236,6 +248,10 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
             </div>
           )}
         </div>
+
+        {addFailed && (
+          <div className="browse-add-error" role="alert">{t.browseAddFailed}</div>
+        )}
 
         <div className="import-footer">
           <button onClick={onClose} className="import-footer__cancel">{t.close}</button>
