@@ -1,5 +1,6 @@
 import { createPortal } from 'react-dom'
 import { useDialog } from '../../hooks/useDialog'
+import { useSheetDrag } from '../../hooks/useSheetDrag'
 
 // ── The bottom sheet (plan 068) ───────────────────────────────
 // A scrim and a panel rising from the bottom edge: the status sheet,
@@ -8,9 +9,18 @@ import { useDialog } from '../../hooks/useDialog'
 // and goes back to the opener on close — so a sheet is never an
 // overlay a keyboard cannot leave. `sumi` is the pass's own material
 // (the status sheet turns the pass over).
+//
+// The thumb's way out is hooks/useSheetDrag: a push back down the way
+// it came. Escape is a key a phone has not got, and the scrim over a
+// tall sheet is a sliver at the top of the screen — the far end of the
+// reach from the hand that opened it. The handle is the AFFORDANCE for
+// that gesture (it always was, and nothing answered it), but the drag
+// is the whole panel's: aiming for a 36×4 bar is not what a thumb does.
 function Panel({ onClose, jp, cap, sumi, label, children, className }) {
   const ref = useDialog(onClose)
-  const classes = ['sheet', sumi ? 'sheet--sumi' : '', className].filter(Boolean).join(' ')
+  const drag = useSheetDrag(ref, onClose)
+  const classes = ['sheet', sumi ? 'sheet--sumi' : '', drag.dragging ? 'sheet--dragging' : '', className]
+    .filter(Boolean).join(' ')
   return (
     <div className="scrim" onClick={onClose}>
       <div

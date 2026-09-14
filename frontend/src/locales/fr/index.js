@@ -978,6 +978,8 @@ const dictionary = {
   dictGrammar:       'Grammaire',
   dictLevels:        'Niveaux',
   dictLevelAll:      'Tous',
+  // Voir en/index.js : une constatation, pas une question.
+  dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
   formation:         'Formation',
   browseGrammarPoints: 'Parcourir les points',
@@ -1157,14 +1159,17 @@ const profile = {
     `Aucune étude en 14 jours contre une promesse de **${p} par jour**. La ligne attend — le portillon s'ouvre avec une seule carte.`,
   jourNoDest:        'Aucune destination sur cette carte.',
   jourNoDestLink:    'En choisir une au guichet',
-  jourActRecover:    (pace) => `Rouler à ${pace} par jour`,
-  jourActRecoverSub: (date) => `garde le ${date}`,
-  jourActReprint:    (date) => `Réimprimer — arriver le ${date}`,
-  jourActReprintSub: (a) => `à ${a} par jour ; la date bouge, à l'encre`,
+  // Voir en/index.js : les deux gestes sont un seul choix, donc la
+  // seconde ligne est la même phrase des deux côtés — la date
+  // d'arrivée. Le lecteur compare deux dates et deux rythmes.
+  jourActRecover:    (pace) => `Rouler à ${pace} / jour`,
+  jourActRecoverSub: (date) => `arriver le ${date}`,
+  jourActReprint:    'Réimprimer la carte',
+  jourActReprintSub: (date) => `arriver le ${date}`,
   jourActResume:     'Reprendre la ligne',
-  jourActResumeSub:  "le portillon s'ouvre avec une seule carte",
-  jourActSlow:       (pace) => `Réimprimer à ${pace} par jour`,
-  jourActSlowSub:    (date) => `une promesse plus lente vaut mieux qu'une promesse rompue — arriver le ${date}`,
+  jourActResumeSub:  'la carte ne change pas',
+  jourActSlow:       (pace) => `Réimprimer à ${pace} / jour`,
+  jourActSlowSub:    (date) => `arriver le ${date}`,
   jourReprintError:  'Réimpression impossible — réessayez.',
 
   // Contenu de repli hors-ligne, affiché uniquement quand /api/profile

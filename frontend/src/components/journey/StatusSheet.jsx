@@ -202,8 +202,8 @@ export function StatusSheet({ session }) {
               )}
               {model.projected && (
                 <button type="button" className="jour-act" disabled={busy} onClick={() => reprint({ goalTargetDate: iso(model.projected) })}>
-                  <strong>{t.jourActReprint(fmt.format(model.projected))}</strong>
-                  {t.jourActReprintSub(nf.format(model.actualPerDay))}
+                  <strong>{t.jourActReprint}</strong>
+                  {t.jourActReprintSub(fmt.format(model.projected))}
                 </button>
               )}
             </>

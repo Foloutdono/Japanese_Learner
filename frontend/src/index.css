@@ -5429,6 +5429,29 @@ textarea:focus-visible {
   border-bottom: 0;
   border-radius: var(--r-panel) var(--r-panel) 0 0;
   box-shadow: var(--elev-board);
+  /* The finger's vertical gesture belongs to this panel — its own
+     scroll while there is anything above, the dismiss drag once there
+     is not (hooks/useSheetDrag). `pan-y` leaves that scroll alone and
+     only rules out the horizontal pan and the double-tap zoom, neither
+     of which a sheet has any use for.
+
+     `contain` is what stops the gesture LEAKING. Without it a drag at
+     the top of the sheet chains to the page behind, the browser takes
+     it as a scroll, and it answers the pointer stream with a
+     pointercancel one frame in — the drag freezes with the thumb still
+     down (see useSheetDrag's note). A modal's backdrop should not
+     scroll under it in any case. */
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  /* At rest the drag contributes no inline transform at all, so this
+     is the spring back after a push that did not commit. While the
+     finger is down the panel must track it exactly — a transition
+     there would draw the sheet lagging behind the thumb. */
+  transition: transform 0.2s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+.sheet--dragging { transition: none; }
+@media (prefers-reduced-motion: reduce) {
+  .sheet { transition: none; }
 }
 /* The pass's own material; the cap's ink follows it through the pair
    named on the block (the ink guard's escape hatch, on purpose). */
@@ -5592,9 +5615,10 @@ textarea:focus-visible {
 .console__top > .console__action,
 .console__top > .chip { margin-left: auto; }
 /* A second row of chips under the first (the dictionary's JLPT levels
-   under its collections, shown under 文法 alone): the rows already
-   stack — each Chips takes the full width — so this is the hairline
-   between them, and the air the hairline needs. */
+   under its collections, shown under the three that are filed on a
+   level): the rows already stack — each Chips takes the full width —
+   so this is the hairline between them, and the air the hairline
+   needs. */
 .console__top > .dict-levels {
   padding-top: var(--sp-3);
   border-top: 1px solid var(--surface-line);
@@ -7013,8 +7037,20 @@ textarea:focus-visible {
     flex-direction: column;
     flex: 1;
   }
-  .learn > .board > .wmap__lines { flex: 1; }
-  .learn > .board > .wmap__lines > .wmap-line { flex: 1 1 auto; align-content: center; }
+  /* Every ROW on the map takes an equal share of the room going
+     spare — not every GROUP. The lines and the shelf are two blocks of
+     very different row counts, so `flex: 1` each handed four lanes one
+     half of the slack and the single deck row the other: the lanes
+     grew a little and the shelf grew hugely, or (as shipped) the shelf
+     was left out of the sharing altogether and sat squeezed under four
+     lanes with air around them. --rows is the lane count, set by
+     WallMap, so the split stays right when a fifth line is tracked.
+     flex-grow alone: the basis stays `auto`, so what is shared is the
+     SLACK and a lane keeps the extra height its track needs. */
+  .learn > .board > .wmap__lines { flex-grow: var(--rows, 4); }
+  .learn > .board > .wmap__group { flex-grow: 1; }
+  .learn > .board > .wmap__lines > .wmap-line,
+  .learn > .board > .wmap__group > .wmap-row { flex: 1 1 auto; align-content: center; }
 }
 
 /* The halls you use rather than ride. Chips, labelled in the
@@ -11842,6 +11878,23 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* Leaderboard */
 .leaderboard-card { padding: 0; }
 
+
+/* ── もしかして — the query the answer is actually for ────────
+   Printed only when what was typed found nothing and the search was
+   retried against the nearest word the catalogue holds
+   (backend/study/search_match.py). A quiet line in the secondary ink
+   with the word itself in the primary: the page below it is a page of
+   real results, and this says which question they answer. It is a
+   STATEMENT, not the usual "did you mean?" — the retry has already
+   happened, and offering a question about something already done is
+   how a search ends up looking unsure of itself. */
+.dict-corrected {
+  margin-bottom: var(--sp-5);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.dict-corrected b { color: var(--text-primary); font-weight: 700; }
 
 /* ── Selected-radical header ───────────────────────────────
    The radical glyph reuses the home screen's hanko-stamp box (a
@@ -16987,18 +17040,26 @@ html { scrollbar-gutter: stable; }
 
 /* ── The one-rail track (進捗が主役 round) ─────────────────────
    Positional geometry is deliberately numeric (nothing on the space
-   scale means "the rail sits 13px down a 44px drawing"); everything
+   scale means "the rail sits 21px down a 52px drawing"); everything
    typographic reads the token scales. The inner span insets the
    coordinate system so edge stations stay inside the panel.
+
+   The rail sits 8px lower than it first shipped, and the stem is 8px
+   longer to reach it: at a 2px gap the car read as a lozenge stuck to
+   the line rather than a train standing above it, and the dashed
+   promise crossing the rail had nowhere to be read against. Only the
+   separation changed — the car's own top edge is still the drawing's,
+   so the marks all keep their x and the block's four rules hold
+   (GhostTrack.browser.test.jsx measures every one of them relatively).
 
    It was 132px and two lanes: your car above the rail with a YOU tag,
    the promise's car below with a PLAN tag, and a bracket under both
    measuring the delay in days. Three of those parts were a key the
    reader had to learn before the drawing meant anything, and the
    fourth measured a number the head above now prints in words. What is
-   left is one rail at 44px: your train reaching down to it, the
+   left is one rail in 52px: your train reaching down to it, the
    promise crossing it, and the stretch you owe hatched between them. */
-.jour-track { position: relative; height: 44px; }
+.jour-track { position: relative; height: 52px; }
 /* 20px, not the mockup's 14: the widest thing centred on an edge stop
    is its own name, and the containment rule must hold against the bare
    track box — the guarantee travels with the component instead of
@@ -17006,13 +17067,13 @@ html { scrollbar-gutter: stable; }
 .jour-track__span { position: absolute; inset: 0 20px; }
 .jour-track__rail {
   position: absolute;
-  left: 0; right: 0; top: 13px; height: 3px;
+  left: 0; right: 0; top: 21px; height: 3px;
   border-radius: var(--r-plate);
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
 }
 .jour-track__done {
   position: absolute;
-  left: 0; top: 13px; height: 3px;
+  left: 0; top: 21px; height: 3px;
   border-radius: var(--r-plate);
   background: var(--jour-st, var(--success));
   transition: width 0.25s ease;
@@ -17023,7 +17084,7 @@ html { scrollbar-gutter: stable; }
    not running normally. */
 .jour-track__owed {
   position: absolute;
-  top: 10px; height: 9px;
+  top: 18px; height: 9px;
   background:
     repeating-linear-gradient(45deg,
       color-mix(in srgb, var(--jour-st, var(--warning)) 60%, transparent) 0 1px,
@@ -17033,12 +17094,12 @@ html { scrollbar-gutter: stable; }
 }
 .jour-track__station {
   position: absolute;
-  /* 11, so the 7px dot centres on the 3px rail (13 + 1.5 - 3.5) AND its
-     top meets the car's bottom exactly: the two never share a pixel of
-     height, which is what keeps a stop visible when the train stands
-     within a car's width of it — 43.5% against a stop at 46.0% is 8px
-     apart on a phone, and the car is 20px wide. */
-  top: 11px;
+  /* 19, so the 7px dot centres on the 3px rail (21 + 1.5 - 3.5). It
+     clears the car's bottom by the stem's whole length, which is what
+     keeps a stop visible when the train stands within a car's width of
+     it — 43.5% against a stop at 46.0% is 8px apart on a phone, and the
+     car is 20px wide. */
+  top: 19px;
   transform: translateX(-50%);
   display: flex;
   flex-direction: column;
@@ -17079,7 +17140,7 @@ html { scrollbar-gutter: stable; }
   content: '';
   position: absolute;
   left: 50%; top: 11px;
-  width: 2px; height: 5px;
+  width: 2px; height: 13px;
   transform: translateX(-50%);
   background: var(--jour-st, var(--success));
 }
@@ -17088,7 +17149,7 @@ html { scrollbar-gutter: stable; }
    marks can stand at the same x with nothing to keep apart. */
 .jour-track__plan {
   position: absolute;
-  top: 4px;
+  top: 12px;
   transform: translateX(-50%);
   width: 0; height: 21px;
   border-left: 2px dashed color-mix(in srgb, var(--text-on-panel) 55%, transparent);
@@ -17216,17 +17277,27 @@ html { scrollbar-gutter: stable; }
   font-variant-numeric: tabular-nums;
   color: var(--text-on-panel-soft);
 }
+/* The two honest moves, side by side — because they are ONE choice
+   with two answers, and a choice stacked in a column reads as a list
+   of suggestions to work through. Auto-flow column with 1fr tracks so
+   the pair splits the row evenly and a lone move (no recovery pace in
+   reach, or no projection to reprint) still fills it, with no second
+   rule for the one-button case. Stretched, so the two cards are the
+   same height whichever label wraps. */
 .jour-rev__actions {
-  display: flex;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  align-items: stretch;
   gap: var(--sp-3);
-  flex-wrap: wrap;
 }
 .jour-act {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: var(--sp-1);
-  padding: var(--sp-2) var(--sp-4);
+  padding: var(--sp-3) var(--sp-4);
   background: none;
   border: 1px solid color-mix(in srgb, var(--text-on-panel) 30%, transparent);
   border-radius: var(--r-card);

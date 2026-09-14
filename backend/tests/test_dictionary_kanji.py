@@ -271,24 +271,33 @@ def test_the_exam_distractor_tables_still_cover_every_deck_character():
     assert len(gen.RADICAL_INDEX) == 194
 
 
-def test_the_pool_is_searched_on_the_meaning_it_shows(client):
-    """The deck matches a query against get_meaning()'s output — French
-    where KANJIDIC2 has one, English otherwise. The pool has to match the
-    same string, not every column the database happens to store: 璽 is
-    "emperor's seal" in English and "sceau impérial" in French, so
-    "sceau" must answer in a French session and not in an English one.
-    Searching both columns regardless of language would make a
-    French-only term find pool characters and no deck ones — the exact
-    half-answer merging the collections was meant to end."""
-    fr = _page(client, q="sceau", lang="fr", limit=200)
-    assert "璽" in [r["kanji"] for r in fr["results"]]
-    # ...and it is in the POOL half: the deck answers "sceau" too (印, 判),
-    # and those come first, which is the order the whole merge is about.
-    assert next(r for r in fr["results"] if r["kanji"] == "璽")["level"] is None
+def test_a_term_answers_in_either_language(client):
+    """Both app languages are searched, whichever one is on screen.
 
-    en = _page(client, q="sceau", lang="en", limit=200)
-    assert "璽" not in [r["kanji"] for r in en["results"]]
-    # A word that survives the fallback answers in both: 璽 has no French
-    # for "seal", so the French session is shown the English and finds it.
+    璽 is "emperor's seal" in English and "sceau impérial" in French, so
+    it has a term in each that the other has not got. Both must find it,
+    in both sessions — a learner thinks vocabulary in whichever language
+    taught it to them, and the session language is a display setting,
+    not a statement about which half of their head they may search with.
+
+    This USED to be scoped to the shown meaning (the pool matched
+    COALESCE(meaning_fr, meaning_en), mirroring get_meaning's fallback),
+    on the reasoning that a French term finding pool characters but no
+    deck ones was a half-answer. The deck half answers in both languages
+    now, so there is no half left to protect.
+    """
+    for lang in ("fr", "en"):
+        seal = _page(client, q="sceau", lang=lang, limit=200)
+        assert "璽" in [r["kanji"] for r in seal["results"]], lang
+        # ...and it is in the POOL half: the deck answers "sceau" too
+        # (印, 判), and those come first, which is the order the whole
+        # merge is about.
+        assert next(r for r in seal["results"] if r["kanji"] == "璽")["level"] is None
+
+    # The same query, the same collection, whichever language is shown:
+    # what differs between the two sessions is the gloss printed on the
+    # tile, never which tiles there are.
+    assert _page(client, q="sceau", lang="fr", limit=200)["total"] == \
+           _page(client, q="sceau", lang="en", limit=200)["total"]
     assert _page(client, q="dragon", lang="fr", limit=60)["total"] == \
            _page(client, q="dragon", lang="en", limit=60)["total"]

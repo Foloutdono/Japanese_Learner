@@ -203,7 +203,12 @@ beforeEach(() => {
     ok: true, status: 200,
     json: async () => {
       const p = String(path)
-      if (p.startsWith('/api/dictionary/radicals')) return { groups: [] }
+      // One real tile, so a test can actually PICK a radical. It was an
+      // empty index, which made every "in radical mode" assertion stop
+      // at the grid.
+      if (p.startsWith('/api/dictionary/radicals')) {
+        return { groups: [{ stroke_count: 3, radicals: [{ number: 85, char: '水', kanji_count: 12 }] }] }
+      }
       if (p.startsWith('/api/dictionary?')) {
         const cat = new URLSearchParams(p.split('?')[1]).get('category')
         const rows = cat === 'hiragana' ? HIRAGANA : cat === 'katakana' ? KATAKANA
@@ -228,8 +233,10 @@ describe('the dictionary screen', () => {
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
     // Five collections as chips, kanji on; the radical index is a sixth
-    // chip that only exists under the kanji collection.
-    const chips = [...screen.container.querySelectorAll('.console__chips .chip')]
+    // chip that only exists under the kanji collection. Scoped to the
+    // collections row: the console's SECOND row is the JLPT levels, and
+    // a bare `.console__chips .chip` counts both.
+    const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
     expect(chips.length).toBe(6)
     expect(chips[0].classList.contains('chip--on')).toBe(true)
     expect(chips[0].textContent).toBe(T.dictKanji)
@@ -242,7 +249,7 @@ describe('the dictionary screen', () => {
 
   it('switches the collection from the chips and drops the radical index off kanji', async () => {
     const screen = await renderScreen()
-    const chips = () => [...screen.container.querySelectorAll('.console__chips .chip')]
+    const chips = () => [...screen.container.querySelectorAll('.dict-collections .chip')]
     chips()[1].click()
     await settle(80)
     expect(lastQuery().get('category')).toBe('vocab')
@@ -252,13 +259,11 @@ describe('the dictionary screen', () => {
   })
 
   // ── 文法 — the grammar collection ──
-  it('offers grammar as the third collection, in the line\'s pine, with the levels under it and nowhere else', async () => {
+  it('offers grammar as the third collection, in the line\'s pine, with the levels under it', async () => {
     const screen = await renderScreen()
-    const chips = () => [...screen.container.querySelectorAll('.console__chips .chip')]
+    const chips = () => [...screen.container.querySelectorAll('.dict-collections .chip')]
     expect(chips()[2].textContent).toBe(T.dictGrammar)
     expect(chips()[2].style.getPropertyValue('--tab-color')).toBe('var(--line-grammar)')
-    // No level row under kanji.
-    expect(screen.container.querySelector('.dict-levels')).toBeNull()
 
     chips()[2].click()
     await settle(80)
@@ -280,11 +285,79 @@ describe('the dictionary screen', () => {
     expect(lastQuery().get('level')).toBe('N4')
     expect(screen.container.querySelectorAll('.dict-levels .chip')[2].classList.contains('chip--on')).toBe(true)
 
-    // Leaving the collection leaves the level behind with it.
+    // Leaving the collection leaves the level behind with it: N5 in the
+    // grammar and N5 in the kanji are different shelves.
     chips()[0].click()
     await settle(80)
-    expect(screen.container.querySelector('.dict-levels')).toBeNull()
     expect(lastQuery().has('level')).toBe(false)
+    expect([...screen.container.querySelectorAll('.dict-levels .chip--on')]
+      .map(c => c.textContent)).toEqual([T.dictLevelAll])
+  })
+
+  // ── The level, on the other two collections filed by it ──
+  // Kanji and vocabulary got the row the grammar collection had alone.
+  // A level there means THE APP'S OWN DECK at that level — the KANJIDIC
+  // and JMdict pools behind those collections carry none — so the chip
+  // is what turns 13,131 characters into the 103 a course teaches.
+  it('narrows the kanji and the vocabulary by level too', async () => {
+    const screen = await renderScreen()
+    const chips = () => [...screen.container.querySelectorAll('.dict-collections .chip')]
+    const levels = () => [...screen.container.querySelectorAll('.dict-levels .chip')]
+
+    // Kanji is the collection the screen opens on, and the row is there.
+    expect(levels().map(c => c.textContent))
+      .toEqual([T.dictLevelAll, 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(lastQuery().has('level')).toBe(false)
+
+    levels()[1].click()
+    await settle(80)
+    expect(lastQuery().get('category')).toBe('kanji')
+    expect(lastQuery().get('level')).toBe('N5')
+
+    // The vocabulary has its own, and arrives at it unnarrowed.
+    chips()[1].click()
+    await settle(80)
+    expect(lastQuery().get('category')).toBe('vocab')
+    expect(lastQuery().has('level')).toBe(false)
+    levels()[3].click()
+    await settle(80)
+    expect(lastQuery().get('level')).toBe('N3')
+  })
+
+  it('takes the level off the radical index, which has no level to be on', async () => {
+    const screen = await renderScreen()
+    const levels = () => [...screen.container.querySelectorAll('.dict-levels .chip')]
+    levels()[1].click()
+    await settle(80)
+    expect(lastQuery().get('level')).toBe('N5')
+
+    // 部 — the radical index is served whole, deck and pool in stroke
+    // order, so a level cannot cut it. The row goes with the mode.
+    // The chip carries its glyph as well as its label, so it is found
+    // by what it contains rather than by what it equals.
+    const radical = () => [...screen.container.querySelectorAll('.dict-collections .chip')]
+      .find(c => c.textContent.includes(T.dictModeRadical))
+    radical().click()
+    await settle(80)
+    expect(screen.container.querySelector('.dict-levels')).toBeNull()
+
+    // ...and still gone once a radical is PICKED and its characters are
+    // on screen. A visible chip there would refetch without the radical
+    // and silently drop it.
+    const tile = screen.container.querySelector('.radical-tile')
+    expect(tile, 'the index has to offer a radical for this to test anything').not.toBeNull()
+    tile.click()
+    await settle(80)
+    expect(lastQuery().get('radical')).toBe('85')
+    expect(screen.container.querySelector('.dict-levels')).toBeNull()
+
+    // ...and coming back out of it, nothing is narrowed behind the
+    // learner's back.
+    radical().click()
+    await settle(80)
+    expect(lastQuery().has('level')).toBe(false)
+    expect([...screen.container.querySelectorAll('.dict-levels .chip--on')]
+      .map(c => c.textContent)).toEqual([T.dictLevelAll])
   })
 
   it('opens on the collection and the level its address names', async () => {
@@ -293,7 +366,7 @@ describe('the dictionary screen', () => {
     const q = new URLSearchParams(first.split('?')[1])
     expect(q.get('category')).toBe('grammar')
     expect(q.get('level')).toBe('N3')
-    const chips = [...screen.container.querySelectorAll('.console__chips .chip')]
+    const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
     expect(chips[2].classList.contains('chip--on')).toBe(true)
     const on = [...screen.container.querySelectorAll('.dict-levels .chip--on')]
     expect(on.map(c => c.textContent)).toEqual(['N3'])
