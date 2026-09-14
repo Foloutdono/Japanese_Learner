@@ -5469,6 +5469,13 @@ textarea:focus-visible {
   background: color-mix(in srgb, currentcolor 30%, transparent);
 }
 .sheet__head { display: flex; align-items: baseline; gap: var(--sp-3); }
+/* The handle and the head are the mouse's grip on the sheet
+   (hooks/useSheetDrag): a push down from either shuts it, so neither
+   is text to select and both say so under the cursor. */
+.sheet__handle,
+.sheet__head { cursor: grab; user-select: none; }
+.sheet--dragging .sheet__handle,
+.sheet--dragging .sheet__head { cursor: grabbing; }
 .sheet__jp { font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
 .sheet__cap {
   font-family: var(--font-display);
@@ -11285,487 +11292,102 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-on-panel);
 }
 
-/* ── The Explorer ──────────────────────────────────────────
-   Controls on top, a totals line that follows the current slice, then
-   the grouped rows. */
-.explorer { margin-bottom: 48px; }
-
-.explorer__controls {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
-}
-.explorer__control {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.explorer__control-label {
-  width: 76px;
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.explorer__chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-.explorer__chip {
-  padding: 5px 12px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: transparent;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: 11.5px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-}
-/* `:not(--on)` is load-bearing, not tidiness. `.explorer__chip:hover`
-   is two classes and `.explorer__chip--on` is one, so hover *wins* on
-   specificity and repainted the selected chip's text --text-primary —
-   near-black ink on the near-black selected pill. In light mode the
-   label of whatever you had just clicked vanished. */
-.explorer__chip:not(.explorer__chip--on):hover {
-  color: var(--text-primary);
-  border-color: var(--text-secondary);
-}
-.explorer__chip--on {
-  background: var(--bg-panel);
-  border-color: var(--bg-panel);
-  color: var(--text-on-panel);
-}
-.explorer__chip--on:hover {
-  border-color: var(--bg-panel);
-  filter: brightness(1.25);
-}
-
-.explorer__totals {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  margin-bottom: 14px;
-}
-.explorer__totals .composition { height: 8px; }
-.explorer__totals-figures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-}
-.explorer__figure {
-  --fig-color: var(--text-primary);
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.explorer__figure--mastered { --fig-color: var(--state-mastered); }
-.explorer__figure--learning { --fig-color: var(--state-learning); }
-.explorer__figure--new      { --fig-color: var(--state-new); }
-.explorer__figure--due      { --fig-color: var(--state-due); }
-.explorer__figure--accuracy { --fig-color: var(--success); }
-.explorer__figure--muted    { --fig-color: var(--text-secondary); }
-.explorer__figure-value {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.15rem;
-  line-height: 1;
-  color: color-mix(in srgb, var(--fig-color) 55%, var(--text-primary));
-}
-.explorer__figure-label {
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-
-.explorer__rows {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-}
-
-.explorer-group { background: var(--bg-card); }
-.explorer-group__head {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: none;
-  border: none;
-  border-radius: 0;
-  font: inherit;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.explorer-group__head:hover { background: var(--bg-card-hover); }
-.explorer-group__caret {
-  flex-shrink: 0;
-  color: var(--text-secondary);
-}
-.explorer-group__label {
-  /* The same width as .explorer-leaf__name below, and the two columns
-     start within a pixel of each other (16 + caret + gap here, 40 of
-     padding there) — so a group's name and the names of the rows it
-     opens onto sit in one column. It is a fixed width rather than a
-     flexed one because the composition bars have to start at the same
-     x on every row to be comparable at a glance. */
-  width: 176px;
-  flex-shrink: 0;
-  font-weight: 700;
-  font-size: 13.5px;
-  /* A flex item will not go below its longest unbreakable word. Every
-     label here is a level ("N5") or a kana set name, so the ellipsis
-     is a backstop for a deck key added on the backend and not yet
-     named in the string tables — those arrive as one long slug. */
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.explorer-group__pct {
-  width: 44px;
-  flex-shrink: 0;
-  text-align: right;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--state-mastered) 55%, var(--text-primary));
-}
-.explorer-group__counts {
-  flex-shrink: 0;
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--text-secondary);
-}
-
-/* A seal-red count: "something is waiting for you". */
-.explorer-group__due,
-.explorer-leaf__due {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  min-width: 34px;
-  height: 20px;
-  padding: 0 7px;
-  border: none;
-  border-radius: 999px;
-  background: var(--state-due);
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-size: 11px;
-  font-weight: 700;
-}
-.explorer-leaf__due { cursor: pointer; }
-.explorer-leaf__due:hover { filter: brightness(1.15); }
-/* Holds the column open on rows with nothing due, so the numbers
-   above and below it stay in line. */
-/* Holds the column open on a row with nothing due, so every
-   composition bar in the table starts and ends at the same x. */
-.explorer-leaf__due--empty,
-.explorer-group__due--empty {
-  background: none;
-  height: 20px;
-}
-
-.explorer-group__body {
-  display: flex;
-  flex-direction: column;
-  border-top: 1px solid var(--border);
-  background: color-mix(in srgb, var(--border) 22%, var(--bg-card));
-}
-.explorer-leaf {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 7px 16px 7px 40px;
-}
-.explorer-leaf + .explorer-leaf {
-  border-top: 1px solid color-mix(in srgb, var(--border) 55%, transparent);
-}
-.explorer-leaf__name {
-  width: 176px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-  min-width: 0;
-}
-.explorer-leaf__group {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.explorer-leaf__mode {
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.explorer-leaf .composition { height: 5px; }
-.explorer-leaf__numbers {
-  flex-shrink: 0;
-  display: flex;
-  gap: 14px;
-  font-family: var(--font-display);
-  font-size: 11px;
-}
-.explorer-leaf__pct  { width: 34px; text-align: right; color: var(--state-mastered); }
-.explorer-leaf__acc  { width: 34px; text-align: right; color: var(--success); }
-.explorer-leaf__size { width: 40px; text-align: right; color: var(--text-secondary); }
-
-/* Mastered, in progress, and the untouched remainder showing through
-   as the track — three shares of one width, so a 12-card kana set and
-   a 1500-word level are directly comparable. */
-.composition {
-  flex: 1;
-  min-width: 60px;
-  display: flex;
-  height: 6px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--state-new) 26%, transparent);
-}
-.composition__seg { display: block; height: 100%; }
-.composition__seg--mastered { background: var(--state-mastered); }
-.composition__seg--learning { background: var(--state-learning); }
-
-/* Twenty-four columns with the small hours shaded behind them, so a
-   late-night habit reads as late-night and not just as a tall bar. */
-.clock {
-  display: flex;
-  align-items: flex-end;
-  gap: 2px;
-  height: 92px;
-}
-.clock__slot {
-  flex: 1;
-  height: 100%;
-  display: flex;
-  align-items: flex-end;
-}
-.clock__slot--night { background: color-mix(in srgb, var(--indigo) 14%, transparent); }
-.clock__bar {
-  width: 100%;
-  background: color-mix(in srgb, var(--accent4) 72%, transparent);
-  border-radius: 1px 1px 0 0;
-}
-.clock__bar--peak { background: var(--accent); }
-.clock__axis {
-  display: flex;
-  justify-content: space-between;
-  margin-top: -6px;
-  font-family: var(--font-display);
-  font-size: 9.5px;
-  color: var(--text-secondary);
-}
-
-.rating-mix {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.rating-mix__row {
-  --rating-color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-/* Same five inks the rating bar itself uses — see .rating-bar__btn--q*. */
-.rating-mix__row--q5 { --rating-color: var(--success); }
-.rating-mix__row--q4 { --rating-color: var(--accent6); }
-.rating-mix__row--q3 { --rating-color: var(--accent2); }
-.rating-mix__row--q2 { --rating-color: var(--accent7); }
-.rating-mix__row--q1 { --rating-color: var(--accent); }
-.rating-mix__label {
-  width: 96px;
-  flex-shrink: 0;
-  font-size: 11.5px;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.rating-mix__track {
-  flex: 1;
-  height: 8px;
-  border-radius: 4px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--border) 70%, transparent);
-}
-.rating-mix__fill {
-  display: block;
-  height: 100%;
-  background: var(--rating-color);
-}
-.rating-mix__pct {
-  width: 34px;
-  flex-shrink: 0;
-  text-align: right;
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--text-primary);
-}
-
-.ladder {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-.ladder__row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.ladder__label {
-  width: 96px;
-  flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 10.5px;
-  color: var(--text-secondary);
-}
-.ladder__track {
-  flex: 1;
-  height: 9px;
-  border-radius: 2px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--border) 70%, transparent);
-}
-.ladder__fill {
-  display: block;
-  height: 100%;
-  background: color-mix(in srgb, var(--state-learning) 75%, transparent);
-}
-/* A month out or further: the part of the deck that has gone quiet,
-   which is what the whole schedule is working toward. */
-.ladder__fill--settled { background: var(--state-mastered); }
-.ladder__count {
-  width: 46px;
-  flex-shrink: 0;
-  text-align: right;
-  font-family: var(--font-display);
-  font-size: 11px;
-  color: var(--text-primary);
-}
-
-/* ── 弱点 — the trouble list ────────────────────────────────
+/* ── 弱点 — the trouble list (plan 085) ────────────────────
    The card itself is the headline, because that's the thing you're
    failing to recognise. Every row is a door into the drill it came
-   from. */
+   from; six on the screen, the rest behind one foot row, in a sheet. */
 .trouble {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border: 1px solid var(--border);
-  margin-bottom: 48px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
 }
+.trouble--sheet { border: 0; border-radius: var(--r-flat); background: none; }
 .trouble__row {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  background: var(--surface);
-  border: none;
-  border-radius: 0;
+  gap: var(--sp-4);
+  min-height: 44px;
+  padding: var(--sp-4) var(--sp-5);
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: var(--r-flat);
+  background: none;
   font: inherit;
   color: inherit;
   text-align: left;
   transition: background 0.15s ease;
 }
+.trouble__row:first-child { border-top: 0; }
 .trouble__row--open { cursor: pointer; }
-.trouble__row--open:hover { background: var(--bg-card-hover); }
+.trouble__row--open:hover,
+.trouble__row--open:focus-visible { background: var(--overlay-hover); filter: none; }
 .trouble__glyph {
   flex-shrink: 0;
   min-width: 1.5em;
   font-family: var(--font-jp);
-  font-size: 1.45rem;
+  font-size: var(--fs-title);
   line-height: 1.1;
   color: var(--text-primary);
 }
-.trouble__meta {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
+.trouble__meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
 .trouble__where {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-family: var(--font-display);
-  font-size: 9.5px;
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.trouble__mode {
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.trouble__accuracy {
-  width: 56px;
-  flex-shrink: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
 .trouble__accuracy-track {
   height: 5px;
-  border-radius: 3px;
+  border-radius: var(--r-plate);
   overflow: hidden;
   background: color-mix(in srgb, var(--border) 70%, transparent);
 }
-.trouble__accuracy-fill {
-  display: block;
-  height: 100%;
-  background: var(--danger);
-}
+.trouble__accuracy-fill { display: block; height: 100%; background: var(--danger); }
 .trouble__accuracy-value {
+  flex-shrink: 0;
+  min-width: var(--sp-8);
   text-align: right;
   font-family: var(--font-display);
-  font-size: 11px;
   font-weight: 700;
-  color: color-mix(in srgb, var(--danger) 55%, var(--text-primary));
+  font-size: var(--fs-sm);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
 .trouble__lapses {
   flex-shrink: 0;
   font-family: var(--font-display);
-  font-size: 12px;
+  font-weight: 700;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-.trouble__lapses-unit { font-size: 9px; margin-left: 1px; opacity: 0.7; }
+.trouble__lapses-unit { font-size: var(--fs-caption-xs); margin-left: 1px; }
 .trouble__go { flex-shrink: 0; color: var(--text-secondary); opacity: 0.45; }
+.trouble__more {
+  min-height: 44px;
+  padding: 0 var(--sp-5);
+  border: 0;
+  border-top: 1px solid var(--surface-line);
+  border-radius: var(--r-flat);
+  background: none;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.trouble__more:hover,
+.trouble__more:focus-visible { color: var(--text-primary); background: var(--overlay-hover); filter: none; }
+@media (prefers-reduced-motion: reduce) {
+  .trouble__row { transition: none; }
+}
 /* A pass prints its holder on ONE line, because that is what a pass
    does: the field is a fixed slot, and a name too long for it is
    shortened, not run onto a second row. USERNAME_RE caps a name at 20
@@ -15040,11 +14662,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   }
 }
 
-/* Third tier between 768px tablet and 560px phone, for the explorer /
-   board-row / profile-card group specifically: .explorer__control's
-   row-of-chips layout (below) genuinely breaks — six lines of chrome
-   for three controls — if it waits until 560px to stack. Collapsing
-   this into 560px would reintroduce exactly that. */
+/* Third tier between 768px tablet and 560px phone, for the board-row /
+   profile-card group specifically. (The Explorer that first needed it
+   retired with plan 085; the tier stays for the rows that still use it.) */
 @media (max-width: 640px) {
   /* The column keeps --sp-6 between blocks on a phone too. It was 18px
      here -- off every rung, and tighter than the desktop it is meant to
@@ -15054,63 +14674,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   /* The study column's own phone layout lives in the 768px block
      above (the stage, the dock); nothing here any more. */
   .flashcard__hint { margin-top: var(--sp-3); }
-
-  /* The Explorer's group header is five columns wide by design, and at
-     this width they stop fitting on one line. Sharing the leftovers
-     between the label and the composition bar — which is what this did
-     first — left the label 98px, four or five characters short of
-     "Hiragana (combinations)", so it was read as an ellipsis. The
-     header becomes two lines instead: the name takes the full width on
-     the first, the three figures keep a row of their own underneath,
-     indented to the label's own left edge so the bars still start at
-     one x down the table. */
-  .explorer-group__head {
-    display: grid;
-    grid-template-columns: auto auto 1fr auto;
-    grid-template-areas:
-      "caret label label label"
-      ".     pct   bar   due";
-    align-items: center;
-    gap: var(--sp-2) var(--sp-4);
-  }
-  .explorer-group__caret { grid-area: caret; justify-self: start; }
-  .explorer-group__label {
-    grid-area: label;
-    width: auto;
-    white-space: normal;
-    overflow: visible;
-    overflow-wrap: anywhere;
-  }
-  /* Left-flush under the name above it, not right-flush inside a 44px
-     column that would leave "9%" floating away from its own bar. */
-  .explorer-group__pct { grid-area: pct; text-align: left; }
-  .explorer-group__head .composition { grid-area: bar; }
-  .explorer-group__due { grid-area: due; }
-  .explorer-group__counts { display: none; }
-
-  /* The three control rows are the first thing on the panel and were
-     taking six lines of chrome before a single figure: a 76px label
-     column beside chips that then wrapped two and three deep. Label
-     over chips, and the chips themselves tighten. */
-  .explorer__control {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 6px;
-  }
-  .explorer__control-label { width: 100%; }
-  .explorer__chip { padding: 5px 10px; font-size: 11px; }
-  .explorer__chips { gap: 5px; }
-  .explorer-leaf { padding-left: 24px; }
-  .explorer-leaf__name { width: 132px; }
-  /* The leaf's first line carries the coordinates its group does not
-     name, and under the format/direction/exercise groupings that is
-     "Kana · Katakana (combinations)" — 173px of caption in a 132px
-     column. Widening the column is the wrong trade at this width: it
-     comes straight out of the composition bar, which is already at its
-     60px floor here. It wraps instead, so the row that needs a second
-     line takes one and the ellipsis goes back to being a backstop. */
-  .explorer-leaf__group { white-space: normal; }
-  .explorer-leaf__acc, .explorer-leaf__size { display: none; }
 
   .profile-card { flex-direction: column; text-align: center; gap: 18px; }
   .profile-card__info { width: 100%; }
@@ -17742,8 +17305,7 @@ html { scrollbar-gutter: stable; }
   color: var(--text-secondary);
 }
 
-/* ── The records' notes and the door with an icon (canvas ProfileInserts, Statistics) ── */
-.record__note { font-size: var(--fs-caption); color: var(--text-secondary); }
+/* ── The door with an icon (canvas ProfileInserts) ── */
 .pf-line__roundel--icon { display: inline-flex; align-items: center; justify-content: center; }
 
 /* ── The ranking (canvas ProfileInserts) ──
@@ -17819,122 +17381,156 @@ html { scrollbar-gutter: stable; }
 }
 .status-sheet__error { margin: 0; color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
-/* ── The statistics (canvas Statistics) ── */
-.stat-cap {
+/* ── 運行実績 — the statistics, the service record (plan 085) ──
+   Four inserts and no heading: the retention line under its figure,
+   the strength ladder, the lines, the misses over the trouble list.
+   Study state wears state inks and ink; only a line's roundel wears a
+   line pigment, because a line is a place. */
+.rep-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  padding: var(--sp-5);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.rep-card--rows { gap: var(--sp-2); padding: var(--sp-3) var(--sp-5); }
+.rep-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: var(--sp-3);
-  padding-bottom: var(--sp-2);
-  border-bottom: 1px solid var(--surface-line);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
 }
-.stat-cap__fig { color: var(--text-primary); }
-.cal {
+.rep-fig {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
   gap: var(--sp-2);
-  padding: var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  overflow: hidden;
-}
-.cal__months {
-  display: grid;
-  grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));
-  gap: var(--sp-1);
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
+  font-size: var(--fs-display);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
 }
-/* Ellipsis, not a hard cut: a month whose run is too short to print
-   its name is left unnamed upstream (domain/statsModel.js, MIN_MONTH_
-   SPAN), and this is the backstop for a narrower phone than the one
-   that number was measured on — "SEPT…" reads as a shortened word,
-   "SE" reads as a mistake. */
-.cal__month { overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.cal__grid {
-  display: grid;
-  grid-template-columns: repeat(var(--weeks, 14), minmax(0, 1fr));
-  grid-template-rows: repeat(7, minmax(0, 1fr));
-  grid-auto-flow: column;
-  gap: var(--sp-1);
-}
-.cal__cell { aspect-ratio: 1; border-radius: var(--r-plate); background: color-mix(in srgb, var(--text-primary) 6%, transparent); }
-.cal__cell--future { opacity: 0.35; }
-.cal--gold .cal__cell--1 { background: color-mix(in srgb, var(--accent2) 30%, transparent); }
-.cal--gold .cal__cell--2 { background: color-mix(in srgb, var(--accent2) 55%, transparent); }
-.cal--gold .cal__cell--3 { background: color-mix(in srgb, var(--accent2) 80%, transparent); }
-.cal--gold .cal__cell--4 { background: var(--accent2); }
-.cal__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-}
-.cal__scale { display: inline-flex; align-items: center; gap: var(--sp-1); }
-.cal__scale .cal__cell { width: 9px; height: 9px; aspect-ratio: auto; }
-.forecast {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-}
-.forecast__bars {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--sp-2);
-  align-items: end;
-  height: 96px;
-}
-.forecast__col {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--sp-1);
-  height: 100%;
-}
-.forecast__bar {
-  width: 100%;
-  border-radius: var(--r-plate) var(--r-plate) 0 0;
-  background: color-mix(in srgb, var(--state-due) 75%, var(--text-primary));
-}
-.forecast--pass .forecast__bar { background: color-mix(in srgb, var(--pass-ink) 55%, var(--text-primary)); }
-.forecast__v {
+.rep-fig--title { font-size: var(--fs-title); }
+.rep-fig__u { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+.rep-delta {
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
   font-weight: 700;
+  font-size: var(--fs-sm);
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-.forecast__days {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--sp-2);
-  text-align: center;
+.rep-cap,
+.rep-axis {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+.rep-cap { text-indent: var(--tr-caption); }
+.rep-caps { display: flex; justify-content: space-between; gap: var(--sp-3); }
+.rep-caps .rep-cap:last-child { text-indent: 0; text-align: right; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rep-line { display: flex; flex-direction: column; gap: var(--sp-2); }
+/* The svg owns the horizontal gesture: a thumb sweeping along the line
+   scrubs the weeks, and the page must not take that sweep as a scroll. */
+.rep-line__svg { display: block; width: 100%; height: auto; overflow: visible; touch-action: pan-y; cursor: pointer; outline: none; }
+.rep-line__path,
+.rep-line__bridge {
+  fill: none;
+  stroke: var(--text-primary);
+  stroke-width: 2;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+/* A week with nothing between two ridden ones is bridged, not broken:
+   the line stays one line, and the dash says the week is missing. */
+.rep-line__bridge { stroke-dasharray: 2 5; }
+.rep-line__ahead { stroke: var(--surface-line); stroke-width: 2; stroke-dasharray: 4 6; }
+.rep-line__stop { fill: var(--bg-card); stroke: var(--text-primary); stroke-width: 1.5; }
+.rep-line__now { fill: var(--stamp-ink); stroke: none; }
+.rep-line__sel { fill: none; stroke: var(--stamp-ink); stroke-width: 1.5; }
+.rep-line__svg:focus-visible .rep-line__sel { stroke: var(--accent2); }
+.rep-axis { display: flex; justify-content: space-between; }
+
+.rep-ladder { display: flex; flex-direction: column; gap: var(--sp-3); }
+.rep-ladder__bar { display: flex; gap: var(--sp-1); height: var(--sp-6); }
+.rep-ladder__rung {
+  flex: var(--n) 1 0;
+  min-width: var(--sp-8);
+  border-radius: var(--r-plate);
+  background: color-mix(in srgb, var(--state-mastered) var(--tint), var(--surface));
+}
+/* A rung nobody's cards have reached is drawn, not painted: the reach
+   stays on the axis so the wave has somewhere to go. */
+.rep-ladder__rung--empty { background: none; border: 1px dashed var(--surface-line); }
+.rep-ladder__caps { display: flex; gap: var(--sp-1); }
+.rep-ladder__cap {
+  flex: var(--n) 1 0;
+  min-width: var(--sp-8);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  font-family: var(--font-display);
+  line-height: 1;
+}
+.rep-ladder__cap b { font-weight: 700; font-size: var(--fs-sm); font-variant-numeric: tabular-nums; color: var(--text-primary); }
+.rep-ladder__cap span { font-weight: 700; font-size: var(--fs-caption-xs); letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); white-space: nowrap; }
+
+.rep-lines { display: flex; flex-direction: column; }
+.rep-line-row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-flat);
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+}
+.rep-line-row:hover,
+.rep-line-row:focus-visible { filter: none; }
+.rep-line-row:hover .pf-line__roundel,
+.rep-line-row:focus-visible .pf-line__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
+.rep-line-row--level { cursor: default; }
+.rep-line-row__name {
+  flex: 0 0 auto;
+  min-width: var(--sp-9);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+.rep-line-row__pct {
+  flex: 0 0 auto;
+  min-width: var(--sp-8);
+  text-align: right;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-primary);
+}
+.rep-line-row__pct--none { color: var(--text-secondary); }
+.rep-lines--sheet { padding: var(--sp-3) 0; }
+.composition {
+  flex: 1;
+  min-width: var(--sp-9);
+  display: flex;
+  height: 6px;
+  border-radius: var(--r-plate);
+  overflow: hidden;
+  background: color-mix(in srgb, var(--state-new) 26%, transparent);
+}
+.composition__seg { display: block; height: 100%; }
+.composition__seg--mastered { background: var(--state-mastered); }
+.composition__seg--learning { background: var(--state-learning); }
 
 /* ── The settings list and its pages (canvas Settings, SettingsLearn,
    SettingsDestination, SettingsLevelUp / Down) ── */
@@ -17976,12 +17572,21 @@ html { scrollbar-gutter: stable; }
    Declared here, after .stg-row__value, so the modifier does not
    descend in specificity (guard 2). */
 .stg-row--pass .stg-row__value { color: var(--accent2); }
+.stg-row--link { text-decoration: none; }
+/* A page's action that is a link (the privacy policy) is the same
+   ghost as its button neighbours: no underline through the label. */
+a.slip__act { text-decoration: none; }
+.stg-row__sub { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.3; }
+.stg-row__ext { flex: none; font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
 .stg-signout { align-self: stretch; }
 .slip { display: flex; flex-direction: column; gap: var(--sp-3); }
 .slip__label { display: flex; align-items: baseline; justify-content: space-between; gap: var(--sp-3); }
 .slip__name { font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; }
 .slip__hint { font-size: var(--fs-caption); color: var(--text-secondary); line-height: 1.5; }
-.slip__act { align-self: flex-start; }
+/* Every action on a page is the same box, edge to edge: four
+   buttons in four widths, each cut to its own word, read as four
+   different controls. */
+.slip__act { align-self: stretch; }
 .slip__value { font-size: var(--fs-body); color: var(--text-primary); overflow-wrap: anywhere; }
 .slip__confirm { display: flex; flex-direction: column; gap: var(--sp-3); }
 .lvlstrip {
@@ -17995,7 +17600,10 @@ html { scrollbar-gutter: stable; }
   position: absolute;
   left: 10%;
   right: 10%;
-  top: 17px;
+  /* Through the dots' centres: the strip's own top padding (--sp-3,
+     8px) plus half a 13px dot, less half the rail. It sat at 17px and
+     ran under the dots rather than through them. */
+  top: 13px;
   height: 3px;
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--pass-ink) 60%, var(--text-secondary));
@@ -18021,17 +17629,15 @@ html { scrollbar-gutter: stable; }
   border: 2px solid var(--text-secondary);
 }
 .lvlstrip__stop--on { color: var(--text-primary); }
+/* The stop you stand at is filled and ringed, at the same 13px as
+   the others — a bigger dot pulled its centre off the rail. */
 .lvlstrip__stop--on .lvlstrip__dot {
-  width: 17px;
-  height: 17px;
-  margin: -2px 0;
   background: var(--text-primary);
   border-color: var(--text-primary);
+  box-shadow: 0 0 0 3px var(--bg-main), 0 0 0 4px var(--text-primary);
 }
 .lvlstrip__code { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
 .lvlstrip__jp { font-family: var(--font-display); font-size: var(--fs-caption-xs); letter-spacing: var(--tr-term); text-transform: uppercase; }
-.lvl-note { margin: 0; font-size: var(--fs-caption); line-height: 1.5; color: var(--text-secondary); }
-.lvl-note__strong { color: var(--text-primary); }
 .svc-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }
 .svc-grid--2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grades { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sp-3); }

@@ -191,6 +191,20 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 17 — 統計, the service record** (plan 085, 2026-09-14, DONE).
+  Owner-directed rework of the statistics screen, features and design,
+  mobile first. The screen was 90% duplicate of the profile and the fare
+  gate (streak, calendar, due count, accuracy, inventory) plus a pivot
+  table nobody drove at 390px; it now asks the one question neither of
+  those asks — is the learning holding, and where is it leaking — as four
+  inserts with no heading: retention by week (the one chart), the
+  strength ladder (the interval histogram that was fetched and never
+  drawn), the lines with their composition and retention, and the misses
+  over the six weakest cards. Chosen from four directions drawn on a
+  canvas. `GET /api/stats/report` replaces `/api/stats/extra`; 54 orphan
+  locale keys per language retired. Plan file `085-the-service-record.md`.
+  Backend 1305, frontend all lanes green, guards clean (stylelint
+  baseline −1).
 - **Wave 16 — 読解, the level-mix gate and the rows breakdown** (plan 084,
   2026-09-13, DONE). Owner-directed: a generated text may not carry more
   than one word in twenty above its level; comprehension texts are written

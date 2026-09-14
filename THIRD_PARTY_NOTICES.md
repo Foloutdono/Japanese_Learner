@@ -1,10 +1,13 @@
 # Third-party data notices
 
-This app's dictionary, kanji, and example-sentence data is built on the
-following third-party sources. Each is used under its own license, which
-requires this attribution as a condition of use — it is included here to
-satisfy that condition, not as a statement about the license of this
-project's own source code.
+This app's dictionary, kanji, stroke-order, example-sentence and
+station-announcement audio data, and its typefaces, are built on the
+following third-party sources. The app prints the same list on its
+Credits page (Settings › Credits, `frontend/src/domain/attributions.js`);
+keep the two in step. Each is used
+under its own license, which requires this attribution as a condition of
+use — it is included here to satisfy that condition, not as a statement
+about the license of this project's own source code.
 
 ## JMdict / JMnedict
 
@@ -35,6 +38,15 @@ database now carries in full.)
 License: Creative Commons Attribution-ShareAlike 4.0 International (CC
 BY-SA 4.0). https://www.edrdg.org/edrdg/licence.html
 
+## KanjiVG
+
+The stroke-order diagrams served from `backend/kanjivg/` (mounted at
+`/kanjivg`, drawn by `frontend/src/components/study/DrawingCanvas.jsx`
+and the dictionary's kanji plate) are the KanjiVG data by Ulrich Apel.
+
+License: Creative Commons Attribution-ShareAlike 3.0 Unported (CC BY-SA
+3.0). https://kanjivg.tagaini.net/
+
 ## Tatoeba
 
 Example sentences served through `backend/routes/reading.py` include
@@ -43,6 +55,28 @@ its community of volunteers.
 
 License: Creative Commons Attribution 2.0 France (CC BY 2.0 FR).
 https://creativecommons.org/licenses/by/2.0/fr/deed.en
+
+## VOICEVOX — 春日部つむぎ (Kasukabe Tsumugi)
+
+The station-announcement clips in `frontend/public/sounds/announcements/`
+(played by `playAnnouncement`, see `frontend/public/sounds/README.md`) are
+synthesized with the VOICEVOX voice synthesis engine, using the 春日部つむぎ
+(Kasukabe Tsumugi) voice library. VOICEVOX permits commercial use of
+generated audio conditional on a credit indicating VOICEVOX was used, and
+each character voice carries its own additional terms — see the citations
+below.
+
+> VOICEVOX:春日部つむぎ
+
+License (engine): see https://voicevox.hiroshiba.jp/term/
+License (character voice — 春日部つむぎ 利用規約):
+https://tsumugi-official.studio.site/rule
+
+## Typefaces
+
+Noto Sans JP and Noto Serif JP (Google) and Space Grotesk (Florian
+Karsten), bundled through `@fontsource/*`, are used under the SIL Open
+Font License 1.1. https://openfontlicense.org/
 
 ---
 

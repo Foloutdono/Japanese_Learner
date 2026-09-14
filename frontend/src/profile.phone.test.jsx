@@ -158,53 +158,63 @@ describe('the profile at phone width', () => {
 })
 
 describe('the statistics at phone width', () => {
-  it('six records two across, the calendar fourteen weeks whole, the forecast seven bars', async () => {
+  it('the retention line fills its card, the ladder is five rungs on one row, every row is a 44px target', async () => {
     const screen = await render(
       <main className="stats">
-        <div className="records records--stats">
-          {['Streak', 'Due today', 'Mastered', 'Accuracy', 'In progress', 'New'].map(l => (
-            <div key={l} className="record"><span className="record__value">24</span><span className="record__label">{l}</span><span className="record__note">note</span></div>
-          ))}
-        </div>
-        <div className="stat-cap"><span>Practice calendar</span><span>14 weeks · best day <b className="stat-cap__fig">88</b></span></div>
-        <div className="cal cal--gold" style={{ '--weeks': 14 }}>
-          <div className="cal__months"><span className="cal__month" style={{ gridColumn: '1 / span 2' }}>Sept.</span><span className="cal__month" style={{ gridColumn: '3 / span 12' }}>Oct.</span></div>
-          <div className="cal__grid">{Array.from({ length: 98 }, (_, i) => <span key={i} className={`cal__cell${i % 5 ? ` cal__cell--${i % 5}` : ''}`} />)}</div>
-          <div className="cal__foot"><span>One square a day</span><span className="cal__scale">less <span className="cal__cell" /><span className="cal__cell cal__cell--4" /> more</span></div>
-        </div>
-        <div className="forecast forecast--pass">
-          <div className="forecast__bars">{[24, 61, 38, 52, 70, 44, 29].map((v, i) => <span key={i} className="forecast__col"><span className="forecast__v">{v}</span><span className="forecast__bar" style={{ height: `${v}%` }} /></span>)}</div>
-          <div className="forecast__days">{['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'].map(d => <span key={d}>{d}</span>)}</div>
+        <section className="rep-card">
+          <div className="rep-head"><span className="rep-fig">87<span className="rep-fig__u">%</span></span><span className="rep-delta">+4 · 12 wk</span></div>
+          <div className="rep-caps"><span className="rep-cap">Rétention</span><span className="rep-cap">sem. du 14 sept. · 142 révisions</span></div>
+          <div className="rep-line">
+            <svg className="rep-line__svg" viewBox="0 0 326 96"><polyline className="rep-line__path" points="6,60 100,40 320,20" /><circle className="rep-line__now" cx="320" cy="20" r="4" /></svg>
+            <div className="rep-axis"><span>12 wk ago</span><span>this week</span></div>
+          </div>
+        </section>
+        <section className="rep-card">
+          <div className="rep-ladder">
+            <div className="rep-ladder__bar">{[42, 118, 231, 184, 96].map((n, i) => <span key={i} className="rep-ladder__rung" style={{ '--n': n, '--tint': `${20 * (i + 1)}%` }} />)}</div>
+            <div className="rep-ladder__caps">{[['42', '<1 d'], ['118', '1 w'], ['231', '1 m'], ['184', '3 m'], ['96', '3 m+']].map(([n, l]) => <span key={l} className="rep-ladder__cap" style={{ '--n': n }}><b>{n}</b><span>{l}</span></span>)}</div>
+          </div>
+        </section>
+        <section className="rep-card rep-card--rows">
+          <div className="rep-lines">
+            {['Kana', 'Vocabulaire', 'Kanji', 'Grammaire'].map(n => (
+              <button type="button" key={n} className="rep-line-row"><span className="pf-line__roundel">KA</span><span className="rep-line-row__name">{n}</span><span className="composition"><span className="composition__seg composition__seg--mastered" style={{ width: '30%' }} /></span><span className="rep-line-row__pct">91%</span></button>
+            ))}
+          </div>
+        </section>
+        <div className="trouble">
+          <button type="button" className="trouble__row trouble__row--open"><span className="trouble__glyph">遠慮</span><span className="trouble__meta"><span className="trouble__where">Vocabulaire · N3 · Flashcard</span><span className="trouble__accuracy-track"><span className="trouble__accuracy-fill" style={{ width: '45%' }} /></span></span><span className="trouble__accuracy-value">45%</span><span className="trouble__lapses">3<span className="trouble__lapses-unit">L</span></span></button>
+          <button type="button" className="trouble__more">Plus · 12</button>
         </div>
       </main>
     )
-    expect(columns(screen.container.querySelector('.records'))).toBe(2)
-    const records = [...screen.container.querySelectorAll('.record')].map(r => r.getBoundingClientRect())
-    expect(records[5].top).toBeGreaterThan(records[3].bottom - 1)
-    const grid = screen.container.querySelector('.cal__grid')
-    expect(columns(grid)).toBe(14)
-    // Whole, not scrolled: the grid fits the card.
-    expect(grid.scrollWidth).toBeLessThanOrEqual(grid.clientWidth + 1)
-    const cells = grid.querySelectorAll('.cal__cell')
-    const c = cells[0].getBoundingClientRect()
-    expect(Math.abs(c.width - c.height)).toBeLessThan(1)
-    // A month is named into the columns its run owns, and the shortest
-    // run the calendar will name is two of them (domain/statsModel.js,
-    // MIN_MONTH_SPAN). The longest short month French sets has to print
-    // in that: "SEPT." was cut to "SE" at both ends of the calendar.
-    for (const month of screen.container.querySelectorAll('.cal__month')) {
-      expect(month.scrollWidth, month.textContent).toBeLessThanOrEqual(month.clientWidth + 1)
+    const card = screen.container.querySelector('.rep-card')
+    const svg = screen.container.querySelector('.rep-line__svg').getBoundingClientRect()
+    const inner = card.getBoundingClientRect().width - 2 * 16 - 2
+    expect(Math.abs(svg.width - inner)).toBeLessThan(2)
+    // The two caps share one line; the week's cap ends inside the card.
+    const capRow = [...screen.container.querySelectorAll('.rep-caps .rep-cap')].map(c => c.getBoundingClientRect())
+    expect(capRow[1].top).toBeCloseTo(capRow[0].top, 0)
+    expect(capRow[1].right).toBeLessThanOrEqual(card.getBoundingClientRect().right - 16 + 1)
+    // The ladder: five rungs side by side, widest in the middle, none
+    // narrower than a thumb, the caps under their rungs.
+    const rungs = [...screen.container.querySelectorAll('.rep-ladder__rung')].map(r => r.getBoundingClientRect())
+    expect(rungs).toHaveLength(5)
+    for (let i = 1; i < 5; i++) expect(rungs[i].left).toBeGreaterThan(rungs[i - 1].right - 1)
+    expect(rungs[2].width).toBeGreaterThan(rungs[0].width)
+    for (const r of rungs) expect(r.width).toBeGreaterThanOrEqual(44)
+    const caps = [...screen.container.querySelectorAll('.rep-ladder__cap')].map(r => r.getBoundingClientRect())
+    for (let i = 0; i < 5; i++) expect(Math.abs(caps[i].left - rungs[i].left)).toBeLessThan(1)
+    for (const cap of screen.container.querySelectorAll('.rep-ladder__cap span')) {
+      expect(cap.scrollWidth, cap.textContent).toBeLessThanOrEqual(cap.clientWidth + 1)
     }
-    // Column-major: the second cell sits under the first, the eighth beside it.
-    const c1 = cells[1].getBoundingClientRect()
-    const c7 = cells[7].getBoundingClientRect()
-    expect(c1.left).toBeCloseTo(c.left, 0)
-    expect(c1.top).toBeGreaterThan(c.top)
-    expect(c7.top).toBeCloseTo(c.top, 0)
-    expect(c7.left).toBeGreaterThan(c.right - 1)
-    expect(columns(screen.container.querySelector('.forecast__bars'))).toBe(7)
-    const bars = [...screen.container.querySelectorAll('.forecast__bar')].map(b => b.getBoundingClientRect().height)
-    expect(bars[4]).toBeGreaterThan(bars[0])
+    // Every row a target, the longest French name not squeezing the bar away.
+    for (const row of screen.container.querySelectorAll('.rep-line-row, .trouble__row, .trouble__more')) {
+      expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    }
+    for (const bar of screen.container.querySelectorAll('.composition')) {
+      expect(bar.getBoundingClientRect().width).toBeGreaterThanOrEqual(52)
+    }
   })
 })
 
@@ -232,6 +242,13 @@ describe('the settings at phone width', () => {
           </div>
         </div>
         <div className="slip">
+          <span className="slip__hint">One line.</span>
+          <button type="button" className="btn-secondary slip__act">Export</button>
+        </div>
+        <div className="slip">
+          <button type="button" className="btn-secondary btn-secondary--danger slip__act">Delete</button>
+        </div>
+        <div className="slip">
           <div className="dest-grid">
             {['N4', 'N3', 'N2', 'N1'].map(l => <button key={l} type="button" className={`dest${l === 'N3' ? ' dest--on' : ''}`}><span className="dest__code">{l}</span><span className="dest__load">Elementary</span></button>)}
           </div>
@@ -246,9 +263,20 @@ describe('the settings at phone width', () => {
     expect(getComputedStyle(rows[0]).borderTopWidth).toBe('0px')
     expect(getComputedStyle(rows[1]).borderTopWidth).toBe('1px')
     expect(columns(screen.container.querySelector('.lvlstrip'))).toBe(5)
+    // The rail runs through the centre of every dot, the current one
+    // included: it is ringed, not enlarged, so its centre never moves.
     const on = screen.container.querySelector('.lvlstrip__stop--on .lvlstrip__dot').getBoundingClientRect()
     const off = screen.container.querySelector('.lvlstrip__stop:not(.lvlstrip__stop--on) .lvlstrip__dot').getBoundingClientRect()
-    expect(on.width).toBeGreaterThan(off.width)
+    const cy = r => r.top + r.height / 2
+    expect(Math.abs(cy(on) - cy(off))).toBeLessThan(1)
+    const strip = screen.container.querySelector('.lvlstrip')
+    const rail = getComputedStyle(strip, '::before')
+    const railCy = strip.getBoundingClientRect().top + parseFloat(rail.top) + parseFloat(rail.height) / 2
+    expect(Math.abs(railCy - cy(off))).toBeLessThan(1)
+    // Every action on a page is the same box, edge to edge.
+    const acts = [...screen.container.querySelectorAll('.slip__act')].map(a => a.getBoundingClientRect())
+    const slipW = screen.container.querySelector('.slip').getBoundingClientRect().width
+    for (const a of acts) expect(Math.abs(a.width - slipW)).toBeLessThan(1)
     for (const stop of screen.container.querySelectorAll('.lvlstrip__stop')) {
       expect(stop.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }

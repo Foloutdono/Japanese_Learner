@@ -1,7 +1,7 @@
 import logging
 from fastapi import APIRouter, Depends
 from core.db import db_conn
-from core.auth import get_user_id
+from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from study import card_index
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, GRADED_FOR_SOURCE
@@ -223,45 +223,33 @@ def get_stats(user_id: str = Depends(get_user_id)):
     return {**buckets, "items": items}
 
 
-# A year of days plus a few, so the practice calendar always has 53
-# whole weeks to draw and the leading week is never half-empty.
-TREND_DAYS = 371
-FORECAST_DAYS = 14
+# ── The service record (plan 085) ─────────────────────────
+# The statistics screen asks one question the profile and the gate do
+# not: is the learning holding, and where is it leaking? Four answers,
+# every one of them already recorded:
+#
+#   days      reviews and good-or-better ratings per day, twelve weeks —
+#             the retention line is a fold over these on the client
+#   strength  how far ahead the scheduler has pushed each card
+#   weakest   the cards with the worst accuracy, lapses first
+#
+# The screen's per-line composition and retention come from /api/stats
+# itself, which it fetches anyway. What retired with /api/stats/extra:
+# the streak (the stamp book), the trend (same), the forecast (the fare
+# gate) and the hour-of-day histogram (never drawn).
+REPORT_DAYS = 84
+WEAKEST_LIMIT = 12
 
 
-def _rhythm(user_id: str, tz_offset: int) -> dict | None:
-    """When you study, how you rate yourself, and how far ahead the
-    scheduler has pushed your cards.
+@router.get("/api/stats/report")
+def get_report(user_id: str = Depends(get_user_id)):
+    logger.info("Computing stats report for user_id=%s", user_id)
 
-    Guarded deliberately: these are the newest queries in the file and
-    the least load-bearing thing on the screen. If one of them fails,
-    the user should lose a chart — not their streak, forecast, weakest
-    cards and every level bar along with it.
-    """
-    try:
-        return {
-            "hours": srs.get_review_hours(user_id, tz_offset),
-            "quality": srs.get_quality_mix(user_id),
-            "intervals": srs.get_interval_histogram(user_id),
-        }
-    except Exception:
-        logger.exception("rhythm stats failed for user_id=%s", user_id)
-        return None
-
-
-@router.get("/api/stats/extra")
-def get_extra_stats(tz_offset: int = 0, user_id: str = Depends(get_user_id)):
-    """
-    Supplementary stats that don't fit the per-category/mode shape of /api/stats:
-    streak, activity trend, upcoming due forecast, weakest cards, and the
-    rhythm aggregates (hour of day, rating mix, interval ladder).
-    """
-    logger.info("Computing extra stats for user_id=%s", user_id)
-
-    streak = srs.get_streak(user_id)
-    trend = srs.get_daily_review_counts(user_id, days=TREND_DAYS)
-    forecast = srs.get_due_forecast(user_id, days=FORECAST_DAYS)
-    weakest_raw = srs.get_weakest_cards(user_id, limit=12)
+    weakest_raw = srs.get_weakest_cards(user_id, limit=WEAKEST_LIMIT)
+    # Lapses first, then accuracy: a card that keeps falling out of the
+    # schedule is a leak whatever its lifetime ratio says, and a card
+    # missed once in two tries is a coin, not a weakness.
+    weakest_raw.sort(key=lambda w: (-w["lapses"], w["accuracy"]))
 
     prefix_len = len(user_id) + 1
     weakest = []
@@ -277,11 +265,9 @@ def get_extra_stats(tz_offset: int = 0, user_id: str = Depends(get_user_id)):
         })
 
     return {
-        "streak": streak,
-        "trend": trend,
-        "forecast": forecast,
+        "days": srs.get_daily_quality(user_id, days=REPORT_DAYS),
+        "strength": srs.get_interval_histogram(user_id),
         "weakest": weakest,
-        "rhythm": _rhythm(user_id, tz_offset),
     }
 
 

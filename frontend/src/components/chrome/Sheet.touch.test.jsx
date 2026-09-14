@@ -53,6 +53,58 @@ async function open(onClose, children = <p>body</p>) {
   return document.querySelector('.sheet')
 }
 
+// A mouse has a grip: the handle and the head. Pointer events, because
+// a mouse emits no touch stream; dispatched on the grip, released on
+// the window, the way a real drag that wanders off the panel ends.
+function mouse(node, type, y, extra = {}) {
+  node.dispatchEvent(new PointerEvent(type, {
+    bubbles: true, cancelable: true, pointerType: 'mouse', pointerId: 7, button: 0, clientX: 40, clientY: y, ...extra,
+  }))
+}
+
+async function mouseDrag(grip, from, to, { pace = STEP, steps = 4 } = {}) {
+  mouse(grip, 'pointerdown', from)
+  for (let i = 1; i <= steps; i++) {
+    mouse(window, 'pointermove', from + ((to - from) * i) / steps)
+    await tick(pace)
+  }
+  mouse(window, 'pointerup', to)
+  await tick(0)
+}
+
+describe('a sheet is dragged shut by a mouse, from its grip', () => {
+  it('shuts on a push down from the head', async () => {
+    const onClose = vi.fn()
+    const sheet = await open(onClose)
+    await mouseDrag(sheet.querySelector('.sheet__head'), 100, 260)
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(sheet.style.transform).toBe('')
+  })
+
+  it('shuts on a push down from the handle', async () => {
+    const onClose = vi.fn()
+    const sheet = await open(onClose)
+    await mouseDrag(sheet.querySelector('.sheet__handle'), 100, 260)
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('a mouse drag in the body is a selection, not a dismissal', async () => {
+    const onClose = vi.fn()
+    const sheet = await open(onClose)
+    await mouseDrag(sheet.querySelector('p'), 100, 260)
+    expect(onClose).not.toHaveBeenCalled()
+    expect(sheet.style.transform).toBe('')
+  })
+
+  it('springs back from a nudge', async () => {
+    const onClose = vi.fn()
+    const sheet = await open(onClose)
+    await mouseDrag(sheet.querySelector('.sheet__head'), 100, 130, { pace: 60 })
+    expect(onClose).not.toHaveBeenCalled()
+    expect(sheet.classList.contains('sheet--dragging')).toBe(false)
+  })
+})
+
 describe('a sheet is dragged shut', () => {
   it('shuts on a deliberate push down', async () => {
     const onClose = vi.fn()

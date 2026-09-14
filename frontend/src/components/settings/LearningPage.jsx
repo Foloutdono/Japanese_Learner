@@ -99,7 +99,6 @@ export function LearningPage({ session }) {
             </button>
           ))}
         </div>
-        <p className="lvl-note"><Emphasized text={t.settingsLevelNote} strongClassName="lvl-note__strong" /></p>
       </Slip>
 
       <Slip label={t.settingsPace} cap={t.settingsPaceCap}>
@@ -132,8 +131,10 @@ export function LearningPage({ session }) {
 
       <RatingSlip t={t} session={session} />
 
-      <Slip>
-        <span className="slip__hint">{t.settingsRedoHint}</span>
+      {/* The level's consequences are said on the confirm sheet, at the
+          moment they apply, and nowhere else — a page of settings is
+          controls, not a manual. */}
+      <Slip label={t.settingsRedo}>
         {!testing && (
           <button
             type="button"
@@ -260,7 +261,6 @@ function RatingSlip({ t, session }) {
           </button>
         ))}
       </div>
-      <span className="slip__hint">{t.settingsRatingScaleHint}</span>
       {failed && <span className="hint" role="alert">{t.onbPassError}</span>}
     </Slip>
   )

@@ -408,15 +408,16 @@
       "9px"
     ]
   },
-  "_knownUndefined": "Every name here is set inline by JS via style={{ '--x': value }} (CardStamp.jsx, PracticeCalendar.jsx, Daruma.jsx, DarumaRitual.jsx) and referenced with no CSS fallback, same pattern as --ember-x elsewhere in this file. Verified live at plan 044 execution time -- not carried over from any earlier plan's prose. A name landing here that is NOT JS-set is the --text/--text-dim bug class this guard exists to catch.",
+  "_knownUndefined": "Every name here is set inline by JS via style={{ '--x': value }} (CardStamp.jsx, StrengthLadder.jsx, Daruma.jsx, DarumaRitual.jsx) and referenced with no CSS fallback, same pattern as --ember-x elsewhere in this file. Verified live at plan 044 execution time -- not carried over from any earlier plan's prose. A name landing here that is NOT JS-set is the --text/--text-dim bug class this guard exists to catch.",
   "knownUndefined": [
     "--streak-angle",
-    "--weeks",
     "--daruma-color",
     "--ray-angle",
     "--drop-size",
     "--drop-angle",
-    "--drop-dist"
+    "--drop-dist",
+    "--n",
+    "--tint"
   ],
   "duplicateKeyframes": [
     "card-stamp-strike",

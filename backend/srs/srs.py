@@ -1365,6 +1365,47 @@ class SRSEngine:
                 rows = cur.fetchall()
         return {str(int(quality)): int(count) for quality, count in rows}
 
+    def get_daily_quality(self, user_id: str, days: int = 84) -> list[dict[str, Any]]:
+        """Reviews per day and how many of them were rated good or better
+        (quality >= 3), for the last `days` days, oldest first, sparse.
+
+        The statistics screen's one chart (plan 085): retention by week
+        is a fold over these rows, and the fold lives on the client so
+        the week boundary and the window are display decisions. Both
+        halves add back together the way get_daily_review_counts adds
+        them — the rollup keeps the six ratings as six counters, so
+        "good" there is q3 + q4 + q5.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT day, SUM(n)::bigint, SUM(good)::bigint FROM (
+                        SELECT date_trunc('day', reviewed_at)::date AS day,
+                               COUNT(*) AS n,
+                               COUNT(*) FILTER (WHERE quality >= 3) AS good
+                        FROM review_log
+                        WHERE card_id LIKE %s
+                          AND reviewed_at >= NOW() - (%s || ' days')::interval
+                        GROUP BY 1
+                        UNION ALL
+                        SELECT day, SUM(reviews) AS n, SUM(q3 + q4 + q5) AS good
+                        FROM review_daily
+                        WHERE user_id = %s
+                          AND day >= (NOW() - (%s || ' days')::interval)::date
+                        GROUP BY 1
+                    ) both_halves
+                    GROUP BY day
+                    ORDER BY day ASC
+                """
+                self._log_sql("get_daily_quality", sql, (pattern, days, user_id, days))
+                cur.execute(sql, (pattern, days, user_id, days))
+                rows = cur.fetchall()
+        return [
+            {"date": day.isoformat(), "reviews": int(n), "good": int(good)}
+            for day, n, good in rows
+        ]
+
     def get_interval_histogram(self, user_id: str) -> list[dict[str, int]]:
         """(interval, number of card-modes sitting at it) for every card
         that has been reviewed at least once.
