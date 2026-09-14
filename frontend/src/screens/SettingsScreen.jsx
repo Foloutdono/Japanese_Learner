@@ -19,9 +19,10 @@ import { LearningPage } from '../components/settings/LearningPage'
 import { DestinationPage } from '../components/settings/DestinationPage'
 import { DataPage } from '../components/settings/DataPage'
 import { AccountPage } from '../components/settings/AccountPage'
+import { CreditsPage } from '../components/settings/CreditsPage'
 
 // ── Settings (canvas Settings, plan 074) ──────────────────────
-// A list of six rows, each printing its current value, each a door to
+// A list of seven rows, each printing its current value, each a door to
 // its own page at /profile/settings/<page>; Sign out under the list.
 // The pages are components/settings/*; this screen is the list and
 // the switch. Deliberately NOT here: a notifications page — it needs
@@ -34,6 +35,7 @@ const PAGES = {
   destination: DestinationPage,
   data: DataPage,
   account: AccountPage,
+  credits: CreditsPage,
 }
 
 const THEATRE = ['ambiance', 'jingle', 'announcement']
@@ -83,6 +85,7 @@ function SettingsList({ session }) {
     { id: 'destination', label: t.settingsGoal, value: destinationValue },
     { id: 'data', label: t.settingsData, value: '' },
     { id: 'account', label: t.account, value: accountValue },
+    { id: 'credits', label: t.settingsCredits, value: '' },
   ]
 
   return (

@@ -6,6 +6,7 @@ import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
+import { Seg } from '../chrome/Console'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Data — the learner's data, theirs to take or erase ────────
@@ -75,17 +76,18 @@ export function DataPage({ session }) {
           this one runs on its own until they say otherwise. Nothing
           here is new CSS -- .slip__hint and .slip__act are the same
           two the three panels below use. */}
-      <Slip label={t.settingsTrail} cap={optedOut ? t.settingsTrailOff : t.settingsTrailOn}>
+      <Slip label={t.settingsTrail}>
         <span className="slip__hint">{t.settingsTrailHint}</span>
-        <button
-          type="button"
-          className="btn-secondary slip__act"
-          data-action="trail"
-          aria-pressed={!optedOut}
-          onClick={() => { playClick(); setOptedOut(!optedOut) }}
-        >
-          {optedOut ? t.settingsTrailStart : t.settingsTrailStop}
-        </button>
+        {/* One of two, so the rating bar's construction at chip size
+            (DESIGN.md, Controls) rather than a button whose label has
+            to say which way it will flip. */}
+        <Seg
+          full
+          label={t.settingsTrail}
+          value={optedOut ? 'off' : 'on'}
+          onChange={key => { playClick(); setOptedOut(key === 'off') }}
+          options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
+        />
       </Slip>
 
       <Slip label={t.settingsExport}>

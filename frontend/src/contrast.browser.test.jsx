@@ -578,13 +578,14 @@ const Fixture = () => (
     {/* Plan 074 -- the statistics' notes and caps, the settings' rows,
         the service cards (on the pass-ink wash when chosen), the level
         strip, the destination chips and the pass line on paper. */}
-    <div className="records"><div className="record"><span className="record__value">24</span><span className="record__label">Due today</span><span className="record__note st-note">318 this week</span></div></div>
-    <div className="stat-cap st-cap"><span>Practice calendar</span><span>14 weeks · best day <b className="stat-cap__fig st-fig">88</b></span></div>
-    <div className="cal cal--gold"><div className="cal__foot st-cal-foot"><span>One square a day</span></div></div>
-    <div className="forecast forecast--pass">
-      <div className="forecast__bars"><span className="forecast__col"><span className="forecast__v st-fc-v">24</span></span></div>
-      <div className="forecast__days st-fc-days"><span>Sat</span></div>
-    </div>
+    <section className="rep-card">
+      <div className="rep-head"><span className="rep-fig">87<span className="rep-fig__u st-unit">%</span></span><span className="rep-delta st-delta">+4 · 12 wk</span></div>
+      <span className="rep-cap st-cap">Retention</span>
+      <div className="rep-axis"><span className="st-axis">12 wk ago</span></div>
+      <div className="rep-ladder__caps"><span className="rep-ladder__cap"><b className="st-rung-n">231</b><span className="st-rung-cap">1 m</span></span></div>
+      <div className="rep-lines"><button type="button" className="rep-line-row"><span className="rep-line-row__pct rep-line-row__pct--none st-pct-none">—</span></button></div>
+      <div className="trouble"><button type="button" className="trouble__more st-more">More · 12</button></div>
+    </section>
     <section className="sbook"><div className="sbook__dows"><span className="sbook__dow sb-dow">M</span></div></section>
     <div className="stg-list">
       <button type="button" className="stg-row">
@@ -972,12 +973,14 @@ const SITES = [
   ['.bl-fig', 'pass balance figure (gold on sumi)'],
   ['.bl-cap', 'pass balance cap (soft ink on sumi)'],
   ['.bl-refill', 'pass balance refill (soft ink on sumi)'],
-  ['.st-note', 'record note'],
+  ['.st-unit', 'statistics figure unit'],
+  ['.st-delta', 'retention delta'],
   ['.st-cap', 'statistics cap'],
-  ['.st-fig', 'statistics cap figure'],
-  ['.st-cal-foot', 'calendar foot'],
-  ['.st-fc-v', 'forecast value'],
-  ['.st-fc-days', 'forecast day names'],
+  ['.st-axis', 'retention axis caption'],
+  ['.st-rung-n', 'ladder rung count'],
+  ['.st-rung-cap', 'ladder rung reach'],
+  ['.st-pct-none', 'line retention, none yet'],
+  ['.st-more', 'trouble list foot'],
   ['.sb-dow', 'stamp book weekday'],
   ['.st-row', 'settings row'],
   ['.st-value', 'settings row value'],

@@ -6,7 +6,7 @@ import * as credits from '../stores/credits'
 import '../index.css'
 
 // ── Settings (plan 074) ───────────────────────────────────────────
-// The list, its six pages, and the pass row that opens the offer.
+// The list, its seven pages, and the pass row that opens the offer.
 // Pinned here: the parts that fail quietly —
 //   1. every row is reachable and prints its value;
 //   2. the level strip WRITES — through the confirm sheet, whose
@@ -144,14 +144,14 @@ beforeEach(async () => {
 })
 
 describe('SettingsScreen — the list', () => {
-  it('prints six page rows plus the pass, each printing its value', async () => {
+  it('prints seven page rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
     const rows = [...screen.container.querySelectorAll('.stg-row')]
     // Six doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
-    expect(rows).toHaveLength(7)
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account', 'pass'])
+    expect(rows).toHaveLength(8)
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account', 'credits', 'pass'])
     expect(rows[2].querySelector('.stg-row__value').textContent).toContain('N5 · 10')
     expect(rows[3].querySelector('.stg-row__value').textContent).toBe(T.settingsGoalNoneShort)
     expect(rows[5].querySelector('.stg-row__value').textContent).toBe('dev@…')
@@ -162,13 +162,13 @@ describe('SettingsScreen — the list', () => {
     // ‹ Settings brings the list back.
     screen.container.querySelector('.stage__leave').click()
     await settle(30)
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
   })
 
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
   })
 
   // ── The pass row (the paywall's settings door) ──────────────────
@@ -194,7 +194,7 @@ describe('SettingsScreen — the list', () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
 
     // The credits store is module state: leave it as the rest of this
     // file expects to find it, or the pass row vanishes from every

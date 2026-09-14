@@ -62,6 +62,15 @@ const FLICK_V = 0.45      // ...but at least this fast (px/ms)
 // Controls whose own drag outranks the sheet's.
 const OWN_GESTURE = 'input, textarea, select, [contenteditable], [data-sheet-drag="off"]'
 
+// ── The mouse's way in (plan 085's second look) ──
+// A mouse drag anywhere in the panel is a text selection, which is why
+// the gesture above is touch-only. But a mouse still needs a way to
+// push a sheet shut, and the two things at its top edge are not text
+// anyone selects: the handle, which has always been the affordance for
+// exactly this, and the head that names the sheet. A press on either
+// with a mouse or a pen is a grip; the body keeps its selection.
+const GRIP = '.sheet__handle, .sheet__head'
+
 // Is there anything above the finger to scroll to? The panel is the
 // usual scroller, but a sheet may put its own inside (a long list of
 // decks, a ledger), and the rule is the same wherever the scroller
@@ -149,19 +158,14 @@ export function useSheetDrag(panelRef, onClose) {
       offset(Math.max(0, moved - START_SLOP))
     }
 
-    function onEnd(e) {
-      const drag = g
-      g = null
-      if (!drag || !drag.on) return
-      const t = e.changedTouches[0]
-      const y = t ? t.clientY : drag.lastY
-
+    // The release, shared by both kinds of drag.
+    function finish(drag, y, timeStamp) {
       const travelled = Math.max(0, y - drag.y - START_SLOP)
       // Velocity over the last move rather than the whole gesture: a
       // finger that rests, then flicks, means the flick. The +16 on
       // both sides is one frame's grace, so a release in the same
       // millisecond as the last move is not an infinite speed.
-      const v = (y - drag.lastY + 16) / Math.max(1, e.timeStamp - drag.lastT + 16)
+      const v = (y - drag.lastY + 16) / Math.max(1, timeStamp - drag.lastT + 16)
       const commit = travelled > CLOSE_PX || (travelled > FLICK_PX && v > FLICK_V)
 
       setDragging(false)
@@ -170,15 +174,55 @@ export function useSheetDrag(panelRef, onClose) {
       if (commit) onCloseRef.current()
     }
 
+    function onEnd(e) {
+      const drag = g
+      g = null
+      if (!drag || !drag.on) return
+      const t = e.changedTouches[0]
+      finish(drag, t ? t.clientY : drag.lastY, e.timeStamp)
+    }
+
+    // A mouse or pen press on the grip. The move and the release are
+    // the window's, so a drag that leaves the panel still ends cleanly.
+    function onGrip(e) {
+      if (e.pointerType === 'touch' || e.button !== 0) return
+      if (!e.target.closest?.(GRIP)) return
+      e.preventDefault() // no selection starting under the press
+      const m = { y: e.clientY, lastY: e.clientY, lastT: e.timeStamp, on: false }
+
+      const move = ev => {
+        const moved = ev.clientY - m.y
+        if (!m.on) {
+          if (moved < START_SLOP) return
+          m.on = true
+          setDragging(true)
+        }
+        m.lastY = ev.clientY
+        m.lastT = ev.timeStamp
+        offset(Math.max(0, moved - START_SLOP))
+      }
+      const up = ev => {
+        window.removeEventListener('pointermove', move)
+        window.removeEventListener('pointerup', up)
+        window.removeEventListener('pointercancel', up)
+        if (m.on) finish(m, ev.clientY, ev.timeStamp)
+      }
+      window.addEventListener('pointermove', move)
+      window.addEventListener('pointerup', up)
+      window.addEventListener('pointercancel', up)
+    }
+
     panel.addEventListener('touchstart', onStart, { passive: true })
     panel.addEventListener('touchmove', onMove, { passive: false })
     panel.addEventListener('touchend', onEnd)
     panel.addEventListener('touchcancel', onEnd)
+    panel.addEventListener('pointerdown', onGrip)
     return () => {
       panel.removeEventListener('touchstart', onStart)
       panel.removeEventListener('touchmove', onMove)
       panel.removeEventListener('touchend', onEnd)
       panel.removeEventListener('touchcancel', onEnd)
+      panel.removeEventListener('pointerdown', onGrip)
     }
   }, [panelRef, swallowNextClick])
 

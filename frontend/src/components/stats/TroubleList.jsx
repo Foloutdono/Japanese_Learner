@@ -1,58 +1,70 @@
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
+import { Sheet } from '../chrome/Sheet'
 import { modeLabel, categoryLabel, groupLabel } from '../../domain/statsModel'
 import { BoltIcon } from '../ui/Icons'
 
-// ── 弱点 — the trouble list ────────────────────────────────
-// The dozen cards with the worst accuracy. Previously a plain list of
-// "id · category · mode · 40% · 6 lapses", which is data in the sense
-// that a log file is data.
-//
-// Two changes make it usable: the card itself is the headline (that's
-// what you're being asked to recognise, so it should be set in
-// Japanese at a readable size), and every row is a way in — clicking
-// one drops you into that exact level and drill, which is the only
-// thing you'd want to do having read it.
+// ── 弱点 — the trouble list (plan 085) ─────────────────────
+// The cards with the most lapses and the worst accuracy. The card
+// itself is the headline (that's what you're being asked to
+// recognise, so it is set in Japanese at a readable size), and every
+// row is a way in: pressing one drops you into that exact level and
+// drill. Six on the screen; the rest behind one foot row, in a sheet.
+const SHOWN = 6
+
 export function TroubleList({ weakest, onStartReview }) {
   const { t } = useLang()
+  const [more, setMore] = useState(false)
   if (!weakest?.length) return null
 
+  const rows = list => list.map(w => {
+    const canOpen = Boolean(w.category && w.key)
+    const Tag = canOpen ? 'button' : 'div'
+    return (
+      <Tag
+        key={`${w.card_id}:${w.mode}`}
+        {...(canOpen ? { type: 'button', onClick: () => onStartReview(w.category, w.key, w.mode) } : {})}
+        className={`trouble__row${canOpen ? ' trouble__row--open' : ''}`}
+      >
+        <span className="trouble__glyph" lang="ja">{headword(w.raw_id, w.category, w.key)}</span>
+
+        <span className="trouble__meta">
+          <span className="trouble__where">
+            {w.category ? categoryLabel(t, w.category) : '—'}
+            {w.key ? ` · ${groupLabel(t, w.key)}` : ''}
+            {` · ${modeLabel(t, w.category, w.mode)}`}
+          </span>
+          {/* The bar is what leaks — the share of reviews missed — in
+              the danger ink, so a card at 100% shows nothing red. */}
+          <span className="trouble__accuracy-track" aria-hidden="true">
+            <span className="trouble__accuracy-fill" style={{ width: `${Math.max(0, 100 - w.accuracy)}%` }} />
+          </span>
+        </span>
+
+        <span className="trouble__accuracy-value">{Math.round(w.accuracy)}%</span>
+        <span className="trouble__lapses" aria-label={`${w.lapses} ${t.lapses}`}>
+          {w.lapses}<span className="trouble__lapses-unit" aria-hidden="true">{t.lapsesShort}</span>
+        </span>
+
+        {canOpen && <BoltIcon size={12} className="trouble__go" />}
+      </Tag>
+    )
+  })
+
   return (
-    <div className="trouble">
-      {weakest.map(w => {
-        const canOpen = Boolean(w.category && w.key)
-        const Tag = canOpen ? 'button' : 'div'
-        return (
-          <Tag
-            key={`${w.card_id}:${w.mode}`}
-            {...(canOpen ? { type: 'button', onClick: () => onStartReview(w.category, w.key, w.mode) } : {})}
-            className={`trouble__row${canOpen ? ' trouble__row--open' : ''}`}
-          >
-            <span className="trouble__glyph" lang="ja">{headword(w.raw_id, w.category, w.key)}</span>
-
-            <span className="trouble__meta">
-              <span className="trouble__where">
-                {w.category ? categoryLabel(t, w.category) : '—'}
-                {w.key ? ` · ${groupLabel(t, w.key)}` : ''}
-              </span>
-              <span className="trouble__mode">{modeLabel(t, w.category, w.mode)}</span>
-            </span>
-
-            <span className="trouble__accuracy">
-              <span className="trouble__accuracy-track">
-                <span className="trouble__accuracy-fill" style={{ width: `${w.accuracy}%` }} />
-              </span>
-              <span className="trouble__accuracy-value">{Math.round(w.accuracy)}%</span>
-            </span>
-
-            <span className="trouble__lapses" title={t.lapses}>
-              {w.lapses}<span className="trouble__lapses-unit">{t.lapsesShort}</span>
-            </span>
-
-            {canOpen && <BoltIcon size={12} className="trouble__go" />}
-          </Tag>
-        )
-      })}
-    </div>
+    <>
+      <div className="trouble">
+        {rows(weakest.slice(0, SHOWN))}
+        {weakest.length > SHOWN && (
+          <button type="button" className="trouble__more" onClick={() => setMore(true)}>
+            {t.reportMore(weakest.length)}
+          </button>
+        )}
+      </div>
+      <Sheet open={more} onClose={() => setMore(false)} jp="弱点" cap={t.weakestItems} label={t.weakestItems}>
+        <div className="trouble trouble--sheet">{rows(weakest)}</div>
+      </Sheet>
+    </>
   )
 }
 
