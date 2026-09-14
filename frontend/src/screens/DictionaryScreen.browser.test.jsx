@@ -58,6 +58,28 @@ const FILLER = Array.from({ length: 60 }, (_, i) => ({
 }))
 const RESULTS = [KANJI, VOCAB, NOCARD, KANJI_WORD, KANJI_ALONE, ...FILLER]
 
+// ── The grammar collection ──
+// A point as routes/dictionary.py's _grammar_result serves it: the
+// pattern, its formation, the English gloss, its two sentences with
+// their furigana, and the learner's record under the line's card id.
+const GRAMMAR = {
+  type: 'grammar', raw_id: 'grammar_N5_〜ました／〜ませんでした', level: 'N5',
+  pattern: '〜ました／〜ませんでした', structure: 'verb ます-stem + ました／ませんでした',
+  meaning: 'polite past: did / did not',
+  examples: [
+    { jp: '昨日、映画を見ました。', en: 'I watched a film yesterday.',
+      furigana: [{ text: '昨日', reading: 'きのう' }, { text: '、' }, { text: '映画', reading: 'えいが' }, { text: 'を' }, { text: '見', reading: 'み' }, { text: 'ました。' }] },
+    { jp: '朝ご飯を食べませんでした。', en: 'I did not eat breakfast.',
+      furigana: [{ text: '朝', reading: 'あさ' }, { text: 'ご' }, { text: '飯', reading: 'はん' }, { text: 'を' }, { text: '食', reading: 'た' }, { text: 'べませんでした。' }] },
+  ],
+  status: { status: 'learning', total_reviews: 3, correct_reviews: 2, accuracy: 67, interval_days: 2, next_review: '2026-09-16T00:00:00Z', due: false },
+}
+const GRAMMAR_ROWS = [
+  GRAMMAR,
+  { type: 'grammar', raw_id: 'grammar_N5_です／だ', level: 'N5', pattern: 'です／だ', structure: 'Noun/な-adj + です・だ', meaning: 'the copula: is/am/are', examples: [], status: { status: 'not_started', total_reviews: 0 } },
+  { type: 'grammar', raw_id: 'grammar_N3_〜ばかり', level: 'N3', pattern: '〜ばかり', structure: 'verb た-form + ばかり', meaning: 'just did', examples: [], status: { status: 'not_started', total_reviews: 0 } },
+]
+
 // ── A syllabary, as the endpoint serves one ──
 // `group` is what the chart lays out on (backend/content/kana_data.py):
 // the gojūon rows, the voiced rows, one group per yōon base kana, one
@@ -96,8 +118,13 @@ const KATAKANA = [
   ...kana('long', 'アー/aa イー/ii ウー/uu エー/ee オー/oo'),
 ]
 
+// apiJson answers the screen's one JSON call — useMining's deck list
+// on mount, for the grammar plate's add roundel — with a grammar deck
+// the picker can offer.
 vi.mock('../lib/api', () => ({
-  apiFetch: vi.fn(), apiJson: vi.fn(), apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
+  apiFetch: vi.fn(),
+  apiJson: vi.fn(async () => ({ decks: [{ id: 7, type: 'grammar', name: '文法' }] })),
+  apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
 }))
 vi.mock('../lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), speakJapanese: vi.fn() }))
@@ -123,11 +150,11 @@ function Where() {
   return null
 }
 
-async function renderScreen() {
+async function renderScreen(at = '/dictionary') {
   const screen = await render(
     <LangProvider>
       <Probe />
-      <MemoryRouter initialEntries={['/dictionary']}>
+      <MemoryRouter initialEntries={[at]}>
         <Where />
         <Routes>
           <Route path="/dictionary" element={<DictionaryScreen session={{}} />} />
@@ -179,7 +206,8 @@ beforeEach(() => {
       if (p.startsWith('/api/dictionary/radicals')) return { groups: [] }
       if (p.startsWith('/api/dictionary?')) {
         const cat = new URLSearchParams(p.split('?')[1]).get('category')
-        const rows = cat === 'hiragana' ? HIRAGANA : cat === 'katakana' ? KATAKANA : RESULTS
+        const rows = cat === 'hiragana' ? HIRAGANA : cat === 'katakana' ? KATAKANA
+          : cat === 'grammar' ? GRAMMAR_ROWS : RESULTS
         return { results: rows, total: rows.length, has_more: false }
       }
       return {}
@@ -199,10 +227,10 @@ describe('the dictionary screen', () => {
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
-    // Four collections as chips, kanji on; the radical index is a fifth
+    // Five collections as chips, kanji on; the radical index is a sixth
     // chip that only exists under the kanji collection.
     const chips = [...screen.container.querySelectorAll('.console__chips .chip')]
-    expect(chips.length).toBe(5)
+    expect(chips.length).toBe(6)
     expect(chips[0].classList.contains('chip--on')).toBe(true)
     expect(chips[0].textContent).toBe(T.dictKanji)
     expect(lastQuery().get('category')).toBe('kanji')
@@ -218,9 +246,102 @@ describe('the dictionary screen', () => {
     chips()[1].click()
     await settle(80)
     expect(lastQuery().get('category')).toBe('vocab')
-    expect(chips().length).toBe(4)
+    expect(chips().length).toBe(5)
     expect(chips()[1].classList.contains('chip--on')).toBe(true)
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
+  })
+
+  // ── 文法 — the grammar collection ──
+  it('offers grammar as the third collection, in the line\'s pine, with the levels under it and nowhere else', async () => {
+    const screen = await renderScreen()
+    const chips = () => [...screen.container.querySelectorAll('.console__chips .chip')]
+    expect(chips()[2].textContent).toBe(T.dictGrammar)
+    expect(chips()[2].style.getPropertyValue('--tab-color')).toBe('var(--line-grammar)')
+    // No level row under kanji.
+    expect(screen.container.querySelector('.dict-levels')).toBeNull()
+
+    chips()[2].click()
+    await settle(80)
+    expect(lastQuery().get('category')).toBe('grammar')
+    expect(lastQuery().has('level')).toBe(false)
+    // The second row: all, then N5 → N1, "all" on. The radical chip is
+    // kanji's and is gone.
+    const levels = [...screen.container.querySelectorAll('.dict-levels .chip')]
+    expect(levels.map(c => c.textContent)).toEqual([T.dictLevelAll, 'N5', 'N4', 'N3', 'N2', 'N1'])
+    expect(levels[0].classList.contains('chip--on')).toBe(true)
+    expect(chips().some(c => c.textContent === T.dictModeRadical)).toBe(false)
+    // The field stays — grammar is searched, not charted — with its own
+    // placeholder.
+    expect(screen.container.querySelector('.console__field').placeholder).toBe(T.dictionaryPlaceholderGrammar)
+
+    levels[2].click()
+    await settle(80)
+    expect(lastQuery().get('category')).toBe('grammar')
+    expect(lastQuery().get('level')).toBe('N4')
+    expect(screen.container.querySelectorAll('.dict-levels .chip')[2].classList.contains('chip--on')).toBe(true)
+
+    // Leaving the collection leaves the level behind with it.
+    chips()[0].click()
+    await settle(80)
+    expect(screen.container.querySelector('.dict-levels')).toBeNull()
+    expect(lastQuery().has('level')).toBe(false)
+  })
+
+  it('opens on the collection and the level its address names', async () => {
+    const screen = await renderScreen('/dictionary?category=grammar&level=N3')
+    const first = searches()[0]
+    const q = new URLSearchParams(first.split('?')[1])
+    expect(q.get('category')).toBe('grammar')
+    expect(q.get('level')).toBe('N3')
+    const chips = [...screen.container.querySelectorAll('.console__chips .chip')]
+    expect(chips[2].classList.contains('chip--on')).toBe(true)
+    const on = [...screen.container.querySelectorAll('.dict-levels .chip--on')]
+    expect(on.map(c => c.textContent)).toEqual(['N3'])
+  })
+
+  it('draws a grammar point as a card of its pattern over its whole gloss, and opens it on a plate of its own', async () => {
+    const screen = await renderScreen('/dictionary?category=grammar')
+    const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
+    expect(cards.length).toBe(GRAMMAR_ROWS.length)
+    const card = cards[0]
+    expect(card.classList.contains('dict-entry-card--grammar')).toBe(true)
+    expect(card.classList.contains('dict-entry-card--learning')).toBe(true)
+    expect(card.querySelector('.dict-level-badge').textContent).toBe('N5')
+    expect(card.querySelector('.dict-entry-card__char').textContent).toBe(GRAMMAR.pattern)
+    expect(card.querySelector('rt')).toBeNull()
+    // The gloss is a phrase: printed whole, never cut at its first comma.
+    expect(card.querySelector('.dict-entry-card__meaning').textContent).toBe(GRAMMAR.meaning)
+    // A pattern may take two lines, so its divisor stops at eight.
+    expect(card.style.getPropertyValue('--len')).toBe('8')
+    expect(cards[1].style.getPropertyValue('--len')).toBe('4')
+
+    card.click()
+    await settle(60)
+    const entry = screen.container.querySelector('.dict-entry')
+    const plate = entry.querySelector('.dict-plate')
+    // Structure over pattern over gloss; the level and the seal.
+    expect(plate.querySelector('.dict-plate__structure').textContent).toBe(GRAMMAR.structure)
+    expect(plate.querySelector('.dict-plate__word').textContent).toBe(GRAMMAR.pattern)
+    expect(plate.querySelector('.dict-plate__word').classList.contains('dict-plate__word--long')).toBe(true)
+    expect(plate.querySelector('.dict-plate__caption').textContent).toBe(GRAMMAR.meaning)
+    expect(plate.querySelector('.dict-plate__level').textContent).toBe('N5')
+    expect(plate.querySelector('.stage-mark').textContent).toBe(T.learning)
+    expect(plate.querySelector('.dict-plate__yomi')).toBeNull()
+    // No speaker — a pattern is not said — but the add roundel, then ✕.
+    expect(plate.querySelector(`[aria-label="${T.listen}"]`)).toBeNull()
+    const actions = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.mineToDeck, T.close])
+    // The body: formation, meaning, the two sentences with their ruby,
+    // the record — and nothing drawn.
+    const blocks = [...entry.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
+    expect(blocks).toEqual([T.formation, T.meaning, T.examples, T.cardStats])
+    expect(entry.querySelector('.dict-formation').textContent).toBe(GRAMMAR.structure)
+    expect(entry.querySelectorAll('.dict-ex').length).toBe(2)
+    expect(entry.querySelector('.dict-ex rt').textContent).toBe('きのう')
+    expect(entry.querySelector('.dict-ex__tr').textContent).toBe(GRAMMAR.examples[0].en)
+    expect(entry.querySelector('.dict-form')).toBeNull()
+    expect(entry.querySelector('.dict-parts')).toBeNull()
+    expect(entry.querySelector('.records').textContent).toContain('67')
   })
 
   // The stage is the card's bottom edge now, not a word over the

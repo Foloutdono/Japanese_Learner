@@ -10,7 +10,8 @@ import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, splitGlosses } from '../study/gloss'
-import { BoltIcon, ChevronIcon } from '../ui/Icons'
+import { MineButton } from '../analysis/MineButton'
+import { BoltIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 
@@ -103,6 +104,7 @@ function ExampleSentence({ ex, senseNumber }) {
 export const TYPE_META = {
   kanji:    { color: 'var(--accent4)', fallback: 'Kanji' },
   vocab:    { color: 'var(--accent6)', fallback: 'Vocabulaire' },
+  grammar:  { color: 'var(--line-grammar)', fallback: 'Grammaire' },
   hiragana: { color: 'var(--accent3)', fallback: 'Hiragana' },
   katakana: { color: 'var(--accent5)', fallback: 'Katakana' },
 }
@@ -128,6 +130,9 @@ export function isKanaType(type) {
 // too, not just used as a fallback when kanji is absent.
 // eslint-disable-next-line react-refresh/only-export-components -- entryKey is a plain identity-string helper used by DictionaryScreen.jsx for React keys/selection comparisons; not a component.
 export function entryKey(entry) {
+  // A grammar point has no kanji/kana halves; its card id already
+  // carries the level and the pattern (content/grammar_points_data.py).
+  if (entry.type === 'grammar') return `grammar:${entry.level ?? '_'}:${entry.raw_id}`
   return `${entry.type}:${entry.level ?? '_'}:${entry.kanji || ''}:${entry.kana || ''}`
 }
 
@@ -482,20 +487,35 @@ function headwordSize(text) {
 // silently dropped the radical and the words a kanji appears in, and
 // with the radical went its cell in the form lattice: the same entry
 // was two different cards depending on where you had opened it from.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick }) {
+//
+// `mining` (a useMining instance, optional) is what makes a grammar
+// entry's `+` roundel exist: the plate's one action, adding the point
+// to one of the learner's grammar decks through the same write the
+// analyzer's chips use. Without it the plate has the ✕ alone.
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, mining }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
     : null
-  const isKanji = entry.type === 'kanji'
-  const isKana  = isKanaType(entry.type)
+  const isKanji   = entry.type === 'kanji'
+  const isKana    = isKanaType(entry.type)
+  // ── A grammar point ──
+  // The same plate, read differently: the structure is its reading
+  // register (how the pattern is formed), the pattern its headword, the
+  // gloss its caption — printed whole, since "the copula: is/am/are" is
+  // a phrase and not a list. No speak roundel: 〜てから is not a thing
+  // that can be said. The catalogue has no French gloss (routes/
+  // dictionary.py), so the meaning prints as the 文法 line prints it.
+  const isGrammar = entry.type === 'grammar'
   // Kana has no semantic "meaning" to translate — its romaji is its
   // plain-language name and takes the plate's caption instead.
   const meaning = isKana
     ? null
-    : lang === 'fr'
-      ? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
-      : entry.meaning
+    : isGrammar
+      ? entry.meaning
+      : lang === 'fr'
+        ? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
+        : entry.meaning
 
   // Every kanji character used in this vocab word, deduplicated and in
   // reading order — each becomes a tile that opens that kanji's own
@@ -515,12 +535,12 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // its own, so a word never appears without its reading. The caption
   // is the entry's first gloss (the full list lives in the body), or a
   // kana's romaji.
-  const headword = entry.kanji || entry.kana
+  const headword = isGrammar ? entry.pattern : (entry.kanji || entry.kana)
   const headwordFurigana = entry.type === 'vocab' ? entry.furigana : null
   const showKanaLine = entry.type === 'vocab'
     && !headwordFurigana?.length
     && !!entry.kanji && !!entry.kana && entry.kana !== entry.kanji
-  const caption = isKana ? entry.romaji : firstGloss(meaning)
+  const caption = isKana ? entry.romaji : isGrammar ? meaning : firstGloss(meaning)
   // routes/dictionary.py fills a kana's level slot with "Hiragana" /
   // "Katakana" for the catalogue's grouping; the plate prints JLPT
   // levels only — the script is plain from the character itself.
@@ -544,8 +564,9 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
   // With no senses list, the definition is the app's own gloss line.
   // Its first gloss is already the plate's caption, so the block only
-  // prints when there is more to say than that one word.
-  const glossCount = senses.length > 0 ? 0 : splitGlosses(meaning).length
+  // prints when there is more to say than that one word. A grammar
+  // point's body is its own (below), so it takes no gloss block here.
+  const glossCount = (senses.length > 0 || isGrammar) ? 0 : splitGlosses(meaning).length
 
   // Stroke count and radical describe the *drawing* of the character,
   // so they sit beside the stroke-order sheet in one lattice rather
@@ -613,15 +634,35 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             {jlpt && <span className="dict-plate__level">{jlpt}</span>}
           </div>
           <div className="dict-plate__actions">
-            <button
-              type="button"
-              onClick={() => speakJapanese(entry.kana)}
-              className="dict-plate__btn"
-              title={t.listen}
-              aria-label={t.listen}
-            >
-              <SpeakIcon />
-            </button>
+            {!isGrammar && (
+              <button
+                type="button"
+                onClick={() => speakJapanese(entry.kana)}
+                className="dict-plate__btn"
+                title={t.listen}
+                aria-label={t.listen}
+              >
+                <SpeakIcon />
+              </button>
+            )}
+            {/* A grammar point's one action: into one of the learner's
+                grammar decks, the analyzer's own mine write. A ghost
+                like the two beside it — gold cannot carry a filled
+                action (DESIGN.md, "the primary button"). The outcome
+                ("in deck") prints beside it in the caption register. */}
+            {isGrammar && mining && (
+              <MineButton
+                mining={mining}
+                kind="grammar"
+                t={t}
+                className="dict-plate__btn"
+                label={<PlusIcon size={16} />}
+                ariaLabel={t.mineToDeck}
+                onMine={deckId => mining.mineApp({
+                  deckId, source: 'grammar', level: entry.level, rawId: entry.raw_id, kind: 'grammar',
+                })}
+              />
+            )}
             <button
               type="button"
               onClick={onClose}
@@ -665,6 +706,11 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           {showKanaLine && (
             <div className="dict-plate__reading" lang="ja">{entry.kana}</div>
           )}
+          {/* How the pattern is formed, in the reading's place over it:
+              "verb て-form + から" is to 〜てから what やま is to 山. */}
+          {isGrammar && entry.structure && (
+            <div className="dict-plate__structure" lang="ja">{entry.structure}</div>
+          )}
           <h2 className={`dict-plate__word dict-plate__word--${headwordSize(headword)}`} lang="ja">
             {headwordFurigana?.length
               ? <FuriganaParts parts={headwordFurigana} />
@@ -677,6 +723,36 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
       </header>
 
       <div className="dict-entry__body">
+
+        {/* ── A grammar point's body ───────────────────────
+            Formation, meaning, the two sentences — the same three
+            things the study card reveals, as blocks that name
+            themselves. The structure is on the plate already; it is
+            the block's whole content here because on the plate it is
+            a register, one line, and a long formation rule needs its
+            own room. No strokes, no parts: nothing is drawn. */}
+        {isGrammar && entry.structure && (
+          <section className="dict-block" aria-label={t.formation}>
+            <p className="dict-gloss dict-formation" lang="ja">{entry.structure}</p>
+          </section>
+        )}
+        {isGrammar && meaning && (
+          <section className="dict-block" aria-label={t.meaning}>
+            <p className="dict-gloss">{meaning}</p>
+          </section>
+        )}
+        {isGrammar && entry.examples?.length > 0 && (
+          <section className="dict-block" aria-label={t.examples}>
+            <div className="dict-examples">
+              {/* routes/dictionary.py sends the sentence's furigana as
+                  `furigana`, the same parts a word's example carries
+                  as `segments` — one renderer, one spread. */}
+              {entry.examples.map((ex, i) => (
+                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} />
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* ── What it means ────────────────────────────────
             First, always. A word shows its JMdict senses (a
@@ -727,7 +803,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             Sentences that couldn't nest under a specific sense above.
             Straight after the definition, because a sentence reads
             best next to the meaning it illustrates. */}
-        {flatExamples.length > 0 && (
+        {!isGrammar && flatExamples.length > 0 && (
           <section className="dict-block" aria-label={t.examples}>
             <div className="dict-examples">
               {flatExamples.map((ex, i) => (
@@ -880,31 +956,40 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // all until the server puts it there (see dictionary.py's _exact_vocab).
 // Optional — kanji and kana categories have no second key to
 // disambiguate with and pass nothing.
-function useDictionaryLookup(session, term, category, lang, active, kana) {
+//
+// `id` is the other way in: a grammar point is looked up by its card
+// id alone (the analyzer's chips carry one — routes/dictionary.py's
+// `id` moves that point to the front of page 0). An id lookup insists
+// on the exact row and never falls back to the page's first result:
+// an id that names nothing is "not available", not a different point.
+function useDictionaryLookup(session, term, category, lang, active, kana, id) {
   const [state, setState] = useState({ entry: null, loading: false, error: false })
 
   useEffect(() => {
-    if (!active || !term || !category) return
+    if (!active || !category || (!term && !id)) return
     let cancelled = false
     // eslint-disable-next-line react-hooks/set-state-in-effect -- this setState is the "start of the fetch" reset (clears any previous term's stale result and flips on the loading spinner) that has to happen synchronously with kicking off the fetch below; it's inseparable from the network call, not a standalone "reset on id change" this could be replaced by a key-remount for.
     setState({ entry: null, loading: true, error: false })
 
-    const params = new URLSearchParams({ q: term, page: 0, limit: 10, lang: lang ?? '', category })
+    const params = new URLSearchParams({ q: term ?? '', page: 0, limit: 10, lang: lang ?? '', category })
     if (kana) params.set('kana', kana)
+    if (id) params.set('id', id)
     apiFetch(`/api/dictionary?${params.toString()}`, session)
       .then(r => r.json())
       .then(data => {
         if (cancelled) return
         const results = data.results || []
-        const match = (kana && results.find(e => e.kanji === term && e.kana === kana))
-          ?? results.find(e => e.kanji === term || e.kana === term)
-          ?? results[0] ?? null
+        const match = id
+          ? (results.find(e => e.raw_id === id) ?? null)
+          : (kana && results.find(e => e.kanji === term && e.kana === kana))
+            ?? results.find(e => e.kanji === term || e.kana === term)
+            ?? results[0] ?? null
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang, kana])
+  }, [active, term, category, session, lang, kana, id])
 
   return state
 }
@@ -926,14 +1011,19 @@ function useDictionaryLookup(session, term, category, lang, active, kana) {
 // the same one either way, and a run is exactly where it gets asked.
 // The radical is the one door with nowhere to go (it opens the
 // catalogue's own index), so it prints as the figure it is.
-export function DictionaryLookupSheet({ term, kana, category, session, onClose }) {
+//
+// Opened on `term` (+ `kana`) for a word or a kanji, or on `id` for a
+// grammar point (the analyzer's chips, a comprehension result's) —
+// see useDictionaryLookup. `mining` is optional and reaches the plate's
+// `+` roundel on a grammar entry where the opening screen has one.
+export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose }) {
   const { t, lang } = useLang()
   // The entries opened from one another, oldest first. The sheet shows
   // the last; ‹ pops it. Reset by the caller remounting on a new term
   // (the key it is opened with is the term itself).
-  const [stack, setStack] = useState([{ term, kana, category }])
+  const [stack, setStack] = useState([{ term, kana, category, id }])
   const here = stack[stack.length - 1]
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana)
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id)
   const dialogRef = useDialog(onClose)
 
   const open = (nextTerm, nextCategory, nextKana) => {
@@ -943,8 +1033,11 @@ export function DictionaryLookupSheet({ term, kana, category, session, onClose }
 
   return createPortal(
     <div onClick={onClose} className="dict-sheet__scrim">
+      {/* Named by the term it was opened on; a grammar point, opened
+          by id, is named by its pattern once the entry is in hand and
+          by the id until then. */}
       <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
-           role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${here.term}`}>
+           role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${here.term ?? entry?.pattern ?? here.id}`}>
         {loading && (
           <div className="quiz-loading">{t.loadingDictionary}</div>
         )}
@@ -966,6 +1059,7 @@ export function DictionaryLookupSheet({ term, kana, category, session, onClose }
             // one entry to another inside the sheet gets the same exactness
             // the card does.
             onVocabClick={(k, r) => open(k || r, 'vocab', r)}
+            mining={mining}
           />
         )}
       </div>

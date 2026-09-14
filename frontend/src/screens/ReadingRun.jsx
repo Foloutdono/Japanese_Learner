@@ -12,6 +12,7 @@ import RatingBar from '../components/study/RatingBar'
 import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { tierLabelFor } from '../domain/tiers'
 
 const MOBILE_BREAKPOINT = 768
@@ -384,6 +385,7 @@ export default function ReadingRun({ session }) {
       retry={retry}
       openAnalysisWordDetail={openAnalysisWordDetail}
       closeDetail={closeDetail}
+      session={session}
     />
   )
 }
@@ -407,8 +409,12 @@ function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
   feedback, score, streak, error, detail, isMobile, analysis, analysisLoading, backLabel,
   showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
-  gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail,
+  gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail, session,
 }) {
+  // A grammar chip in the rows opens the point's dictionary entry.
+  // Local to the view: nothing above it needs to know.
+  const [grammarId, setGrammarId] = useState(null)
+  const closeGrammar = useCallback(() => setGrammarId(null), [])
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -583,6 +589,7 @@ function SessionView({
                     sentenceText={data.phrase}
                     t={t}
                     onTokenClick={openAnalysisWordDetail}
+                    onGrammarOpen={g => setGrammarId(g.raw_id)}
                   />
                 )}
               </div>
@@ -611,6 +618,9 @@ function SessionView({
 
       {detail && (
         <WordDetail detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
+      )}
+      {grammarId && (
+        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
       )}
     </StudyStage>
   )

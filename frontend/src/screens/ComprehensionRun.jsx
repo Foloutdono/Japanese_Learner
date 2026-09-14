@@ -10,6 +10,7 @@ import { QuestionTypeBadge } from '../components/study/QuizComponents'
 import { PassageBreakdown } from '../components/analysis/PassageBreakdown'
 import { GrammarChips } from '../components/analysis/GrammarChips'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
@@ -133,6 +134,13 @@ export default function ComprehensionRun({ session }) {
     setRereading(true)
     setStage('reading')
   }
+
+  // A grammar chip — over the text or under a sentence — opens the
+  // point's dictionary entry by its card id. No mining here: the plate
+  // has its ✕ alone, as WordDetail has on this stage.
+  const [grammarId, setGrammarId] = useState(null)
+  const closeGrammar = useCallback(() => setGrammarId(null), [])
+  const openGrammar = g => setGrammarId(g.raw_id)
 
   // The sheet wants {title, level, entry, stats}, which is the shape
   // the breakdown's own words carry. Mirrors ReadingRun's.
@@ -420,7 +428,7 @@ export default function ComprehensionRun({ session }) {
           {showBreakdown && (
             <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
               {exercise?.grammar_points?.length > 0 && (
-                <GrammarChips grammar={exercise.grammar_points} t={t} quiet label={t.grammarInText} />
+                <GrammarChips grammar={exercise.grammar_points} t={t} quiet label={t.grammarInText} onOpen={openGrammar} />
               )}
               <PassageBreakdown
                 sentences={breakdown}
@@ -428,6 +436,7 @@ export default function ComprehensionRun({ session }) {
                 openIndex={openIndex}
                 setOpenIndex={setOpenIndex}
                 onTokenClick={openWordDetail}
+                onGrammarOpen={openGrammar}
               />
             </PromptCard>
           )}
@@ -444,6 +453,9 @@ export default function ComprehensionRun({ session }) {
       )}
 
       {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
+      {grammarId && (
+        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      )}
     </StudyStage>
   )
 }

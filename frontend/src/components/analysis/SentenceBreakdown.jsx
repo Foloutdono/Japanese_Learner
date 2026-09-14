@@ -257,10 +257,14 @@ export function WordRows({ analysis, t, onTokenClick }) {
 // mockup's token table, and onJumpToToken is what a table row's
 // surface does (focus that token AND switch back to the carousel —
 // the mockup's own behaviour).
+//
+// `onGrammarOpen(point)` makes each grammar chip a door to the point's
+// dictionary entry (GrammarChips' onOpen); the screen decides what
+// opens — a DictionaryLookupSheet on the point's raw_id.
 export function SentenceBreakdown({
   analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
   speakable = false, controls = null, tokenView = 'stepper', onJumpToToken,
-  translation, note, sentenceText,
+  translation, note, sentenceText, onGrammarOpen,
 }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
 
@@ -272,7 +276,7 @@ export function SentenceBreakdown({
         <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} />
         {translation && <span className="bkd__en">{translation}</span>}
         {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} />}
-        {available && <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} />}
+        {available && <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />}
         {noteText && <span className="prose__ai">{noteText}</span>}
       </div>
     )
@@ -375,7 +379,7 @@ export function SentenceBreakdown({
             <SpeakButton text={analysis.text} label={t.hearSentence} size="md" t={t} />
           )}
         </div>
-        <GrammarChips grammar={analysis.grammar} t={t} mining={mining} />
+        <GrammarChips grammar={analysis.grammar} t={t} mining={mining} onOpen={onGrammarOpen} />
         <div className="phrase-explanation">
           {analysis.explanation}
         </div>

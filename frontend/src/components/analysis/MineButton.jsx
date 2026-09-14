@@ -20,7 +20,12 @@ import { DeckPicker } from './DeckPicker'
 // control on the screen -- undefined is a valid, deliberate value
 // (ReadingRun.jsx doesn't create one), in which case this renders
 // nothing at all rather than a broken control.
-export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t, className = '' }) {
+//
+// `ariaLabel` makes the button an icon: `label` is then a glyph that
+// stays put after a successful add (the dictionary plate's `+` ghost),
+// and the words — "add", then "add to another deck" — move to the
+// accessible name and the tooltip, where a roundel keeps them.
+export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t, className = '', ariaLabel }) {
   const [showPicker, setShowPicker] = useState(false)
   const [pending, setPending] = useState(false)
   // null = not attempted yet; a number once a mine WRITE succeeded
@@ -88,10 +93,20 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
   const outcomeClassName =
     `analysis-mine-status${outcome > 0 ? ' analysis-mine-status--added' : ''}`
 
+  const words = addedOnce
+    ? (t.addToAnotherDeck ?? 'Add to another deck')
+    : (ariaLabel ?? label ?? (t.mineToDeck ?? 'Mine'))
+
   return (
     <>
-      <button onClick={handleClick} disabled={pending} className={className || 'analysis-mine-btn'}>
-        {addedOnce ? (t.addToAnotherDeck ?? 'Add to another deck') : (label ?? (t.mineToDeck ?? 'Mine'))}
+      <button
+        onClick={handleClick}
+        disabled={pending}
+        className={className || 'analysis-mine-btn'}
+        aria-label={ariaLabel ? words : undefined}
+        title={ariaLabel ? words : undefined}
+      >
+        {ariaLabel ? label : words}
       </button>
       {outcome !== null && (
         <span className={outcomeClassName}>{outcomeText}</span>

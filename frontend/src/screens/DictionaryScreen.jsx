@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { useMining } from '../components/analysis/useMining'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { splitReadingTokens } from '../components/study/Readings'
@@ -51,14 +52,23 @@ const SYLLABARY_LIMIT = 200
 // the other one existed before you could conclude the word was not in
 // the app. One collection, one search, and the levelled words a course
 // actually teaches still come first.
+//
+// "grammar" is the 文法 line's 355 points as entries (routes/dictionary.py's
+// _grammar_collection), between the content collections and the two
+// kana charts, in the line's own pine. It is the one collection with a
+// second row of chips: the JLPT levels (LEVELS below), shown under it
+// the way the 部 chip shows under kanji.
 function categoriesFor(t) {
 	return [
 		['kanji',    t.dictKanji,    'var(--line-kanji)'],
 		['vocab',    t.dictVocab,    'var(--line-vocab)'],
+		['grammar',  t.dictGrammar,  'var(--line-grammar)'],
 		['hiragana', t.dictHiragana, 'var(--line-kana)'],
 		['katakana', t.dictKatakana, 'var(--line-rikai)'],
 	]
 }
+
+const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
 // Route: /dictionary — under the shell (plan 073: the canvas's
 // Dictionary). The bar, the analyzer's door, the console with the
@@ -82,9 +92,25 @@ export default function DictionaryScreen({ session }) {
 	}
 	const CATEGORIES = categoriesFor(t)
 
+	// The screen's own deep link: `?category=grammar&level=N5` is where
+	// the 文法 station's "browse the points" door lands (GrammarScreen),
+	// so the collection and the level come from the URL once, on mount,
+	// and are state from then on — the address is not rewritten as the
+	// learner moves between chips. Anything unrecognised is the default.
+	const [sp] = useSearchParams()
+	const initialCategory = CATEGORIES.some(([key]) => key === sp.get('category')) ? sp.get('category') : 'kanji'
+	const initialLevel = initialCategory === 'grammar' && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
+
+	// The plate's add-to-deck roundel (a grammar entry's one action)
+	// writes through the same mining the analyzer uses; one instance
+	// for the screen, remembering the last deck chosen per kind.
+	const mining = useMining(session)
+
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
-	const [category, setCategory]     = useState('kanji') // 'kanji' | 'vocab' | 'hiragana' | 'katakana'
+	const [category, setCategory]     = useState(initialCategory) // 'kanji' | 'vocab' | 'grammar' | 'hiragana' | 'katakana'
+	// The JLPT level the grammar collection is narrowed to; null is every level.
+	const [level, setLevel]           = useState(initialLevel)
 	const [results, setResults]       = useState([])
 	const [loading, setLoading]       = useState(false)
 	const [loadingMore, setLoadingMore] = useState(false)
@@ -111,7 +137,7 @@ export default function DictionaryScreen({ session }) {
 
 
 	useEffect(() => {
-		fetchPage(0, '', category, null)
+		fetchPage(0, '', category, null, undefined, level)
 		loadRadicalGrid()
 	}, [])
 
@@ -146,7 +172,7 @@ export default function DictionaryScreen({ session }) {
 		}, { threshold: 0.1 })
 		if (sentinelRef.current) observerRef.current.observe(sentinelRef.current)
 		return () => observerRef.current?.disconnect()
-	}, [hasMore, loadingMore, loading, page, query, category, selectedRadical])
+	}, [hasMore, loadingMore, loading, page, query, category, selectedRadical, level])
 
 	// Below 1100px the dock is not a dock at all — it becomes a centred
 	// modal, and full-screen below 700px (see .dict-dock's own media
@@ -160,7 +186,10 @@ export default function DictionaryScreen({ session }) {
 			&& window.matchMedia('(min-width: 1100px)').matches
 	}
 
-	function fetchPage(p, q, cat, rad, autoSelectChar) {
+	// `lvl` is the grammar collection's level — the state's value unless
+	// the caller is changing it in the same breath (switchLevel, the
+	// mount), since a setState is not readable until the next render.
+	function fetchPage(p, q, cat, rad, autoSelectChar, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
@@ -174,6 +203,7 @@ export default function DictionaryScreen({ session }) {
 		const limit = (cat === 'hiragana' || cat === 'katakana') ? SYLLABARY_LIMIT : LIMIT
 		const params = new URLSearchParams({ q, page: p, limit, lang, category: cat })
 		if (rad != null) params.set('radical', rad)
+		if (cat === 'grammar' && lvl) params.set('level', lvl)
 
 		apiFetch(`/api/dictionary?${params.toString()}`, session)
 			.then(r => r.json())
@@ -254,7 +284,23 @@ export default function DictionaryScreen({ session }) {
 			setMode('search')
 			setSelectedRadical(null)
 		}
-		fetchPage(0, isSyl ? '' : query, cat, null)
+		// The level row exists under grammar alone; a level left behind
+		// would narrow nothing visible, and would narrow again on return.
+		setLevel(null)
+		fetchPage(0, isSyl ? '' : query, cat, null, undefined, null)
+	}
+
+	// The grammar collection's second row: one JLPT level, or all of
+	// them. The query stays — a learner narrowing "〜て" to N4 is still
+	// looking for "〜て".
+	function switchLevel(lvl) {
+		if (lvl === level) return
+		playUi('click-mode-selection')
+		setLevel(lvl)
+		setSelected(null)
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, query, 'grammar', null, undefined, lvl)
 	}
 
 	function switchToSearchMode() {
@@ -414,6 +460,23 @@ export default function DictionaryScreen({ session }) {
 							</Chip>
 						)}
 					</Chips>
+					{/* The levels, under the grammar collection alone — 355
+					    points is a long wall, and the JLPT level is the one
+					    axis the catalogue is already filed on. A second row of
+					    the same chips, not a second control: each level in its
+					    own tint (the catalogue cards' badge), "all" in 辞書's. */}
+					{category === 'grammar' && (
+						<Chips label={t.dictLevels} className="dict-levels">
+							<Chip on={level == null} color={DICTIONARY_COLOR} onClick={() => switchLevel(null)}>
+								{t.dictLevelAll}
+							</Chip>
+							{LEVELS.map(lvl => (
+								<Chip key={lvl} on={level === lvl} color={LEVEL_COLORS[lvl]} onClick={() => switchLevel(lvl)}>
+									{lvl}
+								</Chip>
+							))}
+						</Chips>
+					)}
 				</ConsoleTop>
 				{/* Hidden while browsing the plain radical grid, shown again
 				    once a radical is picked (to narrow further), and hidden for
@@ -429,7 +492,9 @@ export default function DictionaryScreen({ session }) {
 						value={query}
 						onChange={onSearch}
 						onClear={() => onSearch({ target: { value: '' } })}
-						placeholder={mode === 'radical' ? t.dictionaryPlaceholderRadical : t.dictionaryPlaceholder}
+						placeholder={mode === 'radical' ? t.dictionaryPlaceholderRadical
+							: category === 'grammar' ? t.dictionaryPlaceholderGrammar
+							: t.dictionaryPlaceholder}
 						autoFocus={mode === 'search'}
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
@@ -488,6 +553,7 @@ export default function DictionaryScreen({ session }) {
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={jumpToKanji}
 						onVocabClick={jumpToVocab}
+						mining={mining}
 						t={t}
 					/>
 				)
@@ -675,7 +741,7 @@ function cardFurigana(entry) {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, mining }) {
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
@@ -688,15 +754,22 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onRadicalClick={onRadicalClick}
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
+					mining={mining}
 				/>
 			</aside>
 		</>
 	)
 }
 
+// The tile's headword: what --len counts and what prints large. A
+// grammar point's is its pattern.
+function cardHeadword(entry) {
+	return entry.type === 'grammar' ? entry.pattern : (entry.kanji || entry.kana || ' ')
+}
+
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, t,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, mining, t,
 }) {
 
 	return (
@@ -719,6 +792,8 @@ function ResultsSection({
 							{results.map(entry => {
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
+								const isGrammar = entry.type === 'grammar'
+								const headword = cardHeadword(entry)
 								return (
 									<button
 										key={entryKey(entry)}
@@ -727,12 +802,16 @@ function ResultsSection({
 										// --len is how many characters the headword has: the
 										// tile divides its own width by it and sets the word to
 										// fit on one line (index.css, .dict-entry-card__char).
+										// A pattern is allowed two lines instead (the tile's
+										// --grammar rule), so its divisor stops at 8: past that
+										// the second line is where the rest goes.
 										style={{
 											'--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)',
-											'--len': [...(entry.kanji || entry.kana || ' ')].length,
+											'--len': isGrammar ? Math.min([...headword].length, 8) : [...headword].length,
 										}}
 										className={[
 											'dict-entry-card',
+											isGrammar ? 'dict-entry-card--grammar' : '',
 											stage ? `dict-entry-card--${stage}` : '',
 											selected && entryKey(selected) === entryKey(entry) ? 'dict-entry-card--selected' : '',
 										].filter(Boolean).join(' ')}
@@ -747,10 +826,12 @@ function ResultsSection({
 										<span className="dict-entry-card__char" lang="ja">
 											{furigana
 												? <FuriganaParts parts={furigana} />
-												: (entry.kanji || entry.kana)}
+												: headword}
 										</span>
+										{/* A grammar gloss is a phrase ("the copula: is/am/are"),
+										    not a list of glosses, so it prints whole. */}
 										<span className="dict-entry-card__meaning">
-											{shortMeaning(entry.meaning)}
+											{isGrammar ? entry.meaning : shortMeaning(entry.meaning)}
 										</span>
 									</button>
 								)
@@ -776,6 +857,7 @@ function ResultsSection({
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
+							mining={mining}
 						/>
 					)}
 				</div>

@@ -1006,6 +1006,14 @@ const dictionary = {
   dictVocab:         'Vocabulary',
   dictHiragana:      'Hiragana',
   dictKatakana:      'Katakana',
+  // 文法 — the grammar collection: the 355 points of the JLPT line as
+  // entries, narrowed by level in a second row of chips.
+  dictGrammar:       'Grammar',
+  dictLevels:        'Levels',
+  dictLevelAll:      'All',
+  dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
+  formation:         'Formation',
+  browseGrammarPoints: 'Browse the points',
   dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',

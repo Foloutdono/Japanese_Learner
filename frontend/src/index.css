@@ -5394,10 +5394,20 @@ textarea:focus-visible {
 }
 
 /* ── bottom sheets ── */
+/* A sheet is the topmost transient layer: a picker, a confirm, a
+   balance, opened from whatever is on screen — including a dictionary
+   shell (.dict-dock as a modal, .dict-sheet, and the readings sheet
+   over it at 220), since a grammar entry's + opens the deck picker
+   from the plate. It sat at 40/50 and those shells at 200–220, so on
+   any width under 1100px the picker rose UNDER the dock's scrim: a
+   press on a deck row landed on the scrim, which closed the entry and
+   mined nothing. Above every shell, below the level-up (250) and the
+   cutscenes (300) — a sheet is never the thing a celebration or a
+   departure has to wait behind. */
 .scrim {
   position: fixed;
   inset: 0;
-  z-index: 40;
+  z-index: 230;
   background: rgba(0, 0, 0, 0.55);
 }
 .sheet {
@@ -5406,7 +5416,7 @@ textarea:focus-visible {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 50;
+  z-index: 240;
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
@@ -5581,6 +5591,14 @@ textarea:focus-visible {
 /* A lone chip or the action rides the row's right edge. */
 .console__top > .console__action,
 .console__top > .chip { margin-left: auto; }
+/* A second row of chips under the first (the dictionary's JLPT levels
+   under its collections, shown under 文法 alone): the rows already
+   stack — each Chips takes the full width — so this is the hairline
+   between them, and the air the hairline needs. */
+.console__top > .dict-levels {
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--surface-line);
+}
 .console__index {
   display: flex;
   align-items: center;
@@ -12195,6 +12213,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-indent: var(--tr-reading);
   color: var(--text-secondary);
 }
+/* A grammar point's formation ("verb て-form + から") in the reading's
+   place over the pattern: the same register, untracked — it is mixed
+   script and words, not kana to be spaced. */
+.dict-plate__structure {
+  max-width: 100%;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
 
 /* The headword. --font-jp, like the catalogue plate and the study
    card: it is a specimen, the shape the reader is here to look at,
@@ -13676,6 +13703,23 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   letter-spacing: var(--tr-caption);
   color: var(--text-secondary);
 }
+/* The pattern as a door to its dictionary entry (GrammarChips'
+   onOpen): the word itself, underlined the way the breakdown's token
+   doors are, never a button drawn inside the chip's own pill. */
+.analysis-grammar-chip__door {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.analysis-grammar-chip__door:hover,
+.analysis-grammar-chip__door:focus-visible {
+  filter: none;
+  color: var(--line-grammar);
+}
 
 /* ── Mining controls (plan 017) -- turning a matched word/kanji/
    grammar point/cloze into a Card. Additive only. */
@@ -13699,6 +13743,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 2px 8px;
 }
 .analysis-mine-status--added { color: var(--success); }
+/* The same outcome ("in deck") beside the dictionary plate's ghosts,
+   in the caption register the plate already speaks; the pill padding
+   above has no place in a row of roundels. After the base rule, as
+   the specificity ratchet asks. */
+.dict-plate__actions .analysis-mine-status {
+  padding: 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+}
 
 /* The one Token an i+1 Sentence (exactly one unknown word) is worth
    studying FOR -- its mine control is the whole point, so its card
@@ -15529,6 +15584,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+/* A pattern wraps where a word never does: 〜ました／〜ませんでした
+   on one line would be a caption, and a rule is allowed two lines
+   (the study card's GrammarRule already takes them). The tile's
+   fitted size still applies — the screen caps --len at 8 so the
+   divisor targets two lines — and the floor lifts a rung, so two
+   lines of a rule read as a rule. */
+.dict-entry-card--grammar .dict-entry-card__char {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-overflow: clip;
+  font-size: clamp(
+    var(--fs-sm),
+    calc(96cqw / var(--len, 1)),
+    var(--fs-heading));
 }
 /* The reading is furigana on the headword itself now (see
    DictionaryScreen's cardFurigana), set exactly as the entry's own

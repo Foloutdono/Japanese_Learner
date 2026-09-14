@@ -420,3 +420,54 @@ describe('the analyzer at phone width', () => {
     expect(middle(dial)).toBeCloseTo(middle(mute), 0)
   })
 })
+
+// ── 文法 in the dictionary at phone width ──────────────────────
+// A grammar tile wraps its pattern where a word never wraps, and the
+// level row stands under the collections row on its own line.
+describe('the grammar collection at phone width', () => {
+  it('a pattern tile wraps to a second line at a rung no lower than --fs-sm; the level row sits under the collections', async () => {
+    const screen = await render(
+      <main className="dictionary" style={{ '--line-color': 'var(--line-jisho)' }}>
+        <div className="console">
+          <div className="console__top">
+            <div className="console__chips" role="group">
+              {['Kanji', 'Vocabulary', 'Grammar', 'Hiragana', 'Katakana'].map(c => (
+                <button key={c} type="button" className={`chip${c === 'Grammar' ? ' chip--on' : ''}`}>{c}</button>
+              ))}
+            </div>
+            <div className="console__chips dict-levels" role="group">
+              {['All', 'N5', 'N4', 'N3', 'N2', 'N1'].map(c => (
+                <button key={c} type="button" className={`chip${c === 'All' ? ' chip--on' : ''}`}>{c}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="dict-grid">
+          {[['〜てから', 4], ['〜ました／〜ませんでした', 8]].map(([p, len]) => (
+            <button key={p} type="button" className="dict-entry-card dict-entry-card--grammar dict-entry-card--new"
+              style={{ '--level-color': 'var(--line-grammar)', '--len': len }}>
+              <span className="dict-level-badge">N5</span>
+              <span className="dict-entry-card__char" lang="ja">{p}</span>
+              <span className="dict-entry-card__meaning">polite past: did / did not</span>
+            </button>
+          ))}
+        </div>
+      </main>
+    )
+    const resolve = resolver()
+    const rows = [...screen.container.querySelectorAll('.console__chips')]
+    expect(rows[1].getBoundingClientRect().top).toBeGreaterThanOrEqual(rows[0].getBoundingClientRect().bottom)
+    expect(getComputedStyle(rows[1]).borderTopWidth).toBe('1px')
+
+    const [short, long] = [...screen.container.querySelectorAll('.dict-entry-card__char')]
+    expect(getComputedStyle(long).whiteSpace).toBe('normal')
+    const fs = parseFloat(getComputedStyle(long).fontSize)
+    expect(fs).toBeGreaterThanOrEqual(parseFloat(resolve('fontSize', 'var(--fs-sm)')))
+    expect(fs).toBeLessThanOrEqual(parseFloat(resolve('fontSize', 'var(--fs-heading)')))
+    // Two lines, not one ellipsised line: the box is taller than a line.
+    expect(long.getBoundingClientRect().height).toBeGreaterThan(fs * 1.1 * 1.5)
+    expect(long.scrollWidth).toBeLessThanOrEqual(long.clientWidth + 1)
+    // The short one sits on one line, at or under the heading rung.
+    expect(parseFloat(getComputedStyle(short).fontSize)).toBeLessThanOrEqual(parseFloat(resolve('fontSize', 'var(--fs-heading)')))
+  })
+})

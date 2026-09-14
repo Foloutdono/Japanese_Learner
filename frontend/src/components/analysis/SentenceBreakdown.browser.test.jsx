@@ -285,6 +285,22 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelector('.status-badge, .analysis-status-badge')).toBeNull()
   })
 
+  it('a grammar chip is a door to its entry when given somewhere to open, and stays a word otherwise', async () => {
+    const grammar = [{ pattern: '〜てから', level: 'N5', raw_id: 'grammar_N5_〜てから', start: 2, stats: { status: 'not_started' } }]
+    const onOpen = vi.fn()
+    await render(<GrammarChips grammar={grammar} t={{ ...T, openDictionary: 'Open dictionary entry' }} quiet label={null} onOpen={onOpen} />)
+    const door = document.querySelector('.analysis-grammar-chip__pattern')
+    expect(door.tagName).toBe('BUTTON')
+    expect(door.classList.contains('analysis-grammar-chip__door')).toBe(true)
+    expect(door.getAttribute('aria-label')).toBe('Open dictionary entry: 〜てから')
+    expect(door.textContent).toBe('〜てから')
+    // Quiet still: no pill, no deck action — the door is the only button.
+    expect(document.querySelectorAll('.analysis-grammar-chip button')).toHaveLength(1)
+    door.click()
+    expect(onOpen).toHaveBeenCalledTimes(1)
+    expect(onOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_〜てから')
+  })
+
   it('grammar chips print the caption they are given', async () => {
     const grammar = [{ pattern: '〜てから', level: 'N5', raw_id: 'grammar_N5_y' }]
     await render(<GrammarChips grammar={grammar} t={T} quiet label="Grammar in this text" />)
