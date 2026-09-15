@@ -80,6 +80,7 @@ READINGS = "readings"
 RADICAL = "radical"
 WORD_READING = "word_reading"
 FILL_IN = "fill_in"
+CONTRAST = "contrast"
 FAST_REVIEW = "fast_review"
 
 # How the client renders a mode. Kept here rather than only in the
@@ -89,6 +90,7 @@ RENDER_FLASHCARD = "flashcard"
 RENDER_TYPE = "type"
 RENDER_DRAW = "draw"
 RENDER_FILL = "fill"
+RENDER_CONTRAST = "contrast"
 RENDER_BROWSE = "browse"
 
 
@@ -155,6 +157,13 @@ _ORDERED: dict[str, tuple[Mode, ...]] = {
         # から, もいい and はいけない alike — so it could not be graded
         # fairly.
         _m(GRAMMAR, FILL_IN, hints=_CHOICES, renderer=RENDER_FILL),
+        # The pattern IS blanked here, and it can be, because the choices
+        # are not every rule the slot could take but the point's own
+        # rivals -- the neighbours its lesson tells apart (plan 087). No
+        # hints: the choices are the exercise, not help the learner
+        # switches on. Only points with a marked contrast sentence and a
+        # rival are served (card_index.contrast_ok).
+        _m(GRAMMAR, CONTRAST, renderer=RENDER_CONTRAST),
     ),
     STANDARD: (
         _m(STANDARD, FLASHCARD, F2B, _CHOICES),
@@ -242,7 +251,7 @@ STATUS_MODES: dict[str, tuple[str, ...]] = {
 
 
 # ── Card-pool eligibility ─────────────────────────────────────
-# Three modes can only draw from a subset of their source's deck. The
+# Four modes can only draw from a subset of their source's deck. The
 # filter has to be applied to the card pool AND to the stats totals — if
 # only the pool is filtered, vocab.word_reading's mastery bar is scored
 # out of 8,405 while only 7,308 cards can ever be reached, so it can
@@ -261,6 +270,10 @@ def eligible_for(mode: Mode, entry: dict) -> bool:
         # rule — see study/grammar_match.py. Absent that, the mode has no
         # answerable card and is hidden rather than served empty.
         return bool(entry.get("fill_ok"))
+    if mode.base == CONTRAST:
+        # Needs a rival to offer and a sentence the author marked as
+        # telling them apart — see card_index.contrast_ok.
+        return bool(entry.get("contrast_ok"))
     return True
 
 

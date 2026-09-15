@@ -2,7 +2,7 @@ import {
   InlineReveal, Flashcard, CharDisplay, MeaningDisplay, RevealActions,
 } from './QuizComponents'
 import { FuriganaWord } from './Readings'
-import { GrammarRule, GrammarAnswer, GrammarFillSentence } from './GrammarPieces'
+import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
 import PromptCard from './PromptCard'
 import { speakJapanese, playKana } from '../../lib/audio'
@@ -40,7 +40,7 @@ export default function CardPrompt({
   if (!card) return null
 
   const c = card
-  const { structureKey, isF2B, renderer, isFill, isRadical, isWordReading } = cardShape(c)
+  const { structureKey, isF2B, renderer, isFill, isContrast, isRadical, isWordReading } = cardShape(c)
   const resetKey = `${c.card_id}:${cardNonce}`
 
   const cardHints = c.hints ?? {}
@@ -298,8 +298,15 @@ export default function CardPrompt({
             rule, a meaning, or a sentence. The flip is the reveal in
             all three, and switching the choices on replaces the flip
             rather than sitting beside it — same resolution kanji/vocab
-            use for their own indice_1. */}
-        {!choicesOn ? (
+            use for their own indice_1. The contrast drill (plan 087)
+            has no flip: its rivals are the exercise, under the card,
+            and the reveal is the answer chosen. */}
+        {isContrast ? (
+          <>
+            <GrammarContrastSentence card={c} revealed={answered} t={t} />
+            {answered && <GrammarAnswer card={c} size={36} divided />}
+          </>
+        ) : !choicesOn ? (
           <Flashcard
             t={t} resetKey={resetKey} onReveal={onFlashcardReveal}
             front={

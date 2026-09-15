@@ -29,6 +29,8 @@ import {
 import HintBar from '../components/study/HintBar'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 import { ChevronIcon } from '../components/ui/Icons'
+import { ExampleSentence } from '../components/dictionary/ExampleSentence'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import WritingToggle from '../components/study/WritingToggle'
 
 // ── 教材 — a deck's run (plan 071) ────────────────────────────
@@ -66,6 +68,8 @@ export default function StudyRun({ session }) {
   }, [deck_id])
 
   const [answered, setAnswered]       = useState(false)
+  // The lesson sheet the head's door opens, by card id (plan 087).
+  const [sheet, setSheet] = useState(null)
   // Hints switched on for the card in hand. Session-wide, so it stays
   // where the learner put it, and switchable mid-card.
   const [activeHints, setActiveHints] = useState([])
@@ -214,7 +218,19 @@ export default function StudyRun({ session }) {
   const isF2B = nc?.direction === 'f2b'
   const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
   const isFill    = renderer === RENDER.FILL
+  const isContrast = renderer === RENDER.CONTRAST
   const isRadical = STUDY_MODES[mode]?.base === 'radical'
+
+  // The lesson, one tap from a grammar point's card (plan 087): the
+  // head's own ghost. A built-in point only — a personal card has no
+  // catalogue lesson behind it.
+  const lessonDoor = nc && structureKey === 'grammar' && nc.source === 'builtin_grammar' ? (
+    <button type="button" className="stage__leave dict-browse-door gl-door--ghost"
+            onClick={() => setSheet(nc.raw_id ?? nc.card_id)} disabled={gates.locked}>
+      <span>{t.glLesson}</span>
+      <ChevronIcon direction="right" size={14} />
+    </button>
+  ) : null
 
   // Hints this CARD can offer, not the ones the mode declares. A
   // hand-written card without a matching extra (no distractors to
@@ -267,7 +283,7 @@ export default function StudyRun({ session }) {
       sub={title}
       aside={deck?.type === 'kanji' && usesWritingDrill(mode) ? (
         <WritingToggle on={drawingEnabled} onToggle={() => setDrawingEnabled(d => !d)} />
-      ) : undefined}
+      ) : lessonDoor ?? undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
     >
@@ -343,6 +359,15 @@ export default function StudyRun({ session }) {
             {/* Grammar MCQ — options are plain meaning/pattern strings,
                 for either the flashcard modes or fill_in's own "which
                 rule is at work" choices. */}
+            {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
+            {structureKey === 'grammar' && isContrast && (
+              <MCQGrid
+                choices={nc.contrast?.choices ?? []}
+                correct={nc.grammar}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
             {structureKey === 'grammar' && showChoices && (
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
@@ -359,8 +384,7 @@ export default function StudyRun({ session }) {
                 <div className="grammar-examples__list">
                   {cardHints[HINTS.SENTENCES].map((ex, i) => (
                     <div key={i} className="grammar-example-card">
-                      <div className="grammar-example-card__jp" lang="ja">{ex.jp}</div>
-                      {showEx && <div className="grammar-example-card__en">{ex.en}</div>}
+                      <ExampleSentence ex={{ ...ex, segments: ex.furigana }} showTr={showEx} />
                     </div>
                   ))}
                 </div>
@@ -413,6 +437,10 @@ export default function StudyRun({ session }) {
               />
             )}
           </>
+        )}
+
+        {sheet && (
+          <GrammarLessonSheet key={sheet} id={sheet} session={session} onClose={() => setSheet(null)} />
         )}
     </StudyStage>
   )

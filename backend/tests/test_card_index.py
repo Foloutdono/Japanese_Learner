@@ -3,6 +3,7 @@ import re
 import unittest
 from pathlib import Path
 
+from content.grammar_points_data import LEVELS, RICH_LEVELS
 from study import card_index
 from study.card_lookup import card_stats
 from study.modes import (
@@ -11,6 +12,14 @@ from study.modes import (
 
 BACKEND = Path(__file__).resolve().parents[1]
 SECTIONS = (KANA, VOCAB, KANJI, GRAMMAR)
+
+# grammar.contrast draws only from points whose lesson marks a contrast
+# sentence, and lessons arrive one level per content wave (plan 087). A
+# level whose lessons are not written yet has nothing for it to serve --
+# and the station hides the platform (routes/grammar.py's `totals`).
+# The allowlist is the levels NOT yet rich, so it shrinks as waves land;
+# a rich level with an empty contrast pool is a real failure.
+EMPTY_ALLOWED = {(GRAMMAR, lvl, "grammar.contrast") for lvl in LEVELS if lvl not in RICH_LEVELS}
 
 
 class CardIndexParityTests(unittest.TestCase):
@@ -43,6 +52,8 @@ class CardIndexParityTests(unittest.TestCase):
         indexed = {mode for _, mode in card_index._INDEX}
         for source in SECTIONS:
             for mode in GRADED_FOR_SOURCE[source]:
+                if all((source, deck, mode) in EMPTY_ALLOWED for deck in card_index.deck_keys(source)):
+                    continue  # nothing authored for it yet, by design (see EMPTY_ALLOWED)
                 with self.subTest(mode=mode):
                     self.assertIn(
                         mode, indexed,
@@ -57,16 +68,28 @@ class CardIndexParityTests(unittest.TestCase):
             for deck_key in keys:
                 for mode in GRADED_FOR_SOURCE[source]:
                     with self.subTest(source=source, deck=deck_key, mode=mode):
+                        if (source, deck_key, mode) in EMPTY_ALLOWED:
+                            continue
                         self.assertGreater(
                             card_index.total(source, deck_key, mode), 0,
                             "a mode that can serve nothing would render as a "
                             "0/0 bar rather than being hidden",
                         )
 
+    def test_contrast_is_served_at_every_rich_level(self) -> None:
+        # The inverse of EMPTY_ALLOWED: once a level's lessons are written
+        # its contrast drill has cards, or the lessons are not doing what
+        # the README says they do.
+        for level in RICH_LEVELS:
+            with self.subTest(level=level):
+                self.assertGreater(card_index.total(GRAMMAR, level, "grammar.contrast"), 0)
+
     def test_locate_round_trips_a_real_card(self) -> None:
         for source in SECTIONS:
             deck_key = card_index.deck_keys(source)[0]
             for mode in sorted(GRADED_FOR_SOURCE[source]):
+                if (source, deck_key, mode) in EMPTY_ALLOWED:
+                    continue
                 raw_id = card_index.raw_ids(source, deck_key, mode)[0]
                 with self.subTest(mode=mode, raw_id=raw_id):
                     self.assertEqual(

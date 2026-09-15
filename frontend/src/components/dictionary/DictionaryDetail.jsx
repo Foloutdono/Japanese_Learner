@@ -6,6 +6,8 @@ import { useLang } from '../../LangContext'
 import { apiFetch } from '../../lib/api'
 import { api } from '../../lib/origin'
 import { FuriganaParts, splitReadingTokens } from '../study/Readings'
+import { ExampleSentence, SenseNumeral } from './ExampleSentence'
+import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
@@ -43,51 +45,9 @@ import { speakJapanese } from '../../lib/audio'
 // sections' pigments, and stay on the catalogue's tabs where they
 // belong.
 
-// Small figure for a JMdict sense number — on the senses list itself
-// and on any example sentence that could not nest under its sense, so
-// a reader can tell which gloss a sentence illustrates. A tabular
-// numeral in the entry's ink, per DESIGN.md's "colour is a numeral":
-// no disc, no ring, no fill.
-function SenseNumeral({ number, className = '' }) {
-  return (
-    <span className={`dict-sense__n ${className}`.trim()}>
-      {number}
-    </span>
-  )
-}
-
-// One example sentence: furigana'd/highlighted Japanese over its
-// translation. Shared by the nested-under-its-sense rendering and the
-// flat fallback list (an example whose sense number matches no listed
-// sense, or every example when there are no senses at all) so the two
-// cannot drift apart.
-function ExampleSentence({ ex, senseNumber }) {
-  return (
-    <div className="dict-ex">
-      {senseNumber != null && <SenseNumeral number={senseNumber} className="dict-ex__n" />}
-      <div className="dict-ex__jp" lang="ja">
-        {ex.segments?.length > 0
-          ? ex.segments.map((seg, j) => {
-              // Each segment (a word, a kanji compound, a kana run) is
-              // its own non-breaking unit — the line can wrap between
-              // segments but never inside one, so a word never gets
-              // split with a single trailing kanji/kana stranded alone
-              // on the next line. Already split per kanji by the
-              // backend (content/vocab_extras.py's _expand_furigana),
-              // so this renders the segment as-is.
-              const content = seg.reading
-                ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
-                : seg.text
-              return seg.highlight
-                ? <mark key={j} className="dict-ex__hl dict-ex__seg">{content}</mark>
-                : <span key={j} className="dict-ex__seg">{content}</span>
-            })
-          : ex.jp}
-      </div>
-      <div className="dict-ex__tr">{ex.en}</div>
-    </div>
-  )
-}
+// SenseNumeral and ExampleSentence live in ./ExampleSentence.jsx: the
+// grammar lesson prints the same sentence object in three places
+// (plan 087), so the renderer is shared rather than private here.
 
 // ── Shared dictionary metadata/helpers ─────────────────────
 // Previously defined inside DictionaryScreen.jsx only — pulled out
@@ -488,11 +448,14 @@ function headwordSize(text) {
 // with the radical went its cell in the form lattice: the same entry
 // was two different cards depending on where you had opened it from.
 //
+// `onGrammarClick(raw_id)` is the door a grammar point's compare rows
+// open (plan 087): the rival's own entry, in whatever shell this is in.
+//
 // `mining` (a useMining instance, optional) is what makes a grammar
 // entry's `+` roundel exist: the plate's one action, adding the point
 // to one of the learner's grammar decks through the same write the
 // analyzer's chips use. Without it the plate has the ✕ alone.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, mining }) {
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -504,8 +467,8 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // register (how the pattern is formed), the pattern its headword, the
   // gloss its caption — printed whole, since "the copula: is/am/are" is
   // a phrase and not a list. No speak roundel: 〜てから is not a thing
-  // that can be said. The catalogue has no French gloss (routes/
-  // dictionary.py), so the meaning prints as the 文法 line prints it.
+  // that can be said. The gloss arrives in the learner's language from
+  // routes/dictionary.py (plan 087), as the 文法 line's own cards do.
   const isGrammar = entry.type === 'grammar'
   // Kana has no semantic "meaning" to translate — its romaji is its
   // plain-language name and takes the plate's caption instead.
@@ -725,33 +688,15 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
       <div className="dict-entry__body">
 
         {/* ── A grammar point's body ───────────────────────
-            Formation, meaning, the two sentences — the same three
-            things the study card reveals, as blocks that name
-            themselves. The structure is on the plate already; it is
-            the block's whole content here because on the plate it is
-            a register, one line, and a long formation rule needs its
-            own room. No strokes, no parts: nothing is drawn. */}
-        {isGrammar && entry.structure && (
-          <section className="dict-block" aria-label={t.formation}>
-            <p className="dict-gloss dict-formation" lang="ja">{entry.structure}</p>
-          </section>
-        )}
-        {isGrammar && meaning && (
-          <section className="dict-block" aria-label={t.meaning}>
-            <p className="dict-gloss">{meaning}</p>
-          </section>
-        )}
-        {isGrammar && entry.examples?.length > 0 && (
-          <section className="dict-block" aria-label={t.examples}>
-            <div className="dict-examples">
-              {/* routes/dictionary.py sends the sentence's furigana as
-                  `furigana`, the same parts a word's example carries
-                  as `segments` — one renderer, one spread. */}
-              {entry.examples.map((ex, i) => (
-                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} />
-              ))}
-            </div>
-          </section>
+            The lesson (plan 087): formation, meaning, the steps, the
+            neighbours it is confused with, the sentences with the
+            pattern picked out — as blocks that name themselves, the
+            plate variant since the plate above is already drawn. A
+            point whose lesson is not written yet prints the three
+            blocks it always had. A compare row is a door where the
+            shell can open one (`onGrammarClick`). */}
+        {isGrammar && (
+          <GrammarLesson variant="plate" point={entry} onCompare={onGrammarClick} />
         )}
 
         {/* ── What it means ────────────────────────────────
@@ -1016,7 +961,7 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 // grammar point (the analyzer's chips, a comprehension result's) —
 // see useDictionaryLookup. `mining` is optional and reaches the plate's
 // `+` roundel on a grammar entry where the opening screen has one.
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose }) {
+export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose, over = false }) {
   const { t, lang } = useLang()
   // The entries opened from one another, oldest first. The sheet shows
   // the last; ‹ pops it. Reset by the caller remounting on a new term
@@ -1024,15 +969,21 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
   const [stack, setStack] = useState([{ term, kana, category, id }])
   const here = stack[stack.length - 1]
   const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id)
-  const dialogRef = useDialog(onClose)
+  const dialogRef = useDialog(onClose, { capture: over })
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
     setStack(s => [...s, { term: nextTerm, kana: nextKana, category: nextCategory }])
   }
+  // A grammar point's rival, by its card id (plan 087): the same stack,
+  // so ‹ walks back through the points opened from one another.
+  const openId = nextId => {
+    if (!nextId) return
+    setStack(s => [...s, { category: 'grammar', id: nextId }])
+  }
 
   return createPortal(
-    <div onClick={onClose} className="dict-sheet__scrim">
+    <div onClick={onClose} className={`dict-sheet__scrim${over ? ' dict-sheet__scrim--over' : ''}`}>
       {/* Named by the term it was opened on; a grammar point, opened
           by id, is named by its pattern once the entry is in hand and
           by the id until then. */}
@@ -1059,6 +1010,7 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
             // one entry to another inside the sheet gets the same exactness
             // the card does.
             onVocabClick={(k, r) => open(k || r, 'vocab', r)}
+            onGrammarClick={openId}
             mining={mining}
           />
         )}

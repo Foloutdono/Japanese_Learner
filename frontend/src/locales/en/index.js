@@ -998,6 +998,17 @@ const dictionary = {
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
   formation:         'Formation',
   browseGrammarPoints: 'Browse the points',
+  // 文法 — the lesson (plan 087): the pair marks over the steps, the
+  // door on every card and the station's index, the gate's one button.
+  glLesson:          'Lesson',
+  glPoints:          'The points',
+  glRule:            'Rule',
+  glUse:             'Use',
+  glCareful:         'Careful',
+  glCompare:         'Compare',
+  glBoard:           'Understood — board',
+  glBlank:           'gap',
+  glRegister: { neutral: 'Neutral', casual: 'Casual', polite: 'Polite', formal: 'Formal', written: 'Written' },
   dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
@@ -1108,6 +1119,8 @@ const misc = {
   mode_grammar_flashcard_b2f_desc: 'The meaning is shown. Recall the pattern.',
   mode_grammar_fill_in:            'Name the rule',
   mode_grammar_fill_in_desc:       'A Japanese sentence, no translation. Name the pattern at work in it.',
+  mode_grammar_contrast:           'Which one fits',
+  mode_grammar_contrast_desc:      'A sentence with a gap. Pick the pattern from the ones it is confused with.',
 
   mode_standard_flashcard_f2b:      'Front → back',
   mode_standard_flashcard_f2b_desc: 'Your card, the way you wrote it.',

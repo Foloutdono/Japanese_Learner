@@ -74,10 +74,11 @@ from routes.decks import build_personal_card, VISIBLE_DECKS_CTE   # noqa: E402
 # order so _build_section_card can call all four the same way. The
 # builders' own signatures stay untouched on purpose -- kana.py/kanji.py/
 # vocab.py/grammar.py each call their own builder directly too, and none
-# of them has a use for the params this table exists to route (a kana or
-# grammar card doesn't take raw_id/lang at all; grammar's "level" arg is
-# this queue's deck_key under another name). Only the daily queue needs
-# to dispatch across sources, so only this table knows the mapping.
+# of them has a use for the params this table exists to route (a kana
+# card doesn't take raw_id/lang at all; grammar derives its own id and
+# its "level" arg is this queue's deck_key under another name). Only the
+# daily queue needs to dispatch across sources, so only this table knows
+# the mapping.
 _SECTION_BUILDERS = {
     KANA:    lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
         _build_kana_card(entry, deck_list, m, stage, preview),
@@ -86,7 +87,7 @@ _SECTION_BUILDERS = {
     VOCAB:   lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
         _build_vocab_card(raw_id, entry, deck_list, m, lang, stage, preview),
     GRAMMAR: lambda raw_id, entry, deck_key, deck_list, m, lang, stage, preview:
-        _build_grammar_card(entry, deck_key, deck_list, m, stage, preview),
+        _build_grammar_card(entry, deck_key, deck_list, m, lang, stage, preview),
 }
 
 

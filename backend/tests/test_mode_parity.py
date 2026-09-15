@@ -61,8 +61,8 @@ class ModeParityTests(unittest.TestCase):
         )
 
     def test_frontend_declares_the_expected_count(self) -> None:
-        # 17 graded + the ungraded browse.
-        self.assertEqual(len(_frontend_keys()), 18)
+        # 18 graded + the ungraded browse.
+        self.assertEqual(len(_frontend_keys()), 19)
 
     def test_every_mode_has_an_english_label_and_description(self) -> None:
         # A missing label silently renders the raw key ('kanji.readings')

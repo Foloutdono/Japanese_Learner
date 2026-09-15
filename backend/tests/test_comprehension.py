@@ -34,7 +34,7 @@ import random
 import pytest
 from fastapi import HTTPException
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
 from routes import reading
 
 # All-N5 on every gate — kanji, vocabulary, grammar — and it uses the
@@ -220,7 +220,7 @@ def test_the_prompt_carries_the_grammar_seeds_and_the_words(answered):
     for point in (MASHITA, KUDASAI, TAI):
         assert point["pattern"] in sent
         assert point["structure"] in sent
-        assert point["meaning"] in sent
+        assert gloss(point, "en") in sent
     assert "電車 (でんしゃ)" in sent
     # A kana-only entry shows its first reading as the word.
     assert "バス (バス)" in sent
@@ -268,7 +268,7 @@ def test_grammar_points_claims_only_what_was_found(answered):
     found = data["grammar_points"][0]
     assert found["level"] == "N5"
     assert found["raw_id"] == grammar_to_id(MASHITA, "N5")
-    assert found["meaning"] == MASHITA["meaning"]
+    assert found["meaning"] == gloss(MASHITA, "en")
 
 
 # ── Asked again, and told why ────────────────────────────────────────

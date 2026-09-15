@@ -16,7 +16,7 @@ from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.grammar_points_data import (
-    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
@@ -123,8 +123,9 @@ def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
     m = resolve_for_source(MODE_GRAMMAR, mode)
     if m is None:
         raise HTTPException(status_code=400, detail=f"Invalid grammar mode: {mode!r}")
-    card = _build_grammar_card(entry, level, level_list, m, stage, preview)
-    card["card_id"] = raw_id
+    card = _build_grammar_card(entry, level, level_list, m, lang, stage, preview)
+    if card is not None:
+        card["card_id"] = raw_id
     return card
 
 
@@ -261,7 +262,7 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # before the switch still renders instead of showing a blank
         # front until the wipe clears it.
         return {"front": entry.get("pattern") or entry.get("grammar", ""),
-                "kana": "", "meaning": entry.get("meaning", "")}
+                "kana": "", "meaning": grammar_gloss(entry, lang)}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
@@ -2065,7 +2066,15 @@ def _eligible(pool_entry: dict, mode: str, deck_type: str) -> bool:
         # kanji.radical renders as a flashcard but wants a radical number.
         return _card_answers(pool_entry.get("entry") or {}, MODES[mode])
 
-    return pool_entry["source"] in _allowed_sources(deck_type)
+    # An app card answers the same question its own section asks: the
+    # mode's pool rule (fill_in wants a sentence that pins the rule,
+    # contrast a rival and a marked sentence, word_reading a kanji). It
+    # went unasked here, and only never crashed because every grammar
+    # point had a sentence; a mode with a smaller pool made it a path.
+    return (
+        pool_entry["source"] in _allowed_sources(deck_type)
+        and card_index.eligible(pool_entry["source"], pool_entry["level"], mode, pool_entry["entry"])
+    )
 
 
 @router.get("/api/decks/{deck_id}/study")
@@ -2138,6 +2147,12 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
             cfg = SOURCES[p["source"]]
             level_list = cfg["by_level"].get(p["level"], [])
             card = cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview)
+            if card is None:
+                # A builder that cannot make this mode for this card
+                # (grammar.contrast on a point with no marked sentence);
+                # _eligible keeps such a card out of the pool, so this is
+                # the same defence twice, not a path.
+                continue
             card["card_id"] = raw_id
             card["source"]  = f"builtin_{p['source']}"
 

@@ -34,6 +34,7 @@ export const RENDER = {
   TYPE: 'type',
   DRAW: 'draw',
   FILL: 'fill',
+  CONTRAST: 'contrast',
   BROWSE: 'browse',
 }
 
@@ -158,6 +159,14 @@ const LIST = [
   // から, もいい and はいけない alike — so it could not be graded fairly.
   mode('grammar.fill_in', 'grammar', 'fill_in', {
     hints: C, renderer: RENDER.FILL, service: SERVICE.EXPRESS,
+    format: 'fill', statsDirection: 'recall',
+  }),
+  // The pattern IS blanked here (plan 087): the choices are not every
+  // rule the slot could take but the point's own rivals — the neighbours
+  // its lesson tells apart — so the sentence has one right answer among
+  // them. No hints: the choices are the exercise, always on.
+  mode('grammar.contrast', 'grammar', 'contrast', {
+    renderer: RENDER.CONTRAST, service: SERVICE.EXPRESS,
     format: 'fill', statsDirection: 'recall',
   }),
 

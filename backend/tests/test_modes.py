@@ -13,9 +13,9 @@ class ModeRegistryTests(unittest.TestCase):
     """
 
     def test_expected_graded_key_count(self) -> None:
-        # kana 4 + kanji 5 + vocab 3 + grammar 3 + standard 2.
+        # kana 4 + kanji 5 + vocab 3 + grammar 4 + standard 2.
         # A change here should be deliberate, not incidental.
-        self.assertEqual(len(modes.SRS_MODES), 17)
+        self.assertEqual(len(modes.SRS_MODES), 18)
 
     def test_every_key_is_namespaced_and_uses_the_dot_separator(self) -> None:
         for key in modes.SRS_MODES:
@@ -122,6 +122,13 @@ class ModeRegistryTests(unittest.TestCase):
         self.assertFalse(modes.eligible_for(fill, {"fill_ok": False}))
         self.assertFalse(modes.eligible_for(fill, {}))
 
+        contrast = modes.MODES["grammar.contrast"]
+        self.assertTrue(modes.eligible_for(contrast, {"contrast_ok": True}))
+        self.assertFalse(modes.eligible_for(contrast, {"contrast_ok": False}))
+        self.assertFalse(modes.eligible_for(contrast, {}))
+        # The choices are the exercise, not a hint the learner switches on.
+        self.assertEqual(contrast.hints, frozenset())
+
     def test_flashcards_are_eligible_unconditionally(self) -> None:
         mode = modes.MODES["vocab.flashcard.f2b"]
         self.assertTrue(modes.eligible_for(mode, {"kanji": "", "kana": "ドア"}))
@@ -144,7 +151,7 @@ class ModeRegistryTests(unittest.TestCase):
             self.assertIn(row["key"], modes.MODES)
             self.assertIn(row["renderer"], {
                 modes.RENDER_FLASHCARD, modes.RENDER_TYPE, modes.RENDER_DRAW,
-                modes.RENDER_FILL, modes.RENDER_BROWSE,
+                modes.RENDER_FILL, modes.RENDER_CONTRAST, modes.RENDER_BROWSE,
             })
 
     def test_directions_only_on_flashcards(self) -> None:

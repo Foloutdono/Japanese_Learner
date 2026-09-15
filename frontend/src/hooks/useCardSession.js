@@ -23,7 +23,12 @@ const REFILL_AT = 4
 // those cards are sitting in v4 caches with `meaning: ""` and would
 // still reveal blank on a client carrying the fix. A bump is the only
 // thing that reaches them.
-const CACHE_VERSION = 'v5'
+// v6: grammar payloads changed shape (plan 087) — a sentence's
+// translation is `tr` rather than `en`, a new card carries `lesson`, a
+// contrast card `contrast`, every card `raw_id` — and the grammar key
+// gained a language segment (GrammarRun). A v5 grammar queue would
+// hand a renderer reading `tr` an undefined.
+const CACHE_VERSION = 'v6'
 
 const KEY_PREFIX = 'jp-session'
 

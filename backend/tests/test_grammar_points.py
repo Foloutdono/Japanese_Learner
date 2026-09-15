@@ -1,21 +1,24 @@
+import json
 import unittest
+from pathlib import Path
 
+from content.grammar.renames import MOVES, RETIRED, pattern_renames
 from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL,
+    LEVELS,
+    MIN_PER_LEVEL,
+    all_ids,
+    entry_by_id,
+    find,
     get_grammar_points,
+    gloss,
     grammar_to_id,
 )
+from study import grammar_check
 
-LEVELS = ["N5", "N4", "N3", "N2", "N1"]
-# The catalogue is deliberately the SAME SIZE at every level rather than
-# a fixed number here: a level with visibly fewer points than its
-# neighbours reads to a learner as "there is less to know at N2", which
-# is not what a thinner list means. The count is read off N5 and every
-# other level is required to match it, so growing the catalogue is one
-# edit to the data and none to this file.
-PER_LEVEL = len(GRAMMAR_POINTS_BY_LEVEL["N5"])
-MIN_PER_LEVEL = 41  # what shipped; the catalogue may grow, never shrink
-FIELDS = {"pattern", "structure", "meaning"}
+# Every raw card id the catalogue served before plan 087 re-evaluated it.
+# Dumped once, from the old loader, before the old files were deleted.
+_IDS_BEFORE = Path(__file__).parent / "fixtures" / "grammar_ids_before_087.json"
 
 
 def _norm(s: str) -> str:
@@ -30,53 +33,50 @@ def _all_entries():
             yield level, entry
 
 
+def _texts(entry: dict):
+    """Every piece of prose an entry carries -- what the provenance test
+    holds against the scraped corpus."""
+    yield entry["structure"]
+    for lang in ("en", "fr"):
+        yield entry["meaning"][lang]
+    for step in entry.get("steps", []):
+        yield step["en"]
+        yield step["fr"]
+    for rival in entry.get("compare", []):
+        yield rival["en"]
+        yield rival["fr"]
+    for ex in entry.get("examples", []):
+        yield ex["en"]
+
+
 class GrammarPointsShapeTests(unittest.TestCase):
-    def test_every_level_is_present_and_full(self) -> None:
+    def test_every_level_is_present(self) -> None:
         self.assertEqual(sorted(GRAMMAR_POINTS_BY_LEVEL), sorted(LEVELS))
-        self.assertGreaterEqual(PER_LEVEL, MIN_PER_LEVEL)
+
+    def test_floors_and_monotonic(self) -> None:
+        # A level with more to know lists more: the floors rise with the
+        # level, and no level may be thinner than the one below it. The
+        # old rule -- the same count at every level -- padded N5 with
+        # conjugations filed as points and left N1 short of what is
+        # examined (plan 087).
+        counts = {level: len(GRAMMAR_POINTS_BY_LEVEL[level]) for level in LEVELS}
         for level in LEVELS:
-            self.assertEqual(
-                len(GRAMMAR_POINTS_BY_LEVEL[level]), PER_LEVEL,
-                f"{level} has {len(GRAMMAR_POINTS_BY_LEVEL[level])}, expected {PER_LEVEL}",
+            self.assertGreaterEqual(
+                counts[level], MIN_PER_LEVEL[level],
+                f"{level} has {counts[level]}, floor {MIN_PER_LEVEL[level]}",
             )
+        ordered = [counts[level] for level in LEVELS]
+        self.assertEqual(ordered, sorted(ordered), f"counts do not rise with the level: {counts}")
 
-    def test_meta_is_not_exposed_as_a_level(self) -> None:
-        # grammar_points_data filters keys starting with "_". If that ever
-        # breaks, "_meta" becomes a 205th "level" and the exam generator
-        # iterates a string.
-        self.assertNotIn("_meta", GRAMMAR_POINTS_BY_LEVEL)
+    def test_gate_is_clean(self) -> None:
+        # The whole of content/grammar/README.md's contract, in one call:
+        # shape, both languages, the sentence gate over every example, the
+        # rivals resolving, the contrast marks meaning something.
+        self.assertEqual(grammar_check.problems(), [])
+
+    def test_get_grammar_points_answers_an_unknown_level_with_nothing(self) -> None:
         self.assertEqual(get_grammar_points("_meta"), [])
-
-    def test_entries_carry_exactly_the_three_fields(self) -> None:
-        for level, entry in _all_entries():
-            self.assertEqual(
-                set(entry), FIELDS,
-                f"{level} {entry.get('pattern')!r} has fields {sorted(entry)}",
-            )
-
-    def test_no_field_is_blank_or_padded(self) -> None:
-        for level, entry in _all_entries():
-            for field in FIELDS:
-                value = entry[field]
-                self.assertIsInstance(value, str)
-                self.assertTrue(value, f"{level} {entry['pattern']!r}: {field} is empty")
-                self.assertEqual(
-                    value, value.strip(),
-                    f"{level} {entry['pattern']!r}: {field} has surrounding whitespace",
-                )
-
-    def test_patterns_are_unique_across_every_level(self) -> None:
-        # A pattern in two levels would produce two different card ids for
-        # the same point (grammar_{level}_{pattern}) and let a learner
-        # "master" it twice, once per level.
-        seen: dict[str, str] = {}
-        for level, entry in _all_entries():
-            pattern = entry["pattern"]
-            self.assertNotIn(
-                pattern, seen,
-                f"{pattern!r} appears in both {seen.get(pattern)} and {level}",
-            )
-            seen[pattern] = level
+        self.assertEqual(get_grammar_points("N9"), [])
 
     def test_the_structure_names_its_own_pattern(self) -> None:
         # A structure describing a different pattern than the one it is
@@ -122,6 +122,19 @@ class GrammarPointsShapeTests(unittest.TestCase):
                 f"{tail!r}",
             )
 
+    def test_gloss_falls_back_to_english(self) -> None:
+        entry = {"pattern": "x", "meaning": {"en": "only english", "fr": ""}}
+        self.assertEqual(gloss(entry, "fr"), "only english")
+        self.assertEqual(gloss(entry, "en"), "only english")
+        self.assertEqual(gloss({"pattern": "x", "meaning": "bare"}, "fr"), "bare")
+
+    def test_find_and_entry_by_id_agree(self) -> None:
+        for level, entry in _all_entries():
+            self.assertEqual(find(entry["pattern"]), (level, entry))
+            self.assertEqual(entry_by_id(grammar_to_id(entry, level)), (level, entry))
+        self.assertIsNone(find("〜not a pattern"))
+        self.assertIsNone(entry_by_id("grammar_N5_nope"))
+
 
 class GrammarPointsProvenanceTests(unittest.TestCase):
     """
@@ -129,11 +142,11 @@ class GrammarPointsProvenanceTests(unittest.TestCase):
     in it carries a detail_url back to the page it came from. This
     catalogue is an independent curation that must stay that way: which
     patterns exist and roughly where they are taught are facts about the
-    language, but the *wording* of a gloss or an attachment rule is
-    someone's expression of it.
+    language, but the *wording* of a gloss, an attachment rule, a lesson
+    or an example is someone's expression of it.
 
     So pattern names are allowed to coincide -- they name the same real
-    thing -- while structure and meaning must not, verbatim or near-so.
+    thing -- while every piece of prose must not, verbatim or near-so.
     Without this test that boundary is a claim in a comment; with it, it
     fails the build.
     """
@@ -150,6 +163,13 @@ class GrammarPointsProvenanceTests(unittest.TestCase):
             for entry in entries
             for field in ("meaning", "structure", "explanation")
             if entry.get(field)
+        } | {
+            _norm(ex[field])
+            for entries in GRAMMAR_BY_LEVEL.values()
+            for entry in entries
+            for ex in entry.get("examples", [])
+            for field in ("jp", "en")
+            if ex.get(field)
         }
 
     def test_the_scraped_corpus_actually_loaded(self) -> None:
@@ -157,12 +177,18 @@ class GrammarPointsProvenanceTests(unittest.TestCase):
         # because the import silently yielded nothing to compare against.
         self.assertGreater(len(self.scraped), 300)
 
-    def test_no_structure_or_meaning_is_reused_verbatim(self) -> None:
+    def test_no_prose_is_reused_verbatim(self) -> None:
         collisions = [
-            (level, entry["pattern"], field, entry[field])
+            (level, entry["pattern"], text)
             for level, entry in _all_entries()
-            for field in ("structure", "meaning")
-            if _norm(entry[field]) in self.scraped
+            for text in _texts(entry)
+            if _norm(text) in self.scraped
+        ]
+        collisions += [
+            (level, entry["pattern"], ex["jp"])
+            for level, entry in _all_entries()
+            for ex in entry.get("examples", [])
+            if _norm(ex["jp"]) in self.scraped
         ]
         self.assertEqual(
             collisions, [],
@@ -173,39 +199,26 @@ class GrammarPointsProvenanceTests(unittest.TestCase):
 
 class GrammarIdTests(unittest.TestCase):
     """
-    grammar_to_id used to live in the scraped grammar_data.py, where it
-    read entry['grammar'] -- the field name that file happens to use.
-    This catalogue names that field 'pattern', so the function moved here
-    with the data it formats. Every grammar card id changes as a result,
-    which is one of the two reasons the SRS wipe is required.
+    grammar_to_id reads entry['pattern'] and scopes it by level. The
+    pattern string is the learner's progress, which is why a revision of
+    the catalogue keeps it verbatim for every point that survives -- see
+    GrammarIdStabilityTests.
     """
 
     def test_id_is_level_scoped_and_uses_the_pattern_field(self) -> None:
-        entry = {"pattern": "〜そうだ（伝聞）", "structure": "x", "meaning": "y"}
+        entry = {"pattern": "〜そうだ（伝聞）", "structure": "x", "meaning": {"en": "y", "fr": "y"}}
         self.assertEqual(grammar_to_id(entry, "N3"), "grammar_N3_〜そうだ（伝聞）")
 
     def test_every_catalogue_entry_yields_a_unique_id(self) -> None:
-        ids = [
-            grammar_to_id(entry, level)
-            for level, entry in _all_entries()
-        ]
+        ids = [grammar_to_id(entry, level) for level, entry in _all_entries()]
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertEqual(len(ids), len(LEVELS) * PER_LEVEL)
+        self.assertEqual(set(ids), set(all_ids()))
 
     def test_mixing_the_two_catalogues_fails_loudly(self) -> None:
-        # There are two grammar_to_id functions during the transition: this
-        # one, and the scraped grammar_data.py's, which reads its own
-        # 'grammar' field. routes/{grammar,stats,decks}.py still import
-        # that one, because moving them onto this catalogue changes every
-        # grammar card id and so has to land with the SRS wipe, not before.
-        #
-        # grammar_data.py keeps its copy: the file is a generated artifact
-        # that nothing regenerates any more (the scraper that wrote it is
-        # gone), so it is left exactly as it was rather than hand-edited.
-        # The two coexist, and the thing to guarantee is that
-        # handing one an entry from the other raises instead of quietly
-        # producing an id like "grammar_N3_None" that would look valid,
-        # write a real card_modes row, and never match anything again.
+        # The scraped grammar_data.py names its field 'grammar'. Handing
+        # one of its entries here must raise instead of quietly producing
+        # an id like "grammar_N3_None" that would look valid, write a real
+        # card_modes row, and never match anything again.
         with self.assertRaises(KeyError):
             grammar_to_id({"grammar": "〜わけだ"}, "N3")
 
@@ -215,6 +228,51 @@ class GrammarIdTests(unittest.TestCase):
         # silently rather than breaking loudly.
         for level, entry in _all_entries():
             self.assertNotIn(":", grammar_to_id(entry, level))
+
+
+class GrammarIdStabilityTests(unittest.TestCase):
+    """
+    A grammar card id embeds the pattern and the level, so re-evaluating
+    the catalogue can orphan progress. Every id the catalogue served
+    before plan 087 has exactly one fate: still served, moved (MOVES, and
+    scripts/migrate_grammar_ids.py renames the rows), or retired
+    (RETIRED, rows left and reported). A point cannot simply vanish.
+    """
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.before = set(json.loads(_IDS_BEFORE.read_text(encoding="utf-8")))
+        cls.served = all_ids()
+
+    def test_the_fixture_is_the_catalogue_that_shipped(self) -> None:
+        self.assertEqual(len(self.before), 355)
+
+    def test_every_old_id_has_a_fate(self) -> None:
+        lost = sorted(
+            raw for raw in self.before
+            if raw not in self.served and raw not in MOVES and raw not in RETIRED
+        )
+        self.assertEqual(
+            lost, [],
+            "these ids are no longer served and content/grammar/renames.py "
+            f"says nothing about them: {lost}",
+        )
+
+    def test_a_move_lands_on_a_served_id_in_one_hop(self) -> None:
+        for old, new in MOVES.items():
+            self.assertIn(new, self.served, f"{old} moves to {new}, which is not served")
+            self.assertNotIn(new, MOVES, f"{old} -> {new} -> ... : moves do not chain")
+            self.assertNotEqual(old, new)
+
+    def test_a_moved_or_retired_id_is_not_also_served(self) -> None:
+        self.assertEqual(sorted(set(MOVES) & self.served), [])
+        self.assertEqual(sorted(RETIRED & self.served), [])
+        self.assertEqual(sorted(set(MOVES) & RETIRED), [])
+
+    def test_pattern_renames_follow_the_moves(self) -> None:
+        for old_pattern, new_pattern in pattern_renames().items():
+            self.assertNotEqual(old_pattern, new_pattern)
+            self.assertIsNotNone(find(new_pattern))
 
 
 if __name__ == "__main__":

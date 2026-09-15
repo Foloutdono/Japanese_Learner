@@ -930,6 +930,36 @@ describe('the plate — a grammar point', () => {
   })
 })
 
+// The same point once its lesson is written (plan 087): the steps and
+// the neighbours arrive as blocks between the meaning and the examples,
+// a compare row is a door the shell opens (onGrammarClick), and the
+// pattern is picked out of its sentences.
+const GRAMMAR_RICH = {
+  ...GRAMMAR, register: 'polite',
+  steps: [{ kind: 'rule', text: 'After **doing** one thing, the next.' }, { kind: 'use', text: '- ordering two actions' }],
+  compare: [{ pattern: '〜たあとで', raw_id: 'grammar_N5_〜あとで', level: 'N5', meaning: 'after', text: 'Prefer this for a tight sequence.' }],
+  examples: GRAMMAR.examples.map(ex => ({ ...ex, tr: ex.en, en: undefined, furigana: ex.furigana.map(p => (p.text.includes('てから') ? { ...p, highlight: true } : p)) })),
+}
+
+describe('the plate — a grammar point with its lesson written', () => {
+  it('prints the lesson and the neighbours between the meaning and the examples, and opens a rival', async () => {
+    const onGrammarClick = vi.fn()
+    const { root } = await renderEntry(GRAMMAR_RICH, { ...NAV(), onGrammarClick })
+    const blocks = [...root.querySelectorAll('.dict-block')]
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Lesson', 'Compare', 'Examples'])
+    expect(root.querySelector('h3, h4, .section-header')).toBeNull()
+    expect([...blocks[2].querySelectorAll('.dict-mark__jp')].map(m => m.textContent)).toEqual(['規則', '使い方'])
+    expect(blocks[2].querySelector('strong').textContent).toBe('doing')
+    const door = blocks[3].querySelector('.gl-door')
+    expect(door.tagName).toBe('BUTTON')
+    door.click()
+    expect(onGrammarClick).toHaveBeenCalledWith('grammar_N5_〜あとで')
+    const ex = blocks[4].querySelector('.dict-ex')
+    expect(ex.querySelector('.dict-ex__hl').textContent).toBe('ってから')
+    expect(ex.querySelector('.dict-ex__tr').textContent).toBe('I eat after washing my hands.')
+  })
+})
+
 describe('the lookup sheet — a grammar point by its card id', () => {
   it('asks the collection for the id and insists on that row', async () => {
     vi.mocked(apiFetch).mockResolvedValue({ ok: true, status: 200, json: async () => ({ results: [GRAMMAR, { ...GRAMMAR, raw_id: 'grammar_N5_other', pattern: 'ほか' }] }) })

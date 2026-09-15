@@ -18,7 +18,7 @@
 # is the separate, per-user half.
 import logging
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import find, grammar_to_id
 from study import morphology
 from study.card_lookup import (
     resolve_lemma, resolve_kana, find_kanji_matches, card_stats,
@@ -48,10 +48,8 @@ def _grammar_entries(sentence: str) -> list[dict]:
     know it."""
     out = []
     for pattern, level, start, end in difficulty.points_in(sentence):
-        entry = next(
-            (e for e in GRAMMAR_POINTS_BY_LEVEL.get(level, []) if e.get("pattern") == pattern),
-            None,
-        )
+        found = find(pattern)
+        entry = found[1] if found and found[0] == level else None
         if entry is None:
             logger.debug("points_in hit %r/%s has no catalogue entry; dropped", pattern, level)
             continue

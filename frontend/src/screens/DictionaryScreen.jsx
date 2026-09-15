@@ -9,6 +9,7 @@ import { firstGloss } from '../components/study/gloss'
 import {
 	TYPE_META, isKanaType, entryKey,
 	DictionaryDetail, LevelBadge,
+	DictionaryLookupSheet,
 } from '../components/dictionary/DictionaryDetail'
 
 // The catalogue card's stage: the SRS status folded onto the three
@@ -134,6 +135,10 @@ export default function DictionaryScreen({ session }) {
 	// nothing was retried against the nearest word the catalogue holds.
 	const [corrected, setCorrected]   = useState(null)
 	const [selected, setSelected]     = useState(null)
+	// A grammar point's rival, opened from a compare row on the dock
+	// (plan 087): a lookup sheet stacked over the dock, by card id, so
+	// the catalogue under it does not move.
+	const [rivalId, setRivalId]       = useState(null)
 
 	// Radical browsing
 	const [radicalGroups, setRadicalGroups]     = useState(null)
@@ -630,10 +635,17 @@ export default function DictionaryScreen({ session }) {
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={jumpToKanji}
 						onVocabClick={jumpToVocab}
+						onGrammarClick={setRivalId}
 						mining={mining}
 						t={t}
 					/>
 				)
+			)}
+			{rivalId && (
+				<DictionaryLookupSheet
+					key={rivalId} id={rivalId} category="grammar" session={session} mining={mining} over
+					onClose={() => setRivalId(null)}
+				/>
 			)}
 		</main>
 	)
@@ -719,7 +731,7 @@ function cardFurigana(entry) {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, mining }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining }) {
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
@@ -732,6 +744,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onRadicalClick={onRadicalClick}
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
+					onGrammarClick={onGrammarClick}
 					mining={mining}
 				/>
 			</aside>
@@ -747,7 +760,7 @@ function cardHeadword(entry) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, mining, t,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining, t,
 }) {
 
 	return (
@@ -835,6 +848,7 @@ function ResultsSection({
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
+							onGrammarClick={onGrammarClick}
 							mining={mining}
 						/>
 					)}

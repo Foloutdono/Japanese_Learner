@@ -39,7 +39,7 @@ import logging
 import random
 import re
 
-from content.grammar_points_data import get_grammar_points
+from content.grammar_points_data import get_grammar_points, gloss
 from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_topics import READING_TOPICS, pick_topics
 from study.exam_validation import validate_passage_length, validate_kanji_gate
@@ -52,7 +52,7 @@ logger = logging.getLogger(__name__)
 
 def _points_block(points: list[dict]) -> str:
     return "\n".join(
-        f"{i + 1}. {p['pattern']} ({p['structure']}) -- meaning: {p['meaning']}"
+        f"{i + 1}. {p['pattern']} ({p['structure']}) -- meaning: {gloss(p, 'en')}"
         for i, p in enumerate(points)
     )
 

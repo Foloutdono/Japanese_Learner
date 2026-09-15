@@ -475,8 +475,8 @@ export default function App() {
             <Route path="/learn/kanji/tier/:tier"     element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/radical/:radical" element={<KanjiScreen session={session} />} />
             <Route path="/learn/kanji/:level"         element={<KanjiScreen session={session} />} />
-            <Route path="/learn/grammar"              element={<GrammarScreen />} />
-            <Route path="/learn/grammar/:level"       element={<GrammarScreen />} />
+            <Route path="/learn/grammar"              element={<GrammarScreen session={session} />} />
+            <Route path="/learn/grammar/:level"       element={<GrammarScreen session={session} />} />
             <Route path="/learn/decks"          element={<DecksScreen session={session} />} />
             {/* Declared before /learn/decks/:deck_id. React Router ranks a
                 static segment above a dynamic one either way, but the

@@ -9,8 +9,10 @@ import {
   Flashcard, MeaningDisplay,
 } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
-import { GrammarRule, GrammarAnswer, GrammarFillSentence } from '../components/study/GrammarPieces'
+import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from '../components/study/GrammarPieces'
+import { GrammarLesson, GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { formatGlossLine, GlossList } from '../components/study/gloss'
+import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { CardTransition } from '../components/study/CardTransition'
@@ -25,16 +27,28 @@ import HintBar from '../components/study/HintBar'
 import { ChevronIcon } from '../components/ui/Icons'
 import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 
-// ── 文法 — the run (plan 071) ─────────────────────────────────
+// ── 文法 — the run (plan 071; plan 087) ───────────────────────
 // /learn/grammar/:level/:mode on the stage frame. The level and the
 // mode are the path — the station and the platforms
 // (screens/GrammarScreen.jsx) are the screens before it, and
 // ‹ Grammar is the way back. See KanaRun.jsx for the shape every run
 // shares.
+//
+// Plan 087 adds three things. THE GATE: a card the learner has never
+// met arrives carrying its lesson, and the lesson is shown first, in
+// the card's place, with one button to board — a point is read once
+// before it is drilled, exactly as a radical is (RadicalLesson). Seen
+// is a flag on the queued card itself (updateCurrent persists it into
+// the session mirror), so a reload does not re-gate and the flag goes
+// when the card does; a re-served card arrives `learning` and never
+// gates again. THE DOOR: the lesson, one tap from every card, as the
+// head's own ghost beside the pass. THE CONTRAST DRILL: the pattern
+// blanked out of one of its sentences and its rivals as the choices,
+// always on — the choices are the exercise, not a hint.
 
 export default function GrammarRun({ session }) {
   const navigate = useNavigate()
-  const { t }    = useLang()
+  const { t, lang } = useLang()
   const { level, mode } = useParams()
 
   const reviewing = mode === FAST_REVIEW
@@ -53,28 +67,42 @@ export default function GrammarRun({ session }) {
   const [progress, setProgress]     = useState(null)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
+  // The lesson sheet the door opens, by card id.
+  const [sheet, setSheet]           = useState(null)
 
-  // One session per level+mode (see useCardSession).
-  const storageKey = valid && !reviewing ? sessionKey('grammar', level, mode) : IDLE_KEY
+  // One session per level+mode+language (see useCardSession): the
+  // payload is localised server-side, distractors included, so a
+  // language switch is a fresh queue rather than a re-translation.
+  const storageKey = valid && !reviewing ? sessionKey('grammar', level, mode, lang) : IDLE_KEY
 
   const paceCtl = usePace(storageKey)
   const { capture: capturePace, query: paceQuery } = paceCtl
 
+  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
+  const isFill     = renderer === RENDER.FILL
+  const isContrast = renderer === RENDER.CONTRAST
+
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
     if (!valid || reviewing) return []
     const data = capturePace(await apiJson(
-      `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&count=${count}&exclude=${excludeIds.join(',')}${paceQuery}`,
+      `/api/grammar/cards?level=${encodeURIComponent(level)}&mode=${mode}&lang=${lang}&count=${count}&exclude=${excludeIds.join(',')}${paceQuery}`,
       session,
       { signal },
     ))
     return data.cards ?? []
-  }, [valid, reviewing, level, mode, session, paceQuery, capturePace])
+  }, [valid, reviewing, level, mode, lang, session, paceQuery, capturePace])
 
-  const { current: card, loading, done, error, retry, advance } = useCardSession({
+  const validateCard = useCallback(
+    c => !isContrast || Array.isArray(c.contrast?.choices),
+    [isContrast],
+  )
+
+  const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
     mode,
+    validateCard,
   })
 
   // Every screen's rating flow: the lock, the gates the celebrations
@@ -110,14 +138,14 @@ export default function GrammarRun({ session }) {
     let live = true
     // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch state that must land with the fetch it announces; not an id-keyed reset.
     setReviewLoading(true)
-    apiFetch(`/api/grammar/review-cards?level=${encodeURIComponent(level)}`, session)
+    apiFetch(`/api/grammar/review-cards?level=${encodeURIComponent(level)}&lang=${lang}`, session)
       .then(r => r.json())
       .then(data => { if (live) setReviewCards(data.cards ?? []) })
       .catch(() => { if (live) setReviewCards([]) })
       .finally(() => { if (live) setReviewLoading(false) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [level, reviewing])
+  }, [level, reviewing, lang])
 
   function postReview(quality) {
     // The gates own the lock, so a review already in flight is refused
@@ -183,9 +211,6 @@ export default function GrammarRun({ session }) {
   const currentModeLabel = modeLabel(t, mode)
   // Study.dc.html's footer strip.
   const cardFoot = { left: level ? `${level} 文法` : '文法', right: currentModeLabel }
-  // Driven by the registry, not by comparing against mode-key strings.
-  const renderer = STUDY_MODES[mode]?.renderer ?? RENDER.FLASHCARD
-  const isFill   = renderer === RENDER.FILL
   // b2f shows the meaning and asks for the rule; f2b is the other way up.
   const isB2F    = card?.direction === 'b2f'
 
@@ -211,6 +236,27 @@ export default function GrammarRun({ session }) {
     setActiveHints(hs => (hs.includes(key) ? [] : [key]))
   }
 
+  // The gate: a never-met card, its lesson in hand, not yet read.
+  const gated = Boolean(card && card.stage === 'new' && card.lesson && !card.lesson_seen)
+  // The lesson as the sheet and the gate print it: the card's own
+  // identity over the embedded lesson.
+  const lessonOf = c => c.lesson && ({
+    ...c.lesson, raw_id: c.raw_id ?? c.card_id, level, pattern: c.grammar,
+    structure: c.structure, meaning: c.meaning, stage: c.stage,
+  })
+
+  const door = card && (
+    <button
+      type="button"
+      className="stage__leave dict-browse-door gl-door--ghost"
+      onClick={() => setSheet(card.raw_id ?? card.card_id)}
+      disabled={gates.locked}
+    >
+      <span>{t.glLesson}</span>
+      <ChevronIcon direction="right" size={14} />
+    </button>
+  )
+
   // ── Quiz ──
   return (
     <StudyStage
@@ -219,6 +265,7 @@ export default function GrammarRun({ session }) {
       leaveLabel={t.grammarTitle}
       where={`${t.grammarTitle} ${level}`}
       sub={currentModeLabel}
+      aside={door}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
     >
@@ -228,14 +275,25 @@ export default function GrammarRun({ session }) {
         {done    && <DoneMessage onBack={leave} pace={paceCtl.pace}
           onExtra={paceCtl.pacedOut ? () => paceCtl.boardExtra(retry) : undefined} />}
 
-        {card && !loading && (
+        {card && !loading && gated && (
+          <div className="gl-gate">
+            <GrammarLesson
+              point={lessonOf(card)}
+              variant="gate"
+              onCompare={id => setSheet(id)}
+              onBoard={() => updateCurrent({ lesson_seen: true })}
+            />
+          </div>
+        )}
+
+        {card && !loading && !gated && (
           <>
             <HintBar available={availableHints} active={activeHints}
                      onToggle={toggleHint} disabled={gates.locked} />
 
             <CardTransition
               className="grammar-card-boost"
-              cardKey={card.card_id}
+              cardKey={`${card.card_id}:${card.lesson_seen ? 1 : 0}`}
               stamp={gates.stamp}
               stage={card.stage}
               onStampDone={gates.stampDone}
@@ -246,8 +304,15 @@ export default function GrammarRun({ session }) {
                     the reveal in all three, and switching the choices on
                     replaces the flip rather than sitting beside it (two
                     reveal affordances on one card) — the same resolution
-                    Kanji and Vocab use for their own indice_1. */}
-                {!choicesOn ? (
+                    Kanji and Vocab use for their own indice_1. The
+                    contrast drill has no flip at all: its choices are
+                    the exercise, and the reveal is the answer chosen. */}
+                {isContrast ? (
+                  <>
+                    <GrammarContrastSentence card={card} revealed={answered} t={t} />
+                    {answered && <GrammarAnswer card={card} size={36} divided />}
+                  </>
+                ) : !choicesOn ? (
                   <Flashcard
                     t={t}
                     resetKey={card.card_id}
@@ -316,8 +381,16 @@ export default function GrammarRun({ session }) {
               </PromptCard>
             </CardTransition>
 
+            {/* The contrast drill's choices: the rivals, always on. */}
+            {isContrast && (
+              <MCQGrid
+                choices={card.contrast?.choices ?? []}
+                correct={card.grammar}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer} />
+            )}
+
             {/* Options: meanings for a flashcard, rules for fill_in. */}
-            {showChoices && (
+            {!isContrast && showChoices && (
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
                 correct={isFill || isB2F ? card.grammar : card.meaning}
@@ -327,16 +400,14 @@ export default function GrammarRun({ session }) {
 
             {/* indice_2 — example sentences, translation hidden until asked
                 for. That reveal is the point of the hint, so it is a second
-                switch inside it rather than shown alongside. */}
+                switch inside it rather than shown alongside. Furigana and
+                the pattern picked out, as the lesson prints them. */}
             {sentencesOn && (
               <div className="grammar-examples">
                 <div className="grammar-examples__list">
                   {cardHints[HINTS.SENTENCES].map((ex, i) => (
                     <div key={i} className="grammar-example-card">
-                      <div className="grammar-example-card__jp" lang="ja">{ex.jp}</div>
-                      {showEx
-                        ? <div className="grammar-example-card__en">{ex.en}</div>
-                        : null}
+                      <ExampleSentence ex={{ ...ex, segments: ex.furigana }} showTr={showEx} />
                     </div>
                   ))}
                 </div>
@@ -349,6 +420,16 @@ export default function GrammarRun({ session }) {
 
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
+        )}
+
+        {sheet && (
+          <GrammarLessonSheet
+            key={sheet}
+            id={sheet}
+            initial={card && (card.raw_id ?? card.card_id) === sheet ? lessonOf(card) : null}
+            session={session}
+            onClose={() => setSheet(null)}
+          />
         )}
     </StudyStage>
   )
