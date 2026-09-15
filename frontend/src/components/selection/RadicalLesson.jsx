@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react'
+import { Fragment, useEffect, useId, useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { apiJson, ApiError } from '../../lib/api'
 import { api } from '../../lib/origin'
@@ -15,24 +15,28 @@ import { BlockMark } from '../dictionary/RadicalIndex'
 /**
  * RadicalLesson — one radical, taught before it is drilled (plan 086).
  *
- * The plate first: the glyph drawn stroke by stroke in the plate's
- * own ink (KanjiVG, undressed of the numerals it wears on the
- * dictionary's washi sheet), and beside it what a 漢和辞典 would say
- * on its first line — the Japanese names a teacher uses (みず, then
- * さんずい for the squeezed form), the meaning in the learner's
- * language, the number and the stroke count, the forms it takes in
- * other characters, and where it usually sits. Then the platforms:
- * the same five drills the JLPT line offers, over this family alone.
+ * Three blocks, in the order a learner meets them a second time: the
+ * plate, the door onto its family, the platforms.
  *
- * The family — every kanji of the course filed under the radical — is
- * a DOOR on the plate, not a tail under the screen. It was listed in
+ * THE PLATE IS A LESSON, AND A LESSON IS READ ONCE. So it arrives
+ * shut — the glyph, the meaning, the number and the stroke count, the
+ * line a dictionary's index prints — and opens on a tap into what a
+ * 漢和辞典 gives on its first line: the glyph drawn stroke by stroke
+ * in the plate's own ink (KanjiVG, undressed of the numerals it wears
+ * on the dictionary's washi sheet), the Japanese names a teacher uses
+ * (みず, then さんずい for the squeezed form), the forms it takes
+ * in other characters, and where it usually sits. A learner who has
+ * come back to board has read all of that; a learner who has not is
+ * one tap from it, above everything else on the screen.
+ *
+ * THE FAMILY IS A DOOR, not a tail under the screen. It was listed in
  * full below the platforms until 氵 showed what that costs: 123 tiles
  * is a screen and a half of scrolling past on the way to everything
- * else, on the screen a learner opens to read six lines about one
- * radical. The door carries the figure the route stop prints for a
- * level (learned over total, started while the two disagree) and
- * opens the family as its own view (`browse`), where each kanji is
- * itself a door to its dictionary entry.
+ * else. The door carries the figure the route stop prints for a level
+ * (learned over total, started while the two disagree) and opens the
+ * family as its own view (`browse`), where each kanji is itself a door
+ * to its dictionary entry. It sits OUTSIDE the plate, so shutting the
+ * lesson does not put the kanji behind two taps.
  *
  * No heading of its own. The bar overhead names the station; the
  * blocks name themselves — the plate by being one, each level of the
@@ -41,7 +45,7 @@ import { BlockMark } from '../dictionary/RadicalIndex'
  * Props:
  *   number    — the Kangxi number from the URL
  *   session   — forwarded to the API
- *   platforms — the ModeSelector, rendered under the plate
+ *   platforms — the ModeSelector, rendered under the door
  *   browse    — show the family instead of the lesson (?family=1)
  *   onBrowse  — open that view; the bar's aside is the way back
  *   back      — where an unknown number is sent (the index)
@@ -53,6 +57,9 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
   const [error, setError] = useState(null)
   const [lookup, setLookup] = useState(null)
   const [drawFailed, setDrawFailed] = useState(false)
+  // Shut on arrival, every time: see the plate below.
+  const [open, setOpen] = useState(false)
+  const bodyId = useId()
 
   useEffect(() => {
     let cancelled = false
@@ -128,57 +135,83 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
 
   return (
     <div className="rad">
+      {/* The lesson is read once. A learner who has come back to board
+          knows what 水 is, so the plate arrives SHUT — the glyph, the
+          meaning, the number and the count, which is the line a
+          dictionary's index prints — and the teaching (the strokes
+          drawing, the 部首名, the forms, where it sits) is one tap
+          under it. */}
       <section className="rad-plate" aria-label={t.radLesson}>
-        {/* `bare`: the strokes drawing in the plate's own ink, with
-            KanjiVG's numerals off — no washi sheet under it and no
-            caption over it, the glyph itself is the legend.
+        <button
+          type="button"
+          className="rad-plate__head"
+          aria-expanded={open}
+          aria-controls={bodyId}
+          onClick={() => { playUi('click-mode-selection'); setOpen(v => !v) }}
+        >
+          <span className="rad-plate__id" lang="ja">{radical.glyph}</span>
+          <span className="rad-plate__titles">
+            <span className="rad-plate__meaning">{radical.meaning}</span>
+            <span className="rad-plate__meta">
+              <span>{t.dictRadicalNumber(radical.number)}</span>
+              <span>{radical.stroke_count} {radical.stroke_count === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}</span>
+            </span>
+          </span>
+          <span className="rad-plate__chev" aria-hidden="true">
+            <ChevronIcon direction={open ? 'up' : 'down'} size={16} />
+          </span>
+        </button>
+        {open && (
+          <div className="rad-plate__open" id={bodyId}>
+            {/* `bare`: the strokes drawing in the plate's own ink, with
+                KanjiVG's numerals off — no washi sheet under it and no
+                caption over it, the glyph itself is the legend.
 
-            api(), not the bare path the API hands back: a WebView's
-            own origin serves the bundle and nothing else, so in the
-            native shell a relative /kanjivg fetch 404s and the plate
-            fell back to the character as type — the strokes were
-            missing on a phone and drawn on the web (ADR 0008). */}
-        <div className="rad-plate__glyph" lang="ja" aria-hidden="true">
-          {radical.svg_url && !drawFailed
-            ? <StrokeOrderAnimation src={api(radical.svg_url)} loop bare className="rad-plate__strokes" onError={() => setDrawFailed(true)} />
-            : <span className="rad-plate__char">{radical.glyph}</span>}
-        </div>
-        <div className="rad-plate__body">
-          <div className="rad-plate__names" lang="ja">{radical.names_ja.join(' · ')}</div>
-          <div className="rad-plate__meaning">{radical.meaning}</div>
-          <div className="rad-plate__meta">
-            <span>{t.dictRadicalNumber(radical.number)}</span>
-            <span>{radical.stroke_count} {radical.stroke_count === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}</span>
-          </div>
-          {radical.forms.length > 1 && (
-            <div className="rad-plate__forms" aria-label={t.radForms}>
-              {radical.forms.map(f => <span key={f} className="rad-plate__form" lang="ja">{f}</span>)}
+                api(), not the bare path the API hands back: a WebView's
+                own origin serves the bundle and nothing else, so in the
+                native shell a relative /kanjivg fetch 404s and the plate
+                fell back to the character as type — the strokes were
+                missing on a phone and drawn on the web (ADR 0008). */}
+            <div className="rad-plate__glyph" lang="ja" aria-hidden="true">
+              {radical.svg_url && !drawFailed
+                ? <StrokeOrderAnimation src={api(radical.svg_url)} loop bare className="rad-plate__strokes" onError={() => setDrawFailed(true)} />
+                : <span className="rad-plate__char">{radical.glyph}</span>}
             </div>
-          )}
-          <p className="rad-plate__note">
-            {where
-              ? <>{t.radPositionNote(where)} <span lang="ja" className="rad-plate__pos">{positionJp}</span>.</>
-              : t.radNoPositionNote}
-            {radical.total === 0 && <> {t.radNoKanji}</>}
-          </p>
-          {/* The family as a record that opens: the two figures the
-              route stop prints — learned over total, and started while
-              the two disagree — are the door's own value, so the plate
-              says the size of the family once instead of three times. */}
-          {radical.total > 0 && (
-            <button type="button" className="rad-door" onClick={() => { playUi('click-screen-selection'); onBrowse?.() }}>
-              <span className="rad-door__body">
-                <span className="rad-door__head">
-                  <span className="rad-door__fig"><b>{radical.learned}</b>/ {radical.total}</span>
-                  {startedNote && <span className="rad-door__started">{startedNote}</span>}
-                </span>
-                <span className="rad-door__label">{t.radFamilyShort}</span>
-              </span>
-              <ChevronIcon direction="right" size={16} className="rad-door__chev" />
-            </button>
-          )}
-        </div>
+            <div className="rad-plate__body">
+              <div className="rad-plate__names" lang="ja">{radical.names_ja.join(' · ')}</div>
+              {radical.forms.length > 1 && (
+                <div className="rad-plate__forms" aria-label={t.radForms}>
+                  {radical.forms.map(f => <span key={f} className="rad-plate__form" lang="ja">{f}</span>)}
+                </div>
+              )}
+              <p className="rad-plate__note">
+                {where
+                  ? <>{t.radPositionNote(where)} <span lang="ja" className="rad-plate__pos">{positionJp}</span>.</>
+                  : t.radNoPositionNote}
+                {radical.total === 0 && <> {t.radNoKanji}</>}
+              </p>
+            </div>
+          </div>
+        )}
       </section>
+
+      {/* The family as a record that opens: the two figures the route
+          stop prints — learned over total, and started while the two
+          disagree — are the door's own value. Outside the plate, so a
+          learner who has shut the lesson still reaches its kanji in
+          one tap, beside the platforms rather than behind them. */}
+      {radical.total > 0 && (
+        <button type="button" className="rad-door" onClick={() => { playUi('click-screen-selection'); onBrowse?.() }}>
+          <span className="rad-door__body">
+            <span className="rad-door__head">
+              <span className="rad-door__fig"><b>{radical.learned}</b>/ {radical.total}</span>
+              {startedNote && <span className="rad-door__started">{startedNote}</span>}
+            </span>
+            <span className="rad-door__label">{t.radFamilyShort}</span>
+          </span>
+          <ChevronIcon direction="right" size={16} className="rad-door__chev" />
+        </button>
+      )}
 
       {radical.total > 0 && platforms}
     </div>

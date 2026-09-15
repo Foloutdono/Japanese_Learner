@@ -18810,33 +18810,82 @@ a.slip__act { text-decoration: none; }
 }
 
 /* ── The plate ──
-   A 漢和辞典's first line: the glyph drawn stroke by stroke on the
-   left, and beside it the names a teacher uses, the meaning, the
-   number and count, the forms, where it sits. One card, sumi ink and
-   two registers of text; the line's pigment is the 3px stripe along
-   the bottom edge (the dictionary's entry plate wears its gold the
-   same way) and the ring on the form the learner meets first. */
+   A 漢和辞典's first line, behind a door of its own: shut, it is the
+   glyph, the meaning and the two figures an index prints; open, the
+   strokes drawing on the left and beside them the names a teacher
+   uses, the forms, where it sits. One card, sumi ink and two
+   registers of text; the line's pigment is the 3px stripe along the
+   bottom edge (the dictionary's entry plate wears its gold the same
+   way) and the ring on the form the learner meets first.
+
+   It opens rather than standing open because the lesson is read once
+   and the screen is returned to: the same reasoning that put the 123
+   kanji behind a door (.rad-door), one block up. The head is a row
+   like any other row in the app; the body under it is the grid the
+   whole plate used to be. `overflow: hidden` so the head's own tint
+   stops at the card's corners. */
 .rad-plate {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--sp-5) var(--sp-6);
-  align-items: start;
-  padding: var(--sp-6);
+  display: flex;
+  flex-direction: column;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-bottom: 3px solid var(--line-color);
   border-radius: var(--r-card);
+  overflow: hidden;
+}
+.rad-plate__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-5) var(--sp-6);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.rad-plate__head:hover,
+.rad-plate__head:focus-visible {
+  background: var(--bg-card-hover);
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .rad-plate__head { transition: none; }
+}
+/* The glyph as type, at the size a station name is set: shut, this is
+   the whole plate, and a plate is recognised by its character. */
+.rad-plate__id {
+  flex: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  line-height: 1;
+}
+.rad-plate__titles {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.rad-plate__chev { flex: none; color: var(--text-secondary); }
+.rad-plate__open {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-5) var(--sp-6);
+  align-items: start;
+  padding: 0 var(--sp-6) var(--sp-6);
 }
 @media (max-width: 560px) {
-  .rad-plate {
+  .rad-plate__open {
     grid-template-columns: minmax(0, 1fr);
     justify-items: center;
     text-align: center;
   }
-  /* The body spans the card even while the grid centres it, so the
-     door reaches both edges the way a record does. */
-  .rad-plate__body { width: 100%; }
-  .rad-plate__meta,
   .rad-plate__forms { justify-content: center; }
   .rad-plate__glyph { width: min(280px, 68vw); }
 }
@@ -18936,7 +18985,13 @@ a.slip__act { text-decoration: none; }
    count, and the ledger's ▶ sliding in on approach. The tiles behind
    it used to be listed under the platforms — 123 of them for 氵 —
    which put a screen and a half of scrolling between the lesson and
-   everything else a phone had to reach. */
+   everything else a phone had to reach.
+
+   Its own block between the plate and the platforms, not a line
+   inside the plate: the plate shuts (.rad-plate__head) and its kanji
+   must not shut with it. So it is on the wall like a platform card
+   and takes the same --surface, which is what keeps a card from
+   disappearing into --bg-main in dark theme. */
 .rad-door {
   display: flex;
   align-items: center;
@@ -18945,7 +19000,7 @@ a.slip__act { text-decoration: none; }
   width: 100%;
   min-height: 44px;
   padding: var(--sp-3) var(--sp-4);
-  background: var(--bg-card);
+  background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   color: inherit;

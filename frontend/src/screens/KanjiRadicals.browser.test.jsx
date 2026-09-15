@@ -8,13 +8,16 @@ import '../index.css'
 // The index is the dictionary's own strip and page, dressed as a
 // choice: a tile prints the form the learner meets, its meaning and
 // `learned / total` over the COURSE's kanji. A radical is a lesson
-// before it is a list of platforms: the plate (the strokes drawn on
-// washi, the names, the forms) and the platforms, every drill but the
-// radical one. Its family is a door on the plate rather than a tail
-// under the screen — ?family=1, the same screen, each kanji in its
-// stage ink. These pin that shape and the three ways out — back to
-// the lesson from the family, back to the page of the index the
-// radical is on, and back to the index from a number it does not know.
+// before it is a list of platforms, and the lesson is read once: the
+// plate arrives SHUT (the glyph, the meaning, the number and the
+// count) and opens onto the strokes, the names and the forms. Under
+// it the door onto the family — its own block, so shutting the lesson
+// does not shut the kanji away — then the platforms, every drill but
+// the radical one. The family is the same screen at ?family=1, each
+// kanji in its stage ink. These pin that shape and the three ways out
+// — back to the lesson from the family, back to the page of the index
+// the radical is on, and back to the index from a number it does not
+// know.
 
 vi.mock('../lib/api', () => {
   class ApiError extends Error { constructor(status) { super(`Request failed (${status})`); this.status = status } }
@@ -100,6 +103,9 @@ async function station(at) {
 }
 
 beforeEach(() => {
+  // The KanjiVG fetch is asserted per test (a shut plate asks for
+  // nothing), so its calls must not carry over from the one before.
+  globalThis.fetch.mockClear()
   apiFetch.mockReset()
   apiFetch.mockImplementation(async path => ({
     ok: true, status: 200,
@@ -138,13 +144,16 @@ describe('the index', () => {
 })
 
 describe('the lesson', () => {
-  it('teaches the radical, then offers every drill but the radical one', async () => {
+  it('names the radical on a shut plate, and offers every drill but the radical one', async () => {
     const s = await station('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
-    expect(s.text('.rad-plate__names')).toBe('みず · さんずい')
+    // Shut: the index's own line, and nothing of the lesson.
+    expect(s.text('.rad-plate__id')).toBe('水')
     expect(s.text('.rad-plate__meaning')).toBe('eau')
-    expect(s.all('.rad-plate__form').map(n => n.textContent)).toEqual(['水', '氵', '氺'])
-    expect(s.text('.rad-plate__note')).toContain(fr.radPosition.hen)
+    expect(s.text('.rad-plate__meta')).toContain(fr.dictRadicalNumber(85))
+    expect(s.one('.rad-plate__head').getAttribute('aria-expanded')).toBe('false')
+    expect(s.one('.rad-plate__open')).toBeNull()
+    expect(s.one('.rad-plate__names')).toBeNull()
     // The bar names the radical once the lesson has it.
     expect(s.text('.bar__sub')).toBe(`${fr.byRadicalShort} · 水 eau`)
 
@@ -153,11 +162,30 @@ describe('the lesson', () => {
     expect(titles).toContain(fr.mode_fast_review)
     expect(titles, 'one family, one radical: the radical drill has one answer').not.toContain(fr.mode_kanji_radical)
 
-    // The family is behind the door, not under the platforms.
+    // The family is behind the door, not under the platforms — and the
+    // door is outside the plate, so a shut lesson still reaches it.
     expect(s.one('.rad-family')).toBeNull()
+    expect(s.one('.rad-plate .rad-door')).toBeNull()
     expect(s.text('.rad-door__fig')).toBe('1/ 3')
     expect(s.text('.rad-door__started')).toBe(fr.startedNote(2))
     expect(s.text('.rad-door__label')).toBe(fr.radFamilyShort)
+  })
+
+  it('teaches the radical when the plate is opened, and shuts again', async () => {
+    const s = await station('/learn/kanji/radical/85')
+    await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
+    s.one('.rad-plate__head').click()
+    await expect.poll(() => s.one('.rad-plate__open')).not.toBeNull()
+    expect(s.one('.rad-plate__head').getAttribute('aria-expanded')).toBe('true')
+    expect(s.one('.rad-plate__head').getAttribute('aria-controls')).toBe(s.one('.rad-plate__open').id)
+    expect(s.text('.rad-plate__names')).toBe('みず · さんずい')
+    expect(s.all('.rad-plate__form').map(n => n.textContent)).toEqual(['水', '氵', '氺'])
+    expect(s.text('.rad-plate__note')).toContain(fr.radPosition.hen)
+    // The meaning is the head's, printed once whether open or shut.
+    expect(s.all('.rad-plate__meaning').length).toBe(1)
+
+    s.one('.rad-plate__head').click()
+    await expect.poll(() => s.one('.rad-plate__open')).toBeNull()
   })
 
   // The strokes are what the lesson is for, so they are fetched
@@ -169,7 +197,10 @@ describe('the lesson', () => {
   it('draws the strokes from the API origin, undressed of KanjiVG\'s numerals', async () => {
     const s = await station('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
-    expect(s.one('.rad-plate__glyph')).not.toBeNull()
+    // A shut plate asks for nothing: the drawing is not mounted.
+    expect(globalThis.fetch.mock.calls.map(c => String(c[0])).some(u => u.includes('kanjivg'))).toBe(false)
+    s.one('.rad-plate__head').click()
+    await expect.poll(() => s.one('.rad-plate__glyph')).not.toBeNull()
     const asked = globalThis.fetch.mock.calls.map(c => String(c[0])).filter(u => u.includes('kanjivg'))
     expect(asked).toContain(`${SHELL_ORIGIN}/kanjivg/06c34.svg`)
   })
