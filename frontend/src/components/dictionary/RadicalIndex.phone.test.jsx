@@ -258,8 +258,11 @@ describe('the page', () => {
     // Which is a tile half again the width the full page draws, with
     // the glyph it can now carry.
     expect(row[0].width).toBeGreaterThan(fullTile * 1.3)
-    const glyph = el => parseFloat(getComputedStyle(el.querySelector('.radical-tile__char')).fontSize)
-    expect(glyph(tiles[0])).toBeGreaterThan(glyph(full.all('.radical-tile')[0]))
+    const size = (el, part) => parseFloat(getComputedStyle(el.querySelector(`.radical-tile__${part}`)).fontSize)
+    expect(size(tiles[0], 'char')).toBeGreaterThan(size(full.all('.radical-tile')[0], 'char'))
+    // And the figure with it — it is what the radical is chosen on,
+    // not a caption under the glyph.
+    expect(size(tiles[0], 'count')).toBeGreaterThan(size(full.all('.radical-tile')[0], 'count'))
     // The meaning still prints in full at that width.
     for (const sub of nine.all('.radical-tile__sub')) {
       expect(sub.scrollHeight, sub.textContent).toBeLessThanOrEqual(sub.clientHeight + 1)

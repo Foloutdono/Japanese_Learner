@@ -15683,11 +15683,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transform-origin: left;
 }
 
-/* And the tile grows with its track: the glyph a rung up — the object
-   the page is scanned FOR, at the size the room affords — over the
-   block rhythm a tile that wide reads at. */
+/* And the tile grows with its track: the glyph up to the rung the
+   room affords — it is the object the page is scanned FOR — the
+   figure under it up with the glyph, since it is what the radical is
+   chosen ON and a 10px numeral under a 40px glyph reads as a caption
+   rather than as the datum, and the block rhythm a tile that wide
+   reads at. --fs-sm, not the rung between: the glyph moves two rungs
+   here, and the figure that moved one stayed where it was to the
+   eye. */
 .radical-page[data-fill="short"] .radical-tile { padding: var(--sp-5) var(--sp-2); }
 .radical-page[data-fill="short"] .radical-tile__char { font-size: var(--fs-display); }
+.radical-page[data-fill="short"] .radical-tile__count { font-size: var(--fs-sm); }
 
 /* ── A block's own mark ──
    The stamp book's 九月 in its margin, for the blocks in the
