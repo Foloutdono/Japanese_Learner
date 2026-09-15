@@ -158,9 +158,16 @@ export default function KanjiScreen({ session }) {
     // first page: the index carries the page in its URL for this.
     const leave = here ? `${index}?stroke=${here.stroke_count}` : index
     // One step out at a time: the family leaves to its lesson, the
-    // lesson to the index.
+    // lesson to the index. Both swaps land at the top: the document is
+    // the scroller (.phone is min-height, not a viewport of its own),
+    // and a path that does not change carries its scroll offset across
+    // a body that changes completely — the door is a screen down the
+    // plate, so the family opened already scrolled past its first
+    // level, and the way back dropped the lesson somewhere in its
+    // platforms.
+    const swap = params => { setSp(params); window.scrollTo(0, 0) }
     const aside = browsing
-      ? <Leave onClick={() => setSp({})}>{t.radLesson}</Leave>
+      ? <Leave onClick={() => swap({})}>{t.radLesson}</Leave>
       : <Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>
     return (
       <SelectionScreen
@@ -174,7 +181,7 @@ export default function KanjiScreen({ session }) {
           session={session}
           back={index}
           browse={browsing}
-          onBrowse={() => setSp({ family: '1' })}
+          onBrowse={() => swap({ family: '1' })}
           onLoaded={setLesson}
           platforms={<ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />}
         />

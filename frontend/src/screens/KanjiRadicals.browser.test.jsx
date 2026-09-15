@@ -165,21 +165,24 @@ describe('the lesson', () => {
   // back (ADR 0008; the stubbed origin above is what makes the two
   // distinguishable here). The suite's fetch answers 404 to
   // everything, so what renders is the character-as-type fallback —
-  // the sheet it renders ON is what this checks.
-  it('draws the stroke order on washi, from the API origin', async () => {
+  // the box it renders in is what this checks.
+  it('draws the strokes from the API origin, undressed of KanjiVG\'s numerals', async () => {
     const s = await station('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
-    expect(s.one('.rad-plate__sheet')).not.toBeNull()
-    expect(s.text('.rad-plate__caption')).toBe(fr.strokeOrder)
+    expect(s.one('.rad-plate__glyph')).not.toBeNull()
     const asked = globalThis.fetch.mock.calls.map(c => String(c[0])).filter(u => u.includes('kanjivg'))
     expect(asked).toContain(`${SHELL_ORIGIN}/kanjivg/06c34.svg`)
   })
 
-  it('opens the family from the door, and leaves it back to the lesson', async () => {
+  it('opens the family from the door, at its own top, and leaves it back to the lesson', async () => {
+    // The door is a screen down the plate and the path does not
+    // change, so without this the family opens already scrolled.
+    const scrolled = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
     const s = await station('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-door')).not.toBeNull()
     s.one('.rad-door').click()
     await expect.poll(s.where).toBe('/learn/kanji/radical/85?family=1')
+    expect(scrolled).toHaveBeenCalledWith(0, 0)
 
     // The family, by level; the lesson and its platforms stand down.
     await expect.poll(() => s.one('.rad-family')).not.toBeNull()
@@ -197,9 +200,12 @@ describe('the lesson', () => {
 
     const leave = s.one('.bar__aside .stage__leave')
     expect(leave.textContent).toBe(fr.radLesson)
+    scrolled.mockClear()
     leave.click()
     await expect.poll(s.where).toBe('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
+    expect(scrolled, 'and the lesson comes back at its own top too').toHaveBeenCalledWith(0, 0)
+    scrolled.mockRestore()
   })
 
   it('leaves to the page of the index the radical is on', async () => {

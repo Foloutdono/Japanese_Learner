@@ -15,8 +15,9 @@ import { BlockMark } from '../dictionary/RadicalIndex'
 /**
  * RadicalLesson — one radical, taught before it is drilled (plan 086).
  *
- * The plate first: the glyph drawn stroke by stroke on washi (KanjiVG,
- * the dictionary's own sheet), and beside it what a 漢和辞典 would say
+ * The plate first: the glyph drawn stroke by stroke in the plate's
+ * own ink (KanjiVG, undressed of the numerals it wears on the
+ * dictionary's washi sheet), and beside it what a 漢和辞典 would say
  * on its first line — the Japanese names a teacher uses (みず, then
  * さんずい for the squeezed form), the meaning in the learner's
  * language, the number and the stroke count, the forms it takes in
@@ -128,19 +129,19 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
   return (
     <div className="rad">
       <section className="rad-plate" aria-label={t.radLesson}>
-        <div className="rad-plate__draw">
-          {/* api(), not the bare path the API hands back: a WebView's
-              own origin serves the bundle and nothing else, so in the
-              native shell a relative /kanjivg fetch 404s and the plate
-              fell back to the character as type — the strokes were
-              missing on a phone and drawn on the web (ADR 0008). The
-              dictionary's sheet resolves it the same way. */}
-          <div className="rad-plate__sheet" lang="ja" aria-hidden="true">
-            {radical.svg_url && !drawFailed
-              ? <StrokeOrderAnimation src={api(radical.svg_url)} loop className="rad-plate__strokes" onError={() => setDrawFailed(true)} />
-              : <span className="rad-plate__char">{radical.glyph}</span>}
-          </div>
-          <span className="rad-plate__caption">{t.strokeOrder}</span>
+        {/* `bare`: the strokes drawing in the plate's own ink, with
+            KanjiVG's numerals off — no washi sheet under it and no
+            caption over it, the glyph itself is the legend.
+
+            api(), not the bare path the API hands back: a WebView's
+            own origin serves the bundle and nothing else, so in the
+            native shell a relative /kanjivg fetch 404s and the plate
+            fell back to the character as type — the strokes were
+            missing on a phone and drawn on the web (ADR 0008). */}
+        <div className="rad-plate__glyph" lang="ja" aria-hidden="true">
+          {radical.svg_url && !drawFailed
+            ? <StrokeOrderAnimation src={api(radical.svg_url)} loop bare className="rad-plate__strokes" onError={() => setDrawFailed(true)} />
+            : <span className="rad-plate__char">{radical.glyph}</span>}
         </div>
         <div className="rad-plate__body">
           <div className="rad-plate__names" lang="ja">{radical.names_ja.join(' · ')}</div>

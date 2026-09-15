@@ -27,11 +27,17 @@ import { useEffect, useRef, useState } from 'react'
 // governs. This is what the drawing board lays over a learner's own
 // line (see DrawingCanvas.jsx); the animation stays what the
 // dictionary's sheet shows.
+//
+// `bare` is the second half of that on its own: the strokes still
+// draw, but without the numbers and in the caller's ink. A KanjiVG
+// file is dressed for washi — black ink, grey numerals — and a
+// caller drawing it straight onto a screen's own surface (the radical
+// lesson's plate) needs the drawing without the sheet.
 const STROKE_DURATION_MS = 550   // how long one stroke takes to draw
 const STROKE_STAGGER_MS  = 450   // delay between successive strokes
 const LOOP_PAUSE_MS      = 900   // hold on the finished glyph before replaying
 
-export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, still = false, className, onError }) {
+export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, still = false, bare = false, className, onError }) {
   const containerRef = useRef(null)
   const [svgText, setSvgText] = useState(svgTextProp ?? null)
 
@@ -77,14 +83,16 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
     svgEl.style.height = '100%'
     svgEl.style.display = 'block'
 
-    // The still glyph: strip the stroke numbers, hand the strokes to
-    // the caller's `color`, and stop — every path is already drawn.
-    if (still) {
+    // Undressed from the washi sheet: strip the stroke numbers and
+    // hand the strokes to the caller's `color`. The still glyph is
+    // always this; the animation only when it is asked for.
+    if (still || bare) {
       svgEl.querySelectorAll('[id^="kvg:StrokeNumbers"]').forEach(g => g.remove())
       const strokes = svgEl.querySelector('[id^="kvg:StrokePaths"]')
       if (strokes) strokes.style.stroke = 'currentColor'
-      return
     }
+    // — and stop, for a still glyph: every path is already drawn.
+    if (still) return
 
     const paths = Array.from(svgEl.querySelectorAll('path'))
     let timers = []
@@ -123,7 +131,7 @@ export function StrokeOrderAnimation({ src, svgText: svgTextProp, loop = false, 
       cancelled = true
       timers.forEach(id => { clearTimeout(id); cancelAnimationFrame(id) })
     }
-  }, [svgText, loop, still, onError])
+  }, [svgText, loop, still, bare, onError])
 
   if (!svgText) return null
   return <div ref={containerRef} className={className} style={{ width: '100%', height: '100%' }} />
