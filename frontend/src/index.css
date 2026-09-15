@@ -5374,7 +5374,10 @@ textarea:focus-visible {
   padding-bottom: var(--safe-bottom);
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  /* No rule on top. The bar wears the same sumi as the rating bar
+     directly above it, so a hairline between them did not divide two
+     things -- it drew a seam across one console. The fare reads as the
+     bottom of the same instrument without it. */
   user-select: none;
 }
 .lvlbar__level {
@@ -8182,6 +8185,13 @@ textarea:focus-visible {
    --line-color its shell injects. See .btn-primary's own comment. */
 .quiz-submit {
   width: 100%;
+  /* A hit target, not a spacing rung -- and a deliberate rung above the
+     family's 44px floor, for the same reason the rating tiles take 64:
+     this is the one action on the card, aimed at with a thumb at the
+     bottom edge of a phone, where the field above it has just pushed
+     the keyboard into the frame. */
+  min-height: 56px;
+  padding-block: var(--sp-5);
 }
 
 .quiz-result {
@@ -10992,8 +11002,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   align-items: center;
   justify-content: center;
   gap: var(--sp-2);
-  min-height: 56px; /* a hit target, not a spacing rung -- the one literal this block keeps */
-  padding: var(--sp-3) var(--sp-1);
+  min-height: 64px; /* a hit target, not a spacing rung -- the one literal this block keeps.
+                       64, not 56: the tiles are the whole verdict and they are
+                       pressed with a thumb at the bottom edge of a phone, so
+                       they get the extra rung rather than the minimum. */
+  padding: var(--sp-4) var(--sp-1);
   background: var(--bg-panel);
   border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
   border-radius: var(--r-card);
@@ -11061,7 +11074,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   font-weight: 700;
   /* Study.dc.html's .seg-word. Left at `normal` the label's own leading
-     pushed the ring off-centre against the segment's 56px box. */
+     pushed the ring off-centre against the segment's 64px box. */
   line-height: 1;
   overflow: hidden;
   white-space: nowrap;
