@@ -9,12 +9,16 @@ import { RadicalGrid } from '../dictionary/RadicalIndex'
  * RadicalSelector — 部首, as a way into the kanji (plan 086).
  *
  * The dictionary's radical index dressed as a study source: the same
- * strip and page (components/dictionary/RadicalIndex.jsx), but each
+ * pad and page (components/dictionary/RadicalIndex.jsx), but each
  * tile is one of the course's own radicals — only the 194 that file a
  * kanji the course teaches, since a lesson with no family is not a
  * lesson — and what it prints is what the choice is made on: the form
  * the learner will meet, its meaning in their language, and how many
  * of its kanji they have learned over how many the course holds.
+ *
+ * `order="rank"` is the other half of that: a page of the index is
+ * read here as a shelf of lessons, not as a lookup, so it opens with
+ * the families worth the most work rather than in Kangxi order.
  *
  * The count is the COURSE's, never the language's. The dictionary's
  * tile says 氵 files 656 characters, which is true and useless as a
@@ -59,6 +63,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke })
         started: r.started > 0,
         title: `${r.meaning} · ${r.count} ${t.kanjiUnit}`,
       })}
+      order="rank"
       stroke={stroke}
       onStroke={onStroke}
       t={t}

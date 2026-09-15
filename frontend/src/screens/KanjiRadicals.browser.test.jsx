@@ -5,7 +5,7 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 部首 — the kanji station's third source (plan 086) ──────────
-// The index is the dictionary's own strip and page, dressed as a
+// The index is the dictionary's own pad and page, dressed as a
 // choice: a tile prints the form the learner meets, its meaning and
 // `learned / total` over the COURSE's kanji. A radical is a lesson
 // before it is a list of platforms: the plate, the platforms (every
@@ -110,6 +110,18 @@ describe('the index', () => {
     expect(s.all('.radical-tile__sub').map(n => n.textContent)).toEqual(['eau', 'arbre'])
     expect(s.text('.radical-tile__count')).toBe('0/ 123')
     expect(apiFetch.mock.calls[0][0]).toBe('/api/kanji/radicals?lang=fr')
+  })
+
+  it('turns the page from the stroke pad, and carries it in the URL', async () => {
+    const s = await station('/learn/kanji/radicals?stroke=3')
+    await expect.poll(() => s.all('.stroke-pad__key').length).toBe(2)
+    // Every stroke count the index has is a key — the rail that used
+    // to scroll them sideways, and the ‹ prev / next › row under the
+    // tiles that existed to reach the ones it hid, are both gone.
+    expect(s.all('.stroke-pad__key .stroke-pad__n').map(n => n.textContent)).toEqual(['1', '3'])
+    s.all('.stroke-pad__key')[0].click()
+    await expect.poll(s.where).toBe('/learn/kanji/radicals?stroke=1')
+    await expect.poll(() => s.all('.radical-tile').length).toBe(1)
   })
 
   it('marks a radical the learner has opened, and a tile opens its lesson', async () => {

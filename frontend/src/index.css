@@ -15442,84 +15442,116 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and a media query adds none. */
 
-/* The thumb rail off a printed radical index, one line now instead of
-   three: eighteen numerals that scroll sideways, the read one
-   underlined in 辞書's gold and kept in view. Under it, one stroke
-   count at a time (see RadicalGrid) — a page, not a sheet. */
-/* No bar under the strip on any pointer, and no scrollbar rule to say
-   so: the rail scrolls inside a clip that hides its bottom edge, where
-   a bar — overlay or classic — is drawn. Asking for `scrollbar-width`
-   here would put this rule under the (pointer: fine) guard below and
-   leave a phone its overlay bar, which on a rail this short reads as
-   a control. The clue that there is more is the fade the numerals run
-   into, on the side there is more (see StrokeStrip's data-edge), and
-   the page under it naming its neighbours. */
-/* No hairline under it either: the active tab's underline is the only
-   rule the rail draws, and the page's own mark rules the block below. */
-.stroke-strip__clip { overflow: hidden; }
-.stroke-strip {
-  display: flex;
-  gap: var(--sp-1);
-  overflow-x: auto;
-  /* Room for the bar, then that room clipped by the wrapper. */
-  padding-bottom: var(--sp-6);
-  margin-bottom: calc(-1 * var(--sp-6));
-  mask-image: linear-gradient(90deg, #000 88%, transparent);
+/* ── 画数 — the stroke pad ──
+   Every stroke count of the index on screen at once, wrapped onto as
+   many rows as it takes.
+
+   It was a thumb rail off a printed index — one line of numerals that
+   scrolled sideways inside a clip, the read one underlined, the rest
+   running off into a fade. Seven of eighteen counts fit a 390px
+   phone, so the index's second half lived behind a sideways drag
+   inside a page that scrolls the other way, and the fade that was
+   meant to say "there is more" reads as a shadow. The pager under the
+   tiles (‹ 1画 · 6 … 2画 · 23 ›) existed only to name the neighbours
+   the rail was hiding; both are gone with it, and nothing on this
+   screen scrolls sideways any more.
+
+   auto-fill rather than a column count per tier, and a ragged last
+   row is fine: the keys carry their own edges. The rule this sheet
+   warns about — DESIGN.md, "A lattice's column count must divide its
+   content" — is the hairline lattice's, where the gap IS the seam and
+   a short row shows the background as a bare slab. 44px is the floor
+   a thumb needs; seven fit a phone and every one of them a desktop
+   row. */
+.stroke-pad {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: var(--sp-2);
 }
-.stroke-strip[data-edge="none"] { mask-image: none; }
-.stroke-strip[data-edge="mid"] { mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
-.stroke-strip[data-edge="end"] { mask-image: linear-gradient(90deg, transparent, #000 12%); }
-.stroke-strip__tab {
-  display: inline-flex;
+.stroke-pad__key {
+  display: flex;
   align-items: baseline;
   justify-content: center;
   gap: var(--sp-1);
-  flex: none;
-  min-width: 44px;
-  padding: var(--sp-4) var(--sp-2);
-  border-bottom: 2px solid transparent;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-1);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: none;
   color: var(--text-secondary);
-  transition: color 0.16s ease, border-color 0.16s ease;
+  transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
-.stroke-strip__tab:hover { color: var(--text-primary); }
-.stroke-strip__n {
+.stroke-pad__key:hover,
+.stroke-pad__key:focus-visible {
+  color: var(--text-primary);
+  border-color: var(--text-secondary);
+  filter: none;
+}
+.stroke-pad__n {
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
+  line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.stroke-strip__unit { font-family: var(--font-jp); font-size: var(--fs-caption-xs); opacity: 0.7; }
-.stroke-strip__tab--active {
-  color: var(--text-primary);
-  border-bottom-color: var(--line-color, var(--line-jisho));
+/* The unit rides the chosen key alone (DESIGN.md, "A gate is a
+   pictogram, and only the gate you are on is captioned"): a fixed row
+   that would otherwise print 画 eighteen times captions the one being
+   read. Every key is the same grid cell, so the caption changes no
+   width and the pad cannot reflow under the thumb that tapped it. */
+.stroke-pad__unit {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  line-height: 1;
+}
+/* Chosen: the chip's own three-part treatment (.chip--on above) in
+   the line's ink — 辞書's gold under the dictionary, 漢字's under the
+   station. A ring and a wash, never a fill. */
+.stroke-pad__key--on {
+  color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 60%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 55%, transparent);
+  background: color-mix(in srgb, var(--line-color, var(--line-jisho)) 12%, transparent);
 }
 
-.dict-radical-index { display: block; }
-.radical-page { display: block; margin-top: var(--sp-4); }
+.dict-radical-index {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+}
+.radical-page { display: block; }
 
-/* The lead six, larger, and the rest at tile size. Tiles with their
-   own edges: a ragged last row needs no filler, so neither grid pads. */
-.radical-page__lead,
-.radical-page__rest {
+/* One page, one grid, one order (see RadicalGrid's `order`). It was
+   two grids — the six biggest of a page, larger, over the rest — and
+   at the width a phone gives six columns the two sizes were a few
+   pixels apart while the order visibly restarted halfway down the
+   page. Tiles with their own edges: a ragged last row needs no
+   filler, so the grid does not pad. */
+.radical-page__grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
   gap: var(--sp-2);
 }
-.radical-page__rest { margin-top: var(--sp-2); }
-/* On a wide screen six columns stretch a radical to a 250px card
-   with one character in it. The tiles keep a tile's width there and
-   pack from the left, sixteen to a row — an index, not a gallery. */
-@media (min-width: 769px) {
-  .radical-page__lead { grid-template-columns: repeat(auto-fill, 112px); }
-  .radical-page__rest { grid-template-columns: repeat(auto-fill, 88px); }
-}
+/* A tile that carries a meaning is chosen ON that meaning, so it gets
+   the width to print one: four to a 390px phone instead of six, where
+   the choice was between "marche…", "soi-mê…" and "tête de …". */
+.radical-page__grid--labelled { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
+/* The tail of the index is thin — 15画 files one radical, 12画 four —
+   and at the full grid's width a page of six left most of a screen
+   empty under two short rows. A short page spends that room on its
+   own tiles instead: fewer columns, and the glyph at the size the
+   lead tiles used to carry. Dead space is the failure (DESIGN.md, the
+   density contract). */
+.radical-page[data-fill="short"] .radical-page__grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
+.radical-page[data-fill="short"] .radical-page__grid--labelled { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
 .radical-tile {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: var(--sp-1);
-  padding: var(--sp-3) var(--sp-1);
+  padding: var(--sp-4) var(--sp-1);
+  overflow: hidden;
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -15533,15 +15565,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transform: translateY(-2px);
   filter: none;
 }
+/* The glyph is the whole object — what a learner scans a page of
+   thirty-seven of these FOR — so it is set at the rung the lead tiles
+   used to reserve for six of them. */
 .radical-tile__char {
   font-family: var(--font-jp);
-  font-size: var(--fs-title);
+  font-size: var(--fs-heading);
   line-height: 1.1;
 }
-.radical-tile--lead { padding: var(--sp-4) var(--sp-1); }
-.radical-tile--lead .radical-tile__char { font-size: var(--fs-heading); }
-/* How many kanji use it — the number you are actually choosing on,
-   in the line's ink on the six it matters most for. */
+/* How many kanji use it — the number you are actually choosing on. */
 .radical-tile__count {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
@@ -15550,29 +15582,31 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
 }
-.radical-tile--lead .radical-tile__count,
+/* A radical the learner has opened carries its figure in the line's
+   ink — the pigment carried 40% into the ambient ink, the mix this
+   sheet uses wherever a line colour is TEXT rather than an edge
+   (.chip--on, the entry plate's sense numerals): raw 藤色 reads 3.2:1
+   on --surface in dark and raw 山吹 2.9:1 on paper in light, and a
+   figure is a thing to read. */
 .radical-tile--started .radical-tile__count,
-.radical-tile:hover .radical-tile__count { color: var(--line-color, var(--line-jisho)); }
-
-/* The page turns: the neighbouring stroke counts, named, either side. */
-.radical-page__pager {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  margin-top: var(--sp-4);
+.radical-tile:hover .radical-tile__count {
+  color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 60%, var(--text-primary));
 }
-.radical-page__turn {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-  padding: var(--sp-3) 0;
+/* The same figure as an edge: how much of the family is learned, on
+   the tile's own bottom border — the catalogue tile's instrument
+   (DESIGN.md, "the stage is that card's own bottom edge"). Drawn only
+   where there is a figure to draw; the dictionary's tile has none.
+   scaleX off a unitless --done, so the share is set from JSX without
+   a length being written there. */
+.radical-tile__run {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--line-color, var(--line-jisho));
+  transform: scaleX(var(--done, 0));
+  transform-origin: left;
 }
-.radical-page__turn:hover { color: var(--text-primary); }
-.radical-page__turn--next { margin-left: auto; }
 
 /* ── A block's own mark ──
    The stamp book's 九月 in its margin, for the blocks in the
@@ -18783,25 +18817,39 @@ a.slip__act { text-decoration: none; }
 
 /* ══ 部首 — study by radical (plan 086) ═══════════════════════
    The kanji station's third source. The index is the dictionary's
-   own — .stroke-strip, .radical-page, .radical-tile, lifted into
+   own — .stroke-pad, .radical-page, .radical-tile, lifted into
    components/dictionary/RadicalIndex.jsx — read under the station's
    ink now that those rules take `--line-color` (辞書's gold where the
    dictionary sets it, 漢字's ink under the station). What is new is
    what a tile SAYS (a meaning, a figure) and the lesson under it. */
 
-/* The tile's second line: the meaning, one line, cut at the edge. */
+/* The tile's second line: the meaning the radical is chosen ON, so it
+   is printed rather than abbreviated. It was one line cut at the edge
+   with an ellipsis, and at six tiles to a 390px phone that made the
+   3画 page ask a learner to choose between "marcher" and "marche…"
+   (夂 and 夊, marcher and marcher lentement), "soi-mê…" and
+   "tête de …". Two lines, and the box holds both whether or not the
+   second is used: 13% of the 214 meanings need it, and a grid whose
+   rows change height by which ones landed in them looks broken. */
 .radical-tile__sub {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   max-width: 100%;
+  min-height: 2.4em;
   overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
+  line-height: 1.2;
+  text-align: center;
+  text-wrap: pretty;
   color: var(--text-secondary);
 }
-/* The lead six carry their figure in the line's ink by size; a
-   radical the learner has actually opened (.radical-tile--started)
-   carries it by work — declared beside the lead rule above. */
+/* A radical the learner has opened (.radical-tile--started) carries
+   its figure in the line's ink, and the share of its family already
+   learned runs along the tile's bottom edge (.radical-tile__run) —
+   both declared with the tile above, since the dictionary reads the
+   same rules with neither figure to print. */
 
 .rad {
   display: flex;

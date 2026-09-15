@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import { Loading } from '../ui/Loading'
 
 // ── 部首索引 — the radical index, shared ─────────────────────
@@ -6,7 +6,7 @@ import { Loading } from '../ui/Loading'
 // station now asks the same question the dictionary does — which
 // radical? — as a study source (components/selection/RadicalSelector.jsx).
 // DESIGN.md: a component's markup is used, never hand-copied; so the
-// strip, the tile and the page live here once and the two screens
+// pad, the tile and the page live here once and the two screens
 // dress them. What differs between them is what a tile SAYS about its
 // radical, and that is the `tile` function RadicalGrid takes.
 //
@@ -35,61 +35,53 @@ export function BlockMark({ jp, name, tally }) {
   )
 }
 
-// The thumb rail off a printed radical index, one line: the stroke
-// counts that scroll sideways, the read one underlined in the line's
-// ink and kept in view.
-//
-// No scrollbar under it, on any pointer — and no scrollbar DECLARATION
-// either, since styling one at all is what summons a phone's classic
-// bar (index.css, "Themed scrollbar"; index.scrollbar.browser.test.jsx
-// holds every such rule behind `pointer: fine`). The bar is clipped
-// instead: the rail scrolls inside a wrapper that hides its bottom
-// edge, where the bar is drawn. What says "there is more" is quieter
-// than a bar: the numerals run off the edge into a fade, on whichever
-// side there is more to see — `data-edge` is which — and the page
-// under it names its neighbours.
-function edgeOf(el) {
-  if (!el || el.scrollWidth <= el.clientWidth + 1) return 'none'
-  const atStart = el.scrollLeft <= 1
-  const atEnd = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1
-  return atStart ? 'start' : atEnd ? 'end' : 'mid'
-}
+// "3 traits" — the count in the learner's own words, for the places a
+// stroke count is read rather than seen: a key's accessible name and
+// the page's label.
+const strokes = (n, t) => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
 
-export function StrokeStrip({ groups, active, onPick, t }) {
-  const tabRefs = useRef(new Map())
-  const railRef = useRef(null)
-  const [edge, setEdge] = useState('none')
-  useEffect(() => {
-    tabRefs.current.get(active)?.scrollIntoView({ inline: 'center', block: 'nearest' })
-  }, [active])
-  useEffect(() => {
-    const el = railRef.current
-    if (!el) return undefined
-    const update = () => setEdge(edgeOf(el))
-    update()
-    el.addEventListener('scroll', update, { passive: true })
-    const ro = typeof ResizeObserver === 'function' ? new ResizeObserver(update) : null
-    ro?.observe(el)
-    return () => { el.removeEventListener('scroll', update); ro?.disconnect() }
-  }, [groups])
+// ── 画数 — the stroke pad ──
+// Every stroke count of the index, on screen at once.
+//
+// This was a thumb rail off a printed index: one line of numerals that
+// scrolled sideways under a fade. On a phone that is seven counts
+// visible, the eighth cut in half, and 17画 four flicks away along an
+// axis the page itself does not scroll — a sideways drag inside a
+// vertical scroller is the one gesture a thumb holding the phone
+// cannot make cleanly, and the fade meant to say "there is more" reads
+// as a shadow. The page under it had to name its own neighbours
+// (‹ 1画 · 6 … 2画 · 23 ›) precisely because the rail was hiding them.
+//
+// A pad hides nothing. The counts wrap onto as many rows as they need,
+// every one is a key a thumb can hit, the page below drops the pager
+// with the rail, and nothing on the screen scrolls sideways.
+//
+// The unit rides the chosen key alone — DESIGN.md, "A gate is a
+// pictogram, and only the gate you are on is captioned": a fixed row
+// that would otherwise print 画 eighteen times captions the one you
+// are on and lets the rest be numerals. The keys are equal cells of a
+// grid, so that caption changes no width and the pad never reflows
+// under the thumb that just tapped it.
+export function StrokePad({ groups, active, onPick, t }) {
   return (
-    <div className="stroke-strip__clip">
-      <nav className="stroke-strip" ref={railRef} data-edge={edge} aria-label={t.dictStrokeIndex}>
-        {groups.map(g => (
+    <nav className="stroke-pad" aria-label={t.dictStrokeIndex}>
+      {groups.map(g => {
+        const on = g.stroke_count === active
+        return (
           <button
             key={g.stroke_count}
             type="button"
-            ref={el => { tabRefs.current.set(g.stroke_count, el) }}
             onClick={() => onPick(g.stroke_count)}
-            aria-current={active === g.stroke_count ? 'true' : undefined}
-            className={`stroke-strip__tab${active === g.stroke_count ? ' stroke-strip__tab--active' : ''}`}
+            aria-current={on ? 'true' : undefined}
+            aria-label={strokes(g.stroke_count, t)}
+            className={`stroke-pad__key${on ? ' stroke-pad__key--on' : ''}`}
           >
-            <span className="stroke-strip__n">{g.stroke_count}</span>
-            <span className="stroke-strip__unit" lang="ja">画</span>
+            <span className="stroke-pad__n">{g.stroke_count}</span>
+            {on && <span className="stroke-pad__unit" lang="ja" aria-hidden="true">画</span>}
           </button>
-        ))}
-      </nav>
-    </div>
+        )
+      })}
+    </nav>
   )
 }
 
@@ -104,24 +96,37 @@ function dictionaryTile(r) {
 // plain-language meaning the study index needs and the dictionary's
 // browse does not (its tiles stand under a search field; the study
 // tiles are the choice itself).
-export function RadicalTile({ glyph, count, sub, learned, title, lead, started, onPick }) {
+//
+// Where there is a figure, the share of the family already learned is
+// drawn along the tile's own bottom edge as well as printed: the
+// catalogue tile's instrument (DESIGN.md, "the stage is that card's
+// own bottom edge"), and the difference between a number you read and
+// a thing you see on a page of thirty-seven of them.
+export function RadicalTile({ glyph, count, sub, learned, title, started, onPick }) {
+  const done = learned != null && count > 0 ? Math.min(1, learned / count) : null
   return (
     <button
       type="button"
       onClick={onPick}
       title={title}
-      className={`radical-tile${lead ? ' radical-tile--lead' : ''}${started ? ' radical-tile--started' : ''}`}
+      className={`radical-tile${started ? ' radical-tile--started' : ''}`}
     >
       <span className="radical-tile__char" lang="ja">{glyph}</span>
       {sub && <span className="radical-tile__sub">{sub}</span>}
       <span className="radical-tile__count">
         {learned != null ? <><b>{learned}</b>/ {count}</> : count}
       </span>
+      {done != null && <span className="radical-tile__run" style={{ '--done': done }} aria-hidden="true" />}
     </button>
   )
 }
 
-const LEAD_COUNT = 6
+// The tail of the index is thin — 15画 files one radical, 12画 four —
+// and a short page in the full grid's column count left a screen of
+// nothing under two rows of small tiles. At or below this many, the
+// page spends the room it has on its own tiles instead (see
+// `[data-fill="short"]` in index.css).
+const ROOMY_MAX = 8
 
 /**
  * RadicalGrid — one stroke count at a time.
@@ -132,16 +137,24 @@ const LEAD_COUNT = 6
  *   onPick(number)
  *   tile(r)  — what a tile prints for radical `r`:
  *              { glyph, count, sub?, learned?, title?, started? }.
- *              The lead six of a page are the six with the biggest
- *              `count` — 氵 files 656 characters and 夂 four, and on a
- *              page of 37 the big ones are what the eye should land
- *              on. The rest keep the index's own order, by number.
+ *   order    — 'index' (the default) keeps the index's own order, by
+ *              Kangxi number, because that is what a lookup runs on;
+ *              'rank' puts the biggest families first, which is what a
+ *              learner CHOOSING one is choosing on (氵 files 123 of the
+ *              course's kanji and 夂 one).
+ *
+ *              One grid, one order, either way. It was two grids — the
+ *              six biggest of a page, larger, over the rest in Kangxi
+ *              order — and on a page whose first row read 水 手 心 口
+ *              辶 土 and whose second went back to 口 土 夂, the index
+ *              looked broken rather than weighted. The weight is the
+ *              order now, and the figure on each tile says what it is.
  *   stroke / onStroke — the page, controlled by the caller when it
  *              carries the page in its URL (so leaving a lesson lands
  *              back on the page it was opened from); local otherwise.
  *   t        — the string table
  */
-export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke }) {
+export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index' }) {
   const [ownStroke, setOwnStroke] = useState(null)
   const stroke = strokeProp ?? ownStroke
   const setStroke = n => { if (onStroke) onStroke(n); else setOwnStroke(n) }
@@ -153,50 +166,33 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
 
   const index = Math.max(0, groups.findIndex(g => g.stroke_count === stroke))
   const group = groups[index]
-  const prev = groups[index - 1]
-  const next = groups[index + 1]
 
   const rows = group.radicals.map(r => ({ number: r.number, ...tile(r) }))
-  const ranked = [...rows].sort((a, b) => b.count - a.count)
-  const leadSet = new Set(ranked.slice(0, LEAD_COUNT).map(r => r.number))
-  const lead = ranked.slice(0, LEAD_COUNT)
-  const rest = rows.filter(r => !leadSet.has(r.number))
+  if (order === 'rank') rows.sort((a, b) => b.count - a.count || a.number - b.number)
 
-  const unit = n => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
-  const draw = (r, isLead) => (
-    <RadicalTile key={r.number} {...r} lead={isLead} onPick={() => onPick(r.number)} />
-  )
+  // A tile that carries a meaning is chosen ON that meaning, so it
+  // needs the width to print one — four to a phone rather than six,
+  // where "marche…", "soi-mê…" and "tête de …" were what the learner
+  // had to pick between. Read off the tiles rather than taken as a
+  // prop: whether there is a second line is the `tile` function's
+  // answer, and the grid should not have to be told it twice.
+  const labelled = rows.some(r => r.sub)
 
   return (
     <div className="dict-radical-index">
-      <StrokeStrip groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
+      <StrokePad groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
 
-      <section className="radical-page" data-stroke={group.stroke_count} aria-label={unit(group.stroke_count)}>
-        {/* No mark over the page: the strip above already names the
-            stroke count and lights the one being read, and the
-            section's aria-label says it for a reader. */}
-        <div className="radical-page__lead">
-          {lead.map(r => draw(r, true))}
-        </div>
-        {rest.length > 0 && (
-          <div className="radical-page__rest">
-            {rest.map(r => draw(r, false))}
-          </div>
-        )}
-        {/* The neighbouring pages, named — the strip above scrolls
-            the far counts out of view, and a page should say what
-            is either side of it. */}
-        <div className="radical-page__pager">
-          {prev && (
-            <button type="button" className="radical-page__turn" onClick={() => setStroke(prev.stroke_count)}>
-              ‹ <span lang="ja">{prev.stroke_count}画</span> · {prev.radicals.length}
-            </button>
-          )}
-          {next && (
-            <button type="button" className="radical-page__turn radical-page__turn--next" onClick={() => setStroke(next.stroke_count)}>
-              <span lang="ja">{next.stroke_count}画</span> · {next.radicals.length} ›
-            </button>
-          )}
+      {/* No mark over the page: the pad above names the stroke count
+          and lights the one being read, and the section's aria-label
+          says it for a reader. */}
+      <section
+        className="radical-page"
+        data-stroke={group.stroke_count}
+        data-fill={rows.length <= ROOMY_MAX ? 'short' : undefined}
+        aria-label={strokes(group.stroke_count, t)}
+      >
+        <div className={`radical-page__grid${labelled ? ' radical-page__grid--labelled' : ''}`}>
+          {rows.map(r => <RadicalTile key={r.number} {...r} onPick={() => onPick(r.number)} />)}
         </div>
       </section>
     </div>
