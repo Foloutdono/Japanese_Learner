@@ -506,16 +506,24 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-rest').getAttribute('aria-label')).toBe('No example words yet')
     // Pills come after the bands.
     expect(bands()[0].compareDocumentPosition(dialog.querySelector('.dict-rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Each row picks out the kanji it is an example of — by weight
-    // alone here, where the band above the rows already names the
-    // reading. The gold belongs to the entry's own ledger, which has
-    // nothing else to name it with (see the ledger test below).
+    // Each row picks out the kanji it is an example of — here as an
+    // EDGE, the pigment as a rule under the character rather than as
+    // its ink, since the band above the rows already names the reading
+    // in that same gold. The ink belongs to the entry's own ledger,
+    // which has nothing else to name it with (see the ledger test).
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
     const hit = dialog.querySelector('.dict-word__hit')
     expect(getComputedStyle(hit).color).toBe(probe('color', 'var(--text-primary)', root))
     expect(getComputedStyle(hit.querySelector('rt')).color).toBe(probe('color', 'var(--text-secondary)', root))
+    // Raw, as every edge in the panel is — a rule is not text.
+    expect(getComputedStyle(hit).textDecorationLine).toBe('underline')
+    expect(getComputedStyle(hit).textDecorationColor).toBe(probe('color', 'var(--line-jisho)'))
+    // And the ledger's hit underneath carries no rule: there the
+    // pigment is still the ink.
+    const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
+    expect(getComputedStyle(led).textDecorationLine).toBe('none')
 
     // The other gate swaps the list for the other register's, mark and
     // all — the two are never on screen together to be confused.

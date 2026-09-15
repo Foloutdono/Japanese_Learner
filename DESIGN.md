@@ -412,10 +412,13 @@ stick under a sticky plate whose height it has no way to know.
 Nothing of that list is on the entry itself. The four-word "used in these
 words" ledger stays, and its four words demonstrate four different readings
 where the deck has them, the kanji picked out in each row in the entry's
-ink so the reading it uses is what the eye lands on — **the sheet's rows
-give that gold up** (`WordRow`'s `plain`) and keep only the weight: the band
-above them has already named the reading, and the ledger has nothing else to
-name it with. The plate is `position: sticky`
+ink so the reading it uses is what the eye lands on. **The sheet's rows spend
+that gold as an edge instead of as ink** (`WordRow`'s `plain`): the character
+keeps its weight, takes the ambient ink, and carries the pigment as a 2px rule
+under it. The band above them has already named the reading, so ink there
+would be a row outranking its own heading — a mark of a different kind cannot
+compete for the same register, which a merely dimmer gold still would.
+The ledger keeps the ink: it has nothing else to name the reading with. The plate is `position: sticky`
 inside whichever shell scrolls it, so the word stays in view while its
 examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no

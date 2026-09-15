@@ -12635,15 +12635,35 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    own bleed — which exists to put the rail on a padded block's edge —
    would carry these rows --sp-5 outside the sheet. */
 .dict-rd .dict-words { margin: 0; }
-/* The reading is stated by the band over these rows, so the gold on
-   the kanji inside them is repetition outranking the head it belongs
-   to. The hit keeps its weight, because the character is still the
-   point of the row, and gives up the ink. The entry's own four-word
-   ledger keeps the gold: nothing there names the reading. A modifier
-   the row asks for (WordRow's `plain`) rather than a descendant of
-   .dict-readings — the descendant form outranks .dict-entry-card__char
-   rt further down the sheet, which the specificity ratchet counts. */
-.dict-word__hit--plain { color: var(--text-primary); }
+/* The reading is stated by the band over these rows, so the gold INK
+   on the kanji inside them is repetition outranking the head it
+   belongs to. It becomes an EDGE instead: the character keeps its
+   weight, takes the ambient ink, and carries the pigment as a 2px rule
+   under it — the same gesture as the gate's rail and the plate's
+   stripe, and raw for the same reason ("an edge is not text", see
+   --dict-ink above). A mark of a different kind cannot compete with
+   the band for the same register, which a dimmer gold would still have
+   done. The entry's own four-word ledger keeps the ink: nothing there
+   names the reading, so there is nothing for it to outrank.
+
+   `text-decoration` rather than a border or an inset shadow, and not
+   for taste: both of those draw across the whole ruby box, so 真 under
+   a まこと annotation gets a rule three characters wide. The
+   decoration follows the base glyph. `skip-ink: none` keeps it solid
+   under a character that reaches below the baseline.
+
+   A modifier the row asks for (WordRow's `plain`) rather than a
+   descendant of .dict-readings — the descendant form outranks
+   .dict-entry-card__char rt further down the sheet, which the
+   specificity ratchet counts. */
+.dict-word__hit--plain {
+  color: var(--text-primary);
+  text-decoration: underline;
+  text-decoration-color: var(--line-color, var(--accent2));
+  text-decoration-thickness: 2px;
+  text-decoration-skip-ink: none;
+  text-underline-offset: 3px;
+}
 .dict-word__hit--plain rt { color: var(--text-secondary); }
 
 /* The readings with no word to show for them: pills in the secondary
