@@ -129,21 +129,16 @@ describe('the stroke rail', () => {
 
   it('sets every figure in the middle of its own key', async () => {
     const s = await index()
-    // The unit is out of the flow, so the chosen key's figure sits on
-    // the same two axes as the seventeen without one — it was 8px left
-    // of centre, and every figure 5px high in its box, when the two
-    // shared a baseline-aligned row.
+    // A figure is the only ink in its key — the 画 the chosen one used
+    // to carry pushed it 8px off its own centre while the seventeen
+    // without one were true, and every figure sat 5px high in its box
+    // besides.
     for (const key of s.all('.stroke-rail__key')) {
       const k = key.getBoundingClientRect()
       const n = key.querySelector('.stroke-rail__n').getBoundingClientRect()
       expect(Math.abs((n.left + n.right) / 2 - (k.left + k.right) / 2), key.textContent).toBeLessThan(0.6)
       expect(Math.abs((n.top + n.bottom) / 2 - (k.top + k.bottom) / 2), key.textContent).toBeLessThan(0.6)
     }
-    // And the caption it carries stays inside its key.
-    const on = s.one('.stroke-rail__key--on').getBoundingClientRect()
-    const unit = s.one('.stroke-rail__unit').getBoundingClientRect()
-    expect(unit.right).toBeLessThanOrEqual(on.right)
-    expect(unit.top).toBeGreaterThanOrEqual(on.top)
   })
 
   it('walks the index from the two chevrons, and stops at its ends', async () => {
@@ -177,14 +172,13 @@ describe('the stroke rail', () => {
     expect(visible.length).toBeGreaterThan(2)
   })
 
-  it('captions the chosen key alone, and names every one of them', async () => {
+  it('prints bare figures, and names every one of them for a reader', async () => {
     const s = await index()
-    const units = s.all('.stroke-rail__unit')
-    expect(units.length).toBe(1)
-    expect(units[0].textContent).toBe('画')
-    expect(units[0].closest('.stroke-rail__key').querySelector('.stroke-rail__n').textContent).toBe('3')
-    // The caption changes no width: the keys are one size, so the rail
-    // cannot shift under the thumb that just tapped it.
+    // Nothing on a key but its number — not even the unit the chosen
+    // one used to carry.
+    expect(s.all('.stroke-rail__key').map(k => k.textContent)).toEqual(GROUPS.map(g => String(g.stroke_count)))
+    // And they are one size, so the rail cannot shift under the thumb
+    // that just tapped it.
     const widths = new Set(s.all('.stroke-rail__key').map(k => Math.round(k.getBoundingClientRect().width)))
     expect(widths.size).toBe(1)
 

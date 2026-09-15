@@ -65,12 +65,13 @@ const strokes = (n, t) => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokes
 // all, and it read as a number pad over an index rather than as the
 // page's own control. Owner's call, from the two side by side.
 //
-// The unit rides the chosen key alone — DESIGN.md, "A gate is a
-// pictogram, and only the gate you are on is captioned": a row that
-// would otherwise print 画 eighteen times captions the one you are on
-// and lets the rest be numerals. It is set in the key's corner rather
-// than beside the figure, because a unit the figure makes room for is
-// a figure that is no longer in the middle of its own key.
+// A key is a bare figure. The chosen one carried 画 for a while —
+// DESIGN.md's "only the gate you are on is captioned", applied to a
+// row that would otherwise print the unit eighteen times — and the
+// owner took it off: the numerals under a page of radicals are read
+// as what they are, and the one mark that broke their line was the
+// caption. `strokes()` still says "3 traits" to a screen reader on
+// every key, where a unit costs no ink.
 export function StrokeRail({ groups, active, onPick, t }) {
   const keys = useRef(new Map())
   const at = Math.max(0, groups.findIndex(g => g.stroke_count === active))
@@ -122,7 +123,6 @@ export function StrokeRail({ groups, active, onPick, t }) {
                 className={`stroke-rail__key${on ? ' stroke-rail__key--on' : ''}`}
               >
                 <span className="stroke-rail__n">{g.stroke_count}</span>
-                {on && <span className="stroke-rail__unit" lang="ja" aria-hidden="true">画</span>}
               </button>
             )
           })}

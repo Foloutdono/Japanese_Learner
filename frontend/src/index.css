@@ -15502,7 +15502,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .stroke-rail__key,
 .stroke-rail__step {
-  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -15533,28 +15532,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   border-color: var(--surface-line);
 }
 /* The figure is centred in its key, and every key is one width, so the
-   numerals sit on one line down the middle of their boxes — which is
-   the whole reason the unit below is out of the flow. */
+   numerals sit on one line down the middle of their boxes. It is the
+   only ink in there: the chosen key carried 画 for a while, out of the
+   flow so that it could not push the figure off that line, and the
+   owner took the caption off altogether. What names the counts now is
+   the page under them, and `aria-label` for a reader. */
 .stroke-rail__n {
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
   line-height: 1;
   font-variant-numeric: tabular-nums;
-}
-/* The unit rides the chosen key alone (DESIGN.md, "A gate is a
-   pictogram, and only the gate you are on is captioned"): a row that
-   would otherwise print 画 eighteen times captions the one being read.
-   Set in the corner and OUT OF THE FLOW, because a unit beside the
-   numeral is a unit the numeral makes room for — it sat 8px left of
-   its own key's centre while the other seventeen were dead centre. */
-.stroke-rail__unit {
-  position: absolute;
-  top: var(--sp-1);
-  right: var(--sp-1);
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption-xs);
-  line-height: 1;
 }
 /* Chosen: the chip's own three-part treatment (.chip--on above) in
    the line's ink — 辞書's gold under the dictionary, 漢字's under the
