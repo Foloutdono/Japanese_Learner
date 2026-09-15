@@ -6,7 +6,7 @@ from core import credits
 from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
 from content.grammar_sentences_data import get_sentences
 from study.modes import (
     GRAMMAR, GRADED_FOR_SOURCE, INDICE_CHOICES, INDICE_SENTENCES,
@@ -144,7 +144,7 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
         "direction": m.direction,
         "grammar":   pattern,
         "structure": entry["structure"],
-        "meaning":   entry["meaning"],
+        "meaning":   gloss(entry, "en"),
         # Current SRS stage, so the client can hand it straight back as
         # ReviewPayload.prev_stage without another lookup.
         "stage":     stage,
@@ -169,8 +169,8 @@ def _build_grammar_card(entry: dict, level: str, grammar_list: list[dict], m: Mo
             ) + [pattern]
         else:
             choices = pick_distractors(
-                [g["meaning"] for g in grammar_list], lambda x: x, entry["meaning"],
-            ) + [entry["meaning"]]
+                [gloss(g, "en") for g in grammar_list], lambda x: x, gloss(entry, "en"),
+            ) + [gloss(entry, "en")]
         random.shuffle(choices)
         payload["hints"][INDICE_CHOICES] = choices
 
@@ -344,7 +344,7 @@ def get_grammar_review_cards(level: str, user_id: str = Depends(get_user_id)):
             "card_id":   grammar_to_id(entry, level),
             "grammar":   entry["pattern"],
             "structure": entry["structure"],
-            "meaning":   entry["meaning"],
+            "meaning":   gloss(entry, "en"),
             "stage":     stage,
         })
 

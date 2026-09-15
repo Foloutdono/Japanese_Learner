@@ -4,7 +4,7 @@ from functools import lru_cache
 from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, DECK_BY_CHAR, kanji_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
 from content.grammar_sentences_data import get_sentences
 import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
@@ -646,7 +646,7 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
             structure = entry.get("structure", "")
             if query.empty or query.hits(
                 jp_fields=(entry["pattern"], structure),
-                latin_fields=(structure, entry.get("meaning", "")),
+                latin_fields=(structure, gloss(entry, "en"), gloss(entry, "fr")),
             ):
                 out.append((lvl, entry))
     return out
@@ -655,10 +655,10 @@ def _grammar_matches(query, level: str | None) -> list[tuple[str, dict]]:
 @lru_cache(maxsize=1)
 def _grammar_lexicon() -> tuple[str, ...]:
     return search_match.lexicon(
-        gloss
+        text
         for points in GRAMMAR_POINTS_BY_LEVEL.values()
         for entry in points
-        for gloss in (entry.get("meaning", ""), entry.get("structure", ""))
+        for text in (gloss(entry, "en"), gloss(entry, "fr"), entry.get("structure", ""))
     )
 
 
@@ -670,7 +670,7 @@ def _grammar_result(entry: dict, level: str, states: dict, user_id: str) -> dict
         "level":     level,
         "pattern":   entry["pattern"],
         "structure": entry.get("structure", ""),
-        "meaning":   entry.get("meaning", ""),
+        "meaning":   gloss(entry, "en"),
         "examples":  [
             {"jp": s["jp"], "en": s["en"], "furigana": list(_sentence_furigana(s["jp"]))}
             for s in get_sentences(level, entry["pattern"])

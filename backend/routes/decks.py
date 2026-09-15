@@ -16,7 +16,7 @@ from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.grammar_points_data import (
-    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, grammar_to_id,
+    GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
@@ -261,7 +261,7 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # before the switch still renders instead of showing a blank
         # front until the wipe clears it.
         return {"front": entry.get("pattern") or entry.get("grammar", ""),
-                "kana": "", "meaning": entry.get("meaning", "")}
+                "kana": "", "meaning": grammar_gloss(entry, lang)}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}

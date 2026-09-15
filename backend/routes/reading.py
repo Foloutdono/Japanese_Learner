@@ -18,7 +18,7 @@ from study.card_lookup import (
     find_segments_in_text, attach_stats_to_segments, VOCAB_STATUS_MODES,
     vocab_card_id_for_word,
 )
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss as grammar_gloss, grammar_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content import vocab_extras
 from content import reading_sentences
@@ -1118,7 +1118,7 @@ def _grammar_block(points: list[dict]) -> str:
     if not points:
         return "(none)"
     return "\n".join(
-        f"{i + 1}. {p['pattern']} ({p.get('structure', '')}) -- meaning: {p.get('meaning', '')}"
+        f"{i + 1}. {p['pattern']} ({p.get('structure', '')}) -- meaning: {grammar_gloss(p, 'en')}"
         for i, p in enumerate(points)
     )
 
@@ -1220,7 +1220,7 @@ class _Verdict:
 
     def feedback(self) -> str:
         seeds = [
-            f"The grammar point {p['pattern']} ({p.get('meaning', '')}) does not appear in the text. "
+            f"The grammar point {p['pattern']} ({grammar_gloss(p, 'en')}) does not appear in the text. "
             f"Use it in at least one sentence, in its natural conjugated form."
             for p in self.seeds_missing
         ]
@@ -1404,7 +1404,7 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
             {
                 "pattern": p["pattern"],
                 "structure": p.get("structure", ""),
-                "meaning": p.get("meaning", ""),
+                "meaning": grammar_gloss(p, lang),
                 "level": level,
                 "raw_id": grammar_to_id(p, level),
             }

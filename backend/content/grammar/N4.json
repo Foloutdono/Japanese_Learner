@@ -1,0 +1,1564 @@
+[
+  {
+    "pattern": "〜たら",
+    "structure": "verb た-form + ら",
+    "meaning": {
+      "en": "conditional: if/when",
+      "fr": "conditional: if/when"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "雨がふったら、家にいます。",
+        "en": "If it rains, I will stay at home.",
+        "fr": "If it rains, I will stay at home."
+      },
+      {
+        "jp": "駅に着いたら、電話してください。",
+        "en": "When you arrive at the station, please call me.",
+        "fr": "When you arrive at the station, please call me."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ば",
+    "structure": "verb ば-form",
+    "meaning": {
+      "en": "conditional: if",
+      "fr": "conditional: if"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "時間があれば、映画を見に行きます。",
+        "en": "If I have time, I will go and see a movie.",
+        "fr": "If I have time, I will go and see a movie."
+      },
+      {
+        "jp": "安ければ、この本を買います。",
+        "en": "If it is cheap, I will buy this book.",
+        "fr": "If it is cheap, I will buy this book."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なら",
+    "structure": "noun/plain form + なら",
+    "meaning": {
+      "en": "conditional: if it's the case that",
+      "fr": "conditional: if it's the case that"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "旅行に行くなら、この本がやくに立ちます。",
+        "en": "If you are going travelling, this book will be useful.",
+        "fr": "If you are going travelling, this book will be useful."
+      },
+      {
+        "jp": "犬がすきなら、うちに来てください。",
+        "en": "If you like dogs, please come to my house.",
+        "fr": "If you like dogs, please come to my house."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ので",
+    "structure": "plain form + ので",
+    "meaning": {
+      "en": "because (more objective/polite than から)",
+      "fr": "because (more objective/polite than から)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "あたまがいたいので、今日は休みます。",
+        "en": "Because I have a headache, I will rest today.",
+        "fr": "Because I have a headache, I will rest today."
+      },
+      {
+        "jp": "お金がないので、旅行に行きません。",
+        "en": "Because I have no money, I am not going travelling.",
+        "fr": "Because I have no money, I am not going travelling."
+      }
+    ]
+  },
+  {
+    "pattern": "〜のに",
+    "structure": "plain form + のに",
+    "meaning": {
+      "en": "although, even though (often with surprise/complaint)",
+      "fr": "although, even though (often with surprise/complaint)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "たくさん勉強したのに、答えをまちがえました。",
+        "en": "Even though I studied a lot, I got the answer wrong.",
+        "fr": "Even though I studied a lot, I got the answer wrong."
+      },
+      {
+        "jp": "春なのに、まださむいです。",
+        "en": "Even though it is spring, it is still cold.",
+        "fr": "Even though it is spring, it is still cold."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てあげる／てくれる／てもらう",
+    "structure": "verb て-form + あげる・くれる・もらう",
+    "meaning": {
+      "en": "giving and receiving an action as a favor",
+      "fr": "giving and receiving an action as a favor"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "友だちがにもつを持ってくれました。",
+        "en": "My friend carried my luggage for me.",
+        "fr": "My friend carried my luggage for me."
+      },
+      {
+        "jp": "弟に日本語を教えてあげました。",
+        "en": "I taught my younger brother Japanese.",
+        "fr": "I taught my younger brother Japanese."
+      }
+    ]
+  },
+  {
+    "pattern": "〜そうです",
+    "structure": "verb stem / adjective stem + そうです",
+    "meaning": {
+      "en": "looks like, appears to be (visual impression)",
+      "fr": "looks like, appears to be (visual impression)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この料理はおいしそうです。",
+        "en": "This dish looks delicious.",
+        "fr": "This dish looks delicious."
+      },
+      {
+        "jp": "今にも雨がふりそうです。",
+        "en": "It looks like it will rain at any moment.",
+        "fr": "It looks like it will rain at any moment."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ようです",
+    "structure": "plain form + ようです",
+    "meaning": {
+      "en": "seems like, appears that (inference)",
+      "fr": "seems like, appears that (inference)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "父は元気になったようです。",
+        "en": "It seems my father has got better.",
+        "fr": "It seems my father has got better."
+      },
+      {
+        "jp": "だれか来たようです。",
+        "en": "It seems that someone has come.",
+        "fr": "It seems that someone has come."
+      }
+    ]
+  },
+  {
+    "pattern": "使役形 〜させる",
+    "structure": "verb causative stem + させる",
+    "meaning": {
+      "en": "make or let someone do",
+      "fr": "make or let someone do"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "母は妹に野さいを食べさせました。",
+        "en": "My mother made my younger sister eat vegetables.",
+        "fr": "My mother made my younger sister eat vegetables."
+      },
+      {
+        "jp": "先生は学生に本を読ませました。",
+        "en": "The teacher had the students read a book.",
+        "fr": "The teacher had the students read a book."
+      }
+    ]
+  },
+  {
+    "pattern": "受身形 〜られる",
+    "structure": "verb passive stem + られる",
+    "meaning": {
+      "en": "be done to, have something done to oneself",
+      "fr": "be done to, have something done to oneself"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生に名前をよばれました。",
+        "en": "I was called by name by the teacher.",
+        "fr": "I was called by name by the teacher."
+      },
+      {
+        "jp": "この歌は世界中で歌われています。",
+        "en": "This song is sung all over the world.",
+        "fr": "This song is sung all over the world."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てしまう",
+    "structure": "verb て-form + しまう",
+    "meaning": {
+      "en": "completion, or regret at having done",
+      "fr": "completion, or regret at having done"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "大切な物をなくしてしまいました。",
+        "en": "I have lost something important.",
+        "fr": "I have lost something important."
+      },
+      {
+        "jp": "その本はもう読んでしまいました。",
+        "en": "I have already finished reading that book.",
+        "fr": "I have already finished reading that book."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ておく",
+    "structure": "verb て-form + おく",
+    "meaning": {
+      "en": "do in advance, or leave as is",
+      "fr": "do in advance, or leave as is"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "旅行の前にきっぷを買っておきます。",
+        "en": "I will buy the ticket in advance before the trip.",
+        "fr": "I will buy the ticket in advance before the trip."
+      },
+      {
+        "jp": "パンを買っておきました。",
+        "en": "I bought bread in advance.",
+        "fr": "I bought bread in advance."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことがある",
+    "structure": "verb た-form + ことがある",
+    "meaning": {
+      "en": "have done before (experience)",
+      "fr": "have done before (experience)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "北海道へ行ったことがあります。",
+        "en": "I have been to Hokkaido before.",
+        "fr": "I have been to Hokkaido before."
+      },
+      {
+        "jp": "その映画は見たことがありません。",
+        "en": "I have never seen that film.",
+        "fr": "I have never seen that film."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ようになる",
+    "structure": "verb dictionary form + ようになる",
+    "meaning": {
+      "en": "come to do, reach the point of doing",
+      "fr": "come to do, reach the point of doing"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "漢字が読めるようになりました。",
+        "en": "I have become able to read kanji.",
+        "fr": "I have become able to read kanji."
+      },
+      {
+        "jp": "朝早く起きるようになりました。",
+        "en": "I have come to get up early in the morning.",
+        "fr": "I have come to get up early in the morning."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことにする",
+    "structure": "verb dictionary/ない form + ことにする",
+    "meaning": {
+      "en": "decide to",
+      "fr": "decide to"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "毎朝走ることにしました。",
+        "en": "I have decided to run every morning.",
+        "fr": "I have decided to run every morning."
+      },
+      {
+        "jp": "おさけは飲まないことにしています。",
+        "en": "I make it a rule not to drink alcohol.",
+        "fr": "I make it a rule not to drink alcohol."
+      }
+    ]
+  },
+  {
+    "pattern": "〜つもりです",
+    "structure": "verb dictionary form + つもりです",
+    "meaning": {
+      "en": "intend to",
+      "fr": "intend to"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "来年、日本へ行くつもりです。",
+        "en": "I intend to go to Japan next year.",
+        "fr": "I intend to go to Japan next year."
+      },
+      {
+        "jp": "その仕事はやめるつもりです。",
+        "en": "I intend to quit that job.",
+        "fr": "I intend to quit that job."
+      }
+    ]
+  },
+  {
+    "pattern": "〜という",
+    "structure": "noun/plain form + という",
+    "meaning": {
+      "en": "called ..., that is said to be",
+      "fr": "called ..., that is said to be"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "山田という人が来ました。",
+        "en": "A person called Yamada came.",
+        "fr": "A person called Yamada came."
+      },
+      {
+        "jp": "さくらという店に行きました。",
+        "en": "I went to a shop called Sakura.",
+        "fr": "I went to a shop called Sakura."
+      }
+    ]
+  },
+  {
+    "pattern": "〜はずです",
+    "structure": "plain form + はずです",
+    "meaning": {
+      "en": "should be, expected to be",
+      "fr": "should be, expected to be"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "兄は今日来るはずです。",
+        "en": "My older brother is supposed to come today.",
+        "fr": "My older brother is supposed to come today."
+      },
+      {
+        "jp": "この時間なら、店は開いているはずです。",
+        "en": "At this hour, the shop should be open.",
+        "fr": "At this hour, the shop should be open."
+      }
+    ]
+  },
+  {
+    "pattern": "〜かもしれません",
+    "structure": "plain form + かもしれません",
+    "meaning": {
+      "en": "might, maybe",
+      "fr": "might, maybe"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "あしたはゆきがふるかもしれません。",
+        "en": "It might snow tomorrow.",
+        "fr": "It might snow tomorrow."
+      },
+      {
+        "jp": "姉はもう帰ったかもしれません。",
+        "en": "My older sister might have already gone home.",
+        "fr": "My older sister might have already gone home."
+      }
+    ]
+  },
+  {
+    "pattern": "〜まま",
+    "structure": "た-form/noun + の + まま",
+    "meaning": {
+      "en": "as is, while remaining in a state",
+      "fr": "as is, while remaining in a state"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "くつをはいたまま、家に入らないでください。",
+        "en": "Please do not enter the house with your shoes on.",
+        "fr": "Please do not enter the house with your shoes on."
+      },
+      {
+        "jp": "電気をつけたままねてしまいました。",
+        "en": "I fell asleep with the light left on.",
+        "fr": "I fell asleep with the light left on."
+      }
+    ]
+  },
+  {
+    "pattern": "可能形 〜(ら)れる",
+    "structure": "verb potential stem + る・られる",
+    "meaning": {
+      "en": "can do, be able to — the conjugated potential",
+      "fr": "can do, be able to — the conjugated potential"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "私は漢字が書けます。",
+        "en": "I can write kanji.",
+        "fr": "I can write kanji."
+      },
+      {
+        "jp": "この魚は生で食べられます。",
+        "en": "This fish can be eaten raw.",
+        "fr": "This fish can be eaten raw."
+      }
+    ]
+  },
+  {
+    "pattern": "意向形 〜(よ)う",
+    "structure": "verb volitional form",
+    "meaning": {
+      "en": "let's, I think I'll — the plain counterpart of ましょう",
+      "fr": "let's, I think I'll — the plain counterpart of ましょう"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "そろそろ帰ろう。",
+        "en": "Let's head home soon.",
+        "fr": "Let's head home soon."
+      },
+      {
+        "jp": "今日は早くねよう。",
+        "en": "I think I'll go to bed early today.",
+        "fr": "I think I'll go to bed early today."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ようと思う",
+    "structure": "verb volitional form + と思う",
+    "meaning": {
+      "en": "be thinking of doing, plan to",
+      "fr": "be thinking of doing, plan to"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "来週から運動しようと思います。",
+        "en": "I am thinking of exercising from next week.",
+        "fr": "I am thinking of exercising from next week."
+      },
+      {
+        "jp": "弟に日本語を教えようと思っています。",
+        "en": "I am thinking of teaching my younger brother Japanese.",
+        "fr": "I am thinking of teaching my younger brother Japanese."
+      }
+    ]
+  },
+  {
+    "pattern": "〜と",
+    "structure": "plain form + と",
+    "meaning": {
+      "en": "conditional: whenever A happens, B follows (automatic result)",
+      "fr": "conditional: whenever A happens, B follows (automatic result)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "春になると、さくらがさきます。",
+        "en": "When spring comes, the cherry blossoms bloom.",
+        "fr": "When spring comes, the cherry blossoms bloom."
+      },
+      {
+        "jp": "このボタンをおすと、きっぷが出ます。",
+        "en": "If you press this button, a ticket comes out.",
+        "fr": "If you press this button, a ticket comes out."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ながら",
+    "structure": "verb stem + ながら",
+    "meaning": {
+      "en": "while doing — two actions at once, one subject",
+      "fr": "while doing — two actions at once, one subject"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "音楽を聞きながら勉強します。",
+        "en": "I study while listening to music.",
+        "fr": "I study while listening to music."
+      },
+      {
+        "jp": "歩きながら話しましょう。",
+        "en": "Let's talk while walking.",
+        "fr": "Let's talk while walking."
+      }
+    ]
+  },
+  {
+    "pattern": "〜たり〜たり",
+    "structure": "verb た-form + り + verb た-form + り + する",
+    "meaning": {
+      "en": "doing this and that, alternating between",
+      "fr": "doing this and that, alternating between"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "日曜日は本を読んだり音楽を聞いたりします。",
+        "en": "On Sundays I read books and listen to music.",
+        "fr": "On Sundays I read books and listen to music."
+      },
+      {
+        "jp": "休みの日はそうじしたりせんたくしたりしました。",
+        "en": "On my day off I cleaned and did the laundry.",
+        "fr": "On my day off I cleaned and did the laundry."
+      }
+    ]
+  },
+  {
+    "pattern": "〜すぎる",
+    "structure": "verb stem / adjective stem + すぎる",
+    "meaning": {
+      "en": "too much, excessively",
+      "fr": "too much, excessively"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "夕べは飲みすぎました。",
+        "en": "I drank too much last night.",
+        "fr": "I drank too much last night."
+      },
+      {
+        "jp": "この問題はむずかしすぎます。",
+        "en": "This problem is too difficult.",
+        "fr": "This problem is too difficult."
+      }
+    ]
+  },
+  {
+    "pattern": "〜やすい／〜にくい",
+    "structure": "verb stem + やすい・にくい",
+    "meaning": {
+      "en": "easy to do / hard to do",
+      "fr": "easy to do / hard to do"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この本は字が大きくて読みやすいです。",
+        "en": "This book has large characters and is easy to read.",
+        "fr": "This book has large characters and is easy to read."
+      },
+      {
+        "jp": "この漢字はおぼえにくいです。",
+        "en": "This kanji is hard to remember.",
+        "fr": "This kanji is hard to remember."
+      }
+    ]
+  },
+  {
+    "pattern": "〜はじめる／〜おわる／〜つづける",
+    "structure": "verb stem + はじめる・おわる・つづける",
+    "meaning": {
+      "en": "start, finish, or keep on doing",
+      "fr": "start, finish, or keep on doing"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "三時から雨がふりはじめました。",
+        "en": "It started raining from three o'clock.",
+        "fr": "It started raining from three o'clock."
+      },
+      {
+        "jp": "兄は一時間も歌いつづけました。",
+        "en": "My older brother kept singing for a whole hour.",
+        "fr": "My older brother kept singing for a whole hour."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ていく／〜てくる",
+    "structure": "verb て-form + いく・くる",
+    "meaning": {
+      "en": "movement or change heading away from / toward the speaker",
+      "fr": "movement or change heading away from / toward the speaker"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "これからさむくなっていくでしょう。",
+        "en": "It will probably keep getting colder from now on.",
+        "fr": "It will probably keep getting colder from now on."
+      },
+      {
+        "jp": "パンを買ってくる。",
+        "en": "I will go and buy some bread.",
+        "fr": "I will go and buy some bread."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てみる",
+    "structure": "verb て-form + みる",
+    "meaning": {
+      "en": "try doing and see how it turns out",
+      "fr": "try doing and see how it turns out"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この服を着てみてもいいですか。",
+        "en": "May I try wearing these clothes?",
+        "fr": "May I try wearing these clothes?"
+      },
+      {
+        "jp": "新しい店で食べてみました。",
+        "en": "I tried eating at the new shop.",
+        "fr": "I tried eating at the new shop."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てある",
+    "structure": "verb て-form + ある",
+    "meaning": {
+      "en": "has been done and stays that way (someone did it deliberately)",
+      "fr": "has been done and stays that way (someone did it deliberately)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "かべに地図がはってあります。",
+        "en": "A map is put up on the wall.",
+        "fr": "A map is put up on the wall."
+      },
+      {
+        "jp": "お茶が用意してあります。",
+        "en": "The tea has been prepared.",
+        "fr": "The tea has been prepared."
+      }
+    ]
+  },
+  {
+    "pattern": "〜らしい",
+    "structure": "plain form / noun + らしい",
+    "meaning": {
+      "en": "apparently, I gather that (from an outside source)",
+      "fr": "apparently, I gather that (from an outside source)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "となりの家に新しい人が来たらしいです。",
+        "en": "Apparently a new person has come to the house next door.",
+        "fr": "Apparently a new person has come to the house next door."
+      },
+      {
+        "jp": "あの店の魚は安いらしいです。",
+        "en": "I gather the fish at that shop is cheap.",
+        "fr": "I gather the fish at that shop is cheap."
+      }
+    ]
+  },
+  {
+    "pattern": "〜みたいだ",
+    "structure": "plain form / noun + みたいだ",
+    "meaning": {
+      "en": "seems like, looks like — the colloquial ようだ",
+      "fr": "seems like, looks like — the colloquial ようだ"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "あの人は先生みたいだ。",
+        "en": "That person seems to be a teacher.",
+        "fr": "That person seems to be a teacher."
+      },
+      {
+        "jp": "外はもうくらいみたいだ。",
+        "en": "It seems it is already dark outside.",
+        "fr": "It seems it is already dark outside."
+      }
+    ]
+  },
+  {
+    "pattern": "自動詞／他動詞",
+    "structure": "intransitive: noun + が + verb / transitive: noun + を + verb",
+    "meaning": {
+      "en": "paired verbs: one thing happens, the other is done to something",
+      "fr": "paired verbs: one thing happens, the other is done to something"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "風でドアが開きました。",
+        "en": "The door opened in the wind.",
+        "fr": "The door opened in the wind."
+      },
+      {
+        "jp": "私はゆっくりドアを開けました。",
+        "en": "I opened the door slowly.",
+        "fr": "I opened the door slowly."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことになる",
+    "structure": "verb dictionary/ない form + ことになる",
+    "meaning": {
+      "en": "it has been decided that, it works out that",
+      "fr": "it has been decided that, it works out that"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "来月から東京ではたらくことになりました。",
+        "en": "It has been decided that I will work in Tokyo from next month.",
+        "fr": "It has been decided that I will work in Tokyo from next month."
+      },
+      {
+        "jp": "旅行は来週になることになりました。",
+        "en": "It has been decided that the trip will be next week.",
+        "fr": "It has been decided that the trip will be next week."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ようにする",
+    "structure": "verb dictionary/ない form + ようにする",
+    "meaning": {
+      "en": "make a point of, see to it that",
+      "fr": "make a point of, see to it that"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "毎日野さいを食べるようにしています。",
+        "en": "I make a point of eating vegetables every day.",
+        "fr": "I make a point of eating vegetables every day."
+      },
+      {
+        "jp": "夜おそくまで起きないようにします。",
+        "en": "I will see to it that I do not stay up late.",
+        "fr": "I will see to it that I do not stay up late."
+      }
+    ]
+  },
+  {
+    "pattern": "〜かどうか",
+    "structure": "plain form + かどうか",
+    "meaning": {
+      "en": "whether or not",
+      "fr": "whether or not"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "兄が来るかどうか分かりません。",
+        "en": "I do not know whether my older brother is coming.",
+        "fr": "I do not know whether my older brother is coming."
+      },
+      {
+        "jp": "この答えが正しいかどうか教えてください。",
+        "en": "Please tell me whether this answer is correct.",
+        "fr": "Please tell me whether this answer is correct."
+      }
+    ]
+  },
+  {
+    "pattern": "〜しか〜ない",
+    "structure": "noun + しか + negative verb",
+    "meaning": {
+      "en": "only, nothing but",
+      "fr": "only, nothing but"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "さいふに百円しかありません。",
+        "en": "I have only a hundred yen in my wallet.",
+        "fr": "I have only a hundred yen in my wallet."
+      },
+      {
+        "jp": "日本語しか話せません。",
+        "en": "I can only speak Japanese.",
+        "fr": "I can only speak Japanese."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ても",
+    "structure": "verb て-form + も / adjective + ても",
+    "meaning": {
+      "en": "even if, no matter",
+      "fr": "even if, no matter"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "雨がふっても、私は歩いて行きます。",
+        "en": "Even if it rains, I will walk there.",
+        "fr": "Even if it rains, I will walk there."
+      },
+      {
+        "jp": "いくら考えても分かりません。",
+        "en": "No matter how much I think, I do not understand.",
+        "fr": "No matter how much I think, I do not understand."
+      }
+    ]
+  },
+  {
+    "pattern": "お〜になる／お〜する",
+    "structure": "お + verb stem + になる (respectful)・する (humble)",
+    "meaning": {
+      "en": "keigo: raises the other person, or lowers oneself",
+      "fr": "keigo: raises the other person, or lowers oneself"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生はもうお帰りになりました。",
+        "en": "The teacher has already gone home.",
+        "fr": "The teacher has already gone home."
+      },
+      {
+        "jp": "私がにもつをお持ちします。",
+        "en": "I will carry your luggage.",
+        "fr": "I will carry your luggage."
+      }
+    ]
+  },
+  {
+    "pattern": "〜んです／〜のです",
+    "structure": "plain form + んです・のです",
+    "meaning": {
+      "en": "framing a statement as an explanation",
+      "fr": "framing a statement as an explanation"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "時間がないんです。",
+        "en": "The thing is, I have no time.",
+        "fr": "The thing is, I have no time."
+      },
+      {
+        "jp": "急いでいるんです。",
+        "en": "It's just that I'm in a hurry.",
+        "fr": "It's just that I'm in a hurry."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てほしい",
+    "structure": "verb て-form + ほしい",
+    "meaning": {
+      "en": "want someone else to do",
+      "fr": "want someone else to do"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "もう少し待ってほしいです。",
+        "en": "I want you to wait a little longer.",
+        "fr": "I want you to wait a little longer."
+      },
+      {
+        "jp": "この手紙を読んでほしい。",
+        "en": "I want you to read this letter.",
+        "fr": "I want you to read this letter."
+      }
+    ]
+  },
+  {
+    "pattern": "〜たがる",
+    "structure": "verb stem + たがる",
+    "meaning": {
+      "en": "someone else shows they want to",
+      "fr": "someone else shows they want to"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "弟はいつも外に出たがる。",
+        "en": "My little brother always wants to go outside.",
+        "fr": "My little brother always wants to go outside."
+      },
+      {
+        "jp": "子どもは新しい服を着たがります。",
+        "en": "Children want to wear new clothes.",
+        "fr": "Children want to wear new clothes."
+      }
+    ]
+  },
+  {
+    "pattern": "〜そうにない",
+    "structure": "verb stem + そうにない",
+    "meaning": {
+      "en": "shows no sign of happening",
+      "fr": "shows no sign of happening"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "今日は雨がやみそうにない。",
+        "en": "The rain does not look like stopping today.",
+        "fr": "The rain does not look like stopping today."
+      },
+      {
+        "jp": "この仕事は早く終わりそうにない。",
+        "en": "This work shows no sign of finishing early.",
+        "fr": "This work shows no sign of finishing early."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なくてはいけない",
+    "structure": "verb ない-form (drop い) + くてはいけない",
+    "meaning": {
+      "en": "obliged to do",
+      "fr": "obliged to do"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "明日までに出さなくてはいけない。",
+        "en": "I have to hand it in by tomorrow.",
+        "fr": "I have to hand it in by tomorrow."
+      },
+      {
+        "jp": "毎日、水を飲まなくてはいけません。",
+        "en": "I must drink water every day.",
+        "fr": "I must drink water every day."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なきゃ／〜なくちゃ",
+    "structure": "verb ない-form (drop い) + きゃ・くちゃ",
+    "meaning": {
+      "en": "the spoken short form of must",
+      "fr": "the spoken short form of must"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "そろそろ帰らなきゃ。",
+        "en": "I'd better be heading home.",
+        "fr": "I'd better be heading home."
+      },
+      {
+        "jp": "もう行かなくちゃ、時間がない。",
+        "en": "I have to go now, there's no time.",
+        "fr": "I have to go now, there's no time."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ないといけない",
+    "structure": "verb ない-form + といけない",
+    "meaning": {
+      "en": "it won't do unless you",
+      "fr": "it won't do unless you"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "お金をはらわないといけない。",
+        "en": "I have to pay the money.",
+        "fr": "I have to pay the money."
+      },
+      {
+        "jp": "早く起きないといけません。",
+        "en": "I have to get up early.",
+        "fr": "I have to get up early."
+      }
+    ]
+  },
+  {
+    "pattern": "〜し",
+    "structure": "plain form + し",
+    "meaning": {
+      "en": "listing reasons, with more implied",
+      "fr": "listing reasons, with more implied"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "安いし、近いし、この店にします。",
+        "en": "It's cheap and it's close, so I'll go with this shop.",
+        "fr": "It's cheap and it's close, so I'll go with this shop."
+      },
+      {
+        "jp": "雨は強いし、風もあるし、出かけたくない。",
+        "en": "The rain is heavy and it's windy, so I don't want to go out.",
+        "fr": "The rain is heavy and it's windy, so I don't want to go out."
+      }
+    ]
+  },
+  {
+    "pattern": "〜だろう",
+    "structure": "plain form + だろう",
+    "meaning": {
+      "en": "the plain counterpart of でしょう",
+      "fr": "the plain counterpart of でしょう"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "明日はいい天気だろう。",
+        "en": "The weather will probably be fine tomorrow.",
+        "fr": "The weather will probably be fine tomorrow."
+      },
+      {
+        "jp": "今日はもう家に着いただろう。",
+        "en": "He has probably arrived home by now.",
+        "fr": "He has probably arrived home by now."
+      }
+    ]
+  },
+  {
+    "pattern": "〜かな",
+    "structure": "plain form + かな",
+    "meaning": {
+      "en": "wondering to oneself",
+      "fr": "wondering to oneself"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "あの人は来るかな。",
+        "en": "I wonder if that person will come.",
+        "fr": "I wonder if that person will come."
+      },
+      {
+        "jp": "この道でいいのかな。",
+        "en": "I wonder if this is the right road.",
+        "fr": "I wonder if this is the right road."
+      }
+    ]
+  },
+  {
+    "pattern": "〜のは〜だ",
+    "structure": "clause + のは + noun + だ",
+    "meaning": {
+      "en": "singling one element out as the point",
+      "fr": "singling one element out as the point"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "大切なのは毎日習うことだ。",
+        "en": "What matters is studying every day.",
+        "fr": "What matters is studying every day."
+      },
+      {
+        "jp": "いちばん楽しいのは音楽です。",
+        "en": "What I enjoy most is music.",
+        "fr": "What I enjoy most is music."
+      }
+    ]
+  },
+  {
+    "pattern": "〜こと",
+    "structure": "verb dictionary form + こと",
+    "meaning": {
+      "en": "turning a verb into a noun",
+      "fr": "turning a verb into a noun"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "走ることは体にいいです。",
+        "en": "Running is good for the body.",
+        "fr": "Running is good for the body."
+      },
+      {
+        "jp": "外国語を習うことは楽しい。",
+        "en": "Learning a foreign language is fun.",
+        "fr": "Learning a foreign language is fun."
+      }
+    ]
+  },
+  {
+    "pattern": "〜の",
+    "structure": "verb dictionary form + の",
+    "meaning": {
+      "en": "the spoken nominaliser",
+      "fr": "the spoken nominaliser"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "本を読むのは楽しいです。",
+        "en": "Reading books is enjoyable.",
+        "fr": "Reading books is enjoyable."
+      },
+      {
+        "jp": "歩くのは体にいいです。",
+        "en": "Walking is good for you.",
+        "fr": "Walking is good for you."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ばよかった",
+    "structure": "verb ば-form + よかった",
+    "meaning": {
+      "en": "regret at not having done",
+      "fr": "regret at not having done"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "もっと早く出ればよかった。",
+        "en": "I should have left earlier.",
+        "fr": "I should have left earlier."
+      },
+      {
+        "jp": "あの本を買えばよかったです。",
+        "en": "I should have bought that book.",
+        "fr": "I should have bought that book."
+      }
+    ]
+  },
+  {
+    "pattern": "〜たらどうですか",
+    "structure": "verb た-form + らどうですか",
+    "meaning": {
+      "en": "suggesting a course of action",
+      "fr": "suggesting a course of action"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生に聞いたらどうですか。",
+        "en": "Why don't you ask the teacher?",
+        "fr": "Why don't you ask the teacher?"
+      },
+      {
+        "jp": "少し休んだらどうですか。",
+        "en": "Why don't you take a short rest?",
+        "fr": "Why don't you take a short rest?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ずに",
+    "structure": "verb ない-stem + ずに",
+    "meaning": {
+      "en": "the written form of without doing",
+      "fr": "the written form of without doing"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "朝ごはんを食べずに出かけた。",
+        "en": "I went out without eating breakfast.",
+        "fr": "I went out without eating breakfast."
+      },
+      {
+        "jp": "何も言わずに帰ってしまった。",
+        "en": "He went home without saying anything.",
+        "fr": "He went home without saying anything."
+      }
+    ]
+  },
+  {
+    "pattern": "〜あいだに",
+    "structure": "clause/noun + の + あいだに",
+    "meaning": {
+      "en": "at some point within a span",
+      "fr": "at some point within a span"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "父が出かけているあいだに、そうじをした。",
+        "en": "I cleaned while my father was out.",
+        "fr": "I cleaned while my father was out."
+      },
+      {
+        "jp": "夏休みのあいだに、本を十さつ読んだ。",
+        "en": "I read ten books during the summer holiday.",
+        "fr": "I read ten books during the summer holiday."
+      }
+    ]
+  },
+  {
+    "pattern": "〜あいだ",
+    "structure": "clause/noun + の + あいだ",
+    "meaning": {
+      "en": "throughout a span",
+      "fr": "throughout a span"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "わたしが待っているあいだ、だれも来なかった。",
+        "en": "Nobody came the whole time I was waiting.",
+        "fr": "Nobody came the whole time I was waiting."
+      },
+      {
+        "jp": "夏のあいだ、毎日海へ行った。",
+        "en": "I went to the sea every day throughout the summer.",
+        "fr": "I went to the sea every day throughout the summer."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ところだ",
+    "structure": "verb dictionary/た-form + ところだ",
+    "meaning": {
+      "en": "right at that stage of an action",
+      "fr": "right at that stage of an action"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "今から出かけるところだ。",
+        "en": "I am just about to go out.",
+        "fr": "I am just about to go out."
+      },
+      {
+        "jp": "ちょうど食事が終わったところです。",
+        "en": "I have just this moment finished eating.",
+        "fr": "I have just this moment finished eating."
+      }
+    ]
+  },
+  {
+    "pattern": "〜たばかり",
+    "structure": "verb た-form + ばかり",
+    "meaning": {
+      "en": "only just finished doing",
+      "fr": "only just finished doing"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この店は先月開いたばかりです。",
+        "en": "This shop only opened last month.",
+        "fr": "This shop only opened last month."
+      },
+      {
+        "jp": "日本へ来たばかりで、まだよく分かりません。",
+        "en": "I have only just come to Japan, so I don't know much yet.",
+        "fr": "I have only just come to Japan, so I don't know much yet."
+      }
+    ]
+  },
+  {
+    "pattern": "〜させてください",
+    "structure": "verb causative stem + せてください",
+    "meaning": {
+      "en": "asking to be allowed to do",
+      "fr": "asking to be allowed to do"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この仕事をわたしにさせてください。",
+        "en": "Please let me do this job.",
+        "fr": "Please let me do this job."
+      },
+      {
+        "jp": "少し考えさせてください。",
+        "en": "Please let me think about it a little.",
+        "fr": "Please let me think about it a little."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なさい",
+    "structure": "verb stem + なさい",
+    "meaning": {
+      "en": "a firm but gentle order",
+      "fr": "a firm but gentle order"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "もっと早く起きなさい。",
+        "en": "Get up earlier.",
+        "fr": "Get up earlier."
+      },
+      {
+        "jp": "この字をよく見なさい。",
+        "en": "Take a good look at this character.",
+        "fr": "Take a good look at this character."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ために",
+    "structure": "verb dictionary form / noun + の + ために",
+    "meaning": {
+      "en": "for the sake of, in order to",
+      "fr": "for the sake of, in order to"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "日本語を習うために、学校へ行きます。",
+        "en": "I go to school in order to learn Japanese.",
+        "fr": "I go to school in order to learn Japanese."
+      },
+      {
+        "jp": "家族のために時間を使います。",
+        "en": "I spend my time for my family.",
+        "fr": "I spend my time for my family."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ように",
+    "structure": "verb potential/ない form + ように",
+    "meaning": {
+      "en": "so that a state comes about",
+      "fr": "so that a state comes about"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "よく見えるように、前に立った。",
+        "en": "I stood at the front so that I could see well.",
+        "fr": "I stood at the front so that I could see well."
+      },
+      {
+        "jp": "後で分かるように、紙に書いた。",
+        "en": "I wrote it on paper so it would be clear later.",
+        "fr": "I wrote it on paper so it would be clear later."
+      }
+    ]
+  },
+  {
+    "pattern": "〜方",
+    "structure": "verb stem + 方",
+    "meaning": {
+      "en": "the way of doing something",
+      "fr": "the way of doing something"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この漢字の読み方が分かりません。",
+        "en": "I do not know how to read this kanji.",
+        "fr": "I do not know how to read this kanji."
+      },
+      {
+        "jp": "料理の作り方を教えてください。",
+        "en": "Please teach me how to cook the dish.",
+        "fr": "Please teach me how to cook the dish."
+      }
+    ]
+  },
+  {
+    "pattern": "〜出す",
+    "structure": "verb stem + 出す",
+    "meaning": {
+      "en": "break into an action abruptly",
+      "fr": "break into an action abruptly"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "子どもが急に走り出す。",
+        "en": "The child suddenly starts running.",
+        "fr": "The child suddenly starts running."
+      },
+      {
+        "jp": "風が強くなると、雨がふり出す。",
+        "en": "When the wind picks up, it starts to rain.",
+        "fr": "When the wind picks up, it starts to rain."
+      }
+    ]
+  },
+  {
+    "pattern": "〜直す",
+    "structure": "verb stem + 直す",
+    "meaning": {
+      "en": "do it over again",
+      "fr": "do it over again"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この作文をもう一度書き直す。",
+        "en": "I will write this composition over again.",
+        "fr": "I will write this composition over again."
+      },
+      {
+        "jp": "明日、はじめからやり直す。",
+        "en": "Tomorrow I will do it over from the start.",
+        "fr": "Tomorrow I will do it over from the start."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てもらえませんか",
+    "structure": "verb て-form + もらえませんか",
+    "meaning": {
+      "en": "a polite request for a favour",
+      "fr": "a polite request for a favour"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この本を持ってもらえませんか。",
+        "en": "Could you carry this book for me?",
+        "fr": "Could you carry this book for me?"
+      },
+      {
+        "jp": "もう一度、書いてもらえませんか。",
+        "en": "Could you write it once more?",
+        "fr": "Could you write it once more?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜がする",
+    "structure": "sensation noun + がする",
+    "meaning": {
+      "en": "a smell, sound or taste is perceived",
+      "fr": "a smell, sound or taste is perceived"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "へやからいいにおいがする。",
+        "en": "There is a nice smell coming from the room.",
+        "fr": "There is a nice smell coming from the room."
+      },
+      {
+        "jp": "外で大きな音がする。",
+        "en": "There is a loud noise outside.",
+        "fr": "There is a loud noise outside."
+      }
+    ]
+  },
+  {
+    "pattern": "〜までに",
+    "structure": "time/event + までに",
+    "meaning": {
+      "en": "no later than that point",
+      "fr": "no later than that point"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "五時までに帰ってください。",
+        "en": "Please be back by five.",
+        "fr": "Please be back by five."
+      },
+      {
+        "jp": "来週までに答えを出します。",
+        "en": "I will give an answer by next week.",
+        "fr": "I will give an answer by next week."
+      }
+    ]
+  }
+]

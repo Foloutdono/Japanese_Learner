@@ -234,7 +234,8 @@ def test_volumes_counts_items_not_cards(client):
     assert set(body) == {"vocab", "kanji", "grammar", "kana"}
     # Spot values pinned to the content decks; if a deck grows these
     # move together with it (the endpoint computes from the same data).
-    assert body["grammar"] == {lvl: 71 for lvl in ("N5", "N4", "N3", "N2", "N1")}
+    from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+    assert body["grammar"] == {lvl: len(GRAMMAR_POINTS_BY_LEVEL[lvl]) for lvl in ("N5", "N4", "N3", "N2", "N1")}
     assert body["vocab"]["N5"] == 667
     assert body["kanji"]["N1"] == 1232
     # 238: the gojūon and the yōon of both scripts, and the fourteen

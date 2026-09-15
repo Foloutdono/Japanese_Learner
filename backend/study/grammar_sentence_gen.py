@@ -35,6 +35,7 @@ import json
 import logging
 import re
 
+from content.grammar_points_data import gloss
 from study.grammar_match import contains_pattern, verifiable
 from study.llm_shared import chat, sentence_kanji_ok, llm_configured
 
@@ -80,7 +81,7 @@ Output ONLY a JSON array of {count} entries, each entry exactly {n} pairs, same 
 
 def _points_block(points: list[dict]) -> str:
     return "\n".join(
-        f"{i}. {p['pattern']} ({p['structure']}) = {p['meaning']}"
+        f"{i}. {p['pattern']} ({p['structure']}) = {gloss(p, 'en')}"
         for i, p in enumerate(points, 1)
     )
 
