@@ -10,7 +10,7 @@ import { Sheet } from '../components/chrome/Sheet'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { deckTypeOf } from '../components/decks/deckTypes'
-import { BooksIcon } from '../components/ui/Icons'
+import { BooksIcon, WarningIcon } from '../components/ui/Icons'
 
 // ── One published deck, before you commit to it ───────────────
 // The page you read to decide. It shows what the deck is, who wrote it,
@@ -19,8 +19,11 @@ import { BooksIcon } from '../components/ui/Icons'
 //
 // Following is a LINK, not a copy: the deck stays its author's and
 // their later edits reach you. The copy is "Make it mine" on the deck's
-// own page afterwards, and the line under the button says so, because
-// that is the one thing about this feature a learner cannot guess.
+// own page afterwards. That used to be spelled out in a paragraph under
+// the button; it was three lines of prose between the learner and the
+// cards they came to read, and "Say less" (DESIGN.md) wins — the deck's
+// own page is where the copy is offered, and where the sentence belongs
+// if it is ever missed.
 
 // The closed set the backend validates against (REPORT_REASONS), each
 // with the locale key that names it. Flat keys rather than a nested
@@ -144,30 +147,34 @@ export default function PublicDeckScreen({ session }) {
 
       {deck.description && <p className="lib-blurb">{deck.description}</p>}
 
-      {/* The one thing a learner cannot guess about this feature. */}
-      <p className="lib-note">{t.libraryLinkNote}</p>
-
+      {/* The list and the count of what it left out are one block: the
+          count is the list's caption, and at the page's own block gap it
+          floated between the cards and the report as a third thing. */}
       {preview.length > 0 && (
-        <ul className="card-list lib-preview">
-          {preview.map((card, i) => (
-            <li key={card.id ?? card.raw_id ?? i} className="card-row lib-preview__row">
-              <span className="card-row__front">
-                <span className="card-row__jp" lang="ja">{card.front}</span>
-                {card.kana && <span className="card-row__kana" lang="ja">{card.kana}</span>}
-              </span>
-              <span className="card-row__back">{card.back}</span>
-            </li>
-          ))}
-        </ul>
+        <div className="lib-preview">
+          <ul className="card-list">
+            {preview.map((card, i) => (
+              <li key={card.id ?? card.raw_id ?? i} className="card-row">
+                <span className="card-row__body">
+                  <span className="card-row__front">
+                    <span className="card-row__jp" lang="ja">{card.front}</span>
+                    {card.kana && <span className="card-row__kana" lang="ja">{card.kana}</span>}
+                  </span>
+                  <span className="card-row__back">{card.back}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+          {deck.card_count > preview.length && (
+            <p className="lib-note">{t.libraryAndMore(deck.card_count - preview.length)}</p>
+          )}
+        </div>
       )}
 
-      {deck.card_count > preview.length && (
-        <p className="lib-note">{t.libraryAndMore(deck.card_count - preview.length)}</p>
-      )}
-
-      <div className="chip-row lib-foot">
-        <Chip onClick={() => { playUi('click-mode-selection'); setReport(true) }}
+      <div className="chip-row">
+        <Chip className="chip--danger" onClick={() => { playUi('click-mode-selection'); setReport(true) }}
           aria-haspopup="dialog" disabled={reported}>
+          <WarningIcon size={14} />
           {reported ? t.libraryReported : t.libraryReport}
         </Chip>
       </div>

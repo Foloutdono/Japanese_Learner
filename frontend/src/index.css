@@ -8969,7 +8969,10 @@ textarea:focus-visible {
   border-radius: var(--r-card);
 }
 .deck-identity__roundel { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
-.deck-identity__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+/* --sp-1 between the name and its figures: at line-height 1.2 the
+   caption sat on the serif's baseline and the two read as one
+   wrapped line rather than as a name and its meta. */
+.deck-identity__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; flex: 1; }
 .deck-identity__name {
   margin: 0;
   font-family: var(--font-serif);
@@ -8980,6 +8983,40 @@ textarea:focus-visible {
 .deck-identity__meta { font-size: var(--fs-caption); color: var(--text-secondary); }
 .deck-identity__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 .deck-identity__study { flex: none; }
+
+/* ── The identity block on a phone ──
+   Four things in one row and room for three. At 390px the card holds
+   334px inside its own padding; the roundel takes 30 of it and the
+   action is `flex: none`, so the name and the figures were left about
+   180px -- a column narrower than the author's name, which is the one
+   figure this page exists to carry. The three take tiers instead: the
+   name beside the roundel, the figures across the whole card, the
+   action under both.
+
+   `display: contents` on the names so the h2 and the meta are the
+   grid's own children and can sit in different columns -- the same
+   instrument, for the same reason, as .anl-dial further up. The
+   grid's own row gap replaces the --sp-1 between the two, which is
+   the right distance when they share a column and too little when
+   they no longer do.
+
+   Above the breakpoint the single row is right and stays: a card past
+   ~440px has to earn its width with a right-hand column (DESIGN.md,
+   the density contract), and the action is that column. */
+@media (max-width: 560px) {
+  .deck-identity {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    /* Row then column, the shorthand .anl-dials takes for the same
+       two-column grid. */
+    gap: var(--sp-3) var(--sp-4);
+    align-items: center;
+  }
+  .deck-identity__names { display: contents; }
+  .deck-identity__name { grid-column: 2; }
+  .deck-identity__meta { grid-column: 1 / -1; }
+  .deck-identity__study { grid-column: 1 / -1; }
+}
 
 .chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }
 
@@ -13120,13 +13157,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 700;
 }
 
-/* The preview list is the card list, read-only: no row opens, nothing
-   is removable, so the rows lose the pointer they would otherwise
-   claim. */
-.lib-preview__row { cursor: default; }
-.lib-preview__row:hover { background: none; }
+/* The preview is the card list read-only, and the line counting what it
+   left out. The rows need no rule of their own: the seat
+   (.card-row__body) is a span here rather than a button, so it carries
+   the list's padding and its 56px floor without claiming the pointer or
+   the hover ground a pressable row claims. The block exists for the
+   caption alone -- at the page's --sp-5 it read as a third object
+   between the cards and the report rather than as the list's own tally.
 
-.lib-foot { margin-top: var(--sp-4); }
+   The report under it has no rule at all any more: it wore a .lib-foot
+   that put a --sp-4 on top of the page's own --sp-5 gap, so the one
+   footer action sat 28px below the cards while every other block on the
+   screen sat 16px below its neighbour. A screen has one block rhythm,
+   and the report is not a second one. */
+.lib-preview { display: flex; flex-direction: column; gap: var(--sp-2); }
 
 /* DESIGN.md's figure rule, and the first consumer --fs-heading has
    had: display face, 700, line-height 1, tabular figures. */
