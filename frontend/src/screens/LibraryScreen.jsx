@@ -4,7 +4,7 @@ import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
-import { Bar } from '../components/chrome/Bar'
+import { Bar, Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -74,7 +74,17 @@ export default function LibraryScreen({ session }) {
 
   return (
     <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-      <Bar code="KZ" color="var(--line-decks)" title={t.library} />
+      {/* The way back, as every nested screen under 教材 carries one
+          (the deck page's is the same word). It matters more now that
+          the shelf's Browse door is how you get here: a trip out of
+          your own decks wants the way back into them, and the tab
+          under it only returns to the gate. */}
+      <Bar
+        code="KZ"
+        color="var(--line-decks)"
+        title={t.library}
+        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
+      />
 
       <div className="lib-controls">
         <Seg
