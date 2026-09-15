@@ -44,22 +44,22 @@ export function BlockMark({ jp, name, tally }) {
 const strokes = (n, t) => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
 
 // ── 画数 — the stroke rail ──
-// One line of stroke counts, walked with a button at either end.
+// One line of stroke counts: swiped, or walked with a button at
+// either end.
 //
-// It was a thumb rail that the LEARNER had to drag: seven of eighteen
-// counts fit a 390px phone, the eighth was cut by a fade, and the rest
-// were behind a sideways drag inside a page that scrolls the other way
-// — the one gesture a thumb holding the phone cannot make cleanly. The
+// It was a rail the learner could ONLY drag: seven of eighteen counts
+// fit a 390px phone, the eighth was cut by a fade, and the rest were
+// behind a sideways drag inside a page that scrolls the other way —
+// the one gesture a thumb holding the phone cannot make cleanly. The
 // page under it had to name its own neighbours (‹ 1画 · 6 … 2画 · 23 ›)
 // precisely because the rail was hiding them.
 //
-// So the drag is gone and the two chevrons do the walking: each steps
-// to the next stroke count, the rail carries the read one to its
-// middle, and the counts either side of it stay one tap away. The
-// track cannot be dragged and has no scrollbar to summon — it is
-// `overflow: hidden`, which a script may still scroll and a finger may
-// not — and the pager under the tiles goes with the rail's own
-// neighbours, which are now in plain sight.
+// So the two chevrons do the walking: each steps to the next stroke
+// count, the rail carries the read one to the middle of the track, and
+// the counts either side of it stay one tap away. The swipe stays as
+// the shortcut for a thumb that would rather flick — it is the only
+// way to reach a count without also reading its page, which is what
+// makes it worth keeping beside the buttons.
 //
 // Eighteen keys wrapped onto three rows was the other way to show them
 // all, and it read as a number pad over an index rather than as the
@@ -68,8 +68,9 @@ const strokes = (n, t) => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokes
 // The unit rides the chosen key alone — DESIGN.md, "A gate is a
 // pictogram, and only the gate you are on is captioned": a row that
 // would otherwise print 画 eighteen times captions the one you are on
-// and lets the rest be numerals. The keys are one width, so the
-// caption moves nothing.
+// and lets the rest be numerals. It is set in the key's corner rather
+// than beside the figure, because a unit the figure makes room for is
+// a figure that is no longer in the middle of its own key.
 export function StrokeRail({ groups, active, onPick, t }) {
   const keys = useRef(new Map())
   const at = Math.max(0, groups.findIndex(g => g.stroke_count === active))
@@ -101,24 +102,31 @@ export function StrokeRail({ groups, active, onPick, t }) {
   return (
     <nav className="stroke-rail" aria-label={t.dictStrokeIndex}>
       {step(prev, 'left', t.dictStrokePrev)}
-      <div className="stroke-rail__track">
-        {groups.map(g => {
-          const on = g.stroke_count === active
-          return (
-            <button
-              key={g.stroke_count}
-              type="button"
-              ref={el => { keys.current.set(g.stroke_count, el) }}
-              onClick={() => onPick(g.stroke_count)}
-              aria-current={on ? 'true' : undefined}
-              aria-label={strokes(g.stroke_count, t)}
-              className={`stroke-rail__key${on ? ' stroke-rail__key--on' : ''}`}
-            >
-              <span className="stroke-rail__n">{g.stroke_count}</span>
-              {on && <span className="stroke-rail__unit" lang="ja" aria-hidden="true">画</span>}
-            </button>
-          )
-        })}
+      {/* The clip is what keeps a scrollbar off the swipe: the track
+          scrolls inside a wrapper that hides its bottom edge, where a
+          bar — overlay or classic — is drawn. Styling one instead is
+          what summons a phone's classic bar (index.css, "Themed
+          scrollbar"). */}
+      <div className="stroke-rail__clip">
+        <div className="stroke-rail__track">
+          {groups.map(g => {
+            const on = g.stroke_count === active
+            return (
+              <button
+                key={g.stroke_count}
+                type="button"
+                ref={el => { keys.current.set(g.stroke_count, el) }}
+                onClick={() => onPick(g.stroke_count)}
+                aria-current={on ? 'true' : undefined}
+                aria-label={strokes(g.stroke_count, t)}
+                className={`stroke-rail__key${on ? ' stroke-rail__key--on' : ''}`}
+              >
+                <span className="stroke-rail__n">{g.stroke_count}</span>
+                {on && <span className="stroke-rail__unit" lang="ja" aria-hidden="true">画</span>}
+              </button>
+            )
+          })}
+        </div>
       </div>
       {step(next, 'right', t.dictStrokeNext)}
     </nav>

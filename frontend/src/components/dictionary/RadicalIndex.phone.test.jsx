@@ -13,7 +13,7 @@ import '../../index.css'
 //     (‹ 1画 · 6 … 2画 · 23 ›) to make the hidden half reachable at
 //     all. The counts stay on one line — wrapping them onto three
 //     rows put a number pad over the index — and the two chevrons
-//     walk it instead.
+//     walk it, with the flick kept as a shortcut beside them.
 //   - six tile columns at 390px is a 52px tile, and the study index's
 //     tile is chosen ON its meaning: "marche…", "soi-mê…", "tête de …".
 //
@@ -97,7 +97,7 @@ const track = s => s.one('.stroke-rail__track')
 const steps = s => s.all('.stroke-rail__step')
 
 describe('the stroke rail', () => {
-  it('keeps every count on one line, and gives the finger nothing to drag', async () => {
+  it('keeps every count on one line, swipable, with no bar under it', async () => {
     const s = await index()
     const keys = s.all('.stroke-rail__key')
     expect(keys.length).toBe(GROUPS.length)
@@ -106,15 +106,44 @@ describe('the stroke rail', () => {
     expect(new Set(keys.map(k => Math.round(k.getBoundingClientRect().top))).size).toBe(1)
     expect(fits(rail(s))).toBe(true)
     expect(track(s).scrollWidth).toBeGreaterThan(track(s).clientWidth)
-    // Hidden, not auto: a script may scroll this, a thumb may not, and
-    // no pointer is offered a scrollbar.
-    expect(getComputedStyle(track(s)).overflowX).toBe('hidden')
+    // The flick is the shortcut beside the two chevrons...
+    expect(getComputedStyle(track(s)).overflowX).toBe('auto')
+    // ...and it stays inside the rail rather than turning into the
+    // browser's back gesture at the end of the index.
+    expect(getComputedStyle(track(s)).overscrollBehaviorX).toBe('contain')
+    // ...and it carries no scrollbar on any pointer: the track is
+    // taller than the window it scrolls in, by exactly the room the
+    // bar would be drawn in, and the clip hides that edge. Asking for
+    // `scrollbar-width` instead is what summons a phone's classic bar
+    // (index.scrollbar.browser.test.jsx).
+    const clip = s.one('.stroke-rail__clip')
+    expect(getComputedStyle(clip).overflow).toBe('hidden')
+    expect(track(s).offsetHeight).toBeGreaterThan(clip.clientHeight)
     // Every key and both chevrons are targets a thumb can hit.
     for (const el of [...keys, ...steps(s)]) {
       const box = el.getBoundingClientRect()
       expect(box.height).toBeGreaterThanOrEqual(44)
       expect(box.width).toBeGreaterThanOrEqual(44)
     }
+  })
+
+  it('sets every figure in the middle of its own key', async () => {
+    const s = await index()
+    // The unit is out of the flow, so the chosen key's figure sits on
+    // the same two axes as the seventeen without one — it was 8px left
+    // of centre, and every figure 5px high in its box, when the two
+    // shared a baseline-aligned row.
+    for (const key of s.all('.stroke-rail__key')) {
+      const k = key.getBoundingClientRect()
+      const n = key.querySelector('.stroke-rail__n').getBoundingClientRect()
+      expect(Math.abs((n.left + n.right) / 2 - (k.left + k.right) / 2), key.textContent).toBeLessThan(0.6)
+      expect(Math.abs((n.top + n.bottom) / 2 - (k.top + k.bottom) / 2), key.textContent).toBeLessThan(0.6)
+    }
+    // And the caption it carries stays inside its key.
+    const on = s.one('.stroke-rail__key--on').getBoundingClientRect()
+    const unit = s.one('.stroke-rail__unit').getBoundingClientRect()
+    expect(unit.right).toBeLessThanOrEqual(on.right)
+    expect(unit.top).toBeGreaterThanOrEqual(on.top)
   })
 
   it('walks the index from the two chevrons, and stops at its ends', async () => {

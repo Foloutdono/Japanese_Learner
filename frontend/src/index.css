@@ -15454,52 +15454,67 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    above: equal specificity, and a media query adds none. */
 
 /* ── 画数 — the stroke rail ──
-   One line of stroke counts, walked with a button at either end.
+   One line of stroke counts: swiped, or walked with a button at
+   either end.
 
    Two things were wrong with the rail this replaces, and they pulled
-   in opposite directions. It SCROLLED SIDEWAYS: seven of eighteen
+   in opposite directions. It could ONLY be dragged: seven of eighteen
    counts fit a 390px phone, the eighth was cut by a fade, and the rest
    were behind a horizontal drag inside a page that scrolls the other
-   way. Wrapping every count onto three rows fixed the reach and cost
-   the screen a number pad sitting over its index.
+   way — the one gesture a thumb holding the phone cannot make
+   cleanly. Wrapping every count onto three rows fixed the reach and
+   put a number pad over the index it belongs to.
 
-   So the counts stay on one line and the two chevrons do the walking
-   — each steps to the next stroke count and the track carries the read
-   one to its middle. The track is `overflow: hidden`, which a script
-   may scroll and a finger may not: no drag, no scrollbar to summon on
-   any pointer (index.css, "Themed scrollbar"), and no fade pretending
-   to be an affordance. The pager under the tiles (‹ 1画 · 6 … 2画 · 23 ›)
-   was the rail's apology for hiding its neighbours; they are in plain
-   sight now, so it is gone. */
+   So the counts stay on one line and the two chevrons walk it — each
+   steps to the next stroke count, and the track carries the read one
+   to its middle — with the swipe kept as the shortcut for a thumb
+   that would rather flick. The pager under the tiles (‹ 1画 · 6 …
+   2画 · 23 ›) was the old rail's apology for hiding its neighbours;
+   they are in plain sight now, so it is gone.
+
+   No scrollbar under it on any pointer, and no scrollbar DECLARATION
+   either, since styling one at all is what summons a phone's classic
+   bar (index.css, "Themed scrollbar"; index.scrollbar.browser.test.jsx
+   holds every such rule behind `pointer: fine`). The bar is clipped
+   instead: the track scrolls inside a wrapper that hides its bottom
+   edge, where the bar is drawn. */
 .stroke-rail {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: var(--sp-2);
 }
+.stroke-rail__clip { overflow: hidden; }
 .stroke-rail__track {
   display: flex;
   gap: var(--sp-2);
-  overflow: hidden;
+  /* Centred while they all fit — a desktop row, or an index of three
+     counts — and `safe` so that the first key stays reachable once
+     they do not, which plain centring would push off the start. */
+  justify-content: safe center;
+  overflow-x: auto;
+  /* The swipe belongs to the rail, not to the page behind it: without
+     this a flick past the last count carries on as a back gesture. */
+  overscroll-behavior-x: contain;
+  /* Room for the bar, then that room clipped by the wrapper. */
+  padding-bottom: var(--sp-6);
+  margin-bottom: calc(-1 * var(--sp-6));
 }
 .stroke-rail__key,
 .stroke-rail__step {
-  display: inline-flex;
+  position: relative;
+  display: flex;
   align-items: center;
   justify-content: center;
   flex: none;
   min-width: 44px;
   min-height: 44px;
+  padding: var(--sp-1);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   background: none;
   color: var(--text-secondary);
   transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
-}
-.stroke-rail__key {
-  align-items: baseline;
-  gap: var(--sp-1);
-  padding: var(--sp-3) var(--sp-1);
 }
 .stroke-rail__key:hover,
 .stroke-rail__key:focus-visible,
@@ -15517,6 +15532,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   color: var(--text-secondary);
   border-color: var(--surface-line);
 }
+/* The figure is centred in its key, and every key is one width, so the
+   numerals sit on one line down the middle of their boxes — which is
+   the whole reason the unit below is out of the flow. */
 .stroke-rail__n {
   font-family: var(--font-display);
   font-size: var(--fs-body);
@@ -15527,10 +15545,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The unit rides the chosen key alone (DESIGN.md, "A gate is a
    pictogram, and only the gate you are on is captioned"): a row that
    would otherwise print 画 eighteen times captions the one being read.
-   The keys are one width, so the caption moves nothing. */
+   Set in the corner and OUT OF THE FLOW, because a unit beside the
+   numeral is a unit the numeral makes room for — it sat 8px left of
+   its own key's centre while the other seventeen were dead centre. */
 .stroke-rail__unit {
+  position: absolute;
+  top: var(--sp-1);
+  right: var(--sp-1);
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-caption-xs);
   line-height: 1;
 }
 /* Chosen: the chip's own three-part treatment (.chip--on above) in
