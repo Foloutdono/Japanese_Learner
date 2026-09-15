@@ -11169,6 +11169,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   letter-spacing: var(--tr-term);
 }
 
+/* ── 改札の戻り — the shell's callback passing through (screens/NativeReturn.jsx)
+   The boot screen's room, with one door: the deep link as a button, for
+   a browser that will not follow a custom scheme on its own. */
+.native-return__open { text-decoration: none; }
+
 /* ── Drawing canvas ───────────────────────────────────────── */
 .canvas-wrap {
   /* Three things bound the board, and the smallest wins: the card it

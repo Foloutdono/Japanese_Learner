@@ -868,4 +868,26 @@ describe('BoardingFlow', () => {
     // is still true: that Google account is still somebody's pass.
     expect(live(screen).querySelectorAll('.auth-provider')).toHaveLength(2)
   })
+
+  // The account is on the pass, which is the next screen: a claim that
+  // went through moves on by itself rather than asking for a second
+  // tap to confirm what the green line already said.
+  it('moves on to the pass by itself once the claim succeeds', async () => {
+    sessionStorage.setItem(STASH_KEY, JSON.stringify({ answers: RESUMED, step: 'account', savedName: 'Tester' }))
+    updateUser.mockResolvedValue({
+      data: { user: { email: 'patou@gmail.com', is_anonymous: false } },
+      error: null,
+    })
+    const { screen } = await renderFlow({ guest: true })
+    expect(stepOf(screen)).toBe('account')
+
+    type(q(screen, 'input[type="email"]'), 'patou@gmail.com')
+    type(q(screen, 'input[type="password"]'), 'hunter22')
+    await settle(20)
+    await click(screen, '[data-action="account-create"]')
+    await settle()
+
+    expect(updateUser).toHaveBeenCalledWith({ email: 'patou@gmail.com', password: 'hunter22' })
+    expect(stepOf(screen)).toBe('pass')
+  })
 })

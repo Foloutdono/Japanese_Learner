@@ -20,6 +20,8 @@ import '@fontsource/noto-sans-jp/500.css'
 import '@fontsource/noto-sans-jp/700.css'
 import './index.css'
 import App from './App.jsx'
+import NativeReturn from './screens/NativeReturn.jsx'
+import { isNativeReturn } from './lib/nativeReturn'
 import { registerSW } from 'virtual:pwa-register'
 import { swUpdate } from './stores/swUpdate'
 import { isNative } from './lib/platform'
@@ -71,8 +73,16 @@ if (isNative()) {
   import('./lib/native').then(n => n.initNative()).catch(() => {})
 }
 
+// ── 改札の戻り (lib/nativeReturn.js) ──
+// The shell's Google round trip lands on this origin before going
+// home. That load is not the app's to boot: no session check, no
+// gate, no boarding in a browser tab that is about to close — just
+// the forward to the deep link, and a button for a browser that
+// will not follow a custom scheme on its own.
+const passingThrough = isNativeReturn(window.location.href)
+
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <App />
+    {passingThrough ? <NativeReturn /> : <App />}
   </StrictMode>,
 )

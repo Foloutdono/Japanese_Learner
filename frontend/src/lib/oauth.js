@@ -1,5 +1,7 @@
 import { supabase } from './supabase'
 import { isNative } from './platform'
+import { API_ORIGIN } from './origin'
+import { NATIVE_REDIRECT, NATIVE_RETURN_PATH } from './nativeReturn'
 
 // The shell's half, loaded only once isNative() has said yes — the
 // same rule lib/platform.js follows, so the web bundle never carries a
@@ -29,17 +31,29 @@ const native = () => import('./native')
 //          as a deep link on the scheme below, with the WebView still
 //          mounted the whole time.
 //
-// Both of these have to be in Supabase's own Redirect URLs allowlist
-// (Authentication → URL Configuration) or the round trip ends on
-// Supabase's error page instead of here. See docs/oauth.md.
+// The shell does not ask Supabase for that deep link directly, though.
+// A `redirect_to` Supabase has not been told about is not refused: it
+// is silently swapped for the project's Site URL, which put the
+// learner in the web app inside the custom tab, boarding from question
+// one, while the shell waited underneath for a link that never came.
+// So the shell asks for a page on the WEB origin — always honoured,
+// because it is the Site URL's own hostname — and that page
+// (screens/NativeReturn.jsx) forwards the callback to the deep link.
+// See lib/nativeReturn.js and docs/oauth.md.
 
-/** The shells' deep link. Registered in AndroidManifest.xml and
- *  Info.plist; anything else here has to change all three. */
-export const NATIVE_REDIRECT = 'app.tsuji://auth-callback'
+// The one string the manifests are written against, kept in
+// lib/nativeReturn.js so the page that forwards to it can be reached
+// without loading this module's supabase dependency.
+export { NATIVE_REDIRECT }
 
 /** Where Supabase should send the learner back to. */
 export function redirectTarget() {
-  if (isNative()) return NATIVE_REDIRECT
+  if (isNative()) {
+    // The Vercel origin (ADR 0008's VITE_API_ORIGIN). A shell built
+    // without one cannot bounce through the web, so it asks for the
+    // deep link itself and relies on the allowlist, as it used to.
+    return API_ORIGIN ? `${API_ORIGIN}${NATIVE_RETURN_PATH}` : NATIVE_REDIRECT
+  }
   // The origin, not href: a redirect back onto a deep path would be
   // allowlisted separately, and the app routes itself from / anyway.
   return `${window.location.origin}/`

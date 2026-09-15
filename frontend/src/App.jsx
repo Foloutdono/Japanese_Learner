@@ -24,6 +24,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
+import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { LangProvider, useLang } from './LangContext'
@@ -175,6 +176,13 @@ const SENTENCE_SECTIONS = [
   { base: '/practice/dictation', levelsOnly: true },
 ]
 
+// How long the onboarding gate waits before asking again after a
+// request it could not fail open on (see the gate effect in App). Long
+// enough not to hammer an instance that is still waking, short enough
+// that a server which came up during the last attempt is found at
+// once rather than after another ceiling's worth of wait.
+const GATE_RETRY_MS = 3000
+
 function Moved({ to }) {
   const params = useParams()
   const { search, hash } = useLocation()
@@ -237,10 +245,15 @@ export default function App() {
   // Supabase token refresh (new session object, same user) neither
   // flashes the loading state nor re-gates anyone.
   const [gate, setGate] = useState(null) // { userId, state, profile }
+  // Bumped when the gate's request failed for a learner it may not
+  // fail open for (see the catch below): the effect runs again and
+  // asks once more, while AppLoading keeps drawing the wait.
+  const [gateAttempt, setGateAttempt] = useState(0)
 
   useEffect(() => {
     if (!session) return
     let cancelled = false
+    let retry = null
     const userId = session.user?.id ?? null
     // 45 s, not the 10 s default: the backend sleeps on Render's free
     // tier and a cold start takes 30–60 s. On a phone, where every visit
@@ -251,10 +264,12 @@ export default function App() {
     // The device's clock, on the profile, so the credits refill at the
     // learner's midnight (plan 069). Fire-and-forget: a boot that could
     // not say so refills on UTC's day until the next one that can.
-    apiJson('/api/profile/learning', session, {
-      method: 'PATCH',
-      body: JSON.stringify({ tzOffsetMin: -new Date().getTimezoneOffset() }),
-    }).catch(() => {})
+    if (gateAttempt === 0) {
+      apiJson('/api/profile/learning', session, {
+        method: 'PATCH',
+        body: JSON.stringify({ tzOffsetMin: -new Date().getTimezoneOffset() }),
+      }).catch(() => {})
+    }
     // This request IS the boot wait a learner sits through, so it is
     // also the honest measure of it. render.yaml's `plan: starter` was
     // taken to move this number; without it there is no way to tell
@@ -274,20 +289,42 @@ export default function App() {
           standalone: typeof window !== 'undefined'
             && window.matchMedia?.('(display-mode: standalone)').matches === true,
         })
+        // A real answer: the device now knows this learner is past
+        // the gate, and may wave them through on a day the server is
+        // not answering (stores/onboarded.js).
+        if (p.onboardedAt) rememberOnboarded(userId)
         setGate({ userId, state: p.onboardedAt ? 'done' : 'needed', profile: p })
       })
-      // FAIL OPEN. A flaky network must never lock someone out of an
-      // app they already use; the flow re-offers itself next launch.
       .catch(() => {
         // The 45 s ceiling reached, or the network gave out. Either way
         // the learner watched a loading screen and got nothing, which
         // is the worst first impression the app can make -- and until
         // now, the one it could not count.
         track('boot_timeout', { waited_ms: Date.now() - startedAt })
-        if (!cancelled) setGate({ userId, state: 'done', profile: null })
+        if (cancelled) return
+        // FAIL OPEN — but only for a learner this device has already
+        // seen through the gate. A flaky network must never lock
+        // someone out of an app they already use; the answer they
+        // gave the last time is good enough for today.
+        if (wasOnboardedHere(userId)) {
+          setGate({ userId, state: 'done', profile: null })
+          return
+        }
+        // Anyone else keeps waiting and the gate asks again. The one
+        // who lands here most is a guest whose pass was minted a
+        // moment ago by Embarquer: their first request of the day is
+        // exactly the one a sleeping instance holds past the ceiling,
+        // and failing open would seat them in an app they have not
+        // boarded — no name, no level, no plan — until the next
+        // launch put them back at question one. The boarding is not
+        // skippable, and no screen behind the gate can draw anything
+        // without the server anyway. The pause is short: a request
+        // that timed out on a cold start usually finds the server up
+        // on the next try.
+        retry = setTimeout(() => setGateAttempt(a => a + 1), GATE_RETRY_MS)
       })
-    return () => { cancelled = true }
-  }, [session])
+    return () => { cancelled = true; clearTimeout(retry) }
+  }, [session, gateAttempt])
 
   const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
   const onboardingProfile = gate?.profile ?? null
@@ -381,7 +418,13 @@ export default function App() {
           session={session}
           initialProfile={onboardingProfile}
           guest={isGuest(session)}
-          onComplete={() => setOnboarding('finishing')}
+          onComplete={() => {
+            // The contract is signed server-side by now: this device
+            // may wave the learner through on a launch the server
+            // fails to answer, the same as a profile that said so.
+            rememberOnboarded(session.user?.id ?? null)
+            setOnboarding('finishing')
+          }}
           onExit={() => leaveBoarding()}
           onSignIn={() => leaveBoarding('login')}
         />

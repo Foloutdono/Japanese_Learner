@@ -6,6 +6,7 @@ import { saveBlob } from '../../lib/platform'
 import { playClick } from '../../lib/audio'
 import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
+import { forgetOnboarded } from '../../stores/onboarded'
 import { Seg } from '../chrome/Console'
 import { SettingsPage, Slip } from './SettingsPage'
 
@@ -60,6 +61,9 @@ export function DataPage({ session }) {
     setDeleteFailed(false)
     try {
       await apiJson('/api/account', session, { method: 'DELETE' })
+      // The gate's note for this id goes with the rows: an erased
+      // account is not one this device has "already let through".
+      forgetOnboarded(session?.user?.id ?? null)
       await supabase.auth.signOut({ scope: 'local' })
     } catch {
       setDeleteFailed(true)

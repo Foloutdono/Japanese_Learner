@@ -20,15 +20,36 @@ app ──▶ <project>.supabase.co/auth/v1/authorize?provider=google
 | build | value |
 | --- | --- |
 | web (dev, Vercel) | `window.location.origin` + `/` |
-| shells (Capacitor) | `app.tsuji://auth-callback` |
+| shells (Capacitor) | `VITE_API_ORIGIN` + `/auth/native` — the **web** origin, which forwards to `app.tsuji://auth-callback` |
 
 The shells cannot navigate: the WebView's origin *is* the bundle, so a page
 that leaves for Google can never come home. There the authorization page opens
 in the system browser (`skipBrowserRedirect: true` + `@capacitor/browser`) and
 the answer arrives as a deep link, with the WebView still mounted the whole
 time. The scheme is registered in three places that must agree —
-`src/lib/oauth.js`'s `NATIVE_REDIRECT`,
+`src/lib/nativeReturn.js`'s `NATIVE_REDIRECT` (re-exported by `lib/oauth.js`),
 `android/app/src/main/AndroidManifest.xml`, and `ios/App/App/Info.plist`.
+
+### Why the shell goes through the web first
+
+Supabase does not refuse a `redirect_to` it has not been told about — it
+silently swaps it for the project's **Site URL**. With the deep link asked for
+directly, one missing (or mis-globbed) allowlist entry meant the custom tab
+landed on the Vercel app: that tab signed the *web* in with the new session and
+showed it the boarding from question one, while the shell underneath waited for
+a link that never came. Nothing said why, and the report was "in the app,
+Google sends me to the browser".
+
+A URL on the Site URL's own hostname is always honoured, allowlist or not. So
+the shell asks for `/auth/native` on the web origin, and that page
+(`src/screens/NativeReturn.jsx`, mounted by `main.jsx` *instead of* the app)
+copies the callback — query and fragment, untouched — onto the deep link and
+navigates to it, with the same link offered as a button for a browser that will
+not follow a custom scheme without a tap. `lib/supabase.js` is told not to
+read the URL on that path, so supabase-js never signs the tab in or wipes the
+fragment. The deep-link entry in the allowlist below is still worth having (a
+shell built without `VITE_API_ORIGIN` falls back to asking for it directly),
+but the round trip no longer depends on it.
 
 ## What comes back — the web's half
 
@@ -144,9 +165,14 @@ listed:
 
 ```
 https://japanese-learner-seven.vercel.app/**
-app.tsuji://**
+app.tsuji://auth-callback
 http://localhost:5173/**          ← only if you sign in from `npm run dev`
 ```
+
+The first line is the one the shells now ride on too (`/auth/native`, above).
+A `redirect_to` that matches nothing here is not an error: Supabase falls back
+to the Site URL, which is why a missing line reads as the app "forgetting" to
+come back rather than as a failure.
 
 ### Supabase → Authentication → Providers → Email → Confirm email
 

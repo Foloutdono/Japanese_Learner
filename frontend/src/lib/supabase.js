@@ -5,6 +5,7 @@ import { authStorage } from './authStorage'
 // module order is the only thing that puts it there before supabase-js
 // reads the same URL in its own initialize(). See lib/authRedirect.js.
 import './authRedirect'
+import { isNativeReturn } from './nativeReturn'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -20,11 +21,23 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 // made against it (auth.getSession(), etc.) simply fail/resolve to no
 // session, same as any other offline state.
 // The session's store is the platform's own inside the native shell
-// (lib/authStorage.js, plan 076); `undefined` keeps the default here.
+// (lib/authStorage.js, plan 076); `undefined` keeps the default there.
+//
+// On the shell's return path (lib/nativeReturn.js) the tokens on the
+// URL are the SHELL's, passing through this origin on their way to the
+// deep link. supabase-js would otherwise read that fragment in its own
+// initialize(), sign this browser tab in as the learner and wipe the
+// hash — so the page that forwards it would have nothing left to
+// forward. Told not to look, it leaves the URL exactly as it arrived.
+const passingThrough = typeof window !== 'undefined' && isNativeReturn(window.location.href)
+const authOptions = {
+  ...(authStorage ? { storage: authStorage } : {}),
+  ...(passingThrough ? { detectSessionInUrl: false } : {}),
+}
 export const supabase = createClient(
   SUPABASE_URL || 'https://placeholder.supabase.co',
   SUPABASE_ANON_KEY || 'placeholder-anon-key',
-  authStorage ? { auth: { storage: authStorage } } : undefined,
+  Object.keys(authOptions).length ? { auth: authOptions } : undefined,
 )
 
 // A missing URL in `npm run dev` is nearly always the .env trap:
