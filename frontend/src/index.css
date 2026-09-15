@@ -9349,6 +9349,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .stage__foot .field {
   font-size: var(--fs-lead);
 }
+/* The action under it takes a bigger box than the family's default.
+   The rule is NOT here: `form.stage__foot > .btn-primary` outranks
+   `.exam-nav .btn-primary` and `.token-card__foot .btn-primary`, both
+   declared further down, so stylelint's no-descending-specificity is
+   right that it has to follow them. It lives in the compound group at
+   the end of the file -- search `form.stage__foot`. */
 
 /* ── The practice sessions (canvas Reading / Comprehension /
    Translation / ComprehensionResult, plan 072) ──
@@ -17355,6 +17361,21 @@ html { scrollbar-gutter: stable; }
   min-height: 44px;
   padding-inline: var(--sp-4);
   font-size: var(--fs-sm);
+}
+/* The run's Submit (see "The run's entry", above, for the field it
+   sits under). `form.stage__foot` is exactly the three entry feet --
+   reading's, translation's and dictation's, each a field with one
+   filled action under it -- so the btn-row feet beside them
+   (comprehension's pair, the browse's) keep the family's own box.
+   56px, the same target .quiz-submit takes: this is the one action on
+   a run, thumbed at the bottom edge of a phone with the keyboard
+   already in the frame, so it sits a rung above the family's 44px
+   floor rather than on it. Declared down here with the other
+   compounds, not up in the run's own block, for the reason recorded
+   there: two rules it outranks are declared below that block. */
+form.stage__foot > .btn-primary {
+  min-height: 56px;
+  padding-block: var(--sp-5);
 }
 .dict-form .record { padding: var(--sp-3) var(--sp-4); }
 .record--door:hover .record__chev,
