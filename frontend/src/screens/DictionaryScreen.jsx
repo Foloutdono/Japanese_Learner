@@ -640,7 +640,7 @@ export default function DictionaryScreen({ session }) {
 }
 
 
-// The radical index (StrokeStrip, RadicalTile, RadicalGrid) lives in
+// The radical index (StrokePad, RadicalTile, RadicalGrid) lives in
 // components/dictionary/RadicalIndex.jsx since plan 086, when the kanji
 // station started asking the same question as a study source.
 
