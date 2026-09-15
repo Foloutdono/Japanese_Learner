@@ -28,6 +28,10 @@ vi.mock('./supabase', () => ({ supabase: { auth } }))
 vi.mock('./platform', () => ({ isNative: () => isNative() }))
 vi.mock('./native', () => ({ openAuthTab: (...a) => openAuthTab(...a) }))
 
+// The shell's build carries the Vercel origin (.env.native, ADR 0008);
+// stubbed before the import because lib/origin.js reads it as it loads.
+vi.stubEnv('VITE_API_ORIGIN', 'https://web.test')
+
 const { connectProvider, hasProvider, redirectTarget, NATIVE_REDIRECT } = await import('./oauth')
 
 beforeEach(() => {
@@ -48,9 +52,14 @@ describe('where Supabase sends the learner back', () => {
     expect(redirectTarget()).toBe('https://app.test/')
   })
 
-  it('is the shells\' deep link in the shell, which Google never sees', () => {
+  // Not the deep link itself: a redirect_to Supabase has not been told
+  // about is silently swapped for the Site URL, which is how the shell
+  // ended up watching the web app board in a custom tab. A page on the
+  // web origin is always honoured, and forwards to the deep link
+  // (lib/nativeReturn.js, screens/NativeReturn.jsx).
+  it('is the return page on the WEB origin in the shell, which forwards to the deep link', () => {
     isNative.mockReturnValue(true)
-    expect(redirectTarget()).toBe(NATIVE_REDIRECT)
+    expect(redirectTarget()).toBe('https://web.test/auth/native')
     // The manifests are written against this exact string.
     expect(NATIVE_REDIRECT).toBe('app.tsuji://auth-callback')
   })
@@ -87,7 +96,8 @@ describe('in the shell', () => {
     // The one flag that matters: a WebView whose origin is the bundle
     // cannot navigate to Google and come home.
     expect(args.options.skipBrowserRedirect).toBe(true)
-    expect(args.options.redirectTo).toBe(NATIVE_REDIRECT)
+    // …by way of the web origin's return page (see the redirect tests above).
+    expect(args.options.redirectTo).toBe('https://web.test/auth/native')
     // The authorization page goes to the system browser, and only a
     // deep link on our own scheme is listened for.
     expect(openAuthTab).toHaveBeenCalledWith('https://accounts.google.test/o', 'app.tsuji://')

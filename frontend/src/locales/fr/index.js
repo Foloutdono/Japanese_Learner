@@ -1523,6 +1523,8 @@ const boarding = {
   // raison, pas un haussement d'épaules.
   oauthAlreadyLinked: 'Ce compte Google appartient déjà à une autre carte.',
   oauthSignInInstead: 'Se connecter avec ce compte Google',
+  nativeReturnNote:  'Connecté. Retour vers l’application…',
+  nativeReturnOpen:  'Ouvrir Tsuji',
   oauthLinkingOff: 'Google ne peut pas être ajouté à cette carte pour le moment. Une adresse e-mail, si.',
   // 本乗車券 — mettre une adresse sur la carte (lib/guest.js). Même
   // règle que les deux au-dessus : nommer ce qui s'est passé, et

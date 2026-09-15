@@ -1575,6 +1575,8 @@ const boarding = {
   // reason, not a shrug.
   oauthAlreadyLinked: 'That Google account already belongs to another pass.',
   oauthSignInInstead: 'Sign in with that Google account',
+  nativeReturnNote:  'Signed in. Returning to the app…',
+  nativeReturnOpen:  'Open Tsuji',
   oauthLinkingOff: 'Google cannot be added to this pass right now. An email address can.',
   // 本乗車券 — putting an address on the pass (lib/guest.js). Same
   // rule as the two above: name what happened, and name the road that
