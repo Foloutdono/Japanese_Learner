@@ -416,6 +416,7 @@ const stats = {
   learnFourLines:     'Quatre lignes',
   stationJlpt:        'JLPT',
   stationSources:     'Sources',
+  stationSets:        'Séries',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
   byRadicalShort:     'Par clé',
@@ -527,7 +528,6 @@ const stats = {
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Vous · ${you} — correct · ${right}`,
   examPart: (n) => `Partie ${n}`,
-  kanaSetsSub:        (n) => `${n} séries`,
   serviceName: {
     local:   'Omnibus',
     rapid:   'Rapide',
@@ -965,7 +965,6 @@ const dictionary = {
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
   formation:         'Formation',
-  browseGrammarPoints: 'Parcourir les points',
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',
   glPoints:          'Les points',
