@@ -8969,7 +8969,10 @@ textarea:focus-visible {
   border-radius: var(--r-card);
 }
 .deck-identity__roundel { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
-.deck-identity__names { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+/* --sp-1 between the name and its figures: at line-height 1.2 the
+   caption sat on the serif's baseline and the two read as one
+   wrapped line rather than as a name and its meta. */
+.deck-identity__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; flex: 1; }
 .deck-identity__name {
   margin: 0;
   font-family: var(--font-serif);
@@ -13118,13 +13121,20 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 700;
 }
 
-/* The preview list is the card list, read-only: no row opens, nothing
-   is removable, so the rows lose the pointer they would otherwise
-   claim. */
-.lib-preview__row { cursor: default; }
-.lib-preview__row:hover { background: none; }
+/* The preview is the card list read-only, and the line counting what it
+   left out. The rows need no rule of their own: the seat
+   (.card-row__body) is a span here rather than a button, so it carries
+   the list's padding and its 56px floor without claiming the pointer or
+   the hover ground a pressable row claims. The block exists for the
+   caption alone -- at the page's --sp-5 it read as a third object
+   between the cards and the report rather than as the list's own tally.
 
-.lib-foot { margin-top: var(--sp-4); }
+   The report under it has no rule at all any more: it wore a .lib-foot
+   that put a --sp-4 on top of the page's own --sp-5 gap, so the one
+   footer action sat 28px below the cards while every other block on the
+   screen sat 16px below its neighbour. A screen has one block rhythm,
+   and the report is not a second one. */
+.lib-preview { display: flex; flex-direction: column; gap: var(--sp-2); }
 
 /* DESIGN.md's figure rule, and the first consumer --fs-heading has
    had: display face, 700, line-height 1, tabular figures. */

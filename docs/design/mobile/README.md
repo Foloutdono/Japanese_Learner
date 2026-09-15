@@ -453,9 +453,9 @@ is the class map rather than a port note.
 | `.lib-shelf__more` | both shelves | "See all" / "Show more" — a quiet full-width row, not a `.btn-secondary`: this is navigation, not an action on the screen's object |
 | `.lib-card` + `__author` `__blurb` `__follows` | `components/decks/LibraryCard.jsx` | A published deck. It wears `.platform-card .deck-card` and adds only the two figures a public deck has that a private one does not |
 | `.lib-controls` `__count` | `screens/LibraryScreen.jsx` | The ordering (a `Seg`, not chips) and the tally. **Not a `Console`** — a console's second row is a search field, and there is nothing to search here yet |
-| `.lib-blurb` `.lib-note` | `screens/PublicDeckScreen.jsx` | The author's description, and the quiet line that says what following actually does |
+| `.lib-blurb` `.lib-note` | `screens/PublicDeckScreen.jsx` | The author's description, and the quiet line under a block — the count of the cards the preview left out, and the report sheet's own note |
 | `.lib-warning` `__lead` | `screens/DeckDetailScreen.jsx` | Warn, then vanish: the author has deleted this deck. A state colour on a left rule, never a fill |
-| `.lib-preview` `__row` `.lib-foot` | `screens/PublicDeckScreen.jsx` | The read-only card list, and the report control under it |
+| `.lib-preview` | `screens/PublicDeckScreen.jsx` | The read-only card list and its tally, as one block: the rows are plain `.card-row` + `.card-row__body` (a span, so no pointer and no hover ground), and the `.lib-note` counting what was left out is the list's caption at `--sp-2`, not a third object at the page's own gap. The report under it is a plain `.chip-row` with a `.chip--danger` |
 
 Two things worth knowing before touching it:
 
