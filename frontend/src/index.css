@@ -15595,14 +15595,29 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    the width to print one: four to a 390px phone instead of six, where
    the choice was between "marche…", "soi-mê…" and "tête de …". */
 .radical-page__grid--labelled { grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); }
-/* The tail of the index is thin — 15画 files one radical, 12画 four —
-   and at the full grid's width a page of six left most of a screen
-   empty under two short rows. A short page spends that room on its
-   own tiles instead: fewer columns, and the glyph at the size the
-   lead tiles used to carry. Dead space is the failure (DESIGN.md, the
-   density contract). */
-.radical-page[data-fill="short"] .radical-page__grid { grid-template-columns: repeat(auto-fill, minmax(76px, 1fr)); }
-.radical-page[data-fill="short"] .radical-page__grid--labelled { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); }
+/* The tail of the index is thin — 15画 files one radical, 12画 a
+   couple, 10画 nine — and at the full grid's width those pages left
+   most of a screen empty under two short rows of 56px tiles. A short
+   page spends that room on its own tiles instead.
+
+   The column count is the page's, not the width's (RadicalIndex's
+   `columns`, about the square root of what the page holds), so the
+   track is `repeat(var(--cols), …)` rather than an `auto-fill` that
+   would keep dividing the row by the tile it was given. Each track
+   grows to an equal share of the row — that is what `minmax(0, cap)`
+   buys: a 0 floor takes the row's width out of the tile's hands, and
+   the cap is where growing stops, because a page of two should be two
+   tiles and not two plates. `justify-content: center` is for that
+   case alone; where the share is what binds, the grid already fills
+   its row. Dead space is the failure (DESIGN.md, the density
+   contract). */
+.radical-page[data-fill="short"] .radical-page__grid {
+  grid-template-columns: repeat(var(--cols, 4), minmax(0, 132px));
+  justify-content: center;
+}
+.radical-page[data-fill="short"] .radical-page__grid--labelled {
+  grid-template-columns: repeat(var(--cols, 3), minmax(0, 160px));
+}
 .radical-tile {
   position: relative;
   display: flex;
@@ -15667,6 +15682,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transform: scaleX(var(--done, 0));
   transform-origin: left;
 }
+
+/* And the tile grows with its track: the glyph a rung up — the object
+   the page is scanned FOR, at the size the room affords — over the
+   block rhythm a tile that wide reads at. */
+.radical-page[data-fill="short"] .radical-tile { padding: var(--sp-5) var(--sp-2); }
+.radical-page[data-fill="short"] .radical-tile__char { font-size: var(--fs-display); }
 
 /* ── A block's own mark ──
    The stamp book's 九月 in its margin, for the blocks in the

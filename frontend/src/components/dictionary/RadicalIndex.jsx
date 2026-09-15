@@ -169,12 +169,24 @@ export function RadicalTile({ glyph, count, sub, learned, title, started, onPick
   )
 }
 
-// The tail of the index is thin — 15画 files one radical, 12画 four —
-// and a short page in the full grid's column count left a screen of
-// nothing under two rows of small tiles. At or below this many, the
-// page spends the room it has on its own tiles instead (see
-// `[data-fill="short"]` in index.css).
-const ROOMY_MAX = 8
+// The tail of the index is thin — 15画 files one radical, 12画 a
+// couple, 10画 nine — and a short page drawn at the full grid's
+// column count left a screen of nothing under two rows of small
+// tiles. At or below this many, the page picks its own column count
+// instead and spends the width on its own tiles (see `columns` below
+// and `[data-fill="short"]` in index.css).
+const ROOMY_MAX = 12
+
+// How many columns a short page uses: about the square root of what
+// it holds, so the block reads as wide as it is tall — nine radicals
+// as three rows of three, not as six and then three — and every tile
+// grows to an equal share of the row. Capped, because past four
+// columns the tiles stop growing and past two the room is already
+// spent: a page of two is two tiles, not two plates (the cap on the
+// track itself, in index.css, is what stops them). A labelled tile
+// prints a meaning and is wider to start with, so it takes one column
+// fewer.
+const columns = (n, labelled) => Math.min(labelled ? 3 : 4, Math.max(1, Math.ceil(Math.sqrt(n))))
 
 /**
  * RadicalGrid — one stroke count at a time.
@@ -225,6 +237,7 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
   // prop: whether there is a second line is the `tile` function's
   // answer, and the grid should not have to be told it twice.
   const labelled = rows.some(r => r.sub)
+  const short = rows.length <= ROOMY_MAX
 
   return (
     <div className="dict-radical-index">
@@ -236,7 +249,8 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
       <section
         className="radical-page"
         data-stroke={group.stroke_count}
-        data-fill={rows.length <= ROOMY_MAX ? 'short' : undefined}
+        data-fill={short ? 'short' : undefined}
+        style={short ? { '--cols': columns(rows.length, labelled) } : undefined}
         aria-label={strokes(group.stroke_count, t)}
       >
         <div className={`radical-page__grid${labelled ? ' radical-page__grid--labelled' : ''}`}>
