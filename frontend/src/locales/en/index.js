@@ -998,6 +998,17 @@ const dictionary = {
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
   formation:         'Formation',
   browseGrammarPoints: 'Browse the points',
+  // 文法 — the lesson (plan 087): the pair marks over the steps, the
+  // door on every card and the station's index, the gate's one button.
+  glLesson:          'Lesson',
+  glPoints:          'The points',
+  glRule:            'Rule',
+  glUse:             'Use',
+  glCareful:         'Careful',
+  glCompare:         'Compare',
+  glBoard:           'Understood — board',
+  glBlank:           'gap',
+  glRegister: { neutral: 'Neutral', casual: 'Casual', polite: 'Polite', formal: 'Formal', written: 'Written' },
   dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',

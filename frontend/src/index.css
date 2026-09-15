@@ -19131,3 +19131,216 @@ a.slip__act { text-decoration: none; }
 }
 .rad-kanji--learning::after { background: var(--state-learning); }
 .rad-kanji--mastered::after { background: var(--state-mastered); }
+
+/* ══ 文法 — the lesson (plan 087) ══════════════════════════════
+   A grammar point taught, in three dresses: the gate before a new
+   card in a run, the sheet behind the door on every card and in the
+   station's index, and the body of the dictionary's plate. The
+   blocks are the dictionary's (.dict-block, hairline-divided, no
+   heading — DESIGN.md, "a body that names itself"); what is new here
+   is the step's pair mark, the door onto a neighbour, the gap in a
+   contrast sentence, and the station's index rows. The pigment is
+   文法's, injected once by the shell: the sheet names it below, the
+   stage frame and the dictionary hand it down as --line-color. */
+.gl-sheet { --line-color: var(--line-grammar); }
+.gl-block { display: flex; flex-direction: column; gap: var(--sp-4); }
+/* The gate is the card's own column: the lesson stands where the
+   prompt card will, at the width the stage gives it, on the one
+   surface (DESIGN.md, "one card, everywhere"). */
+.gl--gate {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.gl--gate .dict-plate { position: static; }
+.gl-gate__foot {
+  display: flex;
+  justify-content: center;
+  padding: var(--sp-5);
+  border-top: 1px solid var(--surface-line);
+}
+/* The register, in the plate's corner: a word in the caption register,
+   the way the level numeral beside it is. */
+.gl-register {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+/* ── The steps ──
+   規則, 使い方, 注意: each opens with the mark the radical index puts
+   over a level (.dict-mark), and the text under it is body prose at
+   the reading leading. An ordered list, because the order IS the
+   lesson; the numerals are the marks, so the list's own are off. */
+.gl-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-5);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.gl-step { display: flex; flex-direction: column; gap: var(--sp-3); }
+.gl-step__mark { padding-left: 0; }
+.gl-step__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  color: var(--text-primary);
+  text-wrap: pretty;
+}
+.gl-step__p { margin: 0; }
+.gl-step__list {
+  margin: 0;
+  padding-left: var(--sp-5);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+/* A trap is a state of the step, not a louder step: the mark takes
+   the due ink as an edge, the way the study card's stage word does. */
+.gl-step--careful .gl-step__mark { border-bottom-color: var(--state-due); }
+.gl-step--careful .dict-mark__jp { color: color-mix(in srgb, var(--state-due) 72%, var(--text-primary)); }
+/* ── The neighbours ──
+   One row per rival, the radical family's door: the pattern, its
+   gloss, the one line that says which to use when, and the ▶ sliding
+   in on approach where a shell can open it. Inert where it cannot —
+   the same row, a fact rather than a dead control. */
+.gl-compare { display: flex; flex-direction: column; gap: var(--sp-3); }
+.gl-door {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.gl-door--inert { cursor: default; }
+.gl-door:not(.gl-door--inert):hover,
+.gl-door:not(.gl-door--inert):focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--line-color);
+  filter: none;
+}
+.gl-door__body { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.gl-door__head { display: flex; align-items: baseline; flex-wrap: wrap; gap: var(--sp-3); }
+.gl-door__pattern {
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+}
+.gl-door__level {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.gl-door__gloss { font-size: var(--fs-sm); color: var(--text-secondary); }
+.gl-door__note { font-size: var(--fs-body); line-height: 1.5; color: var(--text-primary); text-wrap: pretty; }
+.gl-door__chev {
+  flex: none;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.gl-door:hover .gl-door__chev,
+.gl-door:focus-visible .gl-door__chev { opacity: 1; transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) {
+  .gl-door, .gl-door__chev { transition: none; }
+}
+/* The translations' one switch, under the examples: a ghost, the
+   secondary ink, the chevron saying which way it goes. */
+.gl-tr-toggle {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+  padding: var(--sp-2) var(--sp-4);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+}
+.gl-tr-toggle:hover,
+.gl-tr-toggle:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
+/* ── The gap ──
+   The contrast drill's blank: a rule under the pattern's place, in
+   the secondary ink, at the sentence's own size. Revealed, it is the
+   pattern picked out as any example picks its pattern out. */
+.gl-blank {
+  border-bottom: 1px solid var(--text-secondary);
+  color: var(--text-secondary);
+}
+.grammar-contrast .dict-ex { align-items: center; }
+.grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
+.grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
+/* ── The ghost door in the stage head ──
+   The lesson, one tap from every card: the head's own ghost, beside
+   the pass, the shape .dict-browse-door has on the station. */
+.gl-door--ghost { gap: var(--sp-2); }
+/* ── The station's index ──
+   The level's points as rows: the pattern, its gloss, the stage
+   word, hairline-divided at the flat radius — a ledger, read top to
+   bottom in the order the level teaches. */
+.gl-index {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  overflow: hidden;
+}
+.gl-index li + li { border-top: 1px solid var(--surface-line); }
+.gl-index__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "pattern stage chev" "gloss stage chev";
+  align-items: center;
+  gap: var(--sp-1) var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  background: transparent;
+  border: 0;
+  border-radius: var(--r-flat);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+}
+.gl-index__row:hover,
+.gl-index__row:focus-visible { background: var(--bg-card-hover); filter: none; }
+.gl-index__pattern {
+  grid-area: pattern;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.gl-index__gloss { grid-area: gloss; font-size: var(--fs-sm); color: var(--text-secondary); }
+.gl-index__row .stage-mark { grid-area: stage; }
+.gl-index__chev { grid-area: chev; color: var(--text-secondary); opacity: 0.7; }

@@ -72,3 +72,29 @@ describe('the study card specimen scale', () => {
     expect(await charDisplayFontSize(vocabCard)).toBe('72px')
   })
 })
+
+// ── The contrast drill's face (plan 087) ──────────────────────
+// A blanked sentence and no flip: the rivals under the card are the
+// exercise, and the reveal — the pattern back in its gap, the
+// translation under it — waits on a pick.
+describe('the grammar contrast face', () => {
+  const contrastCard = {
+    card_id: 'grammar_N5_〜てください', source: 'builtin_grammar', mode: 'grammar.contrast',
+    grammar: '〜てください', structure: 'verb て-form + ください', meaning: 'please do',
+    contrast: {
+      jp: 'ここに名前を書いてください。', tr: 'Please write your name here.',
+      furigana: [{ text: 'ここに名前を書いて' }, { text: '＿＿＿', blank: true }, { text: '。' }],
+      choices: ['〜ないでください', '〜てください', '〜てもいいです', '〜てはいけません'], answer: '〜てください',
+    },
+  }
+  it('shows the gap and no flip until answered, then the answer in the gap', async () => {
+    const screen = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered={false} />)
+    expect(screen.container.querySelector('.gl-blank').textContent).toBe('＿＿＿')
+    expect(screen.container.querySelector('.flashcard, .flip-hint')).toBeNull()
+    expect(screen.container.querySelector('.dict-ex__tr')).toBeNull()
+    const done = await render(<CardPrompt card={contrastCard} t={t} session={{}} answered />)
+    expect(done.container.querySelector('.gl-blank--revealed').textContent).toBe('〜てください')
+    expect(done.container.querySelector('.dict-ex__tr').textContent).toBe('Please write your name here.')
+    expect(done.container.querySelector('.grammar-answer')).toBeTruthy()
+  })
+})

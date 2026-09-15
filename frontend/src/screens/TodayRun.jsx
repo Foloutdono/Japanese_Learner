@@ -15,6 +15,8 @@ import SessionError from '../components/study/SessionError'
 import CardPrompt from '../components/study/CardPrompt'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
+import { ExampleSentence } from '../components/dictionary/ExampleSentence'
+import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
@@ -81,6 +83,8 @@ export default function TodayRun({ session }) {
   // still be on its way — the run does not wait for it.
   const { data: summary } = useTodaySummary()
   const [answered, setAnswered] = useState(false)
+  // The lesson sheet the head's door opens, by card id (plan 087).
+  const [sheet, setSheet] = useState(null)
   const [selected, setSelected] = useState(null)
   const [showRating, setShowRating] = useState(false)
   const [activeHints, setActiveHints] = useState([])
@@ -173,7 +177,18 @@ export default function TodayRun({ session }) {
   })
 
   const nc = card ? normalizeCard(card) : null
-  const { structureKey, renderer, isRadical, isFill, isF2B } = cardShape(nc ?? {})
+  const { structureKey, renderer, isRadical, isFill, isContrast, isF2B } = cardShape(nc ?? {})
+
+  // The lesson, one tap from a grammar point's card (plan 087): the
+  // head's own ghost. A built-in point only — a personal card has no
+  // catalogue lesson behind it.
+  const lessonDoor = nc && structureKey === 'grammar' && nc.source === 'grammar' ? (
+    <button type="button" className="stage__leave dict-browse-door gl-door--ghost"
+            onClick={() => setSheet(nc.raw_id ?? nc.card_id)} disabled={gates.locked}>
+      <span>{t.glLesson}</span>
+      <ChevronIcon direction="right" size={14} />
+    </button>
+  ) : null
   const cardHints = nc?.hints ?? {}
   const availableHints = availableHintsFor(nc)
   const choicesOn = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
@@ -265,6 +280,7 @@ export default function TodayRun({ session }) {
       where={where}
       sub={sub}
       remaining={remaining}
+      aside={lessonDoor ?? undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
     >
@@ -351,6 +367,15 @@ export default function TodayRun({ session }) {
               />
             )}
 
+            {/* The contrast drill's rivals (plan 087): the exercise, always on. */}
+            {structureKey === 'grammar' && isContrast && (
+              <MCQGrid
+                choices={nc.contrast?.choices ?? []}
+                correct={nc.grammar}
+                selected={selected} answered={answered} onAnswer={onMCQAnswer}
+              />
+            )}
+
             {structureKey === 'grammar' && choicesOn && (
               <MCQGrid
                 choices={cardHints[HINTS.CHOICES] ?? []}
@@ -375,8 +400,7 @@ export default function TodayRun({ session }) {
                 <div className="grammar-examples__list">
                   {cardHints[HINTS.SENTENCES].map((ex, i) => (
                     <div key={i} className="grammar-example-card">
-                      <div className="grammar-example-card__jp" lang="ja">{ex.jp}</div>
-                      {showEx && <div className="grammar-example-card__en">{ex.en}</div>}
+                      <ExampleSentence ex={{ ...ex, segments: ex.furigana }} showTr={showEx} />
                     </div>
                   ))}
                 </div>
@@ -420,6 +444,10 @@ export default function TodayRun({ session }) {
 
             <RatingBar active={showRating && !gates.locked} onRate={postReview} />
           </>
+        )}
+
+        {sheet && (
+          <GrammarLessonSheet key={sheet} id={sheet} session={session} onClose={() => setSheet(null)} />
         )}
     </StudyStage>
   )

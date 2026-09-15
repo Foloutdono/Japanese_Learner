@@ -97,6 +97,9 @@ export function cardShape(card) {
     isF2B: card?.direction === 'f2b',
     renderer: spec?.renderer ?? RENDER.FLASHCARD,
     isFill: (spec?.renderer ?? RENDER.FLASHCARD) === RENDER.FILL,
+    // The contrast drill (plan 087): a blanked sentence and the point's
+    // rivals as the choices, always on — no flip, no hint.
+    isContrast: spec?.renderer === RENDER.CONTRAST,
     isRadical: spec?.base === 'radical',
     isWordReading: spec?.base === 'word_reading',
   }

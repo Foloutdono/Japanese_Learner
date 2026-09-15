@@ -1,5 +1,6 @@
 import { MeaningDisplay } from './QuizComponents'
 import { FuriganaParts } from './Readings'
+import { ExampleSentence } from '../dictionary/ExampleSentence'
 
 // ── Shared grammar-card pieces ──────────────────────────────
 // Used by GrammarScreen (a level/tier session) AND StudyScreen (a
@@ -54,19 +55,40 @@ export function GrammarAnswer({ card, size = 44, divided = false }) {
 // no rule — and without it the card quietly asks a kanji question
 // instead of a grammar one. A card whose backend could not tokenize the
 // sentence (see study/furigana.align_sentence) falls back to the plain
-// text, which is what this always showed.
+// text, which is what this always showed. The translation is `tr`, in
+// the learner's language (plan 087).
 export function GrammarFillSentence({ card, echo = false, revealed = false }) {
   const sentence = card.fill_sentence
   if (!sentence?.jp) return null
   const parts = sentence.furigana?.length ? sentence.furigana : [{ text: sentence.jp }]
+  const translation = sentence.tr ?? sentence.en
   return (
     <div className={`grammar-fill-sentence${echo ? ' grammar-fill-sentence--echo' : ''}`}>
       <div className="grammar-fill-sentence__jp" lang="ja">
         <FuriganaParts parts={parts} />
       </div>
-      {revealed && sentence.en && (
-        <div className="grammar-fill-sentence__en">{sentence.en}</div>
+      {revealed && translation && (
+        <div className="grammar-fill-sentence__en">{translation}</div>
       )}
+    </div>
+  )
+}
+
+// ── contrast's sentence (plan 087) ───────────────────────────
+// The pattern blanked out of one of its own sentences; the rivals are
+// the choices under the card. Until the answer is out the gap stays a
+// gap and the translation stays hidden, for the reason fill_in hides
+// its own; once it is, the gap prints the pattern back in the line's
+// ink and the translation under it.
+export function GrammarContrastSentence({ card, revealed = false, t }) {
+  const c = card.contrast
+  if (!c?.jp) return null
+  const segments = (c.furigana?.length ? c.furigana : [{ text: c.jp }]).map(seg => (
+    seg.blank ? { ...seg, answer: c.answer ?? card.grammar } : seg
+  ))
+  return (
+    <div className="grammar-fill-sentence grammar-contrast">
+      <ExampleSentence ex={{ jp: c.jp, tr: c.tr, segments }} showTr={revealed} revealed={revealed} blankLabel={t?.glBlank} />
     </div>
   )
 }
