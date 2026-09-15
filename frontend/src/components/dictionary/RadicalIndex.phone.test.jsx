@@ -6,12 +6,14 @@ import '../../index.css'
 // The index shipped with two defects a 390px screen makes obvious and
 // a desktop lane never sees:
 //
-//   - the stroke counts were a rail that SCROLLED SIDEWAYS. Seven of
+//   - the stroke counts were a rail the LEARNER had to drag. Seven of
 //     the eighteen fit, the eighth was cut by a fade, and the rest
 //     were behind a horizontal drag inside a page that scrolls
 //     vertically. The page under it had to name its own neighbours
 //     (‹ 1画 · 6 … 2画 · 23 ›) to make the hidden half reachable at
-//     all.
+//     all. The counts stay on one line — wrapping them onto three
+//     rows put a number pad over the index — and the two chevrons
+//     walk it instead.
 //   - six tile columns at 390px is a 52px tile, and the study index's
 //     tile is chosen ON its meaning: "marche…", "soi-mê…", "tête de …".
 //
@@ -25,6 +27,8 @@ const t = {
   dictStrokeIndex: 'Index par nombre de traits',
   dictStrokeSingular: 'trait',
   dictStrokesPlural: 'traits',
+  dictStrokePrev: 'Moins de traits',
+  dictStrokeNext: 'Plus de traits',
 }
 
 // The real 3画 group of the course's index, meanings included — the
@@ -88,45 +92,80 @@ async function index({ stroke = 3, tile = studyTile, onPick = () => {}, onStroke
 /** Nothing inside `el` sits outside it on the inline axis. */
 const fits = el => el.scrollWidth <= el.clientWidth + 1
 
-describe('the stroke pad', () => {
-  it('holds every stroke count on screen, with nothing to scroll sideways', async () => {
+const rail = s => s.one('.stroke-rail')
+const track = s => s.one('.stroke-rail__track')
+const steps = s => s.all('.stroke-rail__step')
+
+describe('the stroke rail', () => {
+  it('keeps every count on one line, and gives the finger nothing to drag', async () => {
     const s = await index()
-    const keys = s.all('.stroke-pad__key')
+    const keys = s.all('.stroke-rail__key')
     expect(keys.length).toBe(GROUPS.length)
-    expect(fits(s.one('.stroke-pad'))).toBe(true)
-    // Wrapped, not scrolled: the keys sit on more than one row, and
-    // the last of them is inside the viewport rather than past it.
-    const rows = new Set(keys.map(k => Math.round(k.getBoundingClientRect().top)))
-    expect(rows.size).toBeGreaterThan(1)
-    expect(keys.at(-1).getBoundingClientRect().right).toBeLessThanOrEqual(window.innerWidth)
-    // Every key is a target a thumb can hit.
-    for (const key of keys) expect(key.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // One line: every key shares a top, and the rail itself fits the
+    // phone — only the track behind it holds more than it shows.
+    expect(new Set(keys.map(k => Math.round(k.getBoundingClientRect().top))).size).toBe(1)
+    expect(fits(rail(s))).toBe(true)
+    expect(track(s).scrollWidth).toBeGreaterThan(track(s).clientWidth)
+    // Hidden, not auto: a script may scroll this, a thumb may not, and
+    // no pointer is offered a scrollbar.
+    expect(getComputedStyle(track(s)).overflowX).toBe('hidden')
+    // Every key and both chevrons are targets a thumb can hit.
+    for (const el of [...keys, ...steps(s)]) {
+      const box = el.getBoundingClientRect()
+      expect(box.height).toBeGreaterThanOrEqual(44)
+      expect(box.width).toBeGreaterThanOrEqual(44)
+    }
   })
 
-  it('captions the chosen key alone, and turns the page from any of them', async () => {
+  it('walks the index from the two chevrons, and stops at its ends', async () => {
     const picked = []
     const s = await index({ onStroke: n => picked.push(n) })
-    const units = s.all('.stroke-pad__unit')
-    expect(units.length).toBe(1)
-    expect(units[0].textContent).toBe('画')
-    expect(units[0].closest('.stroke-pad__key').querySelector('.stroke-pad__n').textContent).toBe('3')
-    // The unit changes no width: the keys are equal cells, so tapping
-    // one cannot move the others out from under the thumb.
-    const widths = new Set(s.all('.stroke-pad__key').map(k => Math.round(k.getBoundingClientRect().width)))
-    expect(widths.size).toBe(1)
-    // The far end of the index is a tap, not four flicks.
-    s.all('.stroke-pad__key').at(-1).click()
-    expect(picked).toEqual([17])
+    const [back, on] = steps(s)
+    expect(back.disabled).toBe(false)
+    back.click()
+    on.click()
+    expect(picked).toEqual([2, 4])
+
+    const first = await index({ stroke: 1, onStroke: n => picked.push(n) })
+    expect(steps(first)[0].disabled, 'nothing before 1画').toBe(true)
+    const last = await index({ stroke: 17, onStroke: n => picked.push(n) })
+    expect(steps(last)[1].disabled, 'nothing after the last count').toBe(true)
   })
 
-  it('names each key in the learner language, and marks the one being read', async () => {
+  it('carries the count being read into the middle of the track', async () => {
+    const s = await index({ stroke: 12 })
+    const chosen = () => s.one('.stroke-rail__key--on').getBoundingClientRect()
+    const box = () => track(s).getBoundingClientRect()
+    // 12画 is well past what fits, so it is only in view because the
+    // rail put it there.
+    await expect.poll(() => chosen().left >= box().left - 1).toBe(true)
+    await expect.poll(() => chosen().right <= box().right + 1).toBe(true)
+    // And the counts either side of it are a tap away, not a drag.
+    const visible = s.all('.stroke-rail__key').filter(k => {
+      const r = k.getBoundingClientRect()
+      return r.left >= box().left - 1 && r.right <= box().right + 1
+    })
+    expect(visible.length).toBeGreaterThan(2)
+  })
+
+  it('captions the chosen key alone, and names every one of them', async () => {
     const s = await index()
-    const keys = s.all('.stroke-pad__key')
+    const units = s.all('.stroke-rail__unit')
+    expect(units.length).toBe(1)
+    expect(units[0].textContent).toBe('画')
+    expect(units[0].closest('.stroke-rail__key').querySelector('.stroke-rail__n').textContent).toBe('3')
+    // The caption changes no width: the keys are one size, so the rail
+    // cannot shift under the thumb that just tapped it.
+    const widths = new Set(s.all('.stroke-rail__key').map(k => Math.round(k.getBoundingClientRect().width)))
+    expect(widths.size).toBe(1)
+
+    const keys = s.all('.stroke-rail__key')
     expect(keys[0].getAttribute('aria-label')).toBe('1 trait')
     expect(keys[2].getAttribute('aria-label')).toBe('3 traits')
     expect(keys[2].getAttribute('aria-current')).toBe('true')
     expect(keys.filter(k => k.getAttribute('aria-current')).length).toBe(1)
-    expect(s.one('.stroke-pad').getAttribute('aria-label')).toBe(t.dictStrokeIndex)
+    expect(rail(s).getAttribute('aria-label')).toBe(t.dictStrokeIndex)
+    expect(steps(s).map(b => b.getAttribute('aria-label'))).toEqual([t.dictStrokePrev, t.dictStrokeNext])
   })
 })
 

@@ -112,16 +112,22 @@ describe('the index', () => {
     expect(apiFetch.mock.calls[0][0]).toBe('/api/kanji/radicals?lang=fr')
   })
 
-  it('turns the page from the stroke pad, and carries it in the URL', async () => {
+  it('turns the page from the stroke rail, and carries it in the URL', async () => {
     const s = await station('/learn/kanji/radicals?stroke=3')
-    await expect.poll(() => s.all('.stroke-pad__key').length).toBe(2)
-    // Every stroke count the index has is a key — the rail that used
-    // to scroll them sideways, and the ‹ prev / next › row under the
-    // tiles that existed to reach the ones it hid, are both gone.
-    expect(s.all('.stroke-pad__key .stroke-pad__n').map(n => n.textContent)).toEqual(['1', '3'])
-    s.all('.stroke-pad__key')[0].click()
+    await expect.poll(() => s.all('.stroke-rail__key').length).toBe(2)
+    // Every stroke count the index has is a key on one line, and the
+    // two chevrons walk between them — the drag that used to reach the
+    // far ones, and the ‹ prev / next › row under the tiles that
+    // existed because it hid them, are both gone.
+    expect(s.all('.stroke-rail__key .stroke-rail__n').map(n => n.textContent)).toEqual(['1', '3'])
+    s.one('.stroke-rail__step--left').click()
     await expect.poll(s.where).toBe('/learn/kanji/radicals?stroke=1')
     await expect.poll(() => s.all('.radical-tile').length).toBe(1)
+    // At the near end of the index there is nothing before 1画, and a
+    // key is still a direct jump.
+    expect(s.one('.stroke-rail__step--left').disabled).toBe(true)
+    s.all('.stroke-rail__key')[1].click()
+    await expect.poll(s.where).toBe('/learn/kanji/radicals?stroke=3')
   })
 
   it('marks a radical the learner has opened, and a tile opens its lesson', async () => {

@@ -8608,36 +8608,47 @@ textarea:focus-visible {
 }
 .readings-field__cap { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
 
+/* The picker under the deck form's radical field: the index's own
+   stroke rail, and one stroke count's glyphs under it. It was every
+   group stacked in a 260px scroller — a 22px stroke label beside a
+   wrapped row of 18px glyphs, two hundred of them, inside a box a
+   third the height of the screen. One page of the index fits without
+   a scroller of its own, which is the point: a form field should not
+   contain a second scrolling surface for the page it sits on. */
 .radical-picker {
-  max-height: 260px;
-  overflow-y: auto;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  padding: var(--sp-3);
 }
-.radical-picker__group { display: flex; gap: 8px; align-items: flex-start; }
-.radical-picker__group + .radical-picker__group { margin-top: 6px; }
-.radical-picker__strokes {
-  flex: none;
-  width: 22px;
-  font-size: 11px;
-  color: var(--text-secondary);
-  padding-top: 6px;
-  text-align: right;
+.radical-picker__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  gap: var(--sp-1);
 }
-.radical-picker__row { display: flex; flex-wrap: wrap; gap: 4px; }
+/* A cell is a glyph and a target, not a tile: no figure under it (the
+   card is being filed, not studied) and no edge until it is the one
+   chosen or the one under the thumb. 44px is the floor every other
+   control on this form already keeps. */
 .radical-picker__cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
   font-family: var(--font-jp);
-  font-size: 18px;
+  font-size: var(--fs-lead);
   line-height: 1;
-  padding: 5px 7px;
+  padding: var(--sp-2);
   background: none;
   border: 1px solid transparent;
-  border-radius: 4px;
+  border-radius: var(--r-card);
   color: var(--text-primary);
   cursor: pointer;
 }
-.radical-picker__cell:hover { border-color: var(--border); }
+.radical-picker__cell:hover,
+.radical-picker__cell:focus-visible { border-color: var(--surface-line); filter: none; }
 /* The border keeps the raw pigment -- DESIGN.md's "colour is an edge, a
    ring, or a numeral" -- but the glyph does not: at 18px the raw
    pigment is 2.82:1 on this surface in dark. Same 50% mix toward
@@ -15442,52 +15453,71 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and a media query adds none. */
 
-/* ── 画数 — the stroke pad ──
-   Every stroke count of the index on screen at once, wrapped onto as
-   many rows as it takes.
+/* ── 画数 — the stroke rail ──
+   One line of stroke counts, walked with a button at either end.
 
-   It was a thumb rail off a printed index — one line of numerals that
-   scrolled sideways inside a clip, the read one underlined, the rest
-   running off into a fade. Seven of eighteen counts fit a 390px
-   phone, so the index's second half lived behind a sideways drag
-   inside a page that scrolls the other way, and the fade that was
-   meant to say "there is more" reads as a shadow. The pager under the
-   tiles (‹ 1画 · 6 … 2画 · 23 ›) existed only to name the neighbours
-   the rail was hiding; both are gone with it, and nothing on this
-   screen scrolls sideways any more.
+   Two things were wrong with the rail this replaces, and they pulled
+   in opposite directions. It SCROLLED SIDEWAYS: seven of eighteen
+   counts fit a 390px phone, the eighth was cut by a fade, and the rest
+   were behind a horizontal drag inside a page that scrolls the other
+   way. Wrapping every count onto three rows fixed the reach and cost
+   the screen a number pad sitting over its index.
 
-   auto-fill rather than a column count per tier, and a ragged last
-   row is fine: the keys carry their own edges. The rule this sheet
-   warns about — DESIGN.md, "A lattice's column count must divide its
-   content" — is the hairline lattice's, where the gap IS the seam and
-   a short row shows the background as a bare slab. 44px is the floor
-   a thumb needs; seven fit a phone and every one of them a desktop
-   row. */
-.stroke-pad {
+   So the counts stay on one line and the two chevrons do the walking
+   — each steps to the next stroke count and the track carries the read
+   one to its middle. The track is `overflow: hidden`, which a script
+   may scroll and a finger may not: no drag, no scrollbar to summon on
+   any pointer (index.css, "Themed scrollbar"), and no fade pretending
+   to be an affordance. The pager under the tiles (‹ 1画 · 6 … 2画 · 23 ›)
+   was the rail's apology for hiding its neighbours; they are in plain
+   sight now, so it is gone. */
+.stroke-rail {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(44px, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
   gap: var(--sp-2);
 }
-.stroke-pad__key {
+.stroke-rail__track {
   display: flex;
-  align-items: baseline;
+  gap: var(--sp-2);
+  overflow: hidden;
+}
+.stroke-rail__key,
+.stroke-rail__step {
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: var(--sp-1);
+  flex: none;
+  min-width: 44px;
   min-height: 44px;
-  padding: var(--sp-3) var(--sp-1);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
   background: none;
   color: var(--text-secondary);
   transition: color 0.16s ease, border-color 0.16s ease, background 0.16s ease;
 }
-.stroke-pad__key:hover,
-.stroke-pad__key:focus-visible {
+.stroke-rail__key {
+  align-items: baseline;
+  gap: var(--sp-1);
+  padding: var(--sp-3) var(--sp-1);
+}
+.stroke-rail__key:hover,
+.stroke-rail__key:focus-visible,
+.stroke-rail__step:hover,
+.stroke-rail__step:focus-visible {
   color: var(--text-primary);
   border-color: var(--text-secondary);
   filter: none;
 }
-.stroke-pad__n {
+/* The end of the index: the app's one disabled treatment. */
+.stroke-rail__step:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: none;
+  color: var(--text-secondary);
+  border-color: var(--surface-line);
+}
+.stroke-rail__n {
   font-family: var(--font-display);
   font-size: var(--fs-body);
   font-weight: 700;
@@ -15495,19 +15525,19 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
 }
 /* The unit rides the chosen key alone (DESIGN.md, "A gate is a
-   pictogram, and only the gate you are on is captioned"): a fixed row
-   that would otherwise print 画 eighteen times captions the one being
-   read. Every key is the same grid cell, so the caption changes no
-   width and the pad cannot reflow under the thumb that tapped it. */
-.stroke-pad__unit {
+   pictogram, and only the gate you are on is captioned"): a row that
+   would otherwise print 画 eighteen times captions the one being read.
+   The keys are one width, so the caption moves nothing. */
+.stroke-rail__unit {
   font-family: var(--font-jp);
   font-size: var(--fs-caption);
   line-height: 1;
 }
 /* Chosen: the chip's own three-part treatment (.chip--on above) in
    the line's ink — 辞書's gold under the dictionary, 漢字's under the
-   station. A ring and a wash, never a fill. */
-.stroke-pad__key--on {
+   station, 教材's under the deck form. A ring and a wash, never a
+   fill. */
+.stroke-rail__key--on {
   color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 60%, var(--text-primary));
   border-color: color-mix(in srgb, var(--line-color, var(--line-jisho)) 55%, transparent);
   background: color-mix(in srgb, var(--line-color, var(--line-jisho)) 12%, transparent);
@@ -18817,7 +18847,7 @@ a.slip__act { text-decoration: none; }
 
 /* ══ 部首 — study by radical (plan 086) ═══════════════════════
    The kanji station's third source. The index is the dictionary's
-   own — .stroke-pad, .radical-page, .radical-tile, lifted into
+   own — .stroke-rail, .radical-page, .radical-tile, lifted into
    components/dictionary/RadicalIndex.jsx — read under the station's
    ink now that those rules take `--line-color` (辞書's gold where the
    dictionary sets it, 漢字's ink under the station). What is new is

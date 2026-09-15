@@ -15,6 +15,7 @@ import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
 import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
+import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
 
 // The name the export endpoint chose, out of its Content-Disposition.
@@ -82,10 +83,21 @@ function allowsCustomFor(type) {
 // scoped to radicals with at least one kanji in the app's own deck; a
 // personal card may well use one outside that subset, so it is asked with
 // ?all=true and falls back to whatever it returns.
+//
+// It reaches for the index's own control too: every stroke count as one
+// box of 18-pixel glyphs in a 260px scroller was the same question the
+// dictionary asks — which radical? — answered by asking the learner to
+// scroll past two hundred of them. It is the StrokeRail and one stroke
+// count at a time now (components/dictionary/RadicalIndex.jsx), which
+// is the same instrument at the same size in all three places it is
+// asked. Not the RadicalGrid itself: a form field is choosing a glyph,
+// not reading an index, so it keeps its own small cell and prints no
+// figure under it.
 function RadicalField({ label, value, onChange, session }) {
   const { t } = useLang()
   const [groups, setGroups] = useState(null)
   const [open, setOpen]     = useState(false)
+  const [stroke, setStroke] = useState(null)
 
   useEffect(() => {
     apiFetch('/api/dictionary/radicals?all=true', session)
@@ -99,6 +111,13 @@ function RadicalField({ label, value, onChange, session }) {
     ?.flatMap(g => g.radicals)
     .find(r => r.number === Number(value))
 
+  // The page the picker opens on: the chosen radical's own stroke
+  // count, so re-opening the field lands where the last choice was
+  // made rather than back at 1画.
+  const at = Math.max(0, (groups ?? [])
+    .findIndex(g => g.stroke_count === (stroke ?? chosen?.stroke_count)))
+  const group = groups?.[at]
+
   return (
     <div className="deckdetail-form__group">
       <div className="deckdetail-form__label">{label} *</div>
@@ -110,21 +129,20 @@ function RadicalField({ label, value, onChange, session }) {
       </button>
       {open && (
         <div className="radical-picker">
-          {(groups ?? []).map(g => (
-            <div key={g.stroke_count} className="radical-picker__group">
-              <div className="radical-picker__strokes">{g.stroke_count}</div>
-              <div className="radical-picker__row">
-                {g.radicals.map(r => (
-                  <button key={r.number} type="button" lang="ja"
-                    title={`${r.number}`}
-                    className={`radical-picker__cell${Number(value) === r.number ? ' radical-picker__cell--on' : ''}`}
-                    onClick={() => { onChange(r.number); setOpen(false) }}>
-                    {r.char}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
+          {/* The three dots while the index is on its way; the box
+              stays empty if it never arrives, as it did before. */}
+          {!group && groups == null && <Loading />}
+          {group && <StrokeRail groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />}
+          <div className="radical-picker__grid">
+            {(group?.radicals ?? []).map(r => (
+              <button key={r.number} type="button" lang="ja"
+                title={`${r.number}`}
+                className={`radical-picker__cell${Number(value) === r.number ? ' radical-picker__cell--on' : ''}`}
+                onClick={() => { onChange(r.number); setOpen(false) }}>
+                {r.char}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>

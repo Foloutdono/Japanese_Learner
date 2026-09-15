@@ -1007,6 +1007,8 @@ const dictionary = {
   dictStrokesPlural: 'strokes',
   dictStrokeSingular: 'stroke',
   dictStrokeIndex:   'Stroke count index',
+  dictStrokePrev:    'Fewer strokes',
+  dictStrokeNext:    'More strokes',
   syllabaryMain:     'Main syllabary',
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Voiced sounds',

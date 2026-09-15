@@ -1,13 +1,16 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Loading } from '../ui/Loading'
+import { ChevronIcon } from '../ui/Icons'
 
 // ── 部首索引 — the radical index, shared ─────────────────────
 // Lifted out of DictionaryScreen.jsx (plan 086) because the kanji
 // station now asks the same question the dictionary does — which
 // radical? — as a study source (components/selection/RadicalSelector.jsx).
 // DESIGN.md: a component's markup is used, never hand-copied; so the
-// pad, the tile and the page live here once and the two screens
-// dress them. What differs between them is what a tile SAYS about its
+// rail, the tile and the page live here once and the screens that ask
+// the question dress them — the two indexes, and the deck form's
+// radical field (screens/DeckDetailScreen.jsx), which files a personal
+// card under a radical and reaches for the rail alone. What differs between them is what a tile SAYS about its
 // radical, and that is the `tile` function RadicalGrid takes.
 //
 // The pigment is read as `--line-color`: 辞書's gold under the
@@ -40,47 +43,84 @@ export function BlockMark({ jp, name, tally }) {
 // the page's label.
 const strokes = (n, t) => `${n} ${n === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}`
 
-// ── 画数 — the stroke pad ──
-// Every stroke count of the index, on screen at once.
+// ── 画数 — the stroke rail ──
+// One line of stroke counts, walked with a button at either end.
 //
-// This was a thumb rail off a printed index: one line of numerals that
-// scrolled sideways under a fade. On a phone that is seven counts
-// visible, the eighth cut in half, and 17画 four flicks away along an
-// axis the page itself does not scroll — a sideways drag inside a
-// vertical scroller is the one gesture a thumb holding the phone
-// cannot make cleanly, and the fade meant to say "there is more" reads
-// as a shadow. The page under it had to name its own neighbours
-// (‹ 1画 · 6 … 2画 · 23 ›) precisely because the rail was hiding them.
+// It was a thumb rail that the LEARNER had to drag: seven of eighteen
+// counts fit a 390px phone, the eighth was cut by a fade, and the rest
+// were behind a sideways drag inside a page that scrolls the other way
+// — the one gesture a thumb holding the phone cannot make cleanly. The
+// page under it had to name its own neighbours (‹ 1画 · 6 … 2画 · 23 ›)
+// precisely because the rail was hiding them.
 //
-// A pad hides nothing. The counts wrap onto as many rows as they need,
-// every one is a key a thumb can hit, the page below drops the pager
-// with the rail, and nothing on the screen scrolls sideways.
+// So the drag is gone and the two chevrons do the walking: each steps
+// to the next stroke count, the rail carries the read one to its
+// middle, and the counts either side of it stay one tap away. The
+// track cannot be dragged and has no scrollbar to summon — it is
+// `overflow: hidden`, which a script may still scroll and a finger may
+// not — and the pager under the tiles goes with the rail's own
+// neighbours, which are now in plain sight.
+//
+// Eighteen keys wrapped onto three rows was the other way to show them
+// all, and it read as a number pad over an index rather than as the
+// page's own control. Owner's call, from the two side by side.
 //
 // The unit rides the chosen key alone — DESIGN.md, "A gate is a
-// pictogram, and only the gate you are on is captioned": a fixed row
-// that would otherwise print 画 eighteen times captions the one you
-// are on and lets the rest be numerals. The keys are equal cells of a
-// grid, so that caption changes no width and the pad never reflows
-// under the thumb that just tapped it.
-export function StrokePad({ groups, active, onPick, t }) {
+// pictogram, and only the gate you are on is captioned": a row that
+// would otherwise print 画 eighteen times captions the one you are on
+// and lets the rest be numerals. The keys are one width, so the
+// caption moves nothing.
+export function StrokeRail({ groups, active, onPick, t }) {
+  const keys = useRef(new Map())
+  const at = Math.max(0, groups.findIndex(g => g.stroke_count === active))
+  const prev = groups[at - 1]
+  const next = groups[at + 1]
+
+  // The read key, carried to the middle of the track. Smoothly, unless
+  // the phone has asked for stillness — a rail that jumps under the
+  // thumb that moved it is the motion this is for.
+  useEffect(() => {
+    const el = keys.current.get(active)
+    if (!el?.scrollIntoView) return
+    const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollIntoView({ inline: 'center', block: 'nearest', behavior: still ? 'auto' : 'smooth' })
+  }, [active])
+
+  const step = (to, dir, label) => (
+    <button
+      type="button"
+      className={`stroke-rail__step stroke-rail__step--${dir}`}
+      disabled={!to}
+      aria-label={label}
+      onClick={() => to && onPick(to.stroke_count)}
+    >
+      <ChevronIcon direction={dir} size={16} />
+    </button>
+  )
+
   return (
-    <nav className="stroke-pad" aria-label={t.dictStrokeIndex}>
-      {groups.map(g => {
-        const on = g.stroke_count === active
-        return (
-          <button
-            key={g.stroke_count}
-            type="button"
-            onClick={() => onPick(g.stroke_count)}
-            aria-current={on ? 'true' : undefined}
-            aria-label={strokes(g.stroke_count, t)}
-            className={`stroke-pad__key${on ? ' stroke-pad__key--on' : ''}`}
-          >
-            <span className="stroke-pad__n">{g.stroke_count}</span>
-            {on && <span className="stroke-pad__unit" lang="ja" aria-hidden="true">画</span>}
-          </button>
-        )
-      })}
+    <nav className="stroke-rail" aria-label={t.dictStrokeIndex}>
+      {step(prev, 'left', t.dictStrokePrev)}
+      <div className="stroke-rail__track">
+        {groups.map(g => {
+          const on = g.stroke_count === active
+          return (
+            <button
+              key={g.stroke_count}
+              type="button"
+              ref={el => { keys.current.set(g.stroke_count, el) }}
+              onClick={() => onPick(g.stroke_count)}
+              aria-current={on ? 'true' : undefined}
+              aria-label={strokes(g.stroke_count, t)}
+              className={`stroke-rail__key${on ? ' stroke-rail__key--on' : ''}`}
+            >
+              <span className="stroke-rail__n">{g.stroke_count}</span>
+              {on && <span className="stroke-rail__unit" lang="ja" aria-hidden="true">画</span>}
+            </button>
+          )
+        })}
+      </div>
+      {step(next, 'right', t.dictStrokeNext)}
     </nav>
   )
 }
@@ -180,9 +220,9 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
 
   return (
     <div className="dict-radical-index">
-      <StrokePad groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
+      <StrokeRail groups={groups} active={group.stroke_count} onPick={setStroke} t={t} />
 
-      {/* No mark over the page: the pad above names the stroke count
+      {/* No mark over the page: the rail above names the stroke count
           and lights the one being read, and the section's aria-label
           says it for a reader. */}
       <section

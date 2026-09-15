@@ -979,6 +979,8 @@ const dictionary = {
   dictStrokesPlural: 'traits',
   dictStrokeSingular: 'trait',
   dictStrokeIndex:   'Index par nombre de traits',
+  dictStrokePrev:    'Moins de traits',
+  dictStrokeNext:    'Plus de traits',
   syllabaryMain:     'Syllabaire principal',
   syllabaryNSolo:    'ん',
   syllabaryVoiced:   'Sons voisés',
