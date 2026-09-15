@@ -48,7 +48,8 @@ python -m pytest tests/test_grammar_points.py tests/test_grammar_sentences.py
 
 `RICH_LEVELS` in `content/grammar_points_data.py` names the levels whose
 points carry the full lesson. There the gate requires: a `rule` step, at
-least one `compare` rival, at least one `contrast` example, three or more
+least one `compare` rival, at least one `contrast` example (when the pattern
+can be blanked at all: a bare particle is exempt), three or more
 examples (write four or five), and French that is not a copy of the English.
 The other levels are held to today's bar — a bilingual gloss and two
 examples — until their own content wave; `check_grammar --report` prints

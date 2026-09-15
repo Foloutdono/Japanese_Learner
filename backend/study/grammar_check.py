@@ -203,7 +203,10 @@ def check_entry(level: str, entry: dict, catalogue: dict[str, list[dict]] | None
             for rp in checkable_rivals:
                 if contains_pattern(jp, rp):
                     out.append(f"{tag}: example {i} also contains rival {rp!r}, so the drill would have two answers")
-    if rich and rivals and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict)):
+    # A bare particle or a class label (は, い形容詞／な形容詞) cannot be
+    # blanked, so the drill never draws it; its lesson still names the
+    # neighbours, it just marks no sentence for them.
+    if rich and rivals and verifiable(pattern) and not any(ex.get("contrast") for ex in examples if isinstance(ex, dict)):
         out.append(f"{tag}: compares {len(rivals)} rival(s) but marks no contrast example")
     if rich and not rivals:
         out.append(f"{tag}: a rich level's point names at least one neighbour to compare")

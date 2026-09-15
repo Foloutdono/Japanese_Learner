@@ -33,7 +33,7 @@ LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 # in both languages). A level joins in the same commit as its lessons,
 # one level per content wave; study/grammar_check holds a rich level to
 # the full bar and the others to gloss + sentences.
-RICH_LEVELS: frozenset[str] = frozenset()
+RICH_LEVELS: frozenset[str] = frozenset({"N5"})
 
 # The smallest catalogue each level may carry. Raised in the same commit
 # as the content that meets it, never ahead of it. Monotonic on purpose:
