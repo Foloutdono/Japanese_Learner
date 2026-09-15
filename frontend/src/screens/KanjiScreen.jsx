@@ -38,10 +38,11 @@ const BASE = '/learn/kanji'
 // index — the dictionary's own, dressed with the course's counts and
 // the learner's figures (RadicalSelector) — and /learn/kanji/radical/:n
 // is a LESSON before it is a list of platforms: the radical taught
-// (RadicalLesson), the platforms under it, then its family. The run
-// under it is the same KanjiRun over that family alone; the radical
-// drill is not offered there, since every answer would be the one
-// radical the learner just read about.
+// (RadicalLesson), the platforms under it, and its family behind a
+// door on the plate (?family=1, the same screen). The run under it is
+// the same KanjiRun over that family alone; the radical drill is not
+// offered there, since every answer would be the one radical the
+// learner just read about.
 //
 // See KanaScreen.jsx for the deep-link shape the station still accepts.
 export default function KanjiScreen({ session }) {
@@ -66,6 +67,12 @@ export default function KanjiScreen({ session }) {
   const radicalsPage = page === 'radicals'
   const tierSize = Number(sp.get('size')) || 200
   const strokePage = Number(sp.get('stroke')) || null
+  // A radical's family, browsed: the same screen with the lesson's
+  // door pushed. A query rather than a path segment because
+  // /learn/kanji/radical/:radical/:mode is already the RUN, and
+  // because the lesson stays mounted across it — the door costs no
+  // second fetch, and the back button (Android's included) undoes it.
+  const browsing = sp.get('family') === '1'
 
   const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
 
@@ -150,17 +157,31 @@ export default function KanjiScreen({ session }) {
     // Back to the page of the index this radical is on, not to its
     // first page: the index carries the page in its URL for this.
     const leave = here ? `${index}?stroke=${here.stroke_count}` : index
+    // One step out at a time: the family leaves to its lesson, the
+    // lesson to the index. Both swaps land at the top: the document is
+    // the scroller (.phone is min-height, not a viewport of its own),
+    // and a path that does not change carries its scroll offset across
+    // a body that changes completely — the door is a screen down the
+    // plate, so the family opened already scrolled past its first
+    // level, and the way back dropped the lesson somewhere in its
+    // platforms.
+    const swap = params => { setSp(params); window.scrollTo(0, 0) }
+    const aside = browsing
+      ? <Leave onClick={() => swap({})}>{t.radLesson}</Leave>
+      : <Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>
     return (
       <SelectionScreen
         title={t.kanjiTitle}
         sub={sub}
-        aside={<Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>}
+        aside={aside}
       >
         <RadicalLesson
           key={number}
           number={number}
           session={session}
           back={index}
+          browse={browsing}
+          onBrowse={() => swap({ family: '1' })}
           onLoaded={setLesson}
           platforms={<ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />}
         />
