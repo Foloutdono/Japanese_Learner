@@ -17,6 +17,27 @@ from study.grammar_examples import BLANK, highlight_span, parts_with_span
 from study.grammar_lesson import contrast_payload, lesson_payload
 
 
+@pytest.fixture(scope="module", autouse=True)
+def _fresh_grammar_progress():
+    """The pool tests below expect the probe learner to have N5 grammar
+    cards still to serve. test_level_rule.py seeds every card up to a
+    claimed level as mastered and leaves the rows, so on a database that
+    has already run the whole suite once nothing would be due here."""
+    from core.auth import DEV_USER_ID
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            like = f"{DEV_USER_ID}:grammar\\_%"
+            for table in ("review_log", "card_first_review", "card_modes"):
+                cur.execute(f"DELETE FROM {table} WHERE card_id LIKE %s", (like,))
+            cur.execute("DELETE FROM cards WHERE id LIKE %s", (like,))
+        conn.commit()
+    finally:
+        conn.close()
+    yield
+
+
 def _cards(client, level, mode, **params):
     return client.get("/api/grammar/cards", params={"level": level, "mode": mode, "count": 5, **params}).json()
 

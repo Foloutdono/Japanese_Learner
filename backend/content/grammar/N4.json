@@ -1560,5 +1560,819 @@
         "fr": "I will give an answer by next week."
       }
     ]
+  },
+  {
+    "pattern": "〜そうだ（伝聞）",
+    "structure": "plain form + そうだ",
+    "meaning": {
+      "en": "I hear that, they say that",
+      "fr": "il paraît que, on dit que"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "友だちの話では、あの店はおいしいそうです。",
+        "en": "According to my friend, that restaurant is good.",
+        "fr": "D'après mon ami, ce restaurant est bon."
+      },
+      {
+        "jp": "田中さんは来月、国へ帰るそうだ。",
+        "en": "I hear Tanaka is going back to his country next month.",
+        "fr": "Il paraît que Tanaka rentre dans son pays le mois prochain."
+      }
+    ]
+  },
+  {
+    "pattern": "〜場合",
+    "structure": "verb plain form ／ noun + の + 場合 (+ は)",
+    "meaning": {
+      "en": "in the case that, if it happens that",
+      "fr": "au cas où, dans le cas de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "雨の場合は、中止です。",
+        "en": "In case of rain, it is cancelled.",
+        "fr": "En cas de pluie, c'est annulé."
+      },
+      {
+        "jp": "分からない場合は、先生に聞いてください。",
+        "en": "If you do not understand, ask the teacher.",
+        "fr": "Si vous ne comprenez pas, demandez au professeur."
+      }
+    ]
+  },
+  {
+    "pattern": "〜必要がある",
+    "structure": "verb dictionary form + 必要がある",
+    "meaning": {
+      "en": "it is necessary to, need to",
+      "fr": "il faut, il est nécessaire de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "毎日れんしゅうする必要があります。",
+        "en": "You need to practise every day.",
+        "fr": "Il faut s'entraîner tous les jours."
+      },
+      {
+        "jp": "その本は買う必要がありません。",
+        "en": "There is no need to buy that book.",
+        "fr": "Ce livre, pas besoin de l'acheter."
+      }
+    ]
+  },
+  {
+    "pattern": "〜じゃないか",
+    "structure": "plain form ／ noun + じゃないか（ではないか）",
+    "meaning": {
+      "en": "isn't it?; I told you so (seeking agreement, or pointing something out)",
+      "fr": "n'est-ce pas ? ; je te l'avais dit (chercher l'accord, ou faire remarquer)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "これ、あなたのかさじゃないか。",
+        "en": "Hey, isn't this your umbrella?",
+        "fr": "Mais c'est ton parapluie, non ?"
+      },
+      {
+        "jp": "言ったじゃないか。",
+        "en": "I told you, didn't I?",
+        "fr": "Je te l'avais bien dit, non ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜がる",
+    "structure": "い-adj (drop い) ／ な-adj + がる",
+    "meaning": {
+      "en": "shows signs of feeling… (someone else's wants and feelings)",
+      "fr": "montrer des signes de… (les envies et sentiments d'autrui)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "子どもは犬をこわがる。",
+        "en": "The child is afraid of dogs.",
+        "fr": "L'enfant a peur des chiens."
+      },
+      {
+        "jp": "妹は新しいかばんをほしがる。",
+        "en": "My little sister wants a new bag.",
+        "fr": "Ma petite sœur a envie d'un nouveau sac."
+      }
+    ]
+  },
+  {
+    "pattern": "〜くする／〜にする",
+    "structure": "い-adj (drop い) + くする ／ な-adj・noun + にする",
+    "meaning": {
+      "en": "to make something (smaller, quiet…): acting on a thing",
+      "fr": "rendre (plus petit, calme…) : agir sur une chose"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "テレビの音を小さくする。",
+        "en": "Turn the TV down.",
+        "fr": "Baisser le son de la télé."
+      },
+      {
+        "jp": "会う前に、へやをきれいにする。",
+        "en": "Before we meet, I will tidy the room.",
+        "fr": "Avant qu'on se voie, je range la pièce."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ような",
+    "structure": "noun + の + ような + noun ／ plain form + ような",
+    "meaning": {
+      "en": "like, such as (a likeness before a noun)",
+      "fr": "comme, tel que (une ressemblance devant un nom)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "母のような人になりたい。",
+        "en": "I want to become a person like my mother.",
+        "fr": "Je veux devenir quelqu'un comme ma mère."
+      },
+      {
+        "jp": "夏のような天気ですね。",
+        "en": "It feels like summer weather.",
+        "fr": "On dirait un temps d'été."
+      }
+    ]
+  },
+  {
+    "pattern": "〜でございます",
+    "structure": "noun + でございます (the very polite です)",
+    "meaning": {
+      "en": "the very polite 'is' of shops and announcements",
+      "fr": "le « est » très poli des magasins et des annonces"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "こちらが店の入口でございます。",
+        "en": "This is the shop's entrance.",
+        "fr": "Voici l'entrée du magasin."
+      },
+      {
+        "jp": "お待たせしました。田中でございます。",
+        "en": "Sorry to keep you waiting. This is Tanaka.",
+        "fr": "Merci d'avoir patienté. Tanaka à l'appareil."
+      }
+    ]
+  },
+  {
+    "pattern": "いらっしゃる／おっしゃる／なさる",
+    "structure": "いらっしゃる (be, come, go) ／ おっしゃる (say) ／ なさる (do): honorific verbs for others",
+    "meaning": {
+      "en": "the respectful verbs that replace いる・来る・行く, 言う and する",
+      "fr": "les verbes de respect qui remplacent いる・来る・行く, 言う et する"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生は今、教室にいらっしゃいます。",
+        "en": "The teacher is in the classroom now.",
+        "fr": "Le professeur est dans la salle de classe en ce moment."
+      },
+      {
+        "jp": "社長は何とおっしゃいましたか。",
+        "en": "What did the president say?",
+        "fr": "Qu'a dit le président ?"
+      }
+    ]
+  },
+  {
+    "pattern": "まいる／もうす／いたす",
+    "structure": "まいる (come, go) ／ もうす (say, be called) ／ いたす (do): humble verbs for oneself",
+    "meaning": {
+      "en": "the humble verbs that lower the speaker's own actions",
+      "fr": "les verbes de modestie qui abaissent les actions du locuteur"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "田中ともうします。",
+        "en": "My name is Tanaka.",
+        "fr": "Je m'appelle Tanaka."
+      },
+      {
+        "jp": "明日、またまいります。",
+        "en": "I will come again tomorrow.",
+        "fr": "Je reviendrai demain."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てくださる／〜ていただく",
+    "structure": "verb て-form + くださる (the respectful てくれる); 〜ていただく is the respectful てもらう",
+    "meaning": {
+      "en": "someone above you does something for you; you receive it, humbly",
+      "fr": "un supérieur fait quelque chose pour vous ; vous le recevez avec modestie"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生が本を貸してくださいました。",
+        "en": "The teacher lent me a book.",
+        "fr": "Le professeur m'a prêté un livre."
+      },
+      {
+        "jp": "先生に日本語を教えていただきました。",
+        "en": "I had the teacher teach me Japanese.",
+        "fr": "Le professeur m'a enseigné le japonais."
+      }
+    ]
+  },
+  {
+    "pattern": "お〜ください",
+    "structure": "お + verb stem + ください",
+    "meaning": {
+      "en": "please do (a respectful request)",
+      "fr": "veuillez… (une demande respectueuse)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "少しお待ちください。",
+        "en": "Please wait a moment.",
+        "fr": "Veuillez patienter un instant."
+      },
+      {
+        "jp": "こちらにお名前をお書きください。",
+        "en": "Please write your name here.",
+        "fr": "Veuillez écrire votre nom ici."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ように言う",
+    "structure": "verb dictionary form／ない-form + ように言う（頼む・伝える）",
+    "meaning": {
+      "en": "tell someone to do (reporting an instruction)",
+      "fr": "dire à quelqu'un de faire (rapporter une consigne)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "医者に毎日歩くように言われました。",
+        "en": "The doctor told me to walk every day.",
+        "fr": "Le médecin m'a dit de marcher tous les jours."
+      },
+      {
+        "jp": "子どもに早くねるように言いました。",
+        "en": "I told the child to go to bed early.",
+        "fr": "J'ai dit à l'enfant de se coucher tôt."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ていただけませんか",
+    "structure": "verb て-form + いただけませんか",
+    "meaning": {
+      "en": "could you possibly… (the most polite request)",
+      "fr": "pourriez-vous… (la demande la plus polie)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "もう一度言っていただけませんか。",
+        "en": "Could you say that once more?",
+        "fr": "Pourriez-vous répéter ?"
+      },
+      {
+        "jp": "この漢字の読み方を教えていただけませんか。",
+        "en": "Could you tell me how to read this kanji?",
+        "fr": "Pourriez-vous m'indiquer comment se lit ce kanji ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜てよかった",
+    "structure": "verb て-form + よかった",
+    "meaning": {
+      "en": "I'm glad that…, it was good that…",
+      "fr": "heureusement que…, j'ai bien fait de…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "早く来てよかった。",
+        "en": "I'm glad I came early.",
+        "fr": "J'ai bien fait de venir tôt."
+      },
+      {
+        "jp": "この本を読んでよかったです。",
+        "en": "I'm glad I read this book.",
+        "fr": "Je suis content d'avoir lu ce livre."
+      }
+    ]
+  },
+  {
+    "pattern": "〜な（禁止）",
+    "structure": "verb dictionary form + な（禁止）",
+    "meaning": {
+      "en": "don't! (a blunt prohibition)",
+      "fr": "ne fais pas ! (une interdiction brutale)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "ここに入るなと言われた。",
+        "en": "I was told not to come in here.",
+        "fr": "On m'a dit de ne pas entrer ici."
+      },
+      {
+        "jp": "そんなことを言うな。",
+        "en": "Don't say things like that.",
+        "fr": "Ne dis pas des choses pareilles."
+      }
+    ]
+  },
+  {
+    "pattern": "命令形 〜ろ／〜え",
+    "structure": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (書け, 待て)",
+    "meaning": {
+      "en": "the plain command form",
+      "fr": "l'impératif brut"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "早く起きろ、学校におくれるよ。",
+        "en": "Get up, you'll be late for school.",
+        "fr": "Lève-toi, tu vas être en retard à l'école."
+      },
+      {
+        "jp": "ここに名前を書け。",
+        "en": "Write your name here.",
+        "fr": "Écris ton nom ici."
+      }
+    ]
+  },
+  {
+    "pattern": "〜といい／〜たらいい／〜ばいい",
+    "structure": "verb dictionary form + といい ／ た-form + らいい ／ ば-form + いい",
+    "meaning": {
+      "en": "it would be good if…; you should just…; I hope…",
+      "fr": "il serait bien que… ; tu n'as qu'à… ; j'espère que…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "早くよくなるといいですね。",
+        "en": "I hope you get better soon.",
+        "fr": "J'espère que tu iras vite mieux."
+      },
+      {
+        "jp": "分からなければ、先生に聞けばいい。",
+        "en": "If you don't understand, just ask the teacher.",
+        "fr": "Si tu ne comprends pas, tu n'as qu'à demander au professeur."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ないほうがいい",
+    "structure": "verb ない-form + ほうがいい",
+    "meaning": {
+      "en": "you had better not",
+      "fr": "il vaut mieux ne pas"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "夜おそくコーヒーを飲まないほうがいい。",
+        "en": "You had better not drink coffee late at night.",
+        "fr": "Il vaut mieux ne pas boire de café tard le soir."
+      },
+      {
+        "jp": "その話は言わないほうがいいよ。",
+        "en": "You'd better not mention that.",
+        "fr": "Il vaut mieux ne pas en parler."
+      }
+    ]
+  },
+  {
+    "pattern": "〜さ",
+    "structure": "い-adj (drop い) + さ ／ な-adj + さ",
+    "meaning": {
+      "en": "turns an adjective into a noun: height, kindness",
+      "fr": "transforme un adjectif en nom : la hauteur, la gentillesse"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この山の高さは三千メートルです。",
+        "en": "This mountain's height is three thousand metres.",
+        "fr": "La hauteur de cette montagne est de trois mille mètres."
+      },
+      {
+        "jp": "母のやさしさを思い出した。",
+        "en": "I remembered my mother's kindness.",
+        "fr": "Je me suis rappelé la gentillesse de ma mère."
+      }
+    ]
+  },
+  {
+    "pattern": "〜中",
+    "structure": "noun + 中（ちゅう：during ／ じゅう：throughout）",
+    "meaning": {
+      "en": "during (〜ちゅう) or all through (〜じゅう)",
+      "fr": "pendant (〜ちゅう) ou tout au long de (〜じゅう)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "父は今、仕事中です。",
+        "en": "My father is at work right now.",
+        "fr": "Mon père est au travail en ce moment."
+      },
+      {
+        "jp": "一日中、家で本を読んでいました。",
+        "en": "I was reading at home all day long.",
+        "fr": "J'ai lu à la maison toute la journée."
+      }
+    ]
+  },
+  {
+    "pattern": "〜おきに",
+    "structure": "number + counter + おきに",
+    "meaning": {
+      "en": "every other…, at intervals of",
+      "fr": "tous les… (à intervalles de)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "バスは十分おきに来ます。",
+        "en": "The bus comes every ten minutes.",
+        "fr": "Le bus passe toutes les dix minutes."
+      },
+      {
+        "jp": "一日おきに走っています。",
+        "en": "I run every other day.",
+        "fr": "Je cours un jour sur deux."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なくて",
+    "structure": "verb ない-form (drop い) + なくて ／ い-adj + くなくて ／ noun・な-adj + じゃなくて",
+    "meaning": {
+      "en": "not … and so (a negative cause), or 'not A but B'",
+      "fr": "ne pas… et donc (une cause négative), ou « pas A mais B »"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "お金がなくて、買えませんでした。",
+        "en": "I had no money, so I couldn't buy it.",
+        "fr": "Je n'avais pas d'argent, alors je n'ai pas pu l'acheter."
+      },
+      {
+        "jp": "肉じゃなくて、魚を食べます。",
+        "en": "Not meat, I'll have fish.",
+        "fr": "Pas de viande, je prends du poisson."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ますように",
+    "structure": "verb ます-stem + ますように",
+    "meaning": {
+      "en": "may it be that… (a wish or a prayer)",
+      "fr": "pourvu que… (un souhait ou une prière)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "試験にうかりますように。",
+        "en": "May I pass the exam.",
+        "fr": "Pourvu que je réussisse l'examen."
+      },
+      {
+        "jp": "明日、いい天気になりますように。",
+        "en": "May the weather be good tomorrow.",
+        "fr": "Pourvu qu'il fasse beau demain."
+      }
+    ]
+  },
+  {
+    "pattern": "〜か（間接疑問）",
+    "structure": "question word + plain clause + か（間接疑問） + 知っている／分かる／教える",
+    "meaning": {
+      "en": "an embedded question: I know where… / do you know when…",
+      "fr": "une question enchâssée : je sais où… / sais-tu quand…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生がいつ来るか知っていますか。",
+        "en": "Do you know when the teacher is coming?",
+        "fr": "Sais-tu quand le professeur arrive ?"
+      },
+      {
+        "jp": "何を買うか、まだ分かりません。",
+        "en": "I don't know yet what I'll buy.",
+        "fr": "Je ne sais pas encore ce que je vais acheter."
+      }
+    ]
+  },
+  {
+    "pattern": "〜でしょうか",
+    "structure": "plain form ／ noun + でしょうか",
+    "meaning": {
+      "en": "I wonder if…? (a soft, polite question)",
+      "fr": "est-ce que… ? (une question douce et polie)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "明日は雨でしょうか。",
+        "en": "Will it rain tomorrow, I wonder?",
+        "fr": "Pleuvra-t-il demain ?"
+      },
+      {
+        "jp": "この電車は東京へ行くでしょうか。",
+        "en": "Does this train go to Tokyo, by any chance?",
+        "fr": "Ce train va-t-il bien à Tokyo ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜も（強調）",
+    "structure": "number + counter + も（強調） + predicate",
+    "meaning": {
+      "en": "as much as, as many as (stressing a large amount)",
+      "fr": "pas moins de, jusqu'à (insister sur une grande quantité)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "きのうは十時間もねました。",
+        "en": "I slept as much as ten hours yesterday.",
+        "fr": "Hier, j'ai dormi pas moins de dix heures."
+      },
+      {
+        "jp": "その本は三度も読みました。",
+        "en": "I read that book three whole times.",
+        "fr": "J'ai lu ce livre trois fois, pas moins."
+      }
+    ]
+  },
+  {
+    "pattern": "それで",
+    "structure": "sentence。それで + sentence",
+    "meaning": {
+      "en": "and so, that's why; 'and then?'",
+      "fr": "et donc, c'est pour ça ; « et alors ? »"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "電車がおくれました。それで、ちこくしました。",
+        "en": "The train was late. So I was late.",
+        "fr": "Le train avait du retard. Du coup, je suis arrivé en retard."
+      },
+      {
+        "jp": "それで、旅行はどうでしたか。",
+        "en": "So, how was the trip?",
+        "fr": "Et alors, ce voyage ?"
+      }
+    ]
+  },
+  {
+    "pattern": "それに",
+    "structure": "sentence。それに + sentence",
+    "meaning": {
+      "en": "besides, what's more",
+      "fr": "en plus, de surcroît"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この店は安い。それに、おいしい。",
+        "en": "This restaurant is cheap. What's more, it's good.",
+        "fr": "Ce restaurant est bon marché. En plus, on y mange bien."
+      },
+      {
+        "jp": "今日は風が強い。それに、雨だ。",
+        "en": "The wind is strong today. And it's raining too.",
+        "fr": "Le vent est fort aujourd'hui. Et en plus, il pleut."
+      }
+    ]
+  },
+  {
+    "pattern": "ところで",
+    "structure": "sentence。ところで + new topic",
+    "meaning": {
+      "en": "by the way (changing the subject)",
+      "fr": "au fait (pour changer de sujet)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "ところで、明日は何をしますか。",
+        "en": "By the way, what are you doing tomorrow?",
+        "fr": "Au fait, que fais-tu demain ?"
+      },
+      {
+        "jp": "ところで、お姉さんは元気ですか。",
+        "en": "By the way, how is your sister?",
+        "fr": "Au fait, comment va ta sœur ?"
+      }
+    ]
+  },
+  {
+    "pattern": "または",
+    "structure": "A + または + B",
+    "meaning": {
+      "en": "or (formal, in writing and notices)",
+      "fr": "ou (formel, à l'écrit et sur les avis)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "電話またはメールで知らせてください。",
+        "en": "Please let us know by phone or by e-mail.",
+        "fr": "Merci de nous prévenir par téléphone ou par e-mail."
+      },
+      {
+        "jp": "日本語または英語で書いてください。",
+        "en": "Please write in Japanese or English.",
+        "fr": "Écrivez en japonais ou en anglais, s'il vous plaît."
+      }
+    ]
+  },
+  {
+    "pattern": "こんな／そんな／あんな／どんな",
+    "structure": "こんな／そんな／あんな／どんな + noun",
+    "meaning": {
+      "en": "this kind of, that kind of, what kind of",
+      "fr": "ce genre de, quel genre de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "こんな大きい犬は見たことがない。",
+        "en": "I have never seen such a big dog.",
+        "fr": "Je n'ai jamais vu un chien aussi gros."
+      },
+      {
+        "jp": "どんな音楽を聞きますか。",
+        "en": "What kind of music do you listen to?",
+        "fr": "Quel genre de musique écoutes-tu ?"
+      }
+    ]
+  },
+  {
+    "pattern": "こんなに／そんなに／あんなに",
+    "structure": "こんなに／そんなに／あんなに + adjective／verb",
+    "meaning": {
+      "en": "this much, that much (degree)",
+      "fr": "autant que ça, à ce point (le degré)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "こんなに大きいとは思わなかった。",
+        "en": "I didn't think it would be this big.",
+        "fr": "Je ne pensais pas que ce serait aussi grand."
+      },
+      {
+        "jp": "そんなに急がなくてもいいですよ。",
+        "en": "You don't have to hurry that much.",
+        "fr": "Pas la peine de te presser autant."
+      }
+    ]
+  },
+  {
+    "pattern": "〜予定だ",
+    "structure": "verb dictionary form ／ noun + の + 予定だ",
+    "meaning": {
+      "en": "it is planned that, I am due to",
+      "fr": "il est prévu que, je dois…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "来週、東京へ行く予定です。",
+        "en": "I'm due to go to Tokyo next week.",
+        "fr": "Je dois aller à Tokyo la semaine prochaine."
+      },
+      {
+        "jp": "試験は九時からの予定です。",
+        "en": "The exam is scheduled from nine.",
+        "fr": "L'examen est prévu à partir de neuf heures."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ちゃいけない／〜じゃいけない",
+    "structure": "verb て-form with て→ちゃ／で→じゃ + いけない (the spoken 〜てはいけない; 〜ではいけない → 〜じゃいけない)",
+    "meaning": {
+      "en": "mustn't (spoken)",
+      "fr": "il ne faut pas (à l'oral)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "ここで写真をとっちゃいけないよ。",
+        "en": "You mustn't take photos here.",
+        "fr": "Il ne faut pas prendre de photos ici."
+      },
+      {
+        "jp": "そのボタンをおしちゃいけない。",
+        "en": "You mustn't press that button.",
+        "fr": "Il ne faut pas appuyer sur ce bouton."
+      }
+    ]
+  },
+  {
+    "pattern": "〜が見える／〜が聞こえる",
+    "structure": "noun + が見える ／ が聞こえる",
+    "meaning": {
+      "en": "can be seen / can be heard (of itself, no effort)",
+      "fr": "on voit / on entend (de soi-même, sans effort)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "ここから海が見えます。",
+        "en": "You can see the sea from here.",
+        "fr": "D'ici, on voit la mer."
+      },
+      {
+        "jp": "夜、雨の音が聞こえました。",
+        "en": "At night I could hear the rain.",
+        "fr": "La nuit, j'ai entendu la pluie."
+      }
+    ]
+  },
+  {
+    "pattern": "〜に見える",
+    "structure": "noun／な-adj + に見える ／ い-adj + く見える",
+    "meaning": {
+      "en": "looks (like), appears",
+      "fr": "avoir l'air, sembler"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "その服を着ると、元気に見えるよ。",
+        "en": "In those clothes you look lively.",
+        "fr": "Avec ces vêtements, tu as l'air en forme."
+      },
+      {
+        "jp": "その店は高そうに見える。",
+        "en": "That shop looks expensive.",
+        "fr": "Ce magasin a l'air cher."
+      }
+    ]
   }
 ]

@@ -27,10 +27,29 @@ migration is one hop).
 """
 
 # old raw id -> new raw id
-MOVES: dict[str, str] = {}
+MOVES: dict[str, str] = {
+    # Hearsay そうだ is examined at N4 on the five-level syllabus (the N3
+    # slot goes to 〜によると, which the same sentences usually carry).
+    "grammar_N3_〜そうだ（伝聞）": "grammar_N4_〜そうだ（伝聞）",
+    # Filed at N3 by the old 71-a-level rule; every modern inventory
+    # examines these at N2.
+    "grammar_N3_〜末に": "grammar_N2_〜末に",
+    "grammar_N3_〜次第だ": "grammar_N2_〜次第だ",
+    "grammar_N3_〜っこない": "grammar_N2_〜っこない",
+    "grammar_N3_〜つつある": "grammar_N2_〜つつある",
+    "grammar_N3_〜どころではない": "grammar_N2_〜どころではない",
+    "grammar_N3_〜も〜ば〜も": "grammar_N2_〜も〜ば〜も",
+    "grammar_N3_〜やら〜やら": "grammar_N2_〜やら〜やら",
+}
 
-# old raw ids nothing replaces
-RETIRED: frozenset[str] = frozenset()
+# old raw ids nothing replaces: bare conjugations of です／だ and of the
+# い-adjective, which the parents' lessons now teach as steps.
+RETIRED: frozenset[str] = frozenset({
+    "grammar_N5_〜くありません",
+    "grammar_N5_〜じゃありません",
+    "grammar_N5_〜かったです",
+    "grammar_N5_〜でした",
+})
 
 
 def _pattern_of(raw_id: str) -> str:

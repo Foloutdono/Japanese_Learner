@@ -308,28 +308,6 @@
     ]
   },
   {
-    "pattern": "〜末に",
-    "structure": "verb た-form/noun + の + 末に",
-    "meaning": {
-      "en": "after ..., in the end (following a process)",
-      "fr": "after ..., in the end (following a process)"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "長い間考えた末に、留学を決めました。",
-        "en": "After thinking about it for a long time, I decided to study abroad.",
-        "fr": "After thinking about it for a long time, I decided to study abroad."
-      },
-      {
-        "jp": "何度も話し合った末に、計画は中止になった。",
-        "en": "After discussing it many times, the plan was called off in the end.",
-        "fr": "After discussing it many times, the plan was called off in the end."
-      }
-    ]
-  },
-  {
     "pattern": "〜一方で",
     "structure": "plain form + 一方で",
     "meaning": {
@@ -396,50 +374,6 @@
     ]
   },
   {
-    "pattern": "〜つつある",
-    "structure": "verb stem + つつある",
-    "meaning": {
-      "en": "in the process of, gradually doing",
-      "fr": "in the process of, gradually doing"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "この町の人口は少しずつ変わりつつある。",
-        "en": "The population of this town is gradually changing.",
-        "fr": "The population of this town is gradually changing."
-      },
-      {
-        "jp": "彼の病気は少しずつ良くなりつつある。",
-        "en": "His illness is gradually getting better.",
-        "fr": "His illness is gradually getting better."
-      }
-    ]
-  },
-  {
-    "pattern": "〜次第だ",
-    "structure": "verb た-form + 次第だ",
-    "meaning": {
-      "en": "as soon as; also: it depends on",
-      "fr": "as soon as; also: it depends on"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "向こうに着き次第、電話します。",
-        "en": "I will call you as soon as I arrive over there.",
-        "fr": "I will call you as soon as I arrive over there."
-      },
-      {
-        "jp": "試合をするかどうかは天気次第だ。",
-        "en": "Whether we play the match depends on the weather.",
-        "fr": "Whether we play the match depends on the weather."
-      }
-    ]
-  },
-  {
     "pattern": "使役受身形 〜させられる",
     "structure": "verb causative-passive stem + られる",
     "meaning": {
@@ -458,28 +392,6 @@
         "jp": "父にきらいな野さいを食べさせられました。",
         "en": "I was made by my father to eat vegetables I dislike.",
         "fr": "I was made by my father to eat vegetables I dislike."
-      }
-    ]
-  },
-  {
-    "pattern": "〜そうだ（伝聞）",
-    "structure": "plain form + そうだ",
-    "meaning": {
-      "en": "I hear that, they say that",
-      "fr": "I hear that, they say that"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "天気予報によると、明日は雪が降るそうだ。",
-        "en": "According to the forecast, they say it will snow tomorrow.",
-        "fr": "According to the forecast, they say it will snow tomorrow."
-      },
-      {
-        "jp": "彼は来月、国へ帰るそうだ。",
-        "en": "I hear that he is going back to his country next month.",
-        "fr": "I hear that he is going back to his country next month."
       }
     ]
   },
@@ -1056,28 +968,6 @@
     ]
   },
   {
-    "pattern": "〜っこない",
-    "structure": "verb stem + っこない",
-    "meaning": {
-      "en": "there is no chance of it",
-      "fr": "there is no chance of it"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "そんな話、だれも信じっこない。",
-        "en": "Nobody is going to believe a story like that.",
-        "fr": "Nobody is going to believe a story like that."
-      },
-      {
-        "jp": "一日で全部覚えられっこない。",
-        "en": "There's no way of memorising it all in a day.",
-        "fr": "There's no way of memorising it all in a day."
-      }
-    ]
-  },
-  {
     "pattern": "〜ものだから",
     "structure": "plain form + ものだから",
     "meaning": {
@@ -1408,28 +1298,6 @@
     ]
   },
   {
-    "pattern": "〜どころではない",
-    "structure": "noun / verb dictionary form + どころではない",
-    "meaning": {
-      "en": "the situation does not allow it",
-      "fr": "the situation does not allow it"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "仕事が忙しくて、旅行どころではない。",
-        "en": "Work is so busy that a trip is out of the question.",
-        "fr": "Work is so busy that a trip is out of the question."
-      },
-      {
-        "jp": "熱があって、勉強どころではなかった。",
-        "en": "I had a fever and was in no state to study.",
-        "fr": "I had a fever and was in no state to study."
-      }
-    ]
-  },
-  {
     "pattern": "〜ばかりでなく",
     "structure": "noun / plain form + ばかりでなく",
     "meaning": {
@@ -1448,50 +1316,6 @@
         "jp": "この店は安いばかりでなく、品物もいい。",
         "en": "This shop is not only cheap; the goods are good too.",
         "fr": "This shop is not only cheap; the goods are good too."
-      }
-    ]
-  },
-  {
-    "pattern": "〜も〜ば〜も",
-    "structure": "noun + も + verb ば-form + noun + も",
-    "meaning": {
-      "en": "both this and that alike",
-      "fr": "both this and that alike"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "彼は歌も歌えば、絵もかく。",
-        "en": "He both sings and paints.",
-        "fr": "He both sings and paints."
-      },
-      {
-        "jp": "この町は海もあれば、山もある。",
-        "en": "This town has both the sea and the mountains.",
-        "fr": "This town has both the sea and the mountains."
-      }
-    ]
-  },
-  {
-    "pattern": "〜やら〜やら",
-    "structure": "noun + やら + noun + やら",
-    "meaning": {
-      "en": "what with one thing and another",
-      "fr": "what with one thing and another"
-    },
-    "steps": [],
-    "compare": [],
-    "examples": [
-      {
-        "jp": "休みの日は、そうじやら買い物やらで忙しい。",
-        "en": "On my days off, what with cleaning and shopping, I'm busy.",
-        "fr": "On my days off, what with cleaning and shopping, I'm busy."
-      },
-      {
-        "jp": "うれしいやら悲しいやら、変な気持ちだ。",
-        "en": "What with joy and sadness, I feel strange.",
-        "fr": "What with joy and sadness, I feel strange."
       }
     ]
   },
@@ -1558,6 +1382,1040 @@
         "jp": "時間さえあれば、もっと勉強できるのに。",
         "en": "If only I had the time, I could study more.",
         "fr": "If only I had the time, I could study more."
+      }
+    ]
+  },
+  {
+    "pattern": "いくら〜ても／どんなに〜ても",
+    "structure": "いくら／どんなに + verb て-form + も（ても）",
+    "meaning": {
+      "en": "no matter how much…",
+      "fr": "on a beau…, quel que soit…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "いくら考えても、答えが分からない。",
+        "en": "No matter how much I think, I can't find the answer.",
+        "fr": "J'ai beau réfléchir, je ne trouve pas la réponse."
+      },
+      {
+        "jp": "どんなに高くても、この本は買う。",
+        "en": "However expensive it is, I'll buy this book.",
+        "fr": "Si cher soit-il, j'achète ce livre."
+      }
+    ]
+  },
+  {
+    "pattern": "たとえ〜ても",
+    "structure": "たとえ + verb て-form + も（ても）",
+    "meaning": {
+      "en": "even if (supposing that)",
+      "fr": "même si (en supposant que)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "たとえ雨が降っても、試合は行う。",
+        "en": "Even if it rains, the match will be held.",
+        "fr": "Même s'il pleut, le match aura lieu."
+      },
+      {
+        "jp": "たとえ負けても、最後まで走る。",
+        "en": "Even if I lose, I'll run to the end.",
+        "fr": "Même si je perds, je courrai jusqu'au bout."
+      }
+    ]
+  },
+  {
+    "pattern": "〜だけでなく",
+    "structure": "noun／plain form + だけでなく（〜も）",
+    "meaning": {
+      "en": "not only… (but also)",
+      "fr": "non seulement… (mais aussi)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "彼は英語だけでなく、中国語も話せる。",
+        "en": "He speaks not only English but Chinese too.",
+        "fr": "Il parle non seulement anglais, mais aussi chinois."
+      },
+      {
+        "jp": "この店は安いだけでなく、味もいい。",
+        "en": "This restaurant is not only cheap, the food is good too.",
+        "fr": "Ce restaurant n'est pas seulement bon marché, on y mange bien aussi."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てばかりいる",
+    "structure": "verb て-form + ばかりいる",
+    "meaning": {
+      "en": "does nothing but…",
+      "fr": "ne fait que…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "弟は一日中ゲームをしてばかりいる。",
+        "en": "My brother does nothing but play games all day.",
+        "fr": "Mon frère ne fait que jouer aux jeux vidéo toute la journée."
+      },
+      {
+        "jp": "ないてばかりいないで、話してください。",
+        "en": "Don't just cry, talk to me.",
+        "fr": "Au lieu de pleurer, parle-moi."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てはじめて",
+    "structure": "verb て-form + はじめて",
+    "meaning": {
+      "en": "only after…, not until…",
+      "fr": "ce n'est qu'après… que"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "病気になってはじめて、体の大切さが分かった。",
+        "en": "Only when I fell ill did I understand how precious my body is.",
+        "fr": "Ce n'est qu'en tombant malade que j'ai compris la valeur de mon corps."
+      },
+      {
+        "jp": "日本に来てはじめて、すしを食べた。",
+        "en": "I ate sushi for the first time only after coming to Japan.",
+        "fr": "Ce n'est qu'en arrivant au Japon que j'ai mangé des sushis."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ごとに",
+    "structure": "noun／verb dictionary form + ごとに",
+    "meaning": {
+      "en": "every…, each time",
+      "fr": "chaque…, à chaque"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "三日ごとに水をやってください。",
+        "en": "Water it every three days.",
+        "fr": "Arrosez-le tous les trois jours."
+      },
+      {
+        "jp": "会うごとに、彼は元気になっている。",
+        "en": "Each time we meet, he is livelier.",
+        "fr": "À chaque rencontre, il va mieux."
+      }
+    ]
+  },
+  {
+    "pattern": "〜途中で",
+    "structure": "verb dictionary form／noun + の + 途中で",
+    "meaning": {
+      "en": "on the way, partway through",
+      "fr": "en chemin, en cours de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "学校へ行く途中で、友だちに会った。",
+        "en": "On the way to school I met a friend.",
+        "fr": "En allant à l'école, j'ai croisé un ami."
+      },
+      {
+        "jp": "話の途中で電話が鳴った。",
+        "en": "The phone rang in the middle of the conversation.",
+        "fr": "Le téléphone a sonné au milieu de la conversation."
+      }
+    ]
+  },
+  {
+    "pattern": "〜気味",
+    "structure": "noun／verb ます-stem + 気味",
+    "meaning": {
+      "en": "a touch of, a tendency towards (usually unwelcome)",
+      "fr": "un peu…, une tendance à… (souvent fâcheuse)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "最近、太り気味だ。",
+        "en": "Lately I've been putting on a bit of weight.",
+        "fr": "Ces derniers temps, j'ai tendance à grossir."
+      },
+      {
+        "jp": "今日はつかれ気味なので、早く帰ります。",
+        "en": "I'm feeling a little tired today, so I'll go home early.",
+        "fr": "Je me sens un peu fatigué aujourd'hui, alors je rentre tôt."
+      }
+    ]
+  },
+  {
+    "pattern": "〜的",
+    "structure": "noun + 的（な／に）",
+    "meaning": {
+      "en": "-ic, -al: turns a noun into a な-adjective",
+      "fr": "-ique, -el : fait d'un nom un adjectif en な"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この方法は経済的だ。",
+        "en": "This method is economical.",
+        "fr": "Cette méthode est économique."
+      },
+      {
+        "jp": "科学的に考えましょう。",
+        "en": "Let's think scientifically.",
+        "fr": "Réfléchissons de manière scientifique."
+      }
+    ]
+  },
+  {
+    "pattern": "〜づらい",
+    "structure": "verb ます-stem + づらい",
+    "meaning": {
+      "en": "hard to (because it is unpleasant or awkward)",
+      "fr": "difficile à (parce que c'est pénible ou gênant)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この字は小さくて読みづらい。",
+        "en": "These characters are small and hard to read.",
+        "fr": "Ces caractères sont petits et difficiles à lire."
+      },
+      {
+        "jp": "彼には本当のことが言いづらい。",
+        "en": "It's hard to tell him the truth.",
+        "fr": "C'est difficile de lui dire la vérité."
+      }
+    ]
+  },
+  {
+    "pattern": "〜らしい（典型）",
+    "structure": "noun + らしい（典型） + noun／です",
+    "meaning": {
+      "en": "typical of, true to what a … should be",
+      "fr": "digne de, typique de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "今日は春らしい、いい天気だ。",
+        "en": "Today's weather is lovely, just as spring should be.",
+        "fr": "Aujourd'hui, il fait beau, un vrai temps de printemps."
+      },
+      {
+        "jp": "彼は男らしい人だ。",
+        "en": "He is a manly man.",
+        "fr": "C'est un homme, un vrai."
+      }
+    ]
+  },
+  {
+    "pattern": "〜によると",
+    "structure": "noun + によると（によれば）",
+    "meaning": {
+      "en": "according to (the source of what you heard)",
+      "fr": "d'après, selon (la source de ce qu'on a entendu)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "天気予報によると、明日は雨だ。",
+        "en": "According to the forecast, it will rain tomorrow.",
+        "fr": "D'après la météo, il pleuvra demain."
+      },
+      {
+        "jp": "新聞によると、駅の前に新しい店ができるそうだ。",
+        "en": "According to the paper, a new shop is opening in front of the station.",
+        "fr": "D'après le journal, un nouveau magasin ouvre devant la gare."
+      }
+    ]
+  },
+  {
+    "pattern": "〜に比べて",
+    "structure": "noun + に比べて",
+    "meaning": {
+      "en": "compared with",
+      "fr": "comparé à, par rapport à"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "去年に比べて、今年は雨が多い。",
+        "en": "Compared with last year, this year has a lot of rain.",
+        "fr": "Par rapport à l'an dernier, il pleut beaucoup cette année."
+      },
+      {
+        "jp": "兄に比べて、弟はおとなしい。",
+        "en": "Compared with his elder brother, the younger one is quiet.",
+        "fr": "Comparé à son grand frère, le cadet est calme."
+      }
+    ]
+  },
+  {
+    "pattern": "〜代わりに",
+    "structure": "noun + の + 代わりに ／ verb plain form + 代わりに",
+    "meaning": {
+      "en": "instead of; in exchange for",
+      "fr": "à la place de ; en échange de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "母の代わりに、私が買い物に行った。",
+        "en": "I went shopping instead of my mother.",
+        "fr": "Je suis allé faire les courses à la place de ma mère."
+      },
+      {
+        "jp": "車の代わりに、自転車で通っている。",
+        "en": "I commute by bicycle instead of by car.",
+        "fr": "Je fais le trajet à vélo au lieu de prendre la voiture."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ほかに",
+    "structure": "noun + の + ほかに ／ verb plain form + ほかに",
+    "meaning": {
+      "en": "besides, in addition to",
+      "fr": "en plus de, outre"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "日本語のほかに、英語も勉強している。",
+        "en": "Besides Japanese, I'm also studying English.",
+        "fr": "En plus du japonais, j'étudie aussi l'anglais."
+      },
+      {
+        "jp": "ほかに質問はありませんか。",
+        "en": "Are there any other questions?",
+        "fr": "Y a-t-il d'autres questions ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことは〜が",
+    "structure": "plain form + ことは + same plain form + が",
+    "meaning": {
+      "en": "it's true that…, but",
+      "fr": "c'est vrai que…, mais"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "日本語は話せることは話せるが、上手ではない。",
+        "en": "I can speak Japanese, it's true, but not well.",
+        "fr": "Je parle japonais, c'est vrai, mais pas bien."
+      },
+      {
+        "jp": "この店は安いことは安いが、遠い。",
+        "en": "This shop is cheap, admittedly, but it's far.",
+        "fr": "Ce magasin est bon marché, certes, mais il est loin."
+      }
+    ]
+  },
+  {
+    "pattern": "〜というのは",
+    "structure": "noun + というのは + explanation",
+    "meaning": {
+      "en": "what … means is; the thing called …",
+      "fr": "ce qu'on appelle… ; …, c'est…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "「ふるさと」というのは、生まれた町のことだ。",
+        "en": "'Furusato' means the town where you were born.",
+        "fr": "« Furusato », c'est la ville où l'on est né."
+      },
+      {
+        "jp": "サッカーというのは、足でボールをける遊びだ。",
+        "en": "Football is a game where you kick a ball with your feet.",
+        "fr": "Le football, c'est un jeu où l'on frappe un ballon avec les pieds."
+      }
+    ]
+  },
+  {
+    "pattern": "から〜にかけて",
+    "structure": "A + から + B + にかけて",
+    "meaning": {
+      "en": "from A through B (a stretch of time or space)",
+      "fr": "de A à B (une étendue de temps ou d'espace)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "夜から朝にかけて、雪が降った。",
+        "en": "It snowed from night through to morning.",
+        "fr": "Il a neigé de la nuit jusqu'au matin."
+      },
+      {
+        "jp": "土曜日から日曜日にかけて、雨が降るでしょう。",
+        "en": "It will rain from Saturday into Sunday.",
+        "fr": "Il pleuvra de samedi à dimanche."
+      }
+    ]
+  },
+  {
+    "pattern": "〜させていただく",
+    "structure": "verb causative て-form + いただく",
+    "meaning": {
+      "en": "I'll take the liberty of… (a humble 'let me')",
+      "fr": "permettez-moi de… (un « je me permets » humble)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "会議に出席させていただきます。",
+        "en": "I'll be attending the meeting, if I may.",
+        "fr": "Je me permets d'assister à la réunion."
+      },
+      {
+        "jp": "少し説明させていただきます。",
+        "en": "Allow me to explain briefly.",
+        "fr": "Permettez-moi d'expliquer brièvement."
+      }
+    ]
+  },
+  {
+    "pattern": "ところが",
+    "structure": "sentence。ところが + unexpected result",
+    "meaning": {
+      "en": "however, but then (contrary to expectation)",
+      "fr": "or, mais voilà que (contre toute attente)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "晴れると思った。ところが、雨が降り出した。",
+        "en": "I thought it would clear up. But then it started raining.",
+        "fr": "Je pensais qu'il ferait beau. Or, il s'est mis à pleuvoir."
+      },
+      {
+        "jp": "早く着いた。ところが、店はまだ開いていなかった。",
+        "en": "I arrived early. However, the shop wasn't open yet.",
+        "fr": "Je suis arrivé tôt. Mais voilà, le magasin n'était pas encore ouvert."
+      }
+    ]
+  },
+  {
+    "pattern": "つまり",
+    "structure": "sentence。つまり + restatement",
+    "meaning": {
+      "en": "in other words, that is to say",
+      "fr": "autrement dit, c'est-à-dire"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "彼は母の兄、つまり私のおじだ。",
+        "en": "He is my mother's brother, in other words my uncle.",
+        "fr": "C'est le frère de ma mère, autrement dit mon oncle."
+      },
+      {
+        "jp": "つまり、あなたは反対なのですね。",
+        "en": "In other words, you're against it, right?",
+        "fr": "Autrement dit, vous êtes contre, n'est-ce pas ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ないことはない",
+    "structure": "verb ない-form + ことはない ／ い-adj + くないことはない",
+    "meaning": {
+      "en": "it's not that … isn't the case (a hedged yes)",
+      "fr": "ce n'est pas que… ne… pas (un oui réservé)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "行かないことはないが、あまり行きたくない。",
+        "en": "It's not that I won't go, but I don't really want to.",
+        "fr": "Ce n'est pas que je n'irai pas, mais je n'en ai pas très envie."
+      },
+      {
+        "jp": "この料理は食べられないことはない。",
+        "en": "This dish isn't inedible, exactly.",
+        "fr": "Ce plat n'est pas immangeable, à vrai dire."
+      }
+    ]
+  },
+  {
+    "pattern": "〜上に",
+    "structure": "plain form／noun + の + 上に",
+    "meaning": {
+      "en": "on top of that, in addition",
+      "fr": "en plus de cela, de surcroît"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この店は安い上に、おいしい。",
+        "en": "This restaurant is cheap, and on top of that, good.",
+        "fr": "Ce restaurant est bon marché et, en plus, on y mange bien."
+      },
+      {
+        "jp": "道に迷った上に、雨まで降ってきた。",
+        "en": "I got lost, and to make matters worse it started to rain.",
+        "fr": "Je me suis perdu et, par-dessus le marché, il s'est mis à pleuvoir."
+      }
+    ]
+  },
+  {
+    "pattern": "〜はもちろん",
+    "structure": "noun + はもちろん（〜も）",
+    "meaning": {
+      "en": "not to mention, let alone (obviously A, and B too)",
+      "fr": "sans parler de, bien sûr… (et aussi)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "彼は英語はもちろん、フランス語も話せる。",
+        "en": "He speaks French too, not to mention English.",
+        "fr": "Il parle français aussi, sans parler de l'anglais."
+      },
+      {
+        "jp": "週末はもちろん、平日も人が多い。",
+        "en": "There are many people on weekdays, let alone weekends.",
+        "fr": "Il y a du monde en semaine, sans parler du week-end."
+      }
+    ]
+  },
+  {
+    "pattern": "〜せいか",
+    "structure": "plain form／noun + の + せいか",
+    "meaning": {
+      "en": "perhaps because of (a suspected cause)",
+      "fr": "peut-être à cause de (une cause supposée)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "寝不足のせいか、頭が痛い。",
+        "en": "Perhaps because I didn't sleep enough, I have a headache.",
+        "fr": "Peut-être par manque de sommeil, j'ai mal à la tête."
+      },
+      {
+        "jp": "年のせいか、最近すぐつかれる。",
+        "en": "Maybe it's age, but lately I tire easily.",
+        "fr": "C'est peut-être l'âge, mais je me fatigue vite ces derniers temps."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てもかまわない",
+    "structure": "verb て-form + もかまわない ／ い-adj + くてもかまわない",
+    "meaning": {
+      "en": "it doesn't matter if…, you may",
+      "fr": "peu importe si…, vous pouvez"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "少し遅れてもかまわない。",
+        "en": "It doesn't matter if you're a little late.",
+        "fr": "Ce n'est pas grave si tu es un peu en retard."
+      },
+      {
+        "jp": "高くてもかまわないから、いいものがほしい。",
+        "en": "I don't mind if it's expensive; I want something good.",
+        "fr": "Peu importe le prix, je veux quelque chose de bien."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことになっている",
+    "structure": "verb dictionary form／ない-form + ことになっている",
+    "meaning": {
+      "en": "it is the rule that, it has been arranged that",
+      "fr": "il est convenu que, la règle veut que"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この部屋では、くつをぬぐことになっている。",
+        "en": "In this room the rule is that you take your shoes off.",
+        "fr": "Dans cette pièce, la règle est d'enlever ses chaussures."
+      },
+      {
+        "jp": "来月から東京で働くことになっている。",
+        "en": "It's been arranged that I start work in Tokyo next month.",
+        "fr": "Il est convenu que je commence à travailler à Tokyo le mois prochain."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ことにしている",
+    "structure": "verb dictionary form／ない-form + ことにしている",
+    "meaning": {
+      "en": "make it a rule to (a habit you decided on)",
+      "fr": "se faire une règle de (une habitude décidée)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "毎朝、三十分歩くことにしている。",
+        "en": "I make it a rule to walk thirty minutes every morning.",
+        "fr": "Je me suis fixé comme règle de marcher trente minutes chaque matin."
+      },
+      {
+        "jp": "夜はコーヒーを飲まないことにしている。",
+        "en": "I've made it a habit not to drink coffee at night.",
+        "fr": "Je me suis fait une règle de ne pas boire de café le soir."
+      }
+    ]
+  },
+  {
+    "pattern": "〜なんか／〜なんて",
+    "structure": "noun + なんか／なんて",
+    "meaning": {
+      "en": "things like…; (dismissive) something as … as",
+      "fr": "des choses comme… ; (méprisant) un truc comme…"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "テレビなんか見ないで、勉強しなさい。",
+        "en": "Stop watching TV and the like, and study.",
+        "fr": "Arrête la télé et compagnie, et étudie."
+      },
+      {
+        "jp": "お金なんて、そんなに大切じゃない。",
+        "en": "Money isn't all that important.",
+        "fr": "L'argent, ce n'est pas si important."
+      }
+    ]
+  },
+  {
+    "pattern": "〜だって",
+    "structure": "noun + だって",
+    "meaning": {
+      "en": "even…, … too (spoken)",
+      "fr": "même…, … aussi (à l'oral)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "子どもだって、そのくらい分かる。",
+        "en": "Even a child understands that much.",
+        "fr": "Même un enfant comprend ça."
+      },
+      {
+        "jp": "私だって行きたいよ。",
+        "en": "I want to go too, you know.",
+        "fr": "Moi aussi je veux y aller, tu sais."
+      }
+    ]
+  },
+  {
+    "pattern": "〜通す",
+    "structure": "verb ます-stem + 通す",
+    "meaning": {
+      "en": "do all the way through, to the end",
+      "fr": "faire jusqu'au bout, d'un bout à l'autre"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "一晩で本を読み通す。",
+        "en": "I read the book through in one night.",
+        "fr": "Je lis le livre d'une traite en une nuit."
+      },
+      {
+        "jp": "最後まで自分の意見を言い通す。",
+        "en": "Stick to your opinion to the end.",
+        "fr": "Défendre son opinion jusqu'au bout."
+      }
+    ]
+  },
+  {
+    "pattern": "〜化",
+    "structure": "noun + 化（する）",
+    "meaning": {
+      "en": "-ization: turning into, becoming",
+      "fr": "-isation : le fait de devenir"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この町は急速に都市化した。",
+        "en": "This town urbanised rapidly.",
+        "fr": "Cette ville s'est urbanisée rapidement."
+      },
+      {
+        "jp": "世界の国々の国際化が進んでいる。",
+        "en": "The internationalisation of the world's countries is advancing.",
+        "fr": "L'internationalisation des pays du monde progresse."
+      }
+    ]
+  },
+  {
+    "pattern": "〜み",
+    "structure": "い-adj (drop い) + み",
+    "meaning": {
+      "en": "turns an adjective into a noun for a felt quality: sweetness, weight",
+      "fr": "fait d'un adjectif un nom de qualité ressentie : la douceur, le poids"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "このスープは深い味わいと苦みがある。",
+        "en": "This soup has a deep flavour and a bitterness to it.",
+        "fr": "Cette soupe a une saveur profonde et une pointe d'amertume."
+      },
+      {
+        "jp": "その言葉には重みがある。",
+        "en": "Those words carry weight.",
+        "fr": "Ces mots ont du poids."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ていらっしゃる",
+    "structure": "verb て-form + いらっしゃる (〜ていらっしゃる is the respectful ている)",
+    "meaning": {
+      "en": "is …ing (of someone you respect)",
+      "fr": "est en train de… (pour une personne respectée)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "先生は今、本を読んでいらっしゃいます。",
+        "en": "The teacher is reading a book right now.",
+        "fr": "Le professeur est en train de lire."
+      },
+      {
+        "jp": "社長は東京から来ていらっしゃる。",
+        "en": "The president has come from Tokyo.",
+        "fr": "Le président est venu de Tokyo."
+      }
+    ]
+  },
+  {
+    "pattern": "〜っけ",
+    "structure": "plain form + っけ",
+    "meaning": {
+      "en": "was it…? (checking something you half remember)",
+      "fr": "c'était… déjà ? (vérifier un souvenir flou)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "試験は何時からだっけ。",
+        "en": "What time did the exam start again?",
+        "fr": "L'examen, c'est à quelle heure déjà ?"
+      },
+      {
+        "jp": "彼の名前、何だったっけ。",
+        "en": "What was his name again?",
+        "fr": "Comment il s'appelle, déjà ?"
+      }
+    ]
+  },
+  {
+    "pattern": "〜気がする",
+    "structure": "plain form + 気がする ／ noun + の + 気がする",
+    "meaning": {
+      "en": "I have a feeling that, it seems to me",
+      "fr": "j'ai l'impression que, il me semble que"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "だれかに見られている気がする。",
+        "en": "I have the feeling I'm being watched.",
+        "fr": "J'ai l'impression d'être observé."
+      },
+      {
+        "jp": "この店、前に来たことがある気がする。",
+        "en": "I feel like I've been to this shop before.",
+        "fr": "J'ai l'impression d'être déjà venu dans ce magasin."
+      }
+    ]
+  },
+  {
+    "pattern": "別に〜ない",
+    "structure": "別に + verb / adjective ない-form",
+    "meaning": {
+      "en": "not particularly",
+      "fr": "pas particulièrement"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "別に急いでいるわけではない。",
+        "en": "It's not that I'm in any particular hurry.",
+        "fr": "Ce n'est pas que je sois particulièrement pressé."
+      },
+      {
+        "jp": "別に何も問題はありません。",
+        "en": "There's no particular problem.",
+        "fr": "Il n'y a pas de problème particulier."
+      }
+    ]
+  },
+  {
+    "pattern": "ちっとも〜ない",
+    "structure": "ちっとも + verb / adjective ない-form",
+    "meaning": {
+      "en": "not in the least (spoken)",
+      "fr": "pas le moins du monde (à l'oral)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この話はちっともおもしろくない。",
+        "en": "This story isn't the least bit interesting.",
+        "fr": "Cette histoire n'est pas drôle pour deux sous."
+      },
+      {
+        "jp": "彼はちっとも変わっていない。",
+        "en": "He hasn't changed one bit.",
+        "fr": "Il n'a pas changé d'un poil."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ではなく",
+    "structure": "noun + ではなく（て） + noun",
+    "meaning": {
+      "en": "not A but B",
+      "fr": "non pas A mais B"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "行くのは明日ではなく、明後日だ。",
+        "en": "It's not tomorrow I'm going, it's the day after.",
+        "fr": "Ce n'est pas demain que j'y vais, mais après-demain."
+      },
+      {
+        "jp": "問題は数ではなく、質だ。",
+        "en": "The problem isn't the number but the quality.",
+        "fr": "Le problème, ce n'est pas le nombre mais la qualité."
+      }
+    ]
+  },
+  {
+    "pattern": "〜ふりをする",
+    "structure": "plain form／noun + の + ふりをする",
+    "meaning": {
+      "en": "pretend to",
+      "fr": "faire semblant de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "彼は寝ているふりをした。",
+        "en": "He pretended to be asleep.",
+        "fr": "Il a fait semblant de dormir."
+      },
+      {
+        "jp": "知らないふりをしないでください。",
+        "en": "Don't pretend you don't know.",
+        "fr": "Ne fais pas semblant de ne pas savoir."
+      }
+    ]
+  },
+  {
+    "pattern": "〜か何か",
+    "structure": "noun + か何か",
+    "meaning": {
+      "en": "… or something",
+      "fr": "… ou quelque chose comme ça"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "お茶か何か飲みませんか。",
+        "en": "Would you like tea or something?",
+        "fr": "Tu veux du thé ou autre chose ?"
+      },
+      {
+        "jp": "ペンか何か持っていますか。",
+        "en": "Do you have a pen or something?",
+        "fr": "Tu as un stylo ou quelque chose ?"
+      }
+    ]
+  },
+  {
+    "pattern": "なかなか〜ない",
+    "structure": "なかなか + verb ない-form",
+    "meaning": {
+      "en": "not easily, just won't (despite trying)",
+      "fr": "n'arrive pas à, décidément pas (malgré les efforts)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "バスがなかなか来ない。",
+        "en": "The bus just won't come.",
+        "fr": "Le bus n'arrive décidément pas."
+      },
+      {
+        "jp": "この問題はなかなか解けない。",
+        "en": "I can't seem to solve this problem.",
+        "fr": "Je n'arrive pas à résoudre ce problème."
+      }
+    ]
+  },
+  {
+    "pattern": "〜に代わって",
+    "structure": "noun + に代わって",
+    "meaning": {
+      "en": "on behalf of, in place of (someone)",
+      "fr": "au nom de, à la place de (quelqu'un)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "社長に代わって、私が説明します。",
+        "en": "I will explain on behalf of the president.",
+        "fr": "Je vais expliquer au nom du président."
+      },
+      {
+        "jp": "病気の母に代わって、姉が料理を作った。",
+        "en": "In place of our sick mother, my sister cooked.",
+        "fr": "À la place de notre mère malade, ma sœur a cuisiné."
+      }
+    ]
+  },
+  {
+    "pattern": "〜てごらん",
+    "structure": "verb て-form + ごらん",
+    "meaning": {
+      "en": "try and… (a gentle suggestion to a child or junior)",
+      "fr": "essaie donc de… (une invitation douce à un enfant ou un cadet)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "この本、読んでごらん。",
+        "en": "Try reading this book.",
+        "fr": "Essaie donc de lire ce livre."
+      },
+      {
+        "jp": "もう一度やってごらん。",
+        "en": "Give it another try.",
+        "fr": "Réessaie, va."
+      }
+    ]
+  },
+  {
+    "pattern": "〜とは限らない",
+    "structure": "plain form + とは限らない",
+    "meaning": {
+      "en": "not necessarily, doesn't always",
+      "fr": "pas forcément, pas toujours"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "高いものがいいとは限らない。",
+        "en": "Expensive things aren't necessarily good.",
+        "fr": "Ce qui est cher n'est pas forcément bon."
+      },
+      {
+        "jp": "日本人がみんな漢字に強いとは限らない。",
+        "en": "Not all Japanese people are necessarily good at kanji.",
+        "fr": "Tous les Japonais ne sont pas forcément forts en kanji."
+      }
+    ]
+  },
+  {
+    "pattern": "せっかく",
+    "structure": "せっかく + effort／occasion (+ のに／のだから)",
+    "meaning": {
+      "en": "having gone to the trouble of; a precious chance (often wasted)",
+      "fr": "alors qu'on s'est donné la peine de ; une occasion précieuse (souvent gâchée)"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "せっかく作ったのに、だれも食べなかった。",
+        "en": "I went to the trouble of cooking, but nobody ate.",
+        "fr": "Je m'étais donné la peine de cuisiner, mais personne n'a mangé."
+      },
+      {
+        "jp": "せっかく来たのだから、ゆっくりしていってください。",
+        "en": "Since you've come all this way, do stay a while.",
+        "fr": "Puisque vous avez fait le déplacement, restez donc un moment."
+      }
+    ]
+  },
+  {
+    "pattern": "〜以外",
+    "structure": "noun + 以外（は／に／の）",
+    "meaning": {
+      "en": "except, other than",
+      "fr": "sauf, en dehors de"
+    },
+    "steps": [],
+    "compare": [],
+    "examples": [
+      {
+        "jp": "日曜日以外は毎日開いています。",
+        "en": "We're open every day except Sunday.",
+        "fr": "Ouvert tous les jours sauf le dimanche."
+      },
+      {
+        "jp": "彼以外に、この仕事ができる人はいない。",
+        "en": "Other than him, nobody can do this job.",
+        "fr": "En dehors de lui, personne ne peut faire ce travail."
       }
     ]
   }

@@ -182,14 +182,11 @@ N3 = [
     {"jp": "この計画に関して、意見を聞きたい。", "en": "I would like to hear opinions regarding this plan.", "grammar": "〜に関して", "focus": "計画"},
     {"jp": "先生が言った通りに、書いてみました。", "en": "I tried writing it just as the teacher said.", "grammar": "〜通りに", "focus": "先生"},
     {"jp": "この道を通るたびに、昔を思い出す。", "en": "Every time I pass along this road, I remember the old days.", "grammar": "〜たびに", "focus": "昔"},
-    {"jp": "長い会議の末に、答えが決まった。", "en": "After a long meeting, the answer was decided.", "grammar": "〜末に", "focus": "会議"},
     {"jp": "この町は静かな一方で、少し不便だ。", "en": "This town is quiet, while also being a little inconvenient.", "grammar": "〜一方で", "focus": "不便"},
     {"jp": "約束はしたものの、まだ始めていない。", "en": "Although I made a promise, I have not started yet.", "grammar": "〜ものの", "focus": "約束"},
     {"jp": "大雨が続くと、川があふれるおそれがある。", "en": "If the heavy rain continues, there is a risk the river will overflow.", "grammar": "〜おそれがある", "focus": "川"},
-    {"jp": "町の様子は少しずつ変わりつつある。", "en": "The look of the town is gradually changing.", "grammar": "〜つつある", "focus": "様子"},
-    {"jp": "用意ができ次第、出発します。", "en": "We will set off as soon as everything is ready.", "grammar": "〜次第だ", "focus": "用意"},
     {"jp": "子どものころ、母に長い手紙を書かせられた。", "en": "As a child, I was made to write long letters by my mother.", "grammar": "使役受身形 〜させられる", "focus": "手紙"},
-    {"jp": "天気予報によると、明日は雪が降るそうだ。", "en": "According to the forecast, it will snow tomorrow.", "grammar": "〜そうだ（伝聞）", "focus": "予報"},
+    {"jp": "天気予報によると、明日は雪が降るそうだ。", "en": "According to the forecast, it will snow tomorrow.", "grammar": "〜によると", "focus": "予報"},
     {"jp": "日本の文化について研究しています。", "en": "I am doing research about Japanese culture.", "grammar": "〜について", "focus": "文化"},
     {"jp": "この作品は有名な作家によって書かれた。", "en": "This work was written by a famous author.", "grammar": "〜によって", "focus": "作品"},
     {"jp": "会議は本社において行われます。", "en": "The meeting will be held at the head office.", "grammar": "〜において", "focus": "会議"},
@@ -209,10 +206,16 @@ N3 = [
     {"jp": "いそがしくて、食事をする時間さえない。", "en": "I am so busy I do not even have time to eat.", "grammar": "〜さえ", "focus": "時間"},
     {"jp": "こうなったら、自分でやるしかない。", "en": "Now that it has come to this, there is nothing for it but to do it myself.", "grammar": "〜しかない", "focus": "自分"},
     {"jp": "電車が止まった。それで遅れたわけだ。", "en": "The train stopped. That is why he was late, then.", "grammar": "〜わけだ", "focus": "遅れる"},
+    {"jp": "自分で作ってはじめて、料理の大変さが分かった。", "en": "Only after cooking myself did I understand how hard it is.", "grammar": "〜てはじめて", "focus": "大変"},
+    {"jp": "去年に比べて、今年は雪が少ない。", "en": "Compared with last year, there is little snow this year.", "grammar": "〜に比べて", "focus": "雪"},
+    {"jp": "せっかく作ったのに、だれも食べなかった。", "en": "I went to the trouble of cooking, but nobody ate.", "grammar": "せっかく", "focus": "作る"},
 ]
 
 # ── N2 ────────────────────────────────────────────────────────
 N2 = [
+    {"jp": "長い会議の末に、答えが決まった。", "en": "After a long meeting, the answer was decided.", "grammar": "〜末に", "focus": "会議"},
+    {"jp": "町の様子は少しずつ変わりつつある。", "en": "The look of the town is gradually changing.", "grammar": "〜つつある", "focus": "様子"},
+    {"jp": "用意ができ次第、出発します。", "en": "We will set off as soon as everything is ready.", "grammar": "〜次第だ", "focus": "用意"},
     {"jp": "何度も注意したにもかかわらず、彼は同じ失敗をくり返した。", "en": "Despite being warned many times, he repeated the same mistake.", "grammar": "〜にもかかわらず", "focus": "失敗"},
     {"jp": "台風が近づいているので、旅行を中止せざるを得ない。", "en": "With a typhoon approaching, we have no choice but to call off the trip.", "grammar": "〜ざるを得ない", "focus": "台風"},
     {"jp": "だめだと知りつつも、彼は最後まで続けた。", "en": "Knowing it was hopeless, he still kept going to the end.", "grammar": "〜つつも", "focus": "最後"},

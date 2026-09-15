@@ -38,7 +38,7 @@ RICH_LEVELS: frozenset[str] = frozenset()
 # The smallest catalogue each level may carry. Raised in the same commit
 # as the content that meets it, never ahead of it. Monotonic on purpose:
 # see tests/test_grammar_points.py.
-MIN_PER_LEVEL: dict[str, int] = {"N5": 71, "N4": 71, "N3": 71, "N2": 71, "N1": 71}
+MIN_PER_LEVEL: dict[str, int] = {"N5": 90, "N4": 100, "N3": 100, "N2": 110, "N1": 110}
 
 _TEXT_LANGS = ("en", "fr")
 

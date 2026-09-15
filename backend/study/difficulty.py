@@ -282,6 +282,10 @@ EXTRA_MARKERS: dict[str, tuple[str, ...]] = {
 #   〜にあって  「そこにあって」 is just "being there"
 GATE_BLIND: frozenset[str] = frozenset({
     "〜にして", "〜あまり", "〜上で", "〜出す", "〜直す", "〜にあって",
+    # Plan 087's re-levelling filed three more whose stem is a common
+    # word: 〜上に is inside 山の上に, 〜ものを inside 買いものを, and
+    # 別に〜ない reduces to 別に, which 特別に contains.
+    "〜上に", "〜ものを", "別に〜ない",
 })
 
 
