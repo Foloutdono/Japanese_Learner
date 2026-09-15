@@ -335,7 +335,7 @@ entries went in the same commit.
 | `.rad`, `.rad-plate*` (`__glyph`, `__strokes`, `__names`, `__meaning`, `__meta`, `__forms`, `__form`, `__note`, `__pos`, `__fig`), `.rad-family*`, `.rad-kanji*` (`--learning`, `--mastered`) | the radical lesson: the plate with the strokes and the 漢和辞典's first line, the platforms, then the family by level under a `BlockMark`, each kanji a door to its entry | `components/selection/RadicalLesson.jsx` |
 | `.deck-card__lead`, `__glyph`, `__due`, `__aside`, `__count` | the shelf's card | `screens/DecksScreen.jsx` |
 | `.form`, `.form__label`, `.form__row`, `.type-list`, `.type-row*` | the create form, a card's form | `DecksScreen.jsx`, `screens/DeckDetailScreen.jsx` |
-| `.deck-identity*`, `.chip-row*`, `.card-list`, `.card-row*` | the deck page | `DeckDetailScreen.jsx` (the More sheet on `Sheet`) |
+| `.deck-identity*`, `.chip-row*`, `.card-list`, `.card-row*` | the deck page. `.deck-identity` is one row above 560px (roundel, names, the filled action as the right-hand column the density contract asks a wide card for) and three tiers under it (roundel + name, the figures across the whole card, the action under both) — four things in a 334px row left the author's name an 180px column. The tiers are a grid with `display: contents` on `__names`, so the same markup serves both | `DeckDetailScreen.jsx` (the More sheet on `Sheet`), `PublicDeckScreen.jsx` |
 
 The routes: `/learn` (the map), `/learn/<line>` (the station — the SOURCES
 on vocab and kanji, which are ordered along more than one axis; the stops
