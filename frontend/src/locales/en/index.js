@@ -440,6 +440,9 @@ const stats = {
   // whole question up there instead -- selectStudySource -- because
   // their bar carries no other sub to be consistent with.)
   stationSources:     'Sources',
+  // The same, over かな's set list: the sets are the line's stops, so
+  // the sub names them and the bar's other end is the way out.
+  stationSets:        'Sets',
   byFrequencyShort:   'By frequency',
   byThemeShort:       'By theme',
   byRadicalShort:     'By radical',
@@ -557,7 +560,6 @@ const stats = {
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
   examPart: (n) => `Part ${n}`,
-  kanaSetsSub:        (n) => `${n} sets`,
   serviceName: {
     local:   'Local',
     rapid:   'Rapid',
@@ -997,7 +999,6 @@ const dictionary = {
   dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
   formation:         'Formation',
-  browseGrammarPoints: 'Browse the points',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',

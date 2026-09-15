@@ -19420,7 +19420,8 @@ a.slip__act { text-decoration: none; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
 /* ── The ghost door in the stage head ──
    The lesson, one tap from every card: the head's own ghost, beside
-   the pass, the shape .dict-browse-door has on the station. */
+   the pass. A leave that goes somewhere rather than back, so its
+   chevron points the way — .stage__leave carries the shape. */
 .gl-door--ghost { gap: var(--sp-2); }
 /* ── The station's index ──
    The level's points as rows: the pattern, its gloss, the stage
