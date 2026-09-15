@@ -8,10 +8,11 @@ import { deckTypeOf } from './deckTypes'
 // two figures that only a public deck has — who wrote it, and how many
 // people follow it.
 //
-// Shared by the block under My decks (LibraryShelf) and the library
-// screen, rather than each drawing its own row. Every near-copy of a
-// component in this app has drifted from its original within two
-// features.
+// A component and not a block inside LibraryScreen because it was
+// shared: 教材's preview shelf drew the same row until the bar's
+// Browse door replaced it. It stays one, for the next screen that
+// lists published decks — every near-copy of a component in this app
+// has drifted from its original within two features.
 
 export function LibraryCard({ deck, t, onOpen }) {
   const dt = deckTypeOf(deck.type, t)

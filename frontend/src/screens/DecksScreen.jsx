@@ -9,17 +9,25 @@ import { Console, ConsoleTop, Chips, Chip, ConsoleAction, ConsoleIndex } from '.
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
-import { LibraryShelf } from '../components/decks/LibraryShelf'
 import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
-// /learn/decks on the canvas: the bar with the one creating action in
-// its aside, the console (type chips, the index field, the count),
-// the create form when it is open, and a platform card per deck —
+// /learn/decks on the canvas: the bar, the shelf's two doors under
+// it, the console (type chips, the index field, the count), the
+// create form when it is open, and a platform card per deck —
 // the type's glyph in the roundel, the name, the type and today's due
 // count, the card count in the aside. A card is one tap into the
 // deck's own page, which is where its actions live now.
+//
+// The library used to be a three-deck preview shelf under the grid,
+// and a shelf of your own is exactly what pushes it off the screen:
+// past a handful of decks nobody scrolls far enough to reach it. So
+// it is a door instead — beside the one that creates a deck, above
+// the grid, at a fixed place that does not move as the shelf grows.
+// The preview is no loss: /learn/decks/library draws the same cards
+// with the orderings and the paging, and the request the preview cost
+// this screen goes with it.
 //
 // Filtering happens entirely in the browser: /api/decks returns the
 // whole shelf in one request (one row per deck, not per card), so a
@@ -108,11 +116,22 @@ export default function DecksScreen({ session }) {
 
   return (
     <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-      <Bar
-        code="KZ"
-        color="var(--line-decks)"
-        title={t.decks}
-        aside={creating ? (
+      <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
+
+      {/* The two doors. Browse holds its place while the create form
+          is open — only the door it opened turns into the way out, so
+          the row keeps its shape rather than collapsing to one button
+          and back. It is a destination and not a filter, hence no
+          pressed state for the Chip to report: the same note
+          PracticeScreen's level chips carry. */}
+      <div className="decks-doors">
+        <Chip
+          aria-pressed={undefined}
+          onClick={() => { playUi('click-mode-selection'); navigate('/learn/decks/library') }}
+        >
+          <BooksIcon size={14} />{t.libraryBrowse}
+        </Chip>
+        {creating ? (
           <Chip onClick={() => { playUi('click-mode-selection'); setCreating(false) }}>
             <CrossIcon size={14} />{t.cancel}
           </Chip>
@@ -121,7 +140,7 @@ export default function DecksScreen({ session }) {
             <PlusIcon size={14} />{t.createDeck}
           </ConsoleAction>
         )}
-      />
+      </div>
 
       <Console>
         <ConsoleTop>
@@ -238,11 +257,6 @@ export default function DecksScreen({ session }) {
           })}
         </div>
       )}
-
-      {/* The library, below your own decks — which is where it was
-          asked for. It prints nothing at all while empty, so a learner
-          with no decks still meets one empty state and not two. */}
-      <LibraryShelf session={session} t={t} />
     </main>
   )
 }

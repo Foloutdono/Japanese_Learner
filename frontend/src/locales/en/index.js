@@ -1381,6 +1381,9 @@ const decks = {
   // "Library" alone, with no Japanese pair: owner's call, and the one
   // section in the app that reads Latin-only by design. See DESIGN.md.
   library:               'Library',
+  // The door beside Create deck on the shelf: the verb, because it
+  // sits next to one and the roundel beside it already says books.
+  libraryBrowse:         'Browse',
   librarySeeAll:         'See all',
   libraryMore:           'Show more',
   librarySort:           'Order',

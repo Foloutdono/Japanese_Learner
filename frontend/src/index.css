@@ -13022,9 +13022,54 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .deck-card__aside { min-width: 70px; }
 .deck-card__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 
+/* ── 教材's two doors ──────────────────────────────────────────
+   Browse the library, create a deck. They were one door in the bar's
+   aside and they cannot both go back there: measured at 390px in
+   French the pair is 304px of a 348px row, which leaves the roundel
+   and "Mes Decks" 44px between them and wraps the name onto two lines
+   under the buttons. So the pair takes a row of its own, above the
+   console, and the bar goes back to naming the place.
+
+   The two objects are the bar's own — a 36px ghost pill and the 36px
+   filled action beside it, DESIGN.md's one-filled-action rule with
+   everything next to it a ghost. Not `.chip-row`: that family restyles
+   its chips to 34px sentence case and grows only `.chip`/`.btn-primary`,
+   so a console action dropped into one comes out 2px taller than the
+   chip beside it and refuses to share the width — the "four different
+   shapes in a row" the deck page's selection console was rebuilt to
+   get rid of.
+
+   They stretch rather than sitting ragged at one end, for the reason
+   the deck page's chip row stretches: two doors are a SET — everything
+   this screen opens onto — and a set takes the width it is given. */
+.decks-doors {
+  display: flex;
+  gap: var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+/* The children, not `> .chip` and `> .console__action`: a rule keyed on
+   .chip this far down the sheet has to carry the specificity of every
+   .chip rule above it (.console__chips .chip:only-child is three
+   classes) or stylelint's no-descending-specificity is right to
+   object. The row has exactly two children and they are both doors, so
+   naming them individually bought nothing anyway. */
+.decks-doors > * { flex: 1 1 auto; justify-content: center; }
+/* Growing is a narrow screen's answer, not every screen's: the column
+   opens to --board-w above this breakpoint (see "wide screens: the
+   same frame, centred"), and two doors stretched across 1040px are a
+   500px slab of 蘇芳 for a two-word label. Past it they take their own
+   width and ride the right end — where the console's count sits below
+   them, and where every other screen's bar keeps its action. */
+@media (min-width: 769px) {
+  .decks-doors { justify-content: flex-end; }
+  .decks-doors > * { flex: 0 0 auto; }
+}
+
 /* ── The library (.lib-*) ──────────────────────────────────────
-   Decks other learners published: the block under 教材's own grid,
-   the library screen, and the page you read before following one.
+   Decks other learners published: the library screen, and the page you
+   read before following one. 教材 itself draws none of this any more —
+   the preview shelf under its grid became the door in its bar, and the
+   .lib-shelf wrapper went with it.
 
    Almost nothing new is drawn here. A published deck is still a deck,
    so it wears `.platform-card .deck-card` and these rules only add the
@@ -13033,16 +13078,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    shape of its own would say the decks in it were a different kind of
    thing. */
 
-.lib-shelf {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-
-/* The one way out of a short shelf, and out of a long one: the same
-   quiet full-width row in both places, so "see all" and "show more"
-   are visibly the same gesture. Not a .btn-secondary — this is
-   navigation, not an action on the screen's object. */
+/* The way down a long shelf. The name is the preview shelf's "see all"
+   — the row was drawn in both places, so the two gestures looked like
+   one — and it is kept now that only "show more" is left, because the
+   shape is the library's and renaming it would touch nothing else. */
 .lib-shelf__more {
   width: 100%;
   min-height: 44px;

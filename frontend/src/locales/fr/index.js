@@ -1320,6 +1320,7 @@ const decks = {
 
   // ── La bibliothèque ───────────────────────────────────────
   library:               'Bibliothèque',
+  libraryBrowse:         'Parcourir',
   librarySeeAll:         'Tout voir',
   libraryMore:           'Afficher plus',
   librarySort:           'Ordre',
