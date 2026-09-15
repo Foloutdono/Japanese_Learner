@@ -63,7 +63,11 @@ const group = (stroke, rows) => ({
 // never fitted a phone in one line.
 const GROUPS = [
   group(1, ONE), group(2, THREE.slice(0, 23)), group(3, THREE),
-  ...[4, 5, 6, 7, 8, 9, 10, 11].map(n => group(n, THREE.slice(0, 20))),
+  ...[4, 5, 6, 7, 8, 9].map(n => group(n, THREE.slice(0, 20))),
+  // 10画 files nine, which is the page that used to draw two rows of
+  // small tiles with a screen of nothing under them.
+  group(10, THREE.slice(0, 9)),
+  group(11, THREE.slice(0, 20)),
   ...[12, 13, 14, 15, 16, 17].map(n => group(n, ONE.slice(0, 4))),
 ]
 
@@ -230,6 +234,47 @@ describe('the page', () => {
     const full = await index({ stroke: 3 })
     expect(full.one('.radical-page').getAttribute('data-fill')).toBeNull()
     expect(wideTile).toBeGreaterThan(full.one('.radical-tile').getBoundingClientRect().width)
+  })
+
+  it('picks a column count a short page can fill, and grows its tiles into it', async () => {
+    const full = await index({ stroke: 3 })
+    const fullTile = full.one('.radical-tile').getBoundingClientRect().width
+
+    // Nine radicals: three rows of three rather than six and then
+    // three, and the three span the row they are given.
+    const nine = await index({ stroke: 10 })
+    expect(nine.one('.radical-page').style.getPropertyValue('--cols')).toBe('3')
+    const tiles = nine.all('.radical-tile')
+    expect(tiles.length).toBe(9)
+    const perRow = new Map()
+    for (const tile of tiles) {
+      const top = Math.round(tile.getBoundingClientRect().top)
+      perRow.set(top, (perRow.get(top) || 0) + 1)
+    }
+    expect([...perRow.values()]).toEqual([3, 3, 3])
+    const grid = nine.one('.radical-page__grid').getBoundingClientRect()
+    const row = tiles.slice(0, 3).map(el => el.getBoundingClientRect())
+    expect(row[2].right - row[0].left).toBeGreaterThan(grid.width * 0.95)
+    // Which is a tile half again the width the full page draws, with
+    // the glyph it can now carry.
+    expect(row[0].width).toBeGreaterThan(fullTile * 1.3)
+    const size = (el, part) => parseFloat(getComputedStyle(el.querySelector(`.radical-tile__${part}`)).fontSize)
+    expect(size(tiles[0], 'char')).toBeGreaterThan(size(full.all('.radical-tile')[0], 'char'))
+    // And the figure with it — it is what the radical is chosen on,
+    // not a caption under the glyph.
+    expect(size(tiles[0], 'count')).toBeGreaterThan(size(full.all('.radical-tile')[0], 'count'))
+    // The meaning still prints in full at that width.
+    for (const sub of nine.all('.radical-tile__sub')) {
+      expect(sub.scrollHeight, sub.textContent).toBeLessThanOrEqual(sub.clientHeight + 1)
+      expect(fits(sub), sub.textContent).toBe(true)
+    }
+    expect(fits(nine.one('.radical-page__grid'))).toBe(true)
+
+    // And a page of four is two by two — the cap on a track is what
+    // keeps those four from being drawn as plates.
+    const four = await index({ stroke: 12 })
+    expect(four.one('.radical-page').style.getPropertyValue('--cols')).toBe('2')
+    expect(four.one('.radical-tile').getBoundingClientRect().width).toBeLessThanOrEqual(160)
   })
 
   it('gives the dictionary its own tile, and more of them to a row', async () => {
