@@ -140,6 +140,26 @@ def sample_rank_range_with_examples(start_rank: int, end_rank_inclusive: int, li
     return [_row_to_entry(r) for r in rows]
 
 
+def iter_rank_head(horizon: int):
+    """Stream (kanji, kana, meaning, freq_rank) for every entry in the
+    pool's RANKED head -- the rows whose freq_rank is a real ordering
+    rather than the dump's own sequence, which it becomes at about rank
+    23,000 (the caller sets the horizon; content/theme_data.py has the
+    same note about the column).
+
+    study/kana_words.py folds these into a 250-key index of the words a
+    kana is read in and keeps four rows per key, so this is a generator
+    over a server-side cursor and over four columns rather than seven:
+    nothing holds 23k rows, and the ones the index drops are collected
+    as it goes. idx_entries_freq_rank covers the range, so it is not the
+    212k-row scan the whole table would be.
+    """
+    yield from _conn().execute(
+        "SELECT kanji, kana, meaning, freq_rank FROM entries WHERE freq_rank <= ?",
+        (horizon,),
+    )
+
+
 def get_by_key(kanji: str, kana: str) -> dict | None:
     row = _conn().execute(
         "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries WHERE kanji = ? AND kana = ?",

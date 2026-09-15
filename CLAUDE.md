@@ -49,7 +49,9 @@ runtime purpose. Two consequences worth knowing:
   and `components/selection/RadicalLesson.jsx`), and **087** is the grammar
   rework (cited in `content/grammar_points_data.py`, `study/grammar_check.py`,
   `study/modes.py`, `scripts/migrate_grammar_ids.py` and
-  `components/study/GrammarLesson.jsx`; ADR 0016). When starting a new wave, begin at **088** or higher, and check
+  `components/study/GrammarLesson.jsx`; ADR 0016), and **088** is the words a
+  kana is read in (cited in `study/kana_words.py`, `routes/dictionary.py` and
+  `components/dictionary/DictionaryDetail.jsx`). When starting a new wave, begin at **089** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

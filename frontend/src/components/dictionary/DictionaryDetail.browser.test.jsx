@@ -117,6 +117,15 @@ const KANA = {
   type: 'hiragana', kana: 'あ', romaji: 'a', meaning: 'a', level: 'Hiragana', group: 'vowels',
   svg_url: '/kanjivg/03042.svg',
   status: { status: 'mastered', total_reviews: 40, correct_reviews: 39, accuracy: 98, interval_days: 60, next_review: '2026-11-01T08:00:00Z', due: false },
+  // study/kana_words.py's rows: the reading, the written form behind
+  // it, no alignment — the word that begins with the kana first, the
+  // one that merely contains it last.
+  vocab_examples: [
+    { kanji: '朝', kana: 'あさ', meaning: 'morning', level: 'N5' },
+    { kanji: '青', kana: 'あお', meaning: 'blue', level: 'N5' },
+    { kanji: '', kana: 'あそこ', meaning: 'over there', level: 'N5' },
+    { kanji: '場合', kana: 'ばあい', meaning: 'situation, case', level: 'N3' },
+  ],
 }
 
 // A JMdict-pool word: no level, kana-only headword, no alignment.
@@ -374,6 +383,40 @@ describe('the body — blocks that name themselves', () => {
     expect(form.querySelectorAll('.record')).toHaveLength(0)
     const sheet = form.querySelector('.dict-form__sheet')
     expect(sheet.getBoundingClientRect().width).toBeCloseTo(form.getBoundingClientRect().width - 2, 0)
+  })
+
+  // ── A kana's own ledger (plan 088) ──────────────────────
+  // The same block on the other half of the catalogue, and the one
+  // difference that matters: a reader still learning the syllabary is
+  // shown あさ rather than 朝, with the あ struck in the entry's ink
+  // wherever in the word it falls.
+  it('reads a kana into the words it is read in, and opens each of them', async () => {
+    const kana = await renderEntry(KANA)
+    const ledger = kana.root.querySelector('section[aria-label="Read in these words"]')
+    const rows = [...ledger.querySelectorAll('.dict-word')]
+    expect(rows.map(r => r.querySelector('.dict-word__jp').textContent))
+      .toEqual(['あさ', 'あお', 'あそこ', 'ばあい'])
+    expect(rows[0].querySelector('.dict-word__gloss').textContent).toBe('Morning')
+    // The kana itself, picked out — first character or fourth.
+    expect(rows.map(r => r.querySelector('.dict-word__hit').textContent)).toEqual(['あ', 'あ', 'あ', 'あ'])
+    expect(rows[3].querySelector('.dict-word__jp').firstChild.textContent).toBe('ば')
+    // A row is a door to the word's own entry; a word written in kana
+    // alone (あそこ) is searched for by the reading, which is also its
+    // headword.
+    rows[0].click()
+    expect(kana.onVocabClick).toHaveBeenCalledWith('朝', 'あさ')
+    rows[2].click()
+    expect(kana.onVocabClick).toHaveBeenCalledWith('あそこ', 'あそこ')
+    // The drawing first, then the words, then the record — the kanji
+    // panel's order, since it is the same panel.
+    const order = [...kana.root.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
+    expect(order).toEqual(['Stroke order', 'Read in these words', 'Card stats'])
+  })
+
+  it('draws no ledger for a kana ordinary writing has no word for', async () => {
+    const { root } = await renderEntry({ ...KANA, kana: 'ヲ', romaji: 'wo', type: 'katakana', vocab_examples: [] })
+    expect(root.querySelector('.dict-words')).toBeNull()
+    expect(root.textContent).not.toMatch(/Read in these words/)
   })
 
   it('opens a kanji\'s words from a ledger of doors, and a word\'s kanji from tiles', async () => {
