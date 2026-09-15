@@ -38,7 +38,14 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      # `platform-tools` only. The action's default also asks sdkmanager
+      # for the legacy `tools` package, which Google has withdrawn from
+      # the SDK repository: since 2026-09-15 the step dies on "Failed to
+      # find package 'tools'" before the build starts. Nothing here ever
+      # used it -- Gradle fetches the platform and build-tools it needs.
       - uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
       - name: Install
         working-directory: frontend
         run: npm ci
