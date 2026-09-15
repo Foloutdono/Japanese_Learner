@@ -506,26 +506,32 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-rest').getAttribute('aria-label')).toBe('No example words yet')
     // Pills come after the bands.
     expect(bands()[0].compareDocumentPosition(dialog.querySelector('.dict-rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Each row picks out the kanji it is an example of — here as an
-    // EDGE, the pigment as a rule under the character rather than as
-    // its ink, since the band above the rows already names the reading
-    // in that same gold. The ink belongs to the entry's own ledger,
-    // which has nothing else to name it with (see the ledger test).
+    // Each row picks out the kanji it is an example of — here on a
+    // BLOCK rather than in ink, the character and its own furigana
+    // lifted off the row together, since the band above the rows
+    // already names the reading in that same gold. The ink belongs to
+    // the entry's own ledger, which has nothing else to name it with
+    // (see the ledger test).
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
     const hit = dialog.querySelector('.dict-word__hit')
+    const rt = hit.querySelector('rt')
+    const wash = probe('backgroundColor', 'color-mix(in srgb, var(--line-jisho) 22%, var(--surface))', root)
+    expect(getComputedStyle(hit).backgroundColor).toBe(wash)
+    expect(getComputedStyle(rt).backgroundColor).toBe(wash)
+    // Both inks on the block are the AMBIENT one. The furigana is not
+    // the secondary ink it is everywhere else, and that is measured
+    // rather than chosen: the tint eats that ink's headroom and takes
+    // it to 3.78:1 (contrast.browser.test.jsx pins both).
     expect(getComputedStyle(hit).color).toBe(probe('color', 'var(--text-primary)', root))
-    expect(getComputedStyle(hit.querySelector('rt')).color).toBe(probe('color', 'var(--text-secondary)', root))
-    // Raw, as every edge in the panel is — a rule is not text.
-    expect(getComputedStyle(hit).textDecorationLine).toBe('underline')
-    expect(getComputedStyle(hit).textDecorationColor).toBe(probe('color', 'var(--line-jisho)'))
+    expect(getComputedStyle(rt).color).toBe(probe('color', 'var(--text-primary)', root))
     // …and the character sits CENTRED under a reading wider than it is
     // (木 read もく), rather than flush left with the reading hanging
     // off its right across the text beside it. The annotation being
     // inside its own base's box is the whole of the mechanism.
     const hitBox = hit.getBoundingClientRect()
-    const rtBox = hit.querySelector('rt').getBoundingClientRect()
+    const rtBox = rt.getBoundingClientRect()
     // A CJK glyph advances exactly one em, so the font size IS 木's
     // width — and もく is wider than it, which is the case in question.
     // (The base's own box can no longer say so: widening it to hold the
@@ -535,10 +541,10 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
     // Centred, not merely contained: equal air either side of it.
     expect(Math.abs((rtBox.left - hitBox.left) - (hitBox.right - rtBox.right))).toBeLessThan(1)
-    // And the ledger's hit underneath carries no rule: there the
+    // And the ledger's hit underneath carries no block: there the
     // pigment is still the ink.
     const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
-    expect(getComputedStyle(led).textDecorationLine).toBe('none')
+    expect(getComputedStyle(led).backgroundColor).toBe('rgba(0, 0, 0, 0)')
 
     // The other gate swaps the list for the other register's, mark and
     // all — the two are never on screen together to be confused.

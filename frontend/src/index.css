@@ -12660,34 +12660,41 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .dict-rd .dict-words { margin: 0; }
 /* The reading is stated by the band over these rows, so the gold INK
    on the kanji inside them is repetition outranking the head it
-   belongs to. It becomes an EDGE instead: the character keeps its
-   weight, takes the ambient ink, and carries the pigment as a 2px rule
-   under it — the same gesture as the gate's rail and the plate's
-   stripe, and raw for the same reason ("an edge is not text", see
-   --dict-ink above). A mark of a different kind cannot compete with
-   the band for the same register, which a dimmer gold would still have
-   done. The entry's own four-word ledger keeps the ink: nothing there
-   names the reading, so there is nothing for it to outrank.
+   belongs to. It becomes a BLOCK behind it instead — the character and
+   its own furigana on a wash of the pigment, the pair lifted off the
+   row together, which is the unit the row is really about: this kanji,
+   read this way. The entry's own four-word ledger keeps the ink:
+   nothing there names the reading, so there is nothing for it to
+   outrank.
 
-   `text-decoration` rather than a border or an inset shadow, and not
-   for taste: both of those draw across the whole ruby box, so 真 under
-   a まこと annotation gets a rule three characters wide. The
-   decoration follows the base glyph. `skip-ink: none` keeps it solid
-   under a character that reaches below the baseline.
+   **This is a fill, and DESIGN.md says colour is an edge, a ring or a
+   numeral and never a fill.** Owner-directed (2026-09-15), after a
+   rule under the glyph was tried and judged too faint to find in a
+   list. Recorded as the exception it is under "The entry plate" there;
+   it is one mark inside one list, not a licence to fill a row, a chip
+   or a card.
+
+   The wash is mixed toward the SURFACE rather than laid on at an
+   alpha: a mix toward `transparent` composites toward whatever is
+   behind it and costs contrast in both themes (DESIGN.md, The primary
+   button). 22% is where the block is unmistakable and the ink on it
+   still measures: 8.18:1 dark, 10.17:1 light.
+
+   The furigana on the block is the ambient ink rather than the
+   secondary one, and that is a measurement, not a flourish — the
+   tint eats the secondary ink's headroom, which falls to 4.41:1 dark
+   and 4.48:1 light on this ground and is under the floor on any
+   gold worth seeing. Guard 4 holds both to it (.dj-plain, .dj-plain-rt).
 
    A modifier the row asks for (WordRow's `plain`) rather than a
    descendant of .dict-readings — the descendant form outranks
    .dict-entry-card__char rt further down the sheet, which the
    specificity ratchet counts. */
-.dict-word__hit--plain {
+.dict-word__hit--plain,
+.dict-word__hit--plain rt {
   color: var(--text-primary);
-  text-decoration: underline;
-  text-decoration-color: var(--line-color, var(--accent2));
-  text-decoration-thickness: 2px;
-  text-decoration-skip-ink: none;
-  text-underline-offset: 3px;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 22%, var(--surface));
 }
-.dict-word__hit--plain rt { color: var(--text-secondary); }
 
 /* The readings with no word to show for them: pills in the secondary
    register, the reading alone. Hairline rings rather than a run of

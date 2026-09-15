@@ -296,14 +296,15 @@ function StrokeSheet({ src, notAvailableLabel }) {
 // over a quiz has no dictionary underneath to jump around in) it is a
 // plain row, not a dead-looking button.
 //
-// `plain` moves the hit's pigment from its ink to its edge: the
-// character keeps its weight, takes the ambient ink and carries a 2px
-// rule under it. The ledger picks the kanji out in ink because nothing
-// else there says which reading its four words demonstrate; in the
-// readings sheet the band over the rows has just said it, and a row of
-// gold under a gold heading outranks the heading — which was the old
-// sheet's real defect. Still marked, in a register that cannot compete
-// with the one above it.
+// `plain` moves the hit's pigment from its ink to a block behind it:
+// the character and its own furigana lifted off the row together on a
+// wash of the gold, which is the unit the row is really about — this
+// kanji, read this way. The ledger picks the kanji out in ink because
+// nothing else there says which reading its four words demonstrate; in
+// the readings sheet the band over the rows has just said it, and a
+// row of gold under a gold heading outranks the heading — which was
+// the old sheet's real defect. Still marked, in a register that cannot
+// compete with the one above it.
 function WordRow({ w, char, onClick, plain }) {
   const body = (
     <>
