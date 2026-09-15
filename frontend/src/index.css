@@ -12436,7 +12436,30 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   color: var(--text-primary);
 }
-.dict-word__jp ruby { ruby-position: over; }
+/* A reading WIDER than the character it sits over — 真 read まこと, 生
+   read なま — hangs off the right of it in Blink: the base stays its
+   own width, flush left, and the annotation runs on across whatever
+   follows it (the に of 真に). The kanji then reads as left-aligned
+   under its own furigana, and the rule under the hit makes that
+   obvious.
+
+   `ruby-align: space-between` is what stops it: it is the one value
+   that makes Blink size the base container to the annotation and
+   centre the glyph in it. `center` and `space-around` (the initial
+   value) both leave the overhang exactly as it was — measured, not
+   assumed, against 真/ま, 写真/しゃしん, 真/まこと and 生/なま, where it
+   is the wide pair alone that moves. So do not "correct" this to
+   `center`: that is the value this reads as if it wanted, and it does
+   nothing. WebKit widens and centres of its own accord and ignores
+   `ruby-align` entirely, which is the same result by a different road.
+
+   Scoped to the word rows because that is where a wide reading meets
+   the text beside it; the plate's headword sets its own furigana with
+   room around it. */
+.dict-word__jp ruby {
+  ruby-position: over;
+  ruby-align: space-between;
+}
 .dict-word__jp rt {
   font-size: var(--fs-caption-xs);
   font-weight: 400;

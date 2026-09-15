@@ -520,6 +520,21 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // Raw, as every edge in the panel is — a rule is not text.
     expect(getComputedStyle(hit).textDecorationLine).toBe('underline')
     expect(getComputedStyle(hit).textDecorationColor).toBe(probe('color', 'var(--line-jisho)'))
+    // …and the character sits CENTRED under a reading wider than it is
+    // (木 read もく), rather than flush left with the reading hanging
+    // off its right across the text beside it. The annotation being
+    // inside its own base's box is the whole of the mechanism.
+    const hitBox = hit.getBoundingClientRect()
+    const rtBox = hit.querySelector('rt').getBoundingClientRect()
+    // A CJK glyph advances exactly one em, so the font size IS 木's
+    // width — and もく is wider than it, which is the case in question.
+    // (The base's own box can no longer say so: widening it to hold the
+    // annotation is the whole of the fix.)
+    expect(rtBox.width).toBeGreaterThan(parseFloat(getComputedStyle(hit).fontSize))
+    expect(rtBox.left).toBeGreaterThanOrEqual(hitBox.left - 0.5)
+    expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
+    // Centred, not merely contained: equal air either side of it.
+    expect(Math.abs((rtBox.left - hitBox.left) - (hitBox.right - rtBox.right))).toBeLessThan(1)
     // And the ledger's hit underneath carries no rule: there the
     // pigment is still the ink.
     const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
