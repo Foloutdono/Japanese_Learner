@@ -98,3 +98,23 @@ reason `compare` exists.
 
 Keep it short. A basic rule stays basic; the depth is in the later steps and
 in the neighbours, never in a longer first step.
+
+## What the matcher can and cannot see
+
+`study/grammar_match.stems` reduces a pattern to the substrings a sentence
+must contain (〜てください → てください, でください, てくださ, …), and the
+contrast rule reads those stems. Two consequences while writing `compare`:
+
+- A rival whose stem is inside the point itself can never be a `compare`
+  rival of a point that marks contrast examples: ようにする is inside
+  ようになる (via ように), ことにする inside ことになる (via ことに), そうです
+  inside そうにない, 〜てください inside 〜させてください. Compare such a pair
+  through a third neighbour and explain the pair in the `careful` step.
+- A `contrast` sentence must carry the pattern literally, in the spelling the
+  stems expect: a godan volitional (帰ろう) does not match 〜ようと思う, a
+  short form (食べちゃった) does not match 〜てしまう, 見えません after 字がよく
+  does not match 〜が見える. The gate names the sentence; reword it.
+
+A pattern the matcher cannot check at all (a bare particle, a class label
+such as い形容詞／な形容詞) is exempt from the contrast requirement: its lesson
+names the neighbours, and the drill never draws it.
