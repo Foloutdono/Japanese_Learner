@@ -980,6 +980,12 @@ const dictionary = {
   vocabExamples:     'Utilisé dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
+  // Voir en/index.js : la moitié japonaise est le titre, la moitié en
+  // langue claire sa légende.
+  readingsOnJp:      '音読み',
+  readingsOnName:    'Lecture chinoise',
+  readingsKunJp:     '訓読み',
+  readingsKunName:   'Lecture japonaise',
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',

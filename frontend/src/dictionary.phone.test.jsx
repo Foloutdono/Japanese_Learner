@@ -342,11 +342,11 @@ describe('the analyzer at phone width', () => {
           </button>
         </div>
         <div className="dict-readings">
-          <div className="dict-register">
-            <span className="cap">On</span>
-            <ul className="dict-register__rest">
-              <li className="dict-register__chip">サン</li>
-              <li className="dict-register__chip">ザン</li>
+          <div className="dict-rest">
+            <div className="dict-rest__cap">No example words yet</div>
+            <ul className="dict-rest__chips">
+              <li className="dict-rest__chip">サン</li>
+              <li className="dict-rest__chip">ザン</li>
             </ul>
           </div>
         </div>
@@ -357,10 +357,11 @@ describe('the analyzer at phone width', () => {
     expect(getComputedStyle(rows[0]).borderTopWidth).toBe('0px')
     expect(getComputedStyle(rows[1]).borderTopWidth).toBe('1px')
     expect(getComputedStyle(rows[2]).borderTopWidth).toBe('1px')
-    // The register's chips are quiet pills, not targets (nothing opens
-    // from one): the --sp-6 floor of main's rule, in a pill.
+    // The readings with no example word are quiet pills, not targets
+    // (nothing opens from one): the --sp-6 floor of main's rule, in a
+    // pill.
     const resolve = resolver()
-    for (const chip of screen.container.querySelectorAll('.dict-register__chip')) {
+    for (const chip of screen.container.querySelectorAll('.dict-rest__chip')) {
       expect(chip.getBoundingClientRect().height).toBeGreaterThanOrEqual(parseFloat(resolve('minHeight', 'var(--sp-6)')))
       expect(getComputedStyle(chip).borderTopLeftRadius).toBe('999px')
     }

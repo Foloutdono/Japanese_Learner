@@ -295,12 +295,25 @@ function StrokeSheet({ src, notAvailableLabel }) {
 // under the reading they demonstrate. Without `onClick` (the sheet
 // over a quiz has no dictionary underneath to jump around in) it is a
 // plain row, not a dead-looking button.
-function WordRow({ w, char, onClick }) {
+//
+// `plain` takes the gold off the hit and leaves it its weight. The
+// ledger picks the kanji out in ink because nothing else there says
+// which reading its four words demonstrate; in the readings sheet the
+// band over the rows has just said it, and a row of gold under a gold
+// heading outranks the heading — which was the old sheet's real
+// defect. Same row, one register quieter.
+function WordRow({ w, char, onClick, plain }) {
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
         {w.furigana?.length
-          ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
+          ? (
+            <FuriganaParts
+              parts={w.furigana}
+              hit={char}
+              hitClassName={`dict-word__hit${plain ? ' dict-word__hit--plain' : ''}`}
+            />
+          )
           : w.kanji}
       </span>
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
@@ -322,7 +335,56 @@ function KindMark({ token }) {
   return <span className="dict-kind" aria-hidden="true">{isOnyomiToken(token) ? '音' : '訓'}</span>
 }
 
-// ── Every reading, with its words ─────────────────────────────
+// ── 音 / 訓 — a gate ──────────────────────────────────────────
+// The register, stood at rather than marked: its Japanese name, the
+// count of readings behind it, and its plain-language title under
+// both. The old sheet said this with a 22px carved square at
+// --fs-caption-xs in the secondary ink — which names the register to
+// nobody who cannot already read 音, and is too quiet to divide two
+// blocks besides.
+function ReadingGate({ jp, name, n, open, onPick }) {
+  return (
+    <button
+      type="button"
+      onClick={onPick}
+      className={`dict-gate${open ? ' dict-gate--on' : ''}`}
+      aria-pressed={open}
+    >
+      <span className="dict-gate__jp" lang="ja">
+        {jp}<span className="dict-gate__n">{n}</span>
+      </span>
+      <span className="dict-gate__name">{name}</span>
+    </button>
+  )
+}
+
+// One reading, and the words that demonstrate it: the reading as a
+// band of sumi that sticks to the top of the list while its words
+// pass under it, then the words in the ledger's own rows.
+//
+// The band is the fix for the sheet's second defect. The reading used
+// to be set at --fs-lead in --text-primary — the rung and the ink of
+// the word rows it heads — flush with a list that bleeds sixteen
+// pixels further left than it does, with the gold hit kanji inside
+// every row outranking it. A head cannot be the quietest thing in its
+// own group. Ground, not rung, is what separates them now; the 音/訓
+// mark rides the band so the register is named however far the list
+// has scrolled.
+function ReadingBand({ reading, words, kind, char, onWord }) {
+  return (
+    <section className="dict-rd" aria-label={reading}>
+      <h2 className="dict-rd__head">
+        <span className="dict-rd__kind" aria-hidden="true">{kind}</span>
+        <span className="dict-rd__yomi" lang="ja">{reading}</span>
+      </h2>
+      <div className="dict-words">
+        {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} plain />)}
+      </div>
+    </section>
+  )
+}
+
+// ── Every reading, behind two gates ───────────────────────────
 // The panel behind the plate's door. A sheet of its own over whatever
 // is on screen — the dock, or the lookup sheet over a quiz — in the
 // lookup sheet's chrome, so the entry underneath stays exactly as it
@@ -331,42 +393,21 @@ function KindMark({ token }) {
 // plate's construction without the registers — the kanji, what this
 // is, the ✕ — and the same stripe.
 //
-// Two blocks, one per register, each opened by its 音 / 訓 mark once
-// rather than beside every reading. Inside, the readings the deck has
-// words for, in the deck's order, each a small group: the reading,
-// then up to four words that use it in the ledger's own rows, the
-// kanji picked out in each. The readings no word demonstrates — for
-// 生 that is fourteen of twenty — close the block as one wrapped row
-// of quiet pills: still all of them, without twenty heads in a
-// column. Escape and the scrim close this sheet and only this sheet
-// (see useDialog's `capture`); a word that jumps closes it too, since
-// the entry it belongs to is leaving. On a phone it is the whole
-// screen, as every sheet here is.
-function ReadingsRegister({ label, mark, groups, char, onWord, t }) {
-  const withWords = groups.filter(g => g.words?.length > 0)
-  const rest = groups.filter(g => !g.words?.length)
-  return (
-    <section className="dict-block dict-register" aria-label={label}>
-      <div className="dict-register__head"><KindMark token={mark} /></div>
-      {withWords.map(({ reading, words }) => (
-        <div key={reading} className="dict-reading">
-          <div className="dict-reading__yomi" lang="ja">{reading}</div>
-          <div className="dict-words">
-            {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} />)}
-          </div>
-        </div>
-      ))}
-      {rest.length > 0 && (
-        <ul className="dict-register__rest" aria-label={t.readingsNoWords}>
-          {rest.map(({ reading }) => (
-            <li key={reading} className="dict-register__chip" lang="ja">{reading}</li>
-          ))}
-        </ul>
-      )}
-    </section>
-  )
-}
-
+// ONE REGISTER AT A TIME, under the gates. Both registers in one
+// column is what made them confusable at all; a gate each means they
+// are never on screen together to be confused, and it halves the list
+// 生 opens with. Inside the open one: the readings the deck has words
+// for, in the deck's order, each a band over the ledger's own rows;
+// the readings no word demonstrates — for 生 that is fourteen of
+// twenty — close the list as one wrapped row of quiet pills under a
+// caption that finally says what they are. A kanji with one register
+// gets no gates: a segmented control with one segment is a label
+// pretending to be a choice.
+//
+// Escape and the scrim close this sheet and only this sheet (see
+// useDialog's `capture`); a word that jumps closes it too, since the
+// entry it belongs to is leaving. On a phone it is the whole screen,
+// as every sheet here is.
 function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const { t } = useLang()
   const dialogRef = useDialog(onClose, { capture: true })
@@ -375,9 +416,20 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
     : undefined
   const on = groups.filter(g => isOnyomiToken(g.reading))
   const kun = groups.filter(g => !isOnyomiToken(g.reading))
+  // Which gate is open on arrival: the register the deck's own order
+  // puts first, which is where a kanji marks its primary reading (see
+  // domain/readingPick). A kanji taught for its kun reading does not
+  // open on a 音 list, and one with a single register opens on it.
+  const [gate, setGate] = useState(() => (
+    kun.length === 0 || isOnyomiToken(groups[0]?.reading) ? 'on' : 'kun'
+  ))
+  const open = gate === 'on' && on.length > 0 ? on : kun
+  const kind = open === on ? '音' : '訓'
+  const withWords = open.filter(g => g.words?.length > 0)
+  const rest = open.filter(g => !g.words?.length)
   return createPortal(
     <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
-      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet dict-sheet--readings"
            role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
         <article className="dict-entry">
           <header className="dict-plate">
@@ -400,12 +452,35 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
             </div>
             <div className="dict-plate__stripe" aria-hidden="true" />
           </header>
-          <div className="dict-entry__body">
-            {on.length > 0 && (
-              <ReadingsRegister label={t.onyomi} mark={on[0].reading} groups={on} char={entry.kanji} onWord={jump} t={t} />
-            )}
-            {kun.length > 0 && (
-              <ReadingsRegister label={t.kunyomi} mark={kun[0].reading} groups={kun} char={entry.kanji} onWord={jump} t={t} />
+          {on.length > 0 && kun.length > 0 && (
+            <div className="dict-gates">
+              <ReadingGate
+                jp={t.readingsOnJp} name={t.readingsOnName} n={on.length}
+                open={open === on} onPick={() => setGate('on')}
+              />
+              <ReadingGate
+                jp={t.readingsKunJp} name={t.readingsKunName} n={kun.length}
+                open={open === kun} onPick={() => setGate('kun')}
+              />
+            </div>
+          )}
+          <div className="dict-entry__body dict-readings"
+               aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
+            {withWords.map(({ reading, words }) => (
+              <ReadingBand
+                key={reading} reading={reading} words={words}
+                kind={kind} char={entry.kanji} onWord={jump}
+              />
+            ))}
+            {rest.length > 0 && (
+              <section className="dict-rest" aria-label={t.readingsNoWords}>
+                <div className="dict-rest__cap">{t.readingsNoWords}</div>
+                <ul className="dict-rest__chips">
+                  {rest.map(({ reading }) => (
+                    <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
+                  ))}
+                </ul>
+              </section>
             )}
             <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
               {t.close}

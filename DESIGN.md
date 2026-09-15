@@ -388,14 +388,34 @@ readings**, the first on'yomi and the first kun'yomi, each behind its 音/訓
 mark, and a `+N` door: 生 has twenty readings and a plate is not the place
 for them. The door opens a **sheet of its own** over the entry — the lookup
 sheet's shell, stacked above whatever opened it — listing every reading with
-the words that use it (grouped backend-side by `study/kanji_words.py`): one
-block per register, opened by its 音/訓 mark once, the readings with words as
-small groups over the ledger's own rows, and the readings no word
-demonstrates closing the block as one row of quiet pills. Nothing of that
-list is on the entry itself. The four-word "used in these
+the words that use it (grouped backend-side by `study/kanji_words.py`).
+
+**One register at a time, behind two gates.** The sheet prints a gate per
+register under its stripe — 音読み over CHINESE READING, 訓読み over JAPANESE
+READING, each with the count of readings behind it — and the open one's
+readings below. A reading is a **band of sumi** carrying the register's 音/訓
+mark and the reading in the raw pigment, sticking to the top of the list
+while its words pass under it in the ledger's own rows; the readings no word
+demonstrates close the list as one row of quiet pills, under a caption that
+says what they are. A kanji with a single register gets no gates: a
+segmented control with one segment is a label pretending to be a choice.
+
+This replaced one column holding both registers, each headed once by a 22px
+carved 音/訓 at `--fs-caption-xs`, with every reading set at `--fs-lead` in
+`--text-primary` — the rung and the ink of the word rows under it. Neither
+division survived being looked at: the register was named to nobody who could
+not already read 音, and the head of a group was the quietest thing in it.
+**Ground and place divide them now, not a rung**, which is why the sheet is
+the one shell here that scrolls its body rather than itself — a band cannot
+stick under a sticky plate whose height it has no way to know.
+
+Nothing of that list is on the entry itself. The four-word "used in these
 words" ledger stays, and its four words demonstrate four different readings
 where the deck has them, the kanji picked out in each row in the entry's
-ink so the reading it uses is what the eye lands on. The plate is `position: sticky`
+ink so the reading it uses is what the eye lands on — **the sheet's rows
+give that gold up** (`WordRow`'s `plain`) and keep only the weight: the band
+above them has already named the reading, and the ledger has nothing else to
+name it with. The plate is `position: sticky`
 inside whichever shell scrolls it, so the word stays in view while its
 examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no
