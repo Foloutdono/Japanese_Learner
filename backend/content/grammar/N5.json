@@ -4,7 +4,7 @@
     "structure": "Noun/な-adj + です・だ",
     "meaning": {
       "en": "the copula: is/am/are",
-      "fr": "the copula: is/am/are"
+      "fr": "la copule : être"
     },
     "steps": [],
     "compare": [],
@@ -12,12 +12,12 @@
       {
         "jp": "わたしは学生です。",
         "en": "I am a student.",
-        "fr": "I am a student."
+        "fr": "Je suis étudiant."
       },
       {
         "jp": "あの人は日本語の先生です。",
         "en": "That person is a Japanese teacher.",
-        "fr": "That person is a Japanese teacher."
+        "fr": "Cette personne est professeur de japonais."
       }
     ]
   },
@@ -26,7 +26,7 @@
     "structure": "topic + は",
     "meaning": {
       "en": "marks the sentence topic",
-      "fr": "marks the sentence topic"
+      "fr": "marque le thème de la phrase"
     },
     "steps": [],
     "compare": [],
@@ -34,12 +34,12 @@
       {
         "jp": "今日は天気がいいです。",
         "en": "The weather is good today.",
-        "fr": "The weather is good today."
+        "fr": "Aujourd'hui, il fait beau."
       },
       {
         "jp": "この本はとてもおもしろいです。",
         "en": "This book is very interesting.",
-        "fr": "This book is very interesting."
+        "fr": "Ce livre est très intéressant."
       }
     ]
   },
@@ -48,7 +48,7 @@
     "structure": "subject + が",
     "meaning": {
       "en": "marks the grammatical subject",
-      "fr": "marks the grammatical subject"
+      "fr": "marque le sujet grammatical"
     },
     "steps": [],
     "compare": [],
@@ -56,12 +56,12 @@
       {
         "jp": "花がきれいです。",
         "en": "The flowers are pretty.",
-        "fr": "The flowers are pretty."
+        "fr": "Les fleurs sont jolies."
       },
       {
         "jp": "電車が来ました。",
         "en": "The train came.",
-        "fr": "The train came."
+        "fr": "Le train est arrivé."
       }
     ]
   },
@@ -70,7 +70,7 @@
     "structure": "object + を",
     "meaning": {
       "en": "marks the direct object",
-      "fr": "marks the direct object"
+      "fr": "marque le complément d'objet direct"
     },
     "steps": [],
     "compare": [],
@@ -78,12 +78,12 @@
       {
         "jp": "毎あさパンを食べます。",
         "en": "I eat bread every morning.",
-        "fr": "I eat bread every morning."
+        "fr": "Je mange du pain tous les matins."
       },
       {
         "jp": "つめたい水を飲みました。",
         "en": "I drank cold water.",
-        "fr": "I drank cold water."
+        "fr": "J'ai bu de l'eau froide."
       }
     ]
   },
@@ -92,7 +92,7 @@
     "structure": "noun + に",
     "meaning": {
       "en": "time, destination, or indirect object",
-      "fr": "time, destination, or indirect object"
+      "fr": "le moment, la destination ou le destinataire"
     },
     "steps": [],
     "compare": [],
@@ -100,12 +100,12 @@
       {
         "jp": "七時におきます。",
         "en": "I get up at seven.",
-        "fr": "I get up at seven."
+        "fr": "Je me lève à sept heures."
       },
       {
         "jp": "友だちにてがみを書きました。",
         "en": "I wrote a letter to my friend.",
-        "fr": "I wrote a letter to my friend."
+        "fr": "J'ai écrit une lettre à mon ami."
       }
     ]
   },
@@ -114,7 +114,7 @@
     "structure": "noun + で",
     "meaning": {
       "en": "location of an action, or means/method",
-      "fr": "location of an action, or means/method"
+      "fr": "le lieu d'une action, ou le moyen"
     },
     "steps": [],
     "compare": [],
@@ -122,12 +122,12 @@
       {
         "jp": "駅で友だちに会いました。",
         "en": "I met a friend at the station.",
-        "fr": "I met a friend at the station."
+        "fr": "J'ai retrouvé un ami à la gare."
       },
       {
         "jp": "電車で学校へ行きます。",
         "en": "I go to school by train.",
-        "fr": "I go to school by train."
+        "fr": "Je vais à l'école en train."
       }
     ]
   },
@@ -136,7 +136,7 @@
     "structure": "noun + と + noun",
     "meaning": {
       "en": "and (nouns); also with, together with",
-      "fr": "and (nouns); also with, together with"
+      "fr": "et (entre noms) ; avec, en compagnie de"
     },
     "steps": [],
     "compare": [],
@@ -144,12 +144,12 @@
       {
         "jp": "父と山へ行きました。",
         "en": "I went to the mountain with my father.",
-        "fr": "I went to the mountain with my father."
+        "fr": "Je suis allé à la montagne avec mon père."
       },
       {
         "jp": "本とノートを買いました。",
         "en": "I bought a book and a notebook.",
-        "fr": "I bought a book and a notebook."
+        "fr": "J'ai acheté un livre et un cahier."
       }
     ]
   },
@@ -158,7 +158,7 @@
     "structure": "noun + も, replacing は or が",
     "meaning": {
       "en": "also, too",
-      "fr": "also, too"
+      "fr": "aussi, également"
     },
     "steps": [],
     "compare": [],
@@ -166,12 +166,12 @@
       {
         "jp": "わたしも学生です。",
         "en": "I am a student too.",
-        "fr": "I am a student too."
+        "fr": "Moi aussi, je suis étudiant."
       },
       {
         "jp": "母も日本語を話します。",
         "en": "My mother speaks Japanese too.",
-        "fr": "My mother speaks Japanese too."
+        "fr": "Ma mère aussi parle japonais."
       }
     ]
   },
@@ -180,7 +180,7 @@
     "structure": "noun + の + noun",
     "meaning": {
       "en": "possessive, or links two nouns",
-      "fr": "possessive, or links two nouns"
+      "fr": "possessif, ou relie deux noms"
     },
     "steps": [],
     "compare": [],
@@ -188,12 +188,12 @@
       {
         "jp": "これはわたしの本です。",
         "en": "This is my book.",
-        "fr": "This is my book."
+        "fr": "C'est mon livre."
       },
       {
         "jp": "日本語の先生は女の人です。",
         "en": "The Japanese teacher is a woman.",
-        "fr": "The Japanese teacher is a woman."
+        "fr": "Le professeur de japonais est une femme."
       }
     ]
   },
@@ -202,7 +202,7 @@
     "structure": "noun + から〜noun + まで",
     "meaning": {
       "en": "from ... to ...",
-      "fr": "from ... to ..."
+      "fr": "de... à..., depuis... jusqu'à..."
     },
     "steps": [],
     "compare": [],
@@ -210,12 +210,12 @@
       {
         "jp": "九時から五時まではたらきます。",
         "en": "I work from nine to five.",
-        "fr": "I work from nine to five."
+        "fr": "Je travaille de neuf heures à cinq heures."
       },
       {
         "jp": "学校から駅まであるきます。",
         "en": "I walk from school to the station.",
-        "fr": "I walk from school to the station."
+        "fr": "Je marche de l'école jusqu'à la gare."
       }
     ]
   },
@@ -224,7 +224,7 @@
     "structure": "verb stem + ます・ません",
     "meaning": {
       "en": "polite present/future, affirmative and negative",
-      "fr": "polite present/future, affirmative and negative"
+      "fr": "présent/futur poli, affirmatif et négatif"
     },
     "steps": [],
     "compare": [],
@@ -232,12 +232,12 @@
       {
         "jp": "毎日ぎゅうにゅうを飲みます。",
         "en": "I drink milk every day.",
-        "fr": "I drink milk every day."
+        "fr": "Je bois du lait tous les jours."
       },
       {
         "jp": "おさけは飲みません。",
         "en": "I do not drink alcohol.",
-        "fr": "I do not drink alcohol."
+        "fr": "Je ne bois pas d'alcool."
       }
     ]
   },
@@ -246,7 +246,7 @@
     "structure": "verb stem + ました・ませんでした",
     "meaning": {
       "en": "polite past, affirmative and negative",
-      "fr": "polite past, affirmative and negative"
+      "fr": "passé poli, affirmatif et négatif"
     },
     "steps": [],
     "compare": [],
@@ -254,12 +254,12 @@
       {
         "jp": "きのう、本を読みました。",
         "en": "I read a book yesterday.",
-        "fr": "I read a book yesterday."
+        "fr": "Hier, j'ai lu un livre."
       },
       {
         "jp": "先週はどこへも行きませんでした。",
         "en": "I did not go anywhere last week.",
-        "fr": "I did not go anywhere last week."
+        "fr": "La semaine dernière, je ne suis allé nulle part."
       }
     ]
   },
@@ -268,7 +268,7 @@
     "structure": "verb stem + たいです",
     "meaning": {
       "en": "want to do something",
-      "fr": "want to do something"
+      "fr": "vouloir faire quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -276,12 +276,12 @@
       {
         "jp": "いつか日本へ行きたいです。",
         "en": "I want to go to Japan some day.",
-        "fr": "I want to go to Japan some day."
+        "fr": "Je veux aller au Japon un jour."
       },
       {
         "jp": "つめたい水が飲みたいです。",
         "en": "I want to drink cold water.",
-        "fr": "I want to drink cold water."
+        "fr": "Je veux boire de l'eau froide."
       }
     ]
   },
@@ -290,7 +290,7 @@
     "structure": "verb て-form + ください",
     "meaning": {
       "en": "please do",
-      "fr": "please do"
+      "fr": "faites..., s'il vous plaît"
     },
     "steps": [],
     "compare": [],
@@ -298,12 +298,12 @@
       {
         "jp": "この本を読んでください。",
         "en": "Please read this book.",
-        "fr": "Please read this book."
+        "fr": "Lisez ce livre, s'il vous plaît."
       },
       {
         "jp": "ここに名前を書いてください。",
         "en": "Please write your name here.",
-        "fr": "Please write your name here."
+        "fr": "Écrivez votre nom ici, s'il vous plaît."
       }
     ]
   },
@@ -312,7 +312,7 @@
     "structure": "verb て-form + います",
     "meaning": {
       "en": "ongoing action, or a resulting state",
-      "fr": "ongoing action, or a resulting state"
+      "fr": "action en cours, ou état qui en résulte"
     },
     "steps": [],
     "compare": [],
@@ -320,12 +320,12 @@
       {
         "jp": "母は今りょうりをつくっています。",
         "en": "My mother is cooking now.",
-        "fr": "My mother is cooking now."
+        "fr": "Ma mère est en train de cuisiner."
       },
       {
         "jp": "父は会社ではたらいています。",
         "en": "My father works at a company.",
-        "fr": "My father works at a company."
+        "fr": "Mon père travaille dans une entreprise."
       }
     ]
   },
@@ -334,7 +334,7 @@
     "structure": "verb て-form + もいいです",
     "meaning": {
       "en": "it's okay to / may I",
-      "fr": "it's okay to / may I"
+      "fr": "il est permis de / puis-je"
     },
     "steps": [],
     "compare": [],
@@ -342,12 +342,12 @@
       {
         "jp": "ここでしゃしんをとってもいいです。",
         "en": "You may take photos here.",
-        "fr": "You may take photos here."
+        "fr": "Vous pouvez prendre des photos ici."
       },
       {
         "jp": "この水を飲んでもいいですか。",
         "en": "May I drink this water?",
-        "fr": "May I drink this water?"
+        "fr": "Puis-je boire cette eau ?"
       }
     ]
   },
@@ -356,7 +356,7 @@
     "structure": "verb て-form + はいけません",
     "meaning": {
       "en": "must not do",
-      "fr": "must not do"
+      "fr": "il est interdit de"
     },
     "steps": [],
     "compare": [],
@@ -364,12 +364,12 @@
       {
         "jp": "この川でおよいではいけません。",
         "en": "You must not swim in this river.",
-        "fr": "You must not swim in this river."
+        "fr": "Il est interdit de nager dans cette rivière."
       },
       {
         "jp": "ここに車をとめてはいけません。",
         "en": "You must not park a car here.",
-        "fr": "You must not park a car here."
+        "fr": "Il est interdit de garer une voiture ici."
       }
     ]
   },
@@ -378,7 +378,7 @@
     "structure": "verb dictionary form + ことができます",
     "meaning": {
       "en": "can do, is able to",
-      "fr": "can do, is able to"
+      "fr": "pouvoir, être capable de"
     },
     "steps": [],
     "compare": [],
@@ -386,12 +386,12 @@
       {
         "jp": "わたしは中国語を話すことができます。",
         "en": "I am able to speak Chinese.",
-        "fr": "I am able to speak Chinese."
+        "fr": "Je sais parler chinois."
       },
       {
         "jp": "この店ではカードをつかうことができます。",
         "en": "You can use a card at this shop.",
-        "fr": "You can use a card at this shop."
+        "fr": "On peut payer par carte dans ce magasin."
       }
     ]
   },
@@ -400,7 +400,7 @@
     "structure": "verb ない-form + でください",
     "meaning": {
       "en": "please don't do",
-      "fr": "please don't do"
+      "fr": "ne faites pas..., s'il vous plaît"
     },
     "steps": [],
     "compare": [],
@@ -408,12 +408,12 @@
       {
         "jp": "大きなこえで話さないでください。",
         "en": "Please do not speak in a loud voice.",
-        "fr": "Please do not speak in a loud voice."
+        "fr": "Ne parlez pas fort, s'il vous plaît."
       },
       {
         "jp": "ここにごみをすてないでください。",
         "en": "Please do not throw rubbish here.",
-        "fr": "Please do not throw rubbish here."
+        "fr": "Ne jetez pas d'ordures ici, s'il vous plaît."
       }
     ]
   },
@@ -422,7 +422,7 @@
     "structure": "verb ない-form (drop い) + ければなりません",
     "meaning": {
       "en": "must do",
-      "fr": "must do"
+      "fr": "devoir, il faut"
     },
     "steps": [],
     "compare": [],
@@ -430,12 +430,12 @@
       {
         "jp": "毎日学校へ行かなければなりません。",
         "en": "I must go to school every day.",
-        "fr": "I must go to school every day."
+        "fr": "Je dois aller à l'école tous les jours."
       },
       {
         "jp": "六時に出なければなりません。",
         "en": "I must leave at six.",
-        "fr": "I must leave at six."
+        "fr": "Je dois partir à six heures."
       }
     ]
   },
@@ -444,7 +444,7 @@
     "structure": "noun + へ",
     "meaning": {
       "en": "direction of movement: to, toward",
-      "fr": "direction of movement: to, toward"
+      "fr": "direction d'un déplacement : vers, à"
     },
     "steps": [],
     "compare": [],
@@ -452,12 +452,12 @@
       {
         "jp": "来週、山へ行きます。",
         "en": "I am going to the mountain next week.",
-        "fr": "I am going to the mountain next week."
+        "fr": "La semaine prochaine, je vais à la montagne."
       },
       {
         "jp": "母は店へ出かけました。",
         "en": "My mother went out to the shop.",
-        "fr": "My mother went out to the shop."
+        "fr": "Ma mère est sortie au magasin."
       }
     ]
   },
@@ -466,7 +466,7 @@
     "structure": "noun + や + noun",
     "meaning": {
       "en": "and — an open-ended list, unlike と",
-      "fr": "and — an open-ended list, unlike と"
+      "fr": "et... (liste ouverte, à la différence de と)"
     },
     "steps": [],
     "compare": [],
@@ -474,12 +474,12 @@
       {
         "jp": "つくえの上に本やノートがあります。",
         "en": "There are books and notebooks on the desk.",
-        "fr": "There are books and notebooks on the desk."
+        "fr": "Il y a des livres, des cahiers et d'autres choses sur le bureau."
       },
       {
         "jp": "店で魚や花を買いました。",
         "en": "I bought fish and flowers at the shop.",
-        "fr": "I bought fish and flowers at the shop."
+        "fr": "J'ai acheté du poisson, des fleurs et d'autres choses au magasin."
       }
     ]
   },
@@ -488,7 +488,7 @@
     "structure": "sentence + か",
     "meaning": {
       "en": "turns a statement into a question; also 'or' between nouns",
-      "fr": "turns a statement into a question; also 'or' between nouns"
+      "fr": "transforme une phrase en question ; aussi « ou » entre noms"
     },
     "steps": [],
     "compare": [],
@@ -496,12 +496,12 @@
       {
         "jp": "あなたは学生ですか。",
         "en": "Are you a student?",
-        "fr": "Are you a student?"
+        "fr": "Êtes-vous étudiant ?"
       },
       {
         "jp": "おちゃかコーヒーを飲みますか。",
         "en": "Will you drink tea or coffee?",
-        "fr": "Will you drink tea or coffee?"
+        "fr": "Voulez-vous du thé ou du café ?"
       }
     ]
   },
@@ -510,7 +510,7 @@
     "structure": "sentence + ね",
     "meaning": {
       "en": "seeks agreement: right?, isn't it?",
-      "fr": "seeks agreement: right?, isn't it?"
+      "fr": "cherche l'accord : n'est-ce pas ?"
     },
     "steps": [],
     "compare": [],
@@ -518,12 +518,12 @@
       {
         "jp": "今日はいい天気ですね。",
         "en": "It is nice weather today, isn't it?",
-        "fr": "It is nice weather today, isn't it?"
+        "fr": "Il fait beau aujourd'hui, n'est-ce pas ?"
       },
       {
         "jp": "この花はきれいですね。",
         "en": "These flowers are pretty, aren't they?",
-        "fr": "These flowers are pretty, aren't they?"
+        "fr": "Ces fleurs sont jolies, non ?"
       }
     ]
   },
@@ -532,7 +532,7 @@
     "structure": "sentence + よ",
     "meaning": {
       "en": "asserts something the listener may not know yet",
-      "fr": "asserts something the listener may not know yet"
+      "fr": "affirme quelque chose que l'autre ignore peut-être"
     },
     "steps": [],
     "compare": [],
@@ -540,12 +540,12 @@
       {
         "jp": "あしたは休みですよ。",
         "en": "Tomorrow is a holiday, you know.",
-        "fr": "Tomorrow is a holiday, you know."
+        "fr": "Demain, c'est congé, tu sais."
       },
       {
         "jp": "この店のパンはおいしいですよ。",
         "en": "The bread at this shop is delicious, you know.",
-        "fr": "The bread at this shop is delicious, you know."
+        "fr": "Le pain de ce magasin est délicieux, je t'assure."
       }
     ]
   },
@@ -554,7 +554,7 @@
     "structure": "plain/polite form + から",
     "meaning": {
       "en": "because, since (gives the reason first)",
-      "fr": "because, since (gives the reason first)"
+      "fr": "parce que, puisque (la raison d'abord)"
     },
     "steps": [],
     "compare": [],
@@ -562,12 +562,12 @@
       {
         "jp": "雨がふっているから、今日は行きません。",
         "en": "Because it is raining, I am not going today.",
-        "fr": "Because it is raining, I am not going today."
+        "fr": "Comme il pleut, je n'y vais pas aujourd'hui."
       },
       {
         "jp": "時間がないから、いそぎましょう。",
         "en": "Since there is no time, let's hurry.",
-        "fr": "Since there is no time, let's hurry."
+        "fr": "Puisqu'on n'a pas le temps, dépêchons-nous."
       }
     ]
   },
@@ -576,7 +576,7 @@
     "structure": "verb stem + ませんか",
     "meaning": {
       "en": "won't you? — an invitation",
-      "fr": "won't you? — an invitation"
+      "fr": "voulez-vous... ? (une invitation)"
     },
     "steps": [],
     "compare": [],
@@ -584,12 +584,12 @@
       {
         "jp": "いっしょにごはんを食べませんか。",
         "en": "Won't you eat a meal with me?",
-        "fr": "Won't you eat a meal with me?"
+        "fr": "Voulez-vous manger avec moi ?"
       },
       {
         "jp": "あした、山へ行きませんか。",
         "en": "Won't you go to the mountain tomorrow?",
-        "fr": "Won't you go to the mountain tomorrow?"
+        "fr": "Voulez-vous aller à la montagne demain ?"
       }
     ]
   },
@@ -598,7 +598,7 @@
     "structure": "verb stem + ましょう",
     "meaning": {
       "en": "let's do",
-      "fr": "let's do"
+      "fr": "faisons..., allons-y"
     },
     "steps": [],
     "compare": [],
@@ -606,12 +606,12 @@
       {
         "jp": "いっしょに行きましょう。",
         "en": "Let's go together.",
-        "fr": "Let's go together."
+        "fr": "Allons-y ensemble."
       },
       {
         "jp": "少し休みましょう。",
         "en": "Let's rest a little.",
-        "fr": "Let's rest a little."
+        "fr": "Reposons-nous un peu."
       }
     ]
   },
@@ -620,7 +620,7 @@
     "structure": "verb stem + ましょうか",
     "meaning": {
       "en": "shall I?, shall we?",
-      "fr": "shall I?, shall we?"
+      "fr": "voulez-vous que je... ? et si nous... ?"
     },
     "steps": [],
     "compare": [],
@@ -628,12 +628,12 @@
       {
         "jp": "でんきをつけましょうか。",
         "en": "Shall I turn on the light?",
-        "fr": "Shall I turn on the light?"
+        "fr": "Voulez-vous que j'allume la lumière ?"
       },
       {
         "jp": "にもつをもちましょうか。",
         "en": "Shall I carry your luggage?",
-        "fr": "Shall I carry your luggage?"
+        "fr": "Voulez-vous que je porte vos bagages ?"
       }
     ]
   },
@@ -642,7 +642,7 @@
     "structure": "noun + が + あります・います",
     "meaning": {
       "en": "there is/are — あります for things, います for the living",
-      "fr": "there is/are — あります for things, います for the living"
+      "fr": "il y a : あります pour les choses, います pour les êtres vivants"
     },
     "steps": [],
     "compare": [],
@@ -650,12 +650,12 @@
       {
         "jp": "駅の前に店があります。",
         "en": "There is a shop in front of the station.",
-        "fr": "There is a shop in front of the station."
+        "fr": "Il y a un magasin devant la gare."
       },
       {
         "jp": "へやに男の子がいます。",
         "en": "There is a boy in the room.",
-        "fr": "There is a boy in the room."
+        "fr": "Il y a un garçon dans la chambre."
       }
     ]
   },
@@ -664,7 +664,7 @@
     "structure": "い-adj + noun / な-adj + な + noun",
     "meaning": {
       "en": "the two adjective classes, and how each attaches to a noun",
-      "fr": "the two adjective classes, and how each attaches to a noun"
+      "fr": "les deux classes d'adjectifs, et leur accroche au nom"
     },
     "steps": [],
     "compare": [],
@@ -672,12 +672,12 @@
       {
         "jp": "高い山が見えます。",
         "en": "A tall mountain is visible.",
-        "fr": "A tall mountain is visible."
+        "fr": "On voit une haute montagne."
       },
       {
         "jp": "ここはしずかな店です。",
         "en": "This is a quiet shop.",
-        "fr": "This is a quiet shop."
+        "fr": "C'est un magasin calme."
       }
     ]
   },
@@ -686,7 +686,7 @@
     "structure": "い-adj (drop い) + くて / な-adj + で",
     "meaning": {
       "en": "joins two adjectives or clauses: and",
-      "fr": "joins two adjectives or clauses: and"
+      "fr": "relie deux adjectifs ou propositions : et"
     },
     "steps": [],
     "compare": [],
@@ -694,12 +694,12 @@
       {
         "jp": "このパンは安くておいしいです。",
         "en": "This bread is cheap and delicious.",
-        "fr": "This bread is cheap and delicious."
+        "fr": "Ce pain est bon marché et délicieux."
       },
       {
         "jp": "この山は高くてきれいです。",
         "en": "This mountain is tall and beautiful.",
-        "fr": "This mountain is tall and beautiful."
+        "fr": "Cette montagne est haute et belle."
       }
     ]
   },
@@ -708,7 +708,7 @@
     "structure": "い-adj (drop い) + くなる / noun・な-adj + になる",
     "meaning": {
       "en": "become, turn into",
-      "fr": "become, turn into"
+      "fr": "devenir"
     },
     "steps": [],
     "compare": [],
@@ -716,12 +716,12 @@
       {
         "jp": "子どもは大きくなりました。",
         "en": "The child has grown big.",
-        "fr": "The child has grown big."
+        "fr": "L'enfant a grandi."
       },
       {
         "jp": "友だちは日本語の先生になりました。",
         "en": "My friend became a Japanese teacher.",
-        "fr": "My friend became a Japanese teacher."
+        "fr": "Mon ami est devenu professeur de japonais."
       }
     ]
   },
@@ -730,7 +730,7 @@
     "structure": "noun + より + noun + のほうが + adjective",
     "meaning": {
       "en": "comparison: the second one is more ...",
-      "fr": "comparison: the second one is more ..."
+      "fr": "comparaison : le second est plus..."
     },
     "steps": [],
     "compare": [],
@@ -738,12 +738,12 @@
       {
         "jp": "電車より車のほうがはやいです。",
         "en": "A car is faster than a train.",
-        "fr": "A car is faster than a train."
+        "fr": "La voiture est plus rapide que le train."
       },
       {
         "jp": "魚よりにくのほうがすきです。",
         "en": "I like meat more than fish.",
-        "fr": "I like meat more than fish."
+        "fr": "Je préfère la viande au poisson."
       }
     ]
   },
@@ -752,7 +752,7 @@
     "structure": "group + で + noun + が + いちばん + adjective",
     "meaning": {
       "en": "the most ... within a group",
-      "fr": "the most ... within a group"
+      "fr": "le plus... d'un ensemble"
     },
     "steps": [],
     "compare": [],
@@ -760,12 +760,12 @@
       {
         "jp": "日本でこの山がいちばん高いです。",
         "en": "This mountain is the tallest in Japan.",
-        "fr": "This mountain is the tallest in Japan."
+        "fr": "Cette montagne est la plus haute du Japon."
       },
       {
         "jp": "この店でこのパンがいちばん安いです。",
         "en": "This bread is the cheapest in this shop.",
-        "fr": "This bread is the cheapest in this shop."
+        "fr": "Ce pain est le moins cher de ce magasin."
       }
     ]
   },
@@ -774,7 +774,7 @@
     "structure": "verb た-form/ない-form + ほうがいいです",
     "meaning": {
       "en": "had better, it would be better to",
-      "fr": "had better, it would be better to"
+      "fr": "il vaut mieux, tu ferais mieux de"
     },
     "steps": [],
     "compare": [],
@@ -782,12 +782,12 @@
       {
         "jp": "はやく休んだほうがいいです。",
         "en": "You had better rest early.",
-        "fr": "You had better rest early."
+        "fr": "Tu ferais mieux de te reposer tôt."
       },
       {
         "jp": "雨だから、行かないほうがいいです。",
         "en": "Since it is raining, you had better not go.",
-        "fr": "Since it is raining, you had better not go."
+        "fr": "Comme il pleut, il vaut mieux ne pas y aller."
       }
     ]
   },
@@ -796,7 +796,7 @@
     "structure": "verb ない-form (drop い) + くてもいいです",
     "meaning": {
       "en": "don't have to, need not",
-      "fr": "don't have to, need not"
+      "fr": "ne pas être obligé de"
     },
     "steps": [],
     "compare": [],
@@ -804,12 +804,12 @@
       {
         "jp": "あしたは来なくてもいいです。",
         "en": "You do not have to come tomorrow.",
-        "fr": "You do not have to come tomorrow."
+        "fr": "Tu n'es pas obligé de venir demain."
       },
       {
         "jp": "お金ははらわなくてもいいです。",
         "en": "You do not have to pay.",
-        "fr": "You do not have to pay."
+        "fr": "Vous n'avez pas besoin de payer."
       }
     ]
   },
@@ -818,7 +818,7 @@
     "structure": "verb て-form + から",
     "meaning": {
       "en": "after doing, and then",
-      "fr": "after doing, and then"
+      "fr": "après avoir fait, puis"
     },
     "steps": [],
     "compare": [],
@@ -826,12 +826,12 @@
       {
         "jp": "ごはんを食べてから、店へ行きました。",
         "en": "After eating, I went to the shop.",
-        "fr": "After eating, I went to the shop."
+        "fr": "Après avoir mangé, je suis allé au magasin."
       },
       {
         "jp": "手をあらってから、食べてください。",
         "en": "Please eat after washing your hands.",
-        "fr": "Please eat after washing your hands."
+        "fr": "Mangez après vous être lavé les mains, s'il vous plaît."
       }
     ]
   },
@@ -840,7 +840,7 @@
     "structure": "verb dictionary form / noun + の + まえに",
     "meaning": {
       "en": "before doing",
-      "fr": "before doing"
+      "fr": "avant de faire"
     },
     "steps": [],
     "compare": [],
@@ -848,12 +848,12 @@
       {
         "jp": "ねるまえに、本を読みます。",
         "en": "I read a book before sleeping.",
-        "fr": "I read a book before sleeping."
+        "fr": "Je lis un livre avant de dormir."
       },
       {
         "jp": "学校へ行くまえに、母と話しました。",
         "en": "I talked with my mother before going to school.",
-        "fr": "I talked with my mother before going to school."
+        "fr": "J'ai parlé avec ma mère avant d'aller à l'école."
       }
     ]
   },
@@ -862,7 +862,7 @@
     "structure": "verb た-form / noun + の + あとで",
     "meaning": {
       "en": "after doing",
-      "fr": "after doing"
+      "fr": "après avoir fait"
     },
     "steps": [],
     "compare": [],
@@ -870,12 +870,12 @@
       {
         "jp": "しごとのあとで、友だちに会います。",
         "en": "I will meet a friend after work.",
-        "fr": "I will meet a friend after work."
+        "fr": "Après le travail, je vois un ami."
       },
       {
         "jp": "ごはんを食べたあとで、少し休みます。",
         "en": "I rest a little after eating.",
-        "fr": "I rest a little after eating."
+        "fr": "Après avoir mangé, je me repose un peu."
       }
     ]
   },
@@ -884,7 +884,7 @@
     "structure": "plain form / noun + の + とき",
     "meaning": {
       "en": "when, at the time of",
-      "fr": "when, at the time of"
+      "fr": "quand, au moment de"
     },
     "steps": [],
     "compare": [],
@@ -892,12 +892,12 @@
       {
         "jp": "学生のとき、よく山へ行きました。",
         "en": "When I was a student, I often went to the mountains.",
-        "fr": "When I was a student, I often went to the mountains."
+        "fr": "Quand j'étais étudiant, j'allais souvent à la montagne."
       },
       {
         "jp": "日本へ行くとき、この本を買いました。",
         "en": "When I went to Japan, I bought this book.",
-        "fr": "When I went to Japan, I bought this book."
+        "fr": "Quand je suis allé au Japon, j'ai acheté ce livre."
       }
     ]
   },
@@ -906,7 +906,7 @@
     "structure": "Noun + が好きです",
     "meaning": {
       "en": "like something",
-      "fr": "like something"
+      "fr": "aimer quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -914,12 +914,12 @@
       {
         "jp": "母は花が好きです。",
         "en": "My mother likes flowers.",
-        "fr": "My mother likes flowers."
+        "fr": "Ma mère aime les fleurs."
       },
       {
         "jp": "わたしは魚が好きです。",
         "en": "I like fish.",
-        "fr": "I like fish."
+        "fr": "J'aime le poisson."
       }
     ]
   },
@@ -928,7 +928,7 @@
     "structure": "Noun + がきらいです",
     "meaning": {
       "en": "dislike something",
-      "fr": "dislike something"
+      "fr": "ne pas aimer quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -936,12 +936,12 @@
       {
         "jp": "わたしは雨がきらいです。",
         "en": "I dislike the rain.",
-        "fr": "I dislike the rain."
+        "fr": "Je n'aime pas la pluie."
       },
       {
         "jp": "あの人は魚がきらいです。",
         "en": "That person dislikes fish.",
-        "fr": "That person dislikes fish."
+        "fr": "Cette personne n'aime pas le poisson."
       }
     ]
   },
@@ -950,7 +950,7 @@
     "structure": "Noun + が上手です・が下手です",
     "meaning": {
       "en": "be skilled at / poor at",
-      "fr": "be skilled at / poor at"
+      "fr": "être doué / ne pas être doué pour"
     },
     "steps": [],
     "compare": [],
@@ -958,12 +958,12 @@
       {
         "jp": "あの人は日本語が上手です。",
         "en": "That person is good at Japanese.",
-        "fr": "That person is good at Japanese."
+        "fr": "Cette personne est douée en japonais."
       },
       {
         "jp": "わたしは日本語が下手です。",
         "en": "I am poor at Japanese.",
-        "fr": "I am poor at Japanese."
+        "fr": "Je ne suis pas doué en japonais."
       }
     ]
   },
@@ -972,7 +972,7 @@
     "structure": "Noun + がほしいです",
     "meaning": {
       "en": "want to have a thing",
-      "fr": "want to have a thing"
+      "fr": "vouloir avoir une chose"
     },
     "steps": [],
     "compare": [],
@@ -980,12 +980,12 @@
       {
         "jp": "新しい車がほしいです。",
         "en": "I want a new car.",
-        "fr": "I want a new car."
+        "fr": "Je veux une nouvelle voiture."
       },
       {
         "jp": "わたしは新しい本がほしいです。",
         "en": "I want a new book.",
-        "fr": "I want a new book."
+        "fr": "Je veux un nouveau livre."
       }
     ]
   },
@@ -994,7 +994,7 @@
     "structure": "plain form + でしょう",
     "meaning": {
       "en": "probably, I expect",
-      "fr": "probably, I expect"
+      "fr": "probablement, je suppose"
     },
     "steps": [],
     "compare": [],
@@ -1002,12 +1002,12 @@
       {
         "jp": "あしたは雨でしょう。",
         "en": "It will probably rain tomorrow.",
-        "fr": "It will probably rain tomorrow."
+        "fr": "Il pleuvra probablement demain."
       },
       {
         "jp": "あの店は高いでしょう。",
         "en": "That shop is probably expensive.",
-        "fr": "That shop is probably expensive."
+        "fr": "Ce magasin est sans doute cher."
       }
     ]
   },
@@ -1016,7 +1016,7 @@
     "structure": "まだ + verb て-form + いません",
     "meaning": {
       "en": "has not done it yet",
-      "fr": "has not done it yet"
+      "fr": "ne pas encore avoir fait"
     },
     "steps": [],
     "compare": [],
@@ -1024,12 +1024,12 @@
       {
         "jp": "まだごはんを食べていません。",
         "en": "I have not eaten yet.",
-        "fr": "I have not eaten yet."
+        "fr": "Je n'ai pas encore mangé."
       },
       {
         "jp": "まだその本を読んでいません。",
         "en": "I have not read that book yet.",
-        "fr": "I have not read that book yet."
+        "fr": "Je n'ai pas encore lu ce livre."
       }
     ]
   },
@@ -1038,7 +1038,7 @@
     "structure": "もう + verb stem + ました",
     "meaning": {
       "en": "has already done it",
-      "fr": "has already done it"
+      "fr": "avoir déjà fait"
     },
     "steps": [],
     "compare": [],
@@ -1046,12 +1046,12 @@
       {
         "jp": "もうごはんを食べました。",
         "en": "I have already eaten.",
-        "fr": "I have already eaten."
+        "fr": "J'ai déjà mangé."
       },
       {
         "jp": "もう学校へ行きました。",
         "en": "I have already gone to school.",
-        "fr": "I have already gone to school."
+        "fr": "Je suis déjà allé à l'école."
       }
     ]
   },
@@ -1060,7 +1060,7 @@
     "structure": "quantity + くらい・ぐらい",
     "meaning": {
       "en": "roughly that much",
-      "fr": "roughly that much"
+      "fr": "environ, à peu près"
     },
     "steps": [],
     "compare": [],
@@ -1068,12 +1068,12 @@
       {
         "jp": "駅まで十分くらいです。",
         "en": "It is about ten minutes to the station.",
-        "fr": "It is about ten minutes to the station."
+        "fr": "La gare est à environ dix minutes."
       },
       {
         "jp": "本を五さつぐらい買いました。",
         "en": "I bought about five books.",
-        "fr": "I bought about five books."
+        "fr": "J'ai acheté environ cinq livres."
       }
     ]
   },
@@ -1082,7 +1082,7 @@
     "structure": "point in time + ごろ",
     "meaning": {
       "en": "at about that time",
-      "fr": "at about that time"
+      "fr": "vers (une heure, un moment)"
     },
     "steps": [],
     "compare": [],
@@ -1090,12 +1090,12 @@
       {
         "jp": "三時ごろに来てください。",
         "en": "Please come at around three.",
-        "fr": "Please come at around three."
+        "fr": "Venez vers trois heures, s'il vous plaît."
       },
       {
         "jp": "毎日、七時ごろに出ます。",
         "en": "I leave at about seven every day.",
-        "fr": "I leave at about seven every day."
+        "fr": "Je pars vers sept heures tous les jours."
       }
     ]
   },
@@ -1104,7 +1104,7 @@
     "structure": "quantity + ずつ",
     "meaning": {
       "en": "that many apiece",
-      "fr": "that many apiece"
+      "fr": "chacun, à raison de"
     },
     "steps": [],
     "compare": [],
@@ -1112,12 +1112,12 @@
       {
         "jp": "花を三本ずつ買いました。",
         "en": "I bought three flowers each.",
-        "fr": "I bought three flowers each."
+        "fr": "J'ai acheté trois fleurs de chaque."
       },
       {
         "jp": "少しずつ日本語を話します。",
         "en": "I speak Japanese little by little.",
-        "fr": "I speak Japanese little by little."
+        "fr": "Je parle japonais petit à petit."
       }
     ]
   },
@@ -1126,7 +1126,7 @@
     "structure": "noun/quantity + だけ",
     "meaning": {
       "en": "nothing more than that",
-      "fr": "nothing more than that"
+      "fr": "seulement, rien de plus"
     },
     "steps": [],
     "compare": [],
@@ -1134,12 +1134,12 @@
       {
         "jp": "水だけ飲みました。",
         "en": "I drank only water.",
-        "fr": "I drank only water."
+        "fr": "Je n'ai bu que de l'eau."
       },
       {
         "jp": "時間が少しだけあります。",
         "en": "I have only a little time.",
-        "fr": "I have only a little time."
+        "fr": "J'ai seulement un peu de temps."
       }
     ]
   },
@@ -1148,7 +1148,7 @@
     "structure": "noun + など",
     "meaning": {
       "en": "and things of that sort",
-      "fr": "and things of that sort"
+      "fr": "et autres choses du même genre"
     },
     "steps": [],
     "compare": [],
@@ -1156,12 +1156,12 @@
       {
         "jp": "本や新聞などを読みます。",
         "en": "I read books, newspapers and so on.",
-        "fr": "I read books, newspapers and so on."
+        "fr": "Je lis des livres, des journaux, etc."
       },
       {
         "jp": "花や木などを見ました。",
         "en": "I looked at flowers, trees and the like.",
-        "fr": "I looked at flowers, trees and the like."
+        "fr": "J'ai regardé des fleurs, des arbres et ce genre de choses."
       }
     ]
   },
@@ -1170,7 +1170,7 @@
     "structure": "noun + でも",
     "meaning": {
       "en": "or something along those lines",
-      "fr": "or something along those lines"
+      "fr": "ou quelque chose comme ça"
     },
     "steps": [],
     "compare": [],
@@ -1178,12 +1178,12 @@
       {
         "jp": "お水でも飲みませんか。",
         "en": "Won't you have some water or something?",
-        "fr": "Won't you have some water or something?"
+        "fr": "Voulez-vous de l'eau, ou quelque chose ?"
       },
       {
         "jp": "本でも読みましょう。",
         "en": "Let's read a book or something.",
-        "fr": "Let's read a book or something."
+        "fr": "Lisons un livre, par exemple."
       }
     ]
   },
@@ -1192,7 +1192,7 @@
     "structure": "plain form + と思います",
     "meaning": {
       "en": "I think that",
-      "fr": "I think that"
+      "fr": "je pense que"
     },
     "steps": [],
     "compare": [],
@@ -1200,12 +1200,12 @@
       {
         "jp": "あしたは休みだと思います。",
         "en": "I think tomorrow is a day off.",
-        "fr": "I think tomorrow is a day off."
+        "fr": "Je pense que demain est un jour de congé."
       },
       {
         "jp": "この店は安いと思います。",
         "en": "I think this shop is cheap.",
-        "fr": "I think this shop is cheap."
+        "fr": "Je pense que ce magasin est bon marché."
       }
     ]
   },
@@ -1214,7 +1214,7 @@
     "structure": "quoted words + と言います",
     "meaning": {
       "en": "says that",
-      "fr": "says that"
+      "fr": "dire que"
     },
     "steps": [],
     "compare": [],
@@ -1222,12 +1222,12 @@
       {
         "jp": "先生は来ると言いました。",
         "en": "The teacher said he would come.",
-        "fr": "The teacher said he would come."
+        "fr": "Le professeur a dit qu'il viendrait."
       },
       {
         "jp": "あの人は行かないと言います。",
         "en": "That person says he will not go.",
-        "fr": "That person says he will not go."
+        "fr": "Cette personne dit qu'elle n'ira pas."
       }
     ]
   },
@@ -1236,7 +1236,7 @@
     "structure": "verb dictionary form + のが好きです",
     "meaning": {
       "en": "enjoy doing something",
-      "fr": "enjoy doing something"
+      "fr": "aimer faire quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -1244,12 +1244,12 @@
       {
         "jp": "本を読むのが好きです。",
         "en": "I like reading books.",
-        "fr": "I like reading books."
+        "fr": "J'aime lire des livres."
       },
       {
         "jp": "山へ行くのが好きです。",
         "en": "I like going to the mountains.",
-        "fr": "I like going to the mountains."
+        "fr": "J'aime aller à la montagne."
       }
     ]
   },
@@ -1258,7 +1258,7 @@
     "structure": "verb ない-form + で",
     "meaning": {
       "en": "without doing it",
-      "fr": "without doing it"
+      "fr": "sans faire"
     },
     "steps": [],
     "compare": [],
@@ -1266,12 +1266,12 @@
       {
         "jp": "今日は休まないで来ました。",
         "en": "I came today without taking a rest.",
-        "fr": "I came today without taking a rest."
+        "fr": "Aujourd'hui, je suis venu sans me reposer."
       },
       {
         "jp": "話さないで聞いてください。",
         "en": "Please listen without talking.",
-        "fr": "Please listen without talking."
+        "fr": "Écoutez sans parler, s'il vous plaît."
       }
     ]
   },
@@ -1280,7 +1280,7 @@
     "structure": "Noun + をください",
     "meaning": {
       "en": "asking to be given something",
-      "fr": "asking to be given something"
+      "fr": "demander qu'on vous donne quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -1288,12 +1288,12 @@
       {
         "jp": "つめたい水をください。",
         "en": "Please give me some cold water.",
-        "fr": "Please give me some cold water."
+        "fr": "De l'eau froide, s'il vous plaît."
       },
       {
         "jp": "あの新しい本をください。",
         "en": "Please give me that new book.",
-        "fr": "Please give me that new book."
+        "fr": "Ce nouveau livre, s'il vous plaît."
       }
     ]
   },
@@ -1302,7 +1302,7 @@
     "structure": "Noun + が分かります",
     "meaning": {
       "en": "grasp or understand something",
-      "fr": "grasp or understand something"
+      "fr": "comprendre quelque chose"
     },
     "steps": [],
     "compare": [],
@@ -1310,12 +1310,12 @@
       {
         "jp": "日本語が分かります。",
         "en": "I understand Japanese.",
-        "fr": "I understand Japanese."
+        "fr": "Je comprends le japonais."
       },
       {
         "jp": "先生の話が分かりました。",
         "en": "I understood what the teacher said.",
-        "fr": "I understood what the teacher said."
+        "fr": "J'ai compris ce que le professeur a dit."
       }
     ]
   },
@@ -1324,7 +1324,7 @@
     "structure": "Noun + ができます",
     "meaning": {
       "en": "be capable of something",
-      "fr": "be capable of something"
+      "fr": "savoir, être capable de"
     },
     "steps": [],
     "compare": [],
@@ -1332,12 +1332,12 @@
       {
         "jp": "母はフランス語ができます。",
         "en": "My mother can speak French.",
-        "fr": "My mother can speak French."
+        "fr": "Ma mère parle français."
       },
       {
         "jp": "ここで買いものができます。",
         "en": "You can do your shopping here.",
-        "fr": "You can do your shopping here."
+        "fr": "On peut faire ses courses ici."
       }
     ]
   },
@@ -1346,7 +1346,7 @@
     "structure": "verb stem + たくないです",
     "meaning": {
       "en": "have no wish to do",
-      "fr": "have no wish to do"
+      "fr": "ne pas vouloir faire"
     },
     "steps": [],
     "compare": [],
@@ -1354,12 +1354,12 @@
       {
         "jp": "今日は行きたくないです。",
         "en": "I do not want to go today.",
-        "fr": "I do not want to go today."
+        "fr": "Je ne veux pas y aller aujourd'hui."
       },
       {
         "jp": "その魚は食べたくないです。",
         "en": "I do not want to eat that fish.",
-        "fr": "I do not want to eat that fish."
+        "fr": "Je ne veux pas manger ce poisson."
       }
     ]
   },
@@ -1368,7 +1368,7 @@
     "structure": "group + の中で",
     "meaning": {
       "en": "within a given set",
-      "fr": "within a given set"
+      "fr": "parmi, au sein d'un ensemble"
     },
     "steps": [],
     "compare": [],
@@ -1376,12 +1376,12 @@
       {
         "jp": "四人の中で、わたしがいちばん小さいです。",
         "en": "Of the four of us, I am the smallest.",
-        "fr": "Of the four of us, I am the smallest."
+        "fr": "De nous quatre, je suis le plus petit."
       },
       {
         "jp": "この店の中で、この本がいちばん高いです。",
         "en": "In this shop, this book is the most expensive.",
-        "fr": "In this shop, this book is the most expensive."
+        "fr": "Dans ce magasin, ce livre est le plus cher."
       }
     ]
   },
@@ -1390,7 +1390,7 @@
     "structure": "sentence + 。 そして + sentence",
     "meaning": {
       "en": "and then, joining two statements",
-      "fr": "and then, joining two statements"
+      "fr": "et puis, relie deux énoncés"
     },
     "steps": [],
     "compare": [],
@@ -1398,12 +1398,12 @@
       {
         "jp": "本を読みました。そして、外へ出ました。",
         "en": "I read a book. Then I went outside.",
-        "fr": "I read a book. Then I went outside."
+        "fr": "J'ai lu un livre. Puis je suis sorti."
       },
       {
         "jp": "ごはんを食べました。そして、少し休みました。",
         "en": "I ate, and then rested a little.",
-        "fr": "I ate, and then rested a little."
+        "fr": "J'ai mangé, puis je me suis un peu reposé."
       }
     ]
   },
@@ -1412,7 +1412,7 @@
     "structure": "sentence + 。 それから + sentence",
     "meaning": {
       "en": "after that, next",
-      "fr": "after that, next"
+      "fr": "après cela, ensuite"
     },
     "steps": [],
     "compare": [],
@@ -1420,12 +1420,12 @@
       {
         "jp": "学校へ行きます。それから、友だちに会います。",
         "en": "I go to school. After that, I meet a friend.",
-        "fr": "I go to school. After that, I meet a friend."
+        "fr": "Je vais à l'école. Ensuite, je vois un ami."
       },
       {
         "jp": "水を飲みました。それから、本を読みました。",
         "en": "I drank some water, and after that I read a book.",
-        "fr": "I drank some water, and after that I read a book."
+        "fr": "J'ai bu de l'eau, et ensuite j'ai lu un livre."
       }
     ]
   },
@@ -1434,7 +1434,7 @@
     "structure": "sentence + 。 しかし + sentence",
     "meaning": {
       "en": "but, marking a reversal",
-      "fr": "but, marking a reversal"
+      "fr": "mais, cependant"
     },
     "steps": [],
     "compare": [],
@@ -1442,12 +1442,12 @@
       {
         "jp": "安いです。しかし、あまりよくありません。",
         "en": "It is cheap. However, it is not very good.",
-        "fr": "It is cheap. However, it is not very good."
+        "fr": "C'est bon marché. Cependant, ce n'est pas très bon."
       },
       {
         "jp": "行きたいです。しかし、時間がありません。",
         "en": "I want to go. However, I have no time.",
-        "fr": "I want to go. However, I have no time."
+        "fr": "Je veux y aller. Mais je n'ai pas le temps."
       }
     ]
   },
@@ -1456,7 +1456,7 @@
     "structure": "verb stem + に行きます",
     "meaning": {
       "en": "go somewhere in order to do",
-      "fr": "go somewhere in order to do"
+      "fr": "aller quelque part pour faire"
     },
     "steps": [],
     "compare": [],
@@ -1464,12 +1464,12 @@
       {
         "jp": "魚を買いに行きます。",
         "en": "I am going to buy fish.",
-        "fr": "I am going to buy fish."
+        "fr": "Je vais acheter du poisson."
       },
       {
         "jp": "友だちに会いに行きます。",
         "en": "I am going to meet a friend.",
-        "fr": "I am going to meet a friend."
+        "fr": "Je vais voir un ami."
       }
     ]
   },
