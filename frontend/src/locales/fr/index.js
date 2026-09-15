@@ -437,7 +437,7 @@ const stats = {
   radPositionJp: { hen: '偏', tsukuri: '旁', kanmuri: '冠', ashi: '脚', kamae: '構', tare: '垂', nyou: '繞' },
   radPositionNote:    where => `Comme composant, elle se place le plus souvent ${where} d'un kanji`,
   radNoPositionNote:  'Comme composant, elle n\'a pas de place fixe dans un kanji.',
-  radFamilyNote:      n => `Le cours bâtit ${n} kanji dessus, listés plus bas.`,
+  radFamilyShort:     'Kanji bâtis dessus',
   radNoKanji:         'Le cours n\'enseigne encore aucun kanji bâti dessus.',
   leaveSets:          'Séries',
   leaveTiers:         'Paliers',

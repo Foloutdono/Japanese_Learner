@@ -8,11 +8,13 @@ import '../index.css'
 // The index is the dictionary's own strip and page, dressed as a
 // choice: a tile prints the form the learner meets, its meaning and
 // `learned / total` over the COURSE's kanji. A radical is a lesson
-// before it is a list of platforms: the plate, the platforms (every
-// drill but the radical one), then the family by level, each kanji in
-// its stage ink. These pin that shape and the two ways out — back to
-// the page of the index the radical is on, and back to the index from
-// a number it does not know.
+// before it is a list of platforms: the plate (the strokes drawn on
+// washi, the names, the forms) and the platforms, every drill but the
+// radical one. Its family is a door on the plate rather than a tail
+// under the screen — ?family=1, the same screen, each kanji in its
+// stage ink. These pin that shape and the three ways out — back to
+// the lesson from the family, back to the page of the index the
+// radical is on, and back to the index from a number it does not know.
 
 vi.mock('../lib/api', () => {
   class ApiError extends Error { constructor(status) { super(`Request failed (${status})`); this.status = status } }
@@ -24,6 +26,19 @@ vi.mock('../lib/audio', async o => ({
 vi.mock('../lib/supabase', () => ({
   supabase: { auth: { getSession: async () => ({ data: { session: null } }) } },
 }))
+// The native shell's one build-time knob (lib/origin, ADR 0008), stubbed
+// to a sentinel origin so the assertion below can tell a backend path
+// resolved against it from a bare one. Inside the WebView that
+// difference is the whole bug: its own origin serves the bundle and
+// nothing else, so a bare /kanjivg path 404s there and the plate falls
+// back to the character as type. The literal is repeated rather than
+// read from SHELL_ORIGIN because vi.mock is hoisted above every
+// declaration.
+vi.mock('../lib/origin', () => ({
+  API_ORIGIN: 'https://shell.test',
+  api: path => 'https://shell.test' + path,
+}))
+const SHELL_ORIGIN = 'https://shell.test'
 // KanjiVG is fetched by the stroke animation itself; a failed fetch is
 // the glyph-as-type fallback, which is all this suite needs.
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: false, status: 404, json: async () => ({}), text: async () => '' })
@@ -123,16 +138,13 @@ describe('the index', () => {
 })
 
 describe('the lesson', () => {
-  it('teaches the radical, then offers every drill but the radical one, then its family by level', async () => {
+  it('teaches the radical, then offers every drill but the radical one', async () => {
     const s = await station('/learn/kanji/radical/85')
     await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
     expect(s.text('.rad-plate__names')).toBe('みず · さんずい')
     expect(s.text('.rad-plate__meaning')).toBe('eau')
     expect(s.all('.rad-plate__form').map(n => n.textContent)).toEqual(['水', '氵', '氺'])
     expect(s.text('.rad-plate__note')).toContain(fr.radPosition.hen)
-    expect(s.text('.rad-plate__note')).toContain(fr.radFamilyNote(3))
-    expect(s.text('.rad-plate__learned')).toBe('1/ 3')
-    expect(s.text('.rad-plate__started')).toBe(fr.startedNote(2))
     // The bar names the radical once the lesson has it.
     expect(s.text('.bar__sub')).toBe(`${fr.byRadicalShort} · 水 eau`)
 
@@ -141,12 +153,53 @@ describe('the lesson', () => {
     expect(titles).toContain(fr.mode_fast_review)
     expect(titles, 'one family, one radical: the radical drill has one answer').not.toContain(fr.mode_kanji_radical)
 
+    // The family is behind the door, not under the platforms.
+    expect(s.one('.rad-family')).toBeNull()
+    expect(s.text('.rad-door__fig')).toBe('1/ 3')
+    expect(s.text('.rad-door__started')).toBe(fr.startedNote(2))
+    expect(s.text('.rad-door__label')).toBe(fr.radFamilyShort)
+  })
+
+  // The strokes are what the lesson is for, so they are fetched
+  // through the API origin rather than as the bare path the API hands
+  // back (ADR 0008; the stubbed origin above is what makes the two
+  // distinguishable here). The suite's fetch answers 404 to
+  // everything, so what renders is the character-as-type fallback —
+  // the sheet it renders ON is what this checks.
+  it('draws the stroke order on washi, from the API origin', async () => {
+    const s = await station('/learn/kanji/radical/85')
+    await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
+    expect(s.one('.rad-plate__sheet')).not.toBeNull()
+    expect(s.text('.rad-plate__caption')).toBe(fr.strokeOrder)
+    const asked = globalThis.fetch.mock.calls.map(c => String(c[0])).filter(u => u.includes('kanjivg'))
+    expect(asked).toContain(`${SHELL_ORIGIN}/kanjivg/06c34.svg`)
+  })
+
+  it('opens the family from the door, and leaves it back to the lesson', async () => {
+    const s = await station('/learn/kanji/radical/85')
+    await expect.poll(() => s.one('.rad-door')).not.toBeNull()
+    s.one('.rad-door').click()
+    await expect.poll(s.where).toBe('/learn/kanji/radical/85?family=1')
+
+    // The family, by level; the lesson and its platforms stand down.
+    await expect.poll(() => s.one('.rad-family')).not.toBeNull()
+    expect(s.one('.rad-plate')).toBeNull()
+    expect(s.all('.platform-card').length).toBe(0)
     expect(s.all('.rad-family .dict-mark__jp').map(n => n.textContent)).toEqual(['N5', 'N4'])
     const tiles = s.all('.rad-kanji')
     expect(tiles.map(n => n.querySelector('.rad-kanji__char').textContent)).toEqual(['水', '海', '泳'])
     expect(tiles.map(n => n.className)).toEqual(['rad-kanji rad-kanji--mastered', 'rad-kanji rad-kanji--learning', 'rad-kanji rad-kanji--new'])
     // The first gloss only, sentence-cased as the dictionary casts it: the tile is 88px wide.
     expect(tiles[2].querySelector('.rad-kanji__meaning').textContent).toBe('Nager')
+
+    // One fetch for the two views: the lesson never unmounts.
+    expect(apiJson.mock.calls.filter(c => String(c[0]).startsWith('/api/kanji/radical/85')).length).toBe(1)
+
+    const leave = s.one('.bar__aside .stage__leave')
+    expect(leave.textContent).toBe(fr.radLesson)
+    leave.click()
+    await expect.poll(s.where).toBe('/learn/kanji/radical/85')
+    await expect.poll(() => s.one('.rad-plate')).not.toBeNull()
   })
 
   it('leaves to the page of the index the radical is on', async () => {

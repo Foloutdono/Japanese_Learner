@@ -18833,25 +18833,56 @@ a.slip__act { text-decoration: none; }
     justify-items: center;
     text-align: center;
   }
+  /* The body spans the card even while the grid centres it, so the
+     door reaches both edges the way a record does. */
+  .rad-plate__body { width: 100%; }
   .rad-plate__meta,
-  .rad-plate__forms,
-  .rad-plate__fig { justify-content: center; }
+  .rad-plate__forms { justify-content: center; }
+  .rad-plate__sheet { width: min(280px, 68vw); }
 }
-.rad-plate__glyph {
-  width: 140px;
-  height: 140px;
+/* ── The 手本 ──
+   The glyph drawn stroke by stroke and numbered, on washi (--paper)
+   rather than on the plate's own ground: KanjiVG draws in black ink,
+   which on the dark theme's surface is ink on ink. The dictionary's
+   stroke sheet is the same surface for the same reason
+   (.dict-form__sheet). Square, and the largest thing on the plate —
+   the order of the strokes is what the learner opened this to see, so
+   it is drawn at the size a 手本 is copied from rather than the size
+   of a thumbnail beside the text. */
+.rad-plate__draw {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.rad-plate__sheet {
+  width: 200px;
+  aspect-ratio: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--text-primary);
+  padding: var(--sp-3);
+  background: var(--paper);
+  border-radius: var(--r-card);
 }
 .rad-plate__strokes { width: 100%; height: 100%; }
 /* Only where KanjiVG has no file for the glyph — none today, see
-   tests/test_kanji_radicals.py — the character as type. */
+   tests/test_kanji_radicals.py — the character as type. Washi never
+   flips, so its ink is the fixed dark one (.dict-form__fallback). */
 .rad-plate__char {
   font-family: var(--font-jp);
   font-size: var(--fs-display-fluid);
   line-height: 1;
+  color: var(--text-on-fill);
+}
+.rad-plate__caption {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
 }
 .rad-plate__body {
   display: flex;
@@ -18915,31 +18946,89 @@ a.slip__act { text-decoration: none; }
   font-family: var(--font-jp);
   color: var(--text-primary);
 }
-/* The same two figures the route stop prints: learned over total,
-   and started while the two disagree. */
-.rad-plate__fig {
+/* ── The door onto the family ──
+   A record that opens: the same two figures the route stop prints
+   (learned over total, and started while the two disagree), what they
+   count, and the ledger's ▶ sliding in on approach. The tiles behind
+   it used to be listed under the platforms — 123 of them for 氵 —
+   which put a screen and a half of scrolling between the lesson and
+   everything else a phone had to reach. */
+.rad-door {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-card);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  color: inherit;
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.rad-door:hover,
+.rad-door:focus-visible {
+  background: var(--bg-card-hover);
+  border-color: var(--line-color);
+  filter: none;
+}
+.rad-door__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  min-width: 0;
+}
+.rad-door__head {
   display: flex;
   align-items: baseline;
   flex-wrap: wrap;
-  gap: var(--sp-4);
-  font-family: var(--font-display);
-  font-variant-numeric: tabular-nums;
-}
-.rad-plate__learned {
-  font-size: var(--fs-lead);
+  gap: var(--sp-3);
   color: var(--text-secondary);
 }
-.rad-plate__learned b {
+.rad-door__fig {
+  font-family: var(--font-display);
+  font-size: var(--fs-lead);
+  font-variant-numeric: tabular-nums;
+}
+.rad-door__fig b {
   font-size: var(--fs-heading);
   font-weight: 700;
   color: var(--text-primary);
 }
-.rad-plate__started {
-  font-size: var(--fs-caption);
+.rad-door__started {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.rad-door__label {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
   color: var(--text-secondary);
+}
+.rad-door__chev {
+  flex: none;
+  color: var(--text-secondary);
+  opacity: 0.7;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.rad-door:hover .rad-door__chev,
+.rad-door:focus-visible .rad-door__chev {
+  opacity: 1;
+  transform: translateX(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .rad-door,
+  .rad-door__chev { transition: none; }
 }
 
 /* ── The family ──
