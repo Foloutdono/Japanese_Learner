@@ -1074,6 +1074,8 @@ const misc = {
   mode_grammar_flashcard_b2f_desc: 'Le sens est affiché. Rappelez-vous la structure.',
   mode_grammar_fill_in:            'Nommer la règle',
   mode_grammar_fill_in_desc:       'Une phrase japonaise, sans traduction. Nommez la structure employée.',
+  mode_grammar_contrast:           'Laquelle convient',
+  mode_grammar_contrast_desc:      'Une phrase à trou. Choisissez la structure parmi celles qu\'on confond avec elle.',
 
   mode_standard_flashcard_f2b:      'Recto → verso',
   mode_standard_flashcard_f2b_desc: "Votre carte, telle que vous l'avez écrite.",

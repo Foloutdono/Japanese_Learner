@@ -1106,6 +1106,8 @@ const misc = {
   mode_grammar_flashcard_b2f_desc: 'The meaning is shown. Recall the pattern.',
   mode_grammar_fill_in:            'Name the rule',
   mode_grammar_fill_in_desc:       'A Japanese sentence, no translation. Name the pattern at work in it.',
+  mode_grammar_contrast:           'Which one fits',
+  mode_grammar_contrast_desc:      'A sentence with a gap. Pick the pattern from the ones it is confused with.',
 
   mode_standard_flashcard_f2b:      'Front → back',
   mode_standard_flashcard_f2b_desc: 'Your card, the way you wrote it.',

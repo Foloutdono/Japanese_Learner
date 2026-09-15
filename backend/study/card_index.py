@@ -16,11 +16,12 @@ index lives here now, built from the registry itself, so a mode added to
 study/modes.py is indexed rather than silently unreportable.
 
 ── Totals are REACHABLE totals ───────────────────────────────
-Three modes can only draw from part of their source's deck (see
+Four modes can only draw from part of their source's deck (see
 modes.eligible_for): `vocab.word_reading` skips kana-only entries
 because the prompt would equal the answer, `kanji.radical` needs a
 radical number, `grammar.fill_in` needs a sentence that points at its
-rule uniquely. The pool filter has to be applied to the totals too, not
+rule uniquely, `grammar.contrast` a rival and a sentence marked as
+telling them apart. The pool filter has to be applied to the totals too, not
 just to what gets served -- score word_reading out of all 8,405 vocab
 when only 7,308 can ever appear and its mastery bar can never reach
 100%, which reads as a stalled learner rather than a miscounted
@@ -29,8 +30,8 @@ denominator.
 from content.kana_data import KANA_SETS, kana_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
-from content.grammar_sentences_data import get_sentences
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find, grammar_to_id
+from content.grammar_sentences_data import contrast_examples, get_sentences
 from content.radical_data import radical_for
 
 from study.grammar_match import verifiable
@@ -63,6 +64,22 @@ def fill_ok(level: str, pattern: str) -> bool:
     return verifiable(pattern) and bool(get_sentences(level, pattern))
 
 
+def contrast_ok(level: str, pattern: str) -> bool:
+    """
+    Whether `grammar.contrast` can blank this point out of a sentence and
+    offer its rivals (plan 087): the pattern must be one a sentence can
+    point at (verifiable, as fill_ok), the point must name at least one
+    neighbour to compare, and its author must have marked a sentence in
+    which those neighbours are wrong. Same reason this lives here as
+    fill_ok: the pool and the denominator have to agree.
+    """
+    found = find(pattern)
+    if found is None or found[0] != level:
+        return False
+    entry = found[1]
+    return verifiable(pattern) and bool(entry.get("compare")) and bool(contrast_examples(level, pattern))
+
+
 def _augment(source: str, key: str, entry: dict) -> dict:
     """
     The extra facts eligible_for() asks about, which live outside the
@@ -73,8 +90,26 @@ def _augment(source: str, key: str, entry: dict) -> dict:
         rad = radical_for(entry.get("kanji", ""))
         return {**entry, "radical": rad["number"] if rad else None}
     if source == GRAMMAR:
-        return {**entry, "fill_ok": fill_ok(key, entry["pattern"])}
+        return {
+            **entry,
+            "fill_ok": fill_ok(key, entry["pattern"]),
+            "contrast_ok": contrast_ok(key, entry["pattern"]),
+        }
     return entry
+
+
+def eligible(source: str, deck_key: str, mode_key: str, entry: dict) -> bool:
+    """
+    Can this deck entry be served in this mode -- the one answer the
+    routers, the daily queue and the totals here all give. A router that
+    filtered its own pool with a private copy of the rule (routes/
+    grammar.py once did) could disagree with the denominator the stats
+    draw, which is how a mastery bar stops short of 100%.
+    """
+    mode = MODES.get(mode_key)
+    if mode is None:
+        return False
+    return eligible_for(mode, _augment(source, deck_key, entry))
 
 
 # (source, deck-key, entries, id function) -- "deck key" is a set name

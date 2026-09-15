@@ -1,20 +1,22 @@
 """The dictionary's grammar collection.
 
-The 355 curated points (content/grammar_points.json) used to be
-reachable only by studying them on the 文法 line; the dictionary now
-serves them as a collection of their own — N5 → N1, searchable over
-the pattern, the structure and the gloss, with the two hand-written
-example sentences and the learner's record on each. These pin the
-order, the paging, the `level` narrowing, and the `id` disambiguator
-(the same "front of page 0, never a filter" contract `kana` has for a
-word — see test_dictionary_vocab.py).
+The curated points (content/grammar/*.json) used to be reachable only
+by studying them on the 文法 line; the dictionary serves them as a
+collection of their own — N5 → N1, searchable over the pattern, the
+structure and both glosses, each row the whole lesson (plan 087: the
+steps, the rivals, the example sentences with furigana and the pattern
+picked out, in the learner's language) and the learner's record. These
+pin the order, the paging, the `level` narrowing, and the `id`
+disambiguator (the same "front of page 0, never a filter" contract
+`kana` has for a word — see test_dictionary_vocab.py).
 """
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, grammar_to_id
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, gloss, grammar_to_id
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 TOTAL = sum(len(GRAMMAR_POINTS_BY_LEVEL[lvl]) for lvl in LEVELS)
-FIELDS = {"type", "raw_id", "level", "pattern", "structure", "meaning", "examples", "status"}
+FIELDS = {"type", "raw_id", "level", "pattern", "structure", "meaning", "register",
+          "steps", "compare", "examples", "status"}
 
 
 def _page(client, **params):
@@ -85,17 +87,40 @@ def test_search_matches_the_pattern_as_typed_and_the_gloss_folded(client):
     assert none["results"] == [] and none["total"] == 0 and none["has_more"] is False
 
 
-def test_every_point_carries_its_two_sentences_with_furigana(client):
+def test_every_point_carries_its_sentences_with_furigana(client):
     """Each example is the sentence over its translation, with the
     furigana parts whose text reads back to the sentence itself — the
     contract FuriganaParts renders against. Holds with or without the
     tokenizer installed: align_sentence degrades to one part."""
     results = _page(client, limit=50)["results"]
     for r in results:
-        assert len(r["examples"]) == 2
+        assert len(r["examples"]) >= 2
         for ex in r["examples"]:
-            assert ex["jp"] and ex["en"]
+            assert ex["jp"] and ex["tr"]
             assert "".join(p["text"] for p in ex["furigana"]) == ex["jp"]
+
+
+def test_the_pattern_is_picked_out_of_its_example(client):
+    """A verifiable pattern's example marks the parts that ARE the
+    pattern (plan 087) — the lesson prints them in the line's ink."""
+    body = _page(client, id="grammar_N3_〜べきだ", limit=1)
+    row = body["results"][0]
+    assert row["pattern"] == "〜べきだ"
+    for ex in row["examples"]:
+        marked = "".join(p["text"] for p in ex["furigana"] if p.get("highlight"))
+        assert "べき" in marked, ex
+
+
+def test_lang_picks_the_gloss_and_the_translation(client):
+    entry = GRAMMAR_POINTS_BY_LEVEL["N5"][0]
+    raw_id = grammar_to_id(entry, "N5")
+    en = _page(client, id=raw_id, limit=1, lang="en")["results"][0]
+    fr = _page(client, id=raw_id, limit=1, lang="fr")["results"][0]
+    assert en["meaning"] == gloss(entry, "en")
+    assert fr["meaning"] == gloss(entry, "fr")
+    assert en["examples"][0]["tr"] == entry["examples"][0]["en"]
+    assert fr["examples"][0]["tr"] == (entry["examples"][0]["fr"] or entry["examples"][0]["en"])
+    assert isinstance(en["steps"], list) and isinstance(en["compare"], list)
 
 
 def test_id_moves_the_point_to_the_front_of_page_0_and_filters_nothing(client):
