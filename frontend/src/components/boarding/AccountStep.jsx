@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
 import { useClaim } from '../../hooks/useClaim'
@@ -33,7 +34,17 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
   // lib/authRedirect.js took it off the URL as the app loaded. A plain
   // read, not state: it cannot change while this page load lasts, and
   // the next attempt is a new load.
-  const refused = authRedirectError()
+  //
+  // In the shell the page never leaves, so the same refusal arrives
+  // through the button instead (ProviderButton's onError carries it),
+  // and THAT one is state: each attempt is a new answer. Whichever
+  // road it came by, it is classified below the same way.
+  const [shellRefusal, setShellRefusal] = useState(null)
+  const refused = shellRefusal ?? authRedirectError()
+  const onProviderError = (message, refusal = null) => {
+    claim.setError(message)
+    setShellRefusal(refusal)
+  }
 
   return (
     <>
@@ -44,7 +55,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
               handed a second, empty one; onLeaveForAuth is the last
               moment before the web navigates away, when the answers
               still only exist in memory. */}
-          <ProviderButton link onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={claim.setError} />
+          <ProviderButton link onBeforeRedirect={onLeaveForAuth} onDone={onCreated} onError={onProviderError} />
           {/* Said here rather than on the fields' own line below: this
               is what the button above did, and the one refusal with a
               way out of it is answered immediately underneath.
@@ -70,7 +81,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
             <ProviderButton
               label={t.oauthSignInInstead}
               onDone={onCreated}
-              onError={claim.setError}
+              onError={onProviderError}
             />
           )}
           <p className="auth-or">{t.orWithEmail}</p>

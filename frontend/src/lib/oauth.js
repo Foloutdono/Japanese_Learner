@@ -2,6 +2,7 @@ import { supabase } from './supabase'
 import { isNative } from './platform'
 import { API_ORIGIN } from './origin'
 import { NATIVE_REDIRECT, NATIVE_RETURN_PATH } from './nativeReturn'
+import { isCancellation, parseAuthRedirect } from './authRedirect'
 
 // The shell's half, loaded only once isNative() has said yes — the
 // same rule lib/platform.js follows, so the web bundle never carries a
@@ -95,6 +96,14 @@ function credentialsFrom(url) {
  * -> { ok: true }            the shell finished the round trip here
  * -> { ok: true, redirecting: true }  the web is leaving; nothing after
  *                            this call will run
+ * -> { ok: false, cancelled: true }  the learner backed out (shell)
+ * -> { ok: false, refusal, code, message }  Supabase refused the
+ *                            exchange and said so ON THE CALLBACK
+ *                            (shell; the web reads the same refusal
+ *                            off its own URL in lib/authRedirect.js).
+ *                            `refusal` is that parsed shape, for
+ *                            lib/authRedirect's classifiers and
+ *                            authRedirectMessage.
  * -> { ok: false, message }  anything else, already human-readable
  *
  * `link` needs manual linking enabled on the project. Where losing the
@@ -149,8 +158,19 @@ export async function connectProvider({ provider = 'google', link = false } = {}
 
     const creds = credentialsFrom(back)
     // No code and no tokens means the callback carried a refusal (or
-    // an error) — never a session, so never report one.
-    if (!creds) return { ok: false, message: 'no credentials on the callback' }
+    // an error) — never a session, so never report one. The refusal
+    // is on the same URL, in the same shape the web reads off its own
+    // page load, so it is read the same way: a Google account that is
+    // already somebody else's pass must be SAID here, and the way out
+    // offered, rather than shrugged at as a missing token.
+    if (!creds) {
+      const refusal = parseAuthRedirect(back)
+      if (refusal && isCancellation(refusal)) return { ok: false, cancelled: true }
+      if (refusal) {
+        return { ok: false, refusal, code: refusal.code, message: refusal.description || refusal.error }
+      }
+      return { ok: false, message: 'no credentials on the callback' }
+    }
     const { error: sessionError } = creds.code
       ? await supabase.auth.exchangeCodeForSession(creds.code)
       : await supabase.auth.setSession(creds)

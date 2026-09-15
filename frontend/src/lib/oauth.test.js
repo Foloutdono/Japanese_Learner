@@ -137,6 +137,28 @@ describe('in the shell', () => {
     expect(auth.setSession).not.toHaveBeenCalled()
   })
 
+  // The refusal rides the callback in the shape the web reads off its
+  // own page load; a Google account that is already somebody else's
+  // pass has to be SAID, with its code, not shrugged at as a missing
+  // token — that shrug is what a phone showed for it.
+  it('reads a refusal off the callback, with its code, as the web would', async () => {
+    openAuthTab.mockResolvedValue(
+      'app.tsuji://auth-callback#error=server_error&error_code=identity_already_exists'
+      + '&error_description=Identity+is+already+linked+to+another+user',
+    )
+    const r = await connectProvider({ link: true })
+    expect(r.ok).toBe(false)
+    expect(r.code).toBe('identity_already_exists')
+    expect(r.refusal?.code).toBe('identity_already_exists')
+    expect(r.message).toBe('Identity is already linked to another user')
+    expect(r.cancelled).toBeUndefined()
+  })
+
+  it('treats backing out at Google as a cancellation, not a refusal', async () => {
+    openAuthTab.mockResolvedValue('app.tsuji://auth-callback#error=access_denied')
+    expect(await connectProvider({})).toEqual({ ok: false, cancelled: true })
+  })
+
   it('passes a failed exchange back rather than reporting success', async () => {
     openAuthTab.mockResolvedValue('app.tsuji://auth-callback?code=abc123')
     auth.exchangeCodeForSession.mockResolvedValue({ data: {}, error: { message: 'code expired' } })
