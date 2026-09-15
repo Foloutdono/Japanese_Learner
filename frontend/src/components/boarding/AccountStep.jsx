@@ -21,7 +21,11 @@ import { authRedirectError, authRedirectMessage, isAlreadyLinked } from '../../l
 // demanded at the door.
 export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAuth = null }) {
   const { t } = useLang()
-  const claim = useClaim()
+  // The pass is the next screen and the account is on it, so a claim
+  // that succeeded moves on by itself — the same as Google's onDone
+  // below. Asking for a second tap to confirm what the green line had
+  // just confirmed was a step with nothing on it.
+  const claim = useClaim({ onDone: onCreated })
 
   // 改札 — on the web the learner comes BACK to this screen after
   // Google (the stash in screens/BoardingFlow.jsx puts them here), and
@@ -74,22 +78,14 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
         </div>
       </div>
       <div className="brd__foot">
-        {claim.done
-          ? <Continue label={t.onbContinue} onClick={onCreated} data-action="account-done" />
-          : (
-            <Continue
-              label={t.brdAccountCreate}
-              onClick={claim.submit}
-              disabled={!claim.filled || claim.busy}
-              data-action="account-create"
-            />
-          )}
-        {!claim.done && (
-          <>
-            <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>
-            <BoardLink onClick={onSkip} data-action="account-skip">{t.brdAccountSkip}</BoardLink>
-          </>
-        )}
+        <Continue
+          label={t.brdAccountCreate}
+          onClick={claim.submit}
+          disabled={!claim.filled || claim.busy || !!claim.done}
+          data-action="account-create"
+        />
+        <BoardLink onClick={onSignIn} data-action="account-sign-in">{t.brdHaveAccount}</BoardLink>
+        <BoardLink onClick={onSkip} data-action="account-skip">{t.brdAccountSkip}</BoardLink>
       </div>
     </>
   )
