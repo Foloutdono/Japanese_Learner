@@ -1028,6 +1028,7 @@ const dictionary = {
   syllabaryLong:     'Long vowels',
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
+  kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
   // Icon-button title/aria-label on the dictionary-lookup action that

@@ -11,6 +11,8 @@ These pin the three halves of the fix — the registry, the decks it
 serves, and the dictionary reading the whole syllabary through it.
 """
 
+import re
+
 from content.kana_data import (
     HIRAGANA_LONG, KANA_SETS, KATAKANA_LONG, SYLLABARY_SETS, get_syllabary,
 )
@@ -113,6 +115,27 @@ def test_the_dictionary_holds_the_whole_syllabary(client):
     for term, expected in (("kya", "きゃ"), ("ei", "えい")):
         found = client.get("/api/dictionary", params={"q": term, "category": "hiragana"}).json()
         assert expected in {r["kana"] for r in found["results"]}
+
+
+def test_a_kana_is_served_with_the_words_it_is_read_in(client):
+    """plan 088: the ledger a kanji entry has always had, on the other
+    half of the catalogue. Under the kanji's own field name, because the
+    panel draws the two blocks with one component."""
+    body = client.get("/api/dictionary", params={"category": "hiragana", "limit": 200}).json()
+    by_kana = {r["kana"]: r for r in body["results"]}
+    rows = by_kana["あ"]["vocab_examples"]
+    assert rows and len(rows) <= 4
+    # A row prints its reading, so every one of them is read with the
+    # kana and is written in the script the card teaches.
+    for row in rows:
+        assert "あ" in row["kana"]
+        assert re.fullmatch(r"[\u3041-\u3096\u30fc]+", row["kana"])
+        assert row["meaning"]
+    # And a kana ordinary writing has no word for says so with an empty
+    # list rather than with a curiosity — DictionaryDetail then draws no
+    # block at all.
+    katakana = client.get("/api/dictionary", params={"category": "katakana", "limit": 200}).json()
+    assert {r["kana"]: r for r in katakana["results"]}["ヲ"]["vocab_examples"] == []
 
 
 def test_a_pair_gets_no_stroke_sheet_and_a_single_kana_still_does(client):

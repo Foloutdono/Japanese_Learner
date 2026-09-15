@@ -287,7 +287,24 @@ function StrokeSheet({ src, notAvailableLabel }) {
   )
 }
 
-// One word that uses the kanji: its furigana'd form with the kanji
+// The kana a row is an example of, picked out of the word in the
+// entry's ink. The same job FuriganaParts' `hit` does for a kanji row,
+// on a string that has no parts to mark it in: only the first
+// occurrence is struck, since the row is showing where the character
+// is read, not counting how often.
+function Picked({ text, hit }) {
+  const at = hit ? text.indexOf(hit) : -1
+  if (at < 0) return text
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className="dict-word__hit">{text.slice(at, at + hit.length)}</span>
+      {text.slice(at + hit.length)}
+    </>
+  )
+}
+
+// One word that uses the character: its furigana'd form with the kanji
 // itself picked out in the entry's ink — so the reading this word
 // demonstrates is what the eye lands on — its first gloss, and, when the
 // caller can navigate, the ledger's chevron. Shared by the "used in
@@ -295,20 +312,29 @@ function StrokeSheet({ src, notAvailableLabel }) {
 // under the reading they demonstrate. Without `onClick` (the sheet
 // over a quiz has no dictionary underneath to jump around in) it is a
 // plain row, not a dead-looking button.
-function WordRow({ w, char, onClick }) {
+//
+// `reading` is the kana entry's row (plan 088): it prints the word's
+// READING with the kana picked out of it, because a reader still
+// learning the syllabary cannot be shown 朝 as an example of あ. The
+// written form stays behind the row, as what it opens.
+function WordRow({ w, char, onClick, reading = false }) {
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
-        {w.furigana?.length
-          ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
-          : w.kanji}
+        {reading
+          ? <Picked text={w.kana} hit={char} />
+          : w.furigana?.length
+            ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
+            : w.kanji}
       </span>
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )
   return onClick
     ? (
-      <button type="button" onClick={() => onClick(w.kanji, w.kana)} className="dict-word">
+      // A word written in kana alone (テレビ) has no kanji to search
+      // for, and the reading is its headword as well as its reading.
+      <button type="button" onClick={() => onClick(w.kanji || w.kana, w.kana)} className="dict-word">
         {body}
         <ChevronIcon direction="right" size={16} className="dict-word__chev" />
       </button>
@@ -789,18 +815,29 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
         {/* ── What it connects to ──────────────────────────
             Two directions of one relationship, and an entry only
-            ever has one of them: a kanji links out to the words it
-            appears in (a ledger of rows, each a door — four words
-            chosen to demonstrate as many different readings as the
-            deck can, the kanji picked out in each so the reading it
-            uses is what the eye lands on; the readings sheet has the
-            complete grouping), a word links down to the kanji it is
-            built from (a row of tiles, each the small plate of the
-            entry it opens). */}
-        {isKanji && entry.vocab_examples?.length > 0 && (
-          <section className="dict-block" aria-label={t.vocabExamples}>
+            ever has one of them: a character links out to the words it
+            is read in (a ledger of rows, each a door — for a kanji,
+            four words chosen to demonstrate as many different readings
+            as the deck can, the kanji picked out in each so the reading
+            it uses is what the eye lands on, with the readings sheet
+            holding the complete grouping; for a kana, four words it is
+            read in, printed as READINGS rather than as written forms
+            because a reader who is still learning あ cannot be sent to
+            朝 — see study/kana_words.py), a word links down to the kanji
+            it is built from (a row of tiles, each the small plate of
+            the entry it opens). */}
+        {(isKanji || isKana) && entry.vocab_examples?.length > 0 && (
+          <section className="dict-block" aria-label={isKana ? t.kanaExamples : t.vocabExamples}>
             <div className="dict-words">
-              {entry.vocab_examples.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={onVocabClick} />)}
+              {entry.vocab_examples.map((w, i) => (
+                <WordRow
+                  key={i}
+                  w={w}
+                  char={isKana ? entry.kana : entry.kanji}
+                  onClick={onVocabClick}
+                  reading={isKana}
+                />
+              ))}
             </div>
           </section>
         )}

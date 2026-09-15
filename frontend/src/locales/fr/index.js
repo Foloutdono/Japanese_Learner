@@ -978,6 +978,7 @@ const dictionary = {
   glRegister: { neutral: 'Neutre', casual: 'Familier', polite: 'Poli', formal: 'Soutenu', written: 'Écrit' },
   composingKanji:    'Composé de ces kanji',
   vocabExamples:     'Utilisé dans ces mots',
+  kanaExamples:      'Se lit dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
   dictBackToRadicals:'Retour aux radicaux',

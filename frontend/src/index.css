@@ -12442,10 +12442,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 400;
   color: var(--text-secondary);
 }
-/* The kanji the row is an example of, and its own furigana, in the
+/* The character the row is an example of, and its own furigana, in the
    entry's ink: the reading this word demonstrates is the point of the
    row, so it is the thing the eye lands on — four rows, four readings,
-   legible at a glance. */
+   legible at a glance. A kana's ledger strikes the same mark on a plain
+   string rather than on a ruby (plan 088): the row prints the word's
+   reading, and あ is picked out of ばあい wherever it falls. */
 .dict-word__hit,
 .dict-word__hit rt {
   color: var(--dict-ink);
