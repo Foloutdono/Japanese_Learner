@@ -20,8 +20,10 @@ const DECKS = [
     card_count: 12, followers: 0, author: 'QuietTanuki1207', followed: false },
 ]
 
+const TYPES = ['vocab', 'kanji']
+
 let payload = () => ({
-  results: DECKS, total: 2, page: 0, limit: 24, has_more: false,
+  results: DECKS, total: 2, page: 0, limit: 24, has_more: false, types: TYPES,
 })
 
 vi.mock('../lib/api', () => ({
@@ -39,7 +41,15 @@ vi.mock('../lib/track', () => ({ track: vi.fn(), EVENTS: {} }))
 const { default: LibraryScreen } = await import('./LibraryScreen')
 const { track } = await import('../lib/track')
 
-const settle = (ms = 350) => new Promise(r => setTimeout(r, ms))
+const settle = (ms = 400) => new Promise(r => setTimeout(r, ms))
+
+// A controlled React input reads its value off the node, so the setter
+// has to be the native one for React's own onChange to see the change.
+function type(field, value) {
+  const setter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+  setter.call(field, value)
+  field.dispatchEvent(new Event('input', { bubbles: true }))
+}
 
 async function library() {
   await render(
@@ -59,7 +69,7 @@ const cards = () => [...document.querySelectorAll('.lib-card')]
 
 beforeEach(() => {
   calls.length = 0
-  payload = () => ({ results: DECKS, total: 2, page: 0, limit: 24, has_more: false })
+  payload = () => ({ results: DECKS, total: 2, page: 0, limit: 24, has_more: false, types: TYPES })
 })
 
 describe('the library', () => {
@@ -84,12 +94,12 @@ describe('the library', () => {
   it('asks for the newest first, and reports the tally', async () => {
     await library()
     expect(calls[0]).toBe('/api/decks/library?sort=new&page=0')
-    expect(document.querySelector('.lib-controls__count').textContent).toContain('2')
+    expect(document.querySelector('.console__count').textContent).toContain('2')
   })
 
   it('records the visit without naming a deck', async () => {
     await library()
-    expect(track).toHaveBeenCalledWith('library_view', { sort: 'new', results: 2 })
+    expect(track).toHaveBeenCalledWith('library_view', { sort: 'new', results: 2, filtered: false })
     // The one rule this feature could most easily break.
     const props = track.mock.calls[0][1]
     expect(JSON.stringify(props)).not.toContain('Verbes')
@@ -105,18 +115,92 @@ describe('the library', () => {
   })
 
   it('names the empty library rather than showing a bare screen', async () => {
-    payload = () => ({ results: [], total: 0, page: 0, limit: 24, has_more: false })
+    payload = () => ({ results: [], total: 0, page: 0, limit: 24, has_more: false, types: [] })
     await library()
     expect(cards()).toHaveLength(0)
     expect(document.querySelector('.empty').textContent).toContain('Rien de publié')
   })
 
+  // ── The console (chips, field, count) ──
+
+  it('draws a chip per structure the library holds, and no others', async () => {
+    await library()
+    const chips = [...document.querySelectorAll('.console__chips .chip')]
+    // "All", then the two the answer reported -- never grammar, which
+    // nobody has published: a filter that can only return nothing.
+    expect(chips.map(c => c.textContent.replace(/[単漢]/g, '').trim()))
+      .toEqual(['Tous', 'Vocabulaire', 'Kanji'])
+  })
+
+  it('draws no chip row when the library holds one structure', async () => {
+    // "All" beside a lone "Vocabulary" is a choice between everything
+    // and everything.
+    payload = () => ({ results: [DECKS[0]], total: 1, page: 0, limit: 24, has_more: false, types: ['vocab'] })
+    await library()
+    expect(document.querySelector('.console__chips')).toBeNull()
+    // The ordering stays: it is a choice whatever the shelf holds.
+    expect(document.querySelectorAll('.seg__opt')).toHaveLength(2)
+  })
+
+  it('asks the server to narrow by structure, from page 0', async () => {
+    await library()
+    const kanji = [...document.querySelectorAll('.console__chips .chip')]
+      .find(c => c.textContent.includes('Kanji'))
+    kanji.click()
+    await settle()
+    expect(calls.at(-1)).toBe('/api/decks/library?sort=new&page=0&type=kanji')
+  })
+
+  it('searches the server once the typing stops, not once per keystroke', async () => {
+    await library()
+    const before = calls.length
+    const field = document.querySelector('.console__field')
+
+    type(field, 'ver')
+    type(field, 'verb')
+    // Mid-debounce: nothing has been asked yet.
+    expect(calls.length).toBe(before)
+
+    await settle()
+    expect(calls.length).toBe(before + 1)
+    expect(calls.at(-1)).toBe('/api/decks/library?sort=new&page=0&q=verb')
+  })
+
+  it('says a search found nothing rather than that nobody has published', async () => {
+    await library()
+    payload = () => ({ results: [], total: 0, page: 0, limit: 24, has_more: false, types: TYPES })
+    type(document.querySelector('.console__field'), 'zzz')
+    await settle()
+
+    const empty = document.querySelector('.empty')
+    expect(empty.textContent).toContain('Aucun deck ne correspond')
+    expect(empty.textContent).not.toContain('Rien de publié')
+
+    // And the way out of it puts the whole library back.
+    payload = () => ({ results: DECKS, total: 2, page: 0, limit: 24, has_more: false, types: TYPES })
+    empty.querySelector('button').click()
+    await settle()
+    expect(calls.at(-1)).toBe('/api/decks/library?sort=new&page=0')
+    expect(cards()).toHaveLength(2)
+  })
+
+  it('tells the trail that the shelf was narrowed, never what was typed', async () => {
+    await library()
+    type(document.querySelector('.console__field'), 'verbes')
+    await settle()
+
+    const [name, props] = track.mock.calls.at(-1)
+    expect(name).toBe('library_view')
+    expect(props.filtered).toBe(true)
+    expect(JSON.stringify(props)).not.toContain('verbes')
+  })
+
   it('pages by appending, so the row you were reading stays put', async () => {
-    payload = () => ({ results: [DECKS[0]], total: 2, page: 0, limit: 1, has_more: true })
+    payload = () => ({ results: [DECKS[0]], total: 2, page: 0, limit: 1, has_more: true, types: TYPES })
     await library()
     expect(cards()).toHaveLength(1)
 
-    payload = () => ({ results: [DECKS[1]], total: 2, page: 1, limit: 1, has_more: false })
+    payload = () => ({ results: [DECKS[1]], total: 2, page: 1, limit: 1, has_more: false, types: TYPES })
     document.querySelector('.lib-shelf__more').click()
     await settle()
 

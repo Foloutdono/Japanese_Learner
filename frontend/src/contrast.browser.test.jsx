@@ -177,10 +177,6 @@ const Fixture = () => (
       <span className="lib-warning__lead lib-warn-lead">Retiré.</span>
       <span className="lib-warn-body"> Son auteur a supprimé ce paquet.</span>
     </p>
-    <div className="lib-controls">
-      <span className="lib-controls__count lib-count">2 paquets</span>
-    </div>
-
     {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
         the gold depart action (the wall-map redesign's one fill) */}
     <div className="gate-card">

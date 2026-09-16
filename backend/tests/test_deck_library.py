@@ -86,6 +86,117 @@ def test_an_unknown_sort_is_refused(client):
     assert client.get("/api/decks/library", params={"sort": "best"}).status_code == 400
 
 
+# ── Narrowing the library ─────────────────────────────────────
+#
+# The console's two filters. They are the SERVER's here and the
+# browser's on 教材's own shelf, and the difference is paging: this list
+# is served 24 at a time, so a filter applied to the page in hand would
+# search whichever rows happened to be loaded and print the whole
+# library's tally beside the answer.
+
+
+@pytest.fixture
+def a_small_library(client, other_user, clean_decks):
+    """Three published decks of the other learner's: two vocab, one kanji."""
+    # A personal card is written in its deck's own structure (see
+    # study/structures.py), so the card each deck is published with is
+    # not the same shape in both.
+    CARDS = {
+        "vocab": {"fields": {"word": "会議", "meaning": "meeting"}},
+        "kanji": {"fields": {"kanji": "会", "meaning": "meeting",
+                             "readings": {"on": ["カイ"], "kun": ["あ.う"]},
+                             "radical": 9}},
+    }
+    made = {}
+    with acting_as(other_user):
+        for name, structure, description in [
+            ("Verbes irréguliers", "vocab",   "Les verbes que les listes rangent mal"),
+            ("Kanji du bureau",    "kanji",   ""),
+            ("Compter les choses", "vocab",   "Les compteurs, un par phrase"),
+        ]:
+            out = client.post("/api/decks", json={"name": name, "type": structure})
+            deck_id = out.json()["id"]
+            added = client.post(f"/api/decks/{deck_id}/cards", json=CARDS[structure])
+            assert added.status_code == 200, added.text
+            if description:
+                client.patch(f"/api/decks/{deck_id}", json={"description": description})
+            assert client.post(f"/api/decks/{deck_id}/publish").status_code == 200
+            made[name] = deck_id
+    return made
+
+
+def _names(body):
+    return sorted(r["name"] for r in body["results"])
+
+
+def test_the_search_reads_the_name(client, a_small_library):
+    body = client.get("/api/decks/library", params={"q": "kanji"}).json()
+    assert _names(body) == ["Kanji du bureau"]
+    # The tally is the narrowed one, or paging walks off the end.
+    assert body["total"] == 1
+
+
+def test_the_search_reads_the_description_too(client, a_small_library):
+    """A deck's name is so often just a level; what it is about is in
+    the line under it."""
+    body = client.get("/api/decks/library", params={"q": "compteurs"}).json()
+    assert _names(body) == ["Compter les choses"]
+
+
+def test_the_search_ignores_case(client, a_small_library):
+    assert _names(client.get("/api/decks/library", params={"q": "VERBES"}).json()) \
+        == ["Verbes irréguliers"]
+
+
+def test_a_wildcard_is_a_character_and_not_a_pattern(client, a_small_library):
+    """Someone searching for "%" wants a deck NAMED that, and there is
+    none — LIKE's own punctuation is escaped on the way in."""
+    for pattern in ("%", "_", "\\"):
+        body = client.get("/api/decks/library", params={"q": pattern}).json()
+        assert body["results"] == [], pattern
+        assert body["total"] == 0
+
+
+def test_the_structure_filter_narrows_to_one_kind(client, a_small_library):
+    body = client.get("/api/decks/library", params={"type": "vocab"}).json()
+    assert _names(body) == ["Compter les choses", "Verbes irréguliers"]
+    assert body["total"] == 2
+
+
+def test_the_two_filters_compose(client, a_small_library):
+    body = client.get("/api/decks/library", params={"type": "vocab", "q": "kanji"}).json()
+    assert body["results"] == []
+
+
+def test_an_unknown_structure_is_refused(client):
+    """Closed like the sort, and for the same reason: it reaches SQL."""
+    assert client.get("/api/decks/library", params={"type": "mixed"}).status_code == 400
+
+
+def test_the_library_reports_the_structures_it_holds(client, a_small_library):
+    """What the screen draws its chips from, and never a structure
+    nobody has published: a chip for grammar here could only ever return
+    nothing. The order is STRUCTURES' own, not the scan's."""
+    body = client.get("/api/decks/library").json()
+    assert body["types"] == ["kanji", "vocab"]
+
+
+def test_the_structures_do_not_change_as_they_are_used(client, a_small_library):
+    """The chip row must not lose the chip you just pressed, nor the
+    ones beside it: the set is reported before either narrowing."""
+    assert client.get("/api/decks/library",
+                      params={"type": "kanji"}).json()["types"] == ["kanji", "vocab"]
+    assert client.get("/api/decks/library",
+                      params={"q": "verbes"}).json()["types"] == ["kanji", "vocab"]
+
+
+def test_a_deck_you_follow_leaves_the_chip_row_too(client, a_small_library):
+    """The set is the library's, and the library is what is left to
+    discover — the same rule the rows are under."""
+    client.post(f"/api/decks/{a_small_library['Kanji du bureau']}/subscribe")
+    assert client.get("/api/decks/library").json()["types"] == ["vocab"]
+
+
 # ── Following ─────────────────────────────────────────────────
 
 def test_following_puts_the_deck_on_the_shelf(client, published):

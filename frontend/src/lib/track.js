@@ -50,7 +50,7 @@ export const EVENTS = {
   deck_unpublish: ['structure', 'followers'],
   deck_subscribe: ['structure', 'cards', 'where'],
   deck_detach: ['structure', 'cards', 'withdrawn'],
-  library_view: ['sort', 'results'],
+  library_view: ['sort', 'results', 'filtered'],
   api_error: ['path', 'status'],
   install_prompt: ['outcome'],
 }

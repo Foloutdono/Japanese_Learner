@@ -478,11 +478,16 @@ ink, because raw 山吹 reads 2.9:1 on light paper.
 
 ### The console, one everywhere
 
-Decks, Dictionary and Today share **one console pattern**: a single surface
-panel at `--r-panel`, two rows split by a `1px --surface-line` hairline. Row 1
-holds the filter chips, with the single primary action pinned right. Row 2
-holds search, with the result count pinned right. One console everywhere, not
-three — a screen that needs filtering reaches for this, not a bespoke bar.
+Decks, Dictionary, Today and the Library share **one console pattern**: a
+single surface panel at `--r-panel`, two rows split by a `1px --surface-line`
+hairline. Row 1 holds the filter chips, with the single primary action pinned
+right. Row 2 holds search, with the result count pinned right. One console
+everywhere, not four — a screen that needs filtering reaches for this, not a
+bespoke bar. The Library is what that rule is for: it had a row of its own
+(`.lib-controls`, an ordering and a tally at either end), which was half a
+console written out by hand, drawing its own count in a face nothing else on
+the screen used, on no surface at all. Giving it the real one gained the
+search it never had.
 
 Row 1 is **what you are looking at**; row 2 is **how you are asking**. A
 control that changes the question rather than the shelf belongs in row 2, at
@@ -496,6 +501,15 @@ itself; the word stays in the `title` and the `aria-label`, for the pointer
 and the reader the glyph does not serve. One ring, not two: where a chip in
 row 1 prints its glyph in a `.chip__glyph` roundel, the key in row 2 **is**
 the roundel and sets the glyph bare.
+
+**An ordering rides row 1's trailing edge, under the chips.** The Library's
+Newest / Most followed is the case: it arranges the shelf rather than asking a
+different question of it, so it belongs with row 1's "what you are looking at"
+and not with row 2's ways of asking. The chips take the full width, so the Seg
+wraps to a line of its own and its own `margin-left: auto` carries it right —
+the same edge a lone action rides. **And chips are drawn only for what the
+shelf actually holds**: "All" beside a lone "Vocabulary" is a choice between
+everything and everything, so under two kinds there is no chip row at all.
 
 Where the two meet on a narrow screen, **the figure gives before the control
 does**. Under 560px the count is not printed beside a toggle: the count is

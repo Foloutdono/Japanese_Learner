@@ -910,6 +910,18 @@ LIBRARY_SORTS = {
 }
 
 
+def _like(term: str) -> str:
+    r"""`term` as a LIKE pattern, with LIKE's own punctuation neutralised.
+
+    A learner who types "100%" is looking for a deck NAMED "100%", not
+    for every deck there is. `%` and `_` are the wildcards and `\` is
+    the escape, so all three are escaped before the pattern is built and
+    the query names `\` as its ESCAPE character.
+    """
+    escaped = term.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
+    return f"%{escaped}%"
+
+
 class DeckEditPayload(BaseModel):
     name: str | None = None
     description: str | None = None
@@ -921,9 +933,11 @@ class ReportPayload(BaseModel):
 
 @router.get("/api/decks/library")
 def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
-                sort: str = "new", user_id: str = Depends(get_user_id)):
+                sort: str = "new", q: str = "", type: str | None = None,
+                user_id: str = Depends(get_user_id)):
     """
-    Published decks, newest or most-followed first.
+    Published decks: newest or most-followed first, narrowed by a search
+    term and by structure.
 
     Same page/limit/total/has_more envelope the dictionary uses, so the
     frontend pages it the way it already pages everything else.
@@ -932,15 +946,46 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
     both are on the shelf directly above this, and listing a deck twice
     on one screen — once as yours, once as something to discover — is
     the kind of noise a short library cannot afford.
+
+    The narrowing happens HERE, where 教材's own shelf does it in the
+    browser, and the difference is paging: that screen holds the whole
+    shelf in one request, this one holds 24 rows of an open-ended list.
+    Filtering client-side would search the page that happened to be
+    loaded and print the whole library's tally beside the result.
+
+    `types` is the set of structures the library actually holds, before
+    either narrowing is applied — it is what the screen draws its chips
+    from, so it must not change as the chips are used. A filter for a
+    structure nobody has published can only ever return nothing.
     """
     order = LIBRARY_SORTS.get(sort)
     if order is None:
         raise HTTPException(status_code=400, detail="Unknown sort")
+    if type is not None and type not in DECK_TYPES:
+        raise HTTPException(status_code=400, detail="Unknown deck type")
+
+    params = {"me": user_id, "limit": limit, "offset": page * limit}
+
+    # Built from literals only — `type` is checked against DECK_TYPES
+    # above and the term travels as a bound parameter — so this is safe
+    # to interpolate, on the same terms as `order`.
+    narrow = ""
+    if type is not None:
+        narrow += " AND d.type = %(type)s"
+        params["type"] = type
+    term = q.strip()
+    if term:
+        # The description is searched beside the name because a deck's
+        # name is so often just a level or a lesson number, and what it
+        # is actually about is in the line under it.
+        narrow += (" AND (d.name ILIKE %(term)s ESCAPE '\\'"
+                   " OR COALESCE(d.description, '') ILIKE %(term)s ESCAPE '\\')")
+        params["term"] = _like(term)
 
     conn = db_conn()
     try:
         with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
-            cur.execute("""
+            cur.execute(f"""
                 SELECT COUNT(*) AS n FROM decks d
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
@@ -948,7 +993,8 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                       SELECT 1 FROM deck_subscriptions s
                       WHERE s.deck_id = d.id AND s.user_id = %(me)s
                   )
-            """, {"me": user_id})
+                  {narrow}
+            """, params)
             total = cur.fetchone()["n"]
 
             cur.execute(f"""
@@ -975,10 +1021,22 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
                 WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
                   AND d.user_id <> %(me)s
                   AND mine.user_id IS NULL
+                  {narrow}
                 ORDER BY {order}
                 LIMIT %(limit)s OFFSET %(offset)s
-            """, {"me": user_id, "limit": limit, "offset": page * limit})
+            """, params)
             rows = [dict(r) for r in cur.fetchall()]
+
+            cur.execute("""
+                SELECT DISTINCT d.type FROM decks d
+                WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
+                  AND d.user_id <> %(me)s
+                  AND NOT EXISTS (
+                      SELECT 1 FROM deck_subscriptions s
+                      WHERE s.deck_id = d.id AND s.user_id = %(me)s
+                  )
+            """, {"me": user_id})
+            present = {r["type"] for r in cur.fetchall()}
     finally:
         conn.close()
 
@@ -992,6 +1050,12 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
         "page":     page,
         "limit":    limit,
         "has_more": page * limit + limit < total,
+        # In STRUCTURES' declared order rather than whatever the
+        # DISTINCT happened to scan, so the same library always answers
+        # the same way. Which order the CHIPS are drawn in is the
+        # screen's own business (components/decks/deckTypes.js): this
+        # says which structures exist, not how to arrange them.
+        "types":    [t for t in DECK_TYPES if t in present],
     }
 
 

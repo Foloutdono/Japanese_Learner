@@ -13322,23 +13322,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
 }
 
-/* The library screen's one row of controls: the ordering on the left,
-   the tally on the right. Not a Console -- a console's second row is a
-   search field, and there is nothing to search here yet. */
-.lib-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-}
-.lib-controls__count {
-  margin-left: auto;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-caption);
-}
+/* The library screen's controls are the shared console now (.console,
+   far above): chips and the ordering in row 1, the field and the tally
+   in row 2. The row this replaced (.lib-controls) drew its own count in
+   a face nothing else on the screen used, on no surface at all -- half
+   a console, written out by hand. Nothing is left here to declare: the
+   Seg rides row 1's trailing edge on its own `margin-left: auto`, and
+   the count is the console's own. */
 
 /* The author's own description, on the deck's public page. Prose, so
    the unplated prose measure. */
