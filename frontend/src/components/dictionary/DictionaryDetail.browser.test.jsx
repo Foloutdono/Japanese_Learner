@@ -523,30 +523,69 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-plate__stripe')).toBeTruthy()
     expect(dialog.querySelector('.dict-plate__word')).toBeNull()
 
-    // Two blocks, one per register, each opened by its mark once.
-    const registers = [...dialog.querySelectorAll('.dict-register')]
-    expect(registers.map(r => r.getAttribute('aria-label'))).toEqual(["音読み · on'yomi", "訓読み · kun'yomi"])
-    expect(registers.map(r => r.querySelectorAll('.dict-kind').length)).toEqual([1, 1])
-    expect(registers.map(r => r.querySelector('.dict-kind').textContent)).toEqual(['音', '訓'])
-    // Inside, only the readings the deck has words for stand as groups…
-    const [on, kun] = registers
-    expect([...on.querySelectorAll('.dict-reading__yomi')].map(el => el.textContent)).toEqual(['モク'])
-    expect([...kun.querySelectorAll('.dict-reading__yomi')].map(el => el.textContent)).toEqual(['き'])
-    expect([...on.querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Thursday', 'Lumber'])
-    expect([...kun.querySelectorAll('.dict-word__gloss')].map(el => el.textContent)).toEqual(['Tree', 'Garden shrubs'])
-    // …and the readings no word demonstrates close each block as pills.
-    expect([...on.querySelectorAll('.dict-register__chip')].map(el => el.textContent)).toEqual(['ボク'])
-    expect([...kun.querySelectorAll('.dict-register__chip')].map(el => el.textContent)).toEqual(['こ~'])
-    expect(on.querySelector('.dict-register__rest').getAttribute('aria-label')).toBe('No example words yet')
-    // Pills come after the groups.
-    expect(on.querySelector('.dict-reading').compareDocumentPosition(on.querySelector('.dict-register__rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Each row picks out the kanji it is an example of.
+    // Two gates, one per register, each naming itself in full — the
+    // Japanese heading with the count of readings behind it, the
+    // plain-language title under both. The deck's order starts with an
+    // on reading, so that is the gate standing open.
+    const gates = [...dialog.querySelectorAll('.dict-gate')]
+    expect(gates.map(g => g.querySelector('.dict-gate__jp').textContent)).toEqual(['音読み2', '訓読み2'])
+    expect(gates.map(g => g.querySelector('.dict-gate__name').textContent))
+      .toEqual(['Chinese reading', 'Japanese reading'])
+    expect(gates.map(g => g.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
+    expect(dialog.querySelector('.dict-readings').getAttribute('aria-label')).toBe('Chinese reading')
+
+    // Only the open register is on screen, and inside it only the
+    // readings the deck has words for stand as bands…
+    const bands = () => [...dialog.querySelectorAll('.dict-rd')]
+    const glosses = () => [...dialog.querySelectorAll('.dict-word__gloss')].map(el => el.textContent)
+    const pills = () => [...dialog.querySelectorAll('.dict-rest__chip')].map(el => el.textContent)
+    expect(bands().map(b => b.querySelector('.dict-rd__yomi').textContent)).toEqual(['モク'])
+    expect(bands().map(b => b.querySelector('.dict-rd__kind').textContent)).toEqual(['音'])
+    expect(glosses()).toEqual(['Thursday', 'Lumber'])
+    // …and the readings no word demonstrates close the list as pills,
+    // under a caption that finally says what they are.
+    expect(pills()).toEqual(['ボク'])
+    expect(dialog.querySelector('.dict-rest__cap').textContent).toBe('No example words yet')
+    expect(dialog.querySelector('.dict-rest').getAttribute('aria-label')).toBe('No example words yet')
+    // Pills come after the bands.
+    expect(bands()[0].compareDocumentPosition(dialog.querySelector('.dict-rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    // Each row picks out the kanji it is an example of, in the entry's
+    // ink — the same mark the ledger under the sheet makes, because a
+    // band of sumi over the rows is not a distinction the rows' own
+    // gold can dilute.
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
+    const hit = dialog.querySelector('.dict-word__hit')
+    const rt = hit.querySelector('rt')
+    const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))', root)
+    expect(getComputedStyle(hit).color).toBe(ink)
+    expect(getComputedStyle(rt).color).toBe(ink)
+    // …and the declaration that keeps a reading wider than its kanji
+    // from hanging off the side of it. Asserted here as the computed
+    // value, which no font can move; the geometry it buys is measured
+    // in its own test below, on a reading long enough to be the wider
+    // of the two however the kana are set.
+    expect(getComputedStyle(hit).rubyAlign).toBe('space-between')
+    // The same ink as the ledger's hit underneath, to the value: one
+    // mark for one thing, wherever the row is drawn.
+    const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
+    expect(getComputedStyle(led).color).toBe(ink)
+
+    // The other gate swaps the list for the other register's, mark and
+    // all — the two are never on screen together to be confused.
+    gates[1].click()
+    await settle()
+    expect(gates.map(g => g.getAttribute('aria-pressed'))).toEqual(['false', 'true'])
+    expect(bands().map(b => b.querySelector('.dict-rd__yomi').textContent)).toEqual(['き'])
+    expect(bands().map(b => b.querySelector('.dict-rd__kind').textContent)).toEqual(['訓'])
+    expect(glosses()).toEqual(['Tree', 'Garden shrubs'])
+    expect(pills()).toEqual(['こ~'])
+    gates[0].click()
+    await settle()
 
     // A word that jumps closes the sheet: its entry is leaving.
-    on.querySelector('.dict-word').click()
+    dialog.querySelector('.dict-word').click()
     await settle()
     expect(onVocabClick).toHaveBeenCalledWith('木曜日', 'もくようび')
     expect(sheet()).toBeNull()
@@ -648,15 +687,62 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
   })
 
-  it('drops a register the kanji does not have, and a pill row when every reading has words', async () => {
+  // The wide-reading case, on its own fixture and away from the big
+  // test, because proving it needs a reading that is the wider of the
+  // two in ANY font. There is no Japanese webfont in the test browser
+  // — the lane loads index.css, not the @fontsource faces main.jsx
+  // pulls in — and the runner's fallback sets kana at roughly 0.6em
+  // against the runner-independent 1em of a CJK glyph. An earlier form
+  // of this assertion used 木 over もく, two kana, and read 20px on a
+  // machine with Noto installed and 11.89px on CI. Five kana clears an
+  // em with room to spare either way.
+  it('centres a kanji under a reading wider than it is', async () => {
+    const { root } = await renderEntry({
+      ...KANJI, kanji: '承', kana: 'ショウ・うけたまわ.る',
+      vocab_examples: [],
+      readings: [{ reading: 'うけたまわ.る', words: [{
+        kanji: '承る', kana: 'うけたまわる', meaning: 'to hear, to be told',
+        furigana: [{ text: '承', reading: 'うけたまわ' }, { text: 'る' }],
+      }] }],
+    })
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    const hit = sheet().querySelector('.dict-word__hit')
+    const hitBox = hit.getBoundingClientRect()
+    const rtBox = hit.querySelector('rt').getBoundingClientRect()
+    // The case in question: the reading really is the wider of the two.
+    // Measured against the same glyph set the same way and NOT against
+    // the font size — "a CJK glyph advances one em" is true of a real
+    // Japanese face and false of the fallback a runner without one
+    // reaches for, which is precisely how the earlier assertion passed
+    // here and failed on CI.
+    const ruler = document.createElement('span')
+    ruler.className = 'dict-word__jp'
+    ruler.lang = 'ja'
+    ruler.textContent = '承'
+    hit.closest('.dict-word').appendChild(ruler)
+    const glyph = ruler.getBoundingClientRect().width
+    ruler.remove()
+    expect(rtBox.width).toBeGreaterThan(glyph)
+    // The base's box grew to hold it — that widening IS the fix — so
+    // the reading no longer overhangs the text beside its kanji.
+    expect(hitBox.width).toBeGreaterThanOrEqual(rtBox.width - 0.5)
+    expect(rtBox.left).toBeGreaterThanOrEqual(hitBox.left - 0.5)
+    expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
+  })
+
+  it('offers no gates for one register, and no pill row when every reading has words', async () => {
     const { root } = await renderEntry({
       ...KANJI, kana: 'やま', readings: [{ reading: 'やま', words: [KANJI.vocab_examples[2]] }],
     })
     root.querySelector('.dict-plate__more').click()
     await settle()
-    const registers = [...sheet().querySelectorAll('.dict-register')]
-    expect(registers.map(r => r.getAttribute('aria-label'))).toEqual(["訓読み · kun'yomi"])
-    expect(sheet().querySelector('.dict-register__rest')).toBeNull()
+    // A segmented control with one segment is a label pretending to be
+    // a choice: the one register is simply the list.
+    expect(sheet().querySelector('.dict-gates')).toBeNull()
+    expect([...sheet().querySelectorAll('.dict-rd__yomi')].map(el => el.textContent)).toEqual(['やま'])
+    expect(sheet().querySelector('.dict-rd__kind').textContent).toBe('訓')
+    expect(sheet().querySelector('.dict-rest')).toBeNull()
   })
 
   it('closes when the entry changes under it', async () => {
@@ -684,7 +770,7 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(screen.container.querySelector('.dict-plate__more').getAttribute('aria-expanded')).toBe('false')
   })
 
-  it('is the whole screen on a phone, its head staying put, the close slab at the foot', async () => {
+  it('is the whole screen on a phone, the list scrolling under a fixed head and sticky bands', async () => {
     await page.viewport(390, 700)
     const { root } = await renderEntry(KANJI, NAV(), { width: null })
     root.querySelector('.dict-plate__more').click()
@@ -693,7 +779,17 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     const r = dialog.getBoundingClientRect()
     expect(Math.round(r.width)).toBe(vw())
     expect(Math.round(r.height)).toBe(vh())
-    expect(getComputedStyle(dialog.querySelector('.dict-plate')).position).toBe('sticky')
+    // This sheet alone scrolls its body rather than itself: the bands
+    // stick to the top of the LIST, which they can only do if no
+    // sticky plate is stacked above them in the same scroller.
+    const body = dialog.querySelector('.dict-entry__body')
+    expect(getComputedStyle(dialog).overflow).toBe('hidden')
+    expect(getComputedStyle(body).overflowY).toBe('auto')
+    expect(getComputedStyle(dialog.querySelector('.dict-rd__head')).position).toBe('sticky')
+    // The head sits above the scroller and so cannot scroll away, and
+    // the gates ride with it.
+    expect(body.contains(dialog.querySelector('.dict-plate'))).toBe(false)
+    expect(body.contains(dialog.querySelector('.dict-gates'))).toBe(false)
     expect(getComputedStyle(dialog.querySelector('.dict-entry__close')).display).not.toBe('none')
   })
 })

@@ -497,13 +497,20 @@ describe('the dictionary screen', () => {
 
     more.click()
     await settle(60)
-    // The readings sheet (the entry's own, over the dock): the on
-    // register and the kun register; うまや, which no word carries,
-    // sits in the kun register as a chip.
+    // The readings sheet (the entry's own, over the dock): a gate per
+    // register, standing open at 音 because that is where the deck's
+    // order starts. うまや, which no word carries, is behind the other
+    // gate, as a chip under the kun register's one band.
     const sheet = document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
     expect(sheet).not.toBeNull()
-    expect(sheet.querySelectorAll('.dict-register').length).toBe(2)
-    expect(sheet.querySelector('.dict-register__chip').textContent).toBe('うまや')
+    const gates = [...sheet.querySelectorAll('.dict-gate')]
+    expect(gates.map(g => g.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
+    expect(sheet.querySelector('.dict-rd__yomi').textContent).toBe('エキ')
+    expect(sheet.querySelector('.dict-rest__chip')).toBeNull()
+    gates[1].click()
+    await settle(60)
+    expect(sheet.querySelector('.dict-rd__yomi').textContent).toBe('えき')
+    expect(sheet.querySelector('.dict-rest__chip').textContent).toBe('うまや')
     document.querySelector('.dict-sheet__scrim--over').click()
     await settle(60)
     expect(document.querySelector('.dict-sheet__scrim--over')).toBeNull()

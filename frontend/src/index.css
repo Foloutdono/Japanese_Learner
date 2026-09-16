@@ -12473,7 +12473,30 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.4;
   color: var(--text-primary);
 }
-.dict-word__jp ruby { ruby-position: over; }
+/* A reading WIDER than the character it sits over — 真 read まこと, 生
+   read なま — hangs off the right of it in Blink: the base stays its
+   own width, flush left, and the annotation runs on across whatever
+   follows it (the に of 真に). The kanji then reads as left-aligned
+   under its own furigana, and the rule under the hit makes that
+   obvious.
+
+   `ruby-align: space-between` is what stops it: it is the one value
+   that makes Blink size the base container to the annotation and
+   centre the glyph in it. `center` and `space-around` (the initial
+   value) both leave the overhang exactly as it was — measured, not
+   assumed, against 真/ま, 写真/しゃしん, 真/まこと and 生/なま, where it
+   is the wide pair alone that moves. So do not "correct" this to
+   `center`: that is the value this reads as if it wanted, and it does
+   nothing. WebKit widens and centres of its own accord and ignores
+   `ruby-align` entirely, which is the same result by a different road.
+
+   Scoped to the word rows because that is where a wide reading meets
+   the text beside it; the plate's headword sets its own furigana with
+   room around it. */
+.dict-word__jp ruby {
+  ruby-position: over;
+  ruby-align: space-between;
+}
 .dict-word__jp rt {
   font-size: var(--fs-caption-xs);
   font-weight: 400;
@@ -12517,27 +12540,32 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   transform: translateX(0);
 }
 
-/* ── Every reading, with its words ────────────────────────
-   The sheet behind the plate's door (ReadingsSheet in
+/* ── Every reading, behind two gates ──────────────────────
+   The sheet the plate's door opens (ReadingsSheet in
    DictionaryDetail.jsx): the lookup sheet's shell, stacked over
    whatever opened it, with the plate's construction as its head — the
-   kanji, what this is, the ✕, the stripe — and no registers. Then two
-   blocks, one per register, divided by the body's hairline and each
-   opened by its 音 / 訓 mark once. A reading the deck has words for is
-   a small group — the reading, then its words in the ledger's own
-   rows, bleeding to the sheet's edges as the ledger's do; the readings
-   no word demonstrates close the block as one wrapped row of quiet
-   pills, so twenty readings do not become twenty heads in a column. */
-.dict-register {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-.dict-register__head {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-}
+   kanji, what this is, the ✕, the stripe — and no registers.
+
+   Under the stripe, the two GATES, and one register's readings below
+   them. The form this replaced put both registers in one column, each
+   headed once by a 22px carved 音 / 訓 at --fs-caption-xs in the
+   secondary ink, and set every reading at --fs-lead in --text-primary
+   — the rung and the ink of the word rows beneath it, flush with a
+   list that bleeds --sp-5 further left, under rows whose hit kanji is
+   gold and 700. Neither division survived being looked at: the
+   register was named to nobody who could not already read 音, and the
+   head of a group was the quietest thing in it.
+
+   So the register becomes a place you stand rather than a mark you
+   decode — named in full at its gate, 音読み over CHINESE READING, a
+   pair the way DESIGN.md's first rule builds one — and a reading
+   becomes a band of sumi that carries the register's mark and sticks
+   to the top of the list while its words pass under it. Ground and
+   position do the dividing that a rung could not. */
+/* The head's own two marks: the kanji at reading size and what this
+   sheet is, in the caption register. The plate's three registers do
+   not appear here — the entry they belong to is still on screen
+   underneath. */
 .dict-readings__glyph {
   font-family: var(--font-jp);
   font-size: var(--fs-heading);
@@ -12552,30 +12580,146 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-.dict-reading {
+.dict-gates {
+  display: flex;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--surface-line);
+}
+/* Not a row of buttons: one instrument divided by hairlines, the way
+   the rating bar is (DESIGN.md, Controls). */
+.dict-gate {
+  position: relative;
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: var(--sp-8);
+  padding: var(--sp-3);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  transition: background 0.15s ease;
 }
-.dict-reading__yomi {
+@media (prefers-reduced-motion: reduce) {
+  .dict-gate { transition: none; }
+}
+.dict-gate:hover,
+.dict-gate:focus-visible {
+  filter: none;
+  background: var(--overlay-hover);
+}
+.dict-gate + .dict-gate { border-left: 1px solid var(--surface-line); }
+.dict-gate__jp {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
+  font-family: var(--font-serif);
+  font-size: var(--fs-body);
+  line-height: 1.2;
+  color: var(--text-secondary);
+}
+.dict-gate__n {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+/* The plain-language half. It stays in the caption register whichever
+   gate is open — a caption is --text-secondary by rule, and the name
+   above it is what carries the selection. */
+.dict-gate__name {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--text-secondary);
+}
+/* The gate you are standing at: the name comes up to the ambient ink
+   and 辞書's pigment draws the edge under it. An edge, not a fill
+   (DESIGN.md, Colour) — and the one place the count is worth printing,
+   since the other register is behind a tap and cannot be counted by
+   eye. */
+.dict-gate--on .dict-gate__jp,
+.dict-gate--on .dict-gate__n { color: var(--text-primary); }
+.dict-gate--on::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  height: 2px;
+  background: var(--line-color, var(--accent2));
+}
+
+/* The list, and the band over each reading. Sumi is the app's chrome
+   ink and it does NOT flip with the theme, so the band takes the panel
+   inks and the RAW pigment rather than --dict-ink (DESIGN.md, "The
+   ambient inks flip; the sumi inks do not"): 山吹 reads 6.4:1 on dark
+   paper and sumi is darker still, in both themes. */
+.dict-rd__head {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--sp-7);
+  padding: 0 var(--sp-5);
+  background: var(--bg-panel);
+}
+.dict-rd__kind {
+  flex-shrink: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-on-panel-soft);
+}
+.dict-rd__yomi {
   font-family: var(--font-jp);
   font-size: var(--fs-lead);
-  letter-spacing: var(--tr-term);
-  color: var(--text-primary);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--tr-reading);
+  color: var(--line-color, var(--accent2));
 }
+/* The band above the rows already runs edge to edge, so the ledger's
+   own bleed — which exists to put the rail on a padded block's edge —
+   would carry these rows --sp-5 outside the sheet. */
+.dict-rd .dict-words { margin: 0; }
 /* The readings with no word to show for them: pills in the secondary
    register, the reading alone. Hairline rings rather than a run of
    kana joined by middots, so twenty of them read as twenty readings
-   and not as a sentence. */
-.dict-register__rest {
+   and not as a sentence. The caption over them is the aria-label made
+   visible — a learner looking at こ~ has no way to tell "a reading we
+   have no example for" from "a reading with a marker on it". */
+.dict-rest { padding: var(--sp-5); }
+.dict-rest__cap {
+  margin-bottom: var(--sp-3);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-secondary);
+}
+.dict-rest__chips {
   list-style: none;
-  margin: 0;
-  padding: 0;
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-2);
 }
-.dict-register__chip {
+.dict-rest__chip {
   display: inline-flex;
   align-items: center;
   min-height: var(--sp-6);
@@ -15203,6 +15347,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    be the lookup sheet over a quiz (z 200) or the dock in its modal
    dress (z 201), so this scrim stands above both. */
 .dict-sheet__scrim--over { z-index: 220; }
+/* ── The readings sheet scrolls its BODY, not itself ──
+   Every other shell here scrolls as one piece with the plate sticky
+   inside it. This one cannot: its reading bands stick to the top of
+   the list (.dict-rd__head), and a sticky band and a sticky plate in
+   the same scroller would stack — the band would have to be offset by
+   a plate height that nothing in CSS can tell it. So the plate and the
+   gates sit ABOVE the scroller and the list alone scrolls, which puts
+   the bands' `top: 0` exactly where it reads. (.dict-plate keeps its
+   `position: sticky`; with no scrolling ancestor of its own it simply
+   has nothing to stick to.) Written here rather than beside the
+   readings block above so it lands after .dict-sheet's own `overflow`
+   at equal specificity — the modifier must win by source order, and
+   raising it to .dict-sheet.dict-sheet--readings would put a
+   descending-specificity pair in the sheet. */
+.dict-sheet--readings {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.dict-sheet--readings .dict-entry {
+  flex: 1;
+  min-height: 0;
+}
+.dict-sheet--readings .dict-entry__body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 /* The sheet's empty state: the not-available line and a ghost close,
    because a portalled sheet has no page behind it to click away from. */
 .dict-sheet__empty {

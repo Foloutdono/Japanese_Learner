@@ -1032,6 +1032,15 @@ const dictionary = {
   kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
+  // The two gates on the readings sheet. The Japanese half is the
+  // heading and the plain-language half its caption (DESIGN.md, "Every
+  // name is a pair") — never "ON'YOMI", which is the Japanese written
+  // twice. The sheet's old 音 / 訓 squares said this to nobody who
+  // could not already read them.
+  readingsOnJp:      '音読み',
+  readingsOnName:    'Chinese reading',
+  readingsKunJp:     '訓読み',
+  readingsKunName:   'Japanese reading',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',
