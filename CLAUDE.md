@@ -59,8 +59,12 @@ runtime purpose. Two consequences worth knowing:
   and **090** is a door in the entry panel opening the entry over the
   catalogue rather than moving the catalogue to it (cited in
   `screens/DictionaryScreen.jsx` and
-  `components/dictionary/DictionaryDetail.jsx`).
-  When starting a new wave, begin at **091** or higher, and check
+  `components/dictionary/DictionaryDetail.jsx`), and **091** is the vocab
+  deck's spreadsheet residue — Excel `#NAME?` glosses, and the part-of-speech
+  notes that had displaced 34 entries' readings (cited in
+  `content/vocab_renames.py`, `scripts/migrate_vocab_ids.py`,
+  `tests/test_vocab_deck.py` and `tests/test_dictionary_vocab.py`).
+  When starting a new wave, begin at **092** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -125,14 +129,23 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 python -m scripts.weekly_digest        # the four numbers, as markdown
 ```
 
-And one is a one-shot, run once after a deploy that moved or renamed grammar
-points (`content/grammar/renames.py`): it renames the learner's card rows to
-the new ids, merges on collision, and leaves anything it does not recognise
-in place and reported.
+Two are one-shots, each run once after a deploy that changed the ids a
+content set serves — `content/grammar/renames.py` for grammar points,
+`content/vocab_renames.py` for vocab entries. Both rename the learner's card
+rows to the new ids, merge on collision, and leave anything they do not
+recognise in place and reported.
 
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
+python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
 ```
+
+A vocab card id is `vocab_{level}_{kanji}_{kana}`, so **correcting either
+surface field of a deck entry orphans its SRS rows** — and the deck key
+`"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with
+them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
+carries the progress across; a future deck correction needs its own entries
+in `vocab_renames.MOVES` for the same reason.
 
 Two things are worth knowing before reaching for any of them:
 
