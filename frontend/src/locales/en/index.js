@@ -386,6 +386,7 @@ const quiz = {
   // Misc
   strokes:           'strokes',
   notAvailable:      'Not available',
+  noMeaningRecorded: 'No meaning recorded',
   vocabulary:        'Vocabulary',
   kanji:             'Kanji',
 

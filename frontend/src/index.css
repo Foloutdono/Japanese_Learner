@@ -12205,6 +12205,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* "No meaning recorded" — the caption standing in for a gloss KANJIDIC2
+   does not carry (meaningAbsent in DictionaryDetail.jsx). Same register,
+   at book weight: the plate should not set an absence in the same ink and
+   weight as 土's SOIL, and the app has no third text token to dim it to. */
+.dict-plate__caption--absent {
+  font-weight: 400;
+}
 /* The line stripe: the one place the plate carries colour — the same
    3px edge the catalogue plate wears, in 辞書's pigment here. */
 .dict-plate__stripe {

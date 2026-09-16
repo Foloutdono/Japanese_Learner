@@ -369,6 +369,7 @@ const quiz = {
   // Misc
   strokes:           'traits',
   notAvailable:      'Non disponible',
+  noMeaningRecorded: 'Aucun sens répertorié',
   vocabulary:        'Vocabulaire',
   kanji:             'Kanji',
 
