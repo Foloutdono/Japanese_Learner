@@ -201,6 +201,41 @@ endpoint from a screen. Reading the data: `scripts/weekly_digest.py` (weekly,
 from `.github/workflows/weekly-digest.yml`, into the run's step summary), or
 Metabase/the Supabase SQL editor pointed at the same database.
 
+### Content audit
+
+Every gate in this repo asks whether the content is well-formed;
+`check_grammar` asks whether a sentence contains its pattern and stays
+inside the level's kanji, `test_listening_clips` whether the kana
+transcribes the jp. **Nothing in CI asks whether what we teach is true.**
+A wrong gloss passes every check and is then memorised by someone who has
+no way to know better, which is why it is worth a scheduled job of its own.
+
+A Routine ("Tsuji content audit", Tuesdays and Fridays) wakes a session
+that takes one slice of the taught content, tries to disprove it, and files
+a single GitHub issue labelled `content-audit`. **The audit never edits
+content** — a wrong correction arriving with a citation attached is worse
+than the original error. `docs/content-audit/PLAYBOOK.md` is the method,
+including the evidence bar and what must never be filed.
+
+```bash
+cd backend
+python -m scripts.audit_slice                  # what today's run audits
+python -m scripts.audit_slice --dump           # ... and the entries, as JSON
+python -m scripts.audit_slice --schedule 12    # the next twelve runs
+python -m scripts.audit_slice --on 2026-10-06  # reproduce a past run's slice
+```
+
+The slice is a pure function of the date — grammar, vocab and sentences in
+rotation, each area walking its own list — so there is no ledger to keep in
+sync and no state to corrupt. Read-only, no database, no `.env`, no network:
+it parses the content modules with `ast` rather than importing them, so it
+runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
+not). `tests/test_audit_slice.py` holds the rotation to the playbook's
+promises. Vocab is the one bank too big to walk exhaustively — 8,405 entries
+at 40 a run — so its slices are ordered risk-first by the disagreements with
+JMdict the script can find on its own, and the `flags` it prints are a reason
+to look rather than findings.
+
 ### Frontend (`frontend/`)
 ```bash
 npm install
