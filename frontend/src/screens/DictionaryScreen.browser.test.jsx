@@ -232,15 +232,22 @@ describe('the dictionary screen', () => {
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
-    // Five collections as chips, kanji on; the radical index is a sixth
-    // chip that only exists under the kanji collection. Scoped to the
-    // collections row: the console's SECOND row is the JLPT levels, and
-    // a bare `.console__chips .chip` counts both.
+    // Five collections as chips, kanji on. Scoped to the collections
+    // row: the console's SECOND row is the JLPT levels, and a bare
+    // `.console__chips .chip` counts both.
     const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
-    expect(chips.length).toBe(6)
+    expect(chips.length).toBe(5)
     expect(chips[0].classList.contains('chip--on')).toBe(true)
     expect(chips[0].textContent).toBe(T.dictKanji)
     expect(lastQuery().get('category')).toBe('kanji')
+
+    // The radical index is not a sixth collection: it is a toggle at the
+    // trailing edge of the field, under the kanji collection alone, and
+    // it is off on arrival.
+    const toggle = screen.container.querySelector('.console__index .console__toggle')
+    expect(toggle).not.toBeNull()
+    expect(toggle.textContent).toContain(T.dictModeRadical)
+    expect(toggle.getAttribute('aria-pressed')).toBe('false')
 
     door.querySelector('.anl-door__open').click()
     await settle(30)
@@ -256,6 +263,9 @@ describe('the dictionary screen', () => {
     expect(chips().length).toBe(5)
     expect(chips()[1].classList.contains('chip--on')).toBe(true)
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
+    // A word spans several radicals, so the toggle goes with the
+    // collection it reads — the field under the vocabulary carries none.
+    expect(screen.container.querySelector('.console__toggle')).toBeNull()
   })
 
   // ── 文法 — the grammar collection ──
@@ -274,7 +284,7 @@ describe('the dictionary screen', () => {
     const levels = [...screen.container.querySelectorAll('.dict-levels .chip')]
     expect(levels.map(c => c.textContent)).toEqual([T.dictLevelAll, 'N5', 'N4', 'N3', 'N2', 'N1'])
     expect(levels[0].classList.contains('chip--on')).toBe(true)
-    expect(chips().some(c => c.textContent === T.dictModeRadical)).toBe(false)
+    expect(screen.container.querySelector('.console__toggle')).toBeNull()
     // The field stays — grammar is searched, not charted — with its own
     // placeholder.
     expect(screen.container.querySelector('.console__field').placeholder).toBe(T.dictionaryPlaceholderGrammar)
@@ -333,13 +343,11 @@ describe('the dictionary screen', () => {
 
     // 部 — the radical index is served whole, deck and pool in stroke
     // order, so a level cannot cut it. The row goes with the mode.
-    // The chip carries its glyph as well as its label, so it is found
-    // by what it contains rather than by what it equals.
-    const radical = () => [...screen.container.querySelectorAll('.dict-collections .chip')]
-      .find(c => c.textContent.includes(T.dictModeRadical))
+    const radical = () => screen.container.querySelector('.console__toggle')
     radical().click()
     await settle(80)
     expect(screen.container.querySelector('.dict-levels')).toBeNull()
+    expect(radical().getAttribute('aria-pressed')).toBe('true')
 
     // ...and still gone once a radical is PICKED and its characters are
     // on screen. A visible chip there would refetch without the radical
@@ -358,6 +366,56 @@ describe('the dictionary screen', () => {
     expect(lastQuery().has('level')).toBe(false)
     expect([...screen.container.querySelectorAll('.dict-levels .chip--on')]
       .map(c => c.textContent)).toEqual([T.dictLevelAll])
+  })
+
+  // ── 部 — the index, as a toggle in the field ──
+  // It used to be a sixth chip in the collections row, where it read as
+  // a sixth shelf rather than as a second way of reading the kanji. The
+  // move put it inside the field, which means the field's row has to
+  // survive the one screen that has nothing to type into — the index
+  // itself — or the toggle would be the control you cannot reach to
+  // switch off.
+  it('keeps the toggle in the field\'s row while the index has nothing to type into', async () => {
+    const screen = await renderScreen()
+    const toggle = () => screen.container.querySelector('.console__toggle')
+    const row = () => screen.container.querySelector('.console__index')
+
+    toggle().click()
+    await settle(80)
+    // The grid is up, the field is gone with the search it would run...
+    expect(screen.container.querySelector('.dict-radical-index')).not.toBeNull()
+    expect(screen.container.querySelector('.console__field')).toBeNull()
+    // ...and the row stays, holding the toggle alone.
+    expect(row()).not.toBeNull()
+    expect(row().classList.contains('console__index--bare')).toBe(true)
+    expect(toggle().getAttribute('aria-pressed')).toBe('true')
+
+    // Picking a radical brings the field back, to narrow its characters.
+    screen.container.querySelector('.radical-tile').click()
+    await settle(80)
+    expect(screen.container.querySelector('.console__field')).not.toBeNull()
+    expect(screen.container.querySelector('.console__field').placeholder)
+      .toBe(T.dictionaryPlaceholderRadical)
+    expect(toggle().getAttribute('aria-pressed')).toBe('true')
+
+    // And the toggle is the way out, from either side of the index.
+    toggle().click()
+    await settle(80)
+    expect(screen.container.querySelector('.dict-radical-index')).toBeNull()
+    expect(toggle().getAttribute('aria-pressed')).toBe('false')
+    expect(screen.container.querySelector('.console__field').placeholder)
+      .toBe(T.dictionaryPlaceholder)
+  })
+
+  // A fixed chart is not searched and has no radical to be read by, so
+  // the whole row goes — toggle included.
+  it('takes the row away under a syllabary', async () => {
+    const screen = await renderScreen()
+    const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
+    chips[3].click()
+    await settle(80)
+    expect(lastQuery().get('category')).toBe('hiragana')
+    expect(screen.container.querySelector('.console__index')).toBeNull()
   })
 
   it('opens on the collection and the level its address names', async () => {

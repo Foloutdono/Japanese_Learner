@@ -477,12 +477,21 @@ export default function DictionaryScreen({ session }) {
 			</div>
 
 			{/* ── The console (canvas) ──
-			    The five collections as chips in their own line colours, the
-			    radical index as a sixth chip that only exists under the kanji
-			    collection (a word can span several, and kana have no radical
-			    at all), and the field itself across the bottom with the
-			    count in its slot — the dots stand in for the figure until
-			    it exists (plan 067). */}
+			    The five collections as chips in their own line colours, and
+			    the field itself across the bottom with the count in its slot
+			    — the dots stand in for the figure until it exists (plan 067)
+			    — and, at the field's trailing edge, the 部 index under the
+			    kanji collection (a word can span several radicals, and kana
+			    have none at all).
+
+			    The index was a sixth chip in the row above, where it read as
+			    a sixth collection — a shelf beside the kanji rather than a
+			    second way of reading the one already chosen — and where it
+			    put a control that appears under one collection into the row
+			    you pick the collection FROM, so that row changed length as
+			    you moved along it. It is a toggle in the field now, which is
+			    where the other way of asking the same question already
+			    lives. */}
 			<Console>
 				<ConsoleTop>
 					<Chips label={t.dictCollections} className="dict-collections">
@@ -491,16 +500,6 @@ export default function DictionaryScreen({ session }) {
 								{label}
 							</Chip>
 						))}
-						{category === 'kanji' && (
-							<Chip
-								on={mode === 'radical'}
-								glyph="部"
-								color={DICTIONARY_COLOR}
-								onClick={() => (mode === 'radical' ? switchToSearchMode() : switchToRadicalMode())}
-							>
-								{t.dictModeRadical}
-							</Chip>
-						)}
 					</Chips>
 					{/* The levels, under the three collections filed on them
 					    (LEVELLED). The JLPT level is the axis the whole
@@ -531,14 +530,25 @@ export default function DictionaryScreen({ session }) {
 						</Chips>
 					)}
 				</ConsoleTop>
-				{/* Hidden while browsing the plain radical grid, shown again
-				    once a radical is picked (to narrow further), and hidden for
-				    the syllabary categories (nothing to search on a fixed chart).
+				{/* The FIELD is hidden while browsing the plain radical grid
+				    (there is nothing to type at an index of 214 glyphs, and
+				    what would be typed is not what a radical is filed under)
+				    and shown again once a radical is picked, to narrow its
+				    characters further. The ROW stays either way, because the
+				    toggle is in it and is the only way back out; it holds the
+				    toggle alone, riding the trailing edge the way a lone
+				    action rides row 1's. The whole row is hidden for the
+				    syllabary categories: nothing to search on a fixed chart,
+				    and no radical to read a kana by.
+
 				    The count slot holds a figure, not a wait: while a search is in
 				    flight it says nothing rather than running three gold dots
 				    beside the placeholder, where they read as a stray second
 				    loader. The one wait for this moment is ResultsSection's
-				    <Loading /> under the console.
+				    <Loading /> under the console. On a narrow screen it is not
+				    printed at all (index.css, .console__toggle): the figure is
+				    the first thing to give when the row runs out of room, and
+				    the toggle beside it is a control.
 
 				    No autoFocus: the field used to take focus on arrival, and
 				    on a phone that opens the keyboard over the catalogue the
@@ -546,8 +556,9 @@ export default function DictionaryScreen({ session }) {
 				    least as often as a box to type in, so the one thing it did
 				    on arrival was hide itself. Both ways in are unchanged — tap
 				    the field, or press "/" (the keyboard effect above). */}
-				{!showingRadicalGrid && !isSyllabary && (
+				{!isSyllabary && (
 					<ConsoleIndex
+						field={!showingRadicalGrid}
 						inputRef={searchRef}
 						value={query}
 						onChange={onSearch}
@@ -557,6 +568,17 @@ export default function DictionaryScreen({ session }) {
 							: t.dictionaryPlaceholder}
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
+						toggle={category === 'kanji' ? (
+							<Chip
+								className="console__toggle"
+								on={mode === 'radical'}
+								glyph="部"
+								color={DICTIONARY_COLOR}
+								onClick={() => (mode === 'radical' ? switchToSearchMode() : switchToRadicalMode())}
+							>
+								{t.dictModeRadical}
+							</Chip>
+						) : null}
 					/>
 				)}
 			</Console>

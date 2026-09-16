@@ -440,6 +440,21 @@ holds the filter chips, with the single primary action pinned right. Row 2
 holds search, with the result count pinned right. One console everywhere, not
 three — a screen that needs filtering reaches for this, not a bespoke bar.
 
+Row 1 is **what you are looking at**; row 2 is **how you are asking**. A
+control that changes the question rather than the shelf belongs in row 2, at
+its trailing edge, past the count — the dictionary's 部 index is the one that
+does (`.console__toggle`): it is a second way of reading the kanji collection,
+not a sixth collection, and as a chip in row 1 it read as the latter. Same
+object either way: a `.chip`, at the chip's own height, saying whether it is
+chosen.
+
+Where the two meet on a narrow screen, **the figure gives before the control
+does**. Under 560px the count is not printed beside a toggle: the count is
+meta and the toggle is a way through, and a field squeezed between them is
+cut before anything has been typed into it. And a row 2 with nothing to type
+into keeps its rail and its control rather than going and taking the way back
+with it.
+
 ### The primary button
 
 One screen, one filled action — `.btn-primary`, the only class in the app that

@@ -5786,6 +5786,26 @@ textarea:focus-visible {
   color: var(--text-secondary);
   white-space: nowrap;
 }
+/* A control that belongs to the FIELD rather than to the set above it:
+   the dictionary's 部 index, which is a second way of reading the kanji
+   collection and not a sixth collection to browse. It is a .chip and
+   nothing else — the same object, at the same height, as the chips in
+   the row above; this class is what marks it as the field's.
+   The auto margin is what carries it to the trailing edge of a row that
+   has NOTHING to type into — the radical index (.console__index--bare),
+   where the toggle is the only way back to the field — the way a lone
+   action rides row 1's edge. In the full row it absorbs nothing: the
+   field has already grown into every pixel of free space. */
+.console__toggle { margin-inline-start: auto; }
+/* A narrow row gives up the figure before it gives up the control. The
+   count is meta and the toggle is a way through, and the two of them
+   either side of a 390px field left it about a word wide — the
+   placeholder ("Rechercher un kanji, un kana…") was cut before a
+   learner had typed anything. Scoped to a row that HAS a toggle: every
+   other console keeps its count at every width. */
+@media (max-width: 560px) {
+  .console__index:has(.console__toggle) .console__count { display: none; }
+}
 /* A row of chips outside a console (Add card · Select · More). */
 .chip-row { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
 .chip-row .chip {
