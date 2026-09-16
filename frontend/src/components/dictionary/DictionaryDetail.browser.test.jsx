@@ -1046,8 +1046,9 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
     expect(getComputedStyle(stripe).backgroundColor).toBe(probe('backgroundColor', 'var(--line-jisho)'))
     // The entry is whole here — the same blocks the catalogue prints —
     // and the doors that have somewhere to go open INTO the sheet. The
-    // radical's does not (it opens the catalogue's index), so it prints
-    // as the figure it is.
+    // radical's has nowhere to go unless the caller offers it one (it
+    // opens the catalogue's index, and this one is over a quiz), so it
+    // prints as the figure it is. The case below is the other half.
     expect(dialog.querySelectorAll('.dict-word')).toHaveLength(4)
     expect(dialog.querySelector('.dict-word').tagName).toBe('BUTTON')
     expect(dialog.querySelectorAll('.dict-form .record')).toHaveLength(2)
@@ -1096,6 +1097,43 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
     await settle(140)
     expect(word()).toBe('木')
     expect(dialog().querySelector('.dict-plate__back')).toBeNull()
+    await screen.unmount()
+  })
+
+  // ── The two doors only a shell can honour ──
+  // Over a quiz there is no index to move and no room for a second run,
+  // so the sheet leaves both out (above). The dictionary screen has
+  // both and passes them: the same tap in the catalogue must not open a
+  // lesser entry than that tap opened in the dock before plan 090.
+  it('opens the radical and the run where the caller can offer them, leaving on the way to the index', async () => {
+    vi.mocked(apiFetch).mockResolvedValue({ ok: true, status: 200, json: async () => ({ results: [KANJI] }) })
+    const onRadicalClick = vi.fn()
+    const onReview = vi.fn()
+    const onClose = vi.fn()
+    const screen = await render(
+      <LangProvider>
+        <DictionaryLookupSheet
+          term="木" category="kanji" session={{ access_token: 'tok' }}
+          onRadicalClick={onRadicalClick} onReview={onReview} onClose={onClose}
+        />
+      </LangProvider>
+    )
+    await settle(120)
+    const dialog = document.querySelector('.dict-sheet[role="dialog"]')
+
+    // The run, from under the reader's own record: the one card this
+    // entry is, which a screen that is not itself a run can board.
+    dialog.querySelector('.dict-due').click()
+    expect(onReview).toHaveBeenCalledWith('kanji_N5_木')
+    expect(onClose).not.toHaveBeenCalled()
+
+    // The radical is a door again — and what it opens is the catalogue
+    // UNDER this sheet, so the sheet leaves before the index lands.
+    const radical = dialog.querySelector('.record--door')
+    expect(radical).toBeTruthy()
+    radical.click()
+    expect(onClose).toHaveBeenCalledTimes(1)
+    expect(onRadicalClick).toHaveBeenCalledWith(75)
     await screen.unmount()
   })
 

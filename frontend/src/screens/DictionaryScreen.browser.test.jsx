@@ -28,8 +28,31 @@ const VOCAB = {
   type: 'vocab', kanji: '電車', kana: 'でんしゃ', meaning: 'electric train', level: 'N5',
   status: { status: 'new' },
   furigana: [{ text: '電車', reading: 'でんしゃ' }],
+  // The characters it is written with, each with the reading it takes
+  // here (routes/dictionary.py's _word_kanji) — the ledger a word links
+  // DOWN through, the mirror of a kanji's vocab_examples.
+  kanji_parts: [
+    { char: '電', reading: 'でん', meaning: 'electricity' },
+    { char: '車', reading: 'しゃ', meaning: 'car, vehicle' },
+  ],
   senses: [], examples: [{ jp: '電車で行く。', en: 'Go by train.', sense_number: null }],
 }
+
+// The entries a door inside an open panel leads to (plan 090). A door
+// opens its entry in a lookup sheet, which fetches it by term — so the
+// endpoint has to be able to answer for a word that is not on the
+// catalogue's own page at all.
+const BY_TERM = {
+  '駅員': {
+    type: 'vocab', kanji: '駅員', kana: 'えきいん', meaning: 'station staff', level: 'N5',
+    furigana: [{ text: '駅員', reading: 'えきいん' }], status: { status: 'new' },
+  },
+  '電': {
+    type: 'kanji', kanji: '電', kana: 'デン', meaning: 'electricity', level: 'N5',
+    status: { status: 'new' },
+  },
+}
+
 // The JMdict pool that forms the tail of the vocabulary collection:
 // a vocab entry like any other, but with no card and no level — the
 // endpoint serves it as type "vocab" with level null
@@ -189,6 +212,14 @@ async function openSyllabary(screen, label) {
   await settle(120)
 }
 
+/** A plate's headword without its reading: a word's furigana rides
+ *  inside the same element, in a register of its own. */
+const headwordOf = root => {
+  const word = root.querySelector('.dict-plate__word').cloneNode(true)
+  word.querySelectorAll('rt').forEach(rt => rt.remove())
+  return word.textContent
+}
+
 const searches = () => apiFetch.mock.calls.map(([path]) => String(path)).filter(p => p.startsWith('/api/dictionary?'))
 const lastQuery = () => new URLSearchParams(searches().at(-1).split('?')[1])
 
@@ -211,7 +242,12 @@ beforeEach(() => {
         return { groups: [{ stroke_count: 3, radicals: [{ number: 85, char: '水', kanji_count: 12 }] }] }
       }
       if (p.startsWith('/api/dictionary?')) {
-        const cat = new URLSearchParams(p.split('?')[1]).get('category')
+        const params = new URLSearchParams(p.split('?')[1])
+        // A lookup sheet asks for ONE entry by name; the catalogue asks
+        // for a collection.
+        const term = params.get('q')
+        if (term && BY_TERM[term]) return { results: [BY_TERM[term]], total: 1, has_more: false }
+        const cat = params.get('category')
         const rows = cat === 'hiragana' ? HIRAGANA : cat === 'katakana' ? KATAKANA
           : cat === 'grammar' ? GRAMMAR_ROWS : RESULTS
         return { results: rows, total: rows.length, has_more: false }
@@ -583,6 +619,71 @@ describe('the dictionary screen', () => {
     plate.querySelector(`.dict-plate__btn[aria-label="${T.close}"]`).click()
     await settle(60)
     expect(screen.container.querySelector('.dict-entry')).toBeNull()
+  })
+
+  // ── A door in the panel opens the entry, not the catalogue ──
+  // Tapping 駅員 under 駅 used to switch the collection to vocabulary,
+  // retype the field with the word, throw the result list away and
+  // search again — four moves to answer one question, and the shelf the
+  // reader was standing at was gone with no way back but retyping it.
+  // The row opens the sheet a quiz card opens mid-review now, and
+  // nothing under it moves at all. Plan 090.
+  it('opens a word in the ledger over the catalogue, and leaves the catalogue where it was', async () => {
+    const screen = await renderScreen()
+    screen.container.querySelectorAll('.dict-entry-card')[0].click()
+    await settle(60)
+    const entry = () => screen.container.querySelector('.dict-entry')
+    expect(entry().querySelector('.dict-plate__word').textContent).toBe('駅')
+    const before = searches().length
+
+    entry().querySelectorAll('.dict-word')[0].click()
+    await settle(160)
+
+    // One fetch, for the word that was tapped — with BOTH halves of the
+    // row, so it can land on the right one: a written form alone cannot
+    // say which 工場 was meant. The jump this replaces searched the
+    // written form and opened whatever came back first.
+    expect(searches().length).toBe(before + 1)
+    expect(lastQuery().get('category')).toBe('vocab')
+    expect(lastQuery().get('q')).toBe('駅員')
+    expect(lastQuery().get('kana')).toBe('えきいん')
+    const sheet = document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
+    expect(sheet).not.toBeNull()
+    expect(headwordOf(sheet)).toBe('駅員')
+
+    // Nothing behind it moved: the collection, the field, the catalogue
+    // and the panel the row belongs to are all as they were.
+    const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
+    expect(chips.findIndex(c => c.classList.contains('chip--on'))).toBe(0)
+    expect(screen.container.querySelector('.console__field').value).toBe('')
+    expect(screen.container.querySelectorAll('.dict-grid .dict-entry-card').length).toBe(RESULTS.length)
+    expect(entry().querySelector('.dict-plate__word').textContent).toBe('駅')
+
+    // ...so the ✕ gives the panel back, not a search to retype.
+    sheet.querySelector(`.dict-plate__btn[aria-label="${T.close}"]`).click()
+    await settle(60)
+    expect(document.querySelector('.dict-sheet__scrim--over')).toBeNull()
+    expect(entry().querySelector('.dict-plate__word').textContent).toBe('駅')
+  })
+
+  it('opens a kanji the word is written with through the same door', async () => {
+    const screen = await renderScreen()
+    screen.container.querySelectorAll('.dict-entry-card')[1].click()
+    await settle(60)
+    const entry = () => screen.container.querySelector('.dict-entry')
+    expect(headwordOf(entry())).toBe('電車')
+    const rows = [...entry().querySelectorAll('.dict-word')]
+    expect(rows.length).toBe(2)
+
+    rows[0].click()
+    await settle(160)
+    expect(lastQuery().get('category')).toBe('kanji')
+    expect(lastQuery().get('q')).toBe('電')
+    const sheet = document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"]')
+    expect(headwordOf(sheet)).toBe('電')
+    // The word it was opened from is still on its plate underneath, in
+    // the vocabulary collection the reader was already in.
+    expect(headwordOf(entry())).toBe('電車')
   })
 
   it('typing in the index searches after the pause; the clear empties it', async () => {
