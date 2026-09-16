@@ -76,7 +76,6 @@ vi.mock('../components/analysis/useMining', async importOriginal => ({
   }),
 }))
 vi.mock('../components/video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }))
-vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
