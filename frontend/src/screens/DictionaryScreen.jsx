@@ -256,7 +256,14 @@ export default function DictionaryScreen({ session }) {
 				// this triggers actually resolves — there's no other
 				// moment to select it from.
 				if (autoSelectChar) {
-					const match = newResults.find(e => e.kanji === autoSelectChar)
+					// `kana` as well as `kanji`, because two of the three
+					// jumps land on rows that have no kanji half at all:
+					// a kana's twin (jumpToKana) and a word written in
+					// kana alone (テレビ). In the kanji collection a row's
+					// `kana` is its packed readings, so it can never
+					// collide with the character being looked for.
+					const match = newResults.find(
+						e => e.kanji === autoSelectChar || e.kana === autoSelectChar)
 					if (match) setSelected(match)
 				} else if (p === 0 && (cat === 'hiragana' || cat === 'katakana')
 				           && newResults.length && hasSideDock()) {
@@ -422,6 +429,31 @@ export default function DictionaryScreen({ session }) {
 		setPage(0)
 		setHasMore(true)
 		fetchPage(0, kanji, 'vocab', null, kanji)
+	}
+
+	// あ ↔ ア, from a kana's form lattice (plan 089): switch to the other
+	// syllabary and open that character's own panel, the same shape
+	// jumpToKanji has. The chart it lands on is the one the learner
+	// would have had to find by hand.
+	function jumpToKana(kana, type) {
+		setCategory(type)
+		setMode('search')
+		setSelectedRadical(null)
+		setSelected(null)
+		setQuery(kana)
+		setPage(0)
+		setHasMore(true)
+		fetchPage(0, kana, type, null, kana)
+	}
+
+	// The one card this entry is, in every mode it owes — what the
+	// panel's "review this card" boards when the record says the card
+	// is due (plan 089). The run is the Today run, filtered to one id
+	// (routes/today.py's `only`), so the rating bar, the fare and the
+	// finish are the ones the learner already knows rather than a
+	// second review surface built for one card.
+	function reviewCard(rawId) {
+		navigate(`/today/run?only=${encodeURIComponent(rawId)}`)
 	}
 
 	function loadMore() {
@@ -618,6 +650,9 @@ export default function DictionaryScreen({ session }) {
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={jumpToKanji}
 						onVocabClick={jumpToVocab}
+						onKanaClick={jumpToKana}
+						onReview={reviewCard}
+						mining={mining}
 						accentColor={TYPE_META[category]?.color}
 						t={t}
 					/>
@@ -635,7 +670,9 @@ export default function DictionaryScreen({ session }) {
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={jumpToKanji}
 						onVocabClick={jumpToVocab}
+						onKanaClick={jumpToKana}
 						onGrammarClick={setRivalId}
+						onReview={reviewCard}
 						mining={mining}
 						t={t}
 					/>
@@ -731,7 +768,7 @@ function cardFurigana(entry) {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining }) {
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
@@ -745,6 +782,8 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
 					onGrammarClick={onGrammarClick}
+					onKanaClick={onKanaClick}
+					onReview={onReview}
 					mining={mining}
 				/>
 			</aside>
@@ -760,7 +799,8 @@ function cardHeadword(entry) {
 
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
-	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining, t,
+	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick,
+	onKanaClick, onReview, mining, t,
 }) {
 
 	return (
@@ -848,7 +888,7 @@ function ResultsSection({
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
-							onGrammarClick={onGrammarClick}
+							onGrammarClick={onGrammarClick} onKanaClick={onKanaClick} onReview={onReview}
 							mining={mining}
 						/>
 					)}
@@ -960,7 +1000,7 @@ function SyllabaryTable({ rows, cols, jp, title, byGroup, narrow = false, tail, 
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, accentColor, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, accentColor, t }) {
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -1072,6 +1112,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				<DetailDock
 					entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
+					onKanaClick={onKanaClick} onReview={onReview} mining={mining}
 				/>
 			)}
 		</div>

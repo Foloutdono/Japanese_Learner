@@ -393,3 +393,67 @@ def get_kana_by_set(set_name: str) -> list[dict]:
 
 def kana_to_id(kana_entry: dict) -> str:
     return f"kana_{kana_entry['kana']}"
+
+# ── Which set a kana belongs to, and its opposite script ──────
+# Two lookups the syllabary lists already imply but nothing could ask
+# for. Both are built once here rather than recomputed per request.
+#
+# `set_for` is the KANA_SETS key — the "deck key" every other source
+# spells as a JLPT level. A kana mined into a deck stores it, so the
+# card builder can find the distractor pool the quiz draws from; the
+# dictionary's own "Hiragana"/"Katakana" is a display label and is not
+# one of these keys.
+KANA_SET_BY_CHAR: dict[str, str] = {
+    entry["kana"]: key
+    for key, entries in KANA_SETS.items()
+    for entry in entries
+}
+
+
+def set_for(kana: str) -> str | None:
+    """The KANA_SETS key this kana is listed in, or None."""
+    return KANA_SET_BY_CHAR.get(kana)
+
+
+def _twin_map() -> dict[str, str]:
+    """あ ↔ ア, by (group, romaji) rather than by codepoint arithmetic.
+
+    The ±0x60 offset is right for the gojūon and wrong at both ends of
+    the collection: katakana's long vowels are written with ー and
+    hiragana's by doubling the vowel (えい / エー), so the two lists are
+    not parallel and the offset lands on a character the app does not
+    teach.
+
+    The group is half the key because romaji alone is not unique within
+    one syllabary: じ and ぢ are both "ji", ず and づ both "zu", and を
+    shares "wo" with the foreign-sound combo ウォ. Their gojūon rows
+    differ, which is exactly the distinction the pairing needs.
+
+    A key that is still not one-to-one is left out rather than guessed
+    at — a twin the panel cannot vouch for is a door that opens on the
+    wrong entry.
+    """
+    def table(name: str) -> dict[tuple[str, str], list[str]]:
+        out: dict[tuple[str, str], list[str]] = {}
+        for entry in get_syllabary(name):
+            out.setdefault((entry.get("group", ""), entry["romaji"]), []).append(entry["kana"])
+        return out
+
+    hira, kata = table("hiragana"), table("katakana")
+    pairs: dict[str, str] = {}
+    for key, h in hira.items():
+        k = kata.get(key)
+        if k is None or len(h) != 1 or len(k) != 1:
+            continue
+        pairs[h[0]] = k[0]
+        pairs[k[0]] = h[0]
+    return pairs
+
+
+KANA_TWIN: dict[str, str] = _twin_map()
+
+
+def twin(kana: str) -> str | None:
+    """The same sound in the other script, or None where the pairing is
+    not one-to-one."""
+    return KANA_TWIN.get(kana)

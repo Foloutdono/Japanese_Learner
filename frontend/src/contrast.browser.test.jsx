@@ -757,7 +757,18 @@ const Fixture = () => (
             </div>
           </section>
           <section className="dict-block">
-            <div className="dict-block__note dj-due">Due now</div>
+            {/* The due state, where plan 089 put it: the schedule's own
+                record cell, and the action under the lattice. The
+                floating note this used to measure is retired. */}
+            <div className="records">
+              <div className="record">
+                <span className="record__body">
+                  <span className="record__value record__value--due dj-due">Now</span>
+                  <span className="record__label">Next review</span>
+                </span>
+              </div>
+            </div>
+            <button type="button" className="dict-due dj-due-action">Review this card</button>
           </section>
         </div>
       </article>
@@ -1025,7 +1036,8 @@ const SITES = [
   ['.dj-word-gloss', 'word row gloss'],
   ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
   ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
-  ['.dj-due', 'due note (due ink mixed toward the ink)'],
+  ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
+  ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
 ]
 

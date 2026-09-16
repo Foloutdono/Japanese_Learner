@@ -148,6 +148,27 @@ def keep_lanes(all_lanes, wanted: set):
     return kept
 
 
+def keep_card(all_lanes, raw_id: str):
+    """Restrict the queue to ONE card -- every lane it is due in, and
+    nothing else.
+
+    What the dictionary's "review this card" boards (routes/today.py's
+    `only`). A card due under two modes stays two entries, because
+    clearing it means answering both; a lane that does not hold it drops
+    out entirely, and an id nothing holds yields an empty queue, which
+    the run reports as "nothing due" rather than as an error.
+
+    Deliberately NOT filtered by lane choice or by the level rule: those
+    shape what a mixed day serves, and this is not a day -- it is the
+    one card the learner is looking at. See routes/today.get_today_cards.
+    """
+    kept = OrderedDict()
+    for key, ids in all_lanes.items():
+        if raw_id in ids:
+            kept[key] = [raw_id]
+    return kept
+
+
 def hold_above(all_lanes, level):
     """Hold back the section lanes of JLPT stops beyond the learner's
     level. A move down sets those cards aside rather than deleting them

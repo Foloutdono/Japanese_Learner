@@ -15,6 +15,7 @@ from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
+from content.kana_data import KANA_SETS, kana_to_id
 from content.grammar_points_data import (
     GRAMMAR_POINTS_BY_LEVEL as GRAMMAR_BY_LEVEL, gloss as grammar_gloss, grammar_to_id,
 )
@@ -32,6 +33,7 @@ from study.furigana import align_deck as align_furigana, align_sentence
 # how to shape one card payload (choices, fill-in blanks, review
 # previews, ...) for its own mode set — decks.py just needs to route
 # to the right one per card. See SOURCES below.
+from routes.kana import _build_kana_card
 from routes.kanji import _build_kanji_card
 from routes.vocab import _build_vocab_card
 from routes.grammar import _build_grammar_card
@@ -54,6 +56,7 @@ from study.modes import (
     FLASHCARD as BASE_FLASHCARD,
     GRAMMAR as MODE_GRAMMAR,
     STANDARD as MODE_STANDARD,
+    KANA as MODE_KANA,
     KANJI as MODE_KANJI,
     VOCAB as MODE_VOCAB,
     GRADED_FOR_SOURCE,
@@ -98,13 +101,24 @@ MAX_BATCH = 25
 #     source (e.g. "dictionary") reusing _build_vocab_card the same
 #     way.
 
-# The kanji/vocab builders take a resolved Mode now rather than a mode
+# The section builders take a resolved Mode now rather than a mode
 # string (see _build_kanji_card's docstring for why `format` went away).
 # A deck's session still arrives carrying whatever key get_deck_modes
 # advertised, so resolve it here against the source it belongs to —
 # which also means a legacy key keeps working through LEGACY_ALIASES
 # while the frontend catches up. Restructuring decks.py's own mode
 # handling is the deck-structures phase, not this one.
+def _wrap_kana(raw_id, entry, level, level_list, mode, lang, stage, preview):
+    m = resolve_for_source(MODE_KANA, mode)
+    if m is None:
+        raise HTTPException(status_code=400, detail=f"Invalid kana mode: {mode!r}")
+    # No `lang`: a kana has no meaning to translate. Its own builder
+    # takes the set it belongs to as the distractor pool, which is what
+    # `level` names for this source -- a KANA_SETS key rather than a
+    # JLPT level (see content/kana_data.set_for).
+    return _build_kana_card(entry, level_list, m, stage, preview)
+
+
 def _wrap_kanji(raw_id, entry, level, level_list, mode, lang, stage, preview):
     m = resolve_for_source(MODE_KANJI, mode)
     if m is None:
@@ -130,6 +144,14 @@ def _wrap_grammar(raw_id, entry, level, level_list, mode, lang, stage, preview):
 
 
 SOURCES = {
+    "kana": {
+        "by_level":    KANA_SETS,
+        # kana_to_id takes the entry alone: a kana id carries no level,
+        # because the same あ is あ in every set that lists it.
+        "to_id":       lambda entry, level: kana_to_id(entry),
+        "valid_modes": set(GRADED_FOR_SOURCE[MODE_KANA]),
+        "build":       _wrap_kana,
+    },
     "kanji": {
         "by_level":    KANJI_BY_LEVEL,
         "to_id":       kanji_to_id,
@@ -167,11 +189,12 @@ SOURCES = {
 # so a kanji deck was the one place a personal kanji card could not go.
 # Now every structure accepts personal cards OF ITS OWN STRUCTURE, which
 # is what makes "write your own kanji card" a thing that exists.
-STRUCTURES = ("standard", "kanji", "vocab", "grammar")
+STRUCTURES = ("standard", "kana", "kanji", "vocab", "grammar")
 
 # Structure -> the one app source it browses in. `standard` is a plain
 # front/back pair with no app source behind it.
 SOURCE_FOR_TYPE = {
+    "kana":    {"kana"},
     "kanji":   {"kanji"},
     "vocab":   {"vocab"},
     "grammar": {"grammar"},
@@ -182,6 +205,7 @@ SOURCE_FOR_TYPE = {
 # giving personal cards a structure.
 REGISTRY_SOURCE_FOR_TYPE = {
     "standard": MODE_STANDARD,
+    "kana":     MODE_KANA,
     "kanji":    MODE_KANJI,
     "vocab":    MODE_VOCAB,
     "grammar":  MODE_GRAMMAR,
@@ -263,6 +287,11 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # front until the wipe clears it.
         return {"front": entry.get("pattern") or entry.get("grammar", ""),
                 "kana": "", "meaning": grammar_gloss(entry, lang)}
+    if source == "kana":
+        # The romaji takes the meaning slot, exactly as the dictionary's
+        # own catalogue does for a kana: it is the plain-language name
+        # of the character, and there is nothing else to translate.
+        return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
     meaning = get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
@@ -1952,7 +1981,14 @@ def _custom_card_extras(spec, fields: dict, mode) -> dict:
     """
     out: dict = {}
 
-    if spec.key == "kanji":
+    if spec.key == "kana":
+        # A builtin kana card's payload carries both halves at the top
+        # level (routes/kana.py's _build_kana_card), and every kana
+        # renderer reads them there rather than from front/back.
+        out["kana"] = fields.get("kana", "")
+        out["romaji"] = fields.get("romaji", "")
+
+    elif spec.key == "kanji":
         readings = decode_readings(fields.get("readings"))
         # Packed for InlineReveal/Readings, which split ON/KUN by SCRIPT
         # (see content/kanji_readings.py) — matches how a builtin kanji

@@ -582,6 +582,10 @@ const stats = {
   learning:          'In progress',
   mastered:          'Mastered',
   dueNow:            'Due now',
+  // The same state as dueNow, in the record cell that owns the
+  // schedule: a figure, so one word rather than a phrase (plan 089).
+  dueValue:          'Now',
+  reviewThisCard:    'Review this card',
   total:             'Total',
   overview:        'Overview',
   streak:          'Streak',
@@ -998,7 +1002,6 @@ const dictionary = {
   // what was typed found nothing. A statement, not a question.
   dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
-  formation:         'Formation',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',
@@ -1322,8 +1325,10 @@ const decks = {
   // a feature note.
   flashcardType:     'Flashcard',
   flashcardDesc:     'Your own cards only — any language',
+  kanaType:          'Kana',
   vocabType:         'Vocabulary',
   vocabDesc:         'Words graded N5 to N1\nOr by frequency, by theme, or past the syllabus\nForm to meaning, and back again',
+  deckKanaDesc:      'Kana only — with stroke order',
   deckVocabDesc:     'Vocabulary only — from JLPT levels',
   kanjiType:         'Kanji',
   kanjiDesc:         'Characters by level, with stroke order\nRead them, then write them from memory\nEvery reading, every meaning',

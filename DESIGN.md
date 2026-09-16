@@ -381,9 +381,26 @@ shadow. Separation comes from `--surface-line`.
 
 The dictionary opens an entry as **the catalogue plate at reading size**:
 reading over headword over plain-language caption (the first gloss, or a
-kana's romaji), the stage word and the JLPT numeral in one corner, two ghost
-roundels (speak, close) in the other, and 辞書's gold as the 3px stripe along
-its bottom edge — the one colour on it. A kanji's plate prints **two
+kana's romaji), the stage word and the JLPT numeral in one corner, three ghost
+roundels (speak, add to a deck, close) in the other, and 辞書's gold as the 3px
+stripe along its bottom edge — the one colour on it.
+
+**The caption prints only where the body does not repeat it** (plan 089). It
+used to be the first gloss always, clamped to two lines because the whole list
+lived below — so 土's plate said SOIL a rung above a line reading "Soil ·
+earth · ground · Turkey". A title the next line repeats in full is carrying
+nothing. Where the gloss line does print, the caption stands down; where it
+does not — a kanji with one meaning, a kana (whose caption is its romaji), a
+grammar point — the caption is the only copy, and it is therefore no longer
+clamped either.
+
+**The ＋ is on every kind of entry, and it is the server that says so.** The
+roundel writes the entry into one of the learner's decks through the analyzer's
+own mine write; `app_card` on the row is what decides whether it exists
+(`routes/dictionary.py`). Never the entry's type, and never its raw id — a
+JMdict pool word has a raw id so its stage can be looked up, and no app card
+for a deck to link to. The same field is what "review this card" boards, which
+is why it is not called `mine`. A kanji's plate prints **two
 readings**, the first on'yomi and the first kun'yomi, each behind its 音/訓
 mark, and a `+N` door: 生 has twenty readings and a plate is not the place
 for them. The door opens a **sheet of its own** over the entry — the lookup
@@ -426,7 +443,34 @@ the reading view. Under the stripe, blocks divided by hairlines and **no
 section headings**: a numbered list is a definition, a sentence over its
 translation is an example, strokes drawn on washi in a lattice beside their
 stroke count are how the character is written, and the reader's four figures
-are the profile's own `.record` cells. Each block carries its name as an
+are the profile's own `.record` cells.
+
+Three rulings inside that body, all from plan 089:
+
+- **A block says one thing, once.** A word's kanji were a row of bare tiles
+  between the definition and the record — a glyph in a box each, under no
+  heading, which is a block that needs a heading to be legible. They are the
+  ledger rows the kanji panel already uses for the words a character appears
+  in, the other way round: the character, the reading it takes *in this word*,
+  its own gloss, a chevron. One component, two directions. JMdict's duplicate
+  senses fold the same way — two rows carrying the same glosses and differing
+  only by a frequency tag are one definition, and print as one.
+- **A state belongs to the figure that owns it.** "Due now" was a right-flush
+  caption hanging over a lattice it was not part of, beside a cell saying the
+  next review was two days ago: one state, said twice, with the arithmetic
+  left to the reader. The next-review cell says it, in the due ink.
+- **A due card names the one thing to do about it** — a ghost across the foot
+  of the record block, boarding that one card in every mode it owes
+  (`/today/run?only=…`). It prints only where a caller can offer the run: over
+  a quiz there is nothing to board, and an action with nowhere to go is a dead
+  control, not the inert fact a printed row is.
+
+A kana's form lattice is the kanji's, not a slab of its own: the washi sheet,
+its stroke count (counted off the diagram the app ships —
+`content/kana_strokes.py`, since nothing else knows a kana's), and its
+opposite-script twin as a door. A kanji's radical cell carries the radical's
+own glyph and 部首名 rather than its Kangxi filing number; the number is still
+where the door leads. Each block carries its name as an
 `aria-label` only. The pigment arrives as `--line-color` from the shell
 (`.dict-dock`, `.dict-sheet`) and is spent as the stripe, a rail on a word
 row, a ring on hover, and the sense numerals — mixed 60% toward the ambient

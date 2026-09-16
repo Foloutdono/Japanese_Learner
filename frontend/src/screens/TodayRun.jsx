@@ -75,6 +75,14 @@ export default function TodayRun({ session }) {
   // The gate's choice. Sorted so the same selection always produces
   // the same string — the session key is built from it.
   const laneParam = (params.get('lanes') ?? '').split(',').filter(Boolean).sort().join(',')
+  // One card, in every mode it owes: what the dictionary panel's
+  // "review this card" boards for an entry it has just reported due
+  // (plan 089). It is not a lane choice — the backend does not filter
+  // it by lane or by the level rule — so it rides alongside rather
+  // than through laneParam, and it is part of the session key, because
+  // a one-card run resuming the day's cached queue would serve the
+  // whole day.
+  const only = params.get('only') ?? ''
   const allChosen = laneParam === ''
   const chosenIds = useMemo(() => new Set(laneParam.split(',').filter(Boolean)), [laneParam])
 
@@ -107,6 +115,7 @@ export default function TodayRun({ session }) {
     const data = await apiJson(
       `/api/today/cards?lang=${lang}&count=${count}`
       + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
+      + (only ? `&only=${encodeURIComponent(only)}` : '')
       // Omitted when everything is chosen: an empty `lanes` already
       // means the whole queue on the backend, and sending the full list
       // would make the session key churn as lanes empty out mid-run.
@@ -115,7 +124,7 @@ export default function TodayRun({ session }) {
       { signal },
     )
     return data.cards ?? []
-  }, [lang, session, laneParam, allChosen])
+  }, [lang, session, laneParam, allChosen, only])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -126,7 +135,7 @@ export default function TodayRun({ session }) {
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
     // would serve cards from lanes the learner just switched off.
-    storageKey: sessionKey('today', allChosen ? 'all' : laneParam),
+    storageKey: sessionKey('today', only ? `only:${only}` : allChosen ? 'all' : laneParam),
     fetchBatch,
     batchSize: 10,
     cardKey,

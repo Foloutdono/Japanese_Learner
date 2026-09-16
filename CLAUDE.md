@@ -51,7 +51,12 @@ runtime purpose. Two consequences worth knowing:
   `study/modes.py`, `scripts/migrate_grammar_ids.py` and
   `components/study/GrammarLesson.jsx`; ADR 0016), and **088** is the words a
   kana is read in (cited in `study/kana_words.py`, `routes/dictionary.py` and
-  `components/dictionary/DictionaryDetail.jsx`). When starting a new wave, begin at **089** or higher, and check
+  `components/dictionary/DictionaryDetail.jsx`), and **089** is the entry-panel
+  rework (cited in `routes/dictionary.py`, `routes/today.py`,
+  `routes/decks.py`, `content/kana_strokes.py`, `study/daily_queue.py`,
+  `components/dictionary/DictionaryDetail.jsx`, `components/study/gloss.jsx`
+  and `components/study/GrammarLesson.jsx`; DESIGN.md, "The entry plate").
+  When starting a new wave, begin at **090** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -12139,13 +12139,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 /* The plain-language line: the first gloss, or a kana's romaji — set
    exactly as the station plate sets its romaji, one rung up for
-   legibility under a specimen, and clamped to two lines (the whole
-   list lives in the body). */
+   legibility under a specimen.
+
+   It used to clamp to two lines, on the reasoning that the whole list
+   lives in the body. Since plan 089 that is the other way round: the
+   caption stands down entirely where the body would repeat it (see
+   bodyPrintsGloss in DictionaryDetail.jsx), so wherever it prints it
+   is the ONLY copy — and a clamp over the only copy cuts the end off
+   a grammar point's gloss with nowhere left to read it. */
 .dict-plate__caption {
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
   max-width: 100%;
   font-family: var(--font-display);
   font-size: var(--fs-sm);
@@ -12174,24 +12176,57 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-block { padding: var(--sp-5) var(--sp-5); }
 .dict-block + .dict-block { border-top: 1px solid var(--surface-line); }
-/* A state of the block, not a figure in it: "due now" over the
-   record, in the due ink mixed toward the ambient one the way the
-   study card's stage word is (.stage-mark) — the raw state colour is
-   under the floor as text on paper. */
-.dict-block__note {
-  display: inline-flex;
+/* ── 期限 — a card that is due, and the one thing to do about it ──
+   This was a right-flush "DUE NOW" caption hanging over a lattice it
+   was not part of, beside a cell that said the next review was two
+   days ago: one state said twice, with the arithmetic left to the
+   reader. The cell that owns the schedule says it now
+   (.record__value--due), and the block ends on the action instead
+   (plan 089).
+
+   A ghost, not a fill: the panel has no primary action, and 辞書's
+   gold could not carry an ink at this size anyway (DESIGN.md, "the
+   primary button"). The due pigment is mixed toward the ambient ink
+   the way the study card's stage word is (.stage-mark) — the raw
+   state colour is under the floor as text on paper. */
+.dict-due {
+  display: flex;
   align-items: center;
-  align-self: flex-end;
-  gap: var(--sp-1);
-  margin-bottom: var(--sp-3);
+  justify-content: center;
+  gap: var(--sp-2);
+  width: 100%;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  margin-top: var(--sp-4);
+  padding-inline: var(--sp-6);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
+  font-size: var(--fs-body);
+  font-weight: 600;
   color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary));
+  transition: border-color 0.15s ease, background 0.15s ease;
 }
-.dict-block > .dict-block__note { display: flex; justify-content: flex-end; }
+@media (prefers-reduced-motion: reduce) {
+  .dict-due { transition: none; }
+}
+.dict-due:hover,
+.dict-due:focus-visible {
+  filter: none;
+  border-color: var(--line-color, var(--accent2));
+  background: var(--overlay-hover);
+}
+/* The ledger's own chevron, sliding in on approach (DESIGN.md, Motion). */
+.dict-due__chev {
+  opacity: 0.7;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .dict-due__chev { transform: none; transition: none; }
+}
+.dict-due:hover .dict-due__chev,
+.dict-due:focus-visible .dict-due__chev { opacity: 1; transform: translateX(0); }
 
 /* ── What it means ─────────────────────────────────────────
    JMdict senses: a tabular numeral in the entry's ink, then the tags,
@@ -12738,56 +12773,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .dict-word--static::before { display: none; }
 .dict-word--static:hover { background: transparent; }
 
-/* A word's kanji: a row of tiles, each the small plate of the entry
-   it opens — the one card surface, the 1px lift and the pigment ring
-   on approach that every platform card has. ≤5 short options are a
-   row, never a stack (the density contract). */
-.dict-parts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-}
-.dict-part {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: var(--sp-9);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  font-family: var(--font-jp);
-  font-size: var(--fs-heading);
-  font-weight: 400;
-  line-height: 1;
-  color: var(--text-primary);
-  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dict-part { transition: none; }
-}
-.dict-part:hover,
-.dict-part:focus-visible {
-  filter: none;
-  border-color: var(--line-color, var(--accent2));
-  background: var(--bg-card-hover);
-  transform: translateY(-1px);
-}
-/* The same tile where there is nowhere for it to go — over a run's
-   own sheet the parts of a word are printed, not opened (the twin of
-   .dict-word--static). It keeps the plate; it loses the lift and the
-   pointer, because nothing happens when it is pressed. */
-.dict-part--static { cursor: default; }
-.dict-part--static:hover,
-.dict-part--static:focus-visible {
-  border-color: var(--surface-line);
-  background: var(--surface);
-  transform: none;
-}
-@media (prefers-reduced-motion: reduce) {
-  .dict-part:hover,
-  .dict-part:focus-visible { transform: none; }
-}
+/* A word's kanji were a row of tiles here — .dict-parts / .dict-part,
+   a glyph in a small plate each. They are ledger rows now
+   (.dict-words / .dict-word, the same rows a kanji's own panel uses
+   for the words it appears in), because a bare glyph is a block that
+   needs a heading to be legible and a row carrying the reading and
+   the gloss is not. See _word_kanji in routes/dictionary.py and
+   kanjiRows in DictionaryDetail.jsx; plan 089. */
 
 /* ── Closing ───────────────────────────────────────────────
    The slab is a thumb affordance for a phone, where the entry is the
@@ -17593,6 +17585,19 @@ html { scrollbar-gutter: stable; }
   font-weight: 600;
   color: var(--text-secondary);
 }
+/* A figure whose value is a CHARACTER rather than a number: the
+   radical's own glyph, a kana's twin (plan 089). --font-jp at 400,
+   because that is a specimen and not a numeral (DESIGN.md, Type), and
+   the tabular figures above have nothing to align. */
+.record__value--jp {
+  font-family: var(--font-jp);
+  font-weight: 400;
+}
+/* The one STATE a record cell carries. "Due now" was a caption
+   hanging over the lattice (the retired .dict-block__note); it is the
+   next-review cell's own value now, in the due pigment mixed toward
+   the ambient ink the way .stage-mark mixes a stage's. */
+.record__value--due { color: color-mix(in srgb, var(--state-due) 65%, var(--text-primary)); }
 .record__label {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);

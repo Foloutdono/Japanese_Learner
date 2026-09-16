@@ -70,6 +70,11 @@ function probe(prop, expr, host = document.body) {
 const KANJI = {
   type: 'kanji', kanji: '木', kana: 'モク・ボク・き・こ-', meaning: 'tree; wood',
   stroke_count: 4, radical: 75, level: 'N5', svg_url: '/kanjivg/06728.svg',
+  // The radical as content/radical_info.py knows it, not as a filing
+  // number (plan 089), and the app card both the ＋ and the review
+  // action write against.
+  radical_glyph: '木', radical_name: 'き',
+  app_card: { source: 'kanji', level: 'N5', raw_id: 'kanji_N5_木' },
   status: {
     status: 'learning', total_reviews: 14, correct_reviews: 12, accuracy: 86,
     interval_days: 7, next_review: '2026-09-12T08:00:00Z', due: true,
@@ -97,6 +102,10 @@ KANJI.readings = [
 const VOCAB = {
   type: 'vocab', kanji: '食べる', kana: 'たべる', meaning: 'to eat', level: 'N5',
   furigana: [{ text: '食', reading: 'た' }, { text: 'べる' }],
+  app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_食べる_たべる' },
+  // The characters the word is written with, each with the reading it
+  // takes HERE and its own gloss (routes/dictionary.py's _word_kanji).
+  kanji_parts: [{ char: '食', reading: 'た', meaning: 'eat, food' }],
   senses: [
     { number: 1, glossary: 'to eat',
       tags: [{ code: 'v1', label: 'v1', tooltip: 'Ichidan verb' }, { code: 'vt', label: 'vt', tooltip: 'transitive verb' }] },
@@ -116,6 +125,10 @@ const VOCAB = {
 const KANA = {
   type: 'hiragana', kana: 'あ', romaji: 'a', meaning: 'a', level: 'Hiragana', group: 'vowels',
   svg_url: '/kanjivg/03042.svg',
+  // The two facts a kana row had none of before plan 089, and which is
+  // why its lattice was one full-width sheet of washi and nothing else.
+  stroke_count: 3, twin: 'ア',
+  app_card: { source: 'kana', level: 'hiragana_basic', raw_id: 'kana_あ' },
   status: { status: 'mastered', total_reviews: 40, correct_reviews: 39, accuracy: 98, interval_days: 60, next_review: '2026-11-01T08:00:00Z', due: false },
   // study/kana_words.py's rows: the reading, the written form behind
   // it, no alignment — the word that begins with the kana first, the
@@ -131,12 +144,18 @@ const KANA = {
 // A JMdict-pool word: no level, kana-only headword, no alignment.
 const JMDICT = {
   type: 'vocab', kanji: '', kana: 'お疲れ様でした', meaning: 'thank you for your hard work', level: null,
+  // A pool row has a raw id and no app card: nothing to add to a deck
+  // and nothing to board.
+  app_card: null, kanji_parts: [],
   furigana: [], senses: [{ number: 1, glossary: 'thank you for your hard work', tags: [{ code: 'exp', label: 'exp', tooltip: 'expression' }] }],
   examples: [],
   status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
 }
 
-const NAV = () => ({ onClose: vi.fn(), onRadicalClick: vi.fn(), onKanjiClick: vi.fn(), onVocabClick: vi.fn() })
+const NAV = () => ({
+  onClose: vi.fn(), onRadicalClick: vi.fn(), onKanjiClick: vi.fn(),
+  onVocabClick: vi.fn(), onKanaClick: vi.fn(), onReview: vi.fn(),
+})
 
 // Rendered inside the dock the dictionary screen puts it in, so the
 // shell's pigment and geometry are the real ones. `width` stands in
@@ -215,10 +234,11 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(door.getAttribute('aria-expanded')).toBe('false')
     expect(door.getAttribute('aria-label')).toBe('All readings')
 
-    const caption = root.querySelector('.dict-plate__caption')
-    expect(caption.textContent).toBe('Tree')
-    expect(getComputedStyle(caption).textTransform).toBe('uppercase')
-    expect(getComputedStyle(caption).fontSize).toBe(probe('fontSize', 'var(--fs-sm)'))
+    // 木 has two glosses, so the line below the stripe prints them
+    // both — and the caption stands down rather than saying TREE a
+    // rung above "Tree · Wood" (plan 089).
+    expect(root.querySelector('.dict-plate__caption')).toBeNull()
+    expect(root.querySelector('.dict-gloss').textContent).toBe('Tree·wood')
 
     expect(root.querySelector('.dict-plate__level').textContent).toBe('N5')
     // The stage is the word the study card carries, not a hanko.
@@ -338,8 +358,14 @@ describe('the body — blocks that name themselves', () => {
     const sheet = form.querySelector('.dict-form__sheet')
     const figures = [...form.querySelectorAll('.record')]
     expect(figures).toHaveLength(2)
-    expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['4画', '#75'])
+    // The radical is its own glyph read き, not the Kangxi number it is
+    // filed under: #75 is a fact about a dictionary's ordering (plan
+    // 089). The number is still where the door leads.
+    expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['4画', '木き'])
     expect(figures.map(f => f.querySelector('.record__label').textContent)).toEqual(['strokes', 'Radical'])
+    const glyph = figures[1].querySelector('.record__value')
+    expect(glyph.classList.contains('record__value--jp')).toBe(true)
+    expect(getComputedStyle(glyph).fontFamily).toBe(probe('fontFamily', 'var(--font-jp)'))
 
     const s = sheet.getBoundingClientRect()
     const [a, b] = figures.map(f => f.getBoundingClientRect())
@@ -377,12 +403,35 @@ describe('the body — blocks that name themselves', () => {
     expect(asked.every(u => u.startsWith(SHELL_ORIGIN))).toBe(true)
   })
 
-  it('gives a kana the sheet alone, full width, with nothing bare beside it', async () => {
-    const { root } = await renderEntry(KANA)
+  it('gives a kana the same lattice a kanji has: the sheet, its strokes, and its twin', async () => {
+    // The sheet used to be the whole block — one full-width slab of the
+    // brightest surface in the app, because a kana row carried no
+    // second fact to print. It carries both now (plan 089).
+    const { root, onKanaClick } = await renderEntry(KANA)
     const form = root.querySelector('.dict-form')
-    expect(form.querySelectorAll('.record')).toHaveLength(0)
+    const figures = [...form.querySelectorAll('.record')]
+    expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['3画', 'ア'])
+    expect(figures.map(f => f.querySelector('.record__label').textContent)).toEqual(['strokes', 'Katakana'])
     const sheet = form.querySelector('.dict-form__sheet')
-    expect(sheet.getBoundingClientRect().width).toBeCloseTo(form.getBoundingClientRect().width - 2, 0)
+    const s = sheet.getBoundingClientRect()
+    const [a, b] = figures.map(f => f.getBoundingClientRect())
+    expect(a.left).toBeGreaterThan(s.right - 1)
+    expect(b.top).toBeGreaterThan(a.bottom - 1)
+    expect(s.top).toBeCloseTo(a.top, 0)
+    expect(s.bottom).toBeCloseTo(b.bottom, 0)
+    // The twin is a door: あ opens ア.
+    const door = form.querySelector('.record--door')
+    expect(door.tagName).toBe('BUTTON')
+    door.click()
+    expect(onKanaClick).toHaveBeenCalledWith('ア', 'katakana')
+  })
+
+  it('leaves the sheet alone where a kana has no twin to pair it with', async () => {
+    // えい is written エー, not えい + 0x60, so the pairing is not
+    // one-to-one and the backend sends none. A lattice whose column
+    // count its content cannot fill is what this avoids (DESIGN.md).
+    const { root } = await renderEntry({ ...KANA, kana: 'えい', romaji: 'ei', twin: null, stroke_count: null, svg_url: null })
+    expect(root.querySelector('.dict-form')).toBeNull()
   })
 
   // ── A kana's own ledger (plan 088) ──────────────────────
@@ -419,7 +468,7 @@ describe('the body — blocks that name themselves', () => {
     expect(root.textContent).not.toMatch(/Read in these words/)
   })
 
-  it('opens a kanji\'s words from a ledger of doors, and a word\'s kanji from tiles', async () => {
+  it('opens a kanji\'s words from a ledger of doors, and a word\'s kanji from the same rows', async () => {
     const kanji = await renderEntry(KANJI)
     const rows = kanji.root.querySelectorAll('.dict-word')
     expect(rows).toHaveLength(4)
@@ -433,10 +482,19 @@ describe('the body — blocks that name themselves', () => {
     expect(order).toEqual(['Meaning', 'Stroke order', 'Used in these words', 'Card stats'])
     await kanji.screen.unmount()
 
+    // The other direction of the same relationship, in the same row:
+    // the character, the reading it takes in THIS word, and its own
+    // gloss. It was a bare tile — a glyph in a box, saying nothing
+    // (plan 089).
     const vocab = await renderEntry(VOCAB)
-    const tiles = vocab.root.querySelectorAll('.dict-part')
-    expect([...tiles].map(t => t.textContent)).toEqual(['食'])
-    tiles[0].click()
+    expect(vocab.root.querySelector('.dict-parts')).toBeNull()
+    const parts = [...vocab.root.querySelectorAll('.dict-word')]
+    expect(parts.map(r => r.querySelector('.dict-word__jp').textContent)).toEqual(['食た'])
+    expect(parts.map(r => r.querySelector('.dict-word__gloss').textContent)).toEqual(['Eat'])
+    // The character is picked out in the entry's own ink, as the kanji
+    // panel picks it out of every word it appears in.
+    expect(parts[0].querySelector('.dict-word__hit').textContent).toBe('食た')
+    parts[0].click()
     expect(vocab.onKanjiClick).toHaveBeenCalledWith('食')
   })
 
@@ -460,17 +518,24 @@ describe('the body — blocks that name themselves', () => {
     await withDoors.screen.unmount()
 
     const vocab = await renderEntry(VOCAB, { onClose: vi.fn() })
-    const tiles = vocab.root.querySelectorAll('.dict-part')
-    expect([...tiles].map(t => t.textContent)).toEqual(['食'])
-    expect(tiles[0].tagName).toBe('SPAN')
+    const parts = [...vocab.root.querySelectorAll('.dict-word')]
+    expect(parts.map(r => r.querySelector('.dict-word__jp').textContent)).toEqual(['食た'])
+    expect(parts[0].tagName).toBe('DIV')
   })
 
-  it('prints the reader\'s record two by two, the due note above it, and nothing for a card never reviewed', async () => {
+  it('prints the reader\'s record two by two, the due state in the schedule\'s own cell, and nothing for a card never reviewed', async () => {
     const { root, screen } = await renderEntry(KANJI)
     const records = root.querySelector('.records')
     const cells = [...records.querySelectorAll('.record')]
     expect(cells).toHaveLength(4)
-    expect(cells.map(c => c.querySelector('.record__value').textContent)).toEqual(['86%', '12/14', '7days', 'Sep 12'])
+    // The fourth cell is the schedule's, so it is the one that says the
+    // card is due — in the due ink, in place of a date the reader would
+    // otherwise have to compare against today (plan 089).
+    expect(cells.map(c => c.querySelector('.record__value').textContent)).toEqual(['86%', '12/14', '7days', 'Now'])
+    const due = cells[3].querySelector('.record__value')
+    expect(due.classList.contains('record__value--due')).toBe(true)
+    expect(getComputedStyle(due).color)
+      .toBe(probe('color', 'color-mix(in srgb, var(--state-due) 65%, var(--text-primary))'))
     expect(cells.map(c => c.querySelector('.record__label').textContent)).toEqual(['Accuracy', 'Reviews', 'Interval', 'Next review'])
     const [a, b, c, d] = cells.map(el => el.getBoundingClientRect())
     expect(b.top).toBeCloseTo(a.top, 0)
@@ -479,14 +544,110 @@ describe('the body — blocks that name themselves', () => {
     expect(d.left).toBeCloseTo(b.left, 0)
     // Figures are the profile's own cell: display face, the heading rung.
     expect(getComputedStyle(cells[0].querySelector('.record__value')).fontSize).toBe(probe('fontSize', 'var(--fs-heading)'))
-    const note = root.querySelector('.dict-block__note')
-    expect(note.textContent).toContain('Due now')
-    expect(note.getBoundingClientRect().bottom).toBeLessThanOrEqual(records.getBoundingClientRect().top + 1)
+    // The floating "DUE NOW" caption is gone; the block ends on the one
+    // thing to do about a due card instead.
+    expect(root.querySelector('.dict-block__note')).toBeNull()
+    const action = root.querySelector('.dict-due')
+    expect(action.textContent).toContain('Review this card')
+    expect(action.getBoundingClientRect().top).toBeGreaterThan(records.getBoundingClientRect().bottom - 1)
+    // A ghost, never a fill: this panel has no primary action.
+    expect(getComputedStyle(action).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     await screen.unmount()
 
     const fresh = await renderEntry(VOCAB)
     expect(fresh.root.querySelector('.records')).toBeNull()
-    expect(fresh.root.querySelector('.dict-block__note')).toBeNull()
+    expect(fresh.root.querySelector('.dict-due')).toBeNull()
+  })
+
+  it('boards the one card a due entry is, and only where a caller can offer the run', async () => {
+    const { root, onReview, screen } = await renderEntry(KANJI)
+    root.querySelector('.dict-due').click()
+    expect(onReview).toHaveBeenCalledWith('kanji_N5_木')
+    await screen.unmount()
+
+    // Over a run there is nothing to board, and an action with nowhere
+    // to go is a dead control rather than a fact the way an inert row
+    // is — so it does not print at all.
+    const sheet = await renderEntry(KANJI, { onClose: vi.fn() })
+    expect(sheet.root.querySelector('.records')).toBeTruthy()
+    expect(sheet.root.querySelector('.dict-due')).toBeNull()
+  })
+})
+
+// ── One action, on every kind of entry (plan 089) ──────────────
+// The ＋ was a grammar point's alone, which made the same object three
+// different cards depending on what was in it. What decides now is
+// whether the server says there is an app card behind the entry —
+// never the entry's type, and never a raw id, which a JMdict pool row
+// carries without having a card.
+describe('the ＋ — this entry into one of your decks', () => {
+  const MINE = () => ({
+    loaded: true,
+    decksFor: kind => [{ id: 7, type: kind, name: 'deck' }],
+    targetFor: kind => ({ id: 7, type: kind, name: 'deck' }),
+    ensureDeck: vi.fn(), mineApp: vi.fn(async () => 1), mineCloze: vi.fn(),
+    rememberTarget: vi.fn(), lastOutcome: null,
+  })
+
+  it.each([
+    ['a kanji', KANJI, { source: 'kanji', level: 'N5', raw_id: 'kanji_N5_木' }],
+    ['a word', VOCAB, { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_食べる_たべる' }],
+    ['a kana', KANA, { source: 'kana', level: 'hiragana_basic', raw_id: 'kana_あ' }],
+  ])('adds %s to a deck of its own kind', async (_name, entry, card) => {
+    const mining = MINE()
+    const { root, screen } = await renderEntry(entry, { ...NAV(), mining })
+    const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    // The speaker, the ＋, the ✕ — one action row on every kind.
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Mine', 'Close'])
+    actions[1].click()
+    await settle(60)
+    expect(mining.mineApp).toHaveBeenCalledWith({
+      deckId: 7, source: card.source, level: card.level, rawId: card.raw_id, kind: card.source,
+    })
+    await screen.unmount()
+  })
+
+  it('offers nothing to add for a pool entry, which has a stage and no card', async () => {
+    const { root } = await renderEntry(JMDICT, { ...NAV(), mining: MINE() })
+    const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Close'])
+  })
+
+  it('offers nothing where the screen has no decks to write to', async () => {
+    const { root } = await renderEntry(KANJI)   // no mining
+    const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Close'])
+  })
+})
+
+// ── One definition, however many rows JMdict files it under ────
+describe('the senses — folded where they say the same thing', () => {
+  const TWICE = {
+    ...VOCAB,
+    senses: [
+      { number: 1, glossary: 'every month, each month, monthly', tags: [{ code: 'adv', label: 'adv' }, { code: 'common', label: 'common' }] },
+      { number: 2, glossary: 'every month, each month, monthly', tags: [{ code: 'adv', label: 'adv' }, { code: 'top3k', label: 'top 3k' }] },
+    ],
+    examples: [
+      { jp: '毎月手紙を書きます。', en: 'I write a letter every month.', sense_number: 2,
+        segments: [{ text: '毎月', reading: 'まいげつ', highlight: true }, { text: '手紙', reading: 'てがみ' }, { text: 'を' }, { text: '書', reading: 'か' }, { text: 'きます。' }] },
+    ],
+  }
+
+  it('prints one numbered sense with both rows\' tags, and the sentences of each', async () => {
+    const { root } = await renderEntry(TWICE)
+    const senses = [...root.querySelectorAll('.dict-sense')]
+    expect(senses).toHaveLength(1)
+    expect(senses[0].querySelector('.dict-sense__gloss').textContent)
+      .toBe('Every month·each month·monthly')
+    expect([...senses[0].querySelectorAll('.dict-tag')].map(el => el.textContent))
+      .toEqual(['adv', 'common', 'top 3k'])
+    // The sentence was nested under the sense that was folded away; it
+    // has to arrive under the one that survived, not fall out as a
+    // loose example under its own block.
+    expect(senses[0].querySelectorAll('.dict-ex')).toHaveLength(1)
+    const labels = [...root.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
+    expect(labels.filter(l => l === 'Examples')).toHaveLength(0)
   })
 })
 
@@ -982,6 +1143,7 @@ describe('the lookup sheet — the same panel, over a quiz', () => {
 const GRAMMAR = {
   type: 'grammar', raw_id: 'grammar_N5_〜てから', level: 'N5',
   pattern: '〜てから', structure: 'verb て-form + から', meaning: 'after doing',
+  app_card: { source: 'grammar', level: 'N5', raw_id: 'grammar_N5_〜てから' },
   examples: [
     { jp: '手を洗ってから食べます。', en: 'I eat after washing my hands.',
       furigana: [{ text: '手', reading: 'て' }, { text: 'を' }, { text: '洗', reading: 'あら' }, { text: 'ってから' }, { text: '食', reading: 'た' }, { text: 'べます。' }] },
@@ -1049,14 +1211,17 @@ describe('the plate — a grammar point', () => {
     expect(getComputedStyle(plate.querySelector('.analysis-mine-status')).fontSize).toBe(probe('fontSize', 'var(--fs-caption-xs)'))
   })
 
-  it('prints formation, meaning and the two sentences as blocks that name themselves, and draws nothing', async () => {
+  it('prints the two sentences alone, as a block that names itself, and draws nothing', async () => {
     const { root } = await renderEntry(GRAMMAR)
     const blocks = [...root.querySelectorAll('.dict-block')]
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Examples'])
+    // The formation and the gloss are on the plate above, and were
+    // printed a second time here until plan 089.
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Examples'])
     expect(root.querySelector('h3, h4, .section-header')).toBeNull()
-    expect(blocks[0].querySelector('.dict-formation').textContent).toBe('verb て-form + から')
-    expect(blocks[1].querySelector('.dict-gloss').textContent).toBe('after doing')
-    const exs = [...blocks[2].querySelectorAll('.dict-ex')]
+    expect(root.querySelector('.dict-formation')).toBeNull()
+    expect(root.querySelector('.dict-plate__structure').textContent).toBe('verb て-form + から')
+    expect(root.querySelector('.dict-plate__caption').textContent).toBe('after doing')
+    const exs = [...blocks[0].querySelectorAll('.dict-ex')]
     expect(exs).toHaveLength(2)
     expect(baseText(exs[0].querySelector('.dict-ex__jp'))).toBe('手を洗ってから食べます。')
     expect(exs[0].querySelector('rt').textContent).toBe('て')
@@ -1081,19 +1246,22 @@ const GRAMMAR_RICH = {
 }
 
 describe('the plate — a grammar point with its lesson written', () => {
-  it('prints the lesson and the neighbours between the meaning and the examples, and opens a rival', async () => {
+  it('prints the lesson, then the sentences, then the neighbours, and opens a rival', async () => {
     const onGrammarClick = vi.fn()
     const { root } = await renderEntry(GRAMMAR_RICH, { ...NAV(), onGrammarClick })
     const blocks = [...root.querySelectorAll('.dict-block')]
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Lesson', 'Compare', 'Examples'])
+    // A rival is what you reach for once you have read the rule and
+    // seen it work, so it closes the body rather than standing between
+    // the reader and the sentences (plan 089).
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Lesson', 'Examples', 'Compare'])
     expect(root.querySelector('h3, h4, .section-header')).toBeNull()
-    expect([...blocks[2].querySelectorAll('.dict-mark__jp')].map(m => m.textContent)).toEqual(['規則', '使い方'])
-    expect(blocks[2].querySelector('strong').textContent).toBe('doing')
-    const door = blocks[3].querySelector('.gl-door')
+    expect([...blocks[0].querySelectorAll('.dict-mark__jp')].map(m => m.textContent)).toEqual(['規則', '使い方'])
+    expect(blocks[0].querySelector('strong').textContent).toBe('doing')
+    const door = blocks[2].querySelector('.gl-door')
     expect(door.tagName).toBe('BUTTON')
     door.click()
     expect(onGrammarClick).toHaveBeenCalledWith('grammar_N5_〜あとで')
-    const ex = blocks[4].querySelector('.dict-ex')
+    const ex = blocks[1].querySelector('.dict-ex')
     expect(ex.querySelector('.dict-ex__hl').textContent).toBe('ってから')
     expect(ex.querySelector('.dict-ex__tr').textContent).toBe('I eat after washing my hands.')
   })

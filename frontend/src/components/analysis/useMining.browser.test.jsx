@@ -36,6 +36,7 @@ const ALL_TYPE_DECKS = [
   { id: 2, name: 'My Kanji', type: 'kanji' },
   { id: 3, name: 'My Grammar', type: 'grammar' },
   { id: 4, name: 'My Standard', type: 'standard' },
+  { id: 5, name: 'My Kana', type: 'kana' },
 ]
 
 describe('useMining', () => {
@@ -52,6 +53,15 @@ describe('useMining', () => {
     expect(vocabDecks).toHaveLength(1)
     expect(vocabDecks[0].type).toBe('vocab')
     expect(vocabDecks.some(d => d.type === 'kanji')).toBe(false)
+  })
+
+  it('offers a kana deck for a kana, which used to have no type at all', async () => {
+    // The dictionary's ＋ reaches every kind of entry since plan 089,
+    // and a kind with no deck type behind it offers no decks and
+    // creates one of `type: undefined` — a 400 on the press.
+    const getMining = await mountMining(ALL_TYPE_DECKS)
+    const kanaDecks = getMining().decksFor('kana')
+    expect(kanaDecks.map(d => d.name)).toEqual(['My Kana'])
   })
 
   it('mineApp posts a single-element cards array with the right source/level/raw_id', async () => {

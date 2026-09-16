@@ -1,3 +1,4 @@
+import re
 from collections import defaultdict
 from functools import lru_cache
 
@@ -9,13 +10,14 @@ import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content.vocab_extras import get_vocab_extras
-from content.kana_data import get_syllabary, kana_to_id
+from content.kana_data import get_syllabary, kana_to_id, set_for as kana_set_for, twin as kana_twin
+from content.kana_strokes import stroke_count as kana_stroke_count
 # radical_data.py owns the radical dumps -- its own docstring says so
 # ("read once at import rather than per consumer") -- but this module used
 # to open kanji_radicals.json a second time anyway, and exam_kanji_gen.py a
 # third. One owner now, and KANJI_RADICALS is the deck-scoped table rather
 # than all 13,108 rows; anything outside the deck comes from the database.
-from content.radical_data import KANJI_RADICALS, RADICAL_BY_NUMBER
+from content.radical_data import KANJI_RADICALS, RADICAL_BY_NUMBER, info_for as radical_info
 from translations import get_meaning
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
@@ -28,7 +30,7 @@ from study.card_lookup import (
 from study.grammar_lesson import lesson_payload
 from study import search_match
 from study.kana_words import kana_words
-from study.kanji_words import kanji_as_word, kanji_words, word_furigana
+from study.kanji_words import kanji_as_word, kanji_words, reading_of, word_furigana
 
 router = APIRouter()
 
@@ -183,6 +185,67 @@ def _kanji_lexicon() -> tuple[str, ...]:
     )
 
 
+def _app_card(source: str, level: str | None, raw_id: str | None) -> dict | None:
+    """The app card behind this entry — what a deck links to and what
+    the scheduler schedules — or None where there is none.
+
+    Two controls on the panel need this same answer and neither can work
+    it out from what was already served: the ＋ writes the card into one
+    of the learner's decks, and "review this card" boards it. A pool
+    entry has a raw id too (`vocab_jmdict_to_id`, so its SRS state can
+    be looked up) and no app card behind it, so inferring either control
+    from `raw_id` offers a write that silently adds nothing and a run
+    with no cards in it.
+
+    `level` is the deck key the card builder needs as its distractor
+    pool — a JLPT level for kanji/vocab/grammar, a KANA_SETS key for
+    kana (content/kana_data.set_for).
+    """
+    if raw_id is None or level is None:
+        return None
+    return {"source": source, "level": level, "raw_id": raw_id}
+
+
+# Every CJK ideograph, for splitting a word into the characters it is
+# written with. A kana-only word yields none.
+_CJK = re.compile(r"[一-龯]")
+
+
+def _word_kanji(word: str, furigana: list[dict], lang: str) -> list[dict]:
+    """Each kanji a word is written with, once, in reading order: the
+    reading it takes IN THIS WORD, and the character's own meaning.
+
+    The panel used to print these as bare tiles — two boxes with a glyph
+    in each, under no heading, between the senses and the reader's own
+    record. A glyph alone is not legible as a block (DESIGN.md: "a block
+    that needs a heading to be legible is not finished"), so they are
+    the ledger rows the kanji panel already uses for the words a
+    character appears in — the same component, the other way round
+    (plan 089). A row needs a reading and a gloss, which is what this
+    adds to the payload.
+
+    `reading` is None where the aligner could not isolate the character
+    (生活 → せいかつ says nothing about which half is which); the row
+    then prints the glyph alone rather than inventing one.
+    """
+    chars = list(dict.fromkeys(_CJK.findall(word or "")))
+    if not chars:
+        return []
+    # One query for whatever the curated deck does not teach, rather
+    # than one per character.
+    pool = kanji_db.meanings_for([c for c in chars if c not in DECK_BY_CHAR], lang)
+    out = []
+    for char in chars:
+        deck = DECK_BY_CHAR.get(char)
+        meaning = get_meaning(deck[1], lang, KANJI_FR_MAP) if deck else pool.get(char, "")
+        out.append({
+            "char": char,
+            "reading": reading_of(char, furigana),
+            "meaning": meaning,
+        })
+    return out
+
+
 def _kanji_result(char: str, kana: str, meaning: str, level: str | None,
                   stroke_count, radical, has_svg: bool,
                   lang: str, states: dict, user_id: str, raw_id: str | None,
@@ -207,6 +270,7 @@ def _kanji_result(char: str, kana: str, meaning: str, level: str | None,
     columns), and test_kana_syllabary pins it.
     """
     codepoint = hex(ord(char))[2:].zfill(5)
+    rad_info = radical_info(radical, lang) if radical is not None else None
     # Both the "used in these words" ledger and the per-reading panel come
     # from one grouping pass -- see study/kanji_words.py.
     words = kanji_words(char, lang, packed_readings)
@@ -222,10 +286,17 @@ def _kanji_result(char: str, kana: str, meaning: str, level: str | None,
         "meaning":      meaning,
         "stroke_count": stroke_count,
         "radical":      radical,
+        # The number alone is a filing code: #32 says nothing to a
+        # learner, and content/radical_info.py already knows 32 is 土,
+        # read つち. The panel prints the glyph with the name beside it
+        # and keeps the number as the door's destination.
+        "radical_glyph": rad_info["glyph"] if rad_info else None,
+        "radical_name":  rad_info["names_ja"][0] if rad_info and rad_info["names_ja"] else None,
         "level":        level,
         "svg_url":      f"/kanjivg/{codepoint}.svg" if has_svg else None,
         "status":       card_stats(states, user_id, raw_id, KANJI_STATUS_MODES)
                         if raw_id else None,
+        "app_card":     _app_card("kanji", level, raw_id),
         "vocab_examples": words["examples"],
         # Every reading in the deck's order, each with the words that use
         # it -- the plate shows two, the panel all.
@@ -454,6 +525,7 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
     extras = get_vocab_extras(
         entry.get("kanji", ""), entry.get("kana", ""), entry.get("meaning", ""), lang,
     )
+    furigana = word_furigana(entry.get("kanji", ""), entry.get("kana", ""))
     return {
         "type":     "vocab",
         "kanji":    entry.get("kanji", ""),
@@ -465,8 +537,14 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
         # instead of only the one meaning.
         "senses":   extras["senses"],
         "examples": extras["examples"],
-        "furigana": word_furigana(entry.get("kanji", ""), entry.get("kana", "")),
+        "furigana": furigana,
+        # The characters the word is written with — a ledger row each,
+        # not a bare tile (see _word_kanji).
+        "kanji_parts": _word_kanji(entry.get("kanji", ""), furigana, lang),
         "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
+        # None for a JMdict pool word: it has a raw id, and so a stage,
+        # but no app card for a deck to link to.
+        "app_card": _app_card("vocab", level, raw_id),
     }
 
 
@@ -661,6 +739,7 @@ def _grammar_result(entry: dict, level: str, states: dict, user_id: str, lang: s
         "meaning":   gloss(entry, lang),
         **lesson_payload(level, entry, lang),
         "status":    card_stats(states, user_id, raw_id, GRAMMAR_STATUS_MODES),
+        "app_card":  _app_card("grammar", level, raw_id),
     }
 
 
@@ -885,7 +964,24 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 # this field to lay out the classic a-i-u-e-o chart.
                 "group":   entry.get("group", ""),
                 "svg_url": svg_url,
+                # Counted off the diagram the app already ships, because
+                # nothing else knows it: KANJIDIC2 gives every kanji a
+                # stroke count and the syllabary lists give the kana
+                # none, which is why the form block had one figure short
+                # of a lattice (content/kana_strokes.py). None for a
+                # two-character kana, exactly as svg_url is.
+                "stroke_count": kana_stroke_count(kana),
+                # あ ↔ ア. A door, not a fact: the same sound in the
+                # other script is the one cross-reference a learner of
+                # the syllabary wants, and None where the pairing is not
+                # one-to-one (content/kana_data.twin).
+                "twin":    kana_twin(kana),
                 "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
+                # The deck key is the KANA_SETS one, never the
+                # "Hiragana"/"Katakana" label above: that label is what
+                # the catalogue groups by, and the card builder needs
+                # the set its distractors come from.
+                "app_card": _app_card("kana", kana_set_for(kana), raw_id),
                 # The words the kana is read in -- the kanji ledger's
                 # field, under the kanji ledger's name, because the
                 # panel draws the two blocks with one component
