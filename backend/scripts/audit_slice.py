@@ -28,8 +28,8 @@ without a ledger to keep in sync.
 
 The one area that cannot be walked exhaustively is vocab: 8,405 deck
 entries at 40 a run is years. Its slices are therefore ordered
-RISK-FIRST — by the count of automatic suspicions each entry raises
-(`flags` below) — so the entries most likely to be wrong are audited
+RISK-FIRST — by the weighted suspicions each entry raises (`flags` and
+WEIGHTS below) — so the entries most likely to be wrong are audited
 first and the tail is the part that already agrees with JMdict.
 
 A flag is a reason to LOOK, never a finding: "gloss_absent" fires on
