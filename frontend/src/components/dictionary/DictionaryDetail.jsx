@@ -11,7 +11,7 @@ import { GrammarLesson } from '../study/GrammarLesson'
 import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
-import { GlossList, firstGloss, splitGlosses } from '../study/gloss'
+import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
 import { MineButton } from '../analysis/MineButton'
 import { BoltIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
@@ -176,10 +176,19 @@ export function CloseIcon() {
 // `onClick` makes it a door — the radical figure opens the radical
 // index — with the ledger's own chevron sliding in on approach;
 // without one it is inert text, not a dead-looking control.
-function Figure({ value, unit, unitLang, label, onClick }) {
+//
+// `ink` names a STATE the figure is in rather than a value it holds —
+// "due" is the only one, and it is the whole of what the floating
+// "DUE NOW" note used to say above the lattice (plan 089). `jp` is for
+// a figure whose value is a character rather than a number: the
+// radical's own glyph, a kana's twin.
+function Figure({ value, unit, unitLang, label, onClick, ink, jp }) {
   const body = (
     <span className="record__body">
-      <span className="record__value">
+      <span
+        className={`record__value${ink ? ` record__value--${ink}` : ''}${jp ? ' record__value--jp' : ''}`}
+        lang={jp ? 'ja' : undefined}
+      >
         {value}
         {unit && <span className="record__unit" lang={unitLang}>{unit}</span>}
       </span>
@@ -540,11 +549,22 @@ function headwordSize(text) {
 // `onGrammarClick(raw_id)` is the door a grammar point's compare rows
 // open (plan 087): the rival's own entry, in whatever shell this is in.
 //
-// `mining` (a useMining instance, optional) is what makes a grammar
-// entry's `+` roundel exist: the plate's one action, adding the point
-// to one of the learner's grammar decks through the same write the
-// analyzer's chips use. Without it the plate has the ✕ alone.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, mining }) {
+// `onKanaClick(kana, type)` is the twin's door in a kana's form
+// lattice: あ opens ア and back (plan 089).
+//
+// `mining` (a useMining instance, optional) is what makes the `+`
+// roundel exist: the plate's one action, adding this entry to one of
+// the learner's decks through the same write the analyzer's chips use.
+// It was a grammar point's alone; every entry the app has a card for
+// carries it now, and `entry.app_card` is what says whether there is
+// one (routes/dictionary.py). Without `mining` the plate has the ✕.
+//
+// `onReview(rawId)` boards the one card this entry is: the action
+// under the reader's own record, printed only where a card is DUE and
+// only where a caller can offer the run — a lookup sheet opened over a
+// quiz has no run to send anyone to, and an action with nowhere to go
+// is not a fact the way an inert row is, it is a dead control.
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -569,15 +589,31 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
         ? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
         : entry.meaning
 
-  // Every kanji character used in this vocab word, deduplicated and in
-  // reading order — each becomes a tile that opens that kanji's own
-  // entry (see jumpToKanji in DictionaryScreen). Matches CJK Unified
-  // Ideographs; a kana-only word (entry.kanji empty) yields none.
-  const composingKanji = useMemo(() => {
-    if (entry.type !== 'vocab' || !entry.kanji) return []
-    const chars = entry.kanji.match(/[一-龯]/g) || []
-    return [...new Set(chars)]
-  }, [entry.type, entry.kanji])
+  // The app card behind this entry, or null: what the ＋ writes and
+  // what "review this card" boards. Served whole rather than assembled
+  // here, because a pool entry carries a raw id and no card and only
+  // the server knows the difference (routes/dictionary.py's _app_card).
+  const appCard = entry.app_card ?? null
+
+  // The kanji this word is written with, each as a ledger row — the
+  // same row the kanji panel uses for the words a character appears
+  // in, the other way round. They were bare tiles: two boxes holding a
+  // glyph each, under no heading, between the definition and the
+  // reader's own record — a block that needs a heading to be legible
+  // (DESIGN.md) and a stop in the middle of the reading. A row carrying
+  // the reading the character takes IN THIS WORD and its own gloss
+  // says what a tile could not, and the ledger is where the panel
+  // already puts "what it connects to". Plan 089.
+  //
+  // `reading` is null where the aligner could not isolate the character
+  // (生活 → せいかつ says nothing about which half is which); the row
+  // then prints the glyph alone rather than inventing one.
+  const kanjiRows = useMemo(() => (entry.kanji_parts ?? []).map(part => ({
+    kanji: part.char,
+    kana: part.reading ?? '',
+    meaning: part.meaning,
+    furigana: part.reading ? [{ text: part.char, reading: part.reading }] : null,
+  })), [entry.kanji_parts])
 
   // The plate's three registers. A station plate sets the reading over
   // the name and the plain-language name under it; here the reading is
@@ -592,7 +628,6 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const showKanaLine = entry.type === 'vocab'
     && !headwordFurigana?.length
     && !!entry.kanji && !!entry.kana && entry.kana !== entry.kanji
-  const caption = isKana ? entry.romaji : isGrammar ? meaning : firstGloss(meaning)
   // routes/dictionary.py fills a kana's level slot with "Hiragana" /
   // "Katakana" for the catalogue's grouping; the plate prints JLPT
   // levels only — the script is plain from the character itself.
@@ -603,22 +638,42 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // sense" vs. "flat" here, once, so both the senses list and the
   // fallback examples block below read from the same source instead
   // of each re-deriving it slightly differently.
-  const senses = entry.senses ?? []
+  // Folded first: JMdict files 毎月 under two senses carrying the same
+  // three glosses and differing only by a frequency tag, and printing
+  // them as they come makes one definition read as two (see
+  // mergeSenses, plan 089). A merged sense keeps every number it
+  // absorbed, so the sentences nested under those numbers still show.
+  const senses = useMemo(() => mergeSenses(entry.senses), [entry.senses])
   const examples = entry.examples ?? []
-  const senseNumbers = useMemo(() => new Set((entry.senses ?? []).map(s => s.number)), [entry.senses])
+  const senseNumbers = useMemo(() => new Set(senses.flatMap(s => s.numbers)), [senses])
   // Examples that don't get nested under a sense row: either there are
   // no senses at all (so the per-sense list itself doesn't render),
   // or an example's sense_number doesn't match any listed sense.
   const flatExamples = senses.length > 0
     ? examples.filter(ex => !senseNumbers.has(ex.sense_number))
     : examples
-  const examplesBySense = number => examples.filter(ex => ex.sense_number === number)
+  const examplesBySense = numbers => examples.filter(ex => numbers.includes(ex.sense_number))
 
-  // With no senses list, the definition is the app's own gloss line.
-  // Its first gloss is already the plate's caption, so the block only
-  // prints when there is more to say than that one word. A grammar
-  // point's body is its own (below), so it takes no gloss block here.
+  // With no senses list, the definition is the app's own gloss line —
+  // and it only earns a block when there is more to say than the one
+  // word a caption could carry. A grammar point's body is its own
+  // (below), so it takes no gloss block here.
   const glossCount = (senses.length > 0 || isGrammar) ? 0 : splitGlosses(meaning).length
+
+  // The plate's third register, decided AFTER the body's, because it
+  // stands down where the body would only repeat it: 土's plate said
+  // SOIL and the line directly under it said "Soil · earth · ground ·
+  // Turkey" — the same word twice, a rung apart, in a panel whose whole
+  // argument is that a block should say something new (plan 089). Where
+  // the gloss line does not print — a kanji with one meaning, a kana
+  // (whose caption is its romaji), a word whose senses the caption does
+  // not stand in for — the caption is the only place the meaning
+  // appears and it stays.
+  const bodyPrintsGloss = glossCount > 1
+  const caption = isKana ? entry.romaji
+    : isGrammar ? meaning
+    : bodyPrintsGloss ? null
+    : firstGloss(meaning)
 
   // Stroke count and radical describe the *drawing* of the character,
   // so they sit beside the stroke-order sheet in one lattice rather
@@ -627,8 +682,16 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // spans every figure row beside it, and with no sheet the figures
   // take a column each.
   const hasRadical = isKanji && entry.radical != null
+  // あ ↔ ア. A kana's lattice was one full-width sheet of washi and
+  // nothing beside it, because a kana row carried no second fact to
+  // print — the syllabary lists have no stroke count and KANJIDIC2 is
+  // not asked about kana. It carries both now (routes/dictionary.py,
+  // content/kana_strokes.py), so the sheet stands in the same lattice
+  // the kanji panel draws rather than alone across the panel. Plan 089.
+  const hasTwin = isKana && !!entry.twin
   const hasSheet = (isKanji || isKana) && !!entry.svg_url
-  const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0) + (hasRadical ? 1 : 0)
+  const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0)
+    + (hasRadical ? 1 : 0) + (hasTwin ? 1 : 0)
   const showForm = hasSheet || figureCount > 0
   const formStyle = {
     '--dict-form-cols': hasSheet ? (figureCount > 0 ? 2 : 1) : figureCount,
@@ -697,21 +760,32 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 <SpeakIcon />
               </button>
             )}
-            {/* A grammar point's one action: into one of the learner's
-                grammar decks, the analyzer's own mine write. A ghost
+            {/* The plate's one action: this entry into one of the
+                learner's decks, the analyzer's own mine write. A ghost
                 like the two beside it — gold cannot carry a filled
                 action (DESIGN.md, "the primary button"). The outcome
-                ("in deck") prints beside it in the caption register. */}
-            {isGrammar && mining && (
+                ("in deck") prints beside it in the caption register.
+
+                It was a grammar point's alone, which made the same
+                object three different cards depending on what was in
+                it. `entry.app_card` is the server's answer to "is
+                there a card behind this entry", so a JMdict pool word
+                — which has a raw id and no card — correctly gets no ＋
+                rather than a button that adds nothing. */}
+            {mining && appCard && (
               <MineButton
                 mining={mining}
-                kind="grammar"
+                kind={appCard.source}
                 t={t}
                 className="dict-plate__btn"
                 label={<PlusIcon size={16} />}
                 ariaLabel={t.mineToDeck}
                 onMine={deckId => mining.mineApp({
-                  deckId, source: 'grammar', level: entry.level, rawId: entry.raw_id, kind: 'grammar',
+                  deckId,
+                  source: appCard.source,
+                  level: appCard.level,
+                  rawId: appCard.raw_id,
+                  kind: appCard.source,
                 })}
               />
             )}
@@ -799,7 +873,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           <section className="dict-block" aria-label={t.meaning}>
             <ol className="dict-senses">
               {senses.map(sense => {
-                const exs = examplesBySense(sense.number)
+                const exs = examplesBySense(sense.numbers)
                 return (
                   <li key={sense.number} className="dict-sense">
                     <SenseNumeral number={sense.number} />
@@ -865,11 +939,31 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               {(isKanji || isKana) && entry.stroke_count && (
                 <Figure value={entry.stroke_count} unit="画" unitLang="ja" label={t.strokes} />
               )}
+              {/* The radical's own glyph, read つち, rather than the
+                  Kangxi filing number it is indexed under: #32 is a
+                  fact about a dictionary's ordering and 土 is a fact
+                  about the character. The number is still where the
+                  door leads (content/radical_info.py knows both), and
+                  it is still what prints where the table has no glyph
+                  for it. Plan 089. */}
               {hasRadical && (
                 <Figure
-                  value={`#${entry.radical}`}
+                  value={entry.radical_glyph ?? `#${entry.radical}`}
+                  jp={!!entry.radical_glyph}
+                  unit={entry.radical_name}
+                  unitLang="ja"
                   label={t.radical}
                   onClick={onRadicalClick ? () => onRadicalClick(entry.radical) : undefined}
+                />
+              )}
+              {hasTwin && (
+                <Figure
+                  value={entry.twin}
+                  jp
+                  label={entry.type === 'hiragana' ? t.dictKatakana : t.dictHiragana}
+                  onClick={onKanaClick
+                    ? () => onKanaClick(entry.twin, entry.type === 'hiragana' ? 'katakana' : 'hiragana')
+                    : undefined}
                 />
               )}
             </div>
@@ -905,22 +999,16 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
           </section>
         )}
 
-        {composingKanji.length > 0 && (
+        {kanjiRows.length > 0 && (
           <section className="dict-block" aria-label={t.composingKanji}>
-            <div className="dict-parts">
-              {composingKanji.map(char => (onKanjiClick
-                ? (
-                  <button
-                    type="button"
-                    key={char}
-                    onClick={() => onKanjiClick(char)}
-                    className="dict-part"
-                    lang="ja"
-                  >
-                    {char}
-                  </button>
-                )
-                : <span key={char} className="dict-part dict-part--static" lang="ja">{char}</span>
+            <div className="dict-words">
+              {kanjiRows.map(row => (
+                <WordRow
+                  key={row.kanji}
+                  w={row}
+                  char={row.kanji}
+                  onClick={onKanjiClick ? char => onKanjiClick(char) : undefined}
+                />
               ))}
             </div>
           </section>
@@ -930,14 +1018,17 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             Last, because it is about the reader rather than the word.
             Four figures, two by two, in the profile's records lattice;
             nothing renders at all for an entry never reviewed, since a
-            grid of dashes is noise, not information. "Due now" is a
-            state of the block, so it rides above the lattice as a note
-            rather than inside it as a fifth figure. */}
+            grid of dashes is noise, not information.
+
+            Due is not a fifth figure and no longer a note either. It
+            used to be a right-flush "⚡ DUE NOW" caption hanging over a
+            lattice it was not part of, beside a cell that said the next
+            review was two days ago — two facts for one state, with the
+            arithmetic left to the reader. The cell that owns the
+            schedule says it, in the due ink, and the block then names
+            the one thing to do about it. Plan 089. */}
         {record && (
           <section className="dict-block" aria-label={t.cardStats}>
-            {status.due && (
-              <div className="dict-block__note"><BoltIcon size={12} /> {t.dueNow}</div>
-            )}
             <div className="records">
               <Figure
                 value={status.accuracy != null ? status.accuracy : '—'}
@@ -954,10 +1045,27 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 label={t.interval}
               />
               <Figure
-                value={shortDate(status.next_review, lang) ?? '—'}
+                value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
+                ink={status.due ? 'due' : undefined}
                 label={t.nextReview}
               />
             </div>
+            {/* A ghost, not a filled action: the panel has no primary,
+                and 辞書's gold could not carry one anyway (DESIGN.md,
+                "the primary button"). It boards the one card this entry
+                is — /today/run?only=… — in every mode it owes, which is
+                what clearing it means. */}
+            {status.due && onReview && appCard && (
+              <button
+                type="button"
+                onClick={() => onReview(appCard.raw_id)}
+                className="dict-due"
+              >
+                <BoltIcon size={14} />
+                {t.reviewThisCard}
+                <ChevronIcon direction="right" size={16} className="dict-due__chev" />
+              </button>
+            )}
           </section>
         )}
 
@@ -1055,7 +1163,9 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 // — but the question a reader is asking when they tap 駅 under 駅前 is
 // the same one either way, and a run is exactly where it gets asked.
 // The radical is the one door with nowhere to go (it opens the
-// catalogue's own index), so it prints as the figure it is.
+// catalogue's own index), so it prints as the figure it is — and so is
+// "review this card", which would board a run over the run already
+// being studied.
 //
 // Opened on `term` (+ `kana`) for a word or a kanji, or on `id` for a
 // grammar point (the analyzer's chips, a comprehension result's) —
@@ -1106,6 +1216,10 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
             onClose={onClose}
             onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
             onKanjiClick={char => open(char, 'kanji')}
+            // The twin opens into the stack like every other door here;
+            // "review this card" does not exist in this shell at all —
+            // it is opened over a run, and there is nothing to board.
+            onKanaClick={(kana, type) => open(kana, type)}
             // onVocabClick already hands over both halves, so stepping from
             // one entry to another inside the sheet gets the same exactness
             // the card does.

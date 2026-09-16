@@ -10,8 +10,13 @@ import { LangProvider } from '../../LangContext'
 // markup honoured, a compare row that is a door where a shell can open
 // one and a fact where it cannot, the pattern picked out of each
 // sentence, the translations' one switch, the gate's one button — and
-// that a point whose lesson is not written yet prints exactly the
-// three blocks the plate always had.
+// that a point whose lesson is not written yet prints exactly what it
+// has.
+//
+// Plan 089 moved two things: the plate variant no longer reprints the
+// formation and the gloss the plate above it has already drawn, and
+// the neighbours sit UNDER the sentences rather than between them and
+// the lesson.
 
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 
@@ -49,16 +54,33 @@ describe('the grammar lesson', () => {
   it('prints the plate body as blocks that name themselves, in order, with no headings', async () => {
     const screen = await mount(<GrammarLesson point={RICH} variant="plate" onCompare={() => {}} />)
     const blocks = [...screen.container.querySelectorAll('.dict-block')]
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Lesson', 'Compare', 'Examples'])
+    // The lesson, the sentences, then the neighbours. No formation and
+    // no meaning: the plate above this body has already printed both,
+    // and this is the one variant where there IS a plate above it.
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Lesson', 'Examples', 'Compare'])
     expect(screen.container.querySelector('h3, h4, .section-header')).toBeNull()
     // the plate variant draws no plate of its own: the shell already has one
     expect(screen.container.querySelector('.dict-plate')).toBeNull()
+    expect(screen.container.querySelector('.dict-formation')).toBeNull()
   })
 
-  it('degrades to formation, meaning and examples for a point whose lesson is not written', async () => {
+  it('degrades to the sentences alone for a point whose lesson is not written', async () => {
     const screen = await mount(<GrammarLesson point={PLAIN} variant="plate" />)
     const blocks = [...screen.container.querySelectorAll('.dict-block')]
-    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Formation', 'Meaning', 'Examples'])
+    expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Examples'])
+  })
+
+  it('puts the neighbours under the sentences in every dress', async () => {
+    // A rival is what you reach for once you have read the rule and
+    // seen it work. Above the sentences it stood between the reader and
+    // what they came for, and read as the next lesson rather than as
+    // the thing this one is confused with.
+    for (const variant of ['plate', 'sheet', 'gate']) {
+      const screen = await mount(<GrammarLesson point={RICH} variant={variant} onCompare={() => {}} />)
+      const labels = [...screen.container.querySelectorAll('.dict-block')]
+        .map(b => b.getAttribute('aria-label'))
+      expect(labels.indexOf('Compare')).toBeGreaterThan(labels.indexOf('Examples'))
+    }
   })
 
   it('sets each step under its pair mark, honours **…** and "- " lines, and marks the trap', async () => {

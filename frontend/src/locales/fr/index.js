@@ -550,6 +550,10 @@ const stats = {
   learning:           'En cours',
   mastered:           'Maîtrisé',
   dueNow:             'À réviser',
+  // The same state as dueNow, in the record cell that owns the
+  // schedule: a figure, so one word rather than a phrase (plan 089).
+  dueValue:          'Maintenant',
+  reviewThisCard:    'Réviser cette carte',
   total:              'Total',
   overview:           'Aperçu',
   streak:             'Série',
@@ -964,7 +968,6 @@ const dictionary = {
   // Voir en/index.js : une constatation, pas une question.
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
-  formation:         'Formation',
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',
   glPoints:          'Les points',
@@ -1263,8 +1266,10 @@ const decks = {
   // Deck types
   flashcardType:     'Flashcard',
   flashcardDesc:     'Recto / Verso — toute langue',
+  kanaType:          'Kana',
   vocabType:         'Vocabulaire',
   vocabDesc:         'Le vocabulaire gradué de N5 à N1\nOu par fréquence, par thème, ou hors programme\nDe la forme au sens, et retour',
+  deckKanaDesc:      'Kana uniquement — avec ordre des traits',
   deckVocabDesc:     'Vocabulaire uniquement — issu des niveaux JLPT',
   kanjiType:         'Kanji',
   kanjiDesc:         'Les caractères par niveau, avec l\'ordre des traits\nLes lire, puis les écrire de mémoire\nChaque lecture, chaque sens',

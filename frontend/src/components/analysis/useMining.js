@@ -9,6 +9,10 @@ import { apiJson } from '../../lib/api'
 // own -- it's a hand-written card, so it targets a `standard` deck by
 // convention (see plans/017's "no cloze structure" note).
 const DECK_TYPE_FOR_KIND = {
+  // `kana` joined the rest with plan 089, when the dictionary's panel
+  // grew a ＋ on every kind of entry and a kana was the one with
+  // nowhere to put it (backend/routes/decks.py's SOURCE_FOR_TYPE).
+  kana: 'kana',
   vocab: 'vocab',
   kanji: 'kanji',
   grammar: 'grammar',

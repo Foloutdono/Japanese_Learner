@@ -100,17 +100,18 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
       )}
 
       <div className="dict-entry__body gl-body">
-        {variant === 'plate' && point.structure && (
-          <section className="dict-block gl-block" aria-label={t.formation}>
-            <p className="dict-gloss dict-formation" lang="ja">{point.structure}</p>
-          </section>
-        )}
-        {variant === 'plate' && point.meaning && (
-          <section className="dict-block gl-block" aria-label={t.meaning}>
-            <p className="dict-gloss">{point.meaning}</p>
-          </section>
-        )}
+        {/* The plate variant opens on the lesson. It used to open on
+            two blocks reprinting the formation and the gloss — and it
+            is the ONE variant where the plate above has already printed
+            both (DictionaryDetail's dict-plate__structure and
+            dict-plate__caption), so they said everything twice and
+            pushed 規則 below the fold. The sheet and the gate draw
+            their own plate above, which carries the same two registers,
+            so neither ever printed them either. Plan 089.
 
+            The caption they used to back up is no longer clamped for a
+            grammar point (.dict-plate__caption--whole): a clamp defers
+            to a fuller copy in the body, and there is no longer one. */}
         {steps.length > 0 && (
           <section className="dict-block gl-block" aria-label={t.glLesson}>
             <ol className="gl-steps">
@@ -127,6 +128,25 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
           </section>
         )}
 
+        {examples.length > 0 && (
+          <section className="dict-block gl-block" aria-label={t.examples}>
+            <div className="dict-examples">
+              {examples.map((ex, i) => (
+                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr} />
+              ))}
+            </div>
+            <button type="button" onClick={() => setShowTr(v => !v)} className="gl-tr-toggle">
+              <ChevronIcon direction={showTr ? 'up' : 'down'} size={14} />
+              {showTr ? t.hideTranslation : t.showTranslation}
+            </button>
+          </section>
+        )}
+
+        {/* The neighbours, AFTER the sentences. A rival is what you
+            reach for once you have read the rule and seen it work —
+            above the examples it read as the next lesson rather than as
+            the thing this one is confused with, and it stood between a
+            learner and the sentences they came for. Plan 089. */}
         {compare.length > 0 && (
           <section className="dict-block gl-block" aria-label={t.glCompare}>
             <div className="gl-compare">
@@ -154,20 +174,6 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
                   : <div key={rival.raw_id ?? rival.pattern} className="gl-door gl-door--inert">{body}</div>
               })}
             </div>
-          </section>
-        )}
-
-        {examples.length > 0 && (
-          <section className="dict-block gl-block" aria-label={t.examples}>
-            <div className="dict-examples">
-              {examples.map((ex, i) => (
-                <ExampleSentence key={i} ex={{ ...ex, segments: ex.furigana }} showTr={showTr} />
-              ))}
-            </div>
-            <button type="button" onClick={() => setShowTr(v => !v)} className="gl-tr-toggle">
-              <ChevronIcon direction={showTr ? 'up' : 'down'} size={14} />
-              {showTr ? t.hideTranslation : t.showTranslation}
-            </button>
           </section>
         )}
 

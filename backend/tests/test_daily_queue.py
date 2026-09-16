@@ -79,6 +79,41 @@ class LaneTests(unittest.TestCase):
         self.assertEqual(lanes, {})
 
 
+class KeepCardTests(unittest.TestCase):
+    """What the dictionary panel's "review this card" boards (plan 089):
+    one card, every lane it is due in."""
+
+    def test_only_that_card_survives_in_the_lanes_that_hold_it(self) -> None:
+        lanes = daily_queue.lanes(USER, [
+            row(KANJI_WRITE, "kanji.flashcard.f2b"),
+            row(KANJI_A, "kanji.flashcard.f2b"),
+            row(KANJI_WRITE, "kanji.write_kanji"),
+            row(VOCAB_A, "vocab.flashcard.f2b"),
+        ], {})
+        kept = daily_queue.keep_card(lanes, KANJI_WRITE)
+        # Both modes, because clearing a card means answering it in each
+        # one it owes -- and nothing from the lanes that do not hold it.
+        self.assertEqual(list(kept), [
+            (SECTION, "kanji", "N5", "kanji.flashcard.f2b"),
+            (SECTION, "kanji", "N5", "kanji.write_kanji"),
+        ])
+        self.assertEqual([ids for ids in kept.values()], [[KANJI_WRITE], [KANJI_WRITE]])
+
+    def test_an_id_nothing_holds_leaves_an_empty_queue(self) -> None:
+        # Reported by the run as "nothing due", never as an error: the
+        # card may simply have been answered in another tab.
+        lanes = daily_queue.lanes(USER, [row(KANJI_A, "kanji.flashcard.f2b")], {})
+        self.assertEqual(daily_queue.keep_card(lanes, KANJI_B), {})
+
+    def test_a_personal_card_is_kept_the_same_way(self) -> None:
+        lanes = daily_queue.lanes(
+            USER, [row(PERSONAL_ID, "vocab.flashcard.f2b"), row(VOCAB_A, "vocab.flashcard.f2b")],
+            {PERSONAL_ID: PERSONAL_CARD},
+        )
+        kept = daily_queue.keep_card(lanes, PERSONAL_ID)
+        self.assertEqual(list(kept), [(PERSONAL, 7, "Mots du boulot", "vocab.flashcard.f2b")])
+
+
 class ExcludeTests(unittest.TestCase):
     def test_exclude_is_mode_aware(self) -> None:
         """The bug this shape exists to prevent: excluding a card the

@@ -27,6 +27,11 @@
 // answers. 'flashcard' is renamed 'standard', matching what the study-mode
 // registry calls the same thing (domain/studyModes.js).
 //
+// 'kana' joined them with plan 089, and for the same reason the others
+// exist: the dictionary's panel grew a ＋ on every entry, and a kana
+// was the one kind with nowhere to put it. It takes 仮名's own glyph
+// and pigment from config/tabs.js, like every type here.
+//
 // The structure now decides what a deck can hold BOTH ways: app cards
 // browsed in from its source, and personal cards written in its shape. The
 // old model had that backwards for personal cards — a kanji deck accepted
@@ -35,6 +40,7 @@
 export function deckTypes(t) {
   return [
     { value: 'standard', label: t.standardType, desc: t.standardDesc,     glyph: '札', color: 'var(--text-secondary)' },
+    { value: 'kana',     label: t.kanaType,     desc: t.deckKanaDesc,     glyph: 'あ', color: 'var(--line-kana)' },
     { value: 'vocab',    label: t.vocabType,    desc: t.deckVocabDesc,    glyph: '単', color: 'var(--line-vocab)' },
     { value: 'kanji',    label: t.kanjiType,    desc: t.deckKanjiDesc,    glyph: '漢', color: 'var(--line-kanji)' },
     { value: 'grammar',  label: t.grammarType,  desc: t.deckGrammarDesc,  glyph: '文', color: 'var(--line-grammar)' },

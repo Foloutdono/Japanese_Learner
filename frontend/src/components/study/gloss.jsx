@@ -114,6 +114,49 @@ export function formatGlossLine(meaning) {
   return glossParts(meaning).join(' · ')
 }
 
+// ── Senses that say the same thing ─────────────────────────
+// JMdict files a word under several senses, and two of them can carry
+// an identical gloss list and differ only by a frequency or usage tag:
+// 毎月 arrives as "every month · each month · monthly" twice over,
+// once tagged `common` and once `top 3k`. Printed as they come, the
+// dictionary's own definition block repeats itself word for word under
+// two numerals, which reads as two meanings and is one (plan 089).
+//
+// So senses whose glosses match — compared on the SPLIT list, folded
+// for case and spacing, because the same list can arrive punctuated
+// two ways — fold into the first of them, with the tags unioned and
+// the sense numbers kept. The numbers are kept because the example
+// sentences are nested by `sense_number`: a merged sense has to show
+// the sentences of every sense it absorbed, or the fold would hide
+// them.
+//
+// Order is preserved and nothing is dropped: a sense with a gloss list
+// of its own always survives, whatever its tags.
+// eslint-disable-next-line react-refresh/only-export-components -- mergeSenses is a data helper used by DictionaryDetail.jsx; not a component.
+export function mergeSenses(senses) {
+  const byGloss = new Map()
+  const out = []
+  for (const sense of senses ?? []) {
+    const key = splitGlosses(sense.glossary)
+      .map(g => g.toLowerCase().replace(/\s+/g, ' ').trim())
+      .join('|')
+    const seen = key && byGloss.get(key)
+    if (!seen) {
+      const merged = { ...sense, numbers: [sense.number], tags: [...(sense.tags ?? [])] }
+      out.push(merged)
+      if (key) byGloss.set(key, merged)
+      continue
+    }
+    seen.numbers.push(sense.number)
+    // Union by code: "common" and "top 3k" are both worth keeping, and
+    // the same code arriving twice is not.
+    for (const tag of sense.tags ?? []) {
+      if (!seen.tags.some(t => t.code === tag.code)) seen.tags.push(tag)
+    }
+  }
+  return out
+}
+
 // A full gloss list as elements, with a dimmed middot between them
 // instead of whatever punctuation the deck happened to use — so a
 // kanji's "; " list and a vocab word's "," list are indistinguishable

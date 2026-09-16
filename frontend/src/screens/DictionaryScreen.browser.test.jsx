@@ -66,6 +66,7 @@ const GRAMMAR = {
   type: 'grammar', raw_id: 'grammar_N5_〜ました／〜ませんでした', level: 'N5',
   pattern: '〜ました／〜ませんでした', structure: 'verb ます-stem + ました／ませんでした',
   meaning: 'polite past: did / did not',
+  app_card: { source: 'grammar', level: 'N5', raw_id: 'grammar_N5_〜ました／〜ませんでした' },
   examples: [
     { jp: '昨日、映画を見ました。', en: 'I watched a film yesterday.',
       furigana: [{ text: '昨日', reading: 'きのう' }, { text: '、' }, { text: '映画', reading: 'えいが' }, { text: 'を' }, { text: '見', reading: 'み' }, { text: 'ました。' }] },
@@ -466,11 +467,12 @@ describe('the dictionary screen', () => {
     expect(plate.querySelector(`[aria-label="${T.listen}"]`)).toBeNull()
     const actions = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.mineToDeck, T.close])
-    // The body: formation, meaning, the two sentences with their ruby,
-    // the record — and nothing drawn.
+    // The body: the two sentences with their ruby, then the record —
+    // and nothing drawn. The formation and the gloss are on the plate
+    // above and were printed a second time here until plan 089.
     const blocks = [...entry.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
-    expect(blocks).toEqual([T.formation, T.meaning, T.examples, T.cardStats])
-    expect(entry.querySelector('.dict-formation').textContent).toBe(GRAMMAR.structure)
+    expect(blocks).toEqual([T.examples, T.cardStats])
+    expect(entry.querySelector('.dict-formation')).toBeNull()
     expect(entry.querySelectorAll('.dict-ex').length).toBe(2)
     expect(entry.querySelector('.dict-ex rt').textContent).toBe('きのう')
     expect(entry.querySelector('.dict-ex__tr').textContent).toBe(GRAMMAR.examples[0].en)

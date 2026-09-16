@@ -333,7 +333,7 @@ def get_today(user_id: str = Depends(get_user_id)):
 
 @router.get("/api/today/cards")
 def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
-                    user_id: str = Depends(get_user_id)):
+                    only: str = "", user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
     personal decks, each carrying the mode it must be reviewed under.
@@ -348,16 +348,26 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     one the learner has NOT seen along with the one they have. `|` is
     the separator because neither a card id nor a registry mode key can
     contain one.
+
+    `only` is one raw id, and it serves that card alone -- what the
+    dictionary panel's "review this card" boards for an entry it has
+    just told the reader is due. It is not a lane filter: `lanes` and
+    the level rule shape what a mixed DAY serves, and a learner who
+    pressed the action on one entry is not asking for a day. The credit
+    gate still applies, because a card that cannot be paid for cannot be
+    paid for wherever it was started from.
     """
     count = max(1, min(count, MAX_BATCH))
 
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
-    chosen = daily_queue.keep_lanes(
-        daily_queue.hold_above(
-            daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
-        ),
-        daily_queue.parse_lane_ids(lanes),
+    all_lanes = daily_queue.lanes(user_id, due_rows, personal)
+    chosen = (
+        daily_queue.keep_card(all_lanes, only) if only
+        else daily_queue.keep_lanes(
+            daily_queue.hold_above(all_lanes, resolve_level(user_id)),
+            daily_queue.parse_lane_ids(lanes),
+        )
     )
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
     # Under enforcement a run stops at the balance -- at its worth of
@@ -415,7 +425,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
 
     logger.info(
         "today queue user_id=%s lanes=%d chosen=%s requested=%d served=%d",
-        user_id, len(chosen), lanes or "all", count, len(cards),
+        user_id, len(chosen), only or lanes or "all", count, len(cards),
     )
     return {"cards": cards}
 

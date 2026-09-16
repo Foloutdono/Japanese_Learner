@@ -58,6 +58,17 @@ STRUCTURES: dict[str, Structure] = {
             Field("back", required=True),
         ),
     ),
+    # The syllabary's own shape: a character and the sound it spells.
+    # There is no meaning to translate — a kana is not a word — so the
+    # back is the romaji, which is exactly what kana.write_romaji asks
+    # the learner to produce and what the flashcard directions turn over.
+    "kana": Structure(
+        key="kana", source="kana", front_key="kana", back_key="romaji",
+        fields=(
+            Field("kana", required=True),
+            Field("romaji", required=True),
+        ),
+    ),
     "kanji": Structure(
         key="kanji", source="kanji", front_key="kanji", back_key="meaning",
         fields=(
