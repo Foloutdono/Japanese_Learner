@@ -416,6 +416,7 @@ const stats = {
   learnFourLines:     'Quatre lignes',
   stationJlpt:        'JLPT',
   stationSources:     'Sources',
+  stationSets:        'Séries',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
   byRadicalShort:     'Par clé',
@@ -527,7 +528,6 @@ const stats = {
   destReprint:        'Réimprimer',
   compNote: (you, right) => `Vous · ${you} — correct · ${right}`,
   examPart: (n) => `Partie ${n}`,
-  kanaSetsSub:        (n) => `${n} séries`,
   serviceName: {
     local:   'Omnibus',
     rapid:   'Rapide',
@@ -965,7 +965,6 @@ const dictionary = {
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
   formation:         'Formation',
-  browseGrammarPoints: 'Parcourir les points',
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',
   glPoints:          'Les points',
@@ -978,6 +977,7 @@ const dictionary = {
   glRegister: { neutral: 'Neutre', casual: 'Familier', polite: 'Poli', formal: 'Soutenu', written: 'Écrit' },
   composingKanji:    'Composé de ces kanji',
   vocabExamples:     'Utilisé dans ces mots',
+  kanaExamples:      'Se lit dans ces mots',
   allReadings:       'Toutes les lectures',
   readingsNoWords:   'Pas encore de mots d\'exemple',
   // Voir en/index.js : la moitié japonaise est le titre, la moitié en
@@ -1326,6 +1326,7 @@ const decks = {
 
   // ── La bibliothèque ───────────────────────────────────────
   library:               'Bibliothèque',
+  libraryBrowse:         'Parcourir',
   librarySeeAll:         'Tout voir',
   libraryMore:           'Afficher plus',
   librarySort:           'Ordre',
@@ -1341,8 +1342,7 @@ const decks = {
   libraryGone:           'Ce paquet n’est plus disponible',
   libraryGoneHint:       'Son auteur l’a peut-être retiré.',
   libraryOpen:           'Ouvrir',
-  libraryFollow:         'Suivre ce paquet',
-  libraryLinkNote:       'Suivre crée un lien vers le paquet de son auteur : ses modifications vous parviennent, et votre progression reste la vôtre. Vous pouvez en faire votre copie à tout moment.',
+  libraryFollow:         'Suivre',
   libraryPublish:        'Publier dans la bibliothèque',
   libraryPublished:      'Ce paquet est dans la bibliothèque.',
   libraryUnpublish:      'Retirer de la bibliothèque',

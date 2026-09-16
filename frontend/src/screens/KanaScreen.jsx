@@ -62,7 +62,11 @@ export default function KanaScreen() {
     })
     const here = currentKanaSet(stats?.items?.kana)
     return (
-      <SelectionScreen title={t.kanaTitle} sub={t.kanaSetsSub(SETS.length)}>
+      <SelectionScreen
+        title={t.kanaTitle}
+        sub={t.stationSets}
+        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+      >
         <RouteStops stops={stops} here={here} onSelect={slug => navigate(`/learn/kana/${slug}`)} />
       </SelectionScreen>
     )

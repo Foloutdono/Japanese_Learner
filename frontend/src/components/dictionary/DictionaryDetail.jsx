@@ -287,7 +287,24 @@ function StrokeSheet({ src, notAvailableLabel }) {
   )
 }
 
-// One word that uses the kanji: its furigana'd form with the kanji
+// The kana a row is an example of, picked out of the word in the
+// entry's ink. The same job FuriganaParts' `hit` does for a kanji row,
+// on a string that has no parts to mark it in: only the first
+// occurrence is struck, since the row is showing where the character
+// is read, not counting how often.
+function Picked({ text, hit }) {
+  const at = hit ? text.indexOf(hit) : -1
+  if (at < 0) return text
+  return (
+    <>
+      {text.slice(0, at)}
+      <span className="dict-word__hit">{text.slice(at, at + hit.length)}</span>
+      {text.slice(at + hit.length)}
+    </>
+  )
+}
+
+// One word that uses the character: its furigana'd form with the kanji
 // itself picked out in the entry's ink — so the reading this word
 // demonstrates is what the eye lands on — its first gloss, and, when the
 // caller can navigate, the ledger's chevron. Shared by the "used in
@@ -296,35 +313,28 @@ function StrokeSheet({ src, notAvailableLabel }) {
 // over a quiz has no dictionary underneath to jump around in) it is a
 // plain row, not a dead-looking button.
 //
-// `plain` moves the hit's pigment from its ink to a block behind it:
-// the character and its own furigana lifted off the row together on a
-// wash of the gold, which is the unit the row is really about — this
-// kanji, read this way. The ledger picks the kanji out in ink because
-// nothing else there says which reading its four words demonstrate; in
-// the readings sheet the band over the rows has just said it, and a
-// row of gold under a gold heading outranks the heading — which was
-// the old sheet's real defect. Still marked, in a register that cannot
-// compete with the one above it.
-function WordRow({ w, char, onClick, plain }) {
+// `reading` is the kana entry's row (plan 088): it prints the word's
+// READING with the kana picked out of it, because a reader still
+// learning the syllabary cannot be shown 朝 as an example of あ. The
+// written form stays behind the row, as what it opens.
+function WordRow({ w, char, onClick, reading = false }) {
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
-        {w.furigana?.length
-          ? (
-            <FuriganaParts
-              parts={w.furigana}
-              hit={char}
-              hitClassName={`dict-word__hit${plain ? ' dict-word__hit--plain' : ''}`}
-            />
-          )
-          : w.kanji}
+        {reading
+          ? <Picked text={w.kana} hit={char} />
+          : w.furigana?.length
+            ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
+            : w.kanji}
       </span>
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )
   return onClick
     ? (
-      <button type="button" onClick={() => onClick(w.kanji, w.kana)} className="dict-word">
+      // A word written in kana alone (テレビ) has no kanji to search
+      // for, and the reading is its headword as well as its reading.
+      <button type="button" onClick={() => onClick(w.kanji || w.kana, w.kana)} className="dict-word">
         {body}
         <ChevronIcon direction="right" size={16} className="dict-word__chev" />
       </button>
@@ -363,16 +373,17 @@ function ReadingGate({ jp, name, n, open, onPick }) {
 
 // One reading, and the words that demonstrate it: the reading as a
 // band of sumi that sticks to the top of the list while its words
-// pass under it, then the words in the ledger's own rows.
+// pass under it, then the words in the ledger's own rows, unchanged —
+// the kanji in each picked out in the entry's ink exactly as the
+// ledger picks it out.
 //
 // The band is the fix for the sheet's second defect. The reading used
 // to be set at --fs-lead in --text-primary — the rung and the ink of
 // the word rows it heads — flush with a list that bleeds sixteen
-// pixels further left than it does, with the gold hit kanji inside
-// every row outranking it. A head cannot be the quietest thing in its
-// own group. Ground, not rung, is what separates them now; the 音/訓
-// mark rides the band so the register is named however far the list
-// has scrolled.
+// pixels further left than it does. A head cannot be the quietest
+// thing in its own group. GROUND is what separates them now, which is
+// what lets the rows keep their own gold: sumi against surface is not
+// a distinction the rows can dilute, the way a shared rung was.
 function ReadingBand({ reading, words, kind, char, onWord }) {
   return (
     <section className="dict-rd" aria-label={reading}>
@@ -381,7 +392,7 @@ function ReadingBand({ reading, words, kind, char, onWord }) {
         <span className="dict-rd__yomi" lang="ja">{reading}</span>
       </h2>
       <div className="dict-words">
-        {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} plain />)}
+        {words.map((w, i) => <WordRow key={i} w={w} char={char} onClick={onWord} />)}
       </div>
     </section>
   )
@@ -867,18 +878,29 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
         {/* ── What it connects to ──────────────────────────
             Two directions of one relationship, and an entry only
-            ever has one of them: a kanji links out to the words it
-            appears in (a ledger of rows, each a door — four words
-            chosen to demonstrate as many different readings as the
-            deck can, the kanji picked out in each so the reading it
-            uses is what the eye lands on; the readings sheet has the
-            complete grouping), a word links down to the kanji it is
-            built from (a row of tiles, each the small plate of the
-            entry it opens). */}
-        {isKanji && entry.vocab_examples?.length > 0 && (
-          <section className="dict-block" aria-label={t.vocabExamples}>
+            ever has one of them: a character links out to the words it
+            is read in (a ledger of rows, each a door — for a kanji,
+            four words chosen to demonstrate as many different readings
+            as the deck can, the kanji picked out in each so the reading
+            it uses is what the eye lands on, with the readings sheet
+            holding the complete grouping; for a kana, four words it is
+            read in, printed as READINGS rather than as written forms
+            because a reader who is still learning あ cannot be sent to
+            朝 — see study/kana_words.py), a word links down to the kanji
+            it is built from (a row of tiles, each the small plate of
+            the entry it opens). */}
+        {(isKanji || isKana) && entry.vocab_examples?.length > 0 && (
+          <section className="dict-block" aria-label={isKana ? t.kanaExamples : t.vocabExamples}>
             <div className="dict-words">
-              {entry.vocab_examples.map((w, i) => <WordRow key={i} w={w} char={entry.kanji} onClick={onVocabClick} />)}
+              {entry.vocab_examples.map((w, i) => (
+                <WordRow
+                  key={i}
+                  w={w}
+                  char={isKana ? entry.kana : entry.kanji}
+                  onClick={onVocabClick}
+                  reading={isKana}
+                />
+              ))}
             </div>
           </section>
         )}

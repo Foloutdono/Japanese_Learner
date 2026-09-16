@@ -27,6 +27,7 @@ from study.card_lookup import (
 )
 from study.grammar_lesson import lesson_payload
 from study import search_match
+from study.kana_words import kana_words
 from study.kanji_words import kanji_as_word, kanji_words, word_furigana
 
 router = APIRouter()
@@ -885,6 +886,13 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 "group":   entry.get("group", ""),
                 "svg_url": svg_url,
                 "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
+                # The words the kana is read in -- the kanji ledger's
+                # field, under the kanji ledger's name, because the
+                # panel draws the two blocks with one component
+                # (plan 088). Empty for the handful of kana ordinary
+                # writing has no word for, and the block then prints
+                # nothing; see study/kana_words.py.
+                "vocab_examples": kana_words(entry["kana"], lang),
             })
 
     return {

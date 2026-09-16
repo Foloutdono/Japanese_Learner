@@ -412,24 +412,14 @@ stick under a sticky plate whose height it has no way to know.
 Nothing of that list is on the entry itself. The four-word "used in these
 words" ledger stays, and its four words demonstrate four different readings
 where the deck has them, the kanji picked out in each row in the entry's
-ink so the reading it uses is what the eye lands on. **The sheet's rows mark
-that kanji with a block instead** (`WordRow`'s `plain`): the character and its
-own furigana on a 22% wash of the pigment, lifted off the row as the pair the
-row is about. The band above them has already named the reading, so ink there
-would be a row outranking its own heading. The ledger keeps the ink: it has
-nothing else to name the reading with.
-
-**That block is a fill, and "Colour is an edge, a ring, or a numeral" says
-there are none.** It is the second standing exception, owner-directed
-(2026-09-15) after a 2px rule under the glyph was tried and judged too faint
-to find in a list. Like the primary button it is allowed to exist *because*
-the rule is otherwise absolute: one mark, inside one list, and not precedent
-for filling a row, a chip, a card or a header. Two things it is held to —
-the wash is mixed toward `--surface` rather than laid on at an alpha (a mix
-toward `transparent` composites toward the ground and costs contrast in both
-themes), and **the furigana on it takes the ambient ink rather than the
-secondary one**, because the tint eats that ink's headroom and drops it to
-3.78:1. Guard 4 measures both (`.dj-plain`, `.dj-plain-rt`). The plate is `position: sticky`
+ink so the reading it uses is what the eye lands on. **The sheet's rows are
+that same row, unchanged** — the kanji picked out in the same ink there as
+here. A round of this redesign took the gold off them, on the reasoning that
+gold under a gold heading outranks the heading; the owner reversed it, and
+the reversal is the sounder reading of the screen. Ground is what divides a
+reading from its words now, and sumi against surface is not a distinction the
+rows can dilute the way a shared rung was. One mark means one thing wherever
+the row is drawn, which is worth more than the rivalry was worth avoiding. The plate is `position: sticky`
 inside whichever shell scrolls it, so the word stays in view while its
 examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no

@@ -440,6 +440,9 @@ const stats = {
   // whole question up there instead -- selectStudySource -- because
   // their bar carries no other sub to be consistent with.)
   stationSources:     'Sources',
+  // The same, over かな's set list: the sets are the line's stops, so
+  // the sub names them and the bar's other end is the way out.
+  stationSets:        'Sets',
   byFrequencyShort:   'By frequency',
   byThemeShort:       'By theme',
   byRadicalShort:     'By radical',
@@ -557,7 +560,6 @@ const stats = {
   destReprint:        'Reprint',
   compNote: (you, right) => `You · ${you} — correct · ${right}`,
   examPart: (n) => `Part ${n}`,
-  kanaSetsSub:        (n) => `${n} sets`,
   serviceName: {
     local:   'Local',
     rapid:   'Rapid',
@@ -997,7 +999,6 @@ const dictionary = {
   dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
   formation:         'Formation',
-  browseGrammarPoints: 'Browse the points',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',
@@ -1028,6 +1029,7 @@ const dictionary = {
   syllabaryLong:     'Long vowels',
   composingKanji:    'Made of these kanji',
   vocabExamples:     'Used in these words',
+  kanaExamples:      'Read in these words',
   allReadings:       'All readings',
   readingsNoWords:   'No example words yet',
   // The two gates on the readings sheet. The Japanese half is the
@@ -1388,6 +1390,9 @@ const decks = {
   // "Library" alone, with no Japanese pair: owner's call, and the one
   // section in the app that reads Latin-only by design. See DESIGN.md.
   library:               'Library',
+  // The door beside Create deck on the shelf: the verb, because it
+  // sits next to one and the roundel beside it already says books.
+  libraryBrowse:         'Browse',
   librarySeeAll:         'See all',
   libraryMore:           'Show more',
   librarySort:           'Order',
@@ -1403,8 +1408,7 @@ const decks = {
   libraryGone:           'This deck is no longer available',
   libraryGoneHint:       'Its author may have taken it down.',
   libraryOpen:           'Open',
-  libraryFollow:         'Follow this deck',
-  libraryLinkNote:       'Following links to the author’s deck: their later changes reach you, and your own progress stays yours. You can make your own copy at any time.',
+  libraryFollow:         'Follow',
   libraryPublish:        'Publish to the library',
   libraryPublished:      'This deck is in the library.',
   libraryUnpublish:      'Remove from the library',

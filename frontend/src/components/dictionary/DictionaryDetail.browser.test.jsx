@@ -117,6 +117,15 @@ const KANA = {
   type: 'hiragana', kana: 'あ', romaji: 'a', meaning: 'a', level: 'Hiragana', group: 'vowels',
   svg_url: '/kanjivg/03042.svg',
   status: { status: 'mastered', total_reviews: 40, correct_reviews: 39, accuracy: 98, interval_days: 60, next_review: '2026-11-01T08:00:00Z', due: false },
+  // study/kana_words.py's rows: the reading, the written form behind
+  // it, no alignment — the word that begins with the kana first, the
+  // one that merely contains it last.
+  vocab_examples: [
+    { kanji: '朝', kana: 'あさ', meaning: 'morning', level: 'N5' },
+    { kanji: '青', kana: 'あお', meaning: 'blue', level: 'N5' },
+    { kanji: '', kana: 'あそこ', meaning: 'over there', level: 'N5' },
+    { kanji: '場合', kana: 'ばあい', meaning: 'situation, case', level: 'N3' },
+  ],
 }
 
 // A JMdict-pool word: no level, kana-only headword, no alignment.
@@ -376,6 +385,40 @@ describe('the body — blocks that name themselves', () => {
     expect(sheet.getBoundingClientRect().width).toBeCloseTo(form.getBoundingClientRect().width - 2, 0)
   })
 
+  // ── A kana's own ledger (plan 088) ──────────────────────
+  // The same block on the other half of the catalogue, and the one
+  // difference that matters: a reader still learning the syllabary is
+  // shown あさ rather than 朝, with the あ struck in the entry's ink
+  // wherever in the word it falls.
+  it('reads a kana into the words it is read in, and opens each of them', async () => {
+    const kana = await renderEntry(KANA)
+    const ledger = kana.root.querySelector('section[aria-label="Read in these words"]')
+    const rows = [...ledger.querySelectorAll('.dict-word')]
+    expect(rows.map(r => r.querySelector('.dict-word__jp').textContent))
+      .toEqual(['あさ', 'あお', 'あそこ', 'ばあい'])
+    expect(rows[0].querySelector('.dict-word__gloss').textContent).toBe('Morning')
+    // The kana itself, picked out — first character or fourth.
+    expect(rows.map(r => r.querySelector('.dict-word__hit').textContent)).toEqual(['あ', 'あ', 'あ', 'あ'])
+    expect(rows[3].querySelector('.dict-word__jp').firstChild.textContent).toBe('ば')
+    // A row is a door to the word's own entry; a word written in kana
+    // alone (あそこ) is searched for by the reading, which is also its
+    // headword.
+    rows[0].click()
+    expect(kana.onVocabClick).toHaveBeenCalledWith('朝', 'あさ')
+    rows[2].click()
+    expect(kana.onVocabClick).toHaveBeenCalledWith('あそこ', 'あそこ')
+    // The drawing first, then the words, then the record — the kanji
+    // panel's order, since it is the same panel.
+    const order = [...kana.root.querySelectorAll('.dict-block')].map(b => b.getAttribute('aria-label'))
+    expect(order).toEqual(['Stroke order', 'Read in these words', 'Card stats'])
+  })
+
+  it('draws no ledger for a kana ordinary writing has no word for', async () => {
+    const { root } = await renderEntry({ ...KANA, kana: 'ヲ', romaji: 'wo', type: 'katakana', vocab_examples: [] })
+    expect(root.querySelector('.dict-words')).toBeNull()
+    expect(root.textContent).not.toMatch(/Read in these words/)
+  })
+
   it('opens a kanji\'s words from a ledger of doors, and a word\'s kanji from tiles', async () => {
     const kanji = await renderEntry(KANJI)
     const rows = kanji.root.querySelectorAll('.dict-word')
@@ -506,26 +549,18 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-rest').getAttribute('aria-label')).toBe('No example words yet')
     // Pills come after the bands.
     expect(bands()[0].compareDocumentPosition(dialog.querySelector('.dict-rest')) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
-    // Each row picks out the kanji it is an example of — here on a
-    // BLOCK rather than in ink, the character and its own furigana
-    // lifted off the row together, since the band above the rows
-    // already names the reading in that same gold. The ink belongs to
-    // the entry's own ledger, which has nothing else to name it with
-    // (see the ledger test).
+    // Each row picks out the kanji it is an example of, in the entry's
+    // ink — the same mark the ledger under the sheet makes, because a
+    // band of sumi over the rows is not a distinction the rows' own
+    // gold can dilute.
     for (const row of dialog.querySelectorAll('.dict-word')) {
       expect(baseText(row.querySelector('.dict-word__hit'))).toBe('木')
     }
     const hit = dialog.querySelector('.dict-word__hit')
     const rt = hit.querySelector('rt')
-    const wash = probe('backgroundColor', 'color-mix(in srgb, var(--line-jisho) 22%, var(--surface))', root)
-    expect(getComputedStyle(hit).backgroundColor).toBe(wash)
-    expect(getComputedStyle(rt).backgroundColor).toBe(wash)
-    // Both inks on the block are the AMBIENT one. The furigana is not
-    // the secondary ink it is everywhere else, and that is measured
-    // rather than chosen: the tint eats that ink's headroom and takes
-    // it to 3.78:1 (contrast.browser.test.jsx pins both).
-    expect(getComputedStyle(hit).color).toBe(probe('color', 'var(--text-primary)', root))
-    expect(getComputedStyle(rt).color).toBe(probe('color', 'var(--text-primary)', root))
+    const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))', root)
+    expect(getComputedStyle(hit).color).toBe(ink)
+    expect(getComputedStyle(rt).color).toBe(ink)
     // …and the character sits CENTRED under a reading wider than it is
     // (木 read もく), rather than flush left with the reading hanging
     // off its right across the text beside it. The annotation being
@@ -541,10 +576,10 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
     // Centred, not merely contained: equal air either side of it.
     expect(Math.abs((rtBox.left - hitBox.left) - (hitBox.right - rtBox.right))).toBeLessThan(1)
-    // And the ledger's hit underneath carries no block: there the
-    // pigment is still the ink.
+    // The same ink as the ledger's hit underneath, to the value: one
+    // mark for one thing, wherever the row is drawn.
     const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
-    expect(getComputedStyle(led).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(led).color).toBe(ink)
 
     // The other gate swaps the list for the other register's, mark and
     // all — the two are never on screen together to be confused.

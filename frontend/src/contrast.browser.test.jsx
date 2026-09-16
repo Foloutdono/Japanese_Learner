@@ -754,16 +754,6 @@ const Fixture = () => (
                 </span>
                 <span className="dict-word__gloss dj-word-gloss">Thursday</span>
               </button>
-              {/* The same row as the readings sheet draws it: the hit on
-                  a 22% wash of the pigment instead of wearing it as ink.
-                  Both inks on that block are measured, because the tint
-                  is what put the secondary one under the floor (4.41:1
-                  dark) and sent the furigana to the ambient ink. */}
-              <button type="button" className="dict-word">
-                <span className="dict-word__jp" lang="ja">
-                  <ruby className="dict-word__hit dict-word__hit--plain dj-plain">木<rt className="dj-plain-rt">もく</rt></ruby>曜日
-                </span>
-              </button>
             </div>
           </section>
           <section className="dict-block">
@@ -1035,8 +1025,6 @@ const SITES = [
   ['.dj-word-gloss', 'word row gloss'],
   ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
   ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
-  ['.dj-plain', 'readings sheet: the kanji on its pigment block'],
-  ['.dj-plain-rt', 'readings sheet: its furigana, on the same block'],
   ['.dj-due', 'due note (due ink mixed toward the ink)'],
   ['.dj-tip', 'tag note (panel ink on sumi)'],
 ]

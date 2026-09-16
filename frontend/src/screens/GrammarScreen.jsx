@@ -3,7 +3,7 @@ import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
-import { playClick, playUi } from '../lib/audio'
+import { playUi } from '../lib/audio'
 import { apiJson } from '../lib/api'
 import { ChevronIcon } from '../components/ui/Icons'
 import SelectionScreen from '../components/selection/SelectionScreen'
@@ -62,23 +62,16 @@ export default function GrammarScreen({ session }) {
   if (level && !LEVELS.includes(level)) return <Navigate replace to="/learn/grammar" />
 
   if (!level) {
-    // The line's catalogue is the dictionary's grammar collection
-    // (DictionaryScreen, `?category=grammar`): one browse surface, not
-    // a second list here. The door sits where a station's secondary
-    // action sits, in the bar's own chrome — a Leave that goes
-    // somewhere, so its chevron points the way rather than back.
-    const browse = (
-      <button
-        type="button"
-        className="stage__leave dict-browse-door"
-        onClick={() => { playClick(); navigate('/dictionary?category=grammar&level=N5') }}
-      >
-        <span>{t.browseGrammarPoints}</span>
-        <ChevronIcon direction="right" size={14} />
-      </button>
-    )
+    // The station's own way out, where every other line's first page
+    // puts it (VocabScreen, KanjiScreen): ‹ Learn, back to the gate.
+    // The line's catalogue is reached from a level — the points door
+    // below the platforms — rather than from the bar here.
     return (
-      <SelectionScreen title={t.grammarTitle} sub={t.stationJlpt} aside={browse}>
+      <SelectionScreen
+        title={t.grammarTitle}
+        sub={t.stationJlpt}
+        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+      >
         <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />
       </SelectionScreen>
     )
