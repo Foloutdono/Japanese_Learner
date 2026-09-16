@@ -5,7 +5,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
-import { Console, ConsoleTop, Chips, Chip, ConsoleIndex, Seg } from '../components/chrome/Console'
+import { Console, ConsoleBand, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { LibraryCard } from '../components/decks/LibraryCard'
@@ -32,14 +32,18 @@ import { BooksIcon } from '../components/ui/Icons'
 // half a console already: it drew a count, in a face nothing else on
 // the screen used, on a surface that was not there.
 //
+//   the band — HOW THE WHOLE SHELF IS ARRANGED: newest, or most
+//           followed. Edge to edge at the head, over everything it
+//           orders. It is one control and not two chips, per DESIGN.md
+//           — anything that picks one of two views of the SAME data is
+//           segmented, not a pair of buttons that both look pressable
+//           — and it is a band and not a pill because it applies to
+//           the full width of what is under it. A pill on a row of its
+//           own left that row two thirds empty and read as a third
+//           filter.
 //   row 1 — WHAT YOU ARE LOOKING AT: the structures the library holds,
-//           as chips, and the ordering on the trailing edge. The
-//           ordering is a Seg and not two chips, per DESIGN.md:
-//           anything that picks one of two views of the SAME data is a
-//           segmented control, not a pair of buttons that both look
-//           pressable. It keeps the ordering with the shelf it
-//           arranges rather than in row 2, which is for the ways of
-//           ASKING.
+//           as chips. No chips, no row: the band and the field close
+//           up over it.
 //   row 2 — HOW YOU ARE ASKING: the search field, with the tally
 //           pinned right where every other console keeps its count.
 //
@@ -184,8 +188,20 @@ export default function LibraryScreen({ session }) {
       />
 
       <Console>
-        <ConsoleTop>
-          {typeChips.length > 1 && (
+        <ConsoleBand
+          label={t.librarySort}
+          value={sort}
+          onChange={chooseSort}
+          options={SORTS.map(key => ({
+            key,
+            label: key === 'new' ? t.librarySortNew : t.librarySortFollowed,
+          }))}
+        />
+        {/* The row goes with the chips rather than standing empty: a
+            console whose first row holds nothing is a hairline drawn
+            for its own sake. */}
+        {typeChips.length > 1 && (
+          <ConsoleTop>
             <Chips label={t.libraryTypes}>
               <Chip on={structure === 'all'} color="var(--line-decks)"
                 onClick={() => chooseStructure('all')}>
@@ -198,17 +214,8 @@ export default function LibraryScreen({ session }) {
                 </Chip>
               ))}
             </Chips>
-          )}
-          <Seg
-            label={t.librarySort}
-            value={sort}
-            onChange={chooseSort}
-            options={SORTS.map(key => ({
-              key,
-              label: key === 'new' ? t.librarySortNew : t.librarySortFollowed,
-            }))}
-          />
-        </ConsoleTop>
+          </ConsoleTop>
+        )}
         {/* The count slot holds a figure, not a wait: while the first
             page is in flight it says nothing rather than running a
             second loader beside the placeholder. The one wait for this

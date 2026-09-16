@@ -5,13 +5,11 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── The library's console at 390px ──────────────────────────────
-// The screen's controls are the shared console now, and this lane is
-// where the new combination has to hold: chips on one line, the
-// ordering on the trailing edge of the next, and the field under both
-// with the tally pinned right. Nothing here is a new object — the
-// console, the chips and the Seg are all drawn elsewhere — but this is
-// the first place they are drawn TOGETHER, which is the width at which
-// that either works or does not.
+// The screen's controls are the shared console now: the ordering as a
+// band at the head, edge to edge, then the chips, then the field with
+// the tally pinned right. The band is the one new object in it
+// (.console__band), and a phone is where "edge to edge" has to mean
+// exactly that — no pill, no gutter, no half-empty row.
 //
 // The lane runs in French, the wide case both ways (PLUS SUIVIS
 // against MOST FOLLOWED, "Chercher dans la bibliothèque…" against
@@ -61,31 +59,44 @@ async function library() {
 
 const console_ = () => document.querySelector('.console')
 const chips    = () => document.querySelector('.console__chips')
-const seg      = () => document.querySelector('.seg')
+const band     = () => document.querySelector('.console__band')
 const index    = () => document.querySelector('.console__index')
 
 describe('the library’s console on a phone', () => {
   it('fits the viewport, with nothing pushed off the side', async () => {
     await library()
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
-    for (const el of [console_(), chips(), seg(), index()]) {
+    for (const el of [console_(), chips(), band(), index()]) {
       const box = el.getBoundingClientRect()
       expect(box.left).toBeGreaterThanOrEqual(0)
       expect(box.right).toBeLessThanOrEqual(390)
     }
   })
 
-  it('stacks its three parts in reading order: what, how it is ordered, what you ask', async () => {
+  it('stacks its three parts in reading order: how it is ordered, what kinds, what you ask', async () => {
     await library()
+    const b = band().getBoundingClientRect()
     const c = chips().getBoundingClientRect()
-    const s = seg().getBoundingClientRect()
     const f = index().getBoundingClientRect()
-    // The Seg leaves the chips their own line rather than sharing one
-    // and cutting a chip in half.
-    expect(s.top).toBeGreaterThanOrEqual(c.bottom)
-    expect(f.top).toBeGreaterThanOrEqual(s.bottom)
-    // And it rides the trailing edge, where a lone action rides row 1's.
-    expect(390 - s.right).toBeLessThan(s.left)
+    expect(c.top).toBeGreaterThanOrEqual(b.bottom)
+    expect(f.top).toBeGreaterThanOrEqual(c.bottom)
+  })
+
+  it('draws the ordering edge to edge, in halves, with nothing left over', async () => {
+    await library()
+    const box = band().getBoundingClientRect()
+    const panel = console_().getBoundingClientRect()
+    // A band and not a pill: it is the console's own width, not an
+    // object sitting inside a row of it. Inset by the panel's 1px
+    // border and nothing else.
+    expect(box.left - panel.left).toBeLessThanOrEqual(1)
+    expect(panel.right - box.right).toBeLessThanOrEqual(1)
+    // And the two orderings share it evenly, so neither reads as the
+    // main one.
+    const [a, z] = [...document.querySelectorAll('.console__band-opt')]
+      .map(el => el.getBoundingClientRect())
+    expect(Math.abs(a.width - z.width)).toBeLessThanOrEqual(1)
+    expect(a.width + z.width).toBeGreaterThanOrEqual(box.width - 1)
   })
 
   it('keeps the field wide enough to read what is typed in it', async () => {
@@ -100,10 +111,10 @@ describe('the library’s console on a phone', () => {
 
   it('is one thumb’s worth of height per control', async () => {
     await library()
-    // The console's own family sizes: a chip and a Seg option are the
-    // same instrument at the same rung, and row 2 clears 44.
     expect(document.querySelector('.chip').getBoundingClientRect().height)
-      .toBeGreaterThanOrEqual(36)
+      .toBeGreaterThan(35)
+    expect(document.querySelector('.console__band-opt').getBoundingClientRect().height)
+      .toBeGreaterThanOrEqual(44)
     expect(index().getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
   })
 })

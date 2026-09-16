@@ -502,14 +502,27 @@ and the reader the glyph does not serve. One ring, not two: where a chip in
 row 1 prints its glyph in a `.chip__glyph` roundel, the key in row 2 **is**
 the roundel and sets the glyph bare.
 
-**An ordering rides row 1's trailing edge, under the chips.** The Library's
-Newest / Most followed is the case: it arranges the shelf rather than asking a
-different question of it, so it belongs with row 1's "what you are looking at"
-and not with row 2's ways of asking. The chips take the full width, so the Seg
-wraps to a line of its own and its own `margin-left: auto` carries it right —
-the same edge a lone action rides. **And chips are drawn only for what the
-shelf actually holds**: "All" beside a lone "Vocabulary" is a choice between
-everything and everything, so under two kinds there is no chip row at all.
+**A control that applies to the whole answer is a BAND, at the head.** Rows 1
+and 2 both narrow: the chips cut the shelf down, the field asks it a question.
+An ordering does neither — it arranges the whole of what is left — so it is
+neither a chip nor a key in the field, and the Library's Newest / Most followed
+is the case the rule was written for. `.console__band` is the object: the
+console's full width, options divided by its own `--surface-line` hairline
+rather than set in a pill of their own, the chosen one **washed at 14% in the
+line's pigment** — the rating bar's construction at console width, and the same
+on state `.chip--on` wears. It sits **above row 1**, over everything it orders.
+
+A pill was tried first and is what the band replaced. The chips take the full
+width, so a `Seg` wrapped to a line of its own and sat at the trailing edge
+with two thirds of that line empty beside it — a third band's worth of height
+for one control, reading as a filter that had been left unpressed. **Width is
+meaning here**: a control that fills the row is about everything under it, one
+that shrink-wraps is one choice among the row's others.
+
+**And chips are drawn only for what the shelf actually holds**: "All" beside a
+lone "Vocabulary" is a choice between everything and everything, so under two
+kinds there is no chip row at all — and no row either, because a console whose
+first row holds nothing is a hairline drawn for its own sake.
 
 Where the two meet on a narrow screen, **the figure gives before the control
 does**. Under 560px the count is not printed beside a toggle: the count is

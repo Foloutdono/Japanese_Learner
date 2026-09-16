@@ -107,7 +107,7 @@ describe('the library', () => {
 
   it('reorders without leaving the screen', async () => {
     await library()
-    const [, followed] = [...document.querySelectorAll('.seg__opt')]
+    const [, followed] = [...document.querySelectorAll('.console__band-opt')]
     expect(followed.textContent).toBe('Plus suivis')
     followed.click()
     await settle()
@@ -137,9 +137,12 @@ describe('the library', () => {
     // and everything.
     payload = () => ({ results: [DECKS[0]], total: 1, page: 0, limit: 24, has_more: false, types: ['vocab'] })
     await library()
+    // ...and the row goes with them rather than standing empty.
     expect(document.querySelector('.console__chips')).toBeNull()
-    // The ordering stays: it is a choice whatever the shelf holds.
-    expect(document.querySelectorAll('.seg__opt')).toHaveLength(2)
+    expect(document.querySelector('.console__top')).toBeNull()
+    // The ordering stays: it is a choice whatever the shelf holds, and
+    // it is not in that row to begin with.
+    expect(document.querySelectorAll('.console__band-opt')).toHaveLength(2)
   })
 
   it('asks the server to narrow by structure, from page 0', async () => {
