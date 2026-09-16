@@ -561,21 +561,12 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))', root)
     expect(getComputedStyle(hit).color).toBe(ink)
     expect(getComputedStyle(rt).color).toBe(ink)
-    // …and the character sits CENTRED under a reading wider than it is
-    // (木 read もく), rather than flush left with the reading hanging
-    // off its right across the text beside it. The annotation being
-    // inside its own base's box is the whole of the mechanism.
-    const hitBox = hit.getBoundingClientRect()
-    const rtBox = rt.getBoundingClientRect()
-    // A CJK glyph advances exactly one em, so the font size IS 木's
-    // width — and もく is wider than it, which is the case in question.
-    // (The base's own box can no longer say so: widening it to hold the
-    // annotation is the whole of the fix.)
-    expect(rtBox.width).toBeGreaterThan(parseFloat(getComputedStyle(hit).fontSize))
-    expect(rtBox.left).toBeGreaterThanOrEqual(hitBox.left - 0.5)
-    expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
-    // Centred, not merely contained: equal air either side of it.
-    expect(Math.abs((rtBox.left - hitBox.left) - (hitBox.right - rtBox.right))).toBeLessThan(1)
+    // …and the declaration that keeps a reading wider than its kanji
+    // from hanging off the side of it. Asserted here as the computed
+    // value, which no font can move; the geometry it buys is measured
+    // in its own test below, on a reading long enough to be the wider
+    // of the two however the kana are set.
+    expect(getComputedStyle(hit).rubyAlign).toBe('space-between')
     // The same ink as the ledger's hit underneath, to the value: one
     // mark for one thing, wherever the row is drawn.
     const led = root.querySelector('section[aria-label="Used in these words"] .dict-word__hit')
@@ -694,6 +685,50 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // The rest of the word keeps the ambient ink.
     const plain = rows[0].querySelector('.dict-word__jp ruby:not(.dict-word__hit)')
     expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
+  })
+
+  // The wide-reading case, on its own fixture and away from the big
+  // test, because proving it needs a reading that is the wider of the
+  // two in ANY font. There is no Japanese webfont in the test browser
+  // — the lane loads index.css, not the @fontsource faces main.jsx
+  // pulls in — and the runner's fallback sets kana at roughly 0.6em
+  // against the runner-independent 1em of a CJK glyph. An earlier form
+  // of this assertion used 木 over もく, two kana, and read 20px on a
+  // machine with Noto installed and 11.89px on CI. Five kana clears an
+  // em with room to spare either way.
+  it('centres a kanji under a reading wider than it is', async () => {
+    const { root } = await renderEntry({
+      ...KANJI, kanji: '承', kana: 'ショウ・うけたまわ.る',
+      vocab_examples: [],
+      readings: [{ reading: 'うけたまわ.る', words: [{
+        kanji: '承る', kana: 'うけたまわる', meaning: 'to hear, to be told',
+        furigana: [{ text: '承', reading: 'うけたまわ' }, { text: 'る' }],
+      }] }],
+    })
+    root.querySelector('.dict-plate__more').click()
+    await settle()
+    const hit = sheet().querySelector('.dict-word__hit')
+    const hitBox = hit.getBoundingClientRect()
+    const rtBox = hit.querySelector('rt').getBoundingClientRect()
+    // The case in question: the reading really is the wider of the two.
+    // Measured against the same glyph set the same way and NOT against
+    // the font size — "a CJK glyph advances one em" is true of a real
+    // Japanese face and false of the fallback a runner without one
+    // reaches for, which is precisely how the earlier assertion passed
+    // here and failed on CI.
+    const ruler = document.createElement('span')
+    ruler.className = 'dict-word__jp'
+    ruler.lang = 'ja'
+    ruler.textContent = '承'
+    hit.closest('.dict-word').appendChild(ruler)
+    const glyph = ruler.getBoundingClientRect().width
+    ruler.remove()
+    expect(rtBox.width).toBeGreaterThan(glyph)
+    // The base's box grew to hold it — that widening IS the fix — so
+    // the reading no longer overhangs the text beside its kanji.
+    expect(hitBox.width).toBeGreaterThanOrEqual(rtBox.width - 0.5)
+    expect(rtBox.left).toBeGreaterThanOrEqual(hitBox.left - 0.5)
+    expect(rtBox.right).toBeLessThanOrEqual(hitBox.right + 0.5)
   })
 
   it('offers no gates for one register, and no pill row when every reading has words', async () => {
