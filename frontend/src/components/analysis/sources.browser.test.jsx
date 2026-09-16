@@ -24,12 +24,6 @@ vi.mock('./useMining', async importOriginal => ({
   useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn() }),
 }))
 vi.mock('../video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }))
-// The screen now opens on the selection screen, and the platform choice
-// goes through the boarding store so TrainDoor can play over the commit.
-// The door lives in App, not in this tree, so an unmocked board() would
-// park the commit forever; committing synchronously is exactly what the
-// door itself does under prefers-reduced-motion.
-vi.mock('../../stores/boarding', () => ({ board: commit => commit() }))
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 

@@ -53,9 +53,6 @@ vi.mock('../components/analysis/useMining', async importOriginal => ({
   useMining: () => ({ decks: [], mineApp: vi.fn(), mineCloze: vi.fn() }),
 }))
 vi.mock('../components/video/VideoPlayer', () => ({ VideoPlayer: () => <div /> }))
-// The door lives in App, not in this tree: an unmocked board() would
-// park the platform commit forever.
-vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
 
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
