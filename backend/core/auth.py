@@ -28,8 +28,16 @@ SUPABASE_SERVICE_KEY = os.environ.get("SUPABASE_SERVICE_KEY")
 # make a network call (the first fetch happens on first use in
 # get_user_id), so this is safe even when DEV_USER_ID means the path
 # below is never exercised.
+# The timeout is explicit because PyJWKClient's own default is 30s and
+# this runs on the request path. An unknown `kid` is the case that
+# matters: get_signing_key refetches the JWKS with refresh=True, which
+# SKIPS the cache, so a token carrying a junk kid costs a fresh HTTP
+# fetch every time. Sync routes run on FastAPI's bounded worker
+# threadpool, so at 30s apiece a caller sending junk kids could hold
+# every thread and take the API down without ever authenticating. A
+# timeout here only costs the fallback below, which still authenticates.
 _jwks_client = (
-    jwt.PyJWKClient(f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json")
+    jwt.PyJWKClient(f"{SUPABASE_URL}/auth/v1/.well-known/jwks.json", timeout=5)
     if SUPABASE_URL
     else None
 )
@@ -121,7 +129,13 @@ def get_user_id(credentials: HTTPAuthorizationCredentials | None = Depends(secur
             headers={
                 "Authorization": f"Bearer {token}",
                 "apikey":        SUPABASE_SERVICE_KEY,
-            }
+            },
+            # Already bounded without this -- httpx (unlike requests)
+            # defaults to 5s -- but that 5s applies to EACH phase, and
+            # connect is the one that hangs when the host is unreachable.
+            # Stated explicitly, and tightened where it costs nothing, on
+            # a call that runs per request on a bounded threadpool.
+            timeout=httpx.Timeout(5.0, connect=2.0),
         )
         if response.status_code != 200:
             raise HTTPException(status_code=401, detail="Invalid token")
