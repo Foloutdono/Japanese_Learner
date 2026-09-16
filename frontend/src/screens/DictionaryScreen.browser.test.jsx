@@ -243,10 +243,14 @@ describe('the dictionary screen', () => {
 
     // The radical index is not a sixth collection: it is a toggle at the
     // trailing edge of the field, under the kanji collection alone, and
-    // it is off on arrival.
+    // it is off on arrival. 部 is the whole of what it prints — the name
+    // is there for a pointer and for a reader, which are the two the
+    // glyph does not serve.
     const toggle = screen.container.querySelector('.console__index .console__toggle')
     expect(toggle).not.toBeNull()
-    expect(toggle.textContent).toContain(T.dictModeRadical)
+    expect(toggle.textContent).toBe('部')
+    expect(toggle.getAttribute('aria-label')).toBe(T.dictModeRadical)
+    expect(toggle.title).toBe(T.dictModeRadical)
     expect(toggle.getAttribute('aria-pressed')).toBe('false')
 
     door.querySelector('.anl-door__open').click()

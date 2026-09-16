@@ -496,9 +496,8 @@ describe('the dictionary field at phone width', () => {
               <svg className="svg" width="16" height="16" />
               <input className="console__field" placeholder="Rechercher un kanji, un kana ou un sens…" readOnly value="" />
               <span className="console__count">13 131 RÉSULTATS</span>
-              <button type="button" className="chip console__toggle" aria-pressed="false">
-                <span className="chip__glyph" lang="ja">部</span>
-                Radical
+              <button type="button" className="chip console__toggle" aria-pressed="false" aria-label="Radical">
+                <span lang="ja" aria-hidden="true">部</span>
               </button>
             </div>
           )}
@@ -525,16 +524,19 @@ describe('the dictionary field at phone width', () => {
     expect(g.right).toBeLessThanOrEqual(row.getBoundingClientRect().right + 1)
     // The field keeps enough room to read what is typed into it.
     expect(f.width).toBeGreaterThan(150)
-    // The toggle is the chips' own object, at the chips' own height.
+    // The toggle is the chips' own object, at the chips' own height —
+    // but a key and not a pill: square, and so round at --r-pill, with
+    // the glyph as the whole of what it prints.
     expect(g.height).toBe(screen.container.querySelector('.console__chips .chip').getBoundingClientRect().height)
+    expect(g.width).toBe(g.height)
+    expect(toggle.textContent.trim()).toBe('部')
   })
 
   it('carries the toggle to the trailing edge when the row has nothing to type into', async () => {
     const screen = await render(consoleRow(
       <div className="console__index console__index--bare">
-        <button type="button" className="chip chip--on console__toggle" aria-pressed="true">
-          <span className="chip__glyph" lang="ja">部</span>
-          Radical
+        <button type="button" className="chip chip--on console__toggle" aria-pressed="true" aria-label="Radical">
+          <span lang="ja" aria-hidden="true">部</span>
         </button>
       </div>
     ))

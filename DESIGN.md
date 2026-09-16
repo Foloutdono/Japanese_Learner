@@ -446,7 +446,12 @@ its trailing edge, past the count — the dictionary's 部 index is the one that
 does (`.console__toggle`): it is a second way of reading the kanji collection,
 not a sixth collection, and as a chip in row 1 it read as the latter. Same
 object either way: a `.chip`, at the chip's own height, saying whether it is
-chosen.
+chosen — but **square, and carrying its glyph alone**. A label in row 2 is
+paid for out of the field, and 部 over a kanji dictionary is a body that names
+itself; the word stays in the `title` and the `aria-label`, for the pointer
+and the reader the glyph does not serve. One ring, not two: where a chip in
+row 1 prints its glyph in a `.chip__glyph` roundel, the key in row 2 **is**
+the roundel and sets the glyph bare.
 
 Where the two meet on a narrow screen, **the figure gives before the control
 does**. Under 560px the count is not printed beside a toggle: the count is

@@ -569,14 +569,23 @@ export default function DictionaryScreen({ session }) {
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
 						toggle={category === 'kanji' ? (
+							/* The glyph alone. 部 is the name of the thing —
+							   DESIGN.md, "a body that names itself" — and the
+							   word beside it bought nothing a learner reading a
+							   kanji dictionary does not already have, at the
+							   price of two thirds of the field it stands in.
+							   The name is still there for a pointer (title) and
+							   for a screen reader (aria-label), which are the
+							   two readers the glyph does not serve. */
 							<Chip
 								className="console__toggle"
 								on={mode === 'radical'}
-								glyph="部"
 								color={DICTIONARY_COLOR}
+								title={t.dictModeRadical}
+								aria-label={t.dictModeRadical}
 								onClick={() => (mode === 'radical' ? switchToSearchMode() : switchToRadicalMode())}
 							>
-								{t.dictModeRadical}
+								<span lang="ja" aria-hidden="true">部</span>
 							</Chip>
 						) : null}
 					/>
