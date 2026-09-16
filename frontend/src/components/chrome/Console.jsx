@@ -12,7 +12,7 @@ import { SearchIcon, CrossIcon } from '../ui/Icons'
 //       <Chips>…<Chip on>…</Chips>
 //       <ConsoleAction>Create deck</ConsoleAction>
 //     </ConsoleTop>
-//     <ConsoleIndex value onChange onClear count="128 results" />
+//     <ConsoleIndex value onChange onClear count="128 results" toggle={…} />
 //   </Console>
 export function Console({ children, className = '' }) {
   return <div className={`console ${className}`.trim()}>{children}</div>
@@ -57,7 +57,20 @@ export function ConsoleAction({ gold = false, onClick, children, ...rest }) {
   )
 }
 
-export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inputRef, clearLabel, ...rest }) {
+// `toggle` is a control that belongs to the field rather than to the
+// set above it: the dictionary's 部 index, which is not a sixth
+// collection to browse but a second way of reading the one already
+// chosen. It rides the row's trailing edge, past the count, the way a
+// lone action rides row 1's (.console__top > .console__action).
+//
+// `field={false}` is that same row with nothing to type into — the
+// dictionary browsing its radical index, where the toggle is the only
+// way back out. The row stays, holding the toggle alone, rather than
+// the whole thing going and taking the way out with it.
+export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inputRef, clearLabel, toggle, field = true, ...rest }) {
+  if (!field) {
+    return toggle ? <div className="console__index console__index--bare">{toggle}</div> : null
+  }
   return (
     <div className="console__index">
       <SearchIcon className="svg" />
@@ -75,6 +88,7 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
         </button>
       )}
       {count != null && <span className="console__count">{count}</span>}
+      {toggle}
     </div>
   )
 }

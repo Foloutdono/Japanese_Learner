@@ -472,3 +472,79 @@ describe('the grammar collection at phone width', () => {
     expect(parseFloat(getComputedStyle(short).fontSize)).toBeLessThanOrEqual(parseFloat(resolve('fontSize', 'var(--fs-heading)')))
   })
 })
+
+// ── 部 — the index toggle, in the field, at 390px ──
+// The toggle moved out of the collections row and into the field's own
+// row, which put it beside the result count on the one screen with the
+// least room for both. The count is what gives: it is a figure, the
+// toggle is a way through, and the two of them either side of a 390px
+// field left the placeholder cut before anything had been typed.
+describe('the dictionary field at phone width', () => {
+  function consoleRow(extra = null) {
+    return (
+      <main className="dictionary" style={{ '--line-color': 'var(--line-jisho)' }}>
+        <div className="console">
+          <div className="console__top">
+            <div className="console__chips" role="group">
+              {['Kanji', 'Vocabulaire', 'Grammaire', 'Hiragana', 'Katakana'].map(c => (
+                <button key={c} type="button" className={`chip${c === 'Kanji' ? ' chip--on' : ''}`}>{c}</button>
+              ))}
+            </div>
+          </div>
+          {extra ?? (
+            <div className="console__index">
+              <svg className="svg" width="16" height="16" />
+              <input className="console__field" placeholder="Rechercher un kanji, un kana ou un sens…" readOnly value="" />
+              <span className="console__count">13 131 RÉSULTATS</span>
+              <button type="button" className="chip console__toggle" aria-pressed="false" aria-label="Radical">
+                <span lang="ja" aria-hidden="true">部</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </main>
+    )
+  }
+
+  it('drops the count and keeps the toggle, on one line with a field still worth typing into', async () => {
+    const screen = await render(consoleRow())
+    const row = screen.container.querySelector('.console__index')
+    const field = row.querySelector('.console__field')
+    const toggle = row.querySelector('.console__toggle')
+
+    // The figure is not painted; the control is.
+    expect(getComputedStyle(row.querySelector('.console__count')).display).toBe('none')
+    expect(toggle.getBoundingClientRect().width).toBeGreaterThan(0)
+
+    // One line: the toggle sits beside the field, not under it.
+    const [f, g] = [field.getBoundingClientRect(), toggle.getBoundingClientRect()]
+    expect(g.top).toBeLessThan(f.bottom)
+    expect(g.left).toBeGreaterThanOrEqual(f.right - 1)
+    // ...and inside the row, which is the whole point of dropping the count.
+    expect(g.right).toBeLessThanOrEqual(row.getBoundingClientRect().right + 1)
+    // The field keeps enough room to read what is typed into it.
+    expect(f.width).toBeGreaterThan(150)
+    // The toggle is the chips' own object, at the chips' own height —
+    // but a key and not a pill: square, and so round at --r-pill, with
+    // the glyph as the whole of what it prints.
+    expect(g.height).toBe(screen.container.querySelector('.console__chips .chip').getBoundingClientRect().height)
+    expect(g.width).toBe(g.height)
+    expect(toggle.textContent.trim()).toBe('部')
+  })
+
+  it('carries the toggle to the trailing edge when the row has nothing to type into', async () => {
+    const screen = await render(consoleRow(
+      <div className="console__index console__index--bare">
+        <button type="button" className="chip chip--on console__toggle" aria-pressed="true" aria-label="Radical">
+          <span lang="ja" aria-hidden="true">部</span>
+        </button>
+      </div>
+    ))
+    const row = screen.container.querySelector('.console__index--bare')
+    const toggle = row.querySelector('.console__toggle')
+    expect(toggle.getBoundingClientRect().right)
+      .toBeCloseTo(row.getBoundingClientRect().right - parseFloat(getComputedStyle(row).paddingRight), 0)
+    // A row, not a sliver: the same rail the field's row stands on.
+    expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+  })
+})
