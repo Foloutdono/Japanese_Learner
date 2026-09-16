@@ -428,9 +428,11 @@ function ReadingBand({ reading, words, kind, char, onWord }) {
 // pretending to be a choice.
 //
 // Escape and the scrim close this sheet and only this sheet (see
-// useDialog's `capture`); a word that jumps closes it too, since the
-// entry it belongs to is leaving. On a phone it is the whole screen,
-// as every sheet here is.
+// useDialog's `capture`); a word that opens closes it too — the
+// reading this list was opened to demonstrate is answered by the
+// word's own entry, and a third scrim over the two already standing is
+// a stack no reader is keeping count of. On a phone it is the whole
+// screen, as every sheet here is.
 function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const { t } = useLang()
   const dialogRef = useDialog(onClose, { capture: true })
@@ -1158,20 +1160,25 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 //
 // The entry's own doors work here too, and they open INTO the sheet:
 // the words a kanji appears in, and the kanji a word is built from,
-// stack on top of each other with ‹ back through them. The catalogue
-// answers those taps by moving itself, which this has nothing to move
-// — but the question a reader is asking when they tap 駅 under 駅前 is
-// the same one either way, and a run is exactly where it gets asked.
-// The radical is the one door with nowhere to go (it opens the
-// catalogue's own index), so it prints as the figure it is — and so is
-// "review this card", which would board a run over the run already
-// being studied.
+// stack on top of each other with ‹ back through them. The question a
+// reader is asking when they tap 駅 under 駅前 is the same one wherever
+// they are standing, and a run is exactly where it gets asked — which
+// is why the catalogue opens this sheet too now, rather than moving
+// itself to the row (plan 090).
+//
+// `onRadicalClick` and `onReview` are the two doors only a shell can
+// honour, so they are the caller's to offer. The radical opens the
+// catalogue's own 部 index and "review this card" boards a run: over a
+// quiz there is neither an index to move nor room for a second run, so
+// both are left out and the entry prints them as the figures they are.
+// The dictionary screen passes both, and hands the radical over closed
+// — what that door opens is the catalogue underneath this sheet.
 //
 // Opened on `term` (+ `kana`) for a word or a kanji, or on `id` for a
 // grammar point (the analyzer's chips, a comprehension result's) —
 // see useDictionaryLookup. `mining` is optional and reaches the plate's
 // `+` roundel on a grammar entry where the opening screen has one.
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose, over = false }) {
+export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose, over = false, onRadicalClick, onReview }) {
   const { t, lang } = useLang()
   // The entries opened from one another, oldest first. The sheet shows
   // the last; ‹ pops it. Reset by the caller remounting on a new term
@@ -1215,10 +1222,10 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
             entry={entry}
             onClose={onClose}
             onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
+            onRadicalClick={onRadicalClick ? n => { onClose(); onRadicalClick(n) } : undefined}
+            onReview={onReview}
             onKanjiClick={char => open(char, 'kanji')}
-            // The twin opens into the stack like every other door here;
-            // "review this card" does not exist in this shell at all —
-            // it is opened over a run, and there is nothing to board.
+            // The twin opens into the stack like every other door here.
             onKanaClick={(kana, type) => open(kana, type)}
             // onVocabClick already hands over both halves, so stepping from
             // one entry to another inside the sheet gets the same exactness

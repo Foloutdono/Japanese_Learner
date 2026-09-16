@@ -135,10 +135,15 @@ export default function DictionaryScreen({ session }) {
 	// nothing was retried against the nearest word the catalogue holds.
 	const [corrected, setCorrected]   = useState(null)
 	const [selected, setSelected]     = useState(null)
-	// A grammar point's rival, opened from a compare row on the dock
-	// (plan 087): a lookup sheet stacked over the dock, by card id, so
-	// the catalogue under it does not move.
-	const [rivalId, setRivalId]       = useState(null)
+	// The entry a door inside the open panel leads to: a word from a
+	// kanji's ledger, a kanji from a word's, a kana's twin, a grammar
+	// point's rival. It opens as a lookup sheet stacked over the dock —
+	// the same sheet a quiz opens over a run — so the catalogue under it
+	// does not move. `{ term, kana, category }` for a word, a character
+	// or a kana; `{ id, category: 'grammar' }` for a point (plan 087's
+	// rival was the first door to open this way, plan 090 gave the other
+	// three the same sheet — see openEntry).
+	const [lookup, setLookup]         = useState(null)
 
 	// Radical browsing
 	const [radicalGroups, setRadicalGroups]     = useState(null)
@@ -163,7 +168,7 @@ export default function DictionaryScreen({ session }) {
 
 
 	useEffect(() => {
-		fetchPage(0, '', category, null, undefined, level)
+		fetchPage(0, '', category, null, level)
 		loadRadicalGrid()
 	}, [])
 
@@ -215,7 +220,7 @@ export default function DictionaryScreen({ session }) {
 	// `lvl` is the collection's JLPT level — the state's value unless the
 	// caller is changing it in the same breath (switchLevel, the mount),
 	// since a setState is not readable until the next render.
-	function fetchPage(p, q, cat, rad, autoSelectChar, lvl = level) {
+	function fetchPage(p, q, cat, rad, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
 
@@ -251,30 +256,21 @@ export default function DictionaryScreen({ session }) {
 				setPage(p)
 				setLoading(false)
 				setLoadingMore(false)
-				// Jumping to a specific kanji (see jumpToKanji) needs its
-				// detail panel to open automatically once the search
-				// this triggers actually resolves — there's no other
-				// moment to select it from.
-				if (autoSelectChar) {
-					// `kana` as well as `kanji`, because two of the three
-					// jumps land on rows that have no kanji half at all:
-					// a kana's twin (jumpToKana) and a word written in
-					// kana alone (テレビ). In the kanji collection a row's
-					// `kana` is its packed readings, so it can never
-					// collide with the character being looked for.
-					const match = newResults.find(
-						e => e.kanji === autoSelectChar || e.kana === autoSelectChar)
-					if (match) setSelected(match)
-				} else if (p === 0 && (cat === 'hiragana' || cat === 'katakana')
-				           && newResults.length && hasSideDock()) {
+				// This used to also carry an `autoSelectChar`: the three
+				// jumps (a kanji's word, a word's kanji, a kana's twin)
+				// re-searched the catalogue and needed the row they had
+				// landed on picked out of the results and opened. They open
+				// over the catalogue now and search nothing (openEntry), so
+				// the only selection this makes is the chart's first cell.
+				if (p === 0 && (cat === 'hiragana' || cat === 'katakana')
+				    && newResults.length && hasSideDock()) {
 					// The syllabary charts are five columns wide and no wider,
 					// so beside them the reading dock opened onto empty space
 					// until something was clicked. A chart of 71 fixed cells
 					// has an obvious first cell — あ / ア — so it starts there
 					// and the panel is doing its job from the first frame.
-					// Only the FIRST page, and only when nothing else asked
-					// for a selection, so it can never steal one the learner
-					// already made.
+					// Only the FIRST page, and only where nothing is open, so
+					// it can never steal a selection the learner already made.
 					setSelected(newResults[0])
 				}
 			})
@@ -332,7 +328,7 @@ export default function DictionaryScreen({ session }) {
 		// only just arrived at — or, under a syllabary, narrows nothing
 		// visible and then narrows again on the way back.
 		setLevel(null)
-		fetchPage(0, isSyl ? '' : query, cat, null, undefined, null)
+		fetchPage(0, isSyl ? '' : query, cat, null, null)
 	}
 
 	// The console's second row: one JLPT level, or all of them. The query
@@ -345,7 +341,7 @@ export default function DictionaryScreen({ session }) {
 		setSelected(null)
 		setPage(0)
 		setHasMore(true)
-		fetchPage(0, query, category, null, undefined, lvl)
+		fetchPage(0, query, category, null, lvl)
 	}
 
 	function switchToSearchMode() {
@@ -400,50 +396,42 @@ export default function DictionaryScreen({ session }) {
 		fetchPage(0, '', 'kanji', number)
 	}
 
-	// Jump from a vocab word's detail panel to one of the kanji it's
-	// made of — switches to the kanji tab, searches for that exact
-	// character, and auto-selects it once the search resolves (see
-	// fetchPage's autoSelectChar) so its own detail panel opens right
-	// away instead of leaving the user to pick it out of a result list.
-	function jumpToKanji(char) {
-		setCategory('kanji')
-		setMode('search')
-		setSelectedRadical(null)
-		setSelected(null)
-		setQuery(char)
-		setPage(0)
-		setHasMore(true)
-		fetchPage(0, char, 'kanji', null, char)
+	// ── A door in the panel opens the entry, not the catalogue ──
+	// The words a kanji is read in, the kanji a word is built from and
+	// a kana's twin were all JUMPS: the collection switched, the field
+	// was rewritten with the character, the result list was thrown away
+	// and re-fetched, and the panel reopened on whichever row came back
+	// matching. Four things moved to answer "what is 土?", and the shelf
+	// the reader was standing at — their search, their level chip, their
+	// place in a six-hundred-row list — was gone, with no way back to it
+	// but typing it again.
+	//
+	// The entry opens over the catalogue instead, in the lookup sheet a
+	// quiz card opens mid-review (DictionaryLookupSheet): the doors
+	// inside it stack on each other with ‹ walking back through them,
+	// and the panel underneath, the search behind it and the scroll
+	// position are all still there when the ✕ closes it. One question,
+	// one answer, nothing moved to deliver it. Plan 090.
+	//
+	// The radical figure is the one door that still moves the catalogue,
+	// because what it opens is a MODE of the catalogue — the 部 index —
+	// rather than an entry; jumpToRadical stays a jump, and the sheet
+	// closes itself on the way there.
+	//
+	// `kana` is the row's reading, and callers hand over both halves of
+	// a word so the sheet lands on the one that was tapped: a written
+	// form alone cannot say which 工場 was meant (see
+	// useDictionaryLookup). The jump this replaces searched the written
+	// form and opened whatever came back first.
+	function openEntry(term, category, kana) {
+		if (!term) return
+		setLookup({ term, category, kana })
 	}
 
-	// Jump from a kanji's detail panel to one of the vocab words it
-	// appears in (see entry.vocab_examples) — the mirror image of
-	// jumpToKanji above: switches to the vocab tab, searches for that
-	// exact word, and auto-selects it once the search resolves.
-	function jumpToVocab(kanji) {
-		setCategory('vocab')
-		setMode('search')
-		setSelectedRadical(null)
-		setSelected(null)
-		setQuery(kanji)
-		setPage(0)
-		setHasMore(true)
-		fetchPage(0, kanji, 'vocab', null, kanji)
-	}
-
-	// あ ↔ ア, from a kana's form lattice (plan 089): switch to the other
-	// syllabary and open that character's own panel, the same shape
-	// jumpToKanji has. The chart it lands on is the one the learner
-	// would have had to find by hand.
-	function jumpToKana(kana, type) {
-		setCategory(type)
-		setMode('search')
-		setSelectedRadical(null)
-		setSelected(null)
-		setQuery(kana)
-		setPage(0)
-		setHasMore(true)
-		fetchPage(0, kana, type, null, kana)
+	// The same sheet by card id, for a grammar point's rival (plan 087).
+	function openGrammar(rawId) {
+		if (!rawId) return
+		setLookup({ id: rawId, category: 'grammar' })
 	}
 
 	// The one card this entry is, in every mode it owes — what the
@@ -679,9 +667,9 @@ export default function DictionaryScreen({ session }) {
 						selected={selected}
 						setSelected={setSelected}
 						onRadicalClick={jumpToRadical}
-						onKanjiClick={jumpToKanji}
-						onVocabClick={jumpToVocab}
-						onKanaClick={jumpToKana}
+						onKanjiClick={char => openEntry(char, 'kanji')}
+						onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)}
+						onKanaClick={(k, type) => openEntry(k, type)}
 						onReview={reviewCard}
 						mining={mining}
 						accentColor={TYPE_META[category]?.color}
@@ -699,20 +687,31 @@ export default function DictionaryScreen({ session }) {
 						setSelected={setSelected}
 						sentinelRef={sentinelRef}
 						onRadicalClick={jumpToRadical}
-						onKanjiClick={jumpToKanji}
-						onVocabClick={jumpToVocab}
-						onKanaClick={jumpToKana}
-						onGrammarClick={setRivalId}
+						onKanjiClick={char => openEntry(char, 'kanji')}
+						onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)}
+						onKanaClick={(k, type) => openEntry(k, type)}
+						onGrammarClick={openGrammar}
 						onReview={reviewCard}
 						mining={mining}
 						t={t}
 					/>
 				)
 			)}
-			{rivalId && (
+			{/* The entry a door led to, over the catalogue rather than in
+			    place of it (see openEntry). Keyed on what it was opened on,
+			    so a second door from the panel underneath starts its own
+			    stack instead of pushing onto the last one's. It gets the
+			    radical and the run because this shell has both — the 部 index
+			    is a mode of the catalogue under it, and a run is somewhere to
+			    board from a screen that is not itself a run. */}
+			{lookup && (
 				<DictionaryLookupSheet
-					key={rivalId} id={rivalId} category="grammar" session={session} mining={mining} over
-					onClose={() => setRivalId(null)}
+					key={lookup.id ?? `${lookup.category}:${lookup.term}:${lookup.kana ?? ''}`}
+					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+					session={session} mining={mining} over
+					onRadicalClick={jumpToRadical}
+					onReview={reviewCard}
+					onClose={() => setLookup(null)}
 				/>
 			)}
 		</main>

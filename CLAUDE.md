@@ -55,8 +55,12 @@ runtime purpose. Two consequences worth knowing:
   rework (cited in `routes/dictionary.py`, `routes/today.py`,
   `routes/decks.py`, `content/kana_strokes.py`, `study/daily_queue.py`,
   `components/dictionary/DictionaryDetail.jsx`, `components/study/gloss.jsx`
-  and `components/study/GrammarLesson.jsx`; DESIGN.md, "The entry plate").
-  When starting a new wave, begin at **090** or higher, and check
+  and `components/study/GrammarLesson.jsx`; DESIGN.md, "The entry plate"),
+  and **090** is a door in the entry panel opening the entry over the
+  catalogue rather than moving the catalogue to it (cited in
+  `screens/DictionaryScreen.jsx` and
+  `components/dictionary/DictionaryDetail.jsx`).
+  When starting a new wave, begin at **091** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
