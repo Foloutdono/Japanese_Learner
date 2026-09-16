@@ -1338,6 +1338,7 @@ const decks = {
   librarySort:           'Ordre',
   librarySortNew:        'Plus récents',
   librarySortFollowed:   'Plus suivis',
+  libraryTypes:          'Types de paquets',
   libraryBy:             name => `par ${name}`,
   libraryFollowers:      n => (n === 1 ? '1 abonné' : `${n} abonnés`),
   libraryAndMore:        n => (n === 1 ? 'et 1 carte de plus' : `et ${n} cartes de plus`),

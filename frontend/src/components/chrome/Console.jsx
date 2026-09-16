@@ -18,6 +18,41 @@ export function Console({ children, className = '' }) {
   return <div className={`console ${className}`.trim()}>{children}</div>
 }
 
+// ── The console's band ──
+// ONE control, edge to edge across the console, its options divided by
+// the console's own hairline rather than set in a pill of their own —
+// the rating bar's construction at console width (DESIGN.md,
+// Controls): segments split by rules, the chosen one WASHED at 14%
+// rather than filled.
+//
+// It is for a control that applies to the WHOLE of what the console
+// answers with rather than narrowing it: the library's ordering is the
+// first, at the head, over the chips that narrow and the field that
+// searches. As a pill in row 1 it left most of the row empty and read
+// as a third filter; a band fills the width because it is about the
+// full width of what is below it.
+export function ConsoleBand({ options, value, onChange, label }) {
+  return (
+    <div className="console__band" role="radiogroup" aria-label={label}>
+      {options.map(opt => {
+        const on = opt.key === value
+        return (
+          <button
+            key={opt.key}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            className={`console__band-opt${on ? ' console__band-opt--on' : ''}`}
+            onClick={() => { if (!on) onChange(opt.key) }}
+          >
+            {opt.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function ConsoleTop({ children }) {
   return <div className="console__top">{children}</div>
 }

@@ -103,7 +103,11 @@ EVENTS: dict[str, frozenset[str]] = {
     "deck_unpublish": frozenset({"structure", "followers"}),
     "deck_subscribe": frozenset({"structure", "cards", "where"}),
     "deck_detach":    frozenset({"structure", "cards", "withdrawn"}),
-    "library_view":   frozenset({"sort", "results"}),
+    # `filtered` is a BOOLEAN and deliberately so: it says whether the
+    # library's console was narrowing the shelf, never what was typed
+    # into it — a deck name or a search term is a learner's own words,
+    # which is the rule this module exists to keep.
+    "library_view":   frozenset({"sort", "results", "filtered"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no

@@ -1,14 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
-import { Seg } from '../components/chrome/Console'
+import { Console, ConsoleBand, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { LibraryCard } from '../components/decks/LibraryCard'
+import { deckTypes } from '../components/decks/deckTypes'
 import { BooksIcon } from '../components/ui/Icons'
 
 // ── The library ───────────────────────────────────────────────
@@ -22,14 +23,46 @@ import { BooksIcon } from '../components/ui/Icons'
 // by omission. The pigment stays: that is the deck line's colour, not
 // a name, and it is what keeps this looking like part of 教材.
 //
-// The two orderings are a Seg and not two chips, per DESIGN.md:
-// anything that picks one of two views of the SAME data is a segmented
-// control, not a pair of buttons that both look pressable. There is no
-// Console here either — a console's second row is a search field, and
-// the library has nothing to search yet; half a console with a dead
-// field in it would be worse than none.
+// ── The console ──
+// The screen's own row of controls (.lib-controls: the ordering, and
+// the tally pushed to the other end) is gone, and the shared console
+// holds all three things now — the same object 教材, 辞書 and the
+// Today picker wear, which is what a screen that filters is supposed
+// to reach for rather than a bar of its own. The row it replaces was
+// half a console already: it drew a count, in a face nothing else on
+// the screen used, on a surface that was not there.
+//
+//   the band — HOW THE WHOLE SHELF IS ARRANGED: newest, or most
+//           followed. Edge to edge at the head, over everything it
+//           orders. It is one control and not two chips, per DESIGN.md
+//           — anything that picks one of two views of the SAME data is
+//           segmented, not a pair of buttons that both look pressable
+//           — and it is a band and not a pill because it applies to
+//           the full width of what is under it. A pill on a row of its
+//           own left that row two thirds empty and read as a third
+//           filter.
+//   row 1 — WHAT YOU ARE LOOKING AT: the structures the library holds,
+//           as chips. No chips, no row: the band and the field close
+//           up over it.
+//   row 2 — HOW YOU ARE ASKING: the search field, with the tally
+//           pinned right where every other console keeps its count.
+//
+// The chips are drawn from `types` — the structures actually published,
+// which the endpoint reports before either narrowing is applied, so the
+// row does not change shape as it is used. Fewer than two and there is
+// no chip row at all: "All" beside a lone "Vocabulary" is a choice
+// between everything and everything.
+//
+// ── Why the narrowing is the server's ──
+// 教材's shelf filters in the browser because it holds the whole shelf
+// in one request. This one is paged, 24 at a time, over a list with no
+// end, so the same trick would search whichever page happened to be
+// loaded and print the whole library's tally beside the answer. The
+// term therefore travels (debounced, like the dictionary's) and page 0
+// is asked for again.
 
 const SORTS = ['new', 'followed']
+const DEBOUNCE_MS = 300
 
 export default function LibraryScreen({ session }) {
   const navigate = useNavigate()
@@ -37,17 +70,39 @@ export default function LibraryScreen({ session }) {
 
   const [decks, setDecks]     = useState([])
   const [total, setTotal]     = useState(0)
+  const [types, setTypes]     = useState([])
   const [hasMore, setHasMore] = useState(false)
   const [page, setPage]       = useState(0)
   const [sort, setSort]       = useState('new')
+  // What is typed, and what has actually been asked for. They differ
+  // for the length of the debounce, and it is the second one the
+  // request is keyed on — a fetch per keystroke is what the wait is for.
+  const [query, setQuery]     = useState('')
+  const [term, setTerm]       = useState('')
+  const [structure, setStructure] = useState('all')
   const [loading, setLoading] = useState(true)
   const [failed, setFailed]   = useState(false)
 
+  const debounceRef = useRef(null)
+  const searchRef   = useRef(null)
+
+  useEffect(() => () => clearTimeout(debounceRef.current), [])
+
+  // Whether anything is narrowing the shelf — which decides the empty
+  // state's words, and is the one thing the trail is told about the
+  // console.
+  const narrowed = term !== '' || structure !== 'all'
+
   useEffect(() => {
     let live = true
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- the shelf's own load, not a state reset: sort and page ARE the request.
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the shelf's own load, not a state reset: sort, page and the narrowing ARE the request.
     setLoading(true)
-    apiJson(`/api/decks/library?sort=${sort}&page=${page}`, session)
+    // Only what narrows is spelled out: an unfiltered library asks the
+    // same question it always asked.
+    const params = new URLSearchParams({ sort, page })
+    if (term) params.set('q', term)
+    if (structure !== 'all') params.set('type', structure)
+    apiJson(`/api/decks/library?${params}`, session)
       .then(data => {
         if (!live) return
         // Paging appends: the shelf grows downward rather than
@@ -55,18 +110,64 @@ export default function LibraryScreen({ session }) {
         setDecks(prev => (page === 0 ? data.results : [...prev, ...data.results]))
         setTotal(data.total)
         setHasMore(data.has_more)
+        if (Array.isArray(data.types)) setTypes(data.types)
         setLoading(false)
         setFailed(false)
-        if (page === 0) track('library_view', { sort, results: data.total })
+        // `filtered` and not the term: what was typed is a learner's
+        // own words, and the trail never carries those (core/events.py).
+        // Whether the console is used at all is a different question,
+        // and one this can answer.
+        if (page === 0) track('library_view', { sort, results: data.total, filtered: narrowed })
       })
       .catch(() => { if (live) { setLoading(false); setFailed(true) } })
     return () => { live = false }
-  }, [session, sort, page])
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `narrowed` is these two.
+  }, [session, sort, page, term, structure])
+
+  // Only the structures the library actually holds, in the app's own
+  // order: deckTypes.js declares the order (and the glyph and the
+  // pigment), the endpoint declares the set.
+  const typeChips = useMemo(
+    () => deckTypes(t).filter(dt => types.includes(dt.value)),
+    [types, t]
+  )
 
   function chooseSort(next) {
     playUi('click-mode-selection')
     setPage(0)
     setSort(next)
+  }
+
+  function chooseStructure(next) {
+    if (next === structure) return
+    playUi('click-mode-selection')
+    setPage(0)
+    setStructure(next)
+  }
+
+  // The field answers at once; the library answers after the pause.
+  // The page falls back to 0 with the term and not with the keystroke:
+  // done in this handler it would spend a request on the OLD term
+  // before the new one had even been asked for.
+  function onSearch(e) {
+    const q = e.target.value
+    setQuery(q)
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => { setPage(0); setTerm(q.trim()) }, DEBOUNCE_MS)
+  }
+
+  function clearQuery() {
+    clearTimeout(debounceRef.current)
+    setQuery('')
+    setTerm('')
+    setPage(0)
+    searchRef.current?.focus()
+  }
+
+  function clearFilters() {
+    playUi('click-mode-selection')
+    clearQuery()
+    setStructure('all')
   }
 
   const countLabel = total === 1 ? t.decksCountOne : t.decksCount.replace('{n}', total)
@@ -86,8 +187,8 @@ export default function LibraryScreen({ session }) {
         aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
       />
 
-      <div className="lib-controls">
-        <Seg
+      <Console>
+        <ConsoleBand
           label={t.librarySort}
           value={sort}
           onChange={chooseSort}
@@ -96,8 +197,39 @@ export default function LibraryScreen({ session }) {
             label: key === 'new' ? t.librarySortNew : t.librarySortFollowed,
           }))}
         />
-        {settled && !failed && <span className="lib-controls__count">{countLabel}</span>}
-      </div>
+        {/* The row goes with the chips rather than standing empty: a
+            console whose first row holds nothing is a hairline drawn
+            for its own sake. */}
+        {typeChips.length > 1 && (
+          <ConsoleTop>
+            <Chips label={t.libraryTypes}>
+              <Chip on={structure === 'all'} color="var(--line-decks)"
+                onClick={() => chooseStructure('all')}>
+                {t.decksAllTypes}
+              </Chip>
+              {typeChips.map(dt => (
+                <Chip key={dt.value} on={structure === dt.value} glyph={dt.glyph} color={dt.color}
+                  onClick={() => chooseStructure(dt.value)}>
+                  {dt.label}
+                </Chip>
+              ))}
+            </Chips>
+          </ConsoleTop>
+        )}
+        {/* The count slot holds a figure, not a wait: while the first
+            page is in flight it says nothing rather than running a
+            second loader beside the placeholder. The one wait for this
+            moment is the <Loading /> under the console. */}
+        <ConsoleIndex
+          inputRef={searchRef}
+          value={query}
+          onChange={onSearch}
+          onClear={clearQuery}
+          placeholder={t.decksSearchPlaceholder}
+          clearLabel={t.close}
+          count={settled && !failed ? countLabel : undefined}
+        />
+      </Console>
 
       {loading && page === 0 && <Loading />}
 
@@ -105,8 +237,21 @@ export default function LibraryScreen({ session }) {
         <Empty icon={<BooksIcon size={40} />} message={t.libraryFailed} hint={t.libraryFailedHint} />
       )}
 
+      {/* An empty library and a search that found nothing are two
+          different answers, and telling a learner nobody has published
+          anything when what happened is that their word matched no deck
+          sends them off the screen for good. */}
       {settled && !failed && decks.length === 0 && (
-        <Empty icon={<BooksIcon size={40} />} message={t.libraryEmpty} hint={t.libraryEmptyHint} />
+        narrowed ? (
+          <Empty
+            icon={<BooksIcon size={40} />}
+            message={t.decksNoMatch}
+            hint={t.decksNoMatchHint}
+            action={{ label: t.decksClearFilters, onClick: clearFilters }}
+          />
+        ) : (
+          <Empty icon={<BooksIcon size={40} />} message={t.libraryEmpty} hint={t.libraryEmptyHint} />
+        )
       )}
 
       {/* `settled`, not just `decks.length`: re-sorting reloads page 0,

@@ -5613,6 +5613,56 @@ textarea:focus-visible {
   padding: var(--sp-3) var(--sp-4);
   border-bottom: 1px solid var(--surface-line);
 }
+/* A BAND of the console: one control taking the full width, its
+   options divided by the console's own hairline instead of being set
+   in a pill inside a row. The library's ordering is the first, and it
+   is at the HEAD of the console, above the chips: it does not narrow
+   the shelf the way they do, it arranges the whole of it. As a pill on
+   a row of its own it left two thirds of that row empty and read as a
+   third filter — the band fills the width because what it arranges is
+   the full width of everything under it.
+   The rating bar's construction at console width (DESIGN.md,
+   Controls): segments divided by hairlines rather than gaps, and the
+   chosen one washed at 14% rather than filled. `border-radius: 0` is
+   against the bare `button` rule's --r-panel — the ends are the
+   console's own, and it clips. */
+.console__band {
+  display: flex;
+  border-bottom: 1px solid var(--surface-line);
+}
+.console__band-opt {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 0;
+  border-left: 1px solid var(--surface-line);
+  border-radius: 0;
+  background: none;
+  color: var(--text-secondary);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  /* The tracked label is the only ink in a centred box, which is the
+     case DESIGN.md's `text-indent` is the instrument for: the last
+     letter's letter-spacing prints as empty space inside the box and
+     sets the word half a tracking left of centre. */
+  text-indent: var(--tr-caption);
+  text-transform: uppercase;
+}
+.console__band-opt:first-child { border-left: 0; }
+.console__band-opt:hover,
+.console__band-opt:focus-visible { color: var(--text-primary); filter: none; }
+/* The chosen one wears the line's own pigment, in the mix .chip--on
+   wears: the console has one on state, whatever the control. */
+.console__band-opt--on {
+  background: color-mix(in srgb, var(--line-color) 14%, transparent);
+  color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary));
+}
 .console__chips {
   display: flex;
   flex-wrap: wrap;
@@ -13329,23 +13379,13 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-align: center;
 }
 
-/* The library screen's one row of controls: the ordering on the left,
-   the tally on the right. Not a Console -- a console's second row is a
-   search field, and there is nothing to search here yet. */
-.lib-controls {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-}
-.lib-controls__count {
-  margin-left: auto;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-caption);
-}
+/* The library screen's controls are the shared console now (.console,
+   far above): the ordering as a band at its head (.console__band), the
+   chips in row 1, the field and the tally in row 2. The row this
+   replaced (.lib-controls) drew its own count in a face nothing else
+   on the screen used, on no surface at all -- half a console, written
+   out by hand. Nothing is left here to declare: every part of it is
+   the console's own. */
 
 /* The author's own description, on the deck's public page. Prose, so
    the unplated prose measure. */

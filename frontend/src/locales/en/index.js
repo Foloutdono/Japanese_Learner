@@ -1404,6 +1404,12 @@ const decks = {
   librarySort:           'Order',
   librarySortNew:        'Newest',
   librarySortFollowed:   'Most followed',
+  // The console's chip row, named for a screen reader. Its FIELD says
+  // what 教材's own console says (decksSearchPlaceholder): one console
+  // everywhere means the same words in it, and the longer sentence
+  // ("Search the library...") was cut by the tally on a phone before
+  // anything had been typed into it.
+  libraryTypes:          'Deck types',
   libraryBy:             name => `by ${name}`,
   libraryFollowers:      n => (n === 1 ? '1 follower' : `${n} followers`),
   libraryAndMore:        n => (n === 1 ? 'and 1 more card' : `and ${n} more cards`),

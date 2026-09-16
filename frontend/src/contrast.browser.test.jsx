@@ -155,6 +155,18 @@ const Fixture = () => (
       </div>
     </div>
 
+    {/* Console.jsx -- the console's band (the library's ordering): the
+        chosen half's ink on its own 14% wash, and the other half's on
+        the bare surface. A new ground, so it is measured rather than
+        assumed from .chip--on, which wears the same mix on --surface
+        and not on a wash of itself. */}
+    <div className="console">
+      <div className="console__band" style={{ '--line-color': 'var(--line-decks)' }}>
+        <button type="button" className="console__band-opt console__band-opt--on lb-band-on">Plus récents</button>
+        <button type="button" className="console__band-opt lb-band-off">Plus suivis</button>
+      </div>
+    </div>
+
     {/* LibraryCard.jsx / DeckDetailScreen.jsx -- the library's own
         inks on --surface: the attribution beside the deck type, the
         clamped description, the follower tally in the aside, and the
@@ -177,10 +189,6 @@ const Fixture = () => (
       <span className="lib-warning__lead lib-warn-lead">Retiré.</span>
       <span className="lib-warn-body"> Son auteur a supprimé ce paquet.</span>
     </p>
-    <div className="lib-controls">
-      <span className="lib-controls__count lib-count">2 paquets</span>
-    </div>
-
     {/* GateCard.jsx -- the fare gate on --surface, its lane tint, and
         the gold depart action (the wall-map redesign's one fill) */}
     <div className="gate-card">
@@ -805,6 +813,8 @@ const Fixture = () => (
 const SITES = [
   ['.dk-chip', 'console chip'],
   ['.dk-count', 'console count'],
+  ['.lb-band-on', 'console band, the chosen ordering'],
+  ['.lb-band-off', 'console band, the other ordering'],
   ['.gc-latin', 'fare gate title'],
   ['.gc-unit', 'fare gate unit'],
   ['.gc-when', 'fare gate next-review line'],
