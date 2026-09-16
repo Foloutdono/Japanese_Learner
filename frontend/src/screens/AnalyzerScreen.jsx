@@ -16,7 +16,6 @@ import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
 import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
-import { board } from '../stores/boarding'
 import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
@@ -709,13 +708,26 @@ export default function AnalyzerScreen({ session }) {
           {/* ── The three platforms, on one control (canvas Analyzer) ──
               Choosing another is a mode switch: the workbench clears
               (see boardPlatform), because a Passage typed on Text has
-              no business waiting behind the Photo bench. */}
+              no business waiting behind the Photo bench.
+
+              It commits on the press, with no 扉 over it. The door is
+              the bookend to the ticket gate — the last choice of a
+              selection screen, the one that turns it into a session —
+              and this control is neither: the three intakes sit on one
+              segmented control over the page the learner is already
+              standing on (plan 073), so a switch changes a panel rather
+              than arriving anywhere. Nearly a second of shut doors to
+              reveal the same screen with a different field in it read
+              as the app stalling, and it is paid every time a learner
+              corrects a mis-tap (owner-directed, 2026-09-16). The door
+              still plays where boarding is real — kana, vocab, kanji,
+              grammar, study, practice, exams. */}
           <Seg
             full
             className="seg--kaiseki anl-sources"
             label={t.changeSource}
             value={source}
-            onChange={key => board(() => boardPlatform(key))}
+            onChange={boardPlatform}
             options={SOURCES.map(s => ({ key: s.key, label: t[s.label] }))}
           />
 
