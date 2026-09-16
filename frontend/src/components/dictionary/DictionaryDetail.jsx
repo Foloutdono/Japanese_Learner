@@ -670,8 +670,20 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // not stand in for — the caption is the only place the meaning
   // appears and it stays.
   const bodyPrintsGloss = glossCount > 1
+  // KANJIDIC2 glosses the characters in general use and little else:
+  // 2,724 of its 13,108 carry a radical, a stroke count and readings but
+  // no meaning in any language — rare and historic characters, and the
+  // compatibility codepoints that twin a common one (社 U+FA4C beside the
+  // everyday 社 U+793E). Every one of them is outside the app's own deck,
+  // so this can only be reached from the dictionary's pool half. The plate
+  // printed nothing at all in that case, which reads as a panel that failed
+  // to load rather than a dictionary with no gloss to give; it says so now,
+  // in the caption register but at book weight, so an absence is never
+  // mistaken for the one word a caption normally carries.
+  const meaningAbsent = isKanji && !firstGloss(meaning)
   const caption = isKana ? entry.romaji
     : isGrammar ? meaning
+    : meaningAbsent ? t.noMeaningRecorded
     : bodyPrintsGloss ? null
     : firstGloss(meaning)
 
@@ -693,9 +705,15 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const figureCount = ((isKanji || isKana) && entry.stroke_count ? 1 : 0)
     + (hasRadical ? 1 : 0) + (hasTwin ? 1 : 0)
   const showForm = hasSheet || figureCount > 0
+  // The row count exists so the sheet can span the figures stacked beside
+  // it, so it is the SHEET's measure, not the figures'. Counting rows
+  // without one laid a 2x2 grid over two cells and left the second row
+  // bare --surface-line — a grey band under the lattice on every character
+  // KanjiVG has no diagram for, which is most of the pool half. With no
+  // sheet the figures take a column each, in one row.
   const formStyle = {
     '--dict-form-cols': hasSheet ? (figureCount > 0 ? 2 : 1) : figureCount,
-    '--dict-form-rows': Math.max(figureCount, 1),
+    '--dict-form-rows': hasSheet ? Math.max(figureCount, 1) : 1,
   }
 
   const status = entry.status
@@ -842,7 +860,11 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               ? <FuriganaParts parts={headwordFurigana} />
               : headword}
           </h2>
-          {caption && <div className="dict-plate__caption">{caption}</div>}
+          {caption && (
+            <div className={`dict-plate__caption${meaningAbsent ? ' dict-plate__caption--absent' : ''}`}>
+              {caption}
+            </div>
+          )}
         </div>
 
         <div className="dict-plate__stripe" aria-hidden="true" />

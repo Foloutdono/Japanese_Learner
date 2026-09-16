@@ -99,6 +99,20 @@ KANJI.readings = [
   { reading: 'こ~', words: [] },
 ]
 
+// 龒 as routes/dictionary.py serves it out of the pool half: KANJIDIC2
+// gives it a radical, a stroke count and four readings but no meaning in
+// any language (2,724 of its 13,108 characters carry none), and KanjiVG
+// has no diagram for it. Both absences at once, which is the common case
+// — a character rare enough to have no gloss is rare enough to have no
+// stroke sheet either.
+const POOL_KANJI = {
+  type: 'kanji', kanji: '龒', kana: 'リュウ・リョウ・ロウ・た.つ', meaning: '',
+  stroke_count: 21, radical: 212, level: null, svg_url: null,
+  radical_glyph: '竜', radical_name: 'りゅう',
+  app_card: null, readings: [], vocab_examples: [],
+  status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
+}
+
 const VOCAB = {
   type: 'vocab', kanji: '食べる', kana: 'たべる', meaning: 'to eat', level: 'N5',
   furigana: [{ text: '食', reading: 'た' }, { text: 'べる' }],
@@ -432,6 +446,40 @@ describe('the body — blocks that name themselves', () => {
     // count its content cannot fill is what this avoids (DESIGN.md).
     const { root } = await renderEntry({ ...KANA, kana: 'えい', romaji: 'ei', twin: null, stroke_count: null, svg_url: null })
     expect(root.querySelector('.dict-form')).toBeNull()
+  })
+
+  // ── A character KANJIDIC2 has no gloss for ────────────────
+  // Both halves of what 龒 used to show: a plate whose caption slot
+  // printed nothing, over a lattice with a bare grey row under it.
+  it("says so where KANJIDIC2 records no meaning, rather than printing an empty caption", async () => {
+    const { root } = await renderEntry(POOL_KANJI)
+    const caption = root.querySelector('.dict-plate__caption')
+    expect(caption.textContent).toBe('No meaning recorded')
+    // Book weight, not the 700 a real gloss is set in: the plate must not
+    // put an absence in the same ink and weight as 木's TREE.
+    expect(caption.classList.contains('dict-plate__caption--absent')).toBe(true)
+    expect(getComputedStyle(caption).fontWeight).toBe('400')
+    // And it is the caption alone — an empty meaning is no gloss list.
+    expect(root.querySelector('.dict-gloss')).toBeNull()
+  })
+
+  it('lays the figures in one row where there is no sheet for them to stand beside', async () => {
+    // The row count is the SHEET's measure. Counting rows without one
+    // laid a 2x2 grid over two cells and left the second row bare
+    // --surface-line: a grey band under the lattice on every character
+    // KanjiVG has no diagram for.
+    const { root } = await renderEntry(POOL_KANJI)
+    const form = root.querySelector('.dict-form')
+    expect(form.querySelector('.dict-form__sheet')).toBeNull()
+    const figures = [...form.querySelectorAll('.record')]
+    expect(figures.map(f => f.querySelector('.record__value').textContent)).toEqual(['21画', '竜りゅう'])
+    const f = form.getBoundingClientRect()
+    const [a, b] = figures.map(x => x.getBoundingClientRect())
+    // Side by side, one row each side of the hairline...
+    expect(b.left).toBeGreaterThan(a.right - 1)
+    expect(a.top).toBeCloseTo(b.top, 0)
+    // ...and the lattice ends where they end, to the hairline border.
+    expect(f.bottom - Math.max(a.bottom, b.bottom)).toBeLessThan(2)
   })
 
   // ── A kana's own ledger (plan 088) ──────────────────────
