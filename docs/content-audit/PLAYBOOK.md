@@ -192,6 +192,23 @@ Rules for the body:
 - If the slice is clean, still file the issue saying so. A run that
   reports nothing is indistinguishable from a run that did not happen.
 
+### If the issue cannot be filed
+
+A scheduled run gets its GitHub access from the Routine, and a Routine
+created without connectors fires sessions that have no `mcp__github__*`
+tools at all (there is no `gh` CLI here either). A run that discovers it
+cannot open an issue must not throw the audit away: write the same
+report, unchanged in form, to
+
+    docs/content-audit/reports/<date>-<slice-id>.md
+
+commit it on a branch of its own and push. That is a report about the
+content, not a change to it, so Rule 0 still holds — the content files
+themselves stay untouched. Say plainly, in the commit message, that the
+report was written this way because the issue could not be filed, so the
+maintainer knows to fix the Routine's connectors rather than assume this
+is how the audit works.
+
 ---
 
 ## What is out of scope

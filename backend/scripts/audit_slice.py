@@ -53,8 +53,10 @@ _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 AREAS = ("grammar", "vocab", "sentences")
 
-# The first run. Tuesdays and Fridays after it are the others.
-ANCHOR = dt.date(2026, 9, 22)
+# The first run — the Routine's own first firing. Tuesdays and Fridays
+# after it are the others, and the two must agree: a run on any other
+# weekday resolves to the run BEFORE it and so audits that slice twice.
+ANCHOR = dt.date(2026, 9, 18)
 RUN_WEEKDAYS = (1, 4)  # Monday is 0
 
 # How much one run is asked to research. A rich grammar point (steps,
