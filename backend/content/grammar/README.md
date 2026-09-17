@@ -51,10 +51,11 @@ points carry the full lesson. There the gate requires: a `rule` step, at
 least one `compare` rival, at least one `contrast` example (when the pattern
 can be blanked at all: a bare particle is exempt), three or more
 examples (write four or five), and French that is not a copy of the English.
-The other levels are held to today's bar — a bilingual gloss and two
-examples — until their own content wave; `check_grammar --report` prints
-`fr_pending` so the debt is visible. Adding a level to `RICH_LEVELS` and
-writing its lessons is one commit.
+Every level is rich today. A level taken out of the set (or a new one)
+is held to the lower bar — a bilingual gloss and two examples — until its
+lessons are written; `check_grammar --report` prints `fr_pending` so the
+debt is visible. Adding a level to `RICH_LEVELS` and writing its lessons is
+one commit.
 
 ## Counts
 

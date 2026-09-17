@@ -191,14 +191,14 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
-- **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE
-  for N5/N4; N3, N2, N1 content waves to follow on the same pipeline).
+- **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE;
+  the content waves landed level by level, N5/N4 then N3, N2 and N1).
   Owner-directed rework of the grammar line. The catalogue moves to
   `content/grammar/N5.json … N1.json`, re-levelled to what the modern
   syllabus examines (91/108/110/115/117, floors rising with the level),
-  every gloss and sentence in French and English, and at N5 and N4 a full
-  lesson per point (規則 → 使い方 → 注意, compare rows to the neighbours,
-  four examples with contrast marks). New surfaces: the level's points
+  every gloss and sentence in French and English, and at every level a
+  full lesson per point (規則 → 使い方 → 注意, compare rows to the neighbours,
+  four examples with contrast marks; 541 points, 492 contrast-ready). New surfaces: the level's points
   index, the lesson sheet, the gate before a new card, the lesson door on
   every card, the dictionary plate, and the `grammar.contrast` drill. Card
   ids stay pattern-based; `renames.py` + `migrate_grammar_ids.py` carry the
