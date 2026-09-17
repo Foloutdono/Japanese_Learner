@@ -42,7 +42,8 @@ be a copy of the English, a `rule` step, a rival and three or more examples
 are required. `study/grammar_check.py` enforces all of it, together with the
 existing sentence gate (8–60 characters, kanji within the level, the pattern
 visibly present), and `scripts/check_grammar.py` runs it from a shell. Rich
-levels arrive by wave: N5 and N4 now, then N3, N2, N1 on the same pipeline.
+levels arrive by wave: N5 and N4 first, N3 next, then N2 and N1 on the same
+pipeline.
 
 ### Card ids stay stable; moves are explicit
 

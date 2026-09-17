@@ -192,12 +192,12 @@ Thirteen waves live in this file:
   (40 files), guards clean, build clean.
 
 - **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE
-  for N5/N4; N3, N2, N1 content waves to follow on the same pipeline).
+  for N5/N4/N3; N2 and N1 content waves to follow on the same pipeline).
   Owner-directed rework of the grammar line. The catalogue moves to
   `content/grammar/N5.json … N1.json`, re-levelled to what the modern
   syllabus examines (91/108/110/115/117, floors rising with the level),
-  every gloss and sentence in French and English, and at N5 and N4 a full
-  lesson per point (規則 → 使い方 → 注意, compare rows to the neighbours,
+  every gloss and sentence in French and English, and at N5, N4 and N3 a
+  full lesson per point (規則 → 使い方 → 注意, compare rows to the neighbours,
   four examples with contrast marks). New surfaces: the level's points
   index, the lesson sheet, the gate before a new card, the lesson door on
   every card, the dictionary plate, and the `grammar.contrast` drill. Card
