@@ -42,8 +42,10 @@ be a copy of the English, a `rule` step, a rival and three or more examples
 are required. `study/grammar_check.py` enforces all of it, together with the
 existing sentence gate (8–60 characters, kanji within the level, the pattern
 visibly present), and `scripts/check_grammar.py` runs it from a shell. Rich
-levels arrive by wave: N5 and N4 first, N3 next, then N2 and N1 on the same
-pipeline.
+levels arrived by wave — N5 and N4 first, then N3, N2 and N1 on the same
+pipeline — and every level is rich now; `RICH_LEVELS` stays as the switch
+the gate reads, so a future level (or a level rebuilt from scratch) can be
+held to the lower bar while its lessons are written.
 
 ### Card ids stay stable; moves are explicit
 
@@ -82,10 +84,10 @@ localised server-side.
 - `content/grammar_data.py` (the jlptsensei scrape) stays only as the
   negative corpus of the provenance test: no sentence or gloss in the
   catalogue may appear in it verbatim.
-- Points below a rich level degrade gracefully: gloss, two examples, no
-  contrast platform. The report (`check_grammar --report`) prints
-  `fr_pending`, `with_steps` and `contrast_ok` per level so the debt is
-  visible.
+- A level outside `RICH_LEVELS` degrades gracefully: gloss, two examples,
+  no contrast platform. No level is outside it today; the report
+  (`check_grammar --report`) still prints `fr_pending`, `with_steps` and
+  `contrast_ok` per level so any future debt is visible.
 - `get_deck_modes` may advertise contrast on a personal deck that has no
   contrast content, exactly as it already did for fill-in; accepted.
 - Deploy order matters once: code first, then

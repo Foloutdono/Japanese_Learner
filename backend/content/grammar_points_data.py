@@ -30,10 +30,10 @@ _BASE_DIR = os.path.join(os.path.dirname(__file__), "grammar")
 LEVELS: tuple[str, ...] = ("N5", "N4", "N3", "N2", "N1")
 
 # Levels whose points carry the full lesson (steps, compare, 4-5 examples
-# in both languages). A level joins in the same commit as its lessons,
-# one level per content wave; study/grammar_check holds a rich level to
-# the full bar and the others to gloss + sentences.
-RICH_LEVELS: frozenset[str] = frozenset({"N5", "N4", "N3", "N2"})
+# in both languages). A level joined in the same commit as its lessons,
+# one level per content wave, and all five are in; study/grammar_check
+# holds a rich level to the full bar and any other to gloss + sentences.
+RICH_LEVELS: frozenset[str] = frozenset({"N5", "N4", "N3", "N2", "N1"})
 
 # The smallest catalogue each level may carry. Raised in the same commit
 # as the content that meets it, never ahead of it. Monotonic on purpose:
