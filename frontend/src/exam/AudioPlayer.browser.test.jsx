@@ -21,8 +21,10 @@ import '../index.css'
 // the <audio> element fires `error` — the same event a missing clip
 // fires in production.
 const MISSING = `/exam-audio/${'0'.repeat(24)}.mp3`
-// A real file under public/, so the recovery below is a genuine load.
+// Real files under public/, so the recovery below is a genuine load and
+// the question swap after it a genuine second one.
 const PLAYABLE = '/sounds/kanas/a.mp3'
+const OTHER = '/sounds/kanas/i.mp3'
 
 function player(src) {
   return render(<LangProvider><AudioPlayer src={src} /></LangProvider>)
@@ -59,5 +61,25 @@ describe('AudioPlayer', () => {
 
     await vi.waitFor(() => expect(chrome(screen)).not.toBeNull())
     expect(bar(screen)).toBeNull()
+  })
+
+  it('counts the replays of one clip, not of the section', async () => {
+    // The badge says how much help was taken on THIS question. The
+    // player is not remounted between questions -- only `src` changes --
+    // so a count left standing across the swap accuses the learner of
+    // replays they made on the previous clip.
+    const screen = await player(PLAYABLE)
+    await vi.waitFor(() => expect(chrome(screen)).not.toBeNull())
+
+    const replay = () => screen.container.querySelector('.exam-audio-player__replay')
+    const badge = () => screen.container.querySelector('.exam-audio-player__plays')
+
+    replay().click()
+    replay().click()
+    await vi.waitFor(() => expect(badge()?.textContent).toBe('2'))
+
+    await screen.rerender(<LangProvider><AudioPlayer src={OTHER} /></LangProvider>)
+
+    expect(badge()).toBeNull()
   })
 })
