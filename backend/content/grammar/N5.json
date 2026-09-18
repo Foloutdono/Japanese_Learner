@@ -84,8 +84,8 @@
       },
       {
         "kind": "careful",
-        "en": "は is not « the subject ». A question word (だれ, 何) is never marked with は: it takes が, because it cannot be something already known.",
-        "fr": "は n'est pas « le sujet ». Un mot interrogatif (だれ, 何) ne prend jamais は : il prend が, car il ne peut pas être une chose déjà connue."
+        "en": "は is not « the subject ». A question word (だれ, 何) is never marked with は, because it cannot be something already known: as a subject it takes が, otherwise its own particle (何を食べますか).",
+        "fr": "は n'est pas « le sujet ». Un mot interrogatif (だれ, 何) ne prend jamais は, car il ne peut pas être une chose déjà connue : sujet, il prend が ; sinon, sa propre particule (何を食べますか)."
       }
     ],
     "compare": [
@@ -142,8 +142,8 @@
       },
       {
         "kind": "use",
-        "en": "- New or unexpected information: 電車が来ました.\n- After question words: だれが来ますか.\n- Before adjectives of feeling or ability: 花が好きです, 日本語が分かります.",
-        "fr": "- Une information nouvelle ou inattendue : 電車が来ました.\n- Après un mot interrogatif : だれが来ますか.\n- Devant les adjectifs de goût ou de capacité : 花が好きです, 日本語が分かります."
+        "en": "- New or unexpected information: 電車が来ました.\n- After question words: だれが来ますか.\n- With words of liking, ability or need: 花が好きです, 日本語が分かります.",
+        "fr": "- Une information nouvelle ou inattendue : 電車が来ました.\n- Après un mot interrogatif : だれが来ますか.\n- Avec les mots de goût, de capacité ou de besoin : 花が好きです, 日本語が分かります."
       },
       {
         "kind": "careful",
@@ -210,8 +210,8 @@
       },
       {
         "kind": "careful",
-        "en": "Some verbs that feel transitive take が in Japanese: 分かる, できる, 好きだ, ほしい. Never 日本語を分かります.",
-        "fr": "Certains verbes qui semblent transitifs prennent が en japonais : 分かる, できる, 好きだ, ほしい. Jamais 日本語を分かります."
+        "en": "Some words that feel transitive take が in Japanese: the verbs 分かる, できる and the adjectives 好きだ, ほしい. Never 日本語を分かります.",
+        "fr": "Certains mots qui semblent transitifs prennent が en japonais : les verbes 分かる, できる et les adjectifs 好きだ, ほしい. Jamais 日本語を分かります."
       }
     ],
     "compare": [
@@ -240,9 +240,9 @@
         "register": "polite"
       },
       {
-        "jp": "駅まで道をあるきます。",
-        "en": "I walk along the road to the station.",
-        "fr": "Je marche le long de la route jusqu'à la gare.",
+        "jp": "この道をあるいて駅へ行きます。",
+        "en": "I walk along this road to the station.",
+        "fr": "Je marche sur cette route jusqu'à la gare.",
         "register": "polite"
       },
       {
@@ -399,8 +399,8 @@
       },
       {
         "kind": "careful",
-        "en": "と joins nouns only. Two verbs or two clauses are joined with the て-form, never with と.",
-        "fr": "と ne relie que des noms. Deux verbes ou deux propositions se relient avec la forme en て, jamais avec と."
+        "en": "As « and », と joins nouns only: two verbs or two clauses are joined with the て-form, not with と. The と after a quotation is a different word.",
+        "fr": "Comme « et », と ne relie que des noms : deux verbes ou deux propositions se relient avec la forme en て, pas avec と. Le と après une citation est un autre mot."
       }
     ],
     "compare": [
@@ -462,8 +462,8 @@
       },
       {
         "kind": "careful",
-        "en": "も takes the place of は: never write はも. And it cannot join two nouns in one list; that is と or や.",
-        "fr": "も prend la place de は : jamais はも. Et il ne peut pas relier deux noms dans une liste ; c'est le rôle de と ou や."
+        "en": "も takes the place of は: never write はも. And it never sits between two nouns the way と does: 本と雑誌, never 本も雑誌 — to list with も, repeat it on each item.",
+        "fr": "も prend la place de は : jamais はも. Et il ne se place jamais entre deux noms comme と : 本と雑誌, jamais 本も雑誌 — pour énumérer avec も, il faut le répéter sur chaque élément."
       }
     ],
     "compare": [
@@ -712,7 +712,7 @@
       },
       {
         "kind": "use",
-        "en": "- A finished action: きのう本を読みました.\n- What did not happen: 先週はどこへも行きませんでした.\n- Also for « have just », with もう: もう食べました.",
+        "en": "- A finished action: きのう本を読みました.\n- What did not happen: 先週はどこへも行きませんでした.\n- Also for « already », with もう: もう食べました.",
         "fr": "- Une action terminée : きのう本を読みました.\n- Ce qui n'a pas eu lieu : 先週はどこへも行きませんでした.\n- Aussi pour « déjà fait », avec もう : もう食べました."
       },
       {
