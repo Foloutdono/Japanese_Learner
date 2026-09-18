@@ -37,6 +37,25 @@ export default function AudioPlayer({ src }) {
   const [failedSrc, setFailedSrc] = useState(null)
   const failed = Boolean(src) && failedSrc === src
 
+  // Every other figure here is a fact about one clip too, and the player
+  // is not remounted between questions (see the effect below), so the
+  // swap has to clear them: the replay badge was carrying the previous
+  // question's count into the next one, which is the opposite of what a
+  // play count is for.
+  //
+  // Adjusted during the render that first sees the new src, not in an
+  // effect on [src]: an effect runs after the new src is committed, so a
+  // `loadedmetadata` landing before it would have its duration reset to
+  // zero and never fire again.
+  const [lastSrc, setLastSrc] = useState(src)
+  if (src !== lastSrc) {
+    setLastSrc(src)
+    setPlaying(false)
+    setElapsed(0)
+    setDuration(0)
+    setPlays(0)
+  }
+
   // Moving to the next question must stop the current clip. The native
   // player didn't: `CardTransition` swaps the question, React keeps the
   // <audio> node alive across the crossfade, and the previous
