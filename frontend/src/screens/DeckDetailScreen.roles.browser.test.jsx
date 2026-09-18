@@ -131,7 +131,6 @@ describe('a deck you follow', () => {
     // The body is a div, not a button: nothing to press, nothing to
     // fail against a 403.
     expect(document.querySelector('.card-row__body').tagName).toBe('DIV')
-    expect(document.querySelector('.card-row__remove')).toBeNull()
   })
 
   it('asks before making a copy, and says what is kept', async () => {

@@ -9349,29 +9349,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   white-space: nowrap;
 }
 .card-row__go { flex: none; color: var(--text-secondary); }
-/* A square control, so it states its own box. The bare `button` rule
-   pads every button --sp-3/--sp-5, and inside a border-box 36px square
-   that leaves a 2px content box: the trash can rendered as a speck of
-   stroke in the middle of the ring. */
-.card-row__remove {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  margin-inline-end: var(--sp-4);
-  padding: 0;
-  border-radius: var(--r-pill);
-  border: 1px solid var(--surface-line);
-  background: none;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.card-row__remove svg { flex: none; }
-.card-row__remove:hover,
-.card-row__remove:focus-visible { color: var(--danger); border-color: var(--danger); filter: none; }
-
 .form {
   display: flex;
   flex-direction: column;

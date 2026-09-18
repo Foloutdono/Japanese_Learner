@@ -424,7 +424,6 @@ const Fixture = () => (
           <span className="card-row__front"><span className="card-row__jp" lang="ja">切符</span></span>
           <span className="card-row__back">ticket</span>
         </div>
-        <button type="button" className="card-row__remove dk-remove" aria-label="delete">x</button>
       </div>
     </div>
 
@@ -874,7 +873,6 @@ const SITES = [
   ['.dk-back', 'card row meaning'],
   ['.dk-note', 'card row note'],
   ['.dk-badge', 'card row source badge'],
-  ['.dk-remove', 'card row remove affordance'],
   ['.btn-secondary', 'deck detail ghost button (shared family)'],
   ['.phrase-word-card__reading', 'token card reading'],
   ['.phrase-word-card__pos', 'token card part of speech'],
