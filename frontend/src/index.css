@@ -4021,7 +4021,7 @@ button:focus-visible {
   align-items: flex-end;
   justify-content: center;
   gap: var(--sp-4);
-  padding: var(--sp-7) var(--sp-5);
+  padding: var(--sp-7) 0 var(--sp-7) var(--sp-6);
   border-left: 1px solid var(--surface-line);
   min-width: 116px;
 }
