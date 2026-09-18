@@ -2322,6 +2322,29 @@ def get_deck_stats(deck_id: str, mode: str = "standard.flashcard.f2b",
     }
 
 
+# ── A cell a spreadsheet reads as a formula ───────────────
+#
+# Excel, Sheets and Calc all evaluate a cell whose value starts with
+# =, +, - or @, so a deck's content decides what runs when the file is
+# opened. That was survivable while a deck was your own; the library
+# makes it somebody else's — the author of a deck you follow writes the
+# cards, and export is offered to followers (see export_cards).
+#
+# The leading apostrophe is the neutraliser every spreadsheet honours.
+# _csv_unlead takes it back off on the way in, so the round trip this
+# pair promises still returns the card the author wrote rather than one
+# apostrophe more each time through.
+_FORMULA_LEAD = ("=", "+", "-", "@", "\t", "\r")
+
+
+def _csv_lead(value: str) -> str:
+    return "'" + value if value[:1] in _FORMULA_LEAD else value
+
+
+def _csv_unlead(value: str) -> str:
+    return value[1:] if value[:1] == "'" and value[1:2] in _FORMULA_LEAD else value
+
+
 @router.post("/api/decks/{deck_id}/import")
 async def import_cards(deck_id: str, file: UploadFile = File(...),
                        user_id: str = Depends(get_user_id)):
@@ -2350,8 +2373,8 @@ async def import_cards(deck_id: str, file: UploadFile = File(...),
     try:
         with conn.cursor() as cur:
             for i, row in enumerate(reader, start=2):
-                front = row.get('front', '').strip()
-                back  = row.get('back',  '').strip()
+                front = _csv_unlead(row.get('front', '').strip())
+                back  = _csv_unlead(row.get('back',  '').strip())
                 if not front or not back:
                     errors.append(f"Row {i}: missing front/back — skipped")
                     continue
@@ -2462,7 +2485,7 @@ def export_cards(deck_id: str, lang: str = "fr", user_id: str = Depends(get_user
     writer = csv.writer(buf, lineterminator="\r\n")
     writer.writerow(["front", "back"])
     for card in cards:
-        writer.writerow([card.get("front", ""), card.get("back", "")])
+        writer.writerow([_csv_lead(card.get("front", "")), _csv_lead(card.get("back", ""))])
 
     # The BOM is the other half of import's `utf-8-sig` decode: without
     # it Excel reads a UTF-8 CSV as the local codepage and every Japanese

