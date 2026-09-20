@@ -27,13 +27,23 @@ import { MineButton } from './MineButton'
 // click stops where it lands, because a chip can sit inside a sentence
 // row whose whole head is itself a door (PassageBreakdown).
 export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen }) {
-  if (!grammar?.length) return null
+  // Markers -- the points that ARE one grammatical word: は, が, です／だ
+  // (study/grammar_detect's `kind`) -- are not chips. Since detection
+  // learned to see them (it used to throw away every hit a particle
+  // could make, false and true alike), a chip row under an ordinary
+  // sentence would read は・が・を・に before the rule the sentence is
+  // actually about. They ride the row of the very particle they are
+  // instead, where a learner is already looking at it (rows.js), and
+  // open the same card from there. A point with no `kind` at all is
+  // from a caller that predates this and stays a chip.
+  const points = grammar?.filter(g => g.kind !== 'marker')
+  if (!points?.length) return null
   const caption = label === undefined ? (t.grammarSpotted ?? 'Grammar spotted') : label
   return (
     <div className="analysis-grammar-chips">
       {caption && <span className="cap">{caption}</span>}
       <div className="analysis-grammar-chips__row">
-        {grammar.map(g => (
+        {points.map(g => (
           // Keyed by raw_id+start, not raw_id alone: the same grammar
           // point can legitimately match twice at different spans in
           // one Sentence (points_in returns every occurrence, not just

@@ -189,7 +189,7 @@ export function SentenceLine({ analysis, text, t, onTokenClick }) {
 // model's contextual one where it was bought or came with the text,
 // else the deck's own -- a learner should not need a model to know
 // what 電車 means. The level is the deck's, as a plain badge.
-export function WordRows({ analysis, t, onTokenClick }) {
+export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
   const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
   if (!rows.length) return null
   return (
@@ -199,6 +199,17 @@ export function WordRows({ analysis, t, onTokenClick }) {
         const state = tokState(head)
         const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? ''
         const reading = row.reading !== row.surface ? row.reading : ''
+        const markers = (onGrammarOpen ? row.markers : null) ?? []
+        // A row with no deck entry behind it used to be the one row
+        // that went nowhere -- 「へ」 is not a word anyone mines, so
+        // pressing it did nothing while the rule it IS sat in a chip
+        // below, unattached to the particle demonstrating it. When the
+        // row is a marker and nothing else, the marker is what the row
+        // opens, in the same place and with the same affordance a word
+        // opens its entry. A row that already has a word to open keeps
+        // it, and carries the marker beside its level instead.
+        const door = !head.vocab_match && markers.length === 1 ? markers[0] : null
+        const chips = door ? [] : markers
         return (
           <div key={i} className="bkd-row">
             {head.vocab_match && onTokenClick ? (
@@ -211,13 +222,36 @@ export function WordRows({ analysis, t, onTokenClick }) {
               >
                 {row.surface}
               </button>
+            ) : door ? (
+              <button
+                type="button"
+                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door`}
+                lang="ja"
+                onClick={() => onGrammarOpen(door)}
+                aria-label={t.detailsForToken(row.surface)}
+              >
+                {row.surface}
+              </button>
             ) : (
               <span className={`bkd-row__word bkd-tok bkd-tok--${state}`} lang="ja">{row.surface}</span>
             )}
             {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
             <span className="bkd-row__meaning">{meaning}</span>
-            {head.vocab_match?.level && (
-              <span className="type-badge bkd-row__lvl">{head.vocab_match.level}</span>
+            {chips.map(point => (
+              <button
+                key={point.raw_id}
+                type="button"
+                className="bkd-row__mark"
+                lang="ja"
+                onClick={e => { e.stopPropagation(); onGrammarOpen(point) }}
+                aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${point.pattern}`}
+                title={t.openDictionary}
+              >
+                {point.pattern}
+              </button>
+            ))}
+            {(head.vocab_match?.level || door?.level) && (
+              <span className="type-badge bkd-row__lvl">{head.vocab_match?.level ?? door.level}</span>
             )}
           </div>
         )
@@ -275,7 +309,7 @@ export function SentenceBreakdown({
       <div className="bkd">
         <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} />
         {translation && <span className="bkd__en">{translation}</span>}
-        {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} />}
+        {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen} />}
         {available && <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />}
         {noteText && <span className="prose__ai">{noteText}</span>}
       </div>

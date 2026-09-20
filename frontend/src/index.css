@@ -9748,10 +9748,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .bkd-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   grid-template-areas:
-    "word reading lvl"
-    "meaning meaning lvl";
+    "word reading mark lvl"
+    "meaning meaning mark lvl";
   gap: var(--sp-1) var(--sp-3);
   align-items: baseline;
   padding: var(--sp-2) 0;
@@ -9783,10 +9783,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   grid-area: lvl;
   align-self: center;
 }
+/* The grammatical marker this row is an instance of — the は of 今日は,
+   the へ of へ — as a door to its own card, next to the level badge and
+   drawn like one: the row already carries a word, a reading and a
+   meaning, and the particle is one character, so it earns a chip and
+   not a line. A construction (〜ます／〜ません) stays in the chips under
+   the rows, where it can be printed in full. */
+.bkd-row__mark {
+  grid-area: mark;
+  align-self: center;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.bkd-row__mark:hover,
+.bkd-row__mark:focus-visible {
+  border-color: var(--line-color, var(--accent));
+  color: var(--text-primary);
+}
 @media (min-width: 768px) {
   .bkd-row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-    grid-template-areas: "word reading meaning lvl";
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "word reading meaning mark lvl";
   }
 }
 /* The passage: the sentences stacked, a hairline between them, the

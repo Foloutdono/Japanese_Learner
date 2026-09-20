@@ -27,6 +27,7 @@ from study.card_lookup import (
 )
 from study.furigana import align_deck
 from study import difficulty
+from study import grammar_detect
 
 logger = logging.getLogger(__name__)
 
@@ -39,28 +40,59 @@ _CONTENT_POS = frozenset({"noun", "verb", "adjective", "adverb"})
 CONTENT_POS = _CONTENT_POS
 
 
-def _grammar_entries(sentence: str) -> list[dict]:
-    """difficulty.points_in's (pattern, level, start, end) hits, resolved
-    to a real catalogue entry and a card id. A hit that can't be
-    resolved is dropped (logged, not raised) rather than shipped as a
-    chip with nothing behind it -- never hand-construct the id string,
-    since grammar_to_id's format is the one place that's allowed to
-    know it."""
+def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
+    """grammar_detect's hits, resolved to a real catalogue entry and a
+    card id. A hit that can't be resolved is dropped (logged, not
+    raised) rather than shipped as a chip with nothing behind it --
+    never hand-construct the id string, since grammar_to_id's format is
+    the one place that's allowed to know it.
+
+    `kind` rides along: "marker" for a point that IS one grammatical
+    word (は, です／だ), "pattern" for one built around a word
+    (〜ます／〜ません). Both are cards and both open; what differs is
+    where a screen puts them, since a chip strip of は・が・を over every
+    sentence is wallpaper while the same point on the row of that very
+    particle is the answer to "what is this ん doing here".
+
+    `morphemes` is the tokenization the caller already has, so a
+    breakdown reads the sentence once.
+    """
     out = []
-    for pattern, level, start, end in difficulty.points_in(sentence):
+    for pattern, level, start, end, kind in grammar_detect.detect(sentence, morphemes):
         found = find(pattern)
         entry = found[1] if found and found[0] == level else None
         if entry is None:
-            logger.debug("points_in hit %r/%s has no catalogue entry; dropped", pattern, level)
+            logger.debug("detect hit %r/%s has no catalogue entry; dropped", pattern, level)
             continue
         out.append({
             "pattern": pattern,
             "level": level,
             "start": start,
             "end": end,
+            "kind": kind,
             "raw_id": grammar_to_id(entry, level),
         })
     return out
+
+
+def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
+    """Give every token the points whose span covers it, in place.
+
+    This is what makes a grammar point reachable the way a word is: the
+    rows under a sentence are the learner's map of it, and until now a
+    row like 「へ」 was the one kind of row that went nowhere -- no deck
+    entry, no card, nothing to press -- while the rule it is an instance
+    of sat in a chip below, unconnected to the word that demonstrates
+    it. A point covering a token is that token's own rule, so the row
+    opens it.
+    """
+    for token in tokens:
+        start, end = token["start"], token["end"]
+        token["grammar"] = [
+            {k: g[k] for k in ("pattern", "level", "raw_id", "kind")}
+            for g in grammar
+            if g["start"] < end and start < g["end"]
+        ]
 
 
 def _token_dict(m: morphology.Morpheme) -> dict:
@@ -109,7 +141,8 @@ def analyze_local(text: str, level: str | None = None) -> dict:
         }
 
     tokens = [_token_dict(m) for m in morphemes]
-    grammar = _grammar_entries(text)
+    grammar = _grammar_entries(text, morphemes)
+    _attach_grammar(tokens, grammar)
     estimated = difficulty.estimate_level(text)
     grade_level = level or estimated or "N5"
 
@@ -173,6 +206,10 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         {**g, "stats": card_stats(states, user_id, g["raw_id"], GRAMMAR_STATUS_MODES)}
         for g in analysis["grammar"]
     ]
+    by_id = {g["raw_id"]: g for g in grammar}
+    for tok in tokens:
+        if tok.get("grammar"):
+            tok["grammar"] = [by_id.get(g["raw_id"], g) for g in tok["grammar"]]
 
     return {
         **analysis,

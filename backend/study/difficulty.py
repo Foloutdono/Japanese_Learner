@@ -47,6 +47,7 @@ from functools import lru_cache
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
 from content.kanji_data import get_kanji_string
 from content.vocab_data import VOCAB_BY_LEVEL
+from study import grammar_detect
 from study.grammar_match import stems, verifiable
 
 # Easiest first. Everything here is an index into this list, so "at or
@@ -280,13 +281,13 @@ EXTRA_MARKERS: dict[str, tuple[str, ...]] = {
 #   〜出す      出す is a plain verb, "to take out"
 #   〜直す      直す is a plain verb, "to fix"
 #   〜にあって  「そこにあって」 is just "being there"
-GATE_BLIND: frozenset[str] = frozenset({
-    "〜にして", "〜あまり", "〜上で", "〜出す", "〜直す", "〜にあって",
-    # Plan 087's re-levelling filed three more whose stem is a common
-    # word: 〜上に is inside 山の上に, 〜ものを inside 買いものを, and
-    # 別に〜ない reduces to 別に, which 特別に contains.
-    "〜上に", "〜ものを", "別に〜ない",
-})
+# The points whose surface is a common word in its own right, so that
+# neither this gate nor the detector can tell the point from the word:
+# 〜上に is inside 山の上に, 〜ものを inside 買いものを, 別に〜ない
+# reduces to 別に which 特別に contains. Defined once, in
+# study/grammar_detect, and imported here under the name the gate has
+# always used -- two copies of a list like this drift.
+GATE_BLIND: frozenset[str] = grammar_detect.AMBIGUOUS
 
 
 @lru_cache(maxsize=1)
@@ -387,56 +388,19 @@ def grammar_over_level(sentence: str, level: str) -> list[tuple[str, str]]:
 def points_in(sentence: str) -> list[tuple[str, str, int, int]]:
     """(pattern, level, start, end) for every catalogue point `sentence`
     visibly uses, at ANY level -- unlike grammar_over_level, which only
-    reports points above a given level. Built for study/analysis.py's
-    local tier: every hit here becomes a clickable grammar chip, so this
-    answers "what grammar is present", not "is this sentence too hard".
+    reports points above a given level.
 
-    Two differences from grammar_over_level, both deliberate:
-
-    - _distinctive() is applied to EVERY point, not just above-level
-      ones. grammar_over_level only needs it on the above-level branch
-      because a loose at-or-below match only widens the span an
-      above-level hit has to escape (the conservative direction there).
-      Here every hit becomes a rendered chip, so a two-character
-      all-hiragana stem producing a false chip on uncurated text (OCR
-      output, auto-generated video captions) is a real defect, not a
-      merely-loose match.
-    - _extra_points() (EXTRA_MARKERS) are excluded. Those are bare
-      surface markers with no catalogue entry behind them, so they have
-      no grammar_to_id and nothing for a chip to link to.
-
-    Sorted by start, then by longer span first, so a caller rendering
-    underlays gets a stable order.
-
-    One catalogue point's `needles` includes both a full form and its
-    truncated stems (see grammar_match.stems), which routinely nest --
-    "ています" and its stem "ていま" both match starting at the same
-    position. Without dedup that is two hits for one real occurrence,
-    which study/analysis.py turns into two grammar chips with the same
-    raw_id (a duplicate React key, caught live 2026-08-26 verifying
-    VideoScreen). Collapsed here to the single widest span per
-    (pattern, level) at each position a hit starts covering -- a SECOND,
-    non-overlapping occurrence of the same pattern elsewhere in a longer
-    sentence is a real second hit and stays.
+    The work is study/grammar_detect's now, and this is the name its two
+    callers already had. The two questions parted company when the
+    answer stopped being a substring test: a gate may miss a point (a
+    sentence merely goes through), while a breakdown that misses one
+    leaves a rule untaught and one that invents one teaches a lesson
+    about something absent. grammar_detect answers the second question,
+    with the tokenizer and the catalogue's own example sentences behind
+    it; grammar_over_level below still answers the first, its own
+    conservative way.
     """
-    hits: list[tuple[str, str, int, int]] = []
-    for point_level, pattern, needles in _checkable_points():
-        strong = tuple(n for n in needles if _distinctive(n))
-        if not strong:
-            continue
-        for start, end in _spans(sentence, strong):
-            hits.append((pattern, point_level, start, end))
-    hits.sort(key=lambda h: (h[2], -(h[3] - h[2])))
-
-    deduped: list[tuple[str, str, int, int]] = []
-    covered_spans: dict[tuple[str, str], list[tuple[int, int]]] = {}
-    for pattern, point_level, start, end in hits:
-        spans = covered_spans.setdefault((pattern, point_level), [])
-        if any(s <= start and end <= e for s, e in spans):
-            continue
-        spans.append((start, end))
-        deduped.append((pattern, point_level, start, end))
-    return deduped
+    return grammar_detect.points_in(sentence)
 
 
 # ── Length ────────────────────────────────────────────────────
