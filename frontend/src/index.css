@@ -9357,6 +9357,27 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* The answer's label carries the measurement on its own right: how
+   much of the line the server matched, beside the line it matched
+   against. Not a verdict and deliberately not drawn as one — the
+   verdict is the rating bar under the card, and it is the learner's.
+   In the prose family rather than 書取's own (where it was born)
+   because 読解 prints the same figure from the same measure, and a
+   .kaki- class reused on the reading stage would only say otherwise. */
+.prose__label--measured {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.prose__measure {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-secondary);
+}
 .prose__en {
   font-family: var(--font-display);
   font-size: var(--fs-lead);
@@ -9571,25 +9592,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The answer's label carries the measurement on its own right: how
-   much of the line the server matched, beside the line it matched
-   against. Not a verdict and deliberately not drawn as one — the
-   verdict is the rating bar under the card, and it is the learner's. */
-.kaki-answer__label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-.kaki-accuracy {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--text-secondary);
-}
-
 /* The rail's fill is the state, not the animation: under reduced
    motion it still shows where the clip is, it just stops sliding
    there. Same answer for the roundel's fill on hover. */

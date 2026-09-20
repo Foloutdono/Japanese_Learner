@@ -426,10 +426,12 @@ function Session({ session, level }) {
                 <span className="prose__rule" />
                 {/* The measurement rides on the answer's own label rather
                     than standing over the card as a verdict: it is a hint
-                    for the learner grading below, not the grade. */}
-                <span className="prose__label kaki-answer__label">
+                    for the learner grading below, not the grade. 読解
+                    prints the same figure from the same measure and in
+                    the same place (ReadingRun.jsx). */}
+                <span className="prose__label prose__label--measured">
                   {t.yourAnswer}
-                  <span className="kaki-accuracy">{t.dictationCaught(result.accuracy)}</span>
+                  <span className="prose__measure">{t.answerMatched(result.accuracy)}</span>
                 </span>
                 <span className="prose__en">{answer.trim() || '—'}</span>
               </>

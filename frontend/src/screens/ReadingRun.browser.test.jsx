@@ -197,3 +197,100 @@ describe('ReadingRun — the breakdown toggle', () => {
     expect(root.querySelector('.bkd')).toBeFalsy()
   })
 })
+
+// ── 読解 — the figure beside the answer ───────────────────────
+// How much of the line the answer caught, measured by the server and
+// printed on the answer's own label. It is a hint for the learner
+// rating themselves below it and not the rating, so the rules it lives
+// by are the rules of a hint: the reveal never waits for it, it is
+// simply absent if it never lands, and it never shows a figure
+// belonging to a sentence the reader has already left.
+describe('ReadingRun — the measurement', () => {
+  const measure = root => root.querySelector('.prose__measure')
+
+  /** A phrase read, answered and revealed — no rating. */
+  async function answered(root, given = ANSWER) {
+    type(root.querySelector('input'), given)
+    await settle(20)
+    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(80)
+    return root
+  }
+
+  it('prints what the server matched, on the answer’s own label', async () => {
+    const checks = []
+    apiFetch.mockImplementation((path, _s, opts) => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
+      if (path === '/api/phrase/analyze') return analysisReply
+      if (path === '/api/reading/check') {
+        checks.push(JSON.parse(opts.body))
+        return Promise.resolve(res({ accuracy: 78, matched: 'romaji' }))
+      }
+      return Promise.resolve(res({}))
+    })
+
+    const root = await answered(await run())
+
+    expect(measure(root).textContent).toBe(translations.fr.answerMatched(78))
+    // Measured against the sentence the batch served and the romaji it
+    // served with it — the run holds both, so the reveal itself never
+    // waited on this request.
+    expect(checks).toEqual([
+      { phrase: PHRASE.phrase, romaji: PHRASE.romaji, answer: ANSWER },
+    ])
+    expect(root.textContent).toContain(ANSWER)
+  })
+
+  it('shows the answer with no figure when the measurement fails', async () => {
+    apiFetch.mockImplementation(path => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
+      if (path === '/api/phrase/analyze') return analysisReply
+      if (path === '/api/reading/check') return Promise.reject(new Error('offline'))
+      return Promise.resolve(res({}))
+    })
+
+    const root = await answered(await run())
+
+    // The reveal is the run; the figure is a hint on it. Losing the
+    // hint costs the hint.
+    expect(measure(root)).toBeFalsy()
+    expect(root.textContent).toContain(ANSWER)
+    expect(root.textContent).toContain(translations.fr.yourAnswer)
+    expect(root.querySelector('.rating-bar__btn')).toBeTruthy()
+  })
+
+  it('never prints a figure belonging to the phrase before', async () => {
+    const held = deferred()
+    apiFetch.mockImplementation((path, _s, opts) => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
+      if (path === '/api/phrase/analyze') return analysisReply
+      if (path === '/api/reading/check') {
+        // The first answer's measurement is the slow one.
+        return JSON.parse(opts.body).answer === ANSWER
+          ? held.promise
+          : Promise.resolve(res({ accuracy: 42, matched: 'romaji' }))
+      }
+      return Promise.resolve(res({}))
+    })
+
+    const root = await answered(await run())
+    expect(measure(root)).toBeFalsy()
+
+    // Rate it, move on, and answer the next one.
+    const seals = root.querySelectorAll('.rating-bar__btn')
+    seals[seals.length - 1].click()
+    await settle(80)
+    root.querySelector('.stage__foot button').click()
+    await settle(80)
+    await answered(root, 'zenzen chigau')
+
+    expect(measure(root).textContent).toBe(translations.fr.answerMatched(42))
+
+    // The first sentence's figure, landing late. It belongs to a card
+    // that is no longer on screen and must not overwrite this one.
+    held.release(res({ accuracy: 99, matched: 'romaji' }))
+    await settle(120)
+
+    expect(measure(root).textContent).toBe(translations.fr.answerMatched(42))
+  })
+})

@@ -355,3 +355,60 @@ def test_an_unservable_schedule_is_not_advertised_as_next_due():
             conn.commit()
         finally:
             conn.close()
+
+
+# ── The measurement ──────────────────────────────────────────────────
+#
+# How much of the line the answer caught, printed beside the answer
+# while the learner decides what to rate it. Auto-marking this run was
+# tried and withdrawn for being brittle (routes/reading.normalize_romaji)
+# -- a proportion is what that was reaching for, and it is safe in a way
+# a verdict was not precisely because nothing depends on it: it is not
+# the grade, it schedules nothing, and it writes nothing.
+
+_SENTENCE = "五時に駅の前で会いましょう。"
+_ROMAJI = "goji ni eki no mae de aimashou."
+
+
+def _check(client, answer):
+    r = client.post("/api/reading/check",
+                    json={"phrase": _SENTENCE, "romaji": _ROMAJI, "answer": answer})
+    assert r.status_code == 200, r.text
+    return r.json()
+
+
+def test_the_answer_is_measured_against_the_sentence_it_was_served_with(client):
+    assert _check(client, _ROMAJI) == {"accuracy": 100, "matched": "romaji"}
+    # The sentence itself, typed by a learner who reads kanji: still the
+    # same line, so still full marks -- under the written form this time.
+    assert _check(client, _SENTENCE) == {"accuracy": 100, "matched": "written"}
+
+
+def test_the_spellings_a_learner_actually_types_are_the_same_answer(client):
+    """The same forgiveness 書取 gives, from the same measure: は as wa,
+    a missing macron, kunrei for Hepburn. A figure that reads low for a
+    right answer teaches a learner to distrust a reading that was
+    correct (study/dictation.measure_forms)."""
+    for answer in ("goji ni eki no mae de aimasho",
+                   "goziniekinomaedeaimasyou",
+                   "GOJI NI EKI NO MAE DE AIMASHOU"):
+        assert _check(client, answer)["accuracy"] == 100, answer
+
+
+def test_half_an_answer_measures_around_half(client):
+    assert 30 <= _check(client, "goji ni eki no")["accuracy"] <= 70
+
+
+def test_reading_nothing_measures_nothing_rather_than_being_refused(client):
+    """An empty answer is a learner saying they read none of it."""
+    r = client.post("/api/reading/check", json={"phrase": _SENTENCE, "romaji": _ROMAJI})
+    assert r.status_code == 200, r.text
+    assert r.json()["accuracy"] == 0
+
+
+def test_measuring_writes_nothing(client):
+    """The row belongs to /result, once the learner has rated. A run
+    abandoned at the reveal leaves no half-graded attempt behind."""
+    before = client.get("/api/reading/history", params={"limit": 5}).json()
+    _check(client, "goji ni")
+    assert client.get("/api/reading/history", params={"limit": 5}).json() == before

@@ -29,6 +29,7 @@ from study.exam_gen_utils import kanji_instruction
 from study.grammar_match import contains_pattern, verifiable
 from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
 from study.llm_shared import chat, llm_configured, LLMUnavailable, soften_kanji
+from study.dictation import measure_forms
 from study.romaji import sentence_romaji
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
@@ -682,6 +683,44 @@ def get_reading_batch(
 # en+fr labels and four test updates -- a deliberate piece of work, not a
 # side effect of this one.
 SRS_MODE = "sentence.reading"
+
+
+# ── The measurement ──────────────────────────────────────────────────
+class CheckPayload(BaseModel):
+    phrase: str = Field(min_length=1, max_length=400)
+    # The reference romanization the batch served for that phrase.
+    romaji: str = Field(default="", max_length=400)
+    # Empty is a legitimate answer -- a learner saying they read none of
+    # it -- and measures 0 rather than being rejected.
+    answer: str = Field(default="", max_length=400)
+
+
+@router.post("/api/reading/check")
+def check_reading(payload: CheckPayload, user_id: str = Depends(get_user_id)):
+    """How much of the sentence the learner's transcription caught.
+
+    NOT a grade. The grade is the rating bar under the card and it is
+    the learner's own (docs/adr/0013) -- this is the figure beside their
+    answer while they decide, which is what lets it be forgiving where a
+    mark scheme could not be. Auto-marking this run was tried and
+    withdrawn for being brittle (see normalize_romaji above); a
+    proportion is the honest version of what that was reaching for.
+
+    The same measure 書取 shows, from the same function, so the number
+    means one thing across the app -- study/dictation.measure_forms.
+    There is no kana form to pass: the batch serves a sentence and its
+    romaji, and an answer written in kana is measured against the
+    sentence itself.
+
+    The reference travels up with the answer rather than being looked up
+    here, exactly as /result's does: a reading batch is assembled per
+    request from several sources and its sentences have no id to ask
+    for one by. Nothing is written and nothing is scheduled, so the
+    worst a client can do with a wrong reference is misinform itself.
+    """
+    return measure_forms(
+        payload.answer, jp=payload.phrase, romaji=payload.romaji,
+    )
 
 
 @router.post("/api/reading/result")

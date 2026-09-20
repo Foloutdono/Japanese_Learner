@@ -878,6 +878,11 @@ const reading = {
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
   yourAnswer:           'Your answer',
+  // How much of the line the server matched, printed beside the
+  // learner's own answer on both stages that ask for one (ReadingRun,
+  // DictationRun). A measurement, not a verdict — the verdict is the
+  // rating bar under the card, and it is theirs.
+  answerMatched:        n => `${n}% matched`,
   nextPhrase:           'Next phrase',
   translation:          'Translation',
   didYouGetIt:          'Did you get it right?',
@@ -969,10 +974,6 @@ const dictationMode = {
   dictationPrompt:       'Write what you heard, in romaji',
   dictationListen:       'Listen',
   dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
-  // How much of the line the server matched, printed beside the
-  // learner's own answer. A measurement, not a verdict — the verdict is
-  // the rating bar under the card, and it is theirs.
-  dictationCaught:       n => `${n}% matched`,
 }
 
 // ── Dictionary ────────────────────────────────────────────

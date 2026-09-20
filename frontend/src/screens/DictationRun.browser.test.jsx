@@ -259,7 +259,7 @@ describe('DictationRun', () => {
   it('prints what was typed back, beside how much of it matched', async () => {
     const root = await answered()
     expect(root.textContent).toContain('gakkou wa kuji desu')
-    expect(root.querySelector('.kaki-accuracy').textContent).toContain('90')
+    expect(root.querySelector('.prose__measure').textContent).toContain('90')
   })
 
   it('hands the grade to the learner, not to the server', async () => {
