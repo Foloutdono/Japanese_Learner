@@ -13692,15 +13692,30 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
+  max-width: 100%;
   padding: var(--sp-1) var(--sp-3);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-pill);
 }
 .analysis-grammar-chip__pattern {
+  flex: none;
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
 }
+/* The gloss (plan 095): what the rule does, in the learner's
+   language, between the pattern and its level. The catalogue's
+   one-liners run to eighty characters, so on a phone the gloss
+   wraps inside the pill (min-width: 0) rather than pushing the
+   level past its edge; the pattern and the level never shrink. */
+.analysis-grammar-chip__gloss {
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
 .analysis-grammar-chip__level {
+  flex: none;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;

@@ -307,6 +307,41 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelector('.analysis-grammar-chips .cap').textContent).toBe('Grammar in this text')
   })
 
+  // ── The gloss on the chip (plan 095) ───────────────────────────
+  // A chip says what its rule does. The local tier ships the gloss as
+  // the catalogue's {en, fr} pair (the analysis is shared across
+  // learners, so it cannot pick a language); the comprehension result
+  // ships a string it localised itself. The chip reads both, in the
+  // learner's language -- the browser lane is a French device.
+  const NAGARA = { pattern: '〜ながら', level: 'N4', raw_id: 'grammar_N4_〜ながら', kind: 'pattern', start: 4,
+    meaning: { en: 'while doing', fr: 'tout en faisant' }, structure: 'verb stem + ながら' }
+
+  it("a chip carries its rule's gloss in the learner's language, between the pattern and the level", async () => {
+    await render(withLang(<GrammarChips grammar={[NAGARA]} t={T} quiet label={null} />))
+    const chip = document.querySelector('.analysis-grammar-chip')
+    const gloss = chip.querySelector('.analysis-grammar-chip__gloss')
+    expect(gloss.textContent).toBe('tout en faisant')
+    expect(gloss.title).toBe('verb stem + ながら')
+    expect(before(chip.querySelector('.analysis-grammar-chip__pattern'), gloss)).toBe(true)
+    expect(before(gloss, chip.querySelector('.analysis-grammar-chip__level'))).toBe(true)
+  })
+
+  it('a gloss already localised by the server prints as it is, and a point without one prints none', async () => {
+    const grammar = [
+      { ...NAGARA, meaning: 'while doing' },
+      { pattern: '〜てから', level: 'N5', raw_id: 'grammar_N5_〜てから', start: 0 },
+    ]
+    await render(withLang(<GrammarChips grammar={grammar} t={T} quiet label={null} />))
+    const glosses = [...document.querySelectorAll('.analysis-grammar-chip')].map(c => c.querySelector('.analysis-grammar-chip__gloss')?.textContent ?? null)
+    expect(glosses).toEqual(['while doing', null])
+    expect(document.body.textContent).not.toContain('[object Object]')
+  })
+
+  it('without a language above it the gloss falls back to English rather than the chip falling over', async () => {
+    await render(<GrammarChips grammar={[NAGARA]} t={T} quiet label={null} />)
+    expect(document.querySelector('.analysis-grammar-chip__gloss').textContent).toBe('while doing')
+  })
+
   // ── The grammar a row is an instance of ───────────────────────
   // study/grammar_detect tells a MARKER (a point that is one
   // grammatical word: は, へ, です／だ) from a PATTERN built around one
@@ -343,6 +378,77 @@ describe('SentenceBreakdown', () => {
     // deck entry behind a particle to take one from.
     expect(rows[1].querySelector('.bkd-row__lvl').textContent).toBe('N5')
     expect(onTokenClick).not.toHaveBeenCalled()
+  })
+
+  it("a particle row prints the gloss of the marker it is, when nothing else glossed it (plan 095)", async () => {
+    const wa = { ...WA, meaning: { en: 'marks the sentence topic', fr: 'marque le thème de la phrase' } }
+    const analysis = {
+      available: true,
+      grammar: [{ ...wa, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [wa] })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />,
+    ))
+    const rows = document.querySelectorAll('.bkd-row')
+    // The word keeps the deck's gloss; the particle, which had an
+    // empty cell, reads its rule's -- in the learner's language.
+    expect(rows[0].querySelector('.bkd-row__meaning').textContent).toBe('student')
+    expect(rows[1].querySelector('.bkd-row__meaning').textContent).toBe('marque le thème de la phrase')
+  })
+
+  it("the model's contextual gloss on a particle wins over its marker's", async () => {
+    const wa = { ...WA, meaning: { en: 'marks the sentence topic', fr: 'marque le thème de la phrase' } }
+    const analysis = {
+      available: true,
+      grammar: [{ ...wa, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [wa], meaning: 'topic marker' })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />,
+    ))
+    expect(document.querySelectorAll('.bkd-row')[1].querySelector('.bkd-row__meaning').textContent).toBe('topic marker')
+  })
+
+  // ── The stage (plan 095) ───────────────────────────────────────
+  // The analyzer's shape used to be the one breakdown that showed no
+  // grammar: the points were detected, attached to every token and
+  // shipped, then drawn nowhere. Now the constructions are the quiet
+  // chips under the line, and the card of the word on the stage lists
+  // the rules that word is part of -- markers included, because for a
+  // particle the marker it is IS its rule.
+  it('the stage names the constructions under the line, and the card the rules of the word on it', async () => {
+    const onGrammarOpen = vi.fn()
+    const analysis = {
+      available: true, text: '学生は会いました。', unknown_count: 0,
+      grammar: [{ ...WA, start: 2, end: 3 }, { ...MASU, start: 5, end: 7 }],
+      tokens: [
+        tokenFixture(),
+        particleFixture({ grammar: [WA] }),
+        ...runFixture({ glossed: false, spanEnd: false }).map((tok, i) => (i === 1 ? { ...tok, grammar: [MASU] } : tok)),
+      ],
+    }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis} layout="stage" index={1} setIndex={vi.fn()} t={T}
+        onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={onGrammarOpen}
+      />,
+    ))
+    const stage = document.querySelector('.anl-stagebd')
+    // The line itself holds tokens and nothing else (the canvas rule).
+    expect(stage.querySelector('.tok-line .analysis-grammar-chips')).toBeNull()
+    // Under it, the constructions and not the markers: は is one
+    // word's rule, not the sentence's.
+    const under = [...stage.children].find(el => el.classList.contains('analysis-grammar-chips'))
+    expect([...under.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['〜ます／〜ません'])
+    // The card is は's: its rule is the marker, as a door.
+    const onCard = document.querySelector('.token-card .analysis-grammar-chips')
+    expect([...onCard.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['は'])
+    onCard.querySelector('.analysis-grammar-chip__door').click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
+    // No rule, no row: the card does not hold an empty strip.
+    expect(document.querySelectorAll('.token-card .analysis-grammar-chips')).toHaveLength(1)
   })
 
   it('a row that already opens a word carries its marker beside it rather than losing it', async () => {

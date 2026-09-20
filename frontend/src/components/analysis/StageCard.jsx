@@ -1,5 +1,6 @@
 import { FuriganaParts } from '../study/Readings'
 import { MineButton } from './MineButton'
+import { GrammarChips } from './GrammarChips'
 
 // Content-word POS classes -- matches study/analysis.py's _CONTENT_POS,
 // so the "can't add, not in the app deck" control shows up on exactly
@@ -12,13 +13,17 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // reading beside it, the part of speech as a caption pill; the gloss
 // (the deep tier's contextual one once bought, the dictionary's own
 // otherwise — the learner shouldn't need to buy an explanation to
-// know what 電車 means); then the kanji it contains as squares that
-// open their entries, and the one deck action.
+// know what 電車 means); the rules the word is part of (plan 095):
+// the marker it IS (は, です) and the construction it is inside
+// (〜ています), each with its gloss and each a door to its lesson,
+// through `onGrammarOpen` — the answer to "what is this ん doing
+// here", on the card of that very ん; then the kanji it contains as
+// squares that open their entries, and the one deck action.
 //
 // `emphasize` marks the single unknown Token of an i+1 Sentence (see
 // SentenceBreakdown's isUnknownToken) -- that one word is the entire
 // reason the Sentence is worth studying, so it says so.
-export function StageCard({ word, t, onWordClick, onKanjiClick, mining, emphasize = false }) {
+export function StageCard({ word, t, onWordClick, onKanjiClick, onGrammarOpen, mining, emphasize = false }) {
   const gloss = word.meaning ?? word.vocab_match?.entry?.meaning
   const showMine = word.vocab_match || CONTENT_POS.has(word.pos)
   const surface = <FuriganaParts parts={word.furigana ?? [{ text: word.surface }]} />
@@ -45,6 +50,11 @@ export function StageCard({ word, t, onWordClick, onKanjiClick, mining, emphasiz
 
       {gloss && <span className="token-card__gloss">{gloss}</span>}
       {emphasize && <span className="token-card__i1">{t.iPlusOne}</span>}
+      {/* Markers included: for a particle, the marker it is IS its
+          rule. Quiet, like the chips under the line -- the deck
+          action on this card is the word's, and a rule is added to a
+          deck from its own sheet. */}
+      <GrammarChips grammar={word.grammar} t={t} quiet label={null} withMarkers onOpen={onGrammarOpen} />
 
       <div className="token-card__foot">
         <span className="token-card__kanji">

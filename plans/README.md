@@ -191,6 +191,25 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 20 — the grammar on the stage, and the chip that says what it
+  does** (plan 095, 2026-09-20, DONE). The analyzer's stage was the one
+  breakdown that drew no grammar: the points were detected, attached
+  to every token and shipped, then shown nowhere on the screen a
+  learner brings a sentence to. Now the constructions are the practice
+  modes' quiet chips under the token line and the stage card lists the
+  rules of the word on it (markers included -- for は, the marker it is
+  IS its rule), each a door to the point's sheet (`DictionaryLookupSheet`
+  by card id, as ReadingRun opens it). And every chip carries its
+  rule's one-line gloss: the local tier ships the catalogue's {en, fr}
+  pair (`study/analysis._grammar_entries`; the result is pure and shared,
+  so the screen picks the language through `grammarGloss.js`), the
+  comprehension result's string passes through, and a particle's row
+  prints its marker's gloss where its meaning cell used to be empty.
+  Options 2 (the pattern drawn on the line), 4 (the rules the detector
+  still refuses: 〜すぎる, 〜てみる, the passive and potential forms)
+  and 5 (the explanation tied to the points found) were laid out in the
+  same session and not taken.
+
 - **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE;
   the content waves landed level by level, N5/N4 then N3, N2 and N1).
   Owner-directed rework of the grammar line. The catalogue moves to

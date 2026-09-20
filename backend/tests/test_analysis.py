@@ -74,6 +74,37 @@ class AnalyzeLocalTests(unittest.TestCase):
                 self.assertIn(point["raw_id"], ids)
                 self.assertIn(point["kind"], ("marker", "pattern"))
 
+    def test_a_point_carries_its_gloss_in_both_languages(self) -> None:
+        """Plan 095: a chip says what its rule does without the sheet
+        being opened. The gloss is the catalogue's {en, fr} pair rather
+        than one language, because this result is pure and shared across
+        every learner -- the screen picks the language (frontend
+        grammarGloss.js), and the copy a token carries is the same one,
+        so a particle's row can print it too."""
+        r = analyze_local("今日は学校へ行きません。")
+        wa = next(g for g in r["grammar"] if g["pattern"] == "は")
+        self.assertEqual(set(wa["meaning"]), {"en", "fr"})
+        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"])
+        self.assertTrue(wa["structure"])
+        on_token = next(g for t in r["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])
+        self.assertEqual(on_token["meaning"], wa["meaning"])
+        self.assertEqual(on_token["structure"], wa["structure"])
+        # Kept through the per-user half, on the sentence and the token.
+        with_state = attach_user_state(r, {}, "some-user")
+        self.assertEqual(next(g for g in with_state["grammar"] if g["pattern"] == "は")["meaning"], wa["meaning"])
+        self.assertEqual(
+            next(g for t in with_state["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])["meaning"],
+            wa["meaning"],
+        )
+
+    def test_the_gloss_is_a_copy_and_never_the_catalogue_s_own(self) -> None:
+        """The result is cached and handed around; editing it must not
+        reach the catalogue every later analysis reads from."""
+        from content.grammar_points_data import find
+        r = analyze_local("今日は学校へ行きません。")
+        wa = next(g for g in r["grammar"] if g["pattern"] == "は")
+        self.assertIsNot(wa["meaning"], find("は")[1]["meaning"])
+
     def test_a_marker_is_told_from_a_construction(self) -> None:
         """The screens put the two in different places -- a marker on
         the row of the particle it is, a construction in the chips over

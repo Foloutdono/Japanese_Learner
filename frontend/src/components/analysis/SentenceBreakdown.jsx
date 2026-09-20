@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useLang } from '../../LangContext'
 import { CardTransition } from '../study/CardTransition'
 import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
@@ -10,6 +11,7 @@ import { StatusBadge } from './StatusBadge'
 import { DeckPicker } from './DeckPicker'
 import { StageCard } from './StageCard'
 import { rowsOf } from './rows'
+import { grammarGloss } from './grammarGloss'
 
 // Mirrors study/analysis.py's _CONTENT_POS + unknown_count predicate
 // exactly, so "the single unknown Token" identified here for i+1
@@ -190,6 +192,9 @@ export function SentenceLine({ analysis, text, t, onTokenClick }) {
 // else the deck's own -- a learner should not need a model to know
 // what 電車 means. The level is the deck's, as a plain badge.
 export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
+  // Guarded like GrammarChips': the rows are drawn under a bare render
+  // in the tests, with no provider above them.
+  const lang = useLang()?.lang
   const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
   if (!rows.length) return null
   return (
@@ -197,7 +202,6 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
       {rows.map((row, i) => {
         const head = row.head
         const state = tokState(head)
-        const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? ''
         const reading = row.reading !== row.surface ? row.reading : ''
         const markers = (onGrammarOpen ? row.markers : null) ?? []
         // A row with no deck entry behind it used to be the one row
@@ -210,6 +214,13 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
         // it, and carries the marker beside its level instead.
         const door = !head.vocab_match && markers.length === 1 ? markers[0] : null
         const chips = door ? [] : markers
+        // The meaning: the model's contextual gloss where it was
+        // bought, else the deck's own, else -- for the row that is a
+        // marker and nothing else -- the marker's gloss (plan 095).
+        // 「は」 used to be the one row with an empty meaning cell,
+        // and "marks the sentence topic" is precisely what a learner
+        // looking at that row wants to read there.
+        const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? (door ? grammarGloss(door, lang) : '')
         return (
           <div key={i} className="bkd-row">
             {head.vocab_match && onTokenClick ? (
@@ -237,19 +248,24 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
             )}
             {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
             <span className="bkd-row__meaning">{meaning}</span>
-            {chips.map(point => (
-              <button
-                key={point.raw_id}
-                type="button"
-                className="bkd-row__mark"
-                lang="ja"
-                onClick={e => { e.stopPropagation(); onGrammarOpen(point) }}
-                aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${point.pattern}`}
-                title={t.openDictionary}
-              >
-                {point.pattern}
-              </button>
-            ))}
+            {chips.map(point => {
+              // The marker beside a word row is one character wide, so
+              // its gloss is its title and its name, not a second cell.
+              const gloss = grammarGloss(point, lang)
+              return (
+                <button
+                  key={point.raw_id}
+                  type="button"
+                  className="bkd-row__mark"
+                  lang="ja"
+                  onClick={e => { e.stopPropagation(); onGrammarOpen(point) }}
+                  aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${point.pattern}${gloss ? ` — ${gloss}` : ''}`}
+                  title={gloss || t.openDictionary}
+                >
+                  {point.pattern}
+                </button>
+              )
+            })}
             {(head.vocab_match?.level || door?.level) && (
               <span className="type-badge bkd-row__lvl">{head.vocab_match?.level ?? door.level}</span>
             )}
@@ -272,12 +288,14 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
 //               to share.
 //   'stage'   — the analyser's control-room shape (the mockup round):
 //               the sentence as its own surface panel where status is
-//               an UNDERLINE rather than an ink colour, then the
-//               caller's `controls` (the view/furigana dials), then
-//               the same carousel with the card grown to the stage.
-//               Lives here beside its siblings so the three shapes
-//               share TokenCard, FuriganaParts and the badges instead
-//               of a fourth near-copy drifting off on its own.
+//               an UNDERLINE rather than an ink colour, the grammar
+//               the sentence is built with as quiet chips under it
+//               (plan 095), then the caller's `controls` (the
+//               view/furigana dials), then the same carousel with the
+//               card grown to the stage. Lives here beside its
+//               siblings so the three shapes share TokenCard,
+//               FuriganaParts and the badges instead of a fourth
+//               near-copy drifting off on its own.
 //   'rows'    — the practice modes' shape (plan 084): the ruby line,
 //               the sentence's `translation`, one row per word, the
 //               grammar spotted, and the `note` (else the deep tier's
@@ -353,6 +371,17 @@ export function SentenceBreakdown({
           <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--offdeck" />{t.offDeckKey}</span>
         </div>
 
+        {/* ── The grammar the sentence is built with (plan 095) ──
+            The constructions the local tier found, as the practice
+            modes' quiet chips, each a door to its lesson. The stage
+            used to be the one breakdown that showed none of it: the
+            points were detected, attached to every token and
+            shipped, and then drawn nowhere on the screen a learner
+            brings a sentence to precisely to ask what it is made of.
+            The markers (は, を) are not here -- they are the rule of
+            one word, and the card below says so about that word. */}
+        <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />
+
         {controls}
 
         {tokenView === 'table' ? (
@@ -370,6 +399,7 @@ export function SentenceBreakdown({
                 t={t}
                 onWordClick={onTokenClick}
                 onKanjiClick={onKanjiClick}
+                onGrammarOpen={onGrammarOpen}
                 mining={mining}
                 emphasize={analysis.unknown_count === 1 && isUnknownToken(current)}
               />

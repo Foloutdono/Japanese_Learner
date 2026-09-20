@@ -399,6 +399,44 @@ describe('the token table (canvas: a real table, not the list layout)', () => {
   })
 })
 
+describe('the grammar on the stage (plan 095)', () => {
+  it('names the constructions the sentence is built with under the line, each a door to its lesson', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    const chips = [...bd.children].find(el => el.classList.contains('analysis-grammar-chips'))
+    expect(chips, 'the chips ride the stage, under the line').not.toBeNull()
+    expect([...chips.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['〜から'])
+    // Quiet: no caption, no status pill, no deck action (the rule is
+    // added to a deck from its own sheet).
+    expect(chips.querySelector('.cap')).toBeNull()
+    expect(chips.querySelector('.analysis-mine-btn')).toBeNull()
+
+    // The door opens the point's sheet by its card id, over the stage.
+    expect(document.querySelector('.dict-sheet')).toBeNull()
+    chips.querySelector('.analysis-grammar-chip__door').click()
+    await settle(60)
+    const sheet = document.querySelector('.dict-sheet')
+    expect(sheet).not.toBeNull()
+    expect(sheet.getAttribute('aria-label')).toContain('g1')
+    expect(apiFetch.mock.calls.some(([url]) => String(url).includes('category=grammar') && String(url).includes('id=g1'))).toBe(true)
+    // And closes from the sheet, leaving the stage as it was.
+    document.querySelector('.dict-sheet .btn-secondary').click()
+    await settle(60)
+    expect(document.querySelector('.dict-sheet')).toBeNull()
+    expect(tokens(screen).length).toBe(SENTENCES[0].tokens.length)
+  })
+
+  it('a sentence with no construction carries no chip strip, and the second sentence is read on its own', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    await settle(60)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    expect([...bd.children].some(el => el.classList.contains('analysis-grammar-chips'))).toBe(false)
+  })
+})
+
 describe('the stage rhythm, the stepper and the dials', () => {
   it('breathes: line, card and dials are separated by the stage gap', async () => {
     const screen = await renderScreen()

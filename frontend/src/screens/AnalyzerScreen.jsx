@@ -7,6 +7,7 @@ import { Seg } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { WordDetail } from '../components/analysis/WordDetail'
+import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { useMining } from '../components/analysis/useMining'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
@@ -175,6 +176,12 @@ export default function AnalyzerScreen({ session }) {
   // same fix, and plans/README.md's plan-004 note for the bug class
   // this avoids.
   const closeDetail = useCallback(() => setDetail(null), [])
+  // A grammar point's sheet (plan 095): the chips under the line and
+  // the rules on the stage card open the point's lesson, by its card
+  // id, the way the practice modes do (ReadingRun's grammarId). Stable
+  // for the same reason closeDetail is.
+  const [grammarId, setGrammarId] = useState(null)
+  const closeGrammar = useCallback(() => setGrammarId(null), [])
 
   // Focus lands here when a Passage arrives. It has to be a real focus
   // move, not just a scroll: the Analyze button lives INSIDE the panel
@@ -362,6 +369,7 @@ export default function AnalyzerScreen({ session }) {
 
   function analyzeDraft() {
     setDetail(null)
+    setGrammarId(null)
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
   }
 
@@ -372,14 +380,17 @@ export default function AnalyzerScreen({ session }) {
   // has always done this; the two video ingests did not, which is the
   // only path by which a dialog could still be open when the arrival
   // effect below moves focus to the result -- stealing focus out of a
-  // live dialog and silently defeating useDialog's Tab-wrap trap.
+  // live dialog and silently defeating useDialog's Tab-wrap trap. The
+  // grammar sheet is a dialog over the same Passage, and closes with it.
   function startVideoFromFile(file, opts) {
     setDetail(null)
+    setGrammarId(null)
     analyzer.startVideoFromFile(file, opts)
   }
 
   function startVideoFromLink(url, opts) {
     setDetail(null)
+    setGrammarId(null)
     analyzer.startVideoFromLink(url, opts)
   }
 
@@ -405,6 +416,7 @@ export default function AnalyzerScreen({ session }) {
     if (lastBoardedRef.current !== key) {
       analyzer.reset()
       setDetail(null)
+      setGrammarId(null)
       setDraft('')
       setFromImage(false)
       setVideoUrl('')
@@ -426,6 +438,7 @@ export default function AnalyzerScreen({ session }) {
   function clearPassage() {
     analyzer.reset()
     setDetail(null)
+    setGrammarId(null)
     setDraft('')
     setFromImage(false)
     setIntakeOpen(true)
@@ -580,6 +593,14 @@ export default function AnalyzerScreen({ session }) {
     })
   }
 
+  // A rule, the same way: the lesson opens over the stage, and the
+  // clock stops while it is read.
+  function openGrammar(point) {
+    if (!point?.raw_id) return
+    playerRef.current?.pause()
+    setGrammarId(point.raw_id)
+  }
+
   function openKanjiDetail(k) {
     playerRef.current?.pause()
     setDetail({
@@ -595,6 +616,7 @@ export default function AnalyzerScreen({ session }) {
 
   function openHistoryEntry(entry) {
     setDetail(null)
+    setGrammarId(null)
     analyzer.openHistoryEntry(entry).then(text => {
       // Only a passage entry resolves with its text (a session resolves
       // with null -- see useAnalyzerSession's openHistoryEntry). The
@@ -963,6 +985,7 @@ export default function AnalyzerScreen({ session }) {
                   setIndex={setTokenIndex}
                   onTokenClick={openVocabDetail}
                   onKanjiClick={openKanjiDetail}
+                  onGrammarOpen={openGrammar}
                   mining={mining}
                   controls={
                     /* ── The stage's two dials ──
@@ -1145,6 +1168,9 @@ export default function AnalyzerScreen({ session }) {
 
       {detail && (
         <WordDetail detail={detail} t={t} onClose={closeDetail} mining={mining} />
+      )}
+      {grammarId && (
+        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} mining={mining} onClose={closeGrammar} />
       )}
     </main>
   )

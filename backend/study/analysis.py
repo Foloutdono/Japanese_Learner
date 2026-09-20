@@ -56,6 +56,17 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
 
     `morphemes` is the tokenization the caller already has, so a
     breakdown reads the sentence once.
+
+    `meaning` and `structure` (plan 095) are the catalogue's own one-line
+    gloss and formation, so a chip can say what the rule does without
+    the learner opening its sheet -- 〜ながら is "while", and nobody
+    should have to press it to learn that. The gloss travels as the
+    catalogue's {en, fr} pair rather than in one language: this result
+    is pure and shared across every learner who asks about the sentence
+    (see the module docstring), and which language the reader is in is
+    the screen's to decide (frontend grammarGloss.js). The comprehension
+    result's points (routes/reading.py) were already localised on the
+    server into a plain string; the same reader takes both.
     """
     out = []
     for pattern, level, start, end, kind in grammar_detect.detect(sentence, morphemes):
@@ -64,6 +75,7 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
         if entry is None:
             logger.debug("detect hit %r/%s has no catalogue entry; dropped", pattern, level)
             continue
+        meaning = entry.get("meaning")
         out.append({
             "pattern": pattern,
             "level": level,
@@ -71,6 +83,11 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
             "end": end,
             "kind": kind,
             "raw_id": grammar_to_id(entry, level),
+            # A copy, never the catalogue's own dict: this result is
+            # cached and handed around, and nothing downstream may be
+            # able to edit the catalogue through it.
+            "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
+            "structure": entry.get("structure", ""),
         })
     return out
 
@@ -89,7 +106,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
     for token in tokens:
         start, end = token["start"], token["end"]
         token["grammar"] = [
-            {k: g[k] for k in ("pattern", "level", "raw_id", "kind")}
+            {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure")}
             for g in grammar
             if g["start"] < end and start < g["end"]
         ]

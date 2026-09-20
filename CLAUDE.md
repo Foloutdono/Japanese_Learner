@@ -80,8 +80,15 @@ runtime purpose. Two consequences worth knowing:
   replacing the wall map and the platform grid (cited in
   `components/station/LinePlate.jsx`, `domain/lineProgress.js`'s
   `stopsAround`, `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx`
-  and `index.css`; DESIGN.md, Structure).
-  When starting a new wave, begin at **095** or higher, and check
+  and `index.css`; DESIGN.md, Structure), and **095** is the grammar on
+  the analyzer stage and the chip that says what its rule does — the
+  constructions as quiet chips under the token line, the rules of the
+  word on the stage card, and the catalogue's gloss on every chip and
+  marker row (cited in `study/analysis.py`,
+  `components/analysis/GrammarChips.jsx`, `components/analysis/grammarGloss.js`,
+  `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`
+  and `screens/AnalyzerScreen.jsx`).
+  When starting a new wave, begin at **096** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
