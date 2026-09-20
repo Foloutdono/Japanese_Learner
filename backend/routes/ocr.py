@@ -16,6 +16,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from core.credits import require_pass
 
 from core.auth import get_user_id
+from core.credits import local_today, next_refill_at
 from core.db import db_conn
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
@@ -31,13 +32,27 @@ logger = logging.getLogger(__name__)
 # frontend/src/lib/image.js's MAX_UPLOAD_BYTES must agree with this.
 _MAX_IMAGE_BYTES = 8 * 1024 * 1024
 
-# Nothing here costs money -- NVIDIA's vision models are on the free
-# tier, same account as the text models. The resource being protected is
-# that SHARED quota: one client in a retry loop degrades OCR for
-# everyone and takes the analyzer's deep tier and exam generation down
-# with it, since they draw on the same account. 60 images/day is far
-# beyond real study use.
-_DAILY_OCR_LIMIT = int(os.environ.get("OCR_DAILY_LIMIT", "60"))
+# ── What the cap is for, and why the number moved ───────────────
+# It used to be 60, and the reason given was that nothing here cost
+# money: the vision models were on a free tier, and what a runaway
+# client threatened was the SHARED quota the text models drew on too.
+# That stopped being true when the app went paid (plan 092) -- vision
+# now goes to Google first, and every image is billed. The resource
+# being protected is the bill.
+#
+# An image is roughly 1,400 input tokens plus the prompt, and a few
+# hundred out. At 60 a day that is 1,800 images a month from ONE
+# learner: several dollars against a subscription of a few, which is
+# not a ceiling, it is a hole. See docs/llm-commercial-plan.md's
+# "abuse ceiling" row.
+#
+# 20 rather than the 10-15 that document proposed. 10 would stop being
+# an abuse ceiling and start being a product limit: a learner reading
+# a manga chapter photographs it page by page, and a chapter is more
+# than ten pages. 20 covers a real session and still cuts the worst
+# case by two thirds. It is env-overridable precisely because the right
+# number is a measurement nobody has yet -- ocr_usage has the data.
+_DAILY_OCR_LIMIT = int(os.environ.get("OCR_DAILY_LIMIT", "20"))
 
 # Magic bytes, because a client's declared content_type is a claim, not
 # evidence. WebP is RIFF....WEBP, so it needs the second check.
@@ -84,23 +99,60 @@ def _claim_daily_slot(user_id: str) -> int:
 
     Incremented BEFORE the model call on purpose: a failing call still
     costs a slot, because a client retrying a failure is exactly what a
-    cap exists to stop."""
+    cap exists to stop.
+
+    "Today" is the LEARNER's, not the server's -- core/credits.py's own
+    rule, and the same helper. It was CURRENT_DATE (the server's clock,
+    UTC in every deployment) while the cap was 60 and nobody reached
+    it. At 20 the boundary decides whether someone can study in the
+    evening: a learner in Tokyo crosses into the next UTC day at 09:00
+    local, so a UTC cap would hand them a fresh allowance mid-morning
+    and none at all after dinner. It also makes the message the screen
+    already shows -- "You've hit today's image limit. Try again
+    tomorrow." -- true, which it was not before.
+
+    A learner with no profile row, or none that has reported an offset
+    yet, falls back to UTC exactly as local_today does."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+            cur.execute(
                 """
                 INSERT INTO ocr_usage (user_id, day, count)
-                VALUES (%s, CURRENT_DATE, 1)
+                VALUES (%s, %s, 1)
                 ON CONFLICT (user_id, day)
                 DO UPDATE SET count = ocr_usage.count + 1
                 RETURNING count
                 """,
-                (user_id,),
+                (user_id, local_today(row[0] if row else None)),
             )
             (count,) = cur.fetchone()
         conn.commit()
         return count
+    finally:
+        conn.close()
+
+
+def _resets_at(user_id: str):
+    """When this learner's allowance comes back, as a UTC instant.
+
+    A second query, on the refusal path only: the claim above already
+    read the offset, but threading it out would change that function's
+    return for the sake of a string nobody reads on the happy path."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+        return next_refill_at(row[0] if row else None)
     finally:
         conn.close()
 
@@ -128,9 +180,15 @@ async def recognize_image(
 
     used = _claim_daily_slot(user_id)
     if used > _DAILY_OCR_LIMIT:
+        # The screen shows its own localized line for a 429 (the
+        # frontend's `ocrLimitReached`), so this detail is for the log
+        # and for whoever is asked why a learner is being refused. The
+        # reset instant is the part that cannot be worked out from the
+        # outside, now that the day is the learner's rather than UTC's.
         raise HTTPException(
             status_code=429,
-            detail=f"Daily image limit reached ({_DAILY_OCR_LIMIT} per day)",
+            detail=(f"Daily image limit reached ({_DAILY_OCR_LIMIT} per day); "
+                    f"resets {_resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
         )
 
     prompt = OCR_PROMPT

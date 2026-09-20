@@ -79,7 +79,9 @@ FEATURES = {
     "ocr_vision": (
         20, 1400, 400,
         "20 photos/mo. An image is ~1.1k tokens plus OCR_PROMPT. The daily "
-        "cap is 60 (OCR_DAILY_LIMIT), which is the abuse ceiling, not this.",
+        "cap is 20 (OCR_DAILY_LIMIT), down from 60 once images started "
+        "being billed -- so the abuse ceiling above this row is a third of "
+        "what it was.",
     ),
     "exam_generation": (
         52, 1300, 2000,

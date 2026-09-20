@@ -128,7 +128,7 @@ At Gemini 3.1 Flash-Lite, per paying learner per month:
 | Light (2 sessions/week) | $0.14 | $0.10 |
 | Typical (daily-ish) | $0.46 | $0.32 |
 | Heavy (power user) | $1.37 | $0.97 |
-| **Abuse ceiling at today's limits** | **$6.41** | **$4.44** |
+| **Abuse ceiling at today's limits** | **$5.23** | **$3.67** |
 
 Blended at 70% light / 25% typical / 5% heavy: **$0.20–0.23 per paying
 subscriber per month.**
@@ -145,10 +145,13 @@ the two cheap models it is under 1%; on Claude Sonnet 5 it would be
 ~25%, which is the real reason not to reach for a frontier model here.
 
 The number to watch is not the blended average, it is the last row of
-the first table. `OCR_DAILY_LIMIT` is 60 images a day and reading
-comprehension has no cap at all, so a single determined user can spend
-20x the typical subscriber. That is survivable at these prices, but it
-should be a deliberate decision rather than an accident.
+the first table. A single determined user can still spend 15-20x the
+typical subscriber. `OCR_DAILY_LIMIT` is 20 now (§5.5), which took that
+ceiling from $4.44 to $3.67 — a smaller dent than it looks like it
+should be, and the reason is worth stating plainly: **OCR was never
+where the tail was.** Reading comprehension has no daily ceiling at all,
+and at ~780 calls a month it is most of that row on its own. Capping it
+is the remaining half of §5.5.
 
 ## 5. What to do, in order
 
@@ -216,10 +219,24 @@ already half-built here.
 4. **Batch the offline work.** Exam papers and
    `scripts/generate_grammar_sentences.py` are not on the request path.
    Both Anthropic and OpenAI price a batch queue at 50%.
-5. **Then, and only then, cap the tails.** Drop `OCR_DAILY_LIMIT` from
-   60 to something a human actually needs (10–15), and give reading
-   comprehension a daily ceiling of its own. Both are already the right
-   shape — the OCR one is a counted daily slot with a 429.
+5. **Cap the tails.** **Half done.** `OCR_DAILY_LIMIT` is 20, not 60
+   — and 20 rather than the 10–15 this line first proposed, because 10
+   stops being an abuse ceiling and starts being a product limit: a
+   learner reading a manga chapter photographs it page by page, and a
+   chapter is more than ten pages. The counter also moved to the
+   learner's local day (`core/credits.local_today`), which the 60 never
+   needed and 20 does: a learner in Tokyo crosses into the next UTC day
+   at 09:00 local, so a UTC cap would refill them mid-morning and leave
+   them nothing after dinner — and would make the screen's own "try
+   again tomorrow" untrue.
+
+   **Reading comprehension still has no ceiling**, and it is the bigger
+   half: at ~780 calls a month it is most of the abuse row above on its
+   own, where OCR at 20/day is about $1. The OCR cap moved that row by
+   17%; a comprehension cap would move it far more. It needs a product
+   decision rather than a number — a learner who reads ten exercises in
+   an evening is the app working, not abuse — so it is left open
+   deliberately.
 6. ~~**Keep the free tier as a fallback, not the primary.**~~ **Done.**
    `_DEFAULT_PROVIDER_ORDER` is now `google,openai,openrouter`: paid
    first, OpenRouter `:free` last as the degradation path. NVIDIA is no

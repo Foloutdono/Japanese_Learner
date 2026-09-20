@@ -171,3 +171,112 @@ def test_a_failed_call_still_costs_a_slot(client, monkeypatch):
 
     monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
     assert _post(client).status_code == 429
+
+
+# ── The cap, after plan 092 ──────────────────────────────────
+# It was 60 while the vision models were free and the thing being
+# protected was a shared quota. Every image is billed now, so the cap
+# protects the bill -- and a cap a learner can actually reach has to
+# agree with them about when the day ends.
+
+def test_the_shipped_cap_is_low_enough_to_be_one():
+    """A guard on the number itself. 60 images a day is 1,800 a month
+    from one learner, which against a subscription of a few dollars is
+    not a ceiling. If this needs raising, raise it deliberately --
+    OCR_DAILY_LIMIT is an environment variable for exactly that."""
+    assert ocr_module._DAILY_OCR_LIMIT <= 30, (
+        f"OCR_DAILY_LIMIT ships at {ocr_module._DAILY_OCR_LIMIT}; at this "
+        "level a single client can spend a subscription's worth of vision "
+        "calls in a month (docs/llm-commercial-plan.md, the abuse ceiling)"
+    )
+
+
+def test_the_day_is_the_learners_not_the_servers(client, monkeypatch):
+    """CURRENT_DATE is the server's clock, UTC in every deployment. A
+    learner in Tokyo crosses into the next UTC day at 09:00 local, so a
+    UTC cap hands them a fresh allowance mid-morning and none after
+    dinner -- and makes the screen's own "try again tomorrow" wrong."""
+    from datetime import date
+
+    seen = []
+
+    def _fake_local_today(tz_offset_min, *a, **kw):
+        seen.append(tz_offset_min)
+        return date(2030, 1, 2)
+
+    monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
+    monkeypatch.setattr(ocr_module, "local_today", _fake_local_today)
+    assert _post(client).status_code == 200
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT day FROM ocr_usage WHERE user_id = %s", (DEV_USER_ID,))
+            rows = cur.fetchall()
+            cur.execute("DELETE FROM ocr_usage WHERE user_id = %s", (DEV_USER_ID,))
+        conn.commit()
+    finally:
+        conn.close()
+
+    # The row landed on the learner's day, not on the server's.
+    assert [r[0] for r in rows] == [date(2030, 1, 2)]
+    assert seen, "the learner's offset was never consulted"
+
+
+def test_the_offset_comes_from_the_learners_profile(client, monkeypatch):
+    seen = []
+
+    def _fake_local_today(tz_offset_min, *a, **kw):
+        seen.append(tz_offset_min)
+        from datetime import date
+        return date(2030, 1, 3)
+
+    # ensure_profile_row first: username is NOT NULL, so a bare INSERT
+    # here would be testing the schema rather than the offset. The old
+    # value is restored afterwards -- conftest's header names the bugs
+    # a profile row left behind under DEV_USER_ID has already caused.
+    from routes.profile import ensure_profile_row
+    ensure_profile_row(DEV_USER_ID)
+
+    def _set_offset(value):
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute(
+                    "UPDATE user_profiles SET tz_offset_min = %s WHERE user_id = %s",
+                    (value, DEV_USER_ID),
+                )
+            conn.commit()
+        finally:
+            conn.close()
+
+    previous = None
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                        (DEV_USER_ID,))
+            previous = cur.fetchone()[0]
+    finally:
+        conn.close()
+
+    _set_offset(540)   # UTC+9
+    try:
+        monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
+        monkeypatch.setattr(ocr_module, "local_today", _fake_local_today)
+        assert _post(client).status_code == 200
+        assert seen == [540]
+    finally:
+        _set_offset(previous)
+
+
+def test_the_refusal_says_when_the_allowance_returns(client, monkeypatch):
+    # The screen shows its own localized line; this is what the log and
+    # whoever is asked about it get to see.
+    monkeypatch.setattr(ocr_module, "chat", lambda *a, **k: "猫")
+    monkeypatch.setattr(ocr_module, "_DAILY_OCR_LIMIT", 1)
+    assert _post(client).status_code == 200
+
+    detail = _post(client).json()["detail"]
+    assert "1 per day" in detail
+    assert "resets" in detail
