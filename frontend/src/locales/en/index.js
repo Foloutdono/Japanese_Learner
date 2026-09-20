@@ -10,7 +10,7 @@ const auth = {
   loginBtn:          'Log in',
   signupBtn:         'Sign up',
   signupSuccess:     'Check your email to confirm your account.',
-  signOut:           'Sign Out',
+  signOut:           'Sign out',
   usernameInvalid:   'Username must be 3-20 characters (letters, numbers, underscore).',
   usernameTaken:     'This username is already taken.',
 }
@@ -36,9 +36,9 @@ const nav = {
   delete:            'Delete',
   edit:              'Edit',
   close:             'Close',
-  loading:           'Loading...',
+  loading:           'Loading…',
   waitingServer:     'Waking the server…',
-  errorTitle:        'That did not work',
+  errorTitle:        'That didn’t work',
   errorHint:         'Check your connection — your progress is safe.',
   // ── The chrome (plan 068): the five gates and the HUD ──
   tabLearn:          'Learn',
@@ -67,11 +67,11 @@ const nav = {
   balanceRefillAt:   (at) => `a day, at ${at}`,
   balanceHolds:      (cap) => `holds up to ${cap}`,
   balanceKanaFree:   'Kana reviews cost nothing',
-  gateShort:         (rides, due) => `Only ${rides} of the ${due} required`,
+  gateShort:         (rides, due) => `Only ${rides} of the ${due} can board`,
   gateNoCredits:     (refill, at) => `No credits left — +${refill} at ${at}`,
   runOutTitle:       'Out of credits',
   runOutCleared:     (n) => `${n} cleared`,
-  runOutWaiting:     (n) => `${n} wait for tomorrow`,
+  runOutWaiting:     (n) => `${n} wait until tomorrow`,
   runOutRefill:      'at midnight',
   runOutTomorrow:    'tomorrow',
   // 無料 — a lane that costs nothing (domain/credits.js).
@@ -127,7 +127,7 @@ const home = {
     ltd:     'Written by hand, nothing given',
     review:  'Ungraded browse, at your own pace',
   },
-  tip:               'Short sessions (15-20 min) but regular — SRS schedules everything automatically.',
+  tip:               'Short, regular sessions (15–20 min) — the scheduler does the rest.',
   homeFeedDown:      'Today’s data could not be loaded — tap to retry.',
   start:             'Start',
   homeTitle:         'Home',
@@ -158,7 +158,7 @@ const quiz = {
 
   // Selection prompts
   selectLevel:       'Choose your JLPT level',
-  selectMode:        'Choose your training mode',
+  selectMode:        'Choose how to study',
   selectKanaSet:     'Choose a kana set',
   selectPhase:       'Choose your training phase',
 
@@ -184,7 +184,7 @@ const quiz = {
   selectStudySource: 'Choose your study source',
   selectTier:        'Choose a frequency tier',
   kanjiUnit:         'kanji',
-  loadError:         'Error loading tiers. Try again.',
+  loadError:         'The tiers couldn’t be loaded. Try again.',
   // Label for the Top 100/200/500/1000 size toggle above a tier list
   // (see TierSelector.jsx) — aria-label only, not visible text.
   tierSizeLabel:     'Tier size',
@@ -264,7 +264,7 @@ const quiz = {
 
   // Input
   submit:            'Submit',
-  typeRomaji:        'Type the romaji...',
+  typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
 
@@ -391,7 +391,7 @@ const quiz = {
   kanji:             'Kanji',
 
   // Grammar screen
-  revealMeaning:     'What is the meaning of this rule?',
+  revealMeaning:     'What does this rule mean?',
   revealSentence:    'Complete the sentence below',
   revealMeaningBtn:  'Reveal meaning',
   showExamples:      'Show examples',
@@ -416,7 +416,7 @@ const stats = {
   todayPickSomething: 'Pick at least one',
   todayStart:         n => `Run ${n} ${n === 1 ? 'card' : 'cards'}`,
   todayAllTypes:      'All',
-  todaySearchPlaceholder: 'Find a lane...',
+  todaySearchPlaceholder: 'Find a lane…',
   todayLaneCount:     n => `${n} ${n === 1 ? 'service' : 'services'}`,
   todayNoMatch:       'No lane matches that.',
   todayNoMatchHint:   'Try another name, or clear the filters.',
@@ -574,7 +574,7 @@ const stats = {
   freqDomainDeck:     'JLPT words',
   freqDomainJmdict:   'Beyond JLPT',
   resetStats:        'Reset all',
-  resetConfirm:      'Erase ALL progress? This action is irreversible.',
+  resetConfirm:      'Erase all progress? This cannot be undone.',
   kana:              'Kana',
   jlptVocab:         'JLPT Vocabulary',
   globalSummary:     'Global summary',
@@ -709,7 +709,7 @@ const phraseAnalyzer = {
   hideHistory:         'Hide history',
   noHistory:           'No phrases analyzed yet.',
   phraseAnalyzeError:  "Couldn't analyze this phrase. Try again.",
-  clickForDetails:     'Click for definition & stats',
+  clickForDetails:     'Click for the definition and stats',
   inThisPhrase:        'In this phrase',
   appDefinition:       'Definition in the app',
   cardStats:           'Card stats',
@@ -938,7 +938,7 @@ const translationMode = {
   reviewCorrect:         'Correct',
   reviewAcceptable:      'Acceptable',
   reviewPartial:         'Partly right',
-  reviewIncorrect:       'Not right',
+  reviewIncorrect:       'Incorrect',
   reviewGood:            'What worked',
   reviewFix:             'To fix',
   reviewBetter:          'Corrected',
@@ -977,7 +977,7 @@ const dictationMode = {
 
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
-  dictionaryPlaceholder: 'Search kanji, kana, or meaning...',
+  dictionaryPlaceholder: 'Search a kanji, a kana or a meaning…',
   noResults:         'No results for',
   reading:           'Reading',
   romaji:            'Romaji',
@@ -1001,7 +1001,7 @@ const dictionary = {
   // The search was retried against a word the catalogue holds, because
   // what was typed found nothing. A statement, not a question.
   dictCorrectedFor:  'Results for',
-  dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
+  dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning…',
   // お気に入り — the shelf of kept entries (plan 093): the sixth chip,
   // the star on the plate in both states, and the shelf with nothing
   // on it yet.
@@ -1029,7 +1029,7 @@ const dictionary = {
   dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
-  dictionaryPlaceholderRadical: 'Filter these results by radical...',
+  dictionaryPlaceholderRadical: 'Filter these results by radical…',
   dictionaryResults: n => `${n} results`,
   dictRadicalNumber: (n) => `radical #${n}`,
   dictStrokesPlural: 'strokes',
@@ -1067,7 +1067,7 @@ const comprehension = {
   comprehensionTitle:       'Reading comprehension',
   comprehensionFetchError:  "Couldn't load a text. Try again.",
   comprehensionLimitReached: "That's every new text for today. Come back tomorrow.",
-  comprehensionGenerating:  'Generating a text for you…',
+  comprehensionGenerating:  'Writing a text for you…',
   comprehensionSubmitError:  "Couldn't submit answers. Try again.",
   doneReading:              'Done reading',
   reReadText:               'Re-read the text',
@@ -1277,31 +1277,31 @@ const settings = {
   // the visible toggle is already a real IconSun/IconMoon SVG.
 
   volumeMaster:       'Master volume',
-  volumeKana:         'Volume kana',
-  volumeVoice:        'Volume voice',
-  volumeEffects:      'Volume effects',
-  volumeUi:           'Volume UI',
-  volumeAmbiance:     'Volume ambiance',
-  volumeJingle:       'Volume jingle',
+  volumeKana:         'Kana volume',
+  volumeVoice:        'Voice volume',
+  volumeEffects:      'Effects volume',
+  volumeUi:           'Interface volume',
+  volumeAmbiance:     'Ambiance volume',
+  volumeJingle:       'Jingle volume',
   // The station announcements (playAnnouncement). This key was the one
   // channel in SLIDER_LABELS with nothing behind it in either locale,
   // so its row in the mixer drew a slider with no label at all.
-  volumeAnnouncement: 'Volume announcements',
-  volumeAnnouncements: 'Volume announcements',
+  volumeAnnouncement: 'Announcements volume',
+  volumeAnnouncements: 'Announcements volume',
 }
 
 // ── Decks ─────────────────────────────────────────────────
 const decks = {
   decks:             'My Decks',
   createDeck:        'Create deck',
-  deckNamePlaceholder: 'Deck name...',
+  deckNamePlaceholder: 'Deck name…',
   noDecks:           'No decks yet.',
   createFirstDeck:   'Create your first deck above.',
   // The shelf's own index — a search field and a row of type filters
   // (DecksScreen.jsx), modelled on the dictionary's console. `{n}` is
   // the count that survived both filters, following the same
   // placeholder convention browseSelectedCount uses.
-  decksSearchPlaceholder: 'Find a deck...',
+  decksSearchPlaceholder: 'Find a deck…',
   decksAllTypes:     'All',
   decksCount:        '{n} decks',
   decksCountOne:     '1 deck',
@@ -1358,15 +1358,15 @@ const decks = {
   browseTabVocab:         '語彙 Vocabulary',
   browseTabGrammar:       '文法 Grammar',
   browseAllLevels:        'All',
-  browseSearchPlaceholder: 'Search (kanji, kana, meaning...)',
+  browseSearchPlaceholder: 'Search (kanji, kana, meaning…)',
   browseResults:          'Results',
   // {n} follows the same placeholder convention as andMore above.
   browseSelectedCount:    '{n} selected',
-  searching:              'Searching...',
+  searching:              'Searching…',
   noResults:              'No results.',
   alreadyAdded:           'already added',
   close:                  'Close',
-  adding:                 'Adding...',
+  adding:                 'Adding…',
   addSelected:            'Add ({n})',
   browseAddFailed:        "These cards weren't added. Try again.",
   // Bulk select
@@ -1375,7 +1375,7 @@ const decks = {
 
   // Import modal
   importTitle:       'Import your data',
-  importSubtitle:    'Copy and paste your data here (from Word, Excel, Google Docs, etc.)',
+  importSubtitle:    'Paste your data here — from Word, Excel, Google Docs, anywhere.',
   importPreview:     'Preview',
   noPreview:         'Nothing to preview yet',
   termSep:           'Between term and definition',
@@ -1386,17 +1386,17 @@ const decks = {
   newRow:            'New row',
   semicolon:         'Semicolon',
   importBtn:         'Import',
-  importing:         'Importing...',
+  importing:         'Importing…',
   cards:             'cards',
-  andMore:           '... and {n} more',
+  andMore:           '… and {n} more',
 
   // Study screen
   studyMode:         'Study mode',
-  mixWithJLPT:       'Mix with JLPT content (optional)',
+  mixWithJLPT:       'Mix in JLPT content (optional)',
   startSession:      'Start',
   writePractice:     'Writing practice',
   revealAnswer:      'Reveal answer',
-  typeAnswer:        'Type your answer...',
+  typeAnswer:        'Type your answer…',
   // Custom vocab/kanji deck phase labels (StudyScreen.jsx) — K+K→S is
   // Kanji+Kana → Sens (meaning), same three-phase progression as the
   // built-in vocab/kanji decks.
@@ -1419,7 +1419,7 @@ const decks = {
   // The console's chip row, named for a screen reader. Its FIELD says
   // what 教材's own console says (decksSearchPlaceholder): one console
   // everywhere means the same words in it, and the longer sentence
-  // ("Search the library...") was cut by the tally on a phone before
+  // ("Search the library…") was cut by the tally on a phone before
   // anything had been typed into it.
   libraryTypes:          'Deck types',
   libraryBy:             name => `by ${name}`,
@@ -1443,7 +1443,7 @@ const decks = {
   libraryRemove:         'Remove',
   libraryRemoveConfirm:  'The deck leaves your shelf for good. Make your own copy first if you want to keep it.',
   libraryWithdrawn:      'Withdrawn.',
-  libraryWithdrawnHint:  ' Its author has deleted this deck. You can still study it and make your own copy, for a while.',
+  libraryWithdrawnHint:  ' Its author has deleted this deck. For a while yet, you can still study it and make your own copy.',
   libraryDeleteFollowed: n => (n === 1
     ? '1 learner follows this deck. Deleting it takes it off their shelf too — they will be told, and given a while to copy it.'
     : `${n} learners follow this deck. Deleting it takes it off their shelves too — they will be told, and given a while to copy it.`),
@@ -1486,7 +1486,7 @@ const exam = {
   examKindListening:   'Listening',
   examNotGeneratedYet: 'Written on first open',
   examGenerating:      'Writing your exam…',
-  examGeneratingHint:  'Questions are written fresh when nobody has a paper you haven’t already sat — this takes a minute or two. Once it exists it loads instantly, for you and for everyone else.',
+  examGeneratingHint:  'A paper is written fresh only when there is none you haven’t already sat — that takes a minute or two. Once written, it loads instantly, for you and for everyone else.',
   examLoadFailed:      "This paper couldn't be generated right now.",
   examLoadFailedHint:  'The question writer may be temporarily unavailable. Try again in a moment.',
   // Shown instead of examLoadFailedHint (and instead of the retry
@@ -1511,8 +1511,8 @@ const exam = {
   examNewPaper:        'New paper',
   examStarHint:        'Which piece belongs in the starred position?',
   examFullSentence:    'Full sentence:',
-  examAudioPending:    'Audio clip not generated yet for this question.',
-  examAudioUnavailable: 'Audio clip could not be loaded for this question.',
+  examAudioPending:    'The audio for this question hasn’t been generated yet.',
+  examAudioUnavailable: 'The audio for this question couldn’t be loaded.',
 
   // ── Result ──
   // Never call this a JLPT score. The real one is an IRT-scaled 尺度得点
@@ -1615,7 +1615,7 @@ const boarding = {
   // Welcome: the sign, the rolling stock, the promise.
   brdTagline: 'Take the train to proficiency.',
   brdBoard: 'Board',
-  brdHaveAccount: 'Have an account? Sign in',
+  brdHaveAccount: 'Already have an account? Sign in',
   // Google: "continue", never "sign up" or "sign in" — a provider does
   // not tell the two apart. You simply arrive.
   continueWithGoogle: 'Continue with Google',
@@ -1780,7 +1780,7 @@ const onboarding = {
     context: 'Which word completes the sentence?',
     grammar: 'Which grammar rule is at work?',
   },
-  onbTestStop: 'Stop here — place me on what I’ve answered',
+  onbTestStop: 'Stop here — place me from my answers so far',
   onbTestFinish: 'See my result',
   onbTestError: 'The test could not be loaded. Try again in a moment.',
   onbTestRetake: 'Retake the test',
@@ -1811,7 +1811,7 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
-  settingsRedoDesc: 'Recalibrate your level once you have progressed.',
+  settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the
   // scheduler — each shorter bar is a longer one with buttons left off
@@ -1861,7 +1861,7 @@ const onboarding = {
   settingsDeleteAccountBtn: 'Delete',
   settingsDeleteAccountConfirmQ: 'Delete your account and everything in it? This cannot be undone.',
   settingsDeleteAccountYes: 'Delete my account',
-  settingsDeleteAccountFailed: 'The deletion could not be completed. Please try again.',
+  settingsDeleteAccountFailed: 'Your account couldn’t be deleted. Try again.',
   privacyPolicy: 'Privacy policy',
   // ── The installed app (plan 065) ──
   pwaUpdateReady: 'A new timetable is in effect.',
@@ -1869,7 +1869,7 @@ const onboarding = {
   pwaUpdateLater: 'Later',
   offlineLine: 'No connection — the station is closed for now.',
   installApp: 'Install the app',
-  installAppHint: 'On your home screen, full screen, with the kana audio kept for offline.',
+  installAppHint: 'On your home screen, full screen, with the kana audio kept for offline use.',
   installAppBtn: 'Install',
   installIosTitle: 'Add to your home screen',
   installIosStep1: 'Tap Share in Safari\'s toolbar.',

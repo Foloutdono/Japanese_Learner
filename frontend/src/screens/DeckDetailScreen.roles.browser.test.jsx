@@ -86,7 +86,7 @@ describe('a deck you own', () => {
     await deck(MINE)
     const labels = chips().join(' ')
     expect(labels).toContain('Ajouter')
-    expect(chip('En faire le mien')).toBeUndefined()
+    expect(chip('En faire ma copie')).toBeUndefined()
   })
 
   it('offers publishing from the More sheet, not from the card', async () => {
@@ -120,7 +120,7 @@ describe('a deck you follow', () => {
   it('offers the copy and the exit, and no writes at all', async () => {
     await deck(FOLLOWED)
     const labels = chips().join(' ')
-    expect(labels).toContain('En faire le mien')
+    expect(labels).toContain('En faire ma copie')
     expect(labels).toContain('Ne plus suivre')
     expect(labels).not.toContain('Ajouter')
     expect(labels).not.toContain('Parcourir')
@@ -135,11 +135,11 @@ describe('a deck you follow', () => {
 
   it('asks before making a copy, and says what is kept', async () => {
     await deck(FOLLOWED)
-    chip('En faire le mien').click()
+    chip('En faire ma copie').click()
     await settle()
     expect(document.querySelector('.sheet__q').textContent).toContain('progression')
 
-    sheetButton('En faire le mien').click()
+    sheetButton('En faire ma copie').click()
     await settle()
     expect(requests).toContain('POST /api/decks/1/detach')
     expect(track).toHaveBeenCalledWith('deck_detach',
@@ -154,16 +154,16 @@ describe('a deck you follow', () => {
     // confirm sheet standing, which made the next action on that screen
     // (publishing it) a dead button.
     await deck({ ...FOLLOWED, withdrawn: true })
-    chip('En faire le mien').click()
+    chip('En faire ma copie').click()
     await settle()
-    sheetButton('En faire le mien').click()
+    sheetButton('En faire ma copie').click()
     await settle(600)
 
     expect(document.querySelectorAll('.sheet')).toHaveLength(0)
     expect(document.querySelector('.lib-warning')).toBeNull()
     const labels = chips().join(' ')
     expect(labels).toContain('Ajouter')
-    expect(labels).not.toContain('En faire le mien')
+    expect(labels).not.toContain('En faire ma copie')
     // ...and the owner's own actions are live again, not blocked by a
     // `busy` flag left over from the copy.
     chip('···').click()
@@ -192,7 +192,7 @@ describe('a deck its author has deleted', () => {
     expect(warning.textContent).toContain('Retiré')
     expect(warning.textContent).toContain('supprimé')
     // The point of the grace period: the copy is still reachable.
-    expect(chip('En faire le mien')).toBeDefined()
+    expect(chip('En faire ma copie')).toBeDefined()
     expect(document.querySelector('.deck-identity__study')).not.toBeNull()
   })
 
