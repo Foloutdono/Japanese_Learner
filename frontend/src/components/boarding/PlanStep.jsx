@@ -89,7 +89,7 @@ export default function PlanStep({ name, motive, rhythm, goal, figures, now, onC
   const topLabel = top.toLocaleString(lang)
   return (
     <>
-      <div className="brd__body brd__body--arrival">
+      <div className="brd__body">
         <BoardQuestion>
           <Emphasized text={t.brdPlanQ(name)} strongClassName="brd__q-em" />
         </BoardQuestion>
