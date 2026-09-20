@@ -143,7 +143,12 @@ def _smoke(provider) -> int:
         # directly, mirroring what chat() sends including the provider's
         # own reasoning-knob rendering.
         body = {
-            "model": model, "messages": messages, "max_tokens": 1200,
+            # provider.max_tokens_key, not the literal: OpenAI's GPT-5
+            # family 400s on "max_tokens", and a probe that reported
+            # that as "this model is broken" would be worse than no
+            # probe at all.
+            "model": model, "messages": messages,
+            provider.max_tokens_key: 1200,
             **provider.body_for(False),
         }
         try:
@@ -320,7 +325,12 @@ def _vision_call(provider, model, data_uri):
             {"type": "image_url", "image_url": {"url": data_uri}},
         ],
     }]
-    body = {"model": model, "messages": messages, "max_tokens": 400,
+    # temperature is pinned so a re-probe of the same image is
+    # comparable. Worth knowing if an OpenAI vision model is ever added
+    # to a vision_models tuple: the GPT-5 family accepts only the
+    # default temperature and 400s on anything else.
+    body = {"model": model, "messages": messages,
+            provider.max_tokens_key: 400,
             "temperature": 0.0, **provider.body_for(False)}
 
     for attempt in range(_VISION_RETRIES + 1):

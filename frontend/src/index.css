@@ -19830,7 +19830,7 @@ a.slip__act { text-decoration: none; }
 .gl-index__row .stage-mark { grid-area: stage; }
 .gl-index__chev { grid-area: chev; color: var(--text-secondary); opacity: 0.7; }
 
-/* ══ お気に入り — the dictionary's shelf (plan 092) ═══════════════
+/* ══ お気に入り — the dictionary's shelf (plan 093) ═══════════════
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and nothing here redefines a rule.
 

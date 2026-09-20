@@ -33,7 +33,7 @@ class PassageRetryTests(unittest.TestCase):
     def _build(self, responses):
         calls = []
 
-        def fake_call(prompt, _user_message="x"):
+        def fake_call(prompt, _user_message="x", **_kwargs):
             calls.append(prompt)
             return responses[min(len(calls) - 1, len(responses) - 1)]
 
@@ -112,7 +112,7 @@ class VocabularyMixTests(unittest.TestCase):
     def _build(self, responses):
         calls = []
 
-        def fake_call(prompt, _user_message="x"):
+        def fake_call(prompt, _user_message="x", **_kwargs):
             calls.append(prompt)
             return responses[min(len(calls) - 1, len(responses) - 1)]
 

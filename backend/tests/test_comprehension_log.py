@@ -21,6 +21,25 @@ def served(monkeypatch):
     monkeypatch.setattr(reading, "_pick_word_seeds", lambda *a, **kw: [])
 
 
+@pytest.fixture(autouse=True)
+def _reset_generation_counter():
+    """The daily new-exercise counter is persistent, and every test here
+    that opens the endpoint spends one. Cleared around each test so a
+    day's worth of runs cannot push this module over the ceiling."""
+    def wipe():
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("DELETE FROM comprehension_usage WHERE user_id = %s",
+                            (DEV_USER_ID,))
+            conn.commit()
+        finally:
+            conn.close()
+    wipe()
+    yield
+    wipe()
+
+
 @pytest.fixture
 def clean_log():
     yield

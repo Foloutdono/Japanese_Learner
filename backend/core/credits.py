@@ -130,6 +130,33 @@ def next_refill_at(tz_offset_min: int | None, now: datetime | None = None) -> da
     return (local_midnight - offset).replace(tzinfo=timezone.utc)
 
 
+def resets_at(user_id: str) -> datetime:
+    """When this learner's day rolls over, as a UTC instant.
+
+    The same boundary the refill above uses, looked up by user id --
+    which is what a daily cap somewhere else in the app (the OCR limit,
+    the comprehension ceiling) needs in order to say WHEN an allowance
+    comes back. Lives here rather than in either route because both
+    would otherwise carry the same four lines, and because the offset
+    and the day rule are this module's business.
+
+    Falls back to UTC for a learner with no profile row or no reported
+    offset, exactly as local_today does."""
+    from core.db import db_conn
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+        return next_refill_at(row[0] if row else None)
+    finally:
+        conn.close()
+
+
 # ── The cache ─────────────────────────────────────────────────
 # user_id -> (state, expires_at). Only a full, consistent state is ever
 # cached; every write from this process evicts, so a spend is visible

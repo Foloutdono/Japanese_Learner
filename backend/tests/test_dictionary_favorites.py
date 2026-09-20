@@ -1,5 +1,5 @@
 """お気に入り — the dictionary's shelf of kept entries (routes/favorites.py,
-plan 092).
+plan 093).
 
 A favourite is a REFERENCE (a kind and the key its collection files the
 entry under), resolved back into the catalogue's own row when the shelf

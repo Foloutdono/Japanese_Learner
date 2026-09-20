@@ -286,7 +286,7 @@ def _verify_paraphrase_answers_batch(claims: list[tuple[str, str, str]]) -> list
         content = chat([
             {"role": "system", "content": prompt},
             {"role": "user", "content": "Verify the claims."},
-        ], reasoning=False)
+        ], reasoning=False, task="exam-vocab-verify")
         cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         data = json.loads(cleaned)
     except (RuntimeError, json.JSONDecodeError):
@@ -360,7 +360,7 @@ def _build_vocab_paraphrase_mondai(spec: dict, pool: list[dict], used_words: set
             n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            items = call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt, task="exam-vocab-paraphrase")
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("paraphrase batch of %d failed: %s", len(batch), e)
             continue
@@ -449,7 +449,7 @@ def _build_vocab_usage_mondai(spec: dict, pool: list[dict], used_words: set, use
             n=len(batch), level=level, words_block=_words_block(batch), allowed_kanji=allowed_kanji,
         )
         try:
-            items = call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt, task="exam-vocab-usage")
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("usage batch of %d failed: %s", len(batch), e)
             continue

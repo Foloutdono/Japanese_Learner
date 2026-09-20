@@ -85,7 +85,7 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // can read end to end.
 const LEVELLED = ['kanji', 'vocab', 'grammar']
 
-// The learner's own shelf (plan 092): the entries the ★ on a plate
+// The learner's own shelf (plan 093): the entries the ★ on a plate
 // kept, across every collection, newest first. A sixth chip on the
 // collections row rather than a mode of one of them, because what it
 // holds spans all five — and it is filed on no level and answers no
@@ -564,7 +564,7 @@ export default function DictionaryScreen({ session }) {
 								{label}
 							</Chip>
 						))}
-						{/* The shelf, last on the row (plan 092). It wears no
+						{/* The shelf, last on the row (plan 093). It wears no
 						    line pigment: the five are places and this one is the
 						    learner's (DESIGN.md, "Three families"), so its on
 						    state washes in the ambient ink instead. The star is

@@ -14,7 +14,7 @@ import { favoriteRef, favoriteId } from '../domain/favorites'
 // resolved), so lighting a star costs no request however many entries
 // the learner opens. Toggling writes through PUT and is optimistic —
 // the star turns at once, and turns back if the write fails, which is
-// the one moment the plate has anything to say about it (plan 092).
+// the one moment the plate has anything to say about it (plan 093).
 //
 // `undefined` is a valid value for a caller to pass on: a plate opened
 // somewhere without a shelf (a quiz's lookup sheet) simply prints no

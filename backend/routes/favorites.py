@@ -1,4 +1,4 @@
-"""お気に入り — the entries a learner keeps (plan 092).
+"""お気に入り — the entries a learner keeps (plan 093).
 
 A shelf of the learner's own in the dictionary: the ★ on an entry's
 plate files it here, and the console's sixth chip reads the shelf back

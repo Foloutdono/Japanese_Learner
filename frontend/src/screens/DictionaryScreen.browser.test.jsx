@@ -157,7 +157,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: DictionaryScreen } = await import('./DictionaryScreen')
 const { apiFetch, apiJson } = await import('../lib/api')
 
-// ── The shelf (plan 092) ──
+// ── The shelf (plan 093) ──
 // What /api/dictionary/favorites serves when the sixth chip is on:
 // catalogue rows, newest first. Set per test; empty by default.
 let SHELF_ROWS = []
@@ -279,7 +279,7 @@ describe('the dictionary screen', () => {
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
     // Five collections as chips, kanji on, and the learner's own shelf
-    // as a sixth at the end of the row (plan 092). Scoped to the
+    // as a sixth at the end of the row (plan 093). Scoped to the
     // collections row: the console's SECOND row is the JLPT levels,
     // and a bare `.console__chips .chip` counts both.
     const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
@@ -314,7 +314,7 @@ describe('the dictionary screen', () => {
     chips()[1].click()
     await settle(80)
     expect(lastQuery().get('category')).toBe('vocab')
-    // The five collections and the shelf (plan 092).
+    // The five collections and the shelf (plan 093).
     expect(chips().length).toBe(6)
     expect(chips()[1].classList.contains('chip--on')).toBe(true)
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
@@ -845,7 +845,7 @@ describe('the dictionary screen', () => {
   })
 })
 
-// ── お気に入り — the shelf (plan 092) ──────────────────────
+// ── お気に入り — the shelf (plan 093) ──────────────────────
 // The star on a plate keeps an entry; the sixth chip reads the shelf
 // back as the catalogue's own grid. The shelf's references arrive
 // once, through apiJson, and a toggle is one PUT.

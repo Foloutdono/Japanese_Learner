@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import fr from '../locales/fr/index.js'
 import { TrainDoor } from '../components/station/TrainDoor'
 
 // ── Comprehension: the station, then the stage (plan 072) ───────
@@ -92,6 +93,7 @@ const GRAMMAR_ENTRY = {
 }
 
 const ok = body => ({ ok: true, status: 200, json: async () => body })
+const fail = (status, body = {}) => ({ ok: false, status, json: async () => body })
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
 function clickText(root, text) {
@@ -312,5 +314,61 @@ describe('ComprehensionRun', () => {
     // Nothing to open, so no control that would open nothing.
     expect(items[0].querySelector('.bkd-passage__chev')).toBeNull()
     expect(root.querySelector('.analysis-grammar-chips')).toBeNull()
+  })
+
+  // ── 429 — the day's new texts are spent ─────────────────────
+  // The server caps GENERATIONS, not exercises, and past the cap it
+  // normally hands back a text the learner has read before. A 429 is
+  // the rarer case where it has nothing to hand back -- and the screen
+  // used to meet it with "Couldn't load a text. Try again.", which is
+  // both wrong and an invitation to retry something that cannot work
+  // until tomorrow.
+  it('names the daily limit on a 429, and offers no retry', async () => {
+    apiFetch.mockImplementation(async url => {
+      if (String(url).startsWith('/api/reading/comprehension')) return fail(429, { detail: 'Daily limit' })
+      return ok({})
+    })
+
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
+          <Routes>
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const root = screen.container
+
+    expect(root.textContent).toContain(fr.comprehensionLimitReached)
+    expect(root.textContent).not.toContain(fr.comprehensionFetchError)
+    // A button that fails every time until tomorrow is worse than none.
+    expect(root.querySelector('.empty__action')).toBeNull()
+  })
+
+  it('still offers a retry on an ordinary failure', async () => {
+    // The other half of the same branch: a 500 is worth trying again,
+    // and losing that button would be a quieter regression than
+    // showing the wrong message.
+    apiFetch.mockImplementation(async url => {
+      if (String(url).startsWith('/api/reading/comprehension')) return fail(500)
+      return ok({})
+    })
+
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
+          <Routes>
+            <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const root = screen.container
+
+    expect(root.textContent).toContain(fr.comprehensionFetchError)
+    expect(root.querySelector('.empty__action')).toBeTruthy()
   })
 })

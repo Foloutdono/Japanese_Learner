@@ -793,7 +793,7 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
     "katakana", `entry` a row of content/kana_data.py's syllabary, and
     `meaning` its romaji (the slot dict-entry-card__meaning reads
     whatever the entry's kind). Lifted out of get_dictionary so the
-    favourites shelf (routes/favorites.py, plan 092) can serve the same
+    favourites shelf (routes/favorites.py, plan 093) can serve the same
     row for a kana a learner kept."""
     raw_id = kana_to_id(entry)
     # A stroke file is one character's, and a kana here is not

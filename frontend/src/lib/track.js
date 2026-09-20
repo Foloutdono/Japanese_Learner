@@ -51,7 +51,7 @@ export const EVENTS = {
   deck_subscribe: ['structure', 'cards', 'where'],
   deck_detach: ['structure', 'cards', 'withdrawn'],
   library_view: ['sort', 'results', 'filtered'],
-  // The dictionary's shelf (plan 092): the kind of entry kept or let
+  // The dictionary's shelf (plan 093): the kind of entry kept or let
   // go, never its key — a key names the word a learner looked up.
   favorite_toggle: ['kind', 'on'],
   api_error: ['path', 'status'],

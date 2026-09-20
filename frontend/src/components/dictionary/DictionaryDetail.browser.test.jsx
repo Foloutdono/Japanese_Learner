@@ -646,7 +646,7 @@ describe('the ＋ — this entry into one of your decks', () => {
     const { root, screen } = await renderEntry(entry, { ...NAV(), mining })
     const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
     // The speaker, the ＋, the ✕ — one action row on every kind. The ＋
-    // opens its menu (plan 092); with no shelf here, the deck row is
+    // opens its menu (plan 093); with no shelf here, the deck row is
     // the whole of it.
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
     actions[1].click()
@@ -675,7 +675,7 @@ describe('the ＋ — this entry into one of your decks', () => {
   })
 })
 
-// ── The ★ — this entry on your shelf (plan 092) ─────────────
+// ── The ★ — this entry on your shelf (plan 093) ─────────────
 describe('the shelf row — this entry on your shelf', () => {
   // A shelf as useFavorites holds one, in miniature: the state, and a
   // toggle that flips it or refuses.
@@ -1400,7 +1400,7 @@ describe('the plate — a grammar point', () => {
     expect(add.querySelector('svg')).toBeTruthy()
     expect(add.textContent.trim()).toBe('')
     expect(getComputedStyle(add).backgroundColor).toBe('rgba(0, 0, 0, 0)')
-    // The ＋ opens its menu (plan 092); with no shelf on this plate the
+    // The ＋ opens its menu (plan 093); with no shelf on this plate the
     // deck row is the whole of it, and it is the analyzer's press.
     add.click()
     await settle(30)

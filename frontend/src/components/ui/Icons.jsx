@@ -404,7 +404,7 @@ export function FlagIcon({ size = 16, filled = false, className }) {
 }
 
 // `filled` is the mark as it always was; false is the same star as an
-// outline — the dictionary plate's ★ before it is pressed (plan 092),
+// outline — the dictionary plate's ★ before it is pressed (plan 093),
 // the way FlagIcon draws its two states.
 export function StarIcon({ size = 16, filled = true, className }) {
   return (

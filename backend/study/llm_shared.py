@@ -22,6 +22,7 @@
 # where a failure actually becomes an HTTP response.
 import logging
 import os
+import time
 from dataclasses import dataclass, field
 from functools import lru_cache
 
@@ -53,6 +54,45 @@ class LLMUnavailable(RuntimeError):
 # generation, reading comprehension and phrase analysis simultaneously
 # — there was no second account to fall back to. Any OpenAI-compatible
 # endpoint is a Provider entry here; adding a third is config, not code.
+# ── Paid providers (plan 092) ────────────────────────────────────
+# Added when the app started selling. The two providers below this
+# comment are FREE TIERS and neither survives commercialization:
+# NVIDIA's hosted catalog is a 5,000-credit prototyping trial whose
+# production licence is NVIDIA AI Enterprise (~$4,500/GPU-year), and
+# OpenRouter's `:free` endpoints cap at 20 requests/minute and 1,000 a
+# DAY -- about 28 exam papers for the entire user base, since one N3
+# paper is ~35 calls. See docs/llm-commercial-plan.md.
+#
+# Nothing about the transport changes: both are OpenAI-compatible
+# chat-completions endpoints, which is what Provider has always been.
+#
+# THE MODEL IDS BELOW ARE UNVERIFIED, deliberately and visibly so. Every
+# other model id in this file was confirmed live against the provider's
+# own GET /v1/models before being adopted (see the notes on each entry),
+# and that could not be done here: this was written without a key for
+# either account. Run `python -m scripts.check_llm_models` the first
+# time a key is set -- it answers exactly this question and costs
+# nothing -- and `--smoke` after it, which is the check that actually
+# matters (a model can be in the catalog and still answer an N5 prompt
+# in English). Every id is env-overridable for that reason.
+GOOGLE_API_KEY = os.environ.get("GOOGLE_API_KEY") or os.environ.get("GEMINI_API_KEY")
+GOOGLE_URL = "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+GOOGLE_MODEL = os.environ.get("GOOGLE_MODEL", "gemini-3.1-flash-lite")
+# Vision is a different model but the same account and the same
+# endpoint. Flash rather than Flash-Lite: OCR reads photographs of
+# manga and novels, which are vertical (tategaki), and that is the one
+# axis every cheap model measured here has failed on.
+GOOGLE_VISION_MODEL = os.environ.get("GOOGLE_VISION_MODEL", "gemini-3.1-flash")
+
+OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
+OPENAI_URL = "https://api.openai.com/v1/chat/completions"
+OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-5-mini")
+# The cheap end, for the bounded-JSON batch work whose output is four
+# choices and a sentence and whose answers exam_validation.py checks
+# anyway. Not currently wired to a task -- chat() has no per-task model
+# selection -- so it rides as a fallback.
+OPENAI_CHEAP_MODEL = os.environ.get("OPENAI_CHEAP_MODEL", "gpt-5-nano")
+
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY")
 # 2026-08: switched primary off the paid anthropic/claude-haiku-4.5 —
 # confirmed live against GET /api/v1/models that nvidia/nemotron-3.5-
@@ -89,12 +129,65 @@ class Provider:
     vision_models: tuple[str, ...] = ()
     # reasoning-flag -> extra top-level request-body keys.
     reasoning_body: object = field(default=None)
+    # What this endpoint calls the completion cap. OpenAI renamed it to
+    # `max_completion_tokens` for the GPT-5 family and answers 400
+    # "Unsupported parameter: 'max_tokens'" to the old spelling -- which
+    # chat() reads as a PERMANENT model error and remembers, so getting
+    # this wrong would not fail loudly once, it would silently retire
+    # every OpenAI model on the first call of each process.
+    max_tokens_key: str = "max_tokens"
 
     def body_for(self, reasoning: bool) -> dict:
         return self.reasoning_body(reasoning) if self.reasoning_body else {}
 
 
 _PROVIDER_CATALOG = {
+    "google": Provider(
+        name="google",
+        url=GOOGLE_URL,
+        api_key=GOOGLE_API_KEY,
+        # Gemini through Google's own OpenAI-compatibility layer, not the
+        # native generateContent API: same Bearer auth, same body shape,
+        # so it drops into this dataclass with no transport work. The
+        # probe script's GET /models derivation (it swaps
+        # "/chat/completions" for "/models") lands on the right URL too.
+        models=(GOOGLE_MODEL,),
+        vision_models=(GOOGLE_VISION_MODEL,),
+        # No reasoning knob, on purpose. The two entries below carry one
+        # because their thinking trace lands in `content` and breaks
+        # every JSON parse (NVIDIA) or because the field is the
+        # provider's own (OpenRouter). Gemini returns neither in
+        # `content`, so the safe request is the one that says nothing:
+        # an unrecognised top-level key is a 400 here, and a 400 is
+        # permanent. If batched generation comes back truncated, the
+        # suspect is Gemini spending the completion cap on thinking --
+        # the same failure the OpenRouter entry documents below -- and
+        # the fix is a thinking config in `extra_body`, added only once
+        # `--smoke` has actually shown the truncation.
+        reasoning_body=None,
+    ),
+    "openai": Provider(
+        name="openai",
+        url=OPENAI_URL,
+        api_key=OPENAI_API_KEY,
+        models=(OPENAI_MODEL, OPENAI_CHEAP_MODEL),
+        # No vision models listed, though both are image-capable: OCR's
+        # vertical-text requirement is the whole reason `google` is the
+        # vision primary, and an unmeasured model in this tuple is a
+        # fallback that would quietly serve worse OCR. Benchmark them
+        # with `check_llm_models --vision` before adding either.
+        vision_models=(),
+        # See max_tokens_key above -- this is the one provider here that
+        # does not accept `max_tokens`.
+        max_tokens_key="max_completion_tokens",
+        # GPT-5 takes `reasoning_effort`, not OpenRouter's `reasoning`.
+        # Deliberately not sent: the values are a closed set, a wrong one
+        # is a 400, and a 400 retires the model for the process. The
+        # default effort is fine for every call this app makes, and
+        # reasoning tokens are billed but never returned in `content`,
+        # so nothing here can be corrupted by leaving it alone.
+        reasoning_body=None,
+    ),
     "nvidia": Provider(
         name="nvidia",
         url=NVIDIA_URL,
@@ -254,11 +347,18 @@ _PROVIDER_CATALOG = {
 #      candidate scored 3/3 on clean text; only degraded and vertical
 #      images separated them.
 
-# NVIDIA first by default: OpenRouter is the account that ran out of
-# credit, and this ordering is what the fallback is for. Overridable
-# without a code change -- LLM_PROVIDER_ORDER=openrouter,nvidia in
-# backend/.env puts it back.
-_DEFAULT_PROVIDER_ORDER = "nvidia,openrouter"
+# Paid first, free last -- and NVIDIA not at all unless asked for by
+# name. The free tier is kept rather than deleted because it costs
+# nothing to keep and the day the paid account answers 402 the app
+# degrades to slow instead of stopping, which is exactly what the
+# dead-provider bookkeeping below already knows how to do.
+#
+# NVIDIA is absent from this default because its hosted catalog is
+# licensed for prototyping, not production (see the note above
+# GOOGLE_API_KEY). It remains in the catalog and one line of
+# backend/.env brings it back for local work:
+# LLM_PROVIDER_ORDER=nvidia,openrouter.
+_DEFAULT_PROVIDER_ORDER = "google,openai,openrouter"
 
 # Vision walks providers in a DIFFERENT order than text, because the
 # best free text models and the only free vertical-capable vision model
@@ -268,7 +368,7 @@ _DEFAULT_PROVIDER_ORDER = "nvidia,openrouter"
 #
 # Names not in this tuple keep their relative position, after the ones
 # that are -- so adding a third provider needs no edit here.
-_VISION_PROVIDER_PREFERENCE = ("openrouter", "nvidia")
+_VISION_PROVIDER_PREFERENCE = ("google", "openrouter", "nvidia")
 
 
 def _providers_for(vision: bool) -> list[Provider]:
@@ -294,6 +394,22 @@ def _build_providers() -> list[Provider]:
         if not provider.api_key:
             continue
         out.append(provider)
+
+    # A key that is set and unreachable is worth a word. NVIDIA left the
+    # default order when the app started selling (its hosted catalog is
+    # licensed for prototyping), so an existing deployment carrying only
+    # NVIDIA_API_KEY goes from "generation works" to "no LLM configured"
+    # on deploy -- which degrades correctly everywhere but explains
+    # itself nowhere. One line at startup is the difference between a
+    # five-minute fix and an afternoon.
+    named = {n.strip().lower() for n in order.split(",")}
+    for name, provider in _PROVIDER_CATALOG.items():
+        if provider.api_key and name not in named:
+            logger.warning(
+                "%s has an API key but is not in LLM_PROVIDER_ORDER (%s), so it will "
+                "never be called. Add it to the order in backend/.env to use it.",
+                name, order,
+            )
     return out
 
 
@@ -426,13 +542,66 @@ _DEAD_MODELS: set[tuple[str, str]] = set()
 # models immediately and moves to the next provider.
 _DEAD_PROVIDERS: set[str] = set()
 
+# ── What every call cost (plan 092) ──────────────────────────────
+# Until the app started selling, every provider it had ever called was
+# free, so nothing counted tokens and every figure in
+# docs/llm-commercial-plan.md is an estimate derived from prompt
+# lengths. This is what replaces the estimate with a measurement.
+#
+# Its own logger, not this module's, so the accounting can be routed or
+# silenced without also silencing the failover warnings that share
+# chat() with it: logging.getLogger("study.llm_shared.usage").
+#
+# One line per BILLED response, in a shape awk can total -- the log is
+# the store, there is no table and nothing on the request path writes to
+# the database for this:
+#
+#   llm-usage task=comprehension provider=google model=gemini-... \
+#             in=2731 out=2984 cached=1800 reasoning=0 ms=4210 ok=1
+#
+# `ok=0` is a response that was paid for and could not be used (a 200
+# carrying a null or unparseable body). Those are the expensive
+# invisible ones -- a retry pays twice for one answer -- so they are
+# counted, not skipped.
+#
+# `unreported=1` marks a provider that returned no usage block at all.
+# The alternative, logging zeros, would silently deflate every total.
+usage_logger = logging.getLogger(__name__ + ".usage")
+
+
+def _log_usage(task: str, label: str, payload: object, elapsed_ms: int, *, ok: bool) -> None:
+    """One accounting line for a response that has already been paid
+    for. Never raises: a malformed usage block must not turn a good
+    answer into an error."""
+    usage = payload.get("usage") if isinstance(payload, dict) else None
+    provider, _, model = label.partition(":")
+    fields = [f"task={task or 'unlabelled'}", f"provider={provider}", f"model={model}"]
+    if isinstance(usage, dict):
+        details = usage.get("prompt_tokens_details") or {}
+        completion = usage.get("completion_tokens_details") or {}
+        fields += [
+            f"in={usage.get('prompt_tokens', 0)}",
+            f"out={usage.get('completion_tokens', 0)}",
+            # Present on OpenAI and Google's compatibility layer, absent
+            # elsewhere. It is the difference between the sticker price
+            # and the bill once a stable prompt prefix is cached, so it
+            # is worth its own column rather than being folded into `in`.
+            f"cached={details.get('cached_tokens', 0) if isinstance(details, dict) else 0}",
+            f"reasoning={completion.get('reasoning_tokens', 0) if isinstance(completion, dict) else 0}",
+        ]
+    else:
+        fields += ["in=0", "out=0", "cached=0", "reasoning=0", "unreported=1"]
+    fields += [f"ms={elapsed_ms}", f"ok={int(ok)}"]
+    usage_logger.info("llm-usage %s", " ".join(fields))
+
+
 _PROVIDER_ERROR_STATUSES = (401, 402, 403)
 _PERMANENT_MODEL_STATUSES = (400, 404)
 _RETRYABLE_STATUSES = (429, 500, 502, 503, 504)
 
 
 def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
-         reasoning: bool = True, *, vision: bool = False) -> str:
+         reasoning: bool = True, *, vision: bool = False, task: str = "") -> str:
     """Multi-provider, multi-model fallback chat completion.
 
     Walks PROVIDERS in order and, within each, its models in order:
@@ -465,6 +634,14 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
     vision models is skipped; if NONE has any, this raises
     LLMUnavailable naming the probe script rather than failing per-model.
 
+    `task` names the feature this call serves ("comprehension",
+    "phrase", "ocr", ...) and does nothing but appear in the accounting
+    line -- see _log_usage above. It is what makes the log answer "what
+    does reading practice cost a subscriber a month", which is the
+    question docs/llm-commercial-plan.md currently answers with an
+    estimate. Unlabelled calls are logged as `task=unlabelled` rather
+    than dropped.
+
     max_tokens defaults to 3000 rather than being left unset: every
     caller in this codebase generates one bounded JSON blob (a passage,
     a handful of MCQ choices), never an open-ended completion, and
@@ -477,7 +654,8 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
     asking for far more than any of these tasks could ever need."""
     if not PROVIDERS:
         raise LLMUnavailable(
-            "No LLM provider is configured (set NVIDIA_API_KEY or OPENROUTER_API_KEY)"
+            "No LLM provider is configured "
+            "(set GOOGLE_API_KEY, OPENAI_API_KEY or OPENROUTER_API_KEY)"
         )
 
     # The ONLY thing `vision` changes is which model tuple is walked.
@@ -523,6 +701,7 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
         # produced "nvidia/nvidia/nemotron-..." in the logs.
         label = f"{provider.name}:{model}"
         for _ in range(2):
+            started = time.monotonic()
             try:
                 response = session.post(
                     provider.url,
@@ -531,7 +710,11 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                         "Content-Type": "application/json",
                     },
                     json={
-                        "model": model, "messages": messages, "max_tokens": max_tokens,
+                        "model": model, "messages": messages,
+                        # Not a literal key: OpenAI's GPT-5 family spells
+                        # this `max_completion_tokens` and 400s on the
+                        # old name. See Provider.max_tokens_key.
+                        provider.max_tokens_key: max_tokens,
                         # How to ask for (or suppress) a reasoning pass is
                         # the one thing these endpoints genuinely disagree
                         # on -- see each Provider's reasoning_body above.
@@ -544,15 +727,27 @@ def chat(messages: list[dict], timeout: int = 60, max_tokens: int = 3000,
                 continue
 
             if response.ok:
+                # Parsed once and kept: the same body carries the answer
+                # and the usage block, and a second .json() would parse
+                # it twice per call.
                 try:
-                    content = response.json()["choices"][0]["message"]["content"]
-                except (KeyError, IndexError, ValueError):
+                    payload = response.json()
+                except ValueError:
+                    payload = None
+                try:
+                    content = payload["choices"][0]["message"]["content"]
+                except (KeyError, IndexError, TypeError):
                     content = None
                 # `content` can be present but null -- observed live from
                 # minimaxai/minimax-m3, which answers 200 with a null
                 # content field. Treated as a failed attempt rather than
                 # returned, or it becomes an AttributeError deep in a
                 # caller's .strip().
+                #
+                # Either way the tokens are spent, so both branches are
+                # accounted for before one of them returns.
+                _log_usage(task, label, payload, int((time.monotonic() - started) * 1000),
+                           ok=bool(content))
                 if content:
                     logger.info("Using model %s", label)
                     return content

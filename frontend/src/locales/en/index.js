@@ -1003,7 +1003,7 @@ const dictionary = {
   // what was typed found nothing. A statement, not a question.
   dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
-  // お気に入り — the shelf of kept entries (plan 092): the sixth chip,
+  // お気に入り — the shelf of kept entries (plan 093): the sixth chip,
   // the star on the plate in both states, and the shelf with nothing
   // on it yet.
   dictAdd:             'Add',
@@ -1067,6 +1067,7 @@ const dictionary = {
 const comprehension = {
   comprehensionTitle:       'Reading comprehension',
   comprehensionFetchError:  "Couldn't load a text. Try again.",
+  comprehensionLimitReached: "That's every new text for today. Come back tomorrow.",
   comprehensionGenerating:  'Generating a text for you…',
   comprehensionSubmitError:  "Couldn't submit answers. Try again.",
   doneReading:              'Done reading',

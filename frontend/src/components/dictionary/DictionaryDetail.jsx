@@ -568,7 +568,7 @@ function headwordSize(text) {
 // is not a fact the way an inert row is, it is a dead control.
 //
 // `favorites` (a useFavorites instance, optional) is the learner's
-// shelf in the dictionary (plan 092). The plate's ＋ opens a menu of
+// shelf in the dictionary (plan 093). The plate's ＋ opens a menu of
 // the two places an entry can be put: on the shelf (a bookmark, to
 // read again) and in a deck (a card the scheduler will ask for). Each
 // row exists only where its caller can honour it — no shelf row

@@ -124,7 +124,15 @@ def answered(monkeypatch):
 
 
 def _prompt(calls, i=0) -> str:
-    return calls[i][0]["content"]
+    """Everything the model was told on attempt `i`, both messages.
+
+    The prompt is two messages since plan 092 -- a block stable per
+    (level, lang) so a provider's prefix cache can hold it, and the
+    per-call seeds after it -- and which of the two carries a given
+    sentence is plumbing. These tests are about what the model is
+    TOLD, so they read the conversation rather than one message of it;
+    the split itself is pinned in test_comprehension_prompt_split.py."""
+    return "\n".join(m["content"] for m in calls[i])
 
 
 # ── The paper ────────────────────────────────────────────────────────

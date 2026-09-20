@@ -4,7 +4,7 @@ import { DeckPicker } from './DeckPicker'
 // ── The press, apart from the button ──
 // What a mine control does when pressed — the remembered target or
 // the picker, the write, the outcome — separated from how it is drawn
-// so the dictionary plate's ＋ menu (plan 092) can offer the same act
+// so the dictionary plate's ＋ menu (plan 093) can offer the same act
 // as a row beside "keep in favourites" without a second copy of it.
 // Returns the press handler, the pending flag, the outcome line and
 // the picker element (a portal dialog, rendered wherever the caller

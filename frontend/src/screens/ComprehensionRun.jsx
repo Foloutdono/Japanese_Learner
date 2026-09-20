@@ -69,6 +69,10 @@ export default function ComprehensionRun({ session }) {
   const [detail, setDetail]     = useState(null)
   const closeDetail = useCallback(() => setDetail(null), [])
   const [openRow, setOpenRow]   = useState(null)   // which result row is opened on its question
+  // { message, retry } — the retry flag exists because one of these
+  // cannot be retried: a spent daily allowance comes back tomorrow, and
+  // a button that says "Retry" and fails every time is worse than no
+  // button (see the 429 branch in startSession).
   const [error, setError]       = useState(null)
 
   const timerRef = useRef(null)
@@ -85,7 +89,16 @@ export default function ComprehensionRun({ session }) {
 
     apiFetch(`/api/reading/comprehension?level=${lvl}&lang=${lang}`, session)
       .then(r => {
-        if (!r.ok) throw new Error('Request failed')
+        if (!r.ok) {
+          // The status, carried on the error the way ImageInput's OCR
+          // path does it: without it a 429 is indistinguishable from a
+          // failure to reach the server, and the screen said "Couldn't
+          // load a text. Try again." to a learner who had simply read
+          // every new text the day allows.
+          const failed = new Error('Request failed')
+          failed.status = r.status
+          throw failed
+        }
         return r.json()
       })
       .then(data => {
@@ -96,8 +109,14 @@ export default function ComprehensionRun({ session }) {
         setResults(null)
         setStage('reading')
       })
-      .catch(() => {
-        setError(t.comprehensionFetchError)
+      .catch(e => {
+        // 429 is the daily ceiling on NEW exercises, and it is rare:
+        // past the ceiling the server normally hands back a text the
+        // learner has read before rather than refusing. This is the
+        // case where it has nothing to hand back.
+        setError(e?.status === 429
+          ? { message: t.comprehensionLimitReached, retry: false }
+          : { message: t.comprehensionFetchError, retry: true })
         setStage('error')
       })
   }
@@ -208,7 +227,7 @@ export default function ComprehensionRun({ session }) {
         fare.pay(data)
       })
       .catch(() => {
-        setError(t.comprehensionSubmitError)
+        setError({ message: t.comprehensionSubmitError, retry: true })
         setStage('error')
       })
   }
@@ -277,7 +296,11 @@ export default function ComprehensionRun({ session }) {
       {stage === 'submitting' && <Loading />}
 
       {stage === 'error' && (
-        <Empty tone="error" message={error} action={{ label: t.retry, onClick: () => startSession(level) }} />
+        <Empty
+          tone="error"
+          message={error?.message}
+          action={error?.retry ? { label: t.retry, onClick: () => startSession(level) } : undefined}
+        />
       )}
 
       {stage === 'reading' && exercise && (

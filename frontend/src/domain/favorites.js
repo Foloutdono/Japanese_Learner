@@ -4,7 +4,7 @@
 // routes/favorites.py stores exactly this pair and resolves it back
 // into the catalogue's own row when the shelf is read, so the two
 // sides have to derive the same key from the same row — this is the
-// client's half of that contract (plan 092).
+// client's half of that contract (plan 093).
 //
 //   kanji     the character            駅
 //   vocab     "{kanji}::{kana}"        電車::でんしゃ — the deck key the
