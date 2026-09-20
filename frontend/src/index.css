@@ -13163,11 +13163,31 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .lib-card__follows {
   display: block;
   margin-top: var(--sp-1);
+  min-height: var(--sp-6);
   color: var(--text-secondary);
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   letter-spacing: var(--tr-caption);
   text-align: center;
+}
+
+/* The aside's hairline is a column edge shared down the whole shelf,
+   not a measurement of one card: sized to its contents, it was the
+   follower line that decided where the rule fell, so a followed deck
+   carried its rule left of the decks above and below it and lifted its
+   own count off the height theirs sat at. Two things hold the column
+   still. The aside takes one width for every library card, wide enough
+   that the body still has a phone's worth of room beside it. And the
+   follower line takes one height whether it sets on one line ("1
+   abonné") or two ("128 followers"), which a deck nobody follows
+   reserves as an empty box of the same size -- so the count above it
+   is centred on the same axis on every card, followed or not. */
+.lib-card .deck-card__aside { width: 104px; }
+.lib-card .deck-card__aside:not(:has(.lib-card__follows))::after {
+  content: '';
+  display: block;
+  margin-top: var(--sp-1);
+  min-height: var(--sp-6);
 }
 
 /* The library screen's controls are the shared console now (.console,
