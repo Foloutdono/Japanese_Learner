@@ -8,23 +8,27 @@ import { board } from '../stores/boarding'
 import { playAnnouncement, playUi } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
+import { Plate } from '../components/station/LinePlate'
 import { LEVELS } from '../domain/sentenceSource'
 
-// ── 実践 — the Practice gate: five platforms (plan 068) ───────
+// ── 実践 — the Practice gate: five platforms (plan 068, plates since 093) ──
 // Reading practice, reading comprehension, translation, dictation,
 // the mock exam — the sentence-level sections, which schedule words
-// rather than levels and so have no line on the map. The gate's own bar over
-// one platform card per section, each in its own pigment; boarding one
-// announces it and departs through the gate, like any other section.
-// The pass tags the canvas draws on these cards stay out until a
-// purchase flow exists (plan 069, HAS_STORE).
+// rather than levels and so have no line on the map. The gate's own
+// bar over one station plate per section, the same plate the Learn
+// gate hangs (components/station/LinePlate.jsx), so the two gates are
+// one screen twice rather than a map you read beside a grid you
+// press. Boarding one announces it and departs through the gate, like
+// any other section. The pass tags the canvas draws on these cards
+// stay out until a purchase flow exists (plan 069, HAS_STORE).
 //
-// Each title carried the section's own 読書 理解 翻訳 模試 after it, in a
-// smaller face. It was the second name of a thing already named, and at
-// phone width the pair ran past the card: 理解 broke between its two
-// characters, one to a line. The Japanese is still on the roundel of
-// every station these cards open, and on the gate the departure passes
-// through — this row is the one place it was a caption. Owner's call.
+// The plate prints the name and nothing under it. The card it
+// replaced carried a line of description, and before that the
+// section's own 読書 理解 翻訳 模試 after the title; both were a second
+// name for a thing already named (the owner's word for the row was
+// bland, then busy). The Japanese is still on the roundel of every
+// station these plates open, and on the gate the departure passes
+// through.
 //
 // The bar is the concourse's, not a line's: the home roundel and the
 // gold, exactly as the Learn gate wears them. It was the `register`
@@ -35,16 +39,12 @@ import { LEVELS } from '../domain/sentenceSource'
 // rather than as different.
 //
 // ── The platforms carry their departures ──
-// Four cards of a title and a line of description filled 528px of a
-// 746px screen and said nothing the tab bar had not already said; the
-// owner's word for it was bland. What was missing is what a platform
-// sign is FOR: where the trains go. Every one of them is chosen by
-// JLPT grade first — the two sentence sections offer it as one of
-// three sources, comprehension, dictation and the exam have no other
-// axis — so
-// the grades ride on the card itself and a learner reaches the train
-// in one tap instead of three. The card's own body still opens the
-// station, where 頻度 and 自分のカード live.
+// What a platform sign is FOR is where the trains go. Every one of
+// them is chosen by JLPT grade first — the two sentence sections offer
+// it as one of three sources, comprehension, dictation and the exam
+// have no other axis — so the grades ride the plate's foot and a
+// learner reaches the train in one tap instead of three. The plate's
+// own head still opens the station, where 頻度 and 自分のカード live.
 const LEVEL_PATH = {
   '/practice/reading':       lvl => `/practice/reading/level/${lvl}`,
   '/practice/comprehension': lvl => `/practice/comprehension/${lvl}`,
@@ -84,41 +84,33 @@ export default function PracticeScreen() {
   return (
     <main id="main-content" className="practice">
       <Bar code={HOME_STATION.code} title={t.tabPractice} sub={t.practiceSub} color="var(--accent2)" />
-      <div className="platform-grid">
-        {platforms.map((section, i) => (
-          <div
+      <div className="plates">
+        {platforms.map(section => (
+          <Plate
             key={section.path}
-            className="platform-card platform-card--line platform-card--sign"
-            style={{ '--line-color': section.color }}
-          >
-            <button type="button" className="platform-sign__head" onClick={() => depart(section)}>
-              <span className="platform-card__lead">
-                <span className="platform-card__no">{i + 1}</span>
-              </span>
-              <span className="platform-card__body">
-                <span className="platform-card__title">{section.title}</span>
-                <span className="platform-card__desc">{(section.desc ?? '').split('\n')[0]}</span>
-              </span>
-              <span className="platform-card__go" aria-hidden="true">▶</span>
-            </button>
-            <div className="platform-sign__dests">
-              {LEVELS.map(level => (
-                <Chip
-                  key={level}
-                  className={level === here ? 'chip--here' : ''}
-                  aria-label={`${section.title} — ${level}`}
-                  // A destination, not a filter: it goes somewhere
-                  // rather than toggling, so it carries no pressed
-                  // state for the Chip to report.
-                  aria-pressed={undefined}
-                  aria-current={level === here ? 'location' : undefined}
-                  onClick={() => departLevel(section, level)}
-                >
-                  {level}
-                </Chip>
-              ))}
-            </div>
-          </div>
+            section={section}
+            className="plate--platform"
+            onClick={() => depart(section)}
+            foot={
+              <div className="plate__foot plate__foot--dests">
+                {LEVELS.map(level => (
+                  <Chip
+                    key={level}
+                    className={level === here ? 'chip--here' : ''}
+                    aria-label={`${section.title} — ${level}`}
+                    // A destination, not a filter: it goes somewhere
+                    // rather than toggling, so it carries no pressed
+                    // state for the Chip to report.
+                    aria-pressed={undefined}
+                    aria-current={level === here ? 'location' : undefined}
+                    onClick={() => departLevel(section, level)}
+                  >
+                    {level}
+                  </Chip>
+                ))}
+              </div>
+            }
+          />
         ))}
       </div>
     </main>

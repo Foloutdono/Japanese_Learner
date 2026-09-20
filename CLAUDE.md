@@ -71,8 +71,12 @@ runtime purpose. Two consequences worth knowing:
   (cited in `study/llm_shared.py`, `routes/reading.py`, `routes/ocr.py`,
   `scripts/llm_cost_model.py`, `scripts/llm_usage_report.py`,
   `scripts/prewarm_comprehension_pool.py` and `backend/.env.example`;
-  `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **093** or higher, and check
+  `docs/llm-commercial-plan.md`), and **093** is the gates' station plates —
+  the Learn and Practice gates as a column of 駅名標, replacing the wall map
+  and the platform grid (cited in `components/station/LinePlate.jsx`,
+  `domain/lineProgress.js`'s `stopsAround`, `screens/LearnScreen.jsx`,
+  `screens/PracticeScreen.jsx` and `index.css`; DESIGN.md, Structure).
+  When starting a new wave, begin at **094** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

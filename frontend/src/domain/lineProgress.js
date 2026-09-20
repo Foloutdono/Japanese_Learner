@@ -1,8 +1,10 @@
 // ── 路線図 — how far down each line you have travelled ────────
-// The wall map draws each SRS section as a line with stops, and the
-// learner's position on it. This reads the arithmetic behind the train
-// marker, kept here so the map and the profile's ledger cannot drift
-// apart about how far along a line you are.
+// Each SRS section is a line with stops, and the learner stands
+// somewhere on it: the Learn gate's plate prints the stop reached and
+// the one ahead (plan 093), the pass's ghost track draws the whole
+// line. This is the arithmetic behind both, kept here so the plate
+// and the profile's ledger cannot drift apart about how far along a
+// line you are.
 //
 // A stop's score is /api/stats' own per-deck figure, 0..1, and the
 // unit is CARDS: a kanji is one kanji whether or not you can also
@@ -47,9 +49,9 @@ export const LEVEL_STOPS = ['N5', 'N4', 'N3', 'N2', 'N1']
 export const ORIGIN_STOP = { key: 'novice', label: '初', jp: true }
 
 // The four sections that have a track at all, by route: the SRS lines
-// /api/stats aggregates. Shared by the wall map and the profile's ride
-// ledger so the two can never disagree about which lines exist. A new
-// section lands in the map's practice register by default; adding a
+// /api/stats aggregates. Shared by the Learn gate's plates and the
+// profile's ride ledger so the two can never disagree about which lines
+// exist. A new Learn section hangs a plate with no foot by default; adding a
 // TRACK means the stats endpoint actually aggregates it, so this list
 // is deliberately closed here.
 export const TRACKED_LINES = { '/learn/kana': 'kana', '/learn/vocab': 'vocab', '/learn/kanji': 'kanji', '/learn/grammar': 'grammar' }
@@ -159,4 +161,26 @@ export function lineTotals(stats, source) {
     total += deck.total
   }
   return { learned, total }
+}
+
+/**
+ * The stop you have reached, the one behind it and the one ahead —
+ * what a station plate prints at its foot (plan 093,
+ * components/station/LinePlate.jsx). Read off the same marks the map
+ * drew, so the plate and the ledger cannot disagree about where you
+ * stand. A station is the END of the leg it names, so `reached`
+ * counts whole legs finished: N5 half done is still standing at 初,
+ * with N5 ahead. `leg` is the leg being ridden, 0..1 — the stripe's
+ * fill — and 1 at the terminus, where there is no leg left and the
+ * stripe is the line entire.
+ */
+export function stopsAround(stops) {
+  const marks = lineMarks(stops)
+  const reached = Math.min(marks.length - 1, Math.floor(stopsTravelled(stops)))
+  return {
+    prev: marks[reached - 1] ?? null,
+    here: marks[reached],
+    next: marks[reached + 1] ?? null,
+    leg: stops[reached] ? stops[reached].score : 1,
+  }
 }

@@ -3726,21 +3726,21 @@ button:focus-visible {
 
 .platform-card,
 .route-stop,
-.wmap-line,
+.plate,
 .deck-card {
   animation: arrive 0.32s cubic-bezier(0.22, 0.68, 0.32, 1) backwards;
 }
 /* Capped at eight: past that the last rows are waiting on an
    animation instead of being read, and a board with thirty themes
    should not take a second to finish arriving. */
-.platform-card:nth-child(1),  .route-stop:nth-child(1),  .wmap-line:nth-child(1)  { animation-delay: 0.02s; }
-.platform-card:nth-child(2),  .route-stop:nth-child(2),  .wmap-line:nth-child(2)  { animation-delay: 0.05s; }
-.platform-card:nth-child(3),  .route-stop:nth-child(3),  .wmap-line:nth-child(3)  { animation-delay: 0.08s; }
-.platform-card:nth-child(4),  .route-stop:nth-child(4),  .wmap-line:nth-child(4)  { animation-delay: 0.11s; }
-.platform-card:nth-child(5),  .route-stop:nth-child(5),  .wmap-line:nth-child(5)  { animation-delay: 0.14s; }
-.platform-card:nth-child(6),  .route-stop:nth-child(6),  .wmap-line:nth-child(6)  { animation-delay: 0.17s; }
-.platform-card:nth-child(7),  .route-stop:nth-child(7),  .wmap-line:nth-child(7)  { animation-delay: 0.20s; }
-.platform-card:nth-child(n+8), .route-stop:nth-child(n+8), .wmap-line:nth-child(n+8) { animation-delay: 0.23s; }
+.platform-card:nth-child(1),  .route-stop:nth-child(1),  .plate:nth-child(1)  { animation-delay: 0.02s; }
+.platform-card:nth-child(2),  .route-stop:nth-child(2),  .plate:nth-child(2)  { animation-delay: 0.05s; }
+.platform-card:nth-child(3),  .route-stop:nth-child(3),  .plate:nth-child(3)  { animation-delay: 0.08s; }
+.platform-card:nth-child(4),  .route-stop:nth-child(4),  .plate:nth-child(4)  { animation-delay: 0.11s; }
+.platform-card:nth-child(5),  .route-stop:nth-child(5),  .plate:nth-child(5)  { animation-delay: 0.14s; }
+.platform-card:nth-child(6),  .route-stop:nth-child(6),  .plate:nth-child(6)  { animation-delay: 0.17s; }
+.platform-card:nth-child(7),  .route-stop:nth-child(7),  .plate:nth-child(7)  { animation-delay: 0.20s; }
+.platform-card:nth-child(n+8), .route-stop:nth-child(n+8), .plate:nth-child(n+8) { animation-delay: 0.23s; }
 
 /* An arriving card must not also be sliding: the two transforms fight
    and the row twitches. Fading alone still reads as arrival. */
@@ -3752,7 +3752,7 @@ button:focus-visible {
   .stage,
   .platform-card,
   .route-stop,
-  .wmap-line,
+  .plate,
   .deck-card,
   .profile,
   .stats,
@@ -4067,66 +4067,6 @@ button:focus-visible {
   transform: translateX(0);
 }
 
-/* ── 実践 — a platform, and where its trains go ──────────────
-   The Practice gate's card is the shared platform card with a second
-   register under it: the head opens the station, the grades under it
-   board the train (screens/PracticeScreen.jsx says why they are
-   there). It is a <div> with a button inside rather than one button,
-   because a chip inside a button is not markup — the head keeps the
-   card's own hover, and answers focus for it, so nothing is lost.
-
-   The rail is permanent here, where every other row reveals one on
-   hover: four platforms of the same shape have to be told apart at a
-   glance, and a 2.5px ring around a numeral was the only pigment on a
-   card 163px tall. An edge, which is what colour is allowed to be. */
-.platform-card--sign {
-  flex-direction: column;
-  align-items: stretch;
-}
-.platform-card--sign::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  background: var(--rail);
-}
-.platform-card--sign:has(.platform-sign__head:focus-visible) {
-  background: var(--bg-card-hover);
-  border-color: var(--rail);
-  transform: translateY(-1px);
-}
-.platform-sign__head {
-  display: flex;
-  align-items: stretch;
-  flex: 1;
-  padding: 0;
-  background: none;
-  border: none;
-  border-radius: 0;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.platform-sign__head:hover { filter: none; }
-/* The shared card's own padding is a card's whole vertical rhythm —
-   28px over and under both cells — and this card has a second row
-   under it: at four to a phone the four stacked to 780px in a 640px
-   page. The head keeps the card's horizontal grammar and gives the
-   rhythm back to the row of grades. */
-.platform-card--sign .platform-card__lead { padding: var(--sp-4) var(--sp-2) var(--sp-4) var(--sp-5); }
-.platform-card--sign .platform-card__body { padding: var(--sp-4) var(--sp-5) var(--sp-4) var(--sp-4); }
-/* The console's two-row grammar: a hairline, then the row of choices.
-   Five grades share the width, so each is a third of a thumb wide
-   rather than a 50px pill with 100px of nothing beside it. */
-.platform-sign__dests {
-  display: flex;
-  gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-4);
-  border-top: 1px solid var(--surface-line);
-}
 
 input {
   font-family: inherit;
@@ -5903,7 +5843,7 @@ textarea:focus-visible {
    natural widths first, then stretches what landed on each — so the
    set keeps the shape it wraps into. A lone chip is not a set and
    keeps its own width. */
-.platform-sign__dests .chip {
+.plate__foot--dests .chip {
   flex: 1 1 0;
   justify-content: center;
   padding: 0;
@@ -6976,97 +6916,193 @@ textarea:focus-visible {
 .today-clear__body  { margin: 0; color: var(--text-secondary); }
 .today-clear__next  { margin: 0 0 8px; color: var(--text-secondary); font-size: 14px; }
 
-/* ── The station's main panel ───────────────────────────────
-   Born as the 発車標 departure board; since the wall-map redesign the
-   same sumi panel carries the 路線図 (see WallMap.jsx). The material,
-   the masthead grammar and the gold stripe are exactly what they
-   were — only the rows under them changed, which is why the class
-   keeps its name: it names the panel, not the timetable. */
-.board {
-  position: relative;
-  width: min(var(--board-w), 100%);
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, #fff 3%, var(--bg-panel)) 0%,
-      var(--bg-panel) 34%,
-      color-mix(in srgb, #000 12%, var(--bg-panel)) 100%);
-  border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent);
-  border-radius: 8px;
-  overflow: hidden;
-  color: var(--text-on-panel);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.34);
-}
-/* The scanline is gone (owner's call). The panel wore a 1px-in-3
-   repeating gradient — the lit-board texture a 発車標 has — from when it
-   was a departure board a few rows tall. The map fills the phone now,
-   so the same texture covers most of a screen, and at that size it
-   stops reading as the grain of a lit panel and starts reading as
-   banding across the map's own empty space. The panel keeps its
-   gradient, its gold hairline and its shadow; the material is those. */
+/* ── 駅名標 — the gates hang a plate per line (plan 093) ─────────
+   The Learn and Practice gates are a column of station plates
+   (components/station/LinePlate.jsx): the roundel, the name, the
+   section's aside at the trailing edge, a foot, and the line's
+   pigment as the 4px stripe along the bottom — the stroke every
+   station plate in the app carries. The surface is the app's one
+   card and the shadow is --elev-hang, which means exactly this: a
+   plate hangs.
 
-/* The station's own name, at the head of its board. Left: who you
-   are standing in front of, in the three registers a 駅名標 always
-   carries — reading, name, plain-language name. Right: what the panel
-   is, and the time. The line stripe under it is the same one the
-   plate carries; below that, the lines. */
-/* The line's colour, the full width of the platform — the same stroke
-   the station plate carries along its own bottom edge, which is what
-   ties the two objects together across screens. */
-.board__stripe {
-  height: 4px;
-  background: var(--accent2);
-}
-
-/* ── 路線図 — the lines on the wall map ──────────────────────
-   Inside the board's own sumi panel, where the departure rows used to
-   run. Three registers, by what the app really knows about a place
-   (see WallMap.jsx): tracked lines, practice rows, facility chips.
-   Panel ground throughout — every ink below is the panel pair or a
-   pigment lifted toward it, never the ambient inks that flip. */
-.wmap__lines {
+   It replaced the wall map (plan 071) — the sumi board carrying four
+   tracks of five labels each. Four rows at one weight gave the eye
+   nowhere to land at 390px, and the one thing a learner opens the
+   gate to do (board a line) was a row that did not look pressable.
+   Chosen from five directions drawn side by side; the owner took the
+   plate. The ledger's roundel is the mark, so the two blocks cannot
+   drift about what a line's ring looks like on paper. */
+.plates {
   display: flex;
   flex-direction: column;
-  padding: var(--sp-4) var(--sp-4) var(--sp-3);
+  gap: var(--sp-4);
+  width: min(var(--board-w), 100%);
 }
-.wmap-line {
+.plate {
   position: relative;
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-5);
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  box-shadow: var(--elev-hang);
+  overflow: hidden;
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+/* The hover grammar every card in the app shares (DESIGN.md, Motion):
+   a 1px lift and the border to the pigment. On the block, because the
+   head is the button and the plate is the object. */
+.plate:has(.plate__head:hover),
+.plate:has(.plate__head:focus-visible) {
+  border-color: var(--line-color, var(--accent2));
+  transform: translateY(-1px);
+}
+.plate__head {
+  flex: 1;
+  display: grid;
+  /* The roundel, the name, the aside: the name takes the row and
+     ellipses before the aside moves, so a due chip never pushes one
+     plate's title off the line the others share. */
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: var(--sp-4);
   align-items: center;
   width: 100%;
-  padding: var(--sp-4) var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
   background: none;
   border: none;
-  border-radius: var(--r-card);
+  border-radius: 0;
   color: inherit;
   font: inherit;
   text-align: left;
   cursor: pointer;
-  transition: background 0.15s ease;
 }
-/* The hover grammar every row in the app shares: the rail reveals,
-   the ground lifts a register, the roundel inverts, the ▶ slides. */
-.wmap-line::before,
-.wmap-row::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
+.plate__head:hover,
+.plate__head:focus-visible { filter: none; }
+.plate:has(.plate__head:hover) .plate__roundel,
+.plate:has(.plate__head:focus-visible) .plate__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
+.plate__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.plate__title {
+  min-width: 0;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: var(--fs-title);
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* The shelf's figures under its name: the one plate whose line has
+   no stops to print in a foot. */
+.plate__meta {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.plate__aside { justify-self: end; display: flex; align-items: center; }
+/* Due counts ride the plate as state chips — --warning meaning "due",
+   an edge and a numeral, never a fill. The ink is the deck card's
+   (.deck-card__due): 琥珀 mixed 55% toward the ambient ink, because
+   raw --warning carried on the map's sumi and reads 2.75:1 on paper in
+   light theme — guard 4 caught it on the first render. */
+.plate__due {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-1);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-pill);
+  border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+  color: color-mix(in srgb, var(--warning) 55%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.plate__due__unit {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: var(--fs-caption-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+/* ── The foot ──
+   What a 駅名標 prints under the name: the stop you stand at in the
+   middle, the one behind and the one ahead at the edges. A station is
+   the END of the leg it names (domain/lineProgress), so the middle
+   says which level is FINISHED, and the stripe under it fills with
+   the leg being ridden toward the next. */
+.plate__foot {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-5);
+  border-top: 1px solid var(--surface-line);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.plate__prev { text-align: left; }
+.plate__next { text-align: right; }
+.plate__here {
+  font-size: var(--fs-lead);
+  line-height: 1.3;
+  letter-spacing: var(--tr-term);
+  color: var(--text-primary);
+}
+/* On a practice platform the foot is where the trains go: the five
+   grades, a thumb's worth of chip each, sharing the row — the console's
+   two-row grammar, a hairline and then the choices. */
+.plate__foot--dests {
+  display: flex;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+}
+/* The stripe: the pigment at rest along the whole edge, raw over the
+   stretch ridden. A plate with no track behind it — the shelf, a
+   platform — is painted raw end to end. */
+.plate__stripe {
+  display: block;
+  height: 4px;
+  background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent);
+}
+.plate__stripe i {
+  display: block;
+  height: 100%;
   background: var(--line-color, var(--accent2));
-  transform: scaleY(0);
-  transition: transform 0.18s ease;
+  transition: width 0.6s ease;
 }
-.wmap-line:hover::before, .wmap-line:focus-visible::before,
-.wmap-row:hover::before,  .wmap-row:focus-visible::before { transform: scaleY(1); }
-.wmap-line:hover, .wmap-line:focus-visible,
-.wmap-row:hover,  .wmap-row:focus-visible {
-  background: rgba(255, 255, 255, 0.055);
-  filter: none;
+@media (prefers-reduced-motion: reduce) {
+  .plate { transition: border-color 0.15s ease; }
+  .plate:has(.plate__head:hover),
+  .plate:has(.plate__head:focus-visible) { transform: none; }
+  .plate__stripe i { transition: none; }
+}
+/* ── The plates take the gate ──
+   A gate is a bar and a column of plates, and on a phone the column
+   takes the room the page has and the plates share it equally: each
+   head grows, and its roundel, name and chip sit centred in the room
+   they get, instead of the air pooling under the last plate. Every
+   plate is a plate, so every plate gets one share — the shelf too. */
+@media (max-width: 768px) {
+  .learn > .plates,
+  .practice > .plates { flex: 1; }
+  .learn > .plates > .plate,
+  .practice > .plates > .plate { flex: 1 1 auto; }
 }
 
+/* 駅ナンバリング — the roundel on the panel's ink, kept for the doors
+   and deck cards that draw it (analyzer door, deck glyph, picker row).
+   It was the wall map's; the map went, the mark stayed. */
 .wmap-roundel {
   flex-shrink: 0;
   display: inline-flex;
@@ -7085,242 +7121,8 @@ textarea:focus-visible {
      one that lands the glyph in the middle — see .hud__level. */
   line-height: normal;
 }
-.wmap-line:hover .wmap-roundel, .wmap-line:focus-visible .wmap-roundel,
-.wmap-row:hover .wmap-roundel,  .wmap-row:focus-visible .wmap-roundel,
 .wmap-roundel--sm { width: 24px; height: 24px; }
 
-.wmap-line__id { display: flex; align-items: center; gap: var(--sp-4); min-width: 0; flex: 1 1 auto; }
-.wmap-line__names,
-.wmap-row__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
-/* The line's name, in the learner's language (Japanese is content,
-   not chrome — docs/design/mobile). */
-.wmap-line__jp,
-.wmap-row__jp {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  line-height: 1.2;
-  white-space: nowrap;
-}
-.wmap-line__latin,
-.wmap-row__latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  opacity: 0.55;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ── The track: stations, the travelled portion, the train ──────
-   Geometry mirrors the leg count (see WallMap's Track): the novice's
-   stop at 5%, the terminus at 95%, and a level's station at the point
-   its leg is finished. The rail is the line's pigment at rest, the
-   travelled portion is it raw, and the marker is it lifted toward
-   the panel ink — colour as an edge and a marker, never a fill. */
-.wmap-track { position: relative; height: 30px; flex: 1 1 100%; order: 3; }
-.wmap-track__rail,
-.wmap-track__done {
-  position: absolute;
-  top: 9px;
-  left: 0;
-  height: 3px;
-  border-radius: var(--r-pill);
-}
-.wmap-track__rail { width: 100%; background: color-mix(in srgb, var(--line-color, var(--accent2)) 30%, transparent); }
-.wmap-track__done { background: var(--line-color, var(--accent2)); transition: width 0.6s ease; }
-.wmap-track__stop {
-  position: absolute;
-  top: 5px;
-  width: 11px;
-  height: 11px;
-  border-radius: var(--r-pill);
-  transform: translateX(-50%);
-  border: 2px solid color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--bg-panel));
-  background: var(--bg-panel);
-}
-.wmap-track__stop--past {
-  background: var(--line-color, var(--accent2));
-  border-color: var(--line-color, var(--accent2));
-}
-/* 終点 — the terminus: the last level's own station, since finishing
-   N1 (or キャ) is finishing the line. Squared off rather than round,
-   the way a terminus is marked on a route map, so the end of the line
-   reads as an end and not as one more stop with track beyond it. */
-.wmap-track__stop--end { border-radius: var(--r-plate); }
-.wmap-track__label {
-  position: absolute;
-  top: 19px;
-  transform: translateX(-50%);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-term);
-  opacity: 0.6;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.wmap-track__train {
-  position: absolute;
-  top: 2px;
-  width: 7px;
-  height: 17px;
-  border-radius: var(--r-pill);
-  transform: translateX(-50%);
-  background: color-mix(in srgb, var(--line-color, var(--accent2)) 70%, var(--text-on-panel));
-}
-@media (prefers-reduced-motion: reduce) {
-  .wmap-track__done { transition: none; }
-}
-
-/* Due counts ride the map as state chips — --warning meaning "due",
-   an edge and a numeral, never a fill. */
-.wmap-line__due { justify-self: end; }
-.wmap-due {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp-1);
-  padding: var(--sp-1) var(--sp-3);
-  border-radius: var(--r-pill);
-  border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
-  color: var(--warning);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.wmap-due__unit {
-  margin-left: 2px;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-caption-xs);
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  opacity: 0.8;
-}
-
-/* ── 実践 / 施設 — the groups below the lines ────────────────ー */
-.wmap__group {
-  display: flex;
-  flex-direction: column;
-  padding: var(--sp-2) var(--sp-4) var(--sp-3);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-.wmap-row {
-  position: relative;
-  display: grid;
-  grid-template-columns: 30px minmax(0, auto) minmax(0, 1fr) 22px;
-  gap: var(--sp-5);
-  align-items: center;
-  width: 100%;
-  padding: var(--sp-4) var(--sp-3);
-  background: none;
-  border: none;
-  border-radius: var(--r-card);
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-.wmap-row__note {
-  text-align: right;
-  font-size: var(--fs-caption);
-  line-height: 1.4;
-  opacity: 0.72;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.wmap-row__go {
-  justify-self: end;
-  font-size: var(--fs-caption-xs);
-  color: color-mix(in srgb, var(--line-color, var(--accent2)) 55%, var(--text-on-panel));
-  opacity: 0;
-  transform: translateX(-4px);
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-.wmap-row:hover .wmap-row__go,
-.wmap-row:focus-visible .wmap-row__go { opacity: 1; transform: translateX(0); }
-@media (prefers-reduced-motion: reduce) {
-  .wmap-row__go { transition: opacity 0.15s ease; transform: none; }
-  .wmap-line::before, .wmap-row::before { transition: none; }
-}
-
-@media (max-width: 768px) {
-  /* ── The map is the wall, so it takes the wall ──
-     The Learn gate is a bar and a map, and the map was drawn at its
-     rows' own height: on a 390x844 phone it ended 196px above the tab
-     bar, a panel floating in the middle of the screen with nothing under
-     it. The board takes the room the page has and its lines share it —
-     each line's identity, its due chip and its track then sit in a row
-     with air around them instead of the air pooling below the last. */
-  .learn > .board {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  /* Every ROW on the map takes an equal share of the room going
-     spare — not every GROUP. The lines and the shelf are two blocks of
-     very different row counts, so `flex: 1` each handed four lanes one
-     half of the slack and the single deck row the other: the lanes
-     grew a little and the shelf grew hugely, or (as shipped) the shelf
-     was left out of the sharing altogether and sat squeezed under four
-     lanes with air around them. --rows is the lane count, set by
-     WallMap, so the split stays right when a fifth line is tracked.
-     flex-grow alone: the basis stays `auto`, so what is shared is the
-     SLACK and a lane keeps the extra height its track needs. */
-  .learn > .board > .wmap__lines { flex-grow: var(--rows, 4); }
-  .learn > .board > .wmap__group { flex-grow: 1; }
-  .learn > .board > .wmap__lines > .wmap-line,
-  .learn > .board > .wmap__group > .wmap-row { flex: 1 1 auto; align-content: center; }
-}
-
-/* The halls you use rather than ride. Chips, labelled in the
-   learner's own language — a tool's name is a label, not a place
-   name; the roundel keeps the code and the pigment. */
-.wmap__facilities {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  padding: var(--sp-4) var(--sp-5) var(--sp-6);
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-}
-/* The hall folds to one column before the map's tracks crush; the
-   gate and the pass pair up above the full-width map. 900px is the
-   same bound the settings mixer folds at.
-
-   The rail's pair is auto-fit, not a hard 1fr 1fr: a fixed pair at
-   ~600px gave each card ~280px and the depart button's 出発する
-   wrapped one CHARACTER per line — Japanese has no spaces, so a
-   too-narrow column stacks a word vertically rather than overflowing
-   visibly. Below two comfortable columns the rail stacks on its own,
-   with no third breakpoint to keep honest. */
-@media (max-width: 900px) {
-  .gatehall__rail {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    align-items: stretch;
-  }
-}
-
-/* The map strips fold well before the phone: at ~700px the unfolded
-   grid leaves the track ~300px and five stops crush into the train.
-   Identity and due count take the first line, the track the second at
-   full width — the same fold the 560px query used to hold, moved up
-   to where it is actually needed. */
-@media (max-width: 760px) {
-  .wmap-line__due { order: 2; }
-  .wmap-line { flex: 1 1 100%; order: 3; }
-  /* 備考 goes with the fold, exactly as it did on the board: the
-     destination is what you are scanning for. */
-  .wmap-row { grid-template-columns: 30px minmax(0, 1fr) 22px; }
-  .wmap-row__note { display: none; }
-}
 
 /* ── 路線図 — the route diagram ────────────────────────────
    The stopping-pattern strip inside a train car, turned upright. One

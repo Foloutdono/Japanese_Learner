@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { lineMarks, lineStops, lineTotals, stopsTravelled, ORIGIN_STOP, LEVEL_STOPS, KANA_STOPS } from './lineProgress'
+import { lineMarks, lineStops, lineTotals, stopsAround, stopsTravelled, ORIGIN_STOP, LEVEL_STOPS, KANA_STOPS } from './lineProgress'
 
 // The unit is CARDS, not (card x mode) drills, and it comes from
 // /api/stats' `items` block rather than being recomputed here out of
@@ -136,5 +136,37 @@ describe('lineMarks', () => {
     expect(lineMarks(lineStops(stats, 'kana')).every(m => m.jp)).toBe(true)
     expect(lineMarks(lineStops(stats, 'vocab')).map(m => m.jp))
       .toEqual([true, false, false, false, false, false])
+  })
+})
+
+describe('stopsAround', () => {
+  it('stands at 初 with the first stop ahead on a line nobody has ridden', () => {
+    const around = stopsAround(lineStops(null, 'kanji'))
+    expect(around.prev).toBeNull()
+    expect(around.here.label).toBe('初')
+    expect(around.next.label).toBe('N5')
+    expect(around.leg).toBe(0)
+  })
+
+  it('stands at the last level FINISHED, with the leg being ridden as the fill', () => {
+    // The fixture has N5 at 0.8: four fifths of N5 is not N5, so the
+    // plate still says 初 with N5 ahead and the stripe four fifths in.
+    const stops = lineStops(stats, 'vocab')
+    expect(stopsAround(stops).here.label).toBe('初')
+    expect(stopsAround(stops).leg).toBeCloseTo(0.8)
+    const done = stops.map((s, i) => ({ ...s, score: i === 0 ? 1 : i === 1 ? 0.3 : 0 }))
+    const around = stopsAround(done)
+    expect(around.prev.label).toBe('初')
+    expect(around.here.label).toBe('N5')
+    expect(around.next.label).toBe('N4')
+    expect(around.leg).toBeCloseTo(0.3)
+  })
+
+  it('has nothing ahead at the terminus, and the stripe is the whole line', () => {
+    const stops = lineStops(null, 'kana').map(s => ({ ...s, score: 1 }))
+    const around = stopsAround(stops)
+    expect(around.here.label).toBe('キャ')
+    expect(around.next).toBeNull()
+    expect(around.leg).toBe(1)
   })
 })

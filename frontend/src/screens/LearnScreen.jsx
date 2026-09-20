@@ -7,20 +7,22 @@ import { useTodaySummary } from '../stores/today'
 import { useStats } from '../stores/stats'
 import { beginDeparture } from '../stores/departure'
 import { playAnnouncement } from '../lib/audio'
+import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
 import { Bar } from '../components/chrome/Bar'
-import { WallMap } from '../components/station/WallMap'
+import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
 
-// ── 学習 — the Learn gate: the route map (plan 071) ──────────
-// The bar, then the wall map: the four lines with the learner's train
-// on each, and the shelf of decks as one row. Picking a line announces
-// it aloud and departs through the gate wipe to its station.
+// ── 学習 — the Learn gate: the plates (plan 093) ──────────────
+// The bar, then one station plate per line: the four SRS lines with
+// the stop the learner has reached at the foot of each, and the shelf
+// of decks as a fifth plate. Picking one announces it aloud and
+// departs through the gate wipe to its station.
 //
 // Three feeds, all shared or quiet: /api/stats for the distance
 // travelled (the store every station reads too), /api/today for the
 // due chips (the store the tab bar's badge reads), and /api/decks for
-// the shelf row's figures. All fail quiet: the map draws with nobody
-// aboard rather than shouting (the run owns up on Today, where the
-// retry lives).
+// the shelf plate's figures. All fail quiet: the plates hang with
+// nobody aboard rather than shouting (the run owns up on Today, where
+// the retry lives).
 export default function LearnScreen({ session }) {
   const { t } = useLang()
   const today = useTodaySummary().data
@@ -45,23 +47,38 @@ export default function LearnScreen({ session }) {
   }
 
   const sections = getSections('learn', t)
+  const lines = sections.filter(s => TRACKED[s.path])
   const decksSection = sections.find(s => s.path === '/learn/decks')
 
   return (
     <main id="main-content" className="learn">
       <Bar code={HOME_STATION.code} title={t.routeMap} sub={t.learnFourLines} color="var(--accent2)" />
-      <WallMap
-        sections={sections}
-        stats={stats}
-        bySource={today?.by_source}
-        onDepart={depart}
-        decks={decksSection ? {
-          section: decksSection,
-          count: shelf?.count ?? 0,
-          cards: shelf?.cards ?? 0,
-          due: today?.by_source?.personal ?? 0,
-        } : null}
-      />
+      <div className="plates">
+        {lines.map(section => {
+          const source = TRACKED[section.path]
+          const stops = lineStops(stats, source)
+          return (
+            <Plate
+              key={section.path}
+              section={section}
+              className="plate--line"
+              aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
+              foot={<StopsFoot stops={stops} />}
+              fill={stopsAround(stops).leg}
+              onClick={() => depart(section)}
+            />
+          )
+        })}
+        {decksSection && (
+          <Plate
+            section={decksSection}
+            className="plate--shelf"
+            meta={shelf?.count > 0 ? t.decksRowMeta(shelf.count, shelf.cards) : null}
+            aside={<DueChip due={today?.by_source?.personal ?? 0} />}
+            onClick={() => depart(decksSection)}
+          />
+        )}
+      </div>
     </main>
   )
 }

@@ -205,29 +205,22 @@ const Fixture = () => (
       </button>
     </div>
 
-    {/* WallMap.jsx -- the panel-ink registers on the sumi panel: line
-        captions, stop labels, due chips, group captions, facility
-        chips, practice-row remarks.
-
-        The real .board paints its sumi as a GRADIENT, and
-        effectiveGround() below composites backgroundColor only -- a
-        gradient contributes nothing, so without help these sites
-        would measure against the PAGE and pass/fail on the wrong
-        ground entirely (they reported kinari-on-washi at 1.04:1 in
-        light theme). The inline colour pins the ground to the
-        gradient's own midpoint token, which is what the panel
-        composites to within ±3%. */}
-    <div className="board" style={{ background: 'var(--bg-panel)' }}>
-      <button type="button" className="wmap-line" style={{ '--line-color': 'var(--line-vocab)' }}>
-        <span className="wmap-line__latin wm-latin">Vocabulary</span>
-        <span className="wmap-track">
-          <span className="wmap-track__label wm-stop">N5</span>
+    {/* LinePlate.jsx (plan 093) -- the gates' plates on --surface: the
+        name, the foot's stop names in both registers, the due chip. */}
+    <div className="plate" style={{ '--line-color': 'var(--line-vocab)' }}>
+      <button type="button" className="plate__head">
+        <span className="pf-line__roundel plate__roundel lp-roundel">TG</span>
+        <span className="plate__names">
+          <span className="plate__title lp-title">Vocabulary</span>
+          <span className="plate__meta lp-meta">3 decks · 214 cards</span>
         </span>
-        <span className="wmap-due wm-due">8<span className="wmap-due__unit" lang="ja">件</span></span>
+        <span className="plate__aside"><span className="plate__due lp-due">8<span className="plate__due__unit">due</span></span></span>
       </button>
-      <button type="button" className="wmap-row" style={{ '--line-color': 'var(--line-decks)' }}>
-        <span className="wmap-row__latin wm-note">3 decks · 214 cards</span>
-      </button>
+      <span className="plate__foot">
+        <span className="plate__prev lp-edge">‹ 初</span>
+        <span className="plate__here lp-here">N5</span>
+        <span className="plate__next lp-edge">N4 ›</span>
+      </span>
     </div>
 
     {/* --surface cards carrying secondary text */}
@@ -821,10 +814,12 @@ const SITES = [
   ['.gc-mode', 'gate lane mode (tinted surface)'],
   ['.gc-depart-jp', 'depart button name (gold fill)'],
   ['.gc-depart-latin', 'depart button arrow (gold fill)'],
-  ['.wm-latin', 'map line caption (sumi)'],
-  ['.wm-stop', 'map stop label (sumi)'],
-  ['.wm-due', 'map due chip (sumi)'],
-  ['.wm-note', 'decks row meta (sumi)'],
+  ['.lp-roundel', 'plate roundel (pigment mixed toward the ink)'],
+  ['.lp-title', 'plate title'],
+  ['.lp-meta', 'shelf plate meta'],
+  ['.lp-due', 'plate due chip (warning ink)'],
+  ['.lp-edge', 'plate foot, the stops either side'],
+  ['.lp-here', 'plate foot, the stop reached'],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],
