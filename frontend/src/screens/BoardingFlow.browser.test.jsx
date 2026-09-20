@@ -96,6 +96,13 @@ const RESUMED = {
 
 // The pull is 260 ms; a settle clears it and the leaving car with it.
 const settle = (ms = 340) => new Promise(r => setTimeout(r, ms))
+// The head's track reads n/N off its progressbar: the stops are the
+// count, and no figure is printed.
+function stepsOf(screen) {
+  const track = screen.container.querySelector('.brd__car:not(.brd__car--out) .brd__track, .brd__track')
+  return `${track.getAttribute('aria-valuenow')}/${track.getAttribute('aria-valuemax')}`
+}
+
 const stepOf = screen => screen.container.querySelector('.brd')?.dataset.step
 const live = screen => screen.container.querySelector('.brd__car:not(.brd__car--out)')
 // The head (the back button, the track) stands outside the cars.
@@ -203,7 +210,7 @@ describe('BoardingFlow', () => {
     // flow, so with no `onExit` to leave for there is no button — the
     // guest boarding always passes one (see its own tests below).
     expect(stepOf(screen)).toBe('name')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('1/7')
+    expect(stepsOf(screen)).toBe('1/7')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     expect(document.activeElement?.className).toContain('brd-field')
 
@@ -227,13 +234,13 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('kana')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('3/7')
+    expect(stepsOf(screen)).toBe('3/7')
     // The answers are the foot: each one advances.
     expect(q(screen, '.brd__foot')).toBeNull()
     await click(screen, '[data-kana="both"]')
     await settle()
     expect(stepOf(screen)).toBe('level')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('4/7')
+    expect(stepsOf(screen)).toBe('4/7')
     expect(q(screen, '[data-level="novice"] .brd-opt__code').textContent).toBe('—')
     // The volumes price the list: N5's ~100 kanji, N1's ~2,250.
     expect(q(screen, '[data-level="N5"] .brd-opt__desc').textContent).toContain('100')
@@ -259,7 +266,7 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('time')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('7/7')
+    expect(stepsOf(screen)).toBe('7/7')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('07:30')
     // ── The board settles rather than arriving set ──
     // A 発車標 lights with every drum turning and stops them one after
@@ -343,7 +350,7 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('reveal')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('4/7')
+    expect(stepsOf(screen)).toBe('4/7')
     expect(live(screen).querySelectorAll('.brd-kana__read')).toHaveLength(2)
     await click(screen, '[data-action="continue"]')
     await settle()
@@ -471,7 +478,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')
     await settle()
     expect(stepOf(screen)).toBe('rhythm')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('5/6')
+    expect(stepsOf(screen)).toBe('5/6')
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="continue"]')
@@ -513,7 +520,7 @@ describe('BoardingFlow', () => {
   it('on a native shell the nudge is the eighth stop and Allow signs the reminder', async () => {
     nudgeRef.current = true
     const { screen } = await renderFlow()
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('1/8')
+    expect(stepsOf(screen)).toBe('1/8')
     await passName(screen)
     await click(screen, '[data-kana="none"]')
     await settle()
@@ -526,7 +533,7 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     expect(stepOf(screen)).toBe('nudge')
-    expect(screen.container.querySelector('.brd__count').textContent).toBe('8/8')
+    expect(stepsOf(screen)).toBe('8/8')
     expect(q(screen, '.brd-notif__title').textContent).toContain('07:30')
     await click(screen, '[data-action="allow"]')
     await settle()

@@ -18340,6 +18340,7 @@ a.slip__act { text-decoration: none; }
   padding-bottom: calc(var(--safe-bottom) + var(--sp-6));
   background: var(--bg-main);
   color: var(--text-primary);
+  container: brd / size;
 }
 .brd--welcome { gap: var(--sp-4); }
 /* The cars slide sideways, so the frame clips them — and that clip
@@ -18464,21 +18465,38 @@ a.slip__act { text-decoration: none; }
 }
 .brd__back .svg { width: 18px; height: 18px; }
 .brd__back--void { visibility: hidden; }
-.brd__track { position: relative; flex: 1; height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 18%, transparent); }
-/* The train advances once the new screen stands still: 300 ms after the pull. */
-.brd__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 300ms ease-out 300ms; }
-.brd__train {
+/* ── The track is the line (chosen 2026-09-20 from three heads drawn
+   side by side: stops, segments, a rule on the top edge) ──
+   One stop per question on a hairline rail, the stops behind you
+   filled gold, the one you are at a larger ring -- your train -- and
+   the ones ahead empty. The count is read off the drawing, so no
+   figure is printed beside it. DESIGN.md, Structure: a line with
+   stops is how this app draws distance wherever the axis has named
+   waypoints, and eight questions are eight of them. The rail is as
+   tall as the head so the stops centre on the back button. */
+.brd__track { position: relative; flex: 1; height: 44px; }
+.brd__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+/* The run behind you advances once the new screen stands still: 300 ms after the pull. */
+.brd__done { position: absolute; left: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--accent2); transition: width 300ms ease-out 300ms; }
+.brd__stop {
   position: absolute;
-  top: -4px;
-  width: 8px;
-  height: 14px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
   border-radius: var(--r-pill);
-  background: var(--text-primary);
-  transform: translateX(-50%);
-  box-shadow: 0 0 0 3px var(--bg-main);
-  transition: left 300ms ease-out 300ms;
+  border: 2px solid var(--surface-line);
+  background: var(--bg-main);
+  transform: translate(-50%, -50%);
 }
-.brd__count { flex: none; font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.brd__stop--passed { border-color: var(--accent2); background: var(--accent2); }
+.brd__stop--here {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--bg-main);
+  background: var(--accent2);
+  box-shadow: 0 0 0 2px var(--accent2);
+}
 .brd__q {
   margin: 0;
   font-family: var(--font-serif);
@@ -18969,15 +18987,34 @@ a.slip__act { text-decoration: none; }
    four promises -- so it steps the same way in its own parts: the
    chart's padding and the room between its pieces, and a promise
    standing on its text rather than on a 30px floor. */
+/* The frame is its own size container so these rules follow the
+   frame's height, not only the viewport's: a shell that gives the
+   boarding less than the screen (or a test that does) gets the same
+   step. A container cannot style itself, so the frame's own gap keeps
+   the media query beside it. */
 @media (max-height: 739px) {
   .brd { gap: var(--sp-4); }
+}
+@container brd (max-height: 739px) {
   .brd__car { gap: var(--sp-4); }
   .brd__stage { gap: var(--sp-4); }
   .brd__q { font-size: var(--fs-heading); }
+  /* The roundels and the action give back the size the rework gave
+     them: room, not meaning, so the six motives still clear the
+     docked action at 700px without a scroll. */
+  .brd-opt__icon { width: 32px; height: 32px; }
+  .brd-opt__code { width: 38px; height: 38px; }
+  .brd .btn-depart { min-height: 52px; }
   .brd__opts { gap: var(--sp-2); }
   .brd-opt { min-height: 0; padding: var(--sp-2) var(--sp-4); }
   .brd-chart { gap: var(--sp-2); padding: var(--sp-3); }
   .brd-bullet { min-height: 0; }
+  /* The plan's copy steps down the same rung the question does: on a
+     390x667 handset the lead and four promises at --fs-lead ran 66px
+     past the foot, and the legend broke onto a second line. */
+  .brd-lead, .brd-bullet { font-size: var(--fs-body); }
+  .brd-bullets { gap: var(--sp-2); }
+  .brd-legend, .brd-chart__cap { font-size: var(--fs-caption); }
 }
 
 /* ── What a landed animation leaves behind ──
@@ -19057,7 +19094,7 @@ a.slip__act { text-decoration: none; }
   .brd [class*="brd"]::before,
   .brd .brd__q,
   .brd__car { animation: none; }
-  .brd__done, .brd__train, .brd-build__done, .brd-build__train { transition: none; }
+  .brd__done, .brd-build__done, .brd-build__train { transition: none; }
 }
 
 
