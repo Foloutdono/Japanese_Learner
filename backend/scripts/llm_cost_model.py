@@ -7,6 +7,7 @@ and can be re-run whenever a price, a prompt or a limit moves.
     python -m scripts.llm_cost_model            # the table
     python -m scripts.llm_cost_model --fleet 5000
     python -m scripts.llm_cost_model --model "GPT-5-mini"
+    python -m scripts.llm_cost_model --pool-share 40
 
 Every number below is an ESTIMATE with its reasoning attached, not a
 measurement: nothing in this app records token counts today, because
@@ -59,8 +60,11 @@ FEATURES = {
         34, 2700, 3000,
         "26 exercises/mo x 1.3 attempts (_COMPREHENSION_ATTEMPTS=3, most "
         "pass first). In: 6.5k-char template + kanji list + seeds. Out: a "
-        "250-char passage, 10 questions, a per-sentence breakdown. UNCACHED "
-        "-- one call per learner per exercise, forever.",
+        "250-char passage, 10 questions, a per-sentence breakdown. This row "
+        "is now the COLD-POOL worst case -- one learner alone in their "
+        "(level, lang) bucket. Since plan 092 the answer is pooled and "
+        "shared, so divide these calls by the learners sharing a bucket: "
+        "--pool-share.",
     ),
     "translation_review": (
         60, 600, 400,
@@ -86,15 +90,35 @@ FEATURES = {
     ),
 }
 
+# The one feature whose calls are shared rather than paid per learner
+# (routes/reading.py, "The exercise pool"). Kept as a name rather than a
+# flag on the row so it is obvious there is exactly one, and why.
+POOLED = "reading_comprehension"
+
+
 # What the free wins are worth. Both are provider features, not rewrites.
 CACHED_INPUT_SHARE = 0.60   # template + kanji list are a stable prefix
 CACHE_READ_RATE = 0.10      # cached input bills at ~10%
 BATCHABLE_SHARE = 0.25      # exam papers + prewarm are offline: batch is -50%
 
 
-def totals():
-    tin = sum(c * i for c, i, _, _ in FEATURES.values())
-    tout = sum(c * o for c, _, o, _ in FEATURES.values())
+def totals(pool_share: float = 1.0):
+    """Input and output tokens for one paying learner in a month.
+
+    `pool_share` is how many active learners share each (level, lang)
+    comprehension bucket. One means a cold pool -- the learner pays for
+    every exercise they read, which is what this app did before plan
+    092. Higher divides that row, because an exercise one learner paid
+    for is served to everyone after them.
+
+    It is a share, not a guarantee: the pool has to grow to the depth of
+    the bucket's HEAVIEST reader, so the saving is real for learners who
+    read at similar rates and smaller for a bucket with one outlier."""
+    share = max(pool_share, 1.0)
+    def calls(name, c):
+        return c / share if name == POOLED else c
+    tin = sum(calls(n, c) * i for n, (c, i, _, _) in FEATURES.items())
+    tout = sum(calls(n, c) * o for n, (c, _, o, _) in FEATURES.items())
     return tin, tout
 
 
@@ -116,12 +140,17 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--fleet", type=int, help="paying subscribers to project for")
     ap.add_argument("--model", help="price one model instead of the whole table")
+    ap.add_argument("--pool-share", type=float, default=1.0, metavar="N",
+                    help="active learners sharing each (level, lang) "
+                         "comprehension bucket (default 1: a cold pool)")
     args = ap.parse_args()
 
-    tin, tout = totals()
+    tin, tout = totals(args.pool_share)
     print(f"Per paying learner, a typical month: {tin:,} input / {tout:,} output tokens\n")
     for name, (c, i, o, _why) in FEATURES.items():
-        print(f"  {name:24s} {c:4d} calls  {c * i:8,} in  {c * o:8,} out")
+        n = c / max(args.pool_share, 1.0) if name == POOLED else float(c)
+        note = "  (pooled)" if name == POOLED and args.pool_share > 1 else ""
+        print(f"  {name:24s} {n:6.1f} calls  {n * i:9,.0f} in  {n * o:9,.0f} out{note}")
 
     names = [args.model] if args.model else list(PRICES)
     print(f"\n{'model':24s} {'as-is':>9s} {'+cache/batch':>13s}")
@@ -139,6 +168,8 @@ def main():
             share * cost(tin * mult, tout * mult, pin, pout)
             for share, mult in MIX.values()
         )
+        if args.pool_share > 1:
+            print(f"  (comprehension pooled across {args.pool_share:g} learners a bucket)")
         print(f"\n{name}, {args.fleet:,} paying subscribers "
               f"({', '.join(f'{int(s * 100)}% {k}' for k, (s, _) in MIX.items())}):")
         print(f"  ${blended:.3f}/user/mo -> ${blended * args.fleet:,.0f}/mo")

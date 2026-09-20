@@ -64,10 +64,12 @@ runtime purpose. Two consequences worth knowing:
   notes that had displaced 34 entries' readings (cited in
   `content/vocab_renames.py`, `scripts/migrate_vocab_ids.py`,
   `tests/test_vocab_deck.py` and `tests/test_dictionary_vocab.py`),
-  and **092** is the commercial LLM swap — paid providers, and the
-  per-call token accounting that replaces the estimates (cited in
-  `study/llm_shared.py`, `scripts/llm_cost_model.py`,
-  `scripts/llm_usage_report.py` and `backend/.env.example`;
+  and **092** is the commercial LLM swap — paid providers, the per-call
+  token accounting that replaces the estimates, and the comprehension
+  pool that stops the most expensive call being paid once per learner
+  (cited in `study/llm_shared.py`, `routes/reading.py`,
+  `scripts/llm_cost_model.py`, `scripts/llm_usage_report.py`,
+  `scripts/prewarm_comprehension_pool.py` and `backend/.env.example`;
   `docs/llm-commercial-plan.md`).
   When starting a new wave, begin at **093** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
@@ -132,6 +134,15 @@ One more is read-only and needs no flag, so it is safe to run at any time:
 
 ```bash
 python -m scripts.weekly_digest        # the four numbers, as markdown
+```
+
+Two others fill a shared cache ahead of demand rather than maintaining
+one. Neither is required — both caches fill themselves from real traffic
+— and both cost model calls, so both report first:
+
+```bash
+python -m scripts.prewarm_phrase_cache --dry-run        # the ~220 curated sentences
+python -m scripts.prewarm_comprehension_pool --dry-run  # exercises per (level, lang)
 ```
 
 Two are one-shots, each run once after a deploy that changed the ids a

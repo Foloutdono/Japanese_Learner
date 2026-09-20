@@ -52,7 +52,7 @@ Per paying learner, in a typical month:
 
 | Feature | Calls | Input tok | Output tok | Cached? |
 |---|---:|---:|---:|---|
-| Reading comprehension | 34 | 91,800 | 102,000 | **no** |
+| Reading comprehension | 34 | 91,800 | 102,000 | **pooled** (§5.3) |
 | Exam paper generation (amortized) | 52 | 67,600 | 104,000 | shared papers |
 | Translation review | 60 | 36,000 | 24,000 | no (contains the learner's answer) |
 | Phrase / sentence analysis | 50 | 20,000 | 25,000 | yes, ~75% hit |
@@ -61,11 +61,14 @@ Per paying learner, in a typical month:
 
 Two things fall out of that table.
 
-**Reading comprehension is the most expensive thing we do**, and the
-only big one with no cache. One call writes a passage, ten questions, a
-per-sentence translation *and* a glossed word list, at
+**Reading comprehension is the most expensive thing we do**, and it was
+the only big one with no cache. One call writes a passage, ten
+questions, a per-sentence translation *and* a glossed word list, at
 `max_tokens=12000`, up to three times if the checks reject it
-(`routes/reading.py`, `_call_llm_comprehension`).
+(`routes/reading.py`, `_call_llm_comprehension`). It is pooled now — the
+row above is the cold-pool worst case, a learner alone in their
+(level, lang) bucket; §5.3 is what it becomes once the bucket is
+shared.
 
 **Exam generation is already the cheapest thing we do per learner**, and
 it does not look like it. ~35 calls per paper is a lot, but
@@ -163,14 +166,29 @@ already half-built here.
    N1** — plus a fixed template. That is ~60% of input tokens, and it is
    byte-identical across calls if the volatile part (seeds, topic,
    feedback) goes last. Cached input bills at ~10%.
-3. **Cache the comprehension exercise.** `phrase_analysis_cache` already
-   proves the pattern in this codebase. An exercise is a function of
-   (level, lang, grammar seeds, word seeds) — not of who asked. It
-   cannot be shared as aggressively as a phrase (the seeds are drawn
-   from the learner's own recent history), but a pool of pre-generated
-   exercises per (level, lang), served round-robin and topped up in the
-   background, turns the most expensive call we make into an amortized
-   one. This is the single biggest lever in the list.
+3. ~~**Cache the comprehension exercise.**~~ **Done**, and as a pool
+   rather than a cache — the distinction is the whole design.
+   `phrase_analysis_cache` can key on the phrase because the caller
+   brings the phrase; nobody brings an exercise, and the seeds that
+   would be the key are drawn per learner precisely to *avoid* repeats,
+   so keying on them would hit almost never. The rule that works is
+   `exam_papers`': serve this learner any exercise at their level and
+   language they have not been served, and generate only when there is
+   none. `comprehension_pool` holds the model's answer;
+   `comprehension_served` records who has read which — on serve, not on
+   completion, since an exercise opened and abandoned has still been
+   read.
+
+   What it changes: comprehension generation stops scaling with the
+   number of learners and starts scaling with the *deepest* reader in
+   each bucket. With N learners sharing a (level, lang) bucket and
+   reading at similar rates, the per-learner comprehension bill falls
+   by roughly N. At 40 a bucket, the blended figure in §4 goes from
+   $0.23 to **$0.14** a subscriber — `llm_cost_model --pool-share 40`.
+   The first reader at each level and language still pays full price,
+   which is what every reader paid before, so no case got worse.
+   `scripts/prewarm_comprehension_pool.py` moves even that cost off the
+   learner's path.
 4. **Batch the offline work.** Exam papers and
    `scripts/generate_grammar_sentences.py` are not on the request path.
    Both Anthropic and OpenAI price a batch queue at 50%.
@@ -221,6 +239,13 @@ batched call (see the OpenRouter entry's comment), and if batched
 generation comes back truncated, that is the first suspect; the fix is a
 thinking config in `extra_body`, added once `--smoke` has shown it.
 
+**The pool is retired by a version string, not a migration.** Bump
+`routes/reading._POOL_VERSION` when the prompt, the checks or the served
+shape change enough that a stored exercise would be wrong, and every one
+of them stops being served in one edit — `exam_papers.generator_version`'s
+trick. Do not bump it for a typo. The prewarm script refills against
+whatever the current version is.
+
 **A deployment carrying only `NVIDIA_API_KEY` loses its LLM features on
 deploy.** That is the intended consequence of the licensing, and it
 degrades correctly — `llm_configured()` goes false, generators skip and
@@ -235,7 +260,22 @@ cd backend
 python -m scripts.llm_cost_model                    # the table above
 python -m scripts.llm_cost_model --fleet 5000       # a fleet projection
 python -m scripts.llm_cost_model --model "GPT-5-mini"
+python -m scripts.llm_cost_model --pool-share 40    # with a warm pool
 ```
+
+`--pool-share` is the one number here that can be measured directly
+rather than guessed, and it is worth measuring before it is trusted:
+
+```sql
+SELECT level, lang, COUNT(*) AS exercises FROM comprehension_pool
+ WHERE generator_version = 'comprehension-1' GROUP BY level, lang;
+SELECT COUNT(*) AS serves, COUNT(DISTINCT pool_id) AS exercises
+  FROM comprehension_served;
+```
+
+Serves divided by exercises is the real share. If it stays near 1, the
+pool is not being shared — either the buckets are too thinly populated
+to help yet, or `_POOL_VERSION` is being bumped too often.
 
 The CALLS / IN / OUT columns in that script are the assumptions. The log
 is what replaces them:

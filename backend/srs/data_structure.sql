@@ -491,6 +491,43 @@ CREATE TABLE video_session_jobs (
 -- exam_id/revision, papers regenerated wholesale rather than patched),
 -- learner attempts against a specific revision, and the claim-lock job
 -- table for exam generation (same pattern as video_session_jobs above).
+-- 読解 — the shared pool of comprehension exercises, owned by
+-- routes/reading.py (plan 092). An exercise is a property of its
+-- (level, lang), not of who asked for it: the most expensive model
+-- call in this app used to be paid once per learner per exercise, and
+-- is now paid once for everybody. `generator_version` retires the
+-- whole pool in one edit when the prompt or the served shape changes
+-- (routes/reading._POOL_VERSION), the way exam_papers' own version
+-- string does.
+CREATE TABLE comprehension_pool (
+    id                BIGSERIAL PRIMARY KEY,
+    level             TEXT NOT NULL,
+    lang              TEXT NOT NULL,
+    generator_version TEXT NOT NULL,
+    -- The catalogue patterns the exercise was written around, so a
+    -- learner can be served one that keeps clear of what they just read.
+    grammar           JSONB NOT NULL,
+    -- The model's answer, before any per-learner decoration: text,
+    -- questions, the per-sentence breakdown WITH its word lists, and
+    -- the grammar points the checks found.
+    exercise          JSONB NOT NULL,
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX comprehension_pool_bucket
+    ON comprehension_pool (level, lang, generator_version);
+
+-- Which learner has already read which pooled exercise. Written on
+-- every SERVE, not on completion: an exercise that was opened and
+-- abandoned has still been read. comprehension_log records only the
+-- finished ones, which is a different question.
+CREATE TABLE comprehension_served (
+    user_id   TEXT NOT NULL,
+    pool_id   BIGINT NOT NULL REFERENCES comprehension_pool(id) ON DELETE CASCADE,
+    served_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, pool_id)
+);
+
 CREATE TABLE exam_papers (
     exam_id           TEXT NOT NULL,
     revision          INT NOT NULL DEFAULT 1,

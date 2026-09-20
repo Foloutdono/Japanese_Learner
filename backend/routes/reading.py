@@ -1487,27 +1487,264 @@ def _parse_comprehension(content: str) -> dict:
     data["translation"] = " ".join(part["translation"] for part in data["breakdown"] if part["translation"])
 
     return data
-@router.get("/api/reading/comprehension")
-def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
-    level = resolve_level(user_id, level)
-    rng = random.Random()
-    data = _call_llm_comprehension(
-        level, lang,
-        grammar_seeds=_pick_grammar_seeds(level, rng, _recent_grammar_patterns(user_id)),
-        word_seeds=_pick_word_seeds(level, rng),
-    )
+# ── The exercise pool ─────────────────────────────────────────
+#
+# The most expensive call this app makes, and until now the only big
+# one with no cache. One request writes a passage, ten questions, a
+# per-sentence translation AND a glossed word list per sentence, at
+# max_tokens=12000, up to three times if the checks reject it -- once
+# per learner per exercise, forever. See docs/llm-commercial-plan.md,
+# which measured it at roughly a third of what a paying subscriber
+# costs in inference.
+#
+# An exercise is a property of (level, lang), not of who asked. What IS
+# per-learner is the decoration -- the analysis and SRS state attached
+# to each sentence below -- and that stays per-request, since it is
+# local and costs no tokens.
+#
+# So this is a POOL, not a key-value cache, and the difference matters.
+# phrase_analysis_cache can key on the phrase because the caller brings
+# the phrase; nobody brings an exercise. The seeds that WOULD be the key
+# (study/level_mix's grammar points and words) are drawn per learner to
+# keep clear of what they have just read, so keying on them would hit
+# almost never. The rule that does work is exam_papers' (see
+# routes/exams._select_paper, the same shape): serve this learner any
+# exercise at their level and language that they have not been served
+# before, and only generate when there is none.
+#
+# That makes the marginal cost fall as the user base grows -- an
+# exercise one learner paid for is free for everyone after them -- and
+# leaves the first learner at each (level, lang) paying exactly what
+# every learner pays today. There is no regression to roll back to.
+#
+# `generator_version` is what retires the pool: bump _POOL_VERSION and
+# every stored exercise stops being served, in one edit and without a
+# migration, exactly as exam_papers' own version string does. Bump it
+# when the prompt, the checks or the served shape change enough that an
+# old exercise would be wrong -- not for a typo in a comment.
+_POOL_VERSION = "comprehension-1"
 
-    # 一文ずつ, analysed: each sentence of the breakdown through the
-    # analyzer's local tier (tokens, readings, furigana, deck matches,
-    # grammar points) with the model's own glosses folded on and the
-    # learner's SRS state attached -- the same shape POST /api/phrase/
-    # analyze returns for one sentence, so the screen draws it with the
-    # same component. No second model call: the glosses came with the
-    # text. The raw word lists are not sent; the analysis carries them.
+# How many unseen candidates to look at before choosing. Small on
+# purpose: the point of reading more than one is to prefer an exercise
+# whose grammar the learner has not just met (the job _pick_grammar_
+# seeds does on the generate path), and a dozen is plenty of room for
+# that while keeping the row count per request trivial.
+_POOL_CANDIDATES = 12
+
+
+def _init_comprehension_pool() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS comprehension_pool (
+                    id BIGSERIAL PRIMARY KEY,
+                    level TEXT NOT NULL,
+                    lang TEXT NOT NULL,
+                    generator_version TEXT NOT NULL,
+                    grammar JSONB NOT NULL,
+                    exercise JSONB NOT NULL,
+                    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+                )
+                """
+            )
+            cur.execute(
+                """
+                CREATE INDEX IF NOT EXISTS comprehension_pool_bucket
+                    ON comprehension_pool (level, lang, generator_version)
+                """
+            )
+            # Which learner has already read which exercise. A row per
+            # SERVE, not per completion: an exercise that was opened and
+            # abandoned has still been read, and serving it again is the
+            # one way this pool could be worse than generating fresh
+            # every time. comprehension_log would only know about the
+            # ones that were finished.
+            #
+            # ~26 rows per active subscriber per month, so a thousand of
+            # them is ~300k rows a year -- small enough to leave alone,
+            # and safe to prune whenever it is not: the only cost of
+            # forgetting is that a learner may one day be served a text
+            # they read long ago.
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS comprehension_served (
+                    user_id TEXT NOT NULL,
+                    pool_id BIGINT NOT NULL
+                        REFERENCES comprehension_pool(id) ON DELETE CASCADE,
+                    served_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+                    PRIMARY KEY (user_id, pool_id)
+                )
+                """
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _init_comprehension_pool()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("comprehension_pool could not be initialised")
+
+
+def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:
+    """An exercise this learner has not been served, or None.
+
+    `avoid` is the grammar they have just read (_recent_grammar_
+    patterns): a candidate that uses none of it is preferred, and one
+    that does is taken rather than paying for a generation -- the same
+    trade _pick_grammar_seeds makes when the level has run out of fresh
+    points.
+
+    A miss must never be an error. Every failure here returns None,
+    which is the generate path, which is what this whole layer is an
+    optimisation over.
+
+    An exercise is marked read at the moment it is taken, before the
+    request that will carry it has finished. If that request then fails,
+    the learner has spent an exercise they never saw. Deliberate: the
+    alternative is holding the claim open across the decoration below
+    and the response, and the cost of being wrong is one text out of a
+    pool that grows, against a race that would serve the same passage to
+    the same person twice."""
+    try:
+        conn = db_conn()
+    except Exception:
+        return None
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT id, grammar, exercise
+                  FROM comprehension_pool p
+                 WHERE level = %s AND lang = %s AND generator_version = %s
+                   AND NOT EXISTS (
+                        SELECT 1 FROM comprehension_served s
+                         WHERE s.pool_id = p.id AND s.user_id = %s)
+                 ORDER BY random()
+                 LIMIT %s
+                """,
+                (level, lang, _POOL_VERSION, user_id, _POOL_CANDIDATES),
+            )
+            rows = cur.fetchall()
+            if not rows:
+                return None
+
+            chosen = next(
+                (r for r in rows if not (set(r[1] or []) & avoid)),
+                rows[0],
+            )
+            pool_id, _grammar, exercise = chosen
+            # Marked read in the same transaction as the select, so a
+            # crash between the two cannot hand the same text to the
+            # same learner again. ON CONFLICT DO NOTHING because one
+            # learner can have two requests in flight -- both select the
+            # same row, and the second insert must be a no-op rather
+            # than an error. Two DIFFERENT learners getting the same
+            # exercise needs no handling at all: it is the point.
+            cur.execute(
+                """
+                INSERT INTO comprehension_served (user_id, pool_id)
+                VALUES (%s, %s) ON CONFLICT DO NOTHING
+                """,
+                (user_id, pool_id),
+            )
+        conn.commit()
+    except Exception:
+        logger.exception("comprehension pool read failed")
+        return None
+    finally:
+        conn.close()
+
+    logger.info("comprehension %s/%s served from the pool (#%d)", level, lang, pool_id)
+    return json.loads(exercise) if isinstance(exercise, str) else exercise
+
+
+def _pool_add(user_id: str, level: str, lang: str, data: dict) -> None:
+    """Store a freshly generated exercise and record that this learner
+    has now read it.
+
+    Best-effort, like every other write in this section: an exercise
+    that fails to store has still been served, and the only loss is that
+    the next learner pays for one too.
+
+    MUST be called before the per-learner decoration below, which pops
+    each sentence's word list out of `data` as it folds the glosses into
+    the analysis. Storing after that would fill the pool with exercises
+    whose second reader gets no glosses at all."""
+    grammar = [p["pattern"] for p in data.get("grammar_points", []) if p.get("pattern")]
+    try:
+        conn = db_conn()
+    except Exception:
+        return
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                INSERT INTO comprehension_pool
+                    (level, lang, generator_version, grammar, exercise)
+                VALUES (%s, %s, %s, %s, %s)
+                RETURNING id
+                """,
+                (level, lang, _POOL_VERSION,
+                 json.dumps(grammar, ensure_ascii=False),
+                 json.dumps(data, ensure_ascii=False)),
+            )
+            pool_id = cur.fetchone()[0]
+            cur.execute(
+                """
+                INSERT INTO comprehension_served (user_id, pool_id)
+                VALUES (%s, %s) ON CONFLICT DO NOTHING
+                """,
+                (user_id, pool_id),
+            )
+        conn.commit()
+    except Exception:
+        logger.exception("comprehension pool write failed")
+    finally:
+        conn.close()
+
+
+def _decorate_for(data: dict, user_id: str, level: str) -> dict:
+    """一文ずつ, analysed: each sentence of the breakdown through the
+    analyzer's local tier (tokens, readings, furigana, deck matches,
+    grammar points) with the model's own glosses folded on and the
+    learner's SRS state attached -- the same shape POST /api/phrase/
+    analyze returns for one sentence, so the screen draws it with the
+    same component. No second model call: the glosses came with the
+    text. The raw word lists are not sent; the analysis carries them.
+
+    This is the half that cannot be pooled, and the reason the pool
+    stores the model's answer rather than the response: every figure in
+    it is the asking learner's own."""
     states = srs.get_user_states(user_id)
     for part in data["breakdown"]:
         local = analyze_with_glosses(part["jp"], part.pop("words", None), level)
         part["analysis"] = attach_user_state(local, states, user_id)
+    return data
+
+
+@router.get("/api/reading/comprehension")
+def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: str = Depends(get_user_id)):
+    level = resolve_level(user_id, level)
+    avoid = _recent_grammar_patterns(user_id)
+
+    # The pool first, the model only when it comes up empty. See the
+    # section above for why this is a pool and not a keyed cache.
+    data = _pool_take(user_id, level, lang, avoid)
+    if data is None:
+        rng = random.Random()
+        data = _call_llm_comprehension(
+            level, lang,
+            grammar_seeds=_pick_grammar_seeds(level, rng, avoid),
+            word_seeds=_pick_word_seeds(level, rng),
+        )
+        # Before the decoration, which consumes the word lists.
+        _pool_add(user_id, level, lang, data)
+
+    _decorate_for(data, user_id, level)
 
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
     return {
