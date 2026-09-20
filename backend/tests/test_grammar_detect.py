@@ -207,6 +207,150 @@ class WhatIsReportedTests(unittest.TestCase):
         self.assertEqual(grammar_detect.detect(""), [])
 
 
+def found_in(sentence: str) -> dict[str, str]:
+    """pattern -> the text it was found on."""
+    return {p: sentence[a:b] for p, _lv, a, b, _k in grammar_detect.detect(sentence)}
+
+
+class ByDictionaryFormTests(unittest.TestCase):
+    """The second pass (plan 095): a tail found as the dictionary form of
+    a token rather than as letters, so every conjugation of it is found
+    at once, and the form points found as the form the tokenizer names.
+    Each case pairs a hit with the sentence that must NOT be one."""
+
+    def test_a_short_tail_is_found_on_a_stem_and_not_after_a_particle(self) -> None:
+        self.assertEqual(found_in("食べすぎました。")["〜すぎる"], "すぎ")
+        self.assertEqual(found_in("高すぎる。")["〜すぎる"], "すぎる")
+        self.assertNotIn("〜すぎる", found_in("三時を過ぎました。"))
+
+    def test_a_te_tail_is_found_by_its_verb_and_not_on_the_verb_alone(self) -> None:
+        self.assertEqual(found_in("ちょっと見てみます。")["〜てみる"], "てみ")
+        self.assertNotIn("〜てみる", found_in("映画を見ます。"))
+        self.assertEqual(found_in("買っておきました。")["〜ておく"], "ておき")
+        self.assertEqual(found_in("駅まで歩いていった。")["〜ていく／〜てくる"], "ていっ")
+        self.assertEqual(found_in("食べていた。")["〜ています"], "てい")
+
+    def test_a_conjugated_tail_is_the_same_tail(self) -> None:
+        self.assertEqual(found_in("食べたかった。")["〜たいです"], "たかっ")
+        self.assertEqual(found_in("食べやすいです。")["〜やすい／〜にくい"], "やすい")
+        self.assertEqual(found_in("雨が降り始めた。")["〜はじめる／〜おわる／〜つづける"], "始め")
+
+    def test_the_imperative_of_a_tail_is_its_own_point(self) -> None:
+        """書いてください is 〜てください and never the honorific verb
+        くださる behind 〜てくださる; 教えてくださいました is the verb."""
+        request = found_in("書いてください。")
+        self.assertIn("〜てください", request)
+        self.assertNotIn("〜てくださる／〜ていただく", request)
+        honorific = found_in("先生が教えてくださいました。")
+        self.assertIn("〜てくださる／〜ていただく", honorific)
+        # And the letters てください inside くださいました are not the
+        # request: the first pass learned from 〜てください's lessons
+        # that it ends in the imperative (rule 3, the form).
+        self.assertNotIn("〜てください", honorific)
+
+    def test_the_passive_and_the_potential(self) -> None:
+        # A う-verb: れる is the passive and nothing else.
+        polite = found_in("先生に名前をよばれました。")
+        self.assertEqual(polite["受身形 〜られる"], "れ")
+        self.assertNotIn("可能形 〜(ら)れる", polite)
+        # A う-verb conjugating as 下一段 is the potential and nothing else.
+        skill = found_in("私は漢字が書けます。")
+        self.assertEqual(skill["可能形 〜(ら)れる"], "書け")
+        self.assertNotIn("受身形 〜られる", skill)
+        # A る-verb's られる is both, and both are said (module docstring).
+        both = found_in("この魚は生で食べられます。")
+        self.assertEqual(both["受身形 〜られる"], "られ")
+        self.assertEqual(both["可能形 〜(ら)れる"], "られ")
+        # 見える is in view, not able to look.
+        self.assertNotIn("可能形 〜(ら)れる", found_in("山が見えます。"))
+
+    def test_the_causative_and_its_passive(self) -> None:
+        make = found_in("母は妹に野さいを食べさせました。")
+        self.assertEqual(make["使役形 〜させる"], "させ")
+        self.assertNotIn("受身形 〜られる", make)
+        made = found_in("父にきらいな野さいを食べさせられました。")
+        self.assertEqual(made["使役受身形 〜させられる"], "させられ")
+        self.assertNotIn("使役形 〜させる", made)
+        self.assertNotIn("受身形 〜られる", made)
+
+    def test_the_volitional_is_the_verb_s_and_not_an_auxiliary_s(self) -> None:
+        self.assertEqual(found_in("そろそろ帰ろう。")["意向形 〜(よ)う"], "帰ろう")
+        self.assertEqual(found_in("行こうと思います。")["意向形 〜(よ)う"], "行こう")
+        self.assertNotIn("意向形 〜(よ)う", found_in("雨でしょう。"))
+        self.assertNotIn("意向形 〜(よ)う", found_in("行きましょう。"))
+
+    def test_the_imperative_ends_its_clause_and_is_not_a_polite_request(self) -> None:
+        self.assertEqual(found_in("早く起きろ。")["命令形 〜ろ／〜え"], "起きろ")
+        self.assertEqual(found_in("駅で少し待てと言われました。")["命令形 〜ろ／〜え"], "待て")
+        self.assertNotIn("命令形 〜ろ／〜え", found_in("書いてください。"))
+        self.assertNotIn("命令形 〜ろ／〜え", found_in("食べなさい。"))
+
+    def test_a_form_hit_is_one_piece_with_the_kind_of_a_construction(self) -> None:
+        for h in grammar_detect.hits("食べすぎました。"):
+            if h["pattern"] == "〜すぎる":
+                self.assertEqual(h["segments"], [(h["start"], h["end"])])
+                self.assertEqual(h["kind"], "pattern")
+                break
+        else:
+            self.fail("〜すぎる not found")
+
+    def test_every_form_rule_names_a_point_the_catalogue_files(self) -> None:
+        """A rename in the catalogue is a rename here: a rule keyed on a
+        pattern nobody files would be a rule that never fires."""
+        from content.grammar_points_data import find
+        for pattern in grammar_detect._CLASS_RULES:
+            with self.subTest(pattern=pattern):
+                self.assertIsNotNone(find(pattern))
+                self.assertTrue(grammar_detect._confirmed(find(pattern)[0], pattern),
+                                f"{pattern}'s own lessons do not show its rule working")
+
+    def test_a_rule_is_held_to_its_own_lessons(self) -> None:
+        """The stem rule for 〜すぎる is confirmed by 〜すぎる's examples;
+        a point whose lessons never show its rule is not trusted."""
+        self.assertTrue(grammar_detect._confirmed("N4", "〜すぎる"))
+        self.assertFalse(grammar_detect._confirmed("N1", "〜すぎる"))  # not filed there
+
+    def test_a_tail_is_read_on_a_stem(self) -> None:
+        """たい on its own is the fish; on a stem it is the auxiliary."""
+        core = grammar_detect._tail_core("たいです")
+        self.assertEqual([(pos, reading) for pos, reading, _form in core], [("auxiliary", "たい")])
+        self.assertIsNone(grammar_detect._tail_core("ます"), "a tail of politeness alone is no rule")
+        self.assertIsNone(grammar_detect._tail_core("ませんでした"), "nor one of politeness and tense")
+        self.assertIsNone(grammar_detect._tail_core("ことがある"), "a noun-first tail is the first pass's")
+        # A form written on purpose is kept, and must be matched.
+        self.assertEqual(grammar_detect._tail_core("ましょうか")[0][2], "意志推量形")
+
+    def test_a_tail_s_form_is_part_of_the_tail(self) -> None:
+        """食べますか is 〜ますか and not 〜ましょうか; 行きません is
+        〜ます／〜ません and not 〜ました／〜ませんでした."""
+        asks = found_in("いっしょに食べますか。")
+        self.assertNotIn("〜ましょうか", asks)
+        self.assertIn("〜ましょうか", found_in("いっしょに食べましょうか。"))
+        negative = found_in("今日は学校へ行きません。")
+        self.assertIn("〜ます／〜ません", negative)
+        self.assertNotIn("〜ました／〜ませんでした", negative)
+
+    def test_a_tail_written_in_a_form_is_that_form_and_a_dictionary_form_tail_is_any(self) -> None:
+        """べき, べく and べからず are one word in three forms and three
+        lessons; なきゃ is not every ない; and a tail in its dictionary
+        form (〜ています) is found however it is conjugated."""
+        should = found_in("学生は毎日勉強するべきだ。")
+        self.assertIn("〜べきだ", should)
+        self.assertNotIn("〜べく", should)
+        self.assertNotIn("〜べからず", should)
+        self.assertNotIn("〜なきゃ／〜なくちゃ", found_in("今日は食べない。"))
+        self.assertIn("〜なきゃ／〜なくちゃ", found_in("早く食べなきゃ。"))
+        for sentence in ("雨が降っている。", "雨が降っていた。", "雨が降っていて、寒い。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("〜ています", found_in(sentence))
+
+    def test_a_rule_its_lessons_never_show_is_never_used(self) -> None:
+        """〜があります／います would read as a stem rule on いる, and no
+        example of the point puts いる on a stem -- so the rule is dead,
+        and 食べている is not 〜があります／います."""
+        self.assertFalse(grammar_detect._confirmed("N5", "〜があります／います"))
+
+
 class WithoutMorphologyTests(unittest.TestCase):
     """fugashi/unidic-lite is optional (morphology.MORPHOLOGY_AVAILABLE),
     and every rule above needs it. What must not happen is detection
@@ -275,7 +419,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_a_lesson_sentence_shows_its_own_point(self) -> None:
         share = self.found / self.sentences
         self.assertGreaterEqual(
-            share, 0.86,
+            share, 0.90,
             f"detection found the point its own example was written for in "
             f"{self.found}/{self.sentences} sentences ({share:.1%})",
         )
@@ -283,7 +427,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     def test_nearly_every_point_is_visible_somewhere_in_its_own_lesson(self) -> None:
         share = self.points_found / self.points
         self.assertGreaterEqual(
-            share, 0.90,
+            share, 0.94,
             f"{self.points_found}/{self.points} points were found in at least "
             f"one of their own examples ({share:.1%}) -- see the module "
             f"docstring for the four kinds that are refusals, not misses",
