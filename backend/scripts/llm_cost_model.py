@@ -64,7 +64,9 @@ FEATURES = {
         "is now the COLD-POOL worst case -- one learner alone in their "
         "(level, lang) bucket. Since plan 092 the answer is pooled and "
         "shared, so divide these calls by the learners sharing a bucket: "
-        "--pool-share.",
+        "--pool-share. COMPREHENSION_DAILY_LIMIT caps the GENERATIONS a "
+        "learner can cause at 10/day, which bounds the abuse row rather "
+        "than this one -- 34/mo is nowhere near it.",
     ),
     "translation_review": (
         60, 600, 400,

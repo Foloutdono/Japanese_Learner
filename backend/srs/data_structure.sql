@@ -528,6 +528,22 @@ CREATE TABLE comprehension_served (
     PRIMARY KEY (user_id, pool_id)
 );
 
+-- How many comprehension exercises this learner has had GENERATED for
+-- them today, on their own day (user_profiles.tz_offset_min). Owned by
+-- routes/reading.py. Only pool misses are counted: an exercise served
+-- from comprehension_pool was already paid for, so reading twenty of
+-- those costs nothing and is not metered. Past the ceiling the learner
+-- is handed a text they have read before rather than refused.
+--
+-- Same shape as ocr_usage on purpose, and not yet generalised into one
+-- daily_usage table: two counters is a coincidence, three is a pattern.
+CREATE TABLE comprehension_usage (
+    user_id TEXT NOT NULL,
+    day     DATE NOT NULL,
+    count   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, day)
+);
+
 CREATE TABLE exam_papers (
     exam_id           TEXT NOT NULL,
     revision          INT NOT NULL DEFAULT 1,

@@ -128,7 +128,7 @@ At Gemini 3.1 Flash-Lite, per paying learner per month:
 | Light (2 sessions/week) | $0.14 | $0.10 |
 | Typical (daily-ish) | $0.46 | $0.32 |
 | Heavy (power user) | $1.37 | $0.97 |
-| **Abuse ceiling at today's limits** | **$5.23** | **$3.67** |
+| **Abuse ceiling at today's limits** | **$3.21** | **$2.24** |
 
 Blended at 70% light / 25% typical / 5% heavy: **$0.20–0.23 per paying
 subscriber per month.**
@@ -145,13 +145,18 @@ the two cheap models it is under 1%; on Claude Sonnet 5 it would be
 ~25%, which is the real reason not to reach for a frontier model here.
 
 The number to watch is not the blended average, it is the last row of
-the first table. A single determined user can still spend 15-20x the
-typical subscriber. `OCR_DAILY_LIMIT` is 20 now (§5.5), which took that
-ceiling from $4.44 to $3.67 — a smaller dent than it looks like it
-should be, and the reason is worth stating plainly: **OCR was never
-where the tail was.** Reading comprehension has no daily ceiling at all,
-and at ~780 calls a month it is most of that row on its own. Capping it
-is the remaining half of §5.5.
+the first table. Both tails are capped now (§5.5): `OCR_DAILY_LIMIT` at
+20 images a day took the ceiling from $4.44 to $3.67, and
+`COMPREHENSION_DAILY_LIMIT` at 10 *new* exercises a day took it to
+**$2.24** — roughly half of where it started. The second one is the
+bigger lever because comprehension was always where the tail actually
+was, not OCR.
+
+What remains uncapped is translation review (~600 calls a month at the
+ceiling) and the phrase analyzer, which are an order of magnitude
+cheaper per call and have no equivalent of the pool to fall back on.
+They are worth watching in the usage log before deciding they need a
+number too.
 
 ## 5. What to do, in order
 
@@ -230,13 +235,22 @@ already half-built here.
    them nothing after dinner — and would make the screen's own "try
    again tomorrow" untrue.
 
-   **Reading comprehension still has no ceiling**, and it is the bigger
-   half: at ~780 calls a month it is most of the abuse row above on its
-   own, where OCR at 20/day is about $1. The OCR cap moved that row by
-   17%; a comprehension cap would move it far more. It needs a product
-   decision rather than a number — a learner who reads ten exercises in
-   an evening is the app working, not abuse — so it is left open
-   deliberately.
+   **Reading comprehension is capped too, and on the right thing.**
+   The unit is GENERATIONS, not exercises, and that is what lets the
+   number be generous: an exercise served from the pool was already
+   paid for, so a learner working through twenty of them in an evening
+   costs nothing and is not metered at all. Only a pool *miss* counts.
+   `COMPREHENSION_DAILY_LIMIT` is 10 — about two hours of reading
+   practice — and past it the learner is not refused: they are handed
+   a text they have read before, oldest first. The one hard 429 is a
+   cold pool at that bucket with the ceiling already spent, which only
+   happens before the pool has anything in it.
+
+   That is what answers the product objection this line used to raise.
+   A learner who reads ten exercises in an evening is the app working,
+   and they still can — the cap meets only the learner who outruns
+   everything the pool has, and even then it degrades instead of
+   stopping.
 6. ~~**Keep the free tier as a fallback, not the primary.**~~ **Done.**
    `_DEFAULT_PROVIDER_ORDER` is now `google,openai,openrouter`: paid
    first, OpenRouter `:free` last as the degradation path. NVIDIA is no

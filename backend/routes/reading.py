@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 import random
 import re
 import unicodedata
@@ -7,7 +8,7 @@ from dataclasses import dataclass, field
 from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from core.credits import require_pass
+from core.credits import local_today, require_pass, resets_at
 from pydantic import BaseModel, Field
 
 from core.db import db_conn
@@ -1765,6 +1766,153 @@ def _pool_add(user_id: str, level: str, lang: str, data: dict) -> None:
         conn.close()
 
 
+# ── The daily ceiling ─────────────────────────────────────────
+# What is capped is GENERATIONS, not exercises -- and that distinction
+# is the whole reason this can be generous.
+#
+# Serving from the pool costs nothing: the exercise was already paid
+# for, by whoever read it first. A learner who works through twenty
+# pooled texts in an evening is the app doing its job and costs the
+# business no more than one who reads none. The only expensive learner
+# is the one who outruns the pool, and even they are not pure cost --
+# every exercise they pay for joins the pool for everyone behind them.
+#
+# So the cap is on pool MISSES, at a level a real session never reaches:
+# ten new texts a day is something like two hours of reading practice,
+# and each is a 250-character passage with ten questions and a
+# sentence-by-sentence breakdown. Past it the learner is not refused --
+# they are served a text they have read before, oldest first, which for
+# a reading exercise is a legitimate thing to do and infinitely better
+# than a wall. The only hard refusal is the one case where there is
+# genuinely nothing to serve: over the cap AND the pool empty, which
+# only happens at a cold start.
+#
+# A generation is up to _COMPREHENSION_ATTEMPTS model calls (~1.3 on
+# average), and the cap counts the generation, not the calls: a retry
+# is the system failing its own checks, not something the learner did.
+#
+# Counted the learner's day, like the OCR cap (routes/ocr.py) and the
+# credit refill (core/credits.py); claimed BEFORE the model call for the
+# same reason as OCR, which is that a client retrying a failure is
+# exactly what a cap exists to stop.
+_DAILY_GENERATION_LIMIT = int(os.environ.get("COMPREHENSION_DAILY_LIMIT", "10"))
+
+
+def _init_comprehension_usage() -> None:
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            # Deliberately the same shape as ocr_usage rather than a
+            # shared daily_usage(user_id, feature, day, count): two
+            # counters is a coincidence, three is a pattern. If a third
+            # feature needs one, that is the moment to generalise all
+            # of them -- not now, on a guess, with a migration.
+            cur.execute(
+                """
+                CREATE TABLE IF NOT EXISTS comprehension_usage (
+                    user_id TEXT NOT NULL,
+                    day     DATE NOT NULL,
+                    count   INTEGER NOT NULL DEFAULT 0,
+                    PRIMARY KEY (user_id, day)
+                )
+                """
+            )
+        conn.commit()
+    finally:
+        conn.close()
+
+
+try:
+    _init_comprehension_usage()
+except Exception:  # pragma: no cover - a missing DB must not stop import
+    logger.exception("comprehension_usage could not be initialised")
+
+
+def _claim_generation_slot(user_id: str) -> int:
+    """Increment today's generation counter and return the new value.
+
+    A failure here returns 0 -- under the cap -- rather than refusing:
+    a database hiccup must not cost the learner their exercise, and the
+    pool miss that got us here has already established that the
+    alternative is nothing at all."""
+    try:
+        conn = db_conn()
+    except Exception:
+        return 0
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
+                (user_id,),
+            )
+            row = cur.fetchone()
+            cur.execute(
+                """
+                INSERT INTO comprehension_usage (user_id, day, count)
+                VALUES (%s, %s, 1)
+                ON CONFLICT (user_id, day)
+                DO UPDATE SET count = comprehension_usage.count + 1
+                RETURNING count
+                """,
+                (user_id, local_today(row[0] if row else None)),
+            )
+            (count,) = cur.fetchone()
+        conn.commit()
+        return count
+    except Exception:
+        logger.exception("comprehension generation counter failed")
+        return 0
+    finally:
+        conn.close()
+
+
+def _pool_repeat(user_id: str, level: str, lang: str) -> dict | None:
+    """An exercise this learner HAS read, the one they read longest ago,
+    or None if they have read none.
+
+    What a learner past the day's ceiling is served instead of a
+    refusal. served_at is bumped, so a second repeat in the same
+    session moves on to the next-oldest rather than handing back the
+    same text twice."""
+    try:
+        conn = db_conn()
+    except Exception:
+        return None
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                """
+                SELECT p.id, p.exercise
+                  FROM comprehension_pool p
+                  JOIN comprehension_served s ON s.pool_id = p.id
+                 WHERE s.user_id = %s AND p.level = %s AND p.lang = %s
+                   AND p.generator_version = %s
+                 ORDER BY s.served_at
+                 LIMIT 1
+                """,
+                (user_id, level, lang, _POOL_VERSION),
+            )
+            row = cur.fetchone()
+            if row is None:
+                return None
+            pool_id, exercise = row
+            cur.execute(
+                "UPDATE comprehension_served SET served_at = NOW() "
+                "WHERE user_id = %s AND pool_id = %s",
+                (user_id, pool_id),
+            )
+        conn.commit()
+    except Exception:
+        logger.exception("comprehension repeat read failed")
+        return None
+    finally:
+        conn.close()
+
+    logger.info("comprehension %s/%s repeated (#%d): past the day's ceiling",
+                level, lang, pool_id)
+    return json.loads(exercise) if isinstance(exercise, str) else exercise
+
+
 def _decorate_for(data: dict, user_id: str, level: str) -> dict:
     """一文ずつ, analysed: each sentence of the breakdown through the
     analyzer's local tier (tokens, readings, furigana, deck matches,
@@ -1792,15 +1940,41 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
     # The pool first, the model only when it comes up empty. See the
     # section above for why this is a pool and not a keyed cache.
     data = _pool_take(user_id, level, lang, avoid)
+    repeat = False
     if data is None:
-        rng = random.Random()
-        data = _call_llm_comprehension(
-            level, lang,
-            grammar_seeds=_pick_grammar_seeds(level, rng, avoid),
-            word_seeds=_pick_word_seeds(level, rng),
-        )
-        # Before the decoration, which consumes the word lists.
-        _pool_add(user_id, level, lang, data)
+        # Only a pool MISS is metered -- see "The daily ceiling".
+        if _claim_generation_slot(user_id) > _DAILY_GENERATION_LIMIT:
+            data = _pool_repeat(user_id, level, lang)
+            repeat = data is not None
+            if data is None:
+                # Over the ceiling with nothing read yet to hand back:
+                # a cold pool at this bucket, and the only case in which
+                # this endpoint refuses.
+                #
+                # Reachable in practice one way, and it is worth naming:
+                # a slot is claimed BEFORE the model call, so a provider
+                # outage spends the allowance on generations that never
+                # produced anything, and the learner is eventually told
+                # they hit their daily limit rather than that the model
+                # is down. That is the OCR cap's bargain too -- ten
+                # failed attempts IS the retry loop a cap exists to stop
+                # -- and the message stays true: they did cause ten
+                # generations today. Refunding a failed slot would mean
+                # a broken provider costs nothing to hammer.
+                raise HTTPException(
+                    status_code=429,
+                    detail=(f"Daily limit of {_DAILY_GENERATION_LIMIT} new "
+                            f"exercises reached; resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
+                )
+        else:
+            rng = random.Random()
+            data = _call_llm_comprehension(
+                level, lang,
+                grammar_seeds=_pick_grammar_seeds(level, rng, avoid),
+                word_seeds=_pick_word_seeds(level, rng),
+            )
+            # Before the decoration, which consumes the word lists.
+            _pool_add(user_id, level, lang, data)
 
     _decorate_for(data, user_id, level)
 
@@ -1814,6 +1988,12 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
         "grammar_points": data.get("grammar_points", []),
         "read_seconds": READ_SECONDS_BY_LEVEL.get(level, DEFAULT_READ_SECONDS),
         "question_count": spec["questions"],
+        # True when this is a text the learner has already read, handed
+        # back because they are past the day's ceiling for new ones. The
+        # server is the only place that knows; nothing on the screen
+        # reads it yet, and whether to say anything about it is a
+        # frontend decision.
+        "repeat": repeat,
     }
 
 

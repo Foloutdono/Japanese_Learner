@@ -16,7 +16,7 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from core.credits import require_pass
 
 from core.auth import get_user_id
-from core.credits import local_today, next_refill_at
+from core.credits import local_today, resets_at
 from core.db import db_conn
 from study.llm_shared import chat, LLMUnavailable
 from study.ocr_prompt import OCR_PROMPT, VERTICAL_HINT
@@ -138,25 +138,6 @@ def _claim_daily_slot(user_id: str) -> int:
         conn.close()
 
 
-def _resets_at(user_id: str):
-    """When this learner's allowance comes back, as a UTC instant.
-
-    A second query, on the refusal path only: the claim above already
-    read the offset, but threading it out would change that function's
-    return for the sake of a string nobody reads on the happy path."""
-    conn = db_conn()
-    try:
-        with conn.cursor() as cur:
-            cur.execute(
-                "SELECT tz_offset_min FROM user_profiles WHERE user_id = %s",
-                (user_id,),
-            )
-            row = cur.fetchone()
-        return next_refill_at(row[0] if row else None)
-    finally:
-        conn.close()
-
-
 @router.post("/api/ocr")
 async def recognize_image(
     file: UploadFile = File(...),
@@ -188,7 +169,7 @@ async def recognize_image(
         raise HTTPException(
             status_code=429,
             detail=(f"Daily image limit reached ({_DAILY_OCR_LIMIT} per day); "
-                    f"resets {_resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
+                    f"resets {resets_at(user_id):%Y-%m-%dT%H:%MZ}"),
         )
 
     prompt = OCR_PROMPT

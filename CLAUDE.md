@@ -65,9 +65,10 @@ runtime purpose. Two consequences worth knowing:
   `content/vocab_renames.py`, `scripts/migrate_vocab_ids.py`,
   `tests/test_vocab_deck.py` and `tests/test_dictionary_vocab.py`),
   and **092** is the commercial LLM swap — paid providers, the per-call
-  token accounting that replaces the estimates, and the comprehension
-  pool that stops the most expensive call being paid once per learner
-  (cited in `study/llm_shared.py`, `routes/reading.py`,
+  token accounting that replaces the estimates, the comprehension pool
+  that stops the most expensive call being paid once per learner, and
+  the daily ceilings on what one learner can generate
+  (cited in `study/llm_shared.py`, `routes/reading.py`, `routes/ocr.py`,
   `scripts/llm_cost_model.py`, `scripts/llm_usage_report.py`,
   `scripts/prewarm_comprehension_pool.py` and `backend/.env.example`;
   `docs/llm-commercial-plan.md`).
