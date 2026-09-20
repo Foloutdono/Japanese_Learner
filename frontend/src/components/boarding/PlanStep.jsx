@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
-import { CHART_US, CHART_THEM, approx, axisLabel } from '../../domain/boarding'
+import { CHART_US, CHART_THEM, LINES, approx, axisLabel } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
 import { CheckMark } from './icons'
 
@@ -70,34 +70,53 @@ function Chart({ top, label, aria, from, to, minutes, lang, t }) {
   )
 }
 
-export default function PlanStep({ name, motive, rhythm, goal, figures, now, onContinue }) {
+export default function PlanStep({ name, motive, rhythm, goal, lines = LINES, figures, now, onContinue }) {
   const { t, lang } = useLang()
   const dateLabel = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(figures.date)
   const toNovice = goal === 'novice'
   const [line1, line2] = t.brdPromise[motive] ?? t.brdPromise.other
+  // The figures promised are the chosen lines' and no other's: a
+  // learner riding kanji alone is not promised words they will not be
+  // shown. The words and the kanji are the headline figures, as they
+  // always were; the grammar points are named only when they are all
+  // the ticket holds -- seventy a level is not a figure to lead with,
+  // and three figures no longer fit the bullet's one line on a short
+  // phone. Each wears its ~ and its own rounding.
+  const parts = [
+    lines.includes('vocab') && t.brdFigWords(approx(figures.words, 100).toLocaleString(lang)),
+    lines.includes('kanji') && t.brdFigKanji(approx(figures.kanji, 50).toLocaleString(lang)),
+  ].filter(Boolean)
+  if (parts.length === 0) parts.push(t.brdFigGrammar(approx(figures.grammar, 10).toLocaleString(lang)))
   const bullets = toNovice
     ? [t.brdBulletKana, t.brdBulletThenLine, t.brdOnTrackKana]
     : [
-      t.brdBulletFigures(approx(figures.words, 100).toLocaleString(lang), approx(figures.kanji, 50).toLocaleString(lang)),
+      t.brdBulletFigures(parts),
       line1,
       line2,
       goal ? t.brdOnTrack(goal) : t.brdOnTrackLine,
     ]
-  // What the climbing line climbs to. The floors keep the axis honest
-  // on the beat before the volumes answer (and if they never do).
-  const top = toNovice ? Math.max(50, figures.kana) : Math.max(300, approx(figures.words, 100))
+  // What the climbing line climbs to: the words when the words are on
+  // the ticket, otherwise everything the chosen lines hold -- a chart
+  // climbing to "~0 words" would promise a ride to nowhere. The floors
+  // keep the axis honest on the beat before the volumes answer (and
+  // if they never do).
+  const inWords = lines.includes('vocab')
+  const promised = inWords ? approx(figures.words, 100) : approx(figures.items - figures.kana, 100)
+  const top = toNovice ? Math.max(50, figures.kana) : Math.max(300, promised)
   const topLabel = top.toLocaleString(lang)
+  const chartLabel = toNovice ? t.brdChartLabelKana(topLabel) : inWords ? t.brdChartLabel(topLabel) : t.brdChartLabelItems(topLabel)
+  const chartAria = toNovice ? t.brdChartAriaKana(topLabel) : inWords ? t.brdChartAria(topLabel) : t.brdChartAriaItems(topLabel)
   return (
     <>
-      <div className="brd__body brd__body--arrival">
+      <div className="brd__body">
         <BoardQuestion>
           <Emphasized text={t.brdPlanQ(name)} strongClassName="brd__q-em" />
         </BoardQuestion>
         <div className="brd__stage">
           <Chart
             top={top}
-            label={toNovice ? t.brdChartLabelKana(topLabel) : t.brdChartLabel(topLabel)}
-            aria={toNovice ? t.brdChartAriaKana(topLabel) : t.brdChartAria(topLabel)}
+            label={chartLabel}
+            aria={chartAria}
             from={now}
             to={figures.date}
             minutes={rhythm}

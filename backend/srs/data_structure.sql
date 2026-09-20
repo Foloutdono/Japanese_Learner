@@ -216,7 +216,12 @@ CREATE TABLE user_profiles (
     motive TEXT,
     kana_known TEXT,
     reminder_time TEXT,
-    notifications BOOLEAN NOT NULL DEFAULT FALSE
+    notifications BOOLEAN NOT NULL DEFAULT FALSE,
+    -- Which lines the learner chose to ride (core/lines.py): a
+    -- non-empty subset of {'vocab','kanji','grammar'}, in that order.
+    -- NULL is an account boarded before the question and reads as all
+    -- three. The kana are not listed: every ticket rides them.
+    lines TEXT[]
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

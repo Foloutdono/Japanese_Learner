@@ -11,6 +11,7 @@ import { Emphasized } from '../ui/Emphasized'
 import { Sheet } from '../chrome/Sheet'
 import PlacementTest from '../onboarding/PlacementTest'
 import { PACES } from '../onboarding/paces'
+import { LINES, linesOrAll, toggleLine } from '../../domain/boarding'
 import { SettingsPage, Slip } from './SettingsPage'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
@@ -21,8 +22,11 @@ const RATING_SCALE_IDS = ['binary', 'simple', 'full']
 
 // ── Learning (canvas SettingsLearn, plan 074) ─────────────────
 // The level as the line's five stops with "You are here", the pace as
-// the three services, the rating bar as three grades, and the
-// placement test to retake. Level and pace write through PATCH
+// the three services, the lines to ride as three toggles (the
+// boarding's own question, backend core/lines.py -- at least one stays
+// on, and the kana are not one: every ticket rides them), the rating
+// bar as three grades, and the placement test to retake. Level, pace
+// and lines write through PATCH
 // /api/profile/learning (which never touches onboarded_at — changing
 // your level later is not re-onboarding), then refreshSummary() so the
 // HUD and every station's mark learn the new value at once.
@@ -43,6 +47,7 @@ export function LearningPage({ session }) {
 
   const current = summary?.jlptLevel ?? null
   const pace = summary?.dailyNewTarget ?? null
+  const riding = linesOrAll(summary?.lines)
 
   function save(patch) {
     setSaving(true)
@@ -127,6 +132,33 @@ export function LearningPage({ session }) {
         {pace != null && !PACES.some(p => p.perDay === pace) && (
           <span className="slip__hint">{t.settingsPaceCustom(pace)}</span>
         )}
+      </Slip>
+
+      <Slip label={t.settingsLines} cap={t.settingsLinesCap}>
+        <div className="svc-grid" role="group" aria-label={t.settingsLines}>
+          {LINES.map(line => {
+            const on = riding.includes(line)
+            const next = toggleLine(riding, line)
+            return (
+              <button
+                key={line}
+                type="button"
+                role="checkbox"
+                aria-checked={on}
+                // The last line on cannot go out: an empty ticket rides
+                // nowhere, and the office refuses it too.
+                disabled={saving || next.length === 0}
+                className={`svc${on ? ' svc--on' : ''}`}
+                data-line={line}
+                onClick={() => { playClick(); save({ lines: next }) }}
+              >
+                <span className="svc__jp">{t.brdLine[line]}</span>
+                <span className="svc__words">{on ? t.settingsLineOn : t.settingsLineOff}</span>
+              </button>
+            )
+          })}
+        </div>
+        <span className="slip__hint">{t.settingsLinesHint}</span>
       </Slip>
 
       <RatingSlip t={t} session={session} />

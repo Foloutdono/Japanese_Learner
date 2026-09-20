@@ -153,9 +153,11 @@ async function walkToPlan(screen) {
   await click(screen, '[data-level="N1"]')
   await click(screen, '[data-action="continue"]')
   await settle()
-  await click(screen, '[data-action="continue"]')
+  await click(screen, '[data-action="continue"]')   // the lines
   await settle()
-  await click(screen, '[data-action="continue"]')
+  await click(screen, '[data-action="continue"]')   // the rhythm
+  await settle()
+  await click(screen, '[data-action="continue"]')   // the hour
   await settle()
   await passBuilding(screen)
 }
@@ -203,14 +205,14 @@ beforeEach(() => {
 })
 
 describe('BoardingFlow', () => {
-  it('walks name → why → kana (both) → level → goal → rhythm → time → building → plan → pass and POSTs the whole contract once', async () => {
+  it('walks name → why → kana (both) → level → goal → lines → rhythm → time → building → plan → pass and POSTs the whole contract once', async () => {
     const { screen, onComplete } = await renderFlow()
 
-    // 1/7 on the web: no nudge stop. Back on the first screen leaves the
+    // 1/8 on the web: no nudge stop. Back on the first screen leaves the
     // flow, so with no `onExit` to leave for there is no button — the
     // guest boarding always passes one (see its own tests below).
     expect(stepOf(screen)).toBe('name')
-    expect(stepsOf(screen)).toBe('1/7')
+    expect(stepsOf(screen)).toBe('1/8')
     expect(screen.container.querySelector('button.brd__back')).toBeNull()
     expect(document.activeElement?.className).toContain('brd-field')
 
@@ -234,13 +236,13 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('kana')
-    expect(stepsOf(screen)).toBe('3/7')
+    expect(stepsOf(screen)).toBe('3/8')
     // The answers are the foot: each one advances.
     expect(q(screen, '.brd__foot')).toBeNull()
     await click(screen, '[data-kana="both"]')
     await settle()
     expect(stepOf(screen)).toBe('level')
-    expect(stepsOf(screen)).toBe('4/7')
+    expect(stepsOf(screen)).toBe('4/8')
     expect(q(screen, '[data-level="novice"] .brd-opt__code').textContent).toBe('—')
     // The volumes price the list: N5's ~100 kanji, N1's ~2,250.
     expect(q(screen, '[data-level="N5"] .brd-opt__desc').textContent).toContain('100')
@@ -257,6 +259,23 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-action="continue"]')
     await settle()
 
+    // The lines: all three on to begin with, any number of them, never
+    // none -- the last one out takes Continue with it.
+    expect(stepOf(screen)).toBe('lines')
+    expect(stepsOf(screen)).toBe('6/8')
+    expect([...live(screen).querySelectorAll('[data-line]')].map(el => el.getAttribute('aria-pressed'))).toEqual(['true', 'true', 'true'])
+    await click(screen, '[data-line="grammar"]')
+    expect(q(screen, '[data-line="grammar"]').getAttribute('aria-pressed')).toBe('false')
+    await click(screen, '[data-line="vocab"]')
+    await click(screen, '[data-line="kanji"]')
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(true)
+    expect(q(screen, '.brd__error')).not.toBeNull()
+    await click(screen, '[data-line="kanji"]')
+    await click(screen, '[data-line="vocab"]')
+    expect(q(screen, '[data-action="continue"]').disabled).toBe(false)
+    await click(screen, '[data-action="continue"]')
+    await settle()
+
     expect(stepOf(screen)).toBe('rhythm')
     expect(q(screen, '[data-rhythm="10"]').getAttribute('aria-pressed')).toBe('true')
     expect(q(screen, '[data-rhythm="10"] .brd-tag')).not.toBeNull()
@@ -266,7 +285,7 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('time')
-    expect(stepsOf(screen)).toBe('7/7')
+    expect(stepsOf(screen)).toBe('8/8')
     expect(q(screen, '.brd-board__flaps').getAttribute('aria-label')).toBe('07:30')
     // ── The board settles rather than arriving set ──
     // A 発車標 lights with every drum turning and stops them one after
@@ -350,7 +369,7 @@ describe('BoardingFlow', () => {
     await settle()
 
     expect(stepOf(screen)).toBe('reveal')
-    expect(stepsOf(screen)).toBe('4/7')
+    expect(stepsOf(screen)).toBe('4/8')
     expect(live(screen).querySelectorAll('.brd-kana__read')).toHaveLength(2)
     await click(screen, '[data-action="continue"]')
     await settle()
@@ -411,6 +430,8 @@ describe('BoardingFlow', () => {
     expect(q(screen, '[data-goal="novice"]').getAttribute('aria-pressed')).toBe('true')
     expect(q(screen, '[data-goal="N5"]').getAttribute('aria-pressed')).toBe('false')
     await click(screen, '[data-action="continue"]')
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the lines
     await settle()
     await click(screen, '[data-action="continue"]')   // the rhythm
     await settle()
@@ -477,8 +498,11 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-level="N1"]')
     await click(screen, '[data-action="continue"]')
     await settle()
+    expect(stepOf(screen)).toBe('lines')
+    expect(stepsOf(screen)).toBe('5/7')
+    await click(screen, '[data-action="continue"]')
+    await settle()
     expect(stepOf(screen)).toBe('rhythm')
-    expect(stepsOf(screen)).toBe('5/6')
     await click(screen, '[data-action="continue"]')
     await settle()
     await click(screen, '[data-action="continue"]')
@@ -517,10 +541,10 @@ describe('BoardingFlow', () => {
     expect(stepOf(screen)).toBe('why')
   })
 
-  it('on a native shell the nudge is the eighth stop and Allow signs the reminder', async () => {
+  it('on a native shell the nudge is the ninth stop and Allow signs the reminder', async () => {
     nudgeRef.current = true
     const { screen } = await renderFlow()
-    expect(stepsOf(screen)).toBe('1/8')
+    expect(stepsOf(screen)).toBe('1/9')
     await passName(screen)
     await click(screen, '[data-kana="none"]')
     await settle()
@@ -528,12 +552,14 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-action="continue"]')   // the goal (N5 preselected: a novice)
     await settle()
+    await click(screen, '[data-action="continue"]')   // the lines
+    await settle()
     await click(screen, '[data-action="continue"]')   // the rhythm
     await settle()
     await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     expect(stepOf(screen)).toBe('nudge')
-    expect(stepsOf(screen)).toBe('8/8')
+    expect(stepsOf(screen)).toBe('9/9')
     expect(q(screen, '.brd-notif__title').textContent).toContain('07:30')
     await click(screen, '[data-action="allow"]')
     await settle()
@@ -559,11 +585,13 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the goal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the lines
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     await passBuilding(screen)
     await click(screen, '[data-action="continue"]')
@@ -590,11 +618,13 @@ describe('BoardingFlow', () => {
     await click(screen, '[data-level="N4"]')
     await click(screen, '[data-action="continue"]')
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the goal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the lines
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     await passBuilding(screen)
     await click(screen, '[data-action="continue"]')
@@ -642,13 +672,15 @@ describe('BoardingFlow', () => {
     await settle()
     await click(screen, '[data-kana="katakana"]')
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the reveal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the goal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the lines
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
     await settle()
     await passBuilding(screen)
     await click(screen, '[data-action="continue"]')

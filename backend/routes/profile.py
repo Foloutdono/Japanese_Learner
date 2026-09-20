@@ -16,6 +16,7 @@ from core.auth import get_user_id, prefixed
 from core.srs_instance import srs
 from core.user_level import LEVELS, note_stored_level
 from core import credits
+from core.lines import clean_lines
 from srs.xp import level_progress
 from study import level_rule
 
@@ -92,6 +93,8 @@ def _init_db() -> None:
             # daily nudge's hour ('HH:MM', NULL = none) and notifications
             # whether they said yes to it. The native shell (plan 076)
             # reads the last two on boot to schedule the local reminder.
+            # lines is which of vocab / kanji / grammar the learner
+            # chose to ride (core/lines.py); NULL reads as all three.
             for col, typ in (
                 ("jlpt_level", "TEXT"),
                 ("daily_new_target", "INTEGER"),
@@ -110,6 +113,7 @@ def _init_db() -> None:
                 ("kana_known", "TEXT"),
                 ("reminder_time", "TEXT"),
                 ("notifications", "BOOLEAN NOT NULL DEFAULT FALSE"),
+                ("lines", "TEXT[]"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -183,7 +187,8 @@ def ensure_profile_row(user_id: str) -> str:
 
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
-    rating_scale, motive, kana_known, reminder_time, notifications) —
+    rating_scale, motive, kana_known, reminder_time, notifications,
+    lines) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
     and rating_scale until the learner changes it."""
@@ -194,7 +199,7 @@ def _profile_row(user_id: str) -> tuple:
                 """
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
-                       notifications
+                       notifications, lines
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -204,7 +209,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None)
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -263,6 +268,14 @@ class LearningPayload(BaseModel):
     # -Date.getTimezoneOffset()), so the credits refill at the
     # learner's midnight (core/credits.py). Sent on every boot.
     tzOffsetMin: int | None = None
+    # The lines to ride from now on (core/lines.py): a non-empty subset
+    # of vocab / kanji / grammar. Settings › Learning's toggles.
+    lines: list[str] | None = None
+
+    @field_validator("lines")
+    @classmethod
+    def valid_lines(cls, v: list[str] | None) -> list[str] | None:
+        return clean_lines(v)
 
     @field_validator("tzOffsetMin")
     @classmethod
@@ -378,7 +391,7 @@ CALENDAR_DAYS = 35
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
-     motive, kana_known, reminder_time, notifications) = _profile_row(user_id)
+     motive, kana_known, reminder_time, notifications, lines) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -412,6 +425,10 @@ def get_profile(user_id: str = Depends(get_user_id)):
         "kanaKnown": kana_known,
         "reminderTime": reminder_time,
         "notifications": bool(notifications),
+        # The lines the learner chose to ride (core/lines.py): null for
+        # an account boarded before the question, which every reader
+        # takes as all three.
+        "lines": list(lines) if lines else None,
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
@@ -523,6 +540,9 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
     if payload.tzOffsetMin is not None:
         sets.append("tz_offset_min = %s")
         args.append(payload.tzOffsetMin)
+    if payload.lines is not None:
+        sets.append("lines = %s")
+        args.append(payload.lines)
     if not sets:
         raise HTTPException(status_code=422, detail="Nothing to update")
     conn = db_conn()
@@ -552,6 +572,7 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         "dailyNewTarget": payload.dailyNewTarget,
         "ratingScale": payload.ratingScale,
         "tzOffsetMin": payload.tzOffsetMin,
+        "lines": payload.lines,
         "levelRule": level_rule_result,
     }
 

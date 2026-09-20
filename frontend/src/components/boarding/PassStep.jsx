@@ -127,7 +127,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
   const { t } = useLang()
   return (
     <>
-      <div className="brd__body brd__body--arrival">
+      <div className="brd__body">
         <div className="brd-offer">
           <h1 className="brd__q" tabIndex={-1}>
             <Emphasized text={t.brdPassQ(name)} strongClassName="brd__q-em" />

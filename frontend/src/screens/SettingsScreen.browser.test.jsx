@@ -296,12 +296,42 @@ describe('SettingsScreen — Learning', () => {
   it('the pace cards write the service picked', async () => {
     const screen = await mount('/profile/settings/learning')
     await settle()
-    const cards = [...screen.container.querySelectorAll('.svc-grid .svc')]
+    // The first grid is the pace's; the lines' toggles are the second.
+    const cards = [...screen.container.querySelectorAll('.svc-grid')[0].querySelectorAll('.svc')]
     expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
     cards[2].click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
     expect(JSON.parse(call[2].body)).toEqual({ dailyNewTarget: 20 })
+  })
+})
+
+describe('SettingsScreen — Learning, the lines', () => {
+  it('toggles a line through the learning PATCH, and never the last one out', async () => {
+    profile = { ...PROFILE, lines: ['vocab', 'kanji'] }
+    await refreshSummary()
+    const screen = await mount('/profile/settings/learning')
+    await settle()
+    const toggles = [...screen.container.querySelectorAll('[data-line]')]
+    expect(toggles.map(b => b.getAttribute('aria-checked'))).toEqual(['true', 'true', 'false'])
+    expect(toggles.map(b => b.disabled)).toEqual([false, false, false])
+    toggles[2].click()   // the grammar, on
+    await settle(30)
+    const call = apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')
+    expect(JSON.parse(call[2].body)).toEqual({ lines: ['vocab', 'kanji', 'grammar'] })
+  })
+
+  it('the last line on cannot be switched off', async () => {
+    profile = { ...PROFILE, lines: ['grammar'] }
+    await refreshSummary()
+    const screen = await mount('/profile/settings/learning')
+    await settle()
+    const toggles = [...screen.container.querySelectorAll('[data-line]')]
+    expect(toggles.map(b => b.getAttribute('aria-checked'))).toEqual(['false', 'false', 'true'])
+    expect(toggles[2].disabled).toBe(true)
+    toggles[2].click()
+    await settle(30)
+    expect(apiJson.mock.calls.find(c => c[0] === '/api/profile/learning')).toBeUndefined()
   })
 })
 

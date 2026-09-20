@@ -55,7 +55,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # does not report an hour spent choosing a study rhythm. On
     # boarding_done it is the same measure across the whole line.
     "boarding_step":  frozenset({"step", "to", "index", "dir", "ms"}),
-    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "ms"}),
+    # `lines` is the chosen subset of vocab/kanji/grammar as one
+    # comma-joined string of those three names -- enum values, never
+    # text the learner typed (core/lines.py).
+    "boarding_done":  frozenset({"motive", "kana_known", "level", "pace", "notifications", "lines", "ms"}),
     # "Embarquer" mints an anonymous Supabase guest (lib/guest.js), so an
     # abandoned boarding leaves an auth user with no profile row. `from`
     # tells the two apart.

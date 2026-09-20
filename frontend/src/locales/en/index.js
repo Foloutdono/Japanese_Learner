@@ -1684,6 +1684,17 @@ const boarding = {
   // the novice's own, so it names no level (domain/boarding.js goalStops).
   brdGoalHintStart: 'Every stop is ahead of you.',
   brdNextStop: 'Next stop',
+  // The lines: what to learn. The kana are not a row -- every ticket
+  // rides them -- so the hint says so (components/boarding/LinesStep.jsx).
+  brdLinesQ: 'What do you want to learn?',
+  brdLinesHint: 'The kana ride on every ticket. Pick any of the rest.',
+  brdLinesNone: 'Pick at least one line.',
+  brdLine: { vocab: 'Vocabulary', kanji: 'Kanji', grammar: 'Grammar' },
+  brdLineDesc: {
+    vocab: 'Words, N5 to N1',
+    kanji: 'Readings, meanings, writing',
+    grammar: 'Patterns, with examples',
+  },
   brdRhythmQ: 'What’s your rhythm?',
   brdMinADay: 'min a day',
   brdNewItems: (n) => `~${n} new items`,
@@ -1709,12 +1720,15 @@ const boarding = {
   brdBuildLines: 'Your lines',
   brdBuildRide: 'Your daily ride',
   brdBuildProjection: 'Your projection',
-  brdFourLines: 'Four lines',
   brdArrivalTitle: 'Your plan',
   brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
   brdChartTitle: 'Your projection',
   brdChartAria: (words) => `Words remembered over the ride: daily reviews climb to about ${words}; cramming levels off early.`,
   brdChartLabel: (words) => `~${words} words · daily reviews`,
+  // The same chart for a ticket without the words on it: it climbs to
+  // everything the chosen lines hold.
+  brdChartAriaItems: (n) => `Items remembered over the ride: daily reviews climb to about ${n}; cramming levels off early.`,
+  brdChartLabelItems: (n) => `~${n} items · daily reviews`,
   // The same chart for a ride to the novice's stop, which promises
   // signs rather than words.
   brdChartAriaKana: (kana) => `Kana remembered over the ride: daily reviews climb to about ${kana}; cramming levels off early.`,
@@ -1725,7 +1739,11 @@ const boarding = {
   brdChartCap: 'Spaced reviews against cramming — an illustration, not a measurement.',
   brdLead: (min, date, purpose) => `At **${min} min a day**, by **${date}**, ${purpose}:`,
   brdFor: { studies: 'for your studies', fun: 'for the fun of it', trip: 'for your trip', live: 'for your life in Japan', friends: 'for your friends', other: 'for yourself' },
-  brdBulletFigures: (words, kanji) => `~${words} words and ~${kanji} kanji`,
+  // The first promise: one figure per line on the ticket, joined.
+  brdFigWords: (n) => `~${n} words`,
+  brdFigKanji: (n) => `~${n} kanji`,
+  brdFigGrammar: (n) => `~${n} grammar points`,
+  brdBulletFigures: (parts) => (parts.length > 1 ? `${parts.slice(0, -1).join(', ')} and ${parts.at(-1)}` : parts[0] ?? ''),
   // The novice's stop, taken as a goal: the kana, and the line that
   // waits beyond them. No word count, and no motive line — three weeks
   // of signs cannot promise a drama without pausing.
@@ -1784,6 +1802,15 @@ const onboarding = {
   settingsLearning: 'Learning',
   settingsJlptLevel: 'JLPT level',
   settingsPace: 'Daily pace',
+  // The lines to ride (backend core/lines.py): the Learn gate hangs
+  // these first and the plan is priced at them. The kana are not a
+  // toggle -- every ticket rides them.
+  settingsLines: 'Your lines',
+  settingsLinesCap: 'What you are learning',
+  settingsLinesHint: 'The kana ride on every ticket. At least one line stays on.',
+  settingsLineOn: 'On your route',
+  settingsLineOff: 'Off your route',
+  plateOffRoute: 'Off your route',
   settingsRedoDesc: 'Recalibrate your level once you have progressed.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the

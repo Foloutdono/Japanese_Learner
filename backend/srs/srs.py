@@ -1586,6 +1586,7 @@ class SRSEngine:
         levels: list[str],
         include_kana: bool,
         window_days: int = 14,
+        lines: list[str] | None = None,
     ) -> dict[str, int]:
         """
         The ghost train's two facts (plan 063): distinct ITEMS whose
@@ -1603,6 +1604,9 @@ class SRSEngine:
 
         `since` may be None (no goal set): the since-count then means
         "ever", which is what the pace-only pass back reports against.
+
+        `lines` narrows the three sections to the ones the learner chose
+        to ride (core/lines.py); None is all three.
         """
         pattern = self._user_prefix_pattern(user_id)
         raw = "split_part(card_id, ':', 2)"
@@ -1616,7 +1620,7 @@ class SRSEngine:
         scope_params: tuple = ()
         if levels:
             clauses.append(f"({cat} = ANY(%s) AND {lvl} = ANY(%s))")
-            scope_params = (["vocab", "kanji", "grammar"], list(levels))
+            scope_params = (list(lines) if lines else ["vocab", "kanji", "grammar"], list(levels))
         if include_kana:
             clauses.append(f"{cat} = 'kana'")
         scope = " OR ".join(clauses) or "FALSE"

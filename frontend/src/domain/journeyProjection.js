@@ -15,10 +15,10 @@
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const DAYS_PER_MONTH = 30.4
 
-export function levelItems(volumes, level) {
-  return (volumes.vocab?.[level] ?? 0)
-    + (volumes.kanji?.[level] ?? 0)
-    + (volumes.grammar?.[level] ?? 0)
+// `lines` is the subset of vocab / kanji / grammar the learner rides
+// (domain/boarding.js LINES); every line when not given.
+export function levelItems(volumes, level, lines = ['vocab', 'kanji', 'grammar']) {
+  return lines.reduce((sum, line) => sum + (volumes[line]?.[level] ?? 0), 0)
 }
 
 /**

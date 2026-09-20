@@ -6,7 +6,8 @@
 #   POST /api/onboarding/complete         stamp level + pace + onboarded_at
 #                                         (+ the boarding's own answers,
 #                                         plan 075: motive, kana, rhythm,
-#                                         the hour and the nudge)
+#                                         the hour and the nudge; and the
+#                                         lines, core/lines.py)
 #   GET  /api/onboarding/volumes          per-level item counts (projection)
 #
 # The placement round trip is stateless by design: the paper is a pure
@@ -26,6 +27,7 @@ from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 from core.auth import get_user_id
 from core.db import db_conn
+from core.lines import clean_lines
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level
 from routes.profile import apply_kana_rule, apply_level_rule, ensure_profile_row
 from study.exam_scoring import flatten_questions, score_attempt
@@ -99,6 +101,15 @@ class CompletePayload(BaseModel):
     reminderTime: str | None = None
     notifications: bool = False
     tzOffsetMin: int | None = None
+    # Which of vocab / kanji / grammar the learner wants to ride
+    # (core/lines.py). Optional like the rest: a client that does not
+    # ask leaves NULL, which reads as all three; a replay overwrites.
+    lines: list[str] | None = None
+
+    @field_validator("lines")
+    @classmethod
+    def valid_lines(cls, v: list[str] | None) -> list[str] | None:
+        return clean_lines(v)
 
     @field_validator("motive")
     @classmethod
@@ -263,6 +274,7 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     kana_known = %s,
                     reminder_time = %s,
                     notifications = %s,
+                    lines = %s,
                     tz_offset_min = COALESCE(%s, tz_offset_min)
                 WHERE user_id = %s
                 RETURNING onboarded_at, goal_set_at
@@ -279,6 +291,7 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
                     payload.kanaKnown,
                     payload.reminderTime,
                     payload.notifications,
+                    payload.lines,
                     payload.tzOffsetMin,
                     user_id,
                 ),
@@ -312,6 +325,7 @@ def complete_onboarding(payload: CompletePayload, user_id: str = Depends(get_use
         "rhythmMin": payload.rhythmMin,
         "reminderTime": payload.reminderTime,
         "notifications": payload.notifications,
+        "lines": payload.lines,
     }
 
 

@@ -37,7 +37,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
 
   return (
     <>
-      <div className="brd__body brd__body--arrival">
+      <div className="brd__body">
         <BoardQuestion hint={t.brdAccountHint}>{t.brdAccountQ}</BoardQuestion>
         <div className="brd__stage">
           {/* `link` so the guest KEEPS this account rather than being
