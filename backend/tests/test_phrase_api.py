@@ -56,7 +56,7 @@ def test_save_false_returns_no_id_and_writes_no_history_row(client):
 
 
 def test_deep_tier_merges_explanation_and_word_meaning(client, monkeypatch):
-    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False):
+    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False, **_kwargs):
         return (
             '{"words": [{"surface": "私", "base": "私", "reading": "わたし", '
             '"meaning": "I", "pos": "pronoun"}], '
