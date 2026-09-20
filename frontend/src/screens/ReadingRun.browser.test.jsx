@@ -296,11 +296,16 @@ describe('ReadingRun — the measurement', () => {
 
   it('sends the figure up with the rating, and null when it never landed', async () => {
     const posted = []
-    let measurement = Promise.resolve(res({ accuracy: 78, matched: 'romaji' }))
+    // A function rather than a promise: a rejected promise made here and
+    // only handed to the run several awaits later is unhandled in the
+    // meantime, which vitest reports as an error and exits non-zero on
+    // even though every test passed. Built when the run asks for it, the
+    // rejection is handed straight to measure()'s own catch.
+    let measurement = () => Promise.resolve(res({ accuracy: 78, matched: 'romaji' }))
     apiFetch.mockImplementation((path, _s, opts) => {
       if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
       if (path === '/api/phrase/analyze') return analysisReply
-      if (path === '/api/reading/check') return measurement
+      if (path === '/api/reading/check') return measurement()
       if (path === '/api/reading/result') {
         posted.push(JSON.parse(opts.body))
         return Promise.resolve(res({}))
@@ -326,7 +331,7 @@ describe('ReadingRun — the measurement', () => {
     // a fact about what the learner did either way, so it still goes
     // up -- carrying null, which is "unmeasured" and not "caught none
     // of it".
-    measurement = Promise.reject(new Error('offline'))
+    measurement = () => Promise.reject(new Error('offline'))
     root.querySelector('.stage__foot button').click()
     await settle(80)
     await answered(root, 'zenzen chigau')
