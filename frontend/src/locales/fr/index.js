@@ -969,6 +969,14 @@ const dictionary = {
   // Voir en/index.js : une constatation, pas une question.
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
+  dictFavorites:       'Favoris',
+  dictFavorite:        'Favori',
+  dictFavoriteAdd:     'Garder en favoris',
+  dictFavoriteRemove:  'Retirer des favoris',
+  dictFavoriteFailed:  'Impossible d\'enregistrer.',
+  dictFavoriteFull:    'Les favoris sont pleins : retirez-en un d\'abord.',
+  dictFavoritesEmpty:  'Aucun favori pour l\'instant',
+  dictFavoritesHint:   'L\'étoile d\'une entrée la garde ici.',
   // 文法 — la leçon (plan 087)
   glLesson:          'Leçon',
   glPoints:          'Les points',

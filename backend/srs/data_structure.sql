@@ -678,6 +678,22 @@ CREATE TABLE ocr_usage (
     PRIMARY KEY (user_id, day)
 );
 
+-- ── お気に入り — the dictionary's shelf of kept entries ─────────────
+-- Owned by routes/favorites.py (plan 092). A REFERENCE per row, never a
+-- copy of the entry: `kind` is the collection and `key` what it files
+-- the entry under (a kanji's character, a word's "{kanji}::{kana}", a
+-- grammar point's card id, a kana). Reading the shelf back resolves
+-- each against its collection, so a favourite is always the catalogue's
+-- own row. No cascade from auth (ADR 0010): DELETE /api/account and
+-- scripts/purge_orphans.py clear it.
+CREATE TABLE dictionary_favorites (
+    user_id  TEXT NOT NULL,
+    kind     TEXT NOT NULL,
+    key      TEXT NOT NULL,
+    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, kind, key)
+);
+
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────
 -- Owned by core/events.py, written by routes/events.py (a batch the
 -- client queues and flushes) and by core/credits.py (the fare gate's

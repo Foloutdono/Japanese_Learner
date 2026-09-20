@@ -668,6 +668,66 @@ describe('the ＋ — this entry into one of your decks', () => {
   })
 })
 
+// ── The ★ — this entry on your shelf (plan 092) ─────────────
+describe('the ★ — this entry on your shelf', () => {
+  // A shelf as useFavorites holds one, in miniature: the state, and a
+  // toggle that flips it or refuses.
+  const SHELF = (kept = false, refuse = null) => {
+    const shelf = {
+      loaded: true, count: kept ? 1 : 0,
+      has: () => shelf.kept,
+      toggle: vi.fn(async () => {
+        if (refuse) throw refuse
+        shelf.kept = !shelf.kept
+        return shelf.kept
+      }),
+      kept,
+    }
+    return shelf
+  }
+
+  it('prints no star where the screen holds no shelf', async () => {
+    const { root } = await renderEntry(KANJI)
+    expect(root.querySelector('.dict-plate__fav')).toBeNull()
+  })
+
+  it('draws the star out, then lit with the ring, and turns it from the plate', async () => {
+    const shelf = SHELF(false)
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: shelf })
+    const star = () => root.querySelector('.dict-plate__fav')
+    // A ghost among the ghosts, second in the row.
+    const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Keep in favourites', 'Close'])
+    expect(star().getAttribute('aria-pressed')).toBe('false')
+    expect(star().querySelector('polygon').getAttribute('fill')).toBe('none')
+    // Resolved inside the dock, where the shell injects the pigment.
+    const ring = probe('borderColor', 'var(--line-color)', root.querySelector('.dict-dock'))
+    expect(getComputedStyle(star()).borderColor).not.toBe(ring)
+
+    star().click()
+    await settle(60)
+    expect(shelf.toggle).toHaveBeenCalledWith(KANJI)
+    expect(star().getAttribute('aria-pressed')).toBe('true')
+    expect(star().getAttribute('aria-label')).toBe('Remove from favourites')
+    // Kept: the star fills in the plate's own ink — no line pigment on
+    // the learner's mark — and the ring is 辞書's.
+    expect(star().querySelector('polygon').getAttribute('fill')).toBe('currentColor')
+    expect(getComputedStyle(star()).color).toBe(getComputedStyle(root.querySelector('.dict-plate__btn')).color)
+    expect(getComputedStyle(star()).borderColor).toBe(ring)
+    expect(root.querySelector('.dict-plate__actions .analysis-mine-status')).toBeNull()
+  })
+
+  it('says so beside the star when the write does not take, and stays out', async () => {
+    const full = Object.assign(new Error('favorites_full'), { status: 409 })
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: SHELF(false, full) })
+    root.querySelector('.dict-plate__fav').click()
+    await settle(60)
+    expect(root.querySelector('.dict-plate__fav').getAttribute('aria-pressed')).toBe('false')
+    expect(root.querySelector('.dict-plate__actions .analysis-mine-status').textContent)
+      .toBe('Favourites are full — remove one first.')
+  })
+})
+
 // ── One definition, however many rows JMdict files it under ────
 describe('the senses — folded where they say the same thing', () => {
   const TWICE = {

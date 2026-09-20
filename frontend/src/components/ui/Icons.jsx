@@ -403,10 +403,17 @@ export function FlagIcon({ size = 16, filled = false, className }) {
   )
 }
 
-export function StarIcon({ size = 16, className }) {
+// `filled` is the mark as it always was; false is the same star as an
+// outline — the dictionary plate's ★ before it is pressed (plan 092),
+// the way FlagIcon draws its two states.
+export function StarIcon({ size = 16, filled = true, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeLinejoin="round">
-      <polygon points="12 2.5 15 9 22 10 17 15 18.2 21.8 12 18.5 5.8 21.8 7 15 2 10 9 9" fill="currentColor" stroke="none" />
+      <polygon
+        points="12 2.5 15 9 22 10 17 15 18.2 21.8 12 18.5 5.8 21.8 7 15 2 10 9 9"
+        fill={filled ? 'currentColor' : 'none'}
+        stroke={filled ? 'none' : 'currentColor'}
+      />
     </svg>
   )
 }

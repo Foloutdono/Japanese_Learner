@@ -13,7 +13,7 @@ import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
 import { MineButton } from '../analysis/MineButton'
-import { BoltIcon, ChevronIcon, PlusIcon } from '../ui/Icons'
+import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
 
@@ -566,7 +566,15 @@ function headwordSize(text) {
 // only where a caller can offer the run — a lookup sheet opened over a
 // quiz has no run to send anyone to, and an action with nowhere to go
 // is not a fact the way an inert row is, it is a dead control.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining }) {
+//
+// `favorites` (a useFavorites instance, optional) is what makes the ★
+// exist: the plate's bookmark, keeping this entry on the learner's own
+// shelf in the dictionary (plan 092). A shelf and a deck are different
+// things and the plate says so with two roundels — the star keeps the
+// entry to read again, the ＋ writes a card the scheduler will ask for.
+// Without `favorites` there is no star, the way there is no ＋ without
+// `mining`: a sheet over a quiz has no shelf to file into.
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -734,6 +742,32 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const hiddenReadings = tokens.length - shownReadings.length
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
+  // ── The star ──
+  // Lit from the shelf the screen holds (favorites.has), turned by one
+  // optimistic write. The only thing the plate says about it is the one
+  // time it did not take, beside the star in the caption register — the
+  // same slot the ＋ prints "in deck" in. The state itself is the
+  // shelf's, so opening another entry needs no reset; the refusal is
+  // keyed to the entry it was about, the way the readings sheet is, so
+  // it cannot follow the reader onto the next plate.
+  const kept = !!favorites?.has(entry)
+  const [favPending, setFavPending] = useState(false)
+  const [favRefusal, setFavRefusal] = useState(null)
+  const favError = favRefusal?.key === entryKey(entry) ? favRefusal.message : null
+  async function toggleFavorite() {
+    setFavRefusal(null)
+    setFavPending(true)
+    try {
+      await favorites.toggle(entry)
+    } catch (err) {
+      setFavRefusal({
+        key: entryKey(entry),
+        message: err?.status === 409 ? t.dictFavoriteFull : t.dictFavoriteFailed,
+      })
+    } finally {
+      setFavPending(false)
+    }
+  }
   const readingsOpen = isKanji && readingGroups.length > 0 && openKey === entryKey(entry)
   // card_stats (study/card_lookup.py) says "not_started" for a card
   // with no state in any mode; the seal's vocabulary is new / learning
@@ -779,6 +813,28 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               >
                 <SpeakIcon />
               </button>
+            )}
+            {/* The bookmark (plan 092): a ghost like its neighbours,
+                the star drawn as an outline until it is pressed and
+                filled in the ambient ink once it is — the shelf is the
+                learner's, so the mark wears no line pigment (DESIGN.md,
+                "Three families"); the ring it earns when kept is the
+                selection ring, 辞書's own. aria-pressed says which. */}
+            {favorites && (
+              <button
+                type="button"
+                onClick={toggleFavorite}
+                disabled={favPending}
+                className={`dict-plate__btn dict-plate__fav${kept ? ' dict-plate__fav--on' : ''}`}
+                aria-pressed={kept}
+                title={kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
+                aria-label={kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
+              >
+                <StarIcon size={16} filled={kept} />
+              </button>
+            )}
+            {favError && (
+              <span className="analysis-mine-status" role="status">{favError}</span>
             )}
             {/* The plate's one action: this entry into one of the
                 learner's decks, the analyzer's own mine write. A ghost
@@ -1199,8 +1255,9 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 // Opened on `term` (+ `kana`) for a word or a kanji, or on `id` for a
 // grammar point (the analyzer's chips, a comprehension result's) —
 // see useDictionaryLookup. `mining` is optional and reaches the plate's
-// `+` roundel on a grammar entry where the opening screen has one.
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, onClose, over = false, onRadicalClick, onReview }) {
+// `+` roundel on a grammar entry where the opening screen has one;
+// `favorites` likewise reaches its ★ where the screen holds a shelf.
+export function DictionaryLookupSheet({ term, kana, category, id, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
   const { t, lang } = useLang()
   // The entries opened from one another, oldest first. The sheet shows
   // the last; ‹ pops it. Reset by the caller remounting on a new term
@@ -1255,6 +1312,7 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
             onVocabClick={(k, r) => open(k || r, 'vocab', r)}
             onGrammarClick={openId}
             mining={mining}
+            favorites={favorites}
           />
         )}
       </div>

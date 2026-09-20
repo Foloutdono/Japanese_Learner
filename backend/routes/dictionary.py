@@ -787,6 +787,66 @@ def _grammar_collection(query, page: int, limit: int, level: str | None,
     }
 
 
+def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
+                 states: dict, user_id: str) -> dict:
+    """One kana as the catalogue serves it -- `kind` is "hiragana" or
+    "katakana", `entry` a row of content/kana_data.py's syllabary, and
+    `meaning` its romaji (the slot dict-entry-card__meaning reads
+    whatever the entry's kind). Lifted out of get_dictionary so the
+    favourites shelf (routes/favorites.py, plan 092) can serve the same
+    row for a kana a learner kept."""
+    raw_id = kana_to_id(entry)
+    # A stroke file is one character's, and a kana here is not
+    # always one character: きゃ is two, and so is every long
+    # vowel. A pair gets no sheet rather than an arbitrary half
+    # of one — the panel simply draws the rest of the entry
+    # (DictionaryDetail's `hasSheet`).
+    kana = entry["kana"]
+    svg_url = (
+        f"/kanjivg/{hex(ord(kana))[2:].zfill(5)}.svg"
+        if len(kana) == 1
+        else None
+    )
+    return {
+        "type":    kind,
+        "kana":    entry["kana"],
+        "romaji":  entry["romaji"],
+        "meaning": meaning,
+        "level":   "Hiragana" if kind == "hiragana" else "Katakana",
+        # Which gojūon row this belongs to (k/s/t/n/h/m/y/r/w/
+        # vowels/n_solo, or the voiced g/z/d/b/p rows) — see
+        # kana_data.py. The frontend's syllabary table groups by
+        # this field to lay out the classic a-i-u-e-o chart.
+        "group":   entry.get("group", ""),
+        "svg_url": svg_url,
+        # Counted off the diagram the app already ships, because
+        # nothing else knows it: KANJIDIC2 gives every kanji a
+        # stroke count and the syllabary lists give the kana
+        # none, which is why the form block had one figure short
+        # of a lattice (content/kana_strokes.py). None for a
+        # two-character kana, exactly as svg_url is.
+        "stroke_count": kana_stroke_count(kana),
+        # あ ↔ ア. A door, not a fact: the same sound in the
+        # other script is the one cross-reference a learner of
+        # the syllabary wants, and None where the pairing is not
+        # one-to-one (content/kana_data.twin).
+        "twin":    kana_twin(kana),
+        "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
+        # The deck key is the KANA_SETS one, never the
+        # "Hiragana"/"Katakana" label above: that label is what
+        # the catalogue groups by, and the card builder needs
+        # the set its distractors come from.
+        "app_card": _app_card("kana", kana_set_for(kana), raw_id),
+        # The words the kana is read in -- the kanji ledger's
+        # field, under the kanji ledger's name, because the
+        # panel draws the two blocks with one component
+        # (plan 088). Empty for the handful of kana ordinary
+        # writing has no word for, and the block then prints
+        # nothing; see study/kana_words.py.
+        "vocab_examples": kana_words(entry["kana"], lang),
+    }
+
+
 @router.get("/api/dictionary")
 def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=200), lang: str = "fr",
                     category: str = "all", radical: int | None = None, kana: str = "",
@@ -940,56 +1000,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
                 entry, lvl, meaning, lang, states, user_id, vocab_to_id(entry, lvl),
             ))
         else:  # hiragana or katakana
-            raw_id = kana_to_id(entry)
-            # A stroke file is one character's, and a kana here is not
-            # always one character: きゃ is two, and so is every long
-            # vowel. A pair gets no sheet rather than an arbitrary half
-            # of one — the panel simply draws the rest of the entry
-            # (DictionaryDetail's `hasSheet`).
-            kana = entry["kana"]
-            svg_url = (
-                f"/kanjivg/{hex(ord(kana))[2:].zfill(5)}.svg"
-                if len(kana) == 1
-                else None
-            )
-            results.append({
-                "type":    kind,
-                "kana":    entry["kana"],
-                "romaji":  entry["romaji"],
-                "meaning": meaning,
-                "level":   lvl,
-                # Which gojūon row this belongs to (k/s/t/n/h/m/y/r/w/
-                # vowels/n_solo, or the voiced g/z/d/b/p rows) — see
-                # kana_data.py. The frontend's syllabary table groups by
-                # this field to lay out the classic a-i-u-e-o chart.
-                "group":   entry.get("group", ""),
-                "svg_url": svg_url,
-                # Counted off the diagram the app already ships, because
-                # nothing else knows it: KANJIDIC2 gives every kanji a
-                # stroke count and the syllabary lists give the kana
-                # none, which is why the form block had one figure short
-                # of a lattice (content/kana_strokes.py). None for a
-                # two-character kana, exactly as svg_url is.
-                "stroke_count": kana_stroke_count(kana),
-                # あ ↔ ア. A door, not a fact: the same sound in the
-                # other script is the one cross-reference a learner of
-                # the syllabary wants, and None where the pairing is not
-                # one-to-one (content/kana_data.twin).
-                "twin":    kana_twin(kana),
-                "status":  card_stats(states, user_id, raw_id, KANA_STATUS_MODES),
-                # The deck key is the KANA_SETS one, never the
-                # "Hiragana"/"Katakana" label above: that label is what
-                # the catalogue groups by, and the card builder needs
-                # the set its distractors come from.
-                "app_card": _app_card("kana", kana_set_for(kana), raw_id),
-                # The words the kana is read in -- the kanji ledger's
-                # field, under the kanji ledger's name, because the
-                # panel draws the two blocks with one component
-                # (plan 088). Empty for the handful of kana ordinary
-                # writing has no word for, and the block then prints
-                # nothing; see study/kana_words.py.
-                "vocab_examples": kana_words(entry["kana"], lang),
-            })
+            results.append(_kana_result(kind, entry, meaning, lang, states, user_id))
 
     return {
         "results":  results,
