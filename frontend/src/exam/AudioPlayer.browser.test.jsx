@@ -37,7 +37,7 @@ describe('AudioPlayer', () => {
   it('says a clip could not be loaded instead of showing a dead player', async () => {
     const screen = await player(MISSING)
     await vi.waitFor(() => {
-      expect(bar(screen)?.textContent).toContain('impossible à charger')
+      expect(bar(screen)?.textContent).toContain('pas pu être chargé')
     })
     expect(chrome(screen)).toBeNull()
   })
@@ -47,7 +47,7 @@ describe('AudioPlayer', () => {
     await vi.waitFor(() => expect(bar(failed)).not.toBeNull())
     const never = await player(null)
 
-    expect(bar(never).textContent).toContain('pas encore généré')
+    expect(bar(never).textContent).toContain('pas encore été généré')
     expect(bar(failed).textContent).not.toBe(bar(never).textContent)
   })
 
