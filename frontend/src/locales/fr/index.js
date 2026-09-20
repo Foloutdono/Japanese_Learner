@@ -173,8 +173,8 @@ const quiz = {
   byFrequencyKanjiDesc: 'Classés selon leur fréquence réelle à l\'écrit',
   // Troisième source des kanji (plan 086) : les 214 clés comme porte
   // d'entrée — une leçon sur la clé, puis sa famille de kanji.
-  byRadical:            'Clés',
-  byRadicalDesc:        'Les briques des kanji — une clé, puis tous les kanji bâtis dessus',
+  byRadical:            'Radicaux',
+  byRadicalDesc:        'Les briques des kanji — un radical, puis tous les kanji bâtis dessus',
   byMastery:         'Mes cartes',
   byMasteryDesc:     'Bâties uniquement sur des mots déjà rencontrés',
   byJmdict:          'Hors-JLPT',
@@ -287,7 +287,7 @@ const quiz = {
   modeWrite:         'Écriture',
   // Axe « format » des stats : saisi au clavier, par opposition à tracé.
   modeType:          'Saisie',
-  radicalNumber:       'Clé',
+  radicalNumber:       'Radical',
   // grammaire b2f : le sens est affiché, retrouver la règle.
   revealGrammarRule:   "Quelle règle est-ce ?",
   revealGrammarBtn:    'Afficher la règle',
@@ -299,12 +299,12 @@ const quiz = {
   field_kanji:      'Kanji',
   field_meaning:    'Sens',
   field_readings:   'Lectures',
-  field_radical:    'Clé',
+  field_radical:    'Radical',
   field_word:       'Mot',
   field_reading:    'Lecture',
   field_rule:       'Règle de grammaire',
   field_sentences:  'Phrase d’exemple',
-  pickRadical:      'Choisir une clé',
+  pickRadical:      'Choisir un radical',
   // ── 読み入力 (kanji.readings) ──
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',
@@ -419,12 +419,12 @@ const stats = {
   stationSets:        'Séries',
   byFrequencyShort:   'Par fréquence',
   byThemeShort:       'Par thème',
-  byRadicalShort:     'Par clé',
+  byRadicalShort:     'Par radical',
   leaveLevels:        'Niveaux',
-  leaveRadicals:      'Clés',
+  leaveRadicals:      'Radicaux',
   // ── La leçon sur une clé (plan 086) ──
-  radLesson:          'La clé',
-  radFamily:          'Kanji bâtis sur cette clé',
+  radLesson:          'Le radical',
+  radFamily:          'Kanji bâtis sur ce radical',
   radForms:           'Formes',
   radPosition: {
     hen:     'à gauche',
@@ -436,8 +436,8 @@ const stats = {
     nyou:    'le long du bord gauche et en bas',
   },
   radPositionJp: { hen: '偏', tsukuri: '旁', kanmuri: '冠', ashi: '脚', kamae: '構', tare: '垂', nyou: '繞' },
-  radPositionNote:    where => `Comme composant, elle se place le plus souvent ${where} d'un kanji`,
-  radNoPositionNote:  'Comme composant, elle n\'a pas de place fixe dans un kanji.',
+  radPositionNote:    where => `Comme composant, il se place le plus souvent ${where} d'un kanji`,
+  radNoPositionNote:  'Comme composant, il n\'a pas de place fixe dans un kanji.',
   radFamilyShort:     'Kanji bâtis dessus',
   radNoKanji:         'Le cours n\'enseigne encore aucun kanji bâti dessus.',
   leaveSets:          'Séries',
@@ -953,7 +953,7 @@ const dictionary = {
   levelShort:        'Niv',
   listen:            'Écouter',
   displayedKanji:    'kanji affichés',
-  radical:           'Clé',
+  radical:           'Radical',
   // Additional dictionary keys used by screens
   dictAll:           'Tout',
   dictKanji:         'Kanji',
@@ -999,12 +999,12 @@ const dictionary = {
   readingsOnName:    'Lecture chinoise',
   readingsKunJp:     '訓読み',
   readingsKunName:   'Lecture japonaise',
-  dictBackToRadicals:'Retour aux clés',
+  dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
-  dictModeRadical:   'Clé',
-  dictionaryPlaceholderRadical: 'Filtrer ces résultats par clé…',
+  dictModeRadical:   'Radical',
+  dictionaryPlaceholderRadical: 'Filtrer ces résultats par radical…',
   dictionaryResults: n => `${n} résultats`,
-  dictRadicalNumber: (n) => `clé n°\u00A0${n}`,
+  dictRadicalNumber: (n) => `radical n°\u00A0${n}`,
   dictStrokesPlural: 'traits',
   dictStrokeSingular: 'trait',
   dictStrokeIndex:   'Index par nombre de traits',
@@ -1090,8 +1090,8 @@ const misc = {
   mode_kanji_write_kanji_desc:    'Le sens est donné. Tracez le kanji à la main.',
   mode_kanji_readings:            'Lectures',
   mode_kanji_readings_desc:       "Le kanji est affiché. Tapez ses lectures on'yomi et kun'yomi.",
-  mode_kanji_radical:             'Clé',
-  mode_kanji_radical_desc:        'Le kanji est affiché. Retrouvez sa clé.',
+  mode_kanji_radical:             'Radical',
+  mode_kanji_radical_desc:        'Le kanji est affiché. Retrouvez son radical.',
 
   mode_vocab_flashcard_f2b:       'Mot → sens',
   mode_vocab_flashcard_f2b_desc:  'Le mot est affiché. Retrouvez son sens.',
@@ -1540,12 +1540,10 @@ const boarding = {
   authFoot: 'Tout peut être modifié plus tard dans les réglages.',
   authModeAria: 'Connexion ou inscription',
   brdDocumentTitle: 'Embarquement',
-  // Bienvenue : l’enseigne, le matériel roulant, la promesse.
-  // Pas « Prenez le train vers la maîtrise » : c’est le calque de
-  // l’anglais et il sonne faux — on prend le train POUR une gare, pas
-  // « vers » une qualité abstraite. « En route vers… » est la tournure
-  // que le français a déjà pour ça, et elle enchaîne sur Embarquer.
-  brdTagline: 'En route vers la maîtrise.',
+  // Bienvenue : l’enseigne, le matériel roulant, la promesse. Pas un
+  // calque de l’anglais : la ligne française est la sienne, et c’est
+  // la seule du tableau à tutoyer — une accroche, pas une consigne.
+  brdTagline: 'Accomplis tes objectifs sans détour.',
   brdBoard: 'Embarquer',
   brdHaveAccount: 'Déjà un compte ? Se connecter',
   // Google : « continuer », jamais « s'inscrire » ni « se connecter »

@@ -1613,7 +1613,7 @@ const boarding = {
   authModeAria: 'Login or sign up',
   brdDocumentTitle: 'Boarding',
   // Welcome: the sign, the rolling stock, the promise.
-  brdTagline: 'Take the train to proficiency.',
+  brdTagline: 'Take the train to a very Japanese time of your life.',
   brdBoard: 'Board',
   brdHaveAccount: 'Already have an account? Sign in',
   // Google: "continue", never "sign up" or "sign in" — a provider does
