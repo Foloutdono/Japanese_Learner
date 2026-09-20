@@ -63,8 +63,13 @@ runtime purpose. Two consequences worth knowing:
   deck's spreadsheet residue — Excel `#NAME?` glosses, and the part-of-speech
   notes that had displaced 34 entries' readings (cited in
   `content/vocab_renames.py`, `scripts/migrate_vocab_ids.py`,
-  `tests/test_vocab_deck.py` and `tests/test_dictionary_vocab.py`).
-  When starting a new wave, begin at **092** or higher, and check
+  `tests/test_vocab_deck.py` and `tests/test_dictionary_vocab.py`),
+  and **092** is the commercial LLM swap — paid providers, and the
+  per-call token accounting that replaces the estimates (cited in
+  `study/llm_shared.py`, `scripts/llm_cost_model.py`,
+  `scripts/llm_usage_report.py` and `backend/.env.example`;
+  `docs/llm-commercial-plan.md`).
+  When starting a new wave, begin at **093** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

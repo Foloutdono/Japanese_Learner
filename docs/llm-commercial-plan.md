@@ -152,10 +152,12 @@ should be a deliberate decision rather than an accident.
 Free wins first — these cost quality nothing, and two of them are
 already half-built here.
 
-1. **Log `usage` from every response.** We have never had a reason to
-   count tokens, so every figure above is an estimate from prompt
-   lengths. One extra column in the existing logging, and the model in
-   `scripts/llm_cost_model.py` becomes measurement.
+1. ~~**Log `usage` from every response.**~~ **Done.** `chat()` writes one
+   line per billed response to the logger `study.llm_shared.usage`,
+   carrying the task, the model and the token counts the provider
+   reported. `scripts/llm_usage_report.py` totals a log into the same
+   shape `llm_cost_model.py` estimates, so the two can be compared
+   directly. See §7.
 2. **Prompt-cache the stable prefix.** Every exam-generation call
    re-sends the allowed-kanji list — 613 characters at N3, **2,212 at
    N1** — plus a fixed template. That is ~60% of input tokens, and it is
@@ -176,13 +178,57 @@ already half-built here.
    60 to something a human actually needs (10–15), and give reading
    comprehension a daily ceiling of its own. Both are already the right
    shape — the OCR one is a counted daily slot with a 429.
-6. **Keep the free tier as a fallback, not the primary.** Put the paid
-   provider first in `LLM_PROVIDER_ORDER` and leave OpenRouter `:free`
-   last. It costs nothing to keep, and the day the paid account 402s,
-   the app degrades instead of stopping. The existing dead-provider
-   bookkeeping already does exactly this.
+6. ~~**Keep the free tier as a fallback, not the primary.**~~ **Done.**
+   `_DEFAULT_PROVIDER_ORDER` is now `google,openai,openrouter`: paid
+   first, OpenRouter `:free` last as the degradation path. NVIDIA is no
+   longer in the default order at all, because its hosted catalogue is
+   licensed for prototyping — it stays in the catalogue and
+   `LLM_PROVIDER_ORDER=nvidia,openrouter` brings it back for local work.
+   See §7.
 
-## 6. Measure, then re-run this
+## 6. What is wired, and what is not
+
+Steps 1 and 6 shipped with this document. Three details are worth
+knowing before the first deploy.
+
+**The model ids are unverified.** Every other model id in
+`study/llm_shared.py` was confirmed live against the provider's own
+`GET /v1/models` before being adopted — twice, after being bitten by a
+retired model. That could not be done here: these were chosen on
+published pricing, without an account for either provider. Every id is
+env-overridable for exactly that reason, and the first thing to do with
+a real key is:
+
+```bash
+cd backend
+python -m scripts.check_llm_models          # do the ids exist?
+python -m scripts.check_llm_models --smoke  # do they write usable Japanese?
+python -m scripts.check_llm_models --vision # can they read tategaki?
+```
+
+The `--smoke` run is the one that matters. A model can be in the
+catalogue and still answer an N5 prompt in English, which is exactly
+what `meta/llama-3.3-70b-instruct` did and why it is absent from the
+NVIDIA list.
+
+**One thing to watch on the first paid run:** whether Gemini spends the
+completion budget on thinking. Neither paid provider is sent a reasoning
+knob — the values are a closed set on both, a wrong top-level key is a
+400, and `chat()` treats a 400 as permanent and retires the model for
+the process. Saying nothing is the safe request. But this app has
+already been bitten by a reasoning trace crowding out the answer in a
+batched call (see the OpenRouter entry's comment), and if batched
+generation comes back truncated, that is the first suspect; the fix is a
+thinking config in `extra_body`, added once `--smoke` has shown it.
+
+**A deployment carrying only `NVIDIA_API_KEY` loses its LLM features on
+deploy.** That is the intended consequence of the licensing, and it
+degrades correctly — `llm_configured()` goes false, generators skip and
+routes answer 503 rather than crashing — but it would explain itself
+nowhere, so `_build_providers()` now logs a warning at startup naming
+any provider that has a key and is not in the order.
+
+## 7. Measure, then re-run this
 
 ```bash
 cd backend
@@ -191,9 +237,28 @@ python -m scripts.llm_cost_model --fleet 5000       # a fleet projection
 python -m scripts.llm_cost_model --model "GPT-5-mini"
 ```
 
-The CALLS / IN / OUT columns in that script are the assumptions. Replace
-them with logged `usage` figures once step 1 is done, and the projection
-stops being an argument.
+The CALLS / IN / OUT columns in that script are the assumptions. The log
+is what replaces them:
+
+```bash
+python -m scripts.llm_usage_report app.log --days 30 --users 120
+```
+
+It reads any text stream (a file or stdin), ignores everything that is
+not an `llm-usage` line, and totals by model and by task:
+
+```
+By task                          calls  failed        in       out    cached   $
+  comprehension                    412      19   969,884 1,071,552   612,000  ...
+```
+
+Two columns deserve a second look every time. `failed` counts responses
+that were paid for and could not be used — each one is a retry that
+billed twice for one answer, and they are invisible in any other view.
+`cached` is the prefix the provider served from its cache at about a
+tenth of the price; if it stays at zero while `in` is large, step 2 has
+not actually taken effect and the allowed-kanji list is being re-sent at
+full price on every call.
 
 ## Sources
 

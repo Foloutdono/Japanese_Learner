@@ -136,7 +136,7 @@ class ResultPayload(BaseModel):
     source_word: dict | None = None
 
 
-def _chat(messages, timeout=60, max_tokens=3000):
+def _chat(messages, timeout=60, max_tokens=3000, task=""):
     """Thin adapter over study/llm_shared.chat -- kept as a local name so
     this module's many call sites are unchanged, and so the shared
     function's LLMUnavailable becomes the HTTPException(503) they already
@@ -148,7 +148,7 @@ def _chat(messages, timeout=60, max_tokens=3000):
     llm_shared documents reasoning as helping with -- unlike the batched
     generators, which pass reasoning=False."""
     try:
-        return chat(messages, timeout=timeout, max_tokens=max_tokens)
+        return chat(messages, timeout=timeout, max_tokens=max_tokens, task=task)
     except LLMUnavailable as e:
         raise HTTPException(503, detail=str(e))
 
@@ -1364,7 +1364,7 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
         content = _chat([
             {"role": "system", "content": prompt},
             {"role": "user", "content": "Generate the reading comprehension exercise."},
-        ], timeout=150, max_tokens=12000)
+        ], timeout=150, max_tokens=12000, task="comprehension")
         try:
             data = _parse_comprehension(content)
         except HTTPException as e:

@@ -297,7 +297,7 @@ def test_explain_endpoint_buys_deep_tier_and_records_video_provenance(client, mo
     session_id = post_resp.json()["sessionId"]
     _poll_until_settled(client, session_id)
 
-    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False):
+    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False, **_kwargs):
         return (
             '{"words": [{"surface": "猫", "meaning": "cat"}], '
             '"explanation": "An introduction."}'
@@ -346,7 +346,7 @@ def test_explain_keeps_cue_times(client, monkeypatch):
     assert stored["cue_start"] == 1.0
     assert stored["cue_end"] == 4.0
 
-    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False):
+    def _fake_chat(messages, timeout=30, max_tokens=1200, reasoning=False, **_kwargs):
         return (
             '{"words": [{"surface": "猫", "meaning": "cat"}], '
             '"explanation": "An introduction."}'

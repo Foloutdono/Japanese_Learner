@@ -34,6 +34,20 @@ PRICES = {
     "Claude Sonnet 5":       (2.00, 10.00),
 }
 
+# The API model id a provider bills under -> the PRICES row above.
+# Only ids this project can actually be configured with, and only where
+# a published price was found: scripts/llm_usage_report.py totals an
+# unknown id's tokens and declines to guess what they cost, which is the
+# correct answer until someone reads the invoice.
+MODEL_IDS = {
+    "gemini-3.1-flash-lite": "Gemini 3.1 Flash-Lite",
+    "gemini-2.5-flash-lite": "Gemini 2.5 Flash-Lite",
+    "gpt-5-mini": "GPT-5-mini",
+    "gpt-5-nano": "GPT-5-nano",
+    "claude-haiku-4-5": "Claude Haiku 4.5",
+    "claude-sonnet-5": "Claude Sonnet 5",
+}
+
 # feature -> (calls/month, input tokens/call, output tokens/call, why)
 #
 # The token figures come from the prompts themselves. An English prompt

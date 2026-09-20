@@ -295,7 +295,7 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
     content = reading._chat([
         {"role": "system", "content": prompt},
         {"role": "user", "content": "Review my translation attempt."},
-    ])
+    ], task="translation-review")
     review = _parse_review(content)
     if review is None:
         # Not the shape. The prose is still a review, so it is served as

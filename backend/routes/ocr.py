@@ -153,6 +153,7 @@ async def recognize_image(
             max_tokens=1500,
             reasoning=False,
             vision=True,
+            task="ocr",
         )
     except LLMUnavailable as e:
         logger.error("OCR has no usable vision provider: %s", e)

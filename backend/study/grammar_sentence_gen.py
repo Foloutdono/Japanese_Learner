@@ -209,6 +209,7 @@ def generate_for_points(points: list[dict], level: str,
         [{"role": "system", "content": build_prompt(points, level, n)},
          {"role": "user", "content": "Generate."}],
         max_tokens=_MAX_TOKENS,
+        task="grammar-sentences",
         # See llm_shared.chat: with reasoning on, this model spends its
         # whole budget thinking about a batched request and then returns
         # the prompt's placeholders. Measured 0 usable sentences with it
