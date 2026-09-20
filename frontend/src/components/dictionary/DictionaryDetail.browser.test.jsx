@@ -645,10 +645,17 @@ describe('the ＋ — this entry into one of your decks', () => {
     const mining = MINE()
     const { root, screen } = await renderEntry(entry, { ...NAV(), mining })
     const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
-    // The speaker, the ＋, the ✕ — one action row on every kind.
-    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Mine', 'Close'])
+    // The speaker, the ＋, the ✕ — one action row on every kind. The ＋
+    // opens its menu (plan 093); with no shelf here, the deck row is
+    // the whole of it.
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
     actions[1].click()
+    await settle(30)
+    const rows = [...root.querySelectorAll('.dict-add-menu__row')]
+    expect(rows.map(r => r.textContent)).toEqual(['Add to a deck'])
+    rows[0].click()
     await settle(60)
+    expect(root.querySelector('.dict-add-menu')).toBeNull()
     expect(mining.mineApp).toHaveBeenCalledWith({
       deckId: 7, source: card.source, level: card.level, rawId: card.raw_id, kind: card.source,
     })
@@ -665,6 +672,111 @@ describe('the ＋ — this entry into one of your decks', () => {
     const { root } = await renderEntry(KANJI)   // no mining
     const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
     expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Close'])
+  })
+})
+
+// ── The ★ — this entry on your shelf (plan 093) ─────────────
+describe('the shelf row — this entry on your shelf', () => {
+  // A shelf as useFavorites holds one, in miniature: the state, and a
+  // toggle that flips it or refuses.
+  const SHELF = (kept = false, refuse = null) => {
+    const shelf = {
+      loaded: true, count: kept ? 1 : 0,
+      has: () => shelf.kept,
+      toggle: vi.fn(async () => {
+        if (refuse) throw refuse
+        shelf.kept = !shelf.kept
+        return shelf.kept
+      }),
+      kept,
+    }
+    return shelf
+  }
+  const plus = root => root.querySelector('.dict-plate__add-btn')
+  const rows = root => [...root.querySelectorAll('.dict-add-menu__row')]
+
+  it('prints no ＋ where there is neither a shelf nor a deck to add to', async () => {
+    const { root } = await renderEntry(JMDICT)
+    expect(root.querySelector('.dict-plate__add-btn')).toBeNull()
+  })
+
+  it('offers the shelf alone for a pool entry, which has no card to add', async () => {
+    const { root } = await renderEntry(JMDICT, { ...NAV(), favorites: SHELF(false), mining: { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn() } })
+    plus(root).click()
+    await settle(30)
+    expect(rows(root).map(r => r.textContent)).toEqual(['Keep in favourites'])
+  })
+
+  it('opens both rows under the ＋, keeps from the shelf row, and lights the ring once kept', async () => {
+    const shelf = SHELF(false)
+    const mining = { targetFor: () => ({ id: 7 }), decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn(async () => 1) }
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: shelf, mining })
+    const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual(['Listen', 'Add', 'Close'])
+    expect(plus(root).getAttribute('aria-expanded')).toBe('false')
+    // Resolved inside the dock, where the shell injects the pigment.
+    const ring = probe('borderColor', 'var(--line-color)', root.querySelector('.dict-dock'))
+    expect(getComputedStyle(plus(root)).borderColor).not.toBe(ring)
+
+    plus(root).click()
+    await settle(30)
+    expect(plus(root).getAttribute('aria-expanded')).toBe('true')
+    expect(rows(root).map(r => r.textContent)).toEqual(['Keep in favourites', 'Add to a deck'])
+    expect(rows(root)[0].getAttribute('aria-checked')).toBe('false')
+    expect(rows(root)[0].querySelector('polygon').getAttribute('fill')).toBe('none')
+
+    rows(root)[0].click()
+    await settle(60)
+    expect(shelf.toggle).toHaveBeenCalledWith(KANJI)
+    // The choice closes the menu; the ＋ wears the ring for a kept entry.
+    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    expect(getComputedStyle(plus(root)).borderColor).toBe(ring)
+    expect(root.querySelector('.dict-plate__actions .analysis-mine-status')).toBeNull()
+
+    // Reopened, the row reads the other way and the star is filled in
+    // the row's own ink — no line pigment on the learner's mark.
+    plus(root).click()
+    await settle(30)
+    expect(rows(root)[0].textContent).toBe('Remove from favourites')
+    expect(rows(root)[0].getAttribute('aria-checked')).toBe('true')
+    expect(rows(root)[0].querySelector('polygon').getAttribute('fill')).toBe('currentColor')
+    expect(getComputedStyle(rows(root)[0]).color).toBe(getComputedStyle(plus(root)).color)
+
+    // The deck row is the analyzer's press: the remembered deck, then
+    // the outcome beside the ＋.
+    rows(root)[1].click()
+    await settle(60)
+    expect(mining.mineApp).toHaveBeenCalledWith({ deckId: 7, source: 'kanji', level: 'N5', rawId: 'kanji_N5_木', kind: 'kanji' })
+    expect(root.querySelector('.dict-plate__actions .analysis-mine-status').textContent).toBe('In deck')
+  })
+
+  it('closes on Escape and on a press outside, without choosing', async () => {
+    const shelf = SHELF(false)
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: shelf })
+    plus(root).click()
+    await settle(30)
+    expect(root.querySelector('.dict-add-menu')).not.toBeNull()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    await settle(30)
+    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    plus(root).click()
+    await settle(30)
+    root.querySelector('.dict-plate__word').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))
+    await settle(30)
+    expect(root.querySelector('.dict-add-menu')).toBeNull()
+    expect(shelf.toggle).not.toHaveBeenCalled()
+  })
+
+  it('says so beside the ＋ when the write does not take, and stays out', async () => {
+    const full = Object.assign(new Error('favorites_full'), { status: 409 })
+    const { root } = await renderEntry(KANJI, { ...NAV(), favorites: SHELF(false, full) })
+    plus(root).click()
+    await settle(30)
+    rows(root)[0].click()
+    await settle(60)
+    expect(getComputedStyle(plus(root)).borderColor).not.toBe(probe('borderColor', 'var(--line-color)', root.querySelector('.dict-dock')))
+    expect(root.querySelector('.dict-plate__actions .analysis-mine-status').textContent)
+      .toBe('Favourites are full — remove one first.')
   })
 })
 
@@ -1282,18 +1394,26 @@ describe('the plate — a grammar point', () => {
     const { root } = await renderEntry(GRAMMAR, { ...NAV(), mining })
     const plate = root.querySelector('.dict-plate')
     const btns = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
-    expect(btns.map(b => b.getAttribute('aria-label'))).toEqual(['Mine', 'Close'])
+    expect(btns.map(b => b.getAttribute('aria-label'))).toEqual(['Add', 'Close'])
     const add = btns[0]
     // A glyph, not words: the roundel is the plate's ghost.
     expect(add.querySelector('svg')).toBeTruthy()
     expect(add.textContent.trim()).toBe('')
     expect(getComputedStyle(add).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    // The ＋ opens its menu (plan 093); with no shelf on this plate the
+    // deck row is the whole of it, and it is the analyzer's press.
     add.click()
+    await settle(30)
+    const row = () => plate.querySelector('.dict-add-menu__row')
+    expect(row().textContent).toBe('Add to a deck')
+    row().click()
     await settle(60)
     expect(mining.mineApp).toHaveBeenCalledWith({ deckId: 7, source: 'grammar', level: 'N5', rawId: 'grammar_N5_〜てから', kind: 'grammar' })
     expect(plate.querySelector('.analysis-mine-status').textContent).toBe('In deck')
-    // The roundel stays, and its name moves on.
-    expect(add.getAttribute('aria-label')).toBe('Add to another deck')
+    // The roundel stays, and the row's name moves on.
+    add.click()
+    await settle(30)
+    expect(row().textContent).toBe('Add to another deck')
     expect(getComputedStyle(plate.querySelector('.analysis-mine-status')).fontSize).toBe(probe('fontSize', 'var(--fs-caption-xs)'))
   })
 

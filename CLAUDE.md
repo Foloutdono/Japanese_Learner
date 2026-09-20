@@ -71,8 +71,12 @@ runtime purpose. Two consequences worth knowing:
   (cited in `study/llm_shared.py`, `routes/reading.py`, `routes/ocr.py`,
   `scripts/llm_cost_model.py`, `scripts/llm_usage_report.py`,
   `scripts/prewarm_comprehension_pool.py` and `backend/.env.example`;
-  `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **093** or higher, and check
+  `docs/llm-commercial-plan.md`),
+  and **093** is the dictionary's favourites — a shelf of kept entries, a
+  reference each rather than a copy (cited in `routes/favorites.py`,
+  `hooks/useFavorites.js`, `domain/favorites.js` and
+  `components/dictionary/DictionaryDetail.jsx`).
+  When starting a new wave, begin at **094** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

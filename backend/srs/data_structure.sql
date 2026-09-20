@@ -492,7 +492,7 @@ CREATE TABLE video_session_jobs (
 -- learner attempts against a specific revision, and the claim-lock job
 -- table for exam generation (same pattern as video_session_jobs above).
 -- 読解 — the shared pool of comprehension exercises, owned by
--- routes/reading.py (plan 092). An exercise is a property of its
+-- routes/reading.py (plan 093). An exercise is a property of its
 -- (level, lang), not of who asked for it: the most expensive model
 -- call in this app used to be paid once per learner per exercise, and
 -- is now paid once for everybody. `generator_version` retires the
@@ -729,6 +729,22 @@ CREATE TABLE ocr_usage (
     day      DATE NOT NULL,
     count    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
+);
+
+-- ── お気に入り — the dictionary's shelf of kept entries ─────────────
+-- Owned by routes/favorites.py (plan 093). A REFERENCE per row, never a
+-- copy of the entry: `kind` is the collection and `key` what it files
+-- the entry under (a kanji's character, a word's "{kanji}::{kana}", a
+-- grammar point's card id, a kana). Reading the shelf back resolves
+-- each against its collection, so a favourite is always the catalogue's
+-- own row. No cascade from auth (ADR 0010): DELETE /api/account and
+-- scripts/purge_orphans.py clear it.
+CREATE TABLE dictionary_favorites (
+    user_id  TEXT NOT NULL,
+    kind     TEXT NOT NULL,
+    key      TEXT NOT NULL,
+    added_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    PRIMARY KEY (user_id, kind, key)
 );
 
 -- ── 足跡 — the trail of screens a learner walked ─────────────────────

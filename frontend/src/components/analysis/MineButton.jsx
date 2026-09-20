@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { DeckPicker } from './DeckPicker'
+import { useMineAction, INERT_MINING } from './useMineAction'
 
 // Turns something found in a Sentence into a Card in one of the
 // learner's decks -- the missing button that makes the analyzer worth
@@ -26,23 +25,9 @@ import { DeckPicker } from './DeckPicker'
 // and the words — "add", then "add to another deck" — move to the
 // accessible name and the tooltip, where a roundel keeps them.
 export function MineButton({ mining, kind, disabled, disabledReason, label, successLabel, onMine, t, className = '', ariaLabel }) {
-  const [showPicker, setShowPicker] = useState(false)
-  const [pending, setPending] = useState(false)
-  // null = not attempted yet; a number once a mine WRITE succeeded
-  // (0 is a real, distinct outcome -- already in the deck, or a stale
-  // reference -- shown differently from a successful add); 'error' when
-  // the request itself failed (network, validation), distinct from both.
-  const [outcome, setOutcome] = useState(null)
-  // The outcome used to REPLACE the button, permanently. A learner who
-  // added 猫 to "N5 words" and then wanted it in "Animals" too had no
-  // control left to press until the page reloaded -- and useMining
-  // remembers the last target per kind, so the second add would have
-  // gone somewhere else on purpose.
-  //
-  // Now: the outcome sits next to a button that stays. Pressing again
-  // opens the deck picker rather than repeating the remembered target,
-  // because a second add is by definition a different deck.
-  const [addedOnce, setAddedOnce] = useState(false)
+  // Hooks before the early returns: `mining` undefined is a valid,
+  // deliberate value (see above), answered by rendering nothing.
+  const act = useMineAction({ mining: mining ?? INERT_MINING, kind, onMine, t, successLabel })
 
   if (!mining) return null
 
@@ -54,73 +39,25 @@ export function MineButton({ mining, kind, disabled, disabledReason, label, succ
     )
   }
 
-  async function mine(deckId) {
-    setPending(true)
-    setShowPicker(false)
-    try {
-      const count = await onMine(deckId)
-      setOutcome(typeof count === 'number' ? count : 1)
-      setAddedOnce(true)
-    } catch {
-      setOutcome('error')
-    } finally {
-      setPending(false)
-    }
-  }
-
-  function handleClick(e) {
-    e.stopPropagation()
-    const target = mining.targetFor(kind)
-    // First press: the remembered deck, no dialog. Any press after a
-    // successful add: choose, because repeating the same deck is what
-    // just happened.
-    if (target && !addedOnce) {
-      mine(target.id)
-    } else {
-      setShowPicker(true)
-    }
-  }
-
-  async function handleCreate(name) {
-    const deck = await mining.ensureDeck(kind, name)
-    mine(deck.id)
-  }
-
-  const outcomeText =
-    outcome === 'error' ? (t.mineFailed ?? "Couldn't add this card.")
-    : outcome > 0 ? (successLabel ?? (t.inDeck ?? 'In deck'))
-    : (t.alreadyInDeck ?? 'Already there')
-  const outcomeClassName =
-    `analysis-mine-status${outcome > 0 ? ' analysis-mine-status--added' : ''}`
-
-  const words = addedOnce
+  const words = act.addedOnce
     ? (t.addToAnotherDeck ?? 'Add to another deck')
     : (ariaLabel ?? label ?? (t.mineToDeck ?? 'Mine'))
 
   return (
     <>
       <button
-        onClick={handleClick}
-        disabled={pending}
+        onClick={act.press}
+        disabled={act.pending}
         className={className || 'analysis-mine-btn'}
         aria-label={ariaLabel ? words : undefined}
         title={ariaLabel ? words : undefined}
       >
         {ariaLabel ? label : words}
       </button>
-      {outcome !== null && (
-        <span className={outcomeClassName}>{outcomeText}</span>
+      {act.outcomeText !== null && (
+        <span className={act.outcomeClassName}>{act.outcomeText}</span>
       )}
-      {showPicker && (
-        <DeckPicker
-          decks={mining.decksFor(kind)}
-          currentId={mining.targetFor(kind)?.id ?? null}
-          t={t}
-          onClose={() => setShowPicker(false)}
-          onSelect={mine}
-          onCreate={handleCreate}
-        />
-      )}
+      {act.picker}
     </>
   )
 }

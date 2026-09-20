@@ -155,7 +155,12 @@ vi.mock('../lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), speakJapa
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: DictionaryScreen } = await import('./DictionaryScreen')
-const { apiFetch } = await import('../lib/api')
+const { apiFetch, apiJson } = await import('../lib/api')
+
+// ── The shelf (plan 093) ──
+// What /api/dictionary/favorites serves when the sixth chip is on:
+// catalogue rows, newest first. Set per test; empty by default.
+let SHELF_ROWS = []
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
@@ -230,6 +235,7 @@ function typeInto(el, text) {
 }
 
 beforeEach(() => {
+  SHELF_ROWS = []
   apiFetch.mockReset()
   apiFetch.mockImplementation(async path => ({
     ok: true, status: 200,
@@ -240,6 +246,9 @@ beforeEach(() => {
       // at the grid.
       if (p.startsWith('/api/dictionary/radicals')) {
         return { groups: [{ stroke_count: 3, radicals: [{ number: 85, char: '水', kanji_count: 12 }] }] }
+      }
+      if (p.startsWith('/api/dictionary/favorites?')) {
+        return { results: SHELF_ROWS, total: SHELF_ROWS.length, has_more: false }
       }
       if (p.startsWith('/api/dictionary?')) {
         const params = new URLSearchParams(p.split('?')[1])
@@ -269,13 +278,17 @@ describe('the dictionary screen', () => {
     expect(door.querySelector('.anl-door__title').textContent).toBe(T.analyzerTitle)
     expect(door.querySelectorAll('.anl-door__intake').length).toBe(3)
 
-    // Five collections as chips, kanji on. Scoped to the collections
-    // row: the console's SECOND row is the JLPT levels, and a bare
-    // `.console__chips .chip` counts both.
+    // Five collections as chips, kanji on, and the learner's own shelf
+    // as a sixth at the end of the row (plan 093). Scoped to the
+    // collections row: the console's SECOND row is the JLPT levels,
+    // and a bare `.console__chips .chip` counts both.
     const chips = [...screen.container.querySelectorAll('.dict-collections .chip')]
-    expect(chips.length).toBe(5)
+    expect(chips.length).toBe(6)
     expect(chips[0].classList.contains('chip--on')).toBe(true)
     expect(chips[0].textContent).toBe(T.dictKanji)
+    expect(chips[5].classList.contains('dict-fav-chip')).toBe(true)
+    expect(chips[5].textContent).toBe(T.dictFavorites)
+    expect(chips[5].getAttribute('aria-pressed')).toBe('false')
     expect(lastQuery().get('category')).toBe('kanji')
 
     // The radical index is not a sixth collection: it is a toggle at the
@@ -301,7 +314,8 @@ describe('the dictionary screen', () => {
     chips()[1].click()
     await settle(80)
     expect(lastQuery().get('category')).toBe('vocab')
-    expect(chips().length).toBe(5)
+    // The five collections and the shelf (plan 093).
+    expect(chips().length).toBe(6)
     expect(chips()[1].classList.contains('chip--on')).toBe(true)
     expect(chips()[0].classList.contains('chip--on')).toBe(false)
     // A word spans several radicals, so the toggle goes with the
@@ -499,10 +513,11 @@ describe('the dictionary screen', () => {
     expect(plate.querySelector('.dict-plate__level').textContent).toBe('N5')
     expect(plate.querySelector('.stage-mark').textContent).toBe(T.learning)
     expect(plate.querySelector('.dict-plate__yomi')).toBeNull()
-    // No speaker — a pattern is not said — but the add roundel, then ✕.
+    // No speaker — a pattern is not said — but the ＋ (shelf and deck
+    // behind it), then ✕.
     expect(plate.querySelector(`[aria-label="${T.listen}"]`)).toBeNull()
     const actions = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
-    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.mineToDeck, T.close])
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.dictAdd, T.close])
     // The body: the two sentences with their ruby, then the record —
     // and nothing drawn. The formation and the gloss are on the plate
     // above and were printed a second time here until plan 089.
@@ -828,4 +843,148 @@ describe('the dictionary screen', () => {
     await settle(60)
     expect(WHERE.pathname + WHERE.search).toBe(`/dictionary/analyzer?intake=${key}`)
   })
+})
+
+// ── お気に入り — the shelf (plan 093) ──────────────────────
+// The star on a plate keeps an entry; the sixth chip reads the shelf
+// back as the catalogue's own grid. The shelf's references arrive
+// once, through apiJson, and a toggle is one PUT.
+describe('the shelf', () => {
+  const PUTS = []
+  const FAV_KANJI = { kind: 'kanji', key: '駅' }
+
+  // apiJson answers the shelf's two calls and keeps the deck list the
+  // mining hook expects; restored after each case, since the mock is
+  // module-wide and every other case reads its default.
+  function withShelf(kept, fn) {
+    const prev = apiJson.getMockImplementation()
+    PUTS.length = 0
+    apiJson.mockImplementation(async (path, _session, options = {}) => {
+      if (path === '/api/dictionary/favorites/keys') return { favorites: kept, total: kept.length }
+      if (path === '/api/dictionary/favorites') {
+        const body = JSON.parse(options.body)
+        PUTS.push({ method: options.method, ...body })
+        return { ...body, total: 1 }
+      }
+      return { decks: [{ id: 7, type: 'grammar', name: '文法' }] }
+    })
+    return fn().finally(() => apiJson.mockImplementation(prev))
+  }
+
+  // The shelf row under the plate's ＋, and the row's state.
+  const openMenu = async screen => {
+    screen.container.querySelector('.dict-dock .dict-plate__add-btn').click()
+    await settle(30)
+    return screen.container.querySelector('.dict-dock .dict-add-menu__row[role="menuitemcheckbox"]')
+  }
+
+  it('marks a kept tile; the ＋ opens the shelf row, which keeps and lets go with one write each', () =>
+    withShelf([FAV_KANJI], async () => {
+      const screen = await renderScreen()
+      const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
+      // 駅 is on the shelf: its tile carries the mark, in the corner the
+      // badge leaves free, and the word for a reader. 電車 is not.
+      expect(cards[0].querySelector('.dict-entry-card__fav')).not.toBeNull()
+      expect(cards[0].querySelector('.dict-entry-card__fav .sr-only').textContent).toBe(T.dictFavorite)
+      expect(cards[1].querySelector('.dict-entry-card__fav')).toBeNull()
+
+      // Open 電車: three ghosts, the ＋ between the speaker and the ✕.
+      cards[1].click()
+      await settle(80)
+      const labels = [...screen.container.querySelectorAll('.dict-dock .dict-plate__actions .dict-plate__btn')]
+        .map(b => b.getAttribute('aria-label'))
+      expect(labels).toEqual([T.listen, T.dictAdd, T.close])
+      const plus = () => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
+
+      let row = await openMenu(screen)
+      expect(row.getAttribute('aria-checked')).toBe('false')
+      expect(row.textContent).toBe(T.dictFavoriteAdd)
+      row.click()
+      await settle(60)
+      expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: true }])
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
+      // The tile under the dock took the mark at once.
+      expect(cards[1].querySelector('.dict-entry-card__fav')).not.toBeNull()
+
+      row = await openMenu(screen)
+      expect(row.getAttribute('aria-checked')).toBe('true')
+      expect(row.textContent).toBe(T.dictFavoriteRemove)
+      row.click()
+      await settle(60)
+      expect(PUTS.at(-1)).toEqual({ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false })
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
+      expect(cards[1].querySelector('.dict-entry-card__fav')).toBeNull()
+    }))
+
+  it('opens the shelf from the sixth chip: its own endpoint, no levels, no field, and an empty state that names the star', () =>
+    withShelf([], async () => {
+      const screen = await renderScreen()
+      const chip = () => screen.container.querySelector('.dict-collections .dict-fav-chip')
+      chip().click()
+      await settle(120)
+      expect(chip().getAttribute('aria-pressed')).toBe('true')
+      // The shelf is fetched from its own endpoint, in the catalogue's
+      // page shape and nothing else — no query, no level, no radical.
+      const call = apiFetch.mock.calls.map(([p]) => String(p)).find(p => p.startsWith('/api/dictionary/favorites?'))
+      expect(call).toBeDefined()
+      expect(new URLSearchParams(call.split('?')[1]).get('page')).toBe('0')
+      // Nothing to narrow it by and nothing to ask it: neither the level
+      // row nor the field prints under it.
+      expect(screen.container.querySelector('.dict-levels')).toBeNull()
+      expect(screen.container.querySelector('.console__index')).toBeNull()
+      // Empty, it names the one thing that fills it.
+      const empty = screen.container.querySelector('.empty')
+      expect(empty.querySelector('.empty__msg').textContent).toBe(T.dictFavoritesEmpty)
+      expect(empty.querySelector('.empty__hint').textContent).toBe(T.dictFavoritesHint)
+
+      // Back to a collection: the shelf chip goes out and the field returns.
+      ;[...screen.container.querySelectorAll('.dict-collections .chip')][0].click()
+      await settle(120)
+      expect(chip().getAttribute('aria-pressed')).toBe('false')
+      expect(screen.container.querySelector('.console__index')).not.toBeNull()
+    }))
+
+  it('draws the shelf as the catalogue grid, and takes a tile off it the moment its star goes out', () =>
+    withShelf([FAV_KANJI, { kind: 'vocab', key: '電車::でんしゃ' }], async () => {
+      SHELF_ROWS = [VOCAB, KANJI]
+      const screen = await renderScreen()
+      screen.container.querySelector('.dict-collections .dict-fav-chip').click()
+      await settle(120)
+      const cards = () => [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
+      expect(cards().length).toBe(2)
+      expect(cards().every(c => c.querySelector('.dict-entry-card__fav'))).toBe(true)
+
+      cards()[0].click()
+      await settle(80)
+      const plus = () => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
+      ;(await openMenu(screen)).click()
+      await settle(60)
+      expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false }])
+      // The tile is gone; the plate stays, so the star can be pressed again.
+      expect(cards().length).toBe(1)
+      expect(headwordOf(screen.container.querySelector('.dict-dock'))).toBe('電車')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
+
+      // Kept again, the tile returns at the head — where the server
+      // files the newest — without a fetch, so the open plate never
+      // gives way to the loader.
+      const before = apiFetch.mock.calls.length
+      ;(await openMenu(screen)).click()
+      await settle(60)
+      expect(apiFetch.mock.calls.length).toBe(before)
+      expect(cards().length).toBe(2)
+      expect(cards()[0].querySelector('.dict-entry-card__char ruby').firstChild.textContent).toBe('電車')
+      expect(cards()[0].querySelector('.dict-entry-card__fav')).not.toBeNull()
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
+    }))
+
+  it('opens on the shelf when its address names it', () =>
+    withShelf([], async () => {
+      const screen = await renderScreen('/dictionary?category=favorites')
+      expect(screen.container.querySelector('.dict-collections .dict-fav-chip').getAttribute('aria-pressed')).toBe('true')
+      expect(searches().length).toBe(0)
+      expect(apiFetch.mock.calls.map(([p]) => String(p)).some(p => p.startsWith('/api/dictionary/favorites?'))).toBe(true)
+    }))
 })
