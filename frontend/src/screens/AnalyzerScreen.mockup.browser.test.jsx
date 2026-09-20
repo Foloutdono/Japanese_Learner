@@ -26,7 +26,10 @@ const SENTENCES = [
     cue_start: null, cue_end: null, grammar: [
       // Written on から (offsets 8..10 of the text), as the local tier
       // reports it: the piece the light finds (plan 095).
-      { raw_id: 'g1', pattern: '〜から', level: 'N5', start: 8, end: 10, segments: [[8, 10]] },
+      // The explanation below was bought, so the point carries the
+      // model's line about it too (plan 095).
+      { raw_id: 'g1', pattern: '〜から', level: 'N5', start: 8, end: 10, segments: [[8, 10]],
+        note: 'Here から marks platform three as where the train departs from.' },
     ],
     unknown_count: 1, available: true, level: 'N2', off_deck_count: 0,
     explanation: 'から marks the origin — the train departs FROM platform three.',
@@ -452,6 +455,24 @@ describe('the grammar on the stage (plan 095)', () => {
     await page.elementLocator(screen.container.querySelector('.anl-legend')).hover()
     await settle(60)
     expect(kara.classList.contains('tok--lit')).toBe(false)
+  })
+
+  it("prints the bought line about each rule under its chip, above the dials, and the sentence's own explanation in the explain box", async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    const notes = bd.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(notes.querySelector('.bkd-note__pattern').textContent).toBe('〜から')
+    expect(notes.querySelector('.bkd-note__text').textContent).toBe('Here から marks platform three as where the train departs from.')
+    const order = [...bd.children]
+    expect(order.findIndex(el => el.classList.contains('analysis-grammar-chips')))
+      .toBeLessThan(order.findIndex(el => el.classList.contains('bkd-notes')))
+    expect(order.findIndex(el => el.classList.contains('bkd-notes')))
+      .toBeLessThan(order.findIndex(el => el.classList.contains('anl-dials')))
+    // The whole-sentence explanation is where it always was, not in the list.
+    expect(screen.container.querySelector('.anl-explain__body').textContent).toBe(SENTENCES[0].explanation)
+    expect(notes.textContent).not.toContain('FROM platform three')
   })
 
   it('a sentence with no construction carries no chip strip, and the second sentence is read on its own', async () => {

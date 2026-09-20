@@ -572,6 +572,55 @@ describe('SentenceBreakdown', () => {
     expect(onCard.classList.contains('analysis-grammar-chip--lit')).toBe(true)
   })
 
+  // ── The deep tier's line per rule (plan 095) ───────────────────
+  // Once bought, each construction's note prints under the chips, as
+  // a door and a light like the chip; without one, nothing prints.
+  it('a noted point prints its line under the chips, opens its sheet, and lights its words', async () => {
+    const { analysis, point } = karaMade()
+    const noted = { ...analysis, grammar: [{ ...point, note: 'From the station to the house: the two ends of the walk.' }], explanation: 'A walk.' }
+    const onGrammarOpen = vi.fn()
+    await render(withLang(<SentenceBreakdown analysis={noted} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={onGrammarOpen} />))
+    const notes = document.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(before(document.querySelector('.analysis-grammar-chips'), notes)).toBe(true)
+    expect(before(notes, document.querySelector('.prose__ai'))).toBe(true)
+    const row = notes.querySelector('.bkd-note')
+    expect(row.querySelector('.bkd-note__pattern').textContent).toBe('から〜まで')
+    expect(row.querySelector('.bkd-note__text').textContent).toBe('From the station to the house: the two ends of the walk.')
+    hover(row)
+    await settle()
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    expect(row.classList.contains('bkd-note--lit')).toBe(true)
+    row.querySelector('.bkd-note__door').click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_から〜まで')
+  })
+
+  it('without a note there is no list, and a blank note is no note', async () => {
+    const { analysis, point } = karaMade()
+    await render(withLang(<SentenceBreakdown analysis={{ ...analysis, grammar: [{ ...point, note: '   ' }] }} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
+    expect(document.querySelector('.bkd-notes')).toBeNull()
+  })
+
+  it('on the stage the notes ride under the chips, before the dials', async () => {
+    const { analysis, point } = karaMade()
+    const noted = { ...analysis, grammar: [{ ...point, note: 'The two ends.' }] }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={noted} layout="stage" index={0} setIndex={vi.fn()} t={T} onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={vi.fn()}
+        controls={<div className="dials-here" />}
+      />,
+    ))
+    const stage = document.querySelector('.anl-stagebd')
+    const notes = stage.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(before([...stage.children].find(el => el.classList.contains('analysis-grammar-chips')), notes)).toBe(true)
+    expect(before(notes, stage.querySelector('.dials-here'))).toBe(true)
+    hover(notes.querySelector('.bkd-note'))
+    await settle()
+    expect([...document.querySelectorAll('.tok-line .tok--lit .tok__word')].map(el => el.textContent)).toEqual(['から', 'まで'])
+  })
+
   it('a row that already opens a word carries its marker beside it rather than losing it', async () => {
     const onGrammarOpen = vi.fn()
     const onTokenClick = vi.fn()

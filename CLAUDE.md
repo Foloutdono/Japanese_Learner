@@ -80,14 +80,17 @@ runtime purpose. Two consequences worth knowing:
   replacing the wall map and the platform grid (cited in
   `components/station/LinePlate.jsx`, `domain/lineProgress.js`'s
   `stopsAround`, `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx`
-  and `index.css`; DESIGN.md, Structure), and **095** is the grammar on
-  the analyzer stage, the chip that says what its rule does, and the
-  rule lit where it sits — the constructions as quiet chips under the
-  token line, the rules of the word on the stage card, the catalogue's
-  gloss on every chip and marker row, and each point's `segments`
-  lighting the words it is written on while its chip is hovered,
-  focused or was last pressed (cited in `study/grammar_detect.py`,
-  `study/analysis.py`, `components/analysis/GrammarChips.jsx`,
+  and `index.css`; DESIGN.md, Structure), and **095** is the grammar
+  breakdown rework — the grammar on the analyzer stage, the chip that
+  says what its rule does, the rule lit where it sits, the detector's
+  second pass by dictionary form (〜すぎる, 〜てみる, the passive,
+  potential, causative, volitional and imperative, read off the
+  tokenizer's conjugation fields rather than letters), and the deep
+  tier's line per rule (the model is told which points the local tier
+  found and asked what each does in the sentence; `phrase_analysis_cache`
+  v4) (cited in `study/morphology.py`, `study/grammar_detect.py`,
+  `study/analysis.py`, `routes/phrase.py`, `scripts/prewarm_phrase_cache.py`,
+  `components/analysis/GrammarChips.jsx`, `components/analysis/GrammarNotes.jsx`,
   `components/analysis/grammarGloss.js`, `components/analysis/grammarSpans.js`,
   `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`,
   `components/analysis/PassageBreakdown.jsx` and `screens/AnalyzerScreen.jsx`).

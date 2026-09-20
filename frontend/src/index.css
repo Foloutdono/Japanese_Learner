@@ -9826,6 +9826,55 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     grid-template-areas: "word reading meaning mark lvl";
   }
 }
+/* What each rule does in this sentence (GrammarNotes, plan 095): one
+   row per noted point under the chips, the pattern in the reading
+   register and the model's line beside it, a hairline between rows
+   and never a card each -- the same ruling as the word rows above.
+   A row whose point is lit on the line takes the grammar ink on its
+   pattern, as the chip does on its edge. */
+.bkd-notes {
+  display: flex;
+  flex-direction: column;
+}
+.bkd-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--surface-line);
+}
+.bkd-note:first-child { border-top: 0; }
+.bkd-note__pattern {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.bkd-note__door {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.bkd-note__door:hover,
+.bkd-note__door:focus-visible,
+.bkd-note--lit .bkd-note__pattern { color: var(--line-grammar); }
+.bkd-note__text {
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  .bkd-note {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
 /* The passage: the sentences stacked, a hairline between them, the
    open one marked by the line's rail on its left edge. The head is a
    row (the open line holds word buttons); the chevron is the control. */

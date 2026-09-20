@@ -5,6 +5,7 @@ import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
 import { TokenCard } from './TokenCard'
 import { GrammarChips } from './GrammarChips'
+import { GrammarNotes } from './GrammarNotes'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
 import { StatusBadge } from './StatusBadge'
@@ -339,9 +340,11 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
 //               near-copy drifting off on its own.
 //   'rows'    — the practice modes' shape (plan 084): the ruby line,
 //               the sentence's `translation`, one row per word, the
-//               grammar spotted, and the `note` (else the deep tier's
-//               explanation) last and quiet. `sentenceText` is what
-//               prints when there is no analysis to draw from.
+//               grammar spotted (and, once bought, what each rule does
+//               here -- GrammarNotes, plan 095), and the `note` (else
+//               the deep tier's explanation) last and quiet.
+//               `sentenceText` is what prints when there is no
+//               analysis to draw from.
 //
 // `index`/`setIndex` are used by 'stage' and are owned by the caller
 // (AnalyzerScreen) so they can be reset to 0 whenever a new sentence
@@ -384,6 +387,12 @@ export function SentenceBreakdown({
             grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
             lit={light.litKey} onLight={light.onLight}
           />
+        )}
+        {/* What each rule does here, once an explanation was bought
+            (plan 095): under the chips that name them, before the
+            note about the whole sentence. */}
+        {available && (
+          <GrammarNotes grammar={analysis.grammar} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
         )}
         {noteText && <span className="prose__ai">{noteText}</span>}
       </div>
@@ -440,6 +449,10 @@ export function SentenceBreakdown({
           grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
           lit={light.litKey} onLight={light.onLight}
         />
+        {/* The bought line per rule rides under the chips it belongs
+            to, sharing their light; the note about the whole sentence
+            stays in the caller's explain box below the stage. */}
+        <GrammarNotes grammar={analysis.grammar} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
 
         {controls}
 

@@ -124,6 +124,28 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(on_token["segments"], [[1, 3], [4, 6]])
         self.assertIn("stats", on_token)
 
+    def test_a_note_lands_on_the_point_it_names_and_nowhere_else(self) -> None:
+        """Plan 095: the deep tier's line per point, on the entry and on
+        each token's copy; a note for a pattern the sentence does not
+        use is dropped, and the local result is left untouched."""
+        r = analyze_local("日本に行ったことがあります。")
+        merged = merge_deep(r, [], "An experience.", [
+            {"pattern": " 〜ことがある ", "note": " has been there before "},
+            {"pattern": "〜てしまう", "note": "not here"},
+            {"pattern": "に"},  # no note: ignored
+            "garbage",
+        ])
+        koto = next(g for g in merged["grammar"] if g["pattern"] == "〜ことがある")
+        self.assertEqual(koto["note"], "has been there before")
+        self.assertFalse(any(g.get("note") == "not here" for g in merged["grammar"]))
+        self.assertFalse(any("note" in g for g in merged["grammar"] if g["pattern"] != "〜ことがある"))
+        on_token = next(g for t in merged["tokens"] for g in t["grammar"] if g["pattern"] == "〜ことがある")
+        self.assertEqual(on_token["note"], "has been there before")
+        self.assertFalse(any("note" in g for g in r["grammar"]))
+        self.assertFalse(any("note" in g for t in r["tokens"] for g in t["grammar"]))
+        # Without notes, the grammar is the local tier's, note-free.
+        self.assertFalse(any("note" in g for g in merge_deep(r, [], "x")["grammar"]))
+
     def test_the_gloss_is_a_copy_and_never_the_catalogue_s_own(self) -> None:
         """The result is cached and handed around; editing it must not
         reach the catalogue every later analysis reads from."""
