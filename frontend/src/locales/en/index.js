@@ -1054,6 +1054,7 @@ const dictionary = {
 const comprehension = {
   comprehensionTitle:       'Reading comprehension',
   comprehensionFetchError:  "Couldn't load a text. Try again.",
+  comprehensionLimitReached: "That's every new text for today. Come back tomorrow.",
   comprehensionGenerating:  'Generating a text for you…',
   comprehensionSubmitError:  "Couldn't submit answers. Try again.",
   doneReading:              'Done reading',

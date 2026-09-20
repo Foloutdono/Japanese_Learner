@@ -1016,6 +1016,7 @@ const dictionary = {
 const comprehension = {
   comprehensionTitle:       'Compréhension lecture',
   comprehensionFetchError:  "Impossible de charger le texte. Veuillez réessayer.",
+  comprehensionLimitReached: "Vous avez lu tous les nouveaux textes du jour. Revenez demain.",
   comprehensionGenerating:  'Génération du texte…',
   comprehensionSubmitError:  "Impossible d'envoyer les réponses. Veuillez réessayer.",
   doneReading:              'Terminé',
