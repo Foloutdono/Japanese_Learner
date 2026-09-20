@@ -276,7 +276,7 @@ def _call_llm(phrase: str, lang: str) -> dict:
                 {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE.format(lang_name=lang_name)},
                 {"role": "user", "content": phrase},
             ],
-            timeout=30, max_tokens=1200, reasoning=False,
+            timeout=30, max_tokens=1200, reasoning=False, task="phrase",
         )
     except LLMUnavailable as e:
         logger.error("Phrase analysis has no usable LLM provider: %s", e)

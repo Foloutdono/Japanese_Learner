@@ -212,7 +212,8 @@ def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> d
         # GenerationFailed) is what makes a provider outage cost one
         # request instead of the whole cascade.
         try:
-            items = call_llm_json_batch(prompt, expected_items=batch_n)
+            items = call_llm_json_batch(prompt, expected_items=batch_n,
+                                        task="exam-listening")
         except GenerationFailed as e:
             logger.warning("Listening-mcq batch of %d for %s failed: %s", batch_n, spec["id"], e)
             continue

@@ -76,6 +76,39 @@ def kanji_instruction(level: str) -> str:
     return _N1N2_KANJI_INSTRUCTION
 
 
+# ── Why the generators are not split for prompt caching ─────────
+# Plan 092 split routes/reading.py's comprehension prompt in two -- a
+# block stable per (level, lang) first, the per-call seeds after it --
+# so a provider's prefix cache can hold the stable half. The same
+# treatment was considered here and deliberately NOT applied.
+#
+# Both providers this app calls cache automatically and want a prefix
+# of at least ~1,024 tokens before anything is cached at all. These
+# prompts, measured whole with the kanji list interpolated:
+#
+#   _FILL_PROMPT_BATCH          1,033 chars
+#   _CLOZE_PROMPT               1,111
+#   _USAGE_PROMPT_BATCH         1,165
+#   _PARAPHRASE_PROMPT_BATCH    1,166
+#   _STAR_PROMPT_BATCH          1,356
+#   _LISTENING_MCQ_PROMPT_BATCH 1,594
+#   _PASSAGE_PROMPT             1,867
+#
+# Mostly English, so roughly 250-470 tokens each: every one of them is
+# two to four times UNDER the threshold, and reordering a prompt that
+# can never be cached is churn on text whose current wording was tuned
+# against live failures. The comprehension prompt is 6,500 characters,
+# which is why it was worth splitting and these are not.
+#
+# Note also that the kanji list is only sent in full at N5-N3 (see
+# _FULL_LIST_LEVELS above): at N2-N1 it is a single sentence, so "the
+# allowed-kanji list is what these prompts re-send" is true of at most
+# 613 characters, never the 2,212 of the full N1 set.
+#
+# What would change this: a bigger batch (more items per call grows the
+# volatile half, not the stable one, so it does not help), or a
+# provider whose minimum is lower. Re-measure before reopening it.
+
 # ── Shared LLM-JSON call ─────────────────────────────────────────
 # One call → one JSON blob: strip the markdown fence a model sometimes
 # wraps its answer in, parse it, and turn a parse failure into
@@ -87,11 +120,12 @@ def kanji_instruction(level: str) -> str:
 # _call_llm_passage, despite this module's own reason for existing
 # being exactly "factored out once a second generator needed the same
 # piece" (see the header above).
-def call_llm_json(prompt: str, user_message: str = "Generate the question.") -> dict:
+def call_llm_json(prompt: str, user_message: str = "Generate the question.",
+                  task: str = "exam") -> dict:
     content = chat([
         {"role": "system", "content": prompt},
         {"role": "user", "content": user_message},
-    ])
+    ], task=task)
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
         return json.loads(cleaned)
@@ -110,7 +144,7 @@ _BATCH_TOKEN_OVERHEAD = 600
 
 
 def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions.",
-                        expected_items: int | None = None) -> list:
+                        expected_items: int | None = None, task: str = "exam") -> list:
     """Same contract as call_llm_json, but for a prompt that asks for N
     items back in one array. Batching amortizes the fixed cost every
     single-item call pays unconditionally (the kanji-gate list/
@@ -121,6 +155,10 @@ def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions
     expected_items: how many items the prompt asks for, used to size the
     completion budget. Omit it to keep chat()'s own default — correct
     for a small batch, too tight once a batch grows.
+
+    task: which mondai this batch is for, carried into the usage log so
+    a paper's cost can be read per section rather than as one number
+    (see llm_shared._log_usage). Defaults to the paper as a whole.
 
     reasoning=False: live-diagnosed 2026-08 on this shape (a handful of
     items asked for in one call) — with reasoning on, the model spends
@@ -135,7 +173,7 @@ def call_llm_json_batch(prompt: str, user_message: str = "Generate the questions
     content = chat([
         {"role": "system", "content": prompt},
         {"role": "user", "content": user_message},
-    ], reasoning=False, **kwargs)
+    ], reasoning=False, task=task, **kwargs)
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
         data = json.loads(cleaned)

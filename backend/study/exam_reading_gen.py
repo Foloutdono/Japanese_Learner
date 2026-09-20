@@ -147,7 +147,8 @@ def _call_llm_passage(level: str, mondai_name: str, chars: int, question_count: 
         topic=topic, lo=lo, hi=hi, feedback=feedback,
         length_guidance=guidance.format(chars=chars, sentence_estimate=sentence_estimate, lo=lo),
     )
-    return call_llm_json(prompt, "Generate the passage and questions.")
+    return call_llm_json(prompt, "Generate the passage and questions.",
+                         task="exam-reading")
 
 
 # One LLM call per passage was never retried: a passage that failed the

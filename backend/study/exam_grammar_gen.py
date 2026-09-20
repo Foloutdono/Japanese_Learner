@@ -153,7 +153,7 @@ def _build_grammar_fill_mondai(spec: dict, level: str, points: list[dict], used_
             allowed_kanji=kanji_instruction(level),
         )
         try:
-            items = call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt, task="exam-grammar-fill")
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Grammar-fill batch of %d failed: %s", len(batch), e)
             continue
@@ -293,7 +293,7 @@ def _build_sentence_order_mondai(spec: dict, level: str, points: list[dict], use
             allowed_kanji=kanji_instruction(level),
         )
         try:
-            items = call_llm_json_batch(prompt)
+            items = call_llm_json_batch(prompt, task="exam-grammar-order")
         except (RuntimeError, GenerationFailed) as e:
             logger.warning("Sentence-order batch of %d failed: %s", len(batch), e)
             continue
@@ -356,7 +356,7 @@ def _build_cloze_mondai(spec: dict, level: str, rng: random.Random) -> dict:
     topic = pick_topics(READING_TOPICS, 1, rng)[0]
     prompt = _CLOZE_PROMPT.format(level=level, chars=chars, blank_count=blank_count,
                                   allowed_kanji=kanji_instruction(level), topic=topic)
-    data = call_llm_json(prompt)
+    data = call_llm_json(prompt, task="exam-grammar-cloze")
 
     title = data.get("titleJp")
     template = data.get("textTemplateJp")

@@ -84,7 +84,7 @@ class ReadingPromptTests(unittest.TestCase):
     def _prompt(self, chars: int, topic: str = "a note left on the fridge") -> str:
         captured = {}
 
-        def fake_call(prompt, _user_message="x"):
+        def fake_call(prompt, _user_message="x", **_kwargs):
             captured["prompt"] = prompt
             raise AssertionError("stop here -- only the prompt is under test")
 

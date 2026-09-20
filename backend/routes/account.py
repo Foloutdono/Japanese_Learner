@@ -94,6 +94,8 @@ PLAN = [
     ("phrase_history",      "user_id = %(user)s",       "the sentence bank"),
     ("reading_log",         "user_id = %(user)s",       "reading practice history"),
     ("comprehension_log",   "user_id = %(user)s",       "reading comprehension history"),
+    ("comprehension_served", "user_id = %(user)s",      "which pooled exercises this learner has read"),
+    ("comprehension_usage", "user_id = %(user)s",        "the daily new-exercise counters"),
     ("translation_log",     "user_id = %(user)s",       "translation practice history"),
     ("dictation_log",       "user_id = %(user)s",       "dictation practice history"),
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
@@ -107,6 +109,7 @@ PLAN = [
 
 # Considered and kept, on record — see the module docstring.
 SHARED = {
+    "comprehension_pool":    "generated exercises are a shared pool, like exam_papers; only who READ one is personal (comprehension_served, in PLAN)",
     "exam_papers":           "generated papers are a shared pool; other learners' attempts reference them",
     "exam_generation_jobs":  "claim locks keyed by exam id, not by user",
     "grammar_sentences":     "generated content cache keyed by (level, pattern)",

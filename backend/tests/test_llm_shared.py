@@ -20,14 +20,21 @@ from study.llm_shared import (
 
 
 class FakeResponse:
-    def __init__(self, status_code, content=None):
+    def __init__(self, status_code, content=None, usage=None, body_is_json=True):
         self.status_code = status_code
         self.ok = 200 <= status_code < 300
         self._content = content
+        self._usage = usage
+        self._body_is_json = body_is_json
         self.text = "" if content is None else "body"
 
     def json(self):
-        return {"choices": [{"message": {"content": self._content}}]}
+        if not self._body_is_json:
+            raise ValueError("not json")
+        payload = {"choices": [{"message": {"content": self._content}}]}
+        if self._usage is not None:
+            payload["usage"] = self._usage
+        return payload
 
 
 class FakeSession:
@@ -314,6 +321,165 @@ class OffendingKanjiTest(unittest.TestCase):
             with self.subTest(text=text):
                 self.assertEqual(bool(offending_kanji(text, "N5")),
                                  not sentence_kanji_ok(text, "N5"))
+
+
+class CompletionCapKeyTest(unittest.TestCase):
+    """Whose spelling of the completion cap goes on the wire.
+
+    OpenAI's GPT-5 family answers 400 "Unsupported parameter:
+    'max_tokens'" -- and chat() reads a 400 as a PERMANENT model error
+    and remembers it, so the wrong key here would not fail loudly once,
+    it would retire every OpenAI model on the first call of each
+    process and fall through to the next provider for the rest of it."""
+
+    def test_default_is_max_tokens(self):
+        provider = _provider("plain", ["m1"])
+        session = FakeSession({"m1": FakeResponse(200, "answer")})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session):
+            llm_shared.chat([{"role": "user", "content": "x"}], max_tokens=1234)
+        self.assertEqual(session.bodies[0]["max_tokens"], 1234)
+        self.assertNotIn("max_completion_tokens", session.bodies[0])
+
+    def test_openai_sends_max_completion_tokens_instead(self):
+        provider = Provider(name="openai", url="https://openai.test/v1/chat/completions",
+                            api_key="k", models=("m1",),
+                            max_tokens_key="max_completion_tokens")
+        session = FakeSession({"m1": FakeResponse(200, "answer")})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session):
+            llm_shared.chat([{"role": "user", "content": "x"}], max_tokens=1234)
+        self.assertEqual(session.bodies[0]["max_completion_tokens"], 1234)
+        self.assertNotIn("max_tokens", session.bodies[0])
+
+    def test_the_catalog_agrees(self):
+        self.assertEqual(
+            llm_shared._PROVIDER_CATALOG["openai"].max_tokens_key, "max_completion_tokens"
+        )
+        for name in ("google", "openrouter", "nvidia"):
+            with self.subTest(provider=name):
+                self.assertEqual(llm_shared._PROVIDER_CATALOG[name].max_tokens_key,
+                                 "max_tokens")
+
+
+class PaidProviderTest(unittest.TestCase):
+    """The commercial swap (plan 092): paid providers first, the free
+    tier last as a degradation path, and NVIDIA -- whose hosted catalog
+    is licensed for prototyping, not production -- not in the default
+    order at all."""
+
+    def test_default_order_is_paid_first_and_excludes_nvidia(self):
+        order = llm_shared._DEFAULT_PROVIDER_ORDER.split(",")
+        self.assertEqual(order[:2], ["google", "openai"])
+        self.assertEqual(order[-1], "openrouter",
+                         "the free tier is the fallback, never the primary")
+        self.assertNotIn("nvidia", order)
+
+    def test_nvidia_is_still_reachable_by_name(self):
+        # Removed from the default, not deleted: one line of
+        # backend/.env has to be enough to get it back for local work.
+        self.assertIn("nvidia", llm_shared._PROVIDER_CATALOG)
+
+    def test_vision_prefers_google(self):
+        # OCR reads photographs of manga and novels, which are vertical.
+        self.assertEqual(llm_shared._VISION_PROVIDER_PREFERENCE[0], "google")
+        self.assertTrue(llm_shared._PROVIDER_CATALOG["google"].vision_models)
+
+    def test_paid_providers_send_no_reasoning_field(self):
+        # Both spell the knob differently from OpenRouter, and a wrong
+        # top-level key is a 400 -- which is permanent. Saying nothing
+        # is the safe request; see each entry's comment.
+        for name in ("google", "openai"):
+            with self.subTest(provider=name):
+                self.assertEqual(llm_shared._PROVIDER_CATALOG[name].body_for(True), {})
+                self.assertEqual(llm_shared._PROVIDER_CATALOG[name].body_for(False), {})
+
+
+class UsageLoggingTest(unittest.TestCase):
+    """One accounting line per BILLED response.
+
+    Until the app started selling, nothing counted tokens because every
+    provider it called was free, and every figure in
+    docs/llm-commercial-plan.md is an estimate from prompt lengths.
+    These are the tests that keep the replacement honest."""
+
+    def setUp(self):
+        llm_shared._DEAD_MODELS.clear()
+        llm_shared._DEAD_PROVIDERS.clear()
+        self.addCleanup(llm_shared._DEAD_MODELS.clear)
+        self.addCleanup(llm_shared._DEAD_PROVIDERS.clear)
+
+    def _run(self, response, **kwargs):
+        provider = _provider("alpha", ["a1"])
+        session = FakeSession({"a1": response})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session), \
+             self.assertLogs("study.llm_shared.usage", level="INFO") as logs:
+            try:
+                llm_shared.chat([{"role": "user", "content": "x"}], **kwargs)
+            except LLMUnavailable:
+                pass
+        return logs.output
+
+    def test_a_successful_call_is_accounted_for(self):
+        line = self._run(
+            FakeResponse(200, "answer", usage={
+                "prompt_tokens": 2731, "completion_tokens": 2984,
+                "prompt_tokens_details": {"cached_tokens": 1800},
+                "completion_tokens_details": {"reasoning_tokens": 12},
+            }),
+            task="comprehension",
+        )[0]
+        for expected in ("task=comprehension", "provider=alpha", "model=a1",
+                         "in=2731", "out=2984", "cached=1800", "reasoning=12", "ok=1"):
+            self.assertIn(expected, line)
+
+    def test_an_unusable_body_is_billed_and_counted(self):
+        # The expensive invisible case: a 200 that cost tokens and
+        # produced nothing, so the retry pays twice for one answer.
+        # Two attempts against the one model, so two lines.
+        lines = self._run(FakeResponse(200, None, usage={"prompt_tokens": 400,
+                                                         "completion_tokens": 0}))
+        self.assertEqual(len(lines), 2)
+        self.assertIn("ok=0", lines[0])
+        self.assertIn("in=400", lines[0])
+
+    def test_a_provider_that_reports_nothing_is_marked_not_zeroed(self):
+        # Logging zeros would silently deflate every total, which is
+        # worse than an obvious gap.
+        line = self._run(FakeResponse(200, "answer"))[0]
+        self.assertIn("unreported=1", line)
+        self.assertIn("in=0", line)
+
+    def test_an_unlabelled_call_is_still_accounted_for(self):
+        self.assertIn("task=unlabelled", self._run(FakeResponse(200, "answer"))[0])
+
+    def test_a_malformed_usage_block_does_not_break_the_answer(self):
+        provider = _provider("alpha", ["a1"])
+        session = FakeSession({"a1": FakeResponse(200, "answer", usage="not-a-dict")})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session):
+            self.assertEqual(llm_shared.chat([{"role": "user", "content": "x"}]), "answer")
+
+    def test_a_body_that_is_not_json_at_all_is_a_failed_attempt(self):
+        # chat() parses the body ONCE now (the answer and the usage
+        # block ride in the same payload); a body that will not parse
+        # must still fall through rather than raise.
+        provider = _provider("alpha", ["a1"])
+        session = FakeSession({"a1": FakeResponse(200, "answer", body_is_json=False)})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session):
+            with self.assertRaises(LLMUnavailable):
+                llm_shared.chat([{"role": "user", "content": "x"}])
+
+    def test_failures_before_a_response_cost_nothing_and_log_nothing(self):
+        provider = _provider("alpha", ["a1"])
+        session = FakeSession({"a1": FakeResponse(404)})
+        with mock.patch.object(llm_shared, "PROVIDERS", [provider]), \
+             mock.patch.object(llm_shared.requests, "Session", return_value=session), \
+             self.assertNoLogs("study.llm_shared.usage", level="INFO"):
+            with self.assertRaises(LLMUnavailable):
+                llm_shared.chat([{"role": "user", "content": "x"}])
 
 
 if __name__ == "__main__":
