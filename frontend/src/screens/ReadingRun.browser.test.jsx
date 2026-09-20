@@ -293,4 +293,47 @@ describe('ReadingRun — the measurement', () => {
 
     expect(measure(root).textContent).toBe(translations.fr.answerMatched(42))
   })
+
+  it('sends the figure up with the rating, and null when it never landed', async () => {
+    const posted = []
+    let measurement = Promise.resolve(res({ accuracy: 78, matched: 'romaji' }))
+    apiFetch.mockImplementation((path, _s, opts) => {
+      if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
+      if (path === '/api/phrase/analyze') return analysisReply
+      if (path === '/api/reading/check') return measurement
+      if (path === '/api/reading/result') {
+        posted.push(JSON.parse(opts.body))
+        return Promise.resolve(res({}))
+      }
+      return Promise.resolve(res({}))
+    })
+
+    const root = await answered(await run())
+    const rate = () => {
+      const seals = root.querySelectorAll('.rating-bar__btn')
+      seals[seals.length - 1].click()
+      return settle(80)
+    }
+    await rate()
+
+    // The figure the learner was looking at when they rated, kept
+    // beside the rating rather than instead of it.
+    expect(posted).toHaveLength(1)
+    expect(posted[0].accuracy).toBe(78)
+    expect(posted[0].correct).toBe(true)
+
+    // The next sentence, with no measurement to be had. The rating is
+    // a fact about what the learner did either way, so it still goes
+    // up -- carrying null, which is "unmeasured" and not "caught none
+    // of it".
+    measurement = Promise.reject(new Error('offline'))
+    root.querySelector('.stage__foot button').click()
+    await settle(80)
+    await answered(root, 'zenzen chigau')
+    await rate()
+
+    expect(posted).toHaveLength(2)
+    expect(posted[1].accuracy).toBe(null)
+    expect(posted[1].quality).toBe(posted[0].quality)
+  })
 })

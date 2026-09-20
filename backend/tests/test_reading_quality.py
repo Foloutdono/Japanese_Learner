@@ -357,6 +357,40 @@ def test_an_unservable_schedule_is_not_advertised_as_next_due():
             conn.close()
 
 
+# ── The measurement, kept beside the grade ───────────────────────────
+
+def test_the_accuracy_is_kept_beside_the_rating(client):
+    """Both figures survive the round trip, and neither is derived from
+    the other: a line the learner caught most of and rated down stays
+    rated down, exactly as 書取's own row does."""
+    posted = client.post("/api/reading/result", json=_payload(quality=1, correct=False, accuracy=92))
+    assert posted.status_code == 200, posted.text
+    assert posted.json()["accuracy"] == 92
+
+    row = client.get("/api/reading/history", params={"limit": 1}).json()[0]
+    assert row["accuracy"] == 92
+    assert row["quality"] == 1
+    assert row["correct"] is False
+
+
+def test_a_rating_with_no_measurement_is_still_recorded(client):
+    """The rating is a fact about what the learner did and must survive
+    a measurement that never landed. NULL then means unmeasured -- not a
+    sentence they caught none of."""
+    posted = client.post("/api/reading/result", json=_payload(quality=4))
+    assert posted.status_code == 200, posted.text
+    assert posted.json()["accuracy"] is None
+
+    row = client.get("/api/reading/history", params={"limit": 1}).json()[0]
+    assert row["accuracy"] is None
+    assert row["quality"] == 4
+
+
+def test_an_accuracy_off_the_scale_is_refused(client):
+    """A 422 the caller can read, not a 500 out of the driver -- the
+    same bound `quality` is held to."""
+    for bad in (-1, 101):
+        assert client.post("/api/reading/result", json=_payload(accuracy=bad)).status_code == 422
 # ── The measurement ──────────────────────────────────────────────────
 #
 # How much of the line the answer caught, printed beside the answer

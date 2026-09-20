@@ -269,6 +269,14 @@ CREATE TABLE reading_log (
     -- unknown", not a score of zero. `correct` is derived from it
     -- (q > 2 is a pass) and kept so existing readers still work.
     quality     SMALLINT,
+    -- How much of the line the learner's transcription caught, 0..100,
+    -- as the screen showed it to them while they rated (the same
+    -- measure 書取 stores in dictation_log.accuracy --
+    -- study/dictation.measure_forms). NOT a grade: `quality` is the
+    -- grade and it is the learner's. NULL on every row written before
+    -- the figure existed, and on any row whose measurement never
+    -- landed -- which means "unmeasured", not "caught none of it".
+    accuracy    SMALLINT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 

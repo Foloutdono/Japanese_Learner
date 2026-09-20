@@ -357,6 +357,12 @@ export default function ReadingRun({ session }) {
         answer: answer.trim(),
         correct: isCorrect,
         quality,
+        // The figure the learner was looking at when they rated, which
+        // is the only version of it worth keeping beside the rating.
+        // null when the measurement never landed -- the rating is a
+        // fact about what they did either way, and 書取 sends its own
+        // the same way (DictationRun.jsx).
+        accuracy: feedback?.accuracy ?? null,
         // The word this sentence was chosen to practise. The endpoint
         // resolves it to that word's SRS card so the rating schedules
         // something, rather than only being written down.
