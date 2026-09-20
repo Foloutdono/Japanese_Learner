@@ -87,7 +87,7 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(action).height)).toBe(Math.round(rect(action).height))
   })
 
-  it('keeps a 44 px head: the back button, the 6 px track, the count', async () => {
+  it('keeps a 44 px head: the back button, the line with its stops', async () => {
     const screen = await mountFlow()
     await click(screen.container, '[data-action="continue"]')
     await settle()
@@ -97,10 +97,15 @@ describe('the boarding at 390×844', () => {
     expect(Math.round(rect(head).height)).toBe(44)
     expect(Math.round(rect(back).width)).toBe(44)
     expect(Math.round(rect(back).height)).toBe(44)
-    expect(rect(track).height).toBe(6)
-    // The train is the ink, the done track the gold.
+    expect(rect(head.querySelector('.brd__rail')).height).toBe(2)
+    // One stop per question, the one you stand at the largest and
+    // gold, the ones behind filled, the ones ahead empty.
+    const stops = [...track.querySelectorAll('.brd__stop')]
+    expect(stops).toHaveLength(Number(track.getAttribute('aria-valuemax')))
+    const here = track.querySelector('.brd__stop--here')
+    expect(Math.round(rect(here).width)).toBe(16)
+    expect(track.querySelectorAll('.brd__stop--passed')).toHaveLength(Number(track.getAttribute('aria-valuenow')) - 1)
     const frame = screen.container.querySelector('.brd')
-    expect(getComputedStyle(head.querySelector('.brd__train')).backgroundColor).toBe(getComputedStyle(frame).color)
     // The rows are one choice each, 60 px or taller, the width of the column.
     const rows = [...screen.container.querySelectorAll('.brd__car:not(.brd__car--out) .brd-opt')]
     expect(rows).toHaveLength(6)
@@ -132,10 +137,11 @@ describe('the boarding at 390×844', () => {
     const live = sel => frame.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
     const body = () => live('.brd__body')
 
-    // At rest, the canvas's own rhythm: --sp-9 + --sp-8 over the
-    // question, --sp-9 under it (the body's --sp-5 gap included).
-    expect(Math.round(rect(live('.brd__q')).top - rect(body()).top)).toBe(96)
-    expect(Math.round(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom)).toBe(68)
+    // At rest, one rung of air: --sp-8 over the question and --sp-8
+    // under it (the body's --sp-5 gap included) -- the same on every
+    // screen since the 2026-09-20 rework.
+    expect(Math.round(rect(live('.brd__q')).top - rect(body()).top)).toBe(44)
+    expect(Math.round(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom)).toBe(60)
     expect(body().scrollHeight).toBe(body().clientHeight)
 
     for (const height of [800, 764, 700]) {
@@ -233,7 +239,7 @@ describe('the boarding at 390×844', () => {
     expect(hours).toHaveLength(3)
     for (const h of hours) expect(rect(h).height).toBeGreaterThanOrEqual(76)
     const knob = live().querySelector('.brd-day__train')
-    expect(Math.round(rect(knob).width)).toBe(22)
+    expect(Math.round(rect(knob).width)).toBe(26)
     expect(getComputedStyle(live().querySelector('.brd-day')).touchAction).toBe('none')
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })

@@ -18340,6 +18340,7 @@ a.slip__act { text-decoration: none; }
   padding-bottom: calc(var(--safe-bottom) + var(--sp-6));
   background: var(--bg-main);
   color: var(--text-primary);
+  container: brd / size;
 }
 .brd--welcome { gap: var(--sp-4); }
 /* The cars slide sideways, so the frame clips them — and that clip
@@ -18420,16 +18421,16 @@ a.slip__act { text-decoration: none; }
    own stage does not grow one. */
 .brd__body::before {
   content: "";
-  flex: 0 1 calc(var(--sp-9) + var(--sp-8));
+  flex: 0 1 var(--sp-8);
   min-height: var(--sp-5);
   margin-bottom: calc(-1 * var(--sp-5));
 }
 .brd__body--top::before { content: none; }
-.brd__body--arrival::before { flex-basis: var(--sp-9); }
+.brd__body--arrival::before { flex-basis: var(--sp-8); }
 .brd__air { display: none; }
 .brd__body > .brd__air {
   display: block;
-  flex: 0 1 var(--sp-9);
+  flex: 0 1 var(--sp-8);
   margin-bottom: calc(-1 * var(--sp-5));
 }
 
@@ -18446,7 +18447,7 @@ a.slip__act { text-decoration: none; }
   min-height: 0;
   margin-bottom: 0;
 }
-.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-5); }
+.brd__stage { flex: none; display: flex; flex-direction: column; gap: var(--sp-6); }
 .brd__head { display: flex; align-items: center; gap: var(--sp-4); height: 44px; flex: none; }
 .brd__back {
   display: inline-flex;
@@ -18464,27 +18465,44 @@ a.slip__act { text-decoration: none; }
 }
 .brd__back .svg { width: 18px; height: 18px; }
 .brd__back--void { visibility: hidden; }
-.brd__track { position: relative; flex: 1; height: 6px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 18%, transparent); }
-/* The train advances once the new screen stands still: 300 ms after the pull. */
-.brd__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 300ms ease-out 300ms; }
-.brd__train {
+/* ── The track is the line (chosen 2026-09-20 from three heads drawn
+   side by side: stops, segments, a rule on the top edge) ──
+   One stop per question on a hairline rail, the stops behind you
+   filled gold, the one you are at a larger ring -- your train -- and
+   the ones ahead empty. The count is read off the drawing, so no
+   figure is printed beside it. DESIGN.md, Structure: a line with
+   stops is how this app draws distance wherever the axis has named
+   waypoints, and eight questions are eight of them. The rail is as
+   tall as the head so the stops centre on the back button. */
+.brd__track { position: relative; flex: 1; height: 44px; }
+.brd__rail { position: absolute; left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; background: color-mix(in srgb, var(--accent2) 30%, transparent); }
+/* The run behind you advances once the new screen stands still: 300 ms after the pull. */
+.brd__done { position: absolute; left: 0; top: 50%; height: 2px; margin-top: -1px; background: var(--accent2); transition: width 300ms ease-out 300ms; }
+.brd__stop {
   position: absolute;
-  top: -4px;
-  width: 8px;
-  height: 14px;
+  top: 50%;
+  width: 10px;
+  height: 10px;
+  box-sizing: border-box;
   border-radius: var(--r-pill);
-  background: var(--text-primary);
-  transform: translateX(-50%);
-  box-shadow: 0 0 0 3px var(--bg-main);
-  transition: left 300ms ease-out 300ms;
+  border: 2px solid var(--surface-line);
+  background: var(--bg-main);
+  transform: translate(-50%, -50%);
 }
-.brd__count { flex: none; font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.brd__stop--passed { border-color: var(--accent2); background: var(--accent2); }
+.brd__stop--here {
+  width: 16px;
+  height: 16px;
+  border: 3px solid var(--bg-main);
+  background: var(--accent2);
+  box-shadow: 0 0 0 2px var(--accent2);
+}
 .brd__q {
   margin: 0;
   font-family: var(--font-serif);
   font-weight: 700;
-  font-size: var(--fs-heading);
-  line-height: 1.3;
+  font-size: var(--fs-display-fluid);
+  line-height: 1.25;
   text-align: center;
   text-wrap: pretty;
   outline: none;
@@ -18494,10 +18512,11 @@ a.slip__act { text-decoration: none; }
    question, a kana's meaning, are mixed toward the ambient ink (the
    same move the status inks make on sumi). */
 .brd__q-em { font-weight: 700; color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
-.brd__hint { margin: 0; font-size: var(--fs-sm); line-height: 1.5; text-align: center; color: var(--text-secondary); }
-.brd__error { margin: 0; font-size: var(--fs-sm); line-height: 1.5; text-align: center; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
+.brd__hint { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: center; color: var(--text-secondary); }
+.brd__error { margin: 0; font-size: var(--fs-body); line-height: 1.5; text-align: center; color: color-mix(in srgb, var(--danger) 55%, var(--text-primary)); }
 .brd__foot { display: flex; flex-direction: column; gap: var(--sp-3); flex: none; }
-.brd .btn-depart { width: 100%; min-height: 52px; }
+.brd .btn-depart { width: 100%; min-height: 56px; }
+.brd .btn-depart__jp { font-size: var(--fs-title); }
 .brd__link {
   align-self: center;
   display: inline-flex;
@@ -18507,7 +18526,7 @@ a.slip__act { text-decoration: none; }
   background: none;
   border: none;
   font: inherit;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-body);
   font-weight: 600;
   color: var(--text-secondary);
   text-decoration: underline;
@@ -18528,8 +18547,8 @@ a.slip__act { text-decoration: none; }
   align-items: center;
   gap: var(--sp-4);
   width: 100%;
-  min-height: 60px;
-  padding: var(--sp-3) var(--sp-4);
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-5);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -18539,21 +18558,21 @@ a.slip__act { text-decoration: none; }
   cursor: pointer;
 }
 .brd-opt--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
-.brd-opt__icon { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-secondary); }
-.brd-opt__icon .svg { width: 16px; height: 16px; }
+.brd-opt__icon { display: inline-flex; align-items: center; justify-content: center; width: 40px; height: 40px; flex: none; border: 1px solid var(--surface-line); border-radius: var(--r-pill); color: var(--text-secondary); }
+.brd-opt__icon .svg { width: 20px; height: 20px; }
 .brd-opt--on .brd-opt__icon { border-color: var(--accent2); color: var(--accent2); }
 .brd-opt__code {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 44px;
+  height: 44px;
   flex: none;
   border: 1px solid var(--surface-line);
   border-radius: var(--r-pill);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-caption);
+  font-size: var(--fs-sm);
   letter-spacing: var(--tr-term);
   text-indent: var(--tr-term);
   color: var(--text-secondary);
@@ -18563,24 +18582,24 @@ a.slip__act { text-decoration: none; }
 }
 .brd-opt--on .brd-opt__code { border-color: var(--accent2); color: var(--text-primary); }
 .brd-opt__names { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.brd-opt__label { display: flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); line-height: 1.3; }
-.brd-opt__desc { font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
+.brd-opt__label { display: flex; align-items: center; gap: var(--sp-3); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); line-height: 1.3; }
+.brd-opt__desc { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
 /* On the gold wash the soft ink drops under the floor (4.4:1); the
    chosen row's caption takes the full ink, like Settings' service cards. */
 .brd-opt--on .brd-opt__desc { color: var(--text-primary); }
-.brd-opt__check { display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: transparent; }
-.brd-opt__check .svg { width: 12px; height: 12px; stroke-width: 3; }
+.brd-opt__check { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: transparent; }
+.brd-opt__check .svg { width: 14px; height: 14px; stroke-width: 3; }
 .brd-opt--on .brd-opt__check { border-color: var(--accent2); color: var(--accent2); }
 .brd-tag {
   display: inline-flex;
   align-items: center;
-  height: 20px;
+  height: 22px;
   padding: 0 var(--sp-2);
   flex: none;
   border: 1px solid var(--accent2);
   border-radius: var(--r-pill);
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-indent: var(--tr-caption);
@@ -18591,13 +18610,19 @@ a.slip__act { text-decoration: none; }
      one that lands the glyph in the middle — see .hud__level. */
   line-height: normal;
 }
+/* The word over its sample, never beside it: at the boarding's rungs
+   "Katakana" and ホテル no longer share a half-width row, and a sample
+   broken over two lines is the one thing a "can you read this?" must
+   never show. Both cells take the same shape, so the pair reads as a
+   pair. */
 .brd-kopt {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  min-height: 56px;
-  padding: 0 var(--sp-4);
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: var(--sp-1);
+  min-height: 64px;
+  padding: var(--sp-3) var(--sp-5);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -18607,8 +18632,8 @@ a.slip__act { text-decoration: none; }
   cursor: pointer;
 }
 .brd-kopt--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
-.brd-kopt__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
-.brd-kopt__jp { font-family: var(--font-jp); font-size: var(--fs-lead); color: var(--text-secondary); }
+.brd-kopt__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
+.brd-kopt__jp { font-family: var(--font-jp); font-size: var(--fs-title); color: var(--text-secondary); white-space: nowrap; }
 
 /* ── welcome: the sign, the rolling stock, the promise ── */
 /* The scrolling body is full-bleed here, with the frame's own gutter
@@ -18623,7 +18648,7 @@ a.slip__act { text-decoration: none; }
    the welcome: every other step's body sits inside `.brd__cars`, which
    clips, and none of them has a bleeding child. */
 .brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); }
-.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-2); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out backwards; }
+.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out backwards; }
 .brd-roll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
@@ -18679,21 +18704,21 @@ a.slip__act { text-decoration: none; }
 .brd-demo__bar:nth-child(4) { height: 22px; animation-delay: 360ms; }
 .brd-demo__bar:nth-child(5) { height: 30px; animation-delay: 480ms; }
 .brd-demo__bar:nth-child(6) { height: 16px; animation-delay: 600ms; }
-.brd-tagline { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); text-align: center; line-height: 1.4; text-wrap: pretty; }
+.brd-tagline { margin: 0; font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); text-align: center; line-height: 1.4; text-wrap: pretty; }
 
 /* ── the name ── */
 .brd-field {
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 64px;
+  min-height: 72px;
   padding: 0 var(--sp-5);
   background: var(--surface);
   border: 1.5px solid var(--accent2);
   border-radius: var(--r-card);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-heading);
+  font-size: var(--fs-display-fluid);
   color: var(--text-primary);
   caret-color: var(--accent2);
   outline: none;
@@ -18710,8 +18735,8 @@ a.slip__act { text-decoration: none; }
 .brd-kana__read { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); animation: brd-rise 500ms ease-out 200ms backwards; }
 .brd-kana__read--second { animation-delay: 420ms; }
 .brd-kana__romaji { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-kana__en { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
-.brd-kana__script { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-kana__en { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); color: color-mix(in srgb, var(--accent2) 65%, var(--text-primary)); }
+.brd-kana__script { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 
 /* ── the rhythm and the hours: cards in a lattice ── */
 .brd-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--sp-3); }
@@ -18727,8 +18752,8 @@ a.slip__act { text-decoration: none; }
   align-items: center;
   justify-content: center;
   gap: var(--sp-1);
-  min-height: 120px;
-  padding: var(--sp-4) var(--sp-3);
+  min-height: 132px;
+  padding: var(--sp-5) var(--sp-4);
   background: var(--surface);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-card);
@@ -18739,33 +18764,33 @@ a.slip__act { text-decoration: none; }
 }
 .brd-cell--on { border-color: var(--accent2); background: color-mix(in srgb, var(--accent2) 14%, var(--surface)); }
 .brd-cell__n { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-display); line-height: 1; font-variant-numeric: tabular-nums; }
-.brd-cell__u { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-cell__sub { margin-top: var(--sp-1); font-size: var(--fs-caption); color: var(--text-secondary); }
+.brd-cell__u { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-cell__sub { margin-top: var(--sp-1); font-size: var(--fs-sm); color: var(--text-secondary); }
 .brd-cell--on .brd-cell__u, .brd-cell--on .brd-cell__sub { color: var(--text-primary); }
-.brd-cell__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); }
-.brd-cell__time { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); font-variant-numeric: tabular-nums; }
+.brd-cell__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
+.brd-cell__time { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-heading); font-variant-numeric: tabular-nums; }
 .brd-cell .brd-tag { margin-bottom: var(--sp-1); }
-.brd-cell--sm { min-height: 76px; }
+.brd-cell--sm { min-height: 84px; }
 
 /* ── the departure board and the day track ── */
-.brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
-.brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
+.brd-board { display: flex; flex-direction: column; align-items: center; gap: var(--sp-4); padding: var(--sp-5); background: var(--bg-panel); color: var(--text-on-panel); border: 1px solid color-mix(in srgb, var(--accent2) 16%, transparent); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
+.brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .brd-board__flaps { display: flex; align-items: center; gap: var(--sp-1); perspective: 400px; }
-.brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-title); color: var(--text-on-panel-soft); }
+.brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-heading); color: var(--text-on-panel-soft); }
 /* The board's own tile: a split-flap face at rest (the rewards'
    .flap is the animated instrument; this one only turns its last digit once). */
 .brd-flap {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 40px;
+  width: 34px;
+  height: 48px;
   border-radius: var(--r-plate);
   background: color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel));
   color: var(--text-on-panel);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-title);
+  font-size: var(--fs-heading);
   font-variant-numeric: tabular-nums;
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent);
 }
@@ -18789,14 +18814,14 @@ a.slip__act { text-decoration: none; }
 .brd-day { position: relative; height: 48px; margin: 0 var(--sp-3); touch-action: none; }
 .brd-day__rail { position: absolute; left: 0; right: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 30%, transparent); }
 .brd-day__done { position: absolute; left: 0; top: 16px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
-.brd-day__tick { position: absolute; top: 28px; transform: translateX(-50%); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
+.brd-day__tick { position: absolute; top: 28px; transform: translateX(-50%); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-term); color: var(--text-secondary); font-variant-numeric: tabular-nums; }
 .brd-day__tick--first { transform: none; }
 .brd-day__tick--last { transform: translateX(-100%); }
 .brd-day__train {
   position: absolute;
-  top: 6px;
-  width: 22px;
-  height: 22px;
+  top: 4px;
+  width: 26px;
+  height: 26px;
   padding: 0;
   border-radius: var(--r-pill);
   background: var(--bg-main);
@@ -18808,30 +18833,30 @@ a.slip__act { text-decoration: none; }
 
 /* ── the notification, as the app would send it ── */
 .brd-notif { display: flex; align-items: flex-start; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); box-shadow: var(--elev-hang); animation: brd-drop 700ms cubic-bezier(0.2, 0.8, 0.2, 1) backwards; }
-.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 38px; height: 38px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-lead); }
+.brd-notif__app { display: inline-flex; align-items: center; justify-content: center; width: 44px; height: 44px; flex: none; border-radius: var(--r-card); background: var(--bg-panel); color: var(--accent2); font-family: var(--font-serif); font-weight: 700; font-size: var(--fs-title); }
 .brd-notif__body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: var(--sp-1); }
-.brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
-.brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
-.brd-notif__text { font-size: var(--fs-sm); color: var(--text-secondary); }
+.brd-notif__head { display: flex; justify-content: space-between; gap: var(--sp-3); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-notif__title { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
+.brd-notif__text { font-size: var(--fs-body); color: var(--text-secondary); }
 
 /* ── building the journey ── */
 .brd-build__track { position: relative; height: 8px; margin: var(--sp-3) var(--sp-2) var(--sp-4); border-radius: var(--r-pill); background: color-mix(in srgb, var(--accent2) 18%, transparent); }
 .brd-build__done { position: absolute; left: 0; top: 0; bottom: 0; border-radius: var(--r-pill); background: var(--accent2); transition: width 600ms ease-in-out; }
 .brd-build__train { position: absolute; top: -5px; width: 10px; height: 18px; border-radius: var(--r-pill); background: var(--text-primary); transform: translateX(-50%); box-shadow: 0 0 0 3px var(--bg-main); transition: left 600ms ease-in-out; }
 .brd-steps { display: flex; flex-direction: column; gap: var(--sp-3); }
-.brd-step { display: flex; align-items: center; gap: var(--sp-4); min-height: 56px; padding: 0 var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
-.brd-step__mark { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: var(--accent2); }
-.brd-step__mark .svg { width: 13px; height: 13px; stroke-width: 3; }
+.brd-step { display: flex; align-items: center; gap: var(--sp-4); min-height: 60px; padding: 0 var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-card); }
+.brd-step__mark { display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; flex: none; border: 1.5px solid var(--surface-line); border-radius: var(--r-pill); color: var(--accent2); }
+.brd-step__mark .svg { width: 15px; height: 15px; stroke-width: 3; }
 .brd-step--done .brd-step__mark { border-color: var(--accent2); }
 .brd-step--now .brd-step__mark { border-color: var(--accent2); animation: brd-pulse 1.2s ease-in-out infinite alternate; }
 .brd-step--now .brd-step__mark::before { content: ''; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--accent2); }
 .brd-step--next { opacity: 0.5; }
-.brd-step__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); }
-.brd-step__val { margin-left: auto; font-size: var(--fs-sm); color: var(--text-secondary); white-space: nowrap; }
+.brd-step__label { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); }
+.brd-step__val { margin-left: auto; font-size: var(--fs-body); color: var(--text-secondary); white-space: nowrap; }
 
 /* ── the plan: the projection and the promise ── */
-.brd-chart { display: flex; flex-direction: column; gap: var(--sp-3); padding: var(--sp-4); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
-.brd-chart__title { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
+.brd-chart { display: flex; flex-direction: column; gap: var(--sp-4); padding: var(--sp-5); background: var(--surface); border: 1px solid var(--surface-line); border-radius: var(--r-panel); animation: brd-in 420ms ease-out backwards; }
+.brd-chart__title { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-chart svg { display: block; width: 100%; height: auto; overflow: visible; }
 .brd-chart__grid { stroke: var(--surface-line); stroke-width: 1; }
 .brd-chart__axis { font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-term); fill: var(--text-secondary); }
@@ -18843,8 +18868,8 @@ a.slip__act { text-decoration: none; }
 .brd-chart__dot { stroke-width: 2; stroke: var(--surface); }
 .brd-chart__dot--us { fill: var(--accent2); }
 .brd-chart__dot--them { fill: var(--text-secondary); }
-.brd-chart__cap { font-size: var(--fs-caption); line-height: 1.4; color: var(--text-secondary); }
-.brd-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; color: var(--text-secondary); }
+.brd-chart__cap { font-size: var(--fs-sm); line-height: 1.4; color: var(--text-secondary); }
+.brd-legend { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-5); font-family: var(--font-display); font-size: var(--fs-sm); font-weight: 700; color: var(--text-secondary); }
 .brd-legend__key { display: inline-flex; align-items: center; gap: var(--sp-2); }
 .brd-legend__swatch { width: 14px; height: 3px; border-radius: var(--r-pill); background: var(--accent2); }
 .brd-legend__swatch--them { background: repeating-linear-gradient(90deg, var(--text-secondary) 0 4px, transparent 4px 7px); }
@@ -18853,14 +18878,14 @@ a.slip__act { text-decoration: none; }
    so the ":" can no longer be cut off the end; `pretty` is the other
    half of the same fix — it refuses to leave the last line a scrap,
    the way `.brd__q` above already does. */
-.brd-lead { margin: 0; font-size: var(--fs-body); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
+.brd-lead { margin: 0; font-size: var(--fs-lead); line-height: 1.5; color: var(--text-secondary); text-wrap: pretty; }
 .brd-lead__em { color: var(--text-primary); }
-.brd-bullets { display: flex; flex-direction: column; gap: var(--sp-2); }
-.brd-bullet { display: flex; align-items: center; gap: var(--sp-3); min-height: 30px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-body); animation: brd-in 360ms ease-out backwards; }
+.brd-bullets { display: flex; flex-direction: column; gap: var(--sp-3); }
+.brd-bullet { display: flex; align-items: center; gap: var(--sp-4); min-height: 36px; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lead); animation: brd-in 360ms ease-out backwards; }
 .brd-bullet:nth-child(2) { animation-delay: 60ms; }
 .brd-bullet:nth-child(3) { animation-delay: 120ms; }
 .brd-bullet:nth-child(4) { animation-delay: 180ms; }
-.brd-bullet .svg { width: 18px; height: 18px; flex: none; color: var(--accent2); stroke-width: 3; }
+.brd-bullet .svg { width: 20px; height: 20px; flex: none; color: var(--accent2); stroke-width: 3; }
 
 /* ── the pass, issued ── */
 .brd-offer { display: flex; flex-direction: column; align-items: center; gap: var(--sp-1); text-align: center; }
@@ -18962,14 +18987,34 @@ a.slip__act { text-decoration: none; }
    four promises -- so it steps the same way in its own parts: the
    chart's padding and the room between its pieces, and a promise
    standing on its text rather than on a 30px floor. */
+/* The frame is its own size container so these rules follow the
+   frame's height, not only the viewport's: a shell that gives the
+   boarding less than the screen (or a test that does) gets the same
+   step. A container cannot style itself, so the frame's own gap keeps
+   the media query beside it. */
 @media (max-height: 739px) {
   .brd { gap: var(--sp-4); }
+}
+@container brd (max-height: 739px) {
   .brd__car { gap: var(--sp-4); }
   .brd__stage { gap: var(--sp-4); }
+  .brd__q { font-size: var(--fs-heading); }
+  /* The roundels and the action give back the size the rework gave
+     them: room, not meaning, so the six motives still clear the
+     docked action at 700px without a scroll. */
+  .brd-opt__icon { width: 32px; height: 32px; }
+  .brd-opt__code { width: 38px; height: 38px; }
+  .brd .btn-depart { min-height: 52px; }
   .brd__opts { gap: var(--sp-2); }
   .brd-opt { min-height: 0; padding: var(--sp-2) var(--sp-4); }
   .brd-chart { gap: var(--sp-2); padding: var(--sp-3); }
   .brd-bullet { min-height: 0; }
+  /* The plan's copy steps down the same rung the question does: on a
+     390x667 handset the lead and four promises at --fs-lead ran 66px
+     past the foot, and the legend broke onto a second line. */
+  .brd-lead, .brd-bullet { font-size: var(--fs-body); }
+  .brd-bullets { gap: var(--sp-2); }
+  .brd-legend, .brd-chart__cap { font-size: var(--fs-caption); }
 }
 
 /* ── What a landed animation leaves behind ──
@@ -19049,7 +19094,7 @@ a.slip__act { text-decoration: none; }
   .brd [class*="brd"]::before,
   .brd .brd__q,
   .brd__car { animation: none; }
-  .brd__done, .brd__train, .brd-build__done, .brd-build__train { transition: none; }
+  .brd__done, .brd-build__done, .brd-build__train { transition: none; }
 }
 
 

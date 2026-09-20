@@ -2,8 +2,8 @@ import { useLang } from '../../LangContext'
 import { BackChevron } from './icons'
 
 // ── The frame every boarding screen stands in (plan 075) ─────────
-// The canvas's `.brd`: a head with the back button, the track (the
-// progress bar is the line, the train is where you are) and n/N; the
+// The canvas's `.brd`: a head with the back button and the track (the
+// line with its stops, your train at the one you are answering); the
 // body with the question under the head and the content centred in the
 // room between; the foot docked at the bottom, rising with the
 // keyboard. Composed from these four so a screen file is only its own
@@ -11,7 +11,13 @@ import { BackChevron } from './icons'
 
 export function BoardHead({ index, total, onBack }) {
   const { t } = useLang()
-  const pct = total > 0 ? Math.round((index / total) * 100) : 0
+  // The head's track is the line: one stop per question, the stops
+  // behind you filled, the one you stand at drawn larger (your train),
+  // the ones ahead empty -- so the count is read off the drawing and
+  // no figure is printed. A stop stands at its own share of the rail,
+  // the first on the left edge and the last on the right (the rail
+  // has total-1 legs), and the filled run ends under your stop.
+  const at = n => (total > 1 ? ((n - 1) / (total - 1)) * 100 : 0)
   return (
     <div className="brd__head">
       {onBack
@@ -24,15 +30,19 @@ export function BoardHead({ index, total, onBack }) {
       <div
         className="brd__track"
         role="progressbar"
-        aria-valuemin={0}
+        aria-valuemin={1}
         aria-valuemax={total}
         aria-valuenow={index}
         aria-label={t.onbStepsAria(index, total)}
       >
-        <div className="brd__done" style={{ width: `${pct}%` }} />
-        <span className="brd__train" style={{ left: `${pct}%` }} />
+        <div className="brd__rail" />
+        <div className="brd__done" style={{ width: `${at(index)}%` }} />
+        {Array.from({ length: total }, (_, i) => {
+          const n = i + 1
+          const state = n < index ? 'passed' : n === index ? 'here' : 'ahead'
+          return <span key={n} className={`brd__stop brd__stop--${state}`} style={{ left: `${at(n)}%` }} />
+        })}
       </div>
-      <span className="brd__count" aria-hidden="true">{index}/{total}</span>
     </div>
   )
 }

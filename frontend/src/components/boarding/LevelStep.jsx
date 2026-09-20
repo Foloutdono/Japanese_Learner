@@ -25,7 +25,7 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
   return (
     <>
       <div className="brd__body">
-        <BoardQuestion hint={t.brdLevelHint}>{t.brdLevelQ}</BoardQuestion>
+        <BoardQuestion>{t.brdLevelQ}</BoardQuestion>
         <div className="brd__stage">
           <div className="brd__opts">
             <BoardOption

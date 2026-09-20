@@ -630,7 +630,6 @@ const Fixture = () => (
     <div className="brd" data-step="why">
       <h1 className="brd__q">Why, <strong className="brd__q-em ob-q-em">Aiko</strong>?</h1>
       <p className="brd__hint ob-hint">The stops behind you will be marked known.</p>
-      <span className="brd__count ob-count">2/8</span>
       <p className="brd__error ob-error">Saving failed</p>
       <button type="button" className="brd__link ob-link">Not now</button>
       <button type="button" className="brd-opt brd-opt--on" aria-pressed="true">
@@ -908,7 +907,6 @@ const SITES = [
   // Plan 063 — the goal line's sumi surfaces and tinted chips.
   ['.ob-q-em', 'boarding question, the name in gold'],
   ['.ob-hint', 'boarding hint (soft ink on page)'],
-  ['.ob-count', 'boarding track count'],
   ['.ob-error', 'boarding error line (danger on page)'],
   ['.ob-link', 'boarding ghost link'],
   ['.ob-code-on', 'chosen row code (ink on gold tint)'],
