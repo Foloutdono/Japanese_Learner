@@ -6,7 +6,7 @@ import './index.css'
 // ── The boarding's contract at phone width (plan 075) ────────────
 // The canvas's frame, pinned against the real cascade at 390×844: the
 // foot is docked at the bottom edge with the one filled action full
-// width at 52 px; the head is 44 px with a 44 px back button and a 6
+// width at 56 px; the head is 44 px with a 44 px back button and a 2
 // px track; every choice is a 44 px target or taller; nothing scrolls
 // sideways; the sign-in's segmented control fills its card. The
 // stores behind the pass are stubbed: this is about the frame.
@@ -119,13 +119,18 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 
-  // ── The air gives way before the body scrolls ──
+  // ── The block stands on the centre line; the air gives way before
+  //    the body scrolls ──
   // The rhythm around a question was a fixed pad, so on any phone
   // shorter than the artboard the six motives ran off the bottom while
-  // 164 px of nothing sat above the question. It is a maximum now: the
-  // two spacers collapse in proportion, and the body only scrolls once
-  // they are spent.
-  it('collapses the air rather than scroll the six motives off a shorter phone', async () => {
+  // 164 px of nothing sat above the question -- and on a taller one
+  // the block sat pinned under the head with the room below it empty.
+  // The question and its answers are one block now, centred in the
+  // room between the head and the foot: the spacers at either end
+  // share the free room equally and are nothing once there is none,
+  // the rung under the question is a maximum, and the body only
+  // scrolls once all of it is spent.
+  it('centres the block, then collapses the air rather than scroll the six motives off a shorter phone', async () => {
     const screen = await mountFlow('SilentSamurai6323')
     await click(screen.container, '[data-action="continue"]')
     // Past the staggered arrival: the sixth row's brd-in is 200 ms of
@@ -137,11 +142,15 @@ describe('the boarding at 390×844', () => {
     const live = sel => frame.querySelector(`.brd__car:not(.brd__car--out) ${sel}`)
     const body = () => live('.brd__body')
 
-    // At rest, one rung of air: --sp-8 over the question and --sp-8
-    // under it (the body's --sp-5 gap included) -- the same on every
-    // screen since the 2026-09-20 rework.
-    expect(Math.round(rect(live('.brd__q')).top - rect(body()).top)).toBe(44)
+    // At rest, one rung of air under the question: --sp-8, the body's
+    // --sp-5 gap included -- the same on every screen since the
+    // 2026-09-20 rework -- and the block centred: the room over the
+    // question is the room under the rows, to the pixel.
+    const above = () => rect(live('.brd__q')).top - rect(body()).top
+    const below = () => rect(body()).bottom - rect(live('.brd__stage')).bottom
     expect(Math.round(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom)).toBe(60)
+    expect(Math.abs(above() - below())).toBeLessThanOrEqual(1)
+    expect(above()).toBeGreaterThan(16)
     expect(body().scrollHeight).toBe(body().clientHeight)
 
     for (const height of [800, 764, 700]) {
@@ -151,11 +160,12 @@ describe('the boarding at 390×844', () => {
         // Nothing scrolls, and the sixth motive clears the docked action.
         expect(body().scrollHeight, `${height} px`).toBe(body().clientHeight)
         expect(rect(rows[5]).bottom).toBeLessThanOrEqual(rect(live('.brd__foot')).top)
-        // The air is spent from the top down, never past the body's own
-        // gap: the question keeps --sp-5 off the head and off the rows.
-        expect(rect(live('.brd__q')).top - rect(body()).top).toBeGreaterThanOrEqual(16)
+        // The air is spent evenly at the two ends and never past the
+        // body's own gap: the question keeps --sp-5 off the head and
+        // off the rows, and the block stays on the centre line.
+        expect(above()).toBeGreaterThanOrEqual(16)
         expect(rect(live('.brd__stage')).top - rect(live('.brd__q')).bottom).toBeGreaterThanOrEqual(16)
-        expect(rect(live('.brd__q')).top - rect(body()).top).toBeLessThanOrEqual(96)
+        expect(Math.abs(above() - below())).toBeLessThanOrEqual(1)
       })
     }
   })
