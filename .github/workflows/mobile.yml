@@ -75,12 +75,20 @@ jobs:
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         working-directory: frontend/android
         run: ./gradlew assembleDebug -PversionName=${{ steps.version.outputs.name }} -PversionCode=${{ steps.version.outputs.code }} --no-daemon
+      # Three days, not the default ninety. This APK is ~47 MB and one is
+      # built for every push to main and every frontend pull request, so at
+      # the default it is a gigabyte and a half a week of stored artifact
+      # for builds nobody installs after the day they land. It exists to be
+      # sideloaded onto a device while the branch is open; past that, the
+      # run can be repeated. The release bundle and the IPA below keep the
+      # default -- they are built on tags only, and they are what shipped.
       - name: Upload the debug APK
         if: ${{ !startsWith(github.ref, 'refs/tags/v') }}
         uses: actions/upload-artifact@v4
         with:
           name: app-debug-apk
           path: frontend/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 3
       # The upload key is decoded from a secret onto the runner's disk for
       # the length of the build and named to Gradle through the four
       # variables android/app/build.gradle reads. Never committed.
