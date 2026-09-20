@@ -101,6 +101,17 @@ class ShapeFromTheLessonsTests(unittest.TestCase):
         self.assertIn("の", patterns("これはわたしのかさです。"))
         self.assertNotIn("〜の", patterns("これはわたしのかさです。"))
 
+    def test_a_reading_a_lesson_shows_only_beside_the_real_one_is_a_coincidence(self) -> None:
+        """安いし、近いし、この店にします。 shows 〜し as the particle it is
+        twice, and once more as the し of します, a verb on a token of
+        its own. Seen in no other lesson and never alone, the verb
+        reading teaches nothing: 食べようとしました is not listing
+        reasons, and neither is 宿題をしました."""
+        self.assertNotIn("〜し", found_in("食べようとしました。"))
+        self.assertNotIn("〜し", found_in("宿題をしました。"))
+        self.assertEqual(patterns("安いし、近いし、この店にします。").count("〜し"), 2)
+        self.assertIn("〜し", found_in("雨は強いし、風もあるし、出かけたくない。"))
+
     def test_a_lesson_teaches_the_matcher_its_own_point(self) -> None:
         for level, points in GRAMMAR_POINTS_BY_LEVEL.items():
             for point in points:

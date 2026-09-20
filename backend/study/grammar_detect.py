@@ -318,24 +318,21 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
     # Read without a shape to check against — there is none yet; this is
     # where one comes from — so an example can hand back a second,
     # accidental hit beside the one it was written for.
-    seen: list[list[tuple[bool, str, str, str]]] = [[] for _ in parts]
-    for sentence in examples:
+    seen: list[list[tuple[bool, str, str, str, int]]] = [[] for _ in parts]
+    for index, sentence in enumerate(examples):
         tokens = morphology.tokenize(sentence)
         if not tokens:
             continue
         starts = {t.start for t in tokens}
         for start, end, pos, _c, spelling, _segments in _hits(sentence, tokens, parts):
-            seen[spelling].append((start in starts, pos, _before(start, tokens), _ending(end, tokens)))
+            seen[spelling].append((start in starts, pos, _before(start, tokens), _ending(end, tokens), index))
 
     out = []
     for signatures in seen:
         # When the lessons show a spelling standing on a word of its
         # own, that is what it is, and whatever the same needle also hit
-        # inside some other word is that sentence's coincidence:
-        # 安いし、近いし、この店にします。 shows 〜し as the particle it
-        # is twice, and once more inside します. Learning from both
-        # teaches the matcher that 〜し may be the し of any する — which
-        # is how なくしてしまいました came to be listing reasons.
+        # inside some other word is that sentence's coincidence: the し
+        # of なくして is not the 〜し that lists reasons.
         standing = [sig for sig in signatures if sig[0]]
         kept = standing or signatures
         # Every signature they show, not the ones they agree on: a
@@ -344,19 +341,48 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
         # majority was measured against the catalogue and cost six
         # points of recall to shave a twentieth off the false hits — the
         # wrong way round for a breakdown, where a missing rule is a
-        # rule left untaught.
+        # rule left untaught. The one exception is a coincidence that
+        # stands on a word of its own (_without_coincidences).
         out.append((
-            frozenset(pos for _s, pos, _b, _e in kept),
-            frozenset(before for _s, _h, before, _e in kept),
-            bool(kept) and all(stood for stood, _h, _b, _e in kept),
+            _without_coincidences(kept),
+            frozenset(before for _s, _h, before, _e, _i in kept),
+            bool(kept) and all(stood for stood, _h, _b, _e, _i in kept),
             # The form the word the hit ends in is in, where that form
             # means something: 〜てください ends in ください, the
             # imperative, in every lesson, and 教えてくださいました
             # ends in the same verb in the 連用形 -- the honorific,
             # which is 〜てくださる's lesson and not this one's.
-            frozenset(ending for _s, _h, _b, ending in kept),
+            frozenset(ending for _s, _h, _b, ending, _i in kept),
         ))
     return tuple(out)
+
+
+def _without_coincidences(kept) -> frozenset[str]:
+    """The parts of speech a spelling is realized by, less the ones a
+    lesson shows only by accident.
+
+    安いし、近いし、この店にします。 shows 〜し as the particle it is
+    twice, and once more as the し of します -- a verb, standing on a
+    token of its own, so the rule above does not catch it. Learned, it
+    taught the matcher that 〜し may be the し of any する, and
+    食べようとしました was listing reasons. A reading seen in one lesson
+    only, and there only beside another reading of the same point, is
+    that sentence's coincidence: the sentence was written to show the
+    point, and it shows it in the other reading. A reading seen in two
+    lessons, or alone in one, is the point's -- which keeps a point
+    that really is realized two ways (a particle in one sentence, an
+    auxiliary in the next), and costs nothing measured over the
+    catalogue.
+    """
+    sentences_of: dict[str, set[int]] = {}
+    readings_in: dict[int, set[str]] = {}
+    for _stood, pos, _before, _ending, index in kept:
+        sentences_of.setdefault(pos, set()).add(index)
+        readings_in.setdefault(index, set()).add(pos)
+    return frozenset(
+        pos for pos, sentences in sentences_of.items()
+        if len(sentences) >= 2 or any(readings_in[i] == {pos} for i in sentences)
+    )
 
 
 @lru_cache(maxsize=1)
