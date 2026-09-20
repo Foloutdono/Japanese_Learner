@@ -899,7 +899,21 @@ DEFAULT_READ_SECONDS = 300
 #   - the breakdown must reproduce the text. A drift is fed back; on
 #     the last attempt the breakdown wins, because it is what the
 #     learner opens.
-COMPREHENSION_PROMPT_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
+#   - the prompt is SPLIT, and the split is load-bearing (plan 092).
+#     Everything below that depends only on (level, lang) -- the task,
+#     the length rule, the difficulty, the kanji list, the schema and
+#     every rule about it -- is one block, rendered once per bucket and
+#     byte-identical after that. What changes per call (the seeds, and
+#     the feedback a rejected attempt is told) is a SECOND message.
+#
+#     That is the whole of what "prompt caching" means on the providers
+#     this app calls: both cache automatically, neither takes a flag,
+#     and both cache the longest identical PREFIX of a request. A
+#     volatile value early in the prompt does not cost a little cache,
+#     it costs all of it -- and the seeds used to sit at character 87
+#     of 6,500. See _comprehension_system below for the measurement and
+#     what still has to be checked once real traffic exists.
+_COMPREHENSION_SYSTEM_TEMPLATE = """You are creating a Japanese reading-comprehension exercise for a learner at JLPT level {level}.
 
 Write a self-contained Japanese text of about {target_chars} Japanese characters — never fewer than {min_chars} and never more than {max_chars} — in vocabulary and grammar appropriate for JLPT {level}.
 
@@ -907,11 +921,7 @@ That length is the same at EVERY level. What JLPT {level} changes is how hard th
 
 {difficulty}
 
-Build the text around these grammar points. Use EACH of them at least once, as the natural shape of a sentence — never as a list of examples — and write at least one "grammar" question about each:
-{grammar_block}
-
-Use these words somewhere in the text, inflected as the sentence needs:
-{words_block}
+Build the text around the grammar points given in the message that follows this one. Use EACH of them at least once, as the natural shape of a sentence — never as a list of examples — and write at least one "grammar" question about each. Use the words given there somewhere in the text too, inflected as the sentence needs.
 
 Then write {questions} multiple-choice questions ABOUT THE TEXT, mixing different question types so the exercise tests more than just plot recall. Finally, break the text down one sentence at a time, so the learner can go back over it afterwards and see exactly where their reading went wrong.
 
@@ -969,9 +979,21 @@ Rules:
 - "note" is one short {lang_name} sentence on how that sentence is built — the particle, verb form, construction or word a JLPT {level} learner is most likely to trip on in it. Name the Japanese you are talking about, in 「 」. Never restate the translation; if a sentence really has nothing worth noting, use an empty string.
 - A "note" must BEGIN with a word of {lang_name} — "The particle 「は」 marks...", never "「は」 marks...". Starting one on a bracket is how the opening " of the JSON string goes missing, and that one character costs the whole exercise.
 - "words" lists EVERY word of that sentence, in order, particles and endings included, cut the way a dictionary would: a verb or adjective with its ending is one word (待ちました, not 待ち + ました), a particle is its own word, punctuation is left out. "surface" is the word exactly as it is spelled in "jp". "meaning" is a short {lang_name} gloss of what the word does IN THIS SENTENCE — two or three words, never a sentence; for a particle, its role here ("marks where the action happens").
-- When a sentence uses one of the grammar points listed above, "note" names that point in 「 」 and says what it does in this sentence.
-{feedback}
+- When a sentence uses one of the grammar points you were given, "note" names that point in 「 」 and says what it does in this sentence.
 """
+
+
+# The per-call half: the seeds this exercise is written around, and --
+# on a retry -- what was wrong with the last attempt. Everything here
+# changes between two calls at the same level, which is exactly why it
+# is not in the block above.
+_COMPREHENSION_TASK_TEMPLATE = """Build the text around these grammar points:
+{grammar_block}
+
+Use these words somewhere in the text, inflected as the sentence needs:
+{words_block}
+{feedback}
+Generate the reading comprehension exercise."""
 
 
 VALID_QUESTION_TYPES = {"comprehension", "vocabulary", "grammar", "inference"}
@@ -1170,11 +1192,36 @@ def _recent_grammar_patterns(user_id: str, limit: int = _RECENT_EXERCISES) -> se
     return out
 
 
-def _comprehension_prompt(level: str, lang: str, grammar_seeds: list[dict],
-                          word_seeds: list[dict], feedback: str = "") -> str:
+@lru_cache(maxsize=None)
+def _comprehension_system(level: str, lang: str) -> str:
+    """The half of the prompt that depends only on the bucket, rendered
+    once and byte-identical for every call after that.
+
+    lru_cache is not here to save the string formatting -- that is
+    nothing. It is here so that "byte-identical" is a property of the
+    code rather than a hope: two calls at the same (level, lang) return
+    the SAME object, so no reordering, no stray whitespace and no
+    accidental interpolation can drift between them. A prefix cache is
+    all-or-nothing, and a single changed character costs the whole hit.
+
+    What this buys, measured on the template as it stands: ~1,700
+    tokens of English plus the kanji list (103 characters at N5, 613 at
+    N3, a one-line instruction at N2-N1 -- see
+    exam_gen_utils.kanji_instruction). Both configured providers cache
+    automatically, take no flag, and want a prefix of at least ~1,024
+    tokens, which this clears and the exam generators' own prompts
+    (250-500 tokens each) do not -- see exam_gen_utils, "Why the
+    generators are not split this way".
+
+    Whether it actually HITS is not something this code can assert:
+    implicit caches have their own minimum sizes and lifetimes, and
+    Flash-Lite's are documented inconsistently. The measurement is the
+    `cached=` column of the usage log (study/llm_shared._log_usage) --
+    if it stays at 0 on task=comprehension while `in` is ~2,000, the
+    prefix is not being reused and this split bought nothing."""
     spec = COMPREHENSION_SPECS.get(level, DEFAULT_COMPREHENSION_SPEC)
     min_chars, max_chars = COMPREHENSION_CHARS
-    return COMPREHENSION_PROMPT_TEMPLATE.format(
+    return _COMPREHENSION_SYSTEM_TEMPLATE.format(
         level=level,
         min_chars=min_chars,
         max_chars=max_chars,
@@ -1184,11 +1231,20 @@ def _comprehension_prompt(level: str, lang: str, grammar_seeds: list[dict],
         target_chars=(min_chars + max_chars) // 2,
         difficulty=DIFFICULTY_BY_LEVEL.get(level, DEFAULT_DIFFICULTY),
         questions=spec["questions"],
-        grammar_block=_grammar_block(grammar_seeds),
-        words_block=_words_block(word_seeds),
         allowed_kanji=kanji_instruction(level),
         lang=lang,
         lang_name=LANG_NAMES.get(lang, lang),
+    )
+
+
+def _comprehension_task(grammar_seeds: list[dict], word_seeds: list[dict],
+                        feedback: str = "") -> str:
+    """The half that changes per call: the seeds, and what a rejected
+    attempt is told. Sent as the user message, after the block above,
+    which is what makes that block a prefix."""
+    return _COMPREHENSION_TASK_TEMPLATE.format(
+        grammar_block=_grammar_block(grammar_seeds),
+        words_block=_words_block(word_seeds),
         feedback=feedback,
     )
 
@@ -1353,7 +1409,9 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
     last: HTTPException | None = None
     for attempt in range(_COMPREHENSION_ATTEMPTS):
         last_attempt = attempt == _COMPREHENSION_ATTEMPTS - 1
-        prompt = _comprehension_prompt(level, lang, grammar_seeds, word_seeds, feedback)
+        # Stable first, volatile second -- see _comprehension_system.
+        system = _comprehension_system(level, lang)
+        task = _comprehension_task(grammar_seeds, word_seeds, feedback)
         # max_tokens above the shared 3000 default, and the timeout with
         # it: this one call writes the passage, a dozen four-option
         # questions, a translated and annotated entry per sentence AND
@@ -1362,8 +1420,8 @@ def _call_llm_comprehension(level: str, lang: str, *, grammar_seeds: list[dict] 
         # (exam_gen_utils documents the crowding). A cap that cuts the
         # blob mid-array costs the attempt.
         content = _chat([
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": "Generate the reading comprehension exercise."},
+            {"role": "system", "content": system},
+            {"role": "user", "content": task},
         ], timeout=150, max_tokens=12000, task="comprehension")
         try:
             data = _parse_comprehension(content)

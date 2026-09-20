@@ -18,10 +18,16 @@ Two columns deserve a second look every time:
 
   ok=0   a response that was paid for and could not be used. Every one
          of these is a retry that billed twice for one answer.
-  cached a prompt prefix served from the provider's cache, at roughly a
-         tenth of the price. If this stays at 0 while `in` is large, the
-         stable part of the prompt (the allowed-kanji list is 2,212
-         characters at N1) is being re-sent at full price every call.
+  cached a prompt prefix served from the provider's cache, at a
+         fraction of the price. Both providers cache automatically, from
+         a prefix of about 1,024 tokens, so this column is the only
+         evidence that a prompt is actually shaped to be cached. It is
+         expected to be 0 on every task but `comprehension`, whose
+         prompt is the only one long enough to be eligible (see
+         study/exam_gen_utils.py, "Why the generators are not split this
+         way"). If it is 0 on `comprehension` too, while `in` is around
+         2,000, the split in routes/reading.py is not being reused and
+         bought nothing.
 """
 import argparse
 import re

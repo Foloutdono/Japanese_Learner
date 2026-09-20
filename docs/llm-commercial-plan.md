@@ -161,11 +161,35 @@ already half-built here.
    reported. `scripts/llm_usage_report.py` totals a log into the same
    shape `llm_cost_model.py` estimates, so the two can be compared
    directly. See §7.
-2. **Prompt-cache the stable prefix.** Every exam-generation call
-   re-sends the allowed-kanji list — 613 characters at N3, **2,212 at
-   N1** — plus a fixed template. That is ~60% of input tokens, and it is
-   byte-identical across calls if the volatile part (seeds, topic,
-   feedback) goes last. Cached input bills at ~10%.
+2. ~~**Prompt-cache the stable prefix.**~~ **Done for the one prompt it
+   can work on, and the measurement corrected two things I had wrong
+   when I wrote this line.**
+
+   First, there is no flag. Both configured providers cache
+   automatically, and what they cache is the longest byte-identical
+   *prefix* of a request. So the whole of "prompt caching" here is
+   prompt structure: a volatile value early in the prompt does not cost
+   a little of the cache, it costs all of it — and every prompt in this
+   codebase had one. The comprehension seeds sat at character 87 of
+   6,500.
+
+   Second, both providers ignore prefixes under about 1,024 tokens, and
+   **the exam-generation prompts are 250–470 tokens each** — two to four
+   times under the threshold. No reordering can make them cacheable.
+   The claim this line used to make ("~60% of input tokens", "2,212
+   characters at N1") was wrong twice over: the full kanji list is only
+   sent at N5–N3 (`exam_gen_utils._FULL_LIST_LEVELS`), so it is at most
+   613 characters, and at N2–N1 it is a single sentence. The per-prompt
+   measurements are recorded in `exam_gen_utils.py` so the next person
+   does not re-derive them.
+
+   What did work: the comprehension prompt, at ~6,700 characters, is the
+   one above the threshold. It is now two messages — a block stable per
+   (level, lang) rendered through an `lru_cache` so byte-identity is a
+   property of the code, and the per-call seeds and retry feedback
+   after it. Whether it *hits* is the provider's business; the
+   `cached=` column of the usage log is the answer, and if it stays at
+   0 on `task=comprehension` this bought nothing.
 3. ~~**Cache the comprehension exercise.**~~ **Done**, and as a pool
    rather than a cache — the distinction is the whole design.
    `phrase_analysis_cache` can key on the phrase because the caller

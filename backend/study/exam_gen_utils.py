@@ -76,6 +76,39 @@ def kanji_instruction(level: str) -> str:
     return _N1N2_KANJI_INSTRUCTION
 
 
+# ── Why the generators are not split for prompt caching ─────────
+# Plan 092 split routes/reading.py's comprehension prompt in two -- a
+# block stable per (level, lang) first, the per-call seeds after it --
+# so a provider's prefix cache can hold the stable half. The same
+# treatment was considered here and deliberately NOT applied.
+#
+# Both providers this app calls cache automatically and want a prefix
+# of at least ~1,024 tokens before anything is cached at all. These
+# prompts, measured whole with the kanji list interpolated:
+#
+#   _FILL_PROMPT_BATCH          1,033 chars
+#   _CLOZE_PROMPT               1,111
+#   _USAGE_PROMPT_BATCH         1,165
+#   _PARAPHRASE_PROMPT_BATCH    1,166
+#   _STAR_PROMPT_BATCH          1,356
+#   _LISTENING_MCQ_PROMPT_BATCH 1,594
+#   _PASSAGE_PROMPT             1,867
+#
+# Mostly English, so roughly 250-470 tokens each: every one of them is
+# two to four times UNDER the threshold, and reordering a prompt that
+# can never be cached is churn on text whose current wording was tuned
+# against live failures. The comprehension prompt is 6,500 characters,
+# which is why it was worth splitting and these are not.
+#
+# Note also that the kanji list is only sent in full at N5-N3 (see
+# _FULL_LIST_LEVELS above): at N2-N1 it is a single sentence, so "the
+# allowed-kanji list is what these prompts re-send" is true of at most
+# 613 characters, never the 2,212 of the full N1 set.
+#
+# What would change this: a bigger batch (more items per call grows the
+# volatile half, not the stable one, so it does not help), or a
+# provider whose minimum is lower. Re-measure before reopening it.
+
 # ── Shared LLM-JSON call ─────────────────────────────────────────
 # One call → one JSON blob: strip the markdown fence a model sometimes
 # wraps its answer in, parse it, and turn a parse failure into
