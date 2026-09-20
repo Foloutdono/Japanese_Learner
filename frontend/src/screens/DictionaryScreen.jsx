@@ -26,7 +26,7 @@ function stageOf(status) {
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { FuriganaParts } from '../components/study/Readings'
 import { pickPlateReadings } from '../domain/readingPick'
-import { Bar, Leave } from '../components/chrome/Bar'
+import { Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -103,7 +103,6 @@ const FAVORITES = 'favorites'
 export default function DictionaryScreen({ session }) {
 	const { t, lang } = useLang()
 	const navigate = useNavigate()
-	const station = stationFor('/dictionary')
 	const analyzerStation = stationFor('/dictionary/analyzer')
 
 	// The door, and its three intakes. `?intake=` is the analyzer's own
@@ -501,7 +500,10 @@ export default function DictionaryScreen({ session }) {
 
 	return (
 		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
-			<Bar code={station.code} color={DICTIONARY_COLOR} title={t.dictionaryTitle} />
+			{/* No bar: the gate's head came off the four gates on the owner's
+			    call (2026-09-20, see LearnScreen.jsx). The name stays as the
+			    screen's clipped <h1>. */}
+			<h1 className="sr-only">{t.dictionaryTitle}</h1>
 
 			{/* The analyzer, behind its door (canvas Dictionary): one row
 			    naming the section and its three intakes. The pass tag the

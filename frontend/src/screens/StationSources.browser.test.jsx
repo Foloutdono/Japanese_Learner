@@ -93,8 +93,8 @@ async function station(at) {
   )
   // Scoped to this render's own container, and never unmounted: a
   // mount that is torn down takes the next one in the file with it
-  // (see WallMap.geometry.browser.test.jsx's note on the third render
-  // in a browser test), so the trees are left standing side by side
+  // (the wall map's geometry test, since retired, found the third
+  // render in a browser test never comes up), so the trees are left standing side by side
   // and each helper only ever looks inside its own.
   const all = sel => [...screen.container.querySelectorAll(sel)]
   return {

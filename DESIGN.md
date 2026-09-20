@@ -36,10 +36,12 @@ The app is a Japanese railway station. Learning is a journey: sections are
 your profile is a **commuter pass** (定期券) in its **holder** (定期入れ), and
 the home screen is the
 **gate hall**: the day's reviews at the **fare gate** (改札), your pass under
-them, and the **route map** (路線図) on the wall — every line of the app with
-your own train somewhere along it. (It was a departure board, 発車標, until
-the wall-map redesign; the map answers "how far have I come", which a board
-of equal departures never could.)
+them, and behind the Learn and Practice gates a column of **station plates**
+(駅名標), one per line, each printing the stop you have reached and the one
+ahead. (The Learn gate was a departure board, 発車標, then a wall-mounted
+route map, 路線図, with a train on every line; the plates replaced the map
+on 2026-09-20 — see Structure. The map answered "how far have I come" with
+five labels a line at one weight; the plate answers "what is next" with one.)
 
 The pass is a physical object, so it behaves like one. It has a front and a
 back — the contract it was issued under, 乗車駅 · 行先 · 種別 · 発車時刻 ·
@@ -370,8 +372,9 @@ IC card) → `--r-pill`.
 ### Elevation is rationed
 
 Two shadows exist, and both mean **this object hangs**: `--elev-hang` for the
-station plate, `--elev-board` for the wall map's panel (the departure board's
-successor). A third exists since the wall-map redesign and means something
+station plate (and the gates' line plates, which are that plate), `--elev-board`
+for the sumi panel (the departure board's, then the wall map's; no screen hangs
+one today). A third exists since the wall-map redesign and means something
 else: `--elev-action`, a faint gold glow spent on `.btn-depart` alone — "this
 is the thing to press". One object, by ruling; a fourth shadow needs the same
 argument this one had. Nothing else has a
@@ -800,8 +803,16 @@ a learner who has just rated one card is already looking for the next.
 - **Both bars are sumi with the two panel inks and no line colour.** The
   pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
   aside, and a 2px stripe in the section's colour under it. A screen that
-  is not a place on a line (Practice, the halls behind the pass) takes the
+  is not a place on a line (the halls behind the pass) takes the
   `--register` bar: no roundel, a hairline.
+- **A gate prints no bar** (owner's call, 2026-09-20). Today, Learn,
+  Practice and Dictionary opened on the concourse's bar — 辻 over the
+  gate's name, a caption or the date at the far end — under a HUD, over a
+  tab bar that already captions the gate you are on: the same place named
+  twice within a thumb's reach. The screen begins with its content; the
+  name stays as the screen's one `<h1>`, clipped (`.sr-only`), so a screen
+  reader still lands somewhere named. A *station* behind a gate keeps its
+  bar — that is where the pigment and the way out live.
 - **Japanese is content, not chrome.** The interface speaks the learner's
   language; a word, a sentence, a deck's name, a card's stage are
   Japanese. The
@@ -843,8 +854,8 @@ a learner who has just rated one card is already looking for the next.
   `docs/design/mobile/README.md`.
 
 - **One `<h1>` per screen**, and it is the object that names the place — the
-  station plate, the wall map's masthead, the pass, or the screen's bar. A plated
-  screen never prints a second heading.
+  station plate, the pass, or the screen's bar. A plated screen never prints
+  a second heading.
 - Section headings are `<h2>` inside the paired `SectionHeader`.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the
@@ -856,9 +867,25 @@ a learner who has just rated one card is already looking for the next.
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
   carries its own roundel and 線 name instead of sitting under a "Lines" title.
+- **The two gates hang one plate per line** (plan 094, `LinePlate`): the
+  roundel, the name in the learner's language and nothing under it, the
+  section's aside at the trailing edge (a due count), a foot, and the
+  line's pigment as the 4px stripe along the bottom. The name is left-flush
+  beside the roundel and ellipses before the aside moves, so a chip never
+  pushes one plate's title off the line the others share. The foot is what
+  a real 駅名標 prints under the name: on a Learn line the stop reached in
+  the middle with the stop behind and the stop ahead at the edges, the
+  stripe filling with the leg being ridden; on a Practice platform the five
+  grades its trains leave for. Chosen from five directions drawn side by
+  side (plates, the platform card, the map upright, the ledger, the next
+  train), and drawn without the reading and the caption the mockup gave
+  it — a plate that prints かな over Kana over KANA names one thing three
+  times. On a phone the column takes the gate and every plate gets one
+  share, the shelf too.
 - **A line with stops is how this app draws distance**, and it is one drawing
-  shared by two screens: the wall map's four lines and the pass's ghost track.
-  Same parts every time — a rail, a filled run behind you, stops with labels, your
+  shared by two places: the level picker's route diagram and the pass's ghost
+  track (the wall map was the third, and went with the plates). Same parts
+  every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
   **A stop stands at the END of the leg it names, and the line opens at
@@ -867,7 +894,9 @@ a learner who has just rated one card is already looking for the next.
   standing at 初 rather than on the first level's platform. The wall map had it
   the other way round once: N5's station sat at the START of N5's work, which
   handed a learner that level for boarding the train and left the last stop one
-  leg short of the terminus.
+  leg short of the terminus. The plate's foot reads the same rule
+  (`domain/lineProgress.stopsAround`): the stop in the middle is the last level
+  finished, never the one being ridden.
   Three rules the 進捗が主役 round settled on the pass's copy of it, and they
   hold wherever the drawing goes: your train **rides above the rail and reaches
   it on a stem**, so the x it claims is exact and it never covers a stop — a

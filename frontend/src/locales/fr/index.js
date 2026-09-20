@@ -50,7 +50,6 @@ const nav = {
   tabDictionary:     'Dictionnaire',
   tabProfile:        'Profil',
   tabBarLabel:       'Sections',
-  practiceSub:       'Quatre quais',
   hudStatusLabel:    'État de l’objectif',
   hudOffline:        'Hors ligne',
   hudDays:           (n) => `${n}j`,
@@ -103,8 +102,9 @@ const nav = {
 // ── Home screen ───────────────────────────────────────────
 const home = {
   // ── 辻駅 — la gare ───────────────────────────────────────
-  // L'accueil est le hall de la gare et chaque section une ligne sur
-  // son plan mural (voir config/stations.js et WallMap.jsx). Les noms
+  // L'accueil est le hall de la gare et chaque section une ligne avec
+  // sa plaque derrière un portillon (voir config/stations.js et
+  // components/station/LinePlate.jsx). Les noms
   // de stations et de lignes sont des noms propres japonais et vivent
   // dans cette config, pas ici — voici les libellés qui se traduisent
   // vraiment. `routeMap` (la légende du bandeau) existe déjà plus
@@ -414,7 +414,6 @@ const stats = {
   dueUnit:            'à réviser',
   stageGate:          'Portique',
   nothingGraded:      'Rien n’est noté',
-  learnFourLines:     'Quatre lignes',
   stationJlpt:        'JLPT',
   stationSources:     'Sources',
   stationSets:        'Séries',

@@ -84,7 +84,8 @@ describe('the moved paths', () => {
   })
 
   // One render per test: the third fresh render inside a single
-  // browser test never comes up (see WallMap.geometry's own note).
+  // browser test never comes up (found by the wall map's geometry
+  // test, since retired; the finding outlived it).
   it('mounts the shell on a gate', async () => {
     window.history.replaceState(null, '', '/learn')
     const screen = await render(<App />)

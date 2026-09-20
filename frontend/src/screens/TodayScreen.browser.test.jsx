@@ -7,7 +7,7 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── The gate (plan 070) ───────────────────────────────────────
-// /today is the bar, the fare gate with the day's lanes as the run's
+// /today is the fare gate with the day's lanes as the run's
 // picker, and the strip. The finish comes back from the run through
 // the router's state and is printed here, under the chrome.
 //
@@ -84,11 +84,12 @@ beforeEach(() => {
 })
 
 describe('TodayScreen — the gate', () => {
-  it('opens on the bar, the strip, and the gate with every lane on', async () => {
+  it('opens on the strip and the gate with every lane on, and no bar', async () => {
     const screen = await mount()
     await settle()
-    expect(screen.container.querySelector('.bar__roundel').textContent).toBe('HN')
-    expect(screen.container.querySelector('h1.bar__title').textContent).toBe('Service du jour')
+    // No bar (owner's call, 2026-09-20): the name is the clipped <h1>.
+    expect(screen.container.querySelector('.bar')).toBeNull()
+    expect(screen.container.querySelector('h1.sr-only').textContent).toBe('Service du jour')
     // The strip reads over the gate, not under it: a status line
     // belongs above the object it is about, and it leaves the gate the
     // last thing on the screen, free to take the rest of it.

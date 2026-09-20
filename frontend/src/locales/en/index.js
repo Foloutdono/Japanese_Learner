@@ -47,7 +47,6 @@ const nav = {
   tabDictionary:     'Dictionary',
   tabProfile:        'Profile',
   tabBarLabel:       'Sections',
-  practiceSub:       'Four platforms',
   hudStatusLabel:    'Goal status',
   hudOffline:        'Offline',
   hudDays:           (n) => `${n}d`,
@@ -102,8 +101,9 @@ const nav = {
 // ── Home screen ───────────────────────────────────────────
 const home = {
   // ── 辻駅 — the station ───────────────────────────────────
-  // The home screen is the gate hall and every section is a line on
-  // its wall map (see config/stations.js and WallMap.jsx). Station
+  // The home screen is the gate hall and every section is a line with
+  // a plate behind a gate (see config/stations.js and
+  // components/station/LinePlate.jsx). Station
   // and line names themselves are Japanese proper nouns and live in
   // that config, not here — these are the labels that genuinely
   // translate. `routeMap` (the masthead's caption) already exists
@@ -433,7 +433,6 @@ const stats = {
   dueUnit:            'due',
   stageGate:          'Gate',
   nothingGraded:      'Nothing is graded',
-  learnFourLines:     'Four lines',
   stationJlpt:        'JLPT',
   // The sub over vocabulary's and kanji's source page. Terse, like
   // every other sub on a station: it names the page you are on, and

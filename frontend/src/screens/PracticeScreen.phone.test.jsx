@@ -5,13 +5,14 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 実践 — the gate's platforms, at 390px ────────────────────
-// Each title carried the section's own Japanese name after it — 読書
+// One station plate per platform (plan 094), the Learn gate's own.
+// Each title once carried the section's Japanese name after it — 読書
 // 理解 翻訳 書取 模試 — a second name for a thing the line above
-// already named. At phone width the pair ran past the card and 理解 broke
-// between its two characters, one to a line. The Japanese lives on the
-// roundel of every station these cards open and on the gate the
-// departure passes through; this row was the one place it was a
-// caption.
+// already named; at phone width the pair ran past the card and 理解
+// broke between its two characters. Then a line of description under
+// it, which the plate retired too: a plate prints the name once. The
+// Japanese lives on the roundel of every station these plates open
+// and on the gate the departure passes through.
 
 vi.mock('../lib/api', () => ({
   apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
@@ -35,7 +36,7 @@ const { getSections } = await import('../config/tabs')
 // How many platforms the gate has, asked of the registry rather than
 // written down: this file pinned the number 4 in four places, and every
 // one of them had to be edited the day 書取 was added. The CONTRACT is
-// that each platform gets a card, a full row of grades and an equal
+// that each platform gets a plate, a full row of grades and an equal
 // share of the gate — not that there are four of them.
 const PLATFORMS = getSections('practice', {}).length
 
@@ -76,14 +77,16 @@ describe('the practice gate at phone width', () => {
     )
     await settle()
 
-    const grid = screen.container.querySelector('.platform-grid')
+    const grid = screen.container.querySelector('.plates')
     // Not one Japanese caption left on the row — and the sections still
     // carry their Japanese, for the roundel and the gate.
     expect(grid.querySelector('[lang="ja"]')).toBeNull()
     expect(getSections('practice', {}).every(s => s.icon)).toBe(true)
 
-    const titles = [...grid.querySelectorAll('.platform-card__title')]
+    const titles = [...grid.querySelectorAll('.plate__title')]
     expect(titles).toHaveLength(PLATFORMS)
+    // Nothing under the name either: a plate prints the name once.
+    expect(grid.querySelectorAll('.plate__meta, .platform-card__desc')).toHaveLength(0)
     for (const title of titles) {
       // The title is the title: nothing appended, nothing nested.
       expect(title.children).toHaveLength(0)
@@ -101,20 +104,25 @@ describe('the practice gate at phone width', () => {
   it('gives every platform the whole gate, one share each', async () => {
     const screen = await gate()
     const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
-    const grid = screen.container.querySelector('.platform-grid').getBoundingClientRect()
+    const grid = screen.container.querySelector('.plates').getBoundingClientRect()
     expect(content.bottom - grid.bottom).toBeLessThanOrEqual(24)
-    const cards = [...screen.container.querySelectorAll('.platform-card')].map(el => el.getBoundingClientRect())
+    const cards = [...screen.container.querySelectorAll('.plate')].map(el => el.getBoundingClientRect())
     expect(cards).toHaveLength(PLATFORMS)
     for (const box of cards) {
       expect(box.height).toBeCloseTo(cards[0].height, 0)
-      expect(box.height).toBeGreaterThan(130)
+      expect(box.height).toBeGreaterThan(100)
     }
+    // And every title starts on the same x whatever sits at the
+    // plate's trailing edge: the name is left of the roundel's gap,
+    // never centred against a chip.
+    const titles = [...screen.container.querySelectorAll('.plate__title')].map(el => el.getBoundingClientRect())
+    for (const box of titles) expect(box.left).toBeCloseTo(titles[0].left, 0)
   })
 
   // ── Where the trains go ──
   it('carries the five grades on every platform, and marks the learner\'s own', async () => {
     const screen = await gate()
-    const rows = [...screen.container.querySelectorAll('.platform-sign__dests')]
+    const rows = [...screen.container.querySelectorAll('.plate__foot--dests')]
     expect(rows).toHaveLength(PLATFORMS)
     for (const row of rows) {
       const chips = [...row.querySelectorAll('.chip')]
@@ -137,7 +145,7 @@ describe('the practice gate at phone width', () => {
 
   it('boards that platform\'s train from the grade itself', async () => {
     const screen = await gate()
-    const rows = [...screen.container.querySelectorAll('.platform-sign__dests')]
+    const rows = [...screen.container.querySelectorAll('.plate__foot--dests')]
     const chipAt = (row, level) => [...rows[row].querySelectorAll('.chip')].find(c => c.textContent === level)
 
     // 読書 — the run at that grade, three taps saved.

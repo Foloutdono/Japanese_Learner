@@ -323,35 +323,30 @@ describe('the phone layout contract', () => {
     expect(Math.round(foot.getBoundingClientRect().width)).toBe(Math.round(stageBox.width))
   })
 
-  // ── 路線図 — the map is the wall, so it takes the wall ──
-  it('gives the Learn gate\'s board the whole page too', async () => {
-    const line = i => (
-      <button type="button" key={i} className="wmap-line">
-        <span className="wmap-line__id"><span className="wmap-roundel">KN</span></span>
-        <span className="wmap-line__due" />
-        <span className="wmap-track" />
-      </button>
+  // ── 駅名標 — the plates take the gate ──
+  it('gives the Learn gate\'s plates the whole page too', async () => {
+    const plate = i => (
+      <div key={i} className="plate">
+        <button type="button" className="plate__head"><span className="pf-line__roundel">KN</span><span className="plate__title">Kana</span></button>
+        <span className="plate__foot"><span /><span className="plate__here">初</span><span /></span>
+        <span className="plate__stripe"><i /></span>
+      </div>
     )
     const screen = await render(
       <div className="phone">
         <div className="phone__content">
           <main className="learn">
             <div className="bar"><div className="bar__row" /></div>
-            <div className="board"><div className="wmap__lines">{[0, 1, 2, 3].map(line)}</div></div>
+            <div className="plates">{[0, 1, 2, 3, 4].map(plate)}</div>
           </main>
         </div>
       </div>
     )
     await settle()
     const content = screen.container.querySelector('.phone__content').getBoundingClientRect()
-    const board = screen.container.querySelector('.board').getBoundingClientRect()
-    expect(content.bottom - board.bottom).toBeLessThanOrEqual(24)
-    const lines = [...screen.container.querySelectorAll('.wmap-line')].map(el => el.getBoundingClientRect())
-    for (const box of lines) expect(box.height).toBeCloseTo(lines[0].height, 0)
-    // And it carries no texture over that room: the panel wore a
-    // 1px-in-3 scanline from when it was a departure board a few rows
-    // tall, and at a screen's height the same grain reads as banding
-    // across the map's own empty space. Owner's call.
-    expect(getComputedStyle(screen.container.querySelector('.board'), '::after').content).toBe('none')
+    const plates = screen.container.querySelector('.plates').getBoundingClientRect()
+    expect(content.bottom - plates.bottom).toBeLessThanOrEqual(24)
+    const boxes = [...screen.container.querySelectorAll('.plate')].map(el => el.getBoundingClientRect())
+    for (const box of boxes) expect(box.height).toBeCloseTo(boxes[0].height, 0)
   })
 })
