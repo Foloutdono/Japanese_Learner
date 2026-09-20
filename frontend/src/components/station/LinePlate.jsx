@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
 import { stopsAround } from '../../domain/lineProgress'
 
-// ── 駅名標 — a line as its own station plate (plan 093) ──────────
+// ── 駅名標 — a line as its own station plate (plan 094) ──────────
 // The Learn and Practice gates hang one plate per section: the roundel
 // with the line's code, the name in the learner's language, whatever
 // the section has to say at its trailing edge (a due count), and the

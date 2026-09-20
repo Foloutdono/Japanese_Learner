@@ -5,7 +5,7 @@ import { LangProvider } from '../LangContext'
 import '../index.css'
 
 // ── 実践 — the gate's platforms, at 390px ────────────────────
-// One station plate per platform (plan 093), the Learn gate's own.
+// One station plate per platform (plan 094), the Learn gate's own.
 // Each title once carried the section's Japanese name after it — 読書
 // 理解 翻訳 書取 模試 — a second name for a thing the line above
 // already named; at phone width the pair ran past the card and 理解

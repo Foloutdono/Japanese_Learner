@@ -1,7 +1,7 @@
 // ── 路線図 — how far down each line you have travelled ────────
 // Each SRS section is a line with stops, and the learner stands
 // somewhere on it: the Learn gate's plate prints the stop reached and
-// the one ahead (plan 093), the pass's ghost track draws the whole
+// the one ahead (plan 094), the pass's ghost track draws the whole
 // line. This is the arithmetic behind both, kept here so the plate
 // and the profile's ledger cannot drift apart about how far along a
 // line you are.
@@ -165,7 +165,7 @@ export function lineTotals(stats, source) {
 
 /**
  * The stop you have reached, the one behind it and the one ahead —
- * what a station plate prints at its foot (plan 093,
+ * what a station plate prints at its foot (plan 094,
  * components/station/LinePlate.jsx). Read off the same marks the map
  * drew, so the plate and the ledger cannot disagree about where you
  * stand. A station is the END of the leg it names, so `reached`

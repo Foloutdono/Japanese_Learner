@@ -867,7 +867,7 @@ a learner who has just rated one card is already looking for the next.
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
   carries its own roundel and 線 name instead of sitting under a "Lines" title.
-- **The two gates hang one plate per line** (plan 093, `LinePlate`): the
+- **The two gates hang one plate per line** (plan 094, `LinePlate`): the
   roundel, the name in the learner's language and nothing under it, the
   section's aside at the trailing edge (a due count), a foot, and the
   line's pigment as the 4px stripe along the bottom. The name is left-flush

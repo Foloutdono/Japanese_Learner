@@ -101,6 +101,7 @@ PLAN = [
     ("exam_attempts",       "user_id = %(user)s",       "exam history (the papers are a shared pool and stay)"),
     ("frequency_overrides", "user_id = %(user)s",       "per-user frequency-tier tweaks"),
     ("ocr_usage",           "user_id = %(user)s",       "the OCR daily counters"),
+    ("dictionary_favorites", "user_id = %(user)s",      "the dictionary's shelf of kept entries"),
     ("credit_ledger",       "user_id = %(user)s",       "the credit ledger: refills, fares, grants"),
     ("event_log",           "user_id = %(user)s",       "足跡: which screens were opened, and when"),
     ("event_daily",         "user_id = %(user)s",       "the rolled-up half of that same trail"),

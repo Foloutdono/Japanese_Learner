@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useMining } from '../components/analysis/useMining'
+import { useFavorites } from '../hooks/useFavorites'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { splitReadingTokens } from '../components/study/Readings'
@@ -29,7 +30,7 @@ import { Leave } from '../components/chrome/Bar'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
-import { TextLinesIcon, CameraIcon, VideoIcon } from '../components/ui/Icons'
+import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
@@ -84,6 +85,15 @@ const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 // can read end to end.
 const LEVELLED = ['kanji', 'vocab', 'grammar']
 
+// The learner's own shelf (plan 093): the entries the ★ on a plate
+// kept, across every collection, newest first. A sixth chip on the
+// collections row rather than a mode of one of them, because what it
+// holds spans all five — and it is filed on no level and answers no
+// query, so under it the console prints neither the level row nor the
+// field. It is served by routes/favorites.py in the catalogue's own
+// row shape, so the grid under it is the same grid.
+const FAVORITES = 'favorites'
+
 // Route: /dictionary — under the shell (plan 073: the canvas's
 // Dictionary). The bar, the analyzer's door, the console with the
 // collections and the field, then the catalogue: a grid of entry
@@ -111,13 +121,20 @@ export default function DictionaryScreen({ session }) {
 	// and are state from then on — the address is not rewritten as the
 	// learner moves between chips. Anything unrecognised is the default.
 	const [sp] = useSearchParams()
-	const initialCategory = CATEGORIES.some(([key]) => key === sp.get('category')) ? sp.get('category') : 'kanji'
+	const initialCategory = (CATEGORIES.some(([key]) => key === sp.get('category')) || sp.get('category') === FAVORITES)
+		? sp.get('category') : 'kanji'
 	const initialLevel = LEVELLED.includes(initialCategory) && LEVELS.includes(sp.get('level')) ? sp.get('level') : null
 
 	// The plate's add-to-deck roundel (a grammar entry's one action)
 	// writes through the same mining the analyzer uses; one instance
 	// for the screen, remembering the last deck chosen per kind.
 	const mining = useMining(session)
+	// The shelf, once for the screen: every plate's ★ and every tile's
+	// mark read it (hooks/useFavorites). `shelf` below is the same
+	// instance with one thing added — while the shelf itself is the
+	// catalogue, letting an entry go takes its tile off the grid, and
+	// keeping one again puts the grid back the way the server orders it.
+	const favorites = useFavorites(session)
 
 	const [mode, setMode]             = useState('search') // 'search' | 'radical'
 	const [query, setQuery]           = useState('')
@@ -240,7 +257,12 @@ export default function DictionaryScreen({ session }) {
 		// that mode for the same reason.
 		if (LEVELLED.includes(cat) && lvl && rad == null) params.set('level', lvl)
 
-		apiFetch(`/api/dictionary?${params.toString()}`, session)
+		// The shelf is its own endpoint, answering in the same shape: a
+		// page of rows, newest first, no query and no level to send.
+		const url = cat === FAVORITES
+			? `/api/dictionary/favorites?${new URLSearchParams({ page: p, limit, lang })}`
+			: `/api/dictionary?${params.toString()}`
+		apiFetch(url, session)
 			.then(r => r.json())
 			.then(data => {
 				const newResults = data.results || []
@@ -443,6 +465,27 @@ export default function DictionaryScreen({ session }) {
 		navigate(`/today/run?only=${encodeURIComponent(rawId)}`)
 	}
 
+	// The shelf as the plates and tiles see it (see `favorites` above).
+	// Off the shelf, a toggle is the hook's own. On it, the grid is the
+	// shelf: a tile let go leaves at once — the panel stays, so the
+	// star can be pressed again — and an entry kept again goes back to
+	// the head, which is where the server files the newest. Moved in
+	// place rather than refetched: a fetch would raise the loader over
+	// the grid and take the open panel down with it for a beat, to draw
+	// the same rows it had.
+	const shelf = {
+		...favorites,
+		toggle: async entry => {
+			const on = await favorites.toggle(entry)
+			if (category === FAVORITES && on != null) {
+				const others = prev => prev.filter(e => entryKey(e) !== entryKey(entry))
+				setResults(prev => (on ? [entry, ...others(prev)] : others(prev)))
+				setTotal(n => Math.max(0, n + (on ? 1 : -1)))
+			}
+			return on
+		},
+	}
+
 	function loadMore() {
 		fetchPage(page + 1, query, category, selectedRadical)
 	}
@@ -453,6 +496,7 @@ export default function DictionaryScreen({ session }) {
 	// each including voiced rows), so there's nothing to page through
 	// and a search box over a 71-symbol table adds little.
 	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
+	const isShelf = category === FAVORITES
 
 	return (
 		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
@@ -522,6 +566,21 @@ export default function DictionaryScreen({ session }) {
 								{label}
 							</Chip>
 						))}
+						{/* The shelf, last on the row (plan 093). It wears no
+						    line pigment: the five are places and this one is the
+						    learner's (DESIGN.md, "Three families"), so its on
+						    state washes in the ambient ink instead. The star is
+						    its glyph, drawn rather than set — the roundel a
+						    section chip carries is for a character. */}
+						<Chip
+							className="dict-fav-chip"
+							on={isShelf}
+							color="var(--text-primary)"
+							onClick={() => switchCategory(FAVORITES)}
+						>
+							<StarIcon size={12} filled={isShelf} />
+							{t.dictFavorites}
+						</Chip>
 					</Chips>
 					{/* The levels, under the three collections filed on them
 					    (LEVELLED). The JLPT level is the axis the whole
@@ -578,7 +637,7 @@ export default function DictionaryScreen({ session }) {
 				    least as often as a box to type in, so the one thing it did
 				    on arrival was hide itself. Both ways in are unchanged — tap
 				    the field, or press "/" (the keyboard effect above). */}
-				{!isSyllabary && (
+				{!isSyllabary && !isShelf && (
 					<ConsoleIndex
 						field={!showingRadicalGrid}
 						inputRef={searchRef}
@@ -674,6 +733,7 @@ export default function DictionaryScreen({ session }) {
 						onKanaClick={(k, type) => openEntry(k, type)}
 						onReview={reviewCard}
 						mining={mining}
+						favorites={shelf}
 						accentColor={TYPE_META[category]?.color}
 						t={t}
 					/>
@@ -695,6 +755,8 @@ export default function DictionaryScreen({ session }) {
 						onGrammarClick={openGrammar}
 						onReview={reviewCard}
 						mining={mining}
+						favorites={shelf}
+						shelf={isShelf}
 						t={t}
 					/>
 				)
@@ -710,7 +772,7 @@ export default function DictionaryScreen({ session }) {
 				<DictionaryLookupSheet
 					key={lookup.id ?? `${lookup.category}:${lookup.term}:${lookup.kana ?? ''}`}
 					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
-					session={session} mining={mining} over
+					session={session} mining={mining} favorites={shelf} over
 					onRadicalClick={jumpToRadical}
 					onReview={reviewCard}
 					onClose={() => setLookup(null)}
@@ -800,7 +862,7 @@ function cardFurigana(entry) {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
-function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining }) {
+function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
@@ -817,6 +879,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					onKanaClick={onKanaClick}
 					onReview={onReview}
 					mining={mining}
+					favorites={favorites}
 				/>
 			</aside>
 		</>
@@ -832,15 +895,20 @@ function cardHeadword(entry) {
 function ResultsSection({
 	loading, loadingMore, hasMore, results, total, query,
 	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick,
-	onKanaClick, onReview, mining, t,
+	onKanaClick, onReview, mining, favorites, shelf = false, t,
 }) {
 
 	return (
 		<>
 			{loading && <Loading />}
 
+			{/* An empty shelf names the one thing that fills it — the
+			    star — where an empty search names the word that found
+			    nothing (components/ui/Empty). */}
 			{!loading && results.length === 0 && (
-				<Empty icon={null} message={`${t.noResults} « ${query} »`} />
+				shelf
+					? <Empty icon={<StarIcon size={28} filled={false} />} message={t.dictFavoritesEmpty} hint={t.dictFavoritesHint} />
+					: <Empty icon={null} message={`${t.noResults} « ${query} »`} />
 			)}
 
 			{!loading && results.length > 0 && (
@@ -880,6 +948,16 @@ function ResultsSection({
 										].filter(Boolean).join(' ')}
 									>
 										<LevelBadge level={entry.level} />
+										{/* A kept entry carries the star in the corner the badge
+										    leaves free: at tile size it is the one mark that says
+										    "you have this one", in the ambient ink like the badge
+										    beside it, with the word for a screen reader. */}
+										{favorites?.has(entry) && (
+											<span className="dict-entry-card__fav">
+												<StarIcon size={12} />
+												<span className="sr-only">{t.dictFavorite}</span>
+											</span>
+										)}
 										{/* The stage is the card's bottom edge now (index.css,
 										    .dict-entry-card::after) — but an edge is a colour, and
 										    a colour is not a word: the tile keeps the word where a
@@ -921,7 +999,7 @@ function ResultsSection({
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
 							onGrammarClick={onGrammarClick} onKanaClick={onKanaClick} onReview={onReview}
-							mining={mining}
+							mining={mining} favorites={favorites}
 						/>
 					)}
 				</div>
@@ -1032,7 +1110,7 @@ function SyllabaryTable({ rows, cols, jp, title, byGroup, narrow = false, tail, 
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, accentColor, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, favorites, accentColor, t }) {
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -1144,7 +1222,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				<DetailDock
 					entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
-					onKanaClick={onKanaClick} onReview={onReview} mining={mining}
+					onKanaClick={onKanaClick} onReview={onReview} mining={mining} favorites={favorites}
 				/>
 			)}
 		</div>

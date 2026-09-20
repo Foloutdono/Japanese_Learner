@@ -9,7 +9,7 @@ import { playAnnouncement } from '../lib/audio'
 import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
 import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
 
-// ── 学習 — the Learn gate: the plates (plan 093) ──────────────
+// ── 学習 — the Learn gate: the plates (plan 094) ──────────────
 // One station plate per line, and no bar over them: the four SRS lines with
 // the stop the learner has reached at the foot of each, and the shelf
 // of decks as a fifth plate. Picking one announces it aloud and

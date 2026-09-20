@@ -1002,6 +1002,19 @@ const dictionary = {
   // what was typed found nothing. A statement, not a question.
   dictCorrectedFor:  'Results for',
   dictionaryPlaceholderGrammar: 'Search a point, a structure or a meaning...',
+  // お気に入り — the shelf of kept entries (plan 093): the sixth chip,
+  // the star on the plate in both states, and the shelf with nothing
+  // on it yet.
+  dictAdd:             'Add',
+  dictAddToDeck:       'Add to a deck',
+  dictFavorites:       'Favourites',
+  dictFavorite:        'Favourite',
+  dictFavoriteAdd:     'Keep in favourites',
+  dictFavoriteRemove:  'Remove from favourites',
+  dictFavoriteFailed:  "Couldn't save that.",
+  dictFavoriteFull:    'Favourites are full — remove one first.',
+  dictFavoritesEmpty:  'No favourites yet',
+  dictFavoritesHint:   'The star on an entry keeps it here.',
   // 文法 — the lesson (plan 087): the pair marks over the steps, the
   // door on every card and the station's index, the gate's one button.
   glLesson:          'Lesson',

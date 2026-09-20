@@ -7,7 +7,7 @@ import { LangProvider } from '../LangContext'
 // is loaded.
 import '../index.css'
 
-// ── The Learn gate (plan 068; plates since plan 093) ───────────
+// ── The Learn gate (plan 068; plates since plan 094) ───────────
 // One station plate per line behind the Learn gate, the shelf of
 // decks as a fifth. These pin what the wall map's tests pinned about
 // the map, on the plates that replaced it:

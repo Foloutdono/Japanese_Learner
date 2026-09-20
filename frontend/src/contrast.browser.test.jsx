@@ -205,7 +205,7 @@ const Fixture = () => (
       </button>
     </div>
 
-    {/* LinePlate.jsx (plan 093) -- the gates' plates on --surface: the
+    {/* LinePlate.jsx (plan 094) -- the gates' plates on --surface: the
         name, the foot's stop names in both registers, the due chip. */}
     <div className="plate" style={{ '--line-color': 'var(--line-vocab)' }}>
       <button type="button" className="plate__head">

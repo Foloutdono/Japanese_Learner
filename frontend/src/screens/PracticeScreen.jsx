@@ -9,7 +9,7 @@ import { Chip } from '../components/chrome/Console'
 import { Plate } from '../components/station/LinePlate'
 import { LEVELS } from '../domain/sentenceSource'
 
-// ── 実践 — the Practice gate: five platforms (plan 068, plates since 093) ──
+// ── 実践 — the Practice gate: five platforms (plan 068, plates since 094) ──
 // Reading practice, reading comprehension, translation, dictation,
 // the mock exam — the sentence-level sections, which schedule words
 // rather than levels and so have no line on the map. One station

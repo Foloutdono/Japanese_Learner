@@ -108,6 +108,10 @@ EVENTS: dict[str, frozenset[str]] = {
     # into it — a deck name or a search term is a learner's own words,
     # which is the rule this module exists to keep.
     "library_view":   frozenset({"sort", "results", "filtered"}),
+    # ── お気に入り — the dictionary's shelf (plan 093) ────────────
+    # The kind of entry and the direction, never the key: a key names
+    # the word a learner looked up, which is theirs.
+    "favorite_toggle": frozenset({"kind", "on"}),
 
     # ── Friction ─────────────────────────────────────────────────
     # `path` is a route pattern, never a URL with ids in it, and no
