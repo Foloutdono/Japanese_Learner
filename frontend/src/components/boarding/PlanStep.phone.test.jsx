@@ -128,9 +128,9 @@ describe('the plan at 390×844', () => {
   it('still prints the colon the lead ends on', async () => {
     const screen = await mount()
     const lead = screen.container.querySelector('.brd-lead')
-    // Welded, not deleted: the sentence still ends "pour vous :".
+    // Welded, not deleted: the sentence still ends "pour toi :".
     expect(lead.textContent.endsWith(' :')).toBe(true)
-    expect(lead.textContent).toContain('pour vous')
+    expect(lead.textContent).toContain('pour toi')
   })
 
   it('keeps the whole arrival inside the phone', async () => {

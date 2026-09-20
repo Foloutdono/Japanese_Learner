@@ -197,7 +197,7 @@ describe('LearnScreen — the plates', () => {
       expect(plates).toHaveLength(4)
       expect(plates.map(p => p.querySelector('.plate__title').textContent)).toEqual(['Kana', 'Kanji', 'Vocabulaire JLPT', 'Grammaire'])
       expect(plates.map(p => p.classList.contains('plate--off'))).toEqual([false, false, true, true])
-      expect(plates[2].querySelector('.plate__meta').textContent).toBe('Hors de votre trajet')
+      expect(plates[2].querySelector('.plate__meta').textContent).toBe('Hors de ton trajet')
       expect(plates[0].querySelector('.plate__meta')).toBeNull()
       // Off the route is not off the map: the plate still departs.
       plates[3].querySelector('.plate__head').click()
