@@ -2,11 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useProfileSummary } from '../stores/profileSummary'
 import { getSections } from '../config/tabs'
-import { HOME_STATION } from '../config/stations'
 import { beginDeparture } from '../stores/departure'
 import { board } from '../stores/boarding'
 import { playAnnouncement, playUi } from '../lib/audio'
-import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { Plate } from '../components/station/LinePlate'
 import { LEVELS } from '../domain/sentenceSource'
@@ -14,8 +12,8 @@ import { LEVELS } from '../domain/sentenceSource'
 // ── 実践 — the Practice gate: five platforms (plan 068, plates since 093) ──
 // Reading practice, reading comprehension, translation, dictation,
 // the mock exam — the sentence-level sections, which schedule words
-// rather than levels and so have no line on the map. The gate's own
-// bar over one station plate per section, the same plate the Learn
+// rather than levels and so have no line on the map. One station
+// plate per section, the same plate the Learn
 // gate hangs (components/station/LinePlate.jsx), so the two gates are
 // one screen twice rather than a map you read beside a grid you
 // press. Boarding one announces it and departs through the gate, like
@@ -30,13 +28,11 @@ import { LEVELS } from '../domain/sentenceSource'
 // station these plates open, and on the gate the departure passes
 // through.
 //
-// The bar is the concourse's, not a line's: the home roundel and the
-// gold, exactly as the Learn gate wears them. It was the `register`
-// variant — no roundel, a grey hairline — on the reasoning that
-// Practice is not a place on a line, and that reading was right about
-// the map and wrong about the screen: it made the one gate of five
-// that carries no roundel and no pigment, which reads as unfinished
-// rather than as different.
+// No bar over the plates. The gate opened on the concourse's bar
+// (辻 · Practice · FOUR PLATFORMS) until the owner had the head taken
+// off the four gates (2026-09-20, see LearnScreen.jsx): the tab bar
+// captions the gate you are on already. The name stays as the
+// screen's clipped <h1>.
 //
 // ── The platforms carry their departures ──
 // What a platform sign is FOR is where the trains go. Every one of
@@ -83,7 +79,7 @@ export default function PracticeScreen() {
 
   return (
     <main id="main-content" className="practice">
-      <Bar code={HOME_STATION.code} title={t.tabPractice} sub={t.practiceSub} color="var(--accent2)" />
+      <h1 className="sr-only">{t.tabPractice}</h1>
       <div className="plates">
         {platforms.map(section => (
           <Plate

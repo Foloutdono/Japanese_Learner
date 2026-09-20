@@ -1,18 +1,16 @@
 import { useEffect, useState } from 'react'
 import { useLang } from '../LangContext'
 import { getSections } from '../config/tabs'
-import { HOME_STATION } from '../config/stations'
 import { apiJson } from '../lib/api'
 import { useTodaySummary } from '../stores/today'
 import { useStats } from '../stores/stats'
 import { beginDeparture } from '../stores/departure'
 import { playAnnouncement } from '../lib/audio'
 import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
-import { Bar } from '../components/chrome/Bar'
 import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
 
 // ── 学習 — the Learn gate: the plates (plan 093) ──────────────
-// The bar, then one station plate per line: the four SRS lines with
+// One station plate per line, and no bar over them: the four SRS lines with
 // the stop the learner has reached at the foot of each, and the shelf
 // of decks as a fifth plate. Picking one announces it aloud and
 // departs through the gate wipe to its station.
@@ -23,6 +21,13 @@ import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
 // the shelf plate's figures. All fail quiet: the plates hang with
 // nobody aboard rather than shouting (the run owns up on Today, where
 // the retry lives).
+//
+// The gate prints no head. It opened on the concourse's bar — 辻 over
+// "Route map", "Four lines" at the far end — and the owner had it
+// removed from the four gates (2026-09-20): the tab bar already
+// captions the gate you are on, and a bar under the HUD naming the
+// same place was a second title. The name stays as the screen's one
+// <h1>, clipped, so a screen reader still lands somewhere named.
 export default function LearnScreen({ session }) {
   const { t } = useLang()
   const today = useTodaySummary().data
@@ -52,7 +57,7 @@ export default function LearnScreen({ session }) {
 
   return (
     <main id="main-content" className="learn">
-      <Bar code={HOME_STATION.code} title={t.routeMap} sub={t.learnFourLines} color="var(--accent2)" />
+      <h1 className="sr-only">{t.tabLearn}</h1>
       <div className="plates">
         {lines.map(section => {
           const source = TRACKED[section.path]

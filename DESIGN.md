@@ -803,8 +803,16 @@ a learner who has just rated one card is already looking for the next.
 - **Both bars are sumi with the two panel inks and no line colour.** The
   pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
   aside, and a 2px stripe in the section's colour under it. A screen that
-  is not a place on a line (Practice, the halls behind the pass) takes the
+  is not a place on a line (the halls behind the pass) takes the
   `--register` bar: no roundel, a hairline.
+- **A gate prints no bar** (owner's call, 2026-09-20). Today, Learn,
+  Practice and Dictionary opened on the concourse's bar — 辻 over the
+  gate's name, a caption or the date at the far end — under a HUD, over a
+  tab bar that already captions the gate you are on: the same place named
+  twice within a thumb's reach. The screen begins with its content; the
+  name stays as the screen's one `<h1>`, clipped (`.sr-only`), so a screen
+  reader still lands somewhere named. A *station* behind a gate keeps its
+  bar — that is where the pigment and the way out live.
 - **Japanese is content, not chrome.** The interface speaks the learner's
   language; a word, a sentence, a deck's name, a card's stage are
   Japanese. The

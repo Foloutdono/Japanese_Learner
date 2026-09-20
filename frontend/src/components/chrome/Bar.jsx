@@ -7,11 +7,13 @@ import { ChevronIcon } from '../ui/Icons'
 
 // ── The compact header (plan 068) ─────────────────────────────
 // One row — roundel, title, sub, aside — and the section's pigment as
-// a rule under it. Every tab screen opens with one; the `register`
+// a rule under it. Every station screen opens with one; the `register`
 // variant has no roundel and a hairline instead of the pigment, for a
-// screen that is not a place on a line at all. The five gates are not
-// that case — each wears a roundel and a colour, the concourse's gold
-// where it is not a line's own — so the variant is left to ScreenBar,
+// screen that is not a place on a line at all. The gates themselves
+// print no bar since 2026-09-20 (owner's call): the tab bar captions
+// the gate you are on, and a head under the HUD naming the same place
+// was a second title — each keeps its name as a clipped <h1>. The
+// profile never had one; it is the pass. So the variant is left to ScreenBar,
 // for a path with no section behind it.
 //
 // The sign puts the name at one end and its caption at the other, which

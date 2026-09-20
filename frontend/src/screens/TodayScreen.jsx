@@ -1,7 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { Bar } from '../components/chrome/Bar'
-import { stationFor } from '../config/stations'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useCredits } from '../stores/credits'
 import GateCard from '../components/station/GateCard'
@@ -49,18 +47,17 @@ export default function TodayScreen() {
   const location = useLocation()
   const { data: today, failed } = useTodaySummary()
   const credits = useCredits()
-  const station = stationFor('/today')
 
   // What the run just cleared, handed back through the router's state
   // (screens/TodayRun.jsx). A reload has no state and shows the gate.
   const run = location.state?.run
 
-  // "Sat 5 Sep" — the bar's sub, on the learner's calendar.
-  const dateSub = new Intl.DateTimeFormat(lang, { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date())
-
   return (
     <main id="main-content" className="today">
-      <Bar code={station.code} title={t.todayTitle} sub={dateSub} color="var(--accent2)" />
+      {/* No bar: the gate's head (本日 · Today · the date) came off the
+          four gates on the owner's call (2026-09-20, see LearnScreen.jsx).
+          The name stays as the screen's clipped <h1>. */}
+      <h1 className="sr-only">{t.todayTitle}</h1>
 
       {run ? (
         <RunComplete

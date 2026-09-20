@@ -258,9 +258,11 @@ beforeEach(() => {
 })
 
 describe('the dictionary screen', () => {
-  it("opens on the bar, the analyzer's door and the console of collections", async () => {
+  it("opens on the analyzer's door and the console of collections, with no bar", async () => {
     const screen = await renderScreen()
-    expect(screen.container.querySelector('.bar__title').textContent).toBe(T.dictionaryTitle)
+    // No bar (owner's call, 2026-09-20): the name is the clipped <h1>.
+    expect(screen.container.querySelector('.bar')).toBeNull()
+    expect(screen.container.querySelector('h1.sr-only').textContent).toBe(T.dictionaryTitle)
 
     // The door names the analyzer and its three intakes, and opens it.
     // The row is a container of buttons, not a button: its three

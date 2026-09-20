@@ -47,7 +47,6 @@ const nav = {
   tabDictionary:     'Dictionary',
   tabProfile:        'Profile',
   tabBarLabel:       'Sections',
-  practiceSub:       'Four platforms',
   hudStatusLabel:    'Goal status',
   hudOffline:        'Offline',
   hudDays:           (n) => `${n}d`,
@@ -434,7 +433,6 @@ const stats = {
   dueUnit:            'due',
   stageGate:          'Gate',
   nothingGraded:      'Nothing is graded',
-  learnFourLines:     'Four lines',
   stationJlpt:        'JLPT',
   // The sub over vocabulary's and kanji's source page. Terse, like
   // every other sub on a station: it names the page you are on, and

@@ -122,7 +122,7 @@ beforeEach(() => {
 })
 
 describe('LearnScreen — the plates', () => {
-  it('keeps every line reachable: 4 line plates, the shelf as a fifth, one heading on the bar', async () => {
+  it('keeps every line reachable: 4 line plates, the shelf as a fifth, no bar over them', async () => {
     const screen = await mount()
     await settle()
     const root = screen.container
@@ -134,8 +134,11 @@ describe('LearnScreen — the plates', () => {
     expect(shelf[0].querySelector('.plate__meta').textContent).toContain('2')
     expect(shelf[0].querySelector('.plate__meta').textContent).toContain('47')
     expect(shelf[0].querySelector('.plate__due').textContent).toContain('3')
+    // No bar over the plates (owner's call): the name is the screen's
+    // one <h1>, clipped for a screen reader, and nothing prints it.
     expect(root.querySelectorAll('h1')).toHaveLength(1)
-    expect(root.querySelector('h1.bar__title')).toBeTruthy()
+    expect(root.querySelector('h1').classList.contains('sr-only')).toBe(true)
+    expect(root.querySelector('.bar')).toBeNull()
   })
 
   it('names the stop reached at the foot, and carries the due chips from the shared store', async () => {

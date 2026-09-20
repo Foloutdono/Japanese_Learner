@@ -117,7 +117,7 @@ draw and readings faces keep their button under the widget).
 
 | Canvas class | `index.css` block | Component |
 |---|---|---|
-| `.platform-card--line` | the hub — retired for the Learn gate's plates (plan 093, `.plate--platform`, the grades in `.plate__foot--dests`) | `screens/PracticeScreen.jsx` (plan 068) — its bar is the concourse's, the home roundel and the gold, as the Learn gate's is; it was `.bar--register` until that made it the one gate of five with neither roundel nor pigment |
+| `.platform-card--line` | the hub — retired for the Learn gate's plates (plan 093, `.plate--platform`, the grades in `.plate__foot--dests`) | `screens/PracticeScreen.jsx` (plan 068). Its bar was the concourse's, the home roundel and the gold, as the Learn gate's was; since 2026-09-20 no gate prints a bar at all (DESIGN.md, The chrome) — the name is a clipped `<h1>` |
 | `.timer`, `.timer__bar`, `.timer__fill` (`--low`), `.timer__label` | the practice sessions | `screens/ReadingRun.jsx`, `screens/ComprehensionRun.jsx` |
 | `.sentence`, `.sentence--left`, `.sentence--covered` | the card's one line | `ReadingRun.jsx` |
 | `.prose`, `.prose__label`, `.prose__en` (`--lead`), `.prose__jp` (`--passage`), `.prose__romaji`, `.prose__ai`, `.prose__rule`, `.prose__verdict` (`--ok`, `--x`), `.prose__breakdown` | the card as a page — `PromptCard`'s `prose` prop puts it on `.prompt-card__body` (`.prompt-card__body--prose`) | `ReadingRun.jsx`, `screens/TranslationRun.jsx`, `ComprehensionRun.jsx` |
