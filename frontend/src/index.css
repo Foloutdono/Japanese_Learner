@@ -19834,13 +19834,50 @@ a.slip__act { text-decoration: none; }
    Appended, like everything else that refines the dictionary block
    above: equal specificity, and nothing here redefines a rule.
 
-   The star is the learner's mark, so it wears no line pigment
-   (DESIGN.md, "Three families"): the ambient ink, outlined until
-   pressed and filled once kept. What the kept state earns is the ring
-   — the selection ring, 辞書's own, the one .dict-plate__btn already
-   shows on approach, held. */
-.dict-plate__fav--on { border-color: var(--line-color, var(--accent2)); }
-.dict-plate__fav:disabled { opacity: 0.45; }
+   The ＋ is the plate's one action and opens a menu of its two
+   destinations. Kept, it earns the ring — the selection ring, 辞書's
+   own, the one .dict-plate__btn already shows on approach, held. The
+   star in the menu row is the learner's mark, so it wears no line
+   pigment (DESIGN.md, "Three families"): the ambient ink, outlined
+   until kept and filled once it is. */
+.dict-plate__add { position: relative; display: inline-flex; }
+.dict-plate__add-btn--kept { border-color: var(--line-color, var(--accent2)); }
+/* The menu hangs under the ＋, flush with its trailing edge, on the
+   app's one card surface; it sits inside the sticky plate, which is
+   already above the body it hangs over. */
+.dict-add-menu {
+  position: absolute;
+  top: calc(100% + var(--sp-2));
+  right: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: max-content;
+  padding: var(--sp-2);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.dict-add-menu__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-4);
+  border: 0;
+  border-radius: var(--r-flat);
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-align: left;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.dict-add-menu__row:hover,
+.dict-add-menu__row:focus-visible { background: var(--bg-card-hover); filter: none; }
 
 /* On the tile, the corner the level badge leaves free, in the badge's
    own ink and at its own weight — a mark that says "you have this

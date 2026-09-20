@@ -513,11 +513,11 @@ describe('the dictionary screen', () => {
     expect(plate.querySelector('.dict-plate__level').textContent).toBe('N5')
     expect(plate.querySelector('.stage-mark').textContent).toBe(T.learning)
     expect(plate.querySelector('.dict-plate__yomi')).toBeNull()
-    // No speaker — a pattern is not said — but the star, the add
-    // roundel, then ✕.
+    // No speaker — a pattern is not said — but the ＋ (shelf and deck
+    // behind it), then ✕.
     expect(plate.querySelector(`[aria-label="${T.listen}"]`)).toBeNull()
     const actions = [...plate.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
-    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.dictFavoriteAdd, T.mineToDeck, T.close])
+    expect(actions.map(b => b.getAttribute('aria-label'))).toEqual([T.dictAdd, T.close])
     // The body: the two sentences with their ruby, then the record —
     // and nothing drawn. The formation and the gloss are on the plate
     // above and were printed a second time here until plan 089.
@@ -871,7 +871,14 @@ describe('the shelf', () => {
     return fn().finally(() => apiJson.mockImplementation(prev))
   }
 
-  it('lights the star on a kept entry and marks its tile; the star keeps and lets go with one write each', () =>
+  // The shelf row under the plate's ＋, and the row's state.
+  const openMenu = async screen => {
+    screen.container.querySelector('.dict-dock .dict-plate__add-btn').click()
+    await settle(30)
+    return screen.container.querySelector('.dict-dock .dict-add-menu__row[role="menuitemcheckbox"]')
+  }
+
+  it('marks a kept tile; the ＋ opens the shelf row, which keeps and lets go with one write each', () =>
     withShelf([FAV_KANJI], async () => {
       const screen = await renderScreen()
       const cards = [...screen.container.querySelectorAll('.dict-grid .dict-entry-card')]
@@ -881,32 +888,32 @@ describe('the shelf', () => {
       expect(cards[0].querySelector('.dict-entry-card__fav .sr-only').textContent).toBe(T.dictFavorite)
       expect(cards[1].querySelector('.dict-entry-card__fav')).toBeNull()
 
-      // Open 電車: the plate's star is out, between the speaker and the ✕.
+      // Open 電車: three ghosts, the ＋ between the speaker and the ✕.
       cards[1].click()
       await settle(80)
-      const star = () => screen.container.querySelector('.dict-dock .dict-plate__fav')
-      expect(star().getAttribute('aria-pressed')).toBe('false')
-      expect(star().getAttribute('aria-label')).toBe(T.dictFavoriteAdd)
-      // The ghosts, in order: the speaker, the star, the ＋ (the deck
-      // list mining loaded offers nothing for a word), the ✕.
       const labels = [...screen.container.querySelectorAll('.dict-dock .dict-plate__actions .dict-plate__btn')]
         .map(b => b.getAttribute('aria-label'))
-      expect(labels[0]).toBe(T.listen)
-      expect(labels[1]).toBe(T.dictFavoriteAdd)
-      expect(labels.at(-1)).toBe(T.close)
+      expect(labels).toEqual([T.listen, T.dictAdd, T.close])
+      const plus = () => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
 
-      star().click()
+      let row = await openMenu(screen)
+      expect(row.getAttribute('aria-checked')).toBe('false')
+      expect(row.textContent).toBe(T.dictFavoriteAdd)
+      row.click()
       await settle(60)
       expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: true }])
-      expect(star().getAttribute('aria-pressed')).toBe('true')
-      expect(star().getAttribute('aria-label')).toBe(T.dictFavoriteRemove)
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
       // The tile under the dock took the mark at once.
       expect(cards[1].querySelector('.dict-entry-card__fav')).not.toBeNull()
 
-      star().click()
+      row = await openMenu(screen)
+      expect(row.getAttribute('aria-checked')).toBe('true')
+      expect(row.textContent).toBe(T.dictFavoriteRemove)
+      row.click()
       await settle(60)
       expect(PUTS.at(-1)).toEqual({ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false })
-      expect(star().getAttribute('aria-pressed')).toBe('false')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
       expect(cards[1].querySelector('.dict-entry-card__fav')).toBeNull()
     }))
 
@@ -950,27 +957,27 @@ describe('the shelf', () => {
 
       cards()[0].click()
       await settle(80)
-      const star = () => screen.container.querySelector('.dict-dock .dict-plate__fav')
-      expect(star().getAttribute('aria-pressed')).toBe('true')
-      star().click()
+      const plus = () => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
+      ;(await openMenu(screen)).click()
       await settle(60)
       expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false }])
       // The tile is gone; the plate stays, so the star can be pressed again.
       expect(cards().length).toBe(1)
       expect(headwordOf(screen.container.querySelector('.dict-dock'))).toBe('電車')
-      expect(star().getAttribute('aria-pressed')).toBe('false')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
 
       // Kept again, the tile returns at the head — where the server
       // files the newest — without a fetch, so the open plate never
       // gives way to the loader.
       const before = apiFetch.mock.calls.length
-      star().click()
+      ;(await openMenu(screen)).click()
       await settle(60)
       expect(apiFetch.mock.calls.length).toBe(before)
       expect(cards().length).toBe(2)
       expect(cards()[0].querySelector('.dict-entry-card__char ruby').firstChild.textContent).toBe('電車')
       expect(cards()[0].querySelector('.dict-entry-card__fav')).not.toBeNull()
-      expect(star().getAttribute('aria-pressed')).toBe('true')
+      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
     }))
 
   it('opens on the shelf when its address names it', () =>

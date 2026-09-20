@@ -1006,6 +1006,8 @@ const dictionary = {
   // お気に入り — the shelf of kept entries (plan 092): the sixth chip,
   // the star on the plate in both states, and the shelf with nothing
   // on it yet.
+  dictAdd:             'Add',
+  dictAddToDeck:       'Add to a deck',
   dictFavorites:       'Favourites',
   dictFavorite:        'Favourite',
   dictFavoriteAdd:     'Keep in favourites',

@@ -12,7 +12,7 @@ import { StrokeOrderAnimation } from '../study/StrokeOrderAnimation'
 import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
-import { MineButton } from '../analysis/MineButton'
+import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { speakJapanese } from '../../lib/audio'
@@ -567,13 +567,14 @@ function headwordSize(text) {
 // quiz has no run to send anyone to, and an action with nowhere to go
 // is not a fact the way an inert row is, it is a dead control.
 //
-// `favorites` (a useFavorites instance, optional) is what makes the ★
-// exist: the plate's bookmark, keeping this entry on the learner's own
-// shelf in the dictionary (plan 092). A shelf and a deck are different
-// things and the plate says so with two roundels — the star keeps the
-// entry to read again, the ＋ writes a card the scheduler will ask for.
-// Without `favorites` there is no star, the way there is no ＋ without
-// `mining`: a sheet over a quiz has no shelf to file into.
+// `favorites` (a useFavorites instance, optional) is the learner's
+// shelf in the dictionary (plan 092). The plate's ＋ opens a menu of
+// the two places an entry can be put: on the shelf (a bookmark, to
+// read again) and in a deck (a card the scheduler will ask for). Each
+// row exists only where its caller can honour it — no shelf row
+// without `favorites`, no deck row without `mining` and a card — and
+// with neither there is no ＋ at all: a sheet over a quiz files
+// nowhere.
 export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
@@ -742,18 +743,50 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const hiddenReadings = tokens.length - shownReadings.length
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
-  // ── The star ──
-  // Lit from the shelf the screen holds (favorites.has), turned by one
-  // optimistic write. The only thing the plate says about it is the one
-  // time it did not take, beside the star in the caption register — the
-  // same slot the ＋ prints "in deck" in. The state itself is the
-  // shelf's, so opening another entry needs no reset; the refusal is
-  // keyed to the entry it was about, the way the readings sheet is, so
-  // it cannot follow the reader onto the next plate.
+  // ── The ＋ and its menu ──
+  // The shelf half: lit from the shelf the screen holds (favorites.has),
+  // turned by one optimistic write. The only thing the plate says about
+  // it is the one time it did not take, beside the ＋ in the caption
+  // register — the slot the deck half prints "in deck" in. The state
+  // itself is the shelf's, so opening another entry needs no reset; the
+  // refusal is keyed to the entry it was about, the way the readings
+  // sheet is, so it cannot follow the reader onto the next plate.
   const kept = !!favorites?.has(entry)
   const [favPending, setFavPending] = useState(false)
   const [favRefusal, setFavRefusal] = useState(null)
   const favError = favRefusal?.key === entryKey(entry) ? favRefusal.message : null
+  // The deck half: the analyzer's own press (useMineAction) — the
+  // remembered deck or the picker, then the write. Run on a stand-in
+  // where there is no mining, so the hook order holds.
+  const canMine = !!(mining && appCard)
+  const mine = useMineAction({
+    mining: mining ?? INERT_MINING,
+    kind: appCard?.source,
+    t,
+    onMine: deckId => mining.mineApp({
+      deckId,
+      source: appCard.source,
+      level: appCard.level,
+      rawId: appCard.raw_id,
+      kind: appCard.source,
+    }),
+  })
+  // The menu: open under the ＋, closed by a choice, a press outside or
+  // Escape. Keyed to the entry so it never survives onto the next.
+  const [menuFor, setMenuFor] = useState(null)
+  const menuOpen = menuFor === entryKey(entry)
+  const addRef = useRef(null)
+  useEffect(() => {
+    if (!menuOpen) return
+    function onDown(e) { if (!addRef.current?.contains(e.target)) setMenuFor(null) }
+    function onKey(e) { if (e.key === 'Escape') { e.stopPropagation(); setMenuFor(null) } }
+    document.addEventListener('pointerdown', onDown)
+    window.addEventListener('keydown', onKey, true)
+    return () => {
+      document.removeEventListener('pointerdown', onDown)
+      window.removeEventListener('keydown', onKey, true)
+    }
+  }, [menuOpen])
   async function toggleFavorite() {
     setFavRefusal(null)
     setFavPending(true)
@@ -814,57 +847,71 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 <SpeakIcon />
               </button>
             )}
-            {/* The bookmark (plan 092): a ghost like its neighbours,
-                the star drawn as an outline until it is pressed and
-                filled in the ambient ink once it is — the shelf is the
-                learner's, so the mark wears no line pigment (DESIGN.md,
-                "Three families"); the ring it earns when kept is the
-                selection ring, 辞書's own. aria-pressed says which. */}
-            {favorites && (
-              <button
-                type="button"
-                onClick={toggleFavorite}
-                disabled={favPending}
-                className={`dict-plate__btn dict-plate__fav${kept ? ' dict-plate__fav--on' : ''}`}
-                aria-pressed={kept}
-                title={kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
-                aria-label={kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
-              >
-                <StarIcon size={16} filled={kept} />
-              </button>
-            )}
-            {favError && (
-              <span className="analysis-mine-status" role="status">{favError}</span>
-            )}
-            {/* The plate's one action: this entry into one of the
-                learner's decks, the analyzer's own mine write. A ghost
-                like the two beside it — gold cannot carry a filled
-                action (DESIGN.md, "the primary button"). The outcome
-                ("in deck") prints beside it in the caption register.
+            {/* The plate's one action, with two destinations (plan
+                092): the ＋ opens a menu — keep on the shelf, add to a
+                deck — rather than a roundel per place, so the row stays
+                three ghosts wherever the entry opens. A ghost like the
+                two beside it — gold cannot carry a filled action
+                (DESIGN.md, "the primary button") — earning the
+                selection ring, 辞書's own, once the entry is kept. The
+                outcome of either choice ("in deck", or a refusal) prints
+                beside it in the caption register.
 
-                It was a grammar point's alone, which made the same
-                object three different cards depending on what was in
-                it. `entry.app_card` is the server's answer to "is
-                there a card behind this entry", so a JMdict pool word
-                — which has a raw id and no card — correctly gets no ＋
-                rather than a button that adds nothing. */}
-            {mining && appCard && (
-              <MineButton
-                mining={mining}
-                kind={appCard.source}
-                t={t}
-                className="dict-plate__btn"
-                label={<PlusIcon size={16} />}
-                ariaLabel={t.mineToDeck}
-                onMine={deckId => mining.mineApp({
-                  deckId,
-                  source: appCard.source,
-                  level: appCard.level,
-                  rawId: appCard.raw_id,
-                  kind: appCard.source,
-                })}
-              />
+                The deck row exists where the server says there is a
+                card: `entry.app_card` is its answer to "is there a card
+                behind this entry", so a JMdict pool word — a raw id and
+                no card — gets no deck row rather than one that adds
+                nothing. The shelf row exists where the screen holds a
+                shelf; a sheet over a quiz holds none. */}
+            {(favorites || canMine) && (
+              <span className="dict-plate__add" ref={addRef}>
+                <button
+                  type="button"
+                  onClick={() => setMenuFor(menuOpen ? null : entryKey(entry))}
+                  disabled={favPending || mine.pending}
+                  className={`dict-plate__btn dict-plate__add-btn${kept ? ' dict-plate__add-btn--kept' : ''}`}
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  title={t.dictAdd}
+                  aria-label={t.dictAdd}
+                >
+                  <PlusIcon size={16} />
+                </button>
+                {menuOpen && (
+                  <div className="dict-add-menu" role="menu" aria-label={t.dictAdd}>
+                    {favorites && (
+                      <button
+                        type="button"
+                        role="menuitemcheckbox"
+                        aria-checked={kept}
+                        className="dict-add-menu__row"
+                        onClick={() => { setMenuFor(null); toggleFavorite() }}
+                      >
+                        <StarIcon size={14} filled={kept} />
+                        {kept ? t.dictFavoriteRemove : t.dictFavoriteAdd}
+                      </button>
+                    )}
+                    {canMine && (
+                      <button
+                        type="button"
+                        role="menuitem"
+                        className="dict-add-menu__row"
+                        onClick={e => { setMenuFor(null); mine.press(e) }}
+                      >
+                        <PlusIcon size={14} />
+                        {mine.addedOnce ? t.addToAnotherDeck : t.dictAddToDeck}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </span>
             )}
+            {(favError || mine.outcomeText) && (
+              <span className={favError ? 'analysis-mine-status' : mine.outcomeClassName} role="status">
+                {favError ?? mine.outcomeText}
+              </span>
+            )}
+            {mine.picker}
             <button
               type="button"
               onClick={onClose}

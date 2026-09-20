@@ -969,6 +969,8 @@ const dictionary = {
   // Voir en/index.js : une constatation, pas une question.
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens...',
+  dictAdd:             'Ajouter',
+  dictAddToDeck:       'Ajouter à un deck',
   dictFavorites:       'Favoris',
   dictFavorite:        'Favori',
   dictFavoriteAdd:     'Garder en favoris',
