@@ -67,6 +67,28 @@ class MeasureTests(unittest.TestCase):
             with self.subTest(answer=answer):
                 self.assertEqual(dictation.measure(answer, N5)["accuracy"], 100)
 
+    def test_a_line_with_no_kana_form_is_still_measured(self) -> None:
+        """読解 holds a sentence and its romaji and no separate kana
+        line (routes/reading.check_reading). A form nobody passed is
+        simply not one of the ways the answer could have been written —
+        it must not drag the figure down, and it must not be the form
+        the measure claims to have matched."""
+        full = dictation.measure_forms(
+            N5["romaji"], jp=N5["jp"], romaji=N5["romaji"],
+        )
+        self.assertEqual(full, {"accuracy": 100, "matched": "romaji"})
+
+        written = dictation.measure_forms(N5["jp"], jp=N5["jp"], romaji=N5["romaji"])
+        self.assertEqual(written, {"accuracy": 100, "matched": "written"})
+
+    def test_a_line_given_in_no_form_at_all_measures_nothing(self) -> None:
+        """Not an error: a caller with no reference to measure against
+        gets the honest figure rather than a crash or a false 100."""
+        self.assertEqual(
+            dictation.measure_forms("kyou wa"),
+            {"accuracy": 0, "matched": None},
+        )
+
     def test_a_dropped_geminate_still_costs(self) -> None:
         """きって and きて are different words and audibly different, so
         the fold must not forgive a missing っ."""

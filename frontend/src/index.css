@@ -9357,6 +9357,27 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
+/* The answer's label carries the measurement on its own right: how
+   much of the line the server matched, beside the line it matched
+   against. Not a verdict and deliberately not drawn as one — the
+   verdict is the rating bar under the card, and it is the learner's.
+   In the prose family rather than 書取's own (where it was born)
+   because 読解 prints the same figure from the same measure, and a
+   .kaki- class reused on the reading stage would only say otherwise. */
+.prose__label--measured {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.prose__measure {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: normal;
+  text-transform: none;
+  color: var(--text-secondary);
+}
 .prose__en {
   font-family: var(--font-display);
   font-size: var(--fs-lead);
@@ -9571,25 +9592,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   color: var(--text-secondary);
 }
-/* The answer's label carries the measurement on its own right: how
-   much of the line the server matched, beside the line it matched
-   against. Not a verdict and deliberately not drawn as one — the
-   verdict is the rating bar under the card, and it is the learner's. */
-.kaki-answer__label {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--sp-4);
-}
-.kaki-accuracy {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: normal;
-  text-transform: none;
-  color: var(--text-secondary);
-}
-
 /* The rail's fill is the state, not the animation: under reduced
    motion it still shows where the clip is, it just stops sliding
    there. Same answer for the roundel's fill on hover. */
@@ -9746,10 +9748,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .bkd-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   grid-template-areas:
-    "word reading lvl"
-    "meaning meaning lvl";
+    "word reading mark lvl"
+    "meaning meaning mark lvl";
   gap: var(--sp-1) var(--sp-3);
   align-items: baseline;
   padding: var(--sp-2) 0;
@@ -9781,10 +9783,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   grid-area: lvl;
   align-self: center;
 }
+/* The grammatical marker this row is an instance of — the は of 今日は,
+   the へ of へ — as a door to its own card, next to the level badge and
+   drawn like one: the row already carries a word, a reading and a
+   meaning, and the particle is one character, so it earns a chip and
+   not a line. A construction (〜ます／〜ません) stays in the chips under
+   the rows, where it can be printed in full. */
+.bkd-row__mark {
+  grid-area: mark;
+  align-self: center;
+  padding: var(--sp-1) var(--sp-3);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--bg-card);
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+.bkd-row__mark:hover,
+.bkd-row__mark:focus-visible {
+  border-color: var(--line-color, var(--accent));
+  color: var(--text-primary);
+}
 @media (min-width: 768px) {
   .bkd-row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-    grid-template-areas: "word reading meaning lvl";
+    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "word reading meaning mark lvl";
   }
 }
 /* The passage: the sentences stacked, a hairline between them, the
@@ -13147,6 +13173,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    not as much as what the deck is. */
 .lib-card__author { color: var(--text-secondary); }
 
+/* A deck's name, its author's name and the blurb under them are the
+   learner's own text, and a learner's text does not come with spaces
+   where a column needs them: "KeenSakura6224666666" is one word wider
+   than the body it sits in, and it set straight on through the aside's
+   hairline and under the card count. A word with nowhere to break
+   breaks anywhere, here alone -- the app's own copy never reaches this
+   rule, because break-word only breaks a word that has no other way to
+   fit. */
+.deck-card .platform-card__title,
+.lib-card .platform-card__desc,
+.lib-card__blurb { overflow-wrap: break-word; }
+
 .lib-card__blurb {
   display: -webkit-box;
   -webkit-box-orient: vertical;
@@ -13163,11 +13201,31 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .lib-card__follows {
   display: block;
   margin-top: var(--sp-1);
+  min-height: var(--sp-6);
   color: var(--text-secondary);
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   letter-spacing: var(--tr-caption);
   text-align: center;
+}
+
+/* The aside's hairline is a column edge shared down the whole shelf,
+   not a measurement of one card: sized to its contents, it was the
+   follower line that decided where the rule fell, so a followed deck
+   carried its rule left of the decks above and below it and lifted its
+   own count off the height theirs sat at. Two things hold the column
+   still. The aside takes one width for every library card, wide enough
+   that the body still has a phone's worth of room beside it. And the
+   follower line takes one height whether it sets on one line ("1
+   abonné") or two ("128 followers"), which a deck nobody follows
+   reserves as an empty box of the same size -- so the count above it
+   is centred on the same axis on every card, followed or not. */
+.lib-card .deck-card__aside { width: 104px; }
+.lib-card .deck-card__aside:not(:has(.lib-card__follows))::after {
+  content: '';
+  display: block;
+  margin-top: var(--sp-1);
+  min-height: var(--sp-6);
 }
 
 /* The library screen's controls are the shared console now (.console,

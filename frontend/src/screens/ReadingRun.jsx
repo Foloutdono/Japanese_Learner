@@ -55,7 +55,7 @@ export default function ReadingRun({ session }) {
   const [data, setData]     = useState(null)   // current phrase item from the batch
   const [timeLeft, setTimeLeft] = useState(0)
   const [answer, setAnswer] = useState('')
-  const [feedback, setFeedback] = useState(null) // { correct, romaji }
+  const [feedback, setFeedback] = useState(null) // { correct, romaji, accuracy }
   const [score, setScore]   = useState({ correct: 0, total: 0 })
   // The fare per rated sentence, from the result's own response.
   const fare = usePracticeXp()
@@ -123,6 +123,10 @@ export default function ReadingRun({ session }) {
   // can't overwrite the (possibly already-loaded) analysis for the
   // phrase actually on screen.
   const analysisPhraseRef = useRef(null)
+  // The phrase whose measurement is in flight, by the same _uiKey the
+  // card is keyed on: a figure that lands after the reader has moved
+  // on belongs to a sentence that is no longer on screen.
+  const measureKeyRef = useRef(null)
 
   const BATCH_SIZE = 5
   const PREFETCH_THRESHOLD = 1 // refill once only this many (or fewer) remain in queue
@@ -292,8 +296,40 @@ export default function ReadingRun({ session }) {
     clearTimer()
     // No correctness check here anymore — auto-comparing romaji proved too
     // brittle. Reveal the answer and let the user judge for themselves.
-    setFeedback({ correct: null, romaji: data.romaji })
+    setFeedback({ correct: null, romaji: data.romaji, accuracy: null })
     setStage('feedback')
+    measure(data, answer.trim())
+  }
+
+  // How much of the line the answer caught, from the server's own
+  // measure — the same figure 書取 prints, so the two practices say the
+  // same thing about the same answer (study/dictation.measure_forms).
+  //
+  // Asked for AFTER the reveal rather than before it, and the reveal
+  // never waits on it: the sentence, the romaji and the answer are all
+  // already here, and a run that showed nothing until a round trip
+  // landed would be a worse screen than one that shows the figure a
+  // beat late. A failed measurement costs the figure and nothing else
+  // — the grade below it was always the learner's.
+  function measure(phraseData, given) {
+    const key = phraseData._uiKey
+    measureKeyRef.current = key
+    apiFetch('/api/reading/check', session, {
+      method: 'POST',
+      body: JSON.stringify({
+        phrase: phraseData.phrase,
+        romaji: phraseData.romaji,
+        answer: given,
+      }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(m => {
+        if (!m || measureKeyRef.current !== key) return // reader already moved on
+        setFeedback(f => (f ? { ...f, accuracy: m.accuracy } : f))
+      })
+      .catch(() => {
+        // The figure is a hint, not the run.
+      })
   }
 
   // `quality` is the learner's own rating, 0..5 worst to best, as
@@ -321,6 +357,12 @@ export default function ReadingRun({ session }) {
         answer: answer.trim(),
         correct: isCorrect,
         quality,
+        // The figure the learner was looking at when they rated, which
+        // is the only version of it worth keeping beside the rating.
+        // null when the measurement never landed -- the rating is a
+        // fact about what they did either way, and 書取 sends its own
+        // the same way (DictationRun.jsx).
+        accuracy: feedback?.accuracy ?? null,
         // The word this sentence was chosen to practise. The endpoint
         // resolves it to that word's SRS card so the rating schedules
         // something, rather than only being written down.
@@ -551,7 +593,18 @@ function SessionView({
                   </>
                 )}
                 <span className="prose__rule" />
-                <span className="prose__label">{t.yourAnswer}</span>
+                {/* The measurement rides on the answer's own label, as
+                    it does in 書取: a hint for the learner grading
+                    below, not the grade. Absent until it lands, and
+                    absent for good if it never does — the label is the
+                    same label either way rather than a row that jumps
+                    when a number arrives in it. */}
+                <span className="prose__label prose__label--measured">
+                  {t.yourAnswer}
+                  {feedback.accuracy !== null && feedback.accuracy !== undefined && (
+                    <span className="prose__measure">{t.answerMatched(feedback.accuracy)}</span>
+                  )}
+                </span>
                 <span className="prose__en">{answer}</span>
                 <span
                   className={`prose__verdict${feedback.correct === null ? '' : feedback.correct ? ' prose__verdict--ok' : ' prose__verdict--x'}`}

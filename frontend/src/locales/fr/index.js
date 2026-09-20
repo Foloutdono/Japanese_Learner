@@ -841,6 +841,12 @@ const reading = {
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',
   yourAnswer:           'Ta réponse',
+  // La part de la phrase retrouvée par le serveur, imprimée à côté de
+  // la réponse de l'apprenant, sur les deux scènes qui en demandent une
+  // (ReadingRun, DictationRun). Une mesure, pas un verdict — le
+  // verdict, c'est la barre de notation sous la carte, et elle lui
+  // appartient.
+  answerMatched:        n => `${n}\u00A0% retrouvé`,
   nextPhrase:           'Phrase suivante',
   translation:          'Traduction',
   didYouGetIt:          'Alors, c’était juste ?',
@@ -935,10 +941,6 @@ const dictationMode = {
   dictationPrompt:       'Écris en romaji ce que tu as entendu',
   dictationListen:       'Écouter',
   dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
-  // La part de la phrase retrouvée par le serveur, imprimée à côté de
-  // la réponse de l'apprenant. Une mesure, pas un verdict — le verdict,
-  // c'est la barre de notation sous la carte, et elle lui appartient.
-  dictationCaught:       n => `${n}\u00A0% retrouvé`,
 }
 
 // ── Dictionary ────────────────────────────────────────────

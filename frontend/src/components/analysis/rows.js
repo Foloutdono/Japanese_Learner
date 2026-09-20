@@ -21,6 +21,26 @@
 const SKIP_POS = new Set(['symbol', 'punctuation', 'filler'])
 const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
 
+// The grammar points a row's own morphemes are an instance of, kept to
+// the MARKERS -- the points that are one grammatical word rather than a
+// construction around one (study/grammar_detect's `kind`). A marker is
+// the particle on the row itself, so the row is where it belongs and
+// where it fits: 「は」 and 「へ」 are one character wide. The
+// constructions stay in the chips under the rows, where a point like
+// 〜ます／〜ません can be printed in full without squeezing the word,
+// the reading and the meaning into what is left of a phone.
+function markersOf(group) {
+  const out = []
+  for (const token of group) {
+    for (const point of token.grammar ?? []) {
+      if (point.kind !== 'marker') continue
+      if (out.some(p => p.raw_id === point.raw_id)) continue
+      out.push(point)
+    }
+  }
+  return out
+}
+
 export function rowsOf(tokens) {
   const rows = []
   let i = 0
@@ -39,6 +59,7 @@ export function rowsOf(tokens) {
       tokens: group,
       surface: group.map(t => t.surface).join(''),
       reading: group.map(t => t.reading || t.surface).join(''),
+      markers: markersOf(group),
     })
     i = end + 1
   }

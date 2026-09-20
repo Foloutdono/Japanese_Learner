@@ -94,4 +94,53 @@ describe('the library card on a phone', () => {
     const el = await card({ ...DECK, description: '' })
     expect(el.querySelector('.lib-card__blurb')).toBeNull()
   })
+
+  // The shelf reads as a column of figures behind one rule, so neither
+  // the rule nor the figure can be measured per card: a deck with
+  // followers used to widen its own aside, carrying the hairline left
+  // of the deck above it, and lift its count off the height that
+  // deck's count sat at. Both are pinned against a followed deck, an
+  // unfollowed one, and the follower line long enough to set on two
+  // lines, all on the shelf together.
+  it('keeps the aside rule and the count where its neighbour has them', async () => {
+    await card()
+    await card({ ...DECK, id: 8, followers: 0 })
+    await card({ ...DECK, id: 9, followers: 128 })
+    const cards = [...document.querySelectorAll('.lib-card')]
+    expect(cards).toHaveLength(3)
+    expect(cards[1].querySelector('.lib-card__follows')).toBeNull()
+
+    const rule = el => el.querySelector('.deck-card__aside').getBoundingClientRect().left
+    const fig = el => el.querySelector('.deck-card__fig').getBoundingClientRect().top
+      - el.getBoundingClientRect().top
+
+    for (const el of cards.slice(1)) {
+      expect(rule(el)).toBeCloseTo(rule(cards[0]), 1)
+      expect(fig(el)).toBeCloseTo(fig(cards[0]), 1)
+    }
+  })
+
+  // A learner's text has no spaces where the column needs them. A deck
+  // named in one run-on word, by an author named in another, used to
+  // set straight through the aside's hairline and under the count; the
+  // body is the only place either is allowed to be.
+  it('breaks a run-on name rather than setting it through the rule', async () => {
+    const el = await card({
+      ...DECK,
+      name: 'Verbesirreguliersdutroisiemegroupe',
+      author: 'KeenSakura6224666666',
+      description: '',
+    })
+    const rule = el.querySelector('.deck-card__aside').getBoundingClientRect().left
+    // The text's own extent, not its box's: a flex item's box stops at
+    // the body's edge whether the line inside it does or not, so a rect
+    // over the box would pass either way.
+    for (const sel of ['.platform-card__title', '.platform-card__desc']) {
+      const range = document.createRange()
+      range.selectNodeContents(el.querySelector(sel))
+      const box = range.getBoundingClientRect()
+      expect(box.width).toBeGreaterThan(0)
+      expect(box.right).toBeLessThanOrEqual(rule)
+    }
+  })
 })

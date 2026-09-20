@@ -186,27 +186,53 @@ def _ratio(target: str, answer: str) -> float:
     return difflib.SequenceMatcher(None, target, answer).ratio()
 
 
-def measure(answer: str, row: dict) -> dict:
-    """How close `answer` came to the line in `row`, and which of the
-    three ways of writing it the learner was using.
+def measure_forms(answer: str, *, jp: str = "", kana: str = "", romaji: str = "") -> dict:
+    """How close `answer` came to a line given in any of its forms, and
+    which of them the learner was writing in.
 
-    Every form is tried and the best score wins, so nothing has to
-    detect what the learner typed: an answer in romaji simply scores
-    near zero against the kana and near one against the romaji. The one
-    thing that does need deciding is which normalizer to compare under,
-    and that is per-form rather than per-answer — the Latin forms fold
-    (study/romaji), the Japanese ones normalize.
+    Every form it is handed is tried and the best score wins, so nothing
+    has to detect what the learner typed: an answer in romaji simply
+    scores near zero against the kana and near one against the romaji.
+    The one thing that does need deciding is which normalizer to compare
+    under, and that is per-form rather than per-answer — the Latin forms
+    fold (study/romaji), the Japanese ones normalize.
+
+    Forms are optional because not every screen holds all three. 書取
+    passes the bank's own row, which has each of them; 読解 (routes/
+    reading) has the sentence and its romaji and no separate kana line,
+    and a form nobody passed simply is not among the ways the answer
+    could have been written. The measure itself is the same one either
+    way, which is the point of it being here rather than copied: the
+    figure a learner is shown under one practice has to mean what it
+    means under the other.
     """
     japanese = normalize(answer)
     latin = romaji_lib.fold(answer)
 
-    scores = {
-        "written": _ratio(normalize(row["jp"]), japanese),
-        "kana": _ratio(normalize(row["kana"]), japanese),
-        "romaji": _ratio(romaji_lib.fold(row["romaji"]), latin),
+    forms = {
+        "written": (normalize(jp), japanese),
+        "kana": (normalize(kana), japanese),
+        "romaji": (romaji_lib.fold(romaji), latin),
     }
+    scores = {
+        name: _ratio(target, given)
+        for name, (target, given) in forms.items()
+        if target
+    }
+    if not scores:
+        # Nothing to measure against. Not an error — a sentence with no
+        # reference is a caller's problem, and 0 is the honest figure.
+        return {"accuracy": 0, "matched": None}
     matched = max(scores, key=scores.get)
     return {"accuracy": round(scores[matched] * 100), "matched": matched}
+
+
+def measure(answer: str, row: dict) -> dict:
+    """`measure_forms` for a row of the dictation bank, which carries
+    all three ways of writing its line."""
+    return measure_forms(
+        answer, jp=row["jp"], kana=row["kana"], romaji=row["romaji"],
+    )
 
 
 def reveal(row: dict) -> dict:

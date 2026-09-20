@@ -306,4 +306,111 @@ describe('SentenceBreakdown', () => {
     await render(<GrammarChips grammar={grammar} t={T} quiet label="Grammar in this text" />)
     expect(document.querySelector('.analysis-grammar-chips .cap').textContent).toBe('Grammar in this text')
   })
+
+  // ── The grammar a row is an instance of ───────────────────────
+  // study/grammar_detect tells a MARKER (a point that is one
+  // grammatical word: は, へ, です／だ) from a PATTERN built around one
+  // (〜ます／〜ません). The row is where a marker belongs -- it is the
+  // very particle the row prints -- and the chips under the rows are
+  // where a pattern belongs, where it can be printed in full. Both open
+  // the same card; before this, a particle row was the one row in the
+  // breakdown that went nowhere.
+
+  const WA = { pattern: 'は', level: 'N5', raw_id: 'grammar_N5_は', kind: 'marker' }
+  const MASU = { pattern: '〜ます／〜ません', level: 'N5', raw_id: 'grammar_N5_〜ます／〜ません', kind: 'pattern' }
+
+  it('a particle row opens the point it is an instance of, the way a word opens its entry', async () => {
+    const onGrammarOpen = vi.fn()
+    const onTokenClick = vi.fn()
+    const analysis = {
+      available: true,
+      grammar: [{ ...WA, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [WA] })],
+    }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis} t={T} layout="rows"
+        onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen}
+      />
+    ))
+    const rows = document.querySelectorAll('.bkd-row')
+    const word = rows[1].querySelector('.bkd-row__word')
+    expect(word.tagName).toBe('BUTTON')
+    word.click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
+    // It is the grammar card's own level the row prints: there is no
+    // deck entry behind a particle to take one from.
+    expect(rows[1].querySelector('.bkd-row__lvl').textContent).toBe('N5')
+    expect(onTokenClick).not.toHaveBeenCalled()
+  })
+
+  it('a row that already opens a word carries its marker beside it rather than losing it', async () => {
+    const onGrammarOpen = vi.fn()
+    const onTokenClick = vi.fn()
+    // 今日は as the deep tier binds it: one row, two morphemes, the
+    // marker on the second. The word still opens the word.
+    const analysis = {
+      available: true,
+      grammar: [{ ...WA, start: 2, end: 3 }],
+      tokens: [
+        tokenFixture({ surface: '今日', span_end: 1 }),
+        particleFixture({ grammar: [WA] }),
+      ],
+    }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis} t={T} layout="rows"
+        onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen}
+      />
+    ))
+    const row = document.querySelector('.bkd-row')
+    expect(row.querySelector('.bkd-row__word').textContent).toBe('今日は')
+    row.querySelector('.bkd-row__word').click()
+    expect(onTokenClick).toHaveBeenCalledTimes(1)
+
+    const mark = row.querySelector('.bkd-row__mark')
+    expect(mark.textContent).toBe('は')
+    mark.click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
+  })
+
+  it('a marker is never a chip, and a pattern always is', async () => {
+    const analysis = {
+      available: true,
+      grammar: [{ ...WA, start: 2, end: 3 }, { ...MASU, start: 8, end: 11 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [WA] })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={T} layout="rows" onTokenClick={() => {}} onGrammarOpen={() => {}} />
+    ))
+    const chips = [...document.querySelectorAll('.analysis-grammar-chip__pattern')]
+    expect(chips.map(c => c.textContent)).toEqual(['〜ます／〜ません'])
+  })
+
+  it('leaves the rows alone when a screen has nowhere to open a point', async () => {
+    const analysis = {
+      available: true,
+      grammar: [{ ...WA, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [WA] })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} t={T} layout="rows" onTokenClick={() => {}} />
+    ))
+    const rows = document.querySelectorAll('.bkd-row')
+    expect(rows[1].querySelector('.bkd-row__word').tagName).toBe('SPAN')
+    expect(document.querySelector('.bkd-row__mark')).toBeNull()
+  })
+
+  it('a row collects its own morphemes’ points, once each', () => {
+    const rows = rowsOf([
+      tokenFixture({ surface: '今日', span_end: 1 }),
+      particleFixture({ grammar: [WA] }),
+      particleFixture({ surface: 'は', grammar: [WA, MASU] }),
+    ])
+    expect(rows[0].markers.map(m => m.raw_id)).toEqual(['grammar_N5_は'])
+    // A pattern is not a marker: it belongs to the chips, not the row.
+    expect(rows[1].markers.map(m => m.pattern)).toEqual(['は'])
+  })
 })

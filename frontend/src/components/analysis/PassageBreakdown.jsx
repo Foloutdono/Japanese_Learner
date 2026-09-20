@@ -67,7 +67,7 @@ export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onToke
               <div id={bodyId} className="bkd-passage__body">
                 {sentence.analysis?.available && (
                   <>
-                    <WordRows analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} />
+                    <WordRows analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen} />
                     <GrammarChips grammar={sentence.analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />
                   </>
                 )}

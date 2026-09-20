@@ -29,6 +29,7 @@ from study.exam_gen_utils import kanji_instruction
 from study.grammar_match import contains_pattern, verifiable
 from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
 from study.llm_shared import chat, llm_configured, LLMUnavailable, soften_kanji
+from study.dictation import measure_forms
 from study.romaji import sentence_romaji
 import content.vocab_jmdict_data as jmdict_db
 import content.frequency_data as freq
@@ -61,6 +62,14 @@ logger = logging.getLogger(__name__)
 # genuinely has no rating, and a default would invent one. A reader has
 # to treat NULL as "graded, resolution unknown" rather than as a score.
 #
+# reading_log.accuracy: how much of the line the learner's answer
+# caught, 0..100, as /check measured it and as the card showed it while
+# they rated. Kept BESIDE the rating and never instead of it, exactly as
+# 書取 keeps its own (routes/dictation.py): the figure is a hint, the
+# rating is the grade. NULLable for the same reason `quality` is -- a
+# row from before the figure existed, or one whose measurement never
+# landed, genuinely has none, and 0 would read as "caught nothing".
+#
 # comprehension_log.grammar (plan 084): the grammar points an exercise
 # was written around, as a JSON list of catalogue patterns. NULLable for
 # the same reason -- every exercise before this had no seeds -- and read
@@ -72,6 +81,9 @@ def _migrate_reading_log_schema() -> None:
         with conn.cursor() as cur:
             cur.execute(
                 "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS quality SMALLINT"
+            )
+            cur.execute(
+                "ALTER TABLE reading_log ADD COLUMN IF NOT EXISTS accuracy SMALLINT"
             )
             cur.execute(
                 "ALTER TABLE comprehension_log ADD COLUMN IF NOT EXISTS grammar JSONB"
@@ -131,6 +143,13 @@ class ResultPayload(BaseModel):
     # enforced here rather than by a CHECK so a bad value is a 422 the
     # caller can read, not a 500 from the driver.
     quality: int | None = Field(default=None, ge=0, le=5)
+    # What /check measured, 0..100, sent back up by the client rather
+    # than recomputed here: it is the figure the learner was looking at
+    # when they rated, which is the only version of it worth keeping
+    # beside the rating. 書取 keeps its own the same way
+    # (routes/dictation.py). Optional, because a measurement that never
+    # landed must not stop the rating being recorded.
+    accuracy: int | None = Field(default=None, ge=0, le=100)
     # The sentence's source word, straight from the batch payload, so the
     # rating can reach that word's schedule. Optional: an older client
     # does not send it, and an uncurated sentence has none.
@@ -684,6 +703,44 @@ def get_reading_batch(
 SRS_MODE = "sentence.reading"
 
 
+# ── The measurement ──────────────────────────────────────────────────
+class CheckPayload(BaseModel):
+    phrase: str = Field(min_length=1, max_length=400)
+    # The reference romanization the batch served for that phrase.
+    romaji: str = Field(default="", max_length=400)
+    # Empty is a legitimate answer -- a learner saying they read none of
+    # it -- and measures 0 rather than being rejected.
+    answer: str = Field(default="", max_length=400)
+
+
+@router.post("/api/reading/check")
+def check_reading(payload: CheckPayload, user_id: str = Depends(get_user_id)):
+    """How much of the sentence the learner's transcription caught.
+
+    NOT a grade. The grade is the rating bar under the card and it is
+    the learner's own (docs/adr/0013) -- this is the figure beside their
+    answer while they decide, which is what lets it be forgiving where a
+    mark scheme could not be. Auto-marking this run was tried and
+    withdrawn for being brittle (see normalize_romaji above); a
+    proportion is the honest version of what that was reaching for.
+
+    The same measure 書取 shows, from the same function, so the number
+    means one thing across the app -- study/dictation.measure_forms.
+    There is no kana form to pass: the batch serves a sentence and its
+    romaji, and an answer written in kana is measured against the
+    sentence itself.
+
+    The reference travels up with the answer rather than being looked up
+    here, exactly as /result's does: a reading batch is assembled per
+    request from several sources and its sentences have no id to ask
+    for one by. Nothing is written and nothing is scheduled, so the
+    worst a client can do with a wrong reference is misinform itself.
+    """
+    return measure_forms(
+        payload.answer, jp=payload.phrase, romaji=payload.romaji,
+    )
+
+
 @router.post("/api/reading/result")
 def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_id)):
     # Correctness is self-assessed by the user after seeing the reveal
@@ -704,11 +761,11 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
             cur.execute(
                 """
                 INSERT INTO reading_log(user_id, level, phase, phrase, romaji,
-                                        answer, correct, quality)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+                                        answer, correct, quality, accuracy)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
                 (user_id, level_for_log, payload.source, payload.phrase, payload.romaji,
-                 payload.answer, payload.correct, payload.quality),
+                 payload.answer, payload.correct, payload.quality, payload.accuracy),
             )
         conn.commit()
     finally:
@@ -749,6 +806,7 @@ def post_reading_result(payload: ResultPayload, user_id: str = Depends(get_user_
         "correct": payload.correct,
         "romaji": payload.romaji,
         "quality": payload.quality,
+        "accuracy": payload.accuracy,
         # None when the rating scheduled nothing -- no quality given, or
         # the sentence's word is not in the vocabulary list.
         "scheduled": scheduled,
@@ -763,7 +821,7 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
             cur.execute(
                 """
                 SELECT level, phase, phrase, romaji, answer, correct, quality,
-                       created_at
+                       accuracy, created_at
                 FROM reading_log
                 WHERE user_id = %s
                 ORDER BY created_at DESC
@@ -782,9 +840,13 @@ def get_reading_history(user_id: str = Depends(get_user_id), limit: int = Query(
             # NULL on every row written before the screen graded with the
             # rating bar -- "graded, resolution unknown", not a zero.
             "quality": quality,
+            # NULL on a row from before the measurement existed, and on
+            # one whose measurement never landed: unmeasured, rather
+            # than a line the learner caught none of.
+            "accuracy": accuracy,
             "created_at": created_at.isoformat(),
         }
-        for level, phase, phrase, romaji, answer, correct, quality, created_at in rows
+        for level, phase, phrase, romaji, answer, correct, quality, accuracy, created_at in rows
     ]
 
 

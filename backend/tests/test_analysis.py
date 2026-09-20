@@ -53,6 +53,36 @@ class AnalyzeLocalTests(unittest.TestCase):
         hit = next(g for g in r["grammar"] if g["pattern"] == "〜ようとする")
         self.assertTrue(hit["raw_id"].startswith("grammar_"))
 
+    def test_a_point_rides_the_tokens_it_covers(self) -> None:
+        """What makes a rule reachable the way a word is: the rows under
+        a sentence are the learner's map of it, and a particle row used
+        to be the one row that went nowhere -- no deck entry, no card,
+        nothing to press -- while the rule it is an instance of sat in a
+        chip below, unattached to the word demonstrating it."""
+        r = analyze_local("今日は学校へ行きません。")
+        by_surface = {t["surface"]: [g["pattern"] for g in t["grammar"]] for t in r["tokens"]}
+        self.assertEqual(by_surface["は"], ["は"])
+        self.assertEqual(by_surface["へ"], ["へ"])
+        self.assertEqual(by_surface["ませ"], ["〜ます／〜ません"])
+        # A word the point does not cover carries none of it.
+        self.assertEqual(by_surface["学校"], [])
+        # Every point a token carries is one the sentence reports, with
+        # the card id the chip would open.
+        ids = {g["raw_id"] for g in r["grammar"]}
+        for token in r["tokens"]:
+            for point in token["grammar"]:
+                self.assertIn(point["raw_id"], ids)
+                self.assertIn(point["kind"], ("marker", "pattern"))
+
+    def test_a_marker_is_told_from_a_construction(self) -> None:
+        """The screens put the two in different places -- a marker on
+        the row of the particle it is, a construction in the chips over
+        the sentence (frontend rows.js, GrammarChips.jsx)."""
+        r = analyze_local("今日は学校へ行きません。")
+        kinds = {g["pattern"]: g["kind"] for g in r["grammar"]}
+        self.assertEqual(kinds["は"], "marker")
+        self.assertEqual(kinds["〜ます／〜ません"], "pattern")
+
     def test_purity_same_input_same_output(self) -> None:
         s = "私は学生です。"
         self.assertEqual(analyze_local(s), analyze_local(s))
