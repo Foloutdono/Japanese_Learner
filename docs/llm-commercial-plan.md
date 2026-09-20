@@ -160,8 +160,12 @@ number too.
 
 ## 5. What to do, in order
 
-Free wins first — these cost quality nothing, and two of them are
-already half-built here.
+Free wins first — these cost quality nothing, and two of them were
+already half-built here. All six are settled now: five implemented, one
+measured and declined. Each entry keeps its original wording struck
+through, because what a step turned out to be worth is usually more
+useful than what it was expected to be worth — three of them were wrong
+in a way only measuring found.
 
 1. ~~**Log `usage` from every response.**~~ **Done.** `chat()` writes one
    line per billed response to the logger `study.llm_shared.usage`,
@@ -221,9 +225,52 @@ already half-built here.
    which is what every reader paid before, so no case got worse.
    `scripts/prewarm_comprehension_pool.py` moves even that cost off the
    learner's path.
-4. **Batch the offline work.** Exam papers and
-   `scripts/generate_grammar_sentences.py` are not on the request path.
-   Both Anthropic and OpenAI price a batch queue at 50%.
+4. ~~**Batch the offline work.**~~ **Measured and declined**, 2026-09-20.
+   Kept here rather than deleted, because the next person to read this
+   list will have the same idea.
+
+   The discount is real and both providers we call serve it through the
+   same OpenAI-compatible surface the code already speaks: upload a
+   JSONL of requests, poll, collect by `custom_id`, 50% off input and
+   output, a 24-hour target that usually lands in a few. So the
+   research answer is yes.
+
+   The arithmetic is what kills it. Every offline job in this app, run
+   once:
+
+   | Job | As-is | Batched |
+   |---|---:|---:|
+   | Comprehension prewarm (300 exercises × 1.3 attempts) | $2.02 | $1.01 |
+   | Exam papers, *if* they were pre-generated (15 × 35 calls) | $1.75 | $0.87 |
+   | Grammar sentences (541 points, 8 to a call) | $0.21 | $0.11 |
+   | Phrase prewarm (226 curated sentences) | $0.19 | $0.10 |
+   | **Total** | **$4.17** | **$2.08** |
+
+   Two dollars, for a file-upload/poll/retrieve client, partial-failure
+   handling, and splitting `_call_llm_comprehension`'s validate-and-ask-
+   again loop so answers can be checked in rounds instead of inline —
+   a refactor of the most heavily tested function in `routes/reading.py`.
+   And two of those four jobs are one-offs, not recurring: the phrase
+   bank is a fixed 226 sentences and the grammar catalogue a fixed 541
+   points.
+
+   **The exam-paper row is also a correction.** This line used to name
+   exam papers as a batch candidate. They are not: a paper is generated
+   by a background worker while the learner waits and polls
+   (`routes/exams.py`), so a 24-hour queue is the wrong shape entirely.
+   Batching them would first mean pre-generating them on a schedule,
+   which is a product change, not a billing one.
+
+   **If the prewarm becomes a problem, it will be wall-clock, not
+   price.** It runs serially with a one-second pause, so 300 exercises
+   is about 100 minutes. A worker pool fixes that, costs nothing extra,
+   adds no asynchronous subsystem and leaves the retry loop intact —
+   reach for that before reaching for a batch queue.
+
+   What would change the answer: an offline surface an order of
+   magnitude bigger than today's. Re-measure with
+   `scripts/llm_cost_model.py` before reopening it; do not re-derive
+   the provider research, it is above.
 5. **Cap the tails.** **Half done.** `OCR_DAILY_LIMIT` is 20, not 60
    — and 20 rather than the 10–15 this line first proposed, because 10
    stops being an abuse ceiling and starts being a product limit: a
@@ -261,8 +308,10 @@ already half-built here.
 
 ## 6. What is wired, and what is not
 
-Steps 1 and 6 shipped with this document. Three details are worth
-knowing before the first deploy.
+Every step in §5 is now settled: 1, 2, 3, 5 and 6 are implemented, and
+4 was measured and declined (the numbers are in its entry). What follows
+is what a reader needs before the first deploy — the things no test can
+assert and no code comment is the right place for.
 
 **The model ids are unverified.** Every other model id in
 `study/llm_shared.py` was confirmed live against the provider's own

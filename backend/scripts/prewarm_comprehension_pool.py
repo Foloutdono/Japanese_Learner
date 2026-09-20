@@ -24,9 +24,17 @@ only pays for what is still missing, and a bucket already at target
 costs nothing. It never deletes. Bump routes/reading._POOL_VERSION to
 retire the existing exercises; this then refills against the new one.
 
-Offline by design -- nothing here is on a request path, which also
-makes it the right place to spend a provider's batch queue if one is
-ever wired up (see docs/llm-commercial-plan.md, step 4).
+Offline by design -- nothing here is on a request path. That makes it
+the obvious candidate for a provider's 50%-off batch queue, which is
+why docs/llm-commercial-plan.md's step 4 measured it and declined: the
+whole offline surface of this app is about $4 a run, so batching it
+saves two dollars for an asynchronous subsystem and a refactor of
+routes/reading.py's retry loop. Read that section before reopening it.
+
+If this script is ever a problem it will be for its DURATION, not its
+price -- serial calls with a pause between them, so a full 300-exercise
+fill is on the order of an hour and a half. A worker pool is the fix
+for that, and it costs nothing.
 """
 import argparse
 import json
