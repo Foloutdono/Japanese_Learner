@@ -144,6 +144,8 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // goal
     await click(screen, '[data-goal="N5"]')
     await click(screen, '[data-action="continue"]')
+    await record()                                    // lines
+    await click(screen, '[data-action="continue"]')
     await record()                                    // rhythm
     await click(screen, '[data-action="continue"]')
     await record()                                    // time
@@ -161,7 +163,7 @@ describe('the boarding on a 390x667 handset', () => {
     await record()                                    // pass
 
     expect(Object.keys(over)).toEqual(
-      ['name', 'why', 'kana', 'level', 'goal', 'rhythm', 'time', 'plan', 'pass'])
+      ['name', 'why', 'kana', 'level', 'goal', 'lines', 'rhythm', 'time', 'plan', 'pass'])
     expect(Object.entries(over).filter(([, px]) => px > 0)).toEqual([])
   }, 90000)
 

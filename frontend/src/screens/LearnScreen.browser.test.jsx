@@ -76,6 +76,10 @@ vi.mock('../lib/supabase', () => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: LearnScreen } = await import('./LearnScreen')
+// The lines the learner rides come off the profile summary (a
+// module-level cache): seeded per test, and cleared back to "never
+// answered" so the plates hang in registry order everywhere else.
+const { seedSummary } = await import('../stores/profileSummary')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
 
@@ -127,6 +131,8 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.plate--line')).toHaveLength(4)
+    // Nothing answered: every line is on the route.
+    expect(root.querySelectorAll('.plate--off')).toHaveLength(0)
     const shelf = root.querySelectorAll('.plate--shelf')
     expect(shelf).toHaveLength(1)
     // The shelf's figures come from /api/decks; the due chip from the
@@ -174,6 +180,31 @@ describe('LearnScreen — the plates', () => {
       expect(title.textContent.trim().length).toBeGreaterThan(0)
       // Every Japanese glyph on the plate is a stop name in the foot.
       for (const ja of plate.querySelectorAll('[lang="ja"]')) expect(ja.closest('.plate__foot')).toBeTruthy()
+    }
+  })
+
+  // ── The lines chosen at the boarding hang first ──
+  // A learner riding the kanji alone still has four plates: the kana
+  // (on every ticket) and the kanji first, then the vocabulary and the
+  // grammar marked off their route -- still plates, still buttons.
+  it('hangs the chosen lines first and marks the others off the route, all still reachable', async () => {
+    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, lines: ['kanji'] })
+    try {
+      const screen = await mount()
+      await settle()
+      const root = screen.container
+      const plates = [...root.querySelectorAll('.plate--line')]
+      expect(plates).toHaveLength(4)
+      expect(plates.map(p => p.querySelector('.plate__title').textContent)).toEqual(['Kana', 'Kanji', 'Vocabulaire JLPT', 'Grammaire'])
+      expect(plates.map(p => p.classList.contains('plate--off'))).toEqual([false, false, true, true])
+      expect(plates[2].querySelector('.plate__meta').textContent).toBe('Hors de votre trajet')
+      expect(plates[0].querySelector('.plate__meta')).toBeNull()
+      // Off the route is not off the map: the plate still departs.
+      plates[3].querySelector('.plate__head').click()
+      await settle(20)
+      expect(beginDeparture).toHaveBeenCalledWith(expect.objectContaining({ path: '/learn/grammar' }))
+    } finally {
+      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
     }
   })
 

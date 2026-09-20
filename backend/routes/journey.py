@@ -27,6 +27,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
 from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL
+from core.lines import lines_or_all
 from routes.onboarding import DEPARTURES, DEPART_TIMES, VOLUMES
 from routes.profile import ensure_profile_row
 
@@ -43,7 +44,7 @@ def _journey_row(user_id: str):
                 """
                 SELECT jlpt_level, daily_new_target, goal_start_level,
                        goal_level, goal_target_date, goal_set_at,
-                       daily_departure,
+                       daily_departure, lines,
                        -- Whole days between the learner's first day and
                        -- today, on the same clock and day boundary the
                        -- window count uses (get_journey_item_counts's
@@ -107,10 +108,13 @@ def _window_days(days_since_start) -> int:
     return max(1, min(WINDOW_DAYS, int(days_since_start) + 1))
 
 
-def _items_total(levels: list[str], include_kana: bool) -> int:
+def _items_total(levels: list[str], include_kana: bool, lines: list[str] | None = None) -> int:
+    """The promise, in items: the chosen lines' volumes over the ride's
+    levels, and the kana in front when the ride begins at N5. `lines`
+    None is every line (core/lines.py) -- the pre-question account."""
     total = VOLUMES["kana"] if include_kana else 0
     for lvl in levels:
-        total += VOLUMES["vocab"][lvl] + VOLUMES["kanji"][lvl] + VOLUMES["grammar"][lvl]
+        total += sum(VOLUMES[line][lvl] for line in lines_or_all(lines))
     return total
 
 
@@ -132,7 +136,7 @@ def _status_payload(user_id: str) -> dict:
             "days14": WINDOW_DAYS,
         }
     (jlpt_level, daily_new_target, goal_start_level, goal_level,
-     goal_target_date, goal_set_at, daily_departure, days_since_start) = row
+     goal_target_date, goal_set_at, daily_departure, lines, days_since_start) = row
     window = _window_days(days_since_start)
     start = goal_start_level or jlpt_level
     levels = _journey_levels(start, goal_level)
@@ -143,8 +147,11 @@ def _status_payload(user_id: str) -> dict:
     # position honest either way. Plan 063 open question 2, settled by
     # the cheapest answer that lies to nobody.
     include_kana = start == "N5"
+    # The lines the learner rides scope both halves of the promise: the
+    # total is priced at them and only they move the train.
     counts = srs.get_journey_item_counts(
-        user_id, goal_set_at, levels, include_kana, window_days=WINDOW_DAYS
+        user_id, goal_set_at, levels, include_kana, window_days=WINDOW_DAYS,
+        lines=lines_or_all(lines),
     )
     return {
         "goalStartLevel": goal_start_level,
@@ -153,7 +160,7 @@ def _status_payload(user_id: str) -> dict:
         "goalSetAt": goal_set_at.isoformat() if goal_set_at else None,
         "dailyDeparture": daily_departure,
         "plannedPerDay": daily_new_target,
-        "itemsTotal": _items_total(levels, include_kana),
+        "itemsTotal": _items_total(levels, include_kana, lines),
         # itemsDone is "since the goal was set" when there is a goal,
         # "ever" when there isn't (goal_set_at NULL) — the pace-only
         # pass back reports lifetime position on the open line.

@@ -10,7 +10,7 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor,
+  LINES, RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor,
   levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
@@ -18,6 +18,7 @@ import NameStep from '../components/boarding/NameStep'
 import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
 import { LevelStep, GoalStep } from '../components/boarding/LevelStep'
+import LinesStep from '../components/boarding/LinesStep'
 import RhythmStep from '../components/boarding/RhythmStep'
 import TimeStep from '../components/boarding/TimeStep'
 import NudgeStep from '../components/boarding/NudgeStep'
@@ -28,9 +29,9 @@ import AccountStep from '../components/boarding/AccountStep'
 
 // ── 乗車 — the boarding (plan 075) ────────────────────────────────
 // The canvas's boarding, the owner's sketch drawn: name → why → the
-// kana check → (the reveal | the level) → goal → rhythm → the hour →
-// (the nudge, native only) → building → the plan → (the account) →
-// the pass. Welcome is step zero (components/boarding/Welcome.jsx,
+// kana check → (the reveal | the level) → goal → the lines → rhythm →
+// the hour → (the nudge, native only) → building → the plan → (the
+// account) → the pass. Welcome is step zero (components/boarding/Welcome.jsx,
 // mounted by App.jsx in place of the old landing page); the offer
 // stays out while domain/credits.js's HAS_STORE is false.
 //
@@ -121,7 +122,7 @@ function trackStops(answers) {
   return [
     'name', 'why', 'kana', branch,
     ...(goal ? ['goal'] : []),
-    'rhythm', 'time',
+    'lines', 'rhythm', 'time',
     ...(canNudge() ? ['nudge'] : []),
   ]
 }
@@ -144,6 +145,7 @@ export default function BoardingFlow({
     levelChoice: null,   // 'novice' | 'N5'..'N1' on the level list
     jlpt: null,          // the level the office stores
     goal: null,
+    lines: LINES,        // what to learn: any of vocab / kanji / grammar
     rhythm: RECOMMENDED_RHYTHM,
     minute: timeToMinutes(DEFAULT_TIME),
     notifications: false,
@@ -300,7 +302,7 @@ export default function BoardingFlow({
       jlpt: jlptFor(choice),
       goal: ahead.find(stop => stop !== 'novice') ?? null,
     })
-    return ahead.length > 0 ? 'goal' : 'rhythm'
+    return ahead.length > 0 ? 'goal' : 'lines'
   }
 
   function answerKana(kana) {
@@ -347,15 +349,18 @@ export default function BoardingFlow({
     ? t.brdNovice
     : answers.goal ? `${levelLabel} → ${answers.goal}` : levelLabel
   const perDay = itemsForRhythm(answers.rhythm)
-  const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now)
+  const figures = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, now, answers.lines)
   const time = minutesToTime(answers.minute)
+  // The lines as the building screen prints them: the kana first --
+  // every ticket rides them -- then the ones chosen.
+  const linesLine = [t.kanaTitle, ...answers.lines.map(line => t.brdLine[line])].join(' · ')
 
   function complete() {
     if (busy) return
     if (dryRun) { onComplete(); return }
     setBusy(true)
     setSaveError(null)
-    const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date())
+    const fresh = planFigures(volumes, jlpt, answers.goal, perDay, answers.kana, new Date(), answers.lines)
     const body = {
       jlptLevel: jlpt,
       dailyNewTarget: perDay,
@@ -367,6 +372,9 @@ export default function BoardingFlow({
       dailyDeparture: bucketFor(answers.minute),
       motive: answers.motive,
       kanaKnown: answers.kana,
+      // The lines to ride (backend core/lines.py): the plates' order,
+      // the promise's price, the ghost train's scope.
+      lines: answers.lines,
       rhythmMin: answers.rhythm,
       reminderTime: time,
       notifications: answers.notifications,
@@ -388,6 +396,8 @@ export default function BoardingFlow({
           kana_known: answers.kana,
           level: jlpt,
           pace: perDay,
+          // The chosen names joined, never text a learner typed.
+          lines: answers.lines.join(','),
           notifications: answers.notifications,
           // The same measure across the whole line: does the boarding
           // as a whole ask for too much of someone's evening?
@@ -444,7 +454,9 @@ export default function BoardingFlow({
       case 'level':
         return <LevelStep volumes={volumes} value={answers.levelChoice} onChange={v => set({ levelChoice: v })} onContinue={continueLevel} />
       case 'goal':
-        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} kana={answers.kana} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('rhythm')} />
+        return <GoalStep volumes={volumes} level={answers.levelChoice ?? jlpt} kana={answers.kana} value={answers.goal} onChange={v => set({ goal: v })} onContinue={() => go('lines')} />
+      case 'lines':
+        return <LinesStep value={answers.lines} onChange={v => set({ lines: v })} onContinue={() => go('rhythm')} />
       case 'rhythm':
         return <RhythmStep value={answers.rhythm} onChange={v => set({ rhythm: v })} onContinue={() => go('time')} />
       case 'time':
@@ -468,7 +480,7 @@ export default function BoardingFlow({
             onDone={buildingDone}
             steps={[
               { key: 'goal', label: t.brdBuildGoal, value: goalLine },
-              { key: 'lines', label: t.brdBuildLines, value: t.brdFourLines },
+              { key: 'lines', label: t.brdBuildLines, value: linesLine },
               { key: 'ride', label: t.brdBuildRide, value: `${answers.rhythm} min · ${time}` },
               {
                 key: 'projection',
@@ -485,6 +497,7 @@ export default function BoardingFlow({
             motive={answers.motive ?? 'other'}
             rhythm={answers.rhythm}
             goal={answers.goal}
+            lines={answers.lines}
             figures={figures}
             now={now}
             onContinue={() => go(guest ? 'account' : 'pass')}

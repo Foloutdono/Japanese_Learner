@@ -127,6 +127,26 @@ def test_items_total_is_the_promised_volume(jclient):
     assert body["itemsTotal"] == expected
 
 
+def test_the_chosen_lines_price_the_promise(jclient):
+    # Kanji only: the kana still ride in front (N5 start), and the
+    # words and the grammar are off the ticket.
+    _complete(jclient, lines=["kanji"])
+    body = jclient.get("/api/journey/status").json()
+    assert body["itemsTotal"] == VOLUMES["kana"] + sum(VOLUMES["kanji"][l] for l in ("N5", "N4", "N3"))
+
+
+def test_only_the_chosen_lines_move_the_train(jclient):
+    _complete(jclient, lines=["kanji", "grammar"])
+    _backdate_goal(1)
+    _seed_review("kanji_N5_0001", 0.1)    # on a chosen line
+    _seed_review("grammar_N5_0001", 0.1)  # on a chosen line
+    _seed_review("vocab_N5_0002", 0.1)    # a line the learner is not riding
+    _seed_review("kana_a", 0.1)           # the kana ride on every ticket
+    body = jclient.get("/api/journey/status").json()
+    assert body["itemsDone"] == 3
+    assert body["actual14"] == 3
+
+
 def test_items_are_deduped_across_modes(jclient):
     # THE plan-063 acceptance case: one word met through two modes is
     # one item, not two.

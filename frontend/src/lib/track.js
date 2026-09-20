@@ -33,7 +33,7 @@ export const EVENTS = {
   boot_timeout: ['waited_ms'],
   screen_view: ['route', 'tab'],
   boarding_step: ['step', 'to', 'index', 'dir', 'ms'],
-  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'ms'],
+  boarding_done: ['motive', 'kana_known', 'level', 'pace', 'notifications', 'lines', 'ms'],
   account_claimed: ['from'],
   run_start: ['kind', 'mode', 'level'],
   run_complete: ['kind', 'mode', 'level', 'items', 'secs'],

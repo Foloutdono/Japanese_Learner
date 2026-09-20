@@ -6978,6 +6978,14 @@ textarea:focus-visible {
 }
 .plate__head:hover,
 .plate__head:focus-visible { filter: none; }
+/* A line the learner chose not to ride (core/lines.py) hangs after the
+   others, its name in the soft ink and its roundel and stripe faded,
+   with "Off your route" under the name where the shelf prints its
+   figures. Still a plate, still a button: the choice is a default,
+   never a lock, so nothing is disabled and the hover lift is
+   unchanged. (The name's and the stripe's fades sit after their own
+   rules, below.) */
+.plate--off .plate__roundel { opacity: 0.55; }
 .plate:has(.plate__head:hover) .plate__roundel,
 .plate:has(.plate__head:focus-visible) .plate__roundel { background: color-mix(in srgb, var(--line-color, var(--accent2)) 18%, transparent); }
 .plate__names { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
@@ -6991,6 +6999,8 @@ textarea:focus-visible {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* The off-route plate's name, in the soft ink (its roundel above). */
+.plate--off .plate__title { color: var(--text-secondary); }
 /* The shelf's figures under its name: the one plate whose line has
    no stops to print in a foot. */
 .plate__meta {
@@ -7081,6 +7091,8 @@ textarea:focus-visible {
   background: var(--line-color, var(--accent2));
   transition: width 0.6s ease;
 }
+/* The off-route plate's stripe fades with its roundel (above). */
+.plate--off .plate__stripe { opacity: 0.45; }
 @media (prefers-reduced-motion: reduce) {
   .plate { transition: border-color 0.15s ease; }
   .plate:has(.plate__head:hover),

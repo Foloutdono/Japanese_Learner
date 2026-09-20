@@ -238,7 +238,9 @@ describe('the boarding at 390×844', () => {
     await click(screen.container, '[data-level="N5"]')
     await click(screen.container, '[data-action="continue"]')
     await settle()
-    await click(screen.container, '[data-action="continue"]')
+    await click(screen.container, '[data-action="continue"]')   // the goal
+    await settle()
+    await click(screen.container, '[data-action="continue"]')   // the lines
     await settle()
     const cells = [...live().querySelectorAll('.brd-cell')]
     expect(cells).toHaveLength(4)

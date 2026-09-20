@@ -34,7 +34,7 @@ def _clean_onboarding_state(user_id: str):
                         goal_target_date = NULL, goal_set_at = NULL,
                         daily_departure = NULL, rating_scale = NULL,
                         motive = NULL, kana_known = NULL, reminder_time = NULL,
-                        notifications = FALSE
+                        notifications = FALSE, lines = NULL
                     WHERE user_id = %s
                     """,
                     (user_id,),
@@ -359,6 +359,47 @@ def test_complete_rejects_bad_boarding_answers(client):
         {"tzOffsetMin": 900},
     ):
         assert client.post("/api/onboarding/complete", json={**base, **bad}).status_code == 422, bad
+
+
+# ── The lines: what the learner chose to ride (core/lines.py) ─────
+def test_complete_stores_the_lines_and_the_profile_serves_them(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        # Never asked: null, which every reader takes as all three.
+        assert client.get("/api/profile").json()["lines"] is None
+        done = client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N5", "dailyNewTarget": 10,
+            # Sent out of order and with a repeat: stored in line order, once.
+            "lines": ["kanji", "vocab", "kanji"],
+        })
+        assert done.status_code == 200, done.text
+        assert done.json()["lines"] == ["vocab", "kanji"]
+        assert client.get("/api/profile").json()["lines"] == ["vocab", "kanji"]
+        # A replay that does not answer clears it, like every other choice.
+        client.post("/api/onboarding/complete", json={"jlptLevel": "N5", "dailyNewTarget": 10})
+        assert client.get("/api/profile").json()["lines"] is None
+
+
+def test_complete_refuses_no_line_and_unknown_lines(client):
+    base = {"jlptLevel": "N5", "dailyNewTarget": 10}
+    for bad in ([], ["kana"], ["vocab", "reading"], "vocab"):
+        r = client.post("/api/onboarding/complete", json={**base, "lines": bad})
+        assert r.status_code == 422, bad
+
+
+def test_patch_learning_changes_the_lines_alone(client):
+    with _clean_onboarding_state(DEV_USER_ID):
+        client.post("/api/onboarding/complete", json={
+            "jlptLevel": "N4", "dailyNewTarget": 10, "lines": ["vocab", "kanji", "grammar"],
+        })
+        r = client.patch("/api/profile/learning", json={"lines": ["grammar"]})
+        assert r.status_code == 200, r.text
+        assert r.json()["lines"] == ["grammar"]
+        after = client.get("/api/profile").json()
+        assert after["lines"] == ["grammar"]
+        assert after["jlptLevel"] == "N4"
+        assert after["dailyNewTarget"] == 10
+        assert client.patch("/api/profile/learning", json={"lines": []}).status_code == 422
+        assert client.patch("/api/profile/learning", json={"lines": ["decks"]}).status_code == 422
 
 
 # ── The kana door: the scripts already read start known ───────────

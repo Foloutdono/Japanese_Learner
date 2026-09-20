@@ -17,6 +17,26 @@ export const MOTIVES = ['studies', 'fun', 'trip', 'live', 'friends', 'other']
 // The kana check's four answers (routes/onboarding.py KANA_KNOWN).
 export const KANA_ANSWERS = ['hiragana', 'katakana', 'both', 'none']
 
+// The lines a learner can choose to ride (backend core/lines.py): any
+// non-empty subset of the three, in this order. The kana are not a
+// choice -- every ticket rides them, they are what the other three are
+// read through -- so they are priced by the kana check, not here. All
+// three on is the default; a profile with no answer reads as all three.
+export const LINES = ['vocab', 'kanji', 'grammar']
+
+/** A profile's stored answer, or every line when it never answered. */
+export function linesOrAll(stored) {
+  return Array.isArray(stored) && stored.length > 0 ? LINES.filter(l => stored.includes(l)) : LINES
+}
+
+/** One line on or off, keeping LINES order; never empties the set (the
+ *  step's Continue is what refuses an empty choice, so a tap that
+ *  would leave nothing is simply the last line going out, and the
+ *  caller decides what to say about it). */
+export function toggleLine(chosen, line) {
+  return chosen.includes(line) ? chosen.filter(l => l !== line) : LINES.filter(l => l === line || chosen.includes(l))
+}
+
 // The rhythm: minutes a day, and the new items that fit in them -- one
 // a minute, the canvas's own figure (~10 new items at 10 min), which is
 // also the pace the day's queue takes as daily_new_target.
@@ -135,7 +155,8 @@ export function kanaKnownCount(volumes, kanaAnswer) {
 
 /**
  * The plan's figures, from the learner's own answers:
- *   words, kanji     the vocabulary and kanji from boarding to goal
+ *   words, kanji,    the vocabulary, kanji and grammar points from
+ *   grammar          boarding to goal -- zero on a line not in `lines`
  *   kana             the signs still unread on this ride
  *   items            everything the ride covers, kana included
  *   days, date       at `perDay` new items a day, from `now`
@@ -144,10 +165,16 @@ export function kanaKnownCount(volumes, kanaAnswer) {
  * JLPT level lies behind that stop (goalMath's journeyLevels answers
  * none for it), so it promises signs rather than words.
  */
-export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new Date()) {
+export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new Date(), lines = LINES) {
   const levels = journeyLevels(level, goal)
-  const words = levels.reduce((sum, lvl) => sum + (volumes?.vocab?.[lvl] ?? 0), 0)
-  const kanji = levels.reduce((sum, lvl) => sum + (volumes?.kanji?.[lvl] ?? 0), 0)
+  const volume = line => (lines.includes(line)
+    ? levels.reduce((sum, lvl) => sum + (volumes?.[line]?.[lvl] ?? 0), 0)
+    : 0)
+  // Only the chosen lines are promised: a learner riding kanji alone is
+  // promised no words, and the ride is priced at what it covers.
+  const words = volume('vocab')
+  const kanji = volume('kanji')
+  const grammar = volume('grammar')
   // The kana ride in front of everything else -- goalMath owns when it
   // counts at all. A ride TO that stop prices EVERY sign, the ones the
   // learner already reads included: the destination is the syllabaries
@@ -160,9 +187,9 @@ export function planFigures(volumes, level, goal, perDay, kanaAnswer, now = new 
       ? (volumes?.kana ?? 0)
       : Math.max(0, (volumes?.kana ?? 0) - kanaKnownCount(volumes, kanaAnswer)))
     : 0
-  const items = levels.reduce((sum, lvl) => sum + levelItems(volumes ?? {}, lvl), 0) + kana
+  const items = levels.reduce((sum, lvl) => sum + levelItems(volumes ?? {}, lvl, lines), 0) + kana
   const days = Math.max(1, Math.ceil(items / Math.max(1, perDay)))
-  return { words, kanji, kana, items, days, date: addDays(now, days) }
+  return { words, kanji, grammar, kana, items, days, date: addDays(now, days) }
 }
 
 // The chart is an illustration (the canvas says so on the card): two

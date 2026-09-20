@@ -68,13 +68,15 @@ describe('BoardingFlow under reduced motion', () => {
     await settle()
     await click(screen, '[data-kana="none"]')
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the reveal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the goal
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the lines
     await settle()
-    await click(screen, '[data-action="continue"]')
+    await click(screen, '[data-action="continue"]')   // the rhythm
+    await settle()
+    await click(screen, '[data-action="continue"]')   // the hour
     await settle(20)
 
     // Built at once: every step ticked, the train at the end of the track.

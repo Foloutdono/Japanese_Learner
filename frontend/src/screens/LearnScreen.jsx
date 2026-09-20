@@ -4,6 +4,8 @@ import { getSections } from '../config/tabs'
 import { apiJson } from '../lib/api'
 import { useTodaySummary } from '../stores/today'
 import { useStats } from '../stores/stats'
+import { useProfileSummary } from '../stores/profileSummary'
+import { linesOrAll } from '../domain/boarding'
 import { beginDeparture } from '../stores/departure'
 import { playAnnouncement } from '../lib/audio'
 import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
@@ -22,6 +24,13 @@ import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
 // nobody aboard rather than shouting (the run owns up on Today, where
 // the retry lives).
 //
+// The lines the learner chose at the boarding (domain/boarding.js
+// LINES, backend core/lines.py) hang first; the ones they did not are
+// marked off their route and hang after, still one tap away -- the
+// choice is a default, never a lock. The kana line is never off: every
+// ticket rides it. A profile that never answered (or has not arrived)
+// hangs all four as chosen.
+//
 // The gate prints no head. It opened on the concourse's bar — 辻 over
 // "Route map", "Four lines" at the far end — and the owner had it
 // removed from the four gates (2026-09-20): the tab bar already
@@ -32,6 +41,7 @@ export default function LearnScreen({ session }) {
   const { t } = useLang()
   const today = useTodaySummary().data
   const stats = useStats().data
+  const riding = linesOrAll(useProfileSummary()?.lines)
   const [shelf, setShelf] = useState(null)
 
   useEffect(() => {
@@ -52,7 +62,8 @@ export default function LearnScreen({ session }) {
   }
 
   const sections = getSections('learn', t)
-  const lines = sections.filter(s => TRACKED[s.path])
+  const onRoute = section => TRACKED[section.path] === 'kana' || riding.includes(TRACKED[section.path])
+  const lines = sections.filter(s => TRACKED[s.path]).sort((a, b) => Number(onRoute(b)) - Number(onRoute(a)))
   const decksSection = sections.find(s => s.path === '/learn/decks')
 
   return (
@@ -62,11 +73,13 @@ export default function LearnScreen({ session }) {
         {lines.map(section => {
           const source = TRACKED[section.path]
           const stops = lineStops(stats, source)
+          const off = !onRoute(section)
           return (
             <Plate
               key={section.path}
               section={section}
-              className="plate--line"
+              className={`plate--line${off ? ' plate--off' : ''}`}
+              meta={off ? t.plateOffRoute : null}
               aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
               foot={<StopsFoot stops={stops} />}
               fill={stopsAround(stops).leg}

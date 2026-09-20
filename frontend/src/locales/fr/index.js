@@ -1617,6 +1617,18 @@ const boarding = {
   // sur celui du novice et ne nomme donc aucun niveau (goalStops).
   brdGoalHintStart: 'Tous les arrêts sont devant vous.',
   brdNextStop: 'Prochain arrêt',
+  // Les lignes : quoi apprendre. Les kana ne sont pas une ligne à
+  // choisir -- chaque billet les emprunte -- l’indication le dit
+  // (components/boarding/LinesStep.jsx).
+  brdLinesQ: 'Que voulez-vous apprendre ?',
+  brdLinesHint: 'Les kana sont sur chaque billet. Choisissez le reste.',
+  brdLinesNone: 'Choisissez au moins une ligne.',
+  brdLine: { vocab: 'Vocabulaire', kanji: 'Kanji', grammar: 'Grammaire' },
+  brdLineDesc: {
+    vocab: 'Les mots, de N5 à N1',
+    kanji: 'Lectures, sens, écriture',
+    grammar: 'Les structures, avec des exemples',
+  },
   brdRhythmQ: 'Quel est votre rythme ?',
   brdMinADay: 'min par jour',
   brdNewItems: (n) => `~${n} nouveautés`,
@@ -1642,12 +1654,15 @@ const boarding = {
   brdBuildLines: 'Vos lignes',
   brdBuildRide: 'Votre trajet quotidien',
   brdBuildProjection: 'Votre projection',
-  brdFourLines: 'Quatre lignes',
   brdArrivalTitle: 'Votre plan',
   brdPlanQ: (name) => `Votre plan est prêt, **${name}**.`,
   brdChartTitle: 'Votre projection',
   brdChartAria: (words) => `Mots retenus au fil du trajet : les révisions quotidiennes montent à environ ${words} ; le bachotage plafonne tôt.`,
   brdChartLabel: (words) => `~${words} mots · révisions quotidiennes`,
+  // Le même graphique pour un billet sans les mots : il monte jusqu’à
+  // tout ce que les lignes choisies contiennent.
+  brdChartAriaItems: (n) => `Éléments retenus au fil du trajet : les révisions quotidiennes montent à environ ${n} ; le bachotage plafonne tôt.`,
+  brdChartLabelItems: (n) => `~${n} éléments · révisions quotidiennes`,
   // Le même graphique pour un trajet jusqu’à l’arrêt du novice, qui
   // promet des signes et non des mots.
   brdChartAriaKana: (kana) => `Kana retenus au fil du trajet : les révisions quotidiennes montent à environ ${kana} ; le bachotage plafonne tôt.`,
@@ -1658,7 +1673,11 @@ const boarding = {
   brdChartCap: 'Révisions espacées contre bachotage — une illustration, pas une mesure.',
   brdLead: (min, date, purpose) => `À **${min} min par jour**, d’ici **${date}**, ${purpose} :`,
   brdFor: { studies: 'pour vos études', fun: 'pour le plaisir', trip: 'pour votre voyage', live: 'pour votre vie au Japon', friends: 'pour vos amis', other: 'pour vous' },
-  brdBulletFigures: (words, kanji) => `~${words} mots et ~${kanji} kanji`,
+  // La première promesse : un chiffre par ligne du billet, reliés.
+  brdFigWords: (n) => `~${n} mots`,
+  brdFigKanji: (n) => `~${n} kanji`,
+  brdFigGrammar: (n) => `~${n} points de grammaire`,
+  brdBulletFigures: (parts) => (parts.length > 1 ? `${parts.slice(0, -1).join(', ')} et ${parts.at(-1)}` : parts[0] ?? ''),
   // L’arrêt du novice pris comme objectif : les kana, puis la ligne qui
   // attend derrière. Pas de compte de mots, et aucune promesse de
   // motif — trois semaines de signes ne font pas un drama sans pause.
@@ -1713,6 +1732,15 @@ const onboarding = {
   settingsLearning: 'Apprentissage',
   settingsJlptLevel: 'Niveau JLPT',
   settingsPace: 'Rythme quotidien',
+  // Les lignes empruntées (backend core/lines.py) : le portillon
+  // Apprendre les accroche en premier et le plan est chiffré sur
+  // elles. Les kana ne se décochent pas -- chaque billet les emprunte.
+  settingsLines: 'Vos lignes',
+  settingsLinesCap: 'Ce que vous apprenez',
+  settingsLinesHint: 'Les kana sont sur chaque billet. Une ligne au moins reste allumée.',
+  settingsLineOn: 'Sur votre trajet',
+  settingsLineOff: 'Hors de votre trajet',
+  plateOffRoute: 'Hors de votre trajet',
   settingsRedoDesc: 'Recalibrez votre niveau quand vous avez progressé.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au

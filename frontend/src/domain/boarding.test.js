@@ -1,8 +1,8 @@
 import { describe, it, expect } from 'vitest'
 import {
-  approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
-  kanaKnownCount, kanjiThrough, levelForKana, minuteAtFraction, minutesToTime, planFigures,
-  stopsAhead, timeToMinutes,
+  LINES, approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
+  kanaKnownCount, kanjiThrough, levelForKana, linesOrAll, minuteAtFraction, minutesToTime,
+  planFigures, stopsAhead, timeToMinutes, toggleLine,
 } from './boarding'
 
 const VOLUMES = {
@@ -109,6 +109,28 @@ describe('the plan', () => {
     expect(none.kana).toBe(224)
     // Above N5 the kana never counted.
     expect(planFigures(VOLUMES, 'N3', 'N2', 10, 'none', now).items).toBe(1832 + 367 + 71 + 1796 + 367 + 71)
+  })
+  // Only the lines on the ticket are promised: the words drop to nothing
+  // when the vocabulary is off, and the ride shortens with them.
+  it('prices only the chosen lines', () => {
+    const now = new Date('2026-09-07T00:00:00Z')
+    const all = planFigures(VOLUMES, 'N5', 'N4', 10, 'both', now)
+    const f = planFigures(VOLUMES, 'N5', 'N4', 10, 'both', now, ['kanji', 'grammar'])
+    expect(f.words).toBe(0)
+    expect(f.kanji).toBe(103 + 166)
+    expect(f.grammar).toBe(71 + 71)
+    expect(f.items).toBe(103 + 166 + 71 + 71)
+    expect(f.days).toBeLessThan(all.days)
+    // The kana front-load rides on every ticket regardless.
+    expect(planFigures(VOLUMES, 'N5', 'N4', 10, 'none', now, ['grammar']).items).toBe(71 + 71 + 224)
+  })
+  it('reads a profile’s lines, toggles one, and never orders them otherwise', () => {
+    expect(linesOrAll(null)).toEqual(LINES)
+    expect(linesOrAll([])).toEqual(LINES)
+    expect(linesOrAll(['grammar', 'vocab'])).toEqual(['vocab', 'grammar'])
+    expect(toggleLine(['vocab', 'grammar'], 'kanji')).toEqual(['vocab', 'kanji', 'grammar'])
+    expect(toggleLine(['vocab', 'grammar'], 'vocab')).toEqual(['grammar'])
+    expect(toggleLine(['grammar'], 'grammar')).toEqual([])
   })
   // No JLPT level lies behind the novice's stop, so a ride to it is the
   // kana and nothing else — the plan screen promises signs rather than
