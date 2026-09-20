@@ -74,6 +74,57 @@ def test_deep_tier_merges_explanation_and_word_meaning(client, monkeypatch):
     assert any(t.get("meaning") == "I" for t in body["tokens"])
 
 
+def test_deep_tier_names_the_points_found_and_keeps_the_model_s_notes(client, monkeypatch):
+    """Plan 095: the local tier finds the grammar, the model is told
+    which points and asked what each does in this sentence, and its
+    note lands on the entry and on every token's copy of it. A note on
+    a pattern the sentence does not use is dropped, the way a word the
+    tokenizer does not confirm is. The phrase's cache row is cleared
+    first: the cache is keyed by (phrase, lang) and never expires, so
+    the second run of this test would otherwise never reach the model."""
+    phrase = "京都に三回行ったことがあります。"
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM phrase_analysis_cache WHERE phrase = %s", (phrase,))
+        conn.commit()
+    finally:
+        conn.close()
+    seen = {}
+
+    def _fake_chat(messages, timeout=30, max_tokens=1500, reasoning=False, **_kwargs):
+        seen["system"] = messages[0]["content"]
+        seen["user"] = messages[1]["content"]
+        return (
+            '{"words": [{"surface": "京都", "meaning": "Kyoto"}], '
+            '"grammar": [{"pattern": "〜ことがある", "note": "Says the speaker has been to Kyoto at least once."}, '
+            '{"pattern": "〜てしまう", "note": "Not in this sentence."}], '
+            '"explanation": "An experience."}'
+        )
+
+    monkeypatch.setattr(phrase_module, "chat", _fake_chat)
+    response = client.post(
+        "/api/phrase/analyze",
+        json={"phrase": phrase, "deep": True, "lang": "en", "save": False},
+    )
+    assert response.status_code == 200
+    body = response.json()
+    # The user message carries the phrase and the constructions the local
+    # tier found, each with its formation and gloss; the markers stay out.
+    assert seen["user"].startswith(phrase)
+    assert "- 〜ことがある (" in seen["user"]
+    assert "\n- に" not in seen["user"]
+    assert '"grammar"' in seen["system"]
+    koto = next(g for g in body["grammar"] if g["pattern"] == "〜ことがある")
+    assert koto["note"] == "Says the speaker has been to Kyoto at least once."
+    assert not any(g.get("note") == "Not in this sentence." for g in body["grammar"])
+    on_token = next(
+        g for t in body["tokens"] for g in t.get("grammar", []) if g["pattern"] == "〜ことがある"
+    )
+    assert on_token["note"] == koto["note"]
+    assert body["explanation"] == "An experience."
+
+
 def test_phrase_key_differs_by_language():
     en_key = phrase_module._phrase_key("私は学生です。", "en")
     fr_key = phrase_module._phrase_key("私は学生です。", "fr")

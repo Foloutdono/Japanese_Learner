@@ -191,6 +191,54 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 20 — the grammar breakdown: the rule on the stage, glossed,
+  lit where it sits, found by its form, and explained in place**
+  (plan 095, 2026-09-20, DONE).
+  The analyzer's stage was the one
+  breakdown that drew no grammar: the points were detected, attached
+  to every token and shipped, then shown nowhere on the screen a
+  learner brings a sentence to. Now the constructions are the practice
+  modes' quiet chips under the token line and the stage card lists the
+  rules of the word on it (markers included -- for は, the marker it is
+  IS its rule), each a door to the point's sheet (`DictionaryLookupSheet`
+  by card id, as ReadingRun opens it). And every chip carries its
+  rule's one-line gloss: the local tier ships the catalogue's {en, fr}
+  pair (`study/analysis._grammar_entries`; the result is pure and shared,
+  so the screen picks the language through `grammarGloss.js`), the
+  comprehension result's string passes through, and a particle's row
+  prints its marker's gloss where its meaning cell used to be empty.
+  And each point says where it sits: `grammar_detect.hits` reports the
+  pieces a hit is written on (`segments` -- から and まで, not the
+  clause between them), `_attach_grammar` covers tokens by piece rather
+  than by span (a stage card for 家 no longer lists から〜まで), and the
+  line lights a point's words in the grammar line's ink while its chip
+  or its row is hovered or focused, keeping the last one pressed lit
+  after its sheet closes (`grammarSpans.js`; `useLight` in
+  SentenceBreakdown, PassageBreakdown's own copy).
+  Then the detector's second pass, by dictionary form: `morphology`
+  exposes UniDic's conjugation type and form, and `grammar_detect`
+  reads a pattern's tail as the dictionary form of a token (すぎ IS
+  すぎる, み after て IS みる, たかっ IS たい) and the form points as the
+  form the tokenizer names (the passive and causative auxiliaries, the
+  potential as a 五段 verb conjugating as 下一段, the volitional and
+  the imperative on the verb itself), every rule held to the point's
+  own lessons before it is trusted. Recall over the catalogue's own
+  sentences: 90% → 92%; 510 → 517 of 541 points found in their own
+  lessons. Still refused: い形容詞／な形容詞 and 自動詞／他動詞 (no form to
+  read), the sense-qualified points, and the AMBIGUOUS list.
+  Then the deep tier tied to what was found: the model is told the
+  constructions the local tier detected (`routes/phrase._deep_points`,
+  formation and gloss included) and asked for one line per point on
+  what it does in THIS sentence, returned as `grammar: [{pattern,
+  note}]`; `merge_deep` lands each note on the entry and each token's
+  copy and drops a note on a pattern the sentence does not use, as it
+  drops a word the tokenizer does not confirm. `CACHE_VERSION` 3 → 4.
+  `GrammarNotes` prints the lines under the chips (rows and stage),
+  each a door and a light like its chip; the whole-sentence explanation
+  stays where it was. `prewarm_phrase_cache` makes the same call, with a
+  `--lang`, which also fixes its arity (it had been calling the route's
+  helpers without a language since v2).
+
 - **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE;
   the content waves landed level by level, N5/N4 then N3, N2 and N1).
   Owner-directed rework of the grammar line. The catalogue moves to

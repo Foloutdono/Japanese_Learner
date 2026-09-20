@@ -68,6 +68,11 @@ Public surface:
           against a deck entry's own kana field, since that field is
           always the dictionary-form reading too
         - pos: coarse part-of-speech ("verb", "particle", "noun", ...)
+        - ctype / cform: UniDic's conjugation type and form, as
+          written ("下一段-マ行", "意志推量形"), "" where the token does
+          not conjugate. What tells 読める (読む conjugating as 下一段,
+          the potential) from 食べる, and names the volitional and the
+          imperative -- study/grammar_detect's second pass reads them.
 """
 import logging
 from dataclasses import dataclass
@@ -179,6 +184,19 @@ class Morpheme:
     # 接続助詞 in 読んで). study/romaji.py glues one of these onto the
     # word before it when building a word-spaced reading; a case particle
     # stays its own word either way.
+    ctype: str = ""  # UniDic's cType, the conjugation class: 五段-カ行,
+    # 下一段-マ行, 助動詞-レル. A verb whose dictionary form is 五段 but
+    # conjugates as 下一段 is the potential (読める, lemma 読む) -- the
+    # one thing that tells it from a plain 下一段 verb (食べる).
+    cform: str = ""  # UniDic's cForm, the conjugation form: 連用形-一般,
+    # 意志推量形 (帰ろう), 命令形 (起きろ). Both "" for a word that does
+    # not conjugate, where UniDic writes "*".
+
+
+def _conjugation(raw) -> str:
+    """UniDic writes "*" where a field does not apply; "" is what a
+    caller can test for."""
+    return "" if not raw or raw == "*" else str(raw)
 
 
 def _clean_lemma(raw: str, fallback: str) -> str:
@@ -225,6 +243,8 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 pos=_POS_MAP.get(pos1, "other"),
                 auxiliary_use=(pos2 == "非自立可能"),
                 conjunctive=(pos2 == "接続助詞"),
+                ctype=_conjugation(getattr(feat, "cType", None)),
+                cform=_conjugation(getattr(feat, "cForm", None)),
             ))
         return morphemes
     except Exception:  # pragma: no cover - defensive only

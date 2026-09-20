@@ -80,8 +80,21 @@ runtime purpose. Two consequences worth knowing:
   replacing the wall map and the platform grid (cited in
   `components/station/LinePlate.jsx`, `domain/lineProgress.js`'s
   `stopsAround`, `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx`
-  and `index.css`; DESIGN.md, Structure).
-  When starting a new wave, begin at **095** or higher, and check
+  and `index.css`; DESIGN.md, Structure), and **095** is the grammar
+  breakdown rework — the grammar on the analyzer stage, the chip that
+  says what its rule does, the rule lit where it sits, the detector's
+  second pass by dictionary form (〜すぎる, 〜てみる, the passive,
+  potential, causative, volitional and imperative, read off the
+  tokenizer's conjugation fields rather than letters), and the deep
+  tier's line per rule (the model is told which points the local tier
+  found and asked what each does in the sentence; `phrase_analysis_cache`
+  v4) (cited in `study/morphology.py`, `study/grammar_detect.py`,
+  `study/analysis.py`, `routes/phrase.py`, `scripts/prewarm_phrase_cache.py`,
+  `components/analysis/GrammarChips.jsx`, `components/analysis/GrammarNotes.jsx`,
+  `components/analysis/grammarGloss.js`, `components/analysis/grammarSpans.js`,
+  `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`,
+  `components/analysis/PassageBreakdown.jsx` and `screens/AnalyzerScreen.jsx`).
+  When starting a new wave, begin at **096** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

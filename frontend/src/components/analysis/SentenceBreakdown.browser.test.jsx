@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { SentenceBreakdown } from './SentenceBreakdown'
@@ -307,6 +308,41 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelector('.analysis-grammar-chips .cap').textContent).toBe('Grammar in this text')
   })
 
+  // ── The gloss on the chip (plan 095) ───────────────────────────
+  // A chip says what its rule does. The local tier ships the gloss as
+  // the catalogue's {en, fr} pair (the analysis is shared across
+  // learners, so it cannot pick a language); the comprehension result
+  // ships a string it localised itself. The chip reads both, in the
+  // learner's language -- the browser lane is a French device.
+  const NAGARA = { pattern: '〜ながら', level: 'N4', raw_id: 'grammar_N4_〜ながら', kind: 'pattern', start: 4,
+    meaning: { en: 'while doing', fr: 'tout en faisant' }, structure: 'verb stem + ながら' }
+
+  it("a chip carries its rule's gloss in the learner's language, between the pattern and the level", async () => {
+    await render(withLang(<GrammarChips grammar={[NAGARA]} t={T} quiet label={null} />))
+    const chip = document.querySelector('.analysis-grammar-chip')
+    const gloss = chip.querySelector('.analysis-grammar-chip__gloss')
+    expect(gloss.textContent).toBe('tout en faisant')
+    expect(gloss.title).toBe('verb stem + ながら')
+    expect(before(chip.querySelector('.analysis-grammar-chip__pattern'), gloss)).toBe(true)
+    expect(before(gloss, chip.querySelector('.analysis-grammar-chip__level'))).toBe(true)
+  })
+
+  it('a gloss already localised by the server prints as it is, and a point without one prints none', async () => {
+    const grammar = [
+      { ...NAGARA, meaning: 'while doing' },
+      { pattern: '〜てから', level: 'N5', raw_id: 'grammar_N5_〜てから', start: 0 },
+    ]
+    await render(withLang(<GrammarChips grammar={grammar} t={T} quiet label={null} />))
+    const glosses = [...document.querySelectorAll('.analysis-grammar-chip')].map(c => c.querySelector('.analysis-grammar-chip__gloss')?.textContent ?? null)
+    expect(glosses).toEqual(['while doing', null])
+    expect(document.body.textContent).not.toContain('[object Object]')
+  })
+
+  it('without a language above it the gloss falls back to English rather than the chip falling over', async () => {
+    await render(<GrammarChips grammar={[NAGARA]} t={T} quiet label={null} />)
+    expect(document.querySelector('.analysis-grammar-chip__gloss').textContent).toBe('while doing')
+  })
+
   // ── The grammar a row is an instance of ───────────────────────
   // study/grammar_detect tells a MARKER (a point that is one
   // grammatical word: は, へ, です／だ) from a PATTERN built around one
@@ -343,6 +379,246 @@ describe('SentenceBreakdown', () => {
     // deck entry behind a particle to take one from.
     expect(rows[1].querySelector('.bkd-row__lvl').textContent).toBe('N5')
     expect(onTokenClick).not.toHaveBeenCalled()
+  })
+
+  it("a particle row prints the gloss of the marker it is, when nothing else glossed it (plan 095)", async () => {
+    const wa = { ...WA, meaning: { en: 'marks the sentence topic', fr: 'marque le thème de la phrase' } }
+    const analysis = {
+      available: true,
+      grammar: [{ ...wa, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [wa] })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />,
+    ))
+    const rows = document.querySelectorAll('.bkd-row')
+    // The word keeps the deck's gloss; the particle, which had an
+    // empty cell, reads its rule's -- in the learner's language.
+    expect(rows[0].querySelector('.bkd-row__meaning').textContent).toBe('student')
+    expect(rows[1].querySelector('.bkd-row__meaning').textContent).toBe('marque le thème de la phrase')
+  })
+
+  it("the model's contextual gloss on a particle wins over its marker's", async () => {
+    const wa = { ...WA, meaning: { en: 'marks the sentence topic', fr: 'marque le thème de la phrase' } }
+    const analysis = {
+      available: true,
+      grammar: [{ ...wa, start: 2, end: 3 }],
+      tokens: [tokenFixture(), particleFixture({ grammar: [wa], meaning: 'topic marker' })],
+    }
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />,
+    ))
+    expect(document.querySelectorAll('.bkd-row')[1].querySelector('.bkd-row__meaning').textContent).toBe('topic marker')
+  })
+
+  // ── The stage (plan 095) ───────────────────────────────────────
+  // The analyzer's shape used to be the one breakdown that showed no
+  // grammar: the points were detected, attached to every token and
+  // shipped, then drawn nowhere. Now the constructions are the quiet
+  // chips under the line, and the card of the word on the stage lists
+  // the rules that word is part of -- markers included, because for a
+  // particle the marker it is IS its rule.
+  it('the stage names the constructions under the line, and the card the rules of the word on it', async () => {
+    const onGrammarOpen = vi.fn()
+    const analysis = {
+      available: true, text: '学生は会いました。', unknown_count: 0,
+      grammar: [{ ...WA, start: 2, end: 3 }, { ...MASU, start: 5, end: 7 }],
+      tokens: [
+        tokenFixture(),
+        particleFixture({ grammar: [WA] }),
+        ...runFixture({ glossed: false, spanEnd: false }).map((tok, i) => (i === 1 ? { ...tok, grammar: [MASU] } : tok)),
+      ],
+    }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={analysis} layout="stage" index={1} setIndex={vi.fn()} t={T}
+        onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={onGrammarOpen}
+      />,
+    ))
+    const stage = document.querySelector('.anl-stagebd')
+    // The line itself holds tokens and nothing else (the canvas rule).
+    expect(stage.querySelector('.tok-line .analysis-grammar-chips')).toBeNull()
+    // Under it, the constructions and not the markers: は is one
+    // word's rule, not the sentence's.
+    const under = [...stage.children].find(el => el.classList.contains('analysis-grammar-chips'))
+    expect([...under.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['〜ます／〜ません'])
+    // The card is は's: its rule is the marker, as a door.
+    const onCard = document.querySelector('.token-card .analysis-grammar-chips')
+    expect([...onCard.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['は'])
+    onCard.querySelector('.analysis-grammar-chip__door').click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
+    // No rule, no row: the card does not hold an empty strip.
+    expect(document.querySelectorAll('.token-card .analysis-grammar-chips')).toHaveLength(1)
+  })
+
+  // ── The light (plan 095) ───────────────────────────────────────
+  // Where a point sits on the sentence: the words it is written on
+  // light while its chip is hovered or focused, a two-part point
+  // lights its two words and not the clause between, and the last
+  // point pressed stays lit once the pointer has left.
+  const settle = (ms = 30) => new Promise(r => setTimeout(r, ms))
+  const hover = el => el.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+  const leave = el => el.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+  const litSurfaces = () => [...document.querySelectorAll('.bkd-line .bkd-tok--lit')].map(el => el.textContent)
+
+  // 駅から家まで歩きました。 as the local tier cuts it, から〜まで written
+  // on から and まで, with the 家 between them in neither piece.
+  function karaMade() {
+    const KARA_MADE = { pattern: 'から〜まで', level: 'N5', raw_id: 'grammar_N5_から〜まで', kind: 'pattern', start: 1, end: 6, segments: [[1, 3], [4, 6]] }
+    return {
+      point: KARA_MADE,
+      analysis: {
+        available: true, text: '駅から家まで歩きました。', grammar: [KARA_MADE],
+        tokens: [
+          tokenFixture({ surface: '駅', start: 0, end: 1, reading: 'えき', furigana: [{ text: '駅', reading: 'えき' }] }),
+          particleFixture({ surface: 'から', start: 1, end: 3, reading: 'から', furigana: [{ text: 'から' }], grammar: [KARA_MADE] }),
+          tokenFixture({ surface: '家', start: 3, end: 4, reading: 'いえ', furigana: [{ text: '家', reading: 'いえ' }] }),
+          particleFixture({ surface: 'まで', start: 4, end: 6, reading: 'まで', furigana: [{ text: 'まで' }], grammar: [KARA_MADE] }),
+          tokenFixture({ surface: '歩き', start: 6, end: 8, reading: 'あるき', pos: 'verb', furigana: [{ text: '歩', reading: 'ある' }, { text: 'き' }] }),
+        ],
+      },
+    }
+  }
+
+  it('hovering a chip lights the words its point is written on, and only those', async () => {
+    const { analysis } = karaMade()
+    await render(withLang(<SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
+    expect(litSurfaces()).toEqual([])
+    const chip = document.querySelector('.analysis-grammar-chip')
+    hover(chip)
+    await settle()
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    expect(chip.classList.contains('analysis-grammar-chip--lit')).toBe(true)
+    leave(chip)
+    await settle()
+    expect(litSurfaces()).toEqual([])
+    expect(chip.classList.contains('analysis-grammar-chip--lit')).toBe(false)
+  })
+
+  it('focusing the chip lights it for the keyboard, and pressing it keeps the light after the pointer leaves', async () => {
+    const { analysis } = karaMade()
+    const onGrammarOpen = vi.fn()
+    await render(withLang(<SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={onGrammarOpen} />))
+    const door = document.querySelector('.analysis-grammar-chip__door')
+    door.focus()
+    await settle()
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    door.click()
+    door.blur()
+    await settle()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    // Picked: lit with nothing hovered or focused.
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    expect(document.querySelector('.analysis-grammar-chip').classList.contains('analysis-grammar-chip--lit')).toBe(true)
+  })
+
+  it('a new sentence arrives with nothing lit', async () => {
+    const { analysis } = karaMade()
+    function Host() {
+      const [a, setA] = useState(analysis)
+      return (
+        <>
+          <button type="button" className="next" onClick={() => setA({ ...analysis, text: 'again' })}>next</button>
+          <SentenceBreakdown analysis={a} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />
+        </>
+      )
+    }
+    await render(withLang(<Host />))
+    document.querySelector('.analysis-grammar-chip__door').click()
+    await settle()
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    document.querySelector('.next').click()
+    await settle()
+    expect(litSurfaces()).toEqual([])
+  })
+
+  it('the row that opens a marker lights that particle in the line, as its chip beside a word row does', async () => {
+    const wa = { ...WA, start: 2, end: 3, segments: [[2, 3]] }
+    const analysis = {
+      available: true, grammar: [wa],
+      tokens: [tokenFixture(), particleFixture({ grammar: [wa] })],
+    }
+    await render(withLang(<SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
+    const row = document.querySelectorAll('.bkd-row')[1].querySelector('.bkd-row__word')
+    hover(row)
+    await settle()
+    expect(litSurfaces()).toEqual(['は'])
+    expect(row.classList.contains('bkd-tok--lit')).toBe(true)
+    leave(row)
+    await settle()
+    expect(litSurfaces()).toEqual([])
+  })
+
+  it('on the stage the chip lights the words in the token line, and the card\'s chip lights its own word', async () => {
+    const { analysis } = karaMade()
+    await render(withLang(
+      <SentenceBreakdown analysis={analysis} layout="stage" index={1} setIndex={vi.fn()} t={T} onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={vi.fn()} />,
+    ))
+    const litToks = () => [...document.querySelectorAll('.tok-line .tok--lit .tok__word')].map(el => el.textContent)
+    const stage = document.querySelector('.anl-stagebd')
+    const under = [...stage.children].find(el => el.classList.contains('analysis-grammar-chips'))
+    hover(under.querySelector('.analysis-grammar-chip'))
+    await settle()
+    expect(litToks()).toEqual(['から', 'まで'])
+    leave(under.querySelector('.analysis-grammar-chip'))
+    await settle()
+    expect(litToks()).toEqual([])
+    // The card is から's; its chip is the same point, and lights the same words.
+    const onCard = document.querySelector('.token-card .analysis-grammar-chip')
+    hover(onCard)
+    await settle()
+    expect(litToks()).toEqual(['から', 'まで'])
+    expect(onCard.classList.contains('analysis-grammar-chip--lit')).toBe(true)
+  })
+
+  // ── The deep tier's line per rule (plan 095) ───────────────────
+  // Once bought, each construction's note prints under the chips, as
+  // a door and a light like the chip; without one, nothing prints.
+  it('a noted point prints its line under the chips, opens its sheet, and lights its words', async () => {
+    const { analysis, point } = karaMade()
+    const noted = { ...analysis, grammar: [{ ...point, note: 'From the station to the house: the two ends of the walk.' }], explanation: 'A walk.' }
+    const onGrammarOpen = vi.fn()
+    await render(withLang(<SentenceBreakdown analysis={noted} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={onGrammarOpen} />))
+    const notes = document.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(before(document.querySelector('.analysis-grammar-chips'), notes)).toBe(true)
+    expect(before(notes, document.querySelector('.prose__ai'))).toBe(true)
+    const row = notes.querySelector('.bkd-note')
+    expect(row.querySelector('.bkd-note__pattern').textContent).toBe('から〜まで')
+    expect(row.querySelector('.bkd-note__text').textContent).toBe('From the station to the house: the two ends of the walk.')
+    hover(row)
+    await settle()
+    expect(litSurfaces()).toEqual(['から', 'まで'])
+    expect(row.classList.contains('bkd-note--lit')).toBe(true)
+    row.querySelector('.bkd-note__door').click()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_から〜まで')
+  })
+
+  it('without a note there is no list, and a blank note is no note', async () => {
+    const { analysis, point } = karaMade()
+    await render(withLang(<SentenceBreakdown analysis={{ ...analysis, grammar: [{ ...point, note: '   ' }] }} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
+    expect(document.querySelector('.bkd-notes')).toBeNull()
+  })
+
+  it('on the stage the notes ride under the chips, before the dials', async () => {
+    const { analysis, point } = karaMade()
+    const noted = { ...analysis, grammar: [{ ...point, note: 'The two ends.' }] }
+    await render(withLang(
+      <SentenceBreakdown
+        analysis={noted} layout="stage" index={0} setIndex={vi.fn()} t={T} onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={vi.fn()}
+        controls={<div className="dials-here" />}
+      />,
+    ))
+    const stage = document.querySelector('.anl-stagebd')
+    const notes = stage.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(before([...stage.children].find(el => el.classList.contains('analysis-grammar-chips')), notes)).toBe(true)
+    expect(before(notes, stage.querySelector('.dials-here'))).toBe(true)
+    hover(notes.querySelector('.bkd-note'))
+    await settle()
+    expect([...document.querySelectorAll('.tok-line .tok--lit .tok__word')].map(el => el.textContent)).toEqual(['から', 'まで'])
   })
 
   it('a row that already opens a word carries its marker beside it rather than losing it', async () => {

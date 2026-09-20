@@ -56,27 +56,53 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
 
     `morphemes` is the tokenization the caller already has, so a
     breakdown reads the sentence once.
+
+    `meaning` and `structure` (plan 095) are the catalogue's own one-line
+    gloss and formation, so a chip can say what the rule does without
+    the learner opening its sheet -- 〜ながら is "while", and nobody
+    should have to press it to learn that. The gloss travels as the
+    catalogue's {en, fr} pair rather than in one language: this result
+    is pure and shared across every learner who asks about the sentence
+    (see the module docstring), and which language the reader is in is
+    the screen's to decide (frontend grammarGloss.js). The comprehension
+    result's points (routes/reading.py) were already localised on the
+    server into a plain string; the same reader takes both.
+
+    `segments` (plan 095) is where on the sentence the point is written,
+    as [start, end] pieces -- one for a point written in one piece, one
+    per part for から〜まで, whose `start`..`end` reaches over a clause
+    it does not own. A screen that shows where a rule sits lights the
+    pieces (frontend grammarSpans.js); the tokens a point covers are
+    the pieces' tokens (_attach_grammar).
     """
     out = []
-    for pattern, level, start, end, kind in grammar_detect.detect(sentence, morphemes):
+    for hit in grammar_detect.hits(sentence, morphemes):
+        pattern, level = hit["pattern"], hit["level"]
         found = find(pattern)
         entry = found[1] if found and found[0] == level else None
         if entry is None:
             logger.debug("detect hit %r/%s has no catalogue entry; dropped", pattern, level)
             continue
+        meaning = entry.get("meaning")
         out.append({
             "pattern": pattern,
             "level": level,
-            "start": start,
-            "end": end,
-            "kind": kind,
+            "start": hit["start"],
+            "end": hit["end"],
+            "segments": [list(seg) for seg in hit["segments"]],
+            "kind": hit["kind"],
             "raw_id": grammar_to_id(entry, level),
+            # A copy, never the catalogue's own dict: this result is
+            # cached and handed around, and nothing downstream may be
+            # able to edit the catalogue through it.
+            "meaning": dict(meaning) if isinstance(meaning, dict) else (meaning or ""),
+            "structure": entry.get("structure", ""),
         })
     return out
 
 
 def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
-    """Give every token the points whose span covers it, in place.
+    """Give every token the points written on it, in place.
 
     This is what makes a grammar point reachable the way a word is: the
     rows under a sentence are the learner's map of it, and until now a
@@ -85,13 +111,23 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
     of sat in a chip below, unconnected to the word that demonstrates
     it. A point covering a token is that token's own rule, so the row
     opens it.
+
+    Covering means written on one of the point's `segments`, not lying
+    anywhere under its span: から〜まで reaches from から to まで, and
+    the 家 between them is not an instance of it. Attached by span, a
+    stage card for 家 listed から〜まで as that word's rule (plan 095).
     """
     for token in tokens:
         start, end = token["start"], token["end"]
         token["grammar"] = [
-            {k: g[k] for k in ("pattern", "level", "raw_id", "kind")}
+            # The occurrence's own offsets ride along, so the row that
+            # opens a marker can light the very particle it is in the
+            # line above -- the same point twice in a sentence is two
+            # lights, not one (frontend grammarSpans.js).
+            {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
+                               "start", "end", "segments")}
             for g in grammar
-            if g["start"] < end and start < g["end"]
+            if any(s < end and start < e for s, e in g["segments"])
         ]
 
 
@@ -206,10 +242,16 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         {**g, "stats": card_stats(states, user_id, g["raw_id"], GRAMMAR_STATUS_MODES)}
         for g in analysis["grammar"]
     ]
-    by_id = {g["raw_id"]: g for g in grammar}
+    # The stats onto the token's own copy, which keeps its occurrence
+    # (its offsets) rather than taking the sentence-level entry's: a
+    # point found twice has one card and two places.
+    stats_by_id = {g["raw_id"]: g["stats"] for g in grammar}
     for tok in tokens:
         if tok.get("grammar"):
-            tok["grammar"] = [by_id.get(g["raw_id"], g) for g in tok["grammar"]]
+            tok["grammar"] = [
+                {**g, "stats": stats_by_id[g["raw_id"]]} if g["raw_id"] in stats_by_id else g
+                for g in tok["grammar"]
+            ]
 
     return {
         **analysis,
@@ -220,9 +262,11 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
     }
 
 
-def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
+def merge_deep(analysis: dict, llm_words: list[dict], explanation: str,
+               llm_grammar: list[dict] | None = None) -> dict:
     """Fold the deep tier's per-word glosses and prose explanation onto
-    Tokens the local tier already verified.
+    Tokens the local tier already verified -- and its per-point notes
+    onto the grammar the local tier found (plan 095).
 
     The tokenizer is the authority on segmentation: only `meaning` is
     copied from an LLM word onto its matched Token. Everything else --
@@ -247,6 +291,16 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
     tokenizer's, and every other field on every Token in the run is
     untouched.
 
+    `llm_grammar` is the model's [{pattern, note}], one line per point
+    the caller listed for it (routes/phrase._deep_points): what the
+    pattern does IN THIS SENTENCE, which is the one thing the
+    catalogue's gloss cannot say. The local tier is the authority on
+    which points are there: a note lands on the entry -- and on every
+    token's copy of it -- whose pattern it names, and a note for a
+    pattern the sentence does not use is dropped, exactly as a word the
+    tokenizer does not confirm is. A model may echo the pattern with
+    its spaces trimmed; nothing looser is matched.
+
     Returns a NEW dict; does not mutate `analysis` -- the local analysis
     is cacheable and may be shared with a caller that never buys the
     deep tier.
@@ -254,6 +308,26 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
     tokens = [dict(t) for t in analysis.get("tokens", [])]
     used = [False] * len(tokens)
     dropped = 0
+
+    notes: dict[str, str] = {}
+    for item in llm_grammar or []:
+        if not isinstance(item, dict):
+            continue
+        pattern, note = item.get("pattern"), item.get("note")
+        if isinstance(pattern, str) and isinstance(note, str) and pattern.strip() and note.strip():
+            notes.setdefault(pattern.strip(), note.strip())
+    grammar = [
+        {**g, "note": notes[g["pattern"]]} if g.get("pattern") in notes else dict(g)
+        for g in analysis.get("grammar", [])
+    ]
+    if notes and not any("note" in g for g in grammar):
+        logger.debug("deep tier noted %d point(s) the sentence does not use", len(notes))
+    for tok in tokens:
+        if tok.get("grammar"):
+            tok["grammar"] = [
+                {**g, "note": notes[g["pattern"]]} if g.get("pattern") in notes else g
+                for g in tok["grammar"]
+            ]
 
     for word in llm_words:
         surface = word.get("surface", "")
@@ -273,6 +347,7 @@ def merge_deep(analysis: dict, llm_words: list[dict], explanation: str) -> dict:
     return {
         **analysis,
         "tokens": tokens,
+        "grammar": grammar,
         "explanation": explanation,
         "deep_dropped": dropped,
     }

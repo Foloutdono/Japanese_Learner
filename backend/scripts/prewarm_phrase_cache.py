@@ -30,7 +30,8 @@ import time
 import scripts._env  # noqa: F401  -- must precede the route import, which
 #                       reads the provider API keys at module scope.
 from content.reading_sentences import BY_LEVEL
-from routes.phrase import _cached_analysis, _call_llm, _store_analysis
+from routes.phrase import _cached_analysis, _call_llm, _deep_points, _store_analysis
+from study.analysis import analyze_local
 from study.llm_shared import llm_configured
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -54,6 +55,10 @@ def main() -> int:
     parser.add_argument("--all", action="store_true", help="every level (the default)")
     parser.add_argument("--dry-run", action="store_true",
                         help="report what is missing without calling the model")
+    # The cache is keyed by (phrase, lang): a breakdown bought in one
+    # language is a miss in the other.
+    parser.add_argument("--lang", default="en", choices=("en", "fr"),
+                        help="the language of the glosses and notes (default: en)")
     args = parser.parse_args()
 
     levels = args.levels or list(BY_LEVEL)
@@ -63,7 +68,7 @@ def main() -> int:
         return 2
 
     todo = phrases_for(levels)
-    missing = [(level, jp) for level, jp in todo if _cached_analysis(jp) is None]
+    missing = [(level, jp) for level, jp in todo if _cached_analysis(jp, args.lang) is None]
 
     logger.info("%d curated sentences across %s", len(todo), ", ".join(levels))
     logger.info("%d already cached, %d to fetch", len(todo) - len(missing), len(missing))
@@ -80,12 +85,14 @@ def main() -> int:
     done = failed = 0
     for i, (level, jp) in enumerate(missing, 1):
         try:
-            result = _call_llm(jp)
+            # The same call the route makes: the points the local tier
+            # finds are what the model is asked to note (plan 095).
+            result = _call_llm(jp, args.lang, _deep_points(analyze_local(jp), args.lang))
         except Exception as exc:  # the route raises HTTPException on exhaustion
             failed += 1
             logger.warning("  [%d/%d] %s FAILED  %s  (%s)", i, len(missing), level, jp, exc)
         else:
-            _store_analysis(jp, result)
+            _store_analysis(jp, args.lang, result)
             done += 1
             logger.info("  [%d/%d] %s ok  %s", i, len(missing), level, jp)
         time.sleep(PAUSE_SECONDS)

@@ -24,7 +24,12 @@ const SENTENCES = [
   {
     text: '次の電車は三番線から発車します。',
     cue_start: null, cue_end: null, grammar: [
-      { raw_id: 'g1', pattern: '〜から', level: 'N5', start: 0, end: 2 },
+      // Written on から (offsets 8..10 of the text), as the local tier
+      // reports it: the piece the light finds (plan 095).
+      // The explanation below was bought, so the point carries the
+      // model's line about it too (plan 095).
+      { raw_id: 'g1', pattern: '〜から', level: 'N5', start: 8, end: 10, segments: [[8, 10]],
+        note: 'Here から marks platform three as where the train departs from.' },
     ],
     unknown_count: 1, available: true, level: 'N2', off_deck_count: 0,
     explanation: 'から marks the origin — the train departs FROM platform three.',
@@ -32,24 +37,27 @@ const SENTENCES = [
       // mastered → the mastered rule, ruby hidden in 'unknown' mode. The
       // entry carries the dictionary gloss the card shows under the
       // word before any deep tier is bought.
-      { surface: '電車', reading: 'でんしゃ', pos: 'noun',
+      { surface: '電車', start: 2, end: 4, reading: 'でんしゃ', pos: 'noun',
         furigana: [{ text: '電車', reading: 'でんしゃ' }],
         vocab_match: { entry: { meaning: 'electric train' }, stats: { status: 'mastered' }, level: 'N5', raw_id: 'v1' } },
       // particle, no vocab_match → no rule ever, and no reading (no kanji)
-      { surface: 'は', reading: 'は', pos: 'particle',
+      { surface: 'は', start: 4, end: 5, reading: 'は', pos: 'particle',
         furigana: [{ text: 'は' }] },
       // learning → the learning rule
-      { surface: '三番線', reading: 'さんばんせん', pos: 'noun',
+      { surface: '三番線', start: 5, end: 8, reading: 'さんばんせん', pos: 'noun',
         furigana: [{ text: '三番線', reading: 'さんばんせん' }],
         vocab_match: { entry: {}, stats: { status: 'learning' }, level: 'N4', raw_id: 'v2' } },
       // not yet started → the "new to you" rule, kanji squares on the card
-      { surface: '発車', reading: 'はっしゃ', pos: 'noun',
+      { surface: '発車', start: 10, end: 12, reading: 'はっしゃ', pos: 'noun',
         furigana: [{ text: '発車', reading: 'はっしゃ' }],
         vocab_match: { entry: {}, stats: { status: 'not_started' }, level: 'N3', raw_id: 'v3' },
         kanji_matches: [
           { kanji: '発', level: 'N3', raw_id: 'k1', entry: { meaning: 'depart' }, stats: { status: 'not_started' } },
           { kanji: '車', level: 'N5', raw_id: 'k2', entry: { meaning: 'vehicle' }, stats: { status: 'mastered' } },
         ] },
+      // the particle the grammar point is written on: what its chip lights
+      { surface: 'から', start: 8, end: 10, reading: 'から', pos: 'particle',
+        furigana: [{ text: 'から' }] },
     ],
   },
   {
@@ -396,6 +404,84 @@ describe('the token table (canvas: a real table, not the list layout)', () => {
     // textContent is base + rt.
     expect(screen.container.querySelector('.token-card__surface').textContent).toContain('三番線')
     expect(tokens(screen)[2].classList.contains('tok--on')).toBe(true)
+  })
+})
+
+describe('the grammar on the stage (plan 095)', () => {
+  it('names the constructions the sentence is built with under the line, each a door to its lesson', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    const chips = [...bd.children].find(el => el.classList.contains('analysis-grammar-chips'))
+    expect(chips, 'the chips ride the stage, under the line').not.toBeNull()
+    expect([...chips.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['〜から'])
+    // Quiet: no caption, no status pill, no deck action (the rule is
+    // added to a deck from its own sheet).
+    expect(chips.querySelector('.cap')).toBeNull()
+    expect(chips.querySelector('.analysis-mine-btn')).toBeNull()
+
+    // The door opens the point's sheet by its card id, over the stage.
+    expect(document.querySelector('.dict-sheet')).toBeNull()
+    chips.querySelector('.analysis-grammar-chip__door').click()
+    await settle(60)
+    const sheet = document.querySelector('.dict-sheet')
+    expect(sheet).not.toBeNull()
+    expect(sheet.getAttribute('aria-label')).toContain('g1')
+    expect(apiFetch.mock.calls.some(([url]) => String(url).includes('category=grammar') && String(url).includes('id=g1'))).toBe(true)
+    // And closes from the sheet, leaving the stage as it was.
+    document.querySelector('.dict-sheet .btn-secondary').click()
+    await settle(60)
+    expect(document.querySelector('.dict-sheet')).toBeNull()
+    expect(tokens(screen).length).toBe(SENTENCES[0].tokens.length)
+  })
+
+  it('hovering the chip lights the word its point is written on, in the grammar line\'s ink, and nothing else', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const chip = screen.container.querySelector('.anl-stagebd > .analysis-grammar-chips .analysis-grammar-chip')
+    const kara = tokens(screen).find(el => el.querySelector('.tok__word').textContent === 'から')
+    const before = getComputedStyle(kara).backgroundColor
+    await page.elementLocator(chip).hover()
+    await settle(60)
+    expect(kara.classList.contains('tok--lit')).toBe(true)
+    expect(tokens(screen).filter(el => el.classList.contains('tok--lit'))).toHaveLength(1)
+    // A tint, not the plain ground: the word is marked where it stands.
+    const lit = getComputedStyle(kara).backgroundColor
+    expect(lit).not.toBe(before)
+    expect(lit).not.toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(chip).borderColor).toBe(resolver()('var(--line-grammar)'))
+    // The rule under the word is the SRS's and stays what it was.
+    expect(getComputedStyle(kara).borderBottomWidth).toBe('2px')
+    await page.elementLocator(screen.container.querySelector('.anl-legend')).hover()
+    await settle(60)
+    expect(kara.classList.contains('tok--lit')).toBe(false)
+  })
+
+  it("prints the bought line about each rule under its chip, above the dials, and the sentence's own explanation in the explain box", async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    const notes = bd.querySelector('.bkd-notes')
+    expect(notes).not.toBeNull()
+    expect(notes.querySelector('.bkd-note__pattern').textContent).toBe('〜から')
+    expect(notes.querySelector('.bkd-note__text').textContent).toBe('Here から marks platform three as where the train departs from.')
+    const order = [...bd.children]
+    expect(order.findIndex(el => el.classList.contains('analysis-grammar-chips')))
+      .toBeLessThan(order.findIndex(el => el.classList.contains('bkd-notes')))
+    expect(order.findIndex(el => el.classList.contains('bkd-notes')))
+      .toBeLessThan(order.findIndex(el => el.classList.contains('anl-dials')))
+    // The whole-sentence explanation is where it always was, not in the list.
+    expect(screen.container.querySelector('.anl-explain__body').textContent).toBe(SENTENCES[0].explanation)
+    expect(notes.textContent).not.toContain('FROM platform three')
+  })
+
+  it('a sentence with no construction carries no chip strip, and the second sentence is read on its own', async () => {
+    const screen = await renderScreen()
+    await analyze(screen)
+    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    await settle(60)
+    const bd = screen.container.querySelector('.anl-stagebd')
+    expect([...bd.children].some(el => el.classList.contains('analysis-grammar-chips'))).toBe(false)
   })
 })
 

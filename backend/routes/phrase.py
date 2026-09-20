@@ -11,6 +11,7 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 from study.llm_shared import chat, LLMUnavailable
+from content.grammar_points_data import localise
 from study.analysis import analyze_local, attach_user_state, merge_deep
 from study.sentences import split_sentences, MAX_SENTENCES
 from routes.reading import LANG_NAMES
@@ -40,6 +41,9 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
   "words": [
     {{"surface": "...", "base": "...", "reading": "...", "meaning": "...", "pos": "..."}}
   ],
+  "grammar": [
+    {{"pattern": "...", "note": "..."}}
+  ],
   "explanation": "..."
 }}
 
@@ -48,13 +52,48 @@ SYSTEM_PROMPT_TEMPLATE = """You are a Japanese language tutor. Given a Japanese 
 - "reading" is the reading in hiragana.
 - "meaning" is what the word means IN THE CONTEXT of this specific phrase, not just a generic dictionary gloss. Write it in {lang_name}.
 - "pos" is a short part-of-speech label (noun, verb, particle, adjective, etc), in {lang_name}.
+- "grammar" has one entry per grammar point listed under the phrase, in the order listed, with "pattern" copied EXACTLY as listed. "note" is ONE sentence, in {lang_name}, saying what that pattern does in THIS phrase -- what it attaches to here and what it adds to the meaning -- not a general definition. An empty list when no points are listed.
 - "explanation" is 2-4 sentences, in {lang_name}, explaining the grammar and nuance of the whole phrase.
 
 The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
-"explanation") must stay exactly as shown, in English, no matter what
-{lang_name} is -- only the VALUES you write for "meaning", "pos" and
-"explanation" go in {lang_name}.
+"grammar", "pattern", "note", "explanation") must stay exactly as shown, in
+English, no matter what {lang_name} is -- only the VALUES you write for
+"meaning", "pos", "note" and "explanation" go in {lang_name}.
 """
+
+
+# ── The points the model is told about (plan 095) ──────────────
+# The local tier finds the grammar; the model is asked what each point
+# does in this sentence, one line per point, and nothing else about
+# which points there are. Told nothing, it explained whichever rules it
+# noticed, in prose the chips could not be tied to -- and the two
+# disagreed often enough that a learner could not tell which to trust.
+# Constructions only: a note on は ("marks the topic 私") is the gloss
+# the row already prints, and the markers keep it.
+def _deep_points(analysis: dict, lang: str) -> list[dict]:
+    seen: set[str] = set()
+    out = []
+    for point in analysis.get("grammar", []):
+        pattern = point.get("pattern")
+        if not pattern or point.get("kind") == "marker" or pattern in seen:
+            continue
+        seen.add(pattern)
+        out.append({
+            "pattern": pattern,
+            "structure": point.get("structure") or "",
+            "meaning": localise(point.get("meaning"), lang),
+        })
+    return out
+
+
+def _user_message(phrase: str, points: list[dict]) -> str:
+    if not points:
+        return phrase
+    lines = [phrase, "", "Grammar points found in this phrase:"]
+    for point in points:
+        detail = " -- ".join(part for part in (point.get("structure"), point.get("meaning")) if part)
+        lines.append(f"- {point['pattern']}" + (f" ({detail})" if detail else ""))
+    return "\n".join(lines)
 
 
 # ── The breakdown cache ───────────────────────────────────────
@@ -87,7 +126,11 @@ The JSON key names ("words", "surface", "base", "reading", "meaning", "pos",
 # it, whichever learner asked first would permanently poison the cache
 # for every other language, since the SAME phrase in French and in
 # English would otherwise hash to the SAME row.
-CACHE_VERSION = 3
+#
+# v4 (plan 095): the prompt lists the grammar points the local tier
+# found and asks for a note on each; an entry bought under v3 has no
+# notes and would never gain them, since the cache never expires.
+CACHE_VERSION = 4
 
 
 def _phrase_key(phrase: str, lang: str) -> str:
@@ -257,13 +300,14 @@ class PhraseRequest(BaseModel):
     source: str = "typed"
 
 
-def _call_llm(phrase: str, lang: str) -> dict:
-    """One word-by-word breakdown, via the shared multi-provider client.
+def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
+    """One word-by-word breakdown, via the shared multi-provider client,
+    with a note on each of `points` (_deep_points) in context.
 
-    max_tokens=1200: a segmentation of one sentence plus a 2-4 sentence
-    note. Generous for the longest phrase the app serves (an N1 reading
-    sentence caps at 80 characters) and stops a model that decides to
-    write an essay from billing for it.
+    max_tokens=1500: a segmentation of one sentence, a line per grammar
+    point and a 2-4 sentence note. Generous for the longest phrase the
+    app serves (an N1 reading sentence caps at 80 characters) and stops
+    a model that decides to write an essay from billing for it.
 
     reasoning=False: this is a structured-extraction task over text the
     caller already has, not one that benefits from a thinking pass --
@@ -274,9 +318,9 @@ def _call_llm(phrase: str, lang: str) -> dict:
         content = chat(
             [
                 {"role": "system", "content": SYSTEM_PROMPT_TEMPLATE.format(lang_name=lang_name)},
-                {"role": "user", "content": phrase},
+                {"role": "user", "content": _user_message(phrase, points or [])},
             ],
-            timeout=30, max_tokens=1200, reasoning=False, task="phrase",
+            timeout=30, max_tokens=1500, reasoning=False, task="phrase",
         )
     except LLMUnavailable as e:
         logger.error("Phrase analysis has no usable LLM provider: %s", e)
@@ -301,9 +345,9 @@ def _parse_llm_json(content: str) -> dict:
 # (e.g. "explication" for a French request) despite SYSTEM_PROMPT_TEMPLATE
 # pinning the key names to English -- verified live against
 # nvidia/nemotron-3-super-120b-a12b, which does this consistently even
-# with that instruction present. The schema has exactly one other
-# top-level key ("words"), so any additional string-valued key is
-# unambiguously the mistranslated "explanation".
+# with that instruction present. The schema's other top-level keys
+# ("words", "grammar") hold lists, so any additional string-valued key
+# is unambiguously the mistranslated "explanation".
 #
 # Applied where llm_result is consumed (_analyze_sentence), not where
 # it's parsed -- a bad key can already be sitting in phrase_analysis_cache
@@ -344,11 +388,14 @@ def _analyze_sentence(text: str, deep: bool, lang: str, states: dict, user_id: s
         # onward is per-user and recomputed every time.
         llm_result = _cached_analysis(text, lang)
         if llm_result is None and allow_llm_call:
-            llm_result = _call_llm(text, lang)
+            llm_result = _call_llm(text, lang, _deep_points(analysis, lang))
             _store_analysis(text, lang, llm_result)
         if llm_result is not None:
             llm_result = _normalize_explanation_key(llm_result)
-            analysis = merge_deep(analysis, llm_result.get("words", []), llm_result.get("explanation", ""))
+            analysis = merge_deep(
+                analysis, llm_result.get("words", []), llm_result.get("explanation", ""),
+                llm_result.get("grammar"),
+            )
 
     return attach_user_state(analysis, states, user_id)
 

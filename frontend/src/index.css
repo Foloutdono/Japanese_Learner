@@ -2127,6 +2127,14 @@
   color: var(--text-primary);
 }
 .tok--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
+/* The words a grammar point is written on, lit while its chip is
+   hovered, focused or was the last one pressed (plan 095): the
+   grammar line's ink as a tint, the way the focused word wears the
+   analyzer's. A two-part point (から〜まで) lights its two words and
+   not the clause between them. The state rule under the word is
+   untouched -- it says what the SRS knows, and this says where a
+   rule sits; the two must be readable at once. */
+.tok--lit { background: color-mix(in srgb, var(--line-grammar) 22%, transparent); }
 .tok--mastered { --tok: var(--state-mastered); }
 .tok--learning { --tok: var(--state-learning); }
 .tok--unknown { --tok: var(--state-new); }
@@ -9726,6 +9734,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .bkd-tok--door { cursor: pointer; }
 .bkd-tok--door:hover,
 .bkd-tok--door:focus-visible { border-bottom-color: var(--line-color, var(--accent)); }
+/* The words a point is written on, lit from its chip or its row (see
+   .tok--lit): a tint in the grammar line's ink, over a word whose
+   rule stays what the SRS made it. */
+.bkd-tok--lit { background: color-mix(in srgb, var(--line-grammar) 22%, transparent); }
 .bkd-line rt,
 .bkd-row__word rt {
   font-size: var(--fs-caption-xs);
@@ -9803,14 +9815,64 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   cursor: pointer;
 }
 .bkd-row__mark:hover,
-.bkd-row__mark:focus-visible {
-  border-color: var(--line-color, var(--accent));
+.bkd-row__mark:focus-visible,
+.bkd-row__mark--lit {
+  border-color: var(--line-grammar);
   color: var(--text-primary);
 }
 @media (min-width: 768px) {
   .bkd-row {
     grid-template-columns: auto auto minmax(0, 1fr) auto auto;
     grid-template-areas: "word reading meaning mark lvl";
+  }
+}
+/* What each rule does in this sentence (GrammarNotes, plan 095): one
+   row per noted point under the chips, the pattern in the reading
+   register and the model's line beside it, a hairline between rows
+   and never a card each -- the same ruling as the word rows above.
+   A row whose point is lit on the line takes the grammar ink on its
+   pattern, as the chip does on its edge. */
+.bkd-notes {
+  display: flex;
+  flex-direction: column;
+}
+.bkd-note {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--sp-1) var(--sp-3);
+  align-items: baseline;
+  padding: var(--sp-2) 0;
+  border-top: 1px solid var(--surface-line);
+}
+.bkd-note:first-child { border-top: 0; }
+.bkd-note__pattern {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  line-height: 1.5;
+  color: var(--text-primary);
+}
+.bkd-note__door {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
+.bkd-note__door:hover,
+.bkd-note__door:focus-visible,
+.bkd-note--lit .bkd-note__pattern { color: var(--line-grammar); }
+.bkd-note__text {
+  min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 767px) {
+  .bkd-note {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 /* The passage: the sentences stacked, a hairline between them, the
@@ -13692,15 +13754,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
+  max-width: 100%;
   padding: var(--sp-1) var(--sp-3);
   border: 1px solid var(--surface-line);
   border-radius: var(--r-pill);
 }
+/* The chip whose point is lit on the line (plan 095): the pill takes
+   the grammar line's ink on its edge, so the chip and the words it
+   lights read as one thing. */
+.analysis-grammar-chip--lit { border-color: var(--line-grammar); }
 .analysis-grammar-chip__pattern {
+  flex: none;
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
 }
+/* The gloss (plan 095): what the rule does, in the learner's
+   language, between the pattern and its level. The catalogue's
+   one-liners run to eighty characters, so on a phone the gloss
+   wraps inside the pill (min-width: 0) rather than pushing the
+   level past its edge; the pattern and the level never shrink. */
+.analysis-grammar-chip__gloss {
+  min-width: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
 .analysis-grammar-chip__level {
+  flex: none;
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;

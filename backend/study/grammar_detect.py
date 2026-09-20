@@ -46,19 +46,52 @@ A point whose own examples do not show it to this matcher keeps the old
 behaviour (a distinctive stem, matched as before), so nothing that used
 to be found is lost while those lessons are written.
 
+The second pass: by dictionary form (plan 095)
+----------------------------------------------
+What a substring cannot see, the tokenizer already knows: すぎ in
+食べすぎました is the verb すぎる, み in 見てみます is the verb みる,
+られ in 褒められました is the auxiliary られる, and 読める is the verb
+読む conjugating as 下一段 -- which is what the potential IS. So a
+pattern's tail is also looked for as the dictionary form of a token
+rather than as letters, and every conjugation of it is found at once.
+Two shapes of tail, read off the pattern itself:
+
+- **stem**: 〜すぎる, 〜たいです, 〜やすい, 〜始める. The tail's own
+  tokens, by dictionary form, on a token that stands right after a verb
+  or adjective stem and is grammaticalised there (an auxiliary, a
+  suffix, or a verb UniDic marks 非自立可能). 三時を過ぎました is not
+  〜すぎる: 過ぎ follows a particle, not a stem.
+- **te**: 〜てみる, 〜ておく, 〜ていく. The conjunctive て／で, then the
+  tail's verb by dictionary form. 映画を見ます is not 〜てみる.
+
+And a table for the FORM points, whose surface is a conjugation the
+tokenizer names rather than a string: the passive and causative
+auxiliaries, the potential (a verb conjugating as 下一段 whose
+dictionary form is not), the volitional and the imperative (the form's
+own name on the token). For a る-verb the passive and the potential are
+one shape (食べられる), and both are reported on it: the catalogue says
+so itself, in each lesson's row about the other, and a span cannot
+choose between two points written the same way (see _detect).
+
+Every rule is held to the point's own lessons, as rule 3 above is: a
+rule that cannot find its point in at least one of the point's example
+sentences is not trusted on anyone else's. The examples are read only
+once a rule has a candidate in hand, so the first analysis after a boot
+still tokenizes nothing it does not need.
+
 Measured over the catalogue's own 2,169 example sentences: the point a
-sentence was written for is found in 90% of them, against 78% for the
-substring matcher this replaced, and 510 of the 541 points are found in
-at least one of their own lessons.
+sentence was written for is found in 92% of them (90% before the second
+pass, 78% for the substring matcher before that), and 517 of the 541
+points are found in at least one of their own lessons (510 before).
 
 What it still cannot see
 ------------------------
-Four kinds of point, all of them refusals rather than misses:
+Three kinds of point, all of them refusals rather than misses:
 
-- A point that names a CLASS rather than a surface: い形容詞／な形容詞,
-  自動詞／他動詞, 可能形 〜(ら)れる. There is no string to look for, and
-  "this sentence contains an adjective" is not a lesson anyone needs
-  pointed out.
+- A point that names a CLASS with no conjugation to read: い形容詞／な形容詞,
+  自動詞／他動詞. There is no string to look for and no form to name,
+  and "this sentence contains an adjective" is not a lesson anyone
+  needs pointed out.
 - A point the catalogue itself marks as a SENSE: 〜を（移動）is を with a
   verb of movement and 〜そうだ（伝聞）is そうだ meaning "I hear that".
   Each has a plain sibling written identically, and the parenthesis is
@@ -67,21 +100,16 @@ Four kinds of point, all of them refusals rather than misses:
   understands the sentence.
 - A point whose surface is an ordinary word (AMBIGUOUS, below): 〜上に
   is 上 + に, and so is 山の上に.
-- A point that attaches to a verb stem as a bare two-mora tail
-  (〜すぎる as 食べすぎ, 〜てみる as 見てみ): the needle that would find
-  those is two hiragana, which is not evidence of anything on its own,
-  and the point's own examples cannot teach a shape for a needle that
-  never matched them. Writing this one out is what a later pass is for.
 
 Without morphology (fugashi/unidic-lite absent -- see
-morphology.MORPHOLOGY_AVAILABLE) none of the three rules is possible,
-and the module falls back to exactly the old substring rule. Detection
+morphology.MORPHOLOGY_AVAILABLE) none of the rules is possible, and the
+module falls back to exactly the old substring rule. Detection
 degrades; it does not vanish.
 """
 import logging
 from functools import lru_cache
 
-from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL
+from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, find
 from study import morphology
 from study.grammar_match import alternatives, stems
 
@@ -264,7 +292,8 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
     beside it grows out of the adjective in front of it. Each entry is
     (the parts of speech the spelling is realized BY, the parts of
     speech it attaches TO, whether it always stands on a word of its
-    own).
+    own, the meaning-bearing forms the word it ends in is seen in --
+    "" for plain inflection).
 
     The first two are sets rather than the pairs they were read from:
     four example sentences cannot enumerate every context a point occurs
@@ -289,24 +318,21 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
     # Read without a shape to check against — there is none yet; this is
     # where one comes from — so an example can hand back a second,
     # accidental hit beside the one it was written for.
-    seen: list[list[tuple[bool, str, str]]] = [[] for _ in parts]
-    for sentence in examples:
+    seen: list[list[tuple[bool, str, str, str, int]]] = [[] for _ in parts]
+    for index, sentence in enumerate(examples):
         tokens = morphology.tokenize(sentence)
         if not tokens:
             continue
         starts = {t.start for t in tokens}
-        for start, _e, pos, _c, spelling in _hits(sentence, tokens, parts):
-            seen[spelling].append((start in starts, pos, _before(start, tokens)))
+        for start, end, pos, _c, spelling, _segments in _hits(sentence, tokens, parts):
+            seen[spelling].append((start in starts, pos, _before(start, tokens), _ending(end, tokens), index))
 
     out = []
     for signatures in seen:
         # When the lessons show a spelling standing on a word of its
         # own, that is what it is, and whatever the same needle also hit
-        # inside some other word is that sentence's coincidence:
-        # 安いし、近いし、この店にします。 shows 〜し as the particle it
-        # is twice, and once more inside します. Learning from both
-        # teaches the matcher that 〜し may be the し of any する — which
-        # is how なくしてしまいました came to be listing reasons.
+        # inside some other word is that sentence's coincidence: the し
+        # of なくして is not the 〜し that lists reasons.
         standing = [sig for sig in signatures if sig[0]]
         kept = standing or signatures
         # Every signature they show, not the ones they agree on: a
@@ -315,18 +341,64 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
         # majority was measured against the catalogue and cost six
         # points of recall to shave a twentieth off the false hits — the
         # wrong way round for a breakdown, where a missing rule is a
-        # rule left untaught.
+        # rule left untaught. The one exception is a coincidence that
+        # stands on a word of its own (_without_coincidences).
         out.append((
-            frozenset(pos for _s, pos, _b in kept),
-            frozenset(before for _s, _h, before in kept),
-            bool(kept) and all(stood for stood, _h, _b in kept),
+            _without_coincidences(kept),
+            frozenset(before for _s, _h, before, _e, _i in kept),
+            bool(kept) and all(stood for stood, _h, _b, _e, _i in kept),
+            # The form the word the hit ends in is in, where that form
+            # means something: 〜てください ends in ください, the
+            # imperative, in every lesson, and 教えてくださいました
+            # ends in the same verb in the 連用形 -- the honorific,
+            # which is 〜てくださる's lesson and not this one's.
+            frozenset(ending for _s, _h, _b, ending, _i in kept),
         ))
     return tuple(out)
+
+
+def _without_coincidences(kept) -> frozenset[str]:
+    """The parts of speech a spelling is realized by, less the ones a
+    lesson shows only by accident.
+
+    安いし、近いし、この店にします。 shows 〜し as the particle it is
+    twice, and once more as the し of します -- a verb, standing on a
+    token of its own, so the rule above does not catch it. Learned, it
+    taught the matcher that 〜し may be the し of any する, and
+    食べようとしました was listing reasons. A reading seen in one lesson
+    only, and there only beside another reading of the same point, is
+    that sentence's coincidence: the sentence was written to show the
+    point, and it shows it in the other reading. A reading seen in two
+    lessons, or alone in one, is the point's -- which keeps a point
+    that really is realized two ways (a particle in one sentence, an
+    auxiliary in the next), and costs nothing measured over the
+    catalogue.
+    """
+    sentences_of: dict[str, set[int]] = {}
+    readings_in: dict[int, set[str]] = {}
+    for _stood, pos, _before, _ending, index in kept:
+        sentences_of.setdefault(pos, set()).add(index)
+        readings_in.setdefault(index, set()).add(pos)
+    return frozenset(
+        pos for pos, sentences in sentences_of.items()
+        if len(sentences) >= 2 or any(readings_in[i] == {pos} for i in sentences)
+    )
 
 
 @lru_cache(maxsize=1)
 def _by_name() -> dict[tuple[str, str], tuple]:
     return {(e[0], e[1]): e for e in _catalogue()}
+
+
+def _ending(end: int, tokens) -> str:
+    """The form of the word a hit ends in, where the form carries a
+    meaning of its own (_MEANING_FORMS): the imperative, the
+    volitional. "" for any other, which is inflection."""
+    for t in tokens:
+        if t.start < end <= t.end:
+            head = _form_head(t.cform)
+            return head if head in _MEANING_FORMS else ""
+    return ""
 
 
 def _before(start: int, tokens) -> str:
@@ -350,11 +422,15 @@ def _before(start: int, tokens) -> str:
 
 
 def _hits(sentence: str, tokens, parts):
-    """Every (start, end, pos-of-first-covered-token) at which `parts`
-    are all present, in order, on word boundaries. The shape test is the
-    caller's (see _shaped): a point's own examples are read only when
-    the point has actually matched something, which is what keeps the
-    first analysis after a boot from tokenizing the whole catalogue."""
+    """Every (start, end, pos-of-first-covered-token, contiguous,
+    spelling, segments) at which `parts` are all present, in order, on
+    word boundaries. `segments` is one (start, end) per part -- the
+    pieces of the sentence the point is actually written on, which for
+    から〜まで are から and まで and not the clause between them (see
+    hits()). The shape test is the caller's (see _shaped): a point's
+    own examples are read only when the point has actually matched
+    something, which is what keeps the first analysis after a boot
+    from tokenizing the whole catalogue."""
     starts = {t.start for t in tokens}
     ends = {t.end for t in tokens}
     # The part of speech of whatever token a position falls inside, and
@@ -369,11 +445,12 @@ def _hits(sentence: str, tokens, parts):
 
     out = []
     for index, alt in enumerate(parts):
-        # Each part in turn, each one starting after the last one ended.
-        spans = [(None, 0)]
+        # Each part in turn, each one starting after the last one ended;
+        # a chain is the parts it has matched so far, as their spans.
+        chains = [((), 0)]
         for needles in alt:
             nxt = []
-            for first, cursor in spans:
+            for segments, cursor in chains:
                 for needle in needles:
                     for at in _find_all(sentence, needle):
                         if at < cursor:
@@ -381,16 +458,17 @@ def _hits(sentence: str, tokens, parts):
                         end = at + len(needle)
                         if not _anchored(at, end, starts, ends, inside, word_start):
                             continue
-                        nxt.append((first if first is not None else at, end))
-            spans = nxt
-            if not spans:
+                        nxt.append((segments + ((at, end),), end))
+            chains = nxt
+            if not chains:
                 break
-        for first, last in spans:
+        for segments, _cursor in chains:
+            first, last = segments[0][0], segments[-1][1]
             # Contiguous when the pattern is written in one piece: a
             # multi-part one (もう〜ました) spans from its first part to
             # its last with a whole clause in between that it does not
             # own, which is why it never explains what it encloses.
-            out.append((first, last, inside.get(first, ""), len(alt) == 1, index))
+            out.append((first, last, inside.get(first, ""), len(alt) == 1, index, segments))
     return out
 
 
@@ -412,9 +490,9 @@ def _shaped(sentence, tokens, level, pattern, parts):
 
     out = []
     for hit in found:
-        start, end, pos, contiguous, spelling = hit
-        heads, befores, stands = (
-            shape[spelling] if spelling < len(shape) else (frozenset(), frozenset(), False)
+        start, end, pos, contiguous, spelling, _segments = hit
+        heads, befores, stands, endings = (
+            shape[spelling] if spelling < len(shape) else (frozenset(), frozenset(), False, frozenset())
         )
         if not heads and not befores:
             # Nothing to check a shape against, so the old rule stands —
@@ -434,6 +512,8 @@ def _shaped(sentence, tokens, level, pattern, parts):
         if pos not in heads:
             continue
         if _before(start, tokens) not in ("", *befores):
+            continue
+        if _ending(end, tokens) not in endings:
             continue
         out.append(hit)
     return out
@@ -457,6 +537,285 @@ def _legacy(sentence: str) -> list[tuple[str, str, int, int]]:
     return hits
 
 
+# ── The second pass: by dictionary form (plan 095) ──────────────
+# See the module docstring. Every rule here answers one question about
+# a token the first pass cannot ask: what word is this, and in what
+# form. Nothing here reads letters.
+
+# Trailing politeness and tense a tail may or may not be written with
+# (〜たいです is たい; 〜ました is ます + た), and the auxiliaries a tail
+# may not consist of alone: a rule made of nothing but ます and た would
+# claim 〜ました on every 食べます.
+_TAIL_TRIM = frozenset({"です", "ます", "だ", "た", "ぬ", "ず"})
+_TAIL_PURE = _TAIL_TRIM | frozenset({"ん"})
+# A tail written in its dictionary form (〜すぎる, 〜たいです, 〜てみる) is
+# found in any plain inflection -- that is what reading by dictionary
+# form is for. A tail written in some other form is that form exactly:
+# 〜べきだ, 〜べく and 〜べからず are one word べし in three forms and
+# three lessons; 〜てください is ください, the imperative of くださる,
+# and 〜てくださる the verb itself; 〜ましょうか is ましょう and not every
+# ますか. The two forms that carry a meaning of their own are never
+# "plain": a dictionary-form tail does not match a verb in the
+# imperative or the volitional.
+_MEANING_FORMS = frozenset({"命令形", "意志推量形"})
+# Politeness and tense that force the word before them into the 連用形:
+# い in ています is only 連用形 because ます follows. A tail's last word
+# before one of these is found in any plain form.
+_FORCES_RENYOKEI = frozenset({"ます", "た"})
+# What a tail's first token may be for a stem rule to read it: a word
+# that attaches to a stem. A noun (〜ことがある), a particle (〜ながら) or
+# a 形状詞 (〜そうです) is the first pass's business.
+_TAIL_POS = frozenset({"verb", "adjective", "auxiliary", "suffix"})
+_INFLECTING_POS = frozenset({"verb", "adjective"})
+_PASSIVE = frozenset({"れる", "られる"})
+_CAUSATIVE = frozenset({"せる", "させる"})
+
+
+# The stem a tail is read on. A tail tokenized on its own is read as a
+# word: たい alone is the fish, やすい the adjective "cheap". On a stem
+# it is what the pattern means it to be.
+_DUMMY_STEM = "食べ"
+
+
+def _form_head(cform: str) -> str:
+    """UniDic's form without its variant: 連用形-イ音便 is 連用形."""
+    return cform.split("-", 1)[0]
+
+
+def _form_required(token) -> str:
+    """What a sentence token's form must be for this tail token: "" for
+    any plain inflection when the tail is written as its own dictionary
+    form (すぎる, たい, みる -- or a word that does not conjugate), the
+    form itself otherwise (べき is not べし, ください is not くださる).
+    Judged on the reading rather than on UniDic's form name: a verb
+    ending a bare fragment is tagged 連体形, and 食べる's 終止形 and
+    連体形 are the same word either way."""
+    return "" if token.reading == token.lemma_reading else _form_head(token.cform)
+
+
+def _form_fits(token, required: str) -> bool:
+    head = _form_head(token.cform)
+    return head not in _MEANING_FORMS if required == "" else head == required
+
+
+def _tail_core(tail: str) -> tuple[tuple[str, str, str], ...] | None:
+    """A tail as (pos, dictionary reading, required form) per token
+    (_form_required), its trailing politeness and tense dropped -- or
+    None where no stem rule may read it: a tail that does not start
+    with a word that attaches to a stem, or one made of nothing but
+    ます／です／た."""
+    tokens = morphology.tokenize(_DUMMY_STEM + tail)
+    if not tokens or tokens[0].surface != _DUMMY_STEM:
+        tokens = morphology.tokenize(tail)
+        if not tokens:
+            return None
+    else:
+        tokens = tokens[1:]
+    trimmed = None
+    while tokens and tokens[-1].lemma_reading in _TAIL_TRIM and _form_head(tokens[-1].cform) not in _MEANING_FORMS:
+        trimmed = tokens.pop().lemma_reading
+    if not tokens or tokens[0].pos not in _TAIL_POS:
+        return None
+    required = [_form_required(t) for t in tokens]
+    if trimmed in _FORCES_RENYOKEI and _form_head(tokens[-1].cform) not in _MEANING_FORMS:
+        required[-1] = ""
+    core = tuple((t.pos, t.lemma_reading, req) for t, req in zip(tokens, required))
+    if all(reading in _TAIL_PURE and not req for _pos, reading, req in core):
+        return None
+    return core
+
+
+@lru_cache(maxsize=1)
+def _form_rules() -> dict[str, list[tuple[str, str, str, tuple[tuple[str, str, str], ...]]]]:
+    """The stem and te rules, indexed by the dictionary reading a
+    sentence must contain for the rule to have a candidate at all:
+    reading -> [(level, pattern, "stem" | "te", core)]. Built once from
+    the catalogue, which already leaves out the AMBIGUOUS and the
+    sense-qualified points (see _catalogue)."""
+    index: dict[str, list] = {}
+    for level, pattern, _parts, _examples in _catalogue():
+        if pattern in _CLASS_RULES:
+            continue
+        for alt in alternatives(pattern):
+            if "〜" in alt:
+                continue  # a two-part pattern is the first pass's
+            te = len(alt) > 1 and alt[0] in "てで"
+            core = _tail_core(alt[1:] if te else alt)
+            if core is None or (te and core[0][0] != "verb"):
+                continue
+            index.setdefault(core[0][1], []).append((level, pattern, "te" if te else "stem", core))
+    return index
+
+
+def _grammaticalised(token) -> bool:
+    return token.pos in ("auxiliary", "suffix") or token.auxiliary_use
+
+
+def _matches_core(tokens, i: int, core) -> int | None:
+    """The end offset of the core's tokens standing at tokens[i], in
+    order, each by dictionary reading -- or None."""
+    if i + len(core) > len(tokens):
+        return None
+    for k, (_pos, reading, required) in enumerate(core):
+        token = tokens[i + k]
+        if token.lemma_reading != reading or not _form_fits(token, required):
+            return None
+    return tokens[i + len(core) - 1].end
+
+
+def _stem_spans(tokens, core) -> list[tuple[int, int]]:
+    """A stem tail: its tokens, right after a verb or adjective, on a
+    token grammaticalised there."""
+    out = []
+    for i in range(1, len(tokens)):
+        if tokens[i - 1].pos not in _INFLECTING_POS or not _grammaticalised(tokens[i]):
+            continue
+        end = _matches_core(tokens, i, core)
+        if end is not None:
+            out.append((tokens[i].start, end))
+    return out
+
+
+def _te_spans(tokens, core) -> list[tuple[int, int]]:
+    """A te tail: the conjunctive て／で, then the tail's tokens."""
+    out = []
+    for i in range(1, len(tokens) - 1):
+        te = tokens[i]
+        if not (te.conjunctive and te.surface in ("て", "で")):
+            continue
+        end = _matches_core(tokens, i + 1, core)
+        if end is not None:
+            out.append((te.start, end))
+    return out
+
+
+def _after_verb(tokens, i: int) -> bool:
+    return i > 0 and tokens[i - 1].pos == "verb"
+
+
+def _passive_spans(tokens):
+    return [(t.start, t.end) for i, t in enumerate(tokens)
+            if t.pos == "auxiliary" and t.lemma_reading in _PASSIVE and _after_verb(tokens, i)]
+
+
+def _causative_spans(tokens):
+    return [(t.start, t.end) for i, t in enumerate(tokens)
+            if t.pos == "auxiliary" and t.lemma_reading in _CAUSATIVE and _after_verb(tokens, i)]
+
+
+def _causative_passive_spans(tokens):
+    return [(a.start, b.end) for a, b in zip(tokens, tokens[1:])
+            if a.pos == "auxiliary" and a.lemma_reading in _CAUSATIVE
+            and b.pos == "auxiliary" and b.lemma_reading in _PASSIVE]
+
+
+def _ichidan_stem(reading: str, cform: str) -> str | None:
+    """The stem of a 下一段 token from its reading and the form UniDic
+    says it is in, or None for a form this does not follow."""
+    if cform.startswith(("終止形", "連体形")):
+        return reading[:-1] if reading.endswith("る") else None
+    if cform.startswith(("連用形", "未然形")):
+        return reading
+    if cform.startswith("仮定形"):
+        return reading[:-1] if reading.endswith("れ") else None
+    if cform.startswith("命令形"):
+        return reading[:-1] if reading[-1:] in ("ろ", "よ") else None
+    if cform.startswith("意志推量形"):
+        return reading[:-2] if reading.endswith("よう") else None
+    return None
+
+
+def _potential_spans(tokens):
+    """The potential: a verb conjugating as 下一段 whose dictionary
+    form is not (読める is 読む, 書けます is 書く, 帰れる is 帰る) -- and
+    られる after a る-verb, which is the potential and the passive both,
+    reported as both (module docstring). 見える is 見える, and stays a
+    verb that means something is in view."""
+    out = []
+    for i, t in enumerate(tokens):
+        if t.pos == "verb" and t.ctype.startswith("下一段"):
+            stem = _ichidan_stem(t.reading, t.cform)
+            if stem is not None and stem + "る" != t.lemma_reading:
+                out.append((t.start, t.end))
+        elif t.pos == "auxiliary" and t.lemma_reading == "られる" and _after_verb(tokens, i):
+            out.append((t.start, t.end))
+    return out
+
+
+def _volitional_spans(tokens):
+    """帰ろう, 食べよう: the verb itself in the volitional form. ましょう
+    and でしょう are auxiliaries in that form, and are not it."""
+    return [(t.start, t.end) for t in tokens if t.pos == "verb" and t.cform.startswith("意志推量形")]
+
+
+def _imperative_spans(tokens):
+    """起きろ, 待て: a verb in the imperative that ends its clause. Not
+    ください or なさい, imperatives of the verbs they are but the polite
+    request and 〜なさい as points; and not a verb the tagger reads as an
+    imperative on its way to an auxiliary (習わせられた)."""
+    out = []
+    for i, t in enumerate(tokens):
+        if t.pos != "verb" or not t.cform.startswith("命令形") or t.auxiliary_use:
+            continue
+        if i + 1 < len(tokens) and tokens[i + 1].pos in ("auxiliary", "verb"):
+            continue
+        out.append((t.start, t.end))
+    return out
+
+
+# The form points, by the pattern the catalogue files them under. A
+# rename here is a rename there (tests/test_grammar_detect holds the
+# two together).
+_CLASS_RULES = {
+    "受身形 〜られる": _passive_spans,
+    "可能形 〜(ら)れる": _potential_spans,
+    "使役形 〜させる": _causative_spans,
+    "使役受身形 〜させられる": _causative_passive_spans,
+    "意向形 〜(よ)う": _volitional_spans,
+    "命令形 〜ろ／〜え": _imperative_spans,
+}
+
+
+@lru_cache(maxsize=None)
+def _confirmed(level: str, pattern: str) -> bool:
+    """Whether the point's own lessons show its rule working: the rule
+    finds the point in at least one of the point's example sentences.
+    Read once per point, and only once a sentence has given the rule a
+    candidate."""
+    found = find(pattern)
+    if found is None or found[0] != level:
+        return False
+    for example in found[1].get("examples", []):
+        tokens = morphology.tokenize(example.get("jp", ""))
+        if tokens and any(p == pattern for p, _l, _s, _e in _form_hits(tokens, confirm=False)):
+            return True
+    return False
+
+
+def _form_hits(tokens, confirm: bool = True) -> list[tuple[str, str, int, int]]:
+    """(pattern, level, start, end) for every point the second pass
+    finds, each held to its own lessons unless `confirm` is off (which
+    is how the lessons themselves are read)."""
+    out = []
+    index = _form_rules()
+    for reading in {t.lemma_reading for t in tokens} & index.keys():
+        for level, pattern, shape, core in index[reading]:
+            spans = _te_spans(tokens, core) if shape == "te" else _stem_spans(tokens, core)
+            if spans and (not confirm or _confirmed(level, pattern)):
+                out.extend((pattern, level, s, e) for s, e in spans)
+    for pattern, rule in _CLASS_RULES.items():
+        spans = rule(tokens)
+        if not spans:
+            continue
+        found = find(pattern)
+        if found is None:
+            continue
+        level = found[0]
+        if not confirm or _confirmed(level, pattern):
+            out.extend((pattern, level, s, e) for s, e in spans)
+    return out
+
+
 # A point that IS one grammatical word -- a particle, the copula -- as
 # opposed to one built around a word: 「は」 and です／だ against
 # 〜ます／〜ません and から〜まで. The catalogue writes the difference
@@ -473,11 +832,32 @@ def _kind(pattern: str, token) -> str:
     return "marker"
 
 
+def hits(sentence: str, tokens=None) -> list[dict]:
+    """Every point `sentence` visibly uses, in full: {pattern, level,
+    start, end, kind, segments}.
+
+    `start`..`end` is the whole stretch the hit reaches over; `segments`
+    is the list of (start, end) pieces it is actually written on, one
+    per part of the pattern. For a point written in one piece the two
+    are the same span. For から〜まで they are から and まで, and the
+    clause between them is not in either: a screen that draws where a
+    rule sits on the sentence lights those two words and not the whole
+    line (plan 095), and a token between them is not one the point
+    covers (study/analysis._attach_grammar). detect and points_in are
+    the same list in the tuple forms their callers already read.
+    """
+    return [
+        {"pattern": p, "level": lv, "start": s, "end": e, "kind": k, "segments": list(segs)}
+        for p, lv, s, e, k, segs in _detect(sentence, tokens)
+    ]
+
+
 def detect(sentence: str, tokens=None) -> list[tuple[str, str, int, int, str]]:
     """(pattern, level, start, end, kind) — points_in, plus what shape of
     point each hit is (see _kind). The full form; points_in is the same
-    list with the kind dropped for the callers that predate it."""
-    return _detect(sentence, tokens)
+    list with the kind dropped for the callers that predate it, and
+    hits() the same list with the pieces each hit is written on."""
+    return [(p, lv, s, e, k) for p, lv, s, e, k, _segs in _detect(sentence, tokens)]
 
 
 def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
@@ -496,10 +876,10 @@ def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
     the same point later in a longer sentence is a real second hit and
     stays.
     """
-    return [(p, lv, s, e) for p, lv, s, e, _kind in _detect(sentence, tokens)]
+    return [(p, lv, s, e) for p, lv, s, e, _kind, _segs in _detect(sentence, tokens)]
 
 
-def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
+def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[tuple[int, int], ...]]]:
     if not sentence:
         return []
     if tokens is None:
@@ -509,25 +889,34 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
         # Nothing can be called a marker without a tokenizer to say what
         # part of speech the hit landed on, and the containment rule
         # below needs to know a contiguous hit from a two-part one:
-        # _legacy only ever reports contiguous ones.
-        hits = [(p, lv, s, e, "pattern", True) for p, lv, s, e in _legacy(sentence)]
+        # _legacy only ever reports contiguous ones, so each is written
+        # on the one piece it spans.
+        found = [(p, lv, s, e, "pattern", True, ((s, e),)) for p, lv, s, e in _legacy(sentence)]
     else:
         spans = {(t.start, t.end): t for t in tokens}
-        hits = []
+        found = []
         for level, pattern, parts, _examples in _catalogue():
-            for start, end, _pos, contiguous, _spelling in _shaped(sentence, tokens, level, pattern, parts):
-                hits.append((pattern, level, start, end,
-                             _kind(pattern, spans.get((start, end))), contiguous))
+            for start, end, _pos, contiguous, _spelling, segments in _shaped(sentence, tokens, level, pattern, parts):
+                found.append((pattern, level, start, end,
+                              _kind(pattern, spans.get((start, end))), contiguous, segments))
+        # The second pass, on the same footing: a hit the first pass
+        # also made is one hit (the dedupe below), a wider reading of
+        # the same point wins, and a form inside a longer construction
+        # is that one's (the containment rule below) -- the られ of
+        # 食べさせられた is the causative-passive's, not a passive.
+        for pattern, level, start, end in _form_hits(tokens):
+            found.append((pattern, level, start, end,
+                          _kind(pattern, spans.get((start, end))), True, ((start, end),)))
 
-    hits.sort(key=lambda h: (h[2], -(h[3] - h[2])))
-    deduped: list[tuple[str, str, int, int, str, bool]] = []
+    found.sort(key=lambda h: (h[2], -(h[3] - h[2])))
+    deduped: list[tuple[str, str, int, int, str, bool, tuple[tuple[int, int], ...]]] = []
     covered: dict[tuple[str, str], list[tuple[int, int]]] = {}
-    for pattern, level, start, end, kind, contiguous in hits:
+    for pattern, level, start, end, kind, contiguous, segments in found:
         seen = covered.setdefault((pattern, level), [])
         if any(s <= start and end <= e for s, e in seen):
             continue
         seen.append((start, end))
-        deduped.append((pattern, level, start, end, kind, contiguous))
+        deduped.append((pattern, level, start, end, kind, contiguous, segments))
 
     # A point wholly inside a longer CONTIGUOUS one is that one's own
     # machinery, not a second rule: the と of 食べようとした is
@@ -539,10 +928,10 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
     # be written the same way, and a span cannot choose between them
     # (see _catalogue on the sense-qualified ones).
     return [
-        (pattern, level, start, end, kind)
-        for pattern, level, start, end, kind, _c in deduped
+        (pattern, level, start, end, kind, segments)
+        for pattern, level, start, end, kind, _c, segments in deduped
         if not any(
             whole and (s, e) != (start, end) and s <= start and end <= e
-            for _p, _l, s, e, _k, whole in deduped
+            for _p, _l, s, e, _k, whole, _segs in deduped
         )
     ]

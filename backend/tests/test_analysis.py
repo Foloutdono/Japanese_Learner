@@ -74,6 +74,86 @@ class AnalyzeLocalTests(unittest.TestCase):
                 self.assertIn(point["raw_id"], ids)
                 self.assertIn(point["kind"], ("marker", "pattern"))
 
+    def test_a_point_carries_its_gloss_in_both_languages(self) -> None:
+        """Plan 095: a chip says what its rule does without the sheet
+        being opened. The gloss is the catalogue's {en, fr} pair rather
+        than one language, because this result is pure and shared across
+        every learner -- the screen picks the language (frontend
+        grammarGloss.js), and the copy a token carries is the same one,
+        so a particle's row can print it too."""
+        r = analyze_local("今日は学校へ行きません。")
+        wa = next(g for g in r["grammar"] if g["pattern"] == "は")
+        self.assertEqual(set(wa["meaning"]), {"en", "fr"})
+        self.assertTrue(wa["meaning"]["en"] and wa["meaning"]["fr"])
+        self.assertTrue(wa["structure"])
+        on_token = next(g for t in r["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])
+        self.assertEqual(on_token["meaning"], wa["meaning"])
+        self.assertEqual(on_token["structure"], wa["structure"])
+        # Kept through the per-user half, on the sentence and the token.
+        with_state = attach_user_state(r, {}, "some-user")
+        self.assertEqual(next(g for g in with_state["grammar"] if g["pattern"] == "は")["meaning"], wa["meaning"])
+        self.assertEqual(
+            next(g for t in with_state["tokens"] for g in t["grammar"] if g["raw_id"] == wa["raw_id"])["meaning"],
+            wa["meaning"],
+        )
+
+    def test_a_point_says_where_it_is_written(self) -> None:
+        """Plan 095: `segments` is the pieces of the sentence the point is
+        written on. One piece for a point written in one piece, and for
+        から〜まで the two words and not the clause between them -- which
+        is what a screen lights, and what decides which tokens carry
+        the point (a stage card for 家 must not list から〜まで)."""
+        r = analyze_local("駅から家まで歩きました。")
+        kara_made = next(g for g in r["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual(kara_made["segments"], [[1, 3], [4, 6]])
+        self.assertEqual((kara_made["start"], kara_made["end"]), (1, 6))
+        mashita = next(g for g in r["grammar"] if g["pattern"] == "〜ました／〜ませんでした")
+        self.assertEqual(mashita["segments"], [[mashita["start"], mashita["end"]]])
+        by_surface = {t["surface"]: [g["pattern"] for g in t["grammar"]] for t in r["tokens"]}
+        self.assertIn("から〜まで", by_surface["から"])
+        self.assertIn("から〜まで", by_surface["まで"])
+        self.assertEqual(by_surface["家"], [])
+        # The token's copy keeps the occurrence's offsets, and keeps
+        # them through the per-user half, where only the stats join.
+        kara = next(t for t in r["tokens"] if t["surface"] == "から")
+        on_token = next(g for g in kara["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual((on_token["start"], on_token["end"], on_token["segments"]), (1, 6, [[1, 3], [4, 6]]))
+        with_state = attach_user_state(r, {}, "some-user")
+        kara = next(t for t in with_state["tokens"] if t["surface"] == "から")
+        on_token = next(g for g in kara["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual(on_token["segments"], [[1, 3], [4, 6]])
+        self.assertIn("stats", on_token)
+
+    def test_a_note_lands_on_the_point_it_names_and_nowhere_else(self) -> None:
+        """Plan 095: the deep tier's line per point, on the entry and on
+        each token's copy; a note for a pattern the sentence does not
+        use is dropped, and the local result is left untouched."""
+        r = analyze_local("日本に行ったことがあります。")
+        merged = merge_deep(r, [], "An experience.", [
+            {"pattern": " 〜ことがある ", "note": " has been there before "},
+            {"pattern": "〜てしまう", "note": "not here"},
+            {"pattern": "に"},  # no note: ignored
+            "garbage",
+        ])
+        koto = next(g for g in merged["grammar"] if g["pattern"] == "〜ことがある")
+        self.assertEqual(koto["note"], "has been there before")
+        self.assertFalse(any(g.get("note") == "not here" for g in merged["grammar"]))
+        self.assertFalse(any("note" in g for g in merged["grammar"] if g["pattern"] != "〜ことがある"))
+        on_token = next(g for t in merged["tokens"] for g in t["grammar"] if g["pattern"] == "〜ことがある")
+        self.assertEqual(on_token["note"], "has been there before")
+        self.assertFalse(any("note" in g for g in r["grammar"]))
+        self.assertFalse(any("note" in g for t in r["tokens"] for g in t["grammar"]))
+        # Without notes, the grammar is the local tier's, note-free.
+        self.assertFalse(any("note" in g for g in merge_deep(r, [], "x")["grammar"]))
+
+    def test_the_gloss_is_a_copy_and_never_the_catalogue_s_own(self) -> None:
+        """The result is cached and handed around; editing it must not
+        reach the catalogue every later analysis reads from."""
+        from content.grammar_points_data import find
+        r = analyze_local("今日は学校へ行きません。")
+        wa = next(g for g in r["grammar"] if g["pattern"] == "は")
+        self.assertIsNot(wa["meaning"], find("は")[1]["meaning"])
+
     def test_a_marker_is_told_from_a_construction(self) -> None:
         """The screens put the two in different places -- a marker on
         the row of the particle it is, a construction in the chips over
