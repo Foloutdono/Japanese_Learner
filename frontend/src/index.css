@@ -13147,6 +13147,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    not as much as what the deck is. */
 .lib-card__author { color: var(--text-secondary); }
 
+/* A deck's name, its author's name and the blurb under them are the
+   learner's own text, and a learner's text does not come with spaces
+   where a column needs them: "KeenSakura6224666666" is one word wider
+   than the body it sits in, and it set straight on through the aside's
+   hairline and under the card count. A word with nowhere to break
+   breaks anywhere, here alone -- the app's own copy never reaches this
+   rule, because break-word only breaks a word that has no other way to
+   fit. */
+.deck-card .platform-card__title,
+.lib-card .platform-card__desc,
+.lib-card__blurb { overflow-wrap: break-word; }
+
 .lib-card__blurb {
   display: -webkit-box;
   -webkit-box-orient: vertical;

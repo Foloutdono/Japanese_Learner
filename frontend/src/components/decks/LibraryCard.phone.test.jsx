@@ -119,4 +119,28 @@ describe('the library card on a phone', () => {
       expect(fig(el)).toBeCloseTo(fig(cards[0]), 1)
     }
   })
+
+  // A learner's text has no spaces where the column needs them. A deck
+  // named in one run-on word, by an author named in another, used to
+  // set straight through the aside's hairline and under the count; the
+  // body is the only place either is allowed to be.
+  it('breaks a run-on name rather than setting it through the rule', async () => {
+    const el = await card({
+      ...DECK,
+      name: 'Verbesirreguliersdutroisiemegroupe',
+      author: 'KeenSakura6224666666',
+      description: '',
+    })
+    const rule = el.querySelector('.deck-card__aside').getBoundingClientRect().left
+    // The text's own extent, not its box's: a flex item's box stops at
+    // the body's edge whether the line inside it does or not, so a rect
+    // over the box would pass either way.
+    for (const sel of ['.platform-card__title', '.platform-card__desc']) {
+      const range = document.createRange()
+      range.selectNodeContents(el.querySelector(sel))
+      const box = range.getBoundingClientRect()
+      expect(box.width).toBeGreaterThan(0)
+      expect(box.right).toBeLessThanOrEqual(rule)
+    }
+  })
 })
