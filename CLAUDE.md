@@ -81,13 +81,16 @@ runtime purpose. Two consequences worth knowing:
   `components/station/LinePlate.jsx`, `domain/lineProgress.js`'s
   `stopsAround`, `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx`
   and `index.css`; DESIGN.md, Structure), and **095** is the grammar on
-  the analyzer stage and the chip that says what its rule does — the
-  constructions as quiet chips under the token line, the rules of the
-  word on the stage card, and the catalogue's gloss on every chip and
-  marker row (cited in `study/analysis.py`,
-  `components/analysis/GrammarChips.jsx`, `components/analysis/grammarGloss.js`,
-  `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`
-  and `screens/AnalyzerScreen.jsx`).
+  the analyzer stage, the chip that says what its rule does, and the
+  rule lit where it sits — the constructions as quiet chips under the
+  token line, the rules of the word on the stage card, the catalogue's
+  gloss on every chip and marker row, and each point's `segments`
+  lighting the words it is written on while its chip is hovered,
+  focused or was last pressed (cited in `study/grammar_detect.py`,
+  `study/analysis.py`, `components/analysis/GrammarChips.jsx`,
+  `components/analysis/grammarGloss.js`, `components/analysis/grammarSpans.js`,
+  `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`,
+  `components/analysis/PassageBreakdown.jsx` and `screens/AnalyzerScreen.jsx`).
   When starting a new wave, begin at **096** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

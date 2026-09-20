@@ -295,7 +295,7 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
         if not tokens:
             continue
         starts = {t.start for t in tokens}
-        for start, _e, pos, _c, spelling in _hits(sentence, tokens, parts):
+        for start, _e, pos, _c, spelling, _segments in _hits(sentence, tokens, parts):
             seen[spelling].append((start in starts, pos, _before(start, tokens)))
 
     out = []
@@ -350,11 +350,15 @@ def _before(start: int, tokens) -> str:
 
 
 def _hits(sentence: str, tokens, parts):
-    """Every (start, end, pos-of-first-covered-token) at which `parts`
-    are all present, in order, on word boundaries. The shape test is the
-    caller's (see _shaped): a point's own examples are read only when
-    the point has actually matched something, which is what keeps the
-    first analysis after a boot from tokenizing the whole catalogue."""
+    """Every (start, end, pos-of-first-covered-token, contiguous,
+    spelling, segments) at which `parts` are all present, in order, on
+    word boundaries. `segments` is one (start, end) per part -- the
+    pieces of the sentence the point is actually written on, which for
+    から〜まで are から and まで and not the clause between them (see
+    hits()). The shape test is the caller's (see _shaped): a point's
+    own examples are read only when the point has actually matched
+    something, which is what keeps the first analysis after a boot
+    from tokenizing the whole catalogue."""
     starts = {t.start for t in tokens}
     ends = {t.end for t in tokens}
     # The part of speech of whatever token a position falls inside, and
@@ -369,11 +373,12 @@ def _hits(sentence: str, tokens, parts):
 
     out = []
     for index, alt in enumerate(parts):
-        # Each part in turn, each one starting after the last one ended.
-        spans = [(None, 0)]
+        # Each part in turn, each one starting after the last one ended;
+        # a chain is the parts it has matched so far, as their spans.
+        chains = [((), 0)]
         for needles in alt:
             nxt = []
-            for first, cursor in spans:
+            for segments, cursor in chains:
                 for needle in needles:
                     for at in _find_all(sentence, needle):
                         if at < cursor:
@@ -381,16 +386,17 @@ def _hits(sentence: str, tokens, parts):
                         end = at + len(needle)
                         if not _anchored(at, end, starts, ends, inside, word_start):
                             continue
-                        nxt.append((first if first is not None else at, end))
-            spans = nxt
-            if not spans:
+                        nxt.append((segments + ((at, end),), end))
+            chains = nxt
+            if not chains:
                 break
-        for first, last in spans:
+        for segments, _cursor in chains:
+            first, last = segments[0][0], segments[-1][1]
             # Contiguous when the pattern is written in one piece: a
             # multi-part one (もう〜ました) spans from its first part to
             # its last with a whole clause in between that it does not
             # own, which is why it never explains what it encloses.
-            out.append((first, last, inside.get(first, ""), len(alt) == 1, index))
+            out.append((first, last, inside.get(first, ""), len(alt) == 1, index, segments))
     return out
 
 
@@ -412,7 +418,7 @@ def _shaped(sentence, tokens, level, pattern, parts):
 
     out = []
     for hit in found:
-        start, end, pos, contiguous, spelling = hit
+        start, end, pos, contiguous, spelling, _segments = hit
         heads, befores, stands = (
             shape[spelling] if spelling < len(shape) else (frozenset(), frozenset(), False)
         )
@@ -473,11 +479,32 @@ def _kind(pattern: str, token) -> str:
     return "marker"
 
 
+def hits(sentence: str, tokens=None) -> list[dict]:
+    """Every point `sentence` visibly uses, in full: {pattern, level,
+    start, end, kind, segments}.
+
+    `start`..`end` is the whole stretch the hit reaches over; `segments`
+    is the list of (start, end) pieces it is actually written on, one
+    per part of the pattern. For a point written in one piece the two
+    are the same span. For から〜まで they are から and まで, and the
+    clause between them is not in either: a screen that draws where a
+    rule sits on the sentence lights those two words and not the whole
+    line (plan 095), and a token between them is not one the point
+    covers (study/analysis._attach_grammar). detect and points_in are
+    the same list in the tuple forms their callers already read.
+    """
+    return [
+        {"pattern": p, "level": lv, "start": s, "end": e, "kind": k, "segments": list(segs)}
+        for p, lv, s, e, k, segs in _detect(sentence, tokens)
+    ]
+
+
 def detect(sentence: str, tokens=None) -> list[tuple[str, str, int, int, str]]:
     """(pattern, level, start, end, kind) — points_in, plus what shape of
     point each hit is (see _kind). The full form; points_in is the same
-    list with the kind dropped for the callers that predate it."""
-    return _detect(sentence, tokens)
+    list with the kind dropped for the callers that predate it, and
+    hits() the same list with the pieces each hit is written on."""
+    return [(p, lv, s, e, k) for p, lv, s, e, k, _segs in _detect(sentence, tokens)]
 
 
 def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
@@ -496,10 +523,10 @@ def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
     the same point later in a longer sentence is a real second hit and
     stays.
     """
-    return [(p, lv, s, e) for p, lv, s, e, _kind in _detect(sentence, tokens)]
+    return [(p, lv, s, e) for p, lv, s, e, _kind, _segs in _detect(sentence, tokens)]
 
 
-def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
+def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[tuple[int, int], ...]]]:
     if not sentence:
         return []
     if tokens is None:
@@ -509,25 +536,26 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
         # Nothing can be called a marker without a tokenizer to say what
         # part of speech the hit landed on, and the containment rule
         # below needs to know a contiguous hit from a two-part one:
-        # _legacy only ever reports contiguous ones.
-        hits = [(p, lv, s, e, "pattern", True) for p, lv, s, e in _legacy(sentence)]
+        # _legacy only ever reports contiguous ones, so each is written
+        # on the one piece it spans.
+        found = [(p, lv, s, e, "pattern", True, ((s, e),)) for p, lv, s, e in _legacy(sentence)]
     else:
         spans = {(t.start, t.end): t for t in tokens}
-        hits = []
+        found = []
         for level, pattern, parts, _examples in _catalogue():
-            for start, end, _pos, contiguous, _spelling in _shaped(sentence, tokens, level, pattern, parts):
-                hits.append((pattern, level, start, end,
-                             _kind(pattern, spans.get((start, end))), contiguous))
+            for start, end, _pos, contiguous, _spelling, segments in _shaped(sentence, tokens, level, pattern, parts):
+                found.append((pattern, level, start, end,
+                              _kind(pattern, spans.get((start, end))), contiguous, segments))
 
-    hits.sort(key=lambda h: (h[2], -(h[3] - h[2])))
-    deduped: list[tuple[str, str, int, int, str, bool]] = []
+    found.sort(key=lambda h: (h[2], -(h[3] - h[2])))
+    deduped: list[tuple[str, str, int, int, str, bool, tuple[tuple[int, int], ...]]] = []
     covered: dict[tuple[str, str], list[tuple[int, int]]] = {}
-    for pattern, level, start, end, kind, contiguous in hits:
+    for pattern, level, start, end, kind, contiguous, segments in found:
         seen = covered.setdefault((pattern, level), [])
         if any(s <= start and end <= e for s, e in seen):
             continue
         seen.append((start, end))
-        deduped.append((pattern, level, start, end, kind, contiguous))
+        deduped.append((pattern, level, start, end, kind, contiguous, segments))
 
     # A point wholly inside a longer CONTIGUOUS one is that one's own
     # machinery, not a second rule: the と of 食べようとした is
@@ -539,10 +567,10 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str]]:
     # be written the same way, and a span cannot choose between them
     # (see _catalogue on the sense-qualified ones).
     return [
-        (pattern, level, start, end, kind)
-        for pattern, level, start, end, kind, _c in deduped
+        (pattern, level, start, end, kind, segments)
+        for pattern, level, start, end, kind, _c, segments in deduped
         if not any(
             whole and (s, e) != (start, end) and s <= start and end <= e
-            for _p, _l, s, e, _k, whole in deduped
+            for _p, _l, s, e, _k, whole, _segs in deduped
         )
     ]

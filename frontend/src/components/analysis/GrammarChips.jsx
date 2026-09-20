@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { StatusBadge } from './StatusBadge'
 import { MineButton } from './MineButton'
 import { grammarGloss } from './grammarGloss'
+import { pointKey } from './grammarSpans'
 
 // One chip per grammar point the LOCAL tier spotted in a Sentence
 // (study/difficulty.py's points_in, via analyze_local's `grammar` list),
@@ -42,7 +43,14 @@ import { grammarGloss } from './grammarGloss'
 // `withMarkers` keeps the markers in (see below): the stage card asks
 // for the rules of the ONE word on the stage, and for a particle the
 // marker it is IS the answer.
-export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen, withMarkers = false }) {
+//
+// `lit` and `onLight` (plan 095) tie a chip to the words it is written
+// on: the composer that draws the line beside these chips lights the
+// point's segments while a chip is hovered or focused (`onLight(g)`,
+// then `onLight(null)`), and keeps the last one pressed lit after its
+// sheet closes; `lit` is the key of the point lit now (grammarSpans'
+// pointKey), so that chip wears the same ink as its words.
+export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen, withMarkers = false, lit = null, onLight }) {
   // Read with a guard: a chip can be drawn under a test's bare render
   // with no LangProvider above it, and without one the gloss falls
   // back to English rather than the chip falling over.
@@ -65,6 +73,16 @@ export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen,
       <div className="analysis-grammar-chips__row">
         {points.map(g => {
           const gloss = grammarGloss(g, lang)
+          const key = pointKey(g)
+          // The light follows the pointer and the focus; the press is
+          // the composer's (it wraps onOpen), so a chip with nowhere
+          // to open still lights its words.
+          const light = onLight ? {
+            onMouseEnter: () => onLight(g),
+            onMouseLeave: () => onLight(null),
+            onFocus: () => onLight(g),
+            onBlur: () => onLight(null),
+          } : {}
           return (
             // Keyed by raw_id+start, not raw_id alone: the same grammar
             // point can legitimately match twice at different spans in
@@ -73,7 +91,7 @@ export function GrammarChips({ grammar, t, mining, quiet = false, label, onOpen,
             // triggered a React "two children with the same key" warning
             // -- start disambiguates without touching raw_id itself,
             // which stays the mining/SRS identity used by MineButton below.
-            <div key={`${g.raw_id}_${g.start}`} className="analysis-grammar-chip">
+            <div key={key} className={`analysis-grammar-chip${lit && lit === key ? ' analysis-grammar-chip--lit' : ''}`} {...light}>
               {onOpen
                 ? (
                   <button

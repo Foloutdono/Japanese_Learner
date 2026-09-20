@@ -145,6 +145,39 @@ describe('PassageBreakdown', () => {
     expect(items()[0].classList.contains('bkd-passage__item--open')).toBe(true)
   })
 
+  it("hovering the open sentence's chip lights the words its point is written on, and a pick does not follow to another sentence", async () => {
+    const onGrammarOpen = vi.fn()
+    // 会いました carries 〜ました; the token gets the offsets the local
+    // tier gives it, so the piece can find it.
+    const withOffsets = WITH_GRAMMAR.map((s, i) => (i === 0 ? {
+      ...s,
+      analysis: {
+        ...s.analysis,
+        grammar: [{ ...s.analysis.grammar[0], segments: [[3, 7]] }],
+        tokens: s.analysis.tokens.map((tok, j) => ({ ...tok, start: [0, 1, 2, 7][j], end: [1, 2, 7, 8][j] })),
+      },
+    } : s))
+    await render(<Host sentences={withOffsets} onGrammarOpen={onGrammarOpen} />)
+    const lit = () => [...document.querySelectorAll('.bkd-line .bkd-tok--lit')].map(el => el.textContent)
+    const chip = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip')
+    chip.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
+    await settle()
+    expect(lit()).toEqual(['会いました'])
+    chip.querySelector('.analysis-grammar-chip__door').click()
+    chip.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
+    await settle()
+    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
+    expect(lit()).toEqual(['会いました'])
+    // Opening the second sentence opens it dark; back on the first,
+    // the pick is gone with the sentence it was made in.
+    items()[1].querySelector('.bkd-passage__chev').click()
+    await settle()
+    expect(lit()).toEqual([])
+    items()[0].querySelector('.bkd-passage__chev').click()
+    await settle()
+    expect(lit()).toEqual([])
+  })
+
   it('with nowhere to open, the chip is the pattern as a word', async () => {
     await render(<Host sentences={WITH_GRAMMAR} />)
     const chip = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip')

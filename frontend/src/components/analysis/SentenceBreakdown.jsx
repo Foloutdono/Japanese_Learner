@@ -12,6 +12,7 @@ import { DeckPicker } from './DeckPicker'
 import { StageCard } from './StageCard'
 import { rowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
+import { coversToken, pointKey } from './grammarSpans'
 
 // Mirrors study/analysis.py's _CONTENT_POS + unknown_count predicate
 // exactly, so "the single unknown Token" identified here for i+1
@@ -45,6 +46,31 @@ function tokState(tok) {
 function tokFurigana(tok) {
   if (!tok.reading || !HAS_KANJI.test(tok.surface ?? '')) return ''
   return tok.reading
+}
+
+// ── The light (plan 095) ─────────────────────────────────────
+// Where a grammar point sits on the sentence: the words it is written
+// on light up while its chip (or the row that opens it) is hovered or
+// focused, and the last point pressed stays lit once its sheet has
+// closed -- on a phone there is no hover, and "where was that" is the
+// question the learner comes back from the sheet with. Two states,
+// because a hover ends when the pointer moves and a pick does not:
+// the hover wins while it lasts. Both are remembered against the
+// analysis they were made on, so a new sentence arrives with nothing
+// lit and no effect has to clear it -- not even a hover a keyboard
+// shortcut left behind on a chip that unmounted under the pointer.
+function useLight(analysis) {
+  const [hover, setHover] = useState(null)
+  const [pick, setPick] = useState(null)
+  const here = held => (held && held.analysis === analysis ? held.point : null)
+  const lit = here(hover) ?? here(pick)
+  return {
+    lit,
+    litKey: pointKey(lit),
+    onLight: point => setHover(point ? { analysis, point } : null),
+    // Wraps a screen's onGrammarOpen: the press lights as it opens.
+    open: onOpen => (onOpen ? point => { setPick({ analysis, point }); onOpen(point) } : undefined),
+  }
 }
 
 // ── The token table (the mockup's second view) ────────────
@@ -158,7 +184,10 @@ export function Legend({ t }) {
 // analyzer's own convention). A deck word is a door to its entry; a
 // particle is text. Without an analysis the sentence prints plain,
 // exactly as the card would have printed it -- never a blank.
-export function SentenceLine({ analysis, text, t, onTokenClick }) {
+//
+// `lit` is the grammar point whose words are lit (useLight): a token
+// one of its segments is written on wears the grammar line's tint.
+export function SentenceLine({ analysis, text, t, onTokenClick, lit = null }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   if (analysis?.available === false || !tokens.length) {
     return <span className="prose__jp" lang="ja">{text ?? analysis?.text ?? ''}</span>
@@ -166,7 +195,7 @@ export function SentenceLine({ analysis, text, t, onTokenClick }) {
   return (
     <div className="bkd-line" lang="ja" role="group" aria-label={analysis.text ?? text}>
       {tokens.map((w, i) => {
-        const cls = `bkd-tok bkd-tok--${tokState(w)}`
+        const cls = `bkd-tok bkd-tok--${tokState(w)}${lit && coversToken(lit, w) ? ' bkd-tok--lit' : ''}`
         const parts = w.furigana ?? [{ text: w.surface }]
         return w.vocab_match && onTokenClick ? (
           <button
@@ -191,10 +220,20 @@ export function SentenceLine({ analysis, text, t, onTokenClick }) {
 // model's contextual one where it was bought or came with the text,
 // else the deck's own -- a learner should not need a model to know
 // what 電車 means. The level is the deck's, as a plain badge.
-export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
+//
+// `lit`/`onLight` (plan 095): the row that opens a marker, and the
+// marker chip beside a word row, light the particle in the line above
+// while hovered or focused, exactly as a chip does -- see useLight.
+export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null, onLight }) {
   // Guarded like GrammarChips': the rows are drawn under a bare render
   // in the tests, with no provider above them.
   const lang = useLang()?.lang
+  const light = point => (onLight ? {
+    onMouseEnter: () => onLight(point),
+    onMouseLeave: () => onLight(null),
+    onFocus: () => onLight(point),
+    onBlur: () => onLight(null),
+  } : {})
   const rows = rowsOf(analysis?.tokens ?? analysis?.words ?? [])
   if (!rows.length) return null
   return (
@@ -236,10 +275,11 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
             ) : door ? (
               <button
                 type="button"
-                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door`}
+                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door${lit && pointKey(lit) === pointKey(door) ? ' bkd-tok--lit' : ''}`}
                 lang="ja"
                 onClick={() => onGrammarOpen(door)}
                 aria-label={t.detailsForToken(row.surface)}
+                {...light(door)}
               >
                 {row.surface}
               </button>
@@ -256,11 +296,12 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen }) {
                 <button
                   key={point.raw_id}
                   type="button"
-                  className="bkd-row__mark"
+                  className={`bkd-row__mark${lit && pointKey(lit) === pointKey(point) ? ' bkd-row__mark--lit' : ''}`}
                   lang="ja"
                   onClick={e => { e.stopPropagation(); onGrammarOpen(point) }}
                   aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${point.pattern}${gloss ? ` — ${gloss}` : ''}`}
                   title={gloss || t.openDictionary}
+                  {...light(point)}
                 >
                   {point.pattern}
                 </button>
@@ -319,16 +360,31 @@ export function SentenceBreakdown({
   translation, note, sentenceText, onGrammarOpen,
 }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
+  // The light is this component's in the rows and on the stage (the
+  // line and the chips are both drawn here); PassageBreakdown, which
+  // composes the same pieces itself, holds its own.
+  const light = useLight(analysis)
+  const openGrammar = light.open(onGrammarOpen)
 
   if (layout === 'rows') {
     const available = analysis?.available !== false && tokens.length > 0
     const noteText = note ?? analysis?.explanation ?? ''
     return (
       <div className="bkd">
-        <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} />
+        <SentenceLine analysis={analysis} text={sentenceText} t={t} onTokenClick={onTokenClick} lit={light.lit} />
         {translation && <span className="bkd__en">{translation}</span>}
-        {available && <WordRows analysis={analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={onGrammarOpen} />}
-        {available && <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />}
+        {available && (
+          <WordRows
+            analysis={analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={openGrammar}
+            lit={light.lit} onLight={light.onLight}
+          />
+        )}
+        {available && (
+          <GrammarChips
+            grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
+            lit={light.litKey} onLight={light.onLight}
+          />
+        )}
         {noteText && <span className="prose__ai">{noteText}</span>}
       </div>
     )
@@ -354,7 +410,7 @@ export function SentenceBreakdown({
               key={i}
               type="button"
               onClick={() => setIndex(i)}
-              className={`tok tok--${tokState(w)}${i === index ? ' tok--on' : ''}`}
+              className={`tok tok--${tokState(w)}${i === index ? ' tok--on' : ''}${light.lit && coversToken(light.lit, w) ? ' tok--lit' : ''}`}
               aria-label={t.jumpToTokenNamed(w.surface)}
               aria-pressed={i === index}
               lang="ja"
@@ -380,7 +436,10 @@ export function SentenceBreakdown({
             brings a sentence to precisely to ask what it is made of.
             The markers (は, を) are not here -- they are the rule of
             one word, and the card below says so about that word. */}
-        <GrammarChips grammar={analysis.grammar} t={t} quiet label={null} onOpen={onGrammarOpen} />
+        <GrammarChips
+          grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
+          lit={light.litKey} onLight={light.onLight}
+        />
 
         {controls}
 
@@ -399,7 +458,9 @@ export function SentenceBreakdown({
                 t={t}
                 onWordClick={onTokenClick}
                 onKanjiClick={onKanjiClick}
-                onGrammarOpen={onGrammarOpen}
+                onGrammarOpen={openGrammar}
+                lit={light.litKey}
+                onLight={light.onLight}
                 mining={mining}
                 emphasize={analysis.unknown_count === 1 && isUnknownToken(current)}
               />

@@ -97,6 +97,33 @@ class AnalyzeLocalTests(unittest.TestCase):
             wa["meaning"],
         )
 
+    def test_a_point_says_where_it_is_written(self) -> None:
+        """Plan 095: `segments` is the pieces of the sentence the point is
+        written on. One piece for a point written in one piece, and for
+        から〜まで the two words and not the clause between them -- which
+        is what a screen lights, and what decides which tokens carry
+        the point (a stage card for 家 must not list から〜まで)."""
+        r = analyze_local("駅から家まで歩きました。")
+        kara_made = next(g for g in r["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual(kara_made["segments"], [[1, 3], [4, 6]])
+        self.assertEqual((kara_made["start"], kara_made["end"]), (1, 6))
+        mashita = next(g for g in r["grammar"] if g["pattern"] == "〜ました／〜ませんでした")
+        self.assertEqual(mashita["segments"], [[mashita["start"], mashita["end"]]])
+        by_surface = {t["surface"]: [g["pattern"] for g in t["grammar"]] for t in r["tokens"]}
+        self.assertIn("から〜まで", by_surface["から"])
+        self.assertIn("から〜まで", by_surface["まで"])
+        self.assertEqual(by_surface["家"], [])
+        # The token's copy keeps the occurrence's offsets, and keeps
+        # them through the per-user half, where only the stats join.
+        kara = next(t for t in r["tokens"] if t["surface"] == "から")
+        on_token = next(g for g in kara["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual((on_token["start"], on_token["end"], on_token["segments"]), (1, 6, [[1, 3], [4, 6]]))
+        with_state = attach_user_state(r, {}, "some-user")
+        kara = next(t for t in with_state["tokens"] if t["surface"] == "から")
+        on_token = next(g for g in kara["grammar"] if g["pattern"] == "から〜まで")
+        self.assertEqual(on_token["segments"], [[1, 3], [4, 6]])
+        self.assertIn("stats", on_token)
+
     def test_the_gloss_is_a_copy_and_never_the_catalogue_s_own(self) -> None:
         """The result is cached and handed around; editing it must not
         reach the catalogue every later analysis reads from."""

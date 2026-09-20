@@ -23,7 +23,7 @@ const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
 // `emphasize` marks the single unknown Token of an i+1 Sentence (see
 // SentenceBreakdown's isUnknownToken) -- that one word is the entire
 // reason the Sentence is worth studying, so it says so.
-export function StageCard({ word, t, onWordClick, onKanjiClick, onGrammarOpen, mining, emphasize = false }) {
+export function StageCard({ word, t, onWordClick, onKanjiClick, onGrammarOpen, lit = null, onLight, mining, emphasize = false }) {
   const gloss = word.meaning ?? word.vocab_match?.entry?.meaning
   const showMine = word.vocab_match || CONTENT_POS.has(word.pos)
   const surface = <FuriganaParts parts={word.furigana ?? [{ text: word.surface }]} />
@@ -54,7 +54,7 @@ export function StageCard({ word, t, onWordClick, onKanjiClick, onGrammarOpen, m
           rule. Quiet, like the chips under the line -- the deck
           action on this card is the word's, and a rule is added to a
           deck from its own sheet. */}
-      <GrammarChips grammar={word.grammar} t={t} quiet label={null} withMarkers onOpen={onGrammarOpen} />
+      <GrammarChips grammar={word.grammar} t={t} quiet label={null} withMarkers onOpen={onGrammarOpen} lit={lit} onLight={onLight} />
 
       <div className="token-card__foot">
         <span className="token-card__kanji">

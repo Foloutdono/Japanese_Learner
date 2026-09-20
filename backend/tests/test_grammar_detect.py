@@ -137,6 +137,40 @@ class WhatIsReportedTests(unittest.TestCase):
         self.assertIn("もう〜ました", found)
         self.assertIn("〜くなる／〜になる", found)
 
+    def test_a_hit_says_which_pieces_it_is_written_on(self) -> None:
+        """hits() beside detect(): the same list, each hit with the
+        (start, end) pieces it is written on. One piece for a point in
+        one piece; one per part for a two-part point, and the clause
+        between the parts is in neither (plan 095)."""
+        sentence = "駅から家まで歩きました。"
+        full = grammar_detect.hits(sentence)
+        self.assertEqual(
+            [(h["pattern"], h["level"], h["start"], h["end"], h["kind"]) for h in full],
+            grammar_detect.detect(sentence),
+        )
+        kara_made = next(h for h in full if h["pattern"] == "から〜まで")
+        self.assertEqual(kara_made["segments"], [(1, 3), (4, 6)])
+        mashita = next(h for h in full if h["pattern"] == "〜ました／〜ませんでした")
+        self.assertEqual(mashita["segments"], [(mashita["start"], mashita["end"])])
+        for h in full:
+            with self.subTest(pattern=h["pattern"]):
+                # The pieces are in order, do not overlap, and span
+                # exactly the hit's own stretch.
+                self.assertEqual(h["segments"][0][0], h["start"])
+                self.assertEqual(h["segments"][-1][1], h["end"])
+                for (_s1, e1), (s2, _e2) in zip(h["segments"], h["segments"][1:]):
+                    self.assertLessEqual(e1, s2)
+
+    def test_without_a_tokenizer_a_hit_is_still_written_on_one_piece(self) -> None:
+        original = morphology.tokenize
+        morphology.tokenize = lambda text: None
+        try:
+            for h in grammar_detect.hits("なくしてしまいました。"):
+                with self.subTest(pattern=h["pattern"]):
+                    self.assertEqual(h["segments"], [(h["start"], h["end"])])
+        finally:
+            morphology.tokenize = original
+
     def test_a_marker_is_told_from_a_construction(self) -> None:
         """A screen puts the two in different places: a marker on the
         row of the very particle it is, a construction in the chips over

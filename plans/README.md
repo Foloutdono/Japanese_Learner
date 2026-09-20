@@ -191,8 +191,9 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
-- **Wave 20 — the grammar on the stage, and the chip that says what it
-  does** (plan 095, 2026-09-20, DONE). The analyzer's stage was the one
+- **Wave 20 — the grammar on the stage, the chip that says what it
+  does, and the rule lit where it sits** (plan 095, 2026-09-20, DONE).
+  The analyzer's stage was the one
   breakdown that drew no grammar: the points were detected, attached
   to every token and shipped, then shown nowhere on the screen a
   learner brings a sentence to. Now the constructions are the practice
@@ -205,10 +206,17 @@ Thirteen waves live in this file:
   so the screen picks the language through `grammarGloss.js`), the
   comprehension result's string passes through, and a particle's row
   prints its marker's gloss where its meaning cell used to be empty.
-  Options 2 (the pattern drawn on the line), 4 (the rules the detector
-  still refuses: 〜すぎる, 〜てみる, the passive and potential forms)
-  and 5 (the explanation tied to the points found) were laid out in the
-  same session and not taken.
+  And each point says where it sits: `grammar_detect.hits` reports the
+  pieces a hit is written on (`segments` -- から and まで, not the
+  clause between them), `_attach_grammar` covers tokens by piece rather
+  than by span (a stage card for 家 no longer lists から〜まで), and the
+  line lights a point's words in the grammar line's ink while its chip
+  or its row is hovered or focused, keeping the last one pressed lit
+  after its sheet closes (`grammarSpans.js`; `useLight` in
+  SentenceBreakdown, PassageBreakdown's own copy). Options 4 (the rules
+  the detector still refuses: 〜すぎる, 〜てみる, the passive and
+  potential forms) and 5 (the explanation tied to the points found)
+  were laid out in the same session and not taken.
 
 - **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE;
   the content waves landed level by level, N5/N4 then N3, N2 and N1).

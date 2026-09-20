@@ -67,9 +67,17 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
     the screen's to decide (frontend grammarGloss.js). The comprehension
     result's points (routes/reading.py) were already localised on the
     server into a plain string; the same reader takes both.
+
+    `segments` (plan 095) is where on the sentence the point is written,
+    as [start, end] pieces -- one for a point written in one piece, one
+    per part for から〜まで, whose `start`..`end` reaches over a clause
+    it does not own. A screen that shows where a rule sits lights the
+    pieces (frontend grammarSpans.js); the tokens a point covers are
+    the pieces' tokens (_attach_grammar).
     """
     out = []
-    for pattern, level, start, end, kind in grammar_detect.detect(sentence, morphemes):
+    for hit in grammar_detect.hits(sentence, morphemes):
+        pattern, level = hit["pattern"], hit["level"]
         found = find(pattern)
         entry = found[1] if found and found[0] == level else None
         if entry is None:
@@ -79,9 +87,10 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
         out.append({
             "pattern": pattern,
             "level": level,
-            "start": start,
-            "end": end,
-            "kind": kind,
+            "start": hit["start"],
+            "end": hit["end"],
+            "segments": [list(seg) for seg in hit["segments"]],
+            "kind": hit["kind"],
             "raw_id": grammar_to_id(entry, level),
             # A copy, never the catalogue's own dict: this result is
             # cached and handed around, and nothing downstream may be
@@ -93,7 +102,7 @@ def _grammar_entries(sentence: str, morphemes=None) -> list[dict]:
 
 
 def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
-    """Give every token the points whose span covers it, in place.
+    """Give every token the points written on it, in place.
 
     This is what makes a grammar point reachable the way a word is: the
     rows under a sentence are the learner's map of it, and until now a
@@ -102,13 +111,23 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
     of sat in a chip below, unconnected to the word that demonstrates
     it. A point covering a token is that token's own rule, so the row
     opens it.
+
+    Covering means written on one of the point's `segments`, not lying
+    anywhere under its span: から〜まで reaches from から to まで, and
+    the 家 between them is not an instance of it. Attached by span, a
+    stage card for 家 listed から〜まで as that word's rule (plan 095).
     """
     for token in tokens:
         start, end = token["start"], token["end"]
         token["grammar"] = [
-            {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure")}
+            # The occurrence's own offsets ride along, so the row that
+            # opens a marker can light the very particle it is in the
+            # line above -- the same point twice in a sentence is two
+            # lights, not one (frontend grammarSpans.js).
+            {k: g[k] for k in ("pattern", "level", "raw_id", "kind", "meaning", "structure",
+                               "start", "end", "segments")}
             for g in grammar
-            if g["start"] < end and start < g["end"]
+            if any(s < end and start < e for s, e in g["segments"])
         ]
 
 
@@ -223,10 +242,16 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         {**g, "stats": card_stats(states, user_id, g["raw_id"], GRAMMAR_STATUS_MODES)}
         for g in analysis["grammar"]
     ]
-    by_id = {g["raw_id"]: g for g in grammar}
+    # The stats onto the token's own copy, which keeps its occurrence
+    # (its offsets) rather than taking the sentence-level entry's: a
+    # point found twice has one card and two places.
+    stats_by_id = {g["raw_id"]: g["stats"] for g in grammar}
     for tok in tokens:
         if tok.get("grammar"):
-            tok["grammar"] = [by_id.get(g["raw_id"], g) for g in tok["grammar"]]
+            tok["grammar"] = [
+                {**g, "stats": stats_by_id[g["raw_id"]]} if g["raw_id"] in stats_by_id else g
+                for g in tok["grammar"]
+            ]
 
     return {
         **analysis,
