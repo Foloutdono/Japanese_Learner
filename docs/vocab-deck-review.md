@@ -261,7 +261,14 @@ by design; `CLAUDE.md`'s "8,431 entries at 40 a run" and
 
 Three ids moved, each a `MOVES` line in `content/vocab_renames.py`, so
 `python -m scripts.migrate_vocab_ids` (report first, `--yes` to apply)
-runs once after the deploy that carries them:
+runs once after the deploy that carries them. (The three lines reached
+the table with 108's commit, not 106's: the edit that wrote them sat
+behind a data write that aborted, and nothing in the tests noticed an
+id leaving the deck without a line — a served id has no memory of its
+old self. The migration was never run in between, so nothing is lost;
+but a future rename should be checked against `git diff` of the deck
+before its commit, and 106b should add the guard: every id the last
+tagged deck served is either still served or a `MOVES` key.)
 
 - 掃除 N5 `そうじする` → `そうじ`, the する out of the reading field. The
   N3 掃除/そうじ stays: the two are now one of the exact pairs below.
@@ -334,16 +341,25 @@ Found on the way and left for 108: the N2 entry for たいりつ is
 written "Ͼ立" — a mojibake where 対 should be — which is a written-form
 correction and therefore a `MOVES` line.
 
-### 108 — English gloss hygiene
+### 108 — English gloss hygiene (the mechanical half DONE, 2026-09-21)
 
-Not truth (the content audit's job) but form: the 2,600 unspaced commas
-become ", " by script (gloss is not in the id); the parenthesised notes
-keep one convention, which the deck already leans to — a register note
-before the gloss, "(humble) mother", "(honorable) father" — and a sense
-note after; a gloss that is a JMdict sense dump ("to change,to be of
-use,to reach to" for する) is shortened to what the card teaches. Fold
-into the content audit's vocab slices rather than one pass: forty a run,
-with the audit's evidence bar.
+Not truth (the content audit's job) but form. Done by script, since a
+gloss is not in the id: the 2,629 unspaced commas ("to fly,to hop") are
+", "; 234 glosses began with a capital — the export's own, on N5 nouns
+and adjectives ("Trousers", "Ten", "Below", "Body") — and 114 of them
+are lowercase now, the ones that begin a proper noun (Japan, Shinto,
+the weekdays, North Pole) or a phrase ("Take care of yourself", "How do
+you do?") kept by an explicit list. The N2 たいりつ written "Ͼ立" is
+対立, a `MOVES` line, and now the 26th exact cross-level pair (106b).
+The audit pins the commas at zero.
+
+Left to the content audit's vocab slices, forty a run with the evidence
+bar, because each is a judgement: the parenthesised notes' convention
+(a register note before the gloss, "(humble) mother"; a sense note
+after) and the glosses that are a JMdict sense dump ("to change, to be
+of use, to reach to" for する) to be shortened to what the card
+teaches; and the two numbering styles, "(1) … (2)" (96 glosses) and
+"1. … 2." (35).
 
 ### 109 — placement and the missing-by-frequency list
 

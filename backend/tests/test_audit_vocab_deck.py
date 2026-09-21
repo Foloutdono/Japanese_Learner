@@ -42,6 +42,11 @@ class DeckMeasurementTests(unittest.TestCase):
     def test_no_gloss_is_empty(self) -> None:
         self.assertEqual(self.report["glosses"]["empty"], [])
 
+    def test_a_gloss_separates_its_senses_with_a_comma_and_a_space(self) -> None:
+        """Plan 108: 2,629 glosses read "to fly,to hop", the spreadsheet's
+        own comma; all of them are ", " now, and a new entry follows."""
+        self.assertEqual(self.report["glosses"]["unspaced_commas"], 0)
+
     def test_every_card_has_french_and_none_borrows_another_senses(self) -> None:
         """Plan 107: a card reads its own French line, or the form's when
         every card of that form means the same thing. 38 had none and
@@ -56,9 +61,10 @@ class DeckMeasurementTests(unittest.TestCase):
         # A "/" reading field is the deck's convention since plan 104
         # settled the splitter on it (十 joined its two with a space
         # until 106), so it is measured but not bounded.
+        # 26 exact pairs: 108's mojibake fix made the N2 対立 the same
+        # (form, reading) as the N1 one -- 106b's list, one longer.
         bounds = {
-            ("duplicates", "exact_pairs_count"): 25,
-            ("glosses", "unspaced_commas"): 2600,
+            ("duplicates", "exact_pairs_count"): 26,
         }
         for (section, key), bound in bounds.items():
             with self.subTest(figure=f"{section}.{key}"):

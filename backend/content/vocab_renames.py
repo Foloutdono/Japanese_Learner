@@ -76,6 +76,18 @@ MOVES: dict[str, str] = {
     # ── A note where the reading belongs ─────────────────────────
     "vocab_N3_暖かい_あたたか(い)": "vocab_N3_暖かい_あたたかい",
     "vocab_N2__あげる (=やる)": "vocab_N2__あげる",
+    # ── Plan 106: one spelling, one reading field, no する in it ─
+    # The N5 掃除 carried its する in the reading; the N5 見る had two
+    # spellings in one written-form field, so its lemma key was neither
+    # and every 見る badged as the N3 card; the N5 十 joined its two
+    # readings with a space, which nothing splits.
+    "vocab_N5_掃除_そうじする": "vocab_N5_掃除_そうじ",
+    "vocab_N5_見る 観る_みる": "vocab_N5_見る_みる",
+    "vocab_N5_十_じゅう とお": "vocab_N5_十_じゅう/とお",
+    # ── Plan 108: a mojibake in a written form ───────────────────
+    # The N2 たいりつ was exported as "Ͼ立", a Greek letter where 対
+    # belongs. Same level; the N1 対立 is a different card and stays.
+    "vocab_N2_Ͼ立_たいりつ": "vocab_N2_対立_たいりつ",
 }
 
 
