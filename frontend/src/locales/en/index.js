@@ -1885,7 +1885,9 @@ const onboarding = {
   // The daily pace, lived: the concourse 新規 gauge and the study
   // screens' session terminus (see components/study/usePace.js).
   paceDoneTitle: 'Today’s target reached',
-  paceDoneBody: (n, target) => `${n} of ${target} new items learned today — the line continues in review.`,
+  paceDoneOf: target => `of ${target}`,
+  paceDoneLabel: 'new cards today',
+  paceDoneBody: 'That is today’s share of new cards. Reviews keep running as usual.',
   paceExtraTrain: 'Keep the new cards coming',
   paceGaugeLabel: 'New items',
   paceGaugeAria: (n, target) => `${n} of ${target} new items learned today`,
