@@ -220,6 +220,80 @@ describe('LearnScreen — the plates', () => {
     expect(playAnnouncement).toHaveBeenCalledWith('kana')
   })
 
+  // ── The plate opens where the learner is ──
+  // The station is a stop list, and the learner picks the same stop
+  // every day: the plate departs for it directly. The declared grade
+  // on a JLPT line, the first unfinished set on かな — the two marks
+  // the stop lists themselves ring as "You are here".
+  it('departs to the stop the learner stands at: the declared grade, and かな\'s own', async () => {
+    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
+    statsRef.current = {
+      ...STATS,
+      items: {
+        ...STATS.items,
+        // Hiragana done, its combinations begun: the second set is
+        // where this learner stands (domain/kanaSets.currentKanaSet).
+        kana: {
+          hiragana_basic: { total: 46, learned: 46, score: 1 },
+          hiragana_combos: { total: 36, learned: 5, score: 0.2 },
+        },
+      },
+    }
+    try {
+      const screen = await mount()
+      await settle()
+      const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
+      const paths = []
+      for (const head of heads) {
+        head.click()
+        await settle(20)
+        paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
+      }
+      expect(paths).toEqual([
+        '/learn/kana/hiragana_combos',
+        '/learn/vocab/N4',
+        '/learn/kanji/N4',
+        '/learn/grammar/N4',
+      ])
+      // The gate still wipes in the LINE's identity — the deeper path
+      // is where the train goes, not a different station.
+      expect(beginDeparture.mock.calls.at(-1)[0]?.color).toBe('var(--line-grammar)')
+      expect(playAnnouncement).toHaveBeenLastCalledWith('grammar')
+    } finally {
+      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
+    }
+  })
+
+  // Nothing known about the learner yet — no declared grade, no kana
+  // figures — and the plate opens the station, as it always did: a
+  // guess at the stop would be worse than the question.
+  it('opens the station itself when nothing says where the learner stands', async () => {
+    const screen = await mount()
+    await settle()
+    const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
+    const paths = []
+    for (const head of heads) {
+      head.click()
+      await settle(20)
+      paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
+    }
+    expect(paths).toEqual(['/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar'])
+  })
+
+  // The shelf is not a line: it has no stops, so it opens on the decks.
+  it('opens the shelf on the decks themselves', async () => {
+    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
+    try {
+      const screen = await mount()
+      await settle()
+      screen.container.querySelector('.plate--shelf .plate__head').click()
+      await settle(20)
+      expect(beginDeparture.mock.calls.at(-1)[0]?.path).toBe('/learn/decks')
+    } finally {
+      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
+    }
+  })
+
   it('still hangs every plate from a failed or foreign stats payload', async () => {
     todayRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
     statsRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
