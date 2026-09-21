@@ -40,7 +40,7 @@ these reproducible.
 | entries with no French gloss | 38 (飛ぶ, 起きる, 毎晩, 八, 自動車…) |
 | kana field carrying two readings joined by `/` | 18 — `card_lookup._reading_variants` splits on `;`, so none is ever matched by reading |
 | glosses with an unspaced comma (`to fly,to hop`) | 2,600 |
-| glosses carrying a parenthesised note | 897 |
+| glosses carrying a parenthesised note | 899 |
 | entries whose kanji sit above the entry's own level | 2,241 (379 at N5: 太い, 写真, 曇り, 飲み物…) |
 
 The taught corpus — the 226 curated reading sentences and the grammar
@@ -66,7 +66,7 @@ Two more things the numbers do not show but the work will meet:
   is missing; 109 chooses a source that can.
 - **`vocab_fr.json` is keyed by the written form alone.** 後 has four
   cards (あと, うしろ, ご, のち) and one French gloss, "après, depuis
-  lors, à l'avenir", which is wrong for うしろ. 552 cards share a gloss
+  lors, à l'avenir", which is wrong for うしろ. 550 cards share a gloss
   this way.
 
 ## Decisions this wave embodies
@@ -117,23 +117,39 @@ Two more things the numbers do not show but the work will meet:
   own two-morpheme surface merge: it feeds `difficulty.report`, which
   gates every curated sentence, and widening it moves that gate.
 
-### 103 — `scripts/audit_vocab_deck.py`, the report
+### 103 — `scripts/audit_vocab_deck.py`, the report (DONE, 2026-09-21)
 
 Read-only, no database, no `.env`; prints the two tables above and
 writes them as JSON with `--dump`, so the review is measured the same
-way every time. Sections: shape (counts per level, kana-only, katakana),
-duplicates (exact pairs across levels; forms with several cards),
-readings (`/` fields; readings the lookup cannot split), glosses
-(unspaced commas, parenthesised notes, French coverage, shared French
-glosses), corpus (content words in the taught sentences with no card,
-partitioned into katakana / adverb / auxiliary-gated / real), and the
-focus-word list. The corpus half needs the tokenizer and says so when it
-is missing, like `audit_slice`'s pykakasi note.
+way every time (`--skip-corpus` leaves out the tokenizer half). Sections:
+shape (counts per level, kana-only, katakana), duplicates (exact pairs
+across levels; forms with several cards), readings (`/` fields; `;`
+fields), glosses (unspaced commas, parenthesised notes, empty, French
+coverage, shared French glosses), the frequency order (keys missing from
+it, keys stale in it), kanji above the card's level (a flag, decision 3),
+the focus words, and the corpus: every content word in the taught
+sentences with no card, partitioned into katakana / adverb /
+auxiliary-gated / proper noun / absent. The corpus half needs the
+tokenizer and says so when it is missing, like `audit_slice`'s pykakasi
+note. It resolves words through `card_lookup` exactly as the breakdown
+does, compound fold included, so what it reports unmatched is what the
+screen shows without a badge.
 
-`tests/test_audit_vocab_deck.py` pins the invariants that must not
-regress once repaired: no `;` in a kana field, every deck key present in
-`vocab_frequency.json`, every entry with a French gloss, and the
-`KNOWN_POOL_OVERLAP` set as the one list of tolerated overlaps.
+Its first run corrected the table above: the corpus is 2,487 sentences
+once the dictation lines are counted, 246 lemmas and 925 occurrences
+unmatched — 36 katakana (101), 15 adverbs (136), 2 auxiliary-gated
+(出来る 53, いらっしゃる 6), 9 proper nouns (54: タナカ, トウキョウ…),
+and 184 absent (575), 無い alone 210 of them.
+
+`tests/test_audit_vocab_deck.py` holds the figures: the zeros as zeros
+(no `;` field, no empty gloss, no deck key missing from or stale in
+`vocab_frequency.json`), the rest as ratchets to lower as each plan
+lands (25 exact pairs, 18 `/` fields, 2,600 unspaced commas, 38 without
+French, 550 sharing a French gloss, 184 absent lemmas), the eleven
+unresolved focus words as an exact set, and the partition itself (パン
+is katakana, もう an adverb, 出来る gated, タナカ a name, 無い absent,
+母 and 父 no longer anything). The `KNOWN_POOL_OVERLAP` set stays in
+`tests/test_dictionary_vocab.py`, where it already was.
 
 ### 104 — the lookups: present cards that look absent
 

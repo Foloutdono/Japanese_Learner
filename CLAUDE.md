@@ -128,8 +128,9 @@ runtime purpose. Two consequences worth knowing:
   **102–110** are wave 22, the vocab deck review — 102 (done) is 母 and
   父 as N5 cards and the compound fold in the breakdown (cited in
   `study/card_lookup.py`, `study/analysis.py`, `tests/test_analysis.py`
-  and `tests/test_dictionary_vocab.py`); 103–110 are the review itself,
-  planned in `docs/vocab-deck-review.md`.
+  and `tests/test_dictionary_vocab.py`), 103 (done) the measuring
+  script (`scripts/audit_vocab_deck.py`, `tests/test_audit_vocab_deck.py`);
+  104–110 are the review itself, planned in `docs/vocab-deck-review.md`.
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -325,6 +326,21 @@ python -m scripts.audit_slice                  # what today's run audits
 python -m scripts.audit_slice --dump           # ... and the entries, as JSON
 python -m scripts.audit_slice --schedule 12    # the next twelve runs
 python -m scripts.audit_slice --on 2026-10-06  # reproduce a past run's slice
+```
+
+One more read-only report measures the vocab deck itself (plan 103) —
+its shape, duplicates, readings, glosses, and every content word in the
+taught sentences that resolves to no card, split into the present cards
+the lookups miss and the real gaps. `tests/test_audit_vocab_deck.py`
+holds its figures as ratchets; lower a bound when a plan lowers the
+figure, never raise one. `docs/vocab-deck-review.md` is the review it
+measures for.
+
+```bash
+cd backend
+python -m scripts.audit_vocab_deck                # the report
+python -m scripts.audit_vocab_deck --dump         # the figures and lists, as JSON
+python -m scripts.audit_vocab_deck --skip-corpus  # without the tokenizer half
 ```
 
 The slice is a pure function of the date — grammar, vocab and sentences in
