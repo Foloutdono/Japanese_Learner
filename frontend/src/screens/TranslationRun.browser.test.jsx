@@ -115,11 +115,13 @@ const breakdownButton = root => [...root.querySelectorAll('.prose__breakdown but
 
 beforeEach(() => {
   apiFetch.mockReset()
-  apiFetch.mockImplementation(async url => {
+  apiFetch.mockImplementation(async (url, _session, init) => {
     const u = String(url)
     if (u.startsWith('/api/translation/batch')) return ok({ phrases: PHRASES })
     if (u === '/api/translation/analyze') return ok(TUTOR)
-    if (u === '/api/phrase/analyze') return ok(ANALYSIS)
+    // The local tier for the eager fetch; the explanation only once
+    // bought (deep: true) -- plan 095, owner-directed.
+    if (u === '/api/phrase/analyze') return ok(JSON.parse(init.body).deep ? ANALYSIS : { ...ANALYSIS, explanation: '' })
     return ok({})
   })
 })
@@ -131,10 +133,10 @@ describe('TranslationRun', () => {
     expect(analyze).toHaveLength(1)
     const body = JSON.parse(analyze[0][2].body)
     expect(body.phrase).toBe(PHRASES[0].phrase)
-    // Out of the analyzer's own history, and the deep tier, exactly as
-    // reading practice asks for it.
+    // Out of the analyzer's own history, and the local tier only: the
+    // explanation is bought on demand, exactly as reading practice.
     expect(body.save).toBe(false)
-    expect(body.deep).toBe(true)
+    expect(body.deep).toBe(false)
     // And nothing has been submitted yet: the tutor has not been asked.
     expect(calls('/api/translation/analyze')).toHaveLength(0)
   })
@@ -181,6 +183,17 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.prose__breakdown')).toBeTruthy()
     expect(breakdownButton(root).disabled).toBe(false)
     expect(breakdownButton(root).textContent).toContain('Voir la décomposition')
+  })
+
+  it('buys the explanation of the reference when asked, under the rows', async () => {
+    const root = await graded(await answered(await run()))
+    breakdownButton(root).click()
+    await settle(80)
+    expect(root.querySelector('.bkd .prose__ai')).toBeNull()
+    root.querySelector('.bkd__explain button').click()
+    await settle(120)
+    expect(calls('/api/phrase/analyze').map(c => JSON.parse(c[2].body).deep)).toEqual([false, true])
+    expect(root.querySelector('.bkd .prose__ai').textContent).toBe(ANALYSIS.explanation)
   })
 
   it("opens the rows, puts the prompt and the reference away, and keeps the tutor's reading", async () => {

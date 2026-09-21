@@ -147,7 +147,12 @@ beforeEach(() => {
       : path === '/api/dictation/check' ? Promise.resolve(REVEAL)
         : Promise.resolve({ correct: true }))
   apiFetch.mockReset()
-  apiFetch.mockResolvedValue({ ok: true, status: 200, json: async () => ANALYSIS })
+  // The local tier answers the reveal's fetch; the explanation comes
+  // only when bought (deep: true) -- plan 095, owner-directed.
+  apiFetch.mockImplementation(async (_path, _session, init) => {
+    const body = init?.body ? JSON.parse(init.body) : {}
+    return { ok: true, status: 200, json: async () => (body.deep ? ANALYSIS : { ...ANALYSIS, explanation: '' }) }
+  })
 })
 
 /** The reveal, rated — where the breakdown lives. */
@@ -338,10 +343,10 @@ describe('DictationRun', () => {
     expect(analyze, 'the reveal starts the breakdown').toBeTruthy()
     const body = JSON.parse(analyze[2].body)
     expect(body.phrase).toBe(LINE.jp)
-    // Out of the analyzer's own history, and the deep tier, exactly as
-    // reading practice asks for it.
+    // Out of the analyzer's own history, and the local tier only: the
+    // explanation is bought on demand, exactly as reading practice.
     expect(body.save).toBe(false)
-    expect(body.deep).toBe(true)
+    expect(body.deep).toBe(false)
   })
 
   it('offers no breakdown until the learner has graded themselves', async () => {
@@ -371,12 +376,26 @@ describe('DictationRun', () => {
     expect(root.querySelector('.bkd-line').textContent).toContain('学校')
     expect(root.querySelector('.bkd__en').textContent).toBe(LINE.en)
     expect(root.querySelectorAll('.bkd-row')).toHaveLength(ANALYSIS.tokens.length)
-    expect(root.querySelector('.bkd .prose__ai').textContent).toBe(ANALYSIS.explanation)
+    // No explanation yet: it is an option under the rows.
+    expect(root.querySelector('.bkd .prose__ai')).toBeNull()
+    expect(root.querySelector('.bkd__explain button')).toBeTruthy()
 
     breakdownButton(root).click()
     await settle(80)
     expect(root.querySelector('.bkd')).toBeNull()
     expect(root.querySelector('.kaki-line')).toBeTruthy()
+  })
+
+  it('buys the explanation when asked, and prints it under the rows', async () => {
+    const root = await graded()
+    breakdownButton(root).click()
+    await settle(80)
+    root.querySelector('.bkd__explain button').click()
+    await settle(120)
+    const deep = apiFetch.mock.calls.filter(c => c[0] === '/api/phrase/analyze').map(c => JSON.parse(c[2].body).deep)
+    expect(deep).toEqual([false, true])
+    expect(root.querySelector('.bkd .prose__ai').textContent).toBe(ANALYSIS.explanation)
+    expect(root.querySelector('.bkd__explain')).toBeNull()
   })
 
   it('refuses the toggle while the breakdown is still being fetched', async () => {

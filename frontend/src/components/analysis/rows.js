@@ -8,9 +8,10 @@
 // A run folds back into the word it is by `span_end` when the server
 // bound a model's gloss to the run (study/analysis.merge_deep), else
 // by the grammar of it -- a trailing auxiliary belongs to the verb or
-// adjective before it (食べ + ます, 新しい + です). An auxiliary the
-// model glossed on its own (です as "polite copula") is a word the
-// model named, and keeps its row. Punctuation is no row at all.
+// adjective before it (食べ + ます, 新しかっ + た). A particle or a
+// copula ends any run before it and is a row of its own (standsAlone).
+// An auxiliary the model glossed on its own is a word the model named,
+// and keeps its row. Punctuation is no row at all.
 //
 // The head token carries the row's state, level and gloss; the
 // surface and the reading are the run's own, joined.
@@ -20,15 +21,24 @@
 // tests read this directly.
 const SKIP_POS = new Set(['symbol', 'punctuation', 'filler'])
 const FOLDS_AUXILIARY = new Set(['verb', 'adjective', 'auxiliary'])
+// A particle, and the copula, always stand on a row of their own
+// (plan 095, owner-directed): は is not the tail of 今日, and です is
+// not the tail of いい, whatever run the model bound them into. Each
+// is a grammar point with a card, and the row is where it opens. The
+// past-tense た／だ and the polite ます are inflection and stay with
+// their verb: 休んだ is one word to a learner.
+const COPULA = new Set(['だ', 'です'])
+function standsAlone(tok) {
+  if (tok.pos === 'particle') return true
+  return tok.pos === 'auxiliary' && COPULA.has(tok.lemma || tok.surface)
+}
 
 // The grammar points a row's own morphemes are an instance of, kept to
 // the MARKERS -- the points that are one grammatical word rather than a
 // construction around one (study/grammar_detect's `kind`). A marker is
-// the particle on the row itself, so the row is where it belongs and
-// where it fits: 「は」 and 「へ」 are one character wide. The
-// constructions stay in the chips under the rows, where a point like
-// 〜ます／〜ません can be printed in full without squeezing the word,
-// the reading and the meaning into what is left of a phone.
+// the particle on the row itself, so the row is where it opens. The
+// constructions are listed under the rows (GrammarPoints), each with
+// the words it is made of.
 function markersOf(group) {
   const out = []
   for (const token of group) {
@@ -48,10 +58,16 @@ export function rowsOf(tokens) {
     const tok = tokens[i]
     if (SKIP_POS.has(tok.pos) || !(tok.surface ?? '').trim()) { i += 1; continue }
     let end = i
-    if (typeof tok.span_end === 'number' && tok.span_end > i) {
+    if (standsAlone(tok)) {
+      // its own row, whatever the model bound it into
+    } else if (typeof tok.span_end === 'number' && tok.span_end > i) {
       end = Math.min(tok.span_end, tokens.length - 1)
+      for (let k = i + 1; k <= end; k += 1) {
+        if (standsAlone(tokens[k])) { end = k - 1; break }
+      }
     } else if (FOLDS_AUXILIARY.has(tok.pos)) {
-      while (end + 1 < tokens.length && tokens[end + 1].pos === 'auxiliary' && !tokens[end + 1].meaning) end += 1
+      while (end + 1 < tokens.length && tokens[end + 1].pos === 'auxiliary'
+        && !tokens[end + 1].meaning && !standsAlone(tokens[end + 1])) end += 1
     }
     const group = tokens.slice(i, end + 1)
     rows.push({

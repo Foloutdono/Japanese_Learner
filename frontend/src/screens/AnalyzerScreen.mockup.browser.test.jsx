@@ -412,9 +412,9 @@ describe('the grammar on the stage (plan 095)', () => {
     const screen = await renderScreen()
     await analyze(screen)
     const bd = screen.container.querySelector('.anl-stagebd')
-    const chips = [...bd.children].find(el => el.classList.contains('analysis-grammar-chips'))
-    expect(chips, 'the chips ride the stage, under the line').not.toBeNull()
-    expect([...chips.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['〜から'])
+    const chips = [...bd.children].find(el => el.classList.contains('bkd-points'))
+    expect(chips, 'the list rides the stage, under the line').not.toBeNull()
+    expect([...chips.querySelectorAll('.bkd-point__pattern')].map(el => el.textContent)).toEqual(['〜から'])
     // Quiet: no caption, no status pill, no deck action (the rule is
     // added to a deck from its own sheet).
     expect(chips.querySelector('.cap')).toBeNull()
@@ -422,7 +422,7 @@ describe('the grammar on the stage (plan 095)', () => {
 
     // The door opens the point's sheet by its card id, over the stage.
     expect(document.querySelector('.dict-sheet')).toBeNull()
-    chips.querySelector('.analysis-grammar-chip__door').click()
+    chips.querySelector('.bkd-point__door').click()
     await settle(60)
     const sheet = document.querySelector('.dict-sheet')
     expect(sheet).not.toBeNull()
@@ -438,7 +438,7 @@ describe('the grammar on the stage (plan 095)', () => {
   it('hovering the chip lights the word its point is written on, in the grammar line\'s ink, and nothing else', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-    const chip = screen.container.querySelector('.anl-stagebd > .analysis-grammar-chips .analysis-grammar-chip')
+    const chip = screen.container.querySelector('.anl-stagebd > .bkd-points .bkd-point')
     const kara = tokens(screen).find(el => el.querySelector('.tok__word').textContent === 'から')
     const before = getComputedStyle(kara).backgroundColor
     await page.elementLocator(chip).hover()
@@ -449,7 +449,8 @@ describe('the grammar on the stage (plan 095)', () => {
     const lit = getComputedStyle(kara).backgroundColor
     expect(lit).not.toBe(before)
     expect(lit).not.toBe('rgba(0, 0, 0, 0)')
-    expect(getComputedStyle(chip).borderColor).toBe(resolver()('var(--line-grammar)'))
+    expect(chip.classList.contains('bkd-point--lit')).toBe(true)
+    expect(getComputedStyle(chip.querySelector('.bkd-point__pattern')).color).toBe(resolver()('var(--line-grammar)'))
     // The rule under the word is the SRS's and stays what it was.
     expect(getComputedStyle(kara).borderBottomWidth).toBe('2px')
     await page.elementLocator(screen.container.querySelector('.anl-legend')).hover()
@@ -457,18 +458,18 @@ describe('the grammar on the stage (plan 095)', () => {
     expect(kara.classList.contains('tok--lit')).toBe(false)
   })
 
-  it("prints the bought line about each rule under its chip, above the dials, and the sentence's own explanation in the explain box", async () => {
+  it("prints the bought line about each rule in its row, above the dials, and the sentence's own explanation in the explain box", async () => {
     const screen = await renderScreen()
     await analyze(screen)
     const bd = screen.container.querySelector('.anl-stagebd')
-    const notes = bd.querySelector('.bkd-notes')
+    const notes = bd.querySelector('.bkd-points')
     expect(notes).not.toBeNull()
-    expect(notes.querySelector('.bkd-note__pattern').textContent).toBe('〜から')
-    expect(notes.querySelector('.bkd-note__text').textContent).toBe('Here から marks platform three as where the train departs from.')
+    expect(notes.querySelector('.bkd-point__pattern').textContent).toBe('〜から')
+    expect(notes.querySelector('.bkd-point__note').textContent).toBe('Here から marks platform three as where the train departs from.')
     const order = [...bd.children]
-    expect(order.findIndex(el => el.classList.contains('analysis-grammar-chips')))
-      .toBeLessThan(order.findIndex(el => el.classList.contains('bkd-notes')))
-    expect(order.findIndex(el => el.classList.contains('bkd-notes')))
+    expect(order.findIndex(el => el.classList.contains('tok-line')))
+      .toBeLessThan(order.findIndex(el => el.classList.contains('bkd-points')))
+    expect(order.findIndex(el => el.classList.contains('bkd-points')))
       .toBeLessThan(order.findIndex(el => el.classList.contains('anl-dials')))
     // The whole-sentence explanation is where it always was, not in the list.
     expect(screen.container.querySelector('.anl-explain__body').textContent).toBe(SENTENCES[0].explanation)
@@ -481,7 +482,7 @@ describe('the grammar on the stage (plan 095)', () => {
     screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
     await settle(60)
     const bd = screen.container.querySelector('.anl-stagebd')
-    expect([...bd.children].some(el => el.classList.contains('analysis-grammar-chips'))).toBe(false)
+    expect([...bd.children].some(el => el.classList.contains('bkd-points'))).toBe(false)
   })
 })
 

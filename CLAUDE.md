@@ -88,12 +88,21 @@ runtime purpose. Two consequences worth knowing:
   tokenizer's conjugation fields rather than letters), and the deep
   tier's line per rule (the model is told which points the local tier
   found and asked what each does in the sentence; `phrase_analysis_cache`
-  v4) (cited in `study/morphology.py`, `study/grammar_detect.py`,
-  `study/analysis.py`, `routes/phrase.py`, `scripts/prewarm_phrase_cache.py`,
-  `components/analysis/GrammarChips.jsx`, `components/analysis/GrammarNotes.jsx`,
+  v4) — and, owner-directed after the first round: a particle or a
+  copula is always a row of its own (`rows.js`), a marker survives
+  inside a construction (the が of ことができます opens が), the
+  constructions are listed under the rows with the words each is made
+  of (`GrammarPoints.jsx`, replacing the chips there), and the practice
+  modes fetch the local tier only and buy the explanation from an
+  Explain button (`lib/explainSentence.js`) (cited in `study/morphology.py`,
+  `study/grammar_detect.py`, `study/analysis.py`, `routes/phrase.py`,
+  `scripts/prewarm_phrase_cache.py`, `components/analysis/GrammarChips.jsx`,
+  `components/analysis/GrammarPoints.jsx`, `components/analysis/rows.js`,
   `components/analysis/grammarGloss.js`, `components/analysis/grammarSpans.js`,
   `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`,
-  `components/analysis/PassageBreakdown.jsx` and `screens/AnalyzerScreen.jsx`).
+  `components/analysis/PassageBreakdown.jsx`, `lib/explainSentence.js`,
+  `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
+  `screens/TranslationRun.jsx` and `screens/DictationRun.jsx`).
   When starting a new wave, begin at **096** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

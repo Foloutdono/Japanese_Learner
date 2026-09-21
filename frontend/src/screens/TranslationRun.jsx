@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { explainSentence } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
@@ -161,6 +162,27 @@ export default function TranslationRun({ session }) {
       .finally(() => { fetchingRef.current = false })
   }
 
+
+  // ── The explanation, bought on demand (plan 095, owner-directed) ──
+  // The fetch above buys the local tier only; this buys the deep tier
+  // for the sentence on screen when the learner presses Explain under
+  // the breakdown, and replaces the analysis with the explained one.
+  const [explaining, setExplaining] = useState(false)
+  const [explainError, setExplainError] = useState(null)
+  function explainReference() {
+    const key = breakdownPhraseRef.current
+    if (!key || explaining) return
+    setExplaining(true)
+    setExplainError(null)
+    explainSentence(session, key, lang)
+      .then(d => { if (breakdownPhraseRef.current === key) setBreakdown(d) })
+      .catch(e => {
+        if (breakdownPhraseRef.current !== key) return
+        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+      })
+      .finally(() => { if (breakdownPhraseRef.current === key) setExplaining(false) })
+  }
+
   function showPhrase(phraseData) {
     setData({ ...phraseData, _uiKey: phraseCounterRef.current++ })
     setAnswer('')
@@ -168,21 +190,24 @@ export default function TranslationRun({ session }) {
     setAnalysis(null)
     setAnalysisLoading(false)
     setShowBreakdown(false)
+    setExplaining(false)
+    setExplainError(null)
     setDetail(null)
     setStage('writing')
     fetchBreakdown(phraseData.phrase)
   }
 
   // The breakdown of the reference, started the moment it is on the
-  // client. `save: false` keeps translation runs out of the analyzer's
-  // own history (routes/phrase.py's PhraseRequest.save).
+  // client -- the local tier only; the explanation is bought on demand
+  // (explainReference). `save: false` keeps translation runs out of the
+  // analyzer's own history (routes/phrase.py's PhraseRequest.save).
   function fetchBreakdown(phraseText) {
     breakdownPhraseRef.current = phraseText
     setBreakdown(null)
     setBreakdownLoading(true)
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: phraseText, save: false, deep: true, lang }),
+      body: JSON.stringify({ phrase: phraseText, save: false, deep: false, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (breakdownPhraseRef.current === phraseText) setBreakdown(d) })
@@ -364,6 +389,9 @@ export default function TranslationRun({ session }) {
       analysisLoading={analysisLoading}
       breakdown={breakdown}
       breakdownLoading={breakdownLoading}
+      onExplain={explainReference}
+      explaining={explaining}
+      explainError={explainError}
       showBreakdown={showBreakdown}
       setShowBreakdown={setShowBreakdown}
       detail={detail}
@@ -454,7 +482,8 @@ function Streak({ streak, t }) {
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, fare, error, analysis, analysisLoading, backLabel,
-  breakdown, breakdownLoading, showBreakdown, setShowBreakdown, detail, openWordDetail, closeDetail,
+  breakdown, breakdownLoading, onExplain, explaining, explainError,
+  showBreakdown, setShowBreakdown, detail, openWordDetail, closeDetail,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   // A grammar chip in the rows opens the point's dictionary entry.
@@ -606,6 +635,9 @@ function SessionView({
                     t={t}
                     onTokenClick={openWordDetail}
                     onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onExplain={onExplain}
+                    explaining={explaining}
+                    explainError={explainError}
                   />
                 )}
               </div>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
+import { explainSentence } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
@@ -199,18 +200,20 @@ export default function ReadingRun({ session }) {
       .finally(() => { fetchingRef.current = false })
   }
 
-  // Kicks off the AI breakdown for `phraseText` in the background —
+  // Kicks off the breakdown for `phraseText` in the background --
   // fired the instant a phrase is shown (see showPhrase) so it has the
   // whole display+writing window to resolve before the reader ever
-  // asks for it. `save: false` keeps this out of the phrase-analyzer's
-  // own history (see phrase.py's PhraseRequest.save).
+  // asks for it. The local tier only: free, instant, no model call.
+  // The explanation is bought on demand (explainPhrase). `save: false`
+  // keeps this out of the phrase-analyzer's own history (see
+  // phrase.py's PhraseRequest.save).
   function fetchAnalysis(phraseText) {
     analysisPhraseRef.current = phraseText
     setAnalysis(null)
     setAnalysisLoading(true)
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: phraseText, save: false, deep: true, lang }),
+      body: JSON.stringify({ phrase: phraseText, save: false, deep: false, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => {
@@ -225,12 +228,35 @@ export default function ReadingRun({ session }) {
       })
   }
 
+
+  // ── The explanation, bought on demand (plan 095, owner-directed) ──
+  // The fetch above buys the local tier only; this buys the deep tier
+  // for the sentence on screen when the learner presses Explain under
+  // the breakdown, and replaces the analysis with the explained one.
+  const [explaining, setExplaining] = useState(false)
+  const [explainError, setExplainError] = useState(null)
+  function explainPhrase() {
+    const key = analysisPhraseRef.current
+    if (!key || explaining) return
+    setExplaining(true)
+    setExplainError(null)
+    explainSentence(session, key, lang)
+      .then(d => { if (analysisPhraseRef.current === key) setAnalysis(d) })
+      .catch(e => {
+        if (analysisPhraseRef.current !== key) return
+        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+      })
+      .finally(() => { if (analysisPhraseRef.current === key) setExplaining(false) })
+  }
+
   function showPhrase(phraseData) {
     setData({ ...phraseData, _uiKey: phraseCounterRef.current++ })
     setAnswer('')
     setFeedback(null)
     setDetail(null)
     setShowBreakdown(false)
+    setExplaining(false)
+    setExplainError(null)
     setStage('reading')
     setTimeLeft(phraseData.display_seconds)
     fetchAnalysis(phraseData.phrase)
@@ -426,6 +452,9 @@ export default function ReadingRun({ session }) {
       isMobile={isMobile}
       analysis={analysis}
       analysisLoading={analysisLoading}
+      onExplain={explainPhrase}
+      explaining={explaining}
+      explainError={explainError}
       showBreakdown={showBreakdown}
       setShowBreakdown={setShowBreakdown}
       onBack={leave}
@@ -460,7 +489,7 @@ function Streak({ streak, t }) {
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
   feedback, score, streak, fare, error, detail, isMobile, analysis, analysisLoading, backLabel,
-  showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
+  onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail, session,
 }) {
   // A grammar chip in the rows opens the point's dictionary entry.
@@ -655,6 +684,9 @@ function SessionView({
                     t={t}
                     onTokenClick={openAnalysisWordDetail}
                     onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onExplain={onExplain}
+                    explaining={explaining}
+                    explainError={explainError}
                   />
                 )}
               </div>

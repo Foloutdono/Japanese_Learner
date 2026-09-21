@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { ChevronIcon } from '../ui/Icons'
 import { SentenceLine, WordRows } from './SentenceBreakdown'
-import { GrammarChips } from './GrammarChips'
+import { GrammarPoints } from './GrammarPoints'
 import { pointKey } from './grammarSpans'
 
 // ── 一文ずつ — the passage, sentence by sentence (plan 084) ────
@@ -90,10 +90,7 @@ export function PassageBreakdown({ sentences, t, openIndex, setOpenIndex, onToke
                       analysis={sentence.analysis} t={t} onTokenClick={onTokenClick} onGrammarOpen={openGrammar}
                       lit={lit} onLight={light}
                     />
-                    <GrammarChips
-                      grammar={sentence.analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
-                      lit={litKey} onLight={light}
-                    />
+                    <GrammarPoints analysis={sentence.analysis} t={t} lit={litKey} onLight={light} onOpen={openGrammar} />
                   </>
                 )}
                 {sentence.note && <span className="prose__ai">{sentence.note}</span>}

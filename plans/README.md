@@ -238,6 +238,20 @@ Thirteen waves live in this file:
   stays where it was. `prewarm_phrase_cache` makes the same call, with a
   `--lang`, which also fixes its arity (it had been calling the route's
   helpers without a language since v2).
+  Owner review of the first round (2026-09-21) reshaped the rows: a
+  particle or a copula never folds into the word before it (は is not
+  the tail of 今日, です not the tail of いい; the past た／だ and ます
+  stay with their verb), so the marker chip beside a word row is gone
+  and every particle row opens its rule; a marker now survives inside
+  a construction in `grammar_detect._detect`, so the が of ことができます
+  opens が while the construction is still reported over it; the chips
+  and the notes under the rows became one list, `GrammarPoints` -- the
+  pattern, its gloss and level, the words it is made of (こと + が +
+  できます) and, once bought, the model's line; and the practice modes
+  fetch the local tier only, buying the explanation from an Explain
+  button under the rows (`lib/explainSentence.js`), as the analyzer
+  does -- one model call per sentence a learner actually asks about,
+  none for the ones they only read.
 
 - **Wave 19 — 文法 is taught, not glossed** (plan 087, 2026-09-15, DONE;
   the content waves landed level by level, N5/N4 then N3, N2 and N1).
