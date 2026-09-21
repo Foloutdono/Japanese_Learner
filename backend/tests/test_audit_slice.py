@@ -37,11 +37,11 @@ class RotationTests(unittest.TestCase):
             self.assertTrue(audit.CHECKS[area])
 
     def test_the_areas_advance_in_parallel(self) -> None:
-        """Three runs cover the three areas, always. Grammar's backlog is
+        """Four runs cover the four areas, always. Grammar's backlog is
         a year long and vocab's is longer; walking them in sequence would
         mean the sentence banks were never looked at."""
         for start in (0, 1, 17, 200):
-            areas = {audit.slice_for(start + n)["area"] for n in range(3)}
+            areas = {audit.slice_for(start + n)["area"] for n in range(len(audit.AREAS))}
             self.assertEqual(areas, set(audit.AREAS))
 
     def test_a_full_pass_of_an_area_reaches_every_one_of_its_slices(self) -> None:

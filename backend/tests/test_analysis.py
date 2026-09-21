@@ -46,6 +46,73 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertIsNotNone(daigaku["vocab_match"])
         self.assertTrue(daigaku["vocab_match"]["raw_id"])
 
+    def test_a_deck_compound_is_one_token(self) -> None:
+        """Plan 102. UniDic's short unit cuts 日曜日 into 日曜 + 日, and
+        per-morpheme lookup then showed Sunday at N3 beside day at N4
+        under a sentence written to teach the N5 word. The run folds
+        into the one token the deck teaches, with the ENTRY's reading:
+        the morphemes' joined (にちよう + ひ) misreads the rendaku."""
+        r = analyze_local("日曜日に会いました。")
+        tok = next(t for t in r["tokens"] if t["surface"] == "日曜日")
+        self.assertEqual(tok["vocab_match"]["raw_id"], "vocab_N5_日曜日_にちようび")
+        self.assertEqual(tok["reading"], "にちようび")
+        self.assertEqual((tok["start"], tok["end"]), (0, 3))
+        self.assertEqual([p["text"] for p in tok["furigana"]], ["日", "曜", "日"])
+        self.assertFalse(any(t["surface"] == "日曜" for t in r["tokens"]))
+
+    def test_a_compound_spelled_with_kana_folds_by_its_lemmas(self) -> None:
+        """A curated N5 sentence writes 曜 out as kana because the kanji
+        is above the level (content/reading_sentences.py), so the
+        surfaces joined spell nothing the deck holds and only the
+        lemmas (日曜 + 日) still do. The sentence still rebuilds from
+        the tokens, offsets intact."""
+        sentence = "母は日よう日に買いものをします。"
+        r = analyze_local(sentence)
+        tok = next(t for t in r["tokens"] if t["surface"] == "日よう日")
+        self.assertEqual(tok["vocab_match"]["raw_id"], "vocab_N5_日曜日_にちようび")
+        self.assertEqual(tok["reading"], "にちようび")
+        self.assertEqual("".join(t["surface"] for t in r["tokens"]), sentence)
+        # And 母 is a card of its own now, not a fragment of お母さん.
+        haha = next(t for t in r["tokens"] if t["surface"] == "母")
+        self.assertEqual(haha["vocab_match"]["raw_id"], "vocab_N5_母_はは")
+
+    def test_a_three_morpheme_compound_and_a_counter_fold_too(self) -> None:
+        # お + 母 + さん, longest run first; 二 + 日 with the counter's
+        # own reading rather than ふた + か.
+        r = analyze_local("お母さんは二日に来ます。")
+        by_surface = {t["surface"]: t for t in r["tokens"]}
+        self.assertEqual(by_surface["お母さん"]["vocab_match"]["raw_id"], "vocab_N5_お母さん_おかあさん")
+        self.assertEqual(by_surface["お母さん"]["reading"], "おかあさん")
+        self.assertEqual(by_surface["二日"]["reading"], "ふつか")
+        self.assertNotIn("母", by_surface)
+
+    def test_a_compound_with_two_readings_folds_to_the_one_read(self) -> None:
+        # Plan 106: 一日 is ついたち and いちにち, two N5 cards; 一日中 read
+        # いちにち folds to that one and shows its reading.
+        r = analyze_local("一日中寝た。")
+        tok = next(t for t in r["tokens"] if t["surface"] == "一日")
+        self.assertEqual(tok["vocab_match"]["raw_id"], "vocab_N5_一日_いちにち")
+        self.assertEqual(tok["reading"], "いちにち")
+
+    def test_a_particle_is_never_folded_into_a_compound(self) -> None:
+        # 今日 + は is two words whatever the deck holds (こんにちは is
+        # an N3 entry): a run never crosses a particle.
+        r = analyze_local("今日は雨です。")
+        surfaces = [t["surface"] for t in r["tokens"]]
+        self.assertEqual(surfaces[:2], ["今日", "は"])
+        self.assertEqual(r["tokens"][1]["grammar"][0]["pattern"], "は")
+
+    def test_a_present_card_the_lookups_used_to_miss_now_badges(self) -> None:
+        """Plan 104. パン is an N5 card stored in katakana, もう an N5
+        adverb, できる an N5 verb UniDic tags 非自立可能: all three were
+        in the deck and none badged, in 296 occurrences across the
+        taught sentences (scripts/audit_vocab_deck.py)."""
+        r = analyze_local("もうパンを買うことができます。")
+        by_surface = {t["surface"]: t for t in r["tokens"]}
+        self.assertEqual(by_surface["もう"]["vocab_match"]["raw_id"], "vocab_N5__もう")
+        self.assertEqual(by_surface["パン"]["vocab_match"]["raw_id"], "vocab_N5__パン")
+        self.assertEqual(by_surface["でき"]["vocab_match"]["raw_id"], "vocab_N5__できる")
+
     def test_distinctive_grammar_point_produces_a_grammar_card_id(self) -> None:
         r = analyze_local("食べようとしました")
         patterns = [g["pattern"] for g in r["grammar"]]

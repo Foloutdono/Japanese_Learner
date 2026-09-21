@@ -36,7 +36,7 @@ import logging
 
 from study import difficulty, morphology
 from study.analysis import CONTENT_POS
-from study.card_lookup import find_segments_in_text, resolve_lemma, resolve_kana
+from study.card_lookup import find_segments_in_text, resolve_morpheme
 from study.llm_shared import is_kanji
 
 logger = logging.getLogger(__name__)
@@ -124,13 +124,12 @@ def level_mix(text: str, level: str, allow_kanji: str = "") -> dict:
     # thing it means on the breakdown the learner will read.
     off_deck: list[str] = []
     seen: set[str] = set()
-    for m in content:
-        if len(m.surface) < 2 or m.surface in seen:
+    for i, m in enumerate(morphemes):
+        if m.pos not in CONTENT_POS or len(m.surface) < 2 or m.surface in seen:
             continue
         seen.add(m.surface)
         known = (
-            resolve_lemma(m.lemma, m.lemma_reading)
-            or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
+            resolve_morpheme(morphemes, i)
             or difficulty.word_level(m.surface)
             or difficulty.word_level(m.lemma)
         )

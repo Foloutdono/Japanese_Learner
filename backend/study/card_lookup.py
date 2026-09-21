@@ -57,7 +57,10 @@ def _reading_variants(kana_field: str) -> list:
     """A deck's kana field can list several readings separated by ';'."""
     if not kana_field:
         return []
-    return [r.strip() for r in kana_field.split(';') if r.strip()]
+    # The deck joins with "/" (毎月 is "まいげつ/まいつき", 18 entries);
+    # ";" was the splitter's own convention and never the data's, kept
+    # so a field written either way still splits (plan 104).
+    return [r.strip() for r in kana_field.replace(";", "/").split("/") if r.strip()]
 
 
 def _reading_matches(entry_kana: str, reading: str) -> bool:
@@ -315,12 +318,14 @@ def _vocab_index() -> dict[str, dict[str, dict]]:
     Worth knowing before extending this: between them the two
     generators take the curated focus words that fail to resolve from
     17 down to 13, fixing 買いもの, 友だち and 子ども (which occurs
-    twice). The 13 that remain are NOT a spelling problem, and no
-    richer index will reach them -- 母, 父, 顔, 百円, 洋食, 大雨,
-    失礼, 説明書, 館内, 支援, 専門家, お客様 and 言い方 are absent
-    from the deck under every spelling (母 and 父 appear only as
-    お母さん / お父さん, which are different words, not variants). They
-    need deck entries or different focus words.
+    twice). The ones that remain are NOT a spelling problem, and no
+    richer index will reach them -- 顔, 百円, 洋食, 大雨, 失礼,
+    説明書, 館内, 支援, 専門家, お客様 and 言い方 are absent from the
+    deck under every spelling. They need deck entries or different
+    focus words. 母 and 父 were two more until plan 102 gave them N5
+    entries of their own (they had appeared only as お母さん / お父さん,
+    which are different words, not variants); the rest are that plan's
+    review to settle.
     """
     global _vocab_lookup
     if _vocab_lookup is None:
@@ -582,6 +587,31 @@ def _index_vocab_by_lemma():
                     continue
                 if any(is_kanji(c) for c in variant):
                     index.setdefault(variant, []).append((level, entry))
+
+    # Third pass (plan 106): the entry under UniDic's OWN lemma for its
+    # written form. UniDic's lemma is an orthographic base, not the deck's
+    # spelling -- 帰る lemmatises to 返る, 降りる to 下りる, 終る to
+    # 終わる, 感じる to 感ずる -- so a token of the N5 帰る resolved, when
+    # it resolved at all, to the N1 返る card: 213 deck words, 55 of them
+    # badging a higher level than their own. Keyed by the lemma the
+    # tokenizer will actually hand resolve_morpheme, each such entry is
+    # reachable again; where the lemma is ALSO a deck word (返る is),
+    # both are candidates and resolve_lemma's surface preference tells
+    # them apart. Appended, never skipped: the whole point is to stand
+    # beside the entry that already owns the key. Tokenizing the 7,300
+    # written forms costs 0.08 s at import.
+    if morphology.MORPHOLOGY_AVAILABLE:
+        for level, vocab_list in VOCAB_BY_LEVEL.items():
+            for entry in vocab_list:
+                word = entry.get("kanji") or ""
+                if not word or " " in word or not any(is_kanji(c) for c in word):
+                    continue
+                morphemes = morphology.tokenize(word)
+                if not morphemes or len(morphemes) != 1:
+                    continue
+                lemma = morphemes[0].lemma
+                if lemma != word and (level, entry) not in index.get(lemma, []):
+                    index.setdefault(lemma, []).append((level, entry))
     return index
 
 
@@ -595,7 +625,16 @@ def _index_vocab_by_kana():
     entry might store its kana text directly in the "kanji" field
     rather than leaving it empty — this index doesn't need to assume
     either convention, it just matches by reading when the lemma-text
-    match already tried in the caller comes up empty."""
+    match already tried in the caller comes up empty.
+
+    A katakana reading is keyed by its hiragana fold as well (plan 104):
+    the tokenizer's readings arrive folded (morphology.kata_to_hira, so
+    パン's is ぱん) while the deck stores the 541 katakana-only words as
+    written, and until this key existed not one of them ever matched --
+    パン, コーヒー, バス, テレビ, ドア badged nothing in every sentence
+    that used them. The fold is a second key on the same entry, never a
+    replacement: the written form still answers for a caller that has
+    it (vocab_card_id_for_word)."""
     index = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
@@ -604,6 +643,9 @@ def _index_vocab_by_kana():
                 continue
             for reading in _reading_variants(kana):
                 index.setdefault(reading, []).append((level, entry))
+                folded = morphology.kata_to_hira(reading)
+                if folded != reading:
+                    index.setdefault(folded, []).append((level, entry))
     return index
 
 
@@ -611,13 +653,26 @@ _VOCAB_BY_LEMMA = _index_vocab_by_lemma()
 _VOCAB_BY_KANA = _index_vocab_by_kana()
 
 
-def resolve_lemma(lemma: str, reading: str):
+def resolve_lemma(lemma: str, reading: str, surface: str = ""):
     """(level, entry, raw_id) for the deck entry whose kanji field is
     `lemma`, disambiguated by `reading` when several entries share that
-    lemma text (see _index_vocab_by_lemma), or None."""
+    lemma text (see _index_vocab_by_lemma), or None.
+
+    `surface` is the token as written, when the caller has it (plan 106).
+    Since the index also files an entry under UniDic's lemma for it, one
+    lemma can name two deck words with the same reading -- 返る holds
+    both 返る (N1) and 帰る (N5), 上る holds 上る, 登る and 昇る -- and
+    the reading cannot tell them apart. The page can: a token written 帰り
+    is 帰る. Where any candidate shares the surface's first kanji, only
+    those stay; where none does (the token was written in kana), the
+    reading and the level decide as before."""
     candidates = _VOCAB_BY_LEMMA.get(lemma)
     if not candidates:
         return None
+    if surface and is_kanji(surface[0]):
+        same_head = [c for c in candidates if (c[1].get("kanji") or "")[:1] == surface[0]]
+        if same_head:
+            candidates = same_head
     triples = [(level, entry, entry.get("kana") or entry.get("reading") or "") for level, entry in candidates]
     best = _pick_best_candidate(triples, reading)
     if best is None:
@@ -626,7 +681,7 @@ def resolve_lemma(lemma: str, reading: str):
     return level, entry, vocab_to_id(entry, level)
 
 
-def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
+def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive: bool = True):
     """Fallback for when lemma-TEXT matching finds nothing (see
     _index_vocab_by_kana for why that happens even for words that ARE
     in the deck): match by reading instead. Gated to content-word POS
@@ -637,14 +692,131 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
     marker) is both far more common in ordinary text than its
     independent use and the case most likely to collide with an
     unrelated deck word of the same reading — so this only fires for
-    words being used on their own, not that class of match."""
-    if auxiliary_use or pos not in ("noun", "pronoun", "verb", "adjective") or len(reading) < 2:
+    words being used on their own, not that class of match.
+
+    Two admissions, plan 104, each narrower than the gate it opens:
+
+    An ADVERB is admitted, but only to a kana-only entry. The deck's
+    adverbs are kana-only words with nothing to collide with (もう,
+    もっと, ゆっくり, よく), while the kanji homophones a reading also
+    reaches (こう is 請う and 溝 too) are nouns and verbs, which an
+    adverb is never an instance of. Before this, もう and どう -- N5
+    cards -- badged nothing in the 136 sentences that use them.
+
+    A token in AUXILIARY USE is admitted when it does not follow a
+    conjunctive て/で -- that position is what the gate exists for
+    (ている, てくる, てしまう) -- AND its reading has exactly one
+    candidate at its best level. できる is tagged 非自立可能 by UniDic
+    whatever it does in the sentence, and 買い物ができます has it as the
+    main verb: one N5 entry, admitted. いる has 居る and 要る both at N5:
+    still refused, whatever precedes it. `after_conjunctive` defaults
+    to True so a caller without the context keeps the old gate;
+    resolve_morpheme computes it.
+    """
+    if pos not in ("noun", "pronoun", "verb", "adjective", "adverb") or len(reading) < 2:
         return None
     candidates = _VOCAB_BY_KANA.get(reading)
     if not candidates:
         return None
+    if pos == "adverb":
+        candidates = [c for c in candidates if not c[1].get("kanji")]
+        if not candidates:
+            return None
+    if auxiliary_use:
+        if after_conjunctive:
+            return None
+        best = _level_rank(min(candidates, key=lambda c: _level_rank(c[0]))[0])
+        if sum(1 for c in candidates if _level_rank(c[0]) == best) != 1:
+            return None
     level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
     return level, entry, vocab_to_id(entry, level)
+
+
+def resolve_morpheme(morphemes, i: int):
+    """(level, entry, raw_id) for the deck entry morphemes[i] is, by its
+    lemma first and its reading second, or None -- the one way every
+    screen resolves a word (study/analysis, level_mix, the reading-badge
+    scanner, scripts/audit_vocab_deck), so "off-deck" means the same
+    thing everywhere. The neighbour before it is what resolve_kana's
+    auxiliary admission needs: whether this token hangs off a
+    conjunctive て/で."""
+    m = morphemes[i]
+    previous = morphemes[i - 1] if i > 0 else None
+    after_conjunctive = previous is not None and previous.pos == "particle" and previous.conjunctive
+    if m.auxiliary_use and after_conjunctive:
+        # A verb hanging off a conjunctive て/で in its auxiliary use is
+        # the grammar point's, not a word's (plan 106): ている, てくる,
+        # てみる, ておく, てしまう are all catalogue points, and the row
+        # opens the point. The lemma path used to answer here anyway and
+        # badged 食べてしまった with the N1 仕舞う card.
+        return None
+    return resolve_lemma(m.lemma, m.lemma_reading, m.surface) or resolve_kana(
+        m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive,
+    )
+
+
+# The parts of speech a compound may be assembled from. Nouns, and the
+# prefix and suffix UniDic cuts off them (お + 母 + さん, 二 + 日 where
+# 日 is a suffix). Never a particle, never an auxiliary, never a verb:
+# 今日 + は is two words whatever the deck holds, and a verb's lemma
+# joined to a noun's spells nothing anybody reads.
+_COMPOUND_POS = frozenset({"noun", "prefix", "suffix"})
+_COMPOUND_MAX = 3
+
+
+def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
+    """(level, entry, raw_id, n) for the deck entry that a run of `n`
+    morphemes starting at `i` spells as ONE word, longest run first, or
+    None when no run of two or more does.
+
+    UniDic cuts to the short unit, so a compound the deck teaches as
+    one card arrives as several morphemes: 日曜日 is 日曜 + 日, 誕生日
+    is 誕生 + 日, お母さん is お + 母 + さん, 二日 is 二 + 日. Left as
+    they are, the breakdown shows the halves -- 日曜 at N3 followed by
+    日 at N4, when the sentence was chosen to teach the N5 word -- and
+    a learner reading 日曜日 as two words has been taught something
+    false. The run is looked up both by the surfaces joined and by the
+    lemmas joined: a curated N5 sentence writes 曜 out as kana
+    (日よう日) because the kanji is above the level, and only the
+    lemmas (日曜 + 日) still spell the deck's word.
+
+    The merged word's reading is the caller's to take from the ENTRY,
+    not from the morphemes joined: 日曜 + 日 reads にちよう + ひ, and the
+    compound reads にちようび. Rendaku and the counter readings (二日
+    is ふつか, not ふた + か) are exactly what a per-morpheme reading
+    cannot know.
+
+    A run is only ever a noun and the affixes on it (_COMPOUND_POS) and
+    never crosses a particle, so 今日 + は stays two words, and a token
+    in auxiliary use (居る as 〜ている) is never part of one.
+    """
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 1, -1):
+        run = morphemes[i:i + n]
+        if any(m.pos not in _COMPOUND_POS or m.auxiliary_use for m in run):
+            continue
+        joined_reading = "".join(m.reading for m in run)
+        for key in ("".join(m.surface for m in run), "".join(m.lemma for m in run)):
+            # The joined reading picks between entries that share the
+            # written form (一日 is ついたち and いちにち, two cards): it
+            # matches one of them exactly or, as for にちようび, none.
+            hit = resolve_lemma(key, joined_reading)
+            if hit:
+                level, entry, raw_id = hit
+                return level, entry, raw_id, n
+    return None
+
+
+def compound_reading(entry: dict, morphemes) -> str:
+    """The reading a merged compound is shown with: the deck entry's own
+    (see resolve_compound), and where the entry lists several
+    (まいげつ/まいつき), the one the tokenizer's own readings joined
+    agree with, else the first."""
+    joined = "".join(m.reading for m in morphemes)
+    variants = [r.strip() for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
+    if not variants:
+        return joined
+    return joined if joined in variants else variants[0]
 
 
 def _find_segments_morphological(text: str):
@@ -690,7 +862,7 @@ def _find_segments_morphological(text: str):
                 i += 2
                 continue
 
-        hit = resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
+        hit = resolve_morpheme(morphemes, i)
         if hit:
             level, entry, raw_id = hit
             vocab_hits.append((m.start, m.end, level, entry, raw_id))

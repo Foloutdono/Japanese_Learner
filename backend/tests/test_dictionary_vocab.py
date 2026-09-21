@@ -27,29 +27,17 @@ def _key(entry):
     return (entry["level"], entry["kanji"], entry["kana"])
 
 
-# Four pairs the shipped pool still carries even though the deck now names
-# them too. They are NOT new duplicates: the deck listed all four before
-# plan 091 as well, under a corrupted reading (「しまう／（終わる）」), so the
-# dictionary already showed each of these words on two rows. Correcting the
-# deck's fields only made the two rows name the same pair, which is what
-# this test can finally see.
-#
-# The exclusion that keeps the pool disjoint runs UPSTREAM of
-# scripts/build_jmdict_db.py, over the JMdict export that backend/.gitignore
-# keeps out of the tree, so it cannot be re-applied from this checkout —
-# and hand-deleting the rows from vocab_jmdict.sqlite3 would be undone by
-# the next rebuild, silently. Restore the export and re-run
-# build_jmdict_db.py to clear these, then empty this set.
-#
-# Asserted as an EXACT match, not an allowance: a fifth overlap fails here,
-# and so does a rebuild that clears these four, which is the prompt to
-# delete the set rather than let it rot.
-KNOWN_POOL_OVERLAP = {
-    ("", "しまう"),
-    ("", "ね"),
-    ("", "とん"),
-    ("", "ふと"),
-}
+# The pool is built as "every JMdict word NOT in the deck", so a word the
+# deck gains after the build sits on both sides until it is taken out of
+# the pool -- and the dictionary shows it on two rows. Plan 110 takes it
+# out in place: `python -m scripts.prune_pool_overlap --yes` moves the
+# row's senses to curated_senses under the deck's key and deletes the row,
+# ids untouched (a rebuild from another JMdict edition would renumber
+# every pool card; see that script). Four kana-only words (しまう, ね, とん,
+# ふと) sat on both sides since the first build; 102's and 105's cards
+# joined them; all are out now. Asserted as an EXACT match with the empty
+# set: a deck addition that skips the script fails here.
+KNOWN_POOL_OVERLAP: set[tuple[str, str]] = set()
 
 
 def test_the_collection_is_the_deck_and_the_pool_together():
@@ -64,6 +52,18 @@ def test_the_collection_is_the_deck_and_the_pool_together():
     }
     overlap = {(k, r) for k, r in deck_keys if jmdict_db.get_by_key(k, r)}
     assert overlap == KNOWN_POOL_OVERLAP
+
+
+def test_a_word_taken_out_of_the_pool_keeps_its_senses():
+    """母 was added to the deck in plan 102 and read its glossary and
+    example sentences from the pool row until plan 110 took that row
+    out; the senses moved to curated_senses with it, under the deck's
+    key, and the entry plate still has them."""
+    from content import vocab_meanings_data
+    senses = vocab_meanings_data.get("母::はは")
+    assert senses and any(s.get("examples") for s in senses)
+    assert "母::はは" in vocab_meanings_data.keys_with_examples()
+    assert jmdict_db.get_by_key("母", "はは") is None
 
 
 def test_an_unfiltered_browse_totals_both_pools(client):

@@ -125,7 +125,40 @@ runtime purpose. Two consequences worth knowing:
   `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
   `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
   DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **102** or higher, and check
+  **102–110** are wave 22, the vocab deck review — 102 (done) is 母 and
+  父 as N5 cards and the compound fold in the breakdown (cited in
+  `study/card_lookup.py`, `study/analysis.py`, `tests/test_analysis.py`
+  and `tests/test_dictionary_vocab.py`), 103 (done) the measuring
+  script (`scripts/audit_vocab_deck.py`, `tests/test_audit_vocab_deck.py`),
+  104 (done) the lookup repairs (`card_lookup.resolve_morpheme`, cited
+  in `study/card_lookup.py`, `study/level_mix.py` and
+  `tests/test_card_lookup_variants.py`), 105 the demand list, in slices
+  (the first, 24 cards, done; `scripts/audit_vocab_deck.py`'s
+  `IGNORED_LEMMAS` records what was decided to be grammar instead),
+  106 (done) readings and forms — three `MOVES` lines in
+  `content/vocab_renames.py`, the deck's spelling filed under UniDic's
+  lemma and the auxiliary position closed in `study/card_lookup.py`;
+  106b (done) the 26 cross-level duplicates merged onto the lower card
+  — the first `MOVES` that change a level, so `scripts/migrate_vocab_ids.py`
+  moves `deck_cards.level` with the id — and the served-id snapshot
+  `datas/vocab/vocab_served.json` (`audit_vocab_deck --write-snapshot`,
+  held by `tests/test_vocab_deck.py`) that catches an id leaving the
+  deck without a line, 107 (done) the French
+  gloss per card (`translations.fr_gloss`, `tests/test_translations.py`),
+  108 gloss hygiene (the mechanical half done: comma spacing, the
+  export's capitals, the 対立 mojibake as a `MOVES` line; the rest to
+  the content audit's slices), 109 the placement list — the two
+  sources under `datas/vocab/sources/` (see the README there for the
+  licences), `scripts/placement_report.py` and
+  `tests/test_placement_report.py`, and `vocab_frequency.json` rebuilt
+  in the ranking's order; its three candidate lists remain for the
+  audit's slices, 110 (done) the pool taken out of the deck's way in
+  place (`scripts/prune_pool_overlap.py`; a rebuild from another JMdict
+  edition would renumber every pool card, so never that) and 110b (done)
+  the learner's pool card onto the deck card
+  (`datas/vocab/pool_moves.json`, `scripts/migrate_pool_cards.py`,
+  `tests/test_migrate_pool_cards.py`).
+  When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -208,7 +241,13 @@ recognise in place and reported.
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
+python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
 ```
+
+The third reads `datas/vocab/pool_moves.json`, which
+`scripts/prune_pool_overlap.py` appends to for every pool row it takes
+out (plan 110b): a learner who studied 母 from the pool before it was an
+N5 card keeps that history on the N5 card.
 
 One more one-shot, run once after the deploy that carries plan 097's
 columns (`user_profiles.tutorial_at`, `guided`) and before the frontend that
@@ -225,7 +264,18 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 `"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
-in `vocab_renames.MOVES` for the same reason.
+in `vocab_renames.MOVES` for the same reason. **After any deck change, run
+`python -m scripts.audit_vocab_deck --write-snapshot`,
+`python -m scripts.placement_report --rebuild-order --write-lists` (two
+runs; each flag is its own) and, for an added
+word, `python -m scripts.prune_pool_overlap --yes`** (the JMdict pool is
+"everything not in the deck"; this takes the new word's pool row out,
+senses moved to `curated_senses`, ids untouched — never rebuild the pool
+from another JMdict edition, a pool card's id is its row's position in
+the export) and commit `datas/vocab/vocab_served.json`,
+`vocab_frequency.json` and `vocab_jmdict.sqlite3` with it: `tests/test_vocab_deck.py` fails
+on an id that left the deck without a `MOVES` line, and on a served id
+the snapshot has not seen.
 
 Two things are worth knowing before reaching for any of them:
 
@@ -322,13 +372,48 @@ python -m scripts.audit_slice --schedule 12    # the next twelve runs
 python -m scripts.audit_slice --on 2026-10-06  # reproduce a past run's slice
 ```
 
-The slice is a pure function of the date — grammar, vocab and sentences in
-rotation, each area walking its own list — so there is no ledger to keep in
-sync and no state to corrupt. Read-only, no database, no `.env`, no network:
+One more read-only report measures the vocab deck itself (plan 103) —
+its shape, duplicates, readings, glosses, and every content word in the
+taught sentences that resolves to no card, split into the present cards
+the lookups miss and the real gaps. `tests/test_audit_vocab_deck.py`
+holds its figures as ratchets; lower a bound when a plan lowers the
+figure, never raise one. `docs/vocab-deck-review.md` is the review it
+measures for.
+
+```bash
+cd backend
+python -m scripts.audit_vocab_deck                # the report
+python -m scripts.audit_vocab_deck --dump         # the figures and lists, as JSON
+python -m scripts.audit_vocab_deck --skip-corpus  # without the tokenizer half
+```
+
+A second report puts the deck beside two outside lists (plan 109,
+`datas/vocab/sources/`): cards placed above the level the community
+JLPT lists give the word, list words with no card, and frequent words
+(a subtitle corpus, lemmatised through the tokenizer) with no card.
+Three candidate lists for the audit's slices — it changes no card. The
+one thing it rewrites is `vocab_frequency.json`, the deck's keys in the
+ranking's order; **after any deck change run it with
+`--rebuild-order`**, since a test holds the file equal to what it would
+write.
+
+```bash
+cd backend
+python -m scripts.placement_report                  # the three lists, forty each
+python -m scripts.placement_report --slice 2        # the next forty of each
+python -m scripts.placement_report --rebuild-order  # vocab_frequency.json, in ranking order
+python -m scripts.placement_report --write-lists    # placement_lists.json, for the audit's rotation
+```
+
+The slice is a pure function of the date — grammar, vocab, sentences and,
+since plan 109, placement (the three candidate lists, read from
+`datas/vocab/placement_lists.json`, which `placement_report --write-lists`
+writes) in rotation, each area walking its own list — so there is no
+ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,405 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,404 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

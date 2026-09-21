@@ -600,7 +600,13 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     : isGrammar
       ? entry.meaning
       : lang === 'fr'
-        ? (map?.[entry.kanji || entry.kana] ?? entry.meaning)
+        // The card's own line first (plan 107: "{kanji}::{kana}", the
+        // key vocab_fr.json gained for a form that is several cards --
+        // 私 is わたし, わたくし and あたし, each its own gloss), then
+        // the bare form, then what the server already localised.
+        ? (map?.[`${entry.kanji || ''}::${entry.kana || ''}`]
+          ?? map?.[entry.kanji || entry.kana]
+          ?? entry.meaning)
         : entry.meaning
 
   // The app card behind this entry, or null: what the ＋ writes and
