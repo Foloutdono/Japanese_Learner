@@ -5,7 +5,7 @@ from psycopg2.extras import execute_values
 from typing import Any
 
 from .models import CardState
-from .scheduler import Scheduler
+from .scheduler import Scheduler, clamp_quality
 from .storage import Storage
 from . import xp as xp_math
 
@@ -451,6 +451,15 @@ class SRSEngine:
         }
 
     def review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
+        # Clamped before the card is touched, not inside the scheduler
+        # alone: review_log.quality is a SMALLINT, so a grade past 32767
+        # raised on the INSERT below — after _save_state had already
+        # rescheduled the card, leaving a review that moved the card but
+        # logged no row and paid no XP. An in-range-but-invalid grade was
+        # quieter and worse: stored as-is, it skewed get_daily_quality's
+        # `quality >= 3` for good, and compute_review_xp paid the streak
+        # bonus on a grade whose base XP was 0.
+        quality = clamp_quality(quality)
         state = self._load_state(card_id, mode)
         updated = self.scheduler.review(state, quality)
         self._save_state(updated)

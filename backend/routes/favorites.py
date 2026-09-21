@@ -65,6 +65,9 @@ Kind = Literal["kanji", "vocab", "grammar", "hiragana", "katakana"]
 MAX_FAVORITES = 500
 # The longest key is a grammar id, and those run to ~40 characters.
 MAX_KEY = 200
+# The namespace half of the advisory lock set_favorite takes, so that the
+# key it hashes a user_id into cannot collide with another feature's.
+FAVORITES_LOCK = 931_093
 
 VOCAB_SEP = "::"
 
@@ -215,6 +218,16 @@ def set_favorite(body: FavoriteBody, user_id: str = Depends(get_user_id)):
     try:
         with conn.cursor() as cur:
             if body.favorite:
+                # The cap is checked and then spent in two statements, so
+                # two stars tapped at once both read the old count and
+                # both insert — which is exactly the runaway client the
+                # bound exists to stop. The lock is held to the end of
+                # this transaction and keyed on the learner, so one
+                # shelf's writes serialise and nobody else's wait.
+                cur.execute(
+                    "SELECT pg_advisory_xact_lock(%s, hashtext(%s))",
+                    (FAVORITES_LOCK, user_id),
+                )
                 cur.execute(
                     "SELECT COUNT(*) FROM dictionary_favorites WHERE user_id = %s",
                     (user_id,),

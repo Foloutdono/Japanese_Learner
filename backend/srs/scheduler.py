@@ -38,6 +38,16 @@ PASS = {
     3: (1.00, +0.05),
 }
 
+QUALITY_MIN = 0
+QUALITY_MAX = 5
+
+
+def clamp_quality(quality: int) -> int:
+    """A grade onto the canonical scale. The review payloads take
+    quality as a plain int, so this is what stands between a client and
+    every table keyed by a grade."""
+    return max(QUALITY_MIN, min(QUALITY_MAX, quality))
+
 
 class Lapse(NamedTuple):
     """What a failed answer costs, by grade."""
@@ -117,8 +127,10 @@ class Scheduler:
         # KeyError the one endpoint the whole app is built around. Clamp
         # here, once, rather than trusting six call sites: the stored
         # last_quality and the correct_reviews count then agree with what
-        # was actually scheduled.
-        quality = max(0, min(5, quality))
+        # was actually scheduled. SRSEngine.review clamps before calling
+        # this, so that the review_log row and the XP agree with it too;
+        # this stays for the callers that reach the scheduler directly.
+        quality = clamp_quality(quality)
 
         state.total_reviews += 1
         state.last_quality = quality

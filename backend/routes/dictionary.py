@@ -548,6 +548,29 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
     }
 
 
+@lru_cache(maxsize=1)
+def _vocab_by_pair() -> dict[tuple[str, str], tuple[str, dict]]:
+    """(kanji, reading) -> (level, entry) over the curated deck, for the
+    exact lookup below.
+
+    Built once rather than scanned per call: _exact_vocab is asked once
+    per row by the favourites shelf (routes/favorites.py resolves a page
+    of up to 200 references), and a linear walk of every level there is
+    the whole deck re-read per favourite.
+
+    A deck reading can pack several forms ("まいげつ/まいつき"), so an
+    entry is filed under each of them. First writer wins, which is what
+    keeps a pair held at two levels resolving to the same one the scan
+    in level order returned.
+    """
+    index: dict[tuple[str, str], tuple[str, dict]] = {}
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for w in vocab_list:
+            for reading in w.get("kana", "").split("/"):
+                index.setdefault((w.get("kanji", ""), reading), (level, w))
+    return index
+
+
 def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> dict | None:
     """The one entry whose (kanji, kana) pair is exactly what the caller
     asked for, or None.
@@ -573,13 +596,13 @@ def _exact_vocab(q: str, kana: str, lang: str, states: dict, user_id: str) -> di
     if q == kana:
         pairs.append(("", kana))
 
+    deck = _vocab_by_pair()
     for kanji, reading in pairs:
-        for level, vocab_list in VOCAB_BY_LEVEL.items():
-            for w in vocab_list:
-                # A deck reading can pack several forms ("まいげつ/まいつき").
-                if w.get("kanji", "") == kanji and reading in w.get("kana", "").split("/"):
-                    return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
-                                         lang, states, user_id, vocab_to_id(w, level))
+        hit = deck.get((kanji, reading))
+        if hit is not None:
+            level, w = hit
+            return _vocab_result(w, level, get_meaning(w, lang, VOCAB_FR_MAP),
+                                 lang, states, user_id, vocab_to_id(w, level))
     for kanji, reading in pairs:
         entry = jmdict_db.get_by_key(kanji, reading)
         if entry is not None:
