@@ -15,6 +15,13 @@ import { xpThreshold } from '../domain/xpCurve'
 // sitting frozen until the next real fetch lands.
 let cache = null
 let cacheAt = 0
+// Which account the cache belongs to, counted up every time one leaves
+// (forgetSummary below). A fetch asked for the previous learner can
+// land after the next has signed in, and this summary is not only the
+// HUD's figures: hooks/useGuide reads `guided` off it to decide whether
+// a gate has had its lesson. The wrong answer there costs a new
+// learner the guide entirely.
+let generation = 0
 // Whether the LAST real fetch was refused. The store fails quiet by
 // design (see fetchSummary), but a screen that draws a wait until the
 // summary arrives needs to know when it never will — Settings would
@@ -37,6 +44,7 @@ function setCache(data, { real = false } = {}) {
 }
 
 function fetchSummary() {
+  const gen = generation
   return supabase.auth.getSession()
     .then(({ data }) => {
       const session = data?.session
@@ -44,11 +52,11 @@ function fetchSummary() {
       return apiFetch('/api/profile', session)
     })
     .then(r => (r.ok ? r.json() : Promise.reject()))
-    .then(data => { failed = false; setCache(data, { real: true }) })
+    .then(data => { if (gen === generation) { failed = false; setCache(data, { real: true }) } })
     // Silent fail — this is a background HUD element, not worth a
     // visible error state the way the full Profile screen's fetch is.
     // The flag is the one thing recorded, for useProfileSummaryState.
-    .catch(() => { failed = true; notify() })
+    .catch(() => { if (gen === generation) { failed = true; notify() } })
 }
 
 // Force a real refetch, bypassing the TTL. For the cases where the
@@ -66,6 +74,22 @@ export function refreshSummary() {
 // session still fetches the truth.
 export function seedSummary(data) {
   setCache(data)
+}
+
+/**
+ * Drop the summary: the learner it describes has signed out.
+ *
+ * Signing out does not reload the page, so without this the next
+ * account — a brand-new one, boarded a minute later — is drawn with
+ * the last one's level and, worse, judged against the last one's
+ * `guided` map for the whole of the TTL. See stores/account.js.
+ */
+export function forgetSummary() {
+  generation += 1
+  cache = null
+  cacheAt = 0
+  failed = false
+  notify()
 }
 
 export function useProfileSummary() {

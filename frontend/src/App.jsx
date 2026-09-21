@@ -27,6 +27,7 @@ import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
 import { holdGuide } from './stores/guide'
+import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { LangProvider, useLang } from './LangContext'
@@ -186,6 +187,33 @@ const SENTENCE_SECTIONS = [
 // that a server which came up during the last attempt is found at
 // once rather than after another ceiling's worth of wait.
 const GATE_RETRY_MS = 3000
+
+// ── 正面口 — putting the address back at the front door ──────────
+// Welcome, the sign-in and the boarding are rendered INSTEAD of the
+// router (no route, no station — see screens/BoardingFlow.jsx), so
+// none of them touches the address bar. A learner who signs out from
+// /profile/settings and boards a NEW account therefore finishes the
+// boarding with the URL still reading /profile/settings, and the
+// router mounts straight onto that page: past '/', which is the only
+// route that knows to open the first ride (`rideDue` below). The
+// lesson was skipped and a brand-new account's first screen was its
+// own settings (reported 2026-09-21).
+//
+// So the address is put back whenever the app leaves the router for
+// that continuum — on the way out (a sign-out) and again at the end of
+// a boarding, for the learner who arrived on a deep link and had no
+// session to sign out of. replaceState rather than a navigate: there is
+// no router mounted at either moment, and the page being left is not a
+// history entry worth keeping. It is also invisible to a router that IS
+// still mounted for the last beat of a sign-out — React Router listens
+// for popstate, not replaceState — so nothing flashes on the way.
+function returnToFrontDoor() {
+  // The dev workbenches are addressed by path (the /dev/ branch in App
+  // below reads window.location directly), so they keep theirs.
+  if (import.meta.env.DEV && window.location.pathname.startsWith('/dev/')) return
+  if (window.location.pathname === '/' && !window.location.search && !window.location.hash) return
+  try { window.history.replaceState(null, '', '/') } catch { /* a browser refusing replaceState */ }
+}
 
 function Moved({ to }) {
   const params = useParams()
@@ -360,7 +388,23 @@ export default function App() {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => setSession(session))
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => setSession(session))
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, next) => {
+      // Signed out — from Settings, from the boarding's two exits, or
+      // by a 401 (lib/api.js). The router is about to unmount, and the
+      // page it was on must not be where the NEXT account's router
+      // mounts: the signed-out continuum keeps the address as it found
+      // it, so without this the boarding hands a brand-new learner the
+      // last one's screen. A token refresh carries a session and moves
+      // nothing.
+      if (!next) {
+        returnToFrontDoor()
+        // And the last account's cached answers with it: the HUD, the
+        // pass, the day's queue and — the one that costs a lesson —
+        // the `guided` map the guide is decided on. See stores/account.
+        forgetAccount()
+      }
+      setSession(next)
+    })
     return () => subscription.unsubscribe()
   }, [])
 
@@ -442,6 +486,11 @@ export default function App() {
             // may wave the learner through on a launch the server
             // fails to answer, the same as a profile that said so.
             rememberOnboarded(session.user?.id ?? null)
+            // The 改札 has to open onto the front door: '/' is the one
+            // route that sends a learner who has just boarded to the
+            // first ride. A sign-out already put the address back, but
+            // a boarding reached on a deep link never had one to leave.
+            returnToFrontDoor()
             setOnboarding('finishing')
           }}
           onExit={() => leaveBoarding()}
@@ -639,7 +688,9 @@ export default function App() {
             under the scrim from frame one) — rendered here and not by
             BoardingFlow, which has just unmounted and would take the
             cutscene down mid-wipe with it. onNavigate is a no-op
-            because '/' (→ /today) is already where the router mounts.
+            because the router already mounted on '/' — returnToFrontDoor
+            above is what guarantees it — and '/' has already sent the
+            learner on to the first ride or the run.
             Under prefers-reduced-motion TicketGate fires both callbacks
             synchronously and renders nothing, per house rule. */}
         {onboarding === 'finishing' && (

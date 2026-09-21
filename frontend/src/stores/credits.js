@@ -28,6 +28,11 @@ export function seedCredits(data) {
   store.seed(data)
 }
 
+/** The learner this balance belongs to has signed out (stores/account). */
+export function forgetCredits() {
+  store.forget()
+}
+
 /** The last known balance, outside React (tests, the review helper). */
 export function peekBalance() {
   const cur = store.peek()

@@ -19,3 +19,8 @@ export function refreshStats() {
 export function seedStats(data) {
   store.seed(data)
 }
+
+/** The learner these figures belong to has signed out (stores/account). */
+export function forgetStats() {
+  store.forget()
+}
