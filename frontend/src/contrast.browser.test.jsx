@@ -217,7 +217,7 @@ const Fixture = () => (
         <span className="plate__aside"><span className="plate__due lp-due">8<span className="plate__due__unit">due</span></span></span>
       </button>
       <span className="plate__foot">
-        <span className="plate__prev lp-edge">‹ 初</span>
+        <span className="plate__prev lp-edge">‹ Novice</span>
         <span className="plate__here lp-here">N5</span>
         <span className="plate__next lp-edge">N4 ›</span>
       </span>

@@ -129,34 +129,37 @@ describe('lineMarks', () => {
     expect(marks[1].label).toBe('N5')
   })
 
-  // Every label the map prints is either a level code or a Japanese
-  // specimen, and it says which — the drawing reads the flag for
-  // lang="ja" rather than guessing from the key's spelling.
+  // Every label the map prints is either a word of the interface, a
+  // level code or a Japanese specimen, and it says which — the drawing
+  // reads the flag for lang="ja" rather than guessing from the key's
+  // spelling. The origin is the novice's stop, a word: not Japanese.
   it('marks the Japanese labels as Japanese and the level codes as not', () => {
-    expect(lineMarks(lineStops(stats, 'kana')).every(m => m.jp)).toBe(true)
-    expect(lineMarks(lineStops(stats, 'vocab')).map(m => m.jp))
-      .toEqual([true, false, false, false, false, false])
+    const kana = lineMarks(lineStops(stats, 'kana'))
+    expect(kana[0].jp).toBeFalsy()
+    expect(kana.slice(1).every(m => m.jp)).toBe(true)
+    expect(lineMarks(lineStops(stats, 'vocab')).map(m => Boolean(m.jp)))
+      .toEqual([false, false, false, false, false, false])
   })
 })
 
 describe('stopsAround', () => {
-  it('stands at 初 with the first stop ahead on a line nobody has ridden', () => {
+  it('stands at the novice stop with the first stop ahead on a line nobody has ridden', () => {
     const around = stopsAround(lineStops(null, 'kanji'))
     expect(around.prev).toBeNull()
-    expect(around.here.label).toBe('初')
+    expect(around.here.label).toBe('Novice')
     expect(around.next.label).toBe('N5')
     expect(around.leg).toBe(0)
   })
 
   it('stands at the last level FINISHED, with the leg being ridden as the fill', () => {
     // The fixture has N5 at 0.8: four fifths of N5 is not N5, so the
-    // plate still says 初 with N5 ahead and the stripe four fifths in.
+    // plate still says Novice with N5 ahead and the stripe four fifths in.
     const stops = lineStops(stats, 'vocab')
-    expect(stopsAround(stops).here.label).toBe('初')
+    expect(stopsAround(stops).here.label).toBe('Novice')
     expect(stopsAround(stops).leg).toBeCloseTo(0.8)
     const done = stops.map((s, i) => ({ ...s, score: i === 0 ? 1 : i === 1 ? 0.3 : 0 }))
     const around = stopsAround(done)
-    expect(around.prev.label).toBe('初')
+    expect(around.prev.label).toBe('Novice')
     expect(around.here.label).toBe('N5')
     expect(around.next.label).toBe('N4')
     expect(around.leg).toBeCloseTo(0.3)

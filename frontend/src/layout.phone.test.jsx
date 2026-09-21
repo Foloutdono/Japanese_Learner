@@ -328,7 +328,7 @@ describe('the phone layout contract', () => {
     const plate = i => (
       <div key={i} className="plate">
         <button type="button" className="plate__head"><span className="pf-line__roundel">KN</span><span className="plate__title">Kana</span></button>
-        <span className="plate__foot"><span /><span className="plate__here">初</span><span /></span>
+        <span className="plate__foot"><span /><span className="plate__here">Novice</span><span /></span>
         <span className="plate__stripe"><i /></span>
       </div>
     )

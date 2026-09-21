@@ -412,6 +412,7 @@ const stats = {
   backToStation:      'Retour à la gare',
   fareGate:           'Portique',
   dueUnit:            'à réviser',
+  originStop:         'Débutant',
   stageGate:          'Portique',
   nothingGraded:      'Rien n’est noté',
   stationJlpt:        'JLPT',

@@ -38,15 +38,21 @@
 
 export const LEVEL_STOPS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-// 初 — the novice's stop, at the origin of every line: the one
-// station that is not a leg's completion, because nothing lies behind
-// it. It exists so the line has a platform to stand on before its
-// first level is done — the boarding office signs the same stop
-// (domain/goalMath.js's NOVICE_GOAL, the ride that ends at kana). Not
-// the ghost track's 発: that glyph names a DEPARTURE, the place one
-// journey happened to start from, while a line's origin is a standing
-// — knowing none of it yet — and 初 (初級, 初心者) names that.
-export const ORIGIN_STOP = { key: 'novice', label: '初', jp: true }
+// The novice's stop, at the origin of every line: the one station that
+// is not a leg's completion, because nothing lies behind it. It exists
+// so the line has a platform to stand on before its first level is
+// done — the boarding office signs the same stop (domain/goalMath.js's
+// NOVICE_GOAL, the ride that ends at kana). Not the ghost track's 発:
+// that glyph names a DEPARTURE, the place one journey happened to
+// start from, while a line's origin is a standing — knowing none of it
+// yet — and the novice's stop names that.
+//
+// It used to print the glyph 初 (初級, 初心者), the one stop label on a
+// Learn plate that asked the learner to read Japanese to find out
+// where they stand; `t` names the string table's key instead, so the
+// stop speaks the interface's language like every other label on the
+// plate (components/station/LinePlate.jsx resolves it).
+export const ORIGIN_STOP = { key: 'novice', label: 'Novice', t: 'originStop' }
 
 // The four sections that have a track at all, by route: the SRS lines
 // /api/stats aggregates. Shared by the Learn gate's plates and the
@@ -169,10 +175,10 @@ export function lineTotals(stats, source) {
  * components/station/LinePlate.jsx). Read off the same marks the map
  * drew, so the plate and the ledger cannot disagree about where you
  * stand. A station is the END of the leg it names, so `reached`
- * counts whole legs finished: N5 half done is still standing at 初,
- * with N5 ahead. `leg` is the leg being ridden, 0..1 — the stripe's
- * fill — and 1 at the terminus, where there is no leg left and the
- * stripe is the line entire.
+ * counts whole legs finished: N5 half done is still standing at the
+ * novice's stop, with N5 ahead. `leg` is the leg being ridden, 0..1 —
+ * the stripe's fill — and 1 at the terminus, where there is no leg
+ * left and the stripe is the line entire.
  */
 export function stopsAround(stops) {
   const marks = lineMarks(stops)
