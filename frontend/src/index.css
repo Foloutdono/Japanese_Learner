@@ -13386,7 +13386,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .decks-doors {
   display: flex;
   gap: var(--sp-3);
-  margin-bottom: var(--sp-4);
+  /* No margin of its own: the row sits in 教材's flex column, whose
+     gap already spaces it from the console. A margin here stacked on
+     that gap and put 28px between the doors and the panel they open
+     over, against 16px everywhere else in the column. */
+  margin-bottom: 0;
 }
 /* The children, not `> .chip` and `> .console__action`: a rule keyed on
    .chip this far down the sheet has to carry the specificity of every
