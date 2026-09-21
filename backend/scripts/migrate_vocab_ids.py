@@ -46,11 +46,11 @@ only merge where the learner reached the same card through a deck.
 
 Then, once per moved id rather than per learner:
 
-  deck_cards (source = 'vocab')      raw_id is rewritten. `level` is NOT:
-               no entry changed level, only its surface fields. The
-               primary key is (deck_id, source, raw_id), so a deck that
-               already holds the target keeps its row and the old one is
-               dropped.
+  deck_cards (source = 'vocab')      raw_id is rewritten, and `level`
+               with it, read off the target id (plan 106b's merges are
+               the first MOVES that change one). The primary key is
+               (deck_id, source, raw_id), so a deck that already holds
+               the target keeps its row and the old one is dropped.
   frequency_overrides (domain='vocab')  item_key is the deck's own
                "{kanji}::{kana}" key (frequency_data.resolve()), so the
                same 34 corrections move it too -- see
@@ -208,17 +208,27 @@ def rename_card(conn, card_id: str) -> int:
     return merged
 
 
+def level_of(raw_id: str) -> str:
+    """vocab_{level}_{kanji}_{kana} -> level."""
+    return raw_id.split("_", 2)[1]
+
+
 def rename_deck_cards(cur, user: str | None = None) -> tuple[int, int]:
-    """deck_cards rows onto the new raw_id. `level` is untouched: no entry
-    changed level. Returns (renamed, dropped): a deck that already held
-    the target keeps its row."""
+    """deck_cards rows onto the new raw_id, and onto its level. Until
+    plan 106b no MOVE changed a level and the column was left alone;
+    the 26 cross-level merges do change it, and routes/decks resolves
+    a linked card by (source, level, raw_id), so a row left at the old
+    level would resolve to nothing. The level is read off the target
+    id, never passed in, so it cannot disagree with it. Returns
+    (renamed, dropped): a deck that already held the target keeps its
+    row."""
     renamed = dropped = 0
     scope = " AND user_id = %(user)s" if user else ""
     for old, new in MOVES.items():
-        params = {"old": old, "new": new, "user": user}
+        params = {"old": old, "new": new, "user": user, "level": level_of(new)}
         cur.execute(
             f"""
-            UPDATE deck_cards SET raw_id = %(new)s
+            UPDATE deck_cards SET raw_id = %(new)s, level = %(level)s
             WHERE source = 'vocab' AND raw_id = %(old)s{scope}
               AND NOT EXISTS (
                 SELECT 1 FROM deck_cards d2

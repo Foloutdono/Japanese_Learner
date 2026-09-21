@@ -63,12 +63,16 @@ class DeckMeasurementTests(unittest.TestCase):
         # until 106), so it is measured but not bounded.
         # 26 exact pairs: 108's mojibake fix made the N2 対立 the same
         # (form, reading) as the N1 one -- 106b's list, one longer.
-        bounds = {
-            ("duplicates", "exact_pairs_count"): 26,
-        }
+        bounds = {}
         for (section, key), bound in bounds.items():
             with self.subTest(figure=f"{section}.{key}"):
                 self.assertLessEqual(r[section][key], bound)
+
+    def test_no_word_is_served_at_two_levels(self) -> None:
+        """Plan 106b: 26 (form, reading) pairs sat at two levels and a
+        learner met each once more as "new". One card each now, at the
+        lower level; a new pair lands here."""
+        self.assertEqual(self.report["duplicates"]["exact_pairs"], [])
 
     def test_every_focus_word_resolves_to_a_card(self) -> None:
         """A curated sentence is chosen to practise its focus word, and a

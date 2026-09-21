@@ -4,6 +4,7 @@ Measure the vocab deck, the same way every time (plan 103).
     python -m scripts.audit_vocab_deck                # the report
     python -m scripts.audit_vocab_deck --dump         # the figures and lists, as JSON
     python -m scripts.audit_vocab_deck --skip-corpus  # without the tokenizer half
+    python -m scripts.audit_vocab_deck --write-snapshot  # after a deck change: the served ids, for the guard
 
 Read-only: no database, no .env, no network. It reads the tracked deck
 files under datas/vocab and datas/kanji, the curated sentence banks
@@ -147,6 +148,30 @@ def taught_sentences() -> list[tuple[str, str, str]]:
             if jp:
                 out.append((level, jp, "dictation"))
     return out
+
+
+_SNAPSHOT = os.path.join(_VOCAB, "vocab_served.json")
+
+
+def served_ids() -> list[str]:
+    """Every card id the deck serves, sorted."""
+    return sorted(f"vocab_{level}_{e.get('kanji', '')}_{e.get('kana', '')}" for level, e in entries())
+
+
+def snapshot_ids() -> list[str]:
+    """The ids served at the last `--write-snapshot` (plan 106b): the
+    deck's memory of its old self, so tests/test_vocab_deck.py can see
+    an id leave without a MOVES line. Empty when no snapshot exists."""
+    if not os.path.exists(_SNAPSHOT):
+        return []
+    return _json(_SNAPSHOT)
+
+
+def write_snapshot() -> int:
+    ids = served_ids()
+    with open(_SNAPSHOT, "w", encoding="utf-8") as f:
+        json.dump(ids, f, ensure_ascii=False, separators=(",", ":"))
+    return len(ids)
 
 
 def focus_words() -> list[tuple[str, str]]:
@@ -477,7 +502,12 @@ def main(argv=None) -> int:
     parser.add_argument("--dump", action="store_true", help="the figures and lists as JSON")
     parser.add_argument("--skip-corpus", action="store_true",
                         help="leave out the taught-sentence section (the tokenizer half)")
+    parser.add_argument("--write-snapshot", action="store_true",
+                        help="record every served id in datas/vocab/vocab_served.json (after a deck change)")
     args = parser.parse_args(argv)
+    if args.write_snapshot:
+        print(f"{write_snapshot():,} ids written to {os.path.relpath(_SNAPSHOT, _BASE_DIR)}")
+        return 0
     report = measure(skip_corpus=args.skip_corpus)
     if args.dump:
         json.dump(report, sys.stdout, ensure_ascii=False, indent=1)

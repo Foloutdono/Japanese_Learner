@@ -304,15 +304,28 @@ Settled without an id moving:
   badges the N1 仕舞う card. The audit script does not measure that
   position at all.
 
-**Deferred: the 25 exact duplicates across levels** (どう, でも, はい,
-この, その, ここ, いつも, できる… at N5 and N3; 掃除 joins them). Merging
-one onto the other is a level move, and the migration deliberately
-never moves a level: `deck_cards` stores `level` beside `raw_id` and
-`test_no_rename_changes_the_level` holds the line. Doing it right means
-teaching `migrate_vocab_ids` to rewrite that column for a listed move
-and deciding which level's card survives (the lower, the review says);
-that is a plan of its own, 106b, and until then a learner at N3 meets
-この as a "new" card once more. The 266 shared written forms are 107's.
+**106b — the 26 exact duplicates across levels (DONE, 2026-09-21).**
+どう, でも, はい, この, その, ここ, いつも, できる… at N5 and N3, 掃除
+after 106 and 対立 after 108: the same word twice, so a learner at the
+higher level met it again as "new". One card each now, at the lower
+level, its gloss the union of both (できる is "to be able to, to be
+ready, to occur"); the higher card's id is a `MOVES` line onto it, and
+the migration merges the rows. These are the first moves that change a
+level, so `migrate_vocab_ids.rename_deck_cards` now rewrites
+`deck_cards.level` from the target id — `routes/decks` resolves a linked
+card by (source, level, raw_id), and a row left at N3 would resolve to
+nothing. `test_no_rename_changes_the_level` became "never up": a move
+that sent a card up a level would take it out of an N5 learner's deck.
+Nineteen of plan 091's lines (the "word in both fields" family, この
+and その among them) used to land on ids merged here and now point
+straight at the lower card, since a move is one hop. The deck is 8,404.
+
+The guard 106 lacked is in: `datas/vocab/vocab_served.json` is every id
+served at the last `python -m scripts.audit_vocab_deck
+--write-snapshot`, and `test_vocab_deck` holds that an id in it is
+still served or a `MOVES` key, and that every served id is in it — so
+a deck change carries its snapshot, and the snapshot's diff is where
+a departed id is seen. The 266 shared written forms were 107's.
 
 After 106: 166 unmatched lemmas and 330 occurrences in the corpus (from
 194 and 633), 153 of them absent.

@@ -192,8 +192,8 @@ Thirteen waves live in this file:
   (40 files), guards clean, build clean.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
-  102–104, 106 and 107 DONE, 105 and 108 in slices, the first of each
-  done). Opened by one N5 breakdown showing 母 with no card and 日曜日
+  102–104, 106, 106b and 107 DONE, 105 and 108 in slices, the first of
+  each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
   as two words: 102 gives 母 and 父 N5 entries of their own and folds a
   deck compound UniDic cuts short (日曜 + 日, お + 母 + さん, 二 + 日)
   back into one token with the entry's reading
@@ -206,8 +206,10 @@ Thirteen waves live in this file:
   uses), the words the app's own
   sentences teach without a card, readings and duplicates through the
   migration (106: three `MOVES` lines, the deck's own spelling filed
-  under UniDic's lemma, the auxiliary position closed; the cross-level
-  duplicates deferred to 106b), French glosses per card rather than per
+  under UniDic's lemma, the auxiliary position closed; 106b: the 26
+  cross-level duplicates merged onto the lower card, the migration
+  moving `deck_cards.level` with the id, and the served-id snapshot
+  that guards a rename), French glosses per card rather than per
   written form, gloss
   hygiene, a learner frequency source, and one pool rebuild. The plan is
   `docs/vocab-deck-review.md` — in `docs/`, since `plans/*.md` is

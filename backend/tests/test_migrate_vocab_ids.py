@@ -41,6 +41,10 @@ NEW_A = "vocab_N3__probeA"
 # studied -- the merge path.
 OLD_B = "vocab_N3_probeB_probeB"
 NEW_B = "vocab_N3__probeB"
+# The same word at two levels, merged onto the lower (plan 106b) -- the
+# one kind of move that changes a level, and deck_cards.level with it.
+OLD_C = "vocab_N3__probeC"
+NEW_C = "vocab_N5__probeC"
 STRAY = "vocab_N3_probeStray_probeStray"   # neither served nor mapped
 JMDICT = "vocab_jmdict_4242"               # a different source entirely
 
@@ -73,6 +77,7 @@ def _seed():
         (USER, OLD_A, MODE, 5, 6, 5, 1),
         (USER, OLD_B, MODE, 2, 4, 2, 2),
         (USER, NEW_B, MODE, 9, 10, 9, 0),      # the target already studied
+        (USER, OLD_C, MODE, 4, 4, 4, 0),
         (USER, STRAY, MODE, 1, 1, 1, 0),
         (USER, JMDICT, MODE, 7, 7, 7, 0),      # the other source
         (OTHER, OLD_A, MODE, 3, 3, 3, 0),      # another learner, untouched under --user
@@ -95,7 +100,7 @@ def _seed():
     # an earlier first review on the target than on the merged-in source
     _exec("UPDATE card_first_review SET first_at = NOW() - interval '30 days' WHERE card_id = %s", (f"{USER}:{NEW_B}",))
 
-    for deck_id, raw in ((DECK_ID, OLD_A), (DECK_ID, OLD_B),
+    for deck_id, raw in ((DECK_ID, OLD_A), (DECK_ID, OLD_B), (DECK_ID, OLD_C),
                          (DECK_ID_HOLDING_TARGET, NEW_B), (DECK_ID_HOLDING_TARGET, OLD_B)):
         _exec("INSERT INTO deck_cards(deck_id, user_id, source, level, raw_id) VALUES (%s,%s,'vocab','N3',%s)",
               (deck_id, USER, raw))
@@ -121,9 +126,9 @@ def _wipe():
 @pytest.fixture(autouse=True)
 def probe(monkeypatch):
     _wipe()
-    monkeypatch.setattr(migrate, "MOVES", {OLD_A: NEW_A, OLD_B: NEW_B})
+    monkeypatch.setattr(migrate, "MOVES", {OLD_A: NEW_A, OLD_B: NEW_B, OLD_C: NEW_C})
     monkeypatch.setattr(migrate, "KEY_MOVES", {KEY_A_OLD: KEY_A_NEW, KEY_B_OLD: KEY_B_NEW})
-    monkeypatch.setattr(migrate, "served_ids", lambda: frozenset({NEW_A, NEW_B}))
+    monkeypatch.setattr(migrate, "served_ids", lambda: frozenset({NEW_A, NEW_B, NEW_C}))
     _seed()
     yield
     _wipe()
@@ -147,7 +152,7 @@ def _pins(user):
 
 def test_a_dry_run_changes_nothing():
     assert migrate.main(["--user", USER]) == 0
-    assert _ids(USER) == {OLD_A, OLD_B, NEW_B, STRAY, JMDICT}
+    assert _ids(USER) == {OLD_A, OLD_B, NEW_B, OLD_C, STRAY, JMDICT}
     assert _modes(USER, OLD_A) and _modes(USER, OLD_B)
     assert _pins(USER) == {KEY_A_OLD: 3, KEY_B_OLD: 4, KEY_B_NEW: 9}
 
@@ -180,13 +185,19 @@ def test_moves_rename_merge_and_leave_what_they_should():
     assert _modes(OTHER, NEW_A) == {}
     assert _pins(OTHER) == {KEY_A_OLD: 5}
 
-    # deck_cards: raw_id moves, level is untouched; the deck already
-    # holding the target keeps one row, not two
+    # the level move: the rows follow the id to N5
+    assert OLD_C not in _ids(USER) and NEW_C in _ids(USER)
+    assert _modes(USER, NEW_C) == {MODE: (4, 4, 4, 0)}
+
+    # deck_cards: raw_id moves and level follows the target id (N3 stays
+    # N3 for A and B, N3 becomes N5 for C); the deck already holding the
+    # target keeps one row, not two
     rows = _exec("SELECT deck_id, level, raw_id FROM deck_cards WHERE user_id = %s ORDER BY deck_id, raw_id", (USER,))
     assert (DECK_ID, "N3", NEW_A) in rows
     assert (DECK_ID, "N3", NEW_B) in rows
+    assert (DECK_ID, "N5", NEW_C) in rows
     assert [r for r in rows if r[0] == DECK_ID_HOLDING_TARGET] == [(DECK_ID_HOLDING_TARGET, "N3", NEW_B)]
-    assert not any(r[2] in (OLD_A, OLD_B) for r in rows)
+    assert not any(r[2] in (OLD_A, OLD_B, OLD_C) for r in rows)
 
     # frequency pins: A's moves onto the corrected key; B's collides with
     # a pin the learner already holds, and the one that still resolves wins

@@ -138,7 +138,12 @@ runtime purpose. Two consequences worth knowing:
   106 (done) readings and forms — three `MOVES` lines in
   `content/vocab_renames.py`, the deck's spelling filed under UniDic's
   lemma and the auxiliary position closed in `study/card_lookup.py`;
-  the cross-level duplicates deferred to 106b, 107 (done) the French
+  106b (done) the 26 cross-level duplicates merged onto the lower card
+  — the first `MOVES` that change a level, so `scripts/migrate_vocab_ids.py`
+  moves `deck_cards.level` with the id — and the served-id snapshot
+  `datas/vocab/vocab_served.json` (`audit_vocab_deck --write-snapshot`,
+  held by `tests/test_vocab_deck.py`) that catches an id leaving the
+  deck without a line, 107 (done) the French
   gloss per card (`translations.fr_gloss`, `tests/test_translations.py`),
   108 gloss hygiene (the mechanical half done: comma spacing, the
   export's capitals, the 対立 mojibake as a `MOVES` line; the rest to
@@ -244,7 +249,11 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 `"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
-in `vocab_renames.MOVES` for the same reason.
+in `vocab_renames.MOVES` for the same reason. **After any deck change, run
+`python -m scripts.audit_vocab_deck --write-snapshot`** and commit
+`datas/vocab/vocab_served.json` with it: `tests/test_vocab_deck.py` fails
+on an id that left the deck without a `MOVES` line, and on a served id
+the snapshot has not seen.
 
 Two things are worth knowing before reaching for any of them:
 
@@ -362,7 +371,7 @@ sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,430 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,404 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

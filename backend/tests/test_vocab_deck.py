@@ -145,14 +145,33 @@ def test_renames_never_chain():
     assert set(MOVES.values()) & set(MOVES) == set()
 
 
-def test_no_rename_changes_the_level():
-    """Only the surface fields were corrected. deck_cards stores `level`
-    beside `raw_id`, and the migration deliberately leaves that column
-    alone — this is what makes that safe."""
+def test_a_rename_that_changes_the_level_moves_down_never_up():
+    """Plan 106b merges the same word at two levels onto the lower one, so
+    a learner meets it once. The migration rewrites deck_cards.level from
+    the target id for exactly these; a MOVE that sent a card UP a level
+    would take an N5 learner's card out of their deck, and none may."""
+    order = ("N5", "N4", "N3", "N2", "N1")
+
     def level_of(raw_id):
         return raw_id.split("_", 2)[1]
 
-    assert [(o, n) for o, n in MOVES.items() if level_of(o) != level_of(n)] == []
+    assert [(o, n) for o, n in MOVES.items() if order.index(level_of(n)) > order.index(level_of(o))] == []
+
+
+def test_every_id_the_last_snapshot_served_is_served_or_moved():
+    """The guard plan 106 lacked (docs/vocab-deck-review.md): three ids
+    left the deck without a MOVES line and nothing noticed, because a
+    served id has no memory of its old self. datas/vocab/vocab_served.json
+    is that memory -- every id served at the last snapshot -- so an id
+    that leaves the deck must arrive in MOVES, and an id that arrives
+    must be snapshotted (`python -m scripts.audit_vocab_deck
+    --write-snapshot`), which puts the change in the diff where it is
+    reviewed."""
+    from scripts.audit_vocab_deck import snapshot_ids
+    snapshot = set(snapshot_ids())
+    served = _served()
+    assert snapshot - served - set(MOVES) == set(), "ids left the deck with no MOVES line"
+    assert served - snapshot == set(), "new ids: re-run audit_vocab_deck --write-snapshot"
 
 
 def test_the_frequency_keys_track_the_renamed_ids():
