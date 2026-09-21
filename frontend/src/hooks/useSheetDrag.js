@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { swallowNextClick } from '../lib/swallowClick'
 
 // ── 引き戸 — dragging a sheet shut ────────────────────────────
 // A bottom sheet rises from the bottom edge, so the gesture that
@@ -98,21 +99,6 @@ export function useSheetDrag(panelRef, onClose) {
   const onCloseRef = useRef(onClose)
   useEffect(() => { onCloseRef.current = onClose })
 
-  // A drag that ends on a button would otherwise fire it: the click is
-  // dispatched after the touch ends, to the element the finger lifted
-  // over. One capture-phase listener, swallowing exactly one click.
-  const swallowNextClick = useCallback(() => {
-    const swallow = e => {
-      e.stopPropagation()
-      e.preventDefault()
-      window.removeEventListener('click', swallow, true)
-    }
-    window.addEventListener('click', swallow, true)
-    // If no click follows (the finger lifted over nothing clickable),
-    // the listener must not sit there waiting for the next real one.
-    setTimeout(() => window.removeEventListener('click', swallow, true), 400)
-  }, [])
-
   useEffect(() => {
     const panel = panelRef.current
     if (!panel) return undefined
@@ -170,6 +156,8 @@ export function useSheetDrag(panelRef, onClose) {
 
       setDragging(false)
       offset(0)
+      // A drag that ends over a button would otherwise fire it (see
+      // lib/swallowClick, which the gate swipe shares).
       swallowNextClick()
       if (commit) onCloseRef.current()
     }
@@ -224,7 +212,7 @@ export function useSheetDrag(panelRef, onClose) {
       panel.removeEventListener('touchcancel', onEnd)
       panel.removeEventListener('pointerdown', onGrip)
     }
-  }, [panelRef, swallowNextClick])
+  }, [panelRef])
 
   return { dragging }
 }

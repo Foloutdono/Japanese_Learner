@@ -858,6 +858,20 @@ a learner who has just rated one card is already looking for the next.
   reach for wherever a fixed row must hold a word in every language** —
   the alternative is type small enough to be unreadable, or copy chosen
   to fit rather than to be right.
+- **The tab bar is not the only way along the row of five.** A sideways
+  flick across a gate's own screen moves one gate along it — left for the
+  next, right for the one before — and the arriving gate pulls in from the
+  side the flick came from. The bar is untouched and is still what *says*
+  where you are; this is the same row read with a thumb. Three rules, and
+  each is a decision rather than a detail: only from a **gate**, never from
+  a station behind one (a level, a deck, a hall is a place you walked into,
+  and carrying someone sideways out of it is not a shortcut); the **bar's
+  own order**, because that is the order on screen; and it **does not
+  wrap**, because past Learn and past Profile there is no next gate and
+  wrapping would turn one over-eager flick into a jump across the app.
+  Anything modal, a field, a rail that scrolls sideways, the strip down
+  each edge where the OS keeps its own back gesture, and a departure
+  already in flight all outrank it (`hooks/useGateSwipe.js`).
 - **A run leaves the chrome.** Both bars go; the level bar takes the bottom
   edge (sumi, the level, the gold track, the XP figure — the fare's home once
   the HUD has left), the rating bar (or the field) docks on top of it and
