@@ -64,13 +64,24 @@ export function FuriganaWord({ parts, size = 72, answer = false }) {
   // characters on a 390px phone, plan 098). Spread, not .length: a
   // surrogate pair is one character on screen.
   const len = parts.reduce((n, part) => n + [...(part.text ?? '')].length, 0) || 1
+  // Two boxes, not one. The outer is the specimen's band -- exactly the
+  // box .char-display occupies at the same rung -- and the inner is the
+  // ruby line, centred on it and out of the flow, so the reading's
+  // leading rides ABOVE the word instead of adding to the band. The
+  // word is then in the same place whether its reading is on or off,
+  // which is the whole point: the furigana hint is a line appearing
+  // over the word, not a second thing pushing the word, the "tap to
+  // reveal" under it and the card's own height down (see .furigana-word
+  // in index.css for the numbers that motivated it).
   return (
     <div
       className={`furigana-word${answer ? ' furigana-word--answer' : ''}`}
       style={{ '--furigana-size': `${size}px`, '--len': len }}
       lang="ja"
     >
-      <FuriganaParts parts={parts} />
+      <div className="furigana-word__line">
+        <FuriganaParts parts={parts} />
+      </div>
     </div>
   )
 }

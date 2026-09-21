@@ -8408,7 +8408,21 @@ textarea:focus-visible {
 /* ── Furigana over the kanji it belongs to (indice_3) ──────
    The reading sits on <rt> per kanji, so a compound shows だい over 大
    and がく over 学 rather than one label spanning both. Sized off the
-   word so the ruby scales with the prompt. */
+   word so the ruby scales with the prompt.
+
+   The BAND here is .char-display's exactly: the same rung, the same
+   `* 1.15` box, the same --sp-4 either side (and the same nothing at
+   480px, where that rule zeroes its margin -- see the phone block near
+   the end of this file). The ruby itself is drawn by __line below,
+   outside this box.
+
+   Turning the furigana hint on used to make this box the ruby's own
+   1.9 line -- 136.8px against the plain specimen's 82.8 -- so the same
+   word in the same card sat 8px lower, its "tap to reveal" line 23px
+   lower, and the card itself measured 17px taller. A hint is a line
+   that appears OVER the word; it is not allowed to move the word, and
+   a card that resizes under the learner is the same defect the 220px
+   floor on .prompt-card__body exists to prevent. */
 .furigana-word {
   font-family: var(--font-jp);
   /* Fitted, not wrapped -- .char-display's own clamp: the card is the
@@ -8420,10 +8434,36 @@ textarea:focus-visible {
     var(--fs-caption),
     calc(96cqw / var(--len, 1)),
     var(--furigana-size, 72px));
+  height: calc(var(--furigana-size, 72px) * 1.15);
+  margin: var(--sp-4) 0;
+  /* The same centring instrument .char-display uses, and for the same
+     reason -- but around __line rather than around the text, because a
+     <ruby> box that became a flex item would be blockified and lose its
+     annotation. The line is ONE block-level item; its rubies stay
+     inline inside it. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  line-height: 1.9;
   text-align: center;
   color: var(--text-primary);
+}
+/* The ruby line, centred on that band and free to be taller than it:
+   `line-height` here is the room the ANNOTATION needs, not the word's
+   own line, and the item overflows the band by half of the difference
+   at each end -- upward into the card's own top padding (27px at the
+   word rung, against a 28-44px --card-pad-top, and the card centres
+   its content above that), downward into empty half-leading. So the
+   reading is printed over the word without anything moving under it.
+
+   A flex ITEM, not an absolutely positioned box -- the obvious way to
+   write "out of the flow" here, and wrong: out of flow it contributes
+   no width, so .flashcard__face (a flex item of .vocab-card-boost
+   .flashcard, and therefore sized to its content) shrinks to nothing
+   around it and the word prints from the card's centre line
+   rightward. */
+.furigana-word__line {
+  line-height: 1.9;
 }
 .furigana-word ruby { ruby-position: over; }
 .furigana-word rt {
@@ -8444,13 +8484,20 @@ textarea:focus-visible {
    Sized between the two: clearly the same answer as the ruby above it,
    not a caption. It also carries every accepted reading for the seven
    deck entries that have more than one, which the ruby cannot — it can
-   only ever show the first. */
+   only ever show the first.
+
+   The separation is this margin now, where it was the ruby box's own
+   spare leading plus a 14px literal: .furigana-word is the specimen's
+   band exactly (see its rule), so the ~24px of empty half-leading that
+   used to sit between the word and this line is gone, and the air that
+   reads as deliberate has to be asked for. --sp-6 is the rung, and
+   lands the pair within a few px of how it has always looked. */
 .flashcard-reading {
   font-family: var(--font-jp);
   font-size: 24px;
   color: var(--success);
   letter-spacing: 0.04em;
-  margin-top: 14px;
+  margin-top: var(--sp-6);
 }
 
 /* ── The radical picker (personal kanji cards) ─────────────
@@ -15398,7 +15445,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     border-radius: var(--r-panel);
   }
 
-  .char-display {
+  .char-display,
+  /* The furigana specimen is the same band as the plain one (see
+     .furigana-word) -- including here, or the hint would move the word
+     on a phone exactly as it used to everywhere. */
+  .furigana-word {
     margin: 0 0;
   }
 
