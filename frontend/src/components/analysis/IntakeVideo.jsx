@@ -129,7 +129,6 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
       {!isNative() && <div className="anl-grab">
         <div className="anl-grab__head">
           <span className="anl-grab__title">{t.grabTitle}</span>
-          <span className="anl-grab__jp" lang="ja">字幕取り</span>
         </div>
         <p className="anl-grab__lead">{t.grabLead}</p>
         <div className="anl-grab__row">
@@ -188,7 +187,6 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
         onDrop={handleDrop}
         onClick={() => fileRef.current?.click()}
       >
-        <span className="anl-drop__jp" lang="ja">字幕</span>
         <span className="anl-drop__lead">{t.dropSubtitles}</span>
         <span className="anl-drop__note">{t.subtitleAccepted}</span>
         {/* Visually hidden rather than display:none, which would take

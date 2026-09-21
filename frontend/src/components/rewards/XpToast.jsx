@@ -124,7 +124,6 @@ function RewardScene({ toast, onDone }) {
     >
       <div className="levelup__board">
         <span className="levelup__mark">
-          <span className="levelup__jp" lang="ja">進級</span>
           <span className="levelup__latin">{t.levelUp}</span>
         </span>
         {/* A figure and its label form a fixed pair: the drums, the

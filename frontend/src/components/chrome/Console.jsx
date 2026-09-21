@@ -147,7 +147,6 @@ export function Seg({ options, value, onChange, full = false, className = '', la
             className={`seg__opt${on ? ' seg__opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
-            {opt.jp && <span className="seg__opt-jp" lang="ja">{opt.jp}</span>}
             {opt.label && <span className="seg__opt-latin">{opt.label}</span>}
           </button>
         )

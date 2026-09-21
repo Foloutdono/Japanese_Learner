@@ -16,9 +16,14 @@ import { StampRally } from './StampRally'
 // counting while the bar stays full, because "12 / 10" is information
 // and a bar over 100% is noise. Renders nothing for an account with
 // no stored pace.
+// The target being met used to add a gold 済 pill at the end of the
+// row. It went with the ornamental Japanese labels (2026-09-21) and
+// nothing replaced it, because nothing needed to: the bar is full and
+// the count reads past its target, which is the figure the pill was
+// captioning ("do not caption a figure that adjacent content already
+// explains" -- DESIGN.md, "Say less").
 export function PaceGauge({ pace, t }) {
   const pct = Math.min(100, Math.round((100 * pace.newToday) / Math.max(1, pace.target)))
-  const met = pace.newToday >= pace.target
   return (
     <span className="hall-pace" role="img" aria-label={t.paceGaugeAria(pace.newToday, pace.target)}>
       <span className="hall-pace__name">
@@ -30,7 +35,6 @@ export function PaceGauge({ pace, t }) {
       <span className="hall-pace__count" aria-hidden="true">
         {pace.newToday}<span className="hall-pace__sep"> / </span>{pace.target}
       </span>
-      {met && <span className="onb-reco-badge hall-pace__met" aria-hidden="true">済</span>}
     </span>
   )
 }

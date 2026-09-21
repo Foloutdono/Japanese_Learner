@@ -237,7 +237,12 @@ describe('the lesson', () => {
     await expect.poll(() => s.one('.rad-family')).not.toBeNull()
     expect(s.one('.rad-plate')).toBeNull()
     expect(s.all('.platform-card').length).toBe(0)
-    expect(s.all('.rad-family .dict-mark__jp').map(n => n.textContent)).toEqual(['N5', 'N4'])
+    // The level leads each family's mark. It was .dict-mark__jp, in
+    // the JP face beside a Japanese term on the dictionary's own
+    // marks; with those terms retired (2026-09-21) the slot is
+    // .dict-mark__code — the one lead a mark still takes, and never
+    // Japanese.
+    expect(s.all('.rad-family .dict-mark__code').map(n => n.textContent)).toEqual(['N5', 'N4'])
     const tiles = s.all('.rad-kanji')
     expect(tiles.map(n => n.querySelector('.rad-kanji__char').textContent)).toEqual(['水', '海', '泳'])
     expect(tiles.map(n => n.className)).toEqual(['rad-kanji rad-kanji--mastered', 'rad-kanji rad-kanji--learning', 'rad-kanji rad-kanji--new'])

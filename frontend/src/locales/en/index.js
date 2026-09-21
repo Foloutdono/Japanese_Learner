@@ -1059,9 +1059,7 @@ const dictionary = {
   // name is a pair") — never "ON'YOMI", which is the Japanese written
   // twice. The sheet's old 音 / 訓 squares said this to nobody who
   // could not already read them.
-  readingsOnJp:      '音読み',
   readingsOnName:    'Chinese reading',
-  readingsKunJp:     '訓読み',
   readingsKunName:   'Japanese reading',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
@@ -1803,52 +1801,32 @@ const ride = {
 
 const guide = {
   // 案内 — the guide over each gate (plan 100): one sentence a stop,
-  // beside the thing it is about; the pair on the note names the stop.
+  // beside the thing it is about. The note carried a Japanese eyebrow
+  // naming the stop until 2026-09-21; the sentence is the note now.
   guideLabel: 'Guide',
   guideNext: 'Next',
   guideDone: 'Done',
   guideSkip: 'Skip',
-  guideHudLevelJp: '等級',
   guideHudLevel: 'Your level. Every card you rate pays into it.',
-  guideHudStatusJp: '運行状況',
   guideHudStatus: 'On time or behind your own plan. Tap it for the ghost train.',
-  guideHudPassJp: '回数券',
   guideHudPass: 'Your balance. Reviews cost one each; it refills at midnight.',
-  guideTodayStripJp: '定期券',
   guideTodayStrip: 'The week, the streak, and today\'s new items against your pace.',
-  guideTodayGateJp: '改札',
   guideTodayGate: 'What is due today, line by line. Switch a line off to leave it for later, then depart.',
-  guideTabBarJp: '改札口',
   guideTabBar: 'The five gates: Learn, Practice, Today, Dictionary, your pass.',
-  guideLearnPlateJp: '駅名標',
   guideLearnPlate: 'A line. Tap the plate to open it; the chip is what it owes you today.',
-  guideLearnStopsJp: '現在地',
   guideLearnStops: 'Where you stand on the line, and the stops either side.',
-  guideLearnShelfJp: '教材',
   guideLearnShelf: 'Your own decks, and the library other learners publish to.',
-  guidePracticePlateJp: '乗り場',
   guidePracticePlate: 'A platform: sentences to read, understand, translate or take down — and the mock exam.',
-  guidePracticeDestsJp: '行先',
   guidePracticeDests: 'The levels. Yours is marked; tap another to ride it anyway.',
-  guidePracticePassJp: '定期券',
   guidePracticePass: 'These platforms ride on the pass.',
-  guideDictConsoleJp: '辞書',
   guideDictConsole: 'Search by word, reading or meaning.',
-  guideDictChipsJp: '分類',
   guideDictChips: 'The collections, and your shelf of kept entries at the end.',
-  guideDictEntryJp: '見出し',
   guideDictEntry: 'An entry. Tap it to open; the star keeps it on your shelf.',
-  guideDictAnalyzerJp: '解析',
   guideDictAnalyzer: 'The analyzer: paste, photograph or film a sentence and take it apart.',
-  guideProfilePassJp: '定期券',
   guideProfilePass: 'Your pass: the level, the balance, your name.',
-  guideProfileStampsJp: '判子',
   guideProfileStamps: 'The stamp rally: one a day you study.',
-  guideProfileRecordsJp: '記録',
   guideProfileRecords: 'Your figures, and the door to the statistics.',
-  guideProfileLedgerJp: '路線',
   guideProfileLedger: 'Each line, and how far along it you are.',
-  guideProfileSettingsJp: '窓口',
   guideProfileSettings: 'Settings: the level, the pace, the bar you rate with, and this guide again.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',

@@ -193,7 +193,6 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
 
       {step === 'pass' && (
         <div className="ride__done ride__plate" data-guide="ride.plate">
-          <p className="ride__done-jp" lang="ja" aria-hidden="true">定期券</p>
           <p className="ride__plate-cap">{t.ridePlateCap}</p>
           <p className="ride__done-text">{t.ridePlateBody}</p>
           <ul className="ride__plate-list">

@@ -186,8 +186,8 @@ function ReadingsField({ label, value, onChange }) {
   }
 
   const GROUPS = [
-    { kind: 'on',  label: t.readingsOn,  jp: '音読み', rows: on },
-    { kind: 'kun', label: t.readingsKun, jp: '訓読み', rows: kun },
+    { kind: 'on',  label: t.readingsOn,  rows: on },
+    { kind: 'kun', label: t.readingsKun, rows: kun },
   ]
 
   return (
@@ -195,9 +195,7 @@ function ReadingsField({ label, value, onChange }) {
       <div className="deckdetail-form__label">{label} *</div>
       {GROUPS.map(g => (
         <div key={g.kind} className="readings-field__group">
-          <div className="readings-field__label">
-            <span lang="ja">{g.jp}</span> <span>{g.label}</span>
-          </div>
+          <div className="readings-field__label">{g.label}</div>
           {g.rows.map((v, i) => (
             <div key={i} className="readings-field__row">
               <input

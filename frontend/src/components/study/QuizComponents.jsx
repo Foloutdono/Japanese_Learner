@@ -291,10 +291,12 @@ export function DoneMessage({ onBack, pace, onExtra }) {
     return (
       <div className="quiz-done quiz-done--pace">
         <span className="quiz-done__mark" aria-hidden="true"><CheckIcon size={26} /></span>
-        {/* The pair: the Japanese names the terminus, the Latin captions
-            it (DESIGN.md, "The one rule above all others"). */}
-        <h2 className="quiz-done__name" lang="ja">本日の目標達成</h2>
-        <p className="quiz-done__caption">{t.paceDoneTitle}</p>
+        {/* The terminus's name. It was the pair -- 本日の目標達成 over
+            this line as its caption -- until the owner's call of
+            2026-09-21: an end-of-run panel is not a place, and a pair
+            names a place (DESIGN.md, the third standing exception).
+            The caption is the name now, at the name's own rung. */}
+        <h2 className="quiz-done__name">{t.paceDoneTitle}</h2>
         {/* The day's count as a figure -- the numeral, the target as its
             unit, the caps label beneath -- rather than buried mid-sentence
             ("14 of 10 new items learned today"), where nobody found it. */}
@@ -310,10 +312,11 @@ export function DoneMessage({ onBack, pace, onExtra }) {
         <div className="quiz-done__foot">
           {/* The quiet offer over the one filled action -- the ride's own
               order. Arrival is the plan, so the way out is the action and
-              the 臨時列車 is the ghost above it: a default, never a lock. */}
+              the extra train is the ghost above it: a default, never a
+              lock. (It carried 臨時列車 under its label; same call as
+              above.) */}
           <button onClick={() => { playClick(); onExtra() }} className="btn-depart btn-depart--ghost quiz-done__extra">
             <span className="btn-depart__jp">{t.paceExtraTrain}</span>
-            <span className="quiz-done__extra-jp" lang="ja">臨時列車</span>
           </button>
           <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
             <ChevronIcon direction="left" size={14} /> {t.backToMenu}

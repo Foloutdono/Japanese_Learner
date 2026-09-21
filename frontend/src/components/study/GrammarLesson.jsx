@@ -16,11 +16,17 @@ import { StageMark } from './StageMark'
 // (the plate variant, where the plate itself is already drawn).
 //
 // Blocks divided by hairlines and no section headings (DESIGN.md, "a
-// body that names itself"): the steps carry their own pair marks
-// (規則 RULE, 使い方 USE, 注意 CAREFUL) the way the radical index
-// marks a level; a row that opens a neighbour is a door; a sentence
-// over its translation is an example. Each block carries its name as
-// an aria-label only.
+// body that names itself"): the steps carry their own mark (RULE, USE,
+// CAREFUL) the way the radical index marks a level; a row that opens a
+// neighbour is a door; a sentence over its translation is an example.
+// Each block carries its name as an aria-label only.
+//
+// The marks were pairs -- 規則 RULE -- until the owner's call of
+// 2026-09-21: the Japanese half named a part of a lesson rather than a
+// place, which is the caption "Say less" forbids (DESIGN.md), and it
+// was carrying the weight the plain-language half should have. The
+// name is the mark now, and .dict-mark__name is set to hold the line
+// on its own.
 //
 // A point whose lesson is not written yet (a level before its content
 // wave) prints what it has: formation, meaning, examples — exactly the
@@ -31,7 +37,6 @@ import { StageMark } from './StageMark'
 // GrammarRun). All three carry pattern / structure / meaning / steps /
 // compare / examples in the learner's language already.
 
-const STEP_JP = { rule: '規則', use: '使い方', careful: '注意' }
 const STEP_KEY = { rule: 'glRule', use: 'glUse', careful: 'glCareful' }
 
 // A step's text: paragraphs, and a run of "- " lines as a list. One
@@ -105,7 +110,7 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
             is the ONE variant where the plate above has already printed
             both (DictionaryDetail's dict-plate__structure and
             dict-plate__caption), so they said everything twice and
-            pushed 規則 below the fold. The sheet and the gate draw
+            pushed the first step below the fold. The sheet and the gate draw
             their own plate above, which carries the same two registers,
             so neither ever printed them either. Plan 089.
 
@@ -118,7 +123,6 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
               {steps.map((step, i) => (
                 <li key={i} className={`gl-step gl-step--${step.kind}`}>
                   <div className="dict-mark gl-step__mark">
-                    <span className="dict-mark__jp" lang="ja">{STEP_JP[step.kind] ?? step.kind}</span>
                     <span className="dict-mark__name">{t[STEP_KEY[step.kind]] ?? step.kind}</span>
                   </div>
                   <div className="gl-step__body"><StepText text={step.text} /></div>

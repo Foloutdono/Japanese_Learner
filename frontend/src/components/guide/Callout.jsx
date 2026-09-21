@@ -40,7 +40,7 @@ function measure(anchor, place) {
   return { top: r.top + GAP }
 }
 
-export function Callout({ anchor, place = 'top', jp, text, foot, className = '', live = true }) {
+export function Callout({ anchor, place = 'top', text, foot, className = '', live = true }) {
   const [pos, setPos] = useState(null)
 
   useLayoutEffect(() => {
@@ -74,7 +74,6 @@ export function Callout({ anchor, place = 'top', jp, text, foot, className = '',
       role={live ? 'status' : undefined}
       aria-live={live ? 'polite' : undefined}
     >
-      {jp && <span className="guide-callout__jp" lang="ja">{jp}</span>}
       <p className="guide-callout__text">{text}</p>
       {foot && <div className="guide-callout__foot">{foot}</div>}
     </div>,

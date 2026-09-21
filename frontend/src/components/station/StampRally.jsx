@@ -52,7 +52,7 @@ export function StampRally({ week, streak, t }) {
       </span>
       <span className="stamp-rally__label" aria-hidden="true">
         <span className="stamp-rally__count">
-          {streak ?? 0}<span className="stamp-rally__unit" lang="ja">日</span>
+          {streak ?? 0}
         </span>
         <span className="stamp-rally__caption">{t.streak}</span>
       </span>

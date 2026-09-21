@@ -230,7 +230,6 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
 
       {step === 'done' && (
         <div className="ride__done" data-guide="ride.done">
-          <p className="ride__done-jp" lang="ja" aria-hidden="true">出発進行</p>
           <p className="ride__done-text">
             <Emphasized text={t.rideDoneBody(summary?.dailyNewTarget ?? 10)} />
           </p>

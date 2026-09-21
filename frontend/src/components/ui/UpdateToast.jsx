@@ -22,10 +22,7 @@ export function UpdateToast() {
   if (!ready) return null
   return (
     <div className="dock-note dock-note--update" role="status">
-      <span className="dock-note__text">
-        <span className="dock-note__jp" lang="ja">ダイヤ改正</span>
-        {t.pwaUpdateReady}
-      </span>
+      <span className="dock-note__text">{t.pwaUpdateReady}</span>
       <span className="dock-note__actions">
         <button type="button" className="dock-note__btn dock-note__btn--quiet" onClick={() => swUpdate.dismiss()}>
           {t.pwaUpdateLater}
@@ -50,10 +47,7 @@ export function OfflineNote() {
   if (online || pathname === '/') return null
   return (
     <div className="dock-note dock-note--offline" role="status">
-      <span className="dock-note__text">
-        <span className="dock-note__jp" lang="ja">運休</span>
-        {t.offlineLine}
-      </span>
+      <span className="dock-note__text">{t.offlineLine}</span>
     </div>
   )
 }

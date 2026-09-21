@@ -91,7 +91,7 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
     <section className="rad-family" aria-label={t.radFamily}>
       {radical.levels.map(lv => (
         <Fragment key={lv.level}>
-          <BlockMark jp={lv.level} name={t[`levelHint${lv.level}`]} tally={lv.kanji.length} />
+          <BlockMark code={lv.level} name={t[`levelHint${lv.level}`]} tally={lv.kanji.length} />
           <div className="rad-family__grid">
             {lv.kanji.map(k => (
               <button

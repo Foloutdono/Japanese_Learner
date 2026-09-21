@@ -5,6 +5,7 @@ import { LangProvider } from './LangContext'
 import { Loading } from './components/ui/Loading'
 import Empty from './components/ui/Empty'
 import AppLoading from './screens/AppLoading'
+import fr from './locales/fr'
 import './index.css'
 
 // ── The states sheet (plan 067) ─────────────────────────────
@@ -143,12 +144,14 @@ describe('the boot screen', () => {
     expect(screen.container.querySelector('.app-loading__note').textContent).toBe('')
   })
 
+  // The line opened with サーバー起動中 until 2026-09-21, when every
+  // ornamental Japanese label went; it is the sentence alone now.
   it('owns up to a sleeping server after the wake delay', async () => {
     const screen = await mount(<AppLoading wakesServer wakeAfterMs={20} />)
     await settle()
     const note = screen.container.querySelector('.app-loading__note')
-    expect(note.querySelector('.app-loading__note-jp').textContent).toBe('サーバー起動中')
-    expect(note.textContent.length).toBeGreaterThan('サーバー起動中'.length)
+    expect(note.querySelector('.app-loading__note-jp')).toBeNull()
+    expect(note.textContent).toBe(fr.waitingServer)
   })
 })
 

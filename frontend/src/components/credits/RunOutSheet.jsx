@@ -45,11 +45,11 @@ export function RunOutSheet() {
       </div>
       <div className="balance__rows">
         <div className="balance__cell">
-          <b>+{DAILY_REFILL} <span lang="ja">毎日</span></b>
+          <b>+{DAILY_REFILL}</b>
           <span className="balance__cap">{t.runOutRefill}</span>
         </div>
         <div className="balance__cell">
-          <b>{waiting} <span lang="ja">待機</span></b>
+          <b>{waiting}</b>
           <span className="balance__cap">{t.runOutTomorrow}</span>
         </div>
       </div>

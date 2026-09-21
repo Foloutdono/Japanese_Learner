@@ -76,7 +76,6 @@ export function TrainArrival({ jp, title, onDone }) {
     <div className={`onb-arrival onb-arrival--${phase}`} style={{ '--onb-arrival-x': SPEED }} aria-hidden="true">
       <div className="onb-arrival__scrim" />
       <div className="onb-arrival__board">
-        <span className="onb-arrival__eyebrow" lang="ja">ただいま到着</span>
         <span className="onb-arrival__dest" lang="ja">{jp}</span>
         <span className="onb-arrival__latin">{title}</span>
       </div>

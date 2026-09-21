@@ -1422,13 +1422,14 @@
   border: 1px solid var(--surface-line);
 }
 
-/* 済 — already explained. Deliberately the quietest badge on the stop:
+/* Already explained. Deliberately the quietest badge on the stop:
    i+1 is a recommendation and gets --success, the timestamp is unique
-   data and gets 鶯色, and this is a memory aid. No new pigment. */
+   data and gets 鶯色, and this is a memory aid. No new pigment. The
+   box is the one the other badges wear; what sits in it is a ✓ from
+   the icon set since 2026-09-21, where it was a 済. */
 .anl-stop__done {
   flex-shrink: 0;
-  font-family: var(--font-jp);
-  font-size: 0.68rem;
+  display: inline-flex;
   line-height: 1;
   padding: 2px 4px;
   border-radius: 3px;
@@ -1522,12 +1523,6 @@
   font-weight: 700;
   font-size: var(--fs-body);
   letter-spacing: 0.02em;
-}
-.anl-grab__jp {
-  font-family: var(--font-serif);
-  font-weight: 600;
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
 }
 .anl-grab__lead {
   margin: 0;
@@ -1655,14 +1650,14 @@
   border-color: var(--line-kaiseki);
   border-style: solid;
 }
-.anl-drop__jp {
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: 0.1em;
+/* The lead is the drop zone's own line now: 字幕 stood over it at
+   1.15rem until the ornamental labels went (2026-09-21), and a dashed
+   box the size of this one cannot be led by a 0.88rem caption. */
+.anl-drop__lead {
+  font-size: var(--fs-lead);
+  font-weight: 600;
   color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
 }
-.anl-drop__lead { font-size: 0.88rem; }
 .anl-drop__note { font-size: 0.74rem; color: var(--text-secondary); }
 /* Clipped, not display:none — the latter takes it out of the
    accessibility tree. Same pattern as .analysis-image-input__file. */
@@ -2919,15 +2914,6 @@
   100% { box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35), 0 0 0 10px transparent; }
 }
 
-.onb-arrival__eyebrow {
-  display: block;
-  font-family: var(--font-jp);
-  font-size: 0.7rem;
-  letter-spacing: 0.3em;
-  color: var(--accent2);
-  opacity: 0;
-  animation: onb-arrival-fade calc(200ms * var(--onb-arrival-x)) ease-out calc(300ms * var(--onb-arrival-x)) forwards;
-}
 .onb-arrival__dest {
   display: block;
   margin-top: 4px;
@@ -4323,12 +4309,6 @@ textarea:focus-visible {
   gap: var(--sp-3);
   min-width: 0;
 }
-.dock-note__jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  letter-spacing: var(--tr-term);
-  color: var(--text-on-panel-soft);
-}
 .dock-note__actions {
   display: inline-flex;
   gap: var(--sp-3);
@@ -4930,7 +4910,6 @@ textarea:focus-visible {
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
-.balance__jp { font-size: var(--fs-caption); color: var(--text-secondary); font-weight: 500; }
 .balance__cap {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
@@ -4939,19 +4918,15 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* 無料 — the line that is never charged (core/credits.py,
-   FREE_SOURCES). A sentence under the lattice rather than a third cell
-   in it: .balance__rows is a flush two-column grid, and a third cell
-   would leave half a row empty. */
+/* The line that is never charged (core/credits.py, FREE_SOURCES). A
+   sentence under the lattice rather than a third cell in it:
+   .balance__rows is a flush two-column grid, and a third cell would
+   leave half a row empty. */
 .balance__free {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-2);
   margin: 0;
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
-.balance__free-jp { flex: none; font-weight: 700; color: var(--text-primary); }
 
 /* ── 定期券 — the offer (the paywall) ── */
 /* Shown from five doors, sold from none of them yet. The sheet is
@@ -6458,7 +6433,6 @@ textarea:focus-visible {
 .seg__opt:first-child { border-left: 0; }
 .seg__opt:hover,
 .seg__opt:focus-visible { color: var(--text-primary); filter: none; }
-.seg__opt-jp { font-family: var(--font-jp); font-weight: 700; font-size: var(--fs-sm); }
 .seg__opt--on { background: color-mix(in srgb, var(--accent2) 14%, transparent); color: var(--text-primary); }
 /* The canvas's variants (plan 068): a plain-word option, the full-width
    form (the analyzer's Text / Photo / Video), the analyzer's pigment. */
@@ -6843,7 +6817,6 @@ textarea:focus-visible {
   font-variant-numeric: tabular-nums;
   line-height: 1.3;
 }
-.stamp-rally__unit { font-family: var(--font-jp); font-size: var(--fs-caption-xs); }
 .stamp-rally__caption {
   font-size: var(--fs-caption-xs);
   font-weight: 700;
@@ -6891,14 +6864,6 @@ textarea:focus-visible {
   font-size: var(--fs-sm);
 }
 .hall-pace__sep { color: var(--text-on-panel-soft); font-weight: 400; }
-/* Target met: the onboarding's gold pill, flowed inline. */
-.hall-pace__met {
-  position: static;
-  flex-shrink: 0;
-  box-shadow: none;
-  font-size: var(--fs-caption-xs);
-  line-height: 1.4;
-}
 
 /* ── The queue screen itself ─────────────────────────────────── */
 
@@ -8202,19 +8167,29 @@ textarea:focus-visible {
 .readings-input__submit { margin-top: 26px; }
 
 .readings-input__label {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 8px;
 }
+.readings-input__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.readings-input__row .readings-input__field { margin-bottom: 8px; }
+.readings-input__row svg { flex: none; color: var(--success); }
+
+.readings-input__field--ok   { border-color: var(--success); }
+.readings-input__field--miss { border-color: var(--border); }
+
 /* `--line-color`, not `--line`. Plan 057 established this for the
    DeckDetail form and reported the three that paint the kanji QUIZ;
-   plan 059 is those three (here, .readings-input__add below, and
-   .radical-answer__label further down). Nothing in the app has ever
+   plan 059 was those three. Two of them styled the Japanese half of a
+   label pair (.readings-input__label and .radical-answer__label) and
+   went with those labels on 2026-09-21, so this is the one left, and
+   it keeps the note. Nothing in the app has ever
    set `--line`, so `var(--line, var(--accent))` always resolved to
    the fallback -- 仮名's vermillion, on a card about 漢字, which is a
    plain "one line, one colour" breach on the section that owns 藤色.
@@ -8233,28 +8208,6 @@ textarea:focus-visible {
    as small text at 2.9-3.4:1 and DESIGN.md is explicit that a line
    pigment is "an edge, a ring, or a numeral -- never a fill". Same
    50% figure and the same reason as .deckdetail-form__addline. */
-.readings-input__label [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: 14px;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
-}
-
-.readings-input__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-.readings-input__row .readings-input__field { margin-bottom: 8px; }
-.readings-input__row svg { flex: none; color: var(--success); }
-
-.readings-input__field--ok   { border-color: var(--success); }
-.readings-input__field--miss { border-color: var(--border); }
-
-/* Plan 059 -- second of the three dead `--line` reads; see the note on
-   .readings-input__label [lang="ja"] above for why this is
-   `--line-color` with a 藤色 fallback, mixed toward the ink. */
 .readings-input__add {
   background: none;
   border: none;
@@ -8408,7 +8361,21 @@ textarea:focus-visible {
 /* ── Furigana over the kanji it belongs to (indice_3) ──────
    The reading sits on <rt> per kanji, so a compound shows だい over 大
    and がく over 学 rather than one label spanning both. Sized off the
-   word so the ruby scales with the prompt. */
+   word so the ruby scales with the prompt.
+
+   The BAND here is .char-display's exactly: the same rung, the same
+   `* 1.15` box, the same --sp-4 either side (and the same nothing at
+   480px, where that rule zeroes its margin -- see the phone block near
+   the end of this file). The ruby itself is drawn by __line below,
+   outside this box.
+
+   Turning the furigana hint on used to make this box the ruby's own
+   1.9 line -- 136.8px against the plain specimen's 82.8 -- so the same
+   word in the same card sat 8px lower, its "tap to reveal" line 23px
+   lower, and the card itself measured 17px taller. A hint is a line
+   that appears OVER the word; it is not allowed to move the word, and
+   a card that resizes under the learner is the same defect the 220px
+   floor on .prompt-card__body exists to prevent. */
 .furigana-word {
   font-family: var(--font-jp);
   /* Fitted, not wrapped -- .char-display's own clamp: the card is the
@@ -8420,10 +8387,36 @@ textarea:focus-visible {
     var(--fs-caption),
     calc(96cqw / var(--len, 1)),
     var(--furigana-size, 72px));
+  height: calc(var(--furigana-size, 72px) * 1.15);
+  margin: var(--sp-4) 0;
+  /* The same centring instrument .char-display uses, and for the same
+     reason -- but around __line rather than around the text, because a
+     <ruby> box that became a flex item would be blockified and lose its
+     annotation. The line is ONE block-level item; its rubies stay
+     inline inside it. */
+  display: flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
-  line-height: 1.9;
   text-align: center;
   color: var(--text-primary);
+}
+/* The ruby line, centred on that band and free to be taller than it:
+   `line-height` here is the room the ANNOTATION needs, not the word's
+   own line, and the item overflows the band by half of the difference
+   at each end -- upward into the card's own top padding (27px at the
+   word rung, against a 28-44px --card-pad-top, and the card centres
+   its content above that), downward into empty half-leading. So the
+   reading is printed over the word without anything moving under it.
+
+   A flex ITEM, not an absolutely positioned box -- the obvious way to
+   write "out of the flow" here, and wrong: out of flow it contributes
+   no width, so .flashcard__face (a flex item of .vocab-card-boost
+   .flashcard, and therefore sized to its content) shrinks to nothing
+   around it and the word prints from the card's centre line
+   rightward. */
+.furigana-word__line {
+  line-height: 1.9;
 }
 .furigana-word ruby { ruby-position: over; }
 .furigana-word rt {
@@ -8444,13 +8437,20 @@ textarea:focus-visible {
    Sized between the two: clearly the same answer as the ruby above it,
    not a caption. It also carries every accepted reading for the seven
    deck entries that have more than one, which the ruby cannot — it can
-   only ever show the first. */
+   only ever show the first.
+
+   The separation is this margin now, where it was the ruby box's own
+   spare leading plus a 14px literal: .furigana-word is the specimen's
+   band exactly (see its rule), so the ~24px of empty half-leading that
+   used to sit between the word and this line is gone, and the air that
+   reads as deliberate has to be asked for. --sp-6 is the rung, and
+   lands the pair within a few px of how it has always looked. */
 .flashcard-reading {
   font-family: var(--font-jp);
   font-size: 24px;
   color: var(--success);
   letter-spacing: 0.04em;
-  margin-top: 14px;
+  margin-top: var(--sp-6);
 }
 
 /* ── The radical picker (personal kanji cards) ─────────────
@@ -8509,23 +8509,11 @@ textarea:focus-visible {
    not a one-shot quiz answer. */
 .readings-field__group + .readings-field__group { margin-top: 14px; }
 .readings-field__label {
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
   font-size: 11px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--text-secondary);
   margin-bottom: 6px;
-}
-/* Same treatment as `.deckdetail-form__addline` above, and for the same
-   measured reason: the raw pigment is 2.82:1 on this surface in dark. */
-.readings-field__label [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: 13px;
-  letter-spacing: 0.02em;
-  text-transform: none;
-  color: color-mix(in srgb, var(--line-color, var(--accent)) 50%, var(--text-primary));
 }
 .readings-field__row {
   display: flex;
@@ -8632,15 +8620,6 @@ textarea:focus-visible {
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* Plan 059 -- last of the three dead `--line` reads; see the note on
-   .readings-input__label [lang="ja"] for the reasoning. */
-.radical-answer__label [lang="ja"] {
-  font-family: var(--font-jp);
-  font-size: 13px;
-  letter-spacing: 0.04em;
-  text-transform: none;
-  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
-}
 .radical-answer__char {
   font-family: var(--font-jp);
   font-size: 72px;
@@ -8745,9 +8724,12 @@ textarea:focus-visible {
   font-size: var(--fs-title);
   line-height: 1.3;
 }
-/* The pair. The name is a heading, so it takes the serif; the caption
-   is the Latin half at the caption rung, tracked and indented by the
-   same value so it sits true on the centred axis. */
+/* The terminus's name, and it is a heading, so it takes the serif --
+   the same instrument the balance sheet's own Latin name wears. It was
+   the Japanese half of a pair (本日の目標達成) with .quiz-done__caption
+   under it until 2026-09-21: an end-of-run panel is not a place, and a
+   pair names a place (DESIGN.md, the third standing exception). The
+   caption is the name now, at the name's own rung. */
 .quiz-done__name {
   margin: 0;
   font-family: var(--font-serif);
@@ -8757,16 +8739,6 @@ textarea:focus-visible {
   letter-spacing: var(--tr-name);
   text-indent: var(--tr-name);
   color: var(--text-primary);
-}
-.quiz-done__caption {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
 }
 /* The figure and its label, the fixed pair: the numeral at the
    display rung with the target inline as its unit, and the label
@@ -8815,15 +8787,6 @@ textarea:focus-visible {
 }
 .quiz-done__foot .btn-primary { width: 100%; }
 .quiz-done__foot .btn-depart { margin-top: 0; }
-/* The extra train's name as the quiet second register beside the
-   learner's own words (the analyzer's control grammar: Latin leads,
-   the Japanese is the aside). */
-.quiz-done__extra-jp {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tr-term);
-  color: var(--text-secondary);
-}
 
 /* ── 待合 — the wait (plan 067) ──────────────────────────────
    The canvas's states sheet: three gold dots, no spinner. The rest
@@ -11428,11 +11391,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-size: var(--fs-sm);
   color: var(--text-secondary);
 }
-.app-loading__note-jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
-  letter-spacing: var(--tr-term);
-}
 
 /* ── 改札の戻り — the shell's callback passing through (screens/NativeReturn.jsx)
    The boot screen's room, with one door: the deep link as a button, for
@@ -12854,15 +12812,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   background: var(--overlay-hover);
 }
 .dict-gate + .dict-gate { border-left: 1px solid var(--surface-line); }
-.dict-gate__jp {
-  display: inline-flex;
-  align-items: baseline;
-  gap: var(--sp-2);
-  font-family: var(--font-serif);
-  font-size: var(--fs-body);
-  line-height: 1.2;
-  color: var(--text-secondary);
-}
 .dict-gate__n {
   font-family: var(--font-display);
   font-size: var(--fs-caption);
@@ -12871,12 +12820,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-variant-numeric: tabular-nums;
   color: var(--text-secondary);
 }
-/* The plain-language half. It stays in the caption register whichever
-   gate is open — a caption is --text-secondary by rule, and the name
-   above it is what carries the selection. */
+/* The name, and it is the whole gate now: it stood under 音読み in the
+   caption register, and with the Japanese half retired (see
+   ReadingGate) it takes the register the term held — one rung up, the
+   count riding its baseline, and the ambient ink when this is the gate
+   you are standing at. */
 .dict-gate__name {
+  display: inline-flex;
+  align-items: baseline;
+  gap: var(--sp-2);
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-caption);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-indent: var(--tr-caption);
@@ -12889,7 +12843,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    (DESIGN.md, Colour) — and the one place the count is worth printing,
    since the other register is behind a tap and cannot be counted by
    eye. */
-.dict-gate--on .dict-gate__jp,
+.dict-gate--on .dict-gate__name,
 .dict-gate--on .dict-gate__n { color: var(--text-primary); }
 .dict-gate--on::after {
   content: '';
@@ -15457,7 +15411,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     border-radius: var(--r-panel);
   }
 
-  .char-display {
+  .char-display,
+  /* The furigana specimen is the same band as the plain one (see
+     .furigana-word) -- including here, or the hint would move the word
+     on a phone exactly as it used to everywhere. */
+  .furigana-word {
     margin: 0 0;
   }
 
@@ -16218,31 +16176,52 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    that names every stroke count and lights the one being read. Both
    printed the same term twice and in two languages, with a rule of
    their own. What is left is the name and the hairline; the tally
-   rides it as data — tracked, tabular, quiet. */
+   rides it as data — tracked, tabular, quiet.
+
+   The mark was itself a pair until 2026-09-21 — 五十音 over MAIN
+   SYLLABARY, 規則 over RULE — with the Japanese at --fs-lead in the
+   collection's ink and the name a 10px caption under it. Owner's call:
+   the Japanese half named a part rather than a place, so it went, and
+   the name inherited what it wore. Two rungs up (--fs-caption-xs →
+   --fs-sm) and out of the secondary ink into the collection's own, so
+   the line still opens its block at a glance — which is the whole job
+   a mark has. */
 .dict-mark {
   display: flex;
   align-items: baseline;
   gap: var(--sp-3);
   padding: 0 var(--sp-1) var(--sp-2);
-  border-bottom: 1px solid var(--surface-line);
+  /* The rule under a mark is the mark's own, so it carries the
+     collection's pigment the way the name does -- quietly: an edge,
+     never a fill (DESIGN.md, Colour). It was --surface-line, which is
+     the hairline every block in the sheet is divided by, and a heading
+     that shares its divider with the body reads as one more row. */
+  border-bottom: 1px solid color-mix(in srgb, var(--syl-accent, var(--line-color, var(--line-jisho))) 45%, var(--surface-line));
 }
-.dict-mark__jp {
-  font-family: var(--font-jp);
+/* The one lead a mark still takes, and it is never Japanese: the JLPT
+   level over a radical family's grid, where the level IS the name and
+   .dict-mark__name beside it is the gloss. --font-display, because it
+   is Latin and a figure (DESIGN.md, Type). */
+.dict-mark__code {
+  font-family: var(--font-display);
   font-size: var(--fs-lead);
   font-weight: 700;
   line-height: 1.1;
   letter-spacing: var(--tr-term);
   color: color-mix(in srgb, var(--syl-accent, var(--line-color, var(--line-jisho))) 72%, var(--text-primary));
 }
-/* The twin, tracked out under the same baseline — printed now, because
-   the charts under these marks no longer name their own rows and 五十音
-   alone tells a learner nothing they can act on. */
 .dict-mark__name {
   font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
+  font-size: var(--fs-body);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
   text-transform: uppercase;
+  color: color-mix(in srgb, var(--syl-accent, var(--line-color, var(--line-jisho))) 72%, var(--text-primary));
+}
+/* Beside a code the name is the gloss, not the mark, so it drops back
+   to the caption register the pair's Latin half always had. */
+.dict-mark__code + .dict-mark__name {
+  font-size: var(--fs-caption-xs);
   color: var(--text-secondary);
 }
 .dict-mark__tally {
@@ -17116,27 +17095,33 @@ html { scrollbar-gutter: stable; }
   gap: var(--sp-1);
   min-width: 0;
 }
-.levelup__jp {
-  font-family: var(--font-jp);
-  font-weight: 700;
+/* The mark on the board. It was 進級 at --fs-lead in gold with this
+   line as its caption under it; the Japanese went with the ornamental
+   labels on 2026-09-21 and the announcement would otherwise have been
+   the quietest ink on a board hung across the screen — so the name
+   takes the rung and the metal the term wore. The unit under the
+   drums stays a caption: it labels a figure (DESIGN.md, Figures). */
+.levelup__latin {
+  font-family: var(--font-display);
   font-size: var(--fs-lead);
-  letter-spacing: var(--tr-name);
-  line-height: 1;
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  white-space: nowrap;
   color: var(--accent2);
 }
-.levelup__latin,
+/* A tracked line on a centred axis cancels the trailing letter's
+   tracking with an equal indent (DESIGN.md, Tracking). */
 .levelup__unit {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
   text-transform: uppercase;
   white-space: nowrap;
   color: var(--text-on-panel-soft);
 }
-/* A tracked line on a centred axis cancels the trailing letter's
-   tracking with an equal indent (DESIGN.md, Tracking). */
-.levelup__unit { text-indent: var(--tr-caption); }
 /* The figure and its label, a fixed pair: drums, caps label beneath. */
 .levelup__flaps {
   display: flex;
@@ -19940,7 +19925,7 @@ a.slip__act { text-decoration: none; }
   color: var(--text-secondary);
 }
 /* ── The steps ──
-   規則, 使い方, 注意: each opens with the mark the radical index puts
+   RULE, USE, CAREFUL: each opens with the mark the radical index puts
    over a level (.dict-mark), and the text under it is body prose at
    the reading leading. An ordered list, because the order IS the
    lesson; the numerals are the marks, so the list's own are off. */
@@ -19974,7 +19959,7 @@ a.slip__act { text-decoration: none; }
 /* A trap is a state of the step, not a louder step: the mark takes
    the due ink as an edge, the way the study card's stage word does. */
 .gl-step--careful .gl-step__mark { border-bottom-color: var(--state-due); }
-.gl-step--careful .dict-mark__jp { color: color-mix(in srgb, var(--state-due) 72%, var(--text-primary)); }
+.gl-step--careful .dict-mark__name { color: color-mix(in srgb, var(--state-due) 72%, var(--text-primary)); }
 /* ── The neighbours ──
    One row per rival, the radical family's door: the pattern, its
    gloss, the one line that says which to use when, and the ▶ sliding
@@ -20207,16 +20192,6 @@ a.slip__act { text-decoration: none; }
   animation: guide-callout-in 260ms ease-out backwards;
 }
 .guide-callout--live { pointer-events: auto; }
-/* The pair, small: the Japanese at the small rung in the JP face with
-   the body's tracking (the reading's 0.30em spaced 等級 into two words),
-   in the soft ink, so the sentence under it is the thing read. */
-.guide-callout__jp {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tr-term);
-  line-height: 1.3;
-  color: var(--text-on-panel-soft);
-}
 /* The sentence at the body rung: it is the one thing the note is for,
    and the small rung read as a footnote beside 44px controls. */
 .guide-callout__text {
@@ -20260,20 +20235,22 @@ a.slip__act { text-decoration: none; }
   content: '';
   flex: 1;
 }
-.ride__done-jp {
-  margin: 0;
-  font-family: var(--font-jp);
-  font-size: var(--fs-display);
-  letter-spacing: var(--tr-name);
-  color: var(--line-color, var(--accent));
-}
+/* The sentence, and on the card ride it is now the whole call: 出発進行
+   stood over it at --fs-display until 2026-09-21, when the ornamental
+   Japanese went (DESIGN.md, the third standing exception), and a room
+   with two grow-only spacers in it cannot be headed by a caption. So
+   the line takes the ambient ink at the title rung, and the term it
+   was written to carry -- the pace, through Emphasized -- takes the
+   pigment the call had. The plate below keeps the smaller reading:
+   there the heading is .ride__plate-cap. */
 .ride__done-text {
   margin: 0;
   max-width: 28em;
-  font-size: var(--fs-lead);
+  font-size: var(--fs-title);
   line-height: 1.5;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
+.ride__done-text strong { color: var(--line-color, var(--accent)); }
 .ride__done-note {
   margin: 0;
   max-width: 28em;
@@ -20289,6 +20266,12 @@ a.slip__act { text-decoration: none; }
   flex-direction: column;
   align-items: center;
   gap: var(--sp-3);
+  /* The gutter every other docked foot keeps under its action (the
+     --sp-5 in `.stage > .stage__foot`'s padding-block): this room's
+     spacer grows to the last pixel of the stage, and the level bar is
+     docked immediately under it, so Continue ended flush against the
+     XP figures -- measured at 0.0px. */
+  padding-bottom: var(--sp-5);
 }
 .ride__done-foot .btn-depart { width: 100%; }
 
@@ -20298,13 +20281,23 @@ a.slip__act { text-decoration: none; }
    pigment (a line colour is a section's name, never decoration), the
    open-for-now note, and the foot with the quiet offer over the one
    filled action -- PassStep's own order. */
+/* The plate's heading: it captioned 定期券 above it until 2026-09-21
+   and stands alone now, so it takes the rung and the ink the term had
+   (and loses the negative margin that tucked it under it). */
 .ride__plate-cap {
-  margin: calc(-1 * var(--sp-4)) 0 0;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-lead);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  color: var(--line-color, var(--accent));
+}
+/* Under that heading the sentence is a sentence again, not the call
+   the card ride's is. */
+.ride__plate .ride__done-text {
+  font-size: var(--fs-lead);
   color: var(--text-secondary);
 }
 .ride__plate-list {

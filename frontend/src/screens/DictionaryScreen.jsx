@@ -1057,13 +1057,16 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, cols, jp, title, byGroup, narrow = false, tail, selected, setSelected }) {
+function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected }) {
 	return (
 		<div className="syllabary-table-wrap">
-			{/* The chart's mark, then the chart. The mark names it in both
-			    languages; the grid carries the same name for a screen
-			    reader, which reads the group rather than the sign. */}
-			<BlockMark jp={jp} name={title} />
+			{/* The chart's mark, then the chart. The mark named it in both
+			    languages until 2026-09-21 (五十音 MAIN SYLLABARY); the
+			    Japanese half captioned a chart rather than naming a place,
+			    so what is left is the name a learner can act on. The grid
+			    carries the same name for a screen reader, which reads the
+			    group rather than the sign. */}
+			<BlockMark name={title} />
 			<div
 				className={`syllabary-table${narrow ? ' syllabary-table--narrow' : ''}`}
 				role="group"
@@ -1165,7 +1168,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						<SyllabaryTable
 							rows={MAIN_ROWS}
 							cols={VOWEL_COLS}
-							jp="五十音"
 							title={t.syllabaryMain}
 							byGroup={byGroup}
 							tail={nSolo}
@@ -1177,7 +1179,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 							<SyllabaryTable
 								rows={longRows}
 								cols={VOWEL_COLS}
-								jp="長音"
 								title={t.syllabaryLong}
 								byGroup={byGroup}
 								selected={selected}
@@ -1190,7 +1191,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 						<SyllabaryTable
 							rows={VOICED_ROWS}
 							cols={VOWEL_COLS}
-							jp="濁音"
 							title={t.syllabaryVoiced}
 							byGroup={byGroup}
 							selected={selected}
@@ -1202,7 +1202,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 								rows={YOON_ROWS}
 								cols={YOON_COLS}
 								narrow
-								jp="拗音"
 								title={t.syllabaryYoon}
 								byGroup={byGroup}
 								selected={selected}
@@ -1214,7 +1213,6 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 							<SyllabaryTable
 								rows={FOREIGN_ROWS}
 								cols={VOWEL_COLS}
-								jp="外来音"
 								title={t.syllabaryForeign}
 								byGroup={byGroup}
 								selected={selected}

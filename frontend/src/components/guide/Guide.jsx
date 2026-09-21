@@ -142,7 +142,6 @@ export function Guide({ gate, onEnd }) {
   const pos = lower
     ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
     : { top: rect.bottom + PAD + GAP }
-  const jp = t[`guide${stop.key}Jp`]
   const text = t[`guide${stop.key}`]
 
   function next() {
@@ -172,7 +171,6 @@ export function Guide({ gate, onEnd }) {
         style={pos}
         data-place={lower ? 'above' : 'below'}
       >
-        {jp && <span className="guide-callout__jp" lang="ja">{jp}</span>}
         <p className="guide-callout__text">{text}</p>
         <div className="guide-callout__foot">
           <span className="guide-callout__count" aria-hidden="true">{index + 1}/{stops.length}</span>

@@ -46,12 +46,17 @@ describe('the guide registry', () => {
     }
   })
 
-  it('every stop has its sentence and its pair in both tables', () => {
+  // One sentence per stop, in both tables. It was a sentence and a
+  // Japanese eyebrow over it until 2026-09-21, when the ornamental
+  // half of every such pair was retired app-wide (DESIGN.md, "Say
+  // less"); the note is the sentence now, so a leftover `…Jp` string
+  // would be a table entry nothing prints.
+  it('every stop has its sentence in both tables, and no leftover eyebrow', () => {
     for (const stops of Object.values(GUIDES)) {
       for (const stop of stops) {
         for (const t of [en, fr]) {
           expect(typeof t[`guide${stop.key}`], stop.key).toBe('string')
-          expect(typeof t[`guide${stop.key}Jp`], stop.key).toBe('string')
+          expect(t[`guide${stop.key}Jp`], stop.key).toBeUndefined()
         }
       }
     }

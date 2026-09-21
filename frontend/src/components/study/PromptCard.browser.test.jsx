@@ -468,3 +468,86 @@ describe('the flashcard is the whole card', () => {
     })
   }
 })
+
+// ── The furigana hint moves nothing ────────────────────────
+//
+// indice_3 prints the reading over the word. It was doing more than
+// that: .furigana-word was the ruby's own 1.9 line — 136.8px at the
+// word rung against the plain specimen's 82.8 — so turning the hint on
+// for the SAME card pushed the word 8px down, the "tap to reveal" line
+// under it 23px down, and grew the card by 17px. A hint is a line that
+// appears over the word; a card that resizes under the learner is the
+// defect the stage floor above exists to prevent, and this was that
+// defect arriving through the hint switch instead.
+//
+// Measured on the word, not on its box: a <ruby> element's rect
+// includes its annotation, so only a Range over the base text can say
+// whether the WORD moved.
+const furiganaCard = {
+  card_id: 'vocab_n5_電車_でんしゃ',
+  source: 'builtin_vocab',
+  mode: 'vocab.flashcard.f2b',
+  direction: 'f2b',
+  kanji: '電車',
+  kana: 'でんしゃ',
+  meaning: 'train',
+  hints: { indice_3: [{ text: '電', reading: 'でん' }, { text: '車', reading: 'しゃ' }] },
+}
+
+function wordRect(el) {
+  const base = el.querySelector('ruby')?.firstChild ?? el.firstChild
+  const range = document.createRange()
+  range.selectNode(base)
+  return range.getBoundingClientRect()
+}
+
+async function furiganaLayout(activeHints) {
+  const screen = await render(
+    <Contained>
+      <div className="quiz-card-stage vocab-card-boost">
+        <div className="card-transition">
+          <div className="card-transition-live">
+            <CardPrompt
+              card={furiganaCard}
+              t={{ tapToReveal: 'Touchez pour révéler' }}
+              session={{}}
+              cardNonce="1"
+              activeHints={activeHints}
+              foot={FOOT}
+            />
+          </div>
+        </div>
+      </div>
+    </Contained>
+  )
+  const { container } = screen
+  await settled(container)
+  const card = container.querySelector('.prompt-card').getBoundingClientRect()
+  const spec = container.querySelector('.furigana-word, .char-display')
+  const hint = container.querySelector('.flashcard__hint').getBoundingClientRect()
+  return {
+    cardHeight: card.height,
+    wordTop: wordRect(spec).top - card.top,
+    hintTop: hint.top - card.top,
+    ruby: container.querySelector('.furigana-word rt')?.textContent ?? null,
+  }
+}
+
+describe('the furigana hint (indice_3)', () => {
+  for (const [label, viewport] of [['a desktop', [1280, 800]], ['a phone', PHONE]]) {
+    it(`leaves the word, the hint line and the card where they were on ${label}`, async () => {
+      await page.viewport(...viewport)
+      const off = await furiganaLayout([])
+      const on = await furiganaLayout(['indice_3'])
+
+      // The hint really is on — otherwise the three below match for
+      // the wrong reason.
+      expect(off.ruby).toBe(null)
+      expect(on.ruby).toBe('でん')
+
+      expect(Math.abs(on.wordTop - off.wordTop)).toBeLessThanOrEqual(1)
+      expect(Math.abs(on.hintTop - off.hintTop)).toBeLessThanOrEqual(1)
+      expect(Math.abs(on.cardHeight - off.cardHeight)).toBeLessThanOrEqual(1)
+    })
+  }
+})
