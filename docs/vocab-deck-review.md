@@ -310,16 +310,29 @@ that is a plan of its own, 106b, and until then a learner at N3 meets
 After 106: 166 unmatched lemmas and 330 occurrences in the corpus (from
 194 and 633), 153 of them absent.
 
-### 107 — French glosses per card, not per written form
+### 107 — French glosses per card, not per written form (DONE, 2026-09-21)
 
-Re-key `vocab_fr.json` by the deck key `"{kanji}::{kana}"` (the shape
-`vocab_frequency.json` and `frequency_overrides.item_key` already use),
-with `translations/fr/vocab_fr.py` reading the new key first and the
-bare written form as a fallback so nothing goes blank mid-migration.
-Fill the 38 missing and split the 552 shared, starting with the forms
-whose cards mean different things (後, 店, 門, 二人). The readers are
-`routes/dictionary.py` and `routes/vocab.py`. Not part of the id: no
-migration.
+`vocab_fr.json` keeps its written-form keys and gains per-card keys,
+`"{kanji}::{kana}"` (the deck key `vocab_frequency.json` and
+`frequency_overrides.item_key` already use). `translations.fr_gloss`
+reads the card's own line first and the form second, so nothing goes
+blank; `get_meaning` — every reader but two search-index lines in
+`routes/dictionary.py`, now routed through it too — takes it from
+there. Not part of the id: no migration.
+
+Measured properly, the 552 "shared" cards were two things: 220 cards
+that share a form AND a meaning (the しいんと pair), for which one gloss
+is right, and 334 cards across 160 forms that share a form with a card
+of a different meaning and read whichever card's gloss the form
+carried — the N5 私 as "je (fem.)", the N5 戸 as "unité de mesure pour
+les maisons", the N5 辛い as "douloureux", the N5 僕 as "serviteur". Each
+of the 334 now has a line of its own, translated from its own English
+gloss, and the 38 cards with no French at all have theirs. The audit
+script measures the two figures per card now, and both are zero.
+
+Found on the way and left for 108: the N2 entry for たいりつ is
+written "Ͼ立" — a mojibake where 対 should be — which is a written-form
+correction and therefore a `MOVES` line.
 
 ### 108 — English gloss hygiene
 

@@ -138,8 +138,9 @@ runtime purpose. Two consequences worth knowing:
   106 (done) readings and forms — three `MOVES` lines in
   `content/vocab_renames.py`, the deck's spelling filed under UniDic's
   lemma and the auxiliary position closed in `study/card_lookup.py`;
-  the cross-level duplicates deferred to 106b; 107–110 are the rest,
-  planned in `docs/vocab-deck-review.md`.
+  the cross-level duplicates deferred to 106b, 107 (done) the French
+  gloss per card (`translations.fr_gloss`, `tests/test_translations.py`);
+  108–110 are the rest, planned in `docs/vocab-deck-review.md`.
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -358,7 +359,7 @@ sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,405 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,430 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

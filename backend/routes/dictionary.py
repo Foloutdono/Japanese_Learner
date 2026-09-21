@@ -18,7 +18,7 @@ from content.kana_strokes import stroke_count as kana_stroke_count
 # third. One owner now, and KANJI_RADICALS is the deck-scoped table rather
 # than all 13,108 rows; anything outside the deck comes from the database.
 from content.radical_data import KANJI_RADICALS, RADICAL_BY_NUMBER, info_for as radical_info
-from translations import get_meaning
+from translations import get_meaning, fr_gloss
 from content.kanji_meanings import KANJI_FR
 from translations.fr.vocab_fr import VOCAB_FR
 from core.auth import get_user_id
@@ -487,7 +487,7 @@ def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str,
                 jp_fields=(w.get("kanji", ""), w.get("kana", "")),
                 latin_fields=(
                     w.get("meaning", ""),
-                    VOCAB_FR_MAP.get(w.get("kanji") or w.get("kana", ""), ""),
+                    (fr_gloss(w, VOCAB_FR_MAP) or ""),
                 ),
             ):
                 matches.append((lvl, w, get_meaning(w, lang, VOCAB_FR_MAP)))
@@ -502,7 +502,7 @@ def _vocab_lexicon() -> tuple[str, ...]:
         for w in vocab_list
         for gloss in (
             w.get("meaning", ""),
-            VOCAB_FR_MAP.get(w.get("kanji") or w.get("kana", ""), ""),
+            (fr_gloss(w, VOCAB_FR_MAP) or ""),
         )
     )
 

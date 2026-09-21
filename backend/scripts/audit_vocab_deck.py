@@ -213,13 +213,36 @@ def readings(rows) -> dict:
     }
 
 
+def _senses(meaning: str) -> tuple[str, ...]:
+    return tuple(sorted(x.strip().lower() for x in meaning.replace(";", ",").split(",") if x.strip()))
+
+
 def glosses(rows, fr: dict[str, str]) -> dict:
+    """French is read per card first and per written form second
+    (translations.fr_gloss, plan 107). "no_french" is a card neither key
+    reaches. "shared_french" is a card that shares its written form with
+    a card of a DIFFERENT English meaning and has no line of its own, so
+    it reads whichever card's gloss the form carries -- the N5 私 as
+    "je (fem.)" -- and 220 cards that share a form AND a meaning (the
+    しいんと pair) are not counted: one gloss is right for both."""
     unspaced = sum(1 for _, e in rows if "," in e.get("meaning", "") and ", " not in e.get("meaning", ""))
     parens = sum(1 for _, e in rows if "(" in e.get("meaning", ""))
     empty = [_key(e) for _, e in rows if not e.get("meaning", "").strip()]
-    no_fr = [_key(e) for _, e in rows if (e.get("kanji") or e.get("kana")) not in fr]
-    forms = collections.Counter(e["kanji"] for _, e in rows if e.get("kanji"))
-    shared_fr = {form: n for form, n in forms.items() if n > 1 and form in fr}
+
+    def has_own(e):
+        return e.get("kanji") and e.get("kana") and f"{e['kanji']}::{e['kana']}" in fr
+
+    no_fr = [_key(e) for _, e in rows if not has_own(e) and (e.get("kanji") or e.get("kana")) not in fr]
+    by_form = collections.defaultdict(list)
+    for _, e in rows:
+        if e.get("kanji"):
+            by_form[e["kanji"]].append(e)
+    shared = [
+        _key(e)
+        for form, cards in by_form.items()
+        if len({_senses(c.get("meaning", "")) for c in cards}) > 1
+        for e in cards if not has_own(e)
+    ]
     return {
         "unspaced_commas": unspaced,
         "parenthesised": parens,
@@ -227,8 +250,8 @@ def glosses(rows, fr: dict[str, str]) -> dict:
         "empty_count": len(empty),
         "no_french": no_fr,
         "no_french_count": len(no_fr),
-        "shared_french_forms": len(shared_fr),
-        "shared_french_cards": sum(shared_fr.values()),
+        "shared_french": shared,
+        "shared_french_cards": len(shared),
     }
 
 
@@ -410,7 +433,7 @@ def render(report: dict) -> str:
         f"  glosses: parenthesised note   {g['parenthesised']:,}",
         f"  glosses: empty                {g['empty_count']}",
         f"  no French gloss               {g['no_french_count']}",
-        f"  French gloss shared by form   {g['shared_french_forms']} forms, {g['shared_french_cards']} cards",
+        f"  French borrowed from a form   {g['shared_french_cards']} cards (a different sense, no line of its own)",
         f"  keys missing from the order   {f['missing_from_order_count']}",
         f"  stale keys in the order       {f['stale_in_order_count']}",
         f"  kanji above the card's level  {k['count']:,}  "

@@ -42,20 +42,23 @@ class DeckMeasurementTests(unittest.TestCase):
     def test_no_gloss_is_empty(self) -> None:
         self.assertEqual(self.report["glosses"]["empty"], [])
 
+    def test_every_card_has_french_and_none_borrows_another_senses(self) -> None:
+        """Plan 107: a card reads its own French line, or the form's when
+        every card of that form means the same thing. 38 had none and
+        334 read another sense's; both lists are empty and stay so."""
+        self.assertEqual(self.report["glosses"]["no_french"], [])
+        self.assertEqual(self.report["glosses"]["shared_french"], [])
+
     def test_ratchets_never_rise(self) -> None:
         """The review's figures (2026-09-21). Lower a bound when the plan
         that lowers the figure lands; never raise one."""
         r = self.report
         # A "/" reading field is the deck's convention since plan 104
         # settled the splitter on it (十 joined its two with a space
-        # until 106), so it is measured but not bounded. 552 French
-        # shares: the N5 見る, one spelling since 106, now shares its
-        # form with the N3 見る the way 後's four cards do -- 107's work.
+        # until 106), so it is measured but not bounded.
         bounds = {
             ("duplicates", "exact_pairs_count"): 25,
             ("glosses", "unspaced_commas"): 2600,
-            ("glosses", "no_french_count"): 38,
-            ("glosses", "shared_french_cards"): 552,
         }
         for (section, key), bound in bounds.items():
             with self.subTest(figure=f"{section}.{key}"):
