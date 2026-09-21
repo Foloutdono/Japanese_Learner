@@ -3,6 +3,7 @@
 // every file browser globals only, and this config is the one file in
 // src reach that legitimately runs in Node.
 import process from 'node:process';
+import { fileURLToPath } from 'node:url';
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
 import { VitePWA } from 'vite-plugin-pwa';
@@ -62,9 +63,25 @@ const BROWSER_OPTIMIZE = {
   ],
 };
 
+// vite-plugin-pwa is off outside a production web build, so the module
+// main.jsx imports from it resolves to nothing under vitest. No test ever
+// loads main.jsx -- but every lane's Vite server has this folder as its
+// root, reaches index.html, and warms up the one <script> it carries,
+// which is main.jsx. That warm-up logged a "Failed to resolve import"
+// pre-transform error each time: 448 of them in a CI run, every one about
+// a line no test runs.
+//
+// It goes on the PROJECT rather than the config root, for the same reason
+// optimizeDeps does above: a root-level `resolve.alias` does not reach
+// these servers (tried, and the errors kept coming).
+const PWA_REGISTER_ALIAS = {
+  'virtual:pwa-register': fileURLToPath(new URL('./pwa.register-stub.js', import.meta.url)),
+};
+
 function browserProject(name, include, viewport, contextOptions) {
   return {
     optimizeDeps: BROWSER_OPTIMIZE,
+    resolve: { alias: PWA_REGISTER_ALIAS },
     test: {
       name,
       globals: false,
@@ -187,6 +204,7 @@ export default defineConfig(({ mode }) => {
     // node lane.
     projects: [
       {
+        resolve: { alias: PWA_REGISTER_ALIAS },
         test: {
           name: 'node',
           environment: 'node',
