@@ -8698,7 +8698,7 @@ textarea:focus-visible {
 .quiz-done .btn-panel {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 /* ── 終着 — the paced terminus ───────────────────────────────
@@ -8722,15 +8722,15 @@ textarea:focus-visible {
 .quiz-done__row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sp-5);
   flex-wrap: wrap;
   justify-content: center;
 }
-.quiz-done__extra [lang="ja"] { font-family: var(--font-jp); margin-right: 6px; }
+.quiz-done__extra [lang="ja"] { font-family: var(--font-jp); margin-right: var(--sp-2); }
 .quiz-done__row .btn-ghost {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 /* ── 待合 — the wait (plan 067) ──────────────────────────────
