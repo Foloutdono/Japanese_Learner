@@ -20216,6 +20216,12 @@ a.slip__act { text-decoration: none; }
   flex-direction: column;
   align-items: center;
   gap: var(--sp-3);
+  /* The gutter every other docked foot keeps under its action (the
+     --sp-5 in `.stage > .stage__foot`'s padding-block): this room's
+     spacer grows to the last pixel of the stage, and the level bar is
+     docked immediately under it, so Continue ended flush against the
+     XP figures -- measured at 0.0px. */
+  padding-bottom: var(--sp-5);
 }
 .ride__done-foot .btn-depart { width: 100%; }
 
