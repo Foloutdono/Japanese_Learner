@@ -1619,7 +1619,7 @@ const boarding = {
   authModeAria: 'Login or sign up',
   brdDocumentTitle: 'Boarding',
   // Welcome: the sign, the rolling stock, the promise.
-  brdTagline: 'Take the train to a very Japanese time of your life.',
+  brdTagline: 'Reach your goals.',
   brdBoard: 'Board',
   brdHaveAccount: 'Already have an account? Sign in',
   // Google: "continue", never "sign up" or "sign in" — a provider does
@@ -1652,9 +1652,12 @@ const boarding = {
   brdAccountHint: 'Your journey is already saved. An account is how you reach it from another device — and how you keep it when you change phones.',
   brdAccountCreate: 'Create my account',
   brdAccountSkip: 'Continue without an account',
-  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', listening: 'Listening', reading: 'Reading', kana: 'Kana', exam: 'Mock exam' },
-  brdDemoMeaning: { station: 'station', toEat: 'to eat', fillIn: 'Fill in', craft: 'craft', listen: 'Listen', readIt: 'Read it', ticket: 'ticket', mountain: 'mountain', kippu: 'ki · p · pu', timer: '24:18' },
-  brdDemoFoot: { kanjiMeaning: 'Kanji → meaning', wordMeaning: 'Word → meaning', ruleSentence: 'Rule → sentence', meaningKanji: 'Meaning → kanji', soundMeaning: 'Sound → meaning', sentenceMeaning: 'Sentence → meaning', kanjiReading: 'Kanji → reading', kanaSound: 'Kana → sound', timedPaper: 'Timed paper' },
+  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulary', grammar: 'Grammar', dictation: 'Dictation', reading: 'Reading', kana: 'Kana', translation: 'Translation', analyzer: 'Analyzer', exam: 'Mock exam' },
+  brdDemoMeaning: { station: 'station', toEat: 'to eat', whichRule: 'Which rule?', craft: 'craft', writeIt: 'Write it', readIt: 'Read it', kippu: 'kippu', ki: 'ki', sayIt: 'Translate it', yama: 'yama · san', breakItDown: 'Break it down', timer: '24:18' },
+  brdDemoFoot: { kanjiMeaning: 'Kanji → meaning', wordMeaning: 'Word → meaning', sentenceRule: 'Sentence → rule', meaningKanji: 'Meaning → kanji', soundText: 'Sound → text', sentenceMeaning: 'Sentence → meaning', wordReading: 'Word → reading', kanaRomaji: 'Kana → romaji', meaningSentence: 'Meaning → sentence', kanjiReadings: 'Kanji → readings', sentenceGrammar: 'Sentence → grammar', timedPaper: 'Timed paper' },
+  // The 翻訳 card's prompt is in the learner's language, so it is a
+  // string of the interface's rather than content.
+  brdDemoPrompt: { waiting: 'I’m waiting for a friend at the station.' },
   // The questions.
   brdNameQ: 'What’s your name?',
   brdNameAria: 'Your name',

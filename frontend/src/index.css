@@ -18709,10 +18709,9 @@ a.slip__act { text-decoration: none; }
 }
 .brd__body::before { margin-bottom: calc(-1 * var(--sp-5)); }
 .brd__body::after { margin-top: calc(-1 * var(--sp-5)); }
-/* The welcome fills its body itself (the hero, then the rolling stock
-   taking every pixel left), so it grows no spacer at either end. */
-.brd__body--top::before,
-.brd__body--top::after { content: none; }
+/* The welcome centres its own block with the same pair, redefined
+   beside it (`.brd__body--top::before`, under "welcome" below) so its
+   air is set where its pieces are. */
 .brd__air { display: none; }
 .brd__body > .brd__air {
   display: block;
@@ -18927,9 +18926,27 @@ a.slip__act { text-decoration: none; }
    the text, same bleed for the cards, nothing left to scroll. Scoped to
    the welcome: every other step's body sits inside `.brd__cars`, which
    clips, and none of them has a bleeding child. */
-.brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); }
-.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding-top: var(--sp-7); text-align: center; animation: brd-in 480ms ease-out backwards; }
-.brd-roll { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
+.brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); gap: var(--sp-6); }
+/* The sign, the stock and the promise stand as ONE block on the centre
+   line. The roll used to be the flex item that took the free room
+   (flex: 1, centring its lanes inside it), which put the whole of a
+   tall screen's spare height between the cards and their neighbours:
+   the sign pinned under the top edge, the tagline pinned over the
+   foot, and the cards adrift in the middle with a gulf on each side.
+   The room now goes to two grow-only spacers at the ends of the body
+   instead -- the same pair every other step uses (`.brd__body::before`
+   and `::after` above, which the welcome had switched off), a basis of
+   0 so they are nothing at all once there is none, their negative
+   margins re-cut to this body's wider gap -- and the three pieces keep
+   one --sp-6 between them at every height. The roll still
+   gives way first when the screen is short (min-height: 0, and the
+   back lane steps aside below), and the hero keeps a floor of --sp-4
+   over the frame's own top padding so the sign never touches the
+   edge on a screen where the spacers have vanished. */
+.brd__body--top::before { margin-bottom: calc(-1 * var(--sp-6)); }
+.brd__body--top::after { margin-top: calc(-1 * var(--sp-6)); }
+.brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding-top: var(--sp-4); text-align: center; animation: brd-in 480ms ease-out backwards; }
+.brd-roll { position: relative; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
 /* Two whole lanes want 424px -- two 204px cards and the sp-4 between
@@ -18959,6 +18976,10 @@ a.slip__act { text-decoration: none; }
 .brd-demo__glyph { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
 .brd-demo__t { display: block; width: 100%; font-family: var(--font-jp); font-size: var(--fs-display); line-height: 1.2; text-align: center; white-space: nowrap; color: var(--text-primary); }
 .brd-demo__t--sm { font-size: var(--fs-lead); line-height: 1.6; white-space: normal; text-wrap: balance; }
+/* The 翻訳 card's prompt: the learner's language, so the interface's
+   serif rather than the Japanese face, and a rung down -- a French
+   sentence is longer than the Japanese one it asks for. */
+.brd-demo__t--latin { font-family: var(--font-serif); font-size: var(--fs-body); line-height: 1.5; }
 .brd-demo__t--cap { display: block; margin-bottom: var(--sp-1); font-family: var(--font-display); font-size: var(--fs-caption-xs); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-secondary); }
 .brd-demo__t .cloze { color: var(--accent2); border-bottom: 2px solid var(--accent2); white-space: nowrap; }
 .brd-demo__meaning { text-align: center; font-family: var(--font-display); font-weight: 700; font-size: var(--fs-sm); color: color-mix(in srgb, var(--accent) 55%, var(--text-primary)); }
