@@ -18616,7 +18616,11 @@ a.slip__act { text-decoration: none; }
   color: var(--text-primary);
   container: brd / size;
 }
-.brd--welcome { gap: var(--sp-4); }
+/* The promise stands ON the foot: one rung between "Reach your goals."
+   and Embarquer, rather than the frame's own narrower gap. It is the
+   last gap of the screen and the only one the welcome sets itself --
+   see the roll's block below, which spends the rest of the room. */
+.brd--welcome { gap: var(--sp-7); }
 /* The cars slide sideways, so the frame clips them — and that clip
    was taking the focus ring off the name field with them. A focused
    input's ring is drawn OUTSIDE its border box (2px at +2px offset,
@@ -18709,9 +18713,10 @@ a.slip__act { text-decoration: none; }
 }
 .brd__body::before { margin-bottom: calc(-1 * var(--sp-5)); }
 .brd__body::after { margin-top: calc(-1 * var(--sp-5)); }
-/* The welcome centres its own block with the same pair, redefined
-   beside it (`.brd__body--top::before`, under "welcome" below) so its
-   air is set where its pieces are. */
+/* The welcome keeps only the first of the pair -- air over the sign --
+   and drops the second, so its promise stands on the foot rather than
+   floating over it. Redefined beside its own pieces
+   (`.brd__body--top::before`, under "welcome" below). */
 .brd__air { display: none; }
 .brd__body > .brd__air {
   display: block;
@@ -18927,26 +18932,38 @@ a.slip__act { text-decoration: none; }
    the welcome: every other step's body sits inside `.brd__cars`, which
    clips, and none of them has a bleeding child. */
 .brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); gap: var(--sp-6); }
-/* The sign, the stock and the promise stand as ONE block on the centre
-   line. The roll used to be the flex item that took the free room
-   (flex: 1, centring its lanes inside it), which put the whole of a
-   tall screen's spare height between the cards and their neighbours:
-   the sign pinned under the top edge, the tagline pinned over the
-   foot, and the cards adrift in the middle with a gulf on each side.
-   The room now goes to two grow-only spacers at the ends of the body
-   instead -- the same pair every other step uses (`.brd__body::before`
-   and `::after` above, which the welcome had switched off), a basis of
-   0 so they are nothing at all once there is none, their negative
-   margins re-cut to this body's wider gap -- and the three pieces keep
-   one --sp-6 between them at every height. The roll still
-   gives way first when the screen is short (min-height: 0, and the
-   back lane steps aside below), and the hero keeps a floor of --sp-4
-   over the frame's own top padding so the sign never touches the
-   edge on a screen where the spacers have vanished. */
+/* Where a tall screen's spare height goes. Three claims on it, in
+   this order, and the order is the screen's reading:
+
+   - the sign takes a share over its head (`::before`, the first of
+     the body's grow-only pair, basis 0, its negative margin re-cut to
+     this body's wider gap), so 辻 stands under the top edge rather
+     than on it;
+   - the rolling stock takes the rest and centres its lanes inside it
+     (`flex: 1 1 auto` below, `justify-content: center`), which is what
+     puts equal air above and below the cards -- the train passing
+     through a gap, not a band wedged between its neighbours. The basis
+     is `auto` and not the `flex: 1` shorthand's 0: from a basis of 0
+     the roll and the spacer above it would halve the whole body
+     between them, and the lanes would overflow a box far shorter than
+     they are;
+   - the promise takes none: `::after` is dropped, so "Reach your
+     goals." sits at the foot of the body with one rung between it and
+     Embarquer (the frame's own gap, --sp-7 above).
+
+   Centring all three as one block instead -- the pair at the ends
+   doing the work and the roll taking its natural height -- reads
+   wrong at phone height: it crowds the cards against both the sign
+   and the promise and leaves the whole surplus in one dead gap over
+   the foot, which is the density contract's own failure case
+   (DESIGN.md). The roll still gives way first when the screen is
+   short (min-height: 0, and the back lane steps aside below), and the
+   hero keeps a floor of --sp-4 over the frame's top padding so the
+   sign never touches the edge once the spacer has vanished. */
 .brd__body--top::before { margin-bottom: calc(-1 * var(--sp-6)); }
-.brd__body--top::after { margin-top: calc(-1 * var(--sp-6)); }
+.brd__body--top::after { content: none; }
 .brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding-top: var(--sp-4); text-align: center; animation: brd-in 480ms ease-out backwards; }
-.brd-roll { position: relative; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
+.brd-roll { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
 /* Two whole lanes want 424px -- two 204px cards and the sp-4 between
