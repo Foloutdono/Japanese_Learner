@@ -11,11 +11,12 @@ import './index.css'
 // the reason hooks/useSheetDrag captured off a real handset.
 //
 // What is pinned here is the contract, not the arithmetic: a sweep
-// moves one gate along the bar in the bar's own order, a flick does
-// it on speed rather than distance, a nudge does not, the ends do not
-// wrap, and everything that outranks the gesture keeps it — a scroll,
-// a field, a sideways rail, the screen's own edges, anything modal,
-// and a station behind a gate.
+// moves one gate along the bar in the bar's own order, from a station
+// behind a gate as readily as from the gate itself, a flick does it on
+// speed rather than distance, a nudge does not, the ends do not wrap,
+// and everything that outranks the gesture keeps it — a scroll, a
+// field, a widget that owns its own input, a sideways rail, the
+// screen's own edges, and anything modal.
 
 const apiFetch = vi.fn(async () => ({ ok: false, status: 500, json: async () => ({}) }))
 vi.mock('./lib/api', () => ({
@@ -93,7 +94,9 @@ function mount(path = '/today', screen = <Where />) {
           <Route element={<Shell />}>
             <Route path="/learn" element={screen} />
             <Route path="/learn/decks" element={screen} />
+            <Route path="/learn/vocab/:level" element={screen} />
             <Route path="/practice" element={screen} />
+            <Route path="/profile/stats" element={screen} />
             <Route path="/today" element={screen} />
             <Route path="/dictionary" element={screen} />
             <Route path="/profile" element={screen} />
@@ -130,6 +133,21 @@ describe('a flick moves one gate along the bar', () => {
     await mount('/today')
     // Half the deliberate sweep's distance, covered in two frames.
     await swipe(content(), 300, 240, { pace: 0, steps: 2 })
+    expect(at()).toBe('/dictionary')
+  })
+
+  it('goes from a station behind a gate, and lands on the next GATE', async () => {
+    // Not on the sibling station: the gate is where the next choice
+    // is made, and it is also the one answer that is the same on
+    // every screen the chrome carries.
+    await mount('/learn/vocab/N5')
+    await swipe(content(), 300, 120)
+    expect(at()).toBe('/practice')
+  })
+
+  it('goes from a hall behind the pass', async () => {
+    await mount('/profile/stats')
+    await swipe(content(), 120, 300)
     expect(at()).toBe('/dictionary')
   })
 
@@ -182,6 +200,23 @@ describe('what outranks the flick', () => {
     expect(at()).toBe('/today')
   })
 
+  it('a widget that owns its own input', async () => {
+    // The 統計 retention line is a slider and the analyzer's cropper
+    // an application; reaching the stations put both of them under
+    // this gesture for the first time, and a sideways drag on either
+    // is theirs.
+    await mount('/today', (
+      <Where>
+        <div role="application" data-crop style={{ width: '200px', height: '120px' }} />
+        <div role="slider" data-line style={{ width: '200px', height: '60px' }} />
+      </Where>
+    ))
+    await swipe(document.querySelector('[data-crop]'), 300, 120)
+    expect(at()).toBe('/today')
+    await swipe(document.querySelector('[data-line]'), 300, 120)
+    expect(at()).toBe('/today')
+  })
+
   it('a rail that scrolls sideways under the finger', async () => {
     await mount('/today', (
       <Where>
@@ -217,12 +252,6 @@ describe('what outranks the flick', () => {
     await swipe(content(), 300, 120)
     guide.remove()
     expect(at()).toBe('/today')
-  })
-
-  it('a station behind a gate, which is a place you walked into', async () => {
-    await mount('/learn/decks')
-    await swipe(content(), 300, 120)
-    expect(at()).toBe('/learn/decks')
   })
 
   it('a second finger, which is a pinch and not a flick', async () => {

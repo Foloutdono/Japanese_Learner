@@ -57,24 +57,18 @@ export function tabFor(pathname) {
 }
 
 /**
- * Which gate a pathname IS — `/learn`, not `/learn/vocab/N5` — or
- * null. `tabFor` above answers the looser question the bar asks
- * ("which gate is lit"); this one answers "is this the gate screen
- * itself", which is what the sideways flick needs.
- */
-export function gateRootFor(pathname) {
-  const parts = (pathname ?? '').split('/').filter(Boolean)
-  return parts.length === 1 && TAB_IDS.includes(parts[0]) ? parts[0] : null
-}
-
-/**
- * The gate `step` places along the bar from the one `pathname` is the
- * root of, as a path — or null when there is none. Three rules, and
- * each is a decision:
+ * The gate `step` places along the bar from the one `pathname` is
+ * behind, as a path — or null when there is none. What the sideways
+ * flick (hooks/useGateSwipe) is asking. Three rules, each a decision:
  *
- *  - Only from a GATE. A station behind one (a level, a deck, a hall)
- *    is a place walked into, and carrying a learner sideways out of it
- *    is not a shortcut.
+ *  - From ANYWHERE behind a gate, not from the gate screen alone: the
+ *    lit gate is the answer wherever you are standing under the
+ *    chrome, so the flick is one rule on every screen that has a tab
+ *    bar rather than a gesture that works on five screens and is dead
+ *    on forty. It lands on the GATE, not on the sibling station — a
+ *    swipe from `/learn/vocab/N5` opens Practice, and the gate is
+ *    where the next choice is made. Owner's call, this session; it
+ *    was gate screens only for a day.
  *  - The bar's own order, because that is the order on screen: a flick
  *    left goes where the gate to the right of the lit one is.
  *  - It does not WRAP. Past Learn and past Profile there is no next
@@ -82,7 +76,7 @@ export function gateRootFor(pathname) {
  *    across the whole app, and would make the bar's row a lie.
  */
 export function gateBeside(pathname, step) {
-  const here = gateRootFor(pathname)
+  const here = tabFor(pathname ?? '')
   if (!here) return null
   const next = TAB_IDS[TAB_IDS.indexOf(here) + step]
   return next ? `/${next}` : null

@@ -863,12 +863,14 @@ a learner who has just rated one card is already looking for the next.
   next, right for the one before — and the arriving gate pulls in from the
   side the flick came from. The bar is untouched and is still what *says*
   where you are; this is the same row read with a thumb. Three rules, and
-  each is a decision rather than a detail: only from a **gate**, never from
-  a station behind one (a level, a deck, a hall is a place you walked into,
-  and carrying someone sideways out of it is not a shortcut); the **bar's
-  own order**, because that is the order on screen; and it **does not
-  wrap**, because past Learn and past Profile there is no next gate and
-  wrapping would turn one over-eager flick into a jump across the app.
+  each is a decision rather than a detail: it is live on **every screen the
+  chrome carries**, not on the five gate screens alone — a station, a
+  platform picker, a deck, a settings page — and it lands on the **gate**
+  rather than on a sibling station, because the gate is where the next
+  choice is made; the **bar's own order**, because that is the order on
+  screen; and it **does not wrap**, because past Learn and past Profile
+  there is no next gate and wrapping would turn one over-eager flick into a
+  jump across the app.
   Anything modal, a field, a rail that scrolls sideways, the strip down
   each edge where the OS keeps its own back gesture, and a departure
   already in flight all outrank it (`hooks/useGateSwipe.js`).

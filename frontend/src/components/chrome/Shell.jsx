@@ -55,12 +55,13 @@ export function Shell() {
 
   // ── 乗り換え — the flick between gates ──
   // The tab bar is the navigation; this is the same row of five read
-  // with a thumb. hooks/useGateSwipe owns the gesture and everything
-  // that outranks it; config/tabs' gateBeside owns which gate is
-  // next, and answers null on a station behind a gate and at both
-  // ends of the bar. Closed while a 改札 cutscene is running: that is
-  // already taking the screen somewhere, and two departures at once
-  // is one too many.
+  // with a thumb, and it is live on every screen this frame carries —
+  // a gate, a station, a platform picker, a settings page.
+  // hooks/useGateSwipe owns the gesture and everything that outranks
+  // it; config/tabs' gateBeside owns which gate is next, and answers
+  // null at both ends of the bar. Closed while a 改札 cutscene is
+  // running: that is already taking the screen somewhere, and two
+  // departures at once is one too many.
   const step = useCallback(dir => {
     const path = gateBeside(pathname, dir)
     if (!path) return

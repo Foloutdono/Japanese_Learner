@@ -4,10 +4,15 @@ import { swallowNextClick } from '../lib/swallowClick'
 // ── 乗り換え — a flick between the gates ───────────────────────
 // The five gates are a row in walking order (config/tabs' TAB_IDS),
 // and the bar along the bottom is not the only way along it: a
-// sideways flick across a gate's own screen moves one gate over —
-// left for the next, right for the one before. The tab bar is
-// untouched and is still what SAYS where you are; this is the
-// shortcut the thumb already reaches for, not a second navigation.
+// sideways flick moves one gate over — left for the next, right for
+// the one before. The tab bar is untouched and is still what SAYS
+// where you are; this is the shortcut the thumb already reaches for,
+// not a second navigation.
+//
+// It is live on EVERY screen under the chrome, not on the five gate
+// screens alone — a station, a platform picker, a deck, a settings
+// page. Which gate is next is read off the lit one (config/tabs'
+// gateBeside), so the rule is the same wherever you are standing.
 //
 // ── TOUCH, not pointer events ──
 // The reason hooks/useSheetDrag captured from a real handset: the
@@ -31,8 +36,15 @@ import { swallowNextClick } from '../lib/swallowClick'
 //    this node — but the guide's SPOT takes no pointer events by
 //    design (a learner can tap the very thing it frames), so without
 //    this a swipe would navigate out from under a lesson.
-//  - A field, a select, a slider, a canvas. That drag is the caret's,
-//    the handle's, the stroke's.
+//  - A field, a select, a slider, a canvas, and anything that declares
+//    itself an `application`. That drag is the caret's, the handle's,
+//    the stroke's, the crop rectangle's — the widget owns its own
+//    input, which is what the role says out loud. Reaching the
+//    stations put two of these under the gesture that the gate
+//    screens never had: the 統計 retention line (a slider) and the
+//    analyzer's cropper (an application).
+//  - Anything a screen claims with `data-gate-swipe="off"`, for a
+//    sideways drag that is none of the above.
 //  - Anything that scrolls sideways under the finger — a rail of
 //    stroke counts, a wide table. index.css already says it for the
 //    rail: "the swipe belongs to the rail, not to the page behind it".
@@ -52,7 +64,8 @@ const SIDEWAYS = 1.4   // how much more sideways than up-and-down it must be
 const EDGE = 28        // the strip each side that the system's own gesture owns
 
 // Controls whose own drag outranks the swipe.
-const OWN_GESTURE = 'input, textarea, select, canvas, [contenteditable], [role="slider"], [data-gate-swipe="off"]'
+const OWN_GESTURE =
+  'input, textarea, select, canvas, [contenteditable], [role="slider"], [role="application"], [data-gate-swipe="off"]'
 
 /** Is something modal standing over the screen? */
 function modalUp() {
@@ -79,7 +92,8 @@ function scrollsSideways(from, root) {
 /**
  * Read sideways flicks across `nodeRef` and report them as a step
  * along the bar: +1 for the next gate (a flick to the LEFT, the way
- * the screen would travel), -1 for the one before.
+ * the screen would travel), -1 for the one before. Whether there IS
+ * such a gate is the caller's to answer — see config/tabs' gateBeside.
  *
  * `enabled` is the caller's veto — the Shell closes it while the 改札
  * cutscene is already taking the screen somewhere.
