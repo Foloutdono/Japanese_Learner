@@ -16,7 +16,6 @@ import CardPrompt from '../components/study/CardPrompt'
 import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer'
 import { ChevronIcon } from '../components/ui/Icons'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
-import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
@@ -91,8 +90,6 @@ export default function TodayRun({ session }) {
   // still be on its way — the run does not wait for it.
   const { data: summary } = useTodaySummary()
   const [answered, setAnswered] = useState(false)
-  // The lesson sheet the head's door opens, by card id (plan 087).
-  const [sheet, setSheet] = useState(null)
   const [selected, setSelected] = useState(null)
   const [showRating, setShowRating] = useState(false)
   const [activeHints, setActiveHints] = useState([])
@@ -188,16 +185,10 @@ export default function TodayRun({ session }) {
   const nc = card ? normalizeCard(card) : null
   const { structureKey, renderer, isRadical, isFill, isContrast, isF2B } = cardShape(nc ?? {})
 
-  // The lesson, one tap from a grammar point's card (plan 087): the
-  // head's own ghost. A built-in point only — a personal card has no
-  // catalogue lesson behind it.
-  const lessonDoor = nc && structureKey === 'grammar' && nc.source === 'grammar' ? (
-    <button type="button" className="stage__leave dict-browse-door gl-door--ghost"
-            onClick={() => setSheet(nc.raw_id ?? nc.card_id)} disabled={gates.locked}>
-      <span>{t.glLesson}</span>
-      <ChevronIcon direction="right" size={14} />
-    </button>
-  ) : null
+  // A grammar point's lesson is a tap from the CARD now, not the head:
+  // the corner magnifier kanji/kana/vocab carry opens the point's
+  // dictionary entry, lesson and all, once the answer is revealed. See
+  // CardPrompt's grammar branch.
   const cardHints = nc?.hints ?? {}
   const availableHints = availableHintsFor(nc)
   const choicesOn = activeHints.includes(HINTS.CHOICES) && Array.isArray(cardHints[HINTS.CHOICES])
@@ -289,7 +280,6 @@ export default function TodayRun({ session }) {
       where={where}
       sub={sub}
       remaining={remaining}
-      aside={lessonDoor ?? undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
     >
@@ -455,9 +445,6 @@ export default function TodayRun({ session }) {
           </>
         )}
 
-        {sheet && (
-          <GrammarLessonSheet key={sheet} id={sheet} session={session} onClose={() => setSheet(null)} />
-        )}
     </StudyStage>
   )
 }

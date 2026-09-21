@@ -46,6 +46,23 @@ const base = (over) => ({
 
 const settle = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
+// The catalogue rows the lookup sheet is served (routes/dictionary.py's
+// _grammar_result), and the record of every /api/dictionary URL it asked
+// for — the id it carries is the point of the door.
+const ENTRY = {
+  'grammar_N5_\u301c\u3066\u304f\u3060\u3055\u3044': {
+    type: 'grammar', raw_id: 'grammar_N5_\u301c\u3066\u304f\u3060\u3055\u3044', level: 'N5',
+    pattern: '\u301c\u3066\u304f\u3060\u3055\u3044', structure: 'verb \u3066-form + \u304f\u3060\u3055\u3044',
+    meaning: 'please do', register: 'polite', ...LESSON, status: null, app_card: null,
+  },
+  'grammar_N5_\u301c\u306a\u3044\u3067\u304f\u3060\u3055\u3044': {
+    type: 'grammar', raw_id: 'grammar_N5_\u301c\u306a\u3044\u3067\u304f\u3060\u3055\u3044', level: 'N5',
+    pattern: '\u301c\u306a\u3044\u3067\u304f\u3060\u3055\u3044', structure: 'verb \u306a\u3044-form + \u3067\u304f\u3060\u3055\u3044',
+    meaning: 'please do not', steps: [], compare: [], examples: [], status: null, app_card: null,
+  },
+}
+const dictionaryCalls = []
+
 function mount(mode, cards) {
   apiJson.mockImplementation(async (url) => {
     if (String(url).startsWith('/api/grammar/cards')) return { cards, pace: null }
@@ -66,7 +83,16 @@ function mount(mode, cards) {
 
 beforeEach(() => {
   apiFetch.mockReset()
-  apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ total: 1, new: 1, learning: 0, mastered: 0, due_now: 0 }) }))
+  dictionaryCalls.length = 0
+  apiFetch.mockImplementation(async (url) => {
+    if (String(url).startsWith('/api/dictionary')) {
+      const asked = new URL(String(url), 'http://x')
+      dictionaryCalls.push(asked)
+      const entry = ENTRY[asked.searchParams.get('id')]
+      return { ok: true, status: 200, json: async () => ({ results: entry ? [entry] : [], total: entry ? 1 : 0 }) }
+    }
+    return { ok: true, status: 200, json: async () => ({ total: 1, new: 1, learning: 0, mastered: 0, due_now: 0 }) }
+  })
   apiJson.mockReset()
   localStorage.clear()
   localStorage.setItem('lang', 'en')
@@ -109,26 +135,38 @@ describe('the lesson gate', () => {
     expect(met.container.querySelector('.prompt-card')).toBeTruthy()
   })
 
-  it('keeps the lesson one tap away in the head, as a sheet with a way back through its rivals', async () => {
+  it('opens the point\u2019s dictionary entry from the card once it is revealed, with a way back through its rivals', async () => {
     const screen = await mount('grammar.flashcard.f2b', [base({ stage: 'learning' })])
     await settle(300)
-    const door = screen.container.querySelector('.stage__head .gl-door--ghost')
-    expect(door.textContent).toContain('Lesson')
-    door.click()
+    // The head carries no lesson door any more, and the card's own
+    // magnifier stays shut until the answer is out: a door open BEFORE
+    // the flip is a way to read the answer off the card.
+    expect(screen.container.querySelector('.stage__head').textContent).not.toContain('Lesson')
+    expect(screen.container.querySelector('.reveal-action-btn')).toBeNull()
+
+    screen.container.querySelector('.flashcard').click()
     await settle()
-    const sheet = document.querySelector('.gl-sheet')
+    const look = screen.container.querySelector('.reveal-action-btn')
+    expect(look.getAttribute('aria-label')).toBe('Open dictionary entry')
+    look.click()
+    await settle(300)
+    const sheet = document.querySelector('.dict-sheet')
     expect(sheet).toBeTruthy()
-    expect(sheet.querySelector('.dict-plate__word').textContent).toBe('〜てください')
-    // a compare row pushes the rival; ‹ pops it
+    expect(sheet.querySelector('.dict-plate__word').textContent).toBe('\u301c\u3066\u304f\u3060\u3055\u3044')
+    // and it is looked up by the card's ID, never by its pattern
+    const asked = dictionaryCalls.at(-1)
+    expect(asked.searchParams.get('id')).toBe('grammar_N5_\u301c\u3066\u304f\u3060\u3055\u3044')
+    expect(asked.searchParams.get('category')).toBe('grammar')
+    // a compare row pushes the rival; \u2039 pops it
     sheet.querySelector('.gl-door').click()
     await settle(300)
-    expect(document.querySelector('.gl-sheet .dict-plate__word').textContent).toBe('〜ないでください')
-    document.querySelector('.gl-sheet .dict-plate__back').click()
+    expect(document.querySelector('.dict-sheet .dict-plate__word').textContent).toBe('\u301c\u306a\u3044\u3067\u304f\u3060\u3055\u3044')
+    document.querySelector('.dict-sheet .dict-plate__back').click()
+    await settle(300)
+    expect(document.querySelector('.dict-sheet .dict-plate__word').textContent).toBe('\u301c\u3066\u304f\u3060\u3055\u3044')
+    document.querySelector('.dict-sheet [aria-label="Close"]').click()
     await settle()
-    expect(document.querySelector('.gl-sheet .dict-plate__word').textContent).toBe('〜てください')
-    document.querySelector('.gl-sheet [aria-label="Close"]').click()
-    await settle()
-    expect(document.querySelector('.gl-sheet')).toBeNull()
+    expect(document.querySelector('.dict-sheet')).toBeNull()
   })
 })
 

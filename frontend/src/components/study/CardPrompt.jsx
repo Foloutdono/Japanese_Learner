@@ -292,6 +292,12 @@ export default function CardPrompt({
 
   // ── grammar ─────────────────────────────────────────────────
   if (structureKey === 'grammar') {
+    // The point's dictionary entry, behind the same corner magnifier
+    // kanji/kana/vocab carry -- by the card's ID, never its pattern (a
+    // pattern embeds ／ and 〜; see analysis/lookup.js). A personal
+    // card names no catalogue point, so it has no entry to open and
+    // RevealActions renders nothing for it.
+    const pointId = c.source === 'custom' ? null : (c.raw_id ?? c.card_id)
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
         {/* Every mode here is the same card with a different front: a
@@ -305,6 +311,9 @@ export default function CardPrompt({
           <>
             <GrammarContrastSentence card={c} revealed={answered} t={t} />
             {answered && <GrammarAnswer card={c} size={36} divided />}
+            <RevealActions
+              t={t} revealed={answered} resetKey={resetKey}
+              dictCategory="grammar" dictId={pointId} session={session} />
           </>
         ) : !choicesOn ? (
           <Flashcard
@@ -340,6 +349,7 @@ export default function CardPrompt({
                     </>
                   )
             }
+            dictCategory="grammar" dictId={pointId} session={session}
           />
         ) : (
           /* Choices on — the prompt does NOT swap: the answer is
@@ -359,6 +369,9 @@ export default function CardPrompt({
                 )
                 : <MeaningDisplay meaning={c.meaning} size={34} />}
             {isFill && answered && <GrammarAnswer card={c} size={36} divided />}
+            <RevealActions
+              t={t} revealed={answered} resetKey={resetKey}
+              dictCategory="grammar" dictId={pointId} session={session} />
           </>
         )}
       </PromptCard>

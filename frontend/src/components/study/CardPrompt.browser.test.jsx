@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 import CardPrompt from './CardPrompt'
+import { normalizeCard } from '../../domain/cardShape'
 // Same stylesheet-import trick as RatingBar's neighbours
 // (index.tokens.browser.test.jsx, AnalyzerHistory.browser.test.jsx): the
 // rule this test is pinning only exists once the real sheet is loaded, so
@@ -96,5 +97,39 @@ describe('the grammar contrast face', () => {
     expect(done.container.querySelector('.gl-blank--revealed').textContent).toBe('〜てください')
     expect(done.container.querySelector('.dict-ex__tr').textContent).toBe('Please write your name here.')
     expect(done.container.querySelector('.grammar-answer')).toBeTruthy()
+  })
+})
+
+// ── A grammar point's dictionary door ─────────────────────────
+// The same corner magnifier kanji/kana/vocab carry, and the same rule:
+// shut until the answer is out, because a door open before the flip is
+// a way to read the answer off the card. It replaced the "Lesson" ghost
+// the stage head used to carry. A personal card names no catalogue
+// point, so it has no entry to open and shows nothing.
+describe("a grammar point's dictionary door", () => {
+  const point = {
+    card_id: 'grammar_N5_〜てください', raw_id: 'grammar_N5_〜てください',
+    source: 'builtin_grammar', mode: 'grammar.contrast',
+    grammar: '〜てください', structure: 'verb て-form + ください', meaning: 'please do',
+    contrast: {
+      jp: 'ここに名前を書いてください。', tr: 'Please write your name here.',
+      furigana: [{ text: 'ここに名前を書いて' }, { text: '＿＿＿', blank: true }, { text: '。' }],
+      choices: ['〜ないでください', '〜てください'], answer: '〜てください',
+    },
+  }
+
+  it('is shut until the answer is out, and never opens on a personal card', async () => {
+    const shut = await render(<CardPrompt card={point} t={t} session={{}} answered={false} />)
+    expect(shut.container.querySelector('.reveal-action-btn')).toBeNull()
+
+    const open = await render(<CardPrompt card={point} t={t} session={{}} answered />)
+    expect(open.container.querySelector('.reveal-action-btn')).toBeTruthy()
+
+    const personal = normalizeCard({
+      card_id: 'deck-1', source: 'custom', structure: 'grammar', mode: 'grammar.contrast',
+      fields: { rule: '〜てください', meaning: 'please do' }, contrast: point.contrast,
+    })
+    const none = await render(<CardPrompt card={personal} t={t} session={{}} answered />)
+    expect(none.container.querySelector('.reveal-action-btn')).toBeNull()
   })
 })
