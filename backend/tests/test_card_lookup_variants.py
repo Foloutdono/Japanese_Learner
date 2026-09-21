@@ -1,7 +1,8 @@
 import unittest
 
 from content.vocab_extras import kana_spelling_variants, trailing_kana_variants
-from study.card_lookup import resolve_lemma, _VOCAB_BY_LEMMA
+from study import morphology
+from study.card_lookup import resolve_lemma, resolve_kana, resolve_morpheme, _reading_variants, _VOCAB_BY_LEMMA
 
 
 class LemmaIndexVariantKeyTests(unittest.TestCase):
@@ -96,3 +97,57 @@ class TrailingKanaVariantTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReadingLookupRepairTests(unittest.TestCase):
+    """Plan 104: the three ways a card the deck HAS looked absent, each
+    measured by scripts/audit_vocab_deck.py before the repair -- 36
+    katakana words, 15 adverbs and できる, 296 occurrences in the
+    taught sentences badging nothing."""
+
+    def test_a_katakana_word_resolves_by_its_folded_reading(self) -> None:
+        # The tokenizer's reading arrives folded to hiragana; the deck
+        # stores パン as written. Both keys now reach the same entry.
+        # The fold is morphology.kata_to_hira's, long vowels included:
+        # コーヒー arrives as こうひい, which is what the index must hold.
+        for reading, expected in (("ぱん", "vocab_N5__パン"), ("パン", "vocab_N5__パン"),
+                                  ("こうひい", "vocab_N5__コーヒー"), ("どあ", "vocab_N5__ドア")):
+            with self.subTest(reading=reading):
+                hit = resolve_kana(reading, "noun", False)
+                self.assertIsNotNone(hit)
+                self.assertEqual(hit[2], expected)
+
+    def test_an_adverb_resolves_only_to_a_kana_only_entry(self) -> None:
+        for reading, expected in (("もう", "vocab_N5__もう"), ("どう", "vocab_N5__どう"),
+                                  ("もっと", "vocab_N5__もっと"), ("こう", "vocab_N4__こう")):
+            with self.subTest(reading=reading):
+                self.assertEqual(resolve_kana(reading, "adverb", False)[2], expected)
+        # A reading whose only entries are kanji words is not an adverb
+        # the deck teaches: 漢字 and 感じ are nouns, and a kanji noun is
+        # never handed to an adverb.
+        self.assertIsNone(resolve_kana("かんじ", "adverb", False))
+
+    def test_an_auxiliary_use_token_is_admitted_off_a_conjunctive_and_unambiguous(self) -> None:
+        # できる: one N5 entry, admitted when nothing conjunctive precedes.
+        self.assertEqual(resolve_kana("できる", "verb", True, after_conjunctive=False)[2], "vocab_N5__できる")
+        # Behind て it is the gate's own case, and stays refused.
+        self.assertIsNone(resolve_kana("できる", "verb", True, after_conjunctive=True))
+        # いる has 居る and 要る both at N5: ambiguous, refused either way.
+        self.assertIsNone(resolve_kana("いる", "verb", True, after_conjunctive=False))
+        # A caller without the context keeps the old gate.
+        self.assertIsNone(resolve_kana("できる", "verb", True))
+
+    def test_a_kana_field_splits_on_the_separator_the_deck_uses(self) -> None:
+        self.assertEqual(_reading_variants("まいげつ/まいつき"), ["まいげつ", "まいつき"])
+        self.assertEqual(_reading_variants("a;b"), ["a", "b"])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "fugashi/unidic-lite not installed")
+    def test_resolve_morpheme_reads_the_neighbour(self) -> None:
+        main = morphology.tokenize("買い物ができます。")
+        deki = next(i for i, m in enumerate(main) if m.lemma == "出来る")
+        self.assertEqual(resolve_morpheme(main, deki)[2], "vocab_N5__できる")
+        # 出来る behind て is the gated position -- and with no kanji
+        # lemma in the deck, nothing else answers for it.
+        after_te = morphology.tokenize("勉強してできる。")
+        deki = next(i for i, m in enumerate(after_te) if m.lemma == "出来る")
+        self.assertIsNone(resolve_morpheme(after_te, deki))

@@ -253,7 +253,7 @@ def _resolve_tokens(sentence: str):
     same order, so a word this reports as unmatched is one the screen
     shows without a badge."""
     from study import morphology
-    from study.card_lookup import resolve_compound, resolve_lemma, resolve_kana
+    from study.card_lookup import resolve_compound, resolve_morpheme
 
     morphemes = morphology.tokenize(sentence) or []
     out = []
@@ -265,8 +265,7 @@ def _resolve_tokens(sentence: str):
             i += n
             continue
         m = morphemes[i]
-        hit = resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
-        out.append((m, hit))
+        out.append((m, resolve_morpheme(morphemes, i)))
         i += 1
     return out
 

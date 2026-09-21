@@ -90,14 +90,19 @@ class CorpusMeasurementTests(unittest.TestCase):
                 return kind
         return None
 
-    def test_a_katakana_word_the_deck_holds_is_not_a_gap(self) -> None:
-        self.assertEqual(self._kind_of("パン"), "katakana")
-
-    def test_an_adverb_the_deck_holds_is_not_a_gap(self) -> None:
-        self.assertEqual(self._kind_of("もう"), "adverb")
-
-    def test_a_main_verb_the_gate_refuses_is_not_a_gap(self) -> None:
-        self.assertEqual(self._kind_of("出来る"), "gated")
+    def test_the_lookups_plan_104_repaired_leave_nothing_behind(self) -> None:
+        """パン was "katakana", もう "adverb" and 出来る "gated" until plan
+        104; each now resolves and is no kind at all. The two kinds it
+        emptied stay empty -- a katakana word or an adverb that the deck
+        holds and the screen misses is a regression here, not a gap."""
+        for lemma in ("パン", "もう", "出来る"):
+            with self.subTest(lemma=lemma):
+                self.assertIsNone(self._kind_of(lemma))
+        self.assertEqual(self.corpus["katakana"], [])
+        self.assertEqual(self.corpus["adverb"], [])
+        # What the gate still refuses is its own case: a token behind a
+        # conjunctive て/で, or a reading ambiguous at its best level.
+        self.assertLessEqual(self.corpus["kinds"]["gated"]["lemmas"], 1)
 
     def test_a_name_is_not_a_gap(self) -> None:
         self.assertEqual(self._kind_of("タナカ"), "name")
@@ -113,5 +118,5 @@ class CorpusMeasurementTests(unittest.TestCase):
 
     def test_ratchets_never_rise(self) -> None:
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 190)
-        self.assertLessEqual(c["unmatched_lemmas"], 246)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 184)
+        self.assertLessEqual(c["unmatched_lemmas"], 194)

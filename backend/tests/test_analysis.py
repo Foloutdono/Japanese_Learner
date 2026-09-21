@@ -94,6 +94,17 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(surfaces[:2], ["今日", "は"])
         self.assertEqual(r["tokens"][1]["grammar"][0]["pattern"], "は")
 
+    def test_a_present_card_the_lookups_used_to_miss_now_badges(self) -> None:
+        """Plan 104. パン is an N5 card stored in katakana, もう an N5
+        adverb, できる an N5 verb UniDic tags 非自立可能: all three were
+        in the deck and none badged, in 296 occurrences across the
+        taught sentences (scripts/audit_vocab_deck.py)."""
+        r = analyze_local("もうパンを買うことができます。")
+        by_surface = {t["surface"]: t for t in r["tokens"]}
+        self.assertEqual(by_surface["もう"]["vocab_match"]["raw_id"], "vocab_N5__もう")
+        self.assertEqual(by_surface["パン"]["vocab_match"]["raw_id"], "vocab_N5__パン")
+        self.assertEqual(by_surface["でき"]["vocab_match"]["raw_id"], "vocab_N5__できる")
+
     def test_distinctive_grammar_point_produces_a_grammar_card_id(self) -> None:
         r = analyze_local("食べようとしました")
         patterns = [g["pattern"] for g in r["grammar"]]

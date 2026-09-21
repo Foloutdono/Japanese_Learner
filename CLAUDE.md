@@ -129,8 +129,11 @@ runtime purpose. Two consequences worth knowing:
   父 as N5 cards and the compound fold in the breakdown (cited in
   `study/card_lookup.py`, `study/analysis.py`, `tests/test_analysis.py`
   and `tests/test_dictionary_vocab.py`), 103 (done) the measuring
-  script (`scripts/audit_vocab_deck.py`, `tests/test_audit_vocab_deck.py`);
-  104–110 are the review itself, planned in `docs/vocab-deck-review.md`.
+  script (`scripts/audit_vocab_deck.py`, `tests/test_audit_vocab_deck.py`),
+  104 (done) the lookup repairs (`card_lookup.resolve_morpheme`, cited
+  in `study/card_lookup.py`, `study/level_mix.py` and
+  `tests/test_card_lookup_variants.py`); 105–110 are the review itself,
+  planned in `docs/vocab-deck-review.md`.
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

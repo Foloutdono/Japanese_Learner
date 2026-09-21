@@ -57,7 +57,10 @@ def _reading_variants(kana_field: str) -> list:
     """A deck's kana field can list several readings separated by ';'."""
     if not kana_field:
         return []
-    return [r.strip() for r in kana_field.split(';') if r.strip()]
+    # The deck joins with "/" (毎月 is "まいげつ/まいつき", 18 entries);
+    # ";" was the splitter's own convention and never the data's, kept
+    # so a field written either way still splits (plan 104).
+    return [r.strip() for r in kana_field.replace(";", "/").split("/") if r.strip()]
 
 
 def _reading_matches(entry_kana: str, reading: str) -> bool:
@@ -597,7 +600,16 @@ def _index_vocab_by_kana():
     entry might store its kana text directly in the "kanji" field
     rather than leaving it empty — this index doesn't need to assume
     either convention, it just matches by reading when the lemma-text
-    match already tried in the caller comes up empty."""
+    match already tried in the caller comes up empty.
+
+    A katakana reading is keyed by its hiragana fold as well (plan 104):
+    the tokenizer's readings arrive folded (morphology.kata_to_hira, so
+    パン's is ぱん) while the deck stores the 541 katakana-only words as
+    written, and until this key existed not one of them ever matched --
+    パン, コーヒー, バス, テレビ, ドア badged nothing in every sentence
+    that used them. The fold is a second key on the same entry, never a
+    replacement: the written form still answers for a caller that has
+    it (vocab_card_id_for_word)."""
     index = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
@@ -606,6 +618,9 @@ def _index_vocab_by_kana():
                 continue
             for reading in _reading_variants(kana):
                 index.setdefault(reading, []).append((level, entry))
+                folded = morphology.kata_to_hira(reading)
+                if folded != reading:
+                    index.setdefault(folded, []).append((level, entry))
     return index
 
 
@@ -628,7 +643,7 @@ def resolve_lemma(lemma: str, reading: str):
     return level, entry, vocab_to_id(entry, level)
 
 
-def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
+def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive: bool = True):
     """Fallback for when lemma-TEXT matching finds nothing (see
     _index_vocab_by_kana for why that happens even for words that ARE
     in the deck): match by reading instead. Gated to content-word POS
@@ -639,14 +654,60 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
     marker) is both far more common in ordinary text than its
     independent use and the case most likely to collide with an
     unrelated deck word of the same reading — so this only fires for
-    words being used on their own, not that class of match."""
-    if auxiliary_use or pos not in ("noun", "pronoun", "verb", "adjective") or len(reading) < 2:
+    words being used on their own, not that class of match.
+
+    Two admissions, plan 104, each narrower than the gate it opens:
+
+    An ADVERB is admitted, but only to a kana-only entry. The deck's
+    adverbs are kana-only words with nothing to collide with (もう,
+    もっと, ゆっくり, よく), while the kanji homophones a reading also
+    reaches (こう is 請う and 溝 too) are nouns and verbs, which an
+    adverb is never an instance of. Before this, もう and どう -- N5
+    cards -- badged nothing in the 136 sentences that use them.
+
+    A token in AUXILIARY USE is admitted when it does not follow a
+    conjunctive て/で -- that position is what the gate exists for
+    (ている, てくる, てしまう) -- AND its reading has exactly one
+    candidate at its best level. できる is tagged 非自立可能 by UniDic
+    whatever it does in the sentence, and 買い物ができます has it as the
+    main verb: one N5 entry, admitted. いる has 居る and 要る both at N5:
+    still refused, whatever precedes it. `after_conjunctive` defaults
+    to True so a caller without the context keeps the old gate;
+    resolve_morpheme computes it.
+    """
+    if pos not in ("noun", "pronoun", "verb", "adjective", "adverb") or len(reading) < 2:
         return None
     candidates = _VOCAB_BY_KANA.get(reading)
     if not candidates:
         return None
+    if pos == "adverb":
+        candidates = [c for c in candidates if not c[1].get("kanji")]
+        if not candidates:
+            return None
+    if auxiliary_use:
+        if after_conjunctive:
+            return None
+        best = _level_rank(min(candidates, key=lambda c: _level_rank(c[0]))[0])
+        if sum(1 for c in candidates if _level_rank(c[0]) == best) != 1:
+            return None
     level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
     return level, entry, vocab_to_id(entry, level)
+
+
+def resolve_morpheme(morphemes, i: int):
+    """(level, entry, raw_id) for the deck entry morphemes[i] is, by its
+    lemma first and its reading second, or None -- the one way every
+    screen resolves a word (study/analysis, level_mix, the reading-badge
+    scanner, scripts/audit_vocab_deck), so "off-deck" means the same
+    thing everywhere. The neighbour before it is what resolve_kana's
+    auxiliary admission needs: whether this token hangs off a
+    conjunctive て/で."""
+    m = morphemes[i]
+    previous = morphemes[i - 1] if i > 0 else None
+    after_conjunctive = previous is not None and previous.pos == "particle" and previous.conjunctive
+    return resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(
+        m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive,
+    )
 
 
 # The parts of speech a compound may be assembled from. Nouns, and the
@@ -752,7 +813,7 @@ def _find_segments_morphological(text: str):
                 i += 2
                 continue
 
-        hit = resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
+        hit = resolve_morpheme(morphemes, i)
         if hit:
             level, entry, raw_id = hit
             vocab_hits.append((m.start, m.end, level, entry, raw_id))

@@ -151,31 +151,57 @@ is katakana, もう an adverb, 出来る gated, タナカ a name, 無い absent,
 母 and 父 no longer anything). The `KNOWN_POOL_OVERLAP` set stays in
 `tests/test_dictionary_vocab.py`, where it already was.
 
-### 104 — the lookups: present cards that look absent
+### 104 — the lookups: present cards that look absent (DONE, 2026-09-21)
 
 In `study/card_lookup.py`, each with a test in
 `tests/test_card_lookup_variants.py`:
 
 - **Katakana.** `_index_vocab_by_kana` keys each reading also by its
   hiragana fold (`morphology.kata_to_hira`), so パン's folded reading
-  ぱん finds the deck's パン. Acceptance: the 51 katakana lemmas in the
-  corpus resolve; ドア in 「ドアを開けて」 badges N5.
-- **Adverbs.** `resolve_kana` admits `adverb` for readings of two kana
-  or more; the homophone risk the gate exists for is nouns' (箸/橋),
-  and the deck's adverbs are kana-only entries with nothing to collide
-  with. Acceptance: もう, どう, もっと, ゆっくり resolve; こと/もの/よう
-  still do not (the bare-kana test stays).
-- **出来る.** UniDic's 非自立可能 covers できる as a main verb. Admit an
-  `auxiliary_use` token when its lemma is a kana-only deck entry AND
-  the token is not preceded by a て/で conjunctive particle (which is
-  the ている/てくる case the gate is for). Acceptance: 買い物ができます
-  resolves to `vocab_N5__できる`; 食べている still leaves 居る
-  unmatched.
-- **`_reading_variants` splits on `/`** as the deck writes it (18
-  entries); `;` was never in the data.
+  ぱん finds the deck's パン. The written form stays a key too.
+- **Adverbs.** `resolve_kana` admits `adverb`, but only to a kana-only
+  entry: the deck's adverbs are kana-only words with nothing to collide
+  with, and the kanji homophones a reading also reaches (こう is 請う
+  and 溝 too) are nouns and verbs. こと/もの/よう still do not resolve
+  (the bare-kana test stays).
+- **出来る.** An `auxiliary_use` token is admitted when it does not
+  follow a conjunctive て/で (the ている/てくる/てしまう position the
+  gate exists for) AND its reading has exactly one candidate at its
+  best level. できる has one N5 entry: admitted as the main verb of
+  買い物ができます. いる has 居る and 要る both at N5: refused either
+  way. `resolve_kana` keeps its old gate for a caller without the
+  context; `resolve_morpheme(morphemes, i)` computes it from the
+  neighbour and is now the one way every screen resolves a word
+  (`analysis`, `level_mix`, the reading-badge scanner, the audit
+  script), so "off-deck" means the same thing everywhere.
+- **`_reading_variants` splits on `/`** as the deck writes it (and
+  still on `;`, which was never in the data).
 
-Rerun 103 after: the corpus list should fall from 244 lemmas to the
-real gaps, and that list is 105's input.
+After it, the corpus section reads: katakana 0, adverb 0, gated 1 lemma
+(4 occurrences, its own case), 184 absent lemmas unchanged — 194
+unmatched lemmas and 633 occurrences, from 246 and 925. That list is
+105's input.
+
+Two things the repair exposed, recorded for 105 and 106 rather than
+fixed here, because each is a judgement about the deck:
+
+- **The lemma path is ungated.** `resolve_lemma` runs first and asks
+  no question about use, so 食べてしまった badges the N1 仕舞う card
+  and お金がいる badges 居る (UniDic's lemma for both readings of
+  いる is 居る in that sentence). The reading gate never sees them.
+  Either the gate moves in front of both resolvers for a token in
+  auxiliary use, or the deck's 仕舞う is accepted as what てしまう
+  opens. 106 decides with the duplicates. The same path hands the
+  nominaliser こと to the N3 事 card in every 〜ことができる, since
+  UniDic's lemma for it is 事 and the deck has both 事 (N3) and a
+  kana-only こと (N4); `_index_vocab_by_lemma`'s bare-kana guard only
+  protects the reading path.
+- **UniDic's lemma is an orthographic base, not the deck's spelling.**
+  帰る lemmatises to 返る, so the N5 verb badges as the N1 返る card in
+  every sentence that uses it. The fix is a lemma-to-deck spelling
+  table beside `vocab_renames`, fed from the pairs the audit script can
+  list (a lemma resolving to a level above the sentence's, with a
+  homophone at a lower one); 106 owns it.
 
 ### 105 — the demand list: words the app teaches without a card
 

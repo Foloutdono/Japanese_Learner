@@ -21,7 +21,7 @@ import logging
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
 from study.card_lookup import (
-    resolve_lemma, resolve_kana, resolve_compound, compound_reading,
+    resolve_morpheme, resolve_compound, compound_reading,
     find_kanji_matches, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -131,9 +131,10 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
         ]
 
 
-def _token_dict(m: morphology.Morpheme) -> dict:
+def _token_dict(m: morphology.Morpheme, hit) -> dict:
+    """`hit` is card_lookup.resolve_morpheme's answer for `m`, resolved
+    by the caller, which has the neighbours the resolver reads."""
     vocab_match = None
-    hit = resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(m.lemma_reading, m.pos, m.auxiliary_use)
     if hit:
         level, entry, raw_id = hit
         vocab_match = {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)}
@@ -199,7 +200,7 @@ def _tokens(morphemes: list) -> list[dict]:
             tokens.append(_compound_dict(morphemes[i:i + n], level, entry, raw_id))
             i += n
             continue
-        tokens.append(_token_dict(morphemes[i]))
+        tokens.append(_token_dict(morphemes[i], resolve_morpheme(morphemes, i)))
         i += 1
     return tokens
 
