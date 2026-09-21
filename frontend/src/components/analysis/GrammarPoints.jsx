@@ -15,6 +15,12 @@ import { coversToken, pointKey } from './grammarSpans'
 // the words the point is written on through `lit`/`onLight`, exactly
 // as a token row does. Nothing prints for a sentence with no
 // construction in it.
+//
+// The whole row is that door (plan 096), as a word row's whole row is
+// its own: the pattern used to be the only live pixel on a three-line
+// block, with the gloss, the parts and the bought line beside it all
+// dead to the touch. The pattern keeps its dotted rule -- it is what
+// says the row opens something -- and the <button> is the row.
 export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
   const lang = useLang()?.lang
   const tokens = analysis?.tokens ?? analysis?.words ?? []
@@ -33,33 +39,45 @@ export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
           onFocus: () => onLight(g),
           onBlur: () => onLight(null),
         } : {}
-        return (
-          <div key={key} className={`bkd-point${lit && lit === key ? ' bkd-point--lit' : ''}`} {...light}>
-            <div className="bkd-point__head">
-              {onOpen
-                ? (
-                  <button
-                    type="button"
-                    className="bkd-point__pattern bkd-point__door"
-                    lang="ja"
-                    onClick={e => { e.stopPropagation(); onOpen(g) }}
-                    aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${g.pattern}${gloss ? ` — ${gloss}` : ''}`}
-                    title={t.openDictionary}
-                  >
-                    {g.pattern}
-                  </button>
-                )
-                : <span className="bkd-point__pattern" lang="ja">{g.pattern}</span>}
+        const body = (
+          <>
+            {/* A span, not a div: the row is a <button> when it opens
+                something, and a button holds phrasing content only. */}
+            <span className="bkd-point__head">
+              <span className={`bkd-point__pattern${onOpen ? ' bkd-point__door' : ''}`} lang="ja">{g.pattern}</span>
               {gloss && <span className="bkd-point__gloss" title={g.structure || undefined}>{gloss}</span>}
               {g.level && <span className="type-badge bkd-point__lvl">{g.level}</span>}
-            </div>
+            </span>
             {/* The parts, only where there are parts: a rule of one
                 word (〜すぎる on すぎ) is its own name. */}
             {parts.length > 1 && (
               <span className="bkd-point__parts" lang="ja">{parts.join(' + ')}</span>
             )}
             {note && <span className="bkd-point__note">{note}</span>}
-          </div>
+          </>
+        )
+        const cls = `bkd-point${lit && lit === key ? ' bkd-point--lit' : ''}`
+        if (!onOpen) return <div key={key} className={cls} {...light}>{body}</div>
+        // Everything on the row, in the label: the button's contents
+        // are replaced by it, and the gloss, the parts and the bought
+        // line were all read as plain text before the row became the
+        // control.
+        const label = [
+          `${t.openDictionary ?? 'Open dictionary entry'}: ${g.pattern}`,
+          gloss, parts.length > 1 ? parts.join(' + ') : '', note, g.level,
+        ].filter(Boolean).join(' — ')
+        return (
+          <button
+            key={key}
+            type="button"
+            className={`${cls} bkd-point--door`}
+            onClick={() => onOpen(g)}
+            aria-label={label}
+            title={t.openDictionary}
+            {...light}
+          >
+            {body}
+          </button>
         )
       })}
     </div>

@@ -9,7 +9,7 @@ import { CrossIcon } from '../ui/Icons'
 // 2026-09-01). Structure: what it is in plain words, then three
 // numbered steps with the copy control INSIDE the step that needs it
 // and a device switcher for the create step, then what to do when it
-// fails. Same sheet chrome as DeckPicker/WordDetail (useDialog owns
+// fails. Same sheet chrome as DeckPicker (useDialog owns
 // Esc, the focus trap, and restoring focus to the trigger).
 //
 // `onCopy`/`copied` are owned by IntakeVideo: the panel's own copy

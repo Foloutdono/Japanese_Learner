@@ -69,6 +69,14 @@ const REVIEW = {
   better: '毎日名前を書かなければなりません。',
 }
 const TUTOR = { review: REVIEW, analysis: 'The obligation is right; the object particle is wrong.' }
+// The word a row opens, as the dictionary serves it (plan 096).
+const VOCAB_ENTRY = {
+  type: 'vocab', kanji: '学校', kana: 'がっこう', meaning: 'school', level: 'N5',
+  furigana: [{ text: '学校', reading: 'がっこう' }], kanji_parts: [], examples: [],
+  app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_学校_がっこう' },
+  senses: [{ number: 1, glossary: 'school', tags: [] }],
+  status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
+}
 const PROSE_TUTOR = { review: null, analysis: 'Your sentence is natural; から is the right particle here.' }
 
 const ok = body => ({ ok: true, status: 200, json: async () => body })
@@ -122,6 +130,7 @@ beforeEach(() => {
     // The local tier for the eager fetch; the explanation only once
     // bought (deep: true) -- plan 095, owner-directed.
     if (u === '/api/phrase/analyze') return ok(JSON.parse(init.body).deep ? ANALYSIS : { ...ANALYSIS, explanation: '' })
+    if (u.startsWith('/api/dictionary?')) return ok({ results: [VOCAB_ENTRY], total: 1, has_more: false })
     return ok({})
   })
 })
@@ -219,13 +228,26 @@ describe('TranslationRun', () => {
     expect(root.querySelector('.prose__romaji')).toBeTruthy()
   })
 
-  it('a word in the rows opens its entry', async () => {
+  // Plan 096: the row -- not the word in it -- is the door, and what
+  // it opens is the DICTIONARY plate, asked for the deck entry's own
+  // kanji and kana.
+  it('a word row opens its dictionary entry', async () => {
     const root = await graded(await answered(await run()))
     breakdownButton(root).click()
     await settle(80)
-    root.querySelector('.bkd-row .bkd-tok--door').click()
-    await settle(80)
-    expect(document.querySelector('.word-detail')).toBeTruthy()
+    const row = root.querySelector('.bkd-row')
+    expect(row.tagName).toBe('BUTTON')
+    // Pressed anywhere on it -- here on the gloss, which used to be
+    // dead text beside the only live pixel on the row.
+    row.querySelector('.bkd-row__meaning').click()
+    await settle(150)
+    const lookup = apiFetch.mock.calls.map(c => String(c[0])).find(u => u.startsWith('/api/dictionary?'))
+    expect(lookup).toBeTruthy()
+    const q = new URLSearchParams(lookup.split('?')[1])
+    expect(q.get('category')).toBe('vocab')
+    expect(q.get('q')).toBe('学校')
+    expect(q.get('kana')).toBe('がっこう')
+    expect(document.querySelector('.dict-sheet[role="dialog"]')).toBeTruthy()
     expect(document.body.textContent).toContain('school')
   })
 

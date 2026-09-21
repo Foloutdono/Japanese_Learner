@@ -14,6 +14,21 @@ import { useLang } from '../../LangContext'
 // for a figure and the copy, if any, sits beside them; there it is a
 // span with no role, decoration beside a line that already speaks.
 // `tight` is a wait inside a card, at the card's rhythm.
+
+// The three dots on their own, for a wait that happens INSIDE a
+// control that already speaks -- the breakdown's Explain button, which
+// says "Explaining…" and only needs the app's own mark of a wait
+// beside it (plan 096). It takes no context, deliberately: a button in
+// a component rendered bare in a test has no provider over it, and the
+// dots have nothing to translate.
+export function Dots({ className = '' }) {
+  return (
+    <span className={`loading loading--inline ${className}`.trim()} aria-hidden="true">
+      <i className="loading__dot" /><i className="loading__dot" /><i className="loading__dot" />
+    </span>
+  )
+}
+
 export function Loading({ copy, inline = false, tight = false, className = '' }) {
   const { t } = useLang()
   const classes = ['loading', inline ? 'loading--inline' : '', tight ? 'loading--tight' : '', className]

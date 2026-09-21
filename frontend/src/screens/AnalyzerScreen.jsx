@@ -6,8 +6,8 @@ import { Bar, Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { WordDetail } from '../components/analysis/WordDetail'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
+import { vocabLookup, kanjiLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { useMining } from '../components/analysis/useMining'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
@@ -35,9 +35,9 @@ const MAX_STOP_DOTS = 12
 // The merge of PhraseAnalyzerScreen and VideoScreen (plan 027). They
 // did one job through two screens: take Japanese from the world, split
 // it into Sentences, take each apart. They already shared
-// SentenceBreakdown, WordDetail, useMining and the deep tier, and
+// SentenceBreakdown, the word sheet, useMining and the deep tier, and
 // duplicated the rest verbatim -- including the comment explaining why
-// closeDetail is a useCallback.
+// the sheet's close handler is a useCallback.
 //
 // CONTEXT.md's own definition says this is one screen: "Passage --
 // what the user submits for analysis, as one act: typed text, a photo,
@@ -169,19 +169,19 @@ export default function AnalyzerScreen({ session }) {
   // learner still needs them, bare everywhere they've earned it.
   const [furigana, setFurigana] = useState('unknown')
 
-  const [detail, setDetail] = useState(null) // { title, entry, stats }
-  // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
-  // effect (and steal focus) on every render of this screen while the
-  // detail sheet is open -- see ReadingRun.jsx's closeDetail for the
-  // same fix, and plans/README.md's plan-004 note for the bug class
+  // ONE sheet over the stage (plan 096), whatever was pressed: a word
+  // or a kanji opens its dictionary entry, a chip or a rule opens the
+  // point's lesson -- the same plate, on the same ‹ stack. It used to
+  // be two, a WordDetail for the word and this one for the rule, and
+  // the word's was the poorer of the pair: the deck row's three fields
+  // and the SRS record, where the dictionary carries the readings, the
+  // examples, the kanji the word is built from and the ★ as well.
+  // Stable so the sheet's useDialog doesn't re-run its focus-on-open
+  // effect (and steal focus) on every render of this screen while it
+  // is open -- see plans/README.md's plan-004 note for the bug class
   // this avoids.
-  const closeDetail = useCallback(() => setDetail(null), [])
-  // A grammar point's sheet (plan 095): the chips under the line and
-  // the rules on the stage card open the point's lesson, by its card
-  // id, the way the practice modes do (ReadingRun's grammarId). Stable
-  // for the same reason closeDetail is.
-  const [grammarId, setGrammarId] = useState(null)
-  const closeGrammar = useCallback(() => setGrammarId(null), [])
+  const [lookup, setLookup] = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
 
   // Focus lands here when a Passage arrives. It has to be a real focus
   // move, not just a scroll: the Analyze button lives INSIDE the panel
@@ -239,7 +239,7 @@ export default function AnalyzerScreen({ session }) {
       const url = `https://youtu.be/${grab.videoId}`
       boardPlatform('video')
       setVideoUrl(url)
-      setDetail(null)
+      setLookup(null)
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
         { url },
@@ -368,29 +368,25 @@ export default function AnalyzerScreen({ session }) {
   }
 
   function analyzeDraft() {
-    setDetail(null)
-    setGrammarId(null)
+    setLookup(null)
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
   }
 
-  // Every route into a new Passage closes the open detail sheet, not
-  // just this one. A WordDetail describes a Token of the Passage that
-  // was on screen when it was opened; once a NEW Passage arrives it is
-  // describing content the learner has already replaced. analyzeDraft
-  // has always done this; the two video ingests did not, which is the
-  // only path by which a dialog could still be open when the arrival
-  // effect below moves focus to the result -- stealing focus out of a
-  // live dialog and silently defeating useDialog's Tab-wrap trap. The
-  // grammar sheet is a dialog over the same Passage, and closes with it.
+  // Every route into a new Passage closes the open sheet, not just
+  // this one. The sheet was opened on a Token of the Passage that was
+  // on screen at the time; once a NEW Passage arrives it is describing
+  // content the learner has already replaced. analyzeDraft has always
+  // done this; the two video ingests did not, which is the only path
+  // by which a dialog could still be open when the arrival effect
+  // below moves focus to the result -- stealing focus out of a live
+  // dialog and silently defeating useDialog's Tab-wrap trap.
   function startVideoFromFile(file, opts) {
-    setDetail(null)
-    setGrammarId(null)
+    setLookup(null)
     analyzer.startVideoFromFile(file, opts)
   }
 
   function startVideoFromLink(url, opts) {
-    setDetail(null)
-    setGrammarId(null)
+    setLookup(null)
     analyzer.startVideoFromLink(url, opts)
   }
 
@@ -415,8 +411,7 @@ export default function AnalyzerScreen({ session }) {
   function boardPlatform(key) {
     if (lastBoardedRef.current !== key) {
       analyzer.reset()
-      setDetail(null)
-      setGrammarId(null)
+      setLookup(null)
       setDraft('')
       setFromImage(false)
       setVideoUrl('')
@@ -437,8 +432,7 @@ export default function AnalyzerScreen({ session }) {
   // draft and the detail sheet, which the hook cannot see.
   function clearPassage() {
     analyzer.reset()
-    setDetail(null)
-    setGrammarId(null)
+    setLookup(null)
     setDraft('')
     setFromImage(false)
     setIntakeOpen(true)
@@ -578,45 +572,30 @@ export default function AnalyzerScreen({ session }) {
   // something up is a deliberate break from watching, not something
   // that should keep advancing under the learner) ──────────────────
   function openVocabDetail(word) {
-    if (!word.vocab_match) return
+    const target = vocabLookup(word)
+    if (!target) return
     playerRef.current?.pause()
-    setDetail({
-      title: word.surface,
-      reading: word.reading,
-      contextMeaning: word.meaning,
-      entry: word.vocab_match.entry,
-      stats: word.vocab_match.stats,
-      level: word.vocab_match.level,
-      rawId: word.vocab_match.raw_id,
-      kind: 'vocab',
-      source: 'vocab',
-    })
+    setLookup(target)
   }
 
   // A rule, the same way: the lesson opens over the stage, and the
   // clock stops while it is read.
   function openGrammar(point) {
-    if (!point?.raw_id) return
+    const target = grammarLookup(point)
+    if (!target) return
     playerRef.current?.pause()
-    setGrammarId(point.raw_id)
+    setLookup(target)
   }
 
   function openKanjiDetail(k) {
+    const target = kanjiLookup(k)
+    if (!target) return
     playerRef.current?.pause()
-    setDetail({
-      title: k.kanji,
-      entry: k.entry,
-      stats: k.stats,
-      level: k.level,
-      rawId: k.raw_id,
-      kind: 'kanji',
-      source: 'kanji',
-    })
+    setLookup(target)
   }
 
   function openHistoryEntry(entry) {
-    setDetail(null)
-    setGrammarId(null)
+    setLookup(null)
     analyzer.openHistoryEntry(entry).then(text => {
       // Only a passage entry resolves with its text (a session resolves
       // with null -- see useAnalyzerSession's openHistoryEntry). The
@@ -1166,11 +1145,14 @@ export default function AnalyzerScreen({ session }) {
         </div>
       )}
 
-      {detail && (
-        <WordDetail detail={detail} t={t} onClose={closeDetail} mining={mining} />
-      )}
-      {grammarId && (
-        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} mining={mining} onClose={closeGrammar} />
+      {lookup && (
+        <DictionaryLookupSheet
+          key={lookupKey(lookup)}
+          {...lookup}
+          session={session}
+          mining={mining}
+          onClose={closeLookup}
+        />
       )}
     </main>
   )

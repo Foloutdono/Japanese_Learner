@@ -13,11 +13,10 @@ import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { WordDetail } from '../components/analysis/WordDetail'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
+import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 
-const MOBILE_BREAKPOINT = 768
 const READING_COLOR = 'var(--line-reading)'
 
 // NOTE ON TRANSLATION KEYS: reuses the app's existing generic
@@ -65,12 +64,6 @@ export default function ReadingRun({ session }) {
   // any incorrect grade.
   const [streak, setStreak] = useState(0)
   const [error, setError]   = useState(null)
-  const [detail, setDetail] = useState(null) // { title, level, entry, stats } for the clicked vocab/kanji
-  // Stable so WordDetail's useDialog doesn't re-run its focus-on-open
-  // effect (and steal focus) on every render of this screen while the
-  // detail sheet is open.
-  const closeDetail = useCallback(() => setDetail(null), [])
-
   // AI breakdown of the current phrase — fetched in the background the
   // moment the phrase is shown (see showPhrase), using the exact same
   // LLM-driven segmentation the phrase-analyzer screen uses
@@ -79,36 +72,20 @@ export default function ReadingRun({ session }) {
   // finished reading/writing and reaches the feedback stage, this is
   // almost always already resolved — the "show breakdown" button just
   // reveals it rather than triggering the fetch itself.
+  // ONE sheet for everything the breakdown opens (plan 096): a word
+  // opens its dictionary entry, a marker row and a chip open the
+  // point's lesson, and both are the same plate on the same ‹ stack.
+  // Held HERE and not in the view below, so a new phrase closes it:
+  // the sheet describes a word of the sentence that was on screen when
+  // it was opened. Stable so the sheet's useDialog doesn't re-run its
+  // focus-on-open effect (and steal focus) on every render of this
+  // screen while it is open.
+  const [lookup, setLookup] = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
+
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
-
-  const [isMobile, setIsMobile] = useState(
-    typeof window !== 'undefined' ? window.innerWidth <= MOBILE_BREAKPOINT : false
-  )
-
-  useEffect(() => {
-    const onResize = () => setIsMobile(window.innerWidth <= MOBILE_BREAKPOINT)
-    window.addEventListener('resize', onResize)
-    return () => window.removeEventListener('resize', onResize)
-  }, [])
-
-  // WordDetail just needs {title, level, entry, stats} — sourced from
-  // the AI breakdown's word/kanji shape (the backend no longer returns
-  // a morphology-based `segments` field at all, see reading.py's
-  // _finish_phrase note). Mirrors AnalyzerScreen's
-  // openVocabDetail/openKanjiDetail; kept as its own small function
-  // here rather than importing those directly since the two screens'
-  // detail shapes differ slightly (this one has no contextMeaning).
-  function openAnalysisWordDetail(word) {
-    if (!word.vocab_match) return
-    setDetail({
-      title: word.surface,
-      entry: word.vocab_match.entry,
-      stats: word.vocab_match.stats,
-      level: word.vocab_match.level,
-    })
-  }
 
   const timerRef = useRef(null)
   const fetchingRef = useRef(false) // guards against duplicate concurrent prefetches
@@ -253,7 +230,7 @@ export default function ReadingRun({ session }) {
     setData({ ...phraseData, _uiKey: phraseCounterRef.current++ })
     setAnswer('')
     setFeedback(null)
-    setDetail(null)
+    setLookup(null)
     setShowBreakdown(false)
     setExplaining(false)
     setExplainError(null)
@@ -448,8 +425,9 @@ export default function ReadingRun({ session }) {
       streak={streak}
       fare={fare}
       error={error}
-      detail={detail}
-      isMobile={isMobile}
+      lookup={lookup}
+      setLookup={setLookup}
+      closeLookup={closeLookup}
       analysis={analysis}
       analysisLoading={analysisLoading}
       onExplain={explainPhrase}
@@ -464,8 +442,6 @@ export default function ReadingRun({ session }) {
       gradeAnswer={gradeAnswer}
       next={next}
       retry={retry}
-      openAnalysisWordDetail={openAnalysisWordDetail}
-      closeDetail={closeDetail}
       session={session}
     />
   )
@@ -488,14 +464,11 @@ function Streak({ streak, t }) {
 // decides there is a session to start at all.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
-  feedback, score, streak, fare, error, detail, isMobile, analysis, analysisLoading, backLabel,
+  feedback, score, streak, fare, error, lookup, setLookup, closeLookup,
+  analysis, analysisLoading, backLabel,
   onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
-  gradeAnswer, next, retry, openAnalysisWordDetail, closeDetail, session,
+  gradeAnswer, next, retry, session,
 }) {
-  // A grammar chip in the rows opens the point's dictionary entry.
-  // Local to the view: nothing above it needs to know.
-  const [grammarId, setGrammarId] = useState(null)
-  const closeGrammar = useCallback(() => setGrammarId(null), [])
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -682,8 +655,8 @@ function SessionView({
                     translation={data.translation}
                     sentenceText={data.phrase}
                     t={t}
-                    onTokenClick={openAnalysisWordDetail}
-                    onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onTokenClick={w => setLookup(vocabLookup(w))}
+                    onGrammarOpen={g => setLookup(grammarLookup(g))}
                     onExplain={onExplain}
                     explaining={explaining}
                     explainError={explainError}
@@ -713,11 +686,8 @@ function SessionView({
         </>
       )}
 
-      {detail && (
-        <WordDetail detail={detail} t={t} isMobile={isMobile} onClose={closeDetail} />
-      )}
-      {grammarId && (
-        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      {lookup && (
+        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>
   )

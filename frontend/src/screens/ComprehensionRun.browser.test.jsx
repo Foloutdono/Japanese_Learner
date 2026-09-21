@@ -84,8 +84,16 @@ const RESULT = {
   ],
 }
 
-// The seeded point as the dictionary serves it (routes/dictionary.py's
-// _grammar_result): what the sheet opens when a chip is pressed.
+// The word and the seeded point as the dictionary serves them
+// (routes/dictionary.py's _vocab_result / _grammar_result): what the
+// sheet opens when a row or a chip is pressed (plan 096).
+const VOCAB_ENTRY = {
+  type: 'vocab', kanji: '駅', kana: 'えき', meaning: 'station', level: 'N5',
+  furigana: [{ text: '駅', reading: 'えき' }], kanji_parts: [], examples: [],
+  app_card: { source: 'vocab', level: 'N5', raw_id: 'vocab_N5_駅_えき' },
+  senses: [{ number: 1, glossary: 'station', tags: [] }],
+  status: { status: 'not_started', total_reviews: 0, correct_reviews: 0, accuracy: null, interval_days: null, next_review: null, due: false },
+}
 const GRAMMAR_ENTRY = {
   type: 'grammar', raw_id: 'grammar_N5_〜ました／〜ませんでした', level: 'N5',
   pattern: '〜ました／〜ませんでした', structure: 'verb stem + ました', meaning: 'polite past',
@@ -114,8 +122,13 @@ beforeEach(() => {
   apiFetch.mockImplementation(async url => {
     if (String(url).startsWith('/api/reading/comprehension/result')) return ok(RESULT)
     if (String(url).startsWith('/api/reading/comprehension')) return ok(EXERCISE)
-    // The dictionary, asked for the point a chip opens (by its id).
-    if (String(url).startsWith('/api/dictionary?')) return ok({ results: [GRAMMAR_ENTRY], total: 1, has_more: false })
+    // The dictionary, asked for the word a row opens (by term + kana)
+    // or the point a chip opens (by its id).
+    if (String(url).startsWith('/api/dictionary?')) {
+      const asked = new URLSearchParams(String(url).split('?')[1])
+      const entry = asked.get('category') === 'vocab' ? VOCAB_ENTRY : GRAMMAR_ENTRY
+      return ok({ results: [entry], total: 1, has_more: false })
+    }
     return ok({})
   })
 })
@@ -237,17 +250,33 @@ describe('ComprehensionRun', () => {
     expect(items[1].querySelector('.prose__ai')).toBeNull()
     expect(items[1].querySelector('.bkd-passage__chev')).toBeNull()
 
-    // A word opens its entry as a sheet.
+    // A word row opens the word's DICTIONARY entry (plan 096) -- the
+    // same plate the catalogue opens -- looked up on the DECK entry's
+    // own kanji and kana, not on the token's inflected surface.
     items[0].querySelector('.bkd-row .bkd-tok--door').click()
+    await settle(150)
+    const wordLookup = apiFetch.mock.calls.map(c => String(c[0]))
+      .find(u => u.startsWith('/api/dictionary?') && u.includes('category=vocab'))
+    expect(wordLookup).toBeTruthy()
+    const wq = new URLSearchParams(wordLookup.split('?')[1])
+    expect(wq.get('q')).toBe('駅')
+    expect(wq.get('kana')).toBe('えき')
+    const wordSheet = document.querySelector('.dict-sheet[role="dialog"]')
+    expect(wordSheet).toBeTruthy()
+    // The plate capitalises a gloss (.dict-sense::first-letter's job
+    // is done in the copy itself), so the comparison is folded.
+    expect(wordSheet.textContent.toLowerCase()).toContain('station')
+    // Closed on the scrim: a word plate's first roundel is 聞く, not ✕.
+    document.querySelector('.dict-sheet__scrim').click()
     await settle()
-    expect(document.querySelector('.word-detail')).toBeTruthy()
-    expect(document.body.textContent).toContain('station')
+    expect(document.querySelector('.dict-sheet[role="dialog"]')).toBeNull()
 
     // A grammar chip — the seeded one over the passage — opens the
-    // point's dictionary entry by its card id, as a sheet of its own.
+    // point's dictionary entry by its card id, in the same plate.
     seeded.querySelector('.analysis-grammar-chip__door').click()
     await settle(150)
-    const lookup = apiFetch.mock.calls.map(c => String(c[0])).find(u => u.startsWith('/api/dictionary?'))
+    const lookup = apiFetch.mock.calls.map(c => String(c[0]))
+      .find(u => u.startsWith('/api/dictionary?') && u.includes('category=grammar'))
     expect(lookup).toBeTruthy()
     const q = new URLSearchParams(lookup.split('?')[1])
     expect(q.get('category')).toBe('grammar')
