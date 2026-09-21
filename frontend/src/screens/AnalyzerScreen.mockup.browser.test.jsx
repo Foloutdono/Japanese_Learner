@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page } from '@vitest/browser/context'
+import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
