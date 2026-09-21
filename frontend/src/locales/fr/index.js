@@ -1790,7 +1790,9 @@ const onboarding = {
   // Le rythme quotidien, vécu : la jauge 新規 du hall et le terminus
   // de session des écrans d'étude (voir components/study/usePace.js).
   paceDoneTitle: 'Objectif du jour atteint',
-  paceDoneBody: (n, target) => `${n} nouveautés sur ${target} apprises aujourd’hui — la ligne continue en révision.`,
+  paceDoneOf: target => `sur ${target}`,
+  paceDoneLabel: 'nouveautés aujourd’hui',
+  paceDoneBody: 'C’est la part de nouveautés du jour. Les révisions continuent comme d’habitude.',
   paceExtraTrain: 'Encore des nouveautés',
   paceGaugeLabel: 'Nouveautés',
   paceGaugeAria: (n, target) => `${n} nouveautés apprises sur ${target} aujourd’hui`,
