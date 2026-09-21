@@ -24,9 +24,9 @@ import { FREE_DECKS, FREE_CARDS, PASS_DECKS, PASS_CARDS } from './credits'
 // purchase instead of an interest tap. Nothing else here moves.
 export const HAS_PAYWALL = true
 
-// Where an offer can be opened from. The backend's _SOURCES
-// (backend/routes/events.py) must hold exactly these five — every
-// funnel query slices on this, so a sixth added on one side only is a
+// Where an offer can be opened from. The backend's note beside
+// offer_view (backend/core/events.py) must name exactly these — every
+// funnel query slices on this, so a door added on one side only is a
 // silently-missing column in the dashboard.
 export const SOURCES = Object.freeze({
   ONBOARDING: 'onboarding',   // the last boarding screen, under the pass
@@ -34,6 +34,7 @@ export const SOURCES = Object.freeze({
   PROFILE: 'profile',         // the profile, under the commuter pass
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
+  RIDE: 'ride',               // the reading ride's pass plate (plan 097)
 })
 
 /**

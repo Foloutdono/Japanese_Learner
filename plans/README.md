@@ -4944,7 +4944,7 @@ These are suggestions; each is one line to reverse.
 
 | # | What | Status |
 |---|---|---|
-| 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the four endpoints, the events, the backfill script | PLANNED |
+| 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the six endpoints, the events, the backfill script | DONE (2026-09-21) |
 | 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | PLANNED |
 | 099 | The reading ride and the pass plate | PLANNED |
 | 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | PLANNED |
@@ -5288,6 +5288,39 @@ and at the bottom edge (the tab bar), and its controls are 44 px. Node —
   mechanism is another wave.
 - A kanji or grammar card on the ride: two cards is the lesson; a third
   is a queue.
+
+## Execution notes
+
+**097 (2026-09-21).** Landed as planned, with three things decided at
+the keyboard:
+
+- **The known card is the deck's kana-only こんにちは (N3), not 今日は
+  (N1).** The N1 entry carries kanji a novice cannot read on the one card
+  they are meant to recognise. Its romaji is spelled by hand
+  (`RIDE_KNOWN["romaji"]`): `study/romaji` reads the final は as a
+  particle and prints "konnichiha". The deck's own gloss for it —
+  *hello,good day (daytime greeting, id)* — is spreadsheet residue of
+  the plan-091 kind and prints as-is on the card; a gloss is not part of
+  the card id, so correcting it in the deck is safe and is content
+  work, not this wave's.
+- **The unknown cards are station words**, one per level, all real deck
+  entries checked at import: 駅 (N5), 特急 (N4), 到着 (N3), 定期券 (N2),
+  乗り換え (N1), and 沿線 for the learner already at N1. 特急 is the
+  boarding's own 種別 name; a learner has seen the glyph and now learns
+  the word. The novice is told apart by `kana_known != 'both'` at N5.
+- **The sentence is 駅で友だちに会います。** (N5, で), the one curated N5
+  line with the station in it.
+- `_build_vocab_card` is imported from `routes/vocab.py` under its
+  private name rather than renamed: the ride is the second caller, and
+  a rename touching the batch endpoints was not this plan's to make.
+  `guided` is stamped with `CASE WHEN guided ? %s` so the first time per
+  gate wins; the backfill writes the same ISO shape through `to_char`.
+- Backend 1578 → 1606 (24 new in `test_ride.py`, on a user of their
+  own — boarding at N3 runs the level rule, whose mastered card rows
+  the dictionary tests must not see — and 4 in
+  `test_backfill_first_ride.py`); `test_events.py` covers the four new
+  names through the frontend mirror. Frontend node lane green; nothing
+  else there changes until 098.
 
 ## Verification (to be filled at execution)
 

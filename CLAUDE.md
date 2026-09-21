@@ -202,6 +202,16 @@ python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
 ```
 
+One more one-shot, run once after the deploy that carries plan 097's
+columns (`user_profiles.tutorial_at`, `guided`) and before the frontend that
+reads them: it stamps the first ride as seen on every account that boarded
+before the ride existed, so nobody with three thousand reviews is shown
+how to flip a card. Same shape as the others — reports first.
+
+```bash
+python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
+```
+
 A vocab card id is `vocab_{level}_{kanji}_{kana}`, so **correcting either
 surface field of a deck entry orphans its SRS rows** — and the deck key
 `"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with

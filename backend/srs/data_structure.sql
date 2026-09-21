@@ -221,7 +221,15 @@ CREATE TABLE user_profiles (
     -- non-empty subset of {'vocab','kanji','grammar'}, in that order.
     -- NULL is an account boarded before the question and reads as all
     -- three. The kana are not listed: every ticket rides them.
-    lines TEXT[]
+    lines TEXT[],
+    -- 試乗 -- the first ride (plan 097, routes/onboarding.py): when the
+    -- two rides after the boarding ended, finished or skipped (NULL =
+    -- not yet; the index route shows the ride), and a map of gate id
+    -- ('today' | 'learn' | 'practice' | 'dictionary' | 'profile') to
+    -- the time its guide ended ({} = none seen). Accounts that boarded
+    -- before the ride existed are stamped by scripts/backfill_first_ride.py.
+    tutorial_at TIMESTAMPTZ,
+    guided JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came

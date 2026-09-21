@@ -64,6 +64,24 @@ EVENTS: dict[str, frozenset[str]] = {
     # tells the two apart.
     "account_claimed": frozenset({"from"}),
 
+    # ── 試乗 — the first ride (plan 097) ────────────────────────────
+    # The two lessons after the boarding, measured the way the boarding
+    # is: every transition is a ride_step through the same go()/mark()
+    # pair, and abandonment is a ride_step with no ride_done after it.
+    # `at` on ride_done is which ride it ended on ('cards' | 'reading')
+    # and `skipped` whether the learner left through the head's Skip --
+    # the one question this feature has to answer is whether anyone
+    # sits through it. `step` and `to` are step names, `ms` is engaged
+    # time (lib/dwell.js), never wall-clock.
+    "ride_step":      frozenset({"step", "to", "dir", "ms"}),
+    "ride_done":      frozenset({"skipped", "at", "ms"}),
+    # 案内 — the guide over each gate. `gate` is one of the five ids,
+    # `stop` the anchor's name from the registry (a string the app
+    # wrote, never one the learner did), `index` its place in the tour,
+    # `stops` how many were seen before Done or Skip.
+    "guide_step":     frozenset({"gate", "stop", "index"}),
+    "guide_done":     frozenset({"gate", "skipped", "stops", "ms"}),
+
     # ── Study runs ───────────────────────────────────────────────
     "run_start":      frozenset({"kind", "mode", "level"}),
     "run_complete":   frozenset({"kind", "mode", "level", "items", "secs"}),
@@ -79,7 +97,9 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 定期券 — the offer ───────────────────────────────────────
     # No longer dormant: the pass is SHOWN from five doors and sold from
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
-    # deliberately not HAS_STORE). `where` is which of the five.
+    # deliberately not HAS_STORE). `where` is which of the six doors
+    # (frontend/src/domain/paywall.js's SOURCES -- the five, and the
+    # reading ride's pass plate since plan 097).
     #
     # The three verbs are the whole point: a paywall nobody opens and a
     # paywall opened and refused are indistinguishable from
@@ -130,6 +150,10 @@ EVENTS: dict[str, frozenset[str]] = {
 # the level step ever come back" cannot be asked of a rollup.
 KEEP_LONG = frozenset({
     "boarding_step", "boarding_done", "account_claimed",
+    # The ride and the guides are once per account, and "did the people
+    # who skipped the ride come back" is a question about a whole
+    # history. ride_step is not here: per-transition, like a run.
+    "ride_done", "guide_done",
     "fare_blocked", "limit_reached", "offer_view", "offer_intent", "offer_dismiss",
     # Publishing is a once-or-twice-ever act, and "did the people who
     # published a deck keep doing it" is a question about a whole

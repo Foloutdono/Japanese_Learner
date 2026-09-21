@@ -114,6 +114,20 @@ def _init_db() -> None:
                 ("reminder_time", "TEXT"),
                 ("notifications", "BOOLEAN NOT NULL DEFAULT FALSE"),
                 ("lines", "TEXT[]"),
+                # 試乗 — the first ride (plan 097). tutorial_at is when
+                # the two rides after the boarding ended, finished or
+                # skipped (a learner who skipped is not asked again;
+                # Settings is the way back). guided maps a gate id
+                # ('today' | 'learn' | 'practice' | 'dictionary' |
+                # 'profile') to the ISO time its guide ended -- a map
+                # rather than five columns because the set of gates is
+                # the frontend's (config/tabs.js) to change, and a
+                # sixth gate must not be a migration. Both written only
+                # by routes/onboarding.py. NULL / {} until the ride runs;
+                # scripts/backfill_first_ride.py stamps the accounts
+                # that boarded before it existed.
+                ("tutorial_at", "TIMESTAMPTZ"),
+                ("guided", "JSONB NOT NULL DEFAULT '{}'::jsonb"),
             ):
                 cur.execute(
                     f"ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS {col} {typ}"
@@ -188,7 +202,7 @@ def ensure_profile_row(user_id: str) -> str:
 def _profile_row(user_id: str) -> tuple:
     """(username, jlpt_level, daily_new_target, onboarded_at,
     rating_scale, motive, kana_known, reminder_time, notifications,
-    lines) —
+    lines, tutorial_at, guided) —
     seeding the row lazily like _get_or_create_username, whose creation
     path it reuses. The onboarding fields are NULL until the flow runs,
     and rating_scale until the learner changes it."""
@@ -199,7 +213,7 @@ def _profile_row(user_id: str) -> tuple:
                 """
                 SELECT username, jlpt_level, daily_new_target, onboarded_at,
                        rating_scale, motive, kana_known, reminder_time,
-                       notifications, lines
+                       notifications, lines, tutorial_at, guided
                 FROM user_profiles WHERE user_id = %s
                 """,
                 (user_id,),
@@ -209,7 +223,7 @@ def _profile_row(user_id: str) -> tuple:
                 return row
     finally:
         conn.close()
-    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None)
+    return (_get_or_create_username(user_id), None, None, None, None, None, None, None, False, None, None, {})
 
 
 def usernames_for(user_ids: list[str]) -> dict[str, str]:
@@ -391,7 +405,8 @@ CALENDAR_DAYS = 35
 @router.get("/api/profile")
 def get_profile(user_id: str = Depends(get_user_id)):
     (username, jlpt_level, daily_new_target, onboarded_at, rating_scale,
-     motive, kana_known, reminder_time, notifications, lines) = _profile_row(user_id)
+     motive, kana_known, reminder_time, notifications, lines,
+     tutorial_at, guided) = _profile_row(user_id)
     xp = srs.get_lifetime_xp(user_id)
     progress = level_progress(xp)
     streak = srs.get_streak(user_id)
@@ -429,6 +444,14 @@ def get_profile(user_id: str = Depends(get_user_id)):
         # an account boarded before the question, which every reader
         # takes as all three.
         "lines": list(lines) if lines else None,
+        # 試乗 — the first ride (plan 097). App.jsx's index route sends
+        # a learner with no tutorialAt to the ride instead of /today;
+        # each gate opens its guide while its id is not in `guided`.
+        # Read off the same request the onboarding gate already makes,
+        # so the first screen after the 改札 is decided with no second
+        # round trip.
+        "tutorialAt": tutorial_at.isoformat() if tutorial_at else None,
+        "guided": dict(guided or {}),
         "streak": streak["current"],
         "streakLongest": streak["longest"],
         "totalReviews": records["total_reviews"],
