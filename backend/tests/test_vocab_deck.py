@@ -106,21 +106,17 @@ def test_every_card_id_is_unique_within_its_level():
     sharing both fields at one level share one SRS row and advance each
     other's progress.
 
-    Two such pairs predate plan 091 and are held here rather than
-    silently tolerated: N5 たいへん ("very" / "difficult situation") and
-    N5 あの ("that over there" / "um..."), each a genuine pair of senses
-    that the deck's id scheme cannot tell apart. Correcting them means
-    choosing a disambiguator that becomes part of the id, so they are
-    named here and left for the content audit; the point of the test is
-    that a THIRD one cannot appear unnoticed."""
+    Two such pairs predated plan 091 -- N5 たいへん ("very" / "difficult
+    situation") and N5 あの ("that over there" / "um...") -- and plan 106
+    settled them: the second たいへん was the N3 大変 card's sense and
+    went; the second あの is the filler, its own word, あのう. Neither
+    touched the shared id, so nothing was orphaned. The point of the
+    test is that a new pair cannot appear unnoticed."""
     seen: dict[str, int] = {}
     for level, entry in _entries():
         raw_id = vocab_to_id(entry, level)
         seen[raw_id] = seen.get(raw_id, 0) + 1
-    assert {i for i, n in seen.items() if n > 1} == {
-        "vocab_N5__たいへん",
-        "vocab_N5__あの",
-    }
+    assert {i for i, n in seen.items() if n > 1} == set()
 
 
 # ── The rename table ──────────────────────────────────────────

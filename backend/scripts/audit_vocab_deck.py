@@ -283,6 +283,12 @@ def _resolve_tokens(sentence: str):
             i += n
             continue
         m = morphemes[i]
+        previous = morphemes[i - 1] if i > 0 else None
+        if m.auxiliary_use and previous is not None and previous.pos == "particle" and previous.conjunctive:
+            # ている, てしまう, てみる: the point's, not a word's (plan 106,
+            # card_lookup.resolve_morpheme), so not a word the deck lacks.
+            i += 1
+            continue
         out.append((m, resolve_morpheme(morphemes, i)))
         i += 1
     return out

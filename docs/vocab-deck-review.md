@@ -257,29 +257,58 @@ The N5 count in `tests/test_onboarding_profile.py` moves with the deck,
 by design; `CLAUDE.md`'s "8,431 entries at 40 a run" and
 `tests/test_modes.py`'s "1,097 of 8,405" are prose and follow.
 
-### 106 — readings and forms, through the migration
+### 106 — readings and forms, through the migration (DONE, 2026-09-21; the cross-level duplicates deferred)
 
-Every change here rewrites an id, so each is a `MOVES` line and the
-migration script runs once after deploy (`python -m
-scripts.migrate_vocab_ids`, report first):
+Three ids moved, each a `MOVES` line in `content/vocab_renames.py`, so
+`python -m scripts.migrate_vocab_ids` (report first, `--yes` to apply)
+runs once after the deploy that carries them:
 
-- 一日 gains いちにち: kana `ついたち/いちにち`, and
-  `compound_reading` then picks the tokenizer's reading when it is one
-  of the variants (it already does; the variant was missing).
-- 掃除 N5 `そうじする` → `そうじ` (the N3 card is already 掃除/そうじ:
-  merge, keep N5).
-- The 25 exact duplicates across levels: keep the lower level, move the
-  higher card onto it; the migration merges on collision.
-- たいへん and あの, the two same-level pairs `test_vocab_deck.py`
-  names: choose the disambiguator (a written form for one of each —
-  大変 / あの…) and release the test's allowance.
-- The 266 shared written forms are mostly legitimate (後 is four words)
-  and are 107's problem, not this one's; only a pair that is the same
-  word twice moves.
-- The N5 見る entry's written form is "見る 観る", two spellings in one
-  field with a space, so its lemma key is neither and every 見る badges
-  as the N3 card instead (found while checking 105's slice). One
-  spelling per card; the other is a `MOVES` line or a second entry.
+- 掃除 N5 `そうじする` → `そうじ`, the する out of the reading field. The
+  N3 掃除/そうじ stays: the two are now one of the exact pairs below.
+- 見る 観る → 見る. Two spellings in one written-form field, with a
+  space, meant its lemma key was neither and every 見る badged as the
+  N3 card.
+- 十 `じゅう とお` → `じゅう/とお`, the two readings joined the way the
+  deck joins them (and the splitter, since 104, splits).
+
+Settled without an id moving:
+
+- 一日 already had both cards (ついたち and いちにち — the second glossed
+  "first of the month", now "one day; all day"); what was missing was
+  the fold choosing between them. `resolve_compound` now hands the
+  joined tokenizer reading to `resolve_lemma`, so 一日中 folds to
+  いちにち and reads so.
+- たいへん's second N5 entry ("difficult situation") was the N3 大変
+  card's sense and went; あの's second ("um...") is the filler, its own
+  word, あのう. Neither touched the shared id, so nothing was orphaned,
+  and `test_vocab_deck.py`'s allowance for the two pairs is released.
+- **UniDic's lemma is not the deck's spelling** (104's finding): 213
+  deck words lemmatise to another form, 55 of them to a form that is a
+  higher-level card (帰る → 返る N1, 降りる → 下りる N4, 登る → 上る N2,
+  感じる → 感ずる N2). `_index_vocab_by_lemma` now files each entry
+  under UniDic's lemma for its written form as well (0.08 s at import),
+  and `resolve_lemma` takes the token's surface: where a lemma names two
+  deck words with one reading, the one sharing the surface's first
+  kanji wins, so 帰り is 帰る and 返っ is 返る.
+- **The auxiliary position is closed on both paths** (104's other
+  finding): a verb in auxiliary use behind a conjunctive て/で resolves
+  to nothing, because ている, てくる, てみる, ておく and てしまう are
+  catalogue points and the row opens the point. 食べてしまった no longer
+  badges the N1 仕舞う card. The audit script does not measure that
+  position at all.
+
+**Deferred: the 25 exact duplicates across levels** (どう, でも, はい,
+この, その, ここ, いつも, できる… at N5 and N3; 掃除 joins them). Merging
+one onto the other is a level move, and the migration deliberately
+never moves a level: `deck_cards` stores `level` beside `raw_id` and
+`test_no_rename_changes_the_level` holds the line. Doing it right means
+teaching `migrate_vocab_ids` to rewrite that column for a listed move
+and deciding which level's card survives (the lower, the review says);
+that is a plan of its own, 106b, and until then a learner at N3 meets
+この as a "new" card once more. The 266 shared written forms are 107's.
+
+After 106: 166 unmatched lemmas and 330 occurrences in the corpus (from
+194 and 633), 153 of them absent.
 
 ### 107 — French glosses per card, not per written form
 

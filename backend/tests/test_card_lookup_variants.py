@@ -151,3 +151,42 @@ class ReadingLookupRepairTests(unittest.TestCase):
         after_te = morphology.tokenize("勉強してできる。")
         deki = next(i for i, m in enumerate(after_te) if m.lemma == "出来る")
         self.assertIsNone(resolve_morpheme(after_te, deki))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "fugashi/unidic-lite not installed")
+class LemmaSpellingTests(unittest.TestCase):
+    """Plan 106. UniDic's lemma is an orthographic base, not the deck's
+    spelling: 213 deck words lemmatise to something else, 55 of them to
+    a form that is a HIGHER-level card (帰る -> 返る N1). The lemma index
+    files each entry under its own lemma too, and the surface tells the
+    two apart."""
+
+    def _resolve(self, sentence: str, surface_start: str) -> str | None:
+        morphemes = morphology.tokenize(sentence)
+        i = next(i for i, m in enumerate(morphemes) if m.surface.startswith(surface_start))
+        hit = resolve_morpheme(morphemes, i)
+        return hit and hit[2]
+
+    def test_a_word_resolves_to_its_own_card_not_its_lemma_homograph(self) -> None:
+        self.assertEqual(self._resolve("うちに帰ります。", "帰"), "vocab_N5_帰る_かえる")
+        self.assertEqual(self._resolve("駅で降りる。", "降"), "vocab_N5_降りる_おりる")
+        self.assertEqual(self._resolve("山に登る。", "登"), "vocab_N5_登る_のぼる")
+
+    def test_the_lemma_homograph_keeps_its_own_card(self) -> None:
+        # 返る is a deck word too; a token written 返っ is that one.
+        self.assertEqual(self._resolve("手紙が返ってきた。", "返"), "vocab_N1_返る_かえる")
+
+    def test_an_auxiliary_behind_te_is_the_points_not_a_words(self) -> None:
+        # 食べてしまった badged the N1 仕舞う card through the lemma path;
+        # てしまう is a catalogue point and the row opens it instead.
+        self.assertIsNone(self._resolve("食べてしまった。", "しま"))
+        self.assertIsNone(self._resolve("食べている。", "いる"))
+
+    def test_a_compound_picks_the_entry_its_reading_names(self) -> None:
+        # 一日 is two N5 cards, ついたち and いちにち; the tokenizer's joined
+        # reading decides which one 一日中 folds into.
+        from study.card_lookup import resolve_compound
+        morphemes = morphology.tokenize("一日中寝た。")
+        level, entry, raw_id, n = resolve_compound(morphemes, 0)
+        self.assertEqual(raw_id, "vocab_N5_一日_いちにち")
+        self.assertEqual(n, 2)

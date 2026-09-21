@@ -587,6 +587,31 @@ def _index_vocab_by_lemma():
                     continue
                 if any(is_kanji(c) for c in variant):
                     index.setdefault(variant, []).append((level, entry))
+
+    # Third pass (plan 106): the entry under UniDic's OWN lemma for its
+    # written form. UniDic's lemma is an orthographic base, not the deck's
+    # spelling -- 帰る lemmatises to 返る, 降りる to 下りる, 終る to
+    # 終わる, 感じる to 感ずる -- so a token of the N5 帰る resolved, when
+    # it resolved at all, to the N1 返る card: 213 deck words, 55 of them
+    # badging a higher level than their own. Keyed by the lemma the
+    # tokenizer will actually hand resolve_morpheme, each such entry is
+    # reachable again; where the lemma is ALSO a deck word (返る is),
+    # both are candidates and resolve_lemma's surface preference tells
+    # them apart. Appended, never skipped: the whole point is to stand
+    # beside the entry that already owns the key. Tokenizing the 7,300
+    # written forms costs 0.08 s at import.
+    if morphology.MORPHOLOGY_AVAILABLE:
+        for level, vocab_list in VOCAB_BY_LEVEL.items():
+            for entry in vocab_list:
+                word = entry.get("kanji") or ""
+                if not word or " " in word or not any(is_kanji(c) for c in word):
+                    continue
+                morphemes = morphology.tokenize(word)
+                if not morphemes or len(morphemes) != 1:
+                    continue
+                lemma = morphemes[0].lemma
+                if lemma != word and (level, entry) not in index.get(lemma, []):
+                    index.setdefault(lemma, []).append((level, entry))
     return index
 
 
@@ -628,13 +653,26 @@ _VOCAB_BY_LEMMA = _index_vocab_by_lemma()
 _VOCAB_BY_KANA = _index_vocab_by_kana()
 
 
-def resolve_lemma(lemma: str, reading: str):
+def resolve_lemma(lemma: str, reading: str, surface: str = ""):
     """(level, entry, raw_id) for the deck entry whose kanji field is
     `lemma`, disambiguated by `reading` when several entries share that
-    lemma text (see _index_vocab_by_lemma), or None."""
+    lemma text (see _index_vocab_by_lemma), or None.
+
+    `surface` is the token as written, when the caller has it (plan 106).
+    Since the index also files an entry under UniDic's lemma for it, one
+    lemma can name two deck words with the same reading -- 返る holds
+    both 返る (N1) and 帰る (N5), 上る holds 上る, 登る and 昇る -- and
+    the reading cannot tell them apart. The page can: a token written 帰り
+    is 帰る. Where any candidate shares the surface's first kanji, only
+    those stay; where none does (the token was written in kana), the
+    reading and the level decide as before."""
     candidates = _VOCAB_BY_LEMMA.get(lemma)
     if not candidates:
         return None
+    if surface and is_kanji(surface[0]):
+        same_head = [c for c in candidates if (c[1].get("kanji") or "")[:1] == surface[0]]
+        if same_head:
+            candidates = same_head
     triples = [(level, entry, entry.get("kana") or entry.get("reading") or "") for level, entry in candidates]
     best = _pick_best_candidate(triples, reading)
     if best is None:
@@ -705,7 +743,14 @@ def resolve_morpheme(morphemes, i: int):
     m = morphemes[i]
     previous = morphemes[i - 1] if i > 0 else None
     after_conjunctive = previous is not None and previous.pos == "particle" and previous.conjunctive
-    return resolve_lemma(m.lemma, m.lemma_reading) or resolve_kana(
+    if m.auxiliary_use and after_conjunctive:
+        # A verb hanging off a conjunctive て/で in its auxiliary use is
+        # the grammar point's, not a word's (plan 106): ている, てくる,
+        # てみる, ておく, てしまう are all catalogue points, and the row
+        # opens the point. The lemma path used to answer here anyway and
+        # badged 食べてしまった with the N1 仕舞う card.
+        return None
+    return resolve_lemma(m.lemma, m.lemma_reading, m.surface) or resolve_kana(
         m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive,
     )
 
@@ -750,8 +795,12 @@ def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
         run = morphemes[i:i + n]
         if any(m.pos not in _COMPOUND_POS or m.auxiliary_use for m in run):
             continue
+        joined_reading = "".join(m.reading for m in run)
         for key in ("".join(m.surface for m in run), "".join(m.lemma for m in run)):
-            hit = resolve_lemma(key, "")
+            # The joined reading picks between entries that share the
+            # written form (一日 is ついたち and いちにち, two cards): it
+            # matches one of them exactly or, as for にちようび, none.
+            hit = resolve_lemma(key, joined_reading)
             if hit:
                 level, entry, raw_id = hit
                 return level, entry, raw_id, n

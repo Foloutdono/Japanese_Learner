@@ -86,6 +86,14 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual(by_surface["二日"]["reading"], "ふつか")
         self.assertNotIn("母", by_surface)
 
+    def test_a_compound_with_two_readings_folds_to_the_one_read(self) -> None:
+        # Plan 106: 一日 is ついたち and いちにち, two N5 cards; 一日中 read
+        # いちにち folds to that one and shows its reading.
+        r = analyze_local("一日中寝た。")
+        tok = next(t for t in r["tokens"] if t["surface"] == "一日")
+        self.assertEqual(tok["vocab_match"]["raw_id"], "vocab_N5_一日_いちにち")
+        self.assertEqual(tok["reading"], "いちにち")
+
     def test_a_particle_is_never_folded_into_a_compound(self) -> None:
         # 今日 + は is two words whatever the deck holds (こんにちは is
         # an N3 entry): a run never crosses a particle.
