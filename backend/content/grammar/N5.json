@@ -381,10 +381,10 @@
   },
   {
     "pattern": "と",
-    "structure": "noun + と + noun",
+    "structure": "noun + と + noun ／ 「quotation」 + と + 言う・思う",
     "meaning": {
-      "en": "and (nouns); also with, together with",
-      "fr": "et (entre noms) ; avec, en compagnie de"
+      "en": "and (nouns); with, together with; marks what is said or thought",
+      "fr": "et (entre noms) ; avec, en compagnie de ; introduit ce qui est dit ou pensé"
     },
     "steps": [
       {
@@ -399,8 +399,8 @@
       },
       {
         "kind": "careful",
-        "en": "As « and », と joins nouns only: two verbs or two clauses are joined with the て-form, not with と. The と after a quotation is a different word.",
-        "fr": "Comme « et », と ne relie que des noms : deux verbes ou deux propositions se relient avec la forme en て, pas avec と. Le と après une citation est un autre mot."
+        "en": "As « and », と joins nouns only: two verbs or two clauses are joined with the て-form, not with と. The と that marks a quotation is a separate use (引用の と): it follows a whole clause, and never means « and ».",
+        "fr": "Comme « et », と ne relie que des noms : deux verbes ou deux propositions se relient avec la forme en て, pas avec と. Le と qui marque une citation est un emploi à part (引用の と) : il suit une proposition entière et ne veut jamais dire « et »."
       }
     ],
     "compare": [
