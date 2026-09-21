@@ -113,7 +113,11 @@ runtime purpose. Two consequences worth knowing:
   `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
   `screens/TranslationRun.jsx`, `screens/DictationRun.jsx`,
   `screens/ComprehensionRun.jsx` and `index.css`).
-  When starting a new wave, begin at **097** or higher, and check
+  Numbers **097–101** are claimed by wave 21, the first ride (the
+  flashcard and reading rides after the boarding, and the per-gate
+  guide), planned in `plans/README.md` and not yet executed — cite them
+  from the files that plan names, and nowhere else.
+  When starting a new wave, begin at **102** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
