@@ -19,10 +19,12 @@ Runs are Tuesday and Friday (ANCHOR is the first). The nth run audits
 
     AREAS[n % 3]
 
-so grammar, vocab and sentences advance in parallel — a whole area is
-never starved behind another's backlog — and within an area the cursor is
-n // 3, walking that area's slices in order and wrapping when it reaches
-the end. Nothing is stored: the slice is a pure function of the date, so a
+so grammar, vocab, sentences and placement advance in parallel — a whole
+area is never starved behind another's backlog — and within an area the
+cursor is n // 4, walking that area's slices in order and wrapping when it
+reaches the end. (Placement joined on 2026-09-21, plan 109: the three
+candidate lists an outside ranking and the community JLPT lists raise
+against the deck. Runs before that date rotated over three areas.) Nothing is stored: the slice is a pure function of the date, so a
 run can be reproduced (--on) and the next months inspected (--schedule)
 without a ledger to keep in sync.
 
@@ -51,7 +53,7 @@ _CONTENT = os.path.join(_BASE_DIR, "content")
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
-AREAS = ("grammar", "vocab", "sentences")
+AREAS = ("grammar", "vocab", "sentences", "placement")
 
 # The first run — the Routine's own first firing. Tuesdays and Fridays
 # after it are the others, and the two must agree: a run on any other
@@ -66,6 +68,7 @@ CHUNK_GRAMMAR_RICH = 20
 CHUNK_GRAMMAR = 30
 CHUNK_VOCAB = 40
 CHUNK_READING = 25
+CHUNK_PLACEMENT = 40
 RICH_LEVELS = ("N5", "N4")
 
 
@@ -308,10 +311,53 @@ def _sentence_slices() -> list[dict]:
     return out
 
 
+# The three candidate lists of plan 109 (docs/vocab-deck-review.md),
+# read from the file scripts/placement_report.py writes with
+# --write-lists so this stays tokenizer-free. Each candidate is a claim
+# about the deck an outside list makes -- a card placed above the level
+# the community JLPT lists give the word, a list word with no card, a
+# frequent word with no card -- and the audit's job is the same as for
+# a gloss: try to disprove it, and file only what survives. A finding
+# here proposes a card or a level move; the audit never makes either.
+_PLACEMENT_KINDS = (
+    ("placed_above", "placed above the JLPT lists", "backend/datas/vocab/vocab_deck.json"),
+    ("listed_not_here", "in the JLPT lists, not in the deck", "backend/datas/vocab/sources/jlpt_tanos.json"),
+    ("frequent_not_here", "frequent in the subtitle ranking, not in the deck",
+     "backend/datas/vocab/sources/opensubtitles_ja_50k.txt"),
+)
+
+
+def placement_lists() -> dict[str, list[dict]]:
+    return _json(os.path.join(_VOCAB, "placement_lists.json"))
+
+
+def _placement_slices() -> list[dict]:
+    """The three lists chunked, interleaved one chunk each, so no list
+    waits on another's backlog."""
+    lists = placement_lists()
+    per_kind = []
+    for kind, label, source in _PLACEMENT_KINDS:
+        chunks = [
+            {"id": sid, "area": "placement", "kind": kind,
+             "title": f"{label}, candidates {start + 1}–{stop}",
+             "source": source, "start": start, "stop": stop}
+            for sid, start, stop in _chunk_ids(f"placement-{kind.replace('_', '-')}", len(lists[kind]), CHUNK_PLACEMENT)
+        ]
+        per_kind.append(chunks)
+    out, i = [], 0
+    while any(i < len(c) for c in per_kind):
+        for chunks in per_kind:
+            if i < len(chunks):
+                out.append(chunks[i])
+        i += 1
+    return out
+
+
 def slices(area: str) -> list[dict]:
     return {"grammar": _grammar_slices,
             "vocab": _vocab_slices,
-            "sentences": _sentence_slices}[area]()
+            "sentences": _sentence_slices,
+            "placement": _placement_slices}[area]()
 
 
 def slice_for(index: int) -> dict:
@@ -352,6 +398,14 @@ CHECKS = {
         "Does the level fit the word's real frequency?",
         "For a theme: does every word belong to the theme, and does the band match how common it is?",
     ],
+    "placement": [
+        "Placed above: is the word really one a learner meets at the lists' level, or is the deck's level the defensible one?",
+        "Listed, not here: is it a word (not a pattern, a variant spelling of a card, or a name), and which level would teach it?",
+        "Frequent, not here: is the rank the word's own, or a stem, a filler or a homophone the tokenizer credited to it?",
+        "Does the deck already hold the word under another spelling or reading (kanji vs kana, 御 vs お)?",
+        "Would a card for it be one the app's own sentences ever use, or a word with nothing to teach it in?",
+        "For a level move: is the card's level the word's, not its kanji's (the review's decision 3)?",
+    ],
     "sentences": [
         "Is the Japanese natural — what someone would actually say or write, not translationese?",
         "Does the English say what the Japanese says, at the same register?",
@@ -371,6 +425,8 @@ def entries_of(chosen: dict) -> list[dict]:
         if chosen["kind"] == "theme":
             return theme_words()[chosen["theme"]]
         return list(vocab_entries()[chosen["start"]:chosen["stop"]])
+    if area == "placement":
+        return list(placement_lists()[chosen["kind"]][chosen["start"]:chosen["stop"]])
     if chosen["kind"] == "listening":
         return list(_literal("listening_clips.py", chosen["level"]))
     bank = _literal("reading_sentences.py", chosen["level"])

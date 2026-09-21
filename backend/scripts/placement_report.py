@@ -5,6 +5,7 @@ Where the deck's cards sit, and what it lacks, against outside lists (plan 109).
     python -m scripts.placement_report --dump           # the lists, as JSON
     python -m scripts.placement_report --slice 1        # the first forty candidates of each list
     python -m scripts.placement_report --rebuild-order  # rewrite datas/vocab/vocab_frequency.json
+    python -m scripts.placement_report --write-lists    # the three lists to datas/vocab/placement_lists.json, for the audit's rotation
 
 Read-only unless --rebuild-order; no database, no .env, no network. It
 reads the deck and the two lists under datas/vocab/sources (see the
@@ -60,6 +61,7 @@ _SOURCES = os.path.join(_VOCAB, "sources")
 FREQUENCY_SOURCE = os.path.join(_SOURCES, "opensubtitles_ja_50k.txt")
 JLPT_SOURCE = os.path.join(_SOURCES, "jlpt_tanos.json")
 ORDER_FILE = os.path.join(_VOCAB, "vocab_frequency.json")
+LISTS_FILE = os.path.join(_VOCAB, "placement_lists.json")
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 _RANK = {level: i for i, level in enumerate(LEVELS)}
@@ -312,6 +314,25 @@ def measure() -> dict:
     }
 
 
+def candidate_lists(report: dict | None = None) -> dict[str, list[dict]]:
+    """The three lists as the audit's rotation reads them (plan 109):
+    scripts/audit_slice.py needs no tokenizer and no network, so it
+    reads datas/vocab/placement_lists.json rather than computing this,
+    and tests/test_placement_report.py holds that file equal to what
+    this would write -- rebuilt with --write-lists after a deck change,
+    like the order file."""
+    report = report or measure()
+    return {k: report[k] for k in ("placed_above", "listed_not_here", "frequent_not_here")}
+
+
+def write_lists() -> int:
+    lists = candidate_lists()
+    with open(LISTS_FILE, "w", encoding="utf-8") as f:
+        json.dump(lists, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    return sum(len(v) for v in lists.values())
+
+
 def render(report: dict, slice_no: int | None = None) -> str:
     def window(items):
         if slice_no is None:
@@ -341,12 +362,18 @@ def main(argv=None) -> int:
     parser.add_argument("--slice", type=int, metavar="N", help=f"the Nth {SLICE} candidates of each list")
     parser.add_argument("--rebuild-order", action="store_true",
                         help="rewrite datas/vocab/vocab_frequency.json in ranking order")
+    parser.add_argument("--write-lists", action="store_true",
+                        help="write the three candidate lists to datas/vocab/placement_lists.json")
     args = parser.parse_args(argv)
     if args.rebuild_order:
         keys = ordered_keys()
         with open(ORDER_FILE, "w", encoding="utf-8") as f:
             json.dump(keys, f, ensure_ascii=False, separators=(",", ":"))
         print(f"{len(keys):,} keys written to {os.path.relpath(ORDER_FILE, _BASE_DIR)}")
+        return 0
+    if args.write_lists:
+        n = write_lists()
+        print(f"{n:,} candidates written to {os.path.relpath(LISTS_FILE, _BASE_DIR)}")
         return 0
     report = measure()
     if args.dump:

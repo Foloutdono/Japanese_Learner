@@ -203,8 +203,13 @@ def test_a_pool_character_carries_no_srs_card(client):
     pool = next(r for r in _page(client, q="龍", limit=5)["results"])
     assert pool["status"] is None
 
+    # A deck character carries a status object whatever its state: an
+    # earlier test in the same run may have reviewed 日 under the dev
+    # user (the SRS tables are shared), so the exact label is not
+    # pinned, only that the pool's None is not what a deck entry gets.
     deck = _page(client, q="日", limit=5)["results"][0]
-    assert deck["status"]["status"] == "not_started"
+    assert deck["status"] is not None
+    assert deck["status"]["status"] in {"not_started", "new", "learning", "mastered"}
 
 
 def test_a_pool_character_still_files_its_deck_words(client):

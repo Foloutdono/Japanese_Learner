@@ -43,15 +43,32 @@ python -m scripts.audit_slice                 # what today's run is for
 python -m scripts.audit_slice --dump > /tmp/slice.json
 ```
 
-The slice is a pure function of the date — grammar, vocab and sentences
-in rotation, each area walking its own list — so there is no ledger to
-update and a run can be reproduced later with `--on`. Read
+The slice is a pure function of the date — grammar, vocab, sentences and
+placement in rotation, each area walking its own list — so there is no
+ledger to update and a run can be reproduced later with `--on`. Read
 `scripts/audit_slice.py`'s docstring for the rotation; `--schedule 12`
 shows what is coming.
 
 The dump carries the entries, the `source` file they live in, and a
 `checks` list: the questions this area is audited against. For vocab it
 also carries `risk` and `flags` — see step 3.
+
+**A placement slice is different in kind.** Its entries are not content
+but *claims about* the content, raised by two outside lists (plan 109,
+`docs/vocab-deck-review.md`; the lists and their licences are under
+`backend/datas/vocab/sources/`): a deck card placed above the level the
+community JLPT lists give the word, a list word the deck has no card
+for, or a word high in a subtitle-corpus ranking with no card. Each
+comes with the rank the ranking gives it. The job is the same as for a
+gloss — try to disprove the claim — and the finding, when one survives,
+*proposes* a card or a level move with the evidence, in the same issue
+shape as step 6. The audit never adds the card or moves the level (Rule
+0); a level move is a card-id change and goes through
+`content/vocab_renames.py` and the migration, which is the maintainer's.
+Most claims will not survive: the subtitle ranking credits verb stems
+and homophones, the JLPT lists are the deck's own ancestors, and a
+"missing" word is often present under another spelling. That is the
+point of auditing them rather than importing them.
 
 ### 2. Run the repo's own gates first
 
@@ -213,7 +230,8 @@ is how the audit works.
 
 ## What is out of scope
 
-- Editing anything. See Rule 0.
+- Editing anything. See Rule 0. A placement finding proposes a card or a
+  level move; it never adds one.
 - The learner database. Postgres holds SRS state and review history, not
   taught content; nothing in this audit reads it, and no finding should
   involve a learner's rows.

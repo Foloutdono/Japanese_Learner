@@ -93,6 +93,12 @@ class RankingTests(unittest.TestCase):
         current = json.load(open(report.ORDER_FILE, encoding="utf-8"))
         self.assertEqual(current, report.ordered_keys(self.rank))
 
+    def test_the_lists_file_is_what_the_script_would_write(self) -> None:
+        """placement_lists.json feeds the audit's rotation without a
+        tokenizer; a deck change that forgets `--write-lists` lands here."""
+        current = json.load(open(report.LISTS_FILE, encoding="utf-8"))
+        self.assertEqual(current, report.candidate_lists())
+
     def test_the_lists_are_candidates_with_the_shape_the_audit_reads(self) -> None:
         lookups = self.lookups
         above = report.placed_above(self.rank, lookups)

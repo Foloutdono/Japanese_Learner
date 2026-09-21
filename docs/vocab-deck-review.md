@@ -428,10 +428,14 @@ beside 見る. A card is matched by its own form first, so this only
 reaches a spelling the subtitles never write. If BCCWJ is ever fetched,
 the ranking half is re-based on it with the same script.
 
-**Left:** working the three lists, forty a run, through the audit
-Routine — nothing moves or is added without the evidence bar. The
-105-slice placements flagged earlier (顔 at N5, 支援 and 専門家 at N1)
-are on the first list.
+The three lists are in the audit's rotation: `placement` is the fourth
+area of `scripts/audit_slice.py` (from 2026-09-21), reading
+`datas/vocab/placement_lists.json`, which `placement_report --write-lists`
+writes and a test holds equal to the script's output, so the rotation
+stays tokenizer-free; the playbook's step 1 says what a placement slice
+is and what a finding on it may propose. Nothing moves or is added
+without the evidence bar. The 105-slice placements flagged earlier (顔
+at N5, 支援 and 専門家 at N1) are on the first list.
 
 ### 110 — the pool, in place rather than rebuilt (DONE, 2026-09-21)
 

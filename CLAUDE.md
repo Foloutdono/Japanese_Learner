@@ -266,7 +266,8 @@ them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
 in `vocab_renames.MOVES` for the same reason. **After any deck change, run
 `python -m scripts.audit_vocab_deck --write-snapshot`,
-`python -m scripts.placement_report --rebuild-order` and, for an added
+`python -m scripts.placement_report --rebuild-order --write-lists` (two
+runs; each flag is its own) and, for an added
 word, `python -m scripts.prune_pool_overlap --yes`** (the JMdict pool is
 "everything not in the deck"; this takes the new word's pool row out,
 senses moved to `curated_senses`, ids untouched — never rebuild the pool
@@ -401,11 +402,14 @@ cd backend
 python -m scripts.placement_report                  # the three lists, forty each
 python -m scripts.placement_report --slice 2        # the next forty of each
 python -m scripts.placement_report --rebuild-order  # vocab_frequency.json, in ranking order
+python -m scripts.placement_report --write-lists    # placement_lists.json, for the audit's rotation
 ```
 
-The slice is a pure function of the date — grammar, vocab and sentences in
-rotation, each area walking its own list — so there is no ledger to keep in
-sync and no state to corrupt. Read-only, no database, no `.env`, no network:
+The slice is a pure function of the date — grammar, vocab, sentences and,
+since plan 109, placement (the three candidate lists, read from
+`datas/vocab/placement_lists.json`, which `placement_report --write-lists`
+writes) in rotation, each area walking its own list — so there is no
+ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
