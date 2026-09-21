@@ -192,8 +192,8 @@ Thirteen waves live in this file:
   (40 files), guards clean, build clean.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
-  102–104, 106, 106b, 107 and 109's source and report DONE, 105 and 108
-  in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
+  102–104, 106, 106b, 107, 109's source and report, and 110 DONE; 105
+  and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
   as two words: 102 gives 母 and 父 N5 entries of their own and folds a
   deck compound UniDic cuts short (日曜 + 日, お + 母 + さん, 二 + 日)
   back into one token with the entry's reading
@@ -214,8 +214,10 @@ Thirteen waves live in this file:
   hygiene, a learner frequency source (109: the OpenSubtitles ranking
   and the tanos JLPT lists under `datas/vocab/sources/`,
   `scripts/placement_report.py`'s three candidate lists, and
-  `vocab_frequency.json` rebuilt in ranking order), and one pool
-  rebuild. The plan is
+  `vocab_frequency.json` rebuilt in ranking order), and the pool taken
+  out of the deck's way in place (110, `scripts/prune_pool_overlap.py`:
+  a rebuild from another JMdict edition would renumber every pool card,
+  so the overlapping rows go one by one, senses moved with them). The plan is
   `docs/vocab-deck-review.md` — in `docs/`, since `plans/*.md` is
   gitignored and the session that wrote it had no lasting checkout.
 

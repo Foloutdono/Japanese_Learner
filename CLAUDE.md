@@ -152,8 +152,11 @@ runtime purpose. Two consequences worth knowing:
   licences), `scripts/placement_report.py` and
   `tests/test_placement_report.py`, and `vocab_frequency.json` rebuilt
   in the ranking's order; its three candidate lists remain for the
-  audit's slices; 110 is the pool rebuild, planned in
-  `docs/vocab-deck-review.md`.
+  audit's slices, 110 (done) the pool taken out of the deck's way in
+  place (`scripts/prune_pool_overlap.py`; a rebuild from another JMdict
+  edition would renumber every pool card, so never that) — 110b, the
+  migration for a learner's pool card onto the deck card, is the one
+  piece left, recorded in `docs/vocab-deck-review.md`.
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -255,9 +258,14 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
 in `vocab_renames.MOVES` for the same reason. **After any deck change, run
-`python -m scripts.audit_vocab_deck --write-snapshot` and
-`python -m scripts.placement_report --rebuild-order`** and commit
-`datas/vocab/vocab_served.json` and `vocab_frequency.json` with it: `tests/test_vocab_deck.py` fails
+`python -m scripts.audit_vocab_deck --write-snapshot`,
+`python -m scripts.placement_report --rebuild-order` and, for an added
+word, `python -m scripts.prune_pool_overlap --yes`** (the JMdict pool is
+"everything not in the deck"; this takes the new word's pool row out,
+senses moved to `curated_senses`, ids untouched — never rebuild the pool
+from another JMdict edition, a pool card's id is its row's position in
+the export) and commit `datas/vocab/vocab_served.json`,
+`vocab_frequency.json` and `vocab_jmdict.sqlite3` with it: `tests/test_vocab_deck.py` fails
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
 

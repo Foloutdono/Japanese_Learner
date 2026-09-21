@@ -271,7 +271,7 @@
    "score": 30000.0
   },
   {
-   "domain": "vocab_jmdict",
+   "domain": "vocab",
    "kana": "こいぬ",
    "kanji": "子犬",
    "level": "expert",
@@ -536,7 +536,7 @@
    "score": 500
   },
   {
-   "domain": "vocab_jmdict",
+   "domain": "vocab",
    "kana": "かお",
    "kanji": "顔",
    "level": "basic",
@@ -7509,7 +7509,7 @@
    "score": 34000.0
   },
   {
-   "domain": "vocab_jmdict",
+   "domain": "vocab",
    "kana": "コンビニ",
    "kanji": "",
    "level": "expert",
@@ -8053,7 +8053,7 @@
    "score": 30000.0
   },
   {
-   "domain": "vocab_jmdict",
+   "domain": "vocab",
    "kana": "スマホ",
    "kanji": "",
    "level": "advanced",

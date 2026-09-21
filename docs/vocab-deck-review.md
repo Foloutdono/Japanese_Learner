@@ -92,11 +92,14 @@ Two more things the numbers do not show but the work will meet:
    bar (`docs/content-audit/PLAYBOOK.md`) applies to a new card as it
    does to an old gloss: a wrong card with a citation is worse than no
    card. Slices of forty, like the vocab audit.
-6. **One pool rebuild, at the end.** `vocab_jmdict.sqlite3` is 76 MB and
-   tracked; it is built as "everything not in the deck", so each added
-   card overlaps it until a rebuild. `tests/test_dictionary_vocab.py`'s
-   `KNOWN_POOL_OVERLAP` carries the overlaps meanwhile (母 and 父 are
-   there now); 110 rebuilds once and empties the set.
+6. **The pool is pruned in place, never rebuilt from another edition.**
+   `vocab_jmdict.sqlite3` is 76 MB and tracked; it is built as
+   "everything not in the deck", so each added card overlaps it. A pool
+   card's id is its row's position in the export, so a rebuild from
+   another JMdict edition renumbers every pool card a learner holds;
+   `scripts/prune_pool_overlap.py` takes the deck's words out row by
+   row instead, senses moved with them (110). The overlap set in
+   `tests/test_dictionary_vocab.py` is held empty.
 
 ## The plans
 
@@ -430,13 +433,42 @@ Routine — nothing moves or is added without the evidence bar. The
 105-slice placements flagged earlier (顔 at N5, 支援 and 専門家 at N1)
 are on the first list.
 
-### 110 — the pool rebuild
+### 110 — the pool, in place rather than rebuilt (DONE, 2026-09-21)
 
-Restore the JMdict export beside `vocab_jmdict.sqlite3`, run
-`scripts/build_jmdict_db.py` against the grown deck, empty
-`KNOWN_POOL_OVERLAP` to its four historic entries (or to nothing, if the
-export has moved on), one commit. Last, because the binary is 76 MB and
-one rebuild is the budget.
+The plan was one rebuild of `vocab_jmdict.sqlite3` against the grown
+deck. It cannot be done here and should not be done lightly anywhere:
+a pool row's SRS card id is its `id`, the row's position in the export
+it was built from (`vocab_jmdict_data.py`, CARD-ID SCHEME), so a rebuild
+from any other JMdict edition renumbers every pool card a learner
+holds, and the export this pool came from (JMdict 2026-07-15) is
+gitignored and not on this machine. A rebuild is only ever safe from
+the same export, or with a `migrate_jmdict_card_ids`-shaped migration
+beside it.
+
+`scripts/prune_pool_overlap.py` does the same job in place: it finds
+every pool row whose (kanji, kana) the deck serves — 28 today, the four
+kana-only words that sat on both sides since the first build (しまう,
+ね, とん, ふと) plus 102's and 105's cards — moves each row's senses
+blob to `curated_senses` under the deck's key first (a word added after
+the build had no curated row and read its glossary and examples from
+the pool row through `vocab_extras._find_senses`'s fallback; delete the
+row alone and 母 loses its example sentences), then deletes the
+entries and senses rows. Every other id stays where it is; `freq_rank`
+keeps its gaps, which every reader tolerates (BETWEEN, COUNT). Reports
+first, `--yes` applies, idempotent. `KNOWN_POOL_OVERLAP` in
+`tests/test_dictionary_vocab.py` is the empty set now and stays so: a
+deck addition that skips the script fails there, and a test holds that
+母 still has its examples. The theme lists follow in the same run: four
+rows (子犬, 顔, コンビニ, スマホ) named their word through the pool's
+domain and are the deck's now, which is what a rebuild of the theme
+index would do too.
+
+Not done, recorded as **110b**: a learner who studied a word from the
+pool before the deck taught it holds a `vocab_jmdict_{id}` card that
+now resolves to nothing (the app treats it as content that went away).
+Carrying that history onto the deck card is a migration of the
+`migrate_jmdict_card_ids.py` shape, keyed by the ids this script
+deletes; worth doing before the next deck slice lands in production.
 
 ## Order and dependencies
 
