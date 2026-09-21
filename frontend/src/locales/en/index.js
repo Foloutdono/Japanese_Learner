@@ -431,6 +431,9 @@ const stats = {
   backToStation:      'Back to the station',
   fareGate:           'Fare gate',
   dueUnit:            'due',
+  // The origin of every Learn line: where you stand before a level is
+  // finished (domain/lineProgress.js's ORIGIN_STOP).
+  originStop:         'Novice',
   stageGate:          'Gate',
   nothingGraded:      'Nothing is graded',
   stationJlpt:        'JLPT',

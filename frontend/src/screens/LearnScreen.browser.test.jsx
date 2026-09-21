@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+// The novice's stop is a word of the interface now, not the glyph 初,
+// so the expected label comes from the string table the lane renders in.
+import fr from '../locales/fr/index.js'
 // The stylesheet-import trick every browser test here uses: the rules
 // this test leans on (the map's grid) only exist once the real sheet
 // is loaded.
@@ -152,14 +155,14 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     // A station is the completion of the level behind it, and every
-    // line opens at 初, the novice's stop — so a line nobody has
-    // touched stands at 初 with its first stop ahead. vocab has N5
+    // line opens at the novice's stop — so a line nobody has
+    // touched stands there with its first stop ahead. vocab has N5
     // finished and N4 half done: standing at N5, N4 ahead, and the
     // stripe half painted.
     const plates = [...root.querySelectorAll('.plate--line')]
-    expect(plates.map(p => p.querySelector('.plate__here').textContent)).toEqual(['初', 'N5', '初', '初'])
+    expect(plates.map(p => p.querySelector('.plate__here').textContent)).toEqual([fr.originStop, 'N5', fr.originStop, fr.originStop])
     expect(plates.map(p => p.querySelector('.plate__next').textContent)).toEqual(['あ ›', 'N4 ›', 'N5 ›', 'N5 ›'])
-    expect(plates[1].querySelector('.plate__prev').textContent).toBe('‹ 初')
+    expect(plates[1].querySelector('.plate__prev').textContent).toBe(`‹ ${fr.originStop}`)
     expect(plates[0].querySelector('.plate__prev').textContent).toBe('')
     expect(plates[1].querySelector('.plate__stripe i').style.width).toBe('50%')
     expect(plates[0].querySelector('.plate__stripe i').style.width).toBe('0%')
@@ -225,10 +228,10 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.plate--line')).toHaveLength(4)
-    // Nobody has travelled, so every line stands at 初: with no figures
+    // Nobody has travelled, so every line stands at the novice's stop: with no figures
     // at all the plate still says where the learner is, which is at
     // the start of every line.
-    expect([...root.querySelectorAll('.plate__here')].map(el => el.textContent)).toEqual(['初', '初', '初', '初'])
+    expect([...root.querySelectorAll('.plate__here')].map(el => el.textContent)).toEqual(Array(4).fill(fr.originStop))
     expect(root.querySelectorAll('.plate__due')).toHaveLength(0)
     // And the shelf hangs without its figures.
     expect(root.querySelectorAll('.plate--shelf')).toHaveLength(1)
