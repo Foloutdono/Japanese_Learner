@@ -8679,14 +8679,20 @@ textarea:focus-visible {
   padding: 40px 24px;
   text-align: center;
 }
+/* The line that says the deck is done: the tick and the words as one
+   phrase, so they sit on the gap the switch under them already uses
+   (.quiz-done .btn-panel, --sp-3's 8px spelled as a literal there) --
+   one rung for the whole block rather than a 10px of its own two
+   pixels off it. --fs-lead is 17.92px against the 18px that stood
+   here, which is the rung the size was reaching for. */
 .quiz-done__msg {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--sp-3);
   margin: 0;
   color: var(--success);
-  font-size: 18px;
+  font-size: var(--fs-lead);
   line-height: 1.4;
 }
 .quiz-done .btn-panel {
