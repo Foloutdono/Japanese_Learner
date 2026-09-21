@@ -5374,6 +5374,24 @@ component plan 100 grows the spotlight onto. Found at the keyboard:
   Backend 1606 (one assertion added). Lint, `lint:css`, `lint:scale` and
   the build clean.
 
+**The day's ration (owner-directed, 2026-09-21, after the live check).**
+The run a novice landed on after the ride was an empty gate, and the
+owner asked for new cards on the first day's queue, within the pace.
+`/api/today` and `/api/today/cards` now carry what is left of
+`daily_new_target` as new cards beside the reviews: kana first for a
+learner who does not yet read them (one set at a time, in the
+syllabary's order), then the chosen lines in turn
+(`study/daily_queue.ration` and `merge_new`, `routes/today._new_lanes`).
+The reviews-only rule in `routes/today.py`'s header stood for a reason
+-- a queue that tops itself up cannot end -- and the pace is what keeps
+the reason: the ration is bounded, spent as the day's first reviews
+land, and absent without a stored target. A lane says `due` and `new`
+apart; the gate counts both into its figure and prints the new part as
+a tag (`.lane__new`), and a switched-off line offers nothing new either.
+Not only the first day: the budget is a daily one, and a queue that
+offered new cards once and never again would be day one's problem on
+day two. Backend 1606 → 1613 (`tests/test_today_ration.py`).
+
 ## What the live check caught that the tests did not (098, 2026-09-21)
 
 Driven headless at 390×844 against the real dev backend on a fresh

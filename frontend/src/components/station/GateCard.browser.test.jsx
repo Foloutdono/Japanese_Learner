@@ -171,3 +171,39 @@ describe('GateCard — the fare', () => {
     expect(screen.container.querySelector('.btn-depart')).toBeTruthy()
   })
 })
+
+// ── 新規 — the day's ration on the gate (plan 098) ───────────────
+// A lane's figure is what it puts in the run: the reviews it owes and
+// the new cards the server drew for it against the pace. The new part
+// is said on the row, counted in every sum, and priced like a review.
+describe('GateCard — the ration', () => {
+  it('counts a lane\'s new cards into its figure, the line and the run, and names them on the row', async () => {
+    const rationed = { ...LANES[1], due: 0, new: 5 }
+    const screen = await mount({ ...TODAY, total: 19, lanes: [LANES[0], rationed] })
+    const root = screen.container
+    expect(root.querySelector('.gate-card__count').textContent).toBe('19')
+    const rows = [...root.querySelectorAll('.lane')]
+    const vocab = rows.find(r => r.textContent.includes('N5'))
+    expect(vocab.querySelector('.lane__due').textContent).toBe('5')
+    expect(vocab.querySelector('.lane__new').textContent).toContain('5')
+    // The kanji lane owes reviews only: no tag.
+    const kanji = rows.find(r => r.textContent.includes('N4'))
+    expect(kanji.querySelector('.lane__new')).toBeNull()
+    expect(kanji.querySelector('.lane__due').textContent).toBe('14')
+    // The line chips carry the same arithmetic.
+    const chips = [...root.querySelectorAll('.gate-card__linedue')].map(el => el.textContent)
+    expect(chips).toContain('5')
+    expect(chips).toContain('14')
+  })
+
+  it('a lane switched off takes its new cards out of the run with it', async () => {
+    const rationed = { ...LANES[1], due: 3, new: 4 }
+    const screen = await mount({ ...TODAY, total: 21, lanes: [LANES[0], rationed] })
+    const root = screen.container
+    expect(root.querySelector('.gate-card__count').textContent).toBe('21')
+    const vocab = [...root.querySelectorAll('.lane')].find(r => r.textContent.includes('N5'))
+    vocab.click()
+    await new Promise(r => setTimeout(r, 50))
+    expect(root.querySelector('.gate-card__count').textContent).toBe('14')
+  })
+})

@@ -142,12 +142,17 @@ export default function GateCard({ today, failed }) {
 
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id)
-  const due = lanes.filter(isOn).reduce((n, l) => n + l.due, 0)
+  // What a lane puts in the run: the reviews it owes and, since plan
+  // 098, the day's ration of new cards the server drew for it against
+  // the pace. Two figures on the row, one in every sum -- a new card
+  // is a card the run serves and the fare prices, like any other.
+  const count = lane => (lane.due ?? 0) + (lane.new ?? 0)
+  const due = lanes.filter(isOn).reduce((n, l) => n + count(l), 0)
   // Of the chosen reviews, the ones that cost nothing. A pass is not
   // asked: nothing costs anything on one, so nothing is worth marking
   // free either — the tag would be on every row and say nothing.
   const metered = Boolean(credits && !credits.unlimited)
-  const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + l.due, 0) : 0
+  const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + count(l), 0) : 0
   function toggle(id) {
     setOff(prev => {
       const next = new Set(prev)
@@ -167,7 +172,7 @@ export default function GateCard({ today, failed }) {
   const lines = TYPE_ORDER
     .map(type => {
       const own = lanes.filter(l => laneTypeOf(l) === type)
-      return { type, lanes: own, due: own.reduce((n, l) => n + l.due, 0), on: own.length > 0 && own.every(isOn) }
+      return { type, lanes: own, due: own.reduce((n, l) => n + count(l), 0), on: own.length > 0 && own.every(isOn) }
     })
     .filter(line => line.lanes.length > 0)
 
@@ -247,7 +252,13 @@ export default function GateCard({ today, failed }) {
               {metered && isFreeLane(lane) && (
                 <span className="lane__free">{t.freeFare}</span>
               )}
-              <span className="lane__due">{lane.due}</span>
+              {/* 新規 — the day's ration in this lane, apart from the
+                  reviews: the figure on the right is what the lane
+                  puts in the run, this says how much of it is new. */}
+              {lane.new > 0 && (
+                <span className="lane__new">{t.laneNew(lane.new)}</span>
+              )}
+              <span className="lane__due">{count(lane)}</span>
             </button>
           )
         })}

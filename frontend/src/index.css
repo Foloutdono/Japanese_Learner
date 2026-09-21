@@ -6654,6 +6654,18 @@ textarea:focus-visible {
   letter-spacing: var(--tr-caption);
   color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary));
 }
+/* 新規 — how much of the lane's figure is the day's ration (plan
+   098): the free tag's own register, so the two tags read as one
+   family beside the count. */
+.lane__new {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--lane-color, var(--text-secondary));
+}
 .lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* The screen's one filled action. Gold, because Today is gold — and

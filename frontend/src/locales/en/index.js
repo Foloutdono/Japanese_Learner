@@ -76,6 +76,7 @@ const nav = {
   runOutTomorrow:    'tomorrow',
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
+  laneNew:           n => `${n} new`,
   fareReviews:       'reviews',
   fareFare:          'fare',
   fareCreditsLeft:   'credits left',
