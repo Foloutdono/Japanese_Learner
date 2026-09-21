@@ -20039,27 +20039,38 @@ a.slip__act { text-decoration: none; }
   width: min(var(--card-w), calc(100vw - 2 * var(--sp-5)));
   display: flex;
   flex-direction: column;
-  gap: var(--sp-2);
-  padding: var(--sp-3) var(--sp-4);
+  gap: var(--sp-1);
+  /* The sheet's own rhythm on the panel ink: sp-4 above and below,
+     sp-5 at the sides -- the docked bar's inline padding, so a note
+     resting on the bar shares its edges. The panel's corner and the
+     panel's shadow (--elev-board; the note is the sumi panel, hanging
+     over the screen), and the hairline the bar's tiles draw. */
+  padding: var(--sp-4) var(--sp-5);
   background: var(--bg-panel);
   color: var(--text-on-panel);
-  border: 1px solid var(--border);
-  border-radius: var(--r-card);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-panel);
+  box-shadow: var(--elev-board);
   text-align: left;
   pointer-events: none;
   animation: guide-callout-in 260ms ease-out backwards;
 }
 .guide-callout--live { pointer-events: auto; }
+/* The pair, small: the Japanese at the small rung in the JP face with
+   the body's tracking (the reading's 0.30em spaced 等級 into two words),
+   in the soft ink, so the sentence under it is the thing read. */
 .guide-callout__jp {
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  letter-spacing: var(--tr-reading);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-term);
+  line-height: 1.3;
   color: var(--text-on-panel-soft);
 }
+/* The sentence at the body rung: it is the one thing the note is for,
+   and the small rung read as a footnote beside 44px controls. */
 .guide-callout__text {
   margin: 0;
-  font-size: var(--fs-sm);
+  font-size: var(--fs-body);
   line-height: 1.45;
 }
 .guide-callout__foot {
@@ -20198,8 +20209,8 @@ a.slip__act { text-decoration: none; }
 .guide__spot--identity { border-radius: var(--r-identity); }
 .guide-callout--live .guide-callout__foot {
   align-items: center;
-  gap: var(--sp-2);
-  margin-top: var(--sp-1);
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
 }
 .guide-callout__count {
   margin-right: auto;
