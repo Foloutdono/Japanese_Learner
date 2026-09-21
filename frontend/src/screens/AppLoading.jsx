@@ -42,12 +42,7 @@ export default function AppLoading({ wakesServer = false, wakeAfterMs = WAKE_AFT
           existed before it had anything to say, and the dots do not
           jump when it arrives. */}
       <p className="app-loading__note" role="status" aria-live="polite">
-        {waking && (
-          <>
-            <span className="app-loading__note-jp" lang="ja">サーバー起動中</span>
-            {t.waitingServer}
-          </>
-        )}
+        {waking && t.waitingServer}
       </p>
     </div>
   )

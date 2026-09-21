@@ -100,6 +100,20 @@ library reading as part of 教材 rather than a twelfth line. `SectionHeader`'s
 own unpaired form is what draws the heading. Owner-directed. Same caveat as
 above — this is one section's argument, not a licence to drop pairs elsewhere.
 
+**A third (2026-09-21): only a place gets a pair.** The rule had spread to
+everything with a label — a lesson's steps (規則 RULE), a figure in the
+balance sheet (+30 毎日), a chart in the dictionary (五十音 MAIN SYLLABARY),
+a toast (ダイヤ改正), a guide note (等級), a form's field (音読み ON'YOMI), a
+button (臨時列車 EXTRA TRAIN). None of those is a station, a section or a
+line; each was a caption, in a language the reader is here to learn, over the
+half of the pair that was doing the work. Owner-directed, app-wide: where the
+Japanese named a part rather than a place, it is gone and the plain-language
+half inherits what it wore — the rung, the ink, the position (`.dict-mark`,
+`.dict-gate__name`). What stays: every station and section name, the plates
+and sheet headings that carry them, the brand, the decorative marks that are
+not labels at all (the 済 tick, a stamp's seal, the pass's own 定期券, a
+completion screen's 出発進行), and all study content.
+
 There is a second top-level rule, below, that outranks this one where they
 collide — see "Say less."
 
@@ -113,7 +127,9 @@ is self-evident.
 
 **This outranks the pairing rule where the two collide.** The pair names a
 *place* — a station, a section, a line. It does not caption every number on
-the screen.
+the screen, and as of 2026-09-21 it does not caption a lesson's steps, a
+chart, a toast, a guide note or a form's fields either (see the third
+standing exception above).
 
 ## Colour
 
@@ -393,8 +409,10 @@ third panel idiom:
   for a card, `--r-identity` for the pass) and takes no pigment: the thing
   it frames is already in its line's colour, which is the point.
 - **The note** (`.guide-callout`) is the panel ink speaking — sumi, like the
-  docked rating bar and the sheets — one sentence, the pair as a caption,
-  and on the guide two 44px controls. The ride's notes have no controls and
+  docked rating bar and the sheets — one sentence, and on the guide two 44px
+  controls. It opened with a Japanese word naming the stop until 2026-09-21
+  (see the third standing exception under the pairing rule); the sentence is
+  the note. The ride's notes have no controls and
   take no pointer events, so the card under one is tapped through it. It is
   centred on the column and measured only vertically: under the spot, or
   above it when the spot is in the lower half.
@@ -434,9 +452,11 @@ sheet's shell, stacked above whatever opened it — listing every reading with
 the words that use it (grouped backend-side by `study/kanji_words.py`).
 
 **One register at a time, behind two gates.** The sheet prints a gate per
-register under its stripe — 音読み over CHINESE READING, 訓読み over JAPANESE
-READING, each with the count of readings behind it — and the open one's
-readings below. A reading is a **band of sumi** carrying the register's 音/訓
+register under its stripe — CHINESE READING, JAPANESE READING, each with the
+count of readings behind it — and the open one's readings below. Each gate
+led with 音読み and captioned it until 2026-09-21, when the ornamental half
+of every such pair went (third standing exception, above): the name carries
+the gate now, at the rung the term held. A reading is a **band of sumi** carrying the register's 音/訓
 mark and the reading in the raw pigment, sticking to the top of the list
 while its words pass under it in the ledger's own rows; the readings no word
 demonstrates close the list as one row of quiet pills, under a caption that

@@ -50,25 +50,23 @@ export function BalanceSheet() {
       {balance != null && (
         <div className="balance__rows">
           <div className="balance__cell">
-            <b>+{refill} <span className="balance__jp" lang="ja">毎日</span></b>
+            <b>+{refill}</b>
             <span className="balance__cap">{t.balanceRefillAt(at)}</span>
           </div>
           <div className="balance__cell">
-            <b>{cap} <span className="balance__jp" lang="ja">上限</span></b>
+            <b>{cap}</b>
             <span className="balance__cap">{t.balanceHolds(cap)}</span>
           </div>
         </div>
       )}
-      {/* 無料 — the one line the balance is never asked for
+      {/* The one line the balance is never asked for
           (domain/credits.js). Under the lattice, not a third cell in
           it: the rows are a flush two-column grid and a third cell
           would leave half a row empty. Only where there is a balance
-          to be spared — a pass has nothing to be free of. */}
+          to be spared — a pass has nothing to be free of. It opened
+          with 無料 until 2026-09-21; the sentence says it. */}
       {balance != null && (
-        <p className="balance__free">
-          <span className="balance__free-jp" lang="ja">無料</span>
-          {t.balanceKanaFree}
-        </p>
+        <p className="balance__free">{t.balanceKanaFree}</p>
       )}
       <OfferButton source={SOURCES.BALANCE} className="btn-depart pw-open--wide" />
       <button type="button" className="btn-secondary" onClick={closeBalance}>{t.close}</button>

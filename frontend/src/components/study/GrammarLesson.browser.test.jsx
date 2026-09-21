@@ -83,10 +83,15 @@ describe('the grammar lesson', () => {
     }
   })
 
-  it('sets each step under its pair mark, honours **…** and "- " lines, and marks the trap', async () => {
+  // The mark was a pair -- 規則 RULE -- until 2026-09-21: the Japanese
+  // half captioned a part of a lesson rather than naming a place, so
+  // it went, app-wide, and the name took the rung and the ink it wore
+  // (index.css, .dict-mark__name). A leftover Japanese half here is a
+  // regression, so this asserts there is none.
+  it('sets each step under its mark, honours **…** and "- " lines, and marks the trap', async () => {
     const screen = await mount(<GrammarLesson point={RICH} variant="sheet" />)
     const steps = [...screen.container.querySelectorAll('.gl-step')]
-    expect(steps.map(s => s.querySelector('.dict-mark__jp').textContent)).toEqual(['規則', '使い方', '注意'])
+    expect(steps.map(s => s.querySelector('.dict-mark__jp'))).toEqual([null, null, null])
     expect(steps.map(s => s.querySelector('.dict-mark__name').textContent)).toEqual(['Rule', 'Use', 'Careful'])
     expect(steps[0].querySelector('strong').textContent).toBe('polite request')
     expect([...steps[1].querySelectorAll('li')].map(li => li.textContent)).toEqual(['asking a favour', 'giving an instruction'])

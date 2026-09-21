@@ -3,10 +3,14 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import { TrainDoor } from '../components/station/TrainDoor'
+// The lane runs French (vite.config.js); the extra-train button used to
+// be findable by its own 臨時列車 mark, which went with the ornamental
+// Japanese labels on 2026-09-21, so the table is what names it now.
+import fr from '../locales/fr'
 
 // ── The daily pace, at the screen level ────────────────────────
 // A session that ends because today's new-item target is spent must
-// say so (the paced terminus), and the 臨時列車 button must refetch
+// say so (the paced terminus), and the extra-train button must refetch
 // with beyond_target=true and seat the extra cards. Pinned on
 // KanaScreen, but the machinery under test (usePace + DoneMessage +
 // useCardSession.retry) is the same five screens share.
@@ -56,7 +60,7 @@ beforeEach(() => {
 describe('KanaScreen pace', () => {
   it('shows the paced terminus, and the extra train refetches beyond the target', async () => {
     // Every batch fetch: paced out (no cards, target spent) unless the
-    // 臨時列車 flag rides on the URL — then cards flow again.
+    // extra-train flag rides on the URL — then cards flow again.
     apiJson.mockImplementation(async url => {
       if (url.startsWith('/api/kana/cards')) {
         if (url.includes('beyond_target=true')) return { cards: [CARD], pace: PACE_SPENT }
@@ -93,9 +97,9 @@ describe('KanaScreen pace', () => {
     // "deck finished" — and the extra-train button is offered.
     const done = screen.container.querySelector('.quiz-done--pace')
     expect(done, `paced terminus panel — page: ${screen.container.textContent.slice(0, 400)}`).toBeTruthy()
-    expect(done.textContent).toContain('臨時列車')
+    expect(done.textContent).toContain(fr.paceExtraTrain)
 
-    clickText(screen, '臨時列車')
+    clickText(screen, fr.paceExtraTrain)
     await settle(400)
 
     // The refetch carried the flag and the extra card is on screen.

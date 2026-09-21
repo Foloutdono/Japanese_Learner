@@ -727,14 +727,18 @@ describe('the dictionary screen', () => {
   // twin, a rule — over an object that already says what it is. They
   // carry the stamp book's kind of mark now: the name, a hairline, and
   // the tally as data.
+  //
+  // The mark was itself a pair (五十音 over MAIN SYLLABARY) until
+  // 2026-09-21, when the ornamental Japanese half of every such label
+  // went app-wide: 五十音 is not a name a learner can act on, which
+  // was always the argument for printing the twin, so the twin is the
+  // mark now. `marksOf` stays as the guard against it coming back.
   it('marks the syllabary and the radical groups instead of heading them', async () => {
     const screen = await renderScreen()
     // Hiragana: the charts, each marked, no heading anywhere.
     await openSyllabary(screen, T.dictHiragana)
     expect(screen.container.querySelector('.section-header')).toBeNull()
-    expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音'])
-    // The term and its twin: 五十音 is not a name a learner can act on,
-    // so the mark prints both and the grid still answers to the twin.
+    expect(marksOf(screen)).toEqual([])
     expect(namesOf(screen))
       .toEqual([T.syllabaryMain, T.syllabaryLong, T.syllabaryVoiced, T.syllabaryYoon])
     const charts = chartsOf(screen)
@@ -766,8 +770,11 @@ describe('the dictionary screen', () => {
   it('lays out the yōon, the long vowels and the borrowed sounds', async () => {
     const screen = await renderScreen()
     await openSyllabary(screen, T.dictKatakana)
-    // 外来音 is katakana's alone; hiragana's chart above has four.
-    expect(marksOf(screen)).toEqual(['五十音', '長音', '濁音', '拗音', '外来音'])
+    // The borrowed sounds are katakana's alone; hiragana's chart above
+    // has four.
+    expect(namesOf(screen)).toEqual([
+      T.syllabaryMain, T.syllabaryLong, T.syllabaryVoiced, T.syllabaryYoon, T.syllabaryForeign,
+    ])
 
     // 拗音 is three columns wide, not five: や ゆ よ are the only kana
     // that follow, so there is no い or え column to leave empty.

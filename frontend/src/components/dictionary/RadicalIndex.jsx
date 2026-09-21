@@ -17,21 +17,28 @@ import { ChevronIcon } from '../ui/Icons'
 // dictionary shell, 漢字's ink under the kanji station.
 
 // ── A block's own mark ──
-// The station sign, at the size a block gets: the Japanese term set
-// large in the collection's own ink, its plain-language twin tracked
-// out beside it, a rule under both, and the tally riding the far end as
-// data. For the blocks that used to carry a SectionHeader — the
+// The station sign, at the size a block gets: the block's name in the
+// collection's own ink, a rule under it, and the tally riding the far
+// end as data. For the blocks that used to carry a SectionHeader — the
 // syllabary charts and the radical index's stroke groups — and, since
 // plan 086, the levels of a radical's family.
 //
-// The rule the heading broke was its bulk, not its second language:
-// 五十音 alone tells a learner nothing they can act on, and the charts
-// under these marks no longer name their own rows. So the twin is
-// printed, not only read out. It is one line either way.
-export function BlockMark({ jp, name, tally }) {
+// It was a pair, the Japanese term set large with its plain-language
+// twin tracked out beside it. The owner's call of 2026-09-21 retired
+// the Japanese half wherever it captioned a part rather than naming a
+// place: 五十音 alone tells a learner nothing they can act on, which
+// was the argument for printing the twin in the first place, and the
+// twin is the whole mark now — set at the rung and in the ink the term
+// used to hold (see .dict-mark__name).
+//
+// `code` is the ONE lead the mark still carries, and it is never
+// Japanese: the JLPT level over a radical family's grid (N5), where
+// the level is the thing being named and the plain-language line under
+// it is the gloss.
+export function BlockMark({ code, name, tally }) {
   return (
     <div className="dict-mark">
-      <span className="dict-mark__jp" lang="ja">{jp}</span>
+      {code && <span className="dict-mark__code">{code}</span>}
       {name && <span className="dict-mark__name">{name}</span>}
       {tally != null && <span className="dict-mark__tally">{tally}</span>}
     </div>

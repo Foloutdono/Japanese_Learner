@@ -357,14 +357,18 @@ function KindMark({ token }) {
   return <span className="dict-kind" aria-hidden="true">{isOnyomiToken(token) ? '音' : '訓'}</span>
 }
 
-// ── 音 / 訓 — a gate ──────────────────────────────────────────
-// The register, stood at rather than marked: its Japanese name, the
-// count of readings behind it, and its plain-language title under
-// both. The old sheet said this with a 22px carved square at
-// --fs-caption-xs in the secondary ink — which names the register to
-// nobody who cannot already read 音, and is too quiet to divide two
-// blocks besides.
-function ReadingGate({ jp, name, n, open, onPick }) {
+// ── The register — a gate ─────────────────────────────────────
+// The register, stood at rather than marked: its plain-language name
+// and the count of readings behind it. The old sheet said this with a
+// 22px carved square at --fs-caption-xs in the secondary ink — which
+// names the register to nobody who can already read 音, and is too
+// quiet to divide two blocks besides.
+//
+// It led with 音読み and captioned it CHINESE READING until the
+// owner's call of 2026-09-21. The Latin half of that pair was doing
+// all the work for the learner who needs the gate at all, so it is
+// the gate now, at the rung and in the ink the Japanese held.
+function ReadingGate({ name, n, open, onPick }) {
   return (
     <button
       type="button"
@@ -372,10 +376,9 @@ function ReadingGate({ jp, name, n, open, onPick }) {
       className={`dict-gate${open ? ' dict-gate--on' : ''}`}
       aria-pressed={open}
     >
-      <span className="dict-gate__jp" lang="ja">
-        {jp}<span className="dict-gate__n">{n}</span>
+      <span className="dict-gate__name">
+        {name}<span className="dict-gate__n">{n}</span>
       </span>
-      <span className="dict-gate__name">{name}</span>
     </button>
   )
 }
@@ -480,11 +483,11 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
           {on.length > 0 && kun.length > 0 && (
             <div className="dict-gates">
               <ReadingGate
-                jp={t.readingsOnJp} name={t.readingsOnName} n={on.length}
+                name={t.readingsOnName} n={on.length}
                 open={open === on} onPick={() => setGate('on')}
               />
               <ReadingGate
-                jp={t.readingsKunJp} name={t.readingsKunName} n={kun.length}
+                name={t.readingsKunName} n={kun.length}
                 open={open === kun} onPick={() => setGate('kun')}
               />
             </div>

@@ -57,7 +57,6 @@ describe('Guide', () => {
     expect(rect(spot).top).toBeLessThanOrEqual(rect(plate).top)
     expect(rect(spot).bottom).toBeGreaterThanOrEqual(rect(plate).bottom)
     expect(note.querySelector('.guide-callout__text').textContent).toBe(fr.guideLearnPlate)
-    expect(note.querySelector('.guide-callout__jp').textContent).toBe(fr.guideLearnPlateJp)
     expect(note.querySelector('.guide-callout__count').textContent).toBe(`1/${GUIDES.learn.length}`)
     expect(note.querySelector('[data-action="guide-next"]').textContent).toBe(fr.guideNext)
 

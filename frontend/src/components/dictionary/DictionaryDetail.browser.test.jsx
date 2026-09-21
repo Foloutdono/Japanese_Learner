@@ -845,13 +845,15 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     expect(dialog.querySelector('.dict-plate__word')).toBeNull()
 
     // Two gates, one per register, each naming itself in full — the
-    // Japanese heading with the count of readings behind it, the
-    // plain-language title under both. The deck's order starts with an
-    // on reading, so that is the gate standing open.
+    // name with the count of readings behind it. It led with 音読み
+    // and captioned it until 2026-09-21, when the ornamental Japanese
+    // half of a label went app-wide; the name carries the gate now.
+    // The deck's order starts with an on reading, so that is the gate
+    // standing open.
     const gates = [...dialog.querySelectorAll('.dict-gate')]
-    expect(gates.map(g => g.querySelector('.dict-gate__jp').textContent)).toEqual(['音読み2', '訓読み2'])
+    expect(gates.map(g => g.querySelector('.dict-gate__jp'))).toEqual([null, null])
     expect(gates.map(g => g.querySelector('.dict-gate__name').textContent))
-      .toEqual(['Chinese reading', 'Japanese reading'])
+      .toEqual(['Chinese reading2', 'Japanese reading2'])
     expect(gates.map(g => g.getAttribute('aria-pressed'))).toEqual(['true', 'false'])
     expect(dialog.querySelector('.dict-readings').getAttribute('aria-label')).toBe('Chinese reading')
 
@@ -1461,7 +1463,10 @@ describe('the plate — a grammar point with its lesson written', () => {
     // the reader and the sentences (plan 089).
     expect(blocks.map(b => b.getAttribute('aria-label'))).toEqual(['Lesson', 'Examples', 'Compare'])
     expect(root.querySelector('h3, h4, .section-header')).toBeNull()
-    expect([...blocks[0].querySelectorAll('.dict-mark__jp')].map(m => m.textContent)).toEqual(['規則', '使い方'])
+    // The step marks: the name alone since 2026-09-21 (the pair's
+    // Japanese half is gone app-wide), so no .dict-mark__jp survives.
+    expect(blocks[0].querySelector('.dict-mark__jp')).toBeNull()
+    expect([...blocks[0].querySelectorAll('.dict-mark__name')].map(m => m.textContent)).toEqual(['Rule', 'Use'])
     expect(blocks[0].querySelector('strong').textContent).toBe('doing')
     const door = blocks[2].querySelector('.gl-door')
     expect(door.tagName).toBe('BUTTON')

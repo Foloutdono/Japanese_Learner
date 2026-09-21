@@ -290,14 +290,13 @@ export function DoneMessage({ onBack, pace, onExtra }) {
   if (pace && onExtra) {
     return (
       <div className="quiz-done quiz-done--pace">
-        <p className="quiz-done__banner" lang="ja" aria-hidden="true">本日の目標達成</p>
         <p className="quiz-done__msg">
           <CheckCircleIcon size={22} /> {t.paceDoneTitle}
         </p>
         <p className="quiz-done__sub">{t.paceDoneBody(pace.newToday, pace.target)}</p>
         <div className="quiz-done__row">
           <button onClick={() => { playClick(); onExtra() }} className="btn-panel quiz-done__extra">
-            <span lang="ja">臨時列車</span> {t.paceExtraTrain}
+            {t.paceExtraTrain}
           </button>
           <button onClick={() => { playClick(); onBack() }} className="btn-ghost">
             <ChevronIcon direction="left" size={14} /> {t.backToMenu}

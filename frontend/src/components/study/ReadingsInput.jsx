@@ -79,8 +79,8 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
   }
 
   const GROUPS = [
-    { kind: 'on',  label: t.readingsOn,  jp: '音読み', entries: on },
-    { kind: 'kun', label: t.readingsKun, jp: '訓読み', entries: kun },
+    { kind: 'on',  label: t.readingsOn,  entries: on },
+    { kind: 'kun', label: t.readingsKun, entries: kun },
   ].filter(g => g.entries.length > 0)
 
   return (
@@ -93,9 +93,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
           key={g.kind}
           className={`readings-input__group${gi > 0 ? ' readings-input__group--sep' : ''}`}
         >
-          <div className="readings-input__label">
-            <span lang="ja">{g.jp}</span> <span>{g.label}</span>
-          </div>
+          <div className="readings-input__label">{g.label}</div>
 
           {rows[g.kind].map((value, i) => {
             const ok = submitted && matches(value, g.entries)
