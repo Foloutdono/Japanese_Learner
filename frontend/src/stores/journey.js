@@ -34,6 +34,16 @@ export function seedVolumes(data) {
   volumes.seed(data)
 }
 
+/**
+ * The learner this journey belongs to has signed out (stores/account).
+ * The volumes beside it are content — the same numbers for everyone —
+ * so they stay: there is nothing personal in them to leak, and
+ * dropping them would only buy the next learner a needless request.
+ */
+export function forgetJourney() {
+  store.forget()
+}
+
 // ── 運行状況の裏 — the status sheet (plan 074) ────────────────
 // Module state for the same reason the balance sheet's is: it opens
 // off the HUD's station panel, outside every screen, and mounts beside

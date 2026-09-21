@@ -20,3 +20,8 @@ export function refreshToday() {
 export function seedTodaySummary(data) {
   store.seed(data)
 }
+
+/** The learner this queue belongs to has signed out (stores/account). */
+export function forgetToday() {
+  store.forget()
+}

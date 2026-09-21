@@ -19,9 +19,16 @@ import { apiFetch } from '../lib/api'
 //                       reading Date.now() in render)
 //   today.refresh()  -> Promise, bypassing the TTL
 //   today.seed(data) -> for the dev workbenches; never resets the TTL
+//   today.forget()   -> the account that answered has left (stores/account)
 export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
   let cache = null
   let cacheAt = 0
+  // Which account the cache belongs to, as a count of the times one
+  // has left (forget below). A request asked on behalf of the previous
+  // learner can land after the next one has signed in -- the sign-out
+  // does not abort it -- and without this it would quietly refill the
+  // cache with somebody else's answer.
+  let generation = 0
   // When a seed was planted (the workbenches, the tests): `at` falls
   // back to it, so a consumer taking the answer's own clock reading
   // has one; the TTL clock itself stays untouched by a seed.
@@ -36,6 +43,7 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
 
   function fetchOnce() {
     if (inflight) return inflight
+    const gen = generation
     inflight = supabase.auth.getSession()
       .then(({ data }) => {
         const session = data?.session
@@ -44,6 +52,7 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
       })
       .then(r => (r.ok ? r.json() : Promise.reject()))
       .then(data => {
+        if (gen !== generation) return
         cache = data
         cacheAt = Date.now()
         failed = false
@@ -52,8 +61,10 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
       // Quiet by design: these feed chrome, and a broken HUD element
       // is worse than its absence. The flag is what a consumer that
       // draws a wait reads instead.
-      .catch(() => { failed = true; notify() })
-      .finally(() => { inflight = null })
+      .catch(() => { if (gen === generation) { failed = true; notify() } })
+      // Only if nobody has started a fresh one since: forget() drops
+      // the in-flight request along with the answer it was for.
+      .finally(() => { if (gen === generation) inflight = null })
     return inflight
   }
 
@@ -72,6 +83,25 @@ export function createRemoteStore(path, { ttlMs = 30_000 } = {}) {
     use,
     refresh: fetchOnce,
     seed(data) { cache = data; seededAt = Date.now(); failed = false; notify() },
+    /**
+     * Drop the answer: the learner it belongs to has signed out.
+     *
+     * Every one of these caches is per-account, and signing out does
+     * not reload the page -- the next learner's app is the same
+     * modules with the same module state. Without this, an account
+     * created a moment after another signed out reads the last one's
+     * queue, balance and standing until each TTL runs out (five
+     * minutes, for the journey). See stores/account.js.
+     */
+    forget() {
+      generation += 1
+      inflight = null
+      cache = null
+      cacheAt = 0
+      seededAt = 0
+      failed = false
+      notify()
+    },
     /** The last answer, outside React (a store mutating another). */
     peek: () => cache,
   }
