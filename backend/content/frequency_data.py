@@ -39,15 +39,18 @@ datas/kanji/ and datas/vocab/):
                                 genuine rank; the rest are appended in
                                 JLPT order.
 
-  vocab_frequency.json         PLACEHOLDER as of this writing — plain
-                                JLPT deck order (N5 -> N1). Ranking the
-                                deck's own words for real needs the
-                                same JMdict frequency-tag matching
-                                vocab_jmdict_frequency.json now does
-                                for the non-deck pool (see
-                                build_vocab_jmdict.py) — swap this file
-                                once that's run against the deck too;
-                                nothing here needs to change, this
+  vocab_frequency.json         The deck's own keys in the order of a
+                                real ranking since plan 109: the
+                                OpenSubtitles 2016 subtitle corpus,
+                                lemmatised through the tokenizer and
+                                summed per word (datas/vocab/sources/
+                                README.md has the provenance and the
+                                CC BY-SA attribution). Ranked keys
+                                first, the ~20% the subtitles never
+                                say after them in JLPT order. Rebuilt
+                                with `python -m scripts.placement_report
+                                --rebuild-order`; a test holds the file
+                                equal to what that would write. This
                                 module just reads whatever order is in
                                 the file.
 

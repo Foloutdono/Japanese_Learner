@@ -147,7 +147,12 @@ runtime purpose. Two consequences worth knowing:
   gloss per card (`translations.fr_gloss`, `tests/test_translations.py`),
   108 gloss hygiene (the mechanical half done: comma spacing, the
   export's capitals, the 対立 mojibake as a `MOVES` line; the rest to
-  the content audit's slices); 109–110 are the rest, planned in
+  the content audit's slices), 109 the placement list — the two
+  sources under `datas/vocab/sources/` (see the README there for the
+  licences), `scripts/placement_report.py` and
+  `tests/test_placement_report.py`, and `vocab_frequency.json` rebuilt
+  in the ranking's order; its three candidate lists remain for the
+  audit's slices; 110 is the pool rebuild, planned in
   `docs/vocab-deck-review.md`.
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
@@ -250,8 +255,9 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
 in `vocab_renames.MOVES` for the same reason. **After any deck change, run
-`python -m scripts.audit_vocab_deck --write-snapshot`** and commit
-`datas/vocab/vocab_served.json` with it: `tests/test_vocab_deck.py` fails
+`python -m scripts.audit_vocab_deck --write-snapshot` and
+`python -m scripts.placement_report --rebuild-order`** and commit
+`datas/vocab/vocab_served.json` and `vocab_frequency.json` with it: `tests/test_vocab_deck.py` fails
 on an id that left the deck without a `MOVES` line, and on a served id
 the snapshot has not seen.
 
@@ -363,6 +369,23 @@ cd backend
 python -m scripts.audit_vocab_deck                # the report
 python -m scripts.audit_vocab_deck --dump         # the figures and lists, as JSON
 python -m scripts.audit_vocab_deck --skip-corpus  # without the tokenizer half
+```
+
+A second report puts the deck beside two outside lists (plan 109,
+`datas/vocab/sources/`): cards placed above the level the community
+JLPT lists give the word, list words with no card, and frequent words
+(a subtitle corpus, lemmatised through the tokenizer) with no card.
+Three candidate lists for the audit's slices — it changes no card. The
+one thing it rewrites is `vocab_frequency.json`, the deck's keys in the
+ranking's order; **after any deck change run it with
+`--rebuild-order`**, since a test holds the file equal to what it would
+write.
+
+```bash
+cd backend
+python -m scripts.placement_report                  # the three lists, forty each
+python -m scripts.placement_report --slice 2        # the next forty of each
+python -m scripts.placement_report --rebuild-order  # vocab_frequency.json, in ranking order
 ```
 
 The slice is a pure function of the date — grammar, vocab and sentences in

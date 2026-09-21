@@ -374,19 +374,61 @@ of use, to reach to" for する) to be shortened to what the card
 teaches; and the two numbering styles, "(1) … (2)" (96 glosses) and
 "1. … 2." (35).
 
-### 109 — placement and the missing-by-frequency list
+### 109 — placement and the missing-by-frequency list (the source and the report DONE, 2026-09-21; the slices remain)
 
-Choose a learner frequency source that can ship (licence) and speaks
-the tokenizer's units: the BCCWJ short-unit word list (NINJAL, the same
-corpus `unidic-lite` is trained on) is the natural fit; the community
-JLPT lists are a check on level, not a ranking. Then, per level:
-deck words outside the top band for their level (candidates to move
-up), and top-band words with no card (candidates to add). Output is a
-list with the rank beside each word, reviewed forty at a time through
-the audit Routine's method — `docs/content-audit/PLAYBOOK.md` gains a
-"missing words" slice kind — and never applied in bulk. The same
-ranking replaces the placeholder `vocab_frequency.json` (a list of deck
-keys; no id changes) so the 頻度 tiers finally mean something.
+The two sources the review named first — NINJAL's BCCWJ short-unit
+list and the Leeds internet corpus — are outside the build
+environment's network allowlist. Two that are not, both licensed to
+ship, are under `datas/vocab/sources/` with their provenance and
+attribution in the README there:
+
+- **A ranking**: the OpenSubtitles 2016 Japanese list from
+  hermitdave/FrequencyWords (CC BY-SA 4.0), 50,000 subtitle surfaces
+  with counts. A spoken register, closer to N5–N3 than a newspaper. Its
+  tokens are surfaces (言, 知, 出 are verb stems; ジョン is a cast
+  list), so `scripts/placement_report.py` runs each through the
+  tokenizer and sums the counts per (lemma, reading): ~34,800 words.
+- **A level check**: the community JLPT lists from elzup/jlpt-word-list
+  (MIT), which are Jonathan Waller's tanos.co.uk lists (CC BY). The
+  deck is in all likelihood a descendant of the same lists — the sizes
+  per level match to within a few dozen — so this measures drift from
+  the source, not an independent judgement.
+
+`python -m scripts.placement_report` prints three candidate lists, forty
+at a time with `--slice N`, for the content audit to work through (the
+playbook's "missing words" slice kind is this): deck cards placed above
+the level the JLPT lists give the word (546, most of them the lists'
+N3 the deck holds at N2 — the old level-2 split); JLPT-list words with
+no card (378 once affix patterns and variant rows are left out); and
+words in the ranking's first 6,000 with no card (916), gated through JMdict
+so fillers, names and stems never reach the list. The rule for a match
+is the same everywhere: a kanji card by its form (and UniDic's lemma
+for it) paired with its reading, never by reading alone — 琴 is not
+事's rank 1 and 来る read きたる is not the N5 来る — and a kana-only
+card by its reading. The script never changes a card.
+
+The one thing it rewrites, with `--rebuild-order`, is
+`vocab_frequency.json`: the deck's own keys in the ranking's order,
+the 20% the subtitles never say after them in their old order. Rebuilt
+here, so the 頻度 tiers mean something for the first time; the file is
+a derivative of a CC BY-SA list and carries that attribution.
+`tests/test_placement_report.py` holds the file equal to what the
+script would write, the ranking to words rather than surfaces, and a
+homophone to never inheriting a rank.
+
+Coverage: N5 485 of 675 cards ranked, N4 463 of 643, N3 1,501 of 1,816,
+N2 1,255 of 1,794, N1 2,341 of 3,476; medians 1,545 / 2,354 / 2,672 /
+8,872 / 8,334. One limit to know: UniDic normalises spelling variants
+under one lemma (診る, 観る and 看る under 見る; 帰る under 返る), so a
+variant card carries its group's rank — 診る sits in the first tier
+beside 見る. A card is matched by its own form first, so this only
+reaches a spelling the subtitles never write. If BCCWJ is ever fetched,
+the ranking half is re-based on it with the same script.
+
+**Left:** working the three lists, forty a run, through the audit
+Routine — nothing moves or is added without the evidence bar. The
+105-slice placements flagged earlier (顔 at N5, 支援 and 専門家 at N1)
+are on the first list.
 
 ### 110 — the pool rebuild
 
