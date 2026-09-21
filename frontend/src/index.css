@@ -13679,7 +13679,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    DESIGN.md rules out. Same 50% mix, same reason. */
 
 /* ── Grammar screen ───────────────────────────────────────── */
-.grammar-prompt { margin-bottom: 24px; }
+/* `.grammar-prompt` carries no box of its own, and deliberately. It
+   used to add `margin-bottom: 24px` under the card -- a literal on no
+   rung, and the last survivor of the per-element margins `.stage`'s
+   own gap replaced (see that rule's comment). It stacked ON the gap,
+   so a grammar card sat 40px clear of its choices and 44px clear of
+   its example sentences where a kana, vocab or kanji card sits 16px
+   clear of the same MCQ list: the one prompt class in the sheet with
+   a margin was the one whose answer looked detached from its
+   question. The stage's rhythm is the rhythm. */
 
 .grammar-glyph {
   font-size: 40px;
@@ -13767,7 +13775,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    under the list with its own spacing rather than floating between two
    equally-weighted stacks. */
 .grammar-examples {
-  margin-top: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
