@@ -315,12 +315,14 @@ def _vocab_index() -> dict[str, dict[str, dict]]:
     Worth knowing before extending this: between them the two
     generators take the curated focus words that fail to resolve from
     17 down to 13, fixing 買いもの, 友だち and 子ども (which occurs
-    twice). The 13 that remain are NOT a spelling problem, and no
-    richer index will reach them -- 母, 父, 顔, 百円, 洋食, 大雨,
-    失礼, 説明書, 館内, 支援, 専門家, お客様 and 言い方 are absent
-    from the deck under every spelling (母 and 父 appear only as
-    お母さん / お父さん, which are different words, not variants). They
-    need deck entries or different focus words.
+    twice). The ones that remain are NOT a spelling problem, and no
+    richer index will reach them -- 顔, 百円, 洋食, 大雨, 失礼,
+    説明書, 館内, 支援, 専門家, お客様 and 言い方 are absent from the
+    deck under every spelling. They need deck entries or different
+    focus words. 母 and 父 were two more until plan 102 gave them N5
+    entries of their own (they had appeared only as お母さん / お父さん,
+    which are different words, not variants); the rest are that plan's
+    review to settle.
     """
     global _vocab_lookup
     if _vocab_lookup is None:
@@ -645,6 +647,66 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool):
         return None
     level, entry = min(candidates, key=lambda c: _level_rank(c[0]))
     return level, entry, vocab_to_id(entry, level)
+
+
+# The parts of speech a compound may be assembled from. Nouns, and the
+# prefix and suffix UniDic cuts off them (お + 母 + さん, 二 + 日 where
+# 日 is a suffix). Never a particle, never an auxiliary, never a verb:
+# 今日 + は is two words whatever the deck holds, and a verb's lemma
+# joined to a noun's spells nothing anybody reads.
+_COMPOUND_POS = frozenset({"noun", "prefix", "suffix"})
+_COMPOUND_MAX = 3
+
+
+def resolve_compound(morphemes, i: int, max_len: int = _COMPOUND_MAX):
+    """(level, entry, raw_id, n) for the deck entry that a run of `n`
+    morphemes starting at `i` spells as ONE word, longest run first, or
+    None when no run of two or more does.
+
+    UniDic cuts to the short unit, so a compound the deck teaches as
+    one card arrives as several morphemes: 日曜日 is 日曜 + 日, 誕生日
+    is 誕生 + 日, お母さん is お + 母 + さん, 二日 is 二 + 日. Left as
+    they are, the breakdown shows the halves -- 日曜 at N3 followed by
+    日 at N4, when the sentence was chosen to teach the N5 word -- and
+    a learner reading 日曜日 as two words has been taught something
+    false. The run is looked up both by the surfaces joined and by the
+    lemmas joined: a curated N5 sentence writes 曜 out as kana
+    (日よう日) because the kanji is above the level, and only the
+    lemmas (日曜 + 日) still spell the deck's word.
+
+    The merged word's reading is the caller's to take from the ENTRY,
+    not from the morphemes joined: 日曜 + 日 reads にちよう + ひ, and the
+    compound reads にちようび. Rendaku and the counter readings (二日
+    is ふつか, not ふた + か) are exactly what a per-morpheme reading
+    cannot know.
+
+    A run is only ever a noun and the affixes on it (_COMPOUND_POS) and
+    never crosses a particle, so 今日 + は stays two words, and a token
+    in auxiliary use (居る as 〜ている) is never part of one.
+    """
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 1, -1):
+        run = morphemes[i:i + n]
+        if any(m.pos not in _COMPOUND_POS or m.auxiliary_use for m in run):
+            continue
+        for key in ("".join(m.surface for m in run), "".join(m.lemma for m in run)):
+            hit = resolve_lemma(key, "")
+            if hit:
+                level, entry, raw_id = hit
+                return level, entry, raw_id, n
+    return None
+
+
+def compound_reading(entry: dict, morphemes) -> str:
+    """The reading a merged compound is shown with: the deck entry's own
+    (see resolve_compound), and where the entry lists several
+    (まいげつ/まいつき), the one the tokenizer's own readings joined
+    agree with, else the first."""
+    joined = "".join(m.reading for m in morphemes)
+    variants = [r.strip() for r in (entry.get("kana") or "").replace(";", "/").split("/") if r.strip()]
+    if not variants:
+        return joined
+    return joined if joined in variants else variants[0]
 
 
 def _find_segments_morphological(text: str):

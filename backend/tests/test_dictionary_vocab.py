@@ -49,6 +49,12 @@ KNOWN_POOL_OVERLAP = {
     ("", "ね"),
     ("", "とん"),
     ("", "ふと"),
+    # Plan 102 gave 母 and 父 deck entries of their own (they had appeared
+    # only inside お母さん / お父さん), so until the pool is rebuilt against
+    # the grown deck these two are on both sides. The rebuild clears them;
+    # a deck entry added without a rebuild lands here the same way.
+    ("母", "はは"),
+    ("父", "ちち"),
 }
 
 

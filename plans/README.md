@@ -191,6 +191,20 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
+  102 DONE). Opened by one N5 breakdown showing 母 with no card and 日曜日
+  as two words: 102 gives 母 and 父 N5 entries of their own and folds a
+  deck compound UniDic cuts short (日曜 + 日, お + 母 + さん, 二 + 日)
+  back into one token with the entry's reading
+  (`card_lookup.resolve_compound`, `analysis._tokens`). 103–110 are the
+  review — the measuring script, the lookups that make a present card
+  look absent (katakana, adverbs, できる), the words the app's own
+  sentences teach without a card, readings and duplicates through the
+  migration, French glosses per card rather than per written form, gloss
+  hygiene, a learner frequency source, and one pool rebuild. The plan is
+  `docs/vocab-deck-review.md` — in `docs/`, since `plans/*.md` is
+  gitignored and the session that wrote it had no lasting checkout.
+
 - **Wave 21 — 試乗, the first ride** (plans 097–101, 2026-09-21, DONE).
   The deferral plan 075 left standing: after the boarding, a flashcard
   ride on the real stage (one card the learner knows, one they cannot),

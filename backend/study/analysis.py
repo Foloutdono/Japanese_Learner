@@ -21,9 +21,9 @@ import logging
 from content.grammar_points_data import find, grammar_to_id
 from study import morphology
 from study.card_lookup import (
-    resolve_lemma, resolve_kana, find_kanji_matches, card_stats,
-    serializable_entry, VOCAB_STATUS_MODES, KANJI_STATUS_MODES,
-    GRAMMAR_STATUS_MODES,
+    resolve_lemma, resolve_kana, resolve_compound, compound_reading,
+    find_kanji_matches, card_stats, serializable_entry,
+    VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
 from study.furigana import align_deck
 from study import difficulty
@@ -157,6 +157,53 @@ def _token_dict(m: morphology.Morpheme) -> dict:
     }
 
 
+def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
+    """One token for a run of morphemes the deck teaches as one word
+    (card_lookup.resolve_compound, plan 102). Its surface and offsets
+    are the run's, so the sentence still rebuilds from the tokens and a
+    grammar point written on any part of it still lands on it; its
+    reading is the entry's, since the morphemes' joined would misread
+    it (にちよう + ひ for にちようび); its lemma is the entry's written
+    form, which is what the run spells. A noun, as everything
+    resolve_compound admits is."""
+    surface = "".join(m.surface for m in run)
+    reading = compound_reading(entry, run)
+    return {
+        "surface": surface, "start": run[0].start, "end": run[-1].end,
+        "lemma": entry.get("kanji") or surface, "reading": reading, "pos": "noun",
+        "furigana": align_deck(surface, reading),
+        "vocab_match": {"level": level, "raw_id": raw_id, "entry": serializable_entry(entry)},
+        "kanji_matches": [
+            {"kanji": char, "level": lvl, "raw_id": rid, "entry": serializable_entry(e)}
+            for char, lvl, e, rid in find_kanji_matches(surface)
+        ],
+    }
+
+
+def _tokens(morphemes: list) -> list[dict]:
+    """The morphemes as tokens, a deck compound folded into one.
+
+    UniDic's short unit cuts 日曜日 into 日曜 + 日, and per-morpheme
+    lookup then matched each half to a card of its own -- Sunday at N3
+    and day at N4 under a sentence written to teach the N5 word. The
+    reading-badge scanner (card_lookup._find_segments_morphological)
+    has merged such runs since it was written; the breakdown never
+    did. Longest run first, so お母さん is one word and not お + 母さん.
+    """
+    tokens = []
+    i = 0
+    while i < len(morphemes):
+        hit = resolve_compound(morphemes, i)
+        if hit:
+            level, entry, raw_id, n = hit
+            tokens.append(_compound_dict(morphemes[i:i + n], level, entry, raw_id))
+            i += n
+            continue
+        tokens.append(_token_dict(morphemes[i]))
+        i += 1
+    return tokens
+
+
 def analyze_local(text: str, level: str | None = None) -> dict:
     """Everything about a Sentence that needs no language model. Pure and
     user-independent, therefore cacheable and shareable across learners.
@@ -176,7 +223,7 @@ def analyze_local(text: str, level: str | None = None) -> dict:
             "level": None, "grade": None, "available": False,
         }
 
-    tokens = [_token_dict(m) for m in morphemes]
+    tokens = _tokens(morphemes)
     grammar = _grammar_entries(text, morphemes)
     _attach_grammar(tokens, grammar)
     estimated = difficulty.estimate_level(text)

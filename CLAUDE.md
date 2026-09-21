@@ -125,7 +125,12 @@ runtime purpose. Two consequences worth knowing:
   `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
   `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
   DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
-  When starting a new wave, begin at **102** or higher, and check
+  **102–110** are wave 22, the vocab deck review — 102 (done) is 母 and
+  父 as N5 cards and the compound fold in the breakdown (cited in
+  `study/card_lookup.py`, `study/analysis.py`, `tests/test_analysis.py`
+  and `tests/test_dictionary_vocab.py`); 103–110 are the review itself,
+  planned in `docs/vocab-deck-review.md`.
+  When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -328,7 +333,7 @@ sync and no state to corrupt. Read-only, no database, no `.env`, no network:
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,405 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,407 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
