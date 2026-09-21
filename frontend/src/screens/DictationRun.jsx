@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
+import { explainSentence } from '../lib/explainSentence'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { runSource } from '../domain/sentenceSource'
@@ -169,6 +170,8 @@ function Session({ session, level }) {
     setAnalysis(null)
     setAnalysisLoading(false)
     setShowBreakdown(false)
+    setExplaining(false)
+    setExplainError(null)
     setDetail(null)
     analysisLineRef.current = null
     setStage('listening')
@@ -183,14 +186,36 @@ function Session({ session, level }) {
     analysisLineRef.current = jp
     setAnalysis(null)
     setAnalysisLoading(true)
+    // The local tier only; the explanation is bought on demand below.
     apiFetch('/api/phrase/analyze', session, {
       method: 'POST',
-      body: JSON.stringify({ phrase: jp, save: false, deep: true, lang }),
+      body: JSON.stringify({ phrase: jp, save: false, deep: false, lang }),
     })
       .then(r => (r.ok ? r.json() : null))
       .then(d => { if (analysisLineRef.current === jp) setAnalysis(d) })
       .catch(() => { if (analysisLineRef.current === jp) setAnalysis(null) })
       .finally(() => { if (analysisLineRef.current === jp) setAnalysisLoading(false) })
+  }
+
+
+  // ── The explanation, bought on demand (plan 095, owner-directed) ──
+  // The fetch above buys the local tier only; this buys the deep tier
+  // for the sentence on screen when the learner presses Explain under
+  // the breakdown, and replaces the analysis with the explained one.
+  const [explaining, setExplaining] = useState(false)
+  const [explainError, setExplainError] = useState(null)
+  function explainLine() {
+    const key = analysisLineRef.current
+    if (!key || explaining) return
+    setExplaining(true)
+    setExplainError(null)
+    explainSentence(session, key, lang)
+      .then(d => { if (analysisLineRef.current === key) setAnalysis(d) })
+      .catch(e => {
+        if (analysisLineRef.current !== key) return
+        setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
+      })
+      .finally(() => { if (analysisLineRef.current === key) setExplaining(false) })
   }
 
   // The sheet wants {title, level, entry, stats}, which is the shape
@@ -479,6 +504,9 @@ function Session({ session, level }) {
                     t={t}
                     onTokenClick={openWordDetail}
                     onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onExplain={explainLine}
+                    explaining={explaining}
+                    explainError={explainError}
                   />
                 )}
               </div>

@@ -91,7 +91,7 @@ describe('PassageBreakdown', () => {
     // 新しい + です is one word to a learner (rows.js folds the polite
     // ending onto the adjective), so three rows, not four.
     expect([...items()[1].querySelectorAll('.bkd-row__word')].map(el => el.textContent))
-      .toEqual(['電車', 'は', '新しいです'])
+      .toEqual(['電車', 'は', '新しい', 'です']) // the copula is a row of its own (plan 095)
     // A sentence with nothing worth noting prints no note line.
     expect(items()[1].querySelector('.prose__ai')).toBeNull()
   })
@@ -133,10 +133,10 @@ describe('PassageBreakdown', () => {
     expect(items()[0].classList.contains('bkd-passage__item--open')).toBe(true)
   })
 
-  it("a grammar chip's door opens the point and does not close the sentence", async () => {
+  it("a construction's door opens the point and does not close the sentence", async () => {
     const onGrammarOpen = vi.fn()
     await render(<Host sentences={WITH_GRAMMAR} onGrammarOpen={onGrammarOpen} />)
-    const door = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip__door')
+    const door = items()[0].querySelector('.bkd-passage__body .bkd-point__door')
     expect(door.tagName).toBe('BUTTON')
     door.click()
     await settle()
@@ -159,11 +159,11 @@ describe('PassageBreakdown', () => {
     } : s))
     await render(<Host sentences={withOffsets} onGrammarOpen={onGrammarOpen} />)
     const lit = () => [...document.querySelectorAll('.bkd-line .bkd-tok--lit')].map(el => el.textContent)
-    const chip = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip')
+    const chip = items()[0].querySelector('.bkd-passage__body .bkd-point')
     chip.dispatchEvent(new MouseEvent('mouseover', { bubbles: true }))
     await settle()
     expect(lit()).toEqual(['会いました'])
-    chip.querySelector('.analysis-grammar-chip__door').click()
+    chip.querySelector('.bkd-point__door').click()
     chip.dispatchEvent(new MouseEvent('mouseout', { bubbles: true }))
     await settle()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
@@ -178,10 +178,10 @@ describe('PassageBreakdown', () => {
     expect(lit()).toEqual([])
   })
 
-  it('with nowhere to open, the chip is the pattern as a word', async () => {
+  it('with nowhere to open, the construction is the pattern as a word', async () => {
     await render(<Host sentences={WITH_GRAMMAR} />)
-    const chip = items()[0].querySelector('.bkd-passage__body .analysis-grammar-chip')
-    expect(chip.querySelector('.analysis-grammar-chip__pattern').tagName).toBe('SPAN')
+    const chip = items()[0].querySelector('.bkd-passage__body .bkd-point')
+    expect(chip.querySelector('.bkd-point__pattern').tagName).toBe('SPAN')
     expect(chip.querySelector('button')).toBeNull()
   })
 

@@ -69,6 +69,8 @@ const ANALYSIS = {
   ],
 }
 
+const EXPLANATION = 'から marks the starting point in time.'
+
 const res = (body, ok = true) => ({ ok, status: ok ? 200 : 500, json: async () => body })
 
 /** A promise this test holds the far end of. */
@@ -136,9 +138,14 @@ function registersShowing(root) {
 beforeEach(() => {
   apiFetch.mockReset()
   analysisReply = Promise.resolve(res(ANALYSIS))
-  apiFetch.mockImplementation(path => {
+  apiFetch.mockImplementation((path, _session, init) => {
     if (path.startsWith('/api/reading/batch')) return Promise.resolve(res({ phrases: [PHRASE, { ...PHRASE }] }))
-    if (path === '/api/phrase/analyze') return analysisReply
+    if (path === '/api/phrase/analyze') {
+      // The eager fetch is the local tier; Explain buys the deep tier
+      // (plan 095, owner-directed).
+      if (init?.body && JSON.parse(init.body).deep) return Promise.resolve(res({ ...ANALYSIS, explanation: EXPLANATION }))
+      return analysisReply
+    }
     return Promise.resolve(res({}))
   })
 })
@@ -177,6 +184,20 @@ describe('ReadingRun — the breakdown toggle', () => {
     expect(root.querySelector('.bkd')).toBeTruthy()
     expect(registersShowing(root)).toBe(false)
     expect(toggle(root).textContent).toBe(translations.fr.hideBreakdown)
+  })
+
+  it('fetches the local tier only, and buys the explanation when Explain is pressed', async () => {
+    const root = await graded()
+    const deep = () => apiFetch.mock.calls.filter(c => c[0] === '/api/phrase/analyze').map(c => JSON.parse(c[2].body).deep)
+    expect(deep()).toEqual([false])
+    toggle(root).click()
+    await settle(120)
+    expect(root.querySelector('.bkd .prose__ai')).toBeNull()
+    root.querySelector('.bkd__explain button').click()
+    await settle(120)
+    expect(deep()).toEqual([false, true])
+    expect(root.querySelector('.bkd .prose__ai').textContent).toBe(EXPLANATION)
+    expect(root.querySelector('.bkd__explain')).toBeNull()
   })
 
   it('says the breakdown is unavailable rather than forever coming', async () => {

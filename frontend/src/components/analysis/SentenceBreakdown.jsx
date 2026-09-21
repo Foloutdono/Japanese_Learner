@@ -5,7 +5,7 @@ import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
 import { TokenCard } from './TokenCard'
 import { GrammarChips } from './GrammarChips'
-import { GrammarNotes } from './GrammarNotes'
+import { GrammarPoints } from './GrammarPoints'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
 import { StatusBadge } from './StatusBadge'
@@ -250,10 +250,10 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
         // below, unattached to the particle demonstrating it. When the
         // row is a marker and nothing else, the marker is what the row
         // opens, in the same place and with the same affordance a word
-        // opens its entry. A row that already has a word to open keeps
-        // it, and carries the marker beside its level instead.
+        // opens its entry. A particle never folds into the word before
+        // it (rows.js), so a marker is a row of its own and no chip
+        // rides beside a word any more.
         const door = !head.vocab_match && markers.length === 1 ? markers[0] : null
-        const chips = door ? [] : markers
         // The meaning: the model's contextual gloss where it was
         // bought, else the deck's own, else -- for the row that is a
         // marker and nothing else -- the marker's gloss (plan 095).
@@ -289,25 +289,6 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
             )}
             {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
             <span className="bkd-row__meaning">{meaning}</span>
-            {chips.map(point => {
-              // The marker beside a word row is one character wide, so
-              // its gloss is its title and its name, not a second cell.
-              const gloss = grammarGloss(point, lang)
-              return (
-                <button
-                  key={point.raw_id}
-                  type="button"
-                  className={`bkd-row__mark${lit && pointKey(lit) === pointKey(point) ? ' bkd-row__mark--lit' : ''}`}
-                  lang="ja"
-                  onClick={e => { e.stopPropagation(); onGrammarOpen(point) }}
-                  aria-label={`${t.openDictionary ?? 'Open dictionary entry'}: ${point.pattern}${gloss ? ` — ${gloss}` : ''}`}
-                  title={gloss || t.openDictionary}
-                  {...light(point)}
-                >
-                  {point.pattern}
-                </button>
-              )
-            })}
             {(head.vocab_match?.level || door?.level) && (
               <span className="type-badge bkd-row__lvl">{head.vocab_match?.level ?? door.level}</span>
             )}
@@ -357,10 +338,17 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
 // `onGrammarOpen(point)` makes each grammar chip a door to the point's
 // dictionary entry (GrammarChips' onOpen); the screen decides what
 // opens — a DictionaryLookupSheet on the point's raw_id.
+//
+// `onExplain` (plan 095, owner-directed) makes the explanation an
+// option in the rows: the practice modes fetch the local tier only,
+// and the button buys the deep tier -- the contextual glosses, the
+// line per rule and the note on the whole sentence -- the way the
+// analyzer's Explain does. `explaining` and `explainError` are the
+// call's state, the caller's to hold.
 export function SentenceBreakdown({
   analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
   speakable = false, controls = null, tokenView = 'stepper', onJumpToToken,
-  translation, note, sentenceText, onGrammarOpen,
+  translation, note, sentenceText, onGrammarOpen, onExplain, explaining = false, explainError = null,
 }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
   // The light is this component's in the rows and on the stage (the
@@ -383,18 +371,18 @@ export function SentenceBreakdown({
           />
         )}
         {available && (
-          <GrammarChips
-            grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
-            lit={light.litKey} onLight={light.onLight}
-          />
+          <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
         )}
-        {/* What each rule does here, once an explanation was bought
-            (plan 095): under the chips that name them, before the
-            note about the whole sentence. */}
-        {available && (
-          <GrammarNotes grammar={analysis.grammar} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
-        )}
-        {noteText && <span className="prose__ai">{noteText}</span>}
+        {noteText
+          ? <span className="prose__ai">{noteText}</span>
+          : onExplain && available && (
+            <div className="bkd__explain">
+              {explainError && <span className="hint bkd__explain-hint">{explainError}</span>}
+              <button type="button" className="btn-secondary" onClick={onExplain} disabled={explaining}>
+                {explaining ? t.explaining : t.explainSentence}
+              </button>
+            </div>
+          )}
       </div>
     )
   }
@@ -437,22 +425,13 @@ export function SentenceBreakdown({
         </div>
 
         {/* ── The grammar the sentence is built with (plan 095) ──
-            The constructions the local tier found, as the practice
-            modes' quiet chips, each a door to its lesson. The stage
-            used to be the one breakdown that showed none of it: the
-            points were detected, attached to every token and
-            shipped, and then drawn nowhere on the screen a learner
-            brings a sentence to precisely to ask what it is made of.
-            The markers (は, を) are not here -- they are the rule of
-            one word, and the card below says so about that word. */}
-        <GrammarChips
-          grammar={analysis.grammar} t={t} quiet label={null} onOpen={openGrammar}
-          lit={light.litKey} onLight={light.onLight}
-        />
-        {/* The bought line per rule rides under the chips it belongs
-            to, sharing their light; the note about the whole sentence
-            stays in the caller's explain box below the stage. */}
-        <GrammarNotes grammar={analysis.grammar} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
+            The constructions the local tier found, each with its
+            gloss, its parts and (once bought) its line, every one a
+            door to its lesson. The stage used to be the one breakdown
+            that showed none of it. The markers (は, を) are not here --
+            they are the rule of one word, and the card below says so
+            about that word. */}
+        <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
 
         {controls}
 

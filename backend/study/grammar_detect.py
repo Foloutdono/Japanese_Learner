@@ -927,10 +927,17 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
     # between the two. Equal spans are left alone: two points really can
     # be written the same way, and a span cannot choose between them
     # (see _catalogue on the sense-qualified ones).
+    #
+    # A MARKER is kept whatever encloses it (plan 095): the が of
+    # ことができます is the subject が, and the row that particle stands
+    # on is where a learner asks what it is doing -- a row with nothing
+    # to open was the one kind that went nowhere. The construction is
+    # still reported over it, and a screen lists the construction's
+    # parts beside its name.
     return [
         (pattern, level, start, end, kind, segments)
         for pattern, level, start, end, kind, _c, segments in deduped
-        if not any(
+        if kind == "marker" or not any(
             whole and (s, e) != (start, end) and s <= start and end <= e
             for _p, _l, s, e, _k, whole, _segs in deduped
         )

@@ -141,6 +141,15 @@ class WhatIsReportedTests(unittest.TestCase):
         self.assertIn("〜ました／〜ませんでした", found)
         self.assertNotIn("〜ます／〜ません", found)
 
+    def test_a_marker_inside_a_construction_is_still_the_particle_it_is(self) -> None:
+        """The が of ことができます is the subject が, and the row it
+        stands on opens it; the construction is reported over it too."""
+        found = found_in("日よう日に来ることができます。")
+        self.assertIn("〜ことができます", found)
+        self.assertEqual(found["が"], "が")
+        kinds = {h["pattern"]: h["kind"] for h in grammar_detect.hits("日よう日に来ることができます。")}
+        self.assertEqual(kinds["が"], "marker")
+
     def test_a_multi_part_point_explains_nothing_it_encloses(self) -> None:
         """もう〜ました reaches from もう to the end of the sentence, and
         everything the learner is reading lies between the two."""

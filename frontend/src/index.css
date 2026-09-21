@@ -9760,10 +9760,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .bkd-row {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   grid-template-areas:
-    "word reading mark lvl"
-    "meaning meaning mark lvl";
+    "word reading lvl"
+    "meaning meaning lvl";
   gap: var(--sp-1) var(--sp-3);
   align-items: baseline;
   padding: var(--sp-2) 0;
@@ -9795,64 +9795,49 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   grid-area: lvl;
   align-self: center;
 }
-/* The grammatical marker this row is an instance of — the は of 今日は,
-   the へ of へ — as a door to its own card, next to the level badge and
-   drawn like one: the row already carries a word, a reading and a
-   meaning, and the particle is one character, so it earns a chip and
-   not a line. A construction (〜ます／〜ません) stays in the chips under
-   the rows, where it can be printed in full. */
-.bkd-row__mark {
-  grid-area: mark;
-  align-self: center;
-  padding: var(--sp-1) var(--sp-3);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: var(--bg-card);
-  font-family: var(--font-jp);
-  font-size: var(--fs-caption);
-  line-height: 1.4;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-.bkd-row__mark:hover,
-.bkd-row__mark:focus-visible,
-.bkd-row__mark--lit {
-  border-color: var(--line-grammar);
-  color: var(--text-primary);
-}
 @media (min-width: 768px) {
   .bkd-row {
-    grid-template-columns: auto auto minmax(0, 1fr) auto auto;
-    grid-template-areas: "word reading meaning mark lvl";
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    grid-template-areas: "word reading meaning lvl";
   }
 }
-/* What each rule does in this sentence (GrammarNotes, plan 095): one
-   row per noted point under the chips, the pattern in the reading
-   register and the model's line beside it, a hairline between rows
-   and never a card each -- the same ruling as the word rows above.
-   A row whose point is lit on the line takes the grammar ink on its
-   pattern, as the chip does on its edge. */
-.bkd-notes {
+/* The constructions (GrammarPoints, plan 095): one row per rule under
+   the word rows, ruled apart from them by the grammar line's ink on
+   the left edge -- the rows above are words, these are the rules
+   built over them. Each row: the pattern, its gloss and its level on
+   one line; the words it is made of, in the reading register, under
+   it; the bought line on what it does here last. A row whose point is
+   lit on the line takes the grammar ink on its pattern, as the words
+   it lights take the tint. */
+.bkd-points {
   display: flex;
   flex-direction: column;
+  margin-top: var(--sp-2);
+  padding-left: var(--sp-3);
+  border-left: 2px solid var(--line-grammar);
 }
-.bkd-note {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: var(--sp-1) var(--sp-3);
-  align-items: baseline;
+.bkd-point {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
   padding: var(--sp-2) 0;
   border-top: 1px solid var(--surface-line);
 }
-.bkd-note:first-child { border-top: 0; }
-.bkd-note__pattern {
+.bkd-point:first-child { border-top: 0; }
+.bkd-point__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--sp-1) var(--sp-3);
+}
+.bkd-point__pattern {
   font-family: var(--font-jp);
-  font-size: var(--fs-sm);
+  font-size: var(--fs-lead);
   font-weight: 600;
   line-height: 1.5;
   color: var(--text-primary);
 }
-.bkd-note__door {
+.bkd-point__door {
   padding: 0;
   border: 0;
   background: none;
@@ -9861,20 +9846,37 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   cursor: pointer;
   text-decoration: underline dotted;
 }
-.bkd-note__door:hover,
-.bkd-note__door:focus-visible,
-.bkd-note--lit .bkd-note__pattern { color: var(--line-grammar); }
-.bkd-note__text {
+.bkd-point__door:hover,
+.bkd-point__door:focus-visible,
+.bkd-point--lit .bkd-point__pattern { color: var(--line-grammar); }
+.bkd-point__gloss {
   min-width: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.4;
+  color: var(--text-secondary);
+  overflow-wrap: anywhere;
+}
+.bkd-point__lvl { margin-left: auto; }
+.bkd-point__parts {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-reading);
+  color: var(--text-secondary);
+}
+.bkd-point__note {
   font-size: var(--fs-sm);
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
-@media (max-width: 767px) {
-  .bkd-note {
-    grid-template-columns: minmax(0, 1fr);
-  }
+/* The explanation as an option (plan 095): the button under the rows
+   where the note will print once bought, its failure said above it. */
+.bkd__explain {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  align-items: flex-start;
 }
+.bkd__explain-hint { color: var(--danger); }
 /* The passage: the sentences stacked, a hairline between them, the
    open one marked by the line's rail on its left edge. The head is a
    row (the open line holds word buttons); the chevron is the control. */
