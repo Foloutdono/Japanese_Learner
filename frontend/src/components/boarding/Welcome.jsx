@@ -12,7 +12,7 @@ import { FRONT_LANE, BACK_LANE } from './demoCards'
 // a returning learner skips the boarding. Pre-auth, so no session and
 // no router: App.jsx mounts it in place of the old landing page.
 
-function DemoFace({ card }) {
+function DemoFace({ card, t }) {
   if (card.kind === 'draw') {
     return (
       <span className="brd-demo__draw" aria-hidden="true">
@@ -39,6 +39,15 @@ function DemoFace({ card }) {
       </span>
     )
   }
+  if (card.kind === 'prompt') {
+    // 翻訳: the prompt is in the learner's language, so it is a locale
+    // string rather than content, and set in the interface's face.
+    return (
+      <span className="brd-demo__glyph">
+        <span className="brd-demo__t brd-demo__t--sm brd-demo__t--latin">{t.brdDemoPrompt[card.prompt]}</span>
+      </span>
+    )
+  }
   if (card.kind === 'paper') {
     return (
       <span className="brd-demo__glyph">
@@ -60,7 +69,7 @@ function DemoCard({ card, t }) {
   return (
     <div className="brd-demo" style={{ '--line-color': `var(--line-${card.line})` }}>
       <span className="brd-demo__tag">{t.brdDemoTag[card.tag]}</span>
-      <DemoFace card={card} />
+      <DemoFace card={card} t={t} />
       <span className="brd-demo__meaning">{t.brdDemoMeaning[card.meaning]}</span>
       <span className="brd-demo__foot">{t.brdDemoFoot[card.foot]}</span>
     </div>

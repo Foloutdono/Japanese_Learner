@@ -1582,9 +1582,12 @@ const boarding = {
   brdAccountHint: 'Ton parcours est déjà enregistré. Un compte te permet de le retrouver sur un autre appareil — et de ne pas le perdre en changeant de téléphone.',
   brdAccountCreate: 'Créer mon compte',
   brdAccountSkip: 'Continuer sans compte',
-  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', listening: 'Écoute', reading: 'Lecture', kana: 'Kana', exam: 'Examen blanc' },
-  brdDemoMeaning: { station: 'gare', toEat: 'manger', fillIn: 'À compléter', craft: 'métier', listen: 'Écoute', readIt: 'Lis', ticket: 'billet', mountain: 'montagne', kippu: 'ki · p · pu', timer: '24:18' },
-  brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', ruleSentence: 'Règle → phrase', meaningKanji: 'Sens → kanji', soundMeaning: 'Son → sens', sentenceMeaning: 'Phrase → sens', kanjiReading: 'Kanji → lecture', kanaSound: 'Kana → son', timedPaper: 'Épreuve chronométrée' },
+  brdDemoTag: { kanji: 'Kanji', vocab: 'Vocabulaire', grammar: 'Grammaire', dictation: 'Dictée', reading: 'Lecture', kana: 'Kana', translation: 'Traduction', analyzer: 'Analyseur', exam: 'Examen blanc' },
+  brdDemoMeaning: { station: 'gare', toEat: 'manger', whichRule: 'Quelle règle ?', craft: 'métier', writeIt: 'Écris-le', readIt: 'Lis', kippu: 'kippu', ki: 'ki', sayIt: 'Traduis-le', yama: 'yama · san', breakItDown: 'Décortique', timer: '24:18' },
+  brdDemoFoot: { kanjiMeaning: 'Kanji → sens', wordMeaning: 'Mot → sens', sentenceRule: 'Phrase → règle', meaningKanji: 'Sens → kanji', soundText: 'Son → texte', sentenceMeaning: 'Phrase → sens', wordReading: 'Mot → lecture', kanaRomaji: 'Kana → rōmaji', meaningSentence: 'Sens → phrase', kanjiReadings: 'Kanji → lectures', sentenceGrammar: 'Phrase → grammaire', timedPaper: 'Épreuve chronométrée' },
+  // L’énoncé de la carte 翻訳 est dans la langue de l’apprenant : une
+  // chaîne de l’interface, pas du contenu.
+  brdDemoPrompt: { waiting: 'J’attends un ami à la gare.' },
   // Les questions.
   brdNameQ: 'Comment tu t’appelles ?',
   brdNameAria: 'Ton nom',
