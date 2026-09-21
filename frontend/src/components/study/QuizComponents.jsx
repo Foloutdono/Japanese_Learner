@@ -5,7 +5,7 @@ import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
+import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
@@ -290,16 +290,32 @@ export function DoneMessage({ onBack, pace, onExtra }) {
   if (pace && onExtra) {
     return (
       <div className="quiz-done quiz-done--pace">
-        <p className="quiz-done__banner" lang="ja" aria-hidden="true">本日の目標達成</p>
-        <p className="quiz-done__msg">
-          <CheckCircleIcon size={22} /> {t.paceDoneTitle}
+        <span className="quiz-done__mark" aria-hidden="true"><CheckIcon size={26} /></span>
+        {/* The pair: the Japanese names the terminus, the Latin captions
+            it (DESIGN.md, "The one rule above all others"). */}
+        <h2 className="quiz-done__name" lang="ja">本日の目標達成</h2>
+        <p className="quiz-done__caption">{t.paceDoneTitle}</p>
+        {/* The day's count as a figure -- the numeral, the target as its
+            unit, the caps label beneath -- rather than buried mid-sentence
+            ("14 of 10 new items learned today"), where nobody found it. */}
+        <p className="quiz-done__figure">
+          <span className="quiz-done__count">{pace.newToday}</span>
+          <span className="quiz-done__of" aria-hidden="true">/ {pace.target}</span>
         </p>
-        <p className="quiz-done__sub">{t.paceDoneBody(pace.newToday, pace.target)}</p>
-        <div className="quiz-done__row">
-          <button onClick={() => { playClick(); onExtra() }} className="btn-panel quiz-done__extra">
-            <span lang="ja">臨時列車</span> {t.paceExtraTrain}
+        <p className="quiz-done__label">
+          <span className="sr-only">{t.paceDoneOf(pace.target)} </span>
+          {t.paceDoneLabel}
+        </p>
+        <p className="quiz-done__sub">{t.paceDoneBody}</p>
+        <div className="quiz-done__foot">
+          {/* The quiet offer over the one filled action -- the ride's own
+              order. Arrival is the plan, so the way out is the action and
+              the 臨時列車 is the ghost above it: a default, never a lock. */}
+          <button onClick={() => { playClick(); onExtra() }} className="btn-depart btn-depart--ghost quiz-done__extra">
+            <span className="btn-depart__jp">{t.paceExtraTrain}</span>
+            <span className="quiz-done__extra-jp" lang="ja">臨時列車</span>
           </button>
-          <button onClick={() => { playClick(); onBack() }} className="btn-ghost">
+          <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
             <ChevronIcon direction="left" size={14} /> {t.backToMenu}
           </button>
         </div>
@@ -309,16 +325,13 @@ export function DoneMessage({ onBack, pace, onExtra }) {
 
   return (
     <div className="quiz-done">
-      {/* The message and the button are two rows, not two <br/>s. In a
-          flex container a <br> is a zero-width flex item and breaks
-          nothing, so the button used to sit on the same line as the
-          text it was supposed to follow. */}
-      <p className="quiz-done__msg">
-        <CheckCircleIcon size={22} /> {t.quizComplete}
-      </p>
-      <button onClick={() => { playClick(); onBack() }} className="btn-panel">
-        <ChevronIcon direction="left" size={14} /> {t.backToMenu}
-      </button>
+      <span className="quiz-done__mark" aria-hidden="true"><CheckIcon size={26} /></span>
+      <p className="quiz-done__msg">{t.quizComplete}</p>
+      <div className="quiz-done__foot">
+        <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
+          <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+        </button>
+      </div>
     </div>
   )
 }
