@@ -8707,7 +8707,7 @@ textarea:focus-visible {
    signage register; the 臨時列車 button is the explicit way past it. */
 .quiz-done__banner {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.3em;
