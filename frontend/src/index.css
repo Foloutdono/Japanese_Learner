@@ -13747,7 +13747,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 14px;
 }
 
+/* The sentence hint's translation switch. A row, not a block: the
+   chevron is an inline SVG beside a text node, and a bare button
+   leaves it on the TEXT'S BASELINE with nothing between the two --
+   the arrow touched the S of "Show translation" and sat 2px high of
+   the button's own middle. Same construction as `.gl-tr-toggle`, the
+   lesson's copy of this switch, which has read right all along. */
 .grammar-examples-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
   background: var(--bg-panel);
   color: var(--text-on-panel-soft);
   font-size: 13px;
