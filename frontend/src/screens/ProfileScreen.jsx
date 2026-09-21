@@ -5,6 +5,8 @@ import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
 import { WarningIcon } from '../components/ui/Icons'
 import { CommuterPass } from '../components/profile/CommuterPass'
+import { Guide } from '../components/guide/Guide'
+import { useGuide } from '../hooks/useGuide'
 import { PassHolder } from '../components/profile/PassHolder'
 import { BalanceLine } from '../components/credits/BalanceLine'
 import { OfferButton } from '../components/credits/OfferButton'
@@ -116,9 +118,13 @@ export default function ProfileScreen({ session }) {
 
   const loading = !profile || !leaderboard
 
+  // 案内 — once the pass has printed (plan 100).
+  const guide = useGuide('profile', !loading && Boolean(profile))
+
   return (
     <main id="main-content" className="profile">
       {loading && <Loading />}
+      {guide.open && !loading && <Guide gate="profile" onEnd={guide.onEnd} />}
 
       {!loading && (
         <>

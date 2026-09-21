@@ -312,3 +312,18 @@ describe('LearnScreen — the plates', () => {
     expect(root.querySelector('.plate--shelf .plate__meta')).toBeNull()
   })
 })
+
+
+// ── 案内 — the anchors the guide points at (plan 100) ────────────
+describe('LearnScreen — the guide\'s anchors', () => {
+  it('marks the first plate, its foot and the shelf', async () => {
+    apiJson.mockResolvedValue({ decks: [] })
+    const screen = await mount()
+    await settle(150)
+    const root = screen.container
+    expect(root.querySelector('.plate[data-guide="learn.plate"]')).toBeTruthy()
+    expect(root.querySelector('[data-guide="learn.plate"] [data-guide="learn.stops"]')).toBeTruthy()
+    expect(root.querySelector('.plate--shelf[data-guide="learn.shelf"]')).toBeTruthy()
+    expect(root.querySelectorAll('[data-guide="learn.plate"]')).toHaveLength(1)
+  })
+})

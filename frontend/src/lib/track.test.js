@@ -45,6 +45,10 @@ describe('the event names', () => {
     track('screen_view', { route: '/today', tab: 'today' })
     expect(_peek()).toHaveLength(1)
     expect(_peek()[0].name).toBe('screen_view')
+    // An id of its own, so a batch sent twice is kept once (plan 100's
+    // live walk found two rows for one guide_done).
+    expect(typeof _peek()[0].id).toBe('string')
+    expect(_peek()[0].id.length).toBeGreaterThan(8)
   })
 
   it('declares every name as an array of keys', () => {

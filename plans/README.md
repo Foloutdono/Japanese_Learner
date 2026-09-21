@@ -191,6 +191,17 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 21 — 試乗, the first ride** (plans 097–101, 2026-09-21, DONE).
+  The deferral plan 075 left standing: after the boarding, a flashcard
+  ride on the real stage (one card the learner knows, one they cannot),
+  a reading ride ending on the plate that says which platforms ride on
+  the pass, and 案内, a per-gate guide over the live screen — and,
+  owner-directed on the way, the day's ration of new cards on the daily
+  queue. Per learner on the profile row, fails open, skippable,
+  measured; the rule is `docs/adr/0017`. Its section is at the very
+  bottom of this file, and it is the plan — `plans/*.md` is gitignored,
+  so there are no per-plan files.
+
 - **Wave 20 — the grammar breakdown: the rule on the stage, glossed,
   lit where it sits, found by its form, and explained in place**
   (plan 095, 2026-09-20, DONE).
@@ -4840,3 +4851,743 @@ and `lint:ink` all clean with no baseline touched, `npm run build` green.
   existing connection is the whole review surface.
 - **A notification when a followed deck is withdrawn.** The banner is on the
   deck; a learner who does not open it will find out on day 31.
+
+---
+
+# Wave 21 — 試乗, the first ride (plans 097–101, planned 2026-09-21)
+
+Planned at commit `47d81c5`, not yet executed. The owner's request, as
+given: *"The current workflow for a new user is onboarding and then
+instantly in the app with no explanation how to use it. I want to change
+that: onboarding → flashcard tutorial (one card they aren't supposed to
+know and one they are supposed to know) → reading mode tutorial (all users
+have this tuto but precise it's a paid user feature) → walkthrough of every
+screen for their first opening (every component explanation), skippable."*
+
+The boarding (plan 075) ends at PassStep → `POST /api/onboarding/complete`
+→ the TicketGate finale → `/today`, and nothing follows. Wave 8 had a tour
+of four working demos; plan 075 said *"keep the wave-8 tour if it survives
+the shell; else defer"*, and it was deferred — nothing of it exists today
+(no `onb-tour` class, no component; `RatingBar`'s `scale` prop and
+`playPlatformChime()` are its only fossils). This wave is that deferral,
+paid.
+
+## The idea in one paragraph
+
+Three things, each the smallest that teaches. **試乗, the test ride**: the
+learner's first two flashcards, on the real study stage with the real
+`CardPrompt` and the real `RatingBar`, fed two literal cards and writing
+nothing — one they know (こんにちは) so the flip and the rating make
+sense, one they cannot know (a word one JLPT stop above them, from the
+deck itself) so *rating it wrong* is shown to be the game rather than a
+failure. **The reading ride**: one N5 sentence on the reading stage, the
+timer, the field, the measure, the rating, and then the plate that says
+which platforms ride on the 定期券. **案内, the guide**: a spotlight over
+the live screen, one sentence per stop, playing the first time *each* gate
+is opened, skippable in one tap, replayable from Settings. Everything is
+per learner on the profile row (a guest is a real user), fails open (a
+profile the gate could not read shows no lesson, never a locked door), and
+is measured (足跡) so the question "where do people give up" has an answer
+on day one.
+
+## Where this plan departs from the request, and why
+
+These are suggestions; each is one line to reverse.
+
+1. **The guide plays per screen, on that screen's first opening — not as
+   one walkthrough of every screen at the first opening.** Five gates ×
+   five stops at the moment a learner has been through eight questions,
+   three cutscenes and two lessons is the most-skipped pattern in mobile
+   software, and DESIGN.md's second rule ("say less — the layout should
+   guide the user") argues against explaining components at all. A stop
+   shown when the thing it explains is under the learner's thumb is a
+   stop that gets read. The chained version is one flag away (plan 100,
+   `GUIDE_CHAIN`): the guide's last stop on a gate navigates to the next
+   gate and opens its guide.
+2. **Both rides are skippable, quietly.** The boarding is deliberately not
+   skippable, because its answers are the contract. The rides teach a
+   gesture, and a returning learner who has used Anki for years does not
+   need ninety seconds of it. The way out is the stage head's ‹, labelled
+   *Skip*, never a primary button. Skips are recorded (`ride_done` with
+   `skipped`), so if everyone skips, that is data rather than a guess.
+3. **The "paid feature" line is keyed on the server, not written into the
+   copy.** Nothing can be bought today (`HAS_STORE` is false) and nothing
+   is blocked (`CREDITS_ENFORCE` unset — `/api/credits` says so as
+   `enforced`). A tutorial saying *reading is paid* to a learner who then
+   reads for free all week is a small lie; one saying *this platform rides
+   on the pass* with an `OfferButton` under it is the same offer PassStep
+   makes, in the place it means most, and it records interest (`offer_view`
+   with a new `where: 'ride'`). When `enforced` is false a second line
+   says the platforms are open meanwhile. When the store lands the plate
+   needs no change.
+4. **The ride writes no review.** XP, the level, the streak and the
+   daily-new budget are every one of them a `SUM`/`COUNT` over
+   `review_log` (CLAUDE.md, "review_log is not an audit log"). A tutorial
+   card that posted a review would be the learner's first XP, first
+   streak day and first spent new-card slot, for a card chosen by us. The
+   ride rates locally and the cards are never scheduled; the first real
+   card is the one behind the 改札.
+5. **Veterans are backfilled.** Every account with `onboarded_at` set at
+   deploy time gets `tutorial_at = onboarded_at` and every gate marked
+   guided (a one-shot script, reported before applied, like the other
+   maintenance scripts). Nobody who has reviewed three thousand cards is
+   shown how to flip one. Settings offers both back to anyone who wants
+   them.
+6. **The known card is こんにちは for everyone; the unknown one comes from
+   the deck.** For a learner who answered *no kana*, the romaji rides on
+   the card as the furigana hint does, and the sound plays. The unknown
+   card is served by the backend from `content.vocab_data` at the stop
+   above the stored level (`駅` at N5 for the novice, `経験` at N4,
+   `環境` at N3, an N2 entry to be chosen at execution, `曖昧` at N1),
+   so it is a real deck entry with a real gloss — never a literal that
+   the content audit cannot see.
+
+## Execution order & status
+
+| # | What | Status |
+|---|---|---|
+| 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the six endpoints, the events, the backfill script | DONE (2026-09-21) |
+| 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | DONE (2026-09-21) |
+| 099 | The reading ride and the pass plate | DONE (2026-09-21) |
+| 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | DONE (2026-09-21) |
+| 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, CONTEXT.md, ADR 0017 | DONE (2026-09-21) |
+
+097 first — the three screens all read and write through it. 098 and 099
+are independent of 100 and can be executed in either order; 100 is the
+largest and the one most likely to be cut down after a live look.
+
+## Plan 097 — the seam
+
+**Schema** (`backend/routes/profile.py`, the `_init_db` ALTER loop, and
+`srs/data_structure.sql` kept honest by `tests/test_schema_declared.py`):
+
+```sql
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS tutorial_at timestamptz;
+ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS guided jsonb NOT NULL DEFAULT '{}'::jsonb;
+```
+
+`tutorial_at` is the two rides as one lesson: set when the reading ride
+ends, whether finished or skipped (a learner who skipped is not asked
+again; Settings is the way back). `guided` maps a gate id to the ISO time
+its guide ended: `{"today": "...", "learn": "..."}`. A jsonb map rather
+than five columns because the set of gates is `config/tabs.js`'s to
+change, and a sixth gate must not be a migration.
+
+**`GET /api/profile`** gains `tutorialAt` (ISO or null) and `guided`
+(the map). The onboarding gate in App.jsx already reads this response, so
+the first screen after the 改札 can be decided with no second request.
+
+**Endpoints**, all on `routes/onboarding.py` (the ticket office owns the
+first day), none pass-gated, none spending credits:
+
+- `GET /api/onboarding/ride` → `{ cards: [known, unknown], sentence }`.
+  The two cards are built by the same assembly the vocab batch uses
+  (`routes/vocab.py` — find the function that turns a deck entry into a
+  served card with its `hints`, and call it; do not copy it), mode
+  `vocab.flashcard`, direction f2b, so `CardPrompt` renders them with no
+  ride-specific branch. `known` is 今日は／こんにちは (the deck has it at
+  N1; serve it with the N5 label — the level chip is the card's foot, and
+  the ride's foot says 試乗 instead). `unknown` is
+  `RIDE_UNKNOWN[level_above(stored)]`, each pinned by
+  `tests/test_ride.py` to exist in `get_vocab(level)` with that reading,
+  so a deck correction (plan 091's lesson) fails a test rather than
+  serving a card with no entry behind it. `sentence` is one entry of
+  `content.reading_sentences.N5` with its romaji from
+  `reading.phrase_to_romaji` — fixed, the same for everyone, chosen for
+  the metaphor if one fits (駅 in it), else the first.
+- `POST /api/onboarding/ride/check` `{ answer }` → `measure_forms(answer,
+  jp=RIDE_SENTENCE.jp, romaji=...)`. The sentence is not a parameter: the
+  reading router's own `/check` is pass-gated and takes the phrase from
+  the client, and neither is wanted here.
+- `POST /api/onboarding/ride/done` `{ skipped: bool }` → sets
+  `tutorial_at = COALESCE(tutorial_at, NOW())`. Idempotent, like
+  `/complete`.
+- `POST /api/onboarding/guided/{gate}` → `guided = guided || {gate: now}`;
+  `gate` validated against the five ids. `DELETE /api/onboarding/guided`
+  → `'{}'`. `DELETE /api/onboarding/ride/done` → `tutorial_at = NULL`
+  (the Settings replay).
+
+**Events** (`backend/core/events.py`, mirrored in `lib/track.js`,
+`tests/test_events.py` fails on drift): `ride_step {step, to, dir, ms}`,
+`ride_done {skipped, at, ms}` where `at` is which ride it ended on
+(`cards` | `reading`), `guide_step {gate, stop, index}`, `guide_done
+{gate, skipped, stops, ms}`. `offer_view/intent/dismiss` gain `'ride'` as
+a legal `where` — the funnel note beside `SOURCES` in `domain/paywall.js`
+says the two lists must match; keep them matching.
+
+**The backfill**: `scripts/backfill_first_ride.py` — reports the rows it
+would touch, changes nothing without `--yes`, `--user` to scope. Sets
+`tutorial_at = onboarded_at` and `guided` to all five gates at
+`onboarded_at`, only `WHERE onboarded_at IS NOT NULL AND tutorial_at IS
+NULL`. Run once after the deploy that carries 097, before the frontend
+that reads it goes live; a learner who boards between the two simply gets
+the ride. Not in `_init_db`: an import-time UPDATE would stamp anyone who
+completed the boarding during a deploy, and one-shots live in `scripts/`
+(CLAUDE.md, "Database maintenance").
+
+**Tests**: migration idempotence (the existing profile pattern); the ride
+payload per stored level, including novice → N5 and N1 → N1; the check
+endpoint measures against the fixed sentence and ignores any `phrase` in
+the body; `done` and `guided` idempotence; an unknown gate id is 422; the
+events set. Backend today: 543+; expect ~15 new.
+
+## Plan 098 — 試乗, the flashcard ride
+
+**Routes**, on the `StageFrame` (no HUD, no tab bar — a run):
+`/ride/cards` and `/ride/reading`, plus `/ride` → `/ride/cards`. Added to
+`lib/routePattern.js`'s `ROUTES` (the node test fails otherwise);
+`tabFor` answers null for them, which is right — the ride is before any
+gate.
+
+**The gate wiring** (App.jsx): the index route becomes
+`<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />` where
+`rideDue = gate.profile?.tutorialAt == null && gate.profile != null`. A
+profile the gate failed open without (`profile: null`) means no ride: the
+rule is *never a lesson at the cost of a door*. The TicketGate finale is
+untouched — it already plays over whatever the router mounted at `/`, so
+the 改札 now opens onto the first card, which is better than opening onto
+an empty queue. `RideRun` takes an `onDone` that App uses to stamp
+`gate.profile.tutorialAt` locally (`setGate`), so a later visit to `/`
+does not bounce back into the ride while `/api/profile` is stale in
+`stores/profileSummary`. Deep-linking `/ride/cards` later is allowed and
+is how Settings replays it; it posts `done` again, harmlessly.
+
+**The screen**, `screens/RideRun.jsx`: `StudyStage` with
+`color` the vocab pigment, `where` 試乗, `sub` TEST RIDE, `remaining` the
+cards left, `leaveLabel` *Skip*, `onLeave` = skip (posts `done` with
+`skipped: true` and leaves for `/today`). Inside: `CardTransition` →
+`CardPrompt` (the ride card, `foot` = 試乗), `RatingBar` (the learner's
+own scale, from the store — no `scale` override; the fossil prop can
+go), and a **callout** (see plan 100's `Callout`, built here first and
+moved into `components/guide/` by 100) that says one sentence at each
+step, anchored to the card or to the rating bar by `data-guide`:
+
+| step | anchor | says (fr/en keys `ride*`) |
+|---|---|---|
+| `front` (card 1) | the card | *A card. The word on the front. Tap to turn it.* |
+| `back` (card 1) | the rating bar | *Did you know it? Say so — you are the one who grades.* |
+| `front` (card 2) | the card | *This one you have not met. Turn it.* |
+| `back` (card 2) | the rating bar | *Say wrong. Wrong is not a fault: the card comes back sooner, and that is the whole method.* |
+| `done` | — | *That is the game. N words a day, each back just before you forget it.* — N from the profile's `dailyNewTarget`; one button, *Continue* → `/ride/reading` |
+
+A rating on card 2 that is not wrong gets one more line under the bar
+before the done step (*Guessed? Then it returns in a few days. Say wrong
+when you guessed.*) and moves on; the ride does not argue. Ratings are
+local state; `useReviewGates` and `lib/reviews` are not imported.
+`ride_step` fires on every transition through the same two functions the
+boarding uses (`go`/`mark`), and `ride_done` with `at: 'cards'` only on
+skip — a finished card ride continues into the reading one, whose end
+is the lesson's.
+
+**The known card's romaji**: for `kanaKnown` of `none` or `katakana` the
+furigana hint is switched on from the first paint (`activeHints` includes
+`HINTS.FURIGANA`, and the served card carries the romaji as its furigana
+parts) and the reading is spoken on flip via the same `speakJapanese` a
+vocab run uses. For everyone else the card is plain.
+
+**Dev workbench**: `/dev/ride` beside `/dev/onboarding`, `dryRun` (no
+POST, the ride payload from a literal), a fixed bar with ↺ like
+`OnboardingPreview`.
+
+**Tests**: browser — flip → rate → flip → rate → done with a mocked
+`/api/onboarding/ride`, and *no* request to any `/review` path (assert on
+the fetch mock); skip posts `done {skipped:true}`; keyboard `1` rates.
+Phone lane — the rating bar is docked and the callout is inside the
+viewport at 390×844 with the card at its grown height. Node — the routes
+are in `ROUTES`. Locale test covers the keys.
+
+## Plan 099 — the reading ride and the pass plate
+
+`screens/RideReading.jsx` at `/ride/reading`, on the reading pigment,
+`where` 試乗, `sub` READING. It mirrors `ReadingRun`'s stage, so
+`ReadingRun`'s presentational pieces — the timer over the sentence, the
+docked field with Submit, the measure beside the answer — are **extracted
+into `components/reading/`** and used by both; DESIGN.md's "never
+hand-copy a component's markup" applies, and `ReadingRun` at 694 lines
+is due the split anyway. The session logic (batches, history,
+`/api/reading/result`) stays in `ReadingRun`.
+
+Steps: `read` (the sentence shown for `_display_seconds` worth, callout:
+*Read it. It hides in a moment.*) → `type` (the field; callout: *Write
+what you read, in romaji or kana.*) → `measure` (`POST
+/api/onboarding/ride/check`; the figure beside the answer, the sentence
+back on screen with its translation; callout: *The figure is how much you
+caught. The grade is yours:* over the rating bar) → `pass` (the plate).
+
+**The pass plate** is the last screen and the reason the owner wanted
+this ride for everyone: the platforms that ride on the 定期券, as a
+list drawn from one place — `domain/paywall.js` gains `PASS_PLATFORMS =
+['reading', 'comprehension', 'translation', 'dictation', 'exam',
+'analyzer']`, the six routers under `require_pass` (`reading.py`,
+`translation.py`, `dictation.py`, `exams.py`, `phrase.py` + `ocr.py` +
+`video.py` as the analyzer). Under it, `OfferButton` with
+`SOURCES.RIDE`, exactly as PassStep places it (a quiet line, never the
+primary action), and — while `useCredits().enforced` is false — the line
+*The platforms are open to everyone for now.* The primary action is
+*Enter the station* → `POST ride/done {skipped:false}` → `onDone` →
+`/today`. Reduced motion: no callout animation, every step drawn at rest.
+
+**Tests**: browser — the four steps with the check mocked; the offer
+button records `offer_view {where:'ride'}`; `enforced:false` shows the
+open line and `enforced:true` hides it. A backend test pins
+`PASS_PLATFORMS` against the routers that declare `require_pass` (read
+the router objects' dependencies), so a seventh gated router cannot go
+unlisted on the plate.
+
+## Plan 100 — 案内, the guide
+
+**The component**, `components/guide/Guide.jsx`, portalled to
+`document.body` like `Sheet`, modal through `hooks/useDialog` (Escape
+skips, focus is trapped in the callout and returns to the screen). Props:
+`gate` (the id) and `onEnd(skipped, stops)`. It reads
+`GUIDES[gate]` from `components/guide/guides.js` — an ordered list of
+stops `{ anchor, jp, key }` — finds `[data-guide="<anchor>"]`, scrolls it
+into view (`block: 'center'`), measures it, and draws:
+
+- `.guide__spot` — an absolutely positioned box over the anchor's rect
+  with `box-shadow: 0 0 0 100vmax var(--scrim)` (one element, no SVG
+  mask, the scrim *is* the shadow) and the anchor's own radius
+  (`--r-card` for a card, `--r-chip` for a chip — the stop declares which);
+- `.guide__callout` — a `.card` under the spot (above it when the spot is
+  in the lower half), the pair as heading (`jp` over the Latin from the
+  locale), one sentence, and a foot of two 44 px controls: *Next* (or
+  *Done* on the last) and *Skip*;
+- a `ResizeObserver` on the anchor and a scroll listener re-measure; on
+  an anchor that is not in the DOM the stop is skipped silently (a screen
+  with no due lanes has no `.lane` to point at, and the guide must not
+  strand on a rect it cannot find).
+
+Motion: the spot moves between stops with the boarding's 260 ms ease-out;
+none under reduced motion. Colour: the callout is a plain card; the spot
+takes no pigment — the thing it frames is already in its line's colour,
+which is the point.
+
+**The trigger**, `hooks/useGuide(gate, ready)`: reads
+`useProfileSummary().guided`, opens the guide once per mount when the gate
+is not in it and `ready` is true (the screen passes `ready` when its
+async data has painted — `/today` after the lanes, `/learn` after the
+plates, `/dictionary` immediately). Ending posts `guided/{gate}`,
+updates the store in place (`refreshSummary` after), and on a failed POST
+notes the gate in localStorage `jp-guided` keyed by user id in exactly
+`stores/onboarded.js`'s shape — a mirror so a bad network cannot make the
+guide nag on every launch, never an authority. A guide never opens over
+an open sheet or during the TicketGate (`useGuide` waits for `gate ===
+'done'` via a small store flag App sets).
+
+**The stops** — the request said every component; the cap is six a
+gate, and a stop earns its place only if the layout does not already say
+it. The anchors are `data-guide` attributes on existing components (no
+markup added for the guide's sake):
+
+| gate | stops (anchor → says) |
+|---|---|
+| `today` | `hud.level` the fare and the level · `hud.status` on time or behind, tap for the ghost train · `hud.pass` the balance, +30 at midnight · `today.strip` the week and the streak · `today.gate` what is due, by line · `today.depart` the button — everything due, in one run · `tabbar` the five gates |
+| `learn` | `learn.plate` a line: its stops are the levels, its due count is the chip · `learn.stops` where you are on the line · `learn.shelf` your decks, and the library under them |
+| `practice` | `practice.plate` a platform: the sentence modes and the exam · `practice.dests` the level chips, yours marked · `practice.pass` these platforms ride on the pass (skipped when `enforced` is false and no tag is drawn) |
+| `dictionary` | `dict.console` search, by word, reading or meaning · `dict.chips` collections and levels · `dict.entry` an entry card: tap to open, ☆ to keep · `dict.analyzer` the analyzer door: paste, photograph or film a sentence |
+| `profile` | `profile.pass` your pass: the level, the balance · `profile.stamps` the stamp rally, one a day · `profile.records` · `profile.ledger` the lines and how far along each · `profile.settings` |
+
+`today` is the first gate a learner sees, so its guide carries the HUD
+and the tab bar; the other four never repeat them. `GUIDE_CHAIN` (false):
+when true the last stop's *Done* navigates to the next gate in
+`TAB_IDS` and opens its guide — the owner's original ask, one flag away.
+
+**Settings** (`SettingsScreen`'s learning page): two rows under the
+rating scale — *Take the test ride again* → `/ride/cards`; *Show the
+guide again* → `DELETE guided` + `refreshSummary()`, then a line saying
+it will play on each gate's next opening. No dead controls: both do
+exactly what they say the moment they are tapped.
+
+**Tests**: browser — for each gate, mount the screen with its API mocked
+(the fixtures the screens' existing browser tests already use) and assert
+every anchor in `GUIDES[gate]` is in the DOM, so a refactor that drops a
+`data-guide` fails here and not on a learner; the guide skips a missing
+anchor; Escape ends it as a skip; the POST fires once. Phone lane — the
+callout never leaves the viewport for a spot at the top edge (the HUD)
+and at the bottom edge (the tab bar), and its controls are 44 px. Node —
+`GUIDES` keys are exactly `TAB_IDS`.
+
+## Plan 101 — the record
+
+- This index: the table above to DONE, the traps found, the verification
+  figures, what the live check caught.
+- `CLAUDE.md`: the plan index line for 097–101 with the files that cite
+  them; "begin at 102 or higher".
+- `DESIGN.md`: the guide's spot and callout as a surface (under "Two
+  panel idioms"), the ride as the stage's first use, `.ride-*` and
+  `.guide-*` as namespaces; the pair 試乗 / TEST RIDE and 案内 / GUIDE
+  recorded so nobody re-pairs them.
+- `docs/design/mobile/README.md`: the class map gains both.
+- `docs/adr/0017-a-lesson-is-the-real-component-fed-a-literal-and-writes-nothing.md`:
+  wave 8's principle, re-applied here and now recorded — a tutorial
+  renders the production component with a literal payload and local
+  state, posts no review, schedules nothing, and is served content from
+  the same bank the real thing uses. The alternative (a mock-up of the
+  card) drifts from the card within two features, and the alternative to
+  local state (a real review) is a first XP the learner did not earn.
+- `CONTEXT.md`: **Ride**, **Guide**, and `tutorial_at` under Learner.
+
+## Decisions this wave embodies
+
+- **A lesson never blocks a door.** No ride and no guide shows unless the
+  profile said so; a profile the gate failed open without shows neither.
+  The failure mode of a tutorial is a learner who cannot reach the app,
+  and it is the one this design cannot have.
+- **The ride is the real stage.** `StudyStage`, `CardPrompt`,
+  `RatingBar`, `CardTransition` — not a picture of them. What the learner
+  practises on is what they will use, to the pixel, and a change to the
+  card changes the lesson for free.
+- **Nothing the ride does is a review.** No `review_log` row, no XP, no
+  new-card slot, no `useReviewGates`. The first real card is behind the
+  改札.
+- **The pass is stated where it applies, from the code that applies it.**
+  `PASS_PLATFORMS` is pinned to the routers under `require_pass`; the
+  plate cannot promise more or less than the server enforces.
+- **Per learner, on the row; per device, only as a mirror.** A guest is a
+  real user, and an account made later is the same row, so a lesson seen
+  as a guest is not seen twice. `jp-guided` is `jp-onboarded`'s shape and
+  `jp-onboarded`'s status: a note, never an authority.
+- **Anchors, not copies.** The guide points at the live DOM through
+  `data-guide`; it never draws a replica of the screen. A replica is the
+  hand-copy DESIGN.md forbids, and it would be wrong within two features.
+
+## Traps worth knowing before you touch it
+
+- **The index route is the seam, and `gate.profile` is stale by design.**
+  App's gate fetches `/api/profile` once at boot; after the ride ends the
+  only thing that stops `/` bouncing back to `/ride/cards` is the local
+  stamp through `onDone`. A ride that navigates away without calling it
+  loops.
+- **`CardPrompt` reads the mode off the card.** The ride's cards must
+  carry `mode: 'vocab.flashcard'` and the normalised shape
+  (`normalizeCard` in the run screens) or the face is blank; build them
+  server-side with the vocab batch's own assembly and the problem cannot
+  arise.
+- **`RatingBar` indexes its buttons best-first for the keyboard.** Any
+  ride logic that says "was that wrong?" reads the quality (`q <= 2`),
+  never the button's position.
+- **The TicketGate plays over the mounted router.** The ride's first
+  paint is under the scrim; do not start the ride's `ms` stopwatch or
+  autoplay the known card's audio until `gate === 'done'`.
+- **A guide over a screen still loading finds no anchors.** `ready` is
+  the screen's word, not a timeout; `/today` in particular renders the
+  gate card only after the queue answers.
+- **`offer_view`'s `where` is sliced in every funnel query.** Adding
+  `'ride'` on the frontend without the backend's set means a silently
+  missing column in the dashboard, the same trap `SOURCES`' comment
+  warns about.
+- **`plans/*.md` is gitignored.** This section is the plan; there are no
+  per-plan files to look for in a fresh clone.
+
+## Deferred, deliberately
+
+- A guide for the runs (the stage): the ride is that guide.
+- A guide for the settings pages and the analyzer's workbench: neither is
+  a gate, and both name their controls already.
+- The chained walkthrough across gates: written as `GUIDE_CHAIN`, off.
+- Re-showing a guide when a gate gains a block (the library did, wave 15):
+  a stop added to `GUIDES` shows to new learners only; a "what's new"
+  mechanism is another wave.
+- A kanji or grammar card on the ride: two cards is the lesson; a third
+  is a queue.
+
+## Execution notes
+
+**097 (2026-09-21).** Landed as planned, with three things decided at
+the keyboard:
+
+- **The known card is the deck's kana-only こんにちは (N3), not 今日は
+  (N1).** The N1 entry carries kanji a novice cannot read on the one card
+  they are meant to recognise. Its romaji is spelled by hand
+  (`RIDE_KNOWN["romaji"]`): `study/romaji` reads the final は as a
+  particle and prints "konnichiha". The deck's own gloss for it —
+  *hello,good day (daytime greeting, id)* — is spreadsheet residue of
+  the plan-091 kind and prints as-is on the card; a gloss is not part of
+  the card id, so correcting it in the deck is safe and is content
+  work, not this wave's.
+- **The unknown cards are station words**, one per level, all real deck
+  entries checked at import: 駅 (N5), 特急 (N4), 到着 (N3), 定期券 (N2),
+  乗り換え (N1), and 沿線 for the learner already at N1. 特急 is the
+  boarding's own 種別 name; a learner has seen the glyph and now learns
+  the word. The novice is told apart by `kana_known != 'both'` at N5.
+- **The sentence is 駅で友だちに会います。** (N5, で), the one curated N5
+  line with the station in it.
+- `_build_vocab_card` is imported from `routes/vocab.py` under its
+  private name rather than renamed: the ride is the second caller, and
+  a rename touching the batch endpoints was not this plan's to make.
+  `guided` is stamped with `CASE WHEN guided ? %s` so the first time per
+  gate wins; the backfill writes the same ISO shape through `to_char`.
+- Backend 1578 → 1606 (24 new in `test_ride.py`, on a user of their
+  own — boarding at N3 runs the level rule, whose mastered card rows
+  the dictionary tests must not see — and 4 in
+  `test_backfill_first_ride.py`); `test_events.py` covers the four new
+  names through the frontend mirror. Frontend node lane green; nothing
+  else there changes until 098.
+
+**098 (2026-09-21).** The ride is `screens/RideRun.jsx` on `/ride/cards`
+(and `/ride` → it), the real `StudyStage` + `CardTransition` +
+`CardPrompt` + `RatingBar`, fed by `GET /api/onboarding/ride`; the
+note beside each step is `components/guide/Callout.jsx`, the
+component plan 100 grows the spotlight onto. Found at the keyboard:
+
+- **A card's face is chosen by `source`, not by its mode.**
+  `domain/cardShape.structureKeyOf` reads `card.source`, which a section
+  run knows and the daily queue attaches per card (`routes/today.py`).
+  The ride payload now carries `source: 'vocab'` for the same reason
+  the queue does; without it CardPrompt drew the `standard` face,
+  empty.
+- **The anchors are props, not wrappers.** The phone dock is
+  `.stage > .rating-bar` and the card's floor `.stage > .quiz-card-stage`,
+  so a `<div data-guide>` around either breaks the layout. `CardTransition`
+  and `RatingBar` take a `guide` prop and print it on their own root.
+- **The callout is centred by CSS and measured only vertically.** The
+  stage column is centred and on a phone it is the screen; measuring x
+  bought nothing. `place` is `top` (inside the anchor's upper edge — a
+  card whose content is centred leaves it empty), `above` (resting on a
+  docked bar) or `below` (a plate, plan 100). No pointer events unless
+  it carries controls, so the card is tapped through it.
+- **The source-level guard reads comments.** `reviewGates.guard.test.js`
+  scans `screens/*.jsx` for the literal `useReviewGates` and
+  `review_preview`; a comment saying the ride uses neither, and a
+  fixture carrying `review_preview: null`, both counted. The ride is
+  exactly the case the guard exempts (the bar borrowed for a
+  self-rating, as reading and translation do), so the words changed,
+  not the guard.
+- **The browser lane is fr-FR, and its storage is one origin.** The
+  ride's test first set `lang` to English in localStorage to assert
+  its copy in English -- and that write leaked into every other file
+  running in the lane, flipping the copy under TranslationRun's and
+  ComprehensionRun's assertions whenever the order put them after it
+  (five failures in the full suite, none in any file alone). A browser
+  test asserts copy from the French table, never by switching the
+  language.
+- The known card for a learner without hiragana wears its romaji as the
+  furigana hint's own parts (`{text, reading}`), so the ruby is the
+  existing `FuriganaWord`; the flip speaks the kana. `RatingBar`'s
+  `scale` prop stays for its tests; the ride takes the learner's own
+  bar, since the first bar they rate on is the one they will keep.
+- `/dev/ride` is the workbench (literal cards, `dryRun`, ↺), tree-shaken
+  like the others. `RIDE_NEXT` is `/today` until plan 099 puts the
+  reading ride there and moves the stamp to its last plate.
+- Frontend 1181 → 1212 (6 in `RideRun.browser.test.jsx`, 1 in
+  `ride.phone.test.jsx`, 3 front-door cases in
+  `App.onboarding.browser.test.jsx`, the rest the locale and route
+  registries); `App.routes`'s veteran fixture now carries `tutorialAt`.
+  Backend 1606 (one assertion added). Lint, `lint:css`, `lint:scale` and
+  the build clean.
+
+**099 (2026-09-21).** `screens/RideReading.jsx` at `/ride/reading`, on
+the reading pigment: the clock, the sentence that hides, the field, the
+ticket office's own measure (`POST /api/onboarding/ride/check`), the
+rating, and the plate. The reading run's drawing is shared, not copied:
+`components/reading/ReadingPieces.jsx` (`ReadingTimer`, `ReadingPrompt`,
+`AnswerForm`, `ReadingRegisters`) came out of `ReadingRun.jsx`, which
+now renders them; its seven browser tests passed unchanged, which is
+the point of extracting rather than rewriting. Found at the keyboard:
+
+- **The plate is drawn from a map the server pins.** `domain/paywall.js`
+  gains `PASS_PLATFORMS` (section id → path); the plate lists the
+  sections at those paths from `config/tabs.getAllSections`, so the
+  names, glyphs and pigments are the sections' own.
+  `tests/test_pass_platforms.py` reads the map out of the JS file and
+  checks it both ways against every router under `require_pass`: a
+  seventh gated router cannot go unlisted, and a listed platform cannot
+  front an ungated one. The open-for-now line rides on
+  `useCredits().enforced`, so it disappears the day enforcement is
+  switched on and no copy changes.
+- **The card ride no longer stamps on Continue.** The stamp is the
+  lesson's, and the lesson ends on the plate: `RideRun` stamps only on
+  Skip (the whole lesson declined) and otherwise goes on to
+  `/ride/reading` (`RIDE_NEXT`; the workbench passes `onNext` to chain
+  the two without a router). `ride_done` therefore carries
+  `at: 'reading'` for a finished lesson and `at: 'cards'` only for a
+  skip on the first screen.
+- **A clock that starts at zero reads as run out.** The ride's
+  `timeLeft` began at 0 and the "covered" test fired before the
+  sentence had been up a frame; it starts at null now, and the timer
+  draws the full bar until the sentence is up.
+- **A controlled input is not typed into by setting `.value`.** React
+  reads its own value tracker; the browser test sets the value through
+  the prototype's setter before dispatching `input`, as the boarding's
+  tests do with a helper.
+
+- **Walked live** (boarding → 改札 → the card ride → Continue → the
+  reading ride: the clock at 9.1 s over 駅で友だちに会います。, the note
+  over the sentence, the cover, the field, *100% matched* on the
+  answer's label, the note over the bar, the plate with the six
+  platforms in their own glyphs and pigments and *They are open to
+  everyone for now*, the quiet *See the pass* over *Enter the station*)
+  → `/today` with the day's ration on the gate (*Hiragana (basic) ·
+  free · 10 new · 10*, the tab badge at 10); a second launch lands on
+  `/today`; the trail's `ride_done` reads `at: reading, skipped:
+  false`. Nothing to fix this time. The two 503s in the console are
+  `/api/tts` again.
+
+**100 (2026-09-21).** `components/guide/Guide.jsx` (the spot whose
+shadow is the scrim, the callout with Next/Skip, modal through
+`useDialog`), `components/guide/guides.js` (the registry, in TAB_IDS
+order, `GUIDE_CHAIN` off), `hooks/useGuide.js` (the trigger: the
+profile's `guided` map, the screen's `ready`, the 改札 hold from
+`stores/guide.js`; the stamp, the store refresh, the `jp-guided` mirror
+on a failed POST), the anchors as `data-guide` on the chrome and the
+gates (a `guide` prop on `Plate`, `StopsFoot`, `Console` and `Chips`,
+as `CardTransition` and `RatingBar` took one), and the two rows on
+Settings › Learning. Found at the keyboard:
+
+- **The anchors are read after the guide is in the DOM, never during
+  render.** A screen mounts its guide in the same commit as its blocks,
+  so a filter over `getBoundingClientRect` in the render body found
+  nothing, ended the guide before it began, and the tests saw a note
+  that had already fired `onEnd(false)`. `stops` is state set in a
+  layout effect; the "nothing to point at" end waits for it.
+- **The plates arrive.** Every card and plate on a gate animates in a
+  few pixels low, and a rect taken mid-flight is a spot a few pixels
+  off. The guide re-measures on `animationend` and `transitionend`
+  (document, capture) and twice more on a timer, beside the resize,
+  scroll and `ResizeObserver` it already had.
+- **The trigger demands an answer.** A summary without a `guided` map
+  (every existing fixture, a store seeded by hand, an older server)
+  opens nothing: `!summary?.guided` is the gate, not `summary == null`.
+  Without it the guide would have opened under half the suite's screen
+  tests and over a learner whose profile had not answered.
+- **`TAB_IDS` is learn, practice, today, dictionary, profile** -- not
+  today-first as the plan's table had it. The registry follows the tab
+  bar's order (the node test insists), and `today` still carries the
+  HUD and the tab bar as the first gate a learner SEES; the chain, if
+  ever switched on, walks the bar's order.
+- **A guide that has ended draws nothing**, whether or not the screen
+  that mounted it has let go: `over` state, not the parent's unmount.
+- **Walked live** on every gate after clearing the map: today opens on
+  the level roundel with the strip and gate under the scrim and the
+  note below; 5/6 frames the fare gate; 6/6 the tab bar with the note
+  above it and *Done*; a second visit opens nothing; learn frames the
+  kana plate with its foot and the shelf; profile the pass through to
+  the settings door; dictionary the console, the chips, 土's tile
+  (note above it, the spot being in the lower half) and the analyzer
+  door; practice the reading plate and its destinations at 2/2 (no
+  pass tag drawn, so that stop was skipped in silence, as designed).
+  The five stamps landed and the trail holds a `guide_done` per gate
+  -- twice for two of them, which is `lib/track.js` flushing a batch
+  again after a full navigation, older than this wave and worth a look
+  of its own.
+
+**The day's ration (owner-directed, 2026-09-21, after the live check).**
+The run a novice landed on after the ride was an empty gate, and the
+owner asked for new cards on the first day's queue, within the pace.
+`/api/today` and `/api/today/cards` now carry what is left of
+`daily_new_target` as new cards beside the reviews: kana first for a
+learner who does not yet read them (one set at a time, in the
+syllabary's order), then the chosen lines in turn
+(`study/daily_queue.ration` and `merge_new`, `routes/today._new_lanes`).
+The reviews-only rule in `routes/today.py`'s header stood for a reason
+-- a queue that tops itself up cannot end -- and the pace is what keeps
+the reason: the ration is bounded, spent as the day's first reviews
+land, and absent without a stored target. A lane says `due` and `new`
+apart; the gate counts both into its figure and prints the new part as
+a tag (`.lane__new`), and a switched-off line offers nothing new either.
+Not only the first day: the budget is a daily one, and a queue that
+offered new cards once and never again would be day one's problem on
+day two. Backend 1606 → 1613 (`tests/test_today_ration.py`).
+
+## What the live check caught that the tests did not (098, 2026-09-21)
+
+Driven headless at 390×844 against the real dev backend on a fresh
+learner (a Supabase session injected into storage, `DEV_USER_ID` on the
+server): boarding → 改札 → `/ride/cards` → flip, rate, flip, rate wrong →
+Continue → `/today`; a second launch lands on `/today`; the profile
+carries `tutorialAt`; the trail holds four `ride_step` rows and one
+`ride_done`. Three things the suites had passed:
+
+1. **こんにちは wrapped under its romaji.** `FuriganaWord` set a fixed
+   72px and let the ruby base break after four characters, so the one
+   card a novice is meant to recognise printed as two lines. `CharDisplay`
+   had solved exactly this with `--len` and a fitted clamp; the ruby word
+   now sets the same `--len` and wears the same clamp (`.furigana-word`,
+   allowlisted in `design-scale.json` beside the character display's).
+   This fixes the furigana hint on any long word in a vocab run too.
+2. **The done screen pooled its emptiness in the middle.** The call and
+   the sentence sat under the head with the room empty beneath them and
+   a narrow Continue at the floor: `justify-content: center` with an
+   auto-margin foot, the very pair the density contract warns about. Two
+   grow-only spacers now centre the words and the action fills the
+   column.
+3. **The unknown card's back showed えき to a learner who said no kana.**
+   The letters ride beside it (`えき eki`) for that learner only.
+
+Not this wave's, and worth knowing: the run a novice lands on after the
+ride is an empty gate (*All clear*, nothing due, the status *suspended*)
+— the level rule seeds nothing ahead of N5 and the queue has no new
+cards until a line is opened from 教材. The guide (plan 100) is what
+says so; the product question of a first-day queue for a novice is
+older than this wave. The two 503s in the browser console were
+`/api/tts` (edge-tts has no network here), the known card's sound on
+the flip.
+
+4. **A test that leaked.** Five browser tests in TranslationRun and
+   ComprehensionRun failed in the full suite and passed in any file
+   alone, on a base-branch worktree, and on some full runs: the ride's
+   test wrote `lang` to localStorage, which the lane's files share. It
+   asserts the French copy now (see 098's notes above). The lesson is
+   in the notes; the symptom -- order-dependent failures in files the
+   change never touched -- is the one to remember.
+
+Frontend 1210, all green on two consecutive full runs with nothing else
+on the machine; `lint`, `lint:css` and `lint:scale` clean (the ruby
+word's clamp allowlisted beside the character display's); backend 1606.
+
+## Verification
+
+Executed in one session on 2026-09-21, plan by plan, each walked live
+against the real dev backend in headless Chromium at 390×844 before its
+commit (the walks are recorded per plan above).
+
+- Backend 1578 → 1615 (`test_ride.py` 24, `test_backfill_first_ride.py`
+  4, `test_today_ration.py` 7, `test_pass_platforms.py` 2), one skipped
+  as before.
+- Frontend 1181 → 1229 (`RideRun.browser.test.jsx` 6,
+  `RideReading.browser.test.jsx` 4, `Guide.browser.test.jsx` 3,
+  `guides.test.js` 4, `ride.phone.test.jsx` 1, `guide.phone.test.jsx` 1,
+  three front-door cases in `App.onboarding.browser.test.jsx`, the
+  ration's two on `GateCard`, the anchor checks on four gate tests, the
+  today guide's two, and the registries).
+- `npm run lint` 0 errors; `lint:css` no change; `lint:scale` no new
+  violations (one clamp allowlisted beside the character display's);
+  the production build clean, the dev routes tree-shaken.
+- The live walk, end to end: boarding → 改札 over the first card → flip,
+  rate, flip, rate wrong → the reading ride → the plate with the offer →
+  `/today` with the day's ration on the gate → its guide after the lanes
+  paint → each other gate's guide on its first opening → a second launch
+  lands on `/today` and shows nothing twice. Settings' two rows were
+  exercised through their endpoints (`DELETE ride/done`, `DELETE guided`)
+  rather than tapped.
+
+Not done in this session, and worth doing on the deployed instance:
+`scripts/backfill_first_ride.py --yes` once the backend that carries 097
+is up and before the frontend that reads it, and a tap through Settings ›
+Learning's two rows on a real phone.
+
+## What this wave leaves for the next one
+
+Three of the four were closed the same day, owner-directed:
+
+- **The gate's head says "new" when the whole run is the day's ration**
+  and "due" while any of it is owed (`GateCard`, `newUnit`).
+- **A batch sent twice is kept once.** `lib/track.js` gives every event
+  an id of its own and `event_log` gains `cid` with a partial unique
+  index on `(user_id, cid)`; `core/events.write` inserts `ON CONFLICT …
+  DO NOTHING` and reports what was KEPT. The cause was a flush on
+  `pagehide` whose response arrived after the page had gone: the queue
+  was never trimmed, so the mirror sent the batch again on the next
+  launch and the server took it twice. The server's own rows and an
+  older client's carry no id and are never deduplicated
+  (`tests/test_events.py`).
+- **The two glosses for こんにちは** (the N3 kana entry and the N1
+  今日は) read "hello, good day (daytime greeting)": the ", id" was
+  JMdict's idiom tag left in by the spreadsheet, and the missing space
+  after the comma the same export's. A gloss is not part of the card
+  id, so no SRS row moves. The French was already clean.
+
+Still open:
+
+- `GUIDE_CHAIN` — the owner's original ask, one flag, off; decide on
+  the skip rates.

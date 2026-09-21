@@ -31,7 +31,7 @@ const FOCUSABLE = [
 // closes the whole stack. A capture-phase listener on window runs before
 // any bubble-phase one, and its stopPropagation on Escape stops the
 // dialogs beneath from hearing it. Read once, at mount.
-export function useDialog(onClose, { capture = false } = {}) {
+export function useDialog(onClose, { capture = false, focus = 'first' } = {}) {
   const ref = useRef(null)
   // Captured at mount, before focus moves into the dialog, so it is
   // genuinely the control the user was on when they opened this.
@@ -53,7 +53,12 @@ export function useDialog(onClose, { capture = false } = {}) {
 
     const node = ref.current
     if (node) {
-      const first = node.querySelector(FOCUSABLE)
+      // `focus: 'panel'` lands on the dialog itself rather than its
+      // first control: a note whose controls are a quiet one and a
+      // filled one would otherwise open with a ring on a button before
+      // anyone has pressed a key (the guide, plan 100). Tab still
+      // reaches the controls in order; the trap below is unchanged.
+      const first = focus === 'panel' ? null : node.querySelector(FOCUSABLE)
       // Fall back to the panel itself so focus lands *somewhere* inside
       // even in a dialog that is still loading and has no controls yet.
       if (first) {

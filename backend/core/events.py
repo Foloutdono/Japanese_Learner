@@ -64,6 +64,24 @@ EVENTS: dict[str, frozenset[str]] = {
     # tells the two apart.
     "account_claimed": frozenset({"from"}),
 
+    # ── 試乗 — the first ride (plan 097) ────────────────────────────
+    # The two lessons after the boarding, measured the way the boarding
+    # is: every transition is a ride_step through the same go()/mark()
+    # pair, and abandonment is a ride_step with no ride_done after it.
+    # `at` on ride_done is which ride it ended on ('cards' | 'reading')
+    # and `skipped` whether the learner left through the head's Skip --
+    # the one question this feature has to answer is whether anyone
+    # sits through it. `step` and `to` are step names, `ms` is engaged
+    # time (lib/dwell.js), never wall-clock.
+    "ride_step":      frozenset({"step", "to", "dir", "ms"}),
+    "ride_done":      frozenset({"skipped", "at", "ms"}),
+    # 案内 — the guide over each gate. `gate` is one of the five ids,
+    # `stop` the anchor's name from the registry (a string the app
+    # wrote, never one the learner did), `index` its place in the tour,
+    # `stops` how many were seen before Done or Skip.
+    "guide_step":     frozenset({"gate", "stop", "index"}),
+    "guide_done":     frozenset({"gate", "skipped", "stops", "ms"}),
+
     # ── Study runs ───────────────────────────────────────────────
     "run_start":      frozenset({"kind", "mode", "level"}),
     "run_complete":   frozenset({"kind", "mode", "level", "items", "secs"}),
@@ -79,7 +97,9 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 定期券 — the offer ───────────────────────────────────────
     # No longer dormant: the pass is SHOWN from five doors and sold from
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
-    # deliberately not HAS_STORE). `where` is which of the five.
+    # deliberately not HAS_STORE). `where` is which of the six doors
+    # (frontend/src/domain/paywall.js's SOURCES -- the five, and the
+    # reading ride's pass plate since plan 097).
     #
     # The three verbs are the whole point: a paywall nobody opens and a
     # paywall opened and refused are indistinguishable from
@@ -130,6 +150,10 @@ EVENTS: dict[str, frozenset[str]] = {
 # the level step ever come back" cannot be asked of a rollup.
 KEEP_LONG = frozenset({
     "boarding_step", "boarding_done", "account_claimed",
+    # The ride and the guides are once per account, and "did the people
+    # who skipped the ride come back" is a question about a whole
+    # history. ride_step is not here: per-transition, like a run.
+    "ride_done", "guide_done",
     "fare_blocked", "limit_reached", "offer_view", "offer_intent", "offer_dismiss",
     # Publishing is a once-or-twice-ever act, and "did the people who
     # published a deck keep doing it" is a question about a whole
@@ -221,6 +245,15 @@ def _ensure_events_schema() -> None:
             """)
             # (user_id, at) for one learner's trail in order; (name, at)
             # for the digest's per-name counts across everyone.
+            # The client's own id per event (routes/events.py), so a
+            # batch sent twice is kept once. Partial: the server's own
+            # rows and an older client's carry none, and NULLs must not
+            # collide.
+            cur.execute("ALTER TABLE event_log ADD COLUMN IF NOT EXISTS cid TEXT")
+            cur.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_event_log_user_cid
+                ON event_log(user_id, cid) WHERE cid IS NOT NULL
+            """)
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_event_log_user_at
                 ON event_log(user_id, at)
@@ -249,16 +282,28 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("events schema could not be initialised")
 
 
-def write(cur, user_id: str, rows: list[tuple[str, dict, datetime]]) -> int:
-    """Insert cleaned rows on a cursor the caller owns. Returns the count."""
+def write(cur, user_id: str, rows: list[tuple]) -> int:
+    """Insert cleaned rows on a cursor the caller owns. Returns how many
+    were KEPT: a row whose client id this learner already has is a batch
+    sent twice (a flush the page never heard back about) and is dropped
+    on the unique (user_id, cid). A row with no id -- the server's own,
+    or an older client's -- is never deduplicated.
+
+    rows: (name, props, at) or (name, props, at, cid)."""
     if not rows:
         return 0
-    cur.executemany(
-        "INSERT INTO event_log (user_id, name, props, at) "
-        "VALUES (%s, %s, %s::jsonb, %s)",
-        [(user_id, name, _json(props), at) for name, props, at in rows],
-    )
-    return len(rows)
+    kept = 0
+    for row in rows:
+        name, props, at = row[0], row[1], row[2]
+        cid = row[3] if len(row) > 3 else None
+        cur.execute(
+            "INSERT INTO event_log (user_id, name, props, at, cid) "
+            "VALUES (%s, %s, %s::jsonb, %s, %s) "
+            "ON CONFLICT (user_id, cid) WHERE cid IS NOT NULL DO NOTHING",
+            (user_id, name, _json(props), at, cid),
+        )
+        kept += cur.rowcount
+    return kept
 
 
 def _json(props: dict) -> str:

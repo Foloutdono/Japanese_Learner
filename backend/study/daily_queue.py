@@ -215,3 +215,61 @@ def parse_exclude(exclude: str) -> set:
         raw, _, mode = token.partition("|")
         skip.add((raw, mode))
     return skip
+
+
+# ── 新規 — the day's ration of new cards (plan 098, owner-directed) ──
+# The queue served reviews only, by its own documented design (see
+# routes/today.py's header), which left a learner who had just boarded
+# on an empty gate: nothing is due on day one, and nothing becomes due
+# until a line is opened from 教材. The owner asked for the queue to
+# carry the day's new cards too -- as many as the pace allows and no
+# more, so the queue still ENDS (the objection the reviews-only rule
+# was guarding against) and the pace is the thing that ends it.
+#
+# The ration is spent kana first: a learner who does not yet read a
+# script is handed the signs before any word written in them, one set
+# at a time in the syllabary's own order (the level rule calls the
+# syllabaries the first stop of the run). What is left of the ration
+# after the kana round-robins across the lines the learner chose to
+# ride, so the first day at N4 is a word, a kanji, a rule, a word...
+# rather than the whole ration from one deck.
+
+def ration(kana_lanes, line_lanes, budget: int) -> "OrderedDict[tuple, list[str]]":
+    """
+    kana lane -> new ids (set order), line lane -> new ids -> the lanes
+    of new cards the run may introduce today, at most `budget` cards.
+    Kana sequentially, then the lines in turn; a lane with nothing
+    left simply drops out.
+    """
+    out: "OrderedDict[tuple, list[str]]" = OrderedDict()
+    left = max(0, budget)
+    for key, ids in kana_lanes.items():
+        if left <= 0:
+            break
+        take = ids[:left]
+        if take:
+            out[key] = take
+            left -= len(take)
+    if left > 0 and line_lanes:
+        for key, raw_id in interleave(line_lanes, left):
+            out.setdefault(key, []).append(raw_id)
+    return out
+
+
+def merge_new(due_lanes, new_lanes):
+    """
+    The day's lanes with the ration added: a lane the learner already
+    owes reviews in takes its new cards AFTER the due ones (urgency
+    first, then the new), and a lane with nothing due is appended.
+    Returns (lanes, new counts by lane key) so a label can print the
+    two figures apart.
+    """
+    merged: "OrderedDict[tuple, list[str]]" = OrderedDict((k, list(v)) for k, v in due_lanes.items())
+    counts: dict[tuple, int] = {}
+    for key, ids in new_lanes.items():
+        fresh = [rid for rid in ids if rid not in merged.get(key, ())]
+        if not fresh:
+            continue
+        merged.setdefault(key, []).extend(fresh)
+        counts[key] = len(fresh)
+    return merged, counts

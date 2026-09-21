@@ -29,6 +29,11 @@ class Event(BaseModel):
     name: str
     at: str | None = None
     props: dict = Field(default_factory=dict)
+    # The client's own id for the event (lib/track.js), so a batch it
+    # sends twice -- a flush on pagehide the page never heard back
+    # about -- is kept once. Optional: a client mid-deploy sends none,
+    # and a row without one is simply not deduplicated.
+    id: str | None = Field(default=None, max_length=64)
 
 
 class Batch(BaseModel):
@@ -46,7 +51,7 @@ def post_events(batch: Batch, user_id: str = Depends(get_user_id)):
             # build than this server, which is normal during a deploy --
             # counted, not logged per row.
             continue
-        rows.append((item.name, props, events.clean_at(item.at, now)))
+        rows.append((item.name, props, events.clean_at(item.at, now), item.id))
 
     if not rows:
         return {"kept": 0}

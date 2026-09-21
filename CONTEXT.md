@@ -39,6 +39,20 @@ read it through the resolver seam (`core/user_level.resolve_level`) rather
 than the column: an explicit per-request choice still beats the stored
 value — see `docs/adr/0005`.
 
+**First ride** — the lesson after the boarding (wave 21): the card ride and
+the reading ride, then the guide on each gate. Its state is on the profile
+row — `tutorial_at`, when the rides ended (finished or skipped), and
+`guided`, a map of gate id → when its guide ended — read back as
+`tutorialAt` and `guided` on `GET /api/profile`, written only by
+`routes/onboarding.py`. A lesson is the real component fed a literal and
+writes nothing else — see `docs/adr/0017`.
+
+**Ration** — the day's new cards on the daily queue: what is left of
+`daily_new_target` after today's first-ever reviews, offered beside the
+reviews (`study/daily_queue.ration`). Kana first for a learner who does not
+yet read them, then the chosen lines in turn; none without a stored target.
+A lane reports `due` and `new` apart.
+
 **Clip** — one recorded line in the listening collection
 (`backend/content/listening_clips.py`), and the mp3 it resolves to. Its id IS
 the content key of that audio (`study/dictation.clip_id`), so the same line
@@ -171,7 +185,17 @@ one option within a selection screen. `components/selection/ModeSelector.jsx`.
 快速 / 急行 / 特急). `config/stations.js:173-184`.
 
 **定期券 (teiki-ken)** — the commuter pass: the user's profile screen, styled as
-an IC/commuter card. `components/profile/CommuterPass.jsx`.
+an IC/commuter card. `components/profile/CommuterPass.jsx`. Also the pass
+for sale (not yet), whose platforms the reading ride's plate lists from
+`domain/paywall.PASS_PLATFORMS`.
+
+**試乗 (shijō)** — the test ride: the learner's first two flashcards and one
+sentence, on the real stage, writing nothing. `screens/RideRun.jsx`,
+`screens/RideReading.jsx`; `/ride/cards`, `/ride/reading`.
+
+**案内 (annai)** — the guide: a spot on the live screen and one sentence
+beside it, once per gate on its first opening. `components/guide/`,
+`hooks/useGuide.js`; the stops in `components/guide/guides.js`.
 
 **路線色 (rosen-shoku)** — the line pigments, one per section, that colour that
 section's stripes, rails, rings and numerals. `index.css:3189-3213`.

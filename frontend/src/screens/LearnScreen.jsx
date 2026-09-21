@@ -11,6 +11,8 @@ import { playAnnouncement } from '../lib/audio'
 import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
 import { currentKanaSet } from '../domain/kanaSets'
 import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
+import { Guide } from '../components/guide/Guide'
+import { useGuide } from '../hooks/useGuide'
 
 // ── 学習 — the Learn gate: the plates (plan 094) ──────────────
 // One station plate per line, and no bar over them: the four SRS lines with
@@ -101,11 +103,16 @@ export default function LearnScreen({ session }) {
   const lines = sections.filter(s => TRACKED[s.path]).sort((a, b) => Number(onRoute(b)) - Number(onRoute(a)))
   const decksSection = sections.find(s => s.path === '/learn/decks')
 
+  // 案内 — the plates are drawn from config, so the gate is ready at
+  // once (plan 100).
+  const guide = useGuide('learn', true)
+
   return (
     <main id="main-content" className="learn">
       <h1 className="sr-only">{t.tabLearn}</h1>
+      {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
       <div className="plates">
-        {lines.map(section => {
+        {lines.map((section, i) => {
           const source = TRACKED[section.path]
           const stops = lineStops(stats, source)
           const off = !onRoute(section)
@@ -116,7 +123,10 @@ export default function LearnScreen({ session }) {
               className={`plate--line${off ? ' plate--off' : ''}`}
               meta={off ? t.plateOffRoute : null}
               aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
-              foot={<StopsFoot stops={stops} />}
+              // The guide (plan 100) points at the first plate and its
+              // foot; the others say the same thing by looking the same.
+              guide={i === 0 ? 'learn.plate' : undefined}
+              foot={<StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
               fill={stopsAround(stops).leg}
               onClick={() => depart(section, stopPath(section))}
             />
@@ -126,6 +136,7 @@ export default function LearnScreen({ session }) {
           <Plate
             section={decksSection}
             className="plate--shelf"
+            guide="learn.shelf"
             meta={shelf?.count > 0 ? t.decksRowMeta(shelf.count, shelf.cards) : null}
             aside={<DueChip due={today?.by_source?.personal ?? 0} />}
             onClick={() => depart(decksSection)}

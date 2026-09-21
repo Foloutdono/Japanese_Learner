@@ -6654,6 +6654,18 @@ textarea:focus-visible {
   letter-spacing: var(--tr-caption);
   color: color-mix(in srgb, var(--text-secondary) 60%, var(--text-primary));
 }
+/* 新規 — how much of the lane's figure is the day's ration (plan
+   098): the free tag's own register, so the two tags read as one
+   family beside the count. */
+.lane__new {
+  flex: none;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--lane-color, var(--text-secondary));
+}
 .lane__due { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* The screen's one filled action. Gold, because Today is gold — and
@@ -8362,7 +8374,16 @@ textarea:focus-visible {
    word so the ruby scales with the prompt. */
 .furigana-word {
   font-family: var(--font-jp);
-  font-size: var(--furigana-size, 72px);
+  /* Fitted, not wrapped -- .char-display's own clamp: the card is the
+     query container, the word divides its width by its character
+     count (--len, from FuriganaWord), and the rung is the ceiling.
+     A ruby word that wrapped put こんにちは on two lines under one
+     reading (plan 098). */
+  font-size: clamp(
+    var(--fs-caption),
+    calc(96cqw / var(--len, 1)),
+    var(--furigana-size, 72px));
+  white-space: nowrap;
   line-height: 1.9;
   text-align: center;
   color: var(--text-primary);
@@ -19997,4 +20018,254 @@ a.slip__act { text-decoration: none; }
   display: inline-flex;
   color: var(--text-secondary);
   opacity: 0.8;
+}
+
+
+/* ── 案内 — the callout (plan 098; the guide's from plan 100) ──
+   One sentence beside the thing it is about, on the panel ink so it
+   reads as the console speaking rather than as content: the same
+   material as the docked rating bar and the sheets. Fixed to the
+   viewport, centred on it (the stage column is centred, and on a phone
+   the column is the screen), the vertical set inline by the component
+   from the anchor's rect. Width is the card column's, less the gutter
+   on a narrow screen. No pointer events unless it carries controls
+   (--live): the ride's note is read, and the card under it is tapped
+   through it. Under the sheets (230+) and the cutscenes (300). */
+.guide-callout {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 220;
+  width: min(var(--card-w), calc(100vw - 2 * var(--sp-5)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  /* The sheet's own rhythm on the panel ink: sp-4 above and below,
+     sp-5 at the sides -- the docked bar's inline padding, so a note
+     resting on the bar shares its edges. The panel's corner and the
+     panel's shadow (--elev-board; the note is the sumi panel, hanging
+     over the screen), and the hairline the bar's tiles draw. */
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+  border-radius: var(--r-panel);
+  box-shadow: var(--elev-board);
+  text-align: left;
+  pointer-events: none;
+  animation: guide-callout-in 260ms ease-out backwards;
+}
+.guide-callout--live { pointer-events: auto; }
+/* The pair, small: the Japanese at the small rung in the JP face with
+   the body's tracking (the reading's 0.30em spaced 等級 into two words),
+   in the soft ink, so the sentence under it is the thing read. */
+.guide-callout__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  letter-spacing: var(--tr-term);
+  line-height: 1.3;
+  color: var(--text-on-panel-soft);
+}
+/* The sentence at the body rung: it is the one thing the note is for,
+   and the small rung read as a footnote beside 44px controls. */
+.guide-callout__text {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.45;
+}
+.guide-callout__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+@keyframes guide-callout-in {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide-callout { animation: none; }
+}
+
+/* ── 試乗 — the test ride (plan 098) ──
+   The stage as every run has it; only the last screen is the ride's
+   own: the departure call, the one sentence, and the one filled
+   action. The action docks on a phone like every run's foot
+   (.stage > .stage__foot); here it is the done block's foot, laid out
+   the same way. */
+.ride__done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-5);
+  text-align: center;
+}
+/* The call and the sentence sit in the middle of the room and the
+   action on its floor: two grow-only spacers around the words, never
+   justify-content (the density contract -- an auto margin on the foot
+   would swallow the centring). */
+.ride__done::before,
+.ride__done-air {
+  content: '';
+  flex: 1;
+}
+.ride__done-jp {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  letter-spacing: var(--tr-name);
+  color: var(--line-color, var(--accent));
+}
+.ride__done-text {
+  margin: 0;
+  max-width: 28em;
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.ride__done-note {
+  margin: 0;
+  max-width: 28em;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.ride__done-foot {
+  width: 100%;
+  max-width: var(--card-w);
+  /* The quiet offer over the one filled action (plan 099's plate),
+     PassStep's own order; the card ride's foot holds the action alone. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.ride__done-foot .btn-depart { width: 100%; }
+
+/* ── The reading ride's plate (plan 099) ──
+   The done screen's own room (.ride__done): the pair over a sentence,
+   the platforms as a lattice of roundel-and-name in each line's own
+   pigment (a line colour is a section's name, never decoration), the
+   open-for-now note, and the foot with the quiet offer over the one
+   filled action -- PassStep's own order. */
+.ride__plate-cap {
+  margin: calc(-1 * var(--sp-4)) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.ride__plate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: var(--card-w);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.ride__plate-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  text-align: left;
+}
+.ride__plate-icon {
+  flex: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--line-color, var(--text-primary));
+}
+.ride__plate-title {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}
+
+
+/* ── 案内 — the guide over a gate (plan 100) ──
+   One element over the anchor whose shadow IS the scrim, wearing the
+   anchor's own corner; the note is the callout (.guide-callout, above)
+   with controls. The spot takes no pigment: the thing it frames is
+   already in its line's colour, which is the point. It moves between
+   stops with the boarding's ease; none under reduced motion. */
+.guide__spot {
+  position: fixed;
+  z-index: 219;
+  box-shadow: 0 0 0 100vmax var(--scrim-bg, rgba(0, 0, 0, 0.55));
+  border-radius: var(--r-card);
+  pointer-events: none;
+  transition: top var(--guide-move, 260ms) ease-out, left var(--guide-move, 260ms) ease-out,
+    width var(--guide-move, 260ms) ease-out, height var(--guide-move, 260ms) ease-out;
+}
+.guide__spot--pill { border-radius: var(--r-pill); }
+.guide__spot--flat { border-radius: var(--r-flat); }
+.guide__spot--plate { border-radius: var(--r-plate); }
+.guide__spot--identity { border-radius: var(--r-identity); }
+.guide-callout--live .guide-callout__foot {
+  align-items: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-3);
+}
+.guide-callout__count {
+  margin-right: auto;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+/* The pair is the docked rating bar's own pair of materials, at the
+   action family's geometry (.btn-primary/.btn-secondary: 44px, the
+   card corner, the display face): the filled one is the bar's best
+   tile -- gold, the panel ink on it -- and the quiet one is a tile at
+   rest, the hairline the bar draws on the panel. No pill: a pill is
+   the chip's shape, and these are actions. The focus ring keeps a
+   gap of the panel ink so it never reads as a second border on the
+   gold; the note itself, which takes first focus, shows none. */
+.guide-callout__skip,
+.guide-callout__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-height: 44px;
+  padding-block: 0;
+  padding-inline: var(--sp-5);
+  border-radius: var(--r-card);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
+}
+.guide-callout__skip {
+  background: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
+  color: var(--text-on-panel-soft);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+}
+.guide-callout__skip:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  color: var(--text-on-panel);
+}
+.guide-callout__next {
+  background: var(--accent2);
+  color: var(--bg-panel);
+  border: 1px solid transparent;
+}
+.guide-callout__next:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--accent2) 88%, var(--text-on-panel));
+}
+.guide-callout__skip:focus-visible,
+.guide-callout__next:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 3px;
+}
+.guide-callout:focus-visible { outline: none; }
+@media (prefers-reduced-motion: reduce) {
+  .guide__spot { transition: none; }
 }

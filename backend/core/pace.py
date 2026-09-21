@@ -24,8 +24,9 @@
 #     honest direction to err (slightly more learning, never silently
 #     less).
 #
-# The pace never touches /api/today: that queue serves reviews only,
-# by its own documented design, and reviews are never budgeted.
+# /api/today spends it too, since plan 098: the daily queue carries
+# the day's RATION of new cards -- what is left of the target -- beside
+# the reviews, which are never budgeted (routes/today.py's header).
 import logging
 from dataclasses import dataclass
 

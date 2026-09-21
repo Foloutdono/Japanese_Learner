@@ -380,6 +380,29 @@ is the thing to press". One object, by ruling; a fourth shadow needs the same
 argument this one had. Nothing else has a
 shadow. Separation comes from `--surface-line`.
 
+### The spot and the note
+
+The guide (plan 100) has two objects, and neither is a fourth shadow or a
+third panel idiom:
+
+- **The spot** frames a thing that is already on the screen. It is one
+  element over the anchor's rect, `box-shadow: 0 0 0 100vmax` in the scrim's
+  ink — the shadow *is* the scrim, so the ration above holds: the spot hangs
+  nothing and lifts nothing, it dims everything else. It wears the anchor's
+  own corner (`--r-pill` for a roundel, `--r-plate` for a plate, `--r-card`
+  for a card, `--r-identity` for the pass) and takes no pigment: the thing
+  it frames is already in its line's colour, which is the point.
+- **The note** (`.guide-callout`) is the panel ink speaking — sumi, like the
+  docked rating bar and the sheets — one sentence, the pair as a caption,
+  and on the guide two 44px controls. The ride's notes have no controls and
+  take no pointer events, so the card under one is tapped through it. It is
+  centred on the column and measured only vertically: under the spot, or
+  above it when the spot is in the lower half.
+
+The note is not a tooltip and the spot is not a highlight: both exist for
+a lesson that runs once per gate, and a screen that needs one at every
+visit has a layout problem, not a guide problem ("Say less").
+
 ### The entry plate, and a body that names itself
 
 The dictionary opens an entry as **the catalogue plate at reading size**:
@@ -923,6 +946,14 @@ a learner who has just rated one card is already looking for the next.
   fallbacks and it is how a screen reader knows.
 - A chevron terminating a card or row is centred against the **full height**
   of that card, never against its first line of text.
+- **The first ride** (plans 097–100) is the stage's first use and the
+  gates' first opening, and it adds no screen of its own kind: 試乗 / TEST
+  RIDE and 案内 / GUIDE are the two pairs, `.ride-*` and `.guide-*` the two
+  namespaces, and everything a lesson draws is the production component
+  fed a literal (ADR 0017). The one screen the rides own outright — the
+  done screen and the pass plate — is the stage with its words centred by
+  two grow-only spacers and its one filled action on the floor, the
+  boarding's own room.
 
 ## What not to do
 

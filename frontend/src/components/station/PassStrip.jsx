@@ -45,7 +45,7 @@ export default function PassStrip({ pace }) {
   if (!summary) return null
 
   return (
-    <button type="button" className="pass pass--strip" onClick={() => navigate('/profile')} aria-label={t.passLabel}>
+    <button type="button" className="pass pass--strip" onClick={() => navigate('/profile')} aria-label={t.passLabel} data-guide="today.strip">
       <StampRally week={summary.week} streak={summary.streak} t={t} />
       {pace && <PaceGauge pace={pace} t={t} />}
     </button>

@@ -7,7 +7,7 @@ import { render } from 'vitest-browser-react'
 // the extraction — the safety net — and the rest existed nowhere.
 
 const applyXpGain = vi.fn()
-vi.mock('../stores/profileSummary', () => ({ applyXpGain: (...a) => applyXpGain(...a) }))
+vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()), applyXpGain: (...a) => applyXpGain(...a) }))
 
 const { useReviewGates } = await import('./useReviewGates')
 

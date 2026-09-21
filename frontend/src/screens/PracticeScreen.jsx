@@ -7,6 +7,8 @@ import { board } from '../stores/boarding'
 import { playAnnouncement, playUi } from '../lib/audio'
 import { Chip } from '../components/chrome/Console'
 import { Plate } from '../components/station/LinePlate'
+import { Guide } from '../components/guide/Guide'
+import { useGuide } from '../hooks/useGuide'
 import { LEVELS } from '../domain/sentenceSource'
 
 // ── 実践 — the Practice gate: five platforms (plan 068, plates since 094) ──
@@ -77,18 +79,22 @@ export default function PracticeScreen() {
     else board(() => navigate(to))
   }
 
+  const guide = useGuide('practice', true)
+
   return (
     <main id="main-content" className="practice">
       <h1 className="sr-only">{t.tabPractice}</h1>
+      {guide.open && <Guide gate="practice" onEnd={guide.onEnd} />}
       <div className="plates">
-        {platforms.map(section => (
+        {platforms.map((section, i) => (
           <Plate
             key={section.path}
             section={section}
             className="plate--platform"
+            guide={i === 0 ? 'practice.plate' : undefined}
             onClick={() => depart(section)}
             foot={
-              <div className="plate__foot plate__foot--dests">
+              <div className="plate__foot plate__foot--dests" data-guide={i === 0 ? 'practice.dests' : undefined}>
                 {LEVELS.map(level => (
                   <Chip
                     key={level}

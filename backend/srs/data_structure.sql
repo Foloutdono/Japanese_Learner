@@ -221,7 +221,15 @@ CREATE TABLE user_profiles (
     -- non-empty subset of {'vocab','kanji','grammar'}, in that order.
     -- NULL is an account boarded before the question and reads as all
     -- three. The kana are not listed: every ticket rides them.
-    lines TEXT[]
+    lines TEXT[],
+    -- 試乗 -- the first ride (plan 097, routes/onboarding.py): when the
+    -- two rides after the boarding ended, finished or skipped (NULL =
+    -- not yet; the index route shows the ride), and a map of gate id
+    -- ('today' | 'learn' | 'practice' | 'dictionary' | 'profile') to
+    -- the time its guide ended ({} = none seen). Accounts that boarded
+    -- before the ride existed are stamped by scripts/backfill_first_ride.py.
+    tutorial_at TIMESTAMPTZ,
+    guided JSONB NOT NULL DEFAULT '{}'::jsonb
 );
 
 -- The Sentence bank: what the learner submitted, plus where it came
@@ -776,8 +784,13 @@ CREATE TABLE event_log (
     user_id TEXT NOT NULL,
     name    TEXT NOT NULL,
     props   JSONB NOT NULL DEFAULT '{}'::jsonb,
-    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The client's own id for the event (frontend/src/lib/track.js), so
+    -- a batch the page sends twice is kept once. NULL for the server's
+    -- own rows and an older client's.
+    cid     TEXT
 );
+CREATE UNIQUE INDEX idx_event_log_user_cid ON event_log(user_id, cid) WHERE cid IS NOT NULL;
 
 -- (user_id, at) reads one learner's trail in order; (name, at) is what
 -- the weekly digest counts across everyone.

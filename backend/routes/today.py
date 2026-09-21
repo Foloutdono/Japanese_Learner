@@ -31,15 +31,24 @@ Two things have to be right that a single-section session gets for free:
    payload (it already was, for every source) and POST /api/today/review
    reads it from the client rather than from any session state.
 
-2. NOTHING MAY BE SERVED THAT IS NOT ACTUALLY DUE. get_new_cards is
-   deliberately absent from this file. A queue that quietly tops itself
-   up with new material cannot end, and a queue that cannot end cannot
-   say "you are done for today" -- which is the entire point. When the
-   due set empties, this returns nothing and the client shows the next
-   scheduled time from /api/today.
+2. NOTHING MAY BE SERVED THAT IS NOT DUE -- EXCEPT THE DAY'S RATION.
+   For a long time get_new_cards was deliberately absent from this
+   file: a queue that quietly tops itself up with new material cannot
+   end, and a queue that cannot end cannot say "you are done for
+   today". That rule left a learner who had just boarded on an empty
+   gate -- nothing is due on day one -- and the owner asked (plan 098,
+   2026-09-21) for the queue to carry the day's new cards too. It
+   does, and the objection still holds, because the PACE is what
+   bounds it: the ration is what is left of daily_new_target after
+   today's first-ever reviews (core/pace.py), kana first for a learner
+   who does not yet read them, then the chosen lines in turn
+   (study/daily_queue.ration). A learner with no stored target is
+   served no ration at all. When the due set and the ration are both
+   empty, this returns nothing and the client shows the next scheduled
+   time from /api/today.
 """
 import logging
-from collections import defaultdict
+from collections import OrderedDict, defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
@@ -49,10 +58,12 @@ import psycopg2.extras
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
 from core.db import db_conn
+from core.lines import lines_or_all
 from core.pace import resolve_pace
 from core.srs_instance import srs
 from core.user_level import resolve_level
 from study import card_index, daily_queue
+from study.level_rule import kana_sets_for, primary_mode
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, MODES, try_resolve
 
 router = APIRouter()
@@ -68,6 +79,7 @@ from routes.kanji import _build_kanji_card            # noqa: E402
 from routes.vocab import _build_vocab_card            # noqa: E402
 from routes.grammar import _build_grammar_card        # noqa: E402
 from routes.decks import build_personal_card, VISIBLE_DECKS_CTE   # noqa: E402
+from routes.profile import _profile_row                # noqa: E402
 
 
 # One adapter per section, each closing over that builder's own argument
@@ -241,6 +253,54 @@ def _personal_rows(user_id: str) -> dict:
     }
 
 
+# ── 新規 — the day's ration (study/daily_queue.ration) ─────────────
+def _new_lanes(user_id: str, level: str):
+    """
+    lane key -> new raw ids the run may introduce today, at most what
+    is left of the pace. Empty when no target is stored, when today's
+    is spent, or when the lookups fail -- a ration is a comfort, and
+    nothing here may 500 the gate.
+    """
+    pace = resolve_pace(user_id)
+    if pace is None or pace.remaining <= 0:
+        return OrderedDict()
+    budget = pace.remaining
+    try:
+        row = _profile_row(user_id)
+    except Exception:
+        logger.exception("profile lookup for the ration failed")
+        return OrderedDict()
+    kana_known, lines = row[6], lines_or_all(row[9])
+
+    def fresh(source: str, deck_key: str, mode: str) -> list[str]:
+        ids = card_index.raw_ids(source, deck_key, mode)
+        if not ids:
+            return []
+        # get_new_cards shuffles: the ration is a random draw from what
+        # the learner has never met, as a section run's top-up is.
+        picked = srs.get_new_cards(mode, limit=budget, card_ids=prefixed(ids, user_id))
+        return [unprefixed(cid, user_id) for cid in picked]
+
+    kana_mode = primary_mode(KANA)
+    known_sets = set(kana_sets_for(kana_known))
+    kana_lanes = OrderedDict()
+    for set_name in card_index.deck_keys(KANA):
+        if set_name in known_sets:
+            continue
+        ids = fresh(KANA, set_name, kana_mode)
+        if ids:
+            kana_lanes[(daily_queue.SECTION, KANA, set_name, kana_mode)] = ids
+
+    line_lanes = OrderedDict()
+    for source in lines:
+        mode = primary_mode(source)
+        ids = fresh(source, level, mode)
+        if ids:
+            line_lanes[(daily_queue.SECTION, source, level, mode)] = ids
+
+    return daily_queue.ration(kana_lanes, line_lanes, budget)
+
+
 @router.get("/api/today")
 def get_today(user_id: str = Depends(get_user_id)):
     """
@@ -252,18 +312,26 @@ def get_today(user_id: str = Depends(get_user_id)):
     """
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
+    level = resolve_level(user_id)
     # The stops beyond the learner's level wait (the level rule, plan
     # 074): moving down sets them aside, and the badge must not count
-    # what the run will not serve.
-    lanes = daily_queue.hold_above(
-        daily_queue.lanes(user_id, due_rows, personal), resolve_level(user_id)
+    # what the run will not serve. The day's ration of new cards rides
+    # beside the reviews (plan 098): at the learner's own level, so
+    # the hold never touches it.
+    lanes, fresh = daily_queue.merge_new(
+        daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), level),
+        _new_lanes(user_id, level),
     )
 
     by_source: dict[str, int] = defaultdict(int)
     breakdown = []
     for key, ids in lanes.items():
         lane = daily_queue.label(key)
-        lane["due"] = len(ids)
+        # Two figures, apart: what is owed and what is offered. The
+        # gate adds them for the run's length and prints the second as
+        # its own tag.
+        lane["new"] = fresh.get(key, 0)
+        lane["due"] = len(ids) - lane["new"]
         # 無料 — this lane costs nothing (core/credits.py). Stated on
         # the lane rather than left for the gate to derive from a
         # mirrored source list: the economy is the server's to declare,
@@ -324,9 +392,9 @@ def get_today(user_id: str = Depends(get_user_id)):
         # Only when nothing is due -- "next review in 3 hours" is what
         # turns an empty queue into a finished day.
         "next_due": next_due.isoformat() if next_due else None,
-        # The day's new-item gauge for the concourse strip. This queue
-        # itself never serves new cards (see the module docstring); the
-        # pace here is information, spent by the section endpoints.
+        # The day's new-item gauge for the concourse strip -- and, since
+        # plan 098, the budget the lanes' `new` figures were drawn
+        # against (see the module docstring and _new_lanes).
         "pace": pace.payload() if pace else None,
     }
 
@@ -362,13 +430,19 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
     all_lanes = daily_queue.lanes(user_id, due_rows, personal)
-    chosen = (
-        daily_queue.keep_card(all_lanes, only) if only
-        else daily_queue.keep_lanes(
-            daily_queue.hold_above(all_lanes, resolve_level(user_id)),
-            daily_queue.parse_lane_ids(lanes),
+    level = resolve_level(user_id)
+    if only:
+        chosen = daily_queue.keep_card(all_lanes, only)
+    else:
+        # The ration rides with the reviews (plan 098): drawn again per
+        # batch against what is left of the pace by now, so a run that
+        # has met three new cards is offered three fewer. The lane
+        # choice applies to it like any lane -- a switched-off line
+        # offers nothing new either.
+        merged, _fresh = daily_queue.merge_new(
+            daily_queue.hold_above(all_lanes, level), _new_lanes(user_id, level),
         )
-    )
+        chosen = daily_queue.keep_lanes(merged, daily_queue.parse_lane_ids(lanes))
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
     # Under enforcement a run stops at the balance -- at its worth of
     # PAID cards (plan 069, and _affordable above): the free lanes go

@@ -22,9 +22,17 @@ vi.mock('../stores/today', () => ({
   refreshToday: vi.fn(),
   seedTodaySummary: vi.fn(),
 }))
-vi.mock('../stores/profileSummary', () => ({
-  useProfileSummary: () => ({ username: 'Aiko', week: [], streak: 3, level: 12 }),
+const summaryRef = { current: { username: 'Aiko', week: [], streak: 3, level: 12 } }
+vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()),
+  useProfileSummary: () => summaryRef.current,
+  refreshSummary: vi.fn(async () => {}),
 }))
+const apiJson = vi.fn(async () => ({}))
+vi.mock('../lib/api', async (o) => ({ ...(await o()), apiJson: (...a) => apiJson(...a) }))
+vi.mock('../lib/supabase', () => ({
+  supabase: { auth: { getSession: async () => ({ data: { session: { access_token: 'tok', user: { id: 'u1' } } } }) } },
+}))
+vi.mock('../lib/track', () => ({ track: vi.fn(), flush: vi.fn() }))
 vi.mock('../stores/credits', async (o) => ({
   ...(await o()),
   useCredits: () => ({ balance: 30, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
@@ -193,5 +201,48 @@ describe('.btn-primary — the filled action (plans 051, 052)', () => {
     expect(fill[1]).toBeCloseTo(51.8, 0)
     expect(fill[2]).toBeCloseTo(36.5, 0)
     expect(contrast(rgbOf(style.color), fill)).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+
+// ── 案内 — the gate's guide (plan 100) ────────────────────────────
+describe('TodayScreen — the guide', () => {
+  const settleLong = (ms = 200) => new Promise(r => setTimeout(r, ms))
+
+  it('carries its anchors, and opens the guide once the lanes have painted for a learner who has not seen it', async () => {
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12, guided: {} }
+    apiJson.mockReset()
+    apiJson.mockResolvedValue({})
+    const screen = await mount()
+    await settleLong()
+    const root = screen.container
+    expect(root.querySelector('[data-guide="today.strip"]')).toBeTruthy()
+    expect(root.querySelector('[data-guide="today.gate"]')).toBeTruthy()
+    const guide = document.querySelector('.guide')
+    expect(guide).toBeTruthy()
+    // The HUD and the tab bar are the shell's, not this screen's: the
+    // guide starts on the first anchor that is here.
+    expect(guide.dataset.stop).toBe('today.strip')
+    document.querySelector('[data-action="guide-skip"]').click()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeNull()
+    const stamp = apiJson.mock.calls.find(([u]) => u === '/api/onboarding/guided/today')
+    expect(stamp).toBeTruthy()
+    expect(stamp[2]).toMatchObject({ method: 'POST' })
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+    localStorage.removeItem('jp-guided')
+  })
+
+  it('opens no guide on a gate the profile says was guided, or on a profile that has not answered', async () => {
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12, guided: { today: '2026-09-21T00:00:00Z' } }
+    let screen = await mount()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeNull()
+    screen.unmount()
+    summaryRef.current = { username: 'Aiko', week: [], streak: 3, level: 12 }
+    screen = await mount()
+    await settleLong()
+    expect(document.querySelector('.guide')).toBeNull()
+    screen.unmount()
   })
 })

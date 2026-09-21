@@ -113,7 +113,19 @@ runtime purpose. Two consequences worth knowing:
   `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
   `screens/TranslationRun.jsx`, `screens/DictationRun.jsx`,
   `screens/ComprehensionRun.jsx` and `index.css`).
-  When starting a new wave, begin at **097** or higher, and check
+  **097–101** are wave 21, the first ride — the flashcard and
+  reading rides after the boarding, the per-gate guide, and the day's
+  ration of new cards on the daily queue (cited in
+  `routes/onboarding.py`, `routes/profile.py`, `routes/today.py`,
+  `core/events.py`, `core/pace.py`, `scripts/backfill_first_ride.py`,
+  `study/daily_queue.py`, `tests/test_pass_platforms.py`,
+  `screens/RideRun.jsx`, `screens/RideReading.jsx`,
+  `screens/RidePreview.jsx`, `components/guide/`, `hooks/useGuide.js`,
+  `stores/guide.js`, `components/reading/ReadingPieces.jsx`,
+  `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
+  `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
+  DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
+  When starting a new wave, begin at **102** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -196,6 +208,16 @@ recognise in place and reported.
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
+```
+
+One more one-shot, run once after the deploy that carries plan 097's
+columns (`user_profiles.tutorial_at`, `guided`) and before the frontend that
+reads them: it stamps the first ride as seen on every account that boarded
+before the ride existed, so nobody with three thousand reviews is shown
+how to flip a card. Same shape as the others — reports first.
+
+```bash
+python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
 ```
 
 A vocab card id is `vocab_{level}_{kanji}_{kana}`, so **correcting either
@@ -365,7 +387,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefixed`/`unprefixed`) so SRS state for the same content differs per learner in the same tables.
 
 ### Frontend layout (`frontend/src/`)
-- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards` is a dev-only route (tree-shaken out of production builds via `import.meta.env.DEV`).
+- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
 - `screens/` — one file per route/page (largely 1:1 with `App.jsx` routes).
 - `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the mobile chrome (plan 068): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
 - `domain/` — pure client-side domain logic: card shape helpers, kana sets, level titles, reward tiers, stats modeling, study-mode definitions, XP curve. Mirrors backend concepts but has no network calls.

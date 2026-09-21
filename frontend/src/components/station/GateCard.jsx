@@ -142,12 +142,22 @@ export default function GateCard({ today, failed }) {
 
   const lanes = orderLanes(today.lanes ?? [])
   const isOn = lane => !off.has(lane.id)
-  const due = lanes.filter(isOn).reduce((n, l) => n + l.due, 0)
+  // What a lane puts in the run: the reviews it owes and, since plan
+  // 098, the day's ration of new cards the server drew for it against
+  // the pace. Two figures on the row, one in every sum -- a new card
+  // is a card the run serves and the fare prices, like any other.
+  const count = lane => (lane.due ?? 0) + (lane.new ?? 0)
+  const due = lanes.filter(isOn).reduce((n, l) => n + count(l), 0)
+  // The head's unit is honest about what the figure is: "due" while
+  // any of it is owed, "new" when the whole run is the day's ration
+  // (a first day, or a day with nothing yet to review).
+  const owed = lanes.filter(isOn).reduce((n, l) => n + (l.due ?? 0), 0)
+  const unit = owed === 0 && due > 0 ? t.newUnit : t.dueUnit
   // Of the chosen reviews, the ones that cost nothing. A pass is not
   // asked: nothing costs anything on one, so nothing is worth marking
   // free either — the tag would be on every row and say nothing.
   const metered = Boolean(credits && !credits.unlimited)
-  const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + l.due, 0) : 0
+  const free = metered ? lanes.filter(l => isOn(l) && isFreeLane(l)).reduce((n, l) => n + count(l), 0) : 0
   function toggle(id) {
     setOff(prev => {
       const next = new Set(prev)
@@ -167,7 +177,7 @@ export default function GateCard({ today, failed }) {
   const lines = TYPE_ORDER
     .map(type => {
       const own = lanes.filter(l => laneTypeOf(l) === type)
-      return { type, lanes: own, due: own.reduce((n, l) => n + l.due, 0), on: own.length > 0 && own.every(isOn) }
+      return { type, lanes: own, due: own.reduce((n, l) => n + count(l), 0), on: own.length > 0 && own.every(isOn) }
     })
     .filter(line => line.lanes.length > 0)
 
@@ -198,12 +208,12 @@ export default function GateCard({ today, failed }) {
   }
 
   return (
-    <div className="gate-card">
+    <div className="gate-card" data-guide="today.gate">
       <div className="gate-card__head">
         <span className="gate-card__title">{t.fareGate}</span>
         <span className="gate-card__figure">
           <span className="gate-card__count">{due}</span>
-          <span className="gate-card__unit">{t.dueUnit}</span>
+          <span className="gate-card__unit">{unit}</span>
         </span>
       </div>
 
@@ -247,7 +257,13 @@ export default function GateCard({ today, failed }) {
               {metered && isFreeLane(lane) && (
                 <span className="lane__free">{t.freeFare}</span>
               )}
-              <span className="lane__due">{lane.due}</span>
+              {/* 新規 — the day's ration in this lane, apart from the
+                  reviews: the figure on the right is what the lane
+                  puts in the run, this says how much of it is new. */}
+              {lane.new > 0 && (
+                <span className="lane__new">{t.laneNew(lane.new)}</span>
+              )}
+              <span className="lane__due">{count(lane)}</span>
             </button>
           )
         })}

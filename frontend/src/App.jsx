@@ -19,12 +19,14 @@ import { apiJson, apiJsonWithTimeout } from './lib/api'
 // unreachable in production, it is not in the bundle.
 import RewardsPreview from './screens/RewardsPreview'
 import OnboardingPreview from './screens/OnboardingPreview'
+import RidePreview from './screens/RidePreview'
 import SoundPalette from './screens/SoundPalette'
 import { useState, useEffect } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
+import { holdGuide } from './stores/guide'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { LangProvider, useLang } from './LangContext'
@@ -32,6 +34,8 @@ import { LangProvider, useLang } from './LangContext'
 import Welcome from './components/boarding/Welcome'
 import AuthScreen  from './screens/AuthScreen'
 import BoardingFlow from './screens/BoardingFlow'
+import RideRun from './screens/RideRun'
+import RideReading from './screens/RideReading'
 import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
@@ -329,6 +333,20 @@ export default function App() {
   const onboarding = gate && gate.userId === (session?.user?.id ?? null) ? gate.state : undefined
   const onboardingProfile = gate?.profile ?? null
   const setOnboarding = state => setGate(g => (g ? { ...g, state } : g))
+  // 試乗 — the first ride (plan 098). The index route sends a learner
+  // whose profile carries no tutorialAt to the ride instead of /today,
+  // so the 改札 opens onto the first card. Decided off the same
+  // profile the gate fetched, never a second request -- and a profile
+  // the gate failed open WITHOUT (null) means no ride: a lesson is
+  // never shown at the cost of a door. The ride's own end stamps the
+  // profile here as well as on the server, because this copy is read
+  // again on every visit to '/' and stores/profileSummary's is not it.
+  const rideDue = onboardingProfile != null && onboardingProfile.tutorialAt == null
+  // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
+  useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
+  const rideDone = () => setGate(g => (
+    g?.profile ? { ...g, profile: { ...g.profile, tutorialAt: new Date().toISOString() } } : g
+  ))
 
   // Nothing to preload any more: every effect and interface sound is
   // synthesised at the moment it plays (lib/audio/voices.js), so there
@@ -361,6 +379,7 @@ export default function App() {
           <Routes>
             <Route path="/dev/rewards" element={<RewardsPreview />} />
             <Route path="/dev/onboarding" element={<OnboardingPreview />} />
+            <Route path="/dev/ride" element={<RidePreview />} />
             <Route path="/dev/sounds" element={<SoundPalette />} />
           </Routes>
           {/* The workbench replays the real boarding, so it needs the
@@ -547,11 +566,23 @@ export default function App() {
             <Route path="/practice/translation/tier/:tier"   element={<TranslationRun session={session} />} />
             <Route path="/practice/translation/mastery"      element={<TranslationRun session={session} />} />
             <Route path="/practice/exam/:examId"      element={<ExamRunner session={session} />} />
+            {/* 試乗 — the first ride (plan 098): the lesson after the
+                boarding, on the stage like any run. Reachable at any
+                time (Settings replays it); the index route below is
+                what sends a new learner here first. `covered` is the
+                改札 cutscene still playing over the router. */}
+            <Route path="/ride" element={<Navigate to="/ride/cards" replace />} />
+            <Route
+              path="/ride/cards"
+              element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
+            />
+            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} />} />
           </Route>
 
           {/* The gate hall retired with the chrome; the front door is
-              the run. */}
-          <Route path="/" element={<Navigate to="/today" replace />} />
+              the run -- or, once, the test ride. */}
+          <Route path="/" element={<Navigate to={rideDue ? '/ride/cards' : '/today'} replace />} />
+
           {MOVED.map(([from, to]) => (
             <Route key={from} path={from} element={<Moved to={to} />} />
           ))}

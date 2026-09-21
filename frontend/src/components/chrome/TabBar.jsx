@@ -50,7 +50,7 @@ export function TabBar() {
   const due = useTodaySummary().data?.total ?? 0
 
   return (
-    <nav className="tabbar" aria-label={t.tabBarLabel}>
+    <nav className="tabbar" aria-label={t.tabBarLabel} data-guide="tabbar">
       <div className="tabbar__inner">
         {getTabs(t).map(tab => {
           const on = tab.id === active

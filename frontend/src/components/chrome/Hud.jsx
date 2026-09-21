@@ -72,6 +72,7 @@ export function StatusChip({ model, onClick = null }) {
     <Tag
       {...(onClick ? { type: 'button', onClick, 'aria-label': t.hudStatusLabel } : {})}
       className={`hud__status hud__status--${panel.status}`}
+      data-guide="hud.status"
     >
       <span className="hud__status-word">{t.hudStatus[panel.status]}</span>
       {panel.days && <span className="hud__status-delta">· {t.hudDays(panel.days)}</span>}
@@ -86,7 +87,7 @@ function HudStatus({ onClick }) {
 
   if (!online) {
     return (
-      <button type="button" className="hud__status hud__status--offline" onClick={onClick}>
+      <button type="button" className="hud__status hud__status--offline" data-guide="hud.status" onClick={onClick}>
         <span className="hud__status-word">{t.hudOffline}</span>
       </button>
     )
@@ -105,7 +106,7 @@ export function HudPass({ onClick }) {
   const out = balance === 0
   const classes = ['hud__pass', low ? 'hud__pass--low' : '', out ? 'hud__pass--out' : ''].filter(Boolean).join(' ')
   return (
-    <button type="button" className={classes} onClick={onClick} aria-label={t.passLabel}>
+    <button type="button" className={classes} onClick={onClick} aria-label={t.passLabel} data-guide="hud.pass">
       {/* The contactless mark: three rings, classed rather than bare
           spans so the pass block's own `span` rules never meet them
           in stylelint's specificity order. */}
@@ -138,6 +139,7 @@ export function Hud() {
         <button
           type="button"
           className={`hud__level${gain ? ' hud__level--gain' : ''}`}
+          data-guide="hud.level"
           onClick={toPass}
           aria-label={summary ? `${t.level} ${summary.level}` : t.profileTitle}
         >

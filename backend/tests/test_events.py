@@ -267,3 +267,27 @@ def test_a_new_user_id_never_sees_another_learners_trail():
             conn.commit()
         finally:
             conn.close()
+
+
+# ── The same batch twice is kept once ─────────────────────────────
+
+def test_a_batch_sent_twice_is_kept_once(client):
+    # A flush on pagehide the page never heard back about is sent again
+    # from the mirror on the next launch; the client's id per event is
+    # what keeps the row from doubling (the live walk of plan 100 found
+    # two guide_done rows for one gate).
+    batch = {"events": [
+        {"id": "evt-1", "name": "guide_done", "props": {"gate": "today", "skipped": False, "stops": 6, "ms": 4000}},
+        {"id": "evt-2", "name": "guide_step", "props": {"gate": "today", "stop": "hud.level", "index": 0}},
+    ]}
+    first = client.post("/api/events", json=batch)
+    assert first.status_code == 202 and first.json()["kept"] == 2
+    again = client.post("/api/events", json=batch)
+    assert again.status_code == 202 and again.json()["kept"] == 0
+    assert [r[0] for r in rows()] == ["guide_done", "guide_step"]
+    # A row with no id is never deduplicated: an older client's, or the
+    # server's own.
+    bare = {"events": [{"name": "install_prompt", "props": {"outcome": "dismissed"}}]}
+    client.post("/api/events", json=bare)
+    client.post("/api/events", json=bare)
+    assert [r[0] for r in rows()].count("install_prompt") == 2

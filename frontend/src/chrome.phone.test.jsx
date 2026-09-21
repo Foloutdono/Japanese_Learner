@@ -32,7 +32,7 @@ vi.mock('./lib/supabase', () => ({
     },
   },
 }))
-vi.mock('./stores/profileSummary', () => ({
+vi.mock('./stores/profileSummary', async (o) => ({ ...(await o()),
   useProfileSummary: () => ({ level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500, username: 'Aiko', streak: 3 }),
   useProfileSummaryState: () => ({ summary: null, failed: false }),
   refreshSummary: vi.fn(),

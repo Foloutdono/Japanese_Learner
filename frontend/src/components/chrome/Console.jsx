@@ -14,8 +14,8 @@ import { SearchIcon, CrossIcon } from '../ui/Icons'
 //     </ConsoleTop>
 //     <ConsoleIndex value onChange onClear count="128 results" toggle={…} />
 //   </Console>
-export function Console({ children, className = '' }) {
-  return <div className={`console ${className}`.trim()}>{children}</div>
+export function Console({ children, className = '', guide }) {
+  return <div className={`console ${className}`.trim()} data-guide={guide}>{children}</div>
 }
 
 // ── The console's band ──
@@ -61,8 +61,8 @@ export function ConsoleTop({ children }) {
 // dictionary's JLPT levels under its collections): ConsoleTop wraps and
 // every Chips takes the full row, so two of them already stack — the
 // class only draws the hairline between them.
-export function Chips({ children, label, className = '' }) {
-  return <div className={`console__chips ${className}`.trim()} role={label ? 'group' : undefined} aria-label={label}>{children}</div>
+export function Chips({ children, label, className = '', guide }) {
+  return <div className={`console__chips ${className}`.trim()} role={label ? 'group' : undefined} aria-label={label} data-guide={guide}>{children}</div>
 }
 
 // A chip is a choice, so it says whether it is chosen (aria-pressed).
