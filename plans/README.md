@@ -5568,10 +5568,26 @@ Learning's two rows on a real phone.
 
 ## What this wave leaves for the next one
 
-- The gate's head prints "10 due" when all ten are the day's ration; the
-  unit is the fare gate's and the ration's arrival did not rename it.
-- `lib/track.js` flushed a batch twice across a full navigation in the
-  live walk (two `guide_done` rows for one gate). Older than this wave.
-- The deck's gloss for こんにちは ("hello,good day (daytime greeting, id)")
-  is on the first card a learner is handed; a gloss is safe to correct.
-- `GUIDE_CHAIN` — the owner's original ask, one flag, off.
+Three of the four were closed the same day, owner-directed:
+
+- **The gate's head says "new" when the whole run is the day's ration**
+  and "due" while any of it is owed (`GateCard`, `newUnit`).
+- **A batch sent twice is kept once.** `lib/track.js` gives every event
+  an id of its own and `event_log` gains `cid` with a partial unique
+  index on `(user_id, cid)`; `core/events.write` inserts `ON CONFLICT …
+  DO NOTHING` and reports what was KEPT. The cause was a flush on
+  `pagehide` whose response arrived after the page had gone: the queue
+  was never trimmed, so the mirror sent the batch again on the next
+  launch and the server took it twice. The server's own rows and an
+  older client's carry no id and are never deduplicated
+  (`tests/test_events.py`).
+- **The two glosses for こんにちは** (the N3 kana entry and the N1
+  今日は) read "hello, good day (daytime greeting)": the ", id" was
+  JMdict's idiom tag left in by the spreadsheet, and the missing space
+  after the comma the same export's. A gloss is not part of the card
+  id, so no SRS row moves. The French was already clean.
+
+Still open:
+
+- `GUIDE_CHAIN` — the owner's original ask, one flag, off; decide on
+  the skip rates.

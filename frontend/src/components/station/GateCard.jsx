@@ -148,6 +148,11 @@ export default function GateCard({ today, failed }) {
   // is a card the run serves and the fare prices, like any other.
   const count = lane => (lane.due ?? 0) + (lane.new ?? 0)
   const due = lanes.filter(isOn).reduce((n, l) => n + count(l), 0)
+  // The head's unit is honest about what the figure is: "due" while
+  // any of it is owed, "new" when the whole run is the day's ration
+  // (a first day, or a day with nothing yet to review).
+  const owed = lanes.filter(isOn).reduce((n, l) => n + (l.due ?? 0), 0)
+  const unit = owed === 0 && due > 0 ? t.newUnit : t.dueUnit
   // Of the chosen reviews, the ones that cost nothing. A pass is not
   // asked: nothing costs anything on one, so nothing is worth marking
   // free either — the tag would be on every row and say nothing.
@@ -208,7 +213,7 @@ export default function GateCard({ today, failed }) {
         <span className="gate-card__title">{t.fareGate}</span>
         <span className="gate-card__figure">
           <span className="gate-card__count">{due}</span>
-          <span className="gate-card__unit">{t.dueUnit}</span>
+          <span className="gate-card__unit">{unit}</span>
         </span>
       </div>
 

@@ -784,8 +784,13 @@ CREATE TABLE event_log (
     user_id TEXT NOT NULL,
     name    TEXT NOT NULL,
     props   JSONB NOT NULL DEFAULT '{}'::jsonb,
-    at      TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The client's own id for the event (frontend/src/lib/track.js), so
+    -- a batch the page sends twice is kept once. NULL for the server's
+    -- own rows and an older client's.
+    cid     TEXT
 );
+CREATE UNIQUE INDEX idx_event_log_user_cid ON event_log(user_id, cid) WHERE cid IS NOT NULL;
 
 -- (user_id, at) reads one learner's trail in order; (name, at) is what
 -- the weekly digest counts across everyone.

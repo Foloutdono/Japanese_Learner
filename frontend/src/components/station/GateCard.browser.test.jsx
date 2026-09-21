@@ -196,6 +196,19 @@ describe('GateCard — the ration', () => {
     expect(chips).toContain('14')
   })
 
+  it('names the figure "new" when the whole run is the day\'s ration', async () => {
+    const { default: fr } = await import('../../locales/fr/index.js')
+    const screen = await mount({ ...TODAY, total: 10, lanes: [{ ...KANA_LANE, due: 0, new: 10 }] })
+    expect(screen.container.querySelector('.gate-card__count').textContent).toBe('10')
+    expect(screen.container.querySelector('.gate-card__unit').textContent).toBe(fr.newUnit)
+  })
+
+  it('keeps "due" while any of the run is owed', async () => {
+    const { default: fr } = await import('../../locales/fr/index.js')
+    const screen = await mount({ ...TODAY, total: 13, lanes: [{ ...KANA_LANE, due: 3, new: 10 }] })
+    expect(screen.container.querySelector('.gate-card__unit').textContent).toBe(fr.dueUnit)
+  })
+
   it('a lane switched off takes its new cards out of the run with it', async () => {
     const rationed = { ...LANES[1], due: 3, new: 4 }
     const screen = await mount({ ...TODAY, total: 21, lanes: [LANES[0], rationed] })

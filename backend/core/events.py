@@ -245,6 +245,15 @@ def _ensure_events_schema() -> None:
             """)
             # (user_id, at) for one learner's trail in order; (name, at)
             # for the digest's per-name counts across everyone.
+            # The client's own id per event (routes/events.py), so a
+            # batch sent twice is kept once. Partial: the server's own
+            # rows and an older client's carry none, and NULLs must not
+            # collide.
+            cur.execute("ALTER TABLE event_log ADD COLUMN IF NOT EXISTS cid TEXT")
+            cur.execute("""
+                CREATE UNIQUE INDEX IF NOT EXISTS idx_event_log_user_cid
+                ON event_log(user_id, cid) WHERE cid IS NOT NULL
+            """)
             cur.execute("""
                 CREATE INDEX IF NOT EXISTS idx_event_log_user_at
                 ON event_log(user_id, at)
@@ -273,16 +282,28 @@ except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("events schema could not be initialised")
 
 
-def write(cur, user_id: str, rows: list[tuple[str, dict, datetime]]) -> int:
-    """Insert cleaned rows on a cursor the caller owns. Returns the count."""
+def write(cur, user_id: str, rows: list[tuple]) -> int:
+    """Insert cleaned rows on a cursor the caller owns. Returns how many
+    were KEPT: a row whose client id this learner already has is a batch
+    sent twice (a flush the page never heard back about) and is dropped
+    on the unique (user_id, cid). A row with no id -- the server's own,
+    or an older client's -- is never deduplicated.
+
+    rows: (name, props, at) or (name, props, at, cid)."""
     if not rows:
         return 0
-    cur.executemany(
-        "INSERT INTO event_log (user_id, name, props, at) "
-        "VALUES (%s, %s, %s::jsonb, %s)",
-        [(user_id, name, _json(props), at) for name, props, at in rows],
-    )
-    return len(rows)
+    kept = 0
+    for row in rows:
+        name, props, at = row[0], row[1], row[2]
+        cid = row[3] if len(row) > 3 else None
+        cur.execute(
+            "INSERT INTO event_log (user_id, name, props, at, cid) "
+            "VALUES (%s, %s, %s::jsonb, %s, %s) "
+            "ON CONFLICT (user_id, cid) WHERE cid IS NOT NULL DO NOTHING",
+            (user_id, name, _json(props), at, cid),
+        )
+        kept += cur.rowcount
+    return kept
 
 
 def _json(props: dict) -> str:

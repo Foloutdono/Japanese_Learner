@@ -131,6 +131,17 @@ function clean(name, props) {
   return out
 }
 
+// Each event carries an id of its own, so a batch the server took but
+// the page never heard back about -- a flush on pagehide whose response
+// arrived after the page had gone -- is sent again from the mirror and
+// kept ONCE (core/events.py's unique (user_id, cid)). Without it the
+// live walk of plan 100 wrote two guide_done rows for one gate.
+function eventId() {
+  const c = typeof crypto !== 'undefined' ? crypto : null
+  if (c?.randomUUID) return c.randomUUID()
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 /**
  * Record one event. Never throws, never returns anything worth waiting
  * for, and does nothing at all when the learner has opted out.
@@ -146,7 +157,7 @@ export function track(name, props) {
     if (import.meta.env.DEV) console.warn(`track: unknown event "${name}"`)
     return
   }
-  queue.push({ name, at: new Date().toISOString(), props: cleaned })
+  queue.push({ id: eventId(), name, at: new Date().toISOString(), props: cleaned })
   if (queue.length > MAX_QUEUE) queue = queue.slice(-MAX_QUEUE)
   save()
   if (queue.length >= BATCH) flush()

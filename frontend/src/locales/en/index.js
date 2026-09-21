@@ -432,6 +432,7 @@ const stats = {
   backToStation:      'Back to the station',
   fareGate:           'Fare gate',
   dueUnit:            'due',
+  newUnit:            'new',
   stageGate:          'Gate',
   nothingGraded:      'Nothing is graded',
   stationJlpt:        'JLPT',
