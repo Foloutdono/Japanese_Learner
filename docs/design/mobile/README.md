@@ -478,3 +478,17 @@ store). Reading the canvas: `Artifact` `read` on its URL saves the page; the
 design lives in `<script id="appifact-doc">` as JSON — `content.files` holds
 one `*.dc.html` per artboard plus `canvas.json`; the common prefix of the
 artboard files is this stylesheet.
+
+
+## The first ride and the guide (plans 097–100)
+
+| Canvas class | `index.css` block | Component |
+|---|---|---|
+| `.ride`, `.ride--reading` on `.stage` | 試乗 — the two rides, on the stage frame like any run; the head's ‹ is Skip | `screens/RideRun.jsx`, `screens/RideReading.jsx` (dev workbench `/dev/ride`, `screens/RidePreview.jsx`) |
+| `.ride__done`, `.ride__done-jp`, `.ride__done-text`, `.ride__done-note`, `.ride__done-air`, `.ride__done-foot` | the done screen: the call, the sentence, two grow-only spacers, the one filled action on the floor | `RideRun.jsx` |
+| `.ride__plate`, `.ride__plate-cap`, `.ride__plate-list`, `.ride__plate-item`, `.ride__plate-icon`, `.ride__plate-title` | the pass plate: the platforms on the pass from `domain/paywall.PASS_PLATFORMS`, the quiet offer over "Enter the station" | `RideReading.jsx` |
+| `.guide-callout`, `.guide-callout--live`, `.guide-callout__jp`, `.guide-callout__text`, `.guide-callout__foot`, `.guide-callout__count`, `.guide-callout__skip`, `.guide-callout__next` | 案内 — the note: the panel ink, one sentence, the pair as caption; `--live` carries controls and takes pointer events | `components/guide/Callout.jsx` (the rides), `components/guide/Guide.jsx` (the guide) |
+| `.guide`, `.guide__spot` (`--pill`, `--flat`, `--plate`, `--card`, `--identity`) | the spot whose shadow is the scrim, wearing the anchor's own corner | `components/guide/Guide.jsx`; the stops in `components/guide/guides.js`; the trigger in `hooks/useGuide.js` |
+| `[data-guide="…"]` | not a class: the anchor an element wears for the guide (`guide` prop on `Plate`, `StopsFoot`, `Console`, `Chips`, `CardTransition`, `RatingBar`; the attribute directly on the HUD, the tab bar, the gate card, the strip, the pass, the stamp book, the records, the ledger and the settings door) | the chrome and the five gates |
+| `.furigana-word` (fitted, `--len`) | the ruby word wears `CharDisplay`'s fitted clamp since plan 098 | `components/study/Readings.jsx` |
+| `.lane__new` | the day's ration in a lane, apart from what it owes (the queue carries the pace's new cards since 2026-09-21) | `components/station/GateCard.jsx` |

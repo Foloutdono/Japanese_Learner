@@ -113,18 +113,18 @@ runtime purpose. Two consequences worth knowing:
   `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
   `screens/TranslationRun.jsx`, `screens/DictationRun.jsx`,
   `screens/ComprehensionRun.jsx` and `index.css`).
-  Numbers **097–101** are claimed by wave 21, the first ride (the
-  flashcard and reading rides after the boarding, and the per-gate
-  guide), planned in `plans/README.md`; 097–100 are executed (cited in
+  **097–101** are wave 21, the first ride — the flashcard and
+  reading rides after the boarding, the per-gate guide, and the day's
+  ration of new cards on the daily queue (cited in
   `routes/onboarding.py`, `routes/profile.py`, `routes/today.py`,
-  `core/events.py`, `scripts/backfill_first_ride.py`,
+  `core/events.py`, `core/pace.py`, `scripts/backfill_first_ride.py`,
   `study/daily_queue.py`, `tests/test_pass_platforms.py`,
   `screens/RideRun.jsx`, `screens/RideReading.jsx`,
   `screens/RidePreview.jsx`, `components/guide/`, `hooks/useGuide.js`,
   `stores/guide.js`, `components/reading/ReadingPieces.jsx`,
-  `components/settings/LearningPage.jsx`, `domain/paywall.js`,
-  `lib/routePattern.js` and `index.css`), 101 is not — cite it from the
-  files the plan names, and nowhere else.
+  `components/settings/LearningPage.jsx`, `components/study/Readings.jsx`,
+  `domain/paywall.js`, `lib/routePattern.js` and `index.css`; ADR 0017;
+  DESIGN.md, "The spot and the note"; `docs/design/mobile/README.md`).
   When starting a new wave, begin at **102** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

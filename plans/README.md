@@ -191,14 +191,16 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
-- **Wave 21 — 試乗, the first ride** (plans 097–101, planned 2026-09-21,
-  NOT YET EXECUTED). The deferral plan 075 left standing: after the
-  boarding, a flashcard ride on the real stage (one card the learner
-  knows, one they cannot), a reading ride ending on the plate that says
-  which platforms ride on the pass, and 案内, a per-gate guide over the
-  live screen. Per learner on the profile row, fails open, skippable,
-  measured. Its section is at the very bottom of this file, and it is
-  the plan — `plans/*.md` is gitignored, so there are no per-plan files.
+- **Wave 21 — 試乗, the first ride** (plans 097–101, 2026-09-21, DONE).
+  The deferral plan 075 left standing: after the boarding, a flashcard
+  ride on the real stage (one card the learner knows, one they cannot),
+  a reading ride ending on the plate that says which platforms ride on
+  the pass, and 案内, a per-gate guide over the live screen — and,
+  owner-directed on the way, the day's ration of new cards on the daily
+  queue. Per learner on the profile row, fails open, skippable,
+  measured; the rule is `docs/adr/0017`. Its section is at the very
+  bottom of this file, and it is the plan — `plans/*.md` is gitignored,
+  so there are no per-plan files.
 
 - **Wave 20 — the grammar breakdown: the rule on the stage, glossed,
   lit where it sits, found by its form, and explained in place**
@@ -4948,7 +4950,7 @@ These are suggestions; each is one line to reverse.
 | 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | DONE (2026-09-21) |
 | 099 | The reading ride and the pass plate | DONE (2026-09-21) |
 | 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | DONE (2026-09-21) |
-| 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, ADR 0017 | PLANNED |
+| 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, CONTEXT.md, ADR 0017 | DONE (2026-09-21) |
 
 097 first — the three screens all read and write through it. 098 and 099
 are independent of 100 and can be executed in either order; 100 is the
@@ -5533,11 +5535,43 @@ Frontend 1210, all green on two consecutive full runs with nothing else
 on the machine; `lint`, `lint:css` and `lint:scale` clean (the ruby
 word's clamp allowlisted beside the character display's); backend 1606.
 
-## Verification (to be filled at execution)
+## Verification
 
-Backend and frontend suite counts before and after; `npm run lint`,
-`lint:css`, `lint:scale` clean; the live walk: boarding → 改札 over the
-first card → flip, rate, flip, rate wrong → the reading ride → the plate
-with the offer → `/today` with its guide opening after the lanes paint →
-each other gate's guide on first opening → Settings replays both; and a
-second launch shows nothing twice.
+Executed in one session on 2026-09-21, plan by plan, each walked live
+against the real dev backend in headless Chromium at 390×844 before its
+commit (the walks are recorded per plan above).
+
+- Backend 1578 → 1615 (`test_ride.py` 24, `test_backfill_first_ride.py`
+  4, `test_today_ration.py` 7, `test_pass_platforms.py` 2), one skipped
+  as before.
+- Frontend 1181 → 1229 (`RideRun.browser.test.jsx` 6,
+  `RideReading.browser.test.jsx` 4, `Guide.browser.test.jsx` 3,
+  `guides.test.js` 4, `ride.phone.test.jsx` 1, `guide.phone.test.jsx` 1,
+  three front-door cases in `App.onboarding.browser.test.jsx`, the
+  ration's two on `GateCard`, the anchor checks on four gate tests, the
+  today guide's two, and the registries).
+- `npm run lint` 0 errors; `lint:css` no change; `lint:scale` no new
+  violations (one clamp allowlisted beside the character display's);
+  the production build clean, the dev routes tree-shaken.
+- The live walk, end to end: boarding → 改札 over the first card → flip,
+  rate, flip, rate wrong → the reading ride → the plate with the offer →
+  `/today` with the day's ration on the gate → its guide after the lanes
+  paint → each other gate's guide on its first opening → a second launch
+  lands on `/today` and shows nothing twice. Settings' two rows were
+  exercised through their endpoints (`DELETE ride/done`, `DELETE guided`)
+  rather than tapped.
+
+Not done in this session, and worth doing on the deployed instance:
+`scripts/backfill_first_ride.py --yes` once the backend that carries 097
+is up and before the frontend that reads it, and a tap through Settings ›
+Learning's two rows on a real phone.
+
+## What this wave leaves for the next one
+
+- The gate's head prints "10 due" when all ten are the day's ration; the
+  unit is the fare gate's and the ration's arrival did not rename it.
+- `lib/track.js` flushed a batch twice across a full navigation in the
+  live walk (two `guide_done` rows for one gate). Older than this wave.
+- The deck's gloss for こんにちは ("hello,good day (daytime greeting, id)")
+  is on the first card a learner is handed; a gloss is safe to correct.
+- `GUIDE_CHAIN` — the owner's original ask, one flag, off.
