@@ -34,6 +34,7 @@ import Welcome from './components/boarding/Welcome'
 import AuthScreen  from './screens/AuthScreen'
 import BoardingFlow from './screens/BoardingFlow'
 import RideRun from './screens/RideRun'
+import RideReading from './screens/RideReading'
 import LearnScreen from './screens/LearnScreen'
 import PracticeScreen from './screens/PracticeScreen'
 import TodayScreen from './screens/TodayScreen'
@@ -572,6 +573,7 @@ export default function App() {
               path="/ride/cards"
               element={<RideRun session={session} onDone={rideDone} covered={onboarding === 'finishing'} />}
             />
+            <Route path="/ride/reading" element={<RideReading session={session} onDone={rideDone} />} />
           </Route>
 
           {/* The gate hall retired with the chrome; the front door is

@@ -63,6 +63,7 @@ function mount(props = {}) {
       <MemoryRouter initialEntries={['/ride/cards']}>
         <Routes>
           <Route path="/today" element={<div className="gate-probe">today</div>} />
+          <Route path="/ride/reading" element={<div className="reading-probe">reading</div>} />
           <Route path="/ride/cards" element={<RideRun session={{ access_token: 'tok' }} {...props} />} />
         </Routes>
       </MemoryRouter>
@@ -89,7 +90,7 @@ beforeEach(() => {
 })
 
 describe('RideRun', () => {
-  it('flips and rates two cards on the stage, then Continue stamps the ride and leaves for the app', async () => {
+  it('flips and rates two cards on the stage, then Continue goes on to the reading ride without a stamp', async () => {
     serve()
     const onDone = vi.fn()
     const screen = await mount({ onDone })
@@ -135,22 +136,21 @@ describe('RideRun', () => {
     expect(document.querySelector('.guide-callout')).toBeNull()
     expect(root.querySelector('.today-remaining')).toBeNull()
 
-    // Nothing was reviewed: the only POST is the stamp, after Continue.
+    // Nothing was reviewed and nothing stamped: the lesson's stamp is
+    // the reading ride's plate (plan 099). Continue goes there.
     expect(posts()).toHaveLength(0)
     root.querySelector('.btn-depart').click()
     await settle(200)
-    const [url, , init] = posts()[0]
-    expect(url).toBe('/api/onboarding/ride/done')
-    expect(JSON.parse(init.body)).toEqual({ skipped: false })
+    expect(posts()).toHaveLength(0)
     expect(apiJson.mock.calls.some(([u]) => /review/.test(String(u)))).toBe(false)
-    expect(onDone).toHaveBeenCalledTimes(1)
-    expect(root.querySelector('.gate-probe')).toBeTruthy()
+    expect(onDone).not.toHaveBeenCalled()
+    expect(root.querySelector('.reading-probe')).toBeTruthy()
 
-    // The trail: every transition, then the end with `skipped: false`.
+    // The trail: every transition, the last one onto the reading ride;
+    // no ride_done here -- only a skip ends the lesson on this screen.
     const steps = track.mock.calls.filter(([n]) => n === 'ride_step').map(([, p]) => `${p.step}>${p.to}`)
-    expect(steps).toEqual(['known>known-back', 'known-back>unknown', 'unknown>unknown-back', 'unknown-back>done'])
-    const done = track.mock.calls.find(([n]) => n === 'ride_done')[1]
-    expect(done).toMatchObject({ skipped: false, at: 'cards' })
+    expect(steps).toEqual(['known>known-back', 'known-back>unknown', 'unknown>unknown-back', 'unknown-back>done', 'done>reading'])
+    expect(track.mock.calls.find(([n]) => n === 'ride_done')).toBeUndefined()
   })
 
   it('answers a guessed second card gently, and the keyboard rates like the bar', async () => {

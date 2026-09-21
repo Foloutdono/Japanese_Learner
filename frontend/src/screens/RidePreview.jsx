@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { BrowserRouter } from 'react-router-dom'
 import RideRun from './RideRun'
+import RideReading from './RideReading'
 import { playClick } from '../lib/audio'
 
 // ── /dev/ride — the test ride on repeat (plan 098) ────────────────
@@ -24,19 +25,29 @@ const CARDS = [
   },
 ]
 
+const SENTENCE = {
+  phrase: '駅で友だちに会います。', romaji: 'eki de tomodachi ni aimasu.',
+  translation: 'I meet a friend at the station.', translation_lang: 'en',
+  display_seconds: 9.6, grammar: 'で',
+}
+
 export default function RidePreview() {
   const [run, setRun] = useState(1)
-  const [ended, setEnded] = useState(false)
+  const [phase, setPhase] = useState('cards') // cards | reading | ended
   const session = { access_token: 'dev-preview' }
+  const ended = phase === 'ended'
   function replay() {
     playClick()
-    setEnded(false)
+    setPhase('cards')
     setRun(n => n + 1)
   }
   return (
     <BrowserRouter>
-      {!ended && (
-        <RideRun key={run} session={session} dryRun cards={CARDS} onDone={() => setEnded(true)} />
+      {phase === 'cards' && (
+        <RideRun key={run} session={session} dryRun cards={CARDS} onNext={() => setPhase('reading')} onDone={() => setPhase('ended')} />
+      )}
+      {phase === 'reading' && (
+        <RideReading key={run} session={session} dryRun sentence={SENTENCE} onDone={() => setPhase('ended')} />
       )}
       {ended && (
         <div className="onb-preview-done">

@@ -1784,6 +1784,14 @@ const ride = {
   rideGuessed: 'Guessed it? Then it comes back in a few days. Say wrong when you guessed.',
   rideDoneBody: n => `That is the game. **${n} new words a day**, each one back just before you forget it.`,
   rideContinue: 'Continue',
+  // The reading ride (plan 099): the sentence, the field, the measure,
+  // then the plate that says which platforms ride on the pass.
+  rideReadFront: 'Read it. It hides in a moment.',
+  rideReadType: 'Write what you read, in romaji or kana.',
+  rideReadMeasure: 'The figure is how much you caught. The grade is yours.',
+  ridePlateCap: 'The pass',
+  ridePlateBody: 'These platforms ride on the pass.',
+  ridePlateOpen: 'They are open to everyone for now.',
 }
 
 const onboarding = {

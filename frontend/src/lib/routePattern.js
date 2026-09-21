@@ -28,6 +28,7 @@ export const ROUTES = [
   // answers null for it.
   '/ride',
   '/ride/cards',
+  '/ride/reading',
 
   '/learn',
   '/learn/kana',

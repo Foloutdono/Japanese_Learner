@@ -1717,6 +1717,14 @@ const ride = {
   rideGuessed: 'Deviné ? Alors elle revient dans quelques jours. Dites faux quand vous devinez.',
   rideDoneBody: n => `C'est tout le jeu. **${n} mots nouveaux par jour**, chacun de retour juste avant que vous l'oubliiez.`,
   rideContinue: 'Continuer',
+  // L'essai de lecture (plan 099) : la phrase, le champ, la mesure,
+  // puis la plaque qui dit quels quais sont sur l'abonnement.
+  rideReadFront: 'Lisez-la. Elle se cache dans un instant.',
+  rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
+  rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
+  ridePlateCap: 'L\'abonnement',
+  ridePlateBody: 'Ces quais sont sur l\'abonnement.',
+  ridePlateOpen: 'Ils sont ouverts à tous pour l\'instant.',
 }
 
 const onboarding = {

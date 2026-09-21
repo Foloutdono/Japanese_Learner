@@ -115,12 +115,15 @@ runtime purpose. Two consequences worth knowing:
   `screens/ComprehensionRun.jsx` and `index.css`).
   Numbers **097–101** are claimed by wave 21, the first ride (the
   flashcard and reading rides after the boarding, and the per-gate
-  guide), planned in `plans/README.md`; 097 and 098 are executed (cited
-  in `routes/onboarding.py`, `routes/profile.py`, `core/events.py`,
-  `scripts/backfill_first_ride.py`, `screens/RideRun.jsx`,
+  guide), planned in `plans/README.md`; 097, 098 and 099 are executed
+  (cited in `routes/onboarding.py`, `routes/profile.py`, `routes/today.py`,
+  `core/events.py`, `scripts/backfill_first_ride.py`,
+  `study/daily_queue.py`, `tests/test_pass_platforms.py`,
+  `screens/RideRun.jsx`, `screens/RideReading.jsx`,
   `screens/RidePreview.jsx`, `components/guide/Callout.jsx`,
-  `lib/routePattern.js` and `index.css`), 099–101 are not — cite those
-  from the files the plan names, and nowhere else.
+  `components/reading/ReadingPieces.jsx`, `domain/paywall.js`,
+  `lib/routePattern.js` and `index.css`), 100 and 101 are not — cite
+  those from the files the plan names, and nowhere else.
   When starting a new wave, begin at **102** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.

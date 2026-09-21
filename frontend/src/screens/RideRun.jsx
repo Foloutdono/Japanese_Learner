@@ -45,10 +45,10 @@ import { useProfileSummary } from '../stores/profileSummary'
 // stopwatch and the known card's sound wait for it. `dryRun` is the
 // workbench's (/dev/ride): no POST, and `cards` may be handed in.
 
-// Where a finished ride goes. Plan 099 puts the reading ride here and
-// moves the stamp to its last plate; until then the card ride is the
-// whole lesson.
-export const RIDE_NEXT = '/today'
+// Where a finished card ride goes: the reading ride (plan 099), whose
+// last plate carries the lesson's stamp. Only a SKIP stamps from here,
+// because a skip is the whole lesson declined.
+export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: known, known-back, unknown,
 // unknown-back, done (stepFor below).
@@ -77,7 +77,7 @@ function rideCard(card, latin) {
   }
 }
 
-export default function RideRun({ session, onDone, covered = false, dryRun = false, cards: given = null }) {
+export default function RideRun({ session, onDone, onNext = null, covered = false, dryRun = false, cards: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const summary = useProfileSummary()
@@ -131,18 +131,25 @@ export default function RideRun({ session, onDone, covered = false, dryRun = fal
     if (finished.current) return
     finished.current = true
     setBusy(true)
-    track('ride_done', { skipped, at: 'cards', ms: watches.current?.total.read() ?? 0 })
+    if (!skipped) {
+      // On to the reading ride; the lesson's stamp is its plate's.
+      mark(step, 'reading')
+      if (onNext) onNext()
+      else navigate(RIDE_NEXT, { replace: true })
+      return
+    }
+    track('ride_done', { skipped: true, at: 'cards', ms: watches.current?.total.read() ?? 0 })
     const stamped = dryRun
       ? Promise.resolve()
       : apiJson('/api/onboarding/ride/done', session, {
-          method: 'POST', body: JSON.stringify({ skipped }),
+          method: 'POST', body: JSON.stringify({ skipped: true }),
         }).catch(() => {})
     // A stamp that could not land is not a reason to hold the door:
     // the ride shows again next launch, which costs a learner one more
     // Skip and nothing else.
     stamped.then(() => {
       onDone?.()
-      navigate(RIDE_NEXT, { replace: true })
+      navigate('/today', { replace: true })
     })
   }
 
@@ -153,7 +160,7 @@ export default function RideRun({ session, onDone, covered = false, dryRun = fal
     if (!failed || finished.current) return
     finished.current = true
     onDone?.()
-    navigate(RIDE_NEXT, { replace: true })
+    navigate('/today', { replace: true })
   }, [failed, navigate, onDone])
 
   const card = cards?.[index] ?? null

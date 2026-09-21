@@ -20121,5 +20121,57 @@ a.slip__act { text-decoration: none; }
 .ride__done-foot {
   width: 100%;
   max-width: var(--card-w);
+  /* The quiet offer over the one filled action (plan 099's plate),
+     PassStep's own order; the card ride's foot holds the action alone. */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
 }
 .ride__done-foot .btn-depart { width: 100%; }
+
+/* ── The reading ride's plate (plan 099) ──
+   The done screen's own room (.ride__done): the pair over a sentence,
+   the platforms as a lattice of roundel-and-name in each line's own
+   pigment (a line colour is a section's name, never decoration), the
+   open-for-now note, and the foot with the quiet offer over the one
+   filled action -- PassStep's own order. */
+.ride__plate-cap {
+  margin: calc(-1 * var(--sp-4)) 0 0;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: var(--tr-caption);
+  color: var(--text-secondary);
+}
+.ride__plate-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: var(--card-w);
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--sp-2);
+}
+.ride__plate-item {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  text-align: left;
+}
+.ride__plate-icon {
+  flex: none;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  color: var(--line-color, var(--text-primary));
+}
+.ride__plate-title {
+  font-size: var(--fs-sm);
+  color: var(--text-primary);
+}

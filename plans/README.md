@@ -4946,7 +4946,7 @@ These are suggestions; each is one line to reverse.
 |---|---|---|
 | 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the six endpoints, the events, the backfill script | DONE (2026-09-21) |
 | 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | DONE (2026-09-21) |
-| 099 | The reading ride and the pass plate | PLANNED |
+| 099 | The reading ride and the pass plate | DONE (2026-09-21) |
 | 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | PLANNED |
 | 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, ADR 0017 | PLANNED |
 
@@ -5373,6 +5373,53 @@ component plan 100 grows the spotlight onto. Found at the keyboard:
   registries); `App.routes`'s veteran fixture now carries `tutorialAt`.
   Backend 1606 (one assertion added). Lint, `lint:css`, `lint:scale` and
   the build clean.
+
+**099 (2026-09-21).** `screens/RideReading.jsx` at `/ride/reading`, on
+the reading pigment: the clock, the sentence that hides, the field, the
+ticket office's own measure (`POST /api/onboarding/ride/check`), the
+rating, and the plate. The reading run's drawing is shared, not copied:
+`components/reading/ReadingPieces.jsx` (`ReadingTimer`, `ReadingPrompt`,
+`AnswerForm`, `ReadingRegisters`) came out of `ReadingRun.jsx`, which
+now renders them; its seven browser tests passed unchanged, which is
+the point of extracting rather than rewriting. Found at the keyboard:
+
+- **The plate is drawn from a map the server pins.** `domain/paywall.js`
+  gains `PASS_PLATFORMS` (section id → path); the plate lists the
+  sections at those paths from `config/tabs.getAllSections`, so the
+  names, glyphs and pigments are the sections' own.
+  `tests/test_pass_platforms.py` reads the map out of the JS file and
+  checks it both ways against every router under `require_pass`: a
+  seventh gated router cannot go unlisted, and a listed platform cannot
+  front an ungated one. The open-for-now line rides on
+  `useCredits().enforced`, so it disappears the day enforcement is
+  switched on and no copy changes.
+- **The card ride no longer stamps on Continue.** The stamp is the
+  lesson's, and the lesson ends on the plate: `RideRun` stamps only on
+  Skip (the whole lesson declined) and otherwise goes on to
+  `/ride/reading` (`RIDE_NEXT`; the workbench passes `onNext` to chain
+  the two without a router). `ride_done` therefore carries
+  `at: 'reading'` for a finished lesson and `at: 'cards'` only for a
+  skip on the first screen.
+- **A clock that starts at zero reads as run out.** The ride's
+  `timeLeft` began at 0 and the "covered" test fired before the
+  sentence had been up a frame; it starts at null now, and the timer
+  draws the full bar until the sentence is up.
+- **A controlled input is not typed into by setting `.value`.** React
+  reads its own value tracker; the browser test sets the value through
+  the prototype's setter before dispatching `input`, as the boarding's
+  tests do with a helper.
+
+- **Walked live** (boarding → 改札 → the card ride → Continue → the
+  reading ride: the clock at 9.1 s over 駅で友だちに会います。, the note
+  over the sentence, the cover, the field, *100% matched* on the
+  answer's label, the note over the bar, the plate with the six
+  platforms in their own glyphs and pigments and *They are open to
+  everyone for now*, the quiet *See the pass* over *Enter the station*)
+  → `/today` with the day's ration on the gate (*Hiragana (basic) ·
+  free · 10 new · 10*, the tab badge at 10); a second launch lands on
+  `/today`; the trail's `ride_done` reads `at: reading, skipped:
+  false`. Nothing to fix this time. The two 503s in the console are
+  `/api/tts` again.
 
 **The day's ration (owner-directed, 2026-09-21, after the live check).**
 The run a novice landed on after the ride was an empty gate, and the

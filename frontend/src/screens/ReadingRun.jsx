@@ -7,11 +7,11 @@ import { runSource } from '../domain/sentenceSource'
 import { StudyStage } from '../components/study/StudyStage'
 import { usePracticeXp } from '../hooks/usePracticeXp'
 import PromptCard from '../components/study/PromptCard'
+import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
-import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
-import { FireIcon, EyeOffIcon } from '../components/ui/Icons'
+import { FireIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
@@ -506,56 +506,19 @@ function SessionView({
 
       {stage === 'reading' && data && (
         <>
-          <div className="timer">
-            <div className="timer__bar" aria-hidden="true">
-              <span className="timer__fill" style={{ width: `${(timeLeft / data.display_seconds) * 100}%` }} />
-            </div>
-            <span className="timer__label" role="timer">
-              {phraseCovered ? t.writeWhatYouSaw : `${timeLeft.toFixed(1)}s`}
-            </span>
-          </div>
-
-          <CardTransition cardKey={data._uiKey}>
-            <PromptCard foot={{ left: where, right: t.readingTitle }}>
-              {/* The sentence is covered when the clock runs out, so
-                  recall keeps mattering for anyone still writing. */}
-              <span className={`sentence${phraseCovered ? ' sentence--covered' : ''}`} lang="ja">
-                {phraseCovered ? <EyeOffIcon size={34} /> : data.phrase}
-              </span>
-            </PromptCard>
-          </CardTransition>
-
-          {/* The answer field is available the whole time the phrase is
-              on screen, not only after the timer runs out — the reader
-              can start writing as soon as they're ready.
-
-              Nothing may rewrite what is typed here. Romaji is not a
-              word in any language the keyboard knows, so a phone's own
-              helpers treat every answer as a typo to be repaired:
-              autocapitalise puts a capital on it, autocorrect
-              substitutes the nearest real word, and this run is
-              self-graded — the learner compares what they wrote
-              against the reference and rates themselves on it. A
-              silently rewritten answer is therefore not a cosmetic
-              annoyance but a wrong verdict on their own recall. */}
-          <form className="stage__foot" onSubmit={e => { e.preventDefault(); submitAnswer() }}>
-            <input
-              autoFocus
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              placeholder={t.romajiPlaceholder}
-              aria-label={t.writeWhatYouSaw}
-              className="field field--page"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-              spellCheck={false}
-              enterKeyHint="done"
-            />
-            <button type="submit" className="btn-primary" disabled={!answer.trim()}>
-              {t.submit}
-            </button>
-          </form>
+          {/* The stage's pieces are shared with the reading ride (plan
+              099, components/reading/ReadingPieces.jsx). The answer
+              field is available the whole time the phrase is on
+              screen, not only after the timer runs out — the reader
+              can start writing as soon as they're ready. */}
+          <ReadingTimer timeLeft={timeLeft} total={data.display_seconds} covered={phraseCovered} t={t} />
+          <ReadingPrompt
+            cardKey={data._uiKey}
+            foot={{ left: where, right: t.readingTitle }}
+            phrase={data.phrase}
+            covered={phraseCovered}
+          />
+          <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submitAnswer} t={t} />
         </>
       )}
 
@@ -581,39 +544,16 @@ function SessionView({
                 the registers would only say it twice, over the room
                 the rows need. */}
             {!showBreakdown && (
-              <>
-                <span className="prose__jp" lang="ja">{data.phrase}</span>
-                <span className="prose__romaji">{feedback.romaji}</span>
-                {data.translation && (
-                  <>
-                    {/* Real example sentences only carry an English gloss
-                        regardless of UI language — see reading.py's
-                        translation_lang note — so this is labelled
-                        explicitly instead of implying it matches `lang`. */}
-                    <span className="prose__label">{data.translation_lang === 'en' ? t.translationEnglish : t.translation}</span>
-                    <span className="prose__en">{data.translation}</span>
-                  </>
-                )}
-                <span className="prose__rule" />
-                {/* The measurement rides on the answer's own label, as
-                    it does in 書取: a hint for the learner grading
-                    below, not the grade. Absent until it lands, and
-                    absent for good if it never does — the label is the
-                    same label either way rather than a row that jumps
-                    when a number arrives in it. */}
-                <span className="prose__label prose__label--measured">
-                  {t.yourAnswer}
-                  {feedback.accuracy !== null && feedback.accuracy !== undefined && (
-                    <span className="prose__measure">{t.answerMatched(feedback.accuracy)}</span>
-                  )}
-                </span>
-                <span className="prose__en">{answer}</span>
-                <span
-                  className={`prose__verdict${feedback.correct === null ? '' : feedback.correct ? ' prose__verdict--ok' : ' prose__verdict--x'}`}
-                >
-                  {feedback.correct === null ? t.didYouGetIt : feedback.correct ? t.correct : t.incorrect}
-                </span>
-              </>
+              <ReadingRegisters
+                phrase={data.phrase}
+                romaji={feedback.romaji}
+                translation={data.translation}
+                translationLang={data.translation_lang}
+                answer={answer}
+                accuracy={feedback.accuracy}
+                correct={feedback.correct}
+                t={t}
+              />
             )}
 
             {feedback.correct !== null && (
