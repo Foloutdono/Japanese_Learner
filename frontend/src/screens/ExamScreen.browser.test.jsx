@@ -17,7 +17,7 @@ vi.mock('../lib/audio', async o => ({
   startAmbiance: vi.fn(), stopAmbiance: vi.fn(),
 }))
 vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
-vi.mock('../stores/profileSummary', () => ({ useProfileSummary: () => ({ jlptLevel: 'N5' }) }))
+vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N5' }) }))
 vi.mock('../exam/examService', () => ({
   listExams: async () => [
     { id: 'e-n3', level: 'N3', kind: 'vocab', title: 'N3 語彙', questionCount: 21, generated: true, revision: 1 },

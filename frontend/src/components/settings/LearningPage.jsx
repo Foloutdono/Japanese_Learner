@@ -1,3 +1,6 @@
+import { useNavigate } from 'react-router-dom'
+import { forgetGuidedHere } from '../../hooks/useGuide'
+import { forgetShown } from '../../stores/guide'
 import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { apiJson } from '../../lib/api'
@@ -37,6 +40,18 @@ const RATING_SCALE_IDS = ['binary', 'simple', 'full']
 // deleted. The figures come from GET /api/profile/learning/preview —
 // the same arithmetic the write will run.
 export function LearningPage({ session }) {
+  const navigate = useNavigate()
+  // 案内, again: the server's map cleared, this device's note and this
+  // session's memory with it, and the profile store told to catch up.
+  const [guideReset, setGuideReset] = useState(null) // null | 'busy' | 'done'
+  function resetGuide() {
+    playClick()
+    setGuideReset('busy')
+    apiJson('/api/onboarding/guided', session, { method: 'DELETE' })
+      .then(() => { forgetGuidedHere(); forgetShown(); return refreshSummary() })
+      .then(() => setGuideReset('done'))
+      .catch(() => setGuideReset(null))
+  }
   const { t } = useLang()
   const { summary, failed: summaryFailed } = useProfileSummaryState()
   const [pending, setPending] = useState(null) // { level, preview } while the sheet is open
@@ -197,6 +212,32 @@ export function LearningPage({ session }) {
             </div>
           </>
         )}
+      </Slip>
+
+      {/* 試乗 and 案内, again (plan 100): the ride at any time, and the
+          guide on each gate's next opening. Both do exactly what they
+          say the moment they are tapped -- no dead controls. */}
+      <Slip label={t.settingsFirstRide}>
+        <div className="form__row">
+          <button
+            type="button"
+            className="btn-secondary"
+            data-action="ride-again"
+            onClick={() => { playClick(); navigate('/ride/cards') }}
+          >
+            {t.settingsRideAgain}
+          </button>
+          <button
+            type="button"
+            className="btn-secondary"
+            data-action="guide-again"
+            disabled={guideReset === 'busy'}
+            onClick={resetGuide}
+          >
+            {t.settingsGuideAgain}
+          </button>
+        </div>
+        {guideReset === 'done' && <span className="slip__hint" role="status">{t.settingsGuideAgainDone}</span>}
       </Slip>
 
       {failed && <p className="hint" role="alert">{t.onbPassError}</p>}

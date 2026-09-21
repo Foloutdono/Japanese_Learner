@@ -63,7 +63,7 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   })
 
   return (
-    <section className="sbook" aria-label={`${t.currentStreak}: ${streak ?? 0}`}>
+    <section className="sbook" aria-label={`${t.currentStreak}: ${streak ?? 0}`} data-guide="profile.stamps">
       <div className="sbook__month">
         <span className="sbook__title">{t.stampBook}</span>
         <span className="fig__l">{monthFmt.format(today)}</span>
@@ -133,7 +133,7 @@ export function Records({ profile, t, navigate }) {
   ]
 
   return (
-    <div className="records">
+    <div className="records" data-guide="profile.records">
       {figures.map(f => (
         <div key={f.key} className="record">
           <span className="record__value">
@@ -159,6 +159,7 @@ export function Records({ profile, t, navigate }) {
         type="button"
         className="record record--door"
         style={{ '--line-color': 'var(--pass-ink)' }}
+        data-guide="profile.settings"
         onClick={() => navigate('/profile/settings')}
       >
         <span className="pf-line__id">

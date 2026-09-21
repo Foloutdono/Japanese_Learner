@@ -29,10 +29,10 @@ import { stopsAround } from '../../domain/lineProgress'
 // button. `fill` is how much of the stripe is painted raw: the leg
 // being ridden, 0..1, and 1 for a plate with no track behind it.
 
-export function Plate({ section, aside = null, meta = null, foot = null, fill = 1, onClick, className = '' }) {
+export function Plate({ section, aside = null, meta = null, foot = null, fill = 1, onClick, className = '', guide }) {
   const code = stationFor(section.path).code
   return (
-    <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }}>
+    <div className={`plate ${className}`.trim()} style={{ '--line-color': section.color }} data-guide={guide}>
       <button type="button" className="plate__head" onClick={onClick}>
         <span className="pf-line__roundel plate__roundel" aria-hidden="true">{code}</span>
         <span className="plate__names">
@@ -66,10 +66,10 @@ function Mark({ mark }) {
 }
 
 /** The plate's foot on a Learn line: ‹ behind · HERE · ahead ›. */
-export function StopsFoot({ stops }) {
+export function StopsFoot({ stops, guide }) {
   const { prev, here, next } = stopsAround(stops)
   return (
-    <span className="plate__foot plate__foot--stops">
+    <span className="plate__foot plate__foot--stops" data-guide={guide}>
       <span className="plate__prev">{prev && <>‹ <Mark mark={prev} /></>}</span>
       <span className="plate__here"><Mark mark={here} /></span>
       <span className="plate__next">{next && <><Mark mark={next} /> ›</>}</span>

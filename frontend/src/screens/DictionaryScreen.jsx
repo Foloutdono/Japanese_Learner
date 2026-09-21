@@ -27,6 +27,8 @@ import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { FuriganaParts } from '../components/study/Readings'
 import { pickPlateReadings } from '../domain/readingPick'
 import { Leave } from '../components/chrome/Bar'
+import { Guide } from '../components/guide/Guide'
+import { useGuide } from '../hooks/useGuide'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -498,8 +500,12 @@ export default function DictionaryScreen({ session }) {
 	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
 	const isShelf = category === FAVORITES
 
+	// 案内 — once the first page of the catalogue has painted (plan 100).
+	const guide = useGuide('dictionary', !loading && results.length > 0)
+
 	return (
 		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
+			{guide.open && <Guide gate="dictionary" onEnd={guide.onEnd} />}
 			{/* No bar: the gate's head came off the four gates on the owner's
 			    call (2026-09-20, see LearnScreen.jsx). The name stays as the
 			    screen's clipped <h1>. */}
@@ -509,7 +515,7 @@ export default function DictionaryScreen({ session }) {
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
 			    (plan 069, HAS_STORE). */}
-			<div className="anl-door">
+			<div className="anl-door" data-guide="dict.analyzer">
 				<button type="button" className="anl-door__open" onClick={() => openAnalyzer()}>
 					<span className="wmap-roundel anl-door__roundel" style={{ '--line-color': ANALYZER_COLOR }} aria-hidden="true">{analyzerStation.code}</span>
 					<span className="anl-door__names">
@@ -558,9 +564,9 @@ export default function DictionaryScreen({ session }) {
 			    you moved along it. It is a toggle in the field now, which is
 			    where the other way of asking the same question already
 			    lives. */}
-			<Console>
+			<Console guide="dict.console">
 				<ConsoleTop>
-					<Chips label={t.dictCollections} className="dict-collections">
+					<Chips label={t.dictCollections} className="dict-collections" guide="dict.chips">
 						{CATEGORIES.map(([key, label, color]) => (
 							<Chip key={key} on={category === key} color={color} onClick={() => switchCategory(key)}>
 								{label}
@@ -920,7 +926,7 @@ function ResultsSection({
 					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
 						<div className="dict-grid">
-							{results.map(entry => {
+							{results.map((entry, i) => {
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
 								const isGrammar = entry.type === 'grammar'
@@ -929,6 +935,7 @@ function ResultsSection({
 									<button
 										key={entryKey(entry)}
 										type="button"
+										data-guide={i === 0 ? 'dict.entry' : undefined}
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										// --len is how many characters the headword has: the
 										// tile divides its own width by it and sets the word to

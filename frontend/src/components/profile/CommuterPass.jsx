@@ -30,7 +30,7 @@ export function CommuterPass({ profile, t, children, footer = null, headingTag: 
   const pct  = Math.round((into / span) * 100)
 
   return (
-    <div className="pass">
+    <div className="pass" data-guide="profile.pass">
       {/* 案一 of the pass round: composed the way a real IC card is
           printed — brand and issuer in the top corners, holder in the
           middle, the balance along the bottom with the class printed

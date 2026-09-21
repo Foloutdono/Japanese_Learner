@@ -26,6 +26,7 @@ import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
 import { rememberOnboarded, wasOnboardedHere } from './stores/onboarded'
+import { holdGuide } from './stores/guide'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
 import { LangProvider, useLang } from './LangContext'
@@ -341,6 +342,8 @@ export default function App() {
   // profile here as well as on the server, because this copy is read
   // again on every visit to '/' and stores/profileSummary's is not it.
   const rideDue = onboardingProfile != null && onboardingProfile.tutorialAt == null
+  // 案内 — no gate's guide may open under the 改札 cutscene (plan 100).
+  useEffect(() => { holdGuide(onboarding === 'finishing') }, [onboarding])
   const rideDone = () => setGate(g => (
     g?.profile ? { ...g, profile: { ...g.profile, tutorialAt: new Date().toISOString() } } : g
   ))

@@ -25,7 +25,7 @@ vi.mock('../lib/audio', async o => ({
   playUi: vi.fn(), playAnnouncement: vi.fn(), playClick: vi.fn(),
   startAmbiance: vi.fn(), stopAmbiance: vi.fn(),
 }))
-vi.mock('../stores/profileSummary', () => ({ useProfileSummary: () => ({ jlptLevel: 'N5' }) }))
+vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N5' }) }))
 
 const { default: SentenceStation } = await import('./SentenceStation')
 const { seedStats } = await import('../stores/stats')

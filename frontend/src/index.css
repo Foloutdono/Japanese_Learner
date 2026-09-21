@@ -20175,3 +20175,56 @@ a.slip__act { text-decoration: none; }
   font-size: var(--fs-sm);
   color: var(--text-primary);
 }
+
+
+/* ── 案内 — the guide over a gate (plan 100) ──
+   One element over the anchor whose shadow IS the scrim, wearing the
+   anchor's own corner; the note is the callout (.guide-callout, above)
+   with controls. The spot takes no pigment: the thing it frames is
+   already in its line's colour, which is the point. It moves between
+   stops with the boarding's ease; none under reduced motion. */
+.guide__spot {
+  position: fixed;
+  z-index: 219;
+  box-shadow: 0 0 0 100vmax var(--scrim-bg, rgba(0, 0, 0, 0.55));
+  border-radius: var(--r-card);
+  pointer-events: none;
+  transition: top var(--guide-move, 260ms) ease-out, left var(--guide-move, 260ms) ease-out,
+    width var(--guide-move, 260ms) ease-out, height var(--guide-move, 260ms) ease-out;
+}
+.guide__spot--pill { border-radius: var(--r-pill); }
+.guide__spot--flat { border-radius: var(--r-flat); }
+.guide__spot--plate { border-radius: var(--r-plate); }
+.guide__spot--identity { border-radius: var(--r-identity); }
+.guide-callout--live .guide-callout__foot {
+  align-items: center;
+  gap: var(--sp-3);
+}
+.guide-callout__count {
+  margin-right: auto;
+  font-size: var(--fs-caption);
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel-soft);
+}
+.guide-callout__skip,
+.guide-callout__next {
+  min-height: 44px;
+  padding: 0 var(--sp-4);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+}
+.guide-callout__skip {
+  background: transparent;
+  color: var(--text-on-panel-soft);
+  border: 1px solid var(--border);
+}
+.guide-callout__next {
+  background: var(--accent2);
+  color: var(--text-on-panel);
+  border: 1px solid transparent;
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide__spot { transition: none; }
+}

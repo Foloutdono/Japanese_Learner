@@ -28,7 +28,7 @@ vi.mock('../lib/audio', async o => ({
 // the commit through so the destination is a location, not an
 // animation (the pattern the analyzer's tests use).
 vi.mock('../stores/boarding', () => ({ board: commit => commit() }))
-vi.mock('../stores/profileSummary', () => ({ useProfileSummary: () => ({ jlptLevel: 'N4' }) }))
+vi.mock('../stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N4' }) }))
 
 const { default: PracticeScreen } = await import('./PracticeScreen')
 const { getSections } = await import('../config/tabs')
@@ -172,5 +172,19 @@ describe('the practice gate at phone width', () => {
     chipAt(4, 'N2').click()
     await settle(60)
     expect(here.path).toBe('/practice/exam?level=N2')
+  })
+})
+
+
+// ── 案内 — the anchors the guide points at (plan 100) ────────────
+describe('the practice gate\'s guide anchors', () => {
+  it('marks the first platform and its destinations, once each', async () => {
+    const screen = await gate()
+    const root = screen.container
+    expect(root.querySelectorAll('[data-guide="practice.plate"]')).toHaveLength(1)
+    expect(root.querySelector('[data-guide="practice.plate"] [data-guide="practice.dests"]')).toBeTruthy()
+    // No pass tag is drawn while nothing is for sale: the guide skips
+    // that stop rather than pointing at nothing.
+    expect(root.querySelector('[data-guide="practice.pass"]')).toBeNull()
   })
 })

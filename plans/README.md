@@ -4947,7 +4947,7 @@ These are suggestions; each is one line to reverse.
 | 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the six endpoints, the events, the backfill script | DONE (2026-09-21) |
 | 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | DONE (2026-09-21) |
 | 099 | The reading ride and the pass plate | DONE (2026-09-21) |
-| 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | PLANNED |
+| 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | DONE (2026-09-21) |
 | 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, ADR 0017 | PLANNED |
 
 097 first — the three screens all read and write through it. 098 and 099
@@ -5420,6 +5420,54 @@ the point of extracting rather than rewriting. Found at the keyboard:
   `/today`; the trail's `ride_done` reads `at: reading, skipped:
   false`. Nothing to fix this time. The two 503s in the console are
   `/api/tts` again.
+
+**100 (2026-09-21).** `components/guide/Guide.jsx` (the spot whose
+shadow is the scrim, the callout with Next/Skip, modal through
+`useDialog`), `components/guide/guides.js` (the registry, in TAB_IDS
+order, `GUIDE_CHAIN` off), `hooks/useGuide.js` (the trigger: the
+profile's `guided` map, the screen's `ready`, the 改札 hold from
+`stores/guide.js`; the stamp, the store refresh, the `jp-guided` mirror
+on a failed POST), the anchors as `data-guide` on the chrome and the
+gates (a `guide` prop on `Plate`, `StopsFoot`, `Console` and `Chips`,
+as `CardTransition` and `RatingBar` took one), and the two rows on
+Settings › Learning. Found at the keyboard:
+
+- **The anchors are read after the guide is in the DOM, never during
+  render.** A screen mounts its guide in the same commit as its blocks,
+  so a filter over `getBoundingClientRect` in the render body found
+  nothing, ended the guide before it began, and the tests saw a note
+  that had already fired `onEnd(false)`. `stops` is state set in a
+  layout effect; the "nothing to point at" end waits for it.
+- **The plates arrive.** Every card and plate on a gate animates in a
+  few pixels low, and a rect taken mid-flight is a spot a few pixels
+  off. The guide re-measures on `animationend` and `transitionend`
+  (document, capture) and twice more on a timer, beside the resize,
+  scroll and `ResizeObserver` it already had.
+- **The trigger demands an answer.** A summary without a `guided` map
+  (every existing fixture, a store seeded by hand, an older server)
+  opens nothing: `!summary?.guided` is the gate, not `summary == null`.
+  Without it the guide would have opened under half the suite's screen
+  tests and over a learner whose profile had not answered.
+- **`TAB_IDS` is learn, practice, today, dictionary, profile** -- not
+  today-first as the plan's table had it. The registry follows the tab
+  bar's order (the node test insists), and `today` still carries the
+  HUD and the tab bar as the first gate a learner SEES; the chain, if
+  ever switched on, walks the bar's order.
+- **A guide that has ended draws nothing**, whether or not the screen
+  that mounted it has let go: `over` state, not the parent's unmount.
+- **Walked live** on every gate after clearing the map: today opens on
+  the level roundel with the strip and gate under the scrim and the
+  note below; 5/6 frames the fare gate; 6/6 the tab bar with the note
+  above it and *Done*; a second visit opens nothing; learn frames the
+  kana plate with its foot and the shelf; profile the pass through to
+  the settings door; dictionary the console, the chips, 土's tile
+  (note above it, the spot being in the lower half) and the analyzer
+  door; practice the reading plate and its destinations at 2/2 (no
+  pass tag drawn, so that stop was skipped in silence, as designed).
+  The five stamps landed and the trail holds a `guide_done` per gate
+  -- twice for two of them, which is `lib/track.js` flushing a batch
+  again after a full navigation, older than this wave and worth a look
+  of its own.
 
 **The day's ration (owner-directed, 2026-09-21, after the live check).**
 The run a novice landed on after the ride was an empty gate, and the

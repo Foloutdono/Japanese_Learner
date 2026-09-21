@@ -990,3 +990,17 @@ describe('the shelf', () => {
       expect(apiFetch.mock.calls.map(([p]) => String(p)).some(p => p.startsWith('/api/dictionary/favorites?'))).toBe(true)
     }))
 })
+
+
+// ── 案内 — the anchors the guide points at (plan 100) ────────────
+describe("the dictionary's guide anchors", () => {
+  it('marks the door, the console, the collections and the first entry', async () => {
+    const screen = await renderScreen()
+    const root = screen.container
+    expect(root.querySelector('.anl-door[data-guide="dict.analyzer"]')).toBeTruthy()
+    expect(root.querySelector('.console[data-guide="dict.console"]')).toBeTruthy()
+    expect(root.querySelector('.dict-collections[data-guide="dict.chips"]')).toBeTruthy()
+    // One entry, the first: the rest say the same thing by looking the same.
+    expect(root.querySelectorAll('.dict-entry-card[data-guide="dict.entry"]').length).toBeLessThanOrEqual(1)
+  })
+})

@@ -203,7 +203,7 @@ export default function GateCard({ today, failed }) {
   }
 
   return (
-    <div className="gate-card">
+    <div className="gate-card" data-guide="today.gate">
       <div className="gate-card__head">
         <span className="gate-card__title">{t.fareGate}</span>
         <span className="gate-card__figure">

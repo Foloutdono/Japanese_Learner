@@ -42,7 +42,7 @@ export function LineLedger({ stats, t, navigate }) {
   if (!lines.length) return null
 
   return (
-    <div className="pf-ledger">
+    <div className="pf-ledger" data-guide="profile.ledger">
       {lines.map(s => {
         const source = TRACKED_LINES[s.path]
         const { learned, total } = lineTotals(stats, source)

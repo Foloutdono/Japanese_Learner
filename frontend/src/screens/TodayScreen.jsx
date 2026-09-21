@@ -5,6 +5,8 @@ import { useCredits } from '../stores/credits'
 import GateCard from '../components/station/GateCard'
 import { untilNext } from '../domain/lanes'
 import PassStrip from '../components/station/PassStrip'
+import { Guide } from '../components/guide/Guide'
+import { useGuide } from '../hooks/useGuide'
 import { FareSlip } from '../components/credits/FareSlip'
 import Empty from '../components/ui/Empty'
 import { CheckIcon } from '../components/ui/Icons'
@@ -46,6 +48,8 @@ export default function TodayScreen() {
   const navigate = useNavigate()
   const location = useLocation()
   const { data: today, failed } = useTodaySummary()
+  // 案内 — the gate's guide, once, after the lanes have painted (plan 100).
+  const guide = useGuide('today', Boolean(today) || failed)
   const credits = useCredits()
 
   // What the run just cleared, handed back through the router's state
@@ -83,6 +87,7 @@ export default function TodayScreen() {
           )}
         </>
       )}
+      {guide.open && !run && <Guide gate="today" onEnd={guide.onEnd} />}
     </main>
   )
 }
