@@ -452,6 +452,11 @@ def _ride_card(level: str, entry: dict, lang: str, romaji: str | None = None) ->
     m = resolve_mode(RIDE_MODE)
     card = _build_vocab_card(vocab_to_id(entry, level), entry, VOCAB_BY_LEVEL[level], m, lang, None)
     card["level"] = level
+    # What the daily queue attaches to every card it serves
+    # (routes/today.py): the frontend reads a card's structure off
+    # `source`, and a section run knows its own. This screen is a queue
+    # of two, so it says so the way the queue does.
+    card["source"] = "vocab"
     # The reading in Latin letters, for the learner who answered "no
     # kana" at the boarding: the frontend rides it on the card the way
     # the furigana hint rides on a kanji.

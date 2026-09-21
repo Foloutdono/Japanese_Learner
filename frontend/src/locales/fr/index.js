@@ -1701,6 +1701,23 @@ const boarding = {
   brdEnter: 'Entrer en gare',
 }
 
+const ride = {
+  // 試乗 — l'essai (plan 098) : les deux premières cartes, sur la vraie
+  // scène. Une phrase par étape, à côté de ce dont elle parle ; la
+  // paire nomme le lieu (la tête de scène), les notes ne le répètent pas.
+  rideDocumentTitle: 'Essai',
+  rideJp: '試乗',
+  rideCap: 'Essai',
+  rideSkip: 'Passer',
+  rideKnownFront: 'Une carte. Le mot est devant. Touchez-la pour la retourner.',
+  rideKnownBack: 'Vous le saviez ? Dites-le. C\'est vous qui notez.',
+  rideUnknownFront: 'Celui-ci, vous ne le connaissez pas. Retournez la carte.',
+  rideUnknownBack: 'Dites faux. Faux n\'est pas une faute : la carte revient plus tôt, et c\'est toute la méthode.',
+  rideGuessed: 'Deviné ? Alors elle revient dans quelques jours. Dites faux quand vous devinez.',
+  rideDoneBody: n => `C'est tout le jeu. **${n} mots nouveaux par jour**, chacun de retour juste avant que vous l'oubliiez.`,
+  rideContinue: 'Continuer',
+}
+
 const onboarding = {
   durDays: (n) => `${n} jours`,
   durMonths: (n) => `${n} mois`,
@@ -1858,4 +1875,5 @@ export default welded({
   ...exam,
   ...onboarding,
   ...boarding,
+  ...ride,
 })

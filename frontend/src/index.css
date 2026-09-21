@@ -19998,3 +19998,99 @@ a.slip__act { text-decoration: none; }
   color: var(--text-secondary);
   opacity: 0.8;
 }
+
+
+/* ── 案内 — the callout (plan 098; the guide's from plan 100) ──
+   One sentence beside the thing it is about, on the panel ink so it
+   reads as the console speaking rather than as content: the same
+   material as the docked rating bar and the sheets. Fixed to the
+   viewport, centred on it (the stage column is centred, and on a phone
+   the column is the screen), the vertical set inline by the component
+   from the anchor's rect. Width is the card column's, less the gutter
+   on a narrow screen. No pointer events unless it carries controls
+   (--live): the ride's note is read, and the card under it is tapped
+   through it. Under the sheets (230+) and the cutscenes (300). */
+.guide-callout {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 220;
+  width: min(var(--card-w), calc(100vw - 2 * var(--sp-5)));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  padding: var(--sp-3) var(--sp-4);
+  background: var(--bg-panel);
+  color: var(--text-on-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--r-card);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  text-align: left;
+  pointer-events: none;
+  animation: guide-callout-in 260ms ease-out backwards;
+}
+.guide-callout--live { pointer-events: auto; }
+.guide-callout__jp {
+  font-family: var(--font-jp);
+  font-size: var(--fs-caption);
+  letter-spacing: var(--tr-reading);
+  color: var(--text-on-panel-soft);
+}
+.guide-callout__text {
+  margin: 0;
+  font-size: var(--fs-sm);
+  line-height: 1.45;
+}
+.guide-callout__foot {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+}
+@keyframes guide-callout-in {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to   { opacity: 1; transform: translate(-50%, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .guide-callout { animation: none; }
+}
+
+/* ── 試乗 — the test ride (plan 098) ──
+   The stage as every run has it; only the last screen is the ride's
+   own: the departure call, the one sentence, and the one filled
+   action. The action docks on a phone like every run's foot
+   (.stage > .stage__foot); here it is the done block's foot, laid out
+   the same way. */
+.ride__done {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-5);
+  text-align: center;
+}
+.ride__done-jp {
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-display);
+  letter-spacing: var(--tr-name);
+  color: var(--line-color, var(--accent));
+}
+.ride__done-text {
+  margin: 0;
+  max-width: 28em;
+  font-size: var(--fs-lead);
+  line-height: 1.5;
+  color: var(--text-secondary);
+}
+.ride__done-note {
+  margin: 0;
+  max-width: 28em;
+  font-size: var(--fs-sm);
+  color: var(--text-secondary);
+}
+.ride__done-foot {
+  width: 100%;
+  max-width: var(--card-w);
+  margin-top: auto;
+}

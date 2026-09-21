@@ -122,6 +122,7 @@ def test_ride_serves_the_known_card_then_the_unknown_one_in_the_vocab_shape(clie
         assert known["kana"] == "こんにちは"
         assert known["romaji"] == "konnichiwa"
         assert known["mode"] == "vocab.flashcard.f2b"
+        assert known["source"] == "vocab"      # the queue's own field, so CardPrompt knows the face
         assert known["direction"] == "f2b"
         # Never studied and never to be: no stage, no preview.
         assert known["stage"] is None and known["review_preview"] is None

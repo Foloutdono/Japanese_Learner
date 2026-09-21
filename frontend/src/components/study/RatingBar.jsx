@@ -10,8 +10,9 @@ import { useRatingScale } from '../../stores/ratingScale'
 const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
 
 /**
- * `scale` overrides the learner's own choice — only the onboarding
- * demo and tests pass it. Everything else takes the setting.
+ * `scale` overrides the learner's own choice — only tests pass it.
+ * Everything else takes the setting, the test ride included (plan
+ * 098): the first bar a learner rates on is the one they will keep.
  */
 // How long the pressed segment stays lit after the rating is taken.
 // The bar goes idle the instant a rating lands (see each screen's
@@ -21,7 +22,7 @@ const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
 // the ring closing, not a toast. Matched to the idle fade in index.css.
 const PRESSED_MS = 420
 
-export default function RatingBar({ onRate, active, scale }) {
+export default function RatingBar({ onRate, active, scale, guide }) {
   const { t } = useLang()
   const preferred = useRatingScale()
   const [pressed, setPressed] = useState(null)
@@ -76,7 +77,7 @@ export default function RatingBar({ onRate, active, scale }) {
   // so nothing is reachable before there is a card to rate. The
   // keyboard handler above is separately gated on `active`.
   return (
-    <div className={`rating-bar${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active}>
+    <div className={`rating-bar${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active} data-guide={guide}>
       {/* One continuous instrument, worst to best -- see index.css for
           why. `.map()` already returns a new array, so the `.reverse()`
           below sorts that copy and never QUALITY_BTNS itself; DOM order

@@ -11,7 +11,9 @@ import { kanaSets } from './domain/kanaSets'
 // on the real App with the real router, the same mocks the onboarding
 // gate test mounts it with.
 
-const apiJsonWithTimeout = vi.fn(async () => ({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4' }))
+// A veteran: boarded, and past the first ride (plan 098) -- without
+// tutorialAt the front door would open on the ride instead of the run.
+const apiJsonWithTimeout = vi.fn(async () => ({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4', tutorialAt: '2026-08-28T09:05:00Z', guided: {} }))
 const apiJson = vi.fn(async () => ({ total: 0, by_source: {}, lanes: [], next_due: null, decks: [], cards: [] }))
 const apiFetch = vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) }))
 

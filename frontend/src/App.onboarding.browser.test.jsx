@@ -107,6 +107,29 @@ describe('App onboarding gate', () => {
     expect(screen.container.querySelector('.brd').dataset.step).toBe('name')
   })
 
+  // ── 試乗 — the first ride (plan 098) ──
+  it('opens the front door on the ride while the profile carries no tutorialAt', async () => {
+    apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4', tutorialAt: null, guided: {} })
+    const screen = await render(<App />)
+    await settle(300)
+    expect(window.location.pathname).toBe('/ride/cards')
+    expect(screen.container.querySelector('main.stage.ride')).not.toBeNull()
+    expect(screen.container.querySelector('.brd')).toBeNull()
+  })
+  it('opens the front door on the run once the ride is stamped', async () => {
+    apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4', tutorialAt: '2026-08-28T09:05:00Z', guided: {} })
+    await render(<App />)
+    await settle(300)
+    expect(window.location.pathname).toBe('/today')
+  })
+  it('never opens the ride on a profile it failed open without', async () => {
+    // A lesson is never shown at the cost of a door: no profile, no ride.
+    rememberOnboarded('user-1')
+    apiJsonWithTimeout.mockRejectedValue(new Error('network down'))
+    await render(<App />)
+    await settle(300)
+    expect(window.location.pathname).toBe('/today')
+  })
   it('remembers a learner the profile called onboarded', async () => {
     apiJsonWithTimeout.mockResolvedValue({ username: 'Tester', onboardedAt: '2026-08-28T09:00:00Z', jlptLevel: 'N4' })
 

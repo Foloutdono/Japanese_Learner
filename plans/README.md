@@ -4945,7 +4945,7 @@ These are suggestions; each is one line to reverse.
 | # | What | Status |
 |---|---|---|
 | 097 | The seam: `tutorial_at` + `guided` on the profile, the ride payload, the six endpoints, the events, the backfill script | DONE (2026-09-21) |
-| 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | PLANNED |
+| 098 | 試乗 — the flashcard ride on the stage, the gate wiring, `/dev/ride` | DONE (2026-09-21) |
 | 099 | The reading ride and the pass plate | PLANNED |
 | 100 | 案内 — the guide: the spotlight, the registry, the anchors on the five gates, the Settings replay | PLANNED |
 | 101 | The record: this index, CLAUDE.md, DESIGN.md, the mobile class map, ADR 0017 | PLANNED |
@@ -5321,6 +5321,52 @@ the keyboard:
   `test_backfill_first_ride.py`); `test_events.py` covers the four new
   names through the frontend mirror. Frontend node lane green; nothing
   else there changes until 098.
+
+**098 (2026-09-21).** The ride is `screens/RideRun.jsx` on `/ride/cards`
+(and `/ride` → it), the real `StudyStage` + `CardTransition` +
+`CardPrompt` + `RatingBar`, fed by `GET /api/onboarding/ride`; the
+note beside each step is `components/guide/Callout.jsx`, the
+component plan 100 grows the spotlight onto. Found at the keyboard:
+
+- **A card's face is chosen by `source`, not by its mode.**
+  `domain/cardShape.structureKeyOf` reads `card.source`, which a section
+  run knows and the daily queue attaches per card (`routes/today.py`).
+  The ride payload now carries `source: 'vocab'` for the same reason
+  the queue does; without it CardPrompt drew the `standard` face,
+  empty.
+- **The anchors are props, not wrappers.** The phone dock is
+  `.stage > .rating-bar` and the card's floor `.stage > .quiz-card-stage`,
+  so a `<div data-guide>` around either breaks the layout. `CardTransition`
+  and `RatingBar` take a `guide` prop and print it on their own root.
+- **The callout is centred by CSS and measured only vertically.** The
+  stage column is centred and on a phone it is the screen; measuring x
+  bought nothing. `place` is `top` (inside the anchor's upper edge — a
+  card whose content is centred leaves it empty), `above` (resting on a
+  docked bar) or `below` (a plate, plan 100). No pointer events unless
+  it carries controls, so the card is tapped through it.
+- **The source-level guard reads comments.** `reviewGates.guard.test.js`
+  scans `screens/*.jsx` for the literal `useReviewGates` and
+  `review_preview`; a comment saying the ride uses neither, and a
+  fixture carrying `review_preview: null`, both counted. The ride is
+  exactly the case the guard exempts (the bar borrowed for a
+  self-rating, as reading and translation do), so the words changed,
+  not the guard.
+- **The browser lane is fr-FR.** The ride's test sets `lang` to English
+  in localStorage before mounting, as its copy is asserted in English.
+- The known card for a learner without hiragana wears its romaji as the
+  furigana hint's own parts (`{text, reading}`), so the ruby is the
+  existing `FuriganaWord`; the flip speaks the kana. `RatingBar`'s
+  `scale` prop stays for its tests; the ride takes the learner's own
+  bar, since the first bar they rate on is the one they will keep.
+- `/dev/ride` is the workbench (literal cards, `dryRun`, ↺), tree-shaken
+  like the others. `RIDE_NEXT` is `/today` until plan 099 puts the
+  reading ride there and moves the stamp to its last plate.
+- Frontend 1181 → 1212 (6 in `RideRun.browser.test.jsx`, 1 in
+  `ride.phone.test.jsx`, 3 front-door cases in
+  `App.onboarding.browser.test.jsx`, the rest the locale and route
+  registries); `App.routes`'s veteran fixture now carries `tutorialAt`.
+  Backend 1606 (one assertion added). Lint, `lint:css`, `lint:scale` and
+  the build clean.
 
 ## Verification (to be filled at execution)
 

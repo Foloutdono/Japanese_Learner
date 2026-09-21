@@ -1768,6 +1768,23 @@ const boarding = {
   brdEnter: 'Enter the station',
 }
 
+const ride = {
+  // 試乗 — the test ride (plan 098): the first two cards, on the real
+  // stage. One sentence per step, beside the thing it is about; the
+  // pair names the place (the stage head), the notes do not repeat it.
+  rideDocumentTitle: 'Test ride',
+  rideJp: '試乗',
+  rideCap: 'Test ride',
+  rideSkip: 'Skip',
+  rideKnownFront: 'A card. The word is on the front. Tap it to turn it over.',
+  rideKnownBack: 'Did you know it? Say so. You are the one who grades.',
+  rideUnknownFront: 'This one you have not met. Turn it over.',
+  rideUnknownBack: 'Say wrong. Wrong is not a fault: the card comes back sooner, and that is the whole method.',
+  rideGuessed: 'Guessed it? Then it comes back in a few days. Say wrong when you guessed.',
+  rideDoneBody: n => `That is the game. **${n} new words a day**, each one back just before you forget it.`,
+  rideContinue: 'Continue',
+}
+
 const onboarding = {
   durDays: (n) => `${n} days`,
   durMonths: (n) => `${n} mo`,
@@ -1923,4 +1940,5 @@ export default {
   ...exam,
   ...onboarding,
   ...boarding,
+  ...ride,
 }

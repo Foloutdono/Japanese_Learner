@@ -115,8 +115,12 @@ runtime purpose. Two consequences worth knowing:
   `screens/ComprehensionRun.jsx` and `index.css`).
   Numbers **097–101** are claimed by wave 21, the first ride (the
   flashcard and reading rides after the boarding, and the per-gate
-  guide), planned in `plans/README.md` and not yet executed — cite them
-  from the files that plan names, and nowhere else.
+  guide), planned in `plans/README.md`; 097 and 098 are executed (cited
+  in `routes/onboarding.py`, `routes/profile.py`, `core/events.py`,
+  `scripts/backfill_first_ride.py`, `screens/RideRun.jsx`,
+  `screens/RidePreview.jsx`, `components/guide/Callout.jsx`,
+  `lib/routePattern.js` and `index.css`), 099–101 are not — cite those
+  from the files the plan names, and nowhere else.
   When starting a new wave, begin at **102** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -379,7 +383,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefixed`/`unprefixed`) so SRS state for the same content differs per learner in the same tables.
 
 ### Frontend layout (`frontend/src/`)
-- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards` is a dev-only route (tree-shaken out of production builds via `import.meta.env.DEV`).
+- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
 - `screens/` — one file per route/page (largely 1:1 with `App.jsx` routes).
 - `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the mobile chrome (plan 068): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
 - `domain/` — pure client-side domain logic: card shape helpers, kana sets, level titles, reward tiers, stats modeling, study-mode definitions, XP curve. Mirrors backend concepts but has no network calls.

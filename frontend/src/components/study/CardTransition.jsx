@@ -75,7 +75,7 @@ const OUTGOING_MS = 220
  * the press's own caption, which lands in the same corner with the
  * new stage.
  */
-export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, className, children }) {
+export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage, className, guide, children }) {
   const effectiveContentKey = contentKey ?? cardKey
 
   const [liveKey, setLiveKey] = useState(cardKey)
@@ -186,7 +186,7 @@ export function CardTransition({ cardKey, contentKey, stamp, onStampDone, stage,
   }, [stamp, showStamp, onStampDone])
 
   return (
-    <div className={`quiz-card-stage${className ? ` ${className}` : ''}`}>
+    <div className={`quiz-card-stage${className ? ` ${className}` : ''}`} data-guide={guide}>
       <div
         className="card-transition"
         style={height != null ? { height } : undefined}
