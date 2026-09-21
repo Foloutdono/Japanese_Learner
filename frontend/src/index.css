@@ -20198,7 +20198,8 @@ a.slip__act { text-decoration: none; }
 .guide__spot--identity { border-radius: var(--r-identity); }
 .guide-callout--live .guide-callout__foot {
   align-items: center;
-  gap: var(--sp-3);
+  gap: var(--sp-2);
+  margin-top: var(--sp-1);
 }
 .guide-callout__count {
   margin-right: auto;
@@ -20206,25 +20207,54 @@ a.slip__act { text-decoration: none; }
   font-variant-numeric: tabular-nums;
   color: var(--text-on-panel-soft);
 }
+/* The pair is the docked rating bar's own pair of materials, at the
+   action family's geometry (.btn-primary/.btn-secondary: 44px, the
+   card corner, the display face): the filled one is the bar's best
+   tile -- gold, the panel ink on it -- and the quiet one is a tile at
+   rest, the hairline the bar draws on the panel. No pill: a pill is
+   the chip's shape, and these are actions. The focus ring keeps a
+   gap of the panel ink so it never reads as a second border on the
+   gold; the note itself, which takes first focus, shows none. */
 .guide-callout__skip,
 .guide-callout__next {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
   min-height: 44px;
-  padding: 0 var(--sp-4);
-  border-radius: var(--r-pill);
+  padding-block: 0;
+  padding-inline: var(--sp-5);
+  border-radius: var(--r-card);
   font-family: var(--font-display);
   font-size: var(--fs-sm);
-  font-weight: 700;
+  font-weight: 600;
+  transition: background 0.15s, border-color 0.15s;
 }
 .guide-callout__skip {
-  background: transparent;
+  background: color-mix(in srgb, var(--text-on-panel) 8%, transparent);
   color: var(--text-on-panel-soft);
-  border: 1px solid var(--border);
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+}
+.guide-callout__skip:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  color: var(--text-on-panel);
 }
 .guide-callout__next {
   background: var(--accent2);
-  color: var(--text-on-panel);
+  color: var(--bg-panel);
   border: 1px solid transparent;
 }
+.guide-callout__next:hover {
+  filter: none;
+  background: color-mix(in srgb, var(--accent2) 88%, var(--text-on-panel));
+}
+.guide-callout__skip:focus-visible,
+.guide-callout__next:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: 3px;
+}
+.guide-callout:focus-visible { outline: none; }
 @media (prefers-reduced-motion: reduce) {
   .guide__spot { transition: none; }
 }

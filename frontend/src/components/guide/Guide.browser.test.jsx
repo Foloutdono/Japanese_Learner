@@ -77,6 +77,17 @@ describe('Guide', () => {
     expect(track.mock.calls.find(([n]) => n === 'guide_done')[1]).toMatchObject({ gate: 'learn', skipped: false, stops: 3 })
   })
 
+  it('takes focus itself on open, and Tab reaches Skip then Next', async () => {
+    await mount({ onEnd: vi.fn() })
+    await settle(900)
+    const note = guideEl().querySelector('.guide-callout--live')
+    expect(document.activeElement).toBe(note)
+    // No control wears the ring on open; the note shows none of its own.
+    expect(getComputedStyle(note).outlineStyle).toBe('none')
+    note.querySelector('[data-action="guide-skip"]').focus()
+    expect(document.activeElement.dataset.action).toBe('guide-skip')
+  })
+
   it('skips a stop whose anchor is not on the screen', async () => {
     const onEnd = vi.fn()
     await mount({ onEnd }, { shelf: false })

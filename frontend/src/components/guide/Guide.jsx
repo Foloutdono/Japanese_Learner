@@ -63,7 +63,18 @@ export function Guide({ gate, onEnd }) {
     onEnd?.(skipped, total)
   }
 
-  const ref = useDialog(() => end(true))
+  const ref = useDialog(() => end(true), { focus: 'panel' })
+  // The note is not in the DOM when the dialog hook runs (nothing is
+  // drawn until the first rect lands), so it takes focus itself the
+  // first time it appears: the panel, not a control, so no button opens
+  // wearing a ring; Tab then reaches Skip and Next in order.
+  const focused = useRef(false)
+  useEffect(() => {
+    if (rect && !focused.current && ref.current) {
+      focused.current = true
+      ref.current.focus()
+    }
+  }, [rect, ref])
 
   useEffect(() => {
     watch.current = stopwatch()
@@ -157,6 +168,7 @@ export function Guide({ gate, onEnd }) {
         aria-modal="true"
         aria-label={t.guideLabel}
         className="guide-callout guide-callout--live"
+        tabIndex={-1}
         style={pos}
         data-place={lower ? 'above' : 'below'}
       >
@@ -167,7 +179,7 @@ export function Guide({ gate, onEnd }) {
           <button type="button" className="guide-callout__skip" onClick={() => end(true)} data-action="guide-skip">
             {t.guideSkip}
           </button>
-          <button type="button" className="guide-callout__next" onClick={next} data-action="guide-next" autoFocus>
+          <button type="button" className="guide-callout__next" onClick={next} data-action="guide-next">
             {last ? t.guideDone : t.guideNext}
           </button>
         </div>
