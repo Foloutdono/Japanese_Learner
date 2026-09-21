@@ -151,7 +151,15 @@ def key_moves() -> dict[str, str]:
     for old, new in MOVES.items():
         okj, okn = _fields_of(old)
         nkj, nkn = _fields_of(new)
-        out[f"{okj}::{okn}"] = f"{nkj}::{nkn}"
+        old_key, new_key = f"{okj}::{okn}", f"{nkj}::{nkn}"
+        if old_key == new_key:
+            # A level move (plan 106b) changes the id and not the deck
+            # key: the pin already reads the surviving card. Listed, it
+            # would be a rename onto itself, which migrate_vocab_ids
+            # applies as an UPDATE that matches nothing followed by a
+            # DELETE of the pin -- so the pin is not listed at all.
+            continue
+        out[old_key] = new_key
     return out
 
 

@@ -179,11 +179,21 @@ def test_the_frequency_keys_track_the_renamed_ids():
     not the card id, so the migration needs the same 34 corrections in
     that shape. Derived rather than written twice — this pins the
     derivation."""
-    assert len(KEY_MOVES) == len(MOVES)
+    identity = 0
     for old_id, new_id in MOVES.items():
         okj, okn = _fields_of(old_id)
         nkj, nkn = _fields_of(new_id)
-        assert KEY_MOVES[f"{okj}::{okn}"] == f"{nkj}::{nkn}"
+        old_key, new_key = f"{okj}::{okn}", f"{nkj}::{nkn}"
+        if old_key == new_key:
+            # A level move keeps the deck key, so the pin needs no
+            # rename -- and must not get one, since a rename onto
+            # itself is applied as a DELETE of the pin.
+            assert old_key not in KEY_MOVES
+            identity += 1
+        else:
+            assert KEY_MOVES[old_key] == new_key
+    assert len(KEY_MOVES) + identity == len(MOVES)
+    assert identity > 0  # the 106b merges are the case this guards
 
 
 def test_fields_round_trip_through_the_id():

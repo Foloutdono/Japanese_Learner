@@ -481,6 +481,23 @@ and reported. Reports first, `--yes` applies, `--user` scopes;
 `tests/test_migrate_pool_cards.py` pins the merge and the leave-alones,
 and holds the shipped record to real deck cards and gone pool rows.
 
+### After the review of the branch (2026-09-21)
+
+A code review of the twelve commits found two defects, both fixed:
+
+- **A level move must not list its deck key.** `key_moves()` derived a
+  pin rename for every `MOVES` line; a 106b merge changes the id and
+  not the key, so its entry was a rename onto itself, which the
+  migration applied as an UPDATE matching nothing followed by a DELETE
+  of the learner's pin on どう, この, できる, 見る, 対立… Identity
+  entries are skipped now, and `test_vocab_deck` holds that they are.
+- **The entry plate read the French map by written form**, so plan
+  107's per-card line never reached the screen and the N5 私 still
+  read "je (fem.)". `DictionaryDetail.jsx` reads the card's own key
+  first, then the form, then the server's gloss. Its browser test did
+  not run in this environment (the pinned Playwright's browser cannot
+  be downloaded there); CI runs it.
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104
