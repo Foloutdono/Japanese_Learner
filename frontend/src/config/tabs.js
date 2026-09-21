@@ -56,6 +56,32 @@ export function tabFor(pathname) {
   return TAB_IDS.includes(id) ? id : null
 }
 
+/**
+ * The gate `step` places along the bar from the one `pathname` is
+ * behind, as a path — or null when there is none. What the sideways
+ * flick (hooks/useGateSwipe) is asking. Three rules, each a decision:
+ *
+ *  - From ANYWHERE behind a gate, not from the gate screen alone: the
+ *    lit gate is the answer wherever you are standing under the
+ *    chrome, so the flick is one rule on every screen that has a tab
+ *    bar rather than a gesture that works on five screens and is dead
+ *    on forty. It lands on the GATE, not on the sibling station — a
+ *    swipe from `/learn/vocab/N5` opens Practice, and the gate is
+ *    where the next choice is made. Owner's call, this session; it
+ *    was gate screens only for a day.
+ *  - The bar's own order, because that is the order on screen: a flick
+ *    left goes where the gate to the right of the lit one is.
+ *  - It does not WRAP. Past Learn and past Profile there is no next
+ *    gate — wrapping would turn one over-eager flick into a jump
+ *    across the whole app, and would make the bar's row a lie.
+ */
+export function gateBeside(pathname, step) {
+  const here = tabFor(pathname ?? '')
+  if (!here) return null
+  const next = TAB_IDS[TAB_IDS.indexOf(here) + step]
+  return next ? `/${next}` : null
+}
+
 function sections(t) {
   return [
     // ── 学習 — the lines on the map ──

@@ -4469,6 +4469,14 @@ textarea:focus-visible {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
+  /* The gate pull below moves the screen sideways by --sp-6, which
+     would otherwise put that much of it past the document's edge and
+     flash a horizontal scrollbar for the length of the animation.
+     `clip` rather than `hidden`: hidden makes this a scroll container,
+     which would take `position: sticky` off the HUD inside it. The
+     tab bar is `position: fixed` with no transformed ancestor, so its
+     containing block is the viewport and no clip here reaches it. */
+  overflow-x: clip;
 }
 .phone__content {
   flex: 1;
@@ -4483,6 +4491,35 @@ textarea:focus-visible {
   padding-top: var(--sp-6);
   padding-bottom: var(--dock-bottom);
 }
+/* ── 乗り換え — the flick between gates ──
+   A sideways flick across a gate's screen moves one gate along the
+   bar (hooks/useGateSwipe, components/chrome/Shell.jsx). The arriving
+   gate pulls in from the side the flick came from — the boarding's
+   own movement (@keyframes brd-pull-in) at a gate's scale: the pair
+   of cars there can slide a whole screen width because both are
+   mounted at once, and one screen arriving alone cannot, so this is a
+   short pull out of the ground rather than a train leaving a
+   platform. Under reduced motion the transform goes and the fade
+   stays. */
+.phone__content[data-pull] { animation: gate-pull-in 220ms ease-out; }
+.phone__content[data-pull="back"] { animation-name: gate-pull-in-back; }
+@keyframes gate-pull-in {
+  from { transform: translateX(var(--sp-6)); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes gate-pull-in-back {
+  from { transform: translateX(calc(-1 * var(--sp-6))); opacity: 0; }
+  to { transform: none; opacity: 1; }
+}
+@keyframes gate-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .phone__content[data-pull],
+  .phone__content[data-pull="back"] { animation-name: gate-fade-in; }
+}
+
 /* A screen that still mounts its own .screen shell (plans 070–074
    rebuild each one on the bar) is a flex child here, not a second
    viewport — see .phone__content > .screen beside .screen itself. */
@@ -19928,11 +19965,6 @@ a.slip__act { text-decoration: none; }
 .grammar-contrast .dict-ex { align-items: center; }
 .grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
-/* ── The ghost door in the stage head ──
-   The lesson, one tap from every card: the head's own ghost, beside
-   the pass. A leave that goes somewhere rather than back, so its
-   chevron points the way — .stage__leave carries the shape. */
-.gl-door--ghost { gap: var(--sp-2); }
 /* ── The station's index ──
    The level's points as rows: the pattern, its gloss, the stage
    word, hairline-divided at the flat radius — a ledger, read top to

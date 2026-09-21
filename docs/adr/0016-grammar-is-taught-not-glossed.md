@@ -75,9 +75,13 @@ contrast content simply has no contrast platform.
 
 `components/study/GrammarLesson.jsx` renders the same lesson body as the
 level's index (a points door on the station), the gate before a new card in
-a run (with a ghost lesson door on every card), and the dictionary's grammar
-plate. A language switch is a fresh session key, since the payload is
-localised server-side.
+a run, and the dictionary's grammar plate. A card past its gate reaches the
+lesson through that plate: the run's corner magnifier — the one kanji, kana
+and vocab already carried — opens the point's dictionary entry by card id
+once the answer is revealed. It replaced a ghost "Lesson" door in the stage
+head, which stood open before the flip and so read the answer out. A
+language switch is a fresh session key, since the payload is localised
+server-side.
 
 ## Consequences
 

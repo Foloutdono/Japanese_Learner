@@ -1,5 +1,10 @@
-import { Outlet } from 'react-router-dom'
+import { useCallback, useRef } from 'react'
+import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
+import { gateBeside } from '../../config/tabs'
+import { useGateSwipe } from '../../hooks/useGateSwipe'
+import { useDeparture } from '../../stores/departure'
+import { playClick } from '../../lib/audio'
 import { Hud } from './Hud'
 import { TabBar } from './TabBar'
 import { useChrome } from './useChrome'
@@ -26,13 +31,60 @@ function SkipLink() {
   return <a href="#main-content" className="skip-link">{t.skipToContent}</a>
 }
 
+// The arriving gate pulls in from the side the flick came from: the
+// boarding's own idiom (`.brd__car--in`) at a gate's scale — one
+// screen arriving alone cannot slide a whole width the way a pair of
+// cars does, so it is a short pull and a fade. The content element
+// SURVIVES the route change, which is the whole point of the chrome,
+// so the animation has to be restarted by hand rather than by a fresh
+// mount: drop the attribute, force the reflow that ends the old run,
+// set it again.
+function pull(node, step) {
+  if (!node) return
+  node.removeAttribute('data-pull')
+  void node.offsetWidth
+  node.dataset.pull = step > 0 ? 'next' : 'back'
+}
+
 export function Shell() {
   useChrome('shell')
+  const { pathname } = useLocation()
+  const navigate = useNavigate()
+  const content = useRef(null)
+  const departing = useDeparture()
+
+  // ── 乗り換え — the flick between gates ──
+  // The tab bar is the navigation; this is the same row of five read
+  // with a thumb, and it is live on every screen this frame carries —
+  // a gate, a station, a platform picker, a settings page.
+  // hooks/useGateSwipe owns the gesture and everything that outranks
+  // it; config/tabs' gateBeside owns which gate is next, and answers
+  // null at both ends of the bar. Closed while a 改札 cutscene is
+  // running: that is already taking the screen somewhere, and two
+  // departures at once is one too many.
+  const step = useCallback(dir => {
+    const path = gateBeside(pathname, dir)
+    if (!path) return
+    playClick()
+    pull(content.current, dir)
+    navigate(path)
+  }, [pathname, navigate])
+
+  useGateSwipe(content, step, !departing)
+
   return (
     <div className="phone">
       <SkipLink />
       <Hud />
-      <div className="phone__content">
+      <div
+        ref={content}
+        className="phone__content"
+        // An animation BUBBLES, so a card arriving inside the screen
+        // would otherwise clear the attribute mid-pull.
+        onAnimationEnd={e => {
+          if (e.target === e.currentTarget) e.currentTarget.removeAttribute('data-pull')
+        }}
+      >
         <Outlet />
       </div>
       <TabBar />

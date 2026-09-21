@@ -549,6 +549,11 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 //    dictKana where the caller has it (a vocab card always does): a
 //    surface alone cannot say WHICH 工場 was meant, and the lookup used
 //    to open the wrong entry for ~1.5% of words. See useDictionaryLookup.
+//    dictId is the other way in and stands in for dictTerm: a grammar
+//    point is looked up by its card id alone, never by its pattern (a
+//    pattern embeds ／ and 〜 — see routes/dictionary.py's note on why
+//    the id travels as a query parameter). A caller passing dictId
+//    passes no dictTerm, so nothing is spoken for it either.
 //  - replay-sound needs either an explicit onReplaySound callback
 //    (e.g. a screen's own playKana/speakJapanese with the right
 //    argument) or, failing that, falls back to speaking `sound` (or
@@ -559,7 +564,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 // in index.css) — the caller is expected to render this as a child of
 // a `position: relative` card (PromptCard/.flashcard), not out in the
 // surrounding page flow.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, session, sound, onReplaySound }) {
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   // Same as Flashcard's own reset — a caller reusing this across cards
   // (passing the card's id as resetKey) shouldn't carry a dictionary
   // sheet left open from the previous card into the next. Handled by
@@ -573,6 +578,7 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
       dictTerm={dictTerm}
       dictKana={dictKana}
       dictCategory={dictCategory}
+      dictId={dictId}
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
@@ -580,11 +586,11 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
   )
 }
 
-function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, session, sound, onReplaySound }) {
+function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
 
   const speakText = sound ?? dictTerm
-  const canLookUp = revealed && dictTerm && dictCategory && session
+  const canLookUp = revealed && (dictTerm || dictId) && dictCategory && session
   const canPlaySound = revealed && (onReplaySound || speakText)
 
   // Stable so DictionaryLookupSheet's useDialog doesn't re-run its
@@ -651,6 +657,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, ses
           term={dictTerm}
           kana={dictKana}
           category={dictCategory}
+          id={dictId}
           session={session}
           onClose={closeDictionary}
         />
@@ -676,7 +683,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, ses
 //
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, session, sound, onReplaySound }) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state — done by remounting
@@ -693,6 +700,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
       dictTerm={dictTerm}
       dictKana={dictKana}
       dictCategory={dictCategory}
+      dictId={dictId}
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
@@ -700,7 +708,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
   )
 }
 
-function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, session, sound, onReplaySound }) {
+function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -765,6 +773,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         dictTerm={dictTerm}
         dictKana={dictKana}
         dictCategory={dictCategory}
+        dictId={dictId}
         session={session}
         sound={sound}
         onReplaySound={onReplaySound}

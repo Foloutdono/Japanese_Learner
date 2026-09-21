@@ -6,7 +6,7 @@ import { useLang } from '../LangContext'
 import RatingBar from '../components/study/RatingBar'
 import {
   MCQGrid, DoneMessage, DeckProgress,
-  Flashcard, MeaningDisplay,
+  Flashcard, MeaningDisplay, RevealActions,
 } from '../components/study/QuizComponents'
 import { usePace } from '../components/study/usePace'
 import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from '../components/study/GrammarPieces'
@@ -41,8 +41,13 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // is a flag on the queued card itself (updateCurrent persists it into
 // the session mirror), so a reload does not re-gate and the flag goes
 // when the card does; a re-served card arrives `learning` and never
-// gates again. THE DOOR: the lesson, one tap from every card, as the
-// head's own ghost beside the pass. THE CONTRAST DRILL: the pattern
+// gates again. THE DOOR: the point's dictionary entry, one tap from
+// every card once it is revealed — the same corner magnifier kanji,
+// kana and vocab carry (RevealActions), looked up by the card's id
+// because a pattern is not a searchable term. It replaces the head's
+// own "Lesson" ghost: the entry prints that same lesson and rather
+// more besides, and a door that was open BEFORE the answer was a way
+// to read the answer off the card. THE CONTRAST DRILL: the pattern
 // blanked out of one of its sentences and its rivals as the choices,
 // always on — the choices are the exercise, not a hint.
 
@@ -67,7 +72,8 @@ export default function GrammarRun({ session }) {
   const [progress, setProgress]     = useState(null)
   const [reviewCards, setReviewCards] = useState([])
   const [reviewLoading, setReviewLoading] = useState(false)
-  // The lesson sheet the door opens, by card id.
+  // The lesson sheet a compare row on the gate opens, by card id. The
+  // card itself opens the dictionary entry instead (see pointId below).
   const [sheet, setSheet]           = useState(null)
 
   // One session per level+mode+language (see useCardSession): the
@@ -245,17 +251,10 @@ export default function GrammarRun({ session }) {
     structure: c.structure, meaning: c.meaning, stage: c.stage,
   })
 
-  const door = card && (
-    <button
-      type="button"
-      className="stage__leave dict-browse-door gl-door--ghost"
-      onClick={() => setSheet(card.raw_id ?? card.card_id)}
-      disabled={gates.locked}
-    >
-      <span>{t.glLesson}</span>
-      <ChevronIcon direction="right" size={14} />
-    </button>
-  )
+  // What the card's magnifier opens: this point's dictionary entry, by
+  // its card id. See lookup.js — a pattern embeds ／ and 〜, so the id
+  // is what travels.
+  const pointId = card && (card.raw_id ?? card.card_id)
 
   // ── Quiz ──
   return (
@@ -265,7 +264,6 @@ export default function GrammarRun({ session }) {
       leaveLabel={t.grammarTitle}
       where={`${t.grammarTitle} ${level}`}
       sub={currentModeLabel}
-      aside={door}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
     >
@@ -311,6 +309,9 @@ export default function GrammarRun({ session }) {
                   <>
                     <GrammarContrastSentence card={card} revealed={answered} t={t} />
                     {answered && <GrammarAnswer card={card} size={36} divided />}
+                    <RevealActions
+                      t={t} revealed={answered} resetKey={card.card_id}
+                      dictCategory="grammar" dictId={pointId} session={session} />
                   </>
                 ) : !choicesOn ? (
                   <Flashcard
@@ -355,6 +356,9 @@ export default function GrammarRun({ session }) {
                           )
                           : <MeaningDisplay meaning={card.meaning} size={30} />
                     }
+                    dictCategory="grammar"
+                    dictId={pointId}
+                    session={session}
                   />
                 ) : (
                   /* Choices on — the prompt does NOT swap: the answer is
@@ -376,6 +380,9 @@ export default function GrammarRun({ session }) {
                           </>
                         )}
                     {isFill && answered && <GrammarAnswer card={card} size={36} divided />}
+                    <RevealActions
+                      t={t} revealed={answered} resetKey={card.card_id}
+                      dictCategory="grammar" dictId={pointId} session={session} />
                   </>
                 )}
               </PromptCard>
