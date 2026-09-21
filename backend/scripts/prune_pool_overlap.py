@@ -36,14 +36,16 @@ key first (has_examples carried over), and only then are the entries
 and senses rows deleted. `freq_rank` keeps its gaps: every reader
 ranges over it with BETWEEN and counts what is there.
 
-WHAT DOES NOT MOVE
-------------------
+WHAT MOVES LATER, ON THE LEARNER'S SIDE
+--------------------------------------
 A learner who studied the word from the pool before the deck taught it
-holds a `vocab_jmdict_{id}` card that now resolves to nothing; the app
-treats such a card as content that went away (routes/decks._linked_entry
-returns None) rather than failing. Carrying that history onto the deck
-card is a migration of its own (110b), the shape of
-migrate_jmdict_card_ids.py, and is not done here.
+holds a `vocab_jmdict_{id}` card that now resolves to nothing. Each
+deleted row is therefore recorded in datas/vocab/pool_moves.json as
+`{id: {card, key}}` -- the deck card it became and the deck key a
+frequency pin becomes -- and scripts/migrate_pool_cards.py (110b) renames
+the learner's rows onto it after the deploy, merging where the learner
+already studied the deck card. The record is append-only: an id, once
+deleted, never comes back, so a line is never removed.
 
 THE THEME LISTS FOLLOW
 ----------------------
@@ -71,22 +73,49 @@ _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 DB_PATH = os.path.join(_VOCAB, "vocab_jmdict.sqlite3")
 DECK_PATH = os.path.join(_VOCAB, "vocab_deck.json")
 THEME_PATH = os.path.join(_VOCAB, "theme_words.json")
+MOVES_PATH = os.path.join(_VOCAB, "pool_moves.json")
 
 
 def deck_readings() -> dict[tuple[str, str], str]:
     """(kanji, one reading) -> the deck's packed kana field, which is the
     curated_senses key's second half."""
+    return {k: packed for k, (packed, _level) in _deck_index().items()}
+
+
+def _deck_index() -> dict[tuple[str, str], tuple[str, str]]:
+    """(kanji, one reading) -> (packed kana field, level)."""
     with open(DECK_PATH, encoding="utf-8") as f:
         deck = json.load(f)
-    out: dict[tuple[str, str], str] = {}
-    for entries in deck.values():
+    out: dict[tuple[str, str], tuple[str, str]] = {}
+    for level, entries in deck.items():
         for e in entries:
             kana = e.get("kana") or ""
             for reading in kana.replace(";", "/").split("/"):
                 reading = reading.strip()
                 if reading:
-                    out.setdefault((e.get("kanji") or "", reading), kana)
+                    out.setdefault((e.get("kanji") or "", reading), (kana, level))
     return out
+
+
+def record_moves(rows: list[dict]) -> int:
+    """Append each deleted row's id -> the deck card and key it became."""
+    index = _deck_index()
+    try:
+        with open(MOVES_PATH, encoding="utf-8") as f:
+            moves = json.load(f)
+    except FileNotFoundError:
+        moves = {}
+    added = 0
+    for r in rows:
+        packed, level = index[(r["kanji"], r["kana"])]
+        entry = {"card": f"vocab_{level}_{r['kanji']}_{packed}", "key": f"{r['kanji']}::{packed}"}
+        if str(r["id"]) not in moves:
+            moves[str(r["id"])] = entry
+            added += 1
+    with open(MOVES_PATH, "w", encoding="utf-8") as f:
+        json.dump(moves, f, ensure_ascii=False, indent=1)
+        f.write("\n")
+    return added
 
 
 def overlap(conn: sqlite3.Connection) -> list[dict]:
@@ -181,8 +210,10 @@ def main(argv=None) -> int:
         if not args.yes:
             print("\nreport only; --yes to move their senses to curated_senses and delete the rows")
             return 0
+        recorded = record_moves(rows)
         moved, deleted = prune(conn, rows)
-        print(f"\n{moved} senses moved to curated_senses, {deleted} pool row(s) deleted")
+        print(f"\n{moved} senses moved to curated_senses, {deleted} pool row(s) deleted, "
+              f"{recorded} move(s) recorded in {os.path.relpath(MOVES_PATH, _BASE_DIR)}")
         return 0
     finally:
         conn.close()

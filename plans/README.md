@@ -192,7 +192,7 @@ Thirteen waves live in this file:
   (40 files), guards clean, build clean.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
-  102–104, 106, 106b, 107, 109's source and report, and 110 DONE; 105
+  102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
   as two words: 102 gives 母 and 父 N5 entries of their own and folds a
   deck compound UniDic cuts short (日曜 + 日, お + 母 + さん, 二 + 日)

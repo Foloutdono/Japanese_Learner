@@ -463,12 +463,19 @@ rows (子犬, 顔, コンビニ, スマホ) named their word through the pool's
 domain and are the deck's now, which is what a rebuild of the theme
 index would do too.
 
-Not done, recorded as **110b**: a learner who studied a word from the
-pool before the deck taught it holds a `vocab_jmdict_{id}` card that
-now resolves to nothing (the app treats it as content that went away).
-Carrying that history onto the deck card is a migration of the
-`migrate_jmdict_card_ids.py` shape, keyed by the ids this script
-deletes; worth doing before the next deck slice lands in production.
+**110b — the learner's pool card onto the deck card (DONE, 2026-09-21).**
+A learner who studied a word from the pool before the deck taught it
+holds a `vocab_jmdict_{id}` card that now resolves to nothing. The prune
+records every id it deletes in `datas/vocab/pool_moves.json`
+(`{id: {card, key}}`, append-only, the 28 backfilled), and
+`scripts/migrate_pool_cards.py` renames the learner's rows onto the
+deck card after the deploy, merging where the deck card was already
+studied (the vocab migration's own merge rule, imported), and moves a
+frequency pin from the pool's domain and key to the deck's. An id still
+in the pool, or in neither the pool nor the record, is left as it is
+and reported. Reports first, `--yes` applies, `--user` scopes;
+`tests/test_migrate_pool_cards.py` pins the merge and the leave-alones,
+and holds the shipped record to real deck cards and gone pool rows.
 
 ## Order and dependencies
 

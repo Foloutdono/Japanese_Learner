@@ -154,9 +154,10 @@ runtime purpose. Two consequences worth knowing:
   in the ranking's order; its three candidate lists remain for the
   audit's slices, 110 (done) the pool taken out of the deck's way in
   place (`scripts/prune_pool_overlap.py`; a rebuild from another JMdict
-  edition would renumber every pool card, so never that) — 110b, the
-  migration for a learner's pool card onto the deck card, is the one
-  piece left, recorded in `docs/vocab-deck-review.md`.
+  edition would renumber every pool card, so never that) and 110b (done)
+  the learner's pool card onto the deck card
+  (`datas/vocab/pool_moves.json`, `scripts/migrate_pool_cards.py`,
+  `tests/test_migrate_pool_cards.py`).
   When starting a new wave, begin at **111** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -240,7 +241,13 @@ recognise in place and reported.
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
+python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
 ```
+
+The third reads `datas/vocab/pool_moves.json`, which
+`scripts/prune_pool_overlap.py` appends to for every pool row it takes
+out (plan 110b): a learner who studied 母 from the pool before it was an
+N5 card keeps that history on the N5 card.
 
 One more one-shot, run once after the deploy that carries plan 097's
 columns (`user_profiles.tutorial_at`, `guided`) and before the frontend that
