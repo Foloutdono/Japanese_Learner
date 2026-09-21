@@ -5351,8 +5351,14 @@ component plan 100 grows the spotlight onto. Found at the keyboard:
   exactly the case the guard exempts (the bar borrowed for a
   self-rating, as reading and translation do), so the words changed,
   not the guard.
-- **The browser lane is fr-FR.** The ride's test sets `lang` to English
-  in localStorage before mounting, as its copy is asserted in English.
+- **The browser lane is fr-FR, and its storage is one origin.** The
+  ride's test first set `lang` to English in localStorage to assert
+  its copy in English -- and that write leaked into every other file
+  running in the lane, flipping the copy under TranslationRun's and
+  ComprehensionRun's assertions whenever the order put them after it
+  (five failures in the full suite, none in any file alone). A browser
+  test asserts copy from the French table, never by switching the
+  language.
 - The known card for a learner without hiragana wears its romaji as the
   furigana hint's own parts (`{text, reading}`), so the ruby is the
   existing `FuriganaWord`; the flip speaks the kana. `RatingBar`'s
@@ -5367,6 +5373,52 @@ component plan 100 grows the spotlight onto. Found at the keyboard:
   registries); `App.routes`'s veteran fixture now carries `tutorialAt`.
   Backend 1606 (one assertion added). Lint, `lint:css`, `lint:scale` and
   the build clean.
+
+## What the live check caught that the tests did not (098, 2026-09-21)
+
+Driven headless at 390×844 against the real dev backend on a fresh
+learner (a Supabase session injected into storage, `DEV_USER_ID` on the
+server): boarding → 改札 → `/ride/cards` → flip, rate, flip, rate wrong →
+Continue → `/today`; a second launch lands on `/today`; the profile
+carries `tutorialAt`; the trail holds four `ride_step` rows and one
+`ride_done`. Three things the suites had passed:
+
+1. **こんにちは wrapped under its romaji.** `FuriganaWord` set a fixed
+   72px and let the ruby base break after four characters, so the one
+   card a novice is meant to recognise printed as two lines. `CharDisplay`
+   had solved exactly this with `--len` and a fitted clamp; the ruby word
+   now sets the same `--len` and wears the same clamp (`.furigana-word`,
+   allowlisted in `design-scale.json` beside the character display's).
+   This fixes the furigana hint on any long word in a vocab run too.
+2. **The done screen pooled its emptiness in the middle.** The call and
+   the sentence sat under the head with the room empty beneath them and
+   a narrow Continue at the floor: `justify-content: center` with an
+   auto-margin foot, the very pair the density contract warns about. Two
+   grow-only spacers now centre the words and the action fills the
+   column.
+3. **The unknown card's back showed えき to a learner who said no kana.**
+   The letters ride beside it (`えき eki`) for that learner only.
+
+Not this wave's, and worth knowing: the run a novice lands on after the
+ride is an empty gate (*All clear*, nothing due, the status *suspended*)
+— the level rule seeds nothing ahead of N5 and the queue has no new
+cards until a line is opened from 教材. The guide (plan 100) is what
+says so; the product question of a first-day queue for a novice is
+older than this wave. The two 503s in the browser console were
+`/api/tts` (edge-tts has no network here), the known card's sound on
+the flip.
+
+4. **A test that leaked.** Five browser tests in TranslationRun and
+   ComprehensionRun failed in the full suite and passed in any file
+   alone, on a base-branch worktree, and on some full runs: the ride's
+   test wrote `lang` to localStorage, which the lane's files share. It
+   asserts the French copy now (see 098's notes above). The lesson is
+   in the notes; the symptom -- order-dependent failures in files the
+   change never touched -- is the one to remember.
+
+Frontend 1210, all green on two consecutive full runs with nothing else
+on the machine; `lint`, `lint:css` and `lint:scale` clean (the ruby
+word's clamp allowlisted beside the character display's); backend 1606.
 
 ## Verification (to be filled at execution)
 

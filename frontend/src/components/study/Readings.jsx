@@ -57,10 +57,17 @@ export function FuriganaParts({ parts, className, hit, hitClassName }) {
 // reads as the answer rather than as decoration over the prompt.
 export function FuriganaWord({ parts, size = 72, answer = false }) {
   if (!parts?.length) return null
+  // How many characters share the line -- the same --len CharDisplay
+  // sets, for the same reason: `size` is a CEILING, and a word too
+  // long for the card divides the card's width by its count rather
+  // than wrapping (こんにちは under its romaji broke after four
+  // characters on a 390px phone, plan 098). Spread, not .length: a
+  // surrogate pair is one character on screen.
+  const len = parts.reduce((n, part) => n + [...(part.text ?? '')].length, 0) || 1
   return (
     <div
       className={`furigana-word${answer ? ' furigana-word--answer' : ''}`}
-      style={{ '--furigana-size': `${size}px` }}
+      style={{ '--furigana-size': `${size}px`, '--len': len }}
       lang="ja"
     >
       <FuriganaParts parts={parts} />

@@ -8362,7 +8362,16 @@ textarea:focus-visible {
    word so the ruby scales with the prompt. */
 .furigana-word {
   font-family: var(--font-jp);
-  font-size: var(--furigana-size, 72px);
+  /* Fitted, not wrapped -- .char-display's own clamp: the card is the
+     query container, the word divides its width by its character
+     count (--len, from FuriganaWord), and the rung is the ceiling.
+     A ruby word that wrapped put こんにちは on two lines under one
+     reading (plan 098). */
+  font-size: clamp(
+    var(--fs-caption),
+    calc(96cqw / var(--len, 1)),
+    var(--furigana-size, 72px));
+  white-space: nowrap;
   line-height: 1.9;
   text-align: center;
   color: var(--text-primary);
@@ -20065,9 +20074,17 @@ a.slip__act { text-decoration: none; }
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: var(--sp-5);
   text-align: center;
+}
+/* The call and the sentence sit in the middle of the room and the
+   action on its floor: two grow-only spacers around the words, never
+   justify-content (the density contract -- an auto margin on the foot
+   would swallow the centring). */
+.ride__done::before,
+.ride__done-air {
+  content: '';
+  flex: 1;
 }
 .ride__done-jp {
   margin: 0;
@@ -20092,5 +20109,5 @@ a.slip__act { text-decoration: none; }
 .ride__done-foot {
   width: 100%;
   max-width: var(--card-w);
-  margin-top: auto;
 }
+.ride__done-foot .btn-depart { width: 100%; }

@@ -70,6 +70,9 @@ function rideCard(card, latin) {
   if (!latin || !card.romaji) return nc
   return {
     ...nc,
+    // The back's reading line too: えき alone is one more thing this
+    // learner cannot read yet, so the letters ride beside it.
+    kana: nc.kana && nc.kana !== wordForm(nc) ? `${nc.kana} ${card.romaji}` : nc.kana,
     hints: { ...(nc.hints ?? {}), [HINTS.FURIGANA]: [{ text: wordForm(nc), reading: card.romaji }] },
   }
 }
@@ -225,6 +228,7 @@ export default function RideRun({ session, onDone, covered = false, dryRun = fal
             <Emphasized text={t.rideDoneBody(summary?.dailyNewTarget ?? 10)} />
           </p>
           {guessed && <p className="ride__done-note">{t.rideGuessed}</p>}
+          <div className="ride__done-air" aria-hidden="true" />
           <div className="ride__done-foot">
             <Continue label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
           </div>

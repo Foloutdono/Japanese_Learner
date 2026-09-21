@@ -38,6 +38,11 @@ vi.mock('../lib/audio', async (o) => ({
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: RideRun } = await import('./RideRun')
+// The lane runs fr-FR, and the browser's storage is one origin shared
+// by every file in it: setting `lang` here once flipped the copy under
+// TranslationRun's and ComprehensionRun's assertions mid-run. So the
+// copy is asserted from the French table itself.
+const { default: fr } = await import('../locales/fr/index.js')
 
 const KNOWN = {
   card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
@@ -80,9 +85,6 @@ beforeEach(() => {
   track.mockReset()
   speakJapanese.mockReset()
   localStorage.clear()
-  // The lane runs fr-FR; the copy is asserted in English for the
-  // reader's sake, and the language is the learner's own setting.
-  localStorage.setItem('lang', 'en')
   summaryRef.current = { kanaKnown: 'both', dailyNewTarget: 10 }
 })
 
@@ -95,12 +97,12 @@ describe('RideRun', () => {
     const root = screen.container
     // The stage: ‹ Skip, the pair, the remaining pill.
     expect(root.querySelector('main.stage')).toBeTruthy()
-    expect(root.querySelector('.stage__leave').textContent).toContain('Skip')
+    expect(root.querySelector('.stage__leave').textContent).toContain(fr.rideSkip)
     expect(root.querySelector('.stage__where-jp').textContent).toBe('試乗')
     expect(root.querySelector('.today-remaining').textContent).toBe('2')
     // The known card, front up, and the first note over it.
     expect(root.querySelector('.flashcard').textContent).toContain('こんにちは')
-    expect(document.querySelector('.guide-callout__text').textContent).toContain('Tap it to turn it over')
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownFront)
     expect(root.querySelector('[data-guide="ride.card"]')).toBeTruthy()
     // The bar is reserved but inert until the flip.
     expect(root.querySelector('.rating-bar--idle')).toBeTruthy()
@@ -108,7 +110,7 @@ describe('RideRun', () => {
     root.querySelector('.flashcard').click()
     await settle(80)
     expect(root.querySelector('.rating-bar--idle')).toBeNull()
-    expect(document.querySelector('.guide-callout__text').textContent).toContain('You are the one who grades')
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownBack)
     expect(document.querySelector('.guide-callout').dataset.place).toBe('above')
 
     rateButton(root, 4).click()
@@ -116,18 +118,18 @@ describe('RideRun', () => {
     // The second card: the unknown one, front up, the pill down to 1.
     expect(root.querySelector('.flashcard').textContent).toContain('駅')
     expect(root.querySelector('.today-remaining').textContent).toBe('1')
-    expect(document.querySelector('.guide-callout__text').textContent).toContain('you have not met')
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideUnknownFront)
 
     root.querySelector('.flashcard').click()
     await settle(80)
-    expect(document.querySelector('.guide-callout__text').textContent).toContain('Say wrong')
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideUnknownBack)
     rateButton(root, 1).click()
     await settle(600)
 
     // The done screen: the pace in the sentence, no guess note, the
     // one filled action; no card, no note, no pill.
     expect(root.querySelector('.ride__done')).toBeTruthy()
-    expect(root.querySelector('.ride__done-text').textContent).toContain('10 new words a day')
+    expect(root.querySelector('.ride__done-text').textContent).toContain('10 mots nouveaux par jour')
     expect(root.querySelector('.ride__done-note')).toBeNull()
     expect(root.querySelector('.flashcard')).toBeNull()
     expect(document.querySelector('.guide-callout')).toBeNull()
@@ -166,7 +168,7 @@ describe('RideRun', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }))
     await settle(600)
     expect(root.querySelector('.ride__done')).toBeTruthy()
-    expect(root.querySelector('.ride__done-note').textContent).toContain('Guessed it')
+    expect(root.querySelector('.ride__done-note').textContent).toContain(fr.rideGuessed)
   })
 
   it('Skip is the head\'s ‹ and stamps the ride as skipped', async () => {
