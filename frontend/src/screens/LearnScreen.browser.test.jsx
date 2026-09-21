@@ -2,6 +2,9 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+// The novice's stop is a word of the interface now, not the glyph 初,
+// so the expected label comes from the string table the lane renders in.
+import fr from '../locales/fr/index.js'
 // The stylesheet-import trick every browser test here uses: the rules
 // this test leans on (the map's grid) only exist once the real sheet
 // is loaded.
@@ -152,14 +155,14 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     // A station is the completion of the level behind it, and every
-    // line opens at 初, the novice's stop — so a line nobody has
-    // touched stands at 初 with its first stop ahead. vocab has N5
+    // line opens at the novice's stop — so a line nobody has
+    // touched stands there with its first stop ahead. vocab has N5
     // finished and N4 half done: standing at N5, N4 ahead, and the
     // stripe half painted.
     const plates = [...root.querySelectorAll('.plate--line')]
-    expect(plates.map(p => p.querySelector('.plate__here').textContent)).toEqual(['初', 'N5', '初', '初'])
+    expect(plates.map(p => p.querySelector('.plate__here').textContent)).toEqual([fr.originStop, 'N5', fr.originStop, fr.originStop])
     expect(plates.map(p => p.querySelector('.plate__next').textContent)).toEqual(['あ ›', 'N4 ›', 'N5 ›', 'N5 ›'])
-    expect(plates[1].querySelector('.plate__prev').textContent).toBe('‹ 初')
+    expect(plates[1].querySelector('.plate__prev').textContent).toBe(`‹ ${fr.originStop}`)
     expect(plates[0].querySelector('.plate__prev').textContent).toBe('')
     expect(plates[1].querySelector('.plate__stripe i').style.width).toBe('50%')
     expect(plates[0].querySelector('.plate__stripe i').style.width).toBe('0%')
@@ -217,6 +220,80 @@ describe('LearnScreen — the plates', () => {
     expect(playAnnouncement).toHaveBeenCalledWith('kana')
   })
 
+  // ── The plate opens where the learner is ──
+  // The station is a stop list, and the learner picks the same stop
+  // every day: the plate departs for it directly. The declared grade
+  // on a JLPT line, the first unfinished set on かな — the two marks
+  // the stop lists themselves ring as "You are here".
+  it('departs to the stop the learner stands at: the declared grade, and かな\'s own', async () => {
+    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
+    statsRef.current = {
+      ...STATS,
+      items: {
+        ...STATS.items,
+        // Hiragana done, its combinations begun: the second set is
+        // where this learner stands (domain/kanaSets.currentKanaSet).
+        kana: {
+          hiragana_basic: { total: 46, learned: 46, score: 1 },
+          hiragana_combos: { total: 36, learned: 5, score: 0.2 },
+        },
+      },
+    }
+    try {
+      const screen = await mount()
+      await settle()
+      const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
+      const paths = []
+      for (const head of heads) {
+        head.click()
+        await settle(20)
+        paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
+      }
+      expect(paths).toEqual([
+        '/learn/kana/hiragana_combos',
+        '/learn/vocab/N4',
+        '/learn/kanji/N4',
+        '/learn/grammar/N4',
+      ])
+      // The gate still wipes in the LINE's identity — the deeper path
+      // is where the train goes, not a different station.
+      expect(beginDeparture.mock.calls.at(-1)[0]?.color).toBe('var(--line-grammar)')
+      expect(playAnnouncement).toHaveBeenLastCalledWith('grammar')
+    } finally {
+      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
+    }
+  })
+
+  // Nothing known about the learner yet — no declared grade, no kana
+  // figures — and the plate opens the station, as it always did: a
+  // guess at the stop would be worse than the question.
+  it('opens the station itself when nothing says where the learner stands', async () => {
+    const screen = await mount()
+    await settle()
+    const heads = [...screen.container.querySelectorAll('.plate--line .plate__head')]
+    const paths = []
+    for (const head of heads) {
+      head.click()
+      await settle(20)
+      paths.push(beginDeparture.mock.calls.at(-1)[0]?.path)
+    }
+    expect(paths).toEqual(['/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar'])
+  })
+
+  // The shelf is not a line: it has no stops, so it opens on the decks.
+  it('opens the shelf on the decks themselves', async () => {
+    seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100, jlptLevel: 'N4' })
+    try {
+      const screen = await mount()
+      await settle()
+      screen.container.querySelector('.plate--shelf .plate__head').click()
+      await settle(20)
+      expect(beginDeparture.mock.calls.at(-1)[0]?.path).toBe('/learn/decks')
+    } finally {
+      seedSummary({ username: 'Tester', level: 1, xp: 0, xpPrevLevel: 0, xpForNext: 100 })
+    }
+  })
+
   it('still hangs every plate from a failed or foreign stats payload', async () => {
     todayRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
     statsRef.current = { total: 0, by_source: {}, lanes: [], next_due: null }
@@ -225,10 +302,10 @@ describe('LearnScreen — the plates', () => {
     await settle()
     const root = screen.container
     expect(root.querySelectorAll('.plate--line')).toHaveLength(4)
-    // Nobody has travelled, so every line stands at 初: with no figures
+    // Nobody has travelled, so every line stands at the novice's stop: with no figures
     // at all the plate still says where the learner is, which is at
     // the start of every line.
-    expect([...root.querySelectorAll('.plate__here')].map(el => el.textContent)).toEqual(['初', '初', '初', '初'])
+    expect([...root.querySelectorAll('.plate__here')].map(el => el.textContent)).toEqual(Array(4).fill(fr.originStop))
     expect(root.querySelectorAll('.plate__due')).toHaveLength(0)
     // And the shelf hangs without its figures.
     expect(root.querySelectorAll('.plate--shelf')).toHaveLength(1)

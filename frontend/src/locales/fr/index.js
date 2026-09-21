@@ -414,6 +414,7 @@ const stats = {
   fareGate:           'Portique',
   dueUnit:            'à réviser',
   newUnit:            'nouveaux',
+  originStop:         'Débutant',
   stageGate:          'Portique',
   nothingGraded:      'Rien n’est noté',
   stationJlpt:        'JLPT',

@@ -60,9 +60,14 @@ export function DueChip({ due }) {
   )
 }
 
+// A stop label. `t` on a mark names a string-table key — the novice's
+// stop is a word, not a glyph, so it is written in the learner's
+// language (domain/lineProgress.js's ORIGIN_STOP); every other mark
+// carries its own label, a level's code or a kana specimen.
 function Mark({ mark }) {
+  const { t } = useLang()
   if (!mark) return null
-  return <span lang={mark.jp ? 'ja' : undefined}>{mark.label}</span>
+  return <span lang={mark.jp ? 'ja' : undefined}>{(mark.t && t[mark.t]) || mark.label}</span>
 }
 
 /** The plate's foot on a Learn line: ‹ behind · HERE · ahead ›. */
