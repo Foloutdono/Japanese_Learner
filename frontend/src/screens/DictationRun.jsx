@@ -12,8 +12,8 @@ import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
 import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { WordDetail } from '../components/analysis/WordDetail'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
+import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 
@@ -121,14 +121,13 @@ function Session({ session, level }) {
   const [analysis, setAnalysis]               = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
   const [showBreakdown, setShowBreakdown]     = useState(false)
-  // The word the learner tapped, as a bottom sheet.
-  const [detail, setDetail] = useState(null)
-  // Stable, so WordDetail's useDialog does not re-run its focus effect
-  // (and steal focus) on every render while the sheet is open.
-  const closeDetail = useCallback(() => setDetail(null), [])
-  // A grammar chip in the rows opens the point's dictionary entry.
-  const [grammarId, setGrammarId] = useState(null)
-  const closeGrammar = useCallback(() => setGrammarId(null), [])
+  // One sheet for everything the breakdown opens (plan 096): the word
+  // the learner tapped opens its dictionary entry, a marker row and a
+  // chip open the point's lesson. Stable, so the sheet's useDialog
+  // does not re-run its focus effect (and steal focus) on every render
+  // while it is open.
+  const [lookup, setLookup] = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -172,7 +171,7 @@ function Session({ session, level }) {
     setShowBreakdown(false)
     setExplaining(false)
     setExplainError(null)
-    setDetail(null)
+    setLookup(null)
     analysisLineRef.current = null
     setStage('listening')
   }
@@ -216,18 +215,6 @@ function Session({ session, level }) {
         setExplainError(e?.message === '503' ? t.explainUnavailable : t.explainFailed)
       })
       .finally(() => { if (analysisLineRef.current === key) setExplaining(false) })
-  }
-
-  // The sheet wants {title, level, entry, stats}, which is the shape
-  // the breakdown's own word/kanji carry. Mirrors ReadingRun's pair.
-  function openWordDetail(word) {
-    if (!word.vocab_match) return
-    setDetail({
-      title: word.surface,
-      entry: word.vocab_match.entry,
-      stats: word.vocab_match.stats,
-      level: word.vocab_match.level,
-    })
   }
 
   // Fetches, then either shows the head or says why it cannot. Takes no
@@ -502,8 +489,8 @@ function Session({ session, level }) {
                     translation={result.translation}
                     sentenceText={result.jp}
                     t={t}
-                    onTokenClick={openWordDetail}
-                    onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onTokenClick={w => setLookup(vocabLookup(w))}
+                    onGrammarOpen={g => setLookup(grammarLookup(g))}
                     onExplain={explainLine}
                     explaining={explaining}
                     explainError={explainError}
@@ -525,9 +512,8 @@ function Session({ session, level }) {
         </>
       )}
 
-      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
-      {grammarId && (
-        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      {lookup && (
+        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>
   )

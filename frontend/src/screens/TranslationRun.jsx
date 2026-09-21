@@ -13,8 +13,8 @@ import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon, CheckIcon, CrossIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { WordDetail } from '../components/analysis/WordDetail'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
+import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
 
 const TRANSLATION_COLOR = 'var(--line-honyaku)'
@@ -77,9 +77,15 @@ export default function TranslationRun({ session }) {
   const [breakdown, setBreakdown] = useState(null)
   const [breakdownLoading, setBreakdownLoading] = useState(false)
   const [showBreakdown, setShowBreakdown] = useState(false)
-  // The word the learner tapped in the rows, as a bottom sheet.
-  const [detail, setDetail] = useState(null)
-  const closeDetail = useCallback(() => setDetail(null), [])
+  // ONE sheet for everything the breakdown opens (plan 096): a word
+  // opens its dictionary entry, a marker row and a chip open the
+  // point's lesson, on the same ‹ stack. Held here and not in the view
+  // below, so a new phrase closes it: the sheet describes a word of
+  // the reference that was on screen when it was opened. Stable so the
+  // sheet's useDialog doesn't re-run its focus-on-open effect on every
+  // render while it is open.
+  const [lookup, setLookup] = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
   // Which reference the in-flight breakdown belongs to, so a slow
   // answer for a phrase the learner has already left cannot overwrite
   // the one on screen (ReadingRun's analysisPhraseRef).
@@ -192,7 +198,7 @@ export default function TranslationRun({ session }) {
     setShowBreakdown(false)
     setExplaining(false)
     setExplainError(null)
-    setDetail(null)
+    setLookup(null)
     setStage('writing')
     fetchBreakdown(phraseData.phrase)
   }
@@ -213,18 +219,6 @@ export default function TranslationRun({ session }) {
       .then(d => { if (breakdownPhraseRef.current === phraseText) setBreakdown(d) })
       .catch(() => { if (breakdownPhraseRef.current === phraseText) setBreakdown(null) })
       .finally(() => { if (breakdownPhraseRef.current === phraseText) setBreakdownLoading(false) })
-  }
-
-  // The sheet wants {title, level, entry, stats}, which is the shape
-  // the breakdown's own words carry. Mirrors ReadingRun's.
-  function openWordDetail(word) {
-    if (!word.vocab_match) return
-    setDetail({
-      title: word.surface,
-      entry: word.vocab_match.entry,
-      stats: word.vocab_match.stats,
-      level: word.vocab_match.level,
-    })
   }
 
   function next() {
@@ -394,9 +388,9 @@ export default function TranslationRun({ session }) {
       explainError={explainError}
       showBreakdown={showBreakdown}
       setShowBreakdown={setShowBreakdown}
-      detail={detail}
-      openWordDetail={openWordDetail}
-      closeDetail={closeDetail}
+      lookup={lookup}
+      setLookup={setLookup}
+      closeLookup={closeLookup}
       session={session}
       onBack={leave}
       backLabel={t[backKey]}
@@ -483,12 +477,9 @@ function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, fare, error, analysis, analysisLoading, backLabel,
   breakdown, breakdownLoading, onExplain, explaining, explainError,
-  showBreakdown, setShowBreakdown, detail, openWordDetail, closeDetail,
+  showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
-  // A grammar chip in the rows opens the point's dictionary entry.
-  const [grammarId, setGrammarId] = useState(null)
-  const closeGrammar = useCallback(() => setGrammarId(null), [])
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -633,8 +624,8 @@ function SessionView({
                     translation={data.translation}
                     sentenceText={data.phrase}
                     t={t}
-                    onTokenClick={openWordDetail}
-                    onGrammarOpen={g => setGrammarId(g.raw_id)}
+                    onTokenClick={w => setLookup(vocabLookup(w))}
+                    onGrammarOpen={g => setLookup(grammarLookup(g))}
                     onExplain={onExplain}
                     explaining={explaining}
                     explainError={explainError}
@@ -663,9 +654,8 @@ function SessionView({
         </>
       )}
 
-      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
-      {grammarId && (
-        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      {lookup && (
+        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>
   )

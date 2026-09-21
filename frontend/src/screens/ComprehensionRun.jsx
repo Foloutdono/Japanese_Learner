@@ -10,8 +10,8 @@ import PromptCard from '../components/study/PromptCard'
 import { QuestionTypeBadge } from '../components/study/QuizComponents'
 import { PassageBreakdown } from '../components/analysis/PassageBreakdown'
 import { GrammarChips } from '../components/analysis/GrammarChips'
-import { WordDetail } from '../components/analysis/WordDetail'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
+import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
@@ -65,9 +65,11 @@ export default function ComprehensionRun({ session }) {
   // and a list of closed sentences would be the old list with one
   // more tap in front of it.
   const [openIndex, setOpenIndex] = useState(0)
-  // The word the learner tapped in a sentence, as a bottom sheet.
-  const [detail, setDetail]     = useState(null)
-  const closeDetail = useCallback(() => setDetail(null), [])
+  // One sheet for everything the breakdown opens (plan 096): the word
+  // the learner tapped in a sentence opens its dictionary entry, a
+  // marker row and a chip open the point's lesson.
+  const [lookup, setLookup]     = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
   const [openRow, setOpenRow]   = useState(null)   // which result row is opened on its question
   // { message, retry } — the retry flag exists because one of these
   // cannot be retried: a spent daily allowance comes back tomorrow, and
@@ -83,7 +85,7 @@ export default function ComprehensionRun({ session }) {
     setRereading(false)
     setShowBreakdown(false)
     setOpenIndex(0)
-    setDetail(null)
+    setLookup(null)
     setOpenRow(null)
     setPicked(null)
 
@@ -159,22 +161,8 @@ export default function ComprehensionRun({ session }) {
 
   // A grammar chip — over the text or under a sentence — opens the
   // point's dictionary entry by its card id. No mining here: the plate
-  // has its ✕ alone, as WordDetail has on this stage.
-  const [grammarId, setGrammarId] = useState(null)
-  const closeGrammar = useCallback(() => setGrammarId(null), [])
-  const openGrammar = g => setGrammarId(g.raw_id)
-
-  // The sheet wants {title, level, entry, stats}, which is the shape
-  // the breakdown's own words carry. Mirrors ReadingRun's.
-  function openWordDetail(word) {
-    if (!word.vocab_match) return
-    setDetail({
-      title: word.surface,
-      entry: word.vocab_match.entry,
-      stats: word.vocab_match.stats,
-      level: word.vocab_match.level,
-    })
-  }
+  // has its ✕ alone on this stage.
+  const openGrammar = g => setLookup(grammarLookup(g))
 
   // Next commits the pick (the canvas: choose a row, then Next) and
   // submits on the last question.
@@ -468,7 +456,7 @@ export default function ComprehensionRun({ session }) {
                 t={t}
                 openIndex={openIndex}
                 setOpenIndex={setOpenIndex}
-                onTokenClick={openWordDetail}
+                onTokenClick={w => setLookup(vocabLookup(w))}
                 onGrammarOpen={openGrammar}
               />
             </PromptCard>
@@ -485,9 +473,8 @@ export default function ComprehensionRun({ session }) {
         </>
       )}
 
-      {detail && <WordDetail detail={detail} t={t} onClose={closeDetail} />}
-      {grammarId && (
-        <DictionaryLookupSheet key={grammarId} id={grammarId} category="grammar" session={session} onClose={closeGrammar} />
+      {lookup && (
+        <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>
   )

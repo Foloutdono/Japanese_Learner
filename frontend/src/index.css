@@ -2404,40 +2404,6 @@
   gap: var(--sp-3);
   padding-block: var(--sp-3);
 }
-/* ── The word detail (a sheet) ── */
-.word-detail__block {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-}
-.word-detail__block + .word-detail__block {
-  padding-top: var(--sp-4);
-  border-top: 1px solid var(--surface-line);
-}
-.word-detail__meaning { font-size: var(--fs-body); }
-.word-detail__entry {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-.word-detail__row {
-  display: flex;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  font-size: var(--fs-sm);
-}
-.word-detail__key { color: var(--text-secondary); }
-.word-detail__marks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-}
-.word-detail__act {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-}
 
 /* ── The stage and the line, side by side ──
    ONE one-off breakpoint, per the rule in the Breakpoints block near
@@ -9753,7 +9719,24 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The rows: word | reading | meaning | level, one line each where the
    column is wide enough, and on a phone the meaning drops under the
    word so a long gloss wraps in the room the word left rather than
-   squeezing beside it. A hairline between rows, never a card each. */
+   squeezing beside it. A hairline between rows, never a card each.
+
+   A row that opens something IS a <button> (plan 096), laid out as
+   the same grid -- so it resets the bare-button box the sheet gives
+   every unclassed button (its padding, its --r-panel corner, its
+   blanket hover filter and its 600 weight, which would have made
+   every gloss on the page bold). The rows are the lattice, so the
+   corner is --r-flat like every other board row.
+
+   The block padding is a rung up from what the row carried as a div:
+   the press target is the row now, and --sp-3 top and bottom put the
+   hairlines ~50px apart on a phone with a one-line gloss, over a box
+   floored at the 44px every other control on the stage clears. The
+   inline
+   padding bleeds back out through an equal negative margin, so the
+   hover and press surface reaches a little past the text on both
+   sides while the text itself stays on the column the sentence line
+   above it sets. */
 .bkd-rows {
   display: flex;
   flex-direction: column;
@@ -9766,10 +9749,37 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     "meaning meaning lvl";
   gap: var(--sp-1) var(--sp-3);
   align-items: baseline;
-  padding: var(--sp-2) 0;
+  width: auto;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  margin-inline: calc(-1 * var(--sp-2));
+  padding: var(--sp-3) var(--sp-2);
+  border: 0;
   border-top: 1px solid var(--surface-line);
+  border-radius: var(--r-flat);
+  background: none;
+  font-weight: 400;
+  color: inherit;
+  text-align: left;
 }
 .bkd-row:first-child { border-top: 0; }
+.bkd-row--door { cursor: pointer; }
+/* The bare-button hover is a brightness filter over the whole box;
+   this family lifts the surface instead, the way every other row in
+   the app does. */
+.bkd-row--door:hover {
+  filter: none;
+  background: var(--overlay-hover);
+}
+.bkd-row--door:active { background: var(--chip-bg); }
+.bkd-row--door:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
+/* The word still wears the door -- the pigment on its 2px rule is
+   what says the row opens something -- but the hover that lights it
+   is the ROW's now, not the word's own. */
+.bkd-row--door:hover .bkd-tok--door,
+.bkd-row--door:focus-visible .bkd-tok--door { border-bottom-color: var(--line-color, var(--accent)); }
 .bkd-row__word {
   grid-area: word;
   font-family: var(--font-jp);
@@ -9813,17 +9823,42 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: flex;
   flex-direction: column;
   margin-top: var(--sp-2);
-  padding-left: var(--sp-3);
+  padding-left: var(--sp-1);
   border-left: 2px solid var(--line-grammar);
 }
+/* A point row that opens its lesson is a <button> too (plan 096), and
+   resets the same bare-button box .bkd-row does. The rail keeps
+   --sp-1 of the indent and the row takes the rest as its own padding,
+   so the press surface starts where the rail ends instead of a rung
+   in from it. */
 .bkd-point {
   display: flex;
   flex-direction: column;
+  align-items: stretch;
   gap: var(--sp-1);
-  padding: var(--sp-2) 0;
+  width: auto;
+  min-height: 44px; /* a hit target, not a spacing rung */
+  margin-inline-end: calc(-1 * var(--sp-2));
+  padding: var(--sp-3) var(--sp-2);
+  border: 0;
   border-top: 1px solid var(--surface-line);
+  border-radius: var(--r-flat);
+  background: none;
+  font-weight: 400;
+  color: inherit;
+  text-align: left;
 }
 .bkd-point:first-child { border-top: 0; }
+.bkd-point--door { cursor: pointer; }
+.bkd-point--door:hover {
+  filter: none;
+  background: var(--overlay-hover);
+}
+.bkd-point--door:active { background: var(--chip-bg); }
+.bkd-point--door:focus-visible {
+  outline: 2px solid var(--accent2);
+  outline-offset: -2px;
+}
 .bkd-point__head {
   display: flex;
   flex-wrap: wrap;
@@ -9837,17 +9872,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   line-height: 1.5;
   color: var(--text-primary);
 }
-.bkd-point__door {
-  padding: 0;
-  border: 0;
-  background: none;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
-  text-decoration: underline dotted;
-}
-.bkd-point__door:hover,
-.bkd-point__door:focus-visible,
+.bkd-point__door { text-decoration: underline dotted; }
+.bkd-point--door:hover .bkd-point__door,
+.bkd-point--door:focus-visible .bkd-point__door,
 .bkd-point--lit .bkd-point__pattern { color: var(--line-grammar); }
 .bkd-point__gloss {
   min-width: 0;
@@ -9869,14 +9896,31 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   overflow-wrap: anywhere;
 }
 /* The explanation as an option (plan 095): the button under the rows
-   where the note will print once bought, its failure said above it. */
+   where the note will print once bought, its failure said above it.
+
+   Full width on a phone (plan 096): shrink-wrapped, the button came
+   out ~128px wide and left-aligned under a column of full-bleed rows,
+   which read as a footnote rather than as the one thing left to do --
+   and put the only control on the stage at a third of the reach of
+   every button around it. From the tablet rung up there is room
+   beside it, so it shrink-wraps again. */
 .bkd__explain {
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
-  align-items: flex-start;
+  align-items: stretch;
 }
 .bkd__explain-hint { color: var(--danger); }
+.bkd__explain-btn {
+  width: 100%;
+  /* No 300ms wait between the tap and the press state on a phone. */
+  touch-action: manipulation;
+}
+.bkd__explain-btn:active { background: var(--chip-bg); }
+@media (min-width: 768px) {
+  .bkd__explain { align-items: flex-start; }
+  .bkd__explain-btn { width: auto; }
+}
 /* The passage: the sentences stacked, a hairline between them, the
    open one marked by the line's rail on its left edge. The head is a
    row (the open line holds word buttons); the chevron is the control. */

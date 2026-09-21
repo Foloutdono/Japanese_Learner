@@ -209,18 +209,20 @@ describe('the practice sessions at phone width', () => {
                 </div>
                 <span className="bkd__en">I waited at the station.</span>
                 <div className="bkd-rows">
-                  <div className="bkd-row">
-                    <button type="button" className="bkd-row__word bkd-tok bkd-tok--unknown bkd-tok--door" lang="ja">駅</button>
+                  {/* The row IS the control (plan 096): a <button> laid
+                      out as the same grid, the word a span inside it. */}
+                  <button type="button" className="bkd-row bkd-row--door">
+                    <span className="bkd-row__word bkd-tok bkd-tok--unknown bkd-tok--door" lang="ja">駅</span>
                     <span className="bkd-row__reading" lang="ja">えき</span>
                     <span className="bkd-row__meaning">station</span>
                     <span className="type-badge bkd-row__lvl">N5</span>
-                  </div>
-                  <div className="bkd-row">
-                    <button type="button" className="bkd-row__word bkd-tok bkd-tok--learning bkd-tok--door" lang="ja">待ちました</button>
+                  </button>
+                  <button type="button" className="bkd-row bkd-row--door">
+                    <span className="bkd-row__word bkd-tok bkd-tok--learning bkd-tok--door" lang="ja">待ちました</span>
                     <span className="bkd-row__reading" lang="ja">まちました</span>
                     <span className="bkd-row__meaning">{long}</span>
                     <span className="type-badge bkd-row__lvl">N5</span>
-                  </div>
+                  </button>
                 </div>
               </div>
             </div>
@@ -246,6 +248,11 @@ describe('the practice sessions at phone width', () => {
     expect(getComputedStyle(rows[0]).borderTopWidth).toBe('0px')
     expect(getComputedStyle(rows[1].querySelector('.bkd-row__word')).fontSize)
       .toBe(getComputedStyle(screen.container.querySelector('.bkd-line')).fontSize)
+    // The row is the hit target (plan 096), at the 44px floor every
+    // other control on the stage clears, and the gloss beside it is
+    // NOT bold -- the bare-button 600 weight is reset on the row.
+    expect(rows[0].getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    expect(getComputedStyle(rows[1].querySelector('.bkd-row__meaning')).fontWeight).toBe('400')
   })
 
   it('the choices: lettered roundels, the picked row filled; the result is a lattice and 44px rows', async () => {

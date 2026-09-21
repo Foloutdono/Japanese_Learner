@@ -102,8 +102,18 @@ runtime purpose. Two consequences worth knowing:
   `components/analysis/StageCard.jsx`, `components/analysis/SentenceBreakdown.jsx`,
   `components/analysis/PassageBreakdown.jsx`, `lib/explainSentence.js`,
   `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
-  `screens/TranslationRun.jsx` and `screens/DictationRun.jsx`).
-  When starting a new wave, begin at **096** or higher, and check
+  `screens/TranslationRun.jsx` and `screens/DictationRun.jsx`),
+  and **096** is the breakdown's doors — a word opens its dictionary
+  entry rather than the deck-row sheet that was WordDetail (now
+  deleted), the whole ROW is that door rather than the word in it (and
+  the whole grammar-point row rather than its pattern), and the rows
+  and the Explain button are sized for a thumb (cited in
+  `components/analysis/lookup.js`, `components/analysis/SentenceBreakdown.jsx`,
+  `components/analysis/GrammarPoints.jsx`, `components/ui/Loading.jsx`,
+  `screens/AnalyzerScreen.jsx`, `screens/ReadingRun.jsx`,
+  `screens/TranslationRun.jsx`, `screens/DictationRun.jsx`,
+  `screens/ComprehensionRun.jsx` and `index.css`).
+  When starting a new wave, begin at **097** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

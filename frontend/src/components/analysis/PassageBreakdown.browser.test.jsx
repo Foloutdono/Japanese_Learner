@@ -136,9 +136,11 @@ describe('PassageBreakdown', () => {
   it("a construction's door opens the point and does not close the sentence", async () => {
     const onGrammarOpen = vi.fn()
     await render(<Host sentences={WITH_GRAMMAR} onGrammarOpen={onGrammarOpen} />)
-    const door = items()[0].querySelector('.bkd-passage__body .bkd-point__door')
+    // Plan 096: the row is the door. Pressed here on the pattern,
+    // which is a span inside it -- the click reaches the row.
+    const door = items()[0].querySelector('.bkd-passage__body .bkd-point')
     expect(door.tagName).toBe('BUTTON')
-    door.click()
+    door.querySelector('.bkd-point__door').click()
     await settle()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
     expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_〜ました')
@@ -178,10 +180,13 @@ describe('PassageBreakdown', () => {
     expect(lit()).toEqual([])
   })
 
-  it('with nowhere to open, the construction is the pattern as a word', async () => {
+  it('with nowhere to open, the construction is a row and not a control', async () => {
     await render(<Host sentences={WITH_GRAMMAR} />)
     const chip = items()[0].querySelector('.bkd-passage__body .bkd-point')
-    expect(chip.querySelector('.bkd-point__pattern').tagName).toBe('SPAN')
+    // Plan 096: the row is the door, so with no door it is a <div>
+    // and the pattern wears no dotted rule.
+    expect(chip.tagName).toBe('DIV')
+    expect(chip.querySelector('.bkd-point__door')).toBeNull()
     expect(chip.querySelector('button')).toBeNull()
   })
 

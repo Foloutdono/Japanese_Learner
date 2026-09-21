@@ -222,7 +222,11 @@ describe('SentenceBreakdown', () => {
     expect(readings).toEqual(['がくせい', null, 'あいました'])
   })
 
-  it('a deck word is a focusable control in the line and in its row; a particle is text; nothing nests', async () => {
+  // Plan 096: in the LINE the word itself is the control (there is no
+  // row to press there); in the ROWS the whole row is, and the word
+  // inside it is a span wearing the door's rule. A row with nothing to
+  // open stays a <div>.
+  it('a deck word is a focusable control in the line and its whole row in the rows; a particle is text; nothing nests', async () => {
     const onTokenClick = vi.fn()
     const analysis = { available: true, tokens: [tokenFixture(), particleFixture()], grammar: [] }
     const screen = await render(withLang(
@@ -234,11 +238,16 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelectorAll('.bkd-line button')).toHaveLength(1)
 
     const rows = document.querySelectorAll('.bkd-row')
-    expect(rows[0].querySelector('.bkd-row__word').tagName).toBe('BUTTON')
-    expect(rows[1].querySelector('.bkd-row__word').tagName).toBe('SPAN')
+    expect(rows[0].tagName).toBe('BUTTON')
+    expect(rows[1].tagName).toBe('DIV')
+    expect(rows[0].querySelector('.bkd-row__word').tagName).toBe('SPAN')
     expect(screen.container.querySelectorAll('button button')).toHaveLength(0)
+    // The row's name is everything printed on it, not the word alone:
+    // an aria-label replaces the button's contents.
+    expect(rows[0].getAttribute('aria-label')).toBe('Details for 学生 — がくせい — student — N5')
 
-    rows[0].querySelector('.bkd-row__word').click()
+    // Pressed on the gloss, which is not the word: the row carries it.
+    rows[0].querySelector('.bkd-row__meaning').click()
     lineWord.click()
     expect(onTokenClick).toHaveBeenCalledTimes(2)
     expect(onTokenClick.mock.calls[0][0].surface).toBe('学生')
@@ -389,9 +398,9 @@ describe('SentenceBreakdown', () => {
       />
     ))
     const rows = document.querySelectorAll('.bkd-row')
-    const word = rows[1].querySelector('.bkd-row__word')
-    expect(word.tagName).toBe('BUTTON')
-    word.click()
+    expect(rows[1].tagName).toBe('BUTTON')
+    expect(rows[1].querySelector('.bkd-row__word').tagName).toBe('SPAN')
+    rows[1].click()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
     expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
     // It is the grammar card's own level the row prints: there is no
@@ -519,11 +528,14 @@ describe('SentenceBreakdown', () => {
     const { analysis } = karaMade()
     const onGrammarOpen = vi.fn()
     await render(withLang(<SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={onGrammarOpen} />))
-    const door = document.querySelector('.bkd-point__door')
+    // Plan 096: the ROW takes the focus -- it is the button now, and
+    // the pattern inside it wears the dotted rule that says so.
+    const door = document.querySelector('.bkd-point')
+    expect(door.tagName).toBe('BUTTON')
     door.focus()
     await settle()
     expect(litSurfaces()).toEqual(['から', 'まで'])
-    door.click()
+    door.querySelector('.bkd-point__door').click()
     door.blur()
     await settle()
     expect(onGrammarOpen).toHaveBeenCalledTimes(1)
@@ -559,11 +571,11 @@ describe('SentenceBreakdown', () => {
       tokens: [tokenFixture(), particleFixture({ grammar: [wa] })],
     }
     await render(withLang(<SentenceBreakdown analysis={analysis} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
-    const row = document.querySelectorAll('.bkd-row')[1].querySelector('.bkd-row__word')
+    const row = document.querySelectorAll('.bkd-row')[1]
     hover(row)
     await settle()
     expect(litSurfaces()).toEqual(['は'])
-    expect(row.classList.contains('bkd-tok--lit')).toBe(true)
+    expect(row.querySelector('.bkd-row__word').classList.contains('bkd-tok--lit')).toBe(true)
     leave(row)
     await settle()
     expect(litSurfaces()).toEqual([])

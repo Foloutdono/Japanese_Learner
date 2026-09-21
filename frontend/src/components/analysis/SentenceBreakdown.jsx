@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLang } from '../../LangContext'
+import { Dots } from '../ui/Loading'
 import { CardTransition } from '../study/CardTransition'
 import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
@@ -225,6 +226,11 @@ export function SentenceLine({ analysis, text, t, onTokenClick, lit = null }) {
 // `lit`/`onLight` (plan 095): the row that opens a marker, and the
 // marker chip beside a word row, light the particle in the line above
 // while hovered or focused, exactly as a chip does -- see useLight.
+//
+// The whole row is the door (plan 096): a row that opens something is
+// a <button> laid out as the same grid, with the word, the reading,
+// the gloss and the level as plain spans inside it. A row that opens
+// nothing stays a <div>.
 export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null, onLight }) {
   // Guarded like GrammarChips': the rows are drawn under a bare render
   // in the tests, with no provider above them.
@@ -261,38 +267,55 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
         // and "marks the sentence topic" is precisely what a learner
         // looking at that row wants to read there.
         const meaning = head.meaning ?? head.vocab_match?.entry?.meaning ?? (door ? grammarGloss(door, lang) : '')
-        return (
-          <div key={i} className="bkd-row">
-            {head.vocab_match && onTokenClick ? (
-              <button
-                type="button"
-                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door`}
-                lang="ja"
-                onClick={() => onTokenClick(head)}
-                aria-label={t.detailsForToken(row.surface)}
-              >
-                {row.surface}
-              </button>
-            ) : door ? (
-              <button
-                type="button"
-                className={`bkd-row__word bkd-tok bkd-tok--${state} bkd-tok--door${lit && pointKey(lit) === pointKey(door) ? ' bkd-tok--lit' : ''}`}
-                lang="ja"
-                onClick={() => onGrammarOpen(door)}
-                aria-label={t.detailsForToken(row.surface)}
-                {...light(door)}
-              >
-                {row.surface}
-              </button>
-            ) : (
-              <span className={`bkd-row__word bkd-tok bkd-tok--${state}`} lang="ja">{row.surface}</span>
-            )}
+        const level = head.vocab_match?.level ?? door?.level ?? null
+        // The DOOR IS THE ROW, not the word in it (plan 096). The word
+        // was a 30x24px target on a 65px-tall row, with the reading,
+        // the gloss and the level beside it all dead to the touch --
+        // three quarters of what a learner is looking at when they
+        // reach for it. The word keeps the affordance it always had
+        // (the rule under it, the pigment on hover) and is now drawn
+        // by the row's own state; the row carries the press.
+        const opens = head.vocab_match && onTokenClick
+          ? () => onTokenClick(head)
+          : door
+            ? () => onGrammarOpen(door)
+            : null
+        // A marker's row lights the particle in the line above while
+        // it is hovered or focused -- on the row now, so the whole
+        // row lights it (see useLight).
+        const doorLit = door && lit && pointKey(lit) === pointKey(door)
+        const body = (
+          <>
+            <span
+              className={`bkd-row__word bkd-tok bkd-tok--${state}${opens ? ' bkd-tok--door' : ''}${doorLit ? ' bkd-tok--lit' : ''}`}
+              lang="ja"
+            >
+              {row.surface}
+            </span>
             {reading && <span className="bkd-row__reading" lang="ja">{reading}</span>}
             <span className="bkd-row__meaning">{meaning}</span>
-            {(head.vocab_match?.level || door?.level) && (
-              <span className="type-badge bkd-row__lvl">{head.vocab_match?.level ?? door.level}</span>
-            )}
-          </div>
+            {level && <span className="type-badge bkd-row__lvl">{level}</span>}
+          </>
+        )
+        if (!opens) return <div key={i} className="bkd-row">{body}</div>
+        // The row's name is everything printed on it, not "Details for
+        // 六" alone: an aria-label on a button REPLACES its contents,
+        // so the reading and the gloss -- which were plain text beside
+        // the old word button and read as such -- have to be said here
+        // or they are lost to a screen reader entirely.
+        const label = [t.detailsForToken(row.surface), reading, meaning, level]
+          .filter(Boolean).join(' — ')
+        return (
+          <button
+            key={i}
+            type="button"
+            className="bkd-row bkd-row--door"
+            onClick={opens}
+            aria-label={label}
+            {...(door ? light(door) : {})}
+          >
+            {body}
+          </button>
         )
       })}
     </div>
@@ -378,8 +401,22 @@ export function SentenceBreakdown({
           : onExplain && available && (
             <div className="bkd__explain">
               {explainError && <span className="hint bkd__explain-hint">{explainError}</span>}
-              <button type="button" className="btn-secondary" onClick={onExplain} disabled={explaining}>
+              {/* Full width on a phone, shrink-wrapped from the tablet
+                  rung up (plan 096, see .bkd__explain): a 128px box
+                  left-aligned under a full-bleed column of rows read
+                  as a footnote rather than as the one thing left to
+                  do. The wait is the app's own three dots beside the
+                  label, so the press is answered in the control that
+                  was pressed instead of only in its wording. */}
+              <button
+                type="button"
+                className="btn-secondary bkd__explain-btn"
+                onClick={onExplain}
+                disabled={explaining}
+                aria-busy={explaining || undefined}
+              >
                 {explaining ? t.explaining : t.explainSentence}
+                {explaining && <Dots />}
               </button>
             </div>
           )}
