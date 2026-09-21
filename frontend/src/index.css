@@ -8904,6 +8904,53 @@ textarea:focus-visible {
 .deck-identity__due { color: color-mix(in srgb, var(--warning) 55%, var(--text-primary)); font-weight: 700; }
 .deck-identity__study { flex: none; }
 
+/* ── 通報 — the report, in the identity's corner ──
+   Reporting a deck is not one of this page's offers. As a labelled
+   pill under the cards it read as the third thing on the menu, after
+   Follow and the preview — a learner scanning the page met "Report"
+   at the end of it as if it were a way of using the deck. In the
+   card's top-right corner it is where a complaint belongs: attached
+   to the thing complained about, and out of the reading line. The
+   word goes with the move; the mark carries it, and `title` and the
+   accessible name carry the word for anyone who needs it.
+
+   Quiet at rest, --danger only under the cursor. The screen has ONE
+   action (DESIGN.md, "The primary button"), and a permanently red
+   mark two inches from the filled button argues with it. The hover
+   ink and ring are .chip--danger's own values, so this is the same
+   control family seen from closer in, not a second reading of the
+   pigment.
+
+   Square at --r-pill and glyph-only, the construction .console__toggle
+   takes for the same reason: the button IS the target, so a border
+   round a label's worth of empty pill would be drawn twice. */
+.deck-identity__report {
+  flex: none;
+  /* The corner, not the middle: the row is as tall as the filled
+     action beside it, and centred this would sit level with the
+     button rather than with the name it is about. */
+  align-self: flex-start;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  justify-content: center;
+}
+.deck-identity__report:hover,
+.deck-identity__report:focus-visible {
+  color: color-mix(in srgb, var(--danger) 35%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--danger) 70%, transparent);
+}
+/* Reported is spent, not forbidden, so it does not take the chip
+   family's 0.45: the state is the only thing the corner still has to
+   say, and it says it in the 50% mix 057 settled on for danger as
+   TEXT. Disabled because there is nothing left to press. */
+.deck-identity__report:disabled {
+  opacity: 1;
+  cursor: default;
+  color: color-mix(in srgb, var(--danger) 50%, var(--text-primary));
+  border-color: color-mix(in srgb, var(--danger) 45%, transparent);
+}
+
 /* ── The identity block on a phone ──
    Four things in one row and room for three. At 390px the card holds
    334px inside its own padding; the roundel takes 30 of it and the
@@ -8936,6 +8983,15 @@ textarea:focus-visible {
   .deck-identity__name { grid-column: 2; }
   .deck-identity__meta { grid-column: 1 / -1; }
   .deck-identity__study { grid-column: 1 / -1; }
+  /* The corner is a third track, and only where something stands in
+     it: the deck's own page carries no report, and an empty `auto`
+     column would still cost that card one gap of trailing air.
+     Placed explicitly because the button is last in the DOM -- it is
+     read after the action, and drawn beside the name. */
+  .deck-identity:has(.deck-identity__report) {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  .deck-identity__report { grid-row: 1; grid-column: 3; align-self: center; }
 }
 
 .chip__dots { font-family: var(--font-display); font-weight: 700; letter-spacing: 0.1em; }

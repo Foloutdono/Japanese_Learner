@@ -5,7 +5,6 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
-import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -143,13 +142,22 @@ export default function PublicDeckScreen({ session }) {
             {t.libraryFollow}
           </button>
         )}
+        {/* Last in the DOM, first in the corner: the mark is read after
+            the action it does not compete with, and placed by the grid. */}
+        <button type="button" className="chip deck-identity__report"
+          onClick={() => { playUi('click-mode-selection'); setReport(true) }}
+          aria-haspopup="dialog" disabled={reported}
+          title={reported ? t.libraryReported : t.libraryReport}
+          aria-label={reported ? t.libraryReported : t.libraryReport}>
+          <WarningIcon size={16} />
+        </button>
       </div>
 
       {deck.description && <p className="lib-blurb">{deck.description}</p>}
 
       {/* The list and the count of what it left out are one block: the
           count is the list's caption, and at the page's own block gap it
-          floated between the cards and the report as a third thing. */}
+          floated under the cards as a third thing of its own. */}
       {preview.length > 0 && (
         <div className="lib-preview">
           <ul className="card-list">
@@ -170,14 +178,6 @@ export default function PublicDeckScreen({ session }) {
           )}
         </div>
       )}
-
-      <div className="chip-row">
-        <Chip className="chip--danger" onClick={() => { playUi('click-mode-selection'); setReport(true) }}
-          aria-haspopup="dialog" disabled={reported}>
-          <WarningIcon size={14} />
-          {reported ? t.libraryReported : t.libraryReport}
-        </Chip>
-      </div>
 
       <Sheet open={reportOpen} onClose={() => setReport(false)} label={t.libraryReport}
         cap={t.libraryReport}>
