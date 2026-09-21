@@ -51,6 +51,45 @@ builds run in `.github/workflows/mobile.yml`, and `docs/release.md` is the
 runbook. The store name and bundle id are placeholders until the owner
 picks them (see the runbook).
 
+## Dependency overrides
+
+`package.json` carries an `overrides` block, and every entry in it is there
+because `@capacitor/assets` — the icon and splash generator behind
+`npm run assets:native` — pins transitive dependencies that carry
+advisories. 3.0.5 is its latest release and still pins them, so `npm audit
+fix` has nothing to offer: it reports "no fix available" and proposes a
+downgrade. The overrides are what keep `npm audit` at zero. None of this
+reaches the shipped bundle — the whole chain is devDependencies, used to
+generate icons and to run `cap sync` — but `cap sync` runs in CI on every
+frontend PR, so it is worth keeping clean rather than muted.
+
+- **`@capacitor/cli@^5.3.0` → the root's 8.x.** `@capacitor/assets`
+  declares the 5 line as a dependency and then never imports it; the
+  vestigial entry installed a *second* CLI (5.7.8) whose `tar@^6.1.11`
+  is the critical chain (GHSA-34x7-hfp2-rc4v and eleven siblings). The
+  tar 6 line has no fixed release, so the fix is to delete the duplicate
+  rather than to bump it: pointed at the CLI already installed at the
+  root, which is on tar 7. Matching on the `^5.3.0` spec rather than on
+  the package name leaves the root's own `@capacitor/cli` alone.
+- **`sharp` → `^0.35.4`.** `@capacitor/assets` pins it exactly at 0.32.6,
+  which carries the libvips and libheif advisories. 0.33 changed how sharp
+  ships its binaries, not the dozen calls the generator makes. It does
+  re-encode PNGs a shade differently, so the next `assets:native` run will
+  show a binary diff against the committed icons — same dimensions, largest
+  pixel delta under 10/255, the app icon bit-identical. It is the same
+  picture, not a redesign.
+- **`uuid` → `^11.1.1`.** `xcode`, the pbxproj writer under the Capacitor
+  CLI, asks for `^7.0.3`, below the bounds-check fix in 11.1.1. Held to the
+  11 line deliberately: 12 and later drop the CommonJS entry point that
+  `xcode` requires.
+
+Re-check the block whenever Capacitor moves — an override that upstream has
+caught up with should be deleted, not kept out of habit. One npm wrinkle
+worth knowing: adding or changing an override does not re-resolve a
+lockfile npm already considers satisfied, so `npm install` will report
+"up to date" and change nothing. Delete `node_modules` and
+`package-lock.json` and install again to see the edit take.
+
 ## Design conformance guards
 
 Five guards, run by CI on every PR, exist because this project has 19,000
