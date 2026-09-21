@@ -59,7 +59,7 @@
   .exam-generating__stroke { animation: none; transform: scaleX(1); opacity: 0.5; }
 }
 .exam-generating__title {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.05rem;
   font-weight: 600;
 }
@@ -530,7 +530,7 @@
 
 /* ── Cloze passage blanks (grammar もんだい3) ── */
 .exam-passage__title {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1rem;
   margin-bottom: 10px;
   color: var(--text-secondary);
@@ -583,7 +583,7 @@
   text-align: left;
 }
 .exam-flyer__title {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.3rem;
   margin-bottom: 2px;
 }
@@ -1656,7 +1656,7 @@
   border-style: solid;
 }
 .anl-drop__jp {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.15rem;
   letter-spacing: 0.1em;
@@ -2560,7 +2560,7 @@
    wrapped the dialog's own title onto two lines. */
 .anl-deckpicker__title {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.25rem;
   font-weight: 700;
   letter-spacing: 0.04em;
@@ -2822,7 +2822,7 @@
   justify-content: space-between;
 }
 .onb-test__level {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.3rem;
   font-weight: 700;
 }
@@ -2931,7 +2931,7 @@
 .onb-arrival__dest {
   display: block;
   margin-top: 4px;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.7rem;
   font-weight: 700;
   line-height: 1.2;
@@ -3012,7 +3012,7 @@
   color: var(--text-secondary);
 }
 .onb-preview-done [lang="ja"] {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.6rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -3945,7 +3945,7 @@ button:focus-visible {
   padding: 28px 20px 28px 18px;
 }
 .platform-card__title {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 600;
   font-size: 1.25rem;
   line-height: 1.3;
@@ -4385,7 +4385,7 @@ textarea:focus-visible {
 
 .section-header__title {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: clamp(1.4rem, 1.15rem + 1.1vw, 1.9rem);
   letter-spacing: 0.01em;
@@ -4412,7 +4412,7 @@ textarea:focus-visible {
   min-width: 0;
 }
 .section-header__jp {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: clamp(1.35rem, 1.1rem + 1vw, 1.75rem);
   letter-spacing: 0.1em;
@@ -6045,7 +6045,7 @@ textarea:focus-visible {
 
 .station-sign__name {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 2.5rem;
   line-height: 1.15;
@@ -6306,7 +6306,7 @@ textarea:focus-visible {
 /* The name a pass is issued to, set at the size a pass sets it. */
 
 .pass__holder .profile-card__name {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-size: 1.65rem;
   font-weight: 700;
   line-height: 1.15;
@@ -6332,7 +6332,7 @@ textarea:focus-visible {
   justify-content: center;
   border-radius: 50%;
   background: color-mix(in srgb, var(--pass-color) 45%, var(--bg-panel));
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.7rem;
   color: var(--text-on-panel);
@@ -8716,20 +8716,26 @@ textarea:focus-visible {
   padding: 40px 24px;
   text-align: center;
 }
+/* The line that says the deck is done: the tick and the words as one
+   phrase, so they sit on the gap the switch under them already uses
+   (.quiz-done .btn-panel, --sp-3's 8px spelled as a literal there) --
+   one rung for the whole block rather than a 10px of its own two
+   pixels off it. --fs-lead is 17.92px against the 18px that stood
+   here, which is the rung the size was reaching for. */
 .quiz-done__msg {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: var(--sp-3);
   margin: 0;
   color: var(--success);
-  font-size: 18px;
+  font-size: var(--fs-lead);
   line-height: 1.4;
 }
 .quiz-done .btn-panel {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 /* ── 終着 — the paced terminus ───────────────────────────────
@@ -8738,7 +8744,7 @@ textarea:focus-visible {
    signage register; the 臨時列車 button is the explicit way past it. */
 .quiz-done__banner {
   margin: 0;
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.05rem;
   letter-spacing: 0.3em;
@@ -8753,15 +8759,15 @@ textarea:focus-visible {
 .quiz-done__row {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: var(--sp-5);
   flex-wrap: wrap;
   justify-content: center;
 }
-.quiz-done__extra [lang="ja"] { font-family: var(--font-jp); margin-right: 6px; }
+.quiz-done__extra [lang="ja"] { font-family: var(--font-jp); margin-right: var(--sp-2); }
 .quiz-done__row .btn-ghost {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-3);
 }
 
 /* ── 待合 — the wait (plan 067) ──────────────────────────────
@@ -11733,7 +11739,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    the pencil at the mid-height of a two-line block and grew the card
    under it. The whole name is a tap away in the field. */
 .profile-card__name {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 1.6rem;
   color: var(--text-primary);
@@ -13716,7 +13722,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    DESIGN.md rules out. Same 50% mix, same reason. */
 
 /* ── Grammar screen ───────────────────────────────────────── */
-.grammar-prompt { margin-bottom: 24px; }
+/* `.grammar-prompt` carries no box of its own, and deliberately. It
+   used to add `margin-bottom: 24px` under the card -- a literal on no
+   rung, and the last survivor of the per-element margins `.stage`'s
+   own gap replaced (see that rule's comment). It stacked ON the gap,
+   so a grammar card sat 40px clear of its choices and 44px clear of
+   its example sentences where a kana, vocab or kanji card sits 16px
+   clear of the same MCQ list: the one prompt class in the sheet with
+   a margin was the one whose answer looked detached from its
+   question. The stage's rhythm is the rhythm. */
 
 .grammar-glyph {
   font-size: 40px;
@@ -13784,7 +13798,16 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 14px;
 }
 
+/* The sentence hint's translation switch. A row, not a block: the
+   chevron is an inline SVG beside a text node, and a bare button
+   leaves it on the TEXT'S BASELINE with nothing between the two --
+   the arrow touched the S of "Show translation" and sat 2px high of
+   the button's own middle. Same construction as `.gl-tr-toggle`, the
+   lesson's copy of this switch, which has read right all along. */
 .grammar-examples-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
   background: var(--bg-panel);
   color: var(--text-on-panel-soft);
   font-size: 13px;
@@ -13795,7 +13818,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    under the list with its own spacing rather than floating between two
    equally-weighted stacks. */
 .grammar-examples {
-  margin-top: 4px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -16468,7 +16490,7 @@ button.syllabary-cell:focus-visible {
   line-height: normal;
 }
 .gate__dest {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: clamp(1.7rem, 6vw, 2.6rem);
   letter-spacing: 0.14em;
@@ -16547,7 +16569,7 @@ button.syllabary-cell:focus-visible {
   color: color-mix(in srgb, var(--pass-ink) 40%, var(--text-on-panel));
 }
 .gate__card-name {
-  font-family: 'Noto Serif JP', serif;
+  font-family: var(--font-serif);
   font-weight: 700;
   font-size: 0.86rem;
   line-height: 1.2;
@@ -18653,7 +18675,11 @@ a.slip__act { text-decoration: none; }
   color: var(--text-primary);
   container: brd / size;
 }
-.brd--welcome { gap: var(--sp-4); }
+/* The promise stands ON the foot: one rung between "Reach your goals."
+   and Embarquer, rather than the frame's own narrower gap. It is the
+   last gap of the screen and the only one the welcome sets itself --
+   see the roll's block below, which spends the rest of the room. */
+.brd--welcome { gap: var(--sp-7); }
 /* The cars slide sideways, so the frame clips them — and that clip
    was taking the focus ring off the name field with them. A focused
    input's ring is drawn OUTSIDE its border box (2px at +2px offset,
@@ -18746,9 +18772,10 @@ a.slip__act { text-decoration: none; }
 }
 .brd__body::before { margin-bottom: calc(-1 * var(--sp-5)); }
 .brd__body::after { margin-top: calc(-1 * var(--sp-5)); }
-/* The welcome centres its own block with the same pair, redefined
-   beside it (`.brd__body--top::before`, under "welcome" below) so its
-   air is set where its pieces are. */
+/* The welcome keeps only the first of the pair -- air over the sign --
+   and drops the second, so its promise stands on the foot rather than
+   floating over it. Redefined beside its own pieces
+   (`.brd__body--top::before`, under "welcome" below). */
 .brd__air { display: none; }
 .brd__body > .brd__air {
   display: block;
@@ -18964,26 +18991,38 @@ a.slip__act { text-decoration: none; }
    the welcome: every other step's body sits inside `.brd__cars`, which
    clips, and none of them has a bleeding child. */
 .brd--welcome .brd__body { margin-inline: calc(-1 * var(--sp-5)); padding-inline: var(--sp-5); gap: var(--sp-6); }
-/* The sign, the stock and the promise stand as ONE block on the centre
-   line. The roll used to be the flex item that took the free room
-   (flex: 1, centring its lanes inside it), which put the whole of a
-   tall screen's spare height between the cards and their neighbours:
-   the sign pinned under the top edge, the tagline pinned over the
-   foot, and the cards adrift in the middle with a gulf on each side.
-   The room now goes to two grow-only spacers at the ends of the body
-   instead -- the same pair every other step uses (`.brd__body::before`
-   and `::after` above, which the welcome had switched off), a basis of
-   0 so they are nothing at all once there is none, their negative
-   margins re-cut to this body's wider gap -- and the three pieces keep
-   one --sp-6 between them at every height. The roll still
-   gives way first when the screen is short (min-height: 0, and the
-   back lane steps aside below), and the hero keeps a floor of --sp-4
-   over the frame's own top padding so the sign never touches the
-   edge on a screen where the spacers have vanished. */
+/* Where a tall screen's spare height goes. Three claims on it, in
+   this order, and the order is the screen's reading:
+
+   - the sign takes a share over its head (`::before`, the first of
+     the body's grow-only pair, basis 0, its negative margin re-cut to
+     this body's wider gap), so 辻 stands under the top edge rather
+     than on it;
+   - the rolling stock takes the rest and centres its lanes inside it
+     (`flex: 1 1 auto` below, `justify-content: center`), which is what
+     puts equal air above and below the cards -- the train passing
+     through a gap, not a band wedged between its neighbours. The basis
+     is `auto` and not the `flex: 1` shorthand's 0: from a basis of 0
+     the roll and the spacer above it would halve the whole body
+     between them, and the lanes would overflow a box far shorter than
+     they are;
+   - the promise takes none: `::after` is dropped, so "Reach your
+     goals." sits at the foot of the body with one rung between it and
+     Embarquer (the frame's own gap, --sp-7 above).
+
+   Centring all three as one block instead -- the pair at the ends
+   doing the work and the roll taking its natural height -- reads
+   wrong at phone height: it crowds the cards against both the sign
+   and the promise and leaves the whole surplus in one dead gap over
+   the foot, which is the density contract's own failure case
+   (DESIGN.md). The roll still gives way first when the screen is
+   short (min-height: 0, and the back lane steps aside below), and the
+   hero keeps a floor of --sp-4 over the frame's top padding so the
+   sign never touches the edge once the spacer has vanished. */
 .brd__body--top::before { margin-bottom: calc(-1 * var(--sp-6)); }
-.brd__body--top::after { margin-top: calc(-1 * var(--sp-6)); }
+.brd__body--top::after { content: none; }
 .brd-hero { display: flex; flex-direction: column; align-items: center; gap: var(--sp-3); padding-top: var(--sp-4); text-align: center; animation: brd-in 480ms ease-out backwards; }
-.brd-roll { position: relative; flex: 0 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
+.brd-roll { position: relative; flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; justify-content: center; gap: var(--sp-4); margin: 0 calc(-1 * var(--sp-5)); overflow: hidden; }
 .brd-roll__lane { display: flex; gap: var(--sp-4); width: max-content; animation: brd-roll 26s linear infinite; }
 .brd-roll__lane--back { animation-duration: 34s; animation-direction: reverse; }
 /* Two whole lanes want 424px -- two 204px cards and the sp-4 between
