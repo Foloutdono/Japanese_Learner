@@ -1422,13 +1422,14 @@
   border: 1px solid var(--surface-line);
 }
 
-/* 済 — already explained. Deliberately the quietest badge on the stop:
+/* Already explained. Deliberately the quietest badge on the stop:
    i+1 is a recommendation and gets --success, the timestamp is unique
-   data and gets 鶯色, and this is a memory aid. No new pigment. */
+   data and gets 鶯色, and this is a memory aid. No new pigment. The
+   box is the one the other badges wear; what sits in it is a ✓ from
+   the icon set since 2026-09-21, where it was a 済. */
 .anl-stop__done {
   flex-shrink: 0;
-  font-family: var(--font-jp);
-  font-size: 0.68rem;
+  display: inline-flex;
   line-height: 1;
   padding: 2px 4px;
   border-radius: 3px;
@@ -6863,14 +6864,6 @@ textarea:focus-visible {
   font-size: var(--fs-sm);
 }
 .hall-pace__sep { color: var(--text-on-panel-soft); font-weight: 400; }
-/* Target met: the onboarding's gold pill, flowed inline. */
-.hall-pace__met {
-  position: static;
-  flex-shrink: 0;
-  box-shadow: none;
-  font-size: var(--fs-caption-xs);
-  line-height: 1.4;
-}
 
 /* ── The queue screen itself ─────────────────────────────────── */
 
@@ -20192,20 +20185,22 @@ a.slip__act { text-decoration: none; }
   content: '';
   flex: 1;
 }
-.ride__done-jp {
-  margin: 0;
-  font-family: var(--font-jp);
-  font-size: var(--fs-display);
-  letter-spacing: var(--tr-name);
-  color: var(--line-color, var(--accent));
-}
+/* The sentence, and on the card ride it is now the whole call: 出発進行
+   stood over it at --fs-display until 2026-09-21, when the ornamental
+   Japanese went (DESIGN.md, the third standing exception), and a room
+   with two grow-only spacers in it cannot be headed by a caption. So
+   the line takes the ambient ink at the title rung, and the term it
+   was written to carry -- the pace, through Emphasized -- takes the
+   pigment the call had. The plate below keeps the smaller reading:
+   there the heading is .ride__plate-cap. */
 .ride__done-text {
   margin: 0;
   max-width: 28em;
-  font-size: var(--fs-lead);
+  font-size: var(--fs-title);
   line-height: 1.5;
-  color: var(--text-secondary);
+  color: var(--text-primary);
 }
+.ride__done-text strong { color: var(--line-color, var(--accent)); }
 .ride__done-note {
   margin: 0;
   max-width: 28em;
@@ -20230,13 +20225,23 @@ a.slip__act { text-decoration: none; }
    pigment (a line colour is a section's name, never decoration), the
    open-for-now note, and the foot with the quiet offer over the one
    filled action -- PassStep's own order. */
+/* The plate's heading: it captioned 定期券 above it until 2026-09-21
+   and stands alone now, so it takes the rung and the ink the term had
+   (and loses the negative margin that tucked it under it). */
 .ride__plate-cap {
-  margin: calc(-1 * var(--sp-4)) 0 0;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-lead);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: var(--tr-caption);
+  text-indent: var(--tr-caption);
+  color: var(--line-color, var(--accent));
+}
+/* Under that heading the sentence is a sentence again, not the call
+   the card ride's is. */
+.ride__plate .ride__done-text {
+  font-size: var(--fs-lead);
   color: var(--text-secondary);
 }
 .ride__plate-list {

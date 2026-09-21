@@ -182,13 +182,18 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
                 </>
               )}
 
-              {/* 済 — already explained. The deep tier is the one thing on
+              {/* Already explained. The deep tier is the one thing on
                   this screen that costs a model call (docs/adr/0001), and
                   nothing recorded what had been bought: on a 47-stop
                   subtitle track the only way to know was to open each stop.
                   No new pigment -- the wave's colour rule spends
                   --line-douga on the timestamp chip and nothing else, and
                   --success is already i+1's. This is shape and weight.
+
+                  A ✓ from the icon set, not the 済 it printed until
+                  2026-09-21 — the same call the keep control below made
+                  on 2026-09-11 ("the marks need no language at all"),
+                  and the stop's aria-label still says it in words.
 
                   Session-local for a video Passage: the explain endpoint
                   does not write back into video_sessions.sentences, so a
@@ -197,7 +202,7 @@ export function PassageLine({ sentences, activeIndex, onSelect, t, scrollOnChang
                   typed or photographed Passage keeps them, because the
                   history re-derive merges the cache back in. */}
               {s.explanation && (
-                <span className="anl-stop__done" lang="ja" aria-hidden="true">済</span>
+                <span className="anl-stop__done" aria-hidden="true"><CheckIcon size={11} /></span>
               )}
 
               {/* The one place 鶯色 is spent: the only data a video

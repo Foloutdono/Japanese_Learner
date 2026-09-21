@@ -109,10 +109,16 @@ line; each was a caption, in a language the reader is here to learn, over the
 half of the pair that was doing the work. Owner-directed, app-wide: where the
 Japanese named a part rather than a place, it is gone and the plain-language
 half inherits what it wore — the rung, the ink, the position (`.dict-mark`,
-`.dict-gate__name`). What stays: every station and section name, the plates
-and sheet headings that carry them, the brand, the decorative marks that are
-not labels at all (the 済 tick, a stamp's seal, the pass's own 定期券, a
-completion screen's 出発進行), and all study content.
+`.dict-gate__name`, `.ride__plate-cap`). A **mark drawn rather than written**
+went the same way where it was standing in for a word: the analyzer's 済 is a
+✓ from the icon set and the Today strip's 済 pill is gone outright, the count
+past its target having already said it. The ride's own call (出発進行, 定期券
+at `--fs-display`) went with them, and its sentence is the call now.
+
+What stays: every station and section name, the plates and sheet headings that
+carry them, the brand, a glyph that is a chip's icon (部, a deck type's
+roundel, a stamp's seal, the 定期券 printed on the pass in the gate
+cutscene), and all study content.
 
 There is a second top-level rule, below, that outranks this one where they
 collide — see "Say less."
