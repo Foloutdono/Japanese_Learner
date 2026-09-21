@@ -203,7 +203,7 @@ fixed here, because each is a judgement about the deck:
   list (a lemma resolving to a level above the sentence's, with a
   homophone at a lower one); 106 owns it.
 
-### 105 — the demand list: words the app teaches without a card
+### 105 — the demand list: words the app teaches without a card (first slice DONE, 2026-09-21)
 
 Sources, in the order the learner meets them: the 11 focus words; the
 corpus gaps 104 leaves (N5/N4 first); `content/listening_clips.py`'s
@@ -213,13 +213,48 @@ each word: the level of the lowest sentence that uses it, an English
 gloss in the deck's style ("(humble) mother", not a JMdict sense dump),
 a French gloss, its key in `vocab_frequency.json` beside a neighbour of
 the same level, and a `KNOWN_POOL_OVERLAP` line if the pool holds it.
-Decide 無い: either an N5 card (JMdict has it; every learner meets it in
-week one) or an explicit "grammar, not vocabulary" entry in the
-script's ignore list — not silence. Same for いらっしゃる / ございます
-(keigo verbs the N4 examples use).
+
+**The first slice** (24 words; the deck is 8,431): the eleven focus
+words, every gap first met in an N5 or N4 sentence, and 無い, which got
+the N5 card — kana-only ない, "the negative of ある" — because every
+learner meets it in week one and the deck already teaches ある the same
+way. The auxiliary ない of 食べない is a different part of speech and
+never matches it. After the slice: no focus word unresolved, 154 absent
+lemmas from 184, 275 occurrences from 575.
+
+| level | added |
+|---|---|
+| N5 | 百円, 中国, フランス, りんご, コンビニ, ない, 顔 |
+| N4 | 洋食, 駅前, やり直す, 頑張る, スマホ, 本屋, 足元, メール, 子犬 |
+| N3 | 大雨, 失礼, 説明書, 言い方 |
+| N1 | 館内, 支援, 専門家, お客様 |
+
+Decided as grammar, not vocabulary, and named as such in
+`audit_vocab_deck.IGNORED_LEMMAS` with the reason beside each: ございます
+(the polite copula), かもしれない's 知れる, おいで's 出でる, the
+causative 遊ばす, and 書き直す / 考え直す as instances of 〜直す (やり直す
+is a word of its own). A compound numeral (三十, 三千) is its own kind
+in the report: it composes from the digit cards through the compound
+fold. いらっしゃる was already an N4 card; the gate refuses it only
+behind て, which is right.
+
+Two placements the rule did not settle, flagged for 109: 顔 went to N5
+on `theme_words`' `basic` demand rather than to N2, the lowest sentence
+that uses it; 支援 and 専門家 sit at N1 because only N1 sentences use
+them, and any frequency source will say N2.
+
+**Left for the next slices:** the 154 absent lemmas first met at N3 and
+above (限り, 挙げ句, 多く, 抜き, 通ずる… — the 〜限り and 〜抜き points'
+own words among them, to decide like 知れる); the 31 `theme_words`
+`basic` words with no card (鹿, 亀, 顔 was one, 朝食, 麺, 桃, 洗濯機,
+弁護士, 海老, 野球, 画面…), which need 109's placement since no
+sentence gives them a level; and two N5 grammar examples the tokenizer
+cannot cut because they are written entirely in kana (せが高い reads as
+がせ, しゅくだい as しゅ + くだい) — a finding for the content audit,
+not a card.
 
 The N5 count in `tests/test_onboarding_profile.py` moves with the deck,
-by design; `CLAUDE.md`'s "8,407 entries at 40 a run" and
+by design; `CLAUDE.md`'s "8,431 entries at 40 a run" and
 `tests/test_modes.py`'s "1,097 of 8,405" are prose and follow.
 
 ### 106 — readings and forms, through the migration
@@ -241,6 +276,10 @@ scripts.migrate_vocab_ids`, report first):
 - The 266 shared written forms are mostly legitimate (後 is four words)
   and are 107's problem, not this one's; only a pair that is the same
   word twice moves.
+- The N5 見る entry's written form is "見る 観る", two spellings in one
+  field with a space, so its lemma key is neither and every 見る badges
+  as the N3 card instead (found while checking 105's slice). One
+  spelling per card; the other is a `MOVES` line or a second entry.
 
 ### 107 — French glosses per card, not per written form
 

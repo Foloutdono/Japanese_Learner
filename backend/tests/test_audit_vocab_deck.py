@@ -57,16 +57,12 @@ class DeckMeasurementTests(unittest.TestCase):
             with self.subTest(figure=f"{section}.{key}"):
                 self.assertLessEqual(r[section][key], bound)
 
-    def test_the_unresolved_focus_words_are_exactly_the_known_eleven(self) -> None:
+    def test_every_focus_word_resolves_to_a_card(self) -> None:
         """A curated sentence is chosen to practise its focus word, and a
         focus word with no card schedules nothing (routes/reading.py).
-        Exact, not a bound, so that a twelfth cannot appear unnoticed and
-        plan 105's entries have to come back here and shorten the list."""
-        unresolved = {w["word"] for w in self.report["focus"]["unresolved"]}
-        self.assertEqual(unresolved, {
-            "百円", "洋食", "大雨", "失礼", "説明書", "言い方",
-            "顔", "館内", "支援", "お客様", "専門家",
-        })
+        Eleven could not until plan 105 gave them cards; a new sentence
+        whose focus word the deck lacks lands here."""
+        self.assertEqual(self.report["focus"]["unresolved"], [])
 
     def test_the_report_renders_without_the_corpus(self) -> None:
         text = audit.render(self.report)
@@ -85,7 +81,7 @@ class CorpusMeasurementTests(unittest.TestCase):
         cls.corpus = audit.corpus(audit.taught_sentences())
 
     def _kind_of(self, lemma: str) -> str | None:
-        for kind in ("katakana", "adverb", "gated", "name", "absent"):
+        for kind in ("katakana", "adverb", "gated", "name", "numeral", "absent"):
             if any(item["lemma"] == lemma for item in self.corpus[kind]):
                 return kind
         return None
@@ -108,9 +104,18 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertEqual(self._kind_of("タナカ"), "name")
 
     def test_a_word_no_deck_holds_is_a_gap(self) -> None:
-        # 無い is the review's open question for plan 105, and stays on
-        # the absent list rather than in IGNORED_LEMMAS until answered.
-        self.assertEqual(self._kind_of("無い"), "absent")
+        # 限り, the 〜限り points' own word, is an N3/N1 gap left for the
+        # next slice of plan 105; 無い was the top of this list (210
+        # occurrences) until that plan gave it an N5 card.
+        self.assertEqual(self._kind_of("限り"), "absent")
+        self.assertIsNone(self._kind_of("無い"))
+
+    def test_grammar_and_numerals_are_not_gaps(self) -> None:
+        # ございます is the polite copula, かもしれない a catalogue point,
+        # and 三十 composes from the digit cards: none is a card to add.
+        self.assertIsNone(self._kind_of("御座る"))
+        self.assertIsNone(self._kind_of("知れる"))
+        self.assertEqual(self._kind_of("三十"), "numeral")
 
     def test_the_words_plan_102_added_are_no_longer_gaps(self) -> None:
         self.assertIsNone(self._kind_of("母"))
@@ -118,5 +123,5 @@ class CorpusMeasurementTests(unittest.TestCase):
 
     def test_ratchets_never_rise(self) -> None:
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 184)
-        self.assertLessEqual(c["unmatched_lemmas"], 194)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 154)
+        self.assertLessEqual(c["unmatched_lemmas"], 168)

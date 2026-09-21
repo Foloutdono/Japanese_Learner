@@ -34,6 +34,7 @@ only the last is a deck gap:
     name       a proper noun: UniDic lemmatises a kanji name to its
                katakana transcription (田中 -> タナカ), and no deck
                teaches names
+    numeral    a compound numeral (三十), which composes from the digits
     absent     no entry under any spelling -- the demand list (plan 105)
 
 The first three are plan 104's lookup repairs. Adding a deck entry for
@@ -60,12 +61,29 @@ _KANJI = os.path.join(_BASE_DIR, "datas", "kanji")
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
 _RANK = {level: i for i, level in enumerate(LEVELS)}
 
-# Lemmas UniDic hands back for the grammatical verbs and demonstratives
-# that no deck teaches as vocabulary. They would otherwise head every
+# Lemmas UniDic hands back for words that are grammar, not vocabulary:
+# no deck teaches them as a card, and they would otherwise head every
 # "absent" list (為る is する in every polite sentence) and hide the real
-# gaps under them. Each is a decision, not an oversight: 無い is on the
-# list for plan 105 to decide, and is deliberately NOT ignored here.
-IGNORED_LEMMAS = frozenset({"為る", "有る", "居る", "成る", "来る", "言う", "此の", "其の", "彼の"})
+# gaps under them. Each is a decision, not an oversight, and plan 105
+# added the second group with its reasons (無い was on this list's
+# doorstep and got an N5 card instead):
+#
+#   御座る    ございます, the polite copula (でございます)
+#   知れる    かもしれない, a catalogue point, not the verb 知れる
+#   出でる    おいでください, keigo for 来る
+#   遊ばす    UniDic's lemma for a causative (あそばせる -> 遊ばす); the
+#             card is 遊ぶ and the point is 使役形
+#   書き直す, 考え直す   instances of 〜直す (an N4 point); やり直す is
+#             a card of its own because it is a word of its own
+IGNORED_LEMMAS = frozenset({
+    "為る", "有る", "居る", "成る", "来る", "言う", "此の", "其の", "彼の",
+    "御座る", "知れる", "出でる", "遊ばす", "書き直す", "考え直す",
+})
+
+# A compound numeral (三十, 三千, 二百) composes from the digit cards the
+# deck has and the compound fold (card_lookup.resolve_compound); it is
+# never a card of its own, so it is its own kind below rather than a gap.
+_NUMERALS = frozenset("〇零一二三四五六七八九十百千万億兆")
 
 
 # ── inputs ─────────────────────────────────────────────────────
@@ -279,6 +297,8 @@ def _classify(m) -> str:
         return "katakana"
     if _has_katakana(m.lemma) and not _has_katakana(m.surface):
         return "name"
+    if m.lemma and all(c in _NUMERALS for c in m.lemma):
+        return "numeral"
     present = m.lemma_reading in _VOCAB_BY_KANA
     if m.pos == "adverb" and present:
         return "adverb"
@@ -294,7 +314,7 @@ def corpus(sentences) -> dict:
     if not morphology.MORPHOLOGY_AVAILABLE:
         return {"available": False, "sentences": len(sentences)}
 
-    counts = {kind: collections.Counter() for kind in ("katakana", "adverb", "gated", "name", "absent")}
+    counts = {kind: collections.Counter() for kind in ("katakana", "adverb", "gated", "name", "numeral", "absent")}
     levels = collections.defaultdict(set)
     sources = collections.defaultdict(set)
     for level, jp, source in sentences:
@@ -328,6 +348,7 @@ def corpus(sentences) -> dict:
         "adverb": listing("adverb"),
         "gated": listing("gated"),
         "name": listing("name"),
+        "numeral": listing("numeral"),
     }
 
 
@@ -410,11 +431,12 @@ def render(report: dict) -> str:
                                 ("adverb", "present, an adverb"),
                                 ("gated", "present, auxiliary-gated"),
                                 ("name", "a proper noun"),
+                                ("numeral", "a compound numeral"),
                                 ("absent", "absent from the deck")):
                 n = c["kinds"][kind]
                 lines.append(f"    {label:28s} {n['lemmas']} lemmas, {n['occurrences']} occurrences")
             lines += ["", "  absent, most frequent first:", "    " + _fmt_lemmas(c["absent"], 40)]
-            for kind in ("katakana", "adverb", "gated", "name"):
+            for kind in ("katakana", "adverb", "gated", "name", "numeral"):
                 if c[kind]:
                     lines += [f"  {kind}:", "    " + _fmt_lemmas(c[kind], 12)]
     return "\n".join(lines)
