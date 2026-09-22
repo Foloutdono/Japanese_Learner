@@ -42,6 +42,7 @@ const ROWS = [
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 const rows = () => [...document.querySelectorAll('.browse-result-row')]
 const submit = () => document.querySelector('.import-footer__submit')
+const levelBtn = n => document.querySelectorAll('.study-level-btn')[n]
 
 function renderMenu(onAdded) {
   return render(
@@ -105,5 +106,47 @@ describe('BrowseCardsMenu — adding the selection', () => {
     expect(onAdded).toHaveBeenCalledTimes(1)
     expect(document.querySelector('.browse-add-error')).toBeNull()
     expect(document.querySelectorAll('.browse-result-row--selected')).toHaveLength(0)
+  })
+})
+
+// ── A search the learner has moved on from must not answer ────
+// Browses are not guaranteed to come back in the order they were sent.
+// The level row (and the search field, and the tab row) each start a
+// new one, so the slow answer to the level you just left could land
+// after the fast answer to the level you are on and overwrite it —
+// leaving N5 rows listed under N4, with no request in flight to correct
+// them.
+
+describe('BrowseCardsMenu — out-of-order answers', () => {
+  beforeEach(() => {
+    apiFetch.mockReset()
+    apiJson.mockReset()
+  })
+
+  it('ignores an answer that a newer search has superseded', async () => {
+    const pending = []
+    apiFetch.mockImplementation(url => new Promise(resolve => { pending.push({ url, resolve }) }))
+
+    await renderMenu(vi.fn())
+    await settle()
+
+    // The mount's own browse, then a second one for N4.
+    expect(pending).toHaveLength(1)
+    levelBtn(2).click()          // 0 = "all levels", 1 = N5, 2 = N4
+    await settle()
+    expect(pending).toHaveLength(2)
+
+    const n4Rows = [{ ...ROWS[0], raw_id: '木', front: '木', meaning: 'arbre' }]
+    pending[1].resolve({ json: async () => ({ results: n4Rows }) })
+    await settle()
+    expect(rows()).toHaveLength(1)
+
+    // The first browse finally answers, with the level the learner has
+    // already left. It must not land.
+    pending[0].resolve({ json: async () => ({ results: ROWS }) })
+    await settle()
+
+    expect(rows()).toHaveLength(1)
+    expect(rows()[0].textContent).toContain('arbre')
   })
 })
