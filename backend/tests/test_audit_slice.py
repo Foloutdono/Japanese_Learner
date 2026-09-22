@@ -12,9 +12,11 @@ The script reads the content files with ast rather than importing them,
 so this suite needs nothing installed beyond the repo itself.
 """
 import datetime as dt
+import os
 import unittest
 
 from scripts import audit_slice as audit
+from translations import fr_gloss
 
 
 class RotationTests(unittest.TestCase):
@@ -109,6 +111,23 @@ class VocabRankingTests(unittest.TestCase):
         for entry in self.entries[:500]:
             for flag in entry["flags"]:
                 self.assertIn(flag, audit.WEIGHTS)
+
+    def test_the_french_is_the_one_the_card_serves(self) -> None:
+        """Plan 107 gave a form taught under several readings one French
+        line per card, "盛る::もる" beside the bare "盛る" (which is
+        さかる's). Reading the bare key dumped another reading's gloss
+        for 23 of the first run's 40 entries, and a run that trusted the
+        dump would have filed each as a wrong translation (#155)."""
+        french = audit._json(os.path.join(audit._VOCAB, "vocab_fr.json"))
+        split = [e for e in self.entries
+                 if e["kanji"] and french.get(f"{e['kanji']}::{e['kana']}")
+                 and french[f"{e['kanji']}::{e['kana']}"] != french.get(e["kanji"])]
+        self.assertTrue(split, "no card has a French line of its own to tell the keys apart")
+        for entry in split:
+            with self.subTest(card=f"{entry['kanji']}::{entry['kana']}"):
+                self.assertEqual(entry["fr"], french[f"{entry['kanji']}::{entry['kana']}"])
+        for entry in self.entries:
+            self.assertEqual(entry["fr"], fr_gloss(entry, french))
 
 
 class DumpTests(unittest.TestCase):

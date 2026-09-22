@@ -21,7 +21,7 @@ re-import cannot bring any of the three back unnoticed.
 import re
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.vocab_renames import KEY_MOVES, MOVES, _fields_of
+from content.vocab_renames import FOLDED_FORMS, KEY_MOVES, MOVES, NOT_FOLDED, _fields_of
 from study.modes import MODES, eligible_for
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -158,6 +158,15 @@ def test_renames_never_chain():
     across a chain: a target that is itself a key would leave rows on an
     id the same run had already condemned."""
     assert set(MOVES.values()) & set(MOVES) == set()
+
+
+def test_a_card_that_left_as_no_word_is_not_folded_into_its_target():
+    """頃 read けい carries its rows onto 頃 read ころ, but is not another
+    spelling of it: in FOLDED_FORMS the dictionary would answer けい
+    with the ころ card."""
+    assert NOT_FOLDED <= set(MOVES)
+    folded = {pair for pairs in FOLDED_FORMS.values() for pair in pairs}
+    assert {_fields_of(old) for old in NOT_FOLDED} & folded == set()
 
 
 def test_a_rename_that_changes_the_level_moves_down_never_up():

@@ -538,7 +538,24 @@ MOVES: dict[str, str] = {
     "vocab_N1_目眩_めまい": "vocab_N2__めまい",
     "vocab_N1_諄い_くどい": "vocab_N2__くどい",
     "vocab_N1_下らない_くだらない": "vocab_N2__くだらない",
+    # ── The content audit's first vocab run (#154) ───────────────
+    # 十分 "ten minutes" taught only じっぷん, the traditional reading;
+    # the 2010 常用漢字表 gives 十 ジュッ as well, and it is what a learner
+    # hears -- the app's own dictation bank reads 10分 じゅっぷん. Packed,
+    # modern reading first, so the lookups index both.
+    "vocab_N1_十分_じっぷん": "vocab_N1_十分_じゅっぷん/じっぷん",
+    # 頃 read けい is no word: the reading lives in 頃日 and 頃刻, and
+    # JMdict's only 頃【けい】 is a Chinese unit of land. The card taught
+    # ころ's meaning, KANJIDIC's for the character, so what a learner
+    # drilled on it is the N3 ころ card's -- which takes the rows, and
+    # (NOT_FOLDED below) not the pair.
+    "vocab_N1_頃_けい": "vocab_N3_頃_ころ",
 }
+
+# MOVES keys that are not a spelling of their target. The move carries
+# the learner's rows; the pair stays out of FOLDED_FORMS, or the
+# dictionary would answer けい with ころ as it answers 終る with 終わる.
+NOT_FOLDED: frozenset[str] = frozenset({"vocab_N1_頃_けい"})
 
 
 def _fields_of(raw_id: str) -> tuple[str, str]:
@@ -599,11 +616,14 @@ def folded_forms() -> dict[str, tuple[tuple[str, str], ...]]:
 
     Left out: a move that changed only the level (the fields are the
     target's own), a key whose field is export residue or a packed pair
-    rather than one spelling (see _NOT_A_SPELLING), and plan 091's word
-    in both fields (この in `kanji`), which is the kana word again.
+    rather than one spelling (see _NOT_A_SPELLING), plan 091's word
+    in both fields (この in `kanji`), which is the kana word again, and
+    a card that left as no word at all (NOT_FOLDED).
     """
     out: dict[str, list[tuple[str, str]]] = {}
     for old, new in MOVES.items():
+        if old in NOT_FOLDED:
+            continue
         pair = _fields_of(old)
         kanji, _ = pair
         if pair == _fields_of(new):
