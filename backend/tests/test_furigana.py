@@ -1,7 +1,7 @@
 import unittest
 
 from study import morphology
-from study.furigana import align, align_deck, align_sentence, is_kanji
+from study.furigana import align, align_deck, align_sentence, is_kanji, mark_spans
 
 
 # A tiny stand-in deck, so the alignment rules are tested against known
@@ -189,6 +189,47 @@ class SentenceAlignmentTests(unittest.TestCase):
             self.assertEqual(align_sentence("水だけ飲みました。"), [{"text": "水だけ飲みました。"}])
         finally:
             morphology.tokenize = original
+
+
+class MarkSpansTests(unittest.TestCase):
+    """
+    A mark is placed by character offset into the sentence the parts
+    spell out, and the parts do not divide where the offsets do. Two
+    features point at a span of a sentence -- the grammar lesson at its
+    pattern, the translation review at what it corrected -- and both
+    get the ruling below.
+    """
+
+    def _marked(self, parts):
+        return [(p["text"], p.get("highlight", False)) for p in parts]
+
+    def test_a_readingless_run_is_cut_at_the_span(self) -> None:
+        parts = [{"text": "わたしはがくせいです"}]
+        self.assertEqual(
+            self._marked(mark_spans(parts, [(4, 7)])),
+            [("わたしは", False), ("がくせ", True), ("いです", False)],
+        )
+
+    def test_a_ruby_part_is_marked_whole_rather_than_split(self) -> None:
+        # Half a reading over half a word is wrong furigana, and wrong
+        # furigana is worse than a mark one character too wide.
+        parts = [{"text": "大学", "reading": "だいがく"}, {"text": "です"}]
+        self.assertEqual(
+            self._marked(mark_spans(parts, [(1, 2)])),
+            [("大学", True), ("です", False)],
+        )
+
+    def test_several_spans_at_once(self) -> None:
+        parts = [{"text": "あ"}, {"text": "父", "reading": "ちち"}, {"text": "いうえお"}]
+        self.assertEqual(
+            self._marked(mark_spans(parts, [(0, 1), (3, 5)])),
+            [("あ", True), ("父", False), ("い", False), ("うえ", True), ("お", False)],
+        )
+
+    def test_no_spans_changes_nothing(self) -> None:
+        parts = [{"text": "水", "reading": "みず"}, {"text": "です"}]
+        self.assertEqual(mark_spans(parts, []), parts)
+        self.assertEqual(mark_spans([], [(0, 2)]), [])
 
 
 if __name__ == "__main__":

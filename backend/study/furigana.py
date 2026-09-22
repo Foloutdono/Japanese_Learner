@@ -303,4 +303,47 @@ def align_sentence(text: str) -> list[dict]:
     return parts
 
 
+def mark_spans(parts: list[dict], spans: list[tuple[int, int]]) -> list[dict]:
+    """`parts` with every character inside one of `spans` marked
+    `highlight: True` -- the offsets being into the text the parts
+    spell out, which is the sentence they were aligned from.
+
+    A part with no reading is SPLIT at a span's edges, so a mark can
+    point at three characters of a kana run. A ruby part is never
+    split: half a reading over half a word is wrong furigana, and wrong
+    furigana is worse than a mark a character too wide. So a span
+    touching a ruby part widens to the whole part.
+
+    Two callers mark a span for two reasons -- the grammar lesson picks
+    its pattern out of its example (study/grammar_examples.py), and the
+    translation review picks out what it changed in the learner's own
+    sentence (routes/translation.py) -- and the rule above is the same
+    one for both, which is why it is here beside the parts rather than
+    written twice beside the reasons.
+    """
+    if not spans or not parts:
+        return parts
+    out: list[dict] = []
+    pos = 0
+    for part in parts:
+        text = part["text"]
+        start, end = pos, pos + len(text)
+        pos = end
+        # The part's own characters, each inside a span or not.
+        inside = [any(a <= i < b for a, b in spans) for i in range(start, end)]
+        if not any(inside):
+            out.append(part)
+        elif part.get("reading") is not None or all(inside):
+            out.append({**part, "highlight": True})
+        else:
+            # A readingless run: cut it into alternating stretches.
+            at = 0
+            for i in range(1, len(text) + 1):
+                if i == len(text) or inside[i] != inside[at]:
+                    piece = {"text": text[at:i]}
+                    out.append({**piece, "highlight": True} if inside[at] else piece)
+                    at = i
+    return out
+
+
 _DECK_READINGS: dict[str, str] | None = None

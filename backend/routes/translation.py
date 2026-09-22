@@ -1,3 +1,4 @@
+import difflib
 import json
 import logging
 import re
@@ -11,7 +12,9 @@ from core.auth import get_user_id
 from core.srs_instance import srs
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
 from study.card_lookup import vocab_card_id_for_word
+from study.furigana import align_sentence, mark_spans
 from study.llm_shared import llm_configured
+from study.romaji import sentence_romaji
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -252,6 +255,54 @@ def _parse_review(content: str) -> dict | None:
     }
 
 
+# ── The corrected sentence, as the screen draws it (2026-09-22) ──
+# "better" is the learner's own sentence with the fixes applied, and it
+# was served as a bare string: a line of Japanese with no readings, no
+# romaji, and no sign of WHICH part of it is the correction. A learner
+# who cannot yet read 新聞 cannot read the fix either, and one who can
+# still has to diff two sentences by eye to find it.
+#
+# So it is served the way every other sentence in the app is: furigana
+# parts (study/furigana.align_sentence), the romaji under it, and the
+# spans that differ from what the learner actually wrote marked. The
+# marking is a plain character diff -- the model is not asked to say
+# what it changed, because a model that reports its own edits is one
+# more thing that can be wrong about them, and difflib cannot be.
+def _changed_spans(before: str, after: str) -> list[tuple[int, int]]:
+    """[start, end) of every stretch of `after` that is not in `before`.
+
+    autojunk off: it treats a character appearing in more than 1% of a
+    long string as noise, and Japanese runs on a small set of particles
+    and kana -- exactly the characters it would throw away.
+    """
+    matcher = difflib.SequenceMatcher(None, before, after, autojunk=False)
+    return [
+        (j1, j2) for tag, _i1, _i2, j1, j2 in matcher.get_opcodes()
+        if tag in ("replace", "insert") and j2 > j1
+    ]
+
+
+def _corrected(better: str, user_answer: str) -> dict:
+    """`better` as parts, marked, with its romaji -- the two keys the
+    review carries beside the plain string."""
+    parts = align_sentence(better)
+    # align_sentence is the tokenizer's, and the tokenizer is optional
+    # (study/morphology.py's graceful degradation) -- so never trust the
+    # parts to spell the sentence back. The offsets below are into that
+    # spelling, and a mark placed against a different one is a mark in
+    # the wrong place.
+    if "".join(part["text"] for part in parts) != better:
+        parts = [{"text": better}]
+    spans = _changed_spans(user_answer.strip(), better)
+    # Everything changed, so nothing is worth pointing at: a sentence
+    # marked end to end says only that it is a sentence. That is the
+    # answer written in romaji, or in an alphabet the reference does not
+    # share -- where the correction IS the whole line.
+    if sum(end - start for start, end in spans) >= len(better):
+        spans = []
+    return {"better_parts": mark_spans(parts, spans), "better_romaji": sentence_romaji(better)}
+
+
 def _review_as_text(review: dict) -> str:
     """The shape read out as lines -- what an older client prints, and
     what the log shows."""
@@ -321,6 +372,8 @@ def post_translation_analyze(payload: AnalyzePayload, user_id: str = Depends(get
         logger.warning("translation review was not the shape; served as prose")
         cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
         return {"review": None, "analysis": cleaned}
+    if review["better"]:
+        review.update(_corrected(review["better"], payload.user_answer))
     return {"review": review, "analysis": _review_as_text(review)}
 
 
