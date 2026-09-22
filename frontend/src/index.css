@@ -3094,6 +3094,19 @@
      section name ("Entraînement à la lecture") beside a gate's indent,
      narrow enough to leave two plates side by side at 1100. */
   --desk-rail-w:    256px;
+  /* The desk's canvas (plan 113): how wide a screen beside the rail may
+     grow before it centres. DESIGN.md's "min(1240px, 100%) for a plated
+     selection screen", made a token — the phone's --board-w (1040) was
+     a column for a hand-held screen, and at 1920 it left a third of the
+     desk empty. */
+  --desk-board-w:   1240px;
+  /* The desk's second column (plan 113): the width of whatever stands
+     beside a screen's main work — the pass's back beside the fare gate,
+     a station's stops beside its platforms, a run's session panel. It is
+     a phone's content width (390 less two gutters, give or take), on
+     purpose: nearly everything that goes there was drawn for a phone
+     first, and here it is drawn at the width it was designed at. */
+  --desk-side-w:    360px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -20546,6 +20559,9 @@ a.slip__act { text-decoration: none; }
      screen at --board-w and centres it in what the rail leaves. */
   :root[data-chrome="shell"] { --dock-bottom: var(--safe-bottom); }
   .phone--desk { padding-inline-start: var(--desk-rail-w); }
+  /* The canvas (plan 113): the screen grows to --desk-board-w before it
+     centres, where the phone's column stopped at --board-w. */
+  .phone--desk .phone__content { max-width: var(--desk-board-w); }
 
   /* ── 机 — the rail ──
      The HUD and the tab bar in one column: the same sumi, the same two
@@ -20765,8 +20781,18 @@ a.slip__act { text-decoration: none; }
   :root[data-chrome="shell"] .dock-note { left: var(--desk-rail-w); }
   :root[data-chrome="shell"] .guide-callout { left: calc(50% + var(--desk-rail-w) / 2); }
   .phone--desk .dict-dock {
+    flex-basis: var(--desk-side-w);
     top: var(--sp-6);
     max-height: calc(100dvh - 2 * var(--sp-6));
+  }
+  /* The analyzer's working rail stood on the stage's LEFT, which on the
+     desk put it against the rail: two columns of navigation side by
+     side and the sentence pushed to the far edge. It stands on the
+     right here, at the second column's width, the way every other
+     screen's companion does. */
+  .phone--desk .anl-railcol {
+    order: 1;
+    flex-basis: var(--desk-side-w);
   }
 
   /* ── the gates, laid out for the width ──
@@ -20781,6 +20807,7 @@ a.slip__act { text-decoration: none; }
   .practice > .plates {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
   }
   .learn > .plates > .plate:last-child:nth-child(odd),
   .practice > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -20833,7 +20860,7 @@ a.slip__act { text-decoration: none; }
      in gold, the pass's metal — these are the pass's own settings. */
   .desk-settings {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
     align-items: start;
     column-gap: var(--sp-6);
   }
@@ -20854,6 +20881,77 @@ a.slip__act { text-decoration: none; }
   .desk-settings .stg-row--on {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
+  }
+
+  /* ── the stations, laid out for the width (plan 113) ──
+     A station page is a bar over one thing to choose from, and the
+     phone draws it one card under another. On the desk:
+
+     The platforms (ModeSelector) go two across, and the odd one out
+     takes the row, so the lattice has no short last row; exactly three
+     (a line's three sources, a sentence station's three) go three
+     across. The tier and theme walls are long lists, three across. */
+  .learn > .platform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tier-picker > .platform-grid,
+  .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
+
+  /* A route that is the whole page — the levels a sentence station
+     boards from, 理解's and 書取's, a theme's bands — is drawn the way a
+     line map on a platform wall is: across. One rail through every
+     marker, each stop a column under its marker with its name and its
+     figure, the whole line in view at once instead of five 1,000px bars
+     with six characters at one end. (A route beside its platforms, in a
+     station's split, stays upright: it is a list there.) */
+  .learn > .route {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    column-gap: var(--route-gap);
+  }
+  .learn > .route > .route-stop {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--sp-2);
+    padding: var(--sp-8) var(--sp-3) var(--sp-4);
+    text-align: center;
+  }
+  .learn > .route > .route-stop > .route-stop__rail {
+    inset: calc(var(--sp-8) / 2) calc(-1px - var(--route-gap)) auto;
+    width: auto;
+    height: 3px;
+    transform: translateY(-50%);
+  }
+  .learn > .route > .route-stop > .route-stop__marker {
+    top: calc(var(--sp-8) / 2);
+    left: 50%;
+  }
+  .learn > .route > .route-stop > .route-stop__names {
+    flex: none;
+    align-items: center;
+  }
+  .learn > .route > .route-stop > .route-stop__go { display: none; }
+  .learn > .route > .route-stop--first > .route-stop__rail { left: 50%; }
+  .learn > .route > .route-stop--last > .route-stop__rail { right: 50%; }
+
+  /* ── a run's column ──
+     A run's card is --card-w; its head row (‹ the way out, where you
+     are, the pass), its answer field, its timer and its results were
+     the stage's full 1,052px, so the way out sat 200px left of the card
+     it leaves and Submit 200px right of the field it submits. They
+     share the card's column on the desk. */
+  .stage > .stage__head,
+  .stage > .stage__foot,
+  .stage > .timer,
+  .stage > .result-lattice,
+  .stage > .exam-meta,
+  .stage > .exam-nav,
+  .stage > .exam-sheetbar {
+    width: 100%;
+    max-width: var(--card-w);
+    margin-inline: auto;
   }
 
   /* ── 札 — a sheet is a dialog on the desk ──

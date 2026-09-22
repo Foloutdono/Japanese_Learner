@@ -40,7 +40,10 @@ describe('the wide lane', () => {
 })
 
 describe('the screen column on a laptop', () => {
-  it('stops at --board-w and centres in what the rail leaves', async () => {
+  // The desk's canvas is --desk-board-w (1240, plan 113), where the
+  // phone's column stopped at --board-w (1040): at 1440 the rail leaves
+  // less than that, so the screen takes all of it.
+  it('takes what the rail leaves, up to --desk-board-w', async () => {
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/learn']}>
@@ -55,7 +58,7 @@ describe('the screen column on a laptop', () => {
     await settle(420)
     const rail = document.querySelector('.desk-rail').getBoundingClientRect()
     const content = document.querySelector('.phone__content').getBoundingClientRect()
-    expect(content.width).toBe(1040)
+    expect(getComputedStyle(document.querySelector('.phone__content')).maxWidth).toBe('1240px')
     const left = content.left - rail.right
     // The frame's own edge, which stops short of the window by the
     // page's stable scrollbar gutter (index.css, `html {
@@ -63,5 +66,8 @@ describe('the screen column on a laptop', () => {
     // frame's, not the window's.
     const right = document.querySelector('.phone').getBoundingClientRect().right - content.right
     expect(Math.abs(left - right)).toBeLessThanOrEqual(1)
+    // Under the cap, so no margin at all: rail to frame edge.
+    expect(content.width).toBeGreaterThan(1040)
+    expect(left).toBeLessThanOrEqual(1)
   })
 })
