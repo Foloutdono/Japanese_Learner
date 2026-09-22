@@ -6,6 +6,14 @@ import { track } from '../lib/track'
 // long, big enough that a burst of fast answers doesn't outrun it.
 const REFILL_AT = 4
 
+// How long a resumed queue waits on `checkCached` before it plays as
+// saved. A warm backend answers in well under a second; a cold one can
+// take thirty, and a spinner for thirty seconds is exactly what the
+// saved queue exists to spare a returning learner. Past this the queue
+// plays as saved, and the late answer still trims every card behind
+// the one on screen.
+const CHECK_WAIT_MS = 2500
+
 // Bump when the shape of a cached card changes. Every storageKey built
 // by sessionKey() carries this, so a bump orphans (and then sweeps) the
 // old caches instead of feeding a stale shape to a renderer that no
@@ -157,6 +165,22 @@ function sweepStaleCaches() {
  *   refill de-dup below would silently drop whichever of the two arrived
  *   second, and the learner would never be asked it.
  * @param {number} [fetchTimeoutMs=10000]
+ * @param {(cards: {card_id: string, mode: string}[], signal: AbortSignal) => Promise<{card_id: string, mode: string}[]>} [checkCached]
+ *   Asked before a saved queue is resumed: resolves to the saved cards
+ *   that have been answered since and are not due again, which are
+ *   dropped. Without it the saved queue replays exactly as it was
+ *   saved, and it is per screen and per device, so a card cleared in
+ *   Today, in another section holding the same card, on another device
+ *   or while a stamp held the queue came straight back out of it — days
+ *   before it was due. The screens pass lib/reviews' staleCards.
+ *
+ * ── Resuming ──
+ * With `checkCached`, a saved queue is held back (`loading`) until the
+ * answer arrives, then shown without what it named. If the answer takes
+ * longer than CHECK_WAIT_MS, or fails, the queue plays as saved — the
+ * old behaviour, and better than a spinner — and a late answer still
+ * drops every named card except the one already on screen, which the
+ * learner may be answering.
  *
  * ── On failure ──
  * `error` is set only when a fetch fails AND the queue is empty, so a
@@ -179,12 +203,25 @@ export function useCardSession({
   extraExcludeIds,
   cardKey = c => c.card_id,
   fetchTimeoutMs = 10000,
+  checkCached,
 }) {
   sweepStaleCaches()
 
-  const [queue, setQueue] = useState(() => loadCache(storageKey, mode, validateCard))
+  // Read through a ref, like advance in useReviewGates: a screen builds
+  // it fresh on most renders, and only a key change should restart a
+  // check.
+  const checkRef = useRef(checkCached)
+  useEffect(() => { checkRef.current = checkCached })
+
+  const [saved] = useState(() => loadCache(storageKey, mode, validateCard))
+  const holdSaved = Boolean(checkCached) && storageKey !== IDLE_KEY && saved.length > 0
+  const [queue, setQueue] = useState(holdSaved ? [] : saved)
+  // A saved queue held back while checkCached is asked about it, keyed
+  // to its session so a check can never resume one session's queue
+  // under another's key. Null when nothing is waiting.
+  const [pending, setPending] = useState(holdSaved ? { key: storageKey, cards: saved } : null)
   const [done, setDone] = useState(false)
-  const [fetching, setFetching] = useState(queue.length === 0)
+  const [fetching, setFetching] = useState(!holdSaved && saved.length === 0)
   const [error, setError] = useState(null)
 
   // Monotonic session generation. Bumped whenever storageKey changes.
@@ -204,6 +241,12 @@ export function useCardSession({
   const abortRef = useRef(null)
   const retryTimerRef = useRef(null)
   const attemptsRef = useRef(0)
+  // The check on a resumed queue and its CHECK_WAIT_MS timer. Owned by
+  // the generation, not by the effect that starts them: showing the
+  // queue on the timer ends `pending`, and the check has to outlive
+  // that to trim the queue late.
+  const checkAbortRef = useRef(null)
+  const checkTimerRef = useRef(null)
   // Read inside refill() so the callback doesn't have to depend on
   // `queue` — depending on it made refill a new function on every single
   // answer, which is half of why the old trigger effect was so fragile.
@@ -262,6 +305,15 @@ export function useCardSession({
     }
   }, [])
 
+  const stopCheck = useCallback(() => {
+    checkAbortRef.current?.abort()
+    checkAbortRef.current = null
+    if (checkTimerRef.current) {
+      clearTimeout(checkTimerRef.current)
+      checkTimerRef.current = null
+    }
+  }, [])
+
   // Deck/mode changed — start a fresh session for the new key instead
   // of refilling the old queue under a new name.
   useEffect(() => {
@@ -269,26 +321,92 @@ export function useCardSession({
     activeKeyRef.current = storageKey
     genRef.current += 1
     clearRetry()
+    stopCheck()
     attemptsRef.current = 0
     abortRef.current?.abort()
     abortRef.current = null
 
     const cached = loadCache(storageKey, mode, validateCard)
-    setQueue(cached)
+    const hold = Boolean(checkRef.current) && storageKey !== IDLE_KEY && cached.length > 0
+    setQueue(hold ? [] : cached)
+    setPending(hold ? { key: storageKey, cards: cached } : null)
     setDone(false)
     setError(null)
-    setFetching(cached.length === 0)
+    setFetching(!hold && cached.length === 0)
     // validateCard is a fresh closure on most renders; the guard above
     // means only a real key change gets past the early return anyway.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [storageKey, mode, clearRetry])
+  }, [storageKey, mode, clearRetry, stopCheck])
 
   // Abort whatever is in flight when the component goes away.
   useEffect(() => () => {
     genRef.current += 1
     abortRef.current?.abort()
     if (retryTimerRef.current) clearTimeout(retryTimerRef.current)
-  }, [])
+    stopCheck()
+  }, [stopCheck])
+
+  // Ask about a resumed queue before it plays. See checkCached above.
+  useEffect(() => {
+    if (!pending || pending.key !== storageKey) return
+    const gen = genRef.current
+    const cards = pending.cards
+    const pairKey = c => `${c.card_id}|${c.mode ?? mode}`
+    let shown = false
+
+    const show = (next) => {
+      shown = true
+      if (checkTimerRef.current) {
+        clearTimeout(checkTimerRef.current)
+        checkTimerRef.current = null
+      }
+      saveCache(storageKey, next)
+      setQueue(next)
+      setPending(null)
+      // Nothing left means a refill is next, not a finished deck.
+      setFetching(next.length === 0)
+    }
+
+    const controller = new AbortController()
+    checkAbortRef.current = controller
+    checkTimerRef.current = setTimeout(() => {
+      checkTimerRef.current = null
+      if (gen === genRef.current && !shown) show(cards)
+    }, CHECK_WAIT_MS)
+
+    const asked = cards
+      .map(c => ({ card_id: c.card_id, mode: c.mode ?? mode }))
+      .filter(c => typeof c.mode === 'string' && c.mode.length > 0)
+
+    Promise.resolve()
+      .then(() => (asked.length > 0 ? checkRef.current(asked, controller.signal) : []))
+      .then(stale => {
+        if (gen !== genRef.current) return
+        const drop = new Set((Array.isArray(stale) ? stale : []).map(pairKey))
+        const kept = c => !drop.has(pairKey(c))
+        if (!shown) {
+          show(cards.filter(kept))
+          return
+        }
+        // Too late to hold the queue back: it is on screen, and its
+        // head may be mid-answer — dropping that would make advance()
+        // pop the card behind it instead. Everything behind it is fair.
+        setQueue(q => {
+          if (q.length < 2) return q
+          const next = [q[0], ...q.slice(1).filter(kept)]
+          if (next.length === q.length) return q
+          saveCache(storageKey, next)
+          return next
+        })
+      })
+      .catch(() => {
+        // Offline or refused: play the queue as saved, as it always did.
+        if (gen === genRef.current && !shown) show(cards)
+      })
+      .finally(() => {
+        if (checkAbortRef.current === controller) checkAbortRef.current = null
+      })
+  }, [pending, storageKey, mode])
 
   const refill = useCallback(async () => {
     const gen = genRef.current
@@ -365,10 +483,13 @@ export function useCardSession({
   }, [storageKey, fetchBatch, batchSize, extraExcludeIds, cardKey, fetchTimeoutMs, clearRetry])
 
   useEffect(() => {
+    // Not while a resumed queue is held back: a batch fetched now would
+    // exclude none of it, and could hand back the very cards the check
+    // is about to keep.
     // eslint-disable-next-line react-hooks/set-state-in-effect -- refill() is a real network fetch (batched card refill), not a state reset; its own setFetching(true)/setState-on-response calls are the point of this effect, driven by whether the queue has run low. Not an id-keyed reset a key-remount could replace.
-    if (!done && !error && queue.length <= REFILL_AT) refill()
+    if (!pending && !done && !error && queue.length <= REFILL_AT) refill()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [queue.length, storageKey, done, error])
+  }, [queue.length, storageKey, done, error, pending])
 
   /** Explicit user-facing retry, for the error panel's button. */
   const retry = useCallback(() => {
@@ -411,8 +532,9 @@ export function useCardSession({
     queueLength: queue.length,
     // Only a genuine "nothing to show yet" state — not shown once the
     // cache (or a previous fetch) has put at least one card in hand,
-    // even while a refill is quietly running behind it.
-    loading: fetching && queue.length === 0,
+    // even while a refill is quietly running behind it. A resumed queue
+    // being checked is "nothing to show yet" too.
+    loading: (fetching || pending !== null) && queue.length === 0,
     done,
     // Non-null only when there is nothing to show AND the last fetch
     // failed. Screens must render an error state for this, or a failed
