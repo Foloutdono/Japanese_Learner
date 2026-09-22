@@ -168,7 +168,17 @@ runtime purpose. Two consequences worth knowing:
   `content/reading_sentences.py`, `content/listening_clips.py`,
   `scripts/prewarm_comprehension_pool.py`, `scripts/prewarm_exam_papers.py`,
   `srs/data_structure.sql` and `tests/test_comprehension_seed.py`).
-  When starting a new wave, begin at **112** or higher, and check
+  **112** is one word, one card: the 23 kanji the kanji deck taught at
+  two levels, and the ~360 vocab cards that were a lower card's word
+  again under another spelling (終る/終わる, これ/此れ, いい beside
+  いい/よい, the `川/河` packed fields), folded onto the lower card
+  (cited in `content/kanji_renames.py`, `content/vocab_renames.py`'s
+  `FOLDED_FORMS`, `scripts/migrate_kanji_ids.py`,
+  `scripts/migrate_vocab_ids.py`, `scripts/audit_vocab_deck.py`'s
+  `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
+  `routes/dictionary.py`, `routes/onboarding.py` and
+  `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
+  When starting a new wave, begin at **113** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -254,19 +264,21 @@ reports the seeded and the generated rows apart. Exam papers have no
 seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
 only thing that spares the first learner at each exam id the wait.
 
-Two are one-shots, each run once after a deploy that changed the ids a
+Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
-`content/vocab_renames.py` for vocab entries. Both rename the learner's card
-rows to the new ids, merge on collision, and leave anything they do not
-recognise in place and reported.
+`content/vocab_renames.py` for vocab entries, `content/kanji_renames.py`
+for kanji (plan 112, the 23 characters the deck taught at two levels).
+Each renames the learner's card rows to the new ids, merges on collision,
+and leaves anything it does not recognise in place and reported.
 
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
+python -m scripts.migrate_kanji_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
 ```
 
-The third reads `datas/vocab/pool_moves.json`, which
+The fourth reads `datas/vocab/pool_moves.json`, which
 `scripts/prune_pool_overlap.py` appends to for every pool row it takes
 out (plan 110b): a learner who studied 母 from the pool before it was an
 N5 card keeps that history on the N5 card.
@@ -435,7 +447,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,404 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

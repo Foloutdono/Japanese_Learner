@@ -122,8 +122,8 @@ def siblings_by_stroke(number: int, want: int = 3) -> list[int]:
 # ── Study by radical (plan 086) ─────────────────────────────
 # The inverse of KANJI_RADICALS: for each radical number, the course's
 # own kanji filed under it, one row per character at its native level
-# (DECK_BY_CHAR's rule — 23 characters sit on two levels and a family
-# lists a character once), ordered N5 → N1 and then by stroke count so
+# (DECK_BY_CHAR's rule: a family lists a character once, at its lowest
+# level), ordered N5 → N1 and then by stroke count so
 # a learner meeting the family reads it easy-first and the drill serves
 # it in that order (routes/kanji.py passes ordered=True). Radicals with
 # no deck kanji are simply absent: twenty of the 214 (爿 牙 瓜 …) file

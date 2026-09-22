@@ -3229,7 +3229,7 @@
   {
    "domain": "vocab",
    "kana": "たんす",
-   "kanji": "箪笥",
+   "kanji": "",
    "level": "expert",
    "meaning": "chest of drawers, bureau",
    "rank": 15,
@@ -6103,7 +6103,7 @@
   },
   {
    "domain": "vocab",
-   "kana": "インキ",
+   "kana": "インク",
    "kanji": "",
    "level": "expert",
    "meaning": "ink",
@@ -8246,7 +8246,7 @@
   {
    "domain": "vocab",
    "kana": "のこぎり",
-   "kanji": "鋸",
+   "kanji": "",
    "level": "advanced",
    "meaning": "saw",
    "rank": 10,

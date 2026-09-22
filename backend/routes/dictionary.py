@@ -5,6 +5,7 @@ from functools import lru_cache
 from fastapi import APIRouter, Depends, Query
 from content.kanji_data import KANJI_BY_LEVEL, DECK_BY_CHAR, kanji_to_id
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.vocab_renames import FOLDED_FORMS
 from content.grammar_points_data import GRAMMAR_POINTS_BY_LEVEL, entry_by_id, gloss, grammar_to_id
 import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
@@ -123,7 +124,7 @@ def get_radical_grid(all: bool = False):
 # ── The kanji collection ─────────────────────────────────────────
 # ONE collection over two pools, for the same reason the vocabulary is
 # (see the block below, and commit 116ad2a). The app's own JLPT deck is
-# 2,235 entries over 2,212 characters; KANJIDIC2, which this repo has
+# 2,212 characters, one entry each since plan 112; KANJIDIC2, which this repo has
 # shipped all along, has 13,108. The other 10,896 were reachable from
 # nowhere in the app — not by search, not by radical, not on a plate — so
 # looking a character up and not finding it proved only that it was not
@@ -156,12 +157,12 @@ def _levels_of(by_level: dict, level: str | None):
 
 def _kanji_deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str, dict, str]]:
     """(level, entry, display meaning) for every deck kanji the query
-    matches, in deck order — N5 first, N1 last. 2,235 rows, filtered in
+    matches, in deck order — N5 first, N1 last. 2,212 rows, filtered in
     memory.
 
     Matched against BOTH glosses; SHOWN in the session's language. The
     displayed meaning is now built for the matches alone rather than for
-    all 2,235 rows on the way past.
+    all 2,212 rows on the way past.
     """
     matches = []
     for lvl, kanji_list in _levels_of(KANJI_BY_LEVEL, level):
@@ -366,9 +367,10 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
     radical index is filed in stroke order, the way a paper 漢和辞典 files
     it — not deck-then-pool — so splitting it across two sources would
     interleave wrongly. One indexed query over the whole table gives the
-    right order directly. It is also keyed by CHARACTER, so the 23 kanji
-    the deck teaches at two levels appear once there rather than twice;
-    a radical index listing a character twice was never right.
+    right order directly. It is also keyed by CHARACTER, so a kanji
+    appears once there whatever the deck says -- the 23 the deck taught
+    at two levels until plan 112 did -- and a radical index listing a
+    character twice was never right.
     """
     start = page * limit
 
@@ -473,18 +475,39 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
 # they almost certainly meant.
 
 
+@lru_cache(maxsize=1)
+def _folded_fields() -> dict[tuple[str, str, str], tuple[str, ...]]:
+    """(level, kanji, kana) -> the spellings plan 112 folded into that
+    card, as extra Japanese fields to search: 美味しい finds the おいしい
+    card that took it in, and 終る the 終わる card, where before the
+    merge each found a card of its own. Keyed by the entry's fields
+    rather than its id so the scan below never formats an id."""
+    out = {}
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for w in vocab_list:
+            pairs = FOLDED_FORMS.get(vocab_to_id(w, level))
+            if pairs:
+                out[(level, w.get("kanji", ""), w.get("kana", ""))] = tuple(
+                    field for pair in pairs for field in pair if field
+                )
+    return out
+
+
 def _deck_matches(query, lang: str, level: str | None = None) -> list[tuple[str, dict, str]]:
     """(level, entry, display meaning) for every curated-deck word the
     query matches, in deck order — N5 first, N1 last.
 
     Matched against BOTH glosses; SHOWN in the session's language. See
-    the leniency note at the top of this module.
+    the leniency note at the top of this module. The Japanese side also
+    matches a spelling folded into the card (_folded_fields).
     """
+    folded = _folded_fields()
     matches = []
     for lvl, vocab_list in _levels_of(VOCAB_BY_LEVEL, level):
         for w in vocab_list:
+            kanji, kana = w.get("kanji", ""), w.get("kana", "")
             if query.empty or query.hits(
-                jp_fields=(w.get("kanji", ""), w.get("kana", "")),
+                jp_fields=(kanji, kana, *folded.get((lvl, kanji, kana), ())),
                 latin_fields=(
                     w.get("meaning", ""),
                     (fr_gloss(w, VOCAB_FR_MAP) or ""),
@@ -562,12 +585,22 @@ def _vocab_by_pair() -> dict[tuple[str, str], tuple[str, dict]]:
     entry is filed under each of them. First writer wins, which is what
     keeps a pair held at two levels resolving to the same one the scan
     in level order returned.
+
+    A spelling plan 112 folded into a card is filed under that card too,
+    in a second pass that only fills pairs nobody holds: a favourite kept
+    on 美味しい::おいしい, or on the N5 終る before it was 終わる, still
+    opens the word.
     """
     index: dict[tuple[str, str], tuple[str, dict]] = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for w in vocab_list:
             for reading in w.get("kana", "").split("/"):
                 index.setdefault((w.get("kanji", ""), reading), (level, w))
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for w in vocab_list:
+            for kanji, kana in FOLDED_FORMS.get(vocab_to_id(w, level), ()):
+                for reading in kana.split("/"):
+                    index.setdefault((kanji, reading), (level, w))
     return index
 
 
