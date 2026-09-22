@@ -141,3 +141,60 @@ def test_prose_is_served_as_prose(client, tutor):
     r = client.post("/api/translation/analyze", json=PAYLOAD)
     assert r.status_code == 200
     assert r.json() == {"review": None, "analysis": "Bonjour ! Votre traduction est correcte."}
+
+
+# ── The corrected sentence (2026-09-22) ──────────────────────────
+# "better" is served as furigana parts with the romaji under them and
+# the spans that differ from what the learner wrote marked, so the fix
+# is readable and visible rather than a second sentence to diff by eye.
+# The marking is difflib's, never the model's.
+def _texts(parts):
+    return "".join(part["text"] for part in parts)
+
+
+def _marked(parts):
+    return "".join(part["text"] for part in parts if part.get("highlight"))
+
+
+def test_only_what_changed_is_marked():
+    out = translation._corrected("毎日名前を書きます。", "毎日名前が書きます。")
+    assert _texts(out["better_parts"]) == "毎日名前を書きます。"
+    assert _marked(out["better_parts"]) == "を"
+
+
+def test_an_answer_that_shares_nothing_marks_nothing():
+    # A romaji answer against a Japanese correction: every character
+    # differs, and a sentence marked end to end points at nothing.
+    out = translation._corrected("毎日新聞を読みます。", "mainichi shinbun wo yomimasu")
+    assert _marked(out["better_parts"]) == ""
+
+
+def test_the_parts_always_spell_the_sentence_back(monkeypatch):
+    # The offsets are into what the parts spell, so a tokenizer that
+    # gives back something else (or nothing -- it is optional) must not
+    # move the mark onto the wrong characters.
+    monkeypatch.setattr(translation, "align_sentence", lambda text: [{"text": "something else"}])
+    out = translation._corrected("毎日名前を書きます。", "毎日名前が書きます。")
+    assert _texts(out["better_parts"]) == "毎日名前を書きます。"
+    assert _marked(out["better_parts"]) == "を"
+
+
+def test_the_endpoint_serves_the_corrected_sentence_readable(client, tutor):
+    tutor(_reply())
+    r = client.post("/api/translation/analyze", json=PAYLOAD)
+    assert r.status_code == 200, r.text
+    review = r.json()["review"]
+    # The string stays: an older client prints it, and the log reads it.
+    assert review["better"] == "毎日名前を書かなければなりません。"
+    assert _texts(review["better_parts"]) == review["better"]
+    assert review["better_romaji"]
+    # The learner wrote 「名前が」; the correction is 「を」.
+    assert _marked(review["better_parts"]) == "を"
+
+
+def test_nothing_to_correct_carries_no_parts(client, tutor):
+    tutor(_reply(verdict="correct", fix=[]))
+    r = client.post("/api/translation/analyze", json=PAYLOAD)
+    review = r.json()["review"]
+    assert review["better"] == ""
+    assert "better_parts" not in review

@@ -453,9 +453,49 @@ function Review({ review, grammar, t }) {
       {review.better && (
         <>
           <span className="prose__label">{t.reviewBetter}</span>
-          <span className="rvw__better" lang="ja">{review.better}</span>
+          <Corrected
+            parts={review.better_parts}
+            text={review.better}
+            romaji={review.better_romaji}
+          />
         </>
       )}
+    </div>
+  )
+}
+
+// ── The corrected sentence, readable ──
+// The learner's own sentence with the fixes applied, and until
+// 2026-09-22 it was one bare line of Japanese: no readings on the
+// kanji, no romaji, and no sign of which part of it was the fix. A
+// learner who cannot read 新聞 cannot read the correction either, and
+// one who can was left diffing two sentences by eye.
+//
+// So it is drawn the way every other sentence in the app is: furigana
+// over the kanji, the romaji under the line, and what the tutor
+// actually changed picked out in it. All three come from
+// routes/translation.py (`better_parts`, `better_romaji`) -- the marks
+// are a character diff against what the learner wrote, not a claim the
+// model made about its own edits.
+//
+// `text` is the fallback: a backend that does not send the parts yet
+// (the two deploy separately) prints exactly the line it used to.
+function Corrected({ parts, text, romaji }) {
+  return (
+    <div className="rvw__corrected">
+      <span className="rvw__better" lang="ja">
+        {parts?.length
+          ? parts.map((part, i) => {
+            const body = part.reading
+              ? <ruby>{part.text}<rt>{part.reading}</rt></ruby>
+              : part.text
+            return part.highlight
+              ? <mark key={i} className="rvw__fixed">{body}</mark>
+              : <span key={i}>{body}</span>
+          })
+          : text}
+      </span>
+      {romaji && <span className="prose__romaji">{romaji}</span>}
     </div>
   )
 }

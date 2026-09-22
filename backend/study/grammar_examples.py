@@ -18,7 +18,7 @@ longest stem. A bare particle has no verifiable stem, so it gets no span
 from functools import lru_cache
 
 from content.grammar_sentences_data import translation
-from study.furigana import align_sentence
+from study.furigana import align_sentence, mark_spans
 from study.grammar_match import stems, verifiable
 
 BLANK = "＿＿＿"
@@ -42,46 +42,25 @@ def parts_with_span(jp: str, span: tuple[int, int] | None, mark: str) -> list[di
 
     `mark="highlight"` sets `highlight: True` on every part inside the
     span; `mark="blank"` replaces those parts with one `{text: BLANK,
-    blank: True}` part. A part with no reading is split at the span's
-    edges so the mark is exact; a ruby part (text + reading) is never
-    split -- half a reading over half a word is wrong furigana, which is
-    worse than a slightly wide mark -- so the span widens to the whole
-    part instead.
+    blank: True}` part. The cutting rule is furigana.mark_spans's -- a
+    part with no reading is split at the span's edges so the mark is
+    exact, a ruby part never is -- and the blank below is that same
+    marked run collapsed to one part.
     """
     parts = align_sentence(jp) if jp else []
     if span is None or not parts:
         return parts
-    start, end = span
+    marked = mark_spans(parts, [span])
+    if mark != "blank":
+        return marked
     out: list[dict] = []
-    pos = 0
     blanked = False
-    for part in parts:
-        text = part["text"]
-        p_start, p_end = pos, pos + len(text)
-        pos = p_end
-        if p_end <= start or p_start >= end:
+    for part in marked:
+        if not part.get("highlight"):
             out.append(part)
-            continue
-        if part.get("reading") is not None:
-            # A ruby part: all or nothing.
-            pieces = [(part, True)]
-        else:
-            pieces = []
-            a, b = max(start, p_start), min(end, p_end)
-            if a > p_start:
-                pieces.append(({"text": text[: a - p_start]}, False))
-            pieces.append(({"text": text[a - p_start: b - p_start]}, True))
-            if b < p_end:
-                pieces.append(({"text": text[b - p_start:]}, False))
-        for piece, inside in pieces:
-            if not inside:
-                out.append(piece)
-            elif mark == "blank":
-                if not blanked:
-                    out.append({"text": BLANK, "blank": True})
-                    blanked = True
-            else:
-                out.append({**piece, "highlight": True})
+        elif not blanked:
+            out.append({"text": BLANK, "blank": True})
+            blanked = True
     return out
 
 
