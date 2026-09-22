@@ -604,13 +604,20 @@ spellings, and 下る::さがる into 下がる). The rest, all through
   senses, complete and shorter.
 - **十分 ten minutes read only じっぷん.** It is じゅっぷん/じっぷん now,
   a `MOVES` line, since the app's own dictation says じゅっぷん.
+- **頃 read けい is no word** (the reading lives in 頃日 and 頃刻; JMdict's
+  only 頃【けい】 is a Chinese unit of land, and neither JLPT list has
+  it). The N1 card taught ころ's meaning, KANJIDIC's for the character,
+  so it leaves the deck and its rows go to the N3 ころ card -- the first
+  `MOVES` line that is not a spelling of its target, which
+  `vocab_renames.NOT_FOLDED` keeps out of `FOLDED_FORMS`: the move
+  carries the progress, and the dictionary does not learn to answer
+  けい with ころ. 8,091 → 8,090.
 
 `scripts/audit_slice.py` read the French by written form (#155), so
 the dump showed 23 of the forty with another reading's French; it goes
-through `translations.fr_gloss` now. Left: 頃::けい (N1) is KANJIDIC's
-character meaning on a reading that is no word, and the other forms
-that share one gloss agree with JMdict closely enough that the audit's
-slices, not a sweep, should judge them.
+through `translations.fr_gloss` now. Left: the other forms that share
+one gloss agree with JMdict closely enough that the audit's slices,
+not a sweep, should judge them.
 
 ## Order and dependencies
 
