@@ -20769,6 +20769,90 @@ a.slip__act { text-decoration: none; }
     max-height: calc(100dvh - 2 * var(--sp-6));
   }
 
+  /* ── the gates, laid out for the width ──
+     Learn and Practice hang five plates each. A column of five at the
+     desk's width is five slabs a thousand pixels long, so the plates go
+     two by two — and the fifth, which is the odd one out on both gates
+     (the deck shelf under the four lines; the mock exam after the four
+     platforms), takes the full row. Two columns divide four, and the
+     fifth spans them: a lattice with no short last row (DESIGN.md, "A
+     lattice's column count must divide its content"). */
+  .learn > .plates,
+  .practice > .plates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .learn > .plates > .plate:last-child:nth-child(odd),
+  .practice > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  /* Today: the strip and the fare gate side by side — the status line
+     on the left, the day's work on the right, both read at a glance.
+     Equal halves: the stamp rally needs its width. Placed, not flowed,
+     so the gate does not move when the strip's figures arrive; the
+     finished run's slip takes the whole row. */
+  .today {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
+  .today > .pass--strip {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .today > .gate-card,
+  .today > .empty {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  .today > .today-clear { grid-column: 1 / -1; }
+
+  /* The profile: the holder opened flat — the pass and its stamp book
+     on the left, the record (the figures, the ledger, the 番付) on the
+     right (screens/ProfileScreen.jsx). The ledger in a half-width
+     column goes two across, never three. */
+  .desk-profile {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+  .desk-profile__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* Settings: the list and the open page side by side
+     (screens/SettingsScreen.jsx). The list stays in view while the page
+     scrolls, and the open page's row is marked the way a selection is:
+     in gold, the pass's metal — these are the pass's own settings. */
+  .desk-settings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-settings__list {
+    position: sticky;
+    top: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .desk-settings__page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+    animation: arrive-soft 0.2s linear;
+  }
+  .desk-settings .stg-row--on {
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent2);
+  }
+
   /* ── 札 — a sheet is a dialog on the desk ──
      On a phone a sheet rises from the bottom edge, under the thumb that
      opened it. A computer has no thumb and a bottom edge a long way from
