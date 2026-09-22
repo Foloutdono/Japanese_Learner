@@ -25,6 +25,7 @@ from content import vocab_extras
 from content import reading_sentences
 from study import difficulty
 from study.analysis import analyze_with_glosses, attach_user_state
+from study.answer_balance import balance_answers, position_skew
 from study.exam_gen_utils import kanji_instruction
 from study.grammar_match import contains_pattern, verifiable
 from study.level_mix import level_mix, validate_kanji_mix, validate_vocab_mix
@@ -2109,6 +2110,22 @@ def get_comprehension_text(level: str | None = None, lang: str = "en", user_id: 
             )
             # Before the decoration, which consumes the word lists.
             _pool_add(user_id, level, lang, data)
+
+    # Where the right answer sits, decided here rather than by the
+    # model. This is the ONE place an exercise is served from -- a pool
+    # hit, a seed, a repeat past the ceiling, a fresh generation -- so
+    # one call covers every source, and covers the exercises already
+    # stored: the pool keeps the model's order and this re-rolls it on
+    # the way out, which is why the skew is gone without retiring a
+    # pool anyone paid for (_POOL_VERSION stays where it is).
+    #
+    # Per SERVING, not per exercise, and that is free here: the screen
+    # posts the questions back with the answers, so /result grades
+    # against the order this learner actually saw. Two learners reading
+    # the same text get different papers out of it.
+    if not balance_answers(data["questions"], random.Random()):
+        logger.info("comprehension %s/%s: %s", level, lang, position_skew(
+            [q["correct"] for q in data["questions"] if isinstance(q.get("correct"), int)]))
 
     _decorate_for(data, user_id, level)
 

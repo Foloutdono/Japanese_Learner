@@ -8,6 +8,7 @@ import pytest
 from core.auth import DEV_USER_ID
 from core.db import db_conn
 from routes import reading
+from study.answer_balance import MIN_QUESTIONS_FOR_BALANCE_CHECK, position_skew
 from tests.test_comprehension import _reply, MASHITA, SENTENCE_1
 
 
@@ -92,6 +93,22 @@ def test_each_sentence_carries_its_analysis(client, served):
 
     assert isinstance(analysis["unknown_count"], int)
     assert any(g["pattern"] == MASHITA["pattern"] for g in analysis["grammar"])
+
+
+def test_the_served_paper_does_not_answer_every_question_in_slot_A(client, served):
+    """The fixture answers all eight questions in slot A, which is the
+    habit study/answer_balance exists for. What the learner is served
+    is re-rolled, and the option that was right is still the right one:
+    position moves, content does not."""
+    r = client.get("/api/reading/comprehension?level=N5&lang=en")
+    assert r.status_code == 200, r.text
+    questions = r.json()["questions"]
+
+    assert len(questions) >= MIN_QUESTIONS_FOR_BALANCE_CHECK, "too short to measure a spread"
+    assert position_skew([q["correct"] for q in questions]) is None
+    for q in questions:
+        assert sorted(q["options"]) == ["a", "b", "c", "d"]
+        assert q["options"][q["correct"]] == "a"
 
 
 def test_the_result_records_the_seeded_grammar(client, clean_log):

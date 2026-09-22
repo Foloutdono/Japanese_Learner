@@ -19,12 +19,13 @@ import random
 
 from study.llm_shared import offending_kanji
 
-# A generator that always puts the correct answer in the same slot is
-# a bug, even though it never emits an outright-wrong item; on a paper
-# with only a handful of questions this can't be perfectly uniform, so
-# this catches a real skew rather than expecting an exact 25/25/25/25 split.
-MAX_ANSWER_POSITION_SHARE = 0.6
-MIN_QUESTIONS_FOR_BALANCE_CHECK = 8
+# The threshold and the floor are study/answer_balance.py's, not this
+# module's: 理解 (routes/reading.py) measures the same skew over its
+# own {options, correct} question shape, and two features deciding
+# separately what "too skewed" means is how the two drift apart. Read
+# there for why the numbers are what they are; they keep their names
+# here because this module's checks are written in terms of them.
+from study.answer_balance import MAX_ANSWER_POSITION_SHARE, MIN_QUESTIONS_FOR_BALANCE_CHECK
 
 
 def validate_mcq_question(question: dict) -> list[str]:
