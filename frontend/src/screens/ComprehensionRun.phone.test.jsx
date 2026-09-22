@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import { StageFrame } from '../components/chrome/Shell'
 import '../index.css'
 
 // ── 読解 — the passage at 390×844 ──────────────────────────
@@ -83,11 +84,17 @@ async function reading(text) {
   const screen = await render(
     <LangProvider>
       <MemoryRouter initialEntries={['/practice/comprehension/N5']}>
-        <div className="phone phone--stage">
-          <Routes>
+        <Routes>
+          {/* The real frame, not a div wearing its classes: StageFrame
+              is what stamps data-chrome="stage" on <html>, and every
+              docked instrument on this screen is positioned against
+              the --dock-bottom that attribute sets. A harness without
+              it measured a foot docked on the screen's own edge while
+              the app docked one 36px above it, over the card. */}
+          <Route element={<StageFrame />}>
             <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
-          </Routes>
-        </div>
+          </Route>
+        </Routes>
       </MemoryRouter>
     </LangProvider>
   )
@@ -117,6 +124,18 @@ describe('the comprehension passage at 390×844', () => {
     expect(foot.querySelectorAll('button')).toHaveLength(1)
     expect(foot.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight + 1)
     pageIsStill()
+
+    // And the way on stands UNDER the card, not over it. The dock is
+    // sticky on --dock-bottom, which on a stage is the level bar's
+    // height — and the level bar is the one thing this phase does not
+    // have, so the foot lifted 36px into a card that already ran to
+    // the screen's edge and drew its opaque ground over the strip
+    // (index.css, .stage--passage's --dock-bottom). On screen is not
+    // the same as visible: the strip passed every measurement above
+    // while sliced in half by the bar in front of it.
+    expect(foot.getBoundingClientRect().top).toBeGreaterThanOrEqual(box.bottom - 0.5)
+    // Nor is there a hole where the bar used to reserve that height.
+    expect(foot.getBoundingClientRect().bottom).toBeCloseTo(window.innerHeight, 0)
 
     // At the reading rung (--fs-body), not the sentence one
     // (--fs-lead): one is a page, the other is a prompt. A text inside
@@ -151,5 +170,9 @@ describe('the comprehension passage at 390×844', () => {
     expect(body.scrollTop).toBeGreaterThan(0)
     expect(strip.getBoundingClientRect().top).toBeCloseTo(before, 0)
     pageIsStill()
+
+    // And nothing is docked over it either — see the first test.
+    expect(root.querySelector('.stage__foot').getBoundingClientRect().top)
+      .toBeGreaterThanOrEqual(card.getBoundingClientRect().bottom - 0.5)
   })
 })

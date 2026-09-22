@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import { StageFrame } from '../components/chrome/Shell'
 import '../index.css'
 
 // ── 読解 — the passage band, measured on the smallest phone ──────
@@ -78,11 +79,17 @@ async function reading(text) {
   const screen = await render(
     <LangProvider>
       <MemoryRouter initialEntries={['/practice/comprehension/N1']}>
-        <div className="phone phone--stage">
-          <Routes>
+        <Routes>
+          {/* The real frame, not a div wearing its classes: StageFrame
+              is what stamps data-chrome="stage" on <html>, and every
+              docked instrument on this screen is positioned against
+              the --dock-bottom that attribute sets. A harness without
+              it measured a foot docked on the screen's own edge while
+              the app docked one 36px above it, over the card. */}
+          <Route element={<StageFrame />}>
             <Route path="/practice/comprehension/:level" element={<ComprehensionRun session={{ access_token: 'tok' }} />} />
-          </Routes>
-        </div>
+          </Route>
+        </Routes>
       </MemoryRouter>
     </LangProvider>
   )

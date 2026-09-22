@@ -15063,7 +15063,28 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
      text is up): the band's ceiling is measured against this height
      on the smallest phone (ComprehensionRun.touch.test.jsx), and no
      fare can land while the learner is only reading. */
-  .stage--passage { max-height: 100dvh; }
+  .stage--passage {
+    max-height: 100dvh;
+    /* And the dock comes down with it. --dock-bottom on a stage is the
+       level bar's height plus the inset (:root[data-chrome="stage"]),
+       because every other run docks its instrument ON that bar. The
+       passage is the one phase without it — and the sticky foot went
+       on reserving its 36px anyway, lifting itself that far off the
+       bottom of a stage that now runs to the screen's own edge. The
+       lift came out of the card: the foot's ground is opaque
+       (--bg-main, .stage > .stage__foot below), so it drew straight
+       over the card's last 36px — the strip that names it — and the
+       reader saw `N5 · Reading comprehension` sliced in half by a bar
+       standing in front of it, with 36px of nothing under the bar
+       (reported 2026-09-22, iPhone 16 Pro Max).
+
+       Nothing is below this stage, so the dock is the inset alone.
+       The card's `flex: 1 1 auto` then shrinks against a foot that
+       ends where the screen does, which is what puts the strip back
+       on. ComprehensionRun.phone.test.jsx measures both halves: the
+       foot under the card, and no hole beneath the foot. */
+    --dock-bottom: var(--safe-bottom);
+  }
   /* And the card is what gives the room back. Every item in a flex
      column shrinks by default, so the head and the timer each gave up
      a couple of pixels to a passage long enough to need the scroll —
