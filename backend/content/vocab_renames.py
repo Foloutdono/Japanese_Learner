@@ -538,6 +538,12 @@ MOVES: dict[str, str] = {
     "vocab_N1_目眩_めまい": "vocab_N2__めまい",
     "vocab_N1_諄い_くどい": "vocab_N2__くどい",
     "vocab_N1_下らない_くだらない": "vocab_N2__くだらない",
+    # ── The content audit's first vocab run (#154) ───────────────
+    # 十分 "ten minutes" taught only じっぷん, the traditional reading;
+    # the 2010 常用漢字表 gives 十 ジュッ as well, and it is what a learner
+    # hears -- the app's own dictation bank reads 10分 じゅっぷん. Packed,
+    # modern reading first, so the lookups index both.
+    "vocab_N1_十分_じっぷん": "vocab_N1_十分_じゅっぷん/じっぷん",
 }
 
 

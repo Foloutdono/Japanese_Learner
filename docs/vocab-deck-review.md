@@ -578,6 +578,40 @@ Deploy, then, once each: `migrate_vocab_ids`, `migrate_kanji_ids`,
   `audit_vocab_deck.DISTINCT_PAIRS` so the guard does not call it a
   duplicate of お手洗い.
 
+### The first vocab audit (#154, 2026-09-22)
+
+Run 1 of the content audit took the forty riskiest cards and filed ten
+findings the morning before 112 landed; 112 had already settled two of
+them (明い → 明るい at N5 with the eight other inverted cross-reference
+spellings, and 下る::さがる into 下がる). The rest, all through
+`curated_senses`:
+
+- **A card carrying another word's meaning.** 変化::へんか was *goblin*
+  (へんげ), 臭い::くさい was 匂い's *odour*, 気味::きみ the suffix ぎみ
+  (the N3 grammar point 〜気味 teaches that; the card is きみ, *feeling*),
+  無::ぶ む's *nothing*. 一部 leads with *a part* now, not the counter.
+- **Another reading's gloss written across a form's rows**, the pattern
+  behind 後::うしろ: a card whose gloss shares no word with its own
+  JMdict senses, among forms that repeat one gloss. 空::から was *sky*,
+  額::がく *forehead*, 軒::けん *eaves*, 金::かね *gold*, 生::せい and
+  上::かみ carried なま's and じょう's, 為る::する なる's -- seventeen cards.
+  Plan 107 had given most of them a correct French line; the English
+  was never touched.
+- **The export's length cap.** No gloss reached 110 characters; 37 of
+  the longest stopped mid-word, on a dangling "to" or an open bracket
+  (保つ "to keep we", 渋い "…, 3"), and several French lines with them
+  (合わす ended "à", 下地's *spadework* was *bêche*). Each is JMdict's
+  senses, complete and shorter.
+- **十分 ten minutes read only じっぷん.** It is じゅっぷん/じっぷん now,
+  a `MOVES` line, since the app's own dictation says じゅっぷん.
+
+`scripts/audit_slice.py` read the French by written form (#155), so
+the dump showed 23 of the forty with another reading's French; it goes
+through `translations.fr_gloss` now. Left: 頃::けい (N1) is KANJIDIC's
+character meaning on a reading that is no word, and the other forms
+that share one gloss agree with JMdict closely enough that the audit's
+slices, not a sweep, should judge them.
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104
