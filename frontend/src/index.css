@@ -12325,11 +12325,18 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-plate__word--long { font-size: var(--fs-heading); }
 /* Furigana over the headline word (vocab only — see headwordFurigana
-   in DictionaryDetail.jsx). */
+   in DictionaryDetail.jsx).
+
+   --fs-sm, not --fs-caption: a reading is only as legible as its
+   dakuten, and ご's two strokes fuse into one smudge below ~13px on a
+   1x screen — measured at 9.9, 11.5, 13.1 and 15.2px, they only read
+   as two strokes from 13.1px up, so こ and ご looked alike. Room is
+   not the constraint here: two kana at this rung (26px) still sit
+   inside one --fs-display kanji (40px). */
 .dict-plate__word ruby { ruby-position: over; }
 .dict-plate__word rt {
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-sm);
   font-weight: 400;
   letter-spacing: 0;
   color: var(--text-secondary);
@@ -12585,9 +12592,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   white-space: nowrap;
 }
 .dict-ex__jp ruby { white-space: nowrap; }
+/* One rung up from --fs-caption-xs, and medium: at 9.9px ご's dakuten
+   were one smudge, and ご read as こ (see .dict-plate__word rt). The
+   rung and weight 書取's line already sets over the same --fs-lead
+   sentence (.kaki-line rt), not the plate's --fs-sm: running text
+   cannot afford it. A two-kana reading at this rung (23px) already
+   widens the 18px kanji under it by a few pixels. */
 .dict-ex__jp rt {
-  font-size: var(--fs-caption-xs);
-  font-weight: 400;
+  font-size: var(--fs-caption);
+  font-weight: 500;
   color: var(--text-secondary);
   user-select: none;
 }
@@ -12738,9 +12751,11 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   ruby-position: over;
   ruby-align: space-between;
 }
+/* The example sentence's rung and weight (.dict-ex__jp rt), for the
+   same dakuten, over the same --fs-lead word. */
 .dict-word__jp rt {
-  font-size: var(--fs-caption-xs);
-  font-weight: 400;
+  font-size: var(--fs-caption);
+  font-weight: 500;
   color: var(--text-secondary);
 }
 /* The character the row is an example of, and its own furigana, in the
@@ -15958,9 +15973,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 /* The reading is furigana on the headword itself now (see
    DictionaryScreen's cardFurigana), set exactly as the entry's own
    plate sets it — one vocabulary for the same annotation in both
-   places. The line that used to carry it above the word is gone with
-   it: it was a second register on every tile, and on a kana-only entry
-   it printed the word twice. */
+   places, --fs-sm included, for ご's dakuten (see .dict-plate__word
+   rt). The fitted headword leaves it the room: measured over the whole
+   deck (7,292 words and 2,235 kanji) at a 160px and a 175px tile, the
+   tile's box keeps its height, no reading prints larger than its word,
+   and the rung clips one word the smaller rung did not (にも拘らず, by
+   3px on a 360px phone; 畏まりました already clipped at either). The
+   line that used to carry it above the word is gone with it: it was a
+   second register on every tile, and on a kana-only entry it printed
+   the word twice. */
 .dict-entry-card__char ruby {
   ruby-position: over;
   /* Centred, not spread: the browser's default spaces an annotation
@@ -15971,7 +15992,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-entry-card__char rt {
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-sm);
   font-weight: 400;
   /* The gap over the character. An annotation sits on the line above
      its base, so the only room to be had is inside that line: a taller
