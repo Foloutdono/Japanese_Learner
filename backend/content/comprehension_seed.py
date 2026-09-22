@@ -52,6 +52,15 @@ a model answer must pass (routes/reading._check_comprehension):
   * the paper has exactly COMPREHENSION_SPECS[level] questions, four
     options each, with every question type represented
   * both languages are present on every string
+
+NOT one of the rules: which slot the right answer is written in. Every
+exercise's options are re-ordered per serving, seeds and model answers
+alike (study/answer_balance, called from
+routes/reading.get_comprehension_text), because a model asked to write
+four options and pick one picks the first far too often and an author
+writing the true sentence before the three false ones does the same.
+So `correct` here is WHICH option is right, never the position a
+learner meets it in -- write the true one wherever it reads best.
 """
 import json
 import os

@@ -16,6 +16,7 @@ from core.auth import DEV_USER_ID
 from core.db import db_conn
 from routes import reading
 from study import difficulty as D
+from study.answer_balance import position_skew
 from study.grammar_match import verifiable
 from tests.conftest import acting_as
 
@@ -203,6 +204,19 @@ def test_a_new_learner_s_first_exercise_is_a_seed_and_costs_no_model_call(client
         assert "words" not in part
         assert part["analysis"]["available"] is True
     assert body["grammar_points"], "the chips have something to draw"
+
+    # And spread across the four slots. The seeds are written with the
+    # right answer first far more often than not -- an author writes
+    # the true sentence and then invents three wrong ones -- so this is
+    # the endpoint's re-roll (study/answer_balance) measured on real
+    # pooled content, not on a fixture built to need it.
+    entry = next(e for e in seed.by_level()[level] if e["text"] == body["text"])
+    written = seed.render(entry, lang)["questions"]
+    assert position_skew([q["correct"] for q in body["questions"]]) is None
+    for served, source in zip(body["questions"], written):
+        assert sorted(served["options"]) == sorted(source["options"])
+        assert served["options"][served["correct"]] == source["options"][source["correct"]], \
+            "the re-roll moved the answer, not which option is right"
 
 
 def test_the_seeds_are_read_through_before_the_model_is_asked(client, seeded, monkeypatch):
