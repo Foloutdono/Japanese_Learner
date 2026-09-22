@@ -775,7 +775,8 @@ never the card's — the foot strip is what names the card, and it has to stay
 on screen. A prompt keeps the ordinary ruling; only a passage is bounded.
 
 Above 768px the column is the centred `--card-w` it always was, with the
-progress legend back.
+progress legend back — on the desk too, where the run also prints its keys
+(see *The desk*).
 
 ### Rewards
 
@@ -825,8 +826,8 @@ objects, and not one of them waits to be dismissed:
   the wash, the kumadori, the brush and the petals are gone.
 - **The level** (進級) turns over on the **in-car display**: a sumi board
   docked across the top of a phone (the top bar is hidden while studying, so
-  the edge is free and the docked rating bar stays usable) or under the top
-  bar beside the roundel on a desktop, the number on split-flap drums. On a
+  the edge is free and the docked rating bar stays usable) or a panel in the
+  top-right corner on a wider screen, the number on split-flap drums. On a
   clock, never gating — it leaves by itself while the next card is already
   in hand.
 
@@ -843,12 +844,19 @@ a learner who has just rated one card is already looking for the next.
 
 ### The chrome (the mobile canvas, plan 068)
 
-- **One chrome at every width.** The HUD across the top (level roundel ·
+- **Two chromes, one line** (owner's call, 2026-09-22; ADR 0018). Below
+  1100px it is the phone's: the HUD across the top (level roundel ·
   goal-status panel · commuter pass), the five gates across the bottom
   (Learn · Practice · Today · Dictionary · Profile), the screen between
-  them; on a wide screen the same frame is a centred column of
-  `--board-w`. There is no second chrome — the burger drawer, the
-  auto-hiding top bar and the concourse home retired with it.
+  them; between 769 and 1099 the same frame is a centred column of
+  `--board-w`. At 1100px and up it is **the desk** (below): a rail down
+  the left edge that is the HUD and the tab bar in one column. The line
+  is `hooks/useDesk.js`'s, and the phone never crosses it — below it
+  every screen renders what it rendered before the desk existed. This
+  replaced "one chrome at every width", which answered an app whose wide
+  screen had a burger drawer, an auto-hiding top bar and a concourse home
+  of its own; the desk shares every part with the phone but the frame,
+  which is what keeps the two from drifting as those did.
 - **Both bars are sumi with the two panel inks and no line colour.** The
   pigment belongs to the screen's own bar (`.bar`): roundel, title, sub,
   aside, and a 2px stripe in the section's colour under it. A screen that
@@ -869,7 +877,9 @@ a learner who has just rated one card is already looking for the next.
   the mobile chrome — and, since this rule was written, not even to the
   tab bar, which was its one exception: the gates were a kanji where a
   pictogram goes, with the plain word under each.
-- **A gate is a pictogram, and only the gate you are on is captioned.**
+- **A gate is a pictogram, and only the gate you are on is captioned** —
+  on the phone's row. (The desk's rail is a column with the room for every
+  word, so there all five are captioned.)
   *Owner's ruling, from a rendered comparison of six directions.* Five
   gates are 78px on a 390px phone; `DICTIONNAIRE` is 94 and
   `AUJOURD'HUI` 87, so in French two captions printed straight over
@@ -884,7 +894,9 @@ a learner who has just rated one card is already looking for the next.
   reach for wherever a fixed row must hold a word in every language** —
   the alternative is type small enough to be unreadable, or copy chosen
   to fit rather than to be right.
-- **The tab bar is not the only way along the row of five.** A sideways
+- **The tab bar is not the only way along the row of five** — on the
+  phone. (The desk has no flick: its gates are a column in their own
+  order, so there is no row to walk.) A sideways
   flick across a gate's own screen moves one gate along it — left for the
   next, right for the one before — and the arriving gate pulls in from the
   side the flick came from. The bar is untouched and is still what *says*
@@ -915,8 +927,50 @@ a learner who has just rated one card is already looking for the next.
   left as the next arrives from the right, 260ms ease-out; never a
   cross-fade. Under reduced motion only the rest state is drawn.
 - The chrome's tokens: `--hud-h` (48px), `--tabbar-h` (50px),
-  `--dock-bottom`. The class map from the canvas to `index.css` is
-  `docs/design/mobile/README.md`.
+  `--dock-bottom`, and the desk's `--desk-rail-w` (256px). The class map
+  from the canvas to `index.css` is `docs/design/mobile/README.md`; the
+  desk's is `docs/design/desk/README.md`.
+
+### The desk (机, plan 112)
+
+The computer's design, at 1100px and up. Everything above holds unless a
+line here says otherwise.
+
+- **The rail is the chrome.** One sumi column down the left edge,
+  `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
+  辻 over TSUJI at its head, the five gates, and the HUD's three
+  instruments at its foot (the same components, so the fare is paid into
+  the same roundel). It is chrome, so it wears no line pigment — the one
+  colour in it is Today's due count, a state's.
+- **Every gate is captioned, Today first.** A column has the room the
+  phone's row lacked, so the pictogram carries its word; and with no thumb
+  to set Today under, it opens the list the way `/` opens on it
+  (`config/tabs.js`, `DESK_TAB_IDS`). The lit gate is full ink on the
+  lozenge's wash with the bar's 2px rule on the rail's edge.
+- **The lit gate's stations hang under it, on a drawn line.** A stop per
+  station, the one you are standing in filled — the map's own drawing (a
+  rail, stops, where you are) in the panel's inks. The halls behind the
+  pass list its settings too.
+- **A screen gets a layout only where the width earns it.** The plates go
+  two by two with the odd fifth across the row (a lattice with no short
+  last row); Today sets the strip beside the fare gate; the profile opens
+  the holder flat, the pass beside the record; Settings sets the list
+  beside the open page, under the list's one `<h1>`. Everything else is
+  the phone's screen in the centred column, which is what it was designed
+  to be at that width.
+- **A sheet is a dialog.** The bottom edge is where a thumb is; on a
+  computer it is a long way from the pointer. The same panel is set in
+  the middle of the screen — every corner, no handle, a fade.
+- **A run still leaves the chrome, and prints its keys.** The rail goes
+  as both bars go. The digits that rate and answer and the space bar that
+  turns the card are drawn where they act — a cap in each rating tile's
+  corner (reversed, as the handler reads them: 1 is the best, at the
+  right), the choice's index as the digit that answers it, "Espace pour
+  révéler" — because on a desk the hands are on the keys.
+- **Every desk rule is in one place.** The last section of `index.css`,
+  one media block, names written nowhere else; `src/desk.css.test.js`
+  holds it. Never write a desk rule anywhere else, and never let a phone
+  rule be desk-aware: the line is the only door.
 
 - **One `<h1>` per screen**, and it is the object that names the place — the
   station plate, the pass, or the screen's bar. A plated screen never prints
@@ -977,7 +1031,8 @@ a learner who has just rated one card is already looking for the next.
   still finish; that went with the goals and the badges it counted. A goal
   measured in weeks belongs on the pass's back, where the ghost train already
   measures it, and the day's work belongs at the fare gate.
-- Four column widths: `--board-w` (1040px) for the station column,
+- Four column widths — and, on the desk, the rail's `--desk-rail-w`
+  (256px) beside them: `--board-w` (1040px) for the station column,
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
   and `--card-w` (640px) for the study card column — the quiz prompt card,
   its progress bar, its MCQ list and its rating bar all share this one
@@ -1007,6 +1062,8 @@ a learner who has just rated one card is already looking for the next.
 - Do not put a heading on a block that already names itself.
 - Do not give a flush lattice a column count its content cannot fill.
 - Do not put colour on chrome.
+- Do not write a desk rule outside the 机 section, and do not make a phone
+  rule aware of the desk — the 1100px line is the only door between them.
 - Do not write the Latin line as a transliteration.
 - Do not hand-copy a component's markup to get its look — use the component.
   Every near-copy in this app has drifted from its original within two

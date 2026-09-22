@@ -5665,3 +5665,30 @@ What shipped, per mode:
   topped up to `--target`, `--dry-run` first. `tests/test_prewarm_exam_papers.py`.
 
 Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
+
+---
+
+# Wave 24 — 机, the desk (plan 112, 2026-09-22)
+
+The owner's ask: the app is mobile-first and stays so, but it needs a
+design for a computer — two systems, one for mobile and one for computer,
+and never break the mobile one. Decisions taken with the owner: the desk
+starts at **1100px, width only**; its navigation is a **left rail** with
+the HUD's instruments at its foot; the first round covers the chrome and
+the main screens.
+
+| Plan | What | Status |
+|---|---|---|
+| 112 | The desk: `hooks/useDesk.js`; the rail (`components/chrome/DeskRail.jsx`) in the Shell's slots; the plates two by two; Today and the profile in two columns; Settings' list beside its page; sheets as centred dialogs; the keys printed on a run; the 机 section at the tail of `index.css` and `src/desk.css.test.js`; the `desktop` (1100×800) and `wide` (1440×900) lanes; ADR 0018; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-22) |
+
+Verified beyond the suite: a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute, text
+node, box and computed style at 390, 768, 1024 and 1099px across eight
+screens and a kana run (before and after the reveal) — identical.
+
+Deferred: 理解's A–D list binds no keys (the desk prints none there);
+the stations pickers, decks, library, stats and the exam runner keep the
+phone's screen in the centred column; the dictionary's lookup sheet
+(plan 090) is still a modal on the desk rather than the dock's own stack;
+the guide's tab-bar stop hangs under the rail's list rather than beside
+it.

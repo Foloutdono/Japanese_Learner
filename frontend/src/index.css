@@ -20789,13 +20789,16 @@ a.slip__act { text-decoration: none; }
      on the left, the day's work on the right, both read at a glance.
      Equal halves: the stamp rally needs its width. Placed, not flowed,
      so the gate does not move when the strip's figures arrive; the
-     finished run's slip takes the whole row. */
+     strip stays in view beside a long list of lanes; the finished run's
+     slip takes the whole row. */
   .today {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     align-items: start;
   }
   .today > .pass--strip {
+    position: sticky;
+    top: var(--sp-6);
     grid-column: 1;
     grid-row: 1;
   }

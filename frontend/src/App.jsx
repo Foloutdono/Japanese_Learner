@@ -513,7 +513,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* 車内 — the shell (plan 068): the HUD, the screen, the five
-              gates. One chrome at every width. */}
+              gates — or, at 1100px and up, the desk's rail (plan 112). */}
           <Route element={<Shell />}>
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
