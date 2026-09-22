@@ -48,6 +48,8 @@ import re
 import sqlite3
 import sys
 
+from translations import fr_gloss
+
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _CONTENT = os.path.join(_BASE_DIR, "content")
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
@@ -201,8 +203,11 @@ def vocab_entries() -> tuple[dict, ...]:
                 flags.append("multi_reading")
             if not kanji:
                 flags.append("kana_only")
-            fr = french.get(kanji) if kanji else None
-            if kanji and fr is None:
+            # The French the app serves, not the written form's: a form
+            # the deck teaches under several readings carries one gloss
+            # per card ("盛る::もる"), and the bare "盛る" is さかる's.
+            fr = fr_gloss(row, french)
+            if fr is None:
                 flags.append("fr_missing")
             elif fr == meaning:
                 flags.append("fr_untranslated")
