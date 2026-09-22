@@ -69,7 +69,9 @@ export function LineRows({ rows }) {
   )
 }
 
-function Composition({ row }) {
+// Shared with the desk's station split (components/selection/
+// ModeFigures.jsx, plan 113), which draws one platform's share of it.
+export function Composition({ row }) {
   return (
     <span className="composition" aria-hidden="true">
       <span className="composition__seg composition__seg--mastered" style={{ width: `${row.masteredPct}%` }} />

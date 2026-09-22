@@ -12,6 +12,9 @@ import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { tierLabelFor } from '../domain/tiers'
 import { themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures } from '../components/selection/ModeFigures'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/vocab'
@@ -47,6 +50,7 @@ export default function VocabScreen({ session }) {
   const { pathname, search } = useLocation()
   const { level, tier, theme, themeLevel } = useParams()
   const [sp, setSp] = useSearchParams()
+  const desk = useDesk()
 
   const MODES = modePickerEntries(t, 'vocab')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'vocab'
@@ -94,7 +98,11 @@ export default function VocabScreen({ session }) {
   if (levelsPage) {
     return (
       <SelectionScreen title={t.vocabulary} sub={t.stationJlpt} aside={leaveSources}>
-        <LevelSelector source="vocab" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />
+        {/* On the desk the line stands beside a stop's platforms, so
+            the list alone opens on the learner's own stop (plan 113). */}
+        {desk
+          ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
+          : <LevelSelector source="vocab" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
       </SelectionScreen>
     )
   }
@@ -169,6 +177,25 @@ export default function VocabScreen({ session }) {
   const backLabel = level ? t.leaveLevels : theme ? t.leaveThemeLevels : t.leaveTiers
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
+
+  // ── 机 — the line beside its platforms (plan 113) ──
+  // On the desk a level's platforms stand beside the JLPT line itself
+  // (StationSplit): another stop swaps the platforms in place, and each
+  // platform carries its own figures. The way out is the sources.
+  if (desk && level) {
+    const figured = modes.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="vocab" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen title={t.vocabulary} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="vocab" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.vocabulary}

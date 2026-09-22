@@ -21022,6 +21022,10 @@ a.slip__act { text-decoration: none; }
      (a line's three sources, a sentence station's three) go three
      across. The tier and theme walls are long lists, three across. */
   .learn > .platform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* In a station's split (below) the platforms are a list beside a
+     list: one to a row, the whole page wide, their figures at the
+     row's end. */
+  .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -21065,6 +21069,65 @@ a.slip__act { text-decoration: none; }
   .learn > .route > .route-stop > .route-stop__go { display: none; }
   .learn > .route > .route-stop--first > .route-stop__rail { left: 50%; }
   .learn > .route > .route-stop--last > .route-stop__rail { right: 50%; }
+
+  /* ── a station as two panes (plan 113) ──
+     components/selection/StationSplit: the line's stops upright in the
+     second column's width, sticky, beside the chosen stop's page. The
+     open stop is marked the way a selection is (DESIGN.md: a gold
+     ring), over the route's own "you are here". (Its platforms' grid is
+     with the other platform grids, above.) */
+  .desk-split {
+    display: grid;
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-split__list {
+    position: sticky;
+    top: var(--sp-6);
+    min-width: 0;
+  }
+  .desk-split__page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* A row in a list sits closer to its neighbours than a card on a
+     wall: the phone's thumb-sized vertical padding comes in a rung. */
+  .desk-split__page .platform-card__lead,
+  .desk-split__page .platform-card__body,
+  .desk-split__page .platform-card__aside { padding-block: var(--sp-5); }
+  .desk-split .desk-stop--open {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
+  }
+
+  /* A platform's own figures in its right-hand column (ModeFigures):
+     the due count in the state's ink, then the composition bar and the
+     mastered count — the stats screen's own drawing of the same buckets. */
+  .desk-mode-fig {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-2);
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--text-secondary);
+  }
+  .desk-mode-fig .composition { flex: none; }
+  .desk-mode-fig__due { color: var(--warning); }
+  .desk-mode-fig__unit {
+    margin-inline-start: var(--sp-1);
+    font-size: var(--fs-caption-xs);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  .desk-mode-fig__count b { color: var(--text-primary); }
 
   /* ── a run's column ──
      A run's card is --card-w; its head row (‹ the way out, where you

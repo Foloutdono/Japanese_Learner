@@ -5,6 +5,9 @@ import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures } from '../components/selection/ModeFigures'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import RadicalSelector from '../components/selection/RadicalSelector'
@@ -51,6 +54,7 @@ export default function KanjiScreen({ session }) {
   const { pathname, search } = useLocation()
   const { level, tier, radical } = useParams()
   const [sp, setSp] = useSearchParams()
+  const desk = useDesk()
   // The lesson reports its radical up, so the bar can name it.
   const [lesson, setLesson] = useState(null)
 
@@ -105,7 +109,11 @@ export default function KanjiScreen({ session }) {
   if (levelsPage) {
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.stationJlpt} aside={leaveSources}>
-        <LevelSelector source="kanji" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />
+        {/* On the desk the line stands beside a stop's platforms, so
+            the list alone opens on the learner's own stop (plan 113). */}
+        {desk
+          ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
+          : <LevelSelector source="kanji" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
       </SelectionScreen>
     )
   }
@@ -200,6 +208,24 @@ export default function KanjiScreen({ session }) {
   const back = byLevel ? `${BASE}/levels` : `${BASE}/tiers?size=${tierSize}`
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
+
+  // ── 机 — the line beside its platforms (plan 113) ──
+  // See VocabScreen: on the desk a level's platforms stand beside the
+  // JLPT line, each with its own figures; the way out is the sources.
+  if (desk && byLevel) {
+    const figured = modes.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="kanji" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen title={t.kanjiTitle} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="kanji" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.kanjiTitle}

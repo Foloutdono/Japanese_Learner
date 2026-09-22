@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { weeklyRetention, missesSince, strengthRungs, lineRows } from './statsModel'
+import { weeklyRetention, missesSince, strengthRungs, lineRows, modeRow } from './statsModel'
 
 // A Wednesday, so "this week" started two days earlier.
 const TODAY = new Date(2026, 8, 16, 12) // 2026-09-16
@@ -109,5 +109,27 @@ describe('lineRows', () => {
 
   it('no payload is no rows', () => {
     expect(lineRows(null)).toEqual([])
+  })
+})
+
+// ── One platform (plan 113) ──
+// The desk's station split prints each platform's own composition and
+// due count beside it, read from the same buckets the stats screen sums.
+describe('modeRow', () => {
+  const stats = {
+    vocab: { N5: { 'vocab.flashcard.f2b': { total: 80, new: 40, learning: 20, mastered: 20, due_now: 7, reviews: 50, correct: 40 } } },
+  }
+
+  it('is one bucket with its shares and its due count', () => {
+    const row = modeRow(stats, 'vocab', 'N5', 'vocab.flashcard.f2b')
+    expect(row).toMatchObject({ total: 80, mastered: 20, learning: 20, new: 40, due: 7 })
+    expect(row.masteredPct).toBe(25)
+    expect(row.learningPct).toBe(25)
+  })
+
+  it('is null where there is no bucket', () => {
+    expect(modeRow(stats, 'vocab', 'N4', 'vocab.flashcard.f2b')).toBeNull()
+    expect(modeRow(stats, 'vocab', 'N5', 'fast-review')).toBeNull()
+    expect(modeRow(null, 'vocab', 'N5', 'vocab.flashcard.f2b')).toBeNull()
   })
 })

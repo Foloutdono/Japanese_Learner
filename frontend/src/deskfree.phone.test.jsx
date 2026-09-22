@@ -71,3 +71,18 @@ describe('the gates (P2)', () => {
     expect(document.querySelector('.desk-line')).toBeNull()
   })
 })
+
+describe('the stations (P3)', () => {
+  it('draws no split and marks no stop open', async () => {
+    const { RouteStops } = await import('./components/selection/RouteStops')
+    const stops = ['N5', 'N4'].map(k => ({ key: k, code: k, name: k }))
+    await render(
+      <LangProvider>
+        <main className="learn"><RouteStops stops={stops} here="N4" onSelect={() => {}} /></main>
+      </LangProvider>
+    )
+    await settle()
+    expect(document.querySelector('.desk-split, .desk-stop--open, [aria-current="page"]')).toBeNull()
+    expect(document.querySelector('[aria-current="location"]')).not.toBeNull()
+  })
+})

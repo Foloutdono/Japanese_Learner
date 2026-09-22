@@ -12,6 +12,9 @@ import ModeSelector from '../components/selection/ModeSelector'
 import GrammarIndex from '../components/selection/GrammarIndex'
 import { GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures } from '../components/selection/ModeFigures'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -36,6 +39,7 @@ export default function GrammarScreen({ session }) {
   const { level } = useParams()
   const [sp, setSp] = useSearchParams()
   const [index, setIndex] = useState(null)
+  const desk = useDesk()
 
   const MODES = modePickerEntries(t, 'grammar')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'grammar'
@@ -72,7 +76,11 @@ export default function GrammarScreen({ session }) {
         sub={t.stationJlpt}
         aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
       >
-        <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />
+        {/* On the desk the line stands beside a level's platforms, so
+            the list alone opens on the learner's own level (plan 113). */}
+        {desk
+          ? <LevelRedirect to={lvl => `/learn/grammar/${lvl}`} />
+          : <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />}
       </SelectionScreen>
     )
   }
@@ -93,6 +101,49 @@ export default function GrammarScreen({ session }) {
   const sheet = point && (
     <GrammarLessonSheet key={point} id={point} session={session} onClose={closePoint} />
   )
+
+  // ── 机 — the line beside a level (plan 113) ──
+  // On the desk the JLPT line stands beside the level's page — its
+  // points door and platforms, or the points' own index — and another
+  // level swaps the page in place. Each platform carries its figures.
+  if (desk) {
+    const figured = offered.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="grammar" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen
+        title={t.grammarTitle}
+        sub={browsing ? `${level} · ${t.glPoints}` : `${level} · ${t[`levelHint${level}`] ?? ''}`}
+        aside={browsing
+          ? <Leave onClick={() => swap({})}>{t.leaveLevels}</Leave>
+          : <Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+      >
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="grammar" selected={level} onSelect={lvl => navigate(`/learn/grammar/${lvl}`, { replace: true })} />}
+        >
+          {browsing ? (
+            index && <GrammarIndex points={index.points} onOpen={openPoint} />
+          ) : (
+            <>
+              {index && index.total > 0 && (
+                <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
+                  <span className="rad-door__body">
+                    <span className="rad-door__head">
+                      <span className="rad-door__fig"><b>{index.learned}</b>/ {index.total}</span>
+                      {startedNote && <span className="rad-door__started">{startedNote}</span>}
+                    </span>
+                    <span className="rad-door__label">{t.glPoints}</span>
+                  </span>
+                  <ChevronIcon direction="right" size={16} className="rad-door__chev" />
+                </button>
+              )}
+              <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+            </>
+          )}
+        </StationSplit>
+        {sheet}
+      </SelectionScreen>
+    )
+  }
 
   if (browsing) {
     return (

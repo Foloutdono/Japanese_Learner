@@ -34,7 +34,7 @@ import { RouteStops } from './RouteStops'
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS }) {
+export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null }) {
   const { t } = useLang()
   const stats = useStats().data
   const here = useProfileSummary()?.jlptLevel ?? null
@@ -56,5 +56,5 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
     }
   })
 
-  return <RouteStops stops={stops} here={here} onSelect={onSelect} />
+  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} />
 }

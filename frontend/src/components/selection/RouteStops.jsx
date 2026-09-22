@@ -27,7 +27,11 @@ import { playUi } from '../../lib/audio'
 //           JLPT level for the graded lines, the figures themselves
 //           for kana, which has no such thing.
 //   onSelect(key)
-export function RouteStops({ stops, here = null, onSelect }) {
+//   selected — the stop whose platforms stand beside the route, in the
+//           desk's station split (plan 113, StationSplit): it is the
+//           page, so it is marked as one (`aria-current="page"`, and
+//           the Settings list's own selection). Only the desk passes it.
+export function RouteStops({ stops, here = null, selected = null, onSelect }) {
   const hereIndex = stops.findIndex(s => s.key === here)
   return (
     <div className="route">
@@ -40,19 +44,21 @@ export function RouteStops({ stops, here = null, onSelect }) {
           ? <span className="route-stop__here">{stop.hereLabel}</span>
           : stop.hint ? <span className="route-stop__hint" lang={stop.hintLang}>{stop.hint}</span> : null
         const started = stop.startedLabel && (stop.started ?? 0) > (stop.learned ?? 0)
+        const open = selected != null && stop.key === selected
         const classes = [
           'route-stop',
           i === 0 ? 'route-stop--first' : '',
           i === stops.length - 1 ? 'route-stop--last' : '',
           past ? 'route-stop--past' : '',
           current ? 'route-stop--current' : '',
+          open ? 'desk-stop--open' : '',
         ].filter(Boolean).join(' ')
         return (
           <button
             key={stop.key}
             type="button"
             className={classes}
-            aria-current={current ? 'location' : undefined}
+            aria-current={open ? 'page' : current ? 'location' : undefined}
             onClick={() => { playUi('click-mode-selection'); onSelect(stop.key) }}
           >
             {/* The rail, drawn per stop so the ends can be capped — a

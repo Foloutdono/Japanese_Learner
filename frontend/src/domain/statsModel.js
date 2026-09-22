@@ -185,6 +185,20 @@ function withDerived(row) {
   }
 }
 
+/**
+ * One platform's own figures (plan 113, the desk's station split): the
+ * bucket /api/stats keeps for one mode of one deck — how many of its
+ * cards are mastered, in progress and new, and how many are due now —
+ * with the derived shares the stats screen's composition bar draws.
+ * Null where the payload holds no such bucket (a failed fetch, a mode
+ * with no pool at that deck, the fast review).
+ */
+export function modeRow(stats, source, deck, mode) {
+  const b = stats?.[source]?.[deck]?.[mode]
+  if (!b || typeof b !== 'object') return null
+  return { ...sumBuckets([b]), due: Math.max(0, Number(b.due_now) || 0) }
+}
+
 export function lineRows(stats) {
   if (!stats) return []
   return CATEGORIES.map(category => {
