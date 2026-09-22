@@ -93,35 +93,5 @@ describe('the plated gates on the desk', () => {
   })
 })
 
-describe('Today on the desk', () => {
-  it('sets the strip beside the fare gate, and the finish across both', async () => {
-    await framed('/today', (
-      <main id="main-content" className="today">
-        <h1 className="sr-only">Aujourd’hui</h1>
-        <button type="button" className="pass pass--strip" style={{ height: '120px' }}>strip</button>
-        <div className="gate-card" style={{ height: '320px' }}>gate</div>
-      </main>
-    ))
-    await settle()
-    const strip = document.querySelector('.pass--strip').getBoundingClientRect()
-    const gate = document.querySelector('.gate-card').getBoundingClientRect()
-    expect(getComputedStyle(document.querySelector('.today')).display).toBe('grid')
-    expect(Math.round(strip.top)).toBe(Math.round(gate.top))
-    expect(gate.left).toBeGreaterThan(strip.right)
-    expect(Math.abs(strip.width - gate.width)).toBeLessThanOrEqual(1)
-  })
-
-  it('prints the finished run across the whole gate', async () => {
-    await framed('/today', (
-      <main id="main-content" className="today">
-        <h1 className="sr-only">Aujourd’hui</h1>
-        <div className="today-clear">done</div>
-      </main>
-    ))
-    await settle()
-    const today = document.querySelector('.today')
-    const pad = parseFloat(getComputedStyle(today).paddingLeft) + parseFloat(getComputedStyle(today).paddingRight)
-    const clear = document.querySelector('.today-clear').getBoundingClientRect()
-    expect(Math.abs(clear.width - (today.getBoundingClientRect().width - pad))).toBeLessThanOrEqual(1)
-  })
-})
+// Today's layout on the desk is today.desktop.test.jsx (plan 113), on the
+// real screen.

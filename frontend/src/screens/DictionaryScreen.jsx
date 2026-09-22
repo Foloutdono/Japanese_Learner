@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, Fragment } from 'react'
+import { useState, useEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useMining } from '../components/analysis/useMining'
@@ -10,8 +10,20 @@ import { firstGloss } from '../components/study/gloss'
 import {
 	TYPE_META, isKanaType, entryKey,
 	DictionaryDetail, LevelBadge,
-	DictionaryLookupSheet,
+	DictionaryLookupSheet, DictionaryLookupBody,
 } from '../components/dictionary/DictionaryDetail'
+
+// ── 机 — the dock on the desk (plan 113) ──
+// What DetailDock needs to know on a computer and nowhere else: the
+// entry a door in it led to (which opens INTO the dock rather than over
+// the screen) and how to step back out of it. Null below the desk's
+// line, where the dock is a sheet that closes and a door opens a sheet
+// of its own.
+const DeskDockContext = createContext(null)
+
+// A lookup's identity: what the sheet and the docked body are keyed on,
+// so a second door starts its own stack.
+const lookupKey = l => l.id ?? `${l.category}:${l.term}:${l.kana ?? ''}`
 
 // The catalogue card's stage: the SRS status folded onto the three
 // stages the card can draw. A due card is still in progress; an unknown
@@ -29,7 +41,7 @@ import { pickPlateReadings } from '../domain/readingPick'
 import { Leave } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
-import { isDesk } from '../hooks/useDesk'
+import { isDesk, useDesk } from '../hooks/useDesk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -173,6 +185,10 @@ export default function DictionaryScreen({ session }) {
 	const observerRef = useRef(null)
 	const sentinelRef = useRef(null)
 	const searchRef   = useRef(null)
+	// The catalogue as the arrow keys see it (the key handler is bound
+	// once, so it reads the current rows through this).
+	const navRef      = useRef({ results: [], selected: null })
+	const desk        = useDesk()
 
 	// The picker's rows, by Kangxi number: the glyph, the stroke count
 	// of the group it sat in, and how many kanji it files — what the
@@ -206,12 +222,36 @@ export default function DictionaryScreen({ session }) {
 				searchRef.current?.select()
 			} else if (e.key === 'Escape') {
 				if (typing && e.target === searchRef.current) e.target.blur()
+				// On the desk the dock is the catalogue's standing
+				// companion, not a panel that was opened (plan 113):
+				// Escape steps out of a door opened in it, and never
+				// empties it.
+				else if (isDesk()) setLookup(null)
 				else setSelected(null)
+			} else if (!typing && isDesk() && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+				// ←/→ walk the dock through the catalogue, the tiles'
+				// own order — a reference tool's two most-used moves.
+				const { results: rows, selected: here } = navRef.current
+				if (!rows.length) return
+				const at = here ? rows.findIndex(r => entryKey(r) === entryKey(here)) : -1
+				const next = rows[Math.min(rows.length - 1, Math.max(0, at + (e.key === 'ArrowRight' ? 1 : -1)))]
+				if (next) {
+					e.preventDefault()
+					setLookup(null)
+					setSelected(next)
+				}
 			}
 		}
 		window.addEventListener('keydown', onKey)
 		return () => window.removeEventListener('keydown', onKey)
 	}, [])
+
+	useEffect(() => { navRef.current = { results, selected } }, [results, selected])
+	// A tile chosen from the keyboard is brought into view.
+	useEffect(() => {
+		if (!desk || !selected) return
+		document.querySelector('.dict-entry-card--selected')?.scrollIntoView?.({ block: 'nearest' })
+	}, [desk, selected])
 
 	useEffect(() => {
 		if (observerRef.current) observerRef.current.disconnect()
@@ -282,18 +322,21 @@ export default function DictionaryScreen({ session }) {
 				// jumps (a kanji's word, a word's kanji, a kana's twin)
 				// re-searched the catalogue and needed the row they had
 				// landed on picked out of the results and opened. They open
-				// over the catalogue now and search nothing (openEntry), so
-				// the only selection this makes is the chart's first cell.
-				if (p === 0 && (cat === 'hiragana' || cat === 'katakana')
-				    && newResults.length && hasSideDock()) {
-					// The syllabary charts are five columns wide and no wider,
-					// so beside them the reading dock opened onto empty space
-					// until something was clicked. A chart of 71 fixed cells
-					// has an obvious first cell — あ / ア — so it starts there
-					// and the panel is doing its job from the first frame.
-					// Only the FIRST page, and only where nothing is open, so
-					// it can never steal a selection the learner already made.
-					setSelected(newResults[0])
+				// over the catalogue now and search nothing (openEntry).
+				//
+				// Where the dock stands beside the catalogue (the desk), it
+				// is always open, on the page's first row. It began with the
+				// syllabary charts — five columns and no wider, an obvious
+				// first cell (あ / ア) and empty space beside them until
+				// something was clicked — and since plan 113 it is every
+				// collection: a catalogue beside an empty column is a
+				// phone's layout on a computer. It follows every new page 0
+				// (a collection, a level, a search) and clears when there is
+				// nothing to show. Only the FIRST page, so loading more rows
+				// never moves a selection the learner made.
+				if (p === 0 && hasSideDock()) {
+					setLookup(null)
+					setSelected(newResults[0] ?? null)
 				}
 			})
 	}
@@ -466,6 +509,13 @@ export default function DictionaryScreen({ session }) {
 		navigate(`/today/run?only=${encodeURIComponent(rawId)}`)
 	}
 
+	// A tile is chosen: the dock shows it, stepping out of any door that
+	// was open in it (a door opens into the dock only on the desk).
+	function pickEntry(entry) {
+		setLookup(null)
+		setSelected(entry)
+	}
+
 	// The shelf as the plates and tiles see it (see `favorites` above).
 	// Off the shelf, a toggle is the hook's own. On it, the grid is the
 	// shelf: a tile let go leaves at once — the panel stays, so the
@@ -485,6 +535,19 @@ export default function DictionaryScreen({ session }) {
 			}
 			return on
 		},
+	}
+
+	// What the desk's dock needs to open a door inside itself (see
+	// DeskDockContext): the door that is open, the way back out, and the
+	// shell's own doors, which the docked lookup offers as the sheet did.
+	const deskDock = {
+		lookup,
+		exit: () => setLookup(null),
+		session,
+		mining,
+		favorites: shelf,
+		onRadicalClick: jumpToRadical,
+		onReview: reviewCard,
 	}
 
 	function loadMore() {
@@ -725,13 +788,14 @@ export default function DictionaryScreen({ session }) {
 			)}
 
 			{/* Results (search mode, or a radical's kanji) */}
+			<DeskDockContext.Provider value={desk ? deskDock : null}>
 			{!showingRadicalGrid && (
 				isSyllabary ? (
 					<SyllabaryGrid
 						results={results}
 						loading={loading}
 						selected={selected}
-						setSelected={setSelected}
+						setSelected={pickEntry}
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={char => openEntry(char, 'kanji')}
 						onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)}
@@ -751,7 +815,7 @@ export default function DictionaryScreen({ session }) {
 						total={total}
 						query={query}
 						selected={selected}
-						setSelected={setSelected}
+						setSelected={pickEntry}
 						sentinelRef={sentinelRef}
 						onRadicalClick={jumpToRadical}
 						onKanjiClick={char => openEntry(char, 'kanji')}
@@ -766,6 +830,7 @@ export default function DictionaryScreen({ session }) {
 					/>
 				)
 			)}
+			</DeskDockContext.Provider>
 			{/* The entry a door led to, over the catalogue rather than in
 			    place of it (see openEntry). Keyed on what it was opened on,
 			    so a second door from the panel underneath starts its own
@@ -773,9 +838,9 @@ export default function DictionaryScreen({ session }) {
 			    radical and the run because this shell has both — the 部 index
 			    is a mode of the catalogue under it, and a run is somewhere to
 			    board from a screen that is not itself a run. */}
-			{lookup && (
+			{lookup && !desk && (
 				<DictionaryLookupSheet
-					key={lookup.id ?? `${lookup.category}:${lookup.term}:${lookup.kana ?? ''}`}
+					key={lookupKey(lookup)}
 					term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
 					session={session} mining={mining} favorites={shelf} over
 					onRadicalClick={jumpToRadical}
@@ -867,16 +932,38 @@ function cardFurigana(entry) {
 // the original side panel got wrong and why it was replaced by a
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
+//
+// On the desk (plan 113, DeskDockContext) it is the catalogue's standing
+// companion rather than a panel that was opened: no ✕, and a door in the
+// entry opens INTO the dock (DictionaryLookupBody, the lookup sheet's own
+// body) with ✕ stepping back out to this entry — the catalogue, the
+// search and the scroll never move and nothing covers them.
 function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
+	const deskDock = useContext(DeskDockContext)
+	const dockRef = useRef(null)
+	const lookup = deskDock?.lookup ?? null
+	// A door opened, or stepped back out of: the dock reads from the top.
+	const docked = deskDock != null
+	useEffect(() => { if (docked && dockRef.current) dockRef.current.scrollTop = 0 }, [docked, lookup, entry])
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
 			    covered, so there is nothing to dim. */}
 			<div className="dict-dock__scrim" onClick={onClose} aria-hidden="true" />
-			<aside className="dict-dock">
+			<aside className="dict-dock" ref={dockRef}>
+				{lookup ? (
+					<DictionaryLookupBody
+						key={lookupKey(lookup)}
+						term={lookup.term} kana={lookup.kana} id={lookup.id} category={lookup.category}
+						session={deskDock.session} mining={deskDock.mining} favorites={deskDock.favorites}
+						onRadicalClick={deskDock.onRadicalClick}
+						onReview={deskDock.onReview}
+						onExit={deskDock.exit}
+					/>
+				) : (
 				<DictionaryDetail
 					entry={entry}
-					onClose={onClose}
+					onClose={deskDock ? undefined : onClose}
 					onRadicalClick={onRadicalClick}
 					onKanjiClick={onKanjiClick}
 					onVocabClick={onVocabClick}
@@ -886,6 +973,7 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 					mining={mining}
 					favorites={favorites}
 				/>
+				)}
 			</aside>
 		</>
 	)

@@ -52,3 +52,22 @@ describe('the canvas and the lattices (P1)', () => {
     expect(b.top).toBeGreaterThan(a.bottom - 1)
   })
 })
+
+describe('the gates (P2)', () => {
+  it('keeps the Learn plate\'s three-stop foot', async () => {
+    const { Plate, StopsFoot } = await import('./components/station/LinePlate')
+    const stops = ['N5', 'N4', 'N3', 'N2', 'N1'].map((k, i) => ({ key: k, label: k, jp: false, score: i === 0 ? 0.4 : 0 }))
+    await render(
+      <LangProvider>
+        <main className="learn">
+          <div className="plates">
+            <Plate section={{ path: '/learn/vocab', title: 'Vocab', color: 'var(--line-vocab)' }} foot={<StopsFoot stops={stops} />} />
+          </div>
+        </main>
+      </LangProvider>
+    )
+    await settle()
+    expect(document.querySelector('.plate__foot--stops')).not.toBeNull()
+    expect(document.querySelector('.desk-line')).toBeNull()
+  })
+})

@@ -10,6 +10,9 @@ import { useGuide } from '../hooks/useGuide'
 import { FareSlip } from '../components/credits/FareSlip'
 import Empty from '../components/ui/Empty'
 import { CheckIcon } from '../components/ui/Icons'
+import { useDesk } from '../hooks/useDesk'
+import { DeskSide } from '../components/chrome/DeskSide'
+import { JourneyPanel } from '../components/journey/JourneyPanel'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the bar, the pass at strip size, and under it the
@@ -43,8 +46,9 @@ function RunComplete({ run, today, credits, t, lang, onBack }) {
   )
 }
 
-export default function TodayScreen() {
+export default function TodayScreen({ session }) {
   const { t, lang } = useLang()
+  const desk = useDesk()
   const navigate = useNavigate()
   const location = useLocation()
   const { data: today, failed } = useTodaySummary()
@@ -74,7 +78,9 @@ export default function TodayScreen() {
               day's new items — reads over the object it is about, and
               the gate under it is then the last thing on the screen and
               can take the rest of it. Owner's call. */}
-          <PassStrip pace={today?.pace} />
+          {/* On the desk the strip stands beside the gate instead, with
+              the pass's back under it (below). */}
+          {desk ? null : <PassStrip pace={today?.pace} />}
           {failed && !today ? (
             <Empty
               tone="error"
@@ -88,6 +94,18 @@ export default function TodayScreen() {
         </>
       )}
       {guide.open && !run && <Guide gate="today" onEnd={guide.onEnd} />}
+      {/* 机 — the desk (plan 113): the gate is the work, and beside it
+          what the work is FOR — the pass at strip size (the week, the
+          streak, the day's new items) and the pass's back, the journey
+          it is on: how far along, how far behind the promise, and the
+          two honest moves when behind. On a phone the strip heads the
+          gate and the back is a tap on the HUD away. */}
+      {desk && (
+        <DeskSide label={t.passLabel}>
+          {!run && <PassStrip pace={today?.pace} />}
+          <JourneyPanel session={session} />
+        </DeskSide>
+      )}
     </main>
   )
 }
