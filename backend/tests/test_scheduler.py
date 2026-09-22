@@ -158,6 +158,71 @@ class GrowthTests(unittest.TestCase):
         self.assertLess(state.interval_days, 120)
 
 
+class RelearningTests(unittest.TestCase):
+    """What a lapse leaves a card has to survive the relearning steps.
+
+    FAIL[grade].stability is the fraction a miss lets a card keep, and
+    graduation used to set stability to 1.0 outright -- so on the
+    correct answer that finished relearning, that fraction was thrown
+    away. The tests beside FourButtonScaleTests only ever looked at the
+    card right after the miss, which is why nobody saw it: the
+    difference they check was real for three steps and then erased."""
+
+    def setUp(self) -> None:
+        self.sched = Scheduler()
+
+    def _relearned(self, quality: int, stability: float = 6.0) -> CardState:
+        """A mature card missed at `quality`, then answered Correct
+        until it leaves the learning steps again."""
+        state = CardState(card_id="c", mode="m", is_learning=False)
+        state.interval_days, state.stability, state.difficulty = 81, stability, 2.25
+        state = self.sched.review(state, quality)
+        for _ in range(len(scheduler_mod.LEARNING_STEPS)):
+            if not state.is_learning:
+                break
+            state = self.sched.review(state, 4)
+        self.assertFalse(state.is_learning)
+        return state
+
+    def test_a_relearned_card_keeps_the_stability_its_lapse_left_it(self) -> None:
+        state = self._relearned(quality=1, stability=6.0)
+        self.assertAlmostEqual(state.stability, 6.0 * scheduler_mod.FAIL[1].stability)
+
+    def test_almost_still_differs_from_wrong_once_relearned(self) -> None:
+        almost = self._relearned(quality=2)
+        wrong = self._relearned(quality=1)
+        self.assertGreater(almost.stability, wrong.stability)
+
+    def test_a_relearned_card_regrows_faster_than_a_new_one(self) -> None:
+        # The symptom the learner saw: one slip on a word known for
+        # months, and it came back on the same 2d, 5d, 13d ladder as a
+        # word met last week.
+        relearned = self._relearned(quality=1)
+        new = CardState(card_id="n", mode="m")
+        for _ in range(len(scheduler_mod.LEARNING_STEPS)):
+            new = self.sched.review(new, 4)
+        self.assertFalse(new.is_learning)
+        new.difficulty = relearned.difficulty
+
+        for _ in range(3):
+            relearned = self.sched.review(relearned, 4)
+            new = self.sched.review(new, 4)
+        self.assertGreater(relearned.interval_days, new.interval_days)
+
+    def test_a_new_card_still_graduates_at_the_floor(self) -> None:
+        state = CardState(card_id="c", mode="m")
+        for _ in range(len(scheduler_mod.LEARNING_STEPS)):
+            state = self.sched.review(state, 4)
+        self.assertFalse(state.is_learning)
+        self.assertEqual(state.stability, 1.0)
+        self.assertEqual(state.interval_days, 1)
+
+    def test_a_lapse_that_left_less_than_the_floor_graduates_at_it(self) -> None:
+        # Blackout on a card that had only just graduated: 1.0 x 0.5.
+        state = self._relearned(quality=0, stability=1.0)
+        self.assertEqual(state.stability, 1.0)
+
+
 class IntervalCeilingTests(unittest.TestCase):
     """
     Interval growth is multiplicative and was unbounded. `now +

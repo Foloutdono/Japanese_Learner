@@ -1174,6 +1174,41 @@ class SRSEngine:
             for card_id, mode, next_review, interval_days, lapses in rows
         ]
 
+    def get_stale(self, pairs: list[tuple[str, str]]) -> list[tuple[str, str]]:
+        """
+        Of these (card_id, mode) pairs, the ones no session could serve
+        right now: answered at least once, and not due again yet.
+
+        Exactly the complement of what every batch endpoint hands out --
+        a due card (get_due_cards / get_due_rows) or a new one
+        (get_new_cards) -- so a pair this returns was served, and has
+        been answered since. What asks is the client's saved queue
+        (frontend/src/hooks/useCardSession.js): it is kept per screen
+        and per device, and replayed as it was saved, so a card cleared
+        in Today, on another device, or during the stamp that holds the
+        queue after a rating came straight back out of it. The review
+        endpoints take a review whenever one arrives, so without this
+        nothing stood between that replay and a second, early review.
+        """
+        if not pairs:
+            return []
+        now = datetime.now(timezone.utc)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT cm.card_id, cm.mode
+                    FROM card_modes cm
+                    JOIN unnest(%s::text[], %s::text[]) AS p(card_id, mode)
+                      ON cm.card_id = p.card_id AND cm.mode = p.mode
+                    WHERE cm.total_reviews > 0
+                      AND cm.next_review > %s
+                """
+                params = ([p[0] for p in pairs], [p[1] for p in pairs], now)
+                self._log_sql("get_stale", sql, params)
+                cur.execute(sql, params)
+                rows = cur.fetchall()
+        return [(card_id, mode) for card_id, mode in rows]
+
     def get_next_due_at(self, user_id: str):
         """When the soonest not-yet-due card comes due, or None if the
         user has nothing scheduled ahead. Lets a cleared queue say "next

@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { postReview as sendReview } from '../lib/reviews'
+import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useLang } from '../LangContext'
 import RatingBar from '../components/study/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
@@ -116,12 +116,16 @@ export default function StudyRun({ session }) {
     [],
   )
 
+  // What the saved queue must not replay: cards answered since, here
+  // or anywhere else (lib/reviews, staleCards).
+  const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
     mode,
     extraExcludeIds,
+    checkCached,
   })
 
   // Every screen's rating flow: the lock, the gates the celebrations

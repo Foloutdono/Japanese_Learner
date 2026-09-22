@@ -19,7 +19,7 @@ import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { normalizeCard, cardShape, availableHintsFor, wordForm } from '../domain/cardShape'
 import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
-import { postReview as sendReview } from '../lib/reviews'
+import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { laneWhere as whereOf, laneTypeOf } from '../domain/lanes'
 import { kanaSetLabel } from '../domain/kanaSets'
@@ -128,6 +128,9 @@ export default function TodayRun({ session }) {
     [],
   )
 
+  // What the saved queue must not replay: cards answered since, here
+  // or anywhere else (lib/reviews, staleCards).
+  const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
@@ -137,6 +140,7 @@ export default function TodayRun({ session }) {
     batchSize: 10,
     cardKey,
     extraExcludeIds,
+    checkCached,
   })
   // The key CardTransition crossfades on, and the one any stamp routed
   // onto it must carry. ONE expression, because the two are compared
