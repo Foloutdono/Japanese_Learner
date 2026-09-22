@@ -81,22 +81,44 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
   useEffect(() => { setSelected(new Set()) }, [source])
 
   const debounceRef = useRef(null)
+  const searchRef   = useRef(null)
 
+  // Each search aborts the one before it, and a superseded search
+  // writes nothing. Without that the answers race: the browse for the
+  // tab (or the letter) you just left can land AFTER the one for the
+  // tab you are on and overwrite it, so a vocab search ends up listing
+  // kanji — and the loading flag, cleared by whichever request finished
+  // last, stops agreeing with what is on screen.
+  //
+  // Both halves are load-bearing. The abort is what stops the work and
+  // frees the connection; the `aborted` checks are what make the rule
+  // ours rather than fetch's, since a response that resolved a
+  // microtask before the abort still has its handlers queued. The pair
+  // covers the refresh addSelected fires too, which runs outside the
+  // debounce below.
   const runSearch = useCallback(() => {
     if (!source) return
+    searchRef.current?.abort()
+    const controller = new AbortController()
+    searchRef.current = controller
     setLoading(true)
     const params = new URLSearchParams({ source, level, query, limit: '60' })
-    apiFetch(`/api/decks/${deckId}/browse?${params.toString()}`, session)
+    apiFetch(`/api/decks/${deckId}/browse?${params.toString()}`, session,
+             { signal: controller.signal })
       .then(r => r.json())
-      .then(data => setResults(data.results || []))
-      .catch(() => setResults([]))
-      .finally(() => setLoading(false))
+      .then(data => { if (!controller.signal.aborted) setResults(data.results || []) })
+      .catch(() => { if (!controller.signal.aborted) setResults([]) })
+      .finally(() => { if (!controller.signal.aborted) setLoading(false) })
   }, [deckId, session, source, level, query])
 
   useEffect(() => {
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(runSearch, query ? SEARCH_DEBOUNCE_MS : 0)
-    return () => clearTimeout(debounceRef.current)
+    return () => {
+      clearTimeout(debounceRef.current)
+      // Closing the picker mid-search should not leave one in flight.
+      searchRef.current?.abort()
+    }
   }, [runSearch, query])
 
   function toggle(rawId) {
