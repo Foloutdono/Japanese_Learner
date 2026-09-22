@@ -20768,5 +20768,30 @@ a.slip__act { text-decoration: none; }
     top: var(--sp-6);
     max-height: calc(100dvh - 2 * var(--sp-6));
   }
+
+  /* ── 札 — a sheet is a dialog on the desk ──
+     On a phone a sheet rises from the bottom edge, under the thumb that
+     opened it. A computer has no thumb and a bottom edge a long way from
+     the pointer, so the same panel is set in the middle of the screen:
+     every corner rounded, no handle to drag, fading in the way the
+     dictionary's centred sheet does (no scale — DESIGN.md, Motion).
+     Centred by `inset` and `margin: auto`, never by a transform: the
+     drag (hooks/useSheetDrag) still owns the inline transform, and the
+     mouse's grip on the head still works. */
+  .sheet {
+    inset: 0;
+    width: var(--card-w);
+    height: fit-content;
+    max-height: calc(100dvh - 2 * var(--sp-8));
+    margin: auto;
+    padding: var(--sp-5);
+    border-bottom: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    animation: arrive-soft 0.2s linear;
+  }
+  /* The pass's edge on all four sides: the bottom rule above, restored
+     here so the sumi sheet keeps its own material's edge. */
+  .sheet--sumi { border-bottom-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); }
+  .sheet__handle { display: none; }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
