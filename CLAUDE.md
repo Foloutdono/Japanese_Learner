@@ -158,7 +158,17 @@ runtime purpose. Two consequences worth knowing:
   the learner's pool card onto the deck card
   (`datas/vocab/pool_moves.json`, `scripts/migrate_pool_cards.py`,
   `tests/test_migrate_pool_cards.py`).
-  When starting a new wave, begin at **111** or higher, and check
+  **111** is the pre-generated exercise pool, so a new learner's first
+  tries cost no model call: the hand-written comprehension seeds under
+  `content/comprehension/` (three per level, both languages, upserted
+  into `comprehension_pool` at import on `seed_key`), the reading bank
+  grown to cover every checkable grammar point, the dictation bank
+  grown to thirty lines a level, and `scripts/prewarm_exam_papers.py`
+  (cited in `content/comprehension_seed.py`, `routes/reading.py`,
+  `content/reading_sentences.py`, `content/listening_clips.py`,
+  `scripts/prewarm_comprehension_pool.py`, `scripts/prewarm_exam_papers.py`,
+  `srs/data_structure.sql` and `tests/test_comprehension_seed.py`).
+  When starting a new wave, begin at **112** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -228,9 +238,21 @@ one. Neither is required — both caches fill themselves from real traffic
 — and both cost model calls, so both report first:
 
 ```bash
-python -m scripts.prewarm_phrase_cache --dry-run        # the ~220 curated sentences
+python -m scripts.prewarm_phrase_cache --dry-run        # the ~520 curated sentences
 python -m scripts.prewarm_comprehension_pool --dry-run  # exercises per (level, lang)
+python -m scripts.prewarm_exam_papers --dry-run         # one paper per exam id
 ```
+
+None of the three is what makes a fresh deploy usable: the comprehension
+pool is never empty, because `content/comprehension/*.json` (plan 111,
+three hand-written exercises per level in both languages, held to the
+same checks as a model answer by `tests/test_comprehension_seed.py`) is
+upserted into `comprehension_pool` when `routes/reading.py` is imported,
+keyed on `seed_key` so a corrected seed updates its row. The prewarm
+scripts grow the pools past that floor; `prewarm_comprehension_pool`
+reports the seeded and the generated rows apart. Exam papers have no
+seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
+only thing that spares the first learner at each exam id the wait.
 
 Two are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,

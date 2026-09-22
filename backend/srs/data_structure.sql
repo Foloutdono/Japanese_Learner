@@ -532,11 +532,20 @@ CREATE TABLE comprehension_pool (
     -- questions, the per-sentence breakdown WITH its word lists, and
     -- the grammar points the checks found.
     exercise          JSONB NOT NULL,
-    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at        TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    -- The identity of a hand-written seed exercise (plan 111,
+    -- content/comprehension_seed.seed_key): "seed:<id>:<lang>", NULL
+    -- for every row the model wrote. routes/reading.py upserts the
+    -- seeds on it at import, so a corrected seed updates its row
+    -- rather than adding a copy.
+    seed_key          TEXT
 );
 
 CREATE INDEX comprehension_pool_bucket
     ON comprehension_pool (level, lang, generator_version);
+
+CREATE UNIQUE INDEX comprehension_pool_seed
+    ON comprehension_pool (seed_key);
 
 -- Which learner has already read which pooled exercise. Written on
 -- every SERVE, not on completion: an exercise that was opened and

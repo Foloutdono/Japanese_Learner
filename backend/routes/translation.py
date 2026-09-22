@@ -114,7 +114,7 @@ def get_translation_batch(
     count: int = reading.DEFAULT_BATCH,
     lang: str = "en",
     # Sentences this session has already served, "|"-separated. Passed
-    # straight through: the curated bank is finite (30-55 sentences a
+    # straight through: the curated bank is finite (95-113 sentences a
     # level), and without this the picker reshuffles the same pool every
     # batch and a learner meets 何を買いたいですか three times in a
     # sitting. See reading._pick_curated_phrases.

@@ -606,7 +606,7 @@ def get_reading_batch(
             raise HTTPException(status_code=400, detail="level is required for source=level")
         # The hand-written bank first, the Tatoeba pool for whatever is
         # left. Not a fallback in the "if the good path fails" sense --
-        # the bank is finite (30-55 sentences a level) and a long sitting
+        # the bank is finite (95-113 sentences a level, plan 111) and a long sitting
         # will exhaust it, at which point real corpus sentences that pass
         # the gate are exactly what should come next. Ordering it this
         # way means the first thing a beginner ever reads is a sentence
@@ -1704,10 +1704,82 @@ def _init_comprehension_pool() -> None:
         conn.close()
 
 
+# ── The seeds (plan 111) ──────────────────────────────────────
+# The pool starts empty, and an empty bucket costs its first reader a
+# generation: a two-minute wait and the most expensive call this app
+# makes, once per level and language, on every fresh deploy. The seed
+# exercises in content/comprehension/ are the floor under that -- hand-
+# written, held to the same checks as a model answer, and loaded here
+# at import so every bucket has something to serve before any learner
+# or any operator has done anything.
+#
+# An upsert keyed on `seed_key`, so it is idempotent across workers and
+# restarts: a seed already stored costs one no-op statement, and a seed
+# whose content changed (a corrected gloss, a bumped _POOL_VERSION)
+# updates its row in place rather than adding a second copy beside the
+# old one. Served rows are left alone -- a learner who read the old
+# wording is not shown the corrected one again -- which is what an
+# update in place rather than a delete-and-insert buys.
+#
+# The column is added here rather than in the CREATE above because the
+# table predates it on every deployed database: CREATE TABLE IF NOT
+# EXISTS never revisits a table that exists. Same pattern as
+# translation.py's `quality`.
+def _seed_comprehension_pool() -> int:
+    """Store every seed that is missing or stale. Returns how many rows
+    were written (inserted or updated); 0 on a warm pool."""
+    from content.comprehension_seed import rows as seed_rows
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("ALTER TABLE comprehension_pool ADD COLUMN IF NOT EXISTS seed_key TEXT")
+            # Unique, and NULL for every generated row: Postgres treats
+            # NULLs as distinct in a unique index, so the model's rows
+            # never collide with each other or with a seed.
+            cur.execute(
+                """
+                CREATE UNIQUE INDEX IF NOT EXISTS comprehension_pool_seed
+                    ON comprehension_pool (seed_key)
+                """
+            )
+            written = 0
+            for key, level, lang, grammar, exercise in seed_rows():
+                cur.execute(
+                    """
+                    INSERT INTO comprehension_pool
+                        (level, lang, generator_version, grammar, exercise, seed_key)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    ON CONFLICT (seed_key) DO UPDATE
+                       SET generator_version = EXCLUDED.generator_version,
+                           grammar = EXCLUDED.grammar,
+                           exercise = EXCLUDED.exercise
+                     WHERE comprehension_pool.exercise IS DISTINCT FROM EXCLUDED.exercise
+                        OR comprehension_pool.generator_version <> EXCLUDED.generator_version
+                    """,
+                    (level, lang, _POOL_VERSION,
+                     json.dumps(grammar, ensure_ascii=False),
+                     json.dumps(exercise, ensure_ascii=False),
+                     key),
+                )
+                written += cur.rowcount
+        conn.commit()
+    finally:
+        conn.close()
+    if written:
+        logger.info("comprehension pool: %d seed exercise(s) written", written)
+    return written
+
+
 try:
     _init_comprehension_pool()
 except Exception:  # pragma: no cover - a missing DB must not stop import
     logger.exception("comprehension_pool could not be initialised")
+else:
+    try:
+        _seed_comprehension_pool()
+    except Exception:  # pragma: no cover - the seeds are a warm-up, never a dependency
+        logger.exception("comprehension pool could not be seeded")
 
 
 def _pool_take(user_id: str, level: str, lang: str, avoid: set[str]) -> dict | None:

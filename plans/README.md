@@ -5621,3 +5621,47 @@ Still open:
 
 - `GUIDE_CHAIN` — the owner's original ask, one flag, off; decide on
   the skip rates.
+
+
+# Wave 23 — 準備, the pre-generated exercise pool (plan 111, 2026-09-22)
+
+Executed directly in one session, wave-7 style. A new learner's first
+try at every practice mode used to be the most expensive thing that
+mode does: a comprehension generation under a spinner, ten buckets of
+it (five levels × two languages) on every fresh database. The pool
+(plan 092) only ever filled from traffic.
+
+| # | Plan | Status |
+|---|------|--------|
+| 111 | The pool floor: hand-written comprehension seeds upserted at import; the reading and dictation banks grown; a paper prewarm for the exams | DONE (2026-09-22) |
+
+What shipped, per mode:
+
+- **理解 (comprehension):** `content/comprehension/N5.json … N1.json`,
+  3 exercises per level (15 texts, 220–280 characters each, 8–12
+  questions, a glossed breakdown), every string in en and fr, so 30
+  pool rows. `content/comprehension_seed.py` renders one language into
+  the pool's stored shape; `routes/reading._seed_comprehension_pool`
+  upserts them on the new `comprehension_pool.seed_key` column at
+  import. `tests/test_comprehension_seed.py` runs each seed through
+  `_parse_comprehension` and `_check_comprehension` in both languages,
+  and proves a fresh learner's first request at every bucket is served
+  with the model call stubbed to raise.
+- **読書 / 翻訳 (reading, translation — one bank):** 226 → 524
+  sentences, +298, one per checkable grammar point the bank did not
+  yet demonstrate. Coverage of checkable points is now 66/66, 89/91,
+  103/106, 111/113, 113/116 (N5→N1; the gap is `GATE_BLIND`), and the
+  floors in `tests/test_reading_sentences.py` are raised to match.
+- **書取 (dictation):** 92 → 152 lines, +60 (12 a level), each with
+  kana, spoken romaji and a gloss, held by `listening_clips.problems()`.
+  Audio is synthesized on first request as before; the session this
+  shipped from could not reach edge-tts through its proxy, so the new
+  clips are unverified as audio — `python -m scripts.build_dictation_audio`
+  after deploying.
+- **模試 (exam):** no seed (a paper is ~35 model calls, and a
+  hand-written one would not match the generators' shape), so
+  `scripts/prewarm_exam_papers.py` — the comprehension prewarm's twin:
+  live revisions per exam id at the current `generator_version`,
+  topped up to `--target`, `--dry-run` first. `tests/test_prewarm_exam_papers.py`.
+
+Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).

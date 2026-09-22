@@ -1,0 +1,3583 @@
+[
+ {
+  "id": "n1-01",
+  "level": "N1",
+  "title": "書店の灯り",
+  "grammar": [
+   "〜とはいえ",
+   "〜ならでは",
+   "〜を余儀なくされる"
+  ],
+  "text": "駅前の小さな書店が、来月で店を閉めるという。インターネットで本が買える時代に、小さな書店が生き残るのは難しい。とはいえ、この店が長く地域に親しまれてきたのは、単に本を売っていたからではない。店主は客の顔を覚え、その人が次に読みたくなりそうな一冊を、棚の目立つところに置いた。そうした人の手を介した出会いは、画面上の「おすすめ」には真似のできない、小さな店ならではのものだった。閉店の理由は、売り上げの減少に加え、店主の高齢と後継者の不在だという。同じ事情で閉店を余儀なくされる店は、全国で後を絶たない。書店の灯りが消えるたびに、その問いは重みを増していく。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What is going to happen next month?",
+     "fr": "Que va-t-il se passer le mois prochain ?"
+    },
+    "options": {
+     "en": [
+      "The bookshop in front of the station will close",
+      "A new bookshop will open",
+      "The owner will retire but keep the shop",
+      "The shop will move online"
+     ],
+     "fr": [
+      "La librairie devant la gare va fermer",
+      "Une nouvelle librairie va ouvrir",
+      "Le propriétaire prendra sa retraite mais gardera la boutique",
+      "La boutique passera en ligne"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「とはいえ」 do at the start of the third sentence?",
+     "fr": "Quel est le rôle de 「とはいえ」 au début de la troisième phrase ?"
+    },
+    "options": {
+     "en": [
+      "It concedes the previous point before qualifying it",
+      "It gives the reason for the previous point",
+      "It restates the previous point",
+      "It introduces an example"
+     ],
+     "fr": [
+      "Il concède le point précédent avant de le nuancer",
+      "Il donne la raison du point précédent",
+      "Il reformule le point précédent",
+      "Il introduit un exemple"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Why was the shop loved by the community, according to the writer?",
+     "fr": "Pourquoi la boutique était-elle appréciée du quartier, selon l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "Because of the owner's personal attention to each customer",
+      "Because of its low prices",
+      "Because it was open late",
+      "Because it sold coffee"
+     ],
+     "fr": [
+      "Grâce à l'attention personnelle du propriétaire envers chaque client",
+      "Grâce à ses prix bas",
+      "Parce qu'elle ouvrait tard",
+      "Parce qu'elle vendait du café"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the owner do with a book a customer might want next?",
+     "fr": "Que faisait le propriétaire d'un livre susceptible de plaire ensuite à un client ?"
+    },
+    "options": {
+     "en": [
+      "Placed it where it would catch the eye on the shelf",
+      "Mailed it to the customer",
+      "Reserved it under the counter",
+      "Lowered its price"
+     ],
+     "fr": [
+      "Le plaçait bien en vue sur l'étagère",
+      "L'envoyait par la poste au client",
+      "Le réservait sous le comptoir",
+      "Baissait son prix"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「後継者」 mean?",
+     "fr": "Que signifie 「後継者」 ?"
+    },
+    "options": {
+     "en": [
+      "A successor",
+      "A customer",
+      "A landlord",
+      "A publisher"
+     ],
+     "fr": [
+      "Un successeur",
+      "Un client",
+      "Un propriétaire des murs",
+      "Un éditeur"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「小さな店ならではのもの」 mean?",
+     "fr": "Que signifie 「小さな店ならではのもの」 ?"
+    },
+    "options": {
+     "en": [
+      "Something only a small shop can offer",
+      "Something a small shop lacks",
+      "Something every shop has",
+      "Something a small shop copies"
+     ],
+     "fr": [
+      "Quelque chose que seule une petite boutique peut offrir",
+      "Quelque chose qui manque à une petite boutique",
+      "Quelque chose que toutes les boutiques ont",
+      "Quelque chose qu'une petite boutique copie"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Which is NOT given as a reason for closing?",
+     "fr": "Lequel de ces éléments n'est PAS cité comme raison de la fermeture ?"
+    },
+    "options": {
+     "en": [
+      "A rent increase",
+      "Falling sales",
+      "The owner's age",
+      "No successor"
+     ],
+     "fr": [
+      "Une hausse du loyer",
+      "La baisse des ventes",
+      "L'âge du propriétaire",
+      "L'absence de successeur"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「閉店を余儀なくされる」 express?",
+     "fr": "Qu'exprime 「閉店を余儀なくされる」 ?"
+    },
+    "options": {
+     "en": [
+      "Being forced to close against one's wishes",
+      "Choosing freely to close",
+      "Being forbidden to close",
+      "Planning to close later"
+     ],
+     "fr": [
+      "Être contraint de fermer contre son gré",
+      "Choisir librement de fermer",
+      "Être interdit de fermer",
+      "Prévoir de fermer plus tard"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「後を絶たない」 mean in 「全国で後を絶たない」?",
+     "fr": "Que signifie 「後を絶たない」 dans 「全国で後を絶たない」 ?"
+    },
+    "options": {
+     "en": [
+      "They keep happening one after another",
+      "They have stopped completely",
+      "They are rare",
+      "They are illegal"
+     ],
+     "fr": [
+      "Ils se succèdent sans arrêt",
+      "Ils ont complètement cessé",
+      "Ils sont rares",
+      "Ils sont illégaux"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is 「その問い」 in the last sentence?",
+     "fr": "Qu'est-ce que 「その問い」 dans la dernière phrase ?"
+    },
+    "options": {
+     "en": [
+      "What we are giving up in exchange for convenience",
+      "Why the owner has no successor",
+      "Whether books will still be sold",
+      "How much the shop earned"
+     ],
+     "fr": [
+      "Ce que nous abandonnons en échange du confort",
+      "Pourquoi le propriétaire n'a pas de successeur",
+      "Si l'on vendra encore des livres",
+      "Combien la boutique gagnait"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer imply about online recommendations?",
+     "fr": "Que sous-entend l'auteur à propos des recommandations en ligne ?"
+    },
+    "options": {
+     "en": [
+      "They cannot replace a human who knows the reader",
+      "They are more accurate than a bookseller",
+      "They are cheaper",
+      "They will soon disappear"
+     ],
+     "fr": [
+      "Elles ne peuvent remplacer un humain qui connaît le lecteur",
+      "Elles sont plus précises qu'un libraire",
+      "Elles sont moins chères",
+      "Elles vont bientôt disparaître"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "How would you describe the tone of the text?",
+     "fr": "Comment décrire le ton du texte ?"
+    },
+    "options": {
+     "en": [
+      "Reflective and wistful",
+      "Angry and accusing",
+      "Cheerful",
+      "Neutral and statistical"
+     ],
+     "fr": [
+      "Réfléchi et mélancolique",
+      "En colère et accusateur",
+      "Enjoué",
+      "Neutre et statistique"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "駅前の小さな書店が、来月で店を閉めるという。",
+    "translation": {
+     "en": "The small bookshop in front of the station is said to be closing next month.",
+     "fr": "La petite librairie devant la gare fermerait, dit-on, le mois prochain."
+    },
+    "note": {
+     "en": "The pattern 「〜という」 at the end of the sentence reports what is said rather than asserting it.",
+     "fr": "La structure 「〜という」 en fin de phrase rapporte ce qui se dit au lieu de l'affirmer."
+    },
+    "words": [
+     {
+      "surface": "駅前",
+      "meaning": {
+       "en": "in front of the station",
+       "fr": "devant la gare"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petite"
+      }
+     },
+     {
+      "surface": "書店",
+      "meaning": {
+       "en": "bookshop",
+       "fr": "librairie"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "来月",
+      "meaning": {
+       "en": "next month",
+       "fr": "le mois prochain"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "as of",
+       "fr": "à la date de"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "閉める",
+      "meaning": {
+       "en": "to close",
+       "fr": "fermer"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "インターネットで本が買える時代に、小さな書店が生き残るのは難しい。",
+    "translation": {
+     "en": "In an age when books can be bought online, it is not easy for a small bookshop to survive.",
+     "fr": "À l'ère où l'on peut acheter des livres sur Internet, il n'est pas facile pour une petite librairie de survivre."
+    },
+    "note": {
+     "en": "The pattern 「〜のは難しい」 makes the whole action before 「のは」 the subject of the adjective.",
+     "fr": "La structure 「〜のは難しい」 fait de toute l'action avant 「のは」 le sujet de l'adjectif."
+    },
+    "words": [
+     {
+      "surface": "インターネット",
+      "meaning": {
+       "en": "the internet",
+       "fr": "Internet"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "by (means)",
+       "fr": "sur (moyen)"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "marks what can be bought",
+       "fr": "marque ce qui peut être acheté"
+      }
+     },
+     {
+      "surface": "買える",
+      "meaning": {
+       "en": "can be bought",
+       "fr": "peuvent être achetés"
+      }
+     },
+     {
+      "surface": "時代",
+      "meaning": {
+       "en": "age, era",
+       "fr": "époque"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petite"
+      }
+     },
+     {
+      "surface": "書店",
+      "meaning": {
+       "en": "bookshop",
+       "fr": "librairie"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "生き残る",
+      "meaning": {
+       "en": "to survive",
+       "fr": "survivre"
+      }
+     },
+     {
+      "surface": "のは",
+      "meaning": {
+       "en": "the act of (as topic)",
+       "fr": "le fait de (en thème)"
+      }
+     },
+     {
+      "surface": "難しい",
+      "meaning": {
+       "en": "is difficult",
+       "fr": "est difficile"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "とはいえ、この店が長く地域に親しまれてきたのは、単に本を売っていたからではない。",
+    "translation": {
+     "en": "That said, the reason this shop was cherished by the neighbourhood for so long is not simply that it sold books.",
+     "fr": "Cela dit, si cette boutique a été si longtemps chère au quartier, ce n'est pas simplement parce qu'elle vendait des livres."
+    },
+    "note": {
+     "en": "The pattern 「とはいえ」 concedes the previous sentence before qualifying it; 「親しまれてきた」 is passive plus てきた, cherished over time.",
+     "fr": "La structure 「とはいえ」 concède la phrase précédente avant de la nuancer ; 「親しまれてきた」 est un passif suivi de てきた, apprécié au fil du temps."
+    },
+    "words": [
+     {
+      "surface": "とはいえ",
+      "meaning": {
+       "en": "that said",
+       "fr": "cela dit"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "長く",
+      "meaning": {
+       "en": "for a long time",
+       "fr": "longtemps"
+      }
+     },
+     {
+      "surface": "地域",
+      "meaning": {
+       "en": "local area",
+       "fr": "quartier"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "by (agent of passive)",
+       "fr": "par (agent du passif)"
+      }
+     },
+     {
+      "surface": "親しまれてきた",
+      "meaning": {
+       "en": "has been cherished",
+       "fr": "a été apprécié"
+      }
+     },
+     {
+      "surface": "のは",
+      "meaning": {
+       "en": "the reason that (as topic)",
+       "fr": "la raison pour laquelle (en thème)"
+      }
+     },
+     {
+      "surface": "単に",
+      "meaning": {
+       "en": "simply",
+       "fr": "simplement"
+      }
+     },
+     {
+      "surface": "本",
+      "meaning": {
+       "en": "books",
+       "fr": "livres"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "売っていた",
+      "meaning": {
+       "en": "was selling",
+       "fr": "vendait"
+      }
+     },
+     {
+      "surface": "からではない",
+      "meaning": {
+       "en": "is not because",
+       "fr": "n'est pas parce que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "店主は客の顔を覚え、その人が次に読みたくなりそうな一冊を、棚の目立つところに置いた。",
+    "translation": {
+     "en": "The owner remembered customers' faces and placed the one book that person would probably want to read next where it stood out on the shelf.",
+     "fr": "Le propriétaire retenait le visage des clients et plaçait bien en vue sur l'étagère le livre que cette personne aurait sans doute envie de lire ensuite."
+    },
+    "note": {
+     "en": "The pattern 「〜たくなりそうな」 stacks want-to, become and seems-likely into one modifier before 「一冊」.",
+     "fr": "La structure 「〜たくなりそうな」 empile vouloir, devenir et sembler probable en un seul qualificatif devant 「一冊」."
+    },
+    "words": [
+     {
+      "surface": "店主",
+      "meaning": {
+       "en": "shop owner",
+       "fr": "propriétaire"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "客",
+      "meaning": {
+       "en": "customers",
+       "fr": "clients"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "顔",
+      "meaning": {
+       "en": "faces",
+       "fr": "visages"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "覚え",
+      "meaning": {
+       "en": "remembered, and",
+       "fr": "retenait, et"
+      }
+     },
+     {
+      "surface": "その",
+      "meaning": {
+       "en": "that",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "person",
+       "fr": "personne"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "次に",
+      "meaning": {
+       "en": "next",
+       "fr": "ensuite"
+      }
+     },
+     {
+      "surface": "読みたくなりそうな",
+      "meaning": {
+       "en": "likely to want to read",
+       "fr": "susceptible de vouloir lire"
+      }
+     },
+     {
+      "surface": "一冊",
+      "meaning": {
+       "en": "one book",
+       "fr": "un livre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "棚",
+      "meaning": {
+       "en": "shelf",
+       "fr": "étagère"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "目立つ",
+      "meaning": {
+       "en": "conspicuous",
+       "fr": "bien en vue"
+      }
+     },
+     {
+      "surface": "ところ",
+      "meaning": {
+       "en": "place",
+       "fr": "endroit"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "置いた",
+      "meaning": {
+       "en": "placed",
+       "fr": "plaçait"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "そうした人の手を介した出会いは、画面上の「おすすめ」には真似のできない、小さな店ならではのものだった。",
+    "translation": {
+     "en": "Such encounters, mediated by a human hand, were something only a small shop can offer, which no on-screen recommendation can imitate.",
+     "fr": "De telles rencontres, passées par une main humaine, étaient propres à une petite boutique, et aucune « recommandation » à l'écran ne saurait les imiter."
+    },
+    "note": {
+     "en": "The pattern 「〜ならでは」 means possible only for that thing; 「〜を介した」 means mediated through.",
+     "fr": "La structure 「〜ならでは」 signifie possible uniquement pour cette chose ; 「〜を介した」 signifie par l'intermédiaire de."
+    },
+    "words": [
+     {
+      "surface": "そうした",
+      "meaning": {
+       "en": "such",
+       "fr": "de telles"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "a person",
+       "fr": "une personne"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "手",
+      "meaning": {
+       "en": "hand",
+       "fr": "main"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "介した",
+      "meaning": {
+       "en": "mediated through",
+       "fr": "passées par"
+      }
+     },
+     {
+      "surface": "出会い",
+      "meaning": {
+       "en": "encounters",
+       "fr": "rencontres"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "画面上",
+      "meaning": {
+       "en": "on screen",
+       "fr": "à l'écran"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "おすすめ",
+      "meaning": {
+       "en": "recommendation",
+       "fr": "recommandation"
+      }
+     },
+     {
+      "surface": "には",
+      "meaning": {
+       "en": "for (as the topic)",
+       "fr": "pour (en thème)"
+      }
+     },
+     {
+      "surface": "真似",
+      "meaning": {
+       "en": "imitation",
+       "fr": "imitation"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "できない",
+      "meaning": {
+       "en": "cannot",
+       "fr": "ne peut"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petite"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "ならでは",
+      "meaning": {
+       "en": "unique to",
+       "fr": "propre à"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "thing",
+       "fr": "chose"
+      }
+     },
+     {
+      "surface": "だった",
+      "meaning": {
+       "en": "was",
+       "fr": "était"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "閉店の理由は、売り上げの減少に加え、店主の高齢と後継者の不在だという。",
+    "translation": {
+     "en": "The reasons for closing are said to be, on top of falling sales, the owner's age and the lack of a successor.",
+     "fr": "Les raisons de la fermeture seraient, outre la baisse des ventes, l'âge avancé du propriétaire et l'absence de successeur."
+    },
+    "note": {
+     "en": "The pattern 「〜に加え」 means in addition to; the written stem form drops the て of 「加えて」.",
+     "fr": "La structure 「〜に加え」 signifie en plus de ; la forme écrite omet le て de 「加えて」."
+    },
+    "words": [
+     {
+      "surface": "閉店",
+      "meaning": {
+       "en": "closing the shop",
+       "fr": "fermeture"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "理由",
+      "meaning": {
+       "en": "reasons",
+       "fr": "raisons"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "売り上げ",
+      "meaning": {
+       "en": "sales",
+       "fr": "ventes"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "減少",
+      "meaning": {
+       "en": "decline",
+       "fr": "baisse"
+      }
+     },
+     {
+      "surface": "に加え",
+      "meaning": {
+       "en": "in addition to",
+       "fr": "outre"
+      }
+     },
+     {
+      "surface": "店主",
+      "meaning": {
+       "en": "shop owner",
+       "fr": "propriétaire"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "高齢",
+      "meaning": {
+       "en": "advanced age",
+       "fr": "âge avancé"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "後継者",
+      "meaning": {
+       "en": "successor",
+       "fr": "successeur"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "不在",
+      "meaning": {
+       "en": "absence",
+       "fr": "absence"
+      }
+     },
+     {
+      "surface": "だ",
+      "meaning": {
+       "en": "is",
+       "fr": "est"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "同じ事情で閉店を余儀なくされる店は、全国で後を絶たない。",
+    "translation": {
+     "en": "Shops forced to close for the same reasons keep appearing across the country.",
+     "fr": "Les boutiques contraintes de fermer pour les mêmes raisons ne cessent de se multiplier dans tout le pays."
+    },
+    "note": {
+     "en": "The pattern 「〜を余儀なくされる」 means being compelled to do something unwelcome; 「後を絶たない」 means it never stops.",
+     "fr": "La structure 「〜を余儀なくされる」 signifie être contraint à quelque chose de fâcheux ; 「後を絶たない」 signifie que cela ne cesse pas."
+    },
+    "words": [
+     {
+      "surface": "同じ",
+      "meaning": {
+       "en": "same",
+       "fr": "mêmes"
+      }
+     },
+     {
+      "surface": "事情",
+      "meaning": {
+       "en": "circumstances",
+       "fr": "raisons"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "because of",
+       "fr": "pour"
+      }
+     },
+     {
+      "surface": "閉店",
+      "meaning": {
+       "en": "closing",
+       "fr": "fermeture"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "余儀なくされる",
+      "meaning": {
+       "en": "are forced into",
+       "fr": "sont contraintes à"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shops",
+       "fr": "boutiques"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "全国",
+      "meaning": {
+       "en": "the whole country",
+       "fr": "tout le pays"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "後を絶たない",
+      "meaning": {
+       "en": "never cease",
+       "fr": "ne cessent pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "書店の灯りが消えるたびに、その問いは重みを増していく。",
+    "translation": {
+     "en": "Each time a bookshop's light goes out, that question grows heavier.",
+     "fr": "Chaque fois que la lumière d'une librairie s'éteint, cette question prend plus de poids."
+    },
+    "note": {
+     "en": "The pattern 「〜たびに」 means every time; 「〜ていく」 shows the weight growing on into the future.",
+     "fr": "La structure 「〜たびに」 signifie à chaque fois ; 「〜ていく」 montre le poids qui croît vers l'avenir."
+    },
+    "words": [
+     {
+      "surface": "書店",
+      "meaning": {
+       "en": "bookshop",
+       "fr": "librairie"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "灯り",
+      "meaning": {
+       "en": "light",
+       "fr": "lumière"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "消える",
+      "meaning": {
+       "en": "goes out",
+       "fr": "s'éteint"
+      }
+     },
+     {
+      "surface": "たびに",
+      "meaning": {
+       "en": "every time",
+       "fr": "à chaque fois"
+      }
+     },
+     {
+      "surface": "その",
+      "meaning": {
+       "en": "that",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "問い",
+      "meaning": {
+       "en": "question",
+       "fr": "question"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "重み",
+      "meaning": {
+       "en": "weight",
+       "fr": "poids"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "増していく",
+      "meaning": {
+       "en": "keeps increasing",
+       "fr": "ne cesse d'augmenter"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n1-02",
+  "level": "N1",
+  "title": "もう一つの耳",
+  "grammar": [
+   "〜はおろか",
+   "〜もさることながら",
+   "〜べく"
+  ],
+  "text": "自動翻訳の精度が飛躍的に向上した今、外国語を学ぶ意味はあるのかという問いを、ときおり耳にする。確かに、旅行先で道を尋ねる程度なら、機械に任せて差し支えない場面は増えた。しかし、翻訳の正確さもさることながら、言葉を学ぶことの価値は、相手の文化の内側に立ってものを見る経験そのものにある。機械を通した会話では、相手の冗談の間合いはおろか、沈黙の意味すら伝わらない。ある言語学者は、外国語を身につけることを「もう一つの耳を持つこと」と表現した。機械が担える部分は任せ、人間にしかできない理解を深めるべく、学び方を問い直すときが来ているのではないだろうか。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What question does the writer sometimes hear?",
+     "fr": "Quelle question l'auteur entend-il parfois ?"
+    },
+    "options": {
+     "en": [
+      "Whether learning foreign languages still has any point",
+      "Whether machine translation is legal",
+      "Which language is easiest",
+      "Whether travel is worthwhile"
+     ],
+     "fr": [
+      "Si apprendre une langue étrangère a encore un sens",
+      "Si la traduction automatique est légale",
+      "Quelle langue est la plus facile",
+      "Si voyager en vaut la peine"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "In which situation does the writer admit a machine is fine?",
+     "fr": "Dans quelle situation l'auteur admet-il qu'une machine suffit ?"
+    },
+    "options": {
+     "en": [
+      "Asking the way while travelling",
+      "Telling a joke",
+      "Understanding a silence",
+      "Studying a culture"
+     ],
+     "fr": [
+      "Demander son chemin en voyage",
+      "Raconter une blague",
+      "Comprendre un silence",
+      "Étudier une culture"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「翻訳の正確さもさることながら」 imply?",
+     "fr": "Que sous-entend 「翻訳の正確さもさることながら」 ?"
+    },
+    "options": {
+     "en": [
+      "Accuracy matters, but what follows matters even more",
+      "Accuracy is the only thing that matters",
+      "Accuracy does not matter",
+      "Accuracy has been achieved"
+     ],
+     "fr": [
+      "La précision compte, mais ce qui suit compte encore plus",
+      "La précision est la seule chose qui compte",
+      "La précision ne compte pas",
+      "La précision est atteinte"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Where does the writer locate the value of learning a language?",
+     "fr": "Où l'auteur situe-t-il la valeur de l'apprentissage d'une langue ?"
+    },
+    "options": {
+     "en": [
+      "In the experience of seeing things from inside the other culture",
+      "In getting a better job",
+      "In translating more accurately than a machine",
+      "In travelling more cheaply"
+     ],
+     "fr": [
+      "Dans l'expérience de voir les choses de l'intérieur de l'autre culture",
+      "Dans l'obtention d'un meilleur emploi",
+      "Dans une traduction plus précise que la machine",
+      "Dans des voyages moins chers"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「間合いはおろか、沈黙の意味すら伝わらない」 mean?",
+     "fr": "Que signifie 「間合いはおろか、沈黙の意味すら伝わらない」 ?"
+    },
+    "options": {
+     "en": [
+      "Even the meaning of silence fails to come through, let alone comic timing",
+      "Comic timing comes through but silence does not",
+      "Both come through easily",
+      "Only silence is transmitted"
+     ],
+     "fr": [
+      "Même le sens d'un silence ne passe pas, sans parler du timing d'une blague",
+      "Le timing passe mais pas le silence",
+      "Les deux passent facilement",
+      "Seul le silence est transmis"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「間合い」 refer to here?",
+     "fr": "À quoi renvoie 「間合い」 ici ?"
+    },
+    "options": {
+     "en": [
+      "The timing or pause of a joke",
+      "The volume of a voice",
+      "The grammar of a sentence",
+      "The length of a trip"
+     ],
+     "fr": [
+      "Le timing ou la pause d'une blague",
+      "Le volume de la voix",
+      "La grammaire d'une phrase",
+      "La durée d'un voyage"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How did the linguist describe mastering a foreign language?",
+     "fr": "Comment le linguiste a-t-il décrit la maîtrise d'une langue étrangère ?"
+    },
+    "options": {
+     "en": [
+      "As having another ear",
+      "As having a second mouth",
+      "As opening a door",
+      "As building a bridge"
+     ],
+     "fr": [
+      "Comme posséder une autre oreille",
+      "Comme avoir une seconde bouche",
+      "Comme ouvrir une porte",
+      "Comme construire un pont"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「理解を深めるべく」 express?",
+     "fr": "Qu'exprime 「理解を深めるべく」 ?"
+    },
+    "options": {
+     "en": [
+      "The purpose: in order to deepen understanding",
+      "The result: understanding deepened",
+      "A prohibition on deepening understanding",
+      "Doubt that understanding can deepen"
+     ],
+     "fr": [
+      "Le but : afin d'approfondir la compréhension",
+      "Le résultat : la compréhension s'est approfondie",
+      "Une interdiction d'approfondir",
+      "Un doute sur la possibilité d'approfondir"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What tone does 「〜のではないだろうか」 give the last sentence?",
+     "fr": "Quel ton 「〜のではないだろうか」 donne-t-il à la dernière phrase ?"
+    },
+    "options": {
+     "en": [
+      "A tentative suggestion inviting agreement",
+      "A firm command",
+      "A flat denial",
+      "A neutral report"
+     ],
+     "fr": [
+      "Une suggestion prudente qui invite à l'accord",
+      "Un ordre ferme",
+      "Un démenti catégorique",
+      "Un compte rendu neutre"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's position on translation machines?",
+     "fr": "Quelle est la position de l'auteur sur les machines à traduire ?"
+    },
+    "options": {
+     "en": [
+      "Use them for what they can do, and keep the human part for humans",
+      "Reject them entirely",
+      "Rely on them for everything",
+      "They will replace teachers"
+     ],
+     "fr": [
+      "Les utiliser pour ce qu'elles savent faire, et garder l'humain pour l'humain",
+      "Les rejeter totalement",
+      "S'y fier pour tout",
+      "Elles remplaceront les enseignants"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer mention jokes and silences?",
+     "fr": "Pourquoi l'auteur mentionne-t-il les blagues et les silences ?"
+    },
+    "options": {
+     "en": [
+      "As examples of meaning that a machine cannot carry",
+      "As things that are easy to translate",
+      "As reasons to avoid conversation",
+      "As topics for language lessons"
+     ],
+     "fr": [
+      "Comme exemples de sens qu'une machine ne peut transmettre",
+      "Comme choses faciles à traduire",
+      "Comme raisons d'éviter la conversation",
+      "Comme sujets de cours de langue"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer think should change?",
+     "fr": "Que devrait changer, selon l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "The way languages are learned",
+      "The accuracy of machines",
+      "The number of languages taught",
+      "The cost of travel"
+     ],
+     "fr": [
+      "La manière d'apprendre les langues",
+      "La précision des machines",
+      "Le nombre de langues enseignées",
+      "Le coût des voyages"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "自動翻訳の精度が飛躍的に向上した今、外国語を学ぶ意味はあるのかという問いを、ときおり耳にする。",
+    "translation": {
+     "en": "Now that the accuracy of machine translation has improved by leaps and bounds, one occasionally hears the question of whether there is any point in learning a foreign language.",
+     "fr": "Maintenant que la précision de la traduction automatique a fait un bond, on entend parfois demander s'il y a encore un sens à apprendre une langue étrangère."
+    },
+    "note": {
+     "en": "The pattern 「〜かという問い」 embeds a question inside the noun 「問い」; 「耳にする」 means to happen to hear.",
+     "fr": "La structure 「〜かという問い」 enchâsse une question dans le nom 「問い」 ; 「耳にする」 signifie entendre dire."
+    },
+    "words": [
+     {
+      "surface": "自動翻訳",
+      "meaning": {
+       "en": "machine translation",
+       "fr": "traduction automatique"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "精度",
+      "meaning": {
+       "en": "accuracy",
+       "fr": "précision"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "飛躍的に",
+      "meaning": {
+       "en": "dramatically",
+       "fr": "de façon spectaculaire"
+      }
+     },
+     {
+      "surface": "向上した",
+      "meaning": {
+       "en": "improved",
+       "fr": "s'est améliorée"
+      }
+     },
+     {
+      "surface": "今",
+      "meaning": {
+       "en": "now",
+       "fr": "maintenant"
+      }
+     },
+     {
+      "surface": "外国語",
+      "meaning": {
+       "en": "foreign language",
+       "fr": "langue étrangère"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "学ぶ",
+      "meaning": {
+       "en": "to learn",
+       "fr": "apprendre"
+      }
+     },
+     {
+      "surface": "意味",
+      "meaning": {
+       "en": "point, meaning",
+       "fr": "sens"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "there is",
+       "fr": "il y a"
+      }
+     },
+     {
+      "surface": "のか",
+      "meaning": {
+       "en": "whether",
+       "fr": "si"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "namely",
+       "fr": "à savoir"
+      }
+     },
+     {
+      "surface": "問い",
+      "meaning": {
+       "en": "question",
+       "fr": "question"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "ときおり",
+      "meaning": {
+       "en": "occasionally",
+       "fr": "parfois"
+      }
+     },
+     {
+      "surface": "耳にする",
+      "meaning": {
+       "en": "hear",
+       "fr": "entend"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "確かに、旅行先で道を尋ねる程度なら、機械に任せて差し支えない場面は増えた。",
+    "translation": {
+     "en": "Certainly, for something like asking the way on a trip, there are more and more situations where it is fine to leave it to a machine.",
+     "fr": "Certes, pour quelque chose comme demander son chemin en voyage, les situations où l'on peut sans problème s'en remettre à une machine se sont multipliées."
+    },
+    "note": {
+     "en": "The pattern 「〜程度なら」 limits the claim to a modest level; 「差し支えない」 means there is no harm in it.",
+     "fr": "La structure 「〜程度なら」 limite l'affirmation à un niveau modeste ; 「差し支えない」 signifie qu'il n'y a pas d'inconvénient."
+    },
+    "words": [
+     {
+      "surface": "確かに",
+      "meaning": {
+       "en": "certainly",
+       "fr": "certes"
+      }
+     },
+     {
+      "surface": "旅行先",
+      "meaning": {
+       "en": "travel destination",
+       "fr": "lieu de voyage"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "道",
+      "meaning": {
+       "en": "the way",
+       "fr": "chemin"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "尋ねる",
+      "meaning": {
+       "en": "to ask",
+       "fr": "demander"
+      }
+     },
+     {
+      "surface": "程度",
+      "meaning": {
+       "en": "level, extent",
+       "fr": "niveau"
+      }
+     },
+     {
+      "surface": "なら",
+      "meaning": {
+       "en": "if it is",
+       "fr": "s'il s'agit de"
+      }
+     },
+     {
+      "surface": "機械",
+      "meaning": {
+       "en": "machine",
+       "fr": "machine"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "任せて",
+      "meaning": {
+       "en": "leaving it to",
+       "fr": "en s'en remettant"
+      }
+     },
+     {
+      "surface": "差し支えない",
+      "meaning": {
+       "en": "is fine",
+       "fr": "sans inconvénient"
+      }
+     },
+     {
+      "surface": "場面",
+      "meaning": {
+       "en": "situations",
+       "fr": "situations"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "増えた",
+      "meaning": {
+       "en": "have increased",
+       "fr": "se sont multipliées"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、翻訳の正確さもさることながら、言葉を学ぶことの価値は、相手の文化の内側に立ってものを見る経験そのものにある。",
+    "translation": {
+     "en": "But accuracy of translation aside, the value of learning a language lies in the very experience of standing inside the other person's culture and seeing things from there.",
+     "fr": "Mais, précision de la traduction mise à part, la valeur de l'apprentissage d'une langue réside dans l'expérience même de se placer à l'intérieur de la culture de l'autre pour voir les choses."
+    },
+    "note": {
+     "en": "The pattern 「〜もさることながら」 grants one point as true and then moves to a weightier one.",
+     "fr": "La structure 「〜もさることながら」 reconnaît un point comme vrai puis passe à un point plus important."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "however",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "翻訳",
+      "meaning": {
+       "en": "translation",
+       "fr": "traduction"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "正確さ",
+      "meaning": {
+       "en": "accuracy",
+       "fr": "précision"
+      }
+     },
+     {
+      "surface": "もさることながら",
+      "meaning": {
+       "en": "is one thing, but",
+       "fr": "est une chose, mais"
+      }
+     },
+     {
+      "surface": "言葉",
+      "meaning": {
+       "en": "language",
+       "fr": "langue"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "学ぶ",
+      "meaning": {
+       "en": "to learn",
+       "fr": "apprendre"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "価値",
+      "meaning": {
+       "en": "value",
+       "fr": "valeur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "相手",
+      "meaning": {
+       "en": "the other person",
+       "fr": "l'autre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "文化",
+      "meaning": {
+       "en": "culture",
+       "fr": "culture"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "内側",
+      "meaning": {
+       "en": "inside",
+       "fr": "intérieur"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "立って",
+      "meaning": {
+       "en": "standing",
+       "fr": "en se plaçant"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "things",
+       "fr": "choses"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "見る",
+      "meaning": {
+       "en": "to see",
+       "fr": "voir"
+      }
+     },
+     {
+      "surface": "経験",
+      "meaning": {
+       "en": "experience",
+       "fr": "expérience"
+      }
+     },
+     {
+      "surface": "そのもの",
+      "meaning": {
+       "en": "itself",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "lies",
+       "fr": "réside"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "機械を通した会話では、相手の冗談の間合いはおろか、沈黙の意味すら伝わらない。",
+    "translation": {
+     "en": "In a conversation through a machine, not even the meaning of a silence comes across, let alone the timing of the other person's joke.",
+     "fr": "Dans une conversation passée par une machine, même le sens d'un silence ne passe pas, sans parler du timing d'une blague."
+    },
+    "note": {
+     "en": "The pattern 「〜はおろか〜すら」 names the harder thing first as out of reach, then says even the easier one fails.",
+     "fr": "La structure 「〜はおろか〜すら」 cite d'abord la chose la plus difficile comme hors d'atteinte, puis dit que même la plus simple échoue."
+    },
+    "words": [
+     {
+      "surface": "機械",
+      "meaning": {
+       "en": "machine",
+       "fr": "machine"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "通した",
+      "meaning": {
+       "en": "passed through",
+       "fr": "passée par"
+      }
+     },
+     {
+      "surface": "会話",
+      "meaning": {
+       "en": "conversation",
+       "fr": "conversation"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "in (as the topic)",
+       "fr": "dans (en thème)"
+      }
+     },
+     {
+      "surface": "相手",
+      "meaning": {
+       "en": "the other person",
+       "fr": "l'interlocuteur"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "冗談",
+      "meaning": {
+       "en": "joke",
+       "fr": "blague"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "間合い",
+      "meaning": {
+       "en": "timing",
+       "fr": "timing"
+      }
+     },
+     {
+      "surface": "はおろか",
+      "meaning": {
+       "en": "let alone",
+       "fr": "sans parler de"
+      }
+     },
+     {
+      "surface": "沈黙",
+      "meaning": {
+       "en": "silence",
+       "fr": "silence"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "意味",
+      "meaning": {
+       "en": "meaning",
+       "fr": "sens"
+      }
+     },
+     {
+      "surface": "すら",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "伝わらない",
+      "meaning": {
+       "en": "does not come across",
+       "fr": "ne passe pas"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ある言語学者は、外国語を身につけることを「もう一つの耳を持つこと」と表現した。",
+    "translation": {
+     "en": "One linguist described acquiring a foreign language as \"having another ear\".",
+     "fr": "Un linguiste a décrit l'acquisition d'une langue étrangère comme « posséder une autre oreille »."
+    },
+    "note": {
+     "en": "The pattern 「AをBと表現した」 means described A as B; 「身につける」 means to make one's own.",
+     "fr": "La structure 「AをBと表現した」 signifie a décrit A comme B ; 「身につける」 signifie s'approprier."
+    },
+    "words": [
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "un certain"
+      }
+     },
+     {
+      "surface": "言語学者",
+      "meaning": {
+       "en": "linguist",
+       "fr": "linguiste"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "外国語",
+      "meaning": {
+       "en": "foreign language",
+       "fr": "langue étrangère"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "身につける",
+      "meaning": {
+       "en": "to acquire",
+       "fr": "acquérir"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "もう一つ",
+      "meaning": {
+       "en": "one more",
+       "fr": "une autre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "耳",
+      "meaning": {
+       "en": "ear",
+       "fr": "oreille"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "持つ",
+      "meaning": {
+       "en": "to have",
+       "fr": "posséder"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "as (the description)",
+       "fr": "comme (la description)"
+      }
+     },
+     {
+      "surface": "表現した",
+      "meaning": {
+       "en": "described",
+       "fr": "a décrit"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "機械が担える部分は任せ、人間にしかできない理解を深めるべく、学び方を問い直すときが来ているのではないだろうか。",
+    "translation": {
+     "en": "Perhaps the time has come to rethink how we learn: leaving to machines what they can handle, in order to deepen the understanding only humans can reach.",
+     "fr": "Le moment n'est-il pas venu de repenser notre façon d'apprendre : confier aux machines ce qu'elles peuvent assumer, afin d'approfondir la compréhension dont seul l'humain est capable ?"
+    },
+    "note": {
+     "en": "The pattern 「〜べく」 states a purpose in written style; 「〜にしかできない」 means only that one can do it; 「〜のではないだろうか」 offers the conclusion tentatively.",
+     "fr": "La structure 「〜べく」 exprime un but en style écrit ; 「〜にしかできない」 signifie que seul celui-là en est capable ; 「〜のではないだろうか」 propose la conclusion avec prudence."
+    },
+    "words": [
+     {
+      "surface": "機械",
+      "meaning": {
+       "en": "machine",
+       "fr": "machine"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "担える",
+      "meaning": {
+       "en": "can take on",
+       "fr": "peut assumer"
+      }
+     },
+     {
+      "surface": "部分",
+      "meaning": {
+       "en": "part",
+       "fr": "partie"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "任せ",
+      "meaning": {
+       "en": "leave to, and",
+       "fr": "confier, et"
+      }
+     },
+     {
+      "surface": "人間",
+      "meaning": {
+       "en": "humans",
+       "fr": "l'humain"
+      }
+     },
+     {
+      "surface": "にしか",
+      "meaning": {
+       "en": "only by",
+       "fr": "seulement par"
+      }
+     },
+     {
+      "surface": "できない",
+      "meaning": {
+       "en": "cannot be done",
+       "fr": "ne peut être fait"
+      }
+     },
+     {
+      "surface": "理解",
+      "meaning": {
+       "en": "understanding",
+       "fr": "compréhension"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "深める",
+      "meaning": {
+       "en": "to deepen",
+       "fr": "approfondir"
+      }
+     },
+     {
+      "surface": "べく",
+      "meaning": {
+       "en": "in order to",
+       "fr": "afin de"
+      }
+     },
+     {
+      "surface": "学び方",
+      "meaning": {
+       "en": "way of learning",
+       "fr": "façon d'apprendre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "問い直す",
+      "meaning": {
+       "en": "to reconsider",
+       "fr": "repenser"
+      }
+     },
+     {
+      "surface": "とき",
+      "meaning": {
+       "en": "time",
+       "fr": "moment"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "来ている",
+      "meaning": {
+       "en": "has come",
+       "fr": "est venu"
+      }
+     },
+     {
+      "surface": "のではないだろうか",
+      "meaning": {
+       "en": "is it not the case that",
+       "fr": "n'est-ce pas que"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n1-03",
+  "level": "N1",
+  "title": "扉を叩いた人",
+  "grammar": [
+   "〜をものともせず",
+   "〜に至る",
+   "〜ゆえに"
+  ],
+  "text": "明治の初め、一人の女性が医師を志した。当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。注目すべきは、彼女がその後、自らの成功に満足しなかったことである。女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。今日、医学部の学生の半数近くを女性が占める。それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the woman want to become?",
+     "fr": "Que voulait devenir cette femme ?"
+    },
+    "options": {
+     "en": [
+      "A doctor",
+      "A teacher",
+      "A politician",
+      "A nurse"
+     ],
+     "fr": [
+      "Médecin",
+      "Enseignante",
+      "Femme politique",
+      "Infirmière"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What obstacle did she face at first?",
+     "fr": "Quel obstacle a-t-elle rencontré au départ ?"
+    },
+    "options": {
+     "en": [
+      "The system did not allow women to study medicine",
+      "She could not afford the fees",
+      "She failed the exam",
+      "Her family moved abroad"
+     ],
+     "fr": [
+      "Le système n'autorisait pas les femmes à étudier la médecine",
+      "Elle ne pouvait pas payer les frais",
+      "Elle a échoué à l'examen",
+      "Sa famille a déménagé à l'étranger"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「周囲の冷笑をものともせず」 express?",
+     "fr": "Qu'exprime 「周囲の冷笑をものともせず」 ?"
+    },
+    "options": {
+     "en": [
+      "She pressed on regardless of people's scorn",
+      "She was stopped by people's scorn",
+      "She joined in people's laughter",
+      "She never noticed people's scorn"
+     ],
+     "fr": [
+      "Elle a persévéré sans se soucier des moqueries",
+      "Elle a été arrêtée par les moqueries",
+      "Elle a ri avec les autres",
+      "Elle n'a jamais remarqué les moqueries"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "How long did the negotiations last?",
+     "fr": "Combien de temps ont duré les démarches ?"
+    },
+    "options": {
+     "en": [
+      "Three years",
+      "Three months",
+      "One year",
+      "Ten years"
+     ],
+     "fr": [
+      "Trois ans",
+      "Trois mois",
+      "Un an",
+      "Dix ans"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What nuance does 「〜となるに至った」 add?",
+     "fr": "Quelle nuance ajoute 「〜となるに至った」 ?"
+    },
+    "options": {
+     "en": [
+      "She finally reached that point after a long process",
+      "She became it by chance",
+      "She refused to become it",
+      "She was about to become it"
+     ],
+     "fr": [
+      "Elle en est finalement arrivée là au terme d'un long processus",
+      "Elle l'est devenue par hasard",
+      "Elle a refusé de le devenir",
+      "Elle était sur le point de le devenir"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「私塾」 mean?",
+     "fr": "Que signifie 「私塾」 ?"
+    },
+    "options": {
+     "en": [
+      "A private school",
+      "A hospital",
+      "A government office",
+      "A public library"
+     ],
+     "fr": [
+      "Une école privée",
+      "Un hôpital",
+      "Une administration",
+      "Une bibliothèque publique"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「女性ゆえに」 mean?",
+     "fr": "Que signifie 「女性ゆえに」 ?"
+    },
+    "options": {
+     "en": [
+      "Because of being a woman",
+      "In spite of being a woman",
+      "Together with women",
+      "Before becoming a woman"
+     ],
+     "fr": [
+      "Du fait d'être une femme",
+      "Malgré le fait d'être une femme",
+      "Avec les femmes",
+      "Avant de devenir une femme"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did she do after her own success?",
+     "fr": "Qu'a-t-elle fait après sa propre réussite ?"
+    },
+    "options": {
+     "en": [
+      "Opened a school and devoted her life to educating those who came after",
+      "Retired from public life",
+      "Entered politics",
+      "Moved abroad to practise medicine"
+     ],
+     "fr": [
+      "Elle a ouvert une école et consacré sa vie à former la relève",
+      "Elle s'est retirée de la vie publique",
+      "Elle est entrée en politique",
+      "Elle est partie exercer à l'étranger"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What proportion of medical students are women today, according to the text?",
+     "fr": "Quelle proportion des étudiants en médecine sont des femmes aujourd'hui, selon le texte ?"
+    },
+    "options": {
+     "en": [
+      "Nearly half",
+      "About ten percent",
+      "A small minority",
+      "All of them"
+     ],
+     "fr": [
+      "Près de la moitié",
+      "Environ dix pour cent",
+      "Une petite minorité",
+      "La totalité"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the writer mean by 「それを当然と感じられること自体が…証しなのだ」?",
+     "fr": "Que veut dire l'auteur par 「それを当然と感じられること自体が…証しなのだ」 ?"
+    },
+    "options": {
+     "en": [
+      "Taking today's situation for granted is itself proof of what pioneers achieved",
+      "Today's students do not deserve their places",
+      "The situation is still unfair",
+      "Nobody remembers the pioneers"
+     ],
+     "fr": [
+      "Trouver normale la situation actuelle prouve en soi ce que les pionnières ont accompli",
+      "Les étudiants d'aujourd'hui ne méritent pas leur place",
+      "La situation reste injuste",
+      "Personne ne se souvient des pionnières"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does 「注目すべきは」 signal about what follows?",
+     "fr": "Que signale 「注目すべきは」 à propos de ce qui suit ?"
+    },
+    "options": {
+     "en": [
+      "The writer considers it the most remarkable point",
+      "The writer doubts it",
+      "It is a minor detail",
+      "It contradicts the rest"
+     ],
+     "fr": [
+      "L'auteur y voit le point le plus remarquable",
+      "L'auteur en doute",
+      "C'est un détail mineur",
+      "Cela contredit le reste"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the main message of the text?",
+     "fr": "Quel est le message principal du texte ?"
+    },
+    "options": {
+     "en": [
+      "Rights we take for granted were won by people who fought for them",
+      "Medicine has changed since Meiji",
+      "Exams were harder in the past",
+      "Private schools are better than public ones"
+     ],
+     "fr": [
+      "Les droits qui nous semblent acquis ont été conquis par ceux qui se sont battus",
+      "La médecine a changé depuis Meiji",
+      "Les examens étaient plus durs autrefois",
+      "Les écoles privées valent mieux que les publiques"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "明治の初め、一人の女性が医師を志した。",
+    "translation": {
+     "en": "At the start of the Meiji era, a woman set her heart on becoming a doctor.",
+     "fr": "Au début de l'ère Meiji, une femme se mit en tête de devenir médecin."
+    },
+    "note": {
+     "en": "The verb 「志す」 with 「を」 means to aspire to a goal.",
+     "fr": "Le verbe 「志す」 avec 「を」 signifie aspirer à un but."
+    },
+    "words": [
+     {
+      "surface": "明治",
+      "meaning": {
+       "en": "Meiji era",
+       "fr": "ère Meiji"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "初め",
+      "meaning": {
+       "en": "beginning",
+       "fr": "début"
+      }
+     },
+     {
+      "surface": "一人",
+      "meaning": {
+       "en": "one (person)",
+       "fr": "une (personne)"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "女性",
+      "meaning": {
+       "en": "woman",
+       "fr": "femme"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "医師",
+      "meaning": {
+       "en": "doctor",
+       "fr": "médecin"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the goal",
+       "fr": "marque le but"
+      }
+     },
+     {
+      "surface": "志した",
+      "meaning": {
+       "en": "aspired to",
+       "fr": "aspira à"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "当時、女性が医学を学ぶ道は制度上閉ざされていたが、彼女は周囲の冷笑をものともせず、役所に通って受験の許可を求めたという。",
+    "translation": {
+     "en": "At the time the path for women to study medicine was closed by the system, but undaunted by the scorn around her, she is said to have gone to the authorities again and again to seek permission to sit the exam.",
+     "fr": "À l'époque, le système fermait aux femmes la voie des études de médecine, mais sans se laisser arrêter par les moqueries, elle serait allée sans relâche solliciter auprès de l'administration l'autorisation de passer l'examen."
+    },
+    "note": {
+     "en": "The pattern 「〜をものともせず」 means treating an obstacle as nothing and pressing on; 「制度上」 means under the system.",
+     "fr": "La structure 「〜をものともせず」 signifie ne faire aucun cas d'un obstacle et persévérer ; 「制度上」 signifie sur le plan institutionnel."
+    },
+    "words": [
+     {
+      "surface": "当時",
+      "meaning": {
+       "en": "at the time",
+       "fr": "à l'époque"
+      }
+     },
+     {
+      "surface": "女性",
+      "meaning": {
+       "en": "women",
+       "fr": "femmes"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "医学",
+      "meaning": {
+       "en": "medicine",
+       "fr": "médecine"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "学ぶ",
+      "meaning": {
+       "en": "to study",
+       "fr": "étudier"
+      }
+     },
+     {
+      "surface": "道",
+      "meaning": {
+       "en": "path",
+       "fr": "voie"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "制度上",
+      "meaning": {
+       "en": "under the system",
+       "fr": "institutionnellement"
+      }
+     },
+     {
+      "surface": "閉ざされていた",
+      "meaning": {
+       "en": "was closed",
+       "fr": "était fermée"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "but",
+       "fr": "mais"
+      }
+     },
+     {
+      "surface": "彼女",
+      "meaning": {
+       "en": "she",
+       "fr": "elle"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "周囲",
+      "meaning": {
+       "en": "those around her",
+       "fr": "entourage"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "冷笑",
+      "meaning": {
+       "en": "scorn",
+       "fr": "moqueries"
+      }
+     },
+     {
+      "surface": "をものともせず",
+      "meaning": {
+       "en": "undaunted by",
+       "fr": "sans se laisser arrêter par"
+      }
+     },
+     {
+      "surface": "役所",
+      "meaning": {
+       "en": "government office",
+       "fr": "administration"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "通って",
+      "meaning": {
+       "en": "going repeatedly",
+       "fr": "en se rendant sans relâche"
+      }
+     },
+     {
+      "surface": "受験",
+      "meaning": {
+       "en": "sitting the exam",
+       "fr": "passage de l'examen"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "許可",
+      "meaning": {
+       "en": "permission",
+       "fr": "autorisation"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "求めた",
+      "meaning": {
+       "en": "sought",
+       "fr": "sollicita"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "三年に及ぶ交渉の末、試験を受けることが認められ、彼女は日本で初めての女性医師となるに至った。",
+    "translation": {
+     "en": "After negotiations lasting three years, she was allowed to sit the exam, and went on to become Japan's first female doctor.",
+     "fr": "Au terme de trois années de démarches, elle fut autorisée à passer l'examen et finit par devenir la première femme médecin du Japon."
+    },
+    "note": {
+     "en": "The pattern 「〜に至った」 marks the end point of a long process; 「〜の末」 means after all that.",
+     "fr": "La structure 「〜に至った」 marque l'aboutissement d'un long processus ; 「〜の末」 signifie au terme de."
+    },
+    "words": [
+     {
+      "surface": "三年",
+      "meaning": {
+       "en": "three years",
+       "fr": "trois ans"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "及ぶ",
+      "meaning": {
+       "en": "extending to",
+       "fr": "s'étendant sur"
+      }
+     },
+     {
+      "surface": "交渉",
+      "meaning": {
+       "en": "negotiations",
+       "fr": "démarches"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "末",
+      "meaning": {
+       "en": "at the end of",
+       "fr": "au terme de"
+      }
+     },
+     {
+      "surface": "試験",
+      "meaning": {
+       "en": "exam",
+       "fr": "examen"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "受ける",
+      "meaning": {
+       "en": "to sit",
+       "fr": "passer"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "認められ",
+      "meaning": {
+       "en": "was permitted, and",
+       "fr": "fut autorisé, et"
+      }
+     },
+     {
+      "surface": "彼女",
+      "meaning": {
+       "en": "she",
+       "fr": "elle"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "日本",
+      "meaning": {
+       "en": "Japan",
+       "fr": "Japon"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "au"
+      }
+     },
+     {
+      "surface": "初めて",
+      "meaning": {
+       "en": "first",
+       "fr": "première"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "女性医師",
+      "meaning": {
+       "en": "female doctor",
+       "fr": "femme médecin"
+      }
+     },
+     {
+      "surface": "となる",
+      "meaning": {
+       "en": "to become",
+       "fr": "devenir"
+      }
+     },
+     {
+      "surface": "に至った",
+      "meaning": {
+       "en": "went on to",
+       "fr": "finit par"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "注目すべきは、彼女がその後、自らの成功に満足しなかったことである。",
+    "translation": {
+     "en": "What deserves attention is that she was not content, afterwards, with her own success.",
+     "fr": "Ce qui mérite l'attention, c'est qu'elle ne se contenta pas, par la suite, de sa propre réussite."
+    },
+    "note": {
+     "en": "The pattern 「注目すべきは〜ことである」 frames the whole sentence around one noteworthy fact.",
+     "fr": "La structure 「注目すべきは〜ことである」 organise toute la phrase autour d'un fait notable."
+    },
+    "words": [
+     {
+      "surface": "注目すべき",
+      "meaning": {
+       "en": "worth noting",
+       "fr": "digne d'attention"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "彼女",
+      "meaning": {
+       "en": "she",
+       "fr": "elle"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "その後",
+      "meaning": {
+       "en": "afterwards",
+       "fr": "par la suite"
+      }
+     },
+     {
+      "surface": "自ら",
+      "meaning": {
+       "en": "her own",
+       "fr": "sa propre"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "成功",
+      "meaning": {
+       "en": "success",
+       "fr": "réussite"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "with",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "満足しなかった",
+      "meaning": {
+       "en": "was not satisfied",
+       "fr": "ne se contenta pas"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the fact",
+       "fr": "le fait"
+      }
+     },
+     {
+      "surface": "である",
+      "meaning": {
+       "en": "is (formal)",
+       "fr": "est (formel)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "女性ゆえに学ぶ機会を奪われる者を一人でも減らそうと、私塾を開き、後進の教育に生涯を捧げた。",
+    "translation": {
+     "en": "Hoping to reduce, by even one, the number of those denied a chance to learn because they were women, she opened a private school and devoted her life to educating those who came after her.",
+     "fr": "Pour réduire, ne serait-ce que d'une, le nombre de celles privées d'instruction du fait de leur sexe, elle ouvrit une école privée et consacra sa vie à former la relève."
+    },
+    "note": {
+     "en": "The pattern 「〜ゆえに」 gives a formal reason; 「〜ようと」 states the aim behind the actions that follow.",
+     "fr": "La structure 「〜ゆえに」 donne une raison de registre formel ; 「〜ようと」 énonce l'intention derrière les actions qui suivent."
+    },
+    "words": [
+     {
+      "surface": "女性",
+      "meaning": {
+       "en": "woman",
+       "fr": "femme"
+      }
+     },
+     {
+      "surface": "ゆえに",
+      "meaning": {
+       "en": "because of",
+       "fr": "du fait de"
+      }
+     },
+     {
+      "surface": "学ぶ",
+      "meaning": {
+       "en": "to learn",
+       "fr": "apprendre"
+      }
+     },
+     {
+      "surface": "機会",
+      "meaning": {
+       "en": "opportunity",
+       "fr": "chance"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "奪われる",
+      "meaning": {
+       "en": "are deprived of",
+       "fr": "sont privées de"
+      }
+     },
+     {
+      "surface": "者",
+      "meaning": {
+       "en": "those who",
+       "fr": "celles qui"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "一人でも",
+      "meaning": {
+       "en": "by even one",
+       "fr": "ne serait-ce que d'une"
+      }
+     },
+     {
+      "surface": "減らそう",
+      "meaning": {
+       "en": "let us reduce",
+       "fr": "réduire (intention)"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the aim",
+       "fr": "marque l'intention"
+      }
+     },
+     {
+      "surface": "私塾",
+      "meaning": {
+       "en": "private school",
+       "fr": "école privée"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "開き",
+      "meaning": {
+       "en": "opened, and",
+       "fr": "ouvrit, et"
+      }
+     },
+     {
+      "surface": "後進",
+      "meaning": {
+       "en": "those who come after",
+       "fr": "la relève"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "教育",
+      "meaning": {
+       "en": "education",
+       "fr": "formation"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "生涯",
+      "meaning": {
+       "en": "her life",
+       "fr": "sa vie"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "捧げた",
+      "meaning": {
+       "en": "devoted",
+       "fr": "consacra"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "今日、医学部の学生の半数近くを女性が占める。",
+    "translation": {
+     "en": "Today women make up nearly half of medical students.",
+     "fr": "Aujourd'hui, les femmes représentent près de la moitié des étudiants en médecine."
+    },
+    "note": {
+     "en": "The verb 「占める」 with 「を」 means to account for a share; 「半数近く」 means nearly half.",
+     "fr": "Le verbe 「占める」 avec 「を」 signifie représenter une part ; 「半数近く」 signifie près de la moitié."
+    },
+    "words": [
+     {
+      "surface": "今日",
+      "meaning": {
+       "en": "today (nowadays)",
+       "fr": "aujourd'hui"
+      }
+     },
+     {
+      "surface": "医学部",
+      "meaning": {
+       "en": "faculty of medicine",
+       "fr": "faculté de médecine"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "学生",
+      "meaning": {
+       "en": "students",
+       "fr": "étudiants"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "半数近く",
+      "meaning": {
+       "en": "nearly half",
+       "fr": "près de la moitié"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the share",
+       "fr": "marque la part"
+      }
+     },
+     {
+      "surface": "女性",
+      "meaning": {
+       "en": "women",
+       "fr": "femmes"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "占める",
+      "meaning": {
+       "en": "account for",
+       "fr": "représentent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "それを当然と感じられること自体が、彼女のような先人が切り開いた道の上に私たちが立っている証しなのだ。",
+    "translation": {
+     "en": "The very fact that we can take this for granted is proof that we stand on a road opened up by pioneers like her.",
+     "fr": "Le fait même de pouvoir trouver cela normal est la preuve que nous nous tenons sur une route ouverte par des pionnières comme elle."
+    },
+    "note": {
+     "en": "The pattern 「〜こと自体が〜証しなのだ」 makes the fact itself the evidence; 「切り開いた」 means cleared a way.",
+     "fr": "La structure 「〜こと自体が〜証しなのだ」 fait du fait lui-même la preuve ; 「切り開いた」 signifie a frayé un chemin."
+    },
+    "words": [
+     {
+      "surface": "それ",
+      "meaning": {
+       "en": "that",
+       "fr": "cela"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "当然",
+      "meaning": {
+       "en": "natural, a given",
+       "fr": "normal, acquis"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "as",
+       "fr": "comme"
+      }
+     },
+     {
+      "surface": "感じられる",
+      "meaning": {
+       "en": "can be felt",
+       "fr": "peut être ressenti"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the fact",
+       "fr": "le fait"
+      }
+     },
+     {
+      "surface": "自体",
+      "meaning": {
+       "en": "itself",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "彼女",
+      "meaning": {
+       "en": "she",
+       "fr": "elle"
+      }
+     },
+     {
+      "surface": "のような",
+      "meaning": {
+       "en": "like",
+       "fr": "comme"
+      }
+     },
+     {
+      "surface": "先人",
+      "meaning": {
+       "en": "pioneers",
+       "fr": "pionnières"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "切り開いた",
+      "meaning": {
+       "en": "opened up",
+       "fr": "ont ouvert"
+      }
+     },
+     {
+      "surface": "道",
+      "meaning": {
+       "en": "road",
+       "fr": "route"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "上",
+      "meaning": {
+       "en": "on top",
+       "fr": "sur"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on",
+       "fr": "sur"
+      }
+     },
+     {
+      "surface": "私たち",
+      "meaning": {
+       "en": "we",
+       "fr": "nous"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "立っている",
+      "meaning": {
+       "en": "are standing",
+       "fr": "nous tenons"
+      }
+     },
+     {
+      "surface": "証し",
+      "meaning": {
+       "en": "proof",
+       "fr": "preuve"
+      }
+     },
+     {
+      "surface": "なのだ",
+      "meaning": {
+       "en": "it is that",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

@@ -13,7 +13,7 @@ which means each distinct sentence costs one model call ONCE, ever,
 shared across every user.
 
 Running this turns that "once" into "zero on the user's path": the whole
-curated bank (content/reading_sentences, ~220 sentences) is analysed here
+curated bank (content/reading_sentences, ~520 sentences) is analysed here
 instead, ahead of time. After a run, a reader at any level gets an
 instant breakdown on every curated sentence without a single request
 leaving the server.
