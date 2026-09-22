@@ -74,20 +74,24 @@ DEFAULT_TARGET = 30
 PAUSE_SECONDS = 1.0
 
 
-def _counts() -> dict[tuple[str, str], int]:
-    """How many live exercises each bucket already holds."""
+def _counts() -> dict[tuple[str, str], tuple[int, int]]:
+    """How many live exercises each bucket already holds, as (total,
+    seeded). The seeds (plan 111, content/comprehension/) are loaded at
+    import and count towards the target like any other row -- they are
+    exercises the learner is served -- but are reported apart, so the
+    figure says how much of the bucket the model has actually written."""
     conn = db_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(
                 """
-                SELECT level, lang, COUNT(*) FROM comprehension_pool
+                SELECT level, lang, COUNT(*), COUNT(seed_key) FROM comprehension_pool
                  WHERE generator_version = %s
                  GROUP BY level, lang
                 """,
                 (_POOL_VERSION,),
             )
-            return {(level, lang): n for level, lang, n in cur.fetchall()}
+            return {(level, lang): (n, seeded) for level, lang, n, seeded in cur.fetchall()}
     finally:
         conn.close()
 
@@ -135,7 +139,8 @@ def main() -> int:
         logger.error("unknown level(s): %s", ", ".join(unknown))
         return 2
 
-    have = _counts()
+    counts = _counts()
+    have = {bucket: n for bucket, (n, _seeded) in counts.items()}
     todo = [
         (level, lang, args.target - have.get((level, lang), 0))
         for level in levels for lang in langs
@@ -146,7 +151,8 @@ def main() -> int:
     logger.info("pool version %s, target %d per bucket", _POOL_VERSION, args.target)
     for level in levels:
         for lang in langs:
-            logger.info("  %s/%s: %d stored", level, lang, have.get((level, lang), 0))
+            n, seeded = counts.get((level, lang), (0, 0))
+            logger.info("  %s/%s: %d stored (%d seeded, %d generated)", level, lang, n, seeded, n - seeded)
     logger.info("%d exercise(s) to generate", total)
 
     if args.dry_run or not total:

@@ -14,7 +14,19 @@ from tests.test_comprehension import _reply, MASHITA, SENTENCE_1
 @pytest.fixture
 def served(monkeypatch):
     """The endpoint with its one network call stubbed and its seeds
-    pinned: the text is the fixture's, written around 〜ました."""
+    pinned: the text is the fixture's, written around 〜ました.
+
+    The pool is emptied first, seeds included (plan 111): with anything
+    unread in the N5/en bucket the endpoint serves that and never
+    reaches the stub, and this file is about the generated text meeting
+    the SRS. test_comprehension_seed.py is where the seeds are served."""
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("DELETE FROM comprehension_pool")
+        conn.commit()
+    finally:
+        conn.close()
     monkeypatch.setattr(reading, "llm_configured", lambda: True)
     monkeypatch.setattr(reading, "_chat", lambda messages, *a, **kw: _reply())
     monkeypatch.setattr(reading, "_pick_grammar_seeds", lambda *a, **kw: [MASHITA])

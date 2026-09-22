@@ -44,7 +44,7 @@ class SentenceBankTests(unittest.TestCase):
     # particle, and neither can be confirmed present.
     #
     # Raise these as sentences are added for the new points.
-    COVERAGE_FLOOR = {"N5": 26, "N4": 33, "N3": 40, "N2": 41, "N1": 41}
+    COVERAGE_FLOOR = {"N5": 66, "N4": 89, "N3": 103, "N2": 111, "N1": 113}
 
     def test_coverage_never_regresses(self) -> None:
         """Each level demonstrates at least as many of its own grammar

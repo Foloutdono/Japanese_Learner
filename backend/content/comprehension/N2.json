@@ -1,0 +1,3297 @@
+[
+ {
+  "id": "n2-01",
+  "level": "N2",
+  "title": "人口が減る町",
+  "grammar": [
+   "〜にもかかわらず",
+   "〜つつある",
+   "〜を通じて"
+  ],
+  "text": "私の住む町では、この十年で人口が二割ほど減った。若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。こうした状況にもかかわらず、町は最近、少しずつ活気を取り戻している。きっかけは、空き家を安く貸し出す制度だった。都会の生活に疲れた人が、この制度を通じて町に移り住むようになったのだ。彼らは古い家を自分たちで直し、カフェや小さな店を開いた。祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。人が減ることを止めるのは難しい。しかし、減り方を変えることはできるのだと、この町は示している。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "By how much did the town's population fall in ten years?",
+     "fr": "De combien la population de la ville a-t-elle baissé en dix ans ?"
+    },
+    "options": {
+     "en": [
+      "About twenty percent",
+      "About two percent",
+      "About half",
+      "It did not fall"
+     ],
+     "fr": [
+      "D'environ vingt pour cent",
+      "D'environ deux pour cent",
+      "De moitié environ",
+      "Elle n'a pas baissé"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「上がりつつある」 describe?",
+     "fr": "Que décrit 「上がりつつある」 ?"
+    },
+    "options": {
+     "en": [
+      "A rise that is in progress",
+      "A rise that has finished",
+      "A rise that is expected",
+      "A rise that was prevented"
+     ],
+     "fr": [
+      "Une hausse en cours",
+      "Une hausse terminée",
+      "Une hausse attendue",
+      "Une hausse empêchée"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「こうした状況にもかかわらず」 signal?",
+     "fr": "Que signale 「こうした状況にもかかわらず」 ?"
+    },
+    "options": {
+     "en": [
+      "What follows goes against what the situation would lead one to expect",
+      "What follows is caused by the situation",
+      "What follows is an example of the situation",
+      "What follows happened before the situation"
+     ],
+     "fr": [
+      "Ce qui suit va à l'encontre de ce que la situation laisserait attendre",
+      "Ce qui suit est causé par la situation",
+      "Ce qui suit est un exemple de la situation",
+      "Ce qui suit s'est produit avant la situation"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What started the town's recovery?",
+     "fr": "Qu'est-ce qui a déclenché le renouveau de la ville ?"
+    },
+    "options": {
+     "en": [
+      "A scheme renting out empty houses cheaply",
+      "A new factory",
+      "A new railway line",
+      "A larger festival"
+     ],
+     "fr": [
+      "Un dispositif louant à bas prix les maisons vides",
+      "Une nouvelle usine",
+      "Une nouvelle ligne de train",
+      "Un festival plus grand"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "Who moved to the town through the scheme?",
+     "fr": "Qui s'est installé en ville grâce au dispositif ?"
+    },
+    "options": {
+     "en": [
+      "People tired of city life",
+      "Young people from the town",
+      "Retired farmers",
+      "Tourists"
+     ],
+     "fr": [
+      "Des gens fatigués de la vie urbaine",
+      "Des jeunes de la ville",
+      "Des agriculteurs retraités",
+      "Des touristes"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「活気」 mean in 「活気を取り戻している」?",
+     "fr": "Que signifie 「活気」 dans 「活気を取り戻している」 ?"
+    },
+    "options": {
+     "en": [
+      "Liveliness, energy",
+      "Population",
+      "Money",
+      "Housing"
+     ],
+     "fr": [
+      "Vitalité, animation",
+      "Population",
+      "Argent",
+      "Logement"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the newcomers do with the old houses?",
+     "fr": "Qu'ont fait les nouveaux arrivants des vieilles maisons ?"
+    },
+    "options": {
+     "en": [
+      "Repaired them themselves and opened cafés and small shops",
+      "Demolished them",
+      "Sold them to the city",
+      "Left them empty"
+     ],
+     "fr": [
+      "Ils les ont réparées eux-mêmes et ont ouvert des cafés et de petites boutiques",
+      "Ils les ont démolies",
+      "Ils les ont vendues à la ville",
+      "Ils les ont laissées vides"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「〜を通じて」 mean in 「この制度を通じて」?",
+     "fr": "Que signifie 「〜を通じて」 dans 「この制度を通じて」 ?"
+    },
+    "options": {
+     "en": [
+      "By means of, through",
+      "In spite of",
+      "Instead of",
+      "Apart from"
+     ],
+     "fr": [
+      "Par le biais de, grâce à",
+      "Malgré",
+      "À la place de",
+      "En dehors de"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What helps old and new residents understand each other?",
+     "fr": "Qu'est-ce qui aide anciens et nouveaux habitants à se comprendre ?"
+    },
+    "options": {
+     "en": [
+      "Preparing the festival together",
+      "Sharing the same houses",
+      "Working in the same shops",
+      "Town meetings"
+     ],
+     "fr": [
+      "Préparer le festival ensemble",
+      "Partager les mêmes maisons",
+      "Travailler dans les mêmes boutiques",
+      "Des réunions municipales"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What does the last sentence mean?",
+     "fr": "Que signifie la dernière phrase ?"
+    },
+    "options": {
+     "en": [
+      "Decline may be inevitable, but how it happens can be shaped",
+      "The population has stopped falling",
+      "The town has solved its problems",
+      "Other towns should copy the scheme"
+     ],
+     "fr": [
+      "Le déclin est peut-être inévitable, mais on peut en modeler la forme",
+      "La population a cessé de baisser",
+      "La ville a résolu ses problèmes",
+      "Les autres villes devraient copier le dispositif"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's attitude towards the town's future?",
+     "fr": "Quelle est l'attitude de l'auteur face à l'avenir de la ville ?"
+    },
+    "options": {
+     "en": [
+      "Cautiously hopeful",
+      "Despairing",
+      "Indifferent",
+      "Angry at the newcomers"
+     ],
+     "fr": [
+      "Prudemment optimiste",
+      "Désespérée",
+      "Indifférente",
+      "En colère contre les nouveaux arrivants"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "私の住む町では、この十年で人口が二割ほど減った。",
+    "translation": {
+     "en": "In the town where I live, the population has fallen by about twenty percent in the last ten years.",
+     "fr": "Dans la ville où j'habite, la population a baissé d'environ vingt pour cent en dix ans."
+    },
+    "note": {
+     "en": "The clause 「私の住む」 modifies 「町」 directly; 「割」 counts tenths, so 「二割」 is twenty percent.",
+     "fr": "La proposition 「私の住む」 qualifie directement 「町」 ; 「割」 compte les dixièmes, donc 「二割」 vaut vingt pour cent."
+    },
+    "words": [
+     {
+      "surface": "私",
+      "meaning": {
+       "en": "I",
+       "fr": "je"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "subject marker (in a clause)",
+       "fr": "marque le sujet (dans une proposition)"
+      }
+     },
+     {
+      "surface": "住む",
+      "meaning": {
+       "en": "live",
+       "fr": "habite"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "in (as the topic)",
+       "fr": "dans (en thème)"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "these",
+       "fr": "ces"
+      }
+     },
+     {
+      "surface": "十年",
+      "meaning": {
+       "en": "ten years",
+       "fr": "dix ans"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "within",
+       "fr": "en"
+      }
+     },
+     {
+      "surface": "人口",
+      "meaning": {
+       "en": "population",
+       "fr": "population"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "二割",
+      "meaning": {
+       "en": "twenty percent",
+       "fr": "vingt pour cent"
+      }
+     },
+     {
+      "surface": "ほど",
+      "meaning": {
+       "en": "about",
+       "fr": "environ"
+      }
+     },
+     {
+      "surface": "減った",
+      "meaning": {
+       "en": "decreased",
+       "fr": "a baissé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "若い人の多くが仕事を求めて都市へ出ていき、残った住民の平均年齢は上がりつつある。",
+    "translation": {
+     "en": "Many young people leave for the cities in search of work, and the average age of those who remain is rising.",
+     "fr": "Beaucoup de jeunes partent en ville chercher du travail, et l'âge moyen des habitants restants ne cesse de monter."
+    },
+    "note": {
+     "en": "The pattern 「〜つつある」 on the stem 「上がり」 describes a change that is under way.",
+     "fr": "La structure 「〜つつある」 sur le radical 「上がり」 décrit un changement en cours."
+    },
+    "words": [
+     {
+      "surface": "若い",
+      "meaning": {
+       "en": "young",
+       "fr": "jeune"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "多く",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "仕事",
+      "meaning": {
+       "en": "work",
+       "fr": "travail"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "求めて",
+      "meaning": {
+       "en": "seeking",
+       "fr": "en cherchant"
+      }
+     },
+     {
+      "surface": "都市",
+      "meaning": {
+       "en": "city",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "へ",
+      "meaning": {
+       "en": "to",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "出ていき",
+      "meaning": {
+       "en": "leave, and",
+       "fr": "partent, et"
+      }
+     },
+     {
+      "surface": "残った",
+      "meaning": {
+       "en": "remaining",
+       "fr": "restants"
+      }
+     },
+     {
+      "surface": "住民",
+      "meaning": {
+       "en": "residents",
+       "fr": "habitants"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "平均年齢",
+      "meaning": {
+       "en": "average age",
+       "fr": "âge moyen"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "上がりつつある",
+      "meaning": {
+       "en": "is rising",
+       "fr": "est en train de monter"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "こうした状況にもかかわらず、町は最近、少しずつ活気を取り戻している。",
+    "translation": {
+     "en": "Despite this situation, the town has recently been regaining its liveliness little by little.",
+     "fr": "Malgré cette situation, la ville retrouve peu à peu son animation ces derniers temps."
+    },
+    "note": {
+     "en": "The pattern 「〜にもかかわらず」 means despite, and marks the outcome as contrary to expectation.",
+     "fr": "La structure 「〜にもかかわらず」 signifie malgré, et présente le résultat comme contraire à l'attente."
+    },
+    "words": [
+     {
+      "surface": "こうした",
+      "meaning": {
+       "en": "such",
+       "fr": "une telle"
+      }
+     },
+     {
+      "surface": "状況",
+      "meaning": {
+       "en": "situation",
+       "fr": "situation"
+      }
+     },
+     {
+      "surface": "にもかかわらず",
+      "meaning": {
+       "en": "despite",
+       "fr": "malgré"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "最近",
+      "meaning": {
+       "en": "recently",
+       "fr": "récemment"
+      }
+     },
+     {
+      "surface": "少しずつ",
+      "meaning": {
+       "en": "little by little",
+       "fr": "peu à peu"
+      }
+     },
+     {
+      "surface": "活気",
+      "meaning": {
+       "en": "liveliness",
+       "fr": "animation"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "取り戻している",
+      "meaning": {
+       "en": "is regaining",
+       "fr": "retrouve"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "きっかけは、空き家を安く貸し出す制度だった。",
+    "translation": {
+     "en": "The trigger was a scheme that rents out empty houses cheaply.",
+     "fr": "Le déclencheur a été un dispositif qui loue à bas prix les maisons vides."
+    },
+    "note": {
+     "en": "The word 「きっかけ」 names what set something off; the clause before 「制度」 describes the scheme.",
+     "fr": "Le mot 「きっかけ」 désigne ce qui a tout déclenché ; la proposition avant 「制度」 décrit le dispositif."
+    },
+    "words": [
+     {
+      "surface": "きっかけ",
+      "meaning": {
+       "en": "trigger",
+       "fr": "déclencheur"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "空き家",
+      "meaning": {
+       "en": "empty house",
+       "fr": "maison vide"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "安く",
+      "meaning": {
+       "en": "cheaply",
+       "fr": "à bas prix"
+      }
+     },
+     {
+      "surface": "貸し出す",
+      "meaning": {
+       "en": "to rent out",
+       "fr": "louer"
+      }
+     },
+     {
+      "surface": "制度",
+      "meaning": {
+       "en": "scheme",
+       "fr": "dispositif"
+      }
+     },
+     {
+      "surface": "だった",
+      "meaning": {
+       "en": "was",
+       "fr": "était"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "都会の生活に疲れた人が、この制度を通じて町に移り住むようになったのだ。",
+    "translation": {
+     "en": "People worn out by city life began moving to the town through this scheme.",
+     "fr": "Des gens lassés de la vie urbaine ont commencé à s'installer en ville grâce à ce dispositif."
+    },
+    "note": {
+     "en": "The pattern 「〜を通じて」 means through or by means of; 「〜ようになった」 marks the start of a new pattern.",
+     "fr": "La structure 「〜を通じて」 signifie par le biais de ; 「〜ようになった」 marque le début d'une nouvelle tendance."
+    },
+    "words": [
+     {
+      "surface": "都会",
+      "meaning": {
+       "en": "the city",
+       "fr": "la grande ville"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "生活",
+      "meaning": {
+       "en": "life",
+       "fr": "vie"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "by (cause of tiredness)",
+       "fr": "de (cause de la lassitude)"
+      }
+     },
+     {
+      "surface": "疲れた",
+      "meaning": {
+       "en": "tired",
+       "fr": "lassé"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "ce"
+      }
+     },
+     {
+      "surface": "制度",
+      "meaning": {
+       "en": "scheme",
+       "fr": "dispositif"
+      }
+     },
+     {
+      "surface": "を通じて",
+      "meaning": {
+       "en": "through",
+       "fr": "grâce à"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "移り住む",
+      "meaning": {
+       "en": "to move and settle",
+       "fr": "s'installer"
+      }
+     },
+     {
+      "surface": "ようになった",
+      "meaning": {
+       "en": "came to",
+       "fr": "ont commencé à"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "the fact is",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "彼らは古い家を自分たちで直し、カフェや小さな店を開いた。",
+    "translation": {
+     "en": "They repaired the old houses themselves and opened cafés and small shops.",
+     "fr": "Ils ont réparé eux-mêmes les vieilles maisons et ouvert des cafés et de petites boutiques."
+    },
+    "note": {
+     "en": "The stem form 「直し」 links two clauses in written style, like a て-form.",
+     "fr": "Le radical 「直し」 relie deux propositions dans un style écrit, comme une forme en て."
+    },
+    "words": [
+     {
+      "surface": "彼ら",
+      "meaning": {
+       "en": "they",
+       "fr": "ils"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "古い",
+      "meaning": {
+       "en": "old",
+       "fr": "vieux"
+      }
+     },
+     {
+      "surface": "家",
+      "meaning": {
+       "en": "house",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "自分たちで",
+      "meaning": {
+       "en": "by themselves",
+       "fr": "eux-mêmes"
+      }
+     },
+     {
+      "surface": "直し",
+      "meaning": {
+       "en": "repaired, and",
+       "fr": "ont réparé, et"
+      }
+     },
+     {
+      "surface": "カフェ",
+      "meaning": {
+       "en": "café",
+       "fr": "café"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and (among others)",
+       "fr": "et (entre autres)"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petit"
+      }
+     },
+     {
+      "surface": "店",
+      "meaning": {
+       "en": "shop",
+       "fr": "boutique"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "開いた",
+      "meaning": {
+       "en": "opened",
+       "fr": "ont ouvert"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "祭りの準備を一緒に行ううちに、互いを理解する機会は確実に増えている。",
+    "translation": {
+     "en": "As they prepare the festival together, the chances to understand one another are steadily increasing.",
+     "fr": "À force de préparer le festival ensemble, les occasions de se comprendre augmentent nettement."
+    },
+    "note": {
+     "en": "The pattern 「〜うちに」 means while or in the course of doing something, a change happens.",
+     "fr": "La structure 「〜うちに」 signifie qu'au fil d'une action, un changement se produit."
+    },
+    "words": [
+     {
+      "surface": "祭り",
+      "meaning": {
+       "en": "festival",
+       "fr": "festival"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "準備",
+      "meaning": {
+       "en": "preparations",
+       "fr": "préparatifs"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "一緒に",
+      "meaning": {
+       "en": "together",
+       "fr": "ensemble"
+      }
+     },
+     {
+      "surface": "行う",
+      "meaning": {
+       "en": "to carry out",
+       "fr": "mener"
+      }
+     },
+     {
+      "surface": "うちに",
+      "meaning": {
+       "en": "in the course of",
+       "fr": "au fil de"
+      }
+     },
+     {
+      "surface": "互い",
+      "meaning": {
+       "en": "each other",
+       "fr": "l'un l'autre"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "理解する",
+      "meaning": {
+       "en": "to understand",
+       "fr": "comprendre"
+      }
+     },
+     {
+      "surface": "機会",
+      "meaning": {
+       "en": "opportunity",
+       "fr": "occasion"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "確実に",
+      "meaning": {
+       "en": "steadily, surely",
+       "fr": "nettement"
+      }
+     },
+     {
+      "surface": "増えている",
+      "meaning": {
+       "en": "is increasing",
+       "fr": "augmente"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "人が減ることを止めるのは難しい。",
+    "translation": {
+     "en": "Stopping the population from falling is difficult.",
+     "fr": "Empêcher la population de baisser est difficile."
+    },
+    "note": {
+     "en": "The pattern 「〜のは難しい」 makes the whole action the subject of the adjective.",
+     "fr": "La structure 「〜のは難しい」 fait de toute l'action le sujet de l'adjectif."
+    },
+    "words": [
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "減る",
+      "meaning": {
+       "en": "to decrease",
+       "fr": "diminuer"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the fact of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "止める",
+      "meaning": {
+       "en": "to stop",
+       "fr": "arrêter"
+      }
+     },
+     {
+      "surface": "のは",
+      "meaning": {
+       "en": "the act of (as topic)",
+       "fr": "le fait de (en thème)"
+      }
+     },
+     {
+      "surface": "難しい",
+      "meaning": {
+       "en": "difficult",
+       "fr": "difficile"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、減り方を変えることはできるのだと、この町は示している。",
+    "translation": {
+     "en": "But this town shows that the way it declines can be changed.",
+     "fr": "Mais cette ville montre que l'on peut changer la manière dont elle décline."
+    },
+    "note": {
+     "en": "The suffix 「方」 on the stem 「減り」 means the way something decreases; 「〜のだと示している」 reports what the town demonstrates.",
+     "fr": "Le suffixe 「方」 sur le radical 「減り」 désigne la manière de décliner ; 「〜のだと示している」 rapporte ce que la ville démontre."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "however",
+       "fr": "cependant"
+      }
+     },
+     {
+      "surface": "減り方",
+      "meaning": {
+       "en": "the way of declining",
+       "fr": "la manière de décliner"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "変える",
+      "meaning": {
+       "en": "to change",
+       "fr": "changer"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "できる",
+      "meaning": {
+       "en": "is possible",
+       "fr": "est possible"
+      }
+     },
+     {
+      "surface": "のだ",
+      "meaning": {
+       "en": "the fact is",
+       "fr": "c'est que"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the content",
+       "fr": "marque le contenu"
+      }
+     },
+     {
+      "surface": "この",
+      "meaning": {
+       "en": "this",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "町",
+      "meaning": {
+       "en": "town",
+       "fr": "ville"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "示している",
+      "meaning": {
+       "en": "shows",
+       "fr": "montre"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-02",
+  "level": "N2",
+  "title": "在宅勤務のゆくえ",
+  "grammar": [
+   "〜ざるを得ない",
+   "〜わけにはいかない",
+   "〜からといって"
+  ],
+  "text": "多くの会社が、社員に在宅勤務を認めるようになった。通勤時間がなくなり、自分の都合に合わせて働けるというよい点は大きい。しかし、家で働けるからといって、仕事が楽になるわけではない。むしろ、仕事と生活の境目があいまいになり、かえって長く働いてしまう人も少なくない。ある調査では、在宅勤務を続けたいと答えた人が七割を超えた。会社としては、社員の希望を聞かないわけにはいかない。一方で、全員が同じ日に会社に来れば、オフィスの広さが足りなくなる。つまり、どの会社も、それぞれの事情に合った働き方を探さざるを得ないのである。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What advantage of working from home does the text name first?",
+     "fr": "Quel avantage du télétravail le texte cite-t-il en premier ?"
+    },
+    "options": {
+     "en": [
+      "No commuting time and flexible hours",
+      "Higher pay",
+      "Fewer meetings",
+      "Cheaper offices"
+     ],
+     "fr": [
+      "Pas de trajet et des horaires souples",
+      "Un meilleur salaire",
+      "Moins de réunions",
+      "Des bureaux moins chers"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「家で働けるからといって、仕事が楽になるわけではない」 mean?",
+     "fr": "Que signifie 「家で働けるからといって、仕事が楽になるわけではない」 ?"
+    },
+    "options": {
+     "en": [
+      "Just because one can work at home does not mean the work gets easier",
+      "Because one works at home, the work becomes easy",
+      "One should not work at home",
+      "Work at home is always harder"
+     ],
+     "fr": [
+      "Ce n'est pas parce qu'on peut travailler chez soi que le travail devient plus facile",
+      "Comme on travaille chez soi, le travail devient facile",
+      "On ne devrait pas travailler chez soi",
+      "Le travail à domicile est toujours plus dur"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What problem do some home workers have?",
+     "fr": "Quel problème certains télétravailleurs rencontrent-ils ?"
+    },
+    "options": {
+     "en": [
+      "They end up working longer because work and life blur",
+      "They cannot connect to the office",
+      "They earn less",
+      "They lose their jobs"
+     ],
+     "fr": [
+      "Ils finissent par travailler plus longtemps car travail et vie privée se confondent",
+      "Ils ne peuvent pas se connecter au bureau",
+      "Ils gagnent moins",
+      "Ils perdent leur emploi"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「境目」 mean?",
+     "fr": "Que signifie 「境目」 ?"
+    },
+    "options": {
+     "en": [
+      "Boundary",
+      "Schedule",
+      "Salary",
+      "Office"
+     ],
+     "fr": [
+      "Frontière, limite",
+      "Emploi du temps",
+      "Salaire",
+      "Bureau"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did the survey find?",
+     "fr": "Qu'a révélé l'enquête ?"
+    },
+    "options": {
+     "en": [
+      "Over seventy percent want to keep working from home",
+      "Most people want to return to the office",
+      "Seventy percent of companies closed offices",
+      "Nobody answered"
+     ],
+     "fr": [
+      "Plus de soixante-dix pour cent veulent continuer à télétravailler",
+      "La plupart veulent retourner au bureau",
+      "Soixante-dix pour cent des entreprises ont fermé leurs bureaux",
+      "Personne n'a répondu"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「聞かないわけにはいかない」 express?",
+     "fr": "Qu'exprime 「聞かないわけにはいかない」 ?"
+    },
+    "options": {
+     "en": [
+      "That they cannot afford not to listen",
+      "That they are unable to listen",
+      "That they must not listen",
+      "That they listened by chance"
+     ],
+     "fr": [
+      "Qu'ils ne peuvent pas se permettre de ne pas écouter",
+      "Qu'ils sont incapables d'écouter",
+      "Qu'ils ne doivent pas écouter",
+      "Qu'ils ont écouté par hasard"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What happens if everyone comes to the office on the same day?",
+     "fr": "Que se passe-t-il si tout le monde vient au bureau le même jour ?"
+    },
+    "options": {
+     "en": [
+      "The office is not big enough",
+      "Productivity rises",
+      "The company saves money",
+      "The survey is repeated"
+     ],
+     "fr": [
+      "Le bureau n'est pas assez grand",
+      "La productivité augmente",
+      "L'entreprise économise",
+      "L'enquête est refaite"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What nuance does 「探さざるを得ない」 carry?",
+     "fr": "Quelle nuance porte 「探さざるを得ない」 ?"
+    },
+    "options": {
+     "en": [
+      "There is no choice but to search",
+      "It is easy to search",
+      "Searching is forbidden",
+      "Searching is optional"
+     ],
+     "fr": [
+      "Il n'y a pas d'autre choix que de chercher",
+      "Il est facile de chercher",
+      "Chercher est interdit",
+      "Chercher est facultatif"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「一方で」 do at the start of a sentence?",
+     "fr": "Quel est le rôle de 「一方で」 en début de phrase ?"
+    },
+    "options": {
+     "en": [
+      "It introduces the other side of the matter",
+      "It gives a conclusion",
+      "It gives an example",
+      "It repeats the previous point"
+     ],
+     "fr": [
+      "Il introduit l'autre facette de la question",
+      "Il donne une conclusion",
+      "Il donne un exemple",
+      "Il répète le point précédent"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's conclusion?",
+     "fr": "Quelle est la conclusion de l'auteur ?"
+    },
+    "options": {
+     "en": [
+      "Each company must find a working style suited to its own situation",
+      "Everyone should work from home",
+      "Everyone should return to the office",
+      "Surveys are unreliable"
+     ],
+     "fr": [
+      "Chaque entreprise doit trouver un mode de travail adapté à sa situation",
+      "Tout le monde devrait télétravailler",
+      "Tout le monde devrait retourner au bureau",
+      "Les enquêtes ne sont pas fiables"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "How would you describe the tone of the text?",
+     "fr": "Comment décrire le ton du texte ?"
+    },
+    "options": {
+     "en": [
+      "Balanced, weighing both sides",
+      "Strongly against home working",
+      "Strongly in favour of home working",
+      "Humorous"
+     ],
+     "fr": [
+      "Équilibré, pesant les deux côtés",
+      "Nettement contre le télétravail",
+      "Nettement pour le télétravail",
+      "Humoristique"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "多くの会社が、社員に在宅勤務を認めるようになった。",
+    "translation": {
+     "en": "Many companies have come to allow their employees to work from home.",
+     "fr": "De nombreuses entreprises en sont venues à autoriser le télétravail à leurs employés."
+    },
+    "note": {
+     "en": "The pattern 「〜ようになった」 marks a change that has taken place over time.",
+     "fr": "La structure 「〜ようになった」 marque un changement survenu avec le temps."
+    },
+    "words": [
+     {
+      "surface": "多く",
+      "meaning": {
+       "en": "many",
+       "fr": "beaucoup"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "会社",
+      "meaning": {
+       "en": "companies",
+       "fr": "entreprises"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "社員",
+      "meaning": {
+       "en": "employees",
+       "fr": "employés"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "在宅勤務",
+      "meaning": {
+       "en": "working from home",
+       "fr": "télétravail"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "認める",
+      "meaning": {
+       "en": "to allow",
+       "fr": "autoriser"
+      }
+     },
+     {
+      "surface": "ようになった",
+      "meaning": {
+       "en": "have come to",
+       "fr": "en sont venues à"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "通勤時間がなくなり、自分の都合に合わせて働けるというよい点は大きい。",
+    "translation": {
+     "en": "The advantage of having no commute and being able to work around one's own schedule is considerable.",
+     "fr": "L'avantage de n'avoir plus de trajet et de pouvoir travailler selon ses propres contraintes est considérable."
+    },
+    "note": {
+     "en": "The pattern 「〜という点」 names a feature; 「〜に合わせて」 means adapting to something.",
+     "fr": "La structure 「〜という点」 désigne un aspect ; 「〜に合わせて」 signifie en s'adaptant à quelque chose."
+    },
+    "words": [
+     {
+      "surface": "通勤時間",
+      "meaning": {
+       "en": "commuting time",
+       "fr": "temps de trajet"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "なくなり",
+      "meaning": {
+       "en": "disappears, and",
+       "fr": "disparaît, et"
+      }
+     },
+     {
+      "surface": "自分",
+      "meaning": {
+       "en": "oneself",
+       "fr": "soi-même"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "都合",
+      "meaning": {
+       "en": "convenience, schedule",
+       "fr": "convenance, contraintes"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "合わせて",
+      "meaning": {
+       "en": "adapting to",
+       "fr": "en s'adaptant"
+      }
+     },
+     {
+      "surface": "働ける",
+      "meaning": {
+       "en": "can work",
+       "fr": "peut travailler"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "namely",
+       "fr": "à savoir"
+      }
+     },
+     {
+      "surface": "よい",
+      "meaning": {
+       "en": "good",
+       "fr": "bon"
+      }
+     },
+     {
+      "surface": "点",
+      "meaning": {
+       "en": "point, aspect",
+       "fr": "point, aspect"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "大きい",
+      "meaning": {
+       "en": "big, considerable",
+       "fr": "grand, considérable"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、家で働けるからといって、仕事が楽になるわけではない。",
+    "translation": {
+     "en": "However, just because one can work at home does not mean the work becomes easier.",
+     "fr": "Cependant, ce n'est pas parce qu'on peut travailler chez soi que le travail devient plus facile."
+    },
+    "note": {
+     "en": "The pattern 「〜からといって〜わけではない」 rejects a conclusion drawn too quickly from a reason.",
+     "fr": "La structure 「〜からといって〜わけではない」 rejette une conclusion tirée trop vite d'une raison."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "however",
+       "fr": "cependant"
+      }
+     },
+     {
+      "surface": "家",
+      "meaning": {
+       "en": "home",
+       "fr": "maison"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "at (place of action)",
+       "fr": "à (lieu de l'action)"
+      }
+     },
+     {
+      "surface": "働ける",
+      "meaning": {
+       "en": "can work",
+       "fr": "peut travailler"
+      }
+     },
+     {
+      "surface": "からといって",
+      "meaning": {
+       "en": "just because",
+       "fr": "ce n'est pas parce que"
+      }
+     },
+     {
+      "surface": "仕事",
+      "meaning": {
+       "en": "work",
+       "fr": "travail"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "楽に",
+      "meaning": {
+       "en": "easy (adverb form)",
+       "fr": "facile (forme adverbiale)"
+      }
+     },
+     {
+      "surface": "なる",
+      "meaning": {
+       "en": "become",
+       "fr": "devenir"
+      }
+     },
+     {
+      "surface": "わけではない",
+      "meaning": {
+       "en": "it does not mean that",
+       "fr": "cela ne signifie pas que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "むしろ、仕事と生活の境目があいまいになり、かえって長く働いてしまう人も少なくない。",
+    "translation": {
+     "en": "If anything, the line between work and life blurs, and quite a few people end up working longer instead.",
+     "fr": "Au contraire, la frontière entre travail et vie privée s'estompe, et bon nombre de gens finissent par travailler plus longtemps."
+    },
+    "note": {
+     "en": "The adverb 「かえって」 means contrary to expectation; 「少なくない」 is a double negative meaning quite a few.",
+     "fr": "L'adverbe 「かえって」 signifie contrairement à l'attente ; 「少なくない」 est une double négation signifiant pas mal de."
+    },
+    "words": [
+     {
+      "surface": "むしろ",
+      "meaning": {
+       "en": "rather",
+       "fr": "au contraire"
+      }
+     },
+     {
+      "surface": "仕事",
+      "meaning": {
+       "en": "work",
+       "fr": "travail"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "and",
+       "fr": "et"
+      }
+     },
+     {
+      "surface": "生活",
+      "meaning": {
+       "en": "daily life",
+       "fr": "vie privée"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "境目",
+      "meaning": {
+       "en": "boundary",
+       "fr": "frontière"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "あいまいに",
+      "meaning": {
+       "en": "vague (adverb form)",
+       "fr": "flou (forme adverbiale)"
+      }
+     },
+     {
+      "surface": "なり",
+      "meaning": {
+       "en": "becomes, and",
+       "fr": "devient, et"
+      }
+     },
+     {
+      "surface": "かえって",
+      "meaning": {
+       "en": "on the contrary",
+       "fr": "au contraire"
+      }
+     },
+     {
+      "surface": "長く",
+      "meaning": {
+       "en": "long (adverb form)",
+       "fr": "longtemps"
+      }
+     },
+     {
+      "surface": "働いてしまう",
+      "meaning": {
+       "en": "end up working",
+       "fr": "finissent par travailler"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "gens"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "also",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "少なくない",
+      "meaning": {
+       "en": "are not few",
+       "fr": "ne sont pas rares"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ある調査では、在宅勤務を続けたいと答えた人が七割を超えた。",
+    "translation": {
+     "en": "In one survey, more than seventy percent of respondents said they wanted to keep working from home.",
+     "fr": "Dans une enquête, plus de soixante-dix pour cent des personnes interrogées ont dit vouloir continuer à télétravailler."
+    },
+    "note": {
+     "en": "The word 「ある」 before a noun means a certain, unnamed one; 「〜を超えた」 means exceeded.",
+     "fr": "Le mot 「ある」 devant un nom signifie un certain, non précisé ; 「〜を超えた」 signifie a dépassé."
+    },
+    "words": [
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "une certaine"
+      }
+     },
+     {
+      "surface": "調査",
+      "meaning": {
+       "en": "survey",
+       "fr": "enquête"
+      }
+     },
+     {
+      "surface": "では",
+      "meaning": {
+       "en": "in (as the topic)",
+       "fr": "dans (en thème)"
+      }
+     },
+     {
+      "surface": "在宅勤務",
+      "meaning": {
+       "en": "working from home",
+       "fr": "télétravail"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "続けたい",
+      "meaning": {
+       "en": "want to continue",
+       "fr": "veulent continuer"
+      }
+     },
+     {
+      "surface": "と",
+      "meaning": {
+       "en": "marks the content",
+       "fr": "marque le contenu"
+      }
+     },
+     {
+      "surface": "答えた",
+      "meaning": {
+       "en": "answered",
+       "fr": "ont répondu"
+      }
+     },
+     {
+      "surface": "人",
+      "meaning": {
+       "en": "people",
+       "fr": "personnes"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "七割",
+      "meaning": {
+       "en": "seventy percent",
+       "fr": "soixante-dix pour cent"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "超えた",
+      "meaning": {
+       "en": "exceeded",
+       "fr": "ont dépassé"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "会社としては、社員の希望を聞かないわけにはいかない。",
+    "translation": {
+     "en": "As a company, one cannot afford to ignore what employees want.",
+     "fr": "En tant qu'entreprise, on ne peut pas se permettre d'ignorer les souhaits des employés."
+    },
+    "note": {
+     "en": "The pattern 「〜ないわけにはいかない」 means one cannot get away with not doing it.",
+     "fr": "La structure 「〜ないわけにはいかない」 signifie qu'on ne peut pas se permettre de ne pas le faire."
+    },
+    "words": [
+     {
+      "surface": "会社",
+      "meaning": {
+       "en": "company",
+       "fr": "entreprise"
+      }
+     },
+     {
+      "surface": "としては",
+      "meaning": {
+       "en": "as, from the standpoint of",
+       "fr": "en tant que"
+      }
+     },
+     {
+      "surface": "社員",
+      "meaning": {
+       "en": "employees",
+       "fr": "employés"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "希望",
+      "meaning": {
+       "en": "wishes",
+       "fr": "souhaits"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "聞かない",
+      "meaning": {
+       "en": "not listen to",
+       "fr": "ne pas écouter"
+      }
+     },
+     {
+      "surface": "わけにはいかない",
+      "meaning": {
+       "en": "cannot afford to",
+       "fr": "ne peut pas se permettre de"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "一方で、全員が同じ日に会社に来れば、オフィスの広さが足りなくなる。",
+    "translation": {
+     "en": "On the other hand, if everyone comes in on the same day, the office is not big enough.",
+     "fr": "D'un autre côté, si tout le monde vient le même jour, la surface du bureau ne suffit plus."
+    },
+    "note": {
+     "en": "The pattern 「〜ば」 in 「来れば」 gives the condition; 「足りなくなる」 means becomes insufficient.",
+     "fr": "La structure 「〜ば」 dans 「来れば」 donne la condition ; 「足りなくなる」 signifie devient insuffisant."
+    },
+    "words": [
+     {
+      "surface": "一方で",
+      "meaning": {
+       "en": "on the other hand",
+       "fr": "d'un autre côté"
+      }
+     },
+     {
+      "surface": "全員",
+      "meaning": {
+       "en": "everyone",
+       "fr": "tout le monde"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "同じ",
+      "meaning": {
+       "en": "same",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "日",
+      "meaning": {
+       "en": "day",
+       "fr": "jour"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "on",
+       "fr": "le"
+      }
+     },
+     {
+      "surface": "会社",
+      "meaning": {
+       "en": "office",
+       "fr": "bureau"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "来れば",
+      "meaning": {
+       "en": "if they come",
+       "fr": "s'ils viennent"
+      }
+     },
+     {
+      "surface": "オフィス",
+      "meaning": {
+       "en": "office",
+       "fr": "bureau"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "広さ",
+      "meaning": {
+       "en": "size, space",
+       "fr": "surface"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "足りなくなる",
+      "meaning": {
+       "en": "becomes insufficient",
+       "fr": "devient insuffisante"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "つまり、どの会社も、それぞれの事情に合った働き方を探さざるを得ないのである。",
+    "translation": {
+     "en": "In other words, every company has no choice but to look for a way of working that fits its own circumstances.",
+     "fr": "Autrement dit, chaque entreprise n'a d'autre choix que de chercher un mode de travail adapté à sa propre situation."
+    },
+    "note": {
+     "en": "The pattern 「〜ざるを得ない」 means there is no alternative to doing it; 「のである」 closes the argument formally.",
+     "fr": "La structure 「〜ざるを得ない」 signifie qu'il n'y a pas d'autre issue ; 「のである」 clôt l'argument de façon formelle."
+    },
+    "words": [
+     {
+      "surface": "つまり",
+      "meaning": {
+       "en": "in other words",
+       "fr": "autrement dit"
+      }
+     },
+     {
+      "surface": "どの",
+      "meaning": {
+       "en": "which, every",
+       "fr": "chaque"
+      }
+     },
+     {
+      "surface": "会社",
+      "meaning": {
+       "en": "company",
+       "fr": "entreprise"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "every (with どの)",
+       "fr": "toute (avec どの)"
+      }
+     },
+     {
+      "surface": "それぞれ",
+      "meaning": {
+       "en": "each",
+       "fr": "chacune"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "事情",
+      "meaning": {
+       "en": "circumstances",
+       "fr": "situation"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "à"
+      }
+     },
+     {
+      "surface": "合った",
+      "meaning": {
+       "en": "suited",
+       "fr": "adapté"
+      }
+     },
+     {
+      "surface": "働き方",
+      "meaning": {
+       "en": "way of working",
+       "fr": "mode de travail"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "探さざるを得ない",
+      "meaning": {
+       "en": "cannot help but seek",
+       "fr": "n'a d'autre choix que de chercher"
+      }
+     },
+     {
+      "surface": "のである",
+      "meaning": {
+       "en": "it is that (formal)",
+       "fr": "c'est que (formel)"
+      }
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "id": "n2-03",
+  "level": "N2",
+  "title": "都市のカラス",
+  "grammar": [
+   "〜にすぎない",
+   "〜をはじめ",
+   "〜に伴って"
+  ],
+  "text": "近年、都市部でカラスの数が増えているという報告が相次いでいる。ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
+  "questions": [
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What has been reported repeatedly in recent years?",
+     "fr": "Qu'a-t-on signalé à répétition ces dernières années ?"
+    },
+    "options": {
+     "en": [
+      "An increase in crows in urban areas",
+      "A fall in the number of crows",
+      "New rubbish collection rules",
+      "Crows leaving the cities"
+     ],
+     "fr": [
+      "Une augmentation des corbeaux en ville",
+      "Une baisse du nombre de corbeaux",
+      "De nouvelles règles de collecte des déchets",
+      "Le départ des corbeaux des villes"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "According to the research, what is the cause?",
+     "fr": "Selon l'étude, quelle en est la cause ?"
+    },
+    "options": {
+     "en": [
+      "More household rubbish",
+      "Warmer weather",
+      "Fewer natural enemies",
+      "More trees in cities"
+     ],
+     "fr": [
+      "Davantage de déchets ménagers",
+      "Un climat plus chaud",
+      "Moins de prédateurs",
+      "Plus d'arbres en ville"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "vocabulary",
+    "question": {
+     "en": "What does 「賢い」 mean?",
+     "fr": "Que signifie 「賢い」 ?"
+    },
+    "options": {
+     "en": [
+      "Clever",
+      "Noisy",
+      "Black",
+      "Hungry"
+     ],
+     "fr": [
+      "Intelligent",
+      "Bruyant",
+      "Noir",
+      "Affamé"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What do crows remember, according to the text?",
+     "fr": "De quoi les corbeaux se souviennent-ils, selon le texte ?"
+    },
+    "options": {
+     "en": [
+      "The colour of rubbish bags and the collection time",
+      "The faces of residents",
+      "The names of streets",
+      "The weather forecast"
+     ],
+     "fr": [
+      "La couleur des sacs poubelle et l'heure de la collecte",
+      "Les visages des habitants",
+      "Les noms des rues",
+      "La météo"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「ごく一部にすぎない」 mean?",
+     "fr": "Que signifie 「ごく一部にすぎない」 ?"
+    },
+    "options": {
+     "en": [
+      "It is no more than a very small part",
+      "It is the largest part",
+      "It is exactly half",
+      "It is more than expected"
+     ],
+     "fr": [
+      "Ce n'est qu'une toute petite partie",
+      "C'est la plus grande partie",
+      "C'est exactement la moitié",
+      "C'est plus que prévu"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「木の実をはじめ」 do in the sentence?",
+     "fr": "Quel est le rôle de 「木の実をはじめ」 dans la phrase ?"
+    },
+    "options": {
+     "en": [
+      "It gives the leading example of a longer list",
+      "It excludes nuts from the list",
+      "It says nuts are the only food",
+      "It says nuts come last"
+     ],
+     "fr": [
+      "Il donne l'exemple principal d'une liste plus longue",
+      "Il exclut les fruits des arbres de la liste",
+      "Il dit que les fruits des arbres sont la seule nourriture",
+      "Il dit que les fruits des arbres viennent en dernier"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "grammar",
+    "question": {
+     "en": "What does 「人口の増加に伴って」 express?",
+     "fr": "Qu'exprime 「人口の増加に伴って」 ?"
+    },
+    "options": {
+     "en": [
+      "A change that went along with population growth",
+      "A change that prevented population growth",
+      "A change unrelated to population",
+      "A change that happened before population growth"
+     ],
+     "fr": [
+      "Un changement qui a accompagné la croissance de la population",
+      "Un changement qui a empêché la croissance de la population",
+      "Un changement sans lien avec la population",
+      "Un changement antérieur à la croissance de la population"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What did crows' food change into?",
+     "fr": "En quoi la nourriture des corbeaux s'est-elle transformée ?"
+    },
+    "options": {
+     "en": [
+      "Human rubbish",
+      "Insects only",
+      "Fish",
+      "Farm crops"
+     ],
+     "fr": [
+      "Les déchets humains",
+      "Uniquement des insectes",
+      "Du poisson",
+      "Les récoltes agricoles"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "comprehension",
+    "question": {
+     "en": "What does the writer say is the surest method?",
+     "fr": "Quelle est, selon l'auteur, la méthode la plus sûre ?"
+    },
+    "options": {
+     "en": [
+      "Removing the reasons crows approach rubbish",
+      "Chasing crows away",
+      "Catching crows",
+      "Feeding crows elsewhere"
+     ],
+     "fr": [
+      "Supprimer les raisons pour lesquelles les corbeaux s'approchent des déchets",
+      "Chasser les corbeaux",
+      "Capturer les corbeaux",
+      "Nourrir les corbeaux ailleurs"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "Why does the writer describe what crows eat in nature?",
+     "fr": "Pourquoi l'auteur décrit-il ce que mangent les corbeaux dans la nature ?"
+    },
+    "options": {
+     "en": [
+      "To show that scavenging rubbish is not their normal way of life",
+      "To show crows are dangerous",
+      "To prove crows cannot be controlled",
+      "To recommend feeding them nuts"
+     ],
+     "fr": [
+      "Pour montrer que fouiller les déchets n'est pas leur mode de vie normal",
+      "Pour montrer que les corbeaux sont dangereux",
+      "Pour prouver qu'on ne peut pas les contrôler",
+      "Pour recommander de les nourrir de fruits"
+     ]
+    },
+    "correct": 0
+   },
+   {
+    "type": "inference",
+    "question": {
+     "en": "What is the writer's view of the crow problem?",
+     "fr": "Quel est le point de vue de l'auteur sur le problème des corbeaux ?"
+    },
+    "options": {
+     "en": [
+      "It is largely a human-made problem to be solved by changing human habits",
+      "It is the crows' fault",
+      "It cannot be solved",
+      "It is exaggerated by the media"
+     ],
+     "fr": [
+      "C'est surtout un problème créé par l'homme, à résoudre en changeant les habitudes humaines",
+      "C'est la faute des corbeaux",
+      "Il est insoluble",
+      "Il est exagéré par les médias"
+     ]
+    },
+    "correct": 0
+   }
+  ],
+  "breakdown": [
+   {
+    "jp": "近年、都市部でカラスの数が増えているという報告が相次いでいる。",
+    "translation": {
+     "en": "In recent years there have been one report after another of crows increasing in urban areas.",
+     "fr": "Ces dernières années, les signalements d'une augmentation des corbeaux en zone urbaine se succèdent."
+    },
+    "note": {
+     "en": "The pattern 「〜という報告」 names the content of the report; 「相次いでいる」 means coming one after another.",
+     "fr": "La structure 「〜という報告」 précise le contenu du signalement ; 「相次いでいる」 signifie se succéder."
+    },
+    "words": [
+     {
+      "surface": "近年",
+      "meaning": {
+       "en": "in recent years",
+       "fr": "ces dernières années"
+      }
+     },
+     {
+      "surface": "都市部",
+      "meaning": {
+       "en": "urban areas",
+       "fr": "zones urbaines"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "カラス",
+      "meaning": {
+       "en": "crow",
+       "fr": "corbeau"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "数",
+      "meaning": {
+       "en": "number",
+       "fr": "nombre"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "増えている",
+      "meaning": {
+       "en": "is increasing",
+       "fr": "augmente"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "that (content)",
+       "fr": "selon lesquels"
+      }
+     },
+     {
+      "surface": "報告",
+      "meaning": {
+       "en": "report",
+       "fr": "signalement"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "相次いでいる",
+      "meaning": {
+       "en": "come one after another",
+       "fr": "se succèdent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "ある研究によると、その原因は、家庭から出るごみの量が増えたことにあるらしい。",
+    "translation": {
+     "en": "According to one study, the cause apparently lies in the increase in household rubbish.",
+     "fr": "Selon une étude, la cause résiderait dans l'augmentation des déchets ménagers."
+    },
+    "note": {
+     "en": "The pattern 「〜によると〜らしい」 attributes the claim to a source and marks it as reported.",
+     "fr": "La structure 「〜によると〜らしい」 attribue l'affirmation à une source et la présente comme rapportée."
+    },
+    "words": [
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "a certain",
+       "fr": "une certaine"
+      }
+     },
+     {
+      "surface": "研究",
+      "meaning": {
+       "en": "study",
+       "fr": "étude"
+      }
+     },
+     {
+      "surface": "によると",
+      "meaning": {
+       "en": "according to",
+       "fr": "selon"
+      }
+     },
+     {
+      "surface": "その",
+      "meaning": {
+       "en": "that",
+       "fr": "cette"
+      }
+     },
+     {
+      "surface": "原因",
+      "meaning": {
+       "en": "cause",
+       "fr": "cause"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "家庭",
+      "meaning": {
+       "en": "households",
+       "fr": "ménages"
+      }
+     },
+     {
+      "surface": "から",
+      "meaning": {
+       "en": "from",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "出る",
+      "meaning": {
+       "en": "come out",
+       "fr": "sortir"
+      }
+     },
+     {
+      "surface": "ごみ",
+      "meaning": {
+       "en": "rubbish",
+       "fr": "déchets"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "量",
+      "meaning": {
+       "en": "amount",
+       "fr": "quantité"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "増えた",
+      "meaning": {
+       "en": "increased",
+       "fr": "a augmenté"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the fact",
+       "fr": "le fait"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "in",
+       "fr": "dans"
+      }
+     },
+     {
+      "surface": "ある",
+      "meaning": {
+       "en": "lies",
+       "fr": "réside"
+      }
+     },
+     {
+      "surface": "らしい",
+      "meaning": {
+       "en": "apparently",
+       "fr": "il semble"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "カラスは非常に賢い鳥で、ごみ袋の色や、ごみを集める車が来る時刻まで覚えるという。",
+    "translation": {
+     "en": "Crows are extremely clever birds, said to remember even the colour of rubbish bags and the time the collection truck comes.",
+     "fr": "Les corbeaux sont des oiseaux très intelligents, qui retiendraient jusqu'à la couleur des sacs poubelle et l'heure de passage du camion de collecte."
+    },
+    "note": {
+     "en": "The particle 「まで」 here means even, stressing the extreme; 「〜という」 at the end marks hearsay.",
+     "fr": "La particule 「まで」 signifie ici même, soulignant l'extrême ; 「〜という」 en fin de phrase marque un ouï-dire."
+    },
+    "words": [
+     {
+      "surface": "カラス",
+      "meaning": {
+       "en": "crows",
+       "fr": "corbeaux"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "非常に",
+      "meaning": {
+       "en": "extremely",
+       "fr": "extrêmement"
+      }
+     },
+     {
+      "surface": "賢い",
+      "meaning": {
+       "en": "clever",
+       "fr": "intelligent"
+      }
+     },
+     {
+      "surface": "鳥",
+      "meaning": {
+       "en": "bird",
+       "fr": "oiseau"
+      }
+     },
+     {
+      "surface": "で",
+      "meaning": {
+       "en": "is, and",
+       "fr": "est, et"
+      }
+     },
+     {
+      "surface": "ごみ袋",
+      "meaning": {
+       "en": "rubbish bag",
+       "fr": "sac poubelle"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "色",
+      "meaning": {
+       "en": "colour",
+       "fr": "couleur"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and (among others)",
+       "fr": "et (entre autres)"
+      }
+     },
+     {
+      "surface": "ごみ",
+      "meaning": {
+       "en": "rubbish",
+       "fr": "déchets"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "集める",
+      "meaning": {
+       "en": "to collect",
+       "fr": "ramasser"
+      }
+     },
+     {
+      "surface": "車",
+      "meaning": {
+       "en": "truck",
+       "fr": "camion"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "来る",
+      "meaning": {
+       "en": "comes",
+       "fr": "passe"
+      }
+     },
+     {
+      "surface": "時刻",
+      "meaning": {
+       "en": "time",
+       "fr": "heure"
+      }
+     },
+     {
+      "surface": "まで",
+      "meaning": {
+       "en": "even",
+       "fr": "même"
+      }
+     },
+     {
+      "surface": "覚える",
+      "meaning": {
+       "en": "remember",
+       "fr": "retiennent"
+      }
+     },
+     {
+      "surface": "という",
+      "meaning": {
+       "en": "it is said",
+       "fr": "dit-on"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "しかし、ごみを散らかす行動は、彼らの暮らしのごく一部にすぎない。",
+    "translation": {
+     "en": "However, scattering rubbish is only a very small part of how they live.",
+     "fr": "Cependant, éparpiller les déchets n'est qu'une infime partie de leur mode de vie."
+    },
+    "note": {
+     "en": "The pattern 「〜にすぎない」 means nothing more than, playing something down.",
+     "fr": "La structure 「〜にすぎない」 signifie rien de plus que, et minimise la chose."
+    },
+    "words": [
+     {
+      "surface": "しかし",
+      "meaning": {
+       "en": "however",
+       "fr": "cependant"
+      }
+     },
+     {
+      "surface": "ごみ",
+      "meaning": {
+       "en": "rubbish",
+       "fr": "déchets"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "散らかす",
+      "meaning": {
+       "en": "to scatter",
+       "fr": "éparpiller"
+      }
+     },
+     {
+      "surface": "行動",
+      "meaning": {
+       "en": "behaviour",
+       "fr": "comportement"
+      }
+     },
+     {
+      "surface": "は",
+      "meaning": {
+       "en": "topic marker",
+       "fr": "marque le thème"
+      }
+     },
+     {
+      "surface": "彼ら",
+      "meaning": {
+       "en": "they",
+       "fr": "ils"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "暮らし",
+      "meaning": {
+       "en": "way of life",
+       "fr": "mode de vie"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ごく",
+      "meaning": {
+       "en": "very",
+       "fr": "très"
+      }
+     },
+     {
+      "surface": "一部",
+      "meaning": {
+       "en": "a part",
+       "fr": "une partie"
+      }
+     },
+     {
+      "surface": "にすぎない",
+      "meaning": {
+       "en": "is no more than",
+       "fr": "n'est que"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "実際には、木の実をはじめ、虫や小さな動物など、さまざまなものを食べて生きている。",
+    "translation": {
+     "en": "In reality they live on all sorts of things, starting with nuts and berries and including insects and small animals.",
+     "fr": "En réalité, ils se nourrissent de toutes sortes de choses, à commencer par les fruits des arbres, mais aussi d'insectes et de petits animaux."
+    },
+    "note": {
+     "en": "The pattern 「〜をはじめ」 puts forward the leading example of a list that continues with 「など」.",
+     "fr": "La structure 「〜をはじめ」 met en avant l'exemple principal d'une liste qui se poursuit avec 「など」."
+    },
+    "words": [
+     {
+      "surface": "実際には",
+      "meaning": {
+       "en": "in reality",
+       "fr": "en réalité"
+      }
+     },
+     {
+      "surface": "木の実",
+      "meaning": {
+       "en": "nuts and berries",
+       "fr": "fruits des arbres"
+      }
+     },
+     {
+      "surface": "をはじめ",
+      "meaning": {
+       "en": "starting with",
+       "fr": "à commencer par"
+      }
+     },
+     {
+      "surface": "虫",
+      "meaning": {
+       "en": "insects",
+       "fr": "insectes"
+      }
+     },
+     {
+      "surface": "や",
+      "meaning": {
+       "en": "and (among others)",
+       "fr": "et (entre autres)"
+      }
+     },
+     {
+      "surface": "小さな",
+      "meaning": {
+       "en": "small",
+       "fr": "petits"
+      }
+     },
+     {
+      "surface": "動物",
+      "meaning": {
+       "en": "animals",
+       "fr": "animaux"
+      }
+     },
+     {
+      "surface": "など",
+      "meaning": {
+       "en": "and so on",
+       "fr": "etc."
+      }
+     },
+     {
+      "surface": "さまざまな",
+      "meaning": {
+       "en": "various",
+       "fr": "toutes sortes de"
+      }
+     },
+     {
+      "surface": "もの",
+      "meaning": {
+       "en": "things",
+       "fr": "choses"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "食べて",
+      "meaning": {
+       "en": "eating",
+       "fr": "en mangeant"
+      }
+     },
+     {
+      "surface": "生きている",
+      "meaning": {
+       "en": "live",
+       "fr": "vivent"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "人口の増加に伴って、カラスの食べ物も人間のごみへと変わっていったのである。",
+    "translation": {
+     "en": "As the human population grew, crows' food too shifted towards human rubbish.",
+     "fr": "Avec la croissance de la population, la nourriture des corbeaux s'est elle aussi tournée vers les déchets humains."
+    },
+    "note": {
+     "en": "The pattern 「〜に伴って」 links one change to another that came with it; 「〜ていった」 shows gradual change away from the past.",
+     "fr": "La structure 「〜に伴って」 lie un changement à celui qui l'a accompagné ; 「〜ていった」 montre une évolution progressive."
+    },
+    "words": [
+     {
+      "surface": "人口",
+      "meaning": {
+       "en": "population",
+       "fr": "population"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "増加",
+      "meaning": {
+       "en": "growth",
+       "fr": "croissance"
+      }
+     },
+     {
+      "surface": "に伴って",
+      "meaning": {
+       "en": "along with",
+       "fr": "avec, à mesure de"
+      }
+     },
+     {
+      "surface": "カラス",
+      "meaning": {
+       "en": "crows",
+       "fr": "corbeaux"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "食べ物",
+      "meaning": {
+       "en": "food",
+       "fr": "nourriture"
+      }
+     },
+     {
+      "surface": "も",
+      "meaning": {
+       "en": "too",
+       "fr": "aussi"
+      }
+     },
+     {
+      "surface": "人間",
+      "meaning": {
+       "en": "humans",
+       "fr": "humains"
+      }
+     },
+     {
+      "surface": "の",
+      "meaning": {
+       "en": "of",
+       "fr": "de"
+      }
+     },
+     {
+      "surface": "ごみ",
+      "meaning": {
+       "en": "rubbish",
+       "fr": "déchets"
+      }
+     },
+     {
+      "surface": "へと",
+      "meaning": {
+       "en": "towards",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "変わっていった",
+      "meaning": {
+       "en": "gradually changed",
+       "fr": "s'est progressivement transformée"
+      }
+     },
+     {
+      "surface": "のである",
+      "meaning": {
+       "en": "it is that (formal)",
+       "fr": "c'est que (formel)"
+      }
+     }
+    ]
+   },
+   {
+    "jp": "カラスを追い払うのではなく、彼らがごみに近づく理由をなくすことが、もっとも確実な方法なのだ。",
+    "translation": {
+     "en": "The surest method is not to chase the crows away but to remove the reasons they approach the rubbish.",
+     "fr": "La méthode la plus sûre n'est pas de chasser les corbeaux, mais de supprimer les raisons qui les attirent vers les déchets."
+    },
+    "note": {
+     "en": "The pattern 「〜のではなく〜こと」 rejects one course of action and names another.",
+     "fr": "La structure 「〜のではなく〜こと」 rejette une ligne d'action et en désigne une autre."
+    },
+    "words": [
+     {
+      "surface": "カラス",
+      "meaning": {
+       "en": "crows",
+       "fr": "corbeaux"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "追い払う",
+      "meaning": {
+       "en": "to chase away",
+       "fr": "chasser"
+      }
+     },
+     {
+      "surface": "のではなく",
+      "meaning": {
+       "en": "rather than",
+       "fr": "plutôt que"
+      }
+     },
+     {
+      "surface": "彼ら",
+      "meaning": {
+       "en": "they",
+       "fr": "ils"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "ごみ",
+      "meaning": {
+       "en": "rubbish",
+       "fr": "déchets"
+      }
+     },
+     {
+      "surface": "に",
+      "meaning": {
+       "en": "to",
+       "fr": "vers"
+      }
+     },
+     {
+      "surface": "近づく",
+      "meaning": {
+       "en": "approach",
+       "fr": "s'approcher"
+      }
+     },
+     {
+      "surface": "理由",
+      "meaning": {
+       "en": "reason",
+       "fr": "raison"
+      }
+     },
+     {
+      "surface": "を",
+      "meaning": {
+       "en": "marks the object",
+       "fr": "marque l'objet"
+      }
+     },
+     {
+      "surface": "なくす",
+      "meaning": {
+       "en": "to remove",
+       "fr": "supprimer"
+      }
+     },
+     {
+      "surface": "こと",
+      "meaning": {
+       "en": "the act of",
+       "fr": "le fait de"
+      }
+     },
+     {
+      "surface": "が",
+      "meaning": {
+       "en": "subject marker",
+       "fr": "marque le sujet"
+      }
+     },
+     {
+      "surface": "もっとも",
+      "meaning": {
+       "en": "most",
+       "fr": "le plus"
+      }
+     },
+     {
+      "surface": "確実な",
+      "meaning": {
+       "en": "sure",
+       "fr": "sûr"
+      }
+     },
+     {
+      "surface": "方法",
+      "meaning": {
+       "en": "method",
+       "fr": "méthode"
+      }
+     },
+     {
+      "surface": "なのだ",
+      "meaning": {
+       "en": "it is that",
+       "fr": "c'est que"
+      }
+     }
+    ]
+   }
+  ]
+ }
+]

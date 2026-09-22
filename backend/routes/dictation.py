@@ -135,7 +135,7 @@ def get_dictation_batch(
     level: str = Query(..., description="N5..N1"),
     count: int = Query(DEFAULT_BATCH, ge=1, le=MAX_BATCH),
     # Clip ids this session has already played, "|"-separated. The bank
-    # is finite (18-20 lines a level), so without this a sitting hears
+    # is finite (30-32 lines a level, plan 111), so without this a sitting hears
     # the same line three times; with it, the picker works through the
     # level before it repeats. Same arrangement, and the same separator,
     # as reading practice's `exclude`.
