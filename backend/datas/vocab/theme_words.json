@@ -898,7 +898,7 @@
   {
    "domain": "vocab",
    "kana": "のど",
-   "kanji": "喉",
+   "kanji": "",
    "level": "expert",
    "meaning": "throat",
    "rank": 46,
@@ -952,7 +952,7 @@
   {
    "domain": "vocab",
    "kana": "おなか",
-   "kanji": "お腹",
+   "kanji": "",
    "level": "expert",
    "meaning": "belly, abdomen",
    "rank": 52,
@@ -3184,7 +3184,7 @@
   {
    "domain": "vocab",
    "kana": "いす",
-   "kanji": "椅子",
+   "kanji": "",
    "level": "advanced",
    "meaning": "chair, seat",
    "rank": 10,
@@ -3784,7 +3784,7 @@
   {
    "domain": "vocab",
    "kana": "かぎ",
-   "kanji": "鍵",
+   "kanji": "",
    "level": "medium",
    "meaning": "key",
    "rank": 7,
@@ -4654,7 +4654,7 @@
   {
    "domain": "vocab",
    "kana": "はし",
-   "kanji": "箸",
+   "kanji": "",
    "level": "medium",
    "meaning": "chopsticks",
    "rank": 8,
@@ -5976,7 +5976,7 @@
   {
    "domain": "vocab",
    "kana": "つき",
-   "kanji": "月",
+   "kanji": "",
    "level": "expert",
    "meaning": "Moon",
    "rank": 36,

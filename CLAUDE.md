@@ -177,7 +177,10 @@ runtime purpose. Two consequences worth knowing:
   `scripts/migrate_vocab_ids.py`, `scripts/audit_vocab_deck.py`'s
   `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
   `routes/dictionary.py`, `routes/onboarding.py` and
-  `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
+  `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`), and
+  112b the ~100 kana cards below a kanji card of their own word (いす
+  and 椅子), where the owner chose the kana card (the same files, and
+  `study/card_lookup._vocab_index`'s folded pass).
   When starting a new wave, begin at **113** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -447,7 +450,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
+promises. Vocab is the one bank too big to walk exhaustively — 7,993 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.

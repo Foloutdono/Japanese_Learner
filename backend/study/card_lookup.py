@@ -359,6 +359,17 @@ def _vocab_index() -> dict[str, dict[str, dict]]:
                         continue
                     if any(is_kanji(c) for c in variant):
                         table.setdefault(variant, entry)
+            # A third pass, the same additive rule: a spelling plan 112
+            # folded into a card (vocab_renames.FOLDED_FORMS) names it.
+            # A curated sentence that practises 値段 schedules the N4
+            # ねだん card that took the word in, as it scheduled the N3
+            # 値段 card before plan 112b.
+            for entry in VOCAB_BY_LEVEL.get(level, []):
+                for kanji, kana in FOLDED_FORMS.get(vocab_to_id(entry, level), ()):
+                    readings = [r.strip() for r in kana.split("/") if r.strip()]
+                    keys = [kanji, *(f"{kanji}	{r}" for r in readings)] if kanji else readings
+                    for key in keys:
+                        table.setdefault(key, entry)
             built[level] = table
         _vocab_lookup = built
     return _vocab_lookup

@@ -565,7 +565,8 @@ Deploy, then, once each: `migrate_vocab_ids`, `migrate_kanji_ids`,
   面白い, ほんとう / 本当, いちばん / 一番. The rule would keep the kana
   card and take 椅子 off every card in the deck (the dictionary still
   finds it); the other way puts 椅子 on the N5 card. The first is the
-  JLPT lists' choice, the second decision 3's. The owner's call.
+  JLPT lists' choice, the second decision 3's. The owner chose the kana
+  card: 112b, below.
 - **こと (N4) and 事 (N3).** `resolve_kana` never resolves a bare こと
   (it is the nominaliser), so folding 事 into こと would strip the badge
   from every 事 in a sentence.
@@ -577,6 +578,21 @@ Deploy, then, once each: `migrate_vocab_ids`, `migrate_kanji_ids`,
   font, which JMdict reads みたらし: a content-audit finding, listed in
   `audit_vocab_deck.DISTINCT_PAIRS` so the guard does not call it a
   duplicate of お手洗い.
+
+**112b — the kana card keeps the word (DONE, 2026-09-22).** The owner's
+answer to the first of those: the kana card stays as written, at its
+level, its gloss the union (cleaned by hand where JMdict's numbering or
+tags came along), and the kanji card folds into it -- 98 cards onto 96,
+the deck 8,091 → 7,993. No card asks a learner to read 椅子 now; the
+dictionary finds it, a page's 椅子 badges the N5 いす, and a curated
+sentence practising 値段 or 大変 schedules the kana card, through
+`FOLDED_FORMS` (the focus-word index in `card_lookup._vocab_index` gained
+the same additive pass the other lookups have). Two consequences worth
+knowing: the exam's kanji distractors lose radical 89 (爻), whose last
+deck character was 爽やか's; and ひゃ's example words gain the pool's 百科
+now that ひゃっかじてん is one card, not three. こと and 事 stay apart, and
+the same-level N3 あと / 跡 is left as it is -- neither card sits below
+the other. `migrate_vocab_ids` carries the rows, as for 112.
 
 ## Order and dependencies
 

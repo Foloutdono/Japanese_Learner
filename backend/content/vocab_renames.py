@@ -134,9 +134,10 @@ MOVES: dict[str, str] = {
     # level, its gloss the union where the union reads as a gloss, the
     # other ids moved onto it. Two cards that write one reading with
     # DIFFERENT kanji (会う/遭う, 計る/量る/測る, 川/河) are different
-    # written words and stay; so, for now, does a kana card below a kanji
-    # card JMdict does not mark as usually kana (いす N5 / 椅子 N3).
-    # scripts/audit_vocab_deck's spelling_pairs is the guard.
+    # written words and stay. A kana card below a kanji card JMdict does
+    # not mark as usually kana (いす N5 / 椅子 N3) was left to the owner,
+    # and is 112b's, below. scripts/audit_vocab_deck's spelling_pairs is
+    # the guard.
     # A reading the lower card already packs: the N3 十 read じゅう and
     # the N3 十 read とお beside the N5 十 read じゅう/とお.
     "vocab_N3_十_とお": "vocab_N5_十_じゅう/とお",
@@ -538,6 +539,114 @@ MOVES: dict[str, str] = {
     "vocab_N1_目眩_めまい": "vocab_N2__めまい",
     "vocab_N1_諄い_くどい": "vocab_N2__くどい",
     "vocab_N1_下らない_くだらない": "vocab_N2__くだらない",
+
+    # ── Plan 112b: the kana card keeps the word (the owner's call) ──
+    # 112 left one kind open: a kana card below a kanji card of the same
+    # word whose kanji JMdict does NOT mark usually-kana -- いす (N5) and
+    # 椅子 (N3), かぎ and 鍵, おもしろい and 面白い, ほんとう and 本当.
+    # The owner chose the kana card, the JLPT lists' own spelling at the
+    # level the word is first taught: it stays as written, its gloss the
+    # union, and the kanji card folds in. No card asks for 椅子 now; the
+    # dictionary and the breakdown still find it (FOLDED_FORMS). こと (N4)
+    # and 事 (N3) stay apart for 112's reason.
+    "vocab_N3_邪魔_じゃま": "vocab_N4__じゃま",
+    "vocab_N3_濡れる_ぬれる": "vocab_N4__ぬれる",
+    "vocab_N3_一番_いちばん": "vocab_N5__いちばん",
+    "vocab_N3_素晴らしい_すばらしい": "vocab_N4__すばらしい",
+    "vocab_N3_褒める_ほめる": "vocab_N4__ほめる",
+    "vocab_N3_多分_たぶん": "vocab_N5__たぶん",
+    "vocab_N3_縦_たて": "vocab_N5__たて",
+    "vocab_N3_風呂_ふろ": "vocab_N5__ふろ",
+    "vocab_N3_椅子_いす": "vocab_N5__いす",
+    "vocab_N3_伺う_うかがう": "vocab_N4__うかがう",
+    "vocab_N3_月_つき": "vocab_N4__つき",
+    "vocab_N3_真面目_まじめ": "vocab_N4__まじめ",
+    "vocab_N3_他_ほか": "vocab_N5__ほか",
+    "vocab_N3_外_ほか": "vocab_N5__ほか",
+    "vocab_N3_本当_ほんとう": "vocab_N5__ほんとう",
+    "vocab_N3_お腹_おなか": "vocab_N5__おなか",
+    "vocab_N3_喉_のど": "vocab_N4__のど",
+    "vocab_N3_空く_すく": "vocab_N4__すく",
+    "vocab_N3_嬉しい_うれしい": "vocab_N4__うれしい",
+    "vocab_N3_最も_もっとも": "vocab_N4__もっとも",
+    "vocab_N3_熱心_ねっしん": "vocab_N4__ねっしん",
+    "vocab_N3_値段_ねだん": "vocab_N4__ねだん",
+    "vocab_N3_是非_ぜひ": "vocab_N4__ぜひ",
+    "vocab_N3_浴びる_あびる": "vocab_N5__あびる",
+    "vocab_N3_構う_かまう": "vocab_N4__かまう",
+    "vocab_N3_立派_りっぱ": "vocab_N5__りっぱ",
+    "vocab_N3_鍵_かぎ": "vocab_N5__かぎ",
+    "vocab_N3_大変_たいへん": "vocab_N5__たいへん",
+    "vocab_N3_履く_はく": "vocab_N5__はく",
+    "vocab_N2_床屋_とこや": "vocab_N4__とこや",
+    "vocab_N2_茶碗_ちゃわん": "vocab_N5__ちゃわん",
+    "vocab_N2_醤油_しょうゆ": "vocab_N5__しょうゆ",
+    "vocab_N2_箸_はし": "vocab_N5__はし",
+    "vocab_N1_呆れる_あきれる": "vocab_N2__あきれる",
+    "vocab_N1_素敵_すてき": "vocab_N3__すてき",
+    "vocab_N1_一昨昨日_さきおととい": "vocab_N2__さきおととい",
+    "vocab_N1_当たり前_あたりまえ": "vocab_N2__あたりまえ",
+    "vocab_N1_大ざっぱ_おおざっぱ": "vocab_N2__おおざっぱ",
+    "vocab_N1_其れでは_それでは": "vocab_N5__それでは",
+    "vocab_N1_何も_なにも": "vocab_N3__なにも",
+    "vocab_N1_爽やか_さわやか": "vocab_N2__さわやか",
+    "vocab_N1_仕舞_しまい": "vocab_N3__しまい",
+    "vocab_N1_何時の間にか_いつのまにか": "vocab_N2__いつのまにか",
+    "vocab_N1_図々しい_ずうずうしい": "vocab_N2__ずうずうしい",
+    "vocab_N1_茹でる_ゆでる": "vocab_N2__ゆでる",
+    "vocab_N1_物体ない_もったいない": "vocab_N2__もったいない",
+    "vocab_N1_御免ください_ごめんください": "vocab_N2__ごめんください",
+    "vocab_N1_相変わらず_あいかわらず": "vocab_N2__あいかわらず",
+    "vocab_N1_眩しい_まぶしい": "vocab_N2__まぶしい",
+    "vocab_N1_お願いします_おねがいします": "vocab_N2__おねがいします",
+    "vocab_N1_仰っしゃる_おっしゃる": "vocab_N4__おっしゃる",
+    "vocab_N1_慌てる_あわてる": "vocab_N2__あわてる",
+    "vocab_N1_お先に_おさきに": "vocab_N2__おさきに",
+    "vocab_N1_ご苦労様_ごくろうさま": "vocab_N2__ごくろうさま",
+    "vocab_N1_馬鹿らしい_ばからしい": "vocab_N2__ばからしい",
+    "vocab_N1_赤ちゃん_あかちゃん": "vocab_N4__あかちゃん",
+    "vocab_N1_市_いち": "vocab_N3__いち",
+    "vocab_N1_何しろ_なにしろ": "vocab_N2__なにしろ",
+    "vocab_N1_尻尾_しっぽ": "vocab_N2__しっぽ",
+    "vocab_N1_曖昧_あいまい": "vocab_N2__あいまい",
+    "vocab_N1_お大事に_おだいじに": "vocab_N2__おだいじに",
+    "vocab_N1_戴きます_いただきます": "vocab_N3__いただきます",
+    "vocab_N1_可愛がる_かわいがる": "vocab_N2__かわいがる",
+    "vocab_N1_可愛らしい_かわいらしい": "vocab_N3__かわいらしい",
+    "vocab_N1_好い_よい": "vocab_N5__いい/よい",
+    "vocab_N1_当てはめる_あてはめる": "vocab_N2__あてはめる",
+    "vocab_N1_面白い_おもしろい": "vocab_N5__おもしろい",
+    "vocab_N1_脅かす_おどかす": "vocab_N2__おどかす",
+    "vocab_N1_少なくとも_すくなくとも": "vocab_N2__すくなくとも",
+    "vocab_N1_殴る_なぐる": "vocab_N2__なぐる",
+    "vocab_N1_奇麗_きれい": "vocab_N5__きれい",
+    "vocab_N1_ぶら下げる_ぶらさげる": "vocab_N2__ぶらさげる",
+    "vocab_N1_止むを得ない_やむをえない": "vocab_N2__やむをえない",
+    "vocab_N1_怒鳴る_どなる": "vocab_N2__どなる",
+    "vocab_N1_酸っぱい_すっぱい": "vocab_N2__すっぱい",
+    "vocab_N1_何とも_なんとも": "vocab_N2__なんとも",
+    "vocab_N1_明後日_あさって": "vocab_N5__あさって",
+    "vocab_N1_可成_かなり": "vocab_N3__かなり",
+    "vocab_N1_百科辞典_ひゃっかじてん": "vocab_N2__ひゃっかじてん",
+    "vocab_N1_百科事典_ひゃっかじてん": "vocab_N2__ひゃっかじてん",
+    "vocab_N1_明々後日_しあさって": "vocab_N2__しあさって",
+    "vocab_N1_寄こす_よこす": "vocab_N2__よこす",
+    "vocab_N1_唸る_うなる": "vocab_N3__うなる",
+    "vocab_N1_否_いいえ": "vocab_N5__いいえ",
+    "vocab_N1_慌ただしい_あわただしい": "vocab_N2__あわただしい",
+    "vocab_N1_絨毯_じゅうたん": "vocab_N2__じゅうたん",
+    "vocab_N1_ローマ字_ローマじ": "vocab_N2__ローマじ",
+    "vocab_N1_その上_そのうえ": "vocab_N2__そのうえ",
+    "vocab_N1_お休み_おやすみ": "vocab_N2__おやすみ",
+    "vocab_N1_お目出度う_おめでとう": "vocab_N3__おめでとう",
+    "vocab_N1_騙す_だます": "vocab_N2__だます",
+    "vocab_N1_第一_だいいち": "vocab_N2__だいいち",
+    "vocab_N1_含嗽_うがい": "vocab_N3__うがい",
+    "vocab_N1_是非とも_ぜひとも": "vocab_N2__ぜひとも",
+    "vocab_N1_其れから_それから": "vocab_N5__それから",
+    "vocab_N1_この間_このあいだ": "vocab_N4__このあいだ",
+    "vocab_N1_すれ違う_すれちがう": "vocab_N2__すれちがう",
+    "vocab_N1_割合に_わりあいに": "vocab_N2__わりあいに",
 }
 
 

@@ -273,8 +273,10 @@ def test_the_exam_distractor_tables_still_cover_every_deck_character():
     }
     assert set(gen.KANJI_READINGS) == resolvable
     assert gen.KANJI_READINGS["日"]["ja_on"] == ["ニチ", "ジツ"]
-    # The distractor pool is keyed on radicals the deck actually uses.
-    assert len(gen.RADICAL_INDEX) == 194
+    # The distractor pool is keyed on radicals the deck actually uses:
+    # 194 until plan 112b folded 爽やか into the kana さわやか card, and
+    # with it the deck's last character under 爻 (radical 89).
+    assert len(gen.RADICAL_INDEX) == 193
 
 
 def test_a_term_answers_in_either_language(client):

@@ -252,7 +252,9 @@ def test_a_spelling_folded_into_a_card_still_finds_it(client):
     in the search, and in the exact lookup a favourite resolves by."""
     for typed, kana, card in [("美味しい", "おいしい", ("N5", "", "おいしい")),
                               ("終る", "おわる", ("N5", "終わる", "おわる")),
-                              ("此れ", "これ", ("N5", "", "これ"))]:
+                              ("此れ", "これ", ("N5", "", "これ")),
+                              # plan 112b: the kana card kept the word
+                              ("椅子", "いす", ("N5", "", "いす"))]:
         body = _page(client, q=typed, limit=50)
         assert card in {_key(r) for r in body["results"]}, typed
         got = _lookup(client, typed, kana=kana)

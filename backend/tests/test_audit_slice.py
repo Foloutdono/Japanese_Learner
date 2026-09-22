@@ -12,6 +12,7 @@ The script reads the content files with ast rather than importing them,
 so this suite needs nothing installed beyond the repo itself.
 """
 import datetime as dt
+import os
 import unittest
 
 from scripts import audit_slice as audit
@@ -88,7 +89,11 @@ class VocabRankingTests(unittest.TestCase):
         self.entries = audit.vocab_entries()
 
     def test_the_whole_deck_is_ranked(self) -> None:
-        self.assertGreater(len(self.entries), 8000)
+        """Every card, not a floor under the count: the deck shrinks when
+        a plan merges one word's cards (8,404 to 7,993 over plan 112), and
+        a ranking that dropped cards would audit less than the deck serves."""
+        deck = audit._json(os.path.join(audit._VOCAB, "vocab_deck.json"))
+        self.assertEqual(len(self.entries), sum(len(cards) for cards in deck.values()))
 
     def test_risk_never_rises_down_the_list(self) -> None:
         risks = [entry["risk"] for entry in self.entries]

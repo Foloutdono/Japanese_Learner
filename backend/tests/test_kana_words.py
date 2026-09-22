@@ -132,10 +132,17 @@ class TestTheGaps:
         assert kana_words("ヲ", "en") == []
 
     def test_a_thin_kana_is_short_rather_than_padded(self):
-        # ひゃ is read in ひゃく and almost nowhere else the deck goes.
-        rows = readings("ひゃ")
-        assert rows[0] == "ひゃく"
-        assert len(rows) < MAX_WORDS
+        # びゃ is read in 三百 and 何百 and hardly anywhere else, deck or
+        # pool: three rows, and nothing found to make a fourth.
+        assert len(readings("びゃ")) < MAX_WORDS
+
+    def test_the_deck_leads_and_the_pool_only_fills_what_it_leaves(self):
+        # ひゃ is read in three deck words and the pool's 百科 comes
+        # after them. (It was this test's thin kana until plan 112b: the
+        # deck held ひゃっかじてん three times, the pool is asked only
+        # when the deck has fewer than MAX_WORDS candidates, and three
+        # copies of one reading counted as three.)
+        assert readings("ひゃ")[:3] == ["ひゃく", "ひゃくえん", "ひゃっかじてん"]
 
     def test_nothing_is_asked_of_an_empty_kana(self):
         assert kana_words("", "en") == []

@@ -36,13 +36,6 @@
    "rank": 54
   },
   {
-   "key": "本当::ほんとう",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "truth, reality",
-   "rank": 60
-  },
-  {
    "key": "通り::とおり",
    "level": "N3",
    "lists_say": "N4",
@@ -78,13 +71,6 @@
    "rank": 204
   },
   {
-   "key": "多分::たぶん",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "perhaps, probably",
-   "rank": 217
-  },
-  {
    "key": "内::うち",
    "level": "N3",
    "lists_say": "N4",
@@ -106,25 +92,11 @@
    "rank": 248
   },
   {
-   "key": "素晴らしい::すばらしい",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "wonderful, splendid, magnificent",
-   "rank": 259
-  },
-  {
    "key": "失礼::しつれい",
    "level": "N3",
    "lists_say": "N4",
    "meaning": "rudeness, discourtesy; excuse me",
    "rank": 337
-  },
-  {
-   "key": "一番::いちばん",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "best, first, number one",
-   "rank": 377
   },
   {
    "key": "遭う::あう",
@@ -148,39 +120,11 @@
    "rank": 415
   },
   {
-   "key": "月::つき",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "moon, month",
-   "rank": 435
-  },
-  {
-   "key": "鍵::かぎ",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "key",
-   "rank": 476
-  },
-  {
-   "key": "邪魔::じゃま",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "hindrance, intrusion",
-   "rank": 484
-  },
-  {
    "key": "住::じゅう",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "dwelling, living",
    "rank": 488
-  },
-  {
-   "key": "面白い::おもしろい",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "interesting, amusing",
-   "rank": 513
   },
   {
    "key": "判::はん",
@@ -202,13 +146,6 @@
    "lists_say": "N3",
    "meaning": "medical treatment",
    "rank": 634
-  },
-  {
-   "key": "最も::もっとも",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "most, extremely",
-   "rank": 657
   },
   {
    "key": "保護::ほご",
@@ -244,13 +181,6 @@
    "lists_say": "N4",
    "meaning": "(1) wholly, entirely, completely, (2) not at all (with neg. verb)",
    "rank": 762
-  },
-  {
-   "key": "赤ちゃん::あかちゃん",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "baby, infant",
-   "rank": 827
   },
   {
    "key": "出合い::であい",
@@ -365,13 +295,6 @@
    "rank": 1347
   },
   {
-   "key": "喉::のど",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "throat",
-   "rank": 1392
-  },
-  {
    "key": "興奮::こうふん",
    "level": "N1",
    "lists_say": "N3",
@@ -379,25 +302,11 @@
    "rank": 1393
   },
   {
-   "key": "椅子::いす",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "chair",
-   "rank": 1398
-  },
-  {
    "key": "自己::じこ",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "self, oneself",
    "rank": 1418
-  },
-  {
-   "key": "お腹::おなか",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "stomach",
-   "rank": 1433
   },
   {
    "key": "予想::よそう",
@@ -475,13 +384,6 @@
    "lists_say": "N3",
    "meaning": "approval, agreement, support, favour",
    "rank": 1714
-  },
-  {
-   "key": "是非::ぜひ",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "certainly, without fail",
-   "rank": 1775
   },
   {
    "key": "拘束::こうそく",
@@ -573,13 +475,6 @@
    "lists_say": "N3",
    "meaning": "fellow, companion, comrade",
    "rank": 2113
-  },
-  {
-   "key": "浴びる::あびる",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "to bathe, to bask in the sun, to shower",
-   "rank": 2149
   },
   {
    "key": "下る::くだる",
@@ -799,13 +694,6 @@
    "rank": 3284
   },
   {
-   "key": "値段::ねだん",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "price, cost",
-   "rank": 3374
-  },
-  {
    "key": "郡::ぐん",
    "level": "N2",
    "lists_say": "N3",
@@ -834,10 +722,10 @@
    "rank": 3602
   },
   {
-   "key": "慌てる::あわてる",
-   "level": "N1",
+   "key": "::あわてる",
+   "level": "N2",
    "lists_say": "N3",
-   "meaning": "to become confused (disconcerted disorganized)",
+   "meaning": "to become confused (disconcerted, disorganized)",
    "rank": 3686
   },
   {
@@ -1352,13 +1240,6 @@
    "rank": 6311
   },
   {
-   "key": "呆れる::あきれる",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to be amazed, to be shocked",
-   "rank": 6323
-  },
-  {
    "key": "寮::りょう",
    "level": "N2",
    "lists_say": "N3",
@@ -1520,20 +1401,6 @@
    "rank": 7495
   },
   {
-   "key": "可愛らしい::かわいらしい",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "lovely, sweet",
-   "rank": 7580
-  },
-  {
-   "key": "褒める::ほめる",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "to praise, to admire, to speak well",
-   "rank": 7681
-  },
-  {
    "key": "公演::こうえん",
    "level": "N1",
    "lists_say": "N3",
@@ -1583,8 +1450,8 @@
    "rank": 7973
   },
   {
-   "key": "騙す::だます",
-   "level": "N1",
+   "key": "::だます",
+   "level": "N2",
    "lists_say": "N3",
    "meaning": "to trick, to cheat, to deceive",
    "rank": 8079
@@ -1618,8 +1485,15 @@
    "rank": 8361
   },
   {
-   "key": "殴る::なぐる",
-   "level": "N1",
+   "key": "::まぶしい",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "dazzling, radiant",
+   "rank": 8411
+  },
+  {
+   "key": "::なぐる",
+   "level": "N2",
    "lists_say": "N3",
    "meaning": "to strike, to hit",
    "rank": 8506
@@ -1688,20 +1562,6 @@
    "rank": 9055
   },
   {
-   "key": "大変::たいへん",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "awful, dreadful, terrible, very",
-   "rank": 9098
-  },
-  {
-   "key": "図々しい::ずうずうしい",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "impudent, shameless",
-   "rank": 9108
-  },
-  {
    "key": "先行::せんこう",
    "level": "N1",
    "lists_say": "N3",
@@ -1721,13 +1581,6 @@
    "lists_say": "N3",
    "meaning": "yes or no, existence, flag indicator (comp), presence or absence marker",
    "rank": 9438
-  },
-  {
-   "key": "床屋::とこや",
-   "level": "N2",
-   "lists_say": "N4",
-   "meaning": "barber",
-   "rank": 9559
   },
   {
    "key": "不通::ふつう",
@@ -1940,13 +1793,6 @@
    "rank": 11993
   },
   {
-   "key": "空く::すく",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "(1) to open, to become empty, (2) to be less crowded",
-   "rank": 12182
-  },
-  {
    "key": "課程::かてい",
    "level": "N2",
    "lists_say": "N3",
@@ -2024,15 +1870,8 @@
    "rank": 12962
   },
   {
-   "key": "伺う::うかがう",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "(hon) to visit, to ask, to inquire",
-   "rank": 13052
-  },
-  {
-   "key": "茹でる::ゆでる",
-   "level": "N1",
+   "key": "::ゆでる",
+   "level": "N2",
    "lists_say": "N3",
    "meaning": "to boil",
    "rank": 13053
@@ -2050,13 +1889,6 @@
    "lists_say": "N3",
    "meaning": "to sniff, to smell",
    "rank": 13379
-  },
-  {
-   "key": "箸::はし",
-   "level": "N2",
-   "lists_say": "N5",
-   "meaning": "chopsticks",
-   "rank": 13385
   },
   {
    "key": "::と",
@@ -2092,13 +1924,6 @@
    "lists_say": "N2",
    "meaning": "departure, beginning, counter for gunshots",
    "rank": 14000
-  },
-  {
-   "key": "醤油::しょうゆ",
-   "level": "N2",
-   "lists_say": "N5",
-   "meaning": "soy sauce",
-   "rank": 14016
   },
   {
    "key": "学歴::がくれき",
@@ -2584,18 +2409,11 @@
    "rank": 24127
   },
   {
-   "key": "茶碗::ちゃわん",
+   "key": "::すっぱい",
    "level": "N2",
-   "lists_say": "N5",
-   "meaning": "rice bowl, tea cup, teacup",
-   "rank": 24538
-  },
-  {
-   "key": "当てはめる::あてはめる",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to apply, to adapt",
-   "rank": 24727
+   "lists_say": "N3",
+   "meaning": "sour, acid",
+   "rank": 24548
   },
   {
    "key": "畳む::たたむ",
@@ -2631,13 +2449,6 @@
    "lists_say": "N3",
    "meaning": "to be mixed, to be blended with, to associate with",
    "rank": 25823
-  },
-  {
-   "key": "慌ただしい::あわただしい",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "busy, hurried, confused, flurried",
-   "rank": 26077
   },
   {
    "key": "悪::あく",
@@ -2703,31 +2514,10 @@
    "rank": 31668
   },
   {
-   "key": "濡れる::ぬれる",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "to get wet",
-   "rank": null
-  },
-  {
    "key": "叱る::しかる",
    "level": "N3",
    "lists_say": "N4",
    "meaning": "to scold",
-   "rank": null
-  },
-  {
-   "key": "真面目::まじめ",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "diligent, serious, honest",
-   "rank": null
-  },
-  {
-   "key": "外::ほか",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "other place, the rest",
    "rank": null
   },
   {
@@ -2742,13 +2532,6 @@
    "level": "N3",
    "lists_say": "N5",
    "meaning": "height, stature",
-   "rank": null
-  },
-  {
-   "key": "熱心::ねっしん",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "zeal, enthusiasm",
    "rank": null
   },
   {
@@ -2969,6 +2752,13 @@
    "rank": null
   },
   {
+   "key": "::あいかわらず",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "as ever, as usual, the same",
+   "rank": null
+  },
+  {
    "key": "破れる::やぶれる",
    "level": "N2",
    "lists_say": "N3",
@@ -2994,6 +2784,13 @@
    "level": "N2",
    "lists_say": "N5",
    "meaning": "katakana",
+   "rank": null
+  },
+  {
+   "key": "::あたりまえ",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "usual, common, ordinary, natural, reasonable, obvious",
    "rank": null
   },
   {
@@ -3029,6 +2826,13 @@
    "level": "N2",
    "lists_say": "N3",
    "meaning": "perhaps, maybe, by some chance",
+   "rank": null
+  },
+  {
+   "key": "::すれちがう",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "to pass by one another, to disagree, to miss each other",
    "rank": null
   },
   {
@@ -3074,13 +2878,6 @@
    "rank": null
   },
   {
-   "key": "::すっぱい",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "sour, acid",
-   "rank": null
-  },
-  {
    "key": "助かる::たすかる",
    "level": "N2",
    "lists_say": "N3",
@@ -3099,13 +2896,6 @@
    "level": "N2",
    "lists_say": "N3",
    "meaning": "pleased to meet you",
-   "rank": null
-  },
-  {
-   "key": "::まぶしい",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "dazzling, radiant",
    "rank": null
   },
   {
@@ -3221,13 +3011,6 @@
    "rank": null
   },
   {
-   "key": "一昨昨日::さきおととい",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "two days before yesterday",
-   "rank": null
-  },
-  {
    "key": "語句::ごく",
    "level": "N1",
    "lists_say": "N3",
@@ -3246,13 +3029,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to spread, to be propagated",
-   "rank": null
-  },
-  {
-   "key": "当たり前::あたりまえ",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "usual, common, ordinary, natural, reasonable, obvious",
    "rank": null
   },
   {
@@ -3298,13 +3074,6 @@
    "rank": null
   },
   {
-   "key": "相変わらず::あいかわらず",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "as ever, as usual, the same",
-   "rank": null
-  },
-  {
    "key": "朝寝坊::あさねぼう",
    "level": "N1",
    "lists_say": "N2",
@@ -3316,13 +3085,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to slide, to slip off",
-   "rank": null
-  },
-  {
-   "key": "お願いします::おねがいします",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "please",
    "rank": null
   },
   {
@@ -3354,31 +3116,10 @@
    "rank": null
   },
   {
-   "key": "お先に::おさきに",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "before, ahead, previously",
-   "rank": null
-  },
-  {
-   "key": "ご苦労様::ごくろうさま",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "Thank you very much for your....",
-   "rank": null
-  },
-  {
    "key": "前もって::まえもって",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "in advance, beforehand, previously",
-   "rank": null
-  },
-  {
-   "key": "市::いち",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "market, fair",
    "rank": null
   },
   {
@@ -3410,24 +3151,10 @@
    "rank": null
   },
   {
-   "key": "お大事に::おだいじに",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "Take care of yourself",
-   "rank": null
-  },
-  {
    "key": "高まる::たかまる",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to rise, to swell, to be promoted",
-   "rank": null
-  },
-  {
-   "key": "可愛がる::かわいがる",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to love, to be affectionate",
    "rank": null
   },
   {
@@ -3442,13 +3169,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "node, section, occasion, time",
-   "rank": null
-  },
-  {
-   "key": "脅かす::おどかす",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to threaten, to coerce",
    "rank": null
   },
   {
@@ -3480,13 +3200,6 @@
    "rank": null
   },
   {
-   "key": "怒鳴る::どなる",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to shout, to yell",
-   "rank": null
-  },
-  {
    "key": "慣行::かんこう",
    "level": "N1",
    "lists_say": "N3",
@@ -3515,13 +3228,6 @@
    "rank": null
   },
   {
-   "key": "明後日::あさって",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "day after tomorrow",
-   "rank": null
-  },
-  {
    "key": "水洗::すいせん",
    "level": "N1",
    "lists_say": "N3",
@@ -3540,20 +3246,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "seasoning, flavoring",
-   "rank": null
-  },
-  {
-   "key": "ローマ字::ローマじ",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "romanization, Roman letters",
-   "rank": null
-  },
-  {
-   "key": "お休み::おやすみ",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "holiday, absence, rest, Good night",
    "rank": null
   },
   {
@@ -3578,31 +3270,10 @@
    "rank": null
   },
   {
-   "key": "この間::このあいだ",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "the other day, lately, recently",
-   "rank": null
-  },
-  {
-   "key": "すれ違う::すれちがう",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "to pass by one another, to disagree, to miss each other",
-   "rank": null
-  },
-  {
    "key": "織る::おる",
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to weave",
-   "rank": null
-  },
-  {
-   "key": "割合に::わりあいに",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "comparatively",
    "rank": null
   }
  ],
