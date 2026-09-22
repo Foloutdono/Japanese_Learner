@@ -15971,14 +15971,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     var(--fs-heading));
 }
 /* The reading is furigana on the headword itself now (see
-   DictionaryScreen's cardFurigana), set as the entry's own plate sets
-   it — one vocabulary for the same annotation in both places — but a
-   rung smaller. The plate's --fs-sm is room the tile does not have:
-   its headword is fitted to a ~168px box and can fall to --fs-caption
-   itself, so a reading at --fs-sm could print larger than the word it
-   reads, and a long one run off the tile's clipped edge. The line that used to carry it above the word is gone
-   with it: it was a second register on every tile, and on a kana-only
-   entry it printed the word twice. */
+   DictionaryScreen's cardFurigana), set exactly as the entry's own
+   plate sets it — one vocabulary for the same annotation in both
+   places, --fs-sm included, for ご's dakuten (see .dict-plate__word
+   rt). The fitted headword leaves it the room: measured over the whole
+   deck (7,292 words and 2,235 kanji) at a 160px and a 175px tile, the
+   tile's box keeps its height, no reading prints larger than its word,
+   and the rung clips one word the smaller rung did not (にも拘らず, by
+   3px on a 360px phone; 畏まりました already clipped at either). The
+   line that used to carry it above the word is gone with it: it was a
+   second register on every tile, and on a kana-only entry it printed
+   the word twice. */
 .dict-entry-card__char ruby {
   ruby-position: over;
   /* Centred, not spread: the browser's default spaces an annotation
@@ -15989,7 +15992,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 .dict-entry-card__char rt {
   font-family: var(--font-jp);
-  font-size: var(--fs-caption);
+  font-size: var(--fs-sm);
   font-weight: 400;
   /* The gap over the character. An annotation sits on the line above
      its base, so the only room to be had is inside that line: a taller
