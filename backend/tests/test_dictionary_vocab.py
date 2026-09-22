@@ -242,3 +242,18 @@ def test_an_unknown_reading_falls_back_instead_of_emptying_the_page(client):
     body = client.get("/api/dictionary", params={
         "q": "水", "limit": 10, "category": "vocab", "kana": "not-a-reading"}).json()
     assert body["results"]
+
+
+def test_a_spelling_folded_into_a_card_still_finds_it(client):
+    """Plan 112 merged one word's spellings onto one card, and the
+    spelling that left the deck did not leave the language: a learner
+    still reads 美味しい and types 終る. Each found a card of its own
+    before the merge; each finds the card that took the word in now --
+    in the search, and in the exact lookup a favourite resolves by."""
+    for typed, kana, card in [("美味しい", "おいしい", ("N5", "", "おいしい")),
+                              ("終る", "おわる", ("N5", "終わる", "おわる")),
+                              ("此れ", "これ", ("N5", "", "これ"))]:
+        body = _page(client, q=typed, limit=50)
+        assert card in {_key(r) for r in body["results"]}, typed
+        got = _lookup(client, typed, kana=kana)
+        assert _key(got) == card, (typed, got)

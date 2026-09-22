@@ -39,17 +39,49 @@ class LemmaIndexVariantKeyTests(unittest.TestCase):
 
     def test_variants_never_repoint_an_existing_key(self) -> None:
         # Variant keys are added in a second pass and skip keys the
-        # first pass claimed, so a word the deck stores under BOTH
-        # spellings at different levels (御馳走 N2 / ご馳走 N1) keeps
-        # resolving to the entry it always did, rather than being
-        # merged and handed to the lowest-level tie-break.
+        # first pass claimed, so a word stored under BOTH spellings at
+        # different levels keeps resolving to the entry it always did,
+        # rather than being merged and handed to the lowest-level
+        # tie-break. The deck held three such pairs (御馳走 N2 / ご馳走
+        # N1, 御無沙汰, 御手洗い) until plan 112 merged them, so the
+        # guard is held on a two-card stand-in.
+        from unittest import mock
+        from study import card_lookup
+        n2 = {"kanji": "御馳走", "kana": "ごちそう", "meaning": "feast"}
+        n1 = {"kanji": "ご馳走", "kana": "ごちそう", "meaning": "feast"}
+        # FOLDED_FORMS off too: the stand-in's ids are the real cards',
+        # and the fold is the fourth pass, not the variants' second.
+        with mock.patch.object(card_lookup, "VOCAB_BY_LEVEL", {"N2": [n2], "N1": [n1]}), \
+                mock.patch.object(card_lookup, "FOLDED_FORMS", {}):
+            index = card_lookup._index_vocab_by_lemma()
+        self.assertEqual(index["ご馳走"], [("N1", n1)])
+        self.assertEqual(index["御馳走"], [("N2", n2)])
+
+    def test_a_merged_spelling_reaches_the_one_card(self) -> None:
+        # ...and in the deck as it is, the ご spelling is a variant key
+        # of the one card that holds the word.
         for word, expected in (
-            ("ご馳走", "vocab_N1_ご馳走_ごちそう"),
-            ("ご無沙汰", "vocab_N1_ご無沙汰_ごぶさた"),
+            ("ご馳走", "vocab_N2_御馳走_ごちそう"),
+            ("ご無沙汰", "vocab_N2_御無沙汰_ごぶさた"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(len(_VOCAB_BY_LEMMA[word]), 1)
                 self.assertEqual(resolve_lemma(word, "")[2], expected)
+
+    def test_a_folded_spelling_badges_the_card_that_took_it_in(self) -> None:
+        # vocab_renames.FOLDED_FORMS, the fourth pass: a page that writes
+        # the spelling that left the deck badges the card that stayed,
+        # not nothing -- and not, as before plan 112, an N1 copy of an
+        # N5 word. 身体 keeps both of its readings apart.
+        for word, reading, expected in (
+            ("美味しい", "おいしい", "vocab_N5__おいしい"),
+            ("此れ", "これ", "vocab_N5__これ"),
+            ("終る", "おわる", "vocab_N5_終わる_おわる"),
+            ("身体", "からだ", "vocab_N5_体_からだ"),
+            ("身体", "しんたい", "vocab_N3_身体_しんたい"),
+        ):
+            with self.subTest(word=word, reading=reading):
+                self.assertEqual(resolve_lemma(word, reading)[2], expected)
 
 
 class TrailingKanaVariantTests(unittest.TestCase):

@@ -42,13 +42,16 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 def _build_deck_by_char() -> dict[str, tuple[str, dict]]:
     """char -> (native level, entry), first occurrence wins, N5 -> N1.
 
-    The deck lists 2,235 entries over 2,212 characters: 23 sit on two
-    levels, and since kanji_to_id keys on the level those really are two
-    SRS cards. Anywhere that wants ONE row per character -- radical
-    browsing files a character once, not once per level it was taught at
-    -- needs a single answer, and the lowest level is it. Same rule
-    frequency_data.py's _build_kanji_resolution already applies for the
-    tier path.
+    The deck lists each of its 2,212 characters once. It used to list
+    23 of them twice (会 at N5 and N4, 耳 at N5 and N3), and since
+    kanji_to_id keys on the level those were two SRS cards; plan 112
+    kept the lower one (content/kanji_renames.py carries the other's
+    progress across). The rule here -- first occurrence wins, N5 -> N1,
+    the same one frequency_data.py's _build_kanji_resolution applies
+    for the tier path -- is what served one row per character to the
+    radical index and the dictionary before that, and still decides if
+    a character ever lands twice (tests/test_migrate_kanji_ids.py
+    fails first).
     """
     resolved: dict[str, tuple[str, dict]] = {}
     for level in LEVELS:

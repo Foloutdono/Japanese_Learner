@@ -1,13 +1,6 @@
 {
  "placed_above": [
   {
-   "key": "何::なに",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "what",
-   "rank": 6
-  },
-  {
    "key": "事::こと",
    "level": "N3",
    "lists_say": "N4",
@@ -55,13 +48,6 @@
    "lists_say": "N4",
    "meaning": "in accordance with ~, following ~, ~ Street, ~ Avenue",
    "rank": 113
-  },
-  {
-   "key": "只::ただ",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "free of charge, mere, sole, only, usual, common",
-   "rank": 117
   },
   {
    "key": "教え::おしえ",
@@ -134,20 +120,6 @@
    "rank": 337
   },
   {
-   "key": "有る::ある",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "to be, to have",
-   "rank": 351
-  },
-  {
-   "key": "在る::ある",
-   "level": "N2",
-   "lists_say": "N5",
-   "meaning": "to live, to be",
-   "rank": 351
-  },
-  {
    "key": "一番::いちばん",
    "level": "N3",
    "lists_say": "N5",
@@ -183,13 +155,6 @@
    "rank": 435
   },
   {
-   "key": "余り::あまり",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "not very (used as adverb), not much",
-   "rank": 445
-  },
-  {
    "key": "鍵::かぎ",
    "level": "N3",
    "lists_say": "N5",
@@ -216,27 +181,6 @@
    "lists_say": "N5",
    "meaning": "interesting, amusing",
    "rank": 513
-  },
-  {
-   "key": "可愛い::かわいい",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "pretty, cute, lovely, charming, dear, darling, pet",
-   "rank": 548
-  },
-  {
-   "key": "色々::いろいろ",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "various",
-   "rank": 550
-  },
-  {
-   "key": "恐らく::おそらく",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "perhaps",
-   "rank": 576
   },
   {
    "key": "判::はん",
@@ -365,7 +309,7 @@
    "rank": 1137
   },
   {
-   "key": "知合い::しりあい",
+   "key": "知り合い::しりあい",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "acquaintance",
@@ -384,13 +328,6 @@
    "lists_say": "N3",
    "meaning": "regret, repentance",
    "rank": 1185
-  },
-  {
-   "key": "美味しい::おいしい",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "delicious, tasty",
-   "rank": 1189
   },
   {
    "key": "指揮::しき",
@@ -412,13 +349,6 @@
    "lists_say": "N3",
    "meaning": "anger, hatred",
    "rank": 1203
-  },
-  {
-   "key": "十::じゅう",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "10, ten",
-   "rank": 1208
   },
   {
    "key": "血液::けつえき",
@@ -461,13 +391,6 @@
    "lists_say": "N3",
    "meaning": "self, oneself",
    "rank": 1418
-  },
-  {
-   "key": "随分::ずいぶん",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "extremely",
-   "rank": 1420
   },
   {
    "key": "お腹::おなか",
@@ -708,8 +631,8 @@
    "rank": 2414
   },
   {
-   "key": "大人しい::おとなしい",
-   "level": "N1",
+   "key": "::おとなしい",
+   "level": "N2",
    "lists_say": "N3",
    "meaning": "obedient, docile, quiet",
    "rank": 2428
@@ -720,13 +643,6 @@
    "lists_say": "N3",
    "meaning": "creation",
    "rank": 2437
-  },
-  {
-   "key": "明るい::あかるい",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "bright, cheerful",
-   "rank": 2503
   },
   {
    "key": "操縦::そうじゅう",
@@ -790,13 +706,6 @@
    "lists_say": "N3",
    "meaning": "disposition, spirit, willpower, obstinacy, backbone, appetite",
    "rank": 2755
-  },
-  {
-   "key": "大抵::たいてい",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "usually, generally",
-   "rank": 2756
   },
   {
    "key": "資格::しかく",
@@ -1205,13 +1114,6 @@
    "rank": 5311
   },
   {
-   "key": "段々::だんだん",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "gradually, by degrees",
-   "rank": 5317
-  },
-  {
    "key": "規制::きせい",
    "level": "N1",
    "lists_say": "N3",
@@ -1336,13 +1238,6 @@
    "lists_say": "N3",
    "meaning": "to cross, to pass, to tide over",
    "rank": 5828
-  },
-  {
-   "key": "起こす::おこす",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "to raise, to cause, to wake someone",
-   "rank": 5863
   },
   {
    "key": "裂ける::さける",
@@ -1597,8 +1492,8 @@
    "rank": 7314
   },
   {
-   "key": "お洒落::おしゃれ",
-   "level": "N1",
+   "key": "::おしゃれ",
+   "level": "N2",
    "lists_say": "N3",
    "meaning": "smartly dressed, someone smartly dressed, fashion-conscious",
    "rank": 7316
@@ -1667,10 +1562,10 @@
    "rank": 7847
   },
   {
-   "key": "代る::かわる",
+   "key": "代わる::かわる",
    "level": "N2",
    "lists_say": "N3",
-   "meaning": "(v5r, vi) to take the place of, to relieve, to be substituted for",
+   "meaning": "to take the place of, to relieve, to be substituted for, to be exchanged, to change places with",
    "rank": 7877
   },
   {
@@ -1730,7 +1625,7 @@
    "rank": 8506
   },
   {
-   "key": "付合う::つきあう",
+   "key": "付き合う::つきあう",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to associate with, to keep company with, to get on with",
@@ -1763,13 +1658,6 @@
    "lists_say": "N3",
    "meaning": "form, shape, figure",
    "rank": 8628
-  },
-  {
-   "key": "上がる::あがる",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "to enter, to go up, to rise, to climb up, to advance, to appreciate, to be promoted, to improve, to call on,",
-   "rank": 8641
   },
   {
    "key": "股::また",
@@ -1819,13 +1707,6 @@
    "lists_say": "N3",
    "meaning": "preceding, going first",
    "rank": 9171
-  },
-  {
-   "key": "堪える::こらえる",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to bear, to stand, to endure, to put up with, to support, to withstand, to resist, to brave, to be fit for, t",
-   "rank": 9309
   },
   {
    "key": "間隔::かんかく",
@@ -1994,13 +1875,6 @@
    "lists_say": "N3",
    "meaning": "shell, shellfish",
    "rank": 10779
-  },
-  {
-   "key": "粗筋::あらすじ",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "outline, summary",
-   "rank": 11050
   },
   {
    "key": "協調::きょうちょう",
@@ -2358,6 +2232,13 @@
    "lists_say": "N4",
    "meaning": "recently",
    "rank": 15559
+  },
+  {
+   "key": "::かゆい",
+   "level": "N2",
+   "lists_say": "N3",
+   "meaning": "itchy, itching",
+   "rank": 15717
   },
   {
    "key": "衣料::いりょう",
@@ -2829,13 +2710,6 @@
    "rank": null
   },
   {
-   "key": "::うるさい",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "noisy, loud, fussy",
-   "rank": null
-  },
-  {
    "key": "叱る::しかる",
    "level": "N3",
    "lists_say": "N4",
@@ -2864,20 +2738,6 @@
    "rank": null
   },
   {
-   "key": "::おじいさん",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "grandfather, male senior-citizen",
-   "rank": null
-  },
-  {
-   "key": "誰か::だれか",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "someone, somebody",
-   "rank": null
-  },
-  {
    "key": "背::せい",
    "level": "N3",
    "lists_say": "N5",
@@ -2885,24 +2745,10 @@
    "rank": null
   },
   {
-   "key": "程::ほど",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "degree, extent, bounds, limit",
-   "rank": null
-  },
-  {
    "key": "熱心::ねっしん",
    "level": "N3",
    "lists_say": "N4",
    "meaning": "zeal, enthusiasm",
-   "rank": null
-  },
-  {
-   "key": "何::なん",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "what",
    "rank": null
   },
   {
@@ -2934,17 +2780,10 @@
    "rank": null
   },
   {
-   "key": "押える::おさえる",
+   "key": "押さえる::おさえる",
    "level": "N2",
    "lists_say": "N3",
    "meaning": "to stop, to restrain, to seize, to repress, to suppress, to press down",
-   "rank": null
-  },
-  {
-   "key": "::かゆい",
-   "level": "N2",
-   "lists_say": "N3",
-   "meaning": "itchy, itching",
    "rank": null
   },
   {
@@ -3036,13 +2875,6 @@
    "level": "N2",
    "lists_say": "N3",
    "meaning": "forte, merit",
-   "rank": null
-  },
-  {
-   "key": "再来週::さらいしゅう",
-   "level": "N2",
-   "lists_say": "N4",
-   "meaning": "week after next",
    "rank": null
   },
   {
@@ -3172,13 +3004,6 @@
    "rank": null
   },
   {
-   "key": "再来月::さらいげつ",
-   "level": "N2",
-   "lists_say": "N4",
-   "meaning": "month after next",
-   "rank": null
-  },
-  {
    "key": "退く::どく",
    "level": "N2",
    "lists_say": "N3",
@@ -3204,13 +3029,6 @@
    "level": "N2",
    "lists_say": "N3",
    "meaning": "perhaps, maybe, by some chance",
-   "rank": null
-  },
-  {
-   "key": "::おととし",
-   "level": "N2",
-   "lists_say": "N5",
-   "meaning": "year before last",
    "rank": null
   },
   {
@@ -3459,13 +3277,6 @@
    "rank": null
   },
   {
-   "key": "解く::ほどく",
-   "level": "N1",
-   "lists_say": "N2",
-   "meaning": "to unfasten",
-   "rank": null
-  },
-  {
    "key": "季刊::きかん",
    "level": "N1",
    "lists_say": "N3",
@@ -3536,13 +3347,6 @@
    "rank": null
   },
   {
-   "key": "集まる::あつまる",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "to gather, to collect, to assemble",
-   "rank": null
-  },
-  {
    "key": "生やす::はやす",
    "level": "N1",
    "lists_say": "N3",
@@ -3561,13 +3365,6 @@
    "level": "N1",
    "lists_say": "N2",
    "meaning": "Thank you very much for your....",
-   "rank": null
-  },
-  {
-   "key": "沢山::たくさん",
-   "level": "N1",
-   "lists_say": "N5",
-   "meaning": "many, a lot, much",
    "rank": null
   },
   {
@@ -3683,13 +3480,6 @@
    "rank": null
   },
   {
-   "key": "決まる::きまる",
-   "level": "N1",
-   "lists_say": "N4",
-   "meaning": "to be decided, to be settled, to look good in (clothes)",
-   "rank": null
-  },
-  {
    "key": "怒鳴る::どなる",
    "level": "N1",
    "lists_say": "N2",
@@ -3715,13 +3505,6 @@
    "level": "N1",
    "lists_say": "N3",
    "meaning": "to (happen to) see, to notice, to catch sight of",
-   "rank": null
-  },
-  {
-   "key": "お喋り::おしゃべり",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "chattering, talk, idle talk, chat, chitchat, gossip, chatty, talkative, chatterbox, blabbermouth",
    "rank": null
   },
   {
