@@ -3086,6 +3086,14 @@
      LevelBar.jsx): the dock's floor on a stage, the way the tab bar is
      the floor under the shell. */
   --lvlbar-h:       36px;
+  /* The desk's rail (plan 112, components/chrome/DeskRail.jsx): the
+     second chrome's one width, at and above the desk's 1100px. Declared
+     here rather than inside the desk's own section because every :root
+     token must resolve at every width (design-system.browser.test);
+     nothing below 1100 reads it. Wide enough for the longest French
+     section name ("Entraînement à la lecture") beside a gate's indent,
+     narrow enough to leave two plates side by side at 1100. */
+  --desk-rail-w:    256px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -4329,21 +4337,28 @@ textarea:focus-visible {
 }
 
 /* ── Breakpoints ──────────────────────────────────────────
-   Two, and they are the whole scale:
+   Three, and they are the whole scale:
 
-     560px — phone.  Below this, single column everywhere.
-     768px — tablet. Above it the chrome's frame becomes a centred
-             column (the min-width query in the 車内 block) — the two
-             must move together.
+      560px — phone.  Below this, single column everywhere.
+      768px — tablet. Above it the phone's frame becomes a centred
+              column (the min-width query in the 車内 block) — the two
+              must move together.
+     1100px — desk.   At and above it the app changes chrome: the rail
+              down the left edge instead of the HUD and the tab bar,
+              and the screens laid out for the width (plan 112). Every
+              rule for it lives in ONE block, the 机 section at the very
+              end of this file, and nowhere else — so nothing written
+              for the desk can reach a phone. src/desk.css.test.js
+              holds that, and holds the query equal to hooks/useDesk.js.
 
    Anything else in this file is a specific component's own
    constraint, and if you add one it needs a comment saying which
    component and why. A one-off with no reason attached is how this
    file ended up with thirteen of them.
 
-   The 1099/1100 pair below is deliberate: complementary bounds for
-   the dictionary's docked panel, written as integers so they never
-   both match. */
+   The 1099/1100 pair below predates the desk and is the same line:
+   complementary bounds for the dictionary's docked panel (and the
+   analyzer's rail), written as integers so they never both match. */
 
 /* Room under a page's last row for the docked chrome — the tab bar
    under the shell, the inset alone on a stage — so the last card never
@@ -4423,9 +4438,11 @@ textarea:focus-visible {
 /* ═══════════════════════════════════════
    車内 — the mobile chrome (plan 068)
    ═══════════════════════════════════════
-   One chrome at every width: the HUD across the top, the five gates
-   across the bottom, the screen between them — a phone's frame, drawn
-   as a centred column on a wide screen. Both bars are sumi with the
+   The phone's chrome, below the desk's 1100px: the HUD across the top,
+   the five gates across the bottom, the screen between them — a phone's
+   frame, drawn as a centred column between 769 and 1099. At 1100 and up
+   the app draws its second chrome instead, the desk's rail (机, plan
+   112, the last section of this file). Both bars are sumi with the
    two panel inks and no line colour; the pigment belongs to the
    screen's own bar below. The rules mirror the canvas's mockup
    (docs/design/mobile/mockup.css) class for class, on the tokens;
@@ -20497,3 +20514,259 @@ a.slip__act { text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .guide__spot { transition: none; }
 }
+
+/* ═══ 机 — the desk (plan 112) ═══════════════════════════════════
+   The computer's design, at and above 1100px (hooks/useDesk.js's
+   DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
+   every width below this line draws exactly as it always has, and this
+   one — the rail down the left edge (components/chrome/DeskRail.jsx),
+   every gate captioned, the HUD's three instruments at its foot, sheets
+   as centred dialogs, and the gate screens laid out for the width.
+
+   THE CONTRACT, and why it is shaped like this. Everything for the desk
+   is in the ONE media block below, and this section is the file's tail:
+   a rule here cannot reach a phone because the query is its only door,
+   and a rule elsewhere cannot be desk-only by accident because the desk's
+   names (.desk-*, .phone--desk) are written nowhere else.
+   src/desk.css.test.js holds all of it — the query string, the tail, the
+   names, no !important. The DOM half of the same promise is JavaScript's:
+   below the line the components render exactly what they rendered before
+   the desk existed (the phone lane's "draws no desk").
+
+   Inside: one block, each selector once, specificity ascending, so
+   stylelint's duplicate and descending-specificity guards read it as one
+   context. Values are the :root tokens; the one new width is
+   --desk-rail-w. docs/design/desk/README.md is the class map. */
+@media (min-width: 1100px) {
+  /* ── the frame ──
+     No tab bar under the shell, so nothing docked clears one: the
+     bottom edge is the inset alone, as on a stage. The rail is fixed
+     down the left edge and the page makes room for it; the phone's own
+     wide-screen rule (the 車内 block's min-width query) then caps the
+     screen at --board-w and centres it in what the rail leaves. */
+  :root[data-chrome="shell"] { --dock-bottom: var(--safe-bottom); }
+  .phone--desk { padding-inline-start: var(--desk-rail-w); }
+
+  /* ── 机 — the rail ──
+     The HUD and the tab bar in one column: the same sumi, the same two
+     panel inks, the same lit edge and the shadow it throws — turned to
+     face the screen it borders. --chrome-edge is the one value the HUD
+     and the bar declare together; the rail is the third object of the
+     family and says the same thing (chrome.desktop.test compares them). */
+  .desk-rail {
+    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    width: var(--desk-rail-w);
+    padding-top: calc(var(--safe-top) + var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border-right: 1px solid var(--chrome-edge);
+    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
+    user-select: none;
+  }
+  /* The masthead: 辻 over its name, the origin station's plate. The
+     Latin at --fs-sm is the pair's caption (DESIGN.md, Rule 1: 1.7–2.2×
+     smaller; 1.70 / 0.82 = 2.07). */
+  .desk-rail__mast {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-6);
+  }
+  .desk-rail__glyph {
+    font-family: var(--font-serif);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-on-panel);
+  }
+  .desk-rail__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-rail__list,
+  .desk-rail__stations {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-rail__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    padding: 0 var(--sp-3);
+  }
+  /* A gate: the pictogram and its word, every one of them captioned —
+     the tab bar's caption register (display, uppercase, tracked) at the
+     size a column can afford. The lit gate is full ink on the lozenge's
+     wash, with the bar's 2px rule on the rail's own edge. */
+  .desk-gate {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--r-panel);
+    color: var(--text-on-panel-soft);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-term);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .desk-gate:hover,
+  .desk-gate:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  .desk-gate--on,
+  .desk-gate--on:hover,
+  .desk-gate--on:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  }
+  .desk-gate--on::before {
+    content: '';
+    position: absolute;
+    inset-block: var(--sp-2);
+    left: calc(-1 * var(--sp-3));
+    width: 2px;
+    background: var(--text-on-panel);
+  }
+  .desk-gate__ico {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+  }
+  .desk-gate__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Today's due count: the tab bar's chip, and the only colour in the
+     rail — a state's, never a line's. */
+  .desk-gate__due {
+    flex: none;
+    padding: 0 var(--sp-2);
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+    border-radius: var(--r-pill);
+    color: var(--warning);
+    font-size: var(--fs-caption-xs);
+    letter-spacing: 0;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The stations behind the lit gate, as stops on a drawn line: the
+     line runs down the gates' pictogram column, a stop per station, and
+     the one you are standing in is filled — the map's own drawing (a
+     rail, stops, where you are), in the panel's inks. The names hang
+     from the gate's word, so the eye reads one column of words. */
+  .desk-rail__stations {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-1) 0 var(--sp-2);
+  }
+  .desk-rail__stations::before {
+    content: '';
+    position: absolute;
+    inset-block: var(--sp-3) calc(var(--sp-2) + var(--sp-4));
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 2px;
+    margin-left: -1px;
+    background: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+  }
+  .desk-sec {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 var(--sp-3);
+    /* Hung from the gate's word: its inset, its pictogram, its gap. */
+    padding-inline-start: calc(2 * var(--sp-3) + var(--sp-6));
+    border-radius: var(--r-panel);
+    color: var(--text-on-panel-soft);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-sec:hover,
+  .desk-sec:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  .desk-sec--on { color: var(--text-on-panel); }
+  .desk-sec::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border: 2px solid currentcolor;
+    border-radius: var(--r-pill);
+    background: var(--bg-panel);
+  }
+  .desk-sec--on::before { background: currentcolor; }
+  /* The HUD's three instruments, set at the foot: the level and the
+     pass on one line, the status panel under them at the rail's width.
+     The same components the HUD draws, so the same rules dress them;
+     only their places are the rail's. */
+  .desk-rail__foot {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "level pass"
+      "status status";
+    align-items: center;
+    gap: var(--sp-4);
+    margin-top: auto;
+    padding: var(--sp-5) var(--sp-6);
+    padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+    border-top: 1px solid var(--chrome-edge);
+  }
+  .desk-rail__foot .hud__level { grid-area: level; }
+  .desk-rail__foot .hud__pass {
+    grid-area: pass;
+    justify-self: end;
+  }
+  .desk-rail__foot .hud__status {
+    grid-area: status;
+    justify-content: center;
+  }
+
+  /* ── what the rail moves ──
+     The docked note spans the screen, not the rail; the dictionary's
+     dock was held 84px down to clear a sticky HUD that the desk does
+     not draw; the guide's note centres on the screen it is about. */
+  :root[data-chrome="shell"] .dock-note { left: var(--desk-rail-w); }
+  :root[data-chrome="shell"] .guide-callout { left: calc(50% + var(--desk-rail-w) / 2); }
+  .phone--desk .dict-dock {
+    top: var(--sp-6);
+    max-height: calc(100dvh - 2 * var(--sp-6));
+  }
+}
+/* ═══ 机 — end of the desk ═══════════════════════════════════════ */

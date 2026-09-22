@@ -29,6 +29,7 @@ import { pickPlateReadings } from '../domain/readingPick'
 import { Leave } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
+import { isDesk } from '../hooks/useDesk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -230,10 +231,8 @@ export default function DictionaryScreen({ session }) {
 	// panel before they could see what it was a panel ABOUT. There is no
 	// empty space to fill at those widths either, which is the only
 	// reason the preselect exists.
-	function hasSideDock() {
-		return typeof window !== 'undefined'
-			&& window.matchMedia('(min-width: 1100px)').matches
-	}
+	// The dock's split is the desk's (hooks/useDesk, plan 112).
+	const hasSideDock = isDesk
 
 	// `lvl` is the collection's JLPT level — the state's value unless the
 	// caller is changing it in the same breath (switchLevel, the mount),

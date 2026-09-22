@@ -215,6 +215,8 @@ export default defineConfig(({ mode }) => {
             'src/**/*.phone.test.{js,jsx}',
             'src/**/*.tablet.test.{js,jsx}',
             'src/**/*.touch.test.{js,jsx}',
+            'src/**/*.desktop.test.{js,jsx}',
+            'src/**/*.wide.test.{js,jsx}',
           ],
         },
       },
@@ -256,6 +258,19 @@ export default defineConfig(({ mode }) => {
       // boarding's own short-screen step answers for (index.css,
       // "a short screen closes the rows before it scrolls").
       browserProject('touch', ['src/**/*.touch.test.{js,jsx}'], { width: 390, height: 667 }, { hasTouch: true }),
+      // The desk lanes (plan 112). At 1100px and up the app draws its
+      // second chrome -- the rail down the left edge instead of the HUD
+      // and the tab bar (hooks/useDesk.js) -- and no lane above ever
+      // reaches it: the widest is the tablet's 768. Two widths, for the
+      // same reason the tablet lane exists: `desktop` is the desk at its
+      // tightest, 1100 less the rail, where two plates must still sit
+      // side by side and a French label is likeliest to overflow;
+      // `wide` is a laptop's 1440, where the screen column stops at
+      // --board-w and centres in what the rail leaves. Both from the
+      // first paint, like the phone lane, because a CDP resize does not
+      // fire matchMedia's `change` and the desk is a matchMedia answer.
+      browserProject('desktop', ['src/**/*.desktop.test.{js,jsx}'], { width: 1100, height: 800 }),
+      browserProject('wide', ['src/**/*.wide.test.{js,jsx}'], { width: 1440, height: 900 }),
     ],
   },
   };

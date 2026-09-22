@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { useMediaQuery } from '../hooks/useMediaQuery'
+import { useDesk } from '../hooks/useDesk'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { Seg } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
@@ -157,10 +157,10 @@ export default function AnalyzerScreen({ session }) {
   // bulk pin, all in the room a phone needed for the sentence itself.
   // Not hidden in CSS: a control the learner cannot see should not be
   // in the document, and PassageLine's scroll effect should not run
-  // for a rail nobody can read. The query is the same 1100px split
-  // index.css draws the two-column layout at, and the two must move
-  // together.
-  const wide = useMediaQuery('(min-width: 1100px)')
+  // for a rail nobody can read. The split is the desk's (hooks/useDesk,
+  // plan 112): the width index.css draws the two-column layout at, and
+  // the width the app's second chrome starts at — one line, not three.
+  const wide = useDesk()
   // The stage's token view: one at a time (the carousel) or every
   // Token at once (SentenceBreakdown's own 'list' layout).
   const [view, setView] = useState('stepper')

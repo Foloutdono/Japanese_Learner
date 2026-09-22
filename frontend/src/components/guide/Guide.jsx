@@ -138,7 +138,13 @@ export function Guide({ gate, onEnd }) {
   if (over || !stop || !rect) return null
 
   const last = index === stops.length - 1
-  const lower = stop.place === 'above' || rect.top + rect.height / 2 > window.innerHeight / 2
+  // `above` is the tab bar's stop: on the phone the bar is the bottom
+  // edge and the note rests on it. On the desk (plan 112) the same
+  // anchor is the rail's list of gates, which starts at the top of the
+  // screen — a note "above" it would be off the screen, so there it
+  // takes the ordinary rule and hangs under it.
+  const lower = (stop.place === 'above' && rect.top > window.innerHeight / 2)
+    || rect.top + rect.height / 2 > window.innerHeight / 2
   const pos = lower
     ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
     : { top: rect.bottom + PAD + GAP }
