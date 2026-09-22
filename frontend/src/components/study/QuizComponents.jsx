@@ -7,6 +7,7 @@ import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
 import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -112,7 +113,11 @@ export function CharDisplay({ char, variant, size }) {
 // and if that normalised text were also what "did the user pick the
 // right answer" compared, then any two options whose raw strings
 // differed only in punctuation would start grading as the same answer.
-export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped }) {
+// `keyHint` (the desk, plan 112): the row's index is the key that
+// answers it, so it prints the digit the number row types — 1, not 01,
+// as the exam's rows already do — and the button names its shortcut.
+// Only the first four are bound (domain/choiceKeys).
+export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped, keyHint = false }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
   // A filler is any choice that isn't the right answer and wasn't the
@@ -135,9 +140,10 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
       disabled={answered}
       aria-hidden={isFiller}
       className={`mcq-row${variant}`}
+      aria-keyshortcuts={keyHint && index < 4 ? String(index + 1) : undefined}
     >
       <span className="mcq-row__accent" aria-hidden="true" />
-      <span className="mcq-row__index">{String(index + 1).padStart(2, '0')}</span>
+      <span className="mcq-row__index">{keyHint ? String(index + 1) : String(index + 1).padStart(2, '0')}</span>
       <span className="mcq-row__text">{display ?? choice}</span>
     </button>
   )
@@ -153,6 +159,7 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
 // keying and grading (see MCQButton).
 export function MCQGrid({ choices, correct, selected, answered, onAnswer, formatChoice }) {
   const cramped = useIsCramped()
+  const desk = useDesk()
 
   // One shared entry point for an answer, whether it came from a
   // mouse click on MCQButton or a number-key shortcut below — so the
@@ -189,6 +196,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
           answered={answered}
           index={i}
           cramped={cramped}
+          keyHint={desk}
           onClick={() => handleAnswer(choice)}
         />
       ))}
@@ -725,6 +733,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
 }
 
 function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+  const desk = useDesk()
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -800,7 +809,11 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         {showingBack ? back : front}
       </div>
       <div className="flashcard__hint">
-        {!revealed && (t.tapToReveal)}
+        {/* A phone is tapped; a desk has a keyboard, so there the hint
+            names the key (plan 112). */}
+        {!revealed && (desk
+          ? <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>
+          : t.tapToReveal)}
       </div>
     </div>
   )

@@ -268,6 +268,9 @@ const quiz = {
   typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
+  // The desk's hint (plan 112): a key cap, then the words after it.
+  keySpace:            'Space',
+  revealByKey:         'to reveal',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see

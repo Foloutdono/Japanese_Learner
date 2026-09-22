@@ -250,6 +250,9 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // L'indice du bureau (plan 112) : une touche, puis les mots qui suivent.
+  keySpace:           'Espace',
+  revealByKey:        'pour révéler',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui

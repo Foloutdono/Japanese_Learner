@@ -20877,5 +20877,40 @@ a.slip__act { text-decoration: none; }
      here so the sumi sheet keeps its own material's edge. */
   .sheet--sumi { border-bottom-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); }
   .sheet__handle { display: none; }
+
+  /* ── 鍵 — the keys, on the desk ──
+     A run already answers to the keyboard — the digits rate, the digits
+     answer, the space bar turns the card — and on a phone none of it is
+     drawn, because a thumb has no number row. On the desk the hands are
+     on the keys, so the keys are printed: a cap in the ink of whatever
+     it sits on (currentColor, so one rule serves the sumi rating tile,
+     the gold one and the paper card), in the caption register. */
+  .desk-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6em;
+    padding: 0 var(--sp-1);
+    border: 1px solid color-mix(in srgb, currentcolor 40%, transparent);
+    border-bottom-width: 2px;
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-indent: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The rating tile's key in its corner, clear of the seal and the word:
+     it is what makes the reversed digits (1 is the best, at the right)
+     readable at a glance. */
+  .rating-bar__btn { position: relative; }
+  .rating-bar__btn > .desk-kbd {
+    position: absolute;
+    top: var(--sp-2);
+    left: var(--sp-2);
+    opacity: 0.7;
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
