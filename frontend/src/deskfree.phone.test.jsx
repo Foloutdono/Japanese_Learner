@@ -30,9 +30,19 @@ const REPORT = {
     card_id: `c${i}`, raw_id: `vocab_N5_語${i}_ご`, category: 'vocab', key: 'N5', mode: 'vocab.flashcard.f2b', accuracy: 40, lapses: 3,
   })),
 }
+// And the deck pages' (P7): a deck, its cards, their shapes, its modes.
+const DECK = { id: 1, name: 'Voyage', type: 'standard', role: 'owner', card_count: 1 }
+const deckAnswer = path => ({
+  '/api/decks': { decks: [DECK] },
+  '/api/decks/structures': { structures: [{ key: 'standard', fields: [{ key: 'front', required: true }, { key: 'back', required: true }] }] },
+  '/api/decks/1': DECK,
+  '/api/decks/1/cards': { cards: [{ id: 11, origin: 'custom', front: '駅', back: 'gare', fields: {} }] },
+  '/api/decks/1/modes': { modes: ['vocab.flashcard.f2b'] },
+}[path] ?? {})
+const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(),
+  apiFetch,
   apiJson: vi.fn(),
   apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
   apiUpload: vi.fn(),
@@ -184,5 +194,45 @@ describe('the header (P6)', () => {
     document.querySelector('.stage__leave').click()
     await settle()
     expect(path).toBe('/learn/vocab')
+  })
+})
+
+describe('the decks (P7)', () => {
+  it('keeps ▶ Study, the form in the page and fetches no platforms', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    expect(document.querySelector('.deck-identity__study')).not.toBeNull()
+    document.querySelector('.chip-row button').click()
+    await settle()
+    expect(document.querySelector('main.learn > .deckdetail-form')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(apiFetch.mock.calls.some(([p]) => p === '/api/decks/1/modes')).toBe(false)
+  })
+
+  it('opens "new deck" in the page, its door turned into the way out', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DecksScreen } = await import('./screens/DecksScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter><DecksScreen session={{}} /></MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    const before = document.querySelector('.decks-doors > :last-child').textContent
+    document.querySelector('.decks-doors > :last-child').click()
+    await settle()
+    expect(document.querySelector('main.learn > .form')).not.toBeNull()
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    expect(document.querySelector('.decks-doors > :last-child').textContent).not.toBe(before)
   })
 })

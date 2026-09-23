@@ -20984,6 +20984,37 @@ a.slip__act { text-decoration: none; }
   }
   .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+  /* A deck's page (screens/DeckDetailScreen.jsx): its cards, and beside
+     them the deck's platforms (components/decks/DeckPlatforms), boarding
+     directly — or, while a card is being written, the form, beside the
+     list it adds to. */
+  .desk-deck {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-deck__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-deck__study {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .desk-deck__cap {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
   /* Statistics (plan 113): the sentence the screen reads, in two
      columns (screens/StatsScreen.jsx). What holds on the left — the
      retention line drawn 1:1 (RetentionLine's `fit`), the ladder, the
@@ -21084,7 +21115,8 @@ a.slip__act { text-decoration: none; }
   /* In a station's split (below) the platforms are a list beside a
      list: one to a row, the whole page wide, their figures at the
      row's end. */
-  .desk-split__page > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .desk-split__page > .platform-grid,
+  .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
@@ -21156,7 +21188,9 @@ a.slip__act { text-decoration: none; }
      wall: the phone's thumb-sized vertical padding comes in a rung. */
   .desk-split__page .platform-card__lead,
   .desk-split__page .platform-card__body,
-  .desk-split__page .platform-card__aside { padding-block: var(--sp-5); }
+  .desk-split__page .platform-card__aside,
+  .desk-deck__study .platform-card__lead,
+  .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
   .desk-split .desk-stop--open {
     border-color: var(--accent2);
     background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
