@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
 import { parseVideoId } from '../../lib/youtube'
-import { buildBookmarklet } from '../../lib/captionGrab'
+import { useBookmarkletCopy, watchUrlFor } from './useBookmarkletCopy'
 import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
 
@@ -38,20 +38,24 @@ import { GrabTutorial } from './GrabTutorial'
 // DownSub, pre-filled with the pasted link, is the no-install
 // fallback for anything the bookmarklet cannot reach.
 
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch }) {
+// `grab` and `onTutorial` are the desk's (plan 117): the copy state the
+// screen shares with a walkthrough it opens in its own column, and the
+// door to that column. Without them the walkthrough is this panel's
+// dialog, as it is on a phone.
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch, grab, onTutorial }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
   const [dragging, setDragging] = useState(false)
-  const [copied, setCopied] = useState(false)
+  const own = useBookmarkletCopy()
+  const { copied, copy: copyBookmarklet } = grab ?? own
   const [showTutorial, setShowTutorial] = useState(false)
   const fileRef = useRef(null)
-  const copiedTimer = useRef(null)
 
   const parsedVideoId = parseVideoId(url)
-  const watchUrl = parsedVideoId ? `https://www.youtube.com/watch?v=${parsedVideoId}` : null
+  const watchUrl = watchUrlFor(url)
   const downsubHref = watchUrl
     ? `https://downsub.com/?url=${encodeURIComponent(watchUrl)}`
     : 'https://downsub.com/'
@@ -67,21 +71,6 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
     ? formatTimecode(endSec - startSec)
     : null
   const windowOpts = { url, start: startSec, end: endSec }
-
-  // Copy, not drag: React (rightly) refuses javascript: hrefs, and on
-  // a phone there is nothing to drag to anyway — copy → new bookmark
-  // → paste is the flow that works everywhere.
-  async function copyBookmarklet() {
-    try {
-      await navigator.clipboard.writeText(buildBookmarklet(window.location.origin))
-      setCopied(true)
-      clearTimeout(copiedTimer.current)
-      copiedTimer.current = setTimeout(() => setCopied(false), 2400)
-    } catch {
-      // Clipboard refused (permissions, insecure context) — the
-      // button simply doesn't confirm, and the file path remains.
-    }
-  }
 
   function handleDrop(e) {
     e.preventDefault()
@@ -141,7 +130,8 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           <button
             type="button"
             className="anl-ghost anl-grab__tutorial"
-            onClick={() => setShowTutorial(true)}
+            onClick={() => (onTutorial ? onTutorial() : setShowTutorial(true))}
+            aria-haspopup={onTutorial ? undefined : 'dialog'}
           >
             {t.grabTutorialBtn}
           </button>
