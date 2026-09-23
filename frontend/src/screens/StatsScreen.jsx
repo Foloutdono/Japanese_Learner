@@ -11,6 +11,7 @@ import { RetentionLine } from '../components/stats/RetentionLine'
 import { StrengthLadder } from '../components/stats/StrengthLadder'
 import { LineRows } from '../components/stats/LineRows'
 import { TroubleList } from '../components/stats/TroubleList'
+import { useDesk } from '../hooks/useDesk'
 
 // 統計 wears the plate the profile's door to it already draws (TO, in
 // LineMark) — the bar is the same mark, so the screen you land on is
@@ -32,9 +33,15 @@ const MISS_WINDOW = 30
 //
 // No block carries a heading; each names itself with its mark. Two
 // fetches: /api/stats, which the profile reads too, and the report.
+//
+// On the desk (plan 114) the sentence is read in two columns: what
+// holds on the left — the line drawn 1:1, the ladder, the lines with
+// their levels open in place — and where it leaks on the right, every
+// trouble card under the misses, at the phone's own width. No sheet.
 export default function StatsScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const desk = useDesk()
   const [stats, setStats] = useState(null)
   const [report, setReport] = useState(null)
   const [failed, setFailed] = useState(false)
@@ -77,13 +84,71 @@ export default function StatsScreen({ session }) {
   const weekFmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
   const weekLabel = asked ? weekFmt.format(new Date(`${asked.start}T12:00:00`)) : ''
 
+  // it holds, this well, on these lines
+  const holds = loaded && !nothingYet && (
+    <>
+      <section className="rep-card" aria-label={t.reportRetention}>
+        <div className="rep-head">
+          <span className="rep-fig">
+            {asked?.pct == null ? '—' : asked.pct}
+            {asked?.pct != null && <span className="rep-fig__u">%</span>}
+          </span>
+          {retention.delta !== null && (
+            <span className="rep-delta">
+              {/* Over the span the line draws — first ridden week
+                  to this one — never the twelve the payload holds. */}
+              {t.reportDelta(retention.delta, retention.weeks.length - retention.firstIndex - 1)}
+            </span>
+          )}
+        </div>
+        <div className="rep-caps">
+          <span className="rep-cap">{t.reportRetention}</span>
+          {asked && <span className="rep-cap">{t.reportWeekOf(weekLabel, asked.reviews)}</span>}
+        </div>
+        <RetentionLine
+          weeks={retention.weeks}
+          currentIndex={retention.currentIndex}
+          firstIndex={retention.firstIndex}
+          selected={week}
+          onSelect={setWeek}
+          fit={desk}
+        />
+      </section>
+
+      {strength.total > 0 && (
+        <section className="rep-card">
+          <StrengthLadder rungs={strength.rungs} total={strength.total} />
+        </section>
+      )}
+
+      {lines.some(l => l.total > 0) && (
+        <section className="rep-card rep-card--rows">
+          <LineRows rows={lines} inline={desk} />
+        </section>
+      )}
+    </>
+  )
+
+  // except here
+  const leaks = loaded && report.weakest?.length > 0 && (
+    <>
+      <div className="rep-head">
+        <span className="rep-fig rep-fig--title">
+          {misses.toLocaleString()}
+          <span className="rep-fig__u">{t.reportMisses(misses, MISS_WINDOW)}</span>
+        </span>
+      </div>
+      <TroubleList weakest={report.weakest} onStartReview={startReview} all={desk} />
+    </>
+  )
+
   return (
-    <main id="main-content" className="stats" style={{ '--line-color': 'var(--pass-ink)' }}>
+    <main id="main-content" className={`stats${desk ? ' desk-stats' : ''}`} style={{ '--line-color': 'var(--pass-ink)' }}>
       <Bar
         code={STATION.code}
         title={t.statistics}
         color="var(--pass-ink)"
-        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+        aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
       {!loaded && !failed && <Loading />}
@@ -98,60 +163,17 @@ export default function StatsScreen({ session }) {
 
       {nothingYet && <Empty message={t.reportEmpty} hint={t.reportEmptyHint} />}
 
-      {loaded && !nothingYet && (
+      {loaded && !nothingYet && (desk ? (
         <>
-          <section className="rep-card" aria-label={t.reportRetention}>
-            <div className="rep-head">
-              <span className="rep-fig">
-                {asked?.pct == null ? '—' : asked.pct}
-                {asked?.pct != null && <span className="rep-fig__u">%</span>}
-              </span>
-              {retention.delta !== null && (
-                <span className="rep-delta">
-                  {/* Over the span the line draws — first ridden week
-                      to this one — never the twelve the payload holds. */}
-                  {t.reportDelta(retention.delta, retention.weeks.length - retention.firstIndex - 1)}
-                </span>
-              )}
-            </div>
-            <div className="rep-caps">
-              <span className="rep-cap">{t.reportRetention}</span>
-              {asked && <span className="rep-cap">{t.reportWeekOf(weekLabel, asked.reviews)}</span>}
-            </div>
-            <RetentionLine
-              weeks={retention.weeks}
-              currentIndex={retention.currentIndex}
-              firstIndex={retention.firstIndex}
-              selected={week}
-              onSelect={setWeek}
-            />
-          </section>
-
-          {strength.total > 0 && (
-            <section className="rep-card">
-              <StrengthLadder rungs={strength.rungs} total={strength.total} />
-            </section>
-          )}
-
-          {lines.some(l => l.total > 0) && (
-            <section className="rep-card rep-card--rows">
-              <LineRows rows={lines} />
-            </section>
-          )}
-
-          {report.weakest?.length > 0 && (
-            <>
-              <div className="rep-head">
-                <span className="rep-fig rep-fig--title">
-                  {misses.toLocaleString()}
-                  <span className="rep-fig__u">{t.reportMisses(misses, MISS_WINDOW)}</span>
-                </span>
-              </div>
-              <TroubleList weakest={report.weakest} onStartReview={startReview} />
-            </>
-          )}
+          <div className="desk-stats__holds">{holds}</div>
+          {leaks && <section className="desk-stats__leaks" aria-label={t.weakestItems}>{leaks}</section>}
         </>
-      )}
+      ) : (
+        <>
+          {holds}
+          {leaks}
+        </>
+      ))}
     </main>
   )
 }

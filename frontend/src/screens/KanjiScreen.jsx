@@ -5,12 +5,15 @@ import { board } from '../stores/boarding'
 import { Leave } from '../components/chrome/Bar'
 import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures, ScopeFigures } from '../components/selection/ModeFigures'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import RadicalSelector from '../components/selection/RadicalSelector'
 import RadicalLesson from '../components/selection/RadicalLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
-import { tierLabelFor } from '../domain/tiers'
+import { tierLabelFor, tierAtSize } from '../domain/tiers'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/kanji'
@@ -51,6 +54,7 @@ export default function KanjiScreen({ session }) {
   const { pathname, search } = useLocation()
   const { level, tier, radical } = useParams()
   const [sp, setSp] = useSearchParams()
+  const desk = useDesk()
   // The lesson reports its radical up, so the bar can name it.
   const [lesson, setLesson] = useState(null)
 
@@ -74,7 +78,7 @@ export default function KanjiScreen({ session }) {
   // second fetch, and the back button (Android's included) undoes it.
   const browsing = sp.get('family') === '1'
 
-  const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
+  const leaveSources = <Leave to={BASE}>{t.leaveSources}</Leave>
 
   // ── The sources ──
   if (page === '') {
@@ -94,7 +98,7 @@ export default function KanjiScreen({ session }) {
       <SelectionScreen
         title={t.kanjiTitle}
         sub={t.stationSources}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />
       </SelectionScreen>
@@ -105,13 +109,19 @@ export default function KanjiScreen({ session }) {
   if (levelsPage) {
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.stationJlpt} aside={leaveSources}>
-        <LevelSelector source="kanji" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />
+        {/* On the desk the line stands beside a stop's platforms, so
+            the list alone opens on the learner's own stop (plan 114). */}
+        {desk
+          ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
+          : <LevelSelector source="kanji" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
       </SelectionScreen>
     )
   }
 
   // ── The tiers: by frequency ──
   if (tiersPage) {
+    // See VocabScreen: on the desk the list opens on its first tier.
+    if (desk) return <Navigate replace to={`${BASE}/tier/1?size=${tierSize}`} />
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.byFrequencyShort} aside={leaveSources}>
         <TierSelector
@@ -168,7 +178,7 @@ export default function KanjiScreen({ session }) {
     const swap = params => { setSp(params); window.scrollTo(0, 0) }
     const aside = browsing
       ? <Leave onClick={() => swap({})}>{t.radLesson}</Leave>
-      : <Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>
+      : <Leave to={leave}>{t.leaveRadicals}</Leave>
     return (
       <SelectionScreen
         title={t.kanjiTitle}
@@ -200,11 +210,59 @@ export default function KanjiScreen({ session }) {
   const back = byLevel ? `${BASE}/levels` : `${BASE}/tiers?size=${tierSize}`
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
+
+  // ── 机 — the line beside its platforms (plan 114) ──
+  // See VocabScreen: on the desk a level's platforms stand beside the
+  // JLPT line, each with its own figures; the way out is the sources.
+  if (desk && byLevel) {
+    const figured = modes.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="kanji" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen title={t.kanjiTitle} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="kanji" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
+  // ── 机 — the tiers beside a tier's platforms (plan 115) ──
+  // See VocabScreen: another size keeps the learner's place.
+  if (desk && tier) {
+    const open = Number(tier)
+    const at = (n, size = tierSize) => `${BASE}/tier/${n}?size=${size}`
+    const figured = modes.map(m => ({
+      ...m,
+      aside: <ScopeFigures session={session} url={`/api/frequency/kanji/stats?tier=${open}&tier_size=${tierSize}&mode=${m.key}`} />,
+    }))
+    return (
+      <SelectionScreen title={t.kanjiTitle} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.byFrequencyShort}
+          list={(
+            <TierSelector
+              domain="kanji"
+              session={session}
+              tierSize={tierSize}
+              selected={open}
+              onTierSize={size => navigate(at(tierAtSize(open, tierSize, size), size), { replace: true })}
+              onSelect={n => navigate(at(n), { replace: true })}
+            />
+          )}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.kanjiTitle}
       sub={sub}
-      aside={<Leave onClick={() => navigate(back)}>{byLevel ? t.leaveLevels : t.leaveTiers}</Leave>}
+      aside={<Leave to={back}>{byLevel ? t.leaveLevels : t.leaveTiers}</Leave>}
     >
       <ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

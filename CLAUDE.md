@@ -178,7 +178,66 @@ runtime purpose. Two consequences worth knowing:
   `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
   `routes/dictionary.py`, `routes/onboarding.py` and
   `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
-  When starting a new wave, begin at **113** or higher, and check
+  **113** is the desk (机) — numbered 113–115 because 112 went to the deck
+  fold above while the desk was open — the computer's design, a second
+  chrome at 1100px and up that never reaches the phone: the rail down the left
+  edge in place of the HUD and the tab bar, the plates two by two, Today
+  and the profile in two columns, Settings' list beside its page, sheets
+  as centred dialogs, and the keys printed on a run; every desk rule in
+  the last section of `index.css`, held there by `src/desk.css.test.js`
+  (cited in `hooks/useDesk.js`, `components/chrome/DeskRail.jsx`,
+  `components/chrome/Shell.jsx`, `components/chrome/Hud.jsx`,
+  `config/tabs.js`, `components/guide/Guide.jsx`,
+  `screens/ProfileScreen.jsx`, `screens/SettingsScreen.jsx`,
+  `components/settings/pane.js`, `components/settings/SettingsPage.jsx`,
+  `components/study/RatingBar.jsx`, `components/study/QuizComponents.jsx`,
+  `vite.config.js` and `index.css`; ADR 0018; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  **114** is the desk's second round, the screens laid out for the width —
+  the canvas at `--desk-board-w` and a second column at `--desk-side-w`
+  (`components/chrome/DeskSide.jsx`); Today's journey beside the gate
+  (`components/journey/JourneyPanel.jsx`, `JourneyBody.jsx`); the
+  dictionary's dock always open (`DictionaryLookupBody`); a station as two
+  panes with each platform's figures (`components/selection/StationSplit.jsx`,
+  `ModeFigures.jsx`, `domain/statsModel.js`'s `modeRow`) and the exam's
+  grade in its URL; the statistics as one page (`hooks/useBoxWidth.js`,
+  `components/stats/`); a run's side — the session panel and the revealed
+  card's docked entry (`components/study/SessionPanel.jsx`, `entryDock.js`,
+  `stores/runTally.js`, `stores/deskEntry.js`, `hooks/useReviewGates.js`),
+  or a graded sentence's breakdown (`components/analysis/BreakdownSide.jsx`);
+  the way up and the `/` key (`components/chrome/Bar.jsx`'s `Leave to`,
+  `config/tabs.js`'s `onDeskRail`, `components/chrome/DeskRail.jsx`); a deck
+  beside its platforms (`components/decks/DeckPlatforms.jsx`,
+  `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
+  and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
+  "The desk"; `docs/design/desk/README.md`).
+  **115** is the desk's third round (wave 26), the remaining second screens
+  and sheets taken into the page: five phone bugs the audit found, each with
+  its phone test (`exam/examService.js`'s `blankNumber`, `screens/ExamRunner.jsx`'s
+  replace on finish, `lib/dialogOpen.js`, `stores/boarding.js`'s `returnsTo`
+  with `hooks/useRunExit.js`, `screens/DictionaryScreen.jsx`'s page sequence);
+  a run's side in its pigment and a breakdown's doors opening in it
+  (`StudyStage.jsx`'s `RunSide`, `components/analysis/SideLookup.jsx`);
+  comprehension beside its text (`screens/ComprehensionRun.jsx`,
+  `domain/choiceKeys.js`, `domain/quotedFragments.js`); the stations' second
+  screens folded — grammar points beside the lesson, theme bands and tiers
+  beside their platforms, the deck's platform screen giving way
+  (`GrammarLessonBody`, `ScopeFigures`, `statsModel.bucketRow`,
+  `tiers.tierAtSize`); the mock exam's standing answer sheet, flat passage
+  and review split (`exam/ExamCard.jsx`, `QuestionRenderer`'s `PassageText`);
+  the library's shelf beside a deck and Browse docked
+  (`components/decks/PublicDeckPage.jsx`, `hooks/usePublicDeck.js`,
+  `BrowseCardsDock`); the analyser's dock, intake beside history and the
+  dictionary's handoff (`components/analysis/AnalyzerDock.jsx`,
+  `lookup.tokenLookup`, `Bar.jsx`'s `DeskCrumb`); a run that fits a laptop and
+  its misses at the end (`runTally.tallyMisses`, `SessionPanel`'s `done`); and
+  the keys, the gates' last doors and the guide beside its anchor
+  (`components/chrome/DeskKeys.jsx`, `hooks/useListWalk.js`, `LineFoot`'s legs,
+  `Banzuke`'s `both`, `Guide.jsx`) — every rule in the 机 section of
+  `index.css`, one desktop test file a phase and the phone's side in further
+  blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
+  `docs/design/desk/README.md`; ADR 0018).
+  When starting a new wave, begin at **116** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -458,7 +517,7 @@ npm install
 npm run dev       # Vite dev server, proxies /api -> localhost:8000
 npm run build
 npm run lint
-npm test          # vitest: node, browser, phone, tablet and touch lanes (see vite.config.js)
+npm test          # vitest: node, browser, phone, tablet, touch, desktop and wide lanes (see vite.config.js)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run icons     # re-render brand/icon.html and regenerate the icon set in public/
 ```
@@ -506,13 +565,14 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefixed`/`unprefixed`) so SRS state for the same content differs per learner in the same tables.
 
 ### Frontend layout (`frontend/src/`)
-- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
+- `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar below 1100px; the desk's rail at 1100px and up) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
 - `screens/` — one file per route/page (largely 1:1 with `App.jsx` routes).
-- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the mobile chrome (plan 068): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
+- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the chrome (plan 068; the desk, plan 113): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `DeskRail` (the computer's chrome, drawn instead of both at 1100px and up), the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
 - `domain/` — pure client-side domain logic: card shape helpers, kana sets, level titles, reward tiers, stats modeling, study-mode definitions, XP curve. Mirrors backend concepts but has no network calls.
 - `stores/` — small client-side state modules (boarding/departure transition state, profile summary, rating scale) — not Redux, just modules with subscribable state.
 - `exam/` — mock-exam UI: question rendering, exam kind definitions, `examService.js` for the exam API calls. Pairs with `screens/Exam*.jsx`.
 - `hooks/useCardSession.js` — shared review-session state machine used by the study screens.
+- `hooks/useDesk.js` — the one line between the two chromes (`DESK_QUERY`, `(min-width: 1100px)`). Below it every screen renders exactly the phone's DOM; above it the Shell draws the rail and a few screens lay themselves out for the width. **Never write a desk rule outside the last section of `index.css`, and never write the width anywhere else** — `src/desk.css.test.js` fails on both. See ADR 0018 and `docs/design/desk/README.md`.
 - `lib/api.js` — fetch wrapper. `apiFetch` returns the raw `Response`; `apiJson`/`apiJsonWithTimeout` add `ApiError` on non-2xx and an owned `AbortController` — prefer these over hand-rolled fetch+timeout in new screens.
 - `lib/supabase.js` — Supabase client; falls back to a placeholder project if env vars are unset (keeps builds/tests that don't touch auth from crashing on construction).
 - `config/` — static config: `tabs.js` (the five gates and the section registry behind them: paths, line colours, titles), `stations.js` (codes and readings per route), `identity.js` (the two pass routes).

@@ -5,17 +5,29 @@ import { gateBeside } from '../../config/tabs'
 import { useGateSwipe } from '../../hooks/useGateSwipe'
 import { useDeparture } from '../../stores/departure'
 import { playClick } from '../../lib/audio'
+import { useDesk } from '../../hooks/useDesk'
 import { Hud } from './Hud'
 import { TabBar } from './TabBar'
+import { DeskRail } from './DeskRail'
 import { useChrome } from './useChrome'
 
 // ── 車内 — the two frames every screen renders in (plan 068) ──
 // The canvas's backbone: the HUD across the top (level · goal status ·
 // commuter pass), the five gates across the bottom, and the screen
-// between them. It is ONE chrome at every width — a phone's frame,
-// drawn as a centred column on a wide screen — because the app is
-// one app, and the burger drawer, the top bar and the concourse home
-// it replaces were a second one.
+// between them — a phone's frame, drawn as a centred column between
+// 769 and 1099px.
+//
+// ── 机 — and the desk's (plan 113) ──
+// At 1100px and up (hooks/useDesk.js) the same frame draws the app's
+// second chrome instead: the rail down the left edge (DeskRail.jsx),
+// which is the HUD and the tab bar in one column. The swap is made in
+// JavaScript so that below the line the DOM is exactly the phone's —
+// no hidden rail, no class, nothing for a phone to pay for — and it is
+// made SLOT BY SLOT: the chrome's two places change what they hold,
+// while the screen's container stays the same element at the same
+// index, so a window dragged across 1100 swaps the chrome and keeps the
+// screen (its state, its scroll, a half-typed field) where it was.
+// Shell.desk.browser.test.jsx holds that.
 //
 // A run, a practice session and an exam are the exception the canvas
 // draws: both bars leave, the rating bar (or the field) docks on the
@@ -52,6 +64,7 @@ export function Shell() {
   const navigate = useNavigate()
   const content = useRef(null)
   const departing = useDeparture()
+  const desk = useDesk()
 
   // ── 乗り換え — the flick between gates ──
   // The tab bar is the navigation; this is the same row of five read
@@ -70,12 +83,14 @@ export function Shell() {
     navigate(path)
   }, [pathname, navigate])
 
-  useGateSwipe(content, step, !departing)
+  // The flick is the phone's: it walks the tab bar's row, and the
+  // desk has no row to walk — its gates are a column, in another order.
+  useGateSwipe(content, step, !departing && !desk)
 
   return (
-    <div className="phone">
+    <div className={desk ? 'phone phone--desk' : 'phone'}>
       <SkipLink />
-      <Hud />
+      {desk ? <DeskRail /> : <Hud />}
       <div
         ref={content}
         className="phone__content"
@@ -87,7 +102,7 @@ export function Shell() {
       >
         <Outlet />
       </div>
-      <TabBar />
+      {desk ? null : <TabBar />}
     </div>
   )
 }

@@ -1,6 +1,6 @@
 import { Link, useLocation } from 'react-router-dom'
 import { useLang } from '../../LangContext'
-import { getTabs, tabFor } from '../../config/tabs'
+import { getTabs, tabFor, dueBadge } from '../../config/tabs'
 import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
@@ -27,10 +27,8 @@ import { GateIcon } from './GateIcon'
 // Links, not buttons: a gate is a place, and a link is what a place
 // gets (a long-press, a middle-click, a screen reader's "link").
 
-// A three-figure count is wider than the gate it sits on, and the
-// difference between 239 and 312 due is not a difference anyone acts
-// on: past a hundred the number is "a lot".
-const DUE_CAP = 99
+// The due count is capped at 99+ (config/tabs.js's dueBadge, shared
+// with the desk's rail so both chromes print the same figure).
 
 // The gate you are on is drawn bigger. Full ink, a ground, a rule and
 // the word already say which one it is; the size is the one that says
@@ -68,7 +66,7 @@ export function TabBar() {
               <span className="tab__ico"><GateIcon id={tab.id} size={on ? GLYPH_ON : GLYPH} /></span>
               {badge && (
                 <span className="tab__due" aria-hidden="true">
-                  {due > DUE_CAP ? `${DUE_CAP}+` : due}
+                  {dueBadge(due)}
                 </span>
               )}
               {on && <span className="tab__cap" aria-hidden="true">{tab.label}</span>}

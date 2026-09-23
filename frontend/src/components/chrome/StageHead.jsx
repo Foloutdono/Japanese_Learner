@@ -1,5 +1,8 @@
 import { Leave } from './Bar'
 import { HudPass } from './Hud'
+import { LeaveKey } from './DeskKeys'
+import { useDesk } from '../../hooks/useDesk'
+import { useLang } from '../../LangContext'
 
 // ── The head of a run (plan 068; used from plan 070) ──────────
 // Both bars have left; this row is what a session keeps: the way out
@@ -19,10 +22,19 @@ import { HudPass } from './Hud'
 // see what is left. It comes off only where the surface is a whole
 // mode outside the fare: the practice sessions and the exam runner
 // (docs/design/mobile/README.md).
+//
+// On the desk Esc takes the way out too (plan 115, DeskKeys), its cap
+// printed on it.
 export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside }) {
+  const desk = useDesk()
+  const lang = useLang()
   return (
     <div className="stage__head">
-      <Leave onClick={onLeave}>{leaveLabel}</Leave>
+      <Leave onClick={onLeave} keys={desk ? 'Escape' : undefined}>
+        {leaveLabel}
+        {desk && <kbd className="desk-kbd" aria-hidden="true">{lang?.t.keyEscape}</kbd>}
+      </Leave>
+      <LeaveKey onLeave={onLeave} />
       <span className="stage__where">
         <h1 className="stage__where-jp">{where}</h1>
         {sub && <span className="stage__where-latin">{sub}</span>}

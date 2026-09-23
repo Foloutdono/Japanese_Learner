@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { TAB_IDS, gateBeside, tabFor } from './tabs'
+import { TAB_IDS, DESK_TAB_IDS, getDeskTabs, getDeskSections, inSection, dueBadge, gateBeside, tabFor } from './tabs'
 
 // ── Which gate is next along the bar ──────────────────────────
 // The arithmetic behind the sideways flick (hooks/useGateSwipe), on
@@ -40,5 +40,55 @@ describe('the gate beside one', () => {
     expect(gateBeside('/', 1)).toBeNull()
     expect(gateBeside('', 1)).toBeNull()
     expect(gateBeside(undefined, 1)).toBeNull()
+  })
+})
+
+// ── 机 — the rail's lists (plan 113) ─────────────────────────
+// The desk chrome's navigation, read off the same registry the tab bar
+// reads, so a section added to one is on both.
+const t = new Proxy({}, { get: (_, key) => String(key) })
+
+describe('the rail', () => {
+  it('lists the same five gates, Today first', () => {
+    expect([...DESK_TAB_IDS].sort()).toEqual([...TAB_IDS].sort())
+    expect(DESK_TAB_IDS[0]).toBe('today')
+    expect(getDeskTabs(t).map(tab => tab.id)).toEqual(DESK_TAB_IDS)
+    expect(getDeskTabs(t).map(tab => tab.path)).toEqual(DESK_TAB_IDS.map(id => `/${id}`))
+  })
+
+  it('lists a gate\'s sections without the gate itself', () => {
+    expect(getDeskSections('learn', t).map(s => s.path)).toEqual([
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks',
+    ])
+    expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
+      '/practice/reading', '/practice/comprehension', '/practice/translation',
+      '/practice/dictation', '/practice/exam',
+    ])
+    // The queue IS the gate, and the catalogue is the dictionary.
+    expect(getDeskSections('today', t)).toEqual([])
+    expect(getDeskSections('dictionary', t).map(s => s.path)).toEqual(['/dictionary/analyzer'])
+    // The pass's halls: the record, and its settings.
+    expect(getDeskSections('profile', t).map(s => s.path)).toEqual(['/profile/stats', '/profile/settings'])
+  })
+
+  it('carries no pigment: the rail is chrome', () => {
+    for (const id of DESK_TAB_IDS) {
+      for (const row of getDeskSections(id, t)) expect(Object.keys(row).sort()).toEqual(['path', 'title'])
+    }
+  })
+
+  it('lights a section from anywhere behind it, and only there', () => {
+    expect(inSection('/learn/decks', '/learn/decks')).toBe(true)
+    expect(inSection('/learn/decks/library/abc', '/learn/decks')).toBe(true)
+    expect(inSection('/profile/settings/sound', '/profile/settings')).toBe(true)
+    // A shared prefix is not a shared section.
+    expect(inSection('/learn/kanjiX', '/learn/kanji')).toBe(false)
+    expect(inSection('/learn', '/learn/kana')).toBe(false)
+  })
+
+  it('caps the due count the way the tab bar always has', () => {
+    expect(dueBadge(24)).toBe('24')
+    expect(dueBadge(99)).toBe('99')
+    expect(dueBadge(100)).toBe('99+')
   })
 })

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams, Navigate } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -11,6 +11,10 @@ import { Loading } from '../components/ui/Loading'
 import { LibraryCard } from '../components/decks/LibraryCard'
 import { deckTypes } from '../components/decks/deckTypes'
 import { BooksIcon } from '../components/ui/Icons'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit } from '../components/selection/StationSplit'
+import { PublicDeckPane } from '../components/decks/PublicDeckPage'
+import PublicDeckScreen from './PublicDeckScreen'
 
 // ── The library ───────────────────────────────────────────────
 // Every deck other learners have published. A place under 教材 rather
@@ -64,9 +68,23 @@ import { BooksIcon } from '../components/ui/Icons'
 const SORTS = ['new', 'followed']
 const DEBOUNCE_MS = 300
 
+// ── 机 — the shelf beside a deck's page (plan 115) ──
+// Both library routes land here (App.jsx). On a phone a deck is a
+// screen of its own, as it always was. On the desk the shelf stays and
+// the open deck's page stands beside it (PublicDeckPane): one route
+// component for both paths is what keeps the shelf's search, its
+// narrowing and its paging while the deck beside it changes.
 export default function LibraryScreen({ session }) {
+  const { deck_id } = useParams()
+  const desk = useDesk()
+  if (deck_id && !desk) return <PublicDeckScreen session={session} />
+  return <LibraryShelf session={session} open={desk ? deck_id ?? null : null} />
+}
+
+function LibraryShelf({ session, open }) {
   const navigate = useNavigate()
   const { t } = useLang()
+  const desk = useDesk()
 
   const [decks, setDecks]     = useState([])
   const [total, setTotal]     = useState(0)
@@ -173,8 +191,8 @@ export default function LibraryScreen({ session }) {
   const countLabel = total === 1 ? t.decksCountOne : t.decksCount.replace('{n}', total)
   const settled = !(loading && page === 0)
 
-  return (
-    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+  const chrome = (
+    <>
       {/* The way back, as every nested screen under 教材 carries one
           (the deck page's is the same word). It matters more now that
           the shelf's Browse door is how you get here: a trip out of
@@ -184,7 +202,7 @@ export default function LibraryScreen({ session }) {
         code="KZ"
         color="var(--line-decks)"
         title={t.library}
-        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
+        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
       />
 
       <Console>
@@ -230,6 +248,71 @@ export default function LibraryScreen({ session }) {
           count={settled && !failed ? countLabel : undefined}
         />
       </Console>
+    </>
+  )
+
+  const more = hasMore && (
+    <button type="button" className="lib-shelf__more" disabled={loading}
+      onClick={() => { playUi('click-mode-selection'); setPage(p => p + 1) }}>
+      {t.libraryMore}
+    </button>
+  )
+
+  if (desk) {
+    // The shelf as a list, the open deck as the page beside it: another
+    // deck swaps the page in place (the URL follows, replacing), and the
+    // bare library opens on its first deck once the shelf has answered —
+    // never while a narrowing is in flight, which would open a deck the
+    // narrowing is about to take away.
+    const listed = open ? decks.find(d => String(d.id) === String(open)) : null
+    return (
+      <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+        {chrome}
+        {!open && settled && !failed && decks.length > 0 && (
+          <Navigate replace to={`/learn/decks/library/${decks[0].id}`} />
+        )}
+        <StationSplit
+          className="desk-split--shelf"
+          label={t.library}
+          list={(
+            <>
+              {loading && page === 0 && <Loading />}
+              {settled && failed && (
+                <Empty icon={<BooksIcon size={40} />} message={t.libraryFailed} hint={t.libraryFailedHint} />
+              )}
+              {settled && !failed && decks.length === 0 && (
+                narrowed ? (
+                  <Empty
+                    icon={<BooksIcon size={40} />}
+                    message={t.decksNoMatch}
+                    hint={t.decksNoMatchHint}
+                    action={{ label: t.decksClearFilters, onClick: clearFilters }}
+                  />
+                ) : (
+                  <Empty icon={<BooksIcon size={40} />} message={t.libraryEmpty} hint={t.libraryEmptyHint} />
+                )
+              )}
+              {settled && decks.length > 0 && (
+                <div className="platform-grid">
+                  {decks.map(deck => (
+                    <LibraryCard key={deck.id} deck={deck} t={t} open={String(deck.id) === String(open)}
+                      onOpen={d => navigate(`/learn/decks/library/${d.id}`, { replace: true })} />
+                  ))}
+                </div>
+              )}
+              {more}
+            </>
+          )}
+        >
+          {open && <PublicDeckPane key={open} deckId={open} listed={listed} session={session} />}
+        </StationSplit>
+      </main>
+    )
+  }
+
+  return (
+    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+      {chrome}
 
       {loading && page === 0 && <Loading />}
 
@@ -267,12 +350,7 @@ export default function LibraryScreen({ session }) {
         </div>
       )}
 
-      {hasMore && (
-        <button type="button" className="lib-shelf__more" disabled={loading}
-          onClick={() => { playUi('click-mode-selection'); setPage(p => p + 1) }}>
-          {t.libraryMore}
-        </button>
-      )}
+      {more}
     </main>
   )
 }

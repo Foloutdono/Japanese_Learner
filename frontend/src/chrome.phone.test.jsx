@@ -137,6 +137,22 @@ describe('the shell', () => {
     expect(getComputedStyle(note).bottom).toBe('36px')
     note.remove()
   })
+
+  // ── 机 — the desk never reaches a phone (plan 113) ──
+  // The app has a second chrome at 1100px and up (the rail,
+  // components/chrome/DeskRail.jsx). Below that line the Shell renders
+  // exactly what it rendered before the desk existed: no rail kept
+  // hidden, no class, no key caps — nothing a phone would pay for or a
+  // screen reader would find. The stylesheet's half of the same promise
+  // is src/desk.css.test.js.
+  it('draws no desk', async () => {
+    await mountShell('/learn')
+    await settle()
+    expect(document.querySelector('.phone').className).toBe('phone')
+    expect(document.querySelector('[class*="desk-"], .phone--desk, kbd')).toBeNull()
+    expect(document.querySelector('.hud')).not.toBeNull()
+    expect(document.querySelector('.tabbar')).not.toBeNull()
+  })
 })
 
 describe('the HUD', () => {

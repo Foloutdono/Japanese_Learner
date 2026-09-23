@@ -6,6 +6,10 @@ import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import QuestionRenderer from '../exam/QuestionRenderer'
+import ExamCard from '../exam/ExamCard'
+import { StationSplit } from '../components/selection/StationSplit'
+import { useDesk } from '../hooks/useDesk'
+import { dialogOpen } from '../lib/dialogOpen'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import { flattenQuestions, getAttempt, getExam } from '../exam/examService'
@@ -71,6 +75,7 @@ export default function ExamResult({ session }) {
   const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const { t } = useLang()
+  const desk = useDesk()
   const [expandedId, setExpandedId] = useState(null)
   // Missed questions are what a review is for, so that is what opens.
   // Showing all of them made a 21-question paper into 21 identical
@@ -148,6 +153,39 @@ export default function ExamResult({ session }) {
     return out
   }, [summary, exam, section])
 
+  // ── 机 — the review as a list beside its page (plan 115) ──
+  // On the desk every row is a door to the question's revealed card,
+  // which stands beside the list rather than opening under its row: the
+  // first miss is open on arrival, a click or ←/→ swaps it in place. A
+  // clean sheet lists every question, so there is still something to
+  // open — a listening transcript, say.
+  const deskRows = useMemo(() => {
+    const missed = groups.some(g => g.rows.some(r => !r.isCorrect))
+    return groups.flatMap(g => (showAll || !missed ? g.rows : g.rows.filter(r => !r.isCorrect)))
+  }, [groups, showAll])
+  const openRow = deskRows.find(r => r.id === expandedId) ?? deskRows[0] ?? null
+  useEffect(() => {
+    if (!desk || !openRow) return undefined
+    const onKey = e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName ?? '') || e.target?.isContentEditable) return
+      const at = deskRows.indexOf(openRow)
+      const next = deskRows[at + (e.key === 'ArrowRight' ? 1 : -1)]
+      if (!next) return
+      e.preventDefault()
+      playUi('click-mode-selection')
+      setExpandedId(next.id)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [desk, deskRows, openRow])
+  // The open row kept in view in the list's own scroll.
+  const openId = desk ? openRow?.id : null
+  useEffect(() => {
+    if (openId) document.querySelector('.exam-review-row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [openId])
+
   // Real effect (not a call in the render body) — the render-body call
   // used to re-fire on every re-render, e.g. each time a review row
   // was expanded.
@@ -185,10 +223,8 @@ export default function ExamResult({ session }) {
     setExpandedId(prev => (prev === id ? null : id))
   }
 
-  return (
-    <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
-      <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
-
+  const head = (
+    <>
       <div className="exam-result-head">
         <ScoreRing pct={sectionStats.pct} metTarget={metTarget} />
         <div className="exam-result-figs">
@@ -225,7 +261,80 @@ export default function ExamResult({ session }) {
         </Chip>
         <span className="section-header__rule" aria-hidden="true" />
       </div>
-      <p className="hint">{missedCount === 0 ? t.examAllCorrect : t.examReviewHint}</p>
+      {/* "Tap a question to see it again" says nothing on the desk,
+          where the missed question already stands open beside the list. */}
+      {desk && missedCount > 0 ? null : <p className="hint">{missedCount === 0 ? t.examAllCorrect : t.examReviewHint}</p>}
+    </>
+  )
+
+  // A NEW paper, not this one again. Re-sitting a paper whose answers
+  // you have just read through tests recall of those answers rather
+  // than the language, so the server is asked for a different revision
+  // — another existing one where it has one (free), a freshly generated
+  // one where it doesn't. The excluded revision is the one just sat;
+  // the server would skip it anyway on the strength of the attempt now
+  // recorded, and saying so explicitly costs nothing.
+  const newPaper = (
+    <button
+      type="button"
+      className="btn-primary"
+      onClick={() => {
+        playUi('click-screen-selection')
+        navigate(`/practice/exam/${examId}?exclude=${exam.revision}`, { replace: true })
+      }}
+    >
+      {t.examNewPaper}
+    </button>
+  )
+
+  if (desk) {
+    const shown = new Set(deskRows.map(r => r.id))
+    return (
+      <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
+        <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
+        {head}
+        <StationSplit
+          label={t.examReviewTitle}
+          list={(
+            <div className="surface exam-review">
+              {groups.map(group => {
+                const rows = group.rows.filter(r => shown.has(r.id))
+                if (rows.length === 0) return null
+                return (
+                  <div key={group.key} className="exam-review__part">
+                    <div className="exam-group">
+                      <b className="exam-group__part">{t.examPart(group.number)}</b>
+                      <span className="exam-group__score">{group.correct} / {group.rows.length}</span>
+                    </div>
+                    {rows.map(r => (
+                      <ReviewRow
+                        key={r.id}
+                        r={r}
+                        desk
+                        open={r.id === openRow?.id}
+                        onClick={() => { playUi('click-mode-selection'); setExpandedId(r.id) }}
+                      />
+                    ))}
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        >
+          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed />}
+          {/* The way back to the exams is the rail's; the page keeps
+              the one thing to do next, under the card. */}
+          <div className="btn-row">{newPaper}</div>
+        </StationSplit>
+      </main>
+    )
+  }
+
+  return (
+    <main id="main-content" className="practice" style={{ '--line-color': EXAM_COLOR }}>
+      <Bar code={station.code} color={EXAM_COLOR} title={t.examTitle} sub={paperTitle(exam, t)} />
+
+      {head}
 
       {(showAll || missedCount > 0) && (
         <div className="surface exam-review">
@@ -240,25 +349,9 @@ export default function ExamResult({ session }) {
                 </div>
                 {rows.map(r => {
                   const isOpen = expandedId === r.id
-                  // Three outcomes, not two: a question left blank
-                  // scores like a wrong answer but isn't one, and the
-                  // two used to render identically.
-                  const state = r.isCorrect ? 'ok' : r.given == null ? 'blank' : 'x'
-                  const line = questionLine(r.q)
                   return (
                     <div key={r.id}>
-                      <button type="button" className="exam-review-row" onClick={() => toggle(r.id)} aria-expanded={isOpen}>
-                        <span className={`exam-review-row__mark exam-review-row__mark--${state}`} aria-hidden="true">
-                          {r.isCorrect ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
-                        </span>
-                        <span className="exam-review-row__q">{t.examQuestionAbbrev}{r.q.number}</span>
-                        {state === 'blank'
-                          ? <span className="exam-review-row__blank">{t.examNotAnswered}</span>
-                          : <span className="exam-review-row__jp" lang="ja">{line}</span>}
-                        <span className="exam-review-row__chev" aria-hidden="true">
-                          <ChevronIcon direction={isOpen ? 'up' : 'down'} size={14} />
-                        </span>
-                      </button>
+                      <ReviewRow r={r} open={isOpen} onClick={() => toggle(r.id)} />
                       {isOpen && (
                         <div className="exam-review-row__detail">
                           <QuestionRenderer question={r.q} selected={r.given} onSelect={() => {}} revealed devMode={false} />
@@ -277,26 +370,42 @@ export default function ExamResult({ session }) {
         <button type="button" className="btn-secondary" onClick={() => { playUi('click-screen-selection'); navigate('/practice/exam') }}>
           {t.examBackToExams}
         </button>
-        {/* A NEW paper, not this one again. Re-sitting a paper whose
-            answers you have just read through tests recall of those
-            answers rather than the language, so the server is asked
-            for a different revision — another existing one where it
-            has one (free), a freshly generated one where it doesn't.
-            The excluded revision is the one just sat; the server
-            would skip it anyway on the strength of the attempt now
-            recorded, and saying so explicitly costs nothing. */}
-        <button
-          type="button"
-          className="btn-primary"
-          onClick={() => {
-            playUi('click-screen-selection')
-            navigate(`/practice/exam/${examId}?exclude=${exam.revision}`, { replace: true })
-          }}
-        >
-          {t.examNewPaper}
-        </button>
+        {newPaper}
       </div>
     </main>
+  )
+}
+
+// One question's row in the review: its mark, its number and its line.
+// On a phone it opens its question under itself (aria-expanded, the
+// chevron); on the desk it opens it beside the list, as the page shown.
+function ReviewRow({ r, open, onClick, desk = false }) {
+  const { t } = useLang()
+  // Three outcomes, not two: a question left blank scores like a wrong
+  // answer but isn't one, and the two used to render identically.
+  const state = r.isCorrect ? 'ok' : r.given == null ? 'blank' : 'x'
+  const line = questionLine(r.q)
+  return (
+    <button
+      type="button"
+      className="exam-review-row"
+      onClick={onClick}
+      aria-expanded={desk ? undefined : open}
+      aria-current={desk && open ? 'page' : undefined}
+    >
+      <span className={`exam-review-row__mark exam-review-row__mark--${state}`} aria-hidden="true">
+        {r.isCorrect ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
+      </span>
+      <span className="exam-review-row__q">{t.examQuestionAbbrev}{r.q.number}</span>
+      {state === 'blank'
+        ? <span className="exam-review-row__blank">{t.examNotAnswered}</span>
+        : <span className="exam-review-row__jp" lang="ja">{line}</span>}
+      {desk ? null : (
+        <span className="exam-review-row__chev" aria-hidden="true">
+          <ChevronIcon direction={open ? 'up' : 'down'} size={14} />
+        </span>
+      )}
+    </button>
   )
 }
 

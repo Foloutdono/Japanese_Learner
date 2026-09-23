@@ -167,3 +167,15 @@ describe('RatingBar keyboard contract — two buttons', () => {
     expect(onRate).not.toHaveBeenCalled()
   })
 })
+
+// ── 机 — no key caps below the desk (plan 113) ──
+// On the desk each tile prints its digit (keys.desktop.test); this lane
+// is 414px wide, a phone's width, where a thumb has no number row and
+// the tile keeps its word and its seal alone.
+describe('RatingBar below the desk', () => {
+  it('prints no keys', async () => {
+    await renderBar({ onRate: () => {}, active: true })
+    expect(document.querySelectorAll('.rating-bar__btn')).toHaveLength(6)
+    expect(document.querySelector('.rating-bar .desk-kbd, .rating-bar kbd')).toBeNull()
+  })
+})

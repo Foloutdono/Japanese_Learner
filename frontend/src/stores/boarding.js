@@ -17,6 +17,17 @@ import { useSyncExternalStore } from 'react'
 let current = null
 const listeners = new Set()
 
+// Where the last train was boarded from: the page the learner was on
+// when they chose it. A run's way out uses it (returnsTo, below) to go
+// BACK to that page rather than pile a second copy of it on top of the
+// run in the history — which is what made Back, or a mouse's back
+// button, re-board a run the learner had just left.
+let boardedFrom = null
+
+function here() {
+  return typeof window === 'undefined' ? null : window.location.pathname
+}
+
 function emit() {
   listeners.forEach(fn => fn(current))
 }
@@ -31,8 +42,21 @@ function emit() {
  *                              --line-color already is.
  */
 export function board(commit, color) {
+  boardedFrom = here()
   current = { commit, color, id: Date.now() }
   emit()
+}
+
+/**
+ * Whether leaving the run for `path` is a step back in the history:
+ * the run was boarded from exactly that page, in this tab, and there
+ * is an entry to go back to. Asked once per way out — the record is
+ * spent by the asking, so a reloaded run never reads a stale one.
+ */
+export function returnsTo(path) {
+  const hit = boardedFrom === path && (window.history.state?.idx ?? 0) > 0
+  boardedFrom = null
+  return hit
 }
 
 export function endBoarding() {

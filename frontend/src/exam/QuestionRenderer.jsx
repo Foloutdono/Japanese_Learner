@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { createContext, useContext, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import AudioPlayer from './AudioPlayer'
@@ -18,7 +18,25 @@ import { ImageIcon, StarIcon } from '../components/ui/Icons'
 //   devMode    — if true, show a "reveal script" toggle for listening
 //                questions (never shown to real learners — see AUDIO
 //                NOTE below)
-export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false }) {
+//   keys       — the desk's (plan 115): the rows name their digit keys
+//                (aria-keyshortcuts) and a listening clip answers Space,
+//                its cap printed on the player. Never passed on a phone.
+//   passageAside — the desk's too: a reading passage stands flat beside
+//                its questions (ExamRunner's .desk-paper), so the block
+//                draws the question without it.
+export default function QuestionRenderer({ question, selected, onSelect, revealed = false, devMode = false, keys = false, passageAside = false }) {
+  return (
+    <KeysContext.Provider value={keys}>
+      <QuestionBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} devMode={devMode} passageAside={passageAside} />
+    </KeysContext.Provider>
+  )
+}
+
+// Read by the rows and the player, rather than threaded through every
+// block: a provider adds no box.
+const KeysContext = createContext(false)
+
+function QuestionBlock({ question, selected, onSelect, revealed, devMode, passageAside }) {
   switch (question.type) {
     case 'mcq-text':
       return <McqBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} />
@@ -27,7 +45,7 @@ export default function QuestionRenderer({ question, selected, onSelect, reveale
     case 'cloze-passage':
       return <ClozeBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} />
     case 'reading-passage':
-      return <ReadingPassageBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} />
+      return <ReadingPassageBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} passageAside={passageAside} />
     case 'table-reading':
       return <TableReadingBlock question={question} selected={selected} onSelect={onSelect} revealed={revealed} />
     case 'listening-mcq':
@@ -66,6 +84,7 @@ function selectWithSound(onSelect, id) {
 // classes rather than one shared "active" look.
 function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed, answer, label }) {
   const { t } = useLang()
+  const keys = useContext(KeysContext)
   const listRef = useRef(null)
 
   // A radiogroup has to honour the arrow keys it advertises: assistive
@@ -135,6 +154,7 @@ function ChoiceList({ choices, choiceType = 'text', selected, onSelect, revealed
               role={revealed ? undefined : 'radio'}
               aria-checked={revealed ? undefined : isSelected}
               tabIndex={revealed ? undefined : i === activeIndex ? 0 : -1}
+              aria-keyshortcuts={keys && !revealed ? String(i + 1) : undefined}
               onClick={() => selectWithSound(onSelect, choice.id)}
             >
               <span className="mcq-row__accent" aria-hidden="true" />
@@ -251,12 +271,15 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
 // the blank currently being answered and mask the others so later
 // blanks in the same passage aren't spoiled.
 function ClozeBlock({ question, selected, onSelect, revealed }) {
-  const { passage, number } = question
+  // The blank's own marker number, not the section-wide `number` the
+  // paper prints: 【1】 is the first blank of this passage whichever
+  // question of the section it is (exam/examService.js).
+  const { passage, blankNumber, number } = question
   return (
     <div className="exam-question">
       <h4 className="exam-passage__title" lang="ja">{passage.titleJp}</h4>
       <p className="exam-passage__text" lang="ja">
-        <ClozeText template={passage.textTemplateJp} activeNumber={number} />
+        <ClozeText template={passage.textTemplateJp} activeNumber={blankNumber ?? number} />
       </p>
       <ChoiceList
         choices={question.choices}
@@ -288,18 +311,16 @@ function ClozeText({ template, activeNumber }) {
 }
 
 // もんだい4/5 (reading) — passage (plus optional memo) above the question(s).
-function ReadingPassageBlock({ question, selected, onSelect, revealed }) {
+// On the desk the passage stands beside them instead (`passageAside`).
+function ReadingPassageBlock({ question, selected, onSelect, revealed, passageAside }) {
   const { passage } = question
   return (
     <div className="exam-question">
-      <div className="prompt-card exam-passage">
-        <p className="exam-passage__text" lang="ja">{passage.textJp}</p>
-        {passage.memoJp && (
-          <div className="exam-memo" lang="ja">
-            {passage.memoJp.split('\n').map((line, i) => <div key={i}>{line || ' '}</div>)}
-          </div>
-        )}
-      </div>
+      {!passageAside && (
+        <div className="prompt-card exam-passage">
+          <PassageText passage={passage} />
+        </div>
+      )}
       <p className="exam-question__prompt" lang="ja">{question.promptJp}</p>
       <ChoiceList
         choices={question.choices}
@@ -311,6 +332,21 @@ function ReadingPassageBlock({ question, selected, onSelect, revealed }) {
         label={question.promptJp}
       />
     </div>
+  )
+}
+
+// A reading passage's text and its memo: inside the question's card on
+// a phone, on its own card beside the questions on the desk.
+export function PassageText({ passage }) {
+  return (
+    <>
+      <p className="exam-passage__text" lang="ja">{passage.textJp}</p>
+      {passage.memoJp && (
+        <div className="exam-memo" lang="ja">
+          {passage.memoJp.split('\n').map((line, i) => <div key={i}>{line || ' '}</div>)}
+        </div>
+      )}
+    </>
   )
 }
 
@@ -371,6 +407,7 @@ function TableReadingBlock({ question, selected, onSelect, revealed }) {
 // kept away from real learners.
 function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
   const { t } = useLang()
+  const keys = useContext(KeysContext)
   const [showScript, setShowScript] = useState(false)
   const choices = question.choices
   const choiceType = question.choiceType || 'text'
@@ -380,7 +417,7 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
       {question.questionPromptJp && <p className="exam-question__prompt" lang="ja">{question.questionPromptJp}</p>}
       {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
 
-      <AudioPlayer src={question.audioSrc} />
+      <AudioPlayer src={question.audioSrc} keyHint={keys && !revealed} />
 
       {devMode && !revealed && (
         <div className="exam-dev-panel">

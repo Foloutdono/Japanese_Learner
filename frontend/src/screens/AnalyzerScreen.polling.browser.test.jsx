@@ -91,7 +91,7 @@ async function renderScreen() {
 // fire-and-forget: only the boarded platform's panel is in the DOM,
 // so the subtitle input does not exist until React has re-rendered.
 async function goToPlatform(screen, key) {
-  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  const leave = screen.container.querySelector('.anl-head .stage__leave, .desk-crumb .stage__leave')
   if (leave) { leave.click(); await settle(30) }
   const idx = { text: 0, photo: 1, video: 2 }[key]
   screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()

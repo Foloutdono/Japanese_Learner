@@ -10,9 +10,12 @@ import { BoltIcon } from '../ui/Icons'
 // recognise, so it is set in Japanese at a readable size), and every
 // row is a way in: pressing one drops you into that exact level and
 // drill. Six on the screen; the rest behind one foot row, in a sheet.
+// With `all` (the desk, plan 114) every row is on the page and there is
+// no sheet: the list has a column of its own there, and a foot row that
+// opens a dialog to show six more rows is a phone's economy.
 const SHOWN = 6
 
-export function TroubleList({ weakest, onStartReview }) {
+export function TroubleList({ weakest, onStartReview, all = false }) {
   const { t } = useLang()
   const [more, setMore] = useState(false)
   if (!weakest?.length) return null
@@ -50,6 +53,8 @@ export function TroubleList({ weakest, onStartReview }) {
       </Tag>
     )
   })
+
+  if (all) return <div className="trouble">{rows(weakest)}</div>
 
   return (
     <>

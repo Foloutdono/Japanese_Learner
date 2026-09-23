@@ -53,8 +53,8 @@ export default function SentenceStation({ session, base, levelsOnly = false }) {
   const levelsPage = pathname.endsWith('/levels')
   const tiersPage = pathname.endsWith('/tiers')
 
-  const leavePractice = <Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>
-  const leaveSources = <Leave onClick={() => navigate(base)}>{t.leaveSources}</Leave>
+  const leavePractice = <Leave to={'/practice'}>{t.tabPractice}</Leave>
+  const leaveSources = <Leave to={base}>{t.leaveSources}</Leave>
 
   // ── The JLPT grades ──
   // The only step for comprehension and dictation, the second one

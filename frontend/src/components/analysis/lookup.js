@@ -59,3 +59,18 @@ export function lookupKey(lookup) {
   if (!lookup) return null
   return [lookup.category, lookup.id ?? '', lookup.term ?? '', lookup.kana ?? ''].join(':')
 }
+
+// ── 机 — the entry the analyser's dock follows (plan 115) ──
+// On the desk the analyser's second column is the dictionary, open on
+// the token the stage is showing: ←/→ walk the sentence and the entry
+// walks with it. A word opens as it would from a tap; a token that is
+// no deck word but is one kanji opens that kanji; anything else — a
+// particle the deck does not carry, punctuation — has no entry, and the
+// dock says so rather than holding the last one.
+export function tokenLookup(token) {
+  if (!token) return null
+  const word = vocabLookup(token)
+  if (word) return word
+  const kanji = token.kanji_matches ?? []
+  return kanji.length === 1 ? kanjiLookup(kanji[0]) : null
+}

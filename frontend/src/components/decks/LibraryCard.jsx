@@ -14,14 +14,18 @@ import { deckTypeOf } from './deckTypes'
 // lists published decks — every near-copy of a component in this app
 // has drifted from its original within two features.
 
-export function LibraryCard({ deck, t, onOpen }) {
+//
+// `open` is the desk's (plan 115): the deck whose page stands beside the
+// shelf, marked as that page the way a station's open stop is.
+export function LibraryCard({ deck, t, onOpen, open = false }) {
   const dt = deckTypeOf(deck.type, t)
   const followers = deck.followers ?? 0
 
   return (
     <button
       type="button"
-      className="platform-card deck-card lib-card"
+      className={open ? 'platform-card deck-card lib-card desk-stop--open' : 'platform-card deck-card lib-card'}
+      aria-current={open ? 'page' : undefined}
       style={{ '--rail': dt.color, '--line-color': dt.color }}
       onClick={() => { playUi('click-mode-selection'); onOpen(deck) }}
     >

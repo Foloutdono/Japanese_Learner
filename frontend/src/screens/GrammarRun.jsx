@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useLang } from '../LangContext'
@@ -15,6 +15,8 @@ import { formatGlossLine, GlossList } from '../components/study/gloss'
 import { ExampleSentence } from '../components/dictionary/ExampleSentence'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
@@ -52,14 +54,13 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // always on — the choices are the exercise, not a hint.
 
 export default function GrammarRun({ session }) {
-  const navigate = useNavigate()
   const { t, lang } = useLang()
   const { level, mode } = useParams()
 
   const reviewing = mode === FAST_REVIEW
   const valid = Boolean(level) && (reviewing || STUDY_MODES[mode]?.source === 'grammar')
   const platforms = `/learn/grammar/${level}`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)
@@ -270,6 +271,8 @@ export default function GrammarRun({ session }) {
       sub={currentModeLabel}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel />}
+      sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

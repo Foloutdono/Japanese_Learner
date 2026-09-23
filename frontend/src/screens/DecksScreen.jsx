@@ -5,6 +5,8 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { useTodaySummary } from '../stores/today'
 import { Bar } from '../components/chrome/Bar'
+import { Sheet } from '../components/chrome/Sheet'
+import { useDesk } from '../hooks/useDesk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleAction, ConsoleIndex } from '../components/chrome/Console'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
@@ -37,6 +39,7 @@ import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
 export default function DecksScreen({ session }) {
   const navigate = useNavigate()
   const { t } = useLang()
+  const desk = useDesk()
   const today = useTodaySummary().data
 
   // Type identity (pigment + glyph) lives in components/decks/
@@ -114,6 +117,47 @@ export default function DecksScreen({ session }) {
 
   const countLabel = shown.length === 1 ? t.decksCountOne : t.decksCount.replace('{n}', shown.length)
 
+  // A phone opens the form in the page, under the doors; the desk opens
+  // it as a dialog over the shelf (plan 114), so the shelf does not
+  // move to make room for a form and back.
+  const createForm = (
+    <div className="form">
+      <input
+        value={newName}
+        onChange={e => setNewName(e.target.value)}
+        onKeyDown={e => e.key === 'Enter' && createDeck()}
+        placeholder={t.deckNamePlaceholder}
+        autoFocus
+        className="field"
+        aria-label={t.deckNamePlaceholder}
+      />
+      <div className="type-list" role="radiogroup" aria-label={t.createDeck}>
+        {DECK_TYPES.map(dt => {
+          const on = newType === dt.value
+          return (
+            <button
+              key={dt.value}
+              type="button"
+              role="radio"
+              aria-checked={on}
+              className={`type-row${on ? ' type-row--on' : ''}`}
+              onClick={() => { playUi('click-mode-selection'); setNewType(dt.value) }}
+            >
+              <span className="chip__glyph type-row__glyph" lang="ja" aria-hidden="true" style={{ '--tab-color': dt.color }}>{dt.glyph}</span>
+              <span className="type-row__names">
+                <span className="type-row__label">{dt.label}</span>
+                <span className="type-row__desc">{dt.desc}</span>
+              </span>
+            </button>
+          )
+        })}
+      </div>
+      <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim()}>
+        {t.createDeck}
+      </button>
+    </div>
+  )
+
   return (
     <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
       <Bar code="KZ" color="var(--line-decks)" title={t.decks} />
@@ -131,7 +175,9 @@ export default function DecksScreen({ session }) {
         >
           <BooksIcon size={14} />{t.libraryBrowse}
         </Chip>
-        {creating ? (
+        {/* On the desk the form is a dialog (below), which closes
+            itself: the door stays "+ New deck". */}
+        {creating && !desk ? (
           <Chip onClick={() => { playUi('click-mode-selection'); setCreating(false) }}>
             <CrossIcon size={14} />{t.cancel}
           </Chip>
@@ -167,43 +213,7 @@ export default function DecksScreen({ session }) {
         />
       </Console>
 
-      {creating && (
-        <div className="form">
-          <input
-            value={newName}
-            onChange={e => setNewName(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && createDeck()}
-            placeholder={t.deckNamePlaceholder}
-            autoFocus
-            className="field"
-            aria-label={t.deckNamePlaceholder}
-          />
-          <div className="type-list" role="radiogroup" aria-label={t.createDeck}>
-            {DECK_TYPES.map(dt => {
-              const on = newType === dt.value
-              return (
-                <button
-                  key={dt.value}
-                  type="button"
-                  role="radio"
-                  aria-checked={on}
-                  className={`type-row${on ? ' type-row--on' : ''}`}
-                  onClick={() => { playUi('click-mode-selection'); setNewType(dt.value) }}
-                >
-                  <span className="chip__glyph type-row__glyph" lang="ja" aria-hidden="true" style={{ '--tab-color': dt.color }}>{dt.glyph}</span>
-                  <span className="type-row__names">
-                    <span className="type-row__label">{dt.label}</span>
-                    <span className="type-row__desc">{dt.desc}</span>
-                  </span>
-                </button>
-              )
-            })}
-          </div>
-          <button type="button" onClick={createDeck} className="btn-primary" disabled={!newName.trim()}>
-            {t.createDeck}
-          </button>
-        </div>
-      )}
+      {creating && !desk && createForm}
 
       {loading && <Loading />}
 
@@ -256,6 +266,11 @@ export default function DecksScreen({ session }) {
             )
           })}
         </div>
+      )}
+      {desk && (
+        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck}>
+          {createForm}
+        </Sheet>
       )}
     </main>
   )

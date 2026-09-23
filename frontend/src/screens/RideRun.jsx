@@ -16,6 +16,7 @@ import { Callout } from '../components/guide/Callout'
 import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
+import { useDesk } from '../hooks/useDesk'
 
 // ── 試乗 — the test ride (plan 098) ──────────────────────────────
 // The learner's first two flashcards, on the real stage: the same
@@ -80,6 +81,7 @@ function rideCard(card, latin) {
 export default function RideRun({ session, onDone, onNext = null, covered = false, dryRun = false, cards: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const desk = useDesk()
   const summary = useProfileSummary()
   // "No kana" or "katakana only": neither reads the hiragana on the
   // known card, so the reading rides on it in Latin letters and is
@@ -190,10 +192,10 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   const remaining = cards ? Math.max(0, cards.length - index) : null
   const foot = { left: t.rideJp, right: t.rideCap }
   const callouts = {
-    'known':        { anchor: 'ride.card', place: 'top',   text: t.rideKnownFront },
-    'known-back':   { anchor: 'ride.rate', place: 'above', text: t.rideKnownBack },
-    'unknown':      { anchor: 'ride.card', place: 'top',   text: t.rideUnknownFront },
-    'unknown-back': { anchor: 'ride.rate', place: 'above', text: t.rideUnknownBack },
+    'known':        { anchor: 'ride.card', place: 'top',   text: (desk && t.rideKnownFrontDesk) || t.rideKnownFront },
+    'known-back':   { anchor: 'ride.rate', place: 'above', text: (desk && t.rideKnownBackDesk) || t.rideKnownBack },
+    'unknown':      { anchor: 'ride.card', place: 'top',   text: (desk && t.rideUnknownFrontDesk) || t.rideUnknownFront },
+    'unknown-back': { anchor: 'ride.rate', place: 'above', text: (desk && t.rideUnknownBackDesk) || t.rideUnknownBack },
   }
   const callout = !covered && card && callouts[step]
 
