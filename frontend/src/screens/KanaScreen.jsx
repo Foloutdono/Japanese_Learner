@@ -97,7 +97,7 @@ export default function KanaScreen() {
       >
         <StationSplit
           label={t.stationSets}
-          list={<RouteStops stops={setStops()} here={here} selected={set} onSelect={slug => navigate(`/learn/kana/${slug}`, { replace: true })} />}
+          list={<RouteStops stops={setStops()} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} />}
         >
           <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
         </StationSplit>

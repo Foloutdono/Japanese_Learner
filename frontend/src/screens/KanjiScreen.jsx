@@ -220,7 +220,7 @@ export default function KanjiScreen({ session }) {
       <SelectionScreen title={t.kanjiTitle} sub={sub} aside={leaveSources}>
         <StationSplit
           label={t.stationJlpt}
-          list={<LevelSelector source="kanji" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+          list={<LevelSelector source="kanji" selected={level} linkTo={lvl => `${BASE}/${lvl}`} />}
         >
           <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
         </StationSplit>
@@ -248,7 +248,7 @@ export default function KanjiScreen({ session }) {
               tierSize={tierSize}
               selected={open}
               onTierSize={size => navigate(at(tierAtSize(open, tierSize, size), size), { replace: true })}
-              onSelect={n => navigate(at(n), { replace: true })}
+              linkTo={n => at(n)}
             />
           )}
         >

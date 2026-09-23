@@ -194,7 +194,7 @@ export default function VocabScreen({ session }) {
       <SelectionScreen title={t.vocabulary} sub={sub} aside={leaveSources}>
         <StationSplit
           label={t.stationJlpt}
-          list={<LevelSelector source="vocab" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+          list={<LevelSelector source="vocab" selected={level} linkTo={lvl => `${BASE}/${lvl}`} />}
         >
           <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
         </StationSplit>
@@ -216,7 +216,7 @@ export default function VocabScreen({ session }) {
       <SelectionScreen title={t.vocabulary} sub={sub} aside={<Leave to={`${BASE}/themes`}>{t.leaveThemes}</Leave>}>
         <StationSplit
           label={themeLabelFor(t, theme)}
-          list={<ThemeLevelSelector session={session} theme={theme} selected={themeLevel} onSelect={lvl => navigate(`${BASE}/theme/${theme}/level/${lvl}`, { replace: true })} />}
+          list={<ThemeLevelSelector session={session} theme={theme} selected={themeLevel} linkTo={lvl => `${BASE}/theme/${theme}/level/${lvl}`} />}
         >
           <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
         </StationSplit>
@@ -257,7 +257,7 @@ export default function VocabScreen({ session }) {
                 tierSize={tierSize}
                 selected={open}
                 onTierSize={size => navigate(at(tierAtSize(open, tierSize, size), size), { replace: true })}
-                onSelect={n => navigate(at(n), { replace: true })}
+                linkTo={n => at(n)}
               />
             </>
           )}

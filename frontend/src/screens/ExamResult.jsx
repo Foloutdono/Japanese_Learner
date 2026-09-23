@@ -8,6 +8,7 @@ import { stationFor } from '../config/stations'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
 import { StationSplit } from '../components/selection/StationSplit'
+import { SplitRow } from '../components/selection/SplitRow'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import Empty from '../components/ui/Empty'
@@ -159,11 +160,19 @@ export default function ExamResult({ session }) {
   // first miss is open on arrival, a click or ←/→ swaps it in place. A
   // clean sheet lists every question, so there is still something to
   // open — a listening transcript, say.
+  //
+  // The open question is named in the URL, beside the attempt
+  // (?question=, plan 117), and each row is a link to it: a question
+  // opens in a tab of its own, which rebuilds the result from ?attempt=
+  // as a reload does. The link and ←/→ replace the URL, carrying the
+  // paper and the attempt this screen was handed (router state), so the
+  // swap refetches nothing. The phone keeps its rows opening in place.
   const deskRows = useMemo(() => {
     const missed = groups.some(g => g.rows.some(r => !r.isCorrect))
     return groups.flatMap(g => (showAll || !missed ? g.rows : g.rows.filter(r => !r.isCorrect)))
   }, [groups, showAll])
-  const openRow = deskRows.find(r => r.id === expandedId) ?? deskRows[0] ?? null
+  const asked = searchParams.get('question')
+  const openRow = deskRows.find(r => String(r.id) === asked) ?? deskRows[0] ?? null
   useEffect(() => {
     if (!desk || !openRow) return undefined
     const onKey = e => {
@@ -175,11 +184,11 @@ export default function ExamResult({ session }) {
       if (!next) return
       e.preventDefault()
       playUi('click-mode-selection')
-      setExpandedId(next.id)
+      navigate(questionAt(location.pathname, searchParams, next.id), { replace: true, state: location.state })
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [desk, deskRows, openRow])
+  }, [desk, deskRows, openRow, navigate, location.pathname, location.state, searchParams])
   // The open row kept in view in the list's own scroll.
   const openId = desk ? openRow?.id : null
   useEffect(() => {
@@ -312,7 +321,9 @@ export default function ExamResult({ session }) {
                         r={r}
                         desk
                         open={r.id === openRow?.id}
-                        onClick={() => { playUi('click-mode-selection'); setExpandedId(r.id) }}
+                        to={questionAt(location.pathname, searchParams, r.id)}
+                        navState={location.state}
+                        onClick={() => playUi('click-mode-selection')}
                       />
                     ))}
                   </div>
@@ -376,18 +387,29 @@ export default function ExamResult({ session }) {
   )
 }
 
+// The desk's URL for one question of this result: the same page, the
+// question named beside the attempt (plan 117).
+function questionAt(pathname, searchParams, id) {
+  const next = new URLSearchParams(searchParams)
+  next.set('question', String(id))
+  return { pathname, search: `?${next}` }
+}
+
 // One question's row in the review: its mark, its number and its line.
 // On a phone it opens its question under itself (aria-expanded, the
-// chevron); on the desk it opens it beside the list, as the page shown.
-function ReviewRow({ r, open, onClick, desk = false }) {
+// chevron); on the desk it opens it beside the list, as the page shown,
+// and is a link to that question's URL (`to`, plan 117), `navState`
+// riding with the navigation.
+function ReviewRow({ r, open, onClick, desk = false, to = null, navState = null }) {
   const { t } = useLang()
   // Three outcomes, not two: a question left blank scores like a wrong
   // answer but isn't one, and the two used to render identically.
   const state = r.isCorrect ? 'ok' : r.given == null ? 'blank' : 'x'
   const line = questionLine(r.q)
   return (
-    <button
-      type="button"
+    <SplitRow
+      to={to}
+      state={navState}
       className="exam-review-row"
       onClick={onClick}
       aria-expanded={desk ? undefined : open}
@@ -405,7 +427,7 @@ function ReviewRow({ r, open, onClick, desk = false }) {
           <ChevronIcon direction={open ? 'up' : 'down'} size={14} />
         </span>
       )}
-    </button>
+    </SplitRow>
   )
 }
 

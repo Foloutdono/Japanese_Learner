@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
@@ -113,22 +113,24 @@ export default function GrammarScreen({ session }) {
   // one click or ←/→ per point, where the phone opens each in a sheet
   // over the index. The bare index opens on the first point not yet
   // mastered; a point asked for from the level page opens the same way.
+  // Each row is a link to its point (plan 117), so one also opens in a
+  // tab of its own.
   if (desk && (browsing || point) && (!index || index.points?.length)) {
     if (!index) return <SelectionScreen title={t.grammarTitle} sub={`${level} · ${t.glPoints}`}><Loading /></SelectionScreen>
     const points = index.points
     const open = points.find(p => p.raw_id === point)
+    const pointAt = rawId => `/learn/grammar/${level}?index=1&point=${encodeURIComponent(rawId)}`
     if (!browsing || !open) {
-      const to = open ? point : (points.find(p => p.stage !== 'mastered') ?? points[0]).raw_id
-      return <Navigate replace to={`/learn/grammar/${level}?index=1&point=${encodeURIComponent(to)}`} />
+      return <Navigate replace to={pointAt(open ? point : (points.find(p => p.stage !== 'mastered') ?? points[0]).raw_id)} />
     }
-    const walk = rawId => { setSp({ index: '1', point: rawId }, { replace: true }); window.scrollTo(0, 0) }
+    const walk = rawId => setSp({ index: '1', point: rawId }, { replace: true })
     return (
       <SelectionScreen
         title={t.grammarTitle}
         sub={`${level} · ${t.glPoints}`}
         aside={<Leave onClick={() => swap({})}>{level}</Leave>}
       >
-        <StationSplit label={t.glPoints} list={<GrammarIndex points={points} selected={point} onOpen={walk} />}>
+        <StationSplit label={t.glPoints} list={<GrammarIndex points={points} selected={point} linkTo={pointAt} />}>
           {open && (
             <div className="desk-lesson">
               <GrammarLessonBody key={point} id={point} session={session} />
@@ -150,7 +152,7 @@ export default function GrammarScreen({ session }) {
       >
         <StationSplit
           label={t.stationJlpt}
-          list={<LevelSelector source="grammar" selected={level} onSelect={lvl => navigate(`/learn/grammar/${lvl}`, { replace: true })} />}
+          list={<LevelSelector source="grammar" selected={level} linkTo={lvl => `/learn/grammar/${lvl}`} />}
         >
           {index && index.total > 0 && (
             <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
@@ -213,6 +215,11 @@ export default function GrammarScreen({ session }) {
 // ←/→ walk the level's points on the desk, the lesson following — the
 // dictionary's walk (screens/DictionaryScreen.jsx) for the grammar
 // index. Not while typing or under a dialog. Renders nothing.
+//
+// Another point also takes the page back to its top, for the lesson it
+// now shows. On the change of point rather than in a click handler
+// (plan 117): the rows are links, and a Ctrl/⌘-click that opens a point
+// in another tab changes nothing here, so it must not scroll this page.
 function PointKeys({ points, point, onWalk }) {
   useEffect(() => {
     const onKey = e => {
@@ -228,8 +235,13 @@ function PointKeys({ points, point, onWalk }) {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [points, point, onWalk])
-  // The open row kept in view in the list's own scroll.
+  const shown = useRef(point)
   useEffect(() => {
+    if (shown.current !== point) {
+      shown.current = point
+      window.scrollTo(0, 0)
+    }
+    // The open row kept in view in the list's own scroll.
     document.querySelector('.gl-index__row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
   }, [point])
   return null

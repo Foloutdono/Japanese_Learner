@@ -19,6 +19,10 @@ import { Loading } from '../ui/Loading'
 // (VocabScreen, KanjiScreen, KanaScreen, GrammarScreen, ExamScreen; since
 // plan 115 the grammar points, the tiers, the theme bands, the exam's
 // review and the library's shelf, whose `className` sets its columns).
+//
+// The list's rows are links (plan 117, SplitRow): another stop is a
+// URL, so it opens in a new tab as well as beside the list, and the
+// link replaces rather than pushes, as the split always has.
 export function StationSplit({ label, list, className = '', children }) {
   return (
     <div className={className ? `desk-split ${className}` : 'desk-split'}>

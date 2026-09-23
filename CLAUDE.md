@@ -244,7 +244,20 @@ runtime purpose. Two consequences worth knowing:
   `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
   `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **117** or higher, and check
+  **117** is the desk's split rows as links: a level, a kana set, a theme
+  band, a tier, a grammar point, a library deck or an exam question in a
+  `StationSplit`'s list is a `<Link replace>` on the desk
+  (`components/selection/SplitRow.jsx`), so the middle click, Ctrl/⌘-click
+  and "open in new tab" work, while the phone keeps the button it always
+  had — the row takes its URL from its caller (`RouteStops`' `linkTo`,
+  through `LevelSelector` and `ThemeLevelSelector`; `GrammarIndex`,
+  `TierSelector`, `LibraryCard`'s `to`), the exam review's open question
+  moves into its URL (`screens/ExamResult.jsx`'s `?question=`), the list
+  walk reads links and opens one on Space (`hooks/useListWalk.js`), and
+  the link takes the button's face back in the 机 section of `index.css`
+  (held by `src/splitRows.desktop.test.jsx`, which measures the two
+  against each other, and a block of `src/deskfree.phone.test.jsx`).
+  When starting a new wave, begin at **118** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

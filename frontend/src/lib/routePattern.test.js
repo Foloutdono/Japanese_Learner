@@ -50,6 +50,31 @@ describe('routePattern', () => {
     expect(routePattern('/profile/settings#data')).toBe('/profile/settings')
   })
 
+  it('reduces every desk split row\'s link to its pattern', () => {
+    // Plan 117: on the desk a split's rows are links, and their hrefs
+    // name what the learner opened — a theme, a deck, a grammar point, an
+    // exam question. A click on one is recorded the way a navigate() was
+    // (App.jsx's Trail reads the router's pathname), a tab opened from
+    // one records its own screen_view, and either way the pattern is all
+    // that is kept. The query (point, question, level, size) never is.
+    const links = {
+      '/learn/vocab/N4': '/learn/vocab/:level',
+      '/learn/kana/katakana_basic': '/learn/kana/:set',
+      '/learn/vocab/theme/animaux/level/advanced': '/learn/vocab/theme/:theme/level/:themeLevel',
+      '/learn/vocab/tier/6?size=200&domain=jmdict': '/learn/vocab/tier/:tier',
+      '/learn/kanji/tier/4?size=200': '/learn/kanji/tier/:tier',
+      '/learn/grammar/N4?index=1&point=grammar_N4_c': '/learn/grammar/:level',
+      '/practice/exam?level=N3': '/practice/exam',
+      '/learn/decks/library/42': '/learn/decks/library/:deck_id',
+      '/practice/exam/e1/results?attempt=9&question=q2': '/practice/exam/:examId/results',
+    }
+    for (const [href, pattern] of Object.entries(links)) {
+      const p = routePattern(href)
+      expect(p, href).toBe(pattern)
+      expect(p, href).not.toMatch(/animaux|katakana|42|grammar_N4|q2|N3|N4|\?/)
+    }
+  })
+
   it('treats a trailing slash as the same screen', () => {
     expect(routePattern('/today/')).toBe('/today')
     expect(routePattern('/')).toBe('/')

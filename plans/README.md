@@ -5796,3 +5796,13 @@ desk, in the width a card run gives its session panel.
 Left out on purpose: the grammar browse. It wires no dictionary lookup
 at all, so there is no 🔍 on a phone either, and giving it one would put
 that 🔍 on the phone, which the desk may not change.
+
+# Plan 117 — the split's rows as links (2026-09-23)
+
+Another of wave 26's deferrals: "`<Link replace>` rows for middle-click".
+Every row of a desk split's list was a button that replaced the URL, so
+nothing in those lists could be opened in a new tab.
+
+| Plan | What | Status |
+|---|---|---|
+| 117 | `components/selection/SplitRow.jsx`: a `<Link replace>` when its caller passes a URL, the button it always was when not, so the phone's DOM is untouched and a component rendered outside a router still works. The desk passes URLs to `RouteStops` (levels, kana sets, theme bands), `GrammarIndex`, `TierSelector`, `LibraryCard` and the exam review's rows, whose open question moves into the URL (`?question=`, beside `?attempt=`; the paper rides in the router state, so a swap refetches nothing and a new tab rebuilds from the attempt). `useListWalk` reads links and opens one on Space; the grammar walk's scroll follows the point, not the click. The 机 block gives the link the button's face (weight, leading, no underline, the review's hover, the focus ring). `src/splitRows.desktop.test.jsx` measures link against button; the desk tests assert the hrefs; a block of `src/deskfree.phone.test.jsx`; `routePattern.test.js` holds every row's href to its pattern | DONE (2026-09-23) |

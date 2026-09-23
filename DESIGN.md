@@ -989,7 +989,10 @@ into the page and gave a session its keys.
   route each run opens on, the library's shelf beside the open deck's page
   (the shelf keeping its search and its place), and a deck's platform screen
   gives way to the deck's page. A long list scrolls in its own column; the
-  stops are one tab stop, walked with ↑/↓.
+  stops are one tab stop, walked with ↑/↓. Every row of such a list is a
+  link to what it opens (plan 117), the exam review's question included,
+  so it opens in a new tab as well as beside the list — and it wears the
+  button's face it replaced, to the pixel; the phone keeps its buttons.
 - **The statistics are one page.** What holds on the left — the retention
   line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
   a phone's chart), the ladder, the lines with the open one's levels hung
