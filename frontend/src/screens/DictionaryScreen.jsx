@@ -185,6 +185,11 @@ export default function DictionaryScreen({ session }) {
 	const observerRef = useRef(null)
 	const sentinelRef = useRef(null)
 	const searchRef   = useRef(null)
+	// The latest page-0 request's number. Two searches in flight can
+	// answer out of order — a slow "た" landing after a fast "たべ" — and
+	// the older answer used to overwrite the newer one's results (and,
+	// on the desk, re-point the dock). Only the latest is applied.
+	const pageSeq     = useRef(0)
 	// The catalogue as the arrow keys see it (the key handler is bound
 	// once, so it reads the current rows through this).
 	const navRef      = useRef({ results: [], selected: null })
@@ -287,6 +292,8 @@ export default function DictionaryScreen({ session }) {
 	function fetchPage(p, q, cat, rad, lvl = level) {
 		if (p === 0) setLoading(true)
 		else setLoadingMore(true)
+		if (p === 0) pageSeq.current += 1
+		const seq = pageSeq.current
 
 		// A syllabary is small and fixed — 113 hiragana and 125 katakana,
 		// counting the voiced rows, the yōon, the long vowels and (in
@@ -313,6 +320,7 @@ export default function DictionaryScreen({ session }) {
 		apiFetch(url, session)
 			.then(r => r.json())
 			.then(data => {
+				if (seq !== pageSeq.current) return
 				const newResults = data.results || []
 				if (p === 0) setResults(newResults)
 				else setResults(prev => [...prev, ...newResults])
@@ -345,6 +353,12 @@ export default function DictionaryScreen({ session }) {
 					setLookup(null)
 					setSelected(newResults[0] ?? null)
 				}
+			})
+			// A failed page used to leave the loading line up for good.
+			.catch(() => {
+				if (seq !== pageSeq.current) return
+				setLoading(false)
+				setLoadingMore(false)
 			})
 	}
 
