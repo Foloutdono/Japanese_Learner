@@ -423,7 +423,10 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
       if (typeof summary.xp_earned === 'number') applyXpGain({ amount: summary.xp_earned })
       // attempt id in the URL (not just router state) is what makes a
       // reloaded result page recoverable — see ExamResult.
-      navigate(`/practice/exam/${examId}/results?attempt=${summary.attemptId}`, { state: { summary, exam } })
+      // Replacing, not pushing: Back from the result must not land on
+      // the runner, which would ask the server for a fresh paper — and
+      // start a paid generation when none is left to offer.
+      navigate(`/practice/exam/${examId}/results?attempt=${summary.attemptId}`, { replace: true, state: { summary, exam } })
     } catch {
       // This path used to not exist: a failed submit left the guard ref
       // latched true forever, so a finished exam sat on screen with no
