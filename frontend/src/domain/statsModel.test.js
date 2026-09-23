@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { weeklyRetention, missesSince, strengthRungs, lineRows, modeRow } from './statsModel'
+import { weeklyRetention, missesSince, strengthRungs, lineRows, modeRow, bucketRow } from './statsModel'
 
 // A Wednesday, so "this week" started two days earlier.
 const TODAY = new Date(2026, 8, 16, 12) // 2026-09-16
@@ -131,5 +131,18 @@ describe('modeRow', () => {
     expect(modeRow(stats, 'vocab', 'N4', 'vocab.flashcard.f2b')).toBeNull()
     expect(modeRow(stats, 'vocab', 'N5', 'fast-review')).toBeNull()
     expect(modeRow(null, 'vocab', 'N5', 'vocab.flashcard.f2b')).toBeNull()
+  })
+})
+
+describe('bucketRow', () => {
+  it('reads a scoped stats route\'s bucket', () => {
+    const row = bucketRow({ total: 40, new: 30, learning: 6, mastered: 4, due_now: 3 })
+    expect(row).toMatchObject({ total: 40, mastered: 4, learning: 6, due: 3, masteredPct: 10, learningPct: 15 })
+  })
+
+  it('is no row for an empty tier\'s {error} or a failed fetch', () => {
+    expect(bucketRow({ error: 'Empty tier' })).toBeNull()
+    expect(bucketRow(null)).toBeNull()
+    expect(bucketRow(undefined)).toBeNull()
   })
 })

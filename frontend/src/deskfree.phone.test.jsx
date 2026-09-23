@@ -236,3 +236,94 @@ describe('the decks (P7)', () => {
     expect(document.querySelector('.decks-doors > :last-child').textContent).not.toBe(before)
   })
 })
+
+// ── plan 114, P3 — the second screens a phone keeps ──
+// On the desk a grammar level's points stand beside the open lesson, a
+// theme's bands and the tiers beside the open one's platforms, and the
+// deck's platform screen gives way to the deck's page. A phone keeps
+// every one of them a screen of its own: the index opens each point in
+// its sheet, the lists stay lists with no stop marked open and nothing
+// figured, and nothing redirects.
+describe('the folded stations (plan 114, P3)', () => {
+  const POINTS = [
+    { raw_id: 'grammar_N4_a', pattern: '〜ために', meaning: 'in order to', stage: 'mastered' },
+    { raw_id: 'grammar_N4_b', pattern: '〜ように', meaning: 'so that', stage: 'new' },
+  ]
+  const TIERS = { tiers: [1, 2, 3].map(n => ({ tier: n, start_rank: (n - 1) * 200 + 1, end_rank: n * 200, count: 200 })) }
+  const THEMES = { themes: [{ key: 'animaux', levels: [{ level: 'basic', count: 24 }, { level: 'medium', count: 30 }] }] }
+  const answer = path => (String(path).includes('/tiers') ? TIERS : String(path).startsWith('/api/themes') ? THEMES : deckAnswer(path))
+
+  async function mount(entry, routes) {
+    const { MemoryRouter, Routes, useLocation } = await import('react-router-dom')
+    const seen = { path: null }
+    function Probe() { seen.path = useLocation().pathname + useLocation().search; return null }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[entry]}><Routes>{routes}</Routes><Probe /></MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    return seen
+  }
+
+  it('keeps the grammar index a list, each point opening its sheet', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/grammar/points')
+      ? { points: POINTS, learned: 1, started: 1, total: 2, totals: {} }
+      : { ...POINTS[1], level: 'N4', steps: [], compare: [], examples: [], status: { status: 'new' } }))
+    const { Route } = await import('react-router-dom')
+    const { default: GrammarScreen } = await import('./screens/GrammarScreen')
+    const seen = await mount('/learn/grammar/N4?index=1', <Route path="/learn/grammar/:level" element={<GrammarScreen session={{}} />} />)
+    expect(seen.path).toBe('/learn/grammar/N4?index=1')
+    expect(document.querySelectorAll('.gl-index__row')).toHaveLength(2)
+    expect(document.querySelector('[aria-current="page"]')).toBeNull()
+    expect(document.querySelector('.desk-lesson, .desk-split')).toBeNull()
+    document.querySelectorAll('.gl-index__row')[1].click()
+    await settle(250)
+    expect(document.querySelector('[role="dialog"] article.gl')).not.toBeNull()
+    apiJson.mockReset()
+  })
+
+  it('keeps the tiers, a tier\'s platforms and a theme\'s bands each a screen', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => answer(path) }))
+    const { Route } = await import('react-router-dom')
+    const { default: VocabScreen } = await import('./screens/VocabScreen')
+    const routes = (
+      <>
+        <Route path="/learn/vocab/tiers" element={<VocabScreen session={{}} />} />
+        <Route path="/learn/vocab/tier/:tier" element={<VocabScreen session={{}} />} />
+        <Route path="/learn/vocab/theme/:theme" element={<VocabScreen session={{}} />} />
+      </>
+    )
+    let seen = await mount('/learn/vocab/tiers', routes)
+    expect(seen.path).toBe('/learn/vocab/tiers')
+    expect([...document.querySelectorAll('.platform-card__no')].map(n => n.textContent)).toEqual(['1', '2', '3'])
+    expect(document.querySelector('[aria-current="page"], .desk-stop--open')).toBeNull()
+    document.body.innerHTML = ''
+
+    seen = await mount('/learn/vocab/tier/2?size=200', routes)
+    expect(seen.path).toBe('/learn/vocab/tier/2?size=200')
+    expect(document.querySelector('.desk-split, .desk-mode-fig')).toBeNull()
+    expect(apiFetch.mock.calls.some(([p]) => String(p).includes('/stats'))).toBe(false)
+    document.body.innerHTML = ''
+
+    seen = await mount('/learn/vocab/theme/animaux', routes)
+    expect(seen.path).toBe('/learn/vocab/theme/animaux')
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(4)
+    expect(document.querySelector('[aria-current="page"]')).toBeNull()
+  })
+
+  it('keeps a deck\'s platform screen', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { Route } = await import('react-router-dom')
+    const { default: StudyScreen } = await import('./screens/StudyScreen')
+    const seen = await mount('/learn/decks/1/study', (
+      <>
+        <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={{}} />} />
+        <Route path="/learn/decks/:deck_id" element={<p className="probe-deck">deck</p>} />
+      </>
+    ))
+    expect(seen.path).toBe('/learn/decks/1/study')
+    expect(document.querySelector('.probe-deck')).toBeNull()
+  })
+})

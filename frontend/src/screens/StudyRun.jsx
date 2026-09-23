@@ -11,6 +11,7 @@ import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
+import { useDesk } from '../hooks/useDesk'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -51,7 +52,11 @@ export default function StudyRun({ session }) {
   const { state }    = useLocation()
 
   const valid = Boolean(deck_id) && Boolean(STUDY_MODES[mode]?.implemented) && STUDY_MODES[mode]?.graded !== false
-  const platforms = `/learn/decks/${deck_id}/study`
+  // The deck's platforms: its own screen on the phone, the deck's page on
+  // the desk, where they stand beside the cards (plan 114) — the page a
+  // desk run was boarded from, so leaving steps back to it.
+  const desk = useDesk()
+  const platforms = desk ? `/learn/decks/${deck_id}` : `/learn/decks/${deck_id}/study`
   const leave = useRunExit(platforms)
 
   // Falls back to fetching the deck when opened without router state (a

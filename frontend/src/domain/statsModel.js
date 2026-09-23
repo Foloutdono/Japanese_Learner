@@ -194,8 +194,17 @@ function withDerived(row) {
  * with no pool at that deck, the fast review).
  */
 export function modeRow(stats, source, deck, mode) {
-  const b = stats?.[source]?.[deck]?.[mode]
-  if (!b || typeof b !== 'object') return null
+  return bucketRow(stats?.[source]?.[deck]?.[mode])
+}
+
+/**
+ * The same row from one bucket on its own (plan 114): what a scoped
+ * stats route answers — a theme band's, a frequency tier's — which
+ * /api/stats does not carry. A route that has nothing to count answers
+ * 200 with `{error}` rather than a bucket, so that is no row either.
+ */
+export function bucketRow(b) {
+  if (!b || typeof b !== 'object' || b.error) return null
   return { ...sumBuckets([b]), due: Math.max(0, Number(b.due_now) || 0) }
 }
 

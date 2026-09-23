@@ -9,7 +9,10 @@ import { ChevronIcon } from '../ui/Icons'
 // the stage the learner has reached — each a door onto the lesson
 // sheet. Hairline-divided rows, no heading: the bar overhead names the
 // level, the rows name themselves.
-export default function GrammarIndex({ points, onOpen }) {
+//
+// `selected` is the desk's (plan 114): there the lesson stands open
+// beside the index, and its row is marked as the page shown.
+export default function GrammarIndex({ points, onOpen, selected = null }) {
   const { t } = useLang()
   if (!points?.length) return null
   return (
@@ -17,6 +20,7 @@ export default function GrammarIndex({ points, onOpen }) {
       {points.map(p => (
         <li key={p.raw_id}>
           <button type="button" className={`gl-index__row gl-index__row--${p.stage}`}
+                  aria-current={selected === p.raw_id ? 'page' : undefined}
                   onClick={() => { playUi('click-screen-selection'); onOpen(p.raw_id) }}>
             <span className="gl-index__pattern" lang="ja">{p.pattern}</span>
             <span className="gl-index__gloss">{p.meaning}</span>

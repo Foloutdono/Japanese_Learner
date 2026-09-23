@@ -21098,7 +21098,8 @@ a.slip__act { text-decoration: none; }
     min-width: 0;
     animation: arrive-soft 0.2s linear;
   }
-  .desk-settings .stg-row--on {
+  .desk-settings .stg-row--on,
+  .desk-split .gl-index__row[aria-current="page"] {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
   }
@@ -21119,6 +21120,9 @@ a.slip__act { text-decoration: none; }
   .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* ... except the tiers beside a tier's page (plan 114): a list, one
+     to a row, in the list's column. */
+  .desk-split__list .tier-picker > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
@@ -21173,10 +21177,16 @@ a.slip__act { text-decoration: none; }
     align-items: start;
     column-gap: var(--sp-6);
   }
+  /* A list longer than the window — forty-three tiers, a level's
+     grammar points — scrolls inside its own column (plan 114), so the
+     page beside it never scrolls away from the row that opened it. */
   .desk-split__list {
     position: sticky;
     top: var(--sp-6);
     min-width: 0;
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   .desk-split__page {
     display: flex;
@@ -21195,6 +21205,27 @@ a.slip__act { text-decoration: none; }
     border-color: var(--accent2);
     background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
   }
+  /* The tiers and the grammar points as a list beside their page
+     (plan 114): no ▶ and no ›, since a row here opens beside itself
+     and departs nowhere; and a tier a list's row, not a wall's card —
+     forty-three of them scroll in the column. */
+  .desk-split__list .platform-card__go,
+  .desk-split__list .gl-index__chev { display: none; }
+  .desk-split__list .platform-card__lead,
+  .desk-split__list .platform-card__body { padding-block: var(--sp-3); }
+  /* A grammar point's lesson as the page beside the index (plan 114):
+     the sheet's lesson on the card's own surface, at the card's width,
+     its plate standing where it is drawn rather than pinned to a
+     scroller the page does not have. */
+  .desk-lesson {
+    --line-color: var(--line-grammar);
+    max-width: var(--card-w);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-lesson .dict-plate { position: static; }
 
   /* A platform's own figures in its right-hand column (ModeFigures):
      the due count in the state's ink, then the composition bar and the

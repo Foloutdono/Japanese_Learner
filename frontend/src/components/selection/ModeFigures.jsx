@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { useStats } from '../../stores/stats'
-import { modeRow } from '../../domain/statsModel'
+import { apiFetch } from '../../lib/api'
+import { bucketRow, modeRow } from '../../domain/statsModel'
 import { Composition } from '../stats/LineRows'
 
 // ── 机 — a platform's own figures (plan 113) ────────────────────────
@@ -17,9 +19,29 @@ import { Composition } from '../stats/LineRows'
 // Mounted only on the desk, so the stats fetch it reads is shared with
 // the route beside it and costs a phone nothing.
 export function ModeFigures({ source, deck, mode }) {
+  return <Figures row={modeRow(useStats().data, source, deck, mode)} />
+}
+
+// The same figures for a stop /api/stats does not carry (plan 114): a
+// theme band, a frequency tier. Each platform asks its own scoped
+// stats route — the one its run already reads for its head — so the
+// figure beside the card is the figure the run will open on.
+export function ScopeFigures({ url, session }) {
+  const [got, setGot] = useState(null)
+  useEffect(() => {
+    let live = true
+    apiFetch(url, session)
+      .then(r => (r.ok ? r.json() : null))
+      .then(body => { if (live) setGot({ url, row: bucketRow(body) }) })
+      .catch(() => { if (live) setGot({ url, row: null }) })
+    return () => { live = false }
+  }, [url, session])
+  // A figure from the stop the learner just left is not this stop's.
+  return <Figures row={got?.url === url ? got.row : null} />
+}
+
+function Figures({ row }) {
   const { t } = useLang()
-  const stats = useStats().data
-  const row = modeRow(stats, source, deck, mode)
   if (!row || row.total === 0) return null
   return (
     <span className="desk-mode-fig">

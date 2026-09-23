@@ -7,13 +7,13 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
-import { ModeFigures } from '../components/selection/ModeFigures'
+import { ModeFigures, ScopeFigures } from '../components/selection/ModeFigures'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import RadicalSelector from '../components/selection/RadicalSelector'
 import RadicalLesson from '../components/selection/RadicalLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
-import { tierLabelFor } from '../domain/tiers'
+import { tierLabelFor, tierAtSize } from '../domain/tiers'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/kanji'
@@ -120,6 +120,8 @@ export default function KanjiScreen({ session }) {
 
   // ── The tiers: by frequency ──
   if (tiersPage) {
+    // See VocabScreen: on the desk the list opens on its first tier.
+    if (desk) return <Navigate replace to={`${BASE}/tier/1?size=${tierSize}`} />
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.byFrequencyShort} aside={leaveSources}>
         <TierSelector
@@ -219,6 +221,36 @@ export default function KanjiScreen({ session }) {
         <StationSplit
           label={t.stationJlpt}
           list={<LevelSelector source="kanji" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
+  // ── 机 — the tiers beside a tier's platforms (plan 114) ──
+  // See VocabScreen: another size keeps the learner's place.
+  if (desk && tier) {
+    const open = Number(tier)
+    const at = (n, size = tierSize) => `${BASE}/tier/${n}?size=${size}`
+    const figured = modes.map(m => ({
+      ...m,
+      aside: <ScopeFigures session={session} url={`/api/frequency/kanji/stats?tier=${open}&tier_size=${tierSize}&mode=${m.key}`} />,
+    }))
+    return (
+      <SelectionScreen title={t.kanjiTitle} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.byFrequencyShort}
+          list={(
+            <TierSelector
+              domain="kanji"
+              session={session}
+              tierSize={tierSize}
+              selected={open}
+              onTierSize={size => navigate(at(tierAtSize(open, tierSize, size), size), { replace: true })}
+              onSelect={n => navigate(at(n), { replace: true })}
+            />
+          )}
         >
           <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
         </StationSplit>
