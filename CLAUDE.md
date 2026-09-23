@@ -237,13 +237,10 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  **116** is the browse's side on the desk: the fast review
-  (`components/study/ReviewDeck.jsx`) stands the revealed card's docked
-  entry beside the card, with no tally because a browse rates nothing
-  (`SessionPanel`'s `records={false}`, passed by `screens/KanaRun.jsx`,
-  `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
-  `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
-  DESIGN.md, "The desk").
+  **116** is the fare gate's lanes two across on the desk once the gate
+  holds two at a phone's lane width (cited in the 机 section of
+  `index.css`, `src/today.wide.test.jsx`, `src/today.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; the evaluation is in `plans/README.md`).
   **117** is the desk's split rows as links: a level, a kana set, a theme
   band, a tier, a grammar point, a library deck or an exam question in a
   `StationSplit`'s list is a `<Link replace>` on the desk
@@ -257,7 +254,15 @@ runtime purpose. Two consequences worth knowing:
   the link takes the button's face back in the 机 section of `index.css`
   (held by `src/splitRows.desktop.test.jsx`, which measures the two
   against each other, and a block of `src/deskfree.phone.test.jsx`).
-  When starting a new wave, begin at **118** or higher, and check
+  **118** is the browse's side on the desk (numbered 118 because 116 went
+  to the fare gate's lanes and 117 to the split's rows while it was open):
+  the fast review (`components/study/ReviewDeck.jsx`) stands the revealed
+  card's docked entry beside the card, with no tally because a browse
+  rates nothing (`SessionPanel`'s `records={false}`, passed by `screens/KanaRun.jsx`,
+  `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
+  `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **119** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

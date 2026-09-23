@@ -594,41 +594,46 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 116 — the browse a phone keeps ──
-// On the desk a fast review stands the revealed card's entry beside the
-// card (no tally: a browse rates nothing). A phone keeps the browse a
-// single column, docks nothing, and keeps the 🔍 that opens the entry in
-// a sheet.
-describe('the browse (plan 116)', () => {
-  it('stands no side, docks nothing and keeps the 🔍', async () => {
-    const cards = [
-      { card_id: 'vocab_N5_駅_えき', kanji: '駅', kana: 'えき', meaning: 'gare', stage: 'mastered' },
-      { card_id: 'vocab_N5_川_かわ', kanji: '川', kana: 'かわ', meaning: 'rivière', stage: 'learning' },
-    ]
-    apiFetch.mockImplementation(async path => ({
-      ok: true, status: 200,
-      json: async () => (String(path).startsWith('/api/vocab/review-cards') ? { cards } : {}),
+// ── plan 116 — the gate's lanes a phone keeps ──
+// On a laptop the fare gate's lanes go two across once the gate holds
+// two at a phone's lane width (today.wide.test.jsx). A phone keeps its
+// own box: a column, one lane to a row across the whole of it, and no
+// key printed on Depart.
+describe('the gate\'s lanes (plan 116)', () => {
+  it('keeps one lane to a row across the box, and prints no key', async () => {
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200, json: async () => ({ balance: 50, cap: 200, unlimited: false, enforced: false }),
     }))
-    apiFetch.mockClear()
-    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
-    const { default: VocabRun } = await import('./screens/VocabRun')
-    const { peekEntry } = await import('./stores/deskEntry')
+    const { default: GateCard } = await import('./components/station/GateCard')
+    const lane = (source, deck, mode, due) => ({ id: `${source}:${deck}:${mode}`, kind: 'section', source, deck, mode, due, new: 0 })
+    const lanes = [
+      lane('kana', 'hiragana_basic', 'kana.flashcard.f2b', 18),
+      lane('vocab', 'N5', 'vocab.flashcard.f2b', 30),
+      lane('vocab', 'N5', 'vocab.word_reading', 12),
+      lane('kanji', 'N5', 'kanji.flashcard.f2b', 14),
+      lane('kanji', 'N5', 'kanji.readings', 6),
+      lane('grammar', 'N5', 'grammar.flashcard.f2b', 5),
+    ]
     await render(
       <LangProvider>
-        <MemoryRouter initialEntries={['/learn/vocab/N5/fast_review']}>
-          <Routes><Route path="/learn/vocab/:level/:mode" element={<VocabRun session={{ access_token: 't' }} />} /></Routes>
-        </MemoryRouter>
+        <main className="today">
+          <GateCard today={{ total: lanes.reduce((n, l) => n + l.due, 0), lanes, by_source: {}, next_due: null }} />
+        </main>
       </LangProvider>
     )
-    await settle(300)
-    expect(document.querySelector('.review-deck__counter').textContent).toBe('1 / 2')
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
     await settle()
-    expect(document.querySelector('.screen').className).toBe('screen')
-    expect(document.querySelector('[class*="desk-"]')).toBeNull()
-    expect(document.querySelectorAll('.reveal-action-btn')).toHaveLength(2)
-    expect(peekEntry()).toBeNull()
-    expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
+    const box = document.querySelector('.gate-card__lanes')
+    expect(getComputedStyle(box).display).toBe('flex')
+    expect(getComputedStyle(box).flexDirection).toBe('column')
+    const rows = [...box.querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
+    expect(rows).toHaveLength(6)
+    rows.forEach((r, i) => {
+      expect(Math.round(r.width)).toBe(box.clientWidth)
+      if (i === 0) return
+      expect(r.top).toBeGreaterThanOrEqual(rows[i - 1].bottom)
+      expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
+    })
+    expect(document.querySelector('.gate-card .desk-kbd, .gate-card [aria-keyshortcuts]')).toBeNull()
   })
 })
 
@@ -801,5 +806,43 @@ describe('the split\'s rows (plan 117)', () => {
     await settle()
     expect(row.getAttribute('aria-expanded')).toBe('true')
     expect(seen.path).toBe('/practice/exam/e1/results?attempt=9')
+  })
+})
+
+// ── plan 118 — the browse a phone keeps ──
+// On the desk a fast review stands the revealed card's entry beside the
+// card (no tally: a browse rates nothing). A phone keeps the browse a
+// single column, docks nothing, and keeps the 🔍 that opens the entry in
+// a sheet.
+describe('the browse (plan 118)', () => {
+  it('stands no side, docks nothing and keeps the 🔍', async () => {
+    const cards = [
+      { card_id: 'vocab_N5_駅_えき', kanji: '駅', kana: 'えき', meaning: 'gare', stage: 'mastered' },
+      { card_id: 'vocab_N5_川_かわ', kanji: '川', kana: 'かわ', meaning: 'rivière', stage: 'learning' },
+    ]
+    apiFetch.mockImplementation(async path => ({
+      ok: true, status: 200,
+      json: async () => (String(path).startsWith('/api/vocab/review-cards') ? { cards } : {}),
+    }))
+    apiFetch.mockClear()
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabRun } = await import('./screens/VocabRun')
+    const { peekEntry } = await import('./stores/deskEntry')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N5/fast_review']}>
+          <Routes><Route path="/learn/vocab/:level/:mode" element={<VocabRun session={{ access_token: 't' }} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.querySelector('.review-deck__counter').textContent).toBe('1 / 2')
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+    await settle()
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelectorAll('.reveal-action-btn')).toHaveLength(2)
+    expect(peekEntry()).toBeNull()
+    expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
   })
 })

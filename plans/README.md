@@ -5747,6 +5747,8 @@ answer sheet in the exam runner; the exam result and the library laid
 out for the width; a word looked up from a docked breakdown still opens
 the lookup as a dialog.
 
+---
+
 # Wave 26 — 机, the desk's third round (plan 115, 2026-09-23)
 
 The owner's verdict on wave 25: nicely done, continue to improve it. A
@@ -5784,18 +5786,55 @@ a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
 for middle-click; Today's lanes two across; flag ink unification (a phone
 design change, the owner's to decide). Cut: see plan 115's own list.
 
-# Plan 116 — the browse's side on the desk (2026-09-23)
+---
 
-One of wave 26's deferrals. The fast review stood its card alone on the
-desk, in the width a card run gives its session panel.
+# 机 — the gate's lanes two across (plan 116, 2026-09-23)
+
+Wave 26 deferred "Today's lanes two across"; this is that question.
+On the desk, should Today's fare gate set its lanes two across, the
+line chips and Depart spanning both? Built only if it reads better
+against DESIGN.md's density contract ("a screen gets a layout only
+where the width earns it, and what fills the width has a job").
 
 | Plan | What | Status |
 |---|---|---|
-| 116 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
+| 116 | `.gate-card__lanes` as `repeat(auto-fit, minmax(calc(--desk-side-w − 2·--sp-5), 1fr))` in the 机 block: two across once the gate holds two lanes at a phone's width, one to a row below. No JSX change. `src/today.wide.test.jsx` (new), a case in `src/today.desktop.test.jsx`, a block in `src/deskfree.phone.test.jsx`; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
 
-Left out on purpose: the grammar browse. It wires no dictionary lookup
-at all, so there is no 🔍 on a phone either, and giving it one would put
-that 🔍 on the phone, which the desk may not change.
+**Verdict: yes, where the width earns it.** Measured in the lanes
+(eight lanes, French):
+
+| Window | Lanes' box | Lanes | In view under the 30dvh cut |
+|---|---|---|---|
+| 1100 (`desktop`) | 364px | one to a row, 364px | 5 of 8 |
+| ~1390 | ~660px | the switch: two lanes at 328px fit | — |
+| 1440 (`wide`) | 704px | two across, 349px each | 8 of 8 (10 of 12) |
+| ≥1496 (canvas capped) | ~760px | two across, ~377px; three would need ~996px | — |
+
+Why it reads better at 1440: one lane per row was 704px with the name
+at one end, the figure at the other and ~450px of nothing between — the
+contract's "wide cards leave their right half empty" — and the box is
+height-bounded, so the unused width was also hiding half the day's
+switches under the cut. Two across, a lane is the width a phone draws it
+(the floor is the side column less the gate's phone padding, 328px), its
+figure a glance from its name, and an eight-lane day needs no scroll.
+The lanes are short switches, and two to five of them is the common day:
+"a grid of ≤5 short options is a grid, never a stack of full-width rows".
+
+Why not below ~1390: two columns would put each lane under its phone
+width. The desk's tightest gate (~430px) holds one.
+
+What it costs, accepted: the order reads left to right, then down, so a
+line with an odd count ends mid-row and the next line begins beside it —
+each lane's pigment and tick still name its line, and the chips above
+name the lines. A short last row is left short.
+
+Not done, on purpose: spanning an odd last lane (a switch like its
+siblings; twice their width would promote it — and the lanes are no
+hairline lattice, so the short row shows the card, not a seam);
+starting each line on its own row (more short rows, i.e. dead space
+inside the list); column-major order (it needs the row count from
+JavaScript, or multi-column CSS, which overflows sideways inside a
+height-bounded box).
 
 # Plan 117 — the split's rows as links (2026-09-23)
 
@@ -5806,3 +5845,19 @@ nothing in those lists could be opened in a new tab.
 | Plan | What | Status |
 |---|---|---|
 | 117 | `components/selection/SplitRow.jsx`: a `<Link replace>` when its caller passes a URL, the button it always was when not, so the phone's DOM is untouched and a component rendered outside a router still works. The desk passes URLs to `RouteStops` (levels, kana sets, theme bands), `GrammarIndex`, `TierSelector`, `LibraryCard` and the exam review's rows, whose open question moves into the URL (`?question=`, beside `?attempt=`; the paper rides in the router state, so a swap refetches nothing and a new tab rebuilds from the attempt). `useListWalk` reads links and opens one on Space; the grammar walk's scroll follows the point, not the click. The 机 block gives the link the button's face (weight, leading, no underline, the review's hover, the focus ring). `src/splitRows.desktop.test.jsx` measures link against button; the desk tests assert the hrefs; a block of `src/deskfree.phone.test.jsx`; `routePattern.test.js` holds every row's href to its pattern | DONE (2026-09-23) |
+
+# Plan 118 — the browse's side on the desk (2026-09-23)
+
+Numbered 118 on the merge into main: 116 had gone to the fare gate's
+lanes (above) and 117 to the split's rows while this was open.
+
+One of wave 26's deferrals. The fast review stood its card alone on the
+desk, in the width a card run gives its session panel.
+
+| Plan | What | Status |
+|---|---|---|
+| 118 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
+
+Left out on purpose: the grammar browse. It wires no dictionary lookup
+at all, so there is no 🔍 on a phone either, and giving it one would put
+that 🔍 on the phone, which the desk may not change.
