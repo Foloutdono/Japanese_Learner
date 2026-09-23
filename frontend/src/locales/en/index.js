@@ -275,6 +275,7 @@ const quiz = {
   deskRunLabel:        'This run',
   deskEarned:          'Earned',
   deskEntryWait:       'The dictionary entry opens here once the card is revealed.',
+  deskMissesTitle:     'To look at again',
   deskBreakdownLabel:  'Breakdown',
   deskPassageLabel:    'The text',
   keyEnter:            'Enter',

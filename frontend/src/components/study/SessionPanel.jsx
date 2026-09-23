@@ -1,5 +1,6 @@
+import { useState } from 'react'
 import { useLang } from '../../LangContext'
-import { useRunTally, tallyAccuracy } from '../../stores/runTally'
+import { useRunTally, tallyAccuracy, tallyMisses } from '../../stores/runTally'
 import { useDeskEntry } from '../../stores/deskEntry'
 import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 
@@ -19,11 +20,22 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 //
 // Rendered by a run as StudyStage's `side`, which draws it only on the
 // desk; a phone never mounts it and never fetches for it.
-export function SessionPanel() {
+//
+// `done` is the run's end (plan 114): no card is coming to reveal, so
+// the column stops promising one, and a section run lists the cards
+// whose last rating was below good (stores/runTally's tallyMisses) —
+// each one opens its entry here, the way it opened on reveal. Today
+// passes `misses={false}`: its lanes are other sections' decks, and
+// the day's end is not the place to reopen them.
+export function SessionPanel({ done = false, misses = true }) {
   const { t } = useLang()
   const tally = useRunTally()
-  const entry = useDeskEntry()
+  const docked = useDeskEntry()
   const accuracy = tallyAccuracy(tally)
+  const missed = done && misses ? tallyMisses(tally) : []
+  const [openKey, setOpenKey] = useState(null)
+  const opened = missed.find(m => m.key === openKey) ?? null
+  const entry = done ? opened : docked
 
   return (
     <>
@@ -32,6 +44,26 @@ export function SessionPanel() {
         <Record value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} label={t.accuracy} />
         <Record value={`+${tally.xp}`} unit="XP" label={t.deskEarned} />
       </div>
+
+      {missed.length > 0 && (
+        <section className="desk-misses" aria-labelledby="desk-misses-cap">
+          <h2 id="desk-misses-cap" className="desk-deck__cap">{t.deskMissesTitle}</h2>
+          <div className="desk-misses__list">
+            {missed.map(m => (
+              <button
+                key={m.key}
+                type="button"
+                className={`chip desk-miss${m.key === openKey ? ' chip--on' : ''}`}
+                aria-pressed={m.key === openKey}
+                onClick={() => setOpenKey(k => (k === m.key ? null : m.key))}
+                lang="ja"
+              >
+                {m.term}
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {entry ? (
         <section className="desk-entry" aria-label={t.openDictionary}>
@@ -45,7 +77,7 @@ export function SessionPanel() {
             exact
           />
         </section>
-      ) : (
+      ) : done ? null : (
         <p className="desk-run__note">{t.deskEntryWait}</p>
       )}
     </>

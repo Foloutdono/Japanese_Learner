@@ -510,3 +510,34 @@ describe('the analyser and the dictionary (plan 114, P6)', () => {
     apiJson.mockReset()
   })
 })
+
+// ── plan 114, P7 — the run a phone keeps ──
+// On the desk a run's card and choices stand side by side from the top
+// of the window, the unused choices keep their place once answered, and
+// the panel lists the misses at the end. A phone keeps its stage a
+// column and collapses the unused choices, as ever.
+describe('a run (plan 114, P7)', () => {
+  it('keeps the stage a column and collapses the unused choices', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { StudyStage } = await import('./components/study/StudyStage')
+    const { MCQGrid } = await import('./components/study/QuizComponents')
+    const { CardTransition } = await import('./components/study/CardTransition')
+    const { default: PromptCard } = await import('./components/study/PromptCard')
+    const { SessionPanel } = await import('./components/study/SessionPanel')
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} side={<SessionPanel done />}>
+            <CardTransition className="specimen-card-stage" cardKey="k"><PromptCard><span>駅</span></PromptCard></CardTransition>
+            <MCQGrid choices={['gare', 'eau', 'feu', 'arbre']} correct="gare" selected="eau" answered onAnswer={() => {}} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(500)
+    expect(getComputedStyle(document.querySelector('.stage')).display).toBe('flex')
+    const filler = document.querySelector('.mcq-row--filler')
+    expect(getComputedStyle(filler).maxHeight).toBe('0px')
+    expect(document.querySelector('.desk-run, .desk-run__side, .desk-misses')).toBeNull()
+  })
+})

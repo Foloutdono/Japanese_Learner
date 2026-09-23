@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { applyXpGain } from '../stores/profileSummary'
 import { startTally, countReview } from '../stores/runTally'
+import { peekEntry } from '../stores/deskEntry'
 
 // ── 出発合図 — when the next card is allowed to arrive ────────────
 // A rating does not advance the deck by itself. What the learner just
@@ -125,7 +126,9 @@ export function useReviewGates({ advance, sessionKey }) {
     if (busyRef.current) return false
     busyRef.current = true
     setLocked(true)
-    countReview({ quality, xp: preview?.xp_earned })
+    // The entry the card was revealed on is the card, for the misses
+    // the desk's panel lists at the end (plan 114).
+    countReview({ quality, xp: preview?.xp_earned, entry: peekEntry() })
 
     const gates = gatesRef.current
     // Whatever is still open belongs to a review that is over, and the

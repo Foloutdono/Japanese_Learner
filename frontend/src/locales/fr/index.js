@@ -257,6 +257,7 @@ const quiz = {
   deskRunLabel:       'Ce trajet',
   deskEarned:         'Gagnés',
   deskEntryWait:      'La fiche du dictionnaire s’ouvre ici quand la carte est révélée.',
+  deskMissesTitle:    'À revoir',
   deskBreakdownLabel: 'Décomposition',
   deskPassageLabel:   'Le texte',
   keyEnter:           'Entrée',

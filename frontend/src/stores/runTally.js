@@ -14,7 +14,12 @@ import { useSyncExternalStore } from 'react'
 // and the level bar show.
 //
 // The phone counts too — a few integers, no DOM — and nothing reads it.
-const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0 })
+//
+// Since plan 114 it also keeps the cards themselves, by the dictionary
+// entry each was revealed on (stores/deskEntry) and with the rating it
+// got last, so the panel can end a run with the ones that went badly
+// (tallyMisses): a card missed then got right is not a miss.
+const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]) })
 
 let tally = EMPTY
 const listeners = new Set()
@@ -27,15 +32,32 @@ export function startTally(key) {
   emit()
 }
 
-/** One rated card. */
-export function countReview({ quality, xp } = {}) {
+/** One rated card; `entry` is the dictionary entry it was revealed on, if any. */
+export function countReview({ quality, xp, entry } = {}) {
+  const id = entryId(entry)
   tally = {
     ...tally,
     reviewed: tally.reviewed + 1,
     good: tally.good + (quality >= 3 ? 1 : 0),
     xp: tally.xp + (Number.isFinite(xp) ? xp : 0),
+    // Last rating wins, and the card moves to the end: the order the
+    // misses are listed in is the order they were last seen.
+    cards: id ? [...tally.cards.filter(c => c.id !== id), { id, entry: shape(entry), quality }] : tally.cards,
   }
   emit()
+}
+
+function entryId(entry) {
+  if (!entry || (!entry.term && !entry.id)) return null
+  return [entry.category ?? '', entry.id ?? '', entry.term ?? '', entry.kana ?? ''].join('\u0000')
+}
+function shape({ term, kana, category, id, session }) {
+  return { term, kana, category, id, session }
+}
+
+/** The run's cards whose last rating was below good, as their entries. */
+export function tallyMisses({ cards }) {
+  return cards.filter(c => !(c.quality >= 3)).map(c => ({ ...c.entry, key: c.id }))
 }
 
 /** The share rated good or better, as a whole percent; null before the first. */

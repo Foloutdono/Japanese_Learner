@@ -285,7 +285,7 @@ export default function TodayRun({ session }) {
       remaining={remaining}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
-      side={<SessionPanel />}
+      side={<SessionPanel done={done} misses={false} />}
       sideLabel={t.deskRunLabel}
     >
       {/* The run's own hairline: what this session has cleared of what

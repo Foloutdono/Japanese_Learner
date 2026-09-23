@@ -21367,6 +21367,64 @@ a.slip__act { text-decoration: none; }
      three records over the revealed card's dictionary entry, in the
      dictionary's gold (components/study/SessionPanel.jsx). */
   .desk-run { padding-inline-end: var(--desk-side-w); }
+  /* ── a run fits a laptop (plan 114) ──
+     A run's stage is centred on a phone, where the card is most of the
+     screen. On a desk it starts at the top, like any page, without the
+     quarter-height of air under it; the rating bar docks on the level
+     bar when the stage runs past the window, so it is never below the
+     fold, and the rows it would jump past never move (below). */
+  .desk-run > .stage {
+    justify-content: flex-start;
+    padding-bottom: var(--sp-6);
+  }
+  .desk-run > .stage > .rating-bar {
+    position: sticky;
+    bottom: var(--dock-bottom);
+    z-index: 10;
+    padding-block: var(--sp-3);
+    background: var(--bg-main);
+  }
+  /* The card and its choices side by side: a question and the four
+     answers to it read across, not down past the window's floor (the
+     fourth kanji choice stood at 870px on a 1100×800 screen). The
+     head, the hints and the rating bar span both. A writing drill
+     turns the pair round, the board taking the wide column. */
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) {
+    display: grid;
+    grid-template-columns: minmax(0, var(--card-w)) minmax(0, var(--desk-side-w));
+    place-content: start center;
+    column-gap: var(--sp-5);
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + .drawing-quiz) {
+    grid-template-columns: minmax(0, var(--desk-side-w)) minmax(0, var(--card-w));
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > * {
+    grid-column: 1 / -1;
+    max-width: none;
+    margin-inline: 0;
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > .quiz-card-stage { grid-column: 1; }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > :is(.mcq-list, .grammar-examples, .drawing-quiz) {
+    grid-column: 2;
+    align-self: start;
+  }
+  /* The prompt over a writing board never changes face, so the floor
+     that holds the other cards still is dead height beside the board. */
+  .desk-run > .stage:has(> .quiz-card-stage + .drawing-quiz) .prompt-card--footed .prompt-card__body { min-height: 0; }
+  /* Answered, the choices that were neither right nor picked keep their
+     place, unseen, instead of collapsing: beside the card there is room
+     for them, and the collapse is what moved the rating bar. */
+  .desk-run .mcq-row.mcq-row--filler {
+    max-height: 96px;
+    padding: var(--sp-5);
+    border-width: 1px;
+    visibility: hidden;
+  }
+  .desk-run .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-4); }
+  /* What covers a run stops at its side: the tracing overlay and the
+     docked note leave the session panel standing. */
+  .desk-run .drawing-overlay { right: var(--desk-side-w); }
+  :root[data-chrome="stage"]:has(.desk-run) .dock-note { right: var(--desk-side-w); }
   .desk-run__side {
     position: fixed;
     inset: 0 0 0 auto;
@@ -21394,10 +21452,6 @@ a.slip__act { text-decoration: none; }
      flat on its own card beside its questions, which keep to a sticky
      column so a choice is never a scroll away from the line it asks
      about. */
-  .desk-run--paper > .stage {
-    justify-content: flex-start;
-    padding-bottom: var(--sp-8);
-  }
   .desk-run__side > .exam-timer {
     align-self: flex-start;
     font-size: var(--fs-heading);
@@ -21459,6 +21513,18 @@ a.slip__act { text-decoration: none; }
   }
   .desk-split__page > .btn-row { max-width: var(--card-w); }
   .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* The run's misses at its end (SessionPanel, plan 114): the cards as
+     chips, each opening its entry under them. */
+  .desk-misses {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .desk-misses__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
   .desk-tally > .record { padding: var(--sp-4); }
   .desk-entry {
     --line-color: var(--line-jisho);

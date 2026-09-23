@@ -283,7 +283,7 @@ export default function StudyRun({ session }) {
       ) : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
-      side={<SessionPanel />}
+      side={<SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />

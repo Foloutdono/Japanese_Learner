@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { startTally, countReview, peekTally, tallyAccuracy } from './runTally'
+import { startTally, countReview, peekTally, tallyAccuracy, tallyMisses } from './runTally'
 import { publishEntry, withdrawEntry, peekEntry } from './deskEntry'
 
 describe('the run tally', () => {
@@ -17,6 +17,25 @@ describe('the run tally', () => {
 
     startTally('vocab:N5:f2b')
     expect(peekTally()).toMatchObject({ key: 'vocab:N5:f2b', reviewed: 0, good: 0, xp: 0 })
+  })
+})
+
+describe('the run\'s misses (plan 114)', () => {
+  it('keeps each card by its entry, with the rating it got last', () => {
+    startTally('kanji:N5:f2b')
+    const eki = { term: '駅', kana: 'えき', category: 'vocab', session: {} }
+    const yama = { term: '山', category: 'kanji' }
+    countReview({ quality: 1, xp: 1, entry: eki })
+    countReview({ quality: 2, xp: 1, entry: yama })
+    countReview({ quality: 5, xp: 9, entry: { term: '川', category: 'kanji' } })
+    countReview({ quality: 4, xp: 1 })
+    expect(tallyMisses(peekTally()).map(m => m.term)).toEqual(['駅', '山'])
+    // Missed, then got right: not a miss.
+    countReview({ quality: 4, xp: 5, entry: { ...eki } })
+    expect(tallyMisses(peekTally()).map(m => m.term)).toEqual(['山'])
+    expect(peekTally().reviewed).toBe(5)
+    startTally('kanji:N4:f2b')
+    expect(tallyMisses(peekTally())).toEqual([])
   })
 })
 

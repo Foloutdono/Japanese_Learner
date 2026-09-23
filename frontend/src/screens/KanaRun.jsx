@@ -269,7 +269,7 @@ export default function KanaRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
-      side={<SessionPanel />}
+      side={<SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
