@@ -21099,7 +21099,8 @@ a.slip__act { text-decoration: none; }
     animation: arrive-soft 0.2s linear;
   }
   .desk-settings .stg-row--on,
-  .desk-split .gl-index__row[aria-current="page"] {
+  .desk-split .gl-index__row[aria-current="page"],
+  .desk-split .exam-review-row[aria-current="page"] {
     background: color-mix(in srgb, var(--accent2) 8%, transparent);
     box-shadow: inset 3px 0 0 var(--accent2);
   }
@@ -21267,7 +21268,6 @@ a.slip__act { text-decoration: none; }
   .stage > .exam-mondai,
   .stage > .exam-mondai__text,
   .stage > .exam-nav,
-  .stage > .exam-sheetbar,
   .stage > .qrows {
     width: 100%;
     max-width: var(--card-w);
@@ -21302,6 +21302,77 @@ a.slip__act { text-decoration: none; }
   /* The comprehension text beside its questions (plan 114): whole, at
      the column's width, never the base card's 60vh inner scroll. */
   .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
+  /* ── the mock exam, sat at a desk (plan 114) ──
+     screens/ExamRunner: the answer sheet stands in the side — the clock
+     at the head of the column, the count, the grid, Finish — and the
+     paper is the page's scroll, from its top. A reading passage stands
+     flat on its own card beside its questions, which keep to a sticky
+     column so a choice is never a scroll away from the line it asks
+     about. */
+  .desk-run--paper > .stage {
+    justify-content: flex-start;
+    padding-bottom: var(--sp-8);
+  }
+  .desk-run__side > .exam-timer {
+    align-self: flex-start;
+    font-size: var(--fs-heading);
+  }
+  .desk-answers {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+  }
+  .desk-answers__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-answers__cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .stage > .desk-paper {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+    width: 100%;
+    max-width: var(--board-w);
+    margin-inline: auto;
+  }
+  /* A question beside its passage is the paper's width, not the card's:
+     the head, the part's instructions and the way through line up with
+     the two columns rather than a card column the paper overhangs. */
+  .stage:has(> .desk-paper) > :is(.exam-meta, .deck-progress, .exam-mondai, .exam-mondai__text, .exam-nav) { max-width: var(--board-w); }
+  /* The question fills its card: centred at its content's width it
+     drew the rows at half a 640px card. */
+  .exam-card > .exam-question { align-self: stretch; }
+  .desk-paper__text {
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+  }
+  .desk-paper__ask {
+    position: sticky;
+    top: var(--sp-6);
+    min-width: 0;
+  }
+  /* The flag's corner dot is ringed in the ground it sits on: the
+     side's, not the sheet's card. */
+  .desk-run__side .exam-sheet__chip--flagged::after { border-color: var(--bg-main); }
+  /* The result's review (screens/ExamResult): the open question's
+     revealed card is the page beside the list, whole — the phone's
+     60vh inner scroll was for a card opened under its row. */
+  .desk-split__page > .exam-card {
+    max-height: none;
+    margin-inline: 0;
+    overflow: visible;
+  }
+  .desk-split__page > .btn-row { max-width: var(--card-w); }
   .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .desk-tally > .record { padding: var(--sp-4); }
   .desk-entry {

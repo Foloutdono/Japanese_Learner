@@ -327,3 +327,75 @@ describe('the folded stations (plan 114, P3)', () => {
     expect(document.querySelector('.probe-deck')).toBeNull()
   })
 })
+
+// ── plan 114, P4 — the mock exam a phone keeps ──
+// On the desk the answer sheet stands in the run's side, a reading
+// passage beside its questions, the keys are named, and the review is a
+// list beside its page. A phone keeps the sheet bar and its sheet, the
+// passage inside the question's card, no key names, and the review's
+// rows opening under themselves with both ways on at the foot.
+describe('the mock exam (plan 114, P4)', () => {
+  const choices = (...texts) => texts.map((textJp, i) => ({ id: `c${i + 1}`, textJp }))
+  const PAPER = {
+    id: 'e1', level: 'N4', revision: 3, title: 'N4 Reading',
+    sections: [{
+      id: 'reading', label: 'Reading', labelJp: '読解', timeLimitMin: 25,
+      mondai: [{ id: 'm2', number: 1, type: 'reading-passage', instructionsJp: 'よんでください。', passages: [{
+        id: 'p1', textJp: 'わたしは毎朝七時に起きます。',
+        questions: [
+          { id: 'r1', promptJp: '何時に起きますか。', answer: 'c2', choices: choices('六時', '七時') },
+          { id: 'r2', promptJp: 'だれですか。', answer: 'c1', choices: choices('わたし', 'あなた') },
+        ],
+      }] }],
+    }],
+  }
+
+  it('keeps the sheet bar, the passage in its card and no key names', async () => {
+    localStorage.clear()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => PAPER }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ExamRunner } = await import('./screens/ExamRunner')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/exam/e1']}>
+          <Routes><Route path="/practice/exam/:examId" element={<ExamRunner session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.querySelector('.exam-sheetbar')).not.toBeNull()
+    expect(document.querySelector('.exam-meta [role="timer"]')).not.toBeNull()
+    expect(document.querySelector('.exam-card .exam-passage .exam-passage__text')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"], [aria-keyshortcuts]')).toBeNull()
+    document.querySelector('.exam-sheetbar__open').click()
+    await settle(250)
+    expect(document.querySelector('[role="dialog"] .exam-sheet__grid')).not.toBeNull()
+  })
+
+  it('keeps the review opening each row under itself', async () => {
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ExamResult } = await import('./screens/ExamResult')
+    const review = [
+      { id: 'r1', sectionId: 'reading', given: 'c1', answer: 'c2', isCorrect: false },
+      { id: 'r2', sectionId: 'reading', given: 'c1', answer: 'c1', isCorrect: true },
+    ]
+    const summary = { attemptId: 9, revision: 3, review, perSection: { reading: { correct: 1, total: 2, pct: 50 } } }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/practice/exam/e1/results', state: { summary, exam: PAPER } }]}>
+          <Routes><Route path="/practice/exam/:examId/results" element={<ExamResult session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+    const rows = document.querySelectorAll('.exam-review-row')
+    expect(rows).toHaveLength(1)
+    expect(rows[0].getAttribute('aria-expanded')).toBe('false')
+    expect(document.querySelector('[aria-current="page"], .desk-split, .exam-card')).toBeNull()
+    rows[0].click()
+    await settle()
+    expect(document.querySelector('.exam-review-row__detail .mcq-row--correct')).not.toBeNull()
+    expect(document.querySelectorAll('.btn-row button')).toHaveLength(2)
+    expect(document.querySelector('p.hint')).not.toBeNull()
+  })
+})

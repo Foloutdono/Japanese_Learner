@@ -4,7 +4,7 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { Leave } from '../components/chrome/Bar'
 import { Sheet } from '../components/chrome/Sheet'
-import { StudyStage } from '../components/study/StudyStage'
+import { StudyStage, RunSide } from '../components/study/StudyStage'
 import { LevelBar } from '../components/chrome/LevelBar'
 import { applyXpGain } from '../stores/profileSummary'
 import { CardTransition } from '../components/study/CardTransition'
@@ -12,8 +12,10 @@ import { CHOICE_KEY_INDEX } from '../domain/choiceKeys'
 import Empty from '../components/ui/Empty'
 import { getExam, flattenQuestions, submitAttempt } from '../exam/examService'
 import { paperTitle } from '../exam/examKinds'
-import QuestionRenderer from '../exam/QuestionRenderer'
+import { PassageText } from '../exam/QuestionRenderer'
+import ExamCard from '../exam/ExamCard'
 import AnswerSheet, { SheetBar } from '../exam/AnswerSheet'
+import { useDesk } from '../hooks/useDesk'
 import { PageIcon, ChevronIcon, FlagIcon } from '../components/ui/Icons'
 
 // Poll cadence while the server generates a paper (it answers 202 until
@@ -123,6 +125,7 @@ export default function ExamRunner({ session }) {
 function RunnerScene({ session, examId, exclude, onRetry }) {
   const navigate = useNavigate()
   const { t } = useLang()
+  const desk = useDesk()
   const devMode = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('dev') === '1'
 
   // null = still loading, false = generation failed (see the catch
@@ -361,6 +364,10 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   function jumpTo(i) {
     if (i < 0 || i >= questions.length || i === index) return
     playUi('click-mode-selection')
+    // On the desk the paper is the page's scroll, not a card's: a jump
+    // lands at the top of it, except within one reading passage, whose
+    // text stands where the learner left it.
+    if (desk && !(current.passage && questions[i].passage === current.passage)) window.scrollTo(0, 0)
     setIndex(i)
   }
 
@@ -436,8 +443,30 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     }
   }
 
+  // ── 机 — the paper, sat at a desk (plan 114) ──
+  // The answer sheet stands in the run's side the whole time — the
+  // clock over it, the count, every question's chip, Finish — where the
+  // phone keeps a bar that opens it in a sheet. A reading passage
+  // stands flat beside its questions, on a card of its own that stays
+  // put from one of its questions to the next; the phone scrolls it
+  // inside the question's card.
+  const paper = desk && current.type === 'reading-passage' && current.passage
+  const card = (
+    <CardTransition cardKey={current.id}>
+      <ExamCard question={current} selected={selected} onSelect={select} devMode={devMode} keys={desk} passageAside={Boolean(paper)} />
+    </CardTransition>
+  )
+  const timer = timeLeft !== null && (
+    <span
+      className={`exam-timer${timeLeft < 60 ? ' exam-timer--low' : ''}`}
+      role="timer"
+    >
+      {formatTime(timeLeft)}
+    </span>
+  )
+
   return (
-    <div className="screen">
+    <div className={desk ? 'screen desk-run desk-run--paper' : 'screen'}>
       <main id="main-content" className="container stage" style={{ '--line-color': EXAM_COLOR }}>
         {/* The exam's own head row (canvas ExamRunner): the way out,
             the paper, the clock. Walking out of a timed exam is worth
@@ -448,14 +477,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           <span className="exam-meta__section">
             <h1 className="exam-meta__jp">{paperTitle(exam, t)}</h1>
           </span>
-          {timeLeft !== null && (
-            <span
-              className={`exam-timer${timeLeft < 60 ? ' exam-timer--low' : ''}`}
-              role="timer"
-            >
-              {formatTime(timeLeft)}
-            </span>
-          )}
+          {desk ? null : timer}
         </div>
 
         <div
@@ -496,17 +518,19 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
           </>
         )}
 
-        <CardTransition cardKey={current.id}>
-          <div className="prompt-card prompt-card--ask exam-card">
-            <span className="cap">{t.examQuestionAbbrev}{current.number}</span>
-            <QuestionRenderer question={current} selected={selected} onSelect={select} devMode={devMode} />
+        {paper ? (
+          <div className="desk-paper">
+            <div key={paper.id ?? current.mondaiId} className="prompt-card exam-passage desk-paper__text">
+              <PassageText passage={paper} />
+            </div>
+            <div className="desk-paper__ask">{card}</div>
           </div>
-        </CardTransition>
+        ) : card}
 
         <div className="exam-nav">
           {/* Reuses ReviewDeck's prev/next wording (see quizModes' review
               mode) rather than inventing a third "back"/"next" pair. */}
-          <button type="button" className="btn-secondary" disabled={index === 0} onClick={() => jumpTo(index - 1)}>
+          <button type="button" className="btn-secondary" disabled={index === 0} onClick={() => jumpTo(index - 1)} aria-keyshortcuts={desk ? 'ArrowLeft' : undefined}>
             <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
           </button>
           <button
@@ -515,6 +539,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             onClick={toggleFlag}
             aria-pressed={isFlagged}
             aria-label={isFlagged ? t.examUnflag : t.examFlag}
+            aria-keyshortcuts={desk ? 'F' : undefined}
             title={isFlagged ? t.examUnflag : t.examFlag}
           >
             <FlagIcon size={16} filled={isFlagged} />
@@ -524,29 +549,47 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             className="btn-primary"
             disabled={index === questions.length - 1}
             onClick={() => jumpTo(index + 1)}
+            aria-keyshortcuts={desk ? 'ArrowRight' : undefined}
           >
             {t.reviewNext} <ChevronIcon direction="right" size={14} />
           </button>
         </div>
 
-        <SheetBar
-          questions={questions}
-          answers={answers}
-          flagged={flagged}
-          index={index}
-          answered={answeredCount}
-          onOpen={() => { playUi('click-mode-selection'); setSheetOpen(true) }}
-          onFinish={requestFinish}
-          busy={submitState === 'sending'}
-        />
+        {desk ? null : (
+          <SheetBar
+            questions={questions}
+            answers={answers}
+            flagged={flagged}
+            index={index}
+            answered={answeredCount}
+            onOpen={() => { playUi('click-mode-selection'); setSheetOpen(true) }}
+            onFinish={requestFinish}
+            busy={submitState === 'sending'}
+          />
+        )}
       </main>
       {/* The same level bar every run docks (StudyStage); the exam
           draws its own stage, so it mounts it itself. */}
       <LevelBar />
 
+      {desk && (
+        <RunSide label={t.examSheetTitle} color={EXAM_COLOR}>
+          {timer}
+          <div className="desk-answers">
+            <b className="desk-answers__fig">{answeredCount} / {questions.length}</b>
+            <span className="desk-answers__cap">{t.examSheetTitle}</span>
+          </div>
+          <AnswerSheet questions={questions} answers={answers} flagged={flagged} index={index} onJump={jumpTo} />
+          <button type="button" className="btn-primary desk-answers__finish" onClick={requestFinish} disabled={submitState === 'sending'}>
+            {submitState === 'sending' ? t.examSubmitting : t.examFinishSection}
+          </button>
+        </RunSide>
+      )}
+
       {/* The grid, in a sheet the bar opens. Jumping closes it: the
-          question is what the learner asked for. */}
-      <Sheet open={sheetOpen} onClose={() => setSheetOpen(false)} jp={t.examSheetTitle}>
+          question is what the learner asked for. The desk has no bar:
+          its grid stands in the side. */}
+      <Sheet open={sheetOpen && !desk} onClose={() => setSheetOpen(false)} jp={t.examSheetTitle}>
         <AnswerSheet
           questions={questions}
           answers={answers}
