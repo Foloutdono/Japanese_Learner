@@ -120,7 +120,7 @@ export default function AnalyzerScreen({ session }) {
   // had already been created without a video_id and nothing re-read it.
   const [videoUrl, setVideoUrl] = useState('')
 
-  // 机 (plan 117): the grab's walkthrough, open in the intake's column
+  // 机 (plan 120): the grab's walkthrough, open in the intake's column
   // on the desk rather than over the intake, and the copy state its
   // button shares with the panel's (both are on screen at once there).
   // A phone leaves both to IntakeVideo, whose dialog it is.
@@ -883,7 +883,7 @@ export default function AnalyzerScreen({ session }) {
         <div className="desk-intake">
           <div className="desk-intake__main">{intake}</div>
           {/* The grab's walkthrough takes the column while it is open
-              (plan 117), the history back on its ✕ or Esc. */}
+              (plan 120), the history back on its ✕ or Esc. */}
           {tutorial && source === 'video' ? (
             <DeskSide label={t.tutTitle}>
               <GrabTutorialDock t={t} onClose={closeTutorial} onCopy={grab.copy}

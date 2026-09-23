@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–117, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–120, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -61,17 +61,17 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-lines`, `__line` (`--open`), `__levels` | the lines as one table (a subgrid), the open line's levels hung from its roundel | `components/stats/LineRows.jsx` (`inline`) |
 | `.desk-run`, `.desk-run__side`, `__note` | a run with a side: the side fixed to the right edge in the run's pigment (`RunSide`), the stage top-aligned; card and choices, or prompt and board, side by side; unused choices keep their place | `components/study/StudyStage.jsx` (`side`, `RunSide`) |
 | `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips. A browse (the fast review) passes `records={false}`: the entry alone, no tally (plan 116) | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`); the browse's side in `screens/KanaRun.jsx`, `VocabRun.jsx`, `KanjiRun.jsx` |
-| `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it; since plan 117 also a grammar run's side, for the rival a gate lesson names | `components/analysis/SideLookup.jsx`, `screens/GrammarRun.jsx` |
+| `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it; since plan 120 also a grammar run's side, for the rival a gate lesson names | `components/analysis/SideLookup.jsx`, `screens/GrammarRun.jsx` |
 | `.desk-run--paper`, `.desk-answers`, `__fig`, `__cap`, `__finish`; `.desk-paper`, `__text`, `__ask` | the mock exam: the answer sheet in the side; a reading passage flat beside its questions | `screens/ExamRunner.jsx`, `exam/ExamCard.jsx`, `exam/QuestionRenderer.jsx` (`PassageText`) |
 | `.desk-anl-dock`, `__keys` | the analyser's second column: the dictionary on the stage's token | `components/analysis/AnalyzerDock.jsx` |
 | `.anl-results:focus-visible` | no ring round the result while ←/→ walk it (its arrival focus is a target, not a tab stop; the phone's copy of the rule was lost before plan 113) | `screens/AnalyzerScreen.jsx` |
 | `.desk-intake`, `__main` | the analyser's intake beside its history | `screens/AnalyzerScreen.jsx` |
-| `.desk-dock`, `__head` | a door opened in a column: its caption and ✕ over the phone's own body, in place of the column's tenant until ✕ or Esc; focus goes back to what opened it (plan 117) | `components/chrome/DeskDock.jsx` |
+| `.desk-dock`, `__head` | a door opened in a column: its caption and ✕ over the phone's own body, in place of the column's tenant until ✕ or Esc; focus goes back to what opened it (plan 120) | `components/chrome/DeskDock.jsx` |
 | `.desk-browse` | a deck's Browse, docked in the deck page's side (the result row stacked, as on a phone) | `components/decks/BrowseCardsMenu.jsx` (`BrowseCardsDock`) |
-| `.desk-more` | a deck's More — import, export, the library — in the deck page's side; the deck's deletion asks in a dialog of its own (plan 117) | `screens/DeckDetailScreen.jsx` |
-| `.desk-tut` | the grab's walkthrough in the intake's column, in place of the history; its copy button shares the panel's state (plan 117) | `components/analysis/GrabTutorial.jsx` (`GrabTutorialDock`), `useBookmarkletCopy.js`, `screens/AnalyzerScreen.jsx` |
-| `.desk-readings` | a kanji's every reading in the entry's own place, whatever holds the entry (a dock, a run's side, a lookup dialog); ✕ or Esc steps back to the entry (plan 117) | `components/dictionary/DictionaryDetail.jsx` (`ReadingsInPlace`) |
-| `.desk-install` | the iOS install steps in the settings page, under the row that asked (`aria-expanded`) (plan 117) | `components/settings/DisplayPage.jsx`, `components/ui/InstallSheet.jsx` (`InstallSteps`) |
+| `.desk-more` | a deck's More — import, export, the library — in the deck page's side; the deck's deletion asks in a dialog of its own (plan 120) | `screens/DeckDetailScreen.jsx` |
+| `.desk-tut` | the grab's walkthrough in the intake's column, in place of the history; its copy button shares the panel's state (plan 120) | `components/analysis/GrabTutorial.jsx` (`GrabTutorialDock`), `useBookmarkletCopy.js`, `screens/AnalyzerScreen.jsx` |
+| `.desk-readings` | a kanji's every reading in the entry's own place, whatever holds the entry (a dock, a run's side, a lookup dialog); ✕ or Esc steps back to the entry (plan 120) | `components/dictionary/DictionaryDetail.jsx` (`ReadingsInPlace`) |
+| `.desk-install` | the iOS install steps in the settings page, under the row that asked (`aria-expanded`) (plan 120) | `components/settings/DisplayPage.jsx`, `components/ui/InstallSheet.jsx` (`InstallSteps`) |
 | `.desk-crumb`, `__up` | the way up: a ‹ way out the rail does not already open, as a crumb over the title (`DeskCrumb`, also over the analyser's result and the dictionary's radical header) | `components/chrome/Bar.jsx` |
 | `.desk-deck`, `__main`, `__study`, `__cap` | a deck's cards beside its platforms, or the form while a card is written | `screens/DeckDetailScreen.jsx`, `components/decks/DeckPlatforms.jsx` |
 | `.desk-profile`, `__col` | the holder opened flat: the pass and stamps at `--desk-side-w`, beside the record | `screens/ProfileScreen.jsx` |
@@ -107,12 +107,12 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/lattices.desktop.test.jsx`, `src/today.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/stations.desktop.test.jsx`, `src/stats.desktop.test.jsx`, `src/runs.desktop.test.jsx`, `src/header.desktop.test.jsx`, `src/decks.desktop.test.jsx` | desktop | plan 114, one file a phase |
 | `src/breakdown.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/folds.desktop.test.jsx`, `src/exam.desktop.test.jsx`, `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/laptop.desktop.test.jsx`, `src/session.desktop.test.jsx` | desktop | plan 115, one file a phase |
 | `src/browse.desktop.test.jsx` | desktop | plan 116: the browse's side — the entry docked on reveal, no tally, no column over an empty browse |
-| `src/grammar.desktop.test.jsx`; blocks of `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/settings.desktop.test.jsx` | desktop | plan 117: the doors that open in their columns, and the deck's deletion still asked |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–117's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/grammar.desktop.test.jsx`; blocks of `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/settings.desktop.test.jsx` | desktop | plan 120: the doors that open in their columns, and the deck's deletion still asked |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–120's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |
 
-## Dialogs on the desk (plan 117)
+## Dialogs on the desk (plan 120)
 
 DESIGN.md's rule — a door opens in the column, never over it; a dialog is
 kept for what must interrupt — applied to every `Sheet`, `role="dialog"`
@@ -146,7 +146,7 @@ sheet, held by `src/deskfree.phone.test.jsx`):
 | Which deck to mine into | `components/analysis/DeckPicker.jsx` | the question an add in flight asks before it can finish, asked once and remembered; it opens from the entry or breakdown that often *is* the column |
 | A guide note | `components/guide/Guide.jsx` | a note whose job is to stop the learner at what it teaches; it already stands beside its anchor (plan 115) |
 
-**Already in a column before plan 117:** the exam's answer sheet
+**Already in a column before plan 120:** the exam's answer sheet
 (`RunSide`), the statistics' two sheets, the run lookups (`SideLookup`,
 the entry dock), the analyser's lookup (`AnalyzerDock`), the grammar
 index's lesson (`GrammarLessonBody`), Browse.

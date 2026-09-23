@@ -451,7 +451,7 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   )
 }
 
-// ── 机 — every reading, in the entry's own place (plan 117) ──────────
+// ── 机 — every reading, in the entry's own place (plan 120) ──────────
 // On the desk an entry mostly stands in a column — the dictionary's
 // dock, a run's side, the analyser's dock — and every door in it opens
 // inside that column (DESIGN.md, "A door opens in the column, never over
@@ -800,7 +800,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
   // On the desk the list opens in the entry's place (ReadingsInPlace,
-  // plan 117), taking the door with it; stepping back puts the focus
+  // plan 120), taking the door with it; stepping back puts the focus
   // on the door again, as a dialog's close would.
   const desk = useDesk()
   const readingsDoor = useRef(null)

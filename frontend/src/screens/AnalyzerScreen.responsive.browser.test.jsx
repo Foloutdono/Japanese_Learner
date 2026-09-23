@@ -269,7 +269,7 @@ describe('AnalyzerScreen structure', () => {
   // tutorial").
   it('opens a step-by-step tutorial with per-device instructions', async () => {
     // The dialog is the phone chrome's: on the desk the walkthrough
-    // opens in the intake's column instead (plan 117; analyzer.desktop's
+    // opens in the intake's column instead (plan 120; analyzer.desktop's
     // own case).
     await page.viewport(1099, 900)
     try {

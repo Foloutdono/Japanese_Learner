@@ -244,7 +244,7 @@ runtime purpose. Two consequences worth knowing:
   `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
   `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
   DESIGN.md, "The desk").
-  **117** is the desk's last dialogs: every sheet and modal the desk
+  **120** is the desk's last dialogs: every sheet and modal the desk
   still opened, each either kept because it interrupts or moved into its
   page's column — a deck's More in its side (its deletion asked in a
   dialog of its own), a gate lesson's rival in a grammar run's side, the
@@ -261,7 +261,7 @@ runtime purpose. Two consequences worth knowing:
   shelf, analyzer, dictionary and settings desktop tests and of
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`, "Dialogs on the desk").
-  When starting a new wave, begin at **118** or higher, and check
+  When starting a new wave, begin at **121** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

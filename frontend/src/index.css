@@ -21128,7 +21128,7 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     gap: var(--sp-4);
   }
-  /* A door opened in a column (components/chrome/DeskDock, plan 117):
+  /* A door opened in a column (components/chrome/DeskDock, plan 120):
      its cap and ✕ over the phone's own body — a deck's Browse and More,
      the analyser's grab tutorial — standing where the column's tenant
      stood until it closes. */

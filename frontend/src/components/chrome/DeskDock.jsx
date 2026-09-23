@@ -3,7 +3,7 @@ import { useLang } from '../../LangContext'
 import { CrossIcon } from '../ui/Icons'
 import { dialogOpen } from '../../lib/dialogOpen'
 
-// ── 机 — a door opened in the page's own column (plans 115, 117) ─────
+// ── 机 — a door opened in the page's own column (plans 115, 120) ─────
 // On the desk a door that does not interrupt opens beside the page
 // rather than over it: into the screen's second column (DeskSide), in
 // place of whatever the column was holding, which comes back when the

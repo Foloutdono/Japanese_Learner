@@ -14,7 +14,7 @@ import './index.css'
 // additions.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
-// iOS Safari, for plan 117's install row: off by default, as headless
+// iOS Safari, for plan 120's install row: off by default, as headless
 // Chromium is, so nothing else here meets that row.
 const install = vi.hoisted(() => ({ ios: false }))
 vi.mock('./stores/installPrompt', async o => ({ ...(await o()), isIosSafari: () => install.ios }))
@@ -636,14 +636,14 @@ describe('the browse (plan 116)', () => {
   })
 })
 
-// ── plan 117 — the doors a phone keeps as sheets ──
+// ── plan 120 — the doors a phone keeps as sheets ──
 // On the desk a door that does not interrupt opens in the page's own
 // column: a deck's More in its side (its deletion still asked, in a
 // dialog), a gate lesson's rival in the run's side, the grab's
 // walkthrough beside the intake, a kanji's readings in the entry's
 // place, the iOS install steps in the settings page. A phone keeps every
 // one of them the sheet it was, and draws none of the desk's.
-describe('the doors (plan 117)', () => {
+describe('the doors (plan 120)', () => {
   it('keeps a deck\'s More a sheet, its deletion asked inside it', async () => {
     apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
     const { MemoryRouter, Routes, Route } = await import('react-router-dom')

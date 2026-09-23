@@ -75,7 +75,7 @@ function InstallSlip({ t }) {
   const promptable = useInstallPrompt()
   const [sheet, setSheet] = useState(false)
   const ios = isIosSafari()
-  // 机 (plan 117): an iPad on its side reaches the desk. There the two
+  // 机 (plan 120): an iPad on its side reaches the desk. There the two
   // taps are read in the page, under this row, rather than in a sheet
   // over it — the page is right there, and nothing needs interrupting.
   const desk = useDesk()

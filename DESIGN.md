@@ -931,13 +931,13 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–117)
+### The desk (机, plans 113–120)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
 screens out for the width, so that nothing on a computer reads as a phone
 set down on a desk; plan 115 took the remaining second screens and sheets
-into the page and gave a session its keys; plan 117 went through every
+into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns.
 
 - **The rail is the chrome.** One sumi column down the left edge,
@@ -1020,7 +1020,7 @@ dialog left and moved the ones that do not interrupt into their columns.
   (←/→ walk it); a deck's Browse and More open in the deck page's side, a
   gate lesson's rival in the run's side, the grab's walkthrough beside the
   intake, a kanji's readings in the entry's own place, the iOS install
-  steps in the settings page (plan 117). A panel that takes a column's
+  steps in the settings page (plan 120). A panel that takes a column's
   place (Browse, More, the walkthrough) wears `DeskDock`'s caption and ✕
   over the phone's own body, and the column's tenant comes back on ✕ or
   Esc. A dialog is kept for what must interrupt: a

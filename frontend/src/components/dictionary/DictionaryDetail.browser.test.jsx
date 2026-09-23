@@ -813,7 +813,7 @@ describe('the senses — folded where they say the same thing', () => {
 
 describe('the readings — two on the plate, all of them in a sheet of their own', () => {
   // The sheet is the phone chrome's, and a tablet's: on the desk the
-  // readings open in the entry's own place instead (plan 117;
+  // readings open in the entry's own place instead (plan 120;
   // dictionary.desktop's own case). So these run just under the desk's
   // line, and hand the file's width back after.
   beforeEach(async () => { await page.viewport(1099, 900) })

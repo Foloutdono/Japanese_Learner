@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a lesson's rival opens beside the run (plan 117) ──────────
+// ── 机 — a lesson's rival opens beside the run (plan 120) ──────────
 // A grammar card the learner has never met shows its lesson first, and
 // the lesson's compare rows are doors to the rival points. On a phone
 // each opens the rival's lesson in a sheet over the run; on the desk the

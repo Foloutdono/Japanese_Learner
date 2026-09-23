@@ -78,7 +78,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
 // platforms, or the card form), so Browse opens there rather than over
 // the page: the cards it adds land in the list beside it as they go in,
 // and the page is never behind a scrim. The same body as the phone's
-// overlay, in the dock's shell (chrome/DeskDock, plan 117); Esc or ✕
+// overlay, in the dock's shell (chrome/DeskDock, plan 120); Esc or ✕
 // gives the column back to the platforms.
 export function BrowseCardsDock({ deckId, deckType, session, onAdded, onClose }) {
   const { t } = useLang()

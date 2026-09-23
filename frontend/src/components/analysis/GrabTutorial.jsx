@@ -45,7 +45,7 @@ export function GrabTutorial({ t, onClose, onCopy, copied, watchUrl }) {
   )
 }
 
-// ── 机 — the walkthrough beside the intake (plan 117) ─────────────
+// ── 机 — the walkthrough beside the intake (plan 120) ─────────────
 // On the desk the intake already stands beside a column (its history),
 // and the walkthrough is read while it is followed — copy, make the
 // bookmark, come back — so it opens there rather than over the field it

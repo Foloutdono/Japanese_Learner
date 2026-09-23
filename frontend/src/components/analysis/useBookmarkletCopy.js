@@ -6,7 +6,7 @@ import { buildBookmarklet } from '../../lib/captionGrab'
 // IntakeVideo's panel and the walkthrough (GrabTutorial) both copy the
 // bookmarklet and both link the video's watch page. On a phone the
 // walkthrough is the panel's own dialog; on the desk it stands in the
-// intake's column (plan 117) and the screen holds the state, so both
+// intake's column (plan 120) and the screen holds the state, so both
 // copy buttons — on screen at once there — confirm together.
 
 // The watch page a pasted link names, or null: where the grab runs.

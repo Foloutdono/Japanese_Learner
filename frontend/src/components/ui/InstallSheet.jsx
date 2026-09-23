@@ -33,7 +33,7 @@ export function InstallSheet({ onClose }) {
 }
 
 // The explanation and its two taps: the sheet's body, and on the desk
-// (plan 117) the settings page's own, under the row that asked.
+// (plan 120) the settings page's own, under the row that asked.
 export function InstallSteps() {
   const { t } = useLang()
   return (

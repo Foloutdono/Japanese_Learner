@@ -30,7 +30,7 @@ vi.mock('./lib/supabase', () => ({
 vi.mock('./lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playClick: vi.fn(), playToggle: vi.fn(),
 }))
-// iOS Safari, for the one test that needs its install row (plan 117):
+// iOS Safari, for the one test that needs its install row (plan 120):
 // off by default, as headless Chromium is, so the page is as it was.
 const install = vi.hoisted(() => ({ ios: false }))
 vi.mock('./stores/installPrompt', async o => ({ ...(await o()), isIosSafari: () => install.ios }))
@@ -120,7 +120,7 @@ describe('settings on the desk', () => {
   })
 })
 
-// ── plan 117 — the install steps in the page ──
+// ── plan 120 — the install steps in the page ──
 // iOS Safari installs from its share sheet alone, so the Display page's
 // install row explains the two taps. An iPad on its side reaches the
 // desk, and there the explanation opens in the page under the row

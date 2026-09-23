@@ -233,7 +233,7 @@ describe('the dictionary, on a sentence it has no entry for', () => {
   })
 })
 
-// ── plan 117 — the grab's walkthrough beside the intake ──
+// ── plan 120 — the grab's walkthrough beside the intake ──
 // The walkthrough is read while it is followed (copy, make the
 // bookmark, come back), so on the desk it opens in the intake's column
 // rather than over the field it explains: the history steps aside until

@@ -78,7 +78,7 @@ export default function GrammarRun({ session }) {
   // The lesson sheet a compare row on the gate opens, by card id. The
   // card itself opens the dictionary entry instead (see pointId below).
   const [sheet, setSheet]           = useState(null)
-  // 机 (plan 117): on the desk the run already has a column, so the
+  // 机 (plan 120): on the desk the run already has a column, so the
   // rival a compare row names opens there instead (SideLookup), beside
   // the lesson that named it. Kept with the card it was opened on, so
   // a later gated card never opens on it.

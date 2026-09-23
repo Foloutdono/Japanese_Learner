@@ -512,7 +512,7 @@ export default function DeckDetailScreen({ session }) {
   }
 
   // On the desk the form, Browse, More and the platforms take turns in
-  // one column (plans 115, 117): opening one gives the column to it.
+  // one column (plans 115, 120): opening one gives the column to it.
   function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
 
   function startEdit(card) {
@@ -693,7 +693,7 @@ export default function DeckDetailScreen({ session }) {
 
   // What More holds (plan 071): the cards in and out, and the deck into
   // the library. A sheet on a phone; on the desk it opens in the side
-  // instead (plan 117), since none of it is a question.
+  // instead (plan 120), since none of it is a question.
   const moreActions = (
     <>
       {allowCustom && (
@@ -808,7 +808,7 @@ export default function DeckDetailScreen({ session }) {
           {cards.length > 0 && (
             <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
           )}
-          {/* A sheet on a phone; on the desk, the side's (plan 117). */}
+          {/* A sheet on a phone; on the desk, the side's (plan 120). */}
           <Chip on={desk && moreOpen} onClick={openMore} aria-haspopup={desk ? undefined : 'dialog'}>
             <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
           </Chip>
@@ -995,7 +995,7 @@ export default function DeckDetailScreen({ session }) {
             {adding ? cardForm
               : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
               // More is a list of what can be done to the deck, not a
-              // question: it opens in the column (plan 117), and only its
+              // question: it opens in the column (plan 120), and only its
               // deletion asks, in a dialog of its own (below).
               : moreOpen ? (
                 <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
@@ -1069,7 +1069,7 @@ export default function DeckDetailScreen({ session }) {
 
       {/* On the desk More is a column (above), so the deck's own
           deletion asks in a dialog of its own, as the three other
-          irreversibles here do (plan 117). */}
+          irreversibles here do (plan 120). */}
       <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
         jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck}>
         <span className="sheet__q">

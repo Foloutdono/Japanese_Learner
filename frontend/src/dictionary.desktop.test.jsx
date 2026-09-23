@@ -150,7 +150,7 @@ describe('the search key', () => {
   })
 })
 
-// ── plan 117 — every reading, in the entry's own place ──
+// ── plan 120 — every reading, in the entry's own place ──
 // On a phone "+N" opens the kanji's readings in a sheet over the entry.
 // On the desk the entry stands in a column, and a door in it opens in
 // that column: the list takes the entry's place, and ✕ or Esc steps

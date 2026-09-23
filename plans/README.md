@@ -5797,7 +5797,7 @@ Left out on purpose: the grammar browse. It wires no dictionary lookup
 at all, so there is no 🔍 on a phone either, and giving it one would put
 that 🔍 on the phone, which the desk may not change.
 
-# Plan 117 — the desk's last dialogs (2026-09-23)
+# Plan 120 — the desk's last dialogs (2026-09-23)
 
 Wave 26's deferred "dialog pass over confirm sheets and the CSV import":
 every `Sheet`, `role="dialog"` and `aria-modal` the desk could still
@@ -5806,7 +5806,7 @@ column, never over it; a dialog is kept for what must interrupt.
 
 | Plan | What | Status |
 |---|---|---|
-| 117 | One dock shell, `components/chrome/DeskDock.jsx` (caption, ✕, Esc unless a dialog owns it, focus back to the opener), under Browse and two new docks. **Moved**: a deck's More into its side, taking turns with the form, Browse and the platforms, its deletion now a dialog of its own; a gate lesson's compare row into a grammar run's side (`SideLookup`); the grab's walkthrough into the intake's column, its copy state shared with the panel's (`useBookmarkletCopy`); a kanji's readings into the entry's own place, in a dock, a run's side or a lookup dialog (`ReadingsInPlace`, Esc peeling only the list); the iOS install steps into the settings page (`InstallSteps`). **Kept**: the exam's confirm, leave and failed-submit sheets, the deck's four confirms, the CSV import, a new deck, the report, the balance and the pass's back (the rail's doors), the offer and the run-out, the level change, the deck picker, the guide. `src/grammar.desktop.test.jsx`; blocks of the shelf, analyzer, dictionary and settings desktop tests; a block of `src/deskfree.phone.test.jsx`. The reasons, sheet by sheet: `docs/design/desk/README.md`, "Dialogs on the desk" | DONE (2026-09-23) |
+| 120 | One dock shell, `components/chrome/DeskDock.jsx` (caption, ✕, Esc unless a dialog owns it, focus back to the opener), under Browse and two new docks. **Moved**: a deck's More into its side, taking turns with the form, Browse and the platforms, its deletion now a dialog of its own; a gate lesson's compare row into a grammar run's side (`SideLookup`); the grab's walkthrough into the intake's column, its copy state shared with the panel's (`useBookmarkletCopy`); a kanji's readings into the entry's own place, in a dock, a run's side or a lookup dialog (`ReadingsInPlace`, Esc peeling only the list); the iOS install steps into the settings page (`InstallSteps`). **Kept**: the exam's confirm, leave and failed-submit sheets, the deck's four confirms, the CSV import, a new deck, the report, the balance and the pass's back (the rail's doors), the offer and the run-out, the level change, the deck picker, the guide. `src/grammar.desktop.test.jsx`; blocks of the shelf, analyzer, dictionary and settings desktop tests; a block of `src/deskfree.phone.test.jsx`. The reasons, sheet by sheet: `docs/design/desk/README.md`, "Dialogs on the desk" | DONE (2026-09-23) |
 
 Left: the radical family's lookup and the first ride's 🔍 belong in a
 column their pages do not have yet — a layout decision, not a move; and

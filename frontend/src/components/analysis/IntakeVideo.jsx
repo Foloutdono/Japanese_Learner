@@ -38,7 +38,7 @@ import { GrabTutorial } from './GrabTutorial'
 // DownSub, pre-filled with the pasted link, is the no-install
 // fallback for anything the bookmarklet cannot reach.
 
-// `grab` and `onTutorial` are the desk's (plan 117): the copy state the
+// `grab` and `onTutorial` are the desk's (plan 120): the copy state the
 // screen shares with a walkthrough it opens in its own column, and the
 // door to that column. Without them the walkthrough is this panel's
 // dialog, as it is on a phone.

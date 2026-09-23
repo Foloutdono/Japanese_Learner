@@ -208,7 +208,7 @@ describe('a deck\'s Browse on the desk', () => {
   })
 })
 
-// ── plan 117 — More opens in the side; only its deletion asks ──
+// ── plan 120 — More opens in the side; only its deletion asks ──
 // More is a list of what can be done to the deck (import, export, the
 // library), not a question, so on the desk it takes the deck page's
 // column the way Browse does, taking turns with it. Deleting the deck is
