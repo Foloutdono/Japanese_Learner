@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–116, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–119, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -53,7 +53,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.learn > .route` | a route that boards directly, drawn across as a line | `components/selection/RouteStops.jsx` |
 | `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back. The gate's `.gate-card__lanes` go two across once the gate holds two lanes at a phone's width (~1390px, plan 116) | `screens/TodayScreen.jsx`, `components/station/GateCard.jsx` |
 | `.desk-journey`, `__head`, `__name`, `__word` | the pass's back beside the gate: the status sheet's body on sumi | `components/journey/JourneyPanel.jsx` (body: `JourneyBody.jsx`) |
-| `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓ (`hooks/useListWalk.js`) | `components/selection/StationSplit.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review |
+| `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓ (`hooks/useListWalk.js`). The list's rows are links (`<Link replace>`, plan 117), so a row opens in a new tab too; the link wears the button's face (`.desk-split__list a:is(…)`) | `components/selection/StationSplit.jsx`, `SplitRow.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review (its open question in `?question=`) |
 | `.desk-lesson` | a grammar point's lesson as the page beside the level's points, on the card's surface | `screens/GrammarScreen.jsx`, `components/study/GrammarLesson.jsx` (`GrammarLessonBody`) |
 | `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 118): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold; the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`), `domain/radicals.js` |
 | `.desk-split--shelf`, `.desk-shelf-page` | the library's shelf beside the open deck's page, half and half | `screens/LibraryScreen.jsx`, `components/decks/PublicDeckPage.jsx` (`PublicDeckPane`) |
@@ -61,7 +61,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-stats`, `__holds`, `__leaks` | the statistics in two columns: the line (1:1), the ladder and the lines; the misses and every trouble card | `screens/StatsScreen.jsx` |
 | `.desk-lines`, `__line` (`--open`), `__levels` | the lines as one table (a subgrid), the open line's levels hung from its roundel | `components/stats/LineRows.jsx` (`inline`) |
 | `.desk-run`, `.desk-run__side`, `__note` | a run with a side: the side fixed to the right edge in the run's pigment (`RunSide`), the stage top-aligned; card and choices, or prompt and board, side by side; unused choices keep their place | `components/study/StudyStage.jsx` (`side`, `RunSide`) |
-| `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`) |
+| `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips. A browse (the fast review) passes `records={false}`: the entry alone, no tally (plan 119) | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`); the browse's side in `screens/KanaRun.jsx`, `VocabRun.jsx`, `KanjiRun.jsx` |
 | `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it | `components/analysis/SideLookup.jsx` |
 | `.desk-run--paper`, `.desk-answers`, `__fig`, `__cap`, `__finish`; `.desk-paper`, `__text`, `__ask` | the mock exam: the answer sheet in the side; a reading passage flat beside its questions | `screens/ExamRunner.jsx`, `exam/ExamCard.jsx`, `exam/QuestionRenderer.jsx` (`PassageText`) |
 | `.desk-anl-dock`, `__keys` | the analyser's second column: the dictionary on the stage's token | `components/analysis/AnalyzerDock.jsx` |
@@ -103,7 +103,9 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/lattices.desktop.test.jsx`, `src/today.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/stations.desktop.test.jsx`, `src/stats.desktop.test.jsx`, `src/runs.desktop.test.jsx`, `src/header.desktop.test.jsx`, `src/decks.desktop.test.jsx` | desktop | plan 114, one file a phase |
 | `src/breakdown.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/folds.desktop.test.jsx`, `src/exam.desktop.test.jsx`, `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/laptop.desktop.test.jsx`, `src/session.desktop.test.jsx` | desktop | plan 115, one file a phase |
 | `src/today.wide.test.jsx` | wide | plan 116: the gate's lanes two across, in the list's order, Enter departing with the choice |
+| `src/splitRows.desktop.test.jsx` | desktop | plan 117: a split's row as a link measures as the button it replaced (at rest, hover, focus), and a modified click is left to the browser |
 | `src/radicals.desktop.test.jsx` | desktop | plan 118: a radical's page beside the index, the family in the list, the bare index |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–116 and 118's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/browse.desktop.test.jsx` | desktop | plan 119: the browse's side — the entry docked on reveal, no tally, no column over an empty browse |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–119's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |

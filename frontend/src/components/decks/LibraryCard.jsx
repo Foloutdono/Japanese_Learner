@@ -1,5 +1,6 @@
 import { playUi } from '../../lib/audio'
 import { deckTypeOf } from './deckTypes'
+import { SplitRow } from '../selection/SplitRow'
 
 // ── One published deck, as a shelf card ───────────────────────
 // The same `.platform-card` the shelf uses for your own decks, on
@@ -16,18 +17,20 @@ import { deckTypeOf } from './deckTypes'
 
 //
 // `open` is the desk's (plan 115): the deck whose page stands beside the
-// shelf, marked as that page the way a station's open stop is.
-export function LibraryCard({ deck, t, onOpen, open = false }) {
+// shelf, marked as that page the way a station's open stop is. So is
+// `to` (plan 117): the deck's URL there, which makes the card a link
+// (SplitRow) that replaces the page, rather than a call to `onOpen`.
+export function LibraryCard({ deck, t, onOpen, open = false, to = null }) {
   const dt = deckTypeOf(deck.type, t)
   const followers = deck.followers ?? 0
 
   return (
-    <button
-      type="button"
+    <SplitRow
+      to={to}
       className={open ? 'platform-card deck-card lib-card desk-stop--open' : 'platform-card deck-card lib-card'}
       aria-current={open ? 'page' : undefined}
       style={{ '--rail': dt.color, '--line-color': dt.color }}
-      onClick={() => { playUi('click-mode-selection'); onOpen(deck) }}
+      onClick={() => { playUi('click-mode-selection'); if (to == null) onOpen(deck) }}
     >
       <span className="platform-card__lead deck-card__lead">
         <span className="wmap-roundel deck-card__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
@@ -52,6 +55,6 @@ export function LibraryCard({ deck, t, onOpen, open = false }) {
         )}
       </span>
       <span className="platform-card__go" aria-hidden="true">▶</span>
-    </button>
+    </SplitRow>
   )
 }

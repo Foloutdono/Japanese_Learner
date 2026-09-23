@@ -260,10 +260,11 @@ function LibraryShelf({ session, open }) {
 
   if (desk) {
     // The shelf as a list, the open deck as the page beside it: another
-    // deck swaps the page in place (the URL follows, replacing), and the
-    // bare library opens on its first deck once the shelf has answered —
-    // never while a narrowing is in flight, which would open a deck the
-    // narrowing is about to take away.
+    // deck swaps the page in place (a link replacing the URL, plan 117,
+    // so a deck also opens in a tab of its own), and the bare library
+    // opens on its first deck once the shelf has answered — never while
+    // a narrowing is in flight, which would open a deck the narrowing is
+    // about to take away.
     const listed = open ? decks.find(d => String(d.id) === String(open)) : null
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
@@ -296,7 +297,7 @@ function LibraryShelf({ session, open }) {
                 <div className="platform-grid">
                   {decks.map(deck => (
                     <LibraryCard key={deck.id} deck={deck} t={t} open={String(deck.id) === String(open)}
-                      onOpen={d => navigate(`/learn/decks/library/${d.id}`, { replace: true })} />
+                      to={`/learn/decks/library/${deck.id}`} />
                   ))}
                 </div>
               )}

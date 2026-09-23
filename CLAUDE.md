@@ -241,8 +241,19 @@ runtime purpose. Two consequences worth knowing:
   holds two at a phone's lane width (cited in the 机 section of
   `index.css`, `src/today.wide.test.jsx`, `src/today.desktop.test.jsx` and
   `src/deskfree.phone.test.jsx`; the evaluation is in `plans/README.md`).
-  **117** is claimed by an open branch (`claude/blissful-turing-wwbnn3`,
-  a split's rows as links) and not yet merged here.
+  **117** is the desk's split rows as links: a level, a kana set, a theme
+  band, a tier, a grammar point, a library deck or an exam question in a
+  `StationSplit`'s list is a `<Link replace>` on the desk
+  (`components/selection/SplitRow.jsx`), so the middle click, Ctrl/⌘-click
+  and "open in new tab" work, while the phone keeps the button it always
+  had — the row takes its URL from its caller (`RouteStops`' `linkTo`,
+  through `LevelSelector` and `ThemeLevelSelector`; `GrammarIndex`,
+  `TierSelector`, `LibraryCard`'s `to`), the exam review's open question
+  moves into its URL (`screens/ExamResult.jsx`'s `?question=`), the list
+  walk reads links and opens one on Space (`hooks/useListWalk.js`), and
+  the link takes the button's face back in the 机 section of `index.css`
+  (held by `src/splitRows.desktop.test.jsx`, which measures the two
+  against each other, and a block of `src/deskfree.phone.test.jsx`).
   **118** is a radical's page on the desk as two panes, which plan 115
   deferred: the radicals index beside the lesson and its platforms, the
   open radical in gold and each platform figured from the family's own
@@ -256,7 +267,16 @@ runtime purpose. Two consequences worth knowing:
   `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **119** or higher, and check
+  **119** is the browse's side on the desk (numbered 119 because 116 went
+  to the fare gate's lanes, 117 to the split's rows and 118 to a radical's
+  page while it was open): the fast review
+  (`components/study/ReviewDeck.jsx`) stands the revealed card's docked
+  entry beside the card, with no tally because a browse rates nothing
+  (`SessionPanel`'s `records={false}`, passed by `screens/KanaRun.jsx`,
+  `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
+  `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **120** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

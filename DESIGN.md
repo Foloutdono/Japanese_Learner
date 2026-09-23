@@ -931,7 +931,7 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–116, 118)
+### The desk (机, plans 113–119)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
@@ -993,12 +993,15 @@ into the page and gave a session its keys.
   route each run opens on, the library's shelf beside the open deck's page
   (the shelf keeping its search and its place), and a deck's platform screen
   gives way to the deck's page. A long list scrolls in its own column; the
-  stops are one tab stop, walked with ↑/↓. A radical's page (plan 118)
-  stands the radicals index beside the lesson and its platforms, on the
-  stroke page the radical is on, and another radical swaps the page in
-  place; the family's door no longer takes the lesson's place but swaps
-  the index for the family, in the list, and back. The bare index opens
-  on its page's biggest family.
+  stops are one tab stop, walked with ↑/↓. Every row of the lists above is
+  a link to what it opens (plan 117), the exam review's question included,
+  so it opens in a new tab as well as beside the list — and it wears the
+  button's face it replaced, to the pixel; the phone keeps its buttons.
+  A radical's page (plan 118) stands the radicals index beside the lesson
+  and its platforms, on the stroke page the radical is on, and another
+  radical swaps the page in place; the family's door no longer takes the
+  lesson's place but swaps the index for the family, in the list, and
+  back. The bare index opens on its page's biggest family.
 - **The statistics are one page.** What holds on the left — the retention
   line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
   a phone's chart), the ladder, the lines with the open one's levels hung
@@ -1009,9 +1012,11 @@ into the page and gave a session its keys.
   run's own pigment) holds, on a card run, this run's three records and
   **the revealed card's dictionary entry** — docked by the reveal and never
   before it, because the entry is the answer — and at a section run's end
-  the cards that went badly, each opening its entry; on a graded practice
-  run, the sentence's breakdown, with no toggle. The level bar keeps the
-  stage's width.
+  the cards that went badly, each opening its entry; on a browse (the fast
+  review), that entry alone — a browse rates nothing, so it keeps no tally,
+  and an empty one stands no side; on a graded practice run, the
+  sentence's breakdown, with no toggle. The level bar keeps the stage's
+  width.
 - **A run fits a laptop.** Its stage starts at the top of the window; the
   card and its choices (or the prompt and the writing board, the board in
   the wide column) stand side by side, the head and the rating bar spanning

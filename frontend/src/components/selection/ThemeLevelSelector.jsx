@@ -34,8 +34,10 @@ import Empty from '../ui/Empty'
  *   session, theme, onSelect(levelKey)
  *   selected — the band whose platforms stand beside the route, in the
  *              desk's station split (plan 115); passed to RouteStops.
+ *   linkTo(levelKey) — the band's URL there, which makes the bands
+ *              links (plan 117); passed to RouteStops.
  */
-export default function ThemeLevelSelector({ session, theme, onSelect, selected = null }) {
+export default function ThemeLevelSelector({ session, theme, onSelect, selected = null, linkTo = null }) {
   const { t } = useLang()
   // Held with the theme they answer for: the desk keeps this mounted
   // from one theme's bands to the next, and another theme's counts —
@@ -69,5 +71,5 @@ export default function ThemeLevelSelector({ session, theme, onSelect, selected 
     hint: `${counts[key] ?? 0} ${t.wordNoun}`,
   }))
 
-  return <RouteStops stops={stops} selected={selected} onSelect={onSelect} />
+  return <RouteStops stops={stops} selected={selected} onSelect={onSelect} linkTo={linkTo} />
 }

@@ -21417,6 +21417,27 @@ a.slip__act { text-decoration: none; }
   /* The ▶ was the aside's right margin; without it the figures keep
      their own. */
   .desk-split__list .platform-card__aside { padding-inline-end: var(--sp-4); }
+  /* The list's rows are links (plan 117, components/selection/SplitRow),
+     so that a stop, a point or a deck opens in a new tab too — and a
+     link is not a button: neither the global `button` rule nor the
+     browser's own button face reaches it. It takes back what the row
+     was drawn with, so the link reads exactly as the button it replaced
+     (splitRows.desktop.test.jsx measures the two against each other):
+     the button's weight and leading, where the row leaves its text to
+     them (the route and the cards; the index and the review rows set
+     `font: inherit` of their own), no underline, the button's hover
+     where the row keeps it (the review's), and its focus ring. */
+  .desk-split__list a:is(.route-stop, .platform-card) {
+    font-weight: 600;
+    line-height: normal;
+  }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
+  .desk-split__list a.exam-review-row { transition: filter 0.15s; }
+  .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
   /* A grammar point's lesson as the page beside the index (plan 115):
      the sheet's lesson on the card's own surface, at the card's width,
      its plate standing where it is drawn rather than pinned to a

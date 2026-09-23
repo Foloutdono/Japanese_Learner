@@ -27,7 +27,12 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 // each one opens its entry here, the way it opened on reveal. Today
 // passes `misses={false}`: its lanes are other sections' decks, and
 // the day's end is not the place to reopen them.
-export function SessionPanel({ done = false, misses = true }) {
+//
+// A browse passes `records={false}` (plan 119): the fast review
+// (components/study/ReviewDeck.jsx) rates nothing, so it has no tally
+// to keep, and its column is the revealed card's entry alone — docked
+// by the same reveal, on the same terms.
+export function SessionPanel({ done = false, misses = true, records = true }) {
   const { t } = useLang()
   const tally = useRunTally()
   const docked = useDeskEntry()
@@ -39,11 +44,13 @@ export function SessionPanel({ done = false, misses = true }) {
 
   return (
     <>
-      <div className="records desk-tally" role="group" aria-label={t.deskRunLabel}>
-        <Record value={tally.reviewed} label={t.totalReviews} />
-        <Record value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} label={t.accuracy} />
-        <Record value={`+${tally.xp}`} unit="XP" label={t.deskEarned} />
-      </div>
+      {records && (
+        <div className="records desk-tally" role="group" aria-label={t.deskRunLabel}>
+          <Record value={tally.reviewed} label={t.totalReviews} />
+          <Record value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} label={t.accuracy} />
+          <Record value={`+${tally.xp}`} unit="XP" label={t.deskEarned} />
+        </div>
+      )}
 
       {missed.length > 0 && (
         <section className="desk-misses" aria-labelledby="desk-misses-cap">

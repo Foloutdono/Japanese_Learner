@@ -193,6 +193,9 @@ export default function KanaRun({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
+    // On the desk the browse stands the revealed card's entry beside it,
+    // with no tally: a browse rates nothing (plan 119). Only once there
+    // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage
         color="var(--line-kana)"
@@ -200,6 +203,8 @@ export default function KanaRun({ session }) {
         leaveLabel={t.kanaTitle}
         where={selectedSet.label}
         sub={modeLabel(t, FAST_REVIEW)}
+        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
             foot={selectedSet.label}
