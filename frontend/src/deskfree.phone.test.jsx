@@ -594,12 +594,12 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 115 — the gate's lanes a phone keeps ──
+// ── plan 116 — the gate's lanes a phone keeps ──
 // On a laptop the fare gate's lanes go two across once the gate holds
 // two at a phone's lane width (today.wide.test.jsx). A phone keeps its
 // own box: a column, one lane to a row across the whole of it, and no
 // key printed on Depart.
-describe('the gate\'s lanes (plan 115)', () => {
+describe('the gate\'s lanes (plan 116)', () => {
   it('keeps one lane to a row across the box, and prints no key', async () => {
     apiFetch.mockImplementation(async () => ({
       ok: true, status: 200, json: async () => ({ balance: 50, cap: 200, unlimited: false, enforced: false }),

@@ -21040,7 +21040,7 @@ a.slip__act { text-decoration: none; }
     grid-column: 2;
     grid-row: 1;
   }
-  /* The gate's lanes two across, once the gate holds two (plan 115).
+  /* The gate's lanes two across, once the gate holds two (plan 116).
      At a laptop's 1440 one lane per row ran ~704px: the name at one
      end, its figure at the other, ~450px of nothing between — and the
      box is bounded (the base rule's 30dvh), so the width that bought

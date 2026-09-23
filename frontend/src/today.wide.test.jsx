@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the gate's lanes two across, on a laptop (plan 115) ───────
+// ── 机 — the gate's lanes two across, on a laptop (plan 116) ───────
 // At 1440 one lane per row ran ~704px, the name at one end and its
 // figure at the other, and the bounded box hid half the day's switches
 // under its cut. Two across, a lane is a phone's width again and the

@@ -97,7 +97,7 @@ describe('Today on the desk', () => {
     expect(document.querySelector('[role="dialog"]')).toBeNull()
   })
 
-  // Plan 115 sets the lanes two across once the gate holds two lanes at
+  // Plan 116 sets the lanes two across once the gate holds two lanes at
   // a phone's width (today.wide.test.jsx). At the desk's tightest the
   // gate is ~430px and holds one: the lanes stay one to a row.
   it('keeps the lanes one to a row where the gate holds only one', async () => {
