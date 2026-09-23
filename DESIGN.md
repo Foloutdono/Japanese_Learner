@@ -969,7 +969,11 @@ set down on a desk.
   the window.
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
-  sheet. The
+  sheet. The gate's lanes go two across once the gate holds two at a
+  phone's lane width (about 1390px; plan 115), so a lane's figure stands a
+  phone's width from its name and twice the day's switches show above the
+  list's cut; the line chips and Depart run across both, and below that
+  width the lanes stay one to a row. The
   dictionary's dock is open from the first frame on the first result, and
   every door in an entry opens inside the dock; ←/→ walk the catalogue. A
   Learn plate's foot draws the whole line, a leg per level.

@@ -51,7 +51,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-line`, `__origin`, `__leg` (`--done`, `--here`), `__track`, `__stop`, `__fig` | a Learn plate's foot as the whole line: 初, then a leg per level, filled as far as it is learned | `components/station/LinePlate.jsx` (`LineFoot`) |
 | `.learn > .platform-grid` | two across; an odd last slot takes the row; exactly three go three across | `components/selection/ModeSelector.jsx` and the source pickers |
 | `.learn > .route` | a route that boards directly, drawn across as a line | `components/selection/RouteStops.jsx` |
-| `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back | `screens/TodayScreen.jsx` |
+| `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back. The gate's `.gate-card__lanes` go two across once the gate holds two lanes at a phone's width (~1390px, plan 115) | `screens/TodayScreen.jsx`, `components/station/GateCard.jsx` |
 | `.desk-journey`, `__head`, `__name`, `__word` | the pass's back beside the gate: the status sheet's body on sumi | `components/journey/JourneyPanel.jsx` (body: `JourneyBody.jsx`) |
 | `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky) beside the chosen stop's platforms; the open stop in gold | `components/selection/StationSplit.jsx`; Vocab, Kanji, Kana, Grammar, Exam |
 | `.desk-mode-fig`, `__due`, `__unit`, `__count` | a platform's own figures: due now, the composition bar, mastered / total | `components/selection/ModeFigures.jsx` |
@@ -90,6 +90,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/keys.desktop.test.jsx` | desktop | the keys |
 | `src/components/chrome/Shell.desk.browser.test.jsx` | browser | a resize across 1100 keeps the screen |
 | `src/lattices.desktop.test.jsx`, `src/today.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/stations.desktop.test.jsx`, `src/stats.desktop.test.jsx`, `src/runs.desktop.test.jsx`, `src/header.desktop.test.jsx`, `src/decks.desktop.test.jsx` | desktop | plan 113, one file a phase |
+| `src/today.wide.test.jsx` | wide | plan 115: the gate's lanes two across, in the list's order, Enter departing with the choice |
 | `src/deskfree.phone.test.jsx` | phone (390×844) | plan 113's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |

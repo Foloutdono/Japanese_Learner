@@ -5742,3 +5742,52 @@ Deferred: a comprehension passage beside its questions; a standing
 answer sheet in the exam runner; the exam result and the library laid
 out for the width; a word looked up from a docked breakdown still opens
 the lookup as a dialog.
+
+---
+
+# 机 — the gate's lanes two across (plan 115, 2026-09-23)
+
+The question: on the desk, should Today's fare gate set its lanes two
+across, the line chips and Depart spanning both? Built only if it reads
+better against DESIGN.md's density contract ("a screen gets a layout
+only where the width earns it, and what fills the width has a job").
+
+| Plan | What | Status |
+|---|---|---|
+| 115 | `.gate-card__lanes` as `repeat(auto-fit, minmax(calc(--desk-side-w − 2·--sp-5), 1fr))` in the 机 block: two across once the gate holds two lanes at a phone's width, one to a row below. No JSX change. `src/today.wide.test.jsx` (new), a case in `src/today.desktop.test.jsx`, a block in `src/deskfree.phone.test.jsx`; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+**Verdict: yes, where the width earns it.** Measured in the lanes
+(eight lanes, French):
+
+| Window | Lanes' box | Lanes | In view under the 30dvh cut |
+|---|---|---|---|
+| 1100 (`desktop`) | 364px | one to a row, 364px | 5 of 8 |
+| ~1390 | ~660px | the switch: two lanes at 328px fit | — |
+| 1440 (`wide`) | 704px | two across, 349px each | 8 of 8 (10 of 12) |
+| ≥1496 (canvas capped) | ~760px | two across, ~377px; three would need ~996px | — |
+
+Why it reads better at 1440: one lane per row was 704px with the name
+at one end, the figure at the other and ~450px of nothing between — the
+contract's "wide cards leave their right half empty" — and the box is
+height-bounded, so the unused width was also hiding half the day's
+switches under the cut. Two across, a lane is the width a phone draws it
+(the floor is the side column less the gate's phone padding, 328px), its
+figure a glance from its name, and an eight-lane day needs no scroll.
+The lanes are short switches, and two to five of them is the common day:
+"a grid of ≤5 short options is a grid, never a stack of full-width rows".
+
+Why not below ~1390: two columns would put each lane under its phone
+width. The desk's tightest gate (~430px) holds one.
+
+What it costs, accepted: the order reads left to right, then down, so a
+line with an odd count ends mid-row and the next line begins beside it —
+each lane's pigment and tick still name its line, and the chips above
+name the lines. A short last row is left short.
+
+Not done, on purpose: spanning an odd last lane (a switch like its
+siblings; twice their width would promote it — and the lanes are no
+hairline lattice, so the short row shows the card, not a seam);
+starting each line on its own row (more short rows, i.e. dead space
+inside the list); column-major order (it needs the row count from
+JavaScript, or multi-column CSS, which overflows sideways inside a
+height-bounded box).

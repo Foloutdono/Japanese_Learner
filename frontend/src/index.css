@@ -21013,6 +21013,34 @@ a.slip__act { text-decoration: none; }
     grid-column: 2;
     grid-row: 1;
   }
+  /* The gate's lanes two across, once the gate holds two (plan 115).
+     At a laptop's 1440 one lane per row ran ~704px: the name at one
+     end, its figure at the other, ~450px of nothing between — and the
+     box is bounded (the base rule's 30dvh), so the width that bought
+     nothing also hid half the day's switches under the cut. Two across,
+     a lane's figure stands a phone's width from its name again and twice
+     as many of the day's choices are in view; eight lanes need no
+     scroll at 900px tall.
+
+     The floor is a lane as a phone draws it: the side column (a phone's
+     content width) less the gate's own phone padding, 328px. Under two
+     of those — the desk from 1100 to ~1390, where the gate is ~430–720px
+     — the lanes stay one to a row, as below the line. Three would need
+     ~1000px the canvas never gives the gate. auto-fit, so a single lane
+     keeps the whole row rather than half of it beside an empty track.
+
+     The order is the list's own, left to right then down (the lanes are
+     sorted by line, then urgency), and Tab follows the eye. A line with
+     an odd count ends mid-row and the next begins beside it: each lane's
+     pigment names its line, and the chips above name the lines. An odd
+     last lane is not spanned — it is a switch like its siblings, and
+     twice their width would promote it — and this is no hairline
+     lattice, so the short row shows the card, not a seam. The chips,
+     the notice and Depart are the lanes' siblings, so they span both. */
+  .gate-card__lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - 2 * var(--sp-5)), 1fr));
+  }
 
   /* The pass's back, beside the gate (components/journey/JourneyPanel):
      the status sheet's own body on the sheet's own material — sumi, the

@@ -200,7 +200,16 @@ runtime purpose. Two consequences worth knowing:
   `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
   and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
   "The desk"; `docs/design/desk/README.md`).
-  When starting a new wave, begin at **114** or higher, and check
+  **114** is the desk's third round (P1–P8: a run's side in its line and
+  doors opening beside what they explain, comprehension as a workspace,
+  the stations' second screens folded, the mock exam, the library and
+  Browse, the analyser's dock, a run at a laptop's height, and a session
+  by key — `components/chrome/DeskKeys.jsx`). **115** is the fare gate's lanes two
+  across on the desk once the gate holds two at a phone's lane width
+  (cited in the 机 section of `index.css`, `src/today.wide.test.jsx`,
+  `src/today.desktop.test.jsx` and `src/deskfree.phone.test.jsx`; the
+  evaluation is in `plans/README.md`).
+  When starting a new wave, begin at **116** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
