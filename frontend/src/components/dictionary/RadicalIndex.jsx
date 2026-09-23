@@ -159,7 +159,7 @@ function dictionaryTile(r) {
 // own bottom edge"), and the difference between a number you read and
 // a thing you see on a page of thirty-seven of them.
 //
-// `current` is the desk's (plan 115): the radical whose page stands
+// `current` is the desk's (plan 117): the radical whose page stands
 // beside the index, marked the way an open stop is.
 export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick }) {
   const done = learned != null && count > 0 ? Math.min(1, learned / count) : null
@@ -224,7 +224,7 @@ const columns = (n, labelled) => Math.min(labelled ? 3 : 4, Math.max(1, Math.cei
  *   stroke / onStroke — the page, controlled by the caller when it
  *              carries the page in its URL (so leaving a lesson lands
  *              back on the page it was opened from); local otherwise.
- *   selected — the desk's (plan 115): the radical whose lesson stands
+ *   selected — the desk's (plan 117): the radical whose lesson stands
  *              beside the index. Its tile is marked, the index opens on
  *              the page it is on rather than on the first, and the tile
  *              is kept in view in the list's own scroll.

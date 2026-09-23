@@ -50,7 +50,7 @@ import { BlockMark } from '../dictionary/RadicalIndex'
  *   onBrowse  — open that view; the bar's aside is the way back
  *   back      — where an unknown number is sent (the index)
  *   onLoaded(radical) — the station reads the glyph for its sub
- *   familyOpen — the desk's (plan 115): the family stands beside the
+ *   familyOpen — the desk's (plan 117): the family stands beside the
  *               lesson rather than in its place (RadicalFamilyList, in
  *               the station's split), so the door is a toggle and says
  *               whether it is open. Undefined on the phone.
@@ -229,7 +229,7 @@ function FamilySheet({ lookup, session, onClose }) {
   )
 }
 
-// ── 机 — the family beside the lesson (plan 115) ─────────────────────
+// ── 机 — the family beside the lesson (plan 117) ─────────────────────
 // On the desk the family's door does not take the lesson's place: it
 // swaps the radicals index, in the station split's list, for this. The
 // radical is the lesson's own answer, handed up by its onLoaded, so the

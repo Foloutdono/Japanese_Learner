@@ -138,7 +138,7 @@ export default function KanjiScreen({ session }) {
   // ── The radicals: the index ──
   if (radicalsPage) {
     // On the desk the index stands beside every radical's page, so the
-    // bare index opens on its page's first radical (plan 115).
+    // bare index opens on its page's first radical (plan 117).
     if (desk) {
       return (
         <SelectionScreen title={t.kanjiTitle} sub={t.byRadicalShort} aside={leaveSources}>
@@ -186,7 +186,7 @@ export default function KanjiScreen({ session }) {
     // platforms.
     const swap = params => { setSp(params); window.scrollTo(0, 0) }
 
-    // ── 机 — a radical's page as two panes (plan 115) ──
+    // ── 机 — a radical's page as two panes (plan 117) ──
     // See the stations below: on the desk the radicals index stands
     // beside the lesson and its platforms, the open radical marked, each
     // platform figured from the family's own stats (the route the run

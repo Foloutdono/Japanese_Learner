@@ -4,8 +4,8 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a radical's page as two panes (plan 115) ──────────────────
-// Plan 114 left the kanji station's third source a phone's two screens:
+// ── 机 — a radical's page as two panes (plan 117) ──────────────────
+// Plan 115 left the kanji station's third source a phone's two screens:
 // the lesson with its platforms, and the family behind a door that took
 // the lesson's place. On the desk the radicals index stands beside the
 // lesson and its platforms, the open radical in gold, and another

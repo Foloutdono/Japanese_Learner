@@ -594,7 +594,7 @@ describe('the keys and the boards (plan 115, P8)', () => {
   })
 })
 
-// ── plan 115 — a radical's page a phone keeps ──
+// ── plan 117 — a radical's page a phone keeps ──
 // On the desk a radical's page stands the index beside the lesson and
 // its platforms, the open radical in gold and each platform figured,
 // the family's door swaps the index for the family, and the bare index
@@ -602,7 +602,7 @@ describe('the keys and the boards (plan 115, P8)', () => {
 // its platforms, and the family in the lesson's place behind the door,
 // the way back the bar's ‹ — no index fetched, no figure, nothing
 // marked, nothing redirected.
-describe('a radical\'s page (plan 115)', () => {
+describe('a radical\'s page (plan 117)', () => {
   const GROUPS = [{ stroke_count: 4, radicals: [
     { number: 61, char: '心', glyph: '心', stroke_count: 4, meaning: 'cœur', count: 40, learned: 2, started: 2 },
     { number: 85, char: '水', glyph: '水', stroke_count: 4, meaning: 'eau', count: 123, learned: 10, started: 10 },
