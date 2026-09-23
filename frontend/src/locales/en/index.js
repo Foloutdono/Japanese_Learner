@@ -271,6 +271,12 @@ const quiz = {
   // The desk's hint (plan 112): a key cap, then the words after it.
   keySpace:            'Space',
   revealByKey:         'to reveal',
+  // The run's panel, beside a card on the desk (plan 113).
+  deskRunLabel:        'This run',
+  deskEarned:          'Earned',
+  deskEntryWait:       'The dictionary entry opens here once the card is revealed.',
+  deskBreakdownLabel:  'Breakdown',
+  deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see

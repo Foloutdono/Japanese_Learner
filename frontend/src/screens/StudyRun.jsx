@@ -10,6 +10,7 @@ import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 // The card faces themselves live beside the other study components now,
@@ -277,6 +278,8 @@ export default function StudyRun({ session }) {
       ) : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel />}
+      sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

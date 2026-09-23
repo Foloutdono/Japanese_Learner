@@ -134,3 +134,30 @@ describe('the statistics (P4)', () => {
     expect(document.querySelector('[role="dialog"] .rep-lines--sheet')).not.toBeNull()
   })
 })
+
+describe('the runs (P5)', () => {
+  it('stands no side, docks nothing and keeps the 🔍', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { StudyStage } = await import('./components/study/StudyStage')
+    const { SessionPanel } = await import('./components/study/SessionPanel')
+    const { Flashcard } = await import('./components/study/QuizComponents')
+    const { peekEntry } = await import('./stores/deskEntry')
+    const { default: t } = await import('./locales/fr/index.js')
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} side={<SessionPanel />}>
+            <Flashcard t={t} resetKey="a" front={<span>山</span>} back={<span>mountain</span>} dictTerm="山" dictCategory="kanji" session={{ access_token: 't' }} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+    await settle()
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelectorAll('.reveal-action-btn')).toHaveLength(2)
+    expect(peekEntry()).toBeNull()
+  })
+})

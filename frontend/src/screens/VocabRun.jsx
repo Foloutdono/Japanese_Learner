@@ -16,6 +16,7 @@ import { FuriganaWord } from '../components/study/Readings'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
@@ -302,6 +303,8 @@ export default function VocabRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel />}
+      sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

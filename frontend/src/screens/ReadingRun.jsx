@@ -13,6 +13,8 @@ import Empty from '../components/ui/Empty'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { useDesk } from '../hooks/useDesk'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
@@ -469,6 +471,7 @@ function SessionView({
   onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, session,
 }) {
+  const desk = useDesk()
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -497,6 +500,21 @@ function SessionView({
       aside={<Streak streak={streak} t={t} />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
+      side={(
+        <BreakdownSide
+          graded={stage === 'feedback' && feedback?.correct != null}
+          analysis={analysis}
+          loading={analysisLoading}
+          translation={data?.translation}
+          sentenceText={data?.phrase}
+          onTokenClick={w => setLookup(vocabLookup(w))}
+          onGrammarOpen={g => setLookup(grammarLookup(g))}
+          onExplain={onExplain}
+          explaining={explaining}
+          explainError={explainError}
+        />
+      )}
+      sideLabel={t.deskBreakdownLabel}
     >
       {stage === 'loading' && <Loading />}
 
@@ -556,7 +574,7 @@ function SessionView({
               />
             )}
 
-            {feedback.correct !== null && (
+            {!desk && feedback.correct !== null && (
               <div className="prose__breakdown">
                 {/* Live only when there is something to show. Gating
                     on `!analysis && !analysisLoading` instead left the

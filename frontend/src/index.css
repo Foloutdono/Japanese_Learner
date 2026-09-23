@@ -21206,6 +21206,41 @@ a.slip__act { text-decoration: none; }
     margin-inline: auto;
   }
 
+  /* ── a run's side (plan 113) ──
+     A run that stands a column beside its card (StudyStage's `side`)
+     gives it the right edge: --desk-side-w, the whole height, its own
+     scroll. The stage and its level bar keep the rest, the card centred
+     in it. On a card run the column is the session panel — this run's
+     three records over the revealed card's dictionary entry, in the
+     dictionary's gold (components/study/SessionPanel.jsx). */
+  .desk-run { padding-inline-end: var(--desk-side-w); }
+  .desk-run__side {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: var(--desk-side-w);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-6) var(--sp-5);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-main);
+    border-inline-start: 1px solid var(--surface-line);
+  }
+  .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .desk-tally > .record { padding: var(--sp-4); }
+  .desk-entry {
+    --line-color: var(--line-jisho);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  .desk-run__note {
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+
   /* ── 札 — a sheet is a dialog on the desk ──
      On a phone a sheet rises from the bottom edge, under the thumb that
      opened it. A computer has no thumb and a bottom edge a long way from

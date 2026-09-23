@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
@@ -8,6 +8,8 @@ import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/D
 import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
+import { EntryDockContext } from './entryDock'
+import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -612,10 +614,23 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
 
 function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
+  // On the desk, inside a run with a side column (plan 113), the entry
+  // is docked beside the card the moment the card is revealed, and the
+  // 🔍 that would open the same entry in a sheet is not offered. The
+  // panel remounts per card (`resetKey`), so its cleanup takes the last
+  // card's entry down.
+  const docked = useContext(EntryDockContext)
 
   const speakText = sound ?? dictTerm
   const canLookUp = revealed && (dictTerm || dictId) && dictCategory && session
   const canPlaySound = revealed && (onReplaySound || speakText)
+
+  const dockNow = docked && Boolean(canLookUp)
+  useEffect(() => {
+    if (!dockNow) return
+    const token = publishEntry({ term: dictTerm, kana: dictKana, category: dictCategory, id: dictId, session })
+    return () => withdrawEntry(token)
+  }, [dockNow, dictTerm, dictKana, dictCategory, dictId, session])
 
   // Stable so DictionaryLookupSheet's useDialog doesn't re-run its
   // focus-on-open effect (and steal focus) on every render of this
@@ -654,7 +669,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
             <SpeakIcon />
           </button>
         )}
-        {canLookUp && (
+        {canLookUp && !docked && (
           <button
             type="button"
             onClick={openDictionary}

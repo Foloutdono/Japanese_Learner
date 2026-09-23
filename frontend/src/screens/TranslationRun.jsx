@@ -13,6 +13,8 @@ import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon, CheckIcon, CrossIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { useDesk } from '../hooks/useDesk'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
@@ -520,6 +522,7 @@ function SessionView({
   showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
+  const desk = useDesk()
   const startedRef = useRef(false)
   useEffect(() => {
     if (startedRef.current) return
@@ -549,6 +552,21 @@ function SessionView({
       aside={<Streak streak={streak} t={t} />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
+      side={(
+        <BreakdownSide
+          graded={stage === 'feedback' && feedback?.correct != null}
+          analysis={breakdown}
+          loading={breakdownLoading}
+          translation={data?.translation}
+          sentenceText={data?.phrase}
+          onTokenClick={w => setLookup(vocabLookup(w))}
+          onGrammarOpen={g => setLookup(grammarLookup(g))}
+          onExplain={onExplain}
+          explaining={explaining}
+          explainError={explainError}
+        />
+      )}
+      sideLabel={t.deskBreakdownLabel}
     >
       {stage === 'loading' && <Loading />}
 
@@ -640,7 +658,7 @@ function SessionView({
             {/* The reference, word by word, once the learner has
                 graded themselves -- the same gate and the same button
                 states as dictation's (DictationRun.jsx). */}
-            {feedback.correct !== null && (
+            {!desk && feedback.correct !== null && (
               <div className="prose__breakdown">
                 <button
                   type="button"

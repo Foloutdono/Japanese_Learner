@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -282,6 +283,8 @@ export default function TodayRun({ session }) {
       remaining={remaining}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel />}
+      sideLabel={t.deskRunLabel}
     >
       {/* The run's own hairline: what this session has cleared of what
           it set out to, in the day's gold. A mixed queue has no

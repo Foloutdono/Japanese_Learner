@@ -13,6 +13,7 @@ import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import ReviewDeck from '../components/study/ReviewDeck'
@@ -268,6 +269,8 @@ export default function KanaRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel />}
+      sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

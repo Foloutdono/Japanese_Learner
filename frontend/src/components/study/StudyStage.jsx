@@ -2,6 +2,8 @@ import { StageHead } from '../chrome/StageHead'
 import { LevelBar } from '../chrome/LevelBar'
 import { XpToast } from '../rewards/XpToast'
 import { openBalance } from '../../stores/credits'
+import { useDesk } from '../../hooks/useDesk'
+import { EntryDockContext } from './entryDock'
 
 // ── The run's frame (plan 070) ────────────────────────────────
 // The canvas's <main class="stage">: both bars have left, the head
@@ -17,21 +19,33 @@ import { openBalance } from '../../stores/credits'
 // (this plan re-skins the stage, not the session), and hand this
 // component the head's words and the toast. Kana/Vocab/Kanji/Grammar/
 // Study leave to their mode picker; Today leaves to the gate.
+//
+// `side` is the desk's column beside the card (plan 113): the session
+// panel on a card run (components/study/SessionPanel.jsx), the sentence
+// breakdown on a graded practice run. Drawn only on the desk, where the
+// stage makes room for it on the right (index.css, the 机 block); a
+// phone never renders it, and a run that passes none gets the phone's
+// single column centred on the desk as before. Inside a stage with a
+// side, a revealed card docks its dictionary entry there (entryDock).
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
-  toast, onToastDone, className = '', levelBar = true, children,
+  toast, onToastDone, className = '', levelBar = true, side, sideLabel, children,
 }) {
+  const desk = useDesk()
+  const split = desk && side !== undefined
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
   return (
-    <div className="screen">
+    <div className={split ? 'screen desk-run' : 'screen'}>
       {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} />}
       <main id="main-content" className={classes} style={color ? { '--line-color': color } : undefined}>
-        <StageHead
-          onLeave={onLeave} leaveLabel={leaveLabel}
-          where={where} sub={sub} remaining={remaining}
-          pass={pass} onPass={openBalance} aside={aside}
-        />
-        {children}
+        <EntryDockContext.Provider value={split}>
+          <StageHead
+            onLeave={onLeave} leaveLabel={leaveLabel}
+            where={where} sub={sub} remaining={remaining}
+            pass={pass} onPass={openBalance} aside={aside}
+          />
+          {children}
+        </EntryDockContext.Provider>
       </main>
       {/* The level bar, docked under whatever the stage docks (the
           rating bar, the field): the fare's home on a run, since the
@@ -39,6 +53,7 @@ export function StudyStage({
           `levelBar={false}` is for the one phase that is bounded to the
           screen and can pay nothing — the comprehension passage. */}
       {levelBar && <LevelBar />}
+      {split && <aside className="desk-run__side" aria-label={sideLabel}>{side}</aside>}
     </div>
   )
 }
