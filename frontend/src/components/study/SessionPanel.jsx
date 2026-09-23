@@ -4,7 +4,7 @@ import { useRunTally, tallyAccuracy, tallyMisses } from '../../stores/runTally'
 import { useDeskEntry } from '../../stores/deskEntry'
 import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 
-// ── 机 — the run's panel, beside the card (plan 113) ────────────────
+// ── 机 — the run's panel, beside the card (plan 114) ────────────────
 // What a desk's width buys a run: the column beside the card holds the
 // two things a learner on a phone either cannot see mid-run or has to
 // open a sheet for.
@@ -21,7 +21,7 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 // Rendered by a run as StudyStage's `side`, which draws it only on the
 // desk; a phone never mounts it and never fetches for it.
 //
-// `done` is the run's end (plan 114): no card is coming to reveal, so
+// `done` is the run's end (plan 115): no card is coming to reveal, so
 // the column stops promising one, and a section run lists the cards
 // whose last rating was below good (stores/runTally's tallyMisses) —
 // each one opens its entry here, the way it opened on reveal. Today

@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — the library's shelf beside a deck; Browse beside the cards ──
-// (plan 114). On a phone a published deck is a screen of its own, and
+// (plan 115). On a phone a published deck is a screen of its own, and
 // the shelf is gone while it is read; on the desk the shelf stays — its
 // search, its narrowing, its paging — and the open deck stands beside
 // it, drawn from its shelf row at once. A deck's Browse opens in the

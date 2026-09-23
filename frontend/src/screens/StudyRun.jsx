@@ -53,7 +53,7 @@ export default function StudyRun({ session }) {
 
   const valid = Boolean(deck_id) && Boolean(STUDY_MODES[mode]?.implemented) && STUDY_MODES[mode]?.graded !== false
   // The deck's platforms: its own screen on the phone, the deck's page on
-  // the desk, where they stand beside the cards (plan 114) — the page a
+  // the desk, where they stand beside the cards (plan 115) — the page a
   // desk run was boarded from, so leaving steps back to it.
   const desk = useDesk()
   const platforms = desk ? `/learn/decks/${deck_id}` : `/learn/decks/${deck_id}/study`

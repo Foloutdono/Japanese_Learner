@@ -37,7 +37,7 @@ import { ChevronIcon } from '../ui/Icons'
 // pass (DESIGN.md, Structure: one <h1>, the object that names the
 // place) passes 'span'.
 //
-// On the desk (plan 113) the aside's ‹ way out is not a phone's pill
+// On the desk (plan 114) the aside's ‹ way out is not a phone's pill
 // in the corner. The rail beside the screen already has a door to
 // every gate and to the lit gate's stations, so a Leave whose `to` is
 // one of those (onDeskRail) is dropped — it would be a second door to
@@ -75,7 +75,7 @@ export function Bar({ code, title, sub, aside, color, register = false, as: Titl
 // `to`, a path, which also tells the desk's Bar where it leads; one
 // that is a state (back to a list the screen holds itself) keeps
 // `onClick`.
-// ── 机 — the way up, as a crumb (plan 113; its own since plan 114) ──
+// ── 机 — the way up, as a crumb (plan 114; its own since plan 115) ──
 // A <Leave> drawn over the page it leaves, in the caption register: the
 // Bar draws one for its own way out, and a screen whose way out is not
 // in a Bar — the analyser's result head, the dictionary's radical
@@ -89,7 +89,7 @@ export function DeskCrumb({ leave }) {
   )
 }
 
-// `keys` is the desk's (plan 114): the key that also takes this way
+// `keys` is the desk's (plan 115): the key that also takes this way
 // out (aria-keyshortcuts), when there is one — a run's Esc.
 export function Leave({ onClick, to, children, className = '', keys }) {
   if (to !== undefined) return <LeaveTo to={to} className={className} keys={keys}>{children}</LeaveTo>

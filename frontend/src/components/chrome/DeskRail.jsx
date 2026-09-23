@@ -8,7 +8,7 @@ import { GateIcon } from './GateIcon'
 import { HudInstruments } from './Hud'
 import { dialogOpen } from '../../lib/dialogOpen'
 
-// ── 机 — the rail: the desk's chrome (plan 112) ────────────────────
+// ── 机 — the rail: the desk's chrome (plan 113) ────────────────────
 // At 1100px and up (hooks/useDesk.js) the Shell draws this instead of
 // the HUD and the tab bar: one sumi column down the left edge, which is
 // both of them at once. From the top:
@@ -37,7 +37,7 @@ import { dialogOpen } from '../../lib/dialogOpen'
 // either chrome. A run leaves this chrome exactly as it leaves the
 // phone's: the StageFrame draws neither.
 //
-// "/" is the dictionary's search from anywhere the rail is (plan 113):
+// "/" is the dictionary's search from anywhere the rail is (plan 114):
 // the dictionary screen already answers it on its own page, and the
 // rail carries it there from every other one, asking the field for
 // focus on arrival. Never while typing, never under a dialog, and never

@@ -110,7 +110,7 @@ export default function KanjiScreen({ session }) {
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.stationJlpt} aside={leaveSources}>
         {/* On the desk the line stands beside a stop's platforms, so
-            the list alone opens on the learner's own stop (plan 113). */}
+            the list alone opens on the learner's own stop (plan 114). */}
         {desk
           ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
           : <LevelSelector source="kanji" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
@@ -266,7 +266,7 @@ export default function KanjiScreen({ session }) {
   const modes = byLevel ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plan 113) ──
+  // ── 机 — the line beside its platforms (plan 114) ──
   // See VocabScreen: on the desk a level's platforms stand beside the
   // JLPT line, each with its own figures; the way out is the sources.
   if (desk && byLevel) {
@@ -283,7 +283,7 @@ export default function KanjiScreen({ session }) {
     )
   }
 
-  // ── 机 — the tiers beside a tier's platforms (plan 114) ──
+  // ── 机 — the tiers beside a tier's platforms (plan 115) ──
   // See VocabScreen: another size keeps the learner's place.
   if (desk && tier) {
     const open = Number(tier)

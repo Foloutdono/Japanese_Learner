@@ -23,7 +23,7 @@ import { useLang } from '../../LangContext'
 // mode outside the fare: the practice sessions and the exam runner
 // (docs/design/mobile/README.md).
 //
-// On the desk Esc takes the way out too (plan 114, DeskKeys), its cap
+// On the desk Esc takes the way out too (plan 115, DeskKeys), its cap
 // printed on it.
 export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside }) {
   const desk = useDesk()

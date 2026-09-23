@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the analyser and the dictionary at a desk (plan 114) ──────
+// ── 机 — the analyser and the dictionary at a desk (plan 115) ──────
 // On a phone a word pressed in a breakdown opens a sheet over the
 // stage. On the desk the result's second column is the dictionary: a
 // one-sentence Passage has it open from the start on the token the

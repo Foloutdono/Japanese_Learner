@@ -1,6 +1,6 @@
 import { useMediaQuery } from './useMediaQuery'
 
-// ── 机 — the desk, and the one line that says where it starts (plan 112) ──
+// ── 机 — the desk, and the one line that says where it starts (plan 113) ──
 // Tsuji has two chromes. Below this line it is the phone's: the HUD
 // across the top, the five gates across the bottom, the screen between
 // them (components/chrome/Shell.jsx) — and between 769 and 1099 that same

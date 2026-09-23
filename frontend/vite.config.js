@@ -258,7 +258,7 @@ export default defineConfig(({ mode }) => {
       // boarding's own short-screen step answers for (index.css,
       // "a short screen closes the rows before it scrolls").
       browserProject('touch', ['src/**/*.touch.test.{js,jsx}'], { width: 390, height: 667 }, { hasTouch: true }),
-      // The desk lanes (plan 112). At 1100px and up the app draws its
+      // The desk lanes (plan 113). At 1100px and up the app draws its
       // second chrome -- the rail down the left edge instead of the HUD
       // and the tab bar (hooks/useDesk.js) -- and no lane above ever
       // reaches it: the widest is the tablet's 768. Two widths, for the

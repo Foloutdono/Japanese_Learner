@@ -43,7 +43,7 @@ describe('the gate beside one', () => {
   })
 })
 
-// ── 机 — the rail's lists (plan 112) ─────────────────────────
+// ── 机 — the rail's lists (plan 113) ─────────────────────────
 // The desk chrome's navigation, read off the same registry the tab bar
 // reads, so a section added to one is on both.
 const t = new Proxy({}, { get: (_, key) => String(key) })

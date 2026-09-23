@@ -5,7 +5,7 @@ import { useProfileSummary } from '../../stores/profileSummary'
 import { journeyModel } from '../../domain/goalMath'
 import { JourneyBody } from './JourneyBody'
 
-// ── 机 — the pass's back, standing beside the fare gate (plan 113) ──
+// ── 机 — the pass's back, standing beside the fare gate (plan 114) ──
 // On a phone the question "am I on course?" is a tap away, on the HUD's
 // station panel (StatusSheet). On the desk there is room to answer it
 // where the day's work is chosen: beside the fare gate on Today, the

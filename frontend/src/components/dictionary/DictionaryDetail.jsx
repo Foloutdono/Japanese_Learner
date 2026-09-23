@@ -922,7 +922,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             )}
             {mine.picker}
             {/* No ✕ where there is nothing to close: the desk's dock
-                (plan 113) is the catalogue's standing companion, not a
+                (plan 114) is the catalogue's standing companion, not a
                 panel that was opened. */}
             {onClose && (
               <button
@@ -1259,7 +1259,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // on the exact row and never falls back to the page's first result:
 // an id that names nothing is "not available", not a different point.
 //
-// `exact` (plan 114) drops the page's-first-result fallback for a term
+// `exact` (plan 115) drops the page's-first-result fallback for a term
 // too: the desk's session panel docks a revealed card's entry unasked,
 // and a personal deck's card whose front is no dictionary word would
 // otherwise dock whatever word the search happened to rank first — an
@@ -1330,7 +1330,7 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id, ex
 // The stack of entries opened from one another, oldest first, and the
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
-// 113), so the two walk their doors the same way.
+// 114), so the two walk their doors the same way.
 function useLookupStack(session, { term, kana, category, id }, exact = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
@@ -1427,7 +1427,7 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
   )
 }
 
-// ── 机 — the same lookup, standing where it was asked (plan 113) ──
+// ── 机 — the same lookup, standing where it was asked (plan 114) ──
 // On the desk a door in the catalogue's dock opens INTO the dock rather
 // than over the screen: the catalogue, the search and the scroll stay
 // in view, and ✕ returns the dock to the entry the door was opened

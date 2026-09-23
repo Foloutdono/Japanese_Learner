@@ -5,7 +5,7 @@ import { apiFetch } from '../../lib/api'
 import { bucketRow, modeRow } from '../../domain/statsModel'
 import { Composition } from '../stats/LineRows'
 
-// ── 机 — a platform's own figures (plan 113) ────────────────────────
+// ── 机 — a platform's own figures (plan 114) ────────────────────────
 // A platform card wider than ~440px must earn its width with a
 // right-hand column (DESIGN.md, the density contract), and in the
 // desk's station split every card is. What earns it is the platform's
@@ -22,7 +22,7 @@ export function ModeFigures({ source, deck, mode }) {
   return <Figures row={modeRow(useStats().data, source, deck, mode)} />
 }
 
-// The same figures for a stop /api/stats does not carry (plan 114): a
+// The same figures for a stop /api/stats does not carry (plan 115): a
 // theme band, a frequency tier. Each platform asks its own scoped
 // stats route — the one its run already reads for its head — so the
 // figure beside the card is the figure the run will open on.

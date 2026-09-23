@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the dictionary's dock on the desk (plan 113) ────────────
+// ── 机 — the dictionary's dock on the desk (plan 114) ────────────
 // On a phone the entry is a sheet that is opened and closed. On the desk
 // the dock is the catalogue's standing companion: open from the first
 // frame on the page's first row, following every collection and search,

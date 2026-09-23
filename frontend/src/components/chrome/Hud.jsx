@@ -151,7 +151,7 @@ function HudLevel() {
 }
 
 // The three instruments, in the order the HUD prints them. Shared with
-// the desk's rail (plan 112), which sets the same three at its foot.
+// the desk's rail (plan 113), which sets the same three at its foot.
 export function HudInstruments() {
   return (
     <>

@@ -5668,7 +5668,11 @@ Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
 
 ---
 
-# Wave 24 — 机, the desk (plan 112, 2026-09-22)
+# Wave 24 — 机, the desk (plan 113, 2026-09-22)
+
+Numbered 113–115: plan 112 went to the deck fold ("one word, one card",
+`content/kanji_renames.py`) on main while these three waves were open,
+and a plan number is never reused.
 
 The owner's ask: the app is mobile-first and stays so, but it needs a
 design for a computer — two systems, one for mobile and one for computer,
@@ -5679,7 +5683,7 @@ the main screens.
 
 | Plan | What | Status |
 |---|---|---|
-| 112 | The desk: `hooks/useDesk.js`; the rail (`components/chrome/DeskRail.jsx`) in the Shell's slots; the plates two by two; Today and the profile in two columns; Settings' list beside its page; sheets as centred dialogs; the keys printed on a run; the 机 section at the tail of `index.css` and `src/desk.css.test.js`; the `desktop` (1100×800) and `wide` (1440×900) lanes; ADR 0018; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-22) |
+| 113 | The desk: `hooks/useDesk.js`; the rail (`components/chrome/DeskRail.jsx`) in the Shell's slots; the plates two by two; Today and the profile in two columns; Settings' list beside its page; sheets as centred dialogs; the keys printed on a run; the 机 section at the tail of `index.css` and `src/desk.css.test.js`; the `desktop` (1100×800) and `wide` (1440×900) lanes; ADR 0018; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-22) |
 
 Verified beyond the suite: a branch-against-base pass on two dev servers
 with the same mocked API compared every rendered element, attribute, text
@@ -5695,7 +5699,7 @@ it.
 
 ---
 
-# Wave 25 — 机, the desk's second round (plan 113, 2026-09-22)
+# Wave 25 — 机, the desk's second round (plan 114, 2026-09-22)
 
 The owner's verdict on wave 24: a good beginning — now fill the space
 with purpose and rethink the layout for a computer, so that nobody on one
@@ -5704,7 +5708,7 @@ constraint stands: below 1100px nothing changes.
 
 | Plan | What | Status |
 |---|---|---|
-| 113 | The screens laid out for the width, in seven phases, one commit each: **P1** the canvas at `--desk-board-w` (1240px), the platform lattices with no orphan, a boarding route drawn across, a run's head and field on the card's column; **P2** Today's journey beside the gate (`JourneyPanel`, `JourneyBody`), the dictionary's dock open from the first frame with its doors opening inside it (`DictionaryLookupBody`), ←/→ through the catalogue, a Learn plate's foot as the whole line; **P3** a station as two panes (`StationSplit`) with each platform's figures (`ModeFigures`, `modeRow`), the exam's grade in its URL; **P4** the statistics as one page — the line drawn 1:1 (`useBoxWidth`), the lines' levels in place, all twelve trouble cards; **P5** a run's side: the session panel (`SessionPanel`, `stores/runTally`) and the revealed card's entry docked (`stores/deskEntry`, `entryDock`), a graded sentence's breakdown with no toggle (`BreakdownSide`); **P6** the way up (`Leave to`, `onDeskRail`, `.desk-crumb`) and `/` from anywhere; **P7** a deck beside its platforms (`DeckPlatforms`, `useDeckModes`), a new deck as a dialog. DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+| 114 | The screens laid out for the width, in seven phases, one commit each: **P1** the canvas at `--desk-board-w` (1240px), the platform lattices with no orphan, a boarding route drawn across, a run's head and field on the card's column; **P2** Today's journey beside the gate (`JourneyPanel`, `JourneyBody`), the dictionary's dock open from the first frame with its doors opening inside it (`DictionaryLookupBody`), ←/→ through the catalogue, a Learn plate's foot as the whole line; **P3** a station as two panes (`StationSplit`) with each platform's figures (`ModeFigures`, `modeRow`), the exam's grade in its URL; **P4** the statistics as one page — the line drawn 1:1 (`useBoxWidth`), the lines' levels in place, all twelve trouble cards; **P5** a run's side: the session panel (`SessionPanel`, `stores/runTally`) and the revealed card's entry docked (`stores/deskEntry`, `entryDock`), a graded sentence's breakdown with no toggle (`BreakdownSide`); **P6** the way up (`Leave to`, `onDeskRail`, `.desk-crumb`) and `/` from anywhere; **P7** a deck beside its platforms (`DeckPlatforms`, `useDeckModes`), a new deck as a dialog. DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
 
 What changed for a learner on a computer, counted from the rail:
 
@@ -5743,7 +5747,7 @@ answer sheet in the exam runner; the exam result and the library laid
 out for the width; a word looked up from a docked breakdown still opens
 the lookup as a dialog.
 
-# Wave 26 — 机, the desk's third round (plan 114, 2026-09-23)
+# Wave 26 — 机, the desk's third round (plan 115, 2026-09-23)
 
 The owner's verdict on wave 25: nicely done, continue to improve it. A
 read-only audit (seven areas, an auditor and a skeptic each, then a
@@ -5754,7 +5758,7 @@ phone too, which the owner approved fixing in the same wave.
 
 | Plan | What | Status |
 |---|---|---|
-| 114 | **P0** five phone bugs, a commit and a phone test each: a cloze blank never lit (`blankNumber`), Back from a result re-sitting the paper (replace on finish), run keys under a dialog (`lib/dialogOpen`), leaving a run pushing history (`stores/boarding`'s `returnsTo`, `hooks/useRunExit`), out-of-order dictionary pages; **P1** the run's side in its pigment (`RunSide`), a breakdown's doors opening in the side (`SideLookup`), exact docked lookups, the column's card width for the exam's rows, one Sign out; **P2** comprehension beside its text, A–D/Enter, a miss opening its sentence; **P3** the stations' second screens folded — grammar points beside the lesson, theme bands and tiers beside their platforms (`ScopeFigures`), the deck's platform screen giving way; **P4** the mock exam's standing answer sheet, a flat reading passage (`ExamCard`, `PassageText`), Space for listening, the review as list and page; **P5** the library's shelf beside a deck (`PublicDeckPane`), Browse docked (`BrowseCardsDock`), one /modes fetch, one "No cards"; **P6** the analyser's dock (`AnalyzerDock`, `tokenLookup`), `DeskCrumb`, the intake beside history, Ctrl/⌘+Enter, the dictionary's handoff to the analyser, kana charts that wrap; **P7** a run that fits a laptop (top-aligned, card and choices side by side, rows that keep their place), the misses at a run's end (`tallyMisses`); **P8** Enter and Esc (`DeskKeys`), C for choices, Enter at a run's end, a Learn plate's legs as doors, ↑/↓ along a station (`useListWalk`), the rail's focus ring, the profile's pass at phone size and both rankings, the guide's note beside its anchor with `…Desk` copy; **P9** the records, the identity pass and the screenshots | DONE (2026-09-23) |
+| 115 | **P0** five phone bugs, a commit and a phone test each: a cloze blank never lit (`blankNumber`), Back from a result re-sitting the paper (replace on finish), run keys under a dialog (`lib/dialogOpen`), leaving a run pushing history (`stores/boarding`'s `returnsTo`, `hooks/useRunExit`), out-of-order dictionary pages; **P1** the run's side in its pigment (`RunSide`), a breakdown's doors opening in the side (`SideLookup`), exact docked lookups, the column's card width for the exam's rows, one Sign out; **P2** comprehension beside its text, A–D/Enter, a miss opening its sentence; **P3** the stations' second screens folded — grammar points beside the lesson, theme bands and tiers beside their platforms (`ScopeFigures`), the deck's platform screen giving way; **P4** the mock exam's standing answer sheet, a flat reading passage (`ExamCard`, `PassageText`), Space for listening, the review as list and page; **P5** the library's shelf beside a deck (`PublicDeckPane`), Browse docked (`BrowseCardsDock`), one /modes fetch, one "No cards"; **P6** the analyser's dock (`AnalyzerDock`, `tokenLookup`), `DeskCrumb`, the intake beside history, Ctrl/⌘+Enter, the dictionary's handoff to the analyser, kana charts that wrap; **P7** a run that fits a laptop (top-aligned, card and choices side by side, rows that keep their place), the misses at a run's end (`tallyMisses`); **P8** Enter and Esc (`DeskKeys`), C for choices, Enter at a run's end, a Learn plate's legs as doors, ↑/↓ along a station (`useListWalk`), the rail's focus ring, the profile's pass at phone size and both rankings, the guide's note beside its anchor with `…Desk` copy; **P9** the records, the identity pass and the screenshots | DONE (2026-09-23) |
 
 What changed for a learner on a computer:
 
@@ -5778,23 +5782,24 @@ What changed for a learner on a computer:
 Deferred: the radical lesson page as a split; browse-mode runs with a side;
 a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
 for middle-click; Today's lanes two across; flag ink unification (a phone
-design change, the owner's to decide). Cut: see plan 114's own list.
+design change, the owner's to decide). Cut: see plan 115's own list.
 
 ---
 
-# 机 — a radical's page as two panes (plan 115, 2026-09-23)
+# 机 — a radical's page as two panes (plan 117, 2026-09-23)
 
-What wave 26 deferred first: the kanji station's third source was still a
-phone's two screens on the desk — the lesson with its platforms, and the
-family (`?family=1`) in the lesson's place behind a door, the way back a
-`‹` in the bar — and the bare index its own page. The one constraint
-stands: below 1100px nothing changes.
+What wave 26 (plan 115) deferred first: the kanji station's third
+source was still a phone's two screens on the desk — the lesson with its
+platforms, and the family (`?family=1`) in the lesson's place behind a
+door, the way back a `‹` in the bar — and the bare index its own page.
+The one constraint stands: below 1100px nothing changes. Numbered 117:
+116 is spent on the desk's branch (the browse's side), not yet on main.
 
 | Plan | What | Status |
 |---|---|---|
-| 115 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
+| 117 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
 
-| Flow | Wave 26 | Plan 115 |
+| Flow | Wave 26 | Plan 117 |
 |---|---|---|
 | Another radical from a radical's page | ‹ to the index, then a tile (2 clicks) | a tile beside it (1), the URL replaced |
 | A radical's family | the door, the lesson gone; ‹ to come back | the door; the family beside the lesson and its platforms |

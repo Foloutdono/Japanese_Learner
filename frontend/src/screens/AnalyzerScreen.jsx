@@ -99,7 +99,7 @@ export default function AnalyzerScreen({ session }) {
   // The draft text, shared by the 文字 and 写真 platforms on purpose --
   // they were one field on one screen before the merge, and OCR output
   // the learner wants to edit by hand should survive a switch to 文字.
-  // A sentence handed over by the dictionary (plan 114: a search that
+  // A sentence handed over by the dictionary (plan 115: a search that
   // found no entry, on the desk, offers to analyse what was typed) is
   // the draft the screen opens on, analysed once on arrival below.
   const location = useLocation()
@@ -165,7 +165,7 @@ export default function AnalyzerScreen({ session }) {
   // Not hidden in CSS: a control the learner cannot see should not be
   // in the document, and PassageLine's scroll effect should not run
   // for a rail nobody can read. The split is the desk's (hooks/useDesk,
-  // plan 112): the width index.css draws the two-column layout at, and
+  // plan 113): the width index.css draws the two-column layout at, and
   // the width the app's second chrome starts at — one line, not three.
   const wide = useDesk()
   // The stage's token view: one at a time (the carousel) or every
@@ -189,7 +189,7 @@ export default function AnalyzerScreen({ session }) {
   // this avoids.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
-  // 机 (plan 114): on the desk the lookup opens in the result's second
+  // 机 (plan 115): on the desk the lookup opens in the result's second
   // column (AnalyzerDock), not a sheet. `docked` is whether that column
   // is the dock rather than the route map — always, for a one-sentence
   // Passage. Reset where the lookup is, in the handlers that start over.
@@ -709,7 +709,7 @@ export default function AnalyzerScreen({ session }) {
 
   // The intake — the three platforms and the one standing on — and the
   // history of Passages: one after the other on a phone, side by side
-  // on the desk (plan 114).
+  // on the desk (plan 115).
   const intake = (
     <>
       {/* ── The three platforms, on one control (canvas Analyzer) ──
@@ -864,7 +864,7 @@ export default function AnalyzerScreen({ session }) {
       )}
 
       {!showResult && (wide ? (
-        /* 机 (plan 114): the intake beside its history — a recent
+        /* 机 (plan 115): the intake beside its history — a recent
            Passage is one click from the field it would be typed in
            again, in the column every desk screen keeps its companion. */
         <div className="desk-intake">
@@ -1135,7 +1135,7 @@ export default function AnalyzerScreen({ session }) {
                 {/* The keyboard map — the stage IS a keyboard instrument
                     on a desktop, and nothing else on the screen says
                     so. Hidden on a phone (index.css). The desk prints
-                    each key on what it moves instead (plan 114): ↑/↓
+                    each key on what it moves instead (plan 115): ↑/↓
                     on the stepper, ←/→ over the dock, Space on the
                     player. */}
                 {wide ? null : (
@@ -1232,7 +1232,7 @@ export default function AnalyzerScreen({ session }) {
             </div>
           )}
 
-          {/* 机 — the dock, in the route map's column (plan 114). */}
+          {/* 机 — the dock, in the route map's column (plan 115). */}
           {wide && (docked || sentences.length === 1) && (
             <AnalyzerDock
               entry={lookup ?? tokenLookup(stageToken)}

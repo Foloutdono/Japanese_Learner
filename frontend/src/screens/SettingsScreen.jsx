@@ -50,7 +50,7 @@ export default function SettingsScreen({ session }) {
   const desk = useDesk()
   if (page && !PAGES[page]) return <Navigate to="/profile/settings" replace />
 
-  // ── 机 — the list and the page side by side (plan 112) ──
+  // ── 机 — the list and the page side by side (plan 113) ──
   // A computer has the room to show where you are in the list while you
   // change what it leads to, so on the desk the two share the screen:
   // the list on the left under the screen's one heading, the open page
@@ -167,7 +167,7 @@ function SettingsListBody({ session, current = null }) {
       </div>
 
       {/* The account page, open beside the list on the desk, carries
-          its own Sign out; one is enough on the screen (plan 114).
+          its own Sign out; one is enough on the screen (plan 115).
           `current` is the desk's alone, so the phone's list keeps it. */}
       {current === 'account' ? null : (
         <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>

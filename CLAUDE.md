@@ -178,23 +178,22 @@ runtime purpose. Two consequences worth knowing:
   `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
   `routes/dictionary.py`, `routes/onboarding.py` and
   `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
-  **112** was spent twice, by two waves built in parallel on separate
-  branches: the entry above, and the desk (机) — the computer's design,
-  a second chrome at 1100px and up that never reaches the phone: the rail
-  down the left edge in place of the HUD and the tab bar, the plates two
-  by two, Today and the profile in two columns, Settings' list beside its
-  page, sheets as centred dialogs, and the keys printed on a run; every
-  desk rule in the last section of `index.css`, held there by
-  `src/desk.css.test.js` (cited in `hooks/useDesk.js`,
-  `components/chrome/DeskRail.jsx`, `components/chrome/Shell.jsx`,
-  `components/chrome/Hud.jsx`,
+  **113** is the desk (机) — numbered 113–115 because 112 went to the deck
+  fold above while the desk was open — the computer's design, a second
+  chrome at 1100px and up that never reaches the phone: the rail down the left
+  edge in place of the HUD and the tab bar, the plates two by two, Today
+  and the profile in two columns, Settings' list beside its page, sheets
+  as centred dialogs, and the keys printed on a run; every desk rule in
+  the last section of `index.css`, held there by `src/desk.css.test.js`
+  (cited in `hooks/useDesk.js`, `components/chrome/DeskRail.jsx`,
+  `components/chrome/Shell.jsx`, `components/chrome/Hud.jsx`,
   `config/tabs.js`, `components/guide/Guide.jsx`,
   `screens/ProfileScreen.jsx`, `screens/SettingsScreen.jsx`,
   `components/settings/pane.js`, `components/settings/SettingsPage.jsx`,
   `components/study/RatingBar.jsx`, `components/study/QuizComponents.jsx`,
   `vite.config.js` and `index.css`; ADR 0018; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  **113** is the desk's second round, the screens laid out for the width —
+  **114** is the desk's second round, the screens laid out for the width —
   the canvas at `--desk-board-w` and a second column at `--desk-side-w`
   (`components/chrome/DeskSide.jsx`); Today's journey beside the gate
   (`components/journey/JourneyPanel.jsx`, `JourneyBody.jsx`); the
@@ -212,7 +211,7 @@ runtime purpose. Two consequences worth knowing:
   `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
   and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
   "The desk"; `docs/design/desk/README.md`).
-  **114** is the desk's third round (wave 26), the remaining second screens
+  **115** is the desk's third round (wave 26), the remaining second screens
   and sheets taken into the page: five phone bugs the audit found, each with
   its phone test (`exam/examService.js`'s `blankNumber`, `screens/ExamRunner.jsx`'s
   replace on finish, `lib/dialogOpen.js`, `stores/boarding.js`'s `returnsTo`
@@ -238,7 +237,9 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  **115** is a radical's page on the desk as two panes, which plan 114
+  **116** is spent on the desk's branch (`claude/intelligent-goodall-irh5vz`,
+  the browse's side on the desk) and not yet merged here.
+  **117** is a radical's page on the desk as two panes, which plan 115
   deferred: the radicals index beside the lesson and its platforms, the
   open radical in gold and each platform figured from the family's own
   stats; another radical swaps the page by replacing the URL, the family's
@@ -251,7 +252,7 @@ runtime purpose. Two consequences worth knowing:
   `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **116** or higher, and check
+  When starting a new wave, begin at **118** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -581,7 +582,7 @@ Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefi
 ### Frontend layout (`frontend/src/`)
 - `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar below 1100px; the desk's rail at 1100px and up) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
 - `screens/` — one file per route/page (largely 1:1 with `App.jsx` routes).
-- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the chrome (plan 068; the desk, plan 112): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `DeskRail` (the computer's chrome, drawn instead of both at 1100px and up), the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
+- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the chrome (plan 068; the desk, plan 113): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `DeskRail` (the computer's chrome, drawn instead of both at 1100px and up), the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
 - `domain/` — pure client-side domain logic: card shape helpers, kana sets, level titles, reward tiers, stats modeling, study-mode definitions, XP curve. Mirrors backend concepts but has no network calls.
 - `stores/` — small client-side state modules (boarding/departure transition state, profile summary, rating scale) — not Redux, just modules with subscribable state.
 - `exam/` — mock-exam UI: question rendering, exam kind definitions, `examService.js` for the exam API calls. Pairs with `screens/Exam*.jsx`.

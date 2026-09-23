@@ -1,4 +1,4 @@
-// ── 机 — a list walked with the arrow keys (plan 114) ───────────────
+// ── 机 — a list walked with the arrow keys (plan 115) ───────────────
 // A station's stops in the desk's split (components/selection/RouteStops,
 // StationSplit) are one tab stop — the open stop — and ↑/↓ move along
 // them, Home and End to either end, the way a desktop list is read.

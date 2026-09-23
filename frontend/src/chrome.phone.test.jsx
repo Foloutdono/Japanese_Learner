@@ -138,7 +138,7 @@ describe('the shell', () => {
     note.remove()
   })
 
-  // ── 机 — the desk never reaches a phone (plan 112) ──
+  // ── 机 — the desk never reaches a phone (plan 113) ──
   // The app has a second chrome at 1100px and up (the rail,
   // components/chrome/DeskRail.jsx). Below that line the Shell renders
   // exactly what it rendered before the desk existed: no rail kept

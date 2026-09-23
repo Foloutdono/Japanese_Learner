@@ -6,7 +6,7 @@ import ModeSelector from '../selection/ModeSelector'
 import { Loading } from '../ui/Loading'
 import Empty from '../ui/Empty'
 
-// ── 机 — a deck's platforms, beside its cards (plan 113) ────────────
+// ── 机 — a deck's platforms, beside its cards (plan 114) ────────────
 // On a phone a deck's page ends in ▶ Study, which opens a second screen
 // of platforms (screens/StudyScreen.jsx). On the desk the platforms
 // stand in the page's second column from the start, and a platform
@@ -26,7 +26,7 @@ export function DeckPlatforms({ deckId, deck, session, cardCount }) {
     <section className="desk-deck__study" aria-labelledby="desk-deck-study">
       <h2 id="desk-deck-study" className="desk-deck__cap">{t.study}</h2>
       {!modes && <Loading />}
-      {/* An empty deck says so once, in the page beside this (plan 114). */}
+      {/* An empty deck says so once, in the page beside this (plan 115). */}
       {modes && modes.length === 0 && cardCount > 0 && <Empty message={t.noCards} />}
       {modes && modes.length > 0 && (
         <ModeSelector

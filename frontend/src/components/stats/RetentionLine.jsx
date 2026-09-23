@@ -23,7 +23,7 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // selected week wears a ring in the same ink.
 //
 // On the phone the drawing is 326 units wide and scales to its card.
-// With `fit` (the desk, plan 113) the viewBox is the box's own width in
+// With `fit` (the desk, plan 114) the viewBox is the box's own width in
 // pixels and a taller H, so the strokes and stops are drawn 1:1 however
 // wide the card is — never a phone's chart magnified.
 const PHONE_W = 326

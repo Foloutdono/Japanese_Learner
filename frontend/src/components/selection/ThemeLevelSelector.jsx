@@ -33,7 +33,7 @@ import Empty from '../ui/Empty'
  * Props:
  *   session, theme, onSelect(levelKey)
  *   selected — the band whose platforms stand beside the route, in the
- *              desk's station split (plan 114); passed to RouteStops.
+ *              desk's station split (plan 115); passed to RouteStops.
  */
 export default function ThemeLevelSelector({ session, theme, onSelect, selected = null }) {
   const { t } = useLang()

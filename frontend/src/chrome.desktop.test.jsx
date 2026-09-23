@@ -6,7 +6,7 @@ import { DESK_QUERY } from './hooks/useDesk'
 import { DESK_TAB_IDS } from './config/tabs'
 import './index.css'
 
-// ── 机 — the desk's chrome at its tightest (plan 112) ───────────
+// ── 机 — the desk's chrome at its tightest (plan 113) ───────────
 // The `desktop` lane: 1100×800 from the first paint, the first width
 // the desk answers and the narrowest one it has to fit — 1100 less the
 // rail is where two plates still sit side by side and a French label is

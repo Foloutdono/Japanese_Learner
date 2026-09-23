@@ -17,7 +17,7 @@ export function tierLabelFor(tier, size) {
   return `${start}–${tier * size}`
 }
 
-// ── The same place at another size (plan 114) ────────────────
+// ── The same place at another size (plan 115) ────────────────
 // On the desk the tiers stand beside the open tier's platforms, so the
 // size toggle is pressed with a tier already open. It keeps the learner
 // where they were: the tier at the new size that holds the first rank

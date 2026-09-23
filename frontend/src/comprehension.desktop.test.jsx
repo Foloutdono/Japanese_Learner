@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — reading comprehension as a workspace (plan 114) ───────────
+// ── 机 — reading comprehension as a workspace (plan 115) ───────────
 // On a phone the text and its questions take turns: checking a detail
 // is Re-read, then Back to the questions. On the desk the text stands
 // beside the questions, whole, the way a paper prints them on one page;

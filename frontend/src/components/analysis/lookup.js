@@ -60,7 +60,7 @@ export function lookupKey(lookup) {
   return [lookup.category, lookup.id ?? '', lookup.term ?? '', lookup.kana ?? ''].join(':')
 }
 
-// ── 机 — the entry the analyser's dock follows (plan 114) ──
+// ── 机 — the entry the analyser's dock follows (plan 115) ──
 // On the desk the analyser's second column is the dictionary, open on
 // the token the stage is showing: ←/→ walk the sentence and the entry
 // walks with it. A word opens as it would from a tap; a token that is

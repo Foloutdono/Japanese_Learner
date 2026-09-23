@@ -20,7 +20,7 @@ describe('the run tally', () => {
   })
 })
 
-describe('the run\'s misses (plan 114)', () => {
+describe('the run\'s misses (plan 115)', () => {
   it('keeps each card by its entry, with the rating it got last', () => {
     startTally('kanji:N5:f2b')
     const eki = { term: '駅', kana: 'えき', category: 'vocab', session: {} }

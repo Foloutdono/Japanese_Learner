@@ -73,7 +73,7 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
   )
 }
 
-// ── 机 — Browse, docked beside the deck's cards (plan 114) ──────────
+// ── 机 — Browse, docked beside the deck's cards (plan 115) ──────────
 // On the desk the deck's page has a second column already (its
 // platforms, or the card form), so Browse opens there rather than over
 // the page: the cards it adds land in the list beside it as they go in,

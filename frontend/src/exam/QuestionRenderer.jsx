@@ -18,7 +18,7 @@ import { ImageIcon, StarIcon } from '../components/ui/Icons'
 //   devMode    — if true, show a "reveal script" toggle for listening
 //                questions (never shown to real learners — see AUDIO
 //                NOTE below)
-//   keys       — the desk's (plan 114): the rows name their digit keys
+//   keys       — the desk's (plan 115): the rows name their digit keys
 //                (aria-keyshortcuts) and a listening clip answers Space,
 //                its cap printed on the player. Never passed on a phone.
 //   passageAside — the desk's too: a reading passage stands flat beside

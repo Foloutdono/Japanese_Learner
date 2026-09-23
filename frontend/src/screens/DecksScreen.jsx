@@ -118,7 +118,7 @@ export default function DecksScreen({ session }) {
   const countLabel = shown.length === 1 ? t.decksCountOne : t.decksCount.replace('{n}', shown.length)
 
   // A phone opens the form in the page, under the doors; the desk opens
-  // it as a dialog over the shelf (plan 113), so the shelf does not
+  // it as a dialog over the shelf (plan 114), so the shelf does not
   // move to make room for a form and back.
   const createForm = (
     <div className="form">
