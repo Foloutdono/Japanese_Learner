@@ -719,4 +719,22 @@ describe('the doors (plan 117)', () => {
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
     apiJson.mockReset()
   })
+
+  it('keeps a kanji\'s readings a sheet over the entry', async () => {
+    const { DictionaryDetail } = await import('./components/dictionary/DictionaryDetail')
+    const kanji = {
+      type: 'kanji', kanji: '駅', kana: 'エキ・えき', meaning: 'station', level: 'N5', status: { status: 'learning' },
+      readings: [{ reading: 'エキ', words: [{ kanji: '駅員', kana: 'えきいん', meaning: 'station staff' }] }],
+      vocab_examples: [{ kanji: '駅員', kana: 'えきいん', meaning: 'station staff' }],
+    }
+    await render(<LangProvider><aside className="dict-dock"><DictionaryDetail entry={kanji} /></aside></LangProvider>)
+    await settle()
+    const door = document.querySelector('.dict-plate__more')
+    expect(door.getAttribute('aria-haspopup')).toBe('dialog')
+    door.click()
+    await settle()
+    expect(document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"] .dict-readings')).not.toBeNull()
+    expect(document.querySelector('.dict-dock .dict-plate__word').textContent).toBe('駅')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
 })

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
@@ -15,6 +15,7 @@ import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { useDesk } from '../../hooks/useDesk'
 import { speakJapanese } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
@@ -439,6 +440,58 @@ function ReadingBand({ reading, words, kind, char, onWord }) {
 function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const { t } = useLang()
   const dialogRef = useDialog(onClose, { capture: true })
+  return createPortal(
+    <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet dict-sheet--readings"
+           role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
+        <ReadingsList entry={entry} groups={groups} onClose={onClose} onVocabClick={onVocabClick} />
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+// ── 机 — every reading, in the entry's own place (plan 117) ──────────
+// On the desk an entry mostly stands in a column — the dictionary's
+// dock, a run's side, the analyser's dock — and every door in it opens
+// inside that column (DESIGN.md, "A door opens in the column, never over
+// it"). The readings were the one door still setting a scrim over the
+// lot. Here the list takes the entry's place in whatever holds it, a
+// column or a lookup dialog, and ✕ or Esc steps back to the entry. Esc
+// is taken in the capture phase and spent, so the dock, the lookup or
+// the run holding the entry does not hear it too — unless a dialog that
+// does not hold this list stands over it, whose key it then is.
+function ReadingsInPlace({ entry, groups, onClose, onVocabClick }) {
+  const { t } = useLang()
+  const ref = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useLayoutEffect(() => { onCloseRef.current = onClose })
+  useEffect(() => {
+    const node = ref.current
+    node?.querySelector('.dict-plate__btn')?.focus({ preventScroll: true })
+    node?.scrollIntoView?.({ block: 'nearest' })
+    const onKey = e => {
+      if (e.key !== 'Escape') return
+      const over = [...document.querySelectorAll('[aria-modal="true"]')].some(d => !d.contains(node))
+      if (over) return
+      e.preventDefault()
+      e.stopPropagation()
+      onCloseRef.current()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [])
+  return (
+    <div ref={ref} className="desk-readings" role="region" aria-label={`${t.allReadings}: ${entry.kanji}`}>
+      <ReadingsList entry={entry} groups={groups} onClose={onClose} onVocabClick={onVocabClick} />
+    </div>
+  )
+}
+
+// The list itself — the plate's head, the gates, the bands and the
+// pills — shared by the sheet and the list in place.
+function ReadingsList({ entry, groups, onClose, onVocabClick }) {
+  const { t } = useLang()
   const jump = onVocabClick
     ? (kanji, kana) => { onClose(); onVocabClick(kanji, kana) }
     : undefined
@@ -455,69 +508,63 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const kind = open === on ? '音' : '訓'
   const withWords = open.filter(g => g.words?.length > 0)
   const rest = open.filter(g => !g.words?.length)
-  return createPortal(
-    <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
-      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet dict-sheet--readings"
-           role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
-        <article className="dict-entry">
-          <header className="dict-plate">
-            <div className="dict-plate__row">
-              <div className="dict-plate__marks">
-                <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
-                <span className="dict-readings__title">{t.allReadings}</span>
-              </div>
-              <div className="dict-plate__actions">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="dict-plate__btn"
-                  title={t.close}
-                  aria-label={t.close}
-                >
-                  <CloseIcon />
-                </button>
-              </div>
-            </div>
-            <div className="dict-plate__stripe" aria-hidden="true" />
-          </header>
-          {on.length > 0 && kun.length > 0 && (
-            <div className="dict-gates">
-              <ReadingGate
-                name={t.readingsOnName} n={on.length}
-                open={open === on} onPick={() => setGate('on')}
-              />
-              <ReadingGate
-                name={t.readingsKunName} n={kun.length}
-                open={open === kun} onPick={() => setGate('kun')}
-              />
-            </div>
-          )}
-          <div className="dict-entry__body dict-readings"
-               aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
-            {withWords.map(({ reading, words }) => (
-              <ReadingBand
-                key={reading} reading={reading} words={words}
-                kind={kind} char={entry.kanji} onWord={jump}
-              />
-            ))}
-            {rest.length > 0 && (
-              <section className="dict-rest" aria-label={t.readingsNoWords}>
-                <div className="dict-rest__cap">{t.readingsNoWords}</div>
-                <ul className="dict-rest__chips">
-                  {rest.map(({ reading }) => (
-                    <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
-              {t.close}
+  return (
+    <article className="dict-entry">
+      <header className="dict-plate">
+        <div className="dict-plate__row">
+          <div className="dict-plate__marks">
+            <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
+            <span className="dict-readings__title">{t.allReadings}</span>
+          </div>
+          <div className="dict-plate__actions">
+            <button
+              type="button"
+              onClick={onClose}
+              className="dict-plate__btn"
+              title={t.close}
+              aria-label={t.close}
+            >
+              <CloseIcon />
             </button>
           </div>
-        </article>
+        </div>
+        <div className="dict-plate__stripe" aria-hidden="true" />
+      </header>
+      {on.length > 0 && kun.length > 0 && (
+        <div className="dict-gates">
+          <ReadingGate
+            name={t.readingsOnName} n={on.length}
+            open={open === on} onPick={() => setGate('on')}
+          />
+          <ReadingGate
+            name={t.readingsKunName} n={kun.length}
+            open={open === kun} onPick={() => setGate('kun')}
+          />
+        </div>
+      )}
+      <div className="dict-entry__body dict-readings"
+           aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
+        {withWords.map(({ reading, words }) => (
+          <ReadingBand
+            key={reading} reading={reading} words={words}
+            kind={kind} char={entry.kanji} onWord={jump}
+          />
+        ))}
+        {rest.length > 0 && (
+          <section className="dict-rest" aria-label={t.readingsNoWords}>
+            <div className="dict-rest__cap">{t.readingsNoWords}</div>
+            <ul className="dict-rest__chips">
+              {rest.map(({ reading }) => (
+                <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+          {t.close}
+        </button>
       </div>
-    </div>,
-    document.body,
+    </article>
   )
 }
 
@@ -752,6 +799,12 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const hiddenReadings = tokens.length - shownReadings.length
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
+  // On the desk the list opens in the entry's place (ReadingsInPlace,
+  // plan 117), taking the door with it; stepping back puts the focus
+  // on the door again, as a dialog's close would.
+  const desk = useDesk()
+  const readingsDoor = useRef(null)
+  const wasReading = useRef(false)
   // ── The ＋ and its menu ──
   // The shelf half: lit from the shelf the screen holds (favorites.has),
   // turned by one optimistic write. The only thing the plate says about
@@ -811,10 +864,18 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     }
   }
   const readingsOpen = isKanji && readingGroups.length > 0 && openKey === entryKey(entry)
+  useEffect(() => {
+    if (desk && wasReading.current && !readingsOpen) readingsDoor.current?.focus({ preventScroll: true })
+    wasReading.current = readingsOpen
+  }, [desk, readingsOpen])
   // card_stats (study/card_lookup.py) says "not_started" for a card
   // with no state in any mode; the seal's vocabulary is new / learning
   // / mastered, and a card nobody has touched is the unstruck seal.
   const stage = !status?.status || status.status === 'not_started' ? 'new' : status.status
+
+  if (desk && readingsOpen) {
+    return <ReadingsInPlace entry={entry} groups={readingGroups} onClose={() => setOpenKey(null)} onVocabClick={onVocabClick} />
+  }
 
   return (
     <article className="dict-entry">
@@ -953,9 +1014,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               {readingGroups.length > 0 && (
                 <button
                   type="button"
+                  ref={readingsDoor}
                   onClick={() => setOpenKey(readingsOpen ? null : entryKey(entry))}
                   className={`dict-plate__more${readingsOpen ? ' dict-plate__more--open' : ''}`}
-                  aria-haspopup="dialog"
+                  aria-haspopup={desk ? undefined : 'dialog'}
                   aria-expanded={readingsOpen}
                   aria-label={t.allReadings}
                   title={t.allReadings}
@@ -1221,7 +1283,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
         )}
       </div>
 
-      {readingsOpen && (
+      {readingsOpen && !desk && (
         <ReadingsSheet
           entry={entry}
           groups={readingGroups}
