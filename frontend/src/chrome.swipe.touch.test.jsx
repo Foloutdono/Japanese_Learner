@@ -69,7 +69,16 @@ function touch(node, type, x, y = 300) {
 }
 
 /** One gesture: press, a run of moves, release. `pace` is the ms
- *  between moves — small is a flick, large is a deliberate sweep. */
+ *  between moves — small is a flick, large is a deliberate sweep.
+ *
+ *  The release only STARTS a move. The Shell navigates from a native
+ *  touch listener, and MemoryRouter commits a navigation as a React
+ *  transition, on the scheduler — a few ms after the release, but the
+ *  file's cold first swipe takes twice as long as the rest and, on a
+ *  loaded machine, can outrun the 30 this wait allows. So a gate that
+ *  should change is waited for (`expect.poll`), never read after a
+ *  delay. The fixed wait is for the cases where nothing may move: a
+ *  poll cannot prove an absence. */
 async function swipe(node, from, to, { pace = STEP, steps = 4, y = 300, dy = 0 } = {}) {
   touch(node, 'touchstart', from, y)
   for (let i = 1; i <= steps; i++) {
@@ -118,22 +127,22 @@ describe('a flick moves one gate along the bar', () => {
     // The bar reads Learn · Practice · Today · Dictionary · Profile,
     // so leftward is toward Dictionary.
     await swipe(content(), 300, 120)
-    expect(at()).toBe('/dictionary')
+    await expect.poll(at).toBe('/dictionary')
     await swipe(content(), 120, 300)
-    expect(at()).toBe('/today')
+    await expect.poll(at).toBe('/today')
   })
 
   it('lights the gate it arrived at', async () => {
     await mount('/today')
     await swipe(content(), 300, 120)
-    expect(document.querySelector('.tab--on').dataset.tab).toBe('dictionary')
+    await expect.poll(() => document.querySelector('.tab--on').dataset.tab).toBe('dictionary')
   })
 
   it('goes on a flick — short, but fast', async () => {
     await mount('/today')
     // Half the deliberate sweep's distance, covered in two frames.
     await swipe(content(), 300, 240, { pace: 0, steps: 2 })
-    expect(at()).toBe('/dictionary')
+    await expect.poll(at).toBe('/dictionary')
   })
 
   it('goes from a station behind a gate, and lands on the next GATE', async () => {
@@ -142,13 +151,13 @@ describe('a flick moves one gate along the bar', () => {
     // every screen the chrome carries.
     await mount('/learn/vocab/N5')
     await swipe(content(), 300, 120)
-    expect(at()).toBe('/practice')
+    await expect.poll(at).toBe('/practice')
   })
 
   it('goes from a hall behind the pass', async () => {
     await mount('/profile/stats')
     await swipe(content(), 120, 300)
-    expect(at()).toBe('/dictionary')
+    await expect.poll(at).toBe('/dictionary')
   })
 
   it('stays put on a nudge', async () => {
@@ -179,8 +188,12 @@ describe('a flick moves one gate along the bar', () => {
     await tick(0)
     expect(content().dataset.pull).toBe('next')
     // ...and hands the element back to the stylesheet once it lands.
-    await tick(400)
-    expect(content().hasAttribute('data-pull')).toBe(false)
+    // Waited for on the pull itself, not on a clock: a loaded machine
+    // can go a second without the frame that ends it, and a timer that
+    // comes due in that gap reads the attribute before animationend
+    // has had its chance to clear it.
+    await Promise.all(content().getAnimations().map(a => a.finished))
+    await expect.poll(() => content().hasAttribute('data-pull')).toBe(false)
   })
 })
 
