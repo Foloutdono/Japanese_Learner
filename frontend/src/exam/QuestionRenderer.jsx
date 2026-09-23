@@ -251,12 +251,15 @@ function SentenceOrderBlock({ question, selected, onSelect, revealed }) {
 // the blank currently being answered and mask the others so later
 // blanks in the same passage aren't spoiled.
 function ClozeBlock({ question, selected, onSelect, revealed }) {
-  const { passage, number } = question
+  // The blank's own marker number, not the section-wide `number` the
+  // paper prints: 【1】 is the first blank of this passage whichever
+  // question of the section it is (exam/examService.js).
+  const { passage, blankNumber, number } = question
   return (
     <div className="exam-question">
       <h4 className="exam-passage__title" lang="ja">{passage.titleJp}</h4>
       <p className="exam-passage__text" lang="ja">
-        <ClozeText template={passage.textTemplateJp} activeNumber={number} />
+        <ClozeText template={passage.textTemplateJp} activeNumber={blankNumber ?? number} />
       </p>
       <ChoiceList
         choices={question.choices}
