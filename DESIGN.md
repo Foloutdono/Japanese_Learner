@@ -931,10 +931,12 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plan 112)
+### The desk (机, plans 112–113)
 
 The computer's design, at 1100px and up. Everything above holds unless a
-line here says otherwise.
+line here says otherwise. Plan 112 drew the chrome; plan 113 laid the
+screens out for the width, so that nothing on a computer reads as a phone
+set down on a desk.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -951,13 +953,54 @@ line here says otherwise.
   station, the one you are standing in filled — the map's own drawing (a
   rail, stops, where you are) in the panel's inks. The halls behind the
   pass list its settings too.
-- **A screen gets a layout only where the width earns it.** The plates go
-  two by two with the odd fifth across the row (a lattice with no short
-  last row); Today sets the strip beside the fare gate; the profile opens
-  the holder flat, the pass beside the record; Settings sets the list
-  beside the open page, under the list's one `<h1>`. Everything else is
-  the phone's screen in the centred column, which is what it was designed
-  to be at that width.
+- **A screen gets a layout only where the width earns it, and what fills
+  the width has a job.** A second column holds something the phone had to
+  put behind a tap — a sheet, a toggle, a second screen — never a
+  decoration found to fill it. The plates go two by two with the odd fifth
+  across the row (a lattice with no short last row); the profile opens the
+  holder flat, the pass beside the record; Settings sets the list beside the
+  open page, under the list's one `<h1>`.
+- **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
+  was always allowed, and a second column is **`--desk-side-w` (360px)** —
+  a phone's content width, so a phone-born component set in it (the pass's
+  back, a dictionary entry, a sentence's breakdown, a list of platforms) is
+  drawn at the width it was designed at. `components/chrome/DeskSide.jsx`
+  is the column; it is sticky and scrolls on its own when it is taller than
+  the window.
+- **The gates, with their companion beside them.** Today sets the pass's
+  strip and its back (the journey) beside the fare gate; the back was a
+  sheet. The
+  dictionary's dock is open from the first frame on the first result, and
+  every door in an entry opens inside the dock; ←/→ walk the catalogue. A
+  Learn plate's foot draws the whole line, a leg per level.
+- **A station is two panes.** Levels, sets or grades stand upright on the
+  left and the chosen stop's platforms on the right, each platform with its
+  own figures (due now, and the composition bar the statistics draw); the
+  bare list opens on the learner's own stop, and another stop swaps the
+  page by *replacing* the URL, so Back is never a walk through every stop
+  looked at. A mock exam's grade is in its URL. A route that boards
+  directly (a sentence station's levels) is drawn across as a line.
+- **The statistics are one page.** What holds on the left — the retention
+  line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
+  a phone's chart), the ladder, the lines with the open one's levels hung
+  under it on a shared column so every bar starts where the others do —
+  and where it leaks on the right, every trouble card. No sheet.
+- **A run is a workspace.** The card is centred in what the run's side
+  leaves; the side (StudyStage's `side`, fixed to the right edge) holds,
+  on a card run, this run's three records and **the revealed card's
+  dictionary entry** — docked by the reveal and never before it, because
+  the entry is the answer — and on a graded practice run, the sentence's
+  breakdown, with no toggle. The level bar keeps the stage's width.
+- **The way up is a crumb, and the rail is the way around.** A screen's ‹
+  way out to a place the rail opens (a gate, the lit gate's stations) is
+  not drawn on the desk; any other is a small crumb over the title, never
+  the phone's pill in the bar's corner. A way out is written as `<Leave
+  to>` when it is a place, which is how the bar can tell. A run keeps its
+  pill: it has no rail.
+- **`/` is the dictionary's search from anywhere the rail is**, and the
+  Dictionary gate prints the key. A deck's page is its cards beside its
+  platforms (or the form, while a card is written), and a new deck is a
+  dialog over the shelf.
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
   the middle of the screen — every corner, no handle, a fade.
@@ -1032,7 +1075,8 @@ line here says otherwise.
   measured in weeks belongs on the pass's back, where the ghost train already
   measures it, and the day's work belongs at the fare gate.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
-  (256px) beside them: `--board-w` (1040px) for the station column,
+  (256px) beside them, the canvas grown to `--desk-board-w` (1240px) and a
+  second column at `--desk-side-w` (360px): `--board-w` (1040px) for the station column,
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
   and `--card-w` (640px) for the study card column — the quiz prompt card,
   its progress bar, its MCQ list and its rating bar all share this one

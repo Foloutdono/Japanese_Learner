@@ -5692,3 +5692,53 @@ phone's screen in the centred column; the dictionary's lookup sheet
 (plan 090) is still a modal on the desk rather than the dock's own stack;
 the guide's tab-bar stop hangs under the rail's list rather than beside
 it.
+
+---
+
+# Wave 25 — 机, the desk's second round (plan 113, 2026-09-22)
+
+The owner's verdict on wave 24: a good beginning — now fill the space
+with purpose and rethink the layout for a computer, so that nobody on one
+feels the app was made for a phone first. Set goals and deliver. The one
+constraint stands: below 1100px nothing changes.
+
+| Plan | What | Status |
+|---|---|---|
+| 113 | The screens laid out for the width, in seven phases, one commit each: **P1** the canvas at `--desk-board-w` (1240px), the platform lattices with no orphan, a boarding route drawn across, a run's head and field on the card's column; **P2** Today's journey beside the gate (`JourneyPanel`, `JourneyBody`), the dictionary's dock open from the first frame with its doors opening inside it (`DictionaryLookupBody`), ←/→ through the catalogue, a Learn plate's foot as the whole line; **P3** a station as two panes (`StationSplit`) with each platform's figures (`ModeFigures`, `modeRow`), the exam's grade in its URL; **P4** the statistics as one page — the line drawn 1:1 (`useBoxWidth`), the lines' levels in place, all twelve trouble cards; **P5** a run's side: the session panel (`SessionPanel`, `stores/runTally`) and the revealed card's entry docked (`stores/deskEntry`, `entryDock`), a graded sentence's breakdown with no toggle (`BreakdownSide`); **P6** the way up (`Leave to`, `onDeskRail`, `.desk-crumb`) and `/` from anywhere; **P7** a deck beside its platforms (`DeckPlatforms`, `useDeckModes`), a new deck as a dialog. DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+What changed for a learner on a computer, counted from the rail:
+
+| Flow | Wave 24 | Wave 25 |
+|---|---|---|
+| A kana set's, a grammar level's or an exam grade's platforms | 2 clicks | 1 (the list opens on the learner's own stop) |
+| Vocab or kanji platforms by JLPT level | 3 clicks | 2 |
+| A dictionary entry on arrival | 1 click | 0 (the dock opens on the first result) |
+| A door inside an entry | a modal over the dock | the dock itself, with ‹ back |
+| The journey on Today | a sheet | beside the gate |
+| A line's levels on the statistics | a sheet | in place |
+| Trouble cards | 6, then a sheet | all 12 on the page |
+| The revealed card's dictionary entry | 🔍, then a modal | docked beside the card |
+| A graded sentence's breakdown | a toggle | beside the card, automatically |
+| A deck's platforms | ▶ Study, then a second screen | beside the cards |
+| The canvas at 1920px | 1040px | 1240px |
+| A ‹ back pill that repeats the rail | on every nested screen | not drawn; any other is a crumb |
+
+Cut on purpose, each decoration, a duplicate, or built on data that
+would lie: a twelve-week heatmap (the stamp book already is one); a key
+legend (the keys are printed where they act); pace inside a run (stale
+mid-run); trouble cards on Today (they compete with the one action);
+"last played" on the practice plates (comprehension and exams keep no
+history, reading's has no level); retention on the plates; the due
+forecast (retired by design).
+
+Verified beyond the suite (frontend: 184 files, 1372 tests, seven
+lanes): after every phase a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute,
+text node, box and computed style at 390, 768, 1024 and 1099px across
+twenty-eight screens, a kana run before and after the reveal, and a
+reading run graded — identical to the commit before wave 24.
+
+Deferred: a comprehension passage beside its questions; a standing
+answer sheet in the exam runner; the exam result and the library laid
+out for the width; a word looked up from a docked breakdown still opens
+the lookup as a dialog.

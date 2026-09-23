@@ -99,3 +99,11 @@ The promise that the phone never breaks is carried by structure, not by care:
 - `--desk-rail-w` (256px) is declared in the main `:root`, because
   `design-system.browser.test` resolves every `:root` token at the 414px
   lane. It is the one new value, and nothing below 1100 reads it.
+- Plan 113 (wave 25) laid more of the screens out for the width under the
+  same four guarantees — a second column beside a gate, a station, the
+  statistics, a run and a deck; the way up in place of the pill — and
+  added two values beside the rail's, `--desk-board-w` (1240px, the
+  canvas) and `--desk-side-w` (360px, a second column: a phone's content
+  width, so what is set in it is drawn at the width it was designed at).
+  Its phone side is `src/deskfree.phone.test.jsx`. DESIGN.md, "The desk",
+  lists what it changed.

@@ -182,7 +182,25 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RatingBar.jsx`, `components/study/QuizComponents.jsx`,
   `vite.config.js` and `index.css`; ADR 0018; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **113** or higher, and check
+  **113** is the desk's second round, the screens laid out for the width —
+  the canvas at `--desk-board-w` and a second column at `--desk-side-w`
+  (`components/chrome/DeskSide.jsx`); Today's journey beside the gate
+  (`components/journey/JourneyPanel.jsx`, `JourneyBody.jsx`); the
+  dictionary's dock always open (`DictionaryLookupBody`); a station as two
+  panes with each platform's figures (`components/selection/StationSplit.jsx`,
+  `ModeFigures.jsx`, `domain/statsModel.js`'s `modeRow`) and the exam's
+  grade in its URL; the statistics as one page (`hooks/useBoxWidth.js`,
+  `components/stats/`); a run's side — the session panel and the revealed
+  card's docked entry (`components/study/SessionPanel.jsx`, `entryDock.js`,
+  `stores/runTally.js`, `stores/deskEntry.js`, `hooks/useReviewGates.js`),
+  or a graded sentence's breakdown (`components/analysis/BreakdownSide.jsx`);
+  the way up and the `/` key (`components/chrome/Bar.jsx`'s `Leave to`,
+  `config/tabs.js`'s `onDeskRail`, `components/chrome/DeskRail.jsx`); a deck
+  beside its platforms (`components/decks/DeckPlatforms.jsx`,
+  `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
+  and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
+  "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **114** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
