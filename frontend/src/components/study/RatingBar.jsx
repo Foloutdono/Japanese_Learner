@@ -4,6 +4,7 @@ import { playCorrect, playWrong } from '../../lib/audio'
 import { ratingButtons } from '../../domain/ratingScales'
 import { useRatingScale } from '../../stores/ratingScale'
 import { useDesk } from '../../hooks/useDesk'
+import { dialogOpen } from '../../lib/dialogOpen'
 
 // Keys 1-N map to the bar's buttons. On an AZERTY keyboard the
 // unshifted number row types &é"' rather than 1234, so those are
@@ -60,6 +61,8 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   useEffect(() => {
     if (!active) return
     const handler = e => {
+      // No input guard: a typed-answer run rates from its field.
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       const idx = e.key in AZERTY_INDEX ? AZERTY_INDEX[e.key] : parseInt(e.key) - 1
       if (idx >= 0 && idx < QUALITY_BTNS.length) handleRate(QUALITY_BTNS[idx].q)
     }

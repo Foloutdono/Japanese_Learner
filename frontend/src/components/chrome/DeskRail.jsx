@@ -6,6 +6,7 @@ import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
 import { HudInstruments } from './Hud'
+import { dialogOpen } from '../../lib/dialogOpen'
 
 // ── 机 — the rail: the desk's chrome (plan 112) ────────────────────
 // At 1100px and up (hooks/useDesk.js) the Shell draws this instead of
@@ -59,7 +60,7 @@ export function DeskRail() {
       if (e.key !== '/' || e.defaultPrevented || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
       const el = e.target
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName) || el?.isContentEditable) return
-      if (pathname === '/dictionary' || document.querySelector('[aria-modal="true"]')) return
+      if (pathname === '/dictionary' || dialogOpen()) return
       e.preventDefault()
       navigate('/dictionary', { state: { focusSearch: true } })
     }

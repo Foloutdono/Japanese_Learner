@@ -9,6 +9,7 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
+import { dialogOpen } from '../../lib/dialogOpen'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 
 // ── Is the page actually cramped? ──────────────────────────
@@ -174,7 +175,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
   useEffect(() => {
     if (answered) return
     const handler = e => {
-      if (e.repeat) return
+      if (e.repeat || dialogOpen()) return
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       const idx = CHOICE_KEY_INDEX[e.key]
@@ -791,7 +792,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   // natural one-handed shortcut instead of reaching for the mouse.
   useEffect(() => {
     const handler = e => {
-      if (e.repeat) return
+      if (e.repeat || dialogOpen()) return
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       const key = e.key.toLowerCase()
