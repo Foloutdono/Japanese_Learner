@@ -665,4 +665,40 @@ describe('the doors (plan 117)', () => {
     expect(sheet.querySelector('.sheet__q')).not.toBeNull()
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
   })
+
+  it('keeps a gate lesson\'s rival a sheet over the run', async () => {
+    const { apiJson } = await import('./lib/api')
+    const lesson = {
+      register: 'polite', steps: [{ kind: 'rule', text: 'A polite request.' }], examples: [],
+      compare: [{ pattern: '〜ないでください', raw_id: 'grammar_N5_〜ないでください', level: 'N5', meaning: 'please do not', text: 'the negative' }],
+    }
+    const card = {
+      card_id: 'grammar_N5_〜てください', raw_id: 'grammar_N5_〜てください', mode: 'grammar.flashcard.f2b', direction: 'f2b',
+      grammar: '〜てください', structure: 'verb て-form + ください', meaning: 'please do', register: 'polite',
+      stage: 'new', review_preview: null, hints: {}, lesson,
+    }
+    localStorage.clear()
+    apiJson.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/grammar/cards')) return { cards: [card], pace: null }
+      if (u.startsWith('/api/grammar/point')) return { raw_id: 'grammar_N5_〜ないでください', level: 'N5', pattern: '〜ないでください', structure: 'x', meaning: 'please do not', steps: [], compare: [], examples: [] }
+      return {}
+    })
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ total: 1, new: 1, learning: 0, mastered: 0, due_now: 0 }) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: GrammarRun } = await import('./screens/GrammarRun')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/grammar/N5/grammar.flashcard.f2b']}>
+          <Routes><Route path="/learn/grammar/:level/:mode" element={<GrammarRun session={{ access_token: 't' }} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(400)
+    document.querySelector('.gl--gate .gl-door').click()
+    await settle(300)
+    expect(document.querySelector('.gl-sheet[role="dialog"]')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    apiJson.mockReset()
+  })
 })

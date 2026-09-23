@@ -14,6 +14,8 @@ import { dialogOpen } from '../../lib/dialogOpen'
 // open sentence and its lights survive), `head` — the sentence's ruby
 // line — stays above the entry so the next word is one click, and the
 // entry's ✕ or Esc brings the breakdown back where it was scrolled.
+// A grammar run wraps its session panel the same way (plan 117): the
+// rival a gate lesson's compare row names opens here, not over the run.
 export function SideLookup({ lookup, onExit, session, head, children }) {
   const { t } = useLang()
   const ref = useRef(null)
