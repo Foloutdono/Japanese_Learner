@@ -1,7 +1,7 @@
 import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 import { lookupKey } from './lookup'
 
-// ── 机 — the analyser's dock (plan 114) ─────────────────────────────
+// ── 机 — the analyser's dock (plan 115) ─────────────────────────────
 // On the desk the analyser's second column is the dictionary, open on
 // the word the stage is showing: ←/→ walk the sentence and the entry
 // follows (lookup.js's tokenLookup), and a word, a kanji or a rule

@@ -36,7 +36,7 @@ function rectOf(anchor) {
   if (!el) return null
   const r = el.getBoundingClientRect()
   if (r.width === 0 && r.height === 0) return null
-  // 机 (plan 114): an anchor in the desk's rail has its note to its
+  // 机 (plan 115): an anchor in the desk's rail has its note to its
   // right, one in a side column to its left — beside the thing it is
   // about, never a screen's width away over the page.
   const beside = el.closest('.desk-rail') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
@@ -145,7 +145,7 @@ export function Guide({ gate, onEnd }) {
 
   const last = index === stops.length - 1
   // `above` is the tab bar's stop: on the phone the bar is the bottom
-  // edge and the note rests on it. On the desk (plan 112) the same
+  // edge and the note rests on it. On the desk (plan 113) the same
   // anchor is the rail's list of gates, which starts at the top of the
   // screen — a note "above" it would be off the screen, so there it
   // takes the ordinary rule and hangs under it.
@@ -162,7 +162,7 @@ export function Guide({ gate, onEnd }) {
     : lower
       ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
       : { top: rect.bottom + PAD + GAP }
-  // The desk's own wording where a note teaches a key (plan 114).
+  // The desk's own wording where a note teaches a key (plan 115).
   const text = (desk && t[`guide${stop.key}Desk`]) || t[`guide${stop.key}`]
 
   function next() {

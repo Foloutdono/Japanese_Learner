@@ -4,7 +4,7 @@ import { join, relative } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { DESK_QUERY } from './hooks/useDesk'
 
-// ── 机 — the desk may not touch the phone (plan 112) ─────────────────
+// ── 机 — the desk may not touch the phone (plan 113) ─────────────────
 // Tsuji has two chromes: the phone's, which every width below 1100px
 // draws exactly as it did before the desk existed, and the desk's. The
 // owner's one condition on the second was that it can never break the
@@ -29,7 +29,7 @@ import { DESK_QUERY } from './hooks/useDesk'
 const SRC = fileURLToPath(new URL('.', import.meta.url))
 const CSS = readFileSync(new URL('./index.css', import.meta.url), 'utf8')
 
-const OPEN = '/* ═══ 机 — the desk (plan 112)'
+const OPEN = '/* ═══ 机 — the desk (plan 113)'
 const CLOSE = '/* ═══ 机 — end of the desk'
 
 // The sheet quotes real declarations inside its comments constantly, so

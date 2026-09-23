@@ -68,7 +68,7 @@ import PublicDeckScreen from './PublicDeckScreen'
 const SORTS = ['new', 'followed']
 const DEBOUNCE_MS = 300
 
-// ── 机 — the shelf beside a deck's page (plan 114) ──
+// ── 机 — the shelf beside a deck's page (plan 115) ──
 // Both library routes land here (App.jsx). On a phone a deck is a
 // screen of its own, as it always was. On the desk the shelf stays and
 // the open deck's page stands beside it (PublicDeckPane): one route

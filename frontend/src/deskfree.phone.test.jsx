@@ -5,7 +5,7 @@ import ModeSelector from './components/selection/ModeSelector'
 import { RouteStops } from './components/selection/RouteStops'
 import './index.css'
 
-// ── 机 — nothing of the desk's second round reaches a phone (plan 113) ──
+// ── 机 — nothing of the desk's second round reaches a phone (plan 114) ──
 // The desk's layouts are written in one media block that a phone never
 // matches (src/desk.css.test.js) and rendered only when hooks/useDesk
 // says so. This file is the phone's side of each of them, one block per
@@ -237,14 +237,14 @@ describe('the decks (P7)', () => {
   })
 })
 
-// ── plan 114, P3 — the second screens a phone keeps ──
+// ── plan 115, P3 — the second screens a phone keeps ──
 // On the desk a grammar level's points stand beside the open lesson, a
 // theme's bands and the tiers beside the open one's platforms, and the
 // deck's platform screen gives way to the deck's page. A phone keeps
 // every one of them a screen of its own: the index opens each point in
 // its sheet, the lists stay lists with no stop marked open and nothing
 // figured, and nothing redirects.
-describe('the folded stations (plan 114, P3)', () => {
+describe('the folded stations (plan 115, P3)', () => {
   const POINTS = [
     { raw_id: 'grammar_N4_a', pattern: '〜ために', meaning: 'in order to', stage: 'mastered' },
     { raw_id: 'grammar_N4_b', pattern: '〜ように', meaning: 'so that', stage: 'new' },
@@ -328,13 +328,13 @@ describe('the folded stations (plan 114, P3)', () => {
   })
 })
 
-// ── plan 114, P4 — the mock exam a phone keeps ──
+// ── plan 115, P4 — the mock exam a phone keeps ──
 // On the desk the answer sheet stands in the run's side, a reading
 // passage beside its questions, the keys are named, and the review is a
 // list beside its page. A phone keeps the sheet bar and its sheet, the
 // passage inside the question's card, no key names, and the review's
 // rows opening under themselves with both ways on at the foot.
-describe('the mock exam (plan 114, P4)', () => {
+describe('the mock exam (plan 115, P4)', () => {
   const choices = (...texts) => texts.map((textJp, i) => ({ id: `c${i + 1}`, textJp }))
   const PAPER = {
     id: 'e1', level: 'N4', revision: 3, title: 'N4 Reading',
@@ -400,11 +400,11 @@ describe('the mock exam (plan 114, P4)', () => {
   })
 })
 
-// ── plan 114, P5 — the library and Browse a phone keeps ──
+// ── plan 115, P5 — the library and Browse a phone keeps ──
 // On the desk a published deck stands beside the shelf and Browse docks
 // in the deck page's side. A phone keeps the shelf and the deck two
 // screens (the same route component, deciding), and Browse its overlay.
-describe('the library and Browse (plan 114, P5)', () => {
+describe('the library and Browse (plan 115, P5)', () => {
   const LISTED = [{ id: 7, name: 'Cuisine', type: 'vocab', card_count: 25, author: 'Aiko', followers: 1 }]
 
   it('keeps the shelf and a published deck two screens', async () => {
@@ -455,13 +455,13 @@ describe('the library and Browse (plan 114, P5)', () => {
   })
 })
 
-// ── plan 114, P6 — the analyser and the dictionary a phone keeps ──
+// ── plan 115, P6 — the analyser and the dictionary a phone keeps ──
 // On the desk the analyser's result carries its dictionary in a column,
 // its way back is a crumb, its intake stands beside its history, and the
 // dictionary offers to analyse a sentence it has no entry for. A phone
 // keeps the sheet over the stage, the way back in the head, the history
 // under the intake, the legend, and a plain "no results".
-describe('the analyser and the dictionary (plan 114, P6)', () => {
+describe('the analyser and the dictionary (plan 115, P6)', () => {
   const tok = (surface, kanji, kana) => ({
     surface, pos: 'noun', furigana: [{ text: surface }], kanji_matches: [],
     vocab_match: { entry: { kanji, kana, meaning: 'station' }, stats: { status: 'learning' }, level: 'N5', raw_id: `vocab_N5_${kanji}_${kana}` },
@@ -511,12 +511,12 @@ describe('the analyser and the dictionary (plan 114, P6)', () => {
   })
 })
 
-// ── plan 114, P7 — the run a phone keeps ──
+// ── plan 115, P7 — the run a phone keeps ──
 // On the desk a run's card and choices stand side by side from the top
 // of the window, the unused choices keep their place once answered, and
 // the panel lists the misses at the end. A phone keeps its stage a
 // column and collapses the unused choices, as ever.
-describe('a run (plan 114, P7)', () => {
+describe('a run (plan 115, P7)', () => {
   it('keeps the stage a column and collapses the unused choices', async () => {
     const { MemoryRouter } = await import('react-router-dom')
     const { StudyStage } = await import('./components/study/StudyStage')
@@ -542,12 +542,12 @@ describe('a run (plan 114, P7)', () => {
   })
 })
 
-// ── plan 114, P8 — the keys and doors a phone does without ──
+// ── plan 115, P8 — the keys and doors a phone does without ──
 // On the desk Enter departs and takes a run's last action, Esc leaves a
 // run, C shows the choices, a route is walked by arrow, and the profile
 // shows both rankings. A phone prints no key, answers none of them, and
 // keeps its one board behind the toggle.
-describe('the keys and the boards (plan 114, P8)', () => {
+describe('the keys and the boards (plan 115, P8)', () => {
   const press = (key, init = {}) => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }))
 
   it('answers no Esc, Enter or C, and prints no cap', async () => {

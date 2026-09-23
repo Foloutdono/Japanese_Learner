@@ -20,7 +20,7 @@ import { EntryDockContext } from './entryDock'
 // component the head's words and the toast. Kana/Vocab/Kanji/Grammar/
 // Study leave to their mode picker; Today leaves to the gate.
 //
-// `side` is the desk's column beside the card (plan 113): the session
+// `side` is the desk's column beside the card (plan 114): the session
 // panel on a card run (components/study/SessionPanel.jsx), the sentence
 // breakdown on a graded practice run. Drawn only on the desk, where the
 // stage makes room for it on the right (index.css, the 机 block); a
@@ -58,7 +58,7 @@ export function StudyStage({
   )
 }
 
-// The run's side column, and the line it is on (plan 114). It is the
+// The run's side column, and the line it is on (plan 115). It is the
 // stage's sibling, not its child, so it does not inherit the stage's
 // --line-color: what it holds (a breakdown's open rail, a word's
 // underline) fell back to --accent, which is kana's vermillion, on

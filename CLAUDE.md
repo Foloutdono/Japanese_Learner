@@ -168,8 +168,19 @@ runtime purpose. Two consequences worth knowing:
   `content/reading_sentences.py`, `content/listening_clips.py`,
   `scripts/prewarm_comprehension_pool.py`, `scripts/prewarm_exam_papers.py`,
   `srs/data_structure.sql` and `tests/test_comprehension_seed.py`).
-  **112** is the desk (机) — the computer's design, a second chrome at
-  1100px and up that never reaches the phone: the rail down the left
+  **112** is one word, one card: the 23 kanji the kanji deck taught at
+  two levels, and the ~360 vocab cards that were a lower card's word
+  again under another spelling (終る/終わる, これ/此れ, いい beside
+  いい/よい, the `川/河` packed fields), folded onto the lower card
+  (cited in `content/kanji_renames.py`, `content/vocab_renames.py`'s
+  `FOLDED_FORMS`, `scripts/migrate_kanji_ids.py`,
+  `scripts/migrate_vocab_ids.py`, `scripts/audit_vocab_deck.py`'s
+  `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
+  `routes/dictionary.py`, `routes/onboarding.py` and
+  `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
+  **113** is the desk (机) — numbered 113–115 because 112 went to the deck
+  fold above while the desk was open — the computer's design, a second
+  chrome at 1100px and up that never reaches the phone: the rail down the left
   edge in place of the HUD and the tab bar, the plates two by two, Today
   and the profile in two columns, Settings' list beside its page, sheets
   as centred dialogs, and the keys printed on a run; every desk rule in
@@ -182,7 +193,7 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RatingBar.jsx`, `components/study/QuizComponents.jsx`,
   `vite.config.js` and `index.css`; ADR 0018; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  **113** is the desk's second round, the screens laid out for the width —
+  **114** is the desk's second round, the screens laid out for the width —
   the canvas at `--desk-board-w` and a second column at `--desk-side-w`
   (`components/chrome/DeskSide.jsx`); Today's journey beside the gate
   (`components/journey/JourneyPanel.jsx`, `JourneyBody.jsx`); the
@@ -209,6 +220,32 @@ runtime purpose. Two consequences worth knowing:
   (cited in the 机 section of `index.css`, `src/today.wide.test.jsx`,
   `src/today.desktop.test.jsx` and `src/deskfree.phone.test.jsx`; the
   evaluation is in `plans/README.md`).
+  **115** is the desk's third round (wave 26), the remaining second screens
+  and sheets taken into the page: five phone bugs the audit found, each with
+  its phone test (`exam/examService.js`'s `blankNumber`, `screens/ExamRunner.jsx`'s
+  replace on finish, `lib/dialogOpen.js`, `stores/boarding.js`'s `returnsTo`
+  with `hooks/useRunExit.js`, `screens/DictionaryScreen.jsx`'s page sequence);
+  a run's side in its pigment and a breakdown's doors opening in it
+  (`StudyStage.jsx`'s `RunSide`, `components/analysis/SideLookup.jsx`);
+  comprehension beside its text (`screens/ComprehensionRun.jsx`,
+  `domain/choiceKeys.js`, `domain/quotedFragments.js`); the stations' second
+  screens folded — grammar points beside the lesson, theme bands and tiers
+  beside their platforms, the deck's platform screen giving way
+  (`GrammarLessonBody`, `ScopeFigures`, `statsModel.bucketRow`,
+  `tiers.tierAtSize`); the mock exam's standing answer sheet, flat passage
+  and review split (`exam/ExamCard.jsx`, `QuestionRenderer`'s `PassageText`);
+  the library's shelf beside a deck and Browse docked
+  (`components/decks/PublicDeckPage.jsx`, `hooks/usePublicDeck.js`,
+  `BrowseCardsDock`); the analyser's dock, intake beside history and the
+  dictionary's handoff (`components/analysis/AnalyzerDock.jsx`,
+  `lookup.tokenLookup`, `Bar.jsx`'s `DeskCrumb`); a run that fits a laptop and
+  its misses at the end (`runTally.tallyMisses`, `SessionPanel`'s `done`); and
+  the keys, the gates' last doors and the guide beside its anchor
+  (`components/chrome/DeskKeys.jsx`, `hooks/useListWalk.js`, `LineFoot`'s legs,
+  `Banzuke`'s `both`, `Guide.jsx`) — every rule in the 机 section of
+  `index.css`, one desktop test file a phase and the phone's side in further
+  blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
+  `docs/design/desk/README.md`; ADR 0018).
   When starting a new wave, begin at **116** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -295,19 +332,21 @@ reports the seeded and the generated rows apart. Exam papers have no
 seed -- a paper is ~35 model calls -- so `prewarm_exam_papers` is the
 only thing that spares the first learner at each exam id the wait.
 
-Two are one-shots, each run once after a deploy that changed the ids a
+Three are one-shots, each run once after a deploy that changed the ids a
 content set serves — `content/grammar/renames.py` for grammar points,
-`content/vocab_renames.py` for vocab entries. Both rename the learner's card
-rows to the new ids, merge on collision, and leave anything they do not
-recognise in place and reported.
+`content/vocab_renames.py` for vocab entries, `content/kanji_renames.py`
+for kanji (plan 112, the 23 characters the deck taught at two levels).
+Each renames the learner's card rows to the new ids, merges on collision,
+and leaves anything it does not recognise in place and reported.
 
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
 python -m scripts.migrate_vocab_ids    # report; --yes to apply, --user to scope
+python -m scripts.migrate_kanji_ids    # report; --yes to apply, --user to scope
 python -m scripts.migrate_pool_cards   # same, for a pool card whose word the deck now teaches
 ```
 
-The third reads `datas/vocab/pool_moves.json`, which
+The fourth reads `datas/vocab/pool_moves.json`, which
 `scripts/prune_pool_overlap.py` appends to for every pool row it takes
 out (plan 110b): a learner who studied 母 from the pool before it was an
 N5 card keeps that history on the N5 card.
@@ -476,7 +515,7 @@ ledger to keep in sync and no state to corrupt. Read-only, no database, no `.env
 it parses the content modules with `ast` rather than importing them, so it
 runs in a fresh clone (`content/listening_clips.py` needs pykakasi; this does
 not). `tests/test_audit_slice.py` holds the rotation to the playbook's
-promises. Vocab is the one bank too big to walk exhaustively — 8,404 entries
+promises. Vocab is the one bank too big to walk exhaustively — 8,091 entries
 at 40 a run — so its slices are ordered risk-first by the disagreements with
 JMdict the script can find on its own, and the `flags` it prints are a reason
 to look rather than findings.
@@ -537,7 +576,7 @@ Card IDs are namespaced per user as `"{user_id}:{card_id}"` (`core/auth.py:prefi
 ### Frontend layout (`frontend/src/`)
 - `App.jsx` — top-level router; gates all routes behind Supabase session state (`lib/supabase.js`). Every screen renders under one of two layout routes: the `Shell` (HUD + tab bar below 1100px; the desk's rail at 1100px and up) for the five tab trees (`/today`, `/learn`, `/practice`, `/dictionary`, `/profile`) or the `StageFrame` (no chrome) for runs and sessions; the old top-level paths (`/kana`, `/decks/:id`, `/exam/:id` …) redirect to their place behind a gate. `/dev/rewards`, `/dev/onboarding`, `/dev/sounds` and `/dev/ride` are dev-only routes (tree-shaken out of production builds via `import.meta.env.DEV`).
 - `screens/` — one file per route/page (largely 1:1 with `App.jsx` routes).
-- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the chrome (plan 068; the desk, plan 112): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `DeskRail` (the computer's chrome, drawn instead of both at 1100px and up), the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
+- `components/` — shared UI grouped by feature area (`chrome`, `decks`, `dictionary`, `profile`, `rewards`, `selection`, `station`, `stats`, `study`, `ui`). `components/chrome/` is the chrome (plan 068; the desk, plan 113): the `Shell` and `StageFrame` layout routes, the `Hud`, the `TabBar`, the `DeskRail` (the computer's chrome, drawn instead of both at 1100px and up), the `Bar` (and `ScreenBar`, the transitional header for screens the redesign has not reached), `Sheet`, `Console`/`Chip`/`Seg`, `StageHead` — the class map from the canvas is `docs/design/mobile/README.md`. `components/station/` holds cross-cutting screen-transition UI (`DepartureGate`, `TrainDoor`) rendered outside `<Routes>` in `App.jsx` so their animations survive the navigation that would otherwise unmount them.
 - `domain/` — pure client-side domain logic: card shape helpers, kana sets, level titles, reward tiers, stats modeling, study-mode definitions, XP curve. Mirrors backend concepts but has no network calls.
 - `stores/` — small client-side state modules (boarding/departure transition state, profile summary, rating scale) — not Redux, just modules with subscribable state.
 - `exam/` — mock-exam UI: question rendering, exam kind definitions, `examService.js` for the exam API calls. Pairs with `screens/Exam*.jsx`.

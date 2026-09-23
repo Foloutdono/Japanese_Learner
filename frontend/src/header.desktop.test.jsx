@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the desk's header and its one key (plan 113) ────────────
+// ── 机 — the desk's header and its one key (plan 114) ────────────
 // A phone screen's ‹ way out is a pill in its bar's corner, because a
 // phone has no other way up. The desk has the rail, which already opens
 // every gate and the lit gate's stations: a way out to one of those is

@@ -4,7 +4,7 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 import { lookupKey } from './lookup'
 import { dialogOpen } from '../../lib/dialogOpen'
 
-// ── 机 — a door in a docked breakdown opens beside it (plan 114) ──
+// ── 机 — a door in a docked breakdown opens beside it (plan 115) ──
 // A breakdown standing in a run's side column (BreakdownSide, the
 // comprehension results) is full of doors: a word opens its dictionary
 // entry, a rule its lesson. On the phone each opens a sheet over the

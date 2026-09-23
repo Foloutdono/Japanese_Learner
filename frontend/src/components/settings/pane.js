@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-// ── 机 — a settings page opened beside the list (plan 112) ──────
+// ── 机 — a settings page opened beside the list (plan 113) ──────
 // On the desk the settings list and the open page share the screen
 // (screens/SettingsScreen.jsx), so a page is not a place of its own
 // there: it is a pane under the list's one heading, with no way back

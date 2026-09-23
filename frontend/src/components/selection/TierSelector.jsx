@@ -45,7 +45,7 @@ import { DEFAULT_TIER_SIZE, TIER_SIZE_OPTIONS } from '../../domain/tiers'
  *   color    — optional accent colour override, same convention as
  *              LevelSelector/ModeSelector.
  *   selected — the tier whose platforms stand beside the list, in the
- *              desk's station split (plan 114): marked as the page,
+ *              desk's station split (plan 115): marked as the page,
  *              like RouteStops' own, and kept in view when the list
  *              is longer than the column. Only the desk passes it.
  *

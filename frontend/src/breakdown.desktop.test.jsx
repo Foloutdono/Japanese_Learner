@@ -4,9 +4,9 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a graded sentence's doors open beside it (plan 114) ──────
+// ── 机 — a graded sentence's doors open beside it (plan 115) ──────
 // On the desk a practice run stands its graded breakdown in the side
-// column (plan 113). A word in it is a door to its dictionary entry,
+// column (plan 114). A word in it is a door to its dictionary entry,
 // and that door used to open a dialog with a scrim over the sentence
 // and the learner's answer. It opens IN the column now: the sentence's
 // ruby line stays above the entry, another word is one click, and Esc

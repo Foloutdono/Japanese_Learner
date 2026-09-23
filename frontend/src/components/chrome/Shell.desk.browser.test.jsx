@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../../LangContext'
 import '../../index.css'
 
-// ── 机 — a window dragged across 1100px keeps its screen (plan 112) ──
+// ── 机 — a window dragged across 1100px keeps its screen (plan 113) ──
 // The Shell swaps the phone's chrome for the desk's slot by slot: the
 // HUD's place holds the rail, the tab bar's holds nothing, and the
 // screen's container stays the same element at the same index. So a

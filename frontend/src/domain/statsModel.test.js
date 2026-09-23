@@ -112,7 +112,7 @@ describe('lineRows', () => {
   })
 })
 
-// ── One platform (plan 113) ──
+// ── One platform (plan 114) ──
 // The desk's station split prints each platform's own composition and
 // due count beside it, read from the same buckets the stats screen sums.
 describe('modeRow', () => {

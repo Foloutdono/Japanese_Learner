@@ -445,7 +445,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
     }
   }
 
-  // ── 机 — the paper, sat at a desk (plan 114) ──
+  // ── 机 — the paper, sat at a desk (plan 115) ──
   // The answer sheet stands in the run's side the whole time — the
   // clock over it, the count, every question's chip, Finish — where the
   // phone keeps a bar that opens it in a sheet. A reading passage
@@ -479,7 +479,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             {t.leaveExam}
             {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEscape}</kbd>}
           </Leave>
-          {/* On the desk Esc asks the same question (plan 114). */}
+          {/* On the desk Esc asks the same question (plan 115). */}
           <LeaveKey onLeave={askLeave} />
           <span className="exam-meta__section">
             <h1 className="exam-meta__jp">{paperTitle(exam, t)}</h1>

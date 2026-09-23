@@ -112,7 +112,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
                are not drawn at all (numeric indices are noise on a
                thumb's control, and a thumb has no number row), so the
                shortcut is announced to assistive tech and shown on hover.
-               On the desk (plan 112) there IS a keyboard under the hands,
+               On the desk (plan 113) there IS a keyboard under the hands,
                and undiscoverable-and-reversed was the bad pair: each tile
                prints its key in its corner, which is what makes the
                reversal readable. */

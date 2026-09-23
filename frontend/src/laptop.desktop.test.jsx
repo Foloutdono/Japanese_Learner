@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a run fits a laptop (plan 114) ────────────────────────────
+// ── 机 — a run fits a laptop (plan 115) ────────────────────────────
 // The desktop lane is 1100×800, a laptop's window. A card with four
 // choices used to run its fourth choice down to ~870px, and answering
 // collapsed the three unused rows so the rating bar jumped up the page

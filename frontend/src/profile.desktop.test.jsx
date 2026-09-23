@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the pass holder opened flat (plan 112) ─────────────────
+// ── 机 — the pass holder opened flat (plan 113) ─────────────────
 // On the desk the profile's inserts are the phone's, in the phone's
 // order, split after the stamp book into two columns: the pass and its
 // stamps on the left, the record on the right. The backend is down here
@@ -51,7 +51,7 @@ describe('the profile on the desk', () => {
     const [left, right] = cols.map(c => c.getBoundingClientRect())
     expect(Math.round(left.top)).toBe(Math.round(right.top))
     expect(right.left).toBeGreaterThan(left.right)
-    // The pass and its stamps at the phone's own size (plan 114), the
+    // The pass and its stamps at the phone's own size (plan 115), the
     // record taking the rest.
     expect(Math.round(left.width)).toBe(360)
     expect(right.width).toBeGreaterThan(left.width)

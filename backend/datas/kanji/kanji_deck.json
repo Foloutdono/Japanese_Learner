@@ -528,11 +528,6 @@
       "meaning": "heart; mind; spirit; heart radical (no. 61)"
     },
     {
-      "kanji": "立",
-      "kana": "リツ・リュウ・リットル・た.つ・~た.つ・た.ち~・た.てる・~た.てる・た.て~・たて~・~た.て・~だ.て・~だ.てる",
-      "meaning": "stand up; rise; set up; erect"
-    },
-    {
       "kanji": "兄",
       "kana": "ケイ・キョウ・あに",
       "meaning": "elder brother; big brother"
@@ -563,11 +558,6 @@
       "meaning": "topic; subject"
     },
     {
-      "kanji": "花",
-      "kana": "カ・ケ・はな",
-      "meaning": "flower"
-    },
-    {
       "kanji": "通",
       "kana": "ツウ・ツ・とお.る・とお.り・~とお.り・~どお.り・とお.す・とお.し・~どお.し・かよ.う",
       "meaning": "traffic; pass through; avenue; commute; counter for letters, notes, documents, etc."
@@ -581,11 +571,6 @@
       "kanji": "用",
       "kana": "ヨウ・もち.いる",
       "meaning": "utilize; business; service; use; employ"
-    },
-    {
-      "kanji": "店",
-      "kana": "テン・みせ・たな",
-      "meaning": "store; shop"
     },
     {
       "kanji": "運",
@@ -606,11 +591,6 @@
       "kanji": "死",
       "kana": "シ・し.ぬ・し.に~",
       "meaning": "death; die"
-    },
-    {
-      "kanji": "安",
-      "kana": "アン・やす.い・やす.まる・やす・やす.らか",
-      "meaning": "relax; cheap; low; quiet; rested; contented; peaceful"
     },
     {
       "kanji": "図",
@@ -643,11 +623,6 @@
       "meaning": "question; ask; problem"
     },
     {
-      "kanji": "口",
-      "kana": "コウ・ク・くち",
-      "meaning": "mouth"
-    },
-    {
       "kanji": "夜",
       "kana": "ヤ・よ・よる",
       "meaning": "night; evening"
@@ -678,11 +653,6 @@
       "meaning": "separate; branch off; diverge; fork; another; extra; specially"
     },
     {
-      "kanji": "社",
-      "kana": "シャ・やしろ",
-      "meaning": "company; firm; office; association; shrine"
-    },
-    {
       "kanji": "映",
       "kana": "エイ・うつ.る・うつ.す・は.える・~ば.え",
       "meaning": "reflect; reflection; projection"
@@ -696,16 +666,6 @@
       "kanji": "主",
       "kana": "シュ・ス・シュウ・ぬし・おも・あるじ",
       "meaning": "lord; chief; master; main thing; principal"
-    },
-    {
-      "kanji": "週",
-      "kana": "シュウ",
-      "meaning": "week"
-    },
-    {
-      "kanji": "多",
-      "kana": "タ・おお.い・まさ.に・まさ.る",
-      "meaning": "many; frequent; much"
     },
     {
       "kanji": "試",
@@ -738,19 +698,9 @@
       "meaning": "gather; meet; congregate; swarm; flock"
     },
     {
-      "kanji": "古",
-      "kana": "コ・ふる.い・ふる~・~ふる.す",
-      "meaning": "old"
-    },
-    {
       "kanji": "知",
       "kana": "チ・し.る・し.らせる",
       "meaning": "know; wisdom"
-    },
-    {
-      "kanji": "買",
-      "kana": "バイ・か.う",
-      "meaning": "buy"
     },
     {
       "kanji": "考",
@@ -763,19 +713,9 @@
       "meaning": "younger brother; faithful service to elders"
     },
     {
-      "kanji": "言",
-      "kana": "ゲン・ゴン・い.う・こと",
-      "meaning": "say; word"
-    },
-    {
       "kanji": "質",
       "kana": "シツ・シチ・チ・たち・ただ.す・もと・わりふ",
       "meaning": "substance; quality; matter; temperament"
-    },
-    {
-      "kanji": "少",
-      "kana": "ショウ・すく.ない・すこ.し",
-      "meaning": "few; little"
     },
     {
       "kanji": "牛",
@@ -806,11 +746,6 @@
       "kanji": "地",
       "kana": "チ・ジ",
       "meaning": "ground; earth"
-    },
-    {
-      "kanji": "飲",
-      "kana": "イン・オン・の.む・~の.み",
-      "meaning": "drink; smoke; take"
     },
     {
       "kanji": "思",
@@ -851,11 +786,6 @@
       "kanji": "姉",
       "kana": "シ・あね・はは",
       "meaning": "elder sister"
-    },
-    {
-      "kanji": "駅",
-      "kana": "エキ",
-      "meaning": "station"
     },
     {
       "kanji": "送",
@@ -943,19 +873,9 @@
       "meaning": "logic; arrangement; reason; justice; truth"
     },
     {
-      "kanji": "魚",
-      "kana": "ギョ・うお・さかな・~ざかな",
-      "meaning": "fish"
-    },
-    {
       "kanji": "教",
       "kana": "キョウ・おし.える・おそ.わる",
       "meaning": "teach; faith; doctrine"
-    },
-    {
-      "kanji": "空",
-      "kana": "クウ・そら・あ.く・あ.き・あ.ける・から・す.く・す.かす・むな.しい",
-      "meaning": "empty; sky; void; vacant; vacuum"
     },
     {
       "kanji": "野",
@@ -986,11 +906,6 @@
       "kanji": "鳥",
       "kana": "チョウ・とり",
       "meaning": "bird; chicken"
-    },
-    {
-      "kanji": "新",
-      "kana": "シン・あたら.しい・あら.た・あら~・にい~",
-      "meaning": "new"
     },
     {
       "kanji": "夏",
@@ -1026,11 +941,6 @@
       "kanji": "近",
       "kana": "キン・コン・ちか.い",
       "meaning": "near; early; akin; tantamount"
-    },
-    {
-      "kanji": "足",
-      "kana": "ソク・あし・た.りる・た.る・た.す",
-      "meaning": "leg; foot; be sufficient; counter for pairs of footwear"
     },
     {
       "kanji": "研",
@@ -1138,16 +1048,6 @@
       "meaning": "Sino-; China"
     },
     {
-      "kanji": "道",
-      "kana": "ドウ・トウ・みち・いう",
-      "meaning": "road-way; street; district; journey; course; moral; teachings"
-    },
-    {
-      "kanji": "目",
-      "kana": "モク・ボク・め・~め・ま~",
-      "meaning": "eye; class; look; insight; experience; care; favor"
-    },
-    {
       "kanji": "自",
       "kana": "ジ・シ・みずか.ら・おの.ずから・おの.ずと",
       "meaning": "oneself"
@@ -1201,11 +1101,6 @@
       "kanji": "茶",
       "kana": "チャ・サ",
       "meaning": "tea"
-    },
-    {
-      "kanji": "手",
-      "kana": "シュ・ズ・て・て~・~て・た~",
-      "meaning": "hand"
     },
     {
       "kanji": "青",
@@ -1286,11 +1181,6 @@
       "kanji": "親",
       "kana": "シン・おや・おや~・した.しい・した.しむ",
       "meaning": "parent; intimacy; relative; familiarity; dealer (cards)"
-    },
-    {
-      "kanji": "会",
-      "kana": "カイ・エ・あ.う・あ.わせる・あつ.まる",
-      "meaning": "meeting; meet; party; association; interview; join"
     },
     {
       "kanji": "験",
@@ -2448,11 +2338,6 @@
       "kanji": "流",
       "kana": "リュウ・ル・なが.れる・なが.れ・なが.す・~なが.す",
       "meaning": "current; a sink; flow; forfeit"
-    },
-    {
-      "kanji": "耳",
-      "kana": "ジ・みみ",
-      "meaning": "ear"
     },
     {
       "kanji": "番",

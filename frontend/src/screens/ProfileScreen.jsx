@@ -166,9 +166,9 @@ export default function ProfileScreen({ session }) {
       {guide.open && !loading && <Guide gate="profile" onEnd={guide.onEnd} />}
 
       {inserts && (desk ? (
-        // 机 — the desk (plan 112): the holder opened flat, the pass and
+        // 机 — the desk (plan 113): the holder opened flat, the pass and
         // its stamp book on the left, at the phone's own size since plan
-        // 114 (--desk-side-w), the record taking the rest on the right. The same
+        // 115 (--desk-side-w), the record taking the rest on the right. The same
         // inserts in the same order, split after the stamps — so a
         // screen reader, the Tab key and the guide walk them exactly as
         // they walk the phone's column.

@@ -60,6 +60,12 @@ Then, once per moved id rather than per learner:
                so where the learner already pinned that key their
                existing pin is kept and the moved one dropped: the kept
                row is the one that still resolves to an entry.
+  dictionary_favorites (kind='vocab')  key is the same deck key
+               (routes/favorites.py), so a favourite follows KEY_MOVES
+               the same way (plan 112, whose merges rename a card's
+               written form: the N5 終る is 終わる). The dictionary still
+               opens an unmoved one -- a folded spelling resolves to its
+               card -- but the entry's star reads the card's own key.
 
 Left alone, and why: xp_ledger.ref and credit_ledger.ref hold card ids
 as receipts -- every reader SUMs the ledger and none joins on ref -- so
@@ -272,7 +278,35 @@ def rename_frequency_overrides(cur, user: str | None = None) -> tuple[int, int]:
     return renamed, dropped
 
 
-def count_side_table_candidates(cur, user: str | None = None) -> tuple[int, int]:
+def rename_favorites(cur, user: str | None = None) -> tuple[int, int]:
+    """dictionary_favorites.key onto the corrected deck key, the pins'
+    rule: a learner who already kept the target keeps that row."""
+    renamed = dropped = 0
+    scope = " AND user_id = %(user)s" if user else ""
+    for old, new in KEY_MOVES.items():
+        params = {"old": old, "new": new, "user": user}
+        cur.execute(
+            f"""
+            UPDATE dictionary_favorites SET key = %(new)s
+            WHERE kind = 'vocab' AND key = %(old)s{scope}
+              AND NOT EXISTS (
+                SELECT 1 FROM dictionary_favorites f2
+                WHERE f2.user_id = dictionary_favorites.user_id
+                  AND f2.kind = 'vocab' AND f2.key = %(new)s
+              )
+            """,
+            params,
+        )
+        renamed += cur.rowcount
+        cur.execute(
+            f"DELETE FROM dictionary_favorites WHERE kind = 'vocab' AND key = %(old)s{scope}",
+            params,
+        )
+        dropped += cur.rowcount
+    return renamed, dropped
+
+
+def count_side_table_candidates(cur, user: str | None = None) -> tuple[int, int, int]:
     scope = " AND user_id = %(user)s" if user else ""
     cur.execute(
         f"SELECT COUNT(*) FROM deck_cards WHERE source = 'vocab' AND raw_id = ANY(%(olds)s){scope}",
@@ -284,7 +318,12 @@ def count_side_table_candidates(cur, user: str | None = None) -> tuple[int, int]
         {"olds": list(KEY_MOVES), "user": user},
     )
     pins = cur.fetchone()[0]
-    return decks, pins
+    cur.execute(
+        f"SELECT COUNT(*) FROM dictionary_favorites WHERE kind = 'vocab' AND key = ANY(%(olds)s){scope}",
+        {"olds": list(KEY_MOVES), "user": user},
+    )
+    favorites = cur.fetchone()[0]
+    return decks, pins, favorites
 
 
 def main(argv=None) -> int:
@@ -300,7 +339,7 @@ def main(argv=None) -> int:
     try:
         with conn.cursor() as cur:
             fates = classify(find_card_ids(cur, args.user), served)
-            decks, pins = count_side_table_candidates(cur, args.user)
+            decks, pins, favorites = count_side_table_candidates(cur, args.user)
         conn.commit()
 
         logger.info("vocab card ids: %d served, %d to move, %d unknown (left)",
@@ -309,7 +348,8 @@ def main(argv=None) -> int:
             logger.warning("  not in the deck and not in vocab_renames.py, left as is: %s", card_id)
         for card_id in fates["moved"]:
             logger.info("  %s -> %s", card_id, MOVES[_split(card_id)[1]])
-        logger.info("deck_cards rows to move: %d; frequency_overrides rows to move: %d", decks, pins)
+        logger.info("deck_cards rows to move: %d; frequency_overrides rows to move: %d; "
+                    "dictionary_favorites rows to move: %d", decks, pins, favorites)
 
         if not args.yes:
             logger.info("dry run -- nothing written. Re-run with --yes to apply.")
@@ -325,11 +365,14 @@ def main(argv=None) -> int:
         with conn.cursor() as cur:
             renamed, dropped = rename_deck_cards(cur, args.user)
             pins_renamed, pins_dropped = rename_frequency_overrides(cur, args.user)
+            favs_renamed, favs_dropped = rename_favorites(cur, args.user)
         conn.commit()
         logger.info("moved %d card id(s) (%d card_modes rows merged into an existing track); "
                     "deck_cards: %d moved, %d dropped as duplicates; "
-                    "frequency_overrides: %d moved, %d dropped as duplicates",
-                    len(fates["moved"]), merged, renamed, dropped, pins_renamed, pins_dropped)
+                    "frequency_overrides: %d moved, %d dropped as duplicates; "
+                    "dictionary_favorites: %d moved, %d dropped as duplicates",
+                    len(fates["moved"]), merged, renamed, dropped, pins_renamed, pins_dropped,
+                    favs_renamed, favs_dropped)
         return 0
     finally:
         conn.close()

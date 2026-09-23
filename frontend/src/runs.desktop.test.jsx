@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a run as a workspace (plan 113) ──────────────────────────
+// ── 机 — a run as a workspace (plan 114) ──────────────────────────
 // On the desk a run stands a column beside its card (StudyStage's
 // `side`). On a card run it is the session panel: this run's tally, and
 // the revealed card's dictionary entry — docked by the reveal, never
@@ -154,7 +154,7 @@ describe('a practice run on the desk', () => {
   })
 })
 
-describe('the docked entry of a card with no dictionary word (plan 114)', () => {
+describe('the docked entry of a card with no dictionary word (plan 115)', () => {
   it('says so, with no dead Close and no unrelated word', async () => {
     // A personal deck's card: its front is no dictionary word, and the
     // search's first result is an unrelated one.

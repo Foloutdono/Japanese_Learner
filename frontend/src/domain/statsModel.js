@@ -186,7 +186,7 @@ function withDerived(row) {
 }
 
 /**
- * One platform's own figures (plan 113, the desk's station split): the
+ * One platform's own figures (plan 114, the desk's station split): the
  * bucket /api/stats keeps for one mode of one deck — how many of its
  * cards are mastered, in progress and new, and how many are due now —
  * with the derived shares the stats screen's composition bar draws.
@@ -198,7 +198,7 @@ export function modeRow(stats, source, deck, mode) {
 }
 
 /**
- * The same row from one bucket on its own (plan 114): what a scoped
+ * The same row from one bucket on its own (plan 115): what a scoped
  * stats route answers — a theme band's, a frequency tier's — which
  * /api/stats does not carry. A route that has nothing to count answers
  * 200 with `{error}` rather than a bucket, so that is no row either.

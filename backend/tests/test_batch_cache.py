@@ -39,6 +39,30 @@ class BatchCacheTests(unittest.TestCase):
         # A short result means "nothing left" — callers must not retry.
         self.assertEqual(batch_cache.take_batch("k", lambda limit: [], count=5), [])
 
+    def test_take_batch_never_repeats_a_card_from_a_standing_pool(self) -> None:
+        # srs.get_new_cards is a READ — serving a card writes no reviewed
+        # row, so the same ids come back on every call. A pool shorter
+        # than `count` used to be re-fetched and served over and over
+        # inside one batch (three cards answered a request for ten with
+        # a-b-c-a-b-c-a-b-c-a), which is what a learner finishing a deck
+        # would have seen.
+        calls = []
+
+        def fetch(limit):
+            calls.append(limit)
+            return ["a", "b", "c"]
+
+        picked = batch_cache.take_batch("k", fetch, count=10)
+        self.assertEqual(picked, ["a", "b", "c"])
+        self.assertEqual(len(calls), 1)
+
+    def test_take_batch_refill_skips_what_the_call_already_took(self) -> None:
+        # The leftover of a previous call is served first; the refill
+        # behind it must not hand the same id out a second time.
+        batch_cache._batches["k"] = ["a"]
+        picked = batch_cache.take_batch("k", lambda limit: ["a", "b", "c"], count=3)
+        self.assertEqual(picked, ["a", "b", "c"])
+
     def test_pick_ids_prefers_due_and_excludes_queued(self) -> None:
         picked = batch_cache.pick_ids(
             "k", ["due1", "due2", "due3"], lambda limit: ["new1"],

@@ -17,7 +17,7 @@ import { useChrome } from './useChrome'
 // between them — a phone's frame, drawn as a centred column between
 // 769 and 1099px.
 //
-// ── 机 — and the desk's (plan 112) ──
+// ── 机 — and the desk's (plan 113) ──
 // At 1100px and up (hooks/useDesk.js) the same frame draws the app's
 // second chrome instead: the rail down the left edge (DeskRail.jsx),
 // which is the HUD and the tab bar in one column. The swap is made in

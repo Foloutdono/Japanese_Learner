@@ -36,7 +36,7 @@ const formatTime = secs => {
 
 // The text on its card. The reading stage draws it bounded, its body
 // scrolling inside (prompt-card--passage); the desk's side column draws
-// it whole beside the questions (plan 114), with no foot — the stage's
+// it whole beside the questions (plan 115), with no foot — the stage's
 // head already says which level and which exercise it is.
 function Passage({ text, level, t, className, foot = true }) {
   return (
@@ -256,7 +256,7 @@ export default function ComprehensionRun({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // The keys (plan 114). The one multiple-choice run that needed the
+  // The keys (plan 115). The one multiple-choice run that needed the
   // mouse for every answer: a letter or a digit picks, Enter commits,
   // and Enter ends the reading. Every width, as every run's keys are;
   // the desk prints them. Not while typing, under a dialog, or with a
@@ -323,7 +323,7 @@ export default function ComprehensionRun({ session }) {
     stage === 'results' ? `${level} · ${t.practiceResult}` :
     level
 
-  // The desk's side column (plan 114). While the questions are asked
+  // The desk's side column (plan 115). While the questions are asked
   // the text stands in it whole — the paper prints them on one page, and
   // the phone's Re-read round trip has nothing left to do. On the
   // results it is the breakdown, open with no toggle, its doors opening

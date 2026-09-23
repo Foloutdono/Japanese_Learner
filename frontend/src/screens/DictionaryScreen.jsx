@@ -13,7 +13,7 @@ import {
 	DictionaryLookupSheet, DictionaryLookupBody,
 } from '../components/dictionary/DictionaryDetail'
 
-// ── 机 — the dock on the desk (plan 113) ──
+// ── 机 — the dock on the desk (plan 114) ──
 // What DetailDock needs to know on a computer and nowhere else: the
 // entry a door in it led to (which opens INTO the dock rather than over
 // the screen) and how to step back out of it. Null below the desk's
@@ -228,7 +228,7 @@ export default function DictionaryScreen({ session }) {
 			} else if (e.key === 'Escape') {
 				if (typing && e.target === searchRef.current) e.target.blur()
 				// On the desk the dock is the catalogue's standing
-				// companion, not a panel that was opened (plan 113):
+				// companion, not a panel that was opened (plan 114):
 				// Escape steps out of a door opened in it, and never
 				// empties it.
 				else if (isDesk()) setLookup(null)
@@ -253,7 +253,7 @@ export default function DictionaryScreen({ session }) {
 
 	useEffect(() => { navRef.current = { results, selected } }, [results, selected])
 	// Arrived by the rail's "/" (components/chrome/DeskRail.jsx, plan
-	// 113): the learner pressed the search key, so the field is where
+	// 114): the learner pressed the search key, so the field is where
 	// they meant to land.
 	const focusSearch = useLocation().state?.focusSearch
 	useEffect(() => {
@@ -283,7 +283,7 @@ export default function DictionaryScreen({ session }) {
 	// panel before they could see what it was a panel ABOUT. There is no
 	// empty space to fill at those widths either, which is the only
 	// reason the preselect exists.
-	// The dock's split is the desk's (hooks/useDesk, plan 112).
+	// The dock's split is the desk's (hooks/useDesk, plan 113).
 	const hasSideDock = isDesk
 
 	// `lvl` is the collection's JLPT level — the state's value unless the
@@ -343,7 +343,7 @@ export default function DictionaryScreen({ session }) {
 				// is always open, on the page's first row. It began with the
 				// syllabary charts — five columns and no wider, an obvious
 				// first cell (あ / ア) and empty space beside them until
-				// something was clicked — and since plan 113 it is every
+				// something was clicked — and since plan 114 it is every
 				// collection: a catalogue beside an empty column is a
 				// phone's layout on a computer. It follows every new page 0
 				// (a collection, a level, a search) and clears when there is
@@ -787,7 +787,7 @@ export default function DictionaryScreen({ session }) {
 				const strokes = r ? `${r.strokes} ${r.strokes === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}` : null
 				const number = t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`
 				// On the desk the way back is a crumb over the header
-				// (plan 114), as it is over every other page.
+				// (plan 115), as it is over every other page.
 				const back = <Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
 				return (
 					<>
@@ -960,7 +960,7 @@ function cardFurigana(entry) {
 // modal: a panel pinned to the viewport cannot hold an entry with a
 // dozen senses and a page of examples. Sticky + its own overflow can.
 //
-// On the desk (plan 113, DeskDockContext) it is the catalogue's standing
+// On the desk (plan 114, DeskDockContext) it is the catalogue's standing
 // companion rather than a panel that was opened: no ✕, and a door in the
 // entry opens INTO the dock (DictionaryLookupBody, the lookup sheet's own
 // body) with ✕ stepping back out to this entry — the catalogue, the
@@ -1019,7 +1019,7 @@ function ResultsSection({
 }) {
 	const desk = useDesk()
 	const navigate = useNavigate()
-	// 机 (plan 114): a search that finds nothing is often not a word but
+	// 机 (plan 115): a search that finds nothing is often not a word but
 	// a sentence pasted in, and the analyser is the tool for that. On
 	// the desk, a query of two Japanese characters or more that found no
 	// entry offers to take it there — the draft filled and analysed on

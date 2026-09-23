@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a station as two panes (plan 113) ───────────────────────
+// ── 机 — a station as two panes (plan 114) ───────────────────────
 // On a phone a station is two screens: the stops, then one tap later the
 // chosen stop's platforms. On the desk the stops stand upright beside
 // the platforms (StationSplit): the bare list opens on the learner's own

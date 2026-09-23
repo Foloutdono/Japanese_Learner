@@ -33,3 +33,20 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
     throw e
   }
 }
+
+// ── What a saved queue must not replay ─────────────────────────
+// A study screen resumes its saved queue on the next visit, and that
+// queue is per screen and per device: a card answered since — in
+// Today, in another section holding the same card, on another device —
+// would come straight back out of it, days before it was due. This is
+// the `checkCached` every run screen hands useCardSession: of the saved
+// (card_id, mode) pairs, the ones answered since and not due again.
+// Rejects like any apiJson call; the hook then plays the queue as saved.
+export async function staleCards(session, cards, signal) {
+  const res = await apiJson('/api/today/stale', session, {
+    method: 'POST',
+    body: JSON.stringify({ cards }),
+    signal,
+  })
+  return Array.isArray(res?.stale) ? res.stale : []
+}

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — Today on the desk (plan 113) ────────────────────────────
+// ── 机 — Today on the desk (plan 114) ────────────────────────────
 // The fare gate is the work and takes the width; beside it stands what
 // the work is FOR — the pass at strip size and the pass's back (the
 // journey, the status sheet's own body), always open. On a phone the

@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a session by key, and the gates' last doors (plan 114) ─────
+// ── 机 — a session by key, and the gates' last doors (plan 115) ─────
 // A whole session from Today used to need the pointer to depart and to
 // leave. On the desk Enter departs from the gate card and takes a run's
 // last filled action, Esc leaves a run (never over a dialog, never when

@@ -168,7 +168,7 @@ describe('RatingBar keyboard contract — two buttons', () => {
   })
 })
 
-// ── 机 — no key caps below the desk (plan 112) ──
+// ── 机 — no key caps below the desk (plan 113) ──
 // On the desk each tile prints its digit (keys.desktop.test); this lane
 // is 414px wide, a phone's width, where a thumb has no number row and
 // the tile keeps its word and its seal alone.

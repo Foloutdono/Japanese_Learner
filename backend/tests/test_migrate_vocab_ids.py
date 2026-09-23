@@ -9,6 +9,8 @@
 #   * frequency_overrides keys the DECK KEY, not the card id, so a pin
 #     moves with the entry -- and a learner who already pinned the target
 #     key keeps that pin, because it is the one that still resolves
+#   * dictionary_favorites keys the same deck key and follows the same
+#     rule (plan 112)
 #   * vocab_jmdict_* is a different source with its own migration and must
 #     not be swept up by the "vocab_%" scan
 #   * an unknown id, another user's rows are left alone
@@ -112,6 +114,12 @@ def _seed():
         _exec("INSERT INTO frequency_overrides(user_id, domain, item_key, tier) VALUES (%s,'vocab',%s,%s) "
               "ON CONFLICT DO NOTHING", (user, key, tier))
 
+    # The favourites the same way: one on A's old key, and B's old key
+    # beside the target the learner already keeps.
+    for user, key in ((USER, KEY_A_OLD), (USER, KEY_B_OLD), (USER, KEY_B_NEW), (OTHER, KEY_A_OLD)):
+        _exec("INSERT INTO dictionary_favorites(user_id, kind, key) VALUES (%s,'vocab',%s) "
+              "ON CONFLICT DO NOTHING", (user, key))
+
 
 def _wipe():
     for user in (USER, OTHER):
@@ -120,6 +128,7 @@ def _wipe():
         _exec("DELETE FROM card_modes WHERE card_id LIKE %s", (f"{user}:%",))
         _exec("DELETE FROM cards WHERE id LIKE %s", (f"{user}:%",))
         _exec("DELETE FROM frequency_overrides WHERE user_id = %s", (user,))
+        _exec("DELETE FROM dictionary_favorites WHERE user_id = %s", (user,))
         _exec("DELETE FROM decks WHERE user_id = %s", (user,))
 
 
@@ -150,11 +159,17 @@ def _pins(user):
     return dict(rows)
 
 
+def _favorites(user):
+    rows = _exec("SELECT key FROM dictionary_favorites WHERE user_id = %s AND kind = 'vocab'", (user,))
+    return {r[0] for r in rows}
+
+
 def test_a_dry_run_changes_nothing():
     assert migrate.main(["--user", USER]) == 0
     assert _ids(USER) == {OLD_A, OLD_B, NEW_B, OLD_C, STRAY, JMDICT}
     assert _modes(USER, OLD_A) and _modes(USER, OLD_B)
     assert _pins(USER) == {KEY_A_OLD: 3, KEY_B_OLD: 4, KEY_B_NEW: 9}
+    assert _favorites(USER) == {KEY_A_OLD, KEY_B_OLD, KEY_B_NEW}
 
 
 def test_moves_rename_merge_and_leave_what_they_should():
@@ -202,6 +217,10 @@ def test_moves_rename_merge_and_leave_what_they_should():
     # frequency pins: A's moves onto the corrected key; B's collides with
     # a pin the learner already holds, and the one that still resolves wins
     assert _pins(USER) == {KEY_A_NEW: 3, KEY_B_NEW: 9}
+
+    # favourites: the same two outcomes, and nobody else's touched
+    assert _favorites(USER) == {KEY_A_NEW, KEY_B_NEW}
+    assert _favorites(OTHER) == {KEY_A_OLD}
 
 
 def test_a_second_run_is_a_no_op():

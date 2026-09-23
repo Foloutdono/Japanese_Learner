@@ -32,7 +32,7 @@ import { JourneyBody } from './JourneyBody'
 // office (Settings › Destination); a pass with no contract at all
 // (never onboarded) has nothing to show and the panel never opens it.
 //
-// The body is JourneyBody.jsx (plan 113), which the desk also stands
+// The body is JourneyBody.jsx (plan 114), which the desk also stands
 // beside the fare gate on Today; this is the sheet around it.
 
 export function StatusSheet({ session }) {

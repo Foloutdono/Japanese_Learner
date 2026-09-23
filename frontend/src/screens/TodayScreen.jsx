@@ -45,7 +45,7 @@ function RunComplete({ run, today, credits, t, lang, onBack }) {
         <span className="btn-depart__jp">{t.backToStation}</span>
         {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
       </button>
-      {/* 机 (plan 114): Enter, the one way on. */}
+      {/* 机 (plan 115): Enter, the one way on. */}
       <EnterKey onEnter={onBack} />
     </div>
   )
@@ -99,7 +99,7 @@ export default function TodayScreen({ session }) {
         </>
       )}
       {guide.open && !run && <Guide gate="today" onEnd={guide.onEnd} />}
-      {/* 机 — the desk (plan 113): the gate is the work, and beside it
+      {/* 机 — the desk (plan 114): the gate is the work, and beside it
           what the work is FOR — the pass at strip size (the week, the
           streak, the day's new items) and the pass's back, the journey
           it is on: how far along, how far behind the promise, and the

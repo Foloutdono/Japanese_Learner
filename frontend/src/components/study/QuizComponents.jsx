@@ -117,7 +117,7 @@ export function CharDisplay({ char, variant, size }) {
 // and if that normalised text were also what "did the user pick the
 // right answer" compared, then any two options whose raw strings
 // differed only in punctuation would start grading as the same answer.
-// `keyHint` (the desk, plan 112): the row's index is the key that
+// `keyHint` (the desk, plan 113): the row's index is the key that
 // answers it, so it prints the digit the number row types — 1, not 01,
 // as the exam's rows already do — and the button names its shortcut.
 // Only the first four are bound (domain/choiceKeys).
@@ -287,7 +287,7 @@ export function ModeToggle({ mode, onChange, modes }) {
 export function DoneMessage({ onBack, pace, onExtra }) {
   const { t } = useLang()
   const desk = useDesk()
-  // 机 (plan 114): Enter takes the way back, the one filled action.
+  // 机 (plan 115): Enter takes the way back, the one filled action.
   const back = () => { playClick(); onBack() }
   const enterCap = desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>
 
@@ -622,7 +622,7 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
 
 function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
-  // On the desk, inside a run with a side column (plan 113), the entry
+  // On the desk, inside a run with a side column (plan 114), the entry
   // is docked beside the card the moment the card is revealed, and the
   // 🔍 that would open the same entry in a sheet is not offered. The
   // panel remounts per card (`resetKey`), so its cleanup takes the last
@@ -833,7 +833,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
       </div>
       <div className="flashcard__hint">
         {/* A phone is tapped; a desk has a keyboard, so there the hint
-            names the key (plan 112). */}
+            names the key (plan 113). */}
         {!revealed && (desk
           ? <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>
           : t.tapToReveal)}

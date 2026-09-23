@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the gates laid out for the width (plan 112) ────────────
+// ── 机 — the gates laid out for the width (plan 113) ────────────
 // At the desk's tightest (1100, the rail taking 256 of it) the two
 // plated gates hang their plates two by two, the odd fifth across the
 // row, and Today sets the strip beside the fare gate. The phone's own
@@ -93,5 +93,5 @@ describe('the plated gates on the desk', () => {
   })
 })
 
-// Today's layout on the desk is today.desktop.test.jsx (plan 113), on the
+// Today's layout on the desk is today.desktop.test.jsx (plan 114), on the
 // real screen.

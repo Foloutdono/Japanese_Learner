@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a deck as list and platforms (plan 113) ───────────────────
+// ── 机 — a deck as list and platforms (plan 114) ───────────────────
 // On a phone a deck's page ends in ▶ Study, which opens a second screen
 // of platforms, and its add-card form opens in the page between the
 // chips and the list. On the desk the platforms stand beside the cards

@@ -74,6 +74,15 @@ class DeckMeasurementTests(unittest.TestCase):
         lower level; a new pair lands here."""
         self.assertEqual(self.report["duplicates"]["exact_pairs"], [])
 
+    def test_no_word_is_served_under_two_spellings(self) -> None:
+        """Plan 112: the pairs exact_pairs cannot see because the fields
+        differ -- 終る beside 終わる, いい beside いい/よい, 十 read じゅう
+        beside 十 read じゅう/とお, 見付かる beside 見つかる. Each was one
+        word a learner met twice. One card each now; a new pair lands
+        here, and two words that only look like one go in
+        DISTINCT_PAIRS with the reason."""
+        self.assertEqual(self.report["duplicates"]["spelling_pairs"], [])
+
     def test_every_focus_word_resolves_to_a_card(self) -> None:
         """A curated sentence is chosen to practise its focus word, and a
         focus word with no card schedules nothing (routes/reading.py).

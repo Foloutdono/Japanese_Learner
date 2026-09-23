@@ -29,12 +29,12 @@ import { useListWalk } from '../../hooks/useListWalk'
 //           for kana, which has no such thing.
 //   onSelect(key)
 //   selected — the stop whose platforms stand beside the route, in the
-//           desk's station split (plan 113, StationSplit): it is the
+//           desk's station split (plan 114, StationSplit): it is the
 //           page, so it is marked as one (`aria-current="page"`, and
 //           the Settings list's own selection). Only the desk passes it.
 //
 // In the split the route is also walked by key (hooks/useListWalk,
-// plan 114): one tab stop, the open one, and ↑/↓/Home/End along it.
+// plan 115): one tab stop, the open one, and ↑/↓/Home/End along it.
 export function RouteStops({ stops, here = null, selected = null, onSelect }) {
   const hereIndex = stops.findIndex(s => s.key === here)
   const walked = selected != null

@@ -4,7 +4,7 @@ import { useStats } from '../../stores/stats'
 import { currentKanaSet } from '../../domain/kanaSets'
 import { Loading } from '../ui/Loading'
 
-// ── 机 — a station as two panes (plan 113) ───────────────────────────
+// ── 机 — a station as two panes (plan 114) ───────────────────────────
 // On a phone a station is two screens: the line's stops, then — one tap
 // later — the chosen stop's platforms. On the desk there is room for
 // both at once, which is what a desktop list of choices beside the thing
@@ -17,7 +17,7 @@ import { Loading } from '../ui/Loading'
 //
 // Rendered only when hooks/useDesk says so, by the screen that owns it
 // (VocabScreen, KanjiScreen, KanaScreen, GrammarScreen, ExamScreen; since
-// plan 114 the grammar points, the tiers, the theme bands, the exam's
+// plan 115 the grammar points, the tiers, the theme bands, the exam's
 // review and the library's shelf, whose `className` sets its columns).
 export function StationSplit({ label, list, className = '', children }) {
   return (

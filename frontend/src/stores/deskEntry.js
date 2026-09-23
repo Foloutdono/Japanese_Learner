@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// ── 机 — the revealed card's entry, docked beside the run (plan 113) ──
+// ── 机 — the revealed card's entry, docked beside the run (plan 114) ──
 // On a phone the dictionary entry of a revealed card is one tap away,
 // behind the 🔍 on the card, in a sheet. On the desk it is already
 // open in the session panel beside the card: the card's reveal

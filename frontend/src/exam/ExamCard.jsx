@@ -6,7 +6,7 @@ import QuestionRenderer from './QuestionRenderer'
 // over whatever QuestionRenderer draws for its type. The runner draws it
 // for the question being answered; on the desk the result's review
 // draws the same card, revealed, as the page beside its list of
-// questions (plan 114) — one card, everywhere (DESIGN.md).
+// questions (plan 115) — one card, everywhere (DESIGN.md).
 //
 // `keys` and `passageAside` are the desk's; see QuestionRenderer.
 export default function ExamCard({ question, selected, onSelect = () => {}, revealed = false, devMode = false, keys = false, passageAside = false }) {

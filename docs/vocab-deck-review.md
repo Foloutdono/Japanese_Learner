@@ -498,6 +498,127 @@ A code review of the twelve commits found two defects, both fixed:
   not run in this environment (the pinned Playwright's browser cannot
   be downloaded there); CI runs it.
 
+### 112 — one word, one card, whatever its spelling (DONE, 2026-09-22)
+
+106b merged the pairs that shared both fields. The owner's report was
+that the decks still held duplicates, and they did: pairs that shared
+the WORD and not the fields, which no test could see. Found with
+JMdict (the `jamdict-data` edition on PyPI, entry by entry, so a pair
+counts only when both cards are one dictionary entry) and then with a
+mechanical check that needs no dictionary, which is what guards them
+now (`audit_vocab_deck.spelling_pairs`, held empty by
+`test_audit_vocab_deck`).
+
+**The kanji deck** listed 23 characters twice, identical entries at N5
+and N4 (耳 at N5 and N3): the N5 list had been widened to the community
+lists' N5 without the old N4 list losing them. `kanji_to_id` keys on
+the level, so a learner's 会 forked into two cards. The N4/N3 copies
+are gone; `content/kanji_renames.py` maps each onto the N5 card and
+`scripts/migrate_kanji_ids.py` carries the rows (the vocab migration's
+merge helpers, so the two cannot disagree). The deck is 2,212 entries
+over 2,212 characters; `test_migrate_kanji_ids` holds it so.
+
+**The vocab deck**, 8,404 → 8,091, 361 `MOVES` lines onto 304 cards,
+all at the lower level:
+
+| kind | cards kept | example |
+|---|---|---|
+| a reading the lower card packs | 3 | 十 (じゅう, とお at N3) → 十 じゅう/とお (N5) |
+| the same kana word twice | 11 | いい, よい (N3) → いい/よい (N5); インキ → インク |
+| one word, two kanji spellings | 70 | 終る (N5) + 終わる (N1) → 終わる (N5); 見付かる (N2) → 見つかる (N4) |
+| a written form that misspells its reading | 2 | 誰 read だれか (N5) → 誰か; お・金持ち → 金持ち |
+| two spellings packed in one field | 8 | 川/河 (N5) → 川; 伯父/叔父 read おじいさん → おじいさん |
+| a kana card above its own kanji card | 11 | あした (N3) → 明日 (N5) |
+| a "usually kana" kanji spelling above the kana card | 198 | 此れ (N1) → これ (N5); 美味しい (N1) → おいしい (N5) |
+| same level | 1 | 唯 → ただ (N3) |
+
+The survivor keeps the lower card's spelling, unless that spelling is
+the nonstandard okurigana of the two (終る, 落る, 楽む…), when it takes
+the one JMdict lists first -- so 50 lower ids move too, and `KEY_MOVES`
+carries their pins. 御馳走 and 御無沙汰 keep 御 over ご: UniDic
+lemmatises ご + ちそう to 御馳走, which is what the compound fold looks
+up. The packed fields were plan 106's 見る 観る eight more times: the
+lemma index keyed the N5 川/河 on the whole string, so every 川 in a
+sentence badged the N3 川 card. `test_vocab_deck` now refuses a `/`, a
+space or a ・ in the written form.
+
+**Nothing a learner can type or read is lost.** `vocab_renames.
+FOLDED_FORMS` is the spellings each card took in, derived from `MOVES`,
+and four readers add it and never let it repoint an answer: the
+dictionary's search and exact lookup (美味しい finds おいしい; a
+favourite kept on 終る::おわる still opens), the breakdown's lemma and
+kana indexes (a page's 此れ badges the N5 これ, where it used to badge
+the N1 card), and the placement report (the lists' 知合い still says
+where 知り合い sits, and is not a word "with no card").
+`migrate_vocab_ids` now moves `dictionary_favorites` with the pins, so
+the star on a renamed card stays lit.
+
+Deploy, then, once each: `migrate_vocab_ids`, `migrate_kanji_ids`,
+`migrate_pool_cards` (the N5 初め took one pool row in, recorded in
+`pool_moves.json`). The first ride's N1 card was 乗り換え, now N2; it is
+始発.
+
+**Left, each a decision rather than a duplicate the rule settles:**
+
+- **A kana card below a kanji card JMdict does NOT mark usually-kana**
+  -- about a hundred: いす (N5) / 椅子 (N3), かぎ / 鍵, おもしろい /
+  面白い, ほんとう / 本当, いちばん / 一番. The rule would keep the kana
+  card and take 椅子 off every card in the deck (the dictionary still
+  finds it); the other way puts 椅子 on the N5 card. The first is the
+  JLPT lists' choice, the second decision 3's. The owner's call.
+- **こと (N4) and 事 (N3).** `resolve_kana` never resolves a bare こと
+  (it is the nominaliser), so folding 事 into こと would strip the badge
+  from every 事 in a sentence.
+- **Different kanji for one reading** (会う/遭う, 計る/量る/測る,
+  換える/替える/代える, 川/河) are different written words and stay,
+  though several share an English gloss word for word -- the gloss is
+  the content audit's to sharpen.
+- **The N2 御手洗 read おてあらい** is glossed as a shrine's purifying
+  font, which JMdict reads みたらし: a content-audit finding, listed in
+  `audit_vocab_deck.DISTINCT_PAIRS` so the guard does not call it a
+  duplicate of お手洗い.
+
+### The first vocab audit (#154, 2026-09-22)
+
+Run 1 of the content audit took the forty riskiest cards and filed ten
+findings the morning before 112 landed; 112 had already settled two of
+them (明い → 明るい at N5 with the eight other inverted cross-reference
+spellings, and 下る::さがる into 下がる). The rest, all through
+`curated_senses`:
+
+- **A card carrying another word's meaning.** 変化::へんか was *goblin*
+  (へんげ), 臭い::くさい was 匂い's *odour*, 気味::きみ the suffix ぎみ
+  (the N3 grammar point 〜気味 teaches that; the card is きみ, *feeling*),
+  無::ぶ む's *nothing*. 一部 leads with *a part* now, not the counter.
+- **Another reading's gloss written across a form's rows**, the pattern
+  behind 後::うしろ: a card whose gloss shares no word with its own
+  JMdict senses, among forms that repeat one gloss. 空::から was *sky*,
+  額::がく *forehead*, 軒::けん *eaves*, 金::かね *gold*, 生::せい and
+  上::かみ carried なま's and じょう's, 為る::する なる's -- seventeen cards.
+  Plan 107 had given most of them a correct French line; the English
+  was never touched.
+- **The export's length cap.** No gloss reached 110 characters; 37 of
+  the longest stopped mid-word, on a dangling "to" or an open bracket
+  (保つ "to keep we", 渋い "…, 3"), and several French lines with them
+  (合わす ended "à", 下地's *spadework* was *bêche*). Each is JMdict's
+  senses, complete and shorter.
+- **十分 ten minutes read only じっぷん.** It is じゅっぷん/じっぷん now,
+  a `MOVES` line, since the app's own dictation says じゅっぷん.
+- **頃 read けい is no word** (the reading lives in 頃日 and 頃刻; JMdict's
+  only 頃【けい】 is a Chinese unit of land, and neither JLPT list has
+  it). The N1 card taught ころ's meaning, KANJIDIC's for the character,
+  so it leaves the deck and its rows go to the N3 ころ card -- the first
+  `MOVES` line that is not a spelling of its target, which
+  `vocab_renames.NOT_FOLDED` keeps out of `FOLDED_FORMS`: the move
+  carries the progress, and the dictionary does not learn to answer
+  けい with ころ. 8,091 → 8,090.
+
+`scripts/audit_slice.py` read the French by written form (#155), so
+the dump showed 23 of the forty with another reading's French; it goes
+through `translations.fr_gloss` now. Left: the other forms that share
+one gloss agree with JMdict closely enough that the audit's slices,
+not a sweep, should judge them.
+
 ## Order and dependencies
 
 103 → 104 → 105 → (106, 107, 108 in any order) → 109 → 110. 103 and 104

@@ -18,7 +18,7 @@ import { journeyStations } from './stations'
 // behind, the two honest moves. See StatusSheet.jsx for why it leads
 // with distance.
 //
-// Its own component since the desk (plan 113): on a computer the same
+// Its own component since the desk (plan 114): on a computer the same
 // body stands beside the fare gate on Today (JourneyPanel.jsx) rather
 // than behind a tap on the HUD, because the question it answers — am I
 // on course? — is the one the gate is the answer to. The sheet renders

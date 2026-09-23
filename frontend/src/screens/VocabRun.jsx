@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { postReview as sendReview } from '../lib/reviews'
+import { postReview as sendReview, staleCards } from '../lib/reviews'
 import {
   translatedMap, applyTranslations, retranslateSelection,
 } from '../lib/translationCache'
@@ -113,11 +113,15 @@ export default function VocabRun({ session }) {
   // what fetchBatch fetches going forward mid-refill-cycle, only
   // re-translate what's already in hand — see the effect below)
 
+  // What the saved queue must not replay: cards answered since, here
+  // or anywhere else (lib/reviews, staleCards).
+  const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
   const { current: card, loading, done, error, retry, advance, updateCurrent } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
     mode,
+    checkCached,
   })
 
   // The written form to quiz on — some vocab entries are kana-only (no

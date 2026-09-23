@@ -1,6 +1,6 @@
 import { useLayoutEffect, useState } from 'react'
 
-// ── A box's own width, for a drawing that must be drawn at it (plan 113) ──
+// ── A box's own width, for a drawing that must be drawn at it (plan 114) ──
 // An SVG whose viewBox is fixed scales with its box: the retention line's
 // 326 units are a phone's card, and on the desk's 800px card every stroke
 // and every stop came out two and a half times too heavy. A drawing that

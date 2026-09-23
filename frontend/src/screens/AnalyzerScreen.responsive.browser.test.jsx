@@ -99,7 +99,7 @@ async function analyze(screen) {
 // platform's panel is in the DOM, so the switch has to settle before
 // anything inside the new panel can be queried.
 async function leaveResult(screen) {
-  // Over the head on the desk (plan 114's crumb), in it below the desk.
+  // Over the head on the desk (plan 115's crumb), in it below the desk.
   const leave = screen.container.querySelector('.anl-head .stage__leave, .desk-crumb .stage__leave')
   if (leave) { leave.click(); await settle(30) }
 }
@@ -574,7 +574,7 @@ describe('AnalyzerScreen structure', () => {
   // dialog and silently defeating useDialog's Tab-wrap trap.
   it('closes an open word detail when a new Passage arrives', async () => {
     // The sheet is the phone chrome's: on the desk a word opens in the
-    // result's dock instead (plan 114; analyzer.desktop's own case).
+    // result's dock instead (plan 115; analyzer.desktop's own case).
     await page.viewport(1099, 900)
     try {
       const screen = await renderScreen()

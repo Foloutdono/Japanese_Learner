@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { apiJson, ApiError } from '../lib/api'
 
-// ── A published deck, as the library serves it (plan 114) ──────────
+// ── A published deck, as the library serves it (plan 115) ──────────
 // Shared by the phone's page for it (screens/PublicDeckScreen.jsx) and
 // the desk's pane beside the shelf (components/decks/PublicDeckPage.jsx).
 // `missing` is a 404 — a deck withdrawn or never published — which the

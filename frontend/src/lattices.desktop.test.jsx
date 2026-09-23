@@ -5,7 +5,7 @@ import ModeSelector from './components/selection/ModeSelector'
 import { RouteStops } from './components/selection/RouteStops'
 import './index.css'
 
-// ── 机 — the stations and the run's column, laid out for the width (plan 113) ──
+// ── 机 — the stations and the run's column, laid out for the width (plan 114) ──
 // A station page is a bar over one thing to choose from. On the desk:
 // its platforms go two across with the odd one out taking the row, and
 // exactly three go three across — never a column of 1,000px cards, never

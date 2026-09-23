@@ -508,7 +508,7 @@ export default function DeckDetailScreen({ session }) {
   }
 
   // On the desk the form, Browse and the platforms take turns in one
-  // column (plan 114): opening one gives the column to it.
+  // column (plan 115): opening one gives the column to it.
   function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) setShowBrowse(false) }
 
   function startEdit(card) {
@@ -606,7 +606,7 @@ export default function DeckDetailScreen({ session }) {
   const addLabel = String(t.addCard).replace(/^\+\s*/, '')
 
   // Add / Edit form: in its slot on a phone, in the second column on
-  // the desk (plan 113), where it stands beside the cards it adds to.
+  // the desk (plan 114), where it stands beside the cards it adds to.
   const cardForm = adding && (
     <div className="form deckdetail-form">
       <span className="form__label">

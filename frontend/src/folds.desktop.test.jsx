@@ -4,8 +4,8 @@ import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'rea
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the stations fold their second screens (plan 114) ─────────
-// Plan 113 set a line's stops beside a stop's platforms. The lines it
+// ── 机 — the stations fold their second screens (plan 115) ─────────
+// Plan 114 set a line's stops beside a stop's platforms. The lines it
 // left as two screens fold the same way here: a grammar level's points
 // beside the open point's lesson (one click or ←/→ a point, no sheet),
 // a theme's bands and the frequency tiers beside the open one's

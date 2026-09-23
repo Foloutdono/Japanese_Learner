@@ -1,4 +1,4 @@
-// ── 机 — a screen's second column (plan 113) ───────────────────────
+// ── 机 — a screen's second column (plan 114) ───────────────────────
 // On the desk a screen may stand one companion beside its main work: the
 // pass's back beside the fare gate, a deck's platforms beside its cards.
 // One column, --desk-side-w wide (index.css, the 机 block), sticky so it

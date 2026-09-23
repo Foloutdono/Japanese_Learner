@@ -16,15 +16,15 @@ import { useDesk } from '../hooks/useDesk'
 // picking one boards the train into /learn/decks/:deck_id/study/:mode
 // on the stage frame (screens/StudyRun.jsx). ‹ Deck is the way back
 // to the deck's own page. The modes are hooks/useDeckModes', which the
-// desk's deck page stands beside its cards (plan 113).
+// desk's deck page stands beside its cards (plan 114).
 export default function StudyScreen(props) {
   const desk = useDesk()
   const { deck_id } = useParams()
   const { state } = useLocation()
   // On the desk the deck's page stands its platforms beside its cards
-  // (components/decks/DeckPlatforms, plan 113), so this screen has
+  // (components/decks/DeckPlatforms, plan 114), so this screen has
   // nothing of its own to show: every way here — a deck run's ‹, its
-  // finish, an old link — lands on the deck page instead (plan 114).
+  // finish, an old link — lands on the deck page instead (plan 115).
   // Decided before any fetch, so the desk never asks for these modes.
   if (desk) return <Navigate replace to={`/learn/decks/${deck_id}`} state={state} />
   return <DeckStudyPlatforms {...props} />
