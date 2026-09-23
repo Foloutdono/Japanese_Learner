@@ -5835,3 +5835,35 @@ starting each line on its own row (more short rows, i.e. dead space
 inside the list); column-major order (it needs the row count from
 JavaScript, or multi-column CSS, which overflows sideways inside a
 height-bounded box).
+
+---
+
+# 机 — a radical's page as two panes (plan 118, 2026-09-23)
+
+What wave 26 (plan 115) deferred first: the kanji station's third
+source was still a phone's two screens on the desk — the lesson with its
+platforms, and the family (`?family=1`) in the lesson's place behind a
+door, the way back a `‹` in the bar — and the bare index its own page.
+The one constraint stands: below 1100px nothing changes. Numbered 118:
+116 is the gate's lanes, and 117 is claimed by an open branch (a split's
+rows as links).
+
+| Plan | What | Status |
+|---|---|---|
+| 118 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
+
+| Flow | Wave 26 | Plan 118 |
+|---|---|---|
+| Another radical from a radical's page | ‹ to the index, then a tile (2 clicks) | a tile beside it (1), the URL replaced |
+| A radical's family | the door, the lesson gone; ‹ to come back | the door; the family beside the lesson and its platforms |
+| A platform's record on a radical's page | none | due now, the composition bar, mastered / total |
+| "By radical" from the kanji sources | the index, then a tile (2 clicks) | the page's biggest family's lesson (1) |
+
+Verified beyond the suite: a throwaway browser pass dumped every element,
+attribute, text node, box and computed style of the radical screens (the
+lesson, the plate opened, the family, the family with a kanji's sheet
+open, the door pressed, the bare index) at 390, 768 and 1099px, from the
+merge commit and from this change — the eighteen dumps are identical.
+
+Deferred: ←/→ through a page's radicals; a family kanji's entry opening
+beside the family rather than as a centred dialog.

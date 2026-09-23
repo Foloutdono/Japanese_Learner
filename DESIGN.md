@@ -931,7 +931,7 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–116)
+### The desk (机, plans 113–116, 118)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
@@ -993,7 +993,12 @@ into the page and gave a session its keys.
   route each run opens on, the library's shelf beside the open deck's page
   (the shelf keeping its search and its place), and a deck's platform screen
   gives way to the deck's page. A long list scrolls in its own column; the
-  stops are one tab stop, walked with ↑/↓.
+  stops are one tab stop, walked with ↑/↓. A radical's page (plan 118)
+  stands the radicals index beside the lesson and its platforms, on the
+  stroke page the radical is on, and another radical swaps the page in
+  place; the family's door no longer takes the lesson's place but swaps
+  the index for the family, in the list, and back. The bare index opens
+  on its page's biggest family.
 - **The statistics are one page.** What holds on the left — the retention
   line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
   a phone's chart), the ladder, the lines with the open one's levels hung

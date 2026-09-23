@@ -241,7 +241,22 @@ runtime purpose. Two consequences worth knowing:
   holds two at a phone's lane width (cited in the 机 section of
   `index.css`, `src/today.wide.test.jsx`, `src/today.desktop.test.jsx` and
   `src/deskfree.phone.test.jsx`; the evaluation is in `plans/README.md`).
-  When starting a new wave, begin at **117** or higher, and check
+  **117** is claimed by an open branch (`claude/blissful-turing-wwbnn3`,
+  a split's rows as links) and not yet merged here.
+  **118** is a radical's page on the desk as two panes, which plan 115
+  deferred: the radicals index beside the lesson and its platforms, the
+  open radical in gold and each platform figured from the family's own
+  stats; another radical swaps the page by replacing the URL, the family's
+  door swaps the index for the family in the list and back, and the bare
+  index opens on its page's biggest family (cited in
+  `screens/KanjiScreen.jsx`, `components/selection/RadicalLesson.jsx`'s
+  `RadicalFamily`/`RadicalFamilyList`,
+  `components/selection/RadicalSelector.jsx`'s `RadicalRedirect`,
+  `components/dictionary/RadicalIndex.jsx`'s `selected`,
+  `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  When starting a new wave, begin at **119** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
