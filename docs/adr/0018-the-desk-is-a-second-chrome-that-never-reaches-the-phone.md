@@ -107,3 +107,14 @@ The promise that the phone never breaks is carried by structure, not by care:
   width, so what is set in it is drawn at the width it was designed at).
   Its phone side is `src/deskfree.phone.test.jsx`. DESIGN.md, "The desk",
   lists what it changed.
+- Plan 114 (wave 26) took the desk's remaining second screens and sheets
+  into the page under the same guarantees — a door opens in the column it
+  was pressed in, the stations' second screens fold into their splits, the
+  mock exam and comprehension are sat beside their text, a run fits a
+  laptop's window, and a session needs no pointer — and added no value to
+  `:root`. It also fixed five bugs the audit found on the phone too
+  (a cloze blank never lit, Back re-sitting a finished paper, run keys
+  firing under a dialog, leaving a run pushing history, out-of-order
+  dictionary pages), each in its own commit with its own phone test: the
+  only differences below 1100 the branch-against-base identity pass
+  allows. Its phone side is further blocks of `src/deskfree.phone.test.jsx`.

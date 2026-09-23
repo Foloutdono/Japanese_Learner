@@ -5742,3 +5742,40 @@ Deferred: a comprehension passage beside its questions; a standing
 answer sheet in the exam runner; the exam result and the library laid
 out for the width; a word looked up from a docked breakdown still opens
 the lookup as a dialog.
+
+# Wave 26 — 机, the desk's third round (plan 114, 2026-09-23)
+
+The owner's verdict on wave 25: nicely done, continue to improve it. A
+read-only audit (seven areas, an auditor and a skeptic each, then a
+synthesis) found the screens still shaped like a phone on the desk, runs
+that did not fit a laptop's window, doors that still opened dialogs over a
+docked column, live bugs in the shipped desk work, and five bugs on the
+phone too, which the owner approved fixing in the same wave.
+
+| Plan | What | Status |
+|---|---|---|
+| 114 | **P0** five phone bugs, a commit and a phone test each: a cloze blank never lit (`blankNumber`), Back from a result re-sitting the paper (replace on finish), run keys under a dialog (`lib/dialogOpen`), leaving a run pushing history (`stores/boarding`'s `returnsTo`, `hooks/useRunExit`), out-of-order dictionary pages; **P1** the run's side in its pigment (`RunSide`), a breakdown's doors opening in the side (`SideLookup`), exact docked lookups, the column's card width for the exam's rows, one Sign out; **P2** comprehension beside its text, A–D/Enter, a miss opening its sentence; **P3** the stations' second screens folded — grammar points beside the lesson, theme bands and tiers beside their platforms (`ScopeFigures`), the deck's platform screen giving way; **P4** the mock exam's standing answer sheet, a flat reading passage (`ExamCard`, `PassageText`), Space for listening, the review as list and page; **P5** the library's shelf beside a deck (`PublicDeckPane`), Browse docked (`BrowseCardsDock`), one /modes fetch, one "No cards"; **P6** the analyser's dock (`AnalyzerDock`, `tokenLookup`), `DeskCrumb`, the intake beside history, Ctrl/⌘+Enter, the dictionary's handoff to the analyser, kana charts that wrap; **P7** a run that fits a laptop (top-aligned, card and choices side by side, rows that keep their place), the misses at a run's end (`tallyMisses`); **P8** Enter and Esc (`DeskKeys`), C for choices, Enter at a run's end, a Learn plate's legs as doors, ↑/↓ along a station (`useListWalk`), the rail's focus ring, the profile's pass at phone size and both rankings, the guide's note beside its anchor with `…Desk` copy; **P9** the records, the identity pass and the screenshots | DONE (2026-09-23) |
+
+What changed for a learner on a computer:
+
+| Flow | Wave 25 | Wave 26 |
+|---|---|---|
+| Look up a word in a graded sentence | dialog + scrim, 2 clicks per further word | in the side, 1 click |
+| Comprehension: check the text during a question | Re-read, then Back (2 clicks) | 0: the passage stands beside the question |
+| Comprehension: answer a question | click row + click Next | 2 keys (A–D, Enter) |
+| Grammar point lesson | click → modal → close | 1 click or ←/→ |
+| Theme band / next frequency tier | 2 clicks | 1, with figures |
+| Leave a deck run | the extra platforms screen | the deck page |
+| Exam: jump to a question | open the bar, a dialog, pick | 1 click, sheet always visible |
+| Exam: reading passage | 480px scroll box, re-animates per question | stands still beside its questions |
+| Exam review | accordion, 2 clicks per move | list and page, 1 click or ←/→ |
+| Library: inspect 5 decks | 10 clicks, 5 refetches | 5 clicks, 0 refetches |
+| Analyzer lookup | dialog + close | docked column, ←/→ walk tokens |
+| Pasted sentence in the dictionary | 3 acts on 2 screens | 1 click to the analyzer |
+| Kanji MCQ at 1100×800 | 4th choice at the floor, rating bar below it, jumping on answer | all in view; rating bar never moves |
+| Whole session from Today | mouse to depart and to leave | Enter departs, Esc leaves |
+
+Deferred: the radical lesson page as a split; browse-mode runs with a side;
+a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
+for middle-click; Today's lanes two across; flag ink unification (a phone
+design change, the owner's to decide). Cut: see plan 114's own list.

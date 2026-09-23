@@ -200,7 +200,33 @@ runtime purpose. Two consequences worth knowing:
   `hooks/useDeckModes.js`) — every rule in the 机 section of `index.css`,
   and the phone's side held by `src/deskfree.phone.test.jsx` (DESIGN.md,
   "The desk"; `docs/design/desk/README.md`).
-  When starting a new wave, begin at **114** or higher, and check
+  **114** is the desk's third round (wave 26), the remaining second screens
+  and sheets taken into the page: five phone bugs the audit found, each with
+  its phone test (`exam/examService.js`'s `blankNumber`, `screens/ExamRunner.jsx`'s
+  replace on finish, `lib/dialogOpen.js`, `stores/boarding.js`'s `returnsTo`
+  with `hooks/useRunExit.js`, `screens/DictionaryScreen.jsx`'s page sequence);
+  a run's side in its pigment and a breakdown's doors opening in it
+  (`StudyStage.jsx`'s `RunSide`, `components/analysis/SideLookup.jsx`);
+  comprehension beside its text (`screens/ComprehensionRun.jsx`,
+  `domain/choiceKeys.js`, `domain/quotedFragments.js`); the stations' second
+  screens folded — grammar points beside the lesson, theme bands and tiers
+  beside their platforms, the deck's platform screen giving way
+  (`GrammarLessonBody`, `ScopeFigures`, `statsModel.bucketRow`,
+  `tiers.tierAtSize`); the mock exam's standing answer sheet, flat passage
+  and review split (`exam/ExamCard.jsx`, `QuestionRenderer`'s `PassageText`);
+  the library's shelf beside a deck and Browse docked
+  (`components/decks/PublicDeckPage.jsx`, `hooks/usePublicDeck.js`,
+  `BrowseCardsDock`); the analyser's dock, intake beside history and the
+  dictionary's handoff (`components/analysis/AnalyzerDock.jsx`,
+  `lookup.tokenLookup`, `Bar.jsx`'s `DeskCrumb`); a run that fits a laptop and
+  its misses at the end (`runTally.tallyMisses`, `SessionPanel`'s `done`); and
+  the keys, the gates' last doors and the guide beside its anchor
+  (`components/chrome/DeskKeys.jsx`, `hooks/useListWalk.js`, `LineFoot`'s legs,
+  `Banzuke`'s `both`, `Guide.jsx`) — every rule in the 机 section of
+  `index.css`, one desktop test file a phase and the phone's side in further
+  blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
+  `docs/design/desk/README.md`; ADR 0018).
+  When starting a new wave, begin at **115** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
