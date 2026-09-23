@@ -276,7 +276,16 @@ runtime purpose. Two consequences worth knowing:
   `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
   `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **120** or higher, and check
+  **120** is the radical index's tiles as links: on the desk a radical's
+  tile in the index beside its lesson is a `<Link replace>` to its page,
+  as plan 117 made every other split's row (`RadicalTile`'s `to` and
+  `RadicalGrid`'s `linkTo` in `components/dictionary/RadicalIndex.jsx`,
+  passed by `components/selection/RadicalSelector.jsx` from
+  `screens/KanjiScreen.jsx`, whose scroll to the top now follows the
+  radical rather than the click); the phone's index and the dictionary's
+  keep their buttons (held by `src/splitRows.desktop.test.jsx`,
+  `src/radicals.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`).
+  When starting a new wave, begin at **121** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

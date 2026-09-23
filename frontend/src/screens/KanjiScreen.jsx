@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
@@ -55,6 +55,16 @@ export default function KanjiScreen({ session }) {
   const { level, tier, radical } = useParams()
   const [sp, setSp] = useSearchParams()
   const desk = useDesk()
+  // Another radical beside the index takes the page back to its top, for
+  // the lesson it now shows (plan 118). On the change of radical rather
+  // than in the tile's click (plan 120): the tiles are links on the desk,
+  // and a Ctrl/⌘-click that opens a radical in another tab changes
+  // nothing here, so it must not scroll this page.
+  const shownRadical = useRef(radical)
+  useEffect(() => {
+    if (desk && radical != null && shownRadical.current != null && shownRadical.current !== radical) window.scrollTo(0, 0)
+    shownRadical.current = radical
+  }, [desk, radical])
   // The lesson reports its radical up, so the bar can name it.
   const [lesson, setLesson] = useState(null)
 
@@ -191,18 +201,18 @@ export default function KanjiScreen({ session }) {
     // beside the lesson and its platforms, the open radical marked, each
     // platform figured from the family's own stats (the route the run
     // opens on), and another radical swaps the page by replacing the
-    // URL. The family's door no longer takes the lesson's place: it
-    // swaps the index for the family, in the list, and back — a push,
-    // as on the phone, so Back undoes it; the crumb puts the index back
-    // too. The family is the lesson's own answer (onLoaded), not a
-    // second fetch, and the index stays mounted from one radical to the
-    // next, on the page the learner left it.
+    // URL — each tile a link to it (plan 120), so a radical opens in a
+    // tab of its own too. The family's door no longer takes the lesson's
+    // place: it swaps the index for the family, in the list, and back —
+    // a push, as on the phone, so Back undoes it; the crumb puts the
+    // index back too. The family is the lesson's own answer (onLoaded),
+    // not a second fetch, and the index stays mounted from one radical
+    // to the next, on the page the learner left it.
     if (desk) {
       const figured = modes.map(m => (m.key === FAST_REVIEW ? m : {
         ...m,
         aside: <ScopeFigures session={session} url={`/api/kanji/stats?radical=${number}&mode=${m.key}`} />,
       }))
-      const open = n => { navigate(`${BASE}/radical/${n}`, { replace: true }); window.scrollTo(0, 0) }
       return (
         <SelectionScreen
           title={t.kanjiTitle}
@@ -213,7 +223,7 @@ export default function KanjiScreen({ session }) {
             label={browsing ? t.radFamily : t.byRadicalShort}
             list={browsing
               ? <RadicalFamilyList radical={here} session={session} />
-              : <RadicalSelector session={session} selected={number} onSelect={open} />}
+              : <RadicalSelector session={session} selected={number} linkTo={n => `${BASE}/radical/${n}`} />}
           >
             <RadicalLesson
               key={number}

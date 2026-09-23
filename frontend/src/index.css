@@ -21426,15 +21426,18 @@ a.slip__act { text-decoration: none; }
      the button's weight and leading, where the row leaves its text to
      them (the route and the cards; the index and the review rows set
      `font: inherit` of their own), no underline, the button's hover
-     where the row keeps it (the review's), and its focus ring. */
-  .desk-split__list a:is(.route-stop, .platform-card) {
+     where the row keeps it (the review's), and its focus ring. A
+     radical's tile in the index beside its lesson is one too (plan 120),
+     and also takes back the centring its text had from the button. */
+  .desk-split__list a:is(.route-stop, .platform-card, .radical-tile) {
     font-weight: 600;
     line-height: normal;
   }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row, .radical-tile) { text-decoration: none; }
   .desk-split__list a.exam-review-row { transition: filter 0.15s; }
+  .desk-split__list a.radical-tile { text-align: center; }
   .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
-  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row, .radical-tile):focus-visible {
     outline: 2px solid var(--accent2);
     outline-offset: 2px;
   }

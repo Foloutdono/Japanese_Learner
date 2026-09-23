@@ -53,10 +53,11 @@ describe('routePattern', () => {
   it('reduces every desk split row\'s link to its pattern', () => {
     // Plan 117: on the desk a split's rows are links, and their hrefs
     // name what the learner opened — a theme, a deck, a grammar point, an
-    // exam question. A click on one is recorded the way a navigate() was
-    // (App.jsx's Trail reads the router's pathname), a tab opened from
-    // one records its own screen_view, and either way the pattern is all
-    // that is kept. The query (point, question, level, size) never is.
+    // exam question, a radical (plan 120). A click on one is recorded
+    // the way a navigate() was (App.jsx's Trail reads the router's
+    // pathname), a tab opened from one records its own screen_view, and
+    // either way the pattern is all that is kept. The query (point,
+    // question, level, size) never is.
     const links = {
       '/learn/vocab/N4': '/learn/vocab/:level',
       '/learn/kana/katakana_basic': '/learn/kana/:set',
@@ -67,11 +68,12 @@ describe('routePattern', () => {
       '/practice/exam?level=N3': '/practice/exam',
       '/learn/decks/library/42': '/learn/decks/library/:deck_id',
       '/practice/exam/e1/results?attempt=9&question=q2': '/practice/exam/:examId/results',
+      '/learn/kanji/radical/61': '/learn/kanji/radical/:radical',
     }
     for (const [href, pattern] of Object.entries(links)) {
       const p = routePattern(href)
       expect(p, href).toBe(pattern)
-      expect(p, href).not.toMatch(/animaux|katakana|42|grammar_N4|q2|N3|N4|\?/)
+      expect(p, href).not.toMatch(/animaux|katakana|42|61|grammar_N4|q2|N3|N4|\?/)
     }
   })
 

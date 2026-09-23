@@ -35,8 +35,11 @@ import { firstRadical } from '../../domain/radicals'
  *               way back from a lesson lands on the page it left
  *   selected  — the desk's (plan 118): the radical whose lesson stands
  *               beside the index, marked, its page the one opened
+ *   linkTo(number) — the desk's too (plan 120): the URL of a radical's
+ *               page, which makes the tiles links (RadicalGrid) that
+ *               replace the page; `onSelect` is then not called
  */
-export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected }) {
+export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected, linkTo = null }) {
   const { t } = useLang()
   const { groups, failed } = useRadicalGroups(session)
 
@@ -46,7 +49,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke, s
     <RadicalGrid
       groups={groups}
       loading={!groups}
-      onPick={n => { playUi('click-mode-selection'); onSelect(n) }}
+      onPick={n => { playUi('click-mode-selection'); if (!linkTo) onSelect(n) }}
       tile={r => ({
         glyph: r.glyph,
         sub: r.meaning,
@@ -59,6 +62,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke, s
       stroke={stroke}
       onStroke={onStroke}
       selected={selected}
+      linkTo={linkTo}
       t={t}
     />
   )

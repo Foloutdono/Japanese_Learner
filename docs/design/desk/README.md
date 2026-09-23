@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–119, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–120, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -55,7 +55,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-journey`, `__head`, `__name`, `__word` | the pass's back beside the gate: the status sheet's body on sumi | `components/journey/JourneyPanel.jsx` (body: `JourneyBody.jsx`) |
 | `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓ (`hooks/useListWalk.js`). The list's rows are links (`<Link replace>`, plan 117), so a row opens in a new tab too; the link wears the button's face (`.desk-split__list a:is(…)`) | `components/selection/StationSplit.jsx`, `SplitRow.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review (its open question in `?question=`) |
 | `.desk-lesson` | a grammar point's lesson as the page beside the level's points, on the card's surface | `screens/GrammarScreen.jsx`, `components/study/GrammarLesson.jsx` (`GrammarLessonBody`) |
-| `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 118): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold; the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`), `domain/radicals.js` |
+| `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 118): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold, each tile a link to its page (plan 120, `a.radical-tile` wears the button's face); the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`, `linkTo`), `domain/radicals.js` |
 | `.desk-split--shelf`, `.desk-shelf-page` | the library's shelf beside the open deck's page, half and half | `screens/LibraryScreen.jsx`, `components/decks/PublicDeckPage.jsx` (`PublicDeckPane`) |
 | `.desk-mode-fig`, `__due`, `__unit`, `__count` | a platform's own figures: due now, the composition bar, mastered / total — from /api/stats (`ModeFigures`) or a scoped stats route (`ScopeFigures`, plan 115) | `components/selection/ModeFigures.jsx` |
 | `.desk-stats`, `__holds`, `__leaks` | the statistics in two columns: the line (1:1), the ladder and the lines; the misses and every trouble card | `screens/StatsScreen.jsx` |
@@ -104,8 +104,8 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/breakdown.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/folds.desktop.test.jsx`, `src/exam.desktop.test.jsx`, `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/laptop.desktop.test.jsx`, `src/session.desktop.test.jsx` | desktop | plan 115, one file a phase |
 | `src/today.wide.test.jsx` | wide | plan 116: the gate's lanes two across, in the list's order, Enter departing with the choice |
 | `src/splitRows.desktop.test.jsx` | desktop | plan 117: a split's row as a link measures as the button it replaced (at rest, hover, focus), and a modified click is left to the browser |
-| `src/radicals.desktop.test.jsx` | desktop | plan 118: a radical's page beside the index, the family in the list, the bare index |
+| `src/radicals.desktop.test.jsx` | desktop | plan 118: a radical's page beside the index, the family in the list, the bare index; plan 120: each tile a link, a Ctrl-click leaving the page put |
 | `src/browse.desktop.test.jsx` | desktop | plan 119: the browse's side — the entry docked on reveal, no tally, no column over an empty browse |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–119's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–120's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |

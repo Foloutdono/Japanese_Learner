@@ -918,3 +918,55 @@ describe('the browse (plan 119)', () => {
     expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
   })
 })
+
+// ── plan 120 — a radical's tiles stay buttons below the line ──
+// On the desk the radicals index beside a lesson is a split's list, and
+// its tiles are links (SplitRow). A phone's index is its own page: each
+// tile stays the button it was — the same element, the same attributes
+// — and a tap still pushes the lesson.
+describe('the radical index\'s tiles (plan 120)', () => {
+  const GROUPS = [{ stroke_count: 4, radicals: [
+    { number: 61, char: '心', glyph: '心', stroke_count: 4, meaning: 'cœur', count: 40, learned: 2, started: 2 },
+    { number: 85, char: '水', glyph: '水', stroke_count: 4, meaning: 'eau', count: 123, learned: 10, started: 10 },
+  ] }]
+
+  it('keeps each tile a button that pushes its lesson', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (String(path).startsWith('/api/kanji/radicals') ? { groups: GROUPS } : {}) }))
+    const { MemoryRouter, Routes, Route, useLocation, useNavigationType } = await import('react-router-dom')
+    const { default: KanjiScreen } = await import('./screens/KanjiScreen')
+    const seen = { path: null, type: null }
+    function Probe() {
+      const loc = useLocation()
+      seen.path = loc.pathname
+      seen.type = useNavigationType()
+      return null
+    }
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/kanji/radicals?stroke=4']}>
+          <Routes>
+            <Route path="/learn/kanji/radicals" element={<KanjiScreen session={{}} />} />
+            <Route path="/learn/kanji/radical/:radical" element={<p className="probe-lesson">lesson</p>} />
+          </Routes>
+          <Probe />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    const tiles = [...document.querySelectorAll('.radical-tile')]
+    expect(tiles).toHaveLength(2)
+    for (const tile of tiles) {
+      expect(tile.tagName).toBe('BUTTON')
+      expect(tile.getAttribute('type')).toBe('button')
+      expect([...tile.attributes].map(a => a.name).filter(n => !['type', 'title', 'class'].includes(n))).toEqual([])
+    }
+    expect(document.querySelector('.radical-page a')).toBeNull()
+    tiles.find(el => el.textContent.includes('心')).click()
+    await settle()
+    expect(seen.path).toBe('/learn/kanji/radical/61')
+    expect(seen.type).toBe('PUSH')
+    apiFetch.mockReset()
+  })
+})

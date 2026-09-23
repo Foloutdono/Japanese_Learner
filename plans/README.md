@@ -5894,3 +5894,13 @@ desk, in the width a card run gives its session panel.
 Left out on purpose: the grammar browse. It wires no dictionary lookup
 at all, so there is no 🔍 on a phone either, and giving it one would put
 that 🔍 on the phone, which the desk may not change.
+
+# Plan 120 — the radical index's tiles as links (2026-09-23)
+
+Plan 117 made every row of the desk's split lists a link; plan 118's
+radical page landed on main while 117 was open, its index's tiles still
+buttons that replaced the URL. The owner asked for them to follow.
+
+| Plan | What | Status |
+|---|---|---|
+| 120 | `RadicalTile` takes `to` and draws through `SplitRow`; `RadicalGrid` takes `linkTo`; `RadicalSelector` passes it and stops calling `onSelect` when it does; the desk's kanji station passes `/learn/kanji/radical/:n`. The scroll to the top that `open` did on the click follows the radical instead (a Ctrl-click opens a tab and leaves this page put). The 机 block gives `a.radical-tile` the button's weight, leading and centring, no underline and the focus ring. The stroke rail stays buttons (it pages the index), the family's kanji stay buttons (they open a sheet), the dictionary's index and the phone's keep their tiles. `splitRows.desktop.test.jsx` measures the tile as link against button; `radicals.desktop.test.jsx`; a block of `deskfree.phone.test.jsx`; `routePattern.test.js` | DONE (2026-09-23) |

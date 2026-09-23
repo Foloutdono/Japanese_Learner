@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Loading } from '../ui/Loading'
 import { ChevronIcon } from '../ui/Icons'
 import { byRank } from '../../domain/radicals'
+import { SplitRow } from '../selection/SplitRow'
 
 // ── 部首索引 — the radical index, shared ─────────────────────
 // Lifted out of DictionaryScreen.jsx (plan 086) because the kanji
@@ -160,12 +161,16 @@ function dictionaryTile(r) {
 // a thing you see on a page of thirty-seven of them.
 //
 // `current` is the desk's (plan 118): the radical whose page stands
-// beside the index, marked the way an open stop is.
-export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick }) {
+// beside the index, marked the way an open stop is. So is `to` (plan
+// 120): the radical's page's URL, which makes the tile a link that
+// replaces the page (SplitRow), so a radical opens in a tab of its own
+// too. Without it — a phone, the dictionary — the tile is the button it
+// always was.
+export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick, to = null }) {
   const done = learned != null && count > 0 ? Math.min(1, learned / count) : null
   return (
-    <button
-      type="button"
+    <SplitRow
+      to={to}
       onClick={onPick}
       title={title}
       aria-current={current ? 'page' : undefined}
@@ -177,7 +182,7 @@ export function RadicalTile({ glyph, count, sub, learned, title, started, curren
         {learned != null ? <><b>{learned}</b>/ {count}</> : count}
       </span>
       {done != null && <span className="radical-tile__run" style={{ '--done': done }} aria-hidden="true" />}
-    </button>
+    </SplitRow>
   )
 }
 
@@ -228,9 +233,12 @@ const columns = (n, labelled) => Math.min(labelled ? 3 : 4, Math.max(1, Math.cei
  *              beside the index. Its tile is marked, the index opens on
  *              the page it is on rather than on the first, and the tile
  *              is kept in view in the list's own scroll.
+ *   linkTo(number) — the desk's (plan 120): the URL a radical's page
+ *              stands at, which makes each tile a link to it (RadicalTile's
+ *              `to`); `onPick` still runs on the click, for its sound.
  *   t        — the string table
  */
-export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index', selected }) {
+export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index', selected, linkTo = null }) {
   const [ownStroke, setOwnStroke] = useState(null)
   const page = useRef(null)
   const stroke = strokeProp ?? ownStroke
@@ -281,7 +289,7 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
         aria-label={strokes(group.stroke_count, t)}
       >
         <div className={`radical-page__grid${labelled ? ' radical-page__grid--labelled' : ''}`}>
-          {rows.map(r => <RadicalTile key={r.number} {...r} current={selected != null && r.number === selected} onPick={() => onPick(r.number)} />)}
+          {rows.map(r => <RadicalTile key={r.number} {...r} current={selected != null && r.number === selected} onPick={() => onPick(r.number)} to={linkTo?.(r.number)} />)}
         </div>
       </section>
     </div>

@@ -14,6 +14,11 @@ import './index.css'
 // the lesson staying where it is. The bare index opens on its page's
 // biggest family, the way the tiers open on the first. The phone's side
 // is deskfree.phone.
+//
+// Each tile is a link to its radical's page (plan 120), as every other
+// split's row is (plan 117): a click still swaps the page in place, and
+// a middle click or Ctrl/⌘-click opens the radical in a tab of its own
+// and leaves this page where it is.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -134,11 +139,25 @@ describe('a radical\'s page beside the index', () => {
   it('swaps the page for another radical in one click, replacing the URL', async () => {
     await mount('/learn/kanji/radical/85')
     await settle(400)
-    const heart = $$('.desk-split__list .radical-tile').find(el => el.querySelector('.radical-tile__char').textContent === '心')
+    const tiles = $$('.desk-split__list .radical-tile')
+    expect(tiles.every(el => el.tagName === 'A')).toBe(true)
+    const heart = tiles.find(el => el.querySelector('.radical-tile__char').textContent === '心')
+    expect(heart.getAttribute('href')).toBe('/learn/kanji/radical/61')
+    const scrolled = vi.spyOn(window, 'scrollTo').mockImplementation(() => {})
+    // A Ctrl-click is the browser's (a new tab): this page stays put,
+    // unscrolled. The listener cancels the browser's own navigation.
+    window.addEventListener('click', e => e.preventDefault(), { once: true })
+    heart.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true, button: 0, ctrlKey: true }))
+    await settle(100)
+    expect(where.path).toBe('/learn/kanji/radical/85')
+    expect(scrolled).not.toHaveBeenCalled()
     heart.click()
     await settle(400)
     expect(where.path).toBe('/learn/kanji/radical/61')
     expect(where.type).toBe('REPLACE')
+    // The new lesson starts at the top of the page.
+    expect(scrolled).toHaveBeenCalledWith(0, 0)
+    scrolled.mockRestore()
     expect($('.desk-split__page .rad-plate__id').textContent).toBe('心')
     expect(openTile()[0].querySelector('.radical-tile__char').textContent).toBe('心')
     // The index stood still: fetched once, for both radicals.

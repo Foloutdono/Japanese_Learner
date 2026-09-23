@@ -7,8 +7,8 @@ import './index.css'
 
 // ── 机 — a split's rows are links (plan 117) ─────────────────────
 // On the desk a row of a StationSplit's list — a level, a kana set, a
-// theme band, a tier, a grammar point, a library deck, an exam question
-// — opens its item beside the list. It is a link to that item's URL
+// theme band, a tier, a grammar point, a library deck, an exam question,
+// and since plan 120 a radical's tile — opens its item beside the list. It is a link to that item's URL
 // (components/selection/SplitRow), so the middle click, Ctrl/⌘-click and
 // "open in new tab" work, and a plain click still replaces the page in
 // place. Two promises are held here: the link LOOKS like the button it
@@ -30,6 +30,7 @@ const { RouteStops } = await import('./components/selection/RouteStops')
 const { default: GrammarIndex } = await import('./components/selection/GrammarIndex')
 const { default: TierSelector } = await import('./components/selection/TierSelector')
 const { LibraryCard } = await import('./components/decks/LibraryCard')
+const { RadicalGrid } = await import('./components/dictionary/RadicalIndex')
 const { useLang } = await import('./LangContext')
 
 const settle = (ms = 200) => new Promise(r => setTimeout(r, ms))
@@ -46,6 +47,11 @@ const POINTS = [
   { raw_id: 'mo', pattern: 'も', meaning: 'aussi', stage: 'new' },
 ]
 const DECK = { id: 7, name: 'Voyage', type: 'standard', author: 'Aki', description: 'Les mots du voyage', card_count: 40, followers: 3 }
+const RADICALS = [{ stroke_count: 3, radicals: [
+  { number: 85, glyph: '氵', meaning: 'eau', count: 123, learned: 30, started: 40 },
+  { number: 64, glyph: '扌', meaning: 'main', count: 90, learned: 0, started: 0 },
+  { number: 61, glyph: '忄', meaning: 'cœur', count: 40, learned: 5, started: 5 },
+] }]
 
 // A split as the desk draws it, its list holding `list`.
 function Split({ list, className = '' }) {
@@ -64,6 +70,23 @@ function Shelf({ link }) {
       <LibraryCard deck={DECK} t={t} open to={link ? '/learn/decks/library/7' : null} onOpen={() => {}} />
       <LibraryCard deck={{ ...DECK, id: 8 }} t={t} to={link ? '/learn/decks/library/8' : null} onOpen={() => {}} />
     </div>
+  )
+}
+
+// The radicals index as the desk's kanji station draws it
+// (RadicalSelector's tile: the meaning under the glyph, the figure).
+function Radicals({ link }) {
+  const { t } = useLang()
+  return (
+    <RadicalGrid
+      groups={RADICALS}
+      onPick={() => {}}
+      t={t}
+      order="rank"
+      selected={85}
+      tile={r => ({ glyph: r.glyph, sub: r.meaning, count: r.count, learned: r.learned, started: r.started > 0, title: r.meaning })}
+      linkTo={link ? n => `/learn/kanji/radical/${n}` : null}
+    />
   )
 }
 
@@ -99,11 +122,12 @@ function Both({ link }) {
       <Split list={<TierSelector domain="vocab" session={null} tierSize={200} selected={2} onSelect={() => {}} linkTo={to('/learn/vocab/tier')} />} />
       <Split className="desk-split--shelf" list={<Shelf link={link} />} />
       <Split list={<Review link={link} />} />
+      <Split list={<Radicals link={link} />} />
     </div>
   )
 }
 
-const ROWS = ['.route-stop', '.gl-index__row', '.platform-grid > .platform-card:not(.lib-card)', '.lib-card', '.exam-review-row']
+const ROWS = ['.route-stop', '.gl-index__row', '.platform-grid > .platform-card:not(.lib-card)', '.lib-card', '.exam-review-row', '.radical-tile']
 
 // The same geometry on a phone-sized desk would prove nothing, so the
 // splits sit in the desk's own frame, one form above the other.
