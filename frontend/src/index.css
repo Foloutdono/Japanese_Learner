@@ -20838,6 +20838,12 @@ a.slip__act { text-decoration: none; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
+  /* The result is a focus target, not a tab stop, and meant to be
+     ringless (the note under .anl-results near the top of this file,
+     whose rule was lost). On the desk ←/→ walk the tokens with that
+     focus still held, so the first arrow drew the browser's ring round
+     the whole stage and its dock. */
+  .anl-results:focus-visible { outline: none; }
   /* The intake beside its history (plan 114). */
   .desk-intake {
     display: grid;

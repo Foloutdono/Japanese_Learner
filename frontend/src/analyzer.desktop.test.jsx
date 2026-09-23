@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -146,6 +147,18 @@ describe('the analyser on the desk', () => {
     press('ArrowRight')
     await settle()
     expect(docked()).toBe('待つ')
+  })
+
+  it('draws no ring round the result while the arrows walk it', async () => {
+    await mount()
+    await analyze()
+    const results = $('.anl-results')
+    expect(document.activeElement).toBe(results)
+    // A real key press, so the browser takes the keyboard's modality.
+    await userEvent.keyboard('{ArrowRight}')
+    await settle()
+    expect(document.activeElement).toBe(results)
+    expect(getComputedStyle(results).outlineStyle).toBe('none')
   })
 
   it('opens a door on a longer Passage in the route map\'s column, and Esc gives it back', async () => {
