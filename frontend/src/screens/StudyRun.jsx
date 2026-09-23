@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useNavigate, useLocation, useParams, Navigate } from 'react-router-dom'
+import { useLocation, useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview } from '../lib/reviews'
 import { useLang } from '../LangContext'
@@ -10,6 +10,7 @@ import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -46,13 +47,12 @@ import WritingToggle from '../components/study/WritingToggle'
 
 export default function StudyRun({ session }) {
   const { t, lang } = useLang()
-  const navigate     = useNavigate()
   const { deck_id, mode } = useParams()
   const { state }    = useLocation()
 
   const valid = Boolean(deck_id) && Boolean(STUDY_MODES[mode]?.implemented) && STUDY_MODES[mode]?.graded !== false
   const platforms = `/learn/decks/${deck_id}/study`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   // Falls back to fetching the deck when opened without router state (a
   // refresh, a direct link): the writing-practice toggle depends on

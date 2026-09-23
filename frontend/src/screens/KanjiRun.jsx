@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom'
+import { useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { tierLabelFor } from '../domain/tiers'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview } from '../lib/reviews'
@@ -16,6 +16,7 @@ import { usePace } from '../components/study/usePace'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -44,7 +45,6 @@ import { radicalChoiceRenderer } from '../components/study/radicalChoiceRenderer
 // the shape every run shares.
 
 export default function KanjiRun({ session }) {
-  const navigate    = useNavigate()
   const { t, lang } = useLang()
   const { level, tier, radical, mode } = useParams()
   const [sp] = useSearchParams()
@@ -71,7 +71,7 @@ export default function KanjiRun({ session }) {
   const platforms = level ? `/learn/kanji/${level}`
     : tier ? `/learn/kanji/tier/${tier}?size=${tierSize}`
     : `/learn/kanji/radical/${radical}`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)

@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
@@ -70,6 +71,7 @@ function stageClassFor(structureKey) {
 
 export default function TodayRun({ session }) {
   const navigate = useNavigate()
+  const leaveToGate = useRunExit('/today')
   const { t, lang } = useLang()
   const [params] = useSearchParams()
   // The gate's choice. Sorted so the same selection always produces
@@ -276,7 +278,7 @@ export default function TodayRun({ session }) {
   return (
     <StudyStage
       color={color}
-      onLeave={() => navigate('/today')}
+      onLeave={leaveToGate}
       leaveLabel={t.stageGate}
       where={where}
       sub={sub}

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, useSearchParams, Navigate } from 'react-router-dom'
+import { useParams, useSearchParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview } from '../lib/reviews'
 import {
@@ -16,6 +16,7 @@ import { FuriganaWord } from '../components/study/Readings'
 import { formatGlossLine } from '../components/study/gloss'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -40,7 +41,6 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // the shape every run shares.
 
 export default function VocabRun({ session }) {
-  const navigate    = useNavigate()
   const { t, lang } = useLang()
   const { level, tier, theme, themeLevel, mode } = useParams()
   const [sp] = useSearchParams()
@@ -64,7 +64,7 @@ export default function VocabRun({ session }) {
     level ? `/learn/vocab/${level}`
     : theme ? `/learn/vocab/theme/${theme}${isThemeLevel(themeLevel) ? `/level/${themeLevel}` : ''}`
     : `/learn/vocab/tier/${tier}?size=${tierSize}${freqDomain === 'vocab_jmdict' ? '&domain=jmdict' : ''}`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   const [answered, setAnswered]     = useState(false)
   const [selected, setSelected]     = useState(null)

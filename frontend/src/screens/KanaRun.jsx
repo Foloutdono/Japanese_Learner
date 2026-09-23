@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview } from '../lib/reviews'
 import { useLang } from '../LangContext'
@@ -13,6 +13,7 @@ import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
@@ -41,7 +42,6 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // charged after the scheduler accepts (lib/reviews).
 
 export default function KanaRun({ session }) {
-  const navigate = useNavigate()
   const { t } = useLang()
   const { set, mode } = useParams()
 
@@ -50,7 +50,7 @@ export default function KanaRun({ session }) {
   const reviewing = mode === FAST_REVIEW
   const valid = Boolean(selectedSet) && (reviewing || STUDY_MODES[mode]?.source === 'kana')
   const platforms = `/learn/kana/${set}`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
