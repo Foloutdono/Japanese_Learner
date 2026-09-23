@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the statistics as a dashboard (plan 113) ────────────────
+// ── 机 — the statistics as a dashboard (plan 114) ────────────────
 // On a phone the service record is one column read top to bottom, its
 // two drill-downs (a line's levels, the trouble cards past six) behind
 // sheets, and its chart a 326-unit drawing scaled to the card. On the

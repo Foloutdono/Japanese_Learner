@@ -16,7 +16,7 @@ export function WritingSlip({
   value, onChange, placeholder, t, provenance, hint, onSubmit, submitLabel, busy,
 }) {
   const fieldRef = useRef(null)
-  // 机 (plan 114): on the desk Ctrl+Enter (⌘+Enter on a Mac) submits
+  // 机 (plan 115): on the desk Ctrl+Enter (⌘+Enter on a Mac) submits
   // from the field, the way a computer's multi-line fields do — Enter
   // alone is a new line, which a pasted paragraph needs. Its cap is on
   // the button it presses.

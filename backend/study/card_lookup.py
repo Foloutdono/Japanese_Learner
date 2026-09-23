@@ -5,6 +5,7 @@ phrase analyzer and the reading-practice mode.
 """
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+from content.vocab_renames import FOLDED_FORMS
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, STATUS_MODES
 from content import vocab_extras
@@ -552,14 +553,15 @@ def _index_vocab_by_lemma():
     Variants are added in a SECOND pass, and only for keys the first
     pass did not already claim, which makes them strictly additive:
     they can turn a lookup that used to fail into a hit, never change
-    the answer to one that already succeeded. Three deck words carry
-    both spellings as separate entries at different levels (御馳走 N2
-    and ご馳走 N1, likewise 御無沙汰, 御手洗い); merging those
-    candidate lists would hand ご馳走 to _pick_best_candidate's
-    lowest-level tie-break and silently repoint the word from its N1
-    card to the N2 one, moving the badge off whatever SRS history the
-    learner already has. Whether the deck should hold the same word
-    twice is a separate question from this index.
+    the answer to one that already succeeded. Three deck words used to
+    carry both spellings as separate entries at different levels (御馳走
+    N2 and ご馳走 N1, likewise 御無沙汰, 御手洗い), and merging those
+    candidate lists would have handed ご馳走 to _pick_best_candidate's
+    lowest-level tie-break, repointing the word under a learner's SRS
+    history. Plan 112 answered the question this index could not -- the
+    deck holds each of them once now -- and its fourth pass below is
+    the one that appends to a claimed key, because what it appends is
+    the card that replaced one already there.
     """
     index = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
@@ -612,6 +614,20 @@ def _index_vocab_by_lemma():
                 lemma = morphemes[0].lemma
                 if lemma != word and (level, entry) not in index.get(lemma, []):
                     index.setdefault(lemma, []).append((level, entry))
+
+    # Fourth pass (plan 112): a kanji spelling folded into another card.
+    # The N1 美味しい went into the N5 おいしい and the N5 終る became
+    # 終わる, but a page still writes both, and a token whose lemma is
+    # 美味しい used to find a card of that spelling. The card that took
+    # the word in stands under the key now, exactly where the card it
+    # replaced stood -- beside whatever else the key holds (身体 read
+    # しんたい keeps its place beside 体 for 身体 read からだ), so the
+    # candidates a reading chooses among are the ones it always had.
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for entry in vocab_list:
+            for kanji, _ in FOLDED_FORMS.get(vocab_to_id(entry, level), ()):
+                if kanji and (level, entry) not in index.get(kanji, []):
+                    index.setdefault(kanji, []).append((level, entry))
     return index
 
 
@@ -646,6 +662,19 @@ def _index_vocab_by_kana():
                 folded = morphology.kata_to_hira(reading)
                 if folded != reading:
                     index.setdefault(folded, []).append((level, entry))
+    # A kana spelling folded into another card (plan 112: インキ into
+    # インク, ウェートレス into ウエートレス) stands where the card it
+    # replaced stood -- the lemma index's fourth pass, for the words
+    # written without kanji.
+    for level, vocab_list in VOCAB_BY_LEVEL.items():
+        for entry in vocab_list:
+            for kanji, kana in FOLDED_FORMS.get(vocab_to_id(entry, level), ()):
+                if kanji:
+                    continue
+                for reading in _reading_variants(kana):
+                    for key in {reading, morphology.kata_to_hira(reading)}:
+                        if (level, entry) not in index.get(key, []):
+                            index.setdefault(key, []).append((level, entry))
     return index
 
 

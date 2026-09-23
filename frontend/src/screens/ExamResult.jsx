@@ -153,7 +153,7 @@ export default function ExamResult({ session }) {
     return out
   }, [summary, exam, section])
 
-  // ── 机 — the review as a list beside its page (plan 114) ──
+  // ── 机 — the review as a list beside its page (plan 115) ──
   // On the desk every row is a door to the question's revealed card,
   // which stands beside the list rather than opening under its row: the
   // first miss is open on arrival, a click or ←/→ swaps it in place. A

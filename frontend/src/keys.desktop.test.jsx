@@ -5,7 +5,7 @@ import RatingBar from './components/study/RatingBar'
 import { MCQGrid, Flashcard } from './components/study/QuizComponents'
 import './index.css'
 
-// ── 鍵 — the keys, printed on the desk (plan 112) ───────────────
+// ── 鍵 — the keys, printed on the desk (plan 113) ───────────────
 // A run answers to the keyboard at every width; on a phone nothing of
 // it is drawn, and on the desk the keys are printed where they act:
 // each rating tile carries its digit (reversed, as the handler reads

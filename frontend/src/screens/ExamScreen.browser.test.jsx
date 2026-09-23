@@ -70,7 +70,7 @@ describe('the mock-exam station', () => {
     expect(screen.container.querySelectorAll('.route-stop')).toHaveLength(5)
   })
 
-  // ── The grade is the URL's (plan 113) ──
+  // ── The grade is the URL's (plan 114) ──
   // It was component state, so a second visit to /practice/exam — the
   // desk rail's 模試 link, the browser's own history — landed on the
   // papers of whatever grade was last open, with the bar's ‹ the only

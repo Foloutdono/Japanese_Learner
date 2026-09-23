@@ -4,7 +4,7 @@ import { LangProvider } from './LangContext'
 import { Sheet } from './components/chrome/Sheet'
 import './index.css'
 
-// ── 札 — a sheet is a centred dialog on the desk (plan 112) ─────
+// ── 札 — a sheet is a centred dialog on the desk (plan 113) ─────
 // On a phone the sheet rises from the bottom edge
 // (chrome.phone.test.jsx pins that, and it does not move). On the desk
 // the same component is set in the middle of the screen: every corner

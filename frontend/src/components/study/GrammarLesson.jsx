@@ -263,7 +263,7 @@ export function GrammarLessonSheet({ id, initial, session, onClose, over = false
   )
 }
 
-// ── 机 — a lesson on the page, beside the points (plan 114) ──────────
+// ── 机 — a lesson on the page, beside the points (plan 115) ──────────
 // The sheet's lesson without the sheet: the desk's grammar station sets
 // the level's points beside the open one's lesson, so a point is one
 // click (or ←/→) and there is no dialog, scrim or ✕ to close. The same

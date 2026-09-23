@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── Reading comprehension on the phone (plan 114's other side) ─────
+// ── Reading comprehension on the phone (plan 115's other side) ─────
 // The desk stands the text beside the questions and the breakdown
 // beside the results (comprehension.desktop). At 390 the two still take
 // turns on the card: Re-read is there, the breakdown is behind its

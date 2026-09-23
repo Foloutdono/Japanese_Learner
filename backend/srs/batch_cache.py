@@ -1,4 +1,5 @@
 import random
+import threading
 
 # In-process only: not shared between workers, lost on restart. That is
 # fine for what it holds — a shuffled pool of not-yet-served "new" card
@@ -17,6 +18,25 @@ import random
 # empty until the API was restarted. Nothing here can be stale like that
 # now, so a database wipe no longer needs a restart.
 _batches: dict[str, list[str]] = {}
+
+# One lock per pool. Every pick_ids caller is a sync `def` route, which
+# FastAPI runs in a threadpool, so two requests for the same
+# (user, mode, deck) — a second device, or a queue refilling while the
+# previous request is still out — reach take_batch concurrently over the
+# same list. Its refill is a check-then-act, so unguarded both threads
+# can find the pool dry and both fetch, handing the same card out twice.
+#
+# Per key rather than one global lock: the only pair that has to be
+# serialised is two requests for the SAME pool, and a global one would
+# put every learner's refill behind every other learner's query. Same
+# shape study/word_tts.py uses for its own per-key work.
+_locks_guard = threading.Lock()
+_locks: dict[str, threading.Lock] = {}
+
+
+def _lock_for(cache_key: str) -> threading.Lock:
+    with _locks_guard:
+        return _locks.setdefault(cache_key, threading.Lock())
 
 
 def key(*parts: object) -> str:
@@ -41,28 +61,43 @@ def reset(prefix: str | None = None) -> None:
 def take_batch(cache_key: str, fetch_fn, count: int, limit: int = 10) -> list[str]:
     """
     Pop up to `count` ids from the cached "new card" batch for
-    `cache_key`, transparently refilling from `fetch_fn(limit=...)`
-    whenever the cached batch runs dry. Returns fewer than `count`
-    items (possibly zero) once the underlying pool is exhausted —
-    callers should treat a short result as "no more new cards to hand
-    out", not retry.
+    `cache_key`, refilling once from `fetch_fn(limit=...)` if the cached
+    batch runs dry. Returns fewer than `count` items (possibly zero)
+    once the underlying pool is exhausted — callers should treat a short
+    result as "no more new cards to hand out", not retry.
+
+    ONE refill per call, and what it fetches is filtered against what
+    this call has already taken. `fetch_fn` is a READ, not a queue:
+    srs.get_new_cards selects the cards with no reviewed row, and
+    serving one does not write that row (it is written on first review),
+    so the same ids come back until the learner answers them.
+
+    The loop this replaces re-fetched every time the batch ran dry,
+    which meant a pool smaller than `count` was served over and over
+    inside one batch: a deck with three cards left answered a request
+    for ten with those three cards, three times over, and paid for four
+    identical queries doing it. A short result is the honest answer
+    there, and it is what the contract above already promised.
     """
     if count <= 0:
         return []
 
-    batch = _batches.get(cache_key)
-    result: list[str] = []
+    with _lock_for(cache_key):
+        batch = _batches.get(cache_key)
+        result: list[str] = []
 
-    while len(result) < count:
-        if not batch:
-            batch = list(fetch_fn(limit=max(limit, count)))
+        if batch:
+            take = min(count, len(batch))
+            result = batch[:take]
+            del batch[:take]
+
+        if len(result) < count:
+            taken = set(result)
+            batch = [i for i in fetch_fn(limit=max(limit, count)) if i not in taken]
             _batches[cache_key] = batch
-            if not batch:
-                break  # pool exhausted — fetch_fn has nothing left to give
-
-        take = min(count - len(result), len(batch))
-        result.extend(batch[:take])
-        del batch[:take]
+            take = min(count - len(result), len(batch))
+            result += batch[:take]
+            del batch[:take]
 
     return result
 

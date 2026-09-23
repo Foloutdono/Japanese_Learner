@@ -21,7 +21,7 @@ re-import cannot bring any of the three back unnoticed.
 import re
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.vocab_renames import KEY_MOVES, MOVES, _fields_of
+from content.vocab_renames import FOLDED_FORMS, KEY_MOVES, MOVES, NOT_FOLDED, _fields_of
 from study.modes import MODES, eligible_for
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -90,6 +90,21 @@ def test_the_written_form_field_is_empty_or_holds_a_written_form():
     assert bad == []
 
 
+def test_the_written_form_field_holds_one_spelling():
+    """The lemma index keys a card on its whole written form, so a field
+    packing two spellings (`川/河`, `見る 観る`) is a key no token ever
+    produces: 川 in a sentence met the N3 川 card instead of the N5 one.
+    Plan 106 split 見る 観る, plan 112 the eight `/` fields and the N4
+    `お・金持ち`. A second spelling is a card of its own or a line in
+    vocab_renames.FOLDED_FORMS, never a second half of the field."""
+    bad = [
+        (level, entry)
+        for level, entry in _entries()
+        if any(ch in entry["kanji"] for ch in "/ ・")
+    ]
+    assert bad == []
+
+
 def test_word_reading_never_serves_a_card_whose_prompt_is_its_answer():
     """The defect the two field tests above exist to prevent, stated as
     the behaviour it broke. `eligible_for` filters the pool on the kanji
@@ -145,6 +160,15 @@ def test_renames_never_chain():
     assert set(MOVES.values()) & set(MOVES) == set()
 
 
+def test_a_card_that_left_as_no_word_is_not_folded_into_its_target():
+    """頃 read けい carries its rows onto 頃 read ころ, but is not another
+    spelling of it: in FOLDED_FORMS the dictionary would answer けい
+    with the ころ card."""
+    assert NOT_FOLDED <= set(MOVES)
+    folded = {pair for pairs in FOLDED_FORMS.values() for pair in pairs}
+    assert {_fields_of(old) for old in NOT_FOLDED} & folded == set()
+
+
 def test_a_rename_that_changes_the_level_moves_down_never_up():
     """Plan 106b merges the same word at two levels onto the lower one, so
     a learner meets it once. The migration rewrites deck_cards.level from
@@ -178,8 +202,14 @@ def test_the_frequency_keys_track_the_renamed_ids():
     """frequency_overrides.item_key is the deck's "{kanji}::{kana}" key,
     not the card id, so the migration needs the same 34 corrections in
     that shape. Derived rather than written twice — this pins the
-    derivation."""
+    derivation.
+
+    A deck key is level-free, so two ids can share one: plan 112 folds
+    the N2 and the N4 あげる, both "::あげる", into 上げる. That is one
+    pin rename, and it is only sound while every id sharing the key
+    agrees on where it goes."""
     identity = 0
+    expected: dict[str, str] = {}
     for old_id, new_id in MOVES.items():
         okj, okn = _fields_of(old_id)
         nkj, nkn = _fields_of(new_id)
@@ -191,8 +221,8 @@ def test_the_frequency_keys_track_the_renamed_ids():
             assert old_key not in KEY_MOVES
             identity += 1
         else:
-            assert KEY_MOVES[old_key] == new_key
-    assert len(KEY_MOVES) + identity == len(MOVES)
+            assert expected.setdefault(old_key, new_key) == new_key, old_key
+    assert KEY_MOVES == expected
     assert identity > 0  # the 106b merges are the case this guards
 
 

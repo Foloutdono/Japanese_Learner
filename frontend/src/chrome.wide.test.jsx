@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import { DESK_QUERY } from './hooks/useDesk'
 import './index.css'
 
-// ── 机 — the desk at a laptop's width (plan 112) ────────────────
+// ── 机 — the desk at a laptop's width (plan 113) ────────────────
 // The `wide` lane: 1440×900 from the first paint. Where the desk lane
 // (chrome.desktop.test.jsx) pins the tightest desk, this one is the
 // ordinary one — the screen column stops at --board-w and centres in
@@ -40,7 +40,7 @@ describe('the wide lane', () => {
 })
 
 describe('the screen column on a laptop', () => {
-  // The desk's canvas is --desk-board-w (1240, plan 113), where the
+  // The desk's canvas is --desk-board-w (1240, plan 114), where the
   // phone's column stopped at --board-w (1040): at 1440 the rail leaves
   // less than that, so the screen takes all of it.
   it('takes what the rail leaves, up to --desk-board-w', async () => {

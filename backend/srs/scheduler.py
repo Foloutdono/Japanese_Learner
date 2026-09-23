@@ -171,7 +171,17 @@ class Scheduler:
 
             state.is_learning = False
             state.interval_days = 1
-            state.stability = 1.0
+            # A floor, not a reset. A new card arrives here with the
+            # stability it was created with (0) and leaves with 1.0, as
+            # it always did. A card relearning after a lapse arrives
+            # with what FAIL[grade].stability let it keep — and this
+            # used to be `= 1.0`, which threw that away on the correct
+            # answer that finished relearning. So the FAIL table's
+            # stability column did nothing past the relearning steps:
+            # Almost and Wrong left a card in the same state, and a word
+            # known for months regrew from one slip exactly as slowly as
+            # a word met last week (2d, 5d, 13d rather than 3d, 9d, 26d).
+            state.stability = max(1.0, state.stability)
             state.next_review = now + timedelta(days=1)
 
             return state

@@ -28,7 +28,7 @@ import { PlusIcon } from '../ui/Icons'
 //   onToggle  — (hintKey) => void
 //   disabled  — true while the card is locked mid-review
 //
-// On the desk (plan 114) C shows and hides the choices, the one hint a
+// On the desk (plan 115) C shows and hides the choices, the one hint a
 // learner reaches for card after card — never Ctrl+C, never from a
 // field, never under a dialog — and the switch prints its cap.
 export default function HintBar({ available = [], active = [], onToggle, disabled = false }) {

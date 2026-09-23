@@ -1846,28 +1846,46 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
             # (plan 069); a no-op until enforcement.
             credits.check_card_limit(cur, user_id, adding=len(payload.cards))
 
+            # A ref that doesn't belong to this deck's structure, or that
+            # no longer resolves to a real entry, is skipped rather than
+            # 500ing: a stale browse result (the deck's type changed, or
+            # the content did, since the picker was opened) shouldn't
+            # take the rest of an otherwise-valid batch with it.
+            #
+            # Deduplicated on deck_cards' own key, because the batch is
+            # ONE statement now: the per-row loop this replaces got that
+            # for free — the second INSERT of a ref conflicted with the
+            # first and counted nothing — and a payload naming the same
+            # card twice is a thing a client can post.
+            seen: set[tuple[str, str]] = set()
+            rows = []
+            for c in payload.cards:
+                if c.source not in allowed:
+                    continue
+                if _linked_entry(c.source, c.level, c.raw_id) is None:
+                    continue
+                if (c.source, c.raw_id) in seen:
+                    continue
+                seen.add((c.source, c.raw_id))
+                rows.append((access.deck_id, access.owner_id, c.source, c.level, c.raw_id))
+
             added = 0
-            with conn.cursor() as write_cur:
-                for c in payload.cards:
-                    if c.source not in allowed:
-                        # Same leniency as the "doesn't resolve to a
-                        # real entry" case below — a stale browse
-                        # result (e.g. the deck's type changed since
-                        # the picker was opened) shouldn't 500 out the
-                        # rest of an otherwise-valid batch.
-                        continue
-                    # Ignore refs that don't resolve to a real entry
-                    # instead of 500ing — a stale browse result (deck
-                    # data changed under it) shouldn't break the rest
-                    # of the batch.
-                    if _linked_entry(c.source, c.level, c.raw_id) is None:
-                        continue
-                    write_cur.execute("""
+            if rows:
+                # One statement rather than one per card. The payload is
+                # unbounded (the browse picker alone offers 60 results to
+                # select at once), and each card was a separate round
+                # trip to Postgres. RETURNING counts what actually went
+                # in, which is what the per-row `rowcount` was for: a
+                # card already in the deck conflicts, is skipped, and
+                # doesn't count.
+                with conn.cursor() as write_cur:
+                    inserted = psycopg2.extras.execute_values(write_cur, """
                         INSERT INTO deck_cards (deck_id, user_id, source, level, raw_id)
-                        VALUES (%s, %s, %s, %s, %s)
+                        VALUES %s
                         ON CONFLICT (deck_id, source, raw_id) DO NOTHING
-                    """, (access.deck_id, access.owner_id, c.source, c.level, c.raw_id))
-                    added += write_cur.rowcount
+                        RETURNING raw_id
+                    """, rows, page_size=1000, fetch=True)
+                    added = len(inserted)
         conn.commit()
         return {"added": added}
     finally:

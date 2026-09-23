@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── A graded sentence's doors, on the phone (plan 114's other side) ──
+// ── A graded sentence's doors, on the phone (plan 115's other side) ──
 // The desk opens a breakdown's word inside its side column
 // (breakdown.desktop). At 390 there is no column: the breakdown is
 // behind its toggle on the card, and a word opens the dictionary in a

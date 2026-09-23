@@ -11,7 +11,7 @@ import { SettingsPaneContext } from './pane'
 // when a page is reached from somewhere other than the list (the
 // status sheet lands on Destination).
 //
-// On the desk (plan 112) the page opens in a pane beside the list
+// On the desk (plan 113) the page opens in a pane beside the list
 // (components/settings/pane.js): the list's bar is the screen's one
 // <h1>, so the page's own bar is an <h2>, and it prints no ‹ Settings —
 // the list is right there.

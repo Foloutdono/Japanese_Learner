@@ -15,7 +15,7 @@ import { deckTypeOf } from './deckTypes'
 // has drifted from its original within two features.
 
 //
-// `open` is the desk's (plan 114): the deck whose page stands beside the
+// `open` is the desk's (plan 115): the deck whose page stands beside the
 // shelf, marked as that page the way a station's open stop is.
 export function LibraryCard({ deck, t, onOpen, open = false }) {
   const dt = deckTypeOf(deck.type, t)

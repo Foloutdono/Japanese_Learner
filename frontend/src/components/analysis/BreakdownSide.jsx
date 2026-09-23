@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { SentenceBreakdown, SentenceLine } from './SentenceBreakdown'
 import { SideLookup } from './SideLookup'
 
-// ── 机 — a graded sentence, broken down beside its card (plan 113) ──
+// ── 机 — a graded sentence, broken down beside its card (plan 114) ──
 // Reading, translation and dictation each end a sentence with its
 // breakdown behind a toggle, because on a phone the card IS the stage
 // and the rows would push the learner's own answer off it. On the desk
@@ -12,7 +12,7 @@ import { SideLookup } from './SideLookup'
 // before the grade — word by word it is an answer key.
 //
 // A door in it (a word, a rule) opens in the same column (SideLookup,
-// plan 114), under the sentence's ruby line, rather than as a dialog
+// plan 115), under the sentence's ruby line, rather than as a dialog
 // over the run.
 export function BreakdownSide({ graded, analysis, loading, lookup = null, onExitLookup, session, ...rows }) {
   const { t } = useLang()

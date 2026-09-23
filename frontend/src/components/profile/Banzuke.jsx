@@ -29,7 +29,7 @@ function Row({ e, isMe }) {
   )
 }
 
-// `both` is the desk's (plan 114): the profile's record column has room
+// `both` is the desk's (plan 115): the profile's record column has room
 // for the two boards at once, so neither hides behind a toggle — the
 // week beside lifetime where the column is wide enough for two, one
 // over the other where it is not (index.css, .desk-banzuke).

@@ -931,12 +931,12 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 112–114)
+### The desk (机, plans 113–115)
 
 The computer's design, at 1100px and up. Everything above holds unless a
-line here says otherwise. Plan 112 drew the chrome; plan 113 laid the
+line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
 screens out for the width, so that nothing on a computer reads as a phone
-set down on a desk; plan 114 took the remaining second screens and sheets
+set down on a desk; plan 115 took the remaining second screens and sheets
 into the page and gave a session its keys.
 
 - **The rail is the chrome.** One sumi column down the left edge,
@@ -983,7 +983,7 @@ into the page and gave a session its keys.
   page by *replacing* the URL, so Back is never a walk through every stop
   looked at. A mock exam's grade is in its URL. A route that boards
   directly (a sentence station's levels) is drawn across as a line. The
-  second screens fold the same way (plan 114): a grammar level's points
+  second screens fold the same way (plan 115): a grammar level's points
   beside the open point's lesson (←/→ walk them), a theme's bands and the
   frequency tiers beside the open one's platforms, figured from the stats
   route each run opens on, the library's shelf beside the open deck's page
@@ -1041,7 +1041,7 @@ into the page and gave a session its keys.
   corner (reversed, as the handler reads them: 1 is the best, at the
   right), the choice's index as the digit that answers it, "Espace pour
   révéler" — because on a desk the hands are on the keys. A whole session
-  needs no pointer (plan 114): Enter departs from Today's gate and takes a
+  needs no pointer (plan 115): Enter departs from Today's gate and takes a
   finished run's one filled action, Esc leaves a run (never over a dialog,
   never when a docked entry has taken the key), C shows the choices, A–D
   or 1–4 then Enter answer a comprehension question, Space plays a

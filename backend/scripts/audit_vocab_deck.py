@@ -219,12 +219,87 @@ def duplicates(rows) -> dict:
         for (k, r), levels in sorted(exact.items()) if len(levels) > 1
     ]
     shared = {form: levels for form, levels in forms.items() if len(levels) > 1}
+    spelling = spelling_pairs(rows)
     return {
         "exact_pairs": exact_pairs,
         "exact_pairs_count": len(exact_pairs),
         "shared_forms_count": len(shared),
         "shared_forms_cards": sum(len(v) for v in shared.values()),
+        "spelling_pairs": spelling,
+        "spelling_pairs_count": len(spelling),
     }
+
+
+# Two kana-only cards that share a reading and are two words: the N5
+# キロ for a kilogram and the N5 キロ for a kilometre.
+KANA_HOMOGRAPHS = frozenset({"キロ"})
+
+# Pairs spelling_pairs finds that are two words, not one twice. The N2
+# 御手洗 is glossed as the shrine's purifying font (みたらし in JMdict),
+# not the N5 お手洗い's toilet; whether おてあらい is its reading is a
+# content-audit question, not a duplicate.
+DISTINCT_PAIRS = frozenset({("N2 御手洗::おてあらい", "N5 お手洗い::おてあらい")})
+
+
+def _kanji_core(form: str) -> str:
+    """A written form's kanji, in order: the 御/ご/お prefix off, 々
+    written out, the kana dropped -- so 終る and 終わる, 御無沙汰 and
+    ご無沙汰, 先々月 and 先先月 come out the same."""
+    out = []
+    for ch in form.removeprefix("御").removeprefix("ご").removeprefix("お"):
+        if ch == "々" and out:
+            out.append(out[-1])
+        elif _is_kanji(ch):
+            out.append(ch)
+    return "".join(out)
+
+
+def spelling_pairs(rows) -> list[dict]:
+    """Two cards for one word that exact_pairs cannot see, because the
+    fields differ (plan 112): sharing a reading, they are
+
+        reading   one form, one card's readings a part of the other's
+                  (十 じゅう beside 十 じゅう/とお)
+        kana      two kana-only cards (いい beside いい/よい)
+        spelling  the same kanji, other okurigana or prefix (終る and
+                  終わる, 御無沙汰 and ご無沙汰)
+        variant   one form the other with a kanji written in kana
+                  (見付かる and 見つかる, 間も無く and 間もなく)
+
+    Two forms with DIFFERENT kanji (会う/遭う, 川/河) are two written
+    words and are not listed; nor is a kana card beside a kanji card."""
+    from content import vocab_extras
+    by_reading = collections.defaultdict(list)
+    for level, e in rows:
+        for r in (e.get("kana") or "").split("/"):
+            if r:
+                by_reading[r].append((level, e))
+    found = {}
+    for reading, cards in by_reading.items():
+        for i, (la, a) in enumerate(cards):
+            for lb, b in cards[i + 1:]:
+                ka, kb = a.get("kanji", ""), b.get("kanji", "")
+                if (ka, a.get("kana")) == (kb, b.get("kana")):
+                    continue  # exact_pairs' case
+                if not ka and not kb:
+                    kind = None if reading in KANA_HOMOGRAPHS else "kana"
+                elif not ka or not kb:
+                    kind = None
+                elif ka == kb:
+                    kind = "reading"
+                elif _kanji_core(ka) == _kanji_core(kb):
+                    kind = "spelling"
+                elif kb in vocab_extras.kana_spelling_variants(ka) or \
+                        kb in vocab_extras.trailing_kana_variants(ka, a.get("kana", "")) or \
+                        ka in vocab_extras.kana_spelling_variants(kb) or \
+                        ka in vocab_extras.trailing_kana_variants(kb, b.get("kana", "")):
+                    kind = "variant"
+                else:
+                    kind = None
+                cards = tuple(sorted([f"{la} {_key(a)}", f"{lb} {_key(b)}"]))
+                if kind and cards not in DISTINCT_PAIRS:
+                    found[cards] = {"kind": kind, "cards": list(cards)}
+    return sorted(found.values(), key=lambda p: p["cards"])
 
 
 def readings(rows) -> dict:
@@ -451,6 +526,7 @@ def render(report: dict) -> str:
         + "  ".join(f"{lv} {n:,}" for lv, n in s["per_level"].items()),
         f"  kana-only                     {s['kana_only']:,} (katakana {s['katakana_only']:,})",
         f"  same form+reading, two levels {d['exact_pairs_count']}",
+        f"  one word, two spellings       {d['spelling_pairs_count']}",
         f"  same form, several cards      {d['shared_forms_count']} forms, {d['shared_forms_cards']} cards",
         f"  kana fields joined by /       {r['slash_fields_count']}",
         f"  kana fields joined by ;       {r['semicolon_fields_count']}",

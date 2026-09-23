@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useLocation, useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
-import { postReview as sendReview } from '../lib/reviews'
+import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useLang } from '../LangContext'
 import RatingBar from '../components/study/RatingBar'
 import { MCQGrid, DoneMessage, DeckProgress } from '../components/study/QuizComponents'
@@ -53,7 +53,7 @@ export default function StudyRun({ session }) {
 
   const valid = Boolean(deck_id) && Boolean(STUDY_MODES[mode]?.implemented) && STUDY_MODES[mode]?.graded !== false
   // The deck's platforms: its own screen on the phone, the deck's page on
-  // the desk, where they stand beside the cards (plan 114) — the page a
+  // the desk, where they stand beside the cards (plan 115) — the page a
   // desk run was boarded from, so leaving steps back to it.
   const desk = useDesk()
   const platforms = desk ? `/learn/decks/${deck_id}` : `/learn/decks/${deck_id}/study`
@@ -122,12 +122,16 @@ export default function StudyRun({ session }) {
     [],
   )
 
+  // What the saved queue must not replay: cards answered since, here
+  // or anywhere else (lib/reviews, staleCards).
+  const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     storageKey,
     fetchBatch,
     batchSize: 10,
     mode,
     extraExcludeIds,
+    checkCached,
   })
 
   // Every screen's rating flow: the lock, the gates the celebrations

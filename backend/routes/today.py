@@ -51,7 +51,7 @@ import logging
 from collections import OrderedDict, defaultdict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 import psycopg2.extras
 
@@ -546,3 +546,46 @@ def post_today_review(payload: TodayReviewPayload, user_id: str = Depends(get_us
         "stage": s["stage"],
         "credits": fare,
     }
+
+
+# A saved queue is at most a couple of batches (MAX_BATCH each), so this
+# is generous; it only exists so one request cannot ask about a deck.
+MAX_STALE_CHECK = 200
+
+
+class SavedCard(BaseModel):
+    card_id: str
+    mode: str
+
+
+class StaleCheckPayload(BaseModel):
+    cards: list[SavedCard] = Field(default_factory=list, max_length=MAX_STALE_CHECK)
+
+
+@router.post("/api/today/stale")
+def post_today_stale(payload: StaleCheckPayload, user_id: str = Depends(get_user_id)):
+    """
+    Which of a saved queue's cards have been answered since it was saved.
+
+    Every study screen keeps its queue in the browser and resumes it on
+    the next visit, so a card can wait there for days -- and in the
+    meantime be answered in Today, in another section that holds the
+    same card (N5 vocab and a theme share ids), on another device, or in
+    the stamp that holds the queue after a rating while the learner
+    walks away. Replayed as saved, it came back days before it was due.
+    The client asks here before it resumes a saved queue and drops
+    whatever comes back (hooks/useCardSession.js).
+
+    Here rather than on each section's router because the question is
+    the same for all of them -- a card's schedule is its (id, mode) row
+    whichever screen served it -- and because Today, being mixed-mode,
+    already speaks in (id, mode) pairs. Scoped by the caller's own
+    prefix like every review endpoint, so it can only ever read the
+    caller's rows.
+    """
+    pairs = [(f"{user_id}:{c.card_id}", c.mode) for c in payload.cards]
+    stale = srs.get_stale(pairs)
+    return {"stale": [
+        {"card_id": unprefixed(card_id, user_id), "mode": mode}
+        for card_id, mode in stale
+    ]}

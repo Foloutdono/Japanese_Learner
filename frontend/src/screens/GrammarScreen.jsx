@@ -79,7 +79,7 @@ export default function GrammarScreen({ session }) {
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         {/* On the desk the line stands beside a level's platforms, so
-            the list alone opens on the learner's own level (plan 113). */}
+            the list alone opens on the learner's own level (plan 114). */}
         {desk
           ? <LevelRedirect to={lvl => `/learn/grammar/${lvl}`} />
           : <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />}
@@ -104,12 +104,12 @@ export default function GrammarScreen({ session }) {
     <GrammarLessonSheet key={point} id={point} session={session} onClose={closePoint} />
   )
 
-  // ── 机 — the line beside a level (plan 113) ──
+  // ── 机 — the line beside a level (plan 114) ──
   // On the desk the JLPT line stands beside the level's page — its
   // points door and platforms — and another level swaps the page in
   // place. Each platform carries its figures.
   //
-  // The points (plan 114) are the index beside the open point's lesson:
+  // The points (plan 115) are the index beside the open point's lesson:
   // one click or ←/→ per point, where the phone opens each in a sheet
   // over the index. The bare index opens on the first point not yet
   // mastered; a point asked for from the level page opens the same way.

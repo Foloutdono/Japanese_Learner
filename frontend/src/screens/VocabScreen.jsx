@@ -99,7 +99,7 @@ export default function VocabScreen({ session }) {
     return (
       <SelectionScreen title={t.vocabulary} sub={t.stationJlpt} aside={leaveSources}>
         {/* On the desk the line stands beside a stop's platforms, so
-            the list alone opens on the learner's own stop (plan 113). */}
+            the list alone opens on the learner's own stop (plan 114). */}
         {desk
           ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
           : <LevelSelector source="vocab" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
@@ -184,7 +184,7 @@ export default function VocabScreen({ session }) {
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plan 113) ──
+  // ── 机 — the line beside its platforms (plan 114) ──
   // On the desk a level's platforms stand beside the JLPT line itself
   // (StationSplit): another stop swaps the platforms in place, and each
   // platform carries its own figures. The way out is the sources.
@@ -202,7 +202,7 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── 机 — a theme's bands beside a band's platforms (plan 114) ──
+  // ── 机 — a theme's bands beside a band's platforms (plan 115) ──
   // The same split as the JLPT line's, for the line a theme is: another
   // band swaps the platforms in place, and each platform carries the
   // band's own figures, from the stats route its run opens on. The way
@@ -224,7 +224,7 @@ export default function VocabScreen({ session }) {
     )
   }
 
-  // ── 机 — the tiers beside a tier's platforms (plan 114) ──
+  // ── 机 — the tiers beside a tier's platforms (plan 115) ──
   // The pool and the size stand over the list they change. Another
   // pool is another line, so it opens on its first tier; another size
   // keeps the learner's place (domain/tiers' tierAtSize).

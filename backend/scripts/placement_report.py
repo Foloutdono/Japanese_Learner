@@ -55,6 +55,8 @@ import json
 import os
 import sys
 
+from content.vocab_renames import FOLDED_FORMS
+
 _BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 _VOCAB = os.path.join(_BASE_DIR, "datas", "vocab")
 _SOURCES = os.path.join(_VOCAB, "sources")
@@ -228,17 +230,28 @@ def _is_pattern(expression: str) -> bool:
 
 
 def placed_above(rank, lookups) -> list[dict]:
-    """Deck cards at a level above the lists' level for the word."""
+    """Deck cards at a level above the lists' level for the word, under
+    the card's own spelling or one folded into it.
+
+    Plan 112 merged one word's spellings onto one card (終る into 終わる,
+    知合い into 知り合い, 此れ into これ), and the lists still write the
+    spelling that went (content/vocab_renames.FOLDED_FORMS): it is the
+    surviving card's word, so it says where that card sits -- and, in
+    listed_not_here, that the word has a card."""
     by_pair, by_kana = _jlpt_index()
     out = []
     for level in LEVELS:
         for e in deck().get(level, []):
             form = e.get("kanji") or ""
             readings = [r.strip() for r in (e.get("kana") or "").split("/") if r.strip()]
-            if form:
-                listed = [by_pair[(form, r)] for r in readings if (form, r) in by_pair]
-            else:
-                listed = [by_kana[r] for r in readings if r in by_kana]
+            pairs = [(form, r) for r in readings]
+            for f, kana in FOLDED_FORMS.get(f"vocab_{level}_{form}_{e.get('kana') or ''}", ()):
+                pairs += [(f, r) for r in kana.split("/")]
+            listed = [
+                by_pair[(f, r)] if f else by_kana[r]
+                for f, r in pairs
+                if ((f, r) in by_pair if f else r in by_kana)
+            ]
             if not listed:
                 continue
             lowest = min(listed, key=_RANK.get)
@@ -257,6 +270,13 @@ def listed_not_here(rank, lookups) -> list[dict]:
     # kanji card elsewhere merely shares is not.
     kanas = {r.strip() for es in deck().values() for e in es if not e.get("kanji")
              for r in (e.get("kana") or "").split("/")}
+    # A spelling folded into another card is that card's word.
+    for pairs in FOLDED_FORMS.values():
+        for form, kana in pairs:
+            if form:
+                forms.add(form)
+            else:
+                kanas.update(r.strip() for r in kana.split("/"))
     out = []
     for level in LEVELS:
         for expression, reading in _json(JLPT_SOURCE).get(level, []):

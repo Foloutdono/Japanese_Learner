@@ -75,8 +75,9 @@ def test_the_glyph_is_the_form_the_learner_meets_first():
 
 def test_the_families_partition_the_course_one_row_per_character():
     """Every course character is filed under exactly one radical, once —
-    the 23 dual-level characters at their lowest level, DECK_BY_CHAR's
-    rule — and no radical without a course kanji has a family."""
+    at its lowest level, DECK_BY_CHAR's rule (it mattered while the deck
+    taught 23 characters at two levels, until plan 112) — and no radical
+    without a course kanji has a family."""
     rows = [row for rows in radical_data.DECK_BY_RADICAL.values() for row in rows]
     chars = [entry["kanji"] for _, entry in rows]
     assert len(chars) == len(set(chars)) == len(DECK_BY_CHAR)

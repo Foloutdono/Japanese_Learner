@@ -382,7 +382,9 @@ RIDE_UNKNOWN = {
     "N4": ("特急", "とっきゅう"),
     "N3": ("到着", "とうちゃく"),
     "N2": ("定期券", "ていきけん"),
-    "N1": ("乗り換え", "のりかえ"),
+    # Was 乗り換え, until plan 112 merged the N1 card into the N2 one
+    # it duplicated.
+    "N1": ("始発", "しはつ"),
 }
 RIDE_UNKNOWN_TOP = ("沿線", "えんせん")   # N1, for the learner already at N1
 

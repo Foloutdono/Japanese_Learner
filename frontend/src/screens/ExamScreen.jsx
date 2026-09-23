@@ -61,7 +61,7 @@ export default function ExamScreen({ session }) {
   // grade's papers rather than the list of grades the learner just
   // picked from. Anything that is not a grade is simply the list.
   //
-  // The level lives in the URL rather than in state (plan 113): as state
+  // The level lives in the URL rather than in state (plan 114): as state
   // it survived a second visit to /practice/exam — the rail's 模試 link,
   // the browser's own history — so the way back to the grades was only
   // the bar's ‹. Replaced, not pushed, so the history a phone walks back
@@ -77,7 +77,7 @@ export default function ExamScreen({ session }) {
     return () => { alive = false }
   }, [session])
 
-  // ── 机 — the grades beside a grade's papers (plan 113) ──
+  // ── 机 — the grades beside a grade's papers (plan 114) ──
   // On the desk the list of grades opens on the learner's own and stands
   // beside that grade's papers; another grade swaps the papers in place.
   if (desk && !level && exams?.length > 0) {

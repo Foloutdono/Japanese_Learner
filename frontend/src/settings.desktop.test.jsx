@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the settings list beside the open page (plan 112) ──────
+// ── 机 — the settings list beside the open page (plan 113) ──────
 // On the desk the list and a page share the screen under the list's
 // one heading: the page is a pane (an <h2>, no ‹ Settings — the list is
 // right there), its row is marked, and the URLs are the phone's. The
@@ -103,7 +103,7 @@ describe('settings on the desk', () => {
     expect(document.querySelector('.stg-row[aria-current="page"]').dataset.page).toBe('sound')
   })
 
-  it('prints one Sign out beside the account page, not two (plan 114)', async () => {
+  it('prints one Sign out beside the account page, not two (plan 115)', async () => {
     await mount('/profile/settings/account')
     await settle()
     const outs = [...document.querySelectorAll('button')].filter(b => /^(déconnexion|sign out)$/i.test(b.textContent.trim()))

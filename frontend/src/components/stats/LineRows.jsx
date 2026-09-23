@@ -14,7 +14,7 @@ import { groupLabel } from '../../domain/statsModel'
 // per level, which is the one drill-down the old Explorer's five
 // dimensions were ever used for.
 //
-// `inline` is the desk's reading (plan 113): no sheet. A row opens its
+// `inline` is the desk's reading (plan 114): no sheet. A row opens its
 // levels right under itself, the first line open on arrival, one line
 // open at a time — the drill-down is on the page it drills into.
 export function LineRows({ rows, inline = false }) {
@@ -110,7 +110,7 @@ function LevelRows({ row }) {
 }
 
 // Shared with the desk's station split (components/selection/
-// ModeFigures.jsx, plan 113), which draws one platform's share of it.
+// ModeFigures.jsx, plan 114), which draws one platform's share of it.
 export function Composition({ row }) {
   return (
     <span className="composition" aria-hidden="true">

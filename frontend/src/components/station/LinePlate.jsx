@@ -83,7 +83,7 @@ export function StopsFoot({ stops, guide }) {
 }
 
 /**
- * The desk's foot on a Learn line (plan 113): the whole line, where the
+ * The desk's foot on a Learn line (plan 114): the whole line, where the
  * phone's plate had room for three stops. The novice's stop at the
  * origin, then one leg per level — its rail filled as far as the level
  * is learned, its station at the leg's END (a station is a completion,
@@ -94,7 +94,7 @@ export function StopsFoot({ stops, guide }) {
  * print one piece of, read at a glance from the gate.
  */
 //
-// Every leg is a door (plan 114): its station's platforms are one click
+// Every leg is a door (plan 115): its station's platforms are one click
 // from the gate, where the plate's head departs to the stop being
 // ridden — marked here as the learner's location.
 export function LineFoot({ stops, stats, source, guide, onStop }) {

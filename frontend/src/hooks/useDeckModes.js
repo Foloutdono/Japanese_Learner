@@ -3,7 +3,7 @@ import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { modeLabel, modeDesc } from '../domain/studyModes'
 
-// ── A deck's platforms (plan 071; shared since plan 113) ───────────
+// ── A deck's platforms (plan 071; shared since plan 114) ───────────
 // A deck's available modes come from its STRUCTURE (see decks.py's
 // get_deck_modes): every graded key that structure's source offers,
 // provided the deck actually has a card — rendered with the registry's

@@ -1,6 +1,6 @@
 import { useSyncExternalStore } from 'react'
 
-// ── 本日の乗車 — this run's tally (plan 113) ────────────────────
+// ── 本日の乗車 — this run's tally (plan 114) ────────────────────
 // What the desk's session panel prints beside a run: how many cards
 // this run has rated, how many of them good or better, and the XP they
 // earned. Module state rather than screen state because the six SRS
@@ -15,7 +15,7 @@ import { useSyncExternalStore } from 'react'
 //
 // The phone counts too — a few integers, no DOM — and nothing reads it.
 //
-// Since plan 114 it also keeps the cards themselves, by the dictionary
+// Since plan 115 it also keeps the cards themselves, by the dictionary
 // entry each was revealed on (stores/deskEntry) and with the rating it
 // got last, so the panel can end a run with the ones that went badly
 // (tallyMisses): a card missed then got right is not a miss.

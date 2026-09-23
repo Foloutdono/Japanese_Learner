@@ -34,7 +34,7 @@ const MISS_WINDOW = 30
 // No block carries a heading; each names itself with its mark. Two
 // fetches: /api/stats, which the profile reads too, and the report.
 //
-// On the desk (plan 113) the sentence is read in two columns: what
+// On the desk (plan 114) the sentence is read in two columns: what
 // holds on the left — the line drawn 1:1, the ladder, the lines with
 // their levels open in place — and where it leaks on the right, every
 // trouble card under the misses, at the phone's own width. No sheet.

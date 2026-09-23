@@ -286,7 +286,7 @@ export default function GateCard({ today, failed }) {
         {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
-      {/* 机 (plan 114): Enter departs, from anywhere on Today. */}
+      {/* 机 (plan 115): Enter departs, from anywhere on Today. */}
       <DepartKey onDepart={depart} disabled={closed || due === 0} />
     </div>
   )

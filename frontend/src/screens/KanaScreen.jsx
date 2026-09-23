@@ -49,7 +49,7 @@ export default function KanaScreen() {
   if (set && !selectedSet) return <Navigate replace to="/learn/kana" />
 
   // The sets as a route: the station page on a phone, and on the desk
-  // the list beside a set's platforms (plan 113).
+  // the list beside a set's platforms (plan 114).
   const setStops = () => SETS.map(s => {
       const { learned, total, started } = deckItems(stats, 'kana', s.slug)
       return {
@@ -86,7 +86,7 @@ export default function KanaScreen() {
   // ── The platforms: the set's modes ──
   const run = m => navigate(`/learn/kana/${set}/${m}`)
 
-  // ── 机 — the sets beside a set's platforms (plan 113) ──
+  // ── 机 — the sets beside a set's platforms (plan 114) ──
   if (desk) {
     const figured = MODES.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="kana" deck={set} mode={m.key} /> }))
     return (

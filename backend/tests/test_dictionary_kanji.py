@@ -1,7 +1,8 @@
 """The dictionary's kanji collection, over both of its pools.
 
-The app's own JLPT deck (content/kanji_data.py) is 2,235 entries over
-2,212 characters. KANJIDIC2, which this repo has shipped all along, has
+The app's own JLPT deck (content/kanji_data.py) is 2,212 characters,
+one entry each since plan 112 took the 23 it listed twice down to their
+lowest level. KANJIDIC2, which this repo has shipped all along, has
 13,108 — so 10,896 characters were reachable from nowhere in the app,
 and looking one up and not finding it proved only that it was not one of
 the ~2,200 the course teaches.
@@ -167,8 +168,8 @@ def test_every_radical_leads_somewhere_now(client):
 def test_a_radical_browse_reaches_the_pool_in_stroke_order(client):
     """Radical browsing is filed the way a paper 漢和辞典 files it — by
     stroke count, deck and pool interleaved — not deck-first. It is also
-    keyed by character, so the 23 kanji the deck teaches at two levels
-    appear once here rather than twice."""
+    keyed by character, so a kanji appears once here -- which held even
+    while the deck taught 23 of them at two levels (until plan 112)."""
     body = client.get(
         "/api/dictionary", params={"radical": 75, "limit": 200}).json()
     strokes = [r["stroke_count"] for r in body["results"]]

@@ -10,7 +10,7 @@ import { ChevronIcon } from '../ui/Icons'
 // sheet. Hairline-divided rows, no heading: the bar overhead names the
 // level, the rows name themselves.
 //
-// `selected` is the desk's (plan 114): there the lesson stands open
+// `selected` is the desk's (plan 115): there the lesson stands open
 // beside the index, and its row is marked as the page shown.
 export default function GrammarIndex({ points, onOpen, selected = null }) {
   const { t } = useLang()

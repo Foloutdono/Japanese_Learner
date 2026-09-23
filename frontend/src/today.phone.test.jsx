@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — Today and the dictionary stay the phone's below the desk (plan 113) ──
+// ── 机 — Today and the dictionary stay the phone's below the desk (plan 114) ──
 // The desk stands the pass strip and the pass's back beside the fare
 // gate, and keeps the dictionary's dock open with no ✕. At 390 the strip
 // still heads the gate, nothing stands beside it, and the dictionary's

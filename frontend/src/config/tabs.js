@@ -51,7 +51,7 @@ export function getTabs(t) {
   ]
 }
 
-// ── 机 — the same five, down a rail (plan 112) ──
+// ── 机 — the same five, down a rail (plan 113) ──
 // The desk chrome (components/chrome/DeskRail.jsx, ≥1100px) lists the
 // gates top to bottom, and a column has no thumb to put Today under: it
 // opens the list, the way `/` opens on it. TAB_IDS is still the phone's
@@ -86,7 +86,7 @@ export function getDeskSections(tabId, t) {
 }
 
 /**
- * Whether the desk's rail already has a door to `path` (plan 113): a
+ * Whether the desk's rail already has a door to `path` (plan 114): a
  * gate, or one of any gate's stations. A screen's ‹ way out to one of
  * those is a second door to the same place on the desk, and the Bar
  * drops it (components/chrome/Bar.jsx).

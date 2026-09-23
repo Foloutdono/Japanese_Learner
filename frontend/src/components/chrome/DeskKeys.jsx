@@ -3,7 +3,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { useDeparture } from '../../stores/departure'
 
-// ── 机 — the two keys a session begins and ends on (plan 114) ───────
+// ── 机 — the two keys a session begins and ends on (plan 115) ───────
 // A whole session from Today used to need the pointer twice: to depart
 // from the gate card, and to leave the run at its end. On the desk,
 // Enter departs and Esc leaves. Both render nothing and listen only on

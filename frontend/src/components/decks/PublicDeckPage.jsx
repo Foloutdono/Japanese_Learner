@@ -24,7 +24,7 @@ import { BooksIcon, WarningIcon } from '../ui/Icons'
 // own page is where the copy is offered, and where the sentence belongs
 // if it is ever missed.
 //
-// Three pieces since plan 114: the fetch (hooks/usePublicDeck), the page's
+// Three pieces since plan 115: the fetch (hooks/usePublicDeck), the page's
 // body (PublicDeckBody), and the two things that frame them — the
 // phone's screen of its own (screens/PublicDeckScreen.jsx) and, on the
 // desk, the pane beside the library's shelf (PublicDeckPane).
@@ -160,7 +160,7 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
   )
 }
 
-// ── 机 — a published deck beside the shelf (plan 114) ─────────────
+// ── 机 — a published deck beside the shelf (plan 115) ─────────────
 // On the desk the library is the shelf beside the open deck's page, the
 // way a station's stops stand beside a stop's platforms: another deck is
 // one click, and the shelf — its search, its narrowing, how far down it
