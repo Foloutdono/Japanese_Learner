@@ -99,8 +99,8 @@ EXAM_GENERATORS = {
     },
     **{
         # Same accepted simplification as "-reading-01"/"-grammar-01".
-        # Needs an LLM provider configured (dialogue text) -- audio synthesis
-        # itself needs no credential at all, see exam_tts.py.
+        # Needs an LLM provider configured (dialogue text) and a voice
+        # engine (VOICEVOX_URL, study/voice_engine.py) for the audio.
         f"{level.lower()}-listening-01": ("listening-gen-2", "listening", level, partial(generate_listening_paper, level))
         for level in _LEVELS
     },

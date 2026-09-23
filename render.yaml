@@ -39,3 +39,52 @@ services:
     # re-synthesis), and says so in its startup log — an
     # "EXAM_AUDIO_DIR=... cannot be written to" line there means this
     # blueprint has not been synced onto the running service.
+    envVars:
+      # The voice engine below, reached over Render's private network.
+      # `hostport` is host:port with no scheme; study/voice_engine.py
+      # adds the http://. Only this key is declared here: the others
+      # (DATABASE_URL, EXAM_AUDIO_DIR...) live in the dashboard, and a
+      # Blueprint sync must ADD this one without touching them -- check
+      # the sync preview says so before applying it.
+      - key: VOICEVOX_URL
+        fromService:
+          type: pserv
+          name: voicevox-nemo
+          property: hostport
+
+  # ── 声: the voice engine (plan 113, docs/adr/0018) ───────────────
+  # VOICEVOX Nemo, the stock image run unmodified (LGPL-3.0, credit
+  # "VOICEVOX Nemo" -- THIRD_PARTY_NOTICES.md). A PRIVATE service: it has
+  # no auth of its own, so it must never be reachable from outside;
+  # only the backend above calls it. It keeps no state -- no disk, no
+  # database -- so a restart costs a few seconds of loading and nothing
+  # else. Same region as the backend, which is the default for both:
+  # the private network does not cross regions.
+  - type: pserv
+    name: voicevox-nemo
+    runtime: image
+    image:
+      # cpu-0.23.0, pinned by digest: the newest Nemo engine published
+      # as an image (0.24.0 exists only as downloads), and an
+      # image-backed service does not redeploy when a tag moves, so a
+      # tag would pin nothing anyway. Listens on 50121, which Render
+      # detects; nothing here names the port.
+      url: docker.io/voicevox/voicevox_nemo_engine@sha256:0ff297cef582439227e79da3c1e5123a9186353fcaffbb2e8f04ed0864aca45d
+    # Measured (docker, three voices loaded, plan 113): 376 MB at peak,
+    # so Starter's 512 MB holds it. Starter's 0.5 CPU is the price: a
+    # word takes ~2 s the first time and a 6 s dialogue turn ~10 s,
+    # against ~1 s and ~5 s on Standard's 1 CPU. Every clip is made once
+    # and cached for good, so the wait is paid once per word or line --
+    # Standard is the move if the first-play wait on Android (which
+    # always asks the server) turns out to be what learners notice.
+    plan: starter
+    envVars:
+      # One thread per CPU the plan gives it (the engine's default is
+      # half the HOST's cores, which is not what the container gets).
+      - key: VV_CPU_NUM_THREADS
+        value: "1"
+      # Refuse the endpoints that write the engine's user dictionary and
+      # settings: with no auth, anything that can reach it could
+      # otherwise change how every clip is read.
+      - key: VV_DISABLE_MUTABLE_API
+        value: "1"

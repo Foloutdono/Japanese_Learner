@@ -34,3 +34,7 @@ datas/jlpt/
 # Server-generated TTS output, not owned/tracked source data -- same
 # reasoning as datas/jlpt/ above, see study/exam_tts.py.
 datas/exam_audio/
+# scripts/audition_voices.py's samples: listened to, never shipped (and the
+# VOICEVOX Nemo terms forbid using them for machine learning -- see
+# THIRD_PARTY_NOTICES.md).
+datas/voice_audition/

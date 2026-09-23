@@ -20,8 +20,10 @@ resolve the same directory, or files are written to one place and served
 from another.
 """
 import json
+import math
 import os
 import uuid
+from array import array
 from unittest import mock
 
 import pytest
@@ -30,6 +32,7 @@ from starlette.routing import Mount
 from starlette.testclient import TestClient
 
 import study.exam_tts as tts
+import study.voice_engine as engine
 from core.db import db_conn
 from main import ExamAudioFiles, app
 from study.exam_audio_repair import restore_clip, turns_from_script
@@ -62,13 +65,21 @@ def clip_client(audio_dir):
     return TestClient(served)
 
 
+def tone(seconds: float = 0.5, rate: int = engine.DIALOGUE_RATE) -> engine.Pcm:
+    """Something audible, standing in for a line the engine spoke."""
+    samples = array("h", (int(8000 * math.sin(2 * math.pi * 440 * i / rate))
+                          for i in range(round(seconds * rate))))
+    return engine.Pcm(samples.tobytes(), rate)
+
+
 @pytest.fixture
 def fake_tts():
-    """edge-tts is a network call; the bytes it returns are not what any
-    of this is testing."""
-    with mock.patch.object(tts, "voice_for_speaker", lambda i: f"voice-{i}"), \
-            mock.patch.object(tts, "synthesize", mock.Mock(return_value=b"\xff\xfbmp3")) as synth:
-        yield synth
+    """The engine is a network call; what it says is not what any of this
+    is testing. The encoder is the real one: the file on disk has to be
+    an MP3 the player can read."""
+    with mock.patch.object(engine, "style_for_slot", lambda slot: 100 + slot), \
+            mock.patch.object(engine, "say", mock.Mock(side_effect=lambda *a, **k: tone())) as say:
+        yield say
 
 
 def _script_jp(turns):
@@ -206,7 +217,8 @@ def test_a_missing_clip_is_restored_and_then_served(clip_client, fake_tts, store
     response = clip_client.get(f"/exam-audio/{filename}")
 
     assert response.status_code == 200
-    assert response.content == b"\xff\xfbmp3" * len(turns)
+    assert engine.mp3_summary(response.content)["frames"] > 0
+    assert fake_tts.call_count == len(turns)
     assert os.path.exists(os.path.join(audio_dir, filename))
 
 
@@ -220,5 +232,153 @@ def test_a_restored_clip_is_synthesized_once(clip_client, fake_tts, stored_paper
 
 def test_restore_reports_failure_rather_than_raising(stored_paper, audio_dir):
     filename, _turns = stored_paper
-    with mock.patch.object(tts, "voice_for_speaker", side_effect=tts.TTSFailed("no voices")):
+    with mock.patch.object(engine, "style_for_slot", side_effect=tts.TTSFailed("no voices")):
         assert restore_clip(filename) is False
+
+
+# ── The name is an identity (plan 113) ───────────────────────────
+# dictation_log stores clip ids and exam_papers stores the URLs, so the
+# key formula outlives any engine. Computed with the formula as it stood
+# before the engine changed; if one of these moves, every stored clip
+# reference points at nothing.
+
+def test_content_keys_are_pinned():
+    assert tts.content_key(TURNS) == "4fb26ff92840ba0be8ef77b3"
+    assert tts.content_key([{"speaker": "reader", "textJp": "まいげつ"}]) == "db7628e49227358ee99477f5"
+    assert tts.content_key([{"speaker": "narrator", "textJp": "私は学生です。"}], "-10%") \
+        == "cf02e07acf9530ec0fddc7e0"
+
+
+# ── Who speaks which line ────────────────────────────────────────
+
+def test_the_narrator_and_the_two_speakers_get_three_voices():
+    assert tts.voice_slots(TURNS) == {"narrator": 0, "A": 1, "B": 2}
+
+
+def test_a_script_without_a_narrator_keeps_A_and_B_where_they_are():
+    # Before plan 113, voices went by order of appearance, so a script
+    # opening on A gave A the narrator's voice.
+    turns = [{"speaker": "A", "textJp": "x"}, {"speaker": "B", "textJp": "y"}]
+    assert tts.voice_slots(turns) == {"A": 1, "B": 2}
+
+
+def test_labels_the_model_invented_take_the_slot_they_name():
+    turns = [{"speaker": "男の人", "textJp": "x"}, {"speaker": "女の人", "textJp": "y"},
+             {"speaker": "店員", "textJp": "z"}]
+    assert tts.voice_slots(turns) == {"男の人": 2, "女の人": 1, "店員": 3}
+
+
+def test_a_single_voice_clip_is_read_by_the_reader():
+    assert tts.voice_slots([{"speaker": "reader", "textJp": "x"}]) == {"reader": 0}
+
+
+# ── One file per dialogue ────────────────────────────────────────
+
+def test_a_dialogue_is_joined_with_pauses_and_encoded_once(audio_dir, fake_tts):
+    joined = []
+    real_encode = engine.encode_mp3
+
+    def encode(pcm, **kwargs):
+        joined.append(pcm)
+        return real_encode(pcm, **kwargs)
+
+    with mock.patch.object(engine, "encode_mp3", side_effect=encode):
+        tts.synthesize_dialogue(TURNS)
+
+    assert len(joined) == 1
+    # narrator | A | B | narrator: two narrator boundaries, one between speakers.
+    expected = 4 * tone().seconds + 2 * tts._NARRATOR_GAP_S + tts._TURN_GAP_S
+    assert joined[0].seconds == pytest.approx(expected, abs=0.01)
+    # Each line in its slot's voice (style_for_slot is 100 + slot here).
+    assert [c.args[1] for c in fake_tts.call_args_list] == [100, 101, 102, 100]
+
+
+def test_a_rate_becomes_the_engine_speed(audio_dir, fake_tts):
+    tts.synthesize_dialogue([{"speaker": "narrator", "textJp": "学校は九時からです。"}], "-10%")
+    assert fake_tts.call_args.kwargs["speed"] == pytest.approx(0.9)
+
+
+def test_the_file_is_an_mp3_the_player_can_time(audio_dir, fake_tts):
+    url = tts.synthesize_dialogue(TURNS)
+    info = engine.mp3_summary(open(os.path.join(audio_dir, url.rsplit("/", 1)[-1]), "rb").read())
+    # Constant bitrate: the exam player's clock and seek bar read the
+    # duration off the file.
+    assert (info["sample_rate"], info["channels"], info["kbps"]) == (24000, 1, [48])
+
+
+def test_an_existing_clip_is_not_made_again(audio_dir, fake_tts):
+    tts.synthesize_dialogue(TURNS)
+    tts.synthesize_dialogue(TURNS)
+    assert fake_tts.call_count == len(TURNS)
+
+
+def test_force_remakes_a_clip_in_place(audio_dir, fake_tts):
+    url = tts.synthesize_dialogue(TURNS)
+    assert tts.synthesize_dialogue(TURNS, force=True) == url
+    assert fake_tts.call_count == 2 * len(TURNS)
+
+
+# ── The voice epoch ──────────────────────────────────────────────
+
+def _age(path: str) -> None:
+    """Make `path` older than the current voice."""
+    past = tts.voice_epoch() - 3600
+    os.utime(path, (past, past))
+
+
+def test_the_epoch_is_stamped_once_per_store(audio_dir):
+    first = tts.voice_epoch()
+    marker = os.path.join(audio_dir, tts._EPOCH_MARKER)
+    assert open(marker, encoding="utf-8").read().strip() == engine.VOICE_REV
+    tts._epochs.clear()
+    assert tts.voice_epoch() == first
+
+
+def test_a_new_voice_revision_starts_a_new_epoch(audio_dir):
+    marker = os.path.join(audio_dir, tts._EPOCH_MARKER)
+    with open(marker, "w", encoding="utf-8") as f:
+        f.write("edge\n")
+    os.utime(marker, (1000, 1000))
+    tts._epochs.clear()
+    assert tts.voice_epoch() > 1000
+    assert open(marker, encoding="utf-8").read().strip() == engine.VOICE_REV
+
+
+def test_a_clip_an_earlier_voice_made_is_made_again(audio_dir, fake_tts):
+    url = tts.synthesize_dialogue(TURNS)
+    path = os.path.join(audio_dir, url.rsplit("/", 1)[-1])
+    _age(path)
+    assert tts.is_stale(path)
+
+    assert tts.synthesize_dialogue(TURNS) == url
+    assert fake_tts.call_count == 2 * len(TURNS)
+    assert tts.is_current(path)
+
+
+def test_a_stale_clip_is_remade_before_it_is_served(clip_client, fake_tts, stored_paper, audio_dir):
+    filename, turns = stored_paper
+    path = os.path.join(audio_dir, filename)
+    with open(path, "wb") as f:
+        f.write(b"an old voice")
+    _age(path)
+
+    response = clip_client.get(f"/exam-audio/{filename}")
+
+    assert response.status_code == 200
+    assert response.content != b"an old voice"
+    assert fake_tts.call_count == len(turns)
+
+
+def test_a_stale_clip_that_cannot_be_remade_is_not_served(clip_client, stored_paper, audio_dir):
+    # 404, never the old voice: after a voice change, audio the app is no
+    # longer licensed to use must not play just because it is on disk.
+    filename, _turns = stored_paper
+    path = os.path.join(audio_dir, filename)
+    with open(path, "wb") as f:
+        f.write(b"an old voice")
+    _age(path)
+
+    with mock.patch.object(engine, "style_for_slot", side_effect=tts.TTSFailed("engine down")):
+        response = clip_client.get(f"/exam-audio/{filename}")
+
+    assert response.status_code == 404
