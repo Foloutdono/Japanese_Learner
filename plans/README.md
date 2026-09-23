@@ -5846,17 +5846,50 @@ nothing in those lists could be opened in a new tab.
 |---|---|---|
 | 117 | `components/selection/SplitRow.jsx`: a `<Link replace>` when its caller passes a URL, the button it always was when not, so the phone's DOM is untouched and a component rendered outside a router still works. The desk passes URLs to `RouteStops` (levels, kana sets, theme bands), `GrammarIndex`, `TierSelector`, `LibraryCard` and the exam review's rows, whose open question moves into the URL (`?question=`, beside `?attempt=`; the paper rides in the router state, so a swap refetches nothing and a new tab rebuilds from the attempt). `useListWalk` reads links and opens one on Space; the grammar walk's scroll follows the point, not the click. The 机 block gives the link the button's face (weight, leading, no underline, the review's hover, the focus ring). `src/splitRows.desktop.test.jsx` measures link against button; the desk tests assert the hrefs; a block of `src/deskfree.phone.test.jsx`; `routePattern.test.js` holds every row's href to its pattern | DONE (2026-09-23) |
 
-# Plan 118 — the browse's side on the desk (2026-09-23)
+---
 
-Numbered 118 on the merge into main: 116 had gone to the fare gate's
-lanes (above) and 117 to the split's rows while this was open.
+# 机 — a radical's page as two panes (plan 118, 2026-09-23)
+
+What wave 26 (plan 115) deferred first: the kanji station's third
+source was still a phone's two screens on the desk — the lesson with its
+platforms, and the family (`?family=1`) in the lesson's place behind a
+door, the way back a `‹` in the bar — and the bare index its own page.
+The one constraint stands: below 1100px nothing changes. Numbered 118:
+116 is the gate's lanes, and 117 is claimed by an open branch (a split's
+rows as links).
+
+| Plan | What | Status |
+|---|---|---|
+| 118 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
+
+| Flow | Wave 26 | Plan 118 |
+|---|---|---|
+| Another radical from a radical's page | ‹ to the index, then a tile (2 clicks) | a tile beside it (1), the URL replaced |
+| A radical's family | the door, the lesson gone; ‹ to come back | the door; the family beside the lesson and its platforms |
+| A platform's record on a radical's page | none | due now, the composition bar, mastered / total |
+| "By radical" from the kanji sources | the index, then a tile (2 clicks) | the page's biggest family's lesson (1) |
+
+Verified beyond the suite: a throwaway browser pass dumped every element,
+attribute, text node, box and computed style of the radical screens (the
+lesson, the plate opened, the family, the family with a kanji's sheet
+open, the door pressed, the bare index) at 390, 768 and 1099px, from the
+merge commit and from this change — the eighteen dumps are identical.
+
+Deferred: ←/→ through a page's radicals; a family kanji's entry opening
+beside the family rather than as a centred dialog.
+
+# Plan 119 — the browse's side on the desk (2026-09-23)
+
+Numbered 119 on the merge into main: 116 had gone to the fare gate's
+lanes, 117 to the split's rows and 118 to a radical's page (all above)
+while this was open.
 
 One of wave 26's deferrals. The fast review stood its card alone on the
 desk, in the width a card run gives its session panel.
 
 | Plan | What | Status |
 |---|---|---|
-| 118 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
+| 119 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
 
 Left out on purpose: the grammar browse. It wires no dictionary lookup
 at all, so there is no 🔍 on a phone either, and giving it one would put

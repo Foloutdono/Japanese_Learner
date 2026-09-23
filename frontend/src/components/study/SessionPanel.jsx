@@ -28,7 +28,7 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 // passes `misses={false}`: its lanes are other sections' decks, and
 // the day's end is not the place to reopen them.
 //
-// A browse passes `records={false}` (plan 118): the fast review
+// A browse passes `records={false}` (plan 119): the fast review
 // (components/study/ReviewDeck.jsx) rates nothing, so it has no tally
 // to keep, and its column is the revealed card's entry alone — docked
 // by the same reveal, on the same terms.

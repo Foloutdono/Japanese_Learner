@@ -809,12 +809,84 @@ describe('the split\'s rows (plan 117)', () => {
   })
 })
 
-// ── plan 118 — the browse a phone keeps ──
+// ── plan 118 — a radical's page a phone keeps ──
+// On the desk a radical's page stands the index beside the lesson and
+// its platforms, the open radical in gold and each platform figured,
+// the family's door swaps the index for the family, and the bare index
+// opens on a radical. A phone keeps its two screens: the lesson with
+// its platforms, and the family in the lesson's place behind the door,
+// the way back the bar's ‹ — no index fetched, no figure, nothing
+// marked, nothing redirected.
+describe('a radical\'s page (plan 118)', () => {
+  const GROUPS = [{ stroke_count: 4, radicals: [
+    { number: 61, char: '心', glyph: '心', stroke_count: 4, meaning: 'cœur', count: 40, learned: 2, started: 2 },
+    { number: 85, char: '水', glyph: '水', stroke_count: 4, meaning: 'eau', count: 123, learned: 10, started: 10 },
+  ] }]
+  const WATER = {
+    number: 85, glyph: '水', char: '水', meaning: 'eau', stroke_count: 4, forms: ['水'], names_ja: ['みず'],
+    position: 'hen', svg_url: null, total: 1, learned: 0, started: 0,
+    levels: [{ level: 'N5', kanji: [{ card_id: 'kanji_N5_水', kanji: '水', kana: 'みず', meaning: 'eau', stroke_count: 4, stage: 'new' }] }],
+  }
+
+  async function mount(entry) {
+    const { MemoryRouter, Routes, Route, useLocation } = await import('react-router-dom')
+    const { default: KanjiScreen } = await import('./screens/KanjiScreen')
+    const seen = { path: null }
+    function Probe() { seen.path = useLocation().pathname + useLocation().search; return null }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[entry]}>
+          <Routes>
+            <Route path="/learn/kanji/radicals" element={<KanjiScreen session={{}} />} />
+            <Route path="/learn/kanji/radical/:radical" element={<KanjiScreen session={{}} />} />
+          </Routes>
+          <Probe />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    return seen
+  }
+
+  it('keeps the lesson and the family two screens, with no index beside them', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/kanji/radical/85') ? WATER : {}))
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (String(path).startsWith('/api/kanji/radicals') ? { groups: GROUPS } : {}) }))
+    const seen = await mount('/learn/kanji/radical/85')
+    expect(seen.path).toBe('/learn/kanji/radical/85')
+    expect(document.querySelector('.desk-split, .radical-tile, .desk-mode-fig, [aria-current="page"]')).toBeNull()
+    const door = document.querySelector('.rad-door')
+    expect(door.hasAttribute('aria-expanded')).toBe(false)
+    expect(getComputedStyle(door.querySelector('.rad-door__chev')).display).not.toBe('none')
+    expect(document.querySelector('.bar__aside .stage__leave').textContent).toBe('Radicaux')
+    expect(apiFetch.mock.calls.some(([p]) => /^\/api\/kanji\/(radicals|stats)/.test(String(p)))).toBe(false)
+
+    door.click()
+    await settle()
+    expect(seen.path).toBe('/learn/kanji/radical/85?family=1')
+    expect(document.querySelector('.rad-plate, .platform-card')).toBeNull()
+    expect(document.querySelectorAll('.rad-family .rad-kanji')).toHaveLength(1)
+    expect(document.querySelector('.bar__aside .stage__leave').textContent).toBe('Le radical')
+    apiJson.mockReset()
+  })
+
+  it('keeps the bare index its own page', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (String(path).startsWith('/api/kanji/radicals') ? { groups: GROUPS } : {}) }))
+    const seen = await mount('/learn/kanji/radicals?stroke=4')
+    expect(seen.path).toBe('/learn/kanji/radicals?stroke=4')
+    expect(document.querySelectorAll('.radical-tile')).toHaveLength(2)
+    expect(document.querySelector('[aria-current="page"], .desk-split')).toBeNull()
+  })
+})
+
+// ── plan 119 — the browse a phone keeps ──
 // On the desk a fast review stands the revealed card's entry beside the
 // card (no tally: a browse rates nothing). A phone keeps the browse a
 // single column, docks nothing, and keeps the 🔍 that opens the entry in
 // a sheet.
-describe('the browse (plan 118)', () => {
+describe('the browse (plan 119)', () => {
   it('stands no side, docks nothing and keeps the 🔍', async () => {
     const cards = [
       { card_id: 'vocab_N5_駅_えき', kanji: '駅', kana: 'えき', meaning: 'gare', stage: 'mastered' },

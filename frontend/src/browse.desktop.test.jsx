@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — a browse has a side too (plan 118) ────────────────────────
+// ── 机 — a browse has a side too (plan 119) ────────────────────────
 // The fast review (components/study/ReviewDeck.jsx) flips through cards
 // already studied and rates none of them. On the desk it used to stand
 // its card alone in the width a card run gives its session panel. It

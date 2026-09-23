@@ -50,8 +50,12 @@ import { BlockMark } from '../dictionary/RadicalIndex'
  *   onBrowse  — open that view; the bar's aside is the way back
  *   back      — where an unknown number is sent (the index)
  *   onLoaded(radical) — the station reads the glyph for its sub
+ *   familyOpen — the desk's (plan 118): the family stands beside the
+ *               lesson rather than in its place (RadicalFamilyList, in
+ *               the station's split), so the door is a toggle and says
+ *               whether it is open. Undefined on the phone.
  */
-export default function RadicalLesson({ number, session, platforms, browse, onBrowse, back, onLoaded }) {
+export default function RadicalLesson({ number, session, platforms, browse, onBrowse, back, onLoaded, familyOpen }) {
   const { t, lang } = useLang()
   const [radical, setRadical] = useState(null)
   const [error, setError] = useState(null)
@@ -85,50 +89,14 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
   const positionJp = position ? t.radPositionJp?.[position] : null
   const startedNote = radical.started > radical.learned ? t.startedNote(radical.started) : null
 
-  // The family, by level: the browse view's whole body, and the sheet
-  // a tile opens over it.
-  const family = (
-    <section className="rad-family" aria-label={t.radFamily}>
-      {radical.levels.map(lv => (
-        <Fragment key={lv.level}>
-          <BlockMark code={lv.level} name={t[`levelHint${lv.level}`]} tally={lv.kanji.length} />
-          <div className="rad-family__grid">
-            {lv.kanji.map(k => (
-              <button
-                key={k.card_id}
-                type="button"
-                className={`rad-kanji rad-kanji--${k.stage}`}
-                title={k.meaning}
-                onClick={() => { playUi('click-mode-selection'); setLookup(k) }}
-              >
-                <span className="rad-kanji__char" lang="ja">{k.kanji}</span>
-                <span className="rad-kanji__meaning">{firstGloss(k.meaning)}</span>
-              </button>
-            ))}
-          </div>
-        </Fragment>
-      ))}
-    </section>
-  )
-
-  const sheet = lookup && (
-    <DictionaryLookupSheet
-      key={lookup.card_id}
-      term={lookup.kanji}
-      category="kanji"
-      session={session}
-      onClose={() => setLookup(null)}
-    />
-  )
-
   // ── The family, on its own ──
   // Deep-linked at ?family=1 on a radical the course builds nothing
   // on, this says so rather than drawing an empty screen.
   if (browse) {
     return (
       <div className="rad">
-        {radical.total > 0 ? family : <Empty message={t.radNoKanji} />}
-        {sheet}
+        {radical.total > 0 ? <RadicalFamily radical={radical} onPick={setLookup} /> : <Empty message={t.radNoKanji} />}
+        <FamilySheet lookup={lookup} session={session} onClose={() => setLookup(null)} />
       </div>
     )
   }
@@ -201,7 +169,7 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
           learner who has shut the lesson still reaches its kanji in
           one tap, beside the platforms rather than behind them. */}
       {radical.total > 0 && (
-        <button type="button" className="rad-door" onClick={() => { playUi('click-screen-selection'); onBrowse?.() }}>
+        <button type="button" className="rad-door" aria-expanded={familyOpen} onClick={() => { playUi('click-screen-selection'); onBrowse?.() }}>
           <span className="rad-door__body">
             <span className="rad-door__head">
               <span className="rad-door__fig"><b>{radical.learned}</b>/ {radical.total}</span>
@@ -215,5 +183,67 @@ export default function RadicalLesson({ number, session, platforms, browse, onBr
 
       {radical.total > 0 && platforms}
     </div>
+  )
+}
+
+// The family, by level: the browse view's whole body on the phone, the
+// list beside the lesson on the desk. A tile opens its kanji's entry
+// (`onPick`), in the sheet whoever holds the family draws.
+export function RadicalFamily({ radical, onPick }) {
+  const { t } = useLang()
+  return (
+    <section className="rad-family" aria-label={t.radFamily}>
+      {radical.levels.map(lv => (
+        <Fragment key={lv.level}>
+          <BlockMark code={lv.level} name={t[`levelHint${lv.level}`]} tally={lv.kanji.length} />
+          <div className="rad-family__grid">
+            {lv.kanji.map(k => (
+              <button
+                key={k.card_id}
+                type="button"
+                className={`rad-kanji rad-kanji--${k.stage}`}
+                title={k.meaning}
+                onClick={() => { playUi('click-mode-selection'); onPick(k) }}
+              >
+                <span className="rad-kanji__char" lang="ja">{k.kanji}</span>
+                <span className="rad-kanji__meaning">{firstGloss(k.meaning)}</span>
+              </button>
+            ))}
+          </div>
+        </Fragment>
+      ))}
+    </section>
+  )
+}
+
+function FamilySheet({ lookup, session, onClose }) {
+  if (!lookup) return null
+  return (
+    <DictionaryLookupSheet
+      key={lookup.card_id}
+      term={lookup.kanji}
+      category="kanji"
+      session={session}
+      onClose={onClose}
+    />
+  )
+}
+
+// ── 机 — the family beside the lesson (plan 118) ─────────────────────
+// On the desk the family's door does not take the lesson's place: it
+// swaps the radicals index, in the station split's list, for this. The
+// radical is the lesson's own answer, handed up by its onLoaded, so the
+// family costs no second fetch; until it lands, the three dots. A kanji
+// opens its entry in the sheet, which the desk draws as a centred
+// dialog.
+export function RadicalFamilyList({ radical, session }) {
+  const { t } = useLang()
+  const [lookup, setLookup] = useState(null)
+  if (!radical) return <Loading />
+  return (
+    <>
+      {radical.total > 0 ? <RadicalFamily radical={radical} onPick={setLookup} /> : <Empty message={t.radNoKanji} />}
+      <FamilySheet lookup={lookup} session={session} onClose={() => setLookup(null)} />
+    </>
   )
 }

@@ -242,7 +242,7 @@ export default function VocabRun({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     // On the desk the browse stands the revealed card's entry beside it,
-    // with no tally: a browse rates nothing (plan 118). Only once there
+    // with no tally: a browse rates nothing (plan 119). Only once there
     // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage

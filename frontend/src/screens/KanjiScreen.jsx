@@ -10,8 +10,8 @@ import { StationSplit, LevelRedirect } from '../components/selection/StationSpli
 import { ModeFigures, ScopeFigures } from '../components/selection/ModeFigures'
 import TierSelector from '../components/selection/TierSelector'
 import ModeSelector from '../components/selection/ModeSelector'
-import RadicalSelector from '../components/selection/RadicalSelector'
-import RadicalLesson from '../components/selection/RadicalLesson'
+import RadicalSelector, { RadicalRedirect } from '../components/selection/RadicalSelector'
+import RadicalLesson, { RadicalFamilyList } from '../components/selection/RadicalLesson'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { tierLabelFor, tierAtSize } from '../domain/tiers'
 
@@ -137,6 +137,15 @@ export default function KanjiScreen({ session }) {
 
   // ── The radicals: the index ──
   if (radicalsPage) {
+    // On the desk the index stands beside every radical's page, so the
+    // bare index opens on its page's first radical (plan 118).
+    if (desk) {
+      return (
+        <SelectionScreen title={t.kanjiTitle} sub={t.byRadicalShort} aside={leaveSources}>
+          <RadicalRedirect session={session} stroke={strokePage} to={n => `${BASE}/radical/${n}`} />
+        </SelectionScreen>
+      )
+    }
     return (
       <SelectionScreen title={t.kanjiTitle} sub={t.byRadicalShort} aside={leaveSources}>
         <RadicalSelector
@@ -176,6 +185,52 @@ export default function KanjiScreen({ session }) {
     // level, and the way back dropped the lesson somewhere in its
     // platforms.
     const swap = params => { setSp(params); window.scrollTo(0, 0) }
+
+    // ── 机 — a radical's page as two panes (plan 118) ──
+    // See the stations below: on the desk the radicals index stands
+    // beside the lesson and its platforms, the open radical marked, each
+    // platform figured from the family's own stats (the route the run
+    // opens on), and another radical swaps the page by replacing the
+    // URL. The family's door no longer takes the lesson's place: it
+    // swaps the index for the family, in the list, and back — a push,
+    // as on the phone, so Back undoes it; the crumb puts the index back
+    // too. The family is the lesson's own answer (onLoaded), not a
+    // second fetch, and the index stays mounted from one radical to the
+    // next, on the page the learner left it.
+    if (desk) {
+      const figured = modes.map(m => (m.key === FAST_REVIEW ? m : {
+        ...m,
+        aside: <ScopeFigures session={session} url={`/api/kanji/stats?radical=${number}&mode=${m.key}`} />,
+      }))
+      const open = n => { navigate(`${BASE}/radical/${n}`, { replace: true }); window.scrollTo(0, 0) }
+      return (
+        <SelectionScreen
+          title={t.kanjiTitle}
+          sub={sub}
+          aside={browsing ? <Leave onClick={() => swap({})}>{t.leaveRadicals}</Leave> : leaveSources}
+        >
+          <StationSplit
+            label={browsing ? t.radFamily : t.byRadicalShort}
+            list={browsing
+              ? <RadicalFamilyList radical={here} session={session} />
+              : <RadicalSelector session={session} selected={number} onSelect={open} />}
+          >
+            <RadicalLesson
+              key={number}
+              number={number}
+              session={session}
+              back={index}
+              browse={false}
+              familyOpen={browsing}
+              onBrowse={() => swap(browsing ? {} : { family: '1' })}
+              onLoaded={setLesson}
+              platforms={<ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />}
+            />
+          </StationSplit>
+        </SelectionScreen>
+      )
+    }
+
     const aside = browsing
       ? <Leave onClick={() => swap({})}>{t.radLesson}</Leave>
       : <Leave to={leave}>{t.leaveRadicals}</Leave>
