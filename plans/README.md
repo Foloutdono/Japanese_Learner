@@ -5747,6 +5747,8 @@ answer sheet in the exam runner; the exam result and the library laid
 out for the width; a word looked up from a docked breakdown still opens
 the lookup as a dialog.
 
+---
+
 # Wave 26 — 机, the desk's third round (plan 115, 2026-09-23)
 
 The owner's verdict on wave 25: nicely done, continue to improve it. A
@@ -5786,20 +5788,71 @@ design change, the owner's to decide). Cut: see plan 115's own list.
 
 ---
 
-# 机 — a radical's page as two panes (plan 117, 2026-09-23)
+# 机 — the gate's lanes two across (plan 116, 2026-09-23)
+
+Wave 26 deferred "Today's lanes two across"; this is that question.
+On the desk, should Today's fare gate set its lanes two across, the
+line chips and Depart spanning both? Built only if it reads better
+against DESIGN.md's density contract ("a screen gets a layout only
+where the width earns it, and what fills the width has a job").
+
+| Plan | What | Status |
+|---|---|---|
+| 116 | `.gate-card__lanes` as `repeat(auto-fit, minmax(calc(--desk-side-w − 2·--sp-5), 1fr))` in the 机 block: two across once the gate holds two lanes at a phone's width, one to a row below. No JSX change. `src/today.wide.test.jsx` (new), a case in `src/today.desktop.test.jsx`, a block in `src/deskfree.phone.test.jsx`; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+**Verdict: yes, where the width earns it.** Measured in the lanes
+(eight lanes, French):
+
+| Window | Lanes' box | Lanes | In view under the 30dvh cut |
+|---|---|---|---|
+| 1100 (`desktop`) | 364px | one to a row, 364px | 5 of 8 |
+| ~1390 | ~660px | the switch: two lanes at 328px fit | — |
+| 1440 (`wide`) | 704px | two across, 349px each | 8 of 8 (10 of 12) |
+| ≥1496 (canvas capped) | ~760px | two across, ~377px; three would need ~996px | — |
+
+Why it reads better at 1440: one lane per row was 704px with the name
+at one end, the figure at the other and ~450px of nothing between — the
+contract's "wide cards leave their right half empty" — and the box is
+height-bounded, so the unused width was also hiding half the day's
+switches under the cut. Two across, a lane is the width a phone draws it
+(the floor is the side column less the gate's phone padding, 328px), its
+figure a glance from its name, and an eight-lane day needs no scroll.
+The lanes are short switches, and two to five of them is the common day:
+"a grid of ≤5 short options is a grid, never a stack of full-width rows".
+
+Why not below ~1390: two columns would put each lane under its phone
+width. The desk's tightest gate (~430px) holds one.
+
+What it costs, accepted: the order reads left to right, then down, so a
+line with an odd count ends mid-row and the next line begins beside it —
+each lane's pigment and tick still name its line, and the chips above
+name the lines. A short last row is left short.
+
+Not done, on purpose: spanning an odd last lane (a switch like its
+siblings; twice their width would promote it — and the lanes are no
+hairline lattice, so the short row shows the card, not a seam);
+starting each line on its own row (more short rows, i.e. dead space
+inside the list); column-major order (it needs the row count from
+JavaScript, or multi-column CSS, which overflows sideways inside a
+height-bounded box).
+
+---
+
+# 机 — a radical's page as two panes (plan 118, 2026-09-23)
 
 What wave 26 (plan 115) deferred first: the kanji station's third
 source was still a phone's two screens on the desk — the lesson with its
 platforms, and the family (`?family=1`) in the lesson's place behind a
 door, the way back a `‹` in the bar — and the bare index its own page.
-The one constraint stands: below 1100px nothing changes. Numbered 117:
-116 is spent on the desk's branch (the browse's side), not yet on main.
+The one constraint stands: below 1100px nothing changes. Numbered 118:
+116 is the gate's lanes, and 117 is claimed by an open branch (a split's
+rows as links).
 
 | Plan | What | Status |
 |---|---|---|
-| 117 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
+| 118 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
 
-| Flow | Wave 26 | Plan 117 |
+| Flow | Wave 26 | Plan 118 |
 |---|---|---|
 | Another radical from a radical's page | ‹ to the index, then a tile (2 clicks) | a tile beside it (1), the URL replaced |
 | A radical's family | the door, the lesson gone; ‹ to come back | the door; the family beside the lesson and its platforms |

@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–115, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–116, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -51,11 +51,11 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-line`, `__origin`, `__leg` (`--done`, `--here`), `__track`, `__stop`, `__fig` | a Learn plate's foot as the whole line: 初, then a leg per level, filled as far as it is learned. Each leg is a button to its stop, the ridden one `aria-current="location"` (plan 115) | `components/station/LinePlate.jsx` (`LineFoot`) |
 | `.learn > .platform-grid` | two across; an odd last slot takes the row; exactly three go three across | `components/selection/ModeSelector.jsx` and the source pickers |
 | `.learn > .route` | a route that boards directly, drawn across as a line | `components/selection/RouteStops.jsx` |
-| `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back | `screens/TodayScreen.jsx` |
+| `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back. The gate's `.gate-card__lanes` go two across once the gate holds two lanes at a phone's width (~1390px, plan 116) | `screens/TodayScreen.jsx`, `components/station/GateCard.jsx` |
 | `.desk-journey`, `__head`, `__name`, `__word` | the pass's back beside the gate: the status sheet's body on sumi | `components/journey/JourneyPanel.jsx` (body: `JourneyBody.jsx`) |
 | `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓ (`hooks/useListWalk.js`) | `components/selection/StationSplit.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review |
 | `.desk-lesson` | a grammar point's lesson as the page beside the level's points, on the card's surface | `screens/GrammarScreen.jsx`, `components/study/GrammarLesson.jsx` (`GrammarLessonBody`) |
-| `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 117): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold; the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`), `domain/radicals.js` |
+| `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 118): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold; the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`), `domain/radicals.js` |
 | `.desk-split--shelf`, `.desk-shelf-page` | the library's shelf beside the open deck's page, half and half | `screens/LibraryScreen.jsx`, `components/decks/PublicDeckPage.jsx` (`PublicDeckPane`) |
 | `.desk-mode-fig`, `__due`, `__unit`, `__count` | a platform's own figures: due now, the composition bar, mastered / total — from /api/stats (`ModeFigures`) or a scoped stats route (`ScopeFigures`, plan 115) | `components/selection/ModeFigures.jsx` |
 | `.desk-stats`, `__holds`, `__leaks` | the statistics in two columns: the line (1:1), the ladder and the lines; the misses and every trouble card | `screens/StatsScreen.jsx` |
@@ -102,7 +102,8 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/components/chrome/Shell.desk.browser.test.jsx` | browser | a resize across 1100 keeps the screen |
 | `src/lattices.desktop.test.jsx`, `src/today.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/stations.desktop.test.jsx`, `src/stats.desktop.test.jsx`, `src/runs.desktop.test.jsx`, `src/header.desktop.test.jsx`, `src/decks.desktop.test.jsx` | desktop | plan 114, one file a phase |
 | `src/breakdown.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/folds.desktop.test.jsx`, `src/exam.desktop.test.jsx`, `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/laptop.desktop.test.jsx`, `src/session.desktop.test.jsx` | desktop | plan 115, one file a phase |
-| `src/radicals.desktop.test.jsx` | desktop | plan 117: a radical's page beside the index, the family in the list, the bare index |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–115 and 117's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/today.wide.test.jsx` | wide | plan 116: the gate's lanes two across, in the list's order, Enter departing with the choice |
+| `src/radicals.desktop.test.jsx` | desktop | plan 118: a radical's page beside the index, the family in the list, the bare index |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–116 and 118's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |

@@ -237,9 +237,13 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  **116** is spent on the desk's branch (`claude/intelligent-goodall-irh5vz`,
-  the browse's side on the desk) and not yet merged here.
-  **117** is a radical's page on the desk as two panes, which plan 115
+  **116** is the fare gate's lanes two across on the desk once the gate
+  holds two at a phone's lane width (cited in the 机 section of
+  `index.css`, `src/today.wide.test.jsx`, `src/today.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; the evaluation is in `plans/README.md`).
+  **117** is claimed by an open branch (`claude/blissful-turing-wwbnn3`,
+  a split's rows as links) and not yet merged here.
+  **118** is a radical's page on the desk as two panes, which plan 115
   deferred: the radicals index beside the lesson and its platforms, the
   open radical in gold and each platform figured from the family's own
   stats; another radical swaps the page by replacing the URL, the family's
@@ -252,7 +256,7 @@ runtime purpose. Two consequences worth knowing:
   `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **118** or higher, and check
+  When starting a new wave, begin at **119** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
