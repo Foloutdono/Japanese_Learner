@@ -5665,3 +5665,58 @@ What shipped, per mode:
   topped up to `--target`, `--dry-run` first. `tests/test_prewarm_exam_papers.py`.
 
 Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
+
+
+# Wave 24 — 声, a voice we are allowed to sell (plan 113, 2026-09-23)
+
+Executed directly in one session. Every voice the server made came from
+edge-tts, a client for Microsoft Edge's consumer "Read Aloud" endpoint,
+which nothing licenses for a product that is sold. The kana deck had the
+second half of the problem: 102 recordings of undocumented origin,
+40 of them clipping, 24 of the deck's sounds missing, and ウォ saying を.
+The owner chose VOICEVOX Nemo, a Render private service, and a
+regenerated kana set.
+
+| # | Plan | Status |
+|---|------|--------|
+| 113 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated | DONE (2026-09-23) |
+
+What shipped:
+
+- **The engine.** `study/voice_engine.py` is the only client: httpx,
+  bounded concurrency, retries on connection errors, everything as
+  `TTSFailed`. `render.yaml` gains `voicevox-nemo`, a private service on
+  the stock image pinned by digest, with `VV_DISABLE_MUTABLE_API=1`. The
+  backend's `VOICEVOX_URL` comes from its `hostport`. Measured with three
+  voices loaded, it peaks at 376 MB (Starter), and a word takes about 2 s at
+  0.5 CPU. ADR 0018 has the licence, the credit and the options table.
+- **Nothing is renamed.** `content_key` is byte-identical and pinned in
+  `tests/test_exam_tts.py`. A new voice is a voice EPOCH instead:
+  `{audio_dir}/.voice-rev`. A clip older than the epoch is remade in place
+  before it is served, or is a 404 if it cannot be remade.
+  `scripts/revoice_audio.py` does the lot up front.
+- **Three voices.** They are assigned by speaker label (narrator 0, A 1,
+  B 2), and the listening prompt now says A is 女の人 and B is 男の人. The
+  generator asks the engine `ready()` before the paid model call. A
+  dialogue is joined with pauses and encoded once, at a constant bitrate.
+- **Kana.** A lone kana goes through `/accent_phrases?is_kana=true`, so は
+  is "ha" and へ is "he". The frontend sends a lone kana straight to the
+  server clip rather than the device. `scripts/build_kana_audio.py` made
+  127 clips (48 kHz, −19 dB RMS, peak ≤ −3 dB), named by
+  `kana_data.sound_of`, so ウォ is `wo_foreign`. えい and おう are said as ē and
+  ō. The dictionary's kana play the deck clip.
+- **Caches.** Every clip URL carries a revision (`VOICE_REV`, and
+  `KANA_REV` for the kana set), so neither the service worker nor the
+  one-year `immutable` header replays an old voice.
+- **Credit.** "VOICEVOX Nemo" is on the Credits page and in
+  THIRD_PARTY_NOTICES, with the ban on using the audio for machine
+  learning.
+
+Owner steps after deploy:
+
+1. Sync the Blueprint.
+2. Run `python -m scripts.revoice_audio`, then again with `--yes`, from the
+   backend's Render Shell.
+3. Listen to `scripts/audition_voices.py`. If the provisional voices
+   (女声1, 女声2, 男声1) are not the ones, change `DEFAULT_VOICES`, bump
+   `VOICE_REV` (and `KANA_REV`), and re-run `build_kana_audio --force`.

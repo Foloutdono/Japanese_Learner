@@ -11,6 +11,10 @@ export const ATTRIBUTIONS = [
   { id: 'kanjivg',  name: 'KanjiVG',                 by: 'Ulrich Apel',      what: 'strokes',    license: 'CC BY-SA 3.0', url: 'https://kanjivg.tagaini.net/' },
   { id: 'tatoeba',  name: 'Tatoeba',                 by: null,               what: 'sentences',  license: 'CC BY 2.0 FR', url: 'https://tatoeba.org/' },
   { id: 'voicevox', name: 'VOICEVOX · 春日部つむぎ', by: null,               what: 'voice',      license: 'VOICEVOX terms', url: 'https://voicevox.hiroshiba.jp/' },
+  // Every other voice the app plays -- listening, dictation, card
+  // readings, the kana (plan 113). The credit is the licence's one
+  // condition, so its wording is the licence's: "VOICEVOX Nemo".
+  { id: 'voicevox-nemo', name: 'VOICEVOX Nemo',      by: null,               what: 'speech',     license: 'VOICEVOX Nemo terms', url: 'https://voicevox.hiroshiba.jp/nemo/' },
   { id: 'noto',     name: 'Noto Sans JP · Noto Serif JP', by: 'Google',      what: 'type',       license: 'SIL OFL 1.1', url: 'https://fonts.google.com/noto' },
   { id: 'grotesk',  name: 'Space Grotesk',           by: 'Florian Karsten',  what: 'type',       license: 'SIL OFL 1.1', url: 'https://github.com/floriankarsten/space-grotesk' },
 ]

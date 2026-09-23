@@ -27,14 +27,14 @@ export { preload } from './context'
 // playClick/playToggle come from chimes, not playback: chimes is the
 // station's vocabulary — the names the app calls moments by — and
 // each of those names resolves to a chosen voice in voices.js.
-export { playKana, playSfx, playUi, playAnnouncement } from './playback'
+export { playKana, kanaSound, playSfx, playUi, playAnnouncement } from './playback'
 export {
   playClick, playToggle, playCorrect, playWrong,
   playGateChime, playDoorChime, playDoorSlide, playFareTick, playFlapClatter, playStamp,
   playArrival, playPlatformChime,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
-export { speakJapanese } from './speech'
+export { speakJapanese, voicedUrl } from './speech'
 // The palette itself is not part of the app's own surface — nothing
 // but the /dev/sounds screen picks a voice, and it imports voices.js
 // directly. Only `playVoice` is exported here, for a caller that

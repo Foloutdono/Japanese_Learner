@@ -17,7 +17,7 @@ cost is that a missing file is also invisible. Hence this list.
 | `announcements/` | `announcement` | `playAnnouncement(path)` → `/sounds/announcements/<path>.wav` |
 | `announcements/jingle.mp3` | `jingle` | played before every announcement |
 | `ambiant/` | `ambiance` | `startAmbiance(name)`, looped |
-| `kanas/` | `kana` | `playKana(romaji)` |
+| `kanas/` | `kana` | `playKana(kanaSound(card))` → `/sounds/kanas/<sound>.mp3?v=<KANA_REV>` |
 
 Channel names come from `SOUND_CATEGORIES` in `src/lib/audio/settings.js`
 and each has its own volume slider on the Settings screen.
@@ -196,9 +196,11 @@ design.
 ## Format notes
 
 **Provenance.** The announcement clips are synthesized with VOICEVOX
-(春日部つむぎ/Kasukabe Tsumugi voice), not recorded — see
-`THIRD_PARTY_NOTICES.md` at the repo root for the required credit and
-license terms before adding or replacing any of them.
+(春日部つむぎ/Kasukabe Tsumugi voice), not recorded, and the kana clips
+with VOICEVOX Nemo (plan 113) — see `THIRD_PARTY_NOTICES.md` at the repo
+root for the required credits and license terms before adding or
+replacing any of them. Both forbid using the audio for machine
+learning.
 
 **mp3 for everything new.** The eleven announcements are `.wav` and
 uncompressed — `kanji.wav` alone is 118KB for two seconds. Converting
@@ -213,35 +215,48 @@ sliders.
 
 ---
 
-## かな — the syllable recordings
+## かな — the syllable clips
 
-102 files under `kanas/`. Measured across the whole set by decoding
-every one of them:
+127 files under `kanas/`, one per SOUND the kana deck teaches: every
+kana, yōon, long vowel and 外来音 (ファ ティ ヴ…). They are generated,
+not recorded, by the same voice engine as the rest of the app's speech
+(VOICEVOX Nemo, `backend/study/voice_engine.py`, plan 113):
 
-| | |
-|---|---|
-| loudness spread | **25.2 dB** between quietest and loudest |
-| leading silence | up to **294ms** on 47 files (median 38ms) |
-| clipping | **40 files** at or above 0dBFS, one at 1.03 |
-| format | 48kHz, mixed mono and stereo, 0.29–1.57s |
+    cd backend
+    python -m scripts.build_kana_audio --check     # missing, stray, off-spec
+    python -m scripts.build_kana_audio --force     # remake the set
 
-Two of those three are corrected at playback and need no new audio:
-`playKana` analyses each buffer once on decode and plays it from where
-the speech actually starts, with a gain pulling it toward a common
-loudness. Measured result: **spread 25.2 dB → 0.9 dB**, and the lag
-before a syllable sounds is now a fixed 12ms pre-roll instead of up to
-294ms.
+and `backend/tests/test_kana_audio.py` holds the folder to the deck:
+every kana has its clip, no clip is orphaned, and every file is one the
+generator made.
 
-**The clipping cannot be fixed at playback** — the distortion is baked
-into the sample — and it is the reason the set still wants
-re-recording rather than only re-mixing.
+**A clip is named by sound, not by spelling.**
+`content/kana_data.sound_of(entry)` is the romaji, which already files
+the twins together (あ/ア, を/ヲ, じ/ぢ...). ウォ is the one exception: its
+romaji is を's "wo", but を is said "o" and ウォ "wo", so it has a
+`sound` of its own (`wo_foreign`). Cards carry `sound` and the callers
+play `kanaSound(card)`.
 
-If you do re-record: one voice, one session, 48kHz mono, peak no
-higher than −3 dBFS, trimmed to the syllable with ~20ms of air each
-side. The playback correction stays useful — a file already on target
-gets gain 1 and offset 0, so a good set simply needs less of it.
+**What one clip is.** 48 kHz mono, a constant 96 kbps, trimmed to the
+syllable with 20 ms of air either side and 5 ms fades, loudness at
+`playback.js`'s `TARGET_RMS` with the peak kept at −3 dBFS or below.
+Each clip is 0.26–0.45 s long. The playback correction in `playKana`
+stays: a file already on target gets gain ≈ 1 and offset ≈ 0.
 
-Speech synthesis was considered and rejected: a lone mora gives a TTS
-engine no prosody to work with, and it reads as a letter name rather
-than a sound. The correction above plus a clean set is the better
-answer.
+**Why synthesis works now, when it was once rejected.** Read as TEXT, a
+lone mora gives a speech engine nothing to go on: it reads は as the
+particle "wa" and a single kana as something like its letter name. The
+generator never hands the engine text. It hands it the kana NOTATION
+(`ハ'`, `キャ'`), which names the syllable itself and where the pitch
+falls, and holds the vowel a little so a syllable on its own is not
+clipped. Two spellings are said as the lesson teaches them rather than
+letter by letter: えい as ē and おう as ō.
+
+**A remade set is a new `KANA_REV`** in `src/lib/audio/playback.js`.
+The service worker keeps `/sounds/` cache-first for a year, and the
+revision on the URL is the only way a returning learner hears the new
+set.
+
+The set this replaced was 102 recordings of undocumented provenance.
+They spread 25.2 dB in loudness, and 40 of them clipped at or above
+0 dBFS. 24 of the deck's sounds had no file at all, and ウォ played を's.

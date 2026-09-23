@@ -15,7 +15,7 @@ import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
-import { speakJapanese } from '../../lib/audio'
+import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
 // The catalogue already draws every entry as a small 駅名標: the
@@ -848,7 +848,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             {!isGrammar && (
               <button
                 type="button"
-                onClick={() => speakJapanese(entry.kana)}
+                // A kana plays the deck's own clip -- the same voice the
+                // kana cards use, offline, and えい said as ē -- rather
+                // than being synthesized afresh (plan 113).
+                onClick={() => (isKana ? playKana(kanaSound(entry)) : speakJapanese(entry.kana))}
                 className="dict-plate__btn"
                 title={t.listen}
                 aria-label={t.listen}

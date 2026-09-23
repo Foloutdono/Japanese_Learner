@@ -5,7 +5,7 @@ import { FuriganaWord } from './Readings'
 import { GrammarRule, GrammarAnswer, GrammarFillSentence, GrammarContrastSentence } from './GrammarPieces'
 import { RadicalAnswer } from './RadicalPieces'
 import PromptCard from './PromptCard'
-import { speakJapanese, playKana } from '../../lib/audio'
+import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 import { RENDER, HINTS } from '../../domain/studyModes'
 import { wordForm, cardShape } from '../../domain/cardShape'
 
@@ -77,7 +77,7 @@ export default function CardPrompt({
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
-            onReplaySound={() => playKana(c.romaji)}
+            onReplaySound={() => playKana(kanaSound(c))}
           />
         </PromptCard>
       )
@@ -89,7 +89,7 @@ export default function CardPrompt({
           <RevealActions
             t={t} revealed={answered} resetKey={resetKey}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
-            onReplaySound={() => playKana(c.romaji)}
+            onReplaySound={() => playKana(kanaSound(c))}
           />
         </PromptCard>
       )
@@ -102,7 +102,7 @@ export default function CardPrompt({
             front={isB2F ? romajiPrompt(prompt) : <CharDisplay char={prompt} variant="glyph" />}
             back={isB2F ? <CharDisplay char={answer} variant="glyph" /> : romajiPrompt(answer)}
             dictTerm={c.kana} dictCategory={dictCategory} session={session}
-            onReplaySound={() => playKana(c.romaji)}
+            onReplaySound={() => playKana(kanaSound(c))}
           />
         ) : (
           <>
@@ -110,7 +110,7 @@ export default function CardPrompt({
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
               dictTerm={c.kana} dictCategory={dictCategory} session={session}
-              onReplaySound={() => playKana(c.romaji)}
+              onReplaySound={() => playKana(kanaSound(c))}
             />
           </>
         )}

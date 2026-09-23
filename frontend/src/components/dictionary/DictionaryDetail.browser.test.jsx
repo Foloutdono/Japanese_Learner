@@ -17,7 +17,7 @@ import '../../index.css'
 // that the same panel is the whole screen on a phone and a column
 // beside the catalogue on a desktop.
 
-vi.mock('../../lib/audio', async o => ({ ...(await o()), speakJapanese: vi.fn(), playUi: vi.fn() }))
+vi.mock('../../lib/audio', async o => ({ ...(await o()), speakJapanese: vi.fn(), playKana: vi.fn(), playUi: vi.fn() }))
 vi.mock('../../lib/api', () => ({
   apiFetch: vi.fn(),
   apiJson: vi.fn(async () => ({})),
@@ -49,7 +49,7 @@ globalThis.fetch = vi.fn(async url => ({
 }))
 
 const { DictionaryDetail, DictionaryLookupSheet } = await import('./DictionaryDetail')
-const { speakJapanese } = await import('../../lib/audio')
+const { speakJapanese, playKana } = await import('../../lib/audio')
 const { apiFetch } = await import('../../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -198,6 +198,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await cleanup()
   vi.mocked(speakJapanese).mockClear()
+  vi.mocked(playKana).mockClear()
   // The lane's files share one origin, so the language this file sets
   // must not leak into a suite that reads the French default.
   localStorage.removeItem('lang')
@@ -313,6 +314,14 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     // Ghosts: a ring and the ambient ink, never a filled disc.
     expect(getComputedStyle(speak).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     expect(getComputedStyle(speak).borderTopWidth).toBe('1px')
+  })
+
+  it('plays a kana the deck\'s own clip rather than synthesizing it (plan 113)', async () => {
+    // ウォ's romaji is を's; its clip is its own.
+    const { root } = await renderEntry({ ...KANA, kana: 'ウォ', romaji: 'wo', sound: 'wo_foreign', type: 'katakana' })
+    root.querySelector('.dict-plate__btn').click()
+    expect(playKana).toHaveBeenCalledWith('wo_foreign')
+    expect(speakJapanese).not.toHaveBeenCalled()
   })
 })
 
