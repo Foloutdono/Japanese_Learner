@@ -931,7 +931,7 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–115)
+### The desk (机, plans 113–116)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
@@ -971,7 +971,11 @@ into the page and gave a session its keys.
   the window.
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
-  sheet. The
+  sheet. The gate's lanes go two across once the gate holds two at a
+  phone's lane width (about 1390px; plan 116), so a lane's figure stands a
+  phone's width from its name and twice the day's switches show above the
+  list's cut; the line chips and Depart run across both, and below that
+  width the lanes stay one to a row. The
   dictionary's dock is open from the first frame on the first result, and
   every door in an entry opens inside the dock; ←/→ walk the catalogue. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
