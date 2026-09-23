@@ -113,7 +113,11 @@ describe('the library on the desk', () => {
     await settle(500)
     const asked = shelfCalls()
 
-    $$('.desk-split__list .lib-card')[2].click()
+    // Each deck a link to its page (plan 117), so it opens in a tab too.
+    const cards = $$('.desk-split__list .lib-card')
+    expect(cards.every(c => c.tagName === 'A')).toBe(true)
+    expect(cards[2].getAttribute('href')).toBe('/learn/decks/library/3')
+    cards[2].click()
     await settle()
     expect(where.path).toBe('/learn/decks/library/3')
     expect(where.type).toBe('REPLACE')

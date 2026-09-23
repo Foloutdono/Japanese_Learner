@@ -194,7 +194,7 @@ export default function KanaRun({ session }) {
   if (reviewing) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
     // On the desk the browse stands the revealed card's entry beside it,
-    // with no tally: a browse rates nothing (plan 116). Only once there
+    // with no tally: a browse rates nothing (plan 119). Only once there
     // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage

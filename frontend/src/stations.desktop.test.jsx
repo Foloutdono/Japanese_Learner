@@ -11,6 +11,10 @@ import './index.css'
 // stop, another stop swaps the platforms in place by REPLACING the URL
 // (so Back is not a walk through every stop looked at), and each
 // platform carries its own figures. The phone's side is deskfree.phone.
+//
+// Each stop is a link to its stop's URL (plan 117): the click replaces
+// the page in place, and the middle click or Ctrl/⌘-click opens it in a
+// tab of its own (splitRows.desktop holds the look and the modifiers).
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
@@ -114,7 +118,10 @@ describe('a level\'s platforms on the desk', () => {
   it('swaps the platforms in place when another stop is chosen', async () => {
     await mount('/learn/vocab/N4', vocabRoutes)
     await settle()
-    ;[...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N5')).click()
+    const stops = [...document.querySelectorAll('.desk-split__list .route-stop')]
+    expect(stops.every(s => s.tagName === 'A')).toBe(true)
+    expect(stops.map(s => s.getAttribute('href'))).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'].map(l => `/learn/vocab/${l}`))
+    stops.find(s => s.textContent.includes('N5')).click()
     await settle()
     expect(where.path).toBe('/learn/vocab/N5')
     expect(where.type).toBe('REPLACE')
@@ -144,7 +151,9 @@ describe('the other stations on the desk', () => {
     ))
     await settle()
     expect(where.path).toBe('/learn/kana/katakana_basic')
-    expect(document.querySelector('.desk-split__list .route-stop[aria-current="page"]')).not.toBeNull()
+    const open = document.querySelector('.desk-split__list .route-stop[aria-current="page"]')
+    expect(open.tagName).toBe('A')
+    expect(open.getAttribute('href')).toBe('/learn/kana/katakana_basic')
   })
 
   it('opens grammar on the learner\'s level, its points door beside the line', async () => {
@@ -157,6 +166,12 @@ describe('the other stations on the desk', () => {
     await settle()
     expect(where.path).toBe('/learn/grammar/N4')
     expect(document.querySelector('.desk-split__page .gl-points-door')).not.toBeNull()
+    const n3 = [...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3'))
+    expect(n3.getAttribute('href')).toBe('/learn/grammar/N3')
+    n3.click()
+    await settle()
+    expect(where.path).toBe('/learn/grammar/N3')
+    expect(where.type).toBe('REPLACE')
   })
 
   it('opens the mock exams on the learner\'s grade, and swaps grades in the URL', async () => {
@@ -164,9 +179,13 @@ describe('the other stations on the desk', () => {
     await settle()
     expect(where.search).toBe('?level=N4')
     expect(document.querySelector('.desk-split__page .platform-card__title')).not.toBeNull()
-    ;[...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3')).click()
+    const n3 = [...document.querySelectorAll('.desk-split__list .route-stop')].find(s => s.textContent.includes('N3'))
+    expect(n3.tagName).toBe('A')
+    expect(n3.getAttribute('href')).toBe('/practice/exam?level=N3')
+    n3.click()
     await settle()
     expect(where.search).toBe('?level=N3')
+    expect(where.type).toBe('REPLACE')
     expect(openStop()).toBe('N3')
   })
 })

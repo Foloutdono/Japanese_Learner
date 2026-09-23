@@ -21040,6 +21040,34 @@ a.slip__act { text-decoration: none; }
     grid-column: 2;
     grid-row: 1;
   }
+  /* The gate's lanes two across, once the gate holds two (plan 116).
+     At a laptop's 1440 one lane per row ran ~704px: the name at one
+     end, its figure at the other, ~450px of nothing between — and the
+     box is bounded (the base rule's 30dvh), so the width that bought
+     nothing also hid half the day's switches under the cut. Two across,
+     a lane's figure stands a phone's width from its name again and twice
+     as many of the day's choices are in view; eight lanes need no
+     scroll at 900px tall.
+
+     The floor is a lane as a phone draws it: the side column (a phone's
+     content width) less the gate's own phone padding, 328px. Under two
+     of those — the desk from 1100 to ~1390, where the gate is ~430–720px
+     — the lanes stay one to a row, as below the line. Three would need
+     ~1000px the canvas never gives the gate. auto-fit, so a single lane
+     keeps the whole row rather than half of it beside an empty track.
+
+     The order is the list's own, left to right then down (the lanes are
+     sorted by line, then urgency), and Tab follows the eye. A line with
+     an odd count ends mid-row and the next begins beside it: each lane's
+     pigment names its line, and the chips above name the lines. An odd
+     last lane is not spanned — it is a switch like its siblings, and
+     twice their width would promote it — and this is no hairline
+     lattice, so the short row shows the card, not a seam. The chips,
+     the notice and Depart are the lanes' siblings, so they span both. */
+  .gate-card__lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - 2 * var(--sp-5)), 1fr));
+  }
 
   /* The pass's back, beside the gate (components/journey/JourneyPanel):
      the status sheet's own body on the sheet's own material — sumi, the
@@ -21278,6 +21306,9 @@ a.slip__act { text-decoration: none; }
      as a card's content would like. */
   .desk-split__list > .platform-grid,
   .desk-split__list .tier-picker > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  /* ... and a radical's platforms, under its lesson in the page (plan
+     118): a list beside a list, one to a row. */
+  .desk-split__page > .rad > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
@@ -21356,7 +21387,12 @@ a.slip__act { text-decoration: none; }
   .desk-split__page .platform-card__aside,
   .desk-deck__study .platform-card__lead,
   .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
-  .desk-split .desk-stop--open {
+  /* The open radical in the index beside its lesson, and the family's
+     door while the family stands in the list (plan 118): the same ring,
+     each being a card with its own edge. */
+  .desk-split .desk-stop--open,
+  .desk-split .radical-tile[aria-current="page"],
+  .desk-split .rad-door[aria-expanded="true"] {
     border-color: var(--accent2);
     background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
   }
@@ -21374,14 +21410,37 @@ a.slip__act { text-decoration: none; }
   /* The tiers and the grammar points as a list beside their page
      (plan 115): no ▶ and no ›, since a row here opens beside itself
      and departs nowhere; and a tier a list's row, not a wall's card —
-     forty-three of them scroll in the column. */
+     forty-three of them scroll in the column. A radical's family door
+     (plan 118) opens beside itself too. */
   .desk-split__list .platform-card__go,
-  .desk-split__list .gl-index__chev { display: none; }
+  .desk-split__list .gl-index__chev,
+  .desk-split .rad-door[aria-expanded] > .rad-door__chev { display: none; }
   .desk-split__list .platform-card__lead,
   .desk-split__list .platform-card__body { padding-block: var(--sp-3); }
   /* The ▶ was the aside's right margin; without it the figures keep
      their own. */
   .desk-split__list .platform-card__aside { padding-inline-end: var(--sp-4); }
+  /* The list's rows are links (plan 117, components/selection/SplitRow),
+     so that a stop, a point or a deck opens in a new tab too — and a
+     link is not a button: neither the global `button` rule nor the
+     browser's own button face reaches it. It takes back what the row
+     was drawn with, so the link reads exactly as the button it replaced
+     (splitRows.desktop.test.jsx measures the two against each other):
+     the button's weight and leading, where the row leaves its text to
+     them (the route and the cards; the index and the review rows set
+     `font: inherit` of their own), no underline, the button's hover
+     where the row keeps it (the review's), and its focus ring. */
+  .desk-split__list a:is(.route-stop, .platform-card) {
+    font-weight: 600;
+    line-height: normal;
+  }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
+  .desk-split__list a.exam-review-row { transition: filter 0.15s; }
+  .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
   /* A grammar point's lesson as the page beside the index (plan 115):
      the sheet's lesson on the card's own surface, at the card's width,
      its plate standing where it is drawn rather than pinned to a

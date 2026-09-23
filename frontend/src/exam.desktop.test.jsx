@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -13,14 +13,19 @@ import './index.css'
 // had are named. The result's review is a list beside the open
 // question's revealed card: the first miss open on arrival, ←/→ or a
 // click to the next. The phone's side is deskfree.phone.
+//
+// The open question is in the URL beside the attempt (?question=, plan
+// 117), and each row is a link to it: a question opens in a tab of its
+// own, and the swap in place carries the paper it was handed.
 
 const getExam = vi.fn()
 const submitAttempt = vi.fn()
+const getAttempt = vi.fn()
 vi.mock('./exam/examService', async o => ({
   ...(await o()),
   getExam: (...a) => getExam(...a),
   submitAttempt: (...a) => submitAttempt(...a),
-  getAttempt: vi.fn(),
+  getAttempt: (...a) => getAttempt(...a),
 }))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: () => {}, playClick: () => {}, playCorrect: () => {} }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
@@ -173,11 +178,21 @@ const summaryFor = answers => {
   return { attemptId: 9, revision: 3, startedAt: 0, finishedAt: 600000, review, perSection: { reading: { correct, total: review.length, pct: Math.round((correct / review.length) * 100) } } }
 }
 
-async function mark(answers) {
+const where = { search: null, type: null, state: null }
+function Probe() {
+  const loc = useLocation()
+  where.search = loc.search
+  where.state = loc.state
+  where.type = useNavigationType()
+  return null
+}
+
+async function mark(answers, search = '?attempt=9') {
   await render(
     <LangProvider>
-      <MemoryRouter initialEntries={[{ pathname: '/practice/exam/e1/results', search: '?attempt=9', state: { summary: summaryFor(answers), exam: PAPER } }]}>
+      <MemoryRouter initialEntries={[{ pathname: '/practice/exam/e1/results', search, state: { summary: summaryFor(answers), exam: PAPER } }]}>
         <Routes><Route path="/practice/exam/:examId/results" element={<ExamResult session={{}} />} /></Routes>
+        <Probe />
       </MemoryRouter>
     </LangProvider>
   )
@@ -198,10 +213,13 @@ describe('the exam result on the desk', () => {
   })
 
   it('walks the list with ←/→ and a click, in place', async () => {
+    getAttempt.mockClear()
     await mark(given)
     press('ArrowRight')
     await settle()
     expect(openQ()).toMatch(/3$/)
+    expect(where.search).toBe('?attempt=9&question=r2')
+    expect(where.type).toBe('REPLACE')
     expect($('.desk-split__page .exam-card .exam-question__prompt').textContent).toBe('会社へ何で行きますか。')
     press('ArrowRight')
     await settle()
@@ -209,6 +227,27 @@ describe('the exam result on the desk', () => {
     $$('.desk-split__list .exam-review-row')[0].click()
     await settle()
     expect(openQ()).toMatch(/2$/)
+    expect(where.search).toBe('?attempt=9&question=r1')
+    expect(where.type).toBe('REPLACE')
+    // The paper and the attempt ride with the swap: nothing is fetched.
+    expect(where.state?.exam).toBe(PAPER)
+    expect(getAttempt).not.toHaveBeenCalled()
+  })
+
+  it('makes each row a link to its question, kept beside the attempt', async () => {
+    await mark(given)
+    const rows = $$('.desk-split__list .exam-review-row')
+    expect(rows.every(r => r.tagName === 'A')).toBe(true)
+    expect(rows.map(r => r.getAttribute('href'))).toEqual([
+      '/practice/exam/e1/results?attempt=9&question=r1',
+      '/practice/exam/e1/results?attempt=9&question=r2',
+    ])
+  })
+
+  it('opens the question the URL names', async () => {
+    await mark(given, '?attempt=9&question=r2')
+    expect(openQ()).toMatch(/3$/)
+    expect($('.desk-split__page .exam-card .exam-question__prompt').textContent).toBe('会社へ何で行きますか。')
   })
 
   it('lists every question on a clean sheet, and keeps one thing to do next', async () => {

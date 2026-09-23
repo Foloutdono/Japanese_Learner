@@ -972,7 +972,11 @@ dialog left and moved the ones that do not interrupt into their columns.
   the window.
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
-  sheet. The
+  sheet. The gate's lanes go two across once the gate holds two at a
+  phone's lane width (about 1390px; plan 116), so a lane's figure stands a
+  phone's width from its name and twice the day's switches show above the
+  list's cut; the line chips and Depart run across both, and below that
+  width the lanes stay one to a row. The
   dictionary's dock is open from the first frame on the first result, and
   every door in an entry opens inside the dock; ←/→ walk the catalogue. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
@@ -990,7 +994,15 @@ dialog left and moved the ones that do not interrupt into their columns.
   route each run opens on, the library's shelf beside the open deck's page
   (the shelf keeping its search and its place), and a deck's platform screen
   gives way to the deck's page. A long list scrolls in its own column; the
-  stops are one tab stop, walked with ↑/↓.
+  stops are one tab stop, walked with ↑/↓. Every row of the lists above is
+  a link to what it opens (plan 117), the exam review's question included,
+  so it opens in a new tab as well as beside the list — and it wears the
+  button's face it replaced, to the pixel; the phone keeps its buttons.
+  A radical's page (plan 118) stands the radicals index beside the lesson
+  and its platforms, on the stroke page the radical is on, and another
+  radical swaps the page in place; the family's door no longer takes the
+  lesson's place but swaps the index for the family, in the list, and
+  back. The bare index opens on its page's biggest family.
 - **The statistics are one page.** What holds on the left — the retention
   line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
   a phone's chart), the ladder, the lines with the open one's levels hung

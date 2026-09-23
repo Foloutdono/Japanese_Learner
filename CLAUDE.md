@@ -237,16 +237,50 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  **116** is the browse's side on the desk: the fast review
+  **116** is the fare gate's lanes two across on the desk once the gate
+  holds two at a phone's lane width (cited in the 机 section of
+  `index.css`, `src/today.wide.test.jsx`, `src/today.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; the evaluation is in `plans/README.md`).
+  **117** is the desk's split rows as links: a level, a kana set, a theme
+  band, a tier, a grammar point, a library deck or an exam question in a
+  `StationSplit`'s list is a `<Link replace>` on the desk
+  (`components/selection/SplitRow.jsx`), so the middle click, Ctrl/⌘-click
+  and "open in new tab" work, while the phone keeps the button it always
+  had — the row takes its URL from its caller (`RouteStops`' `linkTo`,
+  through `LevelSelector` and `ThemeLevelSelector`; `GrammarIndex`,
+  `TierSelector`, `LibraryCard`'s `to`), the exam review's open question
+  moves into its URL (`screens/ExamResult.jsx`'s `?question=`), the list
+  walk reads links and opens one on Space (`hooks/useListWalk.js`), and
+  the link takes the button's face back in the 机 section of `index.css`
+  (held by `src/splitRows.desktop.test.jsx`, which measures the two
+  against each other, and a block of `src/deskfree.phone.test.jsx`).
+  **118** is a radical's page on the desk as two panes, which plan 115
+  deferred: the radicals index beside the lesson and its platforms, the
+  open radical in gold and each platform figured from the family's own
+  stats; another radical swaps the page by replacing the URL, the family's
+  door swaps the index for the family in the list and back, and the bare
+  index opens on its page's biggest family (cited in
+  `screens/KanjiScreen.jsx`, `components/selection/RadicalLesson.jsx`'s
+  `RadicalFamily`/`RadicalFamilyList`,
+  `components/selection/RadicalSelector.jsx`'s `RadicalRedirect`,
+  `components/dictionary/RadicalIndex.jsx`'s `selected`,
+  `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  **119** is the browse's side on the desk (numbered 119 because 116 went
+  to the fare gate's lanes, 117 to the split's rows and 118 to a radical's
+  page while it was open): the fast review
   (`components/study/ReviewDeck.jsx`) stands the revealed card's docked
   entry beside the card, with no tally because a browse rates nothing
   (`SessionPanel`'s `records={false}`, passed by `screens/KanaRun.jsx`,
   `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
   `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
   DESIGN.md, "The desk").
-  **120** is the desk's last dialogs: every sheet and modal the desk
-  still opened, each either kept because it interrupts or moved into its
-  page's column — a deck's More in its side (its deletion asked in a
+  **120** is the desk's last dialogs (numbered 120 because 116–119 went
+  to the gate's lanes, the split's rows, a radical's page and the browse
+  while it was open): every sheet and modal the desk still opened, each
+  either kept because it interrupts or moved into its page's column — a
+  deck's More in its side (its deletion asked in a
   dialog of its own), a gate lesson's rival in a grammar run's side, the
   grab's walkthrough beside the analyser's intake, a kanji's readings in
   the entry's own place, the iOS install steps in the settings page —

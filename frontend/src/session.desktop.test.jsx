@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
@@ -153,9 +153,24 @@ describe('the gates\' last doors', () => {
 
   it('walks a station\'s stops with ↑/↓, Home and End, one tab stop among them', async () => {
     const route = [{ key: 'N5', code: 'N5', name: 'a' }, { key: 'N4', code: 'N4', name: 'b' }, { key: 'N3', code: 'N3', name: 'c' }]
-    await wrap(<nav className="desk-split__list"><RouteStops stops={route} selected="N4" onSelect={() => {}} /></nav>)
+    const seen = { path: null, type: null }
+    function Probe() {
+      seen.path = useLocation().pathname
+      seen.type = useNavigationType()
+      return null
+    }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N4']}>
+          <nav className="desk-split__list"><RouteStops stops={route} selected="N4" linkTo={k => `/learn/vocab/${k}`} /></nav>
+          <Probe />
+        </MemoryRouter>
+      </LangProvider>
+    )
     await settle()
+    // The stops are links on the desk (plan 117); the walk is the same.
     const rows = $$('.route-stop')
+    expect(rows.every(r => r.tagName === 'A')).toBe(true)
     expect(rows.map(r => r.tabIndex)).toEqual([-1, 0, -1])
     rows[1].focus()
     rows[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }))
@@ -164,6 +179,14 @@ describe('the gates\' last doors', () => {
     expect(document.activeElement).toBe(rows[0])
     rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }))
     expect(document.activeElement).toBe(rows[2])
+    // Space opens the stop, as it did when it was a button — on a link
+    // it would scroll the page instead.
+    const space = new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true })
+    rows[2].dispatchEvent(space)
+    await settle()
+    expect(space.defaultPrevented).toBe(true)
+    expect(seen.path).toBe('/learn/vocab/N3')
+    expect(seen.type).toBe('REPLACE')
   })
 
   it('shows both rankings at once, one over the other at 1100', async () => {

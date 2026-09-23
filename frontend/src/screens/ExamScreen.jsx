@@ -65,7 +65,8 @@ export default function ExamScreen({ session }) {
   // it survived a second visit to /practice/exam — the rail's 模試 link,
   // the browser's own history — so the way back to the grades was only
   // the bar's ‹. Replaced, not pushed, so the history a phone walks back
-  // through is the one it always was.
+  // through is the one it always was. On the desk a grade is a link to
+  // that URL (plan 117), so it also opens in a tab of its own.
   const level = LEVELS.includes(sp.get('level')) ? sp.get('level') : null
   const setLevel = lvl => setSp(lvl ? { level: lvl } : {}, { replace: true })
 
@@ -162,7 +163,7 @@ export default function ExamScreen({ session }) {
         sub={level}
         aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
-        <StationSplit label={t.stationJlpt} list={<LevelSelector selected={level} onSelect={setLevel} />}>
+        <StationSplit label={t.stationJlpt} list={<LevelSelector selected={level} linkTo={lvl => `/practice/exam?level=${lvl}`} />}>
           {exams === null ? <Loading /> : papers}
         </StationSplit>
       </SelectionScreen>
