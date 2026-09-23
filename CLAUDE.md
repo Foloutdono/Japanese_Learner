@@ -237,7 +237,14 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  When starting a new wave, begin at **116** or higher, and check
+  **116** is the browse's side on the desk: the fast review
+  (`components/study/ReviewDeck.jsx`) stands the revealed card's docked
+  entry beside the card, with no tally because a browse rates nothing
+  (`SessionPanel`'s `records={false}`, passed by `screens/KanaRun.jsx`,
+  `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
+  `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **117** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

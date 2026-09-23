@@ -241,6 +241,9 @@ export default function VocabRun({ session }) {
 
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
+    // On the desk the browse stands the revealed card's entry beside it,
+    // with no tally: a browse rates nothing (plan 116). Only once there
+    // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage
         color="var(--line-vocab)"
@@ -248,6 +251,8 @@ export default function VocabRun({ session }) {
         leaveLabel={t.vocabTitle}
         where={`${t.vocabulary} ${level}`}
         sub={t.modeReview}
+        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
             foot={`${t.vocabulary} ${level}`}

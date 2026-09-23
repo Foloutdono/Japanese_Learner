@@ -244,6 +244,9 @@ export default function KanjiRun({ session }) {
 
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
+    // On the desk the browse stands the revealed card's entry beside it,
+    // with no tally: a browse rates nothing (plan 116). Only once there
+    // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage
         color="var(--line-kanji)"
@@ -251,6 +254,8 @@ export default function KanjiRun({ session }) {
         leaveLabel={t.kanjiTitle}
         where={`${t.kanjiTitle} ${level ?? radicalLabel}`}
         sub={t.modeReview}
+        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
             foot={`${t.kanjiTitle} ${level ?? radicalLabel}`}
