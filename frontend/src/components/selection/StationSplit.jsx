@@ -16,10 +16,12 @@ import { Loading } from '../ui/Loading'
 // only existed because a phone could show one list at a time is gone.
 //
 // Rendered only when hooks/useDesk says so, by the screen that owns it
-// (VocabScreen, KanjiScreen, KanaScreen, GrammarScreen, ExamScreen).
-export function StationSplit({ label, list, children }) {
+// (VocabScreen, KanjiScreen, KanaScreen, GrammarScreen, ExamScreen; since
+// plan 114 the grammar points, the tiers, the theme bands, the exam's
+// review and the library's shelf, whose `className` sets its columns).
+export function StationSplit({ label, list, className = '', children }) {
   return (
-    <div className="desk-split">
+    <div className={className ? `desk-split ${className}` : 'desk-split'}>
       <nav className="desk-split__list" aria-label={label}>{list}</nav>
       <div className="desk-split__page">{children}</div>
     </div>

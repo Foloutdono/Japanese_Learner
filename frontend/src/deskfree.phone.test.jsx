@@ -399,3 +399,58 @@ describe('the mock exam (plan 114, P4)', () => {
     expect(document.querySelector('p.hint')).not.toBeNull()
   })
 })
+
+// ── plan 114, P5 — the library and Browse a phone keeps ──
+// On the desk a published deck stands beside the shelf and Browse docks
+// in the deck page's side. A phone keeps the shelf and the deck two
+// screens (the same route component, deciding), and Browse its overlay.
+describe('the library and Browse (plan 114, P5)', () => {
+  const LISTED = [{ id: 7, name: 'Cuisine', type: 'vocab', card_count: 25, author: 'Aiko', followers: 1 }]
+
+  it('keeps the shelf and a published deck two screens', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/decks/library?')
+      ? { results: LISTED, total: 1, has_more: false, types: ['vocab'] }
+      : { ...LISTED[0], followed: false, preview: [{ id: 1, front: '寿司', back: 'sushi' }] }))
+    const { MemoryRouter, Routes, Route, useLocation } = await import('react-router-dom')
+    const { default: LibraryScreen } = await import('./screens/LibraryScreen')
+    const seen = { path: null }
+    function Probe() { seen.path = useLocation().pathname; return null }
+    const routes = (
+      <Routes>
+        <Route path="/learn/decks/library" element={<LibraryScreen session={{}} />} />
+        <Route path="/learn/decks/library/:deck_id" element={<LibraryScreen session={{}} />} />
+      </Routes>
+    )
+    await render(<LangProvider><MemoryRouter initialEntries={['/learn/decks/library']}>{routes}<Probe /></MemoryRouter></LangProvider>)
+    await settle(300)
+    expect(seen.path).toBe('/learn/decks/library')
+    expect(document.querySelector('.lib-card[aria-current], .desk-split')).toBeNull()
+    document.querySelector('.lib-card').click()
+    await settle(300)
+    expect(seen.path).toBe('/learn/decks/library/7')
+    expect(document.querySelector('.lib-card')).toBeNull()
+    expect(document.querySelector('main.learn > .deck-identity .deck-identity__name').textContent).toBe('Cuisine')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    apiJson.mockReset()
+  })
+
+  it('keeps Browse an overlay over the deck page', async () => {
+    const vocab = { ...DECK, type: 'vocab' }
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => (path === '/api/decks/1' ? vocab : String(path).includes('/browse') ? { results: [] } : deckAnswer(path)) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    ;[...document.querySelectorAll('.chip-row button')].find(b => /browse|parcourir/i.test(b.textContent)).click()
+    await settle(250)
+    expect(document.querySelector('.import-overlay [role="dialog"].browse-modal')).not.toBeNull()
+    expect(document.querySelector('.desk-browse')).toBeNull()
+  })
+})

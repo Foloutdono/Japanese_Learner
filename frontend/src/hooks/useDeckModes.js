@@ -12,8 +12,8 @@ import { modeLabel, modeDesc } from '../domain/studyModes'
 //
 // null while loading, [] when there is nothing to study. `refresh` is
 // any value that says the answer may have changed — the desk's deck
-// page passes its card count, since adding the first card of a shape is
-// what opens its modes.
+// page passes whether the deck has a card, since its first card is what
+// opens its modes.
 export function useDeckModes(deckId, session, refresh) {
   const { t } = useLang()
   const [modes, setModes] = useState(null)

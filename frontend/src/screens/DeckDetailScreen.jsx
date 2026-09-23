@@ -16,7 +16,7 @@ import { dueByDeck } from '../domain/lanes'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
-import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
+import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
@@ -507,13 +507,22 @@ export default function DeckDetailScreen({ session }) {
     })
   }
 
-  function startAdd() { resetForm(); setEditing(null); setAdding(true) }
+  // On the desk the form, Browse and the platforms take turns in one
+  // column (plan 114): opening one gives the column to it.
+  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) setShowBrowse(false) }
 
   function startEdit(card) {
     setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
     setNotes(card.notes || '')
     setEditing(card.id)
     setAdding(true)
+    if (desk) setShowBrowse(false)
+  }
+
+  function openBrowse() {
+    playUi('click-mode-selection')
+    setShowBrowse(true)
+    if (desk) setAdding(false)
   }
 
   function saveCard() {
@@ -739,11 +748,13 @@ export default function DeckDetailScreen({ session }) {
 
       {!selectMode && !isFollower && (
         <div className="chip-row">
+          {/* On the desk Add and Browse are each pressed while their
+              panel holds the page's side. */}
           {allowCustom && (
-            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
+            <Chip on={desk && adding && !editing} onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
           )}
           {allowedSources.length > 0 && (
-            <Chip onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }}><SearchIcon size={14} />{t.browseBtn}</Chip>
+            <Chip on={desk && showBrowse && !adding} onClick={openBrowse}><SearchIcon size={14} />{t.browseBtn}</Chip>
           )}
           {cards.length > 0 && (
             <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
@@ -930,9 +941,13 @@ export default function DeckDetailScreen({ session }) {
       {desk ? (
         <div className="desk-deck">
           <div className="desk-deck__main">{body}</div>
-          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : t.study}>
-            {adding
-              ? cardForm
+          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : t.study}>
+            {adding ? cardForm
+              : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
+              // The platforms once the cards are in: a deck's modes turn
+              // on whether it has a card, and asking before the list has
+              // loaded asked twice.
+              : loading ? <Loading />
               : <DeckPlatforms deckId={deck_id} deck={deck} session={session} cardCount={cards.length} />}
           </DeskSide>
         </div>
@@ -1043,7 +1058,7 @@ export default function DeckDetailScreen({ session }) {
         <ImportCardsMenu onImport={handleImport} onClose={closeImport} />
       )}
 
-      {showBrowse && (
+      {showBrowse && !desk && (
         <BrowseCardsMenu
           deckId={deck_id}
           deckType={deck?.type}

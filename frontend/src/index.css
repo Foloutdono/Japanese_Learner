@@ -21005,6 +21005,32 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     gap: var(--sp-4);
   }
+  /* Browse, docked in the deck's side (plan 114, BrowseCardsDock): its
+     cap and ✕ over the phone's own browser, whose result row stacks the
+     way it does on a phone — 13.5rem of headword and a meaning do not
+     share 360px beside a checkbox. */
+  .desk-browse {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .desk-browse__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .desk-side .browse-result-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .desk-side .browse-result-row__level {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .desk-side .browse-result-row__meaning,
+  .desk-side .browse-result-row__tag { grid-column: 2 / -1; }
   .desk-deck__cap {
     margin: 0;
     font-family: var(--font-display);
@@ -21121,8 +21147,10 @@ a.slip__act { text-decoration: none; }
   .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  /* ... except the tiers beside a tier's page (plan 114): a list, one
-     to a row, in the list's column. */
+  /* ... except a list beside its page (plan 114) — the tiers, the
+     library's shelf: one to a row, in the list's column, never as wide
+     as a card's content would like. */
+  .desk-split__list > .platform-grid,
   .desk-split__list .tier-picker > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -21206,6 +21234,17 @@ a.slip__act { text-decoration: none; }
     border-color: var(--accent2);
     background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
   }
+  /* The library's shelf beside the open deck's page (plan 114,
+     screens/LibraryScreen): a shelf card is a whole card — its blurb,
+     its author, its followers — so the shelf takes half the width, not
+     a list's column, and the page the other half. */
+  .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk-shelf-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
   /* The tiers and the grammar points as a list beside their page
      (plan 114): no ▶ and no ›, since a row here opens beside itself
      and departs nowhere; and a tier a list's row, not a wall's card —
@@ -21214,6 +21253,9 @@ a.slip__act { text-decoration: none; }
   .desk-split__list .gl-index__chev { display: none; }
   .desk-split__list .platform-card__lead,
   .desk-split__list .platform-card__body { padding-block: var(--sp-3); }
+  /* The ▶ was the aside's right margin; without it the figures keep
+     their own. */
+  .desk-split__list .platform-card__aside { padding-inline-end: var(--sp-4); }
   /* A grammar point's lesson as the page beside the index (plan 114):
      the sheet's lesson on the card's own surface, at the card's width,
      its plate standing where it is drawn rather than pinned to a
