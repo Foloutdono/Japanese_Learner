@@ -21268,6 +21268,9 @@ a.slip__act { text-decoration: none; }
      plan 114): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
+  /* The comprehension text beside its questions (plan 114): whole, at
+     the column's width, never the base card's 60vh inner scroll. */
+  .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
   .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .desk-tally > .record { padding: var(--sp-4); }
   .desk-entry {

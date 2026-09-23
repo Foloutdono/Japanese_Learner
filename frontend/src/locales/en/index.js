@@ -276,6 +276,8 @@ const quiz = {
   deskEarned:          'Earned',
   deskEntryWait:       'The dictionary entry opens here once the card is revealed.',
   deskBreakdownLabel:  'Breakdown',
+  deskPassageLabel:    'The text',
+  keyEnter:            'Enter',
   deskWayUp:           'Way up',
   deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
 

@@ -258,6 +258,8 @@ const quiz = {
   deskEarned:         'Gagnés',
   deskEntryWait:      'La fiche du dictionnaire s’ouvre ici quand la carte est révélée.',
   deskBreakdownLabel: 'Décomposition',
+  deskPassageLabel:   'Le texte',
+  keyEnter:           'Entrée',
   deskWayUp:          'Remonter',
   deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
 
