@@ -78,7 +78,7 @@ export default function KanjiScreen({ session }) {
   // second fetch, and the back button (Android's included) undoes it.
   const browsing = sp.get('family') === '1'
 
-  const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
+  const leaveSources = <Leave to={BASE}>{t.leaveSources}</Leave>
 
   // ── The sources ──
   if (page === '') {
@@ -98,7 +98,7 @@ export default function KanjiScreen({ session }) {
       <SelectionScreen
         title={t.kanjiTitle}
         sub={t.stationSources}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />
       </SelectionScreen>
@@ -176,7 +176,7 @@ export default function KanjiScreen({ session }) {
     const swap = params => { setSp(params); window.scrollTo(0, 0) }
     const aside = browsing
       ? <Leave onClick={() => swap({})}>{t.radLesson}</Leave>
-      : <Leave onClick={() => navigate(leave)}>{t.leaveRadicals}</Leave>
+      : <Leave to={leave}>{t.leaveRadicals}</Leave>
     return (
       <SelectionScreen
         title={t.kanjiTitle}
@@ -230,7 +230,7 @@ export default function KanjiScreen({ session }) {
     <SelectionScreen
       title={t.kanjiTitle}
       sub={sub}
-      aside={<Leave onClick={() => navigate(back)}>{byLevel ? t.leaveLevels : t.leaveTiers}</Leave>}
+      aside={<Leave to={back}>{byLevel ? t.leaveLevels : t.leaveTiers}</Leave>}
     >
       <ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

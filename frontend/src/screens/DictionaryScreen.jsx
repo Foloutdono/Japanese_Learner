@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useMining } from '../components/analysis/useMining'
 import { useFavorites } from '../hooks/useFavorites'
@@ -247,6 +247,13 @@ export default function DictionaryScreen({ session }) {
 	}, [])
 
 	useEffect(() => { navRef.current = { results, selected } }, [results, selected])
+	// Arrived by the rail's "/" (components/chrome/DeskRail.jsx, plan
+	// 113): the learner pressed the search key, so the field is where
+	// they meant to land.
+	const focusSearch = useLocation().state?.focusSearch
+	useEffect(() => {
+		if (focusSearch) searchRef.current?.focus()
+	}, [focusSearch])
 	// A tile chosen from the keyboard is brought into view.
 	useEffect(() => {
 		if (!desk || !selected) return

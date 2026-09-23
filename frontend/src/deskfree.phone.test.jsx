@@ -161,3 +161,28 @@ describe('the runs (P5)', () => {
     expect(peekEntry()).toBeNull()
   })
 })
+
+describe('the header (P6)', () => {
+  it('keeps every way out as the pill in the bar\'s corner', async () => {
+    const { MemoryRouter, Routes, Route, useLocation } = await import('react-router-dom')
+    const { Bar, Leave } = await import('./components/chrome/Bar')
+    let path = null
+    const Probe = () => { path = useLocation().pathname; return null }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N5']}>
+          <Routes>
+            <Route path="*" element={<><Bar code="TG" title="Vocab" sub="N5" aside={<Leave to="/learn/vocab">Sources</Leave>} /><Probe /></>} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.bar__aside > .stage__leave')).not.toBeNull()
+    expect(document.querySelector('.bar__names--stacked')).not.toBeNull()
+    document.querySelector('.stage__leave').click()
+    await settle()
+    expect(path).toBe('/learn/vocab')
+  })
+})

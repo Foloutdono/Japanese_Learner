@@ -62,10 +62,10 @@ beforeEach(() => {
   }))
 })
 
-async function mount() {
+async function mount(entry = '/dictionary') {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter initialEntries={['/dictionary']}>
+      <MemoryRouter initialEntries={[entry]}>
         <div className="phone phone--desk">
           <div className="phone__content">
             <Routes><Route path="/dictionary" element={<DictionaryScreen session={{}} />} /></Routes>
@@ -134,5 +134,18 @@ describe('the dock on the desk', () => {
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }))
     await settle()
     expect(headword()).toBe('電車')
+  })
+})
+
+describe('the search key', () => {
+  it('lands in the field when the rail\'s "/" brought the learner here', async () => {
+    await mount({ pathname: '/dictionary', state: { focusSearch: true } })
+    expect(document.activeElement?.tagName).toBe('INPUT')
+    expect(document.activeElement.closest('.dictionary')).not.toBeNull()
+  })
+
+  it('does not take the focus on an ordinary arrival', async () => {
+    await mount()
+    expect(document.activeElement?.tagName).not.toBe('INPUT')
   })
 })

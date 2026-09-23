@@ -1,5 +1,4 @@
 import { useContext } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { Bar, Leave } from '../chrome/Bar'
 import { GearIcon } from '../ui/Icons'
@@ -18,7 +17,6 @@ import { SettingsPaneContext } from './pane'
 // the list is right there.
 export function SettingsPage({ title, children, back = '/profile/settings', backLabel = null }) {
   const { t } = useLang()
-  const navigate = useNavigate()
   const inPane = useContext(SettingsPaneContext)
   if (inPane) {
     return (
@@ -34,7 +32,7 @@ export function SettingsPage({ title, children, back = '/profile/settings', back
         code={<GearIcon size={14} />}
         title={title}
         color="var(--pass-ink)"
-        aside={<Leave onClick={() => navigate(back)}>{backLabel ?? t.settings}</Leave>}
+        aside={<Leave to={back}>{backLabel ?? t.settings}</Leave>}
       />
       {children}
     </main>

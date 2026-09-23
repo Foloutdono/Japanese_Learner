@@ -74,7 +74,7 @@ export default function GrammarScreen({ session }) {
       <SelectionScreen
         title={t.grammarTitle}
         sub={t.stationJlpt}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         {/* On the desk the line stands beside a level's platforms, so
             the list alone opens on the learner's own level (plan 113). */}
@@ -114,7 +114,7 @@ export default function GrammarScreen({ session }) {
         sub={browsing ? `${level} · ${t.glPoints}` : `${level} · ${t[`levelHint${level}`] ?? ''}`}
         aside={browsing
           ? <Leave onClick={() => swap({})}>{t.leaveLevels}</Leave>
-          : <Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+          : <Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <StationSplit
           label={t.stationJlpt}
@@ -162,7 +162,7 @@ export default function GrammarScreen({ session }) {
     <SelectionScreen
       title={t.grammarTitle}
       sub={`${level} · ${t[`levelHint${level}`] ?? ''}`}
-      aside={<Leave onClick={() => navigate('/learn/grammar')}>{t.leaveLevels}</Leave>}
+      aside={<Leave to={'/learn/grammar'}>{t.leaveLevels}</Leave>}
     >
       {/* The points as a record that opens: learned over total, and
           started while the two disagree — the radical lesson's door,

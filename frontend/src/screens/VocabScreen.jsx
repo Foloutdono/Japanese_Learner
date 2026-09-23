@@ -67,7 +67,7 @@ export default function VocabScreen({ session }) {
   const jmdict = sp.get('domain') === 'jmdict'
   const freqDomain = jmdict ? 'vocab_jmdict' : 'vocab'
 
-  const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
+  const leaveSources = <Leave to={BASE}>{t.leaveSources}</Leave>
 
   // ── The sources ──
   if (page === '') {
@@ -87,7 +87,7 @@ export default function VocabScreen({ session }) {
       <SelectionScreen
         title={t.vocabulary}
         sub={t.stationSources}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />
       </SelectionScreen>
@@ -148,7 +148,7 @@ export default function VocabScreen({ session }) {
       <SelectionScreen
         title={t.vocabulary}
         sub={themeLabelFor(t, theme)}
-        aside={<Leave onClick={() => navigate(`${BASE}/themes`)}>{t.leaveThemes}</Leave>}
+        aside={<Leave to={`${BASE}/themes`}>{t.leaveThemes}</Leave>}
       >
         <ThemeLevelSelector
           session={session}
@@ -200,7 +200,7 @@ export default function VocabScreen({ session }) {
     <SelectionScreen
       title={t.vocabulary}
       sub={sub}
-      aside={<Leave onClick={() => navigate(back)}>{backLabel}</Leave>}
+      aside={<Leave to={back}>{backLabel}</Leave>}
     >
       <ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

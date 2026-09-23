@@ -85,6 +85,16 @@ export function getDeskSections(tabId, t) {
   return rows
 }
 
+/**
+ * Whether the desk's rail already has a door to `path` (plan 113): a
+ * gate, or one of any gate's stations. A screen's ‹ way out to one of
+ * those is a second door to the same place on the desk, and the Bar
+ * drops it (components/chrome/Bar.jsx).
+ */
+export function onDeskRail(path) {
+  return DESK_TAB_IDS.some(id => path === `/${id}` || getDeskSections(id, {}).some(s => s.path === path))
+}
+
 /** Whether `pathname` is standing in the section at `path` (or behind it). */
 export function inSection(pathname, path) {
   return pathname === path || pathname.startsWith(`${path}/`)

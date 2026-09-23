@@ -85,7 +85,7 @@ export default function ExamScreen({ session }) {
       <SelectionScreen
         title={t.examTitle}
         sub={t.stationJlpt}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         <LevelRedirect to={lvl => `/practice/exam?level=${lvl}`} />
       </SelectionScreen>
@@ -98,7 +98,7 @@ export default function ExamScreen({ session }) {
       <SelectionScreen
         title={t.examTitle}
         sub={t.stationJlpt}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         {exams === null && <Loading />}
         {exams?.length === 0 && (
@@ -160,7 +160,7 @@ export default function ExamScreen({ session }) {
       <SelectionScreen
         title={t.examTitle}
         sub={level}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         <StationSplit label={t.stationJlpt} list={<LevelSelector selected={level} onSelect={setLevel} />}>
           {exams === null ? <Loading /> : papers}

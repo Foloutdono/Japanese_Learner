@@ -95,7 +95,7 @@ export default function PublicDeckScreen({ session }) {
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
         <Bar code="KZ" color="var(--line-decks)" title={t.library}
-          aside={<Leave onClick={() => navigate('/learn/decks/library')}>{t.back}</Leave>} />
+          aside={<Leave to={'/learn/decks/library'}>{t.back}</Leave>} />
         <Loading />
       </main>
     )
@@ -105,7 +105,7 @@ export default function PublicDeckScreen({ session }) {
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
         <Bar code="KZ" color="var(--line-decks)" title={t.library}
-          aside={<Leave onClick={() => navigate('/learn/decks/library')}>{t.back}</Leave>} />
+          aside={<Leave to={'/learn/decks/library'}>{t.back}</Leave>} />
         <Empty icon={<BooksIcon size={40} />} message={t.libraryGone} hint={t.libraryGoneHint}
           action={{ label: t.librarySeeAll, onClick: () => navigate('/learn/decks/library') }} />
       </main>
@@ -118,7 +118,7 @@ export default function PublicDeckScreen({ session }) {
   return (
     <main id="main-content" className="learn" style={{ '--line-color': dt.color }}>
       <Bar code="KZ" color="var(--line-decks)" title={t.library}
-          aside={<Leave onClick={() => navigate('/learn/decks/library')}>{t.back}</Leave>} />
+          aside={<Leave to={'/learn/decks/library'}>{t.back}</Leave>} />
 
       <div className="deck-identity" style={{ '--rail': dt.color }}>
         <span className="wmap-roundel deck-identity__roundel" lang="ja" aria-hidden="true"

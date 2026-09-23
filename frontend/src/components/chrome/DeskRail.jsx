@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
+import { useEffect } from 'react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { getDeskTabs, getDeskSections, inSection, tabFor, dueBadge } from '../../config/tabs'
 import { useTodaySummary } from '../../stores/today'
@@ -34,6 +35,13 @@ import { HudInstruments } from './Hud'
 // (`tabbar`), so the Today guide's last stop finds the navigation on
 // either chrome. A run leaves this chrome exactly as it leaves the
 // phone's: the StageFrame draws neither.
+//
+// "/" is the dictionary's search from anywhere the rail is (plan 113):
+// the dictionary screen already answers it on its own page, and the
+// rail carries it there from every other one, asking the field for
+// focus on arrival. Never while typing, never under a dialog, and never
+// on a run — a run has no rail, so a slash cannot walk out of one. The
+// Dictionary gate prints the key.
 
 // The same glyph size as an unlit gate on the tab bar: in a list, the
 // lit gate is said by its ground and its rule, not by a glyph that grows.
@@ -42,8 +50,22 @@ const GLYPH = 21
 export function DeskRail() {
   const { t } = useLang()
   const { pathname } = useLocation()
+  const navigate = useNavigate()
   const active = tabFor(pathname)
   const due = useTodaySummary().data?.total ?? 0
+
+  useEffect(() => {
+    function onKey(e) {
+      if (e.key !== '/' || e.defaultPrevented || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      const el = e.target
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(el?.tagName) || el?.isContentEditable) return
+      if (pathname === '/dictionary' || document.querySelector('[aria-modal="true"]')) return
+      e.preventDefault()
+      navigate('/dictionary', { state: { focusSearch: true } })
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [pathname, navigate])
 
   return (
     <header className="desk-rail">
@@ -70,11 +92,13 @@ export function DeskRail() {
                   // it is.
                   aria-current={on ? (here ? 'true' : 'page') : undefined}
                   aria-label={badge ? `${tab.label} — ${t.todayDue(due)}` : undefined}
+                  aria-keyshortcuts={tab.id === 'dictionary' ? '/' : undefined}
                   onClick={() => playClick()}
                 >
                   <span className="desk-gate__ico"><GateIcon id={tab.id} size={GLYPH} /></span>
                   <span className="desk-gate__label">{tab.label}</span>
                   {badge && <span className="desk-gate__due" aria-hidden="true">{dueBadge(due)}</span>}
+                  {tab.id === 'dictionary' && <kbd className="desk-kbd desk-gate__key" aria-hidden="true">/</kbd>}
                 </Link>
                 {stations.length > 0 && (
                   <ul className="desk-rail__stations">

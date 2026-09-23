@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { useDesk } from '../hooks/useDesk'
 import { Bar, Leave } from '../components/chrome/Bar'
@@ -49,7 +49,6 @@ const MAX_STOP_DOTS = 12
 // bench and the subtitle dock -- and exactly one of them is ever
 // mounted: the platform the segmented control over the page selects.
 export default function AnalyzerScreen({ session }) {
-  const navigate = useNavigate()
   const { t } = useLang()
   const mining = useMining(session)
   const analyzer = useAnalyzerSession(session)
@@ -700,7 +699,7 @@ export default function AnalyzerScreen({ session }) {
           code={station.code}
           color={KAISEKI}
           title={t.analyzerTitle}
-          aside={<Leave onClick={() => navigate('/dictionary')}>{t.dictionaryTitle}</Leave>}
+          aside={<Leave to={'/dictionary'}>{t.dictionaryTitle}</Leave>}
         />
       )}
 

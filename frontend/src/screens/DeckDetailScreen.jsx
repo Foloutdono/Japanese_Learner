@@ -598,7 +598,7 @@ export default function DeckDetailScreen({ session }) {
         code="KZ"
         color="var(--line-decks)"
         title={t.decks}
-        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
+        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
       />
 
       {/* The deck, named on its own page: the same roundel, glyph and

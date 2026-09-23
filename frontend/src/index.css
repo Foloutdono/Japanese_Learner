@@ -21235,6 +21235,21 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     min-width: 0;
   }
+  /* ── the way up (plan 113) ──
+     A screen's ‹ way out, on the desk, when the rail has no door to
+     where it leads (components/chrome/Bar.jsx): not the phone's pill
+     in the bar's far corner but a crumb over the title, in the caption
+     register, where a computer's eye looks for what a page sits under.
+     One that the rail already opens is not drawn at all. */
+  .desk-crumb { display: flex; }
+  .desk-crumb__up {
+    height: auto;
+    padding: var(--sp-1) 0;
+    border: 0;
+    font-size: var(--fs-caption);
+  }
+  .desk-crumb__up:hover,
+  .desk-crumb__up:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
   .desk-run__note {
     margin: 0;
     font-size: var(--fs-caption);
@@ -21290,6 +21305,9 @@ a.slip__act { text-decoration: none; }
     text-indent: 0;
     font-variant-numeric: tabular-nums;
   }
+  /* "/" on the Dictionary gate: the dictionary's search from anywhere
+     the rail is (components/chrome/DeskRail.jsx, plan 113). */
+  .desk-gate__key { flex: none; color: var(--text-on-panel-soft); }
   /* The rating tile's key in its corner, clear of the seal and the word:
      it is what makes the reversed digits (1 is the best, at the right)
      readable at a glance. */

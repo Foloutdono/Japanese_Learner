@@ -129,7 +129,7 @@ function SettingsListBody({ session, current = null }) {
         code={<GearIcon size={14} />}
         title={t.settings}
         color="var(--pass-ink)"
-        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+        aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
       <div className="stg-list">

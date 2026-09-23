@@ -184,7 +184,7 @@ export default function LibraryScreen({ session }) {
         code="KZ"
         color="var(--line-decks)"
         title={t.library}
-        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
+        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
       />
 
       <Console>

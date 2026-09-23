@@ -72,7 +72,7 @@ export default function KanaScreen() {
       <SelectionScreen
         title={t.kanaTitle}
         sub={t.stationSets}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         {/* On the desk the sets stand beside a set's platforms, so the
             list alone opens on the set the figures say they are on. */}
@@ -93,7 +93,7 @@ export default function KanaScreen() {
       <SelectionScreen
         title={t.kanaTitle}
         sub={selectedSet.label}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <StationSplit
           label={t.stationSets}
@@ -109,7 +109,7 @@ export default function KanaScreen() {
     <SelectionScreen
       title={t.kanaTitle}
       sub={selectedSet.label}
-      aside={<Leave onClick={() => navigate('/learn/kana')}>{t.leaveSets}</Leave>}
+      aside={<Leave to={'/learn/kana'}>{t.leaveSets}</Leave>}
     >
       <ModeSelector modes={MODES} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

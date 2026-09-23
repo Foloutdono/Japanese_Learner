@@ -148,7 +148,7 @@ export default function StatsScreen({ session }) {
         code={STATION.code}
         title={t.statistics}
         color="var(--pass-ink)"
-        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+        aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
       {!loaded && !failed && <Loading />}
