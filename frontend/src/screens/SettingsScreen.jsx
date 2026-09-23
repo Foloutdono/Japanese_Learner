@@ -166,9 +166,14 @@ function SettingsListBody({ session, current = null }) {
         )}
       </div>
 
-      <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-        {t.signOut}
-      </button>
+      {/* The account page, open beside the list on the desk, carries
+          its own Sign out; one is enough on the screen (plan 114).
+          `current` is the desk's alone, so the phone's list keeps it. */}
+      {current === 'account' ? null : (
+        <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
+          {t.signOut}
+        </button>
+      )}
     </>
   )
 }

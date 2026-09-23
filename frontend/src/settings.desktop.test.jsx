@@ -102,4 +102,16 @@ describe('settings on the desk', () => {
     expect(document.querySelector('.desk-settings__list')).not.toBeNull()
     expect(document.querySelector('.stg-row[aria-current="page"]').dataset.page).toBe('sound')
   })
+
+  it('prints one Sign out beside the account page, not two (plan 114)', async () => {
+    await mount('/profile/settings/account')
+    await settle()
+    const outs = [...document.querySelectorAll('button')].filter(b => /^(déconnexion|sign out)$/i.test(b.textContent.trim()))
+    expect(outs).toHaveLength(1)
+    expect(document.querySelector('.desk-settings__list .stg-signout')).toBeNull()
+
+    document.querySelector('.stg-row[data-page="sound"]').click()
+    await settle()
+    expect(document.querySelector('.desk-settings__list .stg-signout')).not.toBeNull()
+  })
 })

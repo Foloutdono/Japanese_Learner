@@ -42,6 +42,7 @@ export function SessionPanel() {
             category={entry.category}
             id={entry.id}
             session={entry.session}
+            exact
           />
         </section>
       ) : (

@@ -1258,7 +1258,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // `id` moves that point to the front of page 0). An id lookup insists
 // on the exact row and never falls back to the page's first result:
 // an id that names nothing is "not available", not a different point.
-function useDictionaryLookup(session, term, category, lang, active, kana, id) {
+//
+// `exact` (plan 114) drops the page's-first-result fallback for a term
+// too: the desk's session panel docks a revealed card's entry unasked,
+// and a personal deck's card whose front is no dictionary word would
+// otherwise dock whatever word the search happened to rank first — an
+// unrelated entry printed as the answer. The sheets, opened on a
+// learner's own tap, keep the nearest match.
+function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false) {
   const [state, setState] = useState({ entry: null, loading: false, error: false })
 
   useEffect(() => {
@@ -1279,13 +1286,13 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
           ? (results.find(e => e.raw_id === id) ?? null)
           : (kana && results.find(e => e.kanji === term && e.kana === kana))
             ?? results.find(e => e.kanji === term || e.kana === term)
-            ?? results[0] ?? null
+            ?? (exact ? null : results[0] ?? null)
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang, kana, id])
+  }, [active, term, category, session, lang, kana, id, exact])
 
   return state
 }
@@ -1324,13 +1331,15 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 // entry at its head. Shared by the sheet (a portal over a quiz or the
 // catalogue) and the body the desk docks beside the catalogue (plan
 // 113), so the two walk their doors the same way.
-function useLookupStack(session, { term, kana, category, id }) {
+function useLookupStack(session, { term, kana, category, id }, exact = false) {
   const { lang } = useLang()
   // Reset by the caller remounting on a new term (the key it is opened
   // with is the term itself).
   const [stack, setStack] = useState([{ term, kana, category, id }])
   const here = stack[stack.length - 1]
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id)
+  // Only the first lookup is the unasked one: a door opened from it is
+  // the learner's own tap and keeps the nearest match.
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1359,9 +1368,13 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
       {!loading && error && (
         <div className="dict-sheet__empty">
           <div className="quiz-loading">{t.notAvailable}</div>
-          <button type="button" onClick={onClose} className="btn-secondary">
-            {t.close}
-          </button>
+          {/* A docked lookup with no way out (the session panel's) has
+              nothing for a Close to do. Every sheet passes one. */}
+          {onClose && (
+            <button type="button" onClick={onClose} className="btn-secondary">
+              {t.close}
+            </button>
+          )}
         </div>
       )}
       {!loading && entry && (
@@ -1420,8 +1433,8 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // in view, and ✕ returns the dock to the entry the door was opened
 // from. A run's session panel docks the revealed card's entry the same
 // way. No portal, no scrim, no dialog: it is a column's content.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview }) {
-  const look = useLookupStack(session, { term, kana, category, id })
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false }) {
+  const look = useLookupStack(session, { term, kana, category, id }, exact)
   return (
     <LookupContent
       look={look}

@@ -53,7 +53,22 @@ export function StudyStage({
           `levelBar={false}` is for the one phase that is bounded to the
           screen and can pay nothing — the comprehension passage. */}
       {levelBar && <LevelBar />}
-      {split && <aside className="desk-run__side" aria-label={sideLabel}>{side}</aside>}
+      {split && <RunSide label={sideLabel} color={color}>{side}</RunSide>}
     </div>
+  )
+}
+
+// The run's side column, and the line it is on (plan 114). It is the
+// stage's sibling, not its child, so it does not inherit the stage's
+// --line-color: what it holds (a breakdown's open rail, a word's
+// underline) fell back to --accent, which is kana's vermillion, on
+// every other line. It wears the run's colour itself; a docked
+// dictionary entry keeps the dictionary's gold (.desk-entry). Exported
+// for a run that is not a StudyStage — the exam runner draws its own.
+export function RunSide({ label, color, children }) {
+  return (
+    <aside className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined}>
+      {children}
+    </aside>
   )
 }

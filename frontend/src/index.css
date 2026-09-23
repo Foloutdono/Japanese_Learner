@@ -21233,8 +21233,11 @@ a.slip__act { text-decoration: none; }
   .stage > .timer,
   .stage > .result-lattice,
   .stage > .exam-meta,
+  .stage > .exam-mondai,
+  .stage > .exam-mondai__text,
   .stage > .exam-nav,
-  .stage > .exam-sheetbar {
+  .stage > .exam-sheetbar,
+  .stage > .qrows {
     width: 100%;
     max-width: var(--card-w);
     margin-inline: auto;
@@ -21261,6 +21264,10 @@ a.slip__act { text-decoration: none; }
     background: var(--bg-main);
     border-inline-start: 1px solid var(--surface-line);
   }
+  /* A door opened in a docked breakdown (components/analysis/SideLookup,
+     plan 114): the wrapper adds no box, so the breakdown, the sentence
+     line and the entry stand in the side's own column rhythm. */
+  .desk-lookup { display: contents; }
   .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .desk-tally > .record { padding: var(--sp-4); }
   .desk-entry {

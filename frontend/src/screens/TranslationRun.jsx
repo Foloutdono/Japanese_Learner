@@ -564,6 +564,9 @@ function SessionView({
           onExplain={onExplain}
           explaining={explaining}
           explainError={explainError}
+          lookup={lookup}
+          onExitLookup={closeLookup}
+          session={session}
         />
       )}
       sideLabel={t.deskBreakdownLabel}
@@ -712,7 +715,9 @@ function SessionView({
         </>
       )}
 
-      {lookup && (
+      {/* On the desk a door in the docked breakdown opens in the side
+          column (BreakdownSide → SideLookup, plan 114). */}
+      {lookup && !desk && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

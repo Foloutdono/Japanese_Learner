@@ -153,3 +153,29 @@ describe('a practice run on the desk', () => {
     expect($('.desk-run__side').textContent).toContain('山')
   })
 })
+
+describe('the docked entry of a card with no dictionary word (plan 114)', () => {
+  it('says so, with no dead Close and no unrelated word', async () => {
+    // A personal deck's card: its front is no dictionary word, and the
+    // search's first result is an unrelated one.
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [{ ...ENTRY, kanji: '川', kana: 'かわ', meaning: 'river' }] }) }))
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Deck" onLeave={() => {}} leaveLabel="Deck" pass={false} side={<SessionPanel />} sideLabel="This run">
+            <Flashcard t={{}} resetKey="own" front={<span>my word</span>} back={<span>its meaning</span>} dictTerm="my word" dictCategory="vocab" session={{ access_token: 't' }} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    press(' ')
+    await settle(300)
+    expect($('.desk-entry')).not.toBeNull()
+    expect($('.desk-entry').textContent).not.toContain('river')
+    expect($('.desk-entry .dict-sheet__empty')).not.toBeNull()
+    expect($('.desk-entry .dict-sheet__empty button')).toBeNull()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [ENTRY] }) }))
+  })
+})
+
