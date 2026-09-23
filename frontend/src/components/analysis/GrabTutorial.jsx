@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useDialog } from '../../hooks/useDialog'
 import { CrossIcon } from '../ui/Icons'
+import { DeskDock } from '../chrome/DeskDock'
 
 // ── The 字幕取り walkthrough ──────────────────────────────
 // "Copy a bookmarklet" is jargon, and creating a bookmark by hand is
@@ -20,18 +21,6 @@ const DEVICES = ['desktop', 'android', 'iphone']
 
 export function GrabTutorial({ t, onClose, onCopy, copied, watchUrl }) {
   const dialogRef = useDialog(onClose)
-  const [device, setDevice] = useState('desktop')
-
-  const deviceLabels = {
-    desktop: t.tutDeviceDesktop,
-    android: 'Android',
-    iphone: 'iPhone',
-  }
-  const deviceSteps = {
-    desktop: [t.tutDesktop1, t.tutDesktop2, t.tutDesktop3],
-    android: [t.tutAndroid1, t.tutAndroid2, t.tutAndroid3],
-    iphone: [t.tutIphone1, t.tutIphone2, t.tutIphone3],
-  }[device]
 
   return (
     <div onClick={onClose} className="detail-overlay-sheet">
@@ -50,73 +39,111 @@ export function GrabTutorial({ t, onClose, onCopy, copied, watchUrl }) {
           </button>
         </div>
 
-        <p className="anl-tut__what">{t.tutWhat}</p>
-
-        <ol className="anl-tut__steps">
-          <li className="anl-tut__step">
-            <span className="anl-tut__no" aria-hidden="true">1</span>
-            <div className="anl-tut__body">
-              <h3 className="anl-tut__steptitle">{t.tutStep1Title}</h3>
-              <p className="anl-tut__text">{t.tutStep1Body}</p>
-              <button type="button" className="btn-secondary anl-tut__copy" onClick={onCopy}>
-                {copied ? t.bookmarkletCopied : t.copyBookmarklet}
-              </button>
-            </div>
-          </li>
-
-          <li className="anl-tut__step">
-            <span className="anl-tut__no" aria-hidden="true">2</span>
-            <div className="anl-tut__body">
-              <h3 className="anl-tut__steptitle">{t.tutStep2Title}</h3>
-              <p className="anl-tut__text">{t.tutStep2Body}</p>
-              <div className="anl-seg anl-tut__devices" role="group" aria-label={t.tutDeviceLabel}>
-                {DEVICES.map(d => (
-                  <button
-                    key={d}
-                    type="button"
-                    className="anl-seg__opt"
-                    aria-pressed={device === d}
-                    onClick={() => setDevice(d)}
-                  >
-                    {deviceLabels[d]}
-                  </button>
-                ))}
-              </div>
-              <ol className="anl-tut__devicesteps">
-                {deviceSteps.map((s, i) => <li key={`${device}-${i}`}>{s}</li>)}
-              </ol>
-            </div>
-          </li>
-
-          <li className="anl-tut__step">
-            <span className="anl-tut__no" aria-hidden="true">3</span>
-            <div className="anl-tut__body">
-              <h3 className="anl-tut__steptitle">{t.tutStep3Title}</h3>
-              <ol className="anl-tut__devicesteps">
-                <li>
-                  {t.tutStep3a}
-                  {watchUrl && (
-                    <>
-                      {' — '}
-                      <a href={watchUrl} target="_blank" rel="noopener noreferrer">
-                        {t.openOnYoutube}
-                      </a>
-                    </>
-                  )}
-                </li>
-                <li>{t.tutStep3b}</li>
-                <li>{t.tutStep3c}</li>
-              </ol>
-            </div>
-          </li>
-        </ol>
-
-        <div className="anl-tut__trouble">
-          <h3 className="anl-tut__steptitle">{t.tutTroubleTitle}</h3>
-          <p className="anl-tut__text">{t.tutTrouble1}</p>
-          <p className="anl-tut__text">{t.tutTrouble2}</p>
-        </div>
+        <TutorialSteps t={t} onCopy={onCopy} copied={copied} watchUrl={watchUrl} />
       </div>
     </div>
+  )
+}
+
+// ── 机 — the walkthrough beside the intake (plan 120) ─────────────
+// On the desk the intake already stands beside a column (its history),
+// and the walkthrough is read while it is followed — copy, make the
+// bookmark, come back — so it opens there rather than over the field it
+// is about: the same steps, the history back on ✕ or Esc. Both copy
+// buttons, the panel's and this one, are on screen at once and share
+// one state (AnalyzerScreen owns it on the desk).
+export function GrabTutorialDock({ t, onClose, onCopy, copied, watchUrl }) {
+  return (
+    <DeskDock title={t.tutTitle} className="desk-tut" onClose={onClose}>
+      <TutorialSteps t={t} onCopy={onCopy} copied={copied} watchUrl={watchUrl} />
+    </DeskDock>
+  )
+}
+
+// The walkthrough itself — what it is, the three steps, what to do when
+// it fails — shared by the dialog and the dock.
+function TutorialSteps({ t, onCopy, copied, watchUrl }) {
+  const [device, setDevice] = useState('desktop')
+
+  const deviceLabels = {
+    desktop: t.tutDeviceDesktop,
+    android: 'Android',
+    iphone: 'iPhone',
+  }
+  const deviceSteps = {
+    desktop: [t.tutDesktop1, t.tutDesktop2, t.tutDesktop3],
+    android: [t.tutAndroid1, t.tutAndroid2, t.tutAndroid3],
+    iphone: [t.tutIphone1, t.tutIphone2, t.tutIphone3],
+  }[device]
+
+  return (
+    <>
+      <p className="anl-tut__what">{t.tutWhat}</p>
+
+      <ol className="anl-tut__steps">
+        <li className="anl-tut__step">
+          <span className="anl-tut__no" aria-hidden="true">1</span>
+          <div className="anl-tut__body">
+            <h3 className="anl-tut__steptitle">{t.tutStep1Title}</h3>
+            <p className="anl-tut__text">{t.tutStep1Body}</p>
+            <button type="button" className="btn-secondary anl-tut__copy" onClick={onCopy}>
+              {copied ? t.bookmarkletCopied : t.copyBookmarklet}
+            </button>
+          </div>
+        </li>
+
+        <li className="anl-tut__step">
+          <span className="anl-tut__no" aria-hidden="true">2</span>
+          <div className="anl-tut__body">
+            <h3 className="anl-tut__steptitle">{t.tutStep2Title}</h3>
+            <p className="anl-tut__text">{t.tutStep2Body}</p>
+            <div className="anl-seg anl-tut__devices" role="group" aria-label={t.tutDeviceLabel}>
+              {DEVICES.map(d => (
+                <button
+                  key={d}
+                  type="button"
+                  className="anl-seg__opt"
+                  aria-pressed={device === d}
+                  onClick={() => setDevice(d)}
+                >
+                  {deviceLabels[d]}
+                </button>
+              ))}
+            </div>
+            <ol className="anl-tut__devicesteps">
+              {deviceSteps.map((s, i) => <li key={`${device}-${i}`}>{s}</li>)}
+            </ol>
+          </div>
+        </li>
+
+        <li className="anl-tut__step">
+          <span className="anl-tut__no" aria-hidden="true">3</span>
+          <div className="anl-tut__body">
+            <h3 className="anl-tut__steptitle">{t.tutStep3Title}</h3>
+            <ol className="anl-tut__devicesteps">
+              <li>
+                {t.tutStep3a}
+                {watchUrl && (
+                  <>
+                    {' — '}
+                    <a href={watchUrl} target="_blank" rel="noopener noreferrer">
+                      {t.openOnYoutube}
+                    </a>
+                  </>
+                )}
+              </li>
+              <li>{t.tutStep3b}</li>
+              <li>{t.tutStep3c}</li>
+            </ol>
+          </div>
+        </li>
+      </ol>
+
+      <div className="anl-tut__trouble">
+        <h3 className="anl-tut__steptitle">{t.tutTroubleTitle}</h3>
+        <p className="anl-tut__text">{t.tutTrouble1}</p>
+        <p className="anl-tut__text">{t.tutTrouble2}</p>
+      </div>
+    </>
   )
 }

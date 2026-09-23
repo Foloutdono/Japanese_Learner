@@ -149,3 +149,66 @@ describe('the search key', () => {
     expect(document.activeElement?.tagName).not.toBe('INPUT')
   })
 })
+
+// ── plan 120 — every reading, in the entry's own place ──
+// On a phone "+N" opens the kanji's readings in a sheet over the entry.
+// On the desk the entry stands in a column, and a door in it opens in
+// that column: the list takes the entry's place, and ✕ or Esc steps
+// back to the entry with the focus on the door again. Inside a lookup
+// that is itself a dialog, the same holds and Esc peels only the list.
+// The phone's side is deskfree.phone.
+describe('the readings on the desk', () => {
+  const escape = () => (document.activeElement ?? document.body).dispatchEvent(
+    new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }),
+  )
+
+  it('open in the dock, in the entry\'s place, and step back to it', async () => {
+    await mount()
+    const door = document.querySelector('.dict-dock .dict-plate__more')
+    expect(door.hasAttribute('aria-haspopup')).toBe(false)
+    door.click()
+    await settle()
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
+    const list = document.querySelector('.dict-dock .desk-readings')
+    expect(list).not.toBeNull()
+    expect(list.getAttribute('aria-label')).toContain('駅')
+    expect(list.querySelector('.dict-readings__glyph').textContent).toBe('駅')
+    expect(list.querySelector('.dict-rd__yomi').textContent).toBe('エキ')
+    expect(document.querySelector('.dict-dock .dict-plate__word')).toBeNull()
+    expect(document.activeElement).toBe(list.querySelector('.dict-plate__btn'))
+    // The catalogue is untouched beside it.
+    expect(document.querySelectorAll('.dict-grid .dict-entry-card').length).toBe(3)
+
+    escape()
+    await settle()
+    expect(document.querySelector('.desk-readings')).toBeNull()
+    expect(document.querySelector('.dict-dock .dict-plate__word').textContent).toBe('駅')
+    expect(document.activeElement).toBe(document.querySelector('.dict-dock .dict-plate__more'))
+  })
+
+  it('open in a lookup dialog\'s own place, and Esc peels only the list', async () => {
+    const { DictionaryLookupSheet } = await import('./components/dictionary/DictionaryDetail')
+    const onClose = vi.fn()
+    await render(
+      <LangProvider>
+        <DictionaryLookupSheet term="駅" category="kanji" session={{}} onClose={onClose} />
+      </LangProvider>
+    )
+    await settle(250)
+    const dialog = document.querySelector('.dict-sheet[role="dialog"]')
+    dialog.querySelector('.dict-plate__more').click()
+    await settle()
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1)
+    expect(dialog.querySelector('.desk-readings .dict-readings')).not.toBeNull()
+
+    escape()
+    await settle()
+    expect(onClose).not.toHaveBeenCalled()
+    expect(dialog.querySelector('.desk-readings')).toBeNull()
+    expect(dialog.querySelector('.dict-plate__word').textContent).toBe('駅')
+
+    escape()
+    await settle()
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})

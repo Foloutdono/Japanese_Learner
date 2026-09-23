@@ -17,6 +17,8 @@ import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { SideLookup } from '../components/analysis/SideLookup'
+import { useDesk } from '../hooks/useDesk'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
@@ -76,6 +78,13 @@ export default function GrammarRun({ session }) {
   // The lesson sheet a compare row on the gate opens, by card id. The
   // card itself opens the dictionary entry instead (see pointId below).
   const [sheet, setSheet]           = useState(null)
+  // 机 (plan 120): on the desk the run already has a column, so the
+  // rival a compare row names opens there instead (SideLookup), beside
+  // the lesson that named it. Kept with the card it was opened on, so
+  // a later gated card never opens on it.
+  const desk = useDesk()
+  const [compared, setCompared]     = useState(null)
+  const closeCompared = useCallback(() => setCompared(null), [])
 
   // One session per level+mode+language (see useCardSession): the
   // payload is localised server-side, distractors included, so a
@@ -261,6 +270,11 @@ export default function GrammarRun({ session }) {
   // is what travels.
   const pointId = card && (card.raw_id ?? card.card_id)
 
+  // The rival open in the side: only while its card is still at its gate.
+  const comparing = desk && gated && compared?.card === card?.card_id
+    ? { category: 'grammar', id: compared.id }
+    : null
+
   // ── Quiz ──
   return (
     <StudyStage
@@ -271,7 +285,11 @@ export default function GrammarRun({ session }) {
       sub={currentModeLabel}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
-      side={<SessionPanel />}
+      side={(
+        <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
+          <SessionPanel />
+        </SideLookup>
+      )}
       sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
@@ -285,7 +303,7 @@ export default function GrammarRun({ session }) {
             <GrammarLesson
               point={lessonOf(card)}
               variant="gate"
-              onCompare={id => setSheet(id)}
+              onCompare={id => (desk ? setCompared({ card: card.card_id, id }) : setSheet(id))}
               onBoard={() => updateCurrent({ lesson_seen: true })}
             />
           </div>

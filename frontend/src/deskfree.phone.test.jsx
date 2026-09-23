@@ -14,6 +14,10 @@ import './index.css'
 // additions.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
+// iOS Safari, for plan 120's install row: off by default, as headless
+// Chromium is, so nothing else here meets that row.
+const install = vi.hoisted(() => ({ ios: false }))
+vi.mock('./stores/installPrompt', async o => ({ ...(await o()), isIosSafari: () => install.ios }))
 // The statistics' two payloads (P4); nothing else here fetches.
 const STATS = {
   kana: { hiragana_basic: { 'kana.flashcard.f2b': { total: 46, new: 0, learning: 6, mastered: 40, reviews: 200, correct: 180 } } },
@@ -916,5 +920,130 @@ describe('the browse (plan 119)', () => {
     expect(document.querySelectorAll('.reveal-action-btn')).toHaveLength(2)
     expect(peekEntry()).toBeNull()
     expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
+  })
+})
+
+// ── plan 120 — the doors a phone keeps as sheets ──
+// On the desk a door that does not interrupt opens in the page's own
+// column: a deck's More in its side (its deletion still asked, in a
+// dialog), a gate lesson's rival in the run's side, the grab's
+// walkthrough beside the intake, a kanji's readings in the entry's
+// place, the iOS install steps in the settings page. A phone keeps every
+// one of them the sheet it was, and draws none of the desk's.
+describe('the doors (plan 120)', () => {
+  it('keeps a deck\'s More a sheet, its deletion asked inside it', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    const more = [...document.querySelectorAll('.chip-row button')].find(b => b.querySelector('.chip__dots'))
+    expect(more.getAttribute('aria-haspopup')).toBe('dialog')
+    more.click()
+    await settle()
+    const sheet = document.querySelector('.scrim [role="dialog"]')
+    expect(sheet).not.toBeNull()
+    expect(sheet.querySelectorAll('.btn-secondary').length).toBeGreaterThan(0)
+    sheet.querySelector('.btn-primary--danger').click()
+    await settle()
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1)
+    expect(sheet.querySelector('.sheet__q')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+
+  it('keeps a gate lesson\'s rival a sheet over the run', async () => {
+    const { apiJson } = await import('./lib/api')
+    const lesson = {
+      register: 'polite', steps: [{ kind: 'rule', text: 'A polite request.' }], examples: [],
+      compare: [{ pattern: '〜ないでください', raw_id: 'grammar_N5_〜ないでください', level: 'N5', meaning: 'please do not', text: 'the negative' }],
+    }
+    const card = {
+      card_id: 'grammar_N5_〜てください', raw_id: 'grammar_N5_〜てください', mode: 'grammar.flashcard.f2b', direction: 'f2b',
+      grammar: '〜てください', structure: 'verb て-form + ください', meaning: 'please do', register: 'polite',
+      stage: 'new', review_preview: null, hints: {}, lesson,
+    }
+    localStorage.clear()
+    apiJson.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/grammar/cards')) return { cards: [card], pace: null }
+      if (u.startsWith('/api/grammar/point')) return { raw_id: 'grammar_N5_〜ないでください', level: 'N5', pattern: '〜ないでください', structure: 'x', meaning: 'please do not', steps: [], compare: [], examples: [] }
+      return {}
+    })
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ total: 1, new: 1, learning: 0, mastered: 0, due_now: 0 }) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: GrammarRun } = await import('./screens/GrammarRun')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/grammar/N5/grammar.flashcard.f2b']}>
+          <Routes><Route path="/learn/grammar/:level/:mode" element={<GrammarRun session={{ access_token: 't' }} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(400)
+    document.querySelector('.gl--gate .gl-door').click()
+    await settle(300)
+    expect(document.querySelector('.gl-sheet[role="dialog"]')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    apiJson.mockReset()
+  })
+
+  it('keeps the grab\'s walkthrough a dialog over the intake', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({}))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: AnalyzerScreen } = await import('./screens/AnalyzerScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary/analyzer']}><AnalyzerScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(100)
+    document.querySelectorAll('.anl-sources .seg__opt')[2].click()
+    await settle()
+    const door = document.querySelector('.anl-grab__tutorial')
+    expect(door.getAttribute('aria-haspopup')).toBe('dialog')
+    door.click()
+    await settle()
+    expect(document.querySelector('[role="dialog"].anl-tut')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    apiJson.mockReset()
+  })
+
+  it('keeps a kanji\'s readings a sheet over the entry', async () => {
+    const { DictionaryDetail } = await import('./components/dictionary/DictionaryDetail')
+    const kanji = {
+      type: 'kanji', kanji: '駅', kana: 'エキ・えき', meaning: 'station', level: 'N5', status: { status: 'learning' },
+      readings: [{ reading: 'エキ', words: [{ kanji: '駅員', kana: 'えきいん', meaning: 'station staff' }] }],
+      vocab_examples: [{ kanji: '駅員', kana: 'えきいん', meaning: 'station staff' }],
+    }
+    await render(<LangProvider><aside className="dict-dock"><DictionaryDetail entry={kanji} /></aside></LangProvider>)
+    await settle()
+    const door = document.querySelector('.dict-plate__more')
+    expect(door.getAttribute('aria-haspopup')).toBe('dialog')
+    door.click()
+    await settle()
+    expect(document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"] .dict-readings')).not.toBeNull()
+    expect(document.querySelector('.dict-dock .dict-plate__word').textContent).toBe('駅')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+
+  it('keeps the iOS install steps a sheet over the page', async () => {
+    install.ios = true
+    try {
+      const { MemoryRouter } = await import('react-router-dom')
+      const { DisplayPage } = await import('./components/settings/DisplayPage')
+      await render(<LangProvider><MemoryRouter><DisplayPage /></MemoryRouter></LangProvider>)
+      await settle()
+      const button = [...document.querySelectorAll('.slip__act')].pop()
+      expect(button.hasAttribute('aria-expanded')).toBe(false)
+      button.click()
+      await settle()
+      expect(document.querySelector('[role="dialog"].install-sheet')).not.toBeNull()
+      expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    } finally {
+      install.ios = false
+    }
   })
 })

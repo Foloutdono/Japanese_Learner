@@ -21156,22 +21156,25 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     gap: var(--sp-4);
   }
-  /* Browse, docked in the deck's side (plan 115, BrowseCardsDock): its
-     cap and ✕ over the phone's own browser, whose result row stacks the
-     way it does on a phone — 13.5rem of headword and a meaning do not
-     share 360px beside a checkbox. */
-  .desk-browse {
+  /* A door opened in a column (components/chrome/DeskDock, plan 120):
+     its cap and ✕ over the phone's own body — a deck's Browse and More,
+     the analyser's grab tutorial — standing where the column's tenant
+     stood until it closes. */
+  .desk-dock {
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
     min-width: 0;
   }
-  .desk-browse__head {
+  .desk-dock__head {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--sp-3);
   }
+  /* Browse in the deck's side (plan 115, BrowseCardsDock): the result
+     row stacks the way it does on a phone — 13.5rem of headword and a
+     meaning do not share 360px beside a checkbox. */
   .desk-side .browse-result-row {
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: start;

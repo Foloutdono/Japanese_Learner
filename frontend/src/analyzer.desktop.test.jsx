@@ -232,3 +232,65 @@ describe('the dictionary, on a sentence it has no entry for', () => {
     expect($('.empty__action')).toBeNull()
   })
 })
+
+// ── plan 120 — the grab's walkthrough beside the intake ──
+// The walkthrough is read while it is followed (copy, make the
+// bookmark, come back), so on the desk it opens in the intake's column
+// rather than over the field it explains: the history steps aside until
+// ✕ or Esc, and the two copy buttons, both on screen, confirm together.
+// A phone keeps it a dialog (AnalyzerScreen.responsive.browser, and
+// deskfree.phone).
+describe('the grab\'s walkthrough on the desk', () => {
+  it('opens in the intake\'s column in place of the history, and Esc gives it back', async () => {
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: vi.fn(async () => {}) }, configurable: true })
+    await mount()
+    $$('.anl-sources .seg__opt')[2].click()
+    await settle()
+    const door = $('.anl-grab__tutorial')
+    expect(door.hasAttribute('aria-haspopup')).toBe(false)
+    door.click()
+    await settle()
+    expect($('[role="dialog"]')).toBeNull()
+    const dock = $('.desk-intake > .desk-side .desk-tut')
+    expect(dock).not.toBeNull()
+    expect($('.desk-intake > .desk-side').getAttribute('aria-label')).toBe(dock.querySelector('h2').textContent)
+    expect($('.anl-history')).toBeNull()
+    expect(dock.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
+
+    // The device switch still switches.
+    const devices = dock.querySelectorAll('.anl-tut__devices .anl-seg__opt')
+    const before = dock.querySelector('.anl-tut__devicesteps').textContent
+    devices[2].click()
+    await settle(60)
+    expect(dock.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
+
+    // One copy, both buttons confirm it.
+    const panelCopy = $('.anl-grab__copy')
+    const idle = panelCopy.textContent
+    dock.querySelector('.anl-tut__copy').click()
+    await settle(60)
+    expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1)
+    expect(panelCopy.textContent).not.toBe(idle)
+    expect(panelCopy.textContent).toBe(dock.querySelector('.anl-tut__copy').textContent)
+
+    press('Escape')
+    await settle()
+    expect($('.desk-tut')).toBeNull()
+    expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
+  })
+
+  it('closes when the intake leaves the video platform', async () => {
+    await mount()
+    $$('.anl-sources .seg__opt')[2].click()
+    await settle()
+    $('.anl-grab__tutorial').click()
+    await settle()
+    expect($('.desk-tut')).not.toBeNull()
+    $$('.anl-sources .seg__opt')[0].click()
+    await settle()
+    $$('.anl-sources .seg__opt')[2].click()
+    await settle()
+    expect($('.desk-tut')).toBeNull()
+    expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
+  })
+})

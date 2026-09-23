@@ -931,13 +931,14 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–119)
+### The desk (机, plans 113–120)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
 screens out for the width, so that nothing on a computer reads as a phone
 set down on a desk; plan 115 took the remaining second screens and sheets
-into the page and gave a session its keys.
+into the page and gave a session its keys; plan 120 went through every
+dialog left and moved the ones that do not interrupt into their columns.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1028,8 +1029,23 @@ into the page and gave a session its keys.
   (`SideLookup`), the sentence's line kept above it so the next word is one
   click, Esc or ✕ bringing the breakdown back where it was scrolled. The
   analyser's second column is the dictionary on the token the stage shows
-  (←/→ walk it); a deck's Browse opens in the deck page's side. A dialog is
-  kept for what must interrupt: a confirmation, an import.
+  (←/→ walk it); a deck's Browse and More open in the deck page's side, a
+  gate lesson's rival in the run's side, the grab's walkthrough beside the
+  intake, a kanji's readings in the entry's own place, the iOS install
+  steps in the settings page (plan 120). A panel that takes a column's
+  place (Browse, More, the walkthrough) wears `DeskDock`'s caption and ✕
+  over the phone's own body, and the column's tenant comes back on ✕ or
+  Esc. A dialog is kept for what must interrupt: a
+  confirmation (the deck's deletion, taking a followed deck, unfollowing,
+  a level change, the exam's finish with blanks and its way out), an
+  import, a creation that leaves the page (a new deck), a report, a
+  refusal (the offer, a run stopped at an empty balance), a failure the
+  learner has to answer (a paper that did not submit), the question an
+  action asks before it can finish (which deck to mine into), and a guide
+  note. The rail's own doors — the balance, the pass's back — stay dialogs
+  too: they are the chrome's, open the same over every screen, and no page
+  has a column that is theirs. Sheet by sheet, with the reason for each:
+  `docs/design/desk/README.md`, "Dialogs on the desk".
 - **Comprehension and the mock exam are sat, not scrolled.** The text
   stands whole beside its questions; a reading passage stands flat on a
   card of its own beside the questions it serves and stays put across
@@ -1048,7 +1064,8 @@ into the page and gave a session its keys.
   dialog over the shelf.
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
-  the middle of the screen — every corner, no handle, a fade.
+  the middle of the screen — every corner, no handle, a fade. Only the
+  sheets that interrupt are left to be drawn so (above).
 - **A run still leaves the chrome, and prints its keys.** The rail goes
   as both bars go. The digits that rate and answer and the space bar that
   turns the card are drawn where they act — a cap in each rating tile's

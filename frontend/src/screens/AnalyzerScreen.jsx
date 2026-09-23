@@ -16,6 +16,8 @@ import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
+import { GrabTutorialDock } from '../components/analysis/GrabTutorial'
+import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookmarkletCopy'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
@@ -117,6 +119,14 @@ export default function AnalyzerScreen({ session }) {
   // link afterwards used to get no player at all, because the session
   // had already been created without a video_id and nothing re-read it.
   const [videoUrl, setVideoUrl] = useState('')
+
+  // 机 (plan 120): the grab's walkthrough, open in the intake's column
+  // on the desk rather than over the intake, and the copy state its
+  // button shares with the panel's (both are on screen at once there).
+  // A phone leaves both to IntakeVideo, whose dialog it is.
+  const grab = useBookmarkletCopy()
+  const [tutorial, setTutorial] = useState(false)
+  const closeTutorial = useCallback(() => setTutorial(false), [])
 
   // Once a Passage is ready the intake folds away, giving the breakdown
   // the screen. Reopened on demand; reset whenever a new Passage lands.
@@ -465,6 +475,7 @@ export default function AnalyzerScreen({ session }) {
     }
     lastBoardedRef.current = key
     setSource(key)
+    setTutorial(false)
     setIntakeOpen(true)
     // A fresh player mounts paused; the destroyed one can no longer
     // report its own state, so this is the one boolean reset by hand.
@@ -785,6 +796,8 @@ export default function AnalyzerScreen({ session }) {
             onStartFromFile={startVideoFromFile}
             onStartFromLink={startVideoFromLink}
             linkFetch={linkFetch}
+            grab={wide ? grab : undefined}
+            onTutorial={wide ? () => setTutorial(true) : undefined}
           />
         )}
       </div>
@@ -869,7 +882,16 @@ export default function AnalyzerScreen({ session }) {
            again, in the column every desk screen keeps its companion. */
         <div className="desk-intake">
           <div className="desk-intake__main">{intake}</div>
-          <DeskSide label={t.historyTitle}>{history}</DeskSide>
+          {/* The grab's walkthrough takes the column while it is open
+              (plan 120), the history back on its ✕ or Esc. */}
+          {tutorial && source === 'video' ? (
+            <DeskSide label={t.tutTitle}>
+              <GrabTutorialDock t={t} onClose={closeTutorial} onCopy={grab.copy}
+                copied={grab.copied} watchUrl={watchUrlFor(videoUrl)} />
+            </DeskSide>
+          ) : (
+            <DeskSide label={t.historyTitle}>{history}</DeskSide>
+          )}
         </div>
       ) : intake)}
 

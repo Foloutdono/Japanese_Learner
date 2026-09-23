@@ -268,34 +268,43 @@ describe('AnalyzerScreen structure', () => {
   // fallback section. Owner-directed (2026-09-01, "add a real
   // tutorial").
   it('opens a step-by-step tutorial with per-device instructions', async () => {
-    const screen = await renderScreen()
-    await goToPlatform(screen, 'video')
+    // The dialog is the phone chrome's: on the desk the walkthrough
+    // opens in the intake's column instead (plan 120; analyzer.desktop's
+    // own case).
+    await page.viewport(1099, 900)
+    try {
+      const screen = await renderScreen()
+      await goToPlatform(screen, 'video')
 
-    screen.container.querySelector('.anl-grab__tutorial').click()
-    await settle(60)
+      screen.container.querySelector('.anl-grab__tutorial').click()
+      await settle(60)
 
-    const dialog = document.querySelector('[role="dialog"].anl-tut')
-    expect(dialog).not.toBeNull()
-    // The walkthrough is numbered and complete: what it is, copy,
-    // create, use, and a what-if-it-fails section.
-    expect(dialog.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
-    expect(dialog.querySelector('.anl-tut__copy')).not.toBeNull()
+      const dialog = document.querySelector('[role="dialog"].anl-tut')
+      expect(dialog).not.toBeNull()
+      // The walkthrough is numbered and complete: what it is, copy,
+      // create, use, and a what-if-it-fails section.
+      expect(dialog.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
+      expect(dialog.querySelector('.anl-tut__copy')).not.toBeNull()
 
-    // The create step switches between three devices, and the steps
-    // actually CHANGE with the device.
-    const devices = dialog.querySelectorAll('.anl-tut__devices .anl-seg__opt')
-    expect(devices.length).toBe(3)
-    const before = dialog.querySelector('.anl-tut__devicesteps').textContent
-    devices[2].click()
-    await settle(60)
-    expect(devices[2].getAttribute('aria-pressed')).toBe('true')
-    expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
+      // The create step switches between three devices, and the steps
+      // actually CHANGE with the device.
+      const devices = dialog.querySelectorAll('.anl-tut__devices .anl-seg__opt')
+      expect(devices.length).toBe(3)
+      const before = dialog.querySelector('.anl-tut__devicesteps').textContent
+      devices[2].click()
+      await settle(60)
+      expect(devices[2].getAttribute('aria-pressed')).toBe('true')
+      expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
 
-    // Esc-able real dialog (useDialog), and the trigger survives.
-    dialog.querySelector('.detail-close-btn').click()
-    await settle(60)
-    expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
-    expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+      // Esc-able real dialog (useDialog), and the trigger survives.
+      dialog.querySelector('.detail-close-btn').click()
+      await settle(60)
+      expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
+      expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+    } finally {
+      // The viewport leaks across files: hand back this file's width.
+      await page.viewport(1280, 900)
+    }
   })
 
   // ── Smart furigana ──

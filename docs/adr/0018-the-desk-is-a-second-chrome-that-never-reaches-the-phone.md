@@ -118,3 +118,9 @@ The promise that the phone never breaks is carried by structure, not by care:
   dictionary pages), each in its own commit with its own phone test: the
   only differences below 1100 the branch-against-base identity pass
   allows. Its phone side is further blocks of `src/deskfree.phone.test.jsx`.
+- Plan 120 went through every dialog the desk still opened and moved the
+  ones that do not interrupt into their page's column (a deck's More, a
+  gate lesson's rival, the grab's walkthrough, a kanji's readings, the iOS
+  install steps), under the same guarantees and with no value added to
+  `:root`. The ones kept, and why, are listed in
+  `docs/design/desk/README.md`, "Dialogs on the desk".

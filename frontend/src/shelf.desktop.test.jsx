@@ -211,3 +211,95 @@ describe('a deck\'s Browse on the desk', () => {
     expect($('.desk-deck__main .empty')).not.toBeNull()
   })
 })
+
+// ── plan 120 — More opens in the side; only its deletion asks ──
+// More is a list of what can be done to the deck (import, export, the
+// library), not a question, so on the desk it takes the deck page's
+// column the way Browse does, taking turns with it. Deleting the deck is
+// still asked, in a dialog of its own, as the follower's two
+// irreversibles are. The phone's side is deskfree.phone.
+const moreChip = () => $$('.chip-row button').find(b => b.querySelector('.chip__dots'))
+const escape = () => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+
+describe('a deck\'s More on the desk', () => {
+  it('opens in the side, pressed while it holds it, and gives the side back', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    const more = moreChip()
+    expect(more.hasAttribute('aria-haspopup')).toBe(false)
+    more.focus()
+    more.click()
+    await settle()
+    expect($('[role="dialog"]')).toBeNull()
+    const dock = $('.desk-deck > .desk-side .desk-more')
+    expect(dock).not.toBeNull()
+    expect(more.getAttribute('aria-pressed')).toBe('true')
+    expect($('.desk-deck > .desk-side').getAttribute('aria-label')).toBe(dock.querySelector('h2').textContent)
+    // Import, Export and Publish, as the phone's sheet lists them, and
+    // the deletion under them.
+    expect(dock.querySelectorAll('.btn-secondary')).toHaveLength(3)
+    expect(dock.querySelector('.btn-primary--danger')).not.toBeNull()
+    expect($('.desk-deck__study')).toBeNull()
+    expect($('.desk-deck__main .card-list')).not.toBeNull()
+
+    dock.querySelector('.import-header__close').focus()
+    escape()
+    await settle()
+    expect($('.desk-more')).toBeNull()
+    expect(more.getAttribute('aria-pressed')).toBe('false')
+    expect($('.desk-deck__study .platform-card')).not.toBeNull()
+    expect(document.activeElement).toBe(more)
+  })
+
+  it('takes turns with Browse in the one column', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    moreChip().click()
+    await settle()
+    $$('.chip-row button').find(b => /browse|parcourir/i.test(b.textContent)).click()
+    await settle(400)
+    expect($('.desk-more')).toBeNull()
+    expect($('.desk-deck > .desk-side .desk-browse')).not.toBeNull()
+    moreChip().click()
+    await settle()
+    expect($('.desk-browse')).toBeNull()
+    expect($('.desk-deck > .desk-side .desk-more')).not.toBeNull()
+  })
+
+  it('asks before deleting the deck, in a dialog over the dock', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    moreChip().click()
+    await settle()
+    $('.desk-more .btn-primary--danger').click()
+    await settle()
+    const dialog = $('[role="dialog"]')
+    expect(dialog).not.toBeNull()
+    expect(dialog.querySelector('.sheet__q')).not.toBeNull()
+    expect(dialog.querySelector('.btn-primary--danger')).not.toBeNull()
+    // Esc answers the question, not the dock under it.
+    escape()
+    await settle()
+    expect($('[role="dialog"]')).toBeNull()
+    expect($('.desk-more')).not.toBeNull()
+    expect(apiFetch.mock.calls.some(([, , init]) => init?.method === 'DELETE')).toBe(false)
+  })
+
+  it('keeps a follower\'s "make it mine" a question', async () => {
+    deckApi(CARDS)
+    const answer = apiFetch.getMockImplementation()
+    apiFetch.mockImplementation(async (path, ...rest) => (String(path) === '/api/decks/5'
+      ? ok({ ...DECK, role: 'follower', author: 'Mei', card_count: CARDS.length })
+      : answer(path, ...rest)))
+    await mountDeck()
+    await settle(400)
+    expect(moreChip()).toBeUndefined()
+    $$('.chip-row button')[0].click()
+    await settle()
+    expect($('[role="dialog"] .sheet__q')).not.toBeNull()
+    expect($('.desk-side [class*="desk-more"]')).toBeNull()
+  })
+})

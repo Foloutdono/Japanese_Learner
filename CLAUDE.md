@@ -276,7 +276,26 @@ runtime purpose. Two consequences worth knowing:
   `screens/VocabRun.jsx` and `screens/KanjiRun.jsx`; held by
   `src/browse.desktop.test.jsx` and a block of `src/deskfree.phone.test.jsx`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **120** or higher, and check
+  **120** is the desk's last dialogs (numbered 120 because 116–119 went
+  to the gate's lanes, the split's rows, a radical's page and the browse
+  while it was open): every sheet and modal the desk still opened, each
+  either kept because it interrupts or moved into its page's column — a
+  deck's More in its side (its deletion asked in a
+  dialog of its own), a gate lesson's rival in a grammar run's side, the
+  grab's walkthrough beside the analyser's intake, a kanji's readings in
+  the entry's own place, the iOS install steps in the settings page —
+  through one dock shell (cited in `components/chrome/DeskDock.jsx`,
+  `components/decks/BrowseCardsMenu.jsx`, `screens/DeckDetailScreen.jsx`,
+  `screens/GrammarRun.jsx`, `components/analysis/SideLookup.jsx`,
+  `components/analysis/GrabTutorial.jsx`, `components/analysis/IntakeVideo.jsx`,
+  `components/analysis/useBookmarkletCopy.js`, `screens/AnalyzerScreen.jsx`,
+  `components/dictionary/DictionaryDetail.jsx`,
+  `components/settings/DisplayPage.jsx`, `components/ui/InstallSheet.jsx`
+  and `index.css`; held by `src/grammar.desktop.test.jsx`, blocks of the
+  shelf, analyzer, dictionary and settings desktop tests and of
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`, "Dialogs on the desk").
+  When starting a new wave, begin at **121** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

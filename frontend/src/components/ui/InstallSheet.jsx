@@ -26,12 +26,23 @@ export function InstallSheet({ onClose }) {
             <CrossIcon size={16} />
           </button>
         </div>
-        <p className="install-sheet__body">{t.installIosBody}</p>
-        <ol className="install-sheet__steps">
-          <li>{t.installIosStep1}</li>
-          <li>{t.installIosStep2}</li>
-        </ol>
+        <InstallSteps />
       </div>
     </div>
+  )
+}
+
+// The explanation and its two taps: the sheet's body, and on the desk
+// (plan 120) the settings page's own, under the row that asked.
+export function InstallSteps() {
+  const { t } = useLang()
+  return (
+    <>
+      <p className="install-sheet__body">{t.installIosBody}</p>
+      <ol className="install-sheet__steps">
+        <li>{t.installIosStep1}</li>
+        <li>{t.installIosStep2}</li>
+      </ol>
+    </>
   )
 }
