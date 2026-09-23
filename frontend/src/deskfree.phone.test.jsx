@@ -14,6 +14,30 @@ import './index.css'
 // additions.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
+// The statistics' two payloads (P4); nothing else here fetches.
+const STATS = {
+  kana: { hiragana_basic: { 'kana.flashcard.f2b': { total: 46, new: 0, learning: 6, mastered: 40, reviews: 200, correct: 180 } } },
+  vocab: { N5: { 'vocab.flashcard.f2b': { total: 665, new: 465, learning: 80, mastered: 120, reviews: 900, correct: 700 } } },
+}
+const REPORT = {
+  days: [0, 7, 14].map(ago => {
+    const d = new Date()
+    d.setDate(d.getDate() - ago)
+    return { date: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`, reviews: 40, good: 32 }
+  }),
+  strength: [{ days: 0, count: 20 }, { days: 12, count: 30 }],
+  weakest: Array.from({ length: 12 }, (_, i) => ({
+    card_id: `c${i}`, raw_id: `vocab_N5_語${i}_ご`, category: 'vocab', key: 'N5', mode: 'vocab.flashcard.f2b', accuracy: 40, lapses: 3,
+  })),
+}
+vi.mock('./lib/api', () => ({
+  api: p => p,
+  apiFetch: vi.fn(),
+  apiJson: vi.fn(),
+  apiJsonWithTimeout: vi.fn(async path => (path === '/api/stats' ? STATS : REPORT)),
+  apiUpload: vi.fn(),
+  ApiError: class extends Error {},
+}))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
@@ -84,5 +108,29 @@ describe('the stations (P3)', () => {
     await settle()
     expect(document.querySelector('.desk-split, .desk-stop--open, [aria-current="page"]')).toBeNull()
     expect(document.querySelector('[aria-current="location"]')).not.toBeNull()
+  })
+})
+
+describe('the statistics (P4)', () => {
+  it('keeps the phone\'s column, its scaled chart and its two sheets', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: StatsScreen } = await import('./screens/StatsScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <div className="phone"><div className="phone__content"><StatsScreen session={null} /></div></div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.rep-line__svg').getAttribute('viewBox')).toBe('0 0 326 96')
+    expect(document.querySelectorAll('.trouble__row')).toHaveLength(6)
+    expect(document.querySelector('.trouble__more')).not.toBeNull()
+    expect(document.querySelector('[aria-expanded]')).toBeNull()
+
+    document.querySelector('.rep-line-row').click()
+    await settle()
+    expect(document.querySelector('[role="dialog"] .rep-lines--sheet')).not.toBeNull()
   })
 })

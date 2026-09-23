@@ -20984,6 +20984,65 @@ a.slip__act { text-decoration: none; }
   }
   .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
+  /* Statistics (plan 113): the sentence the screen reads, in two
+     columns (screens/StatsScreen.jsx). What holds on the left — the
+     retention line drawn 1:1 (RetentionLine's `fit`), the ladder, the
+     lines with the open one's levels hung under it — and where it leaks
+     on the right: the misses, and every trouble card at the phone's own
+     width. The bar, a wait and an empty state span both. */
+  .desk-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-stats > * { grid-column: 1 / -1; }
+  .desk-stats__holds {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-stats__holds:last-child { grid-column: 1 / -1; }
+  .desk-stats__leaks {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  /* The lines and the open line's levels are one table: every name in
+     one column, so every composition bar starts where the others do and
+     two lines, or two levels, compare at a glance. The open line's
+     levels hang from its roundel on a drawn line in the line's pigment,
+     the way the rail's stations hang from the lit gate. */
+  .desk-lines {
+    display: grid;
+    grid-template-columns: auto max-content minmax(0, 1fr) auto;
+    column-gap: var(--sp-4);
+  }
+  .desk-lines__line { display: contents; }
+  .desk-lines__levels {
+    position: relative;
+    grid-column: 2 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .desk-lines__levels::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto var(--sp-5) calc(-1 * (var(--sp-4) + var(--sp-5)));
+    width: 2px;
+    background: var(--line-color);
+    opacity: 0.55;
+  }
+  .desk-lines .rep-line-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .desk-lines__line--open .pf-line__roundel { background: color-mix(in srgb, var(--line-color) 18%, transparent); }
+
   /* Settings: the list and the open page side by side
      (screens/SettingsScreen.jsx). The list stays in view while the page
      scrolls, and the open page's row is marked the way a selection is:
