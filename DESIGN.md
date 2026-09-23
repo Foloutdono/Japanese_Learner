@@ -931,7 +931,7 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–115)
+### The desk (机, plans 113–116)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
@@ -1000,9 +1000,11 @@ into the page and gave a session its keys.
   run's own pigment) holds, on a card run, this run's three records and
   **the revealed card's dictionary entry** — docked by the reveal and never
   before it, because the entry is the answer — and at a section run's end
-  the cards that went badly, each opening its entry; on a graded practice
-  run, the sentence's breakdown, with no toggle. The level bar keeps the
-  stage's width.
+  the cards that went badly, each opening its entry; on a browse (the fast
+  review), that entry alone — a browse rates nothing, so it keeps no tally,
+  and an empty one stands no side; on a graded practice run, the
+  sentence's breakdown, with no toggle. The level bar keeps the stage's
+  width.
 - **A run fits a laptop.** Its stage starts at the top of the window; the
   card and its choices (or the prompt and the writing board, the board in
   the wide column) stand side by side, the head and the rating bar spanning

@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–115, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–116, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -60,7 +60,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-stats`, `__holds`, `__leaks` | the statistics in two columns: the line (1:1), the ladder and the lines; the misses and every trouble card | `screens/StatsScreen.jsx` |
 | `.desk-lines`, `__line` (`--open`), `__levels` | the lines as one table (a subgrid), the open line's levels hung from its roundel | `components/stats/LineRows.jsx` (`inline`) |
 | `.desk-run`, `.desk-run__side`, `__note` | a run with a side: the side fixed to the right edge in the run's pigment (`RunSide`), the stage top-aligned; card and choices, or prompt and board, side by side; unused choices keep their place | `components/study/StudyStage.jsx` (`side`, `RunSide`) |
-| `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`) |
+| `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips. A browse (the fast review) passes `records={false}`: the entry alone, no tally (plan 116) | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`); the browse's side in `screens/KanaRun.jsx`, `VocabRun.jsx`, `KanjiRun.jsx` |
 | `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it | `components/analysis/SideLookup.jsx` |
 | `.desk-run--paper`, `.desk-answers`, `__fig`, `__cap`, `__finish`; `.desk-paper`, `__text`, `__ask` | the mock exam: the answer sheet in the side; a reading passage flat beside its questions | `screens/ExamRunner.jsx`, `exam/ExamCard.jsx`, `exam/QuestionRenderer.jsx` (`PassageText`) |
 | `.desk-anl-dock`, `__keys` | the analyser's second column: the dictionary on the stage's token | `components/analysis/AnalyzerDock.jsx` |
@@ -101,6 +101,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/components/chrome/Shell.desk.browser.test.jsx` | browser | a resize across 1100 keeps the screen |
 | `src/lattices.desktop.test.jsx`, `src/today.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/stations.desktop.test.jsx`, `src/stats.desktop.test.jsx`, `src/runs.desktop.test.jsx`, `src/header.desktop.test.jsx`, `src/decks.desktop.test.jsx` | desktop | plan 114, one file a phase |
 | `src/breakdown.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/folds.desktop.test.jsx`, `src/exam.desktop.test.jsx`, `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/laptop.desktop.test.jsx`, `src/session.desktop.test.jsx` | desktop | plan 115, one file a phase |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–115's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/browse.desktop.test.jsx` | desktop | plan 116: the browse's side — the entry docked on reveal, no tally, no column over an empty browse |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–116's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |

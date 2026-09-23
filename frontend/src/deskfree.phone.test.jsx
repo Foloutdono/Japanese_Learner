@@ -593,3 +593,41 @@ describe('the keys and the boards (plan 115, P8)', () => {
     expect(document.querySelector('.bz__seg')).not.toBeNull()
   })
 })
+
+// ── plan 116 — the browse a phone keeps ──
+// On the desk a fast review stands the revealed card's entry beside the
+// card (no tally: a browse rates nothing). A phone keeps the browse a
+// single column, docks nothing, and keeps the 🔍 that opens the entry in
+// a sheet.
+describe('the browse (plan 116)', () => {
+  it('stands no side, docks nothing and keeps the 🔍', async () => {
+    const cards = [
+      { card_id: 'vocab_N5_駅_えき', kanji: '駅', kana: 'えき', meaning: 'gare', stage: 'mastered' },
+      { card_id: 'vocab_N5_川_かわ', kanji: '川', kana: 'かわ', meaning: 'rivière', stage: 'learning' },
+    ]
+    apiFetch.mockImplementation(async path => ({
+      ok: true, status: 200,
+      json: async () => (String(path).startsWith('/api/vocab/review-cards') ? { cards } : {}),
+    }))
+    apiFetch.mockClear()
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabRun } = await import('./screens/VocabRun')
+    const { peekEntry } = await import('./stores/deskEntry')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N5/fast_review']}>
+          <Routes><Route path="/learn/vocab/:level/:mode" element={<VocabRun session={{ access_token: 't' }} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.querySelector('.review-deck__counter').textContent).toBe('1 / 2')
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }))
+    await settle()
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelectorAll('.reveal-action-btn')).toHaveLength(2)
+    expect(peekEntry()).toBeNull()
+    expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
+  })
+})

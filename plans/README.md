@@ -5783,3 +5783,16 @@ Deferred: the radical lesson page as a split; browse-mode runs with a side;
 a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
 for middle-click; Today's lanes two across; flag ink unification (a phone
 design change, the owner's to decide). Cut: see plan 115's own list.
+
+# Plan 116 — the browse's side on the desk (2026-09-23)
+
+One of wave 26's deferrals. The fast review stood its card alone on the
+desk, in the width a card run gives its session panel.
+
+| Plan | What | Status |
+|---|---|---|
+| 116 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
+
+Left out on purpose: the grammar browse. It wires no dictionary lookup
+at all, so there is no 🔍 on a phone either, and giving it one would put
+that 🔍 on the phone, which the desk may not change.
