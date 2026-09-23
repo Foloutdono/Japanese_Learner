@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
+import { useState, useEffect, useRef, useCallback, useContext } from 'react'
 import { useLang } from '../../LangContext'
 import { playClick, playArrival } from '../../lib/audio'
 import { Readings, ReadingGroup } from './Readings'
@@ -7,6 +7,11 @@ import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
 import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
+import { useDesk } from '../../hooks/useDesk'
+import { EntryDockContext } from './entryDock'
+import { dialogOpen } from '../../lib/dialogOpen'
+import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
+import { EnterKey } from '../chrome/DeskKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -112,7 +117,11 @@ export function CharDisplay({ char, variant, size }) {
 // and if that normalised text were also what "did the user pick the
 // right answer" compared, then any two options whose raw strings
 // differed only in punctuation would start grading as the same answer.
-export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped }) {
+// `keyHint` (the desk, plan 112): the row's index is the key that
+// answers it, so it prints the digit the number row types — 1, not 01,
+// as the exam's rows already do — and the button names its shortcut.
+// Only the first four are bound (domain/choiceKeys).
+export function MCQButton({ choice, display, correct, selected, answered, onClick, index, cramped, keyHint = false }) {
   const isCorrect  = choice === correct
   const isSelected = choice === selected
   // A filler is any choice that isn't the right answer and wasn't the
@@ -135,9 +144,10 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
       disabled={answered}
       aria-hidden={isFiller}
       className={`mcq-row${variant}`}
+      aria-keyshortcuts={keyHint && index < 4 ? String(index + 1) : undefined}
     >
       <span className="mcq-row__accent" aria-hidden="true" />
-      <span className="mcq-row__index">{String(index + 1).padStart(2, '0')}</span>
+      <span className="mcq-row__index">{keyHint ? String(index + 1) : String(index + 1).padStart(2, '0')}</span>
       <span className="mcq-row__text">{display ?? choice}</span>
     </button>
   )
@@ -153,6 +163,7 @@ export function MCQButton({ choice, display, correct, selected, answered, onClic
 // keying and grading (see MCQButton).
 export function MCQGrid({ choices, correct, selected, answered, onAnswer, formatChoice }) {
   const cramped = useIsCramped()
+  const desk = useDesk()
 
   // One shared entry point for an answer, whether it came from a
   // mouse click on MCQButton or a number-key shortcut below — so the
@@ -165,7 +176,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
   useEffect(() => {
     if (answered) return
     const handler = e => {
-      if (e.repeat) return
+      if (e.repeat || dialogOpen()) return
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       const idx = CHOICE_KEY_INDEX[e.key]
@@ -189,6 +200,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
           answered={answered}
           index={i}
           cramped={cramped}
+          keyHint={desk}
           onClick={() => handleAnswer(choice)}
         />
       ))}
@@ -274,6 +286,10 @@ export function ModeToggle({ mode, onChange, modes }) {
 // boards the extra train anyway — the cap is a default, never a lock.
 export function DoneMessage({ onBack, pace, onExtra }) {
   const { t } = useLang()
+  const desk = useDesk()
+  // 机 (plan 114): Enter takes the way back, the one filled action.
+  const back = () => { playClick(); onBack() }
+  const enterCap = desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>
 
   // The end of a session had no sound at all — the one moment in a
   // study run that is unambiguously an achievement. Guarded against
@@ -318,10 +334,11 @@ export function DoneMessage({ onBack, pace, onExtra }) {
           <button onClick={() => { playClick(); onExtra() }} className="btn-depart btn-depart--ghost quiz-done__extra">
             <span className="btn-depart__jp">{t.paceExtraTrain}</span>
           </button>
-          <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
-            <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+          <button onClick={back} className="btn-primary quiz-done__back" aria-keyshortcuts={desk ? 'Enter' : undefined}>
+            <ChevronIcon direction="left" size={14} /> {t.backToMenu}{enterCap}
           </button>
         </div>
+        <EnterKey onEnter={back} />
       </div>
     )
   }
@@ -331,10 +348,11 @@ export function DoneMessage({ onBack, pace, onExtra }) {
       <span className="quiz-done__mark" aria-hidden="true"><CheckIcon size={26} /></span>
       <p className="quiz-done__msg">{t.quizComplete}</p>
       <div className="quiz-done__foot">
-        <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
-          <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+        <button onClick={back} className="btn-primary quiz-done__back" aria-keyshortcuts={desk ? 'Enter' : undefined}>
+          <ChevronIcon direction="left" size={14} /> {t.backToMenu}{enterCap}
         </button>
       </div>
+      <EnterKey onEnter={back} />
     </div>
   )
 }
@@ -604,10 +622,23 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
 
 function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
+  // On the desk, inside a run with a side column (plan 113), the entry
+  // is docked beside the card the moment the card is revealed, and the
+  // 🔍 that would open the same entry in a sheet is not offered. The
+  // panel remounts per card (`resetKey`), so its cleanup takes the last
+  // card's entry down.
+  const docked = useContext(EntryDockContext)
 
   const speakText = sound ?? dictTerm
   const canLookUp = revealed && (dictTerm || dictId) && dictCategory && session
   const canPlaySound = revealed && (onReplaySound || speakText)
+
+  const dockNow = docked && Boolean(canLookUp)
+  useEffect(() => {
+    if (!dockNow) return
+    const token = publishEntry({ term: dictTerm, kana: dictKana, category: dictCategory, id: dictId, session })
+    return () => withdrawEntry(token)
+  }, [dockNow, dictTerm, dictKana, dictCategory, dictId, session])
 
   // Stable so DictionaryLookupSheet's useDialog doesn't re-run its
   // focus-on-open effect (and steal focus) on every render of this
@@ -646,7 +677,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
             <SpeakIcon />
           </button>
         )}
-        {canLookUp && (
+        {canLookUp && !docked && (
           <button
             type="button"
             onClick={openDictionary}
@@ -725,6 +756,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
 }
 
 function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+  const desk = useDesk()
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -767,7 +799,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   // natural one-handed shortcut instead of reaching for the mouse.
   useEffect(() => {
     const handler = e => {
-      if (e.repeat) return
+      if (e.repeat || dialogOpen()) return
       const tag = e.target?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       const key = e.key.toLowerCase()
@@ -800,7 +832,11 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         {showingBack ? back : front}
       </div>
       <div className="flashcard__hint">
-        {!revealed && (t.tapToReveal)}
+        {/* A phone is tapped; a desk has a keyboard, so there the hint
+            names the key (plan 112). */}
+        {!revealed && (desk
+          ? <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>
+          : t.tapToReveal)}
       </div>
     </div>
   )

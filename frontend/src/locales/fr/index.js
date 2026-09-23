@@ -250,6 +250,20 @@ const quiz = {
   typeRomaji:        'Tape le romaji…',
   tapToFlip:          'Touche pour retourner',
   tapToReveal:        'Touche pour révéler',
+  // L'indice du bureau (plan 112) : une touche, puis les mots qui suivent.
+  keySpace:           'Espace',
+  revealByKey:        'pour révéler',
+  // Le panneau du trajet, à côté d'une carte sur le bureau (plan 113).
+  deskRunLabel:       'Ce trajet',
+  deskEarned:         'Gagnés',
+  deskEntryWait:      'La fiche du dictionnaire s’ouvre ici quand la carte est révélée.',
+  deskMissesTitle:    'À revoir',
+  deskBreakdownLabel: 'Décomposition',
+  deskPassageLabel:   'Le texte',
+  keyEnter:           'Entrée',
+  keyEscape:          'Échap',
+  deskWayUp:          'Remonter',
+  deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui
@@ -665,6 +679,8 @@ const phraseAnalyzer = {
   kbdToken:            'mot',
   kbdSentence:         'phrase',
   kbdPlay:             'lecture',
+  dockNoEntry:         'Pas de fiche de dictionnaire pour ce mot.',
+  dictAnalyseSentence: 'Analyser cette phrase',
   windowWhole:         'toute la vidéo',
   windowSpan:          m => `${m} sélectionnées`,
   windowBackwards:     'La fin doit venir après le début.',
@@ -1717,6 +1733,11 @@ const ride = {
   rideKnownBack: 'Vous le saviez ? Dites-le. C\'est vous qui notez.',
   rideUnknownFront: 'Celui-ci, vous ne le connaissez pas. Retournez la carte.',
   rideUnknownBack: 'Dites faux. Faux n\'est pas une faute : la carte revient plus tôt, et c\'est toute la méthode.',
+  // 机 (plan 114) : les mêmes notes, avec les touches du bureau.
+  rideKnownFrontDesk: 'Une carte. Le mot est devant. Cliquez dessus ou appuyez sur Espace pour la retourner.',
+  rideKnownBackDesk: 'Vous le saviez ? Dites-le, sur la barre ou avec ses touches chiffrées. C\'est vous qui notez.',
+  rideUnknownFrontDesk: 'Celui-ci, vous ne le connaissez pas. Retournez la carte, d\'un clic ou avec Espace.',
+  rideUnknownBackDesk: 'Dites faux, sur la barre ou avec sa touche. Faux n\'est pas une faute : la carte revient plus tôt, et c\'est toute la méthode.',
   rideGuessed: 'Deviné ? Alors elle revient dans quelques jours. Dites faux quand vous devinez.',
   rideDoneBody: n => `C'est tout le jeu. **${n} mots nouveaux par jour**, chacun de retour juste avant que vous l'oubliiez.`,
   rideContinue: 'Continuer',
@@ -1759,6 +1780,10 @@ const guide = {
   guideProfileRecords: 'Vos chiffres, et la porte des statistiques.',
   guideProfileLedger: 'Chaque ligne, et où vous en êtes dessus.',
   guideProfileSettings: 'Réglages : le niveau, le rythme, la barre de notation, et ce guide à nouveau.',
+  // 机 (plan 114) : les notes qui enseignent les touches et les portes du bureau.
+  guideTabBarDesk: 'Les cinq portes, à gauche. Appuyez sur / n\'importe où pour chercher dans le dictionnaire.',
+  guideTodayGateDesk: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez : Entrée le fait de n\'importe où ici.',
+  guideLearnStopsDesk: 'Toute la ligne. Chaque arrêt est une porte vers ses quais.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
   settingsRideAgain: 'Refaire l\'essai',

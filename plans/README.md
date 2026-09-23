@@ -5665,3 +5665,117 @@ What shipped, per mode:
   topped up to `--target`, `--dry-run` first. `tests/test_prewarm_exam_papers.py`.
 
 Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
+
+---
+
+# Wave 24 — 机, the desk (plan 112, 2026-09-22)
+
+The owner's ask: the app is mobile-first and stays so, but it needs a
+design for a computer — two systems, one for mobile and one for computer,
+and never break the mobile one. Decisions taken with the owner: the desk
+starts at **1100px, width only**; its navigation is a **left rail** with
+the HUD's instruments at its foot; the first round covers the chrome and
+the main screens.
+
+| Plan | What | Status |
+|---|---|---|
+| 112 | The desk: `hooks/useDesk.js`; the rail (`components/chrome/DeskRail.jsx`) in the Shell's slots; the plates two by two; Today and the profile in two columns; Settings' list beside its page; sheets as centred dialogs; the keys printed on a run; the 机 section at the tail of `index.css` and `src/desk.css.test.js`; the `desktop` (1100×800) and `wide` (1440×900) lanes; ADR 0018; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-22) |
+
+Verified beyond the suite: a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute, text
+node, box and computed style at 390, 768, 1024 and 1099px across eight
+screens and a kana run (before and after the reveal) — identical.
+
+Deferred: 理解's A–D list binds no keys (the desk prints none there);
+the stations pickers, decks, library, stats and the exam runner keep the
+phone's screen in the centred column; the dictionary's lookup sheet
+(plan 090) is still a modal on the desk rather than the dock's own stack;
+the guide's tab-bar stop hangs under the rail's list rather than beside
+it.
+
+---
+
+# Wave 25 — 机, the desk's second round (plan 113, 2026-09-22)
+
+The owner's verdict on wave 24: a good beginning — now fill the space
+with purpose and rethink the layout for a computer, so that nobody on one
+feels the app was made for a phone first. Set goals and deliver. The one
+constraint stands: below 1100px nothing changes.
+
+| Plan | What | Status |
+|---|---|---|
+| 113 | The screens laid out for the width, in seven phases, one commit each: **P1** the canvas at `--desk-board-w` (1240px), the platform lattices with no orphan, a boarding route drawn across, a run's head and field on the card's column; **P2** Today's journey beside the gate (`JourneyPanel`, `JourneyBody`), the dictionary's dock open from the first frame with its doors opening inside it (`DictionaryLookupBody`), ←/→ through the catalogue, a Learn plate's foot as the whole line; **P3** a station as two panes (`StationSplit`) with each platform's figures (`ModeFigures`, `modeRow`), the exam's grade in its URL; **P4** the statistics as one page — the line drawn 1:1 (`useBoxWidth`), the lines' levels in place, all twelve trouble cards; **P5** a run's side: the session panel (`SessionPanel`, `stores/runTally`) and the revealed card's entry docked (`stores/deskEntry`, `entryDock`), a graded sentence's breakdown with no toggle (`BreakdownSide`); **P6** the way up (`Leave to`, `onDeskRail`, `.desk-crumb`) and `/` from anywhere; **P7** a deck beside its platforms (`DeckPlatforms`, `useDeckModes`), a new deck as a dialog. DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+What changed for a learner on a computer, counted from the rail:
+
+| Flow | Wave 24 | Wave 25 |
+|---|---|---|
+| A kana set's, a grammar level's or an exam grade's platforms | 2 clicks | 1 (the list opens on the learner's own stop) |
+| Vocab or kanji platforms by JLPT level | 3 clicks | 2 |
+| A dictionary entry on arrival | 1 click | 0 (the dock opens on the first result) |
+| A door inside an entry | a modal over the dock | the dock itself, with ‹ back |
+| The journey on Today | a sheet | beside the gate |
+| A line's levels on the statistics | a sheet | in place |
+| Trouble cards | 6, then a sheet | all 12 on the page |
+| The revealed card's dictionary entry | 🔍, then a modal | docked beside the card |
+| A graded sentence's breakdown | a toggle | beside the card, automatically |
+| A deck's platforms | ▶ Study, then a second screen | beside the cards |
+| The canvas at 1920px | 1040px | 1240px |
+| A ‹ back pill that repeats the rail | on every nested screen | not drawn; any other is a crumb |
+
+Cut on purpose, each decoration, a duplicate, or built on data that
+would lie: a twelve-week heatmap (the stamp book already is one); a key
+legend (the keys are printed where they act); pace inside a run (stale
+mid-run); trouble cards on Today (they compete with the one action);
+"last played" on the practice plates (comprehension and exams keep no
+history, reading's has no level); retention on the plates; the due
+forecast (retired by design).
+
+Verified beyond the suite (frontend: 184 files, 1372 tests, seven
+lanes): after every phase a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute,
+text node, box and computed style at 390, 768, 1024 and 1099px across
+twenty-eight screens, a kana run before and after the reveal, and a
+reading run graded — identical to the commit before wave 24.
+
+Deferred: a comprehension passage beside its questions; a standing
+answer sheet in the exam runner; the exam result and the library laid
+out for the width; a word looked up from a docked breakdown still opens
+the lookup as a dialog.
+
+# Wave 26 — 机, the desk's third round (plan 114, 2026-09-23)
+
+The owner's verdict on wave 25: nicely done, continue to improve it. A
+read-only audit (seven areas, an auditor and a skeptic each, then a
+synthesis) found the screens still shaped like a phone on the desk, runs
+that did not fit a laptop's window, doors that still opened dialogs over a
+docked column, live bugs in the shipped desk work, and five bugs on the
+phone too, which the owner approved fixing in the same wave.
+
+| Plan | What | Status |
+|---|---|---|
+| 114 | **P0** five phone bugs, a commit and a phone test each: a cloze blank never lit (`blankNumber`), Back from a result re-sitting the paper (replace on finish), run keys under a dialog (`lib/dialogOpen`), leaving a run pushing history (`stores/boarding`'s `returnsTo`, `hooks/useRunExit`), out-of-order dictionary pages; **P1** the run's side in its pigment (`RunSide`), a breakdown's doors opening in the side (`SideLookup`), exact docked lookups, the column's card width for the exam's rows, one Sign out; **P2** comprehension beside its text, A–D/Enter, a miss opening its sentence; **P3** the stations' second screens folded — grammar points beside the lesson, theme bands and tiers beside their platforms (`ScopeFigures`), the deck's platform screen giving way; **P4** the mock exam's standing answer sheet, a flat reading passage (`ExamCard`, `PassageText`), Space for listening, the review as list and page; **P5** the library's shelf beside a deck (`PublicDeckPane`), Browse docked (`BrowseCardsDock`), one /modes fetch, one "No cards"; **P6** the analyser's dock (`AnalyzerDock`, `tokenLookup`), `DeskCrumb`, the intake beside history, Ctrl/⌘+Enter, the dictionary's handoff to the analyser, kana charts that wrap; **P7** a run that fits a laptop (top-aligned, card and choices side by side, rows that keep their place), the misses at a run's end (`tallyMisses`); **P8** Enter and Esc (`DeskKeys`), C for choices, Enter at a run's end, a Learn plate's legs as doors, ↑/↓ along a station (`useListWalk`), the rail's focus ring, the profile's pass at phone size and both rankings, the guide's note beside its anchor with `…Desk` copy; **P9** the records, the identity pass and the screenshots | DONE (2026-09-23) |
+
+What changed for a learner on a computer:
+
+| Flow | Wave 25 | Wave 26 |
+|---|---|---|
+| Look up a word in a graded sentence | dialog + scrim, 2 clicks per further word | in the side, 1 click |
+| Comprehension: check the text during a question | Re-read, then Back (2 clicks) | 0: the passage stands beside the question |
+| Comprehension: answer a question | click row + click Next | 2 keys (A–D, Enter) |
+| Grammar point lesson | click → modal → close | 1 click or ←/→ |
+| Theme band / next frequency tier | 2 clicks | 1, with figures |
+| Leave a deck run | the extra platforms screen | the deck page |
+| Exam: jump to a question | open the bar, a dialog, pick | 1 click, sheet always visible |
+| Exam: reading passage | 480px scroll box, re-animates per question | stands still beside its questions |
+| Exam review | accordion, 2 clicks per move | list and page, 1 click or ←/→ |
+| Library: inspect 5 decks | 10 clicks, 5 refetches | 5 clicks, 0 refetches |
+| Analyzer lookup | dialog + close | docked column, ←/→ walk tokens |
+| Pasted sentence in the dictionary | 3 acts on 2 screens | 1 click to the analyzer |
+| Kanji MCQ at 1100×800 | 4th choice at the floor, rating bar below it, jumping on answer | all in view; rating bar never moves |
+| Whole session from Today | mouse to depart and to leave | Enter departs, Esc leaves |
+
+Deferred: the radical lesson page as a split; browse-mode runs with a side;
+a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
+for middle-click; Today's lanes two across; flag ink unification (a phone
+design change, the owner's to decide). Cut: see plan 114's own list.

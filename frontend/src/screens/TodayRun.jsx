@@ -3,6 +3,8 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -69,6 +71,7 @@ function stageClassFor(structureKey) {
 
 export default function TodayRun({ session }) {
   const navigate = useNavigate()
+  const leaveToGate = useRunExit('/today')
   const { t, lang } = useLang()
   const [params] = useSearchParams()
   // The gate's choice. Sorted so the same selection always produces
@@ -279,13 +282,15 @@ export default function TodayRun({ session }) {
   return (
     <StudyStage
       color={color}
-      onLeave={() => navigate('/today')}
+      onLeave={leaveToGate}
       leaveLabel={t.stageGate}
       where={where}
       sub={sub}
       remaining={remaining}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel done={done} misses={false} />}
+      sideLabel={t.deskRunLabel}
     >
       {/* The run's own hairline: what this session has cleared of what
           it set out to, in the day's gold. A mixed queue has no

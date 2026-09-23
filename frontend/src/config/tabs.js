@@ -25,6 +25,8 @@
 // the section's announcement in public/sounds/announcements — the
 // clips predate the routes and keep their names.
 
+import { identityFor } from './identity'
+
 export const TAB_IDS = ['learn', 'practice', 'today', 'dictionary', 'profile']
 
 /**
@@ -47,6 +49,66 @@ export function getTabs(t) {
     { id: 'dictionary', path: '/dictionary', label: t.tabDictionary },
     { id: 'profile',    path: '/profile',    label: t.tabProfile },
   ]
+}
+
+// ── 机 — the same five, down a rail (plan 112) ──
+// The desk chrome (components/chrome/DeskRail.jsx, ≥1100px) lists the
+// gates top to bottom, and a column has no thumb to put Today under: it
+// opens the list, the way `/` opens on it. TAB_IDS is still the phone's
+// row and the order the sideways flick walks — the rail has no sideways
+// flick, so the two orders never meet on one screen.
+export const DESK_TAB_IDS = ['today', 'learn', 'practice', 'dictionary', 'profile']
+
+/** The five gates in the rail's order — getTabs, re-read top to bottom. */
+export function getDeskTabs(t) {
+  const byId = Object.fromEntries(getTabs(t).map(tab => [tab.id, tab]))
+  return DESK_TAB_IDS.map(id => byId[id])
+}
+
+/**
+ * What the rail lists under a lit gate: its sections, minus the one the
+ * gate row already is (Today's queue, the dictionary itself), and for the
+ * pass its settings — a hall of the pass rather than a place
+ * (config/identity.js), but a door the rail has the room to print. Titles
+ * only: the rail is chrome, and a section's pigment never goes on chrome
+ * (DESIGN.md, "Colour is an edge, a ring, or a numeral").
+ */
+export function getDeskSections(tabId, t) {
+  const root = `/${tabId}`
+  const rows = getSections(tabId, t)
+    .filter(s => s.path !== root)
+    .map(s => ({ path: s.path, title: s.title }))
+  if (tabId === 'profile') {
+    const settings = identityFor('/profile/settings', t)
+    rows.push({ path: settings.path, title: settings.title })
+  }
+  return rows
+}
+
+/**
+ * Whether the desk's rail already has a door to `path` (plan 113): a
+ * gate, or one of any gate's stations. A screen's ‹ way out to one of
+ * those is a second door to the same place on the desk, and the Bar
+ * drops it (components/chrome/Bar.jsx).
+ */
+export function onDeskRail(path) {
+  return DESK_TAB_IDS.some(id => path === `/${id}` || getDeskSections(id, {}).some(s => s.path === path))
+}
+
+/** Whether `pathname` is standing in the section at `path` (or behind it). */
+export function inSection(pathname, path) {
+  return pathname === path || pathname.startsWith(`${path}/`)
+}
+
+// A three-figure count is wider than the gate it sits on, and the
+// difference between 239 and 312 due is not a difference anyone acts
+// on: past a hundred the number is "a lot". Shared by the tab bar and
+// the rail, so the two chromes print the same figure.
+export const DUE_CAP = 99
+
+/** The due count as a gate prints it: the number, or `99+`. */
+export function dueBadge(due) {
+  return due > DUE_CAP ? `${DUE_CAP}+` : String(due)
 }
 
 /** Which gate a pathname is behind, or null (the dev routes). */

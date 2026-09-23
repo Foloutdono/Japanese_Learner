@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
-import { stopsAround } from '../../domain/lineProgress'
+import { deckItems, lineMarks, stopsAround, stopsTravelled } from '../../domain/lineProgress'
 
 // ── 駅名標 — a line as its own station plate (plan 094) ──────────
 // The Learn and Practice gates hang one plate per section: the roundel
@@ -78,6 +78,50 @@ export function StopsFoot({ stops, guide }) {
       <span className="plate__prev">{prev && <>‹ <Mark mark={prev} /></>}</span>
       <span className="plate__here"><Mark mark={here} /></span>
       <span className="plate__next">{next && <><Mark mark={next} /> ›</>}</span>
+    </span>
+  )
+}
+
+/**
+ * The desk's foot on a Learn line (plan 113): the whole line, where the
+ * phone's plate had room for three stops. The novice's stop at the
+ * origin, then one leg per level — its rail filled as far as the level
+ * is learned, its station at the leg's END (a station is a completion,
+ * domain/lineProgress), and under it the level's own figure, learned
+ * over total, the same one its station page prints. The leg being
+ * ridden is inked; the ones finished are filled. On a 400–570px plate
+ * that is the distance the profile's ledger and the station page each
+ * print one piece of, read at a glance from the gate.
+ */
+//
+// Every leg is a door (plan 114): its station's platforms are one click
+// from the gate, where the plate's head departs to the stop being
+// ridden — marked here as the learner's location.
+export function LineFoot({ stops, stats, source, guide, onStop }) {
+  const marks = lineMarks(stops)
+  const reached = Math.min(stops.length, Math.floor(stopsTravelled(stops)))
+  return (
+    <span className="plate__foot desk-line" data-guide={guide}>
+      <span className="desk-line__origin"><Mark mark={marks[0]} /></span>
+      {stops.map((stop, i) => {
+        const { learned, total } = deckItems(stats, source, stop.key)
+        const state = i < reached ? ' desk-line__leg--done' : i === reached ? ' desk-line__leg--here' : ''
+        return (
+          <button
+            key={stop.key}
+            type="button"
+            className={`desk-line__leg${state}`}
+            aria-current={i === reached ? 'location' : undefined}
+            onClick={() => onStop?.(stop.key)}
+          >
+            <span className="desk-line__track" aria-hidden="true">
+              <i style={{ width: `${Math.round(Math.min(1, Math.max(0, stop.score)) * 100)}%` }} />
+            </span>
+            <span className="desk-line__stop"><Mark mark={marks[i + 1]} /></span>
+            {total > 0 && <span className="desk-line__fig">{learned}/{total}</span>}
+          </button>
+        )
+      })}
     </span>
   )
 }

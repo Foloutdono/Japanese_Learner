@@ -12,6 +12,12 @@ import { PassageBreakdown } from '../components/analysis/PassageBreakdown'
 import { GrammarChips } from '../components/analysis/GrammarChips'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { SideLookup } from '../components/analysis/SideLookup'
+import { SentenceLine } from '../components/analysis/SentenceBreakdown'
+import { useDesk } from '../hooks/useDesk'
+import { dialogOpen } from '../lib/dialogOpen'
+import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
+import { quotedFragments, sentenceFor } from '../domain/quotedFragments'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CheckIcon, CrossIcon, ChevronIcon } from '../components/ui/Icons'
@@ -28,6 +34,18 @@ const formatTime = secs => {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
+// The text on its card. The reading stage draws it bounded, its body
+// scrolling inside (prompt-card--passage); the desk's side column draws
+// it whole beside the questions (plan 114), with no foot — the stage's
+// head already says which level and which exercise it is.
+function Passage({ text, level, t, className, foot = true }) {
+  return (
+    <PromptCard prose className={className} foot={foot ? { left: level, right: t.comprehensionTitle } : undefined}>
+      <span className="prose__jp prose__jp--passage" lang="ja">{text}</span>
+    </PromptCard>
+  )
+}
+
 // Route: /practice/comprehension/:level — the whole exercise on the
 // stage (the canvas's Comprehension and ComprehensionResult
 // artboards). The level list is the station page above it, under the
@@ -39,6 +57,7 @@ const BASE = '/practice/comprehension'
 export default function ComprehensionRun({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
+  const desk = useDesk()
   const { level: levelParam } = useParams()
 
   // The level list is this section's only picker, so its own root is
@@ -237,6 +256,52 @@ export default function ComprehensionRun({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // The keys (plan 114). The one multiple-choice run that needed the
+  // mouse for every answer: a letter or a digit picks, Enter commits,
+  // and Enter ends the reading. Every width, as every run's keys are;
+  // the desk prints them. Not while typing, under a dialog, or with a
+  // modifier (Ctrl+C copies).
+  useEffect(() => {
+    if (stage !== 'questions' && stage !== 'reading') return undefined
+    const onKey = e => {
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || e.isComposing || dialogOpen()) return
+      const target = e.target
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName) || target?.isContentEditable) return
+      const button = target?.closest?.('button')
+      if (stage === 'reading') {
+        // Only once the clock has run a tick: the train door's any-key
+        // skip (components/station/TrainDoor) must not also end the
+        // reading. A focused button answers Enter itself.
+        if (e.key !== 'Enter' || button) return
+        if (!rereading && timeLeft >= exercise?.read_seconds) return
+        e.preventDefault()
+        finishReading()
+        return
+      }
+      const q = exercise?.questions?.[currentQ]
+      if (!q) return
+      const idx = LETTER_KEY_INDEX[e.key.toLowerCase()] ?? CHOICE_KEY_INDEX[e.key]
+      if (idx !== undefined && idx < q.options.length) {
+        e.preventDefault()
+        playUi('click-mode-selection')
+        setPicked(idx)
+        return
+      }
+      if (e.key !== 'Enter') return
+      // Next and Re-read answer Enter themselves when focused. A row
+      // does not: it is the same node on the next question, and its
+      // native press would pick a letter on a question not yet read.
+      if (button && !button.classList.contains('mcq-row')) return
+      e.preventDefault()
+      if (picked != null) {
+        document.activeElement?.blur?.()
+        commitAnswer()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  })
+
   // A grade the level list could not have offered: back to it rather
   // than an exercise nothing can be written for.
   if (!route) return <Navigate replace to={BASE} />
@@ -258,6 +323,57 @@ export default function ComprehensionRun({ session }) {
     stage === 'results' ? `${level} · ${t.practiceResult}` :
     level
 
+  // The desk's side column (plan 114). While the questions are asked
+  // the text stands in it whole — the paper prints them on one page, and
+  // the phone's Re-read round trip has nothing left to do. On the
+  // results it is the breakdown, open with no toggle, its doors opening
+  // in the same column under the open sentence's line. Reading has no
+  // side: the text is the stage then.
+  const breakdownBody = (
+    <>
+      {exercise?.grammar_points?.length > 0 && (
+        <GrammarChips grammar={exercise.grammar_points} t={t} quiet label={t.grammarInText} onOpen={openGrammar} />
+      )}
+      <PassageBreakdown
+        sentences={breakdown}
+        t={t}
+        openIndex={openIndex}
+        setOpenIndex={setOpenIndex}
+        onTokenClick={w => setLookup(vocabLookup(w))}
+        onGrammarOpen={openGrammar}
+      />
+    </>
+  )
+  const openSentence = breakdown[openIndex]
+  const side =
+    (stage === 'questions' || stage === 'submitting') && exercise ? (
+      <Passage text={exercise.text} level={level} t={t} foot={false} />
+    ) : stage === 'results' && results ? (
+      <SideLookup
+        lookup={lookup}
+        onExit={closeLookup}
+        session={session}
+        head={openSentence ? (
+          <SentenceLine analysis={openSentence.analysis} text={openSentence.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
+        ) : null}
+      >
+        {breakdownBody}
+      </SideLookup>
+    ) : undefined
+
+  // A result row opens its question; on the desk it also opens the
+  // sentence the question quotes, in the breakdown beside it.
+  function openResultRow(i, isOpen, r) {
+    playUi('click-mode-selection')
+    setOpenRow(isOpen ? null : i)
+    if (!desk || isOpen) return
+    const k = sentenceFor(breakdown, quotedFragments(r.question))
+    if (k >= 0) {
+      setLookup(null)
+      setOpenIndex(k)
+    }
+  }
+
   return (
     <StudyStage
       color={RIKAI_COLOR}
@@ -272,7 +388,10 @@ export default function ComprehensionRun({ session }) {
       // The level bar steps off while the text is up: the passage band
       // is measured against the whole screen (index.css,
       // .stage--passage) and nothing is graded until the questions.
-      levelBar={stage !== 'reading'}
+      // That band is a phone rule; the desk keeps its bar.
+      levelBar={desk || stage !== 'reading'}
+      side={side}
+      sideLabel={stage === 'results' ? t.deskBreakdownLabel : t.deskPassageLabel}
       // The reading stage is the one that holds a page: it is bounded
       // to the screen so the passage scrolls in its own card rather
       // than taking the stage with it (index.css, .prompt-card--passage).
@@ -312,13 +431,12 @@ export default function ComprehensionRun({ session }) {
               now the breakdown on the result (below) — the same
               sentences, in the same order, but bought AFTER the
               answers are in rather than instead of them. */}
-          <PromptCard prose className="prompt-card--passage" foot={{ left: level, right: t.comprehensionTitle }}>
-            <span className="prose__jp prose__jp--passage" lang="ja">{exercise.text}</span>
-          </PromptCard>
+          <Passage className="prompt-card--passage" text={exercise.text} level={level} t={t} />
 
           <div className="stage__foot btn-row">
-            <button type="button" className="btn-primary" onClick={finishReading}>
+            <button type="button" className="btn-primary" onClick={finishReading} aria-keyshortcuts={desk ? 'Enter' : undefined}>
               {rereading ? t.compBackToQuestions : t.doneReading}
+              {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
             </button>
           </div>
         </>
@@ -349,6 +467,7 @@ export default function ComprehensionRun({ session }) {
                   type="button"
                   className={`mcq-row${picked === i ? ' mcq-row--selected' : ''}`}
                   aria-pressed={picked === i}
+                  aria-keyshortcuts={desk ? `${letter(i)} ${i + 1}` : undefined}
                   onClick={() => { playUi('click-mode-selection'); setPicked(i) }}
                 >
                   <span className="mcq-row__accent" aria-hidden="true" />
@@ -359,11 +478,21 @@ export default function ComprehensionRun({ session }) {
             </div>
 
             <div className="stage__foot btn-row">
-              <button type="button" className="btn-secondary" onClick={reread}>
-                {t.reReadText}
-              </button>
-              <button type="button" className="btn-primary" disabled={picked == null} onClick={commitAnswer}>
+              {/* The text stands beside the questions on the desk. */}
+              {!desk && (
+                <button type="button" className="btn-secondary" onClick={reread}>
+                  {t.reReadText}
+                </button>
+              )}
+              <button
+                type="button"
+                className="btn-primary"
+                disabled={picked == null}
+                onClick={commitAnswer}
+                aria-keyshortcuts={desk ? 'Enter' : undefined}
+              >
                 {currentQ + 1 < total ? t.reviewNext : t.submit}
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
               </button>
             </div>
           </>
@@ -395,7 +524,7 @@ export default function ComprehensionRun({ session }) {
                     type="button"
                     className="qrow"
                     aria-expanded={isOpen}
-                    onClick={() => { playUi('click-mode-selection'); setOpenRow(isOpen ? null : i) }}
+                    onClick={() => openResultRow(i, isOpen, r)}
                   >
                     <span className={`exam-review-row__mark exam-review-row__mark--${r.is_correct ? 'ok' : 'x'}`} aria-hidden="true">
                       {r.is_correct ? <CheckIcon size={11} /> : <CrossIcon size={11} />}
@@ -443,22 +572,15 @@ export default function ComprehensionRun({ session }) {
               text: every sentence, in order, so the card is the
               original too. Over it, the grammar points the text was
               written around (plan 084). */}
-          <button type="button" className="btn-secondary" onClick={() => setShowBreakdown(s => !s)} aria-expanded={showBreakdown}>
-            {showBreakdown ? t.hideBreakdown : t.showBreakdown}
-          </button>
-          {showBreakdown && (
+          {/* On the desk the breakdown stands open in the side column. */}
+          {!desk && (
+            <button type="button" className="btn-secondary" onClick={() => setShowBreakdown(s => !s)} aria-expanded={showBreakdown}>
+              {showBreakdown ? t.hideBreakdown : t.showBreakdown}
+            </button>
+          )}
+          {!desk && showBreakdown && (
             <PromptCard prose foot={{ left: level, right: t.comprehensionTitle }}>
-              {exercise?.grammar_points?.length > 0 && (
-                <GrammarChips grammar={exercise.grammar_points} t={t} quiet label={t.grammarInText} onOpen={openGrammar} />
-              )}
-              <PassageBreakdown
-                sentences={breakdown}
-                t={t}
-                openIndex={openIndex}
-                setOpenIndex={setOpenIndex}
-                onTokenClick={w => setLookup(vocabLookup(w))}
-                onGrammarOpen={openGrammar}
-              />
+              {breakdownBody}
             </PromptCard>
           )}
 
@@ -473,7 +595,7 @@ export default function ComprehensionRun({ session }) {
         </>
       )}
 
-      {lookup && (
+      {lookup && !desk && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

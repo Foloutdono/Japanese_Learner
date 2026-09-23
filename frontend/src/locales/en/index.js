@@ -268,6 +268,20 @@ const quiz = {
   typeRomaji:        'Type the romaji…',
   tapToFlip:          'Tap to flip',
   tapToReveal:         'Tap to reveal',
+  // The desk's hint (plan 112): a key cap, then the words after it.
+  keySpace:            'Space',
+  revealByKey:         'to reveal',
+  // The run's panel, beside a card on the desk (plan 113).
+  deskRunLabel:        'This run',
+  deskEarned:          'Earned',
+  deskEntryWait:       'The dictionary entry opens here once the card is revealed.',
+  deskMissesTitle:     'To look at again',
+  deskBreakdownLabel:  'Breakdown',
+  deskPassageLabel:    'The text',
+  keyEnter:            'Enter',
+  keyEscape:           'Esc',
+  deskWayUp:           'Way up',
+  deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see
@@ -698,6 +712,8 @@ const phraseAnalyzer = {
   kbdToken:            'token',
   kbdSentence:         'sentence',
   kbdPlay:             'play',
+  dockNoEntry:         'No dictionary entry for this word.',
+  dictAnalyseSentence: 'Analyze this sentence',
   windowWhole:         'whole video',
   windowSpan:          m => `${m} selected`,
   windowBackwards:     'The end must come after the start.',
@@ -1786,6 +1802,11 @@ const ride = {
   rideKnownBack: 'Did you know it? Say so. You are the one who grades.',
   rideUnknownFront: 'This one you have not met. Turn it over.',
   rideUnknownBack: 'Say wrong. Wrong is not a fault: the card comes back sooner, and that is the whole method.',
+  // 机 (plan 114): the same notes, teaching the desk's keys.
+  rideKnownFrontDesk: 'A card. The word is on the front. Click it or press Space to turn it over.',
+  rideKnownBackDesk: 'Did you know it? Say so, on the bar or with its number keys. You are the one who grades.',
+  rideUnknownFrontDesk: 'This one you have not met. Turn it over, with a click or Space.',
+  rideUnknownBackDesk: 'Say wrong, on the bar or with its key. Wrong is not a fault: the card comes back sooner, and that is the whole method.',
   rideGuessed: 'Guessed it? Then it comes back in a few days. Say wrong when you guessed.',
   rideDoneBody: n => `That is the game. **${n} new words a day**, each one back just before you forget it.`,
   rideContinue: 'Continue',
@@ -1828,6 +1849,10 @@ const guide = {
   guideProfileRecords: 'Your figures, and the door to the statistics.',
   guideProfileLedger: 'Each line, and how far along it you are.',
   guideProfileSettings: 'Settings: the level, the pace, the bar you rate with, and this guide again.',
+  // 机 (plan 114): the notes that teach the desk's keys and doors.
+  guideTabBarDesk: 'The five gates, down the left. Press / from anywhere to search the dictionary.',
+  guideTodayGateDesk: 'What is due today, line by line. Switch a line off to leave it for later, then depart: Enter does it from anywhere here.',
+  guideLearnStopsDesk: 'The whole line. Every stop on it is a door to its platforms.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
   settingsRideAgain: 'Take the test ride again',

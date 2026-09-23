@@ -9,6 +9,9 @@ import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { kanaSets, currentKanaSet } from '../domain/kanaSets'
 import { deckItems } from '../domain/lineProgress'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, KanaSetRedirect } from '../components/selection/StationSplit'
+import { ModeFigures } from '../components/selection/ModeFigures'
 
 // ── かな — the station and the platforms (plan 071) ──────────
 // /learn/kana lists the sets as the stops of the kana line, with
@@ -31,6 +34,7 @@ export default function KanaScreen() {
   const { set } = useParams()
   const [sp] = useSearchParams()
   const stats = useStats().data
+  const desk = useDesk()
 
   const SETS = kanaSets(t)
   const MODES = modePickerEntries(t, 'kana')
@@ -44,9 +48,9 @@ export default function KanaScreen() {
   }
   if (set && !selectedSet) return <Navigate replace to="/learn/kana" />
 
-  // ── The station: the sets ──
-  if (!selectedSet) {
-    const stops = SETS.map(s => {
+  // The sets as a route: the station page on a phone, and on the desk
+  // the list beside a set's platforms (plan 113).
+  const setStops = () => SETS.map(s => {
       const { learned, total, started } = deckItems(stats, 'kana', s.slug)
       return {
         key: s.slug,
@@ -60,25 +64,52 @@ export default function KanaScreen() {
         startedLabel: t.startedNote(started),
       }
     })
-    const here = currentKanaSet(stats?.items?.kana)
+  const here = currentKanaSet(stats?.items?.kana)
+
+  // ── The station: the sets ──
+  if (!selectedSet) {
     return (
       <SelectionScreen
         title={t.kanaTitle}
         sub={t.stationSets}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
-        <RouteStops stops={stops} here={here} onSelect={slug => navigate(`/learn/kana/${slug}`)} />
+        {/* On the desk the sets stand beside a set's platforms, so the
+            list alone opens on the set the figures say they are on. */}
+        {desk
+          ? <KanaSetRedirect to={slug => `/learn/kana/${slug}`} />
+          : <RouteStops stops={setStops()} here={here} onSelect={slug => navigate(`/learn/kana/${slug}`)} />}
       </SelectionScreen>
     )
   }
 
   // ── The platforms: the set's modes ──
   const run = m => navigate(`/learn/kana/${set}/${m}`)
+
+  // ── 机 — the sets beside a set's platforms (plan 113) ──
+  if (desk) {
+    const figured = MODES.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="kana" deck={set} mode={m.key} /> }))
+    return (
+      <SelectionScreen
+        title={t.kanaTitle}
+        sub={selectedSet.label}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
+      >
+        <StationSplit
+          label={t.stationSets}
+          list={<RouteStops stops={setStops()} here={here} selected={set} onSelect={slug => navigate(`/learn/kana/${slug}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.kanaTitle}
       sub={selectedSet.label}
-      aside={<Leave onClick={() => navigate('/learn/kana')}>{t.leaveSets}</Leave>}
+      aside={<Leave to={'/learn/kana'}>{t.leaveSets}</Leave>}
     >
       <ModeSelector modes={MODES} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

@@ -3,6 +3,8 @@ import { useLang } from '../../LangContext'
 import { playCorrect, playWrong } from '../../lib/audio'
 import { ratingButtons } from '../../domain/ratingScales'
 import { useRatingScale } from '../../stores/ratingScale'
+import { useDesk } from '../../hooks/useDesk'
+import { dialogOpen } from '../../lib/dialogOpen'
 
 // Keys 1-N map to the bar's buttons. On an AZERTY keyboard the
 // unshifted number row types &é"' rather than 1234, so those are
@@ -25,6 +27,7 @@ const PRESSED_MS = 420
 export default function RatingBar({ onRate, active, scale, guide }) {
   const { t } = useLang()
   const preferred = useRatingScale()
+  const desk = useDesk()
   const [pressed, setPressed] = useState(null)
   const pressedTimer = useRef(null)
   useEffect(() => () => clearTimeout(pressedTimer.current), [])
@@ -58,6 +61,8 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   useEffect(() => {
     if (!active) return
     const handler = e => {
+      // No input guard: a typed-answer run rates from its field.
+      if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       const idx = e.key in AZERTY_INDEX ? AZERTY_INDEX[e.key] : parseInt(e.key) - 1
       if (idx >= 0 && idx < QUALITY_BTNS.length) handleRate(QUALITY_BTNS[idx].q)
     }
@@ -101,16 +106,20 @@ export default function RatingBar({ onRate, active, scale, guide }) {
                taken, drawn as the one to reach for. Best-first, so it
                is QUALITY_BTNS[0] on every scale. */
             className={`rating-bar__btn rating-bar__btn--q${q}${q === QUALITY_BTNS[0].q ? ' rating-bar__btn--best' : ''}${pressed === q ? ' rating-bar__btn--pressed' : ''}`}
-            /* The digits are deliberately NOT drawn (numeric indices are
-               noise on a control this size) and are deliberately NOT in
-               display order: QUALITY_BTNS is best-first, so "1" is the
-               best answer at the RIGHT end and the highest digit is the
-               worst at the left. Undiscoverable and reversed is a bad
-               pair, so the shortcut is at least announced to assistive
-               tech and shown on hover. */
+            /* The digits are NOT in display order: QUALITY_BTNS is
+               best-first, so "1" is the best answer at the RIGHT end and
+               the highest digit is the worst at the left. On a phone they
+               are not drawn at all (numeric indices are noise on a
+               thumb's control, and a thumb has no number row), so the
+               shortcut is announced to assistive tech and shown on hover.
+               On the desk (plan 112) there IS a keyboard under the hands,
+               and undiscoverable-and-reversed was the bad pair: each tile
+               prints its key in its corner, which is what makes the
+               reversal readable. */
             aria-keyshortcuts={String(digit)}
             title={`${label} (${digit})`}
           >
+            {desk && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
             {/* The ring is the whole colour story now: unfilled at rest,
                 filled when this rating is the one chosen. Marked hidden
                 because it says nothing the label does not -- it is the

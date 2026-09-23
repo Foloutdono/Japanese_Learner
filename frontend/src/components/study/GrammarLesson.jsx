@@ -193,20 +193,19 @@ export function GrammarLesson({ point, variant = 'sheet', onCompare, onBoard, on
   )
 }
 
-// ── The sheet ───────────────────────────────────────────────────
-// The lookup sheet's shell (a portal over whatever opened it, the
-// dictionary's own chrome) holding a stack of points: a compare row
-// pushes its rival, ‹ pops. `initial` is a lesson already in hand —
-// the one a new card carries — so the sheet opens on it without a
-// round trip; anything else is fetched by id.
-export function GrammarLessonSheet({ id, initial, session, onClose, over = false }) {
-  const { t, lang } = useLang()
+// ── The stack ───────────────────────────────────────────────────
+// The points a lesson walks: a compare row pushes its rival, ‹ pops.
+// `initial` is a lesson already in hand — the one a new card carries —
+// so the lesson opens on it without a round trip; anything else is
+// fetched by id. Shared by the sheet and the desk's page
+// (GrammarLessonBody), so the two walk their doors the same way.
+function useLessonStack(id, initial, session) {
+  const { lang } = useLang()
   const [stack, setStack] = useState([id])
   const [cache, setCache] = useState(() => (initial && initial.raw_id === id ? { [id]: initial } : {}))
   const [error, setError] = useState(null)
   const here = stack[stack.length - 1]
   const point = cache[here]
-  const dialogRef = useDialog(onClose, { capture: over })
 
   useEffect(() => {
     if (point) return undefined
@@ -220,7 +219,23 @@ export function GrammarLessonSheet({ id, initial, session, onClose, over = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [here, lang, session])
 
-  const notFound = error instanceof ApiError && error.status === 404
+  return {
+    here,
+    point,
+    error,
+    notFound: error instanceof ApiError && error.status === 404,
+    back: stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined,
+    compare: rawId => setStack(s => [...s, rawId]),
+  }
+}
+
+// ── The sheet ───────────────────────────────────────────────────
+// The lookup sheet's shell (a portal over whatever opened it, the
+// dictionary's own chrome) holding that stack.
+export function GrammarLessonSheet({ id, initial, session, onClose, over = false }) {
+  const { t } = useLang()
+  const { here, point, error, notFound, back, compare } = useLessonStack(id, initial, session)
+  const dialogRef = useDialog(onClose, { capture: over })
 
   return createPortal(
     <div onClick={onClose} className={`dict-sheet__scrim${over ? ' dict-sheet__scrim--over' : ''}`}>
@@ -238,12 +253,31 @@ export function GrammarLessonSheet({ id, initial, session, onClose, over = false
             point={point}
             variant="sheet"
             onClose={onClose}
-            onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
-            onCompare={rawId => setStack(s => [...s, rawId])}
+            onBack={back}
+            onCompare={compare}
           />
         )}
       </div>
     </div>,
     document.body,
   )
+}
+
+// ── 机 — a lesson on the page, beside the points (plan 114) ──────────
+// The sheet's lesson without the sheet: the desk's grammar station sets
+// the level's points beside the open one's lesson, so a point is one
+// click (or ←/→) and there is no dialog, scrim or ✕ to close. The same
+// stack: a compare row still walks to its rival, ‹ back.
+export function GrammarLessonBody({ id, session }) {
+  const { t } = useLang()
+  const { point, error, notFound, back, compare } = useLessonStack(id, undefined, session)
+  if (!point && !error) return <div className="quiz-loading">{t.loading}</div>
+  if (!point) {
+    return (
+      <div className="dict-sheet__empty">
+        <div className="quiz-loading">{notFound ? t.notAvailable : t.loadError}</div>
+      </div>
+    )
+  }
+  return <GrammarLesson point={point} variant="sheet" onBack={back} onCompare={compare} />
 }

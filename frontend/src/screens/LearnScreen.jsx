@@ -10,7 +10,8 @@ import { beginDeparture } from '../stores/departure'
 import { playAnnouncement } from '../lib/audio'
 import { TRACKED_LINES as TRACKED, lineStops, stopsAround } from '../domain/lineProgress'
 import { currentKanaSet } from '../domain/kanaSets'
-import { Plate, DueChip, StopsFoot } from '../components/station/LinePlate'
+import { Plate, DueChip, StopsFoot, LineFoot } from '../components/station/LinePlate'
+import { useDesk } from '../hooks/useDesk'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 
@@ -65,6 +66,7 @@ export default function LearnScreen({ session }) {
   const { t } = useLang()
   const today = useTodaySummary().data
   const stats = useStats().data
+  const desk = useDesk()
   const profile = useProfileSummary()
   const riding = linesOrAll(profile?.lines)
   const here = profile?.jlptLevel ?? null
@@ -126,7 +128,12 @@ export default function LearnScreen({ session }) {
               // The guide (plan 100) points at the first plate and its
               // foot; the others say the same thing by looking the same.
               guide={i === 0 ? 'learn.plate' : undefined}
-              foot={<StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
+              // The phone's plate has room for the stop behind, the one
+              // reached and the one ahead; the desk's draws the whole
+              // line (plan 113).
+              foot={desk
+                ? <LineFoot stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
+                : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
               fill={stopsAround(stops).leg}
               onClick={() => depart(section, stopPath(section))}
             />

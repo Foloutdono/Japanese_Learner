@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { applyXpGain } from '../stores/profileSummary'
+import { startTally, countReview } from '../stores/runTally'
+import { peekEntry } from '../stores/deskEntry'
 
 // ── 出発合図 — when the next card is allowed to arrive ────────────
 // A rating does not advance the deck by itself. What the learner just
@@ -100,6 +102,9 @@ export function useReviewGates({ advance, sessionKey }) {
   // screens/KanaScreen.stuck.browser.test.jsx.
   // eslint-disable-next-line react-hooks/set-state-in-effect -- a key-keyed reset in shape, and the state it clears (`locked`, and the two celebrations) is also set mid-flow by review() below, independent of the session changing. A key-remounted child would have to take that whole flow with it, which is the machinery this hook exists to hold in one place.
   useEffect(() => { reset() }, [sessionKey, reset])
+  // The run's tally starts over with the session too (stores/runTally,
+  // the desk's session panel, plan 113).
+  useEffect(() => { startTally(sessionKey) }, [sessionKey])
   useEffect(() => clearSafety, [clearSafety])
 
   /**
@@ -121,6 +126,9 @@ export function useReviewGates({ advance, sessionKey }) {
     if (busyRef.current) return false
     busyRef.current = true
     setLocked(true)
+    // The entry the card was revealed on is the card, for the misses
+    // the desk's panel lists at the end (plan 114).
+    countReview({ quality, xp: preview?.xp_earned, entry: peekEntry() })
 
     const gates = gatesRef.current
     // Whatever is still open belongs to a review that is over, and the

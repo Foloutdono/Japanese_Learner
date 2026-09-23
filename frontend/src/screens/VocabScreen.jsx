@@ -10,8 +10,11 @@ import ThemeSelector from '../components/selection/ThemeSelector'
 import ThemeLevelSelector from '../components/selection/ThemeLevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
-import { tierLabelFor } from '../domain/tiers'
-import { themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
+import { tierLabelFor, tierAtSize } from '../domain/tiers'
+import { THEME_LEVELS, themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures, ScopeFigures } from '../components/selection/ModeFigures'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/vocab'
@@ -47,6 +50,7 @@ export default function VocabScreen({ session }) {
   const { pathname, search } = useLocation()
   const { level, tier, theme, themeLevel } = useParams()
   const [sp, setSp] = useSearchParams()
+  const desk = useDesk()
 
   const MODES = modePickerEntries(t, 'vocab')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'vocab'
@@ -63,7 +67,7 @@ export default function VocabScreen({ session }) {
   const jmdict = sp.get('domain') === 'jmdict'
   const freqDomain = jmdict ? 'vocab_jmdict' : 'vocab'
 
-  const leaveSources = <Leave onClick={() => navigate(BASE)}>{t.leaveSources}</Leave>
+  const leaveSources = <Leave to={BASE}>{t.leaveSources}</Leave>
 
   // ── The sources ──
   if (page === '') {
@@ -83,7 +87,7 @@ export default function VocabScreen({ session }) {
       <SelectionScreen
         title={t.vocabulary}
         sub={t.stationSources}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <ModeSelector modes={SOURCES} onSelect={key => navigate(`${BASE}/${key}`)} />
       </SelectionScreen>
@@ -94,7 +98,11 @@ export default function VocabScreen({ session }) {
   if (levelsPage) {
     return (
       <SelectionScreen title={t.vocabulary} sub={t.stationJlpt} aside={leaveSources}>
-        <LevelSelector source="vocab" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />
+        {/* On the desk the line stands beside a stop's platforms, so
+            the list alone opens on the learner's own stop (plan 113). */}
+        {desk
+          ? <LevelRedirect to={lvl => `${BASE}/${lvl}`} />
+          : <LevelSelector source="vocab" onSelect={lvl => navigate(`${BASE}/${lvl}`)} />}
       </SelectionScreen>
     )
   }
@@ -102,6 +110,9 @@ export default function VocabScreen({ session }) {
   // ── The tiers: by frequency, in either pool ──
   if (tiersPage) {
     const domainQuery = jmdict ? '&domain=jmdict' : ''
+    // On the desk the tiers stand beside a tier's platforms (below), so
+    // the list alone opens on the first of them, as the JLPT line does.
+    if (desk) return <Navigate replace to={`${BASE}/tier/1?size=${tierSize}${domainQuery}`} />
     return (
       <SelectionScreen title={t.vocabulary} sub={t.byFrequencyShort} aside={leaveSources}>
         <Seg
@@ -136,11 +147,14 @@ export default function VocabScreen({ session }) {
 
   // ── A theme's own line: its four frequency bands ──
   if (theme && !themeLevel) {
+    // The desk draws the bands beside a band's platforms (below): the
+    // line alone opens on its first band, the commonest words.
+    if (desk) return <Navigate replace to={`${BASE}/theme/${theme}/level/${THEME_LEVELS[0]}`} />
     return (
       <SelectionScreen
         title={t.vocabulary}
         sub={themeLabelFor(t, theme)}
-        aside={<Leave onClick={() => navigate(`${BASE}/themes`)}>{t.leaveThemes}</Leave>}
+        aside={<Leave to={`${BASE}/themes`}>{t.leaveThemes}</Leave>}
       >
         <ThemeLevelSelector
           session={session}
@@ -169,11 +183,96 @@ export default function VocabScreen({ session }) {
   const backLabel = level ? t.leaveLevels : theme ? t.leaveThemeLevels : t.leaveTiers
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
+
+  // ── 机 — the line beside its platforms (plan 113) ──
+  // On the desk a level's platforms stand beside the JLPT line itself
+  // (StationSplit): another stop swaps the platforms in place, and each
+  // platform carries its own figures. The way out is the sources.
+  if (desk && level) {
+    const figured = modes.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="vocab" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen title={t.vocabulary} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="vocab" selected={level} onSelect={lvl => navigate(`${BASE}/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
+  // ── 机 — a theme's bands beside a band's platforms (plan 114) ──
+  // The same split as the JLPT line's, for the line a theme is: another
+  // band swaps the platforms in place, and each platform carries the
+  // band's own figures, from the stats route its run opens on. The way
+  // out is the themes, the one screen left between here and the sources.
+  if (desk && theme) {
+    const figured = modes.map(m => ({
+      ...m,
+      aside: <ScopeFigures session={session} url={`/api/vocab/theme/${theme}/stats?level=${themeLevel}&mode=${m.key}`} />,
+    }))
+    return (
+      <SelectionScreen title={t.vocabulary} sub={sub} aside={<Leave to={`${BASE}/themes`}>{t.leaveThemes}</Leave>}>
+        <StationSplit
+          label={themeLabelFor(t, theme)}
+          list={<ThemeLevelSelector session={session} theme={theme} selected={themeLevel} onSelect={lvl => navigate(`${BASE}/theme/${theme}/level/${lvl}`, { replace: true })} />}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
+  // ── 机 — the tiers beside a tier's platforms (plan 114) ──
+  // The pool and the size stand over the list they change. Another
+  // pool is another line, so it opens on its first tier; another size
+  // keeps the learner's place (domain/tiers' tierAtSize).
+  if (desk && tier) {
+    const open = Number(tier)
+    const at = (n, size = tierSize, pool = jmdict) => `${BASE}/tier/${n}?size=${size}${pool ? '&domain=jmdict' : ''}`
+    const figured = modes.map(m => ({
+      ...m,
+      aside: <ScopeFigures session={session} url={`/api/frequency/${freqDomain}/stats?tier=${open}&tier_size=${tierSize}&mode=${m.key}`} />,
+    }))
+    return (
+      <SelectionScreen title={t.vocabulary} sub={sub} aside={leaveSources}>
+        <StationSplit
+          label={t.byFrequencyShort}
+          list={(
+            <>
+              <Seg
+                full
+                label={t.byFrequencyShort}
+                value={jmdict ? 'jmdict' : 'vocab'}
+                onChange={key => navigate(at(1, tierSize, key === 'jmdict'), { replace: true })}
+                options={[
+                  { key: 'vocab', label: t.freqDomainDeck },
+                  { key: 'jmdict', label: t.freqDomainJmdict },
+                ]}
+              />
+              <TierSelector
+                domain={freqDomain}
+                session={session}
+                tierSize={tierSize}
+                selected={open}
+                onTierSize={size => navigate(at(tierAtSize(open, tierSize, size), size), { replace: true })}
+                onSelect={n => navigate(at(n), { replace: true })}
+              />
+            </>
+          )}
+        >
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.vocabulary}
       sub={sub}
-      aside={<Leave onClick={() => navigate(back)}>{backLabel}</Leave>}
+      aside={<Leave to={back}>{backLabel}</Leave>}
     >
       <ModeSelector modes={modes} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
     </SelectionScreen>

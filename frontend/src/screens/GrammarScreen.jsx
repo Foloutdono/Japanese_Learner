@@ -10,8 +10,13 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import LevelSelector from '../components/selection/LevelSelector'
 import ModeSelector from '../components/selection/ModeSelector'
 import GrammarIndex from '../components/selection/GrammarIndex'
-import { GrammarLessonSheet } from '../components/study/GrammarLesson'
+import { GrammarLessonSheet, GrammarLessonBody } from '../components/study/GrammarLesson'
+import { Loading } from '../components/ui/Loading'
+import { dialogOpen } from '../lib/dialogOpen'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
+import { ModeFigures } from '../components/selection/ModeFigures'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -36,6 +41,7 @@ export default function GrammarScreen({ session }) {
   const { level } = useParams()
   const [sp, setSp] = useSearchParams()
   const [index, setIndex] = useState(null)
+  const desk = useDesk()
 
   const MODES = modePickerEntries(t, 'grammar')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'grammar'
@@ -70,9 +76,13 @@ export default function GrammarScreen({ session }) {
       <SelectionScreen
         title={t.grammarTitle}
         sub={t.stationJlpt}
-        aside={<Leave onClick={() => navigate('/learn')}>{t.tabLearn}</Leave>}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
-        <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />
+        {/* On the desk the line stands beside a level's platforms, so
+            the list alone opens on the learner's own level (plan 113). */}
+        {desk
+          ? <LevelRedirect to={lvl => `/learn/grammar/${lvl}`} />
+          : <LevelSelector source="grammar" onSelect={lvl => navigate(`/learn/grammar/${lvl}`)} />}
       </SelectionScreen>
     )
   }
@@ -94,6 +104,72 @@ export default function GrammarScreen({ session }) {
     <GrammarLessonSheet key={point} id={point} session={session} onClose={closePoint} />
   )
 
+  // ── 机 — the line beside a level (plan 113) ──
+  // On the desk the JLPT line stands beside the level's page — its
+  // points door and platforms — and another level swaps the page in
+  // place. Each platform carries its figures.
+  //
+  // The points (plan 114) are the index beside the open point's lesson:
+  // one click or ←/→ per point, where the phone opens each in a sheet
+  // over the index. The bare index opens on the first point not yet
+  // mastered; a point asked for from the level page opens the same way.
+  if (desk && (browsing || point) && (!index || index.points?.length)) {
+    if (!index) return <SelectionScreen title={t.grammarTitle} sub={`${level} · ${t.glPoints}`}><Loading /></SelectionScreen>
+    const points = index.points
+    const open = points.find(p => p.raw_id === point)
+    if (!browsing || !open) {
+      const to = open ? point : (points.find(p => p.stage !== 'mastered') ?? points[0]).raw_id
+      return <Navigate replace to={`/learn/grammar/${level}?index=1&point=${encodeURIComponent(to)}`} />
+    }
+    const walk = rawId => { setSp({ index: '1', point: rawId }, { replace: true }); window.scrollTo(0, 0) }
+    return (
+      <SelectionScreen
+        title={t.grammarTitle}
+        sub={`${level} · ${t.glPoints}`}
+        aside={<Leave onClick={() => swap({})}>{level}</Leave>}
+      >
+        <StationSplit label={t.glPoints} list={<GrammarIndex points={points} selected={point} onOpen={walk} />}>
+          {open && (
+            <div className="desk-lesson">
+              <GrammarLessonBody key={point} id={point} session={session} />
+            </div>
+          )}
+        </StationSplit>
+        <PointKeys points={points} point={point} onWalk={walk} />
+      </SelectionScreen>
+    )
+  }
+
+  if (desk) {
+    const figured = offered.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="grammar" deck={level} mode={m.key} /> }))
+    return (
+      <SelectionScreen
+        title={t.grammarTitle}
+        sub={`${level} · ${t[`levelHint${level}`] ?? ''}`}
+        aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
+      >
+        <StationSplit
+          label={t.stationJlpt}
+          list={<LevelSelector source="grammar" selected={level} onSelect={lvl => navigate(`/learn/grammar/${lvl}`, { replace: true })} />}
+        >
+          {index && index.total > 0 && (
+            <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
+              <span className="rad-door__body">
+                <span className="rad-door__head">
+                  <span className="rad-door__fig"><b>{index.learned}</b>/ {index.total}</span>
+                  {startedNote && <span className="rad-door__started">{startedNote}</span>}
+                </span>
+                <span className="rad-door__label">{t.glPoints}</span>
+              </span>
+              <ChevronIcon direction="right" size={16} className="rad-door__chev" />
+            </button>
+          )}
+          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   if (browsing) {
     return (
       <SelectionScreen
@@ -111,7 +187,7 @@ export default function GrammarScreen({ session }) {
     <SelectionScreen
       title={t.grammarTitle}
       sub={`${level} · ${t[`levelHint${level}`] ?? ''}`}
-      aside={<Leave onClick={() => navigate('/learn/grammar')}>{t.leaveLevels}</Leave>}
+      aside={<Leave to={'/learn/grammar'}>{t.leaveLevels}</Leave>}
     >
       {/* The points as a record that opens: learned over total, and
           started while the two disagree — the radical lesson's door,
@@ -132,4 +208,29 @@ export default function GrammarScreen({ session }) {
       {sheet}
     </SelectionScreen>
   )
+}
+
+// ←/→ walk the level's points on the desk, the lesson following — the
+// dictionary's walk (screens/DictionaryScreen.jsx) for the grammar
+// index. Not while typing or under a dialog. Renders nothing.
+function PointKeys({ points, point, onWalk }) {
+  useEffect(() => {
+    const onKey = e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return
+      if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
+      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName) || e.target?.isContentEditable) return
+      const at = points.findIndex(p => p.raw_id === point)
+      const next = points[Math.min(points.length - 1, Math.max(0, at + (e.key === 'ArrowRight' ? 1 : -1)))]
+      if (!next || next.raw_id === point) return
+      e.preventDefault()
+      onWalk(next.raw_id)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [points, point, onWalk])
+  // The open row kept in view in the list's own scroll.
+  useEffect(() => {
+    document.querySelector('.gl-index__row[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [point])
+  return null
 }

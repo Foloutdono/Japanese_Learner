@@ -6,6 +6,7 @@ import { track } from '../../lib/track'
 import { stopwatch } from '../../lib/dwell'
 import { playClick } from '../../lib/audio'
 import { GUIDES } from './guides'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── 案内 — the guide over a gate (plan 100) ────────────────────────
 // A spotlight on the live screen and one sentence beside it, stop by
@@ -35,11 +36,16 @@ function rectOf(anchor) {
   if (!el) return null
   const r = el.getBoundingClientRect()
   if (r.width === 0 && r.height === 0) return null
-  return { el, top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom }
+  // 机 (plan 114): an anchor in the desk's rail has its note to its
+  // right, one in a side column to its left — beside the thing it is
+  // about, never a screen's width away over the page.
+  const beside = el.closest('.desk-rail') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
+  return { el, top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom, beside }
 }
 
 export function Guide({ gate, onEnd }) {
   const { t } = useLang()
+  const desk = useDesk()
   // Which stops have an anchor on the screen, decided once the guide
   // is in the DOM: a screen that mounts the guide in the same commit
   // as its blocks has no rects to read during render, and a guide that
@@ -113,7 +119,7 @@ export function Guide({ gate, onEnd }) {
       raf = requestAnimationFrame(() => {
         const r = rectOf(stop.anchor)
         // eslint-disable-next-line react-hooks/set-state-in-effect -- a measurement of the DOM after layout; there is no render-time source for a rect.
-        setRect(r ? { top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom } : null)
+        setRect(r ? { top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom, beside: r.beside } : null)
       })
     }
     update()
@@ -138,11 +144,26 @@ export function Guide({ gate, onEnd }) {
   if (over || !stop || !rect) return null
 
   const last = index === stops.length - 1
-  const lower = stop.place === 'above' || rect.top + rect.height / 2 > window.innerHeight / 2
-  const pos = lower
-    ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
-    : { top: rect.bottom + PAD + GAP }
-  const text = t[`guide${stop.key}`]
+  // `above` is the tab bar's stop: on the phone the bar is the bottom
+  // edge and the note rests on it. On the desk (plan 112) the same
+  // anchor is the rail's list of gates, which starts at the top of the
+  // screen — a note "above" it would be off the screen, so there it
+  // takes the ordinary rule and hangs under it.
+  const lower = (stop.place === 'above' && rect.top > window.innerHeight / 2)
+    || rect.top + rect.height / 2 > window.innerHeight / 2
+  const beside = desk ? rect.beside : null
+  const pos = beside
+    ? {
+      ...(lower ? { bottom: Math.max(0, window.innerHeight - rect.bottom - PAD) } : { top: rect.top - PAD }),
+      ...(beside === 'right'
+        ? { left: rect.left + rect.width + PAD + GAP }
+        : { left: 'auto', right: window.innerWidth - rect.left + PAD + GAP }),
+    }
+    : lower
+      ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
+      : { top: rect.bottom + PAD + GAP }
+  // The desk's own wording where a note teaches a key (plan 114).
+  const text = (desk && t[`guide${stop.key}Desk`]) || t[`guide${stop.key}`]
 
   function next() {
     playClick()
@@ -169,7 +190,7 @@ export function Guide({ gate, onEnd }) {
         className="guide-callout guide-callout--live"
         tabIndex={-1}
         style={pos}
-        data-place={lower ? 'above' : 'below'}
+        data-place={beside ?? (lower ? 'above' : 'below')}
       >
         <p className="guide-callout__text">{text}</p>
         <div className="guide-callout__foot">

@@ -15,6 +15,10 @@ card's stage)
 and the tab bar's icons. The bilingual JP + Latin pairing the desktop chrome
 used retires for the mobile chrome.
 
+At 1100px and up the app draws its second chrome, the desk (plan 112,
+ADR 0018); its class map is `../desk/README.md`. Nothing in it reaches
+the widths this canvas covers.
+
 ## The backbone (plan 068)
 
 | Canvas class | `index.css` block | Component |

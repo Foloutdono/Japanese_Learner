@@ -13,6 +13,8 @@ import { listExams } from '../exam/examService'
 import { LEVELS } from '../domain/sentenceSource'
 import { KIND_ORDER, kindMeta } from '../exam/examKinds'
 import { PageIcon } from '../components/ui/Icons'
+import { useDesk } from '../hooks/useDesk'
+import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
 
 // Route: /practice/exam
 // Level first, then which paper — the same two-step every other study
@@ -51,13 +53,21 @@ import { PageIcon } from '../components/ui/Icons'
 export default function ExamScreen({ session }) {
   const navigate = useNavigate()
   const { t } = useLang()
-  const [sp] = useSearchParams()
+  const [sp, setSp] = useSearchParams()
   const [exams, setExams] = useState(null)
+  const desk = useDesk()
   // ?level=N4 arrives from the practice gate, whose platform rows carry
   // the five grades (screens/PracticeScreen.jsx): the chip opens that
   // grade's papers rather than the list of grades the learner just
   // picked from. Anything that is not a grade is simply the list.
-  const [level, setLevel] = useState(() => (LEVELS.includes(sp.get('level')) ? sp.get('level') : null))
+  //
+  // The level lives in the URL rather than in state (plan 113): as state
+  // it survived a second visit to /practice/exam — the rail's 模試 link,
+  // the browser's own history — so the way back to the grades was only
+  // the bar's ‹. Replaced, not pushed, so the history a phone walks back
+  // through is the one it always was.
+  const level = LEVELS.includes(sp.get('level')) ? sp.get('level') : null
+  const setLevel = lvl => setSp(lvl ? { level: lvl } : {}, { replace: true })
 
   useEffect(() => {
     let alive = true
@@ -67,13 +77,28 @@ export default function ExamScreen({ session }) {
     return () => { alive = false }
   }, [session])
 
+  // ── 机 — the grades beside a grade's papers (plan 113) ──
+  // On the desk the list of grades opens on the learner's own and stands
+  // beside that grade's papers; another grade swaps the papers in place.
+  if (desk && !level && exams?.length > 0) {
+    return (
+      <SelectionScreen
+        title={t.examTitle}
+        sub={t.stationJlpt}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
+      >
+        <LevelRedirect to={lvl => `/practice/exam?level=${lvl}`} />
+      </SelectionScreen>
+    )
+  }
+
   // ── Level ──
   if (!level) {
     return (
       <SelectionScreen
         title={t.examTitle}
         sub={t.stationJlpt}
-        aside={<Leave onClick={() => navigate('/practice')}>{t.tabPractice}</Leave>}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
       >
         {exams === null && <Loading />}
         {exams?.length === 0 && (
@@ -120,19 +145,37 @@ export default function ExamScreen({ session }) {
       }
     })
 
+  const papers = (
+    <ModeSelector
+      modes={modes}
+      onSelect={examId => {
+        playUi('click-screen-selection')
+        board(() => navigate(`/practice/exam/${examId}`))
+      }}
+    />
+  )
+
+  if (desk) {
+    return (
+      <SelectionScreen
+        title={t.examTitle}
+        sub={level}
+        aside={<Leave to={'/practice'}>{t.tabPractice}</Leave>}
+      >
+        <StationSplit label={t.stationJlpt} list={<LevelSelector selected={level} onSelect={setLevel} />}>
+          {exams === null ? <Loading /> : papers}
+        </StationSplit>
+      </SelectionScreen>
+    )
+  }
+
   return (
     <SelectionScreen
       title={t.examTitle}
       sub={level}
       aside={<Leave onClick={() => setLevel(null)}>{t.leaveLevels}</Leave>}
     >
-      <ModeSelector
-        modes={modes}
-        onSelect={examId => {
-          playUi('click-screen-selection')
-          board(() => navigate(`/practice/exam/${examId}`))
-        }}
-      />
+      {papers}
     </SelectionScreen>
   )
 }
