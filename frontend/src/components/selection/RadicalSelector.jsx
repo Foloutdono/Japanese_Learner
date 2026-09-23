@@ -33,7 +33,7 @@ import { firstRadical } from '../../domain/radicals'
  *   onSelect(number)
  *   stroke / onStroke — the page, carried in the station's URL so the
  *               way back from a lesson lands on the page it left
- *   selected  — the desk's (plan 117): the radical whose lesson stands
+ *   selected  — the desk's (plan 118): the radical whose lesson stands
  *               beside the index, marked, its page the one opened
  */
 export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected }) {
@@ -64,7 +64,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke, s
   )
 }
 
-// ── 机 — the bare index opens on a radical (plan 117) ─────────────────
+// ── 机 — the bare index opens on a radical (plan 118) ─────────────────
 // On the desk the index stands beside every radical's page, so the page
 // that was only the index has nothing left to show on its own: it opens
 // on a radical, the way the frequency tiers open on the first — the

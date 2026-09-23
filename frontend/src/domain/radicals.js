@@ -5,7 +5,7 @@
 // kanji and 夂 one — with Kangxi order between equals.
 export const byRank = (a, b) => b.count - a.count || a.number - b.number
 
-// ── The radical the desk's bare index opens on (plan 117) ────
+// ── The radical the desk's bare index opens on (plan 118) ────
 // On the desk the index stands beside every radical's page, so the page
 // that was only the index opens on a radical: the first of the page it
 // was left on (?stroke=), else of the first page, in the order above —
