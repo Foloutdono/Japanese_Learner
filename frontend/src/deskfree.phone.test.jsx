@@ -454,3 +454,59 @@ describe('the library and Browse (plan 114, P5)', () => {
     expect(document.querySelector('.desk-browse')).toBeNull()
   })
 })
+
+// ── plan 114, P6 — the analyser and the dictionary a phone keeps ──
+// On the desk the analyser's result carries its dictionary in a column,
+// its way back is a crumb, its intake stands beside its history, and the
+// dictionary offers to analyse a sentence it has no entry for. A phone
+// keeps the sheet over the stage, the way back in the head, the history
+// under the intake, the legend, and a plain "no results".
+describe('the analyser and the dictionary (plan 114, P6)', () => {
+  const tok = (surface, kanji, kana) => ({
+    surface, pos: 'noun', furigana: [{ text: surface }], kanji_matches: [],
+    vocab_match: { entry: { kanji, kana, meaning: 'station' }, stats: { status: 'learning' }, level: 'N5', raw_id: `vocab_N5_${kanji}_${kana}` },
+  })
+  const SENTENCES = [{ text: '駅で待つ', grammar: [], unknown_count: 0, available: true, level: 'N5', off_deck_count: 0, tokens: [tok('駅', '駅', 'えき')] }]
+  const type = (el, text) => {
+    Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, text)
+    el.dispatchEvent(new Event('input', { bubbles: true }))
+  }
+
+  it('keeps the sheet, the head\'s way back, the legend and the history under the intake', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async url => (String(url).startsWith('/api/phrase/analyze') ? { sentences: SENTENCES, truncated: 0 } : {}))
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [{ type: 'vocab', kanji: '駅', kana: 'えき', meaning: 'station', senses: [], examples: [], status: { status: 'new' } }], total: 1 }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: AnalyzerScreen } = await import('./screens/AnalyzerScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary/analyzer']}><AnalyzerScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(100)
+    expect(document.querySelector('.desk-intake, .desk-side')).toBeNull()
+    expect(document.querySelector('main > .anl-history')).not.toBeNull()
+    expect(document.querySelector('.anl-action .desk-kbd, [aria-keyshortcuts]')).toBeNull()
+    type(document.querySelector('textarea'), '駅で待つ')
+    document.querySelector('.anl-action').click()
+    await settle(300)
+    expect(document.querySelector('.anl-head .stage__leave')).not.toBeNull()
+    expect(document.querySelector('.desk-crumb, .desk-anl-dock')).toBeNull()
+    expect(document.querySelector('.anl-kbd')).not.toBeNull()
+    document.querySelector('.token-card__surface--door').click()
+    await settle(250)
+    expect(document.querySelector('[role="dialog"]')).not.toBeNull()
+    apiJson.mockReset()
+  })
+
+  it('keeps "no results" plain for a sentence the dictionary cannot find', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [], total: 0, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(200)
+    type(document.querySelector('.dictionary input:not([type]), .dictionary input[type="text"], .dictionary input[type="search"]'), '駅で待つ')
+    await settle(700)
+    expect(document.querySelector('.empty')).not.toBeNull()
+    expect(document.querySelector('.empty__action')).toBeNull()
+    apiJson.mockReset()
+  })
+})

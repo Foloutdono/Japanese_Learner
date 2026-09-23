@@ -38,7 +38,7 @@ function stageOf(status) {
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { FuriganaParts } from '../components/study/Readings'
 import { pickPlateReadings } from '../domain/readingPick'
-import { Leave } from '../components/chrome/Bar'
+import { Leave, DeskCrumb } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { isDesk, useDesk } from '../hooks/useDesk'
@@ -786,15 +786,21 @@ export default function DictionaryScreen({ session }) {
 				const r = radicalByNumber[selectedRadical]
 				const strokes = r ? `${r.strokes} ${r.strokes === 1 ? t.dictStrokeSingular : t.dictStrokesPlural}` : null
 				const number = t.dictRadicalNumber ? t.dictRadicalNumber(selectedRadical) : `radical #${selectedRadical}`
+				// On the desk the way back is a crumb over the header
+				// (plan 114), as it is over every other page.
+				const back = <Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
 				return (
+					<>
+					{desk && <DeskCrumb leave={back} />}
 					<div className="dict-radical-header">
-						<Leave onClick={backToRadicalGrid}>{t.dictBackToRadicals}</Leave>
+						{desk ? null : back}
 						<span className="dict-radical-header__mark">
 							<span className="dict-radical-header__glyph" lang="ja">{r?.char ?? '?'}</span>
 							<span className="dict-radical-header__cap">{strokes ? `${number} · ${strokes}` : number}</span>
 							{r && <span className="dict-radical-header__tally">{r.count}</span>}
 						</span>
 					</div>
+					</>
 				)
 			})()}
 
@@ -1011,6 +1017,17 @@ function ResultsSection({
 	selected, setSelected, sentinelRef, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick,
 	onKanaClick, onReview, mining, favorites, shelf = false, t,
 }) {
+	const desk = useDesk()
+	const navigate = useNavigate()
+	// 机 (plan 114): a search that finds nothing is often not a word but
+	// a sentence pasted in, and the analyser is the tool for that. On
+	// the desk, a query of two Japanese characters or more that found no
+	// entry offers to take it there — the draft filled and analysed on
+	// arrival (AnalyzerScreen's handoff) — rather than three steps on
+	// two screens.
+	const typed = query.trim()
+	const analysable = desk && !shelf && /[\u3040-\u30ff\u3400-\u9fff]/.test(typed) && [...typed].length >= 2
+	const analyseQuery = () => navigate('/dictionary/analyzer', { state: { draft: typed } })
 
 	return (
 		<>
@@ -1022,7 +1039,7 @@ function ResultsSection({
 			{!loading && results.length === 0 && (
 				shelf
 					? <Empty icon={<StarIcon size={28} filled={false} />} message={t.dictFavoritesEmpty} hint={t.dictFavoritesHint} />
-					: <Empty icon={null} message={`${t.noResults} « ${query} »`} />
+					: <Empty icon={null} message={`${t.noResults} « ${query} »`} action={analysable ? { label: t.dictAnalyseSentence, onClick: analyseQuery } : undefined} />
 			)}
 
 			{!loading && results.length > 0 && (

@@ -677,6 +677,8 @@ const phraseAnalyzer = {
   kbdToken:            'mot',
   kbdSentence:         'phrase',
   kbdPlay:             'lecture',
+  dockNoEntry:         'Pas de fiche de dictionnaire pour ce mot.',
+  dictAnalyseSentence: 'Analyser cette phrase',
   windowWhole:         'toute la vidéo',
   windowSpan:          m => `${m} sélectionnées`,
   windowBackwards:     'La fin doit venir après le début.',

@@ -20794,6 +20794,49 @@ a.slip__act { text-decoration: none; }
     order: 1;
     flex-basis: var(--desk-side-w);
   }
+  /* The route map steps aside, kept, while the dock holds its column
+     (plan 114, components/analysis/AnalyzerDock). */
+  .phone--desk .anl-railcol[hidden] { display: none; }
+  .desk-anl-dock {
+    order: 1;
+    position: sticky;
+    top: var(--sp-6);
+    display: flex;
+    flex: 0 0 var(--desk-side-w);
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .desk-anl-dock__keys {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  /* The intake beside its history (plan 114). */
+  .desk-intake {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-intake__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* The kana charts wrap to a second row rather than scroll sideways in
+     the dictionary's column beside its dock. */
+  .syllabary-chart-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
 
   /* ── the gates, laid out for the width ──
      Learn and Practice hang five plates each. A column of five at the

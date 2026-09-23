@@ -47,7 +47,6 @@ import { ChevronIcon } from '../ui/Icons'
 // eye looks for "where this sits".
 export function Bar({ code, title, sub, aside, color, register = false, as: Title = 'h1', className = '' }) {
   const desk = useDesk()
-  const lang = useLang()
   const leave = desk && isValidElement(aside) && aside.type === Leave ? aside : null
   const up = leave && !(leave.props.to !== undefined && onDeskRail(leave.props.to)) ? leave : null
   const shown = leave ? null : aside
@@ -55,11 +54,7 @@ export function Bar({ code, title, sub, aside, color, register = false, as: Titl
   const names = ['bar__names', sub && shown ? 'bar__names--stacked' : ''].filter(Boolean).join(' ')
   return (
     <div className={classes} style={color ? { '--line-color': color } : undefined}>
-      {up && (
-        <nav className="desk-crumb" aria-label={lang?.t.deskWayUp}>
-          {cloneElement(up, { className: 'desk-crumb__up' })}
-        </nav>
-      )}
+      {up && <DeskCrumb leave={up} />}
       <div className="bar__row">
         {code && <span className="bar__roundel" aria-hidden="true">{code}</span>}
         <span className={names}>
@@ -80,6 +75,20 @@ export function Bar({ code, title, sub, aside, color, register = false, as: Titl
 // `to`, a path, which also tells the desk's Bar where it leads; one
 // that is a state (back to a list the screen holds itself) keeps
 // `onClick`.
+// ── 机 — the way up, as a crumb (plan 113; its own since plan 114) ──
+// A <Leave> drawn over the page it leaves, in the caption register: the
+// Bar draws one for its own way out, and a screen whose way out is not
+// in a Bar — the analyser's result head, the dictionary's radical
+// header — draws one itself, on the desk only.
+export function DeskCrumb({ leave }) {
+  const lang = useLang()
+  return (
+    <nav className="desk-crumb" aria-label={lang?.t.deskWayUp}>
+      {cloneElement(leave, { className: 'desk-crumb__up' })}
+    </nav>
+  )
+}
+
 export function Leave({ onClick, to, children, className = '' }) {
   if (to !== undefined) return <LeaveTo to={to} className={className}>{children}</LeaveTo>
   return <LeaveButton onClick={onClick} className={className}>{children}</LeaveButton>
