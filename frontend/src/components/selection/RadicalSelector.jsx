@@ -1,9 +1,12 @@
 import { useEffect, useState } from 'react'
+import { Navigate } from 'react-router-dom'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
 import Empty from '../ui/Empty'
+import { Loading } from '../ui/Loading'
 import { RadicalGrid } from '../dictionary/RadicalIndex'
+import { firstRadical } from '../../domain/radicals'
 
 /**
  * RadicalSelector — 部首, as a way into the kanji (plan 086).
@@ -30,23 +33,12 @@ import { RadicalGrid } from '../dictionary/RadicalIndex'
  *   onSelect(number)
  *   stroke / onStroke — the page, carried in the station's URL so the
  *               way back from a lesson lands on the page it left
+ *   selected  — the desk's (plan 115): the radical whose lesson stands
+ *               beside the index, marked, its page the one opened
  */
-export default function RadicalSelector({ session, onSelect, stroke, onStroke }) {
-  const { t, lang } = useLang()
-  const [groups, setGroups] = useState(null)
-  const [failed, setFailed] = useState(false)
-
-  useEffect(() => {
-    let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces; not an id-keyed reset.
-    setGroups(null)
-    setFailed(false)
-    apiFetch(`/api/kanji/radicals?lang=${lang}`, session)
-      .then(r => r.json())
-      .then(data => { if (!cancelled) setGroups(data.groups ?? []) })
-      .catch(() => { if (!cancelled) setFailed(true) })
-    return () => { cancelled = true }
-  }, [session, lang])
+export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected }) {
+  const { t } = useLang()
+  const { groups, failed } = useRadicalGroups(session)
 
   if (failed) return <Empty message={t.loadError} />
 
@@ -66,7 +58,47 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke })
       order="rank"
       stroke={stroke}
       onStroke={onStroke}
+      selected={selected}
       t={t}
     />
   )
+}
+
+// ── 机 — the bare index opens on a radical (plan 115) ─────────────────
+// On the desk the index stands beside every radical's page, so the page
+// that was only the index has nothing left to show on its own: it opens
+// on a radical, the way the frequency tiers open on the first — the
+// biggest family of the page it was left on (domain/radicals.js's
+// firstRadical). It waits for the index rather than guessing, as
+// StationSplit's LevelRedirect waits for the level.
+export function RadicalRedirect({ session, stroke, to }) {
+  const { t } = useLang()
+  const { groups, failed } = useRadicalGroups(session)
+  if (failed) return <Empty message={t.loadError} />
+  if (!groups) return <Loading />
+  const first = firstRadical(groups, stroke)
+  if (first == null) return <Empty message={t.loadError} />
+  return <Navigate replace to={to(first)} />
+}
+
+// The course's radicals, a page per stroke count, in the learner's
+// language — the index's one read.
+function useRadicalGroups(session) {
+  const { lang } = useLang()
+  const [groups, setGroups] = useState(null)
+  const [failed, setFailed] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- start-of-fetch reset that must land with the fetch it announces; not an id-keyed reset.
+    setGroups(null)
+    setFailed(false)
+    apiFetch(`/api/kanji/radicals?lang=${lang}`, session)
+      .then(r => r.json())
+      .then(data => { if (!cancelled) setGroups(data.groups ?? []) })
+      .catch(() => { if (!cancelled) setFailed(true) })
+    return () => { cancelled = true }
+  }, [session, lang])
+
+  return { groups, failed }
 }

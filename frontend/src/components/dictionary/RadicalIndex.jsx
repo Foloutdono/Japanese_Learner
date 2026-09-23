@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Loading } from '../ui/Loading'
 import { ChevronIcon } from '../ui/Icons'
+import { byRank } from '../../domain/radicals'
 
 // ── 部首索引 — the radical index, shared ─────────────────────
 // Lifted out of DictionaryScreen.jsx (plan 086) because the kanji
@@ -157,13 +158,17 @@ function dictionaryTile(r) {
 // catalogue tile's instrument (DESIGN.md, "the stage is that card's
 // own bottom edge"), and the difference between a number you read and
 // a thing you see on a page of thirty-seven of them.
-export function RadicalTile({ glyph, count, sub, learned, title, started, onPick }) {
+//
+// `current` is the desk's (plan 115): the radical whose page stands
+// beside the index, marked the way an open stop is.
+export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick }) {
   const done = learned != null && count > 0 ? Math.min(1, learned / count) : null
   return (
     <button
       type="button"
       onClick={onPick}
       title={title}
+      aria-current={current ? 'page' : undefined}
       className={`radical-tile${started ? ' radical-tile--started' : ''}`}
     >
       <span className="radical-tile__char" lang="ja">{glyph}</span>
@@ -219,23 +224,37 @@ const columns = (n, labelled) => Math.min(labelled ? 3 : 4, Math.max(1, Math.cei
  *   stroke / onStroke — the page, controlled by the caller when it
  *              carries the page in its URL (so leaving a lesson lands
  *              back on the page it was opened from); local otherwise.
+ *   selected — the desk's (plan 115): the radical whose lesson stands
+ *              beside the index. Its tile is marked, the index opens on
+ *              the page it is on rather than on the first, and the tile
+ *              is kept in view in the list's own scroll.
  *   t        — the string table
  */
-export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index' }) {
+export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index', selected }) {
   const [ownStroke, setOwnStroke] = useState(null)
+  const page = useRef(null)
   const stroke = strokeProp ?? ownStroke
   const setStroke = n => { if (onStroke) onStroke(n); else setOwnStroke(n) }
+
+  // The open radical's tile, kept in view in the column it scrolls in —
+  // the grammar index does the same for its open row. Nothing without
+  // a selection, which is every caller but the desk's.
+  useEffect(() => {
+    if (selected == null) return
+    page.current?.querySelector('[aria-current="page"]')?.scrollIntoView?.({ block: 'nearest' })
+  }, [selected, groups])
 
   if (loading || !groups) {
     return <Loading />
   }
   if (!groups.length) return null
 
-  const index = Math.max(0, groups.findIndex(g => g.stroke_count === stroke))
-  const group = groups[index]
+  let index = groups.findIndex(g => g.stroke_count === stroke)
+  if (index < 0 && selected != null) index = groups.findIndex(g => g.radicals.some(r => r.number === selected))
+  const group = groups[Math.max(0, index)]
 
   const rows = group.radicals.map(r => ({ number: r.number, ...tile(r) }))
-  if (order === 'rank') rows.sort((a, b) => b.count - a.count || a.number - b.number)
+  if (order === 'rank') rows.sort(byRank)
 
   // A tile that carries a meaning is chosen ON that meaning, so it
   // needs the width to print one — four to a phone rather than six,
@@ -254,6 +273,7 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
           and lights the one being read, and the section's aria-label
           says it for a reader. */}
       <section
+        ref={page}
         className="radical-page"
         data-stroke={group.stroke_count}
         data-fill={short ? 'short' : undefined}
@@ -261,7 +281,7 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
         aria-label={strokes(group.stroke_count, t)}
       >
         <div className={`radical-page__grid${labelled ? ' radical-page__grid--labelled' : ''}`}>
-          {rows.map(r => <RadicalTile key={r.number} {...r} onPick={() => onPick(r.number)} />)}
+          {rows.map(r => <RadicalTile key={r.number} {...r} current={selected != null && r.number === selected} onPick={() => onPick(r.number)} />)}
         </div>
       </section>
     </div>

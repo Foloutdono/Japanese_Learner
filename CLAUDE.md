@@ -238,7 +238,20 @@ runtime purpose. Two consequences worth knowing:
   `index.css`, one desktop test file a phase and the phone's side in further
   blocks of `src/deskfree.phone.test.jsx` (DESIGN.md, "The desk";
   `docs/design/desk/README.md`; ADR 0018).
-  When starting a new wave, begin at **115** or higher, and check
+  **115** is a radical's page on the desk as two panes, which plan 114
+  deferred: the radicals index beside the lesson and its platforms, the
+  open radical in gold and each platform figured from the family's own
+  stats; another radical swaps the page by replacing the URL, the family's
+  door swaps the index for the family in the list and back, and the bare
+  index opens on its page's biggest family (cited in
+  `screens/KanjiScreen.jsx`, `components/selection/RadicalLesson.jsx`'s
+  `RadicalFamily`/`RadicalFamilyList`,
+  `components/selection/RadicalSelector.jsx`'s `RadicalRedirect`,
+  `components/dictionary/RadicalIndex.jsx`'s `selected`,
+  `domain/radicals.js`, `index.css`, `src/radicals.desktop.test.jsx` and
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  When starting a new wave, begin at **116** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

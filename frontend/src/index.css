@@ -21275,6 +21275,9 @@ a.slip__act { text-decoration: none; }
      as a card's content would like. */
   .desk-split__list > .platform-grid,
   .desk-split__list .tier-picker > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  /* ... and a radical's platforms, under its lesson in the page (plan
+     115): a list beside a list, one to a row. */
+  .desk-split__page > .rad > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
@@ -21353,7 +21356,12 @@ a.slip__act { text-decoration: none; }
   .desk-split__page .platform-card__aside,
   .desk-deck__study .platform-card__lead,
   .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
-  .desk-split .desk-stop--open {
+  /* The open radical in the index beside its lesson, and the family's
+     door while the family stands in the list (plan 115): the same ring,
+     each being a card with its own edge. */
+  .desk-split .desk-stop--open,
+  .desk-split .radical-tile[aria-current="page"],
+  .desk-split .rad-door[aria-expanded="true"] {
     border-color: var(--accent2);
     background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
   }
@@ -21371,9 +21379,11 @@ a.slip__act { text-decoration: none; }
   /* The tiers and the grammar points as a list beside their page
      (plan 114): no ▶ and no ›, since a row here opens beside itself
      and departs nowhere; and a tier a list's row, not a wall's card —
-     forty-three of them scroll in the column. */
+     forty-three of them scroll in the column. A radical's family door
+     (plan 115) opens beside itself too. */
   .desk-split__list .platform-card__go,
-  .desk-split__list .gl-index__chev { display: none; }
+  .desk-split__list .gl-index__chev,
+  .desk-split .rad-door[aria-expanded] > .rad-door__chev { display: none; }
   .desk-split__list .platform-card__lead,
   .desk-split__list .platform-card__body { padding-block: var(--sp-3); }
   /* The ▶ was the aside's right margin; without it the figures keep
