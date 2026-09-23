@@ -38,3 +38,8 @@ datas/exam_audio/
 # VOICEVOX Nemo terms forbid using them for machine learning -- see
 # THIRD_PARTY_NOTICES.md).
 datas/voice_audition/
+# The voicebank scripts/build_kana_audio.py --from-bank cuts the kana clips
+# from (plan 113b, scripts/kana_bank.py). Its author's terms forbid
+# distributing the voice files themselves as material: the processed clips
+# in frontend/public/sounds/kanas/ are committed, the bank never is.
+datas/kana_source/

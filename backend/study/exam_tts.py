@@ -210,26 +210,36 @@ def write_clip(directory: str, path: str, data: bytes) -> None:
 
 
 # ── Who speaks which line ────────────────────────────────────────
-# A script's speaker labels map onto voice_engine's slots: the narrator
-# (and the reader of every single-voice clip) is slot 0, the dialogue's
-# A and B are slots 1 and 2 -- a woman and a man, which is what the
-# listening generator's prompt tells the model they are. Three distinct
-# voices, the way a real JLPT listening track is performed.
+# A script's speaker labels map onto voice_engine's slots
+# (DEFAULT_VOICES):
+#
+#   - a script read by ONE voice is the reader's, slot 0, whatever its
+#     label says. Dictation's label is "narrator" and is part of every
+#     dictation clip's key, so it cannot become "reader"; this rule is
+#     what lets the main voice read those lines anyway;
+#   - in a dialogue, A and B are slots 1 and 2 -- a woman and a man,
+#     which is what the listening generator's prompt tells the model
+#     they are -- and the narrator is slot 3, a third voice, the way a
+#     real JLPT listening track is performed.
 #
 # A label the model invents instead (it sometimes writes 女 / 男, or
 # 女の人) takes the dialogue slot its first character names when that
 # slot is free, and otherwise the first free one, in order of
-# appearance. Never slot 0: a participant must not sound like the
-# narrator.
-FIXED_SLOTS = {"narrator": 0, "reader": 0, "A": 1, "B": 2}
+# appearance. Never the reader's or the narrator's: a participant must
+# not sound like the narrator.
+READER_SLOT = 0
+NARRATOR_SLOT = 3
+FIXED_SLOTS = {"narrator": NARRATOR_SLOT, "reader": READER_SLOT, "A": 1, "B": 2}
 _GENDERED_SLOTS = {"女": 1, "男": 2}
 
 
 def voice_slots(turns: list[dict]) -> dict:
     """Speaker label -> voice slot, for one script."""
     labels = list(dict.fromkeys(t["speaker"] for t in turns))
+    if len(labels) == 1:
+        return {labels[0]: READER_SLOT}
     slots = {label: FIXED_SLOTS[label] for label in labels if label in FIXED_SLOTS}
-    taken = set(slots.values())
+    taken = set(slots.values()) | {READER_SLOT, NARRATOR_SLOT}
     for label in labels:
         if label in slots:
             continue
@@ -317,10 +327,12 @@ def synthesize_dialogue(turns: list[dict], rate: str = "", *, force: bool = Fals
         if slot not in styles:
             styles[slot] = engine.style_for_slot(slot)
         if previous is not None:
-            at_narrator = slot != previous and 0 in (slot, previous)
+            at_narrator = slot != previous and NARRATOR_SLOT in (slot, previous)
             parts.append(engine.silence(_NARRATOR_GAP_S if at_narrator else _TURN_GAP_S,
                                         engine.DIALOGUE_RATE))
-        parts.append(engine.say(turn["textJp"], styles[slot], speed=speed,
+        # The script's rate (dictation's -10%) times the voice's own
+        # tempo (voice_engine.VOICE_TEMPO: 男声1 reads slower).
+        parts.append(engine.say(turn["textJp"], styles[slot], speed=speed * engine.tempo_for_slot(slot),
                                 sample_rate=engine.DIALOGUE_RATE))
         previous = slot
 

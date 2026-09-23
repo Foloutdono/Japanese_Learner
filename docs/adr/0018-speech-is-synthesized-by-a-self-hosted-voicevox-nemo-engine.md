@@ -5,6 +5,9 @@
   [0009](0009-card-readings-fall-back-to-server-audio.md); their decisions
   (device first, a server clip as the fallback, catalog-only text) stand,
   except that a lone kana now skips the device (below).
+- **Amended**: 2026-09-23, plan 113b. The owner chose the voices, and B
+  speaks more slowly ("The voices", below). The kana deck is to move to a
+  recorded voice: [0019](0019-the-kana-are-a-recorded-voice.md).
 - **Date**: 2026-09-23
 - **Plan**: 113
 
@@ -80,16 +83,32 @@ Nine voices without a persona, recorded by real voice providers: 女声1–6 and
 is what counts. Their resource repository was archived in March 2026, so the
 voices are frozen: they won't change, and they won't improve.
 
-Voices are chosen per **slot** (`DEFAULT_VOICES`):
+Voices are chosen per **slot** (`DEFAULT_VOICES`). The owner chose them after
+listening to `scripts/audition_voices.py`'s samples (plan 113b):
 
-- slot 0: the reader and narrator (words, dictation, kana, exam narration);
-- slot 1: speaker A, a woman;
-- slot 2: speaker B, a man.
+| Slot | Role | Voice |
+|---|---|---|
+| 0 | the reader: words, dictation, lone kana | 女声6 |
+| 1 | speaker A, a woman | 女声6 |
+| 2 | speaker B, a man | 男声1 |
+| 3 | the narrator inside an exam dialogue | 女声1 |
 
-`study/exam_tts.voice_slots` maps labels to slots, not order of appearance, and
-the listening prompt now tells the model A is 女の人 and B is 男の人. The current
-choice is provisional (女声1, 女声2, 男声1) until the owner has listened;
-`scripts/audition_voices.py` renders every voice for that.
+`study/exam_tts.voice_slots` maps labels to slots, never by order of
+appearance:
+
+- a script with one speaker is the reader's;
+- in a dialogue, `narrator`, `A` and `B` take their slots;
+- a label starting 女 or 男 takes A's or B's;
+- any other label takes the first free slot.
+
+The listening prompt tells the model that A is 女の人 and B is 男の人. The first,
+provisional choice was 女声1, 女声2 and 男声1.
+
+**A voice's pace** is `VOICE_TEMPO`. The owner found 男声1 a little fast, so he
+speaks at 0.9 of the others' rate. The tempo multiplies a turn's own rate (so
+dictation's −10% still applies), and it follows the voice rather than the slot,
+so it holds under `TTS_VOICES` too. `audition_voices --tempo VOICE` renders one
+line at four speeds, for choosing the value.
 
 ### Kana are named, not read
 
@@ -134,8 +153,10 @@ clip URL: `v=VOICE_REV`, and `v=KANA_REV` for the kana set.
   instead of two, and the exam's narrator is finally a third voice.
 - **Lone kana are right everywhere**: the deck, the dictionary and kanji
   readings. The deck has every sound it teaches.
-- **A fixed monthly cost** where there was none. Measured with the three default
-  voices loaded, the engine peaks at 376 MB.
+- **A fixed monthly cost** where there was none. Measured with three voices
+  loaded and one CPU thread, as on Render, the engine peaks at 343 MB with the
+  owner's voices (女声6, 男声1, 女声1). The first set (女声1, 女声2, 男声1)
+  peaked at 376 MB.
   - **Starter** ($7) holds that at 0.5 CPU, but slowly: about 2 s for a word the
     first time, about 10 s for a 6 s dialogue turn.
   - **Standard** ($25) halves both.
@@ -152,9 +173,10 @@ clip URL: `v=VOICE_REV`, and `v=KANA_REV` for the kana set.
 - **No generated clip may be published as, or fed into, a training set.** This
   matters if the repository is public: the committed kana clips carry the same
   terms.
-- **Changing voices is a code change**: `DEFAULT_VOICES` and `VOICE_REV`
-  together (plus `KANA_REV` if the kana set is remade), then
-  `revoice_audio --yes`. `TTS_VOICES` is for local auditions only.
+- **Changing voices is a code change**: `DEFAULT_VOICES`, `VOICE_TEMPO` and
+  `VOICE_REV` together (plus `KANA_REV` if the kana set is remade), then
+  `revoice_audio --yes`. `TTS_VOICES` is for local auditions only. Plan 113b
+  did exactly this: `VOICE_REV` went from `nemo1` to `nemo2`.
 - **VOICEVOX's "medium quality"** is its own description. It is clear and
   correctly accented, but less natural than the best commercial voices.
   `voice_engine.py` speaks the VOICEVOX engine API, so AivisSpeech and the

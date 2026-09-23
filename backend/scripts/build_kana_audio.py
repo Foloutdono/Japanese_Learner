@@ -1,11 +1,24 @@
 """
-Make the kana deck's syllables: one clip per sound, from the voice
-engine, into frontend/public/sounds/kanas/.
+Make the kana deck's syllables: one clip per sound, into
+frontend/public/sounds/kanas/, cut from a recorded voicebank or
+synthesized by the voice engine.
 
     python -m scripts.build_kana_audio --check      # what is missing, stray or off-spec
-    python -m scripts.build_kana_audio              # make what is missing
-    python -m scripts.build_kana_audio --force      # remake every clip
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro --pitch G4 --credit amitaro --force
+    python -m scripts.build_kana_audio              # make what is missing, on the engine
+    python -m scripts.build_kana_audio --force      # remake every clip on the engine
     python -m scripts.build_kana_audio --only ka kya wo_foreign
+
+-- The recorded voice (plan 113b) ---------------------------------
+The owner listened to the engine's syllables (below) and found them
+short of the standard: a synthesized mora is right, and flat. The set
+the app ships is a real voice, 小春音アミ from あみたろの声素材工房, cut
+from her UTAU single-syllable bank by scripts/kana_bank.py, which has
+the recipes (a long vowel is a held one, あい two samples joined, the
+ヴ row the バ row when the bank has no ゔ). docs/adr/0019 is why this
+voice. The bank is never committed -- its terms forbid distributing
+the voice files themselves -- so unzip it under backend/datas/
+kana_source/, which is gitignored, and point --from-bank at it.
 
 -- Why synthesis, when the README once refused it -------------------
 frontend/public/sounds/README.md turned speech synthesis down for the
@@ -35,13 +48,24 @@ Every entry that shares a name must come out as the same notation, and
 the script stops if two do not -- that would be one file asked to say
 two things.
 
-Needs the voice engine (VOICEVOX_URL, see backend/.env.example) and
-nothing else: no database. The clips are committed; the credit they
-carry ("VOICEVOX Nemo") and the ban on using them for machine learning
-are in THIRD_PARTY_NOTICES.md. A remade set is a new KANA_REV in
-lib/audio/playback.js, or returning learners keep the old one for a year.
+Beside the clips, sources.json records which voice made each one, as
+the id of the row in frontend/src/domain/attributions.js that credits
+it ("voicevox-nemo" for the engine; --credit for a bank). The set this
+replaced was 102 files nobody could name the origin of, and a voice
+whose terms make the credit a condition must not arrive without one:
+tests/test_kana_audio.py holds every id in the file to a row on the
+Credits page.
+
+The engine mode needs the voice engine (VOICEVOX_URL, see
+backend/.env.example), the bank mode the bank; neither needs a
+database. The clips are committed, and the terms they carry are in
+THIRD_PARTY_NOTICES.md: the credit of whichever voice made them, and,
+for the engine's, no use for machine learning. A remade set is a new
+KANA_REV in lib/audio/playback.js, or returning learners keep the old
+one for a year.
 """
 import argparse
+import json
 import logging
 import math
 import os
@@ -54,6 +78,7 @@ from dotenv import load_dotenv
 load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 from content.kana_data import get_all_kana, sound_of  # noqa: E402
+from scripts import kana_bank  # noqa: E402
 from study import voice_engine  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -74,6 +99,10 @@ _FADE_S = 0.005
 # Engine-side padding, trimmed away again below: enough that the gate,
 # not the engine, decides where the syllable begins.
 _ENGINE_PAD_S = 0.08
+
+SOURCES = "sources.json"
+# The engine's row in frontend/src/domain/attributions.js.
+ENGINE_CREDIT = "voicevox-nemo"
 
 _SMALL = set("ァィゥェォャュョ")
 _VOWEL_OF = {}
@@ -155,9 +184,22 @@ def finish(pcm: voice_engine.Pcm) -> tuple[bytes, dict]:
     return out.tobytes(), report
 
 
+def read_sources(out_dir: Path) -> dict[str, str]:
+    path = out_dir / SOURCES
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+
+
+def _record_sources(out_dir: Path, made: dict[str, str]) -> None:
+    """Merge {sound name: attributions.js id} into sources.json."""
+    sources = read_sources(out_dir) | made
+    (out_dir / SOURCES).write_text(json.dumps(dict(sorted(sources.items())), ensure_ascii=False, indent=1) + "\n",
+                                   encoding="utf-8")
+
+
 def _check(sounds: dict[str, dict], out_dir: Path) -> int:
     problems = 0
     present = {p.stem for p in out_dir.glob("*.mp3")}
+    sources = read_sources(out_dir)
     for name in sorted(sounds):
         path = out_dir / f"{name}.mp3"
         if not path.exists():
@@ -169,6 +211,9 @@ def _check(sounds: dict[str, dict], out_dir: Path) -> int:
             logger.info("  off-spec %-11s %s Hz, %s ch, %s kbps", name,
                         info["sample_rate"], info["channels"], info["kbps"])
             problems += 1
+        if name not in sources:
+            logger.info("  unsourced %-10s (no voice named for it in %s)", name, SOURCES)
+            problems += 1
     for stray in sorted(present - set(sounds)):
         logger.info("  stray    %s.mp3 (no kana is filed under it)", stray)
         problems += 1
@@ -176,16 +221,95 @@ def _check(sounds: dict[str, dict], out_dir: Path) -> int:
     return 1 if problems else 0
 
 
-def main() -> int:
+def _engine_maker(sounds: dict[str, dict], voice: str | None, speed: float):
+    """name -> (mp3, report, what it says), on the voice engine; None
+    and a logged reason when there is no engine to use."""
+    if not voice_engine.configured():
+        logger.error("No voice engine configured: set VOICEVOX_URL (see backend/.env.example).")
+        return None
+    voice = voice or voice_engine.voices()[0]
+    try:
+        style = voice_engine.style_named(voice)
+    except voice_engine.TTSFailed as e:
+        logger.error("%s", e)
+        return None
+    logger.info("Voice %s (style %d)", voice, style)
+
+    def make(name: str) -> tuple[bytes, dict, str]:
+        said = sounds[name]["notation"]
+        pcm = voice_engine.say_kana(said, style, speed=speed, sample_rate=RATE, level_pitch=True,
+                                    pad=_ENGINE_PAD_S, hold=voice_engine.LONE_KANA_HOLD_S)
+        frames, report = finish(pcm)
+        return voice_engine.encode_mp3(voice_engine.Pcm(frames, RATE), kbps=KBPS), report, said
+
+    return make
+
+
+def _bank_maker(sounds: dict[str, dict], names: list[str], directory: Path, pitch: str | None):
+    """name -> (mp3, report, what it was cut from), from a recorded
+    bank; None and a logged reason when the bank cannot make every
+    sound asked for -- a set half one voice and half another is worse
+    than either."""
+    if not directory.is_dir():
+        logger.error("No bank at %s (see scripts/kana_bank.py for what one looks like).", directory)
+        return None
+    try:
+        bank = kana_bank.index_bank(directory, pitch)
+    except kana_bank.BankError as e:
+        logger.error("%s", e)
+        return None
+    if not bank.samples:
+        logger.error("No syllable samples under %s%s.", directory,
+                     f" whose path names {pitch!r} -- leave --pitch out for a single-pitch bank"
+                     if pitch else "")
+        return None
+    wanted = kana_bank.recipes({name: sounds[name] for name in names})
+    gaps = kana_bank.missing(bank, wanted)
+    if gaps:
+        logger.error("The bank cannot make %d sound(s):", len(gaps))
+        for gap in gaps:
+            logger.error("  %s", gap)
+        return None
+    logger.info("Bank %s%s: %d syllable samples", directory, f" ({pitch})" if pitch else "",
+                len(bank.samples))
+    for name in sorted(wanted):
+        recipe = wanted[name]
+        if recipe.note and bank.pick(recipe.parts[0]) != recipe.parts[0][0]:
+            logger.info("  %s: %s", name, recipe.note)
+
+    def make(name: str) -> tuple[bytes, dict, str]:
+        pcm, used = kana_bank.make(bank, wanted[name])
+        frames, report = finish(pcm)
+        data = voice_engine.encode_mp3(voice_engine.Pcm(frames, pcm.rate), kbps=KBPS, out_rate=RATE)
+        return data, report, "+".join(used)
+
+    return make
+
+
+def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--check", action="store_true",
                         help="report missing, stray and off-spec files; make nothing")
     parser.add_argument("--force", action="store_true", help="remake clips that exist")
     parser.add_argument("--only", nargs="+", metavar="NAME", help="only these sound names")
-    parser.add_argument("--voice", help="voice name (default: the reader's, slot 0)")
-    parser.add_argument("--speed", type=float, default=1.0, help="speedScale (default 1.0)")
+    parser.add_argument("--from-bank", type=Path, metavar="DIR",
+                        help="cut the clips from a recorded UTAU bank (scripts/kana_bank.py) "
+                             "instead of the voice engine")
+    parser.add_argument("--pitch", metavar="TAG",
+                        help="with --from-bank: only the samples whose path names TAG (a pitch folder, G4)")
+    parser.add_argument("--credit", metavar="ID",
+                        help="with --from-bank: the voice's row id in frontend/src/domain/attributions.js "
+                             "(amitaro), recorded in sources.json")
+    parser.add_argument("--voice", help="engine voice name (default: the reader's, slot 0)")
+    parser.add_argument("--speed", type=float, help="engine speedScale (default 1.0)")
     parser.add_argument("--out", type=Path, default=OUT_DIR, help=f"directory (default {OUT_DIR})")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
+    if args.from_bank and (args.voice or args.speed is not None):
+        parser.error("--voice and --speed are the engine's; a bank has one voice")
+    if (args.pitch or args.credit) and not args.from_bank:
+        parser.error("--pitch and --credit describe a bank: they need --from-bank")
+    if args.from_bank and not args.credit:
+        parser.error("--from-bank needs --credit: the attributions.js id of the voice the bank records")
 
     try:
         sounds = plan()
@@ -205,41 +329,36 @@ def main() -> int:
     if not args.force:
         names = [n for n in names if not (args.out / f"{n}.mp3").exists()]
     if not names:
-        logger.info("Nothing to do.")
+        logger.info("Nothing to do: every clip exists (--force remakes them).")
         return 0
-    if not voice_engine.configured():
-        logger.error("No voice engine configured: set VOICEVOX_URL (see backend/.env.example).")
-        return 1
 
-    voice = args.voice or voice_engine.voices()[0]
-    try:
-        style = voice_engine.style_named(voice)
-    except voice_engine.TTSFailed as e:
-        logger.error("%s", e)
+    if args.from_bank:
+        make, credit = _bank_maker(sounds, names, args.from_bank, args.pitch), args.credit
+    else:
+        make, credit = _engine_maker(sounds, args.voice, 1.0 if args.speed is None else args.speed), ENGINE_CREDIT
+    if make is None:
         return 1
-    logger.info("Voice %s (style %d), %d clip(s) into %s", voice, style, len(names), args.out)
-    logger.info("  %-11s %-8s %6s %7s %7s %7s  kana", "name", "notation", "len", "peak", "rms", "gain")
+    logger.info("%d clip(s) into %s", len(names), args.out)
+    logger.info("  %-11s %-8s %6s %7s %7s %7s  kana", "name", "from", "len", "peak", "rms", "gain")
     args.out.mkdir(parents=True, exist_ok=True)
 
-    failed = []
+    failed, made = [], {}
     for name in names:
-        said = sounds[name]["notation"]
         try:
-            pcm = voice_engine.say_kana(said, style, speed=args.speed, sample_rate=RATE,
-                                        level_pitch=True, pad=_ENGINE_PAD_S,
-                                        hold=voice_engine.LONE_KANA_HOLD_S)
-            frames, report = finish(pcm)
-            data = voice_engine.encode_mp3(voice_engine.Pcm(frames, RATE), kbps=KBPS)
-        except voice_engine.TTSFailed as e:
+            data, report, source = make(name)
+        except (voice_engine.TTSFailed, kana_bank.BankError) as e:
             failed.append(f"{name} ({e})")
             continue
         partial = args.out / f".{name}.mp3.part"
         partial.write_bytes(data)
         os.replace(partial, args.out / f"{name}.mp3")
-        logger.info("  %-11s %-8s %5.2fs %6.1fdB %6.1fdB %+6.1fdB  %s", name, said, report["seconds"],
+        made[name] = credit
+        logger.info("  %-11s %-8s %5.2fs %6.1fdB %6.1fdB %+6.1fdB  %s", name, source, report["seconds"],
                     report["peak_db"], report["rms_db"], report["gain_db"], " ".join(sounds[name]["kana"]))
+    if made:
+        _record_sources(args.out, made)
 
-    logger.info("Made %d clip(s).", len(names) - len(failed))
+    logger.info("Made %d clip(s), credited to %s in %s.", len(made), credit, SOURCES)
     if failed:
         logger.error("%d failed:", len(failed))
         for line in failed:

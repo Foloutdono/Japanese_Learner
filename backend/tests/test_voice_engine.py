@@ -22,6 +22,7 @@ import study.voice_engine as engine
 SPEAKERS = [
     {"name": "女声1", "styles": [{"name": "ノーマル", "id": 10005, "type": "talk"}]},
     {"name": "女声2", "styles": [{"name": "ノーマル", "id": 10007, "type": "talk"}]},
+    {"name": "女声6", "styles": [{"name": "ノーマル", "id": 10006, "type": "talk"}]},
     {"name": "男声1", "styles": [{"name": "ノーマル", "id": 10001, "type": "talk"},
                                  {"name": "ささやき", "id": 10009, "type": "talk"}]},
 ]
@@ -132,10 +133,23 @@ def test_voices_are_resolved_by_name_once(fake):
     assert fake.paths().count("/speakers") == 1
 
 
+def test_the_default_slots_are_the_owners_choice(fake):
+    # Plan 113b: 女声6 reads and is A, 男声1 is B, 女声1 narrates exams.
+    assert [engine.style_for_slot(slot) for slot in range(4)] == [10006, 10006, 10001, 10005]
+
+
+def test_a_voice_brings_its_tempo_to_whichever_slot_it_takes(monkeypatch):
+    monkeypatch.delenv("TTS_VOICES", raising=False)
+    assert [engine.tempo_for_slot(slot) for slot in range(4)] == [1.0, 1.0, 0.9, 1.0]
+    monkeypatch.setenv("TTS_VOICES", "男声1/ノーマル,女声6")
+    assert engine.tempo_for_slot(0) == 0.9
+    assert engine.tempo_for_slot(1) == 1.0
+
+
 def test_an_unknown_voice_names_the_ones_there_are(fake):
     # The website calls them 女性1-6; the engine says 女声. The error has
     # to make that mistake obvious.
-    with pytest.raises(engine.TTSFailed, match="女声1, 女声2, 男声1"):
+    with pytest.raises(engine.TTSFailed, match="女声1, 女声2, 女声6, 男声1"):
         engine.style_named("女性1")
 
 

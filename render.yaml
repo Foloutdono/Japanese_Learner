@@ -70,7 +70,8 @@ services:
       # tag would pin nothing anyway. Listens on 50121, which Render
       # detects; nothing here names the port.
       url: docker.io/voicevox/voicevox_nemo_engine@sha256:0ff297cef582439227e79da3c1e5123a9186353fcaffbb2e8f04ed0864aca45d
-    # Measured (docker, three voices loaded, plan 113): 376 MB at peak,
+    # Measured (docker, one thread, three voices loaded): 343 MB at peak
+    # with the owner's voices (plan 113b; the first set peaked at 376 MB),
     # so Starter's 512 MB holds it. Starter's 0.5 CPU is the price: a
     # word takes ~2 s the first time and a 6 s dialogue turn ~10 s,
     # against ~1 s and ~5 s on Standard's 1 CPU. Every clip is made once

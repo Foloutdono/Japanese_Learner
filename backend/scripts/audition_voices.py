@@ -4,23 +4,25 @@ before choosing study/voice_engine.DEFAULT_VOICES.
 
     python -m scripts.audition_voices                         # all voices
     python -m scripts.audition_voices --voices 女声1,男声2     # some
-    python -m scripts.audition_voices --trio 女声1,女声2,男声1  # a dialogue, as the app would voice it
+    python -m scripts.audition_voices --roles 女声6,女声6,男声1,女声1  # a dialogue, as the app would voice it
+    python -m scripts.audition_voices --tempo 男声1            # one voice at four speeds
 
 One file per voice goes into backend/datas/voice_audition/ (gitignored):
 a narration line, a dialogue line, a dictation line at dictation's
 speed, words, lone kana through the path /api/tts takes (は must say
 "ha", not the particle "wa"), and a run of the kana deck's syllables the
-way scripts/build_kana_audio.py makes them. `--trio` renders one
+way scripts/build_kana_audio.py makes them. `--roles` renders one
 listening item through study/exam_tts.synthesize_dialogue itself --
-narrator, then A (a woman) and B (a man), with the real pauses -- so
-what is heard is what a learner will hear.
+narrator, then A (a woman) and B (a man), with the real pauses and
+tempos -- so what is heard is what a learner will hear. `--tempo`
+renders a line of dialogue in one voice at four speeds, for choosing
+voice_engine.VOICE_TEMPO.
 
-Choosing: the first name is the reader (every word, dictation line and
-kana, and the exam narrator), the second and third are A and B. Put them
-in DEFAULT_VOICES and bump VOICE_REV with them (and KANA_REV in
-frontend/src/lib/audio/playback.js if the kana set is remade in the new
-voice); TTS_VOICES in the environment is for trying a choice out
-locally, not for production.
+Choosing: the four names are the slots of voice_engine.DEFAULT_VOICES --
+the reader (every word, dictation line and lone kana), A, B, and the
+exam narrator. Put them there and bump VOICE_REV with them;
+TTS_VOICES in the environment is for trying a choice out locally, not
+for production.
 
 Needs the voice engine (VOICEVOX_URL) and nothing else: no database.
 """
@@ -51,7 +53,7 @@ WORDS = ["まいげつ", "たべる", "はし", "シングルス", "こんにち
 LONE_KANA = ["は", "へ", "を", "ん", "ド", "キャ", "ウォ"]
 KANA_RUN = ["あ", "か", "さ", "た", "な", "は", "ま", "や", "ら", "わ", "を", "ん",
             "きゃ", "しゅ", "ちょ", "ファ", "ティ", "ヴ", "ウォ", "ああ", "えい", "おう"]
-TRIO = [
+EXAM_ITEM = [
     {"speaker": "narrator", "textJp": "女の人と男の人が話しています。"},
     {"speaker": "A", "textJp": "あした、何時に会いましょうか。"},
     {"speaker": "B", "textJp": "午前十時はどうですか。"},
@@ -78,23 +80,41 @@ def _voice_sample(name: str) -> tuple[bytes, float, float]:
     return voice_engine.encode_mp3(pcm), pcm.seconds, elapsed
 
 
-def _trio(names: list[str]) -> Path:
+def _roles(names: list[str]) -> Path:
     # Through synthesize_dialogue itself, into a scratch clip store, so
-    # the slots and pauses are the app's own rather than a copy of them.
+    # the slots, pauses and tempos are the app's own rather than a copy
+    # of them.
     os.environ["TTS_VOICES"] = ",".join(names)
-    os.environ["EXAM_AUDIO_DIR"] = str(OUT_DIR / "trio-store")
+    os.environ["EXAM_AUDIO_DIR"] = str(OUT_DIR / "roles-store")
     from study import exam_tts
 
-    url = exam_tts.synthesize_dialogue(TRIO, force=True)
-    target = OUT_DIR / f"trio-{'-'.join(names)}.mp3"
+    url = exam_tts.synthesize_dialogue(EXAM_ITEM, force=True)
+    target = OUT_DIR / f"dialogue-{'-'.join(names)}.mp3"
     shutil.copyfile(Path(exam_tts.audio_dir()) / url.rsplit("/", 1)[-1], target)
     return target
+
+
+TEMPOS = (1.0, 0.95, 0.9, 0.85)
+# Long enough to hear a rhythm in, and the kind of line B says.
+TEMPO_LINE = "いいですよ。駅の前で待っていますから、着いたら電話してください。"
+
+
+def _tempo(name: str) -> list[Path]:
+    style = voice_engine.style_named(name)
+    written = []
+    for tempo in TEMPOS:
+        line = voice_engine.say(TEMPO_LINE, style, speed=tempo)
+        target = OUT_DIR / f"tempo-{name}-{tempo:.2f}.mp3"
+        target.write_bytes(voice_engine.encode_mp3(line))
+        written.append(target)
+    return written
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[1])
     parser.add_argument("--voices", help="comma-separated voice names (default: every voice)")
-    parser.add_argument("--trio", help="reader,A,B -- render one listening item with these three")
+    parser.add_argument("--roles", help="reader,A,B,narrator -- render one listening item with these four")
+    parser.add_argument("--tempo", metavar="VOICE", help=f"one voice at speeds {', '.join(map(str, TEMPOS))}")
     args = parser.parse_args()
 
     if not voice_engine.configured():
@@ -110,13 +130,22 @@ def main() -> int:
     logger.info("Voices: %s", ", ".join(f"{n} ({table[n]})" for n in every))
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    if args.trio:
-        names = [n.strip() for n in args.trio.split(",") if n.strip()]
-        if len(names) != 3:
-            logger.error("--trio takes three names: reader,A,B")
+    if args.roles:
+        names = [n.strip() for n in args.roles.split(",") if n.strip()]
+        if len(names) != 4:
+            logger.error("--roles takes four names: reader,A,B,narrator")
             return 1
         try:
-            logger.info("Wrote %s", _trio(names))
+            logger.info("Wrote %s", _roles(names))
+        except voice_engine.TTSFailed as e:
+            logger.error("%s", e)
+            return 1
+        return 0
+
+    if args.tempo:
+        try:
+            for path in _tempo(args.tempo):
+                logger.info("Wrote %s", path)
         except voice_engine.TTSFailed as e:
             logger.error("%s", e)
             return 1

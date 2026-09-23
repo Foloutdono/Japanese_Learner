@@ -188,6 +188,13 @@ runtime purpose. Two consequences worth knowing:
   `scripts/revoice_audio.py`, `render.yaml`, `lib/audio/speech.js`,
   `lib/audio/playback.js`, `frontend/public/sounds/README.md` and
   `tests/test_voice_engine.py`; ADR 0018).
+  **113b** is the owner's voices and a recorded kana voice: 女声6, 男声1 and
+  女声1 over four slots (the reader, A, B and the exam narrator), 男声1 at
+  0.9 (`VOICE_TEMPO`), and the importer that cuts the kana deck from
+  小春音アミ's UTAU bank, with `kanas/sources.json` holding every clip's
+  voice to its credit (cited in `study/voice_engine.py`, `study/exam_tts.py`,
+  `study/word_tts.py`, `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
+  `scripts/audition_voices.py` and `tests/test_kana_audio.py`; ADR 0019).
   When starting a new wave, begin at **114** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -226,8 +233,10 @@ and `THIRD_PARTY_NOTICES.md`). It also **forbids using the audio for machine
 learning**: never publish a generated clip as, or feed it into, a dataset.
 
 **Changing the voice is a code change, not an env var**: edit
-`voice_engine.DEFAULT_VOICES` (slot 0 reads words, dictation, kana and exam
-narration; 1 and 2 are dialogue speakers A, a woman, and B, a man) and bump
+`voice_engine.DEFAULT_VOICES` (plan 113b, the owner's choice: slot 0, the
+reader of words, dictation and lone kana, is 女声6; 1 and 2 are dialogue
+speakers A, a woman, 女声6, and B, a man, 男声1; 3 is the exam narrator,
+女声1) or a voice's pace in `VOICE_TEMPO` (男声1 speaks at 0.9), and bump
 `VOICE_REV` in `voice_engine.py` **and** `lib/audio/speech.js`
 (`tests/test_kana_audio.py` holds them equal). A clip made before the current
 revision is never served; it is remade in place, under the name
@@ -236,13 +245,24 @@ revision is never served; it is remade in place, under the name
 
 ```bash
 python -m scripts.audition_voices                 # every voice, as a sample file each
-python -m scripts.audition_voices --trio 女声1,女声2,男声1  # one exam item, as the app voices it
-python -m scripts.build_kana_audio --check        # kana clips missing, stray or off-spec
-python -m scripts.build_kana_audio --force        # remake frontend/public/sounds/kanas/
+python -m scripts.audition_voices --roles 女声6,女声6,男声1,女声1  # one exam item: reader,A,B,narrator
+python -m scripts.audition_voices --tempo 男声1   # one voice at four speeds, for VOICE_TEMPO
+python -m scripts.build_kana_audio --check        # kana clips missing, stray, off-spec or unsourced
+python -m scripts.build_kana_audio --force        # remake frontend/public/sounds/kanas/ on the engine
+python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro --pitch G4 --credit amitaro --force
 ```
 
-The kana clips are committed. A remade set needs a new `KANA_REV` in
-`lib/audio/playback.js`, or returning learners keep the old one for a year.
+The kana clips are committed, and `kanas/sources.json` records which voice
+made each one, as its row id in `domain/attributions.js`;
+`tests/test_kana_audio.py` fails on a voice without its Credits row and
+`THIRD_PARTY_NOTICES.md` section. The deck is to be cut from a recorded
+voice, 小春音アミ's UTAU bank (plan 113b, ADR 0019, `scripts/kana_bank.py`),
+**once her author has confirmed the use in writing**: her terms do not
+plainly cover audio a web app serves, and ADR 0019 says what to ask. The bank
+goes under `backend/datas/kana_source/`, which is gitignored: her terms forbid
+distributing the voice files themselves. A remade set needs a new `KANA_REV`
+in `lib/audio/playback.js`, or returning learners keep the old one for a
+year.
 
 The one optional warm-up, and it needs no database:
 
@@ -590,7 +610,7 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
   pinned by digest. It has no auth, so it must never be made public; only the
   backend reaches it, through `VOICEVOX_URL` (its `hostport`), over the
   private network, in the same region. It holds no state. Starter's 512 MB
-  fits it (376 MB at peak with three voices) at the cost of slow first
+  fits it (343 MB at peak with the three voices) at the cost of slow first
   syntheses; Standard halves them. See ADR 0018.
 - Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus
   proxy rewrites for `/api`, `/kanjivg` and `/exam-audio` to the Render

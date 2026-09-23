@@ -45,7 +45,9 @@ from content.kana_data import get_all_kana
 from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
 from study import voice_engine as engine
-from study.exam_tts import TTSFailed, audio_dir, content_key, is_current, write_clip  # noqa: F401 -- TTSFailed: clip_for's contract
+from study.exam_tts import (  # noqa: F401 -- TTSFailed: clip_for's contract
+    READER_SLOT, TTSFailed, audio_dir, content_key, is_current, write_clip,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -142,10 +144,10 @@ def speakable(text: str) -> str | None:
 # next request that wants it, while an exam clip's script only exists
 # inside a stored paper. That is what makes the cap below safe.
 _WORDS_SUBDIR = "words"
-# The voice that reads every word: the narrator's slot, the same one
-# that reads the dictation lines and the kana deck
-# (study/voice_engine.py's DEFAULT_VOICES).
-_READER_SLOT = 0
+# The voice that reads every word: the reader's slot, the same one that
+# reads the dictation lines and a lone kana (study/voice_engine.py's
+# DEFAULT_VOICES).
+_READER_SLOT = READER_SLOT
 # Roughly ten thousand clips at the ~10 KB a spoken word comes to. The
 # catalog is larger than that, but a learner touches a few hundred
 # words; the cap exists so a crawler cannot turn the whole catalog into
@@ -223,7 +225,8 @@ def clip_for(text: str) -> str:
         # entry) is safe here: voice_engine.say names the mora through
         # the engine's kana notation instead of reading it as text, so
         # は is "ha" rather than the particle "wa".
-        pcm = engine.say(form, engine.style_for_slot(_READER_SLOT))
+        pcm = engine.say(form, engine.style_for_slot(_READER_SLOT),
+                         speed=engine.tempo_for_slot(_READER_SLOT))
         write_clip(directory, path, engine.encode_mp3(pcm, kbps=engine.DIALOGUE_KBPS))
         _evict_if_over_cap(directory)
     return path

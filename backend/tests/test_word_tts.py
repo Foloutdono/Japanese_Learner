@@ -133,7 +133,7 @@ def test_a_clip_is_synthesized_once_and_then_read_from_disk(store, fake_tts):
     assert word_tts.clip_for("まいげつ") == path
     assert fake_tts.call_count == 1
     # In the reader's voice (slot 0; style_for_slot is 100 + slot here).
-    fake_tts.assert_called_once_with("まいげつ", 100)
+    fake_tts.assert_called_once_with("まいげつ", 100, speed=engine.tempo_for_slot(0))
 
 
 def test_refused_text_never_reaches_the_synthesizer(store, fake_tts):

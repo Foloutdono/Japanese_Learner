@@ -252,7 +252,7 @@ def test_content_keys_are_pinned():
 # ── Who speaks which line ────────────────────────────────────────
 
 def test_the_narrator_and_the_two_speakers_get_three_voices():
-    assert tts.voice_slots(TURNS) == {"narrator": 0, "A": 1, "B": 2}
+    assert tts.voice_slots(TURNS) == {"narrator": 3, "A": 1, "B": 2}
 
 
 def test_a_script_without_a_narrator_keeps_A_and_B_where_they_are():
@@ -265,11 +265,20 @@ def test_a_script_without_a_narrator_keeps_A_and_B_where_they_are():
 def test_labels_the_model_invented_take_the_slot_they_name():
     turns = [{"speaker": "男の人", "textJp": "x"}, {"speaker": "女の人", "textJp": "y"},
              {"speaker": "店員", "textJp": "z"}]
-    assert tts.voice_slots(turns) == {"男の人": 2, "女の人": 1, "店員": 3}
+    # Never the narrator's slot (3) or the reader's (0).
+    assert tts.voice_slots(turns) == {"男の人": 2, "女の人": 1, "店員": 4}
 
 
 def test_a_single_voice_clip_is_read_by_the_reader():
     assert tts.voice_slots([{"speaker": "reader", "textJp": "x"}]) == {"reader": 0}
+
+
+def test_a_dictation_line_is_read_by_the_reader_not_the_exam_narrator():
+    # Dictation's label is "narrator" and is part of every clip's key, so
+    # it cannot change: one voice reading alone is the reader, whatever
+    # the label (plan 113b: the main voice reads dictation, 女声1 only
+    # narrates exams).
+    assert tts.voice_slots([{"speaker": "narrator", "textJp": "x"}]) == {"narrator": 0}
 
 
 # ── One file per dialogue ────────────────────────────────────────
@@ -290,7 +299,22 @@ def test_a_dialogue_is_joined_with_pauses_and_encoded_once(audio_dir, fake_tts):
     expected = 4 * tone().seconds + 2 * tts._NARRATOR_GAP_S + tts._TURN_GAP_S
     assert joined[0].seconds == pytest.approx(expected, abs=0.01)
     # Each line in its slot's voice (style_for_slot is 100 + slot here).
-    assert [c.args[1] for c in fake_tts.call_args_list] == [100, 101, 102, 100]
+    assert [c.args[1] for c in fake_tts.call_args_list] == [103, 101, 102, 103]
+
+
+def test_each_voice_reads_at_its_own_tempo(audio_dir, fake_tts):
+    # 男声1 (B, slot 2) reads slower than the others (voice_engine.VOICE_TEMPO);
+    # the rest keep the script's own speed.
+    tts.synthesize_dialogue(TURNS)
+    speeds = [c.kwargs["speed"] for c in fake_tts.call_args_list]
+    assert speeds == [pytest.approx(1.0), pytest.approx(1.0),
+                      pytest.approx(engine.VOICE_TEMPO["男声1"]), pytest.approx(1.0)]
+
+
+def test_a_voice_tempo_and_a_script_rate_multiply(audio_dir, fake_tts):
+    turns = [{"speaker": "A", "textJp": "x"}, {"speaker": "B", "textJp": "y"}]
+    tts.synthesize_dialogue(turns, "-10%")
+    assert fake_tts.call_args_list[1].kwargs["speed"] == pytest.approx(0.9 * engine.VOICE_TEMPO["男声1"])
 
 
 def test_a_rate_becomes_the_engine_speed(audio_dir, fake_tts):

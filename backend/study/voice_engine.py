@@ -63,21 +63,34 @@ logger = logging.getLogger(__name__)
 # replay a clip in the old voice. Bump it whenever DEFAULT_VOICES, the
 # engine or the synthesis settings change what a clip sounds like;
 # tests/test_kana_audio.py fails if the two sides disagree.
-VOICE_REV = "nemo1"
+VOICE_REV = "nemo2"
 
 # One name per slot, in slot order (study/exam_tts.py maps speaker
-# labels onto slots):
-#   0 -- the narrator, and the reader of every word, dictation line and
-#        kana syllable;
+# labels onto slots). The owner's choice, by ear, from the audition
+# (plan 113b):
+#   0 -- the reader: every word, every dictation line, a lone kana, and
+#        any script read by one voice;
 #   1 -- speaker A of a listening dialogue, a woman (the generator's
-#        prompt says so, and its narration names her 女の人);
-#   2 -- speaker B, a man (男の人).
+#        prompt says so, and its narration names her 女の人) -- the same
+#        voice as the reader, the app's main voice;
+#   2 -- speaker B, a man (男の人);
+#   3 -- the narrator of a dialogue: the scene-setting line and the
+#        question, a third voice so it never sounds like a participant.
 # Changing a name here is changing what every clip sounds like, so it
 # goes with a VOICE_REV bump and a run of scripts/revoice_audio.py.
 # TTS_VOICES overrides this for auditions and local work only
 # (scripts/audition_voices.py); set in production without a revision
 # bump it would mix two voices in one store.
-DEFAULT_VOICES = ("女声1", "女声2", "男声1")
+DEFAULT_VOICES = ("女声6", "女声6", "男声1", "女声1")
+
+# A voice's own tempo, multiplied into every speed it is asked for: a
+# voice that reads fast by nature is slowed here once rather than at
+# every call. 男声1 read noticeably quicker than the voices beside him
+# in the audition; 0.9 is 10% slower (scripts/audition_voices.py
+# --tempo renders the alternatives). Keyed by voice name, so it follows
+# the voice to whichever slot it is given. Part of what a clip sounds
+# like, so a change here is a VOICE_REV bump too.
+VOICE_TEMPO = {"男声1": 0.9}
 
 # Dialogue and word clips: the engine's own rate, and the bitrate edge-tts
 # used to deliver, so a clip costs the same bytes it always did.
@@ -327,9 +340,19 @@ def style_named(name: str) -> int:
     raise TTSFailed(f"the voice engine has no voice named {name!r} (it has: {known})")
 
 
-def style_for_slot(slot: int) -> int:
+def voice_for_slot(slot: int) -> str:
     names = voices()
-    return style_named(names[slot % len(names)])
+    return names[slot % len(names)]
+
+
+def style_for_slot(slot: int) -> int:
+    return style_named(voice_for_slot(slot))
+
+
+def tempo_for_slot(slot: int) -> float:
+    """The speed multiplier of the voice in `slot` (VOICE_TEMPO), 1.0
+    for a voice with none. "男声1/ノーマル" is 男声1's tempo too."""
+    return VOICE_TEMPO.get(voice_for_slot(slot).split("/", 1)[0], 1.0)
 
 
 # ── Speed ────────────────────────────────────────────────────────
@@ -469,10 +492,12 @@ def join(parts: list[Pcm]) -> Pcm:
     return Pcm(b"".join(part.frames for part in parts), rate)
 
 
-def encode_mp3(pcm: Pcm, *, kbps: int = DIALOGUE_KBPS) -> bytes:
+def encode_mp3(pcm: Pcm, *, kbps: int = DIALOGUE_KBPS, out_rate: int | None = None) -> bytes:
     """One MP3 at a CONSTANT bitrate. lameenc writes no Xing header, so
     a variable-bitrate file would report a wrong duration -- and the
     exam player draws a seek bar and a clock from that duration.
+    `out_rate` resamples on the way (LAME's own resampler): the kana
+    voicebank is recorded at 44.1 kHz and the kana set is 48 kHz.
 
     Imported here rather than at the top so that importing this module
     (and study/exam_tts.py, which main.py imports to mount the audio
@@ -482,7 +507,7 @@ def encode_mp3(pcm: Pcm, *, kbps: int = DIALOGUE_KBPS) -> bytes:
     encoder = lameenc.Encoder()
     encoder.set_bit_rate(kbps)
     encoder.set_in_sample_rate(pcm.rate)
-    encoder.set_out_sample_rate(pcm.rate)
+    encoder.set_out_sample_rate(out_rate or pcm.rate)
     encoder.set_channels(1)
     encoder.set_quality(2)
     encoder.silence()

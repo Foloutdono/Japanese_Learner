@@ -197,10 +197,10 @@ design.
 
 **Provenance.** The announcement clips are synthesized with VOICEVOX
 (春日部つむぎ/Kasukabe Tsumugi voice), not recorded, and the kana clips
-with VOICEVOX Nemo (plan 113) — see `THIRD_PARTY_NOTICES.md` at the repo
-root for the required credits and license terms before adding or
-replacing any of them. Both forbid using the audio for machine
-learning.
+with VOICEVOX Nemo (plan 113; `kanas/sources.json` names the voice of
+each) — see `THIRD_PARTY_NOTICES.md` at the repo root for the required
+credits and license terms before adding or replacing any of them. Both
+forbid using the audio for machine learning.
 
 **mp3 for everything new.** The eleven announcements are `.wav` and
 uncompressed — `kanji.wav` alone is 118KB for two seconds. Converting
@@ -218,17 +218,44 @@ sliders.
 ## かな — the syllable clips
 
 127 files under `kanas/`, one per SOUND the kana deck teaches: every
-kana, yōon, long vowel and 外来音 (ファ ティ ヴ…). They are generated,
-not recorded, by the same voice engine as the rest of the app's speech
-(VOICEVOX Nemo, `backend/study/voice_engine.py`, plan 113):
+kana, yōon, long vowel and 外来音 (ファ ティ ヴ…). `kanas/sources.json`
+says which voice made each one, as its row id in
+`src/domain/attributions.js`.
+
+Today every clip is `voicevox-nemo`: generated, not recorded, by the
+same voice engine as the rest of the app's speech (VOICEVOX Nemo,
+`backend/study/voice_engine.py`, plan 113). The owner judged a
+synthesized mora correct but flat, so the set is to be cut from a real
+voice instead: 小春音アミ, from あみたろの声素材工房's UTAU
+single-syllable bank (plan 113b, `docs/adr/0019`). That waits until her
+author confirms the use in writing: her terms do not plainly cover audio
+a web app serves, and the ADR says what to ask. One script makes either
+set:
 
     cd backend
-    python -m scripts.build_kana_audio --check     # missing, stray, off-spec
-    python -m scripts.build_kana_audio --force     # remake the set
+    python -m scripts.build_kana_audio --check     # missing, stray, off-spec, unsourced
+    python -m scripts.build_kana_audio --force     # remake the set on the engine
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro \
+        --pitch G4 --credit amitaro --force        # cut it from the bank
 
-and `backend/tests/test_kana_audio.py` holds the folder to the deck:
-every kana has its clip, no clip is orphaned, and every file is one the
-generator made.
+The bank goes under `backend/datas/kana_source/`, which is gitignored.
+Her terms forbid distributing the voice files themselves, so only the
+clips cut from them are committed.
+
+`backend/scripts/kana_bank.py` has the recipes:
+
+- a long vowel is the bank's long tone (あー);
+- あい and おい are two samples joined in phase;
+- を is お;
+- the ヴ row is the バ row when the bank has no ゔ, and the run says so.
+
+`backend/tests/test_kana_audio.py` holds the folder to the deck:
+
+- every kana has its clip, and no clip is orphaned;
+- every file is one the generator made;
+- every voice `sources.json` names has its row on the Credits page and its
+  section in `THIRD_PARTY_NOTICES.md`. Both voices' terms make the credit a
+  condition, so a set cut from a new voice cannot land without it.
 
 **A clip is named by sound, not by spelling.**
 `content/kana_data.sound_of(entry)` is the romaji, which already files
@@ -240,7 +267,8 @@ play `kanaSound(card)`.
 **What one clip is.** 48 kHz mono, a constant 96 kbps, trimmed to the
 syllable with 20 ms of air either side and 5 ms fades, loudness at
 `playback.js`'s `TARGET_RMS` with the peak kept at −3 dBFS or below.
-Each clip is 0.26–0.45 s long. The playback correction in `playKana`
+An engine clip is 0.26–0.45 s long. A bank cut keeps 0.4 s of the
+syllable, or 0.7 s for a long vowel, before the air is added. The playback correction in `playKana`
 stays: a file already on target gets gain ≈ 1 and offset ≈ 0.
 
 **Why synthesis works now, when it was once rejected.** Read as TEXT, a
