@@ -51,7 +51,10 @@ describe('the profile on the desk', () => {
     const [left, right] = cols.map(c => c.getBoundingClientRect())
     expect(Math.round(left.top)).toBe(Math.round(right.top))
     expect(right.left).toBeGreaterThan(left.right)
-    expect(Math.abs(left.width - right.width)).toBeLessThanOrEqual(1)
+    // The pass and its stamps at the phone's own size (plan 114), the
+    // record taking the rest.
+    expect(Math.round(left.width)).toBe(360)
+    expect(right.width).toBeGreaterThan(left.width)
     expect(cols[0].querySelector('[data-guide="profile.pass"]')).not.toBeNull()
     expect(cols[0].querySelector('[data-guide="profile.stamps"]')).not.toBeNull()
     expect(cols[1].querySelector('[data-guide="profile.records"]')).not.toBeNull()

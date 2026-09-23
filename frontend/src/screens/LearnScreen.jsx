@@ -132,7 +132,7 @@ export default function LearnScreen({ session }) {
               // reached and the one ahead; the desk's draws the whole
               // line (plan 113).
               foot={desk
-                ? <LineFoot stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} />
+                ? <LineFoot stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
                 : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
               fill={stopsAround(stops).leg}
               onClick={() => depart(section, stopPath(section))}

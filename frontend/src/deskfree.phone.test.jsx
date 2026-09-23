@@ -541,3 +541,55 @@ describe('a run (plan 114, P7)', () => {
     expect(document.querySelector('.desk-run, .desk-run__side, .desk-misses')).toBeNull()
   })
 })
+
+// ── plan 114, P8 — the keys and doors a phone does without ──
+// On the desk Enter departs and takes a run's last action, Esc leaves a
+// run, C shows the choices, a route is walked by arrow, and the profile
+// shows both rankings. A phone prints no key, answers none of them, and
+// keeps its one board behind the toggle.
+describe('the keys and the boards (plan 114, P8)', () => {
+  const press = (key, init = {}) => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, ...init }))
+
+  it('answers no Esc, Enter or C, and prints no cap', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { StudyStage } = await import('./components/study/StudyStage')
+    const { DoneMessage } = await import('./components/study/QuizComponents')
+    const { default: HintBar } = await import('./components/study/HintBar')
+    const onLeave = vi.fn()
+    const onBack = vi.fn()
+    const onToggle = vi.fn()
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={onLeave} leaveLabel="Kanji" pass={false}>
+            <HintBar available={['indice_1']} active={[]} onToggle={onToggle} />
+            <DoneMessage onBack={onBack} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    press('Escape'); press('Enter'); press('c')
+    await settle()
+    expect(onLeave).not.toHaveBeenCalled()
+    expect(onBack).not.toHaveBeenCalled()
+    expect(onToggle).not.toHaveBeenCalled()
+    expect(document.querySelector('.desk-kbd, [aria-keyshortcuts]')).toBeNull()
+  })
+
+  it('keeps a route one tab stop per row and the ranking behind its toggle', async () => {
+    const { Banzuke } = await import('./components/profile/Banzuke')
+    const { default: t } = await import('./locales/fr/index.js')
+    const board = { entries: [{ rank: 1, username: 'a', xp: 100 }], me: null }
+    await render(
+      <LangProvider>
+        <RouteStops stops={[{ key: 'N5', code: 'N5', name: 'a' }, { key: 'N4', code: 'N4', name: 'b' }]} onSelect={() => {}} />
+        <Banzuke all={board} week={board} t={t} both={false} />
+      </LangProvider>
+    )
+    await settle()
+    expect([...document.querySelectorAll('.route-stop')].every(r => !r.hasAttribute('tabindex'))).toBe(true)
+    expect(document.querySelectorAll('.banzuke')).toHaveLength(1)
+    expect(document.querySelector('.bz__seg')).not.toBeNull()
+  })
+})

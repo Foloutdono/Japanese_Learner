@@ -3,6 +3,7 @@ import { useLang } from '../LangContext'
 import { useTodaySummary, refreshToday } from '../stores/today'
 import { useCredits } from '../stores/credits'
 import GateCard from '../components/station/GateCard'
+import { EnterKey } from '../components/chrome/DeskKeys'
 import { untilNext } from '../domain/lanes'
 import PassStrip from '../components/station/PassStrip'
 import { Guide } from '../components/guide/Guide'
@@ -27,6 +28,7 @@ import { JourneyPanel } from '../components/journey/JourneyPanel'
 // store. One request each, every consumer.
 
 function RunComplete({ run, today, credits, t, lang, onBack }) {
+  const desk = useDesk()
   const when = untilNext(today?.next_due, lang)
   return (
     <div className="today-clear">
@@ -39,9 +41,12 @@ function RunComplete({ run, today, credits, t, lang, onBack }) {
         xp={run.xp}
         creditsLeft={credits?.unlimited ? null : credits?.balance}
       />
-      <button type="button" className="btn-depart btn-depart--ghost" onClick={onBack}>
+      <button type="button" className="btn-depart btn-depart--ghost" onClick={onBack} aria-keyshortcuts={desk ? 'Enter' : undefined}>
         <span className="btn-depart__jp">{t.backToStation}</span>
+        {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
       </button>
+      {/* 机 (plan 114): Enter, the one way on. */}
+      <EnterKey onEnter={onBack} />
     </div>
   )
 }

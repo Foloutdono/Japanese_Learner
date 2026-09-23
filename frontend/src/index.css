@@ -20733,6 +20733,13 @@ a.slip__act { text-decoration: none; }
     color: var(--text-on-panel);
     background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
   }
+  /* A key's way down the rail (plan 114): the lit link looks the same
+     focused or not, so focus draws a ring of its own, inside the row. */
+  .desk-gate:focus-visible,
+  .desk-sec:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: -2px;
+  }
   .desk-sec--on { color: var(--text-on-panel); }
   .desk-sec::before {
     content: '';
@@ -20780,6 +20787,19 @@ a.slip__act { text-decoration: none; }
      not draw; the guide's note centres on the screen it is about. */
   :root[data-chrome="shell"] .dock-note { left: var(--desk-rail-w); }
   :root[data-chrome="shell"] .guide-callout { left: calc(50% + var(--desk-rail-w) / 2); }
+  /* A note beside a rail or side-column anchor (components/guide/Guide,
+     plan 114) stands against its edge at the side column's width, and
+     rises into place without the centred note's half-width shift. */
+  .guide-callout[data-place="right"],
+  .guide-callout[data-place="left"] {
+    width: var(--desk-side-w);
+    transform: none;
+    animation-name: desk-callout-in;
+  }
+  @keyframes desk-callout-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
   .phone--desk .dict-dock {
     flex-basis: var(--desk-side-w);
     top: var(--sp-6);
@@ -20905,12 +20925,20 @@ a.slip__act { text-decoration: none; }
     background: var(--line-color);
     transform: translateX(-50%);
   }
+  /* A leg is a button, a door to its station (plan 114): it draws no
+     box of its own, and says so on approach by inking its station. */
   .desk-line__leg {
     display: flex;
     flex-direction: column;
     align-items: flex-end;
     gap: var(--sp-1);
     min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
   }
   .desk-line__track {
     position: relative;
@@ -20957,6 +20985,12 @@ a.slip__act { text-decoration: none; }
     background: var(--line-color);
   }
   .desk-line__leg--here .desk-line__stop { color: var(--text-primary); }
+  .desk-line__leg:hover .desk-line__stop,
+  .desk-line__leg:focus-visible .desk-line__stop {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
 
   /* Today (plan 113): the fare gate is the work and takes the width;
      beside it, in the second column, what the work is for — the pass at
@@ -21013,9 +21047,12 @@ a.slip__act { text-decoration: none; }
      on the left, the record (the figures, the ledger, the 番付) on the
      right (screens/ProfileScreen.jsx). The ledger in a half-width
      column goes two across, never three. */
+  /* The pass and its stamps are drawn for a phone's width and read as
+     objects at it; the record — the figures, the lines, the boards —
+     is what grows into the rest (plan 114). */
   .desk-profile {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
     align-items: start;
     gap: var(--sp-5);
   }
@@ -21026,6 +21063,22 @@ a.slip__act { text-decoration: none; }
     min-width: 0;
   }
   .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The two rankings at once (Banzuke's `both`): side by side once the
+     column holds two at the side column's width, stacked below that. */
+  .desk-banzuke {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--desk-side-w), 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+  .desk-bz__period {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
 
   /* A deck's page (screens/DeckDetailScreen.jsx): its cards, and beside
      them the deck's platforms (components/decks/DeckPlatforms), boarding

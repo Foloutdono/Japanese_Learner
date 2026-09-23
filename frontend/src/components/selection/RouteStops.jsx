@@ -1,4 +1,5 @@
 import { playUi } from '../../lib/audio'
+import { useListWalk } from '../../hooks/useListWalk'
 
 // ── 路線図 — the stops of a line (plan 071) ──────────────────
 // The station page: a line's stops as the canvas draws them, one rail
@@ -31,10 +32,16 @@ import { playUi } from '../../lib/audio'
 //           desk's station split (plan 113, StationSplit): it is the
 //           page, so it is marked as one (`aria-current="page"`, and
 //           the Settings list's own selection). Only the desk passes it.
+//
+// In the split the route is also walked by key (hooks/useListWalk,
+// plan 114): one tab stop, the open one, and ↑/↓/Home/End along it.
 export function RouteStops({ stops, here = null, selected = null, onSelect }) {
   const hereIndex = stops.findIndex(s => s.key === here)
+  const walked = selected != null
+  const onWalk = useListWalk(walked)
+  const tabStop = walked && stops.some(s => s.key === selected) ? selected : stops[0]?.key
   return (
-    <div className="route">
+    <div className="route" onKeyDown={onWalk}>
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here
@@ -59,6 +66,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect }) {
             type="button"
             className={classes}
             aria-current={open ? 'page' : current ? 'location' : undefined}
+            tabIndex={walked ? (stop.key === tabStop ? 0 : -1) : undefined}
             onClick={() => { playUi('click-mode-selection'); onSelect(stop.key) }}
           >
             {/* The rail, drawn per stop so the ends can be capped — a

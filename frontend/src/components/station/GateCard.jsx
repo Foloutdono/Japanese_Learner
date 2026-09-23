@@ -7,6 +7,8 @@ import { LINE_COLOR } from '../../config/tabs'
 import { beginDeparture } from '../../stores/departure'
 import { playAnnouncement } from '../../lib/audio'
 import { Chip } from '../chrome/Console'
+import { DepartKey } from '../chrome/DeskKeys'
+import { useDesk } from '../../hooks/useDesk'
 import { Loading } from '../ui/Loading'
 import { CheckIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
@@ -107,6 +109,7 @@ const LINE_TITLE = {
 
 export default function GateCard({ today, failed }) {
   const { t, lang } = useLang()
+  const desk = useDesk()
   const credits = useCredits()
   // The lanes switched OFF, by id. Kept as the exceptions rather than
   // the choice so a refetched lane list (a review landed elsewhere)
@@ -276,11 +279,15 @@ export default function GateCard({ today, failed }) {
         className="btn-depart"
         onClick={depart}
         aria-label={t.todayDue(due)}
+        aria-keyshortcuts={desk ? 'Enter' : undefined}
         disabled={closed || due === 0}
       >
         <span className="btn-depart__jp">{t.depart}</span>
+        {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
         <span className="btn-depart__go" aria-hidden="true">▶</span>
       </button>
+      {/* 机 (plan 114): Enter departs, from anywhere on Today. */}
+      <DepartKey onDepart={depart} disabled={closed || due === 0} />
     </div>
   )
 }

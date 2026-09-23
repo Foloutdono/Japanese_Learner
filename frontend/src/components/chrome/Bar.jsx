@@ -89,19 +89,21 @@ export function DeskCrumb({ leave }) {
   )
 }
 
-export function Leave({ onClick, to, children, className = '' }) {
-  if (to !== undefined) return <LeaveTo to={to} className={className}>{children}</LeaveTo>
-  return <LeaveButton onClick={onClick} className={className}>{children}</LeaveButton>
+// `keys` is the desk's (plan 114): the key that also takes this way
+// out (aria-keyshortcuts), when there is one — a run's Esc.
+export function Leave({ onClick, to, children, className = '', keys }) {
+  if (to !== undefined) return <LeaveTo to={to} className={className} keys={keys}>{children}</LeaveTo>
+  return <LeaveButton onClick={onClick} className={className} keys={keys}>{children}</LeaveButton>
 }
 
-function LeaveTo({ to, className, children }) {
+function LeaveTo({ to, className, keys, children }) {
   const navigate = useNavigate()
-  return <LeaveButton onClick={() => navigate(to)} className={className}>{children}</LeaveButton>
+  return <LeaveButton onClick={() => navigate(to)} className={className} keys={keys}>{children}</LeaveButton>
 }
 
-function LeaveButton({ onClick, children, className }) {
+function LeaveButton({ onClick, children, className, keys }) {
   return (
-    <button type="button" className={`stage__leave ${className}`.trim()} onClick={() => { playClick(); onClick() }}>
+    <button type="button" className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} onClick={() => { playClick(); onClick() }}>
       <ChevronIcon direction="left" size={14} />
       <span>{children}</span>
     </button>

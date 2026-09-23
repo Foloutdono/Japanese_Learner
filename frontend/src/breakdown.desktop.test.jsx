@@ -111,7 +111,7 @@ describe('a graded sentence on the desk', () => {
     expect($('.desk-run__side .desk-entry').textContent).toContain('九時')
     expect($('[role="dialog"]')).toBeNull()
 
-    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
     await settle(80)
     expect($('.desk-run__side .desk-entry')).toBeNull()
     expect(rows.isConnected).toBe(true)

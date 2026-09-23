@@ -11,6 +11,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
+import { EnterKey } from '../chrome/DeskKeys'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -285,6 +286,10 @@ export function ModeToggle({ mode, onChange, modes }) {
 // boards the extra train anyway — the cap is a default, never a lock.
 export function DoneMessage({ onBack, pace, onExtra }) {
   const { t } = useLang()
+  const desk = useDesk()
+  // 机 (plan 114): Enter takes the way back, the one filled action.
+  const back = () => { playClick(); onBack() }
+  const enterCap = desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>
 
   // The end of a session had no sound at all — the one moment in a
   // study run that is unambiguously an achievement. Guarded against
@@ -329,10 +334,11 @@ export function DoneMessage({ onBack, pace, onExtra }) {
           <button onClick={() => { playClick(); onExtra() }} className="btn-depart btn-depart--ghost quiz-done__extra">
             <span className="btn-depart__jp">{t.paceExtraTrain}</span>
           </button>
-          <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
-            <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+          <button onClick={back} className="btn-primary quiz-done__back" aria-keyshortcuts={desk ? 'Enter' : undefined}>
+            <ChevronIcon direction="left" size={14} /> {t.backToMenu}{enterCap}
           </button>
         </div>
+        <EnterKey onEnter={back} />
       </div>
     )
   }
@@ -342,10 +348,11 @@ export function DoneMessage({ onBack, pace, onExtra }) {
       <span className="quiz-done__mark" aria-hidden="true"><CheckIcon size={26} /></span>
       <p className="quiz-done__msg">{t.quizComplete}</p>
       <div className="quiz-done__foot">
-        <button onClick={() => { playClick(); onBack() }} className="btn-primary quiz-done__back">
-          <ChevronIcon direction="left" size={14} /> {t.backToMenu}
+        <button onClick={back} className="btn-primary quiz-done__back" aria-keyshortcuts={desk ? 'Enter' : undefined}>
+          <ChevronIcon direction="left" size={14} /> {t.backToMenu}{enterCap}
         </button>
       </div>
+      <EnterKey onEnter={back} />
     </div>
   )
 }

@@ -157,7 +157,7 @@ export default function ProfileScreen({ session }) {
     // Two figures and the two doors — Statistics, Settings.
     records: <Records profile={profile} t={t} navigate={navigate} />,
     ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
-    board: <Banzuke all={leaderboard} week={weekBoard} t={t} />,
+    board: <Banzuke all={leaderboard} week={weekBoard} t={t} both={desk} />,
   }
 
   return (
@@ -167,7 +167,8 @@ export default function ProfileScreen({ session }) {
 
       {inserts && (desk ? (
         // 机 — the desk (plan 112): the holder opened flat, the pass and
-        // its stamp book on the left, the record on the right. The same
+        // its stamp book on the left, at the phone's own size since plan
+        // 114 (--desk-side-w), the record taking the rest on the right. The same
         // inserts in the same order, split after the stamps — so a
         // screen reader, the Tab key and the guide walk them exactly as
         // they walk the phone's column.

@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
 import { useLang } from '../../LangContext'
+import { useDesk } from '../../hooks/useDesk'
+import { dialogOpen } from '../../lib/dialogOpen'
 import { PlusIcon } from '../ui/Icons'
 
 // ── The hint switch ───────────────────────────────────────────
@@ -24,8 +27,25 @@ import { PlusIcon } from '../ui/Icons'
 //   active    — Set/array of hint keys currently switched on
 //   onToggle  — (hintKey) => void
 //   disabled  — true while the card is locked mid-review
+//
+// On the desk (plan 114) C shows and hides the choices, the one hint a
+// learner reaches for card after card — never Ctrl+C, never from a
+// field, never under a dialog — and the switch prints its cap.
 export default function HintBar({ available = [], active = [], onToggle, disabled = false }) {
   const { t } = useLang()
+  const desk = useDesk()
+  const choices = desk && !disabled && available.includes('indice_1')
+  useEffect(() => {
+    if (!choices) return undefined
+    const onKey = e => {
+      if ((e.key !== 'c' && e.key !== 'C') || e.repeat || e.metaKey || e.ctrlKey || e.altKey) return
+      if (dialogOpen() || e.target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName ?? '')) return
+      e.preventDefault()
+      onToggle('indice_1')
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [choices, onToggle])
   if (available.length === 0) return null
 
   const isOn = key => (active instanceof Set ? active.has(key) : active.includes(key))
@@ -55,11 +75,13 @@ export default function HintBar({ available = [], active = [], onToggle, disable
             onClick={() => onToggle(key)}
             disabled={disabled}
             aria-pressed={on}
+            aria-keyshortcuts={desk && key === 'indice_1' ? 'C' : undefined}
           >
             {/* Study.dc.html draws a plus, not a bulb: these ADD a
                 register to the card rather than offer a hint. */}
             <PlusIcon size={14} />
             {on ? hideLabel : showLabel}
+            {desk && key === 'indice_1' && <kbd className="desk-kbd" aria-hidden="true">C</kbd>}
           </button>
         )
       })}

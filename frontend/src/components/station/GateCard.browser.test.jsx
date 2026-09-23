@@ -14,7 +14,7 @@ const creditsRef = { current: null }
 vi.mock('../../stores/credits', () => ({
   useCredits: () => creditsRef.current,
 }))
-vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn() }))
+vi.mock('../../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 

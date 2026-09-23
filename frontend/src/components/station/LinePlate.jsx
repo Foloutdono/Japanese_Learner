@@ -93,7 +93,11 @@ export function StopsFoot({ stops, guide }) {
  * that is the distance the profile's ledger and the station page each
  * print one piece of, read at a glance from the gate.
  */
-export function LineFoot({ stops, stats, source, guide }) {
+//
+// Every leg is a door (plan 114): its station's platforms are one click
+// from the gate, where the plate's head departs to the stop being
+// ridden — marked here as the learner's location.
+export function LineFoot({ stops, stats, source, guide, onStop }) {
   const marks = lineMarks(stops)
   const reached = Math.min(stops.length, Math.floor(stopsTravelled(stops)))
   return (
@@ -103,13 +107,19 @@ export function LineFoot({ stops, stats, source, guide }) {
         const { learned, total } = deckItems(stats, source, stop.key)
         const state = i < reached ? ' desk-line__leg--done' : i === reached ? ' desk-line__leg--here' : ''
         return (
-          <span key={stop.key} className={`desk-line__leg${state}`}>
+          <button
+            key={stop.key}
+            type="button"
+            className={`desk-line__leg${state}`}
+            aria-current={i === reached ? 'location' : undefined}
+            onClick={() => onStop?.(stop.key)}
+          >
             <span className="desk-line__track" aria-hidden="true">
               <i style={{ width: `${Math.round(Math.min(1, Math.max(0, stop.score)) * 100)}%` }} />
             </span>
             <span className="desk-line__stop"><Mark mark={marks[i + 1]} /></span>
             {total > 0 && <span className="desk-line__fig">{learned}/{total}</span>}
-          </span>
+          </button>
         )
       })}
     </span>

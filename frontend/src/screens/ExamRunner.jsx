@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -16,6 +16,7 @@ import { PassageText } from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
 import AnswerSheet, { SheetBar } from '../exam/AnswerSheet'
 import { useDesk } from '../hooks/useDesk'
+import { LeaveKey } from '../components/chrome/DeskKeys'
 import { PageIcon, ChevronIcon, FlagIcon } from '../components/ui/Icons'
 
 // Poll cadence while the server generates a paper (it answers 202 until
@@ -286,6 +287,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
   }, [current, currentOptions, index, questions.length, dialogOpen])
 
   const leaveToPapers = () => navigate('/practice/exam')
+  const askLeave = useCallback(() => setLeaving(true), [])
 
   // ── Generating ──
   // Not the shared <Loading/>: opening a never-before-seen paper runs
@@ -473,7 +475,12 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             a question — and the answer ("your progress is saved") is
             something the learner otherwise has no way to know. */}
         <div className="exam-meta">
-          <Leave onClick={() => setLeaving(true)}>{t.leaveExam}</Leave>
+          <Leave onClick={() => setLeaving(true)} keys={desk ? 'Escape' : undefined}>
+            {t.leaveExam}
+            {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEscape}</kbd>}
+          </Leave>
+          {/* On the desk Esc asks the same question (plan 114). */}
+          <LeaveKey onLeave={askLeave} />
           <span className="exam-meta__section">
             <h1 className="exam-meta__jp">{paperTitle(exam, t)}</h1>
           </span>
