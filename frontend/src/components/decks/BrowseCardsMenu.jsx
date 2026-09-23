@@ -3,7 +3,7 @@ import { apiFetch, apiJson } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
-import { dialogOpen } from '../../lib/dialogOpen'
+import { DeskDock } from '../chrome/DeskDock'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -78,22 +78,14 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
 // platforms, or the card form), so Browse opens there rather than over
 // the page: the cards it adds land in the list beside it as they go in,
 // and the page is never behind a scrim. The same body as the phone's
-// overlay; Esc or ✕ gives the column back to the platforms.
+// overlay, in the dock's shell (chrome/DeskDock, plan 117); Esc or ✕
+// gives the column back to the platforms.
 export function BrowseCardsDock({ deckId, deckType, session, onAdded, onClose }) {
   const { t } = useLang()
-  useEffect(() => {
-    const onKey = e => { if (e.key === 'Escape' && !dialogOpen()) onClose() }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onClose])
   return (
-    <section className="desk-browse" aria-labelledby="desk-browse-title">
-      <div className="desk-browse__head">
-        <h2 id="desk-browse-title" className="desk-deck__cap">{t.browseTitle}</h2>
-        <button type="button" onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
-      </div>
+    <DeskDock title={t.browseTitle} className="desk-browse" onClose={onClose}>
       <BrowseBody deckId={deckId} deckType={deckType} session={session} onAdded={onAdded} onClose={onClose} autoFocus />
-    </section>
+    </DeskDock>
   )
 }
 

@@ -7,6 +7,7 @@ import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { DeskSide } from '../components/chrome/DeskSide'
+import { DeskDock } from '../components/chrome/DeskDock'
 import { DeckPlatforms } from '../components/decks/DeckPlatforms'
 import { useDesk } from '../hooks/useDesk'
 import { Chip } from '../components/chrome/Console'
@@ -404,6 +405,9 @@ export default function DeckDetailScreen({ session }) {
   // re-render of this screen while one of them is open.
   const closeImport = useCallback(() => setShowImport(false), [])
   const closeBrowse = useCallback(() => setShowBrowse(false), [])
+  // The same for More, whose dock on the desk (DeskDock) keys its Esc
+  // on it. Closing More also drops a deletion that was being asked.
+  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false) }, [])
 
   // Fetched rather than linked: the endpoint needs the bearer token, and
   // a bare <a href> to /api/... sends no Authorization header, so it
@@ -507,22 +511,28 @@ export default function DeckDetailScreen({ session }) {
     })
   }
 
-  // On the desk the form, Browse and the platforms take turns in one
-  // column (plan 115): opening one gives the column to it.
-  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) setShowBrowse(false) }
+  // On the desk the form, Browse, More and the platforms take turns in
+  // one column (plans 115, 117): opening one gives the column to it.
+  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
 
   function startEdit(card) {
     setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
     setNotes(card.notes || '')
     setEditing(card.id)
     setAdding(true)
-    if (desk) setShowBrowse(false)
+    if (desk) { setShowBrowse(false); closeMore() }
   }
 
   function openBrowse() {
     playUi('click-mode-selection')
     setShowBrowse(true)
-    if (desk) setAdding(false)
+    if (desk) { setAdding(false); closeMore() }
+  }
+
+  function openMore() {
+    playUi('click-mode-selection')
+    setMoreOpen(true)
+    if (desk) { setAdding(false); setShowBrowse(false) }
   }
 
   function saveCard() {
@@ -681,6 +691,45 @@ export default function DeckDetailScreen({ session }) {
     </div>
   )
 
+  // What More holds (plan 071): the cards in and out, and the deck into
+  // the library. A sheet on a phone; on the desk it opens in the side
+  // instead (plan 117), since none of it is a question.
+  const moreActions = (
+    <>
+      {allowCustom && (
+        <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
+          <ImportIcon size={14} /> {t.import}
+        </button>
+      )}
+      {cards.length > 0 && (
+        <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
+          <ExportIcon size={14} /> {t.export}
+        </button>
+      )}
+      {/* The library, from the deck that goes into it. Publishing is
+          not an action on the shelf card — the card is one whole
+          button into the deck — and it is not a chip either: the chip
+          row is what you do to the CARDS. */}
+      {cards.length > 0 && deck?.visibility !== 'public' && (
+        <button type="button" className="btn-secondary" disabled={busy}
+          onClick={() => publish(true)}>
+          <BooksIcon size={14} /> {t.libraryPublish}
+        </button>
+      )}
+      {deck?.visibility === 'public' && (
+        <>
+          {/* A statement, not a question: .sheet__q is what the
+              sheet ASKS, and there is nothing to answer here. */}
+          <span className="lib-note">{t.libraryPublished}</span>
+          <button type="button" className="btn-secondary" disabled={busy}
+            onClick={() => publish(false)}>
+            <CrossIcon size={14} /> {t.libraryUnpublish}
+          </button>
+        </>
+      )}
+    </>
+  )
+
   // The page under the bar. On the desk it is the first of two
   // columns, the deck's platforms (or the form) the second.
   const body = (
@@ -759,7 +808,8 @@ export default function DeckDetailScreen({ session }) {
           {cards.length > 0 && (
             <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
           )}
-          <Chip onClick={() => { playUi('click-mode-selection'); setMoreOpen(true) }} aria-haspopup="dialog">
+          {/* A sheet on a phone; on the desk, the side's (plan 117). */}
+          <Chip on={desk && moreOpen} onClick={openMore} aria-haspopup={desk ? undefined : 'dialog'}>
             <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
           </Chip>
         </div>
@@ -941,9 +991,20 @@ export default function DeckDetailScreen({ session }) {
       {desk ? (
         <div className="desk-deck">
           <div className="desk-deck__main">{body}</div>
-          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : t.study}>
+          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : moreOpen ? t.deckMore : t.study}>
             {adding ? cardForm
               : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
+              // More is a list of what can be done to the deck, not a
+              // question: it opens in the column (plan 117), and only its
+              // deletion asks, in a dialog of its own (below).
+              : moreOpen ? (
+                <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
+                  {moreActions}
+                  <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
+                    <TrashIcon size={14} /> {t.deleteDeck}
+                  </button>
+                </DeskDock>
+              )
               // The platforms once the cards are in: a deck's modes turn
               // on whether it has a card, and asking before the list has
               // loaded asked twice.
@@ -980,38 +1041,8 @@ export default function DeckDetailScreen({ session }) {
         </button>
       </Sheet>
 
-      <Sheet open={moreOpen} onClose={() => { setMoreOpen(false); setConfirmingDeck(false) }} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
-        {allowCustom && (
-          <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
-            <ImportIcon size={14} /> {t.import}
-          </button>
-        )}
-        {cards.length > 0 && (
-          <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
-            <ExportIcon size={14} /> {t.export}
-          </button>
-        )}
-        {/* The library, from the deck that goes into it. Publishing is
-            not an action on the shelf card — the card is one whole
-            button into the deck — and it is not a chip either: the chip
-            row is what you do to the CARDS. */}
-        {cards.length > 0 && deck?.visibility !== 'public' && (
-          <button type="button" className="btn-secondary" disabled={busy}
-            onClick={() => publish(true)}>
-            <BooksIcon size={14} /> {t.libraryPublish}
-          </button>
-        )}
-        {deck?.visibility === 'public' && (
-          <>
-            {/* A statement, not a question: .sheet__q is what the
-                sheet ASKS, and there is nothing to answer here. */}
-            <span className="lib-note">{t.libraryPublished}</span>
-            <button type="button" className="btn-secondary" disabled={busy}
-              onClick={() => publish(false)}>
-              <CrossIcon size={14} /> {t.libraryUnpublish}
-            </button>
-          </>
-        )}
+      <Sheet open={moreOpen && !desk} onClose={closeMore} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
+        {moreActions}
         {confirmingDeck ? (
           <>
             <span className="sheet__q">
@@ -1034,6 +1065,22 @@ export default function DeckDetailScreen({ session }) {
             <TrashIcon size={14} /> {t.deleteDeck}
           </button>
         )}
+      </Sheet>
+
+      {/* On the desk More is a column (above), so the deck's own
+          deletion asks in a dialog of its own, as the three other
+          irreversibles here do (plan 117). */}
+      <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck}>
+        <span className="sheet__q">
+          {deck?.followers > 0
+            ? t.libraryDeleteFollowed(deck.followers)
+            : t.deleteDeckConfirm}
+        </span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
       </Sheet>
 
       {/* The selection's deletion, asked in the same sheet — the count

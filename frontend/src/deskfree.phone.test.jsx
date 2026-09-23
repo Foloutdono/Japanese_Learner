@@ -631,3 +631,38 @@ describe('the browse (plan 116)', () => {
     expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
   })
 })
+
+// ── plan 117 — the doors a phone keeps as sheets ──
+// On the desk a door that does not interrupt opens in the page's own
+// column: a deck's More in its side (its deletion still asked, in a
+// dialog), a gate lesson's rival in the run's side, the grab's
+// walkthrough beside the intake, a kanji's readings in the entry's
+// place, the iOS install steps in the settings page. A phone keeps every
+// one of them the sheet it was, and draws none of the desk's.
+describe('the doors (plan 117)', () => {
+  it('keeps a deck\'s More a sheet, its deletion asked inside it', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    const more = [...document.querySelectorAll('.chip-row button')].find(b => b.querySelector('.chip__dots'))
+    expect(more.getAttribute('aria-haspopup')).toBe('dialog')
+    more.click()
+    await settle()
+    const sheet = document.querySelector('.scrim [role="dialog"]')
+    expect(sheet).not.toBeNull()
+    expect(sheet.querySelectorAll('.btn-secondary').length).toBeGreaterThan(0)
+    sheet.querySelector('.btn-primary--danger').click()
+    await settle()
+    expect(document.querySelectorAll('[role="dialog"]')).toHaveLength(1)
+    expect(sheet.querySelector('.sheet__q')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+})
