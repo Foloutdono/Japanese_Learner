@@ -30,6 +30,10 @@ vi.mock('./lib/supabase', () => ({
 vi.mock('./lib/audio', async o => ({
   ...(await o()), playUi: vi.fn(), playClick: vi.fn(), playToggle: vi.fn(),
 }))
+// iOS Safari, for the one test that needs its install row (plan 117):
+// off by default, as headless Chromium is, so the page is as it was.
+const install = vi.hoisted(() => ({ ios: false }))
+vi.mock('./stores/installPrompt', async o => ({ ...(await o()), isIosSafari: () => install.ios }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: SettingsScreen } = await import('./screens/SettingsScreen')
@@ -113,5 +117,36 @@ describe('settings on the desk', () => {
     document.querySelector('.stg-row[data-page="sound"]').click()
     await settle()
     expect(document.querySelector('.desk-settings__list .stg-signout')).not.toBeNull()
+  })
+})
+
+// ── plan 117 — the install steps in the page ──
+// iOS Safari installs from its share sheet alone, so the Display page's
+// install row explains the two taps. An iPad on its side reaches the
+// desk, and there the explanation opens in the page under the row
+// rather than in a sheet over it. The phone's side is deskfree.phone.
+describe('the install row on the desk', () => {
+  it('opens the two taps in the page, and folds them again', async () => {
+    install.ios = true
+    try {
+      await mount('/profile/settings/display')
+      await settle()
+      const page = document.querySelector('.desk-settings__page')
+      const button = [...page.querySelectorAll('.slip__act')].pop()
+      expect(button.getAttribute('aria-expanded')).toBe('false')
+      button.click()
+      await settle()
+      expect(document.querySelector('[role="dialog"]')).toBeNull()
+      expect(button.getAttribute('aria-expanded')).toBe('true')
+      const steps = page.querySelector('.desk-install')
+      expect(steps.id).toBe(button.getAttribute('aria-controls'))
+      expect(steps.querySelectorAll('.install-sheet__steps li')).toHaveLength(2)
+      button.click()
+      await settle()
+      expect(page.querySelector('.desk-install')).toBeNull()
+      expect(button.getAttribute('aria-expanded')).toBe('false')
+    } finally {
+      install.ios = false
+    }
   })
 })

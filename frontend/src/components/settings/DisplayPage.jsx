@@ -6,7 +6,8 @@ import { useThemeChoice } from '../../stores/theme'
 import { useMediaQuery } from '../../hooks/useMediaQuery'
 import { useInstallPrompt, promptInstall, isIosSafari } from '../../stores/installPrompt'
 import { isNative } from '../../lib/platform'
-import { InstallSheet } from '../ui/InstallSheet'
+import { InstallSheet, InstallSteps } from '../ui/InstallSheet'
+import { useDesk } from '../../hooks/useDesk'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Display & language ────────────────────────────────────────
@@ -74,6 +75,10 @@ function InstallSlip({ t }) {
   const promptable = useInstallPrompt()
   const [sheet, setSheet] = useState(false)
   const ios = isIosSafari()
+  // 机 (plan 117): an iPad on its side reaches the desk. There the two
+  // taps are read in the page, under this row, rather than in a sheet
+  // over it — the page is right there, and nothing needs interrupting.
+  const desk = useDesk()
   // The store app is already installed (plan 076).
   if (isNative() || standalone || (!promptable && !ios)) return null
   return (
@@ -82,11 +87,14 @@ function InstallSlip({ t }) {
       <button
         type="button"
         className="btn-secondary slip__act"
-        onClick={() => { playClick(); if (promptable) promptInstall(); else setSheet(true) }}
+        onClick={() => { playClick(); if (promptable) promptInstall(); else setSheet(open => (desk ? !open : true)) }}
+        aria-expanded={desk && !promptable ? sheet : undefined}
+        aria-controls={desk && !promptable ? 'desk-install-steps' : undefined}
       >
         {t.installAppBtn}
       </button>
-      {sheet && <InstallSheet onClose={() => setSheet(false)} />}
+      {sheet && desk && <div className="desk-install" id="desk-install-steps"><InstallSteps /></div>}
+      {sheet && !desk && <InstallSheet onClose={() => setSheet(false)} />}
     </Slip>
   )
 }

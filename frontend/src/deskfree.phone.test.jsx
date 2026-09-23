@@ -14,6 +14,10 @@ import './index.css'
 // additions.
 
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
+// iOS Safari, for plan 117's install row: off by default, as headless
+// Chromium is, so nothing else here meets that row.
+const install = vi.hoisted(() => ({ ios: false }))
+vi.mock('./stores/installPrompt', async o => ({ ...(await o()), isIosSafari: () => install.ios }))
 // The statistics' two payloads (P4); nothing else here fetches.
 const STATS = {
   kana: { hiragana_basic: { 'kana.flashcard.f2b': { total: 46, new: 0, learning: 6, mastered: 40, reviews: 200, correct: 180 } } },
@@ -736,5 +740,23 @@ describe('the doors (plan 117)', () => {
     expect(document.querySelector('.dict-sheet__scrim--over .dict-sheet[role="dialog"] .dict-readings')).not.toBeNull()
     expect(document.querySelector('.dict-dock .dict-plate__word').textContent).toBe('駅')
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
+  })
+
+  it('keeps the iOS install steps a sheet over the page', async () => {
+    install.ios = true
+    try {
+      const { MemoryRouter } = await import('react-router-dom')
+      const { DisplayPage } = await import('./components/settings/DisplayPage')
+      await render(<LangProvider><MemoryRouter><DisplayPage /></MemoryRouter></LangProvider>)
+      await settle()
+      const button = [...document.querySelectorAll('.slip__act')].pop()
+      expect(button.hasAttribute('aria-expanded')).toBe(false)
+      button.click()
+      await settle()
+      expect(document.querySelector('[role="dialog"].install-sheet')).not.toBeNull()
+      expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    } finally {
+      install.ios = false
+    }
   })
 })
