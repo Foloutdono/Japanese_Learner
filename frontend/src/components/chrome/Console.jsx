@@ -131,6 +131,9 @@ export function ConsoleAction({ gold = false, onClick, children, ...rest }) {
 // way back out. The row stays, holding the toggle alone, rather than
 // the whole thing going and taking the way out with it.
 export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inputRef, clearLabel, toggle, field = true, ...rest }) {
+  // The clear is an icon; on the desk it says what it does under a
+  // pointer too (plan 123).
+  const desk = useDesk()
   if (!field) {
     return toggle ? <div className="console__index console__index--bare">{toggle}</div> : null
   }
@@ -146,7 +149,7 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
         {...rest}
       />
       {value && onClear && (
-        <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel}>
+        <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel} title={desk ? clearLabel : undefined}>
           <CrossIcon size={14} />
         </button>
       )}

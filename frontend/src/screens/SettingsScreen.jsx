@@ -10,7 +10,7 @@ import { NOVICE_GOAL } from '../domain/goalMath'
 import { useThemeChoice } from '../stores/theme'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { SplitRow } from '../components/selection/SplitRow'
-import { useListWalk } from '../hooks/useListWalk'
+import { useListWalk, WALK_KEYS } from '../hooks/useListWalk'
 import { ChevronIcon, GearIcon } from '../components/ui/Icons'
 import { useOfferable } from '../hooks/useOfferable'
 import { openPaywall } from '../stores/credits'
@@ -140,7 +140,7 @@ function SettingsListBody({ session, current = null }) {
         aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
-      <div className="stg-list" onKeyDown={onWalk}>
+      <div className="stg-list" onKeyDown={onWalk} aria-keyshortcuts={desk ? WALK_KEYS : undefined}>
         {ROWS.map(row => (
           <SplitRow
             key={row.id}

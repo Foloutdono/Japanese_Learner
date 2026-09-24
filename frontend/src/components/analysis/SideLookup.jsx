@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 import { lookupKey } from './lookup'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { holdEsc } from '../../stores/escHold'
 
 // ── 机 — a door in a docked breakdown opens beside it (plan 115) ──
 // A breakdown standing in a run's side column (BreakdownSide, the
@@ -60,6 +61,9 @@ export function SideLookup({ lookup, onExit, session, head, children }) {
     }
     was.current = open
   }, [open])
+
+  // The run's head drops its Esc while the entry holds the key.
+  useEffect(() => (open ? holdEsc() : undefined), [open])
 
   useEffect(() => {
     if (!open) return undefined

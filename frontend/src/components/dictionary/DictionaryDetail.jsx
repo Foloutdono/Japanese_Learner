@@ -18,6 +18,7 @@ import { useDialog } from '../../hooks/useDialog'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
+import { holdEsc } from '../../stores/escHold'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
@@ -504,12 +505,14 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
             <span className="dict-readings__title">{t.allReadings}</span>
           </div>
           <div className="dict-plate__actions">
+            {/* Desk-only (plan 120), and Esc steps back too (plan 123). */}
             <button
               type="button"
               onClick={onClose}
               className="dict-plate__btn"
-              title={t.close}
+              title={`${t.close} (${t.keyEscape})`}
               aria-label={t.close}
+              aria-keyshortcuts="Escape"
             >
               <CloseIcon />
             </button>
@@ -976,13 +979,17 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             {/* No ✕ where there is nothing to close: the desk's dock
                 (plan 114) is the catalogue's standing companion, not a
                 panel that was opened. */}
+            {/* On the desk every entry that has a ✕ also closes on Esc
+                -- a lookup dialog, a door in a column, the analyser's
+                dock -- so it says so there (plan 123). */}
             {onClose && (
               <button
                 type="button"
                 onClick={onClose}
                 className="dict-plate__btn"
-                title={t.close}
+                title={desk ? `${t.close} (${t.keyEscape})` : t.close}
                 aria-label={t.close}
+                aria-keyshortcuts={desk ? 'Escape' : undefined}
               >
                 <CloseIcon />
               </button>
@@ -1505,6 +1512,10 @@ export function DictionaryLookupBody({ term, kana, category, id, session, mining
   // (which closes an open miss) and lose the key to it.
   const toRoot = useRef(null)
   useEffect(() => { toRoot.current = look.root })
+  // A door open in the docked entry holds Esc: the run's head drops its
+  // cap meanwhile (stores/escHold).
+  const deep = escBack && Boolean(look.root)
+  useEffect(() => (deep ? holdEsc() : undefined), [deep])
   useEffect(() => {
     if (!escBack) return undefined
     const onKey = e => {

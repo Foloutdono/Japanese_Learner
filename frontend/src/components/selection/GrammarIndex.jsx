@@ -4,7 +4,7 @@ import { StageMark } from '../study/StageMark'
 import { ChevronIcon } from '../ui/Icons'
 import { SplitRow } from './SplitRow'
 import { useRef } from 'react'
-import { useListWalk, useFollowFocus } from '../../hooks/useListWalk'
+import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../../hooks/useListWalk'
 
 // ── The points of a level, as an index (plan 087) ───────────────
 // Behind the station's door (GrammarScreen, ?index=1): one row per
@@ -31,7 +31,7 @@ export default function GrammarIndex({ points, onOpen, selected = null, linkTo =
   if (!points?.length) return null
   const stop = points.some(p => p.raw_id === selected) ? selected : points[0].raw_id
   return (
-    <ol className="gl-index" aria-label={t.glPoints} ref={listRef} onKeyDown={onWalk}>
+    <ol className="gl-index" aria-label={t.glPoints} ref={listRef} onKeyDown={onWalk} aria-keyshortcuts={walked ? WALK_KEYS_PAGED : undefined}>
       {points.map(p => (
         <li key={p.raw_id}>
           <SplitRow to={linkTo?.(p.raw_id)} className={`gl-index__row gl-index__row--${p.stage}`}

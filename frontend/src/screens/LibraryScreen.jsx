@@ -12,7 +12,7 @@ import { LibraryCard } from '../components/decks/LibraryCard'
 import { deckTypes } from '../components/decks/deckTypes'
 import { BooksIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
-import { useListWalk, useFollowFocus } from '../hooks/useListWalk'
+import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import { PublicDeckPane } from '../components/decks/PublicDeckPage'
 import PublicDeckScreen from './PublicDeckScreen'
@@ -300,7 +300,7 @@ function LibraryShelf({ session, open }) {
                 )
               )}
               {settled && decks.length > 0 && (
-                <div className="platform-grid" ref={shelfRef} onKeyDown={onShelfWalk}>
+                <div className="platform-grid" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={desk ? WALK_KEYS : undefined}>
                   {decks.map((deck, i) => (
                     <LibraryCard key={deck.id} deck={deck} t={t} open={String(deck.id) === String(open)}
                       to={`/learn/decks/library/${deck.id}`}

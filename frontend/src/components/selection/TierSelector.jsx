@@ -6,7 +6,7 @@ import { Loading } from '../ui/Loading'
 import Empty from '../ui/Empty'
 import { Seg } from '../chrome/Console'
 import { SplitRow } from './SplitRow'
-import { useListWalk, useFollowFocus } from '../../hooks/useListWalk'
+import { useListWalk, useFollowFocus, WALK_KEYS } from '../../hooks/useListWalk'
 
 // The default size and the size options live with the tier maths in
 // domain/tiers.js (the practice pickers read them too, plan 072).
@@ -121,7 +121,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
       )}
 
       {tiers && (
-        <div className="platform-grid" ref={gridRef} onKeyDown={onWalk}>
+        <div className="platform-grid" ref={gridRef} onKeyDown={onWalk} aria-keyshortcuts={walked ? WALK_KEYS : undefined}>
           {visibleTiers.map(tr => {
             const open = selected != null && tr.tier === selected
             return (

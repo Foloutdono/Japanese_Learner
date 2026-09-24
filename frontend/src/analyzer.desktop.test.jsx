@@ -334,3 +334,59 @@ describe('the grab\'s walkthrough on the desk', () => {
     expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
   })
 })
+
+// ── plan 123, P19 — a screenshot goes in without a file ──
+// The photo platform's lead names a screenshot, and the only way in was
+// to save one and find it in a file dialog. On the desk a picture pasted
+// (anywhere but a field) or dropped on the two tiles goes straight to
+// the cropper; both tiles stay, Choose printing the paste's key.
+describe('the photo intake on the desk', () => {
+  const png = () => new File([new Uint8Array([137, 80, 78, 71])], 'shot.png', { type: 'image/png' })
+  const carrying = file => { const d = new DataTransfer(); d.items.add(file); return d }
+  async function photo() {
+    await mount()
+    $$('.anl-sources .seg__opt')[1].click()
+    await settle()
+    expect($('.analysis-image-input .intake-pair')).not.toBeNull()
+  }
+
+  it('takes a pasted picture into the cropper, and prints the key on Choose', async () => {
+    await photo()
+    expect($$('.intake-btn')).toHaveLength(2)
+    const choose = $$('.intake-btn')[1]
+    expect(choose.querySelector('.desk-kbd').textContent).toMatch(/^(Ctrl|⌘) V$/)
+    expect(choose.getAttribute('aria-keyshortcuts')).toMatch(/^(Control|Meta)\+V$/)
+    document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: carrying(png()), bubbles: true, cancelable: true }))
+    await settle()
+    expect($('.analysis-cropper')).not.toBeNull()
+  })
+
+  it('leaves a paste into a field to the field', async () => {
+    await photo()
+    const field = document.createElement('input')
+    document.body.appendChild(field)
+    try {
+      field.dispatchEvent(new ClipboardEvent('paste', { clipboardData: carrying(png()), bubbles: true, cancelable: true }))
+      await settle()
+      expect($('.analysis-cropper')).toBeNull()
+    } finally {
+      field.remove()
+    }
+  })
+
+  it('takes a dropped picture into the cropper', async () => {
+    await photo()
+    const target = $('.desk-photo')
+    const data = carrying(png())
+    const over = new DragEvent('dragover', { dataTransfer: data, bubbles: true, cancelable: true })
+    target.dispatchEvent(over)
+    expect(over.defaultPrevented).toBe(true)
+    await settle(30)
+    expect(target.classList.contains('desk-photo--over')).toBe(true)
+    const drop = new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true })
+    target.dispatchEvent(drop)
+    expect(drop.defaultPrevented).toBe(true)
+    await settle()
+    expect($('.analysis-cropper')).not.toBeNull()
+  })
+})

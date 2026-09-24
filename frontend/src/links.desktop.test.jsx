@@ -94,7 +94,7 @@ async function rest() {
   const corner = document.createElement('div')
   corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
   document.body.appendChild(corner)
-  await userEvent.hover(corner)
+  await userEvent.hover(corner, { force: true })
   corner.remove()
   document.activeElement?.blur()
   // Past a hover's transition out (the halls ease 0.15s).

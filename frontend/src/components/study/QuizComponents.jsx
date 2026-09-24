@@ -816,8 +816,22 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
     return () => window.removeEventListener('keydown', handler)
   }, [revealed])
 
+  // 机 (plan 123): a drag that selects a word on the card ends in a
+  // click, and that click turned the card -- remounting the face and
+  // the selection with it, so nothing on a card could be copied. On the
+  // desk a click that leaves text selected inside the card is a
+  // selection, not a turn. (A double-click's first click still turns
+  // it: telling the two apart would delay every turn.)
+  const onCardClick = desk
+    ? e => {
+      const picked = window.getSelection?.()
+      if (picked && !picked.isCollapsed && e.currentTarget.contains(picked.anchorNode)) return
+      handleClick()
+    }
+    : handleClick
+
   return (
-    <div onClick={handleClick} className="flashcard">
+    <div onClick={onCardClick} className="flashcard">
       <RevealActions
         t={t}
         revealed={revealed}

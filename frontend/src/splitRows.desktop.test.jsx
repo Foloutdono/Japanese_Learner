@@ -185,7 +185,7 @@ describe('a split row as a link looks like the button it was', () => {
     const corner = document.createElement('div')
     corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
     document.body.appendChild(corner)
-    await userEvent.hover(corner)
+    await userEvent.hover(corner, { force: true })
     corner.remove()
     document.activeElement?.blur?.()
     // And past the hover's way out: a stop eases its background over

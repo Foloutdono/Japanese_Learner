@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { CloseIcon } from '../ui/Icons'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing } from '../../lib/keyGuards'
+import { holdEsc } from '../../stores/escHold'
 
 // ── 机 — a door opened in the page's own column (plans 115, 120) ─────
 // On the desk a door that does not interrupt opens beside the page
@@ -48,6 +49,8 @@ export function DeskDock({ title, onClose, className = '', initialFocus, childre
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
+  // A run's head drops its Esc while the dock holds the key.
+  useEffect(() => holdEsc(), [])
 
   useEffect(() => {
     returnTo.current = document.activeElement

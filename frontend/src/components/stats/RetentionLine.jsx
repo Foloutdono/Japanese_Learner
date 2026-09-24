@@ -26,6 +26,11 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // With `fit` (the desk, plan 114) the viewBox is the box's own width in
 // pixels and a taller H, so the strokes and stops are drawn 1:1 however
 // wide the card is — never a phone's chart magnified.
+//
+// `onPreview` is the desk's too (plan 123): a mouse over the line asks
+// the week under it without a press -- the head and the ring follow the
+// pointer, the pressed week comes back when it leaves, and a click still
+// pins one. A press-and-sweep and the arrow keys are as they were.
 const PHONE_W = 326
 const PHONE_H = 96
 const FIT_H = 160
@@ -35,7 +40,7 @@ const RING = 8
 const PAD = RING + 2
 const FOOT = 4
 
-export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSelect, fit = false }) {
+export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSelect, onPreview, fit = false }) {
   const { t } = useLang()
   const svgRef = useRef(null)
   const [boxRef, boxWidth] = useBoxWidth(fit)
@@ -69,13 +74,26 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
   const selShown = sel - firstIndex
   const nowShown = currentIndex - firstIndex
 
-  function pick(clientX) {
+  // The week nearest the pointer, or null with nothing drawn.
+  function nearest(clientX) {
     const box = svgRef.current?.getBoundingClientRect()
-    if (!box || !ridden.length) return
+    if (!box || !ridden.length) return null
     const px = ((clientX - box.left) / box.width) * W
     let best = ridden[0]
     for (const i of ridden) if (Math.abs(x(i) - px) < Math.abs(x(best) - px)) best = i
-    onSelect?.(best + firstIndex)
+    return best + firstIndex
+  }
+
+  function pick(clientX) {
+    const week = nearest(clientX)
+    if (week !== null) onSelect?.(week)
+  }
+
+  function onMove(e) {
+    if (e.buttons) { pick(e.clientX); return }
+    if (!onPreview || e.pointerType !== 'mouse') return
+    const week = nearest(e.clientX)
+    if (week !== null) onPreview(week)
   }
 
   function onKey(e) {
@@ -98,7 +116,8 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
         aria-valuenow={weeks[sel].pct ?? undefined}
         aria-valuetext={t.reportWeekOf(weeks[sel].start, weeks[sel].reviews)}
         onPointerDown={e => { e.currentTarget.setPointerCapture?.(e.pointerId); pick(e.clientX) }}
-        onPointerMove={e => { if (e.buttons) pick(e.clientX) }}
+        onPointerMove={onMove}
+        onPointerLeave={onPreview ? () => onPreview(null) : undefined}
         onKeyDown={onKey}
       >
         {n === 1 && <line className="rep-line__ahead" x1={x(0)} y1={y(shown[0].pct)} x2={W - PAD} y2={y(shown[0].pct)} />}

@@ -18,6 +18,14 @@ import { useEffect } from 'react'
 // a link inside a list item, a review row sits in its part's group.
 export const ROWS = ':scope > :is(a[href], button)'
 
+// The keys a walked list answers, for its `aria-keyshortcuts` (plan 123):
+// the walk is printed nowhere else -- a caption under every list was the
+// key legend plan 114 cut -- so a screen reader is at least told.
+export const WALK_KEYS = 'ArrowUp ArrowDown Home End'
+// A list whose open row the page's ←/→ also move (the grammar points,
+// the exam's questions).
+export const WALK_KEYS_PAGED = `${WALK_KEYS} ArrowLeft ArrowRight`
+
 export function useListWalk(active, { items = ROWS } = {}) {
   return active ? e => walk(e, items) : undefined
 }

@@ -5,7 +5,7 @@ import { playUi, playCorrect } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
-import { useListWalk, useFollowFocus } from '../hooks/useListWalk'
+import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
 import { StationSplit } from '../components/selection/StationSplit'
@@ -312,7 +312,7 @@ export default function ExamResult({ session }) {
         <StationSplit
           label={t.examReviewTitle}
           list={(
-            <div className="surface exam-review" ref={reviewRef} onKeyDown={onReviewWalk}>
+            <div className="surface exam-review" ref={reviewRef} onKeyDown={onReviewWalk} aria-keyshortcuts={desk ? WALK_KEYS_PAGED : undefined}>
               {groups.map(group => {
                 const rows = group.rows.filter(r => shown.has(r.id))
                 if (rows.length === 0) return null

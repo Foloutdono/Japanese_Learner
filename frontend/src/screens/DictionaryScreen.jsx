@@ -1110,7 +1110,7 @@ function ResultsSection({
 					    the order it carries them — with the level in its corner
 					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
-						<div className="dict-grid" onKeyDown={onGridWalk}>
+						<div className="dict-grid" onKeyDown={onGridWalk} aria-keyshortcuts={desk ? 'ArrowLeft ArrowRight ArrowUp ArrowDown Home End' : undefined}>
 							{results.map((entry, i) => {
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)

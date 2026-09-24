@@ -4,7 +4,7 @@ import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { DeskDock } from '../chrome/DeskDock'
-import { useListWalk } from '../../hooks/useListWalk'
+import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 import { composing } from '../../lib/keyGuards'
 
 // ── Browse & add existing app cards into a custom deck ─────
@@ -271,7 +271,7 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, dock = false 
         )}
 
         {!loading && results.length > 0 && (
-          <div ref={listRef} className="import-preview__list browse-results__list" onKeyDown={onWalk}>
+          <div ref={listRef} className="import-preview__list browse-results__list" onKeyDown={onWalk} aria-keyshortcuts={dock ? WALK_KEYS : undefined}>
             {results.map(r => {
               const isSel = selected.has(r.raw_id)
               // The dock's one tab stop: the row last focused, else the

@@ -22142,5 +22142,45 @@ a.slip__act { text-decoration: none; }
     .desk-brd .brd-day { cursor: pointer; }
     .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
   }
+
+  /* ── copied, focused (plan 123) ──
+     A reading copied from a desk's page is the word, not the word and
+     its furigana run together (日本語にほんご): these five ruby lines
+     kept their readings in a selection, where the plate, the examples,
+     the tiles and the fill sentence already let them go. On the desk
+     only, so the phone stays as it is. */
+  :is(.rvw__better, .kaki-line, .bkd-line, .bkd-row__word, .dict-word__jp, .furigana-word) rt { user-select: none; }
+  /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
+     the desk sets in its pages and columns: a keyboard reader was given
+     the global ring and none of what the pointer is shown -- the answer
+     sheet's chips in an exam's side, the analyser's stops, chips and
+     table rows, a word's kanji chips, Browse's rows in the deck's side. */
+  .desk-run__side .exam-sheet__chip:focus-visible {
+    border-color: var(--line-color, var(--line-exam));
+    color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
+  }
+  .desk-run__side .exam-sheet__chip--answered:focus-visible { color: var(--text-on-panel); }
+  :is(.phone--desk, .desk-run__side) .anl-chip:focus-visible { color: var(--text-primary); }
+  :is(.phone--desk, .desk-run__side) .anl-trow__surface:focus-visible { background: var(--overlay-hover); }
+  :is(.phone--desk, .desk-run__side) .anl-stop:focus-visible { background: var(--overlay-hover); color: var(--text-primary); }
+  :is(.phone--desk, .desk-run__side) .phrase-kanji-chip:has(.phrase-kanji-chip__char:focus-visible) { border-color: var(--border); }
+  :is(.phone--desk, .desk-run__side) .phrase-kanji-chip__char:focus-visible {
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 4px;
+  }
+  .desk-browse .browse-result-row--selectable:focus-visible { border-color: var(--deck-action); }
+  /* The photo intake's drop target (components/analysis/ImageInput,
+     plan 123): the two tiles as they are, until a file is dragged over
+     them -- then the video intake's drop face, in the analyser's line. */
+  .desk-photo {
+    border-radius: var(--r-card);
+    transition: background 0.16s ease;
+  }
+  .desk-photo--over {
+    background: var(--bg-card-hover);
+    outline: 1px dashed var(--line-kaiseki);
+    outline-offset: var(--sp-1);
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

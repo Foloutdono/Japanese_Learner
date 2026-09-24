@@ -1345,3 +1345,38 @@ describe('the column\'s doors (plan 123, P18)', () => {
     expect(document.activeElement.classList.contains('browse-search-input')).toBe(false)
   })
 })
+
+// ── plan 123, P19 — a phone's pointer, copy and names ──
+// On the desk a paste or a drop takes a picture into the cropper, a copy
+// leaves ruby readings out, and icon-only figures carry a title. A
+// phone keeps each as it was: no paste taken, the readings selectable,
+// no title written.
+describe('the pointer and the copy (plan 123, P19)', () => {
+  it('takes no paste into the photo intake, and draws the two tiles bare', async () => {
+    const { ImageInput } = await import('./components/analysis/ImageInput')
+    const { default: fr } = await import('./locales/fr/index.js')
+    document.body.innerHTML = ''
+    await render(<LangProvider><ImageInput t={fr} session={null} onTextReady={() => {}} /></LangProvider>)
+    await settle()
+    expect(document.querySelector('.desk-photo, .intake-btn .desk-kbd, .intake-btn[aria-keyshortcuts]')).toBeNull()
+    const data = new DataTransfer()
+    data.items.add(new File([new Uint8Array([137, 80, 78, 71])], 'shot.png', { type: 'image/png' }))
+    document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+    await settle()
+    expect(document.querySelector('.analysis-cropper')).toBeNull()
+  })
+
+  it('keeps the readings selectable and writes no title on the icon-only figures', async () => {
+    const { ConsoleIndex } = await import('./components/chrome/Console')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <span className="furigana-word"><ruby>日本<rt>にほん</rt></ruby></span>
+        <ConsoleIndex value="駅" onChange={() => {}} onClear={() => {}} clearLabel="Effacer" />
+      </LangProvider>
+    )
+    await settle()
+    expect(getComputedStyle(document.querySelector('.furigana-word rt')).userSelect).not.toBe('none')
+    expect(document.querySelector('.console__clear').hasAttribute('title')).toBe(false)
+  })
+})
