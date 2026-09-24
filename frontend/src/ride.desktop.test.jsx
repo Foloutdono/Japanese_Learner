@@ -22,9 +22,10 @@ vi.mock('./lib/api', () => ({
   ApiError: class ApiError extends Error {},
 }))
 vi.mock('./lib/track', () => ({ track: vi.fn(), flush: vi.fn() }))
+const summary = vi.hoisted(() => ({ current: { kanaKnown: 'both', dailyNewTarget: 10 } }))
 vi.mock('./stores/profileSummary', async o => ({
   ...(await o()),
-  useProfileSummary: () => ({ kanaKnown: 'both', dailyNewTarget: 10 }),
+  useProfileSummary: () => summary.current,
 }))
 vi.mock('./stores/credits', async o => ({
   ...(await o()),
@@ -59,7 +60,18 @@ const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
 const posts = () => apiJson.mock.calls.filter(([, , init]) => init?.method === 'POST')
 
+const ENTRIES = {
+  こんにちは: { type: 'vocab', kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', senses: [], examples: [] },
+  駅: { type: 'vocab', kanji: '駅', kana: 'えき', meaning: 'station', level: 'N5', senses: [], examples: [] },
+}
 beforeEach(() => {
+  summary.current = { kanaKnown: 'both', dailyNewTarget: 10 }
+  apiFetch.mockReset()
+  apiFetch.mockImplementation(async url => {
+    const q = new URLSearchParams(String(url).split('?')[1] ?? '').get('q')
+    const e = String(url).startsWith('/api/dictionary') && ENTRIES[q]
+    return { ok: true, status: 200, json: async () => ({ results: e ? [e] : [] }) }
+  })
   apiJson.mockReset()
   apiJson.mockImplementation(async (url, _s, init) => {
     if (String(url).startsWith('/api/onboarding/ride?')) return { cards: [KNOWN, UNKNOWN], sentence: SENTENCE }
@@ -126,5 +138,74 @@ describe('the ride\'s ends on the desk (P8)', () => {
     const done = posts().find(([u]) => u === '/api/onboarding/ride/done')
     expect(JSON.parse(done[2].body)).toEqual({ skipped: false })
     expect(onDone).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── P11 — the ride's side ──
+// The browse's side (plan 119): the flip docks the card's entry beside
+// it, where a phone looks it up from 🔍. Nothing to rate, nothing
+// beside the done room, and the ride's notes stand over the card.
+const box = el => el.getBoundingClientRect()
+const plate = () => $('.desk-run__side .desk-entry .dict-plate__word')?.textContent ?? null
+
+describe('the ride\'s side on the desk (P11)', () => {
+  it('docks each card\'s entry on the flip, and clears it with the next card', async () => {
+    await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
+    await settle(250)
+    const side = $('.desk-run__side')
+    expect(side).not.toBeNull()
+    expect(Math.round(box(side).width)).toBe(360)
+    expect(side.querySelector('.desk-tally')).toBeNull()
+    expect(side.querySelector('.desk-run__note')).not.toBeNull()
+    await userEvent.keyboard(' ')
+    await settle(400)
+    expect(plate()).toBe('こんにちは')
+    // No 🔍 on the card: the column is where the look-up goes.
+    expect($('.reveal-actions')).not.toBeNull()
+    expect([...document.querySelectorAll('.reveal-action-btn')].some(b => /dictionar|dictionnaire/i.test(b.title))).toBe(false)
+    await userEvent.keyboard('1')
+    await settle(650)
+    expect(plate()).toBeNull()
+    expect($('.desk-run__side .desk-run__note')).not.toBeNull()
+    await userEvent.keyboard(' ')
+    await settle(400)
+    expect(plate()).toBe('駅')
+    await userEvent.keyboard('1')
+    await settle(650)
+    expect($('.ride__done')).not.toBeNull()
+    expect($('.desk-run__side')).toBeNull()
+  })
+
+  it('docks 駅 for a learner who reads no hiragana, its reading in Latin letters', async () => {
+    summary.current = { kanaKnown: 'none', dailyNewTarget: 10 }
+    await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
+    await settle(250)
+    await userEvent.keyboard(' ')
+    await settle(400)
+    await userEvent.keyboard('1')
+    await settle(650)
+    await userEvent.keyboard(' ')
+    await settle(400)
+    expect(plate()).toBe('駅')
+  })
+
+  it('stands the ride\'s notes over the card, not over the window\'s middle', async () => {
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
+      await settle(300)
+      const note = $('.guide-callout')
+      expect(note).not.toBeNull()
+      const mid = r => (r.left + r.right) / 2
+      expect(Math.abs(mid(box(note)) - mid(box($('.flashcard'))))).toBeLessThan(1.5)
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  it('keeps no side on the reading ride', async () => {
+    await mount(<RideReading session={{ access_token: 'tok' }} onDone={() => {}} />, '/ride/reading-run')
+    await settle(300)
+    expect($('.desk-run__side')).toBeNull()
   })
 })

@@ -20846,6 +20846,12 @@ a.slip__act { text-decoration: none; }
      not draw; the guide's note centres on the screen it is about. */
   :root[data-chrome="shell"] .dock-note { left: var(--desk-rail-w); }
   :root[data-chrome="shell"] .guide-callout { left: calc(50% + var(--desk-rail-w) / 2); }
+  /* On a run with a side the card is centred in what the side leaves --
+     the first ride's notes (screens/RideRun, plan 122) stand over the
+     card, not over the window's middle. */
+  :root[data-chrome="stage"]:has(.desk-run) .guide-callout:not([data-place="left"], [data-place="right"]) {
+    left: calc(50% - var(--desk-side-w) / 2);
+  }
   /* A note beside a rail or side-column anchor (components/guide/Guide,
      plan 115) stands against its edge at the side column's width, and
      rises into place without the centred note's half-width shift. */
