@@ -505,7 +505,12 @@ content set serves — `content/grammar/renames.py` for grammar points,
 `content/vocab_renames.py` for vocab entries, `content/kanji_renames.py`
 for kanji (plan 112, the 23 characters the deck taught at two levels).
 Each renames the learner's card rows to the new ids, merges on collision,
-and leaves anything it does not recognise in place and reported.
+and leaves anything it does not recognise in place and reported. Vocab
+alone can also **retire** an id that has no card to move to
+(`vocab_renames.RETIRED`, the N5 より、ほう). It drops the schedule
+(`cards`, `card_modes`) and the deck rows, pins and favourites that name
+the card, and keeps `review_log` and `card_first_review`, so no figure
+summed over them moves. Grammar's `RETIRED` only reports.
 
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
@@ -545,7 +550,9 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 `"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
-in `vocab_renames.MOVES` for the same reason. **After any deck change, run
+in `vocab_renames.MOVES` for the same reason, or, for residue that was
+never a word and has no card to fold into, one in `vocab_renames.RETIRED`
+with its reason. **After any deck change, run
 `python -m scripts.audit_vocab_deck --write-snapshot`,
 `python -m scripts.placement_report --rebuild-order --write-lists` (two
 runs; each flag is its own) and, for an added
