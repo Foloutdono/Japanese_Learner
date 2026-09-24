@@ -6543,6 +6543,12 @@
    "meaning": "knowing"
   },
   {
+   "lemma": "貴女",
+   "reading": "きじょ",
+   "rank": 1600,
+   "meaning": "you"
+  },
+  {
    "lemma": "戦士",
    "reading": "せんし",
    "rank": 1610,
@@ -9351,6 +9357,12 @@
    "meaning": "postponement"
   },
   {
+   "lemma": "其方",
+   "reading": "そなた",
+   "rank": 4456,
+   "meaning": "there"
+  },
+  {
    "lemma": "生き残り",
    "reading": "いきのこり",
    "rank": 4460,
@@ -9895,6 +9907,12 @@
    "reading": "わくわく",
    "rank": 4948,
    "meaning": "to be excited"
+  },
+  {
+   "lemma": "彼方",
+   "reading": "かなた",
+   "rank": 4949,
+   "meaning": "beyond"
   },
   {
    "lemma": "中隊",
