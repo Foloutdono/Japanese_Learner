@@ -21581,7 +21581,25 @@ a.slip__act { text-decoration: none; }
      in it. On a card run the column is the session panel — this run's
      three records over the revealed card's dictionary entry, in the
      dictionary's gold (components/study/SessionPanel.jsx). */
-  .desk-run { padding-inline-end: var(--desk-side-w); }
+  .desk-run { padding-inline: var(--desk-run-inset) calc(var(--desk-side-w) + var(--desk-run-inset)); }
+  /* ── the workspace on a wide window (plan 123) ──
+     The side stood on the window's right edge and the card in the
+     middle of what it left, so the gap between them grew with the
+     window: 460px at 1920, 780 at 2560, a look-up a head-turn away from
+     the word. Past --max-w of stage beside the side, the two stand
+     together as one workspace centred in the window, the level bar
+     under the work only (owner's call); the gap stays what --max-w
+     gives it, (--max-w − --card-w) / 2. Zero until then: 1100 and 1440
+     are unchanged, the inset starts at ~1460.
+
+     A length written with 100% and resolved where it is used: the
+     screen's padding and a fixed box's edge both measure it against the
+     window's width, and nothing else may use it. Declared while a run
+     with a side stands, which is everywhere it is read: the run, its
+     side, and the board and the note portalled beside it. */
+  :root:has(.desk-run) {
+    --desk-run-inset: calc((max(100%, var(--max-w) + var(--desk-side-w)) - var(--max-w) - var(--desk-side-w)) / 2);
+  }
   /* ── a run fits a laptop (plans 115, 123) ──
      A run's stage is centred on a phone, where the card is most of the
      screen. On a desk it starts at the top, like any page, without the
@@ -21651,11 +21669,17 @@ a.slip__act { text-decoration: none; }
   .desk-run .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-4); }
   /* What covers a run stops at its side: the tracing overlay and the
      docked note leave the session panel standing. */
-  .desk-run .drawing-overlay { right: var(--desk-side-w); }
-  :root[data-chrome="stage"]:has(.desk-run) .dock-note { right: var(--desk-side-w); }
+  .desk-run .drawing-overlay {
+    left: var(--desk-run-inset);
+    right: calc(var(--desk-side-w) + var(--desk-run-inset));
+  }
+  :root[data-chrome="stage"]:has(.desk-run) .dock-note {
+    left: var(--desk-run-inset);
+    right: calc(var(--desk-side-w) + var(--desk-run-inset));
+  }
   .desk-run__side {
     position: fixed;
-    inset: 0 0 0 auto;
+    inset: 0 var(--desk-run-inset) 0 auto;
     width: var(--desk-side-w);
     display: flex;
     flex-direction: column;
@@ -21665,11 +21689,44 @@ a.slip__act { text-decoration: none; }
     overscroll-behavior: contain;
     background: var(--bg-main);
     border-inline-start: 1px solid var(--surface-line);
+    /* Matched to the level board's slide (below), as a phone's stage is. */
+    transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   /* A door opened in a docked breakdown (components/analysis/SideLookup,
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
+  /* ── the level board over a run's side (plan 123) ──
+     Above a phone's width the board is a panel under the top bar at the
+     screen's right -- and on a run with a side, that is over the side:
+     ~280×95px of the column's entry or tally hidden for 2.4s. It docks
+     across the side's top at a phone's geometry instead (the phone's
+     board is this width), and the column steps down under it while it
+     stands, as a phone's stage does under its own. The board is
+     portalled to the body, so it is found by the run it stands over. */
+  :root[data-chrome="stage"]:has(.desk-run) .levelup {
+    top: 0;
+    left: auto;
+    right: var(--desk-run-inset);
+    width: var(--desk-side-w);
+    background: var(--bg-panel);
+    animation-name: levelup-in;
+  }
+  :root[data-chrome="stage"]:has(.desk-run) .levelup--leaving { animation-name: levelup-out; }
+  :root[data-chrome="stage"]:has(.desk-run) .levelup__board {
+    --flap-size: var(--fs-display);
+    width: 100%;
+    height: var(--levelup-h);
+    gap: var(--sp-5);
+    padding: 0 var(--sp-5);
+    border-radius: 0;
+    border-top: none;
+    border-bottom: 3px solid var(--accent2);
+  }
+  :root[data-levelup] .desk-run__side { padding-top: calc(var(--levelup-h) + var(--sp-6)); }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-run__side { transition: none; }
+  }
   /* The comprehension text beside its questions (plan 115): whole, at
      the column's width, never the base card's 60vh inner scroll. */
   .desk-run__side > .prompt-card { max-height: none; overflow: visible; }

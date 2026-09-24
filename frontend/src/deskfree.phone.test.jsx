@@ -1069,12 +1069,12 @@ describe('the desk\'s key fixes (plan 123, P1)', () => {
   })
 })
 
-// ── plan 123, P3 and P4 — the stage, the foot and the columns ──
+// ── plan 123, P3 to P5 — the stage, the foot, the columns, the board ──
 // Every rule of both is in the 机 block. On a phone a run's stage keeps
 // its own inset -- the level bar is its floor, with nothing under the
 // foot -- the gate's lanes are still the 30dvh box, a state card fills
 // its column and the ticket gate covers the whole screen, chrome or not.
-describe('the stage and the columns (plan 123, P3–P4)', () => {
+describe('the stage and the columns (plan 123, P3–P5)', () => {
   it('keeps a run\'s stage on the level bar, nothing under its foot', async () => {
     document.documentElement.dataset.chrome = 'stage'
     try {
@@ -1099,6 +1099,26 @@ describe('the stage and the columns (plan 123, P3–P4)', () => {
     const lanes = screen.container.querySelector('.gate-card__lanes')
     expect(parseFloat(getComputedStyle(lanes).maxHeight)).toBeCloseTo(window.innerHeight * 0.3, 0)
     expect(getComputedStyle(screen.container.querySelector('.empty')).maxWidth).toBe('none')
+  })
+
+  // P5: the workspace's inset and the board docked over a run's side
+  // key on .desk-run, which a phone never renders.
+  it('hangs the level board across the whole top of a run', async () => {
+    const { XpToast } = await import('./components/rewards/XpToast')
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await render(
+        <LangProvider>
+          <div className="screen"><XpToast toast={{ id: 'p5', amount: 20, leveledUp: true, newLevel: 13 }} /></div>
+        </LangProvider>
+      )
+      await new Promise(r => setTimeout(r, 400))
+      const board = document.querySelector('.levelup').getBoundingClientRect()
+      expect(board.left).toBe(0)
+      expect(Math.round(board.width)).toBe(Math.round(document.body.getBoundingClientRect().width))
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
   })
 
   it('covers the whole screen with the ticket gate', async () => {
