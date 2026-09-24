@@ -228,8 +228,9 @@ describe('CompositionRun', () => {
       raw_id: POINTS[0].raw_id, sentence: SENTENCE, quality: 4,
       found: true, verdict: 'acceptable', grammar_used: true,
     })
-    // The fare rides the response onto the toast.
-    expect(root.textContent).toMatch(/\+7\s*xp/i)
+    // (The fare rides the response onto the level bar through
+    // usePracticeXp; the bar draws nothing under an unseeded summary,
+    // so that is LevelBar.browser.test's to hold, not this file's.)
     // Rated: the bar gives way to Next, and the breakdown's toggle appears.
     expect(root.querySelector('.rating-bar')).toBeNull()
     const nextButton = root.querySelector('.stage__foot .btn-primary')
