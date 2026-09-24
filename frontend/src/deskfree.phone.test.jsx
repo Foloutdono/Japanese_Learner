@@ -1156,3 +1156,18 @@ describe('the kept dialogs (plan 123, P14)', () => {
     expect(b.top).toBeGreaterThanOrEqual(a.bottom)
   })
 })
+
+// ── plan 123, P15 — a phone's lists are walked by the thumb ──
+describe('the lists beside a page (plan 123, P15)', () => {
+  it('leave every row its own tab stop, and the arrows alone', async () => {
+    const { default: GrammarIndex } = await import('./components/selection/GrammarIndex')
+    const points = ['a', 'b', 'c'].map(k => ({ raw_id: `g_${k}`, pattern: k, meaning: k, stage: 'new' }))
+    await render(<LangProvider><GrammarIndex points={points} onOpen={() => {}} /></LangProvider>)
+    await settle()
+    const rows = [...document.querySelectorAll('.gl-index__row')]
+    expect(rows.every(r => !r.hasAttribute('tabindex'))).toBe(true)
+    rows[0].focus()
+    rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }))
+    expect(document.activeElement).toBe(rows[0])
+  })
+})

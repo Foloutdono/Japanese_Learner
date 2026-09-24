@@ -308,6 +308,21 @@ describe('the exam result on the desk', () => {
     play.mockRestore()
   })
 
+  // Plan 123, P15: the review is one tab stop, walked with ↑/↓ across
+  // its parts, and ←/→ take the focus along with the open question.
+  it('walks the review from one tab stop, the focus following ←/→', async () => {
+    await mark(given)
+    const rows = () => $$('.desk-split__list .exam-review-row')
+    expect(rows().filter(r => r.tabIndex === 0)).toEqual([rows()[0]])
+    rows()[0].focus()
+    rows()[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+    await settle()
+    expect(openQ()).toMatch(/3$/)
+    expect(document.activeElement).toBe(rows()[1])
+    rows()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }))
+    expect(document.activeElement).toBe(rows()[0])
+  })
+
   it('lists every question on a clean sheet, and keeps one thing to do next', async () => {
     await mark({ q1: 'c1', r1: 'c2', r2: 'c3' })
     expect($$('.desk-split__list .exam-review-row')).toHaveLength(3)

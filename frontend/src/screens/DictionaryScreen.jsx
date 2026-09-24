@@ -42,6 +42,7 @@ import { Leave, DeskCrumb } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { isDesk, useDesk } from '../hooks/useDesk'
+import { useGridWalk } from '../hooks/useGridWalk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -228,6 +229,16 @@ export default function DictionaryScreen({ session }) {
 		function onKey(e) {
 			if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
 			const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable
+			// ↓ from the search field steps into the catalogue, on the
+			// open tile (plan 123): the grid is one tab stop, walked by key.
+			if (e.key === 'ArrowDown' && isDesk() && e.target === searchRef.current && !composing(e)) {
+				const tile = document.querySelector('.dict-grid > [tabindex="0"]')
+				if (tile) {
+					e.preventDefault()
+					tile.focus()
+				}
+				return
+			}
 			if (e.key === '/' && !typing) {
 				e.preventDefault()
 				searchRef.current?.focus()
@@ -1026,6 +1037,14 @@ function ResultsSection({
 }) {
 	const desk = useDesk()
 	const navigate = useNavigate()
+	// 机 (plan 123): the catalogue is one tab stop, the open tile, and
+	// the arrows walk it as a grid -- a page was fifty tab stops, and
+	// the dock beside it was reached only by tabbing through all of them
+	// (and the more they loaded). A move opens the tile it lands on.
+	const onGridWalk = useGridWalk(desk, i => setSelected(results[i]))
+	const stopKey = desk && results.length
+		? entryKey(selected && results.some(r => entryKey(r) === entryKey(selected)) ? selected : results[0])
+		: null
 	// 机 (plan 115): a search that finds nothing is often not a word but
 	// a sentence pasted in, and the analyser is the tool for that. On
 	// the desk, a query of two Japanese characters or more that found no
@@ -1057,7 +1076,7 @@ function ResultsSection({
 					    the order it carries them — with the level in its corner
 					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
-						<div className="dict-grid">
+						<div className="dict-grid" onKeyDown={onGridWalk}>
 							{results.map((entry, i) => {
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
@@ -1068,6 +1087,8 @@ function ResultsSection({
 										key={entryKey(entry)}
 										type="button"
 										data-guide={i === 0 ? 'dict.entry' : undefined}
+										tabIndex={stopKey ? (entryKey(entry) === stopKey ? 0 : -1) : undefined}
+										aria-current={desk && selected && entryKey(selected) === entryKey(entry) ? 'true' : undefined}
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										// --len is how many characters the headword has: the
 										// tile divides its own width by it and sets the word to

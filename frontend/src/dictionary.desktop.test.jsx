@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -228,3 +229,34 @@ describe('the readings on the desk', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })
+
+// ── plan 123, P15 — the catalogue walked as a grid ──
+// One tab stop, the open tile; the arrows walk the grid as the eye
+// reads it and open the tile they land on, so the ring and the dock
+// agree; ↓ from the search field steps in on the open tile.
+describe('the catalogue walked by key (plan 123)', () => {
+  const tiles = () => [...document.querySelectorAll('.dict-grid > .dict-entry-card')]
+  it('is one tab stop, walked by row and column, the dock following', async () => {
+    await mount()
+    expect(tiles().filter(t => t.tabIndex === 0)).toEqual([tiles()[0]])
+    expect(tiles()[0].getAttribute('aria-current')).toBe('true')
+    const search = document.querySelector('.dict-search input, input[type="search"], .console input')
+    search.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(tiles()[0])
+    await userEvent.keyboard('{ArrowRight}')
+    await settle()
+    // One tile, not two: the page's own ←/→ did not walk it again.
+    expect(document.activeElement).toBe(tiles()[1])
+    expect(headword()).toBe('電車')
+    const columns = getComputedStyle(document.querySelector('.dict-grid')).gridTemplateColumns.split(' ').length
+    await userEvent.keyboard('{Home}')
+    await settle()
+    expect(document.activeElement).toBe(tiles()[0])
+    await userEvent.keyboard('{ArrowDown}')
+    await settle()
+    expect(document.activeElement).toBe(tiles()[Math.min(columns, tiles().length - 1)])
+    expect(tiles().filter(t => t.tabIndex === 0)).toEqual([document.activeElement])
+  })
+})
+

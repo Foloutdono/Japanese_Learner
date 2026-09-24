@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -303,3 +304,21 @@ describe('a deck\'s More on the desk', () => {
     expect($('.desk-side [class*="desk-more"]')).toBeNull()
   })
 })
+
+// ── plan 123, P15 — the shelf walked from one tab stop ──
+describe('the library\'s shelf walked by key (plan 123)', () => {
+  it('is one tab stop, the open deck, walked with ↑/↓ and opened with Space', async () => {
+    await mountLibrary('/learn/decks/library/1')
+    await settle(400)
+    const cards = () => $$('.desk-split__list .lib-card')
+    expect(cards().filter(c => c.tabIndex === 0)).toEqual([cards()[0]])
+    cards()[0].focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(cards()[1])
+    await userEvent.keyboard(' ')
+    await settle(300)
+    expect(where.path).toBe('/learn/decks/library/2')
+    expect(cards().filter(c => c.tabIndex === 0)).toEqual([cards()[1]])
+  })
+})
+

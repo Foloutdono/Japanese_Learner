@@ -6,6 +6,7 @@ import { Loading } from '../ui/Loading'
 import Empty from '../ui/Empty'
 import { Seg } from '../chrome/Console'
 import { SplitRow } from './SplitRow'
+import { useListWalk, useFollowFocus } from '../../hooks/useListWalk'
 
 // The default size and the size options live with the tier maths in
 // domain/tiers.js (the practice pickers read them too, plan 072).
@@ -86,9 +87,17 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
     openRow.current?.scrollIntoView?.({ block: 'nearest' })
   }, [tiers, selected])
 
+  // On the desk the tiers are one tab stop, walked with ↑/↓ (plan 123):
+  // up to 43 rows were a tab stop each.
+  const walked = linkTo != null
+  const onWalk = useListWalk(walked)
+  const gridRef = useRef(null)
+  useFollowFocus(gridRef, selected, walked)
+
   const rowStyle = color ? { '--row-color': color } : undefined
   const unit = domain === 'vocab' ? t.wordNoun : (t.kanjiUnit ?? 'kanji')
   const visibleTiers = (tiers ?? []).filter(tr => tr.count > 0)
+  const stop = visibleTiers.some(tr => tr.tier === selected) ? selected : visibleTiers[0]?.tier
 
   return (
     <div className="tier-picker">
@@ -112,7 +121,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
       )}
 
       {tiers && (
-        <div className="platform-grid">
+        <div className="platform-grid" ref={gridRef} onKeyDown={onWalk}>
           {visibleTiers.map(tr => {
             const open = selected != null && tr.tier === selected
             return (
@@ -126,6 +135,7 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
                 }}
                 className={open ? 'platform-card desk-stop--open' : 'platform-card'}
                 aria-current={open ? 'page' : undefined}
+                tabIndex={walked ? (tr.tier === stop ? 0 : -1) : undefined}
                 style={rowStyle}
               >
                 <span className="platform-card__lead">
