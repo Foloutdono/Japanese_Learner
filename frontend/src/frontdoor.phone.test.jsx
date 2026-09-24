@@ -111,3 +111,29 @@ describe('the keys at first contact, on a phone (P8)', () => {
     expect($('.desk-kbd')).toBeNull()
   })
 })
+
+// ── P9: the boarding frame stays the phone's ──
+describe('the boarding frame on a phone (P9)', () => {
+  it('keeps the plain frame with no side, and plays Building after the hour', async () => {
+    await board()
+    expect($('main.brd').className).toBe('brd')
+    expect($('.desk-brd__side')).toBeNull()
+    await pastName()
+    const next = async () => { inCar('[data-action="continue"]').click(); await settle() }
+    inCar('[data-motive="trip"]').click()
+    await settle(40)
+    await next()
+    inCar('[data-kana="both"]').click()
+    await settle()
+    inCar('[data-level="N1"]').click()
+    await settle(40)
+    await next()        // → lines (N1: no goal)
+    await next()        // → rhythm
+    await next()        // → time
+    expect(stepOf()).toBe('time')
+    expect($('main.brd').className).toBe('brd')
+    await next()
+    expect(stepOf()).toBe('building')
+    expect($('.brd-build__track')).not.toBeNull()
+  })
+})
