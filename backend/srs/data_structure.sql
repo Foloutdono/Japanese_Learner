@@ -565,8 +565,10 @@ CREATE TABLE comprehension_served (
 -- those costs nothing and is not metered. Past the ceiling the learner
 -- is handed a text they have read before rather than refused.
 --
--- Same shape as ocr_usage on purpose, and not yet generalised into one
--- daily_usage table: two counters is a coincidence, three is a pattern.
+-- Same shape as ocr_usage on purpose. The third counter this app needed
+-- (作文's tutor review, plan 124) went into the shared daily_usage table
+-- below instead; these two stay as they are until moving them is worth
+-- a migration -- see core/daily_limit.py.
 CREATE TABLE comprehension_usage (
     user_id TEXT NOT NULL,
     day     DATE NOT NULL,
@@ -749,6 +751,45 @@ CREATE TABLE dictation_log (
 CREATE INDEX idx_dictation_log_user
 ON dictation_log(user_id, created_at);
 
+-- 作文 (composition, plan 124): one row per sentence the learner wrote
+-- from a grammar point and graded. Owned by routes/composition.py,
+-- created there at import time.
+--
+-- Three opinions about one sentence, side by side and never merged --
+-- dictation's accuracy-beside-quality reasoning, one column further:
+--   found         the detector's (study/grammar_detect): the point is
+--                 visibly in the sentence, or is not, or NULL where the
+--                 matcher is not trusted to say on this point
+--                 (grammar_detect.can_find)
+--   verdict,      the tutor's, as the model answered; NULL where there
+--   grammar_used  was no review -- the day's ceiling, an outage, a
+--                 reply that was prose
+--   quality       the learner's rating on the bar, 0..5: the grade, and
+--                 the only one. NOT NULL, unlike translation's: there is
+--                 no pre-rating history here to be honest about, and a
+--                 row exists only because the learner rated.
+-- `correct` is derived from quality (q > 2 is a pass), as everywhere.
+-- raw_id is the card id (grammar_{level}_{pattern}); `pattern` is kept
+-- beside it so a row still reads after a rename stops the id resolving
+-- (content/grammar/renames.py), dictation's clip_id + phrase reasoning.
+CREATE TABLE composition_log (
+    id           BIGSERIAL PRIMARY KEY,
+    user_id      TEXT NOT NULL,
+    level        TEXT NOT NULL DEFAULT '',
+    raw_id       TEXT NOT NULL,
+    pattern      TEXT NOT NULL,
+    sentence     TEXT NOT NULL,
+    found        BOOLEAN,
+    verdict      TEXT,
+    grammar_used BOOLEAN,
+    correct      BOOLEAN NOT NULL,
+    quality      SMALLINT NOT NULL,
+    created_at   TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+CREATE INDEX idx_composition_log_user
+ON composition_log(user_id, created_at);
+
 -- Owned by routes/ocr.py -- per-user daily counter for the vision OCR
 -- endpoint. Nothing here costs money (NVIDIA's vision models are on the
 -- free tier), so this bounds draw on the SHARED free quota that the
@@ -759,6 +800,20 @@ CREATE TABLE ocr_usage (
     day      DATE NOT NULL,
     count    INTEGER NOT NULL DEFAULT 0,
     PRIMARY KEY (user_id, day)
+);
+
+-- ── The daily counters, one table (plan 124) ────────────────────────
+-- Owned by core/daily_limit.py. One row per (learner, feature, local
+-- day); `feature` names the ceiling -- "composition", the tutor's
+-- reviews of a learner's own sentences, today. The third counter this
+-- app needed and the first shared one: ocr_usage and comprehension_usage
+-- above keep their own tables until moving them is worth a migration.
+CREATE TABLE daily_usage (
+    user_id TEXT NOT NULL,
+    feature TEXT NOT NULL,
+    day     DATE NOT NULL,
+    count   INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, feature, day)
 );
 
 -- ── お気に入り — the dictionary's shelf of kept entries ─────────────

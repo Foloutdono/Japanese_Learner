@@ -4,17 +4,19 @@ module is free to self-migrate its own tables at import time; this
 test is the only thing that keeps the reference file from silently
 drifting out of sync with what the code actually creates.
 
-Scope: routes/, srs/, and study/ -- not just routes/+srs/, because
+Scope: routes/, srs/, study/ and core/ -- not just routes/+srs/, because
 study/exam_schema.py and study/grammar_sentence_store.py also create
 tables (exam_papers, exam_attempts, exam_generation_jobs,
-grammar_sentences) that would otherwise be invisible to this check.
+grammar_sentences), and core/events.py and core/daily_limit.py create
+theirs (event_log, event_daily, daily_usage), all of which would
+otherwise be invisible to this check.
 """
 import re
 from pathlib import Path
 
 BACKEND_ROOT = Path(__file__).resolve().parent.parent
 SCHEMA_FILE = BACKEND_ROOT / "srs" / "data_structure.sql"
-SCANNED_DIRS = ["routes", "srs", "study"]
+SCANNED_DIRS = ["routes", "srs", "study", "core"]
 
 CREATE_IF_NOT_EXISTS_RE = re.compile(
     r"CREATE TABLE IF NOT EXISTS\s+(\w+)", re.IGNORECASE

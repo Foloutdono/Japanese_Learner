@@ -1937,11 +1937,13 @@ def _init_comprehension_usage() -> None:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            # Deliberately the same shape as ocr_usage rather than a
-            # shared daily_usage(user_id, feature, day, count): two
-            # counters is a coincidence, three is a pattern. If a third
-            # feature needs one, that is the moment to generalise all
-            # of them -- not now, on a guess, with a migration.
+            # Deliberately the same shape as ocr_usage. This was written
+            # as "two counters is a coincidence, three is a pattern",
+            # and the third came: 作文's tutor review (plan 124) counts
+            # in the shared daily_usage(user_id, feature, day, count)
+            # of core/daily_limit.py. This table and ocr_usage stay
+            # where they are until moving them is worth a migration --
+            # a one-shot INSERT ... SELECT each and one line here.
             cur.execute(
                 """
                 CREATE TABLE IF NOT EXISTS comprehension_usage (
