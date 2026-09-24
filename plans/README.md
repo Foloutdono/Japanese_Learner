@@ -5977,7 +5977,14 @@ What shipped:
 
 Owner steps after deploy:
 
-1. Sync the Blueprint.
+1. Add the voice service by hand, in the backend's project: a private
+   service named `voicevox-nemo`, from the image `render.yaml` pins, in
+   Frankfurt (the backend's region), on Starter, with
+   `VV_CPU_NUM_THREADS=1` and `VV_DISABLE_MUTABLE_API=1`. Then set
+   `VOICEVOX_URL` on the backend (`Japanese_Learner`) to its internal
+   address. Not a Blueprint sync: the running backend is not the
+   Blueprint's, so one made from `render.yaml` would add a second
+   backend.
 2. Run `python -m scripts.revoice_audio`, then again with `--yes`, from the
    backend's Render Shell.
 3. Rebuild the native app (`npm run build:native`), so it ships the new
