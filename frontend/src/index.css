@@ -1124,6 +1124,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--sp-5);
+  outline: none;
 }
 /* A programmatic focus target, not a tab stop -- see AnalyzerScreen's
    arrival effect -- and deliberately ringless. tabIndex is -1, so no
@@ -1135,7 +1136,12 @@
    others, with nothing the reader had done to explain it. The arrival
    announces itself instead -- role="region" with a label, which is what
    the focus move is for. Do not restore the outline here; if focus ever
-   becomes reachable by hand on this element, it needs one again. */
+   becomes reachable by hand on this element, it needs one again. The
+   `outline: none` above is that rule. It was lost once and lived only
+   in the desk's block until plan 123 put it back: ←/→ walk the tokens
+   with this focus held, so a tablet's keyboard drew the ring on the
+   first arrow. An author rule outranks the browser's ring whatever its
+   specificity, so it needs no :focus-visible of its own. */
 .anl-stage {
   display: flex;
   flex-direction: column;
@@ -20859,12 +20865,6 @@ a.slip__act { text-decoration: none; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
-  /* The result is a focus target, not a tab stop, and meant to be
-     ringless (the note under .anl-results near the top of this file,
-     whose rule was lost). On the desk ←/→ walk the tokens with that
-     focus still held, so the first arrow drew the browser's ring round
-     the whole stage and its dock. */
-  .anl-results:focus-visible { outline: none; }
   /* The intake beside its history (plan 115). */
   .desk-intake {
     display: grid;

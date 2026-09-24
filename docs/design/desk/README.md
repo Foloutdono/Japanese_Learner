@@ -65,7 +65,6 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it; since plan 120 also a grammar run's side, for the rival a gate lesson names | `components/analysis/SideLookup.jsx`, `screens/GrammarRun.jsx` |
 | `.desk-run--paper`, `.desk-answers`, `__fig`, `__cap`, `__finish`; `.desk-paper`, `__text`, `__ask` | the mock exam: the answer sheet in the side; a reading passage flat beside its questions | `screens/ExamRunner.jsx`, `exam/ExamCard.jsx`, `exam/QuestionRenderer.jsx` (`PassageText`) |
 | `.desk-anl-dock`, `__keys` | the analyser's second column: the dictionary on the stage's token | `components/analysis/AnalyzerDock.jsx` |
-| `.anl-results:focus-visible` | no ring round the result while ←/→ walk it (its arrival focus is a target, not a tab stop; the phone's copy of the rule was lost before plan 113) | `screens/AnalyzerScreen.jsx` |
 | `.desk-intake`, `__main` | the analyser's intake beside its history | `screens/AnalyzerScreen.jsx` |
 | `.desk-dock`, `__head` | a door opened in a column: its caption and ✕ over the phone's own body, in place of the column's tenant until ✕ or Esc; focus goes back to what opened it (plan 120) | `components/chrome/DeskDock.jsx` |
 | `.desk-browse` | a deck's Browse, docked in the deck page's side (the result row stacked, as on a phone) | `components/decks/BrowseCardsMenu.jsx` (`BrowseCardsDock`) |
