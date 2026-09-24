@@ -914,6 +914,18 @@ def is_usually_kana(kanji: str, kana: str) -> bool:
     return any("uk" in s.get("tags", []) for s in senses)
 
 
+@lru_cache(maxsize=8192)
+def is_written_in_kana(kanji: str, kana: str) -> bool:
+    """True if EVERY JMdict sense of this word carries "uk" -- a word a
+    reader meets in kana whatever it means: 火傷 is やけど, 不山戯る is
+    ふざける. Stricter than is_usually_kana on purpose: "any sense" also
+    catches 山, 犬, 見る and 行く, each for a sense nobody opens the
+    dictionary for, and a kanji's entry should not treat 山 as a word
+    that is not written 山 (study/kanji_words.py)."""
+    senses = _find_senses(kanji, kana)
+    return bool(senses) and all("uk" in s.get("tags", []) for s in senses)
+
+
 # A handful of very common kanji that are conventionally written in
 # kana in running text even though JMdict/the app's deck lists them
 # with their kanji — not general enough to trust a kanji deck's own
