@@ -825,6 +825,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     mining: mining ?? INERT_MINING,
     kind: appCard?.source,
     t,
+    owner: entryKey(entry),
     onMine: deckId => mining.mineApp({
       deckId,
       source: appCard.source,
