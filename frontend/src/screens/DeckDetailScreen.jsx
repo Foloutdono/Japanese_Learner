@@ -6,6 +6,10 @@ import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
 import { track } from '../lib/track'
 import { Bar, Leave } from '../components/chrome/Bar'
+import { DeskSide } from '../components/chrome/DeskSide'
+import { DeskDock } from '../components/chrome/DeskDock'
+import { DeckPlatforms } from '../components/decks/DeckPlatforms'
+import { useDesk } from '../hooks/useDesk'
 import { Chip } from '../components/chrome/Console'
 import { Sheet } from '../components/chrome/Sheet'
 import { useTodaySummary } from '../stores/today'
@@ -13,7 +17,7 @@ import { dueByDeck } from '../domain/lanes'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
-import BrowseCardsMenu from '../components/decks/BrowseCardsMenu'
+import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
@@ -233,6 +237,7 @@ export default function DeckDetailScreen({ session }) {
   const { deck_id }     = useParams()
   const { state }       = useLocation()
   const { t, lang }     = useLang()
+  const desk            = useDesk()
 
   // Falls back to fetching the deck when opened without router state
   // (a refresh, a direct link) — needed now that a deck's `type`
@@ -400,6 +405,9 @@ export default function DeckDetailScreen({ session }) {
   // re-render of this screen while one of them is open.
   const closeImport = useCallback(() => setShowImport(false), [])
   const closeBrowse = useCallback(() => setShowBrowse(false), [])
+  // The same for More, whose dock on the desk (DeskDock) keys its Esc
+  // on it. Closing More also drops a deletion that was being asked.
+  const closeMore = useCallback(() => { setMoreOpen(false); setConfirmingDeck(false) }, [])
 
   // Fetched rather than linked: the endpoint needs the bearer token, and
   // a bare <a href> to /api/... sends no Authorization header, so it
@@ -503,13 +511,28 @@ export default function DeckDetailScreen({ session }) {
     })
   }
 
-  function startAdd() { resetForm(); setEditing(null); setAdding(true) }
+  // On the desk the form, Browse, More and the platforms take turns in
+  // one column (plans 115, 120): opening one gives the column to it.
+  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
 
   function startEdit(card) {
     setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
     setNotes(card.notes || '')
     setEditing(card.id)
     setAdding(true)
+    if (desk) { setShowBrowse(false); closeMore() }
+  }
+
+  function openBrowse() {
+    playUi('click-mode-selection')
+    setShowBrowse(true)
+    if (desk) { setAdding(false); closeMore() }
+  }
+
+  function openMore() {
+    playUi('click-mode-selection')
+    setMoreOpen(true)
+    if (desk) { setAdding(false); setShowBrowse(false) }
   }
 
   function saveCard() {
@@ -592,15 +615,125 @@ export default function DeckDetailScreen({ session }) {
 
   const addLabel = String(t.addCard).replace(/^\+\s*/, '')
 
-  return (
-    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
-      <Bar
-        code="KZ"
-        color="var(--line-decks)"
-        title={t.decks}
-        aside={<Leave onClick={() => navigate('/learn/decks')}>{t.leaveDecks}</Leave>}
-      />
+  // Add / Edit form: in its slot on a phone, in the second column on
+  // the desk (plan 114), where it stands beside the cards it adds to.
+  const cardForm = adding && (
+    <div className="form deckdetail-form">
+      <span className="form__label">
+        {editing ? t.editCard : t.newCard}
+      </span>
+      <div className="deckdetail-form__fields">
+        {/* One input per field the structure declares. A kanji card
+            asks for four things and a standard card for two, from
+            one definition rather than a branch per deck type. */}
+        {(structure?.fields ?? []).map(f => {
+          const label = t[`field_${f.key}`] ?? f.key
+          if (f.kind === 'lines') {
+            const rows = form[f.key] ?? ['']
+            return (
+              <div key={f.key} className="deckdetail-form__group">
+                <div className="deckdetail-form__label">{label}</div>
+                {rows.map((v, i) => (
+                  <input key={i} value={v}
+                    onChange={e => setLine(f.key, i, e.target.value)}
+                    placeholder={label}
+                    className="field deckdetail-form__input" />
+                ))}
+                <button type="button" onClick={() => addLine(f.key)}
+                  className="deckdetail-form__addline">+ {label}</button>
+              </div>
+            )
+          }
+          if (f.picker === 'radical') {
+            return (
+              <RadicalField key={f.key} label={label} session={session}
+                value={form[f.key]} onChange={v => setField(f.key, v)} />
+            )
+          }
+          if (f.kind === 'readings') {
+            return (
+              <ReadingsField key={f.key} label={label}
+                value={form[f.key]} onChange={v => setField(f.key, v)} />
+            )
+          }
+          return (
+            <input key={f.key} value={form[f.key] ?? ''}
+              onChange={e => setField(f.key, e.target.value)}
+              placeholder={f.required ? `${label} *` : label}
+              className="field deckdetail-form__input" />
+          )
+        })}
+        {/* notes is on every structure and never shown during a
+            card — unlike the `hint` it replaces, which appeared
+            mid-quiz as help nobody asked for. */}
+        <input value={notes} onChange={e => setNotes(e.target.value)}
+          placeholder={t.notesPlaceholder}
+          onKeyDown={e => e.key === 'Enter' && saveCard()}
+          className="field deckdetail-form__input" />
+      </div>
+      <div className="form__row">
+        {/* Cancel first, Save last: the row is right-aligned now
+            (see .deckdetail-form__actions), so the confirming
+            action sits at the edge the eye and the thumb both end
+            on, and the order matches DeckDetail.dc.html:144-147.
+            Neither carries a class of its own any more — 052 left
+            them one for `flex: 1`, and dropping the stretch left
+            nothing this file needs to say about them. */}
+        <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
+          className="btn-secondary">
+          {t.cancel}
+        </button>
+        <button onClick={saveCard} disabled={!formComplete()}
+          className="btn-primary">
+          {editing ? t.save : t.addCard}
+        </button>
+      </div>
+    </div>
+  )
 
+  // What More holds (plan 071): the cards in and out, and the deck into
+  // the library. A sheet on a phone; on the desk it opens in the side
+  // instead (plan 120), since none of it is a question.
+  const moreActions = (
+    <>
+      {allowCustom && (
+        <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
+          <ImportIcon size={14} /> {t.import}
+        </button>
+      )}
+      {cards.length > 0 && (
+        <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
+          <ExportIcon size={14} /> {t.export}
+        </button>
+      )}
+      {/* The library, from the deck that goes into it. Publishing is
+          not an action on the shelf card — the card is one whole
+          button into the deck — and it is not a chip either: the chip
+          row is what you do to the CARDS. */}
+      {cards.length > 0 && deck?.visibility !== 'public' && (
+        <button type="button" className="btn-secondary" disabled={busy}
+          onClick={() => publish(true)}>
+          <BooksIcon size={14} /> {t.libraryPublish}
+        </button>
+      )}
+      {deck?.visibility === 'public' && (
+        <>
+          {/* A statement, not a question: .sheet__q is what the
+              sheet ASKS, and there is nothing to answer here. */}
+          <span className="lib-note">{t.libraryPublished}</span>
+          <button type="button" className="btn-secondary" disabled={busy}
+            onClick={() => publish(false)}>
+            <CrossIcon size={14} /> {t.libraryUnpublish}
+          </button>
+        </>
+      )}
+    </>
+  )
+
+  // The page under the bar. On the desk it is the first of two
+  // columns, the deck's platforms (or the form) the second.
+  const body = (
+    <>
       {/* The deck, named on its own page: the same roundel, glyph and
           pigment as its card on the shelf, the figures, and the one
           filled action. */}
@@ -618,13 +751,17 @@ export default function DeckDetailScreen({ session }) {
             {dueToday > 0 && <> · <span className="deck-identity__due">{t.todayDue(dueToday)}</span></>}
           </span>
         </span>
-        <button
-          type="button"
-          className="btn-primary deck-identity__study"
-          onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
-        >
-          ▶ {t.study}
-        </button>
+        {/* On the desk the platforms stand beside the cards
+            (DeckPlatforms), so there is no second screen to open. */}
+        {!desk && (
+          <button
+            type="button"
+            className="btn-primary deck-identity__study"
+            onClick={() => { playUi('click-screen-selection'); navigate(`/learn/decks/${deck_id}/study`, { state: { deck } }) }}
+          >
+            ▶ {t.study}
+          </button>
+        )}
       </div>
 
       {/* Warn, then vanish. The author has deleted this deck; it is
@@ -660,16 +797,19 @@ export default function DeckDetailScreen({ session }) {
 
       {!selectMode && !isFollower && (
         <div className="chip-row">
+          {/* On the desk Add and Browse are each pressed while their
+              panel holds the page's side. */}
           {allowCustom && (
-            <Chip onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
+            <Chip on={desk && adding && !editing} onClick={() => { playUi('click-mode-selection'); startAdd() }}><PlusIcon size={14} />{addLabel}</Chip>
           )}
           {allowedSources.length > 0 && (
-            <Chip onClick={() => { playUi('click-mode-selection'); setShowBrowse(true) }}><SearchIcon size={14} />{t.browseBtn}</Chip>
+            <Chip on={desk && showBrowse && !adding} onClick={openBrowse}><SearchIcon size={14} />{t.browseBtn}</Chip>
           )}
           {cards.length > 0 && (
             <Chip onClick={() => { playUi('click-mode-selection'); setSelectMode(true) }}><CheckIcon size={14} />{t.select}</Chip>
           )}
-          <Chip onClick={() => { playUi('click-mode-selection'); setMoreOpen(true) }} aria-haspopup="dialog">
+          {/* A sheet on a phone; on the desk, the side's (plan 120). */}
+          <Chip on={desk && moreOpen} onClick={openMore} aria-haspopup={desk ? undefined : 'dialog'}>
             <span className="chip__dots" aria-hidden="true">···</span>{t.deckMore}
           </Chip>
         </div>
@@ -755,79 +895,7 @@ export default function DeckDetailScreen({ session }) {
 
         {/* Add / Edit form — one input per field the structure
             declares (GET /api/decks/structures), on the canvas's form. */}
-        {adding && (
-          <div className="form deckdetail-form">
-            <span className="form__label">
-              {editing ? t.editCard : t.newCard}
-            </span>
-            <div className="deckdetail-form__fields">
-              {/* One input per field the structure declares. A kanji card
-                  asks for four things and a standard card for two, from
-                  one definition rather than a branch per deck type. */}
-              {(structure?.fields ?? []).map(f => {
-                const label = t[`field_${f.key}`] ?? f.key
-                if (f.kind === 'lines') {
-                  const rows = form[f.key] ?? ['']
-                  return (
-                    <div key={f.key} className="deckdetail-form__group">
-                      <div className="deckdetail-form__label">{label}</div>
-                      {rows.map((v, i) => (
-                        <input key={i} value={v}
-                          onChange={e => setLine(f.key, i, e.target.value)}
-                          placeholder={label}
-                          className="field deckdetail-form__input" />
-                      ))}
-                      <button type="button" onClick={() => addLine(f.key)}
-                        className="deckdetail-form__addline">+ {label}</button>
-                    </div>
-                  )
-                }
-                if (f.picker === 'radical') {
-                  return (
-                    <RadicalField key={f.key} label={label} session={session}
-                      value={form[f.key]} onChange={v => setField(f.key, v)} />
-                  )
-                }
-                if (f.kind === 'readings') {
-                  return (
-                    <ReadingsField key={f.key} label={label}
-                      value={form[f.key]} onChange={v => setField(f.key, v)} />
-                  )
-                }
-                return (
-                  <input key={f.key} value={form[f.key] ?? ''}
-                    onChange={e => setField(f.key, e.target.value)}
-                    placeholder={f.required ? `${label} *` : label}
-                    className="field deckdetail-form__input" />
-                )
-              })}
-              {/* notes is on every structure and never shown during a
-                  card — unlike the `hint` it replaces, which appeared
-                  mid-quiz as help nobody asked for. */}
-              <input value={notes} onChange={e => setNotes(e.target.value)}
-                placeholder={t.notesPlaceholder}
-                onKeyDown={e => e.key === 'Enter' && saveCard()}
-                className="field deckdetail-form__input" />
-            </div>
-            <div className="form__row">
-              {/* Cancel first, Save last: the row is right-aligned now
-                  (see .deckdetail-form__actions), so the confirming
-                  action sits at the edge the eye and the thumb both end
-                  on, and the order matches DeckDetail.dc.html:144-147.
-                  Neither carries a class of its own any more — 052 left
-                  them one for `flex: 1`, and dropping the stretch left
-                  nothing this file needs to say about them. */}
-              <button onClick={() => { setAdding(false); setEditing(null); resetForm() }}
-                className="btn-secondary">
-                {t.cancel}
-              </button>
-              <button onClick={saveCard} disabled={!formComplete()}
-                className="btn-primary">
-                {editing ? t.save : t.addCard}
-              </button>
-            </div>
-          </div>
-        )}
+        {adding && !desk && cardForm}
 
         {loading && <Loading />}
 
@@ -908,6 +976,44 @@ export default function DeckDetailScreen({ session }) {
           </div>
         )}
 
+    </>
+  )
+
+  return (
+    <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
+      <Bar
+        code="KZ"
+        color="var(--line-decks)"
+        title={t.decks}
+        aside={<Leave to={'/learn/decks'}>{t.leaveDecks}</Leave>}
+      />
+
+      {desk ? (
+        <div className="desk-deck">
+          <div className="desk-deck__main">{body}</div>
+          <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : moreOpen ? t.deckMore : t.study}>
+            {adding ? cardForm
+              : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
+              // More is a list of what can be done to the deck, not a
+              // question: it opens in the column (plan 120), and only its
+              // deletion asks, in a dialog of its own (below).
+              : moreOpen ? (
+                <DeskDock title={t.deckMore} className="desk-more" onClose={closeMore}>
+                  {moreActions}
+                  <button type="button" className="btn-primary btn-primary--danger" onClick={() => setConfirmingDeck(true)}>
+                    <TrashIcon size={14} /> {t.deleteDeck}
+                  </button>
+                </DeskDock>
+              )
+              // The platforms once the cards are in: a deck's modes turn
+              // on whether it has a card, and asking before the list has
+              // loaded asked twice.
+              : loading ? <Loading />
+              : <DeckPlatforms deckId={deck_id} deck={deck} session={session} cardCount={cards.length} />}
+          </DeskSide>
+        </div>
+      ) : body}
+
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
         jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine}>
@@ -935,38 +1041,8 @@ export default function DeckDetailScreen({ session }) {
         </button>
       </Sheet>
 
-      <Sheet open={moreOpen} onClose={() => { setMoreOpen(false); setConfirmingDeck(false) }} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
-        {allowCustom && (
-          <button type="button" className="btn-secondary" onClick={() => { setMoreOpen(false); setShowImport(true) }}>
-            <ImportIcon size={14} /> {t.import}
-          </button>
-        )}
-        {cards.length > 0 && (
-          <button type="button" className="btn-secondary" disabled={exporting} onClick={() => { setMoreOpen(false); exportDeck() }}>
-            <ExportIcon size={14} /> {t.export}
-          </button>
-        )}
-        {/* The library, from the deck that goes into it. Publishing is
-            not an action on the shelf card — the card is one whole
-            button into the deck — and it is not a chip either: the chip
-            row is what you do to the CARDS. */}
-        {cards.length > 0 && deck?.visibility !== 'public' && (
-          <button type="button" className="btn-secondary" disabled={busy}
-            onClick={() => publish(true)}>
-            <BooksIcon size={14} /> {t.libraryPublish}
-          </button>
-        )}
-        {deck?.visibility === 'public' && (
-          <>
-            {/* A statement, not a question: .sheet__q is what the
-                sheet ASKS, and there is nothing to answer here. */}
-            <span className="lib-note">{t.libraryPublished}</span>
-            <button type="button" className="btn-secondary" disabled={busy}
-              onClick={() => publish(false)}>
-              <CrossIcon size={14} /> {t.libraryUnpublish}
-            </button>
-          </>
-        )}
+      <Sheet open={moreOpen && !desk} onClose={closeMore} jp={deck?.name ?? t.deckFallbackTitle} cap={t.deckMore}>
+        {moreActions}
         {confirmingDeck ? (
           <>
             <span className="sheet__q">
@@ -991,6 +1067,22 @@ export default function DeckDetailScreen({ session }) {
         )}
       </Sheet>
 
+      {/* On the desk More is a column (above), so the deck's own
+          deletion asks in a dialog of its own, as the three other
+          irreversibles here do (plan 120). */}
+      <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck}>
+        <span className="sheet__q">
+          {deck?.followers > 0
+            ? t.libraryDeleteFollowed(deck.followers)
+            : t.deleteDeckConfirm}
+        </span>
+        <button type="button" className="btn-primary btn-primary--danger" onClick={deleteDeck}>
+          <TrashIcon size={14} /> {t.delete}
+        </button>
+        <button type="button" className="btn-secondary" onClick={() => setConfirmingDeck(false)}>{t.cancel}</button>
+      </Sheet>
+
       {/* The selection's deletion, asked in the same sheet — the count
           stands where one card puts its own front, because that is
           what is about to go. It was a question squeezed into the
@@ -1013,7 +1105,7 @@ export default function DeckDetailScreen({ session }) {
         <ImportCardsMenu onImport={handleImport} onClose={closeImport} />
       )}
 
-      {showBrowse && (
+      {showBrowse && !desk && (
         <BrowseCardsMenu
           deckId={deck_id}
           deckType={deck?.type}

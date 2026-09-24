@@ -12,6 +12,8 @@ import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
 import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
+import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { useDesk } from '../hooks/useDesk'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
@@ -81,6 +83,7 @@ export default function DictationRun({ session }) {
 
 // 'loading' | 'listening' | 'checking' | 'feedback' | 'error'
 function Session({ session, level }) {
+  const desk = useDesk()
   const navigate = useNavigate()
   const { t, lang } = useLang()
 
@@ -337,6 +340,24 @@ function Session({ session, level }) {
       pass={false}
       toast={fare.toast}
       onToastDone={fare.toastDone}
+      side={(
+        <BreakdownSide
+          graded={stage === 'feedback' && Boolean(result) && rated}
+          analysis={analysis}
+          loading={analysisLoading}
+          translation={result?.translation}
+          sentenceText={result?.jp}
+          onTokenClick={w => setLookup(vocabLookup(w))}
+          onGrammarOpen={g => setLookup(grammarLookup(g))}
+          onExplain={explainLine}
+          explaining={explaining}
+          explainError={explainError}
+          lookup={lookup}
+          onExitLookup={closeLookup}
+          session={session}
+        />
+      )}
+      sideLabel={t.deskBreakdownLabel}
     >
       {(stage === 'loading' || stage === 'checking') && <Loading />}
 
@@ -455,7 +476,7 @@ function Session({ session, level }) {
                 they heard, and a word-by-word gloss offered first is an
                 answer key handed over mid-question. Reading practice
                 gates its own breakdown on the same moment. */}
-            {rated && (
+            {!desk && rated && (
               <div className="prose__breakdown">
                 <button
                   type="button"
@@ -512,7 +533,9 @@ function Session({ session, level }) {
         </>
       )}
 
-      {lookup && (
+      {/* On the desk a door in the docked breakdown opens in the side
+          column (BreakdownSide → SideLookup, plan 115). */}
+      {lookup && !desk && (
         <DictionaryLookupSheet key={lookupKey(lookup)} {...lookup} session={session} onClose={closeLookup} />
       )}
     </StudyStage>

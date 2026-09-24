@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
@@ -15,6 +15,7 @@ import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { useDesk } from '../../hooks/useDesk'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
@@ -439,6 +440,58 @@ function ReadingBand({ reading, words, kind, char, onWord }) {
 function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const { t } = useLang()
   const dialogRef = useDialog(onClose, { capture: true })
+  return createPortal(
+    <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
+      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet dict-sheet--readings"
+           role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
+        <ReadingsList entry={entry} groups={groups} onClose={onClose} onVocabClick={onVocabClick} />
+      </div>
+    </div>,
+    document.body,
+  )
+}
+
+// ── 机 — every reading, in the entry's own place (plan 120) ──────────
+// On the desk an entry mostly stands in a column — the dictionary's
+// dock, a run's side, the analyser's dock — and every door in it opens
+// inside that column (DESIGN.md, "A door opens in the column, never over
+// it"). The readings were the one door still setting a scrim over the
+// lot. Here the list takes the entry's place in whatever holds it, a
+// column or a lookup dialog, and ✕ or Esc steps back to the entry. Esc
+// is taken in the capture phase and spent, so the dock, the lookup or
+// the run holding the entry does not hear it too — unless a dialog that
+// does not hold this list stands over it, whose key it then is.
+function ReadingsInPlace({ entry, groups, onClose, onVocabClick }) {
+  const { t } = useLang()
+  const ref = useRef(null)
+  const onCloseRef = useRef(onClose)
+  useLayoutEffect(() => { onCloseRef.current = onClose })
+  useEffect(() => {
+    const node = ref.current
+    node?.querySelector('.dict-plate__btn')?.focus({ preventScroll: true })
+    node?.scrollIntoView?.({ block: 'nearest' })
+    const onKey = e => {
+      if (e.key !== 'Escape') return
+      const over = [...document.querySelectorAll('[aria-modal="true"]')].some(d => !d.contains(node))
+      if (over) return
+      e.preventDefault()
+      e.stopPropagation()
+      onCloseRef.current()
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+  }, [])
+  return (
+    <div ref={ref} className="desk-readings" role="region" aria-label={`${t.allReadings}: ${entry.kanji}`}>
+      <ReadingsList entry={entry} groups={groups} onClose={onClose} onVocabClick={onVocabClick} />
+    </div>
+  )
+}
+
+// The list itself — the plate's head, the gates, the bands and the
+// pills — shared by the sheet and the list in place.
+function ReadingsList({ entry, groups, onClose, onVocabClick }) {
+  const { t } = useLang()
   const jump = onVocabClick
     ? (kanji, kana) => { onClose(); onVocabClick(kanji, kana) }
     : undefined
@@ -455,69 +508,63 @@ function ReadingsSheet({ entry, groups, onClose, onVocabClick }) {
   const kind = open === on ? '音' : '訓'
   const withWords = open.filter(g => g.words?.length > 0)
   const rest = open.filter(g => !g.words?.length)
-  return createPortal(
-    <div onClick={onClose} className="dict-sheet__scrim dict-sheet__scrim--over">
-      <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet dict-sheet--readings"
-           role="dialog" aria-modal="true" aria-label={`${t.allReadings}: ${entry.kanji}`}>
-        <article className="dict-entry">
-          <header className="dict-plate">
-            <div className="dict-plate__row">
-              <div className="dict-plate__marks">
-                <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
-                <span className="dict-readings__title">{t.allReadings}</span>
-              </div>
-              <div className="dict-plate__actions">
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="dict-plate__btn"
-                  title={t.close}
-                  aria-label={t.close}
-                >
-                  <CloseIcon />
-                </button>
-              </div>
-            </div>
-            <div className="dict-plate__stripe" aria-hidden="true" />
-          </header>
-          {on.length > 0 && kun.length > 0 && (
-            <div className="dict-gates">
-              <ReadingGate
-                name={t.readingsOnName} n={on.length}
-                open={open === on} onPick={() => setGate('on')}
-              />
-              <ReadingGate
-                name={t.readingsKunName} n={kun.length}
-                open={open === kun} onPick={() => setGate('kun')}
-              />
-            </div>
-          )}
-          <div className="dict-entry__body dict-readings"
-               aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
-            {withWords.map(({ reading, words }) => (
-              <ReadingBand
-                key={reading} reading={reading} words={words}
-                kind={kind} char={entry.kanji} onWord={jump}
-              />
-            ))}
-            {rest.length > 0 && (
-              <section className="dict-rest" aria-label={t.readingsNoWords}>
-                <div className="dict-rest__cap">{t.readingsNoWords}</div>
-                <ul className="dict-rest__chips">
-                  {rest.map(({ reading }) => (
-                    <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
-                  ))}
-                </ul>
-              </section>
-            )}
-            <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
-              {t.close}
+  return (
+    <article className="dict-entry">
+      <header className="dict-plate">
+        <div className="dict-plate__row">
+          <div className="dict-plate__marks">
+            <span className="dict-readings__glyph" lang="ja">{entry.kanji}</span>
+            <span className="dict-readings__title">{t.allReadings}</span>
+          </div>
+          <div className="dict-plate__actions">
+            <button
+              type="button"
+              onClick={onClose}
+              className="dict-plate__btn"
+              title={t.close}
+              aria-label={t.close}
+            >
+              <CloseIcon />
             </button>
           </div>
-        </article>
+        </div>
+        <div className="dict-plate__stripe" aria-hidden="true" />
+      </header>
+      {on.length > 0 && kun.length > 0 && (
+        <div className="dict-gates">
+          <ReadingGate
+            name={t.readingsOnName} n={on.length}
+            open={open === on} onPick={() => setGate('on')}
+          />
+          <ReadingGate
+            name={t.readingsKunName} n={kun.length}
+            open={open === kun} onPick={() => setGate('kun')}
+          />
+        </div>
+      )}
+      <div className="dict-entry__body dict-readings"
+           aria-label={open === on ? t.readingsOnName : t.readingsKunName}>
+        {withWords.map(({ reading, words }) => (
+          <ReadingBand
+            key={reading} reading={reading} words={words}
+            kind={kind} char={entry.kanji} onWord={jump}
+          />
+        ))}
+        {rest.length > 0 && (
+          <section className="dict-rest" aria-label={t.readingsNoWords}>
+            <div className="dict-rest__cap">{t.readingsNoWords}</div>
+            <ul className="dict-rest__chips">
+              {rest.map(({ reading }) => (
+                <li key={reading} className="dict-rest__chip" lang="ja">{reading}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+        <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+          {t.close}
+        </button>
       </div>
-    </div>,
-    document.body,
+    </article>
   )
 }
 
@@ -752,6 +799,12 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   const hiddenReadings = tokens.length - shownReadings.length
   const readingGroups = entry.readings ?? []
   const [openKey, setOpenKey] = useState(null)
+  // On the desk the list opens in the entry's place (ReadingsInPlace,
+  // plan 120), taking the door with it; stepping back puts the focus
+  // on the door again, as a dialog's close would.
+  const desk = useDesk()
+  const readingsDoor = useRef(null)
+  const wasReading = useRef(false)
   // ── The ＋ and its menu ──
   // The shelf half: lit from the shelf the screen holds (favorites.has),
   // turned by one optimistic write. The only thing the plate says about
@@ -811,10 +864,18 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     }
   }
   const readingsOpen = isKanji && readingGroups.length > 0 && openKey === entryKey(entry)
+  useEffect(() => {
+    if (desk && wasReading.current && !readingsOpen) readingsDoor.current?.focus({ preventScroll: true })
+    wasReading.current = readingsOpen
+  }, [desk, readingsOpen])
   // card_stats (study/card_lookup.py) says "not_started" for a card
   // with no state in any mode; the seal's vocabulary is new / learning
   // / mastered, and a card nobody has touched is the unstruck seal.
   const stage = !status?.status || status.status === 'not_started' ? 'new' : status.status
+
+  if (desk && readingsOpen) {
+    return <ReadingsInPlace entry={entry} groups={readingGroups} onClose={() => setOpenKey(null)} onVocabClick={onVocabClick} />
+  }
 
   return (
     <article className="dict-entry">
@@ -924,15 +985,20 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               </span>
             )}
             {mine.picker}
-            <button
-              type="button"
-              onClick={onClose}
-              className="dict-plate__btn"
-              title={t.close}
-              aria-label={t.close}
-            >
-              <CloseIcon />
-            </button>
+            {/* No ✕ where there is nothing to close: the desk's dock
+                (plan 114) is the catalogue's standing companion, not a
+                panel that was opened. */}
+            {onClose && (
+              <button
+                type="button"
+                onClick={onClose}
+                className="dict-plate__btn"
+                title={t.close}
+                aria-label={t.close}
+              >
+                <CloseIcon />
+              </button>
+            )}
           </div>
         </div>
 
@@ -951,9 +1017,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
               {readingGroups.length > 0 && (
                 <button
                   type="button"
+                  ref={readingsDoor}
                   onClick={() => setOpenKey(readingsOpen ? null : entryKey(entry))}
                   className={`dict-plate__more${readingsOpen ? ' dict-plate__more--open' : ''}`}
-                  aria-haspopup="dialog"
+                  aria-haspopup={desk ? undefined : 'dialog'}
                   aria-expanded={readingsOpen}
                   aria-label={t.allReadings}
                   title={t.allReadings}
@@ -1212,12 +1279,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             screen and the ✕ is at the far end of it. Hidden everywhere
             else (see .dict-entry__close): the plate's ✕, Escape and the
             scrim already close a dock or a modal. */}
-        <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
-          {t.close}
-        </button>
+        {onClose && (
+          <button type="button" onClick={onClose} className="btn-secondary dict-entry__close">
+            {t.close}
+          </button>
+        )}
       </div>
 
-      {readingsOpen && (
+      {readingsOpen && !desk && (
         <ReadingsSheet
           entry={entry}
           groups={readingGroups}
@@ -1254,7 +1323,14 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 // `id` moves that point to the front of page 0). An id lookup insists
 // on the exact row and never falls back to the page's first result:
 // an id that names nothing is "not available", not a different point.
-function useDictionaryLookup(session, term, category, lang, active, kana, id) {
+//
+// `exact` (plan 115) drops the page's-first-result fallback for a term
+// too: the desk's session panel docks a revealed card's entry unasked,
+// and a personal deck's card whose front is no dictionary word would
+// otherwise dock whatever word the search happened to rank first — an
+// unrelated entry printed as the answer. The sheets, opened on a
+// learner's own tap, keep the nearest match.
+function useDictionaryLookup(session, term, category, lang, active, kana, id, exact = false) {
   const [state, setState] = useState({ entry: null, loading: false, error: false })
 
   useEffect(() => {
@@ -1275,13 +1351,13 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
           ? (results.find(e => e.raw_id === id) ?? null)
           : (kana && results.find(e => e.kanji === term && e.kana === kana))
             ?? results.find(e => e.kanji === term || e.kana === term)
-            ?? results[0] ?? null
+            ?? (exact ? null : results[0] ?? null)
         setState({ entry: match, loading: false, error: !match })
       })
       .catch(() => { if (!cancelled) setState({ entry: null, loading: false, error: true }) })
 
     return () => { cancelled = true }
-  }, [active, term, category, session, lang, kana, id])
+  }, [active, term, category, session, lang, kana, id, exact])
 
   return state
 }
@@ -1316,15 +1392,19 @@ function useDictionaryLookup(session, term, category, lang, active, kana, id) {
 // see useDictionaryLookup. `mining` is optional and reaches the plate's
 // `+` roundel on a grammar entry where the opening screen has one;
 // `favorites` likewise reaches its ★ where the screen holds a shelf.
-export function DictionaryLookupSheet({ term, kana, category, id, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
-  const { t, lang } = useLang()
-  // The entries opened from one another, oldest first. The sheet shows
-  // the last; ‹ pops it. Reset by the caller remounting on a new term
-  // (the key it is opened with is the term itself).
+// The stack of entries opened from one another, oldest first, and the
+// entry at its head. Shared by the sheet (a portal over a quiz or the
+// catalogue) and the body the desk docks beside the catalogue (plan
+// 114), so the two walk their doors the same way.
+function useLookupStack(session, { term, kana, category, id }, exact = false) {
+  const { lang } = useLang()
+  // Reset by the caller remounting on a new term (the key it is opened
+  // with is the term itself).
   const [stack, setStack] = useState([{ term, kana, category, id }])
   const here = stack[stack.length - 1]
-  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id)
-  const dialogRef = useDialog(onClose, { capture: over })
+  // Only the first lookup is the unasked one: a door opened from it is
+  // the learner's own tap and keeps the nearest match.
+  const { entry, loading, error } = useDictionaryLookup(session, here.term, here.category, lang, true, here.kana, here.id, exact && stack.length === 1)
 
   const open = (nextTerm, nextCategory, nextKana) => {
     if (!nextTerm) return
@@ -1336,6 +1416,60 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
     if (!nextId) return
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
+  const back = stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined
+  return { here, entry, loading, error, open, openId, back }
+}
+
+// What a lookup shows: the loading line, the "not available" answer, or
+// the entry with its doors opening into the same stack.
+function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favorites }) {
+  const { t } = useLang()
+  const { entry, loading, error, open, openId, back } = look
+  return (
+    <>
+      {loading && (
+        <div className="quiz-loading">{t.loadingDictionary}</div>
+      )}
+      {!loading && error && (
+        <div className="dict-sheet__empty">
+          <div className="quiz-loading">{t.notAvailable}</div>
+          {/* A docked lookup with no way out (the session panel's) has
+              nothing for a Close to do. Every sheet passes one. */}
+          {onClose && (
+            <button type="button" onClick={onClose} className="btn-secondary">
+              {t.close}
+            </button>
+          )}
+        </div>
+      )}
+      {!loading && entry && (
+        <DictionaryDetail
+          entry={entry}
+          onClose={onClose}
+          onBack={back}
+          onRadicalClick={onRadicalClick ? n => { onClose(); onRadicalClick(n) } : undefined}
+          onReview={onReview}
+          onKanjiClick={char => open(char, 'kanji')}
+          // The twin opens into the stack like every other door here.
+          onKanaClick={(kana, type) => open(kana, type)}
+          // onVocabClick already hands over both halves, so stepping from
+          // one entry to another inside the sheet gets the same exactness
+          // the card does.
+          onVocabClick={(k, r) => open(k || r, 'vocab', r)}
+          onGrammarClick={openId}
+          mining={mining}
+          favorites={favorites}
+        />
+      )}
+    </>
+  )
+}
+
+export function DictionaryLookupSheet({ term, kana, category, id, session, mining, favorites, onClose, over = false, onRadicalClick, onReview }) {
+  const { t } = useLang()
+  const look = useLookupStack(session, { term, kana, category, id })
+  const { here, entry } = look
+  const dialogRef = useDialog(onClose, { capture: over })
 
   return createPortal(
     <div onClick={onClose} className={`dict-sheet__scrim${over ? ' dict-sheet__scrim--over' : ''}`}>
@@ -1344,38 +1478,36 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
           by the id until then. */}
       <div ref={dialogRef} onClick={e => e.stopPropagation()} className="dict-sheet"
            role="dialog" aria-modal="true" aria-label={`${t.dictionaryTitle}: ${here.term ?? entry?.pattern ?? here.id}`}>
-        {loading && (
-          <div className="quiz-loading">{t.loadingDictionary}</div>
-        )}
-        {!loading && error && (
-          <div className="dict-sheet__empty">
-            <div className="quiz-loading">{t.notAvailable}</div>
-            <button type="button" onClick={onClose} className="btn-secondary">
-              {t.close}
-            </button>
-          </div>
-        )}
-        {!loading && entry && (
-          <DictionaryDetail
-            entry={entry}
-            onClose={onClose}
-            onBack={stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined}
-            onRadicalClick={onRadicalClick ? n => { onClose(); onRadicalClick(n) } : undefined}
-            onReview={onReview}
-            onKanjiClick={char => open(char, 'kanji')}
-            // The twin opens into the stack like every other door here.
-            onKanaClick={(kana, type) => open(kana, type)}
-            // onVocabClick already hands over both halves, so stepping from
-            // one entry to another inside the sheet gets the same exactness
-            // the card does.
-            onVocabClick={(k, r) => open(k || r, 'vocab', r)}
-            onGrammarClick={openId}
-            mining={mining}
-            favorites={favorites}
-          />
-        )}
+        <LookupContent
+          look={look}
+          onClose={onClose}
+          onRadicalClick={onRadicalClick}
+          onReview={onReview}
+          mining={mining}
+          favorites={favorites}
+        />
       </div>
     </div>,
     document.body,
+  )
+}
+
+// ── 机 — the same lookup, standing where it was asked (plan 114) ──
+// On the desk a door in the catalogue's dock opens INTO the dock rather
+// than over the screen: the catalogue, the search and the scroll stay
+// in view, and ✕ returns the dock to the entry the door was opened
+// from. A run's session panel docks the revealed card's entry the same
+// way. No portal, no scrim, no dialog: it is a column's content.
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false }) {
+  const look = useLookupStack(session, { term, kana, category, id }, exact)
+  return (
+    <LookupContent
+      look={look}
+      onClose={onExit}
+      onRadicalClick={onRadicalClick}
+      onReview={onReview}
+      mining={mining}
+      favorites={favorites}
+    />
   )
 }

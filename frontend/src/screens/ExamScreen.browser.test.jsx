@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 import '../index.css'
 
@@ -29,11 +29,18 @@ const { default: ExamScreen } = await import('./ExamScreen')
 
 const settle = (ms = 200) => new Promise(r => setTimeout(r, ms))
 
+const here = { search: null }
+function Probe() {
+  here.search = useLocation().search
+  return null
+}
+
 async function open(entry) {
   const screen = await render(
     <LangProvider>
       <MemoryRouter initialEntries={[entry]}>
         <ExamScreen session={null} />
+        <Probe />
       </MemoryRouter>
     </LangProvider>
   )
@@ -60,6 +67,23 @@ describe('the mock-exam station', () => {
 
   it('ignores a grade that is not one', async () => {
     const screen = await open('/practice/exam?level=N9')
+    expect(screen.container.querySelectorAll('.route-stop')).toHaveLength(5)
+  })
+
+  // ── The grade is the URL's (plan 114) ──
+  // It was component state, so a second visit to /practice/exam — the
+  // desk rail's 模試 link, the browser's own history — landed on the
+  // papers of whatever grade was last open, with the bar's ‹ the only
+  // way back to the grades. Replaced, never pushed.
+  it('writes the grade into the URL, and takes it out on the way back', async () => {
+    const screen = await open('/practice/exam')
+    ;[...screen.container.querySelectorAll('.route-stop')].find(s => s.textContent.includes('N3')).click()
+    await settle()
+    expect(here.search).toBe('?level=N3')
+    expect(screen.container.querySelector('.bar__sub').textContent).toBe('N3')
+    screen.container.querySelector('.stage__leave').click()
+    await settle()
+    expect(here.search).toBe('')
     expect(screen.container.querySelectorAll('.route-stop')).toHaveLength(5)
   })
 })

@@ -20,6 +20,8 @@ import { DestinationPage } from '../components/settings/DestinationPage'
 import { DataPage } from '../components/settings/DataPage'
 import { AccountPage } from '../components/settings/AccountPage'
 import { CreditsPage } from '../components/settings/CreditsPage'
+import { SettingsPaneContext } from '../components/settings/pane'
+import { useDesk } from '../hooks/useDesk'
 
 // ── Settings (canvas Settings, plan 074) ──────────────────────
 // A list of seven rows, each printing its current value, each a door to
@@ -40,17 +42,50 @@ const PAGES = {
 
 const THEATRE = ['ambiance', 'jingle', 'announcement']
 
+// The page the desk opens when the list is asked for on its own.
+const FIRST_PAGE = 'display'
+
 export default function SettingsScreen({ session }) {
   const { page } = useParams()
+  const desk = useDesk()
   if (page && !PAGES[page]) return <Navigate to="/profile/settings" replace />
+
+  // ── 机 — the list and the page side by side (plan 113) ──
+  // A computer has the room to show where you are in the list while you
+  // change what it leads to, so on the desk the two share the screen:
+  // the list on the left under the screen's one heading, the open page
+  // beside it (components/settings/pane.js). The URLs are the phone's —
+  // a page is still /profile/settings/<page> — and the bare list opens
+  // on its first page rather than beside an empty pane.
+  if (desk) {
+    if (!page) return <Navigate to={`/profile/settings/${FIRST_PAGE}`} replace />
+    const Page = PAGES[page]
+    return (
+      <main id="main-content" className="settings desk-settings">
+        <div className="desk-settings__list">
+          <SettingsListBody session={session} current={page} />
+        </div>
+        <SettingsPaneContext.Provider value>
+          <Page session={session} />
+        </SettingsPaneContext.Provider>
+      </main>
+    )
+  }
+
   if (page) {
     const Page = PAGES[page]
     return <Page session={session} />
   }
-  return <SettingsList session={session} />
+  return (
+    <main id="main-content" className="settings">
+      <SettingsListBody session={session} />
+    </main>
+  )
 }
 
-function SettingsList({ session }) {
+// The list: its bar, the rows, Sign out. `current` is the page open
+// beside it on the desk, and marks its row; the phone has no such page.
+function SettingsListBody({ session, current = null }) {
   const { t, lang } = useLang()
   const navigate = useNavigate()
   const summary = useProfileSummary()
@@ -89,12 +124,12 @@ function SettingsList({ session }) {
   ]
 
   return (
-    <main id="main-content" className="settings">
+    <>
       <Bar
         code={<GearIcon size={14} />}
         title={t.settings}
         color="var(--pass-ink)"
-        aside={<Leave onClick={() => navigate('/profile')}>{t.profileTitle}</Leave>}
+        aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
       <div className="stg-list">
@@ -102,8 +137,9 @@ function SettingsList({ session }) {
           <button
             key={row.id}
             type="button"
-            className="stg-row"
+            className={`stg-row${row.id === current ? ' stg-row--on' : ''}`}
             data-page={row.id}
+            aria-current={row.id === current ? 'page' : undefined}
             onClick={() => { playClick(); navigate(`/profile/settings/${row.id}`) }}
           >
             <span className="stg-row__names"><span className="stg-row__jp">{row.label}</span></span>
@@ -130,9 +166,14 @@ function SettingsList({ session }) {
         )}
       </div>
 
-      <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-        {t.signOut}
-      </button>
-    </main>
+      {/* The account page, open beside the list on the desk, carries
+          its own Sign out; one is enough on the screen (plan 115).
+          `current` is the desk's alone, so the phone's list keeps it. */}
+      {current === 'account' ? null : (
+        <button type="button" className="btn-secondary stg-signout" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
+          {t.signOut}
+        </button>
+      )}
+    </>
   )
 }

@@ -32,11 +32,17 @@ import Empty from '../ui/Empty'
  *
  * Props:
  *   session, theme, onSelect(levelKey)
+ *   selected — the band whose platforms stand beside the route, in the
+ *              desk's station split (plan 115); passed to RouteStops.
+ *   linkTo(levelKey) — the band's URL there, which makes the bands
+ *              links (plan 117); passed to RouteStops.
  */
-export default function ThemeLevelSelector({ session, theme, onSelect }) {
+export default function ThemeLevelSelector({ session, theme, onSelect, selected = null, linkTo = null }) {
   const { t } = useLang()
-  const [counts, setCounts] = useState(null)
-  const [failed, setFailed] = useState(false)
+  // Held with the theme they answer for: the desk keeps this mounted
+  // from one theme's bands to the next, and another theme's counts —
+  // or its failure — are not this one's.
+  const [got, setGot] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -45,14 +51,16 @@ export default function ThemeLevelSelector({ session, theme, onSelect }) {
       .then(data => {
         if (cancelled) return
         const row = (data.themes ?? []).find(th => th.key === theme)
-        if (!row) { setFailed(true); return }
-        setCounts(Object.fromEntries((row.levels ?? []).map(l => [l.level, l.count])))
+        if (!row) { setGot({ theme, failed: true }); return }
+        setGot({ theme, counts: Object.fromEntries((row.levels ?? []).map(l => [l.level, l.count])) })
       })
-      .catch(() => { if (!cancelled) setFailed(true) })
+      .catch(() => { if (!cancelled) setGot({ theme, failed: true }) })
     return () => { cancelled = true }
   }, [session, theme])
 
-  if (failed) return <Empty tone="error" message={t.loadError} />
+  const mine = got?.theme === theme ? got : null
+  const counts = mine?.counts ?? null
+  if (mine?.failed) return <Empty tone="error" message={t.loadError} />
   if (!counts) return <Loading />
 
   const stops = THEME_LEVELS.map(key => ({
@@ -63,5 +71,5 @@ export default function ThemeLevelSelector({ session, theme, onSelect }) {
     hint: `${counts[key] ?? 0} ${t.wordNoun}`,
   }))
 
-  return <RouteStops stops={stops} onSelect={onSelect} />
+  return <RouteStops stops={stops} selected={selected} onSelect={onSelect} linkTo={linkTo} />
 }

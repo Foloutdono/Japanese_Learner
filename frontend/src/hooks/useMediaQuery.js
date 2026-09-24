@@ -10,10 +10,8 @@ import { useSyncExternalStore } from 'react'
 // once with the wrong layout and corrects it, which on this screen is a
 // visible flash of the route diagram in the wrong orientation.
 //
-// (components/ui/TopBar.jsx still uses a resize listener for its own
-// MOBILE_BREAKPOINT. That one is load-bearing for the auto-hide logic
-// and documented as moving in step with index.css's 768px; it is
-// deliberately not changed here.)
+// The app's one width split in JavaScript is the desk's, and it reads
+// this through hooks/useDesk.js rather than writing its query again.
 export function useMediaQuery(query) {
   return useSyncExternalStore(
     callback => {

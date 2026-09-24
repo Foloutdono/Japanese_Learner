@@ -13,3 +13,9 @@
 // a shared constant alongside them breaks React Fast Refresh for the
 // whole module (react-refresh/only-export-components).
 export const CHOICE_KEY_INDEX = { '1': 0, '2': 1, '3': 2, '4': 3, '&': 0, 'é': 1, '"': 2, "'": 3 }
+
+// A comprehension question's options are lettered A–D (the canvas,
+// screens/ComprehensionRun.jsx), so its letters answer as well as its
+// digits. `e.key` is the character typed, so an AZERTY keyboard's A key
+// sends 'a' like any other; compare lower-cased.
+export const LETTER_KEY_INDEX = { a: 0, b: 1, c: 2, d: 3 }

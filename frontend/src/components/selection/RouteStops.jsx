@@ -1,4 +1,6 @@
 import { playUi } from '../../lib/audio'
+import { useListWalk } from '../../hooks/useListWalk'
+import { SplitRow } from './SplitRow'
 
 // ── 路線図 — the stops of a line (plan 071) ──────────────────
 // The station page: a line's stops as the canvas draws them, one rail
@@ -22,15 +24,31 @@ import { playUi } from '../../lib/audio'
 //            when the note shows is below, once, rather than in each
 //            caller.
 //   here  — the key of the learner's own stop (a landmark, never a
-//           lock: every stop stays a plain button — docs/adr/0005).
+//           lock: every stop stays a plain button, or on the desk a
+//           plain link — docs/adr/0005).
 //           Where it comes from is the caller's business: a declared
 //           JLPT level for the graded lines, the figures themselves
 //           for kana, which has no such thing.
 //   onSelect(key)
-export function RouteStops({ stops, here = null, onSelect }) {
+//   selected — the stop whose platforms stand beside the route, in the
+//           desk's station split (plan 114, StationSplit): it is the
+//           page, so it is marked as one (`aria-current="page"`, and
+//           the Settings list's own selection). Only the desk passes it.
+//   linkTo(key) — the URL a stop opens, in the split (plan 117): the
+//           stops are then links (SplitRow) that replace the page, so
+//           one can be opened in a new tab, and `onSelect` is not
+//           called. Only the desk passes it; without it a stop is the
+//           button it always was.
+//
+// In the split the route is also walked by key (hooks/useListWalk,
+// plan 115): one tab stop, the open one, and ↑/↓/Home/End along it.
+export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null }) {
   const hereIndex = stops.findIndex(s => s.key === here)
+  const walked = selected != null
+  const onWalk = useListWalk(walked)
+  const tabStop = walked && stops.some(s => s.key === selected) ? selected : stops[0]?.key
   return (
-    <div className="route">
+    <div className="route" onKeyDown={onWalk}>
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here
@@ -40,20 +58,23 @@ export function RouteStops({ stops, here = null, onSelect }) {
           ? <span className="route-stop__here">{stop.hereLabel}</span>
           : stop.hint ? <span className="route-stop__hint" lang={stop.hintLang}>{stop.hint}</span> : null
         const started = stop.startedLabel && (stop.started ?? 0) > (stop.learned ?? 0)
+        const open = selected != null && stop.key === selected
         const classes = [
           'route-stop',
           i === 0 ? 'route-stop--first' : '',
           i === stops.length - 1 ? 'route-stop--last' : '',
           past ? 'route-stop--past' : '',
           current ? 'route-stop--current' : '',
+          open ? 'desk-stop--open' : '',
         ].filter(Boolean).join(' ')
         return (
-          <button
+          <SplitRow
             key={stop.key}
-            type="button"
+            to={linkTo?.(stop.key)}
             className={classes}
-            aria-current={current ? 'location' : undefined}
-            onClick={() => { playUi('click-mode-selection'); onSelect(stop.key) }}
+            aria-current={open ? 'page' : current ? 'location' : undefined}
+            tabIndex={walked ? (stop.key === tabStop ? 0 : -1) : undefined}
+            onClick={() => { playUi('click-mode-selection'); if (!linkTo) onSelect(stop.key) }}
           >
             {/* The rail, drawn per stop so the ends can be capped — a
                 line that runs off the top of the first station reads
@@ -81,7 +102,7 @@ export function RouteStops({ stops, here = null, onSelect }) {
               <span className="route-stop__fig"><b>{stop.learned ?? 0}</b>/ {stop.total}</span>
             )}
             <span className="route-stop__go" aria-hidden="true">▶</span>
-          </button>
+          </SplitRow>
         )
       })}
     </div>

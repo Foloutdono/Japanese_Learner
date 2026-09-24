@@ -1,5 +1,6 @@
 import { useRef } from 'react'
 import { useLang } from '../../LangContext'
+import { useBoxWidth } from '../../hooks/useBoxWidth'
 
 // ── 定着 — the retention line (plan 085) ──────────────────
 // The screen's one chart: good-or-better as a share of the week's
@@ -20,19 +21,29 @@ import { useLang } from '../../LangContext'
 //
 // The latest week's stop is pressed in the stamp's lacquer; the
 // selected week wears a ring in the same ink.
-const W = 326
-const H = 96
+//
+// On the phone the drawing is 326 units wide and scales to its card.
+// With `fit` (the desk, plan 114) the viewBox is the box's own width in
+// pixels and a taller H, so the strokes and stops are drawn 1:1 however
+// wide the card is — never a phone's chart magnified.
+const PHONE_W = 326
+const PHONE_H = 96
+const FIT_H = 160
 // The inset clears the asked week's ring (r 8 + its stroke), so a stop
 // at 100% or at either end of the axis is drawn whole, never clipped.
 const RING = 8
 const PAD = RING + 2
 const FOOT = 4
 
-export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSelect }) {
+export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSelect, fit = false }) {
   const { t } = useLang()
   const svgRef = useRef(null)
+  const [boxRef, boxWidth] = useBoxWidth(fit)
 
   if (currentIndex === null || firstIndex === null) return null
+
+  const W = boxWidth ?? PHONE_W
+  const H = boxWidth ? FIT_H : PHONE_H
 
   // The weeks on the axis: from the first ridden to this week.
   const shown = weeks.slice(firstIndex)
@@ -74,7 +85,7 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
   }
 
   return (
-    <div className="rep-line">
+    <div className="rep-line" ref={fit ? boxRef : undefined}>
       <svg
         ref={svgRef}
         className="rep-line__svg"

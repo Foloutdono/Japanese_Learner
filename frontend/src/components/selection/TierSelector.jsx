@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { apiFetch } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { playUi } from '../../lib/audio'
 import { Loading } from '../ui/Loading'
 import Empty from '../ui/Empty'
 import { Seg } from '../chrome/Console'
+import { SplitRow } from './SplitRow'
 
 // The default size and the size options live with the tier maths in
 // domain/tiers.js (the practice pickers read them too, plan 072).
@@ -44,11 +45,18 @@ import { DEFAULT_TIER_SIZE, TIER_SIZE_OPTIONS } from '../../domain/tiers'
  *              selection.
  *   color    — optional accent colour override, same convention as
  *              LevelSelector/ModeSelector.
+ *   selected — the tier whose platforms stand beside the list, in the
+ *              desk's station split (plan 115): marked as the page,
+ *              like RouteStops' own, and kept in view when the list
+ *              is longer than the column. Only the desk passes it.
+ *   linkTo(tier) — the tier's URL in that split (plan 117): the rows
+ *              are then links (SplitRow) at the list's current size, and
+ *              `onSelect` is not called. Only the desk passes it.
  *
  * No header of its own — every caller renders inside <SelectionScreen>,
  * which already names the section on the station plate overhead.
  */
-export default function TierSelector({ domain, session, onSelect, color, tierSize: sizeProp, onTierSize }) {
+export default function TierSelector({ domain, session, onSelect, color, tierSize: sizeProp, onTierSize, selected = null, linkTo = null }) {
   const { t } = useLang()
   // Controlled by the station when it carries the size in its URL;
   // local state otherwise.
@@ -69,6 +77,14 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
       .catch(() => { if (!cancelled) setFailed(true) })
     return () => { cancelled = true }
   }, [domain, session, tierSize])
+
+  // The open tier in view: tier 30 of a 43-stop list sits below the
+  // column's fold, and a list that opens scrolled away from the page
+  // beside it reads as two unrelated screens.
+  const openRow = useRef(null)
+  useEffect(() => {
+    openRow.current?.scrollIntoView?.({ block: 'nearest' })
+  }, [tiers, selected])
 
   const rowStyle = color ? { '--row-color': color } : undefined
   const unit = domain === 'vocab' ? t.wordNoun : (t.kanjiUnit ?? 'kanji')
@@ -97,27 +113,35 @@ export default function TierSelector({ domain, session, onSelect, color, tierSiz
 
       {tiers && (
         <div className="platform-grid">
-          {visibleTiers.map((tr, i) => (
-            <button
-              key={tr.tier}
-              type="button"
-              onClick={() => {
-                playUi('click-mode-selection')
-                onSelect(tr.tier, `${tr.start_rank}–${tr.end_rank}`, tierSize)
-              }}
-              className="platform-card"
-              style={rowStyle}
-            >
-              <span className="platform-card__lead">
-                <span className="platform-card__no">{i + 1}</span>
-              </span>
-              <span className="platform-card__body">
-                <span className="platform-card__title">{tr.start_rank}–{tr.end_rank}</span>
-                <span className="platform-card__desc">{tr.count} {unit}</span>
-              </span>
-              <span className="platform-card__go" aria-hidden="true">▶</span>
-            </button>
-          ))}
+          {visibleTiers.map(tr => {
+            const open = selected != null && tr.tier === selected
+            return (
+              <SplitRow
+                key={tr.tier}
+                ref={open ? openRow : undefined}
+                to={linkTo?.(tr.tier)}
+                onClick={() => {
+                  playUi('click-mode-selection')
+                  if (!linkTo) onSelect(tr.tier, `${tr.start_rank}–${tr.end_rank}`, tierSize)
+                }}
+                className={open ? 'platform-card desk-stop--open' : 'platform-card'}
+                aria-current={open ? 'page' : undefined}
+                style={rowStyle}
+              >
+                <span className="platform-card__lead">
+                  {/* The tier's own number, which is what its URL and
+                      its run's head call it — not its place in the list,
+                      which an emptied tier upstream would shift. */}
+                  <span className="platform-card__no">{tr.tier}</span>
+                </span>
+                <span className="platform-card__body">
+                  <span className="platform-card__title">{tr.start_rank}–{tr.end_rank}</span>
+                  <span className="platform-card__desc">{tr.count} {unit}</span>
+                </span>
+                <span className="platform-card__go" aria-hidden="true">▶</span>
+              </SplitRow>
+            )
+          })}
         </div>
       )}
     </div>

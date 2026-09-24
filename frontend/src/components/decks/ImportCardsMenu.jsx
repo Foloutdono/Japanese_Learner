@@ -31,7 +31,7 @@ export default function ImportCardsMenu({ onImport, onClose }) {
   function parse(text) {
     const ts = getTermSep()
     const cs = getCardSep()
-    if (!text.trim() || !ts) return []
+    if (!text.trim() || !ts || !cs) return []
     return text
       .split(cs)
       .map(l => l.trim())

@@ -3086,6 +3086,27 @@
      LevelBar.jsx): the dock's floor on a stage, the way the tab bar is
      the floor under the shell. */
   --lvlbar-h:       36px;
+  /* The desk's rail (plan 113, components/chrome/DeskRail.jsx): the
+     second chrome's one width, at and above the desk's 1100px. Declared
+     here rather than inside the desk's own section because every :root
+     token must resolve at every width (design-system.browser.test);
+     nothing below 1100 reads it. Wide enough for the longest French
+     section name ("Entraînement à la lecture") beside a gate's indent,
+     narrow enough to leave two plates side by side at 1100. */
+  --desk-rail-w:    256px;
+  /* The desk's canvas (plan 114): how wide a screen beside the rail may
+     grow before it centres. DESIGN.md's "min(1240px, 100%) for a plated
+     selection screen", made a token — the phone's --board-w (1040) was
+     a column for a hand-held screen, and at 1920 it left a third of the
+     desk empty. */
+  --desk-board-w:   1240px;
+  /* The desk's second column (plan 114): the width of whatever stands
+     beside a screen's main work — the pass's back beside the fare gate,
+     a station's stops beside its platforms, a run's session panel. It is
+     a phone's content width (390 less two gutters, give or take), on
+     purpose: nearly everything that goes there was drawn for a phone
+     first, and here it is drawn at the width it was designed at. */
+  --desk-side-w:    360px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -4329,21 +4350,28 @@ textarea:focus-visible {
 }
 
 /* ── Breakpoints ──────────────────────────────────────────
-   Two, and they are the whole scale:
+   Three, and they are the whole scale:
 
-     560px — phone.  Below this, single column everywhere.
-     768px — tablet. Above it the chrome's frame becomes a centred
-             column (the min-width query in the 車内 block) — the two
-             must move together.
+      560px — phone.  Below this, single column everywhere.
+      768px — tablet. Above it the phone's frame becomes a centred
+              column (the min-width query in the 車内 block) — the two
+              must move together.
+     1100px — desk.   At and above it the app changes chrome: the rail
+              down the left edge instead of the HUD and the tab bar,
+              and the screens laid out for the width (plan 113). Every
+              rule for it lives in ONE block, the 机 section at the very
+              end of this file, and nowhere else — so nothing written
+              for the desk can reach a phone. src/desk.css.test.js
+              holds that, and holds the query equal to hooks/useDesk.js.
 
    Anything else in this file is a specific component's own
    constraint, and if you add one it needs a comment saying which
    component and why. A one-off with no reason attached is how this
    file ended up with thirteen of them.
 
-   The 1099/1100 pair below is deliberate: complementary bounds for
-   the dictionary's docked panel, written as integers so they never
-   both match. */
+   The 1099/1100 pair below predates the desk and is the same line:
+   complementary bounds for the dictionary's docked panel (and the
+   analyzer's rail), written as integers so they never both match. */
 
 /* Room under a page's last row for the docked chrome — the tab bar
    under the shell, the inset alone on a stage — so the last card never
@@ -4423,9 +4451,11 @@ textarea:focus-visible {
 /* ═══════════════════════════════════════
    車内 — the mobile chrome (plan 068)
    ═══════════════════════════════════════
-   One chrome at every width: the HUD across the top, the five gates
-   across the bottom, the screen between them — a phone's frame, drawn
-   as a centred column on a wide screen. Both bars are sumi with the
+   The phone's chrome, below the desk's 1100px: the HUD across the top,
+   the five gates across the bottom, the screen between them — a phone's
+   frame, drawn as a centred column between 769 and 1099. At 1100 and up
+   the app draws its second chrome instead, the desk's rail (机, plan
+   113, the last section of this file). Both bars are sumi with the
    two panel inks and no line colour; the pigment belongs to the
    screen's own bar below. The rules mirror the canvas's mockup
    (docs/design/mobile/mockup.css) class for class, on the tokens;
@@ -20518,3 +20548,1214 @@ a.slip__act { text-decoration: none; }
 @media (prefers-reduced-motion: reduce) {
   .guide__spot { transition: none; }
 }
+
+/* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
+   The computer's design, at and above 1100px (hooks/useDesk.js's
+   DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
+   every width below this line draws exactly as it always has, and this
+   one — the rail down the left edge (components/chrome/DeskRail.jsx),
+   every gate captioned, the HUD's three instruments at its foot, sheets
+   as centred dialogs, and the gate screens laid out for the width.
+
+   THE CONTRACT, and why it is shaped like this. Everything for the desk
+   is in the ONE media block below, and this section is the file's tail:
+   a rule here cannot reach a phone because the query is its only door,
+   and a rule elsewhere cannot be desk-only by accident because the desk's
+   names (.desk-*, .phone--desk) are written nowhere else.
+   src/desk.css.test.js holds all of it — the query string, the tail, the
+   names, no !important. The DOM half of the same promise is JavaScript's:
+   below the line the components render exactly what they rendered before
+   the desk existed (the phone lane's "draws no desk").
+
+   Inside: one block, each selector once, specificity ascending, so
+   stylelint's duplicate and descending-specificity guards read it as one
+   context. Values are the :root tokens; the one new width is
+   --desk-rail-w. docs/design/desk/README.md is the class map. */
+@media (min-width: 1100px) {
+  /* ── the frame ──
+     No tab bar under the shell, so nothing docked clears one: the
+     bottom edge is the inset alone, as on a stage. The rail is fixed
+     down the left edge and the page makes room for it; the phone's own
+     wide-screen rule (the 車内 block's min-width query) then caps the
+     screen at --board-w and centres it in what the rail leaves. */
+  :root[data-chrome="shell"] { --dock-bottom: var(--safe-bottom); }
+  .phone--desk { padding-inline-start: var(--desk-rail-w); }
+  /* The canvas (plan 114): the screen grows to --desk-board-w before it
+     centres, where the phone's column stopped at --board-w. */
+  .phone--desk .phone__content { max-width: var(--desk-board-w); }
+
+  /* ── 机 — the rail ──
+     The HUD and the tab bar in one column: the same sumi, the same two
+     panel inks, the same lit edge and the shadow it throws — turned to
+     face the screen it borders. --chrome-edge is the one value the HUD
+     and the bar declare together; the rail is the third object of the
+     family and says the same thing (chrome.desktop.test compares them). */
+  .desk-rail {
+    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    width: var(--desk-rail-w);
+    padding-top: calc(var(--safe-top) + var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border-right: 1px solid var(--chrome-edge);
+    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
+    user-select: none;
+  }
+  /* The masthead: 辻 over its name, the origin station's plate. The
+     Latin at --fs-sm is the pair's caption (DESIGN.md, Rule 1: 1.7–2.2×
+     smaller; 1.70 / 0.82 = 2.07). */
+  .desk-rail__mast {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-6);
+  }
+  .desk-rail__glyph {
+    font-family: var(--font-serif);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-on-panel);
+  }
+  .desk-rail__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-rail__list,
+  .desk-rail__stations {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-rail__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    padding: 0 var(--sp-3);
+  }
+  /* A gate: the pictogram and its word, every one of them captioned —
+     the tab bar's caption register (display, uppercase, tracked) at the
+     size a column can afford. The lit gate is full ink on the lozenge's
+     wash, with the bar's 2px rule on the rail's own edge. */
+  .desk-gate {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-height: 44px;
+    padding: 0 var(--sp-3);
+    border-radius: var(--r-panel);
+    color: var(--text-on-panel-soft);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-term);
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .desk-gate:hover,
+  .desk-gate:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  .desk-gate--on,
+  .desk-gate--on:hover,
+  .desk-gate--on:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+  }
+  .desk-gate--on::before {
+    content: '';
+    position: absolute;
+    inset-block: var(--sp-2);
+    left: calc(-1 * var(--sp-3));
+    width: 2px;
+    background: var(--text-on-panel);
+  }
+  .desk-gate__ico {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+  }
+  .desk-gate__label {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* Today's due count: the tab bar's chip, and the only colour in the
+     rail — a state's, never a line's. */
+  .desk-gate__due {
+    flex: none;
+    padding: 0 var(--sp-2);
+    border: 1px solid color-mix(in srgb, var(--warning) 55%, transparent);
+    border-radius: var(--r-pill);
+    color: var(--warning);
+    font-size: var(--fs-caption-xs);
+    letter-spacing: 0;
+    line-height: 1.5;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The stations behind the lit gate, as stops on a drawn line: the
+     line runs down the gates' pictogram column, a stop per station, and
+     the one you are standing in is filled — the map's own drawing (a
+     rail, stops, where you are), in the panel's inks. The names hang
+     from the gate's word, so the eye reads one column of words. */
+  .desk-rail__stations {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--sp-1) 0 var(--sp-2);
+  }
+  .desk-rail__stations::before {
+    content: '';
+    position: absolute;
+    inset-block: var(--sp-3) calc(var(--sp-2) + var(--sp-4));
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 2px;
+    margin-left: -1px;
+    background: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+  }
+  .desk-sec {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 var(--sp-3);
+    /* Hung from the gate's word: its inset, its pictogram, its gap. */
+    padding-inline-start: calc(2 * var(--sp-3) + var(--sp-6));
+    border-radius: var(--r-panel);
+    color: var(--text-on-panel-soft);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-sec:hover,
+  .desk-sec:focus-visible {
+    color: var(--text-on-panel);
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+  }
+  /* A key's way down the rail (plan 115): the lit link looks the same
+     focused or not, so focus draws a ring of its own, inside the row. */
+  .desk-gate:focus-visible,
+  .desk-sec:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: -2px;
+  }
+  .desk-sec--on { color: var(--text-on-panel); }
+  .desk-sec::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    border: 2px solid currentcolor;
+    border-radius: var(--r-pill);
+    background: var(--bg-panel);
+  }
+  .desk-sec--on::before { background: currentcolor; }
+  /* The HUD's three instruments, set at the foot: the level and the
+     pass on one line, the status panel under them at the rail's width.
+     The same components the HUD draws, so the same rules dress them;
+     only their places are the rail's. */
+  .desk-rail__foot {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-areas:
+      "level pass"
+      "status status";
+    align-items: center;
+    gap: var(--sp-4);
+    margin-top: auto;
+    padding: var(--sp-5) var(--sp-6);
+    padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
+    border-top: 1px solid var(--chrome-edge);
+  }
+  .desk-rail__foot .hud__level { grid-area: level; }
+  .desk-rail__foot .hud__pass {
+    grid-area: pass;
+    justify-self: end;
+  }
+  .desk-rail__foot .hud__status {
+    grid-area: status;
+    justify-content: center;
+  }
+
+  /* ── what the rail moves ──
+     The docked note spans the screen, not the rail; the dictionary's
+     dock was held 84px down to clear a sticky HUD that the desk does
+     not draw; the guide's note centres on the screen it is about. */
+  :root[data-chrome="shell"] .dock-note { left: var(--desk-rail-w); }
+  :root[data-chrome="shell"] .guide-callout { left: calc(50% + var(--desk-rail-w) / 2); }
+  /* A note beside a rail or side-column anchor (components/guide/Guide,
+     plan 115) stands against its edge at the side column's width, and
+     rises into place without the centred note's half-width shift. */
+  .guide-callout[data-place="right"],
+  .guide-callout[data-place="left"] {
+    width: var(--desk-side-w);
+    transform: none;
+    animation-name: desk-callout-in;
+  }
+  @keyframes desk-callout-in {
+    from { opacity: 0; transform: translateY(6px); }
+    to   { opacity: 1; transform: none; }
+  }
+  .phone--desk .dict-dock {
+    flex-basis: var(--desk-side-w);
+    top: var(--sp-6);
+    max-height: calc(100dvh - 2 * var(--sp-6));
+  }
+  /* The analyzer's working rail stood on the stage's LEFT, which on the
+     desk put it against the rail: two columns of navigation side by
+     side and the sentence pushed to the far edge. It stands on the
+     right here, at the second column's width, the way every other
+     screen's companion does. */
+  .phone--desk .anl-railcol {
+    order: 1;
+    flex-basis: var(--desk-side-w);
+  }
+  /* The route map steps aside, kept, while the dock holds its column
+     (plan 115, components/analysis/AnalyzerDock). */
+  .phone--desk .anl-railcol[hidden] { display: none; }
+  .desk-anl-dock {
+    order: 1;
+    position: sticky;
+    top: var(--sp-6);
+    display: flex;
+    flex: 0 0 var(--desk-side-w);
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .desk-anl-dock__keys {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-1);
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  /* The result is a focus target, not a tab stop, and meant to be
+     ringless (the note under .anl-results near the top of this file,
+     whose rule was lost). On the desk ←/→ walk the tokens with that
+     focus still held, so the first arrow drew the browser's ring round
+     the whole stage and its dock. */
+  .anl-results:focus-visible { outline: none; }
+  /* The intake beside its history (plan 115). */
+  .desk-intake {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-intake__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* The kana charts wrap to a second row rather than scroll sideways in
+     the dictionary's column beside its dock. */
+  .syllabary-chart-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  /* ── the gates, laid out for the width ──
+     Learn and Practice hang five plates each. A column of five at the
+     desk's width is five slabs a thousand pixels long, so the plates go
+     two by two — and the fifth, which is the odd one out on both gates
+     (the deck shelf under the four lines; the mock exam after the four
+     platforms), takes the full row. Two columns divide four, and the
+     fifth spans them: a lattice with no short last row (DESIGN.md, "A
+     lattice's column count must divide its content"). */
+  .learn > .plates,
+  .practice > .plates {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+  .learn > .plates > .plate:last-child:nth-child(odd),
+  .practice > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+
+  /* ── the second column (plan 114) ──
+     components/chrome/DeskSide.jsx: whatever stands beside a screen's
+     main work, sticky, so it stays in view while that work scrolls, and
+     scrolling itself if it is ever taller than the screen. */
+  .desk-side {
+    position: sticky;
+    top: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
+  }
+  /* A Learn plate's foot on the desk draws the whole line
+     (components/station/LinePlate's LineFoot): the novice's stop, then a
+     leg per level — a rail filled as far as the level is learned, the
+     level's station at the leg's end, its learned/total under it. The
+     leg being ridden is inked, the finished ones filled. A rail and a
+     ring in the line's own pigment, on the plate that is that line's. */
+  .desk-line {
+    grid-template-columns: auto;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    align-items: start;
+    column-gap: 0;
+    /* The last station's name and figure hang half their width past
+       the line's end, so the end stands a full rung in from the edge. */
+    padding: var(--sp-3) var(--sp-8) var(--sp-4) var(--sp-6);
+    font-size: var(--fs-caption-xs);
+  }
+  /* The origin takes no width of its own: its station stands on the
+     first leg's rail end, and its word hangs under it. */
+  .desk-line__origin {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--sp-1);
+    width: 0;
+    white-space: nowrap;
+  }
+  .desk-line__origin::before {
+    content: '';
+    width: 11px;
+    height: 11px;
+    margin-block: calc(var(--sp-2) - 4px);
+    border-radius: var(--r-pill);
+    background: var(--line-color);
+    transform: translateX(-50%);
+  }
+  /* A leg is a button, a door to its station (plan 115): it draws no
+     box of its own, and says so on approach by inking its station. */
+  .desk-line__leg {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+  .desk-line__track {
+    position: relative;
+    align-self: stretch;
+    height: 3px;
+    margin: var(--sp-2) 0;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--line-color) 25%, transparent);
+  }
+  .desk-line__track i {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--line-color);
+  }
+  .desk-line__track::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    right: 0;
+    width: 11px;
+    height: 11px;
+    border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    transform: translate(50%, -50%);
+  }
+  /* A station's name and figure stand centred under its ring, which is
+     the leg's end: pulled half their own width past it. */
+  .desk-line__stop {
+    font-size: var(--fs-caption);
+    line-height: 1.2;
+    text-align: center;
+    translate: 50% 0;
+  }
+  .desk-line__fig {
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    translate: 50% 0;
+  }
+  .desk-line__leg--done .desk-line__track::after {
+    border-color: var(--line-color);
+    background: var(--line-color);
+  }
+  .desk-line__leg--here .desk-line__stop { color: var(--text-primary); }
+  .desk-line__leg:hover .desk-line__stop,
+  .desk-line__leg:focus-visible .desk-line__stop {
+    color: var(--text-primary);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Today (plan 114): the fare gate is the work and takes the width;
+     beside it, in the second column, what the work is for — the pass at
+     strip size and the pass's back (TodayScreen, JourneyPanel). Placed,
+     not flowed, so nothing moves when the figures arrive; a finished
+     run's slip takes the gate's place. */
+  .today {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .today > .gate-card,
+  .today > .empty,
+  .today > .today-clear {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .today > .desk-side {
+    grid-column: 2;
+    grid-row: 1;
+  }
+  /* The gate's lanes two across, once the gate holds two (plan 116).
+     At a laptop's 1440 one lane per row ran ~704px: the name at one
+     end, its figure at the other, ~450px of nothing between — and the
+     box is bounded (the base rule's 30dvh), so the width that bought
+     nothing also hid half the day's switches under the cut. Two across,
+     a lane's figure stands a phone's width from its name again and twice
+     as many of the day's choices are in view; eight lanes need no
+     scroll at 900px tall.
+
+     The floor is a lane as a phone draws it: the side column (a phone's
+     content width) less the gate's own phone padding, 328px. Under two
+     of those — the desk from 1100 to ~1390, where the gate is ~430–720px
+     — the lanes stay one to a row, as below the line. Three would need
+     ~1000px the canvas never gives the gate. auto-fit, so a single lane
+     keeps the whole row rather than half of it beside an empty track.
+
+     The order is the list's own, left to right then down (the lanes are
+     sorted by line, then urgency), and Tab follows the eye. A line with
+     an odd count ends mid-row and the next begins beside it: each lane's
+     pigment names its line, and the chips above name the lines. An odd
+     last lane is not spanned — it is a switch like its siblings, and
+     twice their width would promote it — and this is no hairline
+     lattice, so the short row shows the card, not a seam. The chips,
+     the notice and Depart are the lanes' siblings, so they span both. */
+  .gate-card__lanes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - 2 * var(--sp-5)), 1fr));
+  }
+
+  /* The pass's back, beside the gate (components/journey/JourneyPanel):
+     the status sheet's own body on the sheet's own material — sumi, the
+     pass-ink edge, the identity corner a pass wears — with the verdict
+     named at its head in the state's ink. */
+  .desk-journey {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-5);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+    border-radius: var(--r-identity);
+  }
+  .desk-journey__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-3);
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  .desk-journey__name { color: var(--text-on-panel-soft); }
+  .desk-journey__word { color: var(--jour-st-ink, var(--text-on-panel)); }
+
+  /* The profile: the holder opened flat — the pass and its stamp book
+     on the left, the record (the figures, the ledger, the 番付) on the
+     right (screens/ProfileScreen.jsx). The ledger in a half-width
+     column goes two across, never three. */
+  /* The pass and its stamps are drawn for a phone's width and read as
+     objects at it; the record — the figures, the lines, the boards —
+     is what grows into the rest (plan 115). */
+  .desk-profile {
+    display: grid;
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--sp-5);
+  }
+  .desk-profile__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The two rankings at once (Banzuke's `both`): side by side once the
+     column holds two at the side column's width, stacked below that. */
+  .desk-banzuke {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(var(--desk-side-w), 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+  }
+  .desk-bz__period {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  /* A deck's page (screens/DeckDetailScreen.jsx): its cards, and beside
+     them the deck's platforms (components/decks/DeckPlatforms), boarding
+     directly — or, while a card is being written, the form, beside the
+     list it adds to. */
+  .desk-deck {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-deck__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-deck__study {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  /* A door opened in a column (components/chrome/DeskDock, plan 120):
+     its cap and ✕ over the phone's own body — a deck's Browse and More,
+     the analyser's grab tutorial — standing where the column's tenant
+     stood until it closes. */
+  .desk-dock {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .desk-dock__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  /* Browse in the deck's side (plan 115, BrowseCardsDock): the result
+     row stacks the way it does on a phone — 13.5rem of headword and a
+     meaning do not share 360px beside a checkbox. */
+  .desk-side .browse-result-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: start;
+  }
+  .desk-side .browse-result-row__level {
+    grid-column: 3;
+    grid-row: 1;
+  }
+  .desk-side .browse-result-row__meaning,
+  .desk-side .browse-result-row__tag { grid-column: 2 / -1; }
+  .desk-deck__cap {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  /* Statistics (plan 114): the sentence the screen reads, in two
+     columns (screens/StatsScreen.jsx). What holds on the left — the
+     retention line drawn 1:1 (RetentionLine's `fit`), the ladder, the
+     lines with the open one's levels hung under it — and where it leaks
+     on the right: the misses, and every trouble card at the phone's own
+     width. The bar, a wait and an empty state span both. */
+  .desk-stats {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-stats > * { grid-column: 1 / -1; }
+  .desk-stats__holds {
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  .desk-stats__holds:last-child { grid-column: 1 / -1; }
+  .desk-stats__leaks {
+    grid-column: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  /* The lines and the open line's levels are one table: every name in
+     one column, so every composition bar starts where the others do and
+     two lines, or two levels, compare at a glance. The open line's
+     levels hang from its roundel on a drawn line in the line's pigment,
+     the way the rail's stations hang from the lit gate. */
+  .desk-lines {
+    display: grid;
+    grid-template-columns: auto max-content minmax(0, 1fr) auto;
+    column-gap: var(--sp-4);
+  }
+  .desk-lines__line { display: contents; }
+  .desk-lines__levels {
+    position: relative;
+    grid-column: 2 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .desk-lines__levels::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto var(--sp-5) calc(-1 * (var(--sp-4) + var(--sp-5)));
+    width: 2px;
+    background: var(--line-color);
+    opacity: 0.55;
+  }
+  .desk-lines .rep-line-row {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+  }
+  .desk-lines__line--open .pf-line__roundel { background: color-mix(in srgb, var(--line-color) 18%, transparent); }
+
+  /* Settings: the list and the open page side by side
+     (screens/SettingsScreen.jsx). The list stays in view while the page
+     scrolls, and the open page's row is marked the way a selection is:
+     in gold, the pass's metal — these are the pass's own settings. */
+  .desk-settings {
+    display: grid;
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  .desk-settings__list {
+    position: sticky;
+    top: var(--sp-6);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .desk-settings__page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+    animation: arrive-soft 0.2s linear;
+  }
+  .desk-settings .stg-row--on,
+  .desk-split .gl-index__row[aria-current="page"],
+  .desk-split .exam-review-row[aria-current="page"] {
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent2);
+  }
+
+  /* ── the stations, laid out for the width (plan 114) ──
+     A station page is a bar over one thing to choose from, and the
+     phone draws it one card under another. On the desk:
+
+     The platforms (ModeSelector) go two across, and the odd one out
+     takes the row, so the lattice has no short last row; exactly three
+     (a line's three sources, a sentence station's three) go three
+     across. The tier and theme walls are long lists, three across. */
+  .learn > .platform-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* In a station's split (below) the platforms are a list beside a
+     list: one to a row, the whole page wide, their figures at the
+     row's end. */
+  .desk-split__page > .platform-grid,
+  .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .tier-picker > .platform-grid,
+  .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* ... except a list beside its page (plan 115) — the tiers, the
+     library's shelf: one to a row, in the list's column, never as wide
+     as a card's content would like. */
+  .desk-split__list > .platform-grid,
+  .desk-split__list .tier-picker > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  /* ... and a radical's platforms, under its lesson in the page (plan
+     118): a list beside a list, one to a row. */
+  .desk-split__page > .rad > .platform-grid { grid-template-columns: minmax(0, 1fr); }
+  .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
+
+  /* A route that is the whole page — the levels a sentence station
+     boards from, 理解's and 書取's, a theme's bands — is drawn the way a
+     line map on a platform wall is: across. One rail through every
+     marker, each stop a column under its marker with its name and its
+     figure, the whole line in view at once instead of five 1,000px bars
+     with six characters at one end. (A route beside its platforms, in a
+     station's split, stays upright: it is a list there.) */
+  .learn > .route {
+    display: grid;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+    column-gap: var(--route-gap);
+  }
+  .learn > .route > .route-stop {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: var(--sp-2);
+    padding: var(--sp-8) var(--sp-3) var(--sp-4);
+    text-align: center;
+  }
+  .learn > .route > .route-stop > .route-stop__rail {
+    inset: calc(var(--sp-8) / 2) calc(-1px - var(--route-gap)) auto;
+    width: auto;
+    height: 3px;
+    transform: translateY(-50%);
+  }
+  .learn > .route > .route-stop > .route-stop__marker {
+    top: calc(var(--sp-8) / 2);
+    left: 50%;
+  }
+  .learn > .route > .route-stop > .route-stop__names {
+    flex: none;
+    align-items: center;
+  }
+  .learn > .route > .route-stop > .route-stop__go { display: none; }
+  .learn > .route > .route-stop--first > .route-stop__rail { left: 50%; }
+  .learn > .route > .route-stop--last > .route-stop__rail { right: 50%; }
+
+  /* ── a station as two panes (plan 114) ──
+     components/selection/StationSplit: the line's stops upright in the
+     second column's width, sticky, beside the chosen stop's page. The
+     open stop is marked the way a selection is (DESIGN.md: a gold
+     ring), over the route's own "you are here". (Its platforms' grid is
+     with the other platform grids, above.) */
+  .desk-split {
+    display: grid;
+    grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
+    align-items: start;
+    column-gap: var(--sp-6);
+  }
+  /* A list longer than the window — forty-three tiers, a level's
+     grammar points — scrolls inside its own column (plan 115), so the
+     page beside it never scrolls away from the row that opened it. */
+  .desk-split__list {
+    position: sticky;
+    top: var(--sp-6);
+    min-width: 0;
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .desk-split__page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* A row in a list sits closer to its neighbours than a card on a
+     wall: the phone's thumb-sized vertical padding comes in a rung. */
+  .desk-split__page .platform-card__lead,
+  .desk-split__page .platform-card__body,
+  .desk-split__page .platform-card__aside,
+  .desk-deck__study .platform-card__lead,
+  .desk-deck__study .platform-card__body { padding-block: var(--sp-5); }
+  /* The open radical in the index beside its lesson, and the family's
+     door while the family stands in the list (plan 118): the same ring,
+     each being a card with its own edge. */
+  .desk-split .desk-stop--open,
+  .desk-split .radical-tile[aria-current="page"],
+  .desk-split .rad-door[aria-expanded="true"] {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 8%, var(--surface));
+  }
+  /* The library's shelf beside the open deck's page (plan 115,
+     screens/LibraryScreen): a shelf card is a whole card — its blurb,
+     its author, its followers — so the shelf takes half the width, not
+     a list's column, and the page the other half. */
+  .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .desk-shelf-page {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* The tiers and the grammar points as a list beside their page
+     (plan 115): no ▶ and no ›, since a row here opens beside itself
+     and departs nowhere; and a tier a list's row, not a wall's card —
+     forty-three of them scroll in the column. A radical's family door
+     (plan 118) opens beside itself too. */
+  .desk-split__list .platform-card__go,
+  .desk-split__list .gl-index__chev,
+  .desk-split .rad-door[aria-expanded] > .rad-door__chev { display: none; }
+  .desk-split__list .platform-card__lead,
+  .desk-split__list .platform-card__body { padding-block: var(--sp-3); }
+  /* The ▶ was the aside's right margin; without it the figures keep
+     their own. */
+  .desk-split__list .platform-card__aside { padding-inline-end: var(--sp-4); }
+  /* The list's rows are links (plan 117, components/selection/SplitRow),
+     so that a stop, a point or a deck opens in a new tab too — and a
+     link is not a button: neither the global `button` rule nor the
+     browser's own button face reaches it. It takes back what the row
+     was drawn with, so the link reads exactly as the button it replaced
+     (splitRows.desktop.test.jsx measures the two against each other):
+     the button's weight and leading, where the row leaves its text to
+     them (the route and the cards; the index and the review rows set
+     `font: inherit` of their own), no underline, the button's hover
+     where the row keeps it (the review's), and its focus ring. */
+  .desk-split__list a:is(.route-stop, .platform-card) {
+    font-weight: 600;
+    line-height: normal;
+  }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row) { text-decoration: none; }
+  .desk-split__list a.exam-review-row { transition: filter 0.15s; }
+  .desk-split__list a.exam-review-row:hover { filter: brightness(1.15); }
+  .desk-split__list a:is(.route-stop, .platform-card, .gl-index__row, .exam-review-row):focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  /* A grammar point's lesson as the page beside the index (plan 115):
+     the sheet's lesson on the card's own surface, at the card's width,
+     its plate standing where it is drawn rather than pinned to a
+     scroller the page does not have. */
+  .desk-lesson {
+    --line-color: var(--line-grammar);
+    max-width: var(--card-w);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    overflow: hidden;
+  }
+  .desk-lesson .dict-plate { position: static; }
+
+  /* A platform's own figures in its right-hand column (ModeFigures):
+     the due count in the state's ink, then the composition bar and the
+     mastered count — the stats screen's own drawing of the same buckets. */
+  .desk-mode-fig {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-2);
+    width: 100%;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+    color: var(--text-secondary);
+  }
+  .desk-mode-fig .composition { flex: none; }
+  .desk-mode-fig__due { color: var(--warning); }
+  .desk-mode-fig__unit {
+    margin-inline-start: var(--sp-1);
+    font-size: var(--fs-caption-xs);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  .desk-mode-fig__count b { color: var(--text-primary); }
+
+  /* ── a run's column ──
+     A run's card is --card-w; its head row (‹ the way out, where you
+     are, the pass), its answer field, its timer and its results were
+     the stage's full 1,052px, so the way out sat 200px left of the card
+     it leaves and Submit 200px right of the field it submits. They
+     share the card's column on the desk. */
+  .stage > .stage__head,
+  .stage > .stage__foot,
+  .stage > .timer,
+  .stage > .result-lattice,
+  .stage > .exam-meta,
+  .stage > .exam-mondai,
+  .stage > .exam-mondai__text,
+  .stage > .exam-nav,
+  .stage > .qrows {
+    width: 100%;
+    max-width: var(--card-w);
+    margin-inline: auto;
+  }
+
+  /* ── a run's side (plan 114) ──
+     A run that stands a column beside its card (StudyStage's `side`)
+     gives it the right edge: --desk-side-w, the whole height, its own
+     scroll. The stage and its level bar keep the rest, the card centred
+     in it. On a card run the column is the session panel — this run's
+     three records over the revealed card's dictionary entry, in the
+     dictionary's gold (components/study/SessionPanel.jsx). */
+  .desk-run { padding-inline-end: var(--desk-side-w); }
+  /* ── a run fits a laptop (plan 115) ──
+     A run's stage is centred on a phone, where the card is most of the
+     screen. On a desk it starts at the top, like any page, without the
+     quarter-height of air under it; the rating bar docks on the level
+     bar when the stage runs past the window, so it is never below the
+     fold, and the rows it would jump past never move (below). */
+  .desk-run > .stage {
+    justify-content: flex-start;
+    padding-bottom: var(--sp-6);
+  }
+  .desk-run > .stage > .rating-bar {
+    position: sticky;
+    bottom: var(--dock-bottom);
+    z-index: 10;
+    padding-block: var(--sp-3);
+    background: var(--bg-main);
+  }
+  /* The card and its choices side by side: a question and the four
+     answers to it read across, not down past the window's floor (the
+     fourth kanji choice stood at 870px on a 1100×800 screen). The
+     head, the hints and the rating bar span both. A writing drill
+     turns the pair round, the board taking the wide column. */
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) {
+    display: grid;
+    grid-template-columns: minmax(0, var(--card-w)) minmax(0, var(--desk-side-w));
+    place-content: start center;
+    column-gap: var(--sp-5);
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + .drawing-quiz) {
+    grid-template-columns: minmax(0, var(--desk-side-w)) minmax(0, var(--card-w));
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > * {
+    grid-column: 1 / -1;
+    max-width: none;
+    margin-inline: 0;
+  }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > .quiz-card-stage { grid-column: 1; }
+  .desk-run > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) > :is(.mcq-list, .grammar-examples, .drawing-quiz) {
+    grid-column: 2;
+    align-self: start;
+  }
+  /* The prompt over a writing board never changes face, so the floor
+     that holds the other cards still is dead height beside the board. */
+  .desk-run > .stage:has(> .quiz-card-stage + .drawing-quiz) .prompt-card--footed .prompt-card__body { min-height: 0; }
+  /* Answered, the choices that were neither right nor picked keep their
+     place, unseen, instead of collapsing: beside the card there is room
+     for them, and the collapse is what moved the rating bar. */
+  .desk-run .mcq-row.mcq-row--filler {
+    max-height: 96px;
+    padding: var(--sp-5);
+    border-width: 1px;
+    visibility: hidden;
+  }
+  .desk-run .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-4); }
+  /* What covers a run stops at its side: the tracing overlay and the
+     docked note leave the session panel standing. */
+  .desk-run .drawing-overlay { right: var(--desk-side-w); }
+  :root[data-chrome="stage"]:has(.desk-run) .dock-note { right: var(--desk-side-w); }
+  .desk-run__side {
+    position: fixed;
+    inset: 0 0 0 auto;
+    width: var(--desk-side-w);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    padding: var(--sp-6) var(--sp-5);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-main);
+    border-inline-start: 1px solid var(--surface-line);
+  }
+  /* A door opened in a docked breakdown (components/analysis/SideLookup,
+     plan 115): the wrapper adds no box, so the breakdown, the sentence
+     line and the entry stand in the side's own column rhythm. */
+  .desk-lookup { display: contents; }
+  /* The comprehension text beside its questions (plan 115): whole, at
+     the column's width, never the base card's 60vh inner scroll. */
+  .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
+  /* ── the mock exam, sat at a desk (plan 115) ──
+     screens/ExamRunner: the answer sheet stands in the side — the clock
+     at the head of the column, the count, the grid, Finish — and the
+     paper is the page's scroll, from its top. A reading passage stands
+     flat on its own card beside its questions, which keep to a sticky
+     column so a choice is never a scroll away from the line it asks
+     about. */
+  .desk-run__side > .exam-timer {
+    align-self: flex-start;
+    font-size: var(--fs-heading);
+  }
+  .desk-answers {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+  }
+  .desk-answers__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-answers__cap {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .stage > .desk-paper {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-5);
+    width: 100%;
+    max-width: var(--board-w);
+    margin-inline: auto;
+  }
+  /* A question beside its passage is the paper's width, not the card's:
+     the head, the part's instructions and the way through line up with
+     the two columns rather than a card column the paper overhangs. */
+  .stage:has(> .desk-paper) > :is(.exam-meta, .deck-progress, .exam-mondai, .exam-mondai__text, .exam-nav) { max-width: var(--board-w); }
+  /* The question fills its card: centred at its content's width it
+     drew the rows at half a 640px card. */
+  .exam-card > .exam-question { align-self: stretch; }
+  .desk-paper__text {
+    max-height: none;
+    margin: 0;
+    overflow: visible;
+  }
+  .desk-paper__ask {
+    position: sticky;
+    top: var(--sp-6);
+    min-width: 0;
+  }
+  /* The flag's corner dot is ringed in the ground it sits on: the
+     side's, not the sheet's card. */
+  .desk-run__side .exam-sheet__chip--flagged::after { border-color: var(--bg-main); }
+  /* The result's review (screens/ExamResult): the open question's
+     revealed card is the page beside the list, whole — the phone's
+     60vh inner scroll was for a card opened under its row. */
+  .desk-split__page > .exam-card {
+    max-height: none;
+    margin-inline: 0;
+    overflow: visible;
+  }
+  .desk-split__page > .btn-row { max-width: var(--card-w); }
+  .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* The run's misses at its end (SessionPanel, plan 115): the cards as
+     chips, each opening its entry under them. */
+  .desk-misses {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+  }
+  .desk-misses__list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .desk-tally > .record { padding: var(--sp-4); }
+  .desk-entry {
+    --line-color: var(--line-jisho);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  /* ── the way up (plan 114) ──
+     A screen's ‹ way out, on the desk, when the rail has no door to
+     where it leads (components/chrome/Bar.jsx): not the phone's pill
+     in the bar's far corner but a crumb over the title, in the caption
+     register, where a computer's eye looks for what a page sits under.
+     One that the rail already opens is not drawn at all. */
+  .desk-crumb { display: flex; }
+  .desk-crumb__up {
+    height: auto;
+    padding: var(--sp-1) 0;
+    border: 0;
+    font-size: var(--fs-caption);
+  }
+  .desk-crumb__up:hover,
+  .desk-crumb__up:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  .desk-run__note {
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+
+  /* ── 札 — a sheet is a dialog on the desk ──
+     On a phone a sheet rises from the bottom edge, under the thumb that
+     opened it. A computer has no thumb and a bottom edge a long way from
+     the pointer, so the same panel is set in the middle of the screen:
+     every corner rounded, no handle to drag, fading in the way the
+     dictionary's centred sheet does (no scale — DESIGN.md, Motion).
+     Centred by `inset` and `margin: auto`, never by a transform: the
+     drag (hooks/useSheetDrag) still owns the inline transform, and the
+     mouse's grip on the head still works. */
+  .sheet {
+    inset: 0;
+    width: var(--card-w);
+    height: fit-content;
+    max-height: calc(100dvh - 2 * var(--sp-8));
+    margin: auto;
+    padding: var(--sp-5);
+    border-bottom: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    animation: arrive-soft 0.2s linear;
+  }
+  /* The pass's edge on all four sides: the bottom rule above, restored
+     here so the sumi sheet keeps its own material's edge. */
+  .sheet--sumi { border-bottom-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); }
+  .sheet__handle { display: none; }
+
+  /* ── 鍵 — the keys, on the desk ──
+     A run already answers to the keyboard — the digits rate, the digits
+     answer, the space bar turns the card — and on a phone none of it is
+     drawn, because a thumb has no number row. On the desk the hands are
+     on the keys, so the keys are printed: a cap in the ink of whatever
+     it sits on (currentColor, so one rule serves the sumi rating tile,
+     the gold one and the paper card), in the caption register. */
+  .desk-kbd {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.6em;
+    padding: 0 var(--sp-1);
+    border: 1px solid color-mix(in srgb, currentcolor 40%, transparent);
+    border-bottom-width: 2px;
+    border-radius: var(--r-plate);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1.5;
+    letter-spacing: 0;
+    text-indent: 0;
+    font-variant-numeric: tabular-nums;
+  }
+  /* "/" on the Dictionary gate: the dictionary's search from anywhere
+     the rail is (components/chrome/DeskRail.jsx, plan 114). */
+  .desk-gate__key { flex: none; color: var(--text-on-panel-soft); }
+  /* The rating tile's key in its corner, clear of the seal and the word:
+     it is what makes the reversed digits (1 is the best, at the right)
+     readable at a glance. */
+  .rating-bar__btn { position: relative; }
+  .rating-bar__btn > .desk-kbd {
+    position: absolute;
+    top: var(--sp-2);
+    left: var(--sp-2);
+    opacity: 0.7;
+  }
+}
+/* ═══ 机 — end of the desk ═══════════════════════════════════════ */

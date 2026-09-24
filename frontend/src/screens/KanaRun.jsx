@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { useParams, Navigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useLang } from '../LangContext'
@@ -13,6 +13,8 @@ import HintBar from '../components/study/HintBar'
 import { DrawingQuiz } from '../components/study/DrawingCanvas'
 import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
+import { useRunExit } from '../hooks/useRunExit'
+import { SessionPanel } from '../components/study/SessionPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import ReviewDeck from '../components/study/ReviewDeck'
@@ -40,7 +42,6 @@ import { useCardSession, sessionKey, IDLE_KEY } from '../hooks/useCardSession'
 // charged after the scheduler accepts (lib/reviews).
 
 export default function KanaRun({ session }) {
-  const navigate = useNavigate()
   const { t } = useLang()
   const { set, mode } = useParams()
 
@@ -49,7 +50,7 @@ export default function KanaRun({ session }) {
   const reviewing = mode === FAST_REVIEW
   const valid = Boolean(selectedSet) && (reviewing || STUDY_MODES[mode]?.source === 'kana')
   const platforms = `/learn/kana/${set}`
-  const leave = () => navigate(platforms)
+  const leave = useRunExit(platforms)
 
   const [answered, setAnswered]       = useState(false)
   const [selected, setSelected]       = useState(null)
@@ -192,6 +193,9 @@ export default function KanaRun({ session }) {
   // ── Review (self-paced, ungraded browse of already-studied cards) ──
   if (reviewing) {
     const dictCategory = selectedSet.slug.startsWith('hiragana') ? 'hiragana' : 'katakana'
+    // On the desk the browse stands the revealed card's entry beside it,
+    // with no tally: a browse rates nothing (plan 119). Only once there
+    // is a card to reveal — an empty browse promises no entry.
     return (
       <StudyStage
         color="var(--line-kana)"
@@ -199,6 +203,8 @@ export default function KanaRun({ session }) {
         leaveLabel={t.kanaTitle}
         where={selectedSet.label}
         sub={modeLabel(t, FAST_REVIEW)}
+        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
             foot={selectedSet.label}
@@ -272,6 +278,8 @@ export default function KanaRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      side={<SessionPanel done={done} />}
+      sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

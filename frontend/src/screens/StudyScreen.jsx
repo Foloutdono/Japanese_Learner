@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useParams, useLocation } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
@@ -8,20 +8,29 @@ import SelectionScreen from '../components/selection/SelectionScreen'
 import ModeSelector from '../components/selection/ModeSelector'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
-import { modeLabel, modeDesc } from '../domain/studyModes'
+import { useDeckModes } from '../hooks/useDeckModes'
+import { useDesk } from '../hooks/useDesk'
 
 // ── 教材 — a deck's platforms (plan 071) ──────────────────────
 // /learn/decks/:deck_id/study lists the deck's modes as platforms;
 // picking one boards the train into /learn/decks/:deck_id/study/:mode
 // on the stage frame (screens/StudyRun.jsx). ‹ Deck is the way back
-// to the deck's own page.
-//
-// A deck's available modes come from its STRUCTURE (see decks.py's
-// get_deck_modes): every graded key that structure's source offers,
-// provided the deck actually has a card — rendered with the
-// registry's own labels, so a mode's text is never out of sync with
-// what it looks like once you're inside it.
-export default function StudyScreen({ session }) {
+// to the deck's own page. The modes are hooks/useDeckModes', which the
+// desk's deck page stands beside its cards (plan 114).
+export default function StudyScreen(props) {
+  const desk = useDesk()
+  const { deck_id } = useParams()
+  const { state } = useLocation()
+  // On the desk the deck's page stands its platforms beside its cards
+  // (components/decks/DeckPlatforms, plan 114), so this screen has
+  // nothing of its own to show: every way here — a deck run's ‹, its
+  // finish, an old link — lands on the deck page instead (plan 115).
+  // Decided before any fetch, so the desk never asks for these modes.
+  if (desk) return <Navigate replace to={`/learn/decks/${deck_id}`} state={state} />
+  return <DeckStudyPlatforms {...props} />
+}
+
+function DeckStudyPlatforms({ session }) {
   const { t } = useLang()
   const navigate = useNavigate()
   const { deck_id } = useParams()
@@ -39,21 +48,7 @@ export default function StudyScreen({ session }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [deck_id])
 
-  const [modes, setModes] = useState(null)
-  useEffect(() => {
-    if (!deck_id) return undefined
-    let live = true
-    apiFetch(`/api/decks/${deck_id}/modes`, session)
-      .then(r => r.json())
-      .then(data => {
-        if (!live) return
-        const keys = data.modes?.length ? data.modes : []
-        setModes(keys.map(key => ({ key, label: modeLabel(t, key), desc: modeDesc(t, key) })))
-      })
-      .catch(() => { if (live) setModes([]) })
-    return () => { live = false }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [deck_id, session])
+  const modes = useDeckModes(deck_id, session)
 
   return (
     <SelectionScreen

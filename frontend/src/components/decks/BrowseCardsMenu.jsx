@@ -3,6 +3,7 @@ import { apiFetch, apiJson } from '../../lib/api'
 import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { DeskDock } from '../chrome/DeskDock'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -55,6 +56,42 @@ function DottedReadings({ text }) {
 }
 
 export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, onClose }) {
+  const { t } = useLang()
+  const dialogRef = useDialog(onClose)
+
+  return (
+    <div className="import-overlay" onClick={onClose}>
+      <div ref={dialogRef} className="import-modal browse-modal" onClick={e => e.stopPropagation()}
+           role="dialog" aria-modal="true" aria-labelledby="browse-cards-title">
+        <div className="import-header">
+          <div className="import-header__title" id="browse-cards-title">{t.browseTitle}</div>
+          <button onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
+        </div>
+        <BrowseBody deckId={deckId} deckType={deckType} session={session} onAdded={onAdded} onClose={onClose} />
+      </div>
+    </div>
+  )
+}
+
+// ── 机 — Browse, docked beside the deck's cards (plan 115) ──────────
+// On the desk the deck's page has a second column already (its
+// platforms, or the card form), so Browse opens there rather than over
+// the page: the cards it adds land in the list beside it as they go in,
+// and the page is never behind a scrim. The same body as the phone's
+// overlay, in the dock's shell (chrome/DeskDock, plan 120); Esc or ✕
+// gives the column back to the platforms.
+export function BrowseCardsDock({ deckId, deckType, session, onAdded, onClose }) {
+  const { t } = useLang()
+  return (
+    <DeskDock title={t.browseTitle} className="desk-browse" onClose={onClose}>
+      <BrowseBody deckId={deckId} deckType={deckType} session={session} onAdded={onAdded} onClose={onClose} autoFocus />
+    </DeskDock>
+  )
+}
+
+// The browser itself — the source tabs, the level row, the search, the
+// results and the footer — shared by the overlay and the dock.
+function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) {
   const { t } = useLang()
 
   const SOURCE_TABS = [
@@ -160,131 +197,123 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
     }
   }
 
-  const dialogRef = useDialog(onClose)
-
   return (
-    <div className="import-overlay" onClick={onClose}>
-      <div ref={dialogRef} className="import-modal browse-modal" onClick={e => e.stopPropagation()}
-           role="dialog" aria-modal="true" aria-labelledby="browse-cards-title">
-        <div className="import-header">
-          <div className="import-header__title" id="browse-cards-title">{t.browseTitle}</div>
-          <button onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
-        </div>
-        {/* Two lines of copy stood here — a subtitle restating the
-            title, and, on a restricted-type deck, a note saying which
-            source it accepts. DESIGN.md's second rule: say less. The
-            title already says what this is; a vocab deck's browse
-            offers vocabulary and nothing else, and every result on
-            screen is a word, which is the note said better. A deck
-            with one source now shows no tab row at all. */}
-        {tabs.length > 1 && (
-          <div className="browse-source-tabs">
-            {tabs.map(s => (
-              <button
-                key={s.key}
-                onClick={() => setSource(s.key)}
-                className={`browse-source-tab${source === s.key ? ' browse-source-tab--active' : ''}`}>
-                {s.label}
-              </button>
-            ))}
-          </div>
-        )}
-
-        <div className="study-level-row browse-level-row">
-          <button
-            onClick={() => setLevel('')}
-            className={`study-level-btn${level === '' ? ' study-level-btn--active' : ''}`}>
-            {t.browseAllLevels}
-          </button>
-          {LEVELS.map(l => (
-            <button key={l}
-              onClick={() => setLevel(l)}
-              className={`study-level-btn${level === l ? ' study-level-btn--active' : ''}`}>
-              {l}
+    <>
+      {/* Two lines of copy stood here — a subtitle restating the
+          title, and, on a restricted-type deck, a note saying which
+          source it accepts. DESIGN.md's second rule: say less. The
+          title already says what this is; a vocab deck's browse
+          offers vocabulary and nothing else, and every result on
+          screen is a word, which is the note said better. A deck
+          with one source now shows no tab row at all. */}
+      {tabs.length > 1 && (
+        <div className="browse-source-tabs">
+          {tabs.map(s => (
+            <button
+              key={s.key}
+              onClick={() => setSource(s.key)}
+              className={`browse-source-tab${source === s.key ? ' browse-source-tab--active' : ''}`}>
+              {s.label}
             </button>
           ))}
         </div>
+      )}
 
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder={t.browseSearchPlaceholder}
-          className="field field--page deckdetail-form__input browse-search-input"
-        />
+      <div className="study-level-row browse-level-row">
+        <button
+          onClick={() => setLevel('')}
+          className={`study-level-btn${level === '' ? ' study-level-btn--active' : ''}`}>
+          {t.browseAllLevels}
+        </button>
+        {LEVELS.map(l => (
+          <button key={l}
+            onClick={() => setLevel(l)}
+            className={`study-level-btn${level === l ? ' study-level-btn--active' : ''}`}>
+            {l}
+          </button>
+        ))}
+      </div>
 
-        <div className="import-preview browse-results">
-          <div className="import-preview__title">
-            {selected.size > 0 ? t.browseSelectedCount.replace('{n}', selected.size) : t.browseResults}
-          </div>
+      <input
+        value={query}
+        onChange={e => setQuery(e.target.value)}
+        placeholder={t.browseSearchPlaceholder}
+        className="field field--page deckdetail-form__input browse-search-input"
+        autoFocus={autoFocus}
+      />
 
-          {loading && <div className="import-preview__empty">{t.searching}</div>}
-
-          {!loading && results.length === 0 && (
-            <div className="import-preview__empty">{t.noResults}</div>
-          )}
-
-          {!loading && results.length > 0 && (
-            <div className="import-preview__list browse-results__list">
-              {results.map(r => {
-                const isSel = selected.has(r.raw_id)
-                return (
-                  /* An entry, not five columns of flex fighting over the
-                     width. The headword and its reading are ONE thing —
-                     the reading belongs over/under the word it reads, the
-                     way it does everywhere else in the app — so they
-                     stack into a single column, and the meaning gets the
-                     whole rest of the row instead of whatever a wrapped
-                     reading column left it. The chevron that used to sit
-                     between them is gone: it separated two things that
-                     were already separated, and was the widest piece of
-                     nothing in the row. */
-                  <div
-                    key={r.raw_id}
-                    onClick={() => !r.in_deck && toggle(r.raw_id)}
-                    className={`browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' browse-result-row--selectable'}${isSel ? ' browse-result-row--selected' : ''}`}
-                  >
-                    <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
-                      {(isSel || r.in_deck) && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
-                    </div>
-
-                    <div className="browse-result-row__entry">
-                      <span className="browse-result-row__front" lang="ja">{r.front}</span>
-                      {r.kana && r.kana !== r.front && (
-                        <span className="browse-result-row__kana" lang="ja">
-                          <DottedReadings text={r.kana} />
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="browse-result-row__meaning">{r.meaning}</div>
-
-                    {/* The level the entry is filed under — the same
-                        thing the level row above filters on, so a result
-                        says which of those buckets it came out of
-                        instead of leaving "All" ambiguous. */}
-                    {r.level && <span className="browse-result-row__level">{r.level}</span>}
-                    {r.in_deck && <span className="browse-result-row__tag">{t.alreadyAdded}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          )}
+      <div className="import-preview browse-results">
+        <div className="import-preview__title">
+          {selected.size > 0 ? t.browseSelectedCount.replace('{n}', selected.size) : t.browseResults}
         </div>
 
-        {addFailed && (
-          <div className="browse-add-error" role="alert">{t.browseAddFailed}</div>
+        {loading && <div className="import-preview__empty">{t.searching}</div>}
+
+        {!loading && results.length === 0 && (
+          <div className="import-preview__empty">{t.noResults}</div>
         )}
 
-        <div className="import-footer">
-          <button onClick={onClose} className="import-footer__cancel">{t.close}</button>
-          <button
-            onClick={addSelected}
-            disabled={selected.size === 0 || adding}
-            className={`import-footer__submit${selected.size > 0 ? ' import-footer__submit--active' : ''}${adding ? ' import-footer__submit--importing' : ''}`}>
-            {adding ? t.adding : t.addSelected.replace('{n}', selected.size)}
-          </button>
-        </div>
+        {!loading && results.length > 0 && (
+          <div className="import-preview__list browse-results__list">
+            {results.map(r => {
+              const isSel = selected.has(r.raw_id)
+              return (
+                /* An entry, not five columns of flex fighting over the
+                   width. The headword and its reading are ONE thing —
+                   the reading belongs over/under the word it reads, the
+                   way it does everywhere else in the app — so they
+                   stack into a single column, and the meaning gets the
+                   whole rest of the row instead of whatever a wrapped
+                   reading column left it. The chevron that used to sit
+                   between them is gone: it separated two things that
+                   were already separated, and was the widest piece of
+                   nothing in the row. */
+                <div
+                  key={r.raw_id}
+                  onClick={() => !r.in_deck && toggle(r.raw_id)}
+                  className={`browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' browse-result-row--selectable'}${isSel ? ' browse-result-row--selected' : ''}`}
+                >
+                  <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
+                    {(isSel || r.in_deck) && <span className="deckdetail-checkbox__mark"><CheckIcon size={12} /></span>}
+                  </div>
+
+                  <div className="browse-result-row__entry">
+                    <span className="browse-result-row__front" lang="ja">{r.front}</span>
+                    {r.kana && r.kana !== r.front && (
+                      <span className="browse-result-row__kana" lang="ja">
+                        <DottedReadings text={r.kana} />
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="browse-result-row__meaning">{r.meaning}</div>
+
+                  {/* The level the entry is filed under — the same
+                      thing the level row above filters on, so a result
+                      says which of those buckets it came out of
+                      instead of leaving "All" ambiguous. */}
+                  {r.level && <span className="browse-result-row__level">{r.level}</span>}
+                  {r.in_deck && <span className="browse-result-row__tag">{t.alreadyAdded}</span>}
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </div>
+
+      {addFailed && (
+        <div className="browse-add-error" role="alert">{t.browseAddFailed}</div>
+      )}
+
+      <div className="import-footer">
+        <button onClick={onClose} className="import-footer__cancel">{t.close}</button>
+        <button
+          onClick={addSelected}
+          disabled={selected.size === 0 || adding}
+          className={`import-footer__submit${selected.size > 0 ? ' import-footer__submit--active' : ''}${adding ? ' import-footer__submit--importing' : ''}`}>
+          {adding ? t.adding : t.addSelected.replace('{n}', selected.size)}
+        </button>
+      </div>
+    </>
   )
 }

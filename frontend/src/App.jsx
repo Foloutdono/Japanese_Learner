@@ -54,7 +54,6 @@ import DictionaryScreen from './screens/DictionaryScreen'
 import DecksScreen      from './screens/DecksScreen'
 import DeckDetailScreen from './screens/DeckDetailScreen'
 import LibraryScreen    from './screens/LibraryScreen'
-import PublicDeckScreen from './screens/PublicDeckScreen'
 import StudyScreen      from './screens/StudyScreen'
 import GrammarScreen from './screens/GrammarScreen'
 import AnalyzerScreen from './screens/AnalyzerScreen'
@@ -513,7 +512,7 @@ export default function App() {
       <BrowserRouter>
         <Routes>
           {/* 車内 — the shell (plan 068): the HUD, the screen, the five
-              gates. One chrome at every width. */}
+              gates — or, at 1100px and up, the desk's rail (plan 113). */}
           <Route element={<Shell />}>
             {/* 本日の運行 — everything due, in one queue. See TodayScreen. */}
             <Route path="/today"                element={<TodayScreen session={session} />} />
@@ -552,7 +551,10 @@ export default function App() {
                 backend's twin routes have to be ordered by hand — so the
                 two files say the same thing in the same order. */}
             <Route path="/learn/decks/library"          element={<LibraryScreen session={session} />} />
-            <Route path="/learn/decks/library/:deck_id" element={<PublicDeckScreen session={session} />} />
+            {/* The same screen for both: on the desk the shelf stays and
+                the deck stands beside it; on a phone it is PublicDeckScreen
+                (screens/LibraryScreen.jsx decides). */}
+            <Route path="/learn/decks/library/:deck_id" element={<LibraryScreen session={session} />} />
             <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={session} />} />
             <Route path="/learn/decks/:deck_id/study" element={<StudyScreen session={session} />} />
             <Route path="/practice"             element={<PracticeScreen />} />

@@ -7,6 +7,7 @@ import { WarningIcon } from '../components/ui/Icons'
 import { CommuterPass } from '../components/profile/CommuterPass'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
+import { useDesk } from '../hooks/useDesk'
 import { PassHolder } from '../components/profile/PassHolder'
 import { BalanceLine } from '../components/credits/BalanceLine'
 import { OfferButton } from '../components/credits/OfferButton'
@@ -120,50 +121,83 @@ export default function ProfileScreen({ session }) {
 
   // 案内 — once the pass has printed (plan 100).
   const guide = useGuide('profile', !loading && Boolean(profile))
+  const desk = useDesk()
+
+  // Each insert once, so the phone's column and the desk's two are the
+  // same objects in the same order — only the holder differs.
+  const inserts = loading ? null : {
+    stale: stale && (
+      <p className="hint profile__stale" role="status">
+        <WarningIcon size={14} className="profile__stale-glyph" />
+        {t.profileStale}
+      </p>
+    ),
+    // The pass, the balance on its footer (plan 069's figure, printed
+    // where the canvas prints it).
+    pass: (
+      <CommuterPass profile={profile} t={t} footer={<BalanceLine />}>
+        <PassHolder
+          profile={profile}
+          session={session}
+          onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
+          t={t}
+        />
+      </CommuterPass>
+    ),
+    offer: <OfferButton source={SOURCES.PROFILE} className="btn-secondary profile__offer" />,
+    stamps: (
+      <StampBook
+        calendar={profile.calendar ?? profile.week}
+        streak={profile.streak}
+        longest={profile.streakLongest}
+        t={t}
+        lang={lang}
+      />
+    ),
+    // Two figures and the two doors — Statistics, Settings.
+    records: <Records profile={profile} t={t} navigate={navigate} />,
+    ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
+    board: <Banzuke all={leaderboard} week={weekBoard} t={t} both={desk} />,
+  }
 
   return (
     <main id="main-content" className="profile">
       {loading && <Loading />}
       {guide.open && !loading && <Guide gate="profile" onEnd={guide.onEnd} />}
 
-      {!loading && (
+      {inserts && (desk ? (
+        // 机 — the desk (plan 113): the holder opened flat, the pass and
+        // its stamp book on the left, at the phone's own size since plan
+        // 115 (--desk-side-w), the record taking the rest on the right. The same
+        // inserts in the same order, split after the stamps — so a
+        // screen reader, the Tab key and the guide walk them exactly as
+        // they walk the phone's column.
         <>
-          {stale && (
-            <p className="hint profile__stale" role="status">
-              <WarningIcon size={14} className="profile__stale-glyph" />
-              {t.profileStale}
-            </p>
-          )}
-
-          {/* The pass, the balance on its footer (plan 069's figure,
-              printed where the canvas prints it). */}
-          <CommuterPass profile={profile} t={t} footer={<BalanceLine />}>
-            <PassHolder
-              profile={profile}
-              session={session}
-              onUsernameChange={u => setProfile(p => ({ ...p, username: u }))}
-              t={t}
-            />
-          </CommuterPass>
-
-          <OfferButton source={SOURCES.PROFILE} className="btn-secondary profile__offer" />
-
-          <StampBook
-            calendar={profile.calendar ?? profile.week}
-            streak={profile.streak}
-            longest={profile.streakLongest}
-            t={t}
-            lang={lang}
-          />
-
-          {/* Two figures and the two doors — Statistics, Settings. */}
-          <Records profile={profile} t={t} navigate={navigate} />
-
-          {stats && <LineLedger stats={stats} t={t} navigate={navigate} />}
-
-          <Banzuke all={leaderboard} week={weekBoard} t={t} />
+          {inserts.stale}
+          <div className="desk-profile">
+            <div className="desk-profile__col">
+              {inserts.pass}
+              {inserts.offer}
+              {inserts.stamps}
+            </div>
+            <div className="desk-profile__col">
+              {inserts.records}
+              {inserts.ledger}
+              {inserts.board}
+            </div>
+          </div>
         </>
-      )}
+      ) : (
+        <>
+          {inserts.stale}
+          {inserts.pass}
+          {inserts.offer}
+          {inserts.stamps}
+          {inserts.records}
+          {inserts.ledger}
+          {inserts.board}
+        </>
+      ))}
     </main>
   )
 }

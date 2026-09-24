@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { api } from '../lib/api'
 import { voicedUrl } from '../lib/audio'
+import { dialogOpen } from '../lib/dialogOpen'
 import { PlayIcon, PauseIcon, UndoIcon, SpeakerOffIcon } from '../components/ui/Icons'
 
 // ── Exam audio player ────────────────────────────────────────
@@ -25,7 +26,7 @@ function formatClock(seconds) {
   return `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, '0')}`
 }
 
-export default function AudioPlayer({ src }) {
+export default function AudioPlayer({ src, keyHint = false }) {
   const { t } = useLang()
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
@@ -68,6 +69,42 @@ export default function AudioPlayer({ src }) {
     }
   }, [src])
 
+  const toggle = useCallback(() => {
+    const el = audioRef.current
+    if (!el) return
+    if (el.paused) {
+      // Counted on the transition into playing, not on the button, so
+      // pausing and resuming mid-clip isn't scored as a second listen.
+      // `ended` matters as much as currentTime === 0: a clip played to
+      // the end sits at its duration, and pressing play there is the
+      // commonest way to take a second listen — checking position alone
+      // missed exactly that one and left the badge under-reporting.
+      if (el.currentTime === 0 || el.ended) setPlays(n => n + 1)
+      el.play().catch(() => setPlaying(false))
+    } else {
+      el.pause()
+    }
+  }, [])
+
+  // 机 (plan 115): Space plays and pauses the clip, the way it turns a
+  // card on every other run — a listening paper otherwise needs the
+  // pointer for the one control it is built around. Not from a field
+  // or a button (Space is theirs: a focused choice checks itself), not
+  // under a dialog. Only the desk passes keyHint.
+  useEffect(() => {
+    if (!keyHint) return undefined
+    const onKey = e => {
+      if (e.key !== ' ' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
+      const target = e.target
+      if (target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target?.tagName ?? '')) return
+      if (!audioRef.current) return
+      e.preventDefault()
+      toggle()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [keyHint, toggle])
+
   // Two ways to have no audio, and they are not the same thing to a
   // learner mid-exam. `!src` is a question whose clip was never made.
   // `failed` is a clip the server has a URL for but could not serve —
@@ -83,23 +120,6 @@ export default function AudioPlayer({ src }) {
         <span>{failed ? t.examAudioUnavailable : t.examAudioPending}</span>
       </div>
     )
-  }
-
-  function toggle() {
-    const el = audioRef.current
-    if (!el) return
-    if (el.paused) {
-      // Counted on the transition into playing, not on the button, so
-      // pausing and resuming mid-clip isn't scored as a second listen.
-      // `ended` matters as much as currentTime === 0: a clip played to
-      // the end sits at its duration, and pressing play there is the
-      // commonest way to take a second listen — checking position alone
-      // missed exactly that one and left the badge under-reporting.
-      if (el.currentTime === 0 || el.ended) setPlays(n => n + 1)
-      el.play().catch(() => setPlaying(false))
-    } else {
-      el.pause()
-    }
   }
 
   function replay() {
@@ -143,6 +163,7 @@ export default function AudioPlayer({ src }) {
         className="exam-audio-player__play"
         onClick={toggle}
         aria-label={playing ? t.examAudioPause : t.examAudioPlay}
+        aria-keyshortcuts={keyHint ? 'Space' : undefined}
       >
         {playing ? <PauseIcon size={16} /> : <PlayIcon size={16} />}
       </button>
@@ -177,6 +198,7 @@ export default function AudioPlayer({ src }) {
         <UndoIcon size={16} />
         {plays > 1 && <span className="exam-audio-player__plays">{plays}</span>}
       </button>
+      {keyHint && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
     </div>
   )
 }

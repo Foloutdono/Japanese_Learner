@@ -30,11 +30,13 @@ import { RouteStops } from './RouteStops'
  *   onSelect(level)
  *   source — 'kanji' | 'vocab' | 'grammar': whose figures to print
  *   levels — array of level strings (default: N5…N1)
+ *   selected, linkTo — the desk's split (plans 114, 117); passed to
+ *            RouteStops, where a stop with `linkTo` is a link.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS }) {
+export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null }) {
   const { t } = useLang()
   const stats = useStats().data
   const here = useProfileSummary()?.jlptLevel ?? null
@@ -56,5 +58,5 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
     }
   })
 
-  return <RouteStops stops={stops} here={here} onSelect={onSelect} />
+  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} linkTo={linkTo} />
 }

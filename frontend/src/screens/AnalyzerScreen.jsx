@@ -1,18 +1,23 @@
 import { useState, useCallback, useRef, useEffect } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { useMediaQuery } from '../hooks/useMediaQuery'
-import { Bar, Leave } from '../components/chrome/Bar'
+import { useDesk } from '../hooks/useDesk'
+import { Bar, Leave, DeskCrumb } from '../components/chrome/Bar'
+import { DeskSide } from '../components/chrome/DeskSide'
+import { AnalyzerDock } from '../components/analysis/AnalyzerDock'
+import { dialogOpen } from '../lib/dialogOpen'
 import { Seg } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
-import { vocabLookup, kanjiLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
+import { vocabLookup, kanjiLookup, grammarLookup, lookupKey, tokenLookup } from '../components/analysis/lookup'
 import { useMining } from '../components/analysis/useMining'
 import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
+import { GrabTutorialDock } from '../components/analysis/GrabTutorial'
+import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookmarkletCopy'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
 import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
@@ -49,7 +54,6 @@ const MAX_STOP_DOTS = 12
 // bench and the subtitle dock -- and exactly one of them is ever
 // mounted: the platform the segmented control over the page selects.
 export default function AnalyzerScreen({ session }) {
-  const navigate = useNavigate()
   const { t } = useLang()
   const mining = useMining(session)
   const analyzer = useAnalyzerSession(session)
@@ -97,7 +101,12 @@ export default function AnalyzerScreen({ session }) {
   // The draft text, shared by the 文字 and 写真 platforms on purpose --
   // they were one field on one screen before the merge, and OCR output
   // the learner wants to edit by hand should survive a switch to 文字.
-  const [draft, setDraft] = useState('')
+  // A sentence handed over by the dictionary (plan 115: a search that
+  // found no entry, on the desk, offers to analyse what was typed) is
+  // the draft the screen opens on, analysed once on arrival below.
+  const location = useLocation()
+  const navigate = useNavigate()
+  const [draft, setDraft] = useState(() => location.state?.draft ?? '')
   // Whether the current draft came from OCR rather than being typed --
   // sent as the Passage's `source` on analyze (plan 016's Sentence bank
   // provenance). Reset on any direct edit, since a full retype is no
@@ -110,6 +119,14 @@ export default function AnalyzerScreen({ session }) {
   // link afterwards used to get no player at all, because the session
   // had already been created without a video_id and nothing re-read it.
   const [videoUrl, setVideoUrl] = useState('')
+
+  // 机 (plan 120): the grab's walkthrough, open in the intake's column
+  // on the desk rather than over the intake, and the copy state its
+  // button shares with the panel's (both are on screen at once there).
+  // A phone leaves both to IntakeVideo, whose dialog it is.
+  const grab = useBookmarkletCopy()
+  const [tutorial, setTutorial] = useState(false)
+  const closeTutorial = useCallback(() => setTutorial(false), [])
 
   // Once a Passage is ready the intake folds away, giving the breakdown
   // the screen. Reopened on demand; reset whenever a new Passage lands.
@@ -157,10 +174,10 @@ export default function AnalyzerScreen({ session }) {
   // bulk pin, all in the room a phone needed for the sentence itself.
   // Not hidden in CSS: a control the learner cannot see should not be
   // in the document, and PassageLine's scroll effect should not run
-  // for a rail nobody can read. The query is the same 1100px split
-  // index.css draws the two-column layout at, and the two must move
-  // together.
-  const wide = useMediaQuery('(min-width: 1100px)')
+  // for a rail nobody can read. The split is the desk's (hooks/useDesk,
+  // plan 113): the width index.css draws the two-column layout at, and
+  // the width the app's second chrome starts at — one line, not three.
+  const wide = useDesk()
   // The stage's token view: one at a time (the carousel) or every
   // Token at once (SentenceBreakdown's own 'list' layout).
   const [view, setView] = useState('stepper')
@@ -182,6 +199,12 @@ export default function AnalyzerScreen({ session }) {
   // this avoids.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
+  // 机 (plan 115): on the desk the lookup opens in the result's second
+  // column (AnalyzerDock), not a sheet. `docked` is whether that column
+  // is the dock rather than the route map — always, for a one-sentence
+  // Passage. Reset where the lookup is, in the handlers that start over.
+  const [docked, setDocked] = useState(false)
+  const closeDock = useCallback(() => { setLookup(null); setDocked(false) }, [])
 
   // Focus lands here when a Passage arrives. It has to be a real focus
   // move, not just a scroll: the Analyze button lives INSIDE the panel
@@ -239,7 +262,7 @@ export default function AnalyzerScreen({ session }) {
       const url = `https://youtu.be/${grab.videoId}`
       boardPlatform('video')
       setVideoUrl(url)
-      setLookup(null)
+      closeDock()
       analyzer.startVideoFromFile(
         new File([vtt], `${grab.videoId}.ja.vtt`, { type: 'text/vtt' }),
         { url },
@@ -249,6 +272,20 @@ export default function AnalyzerScreen({ session }) {
     // Mount-only by design: the hash is read once and consumed.
     // boardPlatform/analyzer are stable enough for a one-shot effect,
     // and re-running on their change would re-read a hash already gone.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // The dictionary's handoff, spent once: the draft is already in the
+  // field (its initial state above); this analyses it, and drops the
+  // route state so a reload or a Back does not analyse it again.
+  const handedOver = useRef(false)
+  useEffect(() => {
+    const text = location.state?.draft
+    if (handedOver.current || !text) return
+    handedOver.current = true
+    analyzer.analyzeText(text, { source: 'typed' })
+    navigate({ pathname: location.pathname, search: location.search }, { replace: true, state: null })
+    // Mount-only, like the grab arrival above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -333,6 +370,9 @@ export default function AnalyzerScreen({ session }) {
 
       if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
         e.preventDefault()
+        // On the desk the dock follows the token walked to: a door
+        // pressed before stops being what it shows.
+        if (wide) setLookup(null)
         const last = (analyzer.focused?.tokens?.length ?? 1) - 1
         setTokenIndex(i => e.key === 'ArrowRight'
           ? Math.min(last, i + 1)
@@ -360,7 +400,22 @@ export default function AnalyzerScreen({ session }) {
     // closure re-binds on every dep change below, which covers every
     // value it reads.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId])
+  }, [ready, analyzer.focused, focusIndex, sentences.length, playing, playerVideoId, wide])
+
+  // Esc gives the dock back: the route map for a longer Passage, the
+  // stage's own token for a one-sentence one. Not from a field, not
+  // under a dialog. The desk's only.
+  useEffect(() => {
+    if (!wide || !ready) return undefined
+    function onKey(e) {
+      if (e.key !== 'Escape' || dialogOpen()) return
+      const tag = document.activeElement?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      closeDock()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [wide, ready, closeDock])
 
   function editDraft(text) {
     setDraft(text)
@@ -368,7 +423,7 @@ export default function AnalyzerScreen({ session }) {
   }
 
   function analyzeDraft() {
-    setLookup(null)
+    closeDock()
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
   }
 
@@ -381,12 +436,12 @@ export default function AnalyzerScreen({ session }) {
   // below moves focus to the result -- stealing focus out of a live
   // dialog and silently defeating useDialog's Tab-wrap trap.
   function startVideoFromFile(file, opts) {
-    setLookup(null)
+    closeDock()
     analyzer.startVideoFromFile(file, opts)
   }
 
   function startVideoFromLink(url, opts) {
-    setLookup(null)
+    closeDock()
     analyzer.startVideoFromLink(url, opts)
   }
 
@@ -411,7 +466,7 @@ export default function AnalyzerScreen({ session }) {
   function boardPlatform(key) {
     if (lastBoardedRef.current !== key) {
       analyzer.reset()
-      setLookup(null)
+      closeDock()
       setDraft('')
       setFromImage(false)
       setVideoUrl('')
@@ -420,6 +475,7 @@ export default function AnalyzerScreen({ session }) {
     }
     lastBoardedRef.current = key
     setSource(key)
+    setTutorial(false)
     setIntakeOpen(true)
     // A fresh player mounts paused; the destroyed one can no longer
     // report its own state, so this is the one boolean reset by hand.
@@ -432,7 +488,7 @@ export default function AnalyzerScreen({ session }) {
   // draft and the detail sheet, which the hook cannot see.
   function clearPassage() {
     analyzer.reset()
-    setLookup(null)
+    closeDock()
     setDraft('')
     setFromImage(false)
     setIntakeOpen(true)
@@ -530,6 +586,8 @@ export default function AnalyzerScreen({ session }) {
   // the player's own control.
   function goToStop(index) {
     analyzer.setFocusIndex(index)
+    // A new stop on the desk: the dock follows its first token.
+    if (wide) setLookup(null)
     // Choosing by hand means the learner has taken the wheel.
     setFollowPlayback(false)
     const target = sentences[index]
@@ -576,6 +634,7 @@ export default function AnalyzerScreen({ session }) {
     if (!target) return
     playerRef.current?.pause()
     setLookup(target)
+    if (wide) setDocked(true)
   }
 
   // A rule, the same way: the lesson opens over the stage, and the
@@ -585,6 +644,7 @@ export default function AnalyzerScreen({ session }) {
     if (!target) return
     playerRef.current?.pause()
     setLookup(target)
+    if (wide) setDocked(true)
   }
 
   function openKanjiDetail(k) {
@@ -592,10 +652,11 @@ export default function AnalyzerScreen({ session }) {
     if (!target) return
     playerRef.current?.pause()
     setLookup(target)
+    if (wide) setDocked(true)
   }
 
   function openHistoryEntry(entry) {
-    setLookup(null)
+    closeDock()
     analyzer.openHistoryEntry(entry).then(text => {
       // Only a passage entry resolves with its text (a session resolves
       // with null -- see useAnalyzerSession's openHistoryEntry). The
@@ -614,6 +675,16 @@ export default function AnalyzerScreen({ session }) {
   }
 
   const focused = analyzer.focused
+  // A token picked on the stage; on the desk the dock follows it, so a
+  // door pressed before stops being what the dock shows.
+  function walkTo(i) {
+    if (wide) setLookup(null)
+    setTokenIndex(i)
+  }
+  // The token on the stage — the one the desk's dock follows. Clamped
+  // the way the stage clamps it (SentenceBreakdown's 'stage' layout).
+  const stageTokens = focused?.tokens ?? focused?.words ?? []
+  const stageToken = stageTokens[Math.min(tokenIndex, stageTokens.length - 1)] ?? null
 
   // One place maps state to copy, so a fifth notice is one entry here
   // rather than a fifth <div> in the render. `tone` is load-bearing: a
@@ -647,15 +718,115 @@ export default function AnalyzerScreen({ session }) {
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
   const isKept = !!focused && analyzer.kept.has(focused.text)
 
+  // The intake — the three platforms and the one standing on — and the
+  // history of Passages: one after the other on a phone, side by side
+  // on the desk (plan 115).
+  const intake = (
+    <>
+      {/* ── The three platforms, on one control (canvas Analyzer) ──
+          Choosing another is a mode switch: the workbench clears
+          (see boardPlatform), because a Passage typed on Text has
+          no business waiting behind the Photo bench.
+
+          It commits on the press, with no 扉 over it. The door is
+          the bookend to the ticket gate — the last choice of a
+          selection screen, the one that turns it into a session —
+          and this control is neither: the three intakes sit on one
+          segmented control over the page the learner is already
+          standing on (plan 073), so a switch changes a panel rather
+          than arriving anywhere. Nearly a second of shut doors to
+          reveal the same screen with a different field in it read
+          as the app stalling, and it is paid every time a learner
+          corrects a mis-tap (owner-directed, 2026-09-16). The door
+          still plays where boarding is real — kana, vocab, kanji,
+          grammar, study, practice, exams. */}
+      <Seg
+        full
+        className="seg--kaiseki anl-sources"
+        label={t.changeSource}
+        value={source}
+        onChange={boardPlatform}
+        options={SOURCES.map(s => ({ key: s.key, label: t[s.label] }))}
+      />
+
+      {/* A finished Passage waits behind the intake while you are
+          here; this is the way back to it without analysing again. */}
+      {ready && (
+        <button type="button" className="btn-secondary anl-resume" onClick={() => setIntakeOpen(false)}>
+          {t.analysisResult} · {t.sentencesCount(sentences.length)}
+        </button>
+      )}
+
+      <div
+        id={`anl-panel-${source}`}
+        tabIndex={-1}
+        className="anl-panel"
+      >
+        {/* The intakes are only their own bodies; the panel and its
+            opening line come from the registry, so a fourth source
+            is one entry there. */}
+        <p className="hint anl-panel__lead">{t[platform.lead]}</p>
+
+        {source === 'text' && (
+          <IntakeText
+            t={t}
+            value={draft}
+            onChange={editDraft}
+            onAnalyze={analyzeDraft}
+            busy={busy}
+          />
+        )}
+        {source === 'photo' && (
+          <IntakePhoto
+            t={t}
+            session={session}
+            value={draft}
+            onChange={editDraft}
+            onTextRecognized={text => { setDraft(text); setFromImage(true) }}
+            onAnalyze={analyzeDraft}
+            busy={busy}
+            fromImage={fromImage}
+          />
+        )}
+        {source === 'video' && (
+          <IntakeVideo
+            t={t}
+            url={videoUrl}
+            onUrlChange={setVideoUrl}
+            onStartFromFile={startVideoFromFile}
+            onStartFromLink={startVideoFromLink}
+            linkFetch={linkFetch}
+            grab={wide ? grab : undefined}
+            onTutorial={wide ? () => setTutorial(true) : undefined}
+          />
+        )}
+      </div>
+    </>
+  )
+  const history = (
+    <AnalyzerHistory
+      t={t}
+      entries={analyzer.history}
+      onOpen={openHistoryFromRow}
+      onDelete={entry => analyzer.deleteHistoryEntry(entry)}
+      lastDeleted={analyzer.lastDeleted}
+      onUndo={analyzer.undoDelete}
+      onDismissUndo={analyzer.dismissUndo}
+    />
+  )
+
   return (
     <main id="main-content" className="dictionary analyzer" style={{ '--line-color': KAISEKI }}>
       {showResult ? (
         /* ── The result's head ──
            The first sentence names the Passage, the sub counts it and
            grades the stop you are on, Kept says the stop is kept, and
-           Clear empties the analyser (see clearPassage). */
+           Clear empties the analyser (see clearPassage). On the desk
+           the way back to the intake is a crumb over it. */
+        <>
+        {wide && <DeskCrumb leave={<Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>} />}
         <div className="stage__head anl-head">
-          <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>
+          {wide ? null : <Leave onClick={() => setIntakeOpen(true)}>{t.leaveAnalyzer}</Leave>}
           <span className="stage__where">
             <h1 className="stage__where-jp" lang="ja">{sentences[0]?.text}</h1>
             <span className="stage__where-latin">
@@ -695,111 +866,40 @@ export default function AnalyzerScreen({ session }) {
             <CrossIcon size={14} />
           </button>
         </div>
+        </>
       ) : (
         <Bar
           code={station.code}
           color={KAISEKI}
           title={t.analyzerTitle}
-          aside={<Leave onClick={() => navigate('/dictionary')}>{t.dictionaryTitle}</Leave>}
+          aside={<Leave to={'/dictionary'}>{t.dictionaryTitle}</Leave>}
         />
       )}
 
-      {!showResult && (
-        <>
-          {/* ── The three platforms, on one control (canvas Analyzer) ──
-              Choosing another is a mode switch: the workbench clears
-              (see boardPlatform), because a Passage typed on Text has
-              no business waiting behind the Photo bench.
-
-              It commits on the press, with no 扉 over it. The door is
-              the bookend to the ticket gate — the last choice of a
-              selection screen, the one that turns it into a session —
-              and this control is neither: the three intakes sit on one
-              segmented control over the page the learner is already
-              standing on (plan 073), so a switch changes a panel rather
-              than arriving anywhere. Nearly a second of shut doors to
-              reveal the same screen with a different field in it read
-              as the app stalling, and it is paid every time a learner
-              corrects a mis-tap (owner-directed, 2026-09-16). The door
-              still plays where boarding is real — kana, vocab, kanji,
-              grammar, study, practice, exams. */}
-          <Seg
-            full
-            className="seg--kaiseki anl-sources"
-            label={t.changeSource}
-            value={source}
-            onChange={boardPlatform}
-            options={SOURCES.map(s => ({ key: s.key, label: t[s.label] }))}
-          />
-
-          {/* A finished Passage waits behind the intake while you are
-              here; this is the way back to it without analysing again. */}
-          {ready && (
-            <button type="button" className="btn-secondary anl-resume" onClick={() => setIntakeOpen(false)}>
-              {t.analysisResult} · {t.sentencesCount(sentences.length)}
-            </button>
+      {!showResult && (wide ? (
+        /* 机 (plan 115): the intake beside its history — a recent
+           Passage is one click from the field it would be typed in
+           again, in the column every desk screen keeps its companion. */
+        <div className="desk-intake">
+          <div className="desk-intake__main">{intake}</div>
+          {/* The grab's walkthrough takes the column while it is open
+              (plan 120), the history back on its ✕ or Esc. */}
+          {tutorial && source === 'video' ? (
+            <DeskSide label={t.tutTitle}>
+              <GrabTutorialDock t={t} onClose={closeTutorial} onCopy={grab.copy}
+                copied={grab.copied} watchUrl={watchUrlFor(videoUrl)} />
+            </DeskSide>
+          ) : (
+            <DeskSide label={t.historyTitle}>{history}</DeskSide>
           )}
-
-          <div
-            id={`anl-panel-${source}`}
-            tabIndex={-1}
-            className="anl-panel"
-          >
-            {/* The intakes are only their own bodies; the panel and its
-                opening line come from the registry, so a fourth source
-                is one entry there. */}
-            <p className="hint anl-panel__lead">{t[platform.lead]}</p>
-
-            {source === 'text' && (
-              <IntakeText
-                t={t}
-                value={draft}
-                onChange={editDraft}
-                onAnalyze={analyzeDraft}
-                busy={busy}
-              />
-            )}
-            {source === 'photo' && (
-              <IntakePhoto
-                t={t}
-                session={session}
-                value={draft}
-                onChange={editDraft}
-                onTextRecognized={text => { setDraft(text); setFromImage(true) }}
-                onAnalyze={analyzeDraft}
-                busy={busy}
-                fromImage={fromImage}
-              />
-            )}
-            {source === 'video' && (
-              <IntakeVideo
-                t={t}
-                url={videoUrl}
-                onUrlChange={setVideoUrl}
-                onStartFromFile={startVideoFromFile}
-                onStartFromLink={startVideoFromLink}
-                linkFetch={linkFetch}
-              />
-            )}
-          </div>
-        </>
-      )}
+        </div>
+      ) : intake)}
 
       <Notices notices={notices} announcement={announcement} t={t} />
 
       {/* History, under the intake: a recent Passage is one tap from the
           field, and a row reopens it on the platform it came from. */}
-      {!showResult && (
-        <AnalyzerHistory
-          t={t}
-          entries={analyzer.history}
-          onOpen={openHistoryFromRow}
-          onDelete={entry => analyzer.deleteHistoryEntry(entry)}
-          lastDeleted={analyzer.lastDeleted}
-          onUndo={analyzer.undoDelete}
-          onDismissUndo={analyzer.dismissUndo}
-        />
-      )}
+      {!showResult && !wide && history}
 
       {/* ── The result (canvas AnalyzerResult) ──
           The stepper walks the stops, the line shows the sentence as
@@ -828,8 +928,10 @@ export default function AnalyzerScreen({ session }) {
                   disabled={focusIndex === 0}
                   onClick={() => goToStop(focusIndex - 1)}
                   aria-label={t.stopNumber(focusIndex, sentences.length)}
+                  aria-keyshortcuts={wide ? 'ArrowUp' : undefined}
                 >
                   <ChevronIcon direction="left" size={16} />
+                  {wide && <kbd className="desk-kbd" aria-hidden="true">↑</kbd>}
                 </button>
                 {sentences.length <= MAX_STOP_DOTS && (
                   <span className="anl-stops" aria-hidden="true">
@@ -846,7 +948,9 @@ export default function AnalyzerScreen({ session }) {
                   disabled={focusIndex === sentences.length - 1}
                   onClick={() => goToStop(focusIndex + 1)}
                   aria-label={t.stopNumber(focusIndex + 2, sentences.length)}
+                  aria-keyshortcuts={wide ? 'ArrowDown' : undefined}
                 >
+                  {wide && <kbd className="desk-kbd" aria-hidden="true">↓</kbd>}
                   <ChevronIcon direction="right" size={16} />
                 </button>
               </div>
@@ -875,10 +979,12 @@ export default function AnalyzerScreen({ session }) {
                     type="button"
                     className="anl-player__btn"
                     aria-label={playing ? t.pauseVideo : t.playVideo}
+                    aria-keyshortcuts={wide ? 'Space' : undefined}
                     onClick={togglePassagePlayback}
                   >
                     {playing ? '❚❚' : '▶'}
                   </button>
+                  {wide && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
                   {hasWindow && (
                     <>
                       <div className="anl-player__track" onClick={seekFromTrack} aria-hidden="true">
@@ -959,9 +1065,9 @@ export default function AnalyzerScreen({ session }) {
                   t={t}
                   layout="stage"
                   tokenView={view}
-                  onJumpToToken={i => { setTokenIndex(i); setView('stepper') }}
+                  onJumpToToken={i => { walkTo(i); setView('stepper') }}
                   index={tokenIndex}
-                  setIndex={setTokenIndex}
+                  setIndex={walkTo}
                   onTokenClick={openVocabDetail}
                   onKanjiClick={openKanjiDetail}
                   onGrammarOpen={openGrammar}
@@ -1050,12 +1156,17 @@ export default function AnalyzerScreen({ session }) {
                 </div>
                 {/* The keyboard map — the stage IS a keyboard instrument
                     on a desktop, and nothing else on the screen says
-                    so. Hidden on a phone (index.css). */}
-                <div className="anl-kbd" aria-hidden="true">
-                  <span><kbd>←</kbd><kbd>→</kbd> {t.kbdToken}</span>
-                  <span><kbd>↑</kbd><kbd>↓</kbd> {t.kbdSentence}</span>
-                  {playerVideoId && <span><kbd>Space</kbd> {t.kbdPlay}</span>}
-                </div>
+                    so. Hidden on a phone (index.css). The desk prints
+                    each key on what it moves instead (plan 115): ↑/↓
+                    on the stepper, ←/→ over the dock, Space on the
+                    player. */}
+                {wide ? null : (
+                  <div className="anl-kbd" aria-hidden="true">
+                    <span><kbd>←</kbd><kbd>→</kbd> {t.kbdToken}</span>
+                    <span><kbd>↑</kbd><kbd>↓</kbd> {t.kbdSentence}</span>
+                    {playerVideoId && <span><kbd>Space</kbd> {t.kbdPlay}</span>}
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -1067,7 +1178,7 @@ export default function AnalyzerScreen({ session }) {
               stepper is the way along the Passage there, and the head
               is the way to keep a stop. */}
           {wide && sentences.length > 1 && (
-            <div className="anl-railcol">
+            <div className="anl-railcol" hidden={docked}>
               {/* ── The working rail head ──
                   Search and filters over the stops, with the count
                   always visible so a filter that hides everything
@@ -1142,10 +1253,22 @@ export default function AnalyzerScreen({ session }) {
               />
             </div>
           )}
+
+          {/* 机 — the dock, in the route map's column (plan 115). */}
+          {wide && (docked || sentences.length === 1) && (
+            <AnalyzerDock
+              entry={lookup ?? tokenLookup(stageToken)}
+              exact={!lookup}
+              session={session}
+              mining={mining}
+              onExit={sentences.length > 1 ? closeDock : lookup ? closeLookup : undefined}
+              t={t}
+            />
+          )}
         </div>
       )}
 
-      {lookup && (
+      {lookup && !wide && (
         <DictionaryLookupSheet
           key={lookupKey(lookup)}
           {...lookup}

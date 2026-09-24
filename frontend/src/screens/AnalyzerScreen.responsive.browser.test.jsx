@@ -99,7 +99,8 @@ async function analyze(screen) {
 // platform's panel is in the DOM, so the switch has to settle before
 // anything inside the new panel can be queried.
 async function leaveResult(screen) {
-  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  // Over the head on the desk (plan 115's crumb), in it below the desk.
+  const leave = screen.container.querySelector('.anl-head .stage__leave, .desk-crumb .stage__leave')
   if (leave) { leave.click(); await settle(30) }
 }
 async function goToPlatform(screen, key) {
@@ -267,34 +268,43 @@ describe('AnalyzerScreen structure', () => {
   // fallback section. Owner-directed (2026-09-01, "add a real
   // tutorial").
   it('opens a step-by-step tutorial with per-device instructions', async () => {
-    const screen = await renderScreen()
-    await goToPlatform(screen, 'video')
+    // The dialog is the phone chrome's: on the desk the walkthrough
+    // opens in the intake's column instead (plan 120; analyzer.desktop's
+    // own case).
+    await page.viewport(1099, 900)
+    try {
+      const screen = await renderScreen()
+      await goToPlatform(screen, 'video')
 
-    screen.container.querySelector('.anl-grab__tutorial').click()
-    await settle(60)
+      screen.container.querySelector('.anl-grab__tutorial').click()
+      await settle(60)
 
-    const dialog = document.querySelector('[role="dialog"].anl-tut')
-    expect(dialog).not.toBeNull()
-    // The walkthrough is numbered and complete: what it is, copy,
-    // create, use, and a what-if-it-fails section.
-    expect(dialog.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
-    expect(dialog.querySelector('.anl-tut__copy')).not.toBeNull()
+      const dialog = document.querySelector('[role="dialog"].anl-tut')
+      expect(dialog).not.toBeNull()
+      // The walkthrough is numbered and complete: what it is, copy,
+      // create, use, and a what-if-it-fails section.
+      expect(dialog.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
+      expect(dialog.querySelector('.anl-tut__copy')).not.toBeNull()
 
-    // The create step switches between three devices, and the steps
-    // actually CHANGE with the device.
-    const devices = dialog.querySelectorAll('.anl-tut__devices .anl-seg__opt')
-    expect(devices.length).toBe(3)
-    const before = dialog.querySelector('.anl-tut__devicesteps').textContent
-    devices[2].click()
-    await settle(60)
-    expect(devices[2].getAttribute('aria-pressed')).toBe('true')
-    expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
+      // The create step switches between three devices, and the steps
+      // actually CHANGE with the device.
+      const devices = dialog.querySelectorAll('.anl-tut__devices .anl-seg__opt')
+      expect(devices.length).toBe(3)
+      const before = dialog.querySelector('.anl-tut__devicesteps').textContent
+      devices[2].click()
+      await settle(60)
+      expect(devices[2].getAttribute('aria-pressed')).toBe('true')
+      expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
 
-    // Esc-able real dialog (useDialog), and the trigger survives.
-    dialog.querySelector('.detail-close-btn').click()
-    await settle(60)
-    expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
-    expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+      // Esc-able real dialog (useDialog), and the trigger survives.
+      dialog.querySelector('.detail-close-btn').click()
+      await settle(60)
+      expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
+      expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+    } finally {
+      // The viewport leaks across files: hand back this file's width.
+      await page.viewport(1280, 900)
+    }
   })
 
   // ── Smart furigana ──
@@ -572,19 +582,27 @@ describe('AnalyzerScreen structure', () => {
   // effect moved focus to the result -- stealing focus out of a live
   // dialog and silently defeating useDialog's Tab-wrap trap.
   it('closes an open word detail when a new Passage arrives', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
+    // The sheet is the phone chrome's: on the desk a word opens in the
+    // result's dock instead (plan 115; analyzer.desktop's own case).
+    await page.viewport(1099, 900)
+    try {
+      const screen = await renderScreen()
+      await analyze(screen)
 
-    const tokenEl = screen.container.querySelector('.token-card__surface--door')
-    expect(tokenEl).not.toBeNull()
-    tokenEl.click()
-    await settle(60)
-    // The word's sheet is portalled to the body (plan 073).
-    expect(document.querySelector('[role="dialog"]')).not.toBeNull()
+      const tokenEl = screen.container.querySelector('.token-card__surface--door')
+      expect(tokenEl).not.toBeNull()
+      tokenEl.click()
+      await settle(60)
+      // The word's sheet is portalled to the body (plan 073).
+      expect(document.querySelector('[role="dialog"]')).not.toBeNull()
 
-    await startFromFile(screen)
+      await startFromFile(screen)
 
-    expect(document.querySelector('[role="dialog"]')).toBeNull()
-    expect(document.activeElement?.classList.contains('anl-results')).toBe(true)
+      expect(document.querySelector('[role="dialog"]')).toBeNull()
+      expect(document.activeElement?.classList.contains('anl-results')).toBe(true)
+    } finally {
+      // The viewport leaks across files: hand back this file's width.
+      await page.viewport(1280, 900)
+    }
   })
 })

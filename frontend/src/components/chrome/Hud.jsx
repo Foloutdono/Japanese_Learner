@@ -80,6 +80,8 @@ export function StatusChip({ model, onClick = null }) {
   )
 }
 
+// The panel as the chrome draws it: the offline word when the network
+// has gone, else the station panel.
 function HudStatus({ onClick }) {
   const { t } = useLang()
   const online = useOnline()
@@ -126,7 +128,8 @@ export function HudPass({ onClick }) {
   )
 }
 
-export function Hud() {
+// The level roundel, with the fare rising off it. A door to the pass.
+function HudLevel() {
   const { t } = useLang()
   const navigate = useNavigate()
   const summary = useProfileSummary()
@@ -134,22 +137,38 @@ export function Hud() {
   const toPass = () => { playClick(); navigate('/profile') }
 
   return (
+    <button
+      type="button"
+      className={`hud__level${gain ? ' hud__level--gain' : ''}`}
+      data-guide="hud.level"
+      onClick={toPass}
+      aria-label={summary ? `${t.level} ${summary.level}` : t.profileTitle}
+    >
+      <span>{summary?.level ?? ''}</span>
+      <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
+    </button>
+  )
+}
+
+// The three instruments, in the order the HUD prints them. Shared with
+// the desk's rail (plan 113), which sets the same three at its foot.
+export function HudInstruments() {
+  return (
+    <>
+      <HudLevel />
+      {/* The panel opens the status sheet — the pass's back (plan
+          074) — rather than walking to the pass. */}
+      <HudStatus onClick={() => { playClick(); openStatus() }} />
+      <HudPass onClick={() => { playClick(); openBalance() }} />
+    </>
+  )
+}
+
+export function Hud() {
+  return (
     <header className="hud">
       <div className="hud__inner">
-        <button
-          type="button"
-          className={`hud__level${gain ? ' hud__level--gain' : ''}`}
-          data-guide="hud.level"
-          onClick={toPass}
-          aria-label={summary ? `${t.level} ${summary.level}` : t.profileTitle}
-        >
-          <span>{summary?.level ?? ''}</span>
-          <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
-        </button>
-        {/* The panel opens the status sheet — the pass's back (plan
-            074) — rather than walking to the pass. */}
-        <HudStatus onClick={() => { playClick(); openStatus() }} />
-        <HudPass onClick={() => { playClick(); openBalance() }} />
+        <HudInstruments />
       </div>
     </header>
   )

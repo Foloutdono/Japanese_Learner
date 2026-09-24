@@ -37,7 +37,7 @@ vi.mock('../stores/credits', async (o) => ({
   ...(await o()),
   useCredits: () => ({ balance: 30, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
-vi.mock('../stores/departure', () => ({ beginDeparture: vi.fn() }))
+vi.mock('../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 

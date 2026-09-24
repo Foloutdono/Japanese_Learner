@@ -1,7 +1,10 @@
-import { useLocation } from 'react-router-dom'
+import { cloneElement, isValidElement } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { sectionFor, stationFor } from '../../config/stations'
 import { identityFor } from '../../config/identity'
+import { onDeskRail } from '../../config/tabs'
+import { useDesk } from '../../hooks/useDesk'
 import { playClick } from '../../lib/audio'
 import { ChevronIcon } from '../ui/Icons'
 
@@ -33,18 +36,32 @@ import { ChevronIcon } from '../ui/Icons'
 // nothing else names the place; a screen with a station plate or a
 // pass (DESIGN.md, Structure: one <h1>, the object that names the
 // place) passes 'span'.
+//
+// On the desk (plan 114) the aside's ‹ way out is not a phone's pill
+// in the corner. The rail beside the screen already has a door to
+// every gate and to the lit gate's stations, so a Leave whose `to` is
+// one of those (onDeskRail) is dropped — it would be a second door to
+// the place the rail's lit link already opens. Any other Leave (‹
+// Themes, ‹ Levels, a way back that is a state rather than a path)
+// becomes the way up: a small crumb above the title, where a desk's
+// eye looks for "where this sits".
 export function Bar({ code, title, sub, aside, color, register = false, as: Title = 'h1', className = '' }) {
+  const desk = useDesk()
+  const leave = desk && isValidElement(aside) && aside.type === Leave ? aside : null
+  const up = leave && !(leave.props.to !== undefined && onDeskRail(leave.props.to)) ? leave : null
+  const shown = leave ? null : aside
   const classes = ['bar', register ? 'bar--register' : '', className].filter(Boolean).join(' ')
-  const names = ['bar__names', sub && aside ? 'bar__names--stacked' : ''].filter(Boolean).join(' ')
+  const names = ['bar__names', sub && shown ? 'bar__names--stacked' : ''].filter(Boolean).join(' ')
   return (
     <div className={classes} style={color ? { '--line-color': color } : undefined}>
+      {up && <DeskCrumb leave={up} />}
       <div className="bar__row">
         {code && <span className="bar__roundel" aria-hidden="true">{code}</span>}
         <span className={names}>
           <Title className="bar__title">{title}</Title>
           {sub && <span className="bar__sub">{sub}</span>}
         </span>
-        {aside && <span className="bar__aside">{aside}</span>}
+        {shown && <span className="bar__aside">{shown}</span>}
       </div>
       <div className="bar__stripe" aria-hidden="true" />
     </div>
@@ -54,10 +71,39 @@ export function Bar({ code, title, sub, aside, color, register = false, as: Titl
 // ── ‹ the way out ──
 // The canvas's leave button: a chevron and the name of where it goes
 // (‹ Gate, ‹ Decks, ‹ Profile). Shared by the stage head and by a
-// nested screen's bar aside.
-export function Leave({ onClick, children, className = '' }) {
+// nested screen's bar aside. A way out that is a place is given as
+// `to`, a path, which also tells the desk's Bar where it leads; one
+// that is a state (back to a list the screen holds itself) keeps
+// `onClick`.
+// ── 机 — the way up, as a crumb (plan 114; its own since plan 115) ──
+// A <Leave> drawn over the page it leaves, in the caption register: the
+// Bar draws one for its own way out, and a screen whose way out is not
+// in a Bar — the analyser's result head, the dictionary's radical
+// header — draws one itself, on the desk only.
+export function DeskCrumb({ leave }) {
+  const lang = useLang()
   return (
-    <button type="button" className={`stage__leave ${className}`.trim()} onClick={() => { playClick(); onClick() }}>
+    <nav className="desk-crumb" aria-label={lang?.t.deskWayUp}>
+      {cloneElement(leave, { className: 'desk-crumb__up' })}
+    </nav>
+  )
+}
+
+// `keys` is the desk's (plan 115): the key that also takes this way
+// out (aria-keyshortcuts), when there is one — a run's Esc.
+export function Leave({ onClick, to, children, className = '', keys }) {
+  if (to !== undefined) return <LeaveTo to={to} className={className} keys={keys}>{children}</LeaveTo>
+  return <LeaveButton onClick={onClick} className={className} keys={keys}>{children}</LeaveButton>
+}
+
+function LeaveTo({ to, className, keys, children }) {
+  const navigate = useNavigate()
+  return <LeaveButton onClick={() => navigate(to)} className={className} keys={keys}>{children}</LeaveButton>
+}
+
+function LeaveButton({ onClick, children, className, keys }) {
+  return (
+    <button type="button" className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} onClick={() => { playClick(); onClick() }}>
       <ChevronIcon direction="left" size={14} />
       <span>{children}</span>
     </button>

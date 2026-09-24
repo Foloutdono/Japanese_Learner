@@ -5666,20 +5666,276 @@ What shipped, per mode:
 
 Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
 
+---
+
+# Wave 24 — 机, the desk (plan 113, 2026-09-22)
+
+Numbered 113–115: plan 112 went to the deck fold ("one word, one card",
+`content/kanji_renames.py`) on main while these three waves were open,
+and a plan number is never reused.
+
+The owner's ask: the app is mobile-first and stays so, but it needs a
+design for a computer — two systems, one for mobile and one for computer,
+and never break the mobile one. Decisions taken with the owner: the desk
+starts at **1100px, width only**; its navigation is a **left rail** with
+the HUD's instruments at its foot; the first round covers the chrome and
+the main screens.
+
+| Plan | What | Status |
+|---|---|---|
+| 113 | The desk: `hooks/useDesk.js`; the rail (`components/chrome/DeskRail.jsx`) in the Shell's slots; the plates two by two; Today and the profile in two columns; Settings' list beside its page; sheets as centred dialogs; the keys printed on a run; the 机 section at the tail of `index.css` and `src/desk.css.test.js`; the `desktop` (1100×800) and `wide` (1440×900) lanes; ADR 0018; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-22) |
+
+Verified beyond the suite: a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute, text
+node, box and computed style at 390, 768, 1024 and 1099px across eight
+screens and a kana run (before and after the reveal) — identical.
+
+Deferred: 理解's A–D list binds no keys (the desk prints none there);
+the stations pickers, decks, library, stats and the exam runner keep the
+phone's screen in the centred column; the dictionary's lookup sheet
+(plan 090) is still a modal on the desk rather than the dock's own stack;
+the guide's tab-bar stop hangs under the rail's list rather than beside
+it.
+
+---
+
+# Wave 25 — 机, the desk's second round (plan 114, 2026-09-22)
+
+The owner's verdict on wave 24: a good beginning — now fill the space
+with purpose and rethink the layout for a computer, so that nobody on one
+feels the app was made for a phone first. Set goals and deliver. The one
+constraint stands: below 1100px nothing changes.
+
+| Plan | What | Status |
+|---|---|---|
+| 114 | The screens laid out for the width, in seven phases, one commit each: **P1** the canvas at `--desk-board-w` (1240px), the platform lattices with no orphan, a boarding route drawn across, a run's head and field on the card's column; **P2** Today's journey beside the gate (`JourneyPanel`, `JourneyBody`), the dictionary's dock open from the first frame with its doors opening inside it (`DictionaryLookupBody`), ←/→ through the catalogue, a Learn plate's foot as the whole line; **P3** a station as two panes (`StationSplit`) with each platform's figures (`ModeFigures`, `modeRow`), the exam's grade in its URL; **P4** the statistics as one page — the line drawn 1:1 (`useBoxWidth`), the lines' levels in place, all twelve trouble cards; **P5** a run's side: the session panel (`SessionPanel`, `stores/runTally`) and the revealed card's entry docked (`stores/deskEntry`, `entryDock`), a graded sentence's breakdown with no toggle (`BreakdownSide`); **P6** the way up (`Leave to`, `onDeskRail`, `.desk-crumb`) and `/` from anywhere; **P7** a deck beside its platforms (`DeckPlatforms`, `useDeckModes`), a new deck as a dialog. DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+What changed for a learner on a computer, counted from the rail:
+
+| Flow | Wave 24 | Wave 25 |
+|---|---|---|
+| A kana set's, a grammar level's or an exam grade's platforms | 2 clicks | 1 (the list opens on the learner's own stop) |
+| Vocab or kanji platforms by JLPT level | 3 clicks | 2 |
+| A dictionary entry on arrival | 1 click | 0 (the dock opens on the first result) |
+| A door inside an entry | a modal over the dock | the dock itself, with ‹ back |
+| The journey on Today | a sheet | beside the gate |
+| A line's levels on the statistics | a sheet | in place |
+| Trouble cards | 6, then a sheet | all 12 on the page |
+| The revealed card's dictionary entry | 🔍, then a modal | docked beside the card |
+| A graded sentence's breakdown | a toggle | beside the card, automatically |
+| A deck's platforms | ▶ Study, then a second screen | beside the cards |
+| The canvas at 1920px | 1040px | 1240px |
+| A ‹ back pill that repeats the rail | on every nested screen | not drawn; any other is a crumb |
+
+Cut on purpose, each decoration, a duplicate, or built on data that
+would lie: a twelve-week heatmap (the stamp book already is one); a key
+legend (the keys are printed where they act); pace inside a run (stale
+mid-run); trouble cards on Today (they compete with the one action);
+"last played" on the practice plates (comprehension and exams keep no
+history, reading's has no level); retention on the plates; the due
+forecast (retired by design).
+
+Verified beyond the suite (frontend: 184 files, 1372 tests, seven
+lanes): after every phase a branch-against-base pass on two dev servers
+with the same mocked API compared every rendered element, attribute,
+text node, box and computed style at 390, 768, 1024 and 1099px across
+twenty-eight screens, a kana run before and after the reveal, and a
+reading run graded — identical to the commit before wave 24.
+
+Deferred: a comprehension passage beside its questions; a standing
+answer sheet in the exam runner; the exam result and the library laid
+out for the width; a word looked up from a docked breakdown still opens
+the lookup as a dialog.
+
+---
+
+# Wave 26 — 机, the desk's third round (plan 115, 2026-09-23)
+
+The owner's verdict on wave 25: nicely done, continue to improve it. A
+read-only audit (seven areas, an auditor and a skeptic each, then a
+synthesis) found the screens still shaped like a phone on the desk, runs
+that did not fit a laptop's window, doors that still opened dialogs over a
+docked column, live bugs in the shipped desk work, and five bugs on the
+phone too, which the owner approved fixing in the same wave.
+
+| Plan | What | Status |
+|---|---|---|
+| 115 | **P0** five phone bugs, a commit and a phone test each: a cloze blank never lit (`blankNumber`), Back from a result re-sitting the paper (replace on finish), run keys under a dialog (`lib/dialogOpen`), leaving a run pushing history (`stores/boarding`'s `returnsTo`, `hooks/useRunExit`), out-of-order dictionary pages; **P1** the run's side in its pigment (`RunSide`), a breakdown's doors opening in the side (`SideLookup`), exact docked lookups, the column's card width for the exam's rows, one Sign out; **P2** comprehension beside its text, A–D/Enter, a miss opening its sentence; **P3** the stations' second screens folded — grammar points beside the lesson, theme bands and tiers beside their platforms (`ScopeFigures`), the deck's platform screen giving way; **P4** the mock exam's standing answer sheet, a flat reading passage (`ExamCard`, `PassageText`), Space for listening, the review as list and page; **P5** the library's shelf beside a deck (`PublicDeckPane`), Browse docked (`BrowseCardsDock`), one /modes fetch, one "No cards"; **P6** the analyser's dock (`AnalyzerDock`, `tokenLookup`), `DeskCrumb`, the intake beside history, Ctrl/⌘+Enter, the dictionary's handoff to the analyser, kana charts that wrap; **P7** a run that fits a laptop (top-aligned, card and choices side by side, rows that keep their place), the misses at a run's end (`tallyMisses`); **P8** Enter and Esc (`DeskKeys`), C for choices, Enter at a run's end, a Learn plate's legs as doors, ↑/↓ along a station (`useListWalk`), the rail's focus ring, the profile's pass at phone size and both rankings, the guide's note beside its anchor with `…Desk` copy; **P9** the records, the identity pass and the screenshots | DONE (2026-09-23) |
+
+What changed for a learner on a computer:
+
+| Flow | Wave 25 | Wave 26 |
+|---|---|---|
+| Look up a word in a graded sentence | dialog + scrim, 2 clicks per further word | in the side, 1 click |
+| Comprehension: check the text during a question | Re-read, then Back (2 clicks) | 0: the passage stands beside the question |
+| Comprehension: answer a question | click row + click Next | 2 keys (A–D, Enter) |
+| Grammar point lesson | click → modal → close | 1 click or ←/→ |
+| Theme band / next frequency tier | 2 clicks | 1, with figures |
+| Leave a deck run | the extra platforms screen | the deck page |
+| Exam: jump to a question | open the bar, a dialog, pick | 1 click, sheet always visible |
+| Exam: reading passage | 480px scroll box, re-animates per question | stands still beside its questions |
+| Exam review | accordion, 2 clicks per move | list and page, 1 click or ←/→ |
+| Library: inspect 5 decks | 10 clicks, 5 refetches | 5 clicks, 0 refetches |
+| Analyzer lookup | dialog + close | docked column, ←/→ walk tokens |
+| Pasted sentence in the dictionary | 3 acts on 2 screens | 1 click to the analyzer |
+| Kanji MCQ at 1100×800 | 4th choice at the floor, rating bar below it, jumping on answer | all in view; rating bar never moves |
+| Whole session from Today | mouse to depart and to leave | Enter departs, Esc leaves |
+
+Deferred: the radical lesson page as a split; browse-mode runs with a side;
+a dialog pass over confirm sheets and the CSV import; `<Link replace>` rows
+for middle-click; Today's lanes two across; flag ink unification (a phone
+design change, the owner's to decide). Cut: see plan 115's own list.
+
+---
+
+# 机 — the gate's lanes two across (plan 116, 2026-09-23)
+
+Wave 26 deferred "Today's lanes two across"; this is that question.
+On the desk, should Today's fare gate set its lanes two across, the
+line chips and Depart spanning both? Built only if it reads better
+against DESIGN.md's density contract ("a screen gets a layout only
+where the width earns it, and what fills the width has a job").
+
+| Plan | What | Status |
+|---|---|---|
+| 116 | `.gate-card__lanes` as `repeat(auto-fit, minmax(calc(--desk-side-w − 2·--sp-5), 1fr))` in the 机 block: two across once the gate holds two lanes at a phone's width, one to a row below. No JSX change. `src/today.wide.test.jsx` (new), a case in `src/today.desktop.test.jsx`, a block in `src/deskfree.phone.test.jsx`; DESIGN.md "The desk"; `docs/design/desk/README.md` | DONE (2026-09-23) |
+
+**Verdict: yes, where the width earns it.** Measured in the lanes
+(eight lanes, French):
+
+| Window | Lanes' box | Lanes | In view under the 30dvh cut |
+|---|---|---|---|
+| 1100 (`desktop`) | 364px | one to a row, 364px | 5 of 8 |
+| ~1390 | ~660px | the switch: two lanes at 328px fit | — |
+| 1440 (`wide`) | 704px | two across, 349px each | 8 of 8 (10 of 12) |
+| ≥1496 (canvas capped) | ~760px | two across, ~377px; three would need ~996px | — |
+
+Why it reads better at 1440: one lane per row was 704px with the name
+at one end, the figure at the other and ~450px of nothing between — the
+contract's "wide cards leave their right half empty" — and the box is
+height-bounded, so the unused width was also hiding half the day's
+switches under the cut. Two across, a lane is the width a phone draws it
+(the floor is the side column less the gate's phone padding, 328px), its
+figure a glance from its name, and an eight-lane day needs no scroll.
+The lanes are short switches, and two to five of them is the common day:
+"a grid of ≤5 short options is a grid, never a stack of full-width rows".
+
+Why not below ~1390: two columns would put each lane under its phone
+width. The desk's tightest gate (~430px) holds one.
+
+What it costs, accepted: the order reads left to right, then down, so a
+line with an odd count ends mid-row and the next line begins beside it —
+each lane's pigment and tick still name its line, and the chips above
+name the lines. A short last row is left short.
+
+Not done, on purpose: spanning an odd last lane (a switch like its
+siblings; twice their width would promote it — and the lanes are no
+hairline lattice, so the short row shows the card, not a seam);
+starting each line on its own row (more short rows, i.e. dead space
+inside the list); column-major order (it needs the row count from
+JavaScript, or multi-column CSS, which overflows sideways inside a
+height-bounded box).
+
+# Plan 117 — the split's rows as links (2026-09-23)
+
+Another of wave 26's deferrals: "`<Link replace>` rows for middle-click".
+Every row of a desk split's list was a button that replaced the URL, so
+nothing in those lists could be opened in a new tab.
+
+| Plan | What | Status |
+|---|---|---|
+| 117 | `components/selection/SplitRow.jsx`: a `<Link replace>` when its caller passes a URL, the button it always was when not, so the phone's DOM is untouched and a component rendered outside a router still works. The desk passes URLs to `RouteStops` (levels, kana sets, theme bands), `GrammarIndex`, `TierSelector`, `LibraryCard` and the exam review's rows, whose open question moves into the URL (`?question=`, beside `?attempt=`; the paper rides in the router state, so a swap refetches nothing and a new tab rebuilds from the attempt). `useListWalk` reads links and opens one on Space; the grammar walk's scroll follows the point, not the click. The 机 block gives the link the button's face (weight, leading, no underline, the review's hover, the focus ring). `src/splitRows.desktop.test.jsx` measures link against button; the desk tests assert the hrefs; a block of `src/deskfree.phone.test.jsx`; `routePattern.test.js` holds every row's href to its pattern | DONE (2026-09-23) |
+
+---
+
+# 机 — a radical's page as two panes (plan 118, 2026-09-23)
+
+What wave 26 (plan 115) deferred first: the kanji station's third
+source was still a phone's two screens on the desk — the lesson with its
+platforms, and the family (`?family=1`) in the lesson's place behind a
+door, the way back a `‹` in the bar — and the bare index its own page.
+The one constraint stands: below 1100px nothing changes. Numbered 118:
+116 is the gate's lanes, and 117 is claimed by an open branch (a split's
+rows as links).
+
+| Plan | What | Status |
+|---|---|---|
+| 118 | `/learn/kanji/radical/:n` on the desk as a `StationSplit`: the radicals index (`RadicalSelector`'s `selected`, through `RadicalGrid` to `RadicalTile`'s `aria-current`) on the radical's own stroke page beside the lesson and its platforms, each figured by `ScopeFigures` from `/api/kanji/stats?radical=`; another radical is one click, replacing the URL, the index staying mounted on the page the learner left it; the family's door (`familyOpen`, `aria-expanded`) swaps the index for the family (`RadicalFamily`, `RadicalFamilyList`, fed by the lesson's own `onLoaded` — no second fetch) and back, and the crumb "‹ Radicaux" puts the index back; the bare index opens on its page's biggest family (`RadicalRedirect`, `domain/radicals.js`'s `byRank`/`firstRadical`); three selectors added to existing rules of the 机 section. `src/radicals.desktop.test.jsx`, a block of `src/deskfree.phone.test.jsx`, `src/domain/radicals.test.js` | DONE (2026-09-23) |
+
+| Flow | Wave 26 | Plan 118 |
+|---|---|---|
+| Another radical from a radical's page | ‹ to the index, then a tile (2 clicks) | a tile beside it (1), the URL replaced |
+| A radical's family | the door, the lesson gone; ‹ to come back | the door; the family beside the lesson and its platforms |
+| A platform's record on a radical's page | none | due now, the composition bar, mastered / total |
+| "By radical" from the kanji sources | the index, then a tile (2 clicks) | the page's biggest family's lesson (1) |
+
+Verified beyond the suite: a throwaway browser pass dumped every element,
+attribute, text node, box and computed style of the radical screens (the
+lesson, the plate opened, the family, the family with a kanji's sheet
+open, the door pressed, the bare index) at 390, 768 and 1099px, from the
+merge commit and from this change — the eighteen dumps are identical.
+
+Deferred: ←/→ through a page's radicals; a family kanji's entry opening
+beside the family rather than as a centred dialog.
+
+# Plan 119 — the browse's side on the desk (2026-09-23)
+
+Numbered 119 on the merge into main: 116 had gone to the fare gate's
+lanes, 117 to the split's rows and 118 to a radical's page (all above)
+while this was open.
+
+One of wave 26's deferrals. The fast review stood its card alone on the
+desk, in the width a card run gives its session panel.
+
+| Plan | What | Status |
+|---|---|---|
+| 119 | The Kana, Vocab and Kanji browses pass StudyStage a `side`: `SessionPanel` with `records={false}`, so the column holds the revealed card's dictionary entry, docked by the reveal (the Flashcard's own `publishEntry`) and cleared by the next card, and no tally, since a browse rates nothing. An empty browse stands no side. No CSS: the browse inherits the top-aligned desk run (plan 115), and Prev/Next stay above the level bar at 1100×800. `src/browse.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | DONE (2026-09-23) |
+
+Left out on purpose: the grammar browse. It wires no dictionary lookup
+at all, so there is no 🔍 on a phone either, and giving it one would put
+that 🔍 on the phone, which the desk may not change.
+
+# Plan 120 — the desk's last dialogs (2026-09-23)
+
+Wave 26's deferred "dialog pass over confirm sheets and the CSV import":
+every `Sheet`, `role="dialog"` and `aria-modal` the desk could still
+open, each decided against DESIGN.md's rule — a door opens in the
+column, never over it; a dialog is kept for what must interrupt.
+
+| Plan | What | Status |
+|---|---|---|
+| 120 | One dock shell, `components/chrome/DeskDock.jsx` (caption, ✕, Esc unless a dialog owns it, focus back to the opener), under Browse and two new docks. **Moved**: a deck's More into its side, taking turns with the form, Browse and the platforms, its deletion now a dialog of its own; a gate lesson's compare row into a grammar run's side (`SideLookup`); the grab's walkthrough into the intake's column, its copy state shared with the panel's (`useBookmarkletCopy`); a kanji's readings into the entry's own place, in a dock, a run's side or a lookup dialog (`ReadingsInPlace`, Esc peeling only the list); the iOS install steps into the settings page (`InstallSteps`). **Kept**: the exam's confirm, leave and failed-submit sheets, the deck's four confirms, the CSV import, a new deck, the report, the balance and the pass's back (the rail's doors), the offer and the run-out, the level change, the deck picker, the guide. `src/grammar.desktop.test.jsx`; blocks of the shelf, analyzer, dictionary and settings desktop tests; a block of `src/deskfree.phone.test.jsx`. The reasons, sheet by sheet: `docs/design/desk/README.md`, "Dialogs on the desk" | DONE (2026-09-23) |
+
+Left: the radical family's lookup, which plan 118 (the radical page as
+two panes, merged while this was open) keeps a centred dialog by its own
+choice though the page beside the family is now a column; the first
+ride's 🔍, whose ride stands no side — a layout decision, not a move; and
+on Today the rail's status panel opens as a dialog the body that stands
+beside the gate. Two browser-lane files that set a desk-wide page for
+their geometry now run their sheet cases at 1099px, just under the line
+(`DictionaryDetail.browser.test.jsx`'s readings,
+`AnalyzerScreen.responsive.browser.test.jsx`'s walkthrough), as plan 115
+did for the analyser's word sheet.
+
+---
 
 # Wave 27 — 声, a voice we are allowed to sell (plans 121–121c, 2026-09-23)
 
-Executed directly in one session. Every voice the server made came from
-edge-tts, a client for Microsoft Edge's consumer "Read Aloud" endpoint,
-which nothing licenses for a product that is sold. The kana deck had the
-second half of the problem: 102 recordings of undocumented origin,
-40 of them clipping, 24 of the deck's sounds missing, and ウォ saying を.
-The owner chose VOICEVOX Nemo, a Render private service, and a
-regenerated kana set.
+Numbered 121: it was planned as 113, 113b and 113c, and 113–120 went to
+the desk while it was open. Executed directly in one session. Every voice
+the server made came from edge-tts, a client for Microsoft Edge's
+consumer "Read Aloud" endpoint, which nothing licenses for a product
+that is sold. The kana deck had the second half of the problem: 102
+recordings of undocumented origin, 40 of them clipping, 24 of the deck's
+sounds missing, and ウォ saying を. The owner chose VOICEVOX Nemo, a Render
+private service, for every voice the server makes, and then a recorded
+voice for the kana.
 
 | # | Plan | Status |
 |---|------|--------|
-| 121 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated | DONE (2026-09-23) |
+| 121 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated. ADR 0019 | DONE (2026-09-23) |
+| 121b | The owner's voices: 女声6 reads and is A, 男声1 is B at 0.9, 女声1 narrates the exams. An importer that cuts the kana deck from an UTAU voicebank, with `kanas/sources.json` holding every clip's voice to its credit. ADR 0020 | DONE (2026-09-23) |
+| 121c | 波音リツ instead of 小春音アミ, for terms that ask for nothing. Joined (連続音) banks read by their aliases; onsets walked back from the vowel; an exact `--pitch`; long vowels from his held notes, and あい/おい from his own moves. The deck imported from 強連続音 Ver1.5.1 at A3 (`KANA_REV` `ritsu1`) | DONE (2026-09-24) |
 
 What shipped:
 
@@ -5687,36 +5943,45 @@ What shipped:
   bounded concurrency, retries on connection errors, everything as
   `TTSFailed`. `render.yaml` gains `voicevox-nemo`, a private service on
   the stock image pinned by digest, with `VV_DISABLE_MUTABLE_API=1`. The
-  backend's `VOICEVOX_URL` comes from its `hostport`. Measured with three
-  voices loaded, it peaks at 376 MB (Starter), and a word takes about 2 s at
-  0.5 CPU. ADR 0019 has the licence, the credit and the options table.
+  backend's `VOICEVOX_URL` comes from its `hostport`. With the owner's
+  three voices loaded it peaks at 343 MB, so Starter holds it, and a word
+  takes about 2 s at 0.5 CPU. ADR 0019 has the licence, the credit and
+  the options table.
 - **Nothing is renamed.** `content_key` is byte-identical and pinned in
   `tests/test_exam_tts.py`. A new voice is a voice EPOCH instead:
   `{audio_dir}/.voice-rev`. A clip older than the epoch is remade in place
   before it is served, or is a 404 if it cannot be remade.
   `scripts/revoice_audio.py` does the lot up front.
-- **Three voices.** They are assigned by speaker label (narrator 0, A 1,
-  B 2), and the listening prompt now says A is 女の人 and B is 男の人. The
-  generator asks the engine `ready()` before the paid model call. A
-  dialogue is joined with pauses and encoded once, at a constant bitrate.
-- **Kana.** A lone kana goes through `/accent_phrases?is_kana=true`, so は
-  is "ha" and へ is "he". The frontend sends a lone kana straight to the
-  server clip rather than the device. `scripts/build_kana_audio.py` made
-  127 clips (48 kHz, −19 dB RMS, peak ≤ −3 dB), named by
-  `kana_data.sound_of`, so ウォ is `wo_foreign`. えい and おう are said as ē and
-  ō. The dictionary's kana play the deck clip.
+- **Four voice slots.** They are assigned by role: the reader 0, the
+  dialogue's A 1 and B 2, the exam narrator 3 (`DEFAULT_VOICES`, with
+  `VOICE_TEMPO` slowing 男声1). The listening prompt now says A is 女の人
+  and B is 男の人. The generator asks the engine `ready()` before the paid
+  model call. A dialogue is joined with pauses and encoded once, at a
+  constant bitrate.
+- **Lone kana.** A lone kana goes through `/accent_phrases?is_kana=true`,
+  so は is "ha" and へ is "he". The frontend sends a lone kana straight to
+  the server clip rather than the device.
+- **The kana deck.** 127 clips (48 kHz, −19 dB RMS, peak ≤ −3 dB), named
+  by `kana_data.sound_of`, so ウォ is `wo_foreign`. The engine made the
+  first set, with えい and おう said as ē and ō. The owner judged it flat,
+  and the set is now cut from 波音リツ's UTAU bank by
+  `scripts/kana_bank.py`: his terms ask for no credit, report or
+  permission. The owner chose the bank and pitch by ear from eleven trial
+  reels over four of his banks. The dictionary's kana play the deck clip.
 - **Caches.** Every clip URL carries a revision (`VOICE_REV`, and
   `KANA_REV` for the kana set), so neither the service worker nor the
   one-year `immutable` header replays an old voice.
 - **Credit.** "VOICEVOX Nemo" is on the Credits page and in
   THIRD_PARTY_NOTICES, with the ban on using the audio for machine
-  learning.
+  learning. 波音リツ is credited in both too, as provenance.
 
 Owner steps after deploy:
 
 1. Sync the Blueprint.
 2. Run `python -m scripts.revoice_audio`, then again with `--yes`, from the
    backend's Render Shell.
-3. Listen to `scripts/audition_voices.py`. If the provisional voices
-   (女声1, 女声2, 男声1) are not the ones, change `DEFAULT_VOICES`, bump
-   `VOICE_REV` (and `KANA_REV`), and re-run `build_kana_audio --force`.
+3. Rebuild the native app (`npm run build:native`), so it ships the new
+   kana.
+
+Left: the owner accepted the kana as "good for now", and a better kana
+voice is to come (ADR 0020, "Follow-up").

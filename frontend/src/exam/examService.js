@@ -154,7 +154,10 @@ function pushMondaiQuestions(section, mondai, out) {
   if (mondai.passages) {
     for (const passage of mondai.passages) {
       if (passage.questions) for (const q of passage.questions) out.push({ ...common, passage, ...q })
-      if (passage.blanks) for (const q of passage.blanks) out.push({ ...common, passage, ...q })
+      // A blank keeps the number its passage marks it with (【n】):
+      // the renumbering below gives `number` a place in the whole
+      // section, which the template's markers know nothing about.
+      if (passage.blanks) for (const q of passage.blanks) out.push({ ...common, passage, ...q, blankNumber: q.number })
     }
   }
 }

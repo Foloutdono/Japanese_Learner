@@ -12,7 +12,7 @@ npm run lint       # JS/JSX
 npm run lint:css   # CSS -- see "Design conformance guards" below
 npm run lint:scale # design-token scale ratchet -- see below
 npm run lint:ink   # ink/ground structural rule -- see below
-npm test           # vitest, five lanes (node, browser, phone, tablet, touch)
+npm test           # vitest, seven lanes (node, browser, phone, tablet, touch, desktop, wide)
 npm run build:native  # the Capacitor bundle (dist-native/, reads .env.native)
 npm run cap:sync      # build:native, then copy it into android/ and ios/
 npm run cap:android   # cap:sync, then run on a connected device / emulator
