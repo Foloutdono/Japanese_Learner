@@ -1,3 +1,5 @@
+import { dialogOpen } from './dialogOpen'
+
 // ── Who a key press belongs to (plan 123) ──────────────────────────
 // The app answers keys at the window: a run's digits and Space, a
 // cutscene's skip, the desk's Enter and Esc. These are the questions
@@ -28,4 +30,17 @@ export function spendKey(e) {
 export function composing(e) {
   const n = e?.nativeEvent ?? e
   return Boolean(n?.isComposing) || n?.keyCode === 229
+}
+
+// A run's window keys -- Space and ZQSD turn the card, the digits pick
+// an answer -- are the run's only when nothing else owns the press:
+// not a held key, not a browser chord (Ctrl/⌘+S saves the page, ⌘+1
+// goes to a tab; neither turns a card), not an input method's, not a
+// field's, not a dialog's. RatingBar, HintBar, the exam and
+// comprehension already asked all of this; the card and the choices
+// now ask it the same way.
+export function runKey(e) {
+  if (e.repeat || e.ctrlKey || e.metaKey || e.altKey || composing(e) || dialogOpen()) return false
+  const target = e.target
+  return !(target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? ''))
 }

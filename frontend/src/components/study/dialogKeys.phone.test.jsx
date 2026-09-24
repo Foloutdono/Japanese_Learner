@@ -52,3 +52,49 @@ describe('the run keys under a dialog', () => {
     expect(document.querySelector('.flashcard').textContent).not.toBe(before)
   })
 })
+
+// ── A browser chord is the browser's (plan 123) ──────────────────
+// The card turned on Ctrl/⌘+S (save) and Ctrl/⌘+D (bookmark), and
+// swallowed both; ⌘+1 answered the question on the page being left for
+// another tab. The run's keys now take no chord, as the rating bar's
+// always did -- and the rating bar takes key 6 on a French PC keyboard,
+// where it types '-'.
+describe('a chord under a run', () => {
+  const chord = (key, mod) => {
+    const e = new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true, [mod]: true })
+    window.dispatchEvent(e)
+    return e
+  }
+
+  it('neither turns the card nor picks a choice, and is left to the browser', async () => {
+    const onAnswer = vi.fn()
+    await render(<Run open={false} onRate={() => {}} onAnswer={onAnswer} />)
+    await settle()
+    const before = document.querySelector('.flashcard').textContent
+    const save = chord('s', 'ctrlKey')
+    const mark = chord('d', 'metaKey')
+    chord('1', 'metaKey')
+    chord('2', 'altKey')
+    await settle()
+    expect(save.defaultPrevented).toBe(false)
+    expect(mark.defaultPrevented).toBe(false)
+    expect(onAnswer).not.toHaveBeenCalled()
+    expect(document.querySelector('.flashcard').textContent).toBe(before)
+    press('s')
+    await settle()
+    expect(document.querySelector('.flashcard').textContent).not.toBe(before)
+  })
+
+  it('rates 6 on a French PC keyboard\'s key 6', async () => {
+    const onRate = vi.fn()
+    await render(<LangProvider><RatingBar scale="full" active onRate={onRate} /></LangProvider>)
+    await settle()
+    press('6')
+    await settle()
+    press('-')
+    await settle()
+    // The same grade as the digit it stands for.
+    expect(onRate).toHaveBeenCalledTimes(2)
+    expect(onRate.mock.calls[1][0]).toBe(onRate.mock.calls[0][0])
+  })
+})

@@ -9,10 +9,9 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
-import { dialogOpen } from '../../lib/dialogOpen'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
-import { composing } from '../../lib/keyGuards'
+import { composing, runKey } from '../../lib/keyGuards'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -177,9 +176,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
   useEffect(() => {
     if (answered) return
     const handler = e => {
-      if (e.repeat || dialogOpen()) return
-      const tag = e.target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!runKey(e)) return
       const idx = CHOICE_KEY_INDEX[e.key]
       if (idx !== undefined && idx < choices.length) {
         handleAnswer(choices[idx])
@@ -800,9 +797,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   // natural one-handed shortcut instead of reaching for the mouse.
   useEffect(() => {
     const handler = e => {
-      if (e.repeat || dialogOpen()) return
-      const tag = e.target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!runKey(e)) return
       const key = e.key.toLowerCase()
       if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
         e.preventDefault()

@@ -167,6 +167,22 @@ describe('the exam runner on the desk', () => {
     expect(play).toHaveBeenCalledTimes(1)
     play.mockRestore()
   })
+
+  it('gives Space back to the clip from an answer already checked (plan 123)', async () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve())
+    await sit(LISTENING)
+    await settle(200)
+    // A click leaves the focus on the choice, as Chrome does.
+    const choice = $$('.mcq-row')[1]
+    choice.click()
+    choice.focus()
+    await settle()
+    expect(choice.getAttribute('aria-checked')).toBe('true')
+    choice.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }))
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+    play.mockRestore()
+  })
 })
 
 // ── The result ──

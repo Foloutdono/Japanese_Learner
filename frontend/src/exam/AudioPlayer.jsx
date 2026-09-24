@@ -96,7 +96,11 @@ export default function AudioPlayer({ src, keyHint = false }) {
     const onKey = e => {
       if (e.key !== ' ' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       const target = e.target
-      if (target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target?.tagName ?? '')) return
+      // An answer already checked has no use for Space, and Chrome
+      // leaves the focus on the choice that was clicked: the key there
+      // goes back to the clip it is printed on (plan 123).
+      const checked = target?.getAttribute?.('role') === 'radio' && target.getAttribute('aria-checked') === 'true'
+      if (!checked && (target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT|BUTTON|A)$/.test(target?.tagName ?? ''))) return
       if (!audioRef.current) return
       e.preventDefault()
       toggle()
