@@ -263,11 +263,12 @@ def _bank_maker(sounds: dict[str, dict], names: list[str], directory: Path, pitc
         logger.error("%s", e)
         return None
     if not bank.samples:
+        folders = kana_bank.index_bank(directory).folders if pitch else []
         logger.error("No syllable samples under %s%s.", directory,
-                     f" whose path names {pitch!r} -- leave --pitch out for a single-pitch bank"
+                     f" in a folder named {pitch!r}; its folders are: {', '.join(folders) or 'none'}"
                      if pitch else "")
         return None
-    if not pitch and len(bank.folders) > 1:
+    if len(bank.folders) > 1:
         logger.error("The samples come from %d folders (%s): pick one with --pitch.",
                      len(bank.folders), ", ".join(bank.folders))
         return None
@@ -304,7 +305,7 @@ def main(argv: list[str] | None = None) -> int:
                         help="cut the clips from a recorded UTAU bank (scripts/kana_bank.py) "
                              "instead of the voice engine")
     parser.add_argument("--pitch", metavar="TAG",
-                        help="with --from-bank: only the samples whose path names TAG (a pitch folder: A3, F4)")
+                        help="with --from-bank: only the samples in the folder named TAG (a pitch: A3, F4, 通常)")
     parser.add_argument("--credit", metavar="ID",
                         help="with --from-bank: the voice's row id in frontend/src/domain/attributions.js "
                              "(amitaro), recorded in sources.json")

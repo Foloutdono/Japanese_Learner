@@ -239,6 +239,42 @@ def test_a_deeper_sample_is_read_at_16_bits(tmp_path, width):
     assert list(array("h", pcm.frames)) == values
 
 
+def _wave(seconds: float, freq: float, amp: float) -> list[int]:
+    return [int(amp * 32767 * math.sin(2 * math.pi * freq * i / BANK_RATE)) for i in range(int(seconds * BANK_RATE))]
+
+
+def test_the_onset_is_the_sound_that_runs_into_the_vowel():
+    # 波音リツ's 通常 bank opens a "- " region some 300 ms early, over room
+    # noise; then silence; then the syllable -- a soft consonant (a hiss,
+    # a tenth the vowel's level) running straight into the vowel. The
+    # noise is louder than the hiss's first samples, so reading forward
+    # from the offset starts the cut in the noise and loses the vowel's
+    # end; reading back from the vowel finds the hiss.
+    noise, gap, hiss, vowel = _wave(0.15, 3000, 0.01), [0] * int(0.15 * BANK_RATE), \
+        _wave(0.06, 5000, 0.03), _wave(0.4, 220, 0.5)
+    samples = array("h", [0] * 4410 + noise + gap + hiss + vowel)
+    consonant = 4410 + len(noise) + len(gap)
+    for offset_ms in (0, 100, 150):                 # at the file's start, the noise's, in the noise
+        assert consonant <= kana_bank.onset(samples, BANK_RATE, offset_ms) <= consonant + 3
+
+
+def test_the_onset_rises_out_of_a_noisy_room(tmp_path):
+    # The same, with room noise running straight into the syllable and no
+    # silence between: the noise is louder than the vowel's peak less
+    # 40 dB, so the gate rises above the noise instead.
+    noise, hiss, vowel = _wave(0.4, 3000, 0.012), _wave(0.06, 5000, 0.05), _wave(0.4, 220, 0.5)
+    samples = array("h", [0] * 4410 + noise + hiss + vowel)
+    consonant = 4410 + len(noise)
+    assert consonant <= kana_bank.onset(samples, BANK_RATE, 100) <= consonant + 3
+
+
+def test_the_onset_looks_no_further_back_than_a_consonant_lasts():
+    hum, vowel = _wave(1.0, 3000, 0.03), _wave(0.4, 220, 0.5)   # a sound that never stops
+    samples = array("h", hum + vowel)
+    found = kana_bank.onset(samples, BANK_RATE)
+    assert len(hum) - int((kana_bank.ONSET_MAX_LEAD_S + kana_bank.ONSET_WINDOW_S + 0.01) * BANK_RATE) <= found < len(hum)
+
+
 def test_the_onset_is_found_even_when_the_oto_leaves_it_at_zero():
     silence, attack = [0] * 4410, [8000, -8000] * 50
     samples = array("h", silence + attack)
@@ -432,6 +468,21 @@ def test_a_bank_in_several_pitch_folders_needs_one_picked(tmp_path, caplog):
         assert build_kana_audio.main(argv) == 1
     assert "pick one with --pitch" in caplog.text
     assert build_kana_audio.main([*argv, "--pitch", "F4"]) == 0
+
+
+def test_a_pitch_names_one_folder_exactly(tmp_path, caplog):
+    # 何かがキレ keeps A4, A4弱 and A4強 side by side: A4 is only A4.
+    for folder in ("A4", "A4弱", "A4強"):
+        _tone(tmp_path / "bank" / folder / "か.wav")
+    bank = kana_bank.index_bank(tmp_path / "bank", "a4")
+    assert (bank.samples["か"].path.parent.name, bank.folders) == ("A4", ["A4"])
+    assert kana_bank.index_bank(tmp_path / "bank", "A4弱").folders == ["A4弱"]
+
+    argv = ["--from-bank", str(tmp_path / "bank"), "--credit", "namine-ritsu", "--only", "ka",
+            "--out", str(tmp_path / "kanas"), "--pitch", "A5"]
+    with caplog.at_level(logging.INFO, logger="build_kana_audio"):
+        assert build_kana_audio.main(argv) == 1
+    assert "its folders are: A4, A4弱, A4強" in caplog.text
 
 
 def test_the_whole_set_from_a_joined_bank(tmp_path, caplog):

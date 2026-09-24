@@ -107,11 +107,29 @@ END_MARGIN_S = 0.020
 MIN_SYLLABLE_S = 0.100
 FADE_OUT_S = 0.070
 FADE_OUT_LONG_S = 0.090
-# The onset is where the sample first rises within this much of its own
-# peak (after the oto offset, when there is one), less PRE_ROLL_S so a
-# soft consonant -- the breath of は, the hiss of さ -- is kept whole.
-# The silence that comes with it is build_kana_audio.finish()'s to trim.
-ONSET_BELOW_PEAK_DB = -36
+# The onset (see onset()) is read off the voice's envelope: its level
+# over ONSET_WINDOW_S, every ONSET_HOP_S -- a window long enough that a
+# low hum in the room reads as the steady level it is. The vowel has
+# arrived at the first window within ONSET_ARRIVAL_DB of the loudest, and
+# the syllable began where the sound running back from there does,
+# stopping at ONSET_GAP_S of windows in a row below the gate, and never
+# more than ONSET_MAX_LEAD_S before the vowel (no consonant is that
+# long). The gate is ONSET_BELOW_PEAK_DB under the loudest, or, in a
+# noisy room, ONSET_ABOVE_NOISE_DB over the noise (the median of what
+# comes before the vowel) -- but never more than ONSET_MOST_BELOW_PEAK_DB
+# under the loudest, which a syllable opening straight on its consonant
+# would otherwise lose the soft start of. The cut then starts PRE_ROLL_S
+# earlier still, so a soft consonant -- the breath of は, the hiss of さ --
+# is kept whole; the silence that comes with it is
+# build_kana_audio.finish()'s to trim.
+ONSET_WINDOW_S = 0.020
+ONSET_HOP_S = 0.005
+ONSET_ARRIVAL_DB = -6
+ONSET_BELOW_PEAK_DB = -40
+ONSET_ABOVE_NOISE_DB = 6
+ONSET_MOST_BELOW_PEAK_DB = -26
+ONSET_GAP_S = 0.020
+ONSET_MAX_LEAD_S = 0.350
 ONSET_FLOOR = 32768 * 10 ** (-60 / 20)
 PRE_ROLL_S = 0.060
 
@@ -318,10 +336,11 @@ def _sounds_in(wav_path: Path, lines: list[tuple[str, float, float | None, float
 def index_bank(root: Path, pitch: str | None = None) -> Bank:
     """Every syllable under `root` that is sung on its own -- a
     single-syllable file, or the sound opening a joined string -- keyed
-    by its hiragana. With `pitch` ("A3"), only the files whose path
-    names it. Where several claim one syllable, the plain sample wins,
-    then the one with the most room before the next sound, then the
-    shortest name: a variant (あ2, か↑) loses to the plain あ, か."""
+    by its hiragana. With `pitch` ("A3"), only the files in a folder of
+    exactly that name: 何かがキレ keeps A4, A4弱 and A4強 side by side, and
+    A4 is not A4弱. Where several claim one syllable, the plain sample
+    wins, then the one with the most room before the next sound, then
+    the shortest name: a variant (あ2, か↑) loses to the plain あ, か."""
     lines: dict[str, list] = {}
     for oto in sorted(root.rglob("oto.ini")):
         for name, alias, offset, cutoff, preutterance in _read_oto(oto):
@@ -330,9 +349,10 @@ def index_bank(root: Path, pitch: str | None = None) -> Bank:
     best: dict[str, tuple] = {}
     glides: dict[tuple[str, str], tuple] = {}
     folders: set[str] = set()
+    wanted = unicodedata.normalize("NFC", pitch).casefold() if pitch else None
     for wav_path in sorted(root.rglob("*.wav")):
         relative = unicodedata.normalize("NFC", wav_path.relative_to(root).as_posix())
-        if pitch and pitch.casefold() not in relative.casefold():
+        if wanted and wanted not in relative.casefold().split("/")[:-1]:
             continue
         for sample, opens in _sounds_in(wav_path, lines.get(_key(wav_path))):
             if not opens or sample.syllable is None:
@@ -386,18 +406,41 @@ def load(path: Path) -> voice_engine.Pcm:
 
 
 def onset(samples: array, rate: int, offset_ms: float = 0.0, end: int | None = None) -> int:
-    """Where the syllable starts: the first sample, from the oto offset
-    on (and before `end`, the next sound in its string), that rises
-    within ONSET_BELOW_PEAK_DB of the syllable's own peak. The offset
-    alone is not trusted -- a bank tuned for singing sets it, but one
-    that left it at 0 would otherwise hand over its leading silence as
-    the syllable."""
+    """Where the syllable starts, between the oto offset and `end` (the
+    next sound in its string): found from the vowel backwards, not from
+    the offset forwards. An offset is only a floor -- one bank leaves it
+    at 0, and 波音リツ's 通常 bank opens every "- " region some 300 ms
+    early, over room noise louder than a soft consonant. Whatever is
+    heard before a gap of silence is not the syllable; so the onset is
+    where the sound that runs unbroken into the vowel begins, refined
+    to its first sample loud enough."""
     begin = min(int(offset_ms / 1000 * rate), len(samples))
     stop = len(samples) if end is None else max(begin, min(end, len(samples)))
-    region = samples[begin:stop]
-    peak = max(max(region), -min(region)) if region else 0
-    gate = max(ONSET_FLOOR, peak * 10 ** (ONSET_BELOW_PEAK_DB / 20))
-    return next((i for i in range(begin, stop) if abs(samples[i]) >= gate), begin)
+    width, hop = max(1, int(ONSET_WINDOW_S * rate)), max(1, int(ONSET_HOP_S * rate))
+    energy = [0.0]                                   # running sum of squares, for any window's level
+    for x in samples[begin:stop]:
+        energy.append(energy[-1] + x * x)
+    starts = range(begin, stop, hop)
+    levels = [math.sqrt((energy[min(i - begin + width, stop - begin)] - energy[i - begin])
+                        / (min(i - begin + width, stop - begin) - (i - begin))) for i in starts]
+    top = max(levels, default=0.0)
+    if top <= 0:
+        return begin
+    arrival = next(k for k, level in enumerate(levels) if level >= top * 10 ** (ONSET_ARRIVAL_DB / 20))
+    gate = max(ONSET_FLOOR, top * 10 ** (ONSET_BELOW_PEAK_DB / 20))
+    if arrival >= 4:
+        noise = sorted(levels[:arrival])[arrival // 2]
+        gate = max(gate, min(noise * 10 ** (ONSET_ABOVE_NOISE_DB / 20), top * 10 ** (ONSET_MOST_BELOW_PEAK_DB / 20)))
+    first, quiet = arrival, 0
+    for k in range(arrival - 1, max(-1, arrival - round(ONSET_MAX_LEAD_S / ONSET_HOP_S) - 1), -1):
+        if levels[k] >= gate:
+            first, quiet = k, 0
+        else:
+            quiet += 1
+            if quiet >= round(ONSET_GAP_S / ONSET_HOP_S):
+                break
+    window = starts[first]
+    return next((i for i in range(window, min(window + width, stop)) if abs(samples[i]) >= gate), window)
 
 
 def _recording(sample: Sample) -> tuple[array, int, int, int]:
