@@ -31,7 +31,7 @@ export default function WhyStep({ name, value, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )

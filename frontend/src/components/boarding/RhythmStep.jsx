@@ -34,7 +34,7 @@ export default function RhythmStep({ value, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
       </div>
     </>
   )

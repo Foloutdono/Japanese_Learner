@@ -17,6 +17,7 @@ import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
 import { useDesk } from '../hooks/useDesk'
+import { EnterKey } from '../components/chrome/DeskKeys'
 
 // ── 試乗 — the test ride (plan 098) ──────────────────────────────
 // The learner's first two flashcards, on the real stage: the same
@@ -238,7 +239,9 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
           {guessed && <p className="ride__done-note">{t.rideGuessed}</p>}
           <div className="ride__done-air" aria-hidden="true" />
           <div className="ride__done-foot">
-            <Continue label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
+            <Continue keys label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
+            {/* 机 (plan 122): Enter goes on, as the key printed says. */}
+            <EnterKey onEnter={() => finish(false)} disabled={busy} />
           </div>
         </div>
       )}

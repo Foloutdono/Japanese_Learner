@@ -51,7 +51,7 @@ export default function NameStep({
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
         {onSignIn && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>}
       </div>
     </>

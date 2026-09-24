@@ -51,7 +51,7 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )
@@ -92,7 +92,7 @@ export function GoalStep({ volumes, level, kana, value, onChange, onContinue }) 
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )

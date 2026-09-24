@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { Continue, BoardLink } from './BoardFrame'
+import { EnterKey } from '../chrome/DeskKeys'
 import { FRONT_LANE, BACK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
@@ -101,7 +102,9 @@ export default function Welcome({ onBoard, onSignIn, boarding = false }) {
         <p className="brd-tagline">{t.brdTagline}</p>
       </div>
       <div className="brd__foot">
-        <Continue label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
+        <Continue keys label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
+        {/* 机 (plan 122): Enter boards. */}
+        <EnterKey onEnter={onBoard} disabled={boarding} />
         <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>
       </div>
     </main>

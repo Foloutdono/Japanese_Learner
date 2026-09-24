@@ -14,6 +14,7 @@ import {
   levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
+import { useBoardKeys } from '../hooks/useBoardKeys'
 import NameStep from '../components/boarding/NameStep'
 import WhyStep from '../components/boarding/WhyStep'
 import { KanaStep, KanaReveal } from '../components/boarding/KanaStep'
@@ -186,6 +187,8 @@ export default function BoardingFlow({
   const watches = useRef(null)
 
   const set = patch => setAnswers(a => ({ ...a, ...patch }))
+  // 机 (plan 122): Enter goes on from anywhere in the live car.
+  useBoardKeys(frameRef, { off: arrival })
 
   useEffect(() => {
     document.title = `${t.brdDocumentTitle} — ${t.appTitle}`

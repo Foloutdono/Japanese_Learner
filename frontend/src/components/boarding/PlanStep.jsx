@@ -134,7 +134,7 @@ export default function PlanStep({ name, motive, rhythm, goal, lines = LINES, fi
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
       </div>
     </>
   )
