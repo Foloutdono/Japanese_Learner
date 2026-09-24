@@ -932,6 +932,10 @@ const translationMode = {
   reviewGood:            'Ce qui marche',
   reviewFix:             'À corriger',
   reviewBetter:          'Version corrigée',
+  // Ce que dit la phrase de l'apprenant, dans sa langue : demandé par
+  // 作文 seul, dessiné par components/study/TutorReview.jsx dès qu'un
+  // avis le porte.
+  reviewMeaning:         'Ce que ça dit',
   reviewGrammarUsed:     'utilisé',
   reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de ta traduction…',

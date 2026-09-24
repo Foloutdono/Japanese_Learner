@@ -11,7 +11,9 @@ import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
-import { FireIcon, CheckIcon, CrossIcon } from '../components/ui/Icons'
+import { FireIcon } from '../components/ui/Icons'
+// The tutor's review, drawn by the component 作文 shares (plan 124).
+import { TutorReview } from '../components/study/TutorReview'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
@@ -406,103 +408,6 @@ export default function TranslationRun({ session }) {
   )
 }
 
-// ── The tutor's review, at a glance ──
-// A verdict, one line, then what worked and what to fix as rows a
-// learner can tell apart without reading: a ✓ in the success pigment,
-// a ✕ in the danger one, the fix under its issue in the quiet
-// register, and the corrected sentence last when there is one. The
-// shape is routes/translation.py's; this only draws it.
-const VERDICT_KEY = {
-  correct: 'reviewCorrect', acceptable: 'reviewAcceptable',
-  partial: 'reviewPartial', incorrect: 'reviewIncorrect',
-}
-
-function Review({ review, grammar, t }) {
-  const verdict = VERDICT_KEY[review.verdict] ? review.verdict : 'partial'
-  const good = review.good ?? []
-  const fix = review.fix ?? []
-  return (
-    <div className="rvw">
-      <div className="rvw__head">
-        <span className={`type-badge rvw__verdict rvw__verdict--${verdict}`}>{t[VERDICT_KEY[verdict]]}</span>
-        {grammar && typeof review.grammar_used === 'boolean' && (
-          <span className="type-badge">
-            <span lang="ja">{grammar}</span> · {review.grammar_used ? t.reviewGrammarUsed : t.reviewGrammarMissed}
-          </span>
-        )}
-        {review.summary && <span className="rvw__summary">{review.summary}</span>}
-      </div>
-      {good.length > 0 && (
-        <div className="rvw__list" aria-label={t.reviewGood}>
-          {good.map((item, i) => (
-            <div key={i} className="rvw__row">
-              <span className="rvw__mark rvw__mark--ok" aria-hidden="true"><CheckIcon size={11} /></span>
-              <span className="rvw__item">{item}</span>
-            </div>
-          ))}
-        </div>
-      )}
-      {fix.length > 0 && (
-        <div className="rvw__list" aria-label={t.reviewFix}>
-          {fix.map((item, i) => (
-            <div key={i} className="rvw__row">
-              <span className="rvw__mark rvw__mark--x" aria-hidden="true"><CrossIcon size={11} /></span>
-              <span className="rvw__item">{item.issue}</span>
-              {item.fix && <span className="rvw__fix">{item.fix}</span>}
-            </div>
-          ))}
-        </div>
-      )}
-      {review.better && (
-        <>
-          <span className="prose__label">{t.reviewBetter}</span>
-          <Corrected
-            parts={review.better_parts}
-            text={review.better}
-            romaji={review.better_romaji}
-          />
-        </>
-      )}
-    </div>
-  )
-}
-
-// ── The corrected sentence, readable ──
-// The learner's own sentence with the fixes applied, and until
-// 2026-09-22 it was one bare line of Japanese: no readings on the
-// kanji, no romaji, and no sign of which part of it was the fix. A
-// learner who cannot read 新聞 cannot read the correction either, and
-// one who can was left diffing two sentences by eye.
-//
-// So it is drawn the way every other sentence in the app is: furigana
-// over the kanji, the romaji under the line, and what the tutor
-// actually changed picked out in it. All three come from
-// routes/translation.py (`better_parts`, `better_romaji`) -- the marks
-// are a character diff against what the learner wrote, not a claim the
-// model made about its own edits.
-//
-// `text` is the fallback: a backend that does not send the parts yet
-// (the two deploy separately) prints exactly the line it used to.
-function Corrected({ parts, text, romaji }) {
-  return (
-    <div className="rvw__corrected">
-      <span className="rvw__better" lang="ja">
-        {parts?.length
-          ? parts.map((part, i) => {
-            const body = part.reading
-              ? <ruby>{part.text}<rt>{part.reading}</rt></ruby>
-              : part.text
-            return part.highlight
-              ? <mark key={i} className="rvw__fixed">{body}</mark>
-              : <span key={i}>{body}</span>
-          })
-          : text}
-      </span>
-      {romaji && <span className="prose__romaji">{romaji}</span>}
-    </div>
-  )
-}
-
 function Streak({ streak, t }) {
   if (streak < 2) return null
   return (
@@ -652,7 +557,7 @@ function SessionView({
             <span className="prose__label">{t.aiAnalysis}</span>
             {analysisLoading && <Loading inline copy={t.analyzingTranslation} />}
             {!analysisLoading && analysis?.review && (
-              <Review review={analysis.review} grammar={data.grammar} t={t} />
+              <TutorReview review={analysis.review} grammar={data.grammar} t={t} />
             )}
             {!analysisLoading && analysis && !analysis.review && (
               <span className="prose__ai">{analysis.analysis}</span>
