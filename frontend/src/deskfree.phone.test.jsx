@@ -1131,3 +1131,28 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
     }
   })
 })
+
+// ── plan 123, P14 — the kept dialogs stay a phone's sheets ──
+// The desk opens a confirm on its way out, sets the actions in a row
+// and draws a ✕ where the body has no way out; a phone's sheet opens
+// on its first control, stacks its actions under the thumb, and is
+// pushed down to close.
+describe('the kept dialogs (plan 123, P14)', () => {
+  it('keep the phone\'s first control, stacked actions and no ✕', async () => {
+    const { Sheet } = await import('./components/chrome/Sheet')
+    await render(
+      <LangProvider>
+        <Sheet open onClose={() => {}} jp="Voyage" cap="Delete" initialFocus=".btn-secondary" dismiss>
+          <button type="button" className="btn-primary">Delete</button>
+          <button type="button" className="btn-secondary">Cancel</button>
+        </Sheet>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.activeElement.textContent).toBe('Delete')
+    expect(document.querySelector('.desk-sheet__close')).toBeNull()
+    expect(getComputedStyle(document.querySelector('.sheet')).flexDirection).toBe('column')
+    const [a, b] = [...document.querySelectorAll('.sheet button')].map(el => el.getBoundingClientRect())
+    expect(b.top).toBeGreaterThanOrEqual(a.bottom)
+  })
+})

@@ -82,6 +82,15 @@ export default function DecksScreen({ session }) {
       .then(r => r.json())
       .then(deck => {
         if (deck?.error || deck?.detail) return
+        // 机 (plan 123): the desk keeps the new deck's dialog because
+        // it ends by leaving the shelf for the deck it made -- so it
+        // does: the deck's page, its card form open in the side.
+        if (desk) {
+          setCreating(false)
+          setNewName('')
+          navigate(`/learn/decks/${deck.id}`, { state: { deck: { ...deck, card_count: 0, role: deck.role ?? 'owner' }, add: true } })
+          return
+        }
         setDecks(prev => [{ ...deck, card_count: 0 }, ...prev])
         setNewName('')
         setCreating(false)
@@ -274,7 +283,7 @@ export default function DecksScreen({ session }) {
         </div>
       )}
       {desk && (
-        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck}>
+        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
           {createForm}
         </Sheet>
       )}

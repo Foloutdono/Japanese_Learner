@@ -29,7 +29,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = 
   }
 
   return (
-    <Sheet open onClose={onClose} jp={word} cap={t.chooseDeck} label={t.chooseDeck}>
+    <Sheet open onClose={onClose} jp={word} cap={t.chooseDeck} label={t.chooseDeck} dismiss>
       <div className="surface picker">
         {decks.length === 0 && (
           <p className="hint picker__empty">{t.noDeckOfType}</p>

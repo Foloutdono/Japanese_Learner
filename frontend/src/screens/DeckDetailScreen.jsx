@@ -516,6 +516,18 @@ export default function DeckDetailScreen({ session }) {
   // one column (plans 115, 120): opening one gives the column to it.
   function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
 
+  // 机 (plan 123): a deck just made on the desk arrives with `add`, and
+  // its first card's form stands open in the side. The flag is spent at
+  // once, so Back and Forward onto this entry do not open it again.
+  const arrivedToAdd = desk && Boolean(state?.add)
+  useEffect(() => {
+    if (!arrivedToAdd || loading || isFollower || cards.length > 0) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- opening the form is the arrival's one instruction, carried in router state and read once the cards have loaded.
+    startAdd()
+    navigate(`/learn/decks/${deck_id}`, { replace: true, state: { deck: state.deck } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrivedToAdd, loading])
+
   function startEdit(card) {
     setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
     setNotes(card.notes || '')
@@ -1017,7 +1029,7 @@ export default function DeckDetailScreen({ session }) {
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine}>
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine} initialFocus=".btn-secondary">
         <span className="sheet__q">{t.libraryMakeMineConfirm}</span>
         <button type="button" className="btn-primary" disabled={busy} onClick={makeItMine}>
           {t.libraryMakeMine}
@@ -1029,7 +1041,7 @@ export default function DeckDetailScreen({ session }) {
 
       <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
         jp={deck?.name ?? t.deckFallbackTitle}
-        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow}>
+        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow} initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
@@ -1072,7 +1084,7 @@ export default function DeckDetailScreen({ session }) {
           deletion asks in a dialog of its own, as the three other
           irreversibles here do (plan 120). */}
       <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck}>
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck} initialFocus=".btn-secondary">
         <span className="sheet__q">
           {deck?.followers > 0
             ? t.libraryDeleteFollowed(deck.followers)
@@ -1094,6 +1106,7 @@ export default function DeckDetailScreen({ session }) {
         onClose={() => setConfirmingDelete(false)}
         jp={t.cardsCount(selected.size)}
         cap={t.delete}
+        initialFocus=".btn-secondary"
       >
         <span className="sheet__q">{t.deleteCardsConfirm}</span>
         <button type="button" className="btn-primary btn-primary--danger" onClick={deleteSelected}>

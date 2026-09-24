@@ -1,6 +1,9 @@
 import { createPortal } from 'react-dom'
 import { useDialog } from '../../hooks/useDialog'
 import { useSheetDrag } from '../../hooks/useSheetDrag'
+import { useDesk } from '../../hooks/useDesk'
+import { useLang } from '../../LangContext'
+import { CrossIcon } from '../ui/Icons'
 
 // ── The bottom sheet (plan 068) ───────────────────────────────
 // A scrim and a panel rising from the bottom edge: the status sheet,
@@ -22,8 +25,23 @@ import { useSheetDrag } from '../../hooks/useSheetDrag'
 // Escape closes it alone -- not the balance too, nor, through the
 // run-out's way out, the run under both (useDialog's `capture`; plan
 // 123).
-function Panel({ onClose, jp, cap, sumi, label, children, className, over = false }) {
-  const ref = useDialog(onClose, { capture: over })
+//
+// Two for the desk, where a sheet is a dialog in the middle and the
+// hands are on the keys (plan 123):
+//   `initialFocus`  a selector for the control that takes the focus on
+//                   opening -- a confirm's Cancel, the run-out's way
+//                   back -- so an Enter held or pressed twice does not
+//                   delete a deck. A phone lands on the first control.
+//   `dismiss`       a ✕ for a sheet whose body holds no way out (the
+//                   pass's back, the deck picker, a report, a new deck):
+//                   the scrim was a mouse's only exit. Last in the tab
+//                   order, drawn in the corner.
+function Panel({ onClose, jp, cap, sumi, label, children, className, over = false, initialFocus = null, dismiss = false }) {
+  const desk = useDesk()
+  // Only the desk's ✕ reads it: a sheet can stand outside a language
+  // provider (a hook's own test), and must not need one to open.
+  const t = useLang()?.t
+  const ref = useDialog(onClose, { capture: over, focus: desk && initialFocus ? initialFocus : 'first' })
   const drag = useSheetDrag(ref, onClose)
   const classes = ['sheet', sumi ? 'sheet--sumi' : '', drag.dragging ? 'sheet--dragging' : '', className]
     .filter(Boolean).join(' ')
@@ -45,6 +63,11 @@ function Panel({ onClose, jp, cap, sumi, label, children, className, over = fals
           </div>
         )}
         {children}
+        {desk && dismiss && (
+          <button type="button" className="import-header__close desk-sheet__close" onClick={onClose} aria-label={t?.close} title={`${t?.close} (Esc)`}>
+            <CrossIcon size={16} />
+          </button>
+        )}
       </div>
     </div>
   )

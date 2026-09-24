@@ -143,7 +143,7 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
       )}
 
       <Sheet open={reportOpen} onClose={() => setReport(false)} label={t.libraryReport}
-        cap={t.libraryReport}>
+        cap={t.libraryReport} dismiss>
         <p className="lib-note">{t.libraryReportNote}</p>
         <div className="type-list" role="group" aria-label={t.libraryReport}>
           {REASONS.map(([reason, key]) => (

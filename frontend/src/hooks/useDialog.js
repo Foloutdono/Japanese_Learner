@@ -58,7 +58,11 @@ export function useDialog(onClose, { capture = false, focus = 'first' } = {}) {
       // filled one would otherwise open with a ring on a button before
       // anyone has pressed a key (the guide, plan 100). Tab still
       // reaches the controls in order; the trap below is unchanged.
-      const first = focus === 'panel' ? null : node.querySelector(FOCUSABLE)
+      // Any other string is a selector for the control to land on -- a
+      // confirm's Cancel on the desk, where Enter is under the hand and
+      // a second press should not act (Sheet's `initialFocus`, plan 123).
+      const named = focus !== 'panel' && focus !== 'first' ? node.querySelector(focus) : null
+      const first = focus === 'panel' ? null : named ?? node.querySelector(FOCUSABLE)
       // Fall back to the panel itself so focus lands *somewhere* inside
       // even in a dialog that is still loading and has no controls yet.
       if (first) {

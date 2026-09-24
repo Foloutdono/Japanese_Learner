@@ -261,7 +261,7 @@ function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
   const up = preview.direction !== 'down'
   const title = up ? t.levelUpTitle(to) : t.levelDownTitle(to)
   return (
-    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet">
+    <Sheet open onClose={onClose} jp={title} label={title} className="lvl-sheet" initialFocus=".btn-secondary">
       <p className="lvl-sheet__body">
         <Emphasized text={up ? t.levelUpBody(to, preview.spreadWeeks ?? 6) : t.levelDownBody(to)} strongClassName="lvl-sheet__strong" />
       </p>

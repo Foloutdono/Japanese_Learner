@@ -21859,6 +21859,7 @@ a.slip__act { text-decoration: none; }
     inset: 0;
     width: var(--card-w);
     height: fit-content;
+    flex-flow: row wrap;
     max-height: calc(100dvh - 2 * var(--sp-8));
     margin: auto;
     padding: var(--sp-5);
@@ -21870,6 +21871,48 @@ a.slip__act { text-decoration: none; }
      here so the sumi sheet keeps its own material's edge. */
   .sheet--sumi { border-bottom-color: color-mix(in srgb, var(--pass-ink) 45%, transparent); }
   .sheet__handle { display: none; }
+  /* A dialog's actions share one row at its foot (plan 123), in the
+     order they are written, which is the order Tab walks: a one-line
+     question was a 640x190 panel of 608px bars stacked two and three
+     high. Everything else keeps a row of its own. */
+  .sheet > :not(.btn-primary, .btn-secondary, .btn-depart) { flex: 1 1 100%; }
+  .sheet > :is(.btn-primary, .btn-secondary, .btn-depart) { flex: 1 1 0; }
+  /* The way out of a dialog whose body has none (Sheet's `dismiss`):
+     the dock's ✕, in the corner, the head kept clear of it. */
+  .desk-sheet__close {
+    position: absolute;
+    top: var(--sp-4);
+    right: var(--sp-4);
+  }
+  .sheet:has(> .desk-sheet__close) > .sheet__head { padding-inline-end: var(--sp-8); }
+  /* The pass's two doors in the rail's foot -- the balance and the
+     pass's back -- stand beside the foot at a column's width, the way
+     the desk draws the pass's objects everywhere else, instead of 640px
+     in the window's middle a long reach from the pass that opened them.
+     Still modal; only placed. Opened from a run's pass, where there is
+     no rail, they stay centred. */
+  :root[data-chrome="shell"] .status-sheet,
+  :root[data-chrome="shell"] .sheet:has(> .balance) {
+    inset: auto auto var(--sp-5) calc(var(--desk-rail-w) + var(--sp-3));
+    width: var(--desk-side-w);
+    margin: 0;
+  }
+  /* At a column's width a row of two actions wraps their labels: they
+     stack, as they do at a phone's, which this width is. */
+  :root[data-chrome="shell"] .sheet:has(> .balance) > :is(.btn-primary, .btn-secondary, .btn-depart) { flex-basis: 100%; }
+  /* The CSV import (components/decks/ImportCardsMenu) is its own
+     overlay, not a sheet; it takes the desk dialog's width, material,
+     scrim and arrival. Centred by auto margins, which fall to nothing
+     when the list makes it taller than the window, so its top is never
+     out of reach. */
+  .import-overlay { background: rgba(0, 0, 0, 0.55); }
+  .import-modal {
+    max-width: var(--card-w);
+    margin-block: auto;
+    border-radius: var(--r-panel);
+    background: var(--surface);
+    animation: arrive-soft 0.2s linear;
+  }
 
   /* ── 鍵 — the keys, on the desk ──
      A run already answers to the keyboard — the digits rate, the digits
