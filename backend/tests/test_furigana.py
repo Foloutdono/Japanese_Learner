@@ -119,7 +119,7 @@ class AlignmentTests(unittest.TestCase):
         )
 
     def test_a_packed_suru_is_not_furigana(self) -> None:
-        # The deck writes 練習 as れんしゅうする and 入学 as にゅうがく・する:
+        # The deck writes 練習 as れんしゅうする and wrote 入学 as にゅうがく・する:
         # する is not written, so nothing is printed over it.
         for reading in ("だいがくする", "だいがく・する"):
             self.assertEqual(
@@ -223,7 +223,7 @@ class DeckAlignmentTests(unittest.TestCase):
                     continue
                 parts = align_deck(word, kana)
                 self.assertEqual("".join(p["text"] for p in parts), word, word)
-                # Less the する the deck packs onto 36 readings (練習
+                # Less the する the deck packs onto three readings (練習
                 # れんしゅうする), which the written form does not spell.
                 rebuilt = "".join(p.get("reading") or p["text"] for p in parts)
                 self.assertEqual(rebuilt, written_reading(word, kana), f"{word} / {kana} -> {parts}")

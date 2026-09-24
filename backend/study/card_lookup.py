@@ -559,9 +559,9 @@ def _index_vocab_by_lemma():
     candidate lists would have handed ご馳走 to _pick_best_candidate's
     lowest-level tie-break, repointing the word under a learner's SRS
     history. Plan 112 answered the question this index could not -- the
-    deck holds each of them once now -- and its fourth pass below is
-    the one that appends to a claimed key, because what it appends is
-    the card that replaced one already there.
+    deck holds each of them once now -- and the fourth pass
+    (_fold_into_lemma_index) is the one that appends to a claimed key,
+    because what it appends is the card that replaced one already there.
     """
     index = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
@@ -614,21 +614,44 @@ def _index_vocab_by_lemma():
                 lemma = morphemes[0].lemma
                 if lemma != word and (level, entry) not in index.get(lemma, []):
                     index.setdefault(lemma, []).append((level, entry))
+    return index
 
-    # Fourth pass (plan 112): a kanji spelling folded into another card.
-    # The N1 美味しい went into the N5 おいしい and the N5 終る became
-    # 終わる, but a page still writes both, and a token whose lemma is
-    # 美味しい used to find a card of that spelling. The card that took
-    # the word in stands under the key now, exactly where the card it
-    # replaced stood -- beside whatever else the key holds (身体 read
-    # しんたい keeps its place beside 体 for 身体 read からだ), so the
-    # candidates a reading chooses among are the ones it always had.
+
+def _fold_into_lemma_index(index) -> dict[tuple[str, str], frozenset[str]]:
+    """The lemma index's fourth pass (plan 112): a kanji spelling folded
+    into another card. The N1 美味しい went into the N5 おいしい and the N5
+    終る became 終わる, but a page still writes both, and a token whose
+    lemma is 美味しい used to find a card of that spelling. The card that
+    took the word in stands under the key now, exactly where the card it
+    replaced stood -- beside whatever else the key holds (身体 read
+    しんたい keeps its place beside 体 for 身体 read からだ).
+
+    Returns (key, raw_id) -> the readings the fold stands for, for each
+    card this pass alone put under a key, and resolve_lemma admits such
+    a card only for one of those readings. A folded spelling is that
+    word READ THAT WAY, and a written form is often another word read
+    another way: 何時 read いつ is the いつ card, 何時 read なんじ is "what
+    time"; 二十 read はたち is 二十歳, read にじゅう it is twenty; 彼の
+    read あの is the あの card, 彼 + の read かれの is "his", in 44 of the
+    app's own sentences. Before the reading was asked, the lowest-level
+    candidate won every one of them. A card the key held before the fold
+    (天皇 folding すめらぎ into 天皇 read てんのう) is not listed: the
+    fold took nothing there that the card did not already answer for.
+    """
+    folded: dict[tuple[str, str], set[str]] = {}
     for level, vocab_list in VOCAB_BY_LEVEL.items():
         for entry in vocab_list:
-            for kanji, _ in FOLDED_FORMS.get(vocab_to_id(entry, level), ()):
-                if kanji and (level, entry) not in index.get(kanji, []):
+            raw_id = vocab_to_id(entry, level)
+            for kanji, kana in FOLDED_FORMS.get(raw_id, ()):
+                if not kanji:
+                    continue
+                if (level, entry) not in index.get(kanji, []):
                     index.setdefault(kanji, []).append((level, entry))
-    return index
+                elif (kanji, raw_id) not in folded:
+                    continue
+                readings = {morphology.kata_to_hira(r) for r in _reading_variants(kana)}
+                folded.setdefault((kanji, raw_id), set()).update(readings)
+    return {key: frozenset(readings) for key, readings in folded.items()}
 
 
 def _index_vocab_by_kana():
@@ -679,7 +702,16 @@ def _index_vocab_by_kana():
 
 
 _VOCAB_BY_LEMMA = _index_vocab_by_lemma()
+_FOLDED_READINGS = _fold_into_lemma_index(_VOCAB_BY_LEMMA)
 _VOCAB_BY_KANA = _index_vocab_by_kana()
+
+
+def _fold_admits(lemma: str, level: str, entry: dict, reading: str) -> bool:
+    """Whether a lemma-index candidate may answer for a token read
+    `reading` (hiragana): always, unless only a folded spelling put it
+    under `lemma`, and then only for a reading that fold stands for."""
+    folded = _FOLDED_READINGS.get((lemma, vocab_to_id(entry, level)))
+    return folded is None or reading in folded
 
 
 def resolve_lemma(lemma: str, reading: str, surface: str = ""):
@@ -694,8 +726,16 @@ def resolve_lemma(lemma: str, reading: str, surface: str = ""):
     the reading cannot tell them apart. The page can: a token written 帰り
     is 帰る. Where any candidate shares the surface's first kanji, only
     those stay; where none does (the token was written in kana), the
-    reading and the level decide as before."""
+    reading and the level decide as before.
+
+    A card that stands under `lemma` only by a folded spelling is a
+    candidate only when `reading` is the one the fold stands for (see
+    _fold_into_lemma_index), so an empty reading never reaches it."""
     candidates = _VOCAB_BY_LEMMA.get(lemma)
+    if not candidates:
+        return None
+    reading_hira = morphology.kata_to_hira(reading) if reading else ""
+    candidates = [c for c in candidates if _fold_admits(lemma, *c, reading_hira)]
     if not candidates:
         return None
     if surface and is_kanji(surface[0]):
@@ -878,11 +918,18 @@ def _find_segments_morphological(text: str):
         # the legacy scan): catches deck entries MeCab tokenizes as more
         # than one morpheme, which in practice is just date/count
         # compounds (二日 = 二 + 日) — see _index_vocab_by_lemma's
-        # numeral-variant keys.
+        # numeral-variant keys. The two readings joined pick between
+        # entries sharing the written form, as resolve_compound's do, and
+        # let a folded spelling merge only read as it was folded (再来 +
+        # 年 is さ来年; 何 + 時 read なんじ is not いつ). Across a particle
+        # there is no reading, so no fold merges there: 彼 + の and 所 +
+        # で spell folds (あの, ところで), and are "his" and "at the
+        # place" far more often than either.
         if i + 1 < len(morphemes):
             m2 = morphemes[i + 1]
             merged = m.surface + m2.surface
-            hit = resolve_lemma(merged, "")
+            crosses = "particle" in (m.pos, m2.pos)
+            hit = resolve_lemma(merged, "" if crosses else m.reading + m2.reading)
             if hit:
                 level, entry, raw_id = hit
                 vocab_hits.append((m.start, m2.end, level, entry, raw_id))

@@ -149,6 +149,13 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertIsNone(self._kind_of("父"))
 
     def test_ratchets_never_rise(self) -> None:
+        # Raised once (2026-09-24), by what a lookup fix uncovered rather
+        # than lost: a folded spelling now resolves only read as folded
+        # (card_lookup._fold_into_lemma_index), so three misfires stopped
+        # counting as matches. 何時 read なんじ had badged いつ and is a
+        # real gap, no card teaches "what time" (absent +1); 二十 read
+        # にじゅう had badged はたち and is a numeral (unmatched +1); 如何
+        # read いかん had badged いかが and is IGNORED_LEMMAS' now.
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 153)
-        self.assertLessEqual(c["unmatched_lemmas"], 166)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 154)
+        self.assertLessEqual(c["unmatched_lemmas"], 168)

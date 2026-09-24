@@ -76,9 +76,12 @@ _RANK = {level: i for i, level in enumerate(LEVELS)}
 #             card is 遊ぶ and the point is 使役形
 #   書き直す, 考え直す   instances of 〜直す (an N4 point); やり直す is
 #             a card of its own because it is a word of its own
+#   如何      the いかん of 〜いかんによらず (an N1 point); it counted as
+#             the いかが card until a folded spelling had to be read as
+#             folded (card_lookup._fold_into_lemma_index)
 IGNORED_LEMMAS = frozenset({
     "為る", "有る", "居る", "成る", "来る", "言う", "此の", "其の", "彼の",
-    "御座る", "知れる", "出でる", "遊ばす", "書き直す", "考え直す",
+    "御座る", "知れる", "出でる", "遊ばす", "書き直す", "考え直す", "如何",
 })
 
 # A compound numeral (三十, 三千, 二百) composes from the digit cards the

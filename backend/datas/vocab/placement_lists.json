@@ -470,13 +470,6 @@
    "rank": 1698
   },
   {
-   "key": "賛成::さんせい",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "approval, agreement, support, favour",
-   "rank": 1714
-  },
-  {
    "key": "是非::ぜひ",
    "level": "N3",
    "lists_say": "N4",
@@ -1261,13 +1254,6 @@
    "rank": 5999
   },
   {
-   "key": "四::し",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "four",
-   "rank": 6013
-  },
-  {
    "key": "反省::はんせい",
    "level": "N2",
    "lists_say": "N3",
@@ -1471,13 +1457,6 @@
    "rank": 7193
   },
   {
-   "key": "九::きゅう",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "nine",
-   "rank": 7255
-  },
-  {
    "key": "柵::さく",
    "level": "N1",
    "lists_say": "N3",
@@ -1595,13 +1574,6 @@
    "lists_say": "N3",
    "meaning": "packing, wrapping",
    "rank": 8288
-  },
-  {
-   "key": "輸入::ゆにゅう",
-   "level": "N3",
-   "lists_say": "N4",
-   "meaning": "importation, import, introduction",
-   "rank": 8295
   },
   {
    "key": "倒産::とうさん",
@@ -2731,13 +2703,6 @@
    "rank": null
   },
   {
-   "key": "七::しち",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "seven",
-   "rank": null
-  },
-  {
    "key": "背::せい",
    "level": "N3",
    "lists_say": "N5",
@@ -2749,13 +2714,6 @@
    "level": "N3",
    "lists_say": "N4",
    "meaning": "zeal, enthusiasm",
-   "rank": null
-  },
-  {
-   "key": "九::く",
-   "level": "N3",
-   "lists_say": "N5",
-   "meaning": "nine",
    "rank": null
   },
   {
@@ -6550,6 +6508,12 @@
    "meaning": "knowing"
   },
   {
+   "lemma": "貴女",
+   "reading": "きじょ",
+   "rank": 1600,
+   "meaning": "you"
+  },
+  {
    "lemma": "戦士",
    "reading": "せんし",
    "rank": 1610,
@@ -9358,6 +9322,12 @@
    "meaning": "postponement"
   },
   {
+   "lemma": "其方",
+   "reading": "そなた",
+   "rank": 4456,
+   "meaning": "there"
+  },
+  {
    "lemma": "生き残り",
    "reading": "いきのこり",
    "rank": 4460,
@@ -9902,6 +9872,12 @@
    "reading": "わくわく",
    "rank": 4948,
    "meaning": "to be excited"
+  },
+  {
+   "lemma": "彼方",
+   "reading": "かなた",
+   "rank": 4949,
+   "meaning": "beyond"
   },
   {
    "lemma": "中隊",
@@ -10604,12 +10580,6 @@
    "reading": "やじん",
    "rank": 5438,
    "meaning": "rustic"
-  },
-  {
-   "lemma": "預言",
-   "reading": "よげん",
-   "rank": 5439,
-   "meaning": "(religious) prophecy"
   },
   {
    "lemma": "顔色",

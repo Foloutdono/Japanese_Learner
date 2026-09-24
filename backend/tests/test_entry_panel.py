@@ -98,11 +98,17 @@ def test_a_character_the_aligner_cannot_isolate_keeps_its_row(client):
     # the aligner keeps it one run and neither half can be given a
     # reading. The row still prints -- the door it opens is the point --
     # with no reading rather than an invented one. (This was 生活 until
-    # the aligner learned to drop the する the deck packs onto its
-    # reading, せいかつ・する, which was the only thing stopping it.)
+    # the aligner learned to drop the する the deck packed onto its
+    # reading, せいかつ・する, which was the only thing stopping it; the
+    # deck no longer packs it either.)
     row = _one(client, "今朝", "vocab", lambda e: e["kanji"] == "今朝")
     assert [p["char"] for p in row["kanji_parts"]] == ["今", "朝"]
     assert all(p["reading"] is None for p in row["kanji_parts"])
+
+
+def test_a_reading_without_residue_lights_each_kanji(client):
+    row = _one(client, "生活", "vocab", lambda e: e["kanji"] == "生活")
+    assert [(p["char"], p["reading"]) for p in row["kanji_parts"]] == [("生", "せい"), ("活", "かつ")]
 
 
 def test_a_kana_only_word_is_written_with_no_kanji(client):

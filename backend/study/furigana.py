@@ -50,8 +50,10 @@ is picked out only where it has a part of its own. So:
               とき|どき); it is not a kanji to look up, but it belongs
               inside a kanji run rather than being a kana anchor that
               never appears in the reading
-  する        the deck packs a suru-verb's する into 36 readings (練習
-              れんしゅうする, 入学 にゅうがく・する); furigana annotates
+  する        the deck packs a suru-verb's する into three readings (練習
+              れんしゅうする, 散歩, 勉強; the ・する ones, 入学
+              にゅうがく・する among them, until the deck dropped
+              theirs); furigana annotates
               what is written, so written_reading() drops it first
   the pool    align_deck() falls back to KANJIDIC2 for a character the
               deck does not teach -- 171 jōyō kanji, 的・無・可・身
@@ -329,7 +331,8 @@ def _kanji_parts(run: str, slice_: str, lookup) -> list[dict]:
 
 
 # The suru-verb marker the deck packs into a reading its written form
-# does not carry: 練習 れんしゅうする, 入学 にゅうがく・する.
+# does not carry: 練習 れんしゅうする, and 入学 にゅうがく・する until the
+# deck dropped it.
 _SURU_MARKERS = ("・する", "する")
 
 
