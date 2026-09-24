@@ -21,7 +21,9 @@ re-import cannot bring any of the three back unnoticed.
 import re
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.vocab_renames import FOLDED_FORMS, KEY_MOVES, MOVES, NOT_FOLDED, _fields_of
+from content.vocab_renames import (
+    FOLDED_FORMS, KEY_MOVES, MOVES, NOT_FOLDED, RETIRED, RETIRED_KEYS, _fields_of,
+)
 from study.modes import MODES, eligible_for
 
 LEVELS = ("N5", "N4", "N3", "N2", "N1")
@@ -79,10 +81,10 @@ def test_the_reading_field_holds_a_reading():
 
 
 # Kana, the long-vowel mark and the kana iteration marks, and "/", the
-# one separator the deck joins readings with (plan 104). "、" is the N5
-# より、ほう's, residue with no card to fold into (docs/vocab-deck-review
-# .md); it goes when that card does.
-_READING = re.compile(r"[ぁ-ゖゝゞァ-ヺーヽヾ/、]+")
+# one separator the deck joins readings with (plan 104). "、" was allowed
+# for the N5 より、ほう alone, residue with no card to fold into; it left
+# as the first RETIRED id, and "、" left with it.
+_READING = re.compile(r"[ぁ-ゖゝゞァ-ヺーヽヾ/]+")
 
 
 def test_the_reading_field_is_written_in_kana():
@@ -184,6 +186,39 @@ def test_renames_never_chain():
     assert set(MOVES.values()) & set(MOVES) == set()
 
 
+# ── Retired ids: a card that left with nowhere to go ─────────
+
+
+def test_no_retired_id_is_still_served():
+    """The migration drops a retired id's schedule; one still in the
+    deck would lose a live card's progress on every run."""
+    assert set(RETIRED) & _served() == set()
+
+
+def test_an_id_is_moved_or_retired_never_both():
+    """Two fates for one id and the migration would carry the rows to
+    the target and then look for them to drop -- or the reverse, in
+    whichever order it ran."""
+    assert set(RETIRED) & set(MOVES) == set()
+
+
+def test_every_retirement_says_why():
+    """The report prints the reason beside every learner's rows it is
+    about to drop; an empty one is a retirement nobody can review."""
+    assert [raw for raw, why in RETIRED.items() if not why.strip()] == []
+
+
+def test_a_retired_key_is_no_card_the_deck_still_serves():
+    """A deck key is level-free: retire vocab_N3_X_y while vocab_N5_X_y
+    is served, and the pin on "X::y" still means the N5 card. Deleting
+    it would take a live pin, so a key some served card carries is never
+    a retired key -- nor one a MOVE renames, which would be two fates
+    for one pin."""
+    served_keys = {f"{e['kanji']}::{e['kana']}" for _, e in _entries()}
+    assert RETIRED_KEYS & served_keys == set()
+    assert RETIRED_KEYS & set(KEY_MOVES) == set()
+
+
 def test_a_card_that_left_as_no_word_is_not_folded_into_its_target():
     """頃 read けい carries its rows onto 頃 read ころ, but is not another
     spelling of it: in FOLDED_FORMS the dictionary would answer けい
@@ -218,7 +253,8 @@ def test_every_id_the_last_snapshot_served_is_served_or_moved():
     from scripts.audit_vocab_deck import snapshot_ids
     snapshot = set(snapshot_ids())
     served = _served()
-    assert snapshot - served - set(MOVES) == set(), "ids left the deck with no MOVES line"
+    assert snapshot - served - set(MOVES) - set(RETIRED) == set(), \
+        "ids left the deck with no MOVES or RETIRED line"
     assert served - snapshot == set(), "new ids: re-run audit_vocab_deck --write-snapshot"
 
 

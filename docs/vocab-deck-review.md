@@ -665,6 +665,7 @@ Left, and why:
   there is no mechanism for retiring an id with no target. The N3 より
   is glossed "twist, ply" (撚り), which is what the N3 list itself says
   (elzup's `n3.csv`). That is a content-audit question of its own.
+  *Retired the same day, and the mechanism built for it; see below.*
 - **The reading field's other residue**: 四 `し / よん`, 九 and 七 join
   two readings with " / " (plan 106 fixed 十's space), and 31 N4 cards
   still carry `・する` in the reading (plan 106 took the する out of
@@ -707,6 +708,50 @@ no ・, 106's 掃除 shape exactly: 練習 れんしゅうする, 散歩 さん�
 needs the same `MOVES` line and a check for a noun card above it.
 `furigana.written_reading` (#175) already drops the する, so the
 entry panel is not hurt meanwhile.
+
+### より、ほう retired, and a way to retire (2026-09-24)
+
+A `MOVES` line needs a card to carry the rows to, and the N5 `::より、ほう`
+had none. It is the grammar point 〜より〜のほうが, which the N5 grammar
+deck teaches, exported as a vocab card. So `vocab_renames.RETIRED` is
+new: an id that leaves the deck with no target, mapped to the reason
+the migration prints. It is for residue that was never a word. A real
+word always has a card to move to.
+
+What `migrate_vocab_ids` does with a retired id, and why:
+
+- **Drops the schedule** (`card_modes`, then `cards`), the deck rows,
+  and the pins and favourites on its deck key (`RETIRED_KEYS`). Leaving
+  them was not harmless. The due counts and queues already skip content
+  that is gone (`daily_queue.lanes`), but a deck's `card_count`, its
+  modes, its publish check and the free-tier limit all COUNT
+  `deck_cards` raw. A deck therefore said "N cards" and listed N−1. A
+  schedule left behind also drove one phantom "next review" countdown,
+  and it put a "—" row in the report's weakest list.
+- **Keeps `review_log` and `card_first_review`.** XP, the level, the
+  streak, the 番付 standing, the daily-new budget and the journey's
+  item counts are all sums over them. A learner who reviewed the card
+  keeps what they earned, which is `prune_withdrawn`'s rule for a
+  withdrawn deck's followers.
+- A second run finds the id again in the history it keeps, reports
+  "history only, nothing to drop", and drops nothing.
+
+Grammar's `RETIRED` (plan 087) leaves every row in place and only
+reports. Its four retired points have the same deck-count leak, and
+this is the shape a fix for them would take.
+
+Held by `test_vocab_deck`: no retired id is served, none is also in
+`MOVES`, every retirement says why, and no retired key is a key a
+served card still carries (a deck key is level-free, so deleting such a
+pin would take a live card's). The served-id guard now accepts an id
+that left through `RETIRED`. `test_migrate_vocab_ids` holds the fate
+itself with a probe card, and a probe learner seeded on the real id went
+through a dry run, `--yes` and a second run as described above.
+
+The card, its French line, its snapshot id and its frequency key are
+gone, and the placement lists come out unchanged. "、" leaves
+`test_the_reading_field_is_written_in_kana`'s alphabet with it.
+8,050 → 8,049 cards.
 
 ## Order and dependencies
 
