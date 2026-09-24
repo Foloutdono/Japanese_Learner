@@ -121,13 +121,13 @@ describe('ROUTES against App.jsx', () => {
   })
 
   it('has no pattern App.jsx does not declare', () => {
-    // The four sentence sections are generated from SENTENCE_SECTIONS
+    // The five sentence sections are generated from SENTENCE_SECTIONS
     // with .flatMap() rather than written as literal path="…", so they
     // have to be named here.
     const generated = new Set([
       '/practice/reading', '/practice/reading/levels', '/practice/reading/tiers',
       '/practice/translation', '/practice/translation/levels', '/practice/translation/tiers',
-      '/practice/comprehension', '/practice/dictation',
+      '/practice/comprehension', '/practice/dictation', '/practice/composition',
     ])
     const stale = ROUTES.filter(p => !declared.includes(p) && !generated.has(p))
     expect(stale, `these are in ROUTES but no longer in App.jsx: ${stale.join(', ')}`)
@@ -138,7 +138,7 @@ describe('ROUTES against App.jsx', () => {
     // Pins the .flatMap() above: if SENTENCE_SECTIONS changes shape the
     // allowance in the previous test would silently cover a stale list.
     expect(app).toContain('SENTENCE_SECTIONS.flatMap')
-    for (const base of ['reading', 'translation', 'comprehension', 'dictation']) {
+    for (const base of ['reading', 'translation', 'comprehension', 'dictation', 'composition']) {
       expect(app).toContain(`/practice/${base}`)
     }
   })

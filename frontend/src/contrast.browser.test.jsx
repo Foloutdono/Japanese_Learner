@@ -223,6 +223,27 @@ const Fixture = () => (
       </span>
     </div>
 
+    {/* 作文 (plan 124) -- the thirteenth pigment, 紫, measured where the
+        twelve before it were assumed: its filled action at rest and at
+        the hover mix (the guard cannot hover, so the 79% recipe is
+        written inline), and its plate roundel. */}
+    <div style={{ '--line-color': 'var(--line-sakubun)' }}>
+      <button type="button" className="btn-primary sb-btn">Valider</button>
+      <button
+        type="button"
+        className="btn-primary sb-btn-hover"
+        style={{ background: 'color-mix(in srgb, var(--line-sakubun) 79%, var(--bg-panel))' }}
+      >
+        Valider
+      </button>
+    </div>
+    <div className="plate" style={{ '--line-color': 'var(--line-sakubun)' }}>
+      <button type="button" className="plate__head">
+        <span className="pf-line__roundel plate__roundel sb-roundel">SB</span>
+        <span className="plate__names"><span className="plate__title">Rédaction</span></span>
+      </button>
+    </div>
+
     {/* --surface cards carrying secondary text */}
     <div className="station-sign">
       <span className="station-sign__kana">えき</span>
@@ -819,6 +840,10 @@ const SITES = [
   ['.lp-due', 'plate due chip (warning ink)'],
   ['.lp-edge', 'plate foot, the stops either side'],
   ['.lp-here', 'plate foot, the stop reached'],
+  // Plan 124 -- 紫, the composition platform's pigment (see the fixture).
+  ['.sb-btn', "composition's filled action at rest (紫 mixed 70% toward the panel)"],
+  ['.sb-btn-hover', "composition's filled action hovering (the 79% mix)"],
+  ['.sb-roundel', "composition's plate roundel (紫 mixed toward the ink)"],
   ['.station-sign__kana', 'station sign kana'],
   ['.station-sign__romaji', 'station sign romaji'],
   ['.record__label', 'record label'],

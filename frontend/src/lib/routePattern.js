@@ -70,9 +70,9 @@ export const ROUTES = [
   '/practice/exam',
   '/practice/exam/:examId',
   '/practice/exam/:examId/results',
-  // The four sentence sections are generated from SENTENCE_SECTIONS in
+  // The five sentence sections are generated from SENTENCE_SECTIONS in
   // App.jsx rather than written out, which is why the test allows these
-  // eight to have no literal `path="…"` of their own.
+  // nine to have no literal `path="…"` of their own.
   '/practice/reading',
   '/practice/reading/levels',
   '/practice/reading/tiers',
@@ -89,6 +89,8 @@ export const ROUTES = [
   '/practice/comprehension/:level',
   '/practice/dictation',
   '/practice/dictation/:level',
+  '/practice/composition',
+  '/practice/composition/:level',
 
   '/dictionary',
   '/dictionary/analyzer',

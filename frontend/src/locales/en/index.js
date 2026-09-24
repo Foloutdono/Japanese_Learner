@@ -1001,6 +1001,28 @@ const dictationMode = {
   dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
 }
 
+// ── 作文 — composition (plan 124) ───────────────────────────────
+// CompositionRun.jsx reuses the shared keys wholesale (selectLevel,
+// leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,
+// readingGrammarPoint, glLesson, the review* keys, the breakdown and
+// explain keys) — only the genuinely new keys live here.
+const compositionMode = {
+  compositionTitle:        'Composition',
+  compositionDesc:         'Write a sentence with the point you are shown\nA tutor reads it back to you\nN5 through N1',
+  compositionFetchError:   "Couldn't load a grammar point. Try again.",
+  compositionPrompt:       'Write a sentence using',
+  // The detector's word, on the answer's own label beside "Your answer":
+  // a hint for the learner grading below, never the grade — and nothing
+  // at all on a point the detector is not trusted on.
+  compositionFound:        'point found',
+  compositionNotFound:     'point not found',
+  analyzingComposition:    'Reading your sentence…',
+  // The day's reviews are spent (routes/composition.py, 429). The run
+  // goes on: the check still prints and the rating still counts.
+  compositionLimitReached: "That's every review for today — your check and your grade still count. The tutor is back tomorrow.",
+}
+
 // ── Dictionary ────────────────────────────────────────────
 const dictionary = {
   dictionaryPlaceholder: 'Search a kanji, a kana or a meaning…',
@@ -1845,7 +1867,7 @@ const guide = {
   guideLearnPlate: 'A line. Tap the plate to open it; the chip is what it owes you today.',
   guideLearnStops: 'Where you stand on the line, and the stops either side.',
   guideLearnShelf: 'Your own decks, and the library other learners publish to.',
-  guidePracticePlate: 'A platform: sentences to read, understand, translate or take down — and the mock exam.',
+  guidePracticePlate: 'A platform: sentences to read, understand, translate, take down or write — and the mock exam.',
   guidePracticeDests: 'The levels. Yours is marked; tap another to ride it anyway.',
   guidePracticePass: 'These platforms ride on the pass.',
   guideDictConsole: 'Search by word, reading or meaning.',
@@ -2020,6 +2042,7 @@ export default {
   ...readingComprehension,
   ...translationMode,
   ...dictationMode,
+  ...compositionMode,
   ...dictionary,
   ...comprehension,
   ...progress,
