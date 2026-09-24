@@ -11,7 +11,7 @@ import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content.vocab_extras import get_vocab_extras
-from content.kana_data import get_syllabary, kana_to_id, set_for as kana_set_for, twin as kana_twin
+from content.kana_data import get_syllabary, kana_to_id, set_for as kana_set_for, sound_of, twin as kana_twin
 from content.kana_strokes import stroke_count as kana_stroke_count
 # radical_data.py owns the radical dumps -- its own docstring says so
 # ("read once at import rather than per consumer") -- but this module used
@@ -212,7 +212,19 @@ def _app_card(source: str, level: str | None, raw_id: str | None) -> dict | None
 _CJK = re.compile(r"[一-龯]")
 
 
-def _word_kanji(word: str, furigana: list[dict], lang: str) -> list[dict]:
+def _off_deck_chars(word: str) -> list[str]:
+    return [c for c in dict.fromkeys(_CJK.findall(word or "")) if c not in DECK_BY_CHAR]
+
+
+def _page_pool_meanings(words, lang: str) -> dict[str, str]:
+    """The pool meanings every word on a page needs, in one query rather
+    than one per word."""
+    chars = dict.fromkeys(c for w in words for c in _off_deck_chars(w))
+    return kanji_db.meanings_for(chars, lang)
+
+
+def _word_kanji(word: str, furigana: list[dict], lang: str,
+                pool: dict[str, str] | None = None) -> list[dict]:
     """Each kanji a word is written with, once, in reading order: the
     reading it takes IN THIS WORD, and the character's own meaning.
 
@@ -232,9 +244,10 @@ def _word_kanji(word: str, furigana: list[dict], lang: str) -> list[dict]:
     chars = list(dict.fromkeys(_CJK.findall(word or "")))
     if not chars:
         return []
-    # One query for whatever the curated deck does not teach, rather
-    # than one per character.
-    pool = kanji_db.meanings_for([c for c in chars if c not in DECK_BY_CHAR], lang)
+    # `pool` is the page's own batch (_page_pool_meanings); a lone
+    # lookup asks for its word's characters alone.
+    if pool is None:
+        pool = kanji_db.meanings_for(_off_deck_chars(word), lang)
     out = []
     for char in chars:
         deck = DECK_BY_CHAR.get(char)
@@ -387,9 +400,9 @@ def _kanji_collection(query, page: int, limit: int, lang: str,
             # A deck character keeps the deck's own level, packed reading
             # and curated (translated) meaning -- the database row is the
             # index that found it, not a second source of truth for it.
-            level, entry = deck_hit
+            deck_level, entry = deck_hit
             results.append(_deck_kanji_result(
-                level, entry, get_meaning(entry, lang, KANJI_FR_MAP),
+                deck_level, entry, get_meaning(entry, lang, KANJI_FR_MAP),
                 lang, states, user_id,
             ))
         return {
@@ -531,7 +544,8 @@ def _vocab_lexicon() -> tuple[str, ...]:
 
 
 def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
-                  states: dict, user_id: str, raw_id: str) -> dict:
+                  states: dict, user_id: str, raw_id: str,
+                  pool: dict[str, str] | None = None) -> dict:
     """One word as the catalogue serves it. Identical shape for a deck
     word and a pool word — `level` is the only field that separates
     them, and it is null for the pool (LevelBadge on the frontend
@@ -563,7 +577,7 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
         "furigana": furigana,
         # The characters the word is written with — a ledger row each,
         # not a bare tile (see _word_kanji).
-        "kanji_parts": _word_kanji(entry.get("kanji", ""), furigana, lang),
+        "kanji_parts": _word_kanji(entry.get("kanji", ""), furigana, lang, pool),
         "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
         # None for a JMdict pool word: it has a raw id, and so a stage,
         # but no app card for a deck to link to.
@@ -701,10 +715,13 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
     # One bulk SRS fetch for the whole page, deck words and pool words
     # alike; card_stats is then a cheap in-memory lookup per entry.
     states = srs.get_user_states(user_id) if (deck_page or pool_page) else {}
+    kanji_pool = _page_pool_meanings(
+        [e.get("kanji", "") for _, e, _ in deck_page]
+        + [e.get("kanji", "") for e in pool_page], lang)
 
     results = [
         _vocab_result(entry, level, meaning, lang, states, user_id,
-                      vocab_to_id(entry, level))
+                      vocab_to_id(entry, level), kanji_pool)
         for level, entry, meaning in deck_page
     ] + [
         # The pool carries no French map (VOCAB_FR is the deck's own,
@@ -712,7 +729,7 @@ def _vocab_collection(query, page: int, limit: int, lang: str, user_id: str,
         # deck word's translation), so its gloss is served as JMdict
         # wrote it.
         _vocab_result(entry, None, entry.get("meaning", ""), lang, states, user_id,
-                      vocab_jmdict_to_id(entry))
+                      vocab_jmdict_to_id(entry), kanji_pool)
         for entry in pool_page
     ]
 
@@ -867,6 +884,10 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
         "type":    kind,
         "kana":    entry["kana"],
         "romaji":  entry["romaji"],
+        # The deck's own clip for this kana (kana_data.sound_of): the
+        # panel plays it instead of synthesizing the kana afresh, so the
+        # dictionary and the deck say it in the same voice, offline.
+        "sound":   sound_of(entry),
         "meaning": meaning,
         "level":   "Hiragana" if kind == "hiragana" else "Katakana",
         # Which gojūon row this belongs to (k/s/t/n/h/m/y/r/w/
@@ -1044,6 +1065,8 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
     # get_user_states does one bulk fetch for the whole user; card_stats is
     # then a cheap in-memory lookup per entry.
     states = srs.get_user_states(user_id) if page_matches else {}
+    kanji_pool = _page_pool_meanings(
+        [e.get("kanji", "") for kind, _, e, _ in page_matches if kind == "vocab"], lang)
 
     results = []
     for kind, lvl, entry, meaning in page_matches:
@@ -1054,6 +1077,7 @@ def get_dictionary(q: str = "", page: int = 0, limit: int = Query(50, ge=1, le=2
         elif kind == "vocab":
             results.append(_vocab_result(
                 entry, lvl, meaning, lang, states, user_id, vocab_to_id(entry, lvl),
+                kanji_pool,
             ))
         else:  # hiragana or katakana
             results.append(_kana_result(kind, entry, meaning, lang, states, user_id))

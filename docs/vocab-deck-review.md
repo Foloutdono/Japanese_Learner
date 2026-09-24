@@ -671,7 +671,7 @@ Left, and why:
   掃除 only). Fixing either changes ids, so each needs `MOVES` lines of
   its own. *Done the same day; see below.*
 
-### The reading field's last residue (2026-09-24)
+### " / " and "・する" out of the reading field (2026-09-24)
 
 35 cards, one more than the scan above counted (the N5 ラジカセ /
 ラジオカセット joined its two with " / " too). Each is a `MOVES` line,
@@ -700,6 +700,13 @@ in `_NOT_A_SPELLING`.
 Left for the owner: けが, けんか and あいさつ are kana cards at N4 beside
 the N3 kanji cards 怪我, 喧嘩 and 挨拶. They join 112's deferred "kana
 card below a kanji card" family (いす/椅子).
+
+Left, and found after this landed: three N5 cards pack the する with
+no ・, 106's 掃除 shape exactly: 練習 れんしゅうする, 散歩 さんぽする, 勉強
+べんきょうする. The guard cannot see them, because する is kana. Each
+needs the same `MOVES` line and a check for a noun card above it.
+`furigana.written_reading` (#175) already drops the する, so the
+entry panel is not hurt meanwhile.
 
 ## Order and dependencies
 

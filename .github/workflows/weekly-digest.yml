@@ -57,7 +57,7 @@ jobs:
         working-directory: backend
         # Deliberately NOT requirements.txt, for the same reason
         # db-maintenance.yml avoids it: that pulls a MeCab dictionary
-        # and edge-tts for a job that only opens a database connection.
+        # and an MP3 encoder for a job that only opens a database connection.
         run: pip install psycopg2-binary python-dotenv
 
       - name: Write the digest

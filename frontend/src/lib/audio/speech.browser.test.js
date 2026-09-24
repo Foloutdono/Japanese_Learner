@@ -20,6 +20,12 @@ const mocks = vi.hoisted(() => ({
 vi.mock('./context', () => ({ getBuffer: mocks.getBuffer, whenUnlocked: mocks.whenUnlocked }))
 vi.mock('./mixer', () => ({ playBuffer: mocks.playBuffer, fadeOutAndStop: mocks.fadeOutAndStop }))
 
+const { VOICE_REV } = await import('./speech')
+
+/** The clip URL for `text`: the voice revision rides on every one, so a
+ *  new voice is a new URL for the caches in front of the server. */
+const clipFor = text => `/api/tts?text=${text}&v=${VOICE_REV}`
+
 const JA_VOICE = { name: 'Kyoko', lang: 'ja-JP', localService: true }
 
 // A real SpeechSynthesisUtterance refuses any `voice` that is not a
@@ -111,7 +117,7 @@ describe('speakJapanese', () => {
 
     speakJapanese('まいげつ/まいつき')
 
-    expect(clipRequest()).toBe('/api/tts?text=まいげつ')
+    expect(clipRequest()).toBe(clipFor('まいげつ'))
   })
 
   it('falls back to the server when no Japanese voice is installed', async () => {
@@ -122,7 +128,7 @@ describe('speakJapanese', () => {
     speakJapanese('まいげつ')
 
     expect(synth.speak).not.toHaveBeenCalled()
-    expect(clipRequest()).toBe('/api/tts?text=まいげつ')
+    expect(clipRequest()).toBe(clipFor('まいげつ'))
   })
 
   it('speaks on the device when there is a voice for it', async () => {
@@ -153,14 +159,14 @@ describe('speakJapanese', () => {
     speakJapanese('まいげつ')
     expect(mocks.getBuffer).not.toHaveBeenCalled()
 
-    await vi.waitFor(() => expect(clipRequest()).toBe('/api/tts?text=まいげつ'))
+    await vi.waitFor(() => expect(clipRequest()).toBe(clipFor('まいげつ')))
     expect(synth.cancel).toHaveBeenCalled()
 
     // And it does not spend that silence again on the next card.
     synth.speak.mockClear()
     speakJapanese('つち')
     expect(synth.speak).not.toHaveBeenCalled()
-    expect(clipRequest()).toBe('/api/tts?text=つち')
+    expect(clipRequest()).toBe(clipFor('つち'))
   })
 
   it('plays the clip through the mixer, so mute and the sliders reach it', async () => {
@@ -180,5 +186,51 @@ describe('speakJapanese', () => {
     speakJapanese(null)
 
     expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+})
+
+// ── A lone kana (plan 121) ───────────────────────────────────────
+// Read as text by a device voice, a lone は is the topic particle, "wa",
+// and へ is "e". The server names the syllable instead, so a lone kana
+// never goes to the device -- not even a device that can speak.
+
+describe('a lone kana', () => {
+  it('skips a working device and asks the server', async () => {
+    const synth = stubSynth({ voices: [JA_VOICE], onSpeak: u => u.onstart?.() })
+    const { speakJapanese } = await loadSpeech()
+
+    speakJapanese('は')
+    expect(synth.speak).not.toHaveBeenCalled()
+    expect(clipRequest()).toBe(clipFor('は'))
+
+    // A kanji's one-mora reading, out of its packed field.
+    speakJapanese('ド・ト・つち')
+    expect(clipRequest()).toBe(clipFor('ド'))
+  })
+
+  // A word still goes to the device first ('speaks on the device when
+  // there is a voice for it', above); what counts as a lone kana, and
+  // so skips it, is this table.
+  it('is one kana, with at most one small kana after it', async () => {
+    const { isLoneKana } = await loadSpeech()
+    for (const yes of ['は', 'へ', 'を', 'ん', 'きゃ', 'ウォ', 'ファ', 'ヴ', 'ド', 'ぢ']) {
+      expect(isLoneKana(yes), yes).toBe(true)
+    }
+    for (const no of ['まいげつ', 'ああ', 'っ', 'ゃ', 'ー', 'は。', 'a', '', null]) {
+      expect(isLoneKana(no), String(no)).toBe(false)
+    }
+  })
+})
+
+describe('voicedUrl', () => {
+  it('adds the voice revision to any clip URL', async () => {
+    const { voicedUrl } = await loadSpeech()
+    expect(voicedUrl('/exam-audio/abc.mp3')).toBe(`/exam-audio/abc.mp3?v=${VOICE_REV}`)
+    expect(voicedUrl('/api/tts?text=x')).toBe(`/api/tts?text=x&v=${VOICE_REV}`)
+    expect(voicedUrl('')).toBe('')
+    expect(voicedUrl(null)).toBe(null)
+    // The audio itself rather than a name for it: left exactly as it is.
+    expect(voicedUrl('data:audio/wav;base64,UklGRg==')).toBe('data:audio/wav;base64,UklGRg==')
+    expect(voicedUrl('blob:https://x/1')).toBe('blob:https://x/1')
   })
 })

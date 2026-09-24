@@ -34,3 +34,13 @@ datas/jlpt/
 # Server-generated TTS output, not owned/tracked source data -- same
 # reasoning as datas/jlpt/ above, see study/exam_tts.py.
 datas/exam_audio/
+# scripts/audition_voices.py's samples: listened to, never shipped (and the
+# VOICEVOX Nemo terms forbid using them for machine learning -- see
+# THIRD_PARTY_NOTICES.md).
+datas/voice_audition/
+# The voicebank scripts/build_kana_audio.py --from-bank cuts the kana clips
+# from (plans 121b/121c, scripts/kana_bank.py), and the trial sets cut from
+# it for listening. The processed clips in frontend/public/sounds/kanas/ are
+# committed, the bank never is: nothing needs it in the repository, and
+# 小春音アミ's terms forbid distributing her files.
+datas/kana_source/

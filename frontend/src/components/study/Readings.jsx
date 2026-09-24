@@ -38,15 +38,32 @@ export function splitReadingTokens(kana) {
 // `hit` names one character whose part also carries `hitClassName`:
 // the dictionary's word rows pick out the kanji they are examples of,
 // so the reading each word demonstrates is the thing the eye lands on.
+//
+// Where the character has no part of its own -- the aligner kept one
+// reading over the whole run, as it does for 今朝 read けさ, where no
+// slice of the reading is 今's -- the character is picked out inside
+// the run's base and its reading is not: the reading belongs to the
+// word, and dressing it in the entry's ink would claim it for 今.
 export function FuriganaParts({ parts, className, hit, hitClassName }) {
   if (!parts?.length) return null
+  const marks = Boolean(hit && hitClassName)
   return parts.map((part, i) => {
-    const cls = [className, hit && hitClassName && part.text === hit ? hitClassName : null]
-      .filter(Boolean).join(' ') || undefined
+    const own = marks && part.text === hit
+    const cls = [className, own ? hitClassName : null].filter(Boolean).join(' ') || undefined
+    const base = marks && !own && part.text.includes(hit)
+      ? pickOut(part.text, hit, hitClassName)
+      : part.text
     return part.reading
-      ? <ruby key={i} className={cls}>{part.text}<rt>{part.reading}</rt></ruby>
-      : <span key={i} className={cls}>{part.text}</span>
+      ? <ruby key={i} className={cls}>{base}<rt>{part.reading}</rt></ruby>
+      : <span key={i} className={cls}>{base}</span>
   })
+}
+
+// `text` with every `hit` in it wrapped in `className`.
+function pickOut(text, hit, className) {
+  return text.split(hit).flatMap((piece, i) => (
+    i === 0 ? [piece] : [<span key={i} className={className}>{hit}</span>, piece]
+  ))
 }
 
 // The whole word, rendered at prompt size with its furigana on top.

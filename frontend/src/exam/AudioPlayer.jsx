@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLang } from '../LangContext'
 import { api } from '../lib/api'
+import { voicedUrl } from '../lib/audio'
 import { dialogOpen } from '../lib/dialogOpen'
 import { PlayIcon, PauseIcon, UndoIcon, SpeakerOffIcon } from '../components/ui/Icons'
 
@@ -141,10 +142,13 @@ export default function AudioPlayer({ src, keyHint = false }) {
       {/* src is backend-relative ("/exam-audio/<hash>.mp3", see
           study/exam_tts.py) — served same-origin like every other
           backend path: the Vite proxy carries it in dev, vercel.json's
-          rewrite in prod. */}
+          rewrite in prod. With the voice revision on it: a clip is
+          remade under the same name when the voice changes, and the
+          service worker would otherwise keep replaying the old one.
+          failedSrc still compares the raw src. */}
       <audio
         ref={audioRef}
-        src={api(src)}
+        src={api(voicedUrl(src))}
         preload="metadata"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}

@@ -10,7 +10,16 @@ import { hasVoice, playVoice } from './voices'
 // something nobody will hear; the actual silencing is the master bus
 // sitting at zero.
 
-const KANA         = romaji => `/sounds/kanas/${romaji}.mp3`
+// The kana set's revision. The clips are made by
+// backend/scripts/build_kana_audio.py -- 'nemo1' synthesized (plan 121),
+// 'ritsu1' cut from 波音リツ's UTAU bank (plan 121c) -- and served from
+// the same paths every set has used, while the service worker keeps
+// /sounds/ cache-first for a year: without a new URL a returning learner
+// would hear the old set until then. A file that used to be MISSING may
+// even be cached as the index.html the SPA fallback answered with. Bump
+// this whenever the set is remade.
+export const KANA_REV = 'ritsu1'
+const KANA         = name   => `/sounds/kanas/${name}.mp3?v=${KANA_REV}`
 const SFX          = name   => `/sounds/sfx/${name}.mp3`
 const UI           = name   => `/sounds/ui/${name}.mp3`
 const ANNOUNCEMENT = name   => `/sounds/announcements/${name}.wav`
@@ -25,24 +34,24 @@ function play(path, category, soundName) {
     .catch(() => { /* a missing asset is silence, not an error */ })
 }
 
-// ── Evening out the kana recordings ───────────────────────
-// Measured across all 102 files, the set has three problems:
+// ── Evening out the kana clips ────────────────────────────
+// Written for the 102 recordings the deck used to ship, which had
+// three problems:
 //
 //   25.2 dB between the quietest and the loudest recording
 //   47 files that start up to 294ms late, so the sound lags the tap
 //   40 files clipping at or above 0dBFS
 //
-// The first two are fixable here and are fixed here: the buffer is
-// analysed once on decode and cached, then played from where the
-// speech actually begins and with a gain that pulls it toward a
-// common loudness. The third is not fixable at playback — clipping
-// distortion is baked into the sample — and is the reason the set
-// still wants re-recording rather than only re-mixing.
+// The first two were fixed here: the buffer is analysed once on decode
+// and cached, then played from where the speech actually begins and
+// with a gain that pulls it toward a common loudness. The third could
+// not be fixed at playback, which is why the set was replaced by
+// generated clips made to this very target (plan 121,
+// backend/scripts/build_kana_audio.py).
 //
-// Everything is measured from the decoded buffer, so a replacement
-// set is picked up automatically and a well-made one simply needs
-// less correction: a file already at the target and starting on time
-// gets gain 1 and offset 0.
+// The correction stays: everything is measured from the decoded
+// buffer, so a well-made set simply needs less of it -- a file already
+// at the target and starting on time gets gain 1 and offset 0.
 const TARGET_RMS = 0.11          // about -19 dBFS
 const MAX_GAIN = 4               // +12dB, so a quiet file is lifted but
                                  // its noise floor is not lifted with it
@@ -71,15 +80,24 @@ function analyseKana(buffer) {
   return shape
 }
 
-export function playKana(romaji) {
-  if (!romaji || isMuted()) return
+/**
+ * The clip a kana card plays: its `sound` (backend
+ * content/kana_data.sound_of), which is the romaji except where two kana
+ * share a romaji but not a sound -- ウォ, whose romaji is を's "wo".
+ */
+export function kanaSound(card) {
+  return card?.sound || card?.romaji || ''
+}
+
+export function playKana(name) {
+  if (!name || isMuted()) return
   const ctx = getAudioContext()
   if (!ctx) return
-  getBuffer(KANA(romaji))
+  getBuffer(KANA(name))
     .then(buffer => {
       if (!buffer || isMuted()) return
       const { offset, gain } = analyseKana(buffer)
-      playBuffer(buffer, 'kana', romaji, { offset, gain })
+      playBuffer(buffer, 'kana', name, { offset, gain })
     })
     .catch(() => { /* a missing asset is silence, not an error */ })
 }

@@ -24,9 +24,9 @@ way a real 聴解 section does, never past what one listen can hold.
     {"jp": ..., "kana": ..., "romaji": ..., "en": ...}
 
 `jp`   the written form. This is the transcription the learner is aiming
-       at, and it is also the text handed to the synthesizer — edge-tts
-       reads kanji with the right segmentation and pitch, where a
-       kana-only string comes out flat and occasionally mis-parsed.
+       at, and it is also the text handed to the synthesizer — the
+       engine reads kanji with the right segmentation and pitch, where a
+       kana-only string loses the words' boundaries and so their accent.
 `kana` the same line with every kanji replaced by its reading, katakana
        left as katakana. An accepted answer in its own right: a learner
        who hears the line and writes it in kana has done the exercise.

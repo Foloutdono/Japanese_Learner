@@ -1018,6 +1018,8 @@ const dictionary = {
   // langue claire sa légende.
   readingsOnName:    'Lecture chinoise',
   readingsKunName:   'Lecture japonaise',
+  // Voir en/index.js : le 熟 d'un mot qui se lit d'un bloc.
+  readingsWhole:     'Se lit d\'un bloc',
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
@@ -1855,7 +1857,7 @@ const onboarding = {
   settingsData: 'Données',
   settingsRedo: 'Test de placement',
   settingsCredits: 'Crédits',
-  creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', type: 'Polices' },
+  creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', speech: 'Voix japonaise', kana: 'Voix des kana', type: 'Polices' },
   themeDark: 'Sombre',
   themeLight: 'Clair',
   themeAuto: 'Système',

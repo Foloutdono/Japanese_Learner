@@ -16,7 +16,7 @@ import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { useDesk } from '../../hooks/useDesk'
-import { speakJapanese } from '../../lib/audio'
+import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
 // The catalogue already draws every entry as a small 駅名標: the
@@ -314,6 +314,16 @@ function Picked({ text, hit }) {
   )
 }
 
+// Whether `char` sits inside a reading the aligner kept whole
+// (study/furigana.py): a part that holds it and more, under one reading.
+// A part of its own means the word reads the character by one of its
+// readings; no reading at all means there is nothing to say.
+function readAsWhole(parts, char) {
+  return Boolean(char) && (parts ?? []).some(
+    p => p.reading && p.text !== char && p.text.includes(char),
+  )
+}
+
 // One word that uses the character: its furigana'd form with the kanji
 // itself picked out in the entry's ink — so the reading this word
 // demonstrates is what the eye lands on — its first gloss, and, when the
@@ -327,7 +337,15 @@ function Picked({ text, hit }) {
 // READING with the kana picked out of it, because a reader still
 // learning the syllabary cannot be shown 朝 as an example of あ. The
 // written form stays behind the row, as what it opens.
+//
+// A word whose reading belongs to the whole of it — 今朝 read けさ, where
+// け is no reading of 今 (熟字訓, 当て字) — keeps one ruby over the run
+// and carries a 熟 in the 音/訓 square beside it: the one row in the
+// ledger that is an example of the character but not of any of its
+// readings, and it says so.
 function WordRow({ w, char, onClick, reading = false }) {
+  const { t } = useLang()
+  const whole = !reading && readAsWhole(w.furigana, char)
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
@@ -337,6 +355,12 @@ function WordRow({ w, char, onClick, reading = false }) {
             ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
             : w.kanji}
       </span>
+      {whole && (
+        <span className="dict-kind" title={t.readingsWhole}>
+          <span aria-hidden="true">熟</span>
+          <span className="sr-only">{t.readingsWhole}</span>
+        </span>
+      )}
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )
@@ -909,7 +933,10 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             {!isGrammar && (
               <button
                 type="button"
-                onClick={() => speakJapanese(entry.kana)}
+                // A kana plays the deck's own clip -- the same voice the
+                // kana cards use, offline, and えい said as ē -- rather
+                // than being synthesized afresh (plan 121).
+                onClick={() => (isKana ? playKana(kanaSound(entry)) : speakJapanese(entry.kana))}
                 className="dict-plate__btn"
                 title={t.listen}
                 aria-label={t.listen}

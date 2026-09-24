@@ -22,15 +22,20 @@ from study.word_tts import clip_for
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
-# A year, immutable: the bytes for one reading never change (the same
-# text always resolves to the same clip), so a phone that has heard a
-# word once should never fetch it again -- the round trip is the whole
-# cost of this path over speaking on the device.
+# A year, immutable: the bytes for one reading never change within one
+# voice revision (the same text always resolves to the same clip), so a
+# phone that has heard a word once should never fetch it again -- the
+# round trip is the whole cost of this path over speaking on the device.
+# A NEW voice is a new URL rather than new bytes behind the old one: the
+# client adds `v` (lib/audio/speech.js's VOICE_REV, which must equal
+# study/voice_engine.VOICE_REV), and that is all `v` is for -- it is
+# never read here.
 _CACHE_FOREVER = "public, max-age=31536000, immutable"
 
 
 @router.get("/api/tts")
-def study_audio(text: str = Query(min_length=1, max_length=64)):
+def study_audio(text: str = Query(min_length=1, max_length=64),
+                v: str | None = Query(default=None, max_length=16)):  # noqa: ARG001 -- cache key only
     try:
         path = clip_for(text)
     except ValueError:

@@ -295,7 +295,36 @@ runtime purpose. Two consequences worth knowing:
   shelf, analyzer, dictionary and settings desktop tests and of
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`, "Dialogs on the desk").
-  When starting a new wave, begin at **121** or higher, and check
+  **121** is 声, a voice the app is allowed to sell (numbered 121 because
+  113–120 went to the desk while it was open): edge-tts replaced by a
+  self-hosted VOICEVOX Nemo engine (a Render private service), the voice
+  epoch that retires every clip an earlier voice made, a lone kana named by
+  the engine's kana notation instead of read as text, and the kana deck
+  regenerated from it (cited in `study/voice_engine.py`, `study/exam_tts.py`,
+  `study/word_tts.py`, `study/exam_listening_gen.py`, `content/kana_data.py`,
+  `scripts/build_kana_audio.py`, `scripts/audition_voices.py`,
+  `scripts/revoice_audio.py`, `render.yaml`, `lib/audio/speech.js`,
+  `lib/audio/playback.js`, `frontend/public/sounds/README.md` and
+  `tests/test_voice_engine.py`; ADR 0019).
+  **121b** is the owner's voices and a recorded kana voice: 女声6, 男声1 and
+  女声1 over four slots (the reader, A, B and the exam narrator), 男声1 at
+  0.9 (`VOICE_TEMPO`), and the importer that cuts the kana deck from
+  小春音アミ's UTAU bank, with `kanas/sources.json` holding every clip's
+  voice to its credit (cited in `study/voice_engine.py`, `study/exam_tts.py`,
+  `study/word_tts.py`, `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
+  `scripts/audition_voices.py` and `tests/test_kana_audio.py`; ADR 0020).
+  **121c** is 波音リツ instead, for terms that ask for no credit, report or
+  permission: the importer reads joined (連続音) banks by their oto.ini
+  aliases, cuts each syllable from the start of a string and before the
+  next sound, holds a long vowel by repeating its steady end in phase, and
+  takes あい/おい from the singer's own glide — and then, on his real
+  banks, onsets found by walking back from the vowel (past the room
+  noise), an exact `--pitch` folder, long vowels joined into the notes he
+  held, and the set imported from 強連続音 A3 (cited in
+  `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
+  `tests/test_kana_audio.py`, `domain/attributions.js` and
+  `lib/audio/playback.js`; ADR 0020).
+  When starting a new wave, begin at **122** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -311,6 +340,62 @@ pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
 
+### Speech — the voice engine (plan 121, ADR 0019)
+
+Every voice the server makes (exam listening, dictation, the `/api/tts` card
+readings) and the kana deck's clips come from a **self-hosted VOICEVOX Nemo
+engine**, reached over HTTP by `study/voice_engine.py`. On Render it is the
+`voicevox-nemo` private service in `render.yaml`, and the backend's
+`VOICEVOX_URL` is filled from its `hostport`. Locally, run the same image and
+set `VOICEVOX_URL=http://localhost:50121` in `backend/.env`:
+
+```bash
+docker run -d --name voicevox-nemo -p 127.0.0.1:50121:50121 voicevox/voicevox_nemo_engine:cpu-0.23.0
+```
+
+Port **50121**, not VOICEVOX's usual 50021. Without an engine nothing breaks:
+listening sections are skipped (before any model call is paid for), dictation
+and `/api/tts` answer 503, and the tests never need one.
+
+The licence's one condition is the credit **"VOICEVOX Nemo"** (Credits page
+and `THIRD_PARTY_NOTICES.md`). It also **forbids using the audio for machine
+learning**: never publish a generated clip as, or feed it into, a dataset.
+
+**Changing the voice is a code change, not an env var**: edit
+`voice_engine.DEFAULT_VOICES` (plan 121b, the owner's choice: slot 0, the
+reader of words, dictation and lone kana, is 女声6; 1 and 2 are dialogue
+speakers A, a woman, 女声6, and B, a man, 男声1; 3 is the exam narrator,
+女声1) or a voice's pace in `VOICE_TEMPO` (男声1 speaks at 0.9), and bump
+`VOICE_REV` in `voice_engine.py` **and** `lib/audio/speech.js`
+(`tests/test_kana_audio.py` holds them equal). A clip made before the current
+revision is never served; it is remade in place, under the name
+`dictation_log`/`exam_papers` already store. Then run `revoice_audio`
+(below) so nobody waits for it.
+
+```bash
+python -m scripts.audition_voices                 # every voice, as a sample file each
+python -m scripts.audition_voices --roles 女声6,女声6,男声1,女声1  # one exam item: reader,A,B,narrator
+python -m scripts.audition_voices --tempo 男声1   # one voice at four speeds, for VOICE_TEMPO
+python -m scripts.build_kana_audio --check        # kana clips missing, stray, off-spec or unsourced
+python -m scripts.build_kana_audio --force        # remake frontend/public/sounds/kanas/ on the engine
+python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/strong --pitch A3 --credit namine-ritsu --force
+```
+
+The kana clips are committed, and `kanas/sources.json` records which voice
+made each one, as its row id in `domain/attributions.js`;
+`tests/test_kana_audio.py` fails on a voice without its Credits row and
+`THIRD_PARTY_NOTICES.md` section. The deck is cut from a recorded voice,
+波音リツ's UTAU bank 強連続音 Ver1.5.1 at A3 (plan 121c, ADR 0020,
+`scripts/kana_bank.py`), whose terms ask for no credit, report or
+permission (the app credits him anyway). The owner chose it by ear, as
+"good for now": a better kana voice is a known follow-up. To remake it,
+unzip `https://www.canon-voice.com/voice/r73_strong_ren0151.zip` (names in
+Shift_JIS) under `backend/datas/kana_source/ritsu/strong/`, which is
+gitignored, and run the `--from-bank … --pitch A3` line above; a trial
+set for listening goes to `--out datas/kana_source/trial-…`. A remade set
+needs a new `KANA_REV` in `lib/audio/playback.js` (`ritsu1` now), or
+returning learners keep the old one for a year.
+
 The one optional warm-up, and it needs no database:
 
 ```bash
@@ -322,9 +407,9 @@ python -m scripts.build_dictation_audio           # synthesize it
 `content/listening_clips.py`. Nothing depends on having run this — a missing
 clip is synthesized on the request that wants it, and again by
 `study/exam_audio_repair.py` if the file is later lost — but the first learner
-of the day otherwise pays for five round trips to edge-tts before the screen
-can show anything. Running it twice costs nothing: a clip that exists is
-skipped without a network call.
+of the day otherwise waits for five syntheses on the voice engine before the
+screen can show anything. Running it twice costs nothing: a clip the current
+voice already made is skipped without a call to the engine.
 
 **Changing `study/dictation.RATE` renames every clip in the collection**, and
 deliberately: the speaking rate is part of the audio's content key, so a clip
@@ -408,6 +493,17 @@ how to flip a card. Same shape as the others — reports first.
 
 ```bash
 python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
+```
+
+And one after any deploy that changes the voice (plan 121 did, from edge-tts
+to VOICEVOX Nemo). Run it from the backend's Render Shell, since it needs the
+database and the disk the clips live on. It remakes every dictation clip and
+every clip a stored paper refers to, in place and in the current voice. Then
+it deletes the clips that cannot be remade: stale files only, never one the
+current voice made. A second run resumes where the first stopped.
+
+```bash
+python -m scripts.revoice_audio        # report; --yes to remake and delete
 ```
 
 A vocab card id is `vocab_{level}_{kanji}_{kana}`, so **correcting either
@@ -615,7 +711,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 - `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
-- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
+- `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.
 - `content/` — static/generated reference data (grammar points, vocab, kanji readings/meanings, frequency lists, reading sentences, the dictation bank in `listening_clips.py`) as Python modules or JSON, built/refreshed by scripts in `scripts/`. **The grammar catalogue is `content/grammar/N5.json … N1.json`** (plan 087, ADR 0016): one list per level, every text in both languages, the lesson (`steps`, `compare`, four examples) beside the gloss at the levels in `RICH_LEVELS`. It is authored, never generated — no sentence from a published list, no model output — and held to `study/grammar_check.py`: run `python -m scripts.check_grammar --report` before every content commit. A pattern string is a card id, so a rename or a level move goes through `content/grammar/renames.py` and the migration script; `content/grammar/README.md` has the schema and the style guide. `content/grammar_data.py` is a dead scrape kept only as the provenance test's negative corpus. **The two big reference sets are SQLite, not JSON, and deliberately so**: `datas/vocab/vocab_jmdict.sqlite3` (212k JMdict entries, via `vocab_jmdict_data.py`) and `datas/kanji/kanji.sqlite3` (all 13,108 KANJIDIC2 characters, via `kanji_pool_data.py`). A dict held at import costs RSS on every worker for the whole process lifetime; SQLite reads only the pages a query touches. Do not "simplify" either back into a `json.load` at module scope — that is what the 512 MB Render budget cannot take. The JSON they are built from is gitignored (`backend/.gitignore`); restore the upstream export beside them and re-run `scripts/build_jmdict_db.py` / `scripts/build_kanji_db.py` to refresh.
 - `scripts/` — one-off data-pipeline scripts (build JMDict/frequency/theme/radical indexes, generate grammar sentences, migrate card IDs, wipe SRS data) and the database-maintenance tools below. Not part of the request path.
 - `translations/` — i18n string tables served to the frontend.
@@ -642,6 +738,13 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 ## Deployment
 
 - Backend: Render (`render.yaml`), root `backend/`, persistent disk mounted at `/data` for SRS storage.
+- Voice engine: a second service in `render.yaml`, `voicevox-nemo`, a
+  **private** service running the stock `voicevox/voicevox_nemo_engine` image
+  pinned by digest. It has no auth, so it must never be made public; only the
+  backend reaches it, through `VOICEVOX_URL` (its `hostport`), over the
+  private network, in the same region. It holds no state. Starter's 512 MB
+  fits it (343 MB at peak with the three voices) at the cost of slow first
+  syntheses; Standard halves them. See ADR 0019.
 - Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus
   proxy rewrites for `/api`, `/kanjivg` and `/exam-audio` to the Render
   backend. The browser never calls `onrender.com` directly — some mobile

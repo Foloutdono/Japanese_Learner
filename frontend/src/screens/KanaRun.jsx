@@ -19,7 +19,7 @@ import { CardTransition } from '../components/study/CardTransition'
 import PromptCard from '../components/study/PromptCard'
 import ReviewDeck from '../components/study/ReviewDeck'
 import SessionError from '../components/study/SessionError'
-import { playKana } from '../lib/audio'
+import { playKana, kanaSound } from '../lib/audio'
 import {
   MODES as STUDY_MODES, RENDER, HINTS, FAST_REVIEW, modeLabel,
 } from '../domain/studyModes'
@@ -161,21 +161,21 @@ export default function KanaRun({ session }) {
     setSelected(choice)
     setAnswered(true)
     setShowRating(true)
-    playKana(card.romaji)
+    playKana(kanaSound(card))
   }
 
   function onFlashcardReveal() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    playKana(card.romaji)
+    playKana(kanaSound(card))
   }
 
   function onDrawValidate() {
     if (answered) return
     setAnswered(true)
     setShowRating(true)
-    playKana(card.romaji)
+    playKana(kanaSound(card))
   }
 
   // write_romaji. The comparison in lib/romaji is FEEDBACK only — the
@@ -185,7 +185,7 @@ export default function KanaRun({ session }) {
     if (answered || !typed.trim()) return
     setAnswered(true)
     setShowRating(true)
-    playKana(card.romaji)
+    playKana(kanaSound(card))
   }
 
   if (!valid) return <Navigate replace to={selectedSet ? platforms : '/learn/kana'} />
@@ -214,7 +214,7 @@ export default function KanaRun({ session }) {
             session={session}
             dictCategory={dictCategory}
             dictTerm={c => c.kana}
-            onReplaySound={c => playKana(c.romaji)}
+            onReplaySound={c => playKana(kanaSound(c))}
             renderFront={c => <CharDisplay char={c.kana} />}
             renderBack={c => (
               <div>
@@ -322,7 +322,7 @@ export default function KanaRun({ session }) {
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
                     session={session}
-                    onReplaySound={() => playKana(card.romaji)}
+                    onReplaySound={() => playKana(kanaSound(card))}
                   />
                 </PromptCard>
               )}
@@ -339,7 +339,7 @@ export default function KanaRun({ session }) {
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
                     session={session}
-                    onReplaySound={() => playKana(card.romaji)}
+                    onReplaySound={() => playKana(kanaSound(card))}
                   />
                 </PromptCard>
               )}
@@ -355,7 +355,7 @@ export default function KanaRun({ session }) {
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
                     session={session}
-                    onReplaySound={() => playKana(card.romaji)}
+                    onReplaySound={() => playKana(kanaSound(card))}
                   />
                 </PromptCard>
               )}
@@ -371,7 +371,7 @@ export default function KanaRun({ session }) {
                     dictTerm={card.kana}
                     dictCategory={dictCategory}
                     session={session}
-                    onReplaySound={() => playKana(card.romaji)}
+                    onReplaySound={() => playKana(kanaSound(card))}
                   />
                 </PromptCard>
               )}

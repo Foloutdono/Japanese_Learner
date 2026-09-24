@@ -13,15 +13,20 @@ learner hears anything at all:
   - and nothing else is, which is what keeps /api/tts from being the
     open TTS proxy docs/adr/0006 refused.
 
-Synthesis itself is stubbed throughout: edge-tts is a network call to a
-consumer service, and none of the above is a fact about its output.
+Synthesis itself is stubbed throughout: the voice engine
+(study/voice_engine.py) is a network call, and none of the above is a
+fact about its output. The encoder is real, so what lands on disk is an
+MP3.
 """
+import math
 import os
+from array import array
 from unittest import mock
 
 import pytest
 
 import study.exam_tts as tts
+import study.voice_engine as engine
 import study.word_tts as word_tts
 from content.kana_data import get_all_kana
 from content.kanji_data import KANJI_BY_LEVEL
@@ -41,11 +46,17 @@ def store(tmp_path):
         yield os.path.join(directory, "words")
 
 
+def _word() -> engine.Pcm:
+    rate = engine.DIALOGUE_RATE
+    samples = array("h", (int(8000 * math.sin(2 * math.pi * 440 * i / rate)) for i in range(rate // 2)))
+    return engine.Pcm(samples.tobytes(), rate)
+
+
 @pytest.fixture
 def fake_tts():
-    with mock.patch.object(word_tts, "voice_for_speaker", lambda i: f"voice-{i}"), \
-            mock.patch.object(word_tts, "synthesize", mock.Mock(return_value=b"\xff\xfbmp3")) as synth:
-        yield synth
+    with mock.patch.object(engine, "style_for_slot", lambda slot: 100 + slot), \
+            mock.patch.object(engine, "say", mock.Mock(side_effect=lambda *a, **k: _word())) as say:
+        yield say
 
 
 # ── What gets said ───────────────────────────────────────────────
@@ -117,11 +128,12 @@ def test_a_clip_is_synthesized_once_and_then_read_from_disk(store, fake_tts):
     path = word_tts.clip_for(PACKED_VOCAB)
 
     assert os.path.dirname(path) == store
-    assert open(path, "rb").read() == b"\xff\xfbmp3"
+    assert engine.mp3_summary(open(path, "rb").read())["frames"] > 0
     # The packed field and the reading it normalizes to are one clip.
     assert word_tts.clip_for("まいげつ") == path
     assert fake_tts.call_count == 1
-    fake_tts.assert_called_once_with("まいげつ", "voice-0")
+    # In the reader's voice (slot 0; style_for_slot is 100 + slot here).
+    fake_tts.assert_called_once_with("まいげつ", 100, speed=engine.tempo_for_slot(0))
 
 
 def test_refused_text_never_reaches_the_synthesizer(store, fake_tts):
@@ -141,8 +153,10 @@ def test_the_store_is_trimmed_when_it_grows_past_its_cap(store, fake_tts):
         f.write(b"0" * 4096)
     os.utime(stale, (0, 0))
 
-    with mock.patch.object(word_tts, "_MAX_BYTES", 1024), \
-            mock.patch.object(word_tts, "_EVICT_TO", 512):
+    # A real clip here is half a second of MP3, about 3 KB: the cap sits
+    # above the fresh clip alone and below the two together.
+    with mock.patch.object(word_tts, "_MAX_BYTES", 6000), \
+            mock.patch.object(word_tts, "_EVICT_TO", 5000):
         fresh = word_tts.clip_for(PACKED_VOCAB)
 
     # A clip here is disposable -- the text is in the URL, so whatever
@@ -159,7 +173,7 @@ def test_a_known_reading_is_served_as_a_cacheable_mp3(client, store, fake_tts):
     assert response.status_code == 200
     assert response.headers["content-type"] == "audio/mpeg"
     assert "immutable" in response.headers["cache-control"]
-    assert response.content == b"\xff\xfbmp3"
+    assert engine.mp3_summary(response.content)["frames"] > 0
 
 
 def test_the_route_refuses_anything_outside_the_decks(client, store, fake_tts):
@@ -171,5 +185,25 @@ def test_the_route_refuses_anything_outside_the_decks(client, store, fake_tts):
 
 
 def test_a_synthesis_failure_is_not_a_crash(client, store):
-    with mock.patch.object(word_tts, "voice_for_speaker", side_effect=tts.TTSFailed("no voices")):
+    with mock.patch.object(engine, "style_for_slot", side_effect=tts.TTSFailed("no voices")):
         assert client.get("/api/tts", params={"text": PACKED_VOCAB}).status_code == 503
+
+
+def test_the_voice_revision_in_the_url_is_only_a_cache_key(client, store, fake_tts):
+    # lib/audio/speech.js adds v=<VOICE_REV> so a new voice is a new URL
+    # for every cache in front of this route; the route itself ignores it.
+    plain = client.get("/api/tts", params={"text": PACKED_VOCAB})
+    versioned = client.get("/api/tts", params={"text": PACKED_VOCAB, "v": engine.VOICE_REV})
+    assert versioned.status_code == 200
+    assert versioned.content == plain.content
+    assert fake_tts.call_count == 1
+
+
+def test_a_word_an_earlier_voice_said_is_said_again(store, fake_tts):
+    path = word_tts.clip_for(PACKED_VOCAB)
+    past = tts.voice_epoch() - 3600
+    os.utime(path, (past, past))
+
+    assert word_tts.clip_for(PACKED_VOCAB) == path
+    assert fake_tts.call_count == 2
+    assert tts.is_current(path)

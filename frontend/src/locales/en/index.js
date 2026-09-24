@@ -1077,6 +1077,9 @@ const dictionary = {
   // could not already read them.
   readingsOnName:    'Chinese reading',
   readingsKunName:   'Japanese reading',
+  // The 熟 on a word row whose reading belongs to the whole word
+  // (今朝 けさ, 時計 とけい), not to the kanji the row is about.
+  readingsWhole:     'Read as a whole word',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',
@@ -1927,7 +1930,7 @@ const onboarding = {
   settingsData: 'Data',
   settingsRedo: 'Placement test',
   settingsCredits: 'Credits',
-  creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', type: 'Typefaces' },
+  creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', speech: 'Japanese speech', kana: 'Kana voice', type: 'Typefaces' },
   themeDark: 'Dark',
   themeLight: 'Light',
   themeAuto: 'System',

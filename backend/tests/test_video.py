@@ -120,6 +120,21 @@ def test_oversized_upload_returns_413(client):
     assert response.status_code == 413
 
 
+def test_oversized_upload_is_refused_before_the_form_is_parsed(client, monkeypatch):
+    from starlette.requests import Request
+
+    async def _parsed(self, *args, **kwargs):
+        raise AssertionError("an oversized body reached the multipart parser")
+
+    monkeypatch.setattr(Request, "form", _parsed)
+    huge = b"1\n00:00:01,000 --> 00:00:02,000\nx\n" * 100_000
+    response = client.post(
+        "/api/video/session",
+        files={"file": ("huge.srt", huge, "text/plain")},
+    )
+    assert response.status_code == 413
+
+
 def test_a_long_window_is_honoured_not_capped(client):
     """The Window used to be clamped to 5 minutes. It was a second,
     blunter cap on what MAX_SENTENCES already bounds, and one the learner

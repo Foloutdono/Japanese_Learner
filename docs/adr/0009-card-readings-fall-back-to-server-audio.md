@@ -1,6 +1,8 @@
 # 0009 — Card readings fall back to server audio
 
-- **Status**: accepted
+- **Status**: accepted; the engine (edge-tts) replaced, and a lone kana sent
+  to the server rather than the device, by
+  [0019](0019-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md)
 - **Date**: 2026-09-08
 
 ## Context

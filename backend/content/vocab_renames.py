@@ -586,7 +586,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_少女_おとめ": "vocab_N3_少女_しょうじょ",
     "vocab_N1_予言_かねごと": "vocab_N1_予言_よげん",
     "vocab_N1_旧事_くじ": "vocab_N1_旧事_きゅうじ",
-    # ── The reading field's last residue ─────────────────────────
+    # ── " / " and "・する" in the reading field ──────────────────
     # Two readings joined with " / " (plan 106 fixed 十's space; these
     # three and ラジカセ kept theirs). The spaces also hid 四, 九 and 七
     # from 112's reading pairs, since "し " is no reading: the N3 cards

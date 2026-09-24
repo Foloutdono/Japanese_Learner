@@ -12258,7 +12258,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 /* 音 / 訓, as a carved square — the mark the plate and the readings
    panel share, so the two registers tell apart without the long
-   translated labels the study card prints. */
+   translated labels the study card prints. A word row carries the same
+   square with 熟 where the word's reading belongs to the whole of it
+   (今朝 けさ) rather than to the kanji the row is about. */
 .dict-kind {
   flex-shrink: 0;
   display: inline-flex;

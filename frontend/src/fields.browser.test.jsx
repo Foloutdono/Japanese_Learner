@@ -144,7 +144,25 @@ const contrast = (a, b) => {
   return (hi + 0.05) / (lo + 0.05)
 }
 
-const setTheme = (t) => document.documentElement.setAttribute('data-theme', t)
+// The page cross-fades between themes: html and body carry `transition:
+// background 0.2s` and .field its own 0.15s, so a read straight after a
+// switch is a frame of the fade and not the theme. At t=0 that frame is
+// the OLD theme -- the light pass here was measuring every .field's dark
+// well -- and partway through it is neither: the sheet's own first paint
+// fades body from the UA's transparent to --bg-main as this file imports
+// it, and a case that sits on the page (the account page's claim fields)
+// read ~90-100ms into that fade found its well matching the ground.
+// Finish every fade the switch started, in passes -- finishing html's
+// can restart body's -- and read the colours the theme settles on.
+function setTheme(t) {
+  document.documentElement.setAttribute('data-theme', t)
+  for (let pass = 0; ; pass++) {
+    const fades = document.getAnimations().filter(a => a instanceof CSSTransition)
+    if (!fades.length) return
+    if (pass === 5) throw new Error(`the ${t} theme never settled: its fades keep restarting`)
+    fades.forEach(a => a.finish())
+  }
+}
 
 describe('every field is visible on the ground it is mounted on', () => {
   it.each(CASES)('%s', async (label, markup) => {

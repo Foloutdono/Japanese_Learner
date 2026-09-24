@@ -1,7 +1,9 @@
 import unittest
 
 from study import morphology
-from study.furigana import align, align_deck, align_sentence, is_kanji, mark_spans
+from study.furigana import (
+    align, align_deck, align_sentence, is_kanji, mark_spans, written_reading,
+)
 
 
 # A tiny stand-in deck, so the alignment rules are tested against known
@@ -16,6 +18,11 @@ _FAKE = {
     "人": "ジン・ニン・ひと",
     "国": "コク・くに",
     "会": "カイ・エ・あ.う",
+    "売": "バイ・う.る",
+    "上": "ジョウ・うえ・あ.げる",
+    "世": "セイ・セ・よ",
+    "界": "カイ",
+    "中": "チュウ・なか",
 }
 
 
@@ -99,6 +106,56 @@ class AlignmentTests(unittest.TestCase):
         self.assertTrue(is_kanji("学"))
         self.assertFalse(is_kanji("が"))
         self.assertFalse(is_kanji("A"))
+        # 々 belongs in a kanji run, but it is not a character anyone
+        # looks up, and study/kanji_words.py indexes by is_kanji.
+        self.assertFalse(is_kanji("々"))
+
+    def test_the_iteration_mark_repeats_the_kanji_before_it(self) -> None:
+        # 々 was a kana anchor that never appears in a reading, so every
+        # word with one came back as one blanket ruby.
+        self.assertEqual(
+            _flat(align("人々", "ひとびと", _fake)),
+            [("人", "ひと"), ("々", "びと")],
+        )
+
+    def test_a_packed_suru_is_not_furigana(self) -> None:
+        # The deck writes 練習 as れんしゅうする and wrote 入学 as にゅうがく・する:
+        # する is not written, so nothing is printed over it.
+        for reading in ("だいがくする", "だいがく・する"):
+            self.assertEqual(
+                _flat(align("大学", reading, _fake)),
+                [("大", "だい"), ("学", "がく")],
+                reading,
+            )
+
+    def test_written_reading_drops_only_a_suru_the_text_does_not_spell(self) -> None:
+        self.assertEqual(written_reading("練習", "れんしゅうする"), "れんしゅう")
+        self.assertEqual(written_reading("入学", "にゅうがく・する"), "にゅうがく")
+        # A word ending in kana spells its own ending: 為る IS する.
+        self.assertEqual(written_reading("為る", "する"), "する")
+        self.assertEqual(written_reading("擦る", "こする"), "こする")
+        self.assertEqual(written_reading("大学", "だいがく"), "だいがく")
+
+    def test_okurigana_taken_into_the_kanji(self) -> None:
+        # 売上 writes neither う.る's る nor あ.げる's げる: the second pass
+        # reads 売 as うり (連用形) and 上 as あげ.
+        self.assertEqual(
+            _flat(align("売上", "うりあげ", _fake)),
+            [("売", "うり"), ("上", "あげ")],
+        )
+
+    def test_a_voiced_chi_written_ji(self) -> None:
+        # 世界中 is せかいじゅう: rendaku gives ぢゅう, modern spelling じゅう.
+        self.assertEqual(
+            _flat(align("世界中", "せかいじゅう", _fake)),
+            [("世", "せ"), ("界", "かい"), ("中", "じゅう")],
+        )
+
+    def test_the_second_pass_never_voices_a_word_initial_kanji(self) -> None:
+        self.assertEqual(
+            _flat(align("中界", "じゅうかい", _fake)),
+            [("中界", "じゅうかい")],
+        )
 
 
 class DeckAlignmentTests(unittest.TestCase):
@@ -110,8 +167,46 @@ class DeckAlignmentTests(unittest.TestCase):
             ("新聞", "しんぶん", [("新", "しん"), ("聞", "ぶん")]),
             ("先生", "せんせい", [("先", "せん"), ("生", "せい")]),
             ("友達", "ともだち", [("友", "とも"), ("達", "だち")]),
+            ("時々", "ときどき", [("時", "とき"), ("々", "どき")]),
+            ("練習", "れんしゅうする", [("練", "れん"), ("習", "しゅう")]),
+            ("戸締り", "とじまり", [("戸", "と"), ("締", "じま"), ("り", None)]),
         ]:
             self.assertEqual(_flat(align_deck(text, reading)), expected, text)
+
+    def test_a_kanji_the_deck_does_not_teach_reads_from_kanjidic(self) -> None:
+        # 身 and 的 are jōyō kanji the deck has no card for, and with no
+        # readings to try every word containing one came back undivided.
+        from content.kanji_data import KANJI_BY_LEVEL
+
+        taught = {e["kanji"] for entries in KANJI_BY_LEVEL.values() for e in entries}
+        self.assertNotIn("身", taught, "pick another untaught kanji for this test")
+        self.assertEqual(_flat(align_deck("独身", "どくしん")), [("独", "どく"), ("身", "しん")])
+        self.assertEqual(_flat(align_deck("目的", "もくてき")), [("目", "もく"), ("的", "てき")])
+
+    def test_a_reading_that_belongs_to_the_whole_word_stays_whole(self) -> None:
+        # 熟字訓: け is no reading of 今, and no rule may pretend it is.
+        self.assertEqual(_flat(align_deck("今朝", "けさ")), [("今朝", "けさ")])
+        self.assertEqual(_flat(align_deck("時計", "とけい")), [("時計", "とけい")])
+
+    def test_the_deck_divides(self) -> None:
+        # A ratchet, not a target: the deck's words in which some kanji
+        # gets no furigana of its own. 391 before the pool fallback, 々,
+        # the packed する and the second pass; what is left is mostly
+        # 熟字訓 and 当て字, which must stay whole. Lower the bound when a
+        # change lowers the figure; never raise it.
+        from content.vocab_data import VOCAB_BY_LEVEL
+
+        undivided = []
+        for entries in VOCAB_BY_LEVEL.values():
+            for e in entries:
+                word = (e.get("kanji") or "").strip()
+                kana = (e.get("kana") or "").split("/")[0].strip()
+                if not word or not kana or not any(is_kanji(c) for c in word):
+                    continue
+                texts = {p["text"] for p in align_deck(word, kana)}
+                if any(is_kanji(c) and c not in texts for c in word):
+                    undivided.append(word)
+        self.assertLessEqual(len(undivided), 155, undivided[:20])
 
     def test_a_reading_is_never_invented(self) -> None:
         # Whatever the split, concatenating the parts must reproduce the
@@ -128,8 +223,10 @@ class DeckAlignmentTests(unittest.TestCase):
                     continue
                 parts = align_deck(word, kana)
                 self.assertEqual("".join(p["text"] for p in parts), word, word)
+                # Less the する the deck packs onto three readings (練習
+                # れんしゅうする), which the written form does not spell.
                 rebuilt = "".join(p.get("reading") or p["text"] for p in parts)
-                self.assertEqual(rebuilt, kana, f"{word} / {kana} -> {parts}")
+                self.assertEqual(rebuilt, written_reading(word, kana), f"{word} / {kana} -> {parts}")
                 checked += 1
         self.assertGreater(checked, 5000, "guard would pass vacuously")
 

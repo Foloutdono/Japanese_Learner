@@ -29,11 +29,56 @@ A kanji's reading inside a compound is not always its citation form:
 All three are tried. Anything that still does not segment cleanly keeps
 the whole-run reading rather than being guessed at: a wrong furigana is
 worse than a coarse one, because the learner cannot tell it is wrong.
+
+── A second, looser pass ─────────────────────────────────────
+Two shapes the strict pass does not know, tried only on a run it could
+not divide, so no word it already divides can come out differently:
+
+  okurigana   a kun reading's okurigana taken into the kanji -- 売上 is
+  absorbed    う(り)+あげ, 戸締り is と+じま+り: う.る and あ.げる and
+              し.まる, written without the kana they usually carry
+  じ and ず   modern spelling writes a voiced ち/つ as じ/ず once the
+              compound is felt as one word -- 世界中 せかいじゅう,
+              融通 ゆうずう -- where rendaku alone gives ぢ/づ
+
+── What else stood in the way ────────────────────────────────
+A word could fail for reasons that are not about readings at all, and
+the dictionary's word rows showed it: the kanji a row is an example of
+is picked out only where it has a part of its own. So:
+
+  々          repeats the kanji before it and takes its readings (時々
+              とき|どき); it is not a kanji to look up, but it belongs
+              inside a kanji run rather than being a kana anchor that
+              never appears in the reading
+  する        the deck packs a suru-verb's する into three readings (練習
+              れんしゅうする, 散歩, 勉強; the ・する ones, 入学
+              にゅうがく・する among them, until the deck dropped
+              theirs); furigana annotates
+              what is written, so written_reading() drops it first
+  the pool    align_deck() falls back to KANJIDIC2 for a character the
+              deck does not teach -- 171 jōyō kanji, 的・無・可・身
+              among them, had no readings here at all
+
+What is left undivided after all of it is, overwhelmingly, a word whose
+reading belongs to the whole word -- 熟字訓 and 当て字, 今朝 けさ,
+時計 とけい -- which is exactly what the coarse rendering says.
 """
+from functools import lru_cache
+
 from content.kanji_readings import display_reading, split_readings
 
 def is_kanji(c: str) -> bool:
     return "一" <= c <= "龯"
+
+
+# 々 (the iteration mark) repeats the kanji before it. Deliberately NOT
+# is_kanji: callers index characters by it (study/kanji_words.py) and 々
+# is not a character anyone looks up. It only ever belongs in a run.
+_ITERATION = "々"
+
+
+def _in_kanji_run(c: str) -> bool:
+    return is_kanji(c) or c == _ITERATION
 
 
 def _to_hiragana(s: str) -> str:
@@ -53,10 +98,24 @@ _RENDAKU = {
 }
 # は-row can also go handakuten (っぱ), which rendaku alone misses.
 _HANDAKU = {"は": "ぱ", "ひ": "ぴ", "ふ": "ぷ", "へ": "ぺ", "ほ": "ぽ"}
+# Loose pass only: the voiced ち/つ as modern spelling writes it once the
+# compound is one word (世界中 じゅう, 融通 ずう) rather than as ぢ/づ.
+_YOTSUGANA = {"ち": "じ", "つ": "ず"}
+# Loose pass only: a godan ending in its 連用形, the form a verb takes
+# as the first half of a compound noun -- う.る is うり in 売上, あつか.う
+# is あつかい in 取扱.
+_GODAN_I = {
+    "う": "い", "く": "き", "ぐ": "ぎ", "す": "し", "つ": "ち",
+    "ぬ": "に", "ぶ": "び", "む": "み", "る": "り",
+}
 
 
-def _variants(reading: str, first: bool) -> list[str]:
-    """Every surface form this reading may take in a compound."""
+def _variants(reading: str, first: bool, loose: bool = False) -> list[str]:
+    """Every surface form this reading may take in a compound.
+
+    `loose` adds the second pass's forms (see the module docstring),
+    AFTER every strict one, so a strict form is always tried first.
+    """
     bases = [_to_hiragana(display_reading(reading))]
     # A kun reading carries its okurigana boundary: 切 is き.る, and inside
     # a compound only the き before the dot appears -- 切手 is きって, not
@@ -71,10 +130,34 @@ def _variants(reading: str, first: bool) -> list[str]:
         if not base:
             continue
         out.extend(_forms(base, first))
+    if loose:
+        for base in bases + _absorbed(reading):
+            if base:
+                out.extend(_forms(base, first, loose=True))
     return list(dict.fromkeys(out))
 
 
-def _forms(base: str, first: bool) -> list[str]:
+def _absorbed(reading: str) -> list[str]:
+    """A kun reading with its okurigana taken into the kanji, in part or
+    as the verb's 連用形: し.まる gives しま (戸締り, whose り is still
+    written), し.める gives しめ and き.る gives きり (締切, which writes
+    neither), う.る gives うり and あ.げる あげ (売上). Nothing for a
+    reading with no okurigana."""
+    if "." not in reading:
+        return []
+    stem, okurigana = reading.replace("~", "").split(".", 1)
+    stem, okurigana = _to_hiragana(stem), _to_hiragana(okurigana)
+    if not stem or not okurigana:
+        return []
+    out = []
+    if len(okurigana) > 1:
+        out.append(stem + okurigana[:-1])
+    if okurigana[-1] in _GODAN_I:
+        out.append(stem + okurigana[:-1] + _GODAN_I[okurigana[-1]])
+    return out
+
+
+def _forms(base: str, first: bool, loose: bool = False) -> list[str]:
     out = [base]
     if not first:
         head, tail = base[0], base[1:]
@@ -82,6 +165,8 @@ def _forms(base: str, first: bool) -> list[str]:
             out.append(_RENDAKU[head] + tail)
         if head in _HANDAKU:
             out.append(_HANDAKU[head] + tail)
+        if loose and head in _YOTSUGANA:
+            out.append(_YOTSUGANA[head] + tail)
     # 促音便: a final つ・ち・く・き hardens to っ before the next
     # element. がく + こう is がっこう, not がくこう -- and く is by far the
     # commonest of the four, so omitting it fails most 学-compounds.
@@ -120,10 +205,13 @@ def reading_token_for(surface: str, tokens: list[str], first: bool) -> str | Non
     whether the kanji opens the word, because rendaku only voices a
     non-initial element.
 
-    Two passes, exact before variant: 日's "び" is listed as its own bound
-    form (~び), and that entry should own the word rather than ひ claiming
-    it through rendaku. Within a pass the deck's order decides, which is
-    where a primary reading is marked -- it comes first.
+    Three passes, exact before variant before the aligner's loose forms:
+    日's "び" is listed as its own bound form (~び), and that entry should
+    own the word rather than ひ claiming it through rendaku; and a slice
+    only the loose pass could have cut (売上's うり) still files under the
+    reading it came from (う.る) rather than under none. Within a pass
+    the deck's order decides, which is where a primary reading is marked
+    -- it comes first.
     """
     if not surface:
         return None
@@ -133,14 +221,15 @@ def reading_token_for(surface: str, tokens: list[str], first: bool) -> str | Non
         stem = _to_hiragana(tok.split(".", 1)[0].replace("~", "")) if "." in tok else bare
         if surface in (bare, stem):
             return tok
-    for tok in tokens:
-        if surface in _variants(tok, first):
-            return tok
+    for loose in (False, True):
+        for tok in tokens:
+            if surface in _variants(tok, first, loose=loose):
+                return tok
     return None
 
 
-def _readings_for(char: str, lookup) -> list[str]:
-    packed = lookup(char)
+def _readings_for(char: str | None, lookup) -> list[str]:
+    packed = lookup(char) if char else None
     if not packed:
         return []
     split = split_readings(packed)
@@ -149,7 +238,8 @@ def _readings_for(char: str, lookup) -> list[str]:
     return sorted(split["on"] + split["kun"], key=len, reverse=True)
 
 
-def _segment(chars: str, reading: str, lookup, first: bool = True) -> list[str] | None:
+def _segment(chars: str, reading: str, lookup, first: bool = True,
+             loose: bool = False, prev: str | None = None) -> list[str] | None:
     """
     Split `reading` across `chars`, one slice per kanji, or None.
 
@@ -157,25 +247,31 @@ def _segment(chars: str, reading: str, lookup, first: bool = True) -> list[str] 
     tail on compounds where an early kanji has a long reading that happens
     to prefix the right answer, and there are few enough candidates that
     trying them all is free.
+
+    A 々 reads as `prev`, the kanji it repeats; `loose` is the second
+    pass (module docstring).
     """
     if not chars:
         return [] if not reading else None
     head, rest = chars[0], chars[1:]
-    for candidate in _readings_for(head, lookup):
-        for form in _variants(candidate, first):
+    char = prev if head == _ITERATION else head
+    for candidate in _readings_for(char, lookup):
+        for form in _variants(candidate, first, loose):
             if not reading.startswith(form):
                 continue
-            tail = _segment(rest, reading[len(form):], lookup, first=False)
+            tail = _segment(rest, reading[len(form):], lookup, first=False,
+                            loose=loose, prev=char)
             if tail is not None:
                 return [form] + tail
     return None
 
 
 def _split_runs(text: str) -> list[str]:
-    """Runs of kanji and runs of everything else, in order."""
+    """Runs of kanji and runs of everything else, in order. A 々 sits in
+    the run of the kanji it repeats."""
     runs: list[str] = []
     for c in text:
-        if runs and is_kanji(runs[-1][-1]) == is_kanji(c):
+        if runs and _in_kanji_run(runs[-1][-1]) == _in_kanji_run(c):
             runs[-1] += c
         else:
             runs.append(c)
@@ -198,7 +294,7 @@ def _walk(runs: list[str], reading: str, lookup) -> list[dict] | None:
 
     run, rest = runs[0], runs[1:]
 
-    if not is_kanji(run[0]):
+    if not _in_kanji_run(run[0]):
         if not reading.startswith(run):
             return None
         tail = _walk(rest, reading[len(run):], lookup)
@@ -220,11 +316,39 @@ def _walk(runs: list[str], reading: str, lookup) -> list[dict] | None:
 
 
 def _kanji_parts(run: str, slice_: str, lookup) -> list[dict]:
-    """One part per kanji when the slice divides, else one for the run."""
-    segments = _segment(run, slice_, lookup) if len(run) > 1 else None
+    """One part per kanji when the slice divides, else one for the run.
+
+    The loose pass runs only where the strict one found nothing, which is
+    what keeps it from ever changing a division the strict pass makes.
+    """
+    segments = None
+    if len(run) > 1:
+        segments = (_segment(run, slice_, lookup)
+                    or _segment(run, slice_, lookup, loose=True))
     if segments and len(segments) == len(run):
         return [{"text": ch, "reading": seg} for ch, seg in zip(run, segments)]
     return [{"text": run, "reading": slice_}]
+
+
+# The suru-verb marker the deck packs into a reading its written form
+# does not carry: 練習 れんしゅうする, and 入学 にゅうがく・する until the
+# deck dropped it.
+_SURU_MARKERS = ("・する", "する")
+
+
+def written_reading(text: str, reading: str) -> str:
+    """The part of `reading` that `text` spells: the reading less a する
+    the deck packed onto a word written without one.
+
+    Only after a kanji: a word ending in kana spells its own ending, and
+    為る (する), 擦る (こする) are read する because they are written so.
+    """
+    if not text or not reading or not _in_kanji_run(text[-1]):
+        return reading
+    for marker in _SURU_MARKERS:
+        if reading.endswith(marker) and len(reading) > len(marker):
+            return reading[:-len(marker)]
+    return reading
 
 
 def align(text: str, reading: str, lookup) -> list[dict]:
@@ -239,18 +363,44 @@ def align(text: str, reading: str, lookup) -> list[dict]:
     whole reading: the coarse rendering the app already did. A wrong
     furigana is worse than a coarse one, because the learner cannot tell
     it is wrong.
+
+    The parts spell `text` and read written_reading(text, reading): a
+    packed する is metadata about the word, not kana over it.
     """
     if not text:
         return []
-    if not reading or not any(is_kanji(c) for c in text):
+    if not reading or not any(_in_kanji_run(c) for c in text):
         return [{"text": text}]
 
+    reading = written_reading(text, reading)
     parts = _walk(_split_runs(text), reading, lookup)
     return parts if parts is not None else [{"text": text, "reading": reading}]
 
 
+@lru_cache(maxsize=4096)
+def _pool_readings(char: str) -> str | None:
+    """A character's KANJIDIC2 readings, in the deck's packed format, for
+    the ones the deck does not teach. One indexed SQLite read per
+    character, cached: the pool is 13,108 rows and is never held whole
+    (content/kanji_pool_data.py)."""
+    from content import kanji_pool_data
+
+    return kanji_pool_data.packed_readings_for([char]).get(char)
+
+
+def _deck_or_pool(char: str) -> str | None:
+    return _DECK_READINGS.get(char) or _pool_readings(char)
+
+
 def align_deck(text: str, reading: str) -> list[dict]:
-    """align() against the app's own kanji deck."""
+    """align() against the app's own kanji deck, and KANJIDIC2 for a
+    character the deck does not teach.
+
+    The deck's readings come first because they are the ones the app
+    teaches, and a character it teaches never reaches the pool: 的, 無
+    and 身 are the reason the pool is asked at all, and until it was
+    every word containing one came back undivided.
+    """
     from content.kanji_data import KANJI_BY_LEVEL
 
     global _DECK_READINGS
@@ -259,7 +409,7 @@ def align_deck(text: str, reading: str) -> list[dict]:
             e["kanji"]: e.get("kana", "")
             for entries in KANJI_BY_LEVEL.values() for e in entries
         }
-    return align(text, reading, _DECK_READINGS.get)
+    return align(text, reading, _deck_or_pool)
 
 
 def align_sentence(text: str) -> list[dict]:

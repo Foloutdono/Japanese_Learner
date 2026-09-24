@@ -17,7 +17,7 @@ import '../../index.css'
 // that the same panel is the whole screen on a phone and a column
 // beside the catalogue on a desktop.
 
-vi.mock('../../lib/audio', async o => ({ ...(await o()), speakJapanese: vi.fn(), playUi: vi.fn() }))
+vi.mock('../../lib/audio', async o => ({ ...(await o()), speakJapanese: vi.fn(), playKana: vi.fn(), playUi: vi.fn() }))
 vi.mock('../../lib/api', () => ({
   apiFetch: vi.fn(),
   apiJson: vi.fn(async () => ({})),
@@ -49,7 +49,7 @@ globalThis.fetch = vi.fn(async url => ({
 }))
 
 const { DictionaryDetail, DictionaryLookupSheet } = await import('./DictionaryDetail')
-const { speakJapanese } = await import('../../lib/audio')
+const { speakJapanese, playKana } = await import('../../lib/audio')
 const { apiFetch } = await import('../../lib/api')
 
 const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
@@ -198,6 +198,7 @@ beforeEach(async () => {
 afterEach(async () => {
   await cleanup()
   vi.mocked(speakJapanese).mockClear()
+  vi.mocked(playKana).mockClear()
   // The lane's files share one origin, so the language this file sets
   // must not leak into a suite that reads the French default.
   localStorage.removeItem('lang')
@@ -313,6 +314,14 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     // Ghosts: a ring and the ambient ink, never a filled disc.
     expect(getComputedStyle(speak).backgroundColor).toBe('rgba(0, 0, 0, 0)')
     expect(getComputedStyle(speak).borderTopWidth).toBe('1px')
+  })
+
+  it('plays a kana the deck\'s own clip rather than synthesizing it (plan 121)', async () => {
+    // ウォ's romaji is を's; its clip is its own.
+    const { root } = await renderEntry({ ...KANA, kana: 'ウォ', romaji: 'wo', sound: 'wo_foreign', type: 'katakana' })
+    root.querySelector('.dict-plate__btn').click()
+    expect(playKana).toHaveBeenCalledWith('wo_foreign')
+    expect(speakJapanese).not.toHaveBeenCalled()
   })
 })
 
@@ -1014,6 +1023,41 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // The rest of the word keeps the ambient ink.
     const plain = rows[0].querySelector('.dict-word__jp ruby:not(.dict-word__hit)')
     expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
+    // A word read by one of the character's readings needs no mark.
+    expect(root.querySelector('section[aria-label="Used in these words"] .dict-kind')).toBeNull()
+  })
+
+  // 今朝 is けさ, and け is no reading of 今: study/furigana.py keeps one
+  // ruby over the pair (熟字訓), so 今 has no part of its own to carry
+  // the hit. It used to go unmarked, the one row in the ledger with no
+  // gold in it.
+  it('picks the kanji out of a word read as a whole, and marks the row 熟', async () => {
+    const { root } = await renderEntry({
+      ...KANJI, kanji: '今', kana: 'コン・キン・いま',
+      vocab_examples: [
+        { kanji: '今週', kana: 'こんしゅう', meaning: 'this week', level: 'N5',
+          furigana: [{ text: '今', reading: 'こん' }, { text: '週', reading: 'しゅう' }] },
+        { kanji: '今朝', kana: 'けさ', meaning: 'this morning', level: 'N5',
+          furigana: [{ text: '今朝', reading: 'けさ' }] },
+      ],
+      readings: [],
+    })
+    const [split, whole] = root.querySelectorAll('section[aria-label="Used in these words"] .dict-word')
+    const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))')
+
+    const hit = whole.querySelector('.dict-word__hit')
+    expect(hit.textContent).toBe('今')
+    expect(getComputedStyle(hit).color).toBe(ink)
+    // The reading is the word's, not 今's: it keeps the row's own ink.
+    const rt = whole.querySelector('rt')
+    expect(rt.textContent).toBe('けさ')
+    expect(getComputedStyle(rt).color).not.toBe(ink)
+    expect(baseText(whole.querySelector('.dict-word__jp'))).toBe('今朝')
+
+    const mark = whole.querySelector('.dict-kind')
+    expect(mark.querySelector('[aria-hidden="true"]').textContent).toBe('熟')
+    expect(mark.querySelector('.sr-only').textContent).toBe('Read as a whole word')
+    expect(split.querySelector('.dict-kind')).toBeNull()
   })
 
   // The wide-reading case, on its own fixture and away from the big
