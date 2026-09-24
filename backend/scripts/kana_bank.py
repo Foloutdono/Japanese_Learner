@@ -39,11 +39,15 @@ Every sound the deck teaches, by recipe (recipe_for):
     past the next sound in its string;
   - a long vowel (ああ, アー, and えい/おう, which the lesson teaches as ē
     and ō) is the bank's long tone (あー) where it has one; else the
-    vowel held -- its steady end repeated past the end of its
-    recording, each repeat joined in phase (_hold, _in_phase);
-  - あい and おい are the glide the singer made, where a string goes
-    from one vowel to the other ("- あ" then "a い"); else two samples
-    joined in phase;
+    vowel's own attack joined into the longest note the singer held on
+    that vowel -- in a joined bank, the note that ends a string
+    (_sustained); a looped steady end (_hold) only for a bank with
+    neither, since a loop is heard as the vowel said again;
+  - あい and おい are the singer's own move from one vowel to the other
+    ("a い", from whichever string sings it), entered from the first
+    vowel's word-initial attack (_glide); two samples joined in phase
+    only where no string makes the move -- two takes butted together
+    are heard as あ, then い;
   - を is お's sample, because を is said "o" (ウォ, the "wo" sound, is
     うぉ's);
   - ぢ/づ share じ/ず's clip, as they share the deck's sound name;
@@ -94,9 +98,23 @@ SECOND_SKIP_S = 0.040
 # How far a join may slide to meet what it follows in phase: a pitch
 # period at 133 Hz, below any folder these banks have (A3 is 220 Hz).
 PHASE_SEARCH_S = 0.0075
-# A vowel held past its recording repeats this much of its steady end
-# at a time -- after dropping its last HOLD_GUARD_S, where a sung vowel
-# already bends toward the consonant that follows it in the string.
+# A long vowel is the vowel's own attack, LONG_HEAD_S of it, joined into
+# a note the singer held on that vowel, from STEADY_SKIP_S after that note
+# is heard (past his move into it).
+LONG_HEAD_S = 0.250
+STEADY_SKIP_S = 0.120
+# あい enters his move from あ into い this long before い is heard, while
+# it is still あ -- where the two takes are joined.
+GLIDE_LEAD_S = 0.150
+# Two takes of one vowel are seldom sung at one level: the second is
+# brought to the first's over LEVEL_MATCH_S either side of the join, by
+# LEVEL_MATCH_LIMIT_DB at most.
+LEVEL_MATCH_S = 0.040
+LEVEL_MATCH_LIMIT_DB = 6
+# The last resort for a bank with no note held long enough: repeat this
+# much of the vowel's steady end at a time -- after dropping its last
+# HOLD_GUARD_S, where a sung vowel already bends toward the consonant
+# that follows it in the string.
 HOLD_LOOP_S = 0.200
 HOLD_GUARD_S = 0.050
 # A syllable in a joined string stops this far short of the next sound,
@@ -140,6 +158,10 @@ PRE_ROLL_S = 0.060
 _SYLLABLE = re.compile(r"[ぁ-ゖー]+")
 _READ_AS = str.maketrans({"ヴ": "ゔ", "ン": "ん"})
 _PITCH = re.compile(r"[A-G][#b]?\d")
+# A joined bank names the sound a syllable is sung after by its vowel:
+# "a い" is い entered from あ.
+_AFTER = {"a": "あ", "i": "い", "u": "う", "e": "え", "o": "お", "n": "ん"}
+_VOWELS = set("あいうえお")
 
 
 class BankError(Exception):
@@ -261,8 +283,12 @@ class Sample:
 
 @dataclass
 class Bank:
-    samples: dict[str, Sample] = field(default_factory=dict)             # syllable -> its sample
-    glides: dict[tuple[str, str], Sample] = field(default_factory=dict)  # (it, then) -> a string doing that
+    samples: dict[str, Sample] = field(default_factory=dict)   # syllable -> its word-initial sample
+    # (from, to) -> a sound sung straight out of the vowel `from` ("a い"
+    # is (あ, い)): the moves a joined bank records between its syllables.
+    transitions: dict[tuple[str, str], Sample] = field(default_factory=dict)
+    # vowel -> the longest note held on it, anywhere in the bank.
+    steady: dict[str, Sample] = field(default_factory=dict)
     # Every folder a syllable was found in. More than one is usually one
     # per pitch, and the best sample of each syllable across them would
     # sing the set in several keys.
@@ -347,27 +373,44 @@ def index_bank(root: Path, pitch: str | None = None) -> Bank:
             lines.setdefault(_key(oto.parent / name), []).append((alias, offset, cutoff, preutterance))
 
     best: dict[str, tuple] = {}
-    glides: dict[tuple[str, str], tuple] = {}
+    moves: dict[tuple[str, str], tuple] = {}
+    held: dict[str, tuple] = {}
     folders: set[str] = set()
     wanted = unicodedata.normalize("NFC", pitch).casefold() if pitch else None
+
+    def keep(table: dict, key, rank: tuple, sample: Sample) -> None:
+        if key not in table or rank < table[key][0]:
+            table[key] = (rank, sample)
+
     for wav_path in sorted(root.rglob("*.wav")):
         relative = unicodedata.normalize("NFC", wav_path.relative_to(root).as_posix())
         if wanted and wanted not in relative.casefold().split("/")[:-1]:
             continue
+        duration = _duration_ms(wav_path)
         for sample, opens in _sounds_in(wav_path, lines.get(_key(wav_path))):
-            if not opens or sample.syllable is None:
+            if sample.syllable is None:
                 continue
-            folders.add(wav_path.parent.name)
-            rank = (not sample.plain, -sample.room_ms(), len(sample.alias), relative)
-            if sample.syllable not in best or rank < best[sample.syllable][0]:
-                best[sample.syllable] = (rank, sample)
-            nxt = sample.after
-            if nxt is not None and nxt.syllable is not None:
-                key, glide_rank = (sample.syllable, nxt.syllable), (not nxt.plain, *rank)
-                if key not in glides or glide_rank < glides[key][0]:
-                    glides[key] = (glide_rank, sample)
-    return Bank({s: ranked[1] for s, ranked in best.items()}, {k: ranked[1] for k, ranked in glides.items()},
-                sorted(folders))
+            run = sample.end_ms(duration) - sample.heard_ms     # how long it is heard for
+            if sample.syllable in _VOWELS:
+                keep(held, sample.syllable, (not sample.plain, -run, relative), sample)
+            tokens = unicodedata.normalize("NFC", sample.alias).split()
+            if len(tokens) == 2 and tokens[0].casefold() in _AFTER:
+                keep(moves, (_AFTER[tokens[0].casefold()], sample.syllable), (not sample.plain, -run, relative), sample)
+            if opens:
+                folders.add(wav_path.parent.name)
+                keep(best, sample.syllable, (not sample.plain, -sample.room_ms(), len(sample.alias), relative), sample)
+    return Bank({s: ranked[1] for s, ranked in best.items()}, {k: ranked[1] for k, ranked in moves.items()},
+                {v: ranked[1] for v, ranked in held.items()}, sorted(folders))
+
+
+def _duration_ms(path: Path) -> float:
+    """A WAV's length from its header, without reading its samples (one
+    the stdlib cannot open counts as endless: the cut finds its end)."""
+    try:
+        with wave.open(str(path)) as clip:
+            return clip.getnframes() / clip.getframerate() * 1000
+    except (wave.Error, EOFError, OSError):
+        return float("inf")
 
 
 def missing(bank: Bank, plan: dict[str, Recipe]) -> list[str]:
@@ -513,6 +556,35 @@ def _join(first: list[float], second: list[float], rate: int) -> list[float]:
     return head + glide + second[overlap:]
 
 
+def _match_level(tail: list[float], head: list[float], rate: int) -> list[float]:
+    """`tail` scaled so its first LEVEL_MATCH_S is as loud as the last of
+    `head`, which it is about to be joined to."""
+    n = int(LEVEL_MATCH_S * rate)
+    ends = [math.sqrt(sum(x * x for x in part) / len(part)) if part else 0.0 for part in (head[-n:], tail[:n])]
+    if min(ends) <= 0:
+        return tail
+    limit = 10 ** (LEVEL_MATCH_LIMIT_DB / 20)
+    gain = min(max(ends[0] / ends[1], 1 / limit), limit)
+    return [x * gain for x in tail]
+
+
+def _sustained(attack: Sample, note: Sample) -> tuple[list[float], int] | None:
+    """A long vowel as he sang one: the vowel's word-initial attack
+    (LONG_HEAD_S of it), then -- joined in phase, at the attack's level --
+    the note he held on that vowel, from STEADY_SKIP_S after it is heard.
+    None when the note is too short to fill LONG_S, or at another rate."""
+    head, rate, heard = _spoken(attack, LONG_HEAD_S)
+    samples, note_rate, _begin, end = _recording(note)
+    if note_rate != rate:
+        return None
+    start = int((note.heard_ms / 1000 + STEADY_SKIP_S) * rate)
+    need = int(LONG_S * rate) - heard + int((CROSSFADE_S + PHASE_SEARCH_S) * rate)
+    if end - start < need:
+        return None
+    piece = _join(head, _match_level(_floats(samples, start, start + need), head, rate), rate)
+    return piece[:len(head) - heard + int(LONG_S * rate)], rate
+
+
 def _hold(piece: list[float], rate: int, length: int) -> list[float]:
     """A vowel held longer than its recording holds it: the last
     HOLD_LOOP_S of it, steady by then, repeated -- each repeat joined
@@ -526,27 +598,23 @@ def _hold(piece: list[float], rate: int, length: int) -> list[float]:
     return held[:length]
 
 
-def _glide(sample: Sample) -> tuple[list[float], int]:
-    """あい as the singer sang it: the first vowel from its onset, then
-    the recorded move into the second (`sample.after`). A first vowel
-    held longer than DIPHTHONG_FIRST_S loses its middle, its two ends
-    joined in phase -- it is one vowel either side of the cut."""
-    after = sample.after
-    samples, rate, begin, _end = _recording(sample)
+def _glide(attack: Sample, move: Sample) -> tuple[list[float], int]:
+    """あい as he sang it: the first vowel's word-initial attack, then his
+    own move into the second (`move`, "a い"), entered GLIDE_LEAD_S before
+    the second vowel is heard -- still the first vowel, where the two takes
+    are joined, in phase and at one level. The attack is cut so that the
+    first vowel lasts DIPHTHONG_FIRST_S in all."""
+    samples, rate, _begin, end = _recording(move)
     to_frames = rate / 1000
-    turn = int(after.start_ms * to_frames)        # the move begins: still the first vowel
-    heard = int(after.heard_ms * to_frames)       # the second vowel is heard
-    start = onset(samples, rate, sample.start_ms, heard)
-    after_end = int(after.end_ms(len(samples) / to_frames) * to_frames)
-    if after.after is not None:
-        after_end -= int(END_MARGIN_S * rate)
-    stop = min(heard + int(DIPHTHONG_SECOND_S * rate), after_end)
-    keep = max(int(DIPHTHONG_FIRST_S * rate) - (heard - turn), int(MIN_SYLLABLE_S * rate))
-    first_from = start - int(PRE_ROLL_S * rate)
-    if turn - start <= keep:
-        return _floats(samples, first_from, stop), rate
-    first = _floats(samples, first_from, start + keep + int(CROSSFADE_S * rate))
-    return _join(first, _floats(samples, turn - int(PHASE_SEARCH_S * rate), stop), rate), rate
+    heard = int(move.heard_ms * to_frames)
+    enter = max(int(move.start_ms * to_frames), heard - int(GLIDE_LEAD_S * rate))
+    stop = min(heard + int(DIPHTHONG_SECOND_S * rate), end)
+    first = max(DIPHTHONG_FIRST_S - (heard - enter) / rate, MIN_SYLLABLE_S) + CROSSFADE_S
+    head, head_rate, _heard = _spoken(attack, first)
+    if head_rate != rate:
+        raise BankError(f"{attack.alias} and {move.alias} are recorded at different rates")
+    tail = _floats(samples, enter - int(PHASE_SEARCH_S * rate), stop)
+    return _join(head, _match_level(tail, head, rate), rate), rate
 
 
 def make(bank: Bank, recipe: Recipe) -> tuple[voice_engine.Pcm, str]:
@@ -564,13 +632,18 @@ def make(bank: Bank, recipe: Recipe) -> tuple[voice_engine.Pcm, str]:
         piece, rate, heard = _spoken(first, LONG_S)
         source, fade = first.alias, FADE_OUT_LONG_S
         if heard < int(LONG_S * rate):
-            piece = _hold(piece, rate, len(piece) + int(LONG_S * rate) - heard)
-            source += " (held)"
+            note = None if used[0].endswith("ー") else bank.steady.get(used[0])
+            sustained = _sustained(first, note) if note is not None else None
+            if sustained is not None:
+                (piece, rate), source = sustained, f"{first.alias} + {note.alias}"
+            else:
+                piece = _hold(piece, rate, len(piece) + int(LONG_S * rate) - heard)
+                source += " (held)"
     elif recipe.shape == "diphthong":
-        glide, fade = bank.glides.get((used[0], used[1])), FADE_OUT_S
-        if glide is not None:
-            piece, rate = _glide(glide)
-            source = f"{glide.alias} → {glide.after.alias}"
+        move, fade = bank.transitions.get((used[0], used[1])), FADE_OUT_S
+        if move is not None:
+            piece, rate = _glide(first, move)
+            source = f"{first.alias} → {move.alias}"
         else:
             second = bank.samples[used[1]]
             head, rate, _heard = _spoken(first, DIPHTHONG_FIRST_S)

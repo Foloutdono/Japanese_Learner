@@ -279,8 +279,9 @@ def _bank_maker(sounds: dict[str, dict], names: list[str], directory: Path, pitc
         for gap in gaps:
             logger.error("  %s", gap)
         return None
-    logger.info("Bank %s%s: %d syllables sung on their own, %d recorded glides", directory,
-                f" ({pitch})" if pitch else "", len(bank.samples), len(bank.glides))
+    logger.info("Bank %s%s: %d syllables sung on their own, %d moves between sounds, held notes on %s",
+                directory, f" ({pitch})" if pitch else "", len(bank.samples), len(bank.transitions),
+                "".join(sorted(bank.steady)) or "no vowel")
     for name in sorted(wanted):
         recipe = wanted[name]
         if recipe.note and bank.pick(recipe.parts[0]) != recipe.parts[0][0]:

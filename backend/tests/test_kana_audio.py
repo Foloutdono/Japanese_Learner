@@ -397,7 +397,9 @@ def test_a_joined_bank_is_read_by_the_syllables_that_open_its_strings(tmp_path):
     assert ka.after.alias == "a かF4"               # the plain name stands for the sound
     assert ka.end_ms(10_000) == starts[1]           # where the next か is heard
     assert ka.after.after.alias == "a きF4"
-    assert bank.glides == {("か", "か"): ka}
+    assert sorted(bank.transitions) == [("あ", "か"), ("あ", "き")]    # か and き, each entered from あ
+    assert bank.transitions[("あ", "か")].alias == "a かF4"
+    assert bank.steady == {}                                           # no vowel held anywhere
     assert kana_bank.missing(bank, {"ki": kana_bank.recipe_for("き")}) == ["ki: needs き"]
 
 
@@ -425,6 +427,33 @@ def test_a_long_vowel_is_held_past_the_end_of_its_recording(tmp_path):
     assert _flatness(pcm, fade_s=kana_bank.FADE_OUT_LONG_S) > 0.9
 
 
+def test_a_long_vowel_is_his_held_note(tmp_path):
+    # His あ that opens a string is cut short by the next sound; another
+    # string ends on an あ he held for a second, sung more softly. The
+    # long vowel is the first's attack joined into the second's note --
+    # at one level, or the join is heard as the vowel said again.
+    starts = _string(tmp_path / "_あか.wav", [(0.45, 220.0, 0.5), (0.5, 247.0, 0.5)])
+    held = _string(tmp_path / "_かあ.wav", [(0.3, 247.0, 0.5), (1.0, 220.0, 0.25)])
+    _oto(tmp_path, [f"_あか.wav=- あ,{starts[0] - 10},0,-450,10,0",
+                    f"_あか.wav=a か,{starts[1] - 80},60,0,80,30",
+                    f"_かあ.wav=- か,{held[0] - 10},60,-300,10,0",
+                    f"_かあ.wav=a あ,{held[1] - 100},0,0,100,30"])
+    bank = kana_bank.index_bank(tmp_path)
+    assert bank.steady["あ"].alias == "a あ"
+
+    pcm, source = kana_bank.make(bank, kana_bank.recipe_for("ああ"))
+    assert source == "- あ + a あ"
+    assert pcm.seconds == pytest.approx(kana_bank.PRE_ROLL_S + kana_bank.LONG_S, abs=0.002)
+    assert _flatness(pcm, fade_s=kana_bank.FADE_OUT_LONG_S) > 0.9       # no dip at the join
+    samples, rate = array("h", pcm.frames), pcm.rate
+
+    def level(a: float, b: float) -> float:
+        part = samples[int((kana_bank.PRE_ROLL_S + a) * rate):int((kana_bank.PRE_ROLL_S + b) * rate)]
+        return math.sqrt(sum(x * x for x in part) / len(part))
+
+    assert level(0.35, 0.55) / level(0.05, 0.20) == pytest.approx(1.0, rel=0.1)   # nor a step
+
+
 def test_a_diphthong_is_the_glide_the_singer_made(tmp_path):
     starts = _string(tmp_path / "_あい.wav", [(0.5, 220.0, 0.3), (0.6, 247.0, 0.6)])
     _oto(tmp_path, [f"_あい.wav=- あ,{starts[0] - 10},0,-500,10,0",
@@ -448,6 +477,33 @@ def test_a_diphthong_is_the_glide_the_singer_made(tmp_path):
     assert level(0.33, 0.50) / level(0.05, 0.25) == pytest.approx(2.0, rel=0.1)   # い is sung twice as loud
     assert _flatness(engine.Pcm(samples[:int((kana_bank.PRE_ROLL_S + 0.27) * rate)].tobytes(), rate),
                      fade_s=-0.01) > 0.9                                          # the cut in あ is seamless
+
+
+def test_a_diphthong_is_his_move_from_another_string(tmp_path):
+    # No string opens あ and goes on to い; one sings あ into い further
+    # along, more softly. あい is the first あ's attack joined into that
+    # move while it is still あ -- brought to one level -- not い glued on.
+    starts = _string(tmp_path / "_あか.wav", [(0.45, 220.0, 0.3), (0.5, 247.0, 0.3)])
+    moves = _string(tmp_path / "_かあい.wav", [(0.3, 247.0, 0.15), (0.5, 220.0, 0.15), (0.6, 262.0, 0.3)])
+    _oto(tmp_path, [f"_あか.wav=- あ,{starts[0] - 10},0,-450,10,0",
+                    f"_あか.wav=a か,{starts[1] - 80},60,0,80,30",
+                    f"_かあい.wav=- か,{moves[0] - 10},60,-300,10,0",
+                    f"_かあい.wav=a あ,{moves[1] - 100},0,0,100,30",
+                    f"_かあい.wav=a い,{moves[2] - 100},0,0,100,30"])
+    _tone(tmp_path / "い.wav", freq=262.0)
+    pcm, source = kana_bank.make(kana_bank.index_bank(tmp_path), kana_bank.recipe_for("あい"))
+    assert source == "- あ → a い"
+    assert pcm.seconds == pytest.approx(
+        kana_bank.PRE_ROLL_S + kana_bank.DIPHTHONG_FIRST_S + kana_bank.DIPHTHONG_SECOND_S, abs=0.01)
+    samples, rate = array("h", pcm.frames), pcm.rate
+
+    def level(a: float, b: float) -> float:
+        part = samples[int((kana_bank.PRE_ROLL_S + a) * rate):int((kana_bank.PRE_ROLL_S + b) * rate)]
+        return math.sqrt(sum(x * x for x in part) / len(part))
+
+    # His move was sung at half the first あ's level; brought up to it, い
+    # comes out twice as loud as あ, as he sang the two.
+    assert level(0.33, 0.50) / level(0.05, 0.25) == pytest.approx(2.0, rel=0.1)
 
 
 def test_the_v_row_is_the_banks_own_when_it_has_one(tmp_path):
@@ -486,17 +542,18 @@ def test_a_pitch_names_one_folder_exactly(tmp_path, caplog):
 
 
 def test_the_whole_set_from_a_joined_bank(tmp_path, caplog):
-    # Every syllable opens a string of its own, as in 波音リツ's bank; あ
-    # and お go on to い, so their diphthongs are the singer's glide.
+    # Every syllable opens a string of its own, as in 波音リツ's bank, and
+    # the string ends on a vowel he holds: あ and お go on to い, so their
+    # diphthongs are his own move, and every vowel is held somewhere.
     folder, out = tmp_path / "bank" / "A3", tmp_path / "kanas"
     one = folder / "_.wav"
-    starts = _string(one, [(0.45, 220.0, 0.4), (0.45, 247.0, 0.4)])
+    starts = _string(one, [(0.45, 220.0, 0.4), (0.9, 247.0, 0.4)])
     lines = []
     for i, syllable in enumerate(sorted(_bank_syllables() - {"あー", "いー", "うー", "えー", "おー"})):
-        name, then = f"_{i:03d}.wav", "い" if syllable in ("あ", "お") else "あ"
+        name, then = f"_{i:03d}.wav", "い" if syllable in ("あ", "お") else "あいうえお"[i % 5]
         shutil.copyfile(one, folder / name)
         lines += [f"{name}=- {syllable.replace('ゔ', 'ヴ')}A3,{starts[0] - 10},60,-450,10,0",
-                  f"{name}=a {then}A3,{starts[1] - 80},0,0,80,30"]
+                  f"{name}={'o' if syllable == 'お' else 'a'} {then}A3,{starts[1] - 80},0,0,80,30"]
     one.unlink()
     _oto(folder, lines)
 
@@ -506,8 +563,9 @@ def test_the_whole_set_from_a_joined_bank(tmp_path, caplog):
     assert build_kana_audio._check(plan(), out) == 0
     assert read_sources(out) == {name: "namine-ritsu" for name in plan()}
     logged = caplog.text
-    assert "- あA3 → a いA3" in logged and "- おA3 → a いA3" in logged
-    assert "- えA3 (held)" in logged
+    assert "- あA3 → a いA3" in logged and "- おA3 → o いA3" in logged
+    assert "- えA3 + " in logged                      # ē: his え, held on another string
+    assert "(held)" not in logged                     # nothing looped
     assert "the バ row" not in logged                 # the ヴ row is his own
 
 
