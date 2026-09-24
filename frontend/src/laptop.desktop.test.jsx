@@ -56,7 +56,7 @@ function Stage({ children, done = false }) {
   return (
     <LangProvider>
       <MemoryRouter>
-        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} side={<SessionPanel done={done} />} sideLabel="This run">
+        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records done={done} side={<SessionPanel done={done} />} sideLabel="This run">
           {children}
         </StudyStage>
       </MemoryRouter>
@@ -186,7 +186,7 @@ describe('the session panel at a run\'s end', () => {
     await settle()
     expect($('.desk-misses')).toBeNull()
     expect($('.desk-run__note')).toBeNull()
-    expect($$('.desk-tally .record')).toHaveLength(3)
+    expect($$('.lvlbar .desk-tally .desk-tally__fig')).toHaveLength(3)
   })
 })
 

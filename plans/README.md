@@ -199,8 +199,16 @@ Thirteen waves live in this file:
   everywhere (Esc's owner, one walk for every list, places as links,
   radios, doors that own their focus, a run's foot under its card, the
   workspace centred on a wide window), with eleven phone bugs fixed on
-  the way. Its section is at the very bottom of this file. The next wave
-  begins at 124.
+  the way. Its section is near the bottom of this file.
+
+- **Wave 29 — 操作盤, the run's console on the desk** (plan 124,
+  2026-09-25, DONE). A card run's floor on the desk is one console of two
+  rows across the stage: the rating tiles over the level bar, the bar
+  holding this run's three figures beside the fare, the card grown to
+  it; the side is the entry's place, with the misses listed as they
+  happen. Numbered 124 because 122–123 went to wave 28 while it was open.
+  Its section is at the very bottom of this file. The next wave begins
+  at 125.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
@@ -6117,3 +6125,29 @@ The identity pass compares the branch with base c1aa347 at 390, 768,
 
 The P0 commits are the only intended differences below 1100. Each was
 diffed alone when it landed.
+
+---
+
+# Wave 29 — 操作盤, the run's console on the desk (plan 124, 2026-09-25)
+
+Numbered 124 because 122–123 went to wave 28 while the console was open;
+the next wave begins at 125.
+
+Planned 2026-09-25 from four layouts drawn side by side the day before
+(the "Tsuji desk run layouts" canvas, direction B, the owner's pick). The
+complaint: on the desk a card run was a 640px card in a 1,517px stage,
+~350px of nothing under its rating bar, and a 360px side glued to the
+window's edge that held three figures and a sentence before the reveal.
+
+| # | Plan | Status |
+|---|------|--------|
+| 124 | 操作盤: a card run's floor is one console of two rows across the stage — the rating tiles' row fixed above the level bar, the bar holding this run's three figures at its left beside the fare; the card grows to it, or stands as tall as its choices; the side is the entry's place, with the misses listed as they happen. `StudyStage`'s `records`, `LevelBar`'s `records`, `RunRecords`; `src/console.desktop.test.jsx` and a block of `deskfree.phone` | DONE (2026-09-25) |
+
+The one row the canvas drew — the tiles between the figures and the
+fare — does not fit under about 1,600px, and the desk is one media block
+with no second width query allowed (`src/desk.css.test.js`), so the rows
+are two everywhere. The deck's composition is not repeated in the side:
+the hairline under the head draws it and the desk prints its legend.
+The level bar's `progressbar` role moved from the bar to its track, since
+a progressbar's children are presentational and the figures now stand in
+the bar.

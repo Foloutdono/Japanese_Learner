@@ -1380,3 +1380,35 @@ describe('the pointer and the copy (plan 123, P19)', () => {
     expect(document.querySelector('.console__clear').hasAttribute('title')).toBe(false)
   })
 })
+
+// ── plan 124 — the console a phone does without ──
+// On the desk a card run's floor is the console: the rating tiles' row
+// fixed above the level bar, and this run's three figures on the bar
+// beside the fare. A phone's level bar is the strip it always was, with
+// no figures on it, and its rating bar docks in the stage as before.
+describe('the console (plan 124)', () => {
+  it('keeps the level bar a strip with no figures, and the rating bar docked in the stage', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { StudyStage } = await import('./components/study/StudyStage')
+    const { CardTransition } = await import('./components/study/CardTransition')
+    const { default: PromptCard } = await import('./components/study/PromptCard')
+    const { default: RatingBar } = await import('./components/study/RatingBar')
+    const { SessionPanel } = await import('./components/study/SessionPanel')
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records side={<SessionPanel />}>
+            <CardTransition className="specimen-card-stage" cardKey="k"><PromptCard><span>駅</span></PromptCard></CardTransition>
+            <RatingBar active onRate={() => {}} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(500)
+    expect(document.querySelector('.desk-run--console, .desk-tally, .desk-run__side')).toBeNull()
+    const lvl = document.querySelector('.lvlbar')
+    expect(lvl.getBoundingClientRect().height).toBe(36)
+    expect(lvl.querySelector('.lvlbar__track').getAttribute('role')).toBe('progressbar')
+    expect(getComputedStyle(document.querySelector('.rating-bar')).position).toBe('sticky')
+  })
+})

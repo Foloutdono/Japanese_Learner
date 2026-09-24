@@ -285,6 +285,8 @@ export default function GrammarRun({ session }) {
       sub={currentModeLabel}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
+      done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
           <SessionPanel done={done} />

@@ -348,7 +348,17 @@ runtime purpose. Two consequences worth knowing:
   (cited across `components/`, `screens/`, `hooks/`, `lib/keyGuards.js` and
   `index.css`, and held by the desktop, wide and phone tests named in
   `docs/design/desk/README.md`; DESIGN.md, "The desk"; ADR 0018).
-  When starting a new wave, begin at **124** or higher, and check
+  **124** is 操作盤, the run's console on the desk (wave 29; numbered 124
+  because 122–123 went to wave 28 while it was open): a card run's floor
+  as one console of two rows across the stage — the rating tiles' row
+  fixed above the level bar, the bar holding this run's three figures
+  beside the fare — the card grown to it, the side the entry's place
+  with the misses listed during the run (cited in
+  `components/chrome/LevelBar.jsx`, `components/study/StudyStage.jsx`'s
+  `records`, `components/study/RunRecords.jsx`,
+  `components/study/SessionPanel.jsx`, `src/console.desktop.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **125** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

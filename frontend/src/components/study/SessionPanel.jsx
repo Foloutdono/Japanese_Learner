@@ -2,51 +2,60 @@ import { useEffect, useState } from 'react'
 import { composing } from '../../lib/keyGuards'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { useLang } from '../../LangContext'
-import { useRunTally, tallyAccuracy, tallyMisses } from '../../stores/runTally'
+import { useRunTally, tallyMisses } from '../../stores/runTally'
 import { useDeskEntry } from '../../stores/deskEntry'
 import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 
 // ── 机 — the run's panel, beside the card (plan 114) ────────────────
-// What a desk's width buys a run: the column beside the card holds the
-// two things a learner on a phone either cannot see mid-run or has to
-// open a sheet for.
+// What a desk's width buys a run: the column beside the card is the
+// entry's place — the two things a learner on a phone either cannot
+// see mid-run or has to open a sheet for.
 //
-//   - This run, in three records: cards rated, the share good or
-//     better, the XP they earned (stores/runTally, counted where every
-//     SRS run already reviews — hooks/useReviewGates).
 //   - The revealed card's dictionary entry, open: meanings, readings,
 //     the kanji it is written with, the words it makes. Docked by the
 //     reveal (stores/deskEntry), so never before it — the entry is the
 //     answer. Its doors open into the same panel (the lookup's own
 //     stack), and the next card clears it.
+//   - The cards that went badly so far (stores/runTally's tallyMisses,
+//     the last rating of each below good), as chips, each opening its
+//     entry here the way the reveal did. Plan 115 listed them at the
+//     run's end only; plan 124 lists them as they happen, so a learner
+//     can look back at a card without leaving the run. A reveal takes
+//     the column, and the chip it displaces is no longer open.
+//
+// This run's three records — rated, good or better, XP earned — stood
+// at the head of this column until plan 124 moved them onto the run's
+// floor, the console (components/study/RunRecords.jsx, drawn by the
+// level bar). A browse (components/study/ReviewDeck.jsx) rates nothing,
+// so it has no console and no misses: its column is the entry alone.
 //
 // Rendered by a run as StudyStage's `side`, which draws it only on the
 // desk; a phone never mounts it and never fetches for it.
 //
 // `done` is the run's end (plan 115): no card is coming to reveal, so
-// the column stops promising one, and a section run lists the cards
-// whose last rating was below good (stores/runTally's tallyMisses) —
-// each one opens its entry here, the way it opened on reveal. Today
-// passes `misses={false}`: its lanes are other sections' decks, and
-// the day's end is not the place to reopen them.
-//
-// A browse passes `records={false}` (plan 119): the fast review
-// (components/study/ReviewDeck.jsx) rates nothing, so it has no tally
-// to keep, and its column is the revealed card's entry alone — docked
-// by the same reveal, on the same terms.
-export function SessionPanel({ done = false, misses = true, records = true }) {
+// the column stops promising one. Today passes `misses={false}`: its
+// lanes are other sections' decks, and its column is not the place to
+// reopen them.
+export function SessionPanel({ done = false, misses = true }) {
   const { t } = useLang()
   const tally = useRunTally()
   const docked = useDeskEntry()
-  const accuracy = tallyAccuracy(tally)
-  const missed = done && misses ? tallyMisses(tally) : []
+  const missed = misses ? tallyMisses(tally) : []
   const [openKey, setOpenKey] = useState(null)
+  // A reveal takes the column, and the chip it displaces is no longer
+  // open: adjusted as the dock changes, during the render, not after it.
+  const [dockSeen, setDockSeen] = useState(docked)
+  if (docked !== dockSeen) {
+    setDockSeen(docked)
+    if (docked) setOpenKey(null)
+  }
   const opened = missed.find(m => m.key === openKey) ?? null
-  const entry = done ? opened : docked
+  const entry = done ? opened : (docked ?? opened)
 
-  // At a run's end Esc closes an open miss before it leaves the run
-  // (plan 123). Registered after the entry's own Esc (children's effects
-  // run first), so a door opened inside the miss steps back first.
+  // Esc closes an open miss before it leaves the run (plan 123; the
+  // misses stand during the run since plan 124). Registered after the
+  // entry's own Esc (children's effects run first), so a door opened
+  // inside the miss steps back first.
   useEffect(() => {
     if (!opened) return undefined
     const onKey = e => {
@@ -60,17 +69,6 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
 
   return (
     <>
-      {/* A run that ends with nothing rated -- nothing was due -- has
-          no record to keep, and three zeros beside its done message
-          said otherwise (plan 123). */}
-      {records && !(done && tally.reviewed === 0) && (
-        <div className="records desk-tally" role="group" aria-label={t.deskRunLabel}>
-          <Record value={tally.reviewed} label={t.totalReviews} />
-          <Record value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} label={t.accuracy} />
-          <Record value={`+${tally.xp}`} unit="XP" label={t.deskEarned} />
-        </div>
-      )}
-
       {missed.length > 0 && (
         <section className="desk-misses" aria-labelledby="desk-misses-cap">
           <h2 id="desk-misses-cap" className="desk-deck__cap">{t.deskMissesTitle}</h2>
@@ -108,17 +106,5 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
         <p className="desk-run__note">{t.deskEntryWait}</p>
       )}
     </>
-  )
-}
-
-function Record({ value, unit, label }) {
-  return (
-    <div className="record">
-      <span className="record__value">
-        {value}
-        {unit && <span className="record__unit">{unit}</span>}
-      </span>
-      <span className="record__label">{label}</span>
-    </div>
   )
 }

@@ -10,7 +10,9 @@ import { dirname, join } from 'node:path'
 // revealed" long after the last card. And a run whose batch failed stood
 // the panel's zeros and that promise beside its error. Each card run now
 // passes `done`, and stands an empty column (side={null}) on an error
-// with no card. The browses pass `records={false}` and have no end.
+// with no card. The browses stand a bare panel, the entry alone (plan
+// 119; the figures left the side for the console in plan 124), and have
+// no end.
 
 const here = dirname(fileURLToPath(import.meta.url))
 const RUNS = ['KanaRun', 'KanjiRun', 'VocabRun', 'StudyRun', 'TodayRun', 'GrammarRun']
@@ -19,8 +21,9 @@ describe('the card runs\' side', () => {
   for (const run of RUNS) {
     it(`${run} passes done, and no panel beside an error`, () => {
       const src = readFileSync(join(here, 'screens', `${run}.jsx`), 'utf8')
-      const panels = [...src.matchAll(/<SessionPanel\b([^>]*)\/>/g)].map(m => m[1])
-      const runPanels = panels.filter(p => !/records=\{false\}/.test(p))
+      // The browse's side is the one `reviewCards.length > 0 ?` stands.
+      const runSrc = src.replace(/side=\{reviewCards\.length > 0 \? <SessionPanel\b[^>]*\/>/g, '')
+      const runPanels = [...runSrc.matchAll(/<SessionPanel\b([^>]*)\/>/g)].map(m => m[1])
       expect(runPanels.length, run).toBeGreaterThan(0)
       for (const p of runPanels) expect(p, run).toMatch(/done=\{done\}/)
       expect(src, run).toMatch(/side=\{error && !card \? null :/)

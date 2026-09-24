@@ -52,7 +52,7 @@ function Run({ card = 'yama' }) {
   return (
     <LangProvider>
       <MemoryRouter>
-        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} side={<SessionPanel />} sideLabel="This run">
+        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records side={<SessionPanel />} sideLabel="This run">
           <Flashcard
             t={{}}
             resetKey={card}
@@ -119,10 +119,10 @@ describe('a card run on the desk', () => {
     expect($('.flashcard').textContent).not.toBe(before)
   })
 
-  it('counts the run: rated, good or better, XP earned', async () => {
+  it('counts the run: rated, good or better, XP earned — on the floor since plan 124', async () => {
     await render(<Run />)
     await settle()
-    const values = () => [...document.querySelectorAll('.desk-tally .record__value')].map(el => el.textContent)
+    const values = () => [...document.querySelectorAll('.lvlbar .desk-tally .desk-tally__num')].map(el => el.textContent)
     expect(values()).toEqual(['0', '—', '+0XP'])
     $('.probe-rate').click()
     await settle()

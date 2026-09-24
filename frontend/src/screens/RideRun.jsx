@@ -212,8 +212,11 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       className="ride"
       // 机 (plan 122): the browse's side (plan 119) -- the flip docks
       // the card's entry beside it, where a phone looks it up from 🔍.
-      // Nothing to rate there, and nothing beside the done room.
-      side={cards?.length > 0 && step !== 'done' ? <SessionPanel records={false} /> : undefined}
+      // Nothing to rate there, and nothing beside the done room. No
+      // misses either: the ride keeps no tally of its own (plan 124
+      // lists a run's misses as they happen), so its column is the
+      // entry alone.
+      side={cards?.length > 0 && step !== 'done' ? <SessionPanel misses={false} /> : undefined}
       sideLabel={t.dictionaryTitle}
     >
       {!cards && !failed && <Loading />}
