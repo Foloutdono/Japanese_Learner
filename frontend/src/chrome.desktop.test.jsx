@@ -220,7 +220,7 @@ describe('the rail', () => {
   it('prints a French station name whole', async () => {
     await mountShell('/practice')
     await settle()
-    expect(stations()).toHaveLength(5)
+    expect(stations()).toHaveLength(6)
     for (const s of stations()) expect(s.scrollWidth, s.textContent).toBeLessThanOrEqual(s.clientWidth)
   })
 
