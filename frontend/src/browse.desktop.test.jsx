@@ -103,6 +103,25 @@ function Browse({ at }) {
 }
 
 describe('a browse on the desk', () => {
+  // Plan 123: the browse's Prev/Next stay put (a target pressed over and
+  // over must not move), so ← and → are the way through without them.
+  it('turns its pages with ← and →, the keys printed on the buttons', async () => {
+    await render(<Browse at="/learn/vocab/N5/fast_review" />)
+    await settle(300)
+    const nav = [...document.querySelectorAll('.browse-nav button')]
+    expect(nav.map(b => b.getAttribute('aria-keyshortcuts'))).toEqual(['ArrowLeft', 'ArrowRight'])
+    expect(nav.map(b => b.querySelector('.desk-kbd')?.textContent)).toEqual(['←', '→'])
+    press('ArrowRight')
+    await settle()
+    expect($('.review-deck__counter').textContent).toBe('2 / 2')
+    press('ArrowRight')
+    await settle()
+    expect($('.review-deck__counter').textContent).toBe('2 / 2')
+    press('ArrowLeft')
+    await settle()
+    expect($('.review-deck__counter').textContent).toBe('1 / 2')
+  })
+
   it('stands the entry\'s column on the right edge, the card centred beside it, and no tally', async () => {
     await render(<Browse at="/learn/vocab/N5/fast_review" />)
     await settle(300)

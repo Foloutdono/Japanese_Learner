@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { api } from '../../lib/api'
 import { voicedUrl } from '../../lib/audio'
+import { runKey } from '../../lib/keyGuards'
 import { PlayIcon, PauseIcon, SpeakerOffIcon } from '../ui/Icons'
 
 // ── 書取 — the clip, played a fixed number of times ───────────
@@ -35,7 +36,11 @@ import { PlayIcon, PauseIcon, SpeakerOffIcon } from '../ui/Icons'
 // No colour prop: the pigment is injected once, by the screen shell
 // (StudyStage sets --line-color on .stage), and everything under it
 // reads var(--line-color). DESIGN.md, "The pigment is injected once".
-export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
+//
+// `keyHint` is the desk's (plan 123): Space plays and pauses, as it
+// does the exam's clip one gate over, under the same spent-listen rule
+// -- it presses the button, so it can do nothing the button cannot.
+export default function ClipPlayer({ src, plays, maxPlays, onPlay, keyHint = false }) {
   const { t } = useLang()
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
@@ -63,6 +68,23 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
     const el = audioRef.current
     return () => { if (el) el.pause() }
   }, [])
+
+  // Space from nowhere in particular: not from the field (romaji has
+  // spaces) nor from a button or a link, whose own Space it is.
+  const playRef = useRef(null)
+  useEffect(() => {
+    if (!keyHint) return undefined
+    const onKey = e => {
+      if (e.key !== ' ' || !runKey(e)) return
+      if (/^(BUTTON|A)$/.test(e.target?.tagName ?? '')) return
+      const button = playRef.current
+      if (!button || button.disabled) return
+      e.preventDefault()
+      button.click()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [keyHint])
 
   if (!src || failed) {
     return (
@@ -122,11 +144,13 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
       />
 
       <button
+        ref={playRef}
         type="button"
         className="clip-player__play"
         onClick={toggle}
         disabled={spent && !playing && start}
         aria-label={playing ? t.examAudioPause : t.dictationListen}
+        aria-keyshortcuts={keyHint ? 'Space' : undefined}
       >
         {playing ? <PauseIcon size={26} /> : <PlayIcon size={26} />}
       </button>
@@ -145,6 +169,7 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
             ))}
           </span>
           <span className="clip-player__left" role="status">{t.dictationListensLeft(left)}</span>
+          {keyHint && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
         </span>
       </div>
     </div>

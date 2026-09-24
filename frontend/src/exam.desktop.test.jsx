@@ -283,6 +283,31 @@ describe('the exam result on the desk', () => {
     expect($('.desk-split__page .exam-card .exam-question__prompt').textContent).toBe('会社へ何で行きますか。')
   })
 
+  // Plan 123: the review stands the card whole beside the list, so a
+  // listening question's transcript stands open (it folded again on
+  // every ←/→), and its clip still answers Space.
+  it('opens a listening question\'s transcript, its clip on Space', async () => {
+    const qs = flattenQuestions(LISTENING)
+    const review = qs.map(q => ({ id: q.id, sectionId: 'listening', given: 'c2', answer: q.answer, isCorrect: false }))
+    const summary = { attemptId: 9, revision: 1, startedAt: 0, finishedAt: 600000, review, perSection: { listening: { correct: 0, total: review.length, pct: 0 } } }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/practice/exam/e2/results', search: '?attempt=9', state: { summary, exam: LISTENING } }]}>
+          <Routes><Route path="/practice/exam/:examId/results" element={<ExamResult session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+    const card = $('.desk-split__page .exam-card')
+    expect(card.querySelector('details.exam-transcript').open).toBe(true)
+    expect(card.querySelector('.exam-audio-player__play').getAttribute('aria-keyshortcuts')).toBe('Space')
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    press(' ')
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+    play.mockRestore()
+  })
+
   it('lists every question on a clean sheet, and keeps one thing to do next', async () => {
     await mark({ q1: 'c1', r1: 'c2', r2: 'c3' })
     expect($$('.desk-split__list .exam-review-row')).toHaveLength(3)

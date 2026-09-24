@@ -332,7 +332,7 @@ export default function ExamResult({ session }) {
             </div>
           )}
         >
-          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed />}
+          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed keys />}
           {/* The way back to the exams is the rail's; the page keeps
               the one thing to do next, under the card. */}
           <div className="btn-row">{newPaper}</div>

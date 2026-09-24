@@ -4,6 +4,8 @@ import { parseVideoId } from '../../lib/youtube'
 import { useBookmarkletCopy, watchUrlFor } from './useBookmarkletCopy'
 import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
+import { useDesk } from '../../hooks/useDesk'
+import { composing } from '../../lib/keyGuards'
 
 // ── 3番線 動画 — the subtitle dock ────────────────────────
 // Three ways in, in the order they should be tried:
@@ -71,6 +73,19 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
     ? formatTimecode(endSec - startSec)
     : null
   const windowOpts = { url, start: startSec, end: endSec }
+  // 机 (plan 123): Enter in the link field analyses the link, as the
+  // text platform's Ctrl/⌘+Enter does -- only where the button it
+  // presses is drawn.
+  const desk = useDesk()
+  const canFetch = Boolean(linkFetch && parsedVideoId)
+  const startLink = () => onStartFromLink(url, { start: startSec, end: endSec })
+  const onUrlKey = desk && canFetch
+    ? e => {
+      if (e.key !== 'Enter' || e.repeat || composing(e) || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+      e.preventDefault()
+      startLink()
+    }
+    : undefined
 
   function handleDrop(e) {
     e.preventDefault()
@@ -90,6 +105,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           className="field field--page anl-field"
           value={url}
           onChange={e => onUrlChange(e.target.value)}
+          onKeyDown={onUrlKey}
           placeholder="https://youtu.be/…"
         />
         <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
@@ -99,14 +115,16 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           server said it can be honoured. No heading and no caption
           above it: the link sits in the field directly above, and the
           button says what it does — DESIGN.md, "Say less". */}
-      {linkFetch && parsedVideoId && (
+      {canFetch && (
         <div className="anl-link">
           <button
             type="button"
             className="btn-primary"
-            onClick={() => onStartFromLink(url, { start: startSec, end: endSec })}
+            onClick={startLink}
+            aria-keyshortcuts={desk ? 'Enter' : undefined}
           >
             {t.analyzeThisLink}
+            {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
           </button>
         </div>
       )}

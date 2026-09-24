@@ -21,6 +21,8 @@ import { ImageIcon, StarIcon } from '../components/ui/Icons'
 //   keys       — the desk's (plan 115): the rows name their digit keys
 //                (aria-keyshortcuts) and a listening clip answers Space,
 //                its cap printed on the player. Never passed on a phone.
+//                Revealed, on the desk's review (plan 123), the clip
+//                still answers Space and the transcript stands open.
 //   passageAside — the desk's too: a reading passage stands flat beside
 //                its questions (ExamRunner's .desk-paper), so the block
 //                draws the question without it.
@@ -417,7 +419,7 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
       {question.questionPromptJp && <p className="exam-question__prompt" lang="ja">{question.questionPromptJp}</p>}
       {question.imageAlt && <ImagePlaceholder alt={question.imageAlt} />}
 
-      <AudioPlayer src={question.audioSrc} keyHint={keys && !revealed} />
+      <AudioPlayer src={question.audioSrc} keyHint={keys} />
 
       {devMode && !revealed && (
         <div className="exam-dev-panel">
@@ -438,8 +440,12 @@ function ListeningBlock({ question, selected, onSelect, revealed, devMode }) {
         label={question.questionPromptJp}
       />
 
+      {/* Open on the desk's review (plan 123): the card stands whole
+          beside its list there, and a listening question is the one a
+          clean sheet still lists for this; folded, it folded again on
+          every ←/→. */}
       {revealed && question.scriptJp && (
-        <details className="exam-transcript">
+        <details className="exam-transcript" open={keys || undefined}>
           <summary className="exam-transcript__summary">{t.examTranscript}</summary>
           <p className="exam-transcript__text" lang="ja">{question.scriptJp}</p>
         </details>
