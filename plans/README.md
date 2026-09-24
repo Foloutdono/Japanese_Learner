@@ -191,6 +191,16 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 29 — 作文, composition** (plan 124, 2026-09-25, DONE). A sixth
+  practice platform: the learner is handed a grammar point and writes a
+  sentence that uses it. Three opinions about the sentence, kept apart —
+  the detector's (free, and only where it is trusted on the point), the
+  tutor's (the review shape translation's tutor answers in, now shared,
+  rationed by the day through the first shared daily counter) and the
+  learner's own rating, which is the grade. 紫 minted for it, measured
+  by the guard's own sites. Its section is at the very bottom of this
+  file. The next wave begins at 125.
+
 - **Wave 28 — 机, the desk's fourth round: 正面口 and 作業** (plans
   122–123, 2026-09-24, DONE). First contact drawn for a computer (the
   sign-in beside Board, the boarding beside the journey it builds, the
@@ -6058,6 +6068,69 @@ not measured by a script.
 | Esc in Browse's search, 12 ticked | the dock closes, the ticks lost | the field blurs; a second Esc closes |
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
+
+# Wave 29 — 作文, composition (plan 124, 2026-09-25)
+
+The owner's request: "Create a new practice mode: the user is given a
+grammar point and has to create a sentence using it correctly." Four
+decisions were taken with the owner before the plan was written and
+none was re-litigated: the model reviews and the learner rates (ADR
+0013, the split every practice mode uses); a run serves the chosen
+level's points, the ones already studied first; the model review is
+capped per day through a shared counter; the pair is 作文 / Composition
+(Rédaction). No new ADR: 0013 covers the grading, 0016 the catalogue,
+0017 the free lesson door, and the shared counter is the generalisation
+`routes/reading.py` asked for on the third feature.
+
+Numbered 124 because 122–123 went to the desk's fourth round while this
+wave was being planned: the main checkout's local `main` was behind
+`origin/main`, and a grep of the source, not the index, settled it. The
+work was done in a worktree on `origin/main` for the same reason.
+
+| Plan | What | Status |
+|---|---|---|
+| 124 | **P0** `study/tutor_review.py`: the review shape (fence, parser, corrected sentence, text form) out of `routes/translation.py`, which keeps its names as aliases; one key added, `meaning`. **P1** `components/study/TutorReview.jsx`: the review out of `TranslationRun.jsx`, drawn once for two runs. **P2** `core/daily_limit.py` and `daily_usage` (learner, feature, local day): the third counter as the first shared one; the schema guard scans `core/`. **P3** `grammar_detect.can_find`: the detector trusted only where it finds a point in that point's own lesson (517 of 541). **P4** `routes/composition.py`: batch (studied first, `exclude` never empties a run), check (free, uncapped), review (two messages so the system block is a cached prefix, every value fenced, `COMPOSITION_DAILY_LIMIT` 30 → 429 naming the reset), result (`composition_log` with the three opinions side by side, `award_practice`), history; pass-gated and on the plate; `llm_cost_model`'s row. **P5** `screens/CompositionRun.jsx` on the phone: the point as the prose page with a lesson door and no example, translation's Japanese field, the three calls at once, the detector's hint on the answer's label, the review, the bar (never gated on the tutor), the breakdown; 紫 minted at 7.70:1 / 6.84:1 (8.68 / 7.99 light), measured by three new sites in the contrast guard. **P6** the plate between 書取 and 模試, the station code SB, the level path; six plates in three rows of two on the desk with no CSS. **P7** the desk's side: the lesson while writing and reading the review, the breakdown once rated, Enter to the next point. **P8** the record | DONE (2026-09-25) |
+
+What changed for a learner:
+
+| Flow | Before | After |
+|---|---|---|
+| Producing a grammar point | recognition only (flashcard, fill-in, contrast); translation names a point only when a curated sentence carries one | a sixth platform: a point, a sentence, three opinions kept apart |
+| A hint on a point the detector cannot see | — | none: the hint prints on the 517 points the detector finds in their own lessons, and nothing on the rest |
+| The day's reviews spent | — | the tutor is done for the day and says so; the check still prints, the rating still counts, no slot is spent on a refused call |
+| A tutor review's cost | translation: one uncached block | a stable system block the provider caches, the learner's line in the user block, at most two of the lesson's sentences |
+| A second run drawing the review | a copy waiting to drift | one component, one parser |
+
+Deferred, deliberately: `ocr_usage` and `comprehension_usage` onto
+`daily_usage` (a data migration with nothing to gain yet — the helper is
+ready and each route swaps in one line); a `?point=` door from the
+grammar lesson ("write one with this"); a history screen for
+`composition_log`; registering `sentence.composition` so a written
+sentence counts toward the point's stage (decided later on the
+`found`/`grammar_used`/`quality` figures the log collects); the point's
+row lit in the breakdown; holding the lesson's examples back in the desk
+side until the grade, if the open lesson invites copying.
+
+Cut: nothing.
+
+Verified beyond the suite, on the worktree's own servers (backend 8010,
+Vite 5174 through an untracked proxy wrapper, the dev database, the
+OpenRouter key): the gate at desk width shows six plates in three rows
+of two with 作文 between 書取 and 模試 and the guide's new line; the
+run at 1280 stands the lesson in the purple side while writing, prints
+"point repéré" on the answer's label the instant the check lands, the
+tutor's answer after it (the free OpenRouter reasoning model returned
+its reasoning as prose rather than the JSON shape, and the screen
+served the prose exactly as translation does on that provider), rates
+from the 1 key (+7 XP on the level bar, 1 / 1), and Enter takes the
+next point with the side swapping to its lesson; at 375px the card,
+the Leçon door, the docked field, the hint, the bar on the floor and
+the breakdown toggle, with no console errors anywhere.
+
+Owner steps after deploy: none required. `COMPOSITION_DAILY_LIMIT` is
+env-overridable (default 30); `daily_usage` is created at the app's
+start. The privacy page's "NVIDIA NIM or OpenRouter" list predates plan
+092 and was left as found.
 
 **RideReading keeps no side, on purpose.** The first ride's reading
 sentence could dock its breakdown the way a practice run does. But
