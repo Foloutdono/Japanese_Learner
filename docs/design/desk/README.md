@@ -1,6 +1,6 @@
 # The desk (机) — class map
 
-The app's computer design (plans 113–120, ADR 0018). At **1100px and up**
+The app's computer design (plans 113–123, ADR 0018). At **1100px and up**
 (`frontend/src/hooks/useDesk.js`, `DESK_QUERY`) the Shell draws the rail
 instead of the HUD and the tab bar, and the screens that the width serves
 are laid out for it. Below that width nothing here exists. The phone's
@@ -27,6 +27,8 @@ was verified with.
 | `.phone--desk` | the Shell's frame on the desk. It reserves `--desk-rail-w` on the left; `.phone__content` grows to `--desk-board-w` (1240px) and centres in what is left | `components/chrome/Shell.jsx` |
 | `.desk-side` | a screen's second column: `--desk-side-w` (360px, a phone's content width), sticky, scrolling on its own when taller than the window | `components/chrome/DeskSide.jsx` |
 | `:root[data-chrome="shell"]` (in the block) | `--dock-bottom` is the inset alone, because there is no tab bar | `components/chrome/useChrome.js` |
+| `.desk-door`, `__side` | first contact (plan 122): the Welcome with no rail, the work centred and the sign-in (`AuthCard`, login only, Log in a ghost beside Board) standing in a `--desk-side-w` column at the right edge; the roll's lanes masked at the work's edges, four copies a lane, paused under a pointer. `authMode` opens the side on a mode rather than a second screen | `components/boarding/Welcome.jsx`, `components/account/AuthCard.jsx`, `App.jsx` |
+| `.desk-brd`, `--side`, `__side` | the boarding as a run's frame (plan 122): the questions and their Continue on the centre line at `--desk-side-w`, beside the journey being built (`BuildSteps` over `domain/boarding.js`'s `boardingDraft`, repriced on every answer); Building skipped; the plan's chart 1:1 | `screens/BoardingFlow.jsx`, `components/boarding/Building.jsx`, `PlanStep.jsx` |
 
 ## The rail
 
@@ -38,7 +40,8 @@ was verified with.
 | `.desk-gate`, `--on`, `__ico`, `__label`, `__due` | a gate: `GateIcon` plus its word, always captioned. The lit gate has the lozenge's wash and a 2px rule on the rail's edge. Today's due count is warning ink, the rail's only colour | 〃 |
 | `.desk-gate__key` | the `/` cap on the Dictionary gate: the dictionary's search from anywhere the rail is (plan 114) | 〃 |
 | `.desk-rail__stations`, `.desk-sec`, `--on` | the lit gate's stations as stops on a drawn line, the one you stand in filled. `config/tabs.js`'s `getDeskSections` supplies them | 〃 |
-| `.desk-rail__foot` | the HUD's three instruments (`HudInstruments`): level and pass on one line, the status panel under them | `components/chrome/Hud.jsx` |
+| `.desk-rail__foot` | the HUD's three instruments (`HudInstruments`): level and pass on one line, the status panel under them; each icon-only figure titled (plan 123). On Today the status panel scrolls to and calls the journey beside the gate (`.desk-journey--called`) rather than opening its sheet | `components/chrome/Hud.jsx` |
+| `.desk-rail__gates` | the gates scroll alone on a short window; the head and the foot stay whole (plan 123) | `components/chrome/DeskRail.jsx` |
 
 The order is `config/tabs.js`'s `DESK_TAB_IDS` (Today first). `TAB_IDS` is
 still the phone's row and the flick's order. The rail has no flick.
@@ -53,21 +56,24 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.learn > .route` | a route that boards directly, drawn across as a line | `components/selection/RouteStops.jsx` |
 | `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back. The gate's `.gate-card__lanes` go two across once the gate holds two lanes at a phone's width (~1390px, plan 116) | `screens/TodayScreen.jsx`, `components/station/GateCard.jsx` |
 | `.desk-journey`, `__head`, `__name`, `__word` | the pass's back beside the gate: the status sheet's body on sumi | `components/journey/JourneyPanel.jsx` (body: `JourneyBody.jsx`) |
-| `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓ (`hooks/useListWalk.js`). The list's rows are links (`<Link replace>`, plan 117), so a row opens in a new tab too; the link wears the button's face (`.desk-split__list a:is(…)`) | `components/selection/StationSplit.jsx`, `SplitRow.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review (its open question in `?question=`) |
+| `.desk-split`, `__list`, `__page`; `.desk-stop--open` | a station as two panes: the stops (sticky, scrolling in their own column) beside the chosen stop's platforms; the open stop in gold, one tab stop walked with ↑/↓, Home and End, Space opening it (`hooks/useListWalk.js`; since plan 123 every list beside a page walks this way, its keys in `aria-keyshortcuts`). The list's rows are links (`<Link replace>`, plan 117), so a row opens in a new tab too; the link wears the button's face (`.desk-split__list a:is(…)`) | `components/selection/StationSplit.jsx`, `SplitRow.jsx`; Vocab, Kanji, Kana, Grammar, Exam; since plan 115 the grammar points, the tiers, a theme's bands, the exam's review (its open question in `?question=`) |
 | `.desk-lesson` | a grammar point's lesson as the page beside the level's points, on the card's surface | `screens/GrammarScreen.jsx`, `components/study/GrammarLesson.jsx` (`GrammarLessonBody`) |
+| `a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row)` | the desk's other places as links (plan 123) — the shelf's decks (pushed) and its library door, a radical page's tiles, a bar's way up, the profile's halls and lines, Settings' pages — each wearing its button's face, measured against a button twin by `links.desktop.test.jsx` | `components/selection/SplitRow.jsx` (`push`), `components/chrome/Bar.jsx` (`LeaveTo`), `components/chrome/Console.jsx` (`Chip`'s `to`) |
 | `.desk-split .radical-tile[aria-current="page"]`, `.rad-door[aria-expanded]`; `.desk-split__page > .rad > .platform-grid` | a radical's page as two panes (plan 118): the index on the radical's stroke page beside the lesson and its platforms (one to a row, figured by `ScopeFigures`), the open radical in gold; the family's door a toggle, in gold and with no › while the family stands in the list instead of the index. The bare index opens on its page's biggest family | `screens/KanjiScreen.jsx`, `components/selection/RadicalSelector.jsx` (`RadicalRedirect`), `components/selection/RadicalLesson.jsx` (`RadicalFamilyList`), `components/dictionary/RadicalIndex.jsx` (`selected`), `domain/radicals.js` |
 | `.desk-split--shelf`, `.desk-shelf-page` | the library's shelf beside the open deck's page, half and half | `screens/LibraryScreen.jsx`, `components/decks/PublicDeckPage.jsx` (`PublicDeckPane`) |
 | `.desk-mode-fig`, `__due`, `__unit`, `__count` | a platform's own figures: due now, the composition bar, mastered / total — from /api/stats (`ModeFigures`) or a scoped stats route (`ScopeFigures`, plan 115) | `components/selection/ModeFigures.jsx` |
 | `.desk-stats`, `__holds`, `__leaks` | the statistics in two columns: the line (1:1), the ladder and the lines; the misses and every trouble card | `screens/StatsScreen.jsx` |
 | `.desk-lines`, `__line` (`--open`), `__levels` | the lines as one table (a subgrid), the open line's levels hung from its roundel | `components/stats/LineRows.jsx` (`inline`) |
-| `.desk-run`, `.desk-run__side`, `__note` | a run with a side: the side fixed to the right edge in the run's pigment (`RunSide`), the stage top-aligned; card and choices, or prompt and board, side by side; unused choices keep their place | `components/study/StudyStage.jsx` (`side`, `RunSide`) |
+| `.desk-run`, `.desk-run__side`, `__note` | a run with a side: the side fixed to the right edge in the run's pigment (`RunSide`), the stage top-aligned; card and choices, or prompt and board, side by side; unused choices keep their place. The run's foot sticks under its content at the dock line (plan 123). Above ~1460px the card and the side are centred together by `--desk-run-inset` (`:root:has(.desk-run)`), the level bar spanning the workspace; the level board docks across the side's top. The first ride keeps one too (plan 122), the flipped card's entry docked in it | `components/study/StudyStage.jsx` (`side`, `RunSide`), `screens/RideRun.jsx` |
 | `.desk-tally`, `.desk-entry`, `.desk-misses`, `__list`, `.desk-miss` | the session panel: this run's three records, the revealed card's entry; at a section run's end the misses as chips. A browse (the fast review) passes `records={false}`: the entry alone, no tally (plan 119) | `components/study/SessionPanel.jsx`, `stores/runTally.js` (`tallyMisses`); the browse's side in `screens/KanaRun.jsx`, `VocabRun.jsx`, `KanjiRun.jsx` |
 | `.desk-lookup` | a door opened in a docked breakdown: the entry in the column, the breakdown kept beside it; since plan 120 also a grammar run's side, for the rival a gate lesson names | `components/analysis/SideLookup.jsx`, `screens/GrammarRun.jsx` |
 | `.desk-run--paper`, `.desk-answers`, `__fig`, `__cap`, `__finish`; `.desk-paper`, `__text`, `__ask` | the mock exam: the answer sheet in the side; a reading passage flat beside its questions | `screens/ExamRunner.jsx`, `exam/ExamCard.jsx`, `exam/QuestionRenderer.jsx` (`PassageText`) |
 | `.desk-anl-dock`, `__keys` | the analyser's second column: the dictionary on the stage's token | `components/analysis/AnalyzerDock.jsx` |
 | `.desk-intake`, `__main` | the analyser's intake beside its history | `screens/AnalyzerScreen.jsx` |
-| `.desk-dock`, `__head` | a door opened in a column: its caption and ✕ over the phone's own body, in place of the column's tenant until ✕ or Esc; focus goes back to what opened it (plan 120) | `components/chrome/DeskDock.jsx` |
-| `.desk-browse` | a deck's Browse, docked in the deck page's side (the result row stacked, as on a phone) | `components/decks/BrowseCardsMenu.jsx` (`BrowseCardsDock`) |
+| `.desk-photo`, `--over` | the photo intake's drop target around its two tiles; a picture pasted (Ctrl/⌘ V, printed on Choose) or dropped goes straight to the cropper (plan 123) | `components/analysis/ImageInput.jsx` |
+| `.desk-dock`, `__head` | a door opened in a column: its caption and the entry's roundel ✕ (`.dict-plate__btn`, titled with Esc) over the phone's own body, in place of the column's tenant until ✕, Esc or the lit chip pressed again. It takes the focus in (`initialFocus`, else its caption) and gives it back to what opened it; an Esc from a filled field leaves the field first (plans 120, 123) | `components/chrome/DeskDock.jsx` |
+| `.desk-cardform` | a deck's card form in its own dock (plan 123): New card or Edit card, its first field focused, a new card's draft kept until it is saved or cancelled | `screens/DeckDetailScreen.jsx` |
+| `.desk-browse` | a deck's Browse, docked in the deck page's side (the result row stacked, as on a phone); the ✕ its one close, the results one tab stop walked with ↑/↓ from the search and ticked on Space (plan 123) | `components/decks/BrowseCardsMenu.jsx` (`BrowseCardsDock`) |
 | `.desk-more` | a deck's More — import, export, the library — in the deck page's side; the deck's deletion asks in a dialog of its own (plan 120) | `screens/DeckDetailScreen.jsx` |
 | `.desk-tut` | the grab's walkthrough in the intake's column, in place of the history; its copy button shares the panel's state (plan 120) | `components/analysis/GrabTutorial.jsx` (`GrabTutorialDock`), `useBookmarkletCopy.js`, `screens/AnalyzerScreen.jsx` |
 | `.desk-readings` | a kanji's every reading in the entry's own place, whatever holds the entry (a dock, a run's side, a lookup dialog); ✕ or Esc steps back to the entry (plan 120) | `components/dictionary/DictionaryDetail.jsx` (`ReadingsInPlace`) |
@@ -76,8 +82,8 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.desk-deck`, `__main`, `__study`, `__cap` | a deck's cards beside its platforms, or the form while a card is written | `screens/DeckDetailScreen.jsx`, `components/decks/DeckPlatforms.jsx` |
 | `.desk-profile`, `__col` | the holder opened flat: the pass and stamps at `--desk-side-w`, beside the record | `screens/ProfileScreen.jsx` |
 | `.desk-banzuke`, `.desk-bz__period` | both rankings at once, side by side where the column holds two | `components/profile/Banzuke.jsx` (`both`) |
-| `.desk-settings`, `__list`, `__page`; `.stg-row--on` | the list (sticky, the one `<h1>`) beside the open page (a pane, `<h2>`, no way back). The open row is marked in gold. The bare list opens its first page | `screens/SettingsScreen.jsx`, `components/settings/SettingsPage.jsx`, `components/settings/pane.js` |
-| `.sheet`, `.sheet--sumi`, `.sheet__handle` | a sheet is a centred dialog: all four corners, no handle, a fade. It is centred by `inset` and `margin: auto`, never a transform, because the drag owns that | `components/chrome/Sheet.jsx` |
+| `.desk-settings`, `__list`, `__page`; `.stg-row--on` | the list (sticky, bounded, the one `<h1>`) beside the open page at `--card-w` (a pane, `<h2>`, no way back). The open row is marked in gold. The bare list opens its first page. The rows are links that replace the page beside them, with no › (the pass, a dialog, keeps its own), one tab stop walked with ↑/↓ (plan 123) | `screens/SettingsScreen.jsx`, `components/settings/SettingsPage.jsx`, `components/settings/pane.js` |
+| `.sheet`, `.sheet--sumi`, `.sheet__handle` | a sheet is a centred dialog: all four corners, no handle, a fade. It is centred by `inset` and `margin: auto`, never a transform, because the drag owns that. Since plan 123 its actions share a row, it opens on `initialFocus` (the way back, never the irreversible act), and a `dismiss` sheet draws a ✕ (`.desk-sheet__close`); the rail's two sheets (`:root[data-chrome="shell"] .status-sheet`, the balance) stand beside the rail at `--desk-side-w` | `components/chrome/Sheet.jsx` |
 | `.phone--desk .dict-dock` | the dictionary's dock, `--desk-side-w` wide, open on the first result from the first frame | `screens/DictionaryScreen.jsx` |
 | `.phone--desk .anl-railcol` | the analyzer's rail on the right of the stage, away from the desk's rail | `screens/AnalyzerScreen.jsx` |
 | `.stage > .stage__head`, `__foot`, `.timer`, … | a run's head, foot and field share the card's `--card-w` column | the runs |
@@ -91,6 +97,8 @@ still the phone's row and the flick's order. The rail has no flick.
 | `.rating-bar__btn > .desk-kbd` | each rating tile's digit in its corner (1 is the best, at the right) | `components/study/RatingBar.jsx` |
 | `.mcq-row__index` (desk: the bare digit) | the choice's index is the key that answers it, with `aria-keyshortcuts` | `components/study/QuizComponents.jsx` |
 | `.flashcard__hint .desk-kbd` | "Espace pour révéler" | 〃 |
+| (plan 122) | the boarding answers the keys: Enter presses the live step's Continue (its cap printed; from a pressed answer too), the digits pick (`PICK_KEY_DIGIT`, a level its own number — N5 5, the kana stop 0), Esc does nothing; Enter boards from the Welcome and goes on from the ride's ends | `hooks/useBoardKeys.js`, `domain/choiceKeys.js`, `components/boarding/BoardFrame.jsx` (`Continue`'s `keys`) |
+| (plan 123) | a reading, translation or dictation line goes type, Enter, digit, Enter (Next's cap); Space plays the dictation clip, the field focused on play; ←/→ step a browse; digits and Enter answer the placement test; → and Enter go on in a guide; ↑/↓/Home/End walk every list beside a page (`useListWalk`, `WALK_KEYS`), arrows walk the dictionary's grid (`useGridWalk`) and a radio group (`useRadioWalk`); Ctrl/⌘ V pastes a picture into the photo intake. Esc has one owner, the innermost door that holds it (`stores/escHold.js`), and the run's head drops its cap meanwhile. Enter after a pointer press goes to the page, not to the control the pointer left focused (`pressedByPointer`) | `components/chrome/DeskKeys.jsx`, `lib/keyGuards.js`, `hooks/useListWalk.js`, `hooks/useGridWalk.js`, `hooks/useRadioWalk.js`, `stores/escHold.js`, `components/analysis/ImageInput.jsx` |
 | (plan 115) | Enter departs from Today and takes a finished run's action; Esc leaves a run (`DepartKey`, `EnterKey`, `LeaveKey`); C shows the choices; A–D/1–4 and Enter answer comprehension; Space plays a listening clip; Ctrl/⌘+Enter analyses; ←/→ walk the grammar points, the exam's review, the analyser's tokens. Each cap on what it presses, with `aria-keyshortcuts` | `components/chrome/DeskKeys.jsx`, `components/study/HintBar.jsx`, `screens/ComprehensionRun.jsx`, `exam/AudioPlayer.jsx`, `components/analysis/WritingSlip.jsx` |
 
 ## Tests
@@ -111,7 +119,9 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/radicals.desktop.test.jsx` | desktop | plan 118: a radical's page beside the index, the family in the list, the bare index |
 | `src/browse.desktop.test.jsx` | desktop | plan 119: the browse's side — the entry docked on reveal, no tally, no column over an empty browse |
 | `src/grammar.desktop.test.jsx`; blocks of `src/shelf.desktop.test.jsx`, `src/analyzer.desktop.test.jsx`, `src/dictionary.desktop.test.jsx`, `src/settings.desktop.test.jsx` | desktop | plan 120: the doors that open in their columns, and the deck's deletion still asked |
-| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–120's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
+| `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx`, `src/ride.desktop.test.jsx`; `src/frontdoor.phone.test.jsx`, `src/ride.phone.test.jsx` | desktop, wide, phone | plan 122: the Welcome and its side, the boarding's frame, keys and digits, the first ride's side and ends |
+| `src/columns.wide.test.jsx`, `src/runs.wide.test.jsx`, `src/practice.desktop.test.jsx`, `src/guide.desktop.test.jsx`, `src/links.desktop.test.jsx`, `src/radios.desktop.test.jsx`, `src/focus.desktop.test.jsx`; blocks of the session, today, dictionary, keys, shelf, sheet, chrome, settings, stations, laptop, exam, browse, grammar, folds, analyzer, breakdown, stats and runs desktop tests | desktop, wide | plan 123, P1–P19 |
+| `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–123's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |
 
@@ -141,7 +151,7 @@ sheet, held by `src/deskfree.phone.test.jsx`):
 | The paper did not submit | `screens/ExamRunner.jsx` | the paper is not marked, and the clock can submit it by itself (`isTimeUp`), so a line in the side could go unseen. It is the answer to the learner's own commit |
 | Make it mine; unfollow or remove; delete the selected cards; delete the deck | `screens/DeckDetailScreen.jsx` | confirmations of what cannot be undone. On the desk the deck's deletion is its own dialog over the More dock, as the other three are |
 | The CSV import | `components/decks/ImportCardsMenu.jsx` | a paste and a commit in one go, whose preview is its own list: nothing on the page is of use beside it |
-| A new deck | `screens/DecksScreen.jsx` | a creation that ends by leaving the shelf for the deck it made; the shelf has no second column, and conjuring one for a two-field form would be a column found to fill (plan 114) |
+| A new deck | `screens/DecksScreen.jsx` | a creation that ends by leaving the shelf for the deck it made; the shelf has no second column, and conjuring one for a two-field form would be a column found to fill (plan 114). Since plan 123 it does leave: the new deck's page opens with its first card's form in the side |
 | Report a deck | `components/decks/PublicDeckPage.jsx` | each reason sends the report: an outward act, the sheet its confirmation |
 | The balance; the pass's back | `components/credits/BalanceSheet.jsx`, `components/journey/StatusSheet.jsx` | the rail's doors, the chrome's rather than a page's: they open the same over every screen, and no page has a column that is theirs — in a page's side they would evict its companion |
 | The offer; a run stopped at an empty balance | `components/credits/PaywallSheet.jsx`, `RunOutSheet.jsx` | a refusal, and a run that cannot go on |
@@ -161,8 +171,21 @@ index's lesson (`GrammarLessonBody`), Browse.
   page's list beside the lesson, and a tile still opens its entry as a
   centred dialog — plan 118's own stated choice, made while this plan was
   open. By this rule it belongs in the page's column beside the family.
-- The first ride's 🔍 (`screens/RideRun.jsx`): the ride stands no side, so
-  there is no column to open it in; giving the ride one is a layout
-  decision, not a move.
-- On Today the rail's status panel opens the pass's back as a dialog while
-  the same body stands open beside the gate.
+- A ← → caption line where a walk has no control of its own (the grammar
+  lesson, the exam's review, the dictionary's dock): the keys are in
+  `aria-keyshortcuts`, but printing them reopens plan 114's key-legend cut.
+- A Learn or Practice plate's foot as one tab stop walked with ←/→ (five
+  stops a plate today).
+- The exam review row's hover is the bare button's brightness filter, kept
+  to the pixel with the phone's button (plan 117); restyling it is a change
+  to both sides.
+- Ruby readings still go into a copy on the phone (the five lines the desk
+  now strips), and a note stands over the rating bar with no token for its
+  place: both phone changes, left for the owner.
+- Shoot on a real computer duplicates Choose; hiding it should be keyed on
+  `(any-pointer: coarse)`, never on the width, since a tablet reaches the
+  desk.
+
+(The first ride's 🔍 and Today's status dialog, listed here after plan 120,
+are gone: the ride has a side now (plan 122), and the status panel calls
+the journey standing beside the gate (plan 123).)

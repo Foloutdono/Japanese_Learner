@@ -124,3 +124,40 @@ The promise that the phone never breaks is carried by structure, not by care:
   install steps), under the same guarantees and with no value added to
   `:root`. The ones kept, and why, are listed in
   `docs/design/desk/README.md`, "Dialogs on the desk".
+- Plans 122 and 123 (wave 27) drew first contact for the desk and made
+  the workspace answer a keyboard and a pointer one way everywhere, under
+  the same guarantees. First contact is a run's frame with no rail: the
+  sign-in beside Board on the Welcome, the journey being built beside the
+  boarding's questions, the card's entry beside the first ride. The
+  workspace work covered:
+  - Esc's owner: the innermost door that holds it (`stores/escHold.js`);
+  - the list, grid and radio walks (`hooks/useListWalk.js`,
+    `useGridWalk.js`, `useRadioWalk.js`);
+  - places as links, doors that own their focus, and kept dialogs drawn
+    for a desk;
+  - a run's foot following its content;
+  - on a wide window, the run's workspace centred by
+    `--desk-run-inset`. That value is declared inside the 机 block on
+    `:root:has(.desk-run)`, not in the main `:root`, so the 414px lane's
+    token check never meets it.
+
+  Ten bugs the audit found on the phone too were fixed, each in its own
+  commit with its own phone test. They are the only differences below
+  1100 that the branch-against-base identity pass allows:
+  - a skip key reaching the card under a cutscene;
+  - an input method's Enter submitting;
+  - run keys taking browser chords;
+  - the dictionary's and the analyser's keys acting under a dialog;
+  - the ＋'s outcome carried to the next entry;
+  - Esc on the offer closing the sheet under it;
+  - a new deck hidden by the shelf's filter;
+  - Browse's rows out of the keyboard's reach;
+  - the analyser's result ring;
+  - Back leaving the boarding.
+
+  An eleventh, Building's line-up running off a phone in French, was
+  wrapped. The phone's visible design otherwise stayed as it was, by the
+  owner's decision: a phone change the audit proposed is recorded for the
+  owner instead (`docs/design/desk/README.md`, "Left for the owner"). The
+  phone side is further blocks of `src/deskfree.phone.test.jsx`, and
+  `frontdoor.phone`, `ride.phone` and `practiceKeys.phone`.

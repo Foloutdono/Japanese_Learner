@@ -324,7 +324,31 @@ runtime purpose. Two consequences worth knowing:
   `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
   `tests/test_kana_audio.py`, `domain/attributions.js` and
   `lib/audio/playback.js`; ADR 0020).
-  When starting a new wave, begin at **122** or higher, and check
+  **122–123** are wave 28, the desk's fourth round (numbered 122 because
+  121 went to 声 while its audit was open). **122** is 正面口, first contact
+  drawn for a computer as a run's frame: the Welcome with the sign-in
+  beside Board (`AuthCard`, no second screen on the desk), the boarding
+  centred beside the journey it builds (`BuildSteps` over
+  `domain/boarding.js`'s `boardingDraft`, Building skipped), the first
+  ride's side, and Enter and the digits from the Welcome to the first card
+  (`hooks/useBoardKeys.js`, `domain/choiceKeys.js`'s `PICK_KEY_DIGIT`)
+  (cited in `App.jsx`, `components/account/AuthCard.jsx`,
+  `components/boarding/`, `screens/BoardingFlow.jsx`, `screens/AuthScreen.jsx`,
+  `screens/RideRun.jsx`, `screens/RideReading.jsx`, `index.css` and the
+  `frontdoor` and `ride` tests). **123** is 作業, the workspace: eleven phone
+  bugs, each in its own commit with its own phone test; Esc's owner
+  (`stores/escHold.js`, `DeskKeys`' `pressedByPointer`); a run's foot
+  under its card and the workspace centred on a wide window
+  (`--desk-run-inset`); Enter through practice; the guide on its anchor;
+  the kept dialogs drawn for a desk (`Sheet`'s `initialFocus` and
+  `dismiss`); one walk for every list (`hooks/useListWalk.js`,
+  `useGridWalk.js`); places as links (`SplitRow`'s `push`); radio groups
+  (`hooks/useRadioWalk.js`); the column's doors (`DeskDock`'s focus
+  contract, the card form docked); and the pointer, copy and printed keys
+  (cited across `components/`, `screens/`, `hooks/`, `lib/keyGuards.js` and
+  `index.css`, and held by the desktop, wide and phone tests named in
+  `docs/design/desk/README.md`; DESIGN.md, "The desk"; ADR 0018).
+  When starting a new wave, begin at **124** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
