@@ -152,11 +152,20 @@ the first table. Both tails are capped now (§5.5): `OCR_DAILY_LIMIT` at
 bigger lever because comprehension was always where the tail actually
 was, not OCR.
 
+The third cap arrived with 作文 (plan 124): `COMPOSITION_DAILY_LIMIT`,
+30 tutor reviews of a learner's own sentences a day, counted in the
+shared `daily_usage` table (`core/daily_limit.py`) rather than a fourth
+copy of the OCR counter. Same shape of call as translation review, one
+per sentence, the learner's text in the prompt; the system block is a
+stable prefix the provider's cache serves. Past the cap the run goes on
+without the tutor -- the local check and the learner's own grade never
+depended on the model.
+
 What remains uncapped is translation review (~600 calls a month at the
 ceiling) and the phrase analyzer, which are an order of magnitude
 cheaper per call and have no equivalent of the pool to fall back on.
 They are worth watching in the usage log before deciding they need a
-number too.
+number too; translation can take the shared counter the day it does.
 
 ## 5. What to do, in order
 

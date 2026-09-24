@@ -102,6 +102,7 @@ UNTOUCHED = {
     "comprehension_log": "reading comprehension history",
     "phrase_history": "analyzer history",
     "translation_log": "translation history",
+    "composition_log": "composition history",
     "frequency_overrides": "per-user frequency tweaks are settings",
     "grammar_sentences": "generated example sentences are content, and expensive",
     "credit_ledger": "the balance is not progress: a wipe starts the schedule over, not the fare (plan 069)",

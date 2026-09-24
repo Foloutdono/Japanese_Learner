@@ -43,6 +43,7 @@ from routes.grammar         import router as grammar_router
 from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
 from routes.dictation        import router as dictation_router
+from routes.composition      import router as composition_router
 from routes.profile          import router as profile_router
 from routes.frequency       import router as frequency_router
 from routes.theme_vocab      import router as theme_vocab_router
@@ -59,6 +60,11 @@ from routes.events          import router as events_router
 from routes.tts             import router as tts_router
 from routes.events          import router as events_router
 from core.credits import OutOfCredits, PassRequired, LimitReached
+# The shared daily counter's table is made here, at the app's start,
+# rather than by whichever feature happens to count on it: DELETE
+# /api/account erases daily_usage on every install (routes/account.py's
+# PLAN), so the table has to exist on every install.
+import core.daily_limit  # noqa: E402,F401
 
 logging.basicConfig(level=logging.INFO)
 
@@ -174,6 +180,7 @@ app.include_router(grammar_router)
 app.include_router(phrase_router)
 app.include_router(reading_router)
 app.include_router(dictation_router)
+app.include_router(composition_router)
 app.include_router(profile_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)
