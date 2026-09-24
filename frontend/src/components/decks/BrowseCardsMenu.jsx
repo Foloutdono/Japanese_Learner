@@ -268,9 +268,23 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) 
                    between them is gone: it separated two things that
                    were already separated, and was the widest piece of
                    nothing in the row. */
+                /* A checkbox to the keyboard and to a screen reader
+                   (plan 123): a Tab stop that ticks on Space or Enter
+                   and says whether it is ticked. It stays a div -- its
+                   children are blocks, which a button may not hold --
+                   so nothing about how it looks moves. */
                 <div
                   key={r.raw_id}
+                  role="checkbox"
+                  aria-checked={isSel || r.in_deck}
+                  aria-disabled={r.in_deck || undefined}
+                  tabIndex={r.in_deck ? undefined : 0}
                   onClick={() => !r.in_deck && toggle(r.raw_id)}
+                  onKeyDown={e => {
+                    if (e.key !== ' ' && e.key !== 'Enter') return
+                    e.preventDefault()
+                    if (!r.in_deck) toggle(r.raw_id)
+                  }}
                   className={`browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' browse-result-row--selectable'}${isSel ? ' browse-result-row--selected' : ''}`}
                 >
                   <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
