@@ -1,4 +1,4 @@
-# ── 声 — the voice engine (plan 113, docs/adr/0018) ──────────────
+# ── 声 — the voice engine (plan 121, docs/adr/0019) ──────────────
 # The one module that talks to the speech synthesizer. Everything the
 # app says out loud on the server -- the exam listening dialogues, the
 # dictation bank, the card readings /api/tts falls back to, and the kana
@@ -13,7 +13,7 @@
 # "VOICEVOX Nemo", which THIRD_PARTY_NOTICES.md and the Credits page
 # (frontend/src/domain/attributions.js) carry. The same terms forbid
 # using the audio for machine learning -- no clip this module makes may
-# ever be published as, or fed into, a training set. ADR 0018 has the
+# ever be published as, or fed into, a training set. ADR 0019 has the
 # options that were weighed and why this one won.
 #
 # Nemo's nine voices (女声1-6, 男声1-3 -- the website writes 女性/男性,
@@ -67,7 +67,7 @@ VOICE_REV = "nemo2"
 
 # One name per slot, in slot order (study/exam_tts.py maps speaker
 # labels onto slots). The owner's choice, by ear, from the audition
-# (plan 113b):
+# (plan 121b):
 #   0 -- the reader: every word, every dictation line, a lone kana, and
 #        any script read by one voice;
 #   1 -- speaker A of a listening dialogue, a woman (the generator's

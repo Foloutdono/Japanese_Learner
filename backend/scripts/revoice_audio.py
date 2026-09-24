@@ -5,7 +5,7 @@ moved.
     python -m scripts.revoice_audio          # report only, changes nothing
     python -m scripts.revoice_audio --yes    # do it
 
-Run it once after any deploy that changes the voice (plan 113 did, from
+Run it once after any deploy that changes the voice (plan 121 did, from
 edge-tts to VOICEVOX Nemo -- study/voice_engine.py), from the backend's
 own shell (Render Shell): it needs the database for the stored papers,
 and only that instance mounts the disk the clips live on.

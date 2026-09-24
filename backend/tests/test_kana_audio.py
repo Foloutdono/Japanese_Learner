@@ -1,6 +1,6 @@
 """
-かな — the kana deck's clips (frontend/public/sounds/kanas/, plans 113
-and 113b).
+かな — the kana deck's clips (frontend/public/sounds/kanas/, plans 121
+and 121b).
 
 The files are made by scripts/build_kana_audio.py -- cut from a recorded
 voicebank (scripts/kana_bank.py), or synthesized by the voice engine --
@@ -85,7 +85,7 @@ def test_every_clip_is_one_the_generator_made(path):
 
 def test_every_voice_that_made_a_clip_is_credited():
     # A clip with no source is a clip nobody can say the terms of -- the
-    # state the recordings plan 113 replaced were in. And each voice's
+    # state the recordings plan 121 replaced were in. And each voice's
     # terms make its credit a condition (VOICEVOX Nemo's; あみたろ's,
     # "クレジットを書かずに使うのは禁止"), so a set cut from a new voice
     # cannot land without its row.
@@ -109,7 +109,7 @@ def test_the_frontend_asks_for_the_voice_the_backend_makes():
     assert match.group(1) == engine.VOICE_REV
 
 
-# ── The bank importer (plans 113b and 113c) ──────────────────────
+# ── The bank importer (plans 121b and 121c) ──────────────────────
 
 BANK_RATE = 44100
 

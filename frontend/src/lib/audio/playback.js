@@ -11,8 +11,8 @@ import { hasVoice, playVoice } from './voices'
 // sitting at zero.
 
 // The kana set's revision. The clips are made by
-// backend/scripts/build_kana_audio.py -- 'nemo1' synthesized (plan 113),
-// 'ritsu1' cut from 波音リツ's UTAU bank (plan 113c) -- and served from
+// backend/scripts/build_kana_audio.py -- 'nemo1' synthesized (plan 121),
+// 'ritsu1' cut from 波音リツ's UTAU bank (plan 121c) -- and served from
 // the same paths every set has used, while the service worker keeps
 // /sounds/ cache-first for a year: without a new URL a returning learner
 // would hear the old set until then. A file that used to be MISSING may
@@ -46,7 +46,7 @@ function play(path, category, soundName) {
 // and cached, then played from where the speech actually begins and
 // with a gain that pulls it toward a common loudness. The third could
 // not be fixed at playback, which is why the set was replaced by
-// generated clips made to this very target (plan 113,
+// generated clips made to this very target (plan 121,
 // backend/scripts/build_kana_audio.py).
 //
 // The correction stays: everything is measured from the decoded

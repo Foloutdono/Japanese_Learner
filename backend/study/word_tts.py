@@ -6,7 +6,7 @@
 # arguments are about arbitrary text. A card's reading is not arbitrary:
 # it is one of a fixed set of strings this app ships in content/, the
 # same "small, fixed, and worth caching" shape the ADR reserved server
-# synthesis for. (The engine is study/voice_engine.py since plan 113.)
+# synthesis for. (The engine is study/voice_engine.py since plan 121.)
 #
 # It needs to exist because the browser path does not reach a large part
 # of the phones this app is used on:

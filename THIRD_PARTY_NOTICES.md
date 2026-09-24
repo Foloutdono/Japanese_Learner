@@ -81,11 +81,11 @@ is synthesized with VOICEVOX Nemo:
 - the dictation (書取) clips;
 - the card readings served by `/api/tts`.
 
-It also made the kana deck's syllables until plan 113c, when they were cut
+It also made the kana deck's syllables until plan 121c, when they were cut
 from a recorded voice instead (波音リツ, below).
 
 The engine runs as a self-hosted service; see `backend/study/voice_engine.py`
-and `docs/adr/0018-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md`.
+and `docs/adr/0019-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md`.
 
 VOICEVOX Nemo permits commercial and non-commercial use of the audio it
 generates on the condition of this credit:

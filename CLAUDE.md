@@ -178,7 +178,7 @@ runtime purpose. Two consequences worth knowing:
   `spelling_pairs`, `scripts/placement_report.py`, `study/card_lookup.py`,
   `routes/dictionary.py`, `routes/onboarding.py` and
   `tests/test_migrate_kanji_ids.py`; `docs/vocab-deck-review.md`).
-  **113** is 声, a voice the app is allowed to sell: edge-tts replaced by a
+  **121** is 声, a voice the app is allowed to sell: edge-tts replaced by a
   self-hosted VOICEVOX Nemo engine (a Render private service), the voice
   epoch that retires every clip an earlier voice made, a lone kana named by
   the engine's kana notation instead of read as text, and the kana deck
@@ -187,15 +187,15 @@ runtime purpose. Two consequences worth knowing:
   `scripts/build_kana_audio.py`, `scripts/audition_voices.py`,
   `scripts/revoice_audio.py`, `render.yaml`, `lib/audio/speech.js`,
   `lib/audio/playback.js`, `frontend/public/sounds/README.md` and
-  `tests/test_voice_engine.py`; ADR 0018).
-  **113b** is the owner's voices and a recorded kana voice: 女声6, 男声1 and
+  `tests/test_voice_engine.py`; ADR 0019).
+  **121b** is the owner's voices and a recorded kana voice: 女声6, 男声1 and
   女声1 over four slots (the reader, A, B and the exam narrator), 男声1 at
   0.9 (`VOICE_TEMPO`), and the importer that cuts the kana deck from
   小春音アミ's UTAU bank, with `kanas/sources.json` holding every clip's
   voice to its credit (cited in `study/voice_engine.py`, `study/exam_tts.py`,
   `study/word_tts.py`, `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
-  `scripts/audition_voices.py` and `tests/test_kana_audio.py`; ADR 0019).
-  **113c** is 波音リツ instead, for terms that ask for no credit, report or
+  `scripts/audition_voices.py` and `tests/test_kana_audio.py`; ADR 0020).
+  **121c** is 波音リツ instead, for terms that ask for no credit, report or
   permission: the importer reads joined (連続音) banks by their oto.ini
   aliases, cuts each syllable from the start of a string and before the
   next sound, holds a long vowel by repeating its steady end in phase, and
@@ -205,7 +205,7 @@ runtime purpose. Two consequences worth knowing:
   held, and the set imported from 強連続音 A3 (cited in
   `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
   `tests/test_kana_audio.py`, `domain/attributions.js` and
-  `lib/audio/playback.js`; ADR 0019).
+  `lib/audio/playback.js`; ADR 0020).
   When starting a new wave, begin at **114** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -222,7 +222,7 @@ pytest tests/test_scheduler.py            # single file
 pytest tests/test_scheduler.py::test_name # single test
 ```
 
-### Speech — the voice engine (plan 113, ADR 0018)
+### Speech — the voice engine (plan 121, ADR 0019)
 
 Every voice the server makes (exam listening, dictation, the `/api/tts` card
 readings) and the kana deck's clips come from a **self-hosted VOICEVOX Nemo
@@ -244,7 +244,7 @@ and `THIRD_PARTY_NOTICES.md`). It also **forbids using the audio for machine
 learning**: never publish a generated clip as, or feed it into, a dataset.
 
 **Changing the voice is a code change, not an env var**: edit
-`voice_engine.DEFAULT_VOICES` (plan 113b, the owner's choice: slot 0, the
+`voice_engine.DEFAULT_VOICES` (plan 121b, the owner's choice: slot 0, the
 reader of words, dictation and lone kana, is 女声6; 1 and 2 are dialogue
 speakers A, a woman, 女声6, and B, a man, 男声1; 3 is the exam narrator,
 女声1) or a voice's pace in `VOICE_TEMPO` (男声1 speaks at 0.9), and bump
@@ -267,7 +267,7 @@ The kana clips are committed, and `kanas/sources.json` records which voice
 made each one, as its row id in `domain/attributions.js`;
 `tests/test_kana_audio.py` fails on a voice without its Credits row and
 `THIRD_PARTY_NOTICES.md` section. The deck is cut from a recorded voice,
-波音リツ's UTAU bank 強連続音 Ver1.5.1 at A3 (plan 113c, ADR 0019,
+波音リツ's UTAU bank 強連続音 Ver1.5.1 at A3 (plan 121c, ADR 0020,
 `scripts/kana_bank.py`), whose terms ask for no credit, report or
 permission (the app credits him anyway). The owner chose it by ear, as
 "good for now": a better kana voice is a known follow-up. To remake it,
@@ -377,7 +377,7 @@ how to flip a card. Same shape as the others — reports first.
 python -m scripts.backfill_first_ride  # report; --yes to apply, --user to scope
 ```
 
-And one after any deploy that changes the voice (plan 113 did, from edge-tts
+And one after any deploy that changes the voice (plan 121 did, from edge-tts
 to VOICEVOX Nemo). Run it from the backend's Render Shell, since it needs the
 database and the disk the clips live on. It remakes every dictation clip and
 every clip a stored paper refers to, in place and in the current voice. Then
@@ -625,7 +625,7 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
   backend reaches it, through `VOICEVOX_URL` (its `hostport`), over the
   private network, in the same region. It holds no state. Starter's 512 MB
   fits it (343 MB at peak with the three voices) at the cost of slow first
-  syntheses; Standard halves them. See ADR 0018.
+  syntheses; Standard halves them. See ADR 0019.
 - Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus
   proxy rewrites for `/api`, `/kanjivg` and `/exam-audio` to the Render
   backend. The browser never calls `onrender.com` directly — some mobile

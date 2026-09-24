@@ -4,7 +4,7 @@
   [0009](0009-card-readings-fall-back-to-server-audio.md), which adds a server
   fallback for the phones this decision left silent; the server engine named
   below (edge-tts) replaced by
-  [0018](0018-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md)
+  [0019](0019-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md)
 - **Date**: 2026-08-25
 
 ## Context

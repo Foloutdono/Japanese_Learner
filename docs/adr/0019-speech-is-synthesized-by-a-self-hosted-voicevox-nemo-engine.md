@@ -1,15 +1,15 @@
-# 0018 — Speech is synthesized by a self-hosted VOICEVOX Nemo engine
+# 0019 — Speech is synthesized by a self-hosted VOICEVOX Nemo engine
 
 - **Status**: accepted. Replaces the engine named by
   [0006](0006-browser-speech-for-study-audio.md) and
   [0009](0009-card-readings-fall-back-to-server-audio.md); their decisions
   (device first, a server clip as the fallback, catalog-only text) stand,
   except that a lone kana now skips the device (below).
-- **Amended**: 2026-09-23, plan 113b. The owner chose the voices, and B
+- **Amended**: 2026-09-23, plan 121b. The owner chose the voices, and B
   speaks more slowly ("The voices", below). The kana deck is to move to a
-  recorded voice: [0019](0019-the-kana-are-a-recorded-voice.md).
+  recorded voice: [0020](0020-the-kana-are-a-recorded-voice.md).
 - **Date**: 2026-09-23
-- **Plan**: 113
+- **Plan**: 121
 
 ## Context
 
@@ -84,7 +84,7 @@ is what counts. Their resource repository was archived in March 2026, so the
 voices are frozen: they won't change, and they won't improve.
 
 Voices are chosen per **slot** (`DEFAULT_VOICES`). The owner chose them after
-listening to `scripts/audition_voices.py`'s samples (plan 113b):
+listening to `scripts/audition_voices.py`'s samples (plan 121b):
 
 | Slot | Role | Voice |
 |---|---|---|
@@ -175,7 +175,7 @@ clip URL: `v=VOICE_REV`, and `v=KANA_REV` for the kana set.
   terms.
 - **Changing voices is a code change**: `DEFAULT_VOICES`, `VOICE_TEMPO` and
   `VOICE_REV` together (plus `KANA_REV` if the kana set is remade), then
-  `revoice_audio --yes`. `TTS_VOICES` is for local auditions only. Plan 113b
+  `revoice_audio --yes`. `TTS_VOICES` is for local auditions only. Plan 121b
   did exactly this: `VOICE_REV` went from `nemo1` to `nemo2`.
 - **VOICEVOX's "medium quality"** is its own description. It is clear and
   correctly accented, but less natural than the best commercial voices.

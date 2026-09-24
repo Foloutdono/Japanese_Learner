@@ -1,13 +1,13 @@
 """
-The kana deck from a recorded voicebank (plans 113b and 113c,
-docs/adr/0019).
+The kana deck from a recorded voicebank (plans 121b and 121c,
+docs/adr/0020).
 
 scripts/build_kana_audio.py --from-bank DIR uses this module to turn an
 UTAU voicebank into the deck's 127 clips. The deck is cut from 波音リツ
 (カノン, https://www.canon-voice.com/voicebanks/), whom the owner chose
 for his terms (below). The module reads both layouts UTAU banks come in,
 so 小春音アミ's single-syllable bank -- the first choice, set aside for
-her terms (ADR 0019) -- reads as well.
+her terms (ADR 0020) -- reads as well.
 
 -- What a bank looks like ----------------------------------------
 A folder of WAVs, often one sub-folder per pitch (A3/ F4/, or C4/ ...

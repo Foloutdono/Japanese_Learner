@@ -236,7 +236,7 @@ def test_restore_reports_failure_rather_than_raising(stored_paper, audio_dir):
         assert restore_clip(filename) is False
 
 
-# ── The name is an identity (plan 113) ───────────────────────────
+# ── The name is an identity (plan 121) ───────────────────────────
 # dictation_log stores clip ids and exam_papers stores the URLs, so the
 # key formula outlives any engine. Computed with the formula as it stood
 # before the engine changed; if one of these moves, every stored clip
@@ -256,7 +256,7 @@ def test_the_narrator_and_the_two_speakers_get_three_voices():
 
 
 def test_a_script_without_a_narrator_keeps_A_and_B_where_they_are():
-    # Before plan 113, voices went by order of appearance, so a script
+    # Before plan 121, voices went by order of appearance, so a script
     # opening on A gave A the narrator's voice.
     turns = [{"speaker": "A", "textJp": "x"}, {"speaker": "B", "textJp": "y"}]
     assert tts.voice_slots(turns) == {"A": 1, "B": 2}
@@ -276,7 +276,7 @@ def test_a_single_voice_clip_is_read_by_the_reader():
 def test_a_dictation_line_is_read_by_the_reader_not_the_exam_narrator():
     # Dictation's label is "narrator" and is part of every clip's key, so
     # it cannot change: one voice reading alone is the reader, whatever
-    # the label (plan 113b: the main voice reads dictation, 女声1 only
+    # the label (plan 121b: the main voice reads dictation, 女声1 only
     # narrates exams).
     assert tts.voice_slots([{"speaker": "narrator", "textJp": "x"}]) == {"narrator": 0}
 

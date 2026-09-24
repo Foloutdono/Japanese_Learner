@@ -850,7 +850,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 type="button"
                 // A kana plays the deck's own clip -- the same voice the
                 // kana cards use, offline, and えい said as ē -- rather
-                // than being synthesized afresh (plan 113).
+                // than being synthesized afresh (plan 121).
                 onClick={() => (isKana ? playKana(kanaSound(entry)) : speakJapanese(entry.kana))}
                 className="dict-plate__btn"
                 title={t.listen}

@@ -223,11 +223,11 @@ says which voice made each one, as its row id in
 `src/domain/attributions.js`.
 
 Every clip is `namine-ritsu`: a real voice, cut from 波音リツ's UTAU
-bank 強連続音 Ver1.5.1, its A3 folder (by カノン, plan 113c,
-`docs/adr/0019`). The owner chose it by ear from eleven trial reels
+bank 強連続音 Ver1.5.1, its A3 folder (by カノン, plan 121c,
+`docs/adr/0020`). The owner chose it by ear from eleven trial reels
 across four of his banks. His terms ask for no credit, report or
 permission; the app credits him anyway. The set before it was generated
-by the voice engine (VOICEVOX Nemo, plan 113), which the owner judged
+by the voice engine (VOICEVOX Nemo, plan 121), which the owner judged
 correct but flat. The engine can still make a set, as a fallback.
 
 To remake the set, download
@@ -288,7 +288,7 @@ playback correction in `playKana` stays: a file already on target gets
 gain ≈ 1 and offset ≈ 0.
 
 **Why synthesis worked, when it was once rejected** (the engine's set,
-plan 113). Read as TEXT, a lone mora gives a speech engine nothing to go
+plan 121). Read as TEXT, a lone mora gives a speech engine nothing to go
 on: it reads は as the particle "wa" and a single kana as something like
 its letter name. The generator never hands the engine text. It hands it
 the kana NOTATION (`ハ'`, `キャ'`), which names the syllable itself and

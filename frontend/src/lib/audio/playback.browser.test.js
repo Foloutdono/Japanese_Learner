@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
-// ── Which kana clip is asked for (plan 113) ──────────────────────
+// ── Which kana clip is asked for (plan 121) ──────────────────────
 // The kana set was regenerated under the same paths as the recordings
 // it replaced, and the service worker keeps /sounds/ cache-first for a
 // year: the revision on the URL is what makes a returning learner fetch

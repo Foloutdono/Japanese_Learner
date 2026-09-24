@@ -1,4 +1,4 @@
-# 0019 — The kana are a recorded voice
+# 0020 — The kana are a recorded voice
 
 - **Status**: accepted by the owner, and done.
   - **2026-09-24:** changed to 波音リツ, after 小春音アミ was set aside for
@@ -7,15 +7,15 @@
     bank, its A3 folder, which the owner chose by ear from eleven trial
     reels. The owner's verdict was "good for now": a better kana voice is
     a known follow-up ("Follow-up", below).
-- **Amends**: [0018](0018-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md),
+- **Amends**: [0019](0019-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md),
   for the kana deck only. The engine keeps every other voice, and a lone
   kana spoken through `/api/tts`.
 - **Date**: 2026-09-23, revised 2026-09-24
-- **Plan**: 113b, 113c
+- **Plan**: 121b, 121c
 
 ## Context
 
-Plan 113 regenerated the kana deck from VOICEVOX Nemo's kana notation.
+Plan 121 regenerated the kana deck from VOICEVOX Nemo's kana notation.
 The set is complete and correct: every sound the deck teaches, は as "ha".
 The owner listened and judged it below the standard a course needs. A
 synthesized mora is right, and flat. Kana are the first sound a learner
@@ -282,7 +282,7 @@ fixed. The options, from cheapest to most expensive:
 
 | Option | Why not |
 |---|---|
-| Keep the engine's kana (0018) | Complete and correct, but judged not good enough by ear. It remains the fallback. |
+| Keep the engine's kana (0019) | Complete and correct, but judged not good enough by ear. It remains the fallback. |
 | 小春音アミ's single-syllable bank | The first choice. See "Why not 小春音アミ": a credit, a report and her written OK. |
 | His other banks and pitches | See the table under "The voice". Eve and 眩/麗 cut their vowels too short. The owner chose 強 A3 over the rest by ear. |
 | A commissioned recording | Spoken, one voice, under a licence written for this use: the best result, for a one-off fee. There are two routes. A ココナラ/Upwork seller with the rights transferred costs about ¥10k–40k. あみたろ's paid recording, licensed without a credit, costs ¥34,750. This is the "Follow-up" option. |

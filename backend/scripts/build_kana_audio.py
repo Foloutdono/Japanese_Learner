@@ -11,7 +11,7 @@ synthesized by the voice engine.
     python -m scripts.build_kana_audio --force      # remake every clip on the engine
     python -m scripts.build_kana_audio --only ka kya wo_foreign
 
--- The recorded voice (plans 113b and 113c) ------------------------
+-- The recorded voice (plans 121b and 121c) ------------------------
 The owner listened to the engine's syllables (below) and found them
 short of the standard: a synthesized mora is right, and flat. The deck
 is to be a real voice, cut from an UTAU voicebank by
@@ -20,7 +20,7 @@ opening a recorded string, cut before the next sound; a long vowel is
 held; あい is the singer's own glide where a string has one). The voice
 is 波音リツ, whose terms ask for nothing -- no credit, no report, no
 permission; 小春音アミ, the first choice, asked for all three
-(docs/adr/0019). Unzip the bank under backend/datas/kana_source/, which
+(docs/adr/0020). Unzip the bank under backend/datas/kana_source/, which
 is gitignored, and point --from-bank at it; a bank with a folder per
 pitch needs --pitch to pick one.
 
@@ -35,7 +35,7 @@ with the pitch where the mark puts it, and nothing is left to guess.
 
 The set it replaced was 102 recordings of undocumented origin, forty of
 them clipping, with 24 of the deck's sounds missing outright (the long
-vowels, ファ ティ ヴ and the rest) and ウォ borrowing を's file. Plan 113.
+vowels, ファ ティ ヴ and the rest) and ウォ borrowing を's file. Plan 121.
 
 -- What one clip is ---------------------------------------------
 The README's spec, for a re-recording: one voice, 48 kHz mono, peak no

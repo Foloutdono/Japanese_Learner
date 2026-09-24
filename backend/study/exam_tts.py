@@ -1,7 +1,7 @@
 # ── 聴解 (listening) audio: the clip store ────────────────────────
 # Where every synthesized clip lives, what it is called, and how a
 # dialogue becomes one file. The speaking itself is study/voice_engine.py
-# (a self-hosted VOICEVOX Nemo engine, plan 113 / docs/adr/0018); this
+# (a self-hosted VOICEVOX Nemo engine, plan 121 / docs/adr/0019); this
 # module only reaches it through that module's say() and encode_mp3().
 #
 # It used to hold edge-tts -- a client for Microsoft Edge's consumer

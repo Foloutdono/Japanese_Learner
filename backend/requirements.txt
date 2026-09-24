@@ -50,7 +50,7 @@ pytest>=9.0.3
 # (LGPL-3.0-or-later, see THIRD_PARTY_NOTICES.md), because Render's
 # native runtime has no ffmpeg. The speech itself comes from the voice
 # engine over HTTP (httpx above) -- a self-hosted VOICEVOX Nemo, plan
-# 113 -- so nothing here synthesizes; edge-tts, which did, is gone:
+# 121 -- so nothing here synthesizes; edge-tts, which did, is gone:
 # nothing licenses its consumer endpoint for a product that is sold.
 lameenc>=1.8.4
 # study/captions.py's link ingest -- the ONLY dependency here that is

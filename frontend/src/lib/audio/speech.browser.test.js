@@ -189,7 +189,7 @@ describe('speakJapanese', () => {
   })
 })
 
-// ── A lone kana (plan 113) ───────────────────────────────────────
+// ── A lone kana (plan 121) ───────────────────────────────────────
 // Read as text by a device voice, a lone は is the topic particle, "wa",
 // and へ is "e". The server names the syllable instead, so a lone kana
 // never goes to the device -- not even a device that can speak.

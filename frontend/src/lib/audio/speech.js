@@ -25,7 +25,7 @@ import { api } from '../origin'
 //
 // So the SERVER's clip is the fallback: /api/tts, made by the voice
 // engine the exam listening section uses (backend/study/voice_engine.py,
-// a self-hosted VOICEVOX Nemo -- plan 113; backend/study/word_tts.py
+// a self-hosted VOICEVOX Nemo -- plan 121; backend/study/word_tts.py
 // explains why an endpoint for card readings is allowed where one for
 // arbitrary text is not). It arrives as an mp3 and plays through the
 // mixer like every other sound, which means mute and the volume

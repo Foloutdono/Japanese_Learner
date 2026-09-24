@@ -4,7 +4,7 @@
 A listening item is worthless without its audio, and the dialogue is
 bought from a model before the audio is made. So the voice engine is
 asked first (study/voice_engine.ready): with it down or unconfigured,
-not one model call is paid for. Plan 113.
+not one model call is paid for. Plan 121.
 """
 from unittest import mock
 

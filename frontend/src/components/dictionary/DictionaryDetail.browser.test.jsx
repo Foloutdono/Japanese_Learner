@@ -316,7 +316,7 @@ describe('the plate — three registers, a seal, a level, two ghosts', () => {
     expect(getComputedStyle(speak).borderTopWidth).toBe('1px')
   })
 
-  it('plays a kana the deck\'s own clip rather than synthesizing it (plan 113)', async () => {
+  it('plays a kana the deck\'s own clip rather than synthesizing it (plan 121)', async () => {
     // ウォ's romaji is を's; its clip is its own.
     const { root } = await renderEntry({ ...KANA, kana: 'ウォ', romaji: 'wo', sound: 'wo_foreign', type: 'katakana' })
     root.querySelector('.dict-plate__btn').click()

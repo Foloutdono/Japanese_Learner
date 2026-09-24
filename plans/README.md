@@ -5667,7 +5667,7 @@ What shipped, per mode:
 Backend `pytest`: 1668 → 1797 (+129; the seed matrix is most of it).
 
 
-# Wave 24 — 声, a voice we are allowed to sell (plan 113, 2026-09-23)
+# Wave 27 — 声, a voice we are allowed to sell (plans 121–121c, 2026-09-23)
 
 Executed directly in one session. Every voice the server made came from
 edge-tts, a client for Microsoft Edge's consumer "Read Aloud" endpoint,
@@ -5679,7 +5679,7 @@ regenerated kana set.
 
 | # | Plan | Status |
 |---|------|--------|
-| 113 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated | DONE (2026-09-23) |
+| 121 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated | DONE (2026-09-23) |
 
 What shipped:
 
@@ -5689,7 +5689,7 @@ What shipped:
   the stock image pinned by digest, with `VV_DISABLE_MUTABLE_API=1`. The
   backend's `VOICEVOX_URL` comes from its `hostport`. Measured with three
   voices loaded, it peaks at 376 MB (Starter), and a word takes about 2 s at
-  0.5 CPU. ADR 0018 has the licence, the credit and the options table.
+  0.5 CPU. ADR 0019 has the licence, the credit and the options table.
 - **Nothing is renamed.** `content_key` is byte-identical and pinned in
   `tests/test_exam_tts.py`. A new voice is a voice EPOCH instead:
   `{audio_dir}/.voice-rev`. A clip older than the epoch is remade in place

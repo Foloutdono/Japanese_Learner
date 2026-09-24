@@ -1,5 +1,5 @@
 """
-声 — the voice engine client (study/voice_engine.py, plan 113).
+声 — the voice engine client (study/voice_engine.py, plan 121).
 
 Against a fake engine on httpx.MockTransport: what matters here is what
 the client ASKS the engine for -- which path a lone kana takes, which
@@ -134,7 +134,7 @@ def test_voices_are_resolved_by_name_once(fake):
 
 
 def test_the_default_slots_are_the_owners_choice(fake):
-    # Plan 113b: 女声6 reads and is A, 男声1 is B, 女声1 narrates exams.
+    # Plan 121b: 女声6 reads and is A, 男声1 is B, 女声1 narrates exams.
     assert [engine.style_for_slot(slot) for slot in range(4)] == [10006, 10006, 10001, 10005]
 
 
