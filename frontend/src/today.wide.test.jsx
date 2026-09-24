@@ -76,10 +76,10 @@ beforeEach(() => {
   todayRef.current = todayOf(EIGHT)
 })
 
-async function mount() {
+async function mount(entry = '/today') {
   const screen = await render(
     <LangProvider>
-      <MemoryRouter initialEntries={['/today']}>
+      <MemoryRouter initialEntries={[entry]}>
         <div className="phone phone--desk">
           <div className="phone__content"><TodayScreen session={{}} /></div>
         </div>
@@ -174,3 +174,19 @@ describe('Enter, with the lanes two across', () => {
     expect(chosen).not.toContain(EIGHT[3].id)
   })
 })
+
+// ── plan 123 — a finished run's slip at the card's width ──
+describe('Today\'s finish at 1440', () => {
+  it('stands the slip at the card\'s width, centred in the gate\'s column', async () => {
+    await mount({ pathname: '/today', state: { run: { cleared: 12, xp: 40 } } })
+    const clear = $('main.today > .today-clear').getBoundingClientRect()
+    expect(Math.round(clear.width)).toBe(640)
+    const side = $('main.today > .desk-side').getBoundingClientRect()
+    const main = $('main.today').getBoundingClientRect()
+    // Centred in what the side leaves.
+    const column = side.left - main.left
+    expect(Math.abs((clear.left - main.left) - (column - clear.width - 24) / 2)).toBeLessThan(40)
+    expect($('main.today > .desk-side .pass--strip')).not.toBeNull()
+  })
+})
+

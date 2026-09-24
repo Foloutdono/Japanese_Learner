@@ -162,6 +162,22 @@ describe('the session panel at a run\'s end', () => {
     expect($('.desk-entry').textContent.toLowerCase()).toContain('meaning of 山')
   })
 
+  it('prints a grammar miss by its pattern, not a blank chip (plan 123)', async () => {
+    startTally('grammar:N5:f2b')
+    countReview({ quality: 1, xp: 1, entry: { id: 'grammar_N5_〜てください', category: 'grammar', label: '〜てください', session: {} } })
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($$('.desk-misses .desk-miss').map(c => c.textContent)).toEqual(['〜てください'])
+  })
+
+  it('keeps no zero records for a run that had nothing to rate (plan 123)', async () => {
+    startTally('kanji:N5:f2b')
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($('.desk-tally')).toBeNull()
+    expect($('.desk-run__note')).toBeNull()
+  })
+
   it('says nothing more on a run with no misses', async () => {
     startTally('kanji:N5:f2b')
     countReview({ quality: 4, xp: 5, entry: { term: '川', category: 'kanji', session: {} } })

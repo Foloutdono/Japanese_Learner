@@ -202,6 +202,29 @@ describe('the analyser on the desk', () => {
   })
 })
 
+describe('the analyser\'s notices beside a long history (plan 123)', () => {
+  it('stand under the intake, in view, with the one live region after the grid', async () => {
+    const rows = Array.from({ length: 20 }, (_, i) => ({ id: i + 1, phrase: `文${i + 1}`, source: 'text', created_at: '2026-09-20T10:00:00Z', kept: false }))
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/phrase/history')) return ok(rows)
+      return ok([])
+    })
+    apiJson.mockImplementation(async () => { throw new Error('boom') })
+    await mount()
+    await settle(200)
+    expect($$('.desk-intake .anl-hist, .desk-intake [class*="anl-hist__"]').length).toBeGreaterThan(0)
+    await analyze()
+    await settle(200)
+    const line = $('.desk-intake__main .anl-notice-line--bad')
+    expect(line).not.toBeNull()
+    expect(line.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+    // One live region, after the grid, where it stands in every state.
+    expect($$('[role="status"]')).toHaveLength(1)
+    expect($('.desk-intake [role="status"]')).toBeNull()
+  })
+})
+
 describe('the dictionary, on a sentence it has no entry for', () => {
   it('offers the analyser, which analyses it on arrival', async () => {
     await mount('/dictionary')

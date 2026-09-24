@@ -8,6 +8,7 @@ import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
 import { showsCap } from '../../domain/credits'
 import { playClick } from '../../lib/audio'
+import { isDesk } from '../../hooks/useDesk'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
@@ -150,6 +151,22 @@ function HudLevel() {
   )
 }
 
+// 机 (plan 123): on Today the pass's back already stands beside the
+// gate (components/journey/JourneyPanel), and the rail's status chip
+// opened a dialog copy of it, the scrim hiding the panel it duplicated.
+// Where that panel stands, the chip walks to it instead: in view,
+// focused, marked with one soft arrival. Everywhere else, and on every
+// phone, it opens the sheet as it always has.
+function showStatus() {
+  const panel = isDesk() ? document.querySelector('.desk-journey') : null
+  if (!panel) { openStatus(); return }
+  panel.scrollIntoView({ block: 'nearest' })
+  panel.focus({ preventScroll: true })
+  panel.classList.remove('desk-journey--called')
+  void panel.offsetWidth
+  panel.classList.add('desk-journey--called')
+}
+
 // The three instruments, in the order the HUD prints them. Shared with
 // the desk's rail (plan 113), which sets the same three at its foot.
 export function HudInstruments() {
@@ -158,7 +175,7 @@ export function HudInstruments() {
       <HudLevel />
       {/* The panel opens the status sheet — the pass's back (plan
           074) — rather than walking to the pass. */}
-      <HudStatus onClick={() => { playClick(); openStatus() }} />
+      <HudStatus onClick={() => { playClick(); showStatus() }} />
       <HudPass onClick={() => { playClick(); openBalance() }} />
     </>
   )

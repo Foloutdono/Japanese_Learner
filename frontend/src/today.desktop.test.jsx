@@ -117,3 +117,48 @@ describe('Today on the desk', () => {
     expect(document.querySelector('.desk-side .pass--strip')).not.toBeNull()
   })
 })
+
+// ── plan 123 — one panel, one word; the finish keeps the strip ──
+describe('Today\'s side, called and finished (plan 123)', () => {
+  it('walks the rail\'s status chip to the panel beside the gate, with no dialog', async () => {
+    journeyRef.current = BEHIND
+    const { HudInstruments } = await import('./components/chrome/Hud')
+    const { openStatus } = await import('./stores/journey')
+    openStatus.mockClear()
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <div className="phone phone--desk">
+            <aside className="desk-rail"><HudInstruments /></aside>
+            <div className="phone__content"><TodayScreen session={{}} /></div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    document.querySelector('.desk-rail [data-guide="hud.status"]').click()
+    await settle(60)
+    expect(openStatus).not.toHaveBeenCalled()
+    expect(document.querySelector('[aria-modal="true"]')).toBeNull()
+    expect(document.activeElement).toBe(document.querySelector('.desk-journey'))
+  })
+
+  it('keeps the stamp strip on a finish, and the slip at the card\'s width', async () => {
+    journeyRef.current = BEHIND
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/today', state: { run: { cleared: 12, xp: 40 } } }]}>
+          <div className="phone phone--desk">
+            <div className="phone__content"><TodayScreen session={{}} /></div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const clear = document.querySelector('main.today > .today-clear')
+    expect(clear).not.toBeNull()
+    expect(clear.getBoundingClientRect().width).toBeLessThanOrEqual(640)
+    expect(document.querySelector('main.today > .desk-side .pass--strip')).not.toBeNull()
+  })
+})
+

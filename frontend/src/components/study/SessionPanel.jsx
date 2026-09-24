@@ -60,7 +60,10 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
 
   return (
     <>
-      {records && (
+      {/* A run that ends with nothing rated -- nothing was due -- has
+          no record to keep, and three zeros beside its done message
+          said otherwise (plan 123). */}
+      {records && !(done && tally.reviewed === 0) && (
         <div className="records desk-tally" role="group" aria-label={t.deskRunLabel}>
           <Record value={tally.reviewed} label={t.totalReviews} />
           <Record value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} label={t.accuracy} />
@@ -81,7 +84,7 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
                 onClick={() => setOpenKey(k => (k === m.key ? null : m.key))}
                 lang="ja"
               >
-                {m.term}
+                {m.label ?? m.term}
               </button>
             ))}
           </div>

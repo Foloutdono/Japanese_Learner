@@ -21044,6 +21044,14 @@ a.slip__act { text-decoration: none; }
     grid-column: 2;
     grid-row: 1;
   }
+  /* A finished run's slip stands at the card's width, centred in the
+     gate's column (plan 123): its three figures and its way back ran
+     ~730px wide at 1440, each figure alone in a third of it. */
+  .today > .today-clear {
+    width: 100%;
+    max-width: var(--card-w);
+    justify-self: center;
+  }
   /* The gate's lanes two across, once the gate holds two (plan 116).
      At a laptop's 1440 one lane per row ran ~704px: the name at one
      end, its figure at the other, ~450px of nothing between — and the
@@ -21087,6 +21095,10 @@ a.slip__act { text-decoration: none; }
     border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
     border-radius: var(--r-identity);
   }
+  /* Called by the rail's status chip (plan 123): one soft arrival, and
+     no ring for a focus the pointer asked for. */
+  .desk-journey:focus { outline: none; }
+  .desk-journey--called { animation: arrive-soft 0.2s linear; }
   .desk-journey__head {
     display: flex;
     align-items: baseline;

@@ -107,7 +107,9 @@ export default function TodayScreen({ session }) {
           gate and the back is a tap on the HUD away. */}
       {desk && (
         <DeskSide label={t.passLabel}>
-          {!run && <PassStrip pace={today?.pace} />}
+          {/* The strip stays on the finish too (plan 123): the run has
+              just inked today's stamp and moved the new-items gauge. */}
+          <PassStrip pace={today?.pace} />
           <JourneyPanel session={session} />
         </DeskSide>
       )}

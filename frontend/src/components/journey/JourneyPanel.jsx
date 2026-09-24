@@ -29,7 +29,13 @@ export function JourneyPanel({ session }) {
   if (!model || model.status == null) return null
 
   return (
-    <section className={`desk-journey jour-st--${model.status}`} aria-labelledby="desk-journey-head">
+    <section
+      className={`desk-journey jour-st--${model.status}`}
+      aria-labelledby="desk-journey-head"
+      // The rail's status chip walks here on Today (Hud's showStatus).
+      tabIndex={-1}
+      onAnimationEnd={e => { if (e.animationName === 'arrive-soft') e.currentTarget.classList.remove('desk-journey--called') }}
+    >
       <h2 className="desk-journey__head" id="desk-journey-head">
         <span className="desk-journey__name">{t.hudStatusLabel}</span>
         <span className="desk-journey__word">{t.jourStatus[model.status]}</span>
