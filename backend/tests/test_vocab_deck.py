@@ -104,6 +104,29 @@ def test_the_reading_field_is_written_in_kana():
     assert bad == []
 
 
+def test_the_reading_carries_no_suru_the_word_does_not_write():
+    """掃除 read そうじする (plan 106), 案内 read あんない・する and 練習 read
+    れんしゅうする: the verb's する packed onto the noun's reading, so
+    word_reading answered 練習 with れんしゅうする and the entry panel
+    could not lay the reading over the kanji. する is kana, so the
+    reading test above cannot see it; furigana.written_reading can,
+    since it drops a する the written form does not spell (擦る read
+    こする keeps its す). A kana-only card has no written form to ask,
+    so its tell is a card of its own for the stem (コピーする beside
+    コピー)."""
+    from study.furigana import written_reading
+
+    kana_words = {r for _, e in _entries() if not e["kanji"] for r in e["kana"].split("/")}
+    bad = [
+        (level, entry["kanji"], reading)
+        for level, entry in _entries()
+        for reading in entry["kana"].split("/")
+        if (entry["kanji"] and written_reading(entry["kanji"], reading) != reading)
+        or (not entry["kanji"] and reading.endswith("する") and reading[:-2] in kana_words)
+    ]
+    assert bad == []
+
+
 def test_the_written_form_field_is_empty_or_holds_a_written_form():
     """A kana-only word writes `kanji: ""` — 1,097 entries do. An entry
     that instead parks the kana word in `kanji` reads as a word with a
