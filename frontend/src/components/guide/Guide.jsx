@@ -5,7 +5,7 @@ import { useDialog } from '../../hooks/useDialog'
 import { track } from '../../lib/track'
 import { stopwatch } from '../../lib/dwell'
 import { playClick } from '../../lib/audio'
-import { GUIDES } from './guides'
+import { GUIDES, deskStops } from './guides'
 import { useDesk } from '../../hooks/useDesk'
 
 // ── 案内 — the guide over a gate (plan 100) ────────────────────────
@@ -41,6 +41,23 @@ function rectOf(anchor) {
   // about, never a screen's width away over the page.
   const beside = el.closest('.desk-rail') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
   return { el, top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom, beside }
+}
+
+// 机 (plan 123): a note under or over an anchor in the page's column
+// stands on the anchor, not on the canvas's middle -- Today's gate sits
+// beside a side column, Learn's first plate in a grid of two, and a
+// note centred on the canvas lay half over the neighbour. As wide as
+// the anchor, between a column and a card, and kept inside the canvas.
+function centredOn(rect) {
+  const tokens = getComputedStyle(document.documentElement)
+  const cardW = parseFloat(tokens.getPropertyValue('--card-w')) || 640
+  const sideW = parseFloat(tokens.getPropertyValue('--desk-side-w')) || 360
+  const width = Math.min(cardW, Math.max(rect.width, sideW))
+  const canvas = document.querySelector('.phone__content')?.getBoundingClientRect()
+  const from = (canvas?.left ?? 0) + width / 2
+  const to = (canvas?.right ?? window.innerWidth) - width / 2
+  const centre = rect.left + rect.width / 2
+  return { left: Math.min(Math.max(centre, from), Math.max(from, to)), width }
 }
 
 export function Guide({ gate, onEnd }) {
@@ -89,8 +106,8 @@ export function Guide({ gate, onEnd }) {
 
   useLayoutEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the anchors are DOM, read once the guide is in it.
-    setStops((GUIDES[gate] ?? []).filter(s => rectOf(s.anchor)))
-  }, [gate])
+    setStops((desk ? deskStops(gate) : GUIDES[gate] ?? []).filter(s => rectOf(s.anchor)))
+  }, [gate, desk])
 
   // Nothing to point at: over before it begins, and not a skip.
   useEffect(() => {
@@ -141,6 +158,31 @@ export function Guide({ gate, onEnd }) {
     }
   }, [stop])
 
+  // 机 (plan 123): → is Next wherever the focus is, and Enter is Next
+  // on the note itself -- the panel holds the focus, and Enter there did
+  // nothing, so a desk learner went Tab, Tab, Enter at every stop. Enter
+  // on a focused Skip or Next keeps its own meaning. Taken in the
+  // capture phase and stopped, so the page under the note never hears
+  // them (the dictionary's → would walk the catalogue under it). Esc
+  // stays the dialog's skip.
+  useEffect(() => {
+    if (!desk || !stop || over) return undefined
+    const onKey = e => {
+      if (e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
+      if (e.key !== 'ArrowRight' && !(e.key === 'Enter' && e.target === ref.current)) return
+      e.preventDefault()
+      e.stopPropagation()
+      if (e.repeat) return
+      playClick()
+      if (index === stops.length - 1) end(false)
+      else setIndex(i => i + 1)
+    }
+    window.addEventListener('keydown', onKey, true)
+    return () => window.removeEventListener('keydown', onKey, true)
+    // `end` is this render's; the stop and its index are what it reads.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [desk, stop, index, stops, over])
+
   if (over || !stop || !rect) return null
 
   const last = index === stops.length - 1
@@ -159,9 +201,12 @@ export function Guide({ gate, onEnd }) {
         ? { left: rect.left + rect.width + PAD + GAP }
         : { left: 'auto', right: window.innerWidth - rect.left + PAD + GAP }),
     }
-    : lower
-      ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
-      : { top: rect.bottom + PAD + GAP }
+    : {
+      ...(lower
+        ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
+        : { top: rect.bottom + PAD + GAP }),
+      ...(desk ? centredOn(rect) : {}),
+    }
   // The desk's own wording where a note teaches a key (plan 115).
   const text = (desk && t[`guide${stop.key}Desk`]) || t[`guide${stop.key}`]
 
@@ -195,11 +240,13 @@ export function Guide({ gate, onEnd }) {
         <p className="guide-callout__text">{text}</p>
         <div className="guide-callout__foot">
           <span className="guide-callout__count" aria-hidden="true">{index + 1}/{stops.length}</span>
-          <button type="button" className="guide-callout__skip" onClick={() => end(true)} data-action="guide-skip">
+          <button type="button" className="guide-callout__skip" onClick={() => end(true)} data-action="guide-skip" aria-keyshortcuts={desk ? 'Escape' : undefined}>
             {t.guideSkip}
+            {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEscape}</kbd>}
           </button>
-          <button type="button" className="guide-callout__next" onClick={next} data-action="guide-next">
+          <button type="button" className="guide-callout__next" onClick={next} data-action="guide-next" aria-keyshortcuts={desk ? 'Enter ArrowRight' : undefined}>
             {last ? t.guideDone : t.guideNext}
+            {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
           </button>
         </div>
       </div>
