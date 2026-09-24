@@ -188,6 +188,10 @@ describe('a split row as a link looks like the button it was', () => {
     await userEvent.hover(corner)
     corner.remove()
     document.activeElement?.blur?.()
+    // And past the hover's way out: a stop eases its background over
+    // 0.16s, and a reading taken inside it (a full parallel run is slow
+    // enough to land there) is a tween, not the rest (plan 123).
+    await new Promise(r => setTimeout(r, 300))
     for (const sel of ROWS) {
       const { buttons, links } = pairs(sel)
       buttons.forEach((b, i) => expect.soft(differences(b, links[i]), `${sel} #${i}`).toEqual([]))

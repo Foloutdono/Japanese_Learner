@@ -21238,6 +21238,10 @@ a.slip__act { text-decoration: none; }
     justify-content: space-between;
     gap: var(--sp-3);
   }
+  /* The caption is where the focus lands when the dock has nothing to
+     type in (plan 123): a place to start from, not a control, so no
+     ring -- the next Tab rings the ✕. */
+  .desk-dock__head > h2:focus-visible { outline: none; }
   /* Browse in the deck's side (plan 115, BrowseCardsDock): the result
      row stacks the way it does on a phone — 13.5rem of headword and a
      meaning do not share 360px beside a checkbox. */
@@ -21847,6 +21851,12 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     min-width: 0;
   }
+  /* The landing spot of a door in a column (plan 123) -- the entry
+     SideLookup opens, and the dictionary's dock while its lookup's fetch
+     is out -- until its plate is there to take the focus: a place to
+     start from, so no ring, as a dock's caption. */
+  .desk-lookup > .desk-entry:focus-visible,
+  .dict-dock:focus-visible { outline: none; }
   /* ── the way up (plan 114) ──
      A screen's ‹ way out, on the desk, when the rail has no door to
      where it leads (components/chrome/Bar.jsx): not the phone's pill

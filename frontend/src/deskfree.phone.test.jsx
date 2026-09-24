@@ -1292,3 +1292,56 @@ describe('the radio groups (plan 123, P17)', () => {
     }
   })
 })
+
+// ── plan 123, P18 — a phone's doors are its own ──
+// On the desk the column's docks take and give back the focus, close on
+// the entry's roundel, release on a second press, and hold the card form
+// with its draft; Browse's rows are one stop walked with ↑/↓. A phone
+// keeps the form in the page under its label (Add pressed again clears
+// it, as it did), and Browse its overlay with its footer Close and a tab
+// stop on every row it can tick.
+describe('the column\'s doors (plan 123, P18)', () => {
+  async function mountDeck(answer) {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => answer(path) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+  }
+
+  it('keeps the form in the page under its label, Add clearing it', async () => {
+    await mountDeck(deckAnswer)
+    const add = () => document.querySelector('.chip-row button')
+    add().click()
+    await settle()
+    const form = document.querySelector('main.learn > .deckdetail-form')
+    expect(form.querySelector('.form__label')).not.toBeNull()
+    expect(document.querySelector('.desk-dock, .dict-plate__btn')).toBeNull()
+    const input = form.querySelector('input')
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(input, '犬')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(50)
+    add().click()
+    await settle()
+    expect(document.querySelector('main.learn > .deckdetail-form input').value).toBe('')
+  })
+
+  it('keeps Browse\'s footer Close and a tab stop on every row it can tick', async () => {
+    const results = ['水', '火', '木'].map((w, i) => ({ raw_id: `v${i}`, source: 'vocab', level: 'N5', front: w, kana: w, meaning: w, in_deck: false }))
+    await mountDeck(path => (path === '/api/decks/1' ? { ...DECK, type: 'vocab' } : String(path).includes('/browse') ? { results } : deckAnswer(path)))
+    ;[...document.querySelectorAll('.chip-row button')].find(b => /browse|parcourir/i.test(b.textContent)).click()
+    await settle(300)
+    const modal = document.querySelector('.browse-modal')
+    expect(modal.querySelector('.import-footer__cancel')).not.toBeNull()
+    expect(modal.querySelector('.import-header__close')).not.toBeNull()
+    expect([...modal.querySelectorAll('.browse-result-row')].map(r => r.tabIndex)).toEqual([0, 0, 0])
+    expect(document.activeElement.classList.contains('browse-search-input')).toBe(false)
+  })
+})

@@ -302,6 +302,23 @@ describe('the grab\'s walkthrough on the desk', () => {
     expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
   })
 
+  // Plan 123, P18: in on the dock's caption, out to the opener, closed by
+  // the column's own roundel.
+  it('takes the focus to its caption and gives it back to its door', async () => {
+    await mount()
+    $$('.anl-sources .seg__opt')[2].click()
+    await settle()
+    const door = $('.anl-grab__tutorial')
+    door.focus()
+    door.click()
+    await settle()
+    expect(document.activeElement).toBe($('.desk-tut h2'))
+    expect($('.desk-tut .desk-dock__head .dict-plate__btn')).not.toBeNull()
+    press('Escape')
+    await settle()
+    expect(document.activeElement).toBe(door)
+  })
+
   it('closes when the intake leaves the video platform', async () => {
     await mount()
     $$('.anl-sources .seg__opt')[2].click()

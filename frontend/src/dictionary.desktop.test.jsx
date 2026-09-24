@@ -260,3 +260,32 @@ describe('the catalogue walked by key (plan 123)', () => {
   })
 })
 
+
+// ── plan 123, P18 — the focus and the scroll through a door ──
+// A door in the dock unmounts with the entry it belongs to: the focus
+// fell to the page's body and the entry came back at its top. The door
+// has the focus again on the way back, the entry scrolled where it was.
+describe('a door in the dock, and back', () => {
+  it('gives the focus back to the door, and the entry its scroll', async () => {
+    await mount()
+    ;[...document.querySelectorAll('.dict-entry-card')].find(c => c.textContent.includes('電車')).click()
+    await settle()
+    const dock = document.querySelector('.dict-dock')
+    // Short enough to scroll, whatever the entry holds.
+    dock.style.maxHeight = '160px'
+    dock.scrollTop = 60
+    await settle(60)
+    const read = dock.scrollTop
+    expect(read).toBeGreaterThan(0)
+    dock.querySelector('.dict-word').focus({ preventScroll: true })
+    await userEvent.keyboard('{Enter}')
+    await settle(250)
+    expect(headword()).toBe('電')
+    expect(dock.contains(document.activeElement)).toBe(true)
+    await userEvent.keyboard('{Escape}')
+    await settle()
+    expect(headword()).toBe('電車')
+    expect(document.activeElement).toBe(dock.querySelector('.dict-word'))
+    expect(dock.scrollTop).toBe(read)
+  })
+})

@@ -514,7 +514,33 @@ export default function DeckDetailScreen({ session }) {
 
   // On the desk the form, Browse, More and the platforms take turns in
   // one column (plans 115, 120): opening one gives the column to it.
-  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
+  //
+  // And its chip gives it back (plan 123): the lit Add, Browse or More,
+  // pressed again, returns the column to the platforms -- the lit Add
+  // used to reopen the form, emptied, over the card half written in it.
+  // A new card's form keeps what was typed in it until it is saved or
+  // cancelled: closing the column and coming back finds it as it was
+  // left. An edit's fields are never a new card's draft.
+  function startAdd() {
+    if (desk && adding && !editing) { setAdding(false); return }
+    if (!desk || editing || !formTyped()) resetForm()
+    setEditing(null)
+    setAdding(true)
+    if (desk) { setShowBrowse(false); closeMore() }
+  }
+
+  /** Whether the form holds anything typed (the desk's kept draft). */
+  function formTyped() {
+    const typed = v => (v && typeof v === 'object' ? Object.values(v).flat().some(typed) : String(v ?? '').trim() !== '')
+    return typed(notes) || Object.values(form).some(typed)
+  }
+
+  // The dock's ✕ or Esc (the desk's): the column goes back to the
+  // platforms, a new card's draft kept, an edit let go.
+  function closeForm() {
+    setAdding(false)
+    if (editing) { setEditing(null); resetForm() }
+  }
 
   // 机 (plan 123): a deck just made on the desk arrives with `add`, and
   // its first card's form stands open in the side. The flag is spent at
@@ -538,12 +564,14 @@ export default function DeckDetailScreen({ session }) {
 
   function openBrowse() {
     playUi('click-mode-selection')
+    if (desk && showBrowse && !adding) { closeBrowse(); return }
     setShowBrowse(true)
     if (desk) { setAdding(false); closeMore() }
   }
 
   function openMore() {
     playUi('click-mode-selection')
+    if (desk && moreOpen) { closeMore(); return }
     setMoreOpen(true)
     if (desk) { setAdding(false); setShowBrowse(false) }
   }
@@ -630,11 +658,15 @@ export default function DeckDetailScreen({ session }) {
 
   // Add / Edit form: in its slot on a phone, in the second column on
   // the desk (plan 114), where it stands beside the cards it adds to.
+  // On the desk it stands in the column's dock (plan 123), whose caption
+  // says what the phone's label says.
   const cardForm = adding && (
     <div className="form deckdetail-form">
-      <span className="form__label">
-        {editing ? t.editCard : t.newCard}
-      </span>
+      {!desk && (
+        <span className="form__label">
+          {editing ? t.editCard : t.newCard}
+        </span>
+      )}
       <div className="deckdetail-form__fields">
         {/* One input per field the structure declares. A kanji card
             asks for four things and a standard card for two, from
@@ -1005,7 +1037,11 @@ export default function DeckDetailScreen({ session }) {
         <div className="desk-deck">
           <div className="desk-deck__main">{body}</div>
           <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : moreOpen ? t.deckMore : t.study}>
-            {adding ? cardForm
+            {adding ? (
+              <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
+                {cardForm}
+              </DeskDock>
+            )
               : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
               // More is a list of what can be done to the deck, not a
               // question: it opens in the column (plan 120), and only its

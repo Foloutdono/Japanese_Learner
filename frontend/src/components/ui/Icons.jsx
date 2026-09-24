@@ -316,6 +316,27 @@ export function CheckIcon({ size = 14, className }) {
   )
 }
 
+// The entry's ✕ (moved from dictionary/DictionaryDetail.jsx in plan
+// 123): the plate's roundel draws it, and so does every door a desk's
+// column opens (chrome/DeskDock). Sized by .dict-icon, as it always was.
+export function CloseIcon() {
+  return (
+    <svg
+      className="dict-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <line x1="6" y1="6" x2="18" y2="18" />
+      <line x1="18" y1="6" x2="6" y2="18" />
+    </svg>
+  )
+}
+
 export function CrossIcon({ size = 14, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth={2.5}>

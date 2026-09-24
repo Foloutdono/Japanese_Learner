@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef } from 'react'
 import { useLang } from '../../LangContext'
-import { CrossIcon } from '../ui/Icons'
+import { CloseIcon } from '../ui/Icons'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing } from '../../lib/keyGuards'
 
@@ -16,10 +16,22 @@ import { composing } from '../../lib/keyGuards'
 // takes focus with it, as a dialog's does (hooks/useDialog).
 //
 // Rendered only on the desk, by the screen that owns the column.
-export function DeskDock({ title, onClose, className = '', children }) {
+//
+// Focus (plan 123): the dock takes it on the way in and gives it back on
+// the way out, one way for every door. It first remembers what had the
+// focus -- the chip that opened it -- then puts it on `initialFocus` (a
+// selector inside the dock: Browse's search, the card form's first
+// field), or on its own caption when there is nothing to type in, so the
+// next Tab is the dock's first control rather than the next of the
+// cards listed before the column. None of its children autofocuses:
+// one that did ran before this, and the dock remembered the child as its
+// opener. The ✕ is the column's own, the entry's roundel.
+export function DeskDock({ title, onClose, className = '', initialFocus, children }) {
   const { t } = useLang()
   const id = useId()
   const returnTo = useRef(null)
+  const ref = useRef(null)
+  const cap = useRef(null)
 
   useEffect(() => {
     const onKey = e => {
@@ -39,17 +51,23 @@ export function DeskDock({ title, onClose, className = '', children }) {
 
   useEffect(() => {
     returnTo.current = document.activeElement
+    const into = (initialFocus && ref.current?.querySelector(initialFocus)) || cap.current
+    into?.focus({ preventScroll: true })
     return () => {
       const active = document.activeElement
       if (returnTo.current?.isConnected && (!active || active === document.body)) returnTo.current.focus?.()
     }
+    // The dock's arrival, once: a selector that changes later is not a
+    // second arrival.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  const close = `${t.close} (${t.keyEscape})`
   return (
-    <section className={`desk-dock${className ? ` ${className}` : ''}`} aria-labelledby={id}>
+    <section ref={ref} className={`desk-dock${className ? ` ${className}` : ''}`} aria-labelledby={id}>
       <div className="desk-dock__head">
-        <h2 id={id} className="desk-deck__cap">{title}</h2>
-        <button type="button" onClick={onClose} className="import-header__close" aria-label={t.close}><CrossIcon size={16} /></button>
+        <h2 ref={cap} id={id} className="desk-deck__cap" tabIndex={-1}>{title}</h2>
+        <button type="button" onClick={onClose} className="dict-plate__btn" title={close} aria-label={t.close} aria-keyshortcuts="Escape"><CloseIcon /></button>
       </div>
       {children}
     </section>

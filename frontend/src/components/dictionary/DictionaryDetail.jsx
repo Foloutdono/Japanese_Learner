@@ -13,7 +13,7 @@ import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
-import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
+import { BoltIcon, ChevronIcon, CloseIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { composing } from '../../lib/keyGuards'
@@ -147,23 +147,8 @@ export function SpeakIcon() {
   )
 }
 
-export function CloseIcon() {
-  return (
-    <svg
-      className="dict-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
-    </svg>
-  )
-}
+// CloseIcon moved to components/ui/Icons.jsx in plan 123: the desk's
+// column docks (chrome/DeskDock) close with the entry's own roundel.
 
 // SearchIcon moved to components/ui/Icons.jsx in plan 052 — it was
 // used by three screens outside the dictionary, two of which were

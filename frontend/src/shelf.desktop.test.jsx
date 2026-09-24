@@ -244,7 +244,7 @@ describe('a deck\'s More on the desk', () => {
     expect($('.desk-deck__study')).toBeNull()
     expect($('.desk-deck__main .card-list')).not.toBeNull()
 
-    dock.querySelector('.import-header__close').focus()
+    dock.querySelector('.desk-dock__head .dict-plate__btn').focus()
     escape()
     await settle()
     expect($('.desk-more')).toBeNull()
@@ -322,3 +322,135 @@ describe('the library\'s shelf walked by key (plan 123)', () => {
   })
 })
 
+
+// ── plan 123, P18 — the column's doors ──
+// One way in and out for every door the deck's column opens: the dock
+// takes the focus (Browse's search, the form's first field, else its
+// caption) and gives it back to the chip that opened it; the ✕ is the
+// column's roundel; a lit chip pressed again gives the column back; the
+// card form stands in a dock of its own and keeps a new card's draft;
+// Browse's results are one tab stop walked with ↑/↓ and ticked on Space.
+const chip = re => $$('.chip-row button').find(b => re.test(b.textContent))
+function formApi() {
+  deckApi(CARDS)
+  const answer = apiFetch.getMockImplementation()
+  apiFetch.mockImplementation(async (path, ...rest) => {
+    const p = String(path)
+    if (p === '/api/decks/structures') return ok({ structures: [{ key: 'vocab', fields: [{ key: 'front', required: true }, { key: 'back', required: true }] }] })
+    if (p.startsWith('/api/decks/5/browse')) {
+      return ok({ results: ['水', '火', '木', '金'].map((w, i) => ({ raw_id: `v${i}`, source: 'vocab', level: 'N5', front: w, kana: w, meaning: w, in_deck: i === 1 })) })
+    }
+    return answer(path, ...rest)
+  })
+}
+
+describe('the column\'s doors (plan 123, P18)', () => {
+  it('gives the focus back to Browse\'s chip, and closes with the column\'s own ✕', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    const browse = chip(/browse|parcourir/i)
+    browse.focus()
+    browse.click()
+    await settle(400)
+    const dock = $('.desk-browse')
+    expect(document.activeElement).toBe(dock.querySelector('.browse-search-input'))
+    const x = dock.querySelector('.desk-dock__head .dict-plate__btn')
+    expect(x.getAttribute('aria-keyshortcuts')).toBe('Escape')
+    expect(x.title).toMatch(/\((Esc|Échap)\)$/)
+    // The ✕ is the one close: no footer Close in the dock.
+    expect(dock.querySelector('.import-footer__cancel')).toBeNull()
+    escape()
+    await settle()
+    expect($('.desk-browse')).toBeNull()
+    expect(document.activeElement).toBe(browse)
+  })
+
+  it('lands on More\'s caption, so the next Tab is the dock\'s', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    moreChip().click()
+    await settle()
+    expect(document.activeElement).toBe($('.desk-more h2'))
+    await userEvent.keyboard('{Tab}')
+    expect(document.activeElement).toBe($('.desk-more .dict-plate__btn'))
+  })
+
+  it('gives the column back when a lit chip is pressed again', async () => {
+    deckApi(CARDS)
+    await mountDeck()
+    await settle(400)
+    for (const open of [() => chip(/browse|parcourir/i), moreChip]) {
+      open().click()
+      await settle(300)
+      expect(open().getAttribute('aria-pressed')).toBe('true')
+      open().click()
+      await settle(300)
+      expect(open().getAttribute('aria-pressed')).toBe('false')
+      expect($('.desk-dock')).toBeNull()
+      expect($('.desk-deck__study .platform-card')).not.toBeNull()
+    }
+  })
+
+  it('stands the card form in a dock, its first field focused, and keeps a new card\'s draft', async () => {
+    formApi()
+    await mountDeck()
+    await settle(400)
+    const add = () => chip(/ajouter|add/i)
+    await userEvent.click(add())
+    await settle(300)
+    const dock = $('.desk-deck > .desk-side .desk-cardform')
+    expect(dock).not.toBeNull()
+    expect(dock.querySelector('h2').textContent).toMatch(/nouvelle carte|new card/i)
+    expect(dock.querySelector('.form__label')).toBeNull()
+    const [front] = dock.querySelectorAll('input')
+    expect(document.activeElement).toBe(front)
+    await userEvent.keyboard('犬')
+    // Esc in the filled field leaves the field; the next closes the dock.
+    await userEvent.keyboard('{Escape}')
+    await settle()
+    expect($('.desk-cardform')).not.toBeNull()
+    await userEvent.keyboard('{Escape}')
+    await settle()
+    expect($('.desk-cardform')).toBeNull()
+    expect(document.activeElement).toBe(add())
+    // Add again: the draft as it was left.
+    add().click()
+    await settle(300)
+    expect($('.desk-cardform input').value).toBe('犬')
+    // The lit Add, pressed again, gives the column back -- and keeps it.
+    add().click()
+    await settle(300)
+    expect($('.desk-cardform')).toBeNull()
+    add().click()
+    await settle(300)
+    expect($('.desk-cardform input').value).toBe('犬')
+    // Cancel is the one that lets it go.
+    $$('.desk-cardform .btn-secondary').find(b => /annuler|cancel/i.test(b.textContent)).click()
+    await settle(300)
+    add().click()
+    await settle(300)
+    expect($('.desk-cardform input').value).toBe('')
+  })
+
+  it('walks Browse\'s results with ↑/↓ from the search, one stop, and ticks on Space', async () => {
+    formApi()
+    await mountDeck()
+    await settle(400)
+    chip(/browse|parcourir/i).click()
+    await settle(500)
+    const rows = () => $$('.desk-browse .browse-result-row')
+    expect(rows().filter(r => r.tabIndex === 0)).toEqual([rows()[0]])
+    expect(rows()[1].hasAttribute('tabindex')).toBe(false)
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard('{ArrowDown}')
+    // The row already in the deck is passed over.
+    expect(document.activeElement).toBe(rows()[2])
+    await userEvent.keyboard(' ')
+    expect(rows()[2].getAttribute('aria-checked')).toBe('true')
+    expect(rows().filter(r => r.tabIndex === 0)).toEqual([rows()[2]])
+    expect($('.desk-browse .import-footer__submit').disabled).toBe(false)
+  })
+})

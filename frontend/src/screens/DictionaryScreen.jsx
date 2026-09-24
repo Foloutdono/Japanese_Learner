@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useMining } from '../components/analysis/useMining'
@@ -966,6 +966,10 @@ function cardFurigana(entry) {
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
 }
 
+// The dock's focusable controls, in order: where a door is found again
+// once the entry it belongs to is back.
+const doorsIn = node => [...node.querySelectorAll('button:not([disabled]), a[href], input, [tabindex="0"]')]
+
 // ── The detail dock ──────────────────────────────────────
 // One node, two presentations. On a wide screen it is a sticky column
 // standing beside the catalogue — you scan and read at the same time,
@@ -987,15 +991,45 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 	const deskDock = useContext(DeskDockContext)
 	const dockRef = useRef(null)
 	const lookup = deskDock?.lookup ?? null
-	// A door opened, or stepped back out of: the dock reads from the top.
 	const docked = deskDock != null
-	useEffect(() => { if (docked && dockRef.current) dockRef.current.scrollTop = 0 }, [docked, lookup, entry])
+	// A door opened: the dock reads from the top, and holds the focus the
+	// door took with it when it went (the lookup's plate comes when its
+	// fetch does). Stepped back out of (plan 123): the entry comes back
+	// scrolled where it was read, the door that opened the lookup focused
+	// again -- it used to reopen at the top with the focus on the page's
+	// body. Another entry reads from the top.
+	const back = useRef({ scroll: 0, index: -1 })
+	const was = useRef({ lookup: null, entry })
+	useLayoutEffect(() => {
+		const dock = dockRef.current
+		const before = was.current
+		was.current = { lookup, entry }
+		if (!docked || !dock) return undefined
+		if (!lookup && before.lookup && before.entry === entry) {
+			const { scroll, index } = back.current
+			dock.scrollTop = scroll
+			const active = document.activeElement
+			if (!active || active === document.body || active === dock) doorsIn(dock)[index]?.focus({ preventScroll: true })
+			// The entry's own sections can land a frame late.
+			const raf = requestAnimationFrame(() => { if (dock.scrollTop !== scroll) dock.scrollTop = scroll })
+			return () => cancelAnimationFrame(raf)
+		}
+		dock.scrollTop = 0
+		if (lookup && !before.lookup) dock.focus({ preventScroll: true })
+		if (!lookup) back.current = { scroll: 0, index: -1 }
+		return undefined
+	}, [docked, lookup, entry])
+	// Where the entry is read, and which of its doors has the focus.
+	const remember = docked && !lookup ? {
+		onScroll: () => { back.current.scroll = dockRef.current.scrollTop },
+		onFocus: e => { back.current.index = doorsIn(dockRef.current).indexOf(e.target) },
+	} : {}
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
 			    covered, so there is nothing to dim. */}
 			<div className="dict-dock__scrim" onClick={onClose} aria-hidden="true" />
-			<aside className="dict-dock" ref={dockRef}>
+			<aside className="dict-dock" ref={dockRef} tabIndex={docked ? -1 : undefined} {...remember}>
 				{lookup ? (
 					<DictionaryLookupBody
 						key={lookupKey(lookup)}
