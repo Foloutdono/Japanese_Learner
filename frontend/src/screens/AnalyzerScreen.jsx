@@ -359,6 +359,10 @@ export default function AnalyzerScreen({ session }) {
     function onKey(e) {
       const handled = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ']
       if (!handled.includes(e.key)) return
+      // Not under a dialog -- the deck picker's ↑/↓ walked the Passage
+      // behind it -- and not on a chord: Alt/⌘+← is the browser's Back
+      // (plan 123).
+      if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       const el = document.activeElement
       const tag = el?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return

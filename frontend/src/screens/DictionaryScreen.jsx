@@ -50,6 +50,7 @@ import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
 import { composing } from '../lib/keyGuards'
+import { dialogOpen } from '../lib/dialogOpen'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
 const ANALYZER_COLOR = 'var(--line-kaiseki)'
@@ -218,9 +219,14 @@ export default function DictionaryScreen({ session }) {
 	// closes the open entry — the two things you do constantly in a
 	// dictionary and previously had to reach for the mouse to do.
 	// Guarded on the event target so "/" typed into the field itself
-	// (or any other input on the page) still types a slash.
+	// (or any other input on the page) still types a slash. None of it
+	// runs under a dialog -- the deck picker, a door's sheet, the guide:
+	// the dialog's Esc is the dialog's alone, and "/" or an arrow there
+	// used to reach the catalogue behind it -- nor on a chord, so Alt/⌘+←
+	// is the browser's Back again (plan 123).
 	useEffect(() => {
 		function onKey(e) {
+			if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
 			const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable
 			if (e.key === '/' && !typing) {
 				e.preventDefault()
