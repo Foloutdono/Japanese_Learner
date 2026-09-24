@@ -701,12 +701,15 @@ Left for the owner: けが, けんか and あいさつ are kana cards at N4 besi
 the N3 kanji cards 怪我, 喧嘩 and 挨拶. They join 112's deferred "kana
 card below a kanji card" family (いす/椅子).
 
-Left, and found after this landed: three N5 cards pack the する with
+Found after, and done the same day: four N5 cards packed the する with
 no ・, 106's 掃除 shape exactly: 練習 れんしゅうする, 散歩 さんぽする, 勉強
-べんきょうする. The guard cannot see them, because する is kana. Each
-needs the same `MOVES` line and a check for a noun card above it.
-`furigana.written_reading` (#175) already drops the する, so the
-entry panel is not hurt meanwhile.
+べんきょうする, and the kana-only コピーする. Each had an N3 noun card,
+which folds down into it; コピー's gloss loses its "(1)/(2)" export
+numbering on the way. 8,050 → 8,046. する is kana, so the reading test
+could not see them. `test_the_reading_carries_no_suru_the_word_does_not_write`
+can: it asks `furigana.written_reading` (#175) whether a card's written
+form spells its whole reading, and for a kana-only card whether the
+stem is a card of its own.
 
 ## Order and dependencies
 

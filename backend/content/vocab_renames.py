@@ -667,6 +667,17 @@ MOVES: dict[str, str] = {
     "vocab_N3_食事_しょくじ": "vocab_N4_食事_しょくじ",
     "vocab_N4_出席_しゅっせき・する": "vocab_N4_出席_しゅっせき",
     "vocab_N3_出席_しゅっせき": "vocab_N4_出席_しゅっせき",
+    # And the four with no ・, 掃除's own shape: each N5 card reads the
+    # noun and takes the N3 noun card's gloss, and that card folds into
+    # it. furigana.written_reading is the guard now (test_vocab_deck).
+    "vocab_N5_練習_れんしゅうする": "vocab_N5_練習_れんしゅう",
+    "vocab_N3_練習_れんしゅう": "vocab_N5_練習_れんしゅう",
+    "vocab_N5_散歩_さんぽする": "vocab_N5_散歩_さんぽ",
+    "vocab_N3_散歩_さんぽ": "vocab_N5_散歩_さんぽ",
+    "vocab_N5_勉強_べんきょうする": "vocab_N5_勉強_べんきょう",
+    "vocab_N3_勉強_べんきょう": "vocab_N5_勉強_べんきょう",
+    "vocab_N5__コピーする": "vocab_N5__コピー",
+    "vocab_N3__コピー": "vocab_N5__コピー",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
