@@ -84,6 +84,11 @@ export default function DecksScreen({ session }) {
         setDecks(prev => [{ ...deck, card_count: 0 }, ...prev])
         setNewName('')
         setCreating(false)
+        // The new deck must be on the shelf it was made from: a type
+        // chip or a query still in force would filter it out, and the
+        // form would close on nothing (plan 123).
+        setQuery('')
+        setTypeFilter('all')
       })
       .catch(() => {})
   }
