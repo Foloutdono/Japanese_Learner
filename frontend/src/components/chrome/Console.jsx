@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { SearchIcon, CrossIcon } from '../ui/Icons'
 
 // ── The console (plan 068) ────────────────────────────────────
@@ -68,7 +69,25 @@ export function Chips({ children, label, className = '', guide }) {
 // A chip is a choice, so it says whether it is chosen (aria-pressed).
 // `glyph` is the roundel a section chip carries (単 / 漢 / 文); `color`
 // is that section's pigment, read by the on state.
-export function Chip({ on = false, glyph, color, onClick, children, className = '', ...rest }) {
+//
+// `to` (plan 123): a chip that is a door to a place rather than a
+// choice -- the library from the shelf -- is a link on the desk, and
+// says nothing about being pressed.
+export function Chip({ on = false, glyph, color, onClick, children, className = '', to, ...rest }) {
+  if (to != null) {
+    return (
+      <Link
+        to={to}
+        className={`chip ${className}`.trim()}
+        style={color ? { '--tab-color': color } : undefined}
+        onClick={onClick}
+        {...rest}
+      >
+        {glyph && <span className="chip__glyph" lang="ja" aria-hidden="true">{glyph}</span>}
+        {children}
+      </Link>
+    )
+  }
   return (
     <button
       type="button"

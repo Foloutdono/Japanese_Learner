@@ -9,6 +9,8 @@ import { useJourneyStatus } from '../stores/journey'
 import { NOVICE_GOAL } from '../domain/goalMath'
 import { useThemeChoice } from '../stores/theme'
 import { Bar, Leave } from '../components/chrome/Bar'
+import { SplitRow } from '../components/selection/SplitRow'
+import { useListWalk } from '../hooks/useListWalk'
 import { ChevronIcon, GearIcon } from '../components/ui/Icons'
 import { useOfferable } from '../hooks/useOfferable'
 import { openPaywall } from '../stores/credits'
@@ -87,6 +89,12 @@ export default function SettingsScreen({ session }) {
 // beside it on the desk, and marks its row; the phone has no such page.
 function SettingsListBody({ session, current = null }) {
   const { t, lang } = useLang()
+  // The desk's list (plan 123): `current` is passed only there. Its rows
+  // are links that replace the page beside them (SplitRow), so looking
+  // at seven pages leaves one entry for Back, not seven; one tab stop,
+  // walked with ↑/↓ (hooks/useListWalk).
+  const desk = current != null
+  const onWalk = useListWalk(desk)
   const navigate = useNavigate()
   const summary = useProfileSummary()
   const { data: journey } = useJourneyStatus()
@@ -132,20 +140,21 @@ function SettingsListBody({ session, current = null }) {
         aside={<Leave to={'/profile'}>{t.profileTitle}</Leave>}
       />
 
-      <div className="stg-list">
+      <div className="stg-list" onKeyDown={onWalk}>
         {ROWS.map(row => (
-          <button
+          <SplitRow
             key={row.id}
-            type="button"
+            to={desk ? `/profile/settings/${row.id}` : undefined}
             className={`stg-row${row.id === current ? ' stg-row--on' : ''}`}
             data-page={row.id}
             aria-current={row.id === current ? 'page' : undefined}
-            onClick={() => { playClick(); navigate(`/profile/settings/${row.id}`) }}
+            tabIndex={desk ? (row.id === current ? 0 : -1) : undefined}
+            onClick={() => { playClick(); if (!desk) navigate(`/profile/settings/${row.id}`) }}
           >
             <span className="stg-row__names"><span className="stg-row__jp">{row.label}</span></span>
             <span className="stg-row__value">{row.value}</span>
             <ChevronIcon direction="right" size={16} className="stg-row__chev" />
-          </button>
+          </SplitRow>
         ))}
 
         {/* The pass. Not one of PAGES — it opens the offer sheet, so it
@@ -157,6 +166,7 @@ function SettingsListBody({ session, current = null }) {
             className="stg-row stg-row--pass"
             data-page="pass"
             data-action="paywall-open"
+            tabIndex={desk ? -1 : undefined}
             onClick={() => { playClick(); openPaywall(SOURCES.SETTINGS) }}
           >
             <span className="stg-row__names"><span className="stg-row__jp">{t.passLabel}</span></span>

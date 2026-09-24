@@ -1171,3 +1171,87 @@ describe('the lists beside a page (plan 123, P15)', () => {
     expect(document.activeElement).toBe(rows[0])
   })
 })
+
+// ── plan 123, P16 — a phone's places stay buttons ──
+// On the desk Settings' pages, the shelf's decks and its library door, a
+// radical page's tiles, a bar's way up, the profile's halls and lines
+// are links. A phone keeps every one the button it was, and a tap still
+// pushes the next screen -- Settings' list and its page are two screens
+// there, so Back from a page is the list.
+describe('the places (plan 123, P16)', () => {
+  async function mount(entry, element) {
+    const { MemoryRouter, Routes, Route, useLocation, useNavigationType } = await import('react-router-dom')
+    const seen = { path: null, type: null }
+    function Probe() {
+      seen.path = useLocation().pathname
+      seen.type = useNavigationType()
+      return null
+    }
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[entry]}><Routes><Route path="*" element={element} /></Routes><Probe /></MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    return seen
+  }
+  const buttons = sel => {
+    const all = [...document.querySelectorAll(sel)]
+    expect(all.length, sel).toBeGreaterThan(0)
+    expect(all.map(b => b.tagName), sel).toEqual(all.map(() => 'BUTTON'))
+    expect(all.every(b => !b.hasAttribute('href') && !b.hasAttribute('tabindex')), sel).toBe(true)
+    return all
+  }
+
+  it('keeps Settings\' rows buttons with their ›, a tap pushing the page', async () => {
+    const { default: SettingsScreen } = await import('./screens/SettingsScreen')
+    const seen = await mount('/profile/settings', <SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} />)
+    const rows = buttons('.stg-row[data-page]')
+    expect(document.querySelector('main a')).toBeNull()
+    expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
+    rows.find(r => r.dataset.page === 'display').click()
+    await settle()
+    expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH'])
+  })
+
+  it('keeps the shelf\'s decks and its library door buttons', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { default: DecksScreen } = await import('./screens/DecksScreen')
+    const seen = await mount('/learn/decks', <DecksScreen session={{}} />)
+    buttons('.decks-doors > .chip')
+    const [card] = buttons('.platform-grid > .deck-card')
+    expect(document.querySelector('main a')).toBeNull()
+    card.click()
+    await settle()
+    expect([seen.path, seen.type]).toEqual(['/learn/decks/1', 'PUSH'])
+  })
+
+  it('keeps the way up, the halls and the lines buttons', async () => {
+    const { Bar, Leave } = await import('./components/chrome/Bar')
+    const { Records } = await import('./components/profile/ProfileBlocks')
+    const { LineLedger } = await import('./components/profile/LineLedger')
+    const { default: fr } = await import('./locales/fr/index.js')
+    await mount('/profile', (
+      <main className="profile">
+        <Bar title="Thèmes" aside={<Leave to="/learn/vocab/themes">Thèmes</Leave>} />
+        <Records profile={{ totalReviews: 3 }} t={fr} navigate={() => {}} />
+        <LineLedger stats={null} t={fr} navigate={() => {}} />
+      </main>
+    ))
+    buttons('.stage__leave')
+    buttons('.record--door')
+    buttons('.pf-line')
+    expect(document.querySelector('main a')).toBeNull()
+  })
+
+  it('keeps a radical page\'s tiles buttons', async () => {
+    const { RadicalTile } = await import('./components/dictionary/RadicalIndex')
+    await mount('/learn/kanji/radicals', (
+      <div className="radical-page__grid">
+        <RadicalTile glyph="亻" sub="personne" count={10} learned={3} started onPick={() => {}} />
+      </div>
+    ))
+    buttons('.radical-tile')
+  })
+})

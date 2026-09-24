@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -186,7 +187,8 @@ export default function DecksScreen({ session }) {
       <div className="decks-doors">
         <Chip
           aria-pressed={undefined}
-          onClick={() => { playUi('click-mode-selection'); navigate('/learn/decks/library') }}
+          to={desk ? '/learn/decks/library' : undefined}
+          onClick={() => { playUi('click-mode-selection'); if (!desk) navigate('/learn/decks/library') }}
         >
           <BooksIcon size={14} />{t.libraryBrowse}
         </Chip>
@@ -251,12 +253,17 @@ export default function DecksScreen({ session }) {
             const dt = deckTypeOf(deck.type, t)
             const n = due.get(String(deck.id)) ?? 0
             return (
-              <button
+              <SplitRow
                 key={deck.id}
-                type="button"
+                // 机 (plan 123): a deck is a place, so on the desk it is
+                // a link -- the middle click and "open in a new tab" work,
+                // the page rebuilds from its id. Pushed: the shelf is left.
+                to={desk ? `/learn/decks/${deck.id}` : undefined}
+                push
+                state={{ deck }}
                 className="platform-card deck-card"
                 style={{ '--rail': dt.color, '--line-color': dt.color }}
-                onClick={() => { playUi('click-mode-selection'); navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
+                onClick={() => { playUi('click-mode-selection'); if (!desk) navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
               >
                 <span className="platform-card__lead deck-card__lead">
                   <span className="wmap-roundel deck-card__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
@@ -277,7 +284,7 @@ export default function DecksScreen({ session }) {
                   <span className="deck-card__count"><b className="deck-card__fig">{deck.card_count ?? 0}</b><span className="deck-card__unit">{t.cards}</span></span>
                 </span>
                 <span className="platform-card__go" aria-hidden="true">▶</span>
-              </button>
+              </SplitRow>
             )
           })}
         </div>

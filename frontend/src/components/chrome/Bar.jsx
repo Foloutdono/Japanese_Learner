@@ -1,5 +1,5 @@
 import { cloneElement, isValidElement } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useLang } from '../../LangContext'
 import { sectionFor, stationFor } from '../../config/stations'
 import { identityFor } from '../../config/identity'
@@ -96,8 +96,20 @@ export function Leave({ onClick, to, children, className = '', keys }) {
   return <LeaveButton onClick={onClick} className={className} keys={keys}>{children}</LeaveButton>
 }
 
+// A way up to a place is a link on the desk (plan 123): the middle
+// click, "open in a new tab" and the URL under the pointer, as every
+// other place there. The phone keeps its button.
 function LeaveTo({ to, className, keys, children }) {
   const navigate = useNavigate()
+  const desk = useDesk()
+  if (desk) {
+    return (
+      <Link to={to} className={`stage__leave ${className}`.trim()} aria-keyshortcuts={keys} onClick={() => playClick()}>
+        <ChevronIcon direction="left" size={14} />
+        <span>{children}</span>
+      </Link>
+    )
+  }
   return <LeaveButton onClick={() => navigate(to)} className={className} keys={keys}>{children}</LeaveButton>
 }
 

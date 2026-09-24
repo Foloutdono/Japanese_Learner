@@ -21498,6 +21498,28 @@ a.slip__act { text-decoration: none; }
   /* The ▶ was the aside's right margin; without it the figures keep
      their own. */
   .desk-split__list .platform-card__aside { padding-inline-end: var(--sp-4); }
+  /* The desk's places are links (plan 123), as a split's rows are
+     (below): Settings' pages, the shelf's decks and its door to the
+     library, a radical page's tiles, a bar's way up, the profile's
+     halls and its lines. Each takes back its button's face the same
+     way (links.desktop.test.jsx measures every one against a button
+     twin): the button's weight and leading where the class leaves its
+     text to them, the button's centring where the class does, no
+     underline, the button's hover where the class keeps it (Settings'
+     rows), and its focus ring. Settings' › goes from the pages' rows:
+     the page it pointed at stands beside the list. The pass keeps its
+     own, since it opens a dialog rather than a page. */
+  a:is(.deck-card, .radical-tile) { font-weight: 600; }
+  a:is(.deck-card, .radical-tile, .chip) { line-height: normal; }
+  a:is(.radical-tile, .chip, .stage__leave) { text-align: center; }
+  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row) { text-decoration: none; }
+  a.stg-row { transition: filter 0.15s; }
+  a.stg-row:hover { filter: brightness(1.15); }
+  a:is(.deck-card, .radical-tile, .chip, .stage__leave, .record--door, .pf-line, .stg-row):focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: 2px;
+  }
+  .desk-settings__list .stg-row:not(.stg-row--pass) > .stg-row__chev { display: none; }
   /* The list's rows are links (plan 117, components/selection/SplitRow),
      so that a stop, a point or a deck opens in a new tab too — and a
      link is not a button: neither the global `button` rule nor the

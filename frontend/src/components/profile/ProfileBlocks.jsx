@@ -1,6 +1,8 @@
 import { getProfileHalls } from '../../config/tabs'
 import { ChevronIcon, GearIcon } from '../ui/Icons'
 import { LineMark } from './LineLedger'
+import { SplitRow } from '../selection/SplitRow'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── The stamp book (canvas Profile, plan 074) ─────────────────
 // DESIGN.md, Motion: the streak is a stamp rally, not a flame. The
@@ -121,7 +123,10 @@ function Figure({ value, unit, label }) {
 // and Settings with the gear in its roundel. Four cells always: a
 // figure with nothing to count yet prints a dash rather than leaving
 // the lattice a bare slab.
+// The halls and Settings are places: on the desk (plan 123) they are
+// links, so they open in a new tab too; the phone keeps its buttons.
 export function Records({ profile, t, navigate }) {
+  const desk = useDesk()
   const figures = [
     { key: 'reviews',   value: profile.totalReviews, label: t.totalReviews },
     {
@@ -144,30 +149,32 @@ export function Records({ profile, t, navigate }) {
         </div>
       ))}
       {getProfileHalls(t).map(hall => (
-        <button
-          type="button"
+        <SplitRow
           key={hall.path}
+          to={desk ? hall.path : undefined}
+          push
           className="record record--door"
           style={{ '--line-color': 'var(--pass-ink)' }}
-          onClick={() => navigate(hall.path)}
+          onClick={() => { if (!desk) navigate(hall.path) }}
         >
           <LineMark section={hall} />
           <ChevronIcon direction="right" size={15} className="record__chev" />
-        </button>
+        </SplitRow>
       ))}
-      <button
-        type="button"
+      <SplitRow
+        to={desk ? '/profile/settings' : undefined}
+        push
         className="record record--door"
         style={{ '--line-color': 'var(--pass-ink)' }}
         data-guide="profile.settings"
-        onClick={() => navigate('/profile/settings')}
+        onClick={() => { if (!desk) navigate('/profile/settings') }}
       >
         <span className="pf-line__id">
           <span className="pf-line__roundel pf-line__roundel--icon" aria-hidden="true"><GearIcon size={14} /></span>
           <span className="pf-line__names"><span className="pf-line__jp">{t.settings}</span></span>
         </span>
         <ChevronIcon direction="right" size={15} className="record__chev" />
-      </button>
+      </SplitRow>
     </div>
   )
 }
