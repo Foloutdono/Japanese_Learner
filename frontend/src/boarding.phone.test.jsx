@@ -287,3 +287,57 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 })
+
+// ── The browser's Back walks the questions (plan 123) ─────────────
+// The flow changes screens through state, so the browser's Back (a
+// phone's back gesture, Alt+←) left Tsuji from any question and the
+// answers were gone on the way back in. One guard entry now stands in
+// the browser's history while a question is behind the learner: Back
+// steps back one question, answers kept, and from the first question
+// it leaves as it always has.
+describe('the browser\'s Back in the boarding', () => {
+  const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
+  const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
+
+  it('steps back one question at a time, keeping every answer', async () => {
+    const start = window.history.length
+    const screen = await mountFlow()
+    await click(screen.container, '[data-action="continue"]')        // name → why
+    await settle()
+    await click(screen.container, '[data-motive="trip"]')
+    await click(screen.container, '[data-action="continue"]')        // why → kana
+    await settle()
+    expect(live(screen.container).querySelector('.brd-kana')).not.toBeNull()
+    // One entry for the whole flow, however deep.
+    expect(window.history.length).toBe(start + 1)
+
+    let back = popped()
+    window.history.back()
+    await back
+    await settle()
+    // Back on the motives, the one chosen still chosen.
+    expect(live(screen.container).querySelector('[data-motive="trip"]').getAttribute('aria-pressed')).toBe('true')
+
+    back = popped()
+    window.history.back()
+    await back
+    await settle()
+    // Back on the name, with nothing left behind: the guard is gone.
+    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
+    expect(live(screen.container).querySelector('.brd-field').value).toBe('Tester')
+  })
+
+  it('takes the guard out when ‹ brings the learner back to the first question', async () => {
+    const screen = await mountFlow()
+    const before = window.history.state
+    await click(screen.container, '[data-action="continue"]')        // name → why
+    await settle()
+    expect(window.history.state).toEqual({ brd: true })
+    const back = popped()
+    await click(screen.container, '.brd__back')                      // ‹ to the name
+    await back
+    await settle()
+    expect(window.history.state).toEqual(before)
+    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
+  })
+})

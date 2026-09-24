@@ -61,4 +61,36 @@ describe('App signed out', () => {
     await settle(30)
     expect(checkedSide(screen)).toBe(1)
   })
+
+  // The browser's Back (plan 123): the sign-in replaces Welcome through
+  // state, so Back used to leave Tsuji. It returns to Welcome now, and
+  // the ‹ leaves no entry behind it.
+  it('returns to Welcome on the browser\'s Back, and ‹ leaves no entry behind', async () => {
+    window.history.replaceState(null, '', '/')
+    const start = window.history.length
+    const screen = await render(<App />)
+    await settle()
+    const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
+
+    screen.container.querySelector('[data-action="sign-in"]').click()
+    await settle(60)
+    expect(screen.container.querySelector('.auth')).not.toBeNull()
+    expect(window.history.length).toBe(start + 1)
+    let back = popped()
+    window.history.back()
+    await back
+    await settle(60)
+    expect(screen.container.querySelector('.auth')).toBeNull()
+    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+
+    screen.container.querySelector('[data-action="sign-in"]').click()
+    await settle(60)
+    back = popped()
+    screen.container.querySelector('.auth__head .brd__back').click()
+    await back
+    await settle(60)
+    expect(screen.container.querySelector('.brd--welcome')).not.toBeNull()
+    expect(window.history.state).toBeNull()
+  })
 })
+

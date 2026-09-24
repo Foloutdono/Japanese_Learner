@@ -21,7 +21,7 @@ import RewardsPreview from './screens/RewardsPreview'
 import OnboardingPreview from './screens/OnboardingPreview'
 import RidePreview from './screens/RidePreview'
 import SoundPalette from './screens/SoundPalette'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
@@ -232,6 +232,40 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
+  // The browser's Back on the sign-in (plan 123): the sign-in replaces
+  // Welcome through state, so Back left Tsuji rather than returning to
+  // Welcome. While the sign-in stands for a signed-out learner, one
+  // guard entry stands in the browser's history; Back pops it and puts
+  // Welcome back, and the ‹ takes it out again (its pop ignored). A
+  // sign-in that succeeds leaves it -- one Back that stays on the page
+  // -- rather than racing the router mounting over it.
+  const authGuard = useRef(false)
+  const authIgnore = useRef(false)
+  const onSignInScreen = session === null && authMode != null
+  useEffect(() => {
+    function onPop() {
+      if (authIgnore.current) { authIgnore.current = false; return }
+      if (!authGuard.current) return
+      authGuard.current = false
+      setAuthMode(null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  useEffect(() => {
+    try {
+      if (onSignInScreen && !authGuard.current) {
+        window.history.pushState({ auth: true }, '')
+        authGuard.current = true
+      } else if (!onSignInScreen && authGuard.current && session === null) {
+        authGuard.current = false
+        authIgnore.current = true
+        window.history.back()
+      } else if (session) {
+        authGuard.current = false
+      }
+    } catch { /* a browser refusing the history API: Back leaves, as before */ }
+  }, [onSignInScreen, session])
   // Embarquer mints a guest pass rather than asking for an account
   // (lib/guest.js): the boarding runs on a real user with no
   // credentials, and the account is offered at the END, refusably. The

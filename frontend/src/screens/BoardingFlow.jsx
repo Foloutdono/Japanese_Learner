@@ -264,6 +264,47 @@ export default function BoardingFlow({
     setStep(prev)
   }
 
+  // ── The browser's Back (plan 123) ────────────────────────────
+  // The flow changes screens through state alone, so the browser's
+  // Back -- Alt+←, a mouse's side button, a phone's back gesture --
+  // left Tsuji from question 8, and coming back was a fresh load at
+  // question 1 with the answers gone. One guard entry stands in the
+  // browser's history exactly while the flow has a question behind it:
+  // Back pops the guard and steps back one question, and the guard is
+  // put back while more remain. It is taken out again (history.back(),
+  // its pop ignored) the moment none do -- ‹ back to the first
+  // question, or the plan being built -- so by the time the router
+  // mounts no dead entry is left, and returnToFrontDoor still replaces
+  // the entry the flow began on. From the first question Back leaves,
+  // as it always has.
+  const guard = useRef(false)
+  const ignorePop = useRef(false)
+  const backRef = useRef(back)
+  useEffect(() => { backRef.current = back })
+  useEffect(() => {
+    function onPop() {
+      if (ignorePop.current) { ignorePop.current = false; return }
+      if (!guard.current) return
+      guard.current = false
+      backRef.current()
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  const depth = history.length
+  useEffect(() => {
+    try {
+      if (depth > 0 && !guard.current) {
+        window.history.pushState({ brd: true }, '')
+        guard.current = true
+      } else if (depth === 0 && guard.current) {
+        guard.current = false
+        ignorePop.current = true
+        window.history.back()
+      }
+    } catch { /* a browser refusing the history API: Back leaves, as before */ }
+  }, [depth])
+
   // ── The answers ──────────────────────────────────────────────
   function continueName() {
     const name = answers.name.trim()
