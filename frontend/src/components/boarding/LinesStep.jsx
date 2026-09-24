@@ -31,9 +31,10 @@ export default function LinesStep({ value, onChange, onContinue }) {
         <BoardQuestion hint={t.brdLinesHint}>{t.brdLinesQ}</BoardQuestion>
         <div className="brd__stage">
           <div className="brd__opts" role="group" aria-label={t.brdLinesQ}>
-            {LINES.map(line => (
+            {LINES.map((line, i) => (
               <BoardOption
                 key={line}
+                pick={i + 1}
                 on={value.includes(line)}
                 onClick={() => onChange(toggleLine(value, line))}
                 code={<span lang="ja">{GLYPH[line]}</span>}

@@ -163,3 +163,16 @@ describe('the front door on a phone (P10)', () => {
     expect($('main.auth .auth-foot')).not.toBeNull()
   })
 })
+
+// ── P12: no digit picks on a phone ──
+describe('the digits at first contact, on a phone (P12)', () => {
+  it('picks nothing by a digit and prints none', async () => {
+    await board()
+    await pastName()
+    document.body.dispatchEvent(new KeyboardEvent('keydown', { key: '1', bubbles: true, cancelable: true }))
+    await settle(60)
+    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('false')
+    expect($('.desk-kbd')).toBeNull()
+    expect($('[aria-keyshortcuts]')).toBeNull()
+  })
+})

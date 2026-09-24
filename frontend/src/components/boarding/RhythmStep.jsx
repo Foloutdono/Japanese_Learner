@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { RHYTHMS, RECOMMENDED_RHYTHM, itemsForRhythm } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── 6 · the rhythm (plan 075) ────────────────────────────────────
 // Four cards in a lattice: minutes a day, and the new items that fit
@@ -8,21 +9,25 @@ import { BoardQuestion, Continue } from './BoardFrame'
 // flow; the picked card lifts to its wash.
 export default function RhythmStep({ value, onChange, onContinue }) {
   const { t } = useLang()
+  // 机 (plan 122): 1-4 pick a rhythm.
+  const desk = useDesk()
   return (
     <>
       <div className="brd__body">
         <BoardQuestion>{t.brdRhythmQ}</BoardQuestion>
         <div className="brd__stage">
           <div className="brd-grid" role="group" aria-label={t.brdRhythmQ}>
-            {RHYTHMS.map(min => (
+            {RHYTHMS.map((min, i) => (
               <button
                 key={min}
                 type="button"
                 className={`brd-cell${value === min ? ' brd-cell--on' : ''}`}
                 aria-pressed={value === min}
                 onClick={() => onChange(min)}
+                aria-keyshortcuts={desk ? String(i + 1) : undefined}
                 data-rhythm={min}
               >
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
                 {min === RECOMMENDED_RHYTHM && <span className="brd-tag">{t.onbPaceRecommended}</span>}
                 <span className="brd-cell__n">{min}</span>
                 <span className="brd-cell__u">{t.brdMinADay}</span>

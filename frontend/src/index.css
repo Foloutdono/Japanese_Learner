@@ -21917,6 +21917,22 @@ a.slip__act { text-decoration: none; }
     right: calc(-1 * var(--sp-2));
     background: var(--bg-main);
   }
+  /* The boarding's tiles -- the kana answers, the rhythms, the hours --
+     carry their pick's digit in a corner as the rating tile does
+     (plan 122): a cell's top left, clear of its centred tag; a kana
+     answer's top right, clear of its label. */
+  .desk-brd .brd-kopt { position: relative; }
+  .desk-brd .brd-kopt > .desk-kbd,
+  .desk-brd .brd-cell > .desk-kbd {
+    position: absolute;
+    top: var(--sp-2);
+    left: var(--sp-2);
+    opacity: 0.7;
+  }
+  .desk-brd .brd-kopt > .desk-kbd {
+    left: auto;
+    right: var(--sp-2);
+  }
 
   /* ── 正面口 — first contact (plan 122) ──
      From the Welcome to the first card a computer drew a phone: a 640px

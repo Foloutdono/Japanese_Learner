@@ -465,3 +465,71 @@ describe('the front door on the desk (P10)', () => {
     expect(document.activeElement).toBe(inSide('input[type="email"]'))
   })
 })
+
+// ── P12 — the digits ──
+// A digit picks the answer that names it, printed on it: a motive by
+// its row, a level by its own number (the novice on 0), a kana answer
+// by its tile -- and a kana answer advances, as a tap does.
+const kbdOf = el => el?.querySelector('.desk-kbd')?.textContent ?? null
+// An AZERTY key a US layout has no key for (é, à): Playwright would
+// insert it as text with no keydown, so the keydown is dispatched from
+// the focus, as the key would arrive.
+const azerty = key => (document.activeElement ?? document.body)
+  .dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
+describe('the digits at first contact (P12)', () => {
+  it('picks a motive by its row, on either keyboard row', async () => {
+    await board()
+    // Typed in the name field, a digit is the name's.
+    await userEvent.keyboard('2')
+    expect(inCar('.brd-field').value).toBe('Tester2')
+    await userEvent.keyboard('{Backspace}')
+    await pastName()
+    expect(kbdOf(inCar('[data-motive="fun"]'))).toBe('2')
+    await userEvent.keyboard('2')
+    expect(inCar('[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('&')
+    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('true')
+    azerty('é')
+    await settle(40)
+    expect(inCar('[data-motive="fun"]').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('answers the kana by its tile and goes on, and picks a level by its own number', async () => {
+    await board()
+    await pastName()
+    await userEvent.keyboard('3')
+    await userEvent.keyboard('{Enter}')
+    await settle()
+    expect(stepOf()).toBe('kana')
+    expect(kbdOf(inCar('[data-kana="both"]'))).toBe('3')
+    await userEvent.keyboard('3')
+    await settle()
+    expect(stepOf()).toBe('level')
+    expect(kbdOf(inCar('[data-level="N5"]'))).toBe('5')
+    expect(kbdOf(inCar('[data-level="novice"]'))).toBe('0')
+    await userEvent.keyboard('5')
+    expect(inCar('[data-level="N5"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('1')
+    expect(inCar('[data-level="N1"]').getAttribute('aria-pressed')).toBe('true')
+    azerty('à')
+    await settle(40)
+    expect(inCar('[data-level="novice"]').getAttribute('aria-pressed')).toBe('true')
+    await userEvent.keyboard('{Enter}')
+    await settle()
+    // The goal list names its stops the same way: N4 on 4.
+    expect(stepOf()).toBe('goal')
+    await userEvent.keyboard('4')
+    expect(inCar('[data-goal="N4"]').getAttribute('aria-pressed')).toBe('true')
+  })
+
+  it('picks nothing under a dialog', async () => {
+    await board()
+    await pastName()
+    const modal = document.createElement('div')
+    modal.setAttribute('aria-modal', 'true')
+    modal.dataset.probeModal = ''
+    document.body.appendChild(modal)
+    await userEvent.keyboard('1')
+    expect(inCar('[data-motive="studies"]').getAttribute('aria-pressed')).toBe('false')
+  })
+})

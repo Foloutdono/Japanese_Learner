@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import { useDesk } from './useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import { composing, pressedByPointer, trackPresses } from '../lib/keyGuards'
+import { PICK_KEY_DIGIT } from '../domain/choiceKeys'
 
 // ── 乗車 — the boarding's keys on the desk (plan 122) ─────────────
 // A computer answered the boarding with the pointer alone: some fifty
@@ -20,6 +21,10 @@ import { composing, pressedByPointer, trackPresses } from '../lib/keyGuards'
 //     Chrome leaves the focus on a clicked button, and Enter there
 //     pressed it again -- a line clicked off came back on. From those,
 //     Enter goes on, the pick as it stands.
+// A digit picks the answer that names it (P12, BoardOption's `pick`):
+// a motive by its row, a level by its own number, the novice on 0 --
+// on either keyboard row (domain/choiceKeys PICK_KEY_DIGIT). A pick
+// that advances on a tap (the kana) advances on its digit.
 // Nothing while a dialog is open or the arrival plays (its own key
 // skips it), and never from the car that is leaving. No Esc: on the
 // desk Esc means leave, and the boarding's way out signs the guest
@@ -30,12 +35,20 @@ export function useBoardKeys(frameRef, { off = false } = {}) {
     if (!desk || off) return undefined
     trackPresses()
     const onKey = e => {
-      if (e.key !== 'Enter' || e.shiftKey) return
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || composing(e) || dialogOpen()) return
       const target = e.target instanceof Element ? e.target : null
       if (target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? '')) return
       const car = frameRef.current?.querySelector('.brd__car:not(.brd__car--out)')
       if (!car) return
+      const digit = PICK_KEY_DIGIT[e.key]
+      if (digit !== undefined) {
+        const pick = car.querySelector(`[aria-keyshortcuts~="${digit}"]`)
+        if (!pick || pick.disabled) return
+        e.preventDefault()
+        pick.click()
+        return
+      }
+      if (e.key !== 'Enter' || e.shiftKey) return
       const control = target?.closest('button, a[href], summary')
       if (control) {
         const picked = car.contains(control) && control.getAttribute('aria-pressed') === 'true'
