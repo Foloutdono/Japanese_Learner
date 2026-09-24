@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { playPlatformChime } from '../../lib/audio'
+import { spendKey } from '../../lib/keyGuards'
 
 // ── 到着 — arriving at the network ─────────────────────────────
 // The third cutscene in the station family, and the first that means
@@ -59,14 +60,16 @@ export function TrainArrival({ jp, title, onDone }) {
       timers.current = []
       cbs.current.onDone()
     }
+    // A key is spent on the scene it skips (lib/keyGuards, plan 123).
+    const skipKey = e => { spendKey(e); skip() }
     window.addEventListener('pointerdown', skip)
-    window.addEventListener('keydown', skip)
+    window.addEventListener('keydown', skipKey, true)
 
     return () => {
       timers.current.forEach(clearTimeout)
       timers.current = []
       window.removeEventListener('pointerdown', skip)
-      window.removeEventListener('keydown', skip)
+      window.removeEventListener('keydown', skipKey, true)
     }
   }, [])
 
