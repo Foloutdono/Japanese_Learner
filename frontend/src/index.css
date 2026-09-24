@@ -21525,20 +21525,33 @@ a.slip__act { text-decoration: none; }
      three records over the revealed card's dictionary entry, in the
      dictionary's gold (components/study/SessionPanel.jsx). */
   .desk-run { padding-inline-end: var(--desk-side-w); }
-  /* ── a run fits a laptop (plan 115) ──
+  /* ── a run fits a laptop (plans 115, 123) ──
      A run's stage is centred on a phone, where the card is most of the
      screen. On a desk it starts at the top, like any page, without the
-     quarter-height of air under it; the rating bar docks on the level
-     bar when the stage runs past the window, so it is never below the
-     fold, and the rows it would jump past never move (below). */
-  .desk-run > .stage {
+     quarter-height of air under it -- every stage, not only a run with
+     a side (plan 123): the first ride, a browse with no side, the
+     comprehension passage and the exam's waits were still centred, the
+     ride's head 200px down a 1080px window. */
+  .screen > .stage {
     justify-content: flex-start;
     padding-bottom: var(--sp-6);
   }
-  .desk-run > .stage > .rating-bar {
+  /* The run's action docks on the level bar when the stage runs past
+     the window, so it is never below the fold, and otherwise follows
+     what it answers at the stage's own gap (plan 123): comprehension's
+     Next, the practice runs' field and Submit, the exam's Previous and
+     Next sat on the window's floor, 250px under the last choice at
+     900px tall and 430px at 1080 -- and under the level bar on a
+     1280×650 laptop. A browse's Prev/Next stays where it is: it is
+     pressed over and over, and a target that moved with each card
+     would be missed (it takes ←/→ instead). */
+  .screen > .stage > .rating-bar,
+  .screen > .stage > .stage__foot:not(.browse-nav),
+  .desk-run--paper > .stage > .exam-nav {
     position: sticky;
     bottom: var(--dock-bottom);
     z-index: 10;
+    margin-top: 0;
     padding-block: var(--sp-3);
     background: var(--bg-main);
   }
@@ -21772,6 +21785,15 @@ a.slip__act { text-decoration: none; }
     top: var(--sp-2);
     left: var(--sp-2);
     opacity: 0.7;
+  }
+  /* The exam's flag is a 44px icon: its F rides its corner as a tag,
+     on the page's ground, rather than crowding the flag (plan 123). */
+  .exam-flag { position: relative; }
+  .exam-flag > .desk-kbd {
+    position: absolute;
+    top: calc(-1 * var(--sp-2));
+    right: calc(-1 * var(--sp-2));
+    background: var(--bg-main);
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

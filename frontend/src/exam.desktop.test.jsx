@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -148,12 +149,28 @@ describe('the exam runner on the desk', () => {
     expect($('.desk-paper__text')).toBe(text)
   })
 
-  it('names the keys it answers to', async () => {
+  it('names the keys it answers to, and prints them', async () => {
     await sit()
     expect($$('.mcq-row').map(r => r.getAttribute('aria-keyshortcuts'))).toEqual(['1', '2', '3', '4'])
     expect($('.exam-nav .btn-primary').getAttribute('aria-keyshortcuts')).toBe('ArrowRight')
     expect($('.exam-nav .btn-secondary').getAttribute('aria-keyshortcuts')).toBe('ArrowLeft')
     expect($('.exam-flag').getAttribute('aria-keyshortcuts')).toBe('F')
+    // Every cap is printed on what it presses (plan 123).
+    expect($$('.exam-nav .desk-kbd').map(k => k.textContent)).toEqual(['←', 'F', '→'])
+  })
+
+  it('docks Previous and Next above the level bar on a short laptop window (plan 123)', async () => {
+    await page.viewport(1100, 650)
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await sit()
+      const nav = $('.exam-nav').getBoundingClientRect()
+      expect(nav.bottom).toBeLessThanOrEqual($('.lvlbar').getBoundingClientRect().top + 1)
+      expect(nav.top).toBeGreaterThan(0)
+    } finally {
+      delete document.documentElement.dataset.chrome
+      await page.viewport(1100, 800)
+    }
   })
 
   it('plays a listening clip with Space', async () => {
