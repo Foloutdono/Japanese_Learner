@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -154,13 +155,17 @@ describe('Enter, with the lanes two across', () => {
     await mount()
     const second = $$('.lane')[3]
     expect(second.getBoundingClientRect().left).toBeGreaterThan($$('.lane')[2].getBoundingClientRect().right)
-    second.click()
+    // A real click, which leaves the focus on the lane, as Chrome does.
+    // The page's Enter departs from there: a lane pressed by the pointer
+    // does not own the key (plan 123) -- it used to press the lane again
+    // and turn it back on, which the blur this test once made hid.
+    await userEvent.click(second)
     await settle(60)
     expect(second.getAttribute('aria-pressed')).toBe('false')
-    // A focused lane keeps its own Enter (DeskKeys); off it, Enter departs.
-    second.blur()
-    press('Enter')
+    expect(document.activeElement).toBe(second)
+    await userEvent.keyboard('{Enter}')
     await settle(60)
+    expect(second.getAttribute('aria-pressed')).toBe('false')
     expect(departure.begin).toHaveBeenCalledTimes(1)
     const path = departure.begin.mock.calls[0][0].path
     const chosen = decodeURIComponent(path.split('lanes=')[1] ?? '').split(',')

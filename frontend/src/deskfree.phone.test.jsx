@@ -1047,3 +1047,24 @@ describe('the doors (plan 120)', () => {
     }
   })
 })
+
+// ── plan 123, P1 — the keys that misfired on the desk ──
+// Every fix is a listener that only the desk installs: the docked
+// entry's Esc lives in the run's side, which a phone never mounts; the
+// level board takes Esc only at a desk; the pointer tracker behind the
+// page's Enter is installed by EnterKey, which listens only on the desk.
+describe('the desk\'s key fixes (plan 123, P1)', () => {
+  it('leave the level board to its clock on a phone', async () => {
+    const { XpToast } = await import('./components/rewards/XpToast')
+    await render(
+      <LangProvider>
+        <XpToast toast={{ id: 'p1', amount: 20, leveledUp: true, newLevel: 13 }} />
+      </LangProvider>
+    )
+    await new Promise(r => setTimeout(r, 150))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    await new Promise(r => setTimeout(r, 100))
+    expect(document.querySelector('.levelup--leaving')).toBeNull()
+    expect(document.documentElement.hasAttribute('data-levelup')).toBe(true)
+  })
+})

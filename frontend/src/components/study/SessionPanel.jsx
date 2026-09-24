@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { composing } from '../../lib/keyGuards'
+import { dialogOpen } from '../../lib/dialogOpen'
 import { useLang } from '../../LangContext'
 import { useRunTally, tallyAccuracy, tallyMisses } from '../../stores/runTally'
 import { useDeskEntry } from '../../stores/deskEntry'
@@ -42,6 +44,20 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
   const opened = missed.find(m => m.key === openKey) ?? null
   const entry = done ? opened : docked
 
+  // At a run's end Esc closes an open miss before it leaves the run
+  // (plan 123). Registered after the entry's own Esc (children's effects
+  // run first), so a door opened inside the miss steps back first.
+  useEffect(() => {
+    if (!opened) return undefined
+    const onKey = e => {
+      if (e.key !== 'Escape' || e.repeat || e.defaultPrevented || composing(e) || dialogOpen()) return
+      e.preventDefault()
+      setOpenKey(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [opened])
+
   return (
     <>
       {records && (
@@ -82,6 +98,7 @@ export function SessionPanel({ done = false, misses = true, records = true }) {
             id={entry.id}
             session={entry.session}
             exact
+            escBack
           />
         </section>
       ) : done ? null : (

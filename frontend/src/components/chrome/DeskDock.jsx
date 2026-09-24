@@ -25,6 +25,12 @@ export function DeskDock({ title, onClose, className = '', children }) {
     const onKey = e => {
       if (e.key !== 'Escape' || e.defaultPrevented || composing(e) || dialogOpen()) return
       e.preventDefault()
+      // An Esc from a field that holds text leaves the field and is
+      // spent there: Esc typed in Browse's search closed the dock and
+      // threw away the cards ticked under it (plan 123). The next Esc
+      // closes the dock.
+      const field = e.target
+      if (/^(INPUT|TEXTAREA)$/.test(field?.tagName ?? '') && field.value) { field.blur(); return }
       onClose()
     }
     window.addEventListener('keydown', onKey)

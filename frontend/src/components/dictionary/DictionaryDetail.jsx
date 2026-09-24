@@ -15,6 +15,8 @@ import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
 import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { dialogOpen } from '../../lib/dialogOpen'
+import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
@@ -1418,7 +1420,10 @@ function useLookupStack(session, { term, kana, category, id }, exact = false) {
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
   const back = stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined
-  return { here, entry, loading, error, open, openId, back }
+  // Straight back to the entry the stack was opened on, however many
+  // doors deep (plan 123): the run's docked entry's Esc.
+  const root = stack.length > 1 ? () => setStack(s => s.slice(0, 1)) : undefined
+  return { here, entry, loading, error, open, openId, back, root }
 }
 
 // What a lookup shows: the loading line, the "not available" answer, or
@@ -1499,8 +1504,33 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // in view, and ✕ returns the dock to the entry the door was opened
 // from. A run's session panel docks the revealed card's entry the same
 // way. No portal, no scrim, no dialog: it is a column's content.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false }) {
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false }) {
   const look = useLookupStack(session, { term, kana, category, id }, exact)
+  // `escBack` (plan 123): a host with no way out of its own -- the run's
+  // session panel, docked beside the card -- lets Escape step back out
+  // of the doors opened in it, to the entry it was opened on. The key
+  // is spent (preventDefault), so the run's Esc (DeskKeys' LeaveKey,
+  // which waits to see) does not also leave the run: a learner who
+  // opened 駅's kanji and pressed Esc lost the run and its tally. A list
+  // open inside the entry (the readings, the ＋ menu) takes Escape first,
+  // in the capture phase, and keeps it.
+  //
+  // Subscribed once, reading the stack through a ref: a listener that
+  // re-subscribed on every door would fall behind the panel's own Esc
+  // (which closes an open miss) and lose the key to it.
+  const toRoot = useRef(null)
+  useEffect(() => { toRoot.current = look.root })
+  useEffect(() => {
+    if (!escBack) return undefined
+    const onKey = e => {
+      if (e.key !== 'Escape' || e.repeat || e.defaultPrevented || composing(e) || dialogOpen()) return
+      if (!toRoot.current) return
+      e.preventDefault()
+      toRoot.current()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [escBack])
   return (
     <LookupContent
       look={look}

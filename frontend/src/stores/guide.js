@@ -25,6 +25,9 @@ export function holdGuide(value) {
   notify()
 }
 
+/** The same, read once, for a key handler (components/chrome/DeskKeys). */
+export function guideHeld() { return held }
+
 export function useGuideHeld() {
   return useSyncExternalStore(subscribe, () => held, () => false)
 }

@@ -44,3 +44,27 @@ export function runKey(e) {
   const target = e.target
   return !(target?.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target?.tagName ?? ''))
 }
+
+// Which control the pointer last pressed, until a Tab moves the focus
+// on (plan 123). Chrome focuses a clicked button, so after a click the
+// focus sits on it, and Enter would press it again -- a learner who
+// clicked a lane off and pressed Enter to depart turned the lane back
+// on instead. A page's Enter (components/chrome/DeskKeys' EnterKey, the
+// boarding's keys) asks this and treats that control as not owning the
+// key. Installed once, by the desk's first key listener; a phone never
+// installs it.
+let pressed = null
+let tracking = false
+export function trackPresses() {
+  if (tracking || typeof window === 'undefined') return
+  tracking = true
+  window.addEventListener('pointerdown', e => {
+    pressed = e.target?.closest?.('button, a[href], summary') ?? null
+  }, true)
+  window.addEventListener('keydown', e => { if (e.key === 'Tab') pressed = null }, true)
+}
+
+/** Whether `el` holds the focus because the pointer pressed it. */
+export function pressedByPointer(el) {
+  return el != null && el === pressed && document.activeElement === el
+}

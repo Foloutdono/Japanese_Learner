@@ -799,6 +799,10 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
     const handler = e => {
       if (!runKey(e)) return
       const key = e.key.toLowerCase()
+      // A control focused in the run's side (a word row in the docked
+      // entry, a miss) keeps its own Space: it opens, and the card
+      // stays as it is (plan 123).
+      if (key === ' ' && /^(BUTTON|A)$/.test(e.target?.tagName ?? '') && e.target.closest('.desk-run__side')) return
       if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
         e.preventDefault()
         handleClick()

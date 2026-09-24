@@ -135,6 +135,22 @@ describe('the dock on the desk', () => {
     await settle()
     expect(headword()).toBe('電車')
   })
+
+  it('walks nothing under a dialog, nor on the browser\'s Back chord (plan 123)', async () => {
+    await mount()
+    const dialog = document.createElement('div')
+    dialog.setAttribute('aria-modal', 'true')
+    document.body.appendChild(dialog)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+    await settle()
+    dialog.remove()
+    expect(headword()).toBe('駅')
+    const back = new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true })
+    window.dispatchEvent(back)
+    await settle()
+    expect(back.defaultPrevented).toBe(false)
+    expect(headword()).toBe('駅')
+  })
 })
 
 describe('the search key', () => {
