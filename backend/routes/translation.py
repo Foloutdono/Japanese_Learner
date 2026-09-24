@@ -1,5 +1,3 @@
-import difflib
-import json
 import logging
 import re
 
@@ -11,10 +9,9 @@ from core.db import db_conn
 from core.auth import get_user_id
 from core.srs_instance import srs
 import routes.reading as reading  # reused wholesale below — see get_translation_batch's docstring
+from study import tutor_review
 from study.card_lookup import vocab_card_id_for_word
-from study.furigana import align_sentence, mark_spans
 from study.llm_shared import llm_configured
-from study.romaji import sentence_romaji
 
 # A pass feature (plan 069): every route here refuses a free learner
 # with 402 pass_required once CREDITS_ENFORCE=1; a no-op until then.
@@ -163,8 +160,8 @@ class AnalyzePayload(BaseModel):
 # own sentence corrected. The model proposes the shape; _parse_review
 # decides what of it is usable, and a reply that is not the shape at
 # all is served as the prose it is rather than lost.
-VERDICTS = ("correct", "acceptable", "partial", "incorrect")
-_MAX_ITEMS = 3
+VERDICTS = tutor_review.VERDICTS
+_MAX_ITEMS = tutor_review.MAX_ITEMS
 
 ANALYSIS_PROMPT_TEMPLATE = """You are a Japanese teacher reviewing a learner's translation attempt. The learner reads your review at a glance on a phone, so it is a SHAPE, not a paragraph.
 
@@ -200,118 +197,17 @@ Rules:
 - Short over complete. The learner should see the verdict, the good items and the fix items and know in three seconds where they stand."""
 
 
-def _short(value, limit: int = 240) -> str:
-    return value.strip()[:limit] if isinstance(value, str) else ""
-
-
-def _fenced(value: str) -> str:
-    """`value`, safe to place between <<< and >>> in the analysis prompt.
-
-    The delimiter is only a soft signal to the model, not a real parser
-    boundary -- so a value that contains a literal <<< or >>> could
-    otherwise "close" the data block early and have its tail read back
-    as part of the surrounding instructions. Breaking up the marker
-    (zero-width joiner) keeps it visibly the same text to the model
-    without ever reproducing the exact sequence the prompt uses as a
-    boundary.
-    """
-    return value.replace("<<<", "<​<<").replace(">>>", ">​>>")
-
-
-def _parse_review(content: str) -> dict | None:
-    """The model's answer as the shape the screen draws, or None when it
-    is not that shape at all -- in which case the caller serves the
-    prose. Lenient inside the shape: a bad verdict becomes "partial", a
-    list too long is cut to its first items, an item that is not text
-    is dropped."""
-    cleaned = re.sub(r"^```(?:\w+)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
-    try:
-        data = json.loads(cleaned)
-    except json.JSONDecodeError:
-        return None
-    if not isinstance(data, dict) or "verdict" not in data:
-        return None
-
-    verdict = data.get("verdict") if data.get("verdict") in VERDICTS else "partial"
-    good = []
-    if isinstance(data.get("good"), list):
-        good = [_short(item) for item in data["good"] if _short(item)][:_MAX_ITEMS]
-    fix = []
-    if isinstance(data.get("fix"), list):
-        for item in data["fix"]:
-            if isinstance(item, dict) and _short(item.get("issue")):
-                fix.append({"issue": _short(item.get("issue")), "fix": _short(item.get("fix"))})
-            elif _short(item):
-                fix.append({"issue": _short(item), "fix": ""})
-    fix = fix[:_MAX_ITEMS]
-    grammar_used = data.get("grammar_used")
-    return {
-        "verdict": verdict,
-        "summary": _short(data.get("summary")),
-        "good": good,
-        "fix": fix,
-        "grammar_used": grammar_used if isinstance(grammar_used, bool) else None,
-        "better": _short(data.get("better")) if fix else "",
-    }
-
-
-# ── The corrected sentence, as the screen draws it (2026-09-22) ──
-# "better" is the learner's own sentence with the fixes applied, and it
-# was served as a bare string: a line of Japanese with no readings, no
-# romaji, and no sign of WHICH part of it is the correction. A learner
-# who cannot yet read 新聞 cannot read the fix either, and one who can
-# still has to diff two sentences by eye to find it.
-#
-# So it is served the way every other sentence in the app is: furigana
-# parts (study/furigana.align_sentence), the romaji under it, and the
-# spans that differ from what the learner actually wrote marked. The
-# marking is a plain character diff -- the model is not asked to say
-# what it changed, because a model that reports its own edits is one
-# more thing that can be wrong about them, and difflib cannot be.
-def _changed_spans(before: str, after: str) -> list[tuple[int, int]]:
-    """[start, end) of every stretch of `after` that is not in `before`.
-
-    autojunk off: it treats a character appearing in more than 1% of a
-    long string as noise, and Japanese runs on a small set of particles
-    and kana -- exactly the characters it would throw away.
-    """
-    matcher = difflib.SequenceMatcher(None, before, after, autojunk=False)
-    return [
-        (j1, j2) for tag, _i1, _i2, j1, j2 in matcher.get_opcodes()
-        if tag in ("replace", "insert") and j2 > j1
-    ]
-
-
-def _corrected(better: str, user_answer: str) -> dict:
-    """`better` as parts, marked, with its romaji -- the two keys the
-    review carries beside the plain string."""
-    parts = align_sentence(better)
-    # align_sentence is the tokenizer's, and the tokenizer is optional
-    # (study/morphology.py's graceful degradation) -- so never trust the
-    # parts to spell the sentence back. The offsets below are into that
-    # spelling, and a mark placed against a different one is a mark in
-    # the wrong place.
-    if "".join(part["text"] for part in parts) != better:
-        parts = [{"text": better}]
-    spans = _changed_spans(user_answer.strip(), better)
-    # Everything changed, so nothing is worth pointing at: a sentence
-    # marked end to end says only that it is a sentence. That is the
-    # answer written in romaji, or in an alphabet the reference does not
-    # share -- where the correction IS the whole line.
-    if sum(end - start for start, end in spans) >= len(better):
-        spans = []
-    return {"better_parts": mark_spans(parts, spans), "better_romaji": sentence_romaji(better)}
-
-
-def _review_as_text(review: dict) -> str:
-    """The shape read out as lines -- what an older client prints, and
-    what the log shows."""
-    lines = [review["summary"]] if review["summary"] else []
-    lines += [f"+ {item}" for item in review["good"]]
-    lines += [f"- {item['issue']}" + (f" -> {item['fix']}" if item["fix"] else "") for item in review["fix"]]
-    if review["better"]:
-        lines.append(review["better"])
-    return "\n".join(lines)
+# The shape's tools -- the fence, the parser, the corrected sentence
+# and the text form -- live in study/tutor_review.py since 作文
+# (composition) began drawing the same review of a sentence written
+# from a grammar point. These are the names this module and its tests
+# have always used, bound to the same objects.
+_short = tutor_review.short
+_fenced = tutor_review.fenced
+_parse_review = tutor_review.parse_review
+_changed_spans = tutor_review.changed_spans
+_corrected = tutor_review.corrected
+_review_as_text = tutor_review.review_as_text
 
 
 @router.post("/api/translation/analyze")

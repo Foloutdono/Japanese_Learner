@@ -10,6 +10,7 @@ import json
 import pytest
 
 from routes import reading, translation
+from study import tutor_review
 
 
 def _reply(**over):
@@ -173,7 +174,10 @@ def test_the_parts_always_spell_the_sentence_back(monkeypatch):
     # The offsets are into what the parts spell, so a tokenizer that
     # gives back something else (or nothing -- it is optional) must not
     # move the mark onto the wrong characters.
-    monkeypatch.setattr(translation, "align_sentence", lambda text: [{"text": "something else"}])
+    # The aligner is read by study/tutor_review, where _corrected lives
+    # since 作文 began drawing the same review; the alias here is the
+    # same function object, so the patch has to land there.
+    monkeypatch.setattr(tutor_review, "align_sentence", lambda text: [{"text": "something else"}])
     out = translation._corrected("毎日名前を書きます。", "毎日名前が書きます。")
     assert _texts(out["better_parts"]) == "毎日名前を書きます。"
     assert _marked(out["better_parts"]) == "を"
