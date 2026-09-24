@@ -56,6 +56,9 @@ logger = logging.getLogger(__name__)
 # Subtitle files are plain text; 1 MB is already generous (a feature-
 # length film's SRT is a few hundred KB).
 _MAX_UPLOAD_BYTES = 1 * 1024 * 1024
+# Room in a multipart body for its boundaries and the small form fields
+# (start, end, url) beside the file.
+_MULTIPART_OVERHEAD_BYTES = 64 * 1024
 
 # Same reasoning and same values as routes/exams.py's own constants --
 # see that module's comment. Not shared as an import: a generic
@@ -337,11 +340,20 @@ async def create_video_session(request: Request, user_id: str = Depends(get_user
     content_type = request.headers.get("content-type", "")
 
     if content_type.startswith("multipart/form-data"):
+        # Refused on the declared length before the body is parsed, so an
+        # oversized upload is never spooled; the bounded read below covers
+        # a body that declares no length or understates it.
+        try:
+            declared = int(request.headers.get("content-length", ""))
+        except ValueError:
+            declared = None
+        if declared is not None and declared > _MAX_UPLOAD_BYTES + _MULTIPART_OVERHEAD_BYTES:
+            raise HTTPException(status_code=413, detail="Subtitle file is too large")
         form = await request.form()
         upload = form.get("file")
         if upload is None:
             raise HTTPException(status_code=400, detail="file is required for an upload")
-        raw = await upload.read()
+        raw = await upload.read(_MAX_UPLOAD_BYTES + 1)
         if len(raw) > _MAX_UPLOAD_BYTES:
             raise HTTPException(status_code=413, detail="Subtitle file is too large")
         try:
