@@ -23,13 +23,51 @@ import { api } from '../origin'
 //     speak() happened inside a user gesture -- and answers a refusal
 //     with silence, not an error.
 //
-// So the SERVER's clip is the fallback: /api/tts, edge-tts, the same
-// engine the exam listening section uses (backend/study/word_tts.py
+// So the SERVER's clip is the fallback: /api/tts, made by the voice
+// engine the exam listening section uses (backend/study/voice_engine.py,
+// a self-hosted VOICEVOX Nemo -- plan 121; backend/study/word_tts.py
 // explains why an endpoint for card readings is allowed where one for
 // arbitrary text is not). It arrives as an mp3 and plays through the
 // mixer like every other sound, which means mute and the volume
 // sliders reach it -- something the browser's own speech, playing
 // outside our AudioContext, has never been able to offer.
+//
+// ONE exception to "device first": a lone kana (は, へ, ド, きゃ).
+// A device voice reads its text, and read as text a lone は is the
+// topic particle, "wa", and へ is "e" -- with no way to tell it
+// otherwise. The server names the syllable itself (the engine's kana
+// notation), so a lone kana goes straight there, and is silent rather
+// than wrong if the server cannot say it.
+
+// The voice every server clip is made in. Part of every clip URL, so
+// that a new voice is a new URL for every cache in front of the server:
+// /api/tts answers "immutable, one year", and the service worker keeps
+// clips thirty days. Must equal backend/study/voice_engine.VOICE_REV
+// (backend/tests/test_kana_audio.py holds the two together).
+export const VOICE_REV = 'nemo2'
+
+/**
+ * `url` with the voice revision on it. The exam and dictation players
+ * use it too: those clips are remade under the same name when the voice
+ * changes (their name is stored in the paper and in dictation_log), so
+ * the URL is the only thing that can change for a cache to notice.
+ */
+export function voicedUrl(url) {
+  // A data: or blob: URL is the audio itself, not a name for it: there
+  // is no cache in front of it to outwit, and a query would corrupt it.
+  if (!url || /^(?:data|blob):/.test(url)) return url
+  return `${url}${url.includes('?') ? '&' : '?'}v=${VOICE_REV}`
+}
+
+// One kana the server says by name: a full-size kana, optionally with a
+// small one after it (きゃ, ファ, ウォ). The server's own rule
+// (backend/study/voice_engine.lone_kana_notation) is the same shape; っ
+// and ー alone are not syllables, and stay with the device.
+const LONE_KANA = /^(?:[あいうえおか-ぢつ-もやゆよら-ろわをんゔ]|[アイウエオカ-ヂツ-モヤユヨラ-ロワヲンヴ])[ぁぃぅぇぉゃゅょァィゥェォャュョ]?$/
+
+export function isLoneKana(text) {
+  return typeof text === 'string' && LONE_KANA.test(text)
+}
 
 // A packed reading field holds every reading a card has -- vocab joins
 // them with "/", kanji with "・", both decks sometimes with ";". Handed
@@ -117,7 +155,7 @@ let playing = null
 function playServerClip(text) {
   // Same-origin on the web, the Vercel origin in the native shell --
   // api() is the one place that knows (lib/origin.js, ADR 0008).
-  const url = api(`/api/tts?text=${encodeURIComponent(text)}`)
+  const url = api(voicedUrl(`/api/tts?text=${encodeURIComponent(text)}`))
   getBuffer(url)
     .then(buffer => {
       if (buffer) playing = playBuffer(buffer, 'tts', text)
@@ -187,7 +225,7 @@ function startUtterance(synth, voice, text) {
 export function speakJapanese(text) {
   const spoken = spokenForm(text)
   if (!spoken || isMuted()) return
-  if (!deviceSpeechBroken && speakOnDevice(spoken)) return
+  if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken)) return
   playServerClip(spoken)
 }
 

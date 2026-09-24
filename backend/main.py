@@ -28,7 +28,7 @@ from fastapi.staticfiles import StaticFiles                      # noqa: E402
 from starlette.concurrency import run_in_threadpool               # noqa: E402
 from starlette.exceptions import HTTPException as StarletteHTTPException  # noqa: E402
 
-from study.exam_tts import audio_dir                              # noqa: E402
+from study.exam_tts import audio_dir, is_stale                    # noqa: E402
 from study.exam_audio_repair import restore_clip                  # noqa: E402
 
 from routes.kana            import router as kana_router         # noqa: E402
@@ -87,12 +87,28 @@ app.mount("/kanjivg", StaticFiles(directory="kanjivg"), name="kanjivg")
 class ExamAudioFiles(StaticFiles):
     """A missing directory is a 404, and a missing FILE gets one chance
     to be re-synthesized from the paper that references it (see
-    study/exam_audio_repair.py) before becoming one."""
+    study/exam_audio_repair.py) before becoming one.
+
+    So does a STALE file -- one made by an earlier voice than the
+    current one (study/exam_tts.py's voice epoch). It is remade in place
+    before it is served, and if it cannot be remade the answer is 404,
+    never the old voice: after a voice change, audio the app is no
+    longer licensed to use must not keep playing just because it is
+    still on the disk."""
 
     async def check_config(self) -> None:
         return
 
+    def _stale(self, path: str) -> bool:
+        # Resolved inside the mount only: `path` is the URL's, and this
+        # stat runs before StaticFiles' own lookup has vetted it.
+        root = os.path.realpath(self.directory)
+        full = os.path.realpath(os.path.join(root, path))
+        return full.startswith(root + os.sep) and is_stale(full)
+
     async def get_response(self, path: str, scope):
+        if self._stale(path) and not await run_in_threadpool(restore_clip, path):
+            raise StarletteHTTPException(status_code=404)
         try:
             return await super().get_response(path, scope)
         except StarletteHTTPException as exc:

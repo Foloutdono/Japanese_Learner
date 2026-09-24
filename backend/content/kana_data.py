@@ -290,7 +290,10 @@ KATAKANA_COMBINATIONS = [
     {"kana": "ドゥ", "romaji": "du",  "group": "du_foreign"},
     {"kana": "ウィ", "romaji": "wi",  "group": "w_foreign"},
     {"kana": "ウェ", "romaji": "we",  "group": "w_foreign"},
-    {"kana": "ウォ", "romaji": "wo",  "group": "w_foreign"},
+    # "sound": its own clip. The romaji is "wo" like を's, but を is
+    # said "o" and ウォ "wo", and the clips are filed by sound (see
+    # sound_of below).
+    {"kana": "ウォ", "romaji": "wo",  "group": "w_foreign", "sound": "wo_foreign"},
     {"kana": "ヴァ", "romaji": "va",  "group": "v_foreign"},
     {"kana": "ヴィ", "romaji": "vi",  "group": "v_foreign"},
     {"kana": "ヴ",   "romaji": "vu",  "group": "v_foreign"},
@@ -393,6 +396,18 @@ def get_kana_by_set(set_name: str) -> list[dict]:
 
 def kana_to_id(kana_entry: dict) -> str:
     return f"kana_{kana_entry['kana']}"
+
+def sound_of(kana_entry: dict) -> str:
+    """The name of the kana's clip, frontend/public/sounds/kanas/<name>.mp3.
+
+    One name, one sound. It is the romaji, which already files the twins
+    together -- あ and ア, を and ヲ (both said "o"), じ ぢ ジ ヂ (the
+    voice engine gives ぢ exactly じ's phonemes), ず づ ズ ヅ -- except
+    where two entries share a romaji but not a sound, which is ウォ alone
+    and why it carries a "sound" of its own. scripts/build_kana_audio.py
+    makes the files and tests/test_kana_audio.py holds every entry to
+    having one."""
+    return kana_entry.get("sound") or kana_entry["romaji"]
 
 # ── Which set a kana belongs to, and its opposite script ──────
 # Two lookups the syllabary lists already imply but nothing could ask

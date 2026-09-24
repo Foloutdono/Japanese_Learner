@@ -62,7 +62,7 @@ MAX_PLAYS = 2
 # file in the collection.
 SPEAKER = "narrator"
 
-# Slower than the service's default, and the reason is the exercise
+# Slower than the engine's default, and the reason is the exercise
 # rather than the language: a listener following a sentence keeps up
 # fine at full speed, but a listener TRANSCRIBING one is working at the
 # speed of their hand and loses the tail of the line while writing its
@@ -71,7 +71,10 @@ SPEAKER = "narrator"
 # It is part of the content key (study/exam_tts.content_key), so
 # changing this number renames every clip in the collection and the next
 # request re-synthesizes it at the new speed. That is the intended
-# behaviour and the reason the rate is keyed at all.
+# behaviour and the reason the rate is keyed at all. The percentage form
+# is the one the first engine took; study/voice_engine.speed_scale reads
+# it as the current engine's speedScale (0.9) rather than the string
+# changing, because the string is what names the files.
 RATE = "-10%"
 
 # What a transcription may differ by without being a different answer:
@@ -161,9 +164,11 @@ def ensure_clip(jp: str) -> str | None:
     first time anyone has asked. None if it could not be made.
 
     Idempotent and free on the common path: synthesize_dialogue returns
-    the existing URL without a network call when the file is already
-    there, which after scripts/build_dictation_audio.py has run is every
-    line in the collection."""
+    the existing URL without a call to the voice engine when the current
+    voice already made the file, which after
+    scripts/build_dictation_audio.py has run is every line in the
+    collection. A clip an earlier voice made is remade here, in place
+    (study/exam_tts.py's voice epoch)."""
     try:
         return synthesize_dialogue(clip_turns(jp), RATE)
     except TTSFailed as e:

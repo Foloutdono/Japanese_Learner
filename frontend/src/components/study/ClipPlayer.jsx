@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { api } from '../../lib/api'
+import { voicedUrl } from '../../lib/audio'
 import { PlayIcon, PauseIcon, SpeakerOffIcon } from '../ui/Icons'
 
 // ── 書取 — the clip, played a fixed number of times ───────────
@@ -104,10 +105,11 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay }) {
       {/* src is backend-relative ("/exam-audio/<key>.mp3", see
           study/dictation.py) — served same-origin like every other
           backend path: the Vite proxy in dev, vercel.json's rewrite in
-          production. */}
+          production. The voice revision rides on it, as in
+          exam/AudioPlayer: a remade clip keeps its name. */}
       <audio
         ref={audioRef}
-        src={api(src)}
+        src={api(voicedUrl(src))}
         preload="auto"
         onPlay={() => setPlaying(true)}
         onPause={() => setPlaying(false)}

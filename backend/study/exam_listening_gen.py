@@ -25,6 +25,7 @@ from study.exam_blueprint import LEVEL_BLUEPRINT
 from study.exam_topics import LISTENING_TOPICS, pick_topics
 from study.exam_gen_utils import GenerationFailed, kanji_instruction, call_llm_json_batch
 from study.exam_pipeline import generate_paper
+from study import voice_engine
 from study.exam_tts import synthesize_dialogue, TTSFailed
 from study.llm_shared import soften_kanji, llm_configured
 
@@ -52,7 +53,10 @@ For EACH of the {n} questions, write a short, natural Japanese dialogue \
 between two people (labeled "A" and "B") about that question's assigned \
 subject, such that after hearing it, a listener could answer a concrete \
 question about what needs to be done, by whom, when, or which one was \
-chosen. Do not drift from the assigned subject onto a different one, and \
+chosen. A is a woman (女の人) and B is a man (男の人): the audio gives \
+them a woman's and a man's voice, so any line that tells them apart \
+must say 女の人 for A and 男の人 for B. Do not drift from the assigned \
+subject onto a different one, and \
 in particular do not fall back on arranging a meeting time or a scene at \
 a station unless that is what the subject actually says. Any vocabulary \
 you use should be appropriate for a \
@@ -143,9 +147,10 @@ def _build_one_listening_mcq_question(item, level: str, q_id: str, number: int) 
         raise GenerationFailed(f"{q_id}: choices collapsed into duplicates once softened to kana")
 
     # Narrator reads the scene-setting line and the question; A/B read
-    # the dialogue itself -- three distinct voices, matching how a real
-    # JLPT listening track is actually performed (narration + two
-    # participants), not a single flat voice for everything.
+    # the dialogue itself -- three distinct voices (study/exam_tts.py's
+    # voice_slots: narrator, then A a woman and B a man, as the prompt
+    # told the model), matching how a real JLPT listening track is
+    # performed rather than a single flat voice for everything.
     script_turns = []
     if context:
         script_turns.append({"speaker": "narrator", "textJp": context})
@@ -219,8 +224,9 @@ def _build_listening_mcq_mondai(spec: dict, level: str, rng: random.Random) -> d
             continue
 
         # TTS is still per-question here (unaffected by batching the LLM
-        # call above) -- synthesize_dialogue is a free, content-keyed,
-        # idempotent call per question, not part of the token budget.
+        # call above) -- synthesize_dialogue is a content-keyed,
+        # idempotent call per question on our own voice engine, not
+        # part of the token budget.
         for item in items:
             if len(questions) >= spec["count"]:
                 break
@@ -278,6 +284,12 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
 
     mondai = []
     included_items = 0
+    # Asked once, before the first paid model call rather than after it:
+    # a listening item is worthless without its audio, and finding out
+    # the engine is down only once the dialogue has been bought would
+    # spend a paper's worth of model calls on items that are then
+    # skipped one by one.
+    voice_up = None
 
     for spec in specs:
         if spec["type"] != "listening-mcq":
@@ -285,6 +297,11 @@ def _generate_listening_paper_once(level: str, seed: int) -> dict:
             continue
         if not llm_configured():
             logger.warning("Skipping %s (listening-mcq): no LLM provider is configured", spec["id"])
+            continue
+        if voice_up is None:
+            voice_up = voice_engine.ready()
+        if not voice_up:
+            logger.warning("Skipping %s (listening-mcq): the voice engine is not configured or not answering", spec["id"])
             continue
         try:
             built = _build_listening_mcq_mondai(spec, level, rng)

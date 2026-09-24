@@ -5916,3 +5916,72 @@ their geometry now run their sheet cases at 1099px, just under the line
 (`DictionaryDetail.browser.test.jsx`'s readings,
 `AnalyzerScreen.responsive.browser.test.jsx`'s walkthrough), as plan 115
 did for the analyser's word sheet.
+
+---
+
+# Wave 27 — 声, a voice we are allowed to sell (plans 121–121c, 2026-09-23)
+
+Numbered 121: it was planned as 113, 113b and 113c, and 113–120 went to
+the desk while it was open. Executed directly in one session. Every voice
+the server made came from edge-tts, a client for Microsoft Edge's
+consumer "Read Aloud" endpoint, which nothing licenses for a product
+that is sold. The kana deck had the second half of the problem: 102
+recordings of undocumented origin, 40 of them clipping, 24 of the deck's
+sounds missing, and ウォ saying を. The owner chose VOICEVOX Nemo, a Render
+private service, for every voice the server makes, and then a recorded
+voice for the kana.
+
+| # | Plan | Status |
+|---|------|--------|
+| 121 | 声: edge-tts out, a self-hosted VOICEVOX Nemo engine in; the voice epoch; lone kana named by kana notation; the kana deck regenerated. ADR 0019 | DONE (2026-09-23) |
+| 121b | The owner's voices: 女声6 reads and is A, 男声1 is B at 0.9, 女声1 narrates the exams. An importer that cuts the kana deck from an UTAU voicebank, with `kanas/sources.json` holding every clip's voice to its credit. ADR 0020 | DONE (2026-09-23) |
+| 121c | 波音リツ instead of 小春音アミ, for terms that ask for nothing. Joined (連続音) banks read by their aliases; onsets walked back from the vowel; an exact `--pitch`; long vowels from his held notes, and あい/おい from his own moves. The deck imported from 強連続音 Ver1.5.1 at A3 (`KANA_REV` `ritsu1`) | DONE (2026-09-24) |
+
+What shipped:
+
+- **The engine.** `study/voice_engine.py` is the only client: httpx,
+  bounded concurrency, retries on connection errors, everything as
+  `TTSFailed`. `render.yaml` gains `voicevox-nemo`, a private service on
+  the stock image pinned by digest, with `VV_DISABLE_MUTABLE_API=1`. The
+  backend's `VOICEVOX_URL` comes from its `hostport`. With the owner's
+  three voices loaded it peaks at 343 MB, so Starter holds it, and a word
+  takes about 2 s at 0.5 CPU. ADR 0019 has the licence, the credit and
+  the options table.
+- **Nothing is renamed.** `content_key` is byte-identical and pinned in
+  `tests/test_exam_tts.py`. A new voice is a voice EPOCH instead:
+  `{audio_dir}/.voice-rev`. A clip older than the epoch is remade in place
+  before it is served, or is a 404 if it cannot be remade.
+  `scripts/revoice_audio.py` does the lot up front.
+- **Four voice slots.** They are assigned by role: the reader 0, the
+  dialogue's A 1 and B 2, the exam narrator 3 (`DEFAULT_VOICES`, with
+  `VOICE_TEMPO` slowing 男声1). The listening prompt now says A is 女の人
+  and B is 男の人. The generator asks the engine `ready()` before the paid
+  model call. A dialogue is joined with pauses and encoded once, at a
+  constant bitrate.
+- **Lone kana.** A lone kana goes through `/accent_phrases?is_kana=true`,
+  so は is "ha" and へ is "he". The frontend sends a lone kana straight to
+  the server clip rather than the device.
+- **The kana deck.** 127 clips (48 kHz, −19 dB RMS, peak ≤ −3 dB), named
+  by `kana_data.sound_of`, so ウォ is `wo_foreign`. The engine made the
+  first set, with えい and おう said as ē and ō. The owner judged it flat,
+  and the set is now cut from 波音リツ's UTAU bank by
+  `scripts/kana_bank.py`: his terms ask for no credit, report or
+  permission. The owner chose the bank and pitch by ear from eleven trial
+  reels over four of his banks. The dictionary's kana play the deck clip.
+- **Caches.** Every clip URL carries a revision (`VOICE_REV`, and
+  `KANA_REV` for the kana set), so neither the service worker nor the
+  one-year `immutable` header replays an old voice.
+- **Credit.** "VOICEVOX Nemo" is on the Credits page and in
+  THIRD_PARTY_NOTICES, with the ban on using the audio for machine
+  learning. 波音リツ is credited in both too, as provenance.
+
+Owner steps after deploy:
+
+1. Sync the Blueprint.
+2. Run `python -m scripts.revoice_audio`, then again with `--yes`, from the
+   backend's Render Shell.
+3. Rebuild the native app (`npm run build:native`), so it ships the new
+   kana.
+
+Left: the owner accepted the kana as "good for now", and a better kana
+voice is to come (ADR 0020, "Follow-up").

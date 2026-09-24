@@ -32,7 +32,7 @@ import threading
 
 from core.db import db_conn
 from study import dictation
-from study.exam_tts import TTSFailed, audio_dir, content_key, synthesize_dialogue
+from study.exam_tts import TTSFailed, audio_dir, content_key, is_current, synthesize_dialogue
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +76,7 @@ def turns_from_script(script_jp: str) -> list[dict] | None:
     return turns or None
 
 
-def _questions_with_audio(node):
+def questions_with_audio(node):
     """Every dict carrying an audioSrc, anywhere in a paper. A recursive
     walk rather than sections -> mondai -> questions: paper shapes
     already differ per generator (reading nests questions under
@@ -86,10 +86,10 @@ def _questions_with_audio(node):
         if "audioSrc" in node:
             yield node
         for value in node.values():
-            yield from _questions_with_audio(value)
+            yield from questions_with_audio(value)
     elif isinstance(node, list):
         for value in node:
-            yield from _questions_with_audio(value)
+            yield from questions_with_audio(value)
 
 
 def _turns_for_clip(filename: str, key: str) -> list[dict] | None:
@@ -115,7 +115,7 @@ def _turns_for_clip(filename: str, key: str) -> list[dict] | None:
         conn.close()
 
     for (paper,) in rows:
-        for question in _questions_with_audio(paper):
+        for question in questions_with_audio(paper):
             if question.get("audioSrc") != src:
                 continue
             turns = turns_from_script(question.get("scriptJp") or "")
@@ -125,8 +125,10 @@ def _turns_for_clip(filename: str, key: str) -> list[dict] | None:
 
 
 def restore_clip(filename: str) -> bool:
-    """Re-synthesize a missing clip from the paper that references it.
-    True if the file is on disk afterwards.
+    """Re-synthesize a missing clip from the paper that references it --
+    or a stale one, made by an earlier voice (study/exam_tts.py's voice
+    epoch), which is remade in place under the same name. True if a
+    current file is on disk afterwards.
 
     Never raises: the caller is main.py's static mount serving a
     request, and every failure here has the same correct answer for the
@@ -137,7 +139,7 @@ def restore_clip(filename: str) -> bool:
     key = match.group(1)
 
     with _lock_for(key):
-        if os.path.exists(os.path.join(audio_dir(), filename)):
+        if is_current(os.path.join(audio_dir(), filename)):
             return True  # another request restored it while this one waited
 
         # The shipped dictation collection first: it is a dict lookup

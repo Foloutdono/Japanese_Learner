@@ -880,11 +880,21 @@ describe('the shelf', () => {
     return fn().finally(() => apiJson.mockImplementation(prev))
   }
 
-  // The shelf row under the plate's ＋, and the row's state.
+  // The shelf row under the plate's ＋, and the row's state. The ＋ is
+  // disabled while a write is in flight (DictionaryDetail's favPending),
+  // and a press on a disabled button opens nothing: read after a fixed
+  // delay, the second press of a case could land before the first write
+  // had settled, on a loaded runner. So the ＋ is waited for, then the
+  // row (`expect.poll`), and what a press changes is polled for too; the
+  // one fixed wait left is for a fetch that must NOT happen, since a poll
+  // cannot prove an absence.
+  const plusOf = screen => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
   const openMenu = async screen => {
-    screen.container.querySelector('.dict-dock .dict-plate__add-btn').click()
-    await settle(30)
-    return screen.container.querySelector('.dict-dock .dict-add-menu__row[role="menuitemcheckbox"]')
+    await expect.poll(() => plusOf(screen).disabled).toBe(false)
+    plusOf(screen).click()
+    const row = () => screen.container.querySelector('.dict-dock .dict-add-menu__row[role="menuitemcheckbox"]')
+    await expect.poll(row).not.toBeNull()
+    return row()
   }
 
   it('marks a kept tile; the ＋ opens the shelf row, which keeps and lets go with one write each', () =>
@@ -910,9 +920,9 @@ describe('the shelf', () => {
       expect(row.getAttribute('aria-checked')).toBe('false')
       expect(row.textContent).toBe(T.dictFavoriteAdd)
       row.click()
-      await settle(60)
+      await expect.poll(() => PUTS.length).toBe(1)
       expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: true }])
-      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
+      await expect.poll(() => plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
       // The tile under the dock took the mark at once.
       expect(cards[1].querySelector('.dict-entry-card__fav')).not.toBeNull()
 
@@ -920,9 +930,9 @@ describe('the shelf', () => {
       expect(row.getAttribute('aria-checked')).toBe('true')
       expect(row.textContent).toBe(T.dictFavoriteRemove)
       row.click()
-      await settle(60)
+      await expect.poll(() => PUTS.length).toBe(2)
       expect(PUTS.at(-1)).toEqual({ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false })
-      expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
+      await expect.poll(() => plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
       expect(cards[1].querySelector('.dict-entry-card__fav')).toBeNull()
     }))
 
@@ -969,10 +979,10 @@ describe('the shelf', () => {
       const plus = () => screen.container.querySelector('.dict-dock .dict-plate__add-btn')
       expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)
       ;(await openMenu(screen)).click()
-      await settle(60)
+      await expect.poll(() => PUTS.length).toBe(1)
       expect(PUTS).toEqual([{ method: 'PUT', kind: 'vocab', key: '電車::でんしゃ', favorite: false }])
       // The tile is gone; the plate stays, so the star can be pressed again.
-      expect(cards().length).toBe(1)
+      await expect.poll(() => cards().length).toBe(1)
       expect(headwordOf(screen.container.querySelector('.dict-dock'))).toBe('電車')
       expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(false)
 
@@ -981,9 +991,9 @@ describe('the shelf', () => {
       // gives way to the loader.
       const before = apiFetch.mock.calls.length
       ;(await openMenu(screen)).click()
+      await expect.poll(() => cards().length).toBe(2)
       await settle(60)
       expect(apiFetch.mock.calls.length).toBe(before)
-      expect(cards().length).toBe(2)
       expect(cards()[0].querySelector('.dict-entry-card__char ruby').firstChild.textContent).toBe('電車')
       expect(cards()[0].querySelector('.dict-entry-card__fav')).not.toBeNull()
       expect(plus().classList.contains('dict-plate__add-btn--kept')).toBe(true)

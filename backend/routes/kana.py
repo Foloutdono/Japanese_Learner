@@ -1,7 +1,7 @@
 import logging
 import random
 from fastapi import APIRouter, Depends, Query
-from content.kana_data import KANA_SETS, kana_to_id
+from content.kana_data import KANA_SETS, kana_to_id, sound_of
 from core.auth import get_user_id, prefixed, unprefixed
 from core import credits
 from core.pace import new_card_limit, resolve_pace
@@ -115,6 +115,10 @@ def _build_kana_card(kana_entry: dict, kana_list: list[dict], m: Mode, stage: st
         "direction": m.direction,
         "kana":    kana_entry["kana"],
         "romaji":  kana_entry["romaji"],
+        # The clip to play (frontend/public/sounds/kanas/<sound>.mp3):
+        # the romaji except where two kana share one but not a sound
+        # (content/kana_data.sound_of).
+        "sound":   sound_of(kana_entry),
         # Current SRS stage, so the client can hand it straight back
         # as ReviewPayload.prev_stage without another lookup — see the
         # comment on that field for why that matters.
@@ -299,6 +303,7 @@ def get_kana_review_cards(set_name: str, user_id: str = Depends(get_user_id)):
             "card_id": kana_to_id(kana_entry),
             "kana":    kana_entry["kana"],
             "romaji":  kana_entry["romaji"],
+            "sound":   sound_of(kana_entry),
             "stage":   stage,
         })
 

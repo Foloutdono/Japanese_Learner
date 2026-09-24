@@ -46,12 +46,13 @@ unidic-lite
 # directory name (local-only, and pytest never runs outside CI/dev here,
 # but pinned as a floor regardless).
 pytest>=9.0.3
-# study/exam_tts.py's listening-audio synthesis -- a thin async client
-# for Microsoft Edge's free consumer "Read Aloud" service (the same
-# free voices freetts.org's own /api/tts widget proxies), not a paid
-# API and not a locally-hosted model. Free, no API key, no vendor
-# account.
-edge-tts>=7.0.0
+# study/voice_engine.py's MP3 encoder: LAME, built into the wheel
+# (LGPL-3.0-or-later, see THIRD_PARTY_NOTICES.md), because Render's
+# native runtime has no ffmpeg. The speech itself comes from the voice
+# engine over HTTP (httpx above) -- a self-hosted VOICEVOX Nemo, plan
+# 121 -- so nothing here synthesizes; edge-tts, which did, is gone:
+# nothing licenses its consumer endpoint for a product that is sold.
+lameenc>=1.8.4
 # study/captions.py's link ingest -- the ONLY dependency here that is
 # useless without a paid credential. It performs the InnerTube
 # handshake YouTube's own player makes; the addresses it makes it from

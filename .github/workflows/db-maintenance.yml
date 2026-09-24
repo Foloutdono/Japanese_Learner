@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         working-directory: backend
         # Deliberately NOT requirements.txt: that pulls fugashi,
-        # unidic-lite, pykakasi and edge-tts (a MeCab dictionary among
+        # unidic-lite, pykakasi and lameenc (a MeCab dictionary among
         # them, minutes of build time) for a job that only opens a
         # database connection. These five are everything the two scripts
         # import, transitively -- routes/account.py brings in FastAPI and

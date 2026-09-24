@@ -11,16 +11,16 @@ before a learner asks for it.
 routes/dictation.py already synthesizes a missing clip on the request
 that wants it, so the collection is never broken without this script.
 What the script buys is that the FIRST learner of the day does not pay
-for it: a batch of five unmade clips is five round trips to a free
-consumer service before the screen can show anything, and edge-tts is
-not fast.
+for it: a batch of five unmade clips is five syntheses on the voice
+engine (study/voice_engine.py) before the screen can show anything.
 
 So this is a warm-up, not a migration. Nothing depends on having run it,
-running it twice costs nothing (a clip that exists is skipped without a
-network call), and it needs no database — unlike every other script
-here, which is why it does not import scripts._env: that module demands
-DATABASE_URL, and this job has nothing to say to Postgres. It reads
-backend/.env only for EXAM_AUDIO_DIR, and works with neither set.
+running it twice costs nothing (a clip the current voice already made
+is skipped without a call to the engine), and it needs no database —
+unlike every other script here, which is why it does not import
+scripts._env: that module demands DATABASE_URL, and this job has nothing
+to say to Postgres. It reads backend/.env for VOICEVOX_URL (the engine,
+required) and EXAM_AUDIO_DIR (where to write, optional).
 
 -- Where the files go ----------------------------------------
 study/exam_tts.audio_dir() decides, exactly as it does for exam audio
@@ -45,7 +45,8 @@ load_dotenv(Path(__file__).resolve().parents[1] / ".env", override=False)
 
 from content.listening_clips import BY_LEVEL, LEVELS, all_clips   # noqa: E402
 from study import dictation                                        # noqa: E402
-from study.exam_tts import TTSFailed, audio_dir, synthesize_dialogue  # noqa: E402
+from study import voice_engine                                     # noqa: E402
+from study.exam_tts import TTSFailed, audio_dir, is_current, synthesize_dialogue  # noqa: E402
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("build_dictation_audio")
@@ -70,9 +71,11 @@ def main() -> int:
     rows = _rows(args.level)
     logger.info("%d lines, audio in %s", len(rows), directory)
 
+    # Missing, or made by an earlier voice (study/exam_tts.py's voice
+    # epoch) -- the two are the same thing to a learner about to hear it.
     missing = [r for r in rows
-               if not os.path.exists(os.path.join(directory, f"{dictation.clip_id(r['jp'])}.mp3"))]
-    logger.info("%d already there, %d missing.", len(rows) - len(missing), len(missing))
+               if not is_current(os.path.join(directory, f"{dictation.clip_id(r['jp'])}.mp3"))]
+    logger.info("%d already there, %d missing or stale.", len(rows) - len(missing), len(missing))
 
     if args.check:
         for row in missing:
@@ -83,27 +86,21 @@ def main() -> int:
     if not todo:
         logger.info("Nothing to do.")
         return 0
+    if not voice_engine.configured():
+        logger.error("No voice engine configured: set VOICEVOX_URL (see backend/.env.example).")
+        return 1
 
     made = 0
     failed: list[str] = []
     for i, row in enumerate(todo, 1):
-        key = dictation.clip_id(row["jp"])
-        path = os.path.join(directory, f"{key}.mp3")
-        if args.force and os.path.exists(path):
-            # synthesize_dialogue returns early on an existing file, so
-            # --force has to clear the way for it. Best-effort: a clip
-            # that cannot be removed is left alone and reported below
-            # rather than taking the run down.
-            try:
-                os.remove(path)
-            except OSError as e:
-                failed.append(f"{row['jp']} ({e})")
-                continue
         try:
-            # Through dictation's own rate, not the service default:
+            # Through dictation's own rate, not the engine's default:
             # the rate is part of the content key, so synthesizing
-            # without it writes a file the app never asks for.
-            synthesize_dialogue(dictation.clip_turns(row["jp"]), dictation.RATE)
+            # without it writes a file the app never asks for. `force`
+            # remakes a clip that exists, in place -- the old one keeps
+            # being served until the new one is renamed over it, so a
+            # failure here leaves the collection as it was.
+            synthesize_dialogue(dictation.clip_turns(row["jp"]), dictation.RATE, force=args.force)
         except TTSFailed as e:
             failed.append(f"{row['jp']} ({e})")
             continue

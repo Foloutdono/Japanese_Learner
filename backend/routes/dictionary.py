@@ -11,7 +11,7 @@ import content.vocab_jmdict_data as jmdict_db
 import content.kanji_pool_data as kanji_db
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from content.vocab_extras import get_vocab_extras
-from content.kana_data import get_syllabary, kana_to_id, set_for as kana_set_for, twin as kana_twin
+from content.kana_data import get_syllabary, kana_to_id, set_for as kana_set_for, sound_of, twin as kana_twin
 from content.kana_strokes import stroke_count as kana_stroke_count
 # radical_data.py owns the radical dumps -- its own docstring says so
 # ("read once at import rather than per consumer") -- but this module used
@@ -884,6 +884,10 @@ def _kana_result(kind: str, entry: dict, meaning: str, lang: str,
         "type":    kind,
         "kana":    entry["kana"],
         "romaji":  entry["romaji"],
+        # The deck's own clip for this kana (kana_data.sound_of): the
+        # panel plays it instead of synthesizing the kana afresh, so the
+        # dictionary and the deck say it in the same voice, offline.
+        "sound":   sound_of(entry),
         "meaning": meaning,
         "level":   "Hiragana" if kind == "hiragana" else "Katakana",
         # Which gojūon row this belongs to (k/s/t/n/h/m/y/r/w/
