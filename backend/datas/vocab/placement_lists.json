@@ -470,13 +470,6 @@
    "rank": 1698
   },
   {
-   "key": "賛成::さんせい",
-   "level": "N1",
-   "lists_say": "N3",
-   "meaning": "approval, agreement, support, favour",
-   "rank": 1714
-  },
-  {
    "key": "是非::ぜひ",
    "level": "N3",
    "lists_say": "N4",
@@ -10604,12 +10597,6 @@
    "reading": "やじん",
    "rank": 5438,
    "meaning": "rustic"
-  },
-  {
-   "lemma": "預言",
-   "reading": "よげん",
-   "rank": 5439,
-   "meaning": "(religious) prophecy"
   },
   {
    "lemma": "顔色",

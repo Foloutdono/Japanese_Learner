@@ -78,6 +78,28 @@ def test_the_reading_field_holds_a_reading():
     assert bad == []
 
 
+# Kana, the long-vowel mark and the kana iteration marks, and what the
+# deck still joins its readings with: "/" (plan 104's separator), and
+# the " / ", "・する" and "、" of residue no plan has reached yet (the N5
+# 四 し / よん, the N4 案内 あんない・する, the N5 より、ほう).
+_READING = re.compile(r"[ぁ-ゖゝゞァ-ヺーヽヾ/ ・、]+")
+
+
+def test_the_reading_field_is_written_in_kana():
+    """The N3 賛成 read "Uӣ[い", a mojibake of さんせい -- Latin, Cyrillic
+    and a bracket where the kana belong -- and nothing noticed: no
+    （note） for the test above to find, and a kana field 106b's merge
+    could not match against the N1 賛成::さんせい, so the word sat at two
+    levels under two ids. Whatever script the next mojibake lands in,
+    it is not kana."""
+    bad = [
+        (level, entry)
+        for level, entry in _entries()
+        if not _READING.fullmatch(entry["kana"])
+    ]
+    assert bad == []
+
+
 def test_the_written_form_field_is_empty_or_holds_a_written_form():
     """A kana-only word writes `kanji: ""` — 1,097 entries do. An entry
     that instead parks the kana word in `kanji` reads as a word with a

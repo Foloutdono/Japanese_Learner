@@ -550,12 +550,58 @@ MOVES: dict[str, str] = {
     # drilled on it is the N3 ころ card's -- which takes the rows, and
     # (NOT_FOLDED below) not the pair.
     "vocab_N1_頃_けい": "vocab_N3_頃_ころ",
+    # ── A reading that is not the word's ─────────────────────────
+    # Found while looking into example words in the kanji entry panel
+    # that did not light their kanji. Each was checked against the JMdict match the deck's senses were
+    # built from (vocab_meanings.json before plan 108's optimisation
+    # recorded exact_reading or term_only per card), the two JLPT lists
+    # of datas/vocab/sources and UniDic's reading of the word.
+    # The N3 賛成 was exported as "Uӣ[い", a mojibake of さんせい, which is
+    # why 106b's exact-pair merge never met the N1 賛成::さんせい. The N3
+    # card takes its reading back and the N1 one folds in.
+    "vocab_N3_賛成_Uӣ[い": "vocab_N3_賛成_さんせい",
+    "vocab_N1_賛成_さんせい": "vocab_N3_賛成_さんせい",
+    # No reading of the form (JMdict matched the written form only), and
+    # the gloss is the lower card's: 途中 read つちゅう, 三日月 みかずき (a
+    # ず for づ), 平均 ならし (均し's reading), 徐々 そろそろ (glossed with
+    # JMdict's そろそろ senses, on a form its export does not give that
+    # word). The lower card takes the rows.
+    "vocab_N1_途中_つちゅう": "vocab_N4_途中_とちゅう",
+    "vocab_N1_三日月_みかずき": "vocab_N2_三日月_みかづき",
+    "vocab_N1_平均_ならし": "vocab_N3_平均_へいきん",
+    "vocab_N1_徐々_そろそろ": "vocab_N4__そろそろ",
+    # No reading of the form either, and no lower card to fold into: the
+    # N1 list has 一筋 ひとすじ and 真実 しんじつ, and so does UniDic.
+    "vocab_N1_一筋_ひとすき": "vocab_N1_一筋_ひとすじ",
+    "vocab_N1_真実_さな": "vocab_N1_真実_しんじつ",
+    # Real readings, JMdict's later and archaic ones (すめらぎ and かねごと
+    # tagged arch, あだびと an outdated form), on the gloss of the
+    # everyday reading: neither JLPT list has any of them, and a learner
+    # typing てんのう was graded wrong. The word goes to its card; where
+    # there is none, the card takes the reading both lists and UniDic
+    # give. These stay in FOLDED_FORMS -- すめらぎ is 天皇, so the
+    # dictionary may answer it with the 天皇 card.
+    "vocab_N1_天皇_すめらぎ": "vocab_N2_天皇_てんのう",
+    "vocab_N1_他人_あだびと": "vocab_N3_他人_たにん",
+    "vocab_N1_少女_おとめ": "vocab_N3_少女_しょうじょ",
+    "vocab_N1_予言_かねごと": "vocab_N1_予言_よげん",
+    "vocab_N1_旧事_くじ": "vocab_N1_旧事_きゅうじ",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
 # the learner's rows; the pair stays out of FOLDED_FORMS, or the
-# dictionary would answer けい with ころ as it answers 終る with 終わる.
-NOT_FOLDED: frozenset[str] = frozenset({"vocab_N1_頃_けい"})
+# dictionary would answer けい with ころ as it answers 終る with 終わる --
+# and the breakdown would badge every 徐々 in a text as そろそろ.
+NOT_FOLDED: frozenset[str] = frozenset({
+    "vocab_N1_頃_けい",
+    "vocab_N3_賛成_Uӣ[い",
+    "vocab_N1_途中_つちゅう",
+    "vocab_N1_三日月_みかずき",
+    "vocab_N1_平均_ならし",
+    "vocab_N1_徐々_そろそろ",
+    "vocab_N1_一筋_ひとすき",
+    "vocab_N1_真実_さな",
+})
 
 
 def _fields_of(raw_id: str) -> tuple[str, str]:
