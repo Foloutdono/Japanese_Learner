@@ -289,6 +289,8 @@ export default function TodayRun({ session }) {
       remaining={remaining}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
+      done={done}
       side={error && !card ? null : <SessionPanel done={done} misses={false} />}
       sideLabel={t.deskRunLabel}
     >

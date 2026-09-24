@@ -3113,6 +3113,12 @@
      purpose: nearly everything that goes there was drawn for a phone
      first, and here it is drawn at the width it was designed at. */
   --desk-side-w:    360px;
+  /* The desk's console (plan 124): the height of the rating tiles' row
+     on a card run's floor, fixed above the level bar, which the stage
+     reserves so the card can grow to it — the tile's own 64px
+     (.rating-bar__btn) and the docked strip's --sp-3 either side. Here
+     for the same reason as --desk-rail-w. */
+  --desk-console-h: calc(64px + 2 * var(--sp-3));
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -21658,6 +21664,17 @@ a.slip__act { text-decoration: none; }
     justify-content: flex-start;
     padding-bottom: var(--sp-6);
   }
+  /* The console's floor (plan 124, the block at the section's end): the
+     stage reserves the tiles' row, and the card takes the height left —
+     beside its choices (the grid below) it fills the row instead, as
+     tall as the four of them. Here, before the grid, for the cascade's
+     order; the rest of the chain is with the console. */
+  .desk-run--console > .stage { padding-bottom: calc(var(--desk-console-h) + var(--sp-6)); }
+  .desk-run--console > .stage > .quiz-card-stage {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+  }
   /* The run's action docks on the level bar when the stage runs past
      the window, so it is never below the fold, and otherwise follows
      what it answers at the stage's own gap (plan 123): comprehension's
@@ -21846,7 +21863,6 @@ a.slip__act { text-decoration: none; }
     overflow: visible;
   }
   .desk-split__page > .btn-row { max-width: var(--card-w); }
-  .desk-tally { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   /* The run's misses at its end (SessionPanel, plan 115): the cards as
      chips, each opening its entry under them. */
   .desk-misses {
@@ -21859,7 +21875,6 @@ a.slip__act { text-decoration: none; }
     flex-wrap: wrap;
     gap: var(--sp-2);
   }
-  .desk-tally > .record { padding: var(--sp-4); }
   .desk-entry {
     --line-color: var(--line-jisho);
     display: flex;
@@ -22196,6 +22211,103 @@ a.slip__act { text-decoration: none; }
     background: var(--bg-card-hover);
     outline: 1px dashed var(--line-kaiseki);
     outline-offset: var(--sp-1);
+  }
+
+  /* ── 操作盤 — the run's console (plan 124) ──
+     The level bar was the floor a run docks on, sumi like the rating
+     bar it sat under (components/chrome/LevelBar.jsx). On the desk a
+     card run's floor is one console of two rows across the stage: the
+     rating tiles' row, and under it the strip, holding this run's
+     three figures at its left (RunRecords, handed to the level bar by
+     StudyStage's `records`) and the fare at its right. The tiles' row
+     is fixed above the strip rather than sticky in the stage, so it
+     spans the stage's whole width the way the strip does — a sticky
+     bar is its column's width, 1,052px at most — and the stage
+     reserves its height; the card grows into what it leaves, the
+     phone's own rule (the ≤768px block's .quiz-card-stage chain): a
+     lone glyph in the middle of a tall card, never a floor of nothing
+     under the rating bar. One row — the tiles between the figures and
+     the fare — was drawn first and chosen; it does not fit under about
+     1,600px, and the desk is one media block, so the rows are two
+     everywhere. A run without a rating bar (a browse, the practice
+     runs, the rides) passes no `records` and keeps the strip. On a
+     wide window the row keeps to the workspace, as the strip does
+     (--desk-run-inset, plan 123). */
+  .desk-run--console > .stage > .rating-bar {
+    position: fixed;
+    inset: auto calc(var(--desk-side-w) + var(--desk-run-inset)) var(--lvlbar-h) var(--desk-run-inset);
+    display: flex;
+    align-items: center;
+    height: var(--desk-console-h);
+    padding: 0 var(--sp-6);
+    background: var(--bg-panel);
+  }
+  .desk-run--console > .stage > .rating-bar > .rating-bar__buttons { flex: 1 1 auto; }
+  .desk-run--console > .stage > .rating-bar .rating-bar__btn { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
+  .desk-run--console > .stage > .rating-bar .rating-bar__btn.rating-bar__btn--best { background: var(--accent2); }
+  /* The strip: this run's figures at the left, the fare at the right.
+     The figures never shrink; the track takes what is left, up to a
+     side column's width — at a laptop's 740px stage it is the track
+     that gives, never the words (they ran under the fare when both
+     shrank). */
+  .desk-run--console > .lvlbar { padding-inline: var(--sp-6); }
+  .desk-run--console > .lvlbar > .lvlbar__level { margin-inline-start: auto; }
+  .desk-run--console > .lvlbar > .lvlbar__track {
+    flex: 1 1 auto;
+    max-width: var(--desk-side-w);
+  }
+  .desk-tally {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-5);
+  }
+  /* A figure in the strip: the level's own pair (.lvlbar__level,
+     .lvlbar__level-num, .lvlbar__unit), the number a rung up. */
+  .desk-tally__fig {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+    white-space: nowrap;
+  }
+  .desk-tally__num {
+    font-size: var(--fs-lead);
+    letter-spacing: 0;
+    text-transform: none;
+    color: var(--text-on-panel);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-tally__unit {
+    margin-inline-start: var(--sp-1);
+    font-size: var(--fs-caption-xs);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  /* The card grows to the console: the rest of the phone's chain, on
+     the desk (its head, the stage's floor and .quiz-card-stage, stands
+     with the laptop's rules above, before the choices' grid). */
+  .desk-run--console > .stage > .quiz-card-stage > .card-transition,
+  .desk-run--console > .stage > .quiz-card-stage .card-transition-live {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--console > .stage > .quiz-card-stage .card-transition-live > .prompt-card {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  .desk-run--console > .stage > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

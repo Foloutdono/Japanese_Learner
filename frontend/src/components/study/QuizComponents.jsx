@@ -799,6 +799,18 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   // Keyboard reveal/flip: spacebar, plus ZQSD — the AZERTY keyboard's
   // equivalent home-row of WASD — so a French keyboard gets a
   // natural one-handed shortcut instead of reaching for the mouse.
+  //
+  // The key calls the LATEST handleClick, read through a ref. Bound
+  // once and left alone, the listener kept the onReveal of the render
+  // this card mounted in — and a card mounts in the render right after
+  // the last one was rated, while the run's `answered` is still that
+  // card's `true` (its reset is an effect, one render later). Space
+  // then turned the card and the run's onReveal bailed on the stale
+  // flag: no rating bar, and a click only flips a revealed card, so
+  // the run was stuck. A click never was, being bound every render.
+  // Held by Flashcard.keys.browser.test.jsx.
+  const clickRef = useRef(handleClick)
+  useEffect(() => { clickRef.current = handleClick })
   useEffect(() => {
     const handler = e => {
       if (!runKey(e)) return
@@ -809,12 +821,12 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
       if (key === ' ' && /^(BUTTON|A)$/.test(e.target?.tagName ?? '') && e.target.closest('.desk-run__side')) return
       if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
         e.preventDefault()
-        handleClick()
+        clickRef.current()
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [revealed])
+  }, [])
 
   // 机 (plan 123): a drag that selects a word on the card ends in a
   // click, and that click turned the card -- remounting the face and

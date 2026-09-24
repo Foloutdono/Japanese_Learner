@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useXpGain } from './useXpGain'
 import { FareFigure } from './Hud'
+import { RunRecords } from '../study/RunRecords'
 
 // ── 運賃表示 — the level bar, docked on a run ─────────────────
 // The stage frame takes the HUD away, and with it the one object that
@@ -23,7 +24,16 @@ import { FareFigure } from './Hud'
 //
 // Rendered before the summary arrives too, at its full height, so the
 // docks above it never move when the figures land.
-export function LevelBar() {
+//
+// On the desk a card run's floor is the console (plan 124): this bar,
+// fixed to the floor of the stage and grown to one row that holds this
+// run's three records at its left (RunRecords, when `records` is on —
+// StudyStage sets it only where the desk stands a side), the rating
+// tiles on the row above, and the fare at its right. The track carries
+// the progressbar role, not the bar: a progressbar's children are
+// presentational, and the records could not stand inside one. A phone
+// never receives `records`, and its bar is the strip it always was.
+export function LevelBar({ records = false, done = false }) {
   const { t } = useLang()
   const summary = useProfileSummary()
   const { gain, clear } = useXpGain(summary)
@@ -33,19 +43,20 @@ export function LevelBar() {
   const pct  = Math.round((into / span) * 100)
 
   return (
-    <div
-      className="lvlbar"
-      role="progressbar"
-      aria-label={summary ? `${t.level} ${summary.level}` : t.level}
-      aria-valuemin={0}
-      aria-valuemax={span}
-      aria-valuenow={into}
-    >
-      <span className="lvlbar__level">
+    <div className="lvlbar">
+      {records && <RunRecords done={done} />}
+      <span className="lvlbar__level" aria-hidden="true">
         {t.levelShort}
         <b className="lvlbar__level-num">{summary?.level ?? ''}</b>
       </span>
-      <span className="lvlbar__track" aria-hidden="true">
+      <span
+        className="lvlbar__track"
+        role="progressbar"
+        aria-label={summary ? `${t.level} ${summary.level}` : t.level}
+        aria-valuemin={0}
+        aria-valuemax={span}
+        aria-valuenow={into}
+      >
         <span className="lvlbar__fill" style={{ width: `${pct}%` }} />
         {gain && gain.toPct > gain.fromPct && (
           <span
@@ -55,7 +66,7 @@ export function LevelBar() {
           />
         )}
       </span>
-      <span className="lvlbar__xp">
+      <span className="lvlbar__xp" aria-hidden="true">
         <FareFigure gain={gain} className="hud-fare hud-fare--bar" onEnd={clear} />
         {summary ? `${into.toLocaleString()} / ${span.toLocaleString()}` : ''}
         <span className="lvlbar__unit">xp</span>

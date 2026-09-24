@@ -251,7 +251,7 @@ export default function VocabRun({ session }) {
         leaveLabel={t.vocabTitle}
         where={`${t.vocabulary} ${level}`}
         sub={t.modeReview}
-        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        side={reviewCards.length > 0 ? <SessionPanel /> : undefined}
         sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
@@ -312,6 +312,8 @@ export default function VocabRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
+      done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >
