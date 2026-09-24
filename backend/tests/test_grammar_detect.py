@@ -452,3 +452,31 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
             f"one of their own examples ({share:.1%}) -- see the module "
             f"docstring for the four kinds that are refusals, not misses",
         )
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class CanFindTests(unittest.TestCase):
+    """Where the detector may say "not in this sentence" (plan 124):
+    only on a point it finds in that point's own lesson. 作文 prints its
+    found / not-found hint on those and holds its tongue on the rest."""
+
+    def test_a_point_its_own_lesson_shows_is_trusted(self) -> None:
+        self.assertTrue(grammar_detect.can_find("〜てください"))
+        self.assertTrue(grammar_detect.can_find("〜ながら"))
+
+    def test_a_point_no_rule_reads_is_not(self) -> None:
+        for pattern in ("い形容詞／な形容詞", "〜しか〜ない", "〜上に"):
+            self.assertFalse(grammar_detect.can_find(pattern), pattern)
+
+    def test_an_unknown_pattern_is_not(self) -> None:
+        self.assertFalse(grammar_detect.can_find("〜not a point"))
+
+    def test_nearly_every_point_is_trusted(self) -> None:
+        trusted = sum(
+            grammar_detect.can_find(point["pattern"])
+            for points in GRAMMAR_POINTS_BY_LEVEL.values()
+            for point in points
+        )
+        # A ratchet: 517 of 541 when written. Lower it only when a plan
+        # lowers the figure, never to make a build pass.
+        self.assertGreaterEqual(trusted, 505, f"{trusted} points trusted")

@@ -879,6 +879,32 @@ def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
     return [(p, lv, s, e) for p, lv, s, e, _kind, _segs in _detect(sentence, tokens)]
 
 
+@lru_cache(maxsize=None)
+def can_find(pattern: str) -> bool:
+    """Whether the detector may say a sentence does NOT use `pattern`
+    (plan 124): true when it finds the point in at least one of the
+    point's own catalogue examples.
+
+    A "not found" is evidence only where the matcher has proved itself
+    on the point. It never sees some two dozen of the 541 -- the
+    sense-qualified and AMBIGUOUS points _catalogue() drops (〜が（逆接）,
+    〜上に) and the class labels and shapes no rule reads (い形容詞／な形容詞,
+    〜しか〜ない) -- and for those the honest answer to "is it in this
+    sentence" is no answer. 作文 asks here before printing its found /
+    not-found hint, and prints nothing when the answer is False. Read
+    once per point, like _confirmed, and only when asked."""
+    found = find(pattern)
+    if found is None:
+        return False
+    level, entry = found
+    return any(
+        (hit["pattern"], hit["level"]) == (pattern, level)
+        for example in entry.get("examples", [])
+        if example.get("jp")
+        for hit in hits(example["jp"])
+    )
+
+
 def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[tuple[int, int], ...]]]:
     if not sentence:
         return []
