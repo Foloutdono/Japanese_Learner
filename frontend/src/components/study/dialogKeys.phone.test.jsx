@@ -98,3 +98,40 @@ describe('a chord under a run', () => {
     expect(onRate.mock.calls[1][0]).toBe(onRate.mock.calls[0][0])
   })
 })
+
+// ── One Escape, one dialog (plan 123) ────────────────────────────
+// The offer opens as a second sheet over the balance (its "see the
+// pass") or over the run-out. Every sheet heard Escape on window in the
+// same phase, so one Escape closed the offer AND the balance -- and over
+// the run-out, whose way out is to leave, it left the run. The offer is
+// opened `over`: it hears Escape first and keeps it.
+describe('the offer over another sheet', () => {
+  it('closes alone on Escape', async () => {
+    const { PaywallSheet } = await import('../credits/PaywallSheet')
+    const { openPaywall, usePaywall } = await import('../../stores/credits')
+    const under = vi.fn()
+    function Stack() {
+      const offer = usePaywall()
+      return (
+        <LangProvider>
+          <Sheet open onClose={under} jp="券" cap="balance">
+            <button type="button" className="probe-see" onClick={() => openPaywall('balance')}>see the pass</button>
+          </Sheet>
+          <PaywallSheet />
+          <span className="probe-offer">{offer ? 'open' : 'closed'}</span>
+        </LangProvider>
+      )
+    }
+    await render(<Stack />)
+    await settle()
+    document.querySelector('.probe-see').click()
+    await settle()
+    expect(document.querySelectorAll('[aria-modal="true"]')).toHaveLength(2)
+    // From where the focus is, as a real key is: the offer took it.
+    expect(document.activeElement.closest('.sheet--sumi')).not.toBeNull()
+    document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    await settle()
+    expect(document.querySelector('.probe-offer').textContent).toBe('closed')
+    expect(under).not.toHaveBeenCalled()
+  })
+})

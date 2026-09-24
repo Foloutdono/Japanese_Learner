@@ -16,8 +16,14 @@ import { useSheetDrag } from '../../hooks/useSheetDrag'
 // reach from the hand that opened it. The handle is the AFFORDANCE for
 // that gesture (it always was, and nothing answered it), but the drag
 // is the whole panel's: aiming for a 36×4 bar is not what a thumb does.
-function Panel({ onClose, jp, cap, sumi, label, children, className }) {
-  const ref = useDialog(onClose)
+//
+// `over`: a sheet opened from inside another one (the offer, from the
+// balance or the run-out) listens for Escape first and keeps it, so one
+// Escape closes it alone -- not the balance too, nor, through the
+// run-out's way out, the run under both (useDialog's `capture`; plan
+// 123).
+function Panel({ onClose, jp, cap, sumi, label, children, className, over = false }) {
+  const ref = useDialog(onClose, { capture: over })
   const drag = useSheetDrag(ref, onClose)
   const classes = ['sheet', sumi ? 'sheet--sumi' : '', drag.dragging ? 'sheet--dragging' : '', className]
     .filter(Boolean).join(' ')
