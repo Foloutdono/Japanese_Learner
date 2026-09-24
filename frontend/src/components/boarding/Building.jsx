@@ -65,21 +65,29 @@ export default function Building({ name, steps, onDone }) {
           <div className="brd-build__done" style={{ width: `${pct}%` }} />
           <span className="brd-build__train" style={{ left: `${pct}%` }} />
         </div>
-        <div className="brd-steps">
-          {steps.map((step, i) => {
-            const state = i < done ? 'done' : i === done ? 'now' : 'next'
-            return (
-              <div key={step.key} className={`brd-step brd-step--${state}`} data-build={step.key}>
-                <span className="brd-step__mark">{state === 'done' && <CheckMark />}</span>
-                <span className="brd-step__label">{step.label}</span>
-                {(state === 'done' || step.always) && step.value && (
-                  <span className="brd-step__val">{step.value}</span>
-                )}
-              </div>
-            )
-          })}
-        </div>
+        <BuildSteps steps={steps.map((step, i) => ({ ...step, state: i < done ? 'done' : i === done ? 'now' : 'next' }))} />
       </div>
+    </div>
+  )
+}
+
+// The journey's rows -- the goal, the lines, the daily ride, the
+// projection -- each 'done', 'now' or 'next'. Building ticks them off
+// one by one; on the desk they stand beside the questions and fill as
+// each is answered (plan 122). A row prints its value once done, or
+// while it is being answered when it says `always`.
+export function BuildSteps({ steps }) {
+  return (
+    <div className="brd-steps">
+      {steps.map(step => (
+        <div key={step.key} className={`brd-step brd-step--${step.state}`} data-build={step.key}>
+          <span className="brd-step__mark">{step.state === 'done' && <CheckMark />}</span>
+          <span className="brd-step__label">{step.label}</span>
+          {(step.state === 'done' || step.always) && step.value && (
+            <span className="brd-step__val">{step.value}</span>
+          )}
+        </div>
+      ))}
     </div>
   )
 }

@@ -10,8 +10,8 @@ import { USERNAME_RE } from '../components/profile/EditableUsername'
 import { TrainArrival } from '../components/onboarding/TrainArrival'
 import { DEPART_TIMES } from '../components/onboarding/departures'
 import {
-  LINES, RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm, jlptFor,
-  levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
+  LINES, RECOMMENDED_RHYTHM, bucketFor, goalStops, itemsForRhythm,
+  levelAnswers, levelForKana, minutesToTime, planFigures, stopsAhead, timeToMinutes,
 } from '../domain/boarding'
 import { BoardHead } from '../components/boarding/BoardFrame'
 import NameStep from '../components/boarding/NameStep'
@@ -337,13 +337,8 @@ export default function BoardingFlow({
   // but which one to ride to is the learner's call to make rather than
   // the flow's to make for them.
   function afterLevel(choice, kana) {
-    const ahead = goalStops(choice, kana)
-    set({
-      levelChoice: choice,
-      jlpt: jlptFor(choice),
-      goal: ahead.find(stop => stop !== 'novice') ?? null,
-    })
-    return ahead.length > 0 ? 'goal' : 'lines'
+    set(levelAnswers(choice, kana))
+    return goalStops(choice, kana).length > 0 ? 'goal' : 'lines'
   }
 
   function answerKana(kana) {
