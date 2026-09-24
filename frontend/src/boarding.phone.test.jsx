@@ -341,3 +341,32 @@ describe('the browser\'s Back in the boarding', () => {
     expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
   })
 })
+
+// ── The building's lines row holds the longest French line-up ──────
+// (plan 123) The row's value is `nowrap`, and "Kana · Vocabulaire ·
+// Kanji · Grammaire" is the longest thing it is ever asked to hold. At
+// 390 it has to fit beside its label without running past the frame.
+describe('the building\'s rows at 390', () => {
+  it('fit every line, in French', async () => {
+    const { default: Building } = await import('./components/boarding/Building')
+    const screen = await render(
+      <LangProvider>
+        <main className="brd"><div className="brd__cars"><div className="brd__car">
+          <Building name="Tester" onDone={() => {}} steps={[
+            { key: 'goal', label: 'Objectif', value: 'N3 · en 14 mois', always: true },
+            { key: 'lines', label: 'Lignes', value: 'Kana · Vocabulaire · Kanji · Grammaire', always: true },
+            { key: 'ride', label: 'Trajet', value: '15 min · 19:30', always: true },
+          ]} />
+        </div></div></main>
+      </LangProvider>
+    )
+    await settle(60)
+    const frame = rect(screen.container.querySelector('.brd'))
+    for (const row of screen.container.querySelectorAll('.brd-step')) {
+      const val = row.querySelector('.brd-step__val')
+      expect(rect(val).right).toBeLessThanOrEqual(frame.right)
+      expect(rect(val).left).toBeGreaterThanOrEqual(rect(row.querySelector('.brd-step__label')).right)
+    }
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+  })
+})
