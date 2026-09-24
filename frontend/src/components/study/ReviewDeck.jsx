@@ -1,5 +1,7 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { playClick } from '../../lib/audio'
+import { useDesk } from '../../hooks/useDesk'
+import { runKey } from '../../lib/keyGuards'
 import { Flashcard } from './QuizComponents'
 import { CardTransition } from './CardTransition'
 import PromptCard from './PromptCard'
@@ -35,6 +37,29 @@ export default function ReviewDeck({
   onExit, foot,
 }) {
   const [index, setIndex] = useState(0)
+  const desk = useDesk()
+  const count = cards?.length ?? 0
+
+  // 机 (plan 123): ← and → turn the pages of a browse. Its Prev/Next
+  // stay where they are rather than follow the card (a target pressed
+  // over and over must not move), so the keys are the way through
+  // without the pointer. Not from a field, a dialog or a chord.
+  useEffect(() => {
+    if (!desk || count === 0) return undefined
+    const at = Math.min(index, count - 1)
+    const onKey = e => {
+      if (!runKey(e) || e.shiftKey) return
+      const step = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0
+      if (!step) return
+      e.preventDefault()
+      const to = Math.max(0, Math.min(count - 1, at + step))
+      if (to === at) return
+      playClick()
+      setIndex(to)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [desk, count, index])
 
   if (loading) return <Loading />
 
@@ -75,11 +100,13 @@ export default function ReviewDeck({
       {/* The stage's foot (canvas RunBrowse): the way back, and the
           filled action forward. */}
       <div className="stage__foot browse-nav">
-        <button type="button" onClick={goPrev} disabled={safeIndex === 0} className="btn-secondary">
+        <button type="button" onClick={goPrev} disabled={safeIndex === 0} className="btn-secondary" aria-keyshortcuts={desk ? 'ArrowLeft' : undefined}>
           <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
+          {desk && <kbd className="desk-kbd" aria-hidden="true">←</kbd>}
         </button>
-        <button type="button" onClick={goNext} disabled={safeIndex === cards.length - 1} className="btn-primary">
+        <button type="button" onClick={goNext} disabled={safeIndex === cards.length - 1} className="btn-primary" aria-keyshortcuts={desk ? 'ArrowRight' : undefined}>
           {t.reviewNext} <ChevronIcon direction="right" size={14} />
+          {desk && <kbd className="desk-kbd" aria-hidden="true">→</kbd>}
         </button>
       </div>
     </>

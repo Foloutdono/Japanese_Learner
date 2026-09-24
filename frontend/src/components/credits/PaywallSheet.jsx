@@ -50,7 +50,7 @@ export function PaywallSheet() {
   const taken = paywall.taken
 
   return (
-    <Sheet open sumi onClose={closePaywall} jp={t.paywallTitle} cap={t.passLabel} label={t.paywallTitle}>
+    <Sheet open sumi over onClose={closePaywall} jp={t.paywallTitle} cap={t.passLabel} label={t.paywallTitle}>
       <p className="pw__lede">{t.paywallLede}</p>
 
       <ul className="pw-list">

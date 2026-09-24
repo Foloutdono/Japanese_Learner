@@ -3,6 +3,7 @@ import { HudPass } from './Hud'
 import { LeaveKey } from './DeskKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { useLang } from '../../LangContext'
+import { useEscHeld } from '../../stores/escHold'
 
 // ── The head of a run (plan 068; used from plan 070) ──────────
 // Both bars have left; this row is what a session keeps: the way out
@@ -24,15 +25,19 @@ import { useLang } from '../../LangContext'
 // (docs/design/mobile/README.md).
 //
 // On the desk Esc takes the way out too (plan 115, DeskKeys), its cap
-// printed on it.
+// printed on it -- unless a door in the run's side holds the key
+// (stores/escHold, plan 123), when the cap goes: it said "leave" while
+// Esc closed the entry.
 export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside }) {
   const desk = useDesk()
   const lang = useLang()
+  const held = useEscHeld()
+  const esc = desk && !held
   return (
     <div className="stage__head">
-      <Leave onClick={onLeave} keys={desk ? 'Escape' : undefined}>
+      <Leave onClick={onLeave} keys={esc ? 'Escape' : undefined}>
         {leaveLabel}
-        {desk && <kbd className="desk-kbd" aria-hidden="true">{lang?.t.keyEscape}</kbd>}
+        {esc && <kbd className="desk-kbd" aria-hidden="true">{lang?.t.keyEscape}</kbd>}
       </Leave>
       <LeaveKey onLeave={onLeave} />
       <span className="stage__where">

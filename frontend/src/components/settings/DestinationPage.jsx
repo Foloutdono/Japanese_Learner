@@ -9,6 +9,8 @@ import { goalDerived } from '../onboarding/goalDerived'
 import { DEFAULT_PER_DAY, PACES } from '../onboarding/paces'
 import { DEPARTURES, DEPART_TIMES } from '../onboarding/departures'
 import { SettingsPage, Slip } from './SettingsPage'
+import { useDesk } from '../../hooks/useDesk'
+import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 
 const iso = d => d.toISOString().slice(0, 10)
 
@@ -48,6 +50,13 @@ export function DestinationPage() {
   const [busy, setBusy] = useState(false)
   const [failed, setFailed] = useState(false)
   const [done, setDone] = useState(null) // 'issued' | 'dropped' | null
+  // One tab stop a group on the desk (plan 123). The destination and
+  // the service are dialled here and issued by the button under them,
+  // so the arrows check them; the hour is saved on the spot, so its
+  // arrows move the focus alone and Space chooses.
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
+  const onWalkHours = useRadioWalk(desk, { check: false })
 
   const startLevel = summary?.jlptLevel ?? null
   // 行先 — the stops ahead. The kana stop rides at the head of the list
@@ -118,13 +127,14 @@ export function DestinationPage() {
   return (
     <SettingsPage title={t.settingsGoal}>
       <Slip label={t.settingsGoal} cap={t.destOnPass}>
-        <div className="dest-grid" role="radiogroup" aria-label={t.settingsGoal}>
-          {options.map(level => (
+        <div className="dest-grid" role="radiogroup" aria-label={t.settingsGoal} onKeyDown={onWalk}>
+          {options.map((level, i) => (
             <button
               key={level}
               type="button"
               role="radio"
               aria-checked={chosenDest === level}
+              tabIndex={radioTab(desk, i, options.indexOf(chosenDest))}
               disabled={busy}
               className={`dest${chosenDest === level ? ' dest--on' : ''}`}
               onClick={() => { playClick(); setDest(level) }}
@@ -140,13 +150,14 @@ export function DestinationPage() {
       </Slip>
 
       <Slip label={t.destService} cap={t.settingsPaceCap}>
-        <div className="svc-grid" role="radiogroup" aria-label={t.destService}>
-          {PACES.map(p => (
+        <div className="svc-grid" role="radiogroup" aria-label={t.destService} onKeyDown={onWalk}>
+          {PACES.map((p, i) => (
             <button
               key={p.id}
               type="button"
               role="radio"
               aria-checked={chosenPace === p.perDay}
+              tabIndex={radioTab(desk, i, PACES.findIndex(q => q.perDay === chosenPace))}
               disabled={busy}
               className={`svc${chosenPace === p.perDay ? ' svc--on' : ''}`}
               onClick={() => { playClick(); setPerDay(p.perDay) }}
@@ -164,8 +175,8 @@ export function DestinationPage() {
       {/* The hour rides with or without a destination — it is a habit,
           not a promise, and the pass prints it either way. */}
       <Slip label={t.destDailyRide} cap={t.destOptional}>
-        <div className="hour-grid" role="radiogroup" aria-label={t.destDailyRide}>
-          {[...DEPARTURES, null].map(id => {
+        <div className="hour-grid" role="radiogroup" aria-label={t.destDailyRide} onKeyDown={onWalkHours}>
+          {[...DEPARTURES, null].map((id, i, hours) => {
             const on = (status?.dailyDeparture ?? null) === id
             return (
               <button
@@ -173,6 +184,7 @@ export function DestinationPage() {
                 type="button"
                 role="radio"
                 aria-checked={on}
+                tabIndex={radioTab(desk, i, hours.indexOf(status?.dailyDeparture ?? null))}
                 disabled={busy || !status}
                 data-hour={id ?? 'free'}
                 className={`svc${on ? ' svc--on' : ''}`}

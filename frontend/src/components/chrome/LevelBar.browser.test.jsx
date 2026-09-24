@@ -24,7 +24,7 @@ describe('the level bar', () => {
     seedSummary({ username: 'Aiko', level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500 })
     const screen = await render(<LangProvider><LevelBar /></LangProvider>)
     await settle()
-    // The track is the progressbar (plan 122: the bar can hold a run's
+    // The track is the progressbar (plan 124: the bar can hold a run's
     // figures too, and a progressbar's children are presentational).
     const bar = screen.container.querySelector('.lvlbar__track')
     expect(bar.getAttribute('role')).toBe('progressbar')

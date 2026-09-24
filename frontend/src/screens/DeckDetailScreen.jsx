@@ -21,6 +21,7 @@ import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCard
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
+import { composing } from '../lib/keyGuards'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -513,7 +514,45 @@ export default function DeckDetailScreen({ session }) {
 
   // On the desk the form, Browse, More and the platforms take turns in
   // one column (plans 115, 120): opening one gives the column to it.
-  function startAdd() { resetForm(); setEditing(null); setAdding(true); if (desk) { setShowBrowse(false); closeMore() } }
+  //
+  // And its chip gives it back (plan 123): the lit Add, Browse or More,
+  // pressed again, returns the column to the platforms -- the lit Add
+  // used to reopen the form, emptied, over the card half written in it.
+  // A new card's form keeps what was typed in it until it is saved or
+  // cancelled: closing the column and coming back finds it as it was
+  // left. An edit's fields are never a new card's draft.
+  function startAdd() {
+    if (desk && adding && !editing) { setAdding(false); return }
+    if (!desk || editing || !formTyped()) resetForm()
+    setEditing(null)
+    setAdding(true)
+    if (desk) { setShowBrowse(false); closeMore() }
+  }
+
+  /** Whether the form holds anything typed (the desk's kept draft). */
+  function formTyped() {
+    const typed = v => (v && typeof v === 'object' ? Object.values(v).flat().some(typed) : String(v ?? '').trim() !== '')
+    return typed(notes) || Object.values(form).some(typed)
+  }
+
+  // The dock's ✕ or Esc (the desk's): the column goes back to the
+  // platforms, a new card's draft kept, an edit let go.
+  function closeForm() {
+    setAdding(false)
+    if (editing) { setEditing(null); resetForm() }
+  }
+
+  // 机 (plan 123): a deck just made on the desk arrives with `add`, and
+  // its first card's form stands open in the side. The flag is spent at
+  // once, so Back and Forward onto this entry do not open it again.
+  const arrivedToAdd = desk && Boolean(state?.add)
+  useEffect(() => {
+    if (!arrivedToAdd || loading || isFollower || cards.length > 0) return
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- opening the form is the arrival's one instruction, carried in router state and read once the cards have loaded.
+    startAdd()
+    navigate(`/learn/decks/${deck_id}`, { replace: true, state: { deck: state.deck } })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [arrivedToAdd, loading])
 
   function startEdit(card) {
     setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
@@ -525,12 +564,14 @@ export default function DeckDetailScreen({ session }) {
 
   function openBrowse() {
     playUi('click-mode-selection')
+    if (desk && showBrowse && !adding) { closeBrowse(); return }
     setShowBrowse(true)
     if (desk) { setAdding(false); closeMore() }
   }
 
   function openMore() {
     playUi('click-mode-selection')
+    if (desk && moreOpen) { closeMore(); return }
     setMoreOpen(true)
     if (desk) { setAdding(false); setShowBrowse(false) }
   }
@@ -617,11 +658,15 @@ export default function DeckDetailScreen({ session }) {
 
   // Add / Edit form: in its slot on a phone, in the second column on
   // the desk (plan 114), where it stands beside the cards it adds to.
+  // On the desk it stands in the column's dock (plan 123), whose caption
+  // says what the phone's label says.
   const cardForm = adding && (
     <div className="form deckdetail-form">
-      <span className="form__label">
-        {editing ? t.editCard : t.newCard}
-      </span>
+      {!desk && (
+        <span className="form__label">
+          {editing ? t.editCard : t.newCard}
+        </span>
+      )}
       <div className="deckdetail-form__fields">
         {/* One input per field the structure declares. A kanji card
             asks for four things and a standard card for two, from
@@ -668,7 +713,7 @@ export default function DeckDetailScreen({ session }) {
             mid-quiz as help nobody asked for. */}
         <input value={notes} onChange={e => setNotes(e.target.value)}
           placeholder={t.notesPlaceholder}
-          onKeyDown={e => e.key === 'Enter' && saveCard()}
+          onKeyDown={e => e.key === 'Enter' && !composing(e) && saveCard()}
           className="field deckdetail-form__input" />
       </div>
       <div className="form__row">
@@ -992,7 +1037,11 @@ export default function DeckDetailScreen({ session }) {
         <div className="desk-deck">
           <div className="desk-deck__main">{body}</div>
           <DeskSide label={adding ? (editing ? t.editCard : t.newCard) : showBrowse ? t.browseTitle : moreOpen ? t.deckMore : t.study}>
-            {adding ? cardForm
+            {adding ? (
+              <DeskDock title={editing ? t.editCard : t.newCard} className="desk-cardform" onClose={closeForm} initialFocus="input, textarea">
+                {cardForm}
+              </DeskDock>
+            )
               : showBrowse ? <BrowseCardsDock deckId={deck_id} deckType={deck?.type} session={session} onAdded={fetchCards} onClose={closeBrowse} />
               // More is a list of what can be done to the deck, not a
               // question: it opens in the column (plan 120), and only its
@@ -1016,7 +1065,7 @@ export default function DeckDetailScreen({ session }) {
 
       {/* The More sheet: what the shelf's card used to carry. */}
       <Sheet open={confirmingMine} onClose={() => setConfirmingMine(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine}>
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.libraryMakeMine} initialFocus=".btn-secondary">
         <span className="sheet__q">{t.libraryMakeMineConfirm}</span>
         <button type="button" className="btn-primary" disabled={busy} onClick={makeItMine}>
           {t.libraryMakeMine}
@@ -1028,7 +1077,7 @@ export default function DeckDetailScreen({ session }) {
 
       <Sheet open={confirmingUnfollow} onClose={() => setConfirmingUnfollow(false)}
         jp={deck?.name ?? t.deckFallbackTitle}
-        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow}>
+        cap={withdrawn ? t.libraryRemove : t.libraryUnfollow} initialFocus=".btn-secondary">
         <span className="sheet__q">
           {withdrawn ? t.libraryRemoveConfirm : t.libraryUnfollowConfirm}
         </span>
@@ -1071,7 +1120,7 @@ export default function DeckDetailScreen({ session }) {
           deletion asks in a dialog of its own, as the three other
           irreversibles here do (plan 120). */}
       <Sheet open={desk && confirmingDeck} onClose={() => setConfirmingDeck(false)}
-        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck}>
+        jp={deck?.name ?? t.deckFallbackTitle} cap={t.deleteDeck} initialFocus=".btn-secondary">
         <span className="sheet__q">
           {deck?.followers > 0
             ? t.libraryDeleteFollowed(deck.followers)
@@ -1093,6 +1142,7 @@ export default function DeckDetailScreen({ session }) {
         onClose={() => setConfirmingDelete(false)}
         jp={t.cardsCount(selected.size)}
         cap={t.delete}
+        initialFocus=".btn-secondary"
       >
         <span className="sheet__q">{t.deleteCardsConfirm}</span>
         <button type="button" className="btn-primary btn-primary--danger" onClick={deleteSelected}>

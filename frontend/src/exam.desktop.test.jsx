@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -148,12 +149,28 @@ describe('the exam runner on the desk', () => {
     expect($('.desk-paper__text')).toBe(text)
   })
 
-  it('names the keys it answers to', async () => {
+  it('names the keys it answers to, and prints them', async () => {
     await sit()
     expect($$('.mcq-row').map(r => r.getAttribute('aria-keyshortcuts'))).toEqual(['1', '2', '3', '4'])
     expect($('.exam-nav .btn-primary').getAttribute('aria-keyshortcuts')).toBe('ArrowRight')
     expect($('.exam-nav .btn-secondary').getAttribute('aria-keyshortcuts')).toBe('ArrowLeft')
     expect($('.exam-flag').getAttribute('aria-keyshortcuts')).toBe('F')
+    // Every cap is printed on what it presses (plan 123).
+    expect($$('.exam-nav .desk-kbd').map(k => k.textContent)).toEqual(['←', 'F', '→'])
+  })
+
+  it('docks Previous and Next above the level bar on a short laptop window (plan 123)', async () => {
+    await page.viewport(1100, 650)
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await sit()
+      const nav = $('.exam-nav').getBoundingClientRect()
+      expect(nav.bottom).toBeLessThanOrEqual($('.lvlbar').getBoundingClientRect().top + 1)
+      expect(nav.top).toBeGreaterThan(0)
+    } finally {
+      delete document.documentElement.dataset.chrome
+      await page.viewport(1100, 800)
+    }
   })
 
   it('plays a listening clip with Space', async () => {
@@ -163,6 +180,22 @@ describe('the exam runner on the desk', () => {
     expect($('.exam-audio-player .desk-kbd')).not.toBeNull()
     expect($('.exam-audio-player__play').getAttribute('aria-keyshortcuts')).toBe('Space')
     press(' ')
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+    play.mockRestore()
+  })
+
+  it('gives Space back to the clip from an answer already checked (plan 123)', async () => {
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockImplementation(() => Promise.resolve())
+    await sit(LISTENING)
+    await settle(200)
+    // A click leaves the focus on the choice, as Chrome does.
+    const choice = $$('.mcq-row')[1]
+    choice.click()
+    choice.focus()
+    await settle()
+    expect(choice.getAttribute('aria-checked')).toBe('true')
+    choice.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true, cancelable: true }))
     await settle()
     expect(play).toHaveBeenCalledTimes(1)
     play.mockRestore()
@@ -248,6 +281,46 @@ describe('the exam result on the desk', () => {
     await mark(given, '?attempt=9&question=r2')
     expect(openQ()).toMatch(/3$/)
     expect($('.desk-split__page .exam-card .exam-question__prompt').textContent).toBe('会社へ何で行きますか。')
+  })
+
+  // Plan 123: the review stands the card whole beside the list, so a
+  // listening question's transcript stands open (it folded again on
+  // every ←/→), and its clip still answers Space.
+  it('opens a listening question\'s transcript, its clip on Space', async () => {
+    const qs = flattenQuestions(LISTENING)
+    const review = qs.map(q => ({ id: q.id, sectionId: 'listening', given: 'c2', answer: q.answer, isCorrect: false }))
+    const summary = { attemptId: 9, revision: 1, startedAt: 0, finishedAt: 600000, review, perSection: { listening: { correct: 0, total: review.length, pct: 0 } } }
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/practice/exam/e2/results', search: '?attempt=9', state: { summary, exam: LISTENING } }]}>
+          <Routes><Route path="/practice/exam/:examId/results" element={<ExamResult session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+    const card = $('.desk-split__page .exam-card')
+    expect(card.querySelector('details.exam-transcript').open).toBe(true)
+    expect(card.querySelector('.exam-audio-player__play').getAttribute('aria-keyshortcuts')).toBe('Space')
+    const play = vi.spyOn(HTMLMediaElement.prototype, 'play').mockResolvedValue()
+    press(' ')
+    await settle()
+    expect(play).toHaveBeenCalledTimes(1)
+    play.mockRestore()
+  })
+
+  // Plan 123, P15: the review is one tab stop, walked with ↑/↓ across
+  // its parts, and ←/→ take the focus along with the open question.
+  it('walks the review from one tab stop, the focus following ←/→', async () => {
+    await mark(given)
+    const rows = () => $$('.desk-split__list .exam-review-row')
+    expect(rows().filter(r => r.tabIndex === 0)).toEqual([rows()[0]])
+    rows()[0].focus()
+    rows()[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+    await settle()
+    expect(openQ()).toMatch(/3$/)
+    expect(document.activeElement).toBe(rows()[1])
+    rows()[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }))
+    expect(document.activeElement).toBe(rows()[0])
   })
 
   it('lists every question on a clean sheet, and keeps one thing to do next', async () => {

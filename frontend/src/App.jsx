@@ -21,7 +21,7 @@ import RewardsPreview from './screens/RewardsPreview'
 import OnboardingPreview from './screens/OnboardingPreview'
 import RidePreview from './screens/RidePreview'
 import SoundPalette from './screens/SoundPalette'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { authRedirectError } from './lib/authRedirect'
 import { isGuest, startGuest } from './lib/guest'
@@ -30,6 +30,7 @@ import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
+import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
@@ -232,6 +233,44 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
+  // 机 (plan 122): on the desk the sign-in stands beside Board in the
+  // Welcome's side column, so there is no second screen to swap to --
+  // authMode only says which side the card opens on.
+  const desk = useDesk()
+  // The browser's Back on the sign-in (plan 123): the sign-in replaces
+  // Welcome through state, so Back left Tsuji rather than returning to
+  // Welcome. While the sign-in stands for a signed-out learner, one
+  // guard entry stands in the browser's history; Back pops it and puts
+  // Welcome back, and the ‹ takes it out again (its pop ignored). A
+  // sign-in that succeeds leaves it -- one Back that stays on the page
+  // -- rather than racing the router mounting over it.
+  const authGuard = useRef(false)
+  const authIgnore = useRef(false)
+  const onSignInScreen = session === null && authMode != null && !desk
+  useEffect(() => {
+    function onPop() {
+      if (authIgnore.current) { authIgnore.current = false; return }
+      if (!authGuard.current) return
+      authGuard.current = false
+      setAuthMode(null)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  useEffect(() => {
+    try {
+      if (onSignInScreen && !authGuard.current) {
+        window.history.pushState({ auth: true }, '')
+        authGuard.current = true
+      } else if (!onSignInScreen && authGuard.current && session === null) {
+        authGuard.current = false
+        authIgnore.current = true
+        window.history.back()
+      } else if (session) {
+        authGuard.current = false
+      }
+    } catch { /* a browser refusing the history API: Back leaves, as before */ }
+  }, [onSignInScreen, session])
   // Embarquer mints a guest pass rather than asking for an account
   // (lib/guest.js): the boarding runs on a real user with no
   // credentials, and the account is offered at the END, refusably. The
@@ -449,9 +488,9 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        {authMode
+        {authMode && !desk
           ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
-          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} />}
+          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} authMode={authMode} />}
       </LangProvider>
     )
   }

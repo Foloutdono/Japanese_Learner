@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -55,7 +56,7 @@ function Stage({ children, done = false }) {
   return (
     <LangProvider>
       <MemoryRouter>
-        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records side={<SessionPanel done={done} />} sideLabel="This run">
+        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records done={done} side={<SessionPanel done={done} />} sideLabel="This run">
           {children}
         </StudyStage>
       </MemoryRouter>
@@ -162,6 +163,22 @@ describe('the session panel at a run\'s end', () => {
     expect($('.desk-entry').textContent.toLowerCase()).toContain('meaning of 山')
   })
 
+  it('prints a grammar miss by its pattern, not a blank chip (plan 123)', async () => {
+    startTally('grammar:N5:f2b')
+    countReview({ quality: 1, xp: 1, entry: { id: 'grammar_N5_〜てください', category: 'grammar', label: '〜てください', session: {} } })
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($$('.desk-misses .desk-miss').map(c => c.textContent)).toEqual(['〜てください'])
+  })
+
+  it('keeps no zero records for a run that had nothing to rate (plan 123)', async () => {
+    startTally('kanji:N5:f2b')
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($('.desk-tally')).toBeNull()
+    expect($('.desk-run__note')).toBeNull()
+  })
+
   it('says nothing more on a run with no misses', async () => {
     startTally('kanji:N5:f2b')
     countReview({ quality: 4, xp: 5, entry: { term: '川', category: 'kanji', session: {} } })
@@ -172,3 +189,63 @@ describe('the session panel at a run\'s end', () => {
     expect($$('.lvlbar .desk-tally .desk-tally__fig')).toHaveLength(3)
   })
 })
+
+// ── plan 123 — every stage starts at the top; the action follows ──
+// A run's foot (comprehension's Next, a practice run's field and
+// Submit) sat on the window's floor, hundreds of pixels under what it
+// answered, and under the level bar on a short laptop window. It now
+// follows its content at the stage's gap and docks on the level bar
+// when the stage runs past the window. And a stage with no side (the
+// first ride, a browse without one) starts at the top like the rest.
+describe('the action under what it answers (plan 123)', () => {
+  function Foot({ side = true, rows = 4 }) {
+    return (
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Reading" onLeave={() => {}} leaveLabel="Reading" pass={false}
+            side={side ? <SessionPanel /> : undefined} sideLabel="This run">
+            <div className="qrows">
+              {Array.from({ length: rows }, (_, i) => <p key={i} className="probe-row" style={{ height: '60px', margin: 0 }}>{i}</p>)}
+            </div>
+            <div className="stage__foot"><button type="button" className="btn-primary">Next</button></div>
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+  }
+
+  it('follows the last content at the stage\'s gap', async () => {
+    await render(<Foot />)
+    await settle(600)
+    const last = $('.qrows').getBoundingClientRect()
+    const foot = $('.stage__foot').getBoundingClientRect()
+    const gap = parseFloat(getComputedStyle($('.stage')).rowGap)
+    expect(Math.round(foot.top - last.bottom)).toBe(Math.round(gap))
+    // Nowhere near the floor.
+    expect(foot.bottom).toBeLessThan($('.lvlbar').getBoundingClientRect().top - 100)
+  })
+
+  it('docks on the level bar on a short window', async () => {
+    await page.viewport(1100, 600)
+    // The stage frame's chrome, which is what lifts the dock onto the bar.
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await render(<Foot rows={9} />)
+      await settle(600)
+      const foot = $('.stage__foot').getBoundingClientRect()
+      expect(foot.bottom).toBeLessThanOrEqual($('.lvlbar').getBoundingClientRect().top + 1)
+      expect(foot.top).toBeGreaterThan(0)
+    } finally {
+      delete document.documentElement.dataset.chrome
+      await page.viewport(1100, 800)
+    }
+  })
+
+  it('starts a stage with no side at the top too', async () => {
+    await render(<Foot side={false} />)
+    await settle(600)
+    expect($('.screen.desk-run')).toBeNull()
+    expect($('.stage__head').getBoundingClientRect().top).toBeLessThan(80)
+  })
+})
+

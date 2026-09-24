@@ -359,6 +359,10 @@ export default function AnalyzerScreen({ session }) {
     function onKey(e) {
       const handled = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', ' ']
       if (!handled.includes(e.key)) return
+      // Not under a dialog -- the deck picker's ↑/↓ walked the Passage
+      // behind it -- and not on a chord: Alt/⌘+← is the browser's Back
+      // (plan 123).
+      if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
       const el = document.activeElement
       const tag = el?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA' || el?.isContentEditable) return
@@ -881,7 +885,10 @@ export default function AnalyzerScreen({ session }) {
            Passage is one click from the field it would be typed in
            again, in the column every desk screen keeps its companion. */
         <div className="desk-intake">
-          <div className="desk-intake__main">{intake}</div>
+          {/* The notices stand under the intake, not after the grid,
+              where a long history column pushed "Analysis failed" below
+              the fold (plan 123). The live region stays below. */}
+          <div className="desk-intake__main">{intake}<Notices notices={notices} region={false} /></div>
           {/* The grab's walkthrough takes the column while it is open
               (plan 120), the history back on its ✕ or Esc. */}
           {tutorial && source === 'video' ? (
@@ -895,7 +902,7 @@ export default function AnalyzerScreen({ session }) {
         </div>
       ) : intake)}
 
-      <Notices notices={notices} announcement={announcement} t={t} />
+      <Notices notices={notices} announcement={announcement} t={t} lines={!(wide && !showResult)} />
 
       {/* History, under the intake: a recent Passage is one tap from the
           field, and a row reopens it on the platform it came from. */}

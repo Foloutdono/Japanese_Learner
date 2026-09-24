@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { GUIDES } from './guides'
+import { GUIDES, DESK_ORDER, deskStops } from './guides'
 import { TAB_IDS } from '../../config/tabs'
 import en from '../../locales/en/index.js'
 import fr from '../../locales/fr/index.js'
@@ -60,5 +60,33 @@ describe('the guide registry', () => {
         }
       }
     }
+  })
+})
+
+// ── 机 — what the desk prints (plan 123) ──
+// The desk reads guide<Key>Desk where a stop has one. Whatever it
+// prints must be worded for a pointer: four notes said "tap" there, and
+// two of them pointed at a thing the desk had already opened.
+describe('the guide on the desk', () => {
+  const printed = (t, key) => t[`guide${key}Desk`] ?? t[`guide${key}`]
+  it('says tap nowhere the desk prints', () => {
+    for (const stops of Object.values(GUIDES)) {
+      for (const stop of stops) {
+        for (const t of [en, fr]) expect(printed(t, stop.key), stop.key).not.toMatch(/\btap|touchez/i)
+      }
+    }
+    for (const t of [en, fr]) {
+      for (const [key, text] of Object.entries(t)) {
+        if (/^ride[A-Za-z]*Desk$/.test(key)) expect(text, key).not.toMatch(/\btap|touchez/i)
+      }
+    }
+  })
+
+  it('walks a gate in a desk order made of its own stops, every one', () => {
+    for (const [gate, order] of Object.entries(DESK_ORDER)) {
+      expect([...order].sort(), gate).toEqual(GUIDES[gate].map(s => s.anchor).sort())
+      expect(deskStops(gate).map(s => s.anchor)).toEqual(order)
+    }
+    expect(deskStops('learn')).toBe(GUIDES.learn)
   })
 })

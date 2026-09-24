@@ -95,7 +95,7 @@ describe('a lesson\'s compare row on the desk', () => {
     expect(side).not.toBeNull()
     expect($('.gl--gate')).not.toBeNull()
     // The session panel stands in the side (its note, before any reveal);
-    // this run's figures are on the floor since plan 122.
+    // this run's figures are on the floor since plan 124.
     expect(side.querySelector('.desk-run__note')).not.toBeNull()
     expect($('.lvlbar .desk-tally')).not.toBeNull()
 

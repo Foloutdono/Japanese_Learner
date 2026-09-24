@@ -54,4 +54,28 @@ describe('the guide at 390×844', () => {
     expect(rect(note).bottom).toBeLessThanOrEqual(rect(document.querySelector('.guide__spot')).top + 1)
     expect(rect(note).top).toBeGreaterThanOrEqual(0)
   })
+
+  // Plan 123: the desk's order, keys and anchor-centred width are the
+  // desk's alone.
+  it('walks Today in the phone\'s order, by its buttons, at the phone\'s width', async () => {
+    await render(
+      <LangProvider>
+        {['hud.level', 'hud.status', 'hud.pass', 'today.strip', 'today.gate', 'tabbar'].map(a => (
+          <div key={a} data-guide={a} style={{ height: 40 }}>{a}</div>
+        ))}
+        <Guide gate="today" onEnd={() => {}} />
+      </LangProvider>
+    )
+    await settle(200)
+    expect(document.querySelector('.guide').dataset.stop).toBe('hud.level')
+    const note = document.querySelector('.guide-callout--live')
+    expect(note.style.width).toBe('')
+    expect(note.style.left).toBe('')
+    expect(document.querySelector('.guide .desk-kbd')).toBeNull()
+    expect(document.querySelector('[aria-keyshortcuts]')).toBeNull()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }))
+    await settle()
+    expect(document.querySelector('.guide').dataset.stop).toBe('hud.level')
+  })
 })
+

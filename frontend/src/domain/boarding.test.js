@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import {
-  LINES, approx, axisLabel, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
-  kanaKnownCount, kanjiThrough, levelForKana, linesOrAll, minuteAtFraction, minutesToTime,
+  LINES, approx, axisLabel, boardingDraft, bucketFor, clampDeparture, dayFraction, goalStops, jlptFor,
+  kanaKnownCount, kanjiThrough, levelAnswers, levelForKana, linesOrAll, minuteAtFraction, minutesToTime,
   planFigures, stopsAhead, timeToMinutes, toggleLine,
 } from './boarding'
 
@@ -162,5 +162,24 @@ describe('the plan', () => {
     expect(axisLabel(500)).toBe('500')
     expect(axisLabel(1000)).toBe('1k')
     expect(axisLabel(1500)).toBe('1.5k')
+  })
+})
+
+// Plan 122: the level-list answer, committed by BoardingFlow and priced
+// by the desk's side before Continue through the same function.
+describe('the level answer', () => {
+  it('sets what afterLevel always set', () => {
+    expect(levelAnswers('novice', 'none')).toEqual({ levelChoice: 'novice', jlpt: 'N5', goal: 'N5' })
+    expect(levelAnswers('novice', 'both')).toEqual({ levelChoice: 'novice', jlpt: 'N5', goal: 'N5' })
+    expect(levelAnswers('N5', 'both')).toEqual({ levelChoice: 'N5', jlpt: 'N5', goal: 'N4' })
+    expect(levelAnswers('N3', 'both')).toEqual({ levelChoice: 'N3', jlpt: 'N3', goal: 'N2' })
+    expect(levelAnswers('N1', 'both')).toEqual({ levelChoice: 'N1', jlpt: 'N1', goal: null })
+  })
+
+  it('drafts a picked level before Continue, and nothing on any other question', () => {
+    const answers = { kana: 'both', levelChoice: 'N3', jlpt: null, goal: null, rhythm: 10 }
+    expect(boardingDraft(answers, 'level')).toEqual({ ...answers, jlpt: 'N3', goal: 'N2' })
+    expect(boardingDraft(answers, 'goal')).toBe(answers)
+    expect(boardingDraft({ ...answers, levelChoice: null }, 'level').goal).toBeNull()
   })
 })

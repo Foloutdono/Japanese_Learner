@@ -15,6 +15,8 @@ import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../co
 import { PASS_PLATFORMS, SOURCES } from '../domain/paywall'
 import { getAllSections } from '../config/tabs'
 import { useCredits } from '../stores/credits'
+import { EnterKey } from '../components/chrome/DeskKeys'
+import { useDesk } from '../hooks/useDesk'
 
 // ── 試乗 — the reading ride (plan 099) ───────────────────────────
 // The second half of the lesson, on the reading stage: one curated N5
@@ -40,6 +42,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const credits = useCredits()
+  const desk = useDesk()
 
   const [sentence, setSentence] = useState(given)
   const [failed, setFailed] = useState(false)
@@ -149,7 +152,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   const callouts = {
     read:    { anchor: 'ride.sentence', place: 'top',   text: t.rideReadFront },
     type:    { anchor: 'ride.answer',   place: 'above', text: t.rideReadType },
-    measure: { anchor: 'ride.rate',     place: 'above', text: t.rideReadMeasure },
+    measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
   const callout = sentence && callouts[step]
 
@@ -207,7 +210,9 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
           <div className="ride__done-air" aria-hidden="true" />
           <div className="ride__done-foot">
             <OfferButton source={SOURCES.RIDE} className="pw-open--quiet" />
-            <Continue label={t.brdEnter} onClick={() => finish(false)} disabled={busy} data-action="enter" />
+            <Continue keys label={t.brdEnter} onClick={() => finish(false)} disabled={busy} data-action="enter" />
+            {/* 机 (plan 122): Enter goes on, as the key printed says. */}
+            <EnterKey onEnter={() => finish(false)} disabled={busy} />
           </div>
         </div>
       )}

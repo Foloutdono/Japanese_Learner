@@ -222,3 +222,58 @@ class LemmaSpellingTests(unittest.TestCase):
         level, entry, raw_id, n = resolve_compound(morphemes, 0)
         self.assertEqual(raw_id, "vocab_N5_一日_いちにち")
         self.assertEqual(n, 2)
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "fugashi/unidic-lite not installed")
+class FoldedSpellingReadingTests(unittest.TestCase):
+    """A spelling plan 112 folded into another card (vocab_renames
+    .FOLDED_FORMS) is that word READ AS FOLDED. The same written form
+    is often another word read another way, and the lowest-level
+    candidate used to win regardless: 彼の badged あの ("that") in 44 of
+    the app's own sentences where it is 彼 + の ("his"), 今日は badged
+    こんにちは in 49, 何時 read なんじ "what time" badged いつ "when"."""
+
+    def _badges(self, sentence: str) -> dict[str, str]:
+        from study.card_lookup import find_segments_in_text
+        return {s["text"]: s["raw_id"] for s in find_segments_in_text(sentence) if s["type"] == "vocab"}
+
+    def test_his_opinion_is_not_that_opinion(self) -> None:
+        from study.analysis import analyze_local
+        sentence = "私は彼の意見に賛成です。"
+        badges = self._badges(sentence)
+        self.assertEqual(badges.get("彼"), "vocab_N4_彼_かれ")
+        self.assertNotIn("vocab_N5__あの", badges.values())
+        tokens = analyze_local(sentence)["tokens"]
+        kare = next(t for t in tokens if t["surface"] == "彼")
+        self.assertEqual(kare["vocab_match"]["raw_id"], "vocab_N4_彼_かれ")
+        self.assertNotIn("vocab_N5__あの", {(t["vocab_match"] or {}).get("raw_id") for t in tokens})
+
+    def test_a_fold_answers_only_for_its_own_reading(self) -> None:
+        for word, other, card in (
+            ("何時", "なんじ", "vocab_N5__いつ"),
+            ("二十", "にじゅう", "vocab_N5_二十歳_はたち"),
+            # UniDic's lemma for the いかん of 〜いかんによらず is 如何.
+            ("如何", "いかん", "vocab_N5__いかが"),
+        ):
+            with self.subTest(word=word):
+                hit = resolve_lemma(word, other)
+                self.assertNotEqual(hit and hit[2], card)
+                self.assertEqual(resolve_lemma(word, card.rsplit("_", 1)[1])[2], card)
+        # No reading, nothing to vouch for the fold.
+        self.assertIsNone(resolve_lemma("彼の", ""))
+
+    def test_the_scanner_merges_no_fold_across_a_particle(self) -> None:
+        # こんな所で is "in a place like this": ところ + で reads the same
+        # as the conjunction ところで, so the reading cannot refuse it --
+        # the particle does, as resolve_compound's never crosses one.
+        self.assertEqual(self._badges("今日は雨です。").get("今日"), "vocab_N5_今日_きょう")
+        badges = self._badges("こんな所で会うとは、驚いた。")
+        self.assertEqual(badges.get("所"), "vocab_N5_所_ところ")
+        self.assertNotIn("所で", badges)
+
+    def test_the_scanner_merges_a_fold_read_as_folded(self) -> None:
+        # 再来 + 年 read さらいねん is the card さ来年 took in, and the
+        # joined reading picks between the cards one form holds, as
+        # resolve_compound's does: 一日おきに is いちにち, not ついたち.
+        self.assertEqual(self._badges("再来年日本に行きます。").get("再来年"), "vocab_N5_さ来年_さらいねん")
+        self.assertEqual(self._badges("一日おきに走っています。").get("一日"), "vocab_N5_一日_いちにち")

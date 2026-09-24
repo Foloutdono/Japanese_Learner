@@ -122,6 +122,9 @@ describe('a radical\'s page beside the index', () => {
     expect($('.desk-split__list .stroke-rail__key[aria-current="true"]').textContent).toBe('4')
     expect(openTile()).toHaveLength(1)
     expect(openTile()[0].querySelector('.radical-tile__char').textContent).toBe('水')
+    // Each tile is a link to its radical's page (plan 123), as a split's rows are.
+    expect(openTile()[0].getAttribute('href')).toBe('/learn/kanji/radical/85')
+    expect($$('.desk-split__list .radical-tile').every(a => a.tagName === 'A' && /^\/learn\/kanji\/radical\/\d+$/.test(a.getAttribute('href')))).toBe(true)
     const [open, other] = [openTile()[0], $('.desk-split__list .radical-tile:not([aria-current])')]
     expect(getComputedStyle(open).borderColor).not.toBe(getComputedStyle(other).borderColor)
     // The page is the phone's lesson: the plate, the door, the platforms.

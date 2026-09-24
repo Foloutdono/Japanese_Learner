@@ -1,4 +1,5 @@
 import { useLang } from '../../LangContext'
+import { useDesk } from '../../hooks/useDesk'
 import { BackChevron } from './icons'
 
 // ── The frame every boarding screen stands in (plan 075) ─────────
@@ -67,11 +68,18 @@ export function BoardAir() {
   return <div className="brd__air" aria-hidden="true" />
 }
 
-/** The one filled action: gold, full width, docked. */
-export function Continue({ label, onClick, disabled = false, ...rest }) {
+/** The one filled action: gold, full width, docked. `keys` is the
+    desk's (plan 122): Enter presses it -- hooks/useBoardKeys in the
+    boarding, EnterKey on the Welcome and at a ride's end -- so it
+    prints the key and names it. Only where Enter really does. */
+export function Continue({ label, onClick, disabled = false, keys = false, ...rest }) {
+  const { t } = useLang()
+  const desk = useDesk()
+  const printed = keys && desk
   return (
-    <button type="button" className="btn-depart" onClick={onClick} disabled={disabled} {...rest}>
+    <button type="button" className="btn-depart" onClick={onClick} disabled={disabled} aria-keyshortcuts={printed ? 'Enter' : undefined} {...rest}>
       <span className="btn-depart__jp">{label}</span>
+      {printed && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
       <span className="btn-depart__go" aria-hidden="true">▶</span>
     </button>
   )

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Sheet } from '../chrome/Sheet'
 import { PlusIcon } from '../ui/Icons'
+import { composing } from '../../lib/keyGuards'
 
 // Which deck to mine into, when none is remembered yet for this kind.
 // Only ever offered decks of the matching type (see useMining.js's
@@ -28,7 +29,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = 
   }
 
   return (
-    <Sheet open onClose={onClose} jp={word} cap={t.chooseDeck} label={t.chooseDeck}>
+    <Sheet open onClose={onClose} jp={word} cap={t.chooseDeck} label={t.chooseDeck} dismiss>
       <div className="surface picker">
         {decks.length === 0 && (
           <p className="hint picker__empty">{t.noDeckOfType}</p>
@@ -66,7 +67,7 @@ export function DeckPicker({ decks, t, onClose, onSelect, onCreate, currentId = 
               className="field"
               value={name}
               onChange={e => setName(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && submitCreate()}
+              onKeyDown={e => e.key === 'Enter' && !composing(e) && submitCreate()}
               placeholder={t.createDeck}
               aria-label={t.createDeck}
               autoFocus

@@ -22,14 +22,24 @@ aligner does -- an on-reading is written in katakana in the deck and
 appears in hiragana in a word, a kun-reading's okurigana stays outside
 the kanji (生きる files under い.きる by its stem い), and a non-initial
 element may voice or geminate (日 read び, 学 read がっ). A word whose
-slice the aligner could not isolate (生活 comes back as one run,
-せいかつ) is filed under no reading: it still appears in the ledger, last,
-but never under a reading it cannot vouch for.
+slice the aligner could not isolate is filed under no reading -- almost
+always a reading that belongs to the whole word, 熟字訓 or 当て字 (今朝
+comes back as one run, けさ, and け is no reading of 今). It may still
+appear in the ledger, but only once every filed reading has run out of
+words, and never under a reading it cannot vouch for.
+
+── Words written in kana ──────────────────────────────────────
+A word JMdict says is written in kana in every sense (火傷 やけど,
+不山戯る ふざける) is the weakest example a kanji can have: the reader
+will meet the word, but not the character in it. Such a word goes after
+the others of its group rather than out of it, because for some readings
+it is the only word the deck has.
 """
 from collections import defaultdict
 
 from content.kanji_data import KANJI_BY_LEVEL
 from content.vocab_data import VOCAB_BY_LEVEL
+from content.vocab_extras import is_written_in_kana
 from study.furigana import align_deck, is_kanji, reading_stem, reading_token_for
 from translations import get_meaning
 from translations.fr.vocab_fr import VOCAB_FR
@@ -112,9 +122,10 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
     Order inside a bucket is most-common level first, and multi-character
     compounds before the bare single-character word, since a kanji's
     entry should show how it combines with others rather than just
-    repeat itself. Buckets are keyed by the deck's own reading token
-    (see reading_token_for), with None for a word the aligner could not
-    place.
+    repeat itself -- and, before either, written in kanji before written
+    in kana (module docstring). Buckets are keyed by the deck's own
+    reading token (see reading_token_for), with None for a word the
+    aligner could not place.
     """
     tokens = reading_tokens(char, packed)
     candidates = _KANJI_TO_VOCAB.get(char, [])
@@ -141,6 +152,9 @@ def _buckets(char: str, lang: str, packed: str | None = None) -> tuple[list[str]
         surface = reading_of(char, furigana)
         token = reading_token_for(surface, tokens, first=kanji.find(char) == 0) if surface else None
         buckets[token].append(entry)
+    # Stable: the level and compound order above holds on either side.
+    for words in buckets.values():
+        words.sort(key=lambda e: is_written_in_kana(e["kanji"], e["kana"]))
     return tokens, buckets
 
 
@@ -196,22 +210,27 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
                上がる are both あ, and 生まれる under う.まれる and うま.れる
                are one sound, so okurigana variants of one reading share
                a slot rather than each taking one. Words the aligner could
-               not place come last -- a word that cannot say which reading
-               it demonstrates is the weakest example, not a wrong one. A
-               kanji with one reading is unaffected: one bucket, the same
-               order it always had.
+               not place come after every placed word, not merely after
+               each round of them -- a word that cannot say which reading
+               it demonstrates is the weakest example, not a wrong one.
+               It used to take the first free slot of the first round,
+               which is how 今朝 (けさ) came before 今週 and 不山戯る before
+               火山. A kanji with one reading is unaffected: one bucket,
+               the same order it always had.
     """
     tokens, buckets = _buckets(char, lang, packed)
     readings = [{"reading": tok, "words": buckets[tok][:MAX_WORDS]} for tok in tokens]
 
     # One queue per stem, in the deck's order; a stem's queue is its
     # tokens' buckets back to back, so the ledger never spends two slots
-    # on one sound. The unplaced words are a queue of their own, last.
-    queues: dict[str | None, list[dict]] = {}
+    # on one sound, then re-sorted so a word written in kana from one
+    # token does not stand before a written one from the next.
+    queues: dict[str, list[dict]] = {}
     for tok in tokens:
         if buckets[tok]:
             queues.setdefault(reading_stem(tok), []).extend(buckets[tok])
-    queues[None] = buckets[None]
+    for words in queues.values():
+        words.sort(key=lambda e: is_written_in_kana(e["kanji"], e["kana"]))
 
     examples: list[dict] = []
     depth = 0
@@ -227,4 +246,6 @@ def kanji_words(char: str, lang: str, packed: str | None = None) -> dict:
         if not added:
             break
         depth += 1
+    # The unplaced words, only in the slots the placed ones left.
+    examples.extend(buckets[None][:MAX_WORDS - len(examples)])
     return {"readings": readings, "examples": examples}

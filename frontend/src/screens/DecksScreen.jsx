@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -13,6 +14,8 @@ import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
 import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
+import { composing } from '../lib/keyGuards'
+import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -55,6 +58,9 @@ export default function DecksScreen({ session }) {
   const [query, setQuery]       = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const searchRef = useRef(null)
+  // The deck's type, one tab stop walked with the arrows on the desk
+  // (plan 123), where the form is a dialog.
+  const onWalkTypes = useRadioWalk(desk)
 
   function fetchDecks() {
     setLoading(true)
@@ -81,9 +87,23 @@ export default function DecksScreen({ session }) {
       .then(r => r.json())
       .then(deck => {
         if (deck?.error || deck?.detail) return
+        // 机 (plan 123): the desk keeps the new deck's dialog because
+        // it ends by leaving the shelf for the deck it made -- so it
+        // does: the deck's page, its card form open in the side.
+        if (desk) {
+          setCreating(false)
+          setNewName('')
+          navigate(`/learn/decks/${deck.id}`, { state: { deck: { ...deck, card_count: 0, role: deck.role ?? 'owner' }, add: true } })
+          return
+        }
         setDecks(prev => [{ ...deck, card_count: 0 }, ...prev])
         setNewName('')
         setCreating(false)
+        // The new deck must be on the shelf it was made from: a type
+        // chip or a query still in force would filter it out, and the
+        // form would close on nothing (plan 123).
+        setQuery('')
+        setTypeFilter('all')
       })
       .catch(() => {})
   }
@@ -125,14 +145,14 @@ export default function DecksScreen({ session }) {
       <input
         value={newName}
         onChange={e => setNewName(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && createDeck()}
+        onKeyDown={e => e.key === 'Enter' && !composing(e) && createDeck()}
         placeholder={t.deckNamePlaceholder}
         autoFocus
         className="field"
         aria-label={t.deckNamePlaceholder}
       />
-      <div className="type-list" role="radiogroup" aria-label={t.createDeck}>
-        {DECK_TYPES.map(dt => {
+      <div className="type-list" role="radiogroup" aria-label={t.createDeck} onKeyDown={onWalkTypes}>
+        {DECK_TYPES.map((dt, i) => {
           const on = newType === dt.value
           return (
             <button
@@ -140,6 +160,7 @@ export default function DecksScreen({ session }) {
               type="button"
               role="radio"
               aria-checked={on}
+              tabIndex={radioTab(desk, i, DECK_TYPES.findIndex(d => d.value === newType))}
               className={`type-row${on ? ' type-row--on' : ''}`}
               onClick={() => { playUi('click-mode-selection'); setNewType(dt.value) }}
             >
@@ -171,7 +192,8 @@ export default function DecksScreen({ session }) {
       <div className="decks-doors">
         <Chip
           aria-pressed={undefined}
-          onClick={() => { playUi('click-mode-selection'); navigate('/learn/decks/library') }}
+          to={desk ? '/learn/decks/library' : undefined}
+          onClick={() => { playUi('click-mode-selection'); if (!desk) navigate('/learn/decks/library') }}
         >
           <BooksIcon size={14} />{t.libraryBrowse}
         </Chip>
@@ -236,12 +258,17 @@ export default function DecksScreen({ session }) {
             const dt = deckTypeOf(deck.type, t)
             const n = due.get(String(deck.id)) ?? 0
             return (
-              <button
+              <SplitRow
                 key={deck.id}
-                type="button"
+                // 机 (plan 123): a deck is a place, so on the desk it is
+                // a link -- the middle click and "open in a new tab" work,
+                // the page rebuilds from its id. Pushed: the shelf is left.
+                to={desk ? `/learn/decks/${deck.id}` : undefined}
+                push
+                state={{ deck }}
                 className="platform-card deck-card"
                 style={{ '--rail': dt.color, '--line-color': dt.color }}
-                onClick={() => { playUi('click-mode-selection'); navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
+                onClick={() => { playUi('click-mode-selection'); if (!desk) navigate(`/learn/decks/${deck.id}`, { state: { deck } }) }}
               >
                 <span className="platform-card__lead deck-card__lead">
                   <span className="wmap-roundel deck-card__glyph" lang="ja" aria-hidden="true">{dt.glyph}</span>
@@ -262,13 +289,13 @@ export default function DecksScreen({ session }) {
                   <span className="deck-card__count"><b className="deck-card__fig">{deck.card_count ?? 0}</b><span className="deck-card__unit">{t.cards}</span></span>
                 </span>
                 <span className="platform-card__go" aria-hidden="true">▶</span>
-              </button>
+              </SplitRow>
             )
           })}
         </div>
       )}
       {desk && (
-        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck}>
+        <Sheet open={creating} onClose={() => setCreating(false)} jp="教材" cap={t.createDeck} label={t.createDeck} dismiss>
           {createForm}
         </Sheet>
       )}

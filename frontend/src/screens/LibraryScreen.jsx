@@ -12,6 +12,7 @@ import { LibraryCard } from '../components/decks/LibraryCard'
 import { deckTypes } from '../components/decks/deckTypes'
 import { BooksIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
+import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import { PublicDeckPane } from '../components/decks/PublicDeckPage'
 import PublicDeckScreen from './PublicDeckScreen'
@@ -85,6 +86,11 @@ function LibraryShelf({ session, open }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const desk = useDesk()
+  // On the desk the shelf beside a deck is one tab stop, walked with
+  // ↑/↓ (plan 123): 24 decks a page, more with More, were a tab stop each.
+  const onShelfWalk = useListWalk(desk)
+  const shelfRef = useRef(null)
+  useFollowFocus(shelfRef, open, desk)
 
   const [decks, setDecks]     = useState([])
   const [total, setTotal]     = useState(0)
@@ -294,10 +300,11 @@ function LibraryShelf({ session, open }) {
                 )
               )}
               {settled && decks.length > 0 && (
-                <div className="platform-grid">
-                  {decks.map(deck => (
+                <div className="platform-grid" ref={shelfRef} onKeyDown={onShelfWalk} aria-keyshortcuts={desk ? WALK_KEYS : undefined}>
+                  {decks.map((deck, i) => (
                     <LibraryCard key={deck.id} deck={deck} t={t} open={String(deck.id) === String(open)}
-                      to={`/learn/decks/library/${deck.id}`} />
+                      to={`/learn/decks/library/${deck.id}`}
+                      tabIndex={(listed ? String(deck.id) === String(open) : i === 0) ? 0 : -1} />
                   ))}
                 </div>
               )}

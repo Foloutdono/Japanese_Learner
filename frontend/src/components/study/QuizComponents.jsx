@@ -9,9 +9,9 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
-import { dialogOpen } from '../../lib/dialogOpen'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
+import { composing, runKey } from '../../lib/keyGuards'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -176,9 +176,7 @@ export function MCQGrid({ choices, correct, selected, answered, onAnswer, format
   useEffect(() => {
     if (answered) return
     const handler = e => {
-      if (e.repeat || dialogOpen()) return
-      const tag = e.target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!runKey(e)) return
       const idx = CHOICE_KEY_INDEX[e.key]
       if (idx !== undefined && idx < choices.length) {
         handleAnswer(choices[idx])
@@ -227,7 +225,7 @@ export function TypeInput({
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter') { playClick(); onSubmit() } }}
+        onKeyDown={e => { if (e.key === 'Enter' && !composing(e)) { playClick(); onSubmit() } }}
         placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus
@@ -598,7 +596,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 // in index.css) — the caller is expected to render this as a child of
 // a `position: relative` card (PromptCard/.flashcard), not out in the
 // surrounding page flow.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   // Same as Flashcard's own reset — a caller reusing this across cards
   // (passing the card's id as resetKey) shouldn't carry a dictionary
   // sheet left open from the previous card into the next. Handled by
@@ -613,6 +611,7 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
       dictKana={dictKana}
       dictCategory={dictCategory}
       dictId={dictId}
+      dictLabel={dictLabel}
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
@@ -620,7 +619,7 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
   )
 }
 
-function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   const [showDictionary, setShowDictionary] = useState(false)
   // On the desk, inside a run with a side column (plan 114), the entry
   // is docked beside the card the moment the card is revealed, and the
@@ -636,9 +635,11 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
   const dockNow = docked && Boolean(canLookUp)
   useEffect(() => {
     if (!dockNow) return
-    const token = publishEntry({ term: dictTerm, kana: dictKana, category: dictCategory, id: dictId, session })
+    // `label` is what the run's misses print for an entry reached by id
+    // alone (a grammar point's pattern; plan 123).
+    const token = publishEntry({ term: dictTerm, kana: dictKana, category: dictCategory, id: dictId, label: dictLabel, session })
     return () => withdrawEntry(token)
-  }, [dockNow, dictTerm, dictKana, dictCategory, dictId, session])
+  }, [dockNow, dictTerm, dictKana, dictCategory, dictId, dictLabel, session])
 
   // Stable so DictionaryLookupSheet's useDialog doesn't re-run its
   // focus-on-open effect (and steal focus) on every render of this
@@ -730,7 +731,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
 //
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state — done by remounting
@@ -748,6 +749,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
       dictKana={dictKana}
       dictCategory={dictCategory}
       dictId={dictId}
+      dictLabel={dictLabel}
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
@@ -755,7 +757,7 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
   )
 }
 
-function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, session, sound, onReplaySound }) {
+function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   const desk = useDesk()
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
@@ -811,10 +813,12 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
   useEffect(() => { clickRef.current = handleClick })
   useEffect(() => {
     const handler = e => {
-      if (e.repeat || dialogOpen()) return
-      const tag = e.target?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!runKey(e)) return
       const key = e.key.toLowerCase()
+      // A control focused in the run's side (a word row in the docked
+      // entry, a miss) keeps its own Space: it opens, and the card
+      // stays as it is (plan 123).
+      if (key === ' ' && /^(BUTTON|A)$/.test(e.target?.tagName ?? '') && e.target.closest('.desk-run__side')) return
       if (key === ' ' || ['z', 'q', 's', 'd'].includes(key)) {
         e.preventDefault()
         clickRef.current()
@@ -824,8 +828,22 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
     return () => window.removeEventListener('keydown', handler)
   }, [])
 
+  // 机 (plan 123): a drag that selects a word on the card ends in a
+  // click, and that click turned the card -- remounting the face and
+  // the selection with it, so nothing on a card could be copied. On the
+  // desk a click that leaves text selected inside the card is a
+  // selection, not a turn. (A double-click's first click still turns
+  // it: telling the two apart would delay every turn.)
+  const onCardClick = desk
+    ? e => {
+      const picked = window.getSelection?.()
+      if (picked && !picked.isCollapsed && e.currentTarget.contains(picked.anchorNode)) return
+      handleClick()
+    }
+    : handleClick
+
   return (
-    <div onClick={handleClick} className="flashcard">
+    <div onClick={onCardClick} className="flashcard">
       <RevealActions
         t={t}
         revealed={revealed}
@@ -834,6 +852,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         dictKana={dictKana}
         dictCategory={dictCategory}
         dictId={dictId}
+      dictLabel={dictLabel}
         session={session}
         sound={sound}
         onReplaySound={onReplaySound}

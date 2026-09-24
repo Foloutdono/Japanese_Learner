@@ -34,11 +34,16 @@ import { Loading } from '../ui/Loading'
 // work in progress, and the three dots sit beside its text (plan 067)
 // — the dots are decoration here, not a second live region: the
 // region below already announces the work.
+//
+// `lines` and `region` split the two halves (plan 123): on the desk the
+// banners stand under the intake, beside a history column that can run
+// past the fold, while the one live region stays where it always is --
+// moved with them, it would mount at the moment its text arrived.
 // eslint-disable-next-line no-unused-vars
-export function Notices({ notices = [], announcement, t }) {
+export function Notices({ notices = [], announcement, t, lines = true, region = true }) {
   return (
     <>
-      {notices.map(n => (
+      {lines && notices.map(n => (
         <div
           key={n.id}
           className={`anl-panel anl-notice-line anl-notice-line--${n.tone}`}
@@ -47,7 +52,7 @@ export function Notices({ notices = [], announcement, t }) {
           {n.text}
         </div>
       ))}
-      <p className="anl-sr-only" role="status" aria-live="polite">{announcement ?? ''}</p>
+      {region && <p className="anl-sr-only" role="status" aria-live="polite">{announcement ?? ''}</p>}
     </>
   )
 }

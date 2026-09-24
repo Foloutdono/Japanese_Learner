@@ -49,6 +49,8 @@ export default function StatsScreen({ session }) {
   // The week the retention line is being asked about; null is the
   // latest ridden week. Reset with the report, never carried over.
   const [week, setWeek] = useState(null)
+  // The week under the mouse on the desk, null off the line (plan 123).
+  const [preview, setPreview] = useState(null)
 
   useEffect(() => {
     let live = true
@@ -56,7 +58,7 @@ export default function StatsScreen({ session }) {
       apiJsonWithTimeout('/api/stats', session),
       apiJsonWithTimeout('/api/stats/report', session),
     ])
-      .then(([s, r]) => { if (live) { setStats(s); setReport(r); setWeek(null) } })
+      .then(([s, r]) => { if (live) { setStats(s); setReport(r); setWeek(null); setPreview(null) } })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -78,8 +80,9 @@ export default function StatsScreen({ session }) {
   const nothingYet = loaded && retention.current === null && strength.total === 0
 
   // The head prints the asked week — this week unless a stop was
-  // pressed — and the delta stays what it is: the whole line's drift.
-  const askedIndex = week ?? retention.currentIndex
+  // pressed, or on the desk the one under the mouse (plan 123) — and the
+  // delta stays what it is: the whole line's drift.
+  const askedIndex = preview ?? week ?? retention.currentIndex
   const asked = askedIndex === null ? null : retention.weeks[askedIndex]
   const weekFmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
   const weekLabel = asked ? weekFmt.format(new Date(`${asked.start}T12:00:00`)) : ''
@@ -109,8 +112,9 @@ export default function StatsScreen({ session }) {
           weeks={retention.weeks}
           currentIndex={retention.currentIndex}
           firstIndex={retention.firstIndex}
-          selected={week}
+          selected={preview ?? week}
           onSelect={setWeek}
+          onPreview={desk ? setPreview : undefined}
           fit={desk}
         />
       </section>

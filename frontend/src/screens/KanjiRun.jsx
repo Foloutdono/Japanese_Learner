@@ -305,7 +305,8 @@ export default function KanjiRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
-      side={<SessionPanel done={done} />}
+      done={done}
+      side={error && !card ? null : <SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >
         <DeckProgress stats={progress} />

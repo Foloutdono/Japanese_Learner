@@ -79,6 +79,7 @@ export default function AccountStep({ onCreated, onSkip, onSignIn, onLeaveForAut
       </div>
       <div className="brd__foot">
         <Continue
+          keys
           label={t.brdAccountCreate}
           onClick={claim.submit}
           disabled={!claim.filled || claim.busy || !!claim.done}

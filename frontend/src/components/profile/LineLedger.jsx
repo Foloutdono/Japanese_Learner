@@ -1,6 +1,8 @@
 import { getSections } from '../../config/tabs'
 import { stationFor } from '../../config/stations'
 import { TRACKED_LINES, lineTotals } from '../../domain/lineProgress'
+import { SplitRow } from '../selection/SplitRow'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── The ride ledger — how far down each line you have ridden ────
 // The map on the Learn tab draws the four SRS lines with a train on
@@ -37,7 +39,9 @@ export function LineMark({ section }) {
   )
 }
 
+// A line is a place: on the desk (plan 123) its row is a link.
 export function LineLedger({ stats, t, navigate }) {
+  const desk = useDesk()
   const lines = getSections('learn', t).filter(s => TRACKED_LINES[s.path])
   if (!lines.length) return null
 
@@ -48,12 +52,13 @@ export function LineLedger({ stats, t, navigate }) {
         const { learned, total } = lineTotals(stats, source)
         const pct = total ? Math.round((learned / total) * 100) : 0
         return (
-          <button
-            type="button"
+          <SplitRow
             key={s.path}
+            to={desk ? s.path : undefined}
+            push
             className="pf-line"
             style={{ '--line-color': s.color }}
-            onClick={() => navigate(s.path)}
+            onClick={() => { if (!desk) navigate(s.path) }}
           >
             <LineMark section={s} />
             <span className="pf-line__fig" aria-label={`${learned.toLocaleString()} ${t.mastered}`}>
@@ -63,7 +68,7 @@ export function LineLedger({ stats, t, navigate }) {
             <span className="pf-line__track" aria-hidden="true">
               <span className="pf-line__done" style={{ width: `${pct}%` }} />
             </span>
-          </button>
+          </SplitRow>
         )
       })}
     </div>

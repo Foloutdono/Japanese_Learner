@@ -134,3 +134,41 @@ describe('the shelf’s bar on a phone', () => {
     expect(document.querySelector('.lib-card')).toBeFalsy()
   })
 })
+
+// ── A new deck on a filtered shelf (plan 123) ───────────────────
+// Creating a deck closed the form but left the type chip and the
+// query in force, so a Standard deck made under the Kanji chip was
+// filtered out of the shelf it had just been added to.
+describe('a deck made on a filtered shelf', () => {
+  it('shows the new deck, with the filters cleared', async () => {
+    const posted = []
+    globalThis.fetch.mockImplementation((url, init) => {
+      if (init?.method === 'POST') {
+        posted.push(JSON.parse(init.body))
+        return Promise.resolve(new Response(JSON.stringify({ id: 9, name: 'nouveau', type: 'standard' }), {
+          status: 200, headers: { 'Content-Type': 'application/json' },
+        }))
+      }
+      return Promise.resolve(new Response(JSON.stringify({ decks: DECKS }), {
+        status: 200, headers: { 'Content-Type': 'application/json' },
+      }))
+    })
+    await shelf()
+    const kanji = [...document.querySelectorAll('.console .chip')].find(c => c.textContent.includes('Kanji'))
+    kanji.click()
+    await settle()
+    expect([...document.querySelectorAll('.deck-card .platform-card__title')].map(n => n.textContent)).toEqual(['baeva'])
+    create().click()
+    await settle()
+    const field = document.querySelector('.form .field')
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, 'nouveau')
+    field.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle()
+    document.querySelector('.form .btn-primary').click()
+    await settle(150)
+    expect(posted).toEqual([{ name: 'nouveau', type: 'standard' }])
+    const titles = [...document.querySelectorAll('.deck-card .platform-card__title')].map(n => n.textContent)
+    expect(titles).toContain('nouveau')
+    expect(titles).toHaveLength(5)
+  })
+})

@@ -77,4 +77,25 @@ describe('the test ride at 390×844', () => {
       expect(rect(btn).height).toBeGreaterThanOrEqual(44)
     }
   })
+
+  // Plan 122: the desk docks the card's entry in a side column; a phone
+  // has no side, and looks the word up from the card's own 🔍.
+  it('draws no side, and keeps the look-up on the card', async () => {
+    const screen = await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/ride/cards']}>
+          <Routes>
+            <Route path="/ride/cards" element={<RideRun session={{ access_token: 'tok' }} dryRun cards={CARDS} />} />
+          </Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+    const root = screen.container
+    expect(root.querySelector('.desk-run')).toBeNull()
+    expect(document.querySelector('.desk-run__side')).toBeNull()
+    root.querySelector('.flashcard').click()
+    await settle(120)
+    expect([...root.querySelectorAll('.reveal-action-btn')].some(b => /dictionar|dictionnaire/i.test(b.title))).toBe(true)
+  })
 })

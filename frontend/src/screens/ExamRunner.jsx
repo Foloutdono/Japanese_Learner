@@ -539,6 +539,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
               mode) rather than inventing a third "back"/"next" pair. */}
           <button type="button" className="btn-secondary" disabled={index === 0} onClick={() => jumpTo(index - 1)} aria-keyshortcuts={desk ? 'ArrowLeft' : undefined}>
             <ChevronIcon direction="left" size={14} /> {t.reviewPrev}
+            {desk && <kbd className="desk-kbd" aria-hidden="true">←</kbd>}
           </button>
           <button
             type="button"
@@ -547,9 +548,10 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             aria-pressed={isFlagged}
             aria-label={isFlagged ? t.examUnflag : t.examFlag}
             aria-keyshortcuts={desk ? 'F' : undefined}
-            title={isFlagged ? t.examUnflag : t.examFlag}
+            title={`${isFlagged ? t.examUnflag : t.examFlag}${desk ? ' (F)' : ''}`}
           >
             <FlagIcon size={16} filled={isFlagged} />
+            {desk && <kbd className="desk-kbd" aria-hidden="true">F</kbd>}
           </button>
           <button
             type="button"
@@ -559,6 +561,7 @@ function RunnerScene({ session, examId, exclude, onRetry }) {
             aria-keyshortcuts={desk ? 'ArrowRight' : undefined}
           >
             {t.reviewNext} <ChevronIcon direction="right" size={14} />
+            {desk && <kbd className="desk-kbd" aria-hidden="true">→</kbd>}
           </button>
         </div>
 

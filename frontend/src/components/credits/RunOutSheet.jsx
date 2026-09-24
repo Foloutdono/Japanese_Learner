@@ -30,7 +30,7 @@ export function RunOutSheet() {
   }
 
   return (
-    <Sheet open onClose={leave} jp={t.balanceTitle} label={t.runOutTitle}>
+    <Sheet open onClose={leave} jp={t.balanceTitle} label={t.runOutTitle} initialFocus=".btn-depart">
       <div className="balance">
         <span className="balance__fig balance__fig--out">
           0<span className="balance__unit">{t.creditsUnit}</span>

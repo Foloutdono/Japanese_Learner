@@ -30,7 +30,7 @@ export default function NudgeStep({ time, onAllow, onSkip }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.brdAllow} onClick={onAllow} data-action="allow" />
+        <Continue keys label={t.brdAllow} onClick={onAllow} data-action="allow" />
         <BoardLink onClick={onSkip} data-action="not-now">{t.brdNotNow}</BoardLink>
       </div>
     </>

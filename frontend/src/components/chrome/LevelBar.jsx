@@ -25,7 +25,7 @@ import { RunRecords } from '../study/RunRecords'
 // Rendered before the summary arrives too, at its full height, so the
 // docks above it never move when the figures land.
 //
-// On the desk a card run's floor is the console (plan 122): this bar,
+// On the desk a card run's floor is the console (plan 124): this bar,
 // fixed to the floor of the stage and grown to one row that holds this
 // run's three records at its left (RunRecords, when `records` is on —
 // StudyStage sets it only where the desk stands a side), the rating
@@ -33,7 +33,7 @@ import { RunRecords } from '../study/RunRecords'
 // the progressbar role, not the bar: a progressbar's children are
 // presentational, and the records could not stand inside one. A phone
 // never receives `records`, and its bar is the strip it always was.
-export function LevelBar({ records = false }) {
+export function LevelBar({ records = false, done = false }) {
   const { t } = useLang()
   const summary = useProfileSummary()
   const { gain, clear } = useXpGain(summary)
@@ -44,7 +44,7 @@ export function LevelBar({ records = false }) {
 
   return (
     <div className="lvlbar">
-      {records && <RunRecords />}
+      {records && <RunRecords done={done} />}
       <span className="lvlbar__level" aria-hidden="true">
         {t.levelShort}
         <b className="lvlbar__level-num">{summary?.level ?? ''}</b>

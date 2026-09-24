@@ -191,6 +191,25 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
+- **Wave 28 — 机, the desk's fourth round: 正面口 and 作業** (plans
+  122–123, 2026-09-24, DONE). First contact drawn for a computer (the
+  sign-in beside Board, the boarding beside the journey it builds, the
+  first ride's side, Enter and the digits from the Welcome to the first
+  card), and a workspace that answers a keyboard and a pointer one way
+  everywhere (Esc's owner, one walk for every list, places as links,
+  radios, doors that own their focus, a run's foot under its card, the
+  workspace centred on a wide window), with eleven phone bugs fixed on
+  the way. Its section is near the bottom of this file.
+
+- **Wave 29 — 操作盤, the run's console on the desk** (plan 124,
+  2026-09-25, DONE). A card run's floor on the desk is one console of two
+  rows across the stage: the rating tiles over the level bar, the bar
+  holding this run's three figures beside the fare, the card grown to
+  it; the side is the entry's place, with the misses listed as they
+  happen. Numbered 124 because 122–123 went to wave 28 while it was open.
+  Its section is at the very bottom of this file. The next wave begins
+  at 125.
+
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
@@ -5986,7 +6005,133 @@ Owner steps after deploy:
 Left: the owner accepted the kana as "good for now", and a better kana
 voice is to come (ADR 0020, "Follow-up").
 
-# Wave 28 — 操作盤, the run's console on the desk (plan 122, 2026-09-25)
+---
+
+# Wave 28 — 机, the desk's fourth round: 正面口 and 作業 (plans 122–123, 2026-09-24)
+
+Numbered 122–123 because 121 went to 声 while the audit was open; the
+next wave begins at 124. The owner's word on wave 26 and the plans after
+it: continue to improve it. A read-only audit of main ran seven auditors,
+each followed by a skeptic, then a first-contact design panel and a judge.
+Of 85 findings, 82 survived. It found five things:
+
+- first contact was still a phone: a 640px column from the Welcome to
+  the first card, sign-in a second screen, and no keys in the boarding;
+- shipped desk keys misfired;
+- a run's action sat on the window's floor;
+- the lists beside a page walked four different ways;
+- eleven bugs on the phone too.
+
+The owner's decisions:
+
+- fix the phone bugs with no visible phone change;
+- skip Building on the desk;
+- a level's digit is its own number;
+- above ~1460px the level bar spans the workspace only.
+
+| Plan | What | Status |
+|---|---|---|
+| 122 | 正面口, first contact as a run's frame. **P7** `AuthCard`, `BuildSteps` and `domain/boarding.js`'s `levelAnswers`/`boardingDraft` lifted out, with no visible change. **P8** Enter goes on (`hooks/useBoardKeys.js`, `Continue`'s `keys`, `EnterKey` on the Welcome and the ride's ends). **P9** the boarding centred beside the journey being built and priced, Building skipped, the plan's chart 1:1. **P10** the Welcome with the sign-in beside Board (Log in a ghost), `authMode` opening the side instead of `AuthScreen`, the roll masked and slowed. **P11** the first ride's side, the flip docking the entry. **P12** the digits (`PICK_KEY_DIGIT`: Why 1–6, Kana, Lines, Rhythm, the hours, a level its own number, the kana stop 0) | DONE (2026-09-24) |
+| 123 | 作業, the workspace. **P0** eleven phone bugs, a commit and a phone test each: the cutscene's skip key reaching the card, IME Enter and Esc, run keys taking chords (and AZERTY's 6, Space on a checked clip), the dictionary's and analyser's keys under a dialog, the ＋'s outcome on the next entry, Esc on the offer closing the sheet under it, a new deck hidden by the shelf's filter, Browse's rows out of the keyboard's reach, the analyser's result ring, Back quitting the boarding, Building's line-up running off in French. **P1** keys that misfired: Esc in a docked entry, Enter after a pointer press (`pressedByPointer`), →/← under the deck picker, Esc during the 改札, the level board's Esc, a dock's Esc from a field, Space in the side. **P2** the side tells the truth. **P3** a run's foot follows its card, and the exam's nav docks. **P4** columns that overhang or overstretch. **P5** the workspace centred on a wide window (`--desk-run-inset`), and the level board docked across the side. **P6** Enter and Space through practice. **P13** the guide on its anchor, with → and Enter and no "tap". **P14** the kept dialogs drawn for a desk (`initialFocus`, a row, a ✕), and a new deck landing on its page with the form open. **P15** every list walked one way (`useListWalk`'s `items`, `useGridWalk`). **P16** places are links (`SplitRow`'s `push`, `LeaveTo`, `Chip`'s `to`), and Settings as a split. **P17** radio groups honour their arrows (`useRadioWalk`). **P18** the column's doors (`DeskDock`'s focus contract and roundel ✕, chips that release, the card form docked, Browse walked, focus back from a door). **P19** pointer, copy and printed keys (the retention line's hover, a selection that is not a turn, ruby left out of a copy, focus twins, `stores/escHold.js`, titles, `aria-keyshortcuts`, and a screenshot pasted or dropped into the analyser). **P20** the records, the identity pass and the screenshots | DONE (2026-09-24) |
+
+What changed for a learner on a computer. The After column is what the
+phases' tests hold. The key and Tab counts are counted from the flows,
+not measured by a script.
+
+| Flow | Before | After |
+|---|---|---|
+| Esc after opening a door in a run's docked entry | leaves the run; tally lost | back to the card's entry; a second Esc leaves |
+| Click a Today lane off, then Enter | the lane back on, no departure | departs with the chosen lanes |
+| → with the deck picker open over the dictionary dock | swaps the entry and the add's target | nothing moves |
+| Comprehension: last choice → Next, at 1100×900 / 1920×1080 | 250px / 430px | `--sp-6` + `--sp-3` |
+| Exam Previous/flag/Next at 1280×650 | under the level bar | docked above it |
+| Card-to-side gap at 1920 / 2560 | 460 / 780px | (`--max-w` − `--card-w`)/2 |
+| 20 sentences of reading, translation or dictation | 20 pointer trips | 0 (type, Enter, digit, Enter) |
+| Keyboard-only boarding, novice | ~55 keys | ~18 |
+| Returning learner on the Welcome | link → new screen → field | 0: the sign-in stands beside Board |
+| The plan at 1100×800 | scrolls, chart ×1.76 | no scroll, chart 1:1 |
+| The Welcome's roll at 1440 | clipped mid-window, 3.8 cards a lane | clipped at the work's edges, faded |
+| First ride: look a word up | 🔍 then a dialog | docked on the flip |
+| Esc during the 改札 cutscene | declines the ride | skips the cutscene only |
+| Today's lanes in view at 1280×650 | 3.9 | ~7.9 |
+| The rail's foot at 1280×600 | cut; the rail scrolls | whole; only the gates scroll |
+| Kept dialogs opening focused on the irreversible act | 7 | 0 |
+| Back presses to leave Settings after 7 pages | 7 | 1 |
+| Tabs from an N1 grammar row into its lesson | up to 118 | 2 |
+| Tabs from dictionary search to the dock's ＋ | 51+ | 2 |
+| The level board over the run's side | ~280×95px for 2.4s | docked across the side's top |
+| New deck → its first card's form | 4 acts | 2 |
+| A screenshot into the analyser | save, file dialog, pick | Ctrl/⌘+V or drop |
+| Guide notes saying "tap" on the desk | 4 of 20 (2 false) | 0 |
+| Esc in Browse's search, 12 ticked | the dock closes, the ticks lost | the field blurs; a second Esc closes |
+| A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
+| Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
+
+**RideReading keeps no side, on purpose.** The first ride's reading
+sentence could dock its breakdown the way a practice run does. But
+`/api/phrase/analyze` is behind `require_pass` (`routes/phrase.py:21`),
+and a learner on their first ride holds no pass, so the side would be a
+402. The card ride has a side (P11); the reading ride keeps the phone's
+layout.
+
+Cut, with reasons:
+
+- FC-9's motives two across: the answers stand at `--desk-side-w`.
+- FC-2's re-measured chart: the plan's grid draws it 1:1.
+- FC-10's per-car spacers: the joined block replaces them.
+- FC-1's Esc and ↑/↓ in the boarding: Esc means leave, and leaving
+  signs the guest out.
+- CO-10's `overscroll-behavior: contain`: it contradicts WH-5.
+- PK-1's one-step Esc in every host: only the session panel lacked a
+  way out.
+- Docking `.browse-nav`: a target clicked over and over must not move.
+- FC-4's new keyframes: four copies a lane suffice.
+- The dictation replay chord: the owner's call, taken as no.
+- JourneyPanel's head word: the owner's call, taken as no.
+- The phone landing on a new deck's page: a phone change.
+
+Deferred:
+
+- A ← → caption line where a walk has no control of its own. The keys
+  are in `aria-keyshortcuts`; printing them reopens plan 114's
+  key-legend cut, which is for the owner.
+- FC-6's answered stops as doors back.
+- A bound on `.desk-paper__ask` (needs a token).
+- A plate's foot as one tab stop.
+- OV-16, the train door's aspect.
+- Selectable dialog titles.
+- ←/→ through a radical page.
+- The radical family's lookup in a column.
+- The phone's own share of four fixes, each a visible phone change for
+  the owner:
+  - P0.7, the note over the rating bar (needs a token);
+  - P0.11, the grammar index's label;
+  - PK-15's ruby rule on the base selectors;
+  - PK-16's review row hover, the button's brightness kept to the
+    pixel by plan 117.
+- Shoot on a real computer, keyed on `(any-pointer: coarse)` rather than
+  the width.
+- A double-click's first click still turns a flashcard; telling the two
+  apart would delay every turn.
+
+The identity pass compares the branch with base c1aa347 at 390, 768,
+1024 and 1099, DOM and computed styles:
+
+- all 44 default pages: identical, except comprehension's countdown,
+  which base and branch read three seconds apart (0:55 against 0:58);
+- the Welcome and the sign-in screen, signed out: identical;
+- the boarding at eleven checkpoints on both kana branches, from the
+  name to the step after the hour: identical.
+
+The P0 commits are the only intended differences below 1100. Each was
+diffed alone when it landed.
+
+---
+
+# Wave 29 — 操作盤, the run's console on the desk (plan 124, 2026-09-25)
+
+Numbered 124 because 122–123 went to wave 28 while the console was open;
+the next wave begins at 125.
 
 Planned 2026-09-25 from four layouts drawn side by side the day before
 (the "Tsuji desk run layouts" canvas, direction B, the owner's pick). The
@@ -5996,7 +6141,7 @@ window's edge that held three figures and a sentence before the reveal.
 
 | # | Plan | Status |
 |---|------|--------|
-| 122 | 操作盤: a card run's floor is one console of two rows across the stage — the rating tiles' row fixed above the level bar, the bar holding this run's three figures at its left beside the fare; the card grows to it, or stands as tall as its choices; the side is the entry's place, with the misses listed as they happen. `StudyStage`'s `records`, `LevelBar`'s `records`, `RunRecords`; `src/console.desktop.test.jsx` and a block of `deskfree.phone` | DONE (2026-09-25) |
+| 124 | 操作盤: a card run's floor is one console of two rows across the stage — the rating tiles' row fixed above the level bar, the bar holding this run's three figures at its left beside the fare; the card grows to it, or stands as tall as its choices; the side is the entry's place, with the misses listed as they happen. `StudyStage`'s `records`, `LevelBar`'s `records`, `RunRecords`; `src/console.desktop.test.jsx` and a block of `deskfree.phone` | DONE (2026-09-25) |
 
 The one row the canvas drew — the tiles between the figures and the
 fare — does not fit under about 1,600px, and the desk is one media block

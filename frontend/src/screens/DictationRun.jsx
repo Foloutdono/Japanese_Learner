@@ -14,6 +14,7 @@ import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
+import { EnterKey } from '../components/chrome/DeskKeys'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
@@ -98,6 +99,14 @@ function Session({ session, level }) {
   const fare = usePracticeXp()
   const [rated, setRated]       = useState(false)
   const [error, setError]       = useState(null)
+  // 机 (plan 123): on the desk the field is not focused on arrival, so
+  // the first Space plays the clip; the listen puts the pen in the
+  // field. Replays stay on ▶ -- Space in the field is a space.
+  const fieldRef = useRef(null)
+  function onListen() {
+    setPlays(n => n + 1)
+    if (desk) fieldRef.current?.focus()
+  }
 
   // ── The word-by-word breakdown (reading practice's, on this stage) ──
   // The same LLM segmentation the 解析 screen runs, through the same
@@ -390,7 +399,8 @@ function Session({ session, level }) {
               src={clip.audioSrc}
               plays={plays}
               maxPlays={maxPlays}
-              onPlay={() => setPlays(n => n + 1)}
+              onPlay={onListen}
+              keyHint={desk}
             />
           </PromptCard>
 
@@ -409,7 +419,8 @@ function Session({ session, level }) {
               invites an IME onto a keyboard the learner does not have. */}
           <form className="stage__foot" onSubmit={e => { e.preventDefault(); submit() }}>
             <input
-              autoFocus
+              ref={fieldRef}
+              autoFocus={!desk}
               value={answer}
               onChange={e => setAnswer(e.target.value)}
               placeholder={t.dictationPlaceholder}
@@ -523,7 +534,12 @@ function Session({ session, level }) {
 
           {rated ? (
             <div className="stage__foot">
-              <button type="button" className="btn-primary" onClick={next}>{t.nextPhrase}</button>
+              <button type="button" className="btn-primary" onClick={next} aria-keyshortcuts={desk ? 'Enter' : undefined}>
+                {t.nextPhrase}
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+              </button>
+              {/* 机 (plan 123): Enter takes the next line. */}
+              <EnterKey onEnter={next} />
             </div>
           ) : (
             /* Docked on the stage's bottom edge (index.css, .stage),

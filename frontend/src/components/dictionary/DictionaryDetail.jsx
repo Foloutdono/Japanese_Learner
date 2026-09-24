@@ -13,9 +13,12 @@ import { StageMark } from '../study/StageMark'
 import { isOnyomiToken, pickPlateReadings } from '../../domain/readingPick'
 import { GlossList, firstGloss, mergeSenses, splitGlosses } from '../study/gloss'
 import { useMineAction, INERT_MINING } from '../analysis/useMineAction'
-import { BoltIcon, ChevronIcon, PlusIcon, StarIcon } from '../ui/Icons'
+import { BoltIcon, ChevronIcon, CloseIcon, PlusIcon, StarIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
+import { dialogOpen } from '../../lib/dialogOpen'
+import { composing } from '../../lib/keyGuards'
 import { useDesk } from '../../hooks/useDesk'
+import { holdEsc } from '../../stores/escHold'
 import { speakJapanese, playKana, kanaSound } from '../../lib/audio'
 
 // ── 見出し語 — the entry, as a plate ──────────────────────────
@@ -145,23 +148,8 @@ export function SpeakIcon() {
   )
 }
 
-export function CloseIcon() {
-  return (
-    <svg
-      className="dict-icon"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <line x1="6" y1="6" x2="18" y2="18" />
-      <line x1="18" y1="6" x2="6" y2="18" />
-    </svg>
-  )
-}
+// CloseIcon moved to components/ui/Icons.jsx in plan 123: the desk's
+// column docks (chrome/DeskDock) close with the entry's own roundel.
 
 // SearchIcon moved to components/ui/Icons.jsx in plan 052 — it was
 // used by three screens outside the dictionary, two of which were
@@ -314,6 +302,16 @@ function Picked({ text, hit }) {
   )
 }
 
+// Whether `char` sits inside a reading the aligner kept whole
+// (study/furigana.py): a part that holds it and more, under one reading.
+// A part of its own means the word reads the character by one of its
+// readings; no reading at all means there is nothing to say.
+function readAsWhole(parts, char) {
+  return Boolean(char) && (parts ?? []).some(
+    p => p.reading && p.text !== char && p.text.includes(char),
+  )
+}
+
 // One word that uses the character: its furigana'd form with the kanji
 // itself picked out in the entry's ink — so the reading this word
 // demonstrates is what the eye lands on — its first gloss, and, when the
@@ -327,7 +325,15 @@ function Picked({ text, hit }) {
 // READING with the kana picked out of it, because a reader still
 // learning the syllabary cannot be shown 朝 as an example of あ. The
 // written form stays behind the row, as what it opens.
+//
+// A word whose reading belongs to the whole of it — 今朝 read けさ, where
+// け is no reading of 今 (熟字訓, 当て字) — keeps one ruby over the run
+// and carries a 熟 in the 音/訓 square beside it: the one row in the
+// ledger that is an example of the character but not of any of its
+// readings, and it says so.
 function WordRow({ w, char, onClick, reading = false }) {
+  const { t } = useLang()
+  const whole = !reading && readAsWhole(w.furigana, char)
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
@@ -337,6 +343,12 @@ function WordRow({ w, char, onClick, reading = false }) {
             ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
             : w.kanji}
       </span>
+      {whole && (
+        <span className="dict-kind" title={t.readingsWhole}>
+          <span aria-hidden="true">熟</span>
+          <span className="sr-only">{t.readingsWhole}</span>
+        </span>
+      )}
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )
@@ -517,12 +529,14 @@ function ReadingsList({ entry, groups, onClose, onVocabClick }) {
             <span className="dict-readings__title">{t.allReadings}</span>
           </div>
           <div className="dict-plate__actions">
+            {/* Desk-only (plan 120), and Esc steps back too (plan 123). */}
             <button
               type="button"
               onClick={onClose}
               className="dict-plate__btn"
-              title={t.close}
+              title={`${t.close} (${t.keyEscape})`}
               aria-label={t.close}
+              aria-keyshortcuts="Escape"
             >
               <CloseIcon />
             </button>
@@ -825,6 +839,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     mining: mining ?? INERT_MINING,
     kind: appCard?.source,
     t,
+    owner: entryKey(entry),
     onMine: deckId => mining.mineApp({
       deckId,
       source: appCard.source,
@@ -988,13 +1003,17 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             {/* No ✕ where there is nothing to close: the desk's dock
                 (plan 114) is the catalogue's standing companion, not a
                 panel that was opened. */}
+            {/* On the desk every entry that has a ✕ also closes on Esc
+                -- a lookup dialog, a door in a column, the analyser's
+                dock -- so it says so there (plan 123). */}
             {onClose && (
               <button
                 type="button"
                 onClick={onClose}
                 className="dict-plate__btn"
-                title={t.close}
+                title={desk ? `${t.close} (${t.keyEscape})` : t.close}
                 aria-label={t.close}
+                aria-keyshortcuts={desk ? 'Escape' : undefined}
               >
                 <CloseIcon />
               </button>
@@ -1417,7 +1436,10 @@ function useLookupStack(session, { term, kana, category, id }, exact = false) {
     setStack(s => [...s, { category: 'grammar', id: nextId }])
   }
   const back = stack.length > 1 ? () => setStack(s => s.slice(0, -1)) : undefined
-  return { here, entry, loading, error, open, openId, back }
+  // Straight back to the entry the stack was opened on, however many
+  // doors deep (plan 123): the run's docked entry's Esc.
+  const root = stack.length > 1 ? () => setStack(s => s.slice(0, 1)) : undefined
+  return { here, entry, loading, error, open, openId, back, root }
 }
 
 // What a lookup shows: the loading line, the "not available" answer, or
@@ -1498,8 +1520,37 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // in view, and ✕ returns the dock to the entry the door was opened
 // from. A run's session panel docks the revealed card's entry the same
 // way. No portal, no scrim, no dialog: it is a column's content.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false }) {
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false }) {
   const look = useLookupStack(session, { term, kana, category, id }, exact)
+  // `escBack` (plan 123): a host with no way out of its own -- the run's
+  // session panel, docked beside the card -- lets Escape step back out
+  // of the doors opened in it, to the entry it was opened on. The key
+  // is spent (preventDefault), so the run's Esc (DeskKeys' LeaveKey,
+  // which waits to see) does not also leave the run: a learner who
+  // opened 駅's kanji and pressed Esc lost the run and its tally. A list
+  // open inside the entry (the readings, the ＋ menu) takes Escape first,
+  // in the capture phase, and keeps it.
+  //
+  // Subscribed once, reading the stack through a ref: a listener that
+  // re-subscribed on every door would fall behind the panel's own Esc
+  // (which closes an open miss) and lose the key to it.
+  const toRoot = useRef(null)
+  useEffect(() => { toRoot.current = look.root })
+  // A door open in the docked entry holds Esc: the run's head drops its
+  // cap meanwhile (stores/escHold).
+  const deep = escBack && Boolean(look.root)
+  useEffect(() => (deep ? holdEsc() : undefined), [deep])
+  useEffect(() => {
+    if (!escBack) return undefined
+    const onKey = e => {
+      if (e.key !== 'Escape' || e.repeat || e.defaultPrevented || composing(e) || dialogOpen()) return
+      if (!toRoot.current) return
+      e.preventDefault()
+      toRoot.current()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [escBack])
   return (
     <LookupContent
       look={look}

@@ -17,9 +17,10 @@ export default function WhyStep({ name, value, onChange, onContinue }) {
         </BoardQuestion>
         <div className="brd__stage">
           <div className="brd__opts">
-            {MOTIVES.map(m => (
+            {MOTIVES.map((m, i) => (
               <BoardOption
                 key={m}
+                pick={i + 1}
                 on={value === m}
                 onClick={() => onChange(m)}
                 icon={<MotiveIcon motive={m} />}
@@ -31,7 +32,7 @@ export default function WhyStep({ name, value, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )

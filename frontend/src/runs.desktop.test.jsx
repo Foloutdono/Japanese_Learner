@@ -119,7 +119,7 @@ describe('a card run on the desk', () => {
     expect($('.flashcard').textContent).not.toBe(before)
   })
 
-  it('counts the run: rated, good or better, XP earned — on the floor since plan 122', async () => {
+  it('counts the run: rated, good or better, XP earned — on the floor since plan 124', async () => {
     await render(<Run />)
     await settle()
     const values = () => [...document.querySelectorAll('.lvlbar .desk-tally .desk-tally__num')].map(el => el.textContent)
@@ -179,3 +179,31 @@ describe('the docked entry of a card with no dictionary word (plan 115)', () => 
   })
 })
 
+
+// ── plan 123, P19 — a word on a card can be copied ──
+// A drag that selected a word ended in a click, and the click turned the
+// card, remounting the face and the selection with it. On the desk a
+// click that leaves text selected in the card is a selection.
+describe('a selection on the card', () => {
+  it('is not a turn; a plain click still is', async () => {
+    await render(<Run />)
+    await settle()
+    $('.flashcard').click()
+    await settle()
+    const back = $('.probe-back')
+    expect(back).not.toBeNull()
+    const range = document.createRange()
+    range.selectNodeContents(back)
+    window.getSelection().removeAllRanges()
+    window.getSelection().addRange(range)
+    $('.flashcard').click()
+    await settle()
+    expect($('.probe-back')).toBe(back)
+    expect(window.getSelection().toString()).toBe('mountain')
+    window.getSelection().removeAllRanges()
+    $('.flashcard').click()
+    await settle()
+    expect($('.probe-back')).toBeNull()
+    expect($('.probe-front')).not.toBeNull()
+  })
+})

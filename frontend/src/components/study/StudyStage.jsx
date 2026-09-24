@@ -29,18 +29,21 @@ import { EntryDockContext } from './entryDock'
 // side, a revealed card docks its dictionary entry there (entryDock).
 //
 // `records` says the run rates and keeps a tally (stores/runTally): on
-// the desk, with a side, its floor is then the console (plan 122) — the
+// the desk, with a side, its floor is then the console (plan 124) — the
 // rating tiles' row fixed above the level bar, the bar holding this
 // run's three figures beside the fare, and the card growing to it. The
 // six card runs pass it; a browse, a practice run and the rides do not,
-// and keep the strip. A phone reads nothing of it.
+// and keep the strip. A phone reads nothing of it. A run whose batch
+// failed stands an empty column (side={null}, plan 123) and no figures
+// beside its error; `done` is the run's end, and one that rated nothing
+// keeps no three zeros either (RunRecords).
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
-  toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, children,
+  toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false, children,
 }) {
   const desk = useDesk()
   const split = desk && side !== undefined
-  const figures = split && records
+  const figures = split && records && side !== null
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
   return (
     <div className={split ? `screen desk-run${figures ? ' desk-run--console' : ''}` : 'screen'}>
@@ -60,7 +63,7 @@ export function StudyStage({
           stage frame took the HUD away. See components/chrome/LevelBar.jsx.
           `levelBar={false}` is for the one phase that is bounded to the
           screen and can pay nothing — the comprehension passage. */}
-      {levelBar && <LevelBar records={figures} />}
+      {levelBar && <LevelBar records={figures} done={done} />}
       {split && <RunSide label={sideLabel} color={color}>{side}</RunSide>}
     </div>
   )

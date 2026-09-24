@@ -33,10 +33,12 @@ import { firstRadical } from '../../domain/radicals'
  *   onSelect(number)
  *   stroke / onStroke — the page, carried in the station's URL so the
  *               way back from a lesson lands on the page it left
+ *   linkTo    — the desk's (plan 123): a radical's URL, which makes its
+ *               tile a link (SplitRow), as every split's rows are.
  *   selected  — the desk's (plan 118): the radical whose lesson stands
  *               beside the index, marked, its page the one opened
  */
-export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected }) {
+export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected, linkTo = null }) {
   const { t } = useLang()
   const { groups, failed } = useRadicalGroups(session)
 
@@ -59,6 +61,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke, s
       stroke={stroke}
       onStroke={onStroke}
       selected={selected}
+      linkTo={linkTo}
       t={t}
     />
   )

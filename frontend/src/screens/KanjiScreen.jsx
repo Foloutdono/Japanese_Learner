@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams, useLocation, useSearchParams, Navigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { board } from '../stores/boarding'
@@ -57,6 +57,16 @@ export default function KanjiScreen({ session }) {
   const desk = useDesk()
   // The lesson reports its radical up, so the bar can name it.
   const [lesson, setLesson] = useState(null)
+  // 机 (plan 123): on the desk the index's tiles are links, so another
+  // radical lands at the page's top on the change of radical rather than
+  // in a click handler -- a Ctrl/⌘-click that opens one in another tab
+  // changes nothing here, and must not scroll this page.
+  const shownRadical = useRef(radical)
+  useEffect(() => {
+    if (!desk || shownRadical.current === radical) return
+    shownRadical.current = radical
+    window.scrollTo(0, 0)
+  }, [desk, radical])
 
   const MODES = modePickerEntries(t, 'kanji')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'kanji'
@@ -202,7 +212,6 @@ export default function KanjiScreen({ session }) {
         ...m,
         aside: <ScopeFigures session={session} url={`/api/kanji/stats?radical=${number}&mode=${m.key}`} />,
       }))
-      const open = n => { navigate(`${BASE}/radical/${n}`, { replace: true }); window.scrollTo(0, 0) }
       return (
         <SelectionScreen
           title={t.kanjiTitle}
@@ -213,7 +222,7 @@ export default function KanjiScreen({ session }) {
             label={browsing ? t.radFamily : t.byRadicalShort}
             list={browsing
               ? <RadicalFamilyList radical={here} session={session} />
-              : <RadicalSelector session={session} selected={number} onSelect={open} />}
+              : <RadicalSelector session={session} selected={number} onSelect={() => {}} linkTo={n => `${BASE}/radical/${n}`} />}
           >
             <RadicalLesson
               key={number}

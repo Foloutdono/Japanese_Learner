@@ -141,6 +141,18 @@ describe('a level\'s platforms on the desk', () => {
   })
 })
 
+// The list's wheel hands on at its ends (plan 123): `contain` held a
+// wheel turned over a short list, so the page beside it would not
+// scroll from there.
+describe('a split\'s list and the wheel', () => {
+  it('hands the wheel on to the page at its ends', async () => {
+    await mount('/learn/vocab/N4', vocabRoutes)
+    await settle()
+    const list = document.querySelector('.desk-split__list')
+    expect(getComputedStyle(list).overscrollBehaviorY).toBe('auto')
+  })
+})
+
 describe('the other stations on the desk', () => {
   it('opens kana on the set the figures say they are on', async () => {
     await mount('/learn/kana', (

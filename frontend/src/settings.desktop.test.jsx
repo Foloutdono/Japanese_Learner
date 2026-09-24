@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -117,6 +118,26 @@ describe('settings on the desk', () => {
     document.querySelector('.stg-row[data-page="sound"]').click()
     await settle()
     expect(document.querySelector('.desk-settings__list .stg-signout')).not.toBeNull()
+  })
+
+  // A laptop's short window (plan 123): the list is sticky, and taller
+  // than 600px it had Sign out under the window's floor, beyond any
+  // scroll. It is bounded by the window now, and scrolls on its own.
+  it('keeps Sign out within reach on a short window', async () => {
+    await page.viewport(1100, 600)
+    try {
+      await mount('/profile/settings/sound')
+      await settle()
+      const list = document.querySelector('.desk-settings__list')
+      expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+      list.scrollTop = list.scrollHeight
+      await settle(60)
+      const out = list.querySelector('.stg-signout').getBoundingClientRect()
+      expect(out.bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(out.top).toBeGreaterThanOrEqual(0)
+    } finally {
+      await page.viewport(1100, 800)
+    }
   })
 })
 

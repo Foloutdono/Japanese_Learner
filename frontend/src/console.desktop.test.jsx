@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — 操作盤, the run's console (plan 122) ─────────────────────
+// ── 机 — 操作盤, the run's console (plan 124) ─────────────────────
 // A card run's floor on the desk is one console of two rows across the
 // stage: the rating tiles' row, fixed above the level bar and spanning
 // it, and on the strip this run's three figures at the left with the
@@ -56,11 +56,11 @@ beforeEach(() => {
   startTally('kanji:N5:f2b')
 })
 
-function Stage({ records = true, children }) {
+function Stage({ records = true, side = <SessionPanel />, done = false, children }) {
   return (
     <LangProvider>
       <MemoryRouter>
-        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records={records} side={<SessionPanel />} sideLabel="This run">
+        <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records={records} done={done} side={side} sideLabel="This run">
           {children}
         </StudyStage>
       </MemoryRouter>
@@ -218,5 +218,32 @@ describe('a run without records', () => {
     expect(rect('.lvlbar').height).toBe(36)
     expect(getComputedStyle($('.rating-bar')).position).toBe('sticky')
     expect(getComputedStyle($('.lvlbar')).position).toBe('sticky')
+  })
+})
+
+// Plan 123's two truths about a run's figures, now that they stand on
+// the console: a run whose batch failed stands an empty column
+// (side={null}) and no figures beside its error, and a run that ends
+// with nothing rated -- nothing was due -- keeps no three zeros.
+describe('a run with nothing to count', () => {
+  it('shows no console beside a failed batch, the side an empty column', async () => {
+    await render(<Stage side={null}><p>error</p></Stage>)
+    await settle()
+    expect($('.desk-run__side')).not.toBeNull()
+    expect($('.desk-run--console')).toBeNull()
+    expect($('.desk-tally')).toBeNull()
+  })
+
+  it('keeps no three zeros at the end of a run that rated nothing', async () => {
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($('.desk-tally')).toBeNull()
+  })
+
+  it('keeps the figures at the end of a run that rated', async () => {
+    countReview({ quality: 5, xp: 9, entry: { term: '駅', category: 'kanji', session: {} } })
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($$('.lvlbar .desk-tally .desk-tally__num').map(el => el.textContent)).toEqual(['1', '100%', '+9XP'])
   })
 })

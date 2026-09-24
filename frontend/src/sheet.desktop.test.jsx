@@ -76,3 +76,107 @@ describe('the sheet on the desk', () => {
     expect(onClose).toHaveBeenCalledTimes(1)
   })
 })
+
+// ── plan 123 — the kept dialogs, drawn for a desk ──
+// A confirm opens on its way out, so an Enter held or pressed twice does
+// not act; the actions share a row; a dialog with no way out in its body
+// draws a ✕; the pass's rail doors stand beside the rail's foot; the
+// CSV import wears the dialog's width and material.
+const box = el => el.getBoundingClientRect()
+const token = n => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(n))
+
+function Confirm({ onClose = () => {}, labels = ['Delete', 'Cancel'], ...rest }) {
+  return (
+    <LangProvider>
+      <Sheet open onClose={onClose} jp="Voyage" cap="Delete deck" {...rest}>
+        <span className="sheet__q">Delete this deck?</span>
+        <button type="button" className="btn-primary btn-primary--danger">{labels[0]}</button>
+        {labels.slice(1, -1).map(l => <button key={l} type="button" className="btn-secondary">{l}</button>)}
+        <button type="button" className="btn-secondary">{labels.at(-1)}</button>
+      </Sheet>
+    </LangProvider>
+  )
+}
+
+describe('the kept dialogs on the desk (plan 123)', () => {
+  it('opens a confirm on its way out, not on the act', async () => {
+    await render(<Confirm initialFocus=".btn-secondary" />)
+    await settle()
+    expect(document.activeElement.textContent).toBe('Cancel')
+  })
+
+  it('sets its actions on one row, in the order they are written', async () => {
+    await render(<Confirm />)
+    await settle()
+    const [act, out] = [...document.querySelectorAll('.sheet button')].map(box)
+    expect(Math.round(act.top)).toBe(Math.round(out.top))
+    expect(act.right).toBeLessThan(out.left)
+    const q = box(document.querySelector('.sheet__q'))
+    expect(q.bottom).toBeLessThanOrEqual(act.top)
+  })
+
+  it('fits three actions to a row in French without a clipped label', async () => {
+    await render(<Confirm labels={['Rendre quand même', 'Revoir les blancs', 'Continuer']} />)
+    await settle()
+    const buttons = [...document.querySelectorAll('.sheet button')]
+    expect(new Set(buttons.map(b => Math.round(box(b).top))).size).toBe(1)
+    for (const b of buttons) expect(b.scrollWidth).toBeLessThanOrEqual(b.clientWidth)
+  })
+
+  it('draws a ✕ where the body holds no way out, last in the tab order', async () => {
+    const onClose = vi.fn()
+    await render(
+      <LangProvider>
+        <Sheet open onClose={onClose} jp="駅" cap="Choose a deck" dismiss>
+          <button type="button" className="probe-row">Voyage</button>
+        </Sheet>
+      </LangProvider>
+    )
+    await settle()
+    const x = document.querySelector('.desk-sheet__close')
+    expect(x).not.toBeNull()
+    expect(document.activeElement.className).toBe('probe-row')
+    const buttons = [...document.querySelectorAll('.sheet button')]
+    expect(buttons.at(-1)).toBe(x)
+    expect(box(x).right).toBeGreaterThan(box(document.querySelector('.sheet__cap')).right)
+    x.click()
+    expect(onClose).toHaveBeenCalledTimes(1)
+  })
+
+  it('draws no ✕ on a dialog that ends on its own way out', async () => {
+    await render(<Confirm />)
+    await settle()
+    expect(document.querySelector('.desk-sheet__close')).toBeNull()
+  })
+
+  it('stands the pass\'s rail doors beside the rail\'s foot, at a column\'s width', async () => {
+    document.documentElement.dataset.chrome = 'shell'
+    try {
+      await render(
+        <LangProvider>
+          <Sheet open onClose={() => {}} sumi className="status-sheet" label="Status"><p>the pass's back</p></Sheet>
+        </LangProvider>
+      )
+      await settle()
+      const sheet = box(document.querySelector('.sheet'))
+      expect(Math.round(sheet.left)).toBe(token('--desk-rail-w') + token('--sp-3'))
+      expect(Math.round(sheet.width)).toBe(token('--desk-side-w'))
+      expect(Math.round(window.innerHeight - sheet.bottom)).toBe(token('--sp-5'))
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  it('gives the CSV import the dialog\'s width and material', async () => {
+    await render(<div className="import-overlay"><div className="import-modal">csv</div></div>)
+    await settle(60)
+    const modal = document.querySelector('.import-modal')
+    expect(Math.round(box(modal).width)).toBeLessThanOrEqual(token('--card-w'))
+    expect(parseFloat(getComputedStyle(modal).borderTopLeftRadius)).toBe(token('--r-panel'))
+    const probe = document.createElement('span')
+    probe.style.color = 'var(--surface)'
+    document.body.appendChild(probe)
+    expect(getComputedStyle(modal).backgroundColor).toBe(getComputedStyle(probe).color)
+    probe.remove()
+  })
+})

@@ -1,10 +1,11 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { playUi, playCorrect } from '../lib/audio'
 import { Bar } from '../components/chrome/Bar'
 import { Chip } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
+import { useListWalk, useFollowFocus, WALK_KEYS_PAGED } from '../hooks/useListWalk'
 import QuestionRenderer from '../exam/QuestionRenderer'
 import ExamCard from '../exam/ExamCard'
 import { StationSplit } from '../components/selection/StationSplit'
@@ -173,6 +174,12 @@ export default function ExamResult({ session }) {
   }, [groups, showAll])
   const asked = searchParams.get('question')
   const openRow = deskRows.find(r => String(r.id) === asked) ?? deskRows[0] ?? null
+  // The review is one tab stop, the open question, walked with ↑/↓
+  // across its parts (plan 123); ←/→ open the next, and the focus goes
+  // with them while it is in the list.
+  const onReviewWalk = useListWalk(desk, { items: '.exam-review-row' })
+  const reviewRef = useRef(null)
+  useFollowFocus(reviewRef, openRow?.id, desk)
   useEffect(() => {
     if (!desk || !openRow) return undefined
     const onKey = e => {
@@ -305,7 +312,7 @@ export default function ExamResult({ session }) {
         <StationSplit
           label={t.examReviewTitle}
           list={(
-            <div className="surface exam-review">
+            <div className="surface exam-review" ref={reviewRef} onKeyDown={onReviewWalk} aria-keyshortcuts={desk ? WALK_KEYS_PAGED : undefined}>
               {groups.map(group => {
                 const rows = group.rows.filter(r => shown.has(r.id))
                 if (rows.length === 0) return null
@@ -332,7 +339,7 @@ export default function ExamResult({ session }) {
             </div>
           )}
         >
-          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed />}
+          {openRow && <ExamCard key={openRow.id} question={openRow.q} selected={openRow.given} revealed keys />}
           {/* The way back to the exams is the rail's; the page keeps
               the one thing to do next, under the card. */}
           <div className="btn-row">{newPaper}</div>
@@ -414,6 +421,7 @@ function ReviewRow({ r, open, onClick, desk = false, to = null, navState = null 
       onClick={onClick}
       aria-expanded={desk ? undefined : open}
       aria-current={desk && open ? 'page' : undefined}
+      tabIndex={desk ? (open ? 0 : -1) : undefined}
     >
       <span className={`exam-review-row__mark exam-review-row__mark--${state}`} aria-hidden="true">
         {r.isCorrect ? <CheckIcon size={11} /> : <CrossIcon size={11} />}

@@ -8,6 +8,7 @@ import { useXpGain } from './useXpGain'
 import { journeyModel } from '../../domain/goalMath'
 import { showsCap } from '../../domain/credits'
 import { playClick } from '../../lib/audio'
+import { isDesk, useDesk } from '../../hooks/useDesk'
 
 // ── 運行案内 — the HUD (plan 068) ─────────────────────────────
 // The strip across the top of every tab screen: sumi, two registers
@@ -100,15 +101,20 @@ function HudStatus({ onClick }) {
 
 // The pass at pocket size. Shared with the stage head (plan 070), so a
 // run shows the same object the shell does.
+//
+// On the desk (plan 123) the icon-only figures carry their name as a
+// title too, as the entry's roundels and the rating tiles do: a pointer
+// over them is told what they are.
 export function HudPass({ onClick }) {
   const { t } = useLang()
+  const desk = useDesk()
   const credits = useCredits()
   const balance = credits?.unlimited ? null : credits?.balance
   const low = balance != null && balance > 0 && balance <= 5
   const out = balance === 0
   const classes = ['hud__pass', low ? 'hud__pass--low' : '', out ? 'hud__pass--out' : ''].filter(Boolean).join(' ')
   return (
-    <button type="button" className={classes} onClick={onClick} aria-label={t.passLabel} data-guide="hud.pass">
+    <button type="button" className={classes} onClick={onClick} aria-label={t.passLabel} title={desk ? t.passLabel : undefined} data-guide="hud.pass">
       {/* The contactless mark: three rings, classed rather than bare
           spans so the pass block's own `span` rules never meet them
           in stylelint's specificity order. */}
@@ -135,6 +141,8 @@ function HudLevel() {
   const summary = useProfileSummary()
   const { gain, clear } = useXpGain(summary)
   const toPass = () => { playClick(); navigate('/profile') }
+  const desk = useDesk()
+  const label = summary ? `${t.level} ${summary.level}` : t.profileTitle
 
   return (
     <button
@@ -142,12 +150,29 @@ function HudLevel() {
       className={`hud__level${gain ? ' hud__level--gain' : ''}`}
       data-guide="hud.level"
       onClick={toPass}
-      aria-label={summary ? `${t.level} ${summary.level}` : t.profileTitle}
+      aria-label={label}
+      title={desk ? label : undefined}
     >
       <span>{summary?.level ?? ''}</span>
       <FareFigure gain={gain} className="hud-fare" onEnd={clear} />
     </button>
   )
+}
+
+// 机 (plan 123): on Today the pass's back already stands beside the
+// gate (components/journey/JourneyPanel), and the rail's status chip
+// opened a dialog copy of it, the scrim hiding the panel it duplicated.
+// Where that panel stands, the chip walks to it instead: in view,
+// focused, marked with one soft arrival. Everywhere else, and on every
+// phone, it opens the sheet as it always has.
+function showStatus() {
+  const panel = isDesk() ? document.querySelector('.desk-journey') : null
+  if (!panel) { openStatus(); return }
+  panel.scrollIntoView({ block: 'nearest' })
+  panel.focus({ preventScroll: true })
+  panel.classList.remove('desk-journey--called')
+  void panel.offsetWidth
+  panel.classList.add('desk-journey--called')
 }
 
 // The three instruments, in the order the HUD prints them. Shared with
@@ -158,7 +183,7 @@ export function HudInstruments() {
       <HudLevel />
       {/* The panel opens the status sheet — the pass's back (plan
           074) — rather than walking to the pass. */}
-      <HudStatus onClick={() => { playClick(); openStatus() }} />
+      <HudStatus onClick={() => { playClick(); showStatus() }} />
       <HudPass onClick={() => { playClick(); openBalance() }} />
     </>
   )

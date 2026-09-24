@@ -287,3 +287,86 @@ describe('the boarding at 390×844', () => {
     expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
   })
 })
+
+// ── The browser's Back walks the questions (plan 123) ─────────────
+// The flow changes screens through state, so the browser's Back (a
+// phone's back gesture, Alt+←) left Tsuji from any question and the
+// answers were gone on the way back in. One guard entry now stands in
+// the browser's history while a question is behind the learner: Back
+// steps back one question, answers kept, and from the first question
+// it leaves as it always has.
+describe('the browser\'s Back in the boarding', () => {
+  const popped = () => new Promise(r => window.addEventListener('popstate', () => setTimeout(r, 60), { once: true }))
+  const live = root => root.querySelector('.brd__car:not(.brd__car--out)')
+
+  it('steps back one question at a time, keeping every answer', async () => {
+    const start = window.history.length
+    const screen = await mountFlow()
+    await click(screen.container, '[data-action="continue"]')        // name → why
+    await settle()
+    await click(screen.container, '[data-motive="trip"]')
+    await click(screen.container, '[data-action="continue"]')        // why → kana
+    await settle()
+    expect(live(screen.container).querySelector('.brd-kana')).not.toBeNull()
+    // One entry for the whole flow, however deep.
+    expect(window.history.length).toBe(start + 1)
+
+    let back = popped()
+    window.history.back()
+    await back
+    await settle()
+    // Back on the motives, the one chosen still chosen.
+    expect(live(screen.container).querySelector('[data-motive="trip"]').getAttribute('aria-pressed')).toBe('true')
+
+    back = popped()
+    window.history.back()
+    await back
+    await settle()
+    // Back on the name, with nothing left behind: the guard is gone.
+    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
+    expect(live(screen.container).querySelector('.brd-field').value).toBe('Tester')
+  })
+
+  it('takes the guard out when ‹ brings the learner back to the first question', async () => {
+    const screen = await mountFlow()
+    const before = window.history.state
+    await click(screen.container, '[data-action="continue"]')        // name → why
+    await settle()
+    expect(window.history.state).toEqual({ brd: true })
+    const back = popped()
+    await click(screen.container, '.brd__back')                      // ‹ to the name
+    await back
+    await settle()
+    expect(window.history.state).toEqual(before)
+    expect(live(screen.container).querySelector('.brd-field')).not.toBeNull()
+  })
+})
+
+// ── The building's lines row holds the longest French line-up ──────
+// (plan 123) The row's value is `nowrap`, and "Kana · Vocabulaire ·
+// Kanji · Grammaire" is the longest thing it is ever asked to hold. At
+// 390 it has to fit beside its label without running past the frame.
+describe('the building\'s rows at 390', () => {
+  it('fit every line, in French', async () => {
+    const { default: Building } = await import('./components/boarding/Building')
+    const screen = await render(
+      <LangProvider>
+        <main className="brd"><div className="brd__cars"><div className="brd__car">
+          <Building name="Tester" onDone={() => {}} steps={[
+            { key: 'goal', label: 'Objectif', value: 'N3 · en 14 mois', always: true },
+            { key: 'lines', label: 'Lignes', value: 'Kana · Vocabulaire · Kanji · Grammaire', always: true },
+            { key: 'ride', label: 'Trajet', value: '15 min · 19:30', always: true },
+          ]} />
+        </div></div></main>
+      </LangProvider>
+    )
+    await settle(60)
+    const frame = rect(screen.container.querySelector('.brd'))
+    for (const row of screen.container.querySelectorAll('.brd-step')) {
+      const val = row.querySelector('.brd-step__val')
+      expect(rect(val).right).toBeLessThanOrEqual(frame.right)
+      expect(rect(val).left).toBeGreaterThanOrEqual(rect(row.querySelector('.brd-step__label')).right)
+    }
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(390)
+  })
+})

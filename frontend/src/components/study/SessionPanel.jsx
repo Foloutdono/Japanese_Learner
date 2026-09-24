@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { composing } from '../../lib/keyGuards'
+import { dialogOpen } from '../../lib/dialogOpen'
 import { useLang } from '../../LangContext'
 import { useRunTally, tallyMisses } from '../../stores/runTally'
 import { useDeskEntry } from '../../stores/deskEntry'
@@ -17,12 +19,12 @@ import { DictionaryLookupBody } from '../dictionary/DictionaryDetail'
 //   - The cards that went badly so far (stores/runTally's tallyMisses,
 //     the last rating of each below good), as chips, each opening its
 //     entry here the way the reveal did. Plan 115 listed them at the
-//     run's end only; plan 122 lists them as they happen, so a learner
+//     run's end only; plan 124 lists them as they happen, so a learner
 //     can look back at a card without leaving the run. A reveal takes
 //     the column, and the chip it displaces is no longer open.
 //
 // This run's three records — rated, good or better, XP earned — stood
-// at the head of this column until plan 122 moved them onto the run's
+// at the head of this column until plan 124 moved them onto the run's
 // floor, the console (components/study/RunRecords.jsx, drawn by the
 // level bar). A browse (components/study/ReviewDeck.jsx) rates nothing,
 // so it has no console and no misses: its column is the entry alone.
@@ -50,6 +52,21 @@ export function SessionPanel({ done = false, misses = true }) {
   const opened = missed.find(m => m.key === openKey) ?? null
   const entry = done ? opened : (docked ?? opened)
 
+  // Esc closes an open miss before it leaves the run (plan 123; the
+  // misses stand during the run since plan 124). Registered after the
+  // entry's own Esc (children's effects run first), so a door opened
+  // inside the miss steps back first.
+  useEffect(() => {
+    if (!opened) return undefined
+    const onKey = e => {
+      if (e.key !== 'Escape' || e.repeat || e.defaultPrevented || composing(e) || dialogOpen()) return
+      e.preventDefault()
+      setOpenKey(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [opened])
+
   return (
     <>
       {missed.length > 0 && (
@@ -65,7 +82,7 @@ export function SessionPanel({ done = false, misses = true }) {
                 onClick={() => setOpenKey(k => (k === m.key ? null : m.key))}
                 lang="ja"
               >
-                {m.term}
+                {m.label ?? m.term}
               </button>
             ))}
           </div>
@@ -82,6 +99,7 @@ export function SessionPanel({ done = false, misses = true }) {
             id={entry.id}
             session={entry.session}
             exact
+            escBack
           />
         </section>
       ) : done ? null : (

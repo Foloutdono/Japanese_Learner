@@ -4,6 +4,7 @@ import { useLang } from '../../LangContext'
 import { playFareTick, playFlapClatter } from '../../lib/audio'
 import { rewardTier } from '../../domain/rewardTier'
 import { SplitFlap } from './SplitFlap'
+import { isDesk } from '../../hooks/useDesk'
 
 // ── What happens when you earn something ──────────────────────
 // Two tiers, two sizes; see domain/rewardTier. Neither interrupts —
@@ -96,6 +97,21 @@ function RewardScene({ toast, onDone }) {
     if (leaving) root.removeAttribute('data-levelup')
     else root.setAttribute('data-levelup', '')
     return () => root.removeAttribute('data-levelup')
+  }, [tier, leaving])
+
+  // 机 (plan 123): on the desk Esc retires the board, as any key skips
+  // the cutscenes -- it used to hold the page's Esc for its whole 2.4s.
+  // The run's own Esc (DeskKeys' LeaveKey) steps aside while the board
+  // stands, so the first Esc is the board's and the second leaves.
+  useEffect(() => {
+    if (tier !== 'level' || leaving || !isDesk()) return undefined
+    const onKey = e => {
+      if (e.key !== 'Escape' || e.repeat) return
+      e.preventDefault()
+      setLeaving(true)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
   }, [tier, leaving])
 
   // onDone only ever fires on the real animationend of the exit, never
