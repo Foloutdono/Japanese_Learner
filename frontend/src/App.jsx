@@ -30,6 +30,7 @@ import { holdGuide } from './stores/guide'
 import { forgetAccount } from './stores/account'
 import { track } from './lib/track'
 import { routePattern } from './lib/routePattern'
+import { useDesk } from './hooks/useDesk'
 import { LangProvider, useLang } from './LangContext'
 
 import Welcome from './components/boarding/Welcome'
@@ -232,6 +233,10 @@ export default function App() {
   // if they had never tapped anything. The sign-in screen has that
   // line, and it prints the reason on its own mount.
   const [authMode, setAuthMode] = useState(() => (authRedirectError() ? 'login' : null)) // null | 'login' | 'signup'
+  // 机 (plan 122): on the desk the sign-in stands beside Board in the
+  // Welcome's side column, so there is no second screen to swap to --
+  // authMode only says which side the card opens on.
+  const desk = useDesk()
   // The browser's Back on the sign-in (plan 123): the sign-in replaces
   // Welcome through state, so Back left Tsuji rather than returning to
   // Welcome. While the sign-in stands for a signed-out learner, one
@@ -241,7 +246,7 @@ export default function App() {
   // -- rather than racing the router mounting over it.
   const authGuard = useRef(false)
   const authIgnore = useRef(false)
-  const onSignInScreen = session === null && authMode != null
+  const onSignInScreen = session === null && authMode != null && !desk
   useEffect(() => {
     function onPop() {
       if (authIgnore.current) { authIgnore.current = false; return }
@@ -483,9 +488,9 @@ export default function App() {
   if (!session) {
     return (
       <LangProvider>
-        {authMode
+        {authMode && !desk
           ? <AuthScreen mode={authMode} onBack={() => setAuthMode(null)} />
-          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} />}
+          : <Welcome onBoard={board} boarding={boarding} onSignIn={() => setAuthMode('login')} authMode={authMode} />}
       </LangProvider>
     )
   }

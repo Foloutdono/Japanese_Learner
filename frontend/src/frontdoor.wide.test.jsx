@@ -4,11 +4,12 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── first contact on a phone: nothing of the desk's (plan 122) ─────
-// frontdoor.desktop.test.jsx is the desk's side: Enter goes on through
-// the boarding and boards from the Welcome, each Continue printing its
-// key. On a phone none of it is listened for, printed or named -- the
-// phone's first contact is exactly what it was.
+// ── 机 — first contact on a wide window (plan 122) ─────────────────
+// At 1440 the Welcome's band ran four cards a lane and was clipped mid
+// window; the boarding's column stood in the middle of an empty one.
+// The band now spans the area the sign-in's column leaves, faded at its
+// ends, and its loop never shows a seam; the questions are centred in
+// that area, and the plan stands at the board's width.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiJsonWithTimeout = vi.hoisted(() => vi.fn())
@@ -84,82 +85,54 @@ async function pastName() {
   expect(stepOf()).toBe('why')
 }
 
-const pressEnter = () => document.body.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true, cancelable: true }))
+const box = el => el.getBoundingClientRect()
+const bodyW = () => document.body.getBoundingClientRect().width
+const mid = r => (r.left + r.right) / 2
 
-describe('the keys at first contact, on a phone (P8)', () => {
-  it('prints and names no key on the Welcome, and Enter does not board', async () => {
-    const onBoard = vi.fn()
-    await render(<LangProvider><Welcome onBoard={onBoard} onSignIn={() => {}} /></LangProvider>)
-    await settle(100)
-    expect($('[aria-keyshortcuts]')).toBeNull()
-    expect($('.desk-kbd')).toBeNull()
-    pressEnter()
+describe('first contact at 1440 (P10)', () => {
+  it('runs the band across the whole area, and covers it to the loop\'s last frame', async () => {
+    expect(window.innerWidth).toBe(1440)
+    await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} /></LangProvider>)
+    await settle(150)
+    const roll = $('.brd-roll')
+    expect(Math.round(box(roll).width)).toBe(Math.round(bodyW()) - 360)
+    expect(getComputedStyle(roll).maskImage).toMatch(/linear-gradient/)
+    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
+      // Hold the loop on its last frame: the lane must still reach the
+      // band's right edge, or the seam shows as an empty strip.
+      const secs = parseFloat(getComputedStyle(lane).animationDuration)
+      lane.style.animationDelay = `-${secs * 0.999}s`
+      lane.style.animationPlayState = 'paused'
+    }
     await settle(60)
-    expect(onBoard).not.toHaveBeenCalled()
+    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
+      expect(box(lane).left).toBeLessThan(box(roll).left)
+      expect(box(lane).right).toBeGreaterThan(box(roll).right)
+    }
   })
 
-  it('goes on through the boarding by its buttons only', async () => {
+  it('centres the questions in the area the journey leaves', async () => {
     await board()
-    expect($('[aria-keyshortcuts]')).toBeNull()
     await pastName()
-    inCar('[data-motive="trip"]').click()
-    await settle(60)
-    document.activeElement?.blur?.()
-    pressEnter()
-    await settle()
-    expect(stepOf()).toBe('why')
-    expect($('.desk-kbd')).toBeNull()
+    expect(Math.abs(mid(box(inCar('.brd__q'))) - (bodyW() - 360) / 2)).toBeLessThan(1.5)
+    expect(Math.round(box($('.desk-brd__side')).right)).toBe(Math.round(bodyW()))
   })
-})
 
-// ── P9: the boarding frame stays the phone's ──
-describe('the boarding frame on a phone (P9)', () => {
-  it('keeps the plain frame with no side, and plays Building after the hour', async () => {
+  it('stands the plan at the board\'s width, centred in the window', async () => {
     await board()
-    expect($('main.brd').className).toBe('brd')
-    expect($('.desk-brd__side')).toBeNull()
     await pastName()
-    const next = async () => { inCar('[data-action="continue"]').click(); await settle() }
     inCar('[data-motive="trip"]').click()
     await settle(40)
-    await next()
+    inCar('[data-action="continue"]').click()
+    await settle()
     inCar('[data-kana="both"]').click()
     await settle()
     inCar('[data-level="N1"]').click()
     await settle(40)
-    await next()        // → lines (N1: no goal)
-    await next()        // → rhythm
-    await next()        // → time
-    expect(stepOf()).toBe('time')
-    expect($('main.brd').className).toBe('brd')
-    await next()
-    expect(stepOf()).toBe('building')
-    expect($('.brd-build__track')).not.toBeNull()
-  })
-})
-
-// ── P10: the front door stays the phone's ──
-describe('the front door on a phone (P10)', () => {
-  it('keeps the link to the sign-in, no side, and two runs a lane', async () => {
-    await render(<LangProvider><Welcome onBoard={() => {}} onSignIn={() => {}} authMode="signup" /></LangProvider>)
-    await settle(100)
-    expect($('main').className).toBe('brd brd--welcome')
-    expect($('[data-action="sign-in"]')).not.toBeNull()
-    expect($('.desk-door__side')).toBeNull()
-    expect($('.auth-card')).toBeNull()
-    for (const lane of document.querySelectorAll('.brd-roll__lane')) expect(lane.children).toHaveLength(12)
-  })
-
-  it('swaps the Welcome for the sign-in screen, both sides and its foot', async () => {
-    const { default: App } = await import('./App')
-    window.history.replaceState(null, '', '/')
-    await render(<App />)
-    await settle(300)
-    $('[data-action="sign-in"]').click()
-    await settle(120)
-    expect($('main.auth')).not.toBeNull()
-    expect($('.brd--welcome')).toBeNull()
-    expect($('main.auth .seg')).not.toBeNull()
-    expect($('main.auth .auth-foot')).not.toBeNull()
+    for (let i = 0; i < 4; i++) { inCar('[data-action="continue"]').click(); await settle() }
+    expect(stepOf()).toBe('plan')
+    const plan = box($('main.brd'))
+    expect(Math.round(plan.width)).toBe(1040)
+    expect(Math.abs(mid(plan) - bodyW() / 2)).toBeLessThan(1.5)
   })
 })

@@ -45,10 +45,15 @@ vi.mock('./lib/platform', async o => ({
   requestNudgePermission: async () => false,
 }))
 vi.mock('./lib/audio', async o => ({ ...(await o()), playPlatformChime: vi.fn(), playClick: vi.fn(), playUi: vi.fn() }))
+const refusal = vi.hoisted(() => ({ current: null }))
+vi.mock('./lib/authRedirect', async o => ({ ...(await o()), authRedirectError: () => refusal.current }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { default: BoardingFlow } = await import('./screens/BoardingFlow')
 const { default: Welcome } = await import('./components/boarding/Welcome')
+const { default: App } = await import('./App')
+const { default: en } = await import('./locales/en/index.js')
+const { default: fr } = await import('./locales/fr/index.js')
 
 const VOLUMES = {
   vocab: { N5: 667, N4: 634, N3: 1832, N2: 1796, N1: 3476 },
@@ -71,7 +76,10 @@ beforeEach(() => {
   apiJsonWithTimeout.mockImplementation(async () => ({ jlptLevel: 'N5', dailyNewTarget: 10, onboardedAt: 'x' }))
   sessionStorage.clear()
 })
-afterEach(() => { document.querySelectorAll('[data-probe-modal]').forEach(n => n.remove()) })
+afterEach(() => {
+  document.querySelectorAll('[data-probe-modal]').forEach(n => n.remove())
+  refusal.current = null
+})
 
 async function board({ onComplete = vi.fn(), onExit = vi.fn() } = {}) {
   await render(
@@ -371,5 +379,89 @@ describe('the boarding frame on the desk (P9)', () => {
     expect(box(inCar('.brd-chart')).right).toBeLessThan(box(inCar('.brd-lead')).left)
     expect(fits(inCar('.brd__body'))).toBe(true)
     expect(box(inCar('.brd__foot')).bottom).toBeLessThanOrEqual(window.innerHeight)
+  })
+})
+
+// ── P10 — the front door ──
+// The Welcome with the sign-in beside it: a returning learner signs in
+// with no second screen, Board at a ticket's width, the band across the
+// area and faded at its ends.
+function Door({ authMode = null, onBoard = () => {}, boarding = false }) {
+  return <LangProvider><Welcome onBoard={onBoard} onSignIn={() => {}} boarding={boarding} authMode={authMode} /></LangProvider>
+}
+const inSide = s => $('.desk-door__side')?.querySelector(s)
+
+describe('the front door on the desk (P10)', () => {
+  it('stands the sign-in beside Board, and Board as the one filled action', async () => {
+    await render(<Door />)
+    await settle(150)
+    const side = $('.desk-door__side')
+    expect(Math.round(box(side).width)).toBe(360)
+    expect(Math.round(box(side).right)).toBe(Math.round(document.body.getBoundingClientRect().width))
+    expect(Math.round(box(side).height)).toBe(window.innerHeight)
+    expect([en.brdHaveAccount, fr.brdHaveAccount]).toContain(inSide('.desk-deck__cap').textContent)
+    // Signing in only: no Login / Sign up control, no foot.
+    expect(inSide('.seg')).toBeNull()
+    expect(inSide('.auth-foot')).toBeNull()
+    expect(inSide('input[type="email"]')).not.toBeNull()
+    // Its door stands beside it: no link to a second screen.
+    expect($('[data-action="sign-in"]')).toBeNull()
+    const board = $('[data-action="board"]')
+    expect(Math.round(box(board).width)).toBe(360)
+    const mid = r => (r.left + r.right) / 2
+    expect(Math.abs(mid(box(board)) - (document.body.getBoundingClientRect().width - 360) / 2)).toBeLessThan(1.5)
+    expect(getComputedStyle(inSide('.auth-submit')).backgroundColor).toBe('rgba(0, 0, 0, 0)')
+    expect(getComputedStyle(board).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(document.querySelectorAll('h1')).toHaveLength(1)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    // Nothing is focused, so Enter boards.
+    expect(document.activeElement).toBe(document.body)
+  })
+
+  it('opens on Sign up, both sides named, when Board could not issue a pass', async () => {
+    await render(<Door authMode="signup" />)
+    await settle(150)
+    expect(inSide('.desk-deck__cap')).toBeNull()
+    const sides = [...inSide('.seg').querySelectorAll('.seg__opt')]
+    expect(sides.map(o => o.getAttribute('aria-checked'))).toEqual(['false', 'true'])
+    expect(inSide('.auth-foot')).not.toBeNull()
+    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+  })
+
+  it('focuses the email for a learner who came to sign in, and keeps Enter the form\'s there', async () => {
+    const onBoard = vi.fn()
+    await render(<Door authMode="login" onBoard={onBoard} />)
+    await settle(150)
+    expect(inSide('.seg')).toBeNull()
+    expect(document.activeElement).toBe(inSide('input[type="email"]'))
+    await userEvent.keyboard('aiko@example.com{Enter}')
+    await settle()
+    expect(onBoard).not.toHaveBeenCalled()
+  })
+
+  it('runs the band across the area, faded at its ends, with no seam at the loop\'s end', async () => {
+    await render(<Door />)
+    await settle(150)
+    const roll = $('.brd-roll')
+    expect(getComputedStyle(roll).maskImage).toMatch(/linear-gradient/)
+    expect(Math.round(box(roll).left)).toBe(0)
+    // The window less html's scrollbar gutter, less the column.
+    expect(Math.round(box(roll).right)).toBe(Math.round(document.body.getBoundingClientRect().width) - 360)
+    for (const lane of document.querySelectorAll('.brd-roll__lane')) {
+      expect(lane.children).toHaveLength(24)
+      // The loop moves a lane by half: that half must still cover the band.
+      expect(lane.scrollWidth / 2).toBeGreaterThan(box(roll).width)
+    }
+  })
+
+  it('keeps the Welcome up for a refused Google return, the reason in the side', async () => {
+    refusal.current = { error: 'access_denied', code: null, description: 'denied' }
+    window.history.replaceState(null, '', '/')
+    await render(<App />)
+    await settle(300)
+    expect($('.brd--welcome')).not.toBeNull()
+    expect($('main.auth')).toBeNull()
+    expect(inSide('.auth-message--error')).not.toBeNull()
+    expect(document.activeElement).toBe(inSide('input[type="email"]'))
   })
 })

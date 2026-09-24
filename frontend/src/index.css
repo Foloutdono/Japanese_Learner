@@ -21678,7 +21678,8 @@ a.slip__act { text-decoration: none; }
     right: calc(var(--desk-side-w) + var(--desk-run-inset));
   }
   .desk-run__side,
-  .desk-brd__side {
+  .desk-brd__side,
+  .desk-door__side {
     position: fixed;
     inset: 0 var(--desk-run-inset) 0 auto;
     width: var(--desk-side-w);
@@ -21928,16 +21929,19 @@ a.slip__act { text-decoration: none; }
   }
   /* The side is a run's (above), on the right edge whatever the width:
      the questions are centred in what it leaves, not in a workspace. */
-  .desk-brd__side { inset: 0 0 0 auto; }
+  .desk-brd__side,
+  .desk-door__side { inset: 0 0 0 auto; }
   .desk-brd--side {
     max-width: none;
     padding-inline:
       max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5)))
       calc(var(--desk-side-w) + max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5))));
   }
-  /* The journey on the column's centre line, between grow-only air. */
+  /* What the column holds, on its centre line, between grow-only air. */
   .desk-brd__side::before,
-  .desk-brd__side::after {
+  .desk-brd__side::after,
+  .desk-door__side::before,
+  .desk-door__side::after {
     content: "";
     flex: 1 0 0;
   }
@@ -21964,7 +21968,8 @@ a.slip__act { text-decoration: none; }
      stand at. The name's field keeps the car's, for a name at the
      display size. */
   .desk-brd .brd__stage,
-  .desk-brd .brd__foot {
+  .desk-brd .brd__foot,
+  .desk-door .brd__foot {
     width: 100%;
     max-width: var(--desk-side-w);
     margin-inline: auto;
@@ -21994,6 +21999,37 @@ a.slip__act { text-decoration: none; }
   }
   .desk-brd .brd__stage:has(> .brd-chart) > .brd-chart { grid-row: span 2; }
   .desk-brd[data-step="plan"] .brd__foot { margin-inline: calc(var(--desk-side-w) + var(--sp-6)) auto; }
+  /* The Welcome (components/boarding/Welcome): the sign and the rolling
+     stock across what the sign-in's column leaves, Board at a ticket's
+     width, the sign-in beside it (App no longer swaps to a second
+     screen on the desk). The heading steps down to the section rung
+     under the 辻, which is the mark. The column's Log in wears the
+     provider button's ghost clothes, so Board is the page's one filled
+     action. */
+  .desk-door {
+    --fs-display-fluid: var(--fs-heading);
+    max-width: none;
+    padding-inline-end: calc(var(--desk-side-w) + var(--sp-5));
+  }
+  .desk-door__side .auth-submit {
+    background: transparent;
+    border: 1px solid var(--surface-line);
+    color: var(--text-primary);
+  }
+  /* The band runs across the area, capped at the canvas and faded at
+     its ends -- a clip mid-window read as a broken card, not a train
+     leaving. Four copies a lane (Welcome's Lane) move twice as far per
+     loop, so the loop takes twice as long: the cards pass at a phone's
+     speed. A pointer resting on the band stops it. */
+  .desk-door .brd-roll {
+    width: calc(100% + 2 * var(--sp-5));
+    max-width: var(--desk-board-w);
+    margin-inline: 0;
+    align-self: center;
+    mask-image: linear-gradient(to right, transparent, currentcolor var(--sp-9), currentcolor calc(100% - var(--sp-9)), transparent);
+  }
+  .desk-door .brd-roll__lane { animation-duration: 52s; }
+  .desk-door .brd-roll__lane--back { animation-duration: 68s; }
   /* A pointer's answer to "is this one I can pick": the edge warms
      toward the gold a pick fills, with no lift; the focus ring's twin. */
   @media (pointer: fine) {
@@ -22007,6 +22043,7 @@ a.slip__act { text-decoration: none; }
     }
     .desk-brd .brd__back:hover { color: var(--text-primary); }
     .desk-brd .brd-day { cursor: pointer; }
+    .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

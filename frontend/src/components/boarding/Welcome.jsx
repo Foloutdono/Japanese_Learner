@@ -1,6 +1,8 @@
 import { useLang } from '../../LangContext'
 import { Continue, BoardLink } from './BoardFrame'
 import { EnterKey } from '../chrome/DeskKeys'
+import { AuthCard } from '../account/AuthCard'
+import { useDesk } from '../../hooks/useDesk'
 import { FRONT_LANE, BACK_LANE } from './demoCards'
 
 // ── Welcome — the sign, the rolling stock, the promise (plan 075) ─
@@ -77,18 +79,31 @@ function DemoCard({ card, t }) {
   )
 }
 
-function Lane({ cards, back = false, t }) {
+// A lane is its cards over and over, and the loop moves it by half:
+// twice is seamless across a phone, four times across a desk's band
+// (plan 122) -- one run of six cards is ~1000px.
+function Lane({ cards, back = false, copies = 2, t }) {
+  const run = Array.from({ length: copies }, () => cards).flat()
   return (
     <div className={`brd-roll__lane${back ? ' brd-roll__lane--back' : ''}`}>
-      {[...cards, ...cards].map((card, i) => <DemoCard key={i} card={card} t={t} />)}
+      {run.map((card, i) => <DemoCard key={i} card={card} t={t} />)}
     </div>
   )
 }
 
-export default function Welcome({ onBoard, onSignIn, boarding = false }) {
+// 机 (plan 122): on the desk the sign-in stands beside Board, in a
+// column on the right edge, so a returning learner signs in with no
+// second screen. `authMode` is App's: null draws the column signing in
+// only; 'login' (back from the boarding, a refused Google return)
+// focuses its email; 'signup' (Board could not issue a guest pass)
+// opens it on Sign up with both sides named. On a phone it is unused:
+// App swaps to AuthScreen instead.
+export default function Welcome({ onBoard, onSignIn, boarding = false, authMode = null }) {
   const { t } = useLang()
+  const desk = useDesk()
+  const copies = desk ? 4 : 2
   return (
-    <main className="brd brd--welcome" id="main-content">
+    <main className={desk ? 'brd brd--welcome desk-door' : 'brd brd--welcome'} id="main-content">
       <div className="brd__body brd__body--top">
         <div className="brd-hero">
           <span className="auth-header__glyph" lang="ja">{t.appTitle}</span>
@@ -96,8 +111,8 @@ export default function Welcome({ onBoard, onSignIn, boarding = false }) {
         </div>
         {/* Decoration: the cards say nothing the tagline does not. */}
         <div className="brd-roll" aria-hidden="true">
-          <Lane cards={FRONT_LANE} t={t} />
-          <Lane cards={BACK_LANE} back t={t} />
+          <Lane cards={FRONT_LANE} copies={copies} t={t} />
+          <Lane cards={BACK_LANE} back copies={copies} t={t} />
         </div>
         <p className="brd-tagline">{t.brdTagline}</p>
       </div>
@@ -105,8 +120,20 @@ export default function Welcome({ onBoard, onSignIn, boarding = false }) {
         <Continue keys label={t.brdBoard} onClick={onBoard} disabled={boarding} data-action="board" />
         {/* 机 (plan 122): Enter boards. */}
         <EnterKey onEnter={onBoard} disabled={boarding} />
-        <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>
+        {!desk && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>}
       </div>
+      {desk && (
+        <aside className="desk-door__side" aria-label={t.brdHaveAccount}>
+          {authMode !== 'signup' && <h2 className="desk-deck__cap">{t.brdHaveAccount}</h2>}
+          <AuthCard
+            key={authMode ?? 'none'}
+            initialMode={authMode === 'signup' ? 'signup' : 'login'}
+            seg={authMode === 'signup'}
+            autoFocus={authMode != null}
+          />
+          {authMode === 'signup' && <p className="auth-foot">{t.authFoot}</p>}
+        </aside>
+      )}
     </main>
   )
 }
