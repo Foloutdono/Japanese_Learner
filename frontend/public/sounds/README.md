@@ -226,26 +226,30 @@ Today every clip is `voicevox-nemo`: generated, not recorded, by the
 same voice engine as the rest of the app's speech (VOICEVOX Nemo,
 `backend/study/voice_engine.py`, plan 113). The owner judged a
 synthesized mora correct but flat, so the set is to be cut from a real
-voice instead: 小春音アミ, from あみたろの声素材工房's UTAU
-single-syllable bank (plan 113b, `docs/adr/0019`). That waits until her
-author confirms the use in writing: her terms do not plainly cover audio
-a web app serves, and the ADR says what to ask. One script makes either
-set:
+voice instead: 波音リツ's UTAU voicebank (by カノン, plan 113c,
+`docs/adr/0019`). His terms ask for no credit, report or permission; the
+first choice, 小春音アミ, asked for all three. The clips wait on his
+download site, which the build environment has to be allowed to reach,
+and on the owner's choice of bank and pitch by ear. One script makes
+either set:
 
     cd backend
     python -m scripts.build_kana_audio --check     # missing, stray, off-spec, unsourced
     python -m scripts.build_kana_audio --force     # remake the set on the engine
-    python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro \
-        --pitch G4 --credit amitaro --force        # cut it from the bank
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/<bank> \
+        --pitch A3 --credit namine-ritsu --force   # cut it from the bank
 
-The bank goes under `backend/datas/kana_source/`, which is gitignored.
-Her terms forbid distributing the voice files themselves, so only the
-clips cut from them are committed.
+The bank goes under `backend/datas/kana_source/`, which is gitignored:
+only the clips cut from it are committed.
 
-`backend/scripts/kana_bank.py` has the recipes:
+`backend/scripts/kana_bank.py` reads a single-syllable bank or a joined
+one, like his, where every syllable is taken from the start of a recorded
+string and cut before the next sound. Its recipes:
 
-- a long vowel is the bank's long tone (あー);
-- あい and おい are two samples joined in phase;
+- a long vowel is the bank's long tone (あー) where it has one; otherwise
+  it is the vowel held, with its steady end repeated in phase;
+- あい and おい are the singer's own glide where a string has one;
+  otherwise two samples joined in phase;
 - を is お;
 - the ヴ row is the バ row when the bank has no ゔ, and the run says so.
 
@@ -268,7 +272,8 @@ play `kanaSound(card)`.
 syllable with 20 ms of air either side and 5 ms fades, loudness at
 `playback.js`'s `TARGET_RMS` with the peak kept at −3 dBFS or below.
 An engine clip is 0.26–0.45 s long. A bank cut keeps 0.4 s of the
-syllable, or 0.7 s for a long vowel, before the air is added. The playback correction in `playKana`
+syllable (less if the next sound in its string comes sooner), or 0.7 s
+for a long vowel, before the air is added. The playback correction in `playKana`
 stays: a file already on target gets gain ≈ 1 and offset ≈ 0.
 
 **Why synthesis works now, when it was once rejected.** Read as TEXT, a

@@ -39,7 +39,8 @@ datas/exam_audio/
 # THIRD_PARTY_NOTICES.md).
 datas/voice_audition/
 # The voicebank scripts/build_kana_audio.py --from-bank cuts the kana clips
-# from (plan 113b, scripts/kana_bank.py). Its author's terms forbid
-# distributing the voice files themselves as material: the processed clips
-# in frontend/public/sounds/kanas/ are committed, the bank never is.
+# from (plans 113b/113c, scripts/kana_bank.py), and the trial sets cut from
+# it for listening. The processed clips in frontend/public/sounds/kanas/ are
+# committed, the bank never is: nothing needs it in the repository, and
+# 小春音アミ's terms forbid distributing her files.
 datas/kana_source/

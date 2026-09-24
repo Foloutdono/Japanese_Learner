@@ -1,14 +1,18 @@
 # 0019 — The kana are a recorded voice
 
-- **Status**: accepted by the owner. The importer, its tests and the credit
-  guard are in; the clips themselves are not yet. They wait on two things:
-  the bank (hosted on Google Drive), and the author's written OK for this
-  use, because her terms do not plainly cover it (see "The terms").
+- **Status**: accepted by the owner.
+  - **2026-09-24:** changed to 波音リツ, after 小春音アミ was set aside for
+    her terms ("Why not 小春音アミ", below).
+  - **What is in:** the importer and its tests.
+  - **What the clips wait on:**
+    - the bank's download host, canon-voice.com, which the build environment
+      blocks until it is allowed;
+    - the owner's choice of bank and pitch, by ear.
 - **Amends**: [0018](0018-speech-is-synthesized-by-a-self-hosted-voicevox-nemo-engine.md),
   for the kana deck only. The engine keeps every other voice, and a lone
   kana spoken through `/api/tts`.
-- **Date**: 2026-09-23
-- **Plan**: 113b
+- **Date**: 2026-09-23, revised 2026-09-24
+- **Plan**: 113b, 113c
 
 ## Context
 
@@ -22,43 +26,67 @@ What was wanted:
 
 - one voice for all 127 sounds, real if possible;
 - free or cheap;
-- licensable in a paid app.
+- licensable in a paid app, with as few conditions as possible.
 
 ## Decision
 
 ### The voice
 
-**小春音アミ**, by あみたろの声素材工房: her UTAU single-syllable bank
-単独音3.00, the G4 folder.
+**波音リツ**, by カノン: an UTAU voicebank. There are five on
+https://www.canon-voice.com/voicebanks/: 強, 通常 (弱), キレ, Eve and 眩＆麗.
 
-- **A real voice.** It is recorded in a measured booth: noise floor 18.5 dB(A),
-  T60 220 ms (her figures).
-- **Nearly complete.** It holds every syllable the deck teaches except the ヴ
-  row, and real long tones (あー, いー …) recorded to be held.
-- **Recommended for exactly this by its author.** Her read-aloud page
-  (https://amitaro.net/voice/yomiage_01/) sends anyone who wants the 五十音
-  read aloud to this bank: 「「あー」「いー」など日本語五十音読み上げ音声は、
-  『UTAU音源・小春音アミ』の「単独音3.0」の「G4(ソ)」…をご利用ください」.
+- **The bank known in detail** is 強連続音 Ver1.5.1. It is a joined bank (see
+  below) at two pitches: A3 (220 Hz) and F4 (349 Hz).
+- **The owner picks** the bank and the pitch by ear, from trial sets.
+- **A real voice,** recorded for singing.
+- **Complete.** It covers every sound the deck teaches. That includes the ヴ
+  row, which his bank records as ヴ, ヴぁ, ヴぃ, ヴぇ and ヴぉ, and ウィ, ウェ,
+  ウォ. This comes from a third-party parser of the bank; the import confirms
+  it.
+- **Terms that ask for nothing** (below).
 
 ### How it is made
 
-`scripts/build_kana_audio.py --from-bank DIR --pitch G4 --credit amitaro`
-uses `scripts/kana_bank.py`, which indexes the bank and cuts every sound
-by recipe:
+`scripts/build_kana_audio.py --from-bank DIR --pitch A3 --credit namine-ritsu`
+uses `scripts/kana_bank.py`, which indexes the bank and cuts every sound by
+recipe:
 
 | Sound | From |
 |---|---|
-| a syllable (か, きゃ, ファ …) | its own sample, cut to 0.4 s from the onset |
-| ああ/アー, いい, うう, ええ/えい (ē), おお/おう (ō) | the bank's long tone (あー …), 0.7 s; the vowel's sample if it has none |
-| あい, おい | two samples, the second joined in phase with the first |
+| a syllable (か, きゃ, ファ …) | the sample that opens a recorded string (`- か`), cut to 0.4 s from the onset and never past the next sound in the string |
+| ああ/アー, いい, うう, ええ/えい (ē), おお/おう (ō) | the bank's long tone where it has one (a single-syllable bank may). Otherwise the vowel is held: its steady end is repeated past the end of its recording, each repeat joined in phase, to 0.7 s |
+| あい, おい | the glide the singer made, where a string goes from one vowel to the other (`- あ` then `a い`), with his first vowel shortened to 0.28 s. Otherwise two samples joined in phase |
 | を | お's sample: を is said "o" (ウォ is うぉ's) |
 | じ/ぢ, ず/づ | じ, ず: the deck files them together already |
-| ヴ row | ゔぁ … if the bank has them; else the バ row, which is how most speakers say it. The run reports it. |
+| ヴ row | his own ゔ samples. The バ row only for a bank without them, and the run reports it |
 
-The onset is found from the sample itself (the oto offset is only a floor),
-so a bank that left its offsets at 0 still cuts right. The join of あい
-slides by up to a pitch period to meet the first vowel in phase: blended half
-a period apart, two vowels at one pitch cancel into a dip mid-glide.
+**How a bank is read**
+
+- **Single-syllable banks (単独音).** One syllable a file, named by it or by
+  its oto.ini alias.
+- **Joined banks (連続音, his).** They record strings such as
+  `_かかきかくかけかこ.wav`. Their oto.ini names every sound in each one.
+  - `- か` opens the string, from silence. `a か` is a か sung after a
+    vowel.
+  - Only the `- ` sounds are taken: that is a syllable on its own, which is
+    what a learner hears.
+  - The next sound in the string ends the syllable, at its offset plus its
+    preutterance, which is where it is heard.
+  - The last sound in a file ends at the oto cutoff, by UTAU's rule: a
+    positive cutoff counts from the file's end, a negative one from the
+    offset.
+- **Aliases** are read by `parse_alias`:
+  - a pitch (`A3`, `_G4`) is not part of the syllable;
+  - a variant (`か↑`, `あR`) loses to the plain sample;
+  - ヴ is read as ゔ and ン as ん.
+- **Pitch folders.** A bank with one folder per pitch must be given
+  `--pitch`. Otherwise the best sample of each syllable would sing the set in
+  several keys.
+- **Onsets** are found from the sound itself, searching from the oto offset
+  onwards.
+- **Phase.** Every join slides by up to a pitch period to meet what it follows
+  in phase. Blended half a period apart, two sounds at one pitch cancel into
+  an audible dip.
 
 The same `finish()` as the engine's clips does the rest, and LAME resamples
 the bank's 44.1 kHz. The output spec is unchanged (48 kHz mono, CBR 96 kbps,
@@ -75,127 +103,125 @@ and different rules on machine learning.
 - **Where each clip comes from.** `frontend/public/sounds/kanas/sources.json`
   records which voice made each clip, as its row id in
   `frontend/src/domain/attributions.js`.
-- **The credit is enforced.** `tests/test_kana_audio.py` fails if any voice in
+- **Every voice is credited.** `tests/test_kana_audio.py` fails if any voice in
   that file lacks its row on the Credits page or its section in
   `THIRD_PARTY_NOTICES.md`.
-- **The bank is never committed.** It lives under `backend/datas/kana_source/`,
-  which is gitignored.
+  - His terms do not require a credit. The app credits him anyway, as
+    provenance.
+- **The bank stays out of the repository.** It lives under
+  `backend/datas/kana_source/`, which is gitignored; nothing needs it there.
 
 ## The terms
 
-Three pages apply:
+These are his terms (https://www.canon-voice.com/terms/). They were read from a
+verbatim snapshot of 2026-08-15, because the site is blocked in the build
+environment. Read them again from the site when the bank is downloaded.
 
-- **The UTAU bank's terms** (https://amitaro.net/utau/licence01.html). For use
-  "as general voice material, built into an app", they send you to the
-  voice-material terms as well.
-- **The voice-material terms in Japanese** (https://amitaro.net/voice/voice_rule/,
-  last updated 2026-08-11).
-- **The voice-material terms in English** (https://amitaro.net/voice/terms/).
+**The summary.** The page says to read only this, and that it takes
+precedence over the terms bundled with the bank:
 
-The two voice-material versions differ, and each says which reader it
-applies to: the Japanese one only to those who read Japanese without
-difficulty, the English one to everyone else.
+- 「商用利用可です。」: commercial use is allowed;
+- 「音源の転載、再配布可」: the bank may be reposted and redistributed;
+- 「原音を加工しての転載、再配布可」: the processed recordings may be too;
+- 「クレジット表記不要」: no credit is required.
 
-**Plainly allowed by all three**
+**The formal text below it**
 
-- commercial use;
-- editing, trimming and pitch changes;
-- building the audio into an app;
-- ordinary use without asking first.
+- **Article 6-1** grants a free, non-exclusive licence for commercial and
+  non-commercial use.
+- **Article 8-2.** He may ask for a work he judges inappropriate to be taken
+  down, and the app would comply. The engine's set remains a working fallback.
+- **Article 6-2 is narrower than the summary.** It is older and reads
+  「個人使用の範囲でのデータの加工、改変を行う事は配布をしない限り問題ありません」
+  (modification is fine within personal use, so long as it is not
+  distributed). The page says to read the summary, and Article 7-1 lets him
+  settle any doubt. The page's Q&A answers 「○○してもいいですか？」 with
+  「いいです。」 (yes). An email to confirm (canon7373@gmail.com, on the page)
+  is optional reassurance, not a condition.
 
-**Required**
+**Other points**
 
-- **The credit, clearly visible.** Either 「あみたろの声素材工房（https://amitaro.net/）」
-  or 「小春音アミ」, with a link where possible. Using the audio without it is
-  forbidden. It goes on the Credits page and in `THIRD_PARTY_NOTICES.md`.
-- **A report.** Using the audio in a company's product or service must be
-  reported by email within about a month of launch (the Japanese terms).
+- **Other software.** Use through other software follows that software's
+  terms. None applies here: the importer reads his WAVs directly.
+- **Machine learning.** Nothing in his terms forbids it. VOICEVOX Nemo's
+  clips still forbid it, and `sources.json` says which applies to which clip.
 
-**Forbidden**
+### Why not 小春音アミ
 
-- selling or distributing the voice files themselves as material;
-- hotlinking her server;
-- anything unsuitable for children;
-- political or religious use;
-- registering raw material in Content ID;
-- presenting the voice as your own.
+Her UTAU single-syllable bank (あみたろの声素材工房) was the first choice. It
+is a real voice, complete but for the ヴ row, and the one her author
+recommends for reading the 五十音 aloud. Her terms turned out to ask for three
+things:
 
-**Not plainly covered, which is why the clips wait**
+- **A credit**, clearly visible.
+- **A report** within a month of use in a company's product.
+- **Her written OK.** Neither version of her terms plainly covers a web app
+  serving the clips:
+  - the Japanese terms say 「セリフ素材以外の音声を…アプリに組み込みたい場合は、
+    お問い合わせください」 (ask before building non-line audio into an app);
+  - the English terms forbid "Bundling voice files in any format where end
+    users can independently extract or download them";
+  - the English terms also say that "Lack of response does not constitute
+    approval".
 
-- **Japanese terms.** Their redistribution rules are for her line material
-  (セリフ素材) only, and a UTAU bank is not line material. For everything else
-  they say 「配信音声・コーパス音声などセリフ素材以外の音声を再配布したい・アプリに
-  組み込みたい場合は、お問い合わせください」.
-- **English terms.** They allow "Integrating into software or games, where
-  voice files cannot be independently extracted by end users" and forbid
-  "Bundling voice files in any format where end users can independently
-  extract or download them". A web app serves each clip at its own URL, and
-  no web app can make audio impossible to extract.
-- **Silence is not consent.** The English terms say "Lack of response does not
-  constitute approval". All inquiries must be in Japanese.
-
-So the owner asks her, in Japanese, before the clips ship, and keeps her
-answer with the release records. The email should say what the use is:
-
-- the syllables are processed and served as MP3s by a paid web and mobile app;
-- the credit is on the Credits page.
-
-It should also ask what a paid licence would cost if this use needs one.
-She takes paid commissions (有償依頼), which also offers the best version of
-this: the 127 sounds *spoken* rather than sung, under a licence written for
-the use.
+The owner asked for a bank with fewer conditions. The importer still reads
+hers.
 
 ### When the clips land
 
-One commit, once her answer is in hand:
+One commit:
 
-1. **Cut the set** (from `backend/`):
+1. **Download the bank.** Allow `www.canon-voice.com` and `canon-voice.com` in
+   the environment's network settings. Download the banks into
+   `backend/datas/kana_source/ritsu/`.
+2. **Trial sets for the owner,** one per bank and pitch:
 
    ```bash
-   python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro --pitch G4 --credit amitaro --force
-   python -m scripts.build_kana_audio --check
+   python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/<bank> --pitch A3 \
+       --credit namine-ritsu --out datas/kana_source/trial-<bank>-A3
    ```
 
-   The report should show no gaps, and only the ヴ-row fallback. Listen to
-   the set before committing it.
-2. **The Credits row**, in `frontend/src/domain/attributions.js`:
+3. **Cut the chosen set:** the same command with `--force` and no `--out`,
+   then `--check`.
+4. **The Credits row,** in `frontend/src/domain/attributions.js`:
 
    ```js
-   { id: 'amitaro', name: 'あみたろの声素材工房 · 小春音アミ', by: 'あみたろ', what: 'kana', license: 'Amitaro terms', url: 'https://amitaro.net/' },
+   { id: 'namine-ritsu', name: '波音リツ', by: 'カノン', what: 'kana', license: '波音リツ terms', url: 'https://www.canon-voice.com/' },
    ```
 
    - Add `creditsWhat.kana` in both locales: 'Kana voice' and 'Voix des kana'.
    - Drop "the kana" from the `voicevox-nemo` row's comment.
-3. **Her section in `THIRD_PARTY_NOTICES.md`**, with:
-   - the credit, 「音声素材：あみたろの声素材工房（https://amitaro.net/）」;
-   - the three terms URLs;
-   - what was done to the audio: cut, joined, loudness-matched, resampled;
-   - that the files are not to be redistributed on their own;
-   - the date of her answer.
+5. **His section in `THIRD_PARTY_NOTICES.md`,** with:
+   - the terms URL and the date they were read;
+   - the quoted summary;
+   - Articles 6-1 and 8-2, and the note on 6-2;
+   - what was done to the audio: cut, held, joined, loudness-matched and
+     resampled;
+   - "credit not required; given as provenance".
 
    Take the kana out of the VOICEVOX Nemo section.
-4. **The frontend constant.** `KANA_REV = 'ami1'` in `lib/audio/playback.js`.
-5. **Docs.** Update the かな section of `frontend/public/sounds/README.md` and
+6. **The frontend constant.** `KANA_REV = 'ritsu1'` in `lib/audio/playback.js`.
+7. **Docs.** Update the かな section of `frontend/public/sounds/README.md` and
    this ADR's status line.
-6. **Tell her.** Report the release to her within the month, as her terms ask.
 
-`tests/test_kana_audio.py` fails until steps 2 and 3 are done.
+`tests/test_kana_audio.py` fails until steps 4 and 5 are done.
 
 ## Consequences
 
-- **A real voice for the kana**, once cleared.
-  - **It is young, bright and high.** She rates her voice's youthfulness 8/10
-    (「かなり子供っぽいです」) and the samples are sung at G4 (392 Hz), well
-    above the app's speaking voices. The owner accepted that.
-  - **Trimming turns a sung note into a spoken-length syllable** but keeps its
-    pitch.
+- **A real voice for the kana,** once imported.
+  - **It is sung, and a character's.** 波音リツ is a known UTAU character.
+    The samples hold a steady sung pitch (A3 or F4). Trimming turns a note
+    into a syllable of spoken length, but keeps its pitch. The owner accepted
+    that.
+  - **The long vowels are held by repetition.** A joined bank records no long
+    tones.
 - **The kana no longer share the reader's voice.**
   - The dictionary's kana entries play the deck's clips, so every kana still
     sounds the same everywhere.
   - A kanji's one-mora reading goes through `/api/tts` and stays 女声6.
-- **The ヴ row is the バ row** until a bank with ゔ is used.
-- **The two voices' terms differ on machine learning.** Hers allow training,
-  VOICEVOX Nemo's forbid it. `sources.json` says which applies to which clip.
+- **A takedown request** under Article 8-2 would mean going back to the
+  engine's set, which the script still makes.
+- **The two voices' terms differ on machine learning** (see "The terms").
 - **A new set means a new `KANA_REV`** in `lib/audio/playback.js`, as before.
 
 ## Alternatives considered
@@ -203,10 +229,10 @@ One commit, once her answer is in hand:
 | Option | Why not |
 |---|---|
 | Keep the engine's kana (0018) | Complete and correct, but judged not good enough by ear. It remains the fallback. |
-| Public-domain recordings on Wikimedia Commons | The cleanest licence, but the set found covers the basic kana only: no yōon, no long vowels, no 外来音. The deck would be two voices. |
-| AivisSpeech / Style-Bert-VITS2 models | More natural synthesis, but still synthesis of a lone mora. It needs 2–4 GB of RAM, and each model's licence and training data would have to be checked one by one. |
-| A cloud voice (Google Chirp 3 HD, Azure) | Synthesis again, plus a billing account, for 127 clips made once. |
-| Another UTAU bank (e.g. 波音リツ) | Permissive terms, but a character's singing voice. 小春音アミ is the one bank whose author recommends it for reading kana aloud. |
-| A commissioned recording | The best result: spoken, one voice, under a licence written for this use. It is the natural next step if her answer is a paid one. |
+| 小春音アミ's single-syllable bank | The first choice. See "Why not 小春音アミ": a credit, a report and her written OK. |
+| A commissioned recording | Spoken, one voice, under a licence written for this use: the best result, for a one-off fee. Two routes: a ココナラ/Upwork seller with the rights transferred, about ¥10k–40k; or あみたろ's paid recording, ¥34,750, licensed without a credit. The next step if a sung voice does not serve. |
+| Public-domain recordings on Wikimedia Commons (Hakatanoshio117117) | No conditions at all, and one spoken voice. But it covers 69 of the 127 sounds: the basic kana and dakuten, with no yōon, long vowels or 外来音. The deck would be two voices. |
+| Japanese free sound-effect sites | None has a complete kana set, and several count a tap-to-play sound app as redistribution of their files. |
+| AivisSpeech / Style-Bert-VITS2, cloud voices, VOICEVOX's own 波音リツ | Synthesis, which the owner rejected by ear. |
 | Research corpora (JSUT, JVS), course audio (MIT OCW) | Licensed for research or non-commercial use, not for a product. |
 | Kana clips from other learning sites, found in public repositories | No licence at all. |

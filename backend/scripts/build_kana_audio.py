@@ -4,21 +4,25 @@ frontend/public/sounds/kanas/, cut from a recorded voicebank or
 synthesized by the voice engine.
 
     python -m scripts.build_kana_audio --check      # what is missing, stray or off-spec
-    python -m scripts.build_kana_audio --from-bank datas/kana_source/amitaro --pitch G4 --credit amitaro --force
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu --pitch A3 --credit namine-ritsu \
+        --out datas/kana_source/trial                # a trial set to listen to (gitignored)
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu --pitch A3 --credit namine-ritsu --force
     python -m scripts.build_kana_audio              # make what is missing, on the engine
     python -m scripts.build_kana_audio --force      # remake every clip on the engine
     python -m scripts.build_kana_audio --only ka kya wo_foreign
 
--- The recorded voice (plan 113b) ---------------------------------
+-- The recorded voice (plans 113b and 113c) ------------------------
 The owner listened to the engine's syllables (below) and found them
-short of the standard: a synthesized mora is right, and flat. The set
-the app ships is a real voice, 小春音アミ from あみたろの声素材工房, cut
-from her UTAU single-syllable bank by scripts/kana_bank.py, which has
-the recipes (a long vowel is a held one, あい two samples joined, the
-ヴ row the バ row when the bank has no ゔ). docs/adr/0019 is why this
-voice. The bank is never committed -- its terms forbid distributing
-the voice files themselves -- so unzip it under backend/datas/
-kana_source/, which is gitignored, and point --from-bank at it.
+short of the standard: a synthesized mora is right, and flat. The deck
+is to be a real voice, cut from an UTAU voicebank by
+scripts/kana_bank.py, which has the recipes (a syllable is the one
+opening a recorded string, cut before the next sound; a long vowel is
+held; あい is the singer's own glide where a string has one). The voice
+is 波音リツ, whose terms ask for nothing -- no credit, no report, no
+permission; 小春音アミ, the first choice, asked for all three
+(docs/adr/0019). Unzip the bank under backend/datas/kana_source/, which
+is gitignored, and point --from-bank at it; a bank with a folder per
+pitch needs --pitch to pick one.
 
 -- Why synthesis, when the README once refused it -------------------
 frontend/public/sounds/README.md turned speech synthesis down for the
@@ -263,6 +267,10 @@ def _bank_maker(sounds: dict[str, dict], names: list[str], directory: Path, pitc
                      f" whose path names {pitch!r} -- leave --pitch out for a single-pitch bank"
                      if pitch else "")
         return None
+    if not pitch and len(bank.folders) > 1:
+        logger.error("The samples come from %d folders (%s): pick one with --pitch.",
+                     len(bank.folders), ", ".join(bank.folders))
+        return None
     wanted = kana_bank.recipes({name: sounds[name] for name in names})
     gaps = kana_bank.missing(bank, wanted)
     if gaps:
@@ -270,18 +278,18 @@ def _bank_maker(sounds: dict[str, dict], names: list[str], directory: Path, pitc
         for gap in gaps:
             logger.error("  %s", gap)
         return None
-    logger.info("Bank %s%s: %d syllable samples", directory, f" ({pitch})" if pitch else "",
-                len(bank.samples))
+    logger.info("Bank %s%s: %d syllables sung on their own, %d recorded glides", directory,
+                f" ({pitch})" if pitch else "", len(bank.samples), len(bank.glides))
     for name in sorted(wanted):
         recipe = wanted[name]
         if recipe.note and bank.pick(recipe.parts[0]) != recipe.parts[0][0]:
             logger.info("  %s: %s", name, recipe.note)
 
     def make(name: str) -> tuple[bytes, dict, str]:
-        pcm, used = kana_bank.make(bank, wanted[name])
+        pcm, source = kana_bank.make(bank, wanted[name])
         frames, report = finish(pcm)
         data = voice_engine.encode_mp3(voice_engine.Pcm(frames, pcm.rate), kbps=KBPS, out_rate=RATE)
-        return data, report, "+".join(used)
+        return data, report, source
 
     return make
 
@@ -296,7 +304,7 @@ def main(argv: list[str] | None = None) -> int:
                         help="cut the clips from a recorded UTAU bank (scripts/kana_bank.py) "
                              "instead of the voice engine")
     parser.add_argument("--pitch", metavar="TAG",
-                        help="with --from-bank: only the samples whose path names TAG (a pitch folder, G4)")
+                        help="with --from-bank: only the samples whose path names TAG (a pitch folder: A3, F4)")
     parser.add_argument("--credit", metavar="ID",
                         help="with --from-bank: the voice's row id in frontend/src/domain/attributions.js "
                              "(amitaro), recorded in sources.json")
@@ -339,7 +347,7 @@ def main(argv: list[str] | None = None) -> int:
     if make is None:
         return 1
     logger.info("%d clip(s) into %s", len(names), args.out)
-    logger.info("  %-11s %-8s %6s %7s %7s %7s  kana", "name", "from", "len", "peak", "rms", "gain")
+    logger.info("  %-11s %-10s %6s %7s %7s %7s  kana", "name", "from", "len", "peak", "rms", "gain")
     args.out.mkdir(parents=True, exist_ok=True)
 
     failed, made = [], {}
@@ -353,7 +361,7 @@ def main(argv: list[str] | None = None) -> int:
         partial.write_bytes(data)
         os.replace(partial, args.out / f"{name}.mp3")
         made[name] = credit
-        logger.info("  %-11s %-8s %5.2fs %6.1fdB %6.1fdB %+6.1fdB  %s", name, source, report["seconds"],
+        logger.info("  %-11s %-10s %5.2fs %6.1fdB %6.1fdB %+6.1fdB  %s", name, source, report["seconds"],
                     report["peak_db"], report["rms_db"], report["gain_db"], " ".join(sounds[name]["kana"]))
     if made:
         _record_sources(args.out, made)

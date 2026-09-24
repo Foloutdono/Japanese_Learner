@@ -1,49 +1,55 @@
 """
-The kana deck from a recorded voicebank (plan 113b, docs/adr/0019).
+The kana deck from a recorded voicebank (plans 113b and 113c,
+docs/adr/0019).
 
 scripts/build_kana_audio.py --from-bank DIR uses this module to turn an
-UTAU single-syllable bank -- 小春音アミ's 単独音 bank from
-あみたろの声素材工房 (https://amitaro.net/utau/), which its author
-recommends for exactly this ("日本語五十音読み上げ音声") -- into the
-deck's 127 clips.
+UTAU voicebank into the deck's 127 clips. The deck is cut from 波音リツ
+(カノン, https://www.canon-voice.com/voicebanks/), whom the owner chose
+for his terms (below). The module reads both layouts UTAU banks come in,
+so 小春音アミ's single-syllable bank -- the first choice, set aside for
+her terms (ADR 0019) -- reads as well.
 
 -- What a bank looks like ----------------------------------------
-A folder of WAVs, one sung syllable each, usually named by the syllable
-in hiragana (あ.wav, きゃ.wav, ふぁ.wav) and often one sub-folder per
-pitch (C4/ E4/ G4/ ...), each with an oto.ini: UTAU's table of where
-each sample's sound starts (`file=alias,offset,consonant,cutoff,
-preutterance,overlap`, in milliseconds, and in Shift_JIS as often as
-not). A bank that names its files in romaji names the syllable in the
-oto.ini alias instead, and that is read too. `--pitch` keeps the one
-folder asked for; the author's recommendation for read-aloud is G4
-("「あー」「いー」など日本語五十音読み上げ音声は…「単独音3.0」の「G4(ソ)」",
-https://amitaro.net/voice/yomiage_01/).
+A folder of WAVs, often one sub-folder per pitch (A3/ F4/, or C4/ ...
+G4/), each with an oto.ini: UTAU's table of the sounds in its folder,
+`file=alias,offset,consonant,cutoff,preutterance,overlap` in
+milliseconds, and in Shift_JIS as often as not.
 
-Her manual (https://amitaro.net/utau/tips_t_normal.html) names the
-rest of what such a bank holds, and the index takes it into account:
-a pitch suffix on an alias (あ_G4) is not part of the syllable; a
-long tone (あー, いー...) is a syllable of its own, recorded to be
-held; katakana ガ行 are her nasal variants, and the hiragana ones
-the plain sounds the deck teaches, so only hiragana names are read;
-and her other variants (あR, ら舌, 息...) lose to the plain sample.
+  - A single-syllable (単独音) bank records one syllable a file, usually
+    named by it (あ.wav, きゃ.wav); its alias, where there is one, names
+    the same syllable, perhaps with a pitch (あ_G4).
+  - A joined (連続音) bank records strings -- _かかきかくかけかこ.wav --
+    and its oto.ini names every sound in each: "- か" is the か that
+    opens the string, from silence; "a か" is a か sung after a vowel.
+    Only a "- " one is a syllable on its own, which is what a learner
+    hears, so only those are taken; the next sound in the same string
+    marks where the syllable ends (its offset + preutterance, where it
+    is heard). 波音リツ's 強連続音 bank is this layout, at A3 and F4.
+
+Every alias is read one way (parse_alias): its last token's kana,
+without the pitch (A3, _G4) or the marks of a variant (か↑, あR, ら舌 --
+a variant loses to the plain sample). ヴ is read as ゔ and ン as ん;
+katakana ガ行 are not read, being 小春音アミ's nasal variants. A file
+the oto.ini does not name is read by its own name, as one syllable.
 
 -- What is made from it --------------------------------------------
-Every sound the deck teaches, by recipe (recipe_for), from the bank's
-own syllables:
+Every sound the deck teaches, by recipe (recipe_for):
 
-  - a syllable is its sample, cut short -- the samples are sung and
-    held, and a learner hears a syllable, not a note;
+  - a syllable is its sample cut to a spoken length (SHORT_S), never
+    past the next sound in its string;
   - a long vowel (ああ, アー, and えい/おう, which the lesson teaches as ē
-    and ō) is the bank's long tone (あー), or the vowel's sample held
-    longer where it has none;
-  - あい and おい are two samples, the second joined to the first in
-    phase (see _in_phase);
+    and ō) is the bank's long tone (あー) where it has one; else the
+    vowel held -- its steady end repeated past the end of its
+    recording, each repeat joined in phase (_hold, _in_phase);
+  - あい and おい are the glide the singer made, where a string goes
+    from one vowel to the other ("- あ" then "a い"); else two samples
+    joined in phase;
   - を is お's sample, because を is said "o" (ウォ, the "wo" sound, is
     うぉ's);
   - ぢ/づ share じ/ず's clip, as they share the deck's sound name;
-  - the ヴ row is ゔぁ… if the bank has it, and the バ row otherwise --
-    which is how most speakers say it; the import reports when it
-    happens.
+  - the ヴ row is the bank's own (波音リツ has it), and the バ row where a
+    bank has none -- which is how most speakers say it; the import
+    reports when that happens.
 
 No new dependency: the stdlib `wave` module and `array` do the cutting,
 build_kana_audio.finish() the trim and loudness it gives every clip, and
@@ -51,15 +57,19 @@ LAME (study/voice_engine.encode_mp3) resamples the bank's 44.1 kHz to
 the set's 48 kHz on the way out.
 
 -- The terms ------------------------------------------------------
-あみたろ's terms (https://amitaro.net/voice/voice_rule/,
-https://amitaro.net/utau/licence01.html) allow commercial use on
-conditions: the credit 「あみたろの声素材工房」 with a link (the app's
-Credits page and THIRD_PARTY_NOTICES.md), an email to her after release,
-and no distributing or selling the voice files themselves as material.
-That last one is why the bank is read from backend/datas/kana_source/,
-which is gitignored: only the processed clips are committed.
+波音リツ's (https://www.canon-voice.com/terms/, from a verbatim snapshot
+of 2026-08-15): 「商用利用可です。」「音源の転載、再配布可」「原音を加工しての
+転載、再配布可」「クレジット表記不要」. He may ask for a work he judges
+inappropriate to be taken down (第8条2). The app credits him all the
+same, as provenance: sources.json names the voice of every clip, and
+tests/test_kana_audio.py holds each voice named there to its Credits
+row. The bank itself stays out of the repository
+(backend/datas/kana_source/ is gitignored): nothing needs it there, and
+小春音アミ's terms -- the other bank this reads -- forbid distributing
+hers.
 """
 import io
+import math
 import re
 import unicodedata
 import wave
@@ -81,9 +91,20 @@ CROSSFADE_S = 0.060
 # The second vowel is joined from this far past its own onset, where
 # it is steady, rather than at its attack.
 SECOND_SKIP_S = 0.040
-# How far the join may slide to meet the first vowel in phase: a pitch
-# period at C4 (the lowest folder a bank like this has) is 3.8 ms.
-PHASE_SEARCH_S = 0.005
+# How far a join may slide to meet what it follows in phase: a pitch
+# period at 133 Hz, below any folder these banks have (A3 is 220 Hz).
+PHASE_SEARCH_S = 0.0075
+# A vowel held past its recording repeats this much of its steady end
+# at a time -- after dropping its last HOLD_GUARD_S, where a sung vowel
+# already bends toward the consonant that follows it in the string.
+HOLD_LOOP_S = 0.200
+HOLD_GUARD_S = 0.050
+# A syllable in a joined string stops this far short of the next sound,
+# so none of that sound's consonant is heard.
+END_MARGIN_S = 0.020
+# Less than this between a syllable's onset and the next sound in its
+# string is not a syllable a learner can hear.
+MIN_SYLLABLE_S = 0.100
 FADE_OUT_S = 0.070
 FADE_OUT_LONG_S = 0.090
 # The onset is where the sample first rises within this much of its own
@@ -94,8 +115,13 @@ ONSET_BELOW_PEAK_DB = -36
 ONSET_FLOOR = 32768 * 10 ** (-60 / 20)
 PRE_ROLL_S = 0.060
 
-# A syllable in a file name or an alias: hiragana, and ー for a long tone.
+# A syllable in an alias or a file name: hiragana, and ー for a long
+# tone; ヴ and ン read as their hiragana (a joined bank writes them in
+# katakana), other katakana not at all (小春音アミ's ガ行 are her nasal
+# variants). A pitch (A3, G#4) is not part of what an alias says.
 _SYLLABLE = re.compile(r"[ぁ-ゖー]+")
+_READ_AS = str.maketrans({"ヴ": "ゔ", "ン": "ん"})
+_PITCH = re.compile(r"[A-G][#b]?\d")
 
 
 class BankError(Exception):
@@ -155,26 +181,82 @@ def recipes(sounds: dict[str, dict]) -> dict[str, Recipe]:
 
 # ── The bank ─────────────────────────────────────────────────────
 
+def parse_alias(alias: str) -> tuple[str | None, bool, bool]:
+    """What an alias -- or a file's name -- says: (syllable, whether it
+    opens a string, whether it is the plain sample rather than a
+    variant). "- かA3" is (か, True, True); "a きゃF4" (きゃ, False,
+    True); "あ_G4" and "あ" (あ, True, True); "- か↑A3" and "あR" are
+    variants; "ガ" and "息" say no syllable."""
+    tokens = unicodedata.normalize("NFC", alias).split()
+    if not tokens:
+        return None, True, False
+    opens = len(tokens) == 1 or tokens[0] == "-"
+    token = tokens[-1].translate(_READ_AS)
+    runs = _SYLLABLE.findall(token)
+    if not runs:
+        return None, opens, False
+    syllable = max(runs, key=len)
+    rest = _PITCH.sub("", token.replace(syllable, "", 1)).strip("_- ")
+    return syllable, opens, not rest
+
+
 def _key(path: Path) -> str:
     # A bank unzipped from a Mac archive can name が as か + ゛ (NFD):
     # every path is compared composed.
     return unicodedata.normalize("NFC", str(path))
 
 
+@dataclass(frozen=True)
+class Sample:
+    """One sound in a recording, and where it has to end."""
+
+    path: Path
+    alias: str                       # as the oto.ini names it, or the file's name
+    syllable: str | None
+    plain: bool = True
+    start_ms: float = 0.0            # the oto offset: the onset is looked for from here
+    heard_ms: float = 0.0            # offset + preutterance: where the sound is heard
+    blank_ms: float | None = None    # the oto cutoff, which ends the last sound in a file
+    after: "Sample | None" = None    # the next sound in the same string
+
+    def end_ms(self, duration_ms: float) -> float:
+        """Where the sound ends: where the next one in its string is
+        heard; else the oto cutoff (UTAU's rule: a positive one counts
+        from the end of the file, a negative one from the offset); else
+        the end of the file."""
+        if self.after is not None:
+            return min(self.after.heard_ms, duration_ms)
+        if self.blank_ms is not None:
+            end = duration_ms - self.blank_ms if self.blank_ms >= 0 else self.start_ms - self.blank_ms
+            return max(self.start_ms, min(end, duration_ms))
+        return duration_ms
+
+    def room_ms(self) -> float:
+        """How long the sound runs, as far as the oto.ini says without
+        opening the file (a sound that runs to the file's end: forever)."""
+        if self.after is not None:
+            return self.after.heard_ms - self.start_ms
+        if self.blank_ms is not None and self.blank_ms < 0:
+            return -self.blank_ms
+        return float("inf")
+
+
 @dataclass
 class Bank:
-    samples: dict[str, Path] = field(default_factory=dict)   # syllable -> wav
-    offsets_ms: dict[str, float] = field(default_factory=dict)   # _key(wav) -> oto offset
+    samples: dict[str, Sample] = field(default_factory=dict)             # syllable -> its sample
+    glides: dict[tuple[str, str], Sample] = field(default_factory=dict)  # (it, then) -> a string doing that
+    # Every folder a syllable was found in. More than one is usually one
+    # per pitch, and the best sample of each syllable across them would
+    # sing the set in several keys.
+    folders: list[str] = field(default_factory=list)
 
     def pick(self, choices: tuple[str, ...]) -> str | None:
         return next((c for c in choices if c in self.samples), None)
 
-    def offset_ms(self, path: Path) -> float:
-        return self.offsets_ms.get(_key(path), 0.0)
 
-
-def _read_oto(path: Path) -> list[tuple[str, str, float]]:
-    """(file, alias, offset ms) per line of one oto.ini."""
+def _read_oto(path: Path) -> list[tuple[str, str, float, float | None, float]]:
+    """(file, alias, offset, cutoff, preutterance) per line of one
+    oto.ini, in milliseconds; cutoff is None on a line without one."""
     raw = path.read_bytes()
     for encoding in ("utf-8-sig", "cp932"):
         try:
@@ -187,54 +269,85 @@ def _read_oto(path: Path) -> list[tuple[str, str, float]]:
     lines = []
     for line in text.splitlines():
         name, sep, rest = line.partition("=")
-        fields = rest.split(",")
+        fields = [f.strip() for f in rest.split(",")]
         if not sep or len(fields) < 2:
             continue
         try:
-            lines.append((name.strip(), fields[0].strip(), float(fields[1] or 0)))
+            numbers = [float(f) if f else 0.0 for f in fields[1:6]]
         except ValueError:
             continue
+        if not all(math.isfinite(n) for n in numbers):
+            continue
+        offset, _consonant, cutoff, preutterance = (numbers + [0.0] * 4)[:4]
+        lines.append((name.strip(), fields[0], offset, cutoff if len(fields) > 3 else None, preutterance))
     return lines
 
 
-def _syllable(*names: str) -> str | None:
-    """The syllable a sample is of: the longest hiragana run in the first
-    of `names` that has one ("きゃ", "_きゃ", "きゃ_G4" and "きゃ↑" are all
-    きゃ; "あー" is あー)."""
-    for name in names:
-        runs = _SYLLABLE.findall(unicodedata.normalize("NFC", name))
-        if runs:
-            return max(runs, key=len)
-    return None
+def _sounds_in(wav_path: Path, lines: list[tuple[str, float, float | None, float]] | None
+               ) -> list[tuple[Sample, bool]]:
+    """Every sound the oto.ini names in one recording, in order, each
+    linked to the next, with whether it opens its string -- or, for a
+    file the oto.ini does not name, the file as one syllable."""
+    stem = unicodedata.normalize("NFC", wav_path.stem)
+    if not lines:
+        syllable, opens, plain = parse_alias(stem)
+        return [(Sample(wav_path, stem, syllable, plain), True)] if syllable else []
+    named = []
+    for alias, offset, cutoff, preutterance in lines:
+        syllable, opens, plain = parse_alias(alias or stem)
+        named.append((offset, not plain, alias or stem, syllable, opens, plain, cutoff, preutterance))
+    named.sort(key=lambda n: n[:2])
+    # Two aliases at one offset are two names for one sound (a variant
+    # of the plain one): the plain one stands for it.
+    by_offset = {}
+    for n in named:
+        by_offset.setdefault(n[0], n)
+    ordered = list(by_offset.values())
+    sounds, after = [], None
+    for i in range(len(ordered) - 1, -1, -1):
+        offset, _variant, alias, syllable, opens, plain, cutoff, preutterance = ordered[i]
+        after = Sample(wav_path, alias, syllable, plain, offset, offset + preutterance, cutoff, after)
+        # "- か" opens a string wherever it is; a bare "か" only as the
+        # first sound in its file -- a joined bank that also names its
+        # sounds bare names them in the middle of a string, after a vowel.
+        marked = unicodedata.normalize("NFC", alias).lstrip().startswith("-")
+        sounds.append((after, opens and (marked or i == 0)))
+    return sounds[::-1]
 
 
 def index_bank(root: Path, pitch: str | None = None) -> Bank:
-    """Every syllable sample under `root`, keyed by its hiragana. With
-    `pitch` ("G4"), only the files whose path names it. Where two files
-    claim one syllable, the one named exactly by it wins, then the
-    shortest name: a bank's variants (あ2.wav, あ↑.wav) lose to あ.wav."""
-    bank = Bank()
-    aliases: dict[str, str] = {}
+    """Every syllable under `root` that is sung on its own -- a
+    single-syllable file, or the sound opening a joined string -- keyed
+    by its hiragana. With `pitch` ("A3"), only the files whose path
+    names it. Where several claim one syllable, the plain sample wins,
+    then the one with the most room before the next sound, then the
+    shortest name: a variant (あ2, か↑) loses to the plain あ, か."""
+    lines: dict[str, list] = {}
     for oto in sorted(root.rglob("oto.ini")):
-        for name, alias, offset in _read_oto(oto):
-            key = _key(oto.parent / name)
-            bank.offsets_ms.setdefault(key, offset)
-            aliases.setdefault(key, alias)
+        for name, alias, offset, cutoff, preutterance in _read_oto(oto):
+            lines.setdefault(_key(oto.parent / name), []).append((alias, offset, cutoff, preutterance))
 
-    ranked: dict[str, tuple[int, int, str, Path]] = {}
+    best: dict[str, tuple] = {}
+    glides: dict[tuple[str, str], tuple] = {}
+    folders: set[str] = set()
     for wav_path in sorted(root.rglob("*.wav")):
         relative = unicodedata.normalize("NFC", wav_path.relative_to(root).as_posix())
         if pitch and pitch.casefold() not in relative.casefold():
             continue
-        stem = unicodedata.normalize("NFC", wav_path.stem)
-        syllable = _syllable(stem, aliases.get(_key(wav_path), ""))
-        if syllable is None:
-            continue
-        rank = (0 if stem == syllable else 1, len(stem), relative, wav_path)
-        if syllable not in ranked or rank < ranked[syllable]:
-            ranked[syllable] = rank
-    bank.samples = {syllable: rank[-1] for syllable, rank in ranked.items()}
-    return bank
+        for sample, opens in _sounds_in(wav_path, lines.get(_key(wav_path))):
+            if not opens or sample.syllable is None:
+                continue
+            folders.add(wav_path.parent.name)
+            rank = (not sample.plain, -sample.room_ms(), len(sample.alias), relative)
+            if sample.syllable not in best or rank < best[sample.syllable][0]:
+                best[sample.syllable] = (rank, sample)
+            nxt = sample.after
+            if nxt is not None and nxt.syllable is not None:
+                key, glide_rank = (sample.syllable, nxt.syllable), (not nxt.plain, *rank)
+                if key not in glides or glide_rank < glides[key][0]:
+                    glides[key] = (glide_rank, sample)
+    return Bank({s: ranked[1] for s, ranked in best.items()}, {k: ranked[1] for k, ranked in glides.items()},
+                sorted(folders))
 
 
 def missing(bank: Bank, plan: dict[str, Recipe]) -> list[str]:
@@ -272,36 +385,65 @@ def load(path: Path) -> voice_engine.Pcm:
     return voice_engine.Pcm(samples.tobytes(), rate)
 
 
-def onset(samples: array, rate: int, offset_ms: float = 0.0) -> int:
+def onset(samples: array, rate: int, offset_ms: float = 0.0, end: int | None = None) -> int:
     """Where the syllable starts: the first sample, from the oto offset
-    on, that rises within ONSET_BELOW_PEAK_DB of the sample's peak. The
-    offset alone is not trusted -- a bank tuned for singing sets it, but
-    one that left it at 0 would otherwise hand over its leading silence
-    as the syllable."""
+    on (and before `end`, the next sound in its string), that rises
+    within ONSET_BELOW_PEAK_DB of the syllable's own peak. The offset
+    alone is not trusted -- a bank tuned for singing sets it, but one
+    that left it at 0 would otherwise hand over its leading silence as
+    the syllable."""
     begin = min(int(offset_ms / 1000 * rate), len(samples))
-    rest = samples[begin:]
-    peak = max(max(rest), -min(rest)) if rest else 0
+    stop = len(samples) if end is None else max(begin, min(end, len(samples)))
+    region = samples[begin:stop]
+    peak = max(max(region), -min(region)) if region else 0
     gate = max(ONSET_FLOOR, peak * 10 ** (ONSET_BELOW_PEAK_DB / 20))
-    return next((i for i in range(begin, len(samples)) if abs(samples[i]) >= gate), begin)
+    return next((i for i in range(begin, stop) if abs(samples[i]) >= gate), begin)
 
 
-def _cut(bank: Bank, syllable: str, seconds: float, *, fade_s: float, pre_roll_s: float = PRE_ROLL_S,
-         skip_s: float = 0.0, extra: int = 0) -> tuple[list[float], int]:
-    """`seconds` of a syllable from its onset (+ `skip_s`), with
-    `pre_roll_s` before it and `extra` samples after, as floats, the
-    last `fade_s` faded out."""
-    path = bank.samples[syllable]
-    pcm = load(path)
+def _recording(sample: Sample) -> tuple[array, int, int, int]:
+    """The recording a sample is in, its rate, and where the sample's
+    sound begins (its offset) and ends, in frames."""
+    pcm = load(sample.path)
     samples = array("h", pcm.frames)
-    start = onset(samples, pcm.rate, bank.offset_ms(path)) + int(skip_s * pcm.rate)
-    begin = max(0, start - int(pre_roll_s * pcm.rate))
-    piece = [s / 32768 for s in samples[begin:start + int(seconds * pcm.rate) + extra]]
-    if not piece:
-        raise BankError(f"{path.name}: nothing after the onset")
-    fade = min(int(fade_s * pcm.rate), len(piece))
+    to_frames = pcm.rate / 1000
+    duration_ms = len(samples) / to_frames
+    begin = min(int(sample.start_ms * to_frames), len(samples))
+    end = int(sample.end_ms(duration_ms) * to_frames)
+    if sample.after is not None:
+        end -= int(END_MARGIN_S * pcm.rate)
+    return samples, pcm.rate, begin, max(begin, min(end, len(samples)))
+
+
+def _floats(samples: array, start: int, stop: int) -> list[float]:
+    return [s / 32768 for s in samples[max(0, start):stop]]
+
+
+def _fade(piece: list[float], rate: int, seconds: float) -> list[float]:
+    fade = min(int(seconds * rate), len(piece))
     for i in range(fade):
         piece[-1 - i] *= i / fade
-    return piece, pcm.rate
+    return piece
+
+
+def _spoken(sample: Sample, seconds: float) -> tuple[list[float], int, int]:
+    """The syllable from PRE_ROLL_S before its onset: `seconds` of it,
+    or as much as its recording has before the next sound. Returns the
+    piece, its rate, and how many frames of it follow the onset."""
+    samples, rate, begin, end = _recording(sample)
+    start = onset(samples, rate, sample.start_ms, end)
+    stop = min(start + int(seconds * rate), end)
+    if stop - start < int(MIN_SYLLABLE_S * rate):
+        raise BankError(f"{sample.path.name}: {sample.alias!r} is heard for "
+                        f"{(stop - start) / rate * 1000:.0f} ms before the next sound")
+    return _floats(samples, start - int(PRE_ROLL_S * rate), stop), rate, stop - start
+
+
+def _steady(sample: Sample, seconds: float) -> tuple[list[float], int]:
+    """`seconds` of a vowel from SECOND_SKIP_S past its onset, where it
+    is steady, with the PHASE_SEARCH_S _join slides it by to spare."""
+    samples, rate, begin, end = _recording(sample)
+    start = onset(samples, rate, sample.start_ms, end) + int(SECOND_SKIP_S * rate)
+    return _floats(samples, start, min(start + int((seconds + PHASE_SEARCH_S) * rate), end)), rate
 
 
 def _in_phase(tail: list[float], follow: list[float], search: int) -> int:
@@ -314,29 +456,87 @@ def _in_phase(tail: list[float], follow: list[float], search: int) -> int:
     return max(range(len(scores)), key=scores.__getitem__)
 
 
-def make(bank: Bank, recipe: Recipe) -> tuple[voice_engine.Pcm, list[str]]:
+def _join(first: list[float], second: list[float], rate: int) -> list[float]:
+    """`first`, then `second` slid into phase with it (by up to
+    PHASE_SEARCH_S, which `second` carries to spare) and crossfaded in
+    over CROSSFADE_S."""
+    search = int(PHASE_SEARCH_S * rate)
+    overlap = min(int(CROSSFADE_S * rate), len(first), len(second) - search)
+    if overlap <= 0:
+        raise BankError("too little sound to join")
+    head, tail = first[:len(first) - overlap], first[len(first) - overlap:]
+    second = second[_in_phase(tail, second, search):]
+    glide = [a * (1 - i / overlap) + b * (i / overlap) for i, (a, b) in enumerate(zip(tail, second))]
+    return head + glide + second[overlap:]
+
+
+def _hold(piece: list[float], rate: int, length: int) -> list[float]:
+    """A vowel held longer than its recording holds it: the last
+    HOLD_LOOP_S of it, steady by then, repeated -- each repeat joined
+    in phase with what came before -- until it is `length` frames long.
+    A joined bank has no long tones; its vowel runs only until the next
+    sound in the string."""
+    held = piece[:max(len(piece) - int(HOLD_GUARD_S * rate), int(CROSSFADE_S * rate))]
+    loop = held[-int((HOLD_LOOP_S + PHASE_SEARCH_S) * rate):]
+    while len(held) < length:
+        held = _join(held, list(loop), rate)
+    return held[:length]
+
+
+def _glide(sample: Sample) -> tuple[list[float], int]:
+    """あい as the singer sang it: the first vowel from its onset, then
+    the recorded move into the second (`sample.after`). A first vowel
+    held longer than DIPHTHONG_FIRST_S loses its middle, its two ends
+    joined in phase -- it is one vowel either side of the cut."""
+    after = sample.after
+    samples, rate, begin, _end = _recording(sample)
+    to_frames = rate / 1000
+    turn = int(after.start_ms * to_frames)        # the move begins: still the first vowel
+    heard = int(after.heard_ms * to_frames)       # the second vowel is heard
+    start = onset(samples, rate, sample.start_ms, heard)
+    after_end = int(after.end_ms(len(samples) / to_frames) * to_frames)
+    if after.after is not None:
+        after_end -= int(END_MARGIN_S * rate)
+    stop = min(heard + int(DIPHTHONG_SECOND_S * rate), after_end)
+    keep = max(int(DIPHTHONG_FIRST_S * rate) - (heard - turn), int(MIN_SYLLABLE_S * rate))
+    first_from = start - int(PRE_ROLL_S * rate)
+    if turn - start <= keep:
+        return _floats(samples, first_from, stop), rate
+    first = _floats(samples, first_from, start + keep + int(CROSSFADE_S * rate))
+    return _join(first, _floats(samples, turn - int(PHASE_SEARCH_S * rate), stop), rate), rate
+
+
+def make(bank: Bank, recipe: Recipe) -> tuple[voice_engine.Pcm, str]:
     """The clip a recipe describes, as 16-bit mono at the bank's rate,
-    and the bank syllables it was made from."""
+    and what it was cut from, for the report ("- かA3", "あー",
+    "- あA3 → a いA3", "- えA3 (held)")."""
     used = [bank.pick(choices) for choices in recipe.parts]
     if None in used:
         raise BankError(f"the bank has none of {' / '.join(' or '.join(c) for c in recipe.parts)}")
+    first = bank.samples[used[0]]
     if recipe.shape == "short":
-        signal, rate = _cut(bank, used[0], SHORT_S, fade_s=FADE_OUT_S)
+        piece, rate, _heard = _spoken(first, SHORT_S)
+        source, fade = first.alias, FADE_OUT_S
     elif recipe.shape == "long":
-        signal, rate = _cut(bank, used[0], LONG_S, fade_s=FADE_OUT_LONG_S)
+        piece, rate, heard = _spoken(first, LONG_S)
+        source, fade = first.alias, FADE_OUT_LONG_S
+        if heard < int(LONG_S * rate):
+            piece = _hold(piece, rate, len(piece) + int(LONG_S * rate) - heard)
+            source += " (held)"
     elif recipe.shape == "diphthong":
-        first, rate = _cut(bank, used[0], DIPHTHONG_FIRST_S, fade_s=0.0)
-        search = int(PHASE_SEARCH_S * rate)
-        second, second_rate = _cut(bank, used[1], DIPHTHONG_SECOND_S, fade_s=FADE_OUT_S,
-                                   pre_roll_s=0.0, skip_s=SECOND_SKIP_S, extra=search)
-        if second_rate != rate:
-            raise BankError(f"{used[0]} and {used[1]} are recorded at different rates")
-        overlap = min(int(CROSSFADE_S * rate), len(first), len(second) - search)
-        head, tail = first[:len(first) - overlap], first[len(first) - overlap:]
-        second = second[_in_phase(tail, second, search):]
-        glide = [a * (1 - i / overlap) + b * (i / overlap) for i, (a, b) in enumerate(zip(tail, second))]
-        signal = head + glide + second[overlap:]
+        glide, fade = bank.glides.get((used[0], used[1])), FADE_OUT_S
+        if glide is not None:
+            piece, rate = _glide(glide)
+            source = f"{glide.alias} → {glide.after.alias}"
+        else:
+            second = bank.samples[used[1]]
+            head, rate, _heard = _spoken(first, DIPHTHONG_FIRST_S)
+            follow, second_rate = _steady(second, DIPHTHONG_SECOND_S)
+            if second_rate != rate:
+                raise BankError(f"{first.alias} and {second.alias} are recorded at different rates")
+            piece, source = _join(head, follow, rate), f"{first.alias} + {second.alias}"
     else:
         raise ValueError(f"unknown shape {recipe.shape!r}")
-    frames = array("h", (max(-32768, min(32767, round(x * 32768))) for x in signal))
-    return voice_engine.Pcm(frames.tobytes(), rate), used
+    _fade(piece, rate, fade)
+    frames = array("h", (max(-32768, min(32767, round(x * 32768))) for x in piece))
+    return voice_engine.Pcm(frames.tobytes(), rate), source
