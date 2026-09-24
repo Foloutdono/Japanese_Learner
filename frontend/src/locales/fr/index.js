@@ -966,7 +966,7 @@ const dictationMode = {
   dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
 }
 
-// ── 作文 — la rédaction (plan 124) ──────────────────────────────
+// ── 作文 — la rédaction (plan 125) ──────────────────────────────
 // CompositionRun.jsx réutilise telles quelles les clés partagées
 // (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
 // japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,

@@ -882,7 +882,7 @@ def points_in(sentence: str, tokens=None) -> list[tuple[str, str, int, int]]:
 @lru_cache(maxsize=None)
 def can_find(pattern: str) -> bool:
     """Whether the detector may say a sentence does NOT use `pattern`
-    (plan 124): true when it finds the point in at least one of the
+    (plan 125): true when it finds the point in at least one of the
     point's own catalogue examples.
 
     A "not found" is evidence only where the matcher has proved itself

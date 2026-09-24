@@ -152,7 +152,7 @@ the first table. Both tails are capped now (§5.5): `OCR_DAILY_LIMIT` at
 bigger lever because comprehension was always where the tail actually
 was, not OCR.
 
-The third cap arrived with 作文 (plan 124): `COMPOSITION_DAILY_LIMIT`,
+The third cap arrived with 作文 (plan 125): `COMPOSITION_DAILY_LIMIT`,
 30 tutor reviews of a learner's own sentences a day, counted in the
 shared `daily_usage` table (`core/daily_limit.py`) rather than a fourth
 copy of the OCR counter. Same shape of call as translation review, one

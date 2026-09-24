@@ -456,7 +456,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class CanFindTests(unittest.TestCase):
-    """Where the detector may say "not in this sentence" (plan 124):
+    """Where the detector may say "not in this sentence" (plan 125):
     only on a point it finds in that point's own lesson. 作文 prints its
     found / not-found hint on those and holds its tongue on the rest."""
 

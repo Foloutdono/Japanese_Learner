@@ -1256,13 +1256,13 @@ describe('the places (plan 123, P16)', () => {
   })
 })
 
-// ── plan 124 — 作文, the composition run a phone keeps ──
+// ── plan 125 — 作文, the composition run a phone keeps ──
 // On the desk the run stands the point's lesson beside the field and
 // the sentence's breakdown once rated (composition.desktop.test). A
 // phone keeps its single column: a door on the card opens the lesson
 // as a sheet, the breakdown is a toggle under the review, and neither
 // a column nor a lesson fetch happens unasked.
-describe('the composition run (plan 124)', () => {
+describe('the composition run (plan 125)', () => {
   it('keeps the phone\'s column, its lesson door and no column', async () => {
     const { apiJson } = await import('./lib/api')
     const POINT = { raw_id: 'grammar_N4_〜ながら', level: 'N4', pattern: '〜ながら', structure: 'V-ます + ながら', meaning: 'en faisant', register: null, stage: 'new' }

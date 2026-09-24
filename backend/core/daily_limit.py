@@ -1,5 +1,5 @@
 """
-One counter for every daily ceiling (plan 124).
+One counter for every daily ceiling (plan 125).
 
 routes/ocr.py and routes/reading.py each grew a table of their own --
 ocr_usage, comprehension_usage, the same three columns -- and each said

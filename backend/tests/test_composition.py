@@ -1,4 +1,4 @@
-# 作文 -- the composition platform's API (routes/composition.py, plan 124).
+# 作文 -- the composition platform's API (routes/composition.py, plan 125).
 #
 # The points a run serves and their order, the detector's check and
 # where it holds its tongue, the tutor's review as the shared shape with

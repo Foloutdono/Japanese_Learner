@@ -168,7 +168,7 @@ describe('the practice gate at phone width', () => {
     await settle(60)
     expect(here.path).toBe('/practice/dictation/N4')
 
-    // 作文 — one axis too (plan 124).
+    // 作文 — one axis too (plan 125).
     chipAt(4, 'N3').click()
     await settle(60)
     expect(here.path).toBe('/practice/composition/N3')

@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
 
-// ── 作文 — a sentence written from a grammar point (plan 124) ──
+// ── 作文 — a sentence written from a grammar point (plan 125) ──
 // The learner is handed a point and writes; three opinions come back
 // and are kept apart: the detector's (a hint on the answer's label,
 // only where the detector is trusted), the tutor's (the shared review

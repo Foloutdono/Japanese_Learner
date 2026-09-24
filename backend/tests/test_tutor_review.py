@@ -1,4 +1,4 @@
-# The tutor's review as a shape, shared (study/tutor_review.py, plan 124).
+# The tutor's review as a shape, shared (study/tutor_review.py, plan 125).
 #
 # The parser's leniency, the prose fallback and the corrected sentence
 # are held by tests/test_translation_review.py through translation's

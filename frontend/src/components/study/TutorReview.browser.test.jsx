@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { LangProvider, useLang } from '../../LangContext'
 import { TutorReview } from './TutorReview'
 
-// ── The tutor's review, drawn once for two runs (plan 124) ──
+// ── The tutor's review, drawn once for two runs (plan 125) ──
 // 翻訳 and 作文 hand this component the same shape
 // (study/tutor_review.py) and it draws the same rows; these pin what
 // the move out of TranslationRun.jsx must not have changed, and the one

@@ -75,7 +75,7 @@ FEATURES = {
     ),
     "composition_review": (
         90, 900, 400,
-        "4-5 reviewed sentences a session, 20 sessions (plan 124). One call "
+        "4-5 reviewed sentences a session, 20 sessions (plan 125). One call "
         "each; the learner's sentence is in the user block, so nothing is "
         "shared, but the system block is a stable prefix a provider's cache "
         "serves (~60% of the input). COMPOSITION_DAILY_LIMIT caps it at "

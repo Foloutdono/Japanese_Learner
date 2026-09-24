@@ -170,7 +170,7 @@ function sections(t) {
     // does nothing for a section without it, which is the same silence
     // 統計 and 本日 depart in.
     { icon: '書取', title: t.dictationTitle, desc: t.dictationDesc, path: '/practice/dictation', color: 'var(--line-kakitori)', tab: 'practice' },
-    // 作文 — composition (plan 124): the learner is handed a grammar
+    // 作文 — composition (plan 125): the learner is handed a grammar
     // point and writes a sentence that uses it; the detector says
     // whether the point is there, the tutor reads the sentence back,
     // and the learner grades it — see screens/CompositionRun.jsx. No

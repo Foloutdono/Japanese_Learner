@@ -1939,7 +1939,7 @@ def _init_comprehension_usage() -> None:
         with conn.cursor() as cur:
             # Deliberately the same shape as ocr_usage. This was written
             # as "two counters is a coincidence, three is a pattern",
-            # and the third came: 作文's tutor review (plan 124) counts
+            # and the third came: 作文's tutor review (plan 125) counts
             # in the shared daily_usage(user_id, feature, day, count)
             # of core/daily_limit.py. This table and ocr_usage stay
             # where they are until moving them is worth a migration --

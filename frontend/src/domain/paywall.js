@@ -61,7 +61,7 @@ export function offerable(credits) {
 // Every router under backend/core/credits.require_pass, named by the
 // section that fronts it (config/tabs.js paths): reading and
 // comprehension (routes/reading.py), translation, dictation, composition
-// (plan 124), the exams, and the analyzer (phrase, ocr and video).
+// (plan 125), the exams, and the analyzer (phrase, ocr and video).
 // backend/tests/test_pass_platforms.py pins this map against the
 // routers, so the reading ride's plate (plan 099) can never promise
 // more or less than the server enforces.

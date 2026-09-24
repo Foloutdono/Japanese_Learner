@@ -1,4 +1,4 @@
-# One counter for every daily ceiling (core/daily_limit.py, plan 124).
+# One counter for every daily ceiling (core/daily_limit.py, plan 125).
 #
 # The rules ocr_usage and comprehension_usage each enforced alone, held
 # once: a slot per claim, features and learners counted apart, the

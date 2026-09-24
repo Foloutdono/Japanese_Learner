@@ -1001,7 +1001,7 @@ const dictationMode = {
   dictationListensLeft:  n => (n === 1 ? '1 listen left' : `${n} listens left`),
 }
 
-// ── 作文 — composition (plan 124) ───────────────────────────────
+// ── 作文 — composition (plan 125) ───────────────────────────────
 // CompositionRun.jsx reuses the shared keys wholesale (selectLevel,
 // leaveLevels, stationJlpt, submit, retry, yourAnswer,
 // japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,

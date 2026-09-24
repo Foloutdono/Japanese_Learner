@@ -191,7 +191,7 @@ Thirteen waves live in this file:
   translates the bookmarklet's own error messages. Frontend 269
   (40 files), guards clean, build clean.
 
-- **Wave 29 — 作文, composition** (plan 124, 2026-09-25, DONE). A sixth
+- **Wave 30 — 作文, composition** (plan 125, 2026-09-25, DONE). A sixth
   practice platform: the learner is handed a grammar point and writes a
   sentence that uses it. Three opinions about the sentence, kept apart —
   the detector's (free, and only where it is trusted on the point), the
@@ -199,7 +199,7 @@ Thirteen waves live in this file:
   rationed by the day through the first shared daily counter) and the
   learner's own rating, which is the grade. 紫 minted for it, measured
   by the guard's own sites. Its section is at the very bottom of this
-  file. The next wave begins at 125.
+  file. The next wave begins at 126.
 
 - **Wave 28 — 机, the desk's fourth round: 正面口 and 作業** (plans
   122–123, 2026-09-24, DONE). First contact drawn for a computer (the
@@ -6069,7 +6069,7 @@ not measured by a script.
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
 
-# Wave 29 — 作文, composition (plan 124, 2026-09-25)
+# Wave 30 — 作文, composition (plan 125, 2026-09-25)
 
 The owner's request: "Create a new practice mode: the user is given a
 grammar point and has to create a sentence using it correctly." Four
@@ -6082,14 +6082,16 @@ capped per day through a shared counter; the pair is 作文 / Composition
 0017 the free lesson door, and the shared counter is the generalisation
 `routes/reading.py` asked for on the third feature.
 
-Numbered 124 because 122–123 went to the desk's fourth round while this
-wave was being planned: the main checkout's local `main` was behind
-`origin/main`, and a grep of the source, not the index, settled it. The
-work was done in a worktree on `origin/main` for the same reason.
+Numbered 125 because 122–123 went to the desk's fourth round while this
+wave was being planned — the main checkout's local `main` was behind
+`origin/main`, and a grep of the source, not the index, settled it — and
+124 to 操作盤, the run's console, a parallel session that found the same
+thing and moved to the same number an hour later. The work was done in a
+worktree on `origin/main` for the same reason.
 
 | Plan | What | Status |
 |---|---|---|
-| 124 | **P0** `study/tutor_review.py`: the review shape (fence, parser, corrected sentence, text form) out of `routes/translation.py`, which keeps its names as aliases; one key added, `meaning`. **P1** `components/study/TutorReview.jsx`: the review out of `TranslationRun.jsx`, drawn once for two runs. **P2** `core/daily_limit.py` and `daily_usage` (learner, feature, local day): the third counter as the first shared one; the schema guard scans `core/`. **P3** `grammar_detect.can_find`: the detector trusted only where it finds a point in that point's own lesson (517 of 541). **P4** `routes/composition.py`: batch (studied first, `exclude` never empties a run), check (free, uncapped), review (two messages so the system block is a cached prefix, every value fenced, `COMPOSITION_DAILY_LIMIT` 30 → 429 naming the reset), result (`composition_log` with the three opinions side by side, `award_practice`), history; pass-gated and on the plate; `llm_cost_model`'s row. **P5** `screens/CompositionRun.jsx` on the phone: the point as the prose page with a lesson door and no example, translation's Japanese field, the three calls at once, the detector's hint on the answer's label, the review, the bar (never gated on the tutor), the breakdown; 紫 minted at 7.70:1 / 6.84:1 (8.68 / 7.99 light), measured by three new sites in the contrast guard. **P6** the plate between 書取 and 模試, the station code SB, the level path; six plates in three rows of two on the desk with no CSS. **P7** the desk's side: the lesson while writing and reading the review, the breakdown once rated, Enter to the next point. **P8** the record | DONE (2026-09-25) |
+| 125 | **P0** `study/tutor_review.py`: the review shape (fence, parser, corrected sentence, text form) out of `routes/translation.py`, which keeps its names as aliases; one key added, `meaning`. **P1** `components/study/TutorReview.jsx`: the review out of `TranslationRun.jsx`, drawn once for two runs. **P2** `core/daily_limit.py` and `daily_usage` (learner, feature, local day): the third counter as the first shared one; the schema guard scans `core/`. **P3** `grammar_detect.can_find`: the detector trusted only where it finds a point in that point's own lesson (517 of 541). **P4** `routes/composition.py`: batch (studied first, `exclude` never empties a run), check (free, uncapped), review (two messages so the system block is a cached prefix, every value fenced, `COMPOSITION_DAILY_LIMIT` 30 → 429 naming the reset), result (`composition_log` with the three opinions side by side, `award_practice`), history; pass-gated and on the plate; `llm_cost_model`'s row. **P5** `screens/CompositionRun.jsx` on the phone: the point as the prose page with a lesson door and no example, translation's Japanese field, the three calls at once, the detector's hint on the answer's label, the review, the bar (never gated on the tutor), the breakdown; 紫 minted at 7.70:1 / 6.84:1 (8.68 / 7.99 light), measured by three new sites in the contrast guard. **P6** the plate between 書取 and 模試, the station code SB, the level path; six plates in three rows of two on the desk with no CSS. **P7** the desk's side: the lesson while writing and reading the review, the breakdown once rated, Enter to the next point. **P8** the record | DONE (2026-09-25) |
 
 What changed for a learner:
 

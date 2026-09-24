@@ -566,7 +566,7 @@ CREATE TABLE comprehension_served (
 -- is handed a text they have read before rather than refused.
 --
 -- Same shape as ocr_usage on purpose. The third counter this app needed
--- (作文's tutor review, plan 124) went into the shared daily_usage table
+-- (作文's tutor review, plan 125) went into the shared daily_usage table
 -- below instead; these two stay as they are until moving them is worth
 -- a migration -- see core/daily_limit.py.
 CREATE TABLE comprehension_usage (
@@ -751,7 +751,7 @@ CREATE TABLE dictation_log (
 CREATE INDEX idx_dictation_log_user
 ON dictation_log(user_id, created_at);
 
--- 作文 (composition, plan 124): one row per sentence the learner wrote
+-- 作文 (composition, plan 125): one row per sentence the learner wrote
 -- from a grammar point and graded. Owned by routes/composition.py,
 -- created there at import time.
 --
@@ -802,7 +802,7 @@ CREATE TABLE ocr_usage (
     PRIMARY KEY (user_id, day)
 );
 
--- ── The daily counters, one table (plan 124) ────────────────────────
+-- ── The daily counters, one table (plan 125) ────────────────────────
 -- Owned by core/daily_limit.py. One row per (learner, feature, local
 -- day); `feature` names the ceiling -- "composition", the tutor's
 -- reviews of a learner's own sentences, today. The third counter this

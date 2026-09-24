@@ -1,5 +1,5 @@
 """
-作文 — the composition platform's API (plan 124).
+作文 — the composition platform's API (plan 125).
 
 The learner is handed a grammar point and writes a sentence that uses
 it. Five endpoints, the same split dictation and translation use:

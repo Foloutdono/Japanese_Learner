@@ -223,7 +223,7 @@ const Fixture = () => (
       </span>
     </div>
 
-    {/* 作文 (plan 124) -- the thirteenth pigment, 紫, measured where the
+    {/* 作文 (plan 125) -- the thirteenth pigment, 紫, measured where the
         twelve before it were assumed: its filled action at rest and at
         the hover mix (the guard cannot hover, so the 79% recipe is
         written inline), and its plate roundel. */}

@@ -11,7 +11,7 @@ sentence corrected. The model proposes the shape; parse_review decides
 what of it is usable, and a reply that is not the shape at all is
 served as the prose it is rather than lost.
 
-作文 (composition, plan 124) asks the same tutor about a sentence the
+作文 (composition, plan 125) asks the same tutor about a sentence the
 learner wrote from a grammar point rather than from a translation
 prompt, and draws the same shape (components/study/TutorReview.jsx). So
 the shape lives here and neither route owns it: the fence that keeps a

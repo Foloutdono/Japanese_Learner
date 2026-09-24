@@ -9,7 +9,7 @@ import { CheckIcon, CrossIcon } from '../ui/Icons'
 //
 // Two runs draw it: 翻訳 (screens/TranslationRun.jsx), where it reads
 // a translation attempt against a reference, and 作文
-// (screens/CompositionRun.jsx, plan 124), where it reads a sentence
+// (screens/CompositionRun.jsx, plan 125), where it reads a sentence
 // the learner wrote from a grammar point and there is no reference at
 // all. It lived inside TranslationRun until the second run needed it;
 // a near-copy would have drifted inside two features (DESIGN.md,

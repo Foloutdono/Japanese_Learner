@@ -72,7 +72,7 @@ rating (`quality`, 0–5, as everywhere else). The two sit side by side and are
 never merged — one is measured, one is an opinion.
 
 **Composition** (作文) — the practice mode where the learner is handed a
-grammar point and writes a sentence that uses it (plan 124). Three opinions
+grammar point and writes a sentence that uses it (plan 125). Three opinions
 about the sentence, kept apart in `composition_log`: the server *detects* the
 point (`study/grammar_detect.can_find` decides whether it may say so at all),
 the tutor *reviews* it (`study/tutor_review`, the shape translation's tutor

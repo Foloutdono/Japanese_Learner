@@ -4,7 +4,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — 作文's side (plan 124) ───────────────────────────────────
+// ── 机 — 作文's side (plan 125) ───────────────────────────────────
 // On the desk a composition run stands a column beside its card
 // (StudyStage's `side`, plan 114). While the learner writes it is the
 // point's lesson — rule, use, careful, the examples, the rivals: the

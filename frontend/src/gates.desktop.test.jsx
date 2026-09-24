@@ -7,7 +7,7 @@ import './index.css'
 // ── 机 — the gates laid out for the width (plan 113) ────────────
 // At the desk's tightest (1100, the rail taking 256 of it) the two
 // plated gates hang their plates two by two — Learn's odd fifth across
-// the row, Practice's six in three rows of two since 作文 (plan 124) —
+// the row, Practice's six in three rows of two since 作文 (plan 125) —
 // and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
@@ -85,7 +85,7 @@ describe('the plated gates on the desk', () => {
     expect(getComputedStyle(plates).display).toBe('grid')
     // Six divide by two, so the odd-last rule has nothing to span: the
     // exam keeps its place at the end of the gate and shares the third
-    // row with the platform added before it (plan 124).
+    // row with the platform added before it (plan 125).
     lattice(plates, { count: 6, spans: false })
     expect(plates.lastElementChild.querySelector('.plate__head').textContent).toMatch(/examen|exam/i)
     expect(plates.children[4].querySelector('.plate__head').textContent).toMatch(/rédaction|composition/i)

@@ -12,7 +12,7 @@ import Empty from '../components/ui/Empty'
 import { CardTransition } from '../components/study/CardTransition'
 import RatingBar from '../components/study/RatingBar'
 import { FireIcon } from '../components/ui/Icons'
-// The tutor's review, drawn by the component 作文 shares (plan 124).
+// The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview } from '../components/study/TutorReview'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'

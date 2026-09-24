@@ -27,7 +27,7 @@ const BATCH_SIZE = 5
 const PREFETCH_THRESHOLD = 1
 
 // Route: /practice/composition/:level — the session on the stage
-// (plan 124). The level list is the station page above it, under the
+// (plan 125). The level list is the station page above it, under the
 // chrome (screens/SentenceStation.jsx), so this has one axis and no
 // source picker: a 作文 run is chosen by grade and by nothing else.
 // Same shape as dictation.

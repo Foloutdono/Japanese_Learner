@@ -348,7 +348,7 @@ runtime purpose. Two consequences worth knowing:
   (cited across `components/`, `screens/`, `hooks/`, `lib/keyGuards.js` and
   `index.css`, and held by the desktop, wide and phone tests named in
   `docs/design/desk/README.md`; DESIGN.md, "The desk"; ADR 0018).
-  **124** is 作文, composition (wave 29): a sixth practice platform, where
+  **125** is 作文, composition (wave 30): a sixth practice platform, where
   the learner is handed a grammar point and writes a sentence that uses
   it — the detector's word on whether the point is there
   (`study/grammar_detect.py`'s `can_find`, trusted only where it finds
@@ -363,7 +363,7 @@ runtime purpose. Two consequences worth knowing:
   `screens/CompositionRun.jsx`, `config/tabs.js`, `domain/paywall.js`,
   `src/composition.desktop.test.jsx` and `index.css`; DESIGN.md, "The
   primary button"; `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **125** or higher, and check
+  When starting a new wave, begin at **126** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
