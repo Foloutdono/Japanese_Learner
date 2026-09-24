@@ -2,6 +2,7 @@ import { useEffect, useId, useRef } from 'react'
 import { useLang } from '../../LangContext'
 import { CrossIcon } from '../ui/Icons'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { composing } from '../../lib/keyGuards'
 
 // ── 机 — a door opened in the page's own column (plans 115, 120) ─────
 // On the desk a door that does not interrupt opens beside the page
@@ -22,7 +23,7 @@ export function DeskDock({ title, onClose, className = '', children }) {
 
   useEffect(() => {
     const onKey = e => {
-      if (e.key !== 'Escape' || e.defaultPrevented || dialogOpen()) return
+      if (e.key !== 'Escape' || e.defaultPrevented || composing(e) || dialogOpen()) return
       e.preventDefault()
       onClose()
     }

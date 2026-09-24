@@ -13,6 +13,7 @@ import { Loading } from '../components/ui/Loading'
 import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
 import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
+import { composing } from '../lib/keyGuards'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -130,7 +131,7 @@ export default function DecksScreen({ session }) {
       <input
         value={newName}
         onChange={e => setNewName(e.target.value)}
-        onKeyDown={e => e.key === 'Enter' && createDeck()}
+        onKeyDown={e => e.key === 'Enter' && !composing(e) && createDeck()}
         placeholder={t.deckNamePlaceholder}
         autoFocus
         className="field"

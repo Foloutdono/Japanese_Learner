@@ -12,6 +12,7 @@ import { EntryDockContext } from './entryDock'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
+import { composing } from '../../lib/keyGuards'
 
 // ── Is the page actually cramped? ──────────────────────────
 // Replaces a blind `window.innerWidth < 480` check: that treated
@@ -227,7 +228,7 @@ export function TypeInput({
       <input
         value={value}
         onChange={e => onChange(e.target.value)}
-        onKeyDown={e => { if (e.key === 'Enter') { playClick(); onSubmit() } }}
+        onKeyDown={e => { if (e.key === 'Enter' && !composing(e)) { playClick(); onSubmit() } }}
         placeholder={placeholder ?? t.typeAnswer}
         disabled={submitted}
         autoFocus

@@ -49,6 +49,7 @@ import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon } from '../components/ui
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
+import { composing } from '../lib/keyGuards'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
 const ANALYZER_COLOR = 'var(--line-kaiseki)'
@@ -225,7 +226,7 @@ export default function DictionaryScreen({ session }) {
 				e.preventDefault()
 				searchRef.current?.focus()
 				searchRef.current?.select()
-			} else if (e.key === 'Escape') {
+			} else if (e.key === 'Escape' && !composing(e)) {
 				if (typing && e.target === searchRef.current) e.target.blur()
 				// On the desk the dock is the catalogue's standing
 				// companion, not a panel that was opened (plan 114):

@@ -21,6 +21,7 @@ import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCard
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
 import { ImportIcon, ExportIcon, CheckCircleIcon, CrossIcon, CheckIcon, ChevronIcon, TrashIcon, CardIcon, LightbulbIcon, PlusIcon, SearchIcon, BooksIcon } from '../components/ui/Icons'
+import { composing } from '../lib/keyGuards'
 
 // The name the export endpoint chose, out of its Content-Disposition.
 // Two forms arrive (RFC 6266): `filename*=UTF-8''...` percent-encoded,
@@ -668,7 +669,7 @@ export default function DeckDetailScreen({ session }) {
             mid-quiz as help nobody asked for. */}
         <input value={notes} onChange={e => setNotes(e.target.value)}
           placeholder={t.notesPlaceholder}
-          onKeyDown={e => e.key === 'Enter' && saveCard()}
+          onKeyDown={e => e.key === 'Enter' && !composing(e) && saveCard()}
           className="field deckdetail-form__input" />
       </div>
       <div className="form__row">
