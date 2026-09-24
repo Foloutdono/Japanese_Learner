@@ -106,14 +106,36 @@ class TestKanjiWords:
                 want = min(MAX_WORDS, len(available))
                 assert len(set(shown[:want])) == want, (entry["kanji"], shown, available)
 
-    def test_a_word_the_aligner_cannot_place_is_still_a_ledger_example_last(self):
-        # Nothing is ever filed under a reading it cannot vouch for, but
-        # the ledger may still print it once the filed readings run out.
-        out = kanji_words("木", "en")
-        filed = {(w["kanji"], w["kana"]) for r in out["readings"] for w in r["words"]}
-        unplaced = [w for w in out["examples"] if (w["kanji"], w["kana"]) not in filed]
-        if unplaced:
-            assert out["examples"].index(unplaced[0]) >= len(out["examples"]) - len(unplaced)
+    def test_a_word_the_aligner_cannot_place_waits_for_every_placed_word(self):
+        # Nothing is ever filed under a reading it cannot vouch for, and
+        # the ledger prints such a word only once the filed readings have
+        # no word left -- not in the first round's spare slot, which is
+        # how 今朝 came before 今週.
+        for level in ("N5", "N4"):
+            for entry in KANJI_BY_LEVEL[level]:
+                out = kanji_words(entry["kanji"], "en")
+                filed = {(w["kanji"], w["kana"]) for r in out["readings"] for w in r["words"]}
+                shown = [(w["kanji"], w["kana"]) for w in out["examples"]]
+                unplaced = [k for k in shown if k not in filed]
+                if unplaced:
+                    assert filed <= set(shown), (entry["kanji"], shown)
+                    assert shown[-len(unplaced):] == unplaced, (entry["kanji"], shown)
+
+    def test_a_whole_word_reading_does_not_crowd_out_a_real_one(self):
+        # The four words that reported this: each reads its kanji as part
+        # of a whole (今朝 けさ, 時計 とけい, 火傷 やけど, 不山戯る ふざける),
+        # and each kanji has more placed words than the ledger has slots.
+        for char, word in (("今", "今朝"), ("時", "時計"), ("火", "火傷"), ("山", "不山戯る")):
+            shown = [w["kanji"] for w in kanji_words(char, "en")["examples"]]
+            assert word not in shown, (char, shown)
+
+    def test_a_word_written_in_kana_goes_after_the_rest_of_its_reading(self):
+        # 葉書 is N5 but written はがき; the words that write 書 as が(き)
+        # come first, whatever their level.
+        by = {r["reading"]: r["words"] for r in kanji_words("書", "en")["readings"]}
+        words = [w["kanji"] for w in by["~が.き"]]
+        assert "葉書" in words
+        assert words.index("葉書") > words.index("下書き")
 
     def test_a_kanji_outside_the_deck_has_no_readings_and_no_words(self):
         assert kanji_words("鰻", "en") == {"readings": [], "examples": []}

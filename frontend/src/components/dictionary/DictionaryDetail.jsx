@@ -302,6 +302,16 @@ function Picked({ text, hit }) {
   )
 }
 
+// Whether `char` sits inside a reading the aligner kept whole
+// (study/furigana.py): a part that holds it and more, under one reading.
+// A part of its own means the word reads the character by one of its
+// readings; no reading at all means there is nothing to say.
+function readAsWhole(parts, char) {
+  return Boolean(char) && (parts ?? []).some(
+    p => p.reading && p.text !== char && p.text.includes(char),
+  )
+}
+
 // One word that uses the character: its furigana'd form with the kanji
 // itself picked out in the entry's ink — so the reading this word
 // demonstrates is what the eye lands on — its first gloss, and, when the
@@ -315,7 +325,15 @@ function Picked({ text, hit }) {
 // READING with the kana picked out of it, because a reader still
 // learning the syllabary cannot be shown 朝 as an example of あ. The
 // written form stays behind the row, as what it opens.
+//
+// A word whose reading belongs to the whole of it — 今朝 read けさ, where
+// け is no reading of 今 (熟字訓, 当て字) — keeps one ruby over the run
+// and carries a 熟 in the 音/訓 square beside it: the one row in the
+// ledger that is an example of the character but not of any of its
+// readings, and it says so.
 function WordRow({ w, char, onClick, reading = false }) {
+  const { t } = useLang()
+  const whole = !reading && readAsWhole(w.furigana, char)
   const body = (
     <>
       <span className="dict-word__jp" lang="ja">
@@ -325,6 +343,12 @@ function WordRow({ w, char, onClick, reading = false }) {
             ? <FuriganaParts parts={w.furigana} hit={char} hitClassName="dict-word__hit" />
             : w.kanji}
       </span>
+      {whole && (
+        <span className="dict-kind" title={t.readingsWhole}>
+          <span aria-hidden="true">熟</span>
+          <span className="sr-only">{t.readingsWhole}</span>
+        </span>
+      )}
       <span className="dict-word__gloss">{firstGloss(w.meaning)}</span>
     </>
   )

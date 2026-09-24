@@ -1077,6 +1077,9 @@ const dictionary = {
   // could not already read them.
   readingsOnName:    'Chinese reading',
   readingsKunName:   'Japanese reading',
+  // The 熟 on a word row whose reading belongs to the whole word
+  // (今朝 けさ, 時計 とけい), not to the kanji the row is about.
+  readingsWhole:     'Read as a whole word',
   // Icon-button title/aria-label on the dictionary-lookup action that
   // sits on a revealed card (RevealActions in QuizComponents.jsx).
   openDictionary:    'Open dictionary entry',

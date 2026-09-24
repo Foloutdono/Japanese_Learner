@@ -1023,6 +1023,41 @@ describe('the readings — two on the plate, all of them in a sheet of their own
     // The rest of the word keeps the ambient ink.
     const plain = rows[0].querySelector('.dict-word__jp ruby:not(.dict-word__hit)')
     expect(getComputedStyle(plain).color).toBe(probe('color', 'var(--text-primary)', root))
+    // A word read by one of the character's readings needs no mark.
+    expect(root.querySelector('section[aria-label="Used in these words"] .dict-kind')).toBeNull()
+  })
+
+  // 今朝 is けさ, and け is no reading of 今: study/furigana.py keeps one
+  // ruby over the pair (熟字訓), so 今 has no part of its own to carry
+  // the hit. It used to go unmarked, the one row in the ledger with no
+  // gold in it.
+  it('picks the kanji out of a word read as a whole, and marks the row 熟', async () => {
+    const { root } = await renderEntry({
+      ...KANJI, kanji: '今', kana: 'コン・キン・いま',
+      vocab_examples: [
+        { kanji: '今週', kana: 'こんしゅう', meaning: 'this week', level: 'N5',
+          furigana: [{ text: '今', reading: 'こん' }, { text: '週', reading: 'しゅう' }] },
+        { kanji: '今朝', kana: 'けさ', meaning: 'this morning', level: 'N5',
+          furigana: [{ text: '今朝', reading: 'けさ' }] },
+      ],
+      readings: [],
+    })
+    const [split, whole] = root.querySelectorAll('section[aria-label="Used in these words"] .dict-word')
+    const ink = probe('color', 'color-mix(in srgb, var(--line-jisho) 60%, var(--text-primary))')
+
+    const hit = whole.querySelector('.dict-word__hit')
+    expect(hit.textContent).toBe('今')
+    expect(getComputedStyle(hit).color).toBe(ink)
+    // The reading is the word's, not 今's: it keeps the row's own ink.
+    const rt = whole.querySelector('rt')
+    expect(rt.textContent).toBe('けさ')
+    expect(getComputedStyle(rt).color).not.toBe(ink)
+    expect(baseText(whole.querySelector('.dict-word__jp'))).toBe('今朝')
+
+    const mark = whole.querySelector('.dict-kind')
+    expect(mark.querySelector('[aria-hidden="true"]').textContent).toBe('熟')
+    expect(mark.querySelector('.sr-only').textContent).toBe('Read as a whole word')
+    expect(split.querySelector('.dict-kind')).toBeNull()
   })
 
   // The wide-reading case, on its own fixture and away from the big

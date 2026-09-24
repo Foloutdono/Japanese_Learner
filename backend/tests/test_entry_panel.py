@@ -94,11 +94,14 @@ def test_a_word_names_the_kanji_it_is_written_with(client):
 
 
 def test_a_character_the_aligner_cannot_isolate_keeps_its_row(client):
-    # 生活 is aligned as one unsegmented run, so neither half can be
-    # given a reading. The row still prints -- the door it opens is the
-    # point -- with no reading rather than an invented one.
-    row = _one(client, "生活", "vocab", lambda e: e["kanji"] == "生活")
-    assert [p["char"] for p in row["kanji_parts"]] == ["生", "活"]
+    # 今朝 is read けさ as a whole (熟字訓): no slice of it is 今's, so
+    # the aligner keeps it one run and neither half can be given a
+    # reading. The row still prints -- the door it opens is the point --
+    # with no reading rather than an invented one. (This was 生活 until
+    # the aligner learned to drop the する the deck packs onto its
+    # reading, せいかつ・する, which was the only thing stopping it.)
+    row = _one(client, "今朝", "vocab", lambda e: e["kanji"] == "今朝")
+    assert [p["char"] for p in row["kanji_parts"]] == ["今", "朝"]
     assert all(p["reading"] is None for p in row["kanji_parts"])
 
 

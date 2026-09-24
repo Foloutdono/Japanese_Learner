@@ -488,7 +488,15 @@ gold under a gold heading outranks the heading; the owner reversed it, and
 the reversal is the sounder reading of the screen. Ground is what divides a
 reading from its words now, and sumi against surface is not a distinction the
 rows can dilute the way a shared rung was. One mark means one thing wherever
-the row is drawn, which is worth more than the rivalry was worth avoiding. The plate is `position: sticky`
+the row is drawn, which is worth more than the rivalry was worth avoiding.
+**A word read as a whole keeps the mark on its kanji and not on its
+reading**: 今朝 is けさ, and け is no reading of 今 (熟字訓, 当て字), so the
+aligner keeps one ruby over the word. The row picks 今 out inside it, leaves
+the ruby in the row's own ink, since that reading belongs to the word, and
+sets 熟 beside the word in the plate's 音/訓 square. It is the one row that
+shows the character without showing any of its readings, and it comes last:
+such a word fills a ledger slot only once every reading has run out of
+words. The plate is `position: sticky`
 inside whichever shell scrolls it, so the word stays in view while its
 examples pass under it; on a phone the shell is the whole screen and this is
 the reading view. Under the stripe, blocks divided by hairlines and **no
