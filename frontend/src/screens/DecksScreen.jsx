@@ -15,6 +15,7 @@ import { deckTypes, deckTypeOf } from '../components/decks/deckTypes'
 import { dueByDeck } from '../domain/lanes'
 import { BooksIcon, CrossIcon, PlusIcon } from '../components/ui/Icons'
 import { composing } from '../lib/keyGuards'
+import { useRadioWalk, radioTab } from '../hooks/useRadioWalk'
 
 // ── 教材 — the shelf (plan 071) ───────────────────────────────
 // /learn/decks on the canvas: the bar, the shelf's two doors under
@@ -57,6 +58,9 @@ export default function DecksScreen({ session }) {
   const [query, setQuery]       = useState('')
   const [typeFilter, setTypeFilter] = useState('all')
   const searchRef = useRef(null)
+  // The deck's type, one tab stop walked with the arrows on the desk
+  // (plan 123), where the form is a dialog.
+  const onWalkTypes = useRadioWalk(desk)
 
   function fetchDecks() {
     setLoading(true)
@@ -147,8 +151,8 @@ export default function DecksScreen({ session }) {
         className="field"
         aria-label={t.deckNamePlaceholder}
       />
-      <div className="type-list" role="radiogroup" aria-label={t.createDeck}>
-        {DECK_TYPES.map(dt => {
+      <div className="type-list" role="radiogroup" aria-label={t.createDeck} onKeyDown={onWalkTypes}>
+        {DECK_TYPES.map((dt, i) => {
           const on = newType === dt.value
           return (
             <button
@@ -156,6 +160,7 @@ export default function DecksScreen({ session }) {
               type="button"
               role="radio"
               aria-checked={on}
+              tabIndex={radioTab(desk, i, DECK_TYPES.findIndex(d => d.value === newType))}
               className={`type-row${on ? ' type-row--on' : ''}`}
               onClick={() => { playUi('click-mode-selection'); setNewType(dt.value) }}
             >

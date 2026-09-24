@@ -1255,3 +1255,40 @@ describe('the places (plan 123, P16)', () => {
     buttons('.radical-tile')
   })
 })
+
+// ── plan 123, P17 — a phone's radio groups are tapped ──
+// On the desk a radio group is one tab stop walked with the arrows; a
+// phone's keeps a stop per radio, no tabindex written, and leaves the
+// arrows to the page.
+describe('the radio groups (plan 123, P17)', () => {
+  it('keep a stop per radio and leave the arrows alone', async () => {
+    const { Seg, ConsoleBand } = await import('./components/chrome/Console')
+    const opts = ['a', 'b', 'c'].map(k => ({ key: k, label: k }))
+    const onChange = vi.fn()
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <Seg options={opts} value="b" onChange={onChange} label="seg" />
+        <ConsoleBand options={opts} value="b" onChange={onChange} label="band" />
+      </LangProvider>
+    )
+    await settle()
+    const radios = [...document.querySelectorAll('[role="radio"]')]
+    expect(radios).toHaveLength(6)
+    expect(radios.every(r => !r.hasAttribute('tabindex'))).toBe(true)
+    const heard = vi.fn()
+    const listen = e => heard(e.key)
+    window.addEventListener('keydown', listen)
+    try {
+      for (const r of [radios[1], radios[4]]) {
+        r.focus()
+        r.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(r)
+      }
+      expect(onChange).not.toHaveBeenCalled()
+      expect(heard).toHaveBeenCalledTimes(2)
+    } finally {
+      window.removeEventListener('keydown', listen)
+    }
+  })
+})

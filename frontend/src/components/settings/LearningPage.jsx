@@ -16,6 +16,8 @@ import PlacementTest from '../onboarding/PlacementTest'
 import { PACES } from '../onboarding/paces'
 import { LINES, linesOrAll, toggleLine } from '../../domain/boarding'
 import { SettingsPage, Slip } from './SettingsPage'
+import { useDesk } from '../../hooks/useDesk'
+import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -63,6 +65,11 @@ export function LearningPage({ session }) {
   const current = summary?.jlptLevel ?? null
   const pace = summary?.dailyNewTarget ?? null
   const riding = linesOrAll(summary?.lines)
+  // One tab stop a group on the desk (plan 123). The arrows move the
+  // focus alone: a level asks before it moves, and a pace is a save that
+  // holds the group while it runs -- Space chooses.
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk, { check: false })
 
   function save(patch) {
     setSaving(true)
@@ -102,13 +109,14 @@ export function LearningPage({ session }) {
   return (
     <SettingsPage title={t.settingsLearning}>
       <Slip label={t.settingsJlptLevel} cap={t.levelCurrentMark}>
-        <div className="lvlstrip" role="radiogroup" aria-label={t.settingsJlptLevel}>
-          {LEVELS.map(level => (
+        <div className="lvlstrip" role="radiogroup" aria-label={t.settingsJlptLevel} onKeyDown={onWalk}>
+          {LEVELS.map((level, i) => (
             <button
               key={level}
               type="button"
               role="radio"
               aria-checked={current === level}
+              tabIndex={radioTab(desk, i, LEVELS.indexOf(current))}
               disabled={saving}
               className={`lvlstrip__stop${current === level ? ' lvlstrip__stop--on' : ''}`}
               onClick={() => askLevel(level)}
@@ -122,13 +130,14 @@ export function LearningPage({ session }) {
       </Slip>
 
       <Slip label={t.settingsPace} cap={t.settingsPaceCap}>
-        <div className="svc-grid" role="radiogroup" aria-label={t.settingsPace}>
-          {PACES.map(p => (
+        <div className="svc-grid" role="radiogroup" aria-label={t.settingsPace} onKeyDown={onWalk}>
+          {PACES.map((p, i) => (
             <button
               key={p.id}
               type="button"
               role="radio"
               aria-checked={pace === p.perDay}
+              tabIndex={radioTab(desk, i, PACES.findIndex(q => q.perDay === pace))}
               disabled={saving}
               className={`svc${pace === p.perDay ? ' svc--on' : ''}`}
               title={p.recommended ? t.onbPaceRecommended : undefined}
@@ -299,6 +308,9 @@ function LevelSheet({ from, to, preview, t, onConfirm, onClose }) {
 // study screens draw.
 function RatingSlip({ t, session }) {
   const current = useRatingScale()
+  // The desk's walk (plan 123), focus alone: a choice is a save.
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk, { check: false })
   const [saving, setSaving] = useState(false)
   const [failed, setFailed] = useState(false)
 
@@ -318,13 +330,14 @@ function RatingSlip({ t, session }) {
 
   return (
     <Slip label={t.settingsRatingScale}>
-      <div className="grades" role="radiogroup" aria-label={t.settingsRatingScale}>
-        {RATING_SCALE_IDS.map(id => (
+      <div className="grades" role="radiogroup" aria-label={t.settingsRatingScale} onKeyDown={onWalk}>
+        {RATING_SCALE_IDS.map((id, i) => (
           <button
             key={id}
             type="button"
             role="radio"
             aria-checked={current === id}
+            tabIndex={radioTab(desk, i, RATING_SCALE_IDS.indexOf(current))}
             disabled={saving}
             className={`svc${current === id ? ' svc--on' : ''}`}
             onClick={() => choose(id)}

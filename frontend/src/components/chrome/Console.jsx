@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
 import { SearchIcon, CrossIcon } from '../ui/Icons'
+import { useDesk } from '../../hooks/useDesk'
+import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 
 // ── The console (plan 068) ────────────────────────────────────
 // The one index every catalogue screen has: a row of chips (and at
@@ -32,10 +34,16 @@ export function Console({ children, className = '', guide }) {
 // searches. As a pill in row 1 it left most of the row empty and read
 // as a third filter; a band fills the width because it is about the
 // full width of what is below it.
+//
+// On the desk (plan 123) it is one tab stop and its arrows move and
+// check, as a radio group's do (hooks/useRadioWalk).
 export function ConsoleBand({ options, value, onChange, label }) {
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
+  const checked = options.findIndex(opt => opt.key === value)
   return (
-    <div className="console__band" role="radiogroup" aria-label={label}>
-      {options.map(opt => {
+    <div className="console__band" role="radiogroup" aria-label={label} onKeyDown={onWalk}>
+      {options.map((opt, i) => {
         const on = opt.key === value
         return (
           <button
@@ -43,6 +51,7 @@ export function ConsoleBand({ options, value, onChange, label }) {
             type="button"
             role="radio"
             aria-checked={on}
+            tabIndex={radioTab(desk, i, checked)}
             className={`console__band-opt${on ? ' console__band-opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
@@ -151,11 +160,15 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
 // Two to four options in a pill, one of them on. `full` stretches it
 // across the row (the analyzer's Text / Photo / Video). Options carry
 // `jp` for a Japanese word and `label` for the plain one; either or
-// both.
+// both. On the desk (plan 123) it is one tab stop and its arrows move
+// and check, as a radio group's do (hooks/useRadioWalk).
 export function Seg({ options, value, onChange, full = false, className = '', label }) {
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
+  const checked = options.findIndex(opt => opt.key === value)
   return (
-    <div className={`seg${full ? ' seg--full' : ''} ${className}`.trim()} role="radiogroup" aria-label={label}>
-      {options.map(opt => {
+    <div className={`seg${full ? ' seg--full' : ''} ${className}`.trim()} role="radiogroup" aria-label={label} onKeyDown={onWalk}>
+      {options.map((opt, i) => {
         const on = opt.key === value
         return (
           <button
@@ -163,6 +176,7 @@ export function Seg({ options, value, onChange, full = false, className = '', la
             type="button"
             role="radio"
             aria-checked={on}
+            tabIndex={radioTab(desk, i, checked)}
             className={`seg__opt${on ? ' seg__opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
