@@ -61,8 +61,8 @@ LAME (study/voice_engine.encode_mp3) resamples the bank's 44.1 kHz to
 the set's 48 kHz on the way out.
 
 -- The terms ------------------------------------------------------
-波音リツ's (https://www.canon-voice.com/terms/, from a verbatim snapshot
-of 2026-08-15): 「商用利用可です。」「音源の転載、再配布可」「原音を加工しての
+波音リツ's (https://www.canon-voice.com/terms/, read on the site
+2026-09-24): 「商用利用可です。」「音源の転載、再配布可」「原音を加工しての
 転載、再配布可」「クレジット表記不要」. He may ask for a work he judges
 inappropriate to be taken down (第8条2). The app credits him all the
 same, as provenance: sources.json names the voice of every clip, and

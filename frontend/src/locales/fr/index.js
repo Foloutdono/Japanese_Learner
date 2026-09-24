@@ -1830,7 +1830,7 @@ const onboarding = {
   settingsData: 'Données',
   settingsRedo: 'Test de placement',
   settingsCredits: 'Crédits',
-  creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', speech: 'Voix japonaise', type: 'Polices' },
+  creditsWhat: { dictionary: 'Dictionnaire', kanji: 'Kanji', strokes: 'Ordre des traits', sentences: 'Phrases d’exemple', voice: 'Voix des gares', speech: 'Voix japonaise', kana: 'Voix des kana', type: 'Polices' },
   themeDark: 'Sombre',
   themeLight: 'Clair',
   themeAuto: 'Système',

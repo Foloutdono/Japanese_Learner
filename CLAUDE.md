@@ -199,9 +199,13 @@ runtime purpose. Two consequences worth knowing:
   permission: the importer reads joined (連続音) banks by their oto.ini
   aliases, cuts each syllable from the start of a string and before the
   next sound, holds a long vowel by repeating its steady end in phase, and
-  takes あい/おい from the singer's own glide (cited in
-  `scripts/kana_bank.py`, `scripts/build_kana_audio.py` and
-  `tests/test_kana_audio.py`; ADR 0019).
+  takes あい/おい from the singer's own glide — and then, on his real
+  banks, onsets found by walking back from the vowel (past the room
+  noise), an exact `--pitch` folder, long vowels joined into the notes he
+  held, and the set imported from 強連続音 A3 (cited in
+  `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
+  `tests/test_kana_audio.py`, `domain/attributions.js` and
+  `lib/audio/playback.js`; ADR 0019).
   When starting a new wave, begin at **114** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
@@ -256,21 +260,23 @@ python -m scripts.audition_voices --roles 女声6,女声6,男声1,女声1  # one
 python -m scripts.audition_voices --tempo 男声1   # one voice at four speeds, for VOICE_TEMPO
 python -m scripts.build_kana_audio --check        # kana clips missing, stray, off-spec or unsourced
 python -m scripts.build_kana_audio --force        # remake frontend/public/sounds/kanas/ on the engine
-python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/<bank> --pitch A3 --credit namine-ritsu --force
+python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/strong --pitch A3 --credit namine-ritsu --force
 ```
 
 The kana clips are committed, and `kanas/sources.json` records which voice
 made each one, as its row id in `domain/attributions.js`;
 `tests/test_kana_audio.py` fails on a voice without its Credits row and
-`THIRD_PARTY_NOTICES.md` section. The deck is to be cut from a recorded
-voice, 波音リツ's UTAU bank (plan 113c, ADR 0019, `scripts/kana_bank.py`),
-whose terms ask for no credit, report or permission (the app credits him
-anyway). It waits on his download site, `canon-voice.com`, being allowed in
-the environment's network settings, and on the owner picking a bank and
-pitch from trial sets (`--out datas/kana_source/trial-…`). The bank goes under
-`backend/datas/kana_source/`, which is gitignored. A remade set needs a new
-`KANA_REV` in `lib/audio/playback.js`, or returning learners keep the old
-one for a year.
+`THIRD_PARTY_NOTICES.md` section. The deck is cut from a recorded voice,
+波音リツ's UTAU bank 強連続音 Ver1.5.1 at A3 (plan 113c, ADR 0019,
+`scripts/kana_bank.py`), whose terms ask for no credit, report or
+permission (the app credits him anyway). The owner chose it by ear, as
+"good for now": a better kana voice is a known follow-up. To remake it,
+unzip `https://www.canon-voice.com/voice/r73_strong_ren0151.zip` (names in
+Shift_JIS) under `backend/datas/kana_source/ritsu/strong/`, which is
+gitignored, and run the `--from-bank … --pitch A3` line above; a trial
+set for listening goes to `--out datas/kana_source/trial-…`. A remade set
+needs a new `KANA_REV` in `lib/audio/playback.js` (`ritsu1` now), or
+returning learners keep the old one for a year.
 
 The one optional warm-up, and it needs no database:
 

@@ -10,14 +10,15 @@ import { hasVoice, playVoice } from './voices'
 // something nobody will hear; the actual silencing is the master bus
 // sitting at zero.
 
-// The kana set's revision. The clips are generated
-// (backend/scripts/build_kana_audio.py, plan 113) and served from the
-// same paths as the recordings they replaced -- and the service worker
-// keeps /sounds/ cache-first for a year, so without a new URL a
-// returning learner would hear the old set until then. A file that used
-// to be MISSING may even be cached as the index.html the SPA fallback
-// answered with. Bump this whenever the set is remade.
-export const KANA_REV = 'nemo1'
+// The kana set's revision. The clips are made by
+// backend/scripts/build_kana_audio.py -- 'nemo1' synthesized (plan 113),
+// 'ritsu1' cut from 波音リツ's UTAU bank (plan 113c) -- and served from
+// the same paths every set has used, while the service worker keeps
+// /sounds/ cache-first for a year: without a new URL a returning learner
+// would hear the old set until then. A file that used to be MISSING may
+// even be cached as the index.html the SPA fallback answered with. Bump
+// this whenever the set is remade.
+export const KANA_REV = 'ritsu1'
 const KANA         = name   => `/sounds/kanas/${name}.mp3?v=${KANA_REV}`
 const SFX          = name   => `/sounds/sfx/${name}.mp3`
 const UI           = name   => `/sounds/ui/${name}.mp3`

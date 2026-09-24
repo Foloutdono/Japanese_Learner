@@ -196,11 +196,11 @@ design.
 ## Format notes
 
 **Provenance.** The announcement clips are synthesized with VOICEVOX
-(春日部つむぎ/Kasukabe Tsumugi voice), not recorded, and the kana clips
-with VOICEVOX Nemo (plan 113; `kanas/sources.json` names the voice of
-each) — see `THIRD_PARTY_NOTICES.md` at the repo root for the required
-credits and license terms before adding or replacing any of them. Both
-forbid using the audio for machine learning.
+(春日部つむぎ/Kasukabe Tsumugi voice), not recorded. The kana clips are cut
+from 波音リツ's UTAU bank, and `kanas/sources.json` names the voice of
+each. Before adding or replacing any of them, see `THIRD_PARTY_NOTICES.md`
+at the repo root for the required credits and license terms. VOICEVOX's
+terms forbid using its audio for machine learning.
 
 **mp3 for everything new.** The eleven announcements are `.wav` and
 uncompressed — `kanji.wav` alone is 118KB for two seconds. Converting
@@ -222,44 +222,53 @@ kana, yōon, long vowel and 外来音 (ファ ティ ヴ…). `kanas/sources.jso
 says which voice made each one, as its row id in
 `src/domain/attributions.js`.
 
-Today every clip is `voicevox-nemo`: generated, not recorded, by the
-same voice engine as the rest of the app's speech (VOICEVOX Nemo,
-`backend/study/voice_engine.py`, plan 113). The owner judged a
-synthesized mora correct but flat, so the set is to be cut from a real
-voice instead: 波音リツ's UTAU voicebank (by カノン, plan 113c,
-`docs/adr/0019`). His terms ask for no credit, report or permission; the
-first choice, 小春音アミ, asked for all three. The clips wait on his
-download site, which the build environment has to be allowed to reach,
-and on the owner's choice of bank and pitch by ear. One script makes
-either set:
+Every clip is `namine-ritsu`: a real voice, cut from 波音リツ's UTAU
+bank 強連続音 Ver1.5.1, its A3 folder (by カノン, plan 113c,
+`docs/adr/0019`). The owner chose it by ear from eleven trial reels
+across four of his banks. His terms ask for no credit, report or
+permission; the app credits him anyway. The set before it was generated
+by the voice engine (VOICEVOX Nemo, plan 113), which the owner judged
+correct but flat. The engine can still make a set, as a fallback.
+
+To remake the set, download
+https://www.canon-voice.com/voice/r73_strong_ren0151.zip and unzip it
+under `backend/datas/kana_source/ritsu/strong/`, which is gitignored.
+The zip's names are Shift_JIS, which `LC_ALL=C.UTF-8 unzip -O cp932`
+decodes. Then:
 
     cd backend
     python -m scripts.build_kana_audio --check     # missing, stray, off-spec, unsourced
-    python -m scripts.build_kana_audio --force     # remake the set on the engine
-    python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/<bank> \
-        --pitch A3 --credit namine-ritsu --force   # cut it from the bank
-
-The bank goes under `backend/datas/kana_source/`, which is gitignored:
-only the clips cut from it are committed.
+    python -m scripts.build_kana_audio --from-bank datas/kana_source/ritsu/strong \
+        --pitch A3 --credit namine-ritsu --force   # the set as it is
+    python -m scripts.build_kana_audio --force     # the engine's set instead
 
 `backend/scripts/kana_bank.py` reads a single-syllable bank or a joined
-one, like his, where every syllable is taken from the start of a recorded
-string and cut before the next sound. Its recipes:
+one, like his. In a joined bank, every syllable is taken from where a
+recorded string opens on it, and cut before the next sound. Its onset is
+found by walking back from the vowel, so the room noise before a string
+is never taken as the syllable. Its recipes:
 
-- a long vowel is the bank's long tone (あー) where it has one; otherwise
-  it is the vowel held, with its steady end repeated in phase;
-- あい and おい are the singer's own glide where a string has one;
-  otherwise two samples joined in phase;
-- を is お;
-- the ヴ row is the バ row when the bank has no ゔ, and the run says so.
+- **Long vowels.** A long vowel is the bank's long tone (あー) where it
+  has one. Otherwise it is the vowel's attack joined into the longest
+  note he held on that vowel. The join is in phase and at one level.
+  Repeating the vowel's steady end is the last resort, because it is
+  heard as the vowel said twice.
+- **あい and おい** are his own move from one vowel into the other,
+  entered from the first vowel's attack. Two samples are butted together
+  only where no string makes the move.
+- **を** is お.
+- **The ヴ row** is his own ヴ. It falls back to the バ row only for a bank
+  with no ゔ, and the run says so.
 
 `backend/tests/test_kana_audio.py` holds the folder to the deck:
 
 - every kana has its clip, and no clip is orphaned;
 - every file is one the generator made;
 - every voice `sources.json` names has its row on the Credits page and its
-  section in `THIRD_PARTY_NOTICES.md`. Both voices' terms make the credit a
-  condition, so a set cut from a new voice cannot land without it.
+  section in `THIRD_PARTY_NOTICES.md`. VOICEVOX Nemo's terms make the
+  credit a condition. His do not, and the app gives it as provenance. The
+  test asks it of every voice, so a set cut from a new one cannot land
+  without it.
 
 **A clip is named by sound, not by spelling.**
 `content/kana_data.sound_of(entry)` is the romaji, which already files
@@ -271,19 +280,21 @@ play `kanaSound(card)`.
 **What one clip is.** 48 kHz mono, a constant 96 kbps, trimmed to the
 syllable with 20 ms of air either side and 5 ms fades, loudness at
 `playback.js`'s `TARGET_RMS` with the peak kept at −3 dBFS or below.
-An engine clip is 0.26–0.45 s long. A bank cut keeps 0.4 s of the
-syllable (less if the next sound in its string comes sooner), or 0.7 s
-for a long vowel, before the air is added. The playback correction in `playKana`
-stays: a file already on target gets gain ≈ 1 and offset ≈ 0.
+A bank cut keeps 0.4 s of the syllable (less if the next sound in its
+string comes sooner), or 0.7 s for a long vowel, before the air is added.
+His clips come out 0.42–0.47 s, 0.74–0.77 s for a long vowel, and
+0.62–0.65 s for あい and おい. An engine clip was 0.26–0.45 s. The
+playback correction in `playKana` stays: a file already on target gets
+gain ≈ 1 and offset ≈ 0.
 
-**Why synthesis works now, when it was once rejected.** Read as TEXT, a
-lone mora gives a speech engine nothing to go on: it reads は as the
-particle "wa" and a single kana as something like its letter name. The
-generator never hands the engine text. It hands it the kana NOTATION
-(`ハ'`, `キャ'`), which names the syllable itself and where the pitch
-falls, and holds the vowel a little so a syllable on its own is not
-clipped. Two spellings are said as the lesson teaches them rather than
-letter by letter: えい as ē and おう as ō.
+**Why synthesis worked, when it was once rejected** (the engine's set,
+plan 113). Read as TEXT, a lone mora gives a speech engine nothing to go
+on: it reads は as the particle "wa" and a single kana as something like
+its letter name. The generator never hands the engine text. It hands it
+the kana NOTATION (`ハ'`, `キャ'`), which names the syllable itself and
+where the pitch falls, and holds the vowel a little so a syllable on its
+own is not clipped. Two spellings are said as the lesson teaches them
+rather than letter by letter: えい as ē and おう as ō.
 
 **A remade set is a new `KANA_REV`** in `src/lib/audio/playback.js`.
 The service worker keeps `/sounds/` cache-first for a year, and the

@@ -1902,7 +1902,7 @@ const onboarding = {
   settingsData: 'Data',
   settingsRedo: 'Placement test',
   settingsCredits: 'Credits',
-  creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', speech: 'Japanese speech', type: 'Typefaces' },
+  creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', speech: 'Japanese speech', kana: 'Kana voice', type: 'Typefaces' },
   themeDark: 'Dark',
   themeLight: 'Light',
   themeAuto: 'System',
