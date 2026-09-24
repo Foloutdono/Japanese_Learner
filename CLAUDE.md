@@ -324,7 +324,16 @@ runtime purpose. Two consequences worth knowing:
   `scripts/kana_bank.py`, `scripts/build_kana_audio.py`,
   `tests/test_kana_audio.py`, `domain/attributions.js` and
   `lib/audio/playback.js`; ADR 0020).
-  When starting a new wave, begin at **122** or higher, and check
+  **122** is 操作盤, the run's console on the desk (wave 28): a card
+  run's floor as one console of two rows across the stage — the rating
+  tiles' row fixed above the level bar, the bar holding this run's three
+  figures beside the fare — the card grown to it, the side the entry's
+  place with the misses listed during the run (cited in
+  `components/chrome/LevelBar.jsx`, `components/study/StudyStage.jsx`'s
+  `records`, `components/study/RunRecords.jsx`,
+  `components/study/SessionPanel.jsx`, `src/console.desktop.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **123** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

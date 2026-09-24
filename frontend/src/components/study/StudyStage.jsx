@@ -27,15 +27,23 @@ import { EntryDockContext } from './entryDock'
 // phone never renders it, and a run that passes none gets the phone's
 // single column centred on the desk as before. Inside a stage with a
 // side, a revealed card docks its dictionary entry there (entryDock).
+//
+// `records` says the run rates and keeps a tally (stores/runTally): on
+// the desk, with a side, its floor is then the console (plan 122) — the
+// rating tiles' row fixed above the level bar, the bar holding this
+// run's three figures beside the fare, and the card growing to it. The
+// six card runs pass it; a browse, a practice run and the rides do not,
+// and keep the strip. A phone reads nothing of it.
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
-  toast, onToastDone, className = '', levelBar = true, side, sideLabel, children,
+  toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, children,
 }) {
   const desk = useDesk()
   const split = desk && side !== undefined
+  const figures = split && records
   const classes = ['container', 'stage', className].filter(Boolean).join(' ')
   return (
-    <div className={split ? 'screen desk-run' : 'screen'}>
+    <div className={split ? `screen desk-run${figures ? ' desk-run--console' : ''}` : 'screen'}>
       {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} />}
       <main id="main-content" className={classes} style={color ? { '--line-color': color } : undefined}>
         <EntryDockContext.Provider value={split}>
@@ -52,7 +60,7 @@ export function StudyStage({
           stage frame took the HUD away. See components/chrome/LevelBar.jsx.
           `levelBar={false}` is for the one phase that is bounded to the
           screen and can pay nothing — the comprehension passage. */}
-      {levelBar && <LevelBar />}
+      {levelBar && <LevelBar records={figures} />}
       {split && <RunSide label={sideLabel} color={color}>{side}</RunSide>}
     </div>
   )

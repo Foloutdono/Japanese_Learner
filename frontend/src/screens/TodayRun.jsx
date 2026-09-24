@@ -289,6 +289,7 @@ export default function TodayRun({ session }) {
       remaining={remaining}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
       side={<SessionPanel done={done} misses={false} />}
       sideLabel={t.deskRunLabel}
     >

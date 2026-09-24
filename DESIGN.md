@@ -1010,20 +1010,33 @@ dialog left and moved the ones that do not interrupt into their columns.
   and where it leaks on the right, every trouble card. No sheet.
 - **A run is a workspace.** The card is centred in what the run's side
   leaves; the side (StudyStage's `side`, fixed to the right edge, in the
-  run's own pigment) holds, on a card run, this run's three records and
-  **the revealed card's dictionary entry** — docked by the reveal and never
-  before it, because the entry is the answer — and at a section run's end
-  the cards that went badly, each opening its entry; on a browse (the fast
-  review), that entry alone — a browse rates nothing, so it keeps no tally,
-  and an empty one stands no side; on a graded practice run, the
-  sentence's breakdown, with no toggle. The level bar keeps the stage's
-  width.
+  run's own pigment) is the entry's place: on a card run it holds **the
+  revealed card's dictionary entry** — docked by the reveal and never
+  before it, because the entry is the answer — and the cards that went
+  badly so far (at the run's end too), each opening its entry; on a browse
+  (the fast review), that entry alone — a browse rates nothing, so it has
+  no misses, and an empty one stands no side; on a graded practice run,
+  the sentence's breakdown, with no toggle. This run's three records are
+  on the floor (below, plan 122); they stood at the side's head until
+  then. The level bar keeps the stage's width.
 - **A run fits a laptop.** Its stage starts at the top of the window; the
   card and its choices (or the prompt and the writing board, the board in
-  the wide column) stand side by side, the head and the rating bar spanning
-  both; answered, the unused choices keep their place unseen instead of
-  collapsing, so the rating bar never moves; and it docks on the level bar
-  when the stage runs past the window.
+  the wide column) stand side by side, the head spanning both; answered,
+  the unused choices keep their place unseen instead of collapsing, so
+  nothing under them moves.
+- **A card run's floor is the console** (操作盤, plan 122). The level bar
+  was already the floor a run docks on, sumi like the rating bar; on the
+  desk it is one console of two rows across the stage: the rating tiles'
+  row, fixed above the strip and spanning it, and on the strip this run's
+  three figures — rated, good or better, XP earned — at the left in the
+  level's own register, with the fare at the right. The stage reserves the
+  console's height and **the card grows into what it leaves**, the phone's
+  own rule: a lone glyph in the middle of a tall card, never a floor of
+  nothing under the rating bar; beside its choices the card stands as tall
+  as they do. One row — the tiles between the figures and the fare — was
+  drawn first and chosen, and does not fit under about 1,600px; the desk
+  is one media block, so the rows are two everywhere. A run with no rating
+  bar (a browse, the practice runs, the rides) keeps the strip.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one

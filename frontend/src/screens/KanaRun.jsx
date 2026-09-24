@@ -203,7 +203,7 @@ export default function KanaRun({ session }) {
         leaveLabel={t.kanaTitle}
         where={selectedSet.label}
         sub={modeLabel(t, FAST_REVIEW)}
-        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        side={reviewCards.length > 0 ? <SessionPanel /> : undefined}
         sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
@@ -278,6 +278,7 @@ export default function KanaRun({ session }) {
       sub={title}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
       side={<SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >

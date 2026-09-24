@@ -254,7 +254,7 @@ export default function KanjiRun({ session }) {
         leaveLabel={t.kanjiTitle}
         where={`${t.kanjiTitle} ${level ?? radicalLabel}`}
         sub={t.modeReview}
-        side={reviewCards.length > 0 ? <SessionPanel records={false} /> : undefined}
+        side={reviewCards.length > 0 ? <SessionPanel /> : undefined}
         sideLabel={t.dictionaryTitle}
       >
           <ReviewDeck
@@ -304,6 +304,7 @@ export default function KanjiRun({ session }) {
       ) : undefined}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
+      records
       side={<SessionPanel done={done} />}
       sideLabel={t.deskRunLabel}
     >

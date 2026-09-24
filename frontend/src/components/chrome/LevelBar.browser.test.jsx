@@ -24,10 +24,13 @@ describe('the level bar', () => {
     seedSummary({ username: 'Aiko', level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500 })
     const screen = await render(<LangProvider><LevelBar /></LangProvider>)
     await settle()
-    const bar = screen.container.querySelector('.lvlbar')
+    // The track is the progressbar (plan 122: the bar can hold a run's
+    // figures too, and a progressbar's children are presentational).
+    const bar = screen.container.querySelector('.lvlbar__track')
     expect(bar.getAttribute('role')).toBe('progressbar')
     expect(bar.getAttribute('aria-valuenow')).toBe('200')
     expect(bar.getAttribute('aria-valuemax')).toBe('500')
+    expect(screen.container.querySelector('.desk-tally')).toBeNull()
     expect(screen.container.querySelector('.lvlbar__level-num').textContent).toBe('12')
     expect(screen.container.querySelector('.lvlbar__xp').textContent).toMatch(/200 \/ 500\s*xp/)
     // 200 of 500 into the level: two fifths of the track, in gold.
