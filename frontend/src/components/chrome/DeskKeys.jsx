@@ -2,6 +2,8 @@ import { useEffect } from 'react'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { useDeparture } from '../../stores/departure'
+import { guideHeld } from '../../stores/guide'
+import { composing, pressedByPointer, trackPresses } from '../../lib/keyGuards'
 
 // ── 机 — the two keys a session begins and ends on (plan 115) ───────
 // A whole session from Today used to need the pointer twice: to depart
@@ -16,8 +18,14 @@ import { useDeparture } from '../../stores/departure'
 function ownKey(el) {
   if (!el || el === document.body || el === document.documentElement) return false
   if (el.isContentEditable) return true
+  // A control that has the focus only because the pointer pressed it
+  // (Chrome focuses a clicked button) does not own Enter: a learner who
+  // clicks a lane off and presses Enter means to depart, and the lane's
+  // own Enter pressed it again and turned it back on (plan 123).
+  if (pressedByPointer(el)) return false
   return /^(INPUT|TEXTAREA|SELECT|BUTTON|A|SUMMARY)$/.test(el.tagName)
 }
+
 
 // Enter takes a screen's one filled action: the end of a run
 // (DoneMessage, Today's cleared screen), the gate card's departure.
@@ -25,9 +33,10 @@ export function EnterKey({ onEnter, disabled = false }) {
   const desk = useDesk()
   useEffect(() => {
     if (!desk || disabled || !onEnter) return undefined
+    trackPresses()
     const onKey = e => {
       if (e.key !== 'Enter' || e.repeat || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
-      if (ownKey(e.target) || dialogOpen()) return
+      if (composing(e) || ownKey(e.target) || dialogOpen()) return
       e.preventDefault()
       onEnter()
     }
@@ -55,8 +64,11 @@ export function LeaveKey({ onLeave }) {
   useEffect(() => {
     if (!desk || !onLeave) return undefined
     const onKey = e => {
-      if (e.key !== 'Escape' || e.repeat) return
-      if (dialogOpen() || document.documentElement.hasAttribute('data-levelup')) return
+      if (e.key !== 'Escape' || e.repeat || composing(e)) return
+      // Not under a dialog or the level board, and not while the 改札
+      // still plays over the first ride (guideHeld): its Esc skips the
+      // cutscene, and used to decline the whole ride too (plan 123).
+      if (dialogOpen() || guideHeld() || document.documentElement.hasAttribute('data-levelup')) return
       if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target?.tagName ?? '')) return
       setTimeout(() => { if (!e.defaultPrevented) onLeave() }, 0)
     }

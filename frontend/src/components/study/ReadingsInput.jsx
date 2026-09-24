@@ -3,6 +3,7 @@ import { useLang } from '../../LangContext'
 import { CheckCircleIcon } from '../ui/Icons'
 import { playClick } from '../../lib/audio'
 import { romajiMatchesAny } from '../../lib/romaji'
+import { composing } from '../../lib/keyGuards'
 
 // ── 読み入力 — the readings drill's answer field ────────────────
 // A kanji has an open-ended number of readings and nobody agrees how many
@@ -102,7 +103,7 @@ export default function ReadingsInput({ readings, submitted, onSubmit }) {
                 <input
                   value={value}
                   onChange={e => setRow(g.kind, i, e.target.value)}
-                  onKeyDown={e => { if (e.key === 'Enter' && !submitted) { playClick(); onSubmit() } }}
+                  onKeyDown={e => { if (e.key === 'Enter' && !submitted && !composing(e)) { playClick(); onSubmit() } }}
                   disabled={submitted}
                   autoFocus={i === 0 && g.kind === GROUPS[0].kind}
                   className={`field quiz-input readings-input__field${

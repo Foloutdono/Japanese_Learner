@@ -1818,6 +1818,7 @@ const ride = {
   rideReadFront: 'Read it. It hides in a moment.',
   rideReadType: 'Write what you read, in romaji or kana.',
   rideReadMeasure: 'The figure is how much you caught. The grade is yours.',
+  rideReadMeasureDesk: 'The figure is how much you caught. The grade is yours: on the bar, or with its number keys.',
   ridePlateCap: 'The pass',
   ridePlateBody: 'These platforms ride on the pass.',
   ridePlateOpen: 'They are open to everyone for now.',
@@ -1856,6 +1857,11 @@ const guide = {
   guideTabBarDesk: 'The five gates, down the left. Press / from anywhere to search the dictionary.',
   guideTodayGateDesk: 'What is due today, line by line. Switch a line off to leave it for later, then depart: Enter does it from anywhere here.',
   guideLearnStopsDesk: 'The whole line. Every stop on it is a door to its platforms.',
+  // Worded for a pointer (plan 123): the notes that said "tap".
+  guideHudStatusDesk: 'On time or behind your own plan. Its ghost train stands beside the gate.',
+  guideLearnPlateDesk: 'A line. Click the plate to open it; the chip is what it owes you today.',
+  guidePracticeDestsDesk: 'The levels. Yours is marked; click another to ride it anyway.',
+  guideDictEntryDesk: 'An entry, open beside the catalogue. ← and → walk the catalogue; the star keeps it on your shelf.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
   settingsRideAgain: 'Take the test ride again',

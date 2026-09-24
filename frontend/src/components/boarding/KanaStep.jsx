@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { KANA_ANSWERS } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── 3 · the kana check, and 4 · the reveal (plan 075) ────────────
 // "Can you read this?" over a card with one word per script. The four
@@ -38,21 +39,25 @@ function KanaCard({ reveal = false, t }) {
 
 export function KanaStep({ value, onAnswer }) {
   const { t } = useLang()
+  // 机 (plan 122): 1-4 answer, as a tap does.
+  const desk = useDesk()
   return (
     <div className="brd__body">
       <BoardQuestion>{t.brdKanaQ}</BoardQuestion>
       <div className="brd__stage">
         <KanaCard t={t} />
         <div className="brd-grid" role="group" aria-label={t.brdKanaQ}>
-          {KANA_ANSWERS.map(a => (
+          {KANA_ANSWERS.map((a, i) => (
             <button
               key={a}
               type="button"
               className={`brd-kopt${value === a ? ' brd-kopt--on' : ''}`}
               aria-pressed={value === a}
               onClick={() => onAnswer(a)}
+              aria-keyshortcuts={desk ? String(i + 1) : undefined}
               data-kana={a}
             >
+              {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
               <span className="brd-kopt__label">{t.brdKana[a]}</span>
               {a === 'hiragana' && <span className="brd-kopt__jp" lang="ja">{WORDS[0].jp}</span>}
               {a === 'katakana' && <span className="brd-kopt__jp" lang="ja">{WORDS[1].jp}</span>}
@@ -76,7 +81,7 @@ export function KanaReveal({ onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
       </div>
     </>
   )

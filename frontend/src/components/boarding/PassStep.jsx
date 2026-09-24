@@ -155,7 +155,7 @@ export default function PassStep({ name, profile, onEnter, busy = false, error =
             {error === 'refused' ? t.brdPassRefused : t.onbPassError}
           </p>
         )}
-        <Continue label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
+        <Continue keys label={t.brdEnter} onClick={onEnter} disabled={busy} data-action="enter" />
       </div>
     </>
   )

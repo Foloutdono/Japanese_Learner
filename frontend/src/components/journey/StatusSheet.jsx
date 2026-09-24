@@ -57,6 +57,7 @@ export function StatusSheet({ session }) {
       open
       onClose={closeStatus}
       sumi
+      dismiss
       className={`status-sheet jour-st--${model.status}`}
       /* The verdict is a word no longer printed on this sheet — the
          state's ink and the two deltas carry it — so the sheet's own

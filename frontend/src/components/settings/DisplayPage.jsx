@@ -8,6 +8,7 @@ import { useInstallPrompt, promptInstall, isIosSafari } from '../../stores/insta
 import { isNative } from '../../lib/platform'
 import { InstallSheet, InstallSteps } from '../ui/InstallSheet'
 import { useDesk } from '../../hooks/useDesk'
+import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 import { SettingsPage, Slip } from './SettingsPage'
 
 // ── Display & language ────────────────────────────────────────
@@ -20,6 +21,9 @@ import { SettingsPage, Slip } from './SettingsPage'
 export function DisplayPage() {
   const { t, lang, switchLang } = useLang()
   const [choice, setChoice] = useThemeChoice()
+  // One tab stop a group on the desk, walked with the arrows (plan 123).
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
 
   const THEMES = [
     { key: 'auto', label: t.themeAuto, hint: t.themeAutoHint },
@@ -30,13 +34,14 @@ export function DisplayPage() {
   return (
     <SettingsPage title={t.settingsEnvironment}>
       <Slip label={t.theme}>
-        <div className="svc-grid" role="radiogroup" aria-label={t.theme}>
-          {THEMES.map(opt => (
+        <div className="svc-grid" role="radiogroup" aria-label={t.theme} onKeyDown={onWalk}>
+          {THEMES.map((opt, i) => (
             <button
               key={opt.key}
               type="button"
               role="radio"
               aria-checked={choice === opt.key}
+              tabIndex={radioTab(desk, i, THEMES.findIndex(o => o.key === choice))}
               className={`svc${choice === opt.key ? ' svc--on' : ''}`}
               title={opt.hint}
               onClick={() => { if (choice !== opt.key) { setChoice(opt.key); playToggle() } }}
@@ -48,13 +53,14 @@ export function DisplayPage() {
       </Slip>
 
       <Slip label={t.language}>
-        <div className="svc-grid svc-grid--2" role="radiogroup" aria-label={t.language}>
-          {LANGUAGES.map(l => (
+        <div className="svc-grid svc-grid--2" role="radiogroup" aria-label={t.language} onKeyDown={onWalk}>
+          {LANGUAGES.map((l, i) => (
             <button
               key={l.code}
               type="button"
               role="radio"
               aria-checked={lang === l.code}
+              tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === lang))}
               lang={l.code}
               className={`svc${lang === l.code ? ' svc--on' : ''}`}
               onClick={() => { if (lang !== l.code) { switchLang(l.code); playClick() } }}

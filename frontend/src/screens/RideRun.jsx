@@ -17,6 +17,8 @@ import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
 import { useDesk } from '../hooks/useDesk'
+import { EnterKey } from '../components/chrome/DeskKeys'
+import { SessionPanel } from '../components/study/SessionPanel'
 
 // ── 試乗 — the test ride (plan 098) ──────────────────────────────
 // The learner's first two flashcards, on the real stage: the same
@@ -208,6 +210,11 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       sub={t.rideCap}
       remaining={step === 'done' ? undefined : remaining}
       className="ride"
+      // 机 (plan 122): the browse's side (plan 119) -- the flip docks
+      // the card's entry beside it, where a phone looks it up from 🔍.
+      // Nothing to rate there, and nothing beside the done room.
+      side={cards?.length > 0 && step !== 'done' ? <SessionPanel records={false} /> : undefined}
+      sideLabel={t.dictionaryTitle}
     >
       {!cards && !failed && <Loading />}
 
@@ -238,7 +245,9 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
           {guessed && <p className="ride__done-note">{t.rideGuessed}</p>}
           <div className="ride__done-air" aria-hidden="true" />
           <div className="ride__done-foot">
-            <Continue label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
+            <Continue keys label={t.rideContinue} onClick={() => finish(false)} disabled={busy} />
+            {/* 机 (plan 122): Enter goes on, as the key printed says. */}
+            <EnterKey onEnter={() => finish(false)} disabled={busy} />
           </div>
         </div>
       )}

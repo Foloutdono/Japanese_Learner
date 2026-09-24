@@ -20,7 +20,7 @@ import { SplitRow } from '../selection/SplitRow'
 // shelf, marked as that page the way a station's open stop is. So is
 // `to` (plan 117): the deck's URL there, which makes the card a link
 // (SplitRow) that replaces the page, rather than a call to `onOpen`.
-export function LibraryCard({ deck, t, onOpen, open = false, to = null }) {
+export function LibraryCard({ deck, t, onOpen, open = false, to = null, tabIndex }) {
   const dt = deckTypeOf(deck.type, t)
   const followers = deck.followers ?? 0
 
@@ -29,6 +29,7 @@ export function LibraryCard({ deck, t, onOpen, open = false, to = null }) {
       to={to}
       className={open ? 'platform-card deck-card lib-card desk-stop--open' : 'platform-card deck-card lib-card'}
       aria-current={open ? 'page' : undefined}
+      tabIndex={tabIndex}
       style={{ '--rail': dt.color, '--line-color': dt.color }}
       onClick={() => { playUi('click-mode-selection'); if (to == null) onOpen(deck) }}
     >

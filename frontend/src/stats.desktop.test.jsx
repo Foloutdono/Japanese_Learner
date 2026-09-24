@@ -118,3 +118,36 @@ describe('the statistics on the desk', () => {
     expect($('.trouble__more')).toBeNull()
   })
 })
+
+// ── plan 123, P19 — the line asked by a mouse ──
+// The chart picked a week on a press, and on a move only while pressed:
+// a mouse over it -- the cursor a pointer -- was shown nothing. On the
+// desk the week under the mouse is asked as it passes, the pressed week
+// comes back when it leaves, and a click still pins one.
+describe('the retention line under a mouse', () => {
+  it('previews the week under the pointer, and a click pins it', async () => {
+    const { userEvent } = await import('vitest/browser')
+    await mount()
+    const asked = () => $$('.rep-caps .rep-cap')[1]?.textContent
+    const ring = () => Number($('.rep-line__sel').getAttribute('cx'))
+    const now = [asked(), ring()]
+    await userEvent.hover($('.rep-line__svg'))
+    await settle(60)
+    expect(asked()).not.toBe(now[0])
+    expect(ring()).toBeLessThan(now[1])
+    const middle = [asked(), ring()]
+    await userEvent.hover($('.rep-head'))
+    await settle(60)
+    expect([asked(), ring()]).toEqual(now)
+    await userEvent.click($('.rep-line__svg'))
+    await userEvent.hover($('.rep-head'))
+    await settle(60)
+    expect([asked(), ring()]).toEqual(middle)
+    // The lane's pointer is shared: parked, not over the next file's page.
+    const corner = document.createElement('div')
+    corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
+    document.body.appendChild(corner)
+    await userEvent.hover(corner, { force: true })
+    corner.remove()
+  })
+})

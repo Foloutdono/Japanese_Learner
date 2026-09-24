@@ -4,6 +4,8 @@ import { useLang } from '../../LangContext'
 import { CrossIcon, CheckIcon } from '../ui/Icons'
 import { useDialog } from '../../hooks/useDialog'
 import { DeskDock } from '../chrome/DeskDock'
+import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
+import { composing } from '../../lib/keyGuards'
 
 // ── Browse & add existing app cards into a custom deck ─────
 //
@@ -79,20 +81,29 @@ export default function BrowseCardsMenu({ deckId, deckType, session, onAdded, on
 // the page: the cards it adds land in the list beside it as they go in,
 // and the page is never behind a scrim. The same body as the phone's
 // overlay, in the dock's shell (chrome/DeskDock, plan 120); Esc or ✕
-// gives the column back to the platforms.
+// gives the column back to the platforms. The dock puts the focus in
+// the search (plan 123), and remembers the chip that opened it first.
 export function BrowseCardsDock({ deckId, deckType, session, onAdded, onClose }) {
   const { t } = useLang()
   return (
-    <DeskDock title={t.browseTitle} className="desk-browse" onClose={onClose}>
-      <BrowseBody deckId={deckId} deckType={deckType} session={session} onAdded={onAdded} onClose={onClose} autoFocus />
+    <DeskDock title={t.browseTitle} className="desk-browse" onClose={onClose} initialFocus=".browse-search-input">
+      <BrowseBody deckId={deckId} deckType={deckType} session={session} onAdded={onAdded} onClose={onClose} dock />
     </DeskDock>
   )
 }
 
 // The browser itself — the source tabs, the level row, the search, the
 // results and the footer — shared by the overlay and the dock.
-function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) {
+//
+// `dock` is the desk's (plan 123). The dock's ✕ is its one close, so the
+// footer's Close goes; the results are one tab stop walked with ↑/↓
+// (hooks/useListWalk), ↓ from the search stepping into them, Space
+// ticking the row under the focus.
+function BrowseBody({ deckId, deckType, session, onAdded, onClose, dock = false }) {
   const { t } = useLang()
+  const listRef = useRef(null)
+  const onWalk = useListWalk(dock, { items: ':scope > [role="checkbox"]:not([aria-disabled])' })
+  const [stop, setStop] = useState(null)
 
   const SOURCE_TABS = [
     { key: 'kanji',   label: t.browseTabKanji },
@@ -239,7 +250,13 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) 
         onChange={e => setQuery(e.target.value)}
         placeholder={t.browseSearchPlaceholder}
         className="field field--page deckdetail-form__input browse-search-input"
-        autoFocus={autoFocus}
+        onKeyDown={dock ? e => {
+          if (e.key !== 'ArrowDown' || composing(e)) return
+          const row = listRef.current?.querySelector('[role="checkbox"][tabindex="0"]')
+          if (!row) return
+          e.preventDefault()
+          row.focus()
+        } : undefined}
       />
 
       <div className="import-preview browse-results">
@@ -254,9 +271,12 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) 
         )}
 
         {!loading && results.length > 0 && (
-          <div className="import-preview__list browse-results__list">
+          <div ref={listRef} className="import-preview__list browse-results__list" onKeyDown={onWalk} aria-keyshortcuts={dock ? WALK_KEYS : undefined}>
             {results.map(r => {
               const isSel = selected.has(r.raw_id)
+              // The dock's one tab stop: the row last focused, else the
+              // first that can be ticked.
+              const here = r.raw_id === (results.some(x => x.raw_id === stop && !x.in_deck) ? stop : results.find(x => !x.in_deck)?.raw_id)
               return (
                 /* An entry, not five columns of flex fighting over the
                    width. The headword and its reading are ONE thing —
@@ -268,9 +288,24 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) 
                    between them is gone: it separated two things that
                    were already separated, and was the widest piece of
                    nothing in the row. */
+                /* A checkbox to the keyboard and to a screen reader
+                   (plan 123): a Tab stop that ticks on Space or Enter
+                   and says whether it is ticked. It stays a div -- its
+                   children are blocks, which a button may not hold --
+                   so nothing about how it looks moves. */
                 <div
                   key={r.raw_id}
+                  role="checkbox"
+                  aria-checked={isSel || r.in_deck}
+                  aria-disabled={r.in_deck || undefined}
+                  tabIndex={r.in_deck ? undefined : dock && !here ? -1 : 0}
+                  onFocus={dock ? () => setStop(r.raw_id) : undefined}
                   onClick={() => !r.in_deck && toggle(r.raw_id)}
+                  onKeyDown={e => {
+                    if (e.key !== ' ' && e.key !== 'Enter') return
+                    e.preventDefault()
+                    if (!r.in_deck) toggle(r.raw_id)
+                  }}
                   className={`browse-result-row${r.in_deck ? ' browse-result-row--in-deck' : ' browse-result-row--selectable'}${isSel ? ' browse-result-row--selected' : ''}`}
                 >
                   <div className={`deckdetail-checkbox${isSel || r.in_deck ? ' deckdetail-checkbox--checked' : ''}`}>
@@ -306,7 +341,7 @@ function BrowseBody({ deckId, deckType, session, onAdded, onClose, autoFocus }) 
       )}
 
       <div className="import-footer">
-        <button onClick={onClose} className="import-footer__cancel">{t.close}</button>
+        {!dock && <button onClick={onClose} className="import-footer__cancel">{t.close}</button>}
         <button
           onClick={addSelected}
           disabled={selected.size === 0 || adding}

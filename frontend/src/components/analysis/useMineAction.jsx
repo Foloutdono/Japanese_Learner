@@ -9,14 +9,25 @@ import { DeckPicker } from './DeckPicker'
 // Returns the press handler, the pending flag, the outcome line and
 // the picker element (a portal dialog, rendered wherever the caller
 // puts it — it must stay mounted while a menu around it closes).
-export function useMineAction({ mining, kind, onMine, t, successLabel }) {
-  const [showPicker, setShowPicker] = useState(false)
-  const [pending, setPending] = useState(false)
+export function useMineAction({ mining, kind, onMine, t, successLabel, owner = null }) {
+  // What the state below is about (plan 123). A control that stays
+  // mounted while what it adds changes under it -- the dictionary
+  // plate, walked from entry to entry -- passes the entry's key, and the
+  // picker, the pending flag and the outcome each remember the owner
+  // they were set for: 犬 no longer said "In deck" because 猫 had just
+  // been added, and a picker left open no longer added the entry walked
+  // to. Callers that mount one control per word pass nothing.
+  const [pickerFor, setPickerFor] = useState(undefined)
+  const showPicker = pickerFor === owner
+  const setShowPicker = open => setPickerFor(open ? owner : undefined)
+  const [pendingFor, setPendingFor] = useState(undefined)
+  const pending = pendingFor === owner
   // null = not attempted yet; a number once a mine WRITE succeeded
   // (0 is a real, distinct outcome -- already in the deck, or a stale
   // reference -- shown differently from a successful add); 'error' when
   // the request itself failed (network, validation), distinct from both.
-  const [outcome, setOutcome] = useState(null)
+  const [result, setResult] = useState(null)
+  const outcome = result?.owner === owner ? result.outcome : null
   // The outcome used to REPLACE the button, permanently. A learner who
   // added 猫 to "N5 words" and then wanted it in "Animals" too had no
   // control left to press until the page reloaded -- and useMining
@@ -26,19 +37,21 @@ export function useMineAction({ mining, kind, onMine, t, successLabel }) {
   // Now: the outcome sits next to a button that stays. Pressing again
   // opens the deck picker rather than repeating the remembered target,
   // because a second add is by definition a different deck.
-  const [addedOnce, setAddedOnce] = useState(false)
+  const addedOnce = result?.owner === owner && result.added
 
   async function mine(deckId) {
-    setPending(true)
-    setShowPicker(false)
+    // The owner this press was made for, held across the await: a
+    // result lands on the entry it was about, whichever is shown now.
+    const at = owner
+    setPendingFor(at)
+    setPickerFor(undefined)
     try {
       const count = await onMine(deckId)
-      setOutcome(typeof count === 'number' ? count : 1)
-      setAddedOnce(true)
+      setResult({ owner: at, outcome: typeof count === 'number' ? count : 1, added: true })
     } catch {
-      setOutcome('error')
+      setResult(prev => ({ owner: at, outcome: 'error', added: prev?.owner === at && prev.added }))
     } finally {
-      setPending(false)
+      setPendingFor(p => (p === at ? undefined : p))
     }
   }
 

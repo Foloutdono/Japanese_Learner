@@ -43,13 +43,15 @@ vi.mock('./lib/api', () => ({
 globalThis.fetch = vi.fn().mockResolvedValue(json({}))
 
 const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+const api = await import('./lib/api')
 const { default: DecksScreen } = await import('./screens/DecksScreen')
 
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 let path = null
-function Probe() { path = useLocation().pathname; return null }
+const here = { state: null }
+function Probe() { const loc = useLocation(); path = loc.pathname; here.state = loc.state; return null }
 
 function mount(entry, element) {
   return render(
@@ -111,3 +113,45 @@ describe('the shelf on the desk', () => {
     expect($('.decks-doors > :last-child').textContent).toBe(door.textContent)
   })
 })
+
+// ── plan 123 — a new deck lands on its page ──
+// The desk kept the new deck's dialog because it ends by leaving the
+// shelf for the deck it made; it now does, the first card's form open
+// in the side. The flag is spent on arrival, so Back and Forward onto
+// the page do not open the form again.
+describe('a new deck on the desk', () => {
+  it('opens its page with the first card\'s form in the side', async () => {
+    const base = api.apiFetch.getMockImplementation()
+    const NEW = { id: 2, name: 'Kanji du métro', type: 'standard' }
+    api.apiFetch.mockImplementation(async (path, session, opts) => {
+      if (path === '/api/decks' && opts?.method === 'POST') return json(NEW)
+      if (path === '/api/decks/2') return json({ ...NEW, role: 'owner', card_count: 0 })
+      if (path === '/api/decks/2/cards') return json({ cards: [] })
+      if (path === '/api/decks/2/modes') return json({ modes: [] })
+      return base(path, session, opts)
+    })
+    try {
+      await mount('/learn/decks', (
+        <Routes>
+          <Route path="/learn/decks" element={<DecksScreen session={{}} />} />
+          <Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} />
+        </Routes>
+      ))
+      await settle()
+      $('.decks-doors > :last-child').click()
+      await settle(60)
+      const field = $('[role="dialog"] .form input')
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value').set.call(field, NEW.name)
+      field.dispatchEvent(new Event('input', { bubbles: true }))
+      field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }))
+      await settle(500)
+      expect(path).toBe('/learn/decks/2')
+      expect($('[role="dialog"]')).toBeNull()
+      expect($('.desk-side .deckdetail-form')).not.toBeNull()
+      expect(here.state?.add).toBeUndefined()
+    } finally {
+      api.apiFetch.mockImplementation(base)
+    }
+  })
+})
+

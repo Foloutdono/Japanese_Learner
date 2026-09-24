@@ -1047,3 +1047,336 @@ describe('the doors (plan 120)', () => {
     }
   })
 })
+
+// ── plan 123, P1 — the keys that misfired on the desk ──
+// Every fix is a listener that only the desk installs: the docked
+// entry's Esc lives in the run's side, which a phone never mounts; the
+// level board takes Esc only at a desk; the pointer tracker behind the
+// page's Enter is installed by EnterKey, which listens only on the desk.
+describe('the desk\'s key fixes (plan 123, P1)', () => {
+  it('leave the level board to its clock on a phone', async () => {
+    const { XpToast } = await import('./components/rewards/XpToast')
+    await render(
+      <LangProvider>
+        <XpToast toast={{ id: 'p1', amount: 20, leveledUp: true, newLevel: 13 }} />
+      </LangProvider>
+    )
+    await new Promise(r => setTimeout(r, 150))
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
+    await new Promise(r => setTimeout(r, 100))
+    expect(document.querySelector('.levelup--leaving')).toBeNull()
+    expect(document.documentElement.hasAttribute('data-levelup')).toBe(true)
+  })
+})
+
+// ── plan 123, P3 to P5 — the stage, the foot, the columns, the board ──
+// Every rule of both is in the 机 block. On a phone a run's stage keeps
+// its own inset -- the level bar is its floor, with nothing under the
+// foot -- the gate's lanes are still the 30dvh box, a state card fills
+// its column and the ticket gate covers the whole screen, chrome or not.
+describe('the stage and the columns (plan 123, P3–P5)', () => {
+  it('keeps a run\'s stage on the level bar, nothing under its foot', async () => {
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      const screen = await render(
+        <div className="screen">
+          <div className="stage"><p>card</p><div className="stage__foot"><button type="button">Next</button></div></div>
+        </div>
+      )
+      expect(getComputedStyle(screen.container.querySelector('.stage')).paddingBottom).toBe('0px')
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  it('bounds the gate\'s lanes by a phone\'s 30dvh, and a state card by nothing', async () => {
+    const screen = await render(
+      <main className="today">
+        <div className="gate-card"><div className="gate-card__lanes" /></div>
+        <div className="empty"><p>Nothing yet</p></div>
+      </main>
+    )
+    const lanes = screen.container.querySelector('.gate-card__lanes')
+    expect(parseFloat(getComputedStyle(lanes).maxHeight)).toBeCloseTo(window.innerHeight * 0.3, 0)
+    expect(getComputedStyle(screen.container.querySelector('.empty')).maxWidth).toBe('none')
+  })
+
+  // P5: the workspace's inset and the board docked over a run's side
+  // key on .desk-run, which a phone never renders.
+  it('hangs the level board across the whole top of a run', async () => {
+    const { XpToast } = await import('./components/rewards/XpToast')
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      await render(
+        <LangProvider>
+          <div className="screen"><XpToast toast={{ id: 'p5', amount: 20, leveledUp: true, newLevel: 13 }} /></div>
+        </LangProvider>
+      )
+      await new Promise(r => setTimeout(r, 400))
+      const board = document.querySelector('.levelup').getBoundingClientRect()
+      expect(board.left).toBe(0)
+      expect(Math.round(board.width)).toBe(Math.round(document.body.getBoundingClientRect().width))
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  it('covers the whole screen with the ticket gate', async () => {
+    document.documentElement.dataset.chrome = 'shell'
+    try {
+      const screen = await render(<div className="gate"><span>改札</span></div>)
+      expect(screen.container.querySelector('.gate').getBoundingClientRect().left).toBe(0)
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+})
+
+// ── plan 123, P14 — the kept dialogs stay a phone's sheets ──
+// The desk opens a confirm on its way out, sets the actions in a row
+// and draws a ✕ where the body has no way out; a phone's sheet opens
+// on its first control, stacks its actions under the thumb, and is
+// pushed down to close.
+describe('the kept dialogs (plan 123, P14)', () => {
+  it('keep the phone\'s first control, stacked actions and no ✕', async () => {
+    const { Sheet } = await import('./components/chrome/Sheet')
+    await render(
+      <LangProvider>
+        <Sheet open onClose={() => {}} jp="Voyage" cap="Delete" initialFocus=".btn-secondary" dismiss>
+          <button type="button" className="btn-primary">Delete</button>
+          <button type="button" className="btn-secondary">Cancel</button>
+        </Sheet>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.activeElement.textContent).toBe('Delete')
+    expect(document.querySelector('.desk-sheet__close')).toBeNull()
+    expect(getComputedStyle(document.querySelector('.sheet')).flexDirection).toBe('column')
+    const [a, b] = [...document.querySelectorAll('.sheet button')].map(el => el.getBoundingClientRect())
+    expect(b.top).toBeGreaterThanOrEqual(a.bottom)
+  })
+})
+
+// ── plan 123, P15 — a phone's lists are walked by the thumb ──
+describe('the lists beside a page (plan 123, P15)', () => {
+  it('leave every row its own tab stop, and the arrows alone', async () => {
+    const { default: GrammarIndex } = await import('./components/selection/GrammarIndex')
+    const points = ['a', 'b', 'c'].map(k => ({ raw_id: `g_${k}`, pattern: k, meaning: k, stage: 'new' }))
+    await render(<LangProvider><GrammarIndex points={points} onOpen={() => {}} /></LangProvider>)
+    await settle()
+    const rows = [...document.querySelectorAll('.gl-index__row')]
+    expect(rows.every(r => !r.hasAttribute('tabindex'))).toBe(true)
+    rows[0].focus()
+    rows[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }))
+    expect(document.activeElement).toBe(rows[0])
+  })
+})
+
+// ── plan 123, P16 — a phone's places stay buttons ──
+// On the desk Settings' pages, the shelf's decks and its library door, a
+// radical page's tiles, a bar's way up, the profile's halls and lines
+// are links. A phone keeps every one the button it was, and a tap still
+// pushes the next screen -- Settings' list and its page are two screens
+// there, so Back from a page is the list.
+describe('the places (plan 123, P16)', () => {
+  async function mount(entry, element) {
+    const { MemoryRouter, Routes, Route, useLocation, useNavigationType } = await import('react-router-dom')
+    const seen = { path: null, type: null }
+    function Probe() {
+      seen.path = useLocation().pathname
+      seen.type = useNavigationType()
+      return null
+    }
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[entry]}><Routes><Route path="*" element={element} /></Routes><Probe /></MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    return seen
+  }
+  const buttons = sel => {
+    const all = [...document.querySelectorAll(sel)]
+    expect(all.length, sel).toBeGreaterThan(0)
+    expect(all.map(b => b.tagName), sel).toEqual(all.map(() => 'BUTTON'))
+    expect(all.every(b => !b.hasAttribute('href') && !b.hasAttribute('tabindex')), sel).toBe(true)
+    return all
+  }
+
+  it('keeps Settings\' rows buttons with their ›, a tap pushing the page', async () => {
+    const { default: SettingsScreen } = await import('./screens/SettingsScreen')
+    const seen = await mount('/profile/settings', <SettingsScreen session={{ access_token: 't', user: { email: 'a@b.c' } }} />)
+    const rows = buttons('.stg-row[data-page]')
+    expect(document.querySelector('main a')).toBeNull()
+    expect(getComputedStyle(rows[0].querySelector('.stg-row__chev')).display).not.toBe('none')
+    rows.find(r => r.dataset.page === 'display').click()
+    await settle()
+    expect([seen.path, seen.type]).toEqual(['/profile/settings/display', 'PUSH'])
+  })
+
+  it('keeps the shelf\'s decks and its library door buttons', async () => {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => deckAnswer(path) }))
+    const { default: DecksScreen } = await import('./screens/DecksScreen')
+    const seen = await mount('/learn/decks', <DecksScreen session={{}} />)
+    buttons('.decks-doors > .chip')
+    const [card] = buttons('.platform-grid > .deck-card')
+    expect(document.querySelector('main a')).toBeNull()
+    card.click()
+    await settle()
+    expect([seen.path, seen.type]).toEqual(['/learn/decks/1', 'PUSH'])
+  })
+
+  it('keeps the way up, the halls and the lines buttons', async () => {
+    const { Bar, Leave } = await import('./components/chrome/Bar')
+    const { Records } = await import('./components/profile/ProfileBlocks')
+    const { LineLedger } = await import('./components/profile/LineLedger')
+    const { default: fr } = await import('./locales/fr/index.js')
+    await mount('/profile', (
+      <main className="profile">
+        <Bar title="Thèmes" aside={<Leave to="/learn/vocab/themes">Thèmes</Leave>} />
+        <Records profile={{ totalReviews: 3 }} t={fr} navigate={() => {}} />
+        <LineLedger stats={null} t={fr} navigate={() => {}} />
+      </main>
+    ))
+    buttons('.stage__leave')
+    buttons('.record--door')
+    buttons('.pf-line')
+    expect(document.querySelector('main a')).toBeNull()
+  })
+
+  it('keeps a radical page\'s tiles buttons', async () => {
+    const { RadicalTile } = await import('./components/dictionary/RadicalIndex')
+    await mount('/learn/kanji/radicals', (
+      <div className="radical-page__grid">
+        <RadicalTile glyph="亻" sub="personne" count={10} learned={3} started onPick={() => {}} />
+      </div>
+    ))
+    buttons('.radical-tile')
+  })
+})
+
+// ── plan 123, P17 — a phone's radio groups are tapped ──
+// On the desk a radio group is one tab stop walked with the arrows; a
+// phone's keeps a stop per radio, no tabindex written, and leaves the
+// arrows to the page.
+describe('the radio groups (plan 123, P17)', () => {
+  it('keep a stop per radio and leave the arrows alone', async () => {
+    const { Seg, ConsoleBand } = await import('./components/chrome/Console')
+    const opts = ['a', 'b', 'c'].map(k => ({ key: k, label: k }))
+    const onChange = vi.fn()
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <Seg options={opts} value="b" onChange={onChange} label="seg" />
+        <ConsoleBand options={opts} value="b" onChange={onChange} label="band" />
+      </LangProvider>
+    )
+    await settle()
+    const radios = [...document.querySelectorAll('[role="radio"]')]
+    expect(radios).toHaveLength(6)
+    expect(radios.every(r => !r.hasAttribute('tabindex'))).toBe(true)
+    const heard = vi.fn()
+    const listen = e => heard(e.key)
+    window.addEventListener('keydown', listen)
+    try {
+      for (const r of [radios[1], radios[4]]) {
+        r.focus()
+        r.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+        expect(document.activeElement).toBe(r)
+      }
+      expect(onChange).not.toHaveBeenCalled()
+      expect(heard).toHaveBeenCalledTimes(2)
+    } finally {
+      window.removeEventListener('keydown', listen)
+    }
+  })
+})
+
+// ── plan 123, P18 — a phone's doors are its own ──
+// On the desk the column's docks take and give back the focus, close on
+// the entry's roundel, release on a second press, and hold the card form
+// with its draft; Browse's rows are one stop walked with ↑/↓. A phone
+// keeps the form in the page under its label (Add pressed again clears
+// it, as it did), and Browse its overlay with its footer Close and a tab
+// stop on every row it can tick.
+describe('the column\'s doors (plan 123, P18)', () => {
+  async function mountDeck(answer) {
+    apiFetch.mockImplementation(async path => ({ ok: true, status: 200, json: async () => answer(path) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: DeckDetailScreen } = await import('./screens/DeckDetailScreen')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/decks/1']}>
+          <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+  }
+
+  it('keeps the form in the page under its label, Add clearing it', async () => {
+    await mountDeck(deckAnswer)
+    const add = () => document.querySelector('.chip-row button')
+    add().click()
+    await settle()
+    const form = document.querySelector('main.learn > .deckdetail-form')
+    expect(form.querySelector('.form__label')).not.toBeNull()
+    expect(document.querySelector('.desk-dock, .dict-plate__btn')).toBeNull()
+    const input = form.querySelector('input')
+    Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(input, '犬')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(50)
+    add().click()
+    await settle()
+    expect(document.querySelector('main.learn > .deckdetail-form input').value).toBe('')
+  })
+
+  it('keeps Browse\'s footer Close and a tab stop on every row it can tick', async () => {
+    const results = ['水', '火', '木'].map((w, i) => ({ raw_id: `v${i}`, source: 'vocab', level: 'N5', front: w, kana: w, meaning: w, in_deck: false }))
+    await mountDeck(path => (path === '/api/decks/1' ? { ...DECK, type: 'vocab' } : String(path).includes('/browse') ? { results } : deckAnswer(path)))
+    ;[...document.querySelectorAll('.chip-row button')].find(b => /browse|parcourir/i.test(b.textContent)).click()
+    await settle(300)
+    const modal = document.querySelector('.browse-modal')
+    expect(modal.querySelector('.import-footer__cancel')).not.toBeNull()
+    expect(modal.querySelector('.import-header__close')).not.toBeNull()
+    expect([...modal.querySelectorAll('.browse-result-row')].map(r => r.tabIndex)).toEqual([0, 0, 0])
+    expect(document.activeElement.classList.contains('browse-search-input')).toBe(false)
+  })
+})
+
+// ── plan 123, P19 — a phone's pointer, copy and names ──
+// On the desk a paste or a drop takes a picture into the cropper, a copy
+// leaves ruby readings out, and icon-only figures carry a title. A
+// phone keeps each as it was: no paste taken, the readings selectable,
+// no title written.
+describe('the pointer and the copy (plan 123, P19)', () => {
+  it('takes no paste into the photo intake, and draws the two tiles bare', async () => {
+    const { ImageInput } = await import('./components/analysis/ImageInput')
+    const { default: fr } = await import('./locales/fr/index.js')
+    document.body.innerHTML = ''
+    await render(<LangProvider><ImageInput t={fr} session={null} onTextReady={() => {}} /></LangProvider>)
+    await settle()
+    expect(document.querySelector('.desk-photo, .intake-btn .desk-kbd, .intake-btn[aria-keyshortcuts]')).toBeNull()
+    const data = new DataTransfer()
+    data.items.add(new File([new Uint8Array([137, 80, 78, 71])], 'shot.png', { type: 'image/png' }))
+    document.body.dispatchEvent(new ClipboardEvent('paste', { clipboardData: data, bubbles: true, cancelable: true }))
+    await settle()
+    expect(document.querySelector('.analysis-cropper')).toBeNull()
+  })
+
+  it('keeps the readings selectable and writes no title on the icon-only figures', async () => {
+    const { ConsoleIndex } = await import('./components/chrome/Console')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <span className="furigana-word"><ruby>日本<rt>にほん</rt></ruby></span>
+        <ConsoleIndex value="駅" onChange={() => {}} onClear={() => {}} clearLabel="Effacer" />
+      </LangProvider>
+    )
+    await settle()
+    expect(getComputedStyle(document.querySelector('.furigana-word rt')).userSelect).not.toBe('none')
+    expect(document.querySelector('.console__clear').hasAttribute('title')).toBe(false)
+  })
+})

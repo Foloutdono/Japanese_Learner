@@ -79,8 +79,10 @@ describe('the way up', () => {
     expect(crumb).not.toBeNull()
     expect($('.bar').firstElementChild).toBe(crumb)
     expect(crumb.getAttribute('aria-label')).toBeTruthy()
-    const up = crumb.querySelector('button.desk-crumb__up')
+    // A place, so a link (plan 123): it opens in a new tab too.
+    const up = crumb.querySelector('a.desk-crumb__up')
     expect(up.textContent).toBe('Paliers')
+    expect(up.getAttribute('href')).toBe('/learn/kanji/tiers')
     expect($('.bar__aside')).toBeNull()
     // Above the title, not beside it, and no pill.
     expect(up.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.bar__title').getBoundingClientRect().top + 1)

@@ -1,4 +1,7 @@
+import { Link } from 'react-router-dom'
 import { SearchIcon, CrossIcon } from '../ui/Icons'
+import { useDesk } from '../../hooks/useDesk'
+import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
 
 // ── The console (plan 068) ────────────────────────────────────
 // The one index every catalogue screen has: a row of chips (and at
@@ -31,10 +34,16 @@ export function Console({ children, className = '', guide }) {
 // searches. As a pill in row 1 it left most of the row empty and read
 // as a third filter; a band fills the width because it is about the
 // full width of what is below it.
+//
+// On the desk (plan 123) it is one tab stop and its arrows move and
+// check, as a radio group's do (hooks/useRadioWalk).
 export function ConsoleBand({ options, value, onChange, label }) {
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
+  const checked = options.findIndex(opt => opt.key === value)
   return (
-    <div className="console__band" role="radiogroup" aria-label={label}>
-      {options.map(opt => {
+    <div className="console__band" role="radiogroup" aria-label={label} onKeyDown={onWalk}>
+      {options.map((opt, i) => {
         const on = opt.key === value
         return (
           <button
@@ -42,6 +51,7 @@ export function ConsoleBand({ options, value, onChange, label }) {
             type="button"
             role="radio"
             aria-checked={on}
+            tabIndex={radioTab(desk, i, checked)}
             className={`console__band-opt${on ? ' console__band-opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
@@ -68,7 +78,25 @@ export function Chips({ children, label, className = '', guide }) {
 // A chip is a choice, so it says whether it is chosen (aria-pressed).
 // `glyph` is the roundel a section chip carries (単 / 漢 / 文); `color`
 // is that section's pigment, read by the on state.
-export function Chip({ on = false, glyph, color, onClick, children, className = '', ...rest }) {
+//
+// `to` (plan 123): a chip that is a door to a place rather than a
+// choice -- the library from the shelf -- is a link on the desk, and
+// says nothing about being pressed.
+export function Chip({ on = false, glyph, color, onClick, children, className = '', to, ...rest }) {
+  if (to != null) {
+    return (
+      <Link
+        to={to}
+        className={`chip ${className}`.trim()}
+        style={color ? { '--tab-color': color } : undefined}
+        onClick={onClick}
+        {...rest}
+      >
+        {glyph && <span className="chip__glyph" lang="ja" aria-hidden="true">{glyph}</span>}
+        {children}
+      </Link>
+    )
+  }
   return (
     <button
       type="button"
@@ -103,6 +131,9 @@ export function ConsoleAction({ gold = false, onClick, children, ...rest }) {
 // way back out. The row stays, holding the toggle alone, rather than
 // the whole thing going and taking the way out with it.
 export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inputRef, clearLabel, toggle, field = true, ...rest }) {
+  // The clear is an icon; on the desk it says what it does under a
+  // pointer too (plan 123).
+  const desk = useDesk()
   if (!field) {
     return toggle ? <div className="console__index console__index--bare">{toggle}</div> : null
   }
@@ -118,7 +149,7 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
         {...rest}
       />
       {value && onClear && (
-        <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel}>
+        <button type="button" className="console__clear" onClick={onClear} aria-label={clearLabel} title={desk ? clearLabel : undefined}>
           <CrossIcon size={14} />
         </button>
       )}
@@ -132,11 +163,15 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
 // Two to four options in a pill, one of them on. `full` stretches it
 // across the row (the analyzer's Text / Photo / Video). Options carry
 // `jp` for a Japanese word and `label` for the plain one; either or
-// both.
+// both. On the desk (plan 123) it is one tab stop and its arrows move
+// and check, as a radio group's do (hooks/useRadioWalk).
 export function Seg({ options, value, onChange, full = false, className = '', label }) {
+  const desk = useDesk()
+  const onWalk = useRadioWalk(desk)
+  const checked = options.findIndex(opt => opt.key === value)
   return (
-    <div className={`seg${full ? ' seg--full' : ''} ${className}`.trim()} role="radiogroup" aria-label={label}>
-      {options.map(opt => {
+    <div className={`seg${full ? ' seg--full' : ''} ${className}`.trim()} role="radiogroup" aria-label={label} onKeyDown={onWalk}>
+      {options.map((opt, i) => {
         const on = opt.key === value
         return (
           <button
@@ -144,6 +179,7 @@ export function Seg({ options, value, onChange, full = false, className = '', la
             type="button"
             role="radio"
             aria-checked={on}
+            tabIndex={radioTab(desk, i, checked)}
             className={`seg__opt${on ? ' seg__opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >

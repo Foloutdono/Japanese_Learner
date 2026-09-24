@@ -118,3 +118,29 @@ describe('a graded sentence on the desk', () => {
     expect(rows.offsetParent).not.toBeNull()
   })
 })
+
+// ── plan 123, P18 — the focus through a door ──
+// The row that opens an entry is hidden with the breakdown, and the
+// focus fell to the page's body with it. The entry takes it on the way
+// in, and the row that opened it has it again on the way out.
+describe('the focus through a door in the column', () => {
+  it('goes into the entry, and back to the row that opened it', async () => {
+    const { userEvent } = await import('vitest/browser')
+    await graded()
+    const row = $('.desk-run__side button.bkd-row')
+    await userEvent.click(row)
+    await settle(150)
+    const entry = $('.desk-run__side .desk-entry')
+    expect(entry.contains(document.activeElement)).toBe(true)
+    // The entry holds Esc, so the run's way out stops printing it.
+    const leave = () => $('.stage__head .stage__leave')
+    expect(leave().querySelector('.desk-kbd')).toBeNull()
+    expect(leave().hasAttribute('aria-keyshortcuts')).toBe(false)
+    await userEvent.keyboard('{Escape}')
+    await settle(80)
+    expect($('.desk-run__side .desk-entry')).toBeNull()
+    expect(document.activeElement).toBe(row)
+    expect(leave().querySelector('.desk-kbd')).not.toBeNull()
+    expect(leave().getAttribute('aria-keyshortcuts')).toBe('Escape')
+  })
+})

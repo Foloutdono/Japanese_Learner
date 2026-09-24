@@ -179,6 +179,19 @@ describe('a split row as a link looks like the button it was', () => {
 
   it('at rest: the same boxes and the same face, row by row', async () => {
     await mountBoth()
+    // At rest means under no pointer and no focus: the lane's pointer
+    // is shared, and a file before this one may have left it over a row.
+    // It is parked on a probe in the window's corner, clear of the list.
+    const corner = document.createElement('div')
+    corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
+    document.body.appendChild(corner)
+    await userEvent.hover(corner, { force: true })
+    corner.remove()
+    document.activeElement?.blur?.()
+    // And past the hover's way out: a stop eases its background over
+    // 0.16s, and a reading taken inside it (a full parallel run is slow
+    // enough to land there) is a tween, not the rest (plan 123).
+    await new Promise(r => setTimeout(r, 300))
     for (const sel of ROWS) {
       const { buttons, links } = pairs(sel)
       buttons.forEach((b, i) => expect.soft(differences(b, links[i]), `${sel} #${i}`).toEqual([]))

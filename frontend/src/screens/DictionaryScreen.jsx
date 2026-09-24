@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
+import { useState, useEffect, useLayoutEffect, useRef, useMemo, Fragment, createContext, useContext } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { apiFetch } from '../lib/api'
 import { useMining } from '../components/analysis/useMining'
@@ -42,6 +42,7 @@ import { Leave, DeskCrumb } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { isDesk, useDesk } from '../hooks/useDesk'
+import { useGridWalk } from '../hooks/useGridWalk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
@@ -49,6 +50,8 @@ import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon } from '../components/ui
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
+import { composing } from '../lib/keyGuards'
+import { dialogOpen } from '../lib/dialogOpen'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
 const ANALYZER_COLOR = 'var(--line-kaiseki)'
@@ -217,15 +220,30 @@ export default function DictionaryScreen({ session }) {
 	// closes the open entry — the two things you do constantly in a
 	// dictionary and previously had to reach for the mouse to do.
 	// Guarded on the event target so "/" typed into the field itself
-	// (or any other input on the page) still types a slash.
+	// (or any other input on the page) still types a slash. None of it
+	// runs under a dialog -- the deck picker, a door's sheet, the guide:
+	// the dialog's Esc is the dialog's alone, and "/" or an arrow there
+	// used to reach the catalogue behind it -- nor on a chord, so Alt/⌘+←
+	// is the browser's Back again (plan 123).
 	useEffect(() => {
 		function onKey(e) {
+			if (e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
 			const typing = /^(INPUT|TEXTAREA)$/.test(e.target.tagName) || e.target.isContentEditable
+			// ↓ from the search field steps into the catalogue, on the
+			// open tile (plan 123): the grid is one tab stop, walked by key.
+			if (e.key === 'ArrowDown' && isDesk() && e.target === searchRef.current && !composing(e)) {
+				const tile = document.querySelector('.dict-grid > [tabindex="0"]')
+				if (tile) {
+					e.preventDefault()
+					tile.focus()
+				}
+				return
+			}
 			if (e.key === '/' && !typing) {
 				e.preventDefault()
 				searchRef.current?.focus()
 				searchRef.current?.select()
-			} else if (e.key === 'Escape') {
+			} else if (e.key === 'Escape' && !composing(e)) {
 				if (typing && e.target === searchRef.current) e.target.blur()
 				// On the desk the dock is the catalogue's standing
 				// companion, not a panel that was opened (plan 114):
@@ -948,6 +966,10 @@ function cardFurigana(entry) {
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
 }
 
+// The dock's focusable controls, in order: where a door is found again
+// once the entry it belongs to is back.
+const doorsIn = node => [...node.querySelectorAll('button:not([disabled]), a[href], input, [tabindex="0"]')]
+
 // ── The detail dock ──────────────────────────────────────
 // One node, two presentations. On a wide screen it is a sticky column
 // standing beside the catalogue — you scan and read at the same time,
@@ -969,15 +991,45 @@ function DetailDock({ entry, onClose, onRadicalClick, onKanjiClick, onVocabClick
 	const deskDock = useContext(DeskDockContext)
 	const dockRef = useRef(null)
 	const lookup = deskDock?.lookup ?? null
-	// A door opened, or stepped back out of: the dock reads from the top.
 	const docked = deskDock != null
-	useEffect(() => { if (docked && dockRef.current) dockRef.current.scrollTop = 0 }, [docked, lookup, entry])
+	// A door opened: the dock reads from the top, and holds the focus the
+	// door took with it when it went (the lookup's plate comes when its
+	// fetch does). Stepped back out of (plan 123): the entry comes back
+	// scrolled where it was read, the door that opened the lookup focused
+	// again -- it used to reopen at the top with the focus on the page's
+	// body. Another entry reads from the top.
+	const back = useRef({ scroll: 0, index: -1 })
+	const was = useRef({ lookup: null, entry })
+	useLayoutEffect(() => {
+		const dock = dockRef.current
+		const before = was.current
+		was.current = { lookup, entry }
+		if (!docked || !dock) return undefined
+		if (!lookup && before.lookup && before.entry === entry) {
+			const { scroll, index } = back.current
+			dock.scrollTop = scroll
+			const active = document.activeElement
+			if (!active || active === document.body || active === dock) doorsIn(dock)[index]?.focus({ preventScroll: true })
+			// The entry's own sections can land a frame late.
+			const raf = requestAnimationFrame(() => { if (dock.scrollTop !== scroll) dock.scrollTop = scroll })
+			return () => cancelAnimationFrame(raf)
+		}
+		dock.scrollTop = 0
+		if (lookup && !before.lookup) dock.focus({ preventScroll: true })
+		if (!lookup) back.current = { scroll: 0, index: -1 }
+		return undefined
+	}, [docked, lookup, entry])
+	// Where the entry is read, and which of its doors has the focus.
+	const remember = docked && !lookup ? {
+		onScroll: () => { back.current.scroll = dockRef.current.scrollTop },
+		onFocus: e => { back.current.index = doorsIn(dockRef.current).indexOf(e.target) },
+	} : {}
 	return (
 		<>
 			{/* Only painted in sheet mode — on a desktop nothing is
 			    covered, so there is nothing to dim. */}
 			<div className="dict-dock__scrim" onClick={onClose} aria-hidden="true" />
-			<aside className="dict-dock" ref={dockRef}>
+			<aside className="dict-dock" ref={dockRef} tabIndex={docked ? -1 : undefined} {...remember}>
 				{lookup ? (
 					<DictionaryLookupBody
 						key={lookupKey(lookup)}
@@ -1019,6 +1071,14 @@ function ResultsSection({
 }) {
 	const desk = useDesk()
 	const navigate = useNavigate()
+	// 机 (plan 123): the catalogue is one tab stop, the open tile, and
+	// the arrows walk it as a grid -- a page was fifty tab stops, and
+	// the dock beside it was reached only by tabbing through all of them
+	// (and the more they loaded). A move opens the tile it lands on.
+	const onGridWalk = useGridWalk(desk, i => setSelected(results[i]))
+	const stopKey = desk && results.length
+		? entryKey(selected && results.some(r => entryKey(r) === entryKey(selected)) ? selected : results[0])
+		: null
 	// 机 (plan 115): a search that finds nothing is often not a word but
 	// a sentence pasted in, and the analyser is the tool for that. On
 	// the desk, a query of two Japanese characters or more that found no
@@ -1050,7 +1110,7 @@ function ResultsSection({
 					    the order it carries them — with the level in its corner
 					    and the stage along the card's bottom edge. */}
 					<div className="dict-results-wrap">
-						<div className="dict-grid">
+						<div className="dict-grid" onKeyDown={onGridWalk} aria-keyshortcuts={desk ? 'ArrowLeft ArrowRight ArrowUp ArrowDown Home End' : undefined}>
 							{results.map((entry, i) => {
 								const stage = stageOf(entry.status?.status)
 								const furigana = cardFurigana(entry)
@@ -1061,6 +1121,8 @@ function ResultsSection({
 										key={entryKey(entry)}
 										type="button"
 										data-guide={i === 0 ? 'dict.entry' : undefined}
+										tabIndex={stopKey ? (entryKey(entry) === stopKey ? 0 : -1) : undefined}
+										aria-current={desk && selected && entryKey(selected) === entryKey(entry) ? 'true' : undefined}
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										// --len is how many characters the headword has: the
 										// tile divides its own width by it and sets the word to

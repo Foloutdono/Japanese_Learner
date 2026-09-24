@@ -6,6 +6,7 @@ import {
   bucketFor, clampDeparture, dayFraction, minuteAtFraction, minutesToTime, timeToMinutes,
 } from '../../domain/boarding'
 import { BoardQuestion, Continue } from './BoardFrame'
+import { useDesk } from '../../hooks/useDesk'
 
 // ── 7 · the hour (plan 075) ──────────────────────────────────────
 // The departure board prints the hour on split flaps; the three cells
@@ -100,6 +101,8 @@ function Flaps({ time }) {
 
 export default function TimeStep({ minute, onChange, onContinue }) {
   const { t } = useLang()
+  // 机 (plan 122): 1-3 pick one of the three hours.
+  const desk = useDesk()
   const railRef = useRef(null)
   const time = minutesToTime(minute)
   const pct = dayFraction(minute) * 100
@@ -142,15 +145,17 @@ export default function TimeStep({ minute, onChange, onContinue }) {
             <Flaps time={time} />
           </div>
           <div className="brd-grid brd-grid--3" role="group" aria-label={t.brdDeparture}>
-            {DEPARTURES.map(id => (
+            {DEPARTURES.map((id, i) => (
               <button
                 key={id}
                 type="button"
                 className={`brd-cell brd-cell--sm${bucket === id ? ' brd-cell--on' : ''}`}
                 aria-pressed={bucket === id}
                 onClick={() => onChange(timeToMinutes(DEPART_TIMES[id]))}
+                aria-keyshortcuts={desk ? String(i + 1) : undefined}
                 data-hour={id}
               >
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{i + 1}</kbd>}
                 <span className="brd-cell__label">{t.destHour[id]}</span>
                 <span className="brd-cell__time">{DEPART_TIMES[id]}</span>
               </button>
@@ -190,7 +195,7 @@ export default function TimeStep({ minute, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} data-action="continue" />
       </div>
     </>
   )

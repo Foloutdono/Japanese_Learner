@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -110,6 +111,31 @@ describe('Today on the desk', () => {
     expect(Math.round(a.width)).toBe(box.clientWidth)
   })
 
+  // A laptop's short window (plan 123): the lanes were a phone's 30dvh
+  // box, so 650px showed four of eight switches over empty desk. The
+  // gate is bounded by the window now; the lanes take what is left, and
+  // Depart stays inside it.
+  it('gives the lanes what a short window leaves, Depart still in view', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = ['N5', 'N4', 'N3', 'N2'].flatMap(d => [
+      lane('vocab', d, 'vocab.flashcard.f2b', 5), lane('kanji', d, 'kanji.flashcard.f2b', 5),
+    ])
+    await page.viewport(1100, 650)
+    try {
+      await mount()
+      await settle()
+      const go = document.querySelector('.btn-depart').getBoundingClientRect()
+      expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
+      const box = document.querySelector('.gate-card__lanes')
+      const edge = box.getBoundingClientRect().bottom
+      const seen = [...box.querySelectorAll('.lane')].filter(el => el.getBoundingClientRect().bottom <= edge + 1)
+      expect(seen.length).toBeGreaterThan(5)
+    } finally {
+      TODAY.lanes = lanes
+      await page.viewport(1100, 800)
+    }
+  })
+
   it('stands nothing where there is no journey to judge', async () => {
     await mount()
     await settle()
@@ -117,3 +143,48 @@ describe('Today on the desk', () => {
     expect(document.querySelector('.desk-side .pass--strip')).not.toBeNull()
   })
 })
+
+// ── plan 123 — one panel, one word; the finish keeps the strip ──
+describe('Today\'s side, called and finished (plan 123)', () => {
+  it('walks the rail\'s status chip to the panel beside the gate, with no dialog', async () => {
+    journeyRef.current = BEHIND
+    const { HudInstruments } = await import('./components/chrome/Hud')
+    const { openStatus } = await import('./stores/journey')
+    openStatus.mockClear()
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/today']}>
+          <div className="phone phone--desk">
+            <aside className="desk-rail"><HudInstruments /></aside>
+            <div className="phone__content"><TodayScreen session={{}} /></div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    document.querySelector('.desk-rail [data-guide="hud.status"]').click()
+    await settle(60)
+    expect(openStatus).not.toHaveBeenCalled()
+    expect(document.querySelector('[aria-modal="true"]')).toBeNull()
+    expect(document.activeElement).toBe(document.querySelector('.desk-journey'))
+  })
+
+  it('keeps the stamp strip on a finish, and the slip at the card\'s width', async () => {
+    journeyRef.current = BEHIND
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={[{ pathname: '/today', state: { run: { cleared: 12, xp: 40 } } }]}>
+          <div className="phone phone--desk">
+            <div className="phone__content"><TodayScreen session={{}} /></div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const clear = document.querySelector('main.today > .today-clear')
+    expect(clear).not.toBeNull()
+    expect(clear.getBoundingClientRect().width).toBeLessThanOrEqual(640)
+    expect(document.querySelector('main.today > .desk-side .pass--strip')).not.toBeNull()
+  })
+})
+

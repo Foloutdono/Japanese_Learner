@@ -20,6 +20,10 @@ function kanjiFigure(volumes, level, lang) {
   return n.toLocaleString(lang)
 }
 
+// A level's pick on the desk is its own number (plan 122, owner's
+// call): N5 on 5 ... N1 on 1, the novice -- before N5 -- on 0.
+const levelDigit = level => (level === 'novice' ? 0 : Number(level.slice(1)))
+
 export function LevelStep({ volumes, value, onChange, onContinue }) {
   const { t, lang } = useLang()
   return (
@@ -34,6 +38,7 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
               code="—"
               label={t.brdNovice}
               desc={t.brdLevelDesc.novice}
+              pick={0}
               data-level="novice"
             />
             {LEVELS.map(level => (
@@ -44,6 +49,7 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
                 code={level}
                 label={t.levelName[level]}
                 desc={t.brdLevelDesc[level](kanjiFigure(volumes, level, lang))}
+                pick={levelDigit(level)}
                 data-level={level}
               />
             ))}
@@ -51,7 +57,7 @@ export function LevelStep({ volumes, value, onChange, onContinue }) {
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )
@@ -85,6 +91,7 @@ export function GoalStep({ volumes, level, kana, value, onChange, onContinue }) 
                 label={stop === 'novice' ? t.brdNovice : t.levelName[stop]}
                 tag={i === 0 ? t.brdNextStop : null}
                 desc={stop === 'novice' ? t.brdLevelDesc.novice : t.brdLevelDesc[stop](kanjiFigure(volumes, stop, lang))}
+                pick={levelDigit(stop)}
                 data-goal={stop}
               />
             ))}
@@ -92,7 +99,7 @@ export function GoalStep({ volumes, level, kana, value, onChange, onContinue }) 
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!value} data-action="continue" />
       </div>
     </>
   )

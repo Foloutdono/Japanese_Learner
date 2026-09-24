@@ -1,5 +1,5 @@
 import { playUi } from '../../lib/audio'
-import { useListWalk } from '../../hooks/useListWalk'
+import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 import { SplitRow } from './SplitRow'
 
 // ── 路線図 — the stops of a line (plan 071) ──────────────────
@@ -48,7 +48,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
   const onWalk = useListWalk(walked)
   const tabStop = walked && stops.some(s => s.key === selected) ? selected : stops[0]?.key
   return (
-    <div className="route" onKeyDown={onWalk}>
+    <div className="route" onKeyDown={onWalk} aria-keyshortcuts={walked ? WALK_KEYS : undefined}>
       {stops.map((stop, i) => {
         const past = hereIndex >= 0 && i < hereIndex
         const current = stop.key === here

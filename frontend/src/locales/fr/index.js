@@ -1748,6 +1748,7 @@ const ride = {
   rideReadFront: 'Lisez-la. Elle se cache dans un instant.',
   rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
   rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
+  rideReadMeasureDesk: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre : sur la barre, ou avec ses touches chiffrées.',
   ridePlateCap: 'L\'abonnement',
   ridePlateBody: 'Ces quais sont sur l\'abonnement.',
   ridePlateOpen: 'Ils sont ouverts à tous pour l\'instant.',
@@ -1786,6 +1787,11 @@ const guide = {
   guideTabBarDesk: 'Les cinq portes, à gauche. Appuyez sur / n\'importe où pour chercher dans le dictionnaire.',
   guideTodayGateDesk: 'Ce qui est dû aujourd\'hui, ligne par ligne. Éteignez une ligne pour plus tard, puis partez : Entrée le fait de n\'importe où ici.',
   guideLearnStopsDesk: 'Toute la ligne. Chaque arrêt est une porte vers ses quais.',
+  // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
+  guideHudStatusDesk: 'À l\'heure ou en retard sur votre propre plan. Son train fantôme se tient à côté de la porte.',
+  guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
+  guidePracticeDestsDesk: 'Les niveaux. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
+  guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue ; l\'étoile la garde sur votre étagère.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
   settingsRideAgain: 'Refaire l\'essai',

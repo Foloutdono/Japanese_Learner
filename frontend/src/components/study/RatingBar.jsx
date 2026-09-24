@@ -8,8 +8,9 @@ import { dialogOpen } from '../../lib/dialogOpen'
 
 // Keys 1-N map to the bar's buttons. On an AZERTY keyboard the
 // unshifted number row types &é"' rather than 1234, so those are
-// accepted too — same physical top-row keys, either layout.
-const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '§': 5 }
+// accepted too — same physical top-row keys, either layout. Key 6 is
+// '-' on a French PC keyboard and '§' on a French Mac (plan 123).
+const AZERTY_INDEX = { '&': 0, 'é': 1, '"': 2, "'": 3, '(': 4, '-': 5, '§': 5 }
 
 /**
  * `scale` overrides the learner's own choice — only tests pass it.

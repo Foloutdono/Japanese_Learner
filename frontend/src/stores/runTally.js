@@ -51,8 +51,8 @@ function entryId(entry) {
   if (!entry || (!entry.term && !entry.id)) return null
   return [entry.category ?? '', entry.id ?? '', entry.term ?? '', entry.kana ?? ''].join('\u0000')
 }
-function shape({ term, kana, category, id, session }) {
-  return { term, kana, category, id, session }
+function shape({ term, kana, category, id, label, session }) {
+  return { term, kana, category, id, label, session }
 }
 
 /** The run's cards whose last rating was below good, as their entries. */

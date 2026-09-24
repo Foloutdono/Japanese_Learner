@@ -5,6 +5,7 @@ import { useBoarding, endBoarding } from '../../stores/boarding'
 import { useLang } from '../../LangContext'
 import { sectionFor, stationFor } from '../../config/stations'
 import { playDoorChime, playDoorSlide } from '../../lib/audio'
+import { spendKey } from '../../lib/keyGuards'
 
 // ── 扉 — the train door ────────────────────────────────────
 // The bookend to the ticket gate. The gate is leaving the concourse
@@ -69,14 +70,16 @@ function DoorScene({ commit, color, code }) {
       commitOnce()
       endBoarding()
     }
+    // A key is spent on the scene it skips (lib/keyGuards, plan 123).
+    const skipKey = e => { spendKey(e); skip() }
     window.addEventListener('pointerdown', skip)
-    window.addEventListener('keydown', skip)
+    window.addEventListener('keydown', skipKey, true)
 
     return () => {
       timers.current.forEach(clearTimeout)
       timers.current = []
       window.removeEventListener('pointerdown', skip)
-      window.removeEventListener('keydown', skip)
+      window.removeEventListener('keydown', skipKey, true)
       // Unmounted before the timeline finished — a route change, say.
       // The choice must still take effect, or the tap did nothing.
       commitOnce()

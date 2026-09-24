@@ -131,3 +131,55 @@ describe('the desk width in JavaScript', () => {
     expect(writers).toEqual(['hooks/useDesk.js'])
   })
 })
+
+// ── plan 122 — first contact leaves the short step alone ──
+// The boarding steps its question, its answers and its action down a
+// rung when its frame is under 740px tall (the `brd` container query):
+// on a 1366×768 laptop that is the desk's case too. A desk rule on the
+// same element and property would beat it by specificity and hold the
+// tall value on a short window -- so the desk's first-contact rules
+// write none of the pairs the short step writes, compared on the
+// rightmost class each selector styles and on longhand properties.
+const LONGHANDS = {
+  gap: ['row-gap', 'column-gap'],
+  padding: ['padding-top', 'padding-right', 'padding-bottom', 'padding-left'],
+  'padding-block': ['padding-top', 'padding-bottom'],
+  'padding-inline': ['padding-left', 'padding-right'],
+  margin: ['margin-top', 'margin-right', 'margin-bottom', 'margin-left'],
+  'margin-block': ['margin-top', 'margin-bottom'],
+  'margin-inline': ['margin-left', 'margin-right'],
+}
+function subject(selector) {
+  let s = selector
+  for (let i = 0; i < 4; i++) s = s.replace(/:(not|has|is|where)\([^()]*\)/g, '')
+  const last = s.trim().split(/[\s>+~]+/).at(-1) ?? ''
+  return last.match(/\.[\w-]+/g)?.at(-1) ?? null
+}
+function pairs(rules) {
+  const out = new Set()
+  for (const rule of rules) {
+    const props = rule.body.split(';').map(d => d.split(':')[0].trim()).filter(Boolean)
+    for (const sel of rule.prelude.split(',')) {
+      const cls = subject(sel)
+      if (!cls) continue
+      for (const p of props) for (const l of LONGHANDS[p] ?? [p]) out.add(`${cls} ${l}`)
+    }
+  }
+  return out
+}
+function rulesIn(text) {
+  return statements(text).flatMap(st => (st.body == null ? [] : st.prelude.startsWith('@') ? rulesIn(st.body) : [st]))
+}
+
+describe('the desk\'s first contact (plan 122)', () => {
+  it('writes no pair the boarding\'s short step writes', () => {
+    const outside = stripComments(CSS.slice(0, section().open))
+    const at = outside.indexOf('@container brd (max-height: 739px)')
+    expect(at).toBeGreaterThan(-1)
+    const short = pairs(rulesIn(statements(outside.slice(at))[0].body))
+    expect(short.size).toBeGreaterThan(10)
+    const desk = pairs(rulesIn(section().text).filter(r => /\.desk-(brd|door)\b/.test(r.prelude)))
+    expect(desk.size).toBeGreaterThan(10)
+    expect([...desk].filter(p => short.has(p))).toEqual([])
+  })
+})

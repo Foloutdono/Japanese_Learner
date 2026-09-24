@@ -133,6 +133,30 @@ export function goalStops(choice, kanaAnswer) {
   return choice === NOVICE_GOAL && kanaAnswer !== 'both' ? [NOVICE_GOAL, ...ahead] : ahead
 }
 
+/** What a level-list answer sets (plan 122): the choice as said, the
+ *  level the office stores, and the goal the list opens on -- the
+ *  nearest JLPT stop ahead, the novice's own stop an offer rather than
+ *  a preselection. BoardingFlow commits through this, and the desk's
+ *  side prices a choice through it before Continue, so the preview and
+ *  the commit cannot disagree. */
+export function levelAnswers(choice, kanaAnswer) {
+  return {
+    levelChoice: choice,
+    jlpt: jlptFor(choice),
+    goal: goalStops(choice, kanaAnswer).find(stop => stop !== NOVICE_GOAL) ?? null,
+  }
+}
+
+/** The answers as they would stand if the question in hand were
+ *  answered now (plan 122). Only the level list has one to draft: a
+ *  level picked but not yet continued has not set the level the office
+ *  stores, nor the goal it opens on. Every other answer is set by the
+ *  pick itself. */
+export function boardingDraft(answers, step) {
+  if (step !== 'level' || !answers.levelChoice) return answers
+  return { ...answers, ...levelAnswers(answers.levelChoice, answers.kana) }
+}
+
 /** ~n: the figure a promise wears, rounded to the nearest `to`. */
 export function approx(n, to) {
   return Math.max(to, Math.round(n / to) * to)

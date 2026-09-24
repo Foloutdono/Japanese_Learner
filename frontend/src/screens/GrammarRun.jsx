@@ -285,9 +285,9 @@ export default function GrammarRun({ session }) {
       sub={currentModeLabel}
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
-      side={(
+      side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
-          <SessionPanel />
+          <SessionPanel done={done} />
         </SideLookup>
       )}
       sideLabel={t.deskRunLabel}
@@ -336,7 +336,7 @@ export default function GrammarRun({ session }) {
                     {answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
-                      dictCategory="grammar" dictId={pointId} session={session} />
+                      dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 ) : !choicesOn ? (
                   <Flashcard
@@ -383,6 +383,7 @@ export default function GrammarRun({ session }) {
                     }
                     dictCategory="grammar"
                     dictId={pointId}
+                    dictLabel={card.grammar}
                     session={session}
                   />
                 ) : (
@@ -407,7 +408,7 @@ export default function GrammarRun({ session }) {
                     {isFill && answered && <GrammarAnswer card={card} size={36} divided />}
                     <RevealActions
                       t={t} revealed={answered} resetKey={card.card_id}
-                      dictCategory="grammar" dictId={pointId} session={session} />
+                      dictCategory="grammar" dictId={pointId} dictLabel={card.grammar} session={session} />
                   </>
                 )}
               </PromptCard>

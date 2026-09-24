@@ -32,7 +32,7 @@ export function BalanceSheet() {
   const at = refillClock(credits?.refillAt, lang) ?? '00:00'
 
   return (
-    <Sheet open={open} onClose={closeBalance} jp={t.balanceTitle} cap={t.passLabel} label={t.balanceTitle}>
+    <Sheet open={open} onClose={closeBalance} jp={t.balanceTitle} cap={t.passLabel} label={t.balanceTitle} initialFocus=".btn-secondary">
       <div className="balance">
         <span className={`balance__fig${balance === 0 ? ' balance__fig--out' : ''}`}>
           {balance == null ? '∞' : balance}

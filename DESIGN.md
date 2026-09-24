@@ -939,14 +939,16 @@ a learner who has just rated one card is already looking for the next.
   from the canvas to `index.css` is `docs/design/mobile/README.md`; the
   desk's is `docs/design/desk/README.md`.
 
-### The desk (机, plans 113–120)
+### The desk (机, plans 113–123)
 
 The computer's design, at 1100px and up. Everything above holds unless a
 line here says otherwise. Plan 113 drew the chrome; plan 114 laid the
 screens out for the width, so that nothing on a computer reads as a phone
 set down on a desk; plan 115 took the remaining second screens and sheets
 into the page and gave a session its keys; plan 120 went through every
-dialog left and moved the ones that do not interrupt into their columns.
+dialog left and moved the ones that do not interrupt into their columns;
+plan 122 drew first contact for a desk, and plan 123 made the workspace
+answer a keyboard and a pointer one way everywhere.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1031,7 +1033,17 @@ dialog left and moved the ones that do not interrupt into their columns.
   the wide column) stand side by side, the head and the rating bar spanning
   both; answered, the unused choices keep their place unseen instead of
   collapsing, so the rating bar never moves; and it docks on the level bar
-  when the stage runs past the window.
+  when the stage runs past the window. **The foot follows its content**
+  (plan 123): a run's action — Next, Check, the exam's Previous, flag and
+  Next — stands under what it acts on and sticks at the dock line when the
+  window is short, never on the window's floor half a screen away; only a
+  browse's ← → keep their place, being pressed over and over.
+- **Above about 1460px the workspace is centred** (plan 123): the card and
+  the run's side stand together, the window's spare width shared equally
+  either side of the pair (`--desk-run-inset`) rather than poured between
+  them, and the level bar spans the workspace only. The level board, when
+  a level is reached, docks across the side's top instead of standing over
+  it.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
@@ -1041,9 +1053,14 @@ dialog left and moved the ones that do not interrupt into their columns.
   gate lesson's rival in the run's side, the grab's walkthrough beside the
   intake, a kanji's readings in the entry's own place, the iOS install
   steps in the settings page (plan 120). A panel that takes a column's
-  place (Browse, More, the walkthrough) wears `DeskDock`'s caption and ✕
-  over the phone's own body, and the column's tenant comes back on ✕ or
-  Esc. A dialog is kept for what must interrupt: a
+  place (Browse, More, the walkthrough, a deck's card form) wears
+  `DeskDock`'s caption and the entry's own roundel ✕ over the phone's own
+  body, and the column's tenant comes back on ✕, on Esc, or on the lit chip
+  that opened it pressed again. The dock takes the focus in (the field to
+  type in, else its caption) and gives it back to what opened it; a door
+  opened from a breakdown or in the dictionary's dock does the same, the
+  entry coming back where it was scrolled (plan 123). A dialog is kept for
+  what must interrupt: a
   confirmation (the deck's deletion, taking a followed deck, unfollowing,
   a level change, the exam's finish with blanks and its way out), an
   import, a creation that leaves the page (a new deck), a report, a
@@ -1053,7 +1070,11 @@ dialog left and moved the ones that do not interrupt into their columns.
   note. The rail's own doors — the balance, the pass's back — stay dialogs
   too: they are the chrome's, open the same over every screen, and no page
   has a column that is theirs. Sheet by sheet, with the reason for each:
-  `docs/design/desk/README.md`, "Dialogs on the desk".
+  `docs/design/desk/README.md`, "Dialogs on the desk". A kept dialog is
+  drawn for a desk (plan 123): it opens on its way back (Cancel, the way
+  out), never on the irreversible act; its actions share a row; a ✕ stands
+  where the body has no way out of its own; and the rail's own sheets stand
+  beside the rail at the side column's width.
 - **Comprehension and the mock exam are sat, not scrolled.** The text
   stands whole beside its questions; a reading passage stands flat on a
   card of its own beside the questions it serves and stays put across
@@ -1069,7 +1090,8 @@ dialog left and moved the ones that do not interrupt into their columns.
 - **`/` is the dictionary's search from anywhere the rail is**, and the
   Dictionary gate prints the key. A deck's page is its cards beside its
   platforms (or the form, while a card is written), and a new deck is a
-  dialog over the shelf.
+  dialog over the shelf that ends on the new deck's page, its first card's
+  form open (plan 123).
 - **A sheet is a dialog.** The bottom edge is where a thumb is; on a
   computer it is a long way from the pointer. The same panel is set in
   the middle of the screen — every corner, no handle, a fade. Only the
@@ -1084,11 +1106,49 @@ dialog left and moved the ones that do not interrupt into their columns.
   finished run's one filled action, Esc leaves a run (never over a dialog,
   never when a docked entry has taken the key), C shows the choices, A–D
   or 1–4 then Enter answer a comprehension question, Space plays a
-  listening clip, Ctrl/⌘+Enter analyses. Every cap is printed on what it
-  presses (`.desk-kbd`) and named in `aria-keyshortcuts`.
+  listening clip, Ctrl/⌘+Enter analyses; a reading, a translation or a
+  dictation line goes type, Enter, digit, Enter (plan 123). Every cap is
+  printed on what it presses (`.desk-kbd`) and named in
+  `aria-keyshortcuts`.
+- **Esc belongs to the innermost thing that holds it** (plan 123): a list
+  open in an entry, a door opened inside a docked entry, a dock or a
+  lookup in a column, the level board — and only then the run. A field
+  with text in it spends the first Esc leaving the field. The run's head
+  stops printing its Esc while a door holds the key, since the cap would
+  say "leave" while Esc closed the door.
+- **Lists are walked one way, and places are links** (plan 123). Every
+  list beside a page — a station's stops, the grammar points, the tiers,
+  the library's shelf, the exam's review, Settings, Browse's results — is
+  one tab stop, walked with ↑/↓, Home and End, Space opening the row; the
+  dictionary's grid is one stop walked in two dimensions, ↓ from the
+  search entering it. Everything that is a place is a link wearing its
+  button's face: Settings' pages (replacing, so seven pages looked at cost
+  one Back), the shelf's decks, a radical page's tiles, a bar's way up,
+  the profile's halls and lines. A radio group is one stop whose arrows
+  move and check — or move alone where a choice is a save or a question
+  (the level, the pace, the hour, the rating scale), Space choosing — and
+  every hover has its focus twin.
+- **A copy and a pointer get what they expect** (plan 123): a selection on
+  a card is not a turn, ruby readings stay out of a copy, the retention
+  line answers a mouse passing over it, and a screenshot goes into the
+  analyser by paste or drop.
 - **A guide note stands beside its anchor.** An anchor in the rail has its
-  note to its right, one in a side column to its left; the notes that teach
-  a key say so on the desk (the `…Desk` copy).
+  note to its right, one in a side column to its left, and one in the page
+  on the anchor itself, as wide as it between a column and a card; the
+  notes that teach a key or point at something say so on the desk (the
+  `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
+  stops walk down the rail first (plan 123).
+- **First contact is a run's frame** (plan 122). From the Welcome to the
+  first card there is no rail yet: the work is centred and a column at
+  `--desk-side-w` stands at the right edge, its job changing — on the
+  Welcome the sign-in, standing beside Board as its ghost twin (no second
+  screen); beside the boarding's questions the journey being built, priced
+  on every answer; on the first ride the card's entry, docked by the flip.
+  Building, a phone's pause for effect, is skipped. The plan's chart is
+  drawn 1:1. Every answer has a key: Enter goes on from any step, the
+  digits pick (a level answers to its own number, N5 to 5 and the kana stop
+  to 0), and Esc does nothing — the way out of the boarding signs the guest
+  out.
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

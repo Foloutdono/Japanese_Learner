@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -278,3 +279,45 @@ describe('a deck\'s platforms', () => {
     expect($('.probe-deck')).not.toBeNull()
   })
 })
+
+// ── plan 123, P15 — one way to walk a list ──
+// Every list beside a page is one tab stop, the open row, walked with
+// ↑/↓/Home/End; Space or Enter opens the row walked to; and the page's
+// ←/→ take the focus along with the open row while it is in the list.
+describe('the lists beside a page, walked one way (plan 123)', () => {
+  const stops = sel => $$(sel).filter(r => r.tabIndex === 0)
+
+  it('walks the grammar points from one tab stop, and ←/→ take the focus along', async () => {
+    await mount('/learn/grammar/N4?point=grammar_N4_b', grammarRoutes)
+    await settle()
+    const rows = () => $$('.desk-split__list .gl-index__row')
+    expect(stops('.desk-split__list .gl-index__row')).toEqual([rows()[1]])
+    rows()[1].focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(rows()[2])
+    await userEvent.keyboard('{Home}')
+    expect(document.activeElement).toBe(rows()[0])
+    await userEvent.keyboard(' ')
+    await settle()
+    expect(pointOf()).toBe('grammar_N4_a')
+    await userEvent.keyboard('{ArrowRight}')
+    await settle()
+    expect(pointOf()).toBe('grammar_N4_b')
+    expect(document.activeElement).toBe(rows()[1])
+    // Two Tabs from the list reach the lesson beside it, not 117.
+    expect(stops('.desk-split__list .gl-index__row')).toHaveLength(1)
+  })
+
+  it('walks the tiers from one tab stop', async () => {
+    await mount('/learn/vocab/tier/3?size=200', vocabRoutes)
+    await settle()
+    const rows = () => $$('.desk-split__list .platform-card')
+    expect(stops('.desk-split__list .platform-card')).toEqual([rows()[2]])
+    rows()[2].focus()
+    await userEvent.keyboard('{End}')
+    expect(document.activeElement).toBe(rows().at(-1))
+    await userEvent.keyboard('{ArrowUp}')
+    expect(document.activeElement).toBe(rows().at(-2))
+  })
+})
+

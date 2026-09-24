@@ -15,6 +15,7 @@ import { FireIcon } from '../components/ui/Icons'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
 import { BreakdownSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
+import { EnterKey } from '../components/chrome/DeskKeys'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
@@ -639,9 +640,13 @@ function SessionView({
             <RatingBar active onRate={q => gradeAnswer(q >= 3, q)} />
           ) : (
             <div className="stage__foot">
-              <button type="button" onClick={next} className="btn-primary">
+              <button type="button" onClick={next} className="btn-primary" aria-keyshortcuts={desk ? 'Enter' : undefined}>
                 {t.nextPhrase}
+                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
               </button>
+              {/* 机 (plan 123): Enter takes the next sentence, so a run
+                  is type, Enter, a digit, Enter -- as comprehension's is. */}
+              <EnterKey onEnter={next} />
             </div>
           )}
         </>

@@ -67,6 +67,12 @@ describe('routePattern', () => {
       '/practice/exam?level=N3': '/practice/exam',
       '/learn/decks/library/42': '/learn/decks/library/:deck_id',
       '/practice/exam/e1/results?attempt=9&question=q2': '/practice/exam/:examId/results',
+      // Plan 123: the desk's other places -- Settings' pages, the shelf's
+      // decks, a radical page's tiles, the profile's halls and lines.
+      '/profile/settings/display': '/profile/settings/:page',
+      '/learn/decks/42': '/learn/decks/:deck_id',
+      '/learn/decks/library': '/learn/decks/library',
+      '/learn/kanji/radical/42': '/learn/kanji/radical/:radical',
     }
     for (const [href, pattern] of Object.entries(links)) {
       const p = routePattern(href)

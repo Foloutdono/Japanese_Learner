@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { userEvent } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -135,6 +136,22 @@ describe('the dock on the desk', () => {
     await settle()
     expect(headword()).toBe('電車')
   })
+
+  it('walks nothing under a dialog, nor on the browser\'s Back chord (plan 123)', async () => {
+    await mount()
+    const dialog = document.createElement('div')
+    dialog.setAttribute('aria-modal', 'true')
+    document.body.appendChild(dialog)
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+    await settle()
+    dialog.remove()
+    expect(headword()).toBe('駅')
+    const back = new KeyboardEvent('keydown', { key: 'ArrowRight', altKey: true, bubbles: true, cancelable: true })
+    window.dispatchEvent(back)
+    await settle()
+    expect(back.defaultPrevented).toBe(false)
+    expect(headword()).toBe('駅')
+  })
 })
 
 describe('the search key', () => {
@@ -210,5 +227,65 @@ describe('the readings on the desk', () => {
     escape()
     await settle()
     expect(onClose).toHaveBeenCalledTimes(1)
+  })
+})
+
+// ── plan 123, P15 — the catalogue walked as a grid ──
+// One tab stop, the open tile; the arrows walk the grid as the eye
+// reads it and open the tile they land on, so the ring and the dock
+// agree; ↓ from the search field steps in on the open tile.
+describe('the catalogue walked by key (plan 123)', () => {
+  const tiles = () => [...document.querySelectorAll('.dict-grid > .dict-entry-card')]
+  it('is one tab stop, walked by row and column, the dock following', async () => {
+    await mount()
+    expect(tiles().filter(t => t.tabIndex === 0)).toEqual([tiles()[0]])
+    expect(tiles()[0].getAttribute('aria-current')).toBe('true')
+    const search = document.querySelector('.dict-search input, input[type="search"], .console input')
+    search.focus()
+    await userEvent.keyboard('{ArrowDown}')
+    expect(document.activeElement).toBe(tiles()[0])
+    await userEvent.keyboard('{ArrowRight}')
+    await settle()
+    // One tile, not two: the page's own ←/→ did not walk it again.
+    expect(document.activeElement).toBe(tiles()[1])
+    expect(headword()).toBe('電車')
+    const columns = getComputedStyle(document.querySelector('.dict-grid')).gridTemplateColumns.split(' ').length
+    await userEvent.keyboard('{Home}')
+    await settle()
+    expect(document.activeElement).toBe(tiles()[0])
+    await userEvent.keyboard('{ArrowDown}')
+    await settle()
+    expect(document.activeElement).toBe(tiles()[Math.min(columns, tiles().length - 1)])
+    expect(tiles().filter(t => t.tabIndex === 0)).toEqual([document.activeElement])
+  })
+})
+
+
+// ── plan 123, P18 — the focus and the scroll through a door ──
+// A door in the dock unmounts with the entry it belongs to: the focus
+// fell to the page's body and the entry came back at its top. The door
+// has the focus again on the way back, the entry scrolled where it was.
+describe('a door in the dock, and back', () => {
+  it('gives the focus back to the door, and the entry its scroll', async () => {
+    await mount()
+    ;[...document.querySelectorAll('.dict-entry-card')].find(c => c.textContent.includes('電車')).click()
+    await settle()
+    const dock = document.querySelector('.dict-dock')
+    // Short enough to scroll, whatever the entry holds.
+    dock.style.maxHeight = '160px'
+    dock.scrollTop = 60
+    await settle(60)
+    const read = dock.scrollTop
+    expect(read).toBeGreaterThan(0)
+    dock.querySelector('.dict-word').focus({ preventScroll: true })
+    await userEvent.keyboard('{Enter}')
+    await settle(250)
+    expect(headword()).toBe('電')
+    expect(dock.contains(document.activeElement)).toBe(true)
+    await userEvent.keyboard('{Escape}')
+    await settle()
+    expect(headword()).toBe('電車')
+    expect(document.activeElement).toBe(dock.querySelector('.dict-word'))
+    expect(dock.scrollTop).toBe(read)
   })
 })

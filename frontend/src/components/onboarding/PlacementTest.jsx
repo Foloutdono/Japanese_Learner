@@ -4,6 +4,9 @@ import { apiJsonWithTimeout } from '../../lib/api'
 import { playUi } from '../../lib/audio'
 import QuestionRenderer from '../../exam/QuestionRenderer'
 import { Loading } from '../ui/Loading'
+import { useDesk } from '../../hooks/useDesk'
+import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
+import { runKey } from '../../lib/keyGuards'
 
 // ── 実力診断 — the placement test ────────────────────────────────
 // Twelve deterministic questions laddering N5→N1, one at a time,
@@ -30,6 +33,7 @@ export default function PlacementTest({ session, onResult, onCancel }) {
   const [index, setIndex] = useState(0)
   const answersRef = useRef({})
   const [selected, setSelected] = useState(null)
+  const desk = useDesk()
 
   // Initial phase is already 'loading', so the effect only reports the
   // fetch's outcome — no synchronous setState on mount.
@@ -82,6 +86,10 @@ export default function PlacementTest({ session, onResult, onCancel }) {
       setSelected(answersRef.current[questions[index + 1].id] ?? null)
     }
   }
+  function pick(id) {
+    answersRef.current[question.id] = id
+    setSelected(id)
+  }
 
   return (
     <div className="onb-test">
@@ -97,8 +105,10 @@ export default function PlacementTest({ session, onResult, onCancel }) {
       <QuestionRenderer
         question={question}
         selected={selected}
-        onSelect={id => { answersRef.current[question.id] = id; setSelected(id) }}
+        onSelect={pick}
+        keys={desk}
       />
+      {desk && <PlacementKeys choices={question.choices ?? []} selected={selected} onPick={pick} onAdvance={advance} />}
 
       <div className="onb-step__actions">
         <button
@@ -106,8 +116,10 @@ export default function PlacementTest({ session, onResult, onCancel }) {
           className="onb-action"
           disabled={selected == null}
           onClick={advance}
+          aria-keyshortcuts={desk ? 'Enter' : undefined}
         >
           {isLast ? t.onbTestFinish : t.onbContinue}
+          {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
         </button>
       </div>
 
@@ -123,4 +135,34 @@ export default function PlacementTest({ session, onResult, onCancel }) {
       </div>
     </div>
   )
+}
+
+// ── 机 — the retake's keys (plan 123) ──────────────────────────────
+// The retake in Settings answers keys the way the mock exam on the same
+// questions does -- a digit picks, Enter goes on -- where it was twelve
+// questions by pointer while the rows printed digits that did nothing.
+// Enter from a choice the pointer or the arrows left focused goes on
+// too; Stop and Cancel keep their own. Rendered on the desk only.
+function PlacementKeys({ choices, selected, onPick, onAdvance }) {
+  useEffect(() => {
+    const onKey = e => {
+      if (!runKey(e)) return
+      const idx = CHOICE_KEY_INDEX[e.key]
+      if (idx !== undefined && idx < choices.length) {
+        e.preventDefault()
+        playUi('click-mode-selection')
+        onPick(choices[idx].id)
+        return
+      }
+      if (e.key !== 'Enter' || e.shiftKey || selected == null) return
+      const target = e.target
+      if (/^(BUTTON|A)$/.test(target?.tagName ?? '') && target.getAttribute('role') !== 'radio') return
+      e.preventDefault()
+      target?.blur?.()
+      onAdvance()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [choices, selected, onPick, onAdvance])
+  return null
 }

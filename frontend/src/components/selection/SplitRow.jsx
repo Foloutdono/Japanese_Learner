@@ -18,7 +18,11 @@ import { Link } from 'react-router-dom'
 //
 // The caller's onClick still runs on a link (the click sound); the
 // navigation is the link's own, and a modified click is the browser's.
-export function SplitRow({ to, state, ...props }) {
+//
+// `push` (plan 123) is for a place that is left for rather than opened
+// beside the list -- a deck from the shelf, a hall from the profile:
+// there Back should come back, so the link pushes.
+export function SplitRow({ to, state, push = false, ...props }) {
   if (to == null) return <button type="button" {...props} />
-  return <Link replace to={to} state={state} {...props} />
+  return <Link replace={!push} to={to} state={state} {...props} />
 }

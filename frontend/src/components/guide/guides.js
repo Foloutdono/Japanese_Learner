@@ -46,6 +46,24 @@ export const GUIDES = Object.freeze({
   ],
 })
 
+// 机 (plan 123): the order a gate's stops are walked in on the desk,
+// where it differs from the phone's. Today's six were written top to
+// bottom for a phone -- the HUD, the strip, the gate, the tab bar -- and
+// on the desk that walked the rail's foot three times, then the side's
+// top right, the gate, and the rail's top left. Down the rail instead,
+// then across the page: the gates, the level, the status, the pass, the
+// gate, the strip beside it.
+export const DESK_ORDER = Object.freeze({
+  today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
+})
+
+/** A gate's stops in the order the desk walks them. */
+export function deskStops(gate) {
+  const stops = GUIDES[gate] ?? []
+  const order = DESK_ORDER[gate]
+  return order ? order.map(anchor => stops.find(s => s.anchor === anchor)).filter(Boolean) : stops
+}
+
 // The owner's original ask, one flag away: when true, the last stop's
 // Done on a gate walks to the next gate in TAB_IDS and opens its guide,
 // so the five play as one walkthrough at the first opening. Off: each

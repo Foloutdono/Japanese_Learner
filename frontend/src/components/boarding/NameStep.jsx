@@ -1,5 +1,6 @@
 import { useLang } from '../../LangContext'
 import { BoardQuestion, Continue, BoardLink } from './BoardFrame'
+import { composing } from '../../lib/keyGuards'
 
 // ── 1 · the name (plan 075) ──────────────────────────────────────
 // A real field, already focused: the keyboard comes up with the
@@ -44,13 +45,13 @@ export default function NameStep({
             aria-invalid={error ? true : undefined}
             placeholder={t.brdNameAria}
             onChange={e => onChange(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter' && canGo) onContinue() }}
+            onKeyDown={e => { if (e.key === 'Enter' && canGo && !composing(e)) onContinue() }}
           />
           {error && <p className="brd__error" role="alert">{error}</p>}
         </div>
       </div>
       <div className="brd__foot">
-        <Continue label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
+        <Continue keys label={t.onbContinue} onClick={onContinue} disabled={!canGo} data-action="continue" />
         {onSignIn && <BoardLink onClick={onSignIn} data-action="sign-in">{t.brdHaveAccount}</BoardLink>}
       </div>
     </>

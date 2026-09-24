@@ -3,6 +3,7 @@ import { createPortal } from 'react-dom'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { PassWave } from '../profile/PassWave'
 import { playGateChime } from '../../lib/audio'
+import { spendKey } from '../../lib/keyGuards'
 
 // ── 改札 — the ticket gate ─────────────────────────────────
 // The moment between choosing a destination and arriving at it. You
@@ -83,14 +84,16 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
       cbs.current.onNavigate()
       cbs.current.onDone()
     }
+    // A key is spent on the scene it skips (lib/keyGuards, plan 123).
+    const skipKey = e => { spendKey(e); skip() }
     window.addEventListener('pointerdown', skip)
-    window.addEventListener('keydown', skip)
+    window.addEventListener('keydown', skipKey, true)
 
     return () => {
       timers.current.forEach(clearTimeout)
       timers.current = []
       window.removeEventListener('pointerdown', skip)
-      window.removeEventListener('keydown', skip)
+      window.removeEventListener('keydown', skipKey, true)
     }
   }, [])
 
