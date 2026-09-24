@@ -1,7 +1,13 @@
 services:
+  # The running backend is the dashboard's `Japanese_Learner`, in
+  # Frankfurt, which this file did not create (the names differ). A
+  # Blueprint made from this file would add a second backend beside it
+  # rather than take it over, so the live service is changed in the
+  # dashboard, and this file is kept saying the same.
   - type: web
     name: japanese-app-backend
     runtime: python
+    region: frankfurt
     rootDir: backend
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
@@ -42,10 +48,10 @@ services:
     envVars:
       # The voice engine below, reached over Render's private network.
       # `hostport` is host:port with no scheme; study/voice_engine.py
-      # adds the http://. Only this key is declared here: the others
-      # (DATABASE_URL, EXAM_AUDIO_DIR...) live in the dashboard, and a
-      # Blueprint sync must ADD this one without touching them -- check
-      # the sync preview says so before applying it.
+      # adds the http://. On the running service (see above) it is set
+      # by hand to the voice service's internal address, host:port, as
+      # that service's page shows it. Only this key is declared here: the
+      # others (DATABASE_URL, EXAM_AUDIO_DIR...) live in the dashboard.
       - key: VOICEVOX_URL
         fromService:
           type: pserv
@@ -58,11 +64,13 @@ services:
   # no auth of its own, so it must never be reachable from outside;
   # only the backend above calls it. It keeps no state -- no disk, no
   # database -- so a restart costs a few seconds of loading and nothing
-  # else. Same region as the backend, which is the default for both:
-  # the private network does not cross regions.
+  # else. Frankfurt, pinned: the backend runs there, the private
+  # network does not cross regions, and a service created with no
+  # region lands in Oregon.
   - type: pserv
     name: voicevox-nemo
     runtime: image
+    region: frankfurt
     image:
       # cpu-0.23.0, pinned by digest: the newest Nemo engine published
       # as an image (0.24.0 exists only as downloads), and an
