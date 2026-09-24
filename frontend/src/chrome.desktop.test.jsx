@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import { DESK_QUERY } from './hooks/useDesk'
@@ -256,6 +257,25 @@ describe('the rail', () => {
     const last = gates().at(-1).getBoundingClientRect()
     expect(foot.getBoundingClientRect().top).toBeGreaterThan(last.bottom)
     expect(Math.round(foot.getBoundingClientRect().bottom)).toBe(window.innerHeight)
+  })
+
+  // A laptop's short window (plan 123): the rail used to scroll as one,
+  // so at 600px with Learn's eleven stations hung under it the foot --
+  // the level, the status, the pass -- fell under the window's floor.
+  // The gates scroll alone now, and the foot stays on the bottom edge.
+  it('keeps its foot on the bottom edge of a short window, the gates scrolling alone', async () => {
+    await page.viewport(1100, 600)
+    try {
+      await mountShell('/learn')
+      await settle(120)
+      const foot = rail().querySelector('.desk-rail__foot')
+      expect(Math.round(foot.getBoundingClientRect().bottom)).toBe(window.innerHeight)
+      expect(rail().scrollHeight).toBe(rail().clientHeight)
+      const list = rail().querySelector('.desk-rail__gates')
+      expect(getComputedStyle(list).overflowY).toBe('auto')
+    } finally {
+      await page.viewport(1100, 800)
+    }
   })
 
   it('wears no line\'s pigment: the rail is chrome', async () => {

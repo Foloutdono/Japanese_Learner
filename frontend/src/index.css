@@ -20611,14 +20611,42 @@ a.slip__act { text-decoration: none; }
     gap: var(--sp-6);
     width: var(--desk-rail-w);
     padding-top: calc(var(--safe-top) + var(--sp-6));
-    overflow-y: auto;
-    overscroll-behavior: contain;
+    /* The rail itself never scrolls (plan 123): on a short window the
+       whole of it did, carrying the level, the pass and the status out
+       of its foot. The gates scroll inside it instead (below). */
+    overflow: hidden;
     background: var(--bg-panel);
     color: var(--text-on-panel);
     border-right: 1px solid var(--chrome-edge);
     box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
     user-select: none;
   }
+  /* The gates and their stations are what scrolls on a short window,
+     the foot's instruments standing whole under them (plan 123). */
+  .desk-rail__gates {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  /* A state card -- nothing yet, or something went wrong -- stands at
+     the card's width wherever it lands (plan 123): an empty shelf was a
+     1152px card holding a 40px icon and two centred lines. */
+  .empty {
+    width: 100%;
+    max-width: var(--card-w);
+    margin-inline: auto;
+  }
+  /* The sentence stations' tier page keeps its two toggles at a
+     column's width, as Learn's tiers do in their list (plan 123): two
+     options of ~575px each across the canvas at 1440. */
+  .learn > .seg--full,
+  .learn > .tier-picker > .tier-picker__size { max-width: var(--desk-side-w); }
+  /* The ticket gate stands on the canvas and leaves the rail lit: the
+     rail is the same before and after a departure from a plate (plan
+     123). A departure into a run turns the chrome to the stage while
+     the wipe is opaque, and the gate spans the window again. */
+  :root[data-chrome="shell"] .gate { left: var(--desk-rail-w); }
   /* The masthead: 辻 over its name, the origin station's plate. The
      Latin at --fs-sm is the pair's caption (DESIGN.md, Rule 1: 1.7–2.2×
      smaller; 1.70 / 0.82 = 2.07). */
@@ -20835,6 +20863,11 @@ a.slip__act { text-decoration: none; }
     flex-basis: var(--desk-side-w);
     top: var(--sp-6);
     max-height: calc(100dvh - 2 * var(--sp-6));
+    /* A wheel at the column's end goes on to the page (plan 123): the
+       column stands at --sp-6 below a page that may be scrolled, and its
+       foot was only ever reached by scrolling the page, which `contain`
+       refused while the pointer was over it. */
+    overscroll-behavior-y: auto;
   }
   /* The analyzer's working rail stood on the stage's LEFT, which on the
      desk put it against the rail: two columns of navigation side by
@@ -20859,7 +20892,7 @@ a.slip__act { text-decoration: none; }
     min-width: 0;
     max-height: calc(100dvh - 2 * var(--sp-6));
     overflow-y: auto;
-    overscroll-behavior: contain;
+    overscroll-behavior-y: auto;
   }
   .desk-anl-dock__keys {
     display: flex;
@@ -21080,6 +21113,17 @@ a.slip__act { text-decoration: none; }
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - 2 * var(--sp-5)), 1fr));
   }
+  /* The gate is bounded by the window, not its lanes by a phone's 30dvh
+     (plan 123): a 1280×650 window showed four of eight switches in a
+     box with empty desk under it. The lanes take what the head, the
+     chips, the notice and Depart leave, and Depart never leaves the
+     window. */
+  .today > .gate-card { max-height: calc(100dvh - 2 * var(--sp-6)); }
+  .today .gate-card__lanes {
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
 
   /* The pass's back, beside the gate (components/journey/JourneyPanel):
      the status sheet's own body on the sheet's own material — sumi, the
@@ -21286,12 +21330,20 @@ a.slip__act { text-decoration: none; }
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
+    /* Bounded like every sticky column (plan 123): on a 600px window
+       Sign out sat under the fold, beyond any scroll. */
+    max-height: calc(100dvh - 2 * var(--sp-6));
+    overflow-y: auto;
   }
+  /* A page's controls at the card's width (plan 123): seven action
+     buttons -- Export, Delete account, Sign out -- ran ~770px wide for a
+     one-word label at 1440. */
   .desk-settings__page {
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
     min-width: 0;
+    max-width: var(--card-w);
     animation: arrive-soft 0.2s linear;
   }
   .desk-settings .stg-row--on,
@@ -21388,7 +21440,8 @@ a.slip__act { text-decoration: none; }
     min-width: 0;
     max-height: calc(100dvh - 2 * var(--sp-6));
     overflow-y: auto;
-    overscroll-behavior: contain;
+    /* Chains at its end (plan 123), as the dictionary's dock does. */
+    overscroll-behavior-y: auto;
   }
   .desk-split__page {
     display: flex;
@@ -21417,6 +21470,9 @@ a.slip__act { text-decoration: none; }
      its author, its followers — so the shelf takes half the width, not
      a list's column, and the page the other half. */
   .desk-split--shelf { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* A shelf with nothing to open -- empty, or failed -- stands its one
+     card across, not beside a blank half (plan 123). */
+  .desk-split--shelf:has(> .desk-split__list > .empty):not(:has(> .desk-split__page > *)) { grid-template-columns: minmax(0, 1fr); }
   .desk-shelf-page {
     display: flex;
     flex-direction: column;
@@ -21511,7 +21567,8 @@ a.slip__act { text-decoration: none; }
   .stage > .exam-mondai,
   .stage > .exam-mondai__text,
   .stage > .exam-nav,
-  .stage > .qrows {
+  .stage > .qrows,
+  .stage > .loading {
     width: 100%;
     max-width: var(--card-w);
     margin-inline: auto;

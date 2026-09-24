@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -108,6 +109,31 @@ describe('Today on the desk', () => {
     expect(b.top).toBeGreaterThanOrEqual(a.bottom)
     expect(Math.round(b.left)).toBe(Math.round(a.left))
     expect(Math.round(a.width)).toBe(box.clientWidth)
+  })
+
+  // A laptop's short window (plan 123): the lanes were a phone's 30dvh
+  // box, so 650px showed four of eight switches over empty desk. The
+  // gate is bounded by the window now; the lanes take what is left, and
+  // Depart stays inside it.
+  it('gives the lanes what a short window leaves, Depart still in view', async () => {
+    const lanes = TODAY.lanes
+    TODAY.lanes = ['N5', 'N4', 'N3', 'N2'].flatMap(d => [
+      lane('vocab', d, 'vocab.flashcard.f2b', 5), lane('kanji', d, 'kanji.flashcard.f2b', 5),
+    ])
+    await page.viewport(1100, 650)
+    try {
+      await mount()
+      await settle()
+      const go = document.querySelector('.btn-depart').getBoundingClientRect()
+      expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
+      const box = document.querySelector('.gate-card__lanes')
+      const edge = box.getBoundingClientRect().bottom
+      const seen = [...box.querySelectorAll('.lane')].filter(el => el.getBoundingClientRect().bottom <= edge + 1)
+      expect(seen.length).toBeGreaterThan(5)
+    } finally {
+      TODAY.lanes = lanes
+      await page.viewport(1100, 800)
+    }
   })
 
   it('stands nothing where there is no journey to judge', async () => {

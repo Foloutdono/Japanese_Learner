@@ -1068,3 +1068,46 @@ describe('the desk\'s key fixes (plan 123, P1)', () => {
     expect(document.documentElement.hasAttribute('data-levelup')).toBe(true)
   })
 })
+
+// ── plan 123, P3 and P4 — the stage, the foot and the columns ──
+// Every rule of both is in the 机 block. On a phone a run's stage keeps
+// its own inset -- the level bar is its floor, with nothing under the
+// foot -- the gate's lanes are still the 30dvh box, a state card fills
+// its column and the ticket gate covers the whole screen, chrome or not.
+describe('the stage and the columns (plan 123, P3–P4)', () => {
+  it('keeps a run\'s stage on the level bar, nothing under its foot', async () => {
+    document.documentElement.dataset.chrome = 'stage'
+    try {
+      const screen = await render(
+        <div className="screen">
+          <div className="stage"><p>card</p><div className="stage__foot"><button type="button">Next</button></div></div>
+        </div>
+      )
+      expect(getComputedStyle(screen.container.querySelector('.stage')).paddingBottom).toBe('0px')
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+
+  it('bounds the gate\'s lanes by a phone\'s 30dvh, and a state card by nothing', async () => {
+    const screen = await render(
+      <main className="today">
+        <div className="gate-card"><div className="gate-card__lanes" /></div>
+        <div className="empty"><p>Nothing yet</p></div>
+      </main>
+    )
+    const lanes = screen.container.querySelector('.gate-card__lanes')
+    expect(parseFloat(getComputedStyle(lanes).maxHeight)).toBeCloseTo(window.innerHeight * 0.3, 0)
+    expect(getComputedStyle(screen.container.querySelector('.empty')).maxWidth).toBe('none')
+  })
+
+  it('covers the whole screen with the ticket gate', async () => {
+    document.documentElement.dataset.chrome = 'shell'
+    try {
+      const screen = await render(<div className="gate"><span>改札</span></div>)
+      expect(screen.container.querySelector('.gate').getBoundingClientRect().left).toBe(0)
+    } finally {
+      delete document.documentElement.dataset.chrome
+    }
+  })
+})
