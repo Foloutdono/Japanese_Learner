@@ -422,7 +422,7 @@ MOVES: dict[str, str] = {
     "vocab_N1_従って_したがって": "vocab_N3__したがって",
     "vocab_N1_其れでも_それでも": "vocab_N3__それでも",
     "vocab_N1_兎に角_とにかく": "vocab_N3__とにかく",
-    "vocab_N1_吃驚_びっくり": "vocab_N3__びっくり",
+    "vocab_N1_吃驚_びっくり": "vocab_N4__びっくり",
     "vocab_N1_凡ゆる_あらゆる": "vocab_N3__あらゆる",
     "vocab_N1_即ち_すなわち": "vocab_N3__すなわち",
     "vocab_N1_其れ共_それとも": "vocab_N3__それとも",
@@ -576,8 +576,8 @@ MOVES: dict[str, str] = {
     "vocab_N1_真実_さな": "vocab_N1_真実_しんじつ",
     # Real readings, JMdict's later and archaic ones (すめらぎ and かねごと
     # tagged arch, あだびと an outdated form), on the gloss of the
-    # everyday reading: neither JLPT list has any of them, and a learner
-    # typing てんのう was graded wrong. The word goes to its card; where
+    # everyday reading: neither JLPT list has any of them, and
+    # word_reading answered 天皇 with すめらぎ. The word goes to its card; where
     # there is none, the card takes the reading both lists and UniDic
     # give. These stay in FOLDED_FORMS -- すめらぎ is 天皇, so the
     # dictionary may answer it with the 天皇 card.
@@ -586,6 +586,87 @@ MOVES: dict[str, str] = {
     "vocab_N1_少女_おとめ": "vocab_N3_少女_しょうじょ",
     "vocab_N1_予言_かねごと": "vocab_N1_予言_よげん",
     "vocab_N1_旧事_くじ": "vocab_N1_旧事_きゅうじ",
+    # ── The reading field's last residue ─────────────────────────
+    # Two readings joined with " / " (plan 106 fixed 十's space; these
+    # three and ラジカセ kept theirs). The spaces also hid 四, 九 and 七
+    # from 112's reading pairs, since "し " is no reading: the N3 cards
+    # read し and よん are the N5 card's two readings again, and fold
+    # into it as the N3 十 cards did.
+    "vocab_N5_四_し / よん": "vocab_N5_四_し/よん",
+    "vocab_N3_四_し": "vocab_N5_四_し/よん",
+    "vocab_N3_四_よん": "vocab_N5_四_し/よん",
+    "vocab_N5_九_きゅう / く": "vocab_N5_九_きゅう/く",
+    "vocab_N3_九_きゅう": "vocab_N5_九_きゅう/く",
+    "vocab_N3_九_く": "vocab_N5_九_きゅう/く",
+    "vocab_N5_七_しち / なな": "vocab_N5_七_しち/なな",
+    "vocab_N3_七_しち": "vocab_N5_七_しち/なな",
+    "vocab_N3_七_なな": "vocab_N5_七_しち/なな",
+    "vocab_N5__ラジカセ / ラジオカセット": "vocab_N5__ラジカセ/ラジオカセット",
+    # "・する" in the reading, plan 106's 掃除 そうじする 31 more times:
+    # word_reading answered 案内 with "あんない・する". Each N4
+    # card now reads the noun, as 掃除 does, and takes the noun's gloss
+    # (the verb is the noun + する, the entry's vs tag). 26 of them were
+    # the N3 or N2 noun card again, which folds DOWN into the N4 one,
+    # 106b's rule -- so the N3 びっくり takes plan 112's 吃驚 line with
+    # it. The five with no noun card (けが, けんか, あいさつ, チェック,
+    # 生活) get the noun's gloss from JMdict.
+    "vocab_N4__けが・する": "vocab_N4__けが",
+    "vocab_N4__けんか・する": "vocab_N4__けんか",
+    "vocab_N4__あいさつ・する": "vocab_N4__あいさつ",
+    "vocab_N4__チェック・する": "vocab_N4__チェック",
+    "vocab_N4_生活_せいかつ・する": "vocab_N4_生活_せいかつ",
+    "vocab_N4__びっくり・する": "vocab_N4__びっくり",
+    "vocab_N3__びっくり": "vocab_N4__びっくり",
+    "vocab_N4_経験_けいけん・する": "vocab_N4_経験_けいけん",
+    "vocab_N3_経験_けいけん": "vocab_N4_経験_けいけん",
+    "vocab_N4_故障_こしょう・する": "vocab_N4_故障_こしょう",
+    "vocab_N3_故障_こしょう": "vocab_N4_故障_こしょう",
+    "vocab_N4_拝見_はいけん・する": "vocab_N4_拝見_はいけん",
+    "vocab_N2_拝見_はいけん": "vocab_N4_拝見_はいけん",
+    "vocab_N4_放送_ほうそう・する": "vocab_N4_放送_ほうそう",
+    "vocab_N3_放送_ほうそう": "vocab_N4_放送_ほうそう",
+    "vocab_N4_案内_あんない・する": "vocab_N4_案内_あんない",
+    "vocab_N3_案内_あんない": "vocab_N4_案内_あんない",
+    "vocab_N4_入院_にゅういん・する": "vocab_N4_入院_にゅういん",
+    "vocab_N3_入院_にゅういん": "vocab_N4_入院_にゅういん",
+    "vocab_N4_遠慮_えんりょ・する": "vocab_N4_遠慮_えんりょ",
+    "vocab_N3_遠慮_えんりょ": "vocab_N4_遠慮_えんりょ",
+    "vocab_N4_支度_したく・する": "vocab_N4_支度_したく",
+    "vocab_N3_支度_したく": "vocab_N4_支度_したく",
+    "vocab_N4_相談_そうだん・する": "vocab_N4_相談_そうだん",
+    "vocab_N3_相談_そうだん": "vocab_N4_相談_そうだん",
+    "vocab_N4_輸入_ゆにゅう・する": "vocab_N4_輸入_ゆにゅう",
+    "vocab_N3_輸入_ゆにゅう": "vocab_N4_輸入_ゆにゅう",
+    "vocab_N4_輸出_ゆしゅつ・する": "vocab_N4_輸出_ゆしゅつ",
+    "vocab_N3_輸出_ゆしゅつ": "vocab_N4_輸出_ゆしゅつ",
+    "vocab_N4_運動_うんどう・する": "vocab_N4_運動_うんどう",
+    "vocab_N3_運動_うんどう": "vocab_N4_運動_うんどう",
+    "vocab_N4_心配_しんぱい・する": "vocab_N4_心配_しんぱい",
+    "vocab_N3_心配_しんぱい": "vocab_N4_心配_しんぱい",
+    "vocab_N4_準備_じゅんび・する": "vocab_N4_準備_じゅんび",
+    "vocab_N3_準備_じゅんび": "vocab_N4_準備_じゅんび",
+    "vocab_N4_招待_しょうたい・する": "vocab_N4_招待_しょうたい",
+    "vocab_N3_招待_しょうたい": "vocab_N4_招待_しょうたい",
+    "vocab_N4_出発_しゅっぱつ・する": "vocab_N4_出発_しゅっぱつ",
+    "vocab_N3_出発_しゅっぱつ": "vocab_N4_出発_しゅっぱつ",
+    "vocab_N4_運転_うんてん・する": "vocab_N4_運転_うんてん",
+    "vocab_N3_運転_うんてん": "vocab_N4_運転_うんてん",
+    "vocab_N4_生産_せいさん・する": "vocab_N4_生産_せいさん",
+    "vocab_N3_生産_せいさん": "vocab_N4_生産_せいさん",
+    "vocab_N4_承知_しょうち・する": "vocab_N4_承知_しょうち",
+    "vocab_N3_承知_しょうち": "vocab_N4_承知_しょうち",
+    "vocab_N4_計画_けいかく・する": "vocab_N4_計画_けいかく",
+    "vocab_N3_計画_けいかく": "vocab_N4_計画_けいかく",
+    "vocab_N4_入学_にゅうがく・する": "vocab_N4_入学_にゅうがく",
+    "vocab_N3_入学_にゅうがく": "vocab_N4_入学_にゅうがく",
+    "vocab_N4_世話_せわ・する": "vocab_N4_世話_せわ",
+    "vocab_N3_世話_せわ": "vocab_N4_世話_せわ",
+    "vocab_N4_退院_たいいん・する": "vocab_N4_退院_たいいん",
+    "vocab_N2_退院_たいいん": "vocab_N4_退院_たいいん",
+    "vocab_N4_食事_しょくじ・する": "vocab_N4_食事_しょくじ",
+    "vocab_N3_食事_しょくじ": "vocab_N4_食事_しょくじ",
+    "vocab_N4_出席_しゅっせき・する": "vocab_N4_出席_しゅっせき",
+    "vocab_N3_出席_しゅっせき": "vocab_N4_出席_しゅっせき",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries

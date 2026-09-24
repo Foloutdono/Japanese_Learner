@@ -640,7 +640,7 @@ Every line is in `vocab_renames.MOVES`; the ones marked *no word* are in
 | N1 徐々 そろそろ | `term_only`; glossed with JMdict's そろそろ senses | **folded** into the N4 kana そろそろ, gloss and French the union. *No word*, so 徐々 in a text no longer badges as そろそろ (徐々に reaches its N3 card) |
 | N1 一筋 ひとすき | `term_only`; the N1 list and UniDic say ひとすじ | **corrected** to ひとすじ in place. *No word* |
 | N1 真実 さな | `term_only`; the N1 list and UniDic say しんじつ | **corrected** to しんじつ in place. *No word* |
-| N1 天皇 すめらぎ | `exact_reading`, tagged archaic; N2 てんのう | **folded** into N2: same gloss, no list has すめらぎ, and typing てんのう was graded wrong |
+| N1 天皇 すめらぎ | `exact_reading`, tagged archaic; N2 てんのう | **folded** into N2: same gloss, no list has すめらぎ, and word_reading answered 天皇 with it |
 | N1 他人 あだびと | `exact_reading`, JMdict's "outdated form"; N3 たにん | **folded** into N3, for the same reasons |
 | N1 少女 おとめ | `exact_reading` (a gikun); N3 しょうじょ | **folded** into N3: same gloss, and no list has it |
 | N1 予言 かねごと | `exact_reading`, archaic; the N1 list and UniDic say よげん | **corrected** to よげん; "promise" (かねごと's sense) gives way to "prophecy" |
@@ -669,7 +669,37 @@ Left, and why:
   two readings with " / " (plan 106 fixed 十's space), and 31 N4 cards
   still carry `・する` in the reading (plan 106 took the する out of
   掃除 only). Fixing either changes ids, so each needs `MOVES` lines of
-  its own.
+  its own. *Done the same day; see below.*
+
+### The reading field's last residue (2026-09-24)
+
+35 cards, one more than the scan above counted (the N5 ラジカセ /
+ラジオカセット joined its two with " / " too). Each is a `MOVES` line,
+and none of the old pairs reaches `FOLDED_FORMS`: " ", "/" and "・" are
+in `_NOT_A_SPELLING`.
+
+- **" / " → "/"**: 四 `し/よん`, 九 `きゅう/く`, 七 `しち/なな`, ラジカセ.
+  `card_lookup._reading_variants` already stripped the spaces, so the
+  lookups were never hurt. But `spelling_pairs` split on "/" without
+  stripping, so "し " matched no reading, and the N3 四 read し and read
+  よん stayed hidden beside the N5 card. They fold into it now, as
+  the N3 十 cards did in 112, and so do the N3 九 and 七 pairs.
+- **`・する` dropped**: the 31 N4 cards now read the noun, as 掃除 did
+  in 106, and take the noun's gloss and French. 26 of them were the
+  noun card again at N3 (N2 for 拝見 and 退院), which folds down into the
+  N4 card by 106b's rule. The N3 びっくり takes plan 112's 吃驚 line
+  with it, since a move is one hop. The five with no noun card get the
+  noun's JMdict gloss: けが "injury, wound", けんか "quarrel, fight",
+  あいさつ "greeting, salutation", チェック "check, inspection", 生活
+  "life, living". チェック and 生活 overlapped the pool, so
+  `prune_pool_overlap --yes` took those two rows out.
+- 8,082 → 8,050 cards. `test_the_reading_field_is_written_in_kana`
+  no longer allows " " or "・"; "、" stays until the N5 より、ほう
+  goes.
+
+Left for the owner: けが, けんか and あいさつ are kana cards at N4 beside
+the N3 kanji cards 怪我, 喧嘩 and 挨拶. They join 112's deferred "kana
+card below a kanji card" family (いす/椅子).
 
 ## Order and dependencies
 

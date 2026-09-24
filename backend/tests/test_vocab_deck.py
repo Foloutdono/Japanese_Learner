@@ -78,11 +78,11 @@ def test_the_reading_field_holds_a_reading():
     assert bad == []
 
 
-# Kana, the long-vowel mark and the kana iteration marks, and what the
-# deck still joins its readings with: "/" (plan 104's separator), and
-# the " / ", "・する" and "、" of residue no plan has reached yet (the N5
-# 四 し / よん, the N4 案内 あんない・する, the N5 より、ほう).
-_READING = re.compile(r"[ぁ-ゖゝゞァ-ヺーヽヾ/ ・、]+")
+# Kana, the long-vowel mark and the kana iteration marks, and "/", the
+# one separator the deck joins readings with (plan 104). "、" is the N5
+# より、ほう's, residue with no card to fold into (docs/vocab-deck-review
+# .md); it goes when that card does.
+_READING = re.compile(r"[ぁ-ゖゝゞァ-ヺーヽヾ/、]+")
 
 
 def test_the_reading_field_is_written_in_kana():
@@ -91,7 +91,9 @@ def test_the_reading_field_is_written_in_kana():
     （note） for the test above to find, and a kana field 106b's merge
     could not match against the N1 賛成::さんせい, so the word sat at two
     levels under two ids. Whatever script the next mojibake lands in,
-    it is not kana."""
+    it is not kana. Nor is a space (四 read "し / よん" hid the N3 四
+    cards from plan 112's reading pairs) or a "・する" (word_reading
+    answered 案内 with "あんない・する")."""
     bad = [
         (level, entry)
         for level, entry in _entries()

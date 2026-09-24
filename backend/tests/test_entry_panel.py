@@ -94,12 +94,20 @@ def test_a_word_names_the_kanji_it_is_written_with(client):
 
 
 def test_a_character_the_aligner_cannot_isolate_keeps_its_row(client):
-    # 生活 is aligned as one unsegmented run, so neither half can be
-    # given a reading. The row still prints -- the door it opens is the
-    # point -- with no reading rather than an invented one.
-    row = _one(client, "生活", "vocab", lambda e: e["kanji"] == "生活")
-    assert [p["char"] for p in row["kanji_parts"]] == ["生", "活"]
+    # 大人 read おとな is read as a whole (jukujikun), so the aligner keeps
+    # it as one unsegmented run and neither half can be given a reading.
+    # The row still prints -- the door it opens is the point -- with no
+    # reading rather than an invented one. (This was 生活 until its
+    # reading lost the "・する" that kept it from aligning; せいかつ lays
+    # over 生 and 活 like any on-reading compound.)
+    row = _one(client, "大人", "vocab", lambda e: e["kanji"] == "大人" and e["kana"] == "おとな")
+    assert [p["char"] for p in row["kanji_parts"]] == ["大", "人"]
     assert all(p["reading"] is None for p in row["kanji_parts"])
+
+
+def test_a_reading_without_residue_lights_each_kanji(client):
+    row = _one(client, "生活", "vocab", lambda e: e["kanji"] == "生活")
+    assert [(p["char"], p["reading"]) for p in row["kanji_parts"]] == [("生", "せい"), ("活", "かつ")]
 
 
 def test_a_kana_only_word_is_written_with_no_kanji(client):
