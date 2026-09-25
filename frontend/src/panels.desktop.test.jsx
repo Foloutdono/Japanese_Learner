@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
+import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -8,11 +9,13 @@ import './index.css'
 // A card run on the desk stands on three columns of surface panels: at
 // the left this run (the figures, the level bar as a row, the deck's
 // legend, the remaining count) over the card panel (the card's state,
-// the verdicts as tiles with what each decides, the keys, the rhythm);
-// the card in the middle with its tiles framed under it, unlit before
-// the reveal; the card's details at the right, sealed before the reveal
-// and the entry in its band after. The elements print no key caps. A
-// run without records keeps the side alone. The phone's side is
+// the verdicts as tiles, each a figure of when the card comes back, the
+// keys, the rhythm); the card in the middle with its tiles framed under
+// it, unlit before the reveal; the card's details at the right, sealed
+// before the reveal and the entry in its band after, scrolling rather
+// than shrinking the stroke sheet. The columns share the width 28 | 42
+// | 30. The elements print no key caps but the flashcard's hint. A run
+// without records keeps the side alone. The phone's side is
 // deskfree.phone.
 
 vi.mock('./lib/audio', async o => ({
@@ -46,6 +49,16 @@ const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bu
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
 const rect = s => $(s).getBoundingClientRect()
+// A token expression as Chromium computes it, so a size is compared with
+// the scale and never a hand-copied constant.
+function probe(prop, expr) {
+  const el = document.createElement('div')
+  el.style[prop] = expr
+  document.body.appendChild(el)
+  const v = getComputedStyle(el)[prop]
+  el.remove()
+  return v
+}
 const CHOICES = ['gare', 'électricité', 'voiture', 'montagne']
 const DAY = 86400
 
@@ -136,6 +149,26 @@ describe('the three columns', () => {
     expect($('.desk-session .lvlbar__track').getAttribute('role')).toBe('progressbar')
   })
 
+  it('shares the width 28 | 42 | 30 on the owner\'s window, and stands centred past it', async () => {
+    try {
+      await page.viewport(1877, 900)
+      await render(<Stage><Card /><RatingBar active onRate={() => {}} /></Stage>)
+      await settle(400)
+      const widths = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
+      const sum = widths.reduce((a, b) => a + b, 0)
+      expect(widths.map(w => Math.round((100 * w) / sum))).toEqual([28, 42, 30])
+      // Past --desk-run-w the three keep their widths, centred.
+      await page.viewport(2400, 900)
+      await settle(100)
+      const wide = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
+      wide.forEach((w, i) => expect(w).toBeCloseTo(widths[i], 0))
+      const screen = rect('.screen')
+      expect(Math.abs((rect('.desk-run__left').left - screen.left) - (screen.right - rect('.desk-run__side').right))).toBeLessThan(2)
+    } finally {
+      await page.viewport(1100, 800)
+    }
+  })
+
   it('heads the left column with this run: the figures, the count among them, the level and the legend', async () => {
     await render(<Stage><Card /><RatingBar active onRate={() => {}} /></Stage>)
     await settle()
@@ -154,7 +187,7 @@ describe('the three columns', () => {
 })
 
 describe('the card panel', () => {
-  it('prints the card\'s state, and each verdict as a tile with its digit and when', async () => {
+  it('prints the card\'s state, and each verdict as a tile: when, large, its word and its digit', async () => {
     await render(<Stage><Card /><RatingBar active={false} onRate={() => {}} /></Stage>)
     await settle()
     const panel = $('.desk-run__left > .desk-card')
@@ -170,7 +203,17 @@ describe('the card panel', () => {
     expect(tiles).toHaveLength(4)
     expect(tiles.map(t => t.querySelector('.desk-kbd').textContent)).toEqual(['4', '3', '2', '1'])
     // The four-button bar's best is quality 4 (domain/ratingScales).
-    expect(tiles.map(t => t.querySelector('.desk-verdict__when').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 j', 'dans 3 sem.'])
+    // Each tile is a figure: the wait as a numeral and its unit over the
+    // verdict's word, and in words to a screen reader.
+    expect(tiles.map(t => t.querySelector('.desk-verdict__value').textContent)).toEqual(['3', '10', '3', '3'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__unit').textContent)).toEqual(['min', 'min', 'jours', 'sem.'])
+    expect(tiles.map(t => t.querySelector('.desk-verdict__word').textContent)).toEqual(['Raté', 'Presque', 'Difficile', 'Correct'])
+    expect(tiles.map(t => t.querySelector('.sr-only').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 j', 'dans 3 sem.'])
+    const value = tiles[0].querySelector('.desk-verdict__value')
+    expect(getComputedStyle(value).fontSize).toBe(probe('fontSize', 'var(--fs-display)'))
+    // The numeral is the tile's largest thing, its word beneath it.
+    const word = tiles[0].querySelector('.desk-verdict__word').getBoundingClientRect()
+    expect(word.top).toBeGreaterThanOrEqual(value.getBoundingClientRect().bottom)
     // The keys the elements no longer print, and the rhythm on its foot.
     expect($$('.desk-keys .desk-kbd').map(el => el.textContent)).toEqual(expect.arrayContaining(['C']))
     expect($$('.desk-keys__item')).toHaveLength(3)
@@ -181,7 +224,7 @@ describe('the card panel', () => {
 })
 
 describe('the elements print no key caps', () => {
-  it('leaves the head, the hint switch, the card and the tiles bare', async () => {
+  it('leaves the head, the hint switch and the tiles bare, and the card its hint', async () => {
     await render(
       <Stage>
         <HintBar available={['indice_1']} active={[]} onToggle={() => {}} />
@@ -194,7 +237,9 @@ describe('the elements print no key caps', () => {
     expect($('.stage__leave').getAttribute('aria-keyshortcuts')).toBeNull()
     expect($('.study-assist__toggle .desk-kbd')).toBeNull()
     expect($('.study-assist__toggle').getAttribute('aria-keyshortcuts')).toBe('C')
-    expect($('.flashcard__hint').textContent).toBe('')
+    // The card says how it turns, as it does on every desk (owner's call).
+    expect($('.flashcard__hint .desk-kbd').textContent).toBe('Espace')
+    expect($('.flashcard__hint').textContent).toBe('Espace pour révéler')
     expect($('.rating-bar .desk-kbd')).toBeNull()
     expect($$('.rating-bar__btn').map(b => b.getAttribute('aria-keyshortcuts'))).toEqual(['4', '3', '2', '1'])
   })
@@ -245,6 +290,54 @@ describe('the card\'s details', () => {
     expect(top.bottom).toBeLessThanOrEqual(body.top)
     expect($('.dict-entry__top > .dict-plate')).not.toBeNull()
     expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('1px')
+  })
+
+  // A kanji the learner has met, with its stroke sheet and more words
+  // than a laptop's column holds beside it.
+  function dockKanji(words) {
+    const word = i => ({ kanji: `山${i}`, kana: 'やま', meaning: `word ${i}`, level: 'N5', furigana: [{ text: '山', reading: 'やま' }, { text: String(i) }] })
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [{
+        type: 'kanji', kanji: '山', kana: 'サン・やま', meaning: 'mountain', level: 'N5',
+        stroke_count: 3, radical: 46, radical_glyph: '山', radical_name: 'やま', svg_url: '/kanjivg/05c71.svg',
+        status: { status: 'learning', total_reviews: 2, correct_reviews: 2, accuracy: 100, interval_days: 0, next_review: '2026-09-25T08:00:00Z', due: true },
+        vocab_examples: Array.from({ length: words }, (_, i) => word(i)),
+      }] }),
+    }))
+  }
+
+  it('keep the learner\'s two figures and leave the schedule to the tiles', async () => {
+    dockKanji(2)
+    await render(<Stage><Revealing /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    press(' ')
+    await settle(400)
+    const figures = $$('.dict-entry__top .records > .record')
+    expect(figures.map(f => f.querySelector('.record__label').textContent)).toEqual(['Précision', 'Révisions'])
+    // One row of two, across the panel.
+    const [a, b] = figures.map(f => f.getBoundingClientRect())
+    expect(b.top).toBeCloseTo(a.top, 0)
+  })
+
+  it('scroll rather than shrink the stroke sheet when the column is short', async () => {
+    dockKanji(12)
+    await render(<Stage><Revealing /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    press(' ')
+    await settle(400)
+    const body = $('.dict-entry--band > .dict-entry__body')
+    const sheet = $('.dict-entry--band .dict-form__sheet')
+    // The sheet stands at twice the specimen at least, and the panel
+    // scrolls to it; the column itself does not.
+    expect(sheet.getBoundingClientRect().height).toBeGreaterThanOrEqual(2 * parseFloat(probe('fontSize', 'var(--fs-specimen-glyph)')) - 1)
+    expect(getComputedStyle(body).overflowY).toBe('auto')
+    expect(body.scrollHeight).toBeGreaterThan(body.clientHeight)
+    const side = $('.desk-run__side')
+    expect(side.scrollHeight).toBeLessThanOrEqual(side.clientHeight + 1)
+    body.scrollTop = body.scrollHeight
+    await settle(50)
+    expect(sheet.getBoundingClientRect().bottom).toBeLessThanOrEqual(body.getBoundingClientRect().bottom + 1)
   })
 })
 

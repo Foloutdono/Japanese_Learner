@@ -9,7 +9,6 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
-import { RunPanelsContext } from './runPanels'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
 import { composing, runKey } from '../../lib/keyGuards'
@@ -773,9 +772,6 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
 
 function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   const desk = useDesk()
-  // On the desk's panels the card panel lists the keys, so the face
-  // prints none under the glyph (plan 126).
-  const panels = useContext(RunPanelsContext)
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -881,11 +877,11 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
       </div>
       <div className="flashcard__hint">
         {/* A phone is tapped; a desk has a keyboard, so there the hint
-            names the key (plan 113) -- except on the run's panels, where
-            the card panel names every key and the face keeps its glyph
-            alone (plan 126). */}
+            names the key (plan 113) -- on the run's panels too, though
+            the card panel lists the keys: the owner wanted the card to
+            say how it turns (plan 126's second round). */}
         {!revealed && (desk
-          ? (panels ? null : <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>)
+          ? <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>
           : t.tapToReveal)}
       </div>
     </div>

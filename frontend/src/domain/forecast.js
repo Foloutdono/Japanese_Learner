@@ -3,7 +3,9 @@
 // comes back: `due_in` in seconds off the card's own review_preview
 // (srs.py's preview_reviews_bulk), turned into words at the scale of the
 // wait. (A line saying what the rating does to the card stood under it
-// until the owner cut it for room.)
+// until the owner cut it for room.) The tile draws it as a figure -- a
+// large numeral and its unit, `dueFigure` -- and says it in words,
+// `dueText`, to a screen reader.
 
 const MINUTE = 60
 const HOUR = 60 * MINUTE
@@ -21,4 +23,20 @@ export function dueText(seconds, t) {
   if (days < 60) return t.forecastIn(t.forecastWeeks(Math.round(days / 7)))
   if (days < 730) return t.forecastIn(t.forecastMonths(Math.round(days / 30)))
   return t.forecastIn(t.forecastYears(Math.round(days / 365)))
+}
+
+/** The same wait as a figure, for the tile: `{ value: 3, unit: 'min' }`, a
+ *  day and tomorrow alike `{ value: 1, unit: 'jour' }` so every tile is a
+ *  numeral and its unit; null when there is no forecast. */
+export function dueFigure(seconds, t) {
+  if (!Number.isFinite(seconds)) return null
+  const s = Math.max(0, seconds)
+  const figure = (value, unit) => ({ value, unit: t.forecastUnit(unit, value) })
+  if (s < HOUR) return figure(Math.max(1, Math.round(s / MINUTE)), 'minute')
+  if (s < DAY) return figure(Math.max(1, Math.round(s / HOUR)), 'hour')
+  const days = Math.max(1, Math.round(s / DAY))
+  if (days < 14) return figure(days, 'day')
+  if (days < 60) return figure(Math.round(days / 7), 'week')
+  if (days < 730) return figure(Math.round(days / 30), 'month')
+  return figure(Math.round(days / 365), 'year')
 }

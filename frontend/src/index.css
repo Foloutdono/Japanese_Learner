@@ -3114,15 +3114,14 @@
      first, and here it is drawn at the width it was designed at. */
   --desk-side-w:    360px;
   /* A card run on three panels (plan 126, from the owner's mock drawn at
-     1877px): the run's two left panels at --desk-run-left-w, the card's
-     details at --desk-run-right-w -- the spread's wider entry (plan
-     114's canvas), where the body's blocks stand two across -- with
-     the card's own --card-w between them. On a narrower desk the two
-     side columns give down to --desk-run-col-min and the card gives
-     after them, so the three fit a 1100px laptop with no second width
-     query. Here for the same reason as --desk-rail-w. */
-  --desk-run-left-w:  480px;
-  --desk-run-right-w: 600px;
+     1877px): the three columns share --desk-run-w, the width they took
+     there, 28 | 42 | 30 by the owner's second round -- the card the
+     widest, the run's two left panels and the card's details either
+     side. A wider window centres the three rather than growing them; on
+     a narrower desk the side columns give down to --desk-run-col-min and
+     the card after them, so the three fit a 1100px laptop with no second
+     width query. Here for the same reason as --desk-rail-w. */
+  --desk-run-w:       1720px;
   --desk-run-col-min: 300px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
@@ -22021,9 +22020,9 @@ a.slip__act { text-decoration: none; }
      (plan 122): a cell's top left, clear of its centred tag; a kana
      answer's top right, clear of its label. */
   .desk-brd .brd-kopt { position: relative; }
-  /* The card panel's caps (plan 126): the digit before each verdict's
-     word, and the keys the elements no longer print, in the page's ink. */
-  .desk-verdict__head > .desk-kbd { margin-inline-end: var(--sp-1); }
+  /* The card panel's caps (plan 126): the keys the elements no longer
+     print, in the page's ink. (Each verdict's digit is in its tile's
+     corner, .desk-verdict__key.) */
   .desk-keys__item > .desk-kbd { color: var(--text-primary); }
   .desk-brd .brd-kopt > .desk-kbd,
   .desk-brd .brd-cell > .desk-kbd {
@@ -22220,26 +22219,32 @@ a.slip__act { text-decoration: none; }
      decides, the keys, the rhythm on a sumi foot); the card in the
      middle with its tiles framed under it; the card's details at the
      right -- sealed before the reveal, the entry in its band layout
-     after. The owner drew it at 1877px (480 | 640 | 600); on a narrower
-     desk the side columns give down to --desk-run-col-min and the card
-     after them, so the three fit a laptop with no second width query.
-     Plan 124's console -- the tiles' row fixed above the level strip --
-     is what this replaces. The elements print no key caps here
-     (RunPanelsContext): the card panel lists them. */
+     after. The owner drew it at 1877px, and set the columns at 28 | 42
+     | 30 of --desk-run-w in the second round (482 | 722 | 516 there);
+     past that width the three stand centred, and on a narrower desk the
+     side columns give down to --desk-run-col-min and the card after
+     them, so the three fit a laptop with no second width query. Plan
+     124's console -- the tiles' row fixed above the level strip -- is
+     what this replaces. The elements print no key caps here
+     (RunPanelsContext) but the flashcard's hint: the card panel lists
+     them.
+
+     The inset is the distance from the window's edge to the columns'
+     (the level board docks against it), never less than the gutter. */
   :root:has(.desk-run--panels) {
-    --desk-run-inset: max(0px, calc((100% - var(--desk-run-left-w) - var(--card-w) - var(--desk-run-right-w) - 2 * var(--sp-6)) / 2));
+    --desk-run-inset: max(var(--sp-6), calc((100% - var(--desk-run-w) - 2 * var(--sp-6)) / 2));
   }
   .desk-run--panels {
     display: grid;
     grid-template-columns:
-      minmax(var(--desk-run-col-min), var(--desk-run-left-w))
-      minmax(var(--desk-side-w), var(--card-w))
-      minmax(var(--desk-run-col-min), var(--desk-run-right-w));
-    justify-content: center;
+      minmax(var(--desk-run-col-min), 28fr)
+      minmax(var(--desk-side-w), 42fr)
+      minmax(var(--desk-run-col-min), 30fr);
     column-gap: var(--sp-6);
     height: 100dvh;
     min-height: 0;
-    padding: var(--sp-8) var(--sp-6);
+    padding-block: var(--sp-8);
+    padding-inline: var(--desk-run-inset);
   }
   .desk-run--panels > .desk-run__left,
   :root .desk-run--panels > .desk-run__side {
@@ -22402,17 +22407,31 @@ a.slip__act { text-decoration: none; }
     grid-auto-rows: minmax(min-content, 1fr);
     gap: var(--sp-3);
   }
+  /* A verdict is a figure (DESIGN.md, Figures): when the card comes
+     back as the large numeral and its unit, the verdict's word as the
+     caps label beneath with its dot, the pair centred in the tile and
+     the digit that presses it in the corner -- the run panel's own
+     figures, grown to the tile (owner's second round). */
   .desk-verdict {
     --rating-color: var(--text-secondary);
+    position: relative;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
-    gap: var(--sp-2);
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-3);
     min-width: 0;
-    padding: var(--sp-4);
+    padding: var(--sp-6) var(--sp-3);
+    text-align: center;
     background: color-mix(in srgb, var(--text-primary) 4%, transparent);
     border: 1px solid var(--surface-line);
     border-radius: var(--r-card);
+  }
+  .desk-verdict__key {
+    position: absolute;
+    top: var(--sp-3);
+    left: var(--sp-3);
+    color: var(--text-secondary);
   }
   .desk-verdict--q0 { --rating-color: var(--danger); }
   .desk-verdict--q1 { --rating-color: var(--rating-wrong); }
@@ -22420,24 +22439,38 @@ a.slip__act { text-decoration: none; }
   .desk-verdict--q3 { --rating-color: var(--warning); }
   .desk-verdict--q4 { --rating-color: var(--teal); }
   .desk-verdict--q5 { --rating-color: var(--success); }
+  .desk-verdict__when {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0 var(--sp-2);
+    font-family: var(--font-display);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+  .desk-verdict__value {
+    font-size: var(--fs-display);
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-verdict__unit {
+    font-size: var(--fs-title);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
   .desk-verdict__head {
     display: flex;
     align-items: center;
     gap: var(--sp-2);
     font-family: var(--font-display);
-    font-size: var(--fs-sm);
+    font-size: var(--fs-caption-xs);
     font-weight: 700;
-    color: var(--text-primary);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
   }
   .desk-verdict__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color); flex: none; }
-  .desk-verdict__when {
-    font-family: var(--font-display);
-    font-size: var(--fs-title);
-    font-weight: 700;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    color: var(--text-primary);
-  }
   .desk-keys {
     display: flex;
     flex-wrap: wrap;
@@ -22501,11 +22534,16 @@ a.slip__act { text-decoration: none; }
     overflow: hidden;
   }
   .dict-entry--band > .dict-entry__top { flex: none; }
+  /* The dictionary scrolls in its panel when what it holds is taller
+     than the column leaves it -- the stroke sheet stands at its floor
+     rather than shrinking out of legibility (owner's second round). */
   .dict-entry--band > .dict-entry__body {
     flex: 1 1 auto;
     min-height: 0;
     display: flex;
     flex-direction: column;
+    overflow-y: auto;
+    overscroll-behavior: contain;
   }
   /* The plate as a band: the word at the left, its readings and
      meaning beside it, the marks and the actions at the right, the
@@ -22567,13 +22605,14 @@ a.slip__act { text-decoration: none; }
   .dict-entry--band > .dict-entry__top .record { padding: var(--sp-4) var(--sp-5); }
   .dict-entry--band > .dict-entry__top .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
   /* The dictionary: the senses and the words at their height, the
-     stroke sheet growing into what they leave, its kanji large. */
+     stroke sheet growing into what they leave, its kanji large -- and
+     never below twice the specimen, where the stroke numbers still
+     read; under that the panel scrolls (above). */
   .dict-entry--band > .dict-entry__body > .dict-block { flex: none; }
   .dict-entry--band > .dict-entry__body > .dict-block:has(> .dict-form) {
     order: 1;
-    flex: 1 1 auto;
+    flex: 1 0 auto;
     display: flex;
-    min-height: 0;
     padding: 0;
   }
   .dict-entry--band .dict-form {
@@ -22581,7 +22620,7 @@ a.slip__act { text-decoration: none; }
     border: 0;
     border-radius: 0;
   }
-  .dict-entry--band .dict-form__sheet { min-height: 0; }
+  .dict-entry--band .dict-form__sheet { min-height: calc(2 * var(--fs-specimen-glyph)); }
   .dict-entry--band .dict-form__sheet > .dict-form__glyph {
     width: 100%;
     height: 100%;

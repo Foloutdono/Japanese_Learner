@@ -3,7 +3,7 @@ import { useLang } from '../../LangContext'
 import { ratingButtons } from '../../domain/ratingScales'
 import { useRatingScale } from '../../stores/ratingScale'
 import { useRunTally } from '../../stores/runTally'
-import { dueText } from '../../domain/forecast'
+import { dueFigure, dueText } from '../../domain/forecast'
 import { DeskFigure } from './RunRecords'
 
 // ── 机 — the card panel, the second of a run's two left panels (plan 126) ──
@@ -15,10 +15,12 @@ import { DeskFigure } from './RunRecords'
 //     -- the train at the stage it is in (the card's `stage`).
 //   - The verdicts as tiles, two by two, in the learner's own scale
 //     (four or six, domain/ratingScales), worst to best as the rating
-//     bar draws them, each with the digit that presses it, the word and
-//     when the card comes back (`due_in`, in words by domain/forecast)
-//     -- off the card's own review_preview (srs.py's
-//     preview_reviews_bulk), so nothing here waits on a round trip.
+//     bar draws them, each a figure: when the card comes back as the
+//     large numeral and its unit (`due_in`, by domain/forecast's
+//     dueFigure), the verdict's word as its label beneath, the digit
+//     that presses it in the corner -- off the card's own review_preview
+//     (srs.py's preview_reviews_bulk), so nothing here waits on a round
+//     trip. The tile says the wait in words to a screen reader.
 //
 // No caption on the panel or its parts and no line under an interval
 // saying what the rating does to the card (owner's cut, for room and
@@ -66,15 +68,20 @@ export function CardPanel({ card, remaining = null }) {
       <StateLine stage={stage} t={t} />
       <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel}>
         {verdicts.map(({ q, label, digit }) => {
-          const p = preview?.[String(q)]
+          const due = preview?.[String(q)]?.due_in
+          const figure = dueFigure(due, t)
           return (
             <div key={q} role="listitem" className={`desk-verdict desk-verdict--q${q}`}>
+              <kbd className="desk-kbd desk-verdict__key" aria-hidden="true">{digit}</kbd>
+              <span className="desk-verdict__when" aria-hidden="true">
+                <span className="desk-verdict__value">{figure ? figure.value : '—'}</span>
+                {figure && <span className="desk-verdict__unit">{figure.unit}</span>}
+              </span>
               <span className="desk-verdict__head">
-                <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>
                 <span className="desk-verdict__dot" aria-hidden="true" />
                 <span className="desk-verdict__word">{label}</span>
               </span>
-              <span className="desk-verdict__when">{p ? dueText(p.due_in, t) : '—'}</span>
+              <span className="sr-only">{dueText(due, t)}</span>
             </div>
           )
         })}
