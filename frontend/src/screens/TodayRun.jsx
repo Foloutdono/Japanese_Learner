@@ -235,9 +235,15 @@ export default function TodayRun({ session }) {
   const finished = !error && (done || (!loading && !card))
   useEffect(() => {
     if (!finished) return
+    // A capped run's count is kept for a reload mid-run, not past its
+    // end: the next run of the same length, dealt the same way, has
+    // the same key, and would start with every share already answered.
+    if (capped) {
+      try { window.sessionStorage.removeItem(takenKey) } catch { /* nothing kept */ }
+    }
     if (cleared > 0) refreshToday()
     navigate('/today', { replace: true, state: cleared > 0 ? { run: { cleared, xp: xpTotal } } : null })
-  }, [finished, cleared, xpTotal, navigate])
+  }, [finished, capped, takenKey, cleared, xpTotal, navigate])
 
   // Every screen's rating flow: the lock, the gates the celebrations
   // open, and the advance once they all close. See hooks/useReviewGates.
