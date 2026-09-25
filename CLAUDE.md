@@ -402,7 +402,27 @@ runtime purpose. Two consequences worth knowing:
   `src/today.desktop.test.jsx`, `src/focus.desktop.test.jsx`,
   `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  **128** is 三面・実践, the practice runs on three panels (wave 33): reading,
+  **128** is the dictionary as two columns on the desk (wave 33; numbered
+  128 because 127 went to 定期券 while it was open), the layout the
+  owner chose from four rendered options: the catalogue (the analyser's
+  door, the console, the results) in one column and the entry beside all
+  of it from the page's top at `--desk-entry-w` (440px), never past the
+  window's foot, so a character's entry reads whole with no scroll — its
+  plate laid across, the stroke sheet in one row, the record four across
+  — while a word's plate stays stacked and its senses scroll in the
+  column; and the grammar collection with the split turned round (the
+  owner's second pick), its points a list in the side column and the
+  entry across the page, the lesson in two columns; and the kana charts
+  whole on one screen (the owner's pick of four more), three columns,
+  unmarked, each cell marked with the learner's stage (cited in
+  `screens/DictionaryScreen.jsx`'s `DeskColumns`, `SyllabaryGrid` and
+  `SyllabaryTable`, the 机 section and `:root` of `index.css`,
+  `src/dictionary.desktop.test.jsx`, `src/dictionary.wide.test.jsx`,
+  `src/testing/grammarPoints.json`, `src/testing/kanaRows.json` and
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
+  **129** is 三面・実践, the practice runs on three panels (wave 34; numbered
+  129 because 128 went to the dictionary while it was open): reading,
   translation, dictation, composition and comprehension on plan 126's
   columns, the left panel the run's lines -- every sentence so far with
   its grade, each reopening its breakdown -- the breakdown, lesson or
@@ -415,7 +435,7 @@ runtime purpose. Two consequences worth knowing:
   `hooks/usePracticeXp.js`, the five `screens/*Run.jsx`,
   `src/lines.desktop.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **129** or higher, and check
+  When starting a new wave, begin at **130** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -88,7 +88,7 @@ function Session({ session, level }) {
   const [tutorLoading, setTutorLoading] = useState(false)
   const [limited, setLimited] = useState(false)  // the day's reviews are spent
   const [rated, setRated]     = useState(false)
-  // The grade given, for the run's lines (plan 128); null until rated.
+  // The grade given, for the run's lines (plan 129); null until rated.
   const [quality, setQuality] = useState(null)
   const [score, setScore]     = useState({ correct: 0, total: 0 })
   const [error, setError]     = useState(null)
@@ -110,7 +110,7 @@ function Session({ session, level }) {
   const [explainError, setExplainError]       = useState(null)
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
-  // 机 (plan 128): this run's sentences -- the learner's own -- each
+  // 机 (plan 129): this run's sentences -- the learner's own -- each
   // reopening its breakdown in the side.
   const lines = useRunLines(session, { held: Boolean(lookup) })
 
@@ -258,7 +258,7 @@ function Session({ session, level }) {
   }, [])
 
   function next() {
-    // The sentence just graded joins the run's lines (plan 128), with
+    // The sentence just graded joins the run's lines (plan 129), with
     // what the tutor said it means as its translation.
     if (point && sentence && quality != null) {
       lines.commit({ key: point._uiKey, jp: sentence, translation: tutor?.review?.meaning, quality, analysis })
@@ -338,7 +338,7 @@ function Session({ session, level }) {
   // column (BreakdownSide → SideLookup).
   //
   // A sentence of an earlier point reopened from the run's lines (plan
-  // 128) takes the column until the learner comes back to this one.
+  // 129) takes the column until the learner comes back to this one.
   const doors = {
     onTokenClick: w => setLookup(vocabLookup(w)),
     onGrammarOpen: g => setLookup(grammarLookup(g)),
@@ -374,7 +374,7 @@ function Session({ session, level }) {
       leaveLabel={t.leaveLevels}
       where={t.compositionTitle}
       sub={where}
-      // On the desk the score is the run panel's figures (plan 128).
+      // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       toast={fare.toast}

@@ -35,11 +35,13 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { StudyStage } = await import('./components/study/StudyStage')
 const { SessionPanel } = await import('./components/study/SessionPanel')
 const { CardPanel } = await import('./components/study/CardPanel')
-const { Flashcard, MCQGrid } = await import('./components/study/QuizComponents')
+const { Flashcard, MCQGrid, MeaningDisplay, CharDisplay } = await import('./components/study/QuizComponents')
 const { CardTransition } = await import('./components/study/CardTransition')
 const { default: PromptCard } = await import('./components/study/PromptCard')
 const { default: RatingBar } = await import('./components/study/RatingBar')
 const { default: HintBar } = await import('./components/study/HintBar')
+const { DrawingQuiz } = await import('./components/study/DrawingCanvas')
+const { default: ReadingsInput } = await import('./components/study/ReadingsInput')
 const { startTally, countReview } = await import('./stores/runTally')
 const { seedSummary } = await import('./stores/profileSummary')
 
@@ -382,6 +384,86 @@ describe('the choices beside the card', () => {
   })
 })
 
+describe('the writing board in the middle column', () => {
+  // The drawing drill's column: the prompt, the board with its erase
+  // button and Show the answer, the unlit tiles. The board was sized
+  // off the window (52vh, to 440px) with no word from the column, so
+  // the four stood taller than it and the column scrolled -- Show the
+  // answer under the fold, and the tiles under that. The board takes
+  // what the prompt, its buttons and the tiles leave. The prompt is
+  // KanjiRun's: the meaning, its second sense and the reading.
+  function Draw() {
+    return (
+      <Stage>
+        <CardTransition className="specimen-card-stage" cardKey="k">
+          <PromptCard foot={{ left: 'N4 漢字', right: 'Tracer le kanji' }}>
+            <MeaningDisplay meaning="Tribu, famille" size={32} />
+            <div className="quiz-subtitle">(ゾク)</div>
+          </PromptCard>
+        </CardTransition>
+        <DrawingQuiz kanji="族" onValidate={() => {}} resetKey="k" />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+  }
+
+  it('fits the prompt, a square board, its buttons and the tiles without scrolling', async () => {
+    await render(<Draw />)
+    await settle(400)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    const board = rect('.canvas-board')
+    expect(Math.round(board.width)).toBe(Math.round(board.height))
+    // On the lane's 800px window, a mouse's worth of board rather than
+    // a thumbnail.
+    expect(board.height).toBeGreaterThanOrEqual(160)
+    // The eraser beside Show the answer, small, on one row under the card.
+    const show = rect('.drawing-quiz__validate')
+    const erase = rect('.drawing-quiz__clear')
+    expect(erase.top).toBeCloseTo(show.top, 0)
+    expect(erase.left).toBeGreaterThanOrEqual(show.right)
+    expect(erase.width).toBeLessThan(show.width / 2)
+    expect(rect('.drawing-quiz__card').bottom).toBeLessThanOrEqual(show.top)
+    expect(show.bottom).toBeLessThanOrEqual(rect('.rating-bar').top)
+    // The 田 guide quarters the board.
+    const grid = rect('.canvas-grid')
+    expect(grid.width).toBeCloseTo(board.width, 0)
+    expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(rect('.stage').bottom + 1)
+  })
+
+  it('stands the board on the smaller side of its room, to its cap', async () => {
+    // The room is what the column leaves, so a taller window is a
+    // taller room and a bigger board, until the 440px cap.
+    await render(<Frame width={1877}><Draw /></Frame>)
+    await settle(400)
+    const board = rect('.canvas-board')
+    const room = rect('.canvas-field')
+    expect(board.height).toBeCloseTo(Math.min(room.height, room.width, 440), 0)
+    expect(board.top).toBeGreaterThanOrEqual(room.top - 1)
+    expect(board.bottom).toBeLessThanOrEqual(room.bottom + 1)
+  })
+
+  it('keeps the board still when the answer is shown, Show the answer keeping its room', async () => {
+    await render(<Draw />)
+    await settle(400)
+    const before = rect('.canvas-board')
+    $('.drawing-quiz__validate').click()
+    await settle(200)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    const after = rect('.canvas-board')
+    expect(after.top).toBeCloseTo(before.top, 0)
+    expect(after.height).toBeCloseTo(before.height, 0)
+    // The eraser stays where it was.
+    expect($('.drawing-quiz__clear')).not.toBeNull()
+    // Kept, but unseen and out of reach.
+    const spent = $('.drawing-quiz__validate')
+    expect(getComputedStyle(spent).visibility).toBe('hidden')
+    expect(spent.disabled).toBe(true)
+    expect(spent.getAttribute('aria-hidden')).toBe('true')
+  })
+})
+
 describe('a run without records', () => {
   it('keeps the side alone, the strip on the floor and the tiles docked in the stage', async () => {
     await render(<Stage records={false} panel={null}><Card /><RatingBar active onRate={() => {}} /></Stage>)
@@ -419,5 +501,44 @@ describe('a run with nothing to count', () => {
     chips[0].click()
     await settle(250)
     expect($('.desk-entry').textContent.toLowerCase()).toContain('meaning of 駅')
+  })
+})
+
+describe('the readings drill in the middle column', () => {
+  // The kanji, its box of readings a kind, Valider, the unlit tiles. The
+  // stacked rows it replaced grew down the column a reading at a time
+  // and scrolled it, Valider inline-block 51px off the fields' axis.
+  const READINGS = {
+    on: [{ reading: 'シュ', display: 'シュ' }, { reading: 'ス', display: 'ス' }],
+    kun: [{ reading: 'ぬし', display: 'ぬし' }, { reading: 'おも', display: 'おも' }, { reading: 'あるじ', display: 'あるじ' }],
+  }
+  function Readings() {
+    return (
+      <Stage panel={<CardPanel card={CARD} remaining={19} keys="readings" />}>
+        <CardTransition className="specimen-card-stage" cardKey="k">
+          <PromptCard foot={{ left: 'N4 漢字', right: 'Lectures' }}><CharDisplay char="主" size={100} /></PromptCard>
+        </CardTransition>
+        <ReadingsInput readings={READINGS} submitted={false} onSubmit={() => {}} />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+  }
+
+  it('stands Valider on the boxes\' axis, and fits the column', async () => {
+    await render(<Frame width={1877}><Readings /></Frame>)
+    await settle(400)
+    const group = rect('.readings-input__group')
+    const submit = rect('.readings-input__submit')
+    expect(submit.left).toBeCloseTo(group.left, 0)
+    expect(submit.width).toBeCloseTo(group.width, 0)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+  })
+
+  it('lists the drill\'s own keys on the card panel: a comma or Space adds, Enter checks', async () => {
+    await render(<Readings />)
+    await settle()
+    const keys = $$('.desk-card .desk-keys__item').map(el => el.textContent)
+    expect(keys).toEqual([',Espaceajoute une lecture', 'Entréevalide', 'Échapquitte le trajet'])
   })
 })

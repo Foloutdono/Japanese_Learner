@@ -22,7 +22,7 @@ import { useSyncExternalStore } from 'react'
 // `startedAt` (plan 126): when the run started, for the rhythm the
 // desk's card panel prints -- minutes elapsed, cards a minute.
 //
-// The practice runs count here too since plan 128 (reading,
+// The practice runs count here too since plan 129 (reading,
 // translation, dictation, composition, comprehension), for the same
 // session panel: a sentence at its rating (countReview, with no XP --
 // a practice fare is only known once the result has answered), and the
@@ -55,7 +55,7 @@ export function countReview({ quality, xp, entry } = {}) {
   emit()
 }
 
-/** The fare of a practice answer, once its result has answered (plan 128). */
+/** The fare of a practice answer, once its result has answered (plan 129). */
 export function countXp(xp) {
   if (!Number.isFinite(xp) || xp <= 0) return
   tally = { ...tally, xp: tally.xp + xp }

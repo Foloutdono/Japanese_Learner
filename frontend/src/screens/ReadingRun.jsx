@@ -89,7 +89,7 @@ export default function ReadingRun({ session }) {
   // screen while it is open.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
-  // 机 (plan 128): this run's sentences, each reopening its breakdown in
+  // 机 (plan 129): this run's sentences, each reopening its breakdown in
   // the side; Esc closes an open one unless a door in it holds the key.
   const lines = useRunLines(session, { held: Boolean(lookup) })
 
@@ -255,7 +255,7 @@ export default function ReadingRun({ session }) {
   // the queue back up in the background if it's getting low.
   function next() {
     // The sentence just graded joins the run's lines with whatever
-    // breakdown it has by now (plan 128).
+    // breakdown it has by now (plan 129).
     if (data && feedback?.quality != null) {
       lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis })
     }
@@ -527,7 +527,7 @@ function SessionView({
       leaveLabel={backLabel}
       where={t.readingTitle}
       sub={where}
-      // On the desk the score is the run panel's figures (plan 128).
+      // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       aside={<Streak streak={streak} t={t} />}

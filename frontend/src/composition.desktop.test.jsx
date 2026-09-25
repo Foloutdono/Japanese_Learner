@@ -128,7 +128,7 @@ describe('a composition run on the desk', () => {
     expect(side.textContent).toContain(EXAMPLE)
     expect($('.stage').textContent).not.toContain(EXAMPLE)
     expect($('.stage .prose__breakdown')).toBeNull()
-    // The run's third column (plan 128), right of the stage, in the
+    // The run's third column (plan 129), right of the stage, in the
     // run's own pigment: the lesson as its one panel.
     const box = side.getBoundingClientRect()
     expect(box.width).toBeGreaterThanOrEqual(300)

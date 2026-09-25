@@ -297,6 +297,8 @@ const quiz = {
   deskKeyTurn:         'turns the card',
   deskKeyChoices:      'shows the choices',
   deskKeyLeave:        'leaves the run',
+  deskKeyAddReading:   'adds a reading',
+  deskKeyCheck:        'checks',
   deskRhythm:          'The rhythm',
   deskElapsed:         'Elapsed',
   deskPerMinute:       'Cards / min',
@@ -306,7 +308,7 @@ const quiz = {
   keyEscape:           'Esc',
   deskWayUp:           'Way up',
   deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
-  // An exercise on three panels (plan 128): the run's sentences, each with
+  // An exercise on three panels (plan 129): the run's sentences, each with
   // the grade it got, and an exercise's keys.
   deskLinesLabel:      'This run’s sentences',
   deskLinesNow:        'now',
@@ -314,7 +316,7 @@ const quiz = {
   deskQuestionsRated:  'Questions',
   deskPerMinuteLines:  'Sentences / min',
   deskAnswered:        'Answered',
-  deskKeyCheck:        'checks, then next',
+  deskKeyCheckNext:    'checks, then next',
   deskKeyRate:         'grades your answer',
   deskKeyListen:       'plays the line',
   deskKeyPick:         'picks an answer',
@@ -380,7 +382,10 @@ const quiz = {
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',
   readingsAdd:         'add a reading',
-  readingsAll:         'All readings:',
+  readingsRemove:      (r) => `Remove ${r}`,
+  readingsFound:       'found',
+  readingsWrong:       'wrong',
+  readingsMissed:      'missed',
   readingsPlaceholder: 'kana or romaji',
   readingsCap:         '15 readings is the most this card will take.',
   modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',

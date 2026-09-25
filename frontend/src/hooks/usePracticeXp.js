@@ -20,7 +20,7 @@ import { countXp } from '../stores/runTally'
 // Returns { toast, toastDone, pay }: pass `toast`/`toastDone` to
 // StudyStage, and call `pay(response, quality)` on a graded answer.
 //
-// The fare also goes on this run's tally (stores/runTally, plan 128),
+// The fare also goes on this run's tally (stores/runTally, plan 129),
 // the XP the desk's session panel prints: the run counted the answer
 // when it was rated, and the fare joins it here. A run that keeps no
 // tally (the exam) adds to one nobody reads, and the next run's start

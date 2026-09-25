@@ -229,8 +229,19 @@ Thirteen waves live in this file:
   section is before wave 31's, near the bottom of this file. The next
   wave begins at 128.
 
-- **Wave 33 — 三面・実践, the practice runs on three panels** (plan 128,
-  2026-09-25, DONE). The owner's request, with five screenshots of the
+- **Wave 33 — 辞書机, the dictionary on the desk** (plan 128, 2026-09-25,
+  DONE). The dictionary's entry stood under the analyser's door and the
+  console at the side column's width, its foot below the window's. Each
+  collection was drawn four ways on the real screen and the owner picked
+  one per collection: kanji and words keep the catalogue beside an entry
+  column from the page's top (A), grammar turns the split round (C), the
+  kana show the whole syllabary with each cell's stage (K4). Numbered 128
+  because 127 went to 定期券 while it was open. Its section is at the
+  very bottom of this file. The next wave begins at 129.
+
+- **Wave 34 — 三面・実践, the practice runs on three panels** (plan 129,
+  2026-09-25, DONE; numbered 129 because wave 33 took 128 while it was
+  open). The owner's request, with five screenshots of the
   practice runs on the desk: rework them "entirely like we did for the
   learning modes". Reading, translation, dictation, composition and
   comprehension now stand on plan 126's three columns, the left panel the
@@ -238,7 +249,7 @@ Thirteen waves live in this file:
   keeping its paper (the owner's call). A desk-only chatbot the owner
   means to add later was considered for the layouts and given a place,
   not built. Its section is before wave 32's. The next wave begins at
-  129.
+  130.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
@@ -6104,7 +6115,10 @@ not measured by a script.
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
 
-# Wave 33 — 三面・実践, the practice runs on three panels (plan 128, 2026-09-25)
+# Wave 34 — 三面・実践, the practice runs on three panels (plan 129, 2026-09-25)
+
+Numbered 129 because wave 33 (the dictionary on the desk) took 128 while
+this was open; the next wave begins at 130.
 
 The owner's request, with five screenshots at ~1600px: "We need to rework
 the design/layout of the practice modes entirely like we did for the
@@ -6126,7 +6140,7 @@ exam keeping its paper.
 
 | Plan | What | Status |
 |---|---|---|
-| 128 | `StudyStage`'s panels for the five practice runs (`records`, `recordsLabel`); `RunLines` (`components/study/RunLines.jsx`) as the left column's second panel: the lines, the keys, the rhythm; `hooks/useRunLines.js` (commit on Next with the breakdown as it stands, reopen, fetch a never-had breakdown's local tier, buy the explanation, Esc back unless a door in it holds the key); `components/study/sentenceLines.js` (`useSentenceKeys`, `currentLine`: the row on the stage an ellipsis until the answer is in); the practice runs on `stores/runTally` (`countReview` at the rating, `countXp` from `usePracticeXp`); `BreakdownSide` sealed then `DeskPane` on the panels, `LineSide` for a passed line; `KeyCap` so a practice control prints no cap on the panels, `ClipPlayer` likewise; comprehension's questions as its lines, its review the open question's card in the middle and the first miss open on arrival, its side sealed while the text is read; the 机 section's `.desk-sentences`, `.desk-pane` and the framed floor; `src/lines.desktop.test.jsx`, the practice, breakdown, composition and comprehension desktop tests re-measured, a block of `deskfree.phone`, a case of `runTally.test` | DONE (2026-09-25) |
+| 129 | `StudyStage`'s panels for the five practice runs (`records`, `recordsLabel`); `RunLines` (`components/study/RunLines.jsx`) as the left column's second panel: the lines, the keys, the rhythm; `hooks/useRunLines.js` (commit on Next with the breakdown as it stands, reopen, fetch a never-had breakdown's local tier, buy the explanation, Esc back unless a door in it holds the key); `components/study/sentenceLines.js` (`useSentenceKeys`, `currentLine`: the row on the stage an ellipsis until the answer is in); the practice runs on `stores/runTally` (`countReview` at the rating, `countXp` from `usePracticeXp`); `BreakdownSide` sealed then `DeskPane` on the panels, `LineSide` for a passed line; `KeyCap` so a practice control prints no cap on the panels, `ClipPlayer` likewise; comprehension's questions as its lines, its review the open question's card in the middle and the first miss open on arrival, its side sealed while the text is read; the 机 section's `.desk-sentences`, `.desk-pane` and the framed floor; `src/lines.desktop.test.jsx`, the practice, breakdown, composition and comprehension desktop tests re-measured, a block of `deskfree.phone`, a case of `runTally.test` | DONE (2026-09-25) |
 
 Rejected on the way: the verdict tiles with the fare each pays -- the
 card panel's figure translated -- because a price printed beside a
@@ -6349,3 +6363,59 @@ the hairline under the head draws it and the desk prints its legend.
 The level bar's `progressbar` role moved from the bar to its track, since
 a progressbar's children are presentational and the figures now stand in
 the bar.
+
+---
+
+# Wave 33 — 辞書机, the dictionary on the desk (plan 128, 2026-09-25)
+
+Numbered 128 because 127 went to 定期券 (wave 32) while this was open;
+the next wave begins at 129.
+
+The complaint, from a screenshot at ~1600×917: a kanji's entry could not
+be read without scrolling the page first. It stood in the results at the
+side column's 360px, 270px down under the analyser's door and the
+console, so its foot hung ~230px below the window, and a word's senses or
+a grammar lesson ran on for a page more inside it.
+
+Every option was drawn on the real screen — the real components, the
+catalogue's own rows from `routes/dictionary.py`, only prototype CSS and
+a regrouping of the DOM — and screenshotted at the owner's window size,
+with each entry's overflow measured:
+
+| Collection | Options drawn | Pick |
+|---|---|---|
+| kanji, words (and the shelf, the radicals) | A column from the page's top at 440px · B the entry in two panels · C the entry takes the page · D a dialog over the grid | A |
+| grammar | the same four | C |
+| kana | K1 the whole chart · K2 both scripts per cell · K3 a writing specimen over the chart · K4 the whole chart with each cell's stage | K4, without the per-chart tally, the summary bar or the charts' titles |
+
+| # | Plan | Status |
+|---|------|--------|
+| 128 | 辞書机: the catalogue in one column and the entry beside all of it from the page's top at `--desk-entry-w` (440px), a character's plate laid across, the stroke sheet in one row, the record four across; grammar's points a list in the side column and the entry across the page, its plate laid left, its lesson in two columns of at least `--desk-run-col-min`; the kana charts three across and unmarked, a cell's stage as a tile's, the kana entry at `--desk-side-w`. `DeskColumns` (`bare`, `page`, `chart`), `SyllabaryGrid`'s desk columns; `src/dictionary.desktop.test.jsx`, `src/dictionary.wide.test.jsx` and blocks of `deskfree.phone` | DONE (2026-09-25) |
+
+What the rendered comparison caught that a sketch would not have:
+
+- **A pattern cannot be laid across.** The prototype's grammar plate in A
+  wrapped 〜てください and set its structure line one character to a
+  line. A character's plate is laid across; a word keeps its stacked
+  plate; grammar's page lays its plate left with the marks beside the
+  pattern (over it at seven characters or more), and never lets the entry
+  narrow below 440px, where a six-character pattern broke beside them.
+- **The kana charts had never stood side by side on the desk.** The
+  desk's `flex-wrap: wrap` sat on a group an older rule set to
+  `flex-direction: column`, so the charts stacked and only 五十音 showed
+  above the fold.
+- **The design-scale guard allows the named rungs only.** A kana size
+  fitted to the cell would have been an allowlisted literal; the title
+  rung (20px) fits a pair in the narrowest cell (--sp-8), so the charts
+  use it throughout.
+
+Fit, measured on the real rows:
+
+| Window | 土 | 出す (8 senses) | 〜てください | hiragana | katakana |
+|---|---|---|---|---|---|
+| 1600×917 | whole | scrolls in the column | whole | whole | whole |
+| 1440×900 | whole | scrolls in the column | 40px in the column | whole | whole |
+| 1100×800 | whole | scrolls in the column | one column, scrolls | columns wrap | columns wrap |
+
+The page never scrolls to reach an entry at any size.
+

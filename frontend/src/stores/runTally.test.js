@@ -20,7 +20,7 @@ describe('the run tally', () => {
   })
 })
 
-describe('a practice run\'s tally (plan 128)', () => {
+describe('a practice run\'s tally (plan 129)', () => {
   it('counts a sentence at its rating and its fare when it lands', () => {
     startTally('reading:level:N5')
     countReview({ quality: 4 })

@@ -102,7 +102,7 @@ function Session({ session, level }) {
   // The fare per graded clip, from the result's own response.
   const fare = usePracticeXp()
   const [rated, setRated]       = useState(false)
-  // The grade given, for the run's lines (plan 128); null until rated.
+  // The grade given, for the run's lines (plan 129); null until rated.
   const [quality, setQuality]   = useState(null)
   const [error, setError]       = useState(null)
   // 机 (plan 123): on the desk the field is not focused on arrival, so
@@ -146,7 +146,7 @@ function Session({ session, level }) {
   // while it is open.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
-  // 机 (plan 128): this run's lines, each reopening its breakdown.
+  // 机 (plan 129): this run's lines, each reopening its breakdown.
   const lines = useRunLines(session, { held: Boolean(lookup) })
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
@@ -266,7 +266,7 @@ function Session({ session, level }) {
   }, [])
 
   function next() {
-    // The line just graded joins the run's lines (plan 128).
+    // The line just graded joins the run's lines (plan 129).
     if (clip && result && quality != null) {
       lines.commit({ key: clip.id, jp: result.jp, translation: result.translation, quality, analysis })
     }
@@ -373,7 +373,7 @@ function Session({ session, level }) {
       leaveLabel={t.leaveLevels}
       where={t.dictationTitle}
       sub={where}
-      // On the desk the score is the run panel's figures (plan 128).
+      // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       toast={fare.toast}

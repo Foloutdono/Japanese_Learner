@@ -116,7 +116,7 @@ export default function ComprehensionRun({ session }) {
   function startSession(lvl) {
     setStage('loading')
     setError(null)
-    // A new exercise is a new run: its figures start again (plan 128).
+    // A new exercise is a new run: its figures start again (plan 129).
     startTally(`comprehension:${lvl}`)
     setRereading(false)
     setShowBreakdown(false)
@@ -248,7 +248,7 @@ export default function ComprehensionRun({ session }) {
       .then(data => {
         setResults(data)
         setStage('results')
-        // This run's figures (plan 128): each question at the quality
+        // This run's figures (plan 129): each question at the quality
         // its fare was paid at (reading.py: 4 right, 1 wrong).
         data.results?.forEach(r => countReview({ quality: r.is_correct ? 4 : 1 }))
         fare.pay(data)
@@ -370,7 +370,7 @@ export default function ComprehensionRun({ session }) {
   )
   const openSentence = breakdown[openIndex]
   //
-  // On the desk's panels (plan 128) the column is the run's third from
+  // On the desk's panels (plan 129) the column is the run's third from
   // the first frame: sealed while the text is written and while it is
   // read on the stage -- the breakdown is its translation -- the text
   // beside the questions, the breakdown on the results. A failed fetch
@@ -395,7 +395,7 @@ export default function ComprehensionRun({ session }) {
       <SealedPanel label={t.deskBreakdownWait} />
     )
 
-  // The run's lines (plan 128): the questions, as far as they have been
+  // The run's lines (plan 129): the questions, as far as they have been
   // asked -- never ahead of the one on the stage, and none while the
   // text is read -- and on the results every one with its verdict, each
   // opening its question in the middle and the sentence it quotes in the
@@ -417,7 +417,7 @@ export default function ComprehensionRun({ session }) {
 
   // A result row opens its question; on the desk it also opens the
   // sentence the question quotes, in the breakdown beside it. From the
-  // run's lines (plan 128) a row is only ever opened, never folded: the
+  // run's lines (plan 129) a row is only ever opened, never folded: the
   // middle always stands one question.
   function openLine(i) {
     const r = results?.results?.[i]
@@ -442,7 +442,7 @@ export default function ComprehensionRun({ session }) {
       leaveLabel={t[route.backKey]}
       where={t.comprehensionTitle}
       sub={sub}
-      // On the desk the count is the run's lines' (plan 128).
+      // On the desk the count is the run's lines' (plan 129).
       remaining={stage === 'questions' && !desk ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
       toast={fare.toast}
@@ -581,7 +581,7 @@ export default function ComprehensionRun({ session }) {
         )
       })()}
 
-      {/* 机 (plan 128): the review as the exam's is on the desk -- the
+      {/* 机 (plan 129): the review as the exam's is on the desk -- the
           questions in the run's lines, the open one's card here with its
           options marked, the score in the run's figures. */}
       {stage === 'results' && results && desk && (() => {

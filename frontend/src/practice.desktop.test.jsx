@@ -109,7 +109,7 @@ async function oneSentence(answer) {
   expect($('.rating-bar')).toBeNull()
   const next = nextButton()
   expect(next, 'Next answers Enter').toBeTruthy()
-  // On the run's panels (plan 128) the button prints no cap: the run's
+  // On the run's panels (plan 129) the button prints no cap: the run's
   // lines list the keys, Enter first.
   expect(next.querySelector('.desk-kbd')).toBeNull()
   expect($$('.desk-sentences .desk-keys .desk-kbd').some(k => /^(Enter|Entrée)$/.test(k.textContent))).toBe(true)

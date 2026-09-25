@@ -29,7 +29,7 @@ import { useRunTally, tallyAccuracy } from '../../stores/runTally'
 // the labels are is the language's and the count's.
 //
 // `label` names the first figure where what a run rates is not a card
-// (plan 128): a practice run's sentences, comprehension's questions.
+// (plan 129): a practice run's sentences, comprehension's questions.
 export function RunRecords({ done = false, remaining = null, label = null }) {
   const { t } = useLang()
   const tally = useRunTally()

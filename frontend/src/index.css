@@ -3113,6 +3113,14 @@
      purpose: nearly everything that goes there was drawn for a phone
      first, and here it is drawn at the width it was designed at. */
   --desk-side-w:    360px;
+  /* The dictionary's entry beside its catalogue (plan 128): the side
+     column's width was a phone's, and a kanji's plate, stroke sheet,
+     words and record ran some 230px past a laptop window's foot at it.
+     This is the width the owner chose from four rendered layouts, where
+     a character's entry reads whole with no scroll; a word's senses or
+     a grammar lesson still scroll inside the column. Here for the same
+     reason as --desk-rail-w. */
+  --desk-entry-w:   440px;
   /* A card run on three panels (plan 126, from the owner's mock drawn at
      1877px): the three columns share --desk-run-w, the width they took
      there, 28 | 42 | 30 by the owner's second round -- the card the
@@ -8162,153 +8170,155 @@ textarea:focus-visible {
 .quiz-result--wrong   { color: var(--danger); }
 
 /* ── 読み入力 (kanji.readings) ──────────────────────────────
-   Two labelled groups, each growing a row at a time. The rows sit in a
-   flex row with the tick OUTSIDE the field, so a correct mark never
-   overlaps kana the learner is still reading. Colours come from the
+   One box per kind of reading the card has, each holding the learner's
+   readings as chips and a field for the next (ReadingsInput.jsx). A
+   reading becomes a chip on a separator or the box's +, and on checking
+   the box lays the stored readings out beside them: the ones found
+   ringed in --success, a wrong guess struck, a missed one dashed. It
+   grows sideways, a chip at a time, where the rows it replaced grew
+   down the column 42px a reading and scrolled it. Colours come from the
    line pigment the section handed down, same as every other study
    control -- nothing here picks its own hue. */
-/* Sized to the form, not to the container. Padding tuned for a single
-   big glyph doesn't fit a stack of labelled rows, so this widens it to
-   --sp-7 on every side. max-height/overflow are cleared for the same
-   kind of reason: two groups of several rows each pass 60vh easily,
-   and the base clamp turned the card into an inner scroll area —
-   which cropped the submit button behind the card's own rounded edge
-   and scrolled the answer list out from under the rows it belongs to. */
 /* .prompt-card is compounded in on purpose. The base .prompt-card rule
    (max-height: 60vh; overflow: auto) lives LATER in this file, and two
    single-class selectors of equal specificity are settled by source
    order — so a bare `.readings-input { overflow: visible }` here lost
-   silently and the card stayed an inner scroll area. Same for
-   .drawing-quiz__card below.
+   silently and the card stayed an inner scroll area, cropping Valider
+   behind the card's own rounded edge. Same for .drawing-quiz__card
+   below.
 
-   Plan 049 -- no width override here any more. This used to argue for
-   staying full width: capping it at 520px made this the one mode whose
-   card visibly shrank next to the others sitting above/below it in the
-   same session. That objection was about capping THIS MODE ALONE, not
-   about caps in general -- and a UNIVERSAL cap (every .prompt-card now
-   tracks --card-w, 640px, see index.css:13659) satisfies it exactly,
-   since nothing shrinks relative to anything else any more. The FORM
-   inside still stays comfortably narrow regardless (see
-   .readings-input__group / __submit below), centered in the card
-   rather than stretched edge to edge -- a "kana or romaji" input 640px
-   wide would still be its own kind of ugly. */
+   Plan 049 -- no width override here: the card tracks --card-w like
+   every other, and the FORM inside stays comfortably narrow (the
+   groups and Valider below), centred in the card rather than stretched
+   edge to edge. --sp-7 all round: there are no corner buttons on this
+   card for a taller top to hold. */
 .prompt-card.readings-input {
   text-align: left;
   --card-pad-y: var(--sp-7);
   --card-pad-x: var(--sp-7);
-  /* 44 top, per Study.dc.html -- the extra headroom is what the corner
-     buttons sit in. */
-  --card-pad-top: var(--sp-8);
+  --card-pad-top: var(--sp-7);
   max-height: none;
   overflow: visible;
 }
 
-/* Centered and capped independently of the now full-width card around
-   them — a row of kana/romaji inputs reads as a form, not a banner,
-   only at roughly this width. */
+/* Centered and capped independently of the full-width card around
+   them -- a box of kana reads as a form, not a banner, only at roughly
+   this width. Valider is a block so it takes the groups' axis: a
+   button is inline-block, where auto margins are 0, and it stood at the
+   line's start, 51px left of the fields on the desk. */
 .readings-input__group,
-.readings-input__submit {
+.prompt-card.readings-input > .readings-input__submit {
   max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
-.readings-input__group + .readings-input__group { margin-top: 22px; }
-/* A hairline between 音読み and 訓読み now that both groups share one
-   card — without it the second group's label reads as more of the
-   first group's own content instead of a new section starting. */
-.readings-input__group--sep {
-  padding-top: 22px;
-  border-top: 1px solid var(--border);
+.readings-input__group + .readings-input__group { margin-top: var(--sp-5); }
+.prompt-card.readings-input > .readings-input__submit {
+  display: block;
+  margin-top: var(--sp-6);
 }
-
-/* Sits below a hairline of its own: it is the action for the whole
-   form, not for whichever group happens to be last above it. */
-.readings-input__submit { margin-top: 26px; }
 
 .readings-input__label {
+  display: block;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-3);
 }
-.readings-input__row {
+
+/* The box is the field: the well, the edge, the 44px floor, and the
+   focus ring when its own input has the focus. The input in it is bare,
+   and takes what the chips leave of the line, never less than a short
+   reading's room. */
+.readings-input__box {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  cursor: text;
 }
-.readings-input__row .readings-input__field { margin-bottom: 8px; }
-.readings-input__row svg { flex: none; color: var(--success); }
-
-.readings-input__field--ok   { border-color: var(--success); }
-.readings-input__field--miss { border-color: var(--border); }
-
-/* `--line-color`, not `--line`. Plan 057 established this for the
-   DeckDetail form and reported the three that paint the kanji QUIZ;
-   plan 059 was those three. Two of them styled the Japanese half of a
-   label pair (.readings-input__label and .radical-answer__label) and
-   went with those labels on 2026-09-21, so this is the one left, and
-   it keeps the note. Nothing in the app has ever
-   set `--line`, so `var(--line, var(--accent))` always resolved to
-   the fallback -- 仮名's vermillion, on a card about 漢字, which is a
-   plain "one line, one colour" breach on the section that owns 藤色.
-
-   The fallback here is `--line-kanji` rather than `--accent` because
-   no screen that renders this component injects `--line-color` at all
-   (checked: Kanji, Study and Today all mount it inside a bare
-   `.container.stage`; the eight injectors are the selection/
-   station components and the two Decks screens). Reading
-   `--line-color` first keeps DESIGN.md's "the pigment is injected
-   once" contract for the day a shell does inject one -- a personal
-   deck's kanji card would then correctly wear 蘇芳 -- while the
-   fallback names a real pigment instead of the wrong section's.
-
-   Mixed half-way to --text-primary, not used raw: 057 measured 藤色
-   as small text at 2.9-3.4:1 and DESIGN.md is explicit that a line
-   pigment is "an edge, a ring, or a numeral -- never a fill". Same
-   50% figure and the same reason as .deckdetail-form__addline. */
-.readings-input__add {
-  background: none;
-  border: none;
-  padding: 2px 0 0;
-  font-size: 13px;
-  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
-  cursor: pointer;
+.readings-input__box:has(> .readings-input__field:focus-visible) {
+  outline: 2px solid var(--accent2);
+  outline-offset: 0;
 }
-.readings-input__add:hover { text-decoration: underline; }
-
-.readings-input__answer {
-  margin-top: 6px;
-  font-size: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: baseline;
+.readings-input__box--checked { cursor: default; }
+.readings-input__box > .readings-input__field {
+  flex: 1 1 8ch;
+  width: auto;
+  min-width: 8ch;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-body);
 }
-.readings-input__answer-label { color: var(--text-secondary); }
-/* A wrapping FLEX row, not a run of inline text. Japanese allows a line
-   break between almost any two characters, so as plain text this list
-   broke mid-reading — のぼ.り split across two lines reads as two
-   different readings, which is the one thing a list of readings must
-   not do. Making each entry a flex item moves the break opportunities
-   to the gaps between entries, where they belong.
-   (`white-space: nowrap` alone did NOT work and is why this is a flex
-   row: the entries are rendered adjacent with no whitespace between
-   them, so suppressing breaks inside each one left the whole list with
-   no break opportunity at all and it ran 1218px off the card.) */
-.readings-input__answer-list {
+.readings-input__box > .readings-input__field:focus-visible { outline: none; }
+
+/* A reading: a pill on the well. Pressed, it goes -- the whole chip is
+   the button, and its × says so. On a touch screen the press reaches
+   6px past its edges, top and bottom, to the family's 44px. */
+.readings-input__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 32px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
   font-family: var(--font-jp);
-  font-size: 17px;
+  font-size: var(--fs-body);
+  font-weight: 500;
   color: var(--text-primary);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  row-gap: 4px;
 }
-.readings-input__answer-list .reading-sep-item { white-space: nowrap; }
+.readings-input__chip-x {
+  font-family: var(--font-display);
+  color: var(--text-secondary);
+}
+.readings-input__chip--ok { border-color: var(--success); }
+.readings-input__chip--ok svg { flex: none; color: var(--success); }
+.readings-input__chip--wrong {
+  background: none;
+  border-color: var(--border);
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+/* What was not found: legible, since it is the thing to learn, and
+   dashed, since the learner did not write it. */
+.readings-input__chip--missed {
+  background: none;
+  border-style: dashed;
+}
+
+/* The + that makes a chip of what is typed, there as soon as something
+   is: the phone's way, whose first keyboard page has no comma. */
+.readings-input__add {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  font-size: var(--fs-lead);
+  line-height: 1;
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
+}
+@media (pointer: coarse) {
+  button.readings-input__chip::after,
+  .readings-input__add::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
+}
 
 .readings-input__cap {
-  margin-top: 8px;
+  margin-top: var(--sp-3);
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -11554,6 +11564,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: block;
 }
 
+/* 田 — the practice sheet's guide: a dashed cross that quarters the
+   board, the four squares a learner places strokes against. Faint, so
+   the ink stays the reading; over the slab and under the correction. */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  --grid-ink: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+}
+.canvas-grid::before,
+.canvas-grid::after {
+  content: '';
+  position: absolute;
+}
+.canvas-grid::before {
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  border-left: 1px dashed var(--grid-ink);
+}
+.canvas-grid::after {
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  border-top: 1px dashed var(--grid-ink);
+}
+
 /* 朱書き — the correction, over the learner's own line rather than
    beside it (DrawingCanvas.jsx, Ghost). The learner's ink is
    --brush-ink at full strength, so the same ink at a third reads as
@@ -11720,11 +11758,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    is its own: matched to the card above it, so the button reads as
    belonging to the card instead of being a narrower, unrelated bar
    floating under one edge of it. */
-.drawing-quiz__validate {
+/* Show the answer and the eraser on one row under the card, matched to
+   its width: the answer the wide one, the eraser only its word. */
+.drawing-quiz__actions {
+  display: flex;
+  gap: var(--sp-3);
   width: 100%;
   max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
 }
+.drawing-quiz__validate { flex: 1 1 auto; }
+.drawing-quiz__clear {
+  flex: none;
+  width: auto;
+  max-width: none;
+  margin-left: auto;
+}
+/* Pressed, it is gone -- but for the desk's panels, which keep its room
+   (the 三面 block). */
+.drawing-quiz__validate--spent { display: none; }
 
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
 .quiz-subtitle {
@@ -21057,14 +21109,41 @@ a.slip__act { text-decoration: none; }
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: none; }
   }
-  .phone--desk .dict-dock {
-    flex-basis: var(--desk-side-w);
+  /* ── 机 — the dictionary: the catalogue and its entry (plan 128) ──
+     The catalogue -- the analyser's door, the console, the results -- is
+     one column, and the entry stands beside all of it from the page's
+     top at --desk-entry-w, sticky at --sp-6 and never taller than the
+     window. It used to stand in the results, under the door and the
+     console: 270px down, so the column's foot hung below the window and
+     the page had to scroll before the entry could. The column is held
+     while a page loads (screens/DictionaryScreen's DeskColumns), and
+     only the radical index, which has no entry to show, takes the width
+     alone. The gap is the one the dock always had beside the grid. */
+  .desk-dict {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-entry-w);
+    align-items: start;
+    gap: var(--sp-7);
+  }
+  .desk-dict--bare { grid-template-columns: minmax(0, 1fr); }
+  .desk-dict__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* Two tiles across at the least: the catalogue's own 168px, but never
+     so wide that the narrowest desk (1100px, where the column is some
+     330px) stands its tiles one to a row. */
+  .desk-dict__main .dict-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(168px, calc((100% - var(--sp-3)) / 2)), 1fr));
+  }
+  .desk-dict > .dict-dock {
+    grid-column: 2;
     top: var(--sp-6);
     max-height: calc(100dvh - 2 * var(--sp-6));
-    /* A wheel at the column's end goes on to the page (plan 123): the
-       column stands at --sp-6 below a page that may be scrolled, and its
-       foot was only ever reached by scrolling the page, which `contain`
-       refused while the pointer was over it. */
+    /* A wheel at the column's end goes on to the page (plan 123), which
+       is the catalogue beside it. */
     overscroll-behavior-y: auto;
   }
   /* The analyzer's working rail stood on the stage's LEFT, which on the
@@ -21956,7 +22035,7 @@ a.slip__act { text-decoration: none; }
   /* The comprehension text beside its questions (plan 115): whole, at
      the column's width, never the base card's 60vh inner scroll. */
   .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
-  /* On a practice run's panels (plan 128) it is the column's one card,
+  /* On a practice run's panels (plan 129) it is the column's one card,
      as tall as the column at least, as the pane beside a sentence is. */
   .desk-run--panels > .desk-run__side > .prompt-card { flex: 1 0 auto; }
   /* ── the mock exam, sat at a desk (plan 115) ──
@@ -22469,6 +22548,65 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     justify-content: center;
   }
+  /* But not over a writing board: there the board grows. Sized off the
+     window alone (52vh, to 440px), it stood the column 70px past a
+     800px window and 200px past the owner's, Show the answer under the
+     fold and the tiles under that. The prompt never changes face, so it
+     takes its content; the board takes what the prompt, its two buttons
+     and the tiles leave. Both cards come in to the phone's rung: 44px
+     over and under three lines of prompt, and 28px round a square, are
+     height the board could have been. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage { flex: 0 0 auto; }
+  .desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage > .drawing-quiz {
+    --drawing-card-pad: var(--sp-5);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--panels > .stage > .drawing-quiz > .prompt-card.drawing-quiz__card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The square is the smaller of the room's two sides, to the 440px
+     cap. The room is a size container, so it is what the column gives
+     it and never what the board asks for. Under
+     160px the board stops shrinking and the column scrolls instead: a
+     mouse writes a kanji well enough there (KanjiVG draws at 109), a
+     thumbnail is no writing surface. The floor is in the
+     sum as well as on the room, because a room held up by its
+     min-height reads 0 for 100cqh in Chromium, not its height. */
+  .desk-run--panels > .stage > .drawing-quiz .canvas-wrap {
+    --canvas-cap: min(100cqw, 440px, max(160px, 100cqh));
+    flex: 1 1 auto;
+    min-height: 160px;
+    container-type: size;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-field {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-holder { max-height: none; }
+  /* Pressed, Show the answer keeps its room, so the board does not
+     grow under the correction as it lands. */
+  .desk-run--panels > .stage > .drawing-quiz .drawing-quiz__validate--spent {
+    display: block;
+    visibility: hidden;
+  }
+  /* Nor over the readings drill's boxes: the kanji never turns, so the
+     floor that holds a flashcard still is dead height, and the card
+     gives down to its glyph at the phone's rung where the boxes, Valider
+     and the tiles need the room -- 56px of scroll on a 800px window --
+     growing back into what they leave on a taller one. */
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.
@@ -22797,7 +22935,287 @@ a.slip__act { text-decoration: none; }
     max-height: calc(3 * var(--fs-specimen-glyph));
   }
 
-  /* ── 三面 — the practice runs on three panels (plan 128) ──
+  /* ── 机 — grammar: the catalogue a list, the entry the page (plan 128) ──
+     The split turned round for the grammar collection (DeskColumns'
+     `page`): its points one to a row in the side column, the entry
+     across the rest of the canvas. Before the entry rules below, whose
+     character plate this page never uses. */
+  /* The entry never narrower than it stands for the other collections:
+     on the narrowest desk the list gives up the difference, where a
+     six-character pattern broke across two lines beside its marks. */
+  .desk-dict--page { grid-template-columns: minmax(0, var(--desk-side-w)) minmax(var(--desk-entry-w), 1fr); }
+  /* The count gives first in a side column, as it does on a phone; the
+     list's foot still says how many. */
+  .desk-dict--page .console__count { display: none; }
+  .desk-dict--page .dict-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  /* A point as a row, as a station's stops are: its pattern over its
+     gloss, the star and the level at the right, its stage along the
+     left edge rather than the foot. */
+  .desk-dict--page .dict-entry-card {
+    display: grid;
+    grid-template:
+      "word fav level" auto
+      "meaning fav level" auto
+      / minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-3);
+    padding: var(--sp-3) var(--sp-5);
+    border-width: 0 0 1px;
+    border-radius: 0;
+    text-align: left;
+  }
+  .desk-dict--page .dict-entry-card:last-child { border-bottom-width: 0; }
+  .desk-dict--page .dict-entry-card:is(:hover, :focus-visible, .dict-entry-card--selected) { border-color: var(--surface-line); }
+  .desk-dict--page .dict-entry-card--selected { box-shadow: inset 0 0 0 1px var(--plate); }
+  .desk-dict--page .dict-entry-card::after {
+    inset: 0 auto 0 0;
+    width: 3px;
+    height: auto;
+  }
+  .desk-dict--page .dict-entry-card__char {
+    display: block;
+    grid-area: word;
+    width: auto;
+    min-height: 0;
+    overflow: hidden;
+    font-size: var(--fs-title);
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-dict--page .dict-entry-card__meaning { grid-area: meaning; }
+  .desk-dict--page .dict-entry-card__fav {
+    position: static;
+    grid-area: fav;
+  }
+  .desk-dict--page .dict-entry-card .dict-level-badge {
+    position: static;
+    grid-area: level;
+  }
+  /* The plate laid left, its marks and actions standing at its right
+     rather than over it: the pattern and, beside it on its baseline,
+     how it is formed, the gloss under both. Where the page is too
+     narrow for the pair the formation wraps under the pattern, so no
+     width breaks it -- the pattern laid across a character's way
+     wrapped its own pattern on a narrow desk. */
+  .desk-dict--page .dict-plate {
+    display: grid;
+    grid-template:
+      "stack row" auto
+      "stripe stripe" auto
+      / minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-6);
+  }
+  .desk-dict--page .dict-plate > .dict-plate__stack {
+    flex-flow: row wrap;
+    grid-area: stack;
+    align-items: baseline;
+    gap: var(--sp-1) var(--sp-4);
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .desk-dict--page .dict-plate__word {
+    order: 1;
+    text-indent: 0;
+  }
+  .desk-dict--page .dict-plate__word--glyph {
+    font-size: var(--fs-specimen-word);
+    line-height: 1;
+  }
+  .desk-dict--page .dict-plate__structure { order: 2; }
+  .desk-dict--page .dict-plate__caption {
+    flex-basis: 100%;
+    order: 3;
+    text-indent: 0;
+  }
+  .desk-dict--page .dict-plate > .dict-plate__row {
+    flex-direction: column;
+    grid-area: row;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-dict--page .dict-plate > .dict-plate__stripe {
+    grid-area: stripe;
+    margin-top: var(--sp-4);
+  }
+  /* A long pattern (〜なければなりません) takes the plate's whole width,
+     its marks and actions over it as a phone sets them: beside it, on a
+     narrow desk, it broke across two lines. */
+  .desk-dict--page .dict-plate:has(.dict-plate__word--long) {
+    grid-template:
+      "row" auto
+      "stack" auto
+      "stripe" auto
+      / minmax(0, 1fr);
+  }
+  .desk-dict--page .dict-plate:has(.dict-plate__word--long) > .dict-plate__row {
+    flex-direction: row;
+    align-items: center;
+  }
+  /* The learner's record under the stripe, four across (below), then
+     the lesson in two columns where each holds a desk column's least
+     width, --desk-run-col-min, and one where the page is narrower. A
+     step, a sentence or a rival never breaks between the two. */
+  .desk-dict--page .dict-entry__body > .dict-block:has(> .records) {
+    order: -1;
+    padding: 0;
+    border-bottom: 1px solid var(--surface-line);
+  }
+  /* Flush under the stripe, as the run's band sets it (plan 126). */
+  .desk-dict--page .dict-block > .records {
+    border: 0;
+    border-radius: 0;
+  }
+  .desk-dict--page .dict-block > .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
+  .desk-dict--page .gl-body {
+    display: block;
+    columns: var(--desk-run-col-min) 2;
+    column-gap: 0;
+    column-rule: 1px solid var(--surface-line);
+  }
+  .desk-dict--page .gl-body :is(.gl-step, .dict-ex, .gl-door, .gl-tr-toggle) { break-inside: avoid; }
+
+  /* ── 机 — the dictionary's entry in its column (plan 128) ──
+     After the run's band (plan 126), whose plate rules these share
+     elements with and must come after. */
+  /* A character's plate laid across, as the run's band draws it (plan
+     126): the glyph at the left, its readings and its gloss beside it,
+     the marks over the actions at the right, the stripe under all
+     three -- a hundred pixels the stacked plate spent above the word.
+     Only a character's: a word or a grammar point keeps the plate
+     stacked, because a pattern or a long word cannot stand beside its
+     readings at this width (〜てください, laid across, wrapped its own
+     pattern and set its structure line a character a line). A point
+     whose pattern is one character (は) is laid across on the shelf,
+     its structure where a kanji's readings stand; the grammar
+     collection's own page lays every point out alike (below). */
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) {
+    display: grid;
+    /* The readings and the gloss centred beside the glyph as a pair,
+       whichever of the two the entry has: a kana has only its romaji, a
+       kanji whose body lists its glosses only its readings. */
+    grid-template:
+      "word . row" 1fr
+      "word readings row" auto
+      "word caption row" auto
+      "word . row" 1fr
+      "stripe stripe stripe" auto
+      / auto minmax(0, 1fr) auto;
+    gap: var(--sp-1) var(--sp-6);
+  }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stack { display: contents; }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) .dict-plate__word {
+    grid-area: word;
+    align-self: center;
+    font-size: var(--fs-specimen-word);
+    line-height: 1;
+  }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+    grid-area: readings;
+    justify-content: flex-start;
+    text-align: left;
+  }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) .dict-plate__caption {
+    grid-area: caption;
+    text-align: left;
+    text-indent: 0;
+  }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__row {
+    grid-area: row;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stripe {
+    grid-area: stripe;
+    margin-top: var(--sp-4);
+  }
+  /* The stroke sheet and its figures in one row rather than the sheet
+     beside a stack of them, and the record four across: the two blocks
+     the column's width can take side by side. */
+  .desk-dict .dict-form {
+    grid-template: none;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+  .desk-dict .dict-form__sheet { grid-row: auto; }
+  .desk-dict > .dict-dock .records { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desk-dict > .dict-dock .records > .record { padding: var(--sp-4); }
+
+  /* ── 机 — the kana charts: the whole syllabary, and where the learner
+     stands (plan 128) ──
+     The owner's pick of four: every chart on one screen, each cell
+     marked with the learner's stage on it -- the charts unmarked, no
+     tally, no summary. A kana's entry is short, so it stands at the side
+     column's width (DeskColumns' `chart`). The charts go three across
+     (SyllabaryGrid's desk columns), each column as wide as its cells
+     share, so a cell is one width everywhere: 5 : 5 : 3, between a tap
+     target (--sp-8) and --sp-9. Past the least the columns wrap under one
+     another, on the narrowest desk, rather than shrink the cells; the
+     kana are set at the title rung, where a pair (きゃ, ファ) still fits
+     the narrowest cell, and a cell stands as tall as its kana need, so a
+     chart of twelve rows ends above the foot of a 900px window. */
+  .desk-dict--chart { grid-template-columns: minmax(0, 1fr) var(--desk-side-w); }
+  .desk-dict--chart .syllabary-chart-group {
+    flex-flow: row wrap;
+    align-items: flex-start;
+    gap: var(--sp-6) var(--sp-7);
+  }
+  .desk-dict--chart .syllabary-col {
+    flex: 5 1 0;
+    gap: var(--sp-6);
+    min-width: calc(5 * var(--sp-8) + 4 * var(--sp-1));
+    max-width: calc(5 * var(--sp-9) + 4 * var(--sp-1));
+  }
+  .desk-dict--chart .syllabary-col:has(> .syllabary-table-wrap > .syllabary-table--narrow) {
+    flex-grow: 3;
+    min-width: calc(3 * var(--sp-8) + 2 * var(--sp-1));
+    max-width: calc(3 * var(--sp-9) + 2 * var(--sp-1));
+  }
+  .desk-dict--chart .syllabary-table {
+    grid-template-columns: repeat(var(--syl-cols, 5), minmax(0, 1fr));
+    gap: var(--sp-1);
+  }
+  .desk-dict--chart .syllabary-cell {
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+    padding: var(--sp-2) 0 var(--sp-1);
+  }
+  .desk-dict--chart .syllabary-cell__char {
+    font-size: var(--fs-title);
+    white-space: nowrap;
+  }
+  /* Where the learner stands, as a catalogue tile carries it: its foot
+     in the stage's ink -- vermillion in progress, gold mastered, gold's
+     wash under a mastered kana -- and a kana not yet met in the
+     secondary ink, so the chart reads as the ground covered. */
+  .desk-dict--chart .syllabary-cell--kana::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: var(--stage-edge, transparent);
+  }
+  .desk-dict--chart .syllabary-cell--learning { --stage-edge: var(--state-learning); }
+  .desk-dict--chart .syllabary-cell--mastered { --stage-edge: var(--state-mastered); }
+  .desk-dict--chart .syllabary-cell--mastered:not(.syllabary-cell--selected) {
+    background: color-mix(in srgb, var(--state-mastered) 12%, var(--surface));
+  }
+  .desk-dict--chart .syllabary-cell--kana:not(.syllabary-cell--learning, .syllabary-cell--mastered) .syllabary-cell__char {
+    color: var(--text-secondary);
+  }
+  /* The record two by two at the side column's width. */
+  .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* ── 三面 — the practice runs on three panels (plan 129) ──
      Reading, translation, dictation, composition and comprehension stand
      on the card runs' three columns (plan 126): this run over the run's
      lines at the left (RunLines -- every sentence so far with the grade

@@ -5,7 +5,7 @@ import { QUALITY_LABEL_KEY } from '../../domain/ratingScales'
 import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 import { DeskFigure } from './RunRecords'
 
-// ── 机 — the run's lines, the second of a practice run's left panels (plan 128) ──
+// ── 机 — the run's lines, the second of a practice run's left panels (plan 129) ──
 // What a card run's card panel (CardPanel, plan 126) is to a card, this
 // is to a practice run: the panel under this run's figures. A sentence
 // does not come back the way a card does, so there is no forecast to

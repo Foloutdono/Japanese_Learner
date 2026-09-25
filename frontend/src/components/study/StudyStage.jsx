@@ -41,7 +41,7 @@ import { RunPanel } from './RunPanel'
 // details at the right (`side`). The elements under it print no key
 // caps (RunPanelsContext — the card panel lists the keys), and no level
 // strip docks on the floor. The six card runs pass it, and since plan
-// 128 the five practice runs do too (reading, translation, dictation,
+// 129 the five practice runs do too (reading, translation, dictation,
 // composition, comprehension): their `panel` is the run's lines
 // (components/study/RunLines.jsx), their `side` the sentence's
 // breakdown, the lesson or the text, and `recordsLabel` names what the

@@ -1,0 +1,2444 @@
+{
+"hiragana": [
+{
+"type": "hiragana",
+"kana": "あ",
+"romaji": "a",
+"meaning": "a",
+"level": "Hiragana",
+"group": "vowels",
+"stroke_count": 3,
+"twin": "ア",
+"vocab_examples": [
+{
+"kanji": "会う",
+"kana": "あう",
+"meaning": "rencontrer",
+"level": "N5"
+},
+{
+"kanji": "後",
+"kana": "あと",
+"meaning": "après, ensuite",
+"level": "N5"
+},
+{
+"kanji": "青",
+"kana": "あお",
+"meaning": "bleu",
+"level": "N5"
+},
+{
+"kanji": "飴",
+"kana": "あめ",
+"meaning": "bonbon",
+"level": "N5"
+}
+],
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "い",
+"romaji": "i",
+"group": "vowels",
+"twin": "イ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "う",
+"romaji": "u",
+"group": "vowels",
+"twin": "ウ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "え",
+"romaji": "e",
+"group": "vowels",
+"twin": "エ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "お",
+"romaji": "o",
+"group": "vowels",
+"twin": "オ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "か",
+"romaji": "ka",
+"group": "k",
+"twin": "カ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "き",
+"romaji": "ki",
+"group": "k",
+"twin": "キ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "く",
+"romaji": "ku",
+"group": "k",
+"twin": "ク",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "け",
+"romaji": "ke",
+"group": "k",
+"twin": "ケ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "こ",
+"romaji": "ko",
+"group": "k",
+"twin": "コ",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "hiragana",
+"kana": "さ",
+"romaji": "sa",
+"group": "s",
+"twin": "サ",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "hiragana",
+"kana": "し",
+"romaji": "shi",
+"group": "s",
+"twin": "シ",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "hiragana",
+"kana": "す",
+"romaji": "su",
+"group": "s",
+"twin": "ス",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "hiragana",
+"kana": "せ",
+"romaji": "se",
+"group": "s",
+"twin": "セ",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "hiragana",
+"kana": "そ",
+"romaji": "so",
+"group": "s",
+"twin": "ソ",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "hiragana",
+"kana": "た",
+"romaji": "ta",
+"group": "t",
+"twin": "タ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ち",
+"romaji": "chi",
+"group": "t",
+"twin": "チ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "つ",
+"romaji": "tsu",
+"group": "t",
+"twin": "ツ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "て",
+"romaji": "te",
+"group": "t",
+"twin": "テ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "と",
+"romaji": "to",
+"group": "t",
+"twin": "ト",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "な",
+"romaji": "na",
+"group": "n",
+"twin": "ナ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "に",
+"romaji": "ni",
+"group": "n",
+"twin": "ニ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぬ",
+"romaji": "nu",
+"group": "n",
+"twin": "ヌ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ね",
+"romaji": "ne",
+"group": "n",
+"twin": "ネ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "の",
+"romaji": "no",
+"group": "n",
+"twin": "ノ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "は",
+"romaji": "ha",
+"group": "h",
+"twin": "ハ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ひ",
+"romaji": "hi",
+"group": "h",
+"twin": "ヒ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ふ",
+"romaji": "fu",
+"group": "h",
+"twin": "フ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "へ",
+"romaji": "he",
+"group": "h",
+"twin": "ヘ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ほ",
+"romaji": "ho",
+"group": "h",
+"twin": "ホ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ま",
+"romaji": "ma",
+"group": "m",
+"twin": "マ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "み",
+"romaji": "mi",
+"group": "m",
+"twin": "ミ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "む",
+"romaji": "mu",
+"group": "m",
+"twin": "ム",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "め",
+"romaji": "me",
+"group": "m",
+"twin": "メ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "も",
+"romaji": "mo",
+"group": "m",
+"twin": "モ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "や",
+"romaji": "ya",
+"group": "y",
+"twin": "ヤ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ゆ",
+"romaji": "yu",
+"group": "y",
+"twin": "ユ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "よ",
+"romaji": "yo",
+"group": "y",
+"twin": "ヨ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ら",
+"romaji": "ra",
+"group": "r",
+"twin": "ラ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "り",
+"romaji": "ri",
+"group": "r",
+"twin": "リ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "る",
+"romaji": "ru",
+"group": "r",
+"twin": "ル",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "れ",
+"romaji": "re",
+"group": "r",
+"twin": "レ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ろ",
+"romaji": "ro",
+"group": "r",
+"twin": "ロ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "わ",
+"romaji": "wa",
+"group": "w",
+"twin": "ワ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "を",
+"romaji": "wo",
+"group": "w",
+"twin": "ヲ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ん",
+"romaji": "n",
+"group": "n_solo",
+"twin": "ン",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "が",
+"romaji": "ga",
+"group": "g",
+"twin": "ガ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぎ",
+"romaji": "gi",
+"group": "g",
+"twin": "ギ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぐ",
+"romaji": "gu",
+"group": "g",
+"twin": "グ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "げ",
+"romaji": "ge",
+"group": "g",
+"twin": "ゲ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ご",
+"romaji": "go",
+"group": "g",
+"twin": "ゴ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ざ",
+"romaji": "za",
+"group": "z",
+"twin": "ザ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "じ",
+"romaji": "ji",
+"group": "z",
+"twin": "ジ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ず",
+"romaji": "zu",
+"group": "z",
+"twin": "ズ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぜ",
+"romaji": "ze",
+"group": "z",
+"twin": "ゼ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぞ",
+"romaji": "zo",
+"group": "z",
+"twin": "ゾ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "だ",
+"romaji": "da",
+"group": "d",
+"twin": "ダ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぢ",
+"romaji": "ji",
+"group": "d",
+"twin": "ヂ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "づ",
+"romaji": "zu",
+"group": "d",
+"twin": "ヅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "で",
+"romaji": "de",
+"group": "d",
+"twin": "デ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ど",
+"romaji": "do",
+"group": "d",
+"twin": "ド",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ば",
+"romaji": "ba",
+"group": "b",
+"twin": "バ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "び",
+"romaji": "bi",
+"group": "b",
+"twin": "ビ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぶ",
+"romaji": "bu",
+"group": "b",
+"twin": "ブ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "べ",
+"romaji": "be",
+"group": "b",
+"twin": "ベ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぼ",
+"romaji": "bo",
+"group": "b",
+"twin": "ボ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぱ",
+"romaji": "pa",
+"group": "p",
+"twin": "パ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぴ",
+"romaji": "pi",
+"group": "p",
+"twin": "ピ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぷ",
+"romaji": "pu",
+"group": "p",
+"twin": "プ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぺ",
+"romaji": "pe",
+"group": "p",
+"twin": "ペ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぽ",
+"romaji": "po",
+"group": "p",
+"twin": "ポ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "きゃ",
+"romaji": "kya",
+"group": "k_combo",
+"twin": "キャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "きゅ",
+"romaji": "kyu",
+"group": "k_combo",
+"twin": "キュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "きょ",
+"romaji": "kyo",
+"group": "k_combo",
+"twin": "キョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "しゃ",
+"romaji": "sha",
+"group": "s_combo",
+"twin": "シャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "しゅ",
+"romaji": "shu",
+"group": "s_combo",
+"twin": "シュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "しょ",
+"romaji": "sho",
+"group": "s_combo",
+"twin": "ショ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ちゃ",
+"romaji": "cha",
+"group": "t_combo",
+"twin": "チャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ちゅ",
+"romaji": "chu",
+"group": "t_combo",
+"twin": "チュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ちょ",
+"romaji": "cho",
+"group": "t_combo",
+"twin": "チョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "にゃ",
+"romaji": "nya",
+"group": "n_combo",
+"twin": "ニャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "にゅ",
+"romaji": "nyu",
+"group": "n_combo",
+"twin": "ニュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "にょ",
+"romaji": "nyo",
+"group": "n_combo",
+"twin": "ニョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ひゃ",
+"romaji": "hya",
+"group": "h_combo",
+"twin": "ヒャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ひゅ",
+"romaji": "hyu",
+"group": "h_combo",
+"twin": "ヒュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ひょ",
+"romaji": "hyo",
+"group": "h_combo",
+"twin": "ヒョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "みゃ",
+"romaji": "mya",
+"group": "m_combo",
+"twin": "ミャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "みゅ",
+"romaji": "myu",
+"group": "m_combo",
+"twin": "ミュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "みょ",
+"romaji": "myo",
+"group": "m_combo",
+"twin": "ミョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "りゃ",
+"romaji": "rya",
+"group": "r_combo",
+"twin": "リャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "りゅ",
+"romaji": "ryu",
+"group": "r_combo",
+"twin": "リュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "りょ",
+"romaji": "ryo",
+"group": "r_combo",
+"twin": "リョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぎゃ",
+"romaji": "gya",
+"group": "g_combo",
+"twin": "ギャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぎゅ",
+"romaji": "gyu",
+"group": "g_combo",
+"twin": "ギュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぎょ",
+"romaji": "gyo",
+"group": "g_combo",
+"twin": "ギョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "じゃ",
+"romaji": "ja",
+"group": "z_combo",
+"twin": "ジャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "じゅ",
+"romaji": "ju",
+"group": "z_combo",
+"twin": "ジュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "じょ",
+"romaji": "jo",
+"group": "z_combo",
+"twin": "ジョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "びゃ",
+"romaji": "bya",
+"group": "b_combo",
+"twin": "ビャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "びゅ",
+"romaji": "byu",
+"group": "b_combo",
+"twin": "ビュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "びょ",
+"romaji": "byo",
+"group": "b_combo",
+"twin": "ビョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぴゃ",
+"romaji": "pya",
+"group": "p_combo",
+"twin": "ピャ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぴゅ",
+"romaji": "pyu",
+"group": "p_combo",
+"twin": "ピュ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ぴょ",
+"romaji": "pyo",
+"group": "p_combo",
+"twin": "ピョ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ああ",
+"romaji": "aa",
+"group": "a_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "あい",
+"romaji": "ai",
+"group": "a_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "いい",
+"romaji": "ii",
+"group": "i_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "うう",
+"romaji": "uu",
+"group": "u_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "えい",
+"romaji": "ei",
+"group": "e_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "ええ",
+"romaji": "ee",
+"group": "e_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "おい",
+"romaji": "oi",
+"group": "o_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "おう",
+"romaji": "ou",
+"group": "o_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "hiragana",
+"kana": "おお",
+"romaji": "oo",
+"group": "o_long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+}
+],
+"katakana": [
+{
+"type": "katakana",
+"kana": "ア",
+"romaji": "a",
+"meaning": "a",
+"level": "Katakana",
+"group": "vowels",
+"stroke_count": 2,
+"twin": "あ",
+"vocab_examples": [
+{
+"kanji": "",
+"kana": "アパート",
+"meaning": "appartement",
+"level": "N5"
+},
+{
+"kanji": "",
+"kana": "ドア",
+"meaning": "porte de style occidental",
+"level": "N5"
+},
+{
+"kanji": "",
+"kana": "アジア",
+"meaning": "Asie",
+"level": "N4"
+},
+{
+"kanji": "",
+"kana": "アフリカ",
+"meaning": "Afrique",
+"level": "N4"
+}
+],
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "katakana",
+"kana": "イ",
+"romaji": "i",
+"group": "vowels",
+"twin": "い",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "katakana",
+"kana": "ウ",
+"romaji": "u",
+"group": "vowels",
+"twin": "う",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "katakana",
+"kana": "エ",
+"romaji": "e",
+"group": "vowels",
+"twin": "え",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "katakana",
+"kana": "オ",
+"romaji": "o",
+"group": "vowels",
+"twin": "お",
+"status": {
+"status": "mastered"
+}
+},
+{
+"type": "katakana",
+"kana": "カ",
+"romaji": "ka",
+"group": "k",
+"twin": "か",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "katakana",
+"kana": "キ",
+"romaji": "ki",
+"group": "k",
+"twin": "き",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "katakana",
+"kana": "ク",
+"romaji": "ku",
+"group": "k",
+"twin": "く",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "katakana",
+"kana": "ケ",
+"romaji": "ke",
+"group": "k",
+"twin": "け",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "katakana",
+"kana": "コ",
+"romaji": "ko",
+"group": "k",
+"twin": "こ",
+"status": {
+"status": "learning"
+}
+},
+{
+"type": "katakana",
+"kana": "サ",
+"romaji": "sa",
+"group": "s",
+"twin": "さ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "シ",
+"romaji": "shi",
+"group": "s",
+"twin": "し",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ス",
+"romaji": "su",
+"group": "s",
+"twin": "す",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "セ",
+"romaji": "se",
+"group": "s",
+"twin": "せ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ソ",
+"romaji": "so",
+"group": "s",
+"twin": "そ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "タ",
+"romaji": "ta",
+"group": "t",
+"twin": "た",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "チ",
+"romaji": "chi",
+"group": "t",
+"twin": "ち",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ツ",
+"romaji": "tsu",
+"group": "t",
+"twin": "つ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "テ",
+"romaji": "te",
+"group": "t",
+"twin": "て",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ト",
+"romaji": "to",
+"group": "t",
+"twin": "と",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ナ",
+"romaji": "na",
+"group": "n",
+"twin": "な",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ニ",
+"romaji": "ni",
+"group": "n",
+"twin": "に",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヌ",
+"romaji": "nu",
+"group": "n",
+"twin": "ぬ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ネ",
+"romaji": "ne",
+"group": "n",
+"twin": "ね",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ノ",
+"romaji": "no",
+"group": "n",
+"twin": "の",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ハ",
+"romaji": "ha",
+"group": "h",
+"twin": "は",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヒ",
+"romaji": "hi",
+"group": "h",
+"twin": "ひ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "フ",
+"romaji": "fu",
+"group": "h",
+"twin": "ふ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヘ",
+"romaji": "he",
+"group": "h",
+"twin": "へ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ホ",
+"romaji": "ho",
+"group": "h",
+"twin": "ほ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "マ",
+"romaji": "ma",
+"group": "m",
+"twin": "ま",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ミ",
+"romaji": "mi",
+"group": "m",
+"twin": "み",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ム",
+"romaji": "mu",
+"group": "m",
+"twin": "む",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "メ",
+"romaji": "me",
+"group": "m",
+"twin": "め",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "モ",
+"romaji": "mo",
+"group": "m",
+"twin": "も",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヤ",
+"romaji": "ya",
+"group": "y",
+"twin": "や",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ユ",
+"romaji": "yu",
+"group": "y",
+"twin": "ゆ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヨ",
+"romaji": "yo",
+"group": "y",
+"twin": "よ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ラ",
+"romaji": "ra",
+"group": "r",
+"twin": "ら",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "リ",
+"romaji": "ri",
+"group": "r",
+"twin": "り",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ル",
+"romaji": "ru",
+"group": "r",
+"twin": "る",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "レ",
+"romaji": "re",
+"group": "r",
+"twin": "れ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ロ",
+"romaji": "ro",
+"group": "r",
+"twin": "ろ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ワ",
+"romaji": "wa",
+"group": "w",
+"twin": "わ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヲ",
+"romaji": "wo",
+"group": "w",
+"twin": "を",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ン",
+"romaji": "n",
+"group": "n_solo",
+"twin": "ん",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ガ",
+"romaji": "ga",
+"group": "g",
+"twin": "が",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ギ",
+"romaji": "gi",
+"group": "g",
+"twin": "ぎ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "グ",
+"romaji": "gu",
+"group": "g",
+"twin": "ぐ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ゲ",
+"romaji": "ge",
+"group": "g",
+"twin": "げ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ゴ",
+"romaji": "go",
+"group": "g",
+"twin": "ご",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ザ",
+"romaji": "za",
+"group": "z",
+"twin": "ざ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ジ",
+"romaji": "ji",
+"group": "z",
+"twin": "じ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ズ",
+"romaji": "zu",
+"group": "z",
+"twin": "ず",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ゼ",
+"romaji": "ze",
+"group": "z",
+"twin": "ぜ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ゾ",
+"romaji": "zo",
+"group": "z",
+"twin": "ぞ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ダ",
+"romaji": "da",
+"group": "d",
+"twin": "だ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヂ",
+"romaji": "ji",
+"group": "d",
+"twin": "ぢ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヅ",
+"romaji": "zu",
+"group": "d",
+"twin": "づ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "デ",
+"romaji": "de",
+"group": "d",
+"twin": "で",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ド",
+"romaji": "do",
+"group": "d",
+"twin": "ど",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "バ",
+"romaji": "ba",
+"group": "b",
+"twin": "ば",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ビ",
+"romaji": "bi",
+"group": "b",
+"twin": "び",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ブ",
+"romaji": "bu",
+"group": "b",
+"twin": "ぶ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ベ",
+"romaji": "be",
+"group": "b",
+"twin": "べ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ボ",
+"romaji": "bo",
+"group": "b",
+"twin": "ぼ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "パ",
+"romaji": "pa",
+"group": "p",
+"twin": "ぱ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ピ",
+"romaji": "pi",
+"group": "p",
+"twin": "ぴ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "プ",
+"romaji": "pu",
+"group": "p",
+"twin": "ぷ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ペ",
+"romaji": "pe",
+"group": "p",
+"twin": "ぺ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ポ",
+"romaji": "po",
+"group": "p",
+"twin": "ぽ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "キャ",
+"romaji": "kya",
+"group": "k_combo",
+"twin": "きゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "キュ",
+"romaji": "kyu",
+"group": "k_combo",
+"twin": "きゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "キョ",
+"romaji": "kyo",
+"group": "k_combo",
+"twin": "きょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "シャ",
+"romaji": "sha",
+"group": "s_combo",
+"twin": "しゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "シュ",
+"romaji": "shu",
+"group": "s_combo",
+"twin": "しゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ショ",
+"romaji": "sho",
+"group": "s_combo",
+"twin": "しょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "チャ",
+"romaji": "cha",
+"group": "t_combo",
+"twin": "ちゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "チュ",
+"romaji": "chu",
+"group": "t_combo",
+"twin": "ちゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "チョ",
+"romaji": "cho",
+"group": "t_combo",
+"twin": "ちょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ニャ",
+"romaji": "nya",
+"group": "n_combo",
+"twin": "にゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ニュ",
+"romaji": "nyu",
+"group": "n_combo",
+"twin": "にゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ニョ",
+"romaji": "nyo",
+"group": "n_combo",
+"twin": "にょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヒャ",
+"romaji": "hya",
+"group": "h_combo",
+"twin": "ひゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヒュ",
+"romaji": "hyu",
+"group": "h_combo",
+"twin": "ひゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヒョ",
+"romaji": "hyo",
+"group": "h_combo",
+"twin": "ひょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ミャ",
+"romaji": "mya",
+"group": "m_combo",
+"twin": "みゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ミュ",
+"romaji": "myu",
+"group": "m_combo",
+"twin": "みゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ミョ",
+"romaji": "myo",
+"group": "m_combo",
+"twin": "みょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "リャ",
+"romaji": "rya",
+"group": "r_combo",
+"twin": "りゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "リュ",
+"romaji": "ryu",
+"group": "r_combo",
+"twin": "りゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "リョ",
+"romaji": "ryo",
+"group": "r_combo",
+"twin": "りょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ギャ",
+"romaji": "gya",
+"group": "g_combo",
+"twin": "ぎゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ギュ",
+"romaji": "gyu",
+"group": "g_combo",
+"twin": "ぎゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ギョ",
+"romaji": "gyo",
+"group": "g_combo",
+"twin": "ぎょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ジャ",
+"romaji": "ja",
+"group": "z_combo",
+"twin": "じゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ジュ",
+"romaji": "ju",
+"group": "z_combo",
+"twin": "じゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ジョ",
+"romaji": "jo",
+"group": "z_combo",
+"twin": "じょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ビャ",
+"romaji": "bya",
+"group": "b_combo",
+"twin": "びゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ビュ",
+"romaji": "byu",
+"group": "b_combo",
+"twin": "びゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ビョ",
+"romaji": "byo",
+"group": "b_combo",
+"twin": "びょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ピャ",
+"romaji": "pya",
+"group": "p_combo",
+"twin": "ぴゃ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ピュ",
+"romaji": "pyu",
+"group": "p_combo",
+"twin": "ぴゅ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ピョ",
+"romaji": "pyo",
+"group": "p_combo",
+"twin": "ぴょ",
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ファ",
+"romaji": "fa",
+"group": "f_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "フィ",
+"romaji": "fi",
+"group": "f_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "フェ",
+"romaji": "fe",
+"group": "f_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "フォ",
+"romaji": "fo",
+"group": "f_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ティ",
+"romaji": "ti",
+"group": "ti_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "トゥ",
+"romaji": "tu",
+"group": "tu_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ディ",
+"romaji": "di",
+"group": "di_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ドゥ",
+"romaji": "du",
+"group": "du_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ウィ",
+"romaji": "wi",
+"group": "w_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ウェ",
+"romaji": "we",
+"group": "w_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ウォ",
+"romaji": "wo",
+"group": "w_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヴァ",
+"romaji": "va",
+"group": "v_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヴィ",
+"romaji": "vi",
+"group": "v_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヴ",
+"romaji": "vu",
+"group": "v_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヴェ",
+"romaji": "ve",
+"group": "v_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ヴォ",
+"romaji": "vo",
+"group": "v_foreign",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "アー",
+"romaji": "aa",
+"group": "long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "イー",
+"romaji": "ii",
+"group": "long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "ウー",
+"romaji": "uu",
+"group": "long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "エー",
+"romaji": "ee",
+"group": "long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+},
+{
+"type": "katakana",
+"kana": "オー",
+"romaji": "oo",
+"group": "long",
+"twin": null,
+"status": {
+"status": "not_started"
+}
+}
+]
+}

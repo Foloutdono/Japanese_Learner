@@ -109,7 +109,7 @@ export function SessionPanel({ done = false, misses = true }) {
 
 // The details, sealed (plan 126): one panel, a ?, nothing else -- what
 // would stand here is the answer. The practice runs seal their
-// breakdown the same way until the grade (plan 128, BreakdownSide).
+// breakdown the same way until the grade (plan 129, BreakdownSide).
 export function SealedPanel({ label }) {
   return (
     <section className="desk-sealed" aria-label={label}>

@@ -279,6 +279,8 @@ const quiz = {
   deskKeyTurn:        'retourne la carte',
   deskKeyChoices:     'affiche les choix',
   deskKeyLeave:       'quitte le trajet',
+  deskKeyAddReading:  'ajoute une lecture',
+  deskKeyCheck:       'valide',
   deskRhythm:         'Le rythme',
   deskElapsed:        'Écoulées',
   deskPerMinute:      'Cartes / min',
@@ -288,7 +290,7 @@ const quiz = {
   keyEscape:          'Échap',
   deskWayUp:          'Remonter',
   deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
-  // Un exercice sur trois panneaux (plan 128) : les phrases du trajet, chacune
+  // Un exercice sur trois panneaux (plan 129) : les phrases du trajet, chacune
   // avec la note qu'elle a reçue, et les touches d'un exercice.
   deskLinesLabel:     'Les phrases du trajet',
   deskLinesNow:       'en cours',
@@ -296,7 +298,7 @@ const quiz = {
   deskQuestionsRated: 'Questions',
   deskPerMinuteLines: 'Phrases / min',
   deskAnswered:       'Répondues',
-  deskKeyCheck:       'valide, puis suivante',
+  deskKeyCheckNext:   'valide, puis suivante',
   deskKeyRate:        'note ta réponse',
   deskKeyListen:      'écoute la phrase',
   deskKeyPick:        'choisit une réponse',
@@ -362,7 +364,10 @@ const quiz = {
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',
   readingsAdd:         'ajouter une lecture',
-  readingsAll:         'Toutes les lectures :',
+  readingsRemove:      (r) => `Retirer ${r}`,
+  readingsFound:       'trouvée',
+  readingsWrong:       'fausse',
+  readingsMissed:      'manquée',
   readingsPlaceholder: 'kana ou romaji',
   readingsCap:         "15 lectures, c'est le maximum pour cette carte.",
   modeWriteDesc:     'Le sens seul. Trace le caractère, trait par trait.',

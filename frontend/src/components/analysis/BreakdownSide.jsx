@@ -18,7 +18,7 @@ import { SealedPanel } from '../study/SessionPanel'
 // plan 115), under the sentence's ruby line, rather than as a dialog
 // over the run.
 //
-// On a practice run's panels (plan 128) the column is the run's third:
+// On a practice run's panels (plan 129) the column is the run's third:
 // sealed before the grade, as a card's details are before the reveal
 // (one panel, a ?), and the breakdown a panel after it (DeskPane).
 export function BreakdownSide({ graded, analysis, loading, lookup = null, onExitLookup, session, ...rows }) {
@@ -46,7 +46,7 @@ export function BreakdownSide({ graded, analysis, loading, lookup = null, onExit
   )
 }
 
-// ── 机 — what stands in a practice run's right column, as a panel (plan 128) ──
+// ── 机 — what stands in a practice run's right column, as a panel (plan 129) ──
 // The breakdown, the point's lesson, the text: on the run's panels each
 // is the column's one surface panel, as tall as the column at least and
 // the column scrolling past that (a door's scroll is the column's, as

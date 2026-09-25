@@ -171,7 +171,7 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay, keyHint = fal
             ))}
           </span>
           <span className="clip-player__left" role="status">{t.dictationListensLeft(left)}</span>
-          {/* Not on a run's panels (plan 128): the run's lines list Space. */}
+          {/* Not on a run's panels (plan 129): the run's lines list Space. */}
           {keyHint && !panels && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
         </span>
       </div>

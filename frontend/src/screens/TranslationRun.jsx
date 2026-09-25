@@ -95,7 +95,7 @@ export default function TranslationRun({ session }) {
   // render while it is open.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
-  // 机 (plan 128): this run's sentences, each reopening its reference's
+  // 机 (plan 129): this run's sentences, each reopening its reference's
   // breakdown in the side.
   const lines = useRunLines(session, { held: Boolean(lookup) })
   // Which reference the in-flight breakdown belongs to, so a slow
@@ -236,7 +236,7 @@ export default function TranslationRun({ session }) {
   }
 
   function next() {
-    // The sentence just graded joins the run's lines (plan 128): the
+    // The sentence just graded joins the run's lines (plan 129): the
     // reference, and its breakdown as it stands by now.
     if (data && feedback?.quality != null) {
       lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis: breakdown })
@@ -482,7 +482,7 @@ function SessionView({
       leaveLabel={backLabel}
       where={t.translationTitle}
       sub={where}
-      // On the desk the score is the run panel's figures (plan 128).
+      // On the desk the score is the run panel's figures (plan 129).
       remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       aside={<Streak streak={streak} t={t} />}

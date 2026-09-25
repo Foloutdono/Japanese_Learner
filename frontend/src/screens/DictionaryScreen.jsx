@@ -604,6 +604,19 @@ export default function DictionaryScreen({ session }) {
 	// 案内 — once the first page of the catalogue has painted (plan 100).
 	const guide = useGuide('dictionary', !loading && results.length > 0)
 
+	// 机 (plan 128): the entry's column, stood beside the whole catalogue
+	// rather than inside the results (DeskColumns). Below the desk the
+	// results still carry their own dock, the sheet it becomes there.
+	const dock = desk && selected && !showingRadicalGrid && (
+		<DetailDock
+			entry={selected}
+			onRadicalClick={jumpToRadical} onKanjiClick={char => openEntry(char, 'kanji')}
+			onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)} onGrammarClick={openGrammar}
+			onKanaClick={(k, type) => openEntry(k, type)} onReview={reviewCard}
+			mining={mining} favorites={shelf}
+		/>
+	)
+
 	return (
 		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
 			{guide.open && <Guide gate="dictionary" onEnd={guide.onEnd} />}
@@ -612,6 +625,12 @@ export default function DictionaryScreen({ session }) {
 			    screen's clipped <h1>. */}
 			<h1 className="sr-only">{t.dictionaryTitle}</h1>
 
+			{/* 机 (plan 128): on the desk the catalogue and its entry are two
+			    columns, the entry standing from the page's top rather than under
+			    the door and the console, where the window cut it off (see
+			    DeskColumns). A phone gets the same children with no wrapper. */}
+			<DeskDockContext.Provider value={desk ? deskDock : null}>
+			<DeskColumns desk={desk} bare={showingRadicalGrid} page={category === 'grammar'} chart={isSyllabary} dock={dock}>
 			{/* The analyzer, behind its door (canvas Dictionary): one row
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
@@ -833,7 +852,6 @@ export default function DictionaryScreen({ session }) {
 			)}
 
 			{/* Results (search mode, or a radical's kanji) */}
-			<DeskDockContext.Provider value={desk ? deskDock : null}>
 			{!showingRadicalGrid && (
 				isSyllabary ? (
 					<SyllabaryGrid
@@ -875,6 +893,7 @@ export default function DictionaryScreen({ session }) {
 					/>
 				)
 			)}
+			</DeskColumns>
 			</DeskDockContext.Provider>
 			{/* The entry a door led to, over the catalogue rather than in
 			    place of it (see openEntry). Keyed on what it was opened on,
@@ -964,6 +983,42 @@ function cardFurigana(entry) {
 		return reading ? [{ text: entry.kanji, reading }] : null
 	}
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
+}
+
+// ── 机 — the catalogue and its entry, two columns (plan 128) ──
+// The entry stood under the analyser's door and the console, 270px
+// down, at the side column's 360px: a kanji's plate, stroke sheet,
+// words and record ran some 230px past the window's foot, so the page
+// had to scroll before the entry could, and a word's senses or a
+// grammar lesson ran on for a page more. On the desk the catalogue --
+// the door, the console, the results -- is one column and the entry
+// stands beside all of it, from the page's top, at --desk-entry-w. The
+// column is held while a page loads, so the catalogue does not widen
+// and narrow again under a search; only the radical index, which has
+// no entry to show, takes the width alone (`bare`). A phone renders
+// the children as they were, with no wrapper.
+//
+// The grammar collection turns the split round (`page`, the owner's
+// second pick of the four): a point is its lesson, rule, use, rivals
+// and four sentences, which ran on for a page in any column, and its
+// catalogue is a list to read down rather than tiles to scan. So the
+// catalogue is the narrow column, its points one to a row, and the
+// entry takes the rest of the page, its lesson in two columns where
+// they fit.
+//
+// The kana charts (`chart`, the owner's pick of four) are the other
+// way about: the whole syllabary is the thing to see, every table at
+// once and each cell marked with where the learner stands on it, and a
+// kana's entry is short, so the entry stands at the side column's width.
+function DeskColumns({ desk, bare, page, chart, dock, children }) {
+	if (!desk) return children
+	const variant = bare ? ' desk-dict--bare' : page ? ' desk-dict--page' : chart ? ' desk-dict--chart' : ''
+	return (
+		<div className={`desk-dict${variant}`}>
+			<div className="desk-dict__main">{children}</div>
+			{dock}
+		</div>
+	)
 }
 
 // The dock's focusable controls, in order: where a door is found again
@@ -1188,7 +1243,9 @@ function ResultsSection({
 						</div>
 					</div>
 
-					{selected && (
+					{/* On the desk the screen stands the dock beside the whole
+					    catalogue instead (DeskColumns, plan 128). */}
+					{selected && !desk && (
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
@@ -1244,7 +1301,15 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected }) {
+// 机 (plan 128): on the desk a cell carries where the learner stands on
+// its kana, as a catalogue tile's edge does -- in progress, or mastered --
+// and nothing for one not yet met. A phone's cells are as they were.
+function cellStage(entry, desk) {
+	const stage = desk ? stageOf(entry.status?.status) : null
+	return stage === 'learning' || stage === 'mastered' ? ` syllabary-cell--${stage}` : ''
+}
+
+function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected, desk = false }) {
 	return (
 		<div className="syllabary-table-wrap">
 			{/* The chart's mark, then the chart. The mark named it in both
@@ -1252,8 +1317,10 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 			    Japanese half captioned a chart rather than naming a place,
 			    so what is left is the name a learner can act on. The grid
 			    carries the same name for a screen reader, which reads the
-			    group rather than the sign. */}
-			<BlockMark name={title} />
+			    group rather than the sign. On the desk, where every chart
+			    stands at once, the charts go unmarked (plan 128, the
+			    owner's cut): the grid still carries its name. */}
+			{!desk && <BlockMark name={title} />}
 			<div
 				className={`syllabary-table${narrow ? ' syllabary-table--narrow' : ''}`}
 				role="group"
@@ -1278,7 +1345,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 										key={v}
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
-										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
+										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}${cellStage(entry, desk)}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
 										<span className="syllabary-cell__romaji">{entry.romaji}</span>
@@ -1296,7 +1363,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 					<button
 						type="button"
 						onClick={() => setSelected(tail)}
-						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}`}
+						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}${cellStage(tail, desk)}`}
 					>
 						<span className="syllabary-cell__char">{tail.kana}</span>
 						<span className="syllabary-cell__romaji">{tail.romaji}</span>
@@ -1308,6 +1375,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 }
 
 function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, favorites, accentColor, t }) {
+	const desk = useDesk()
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -1330,6 +1398,30 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 
 	if (loading) return <Loading />
 
+	const table = (rows, cols, title, extra = {}) => (
+		<SyllabaryTable
+			rows={rows} cols={cols} title={title} byGroup={byGroup}
+			selected={selected} setSelected={setSelected} desk={desk} {...extra}
+		/>
+	)
+	const charts = {
+		main: table(MAIN_ROWS, VOWEL_COLS, t.syllabaryMain, { tail: nSolo }),
+		long: hasLong && table(longRows, VOWEL_COLS, t.syllabaryLong),
+		voiced: table(VOICED_ROWS, VOWEL_COLS, t.syllabaryVoiced),
+		yoon: hasYoon && table(YOON_ROWS, YOON_COLS, t.syllabaryYoon, { narrow: true }),
+		foreign: hasForeign && table(FOREIGN_ROWS, VOWEL_COLS, t.syllabaryForeign),
+	}
+	// A phone's two columns keep the teaching order (below). The desk's
+	// three hold every chart on one screen (plan 128): the five-column
+	// charts two by two, the long vowels with whichever column they
+	// balance -- katakana's one bar under 五十音, hiragana's matrix under
+	// 濁音 -- and 拗音's three columns alone.
+	const columns = !desk
+		? [['main', 'long'], ['voiced', 'yoon', 'foreign']]
+		: kataLong
+			? [['main', 'long'], ['voiced', 'foreign'], ['yoon']]
+			: [['main'], ['voiced', 'long'], ['yoon']]
+
 	return (
 		<div className="dict-layout">
 			<div className="dict-results-wrap">
@@ -1351,66 +1443,16 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				    for the stack — and the phone's is the one that has to
 				    be right. */}
 				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
-					<div className="syllabary-col">
-						<SyllabaryTable
-							rows={MAIN_ROWS}
-							cols={VOWEL_COLS}
-							title={t.syllabaryMain}
-							byGroup={byGroup}
-							tail={nSolo}
-							selected={selected}
-							setSelected={setSelected}
-						/>
-
-						{hasLong && (
-							<SyllabaryTable
-								rows={longRows}
-								cols={VOWEL_COLS}
-								title={t.syllabaryLong}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-					</div>
-
-					<div className="syllabary-col">
-						<SyllabaryTable
-							rows={VOICED_ROWS}
-							cols={VOWEL_COLS}
-							title={t.syllabaryVoiced}
-							byGroup={byGroup}
-							selected={selected}
-							setSelected={setSelected}
-						/>
-
-						{hasYoon && (
-							<SyllabaryTable
-								rows={YOON_ROWS}
-								cols={YOON_COLS}
-								narrow
-								title={t.syllabaryYoon}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-
-						{hasForeign && (
-							<SyllabaryTable
-								rows={FOREIGN_ROWS}
-								cols={VOWEL_COLS}
-								title={t.syllabaryForeign}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-					</div>
+					{columns.map(names => (
+						<div key={names.join()} className="syllabary-col">
+							{names.map(name => charts[name] && <Fragment key={name}>{charts[name]}</Fragment>)}
+						</div>
+					))}
 				</div>
 			</div>
 
-			{selected && (
+			{/* Beside the whole catalogue on the desk (DeskColumns). */}
+			{selected && !desk && (
 				<DetailDock
 					entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}

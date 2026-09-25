@@ -5,7 +5,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — 三面, the practice runs on three panels (plan 128) ─────────────
+// ── 机 — 三面, the practice runs on three panels (plan 129) ─────────────
 // Reading, translation, dictation, composition and comprehension stand on
 // the card runs' three columns (plan 126): this run's figures over the
 // run's lines at the left -- every sentence so far with the grade it got,

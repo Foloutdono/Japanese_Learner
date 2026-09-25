@@ -7,7 +7,7 @@ import { composing } from '../lib/keyGuards'
 import { dialogOpen } from '../lib/dialogOpen'
 import { holdEsc } from '../stores/escHold'
 
-// ── 机 — the run's lines (plan 128) ───────────────────────────────────
+// ── 机 — the run's lines (plan 129) ───────────────────────────────────
 // A sentence run on the desk lists its sentences in its left column
 // (components/study/RunLines.jsx), each with the grade it got, and any
 // one of them reopens its breakdown in the right column: on a phone, and

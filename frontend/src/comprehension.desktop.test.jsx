@@ -92,7 +92,7 @@ describe('comprehension on the desk', () => {
     await toQuestions()
     const side = $('.desk-run__side')
     expect(side).not.toBeNull()
-    // The run's third column (plan 128), the text as its one card.
+    // The run's third column (plan 129), the text as its one card.
     expect(side.getBoundingClientRect().width).toBeGreaterThanOrEqual(300)
     const passage = side.querySelector('.prose__jp--passage')
     expect(passage.textContent).toBe(EXERCISE.text)
@@ -109,7 +109,7 @@ describe('comprehension on the desk', () => {
   it('answers a whole paper from the keyboard', async () => {
     await toQuestions()
     expect($('.mcq-row').getAttribute('aria-keyshortcuts')).toBe('A 1')
-    // The keys are the run's lines' to print on the panels (plan 128),
+    // The keys are the run's lines' to print on the panels (plan 129),
     // not the button's.
     expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
     expect($('.stage__foot .btn-primary').getAttribute('aria-keyshortcuts')).toBe('Enter')
@@ -137,7 +137,7 @@ describe('comprehension on the desk', () => {
     expect($$('.desk-run__side .bkd-passage__item')).toHaveLength(2)
     expect($('.btn-secondary[aria-expanded]')).toBeNull()
 
-    // The review as the exam's (plan 128): the questions are the run's
+    // The review as the exam's (plan 129): the questions are the run's
     // lines, each with its verdict, and the first miss is open on
     // arrival -- its card in the middle, its options marked, and the
     // sentence it quotes (「電車」) open in the breakdown.

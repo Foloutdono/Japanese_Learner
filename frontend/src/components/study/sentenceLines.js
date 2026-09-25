@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { useRatingScale } from '../../stores/ratingScale'
 import { ratingButtons } from '../../domain/ratingScales'
 
-// ── 机 — what a sentence run hands its lines (plan 128) ──
+// ── 机 — what a sentence run hands its lines (plan 129) ──
 // The two pieces the four sentence runs (reading, translation,
 // dictation, composition) pass to components/study/RunLines.jsx, kept
 // apart from it so that file exports components only.
@@ -17,7 +17,7 @@ export function useSentenceKeys({ listen = false } = {}) {
   const n = ratingButtons(scale, t).length
   return [
     ...(listen ? [[t.keySpace, t.deskKeyListen]] : []),
-    [t.keyEnter, t.deskKeyCheck],
+    [t.keyEnter, t.deskKeyCheckNext],
     [`1–${n}`, t.deskKeyRate],
     [t.keyEscape, t.deskKeyLeave],
   ]
