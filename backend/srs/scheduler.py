@@ -69,37 +69,50 @@ FAIL = {
     0: Lapse(relearn_step=0, steps_lost=len(LEARNING_STEPS), stability=0.50, difficulty=0.20),
 }
 
-# ── Keeping the pass grades apart ────────────────────────────
+# ── Keeping the grades apart ─────────────────────────────────
 # The desk's card panel prints, on each verdict's tile, when that rating
 # brings the card back (plan 126), and what it printed was mostly pairs:
 # Difficult and Correct gave the same wait on every learning step, and
 # again on a card's first reviews after it graduated, where Correct's 5%
 # of extra growth rounds away. Nothing on screen was wrong -- the two
-# buttons really did the same thing. Three rules keep them apart.
+# buttons really did the same thing. The six-button bar's two ends did
+# it as well: Perfect waited what Correct did on every learning step,
+# and Blackout what Wrong did on every miss. These rules keep them apart.
 #
 # In the learning steps, Difficult still climbs a step, since a pass
 # keeps its progress, but it waits halfway between the step it leaves
 # and the one Correct would wait (learning_wait below): 7 minutes where
-# Correct says 10, 35 where Correct says an hour.
+# Correct says 10, 35 where Correct says an hour. Perfect climbs two
+# steps: an hour where Correct says ten minutes, a day where it says an
+# hour.
 #
 # Leaving the steps, a clean pass waits GRADUATING_DAYS. The last step
 # is already a day, and graduating used to set a day again, so every new
 # card came back after a day twice running. Difficult on that step
-# graduates a day short of it, which is the day the card used to get.
+# graduates a day short of it, which is the day the card used to get,
+# and Perfect a day past it. Perfect on the step before graduates too,
+# at GRADUATING_DAYS, where Correct would wait the last step's day.
 #
 # After graduation, each pass grade lands at least a day past the one
 # below it (_handle_review). Where the growth rule already separates
 # them, which is every interval past a week or so, this does nothing.
 #
+# Blackout sends a card back to the first step as Wrong does, but waits
+# BLACKOUT_WAIT there, a minute where Wrong waits three.
+#
 # Almost and Wrong still match on the first two steps: one step back
 # from there is the first step, and there is nothing before it.
 GRADUATING_DAYS = 2
+BLACKOUT_WAIT = timedelta(minutes=1)
 
 
 def learning_wait(step: int, quality: int) -> timedelta:
     """How long a card waits at learning `step`, `quality` having sent
     it there. Difficult (3) climbed to it from the step below and waits
-    halfway between the two; any other grade waits the step itself."""
+    halfway between the two; Blackout (0) sent it to the first step and
+    waits BLACKOUT_WAIT; any other grade waits the step itself."""
+    if quality == 0:
+        return BLACKOUT_WAIT
     wait = LEARNING_STEPS[step]
     if quality == 3 and step > 0:
         wait = (LEARNING_STEPS[step - 1] + wait) / 2
@@ -197,19 +210,23 @@ class Scheduler:
             # does score it.
             lapse = FAIL[quality]
             state.learning_step = max(0, state.learning_step - lapse.steps_lost)
-            state.next_review = now + LEARNING_STEPS[state.learning_step]
+            state.next_review = now + learning_wait(state.learning_step, quality)
             state.lapses += 1
 
             return state
 
-        state.learning_step += 1
+        # Perfect climbs two steps (see GRADUATING_DAYS).
+        state.learning_step += 2 if quality == 5 else 1
 
         if state.learning_step >= len(LEARNING_STEPS):
 
             state.is_learning = False
             # See GRADUATING_DAYS: Difficult leaves on a day, a clean
-            # pass on two, never a second day after the last step's.
-            state.interval_days = GRADUATING_DAYS - 1 if quality == 3 else GRADUATING_DAYS
+            # pass on two, never a second day after the last step's,
+            # and each step Perfect climbs past the last is a day more.
+            past = state.learning_step - len(LEARNING_STEPS)
+            state.interval_days = GRADUATING_DAYS + past - (1 if quality == 3 else 0)
+            state.learning_step = len(LEARNING_STEPS)
             # A floor, not a reset. A new card arrives here with the
             # stability it was created with (0) and leaves with 1.0, as
             # it always did. A card relearning after a lapse arrives
@@ -247,7 +264,7 @@ class Scheduler:
             state.repetitions = max(0, state.repetitions - 1)
             state.stability = max(0.1, state.stability * lapse.stability)
             state.difficulty = min(MAX_DIFFICULTY, state.difficulty + lapse.difficulty)
-            state.next_review = now + LEARNING_STEPS[lapse.relearn_step]
+            state.next_review = now + learning_wait(lapse.relearn_step, quality)
             return state
 
         # Each pass grade lands at least a day past the one below it

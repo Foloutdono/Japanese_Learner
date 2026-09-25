@@ -120,9 +120,9 @@ def due_after(state: CardState, last_reviewed_at: datetime) -> datetime:
 
     Mirrors what the scheduler itself would have set at that moment: a
     graduated card waits interval_days, a card back in the learning
-    steps waits whichever step it is on (less, if Difficult put it
-    there). A card whose gap has already elapsed comes out in the past,
-    i.e. due now, which is the point.
+    steps waits whichever step it is on (less, if Difficult or Blackout
+    put it there). A card whose gap has already elapsed comes out in the
+    past, i.e. due now, which is the point.
     """
     gap = (timedelta(days=state.interval_days) if not state.is_learning
            else learning_wait(state.learning_step, state.last_quality))

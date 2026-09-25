@@ -10,7 +10,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
 from main import app
-from srs.scheduler import GRADUATING_DAYS, LEARNING_STEPS, learning_wait
+from srs.scheduler import BLACKOUT_WAIT, GRADUATING_DAYS, LEARNING_STEPS, learning_wait
 
 USER = "forecast-test-learner"
 MODE = "kanji.flashcard.f2b"
@@ -46,6 +46,10 @@ def test_a_new_card_forecasts_its_learning_steps(clean):
     assert abs(out[3]["due_in"] - learning_wait(1, 3).total_seconds()) <= 2
     assert out[3]["due_in"] < out[4]["due_in"]
     assert abs(out[1]["due_in"] - LEARNING_STEPS[0].total_seconds()) <= 2
+    # The six-button bar's ends: Perfect climbs two steps, Blackout
+    # comes back sooner than the first.
+    assert abs(out[5]["due_in"] - LEARNING_STEPS[2].total_seconds()) <= 2
+    assert abs(out[0]["due_in"] - BLACKOUT_WAIT.total_seconds()) <= 2
 
 
 def test_a_graduated_card_forecasts_review_and_relearning(clean):
