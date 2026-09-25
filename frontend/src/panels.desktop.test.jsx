@@ -382,6 +382,32 @@ describe('the choices beside the card', () => {
     expect(rect('.mcq-list').top).toBeGreaterThanOrEqual(rect('.prompt-card').bottom)
     expect(rect('.mcq-list').right).toBeLessThanOrEqual(rect('.stage').right + 1)
   })
+
+  // The stage word is pinned to the card stage's corner, so the stage is
+  // the card's width: beside choices or a writing board the rule that
+  // stacks them had widened it to the column, and the word stood off the
+  // card's edge (a kanji trace on the Today queue).
+  it.each([
+    ['choices', <MCQGrid key="m" choices={CHOICES} correct="gare" selected={null} answered={false} onAnswer={() => {}} />],
+    ['a writing board', <DrawingQuiz key="d" kanji="急" resetKey="k" onValidate={() => {}} />],
+  ])('keep the card\'s stage word on the card beside %s', async (_, beside) => {
+    // At the owner's width, where the middle column is wider than a card.
+    await render(
+      <Frame width={1877}><Stage>
+        <CardTransition className="specimen-card-stage" cardKey="k" stage="learning">
+          <PromptCard foot={<span>N4</span>}><span className="probe-kanji">急</span></PromptCard>
+        </CardTransition>
+        {beside}
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage></Frame>
+    )
+    await settle(400)
+    const card = rect('.quiz-card-stage .prompt-card')
+    const mark = rect('.stage-mark')
+    expect(mark.right).toBeLessThanOrEqual(card.right)
+    expect(mark.top).toBeGreaterThanOrEqual(card.top)
+    expect(rect('.quiz-card-stage').width).toBeCloseTo(card.width, 0)
+  })
 })
 
 describe('the writing board in the middle column', () => {

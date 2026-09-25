@@ -21241,13 +21241,38 @@ a.slip__act { text-decoration: none; }
      scrolling itself if it is ever taller than the screen. */
   .desk-side {
     position: sticky;
-    top: var(--sp-6);
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
     min-width: 0;
-    max-height: calc(100dvh - 2 * var(--sp-6));
     overflow-y: auto;
+  }
+  /* ── what a scrolling column must not cut ──
+     The side, Settings' list and a split's list each stick at --sp-6 and
+     scroll in their own box, never taller than the window: this rule
+     holds that for all three. A box that scrolls clips at its padding
+     edge on both axes (`overflow-y: auto` cannot leave x visible), and
+     the rows stood exactly on that edge, so whatever a row draws past
+     its own box was cut. The 1px a card lifts on hover (2px for a
+     radical's tile) took the top border off the first row and off the
+     pass strip, and a focus ring (2px, 2px out) lost its top and both
+     sides. The rows also arrive rising 10px (@keyframes arrive), and
+     while the last one was still low it hung past the column's foot: a
+     list that fits printed a scrollbar for as long as it took to arrive.
+     So the column keeps a gutter inside its edge, --sp-2 round the rows
+     for the lift and the ring and --sp-4 under them for the arrival, and
+     gives it back as a negative margin, its top and its height taking
+     the same, so every row stands, sticks and scrolls to where it did.
+     Only the clip moved out. A row walked into view keeps the gutter
+     too (scroll-padding). scrollColumns.desktop.test holds all of it. */
+  .desk-side,
+  .desk-settings__list,
+  .desk-split__list {
+    top: calc(var(--sp-6) - var(--sp-2));
+    max-height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
+    margin: calc(-1 * var(--sp-2)) calc(-1 * var(--sp-2)) calc(-1 * var(--sp-4));
+    padding: var(--sp-2) var(--sp-2) var(--sp-4);
+    scroll-padding: var(--sp-2) var(--sp-2) var(--sp-4);
   }
   /* A Learn plate's foot on the desk draws the whole line, upright
      (components/station/LinePlate's LineFoot; across the plate from
@@ -21695,13 +21720,12 @@ a.slip__act { text-decoration: none; }
   }
   .desk-settings__list {
     position: sticky;
-    top: var(--sp-6);
     display: flex;
     flex-direction: column;
     gap: var(--sp-5);
-    /* Bounded like every sticky column (plan 123): on a 600px window
-       Sign out sat under the fold, beyond any scroll. */
-    max-height: calc(100dvh - 2 * var(--sp-6));
+    /* Bounded like every sticky column (plan 123), its top and height
+       the side's (above): on a 600px window Sign out sat under the
+       fold, beyond any scroll. */
     overflow-y: auto;
   }
   /* A page's controls at the card's width (plan 123): seven action
@@ -21802,12 +21826,12 @@ a.slip__act { text-decoration: none; }
   }
   /* A list longer than the window — forty-three tiers, a level's
      grammar points — scrolls inside its own column (plan 115), so the
-     page beside it never scrolls away from the row that opened it. */
+     page beside it never scrolls away from the row that opened it. Its
+     top and height are the side's, with the gutter that keeps its rows
+     whole ("what a scrolling column must not cut", above). */
   .desk-split__list {
     position: sticky;
-    top: var(--sp-6);
     min-width: 0;
-    max-height: calc(100dvh - 2 * var(--sp-6));
     overflow-y: auto;
     /* Chains at its end (plan 123), as the dictionary's dock does. */
     overscroll-behavior-y: auto;
@@ -22614,8 +22638,14 @@ a.slip__act { text-decoration: none; }
     display: flex;
     grid-template-columns: none;
   }
-  /* The card grows to what the tiles' row leaves, the phone's own rule. */
+  /* The card grows to what the tiles' row leaves, the phone's own rule.
+     Its stage keeps the card's width, which the beside-rule above takes
+     off everything in a stage with choices or a board: the stage word
+     is pinned to this box's corner, and on a window where the column is
+     wider than a card it stood off the card's edge. */
   .screen.desk-run.desk-run--panels > .stage > .quiz-card-stage {
+    max-width: var(--card-w);
+    margin-inline: auto;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;

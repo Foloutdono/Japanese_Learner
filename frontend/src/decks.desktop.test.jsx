@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { contentBox } from './testing/contentBox'
 import './index.css'
 
 // ── 机 — a deck as list and platforms (plan 114) ───────────────────
@@ -73,7 +74,7 @@ describe('a deck on the desk', () => {
     await mount('/learn/decks/1', <Routes><Route path="/learn/decks/:deck_id" element={<DeckDetailScreen session={{}} />} /></Routes>)
     await settle()
     const main = $('.desk-deck__main').getBoundingClientRect()
-    const side = $('.desk-deck > .desk-side').getBoundingClientRect()
+    const side = contentBox($('.desk-deck > .desk-side'))
     expect(side.left).toBeGreaterThan(main.right)
     expect(side.width).toBe(360)
     expect($('.desk-deck__main .card-list')).not.toBeNull()
