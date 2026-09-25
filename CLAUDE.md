@@ -428,7 +428,7 @@ runtime purpose. Two consequences worth knowing:
   its grade, each reopening its breakdown -- the breakdown, lesson or
   text sealed at the right until the grade, the floor one framed row, the
   keys in the lines; the mock exam keeps its paper; and the place of a
-  desk-only chatbot recorded, not built (cited in
+  desk-only chatbot recorded, built by plan 131 (cited in
   `components/study/RunLines.jsx`, `components/study/sentenceLines.js`,
   `hooks/useRunLines.js`, `components/analysis/BreakdownSide.jsx`,
   `components/chrome/DeskKeys.jsx`'s `KeyCap`, `stores/runTally.js`,
@@ -451,7 +451,21 @@ runtime purpose. Two consequences worth knowing:
   `src/gates.desktop.test.jsx`, `src/gates.wide.test.jsx`,
   `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk"; `docs/design/desk/README.md`).
-  When starting a new wave, begin at **131** or higher, and check
+  **131** is 問, the asking (wave 36; numbered 131 because 130 went to
+  the gates while plan 129 was in review): the desk-only chat of the
+  practice runs, "limited to small questions and only precise answers" —
+  one short question about the exercise just graded, answered in three
+  sentences from what is on the three panels, in the lower half of the
+  run's lines panel, sealed until the grade, a thread per sentence, a
+  question off the exercise declined, forty a day through
+  `daily_usage` (`ASK_DAILY_LIMIT`), nothing the learner typed kept
+  (cited in `routes/ask.py`, `tests/test_ask.py`,
+  `tests/test_pass_platforms.py`, `scripts/llm_cost_model.py`,
+  `components/study/AskPanel.jsx`, `hooks/useAsk.js`, `domain/ask.js`,
+  `components/study/RunLines.jsx`, the five `screens/*Run.jsx`,
+  `src/ask.desktop.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk"; `docs/llm-commercial-plan.md`).
+  When starting a new wave, begin at **132** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

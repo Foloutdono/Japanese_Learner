@@ -304,6 +304,21 @@ const quiz = {
   deskKeyPick:        'choisit une réponse',
   deskKeyNext:        'question suivante',
   deskKeyWalk:        'parcourt les questions',
+  // 問 — une question sur l'exercice, sur le bureau (plan 131) : ouverte une
+  // fois la réponse notée, courte, précise, sur cet exercice seulement.
+  askTitle:           'Une question',
+  askPlaceholder:     'Ta question…',
+  askSealed:          'Les questions s’ouvrent une fois ta réponse notée.',
+  askSealedText:      'Les questions s’ouvrent avec les résultats.',
+  askHint:            'Une réponse courte et précise, sur cet exercice.',
+  askSend:            'Demander',
+  askThinking:        'Réponse en cours',
+  askOffTopic:        'Je ne réponds qu’aux questions sur cet exercice.',
+  askUnavailable:     'Les réponses sont indisponibles pour le moment.',
+  askFailed:          'La réponse n’est pas arrivée. Réessaie.',
+  askSpent:           at => (at ? `Plus de questions aujourd’hui : elles reviennent à ${at}.` : 'Plus de questions aujourd’hui.'),
+  askLeft:            n => `${n} question${n > 1 ? 's' : ''} encore aujourd’hui`,
+  askFull:            'C’est tout pour cette phrase.',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui
