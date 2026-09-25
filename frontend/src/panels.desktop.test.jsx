@@ -35,12 +35,13 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { StudyStage } = await import('./components/study/StudyStage')
 const { SessionPanel } = await import('./components/study/SessionPanel')
 const { CardPanel } = await import('./components/study/CardPanel')
-const { Flashcard, MCQGrid, MeaningDisplay } = await import('./components/study/QuizComponents')
+const { Flashcard, MCQGrid, MeaningDisplay, CharDisplay } = await import('./components/study/QuizComponents')
 const { CardTransition } = await import('./components/study/CardTransition')
 const { default: PromptCard } = await import('./components/study/PromptCard')
 const { default: RatingBar } = await import('./components/study/RatingBar')
 const { default: HintBar } = await import('./components/study/HintBar')
 const { DrawingQuiz } = await import('./components/study/DrawingCanvas')
+const { default: ReadingsInput } = await import('./components/study/ReadingsInput')
 const { startTally, countReview } = await import('./stores/runTally')
 const { seedSummary } = await import('./stores/profileSummary')
 
@@ -491,5 +492,44 @@ describe('a run with nothing to count', () => {
     chips[0].click()
     await settle(250)
     expect($('.desk-entry').textContent.toLowerCase()).toContain('meaning of 駅')
+  })
+})
+
+describe('the readings drill in the middle column', () => {
+  // The kanji, its box of readings a kind, Valider, the unlit tiles. The
+  // stacked rows it replaced grew down the column a reading at a time
+  // and scrolled it, Valider inline-block 51px off the fields' axis.
+  const READINGS = {
+    on: [{ reading: 'シュ', display: 'シュ' }, { reading: 'ス', display: 'ス' }],
+    kun: [{ reading: 'ぬし', display: 'ぬし' }, { reading: 'おも', display: 'おも' }, { reading: 'あるじ', display: 'あるじ' }],
+  }
+  function Readings() {
+    return (
+      <Stage panel={<CardPanel card={CARD} remaining={19} keys="readings" />}>
+        <CardTransition className="specimen-card-stage" cardKey="k">
+          <PromptCard foot={{ left: 'N4 漢字', right: 'Lectures' }}><CharDisplay char="主" size={100} /></PromptCard>
+        </CardTransition>
+        <ReadingsInput readings={READINGS} submitted={false} onSubmit={() => {}} />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+  }
+
+  it('stands Valider on the boxes\' axis, and fits the column', async () => {
+    await render(<Frame width={1877}><Readings /></Frame>)
+    await settle(400)
+    const group = rect('.readings-input__group')
+    const submit = rect('.readings-input__submit')
+    expect(submit.left).toBeCloseTo(group.left, 0)
+    expect(submit.width).toBeCloseTo(group.width, 0)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+  })
+
+  it('lists the drill\'s own keys on the card panel: a comma or Space adds, Enter checks', async () => {
+    await render(<Readings />)
+    await settle()
+    const keys = $$('.desk-card .desk-keys__item').map(el => el.textContent)
+    expect(keys).toEqual([',Espaceajoute une lecture', 'Entréevalide', 'Échapquitte le trajet'])
   })
 })

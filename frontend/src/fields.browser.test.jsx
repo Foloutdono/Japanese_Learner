@@ -64,10 +64,10 @@ const CASES = [
       <input className="field field--page deckdetail-form__input browse-search-input" placeholder="search" />
     </div></div>],
 
-  ['ReadingsInput — the readings quiz',
+  ['ReadingsInput — the readings quiz, whose box is the field',
     <div className="prompt-card readings-input"><div className="readings-input__group">
-      <div className="readings-input__row">
-        <input className="field quiz-input readings-input__field" placeholder="reading" />
+      <div className="field readings-input__box">
+        <input className="field field--bare quiz-input readings-input__field" placeholder="reading" />
       </div>
     </div></div>],
 
@@ -167,7 +167,9 @@ function setTheme(t) {
 describe('every field is visible on the ground it is mounted on', () => {
   it.each(CASES)('%s', async (label, markup) => {
     const screen = await render(markup)
-    const el = screen.container.querySelector('input, textarea')
+    // The element that paints the well: the field itself, or the box
+    // a bare one sits in (the readings quiz's chips share its well).
+    const el = screen.container.querySelector('.field:not(.field--bare), input, textarea')
     expect(el, 'the fixture has no field in it').toBeTruthy()
 
     for (const theme of ['dark', 'light']) {
