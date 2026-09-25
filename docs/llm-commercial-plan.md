@@ -161,6 +161,15 @@ stable prefix the provider's cache serves. Past the cap the run goes on
 without the tutor -- the local check and the learner's own grade never
 depended on the model.
 
+The fourth is the asking (問, plan 131): `ASK_DAILY_LIMIT`, 40 short
+questions a day about an exercise the learner has just graded, in the
+desk's practice runs, counted in the same `daily_usage` table (feature
+`ask`). The cheapest call the app makes -- a cached system block, the
+exercise in the user block, `max_tokens` 400 with reasoning off, three
+sentences at most -- and the one most likely to be leaned on, which is
+why it has a number from the first day. A question off the exercise is
+declined by the model (`OFF_TOPIC`) and still costs its slot.
+
 What remains uncapped is translation review (~600 calls a month at the
 ceiling) and the phrase analyzer, which are an order of magnitude
 cheaper per call and have no equivalent of the pool to fall back on.

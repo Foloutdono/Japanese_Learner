@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { contentBox } from './testing/contentBox'
 import './index.css'
 
 // ── 机 — the settings list beside the open page (plan 113) ──────
@@ -83,7 +84,7 @@ describe('settings on the desk', () => {
     const page = document.querySelector('.desk-settings__page')
     expect(list.querySelector('h1')).not.toBeNull()
     expect(page.querySelector('h2')).not.toBeNull()
-    const l = list.getBoundingClientRect()
+    const l = contentBox(list)
     const p = page.getBoundingClientRect()
     expect(Math.round(l.top)).toBe(Math.round(p.top))
     expect(p.left).toBeGreaterThan(l.right)

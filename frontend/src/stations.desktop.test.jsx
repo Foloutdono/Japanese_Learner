@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { contentBox } from './testing/contentBox'
 import './index.css'
 
 // ── 机 — a station as two panes (plan 114) ───────────────────────
@@ -105,7 +106,7 @@ describe('a level\'s platforms on the desk', () => {
     expect(openStop()).toBe('N4')
     expect(list.querySelector('.desk-stop--open')).not.toBeNull()
     expect(page.querySelectorAll('.platform-card').length).toBeGreaterThan(2)
-    const l = list.getBoundingClientRect()
+    const l = contentBox(list)
     const p = page.getBoundingClientRect()
     expect(Math.round(l.top)).toBe(Math.round(p.top))
     expect(p.left).toBeGreaterThan(l.right)

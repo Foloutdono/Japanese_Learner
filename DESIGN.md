@@ -998,7 +998,10 @@ plated gates take the window.
   back, a dictionary entry, a sentence's breakdown, a list of platforms) is
   drawn at the width it was designed at. `components/chrome/DeskSide.jsx`
   is the column; it is sticky and scrolls on its own when it is taller than
-  the window.
+  the window. Scrolling on its own must not cut what it holds: the column
+  (and every list that scrolls beside a page) keeps a gutter inside its
+  clip edge and gives it back outside, so a row's hover lift, its focus
+  ring and its arrival are drawn whole and no row moves for it.
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
   sheet. The gate's lanes go two across once the gate holds two at a
@@ -1194,14 +1197,26 @@ plated gates take the window.
   arrival, the score in the figures. The elements print no key caps; the
   lines list them. The mock exam keeps its paper (below), and has no
   lines: it is sat, not practised.
-- **The asking (問) has its place and is not built.** The owner means to
-  add a desk-only chatbot for short questions with precise answers. On a
-  practice run it will stand in the run's lines panel, the list giving it
-  the lower half, and it opens when the breakdown does — after the grade,
-  for the breakdown's reason: before it, "what does this mean?" is the
-  answer key. Reading, translation and composition gain most (a follow-up
-  on the tutor's review, a nuance the rows cannot hold), dictation after
-  the reveal, comprehension on its review only; the mock exam never.
+- **The asking (問): one short question, a precise answer** (plan 131;
+  the owner's "limited to small questions and only precise answers").
+  It stands in the practice run's lines panel, the list and the asking a
+  half each so neither moves when the other grows, and it opens when the
+  breakdown does — after the grade, comprehension on its results —
+  because before that "what does this mean?" is the answer key. Sealed
+  until then: the field drawn, disabled, under the line that says when
+  it opens. A question is a line (200 characters), a sentence keeps five
+  and a day forty; the answer is three short sentences at most, names the
+  Japanese it explains in 「 」 with its reading, and is grounded in what
+  is on the three panels — the sentence or the text, its translation,
+  the learner's answer, the point, the tutor's review, the breakdown's
+  words. A question off the exercise is declined in the learner's own
+  words. The thread is the sentence's: the questions under 問 in the
+  page's second ink, the answers under 答 in its first, the gold of the
+  lit row on the mark; a line reopened from the list keeps its own
+  thread. Enter in the field asks, and the run's Enter waits for the
+  field to be left. The send is an arrow, named for a screen reader and
+  on hover, because a laptop's column needs the room for the field.
+  Nothing the learner typed is kept, and the mock exam never asks.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one

@@ -21,6 +21,9 @@ import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
+import { useAsk } from '../hooks/useAsk'
+import { AskPanel } from '../components/study/AskPanel'
+import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
@@ -98,6 +101,8 @@ export default function TranslationRun({ session }) {
   // 机 (plan 129): this run's sentences, each reopening its reference's
   // breakdown in the side.
   const lines = useRunLines(session, { held: Boolean(lookup) })
+  // 問 (plan 131): a question about the sentence, once graded, on the desk.
+  const asking = useAsk(session, 'translation')
   // Which reference the in-flight breakdown belongs to, so a slow
   // answer for a phrase the learner has already left cannot overwrite
   // the one on screen (ReadingRun's analysisPhraseRef).
@@ -151,6 +156,7 @@ export default function TranslationRun({ session }) {
     setStreak(0)
     startTally(`translation:${sourceLabel()}`)
     lines.reset()
+    asking.reset()
     seenRef.current = []
     queueRef.current = []
     setStage('loading')
@@ -235,11 +241,27 @@ export default function TranslationRun({ session }) {
       .finally(() => { if (breakdownPhraseRef.current === phraseText) setBreakdownLoading(false) })
   }
 
+  // What a question about the sentence on the stage carries, less its
+  // breakdown (domain/ask's askTarget adds the words): the reference,
+  // the prompt it translates, the learner's own Japanese, the point,
+  // and the tutor's reading of the attempt.
+  function askBase() {
+    if (!data) return null
+    return {
+      sentence: data.phrase,
+      level: source === 'level' ? level : '',
+      translation: data.translation,
+      answer: answer.trim(),
+      point: data.grammar ?? '',
+      review: analysis?.analysis ?? '',
+    }
+  }
+
   function next() {
     // The sentence just graded joins the run's lines (plan 129): the
     // reference, and its breakdown as it stands by now.
     if (data && feedback?.quality != null) {
-      lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis: breakdown })
+      lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis: breakdown, ask: askBase() })
     }
     if (queueRef.current.length > 0) {
       const [head, ...rest] = queueRef.current
@@ -414,6 +436,8 @@ export default function TranslationRun({ session }) {
       setLookup={setLookup}
       closeLookup={closeLookup}
       lines={lines}
+      asking={asking}
+      askBase={askBase}
       session={session}
       onBack={leave}
       backLabel={t[backKey]}
@@ -443,7 +467,7 @@ function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, fare, error, analysis, analysisLoading, backLabel,
   breakdown, breakdownLoading, onExplain, explaining, explainError,
-  showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup, lines,
+  showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup, lines, asking, askBase,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   const desk = useDesk()
@@ -465,6 +489,12 @@ function SessionView({
   // already knew (DESIGN.md, "say less").
 
   const keys = useSentenceKeys()
+  // The asking's thread: a reopened line's, else the sentence on the
+  // stage's, open once it is graded (plan 131). Its words are the
+  // reference's breakdown.
+  const target = askTarget(lines.opened, {
+    key: data?._uiKey, base: askBase(), analysis: breakdown, open: stage === 'feedback' && feedback?.correct != null,
+  })
   // A door in a breakdown -- the reference on the stage's, or a line
   // reopened from the run's lines -- opens in the column (plan 115).
   const doors = {
@@ -500,6 +530,9 @@ function SessionView({
           onOpen={key => { setLookup(null); lines.open(key) }}
           onCurrent={() => { setLookup(null); lines.close() }}
           keys={keys}
+          ask={target.key != null && (
+            <AskPanel key={target.key} ask={asking} askKey={target.key} context={target.context} open={target.open} />
+          )}
         />
       )}
       side={lines.opened ? <LineSide lines={lines} {...doors} /> : (
