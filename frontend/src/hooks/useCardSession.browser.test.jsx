@@ -145,3 +145,20 @@ describe('useCardSession resuming a saved queue', () => {
     expect(saved(key)).toEqual(['a', 'c'])
   }, 10000)
 })
+
+describe('useCardSession and a queue saved by an older payload', () => {
+  it('fetches afresh rather than resuming a queue saved before the forecast', async () => {
+    // Plan 126 added `due_in` to every rating's preview; a queue saved
+    // under v6 has none, and resumed it drew "—" on every verdict tile.
+    const key = freshKey()
+    const old = key.replace(/^jp-session:v\d+:/, 'jp-session:v6:')
+    expect(old, 'the payload moved past v6').not.toBe(key)
+    save(old, [{ ...card('stale'), review_preview: { 4: { xp_earned: 10 } } }])
+    const fetchBatch = vi.fn(async () => [{ ...card('fresh'), review_preview: { 4: { xp_earned: 10, due_in: 86400 } } }])
+    await render(<Probe storageKey={key} fetchBatch={fetchBatch} mode="m" />)
+
+    await vi.waitFor(() => expect(api.current?.card_id).toBe('fresh'))
+    expect(seen, 'the v6 card was never on screen').toEqual(['fresh'])
+    expect(api.current.review_preview[4].due_in).toBe(86400)
+  })
+})

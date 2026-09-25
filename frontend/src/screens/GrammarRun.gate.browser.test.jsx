@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
+import { sessionKey } from '../hooks/useCardSession'
 
 // ── The gate, the door and the contrast drill (plan 087) ──────
 // A card the learner has never met shows its lesson first, with one
@@ -116,12 +117,12 @@ describe('the lesson gate', () => {
     expect(stage.querySelector('.gl--gate')).toBeNull()
     expect(stage.querySelector('.prompt-card')).toBeTruthy()
     // and the mirror remembers: the queued card carries the flag
-    const cached = JSON.parse(localStorage.getItem('jp-session:v6:grammar:N5:grammar.flashcard.f2b:en'))
+    const cached = JSON.parse(localStorage.getItem(sessionKey('grammar', 'N5', 'grammar.flashcard.f2b', 'en')))
     expect(cached[0].lesson_seen).toBe(true)
   })
 
   it('does not re-gate after a reload, and never gates a card already met', async () => {
-    localStorage.setItem('jp-session:v6:grammar:N5:grammar.flashcard.f2b:en', JSON.stringify([base({ lesson_seen: true })]))
+    localStorage.setItem(sessionKey('grammar', 'N5', 'grammar.flashcard.f2b', 'en'), JSON.stringify([base({ lesson_seen: true })]))
     const screen = await mount('grammar.flashcard.f2b', [])
     await settle(300)
     expect(screen.container.querySelector('.gl--gate')).toBeNull()
