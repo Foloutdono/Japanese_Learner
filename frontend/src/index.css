@@ -23509,5 +23509,92 @@ a.slip__act { text-decoration: none; }
     border: 1px solid var(--surface-line);
     border-radius: var(--r-panel);
   }
+
+  /* ── 問 — the asking (plan 131) ──
+     A short question about the exercise just graded, in the lower half
+     of a practice run's lines panel (AskPanel inside RunLines): the list
+     and the asking take a half each, so neither moves when the other
+     grows -- the list scrolls in its half, the thread in its own. Sealed
+     until the grade: the field drawn, disabled, under the line saying
+     when it opens. The questions in the page's second ink under 問, the
+     answers in its first under 答, the gold of the lit row. */
+  .desk-sentences:has(> .desk-ask) > .desk-sentences__list { flex: 1 1 0; }
+  .desk-ask {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    flex: 1 1 0;
+    min-height: 0;
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--surface-line);
+  }
+  .desk-ask__thread {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+  }
+  .desk-ask__turn {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-ask__q,
+  .desk-ask__a {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-3);
+    margin: 0;
+    font-size: var(--fs-sm);
+    line-height: 1.55;
+  }
+  .desk-ask__q { color: var(--text-secondary); }
+  .desk-ask__a { color: var(--text-primary); }
+  .desk-ask__a--note { color: var(--text-secondary); }
+  .desk-ask__mark {
+    flex: none;
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+  .desk-ask__a > .desk-ask__mark { color: var(--accent2); }
+  .desk-ask__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-line;
+  }
+  .desk-ask__hint {
+    flex: 1 1 auto;
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  .desk-ask__form {
+    display: flex;
+    gap: var(--sp-2);
+    flex: none;
+  }
+  .desk-ask__field {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: var(--fs-sm);
+  }
+  .desk-ask__send {
+    flex: none;
+    min-width: 44px;
+    padding-inline: var(--sp-3);
+  }
+  .desk-ask__note {
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

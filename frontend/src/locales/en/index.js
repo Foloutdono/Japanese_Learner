@@ -322,6 +322,21 @@ const quiz = {
   deskKeyPick:         'picks an answer',
   deskKeyNext:         'next question',
   deskKeyWalk:         'walks the questions',
+  // 問 — a question about the exercise, on the desk (plan 131): open once
+  // the answer is graded, short, precise, about this exercise only.
+  askTitle:            'A question',
+  askPlaceholder:      'Your question…',
+  askSealed:           'Questions open once your answer is graded.',
+  askSealedText:       'Questions open with the results.',
+  askHint:             'A short, precise answer, about this exercise.',
+  askSend:             'Ask',
+  askThinking:         'Answering',
+  askOffTopic:         'I only answer questions about this exercise.',
+  askUnavailable:      'Answers are unavailable right now.',
+  askFailed:           'The answer didn’t arrive. Try again.',
+  askSpent:            at => (at ? `No more questions today: they come back at ${at}.` : 'No more questions today.'),
+  askLeft:             n => `${n} question${n > 1 ? 's' : ''} left today`,
+  askFull:             'That’s all for this sentence.',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see

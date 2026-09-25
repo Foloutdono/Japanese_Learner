@@ -18,6 +18,9 @@ import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
+import { useAsk } from '../hooks/useAsk'
+import { AskPanel } from '../components/study/AskPanel'
+import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
@@ -148,6 +151,8 @@ function Session({ session, level }) {
   const closeLookup = useCallback(() => setLookup(null), [])
   // 机 (plan 129): this run's lines, each reopening its breakdown.
   const lines = useRunLines(session, { held: Boolean(lookup) })
+  // 問 (plan 131): a question about the line, once graded, on the desk.
+  const asking = useAsk(session, 'dictation')
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -265,10 +270,19 @@ function Session({ session, level }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // What a question about the line carries, less its breakdown
+  // (domain/ask's askTarget adds the words): the line, its translation,
+  // what the learner heard. Nothing before the reveal: the line is the
+  // answer.
+  function askBase() {
+    if (!result) return null
+    return { sentence: result.jp, level, translation: result.translation, answer: answer.trim() }
+  }
+
   function next() {
     // The line just graded joins the run's lines (plan 129).
     if (clip && result && quality != null) {
-      lines.commit({ key: clip.id, jp: result.jp, translation: result.translation, quality, analysis })
+      lines.commit({ key: clip.id, jp: result.jp, translation: result.translation, quality, analysis, ask: askBase() })
     }
     if (queueRef.current.length) {
       const [head, ...rest] = queueRef.current
@@ -356,6 +370,9 @@ function Session({ session, level }) {
 
   const where = `${level} · ${t.stationJlpt}`
   const keys = useSentenceKeys({ listen: true })
+  // The asking's thread: a reopened line's, else the line on the
+  // stage's, open once it is graded (plan 131).
+  const target = askTarget(lines.opened, { key: clip?.id, base: askBase(), analysis, open: stage === 'feedback' && rated })
   // A door in a breakdown -- the line on the stage's, or one reopened
   // from the run's lines -- opens in the column (plan 115).
   const doors = {
@@ -390,6 +407,9 @@ function Session({ session, level }) {
           onOpen={key => { setLookup(null); lines.open(key) }}
           onCurrent={() => { setLookup(null); lines.close() }}
           keys={keys}
+          ask={target.key != null && (
+            <AskPanel key={target.key} ask={asking} askKey={target.key} context={target.context} open={target.open} />
+          )}
         />
       )}
       side={lines.opened ? <LineSide lines={lines} {...doors} /> : (
