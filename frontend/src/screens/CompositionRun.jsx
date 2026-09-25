@@ -13,9 +13,13 @@ import { CardTransition } from '../components/study/CardTransition'
 import { TutorReview } from '../components/study/TutorReview'
 import { GrammarLessonBody, GrammarLessonSheet } from '../components/study/GrammarLesson'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { BreakdownSide, LineSide, DeskPane } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
-import { EnterKey } from '../components/chrome/DeskKeys'
+import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
+import { RunLines } from '../components/study/RunLines'
+import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
+import { useRunLines } from '../hooks/useRunLines'
+import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
@@ -84,6 +88,8 @@ function Session({ session, level }) {
   const [tutorLoading, setTutorLoading] = useState(false)
   const [limited, setLimited] = useState(false)  // the day's reviews are spent
   const [rated, setRated]     = useState(false)
+  // The grade given, for the run's lines (plan 129); null until rated.
+  const [quality, setQuality] = useState(null)
   const [score, setScore]     = useState({ correct: 0, total: 0 })
   const [error, setError]     = useState(null)
   // The lesson behind the point, on a phone: a sheet opened from the
@@ -104,6 +110,9 @@ function Session({ session, level }) {
   const [explainError, setExplainError]       = useState(null)
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
+  // 机 (plan 129): this run's sentences -- the learner's own -- each
+  // reopening its breakdown in the side.
+  const lines = useRunLines(session, { held: Boolean(lookup) })
 
   const queueRef = useRef([])      // points fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -149,6 +158,7 @@ function Session({ session, level }) {
     setTutorLoading(false)
     setLimited(false)
     setRated(false)
+    setQuality(null)
     setLesson(false)
     setAnalysis(null)
     setAnalysisLoading(false)
@@ -242,11 +252,17 @@ function Session({ session, level }) {
   useEffect(() => {
     if (startedRef.current) return
     startedRef.current = true
+    startTally(`composition:${level}`)
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function next() {
+    // The sentence just graded joins the run's lines (plan 129), with
+    // what the tutor said it means as its translation.
+    if (point && sentence && quality != null) {
+      lines.commit({ key: point._uiKey, jp: sentence, translation: tutor?.review?.meaning, quality, analysis })
+    }
     if (queueRef.current.length) {
       const [head, ...rest] = queueRef.current
       queueRef.current = rest
@@ -290,7 +306,11 @@ function Session({ session, level }) {
   function grade(quality) {
     if (rated) return
     setRated(true)
+    setQuality(quality)
     setScore(s => ({ correct: s.correct + (quality > 2 ? 1 : 0), total: s.total + 1 }))
+    countReview({ quality })
+    lines.close()
+    setLookup(null)
     apiJson('/api/composition/result', session, {
       method: 'POST',
       body: JSON.stringify({
@@ -316,27 +336,36 @@ function Session({ session, level }) {
   // the grammar station stands beside its points — and the sentence's
   // own breakdown once they have rated, with the doors opening in the
   // column (BreakdownSide → SideLookup).
-  const side = rated
-    ? (
-      <BreakdownSide
-        graded
-        analysis={analysis}
-        loading={analysisLoading}
-        translation={tutor?.review?.meaning}
-        sentenceText={sentence}
-        onTokenClick={w => setLookup(vocabLookup(w))}
-        onGrammarOpen={g => setLookup(grammarLookup(g))}
-        onExplain={explainLine}
-        explaining={explaining}
-        explainError={explainError}
-        lookup={lookup}
-        onExitLookup={closeLookup}
-        session={session}
-      />
-    )
-    : point
-      ? <GrammarLessonBody key={point.raw_id} id={point.raw_id} session={session} />
-      : <p className="desk-run__note">{t.loading}</p>
+  //
+  // A sentence of an earlier point reopened from the run's lines (plan
+  // 129) takes the column until the learner comes back to this one.
+  const doors = {
+    onTokenClick: w => setLookup(vocabLookup(w)),
+    onGrammarOpen: g => setLookup(grammarLookup(g)),
+    lookup,
+    onExitLookup: closeLookup,
+    session,
+  }
+  const keys = useSentenceKeys()
+  const side = lines.opened
+    ? <LineSide lines={lines} {...doors} />
+    : rated
+      ? (
+        <BreakdownSide
+          graded
+          analysis={analysis}
+          loading={analysisLoading}
+          translation={tutor?.review?.meaning}
+          sentenceText={sentence}
+          onExplain={explainLine}
+          explaining={explaining}
+          explainError={explainError}
+          {...doors}
+        />
+      )
+      : point
+        ? <DeskPane label={t.glLesson} className="desk-pane--lesson"><GrammarLessonBody key={point.raw_id} id={point.raw_id} session={session} /></DeskPane>
+        : <p className="desk-run__note">{t.loading}</p>
 
   return (
     <StudyStage
@@ -345,12 +374,28 @@ function Session({ session, level }) {
       leaveLabel={t.leaveLevels}
       where={t.compositionTitle}
       sub={where}
-      remaining={`${score.correct} / ${score.total}`}
+      // On the desk the score is the run panel's figures (plan 129).
+      remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       toast={fare.toast}
       onToastDone={fare.toastDone}
+      records
+      recordsLabel={t.deskLinesRated}
+      panel={(
+        <RunLines
+          lines={lines.lines}
+          // The point until the sentence is written, then the sentence.
+          current={point && stage !== 'error'
+            ? (stage === 'feedback' ? currentLine(sentence, quality) : { label: point.pattern, lang: 'ja', quality: null })
+            : null}
+          openKey={lines.opened?.key ?? null}
+          onOpen={key => { setLookup(null); lines.open(key) }}
+          onCurrent={() => { setLookup(null); lines.close() }}
+          keys={keys}
+        />
+      )}
       side={side}
-      sideLabel={rated ? t.deskBreakdownLabel : t.glLesson}
+      sideLabel={rated || lines.opened ? t.deskBreakdownLabel : t.glLesson}
     >
       {stage === 'loading' && <Loading />}
 
@@ -485,7 +530,7 @@ function Session({ session, level }) {
             <div className="stage__foot">
               <button type="button" className="btn-primary" onClick={next} aria-keyshortcuts={desk ? 'Enter' : undefined}>
                 {t.nextPhrase}
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+                <KeyCap>{t.keyEnter}</KeyCap>
               </button>
               {/* 机: Enter takes the next point, as in every practice run. */}
               <EnterKey onEnter={next} />

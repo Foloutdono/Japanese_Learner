@@ -8170,153 +8170,155 @@ textarea:focus-visible {
 .quiz-result--wrong   { color: var(--danger); }
 
 /* ── 読み入力 (kanji.readings) ──────────────────────────────
-   Two labelled groups, each growing a row at a time. The rows sit in a
-   flex row with the tick OUTSIDE the field, so a correct mark never
-   overlaps kana the learner is still reading. Colours come from the
+   One box per kind of reading the card has, each holding the learner's
+   readings as chips and a field for the next (ReadingsInput.jsx). A
+   reading becomes a chip on a separator or the box's +, and on checking
+   the box lays the stored readings out beside them: the ones found
+   ringed in --success, a wrong guess struck, a missed one dashed. It
+   grows sideways, a chip at a time, where the rows it replaced grew
+   down the column 42px a reading and scrolled it. Colours come from the
    line pigment the section handed down, same as every other study
    control -- nothing here picks its own hue. */
-/* Sized to the form, not to the container. Padding tuned for a single
-   big glyph doesn't fit a stack of labelled rows, so this widens it to
-   --sp-7 on every side. max-height/overflow are cleared for the same
-   kind of reason: two groups of several rows each pass 60vh easily,
-   and the base clamp turned the card into an inner scroll area —
-   which cropped the submit button behind the card's own rounded edge
-   and scrolled the answer list out from under the rows it belongs to. */
 /* .prompt-card is compounded in on purpose. The base .prompt-card rule
    (max-height: 60vh; overflow: auto) lives LATER in this file, and two
    single-class selectors of equal specificity are settled by source
    order — so a bare `.readings-input { overflow: visible }` here lost
-   silently and the card stayed an inner scroll area. Same for
-   .drawing-quiz__card below.
+   silently and the card stayed an inner scroll area, cropping Valider
+   behind the card's own rounded edge. Same for .drawing-quiz__card
+   below.
 
-   Plan 049 -- no width override here any more. This used to argue for
-   staying full width: capping it at 520px made this the one mode whose
-   card visibly shrank next to the others sitting above/below it in the
-   same session. That objection was about capping THIS MODE ALONE, not
-   about caps in general -- and a UNIVERSAL cap (every .prompt-card now
-   tracks --card-w, 640px, see index.css:13659) satisfies it exactly,
-   since nothing shrinks relative to anything else any more. The FORM
-   inside still stays comfortably narrow regardless (see
-   .readings-input__group / __submit below), centered in the card
-   rather than stretched edge to edge -- a "kana or romaji" input 640px
-   wide would still be its own kind of ugly. */
+   Plan 049 -- no width override here: the card tracks --card-w like
+   every other, and the FORM inside stays comfortably narrow (the
+   groups and Valider below), centred in the card rather than stretched
+   edge to edge. --sp-7 all round: there are no corner buttons on this
+   card for a taller top to hold. */
 .prompt-card.readings-input {
   text-align: left;
   --card-pad-y: var(--sp-7);
   --card-pad-x: var(--sp-7);
-  /* 44 top, per Study.dc.html -- the extra headroom is what the corner
-     buttons sit in. */
-  --card-pad-top: var(--sp-8);
+  --card-pad-top: var(--sp-7);
   max-height: none;
   overflow: visible;
 }
 
-/* Centered and capped independently of the now full-width card around
-   them — a row of kana/romaji inputs reads as a form, not a banner,
-   only at roughly this width. */
+/* Centered and capped independently of the full-width card around
+   them -- a box of kana reads as a form, not a banner, only at roughly
+   this width. Valider is a block so it takes the groups' axis: a
+   button is inline-block, where auto margins are 0, and it stood at the
+   line's start, 51px left of the fields on the desk. */
 .readings-input__group,
-.readings-input__submit {
+.prompt-card.readings-input > .readings-input__submit {
   max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
-.readings-input__group + .readings-input__group { margin-top: 22px; }
-/* A hairline between 音読み and 訓読み now that both groups share one
-   card — without it the second group's label reads as more of the
-   first group's own content instead of a new section starting. */
-.readings-input__group--sep {
-  padding-top: 22px;
-  border-top: 1px solid var(--border);
+.readings-input__group + .readings-input__group { margin-top: var(--sp-5); }
+.prompt-card.readings-input > .readings-input__submit {
+  display: block;
+  margin-top: var(--sp-6);
 }
-
-/* Sits below a hairline of its own: it is the action for the whole
-   form, not for whichever group happens to be last above it. */
-.readings-input__submit { margin-top: 26px; }
 
 .readings-input__label {
+  display: block;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-3);
 }
-.readings-input__row {
+
+/* The box is the field: the well, the edge, the 44px floor, and the
+   focus ring when its own input has the focus. The input in it is bare,
+   and takes what the chips leave of the line, never less than a short
+   reading's room. */
+.readings-input__box {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  cursor: text;
 }
-.readings-input__row .readings-input__field { margin-bottom: 8px; }
-.readings-input__row svg { flex: none; color: var(--success); }
-
-.readings-input__field--ok   { border-color: var(--success); }
-.readings-input__field--miss { border-color: var(--border); }
-
-/* `--line-color`, not `--line`. Plan 057 established this for the
-   DeckDetail form and reported the three that paint the kanji QUIZ;
-   plan 059 was those three. Two of them styled the Japanese half of a
-   label pair (.readings-input__label and .radical-answer__label) and
-   went with those labels on 2026-09-21, so this is the one left, and
-   it keeps the note. Nothing in the app has ever
-   set `--line`, so `var(--line, var(--accent))` always resolved to
-   the fallback -- 仮名's vermillion, on a card about 漢字, which is a
-   plain "one line, one colour" breach on the section that owns 藤色.
-
-   The fallback here is `--line-kanji` rather than `--accent` because
-   no screen that renders this component injects `--line-color` at all
-   (checked: Kanji, Study and Today all mount it inside a bare
-   `.container.stage`; the eight injectors are the selection/
-   station components and the two Decks screens). Reading
-   `--line-color` first keeps DESIGN.md's "the pigment is injected
-   once" contract for the day a shell does inject one -- a personal
-   deck's kanji card would then correctly wear 蘇芳 -- while the
-   fallback names a real pigment instead of the wrong section's.
-
-   Mixed half-way to --text-primary, not used raw: 057 measured 藤色
-   as small text at 2.9-3.4:1 and DESIGN.md is explicit that a line
-   pigment is "an edge, a ring, or a numeral -- never a fill". Same
-   50% figure and the same reason as .deckdetail-form__addline. */
-.readings-input__add {
-  background: none;
-  border: none;
-  padding: 2px 0 0;
-  font-size: 13px;
-  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
-  cursor: pointer;
+.readings-input__box:has(> .readings-input__field:focus-visible) {
+  outline: 2px solid var(--accent2);
+  outline-offset: 0;
 }
-.readings-input__add:hover { text-decoration: underline; }
-
-.readings-input__answer {
-  margin-top: 6px;
-  font-size: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: baseline;
+.readings-input__box--checked { cursor: default; }
+.readings-input__box > .readings-input__field {
+  flex: 1 1 8ch;
+  width: auto;
+  min-width: 8ch;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-body);
 }
-.readings-input__answer-label { color: var(--text-secondary); }
-/* A wrapping FLEX row, not a run of inline text. Japanese allows a line
-   break between almost any two characters, so as plain text this list
-   broke mid-reading — のぼ.り split across two lines reads as two
-   different readings, which is the one thing a list of readings must
-   not do. Making each entry a flex item moves the break opportunities
-   to the gaps between entries, where they belong.
-   (`white-space: nowrap` alone did NOT work and is why this is a flex
-   row: the entries are rendered adjacent with no whitespace between
-   them, so suppressing breaks inside each one left the whole list with
-   no break opportunity at all and it ran 1218px off the card.) */
-.readings-input__answer-list {
+.readings-input__box > .readings-input__field:focus-visible { outline: none; }
+
+/* A reading: a pill on the well. Pressed, it goes -- the whole chip is
+   the button, and its × says so. On a touch screen the press reaches
+   6px past its edges, top and bottom, to the family's 44px. */
+.readings-input__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 32px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
   font-family: var(--font-jp);
-  font-size: 17px;
+  font-size: var(--fs-body);
+  font-weight: 500;
   color: var(--text-primary);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  row-gap: 4px;
 }
-.readings-input__answer-list .reading-sep-item { white-space: nowrap; }
+.readings-input__chip-x {
+  font-family: var(--font-display);
+  color: var(--text-secondary);
+}
+.readings-input__chip--ok { border-color: var(--success); }
+.readings-input__chip--ok svg { flex: none; color: var(--success); }
+.readings-input__chip--wrong {
+  background: none;
+  border-color: var(--border);
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+/* What was not found: legible, since it is the thing to learn, and
+   dashed, since the learner did not write it. */
+.readings-input__chip--missed {
+  background: none;
+  border-style: dashed;
+}
+
+/* The + that makes a chip of what is typed, there as soon as something
+   is: the phone's way, whose first keyboard page has no comma. */
+.readings-input__add {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  font-size: var(--fs-lead);
+  line-height: 1;
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
+}
+@media (pointer: coarse) {
+  button.readings-input__chip::after,
+  .readings-input__add::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
+}
 
 .readings-input__cap {
-  margin-top: 8px;
+  margin-top: var(--sp-3);
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -11562,6 +11564,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: block;
 }
 
+/* 田 — the practice sheet's guide: a dashed cross that quarters the
+   board, the four squares a learner places strokes against. Faint, so
+   the ink stays the reading; over the slab and under the correction. */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  --grid-ink: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+}
+.canvas-grid::before,
+.canvas-grid::after {
+  content: '';
+  position: absolute;
+}
+.canvas-grid::before {
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  border-left: 1px dashed var(--grid-ink);
+}
+.canvas-grid::after {
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  border-top: 1px dashed var(--grid-ink);
+}
+
 /* 朱書き — the correction, over the learner's own line rather than
    beside it (DrawingCanvas.jsx, Ghost). The learner's ink is
    --brush-ink at full strength, so the same ink at a third reads as
@@ -11728,11 +11758,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    is its own: matched to the card above it, so the button reads as
    belonging to the card instead of being a narrower, unrelated bar
    floating under one edge of it. */
-.drawing-quiz__validate {
+/* Show the answer and the eraser on one row under the card, matched to
+   its width: the answer the wide one, the eraser only its word. */
+.drawing-quiz__actions {
+  display: flex;
+  gap: var(--sp-3);
   width: 100%;
   max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
 }
+.drawing-quiz__validate { flex: 1 1 auto; }
+.drawing-quiz__clear {
+  flex: none;
+  width: auto;
+  max-width: none;
+  margin-left: auto;
+}
+/* Pressed, it is gone -- but for the desk's panels, which keep its room
+   (the 三面 block). */
+.drawing-quiz__validate--spent { display: none; }
 
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
 .quiz-subtitle {
@@ -21156,21 +21200,40 @@ a.slip__act { text-decoration: none; }
   }
 
   /* ── the gates, laid out for the width ──
-     Learn and Practice hang five plates each. A column of five at the
-     desk's width is five slabs a thousand pixels long, so the plates go
-     two by two — and the fifth, which is the odd one out on both gates
-     (the deck shelf under the four lines; the mock exam after the four
-     platforms), takes the full row. Two columns divide four, and the
-     fifth spans them: a lattice with no short last row (DESIGN.md, "A
-     lattice's column count must divide its content"). */
+     Learn and Practice hang their plates two by two: a column of them
+     at the desk's width was a stack of slabs a thousand pixels long.
+     Learn's fifth, the deck shelf under the four lines, takes the full
+     row, so the lattice has no short last row (DESIGN.md, "A lattice's
+     column count must divide its content").
+
+     And they take the window (plan 130). The plates stood a third of
+     the way down a 950px window with the rest of it empty; now the
+     plates fill the room the page has, their rows sharing it the way
+     the phone's column shares its own, and the room goes to each
+     plate's body — the line drawn upright on Learn, the grades as rows
+     with the learner's record on Practice — never to air in the box
+     (DESIGN.md, the density contract). A row's share never goes below
+     its content: a window too short for the plates scrolls. The shelf
+     keeps its own height, having no body to give the room to. Practice
+     goes three across once three hold a French name whole (about
+     1344px), and its six then stand in two rows. */
   .learn > .plates,
   .practice > .plates {
+    flex: 1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
-  .learn > .plates > .plate:last-child:nth-child(odd),
-  .practice > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .learn > .plates { grid-template-rows: repeat(2, 1fr) auto; }
+  .practice > .plates {
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - var(--sp-5)), 1fr));
+    grid-auto-rows: 1fr;
+  }
+  .learn > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* A plate with a body keeps its head at the head's own height; the
+     body takes the rest. */
+  .learn > .plates > .plate--line > .plate__head,
+  .practice > .plates > .plate > .plate__head { flex: none; }
 
   /* ── the second column (plan 114) ──
      components/chrome/DeskSide.jsx: whatever stands beside a screen's
@@ -21211,100 +21274,92 @@ a.slip__act { text-decoration: none; }
     padding: var(--sp-2) var(--sp-2) var(--sp-4);
     scroll-padding: var(--sp-2) var(--sp-2) var(--sp-4);
   }
-  /* A Learn plate's foot on the desk draws the whole line
-     (components/station/LinePlate's LineFoot): the novice's stop, then a
-     leg per level — a rail filled as far as the level is learned, the
-     level's station at the leg's end, its learned/total under it. The
-     leg being ridden is inked, the finished ones filled. A rail and a
-     ring in the line's own pigment, on the plate that is that line's. */
+  /* A Learn plate's foot on the desk draws the whole line, upright
+     (components/station/LinePlate's LineFoot; across the plate from
+     plan 114, upright since plan 130): the novice's stop at the top,
+     then a row per level — its stretch of the rail filled as far as
+     the level is ridden, its station (a ring) where the leg ends, its
+     name, a bar and its learned/total. The rows share the body's
+     height and one set of columns (a subgrid), so every bar starts
+     and ends where the others do. The bar is the level's make-up:
+     learned in the line's pigment, met but not learned in half of it. */
   .desk-line {
-    grid-template-columns: auto;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
-    align-items: start;
-    column-gap: 0;
-    /* The last station's name and figure hang half their width past
-       the line's end, so the end stands a full rung in from the edge. */
-    padding: var(--sp-3) var(--sp-8) var(--sp-4) var(--sp-6);
-    font-size: var(--fs-caption-xs);
+    flex: 1;
+    display: grid;
+    grid-template-columns: var(--sp-6) var(--sp-8) minmax(0, 1fr) max-content;
+    grid-auto-rows: 1fr;
+    column-gap: var(--sp-4);
+    align-items: stretch;
+    padding: var(--sp-3) var(--sp-6) var(--sp-4) var(--sp-5);
   }
-  /* The origin takes no width of its own: its station stands on the
-     first leg's rail end, and its word hangs under it. */
-  .desk-line__origin {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-1);
-    width: 0;
-    white-space: nowrap;
+  .desk-line__origin,
+  .desk-line__leg {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
   }
-  .desk-line__origin::before {
-    content: '';
-    width: 11px;
-    height: 11px;
-    margin-block: calc(var(--sp-2) - 4px);
-    border-radius: var(--r-pill);
-    background: var(--line-color);
-    transform: translateX(-50%);
-  }
+  .desk-line__origin > :last-child { grid-column: 2 / -1; }
   /* A leg is a button, a door to its station (plan 115): it draws no
      box of its own, and says so on approach by inking its station. */
   .desk-line__leg {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-1);
-    min-width: 0;
     padding: 0;
     border: 0;
+    border-radius: var(--r-flat);
     background: none;
     color: inherit;
     font: inherit;
+    text-align: left;
     cursor: pointer;
   }
-  .desk-line__track {
+  /* The rail: the top half of a row is the end of its own leg, the
+     bottom half the start of the next, each filled to its share of its
+     leg (--up, --down) in the pigment over the pigment at rest. */
+  .desk-line__rail {
     position: relative;
     align-self: stretch;
-    height: 3px;
-    margin: var(--sp-2) 0;
-    border-radius: var(--r-pill);
-    background: color-mix(in srgb, var(--line-color) 25%, transparent);
   }
-  .desk-line__track i {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: var(--line-color);
-  }
-  .desk-line__track::after {
+  .desk-line__rail::before,
+  .desk-line__rail::after {
     content: '';
     position: absolute;
+    left: 50%;
+    width: 3px;
+    translate: -50% 0;
+  }
+  .desk-line__rail::before {
+    top: 0;
+    height: 50%;
+    background: linear-gradient(var(--line-color) calc(var(--up, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line__rail::after {
     top: 50%;
-    right: 0;
+    bottom: 0;
+    background: linear-gradient(var(--line-color) calc(var(--down, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line__origin > .desk-line__rail::before,
+  .desk-line__leg:last-child > .desk-line__rail::after { content: none; }
+  .desk-line__ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
     width: 11px;
     height: 11px;
     border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
     border-radius: var(--r-pill);
     background: var(--surface);
-    transform: translate(50%, -50%);
+    translate: -50% -50%;
   }
-  /* A station's name and figure stand centred under its ring, which is
-     the leg's end: pulled half their own width past it. */
-  .desk-line__stop {
-    font-size: var(--fs-caption);
-    line-height: 1.2;
-    text-align: center;
-    translate: 50% 0;
-  }
-  .desk-line__fig {
-    font-weight: 600;
-    line-height: 1.2;
-    text-align: center;
-    translate: 50% 0;
-  }
-  .desk-line__leg--done .desk-line__track::after {
+  .desk-line__origin .desk-line__ring,
+  .desk-line__leg--done .desk-line__ring {
     border-color: var(--line-color);
     background: var(--line-color);
+  }
+  .desk-line__leg--here .desk-line__ring { border-color: var(--line-color); }
+  .desk-line__stop {
+    font-size: var(--fs-body);
+    line-height: 1.2;
   }
   .desk-line__leg--here .desk-line__stop { color: var(--text-primary); }
   .desk-line__leg:hover .desk-line__stop,
@@ -21313,6 +21368,83 @@ a.slip__act { text-decoration: none; }
     text-decoration: underline;
     text-underline-offset: 3px;
   }
+  .desk-line__bar {
+    position: relative;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--line-color) 14%, transparent);
+    overflow: hidden;
+  }
+  .desk-line__bar > i {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    border-radius: inherit;
+  }
+  .desk-line__met { background: color-mix(in srgb, var(--line-color) 45%, transparent); }
+  .desk-line__learned { background: var(--line-color); }
+  .desk-line__fig {
+    font-weight: 600;
+    text-align: right;
+  }
+  .desk-line__fig > b { color: var(--text-primary); }
+
+  /* A Practice plate's foot on the desk (plan 130, screens/
+     PracticeScreen's GradeRows): the five grades as rows sharing the
+     body's height, each its code, what the learner has done there and
+     the share of it right, and a chevron. The learner's own grade wears
+     the chip's --here look it had on the chip row. */
+  .desk-grades {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    gap: var(--sp-1);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+  .desk-grade {
+    display: grid;
+    grid-template-columns: var(--sp-8) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-4);
+    padding: 0 var(--sp-4);
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .desk-grade:hover,
+  .desk-grade:focus-visible {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    background: var(--overlay-hover);
+    filter: none;
+  }
+  .desk-grade--here {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    background: color-mix(in srgb, var(--line-color) 12%, transparent);
+  }
+  .desk-grade__code {
+    font-size: var(--fs-body);
+    letter-spacing: var(--tr-term);
+    color: var(--text-primary);
+  }
+  .desk-grade--here .desk-grade__code { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
+  .desk-grade__rec {
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-grade__rec--none { color: var(--text-secondary); }
+  .desk-grade__go { font-size: var(--fs-lead); }
+  .desk-grade:hover .desk-grade__go,
+  .desk-grade:focus-visible .desk-grade__go { color: var(--text-primary); }
 
   /* Today (plan 114): the fare gate is the work and takes the width;
      beside it, in the second column, what the work is for — the pass at
@@ -22015,6 +22147,9 @@ a.slip__act { text-decoration: none; }
   /* The comprehension text beside its questions (plan 115): whole, at
      the column's width, never the base card's 60vh inner scroll. */
   .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
+  /* On a practice run's panels (plan 129) it is the column's one card,
+     as tall as the column at least, as the pane beside a sentence is. */
+  .desk-run--panels > .desk-run__side > .prompt-card { flex: 1 0 auto; }
   /* ── the mock exam, sat at a desk (plan 115) ──
      screens/ExamRunner: the answer sheet stands in the side — the clock
      at the head of the column, the count, the grid, Finish — and the
@@ -22531,6 +22666,65 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     justify-content: center;
   }
+  /* But not over a writing board: there the board grows. Sized off the
+     window alone (52vh, to 440px), it stood the column 70px past a
+     800px window and 200px past the owner's, Show the answer under the
+     fold and the tiles under that. The prompt never changes face, so it
+     takes its content; the board takes what the prompt, its two buttons
+     and the tiles leave. Both cards come in to the phone's rung: 44px
+     over and under three lines of prompt, and 28px round a square, are
+     height the board could have been. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage { flex: 0 0 auto; }
+  .desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage > .drawing-quiz {
+    --drawing-card-pad: var(--sp-5);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--panels > .stage > .drawing-quiz > .prompt-card.drawing-quiz__card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The square is the smaller of the room's two sides, to the 440px
+     cap. The room is a size container, so it is what the column gives
+     it and never what the board asks for. Under
+     160px the board stops shrinking and the column scrolls instead: a
+     mouse writes a kanji well enough there (KanjiVG draws at 109), a
+     thumbnail is no writing surface. The floor is in the
+     sum as well as on the room, because a room held up by its
+     min-height reads 0 for 100cqh in Chromium, not its height. */
+  .desk-run--panels > .stage > .drawing-quiz .canvas-wrap {
+    --canvas-cap: min(100cqw, 440px, max(160px, 100cqh));
+    flex: 1 1 auto;
+    min-height: 160px;
+    container-type: size;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-field {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-holder { max-height: none; }
+  /* Pressed, Show the answer keeps its room, so the board does not
+     grow under the correction as it lands. */
+  .desk-run--panels > .stage > .drawing-quiz .drawing-quiz__validate--spent {
+    display: block;
+    visibility: hidden;
+  }
+  /* Nor over the readings drill's boxes: the kanji never turns, so the
+     floor that holds a flashcard still is dead height, and the card
+     gives down to its glyph at the phone's rung where the boxes, Valider
+     and the tiles need the room -- 56px of scroll on a 800px window --
+     growing back into what they leave on a taller one. */
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.
@@ -23138,5 +23332,160 @@ a.slip__act { text-decoration: none; }
   }
   /* The record two by two at the side column's width. */
   .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* ── 三面 — the practice runs on three panels (plan 129) ──
+     Reading, translation, dictation, composition and comprehension stand
+     on the card runs' three columns (plan 126): this run over the run's
+     lines at the left (RunLines -- every sentence so far with the grade
+     it got, each reopening its breakdown; comprehension's questions),
+     the exercise in the middle -- the card grown to what its floor
+     leaves, the floor one framed row: the field and Check, then the
+     rating tiles, then Next -- and at the right the breakdown, the
+     point's lesson or the text, each one panel, sealed until the grade
+     as a card's details are until the reveal. The owner's pick of
+     three candidates for the left panel; the level strip leaves the
+     floor for the run panel, as on a card run. */
+
+  /* The card grows to what the floor leaves: a page handed straight to
+     the stage (a feedback's registers, dictation's player), as a card
+     through CardTransition already does above. */
+  .desk-run--panels > .stage > .prompt-card--footed {
+    flex: 1 0 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  /* The passage read on the stage is bounded and scrolls in its body
+     (.prompt-card--passage), so it takes the column's leftover height
+     and no more. */
+  .desk-run--panels > .stage > .prompt-card--passage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* A page in a grown card is centred by grow-only spacers, the phone's
+     own ruling (.stage > .prompt-card--footed in the phone block): a
+     page taller than its card spills downward only, where the column's
+     scroll can follow it -- or, on the bounded passage, the body's. */
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::after,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::after {
+    content: "";
+    flex: 1 0 0;
+  }
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::before {
+    margin-bottom: calc(-1 * var(--sp-1));
+  }
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::after,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::after {
+    margin-top: calc(-1 * var(--sp-1));
+  }
+  /* The floor: one framed row, as the tiles' is -- the field and Check,
+     then (the rating bar's own frame above) Next, or comprehension's
+     way through. At the column's width and its foot. */
+  .desk-run--panels > .stage > .stage__foot:not(.browse-nav) {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: auto 0 0;
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+
+  /* The run's lines: the list takes the panel's height and scrolls in
+     it, newest at its foot; the keys and the rhythm keep the panel's
+     floor. The room between the list and the keys is where the asking
+     will stand (RunLines). */
+  .desk-sentences { flex: 1 1 auto; }
+  .desk-sentences__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 calc(-1 * var(--sp-3));
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+  }
+  .desk-sentences__list > li { display: flex; min-width: 0; }
+  .desk-sentence {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: var(--sp-2) var(--sp-3);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-card);
+    color: var(--text-secondary);
+    font: inherit;
+    text-align: left;
+  }
+  button.desk-sentence { cursor: pointer; }
+  button.desk-sentence:hover,
+  button.desk-sentence:focus-visible { background: var(--overlay-hover); color: var(--text-primary); filter: none; }
+  /* The row whose breakdown the right column shows: the split's open
+     row (plan 117), gold edge and wash. */
+  .desk-sentence--lit {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent2);
+  }
+  button.desk-sentence--lit:hover,
+  button.desk-sentence--lit:focus-visible { background: color-mix(in srgb, var(--accent2) 12%, transparent); }
+  .desk-sentence__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-sentence__text:lang(ja) { font-family: var(--font-jp); letter-spacing: var(--tr-term); }
+  /* The grade as a dot in its verdict's ink (the tiles' --rating-color
+     inks); a ring before it, a neutral dot for an answer not graded yet
+     (comprehension's, until the paper is marked). */
+  .desk-sentence__dot {
+    --rating-color: transparent;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--rating-color);
+    border: 1.5px solid color-mix(in srgb, var(--text-secondary) 70%, transparent);
+  }
+  .desk-sentence__dot--answered { --rating-color: var(--text-secondary); border-color: var(--rating-color); }
+  .desk-sentence__dot--q0 { --rating-color: var(--danger); }
+  .desk-sentence__dot--q1 { --rating-color: var(--rating-wrong); }
+  .desk-sentence__dot--q2 { --rating-color: var(--rust); }
+  .desk-sentence__dot--q3 { --rating-color: var(--warning); }
+  .desk-sentence__dot--q4 { --rating-color: var(--teal); }
+  .desk-sentence__dot--q5 { --rating-color: var(--success); }
+  .desk-sentence__dot:is(.desk-sentence__dot--q0, .desk-sentence__dot--q1, .desk-sentence__dot--q2, .desk-sentence__dot--q3, .desk-sentence__dot--q4, .desk-sentence__dot--q5) {
+    border-color: var(--rating-color);
+  }
+  .desk-sentences > .desk-keys { margin-top: auto; }
+
+  /* What stands in the right column, as its one panel: the breakdown,
+     the lesson (DeskPane). At least the column's height, the column
+     scrolling past it -- a door's scroll is the column's (SideLookup). */
+  .desk-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    flex: 1 0 auto;
+    min-width: 0;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

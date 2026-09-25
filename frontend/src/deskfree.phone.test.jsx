@@ -1578,3 +1578,77 @@ describe('the kana charts (plan 128)', () => {
     apiJson.mockReset()
   })
 })
+
+// ── plan 129 — the run's lines, which a phone never draws ──
+// On the desk a practice run stands on three panels: this run and its
+// lines at the left, the breakdown sealed at the right until the grade,
+// the keys listed in the lines rather than on the controls. A phone keeps
+// its one column: the score in the head's pill, the level strip on the
+// floor, the breakdown behind its toggle, and no cap anywhere.
+describe('the run\'s lines (plan 129)', () => {
+  it('draws no column, keeps the head\'s score and the breakdown\'s toggle', async () => {
+    const { apiJson } = await import('./lib/api')
+    const PHRASE = { phrase: '山へ行きます。', romaji: 'yama e ikimasu', translation: 'I go to the mountain.', translation_lang: 'en', display_seconds: 30 }
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/reading/batch')) return { ok: true, status: 200, json: async () => ({ phrases: [PHRASE, { ...PHRASE, phrase: '駅で会いました。' }] }) }
+      if (u === '/api/phrase/analyze') {
+        return { ok: true, status: 200, json: async () => ({ text: PHRASE.phrase, available: true, grammar: [], tokens: [{ surface: '山', reading: 'やま', meaning: 'mountain', pos: 'noun', furigana: [{ text: '山', reading: 'やま' }] }] }) }
+      }
+      return { ok: true, status: 200, json: async () => ({ xp_earned: 7 }) }
+    })
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ReadingRun } = await import('./screens/ReadingRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/reading/level/N5']}>
+          <Routes><Route path="/practice/reading/level/:level" element={<ReadingRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    const input = document.querySelector('form.stage__foot input')
+    const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+    setValue.call(input, 'yama')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(20)
+    document.querySelector('form.stage__foot').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(200)
+    const seals = document.querySelectorAll('.rating-bar__btn')
+    seals[seals.length - 1].click()
+    await settle(300)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.stage__head .today-remaining').textContent).toBe('1 / 1')
+    expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
+    expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
+    expect(document.querySelector('kbd')).toBeNull()
+    apiJson.mockReset()
+    apiFetch.mockReset()
+  })
+})
+
+// ── plan 130 — the gates a phone keeps ──
+// On the desk the plates take the window, Learn's line stands upright
+// and Practice's grades are rows carrying the learner's record. A phone
+// keeps its column: the chip row of five on every platform, and no
+// request for a record it has nowhere to print.
+describe('the gates taking the window (plan 130)', () => {
+  it('keeps Practice\'s chip row and never asks for the record', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: PracticeScreen } = await import('./screens/PracticeScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
+    await settle(250)
+    const feet = [...document.querySelectorAll('.plate__foot--dests')]
+    expect(feet).toHaveLength(6)
+    for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
+    expect(document.querySelector('.desk-grades, .desk-grade')).toBeNull()
+    expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
+    // The column is the phone's, one plate to a row.
+    const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
+    expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
+  })
+})

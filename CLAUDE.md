@@ -421,7 +421,37 @@ runtime purpose. Two consequences worth knowing:
   `src/testing/grammarPoints.json`, `src/testing/kanaRows.json` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **129** or higher, and check
+  **129** is 三面・実践, the practice runs on three panels (wave 34; numbered
+  129 because 128 went to the dictionary while it was open): reading,
+  translation, dictation, composition and comprehension on plan 126's
+  columns, the left panel the run's lines -- every sentence so far with
+  its grade, each reopening its breakdown -- the breakdown, lesson or
+  text sealed at the right until the grade, the floor one framed row, the
+  keys in the lines; the mock exam keeps its paper; and the place of a
+  desk-only chatbot recorded, not built (cited in
+  `components/study/RunLines.jsx`, `components/study/sentenceLines.js`,
+  `hooks/useRunLines.js`, `components/analysis/BreakdownSide.jsx`,
+  `components/chrome/DeskKeys.jsx`'s `KeyCap`, `stores/runTally.js`,
+  `hooks/usePracticeXp.js`, the five `screens/*Run.jsx`,
+  `src/lines.desktop.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  **130** is the plated gates taking the window on the desk (wave 35;
+  numbered 130 because 129 went to the practice runs while it was open),
+  the owner's pick of three options rendered on the real screens: the
+  plates fill the window's height, a Learn line is drawn upright with a
+  row per level (its rail, its ring, a bar of learned and met, learned /
+  total), and a Practice platform's grades are rows carrying the
+  learner's record at each grade — sentences, texts or papers done and
+  the share right — from `GET /api/practice/record`, read from the six
+  practice logs; Practice goes three across once three hold a French
+  name; both feet are lists walked with ↑/↓ (cited in
+  `routes/practice.py`, `tests/test_practice_record.py`,
+  `components/station/LinePlate.jsx`'s `LineFoot`,
+  `screens/PracticeScreen.jsx`'s `GradeRows`, `stores/practiceRecord.js`,
+  `src/gates.desktop.test.jsx`, `src/gates.wide.test.jsx`,
+  `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **131** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -813,7 +843,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.

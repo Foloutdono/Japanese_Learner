@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react'
 import { applyXpGain } from '../stores/profileSummary'
+import { countXp } from '../stores/runTally'
 
 // ── The fare on a practice run ──────────────────────────────
 // Reading, translation, comprehension, dictation and the exam grade an
@@ -18,6 +19,12 @@ import { applyXpGain } from '../stores/profileSummary'
 //
 // Returns { toast, toastDone, pay }: pass `toast`/`toastDone` to
 // StudyStage, and call `pay(response, quality)` on a graded answer.
+//
+// The fare also goes on this run's tally (stores/runTally, plan 129),
+// the XP the desk's session panel prints: the run counted the answer
+// when it was rated, and the fare joins it here. A run that keeps no
+// tally (the exam) adds to one nobody reads, and the next run's start
+// clears it.
 export function usePracticeXp() {
   const [toast, setToast] = useState(null)
 
@@ -25,6 +32,7 @@ export function usePracticeXp() {
     const amount = typeof response?.xp_earned === 'number' ? response.xp_earned : 0
     if (amount <= 0) return
     const { leveledUp, newLevel } = applyXpGain({ amount })
+    countXp(amount)
     setToast({ amount, id: Date.now(), leveledUp, newLevel, quality })
   }, [])
 

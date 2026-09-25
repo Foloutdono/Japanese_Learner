@@ -951,7 +951,8 @@ set down on a desk; plan 115 took the remaining second screens and sheets
 into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
-answer a keyboard and a pointer one way everywhere.
+answer a keyboard and a pointer one way everywhere. Plan 130 had the two
+plated gates take the window.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1032,9 +1033,26 @@ answer a keyboard and a pointer one way everywhere.
   stands — a gold wash and foot mastered, a vermillion foot in progress,
   the kana in the secondary ink not yet met — and the short kana entry at
   `--desk-side-w`. On the narrowest desk the columns wrap rather than
-  shrink the cells. A
-  Learn plate's foot draws the whole line, a leg per level, and every leg
-  is a door to its stop.
+  shrink the cells.
+- **The plated gates take the window** (plan 130, the owner's pick of
+  three rendered options). Learn and Practice stood a third of the way
+  down a 950px window with the rest empty; their plates now fill the room
+  the page has, the rows sharing it, and the room goes to each plate's
+  body, never to air in the box (the density contract). A Learn plate's
+  foot draws the whole line **upright**: the novice's stop at the top,
+  then a row per level with its stretch of the rail filled as far as the
+  leg is ridden, its station at the leg's end, a bar of the level's
+  make-up (learned in the line's pigment, met but not learned in half of
+  it) and its learned / total, the bars sharing one column so each starts
+  where the others do. Every row is a door to its stop. A Practice
+  plate's grades are **rows**, each with what the learner has done at
+  that grade (sentences, texts or papers, and the share right, from
+  `/api/practice/record`) or "not yet", the learner's own grade in the
+  chip's --here look; a row departs as its chip does. Practice goes three
+  across once three hold a French name whole, and its six then stand in
+  two rows. The shelf keeps its own height, having no body. Both feet are
+  lists, one tab stop each, walked with ↑/↓. A window too short for the
+  plates scrolls rather than squeezing a row below its content.
 - **A station is two panes.** Levels, sets or grades stand upright on the
   left and the chosen stop's platforms on the right, each platform with its
   own figures (due now, and the composition bar the statistics draw); the
@@ -1123,9 +1141,48 @@ answer a keyboard and a pointer one way everywhere.
   stand centred past it and give down to 300 | 400 | 300 on a laptop
   without a second width query. The elements print no key caps there
   (`RunPanelsContext`) but the flashcard's "Espace pour révéler". A run with no rating bar (a browse, the
-  practice runs, the rides) keeps its side alone, the level strip on the
+  rides) keeps its side alone, the level strip on the
   floor and the plate's own layout; a run that failed or ended with
   nothing rated shows no figures, and the misses stand at its end.
+- **A practice run stands on the same three panels** (plan 129; the
+  owner asked for the practice modes to be reworked as the learning ones
+  were, and picked the left panel from three drawn candidates). Reading,
+  translation, dictation, composition and comprehension: at the left
+  **this run** — sentences (or questions) rated, good or better, XP
+  earned, the level bar as a row; the head's score pill goes — over **the
+  run's lines**: every sentence so far with the grade it got as a dot in
+  its verdict's ink, the one on the stage last, and any passed sentence a
+  door back to its breakdown in the right column (on a phone, and on the
+  desk before this, a sentence was gone the moment Next was pressed). The
+  row on the stage is an ellipsis until the answer is in — the list
+  stands beside the card, and before the answer the sentence is the
+  card's to show or to cover (reading's clock) and dictation's to
+  withhold; the row whose breakdown the column shows is lit in gold, Esc
+  stepping back to the sentence on the stage. The keys at the panel's
+  foot and the rhythm on its sumi. A sentence has no forecast to print:
+  it does not come back the way a card does, and the tiles' figure — what
+  a verdict pays — was rejected because a price beside a self-grade
+  invites the learner to inflate it. In the middle **the exercise**, the
+  card grown to what its floor leaves and the floor one framed row, as
+  the tiles' is: the field and Check, the tiles, then Next. At the right
+  **the breakdown**, sealed until the grade (the breakdown is the
+  answer), then the column's one panel; composition's lesson and
+  comprehension's text stand there the same way. Comprehension's lines
+  are its questions — asked so far, never ahead of the one on the stage,
+  a record rather than doors — and on its review every one with its
+  verdict: the open one's card in the middle with its options marked,
+  the sentence it quotes in the breakdown, the first miss open on
+  arrival, the score in the figures. The elements print no key caps; the
+  lines list them. The mock exam keeps its paper (below), and has no
+  lines: it is sat, not practised.
+- **The asking (問) has its place and is not built.** The owner means to
+  add a desk-only chatbot for short questions with precise answers. On a
+  practice run it will stand in the run's lines panel, the list giving it
+  the lower half, and it opens when the breakdown does — after the grade,
+  for the breakdown's reason: before it, "what does this mean?" is the
+  answer key. Reading, translation and composition gain most (a follow-up
+  on the tutor's review, a nuance the rows cannot hold), dictation after
+  the reveal, comprehension on its review only; the mock exam never.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
@@ -1267,7 +1324,10 @@ answer a keyboard and a pointer one way everywhere.
   train), and drawn without the reading and the caption the mockup gave
   it — a plate that prints かな over Kana over KANA names one thing three
   times. On a phone the column takes the gate and every plate gets one
-  share, the shelf too.
+  share, the shelf too. On the desk the lattice takes the window the same
+  way, and the plate's foot grows into the room: the whole line upright on
+  Learn, the grades as rows with the learner's record on Practice (plan
+  130, "The desk" above).
 - **A line with stops is how this app draws distance**, and it is one drawing
   shared by two places: the level picker's route diagram and the pass's ghost
   track (the wall map was the third, and went with the plates). Same parts

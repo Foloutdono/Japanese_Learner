@@ -279,6 +279,8 @@ const quiz = {
   deskKeyTurn:        'retourne la carte',
   deskKeyChoices:     'affiche les choix',
   deskKeyLeave:       'quitte le trajet',
+  deskKeyAddReading:  'ajoute une lecture',
+  deskKeyCheck:       'valide',
   deskRhythm:         'Le rythme',
   deskElapsed:        'Écoulées',
   deskPerMinute:      'Cartes / min',
@@ -288,6 +290,20 @@ const quiz = {
   keyEscape:          'Échap',
   deskWayUp:          'Remonter',
   deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
+  // Un exercice sur trois panneaux (plan 129) : les phrases du trajet, chacune
+  // avec la note qu'elle a reçue, et les touches d'un exercice.
+  deskLinesLabel:     'Les phrases du trajet',
+  deskLinesNow:       'en cours',
+  deskLinesRated:     'Phrases',
+  deskQuestionsRated: 'Questions',
+  deskPerMinuteLines: 'Phrases / min',
+  deskAnswered:       'Répondues',
+  deskKeyCheckNext:   'valide, puis suivante',
+  deskKeyRate:        'note ta réponse',
+  deskKeyListen:      'écoute la phrase',
+  deskKeyPick:        'choisit une réponse',
+  deskKeyNext:        'question suivante',
+  deskKeyWalk:        'parcourt les questions',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui
@@ -348,7 +364,10 @@ const quiz = {
   readingsOn:          'On (lecture sino-japonaise)',
   readingsKun:         'Kun (lecture japonaise)',
   readingsAdd:         'ajouter une lecture',
-  readingsAll:         'Toutes les lectures :',
+  readingsRemove:      (r) => `Retirer ${r}`,
+  readingsFound:       'trouvée',
+  readingsWrong:       'fausse',
+  readingsMissed:      'manquée',
   readingsPlaceholder: 'kana ou romaji',
   readingsCap:         "15 lectures, c'est le maximum pour cette carte.",
   modeWriteDesc:     'Le sens seul. Trace le caractère, trait par trait.',
@@ -1842,7 +1861,7 @@ const guide = {
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideHudStatusDesk: 'À l\'heure ou en retard sur votre propre plan. Son train fantôme se tient à côté de la porte.',
   guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
-  guidePracticeDestsDesk: 'Les niveaux. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
+  guidePracticeDestsDesk: 'Les niveaux, et ce que vous y avez fait. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue ; l\'étoile la garde sur votre étagère.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
@@ -1893,6 +1912,16 @@ const onboarding = {
   settingsLineOn: 'Sur ton trajet',
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
+  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 130) :
+  // ce qui a été fait à ce niveau, puis la part juste. L'espace avant le
+  // % est insécable, comme partout en français.
+  practiceDone: {
+    sentences: n => `${n} phrase${n > 1 ? 's' : ''}`,
+    texts: n => `${n} texte${n > 1 ? 's' : ''}`,
+    papers: n => `${n} épreuve${n > 1 ? 's' : ''}`,
+  },
+  practiceRight: pct => `${pct}\u00a0% justes`,
+  practiceNotYet: 'Pas encore',
   settingsRedoDesc: 'Repasse-le une fois que tu as progressé — ton niveau suit.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au

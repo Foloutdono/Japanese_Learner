@@ -291,7 +291,7 @@ export default function TodayRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
-      panel={card ? <CardPanel card={card} remaining={remaining} /> : null}
+      panel={card ? <CardPanel card={card} remaining={remaining} keys={structureKey === 'kanji' && renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} misses={false} />}
       sideLabel={t.dictionaryTitle}

@@ -297,6 +297,8 @@ const quiz = {
   deskKeyTurn:         'turns the card',
   deskKeyChoices:      'shows the choices',
   deskKeyLeave:        'leaves the run',
+  deskKeyAddReading:   'adds a reading',
+  deskKeyCheck:        'checks',
   deskRhythm:          'The rhythm',
   deskElapsed:         'Elapsed',
   deskPerMinute:       'Cards / min',
@@ -306,6 +308,20 @@ const quiz = {
   keyEscape:           'Esc',
   deskWayUp:           'Way up',
   deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
+  // An exercise on three panels (plan 129): the run's sentences, each with
+  // the grade it got, and an exercise's keys.
+  deskLinesLabel:      'This run’s sentences',
+  deskLinesNow:        'now',
+  deskLinesRated:      'Sentences',
+  deskQuestionsRated:  'Questions',
+  deskPerMinuteLines:  'Sentences / min',
+  deskAnswered:        'Answered',
+  deskKeyCheckNext:    'checks, then next',
+  deskKeyRate:         'grades your answer',
+  deskKeyListen:       'plays the line',
+  deskKeyPick:         'picks an answer',
+  deskKeyNext:         'next question',
+  deskKeyWalk:         'walks the questions',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see
@@ -366,7 +382,10 @@ const quiz = {
   readingsOn:          'On (Chinese-derived)',
   readingsKun:         'Kun (native Japanese)',
   readingsAdd:         'add a reading',
-  readingsAll:         'All readings:',
+  readingsRemove:      (r) => `Remove ${r}`,
+  readingsFound:       'found',
+  readingsWrong:       'wrong',
+  readingsMissed:      'missed',
   readingsPlaceholder: 'kana or romaji',
   readingsCap:         '15 readings is the most this card will take.',
   modeWriteDesc:     'Meaning only. Draw the character stroke by stroke.',
@@ -1910,7 +1929,7 @@ const guide = {
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideHudStatusDesk: 'On time or behind your own plan. Its ghost train stands beside the gate.',
   guideLearnPlateDesk: 'A line. Click the plate to open it; the chip is what it owes you today.',
-  guidePracticeDestsDesk: 'The levels. Yours is marked; click another to ride it anyway.',
+  guidePracticeDestsDesk: 'The levels, and what you have done at each. Yours is marked; click another to ride it anyway.',
   guideDictEntryDesk: 'An entry, open beside the catalogue. ← and → walk the catalogue; the star keeps it on your shelf.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
@@ -1965,6 +1984,15 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
+  // A grade's record on a Practice platform, on the desk (plan 130):
+  // what was done at that grade, then the share of it that went right.
+  practiceDone: {
+    sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
+    texts: n => `${n} text${n === 1 ? '' : 's'}`,
+    papers: n => `${n} paper${n === 1 ? '' : 's'}`,
+  },
+  practiceRight: pct => `${pct}% right`,
+  practiceNotYet: 'Not yet',
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the

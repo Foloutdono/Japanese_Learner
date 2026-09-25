@@ -120,3 +120,83 @@ export function romajiMatchesAny(answer, accepted) {
 
 // Exported for the unit test, which is the only reason to see inside.
 export const _internals = { FOLD, LONG }
+
+// ── Kana, in the other script and in romaji ───────────────────
+// A kanji's readings are stored in kana -- the on'yomi in katakana, the
+// kun'yomi in hiragana -- and the readings drill takes them "in kana or
+// romaji". Nothing turned a stored reading into romaji, though, so
+// "shu" was compared with "シュ" as it stood and never matched, and an
+// IME's default hiragana しゅ missed シュ too. These two put both sides in
+// one script, and the stored side in Latin letters, so the comparison
+// above can do the rest.
+//
+// A transliteration of READINGS, not of text: kana only, Hepburn as the
+// deck writes it (し shi, つ tsu, じ ji), yōon, the small っ before a
+// consonant, ー as its vowel again, ん as n. Anything else passes
+// through, which for a reading is nothing -- its okurigana dot and
+// markers are gone from the display form it is fed.
+
+const KATAKANA = /[ァ-ヶ]/g
+
+/** The string with its katakana written in hiragana (シュ → しゅ). */
+export function toHiragana(s) {
+  return String(s ?? '').replace(KATAKANA, c => String.fromCharCode(c.charCodeAt(0) - 0x60))
+}
+
+const KANA = {
+  あ: 'a', い: 'i', う: 'u', え: 'e', お: 'o',
+  か: 'ka', き: 'ki', く: 'ku', け: 'ke', こ: 'ko',
+  が: 'ga', ぎ: 'gi', ぐ: 'gu', げ: 'ge', ご: 'go',
+  さ: 'sa', し: 'shi', す: 'su', せ: 'se', そ: 'so',
+  ざ: 'za', じ: 'ji', ず: 'zu', ぜ: 'ze', ぞ: 'zo',
+  た: 'ta', ち: 'chi', つ: 'tsu', て: 'te', と: 'to',
+  だ: 'da', ぢ: 'ji', づ: 'zu', で: 'de', ど: 'do',
+  な: 'na', に: 'ni', ぬ: 'nu', ね: 'ne', の: 'no',
+  は: 'ha', ひ: 'hi', ふ: 'fu', へ: 'he', ほ: 'ho',
+  ば: 'ba', び: 'bi', ぶ: 'bu', べ: 'be', ぼ: 'bo',
+  ぱ: 'pa', ぴ: 'pi', ぷ: 'pu', ぺ: 'pe', ぽ: 'po',
+  ま: 'ma', み: 'mi', む: 'mu', め: 'me', も: 'mo',
+  や: 'ya', ゆ: 'yu', よ: 'yo',
+  ら: 'ra', り: 'ri', る: 'ru', れ: 're', ろ: 'ro',
+  わ: 'wa', ゐ: 'i', ゑ: 'e', を: 'o', ん: 'n', ゔ: 'vu',
+  ぁ: 'a', ぃ: 'i', ぅ: 'u', ぇ: 'e', ぉ: 'o',
+  ゃ: 'ya', ゅ: 'yu', ょ: 'yo', ゎ: 'wa',
+}
+const SMALL_Y = new Set(['ゃ', 'ゅ', 'ょ'])
+const SMALL_VOWEL = new Set(['ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ'])
+
+/** A kana reading in Hepburn: ジョウ → jou, がっこう → gakkou, きょう → kyou. */
+export function kanaToRomaji(kana) {
+  const chars = [...toHiragana(kana)]
+  let out = ''
+  let double = false
+  for (let i = 0; i < chars.length; i++) {
+    const c = chars[i]
+    if (c === 'っ') { double = true; continue }
+    if (c === 'ー') {
+      const vowel = out.match(/[aeiou](?=[^aeiou]*$)/)
+      if (vowel) out += vowel[0]
+      continue
+    }
+    let r = KANA[c]
+    if (r === undefined) { out += c; double = false; continue }
+    const next = chars[i + 1]
+    if (SMALL_Y.has(next) && r.endsWith('i') && r.length > 1) {
+      // きゃ kya, しゃ sha, ちゃ cha, じゃ ja: the i gives way to the glide.
+      const stem = r.slice(0, -1)
+      const vowel = KANA[next].slice(1)
+      r = /(sh|ch|j)$/.test(stem) ? stem + vowel : `${stem}y${vowel}`
+      i++
+    } else if (SMALL_VOWEL.has(next) && r.length > 1) {
+      // ファ fa, ティ ti, ヴァ va: the small vowel takes the syllable's.
+      r = r.replace(/[aeiou]+$/, '') + KANA[next]
+      i++
+    }
+    if (double) {
+      out += r.startsWith('ch') ? 't' : r[0]
+      double = false
+    }
+    out += r
+  }
+  return out
+}

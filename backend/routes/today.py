@@ -253,6 +253,24 @@ def _personal_rows(user_id: str) -> dict:
     }
 
 
+def _hold_line(user_id: str, level: str) -> str:
+    """The level rule's line for this learner: their level, raised to
+    their goal (daily_queue.hold_line). A failed goal lookup falls back
+    to the level -- the rule as it stood -- rather than 500 the gate."""
+    try:
+        conn = db_conn()
+        try:
+            with conn.cursor() as cur:
+                cur.execute("SELECT goal_level FROM user_profiles WHERE user_id = %s", (user_id,))
+                row = cur.fetchone()
+        finally:
+            conn.close()
+    except Exception:
+        logger.exception("goal lookup for the level rule failed")
+        return level
+    return daily_queue.hold_line(level, row[0] if row else None)
+
+
 # ── 新規 — the day's ration (study/daily_queue.ration) ─────────────
 def _new_lanes(user_id: str, level: str):
     """
@@ -313,13 +331,13 @@ def get_today(user_id: str = Depends(get_user_id)):
     due_rows = srs.get_due_rows(user_id)
     personal = _personal_rows(user_id)
     level = resolve_level(user_id)
-    # The stops beyond the learner's level wait (the level rule, plan
-    # 074): moving down sets them aside, and the badge must not count
-    # what the run will not serve. The day's ration of new cards rides
-    # beside the reviews (plan 098): at the learner's own level, so
-    # the hold never touches it.
+    # The stops beyond the learner's level AND goal wait (the level
+    # rule, plan 074; daily_queue.hold_line): moving down sets them
+    # aside, and the badge must not count what the run will not serve.
+    # The day's ration of new cards rides beside the reviews (plan
+    # 098): at the learner's own level, so the hold never touches it.
     lanes, fresh = daily_queue.merge_new(
-        daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), level),
+        daily_queue.hold_above(daily_queue.lanes(user_id, due_rows, personal), _hold_line(user_id, level)),
         _new_lanes(user_id, level),
     )
 
@@ -440,7 +458,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         # choice applies to it like any lane -- a switched-off line
         # offers nothing new either.
         merged, _fresh = daily_queue.merge_new(
-            daily_queue.hold_above(all_lanes, level), _new_lanes(user_id, level),
+            daily_queue.hold_above(all_lanes, _hold_line(user_id, level)), _new_lanes(user_id, level),
         )
         chosen = daily_queue.keep_lanes(merged, daily_queue.parse_lane_ids(lanes))
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))

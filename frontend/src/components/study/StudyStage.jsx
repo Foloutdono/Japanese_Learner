@@ -40,16 +40,20 @@ import { RunPanel } from './RunPanel'
 // the card in the middle with its tiles framed under it; the card's
 // details at the right (`side`). The elements under it print no key
 // caps (RunPanelsContext — the card panel lists the keys), and no level
-// strip docks on the floor. The six card runs pass it; a browse, a
-// practice run and the rides do not, and keep the side alone. A phone
-// reads nothing of it. A run whose batch failed stands an empty column
+// strip docks on the floor. The six card runs pass it, and since plan
+// 129 the five practice runs do too (reading, translation, dictation,
+// composition, comprehension): their `panel` is the run's lines
+// (components/study/RunLines.jsx), their `side` the sentence's
+// breakdown, the lesson or the text, and `recordsLabel` names what the
+// figures count. A browse and the rides pass none, and keep the side
+// alone. A phone reads nothing of it. A run whose batch failed stands an empty column
 // (side={null}, plan 123) and no panels beside its error; `done` is the
 // run's end, and one that rated nothing keeps no three zeros either
 // (RunRecords).
 export function StudyStage({
   color, onLeave, leaveLabel, where, sub, remaining, pass = true, aside,
   toast, onToastDone, className = '', levelBar = true, side, sideLabel, records = false, done = false,
-  panel = null, progress = null, children,
+  panel = null, progress = null, recordsLabel = null, children,
 }) {
   const desk = useDesk()
   const { t } = useLang()
@@ -62,7 +66,7 @@ export function StudyStage({
       {toast !== undefined && <XpToast toast={toast} onDone={onToastDone} />}
       {panels && (
         <aside className="desk-run__left" aria-label={t.deskRunLabel}>
-          <RunPanel remaining={remaining} progress={progress} done={done} />
+          <RunPanel remaining={remaining} progress={progress} done={done} label={recordsLabel} />
           {panel}
         </aside>
       )}

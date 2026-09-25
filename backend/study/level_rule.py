@@ -7,7 +7,9 @@ check spread evenly over the coming six weeks so no single day is
 flooded. Moving up does the same for the stops crossed; moving down
 deletes nothing -- the cards above keep their history and rejoin the
 run when the level rises again (routes/today.py holds their lanes back
-meanwhile; see daily_queue.hold_above).
+meanwhile; see daily_queue.hold_above). A stop on the way to the
+learner's goal is never held: the line is the goal when it lies above
+the level (daily_queue.hold_line).
 
 Pure arithmetic here: which stops, which cards, which mode. The rows
 themselves are written by SRSEngine.seed_known, and the routes that
