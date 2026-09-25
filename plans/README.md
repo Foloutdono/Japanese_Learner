@@ -239,6 +239,18 @@ Thirteen waves live in this file:
   because 127 went to 定期券 while it was open. Its section is at the
   very bottom of this file. The next wave begins at 129.
 
+- **Wave 34 — 三面・実践, the practice runs on three panels** (plan 129,
+  2026-09-25, DONE; numbered 129 because wave 33 took 128 while it was
+  open). The owner's request, with five screenshots of the
+  practice runs on the desk: rework them "entirely like we did for the
+  learning modes". Reading, translation, dictation, composition and
+  comprehension now stand on plan 126's three columns, the left panel the
+  run's lines (the owner's pick of three candidates), the mock exam
+  keeping its paper (the owner's call). A desk-only chatbot the owner
+  means to add later was considered for the layouts and given a place,
+  not built. Its section is before wave 32's. The next wave begins at
+  130.
+
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
@@ -6102,6 +6114,57 @@ not measured by a script.
 | Esc in Browse's search, 12 ticked | the dock closes, the ticks lost | the field blurs; a second Esc closes |
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
+
+# Wave 34 — 三面・実践, the practice runs on three panels (plan 129, 2026-09-25)
+
+Numbered 129 because wave 33 (the dictionary on the desk) took 128 while
+this was open; the next wave begins at 130.
+
+The owner's request, with five screenshots at ~1600px: "We need to rework
+the design/layout of the practice modes entirely like we did for the
+learning modes" -- the practice runs were a 640px card in a stage twice
+its width, the level strip across the floor, and a side column that held
+one sentence of grey text until the grade. Then, mid-work: a desk-only
+chatbot "limited to small questions and only precise answers" is coming;
+consider it for the layouts, do not build it.
+
+Plan 126 decided most of it: the three columns, the card grown in the
+middle with its floor framed under it, the details sealed until the
+answer. Two questions were put to the owner. The left panel -- a card
+run's is the verdicts' forecast, and a sentence has none -- drawn three
+ways: the run's lines (every sentence with its grade, each reopening its
+breakdown), the exercise's instruments (the steps on a line, the
+machine's measure as big figures), the keys alone with the chat's room
+kept; the owner picked the lines. And the scope: the five runs, the mock
+exam keeping its paper.
+
+| Plan | What | Status |
+|---|---|---|
+| 129 | `StudyStage`'s panels for the five practice runs (`records`, `recordsLabel`); `RunLines` (`components/study/RunLines.jsx`) as the left column's second panel: the lines, the keys, the rhythm; `hooks/useRunLines.js` (commit on Next with the breakdown as it stands, reopen, fetch a never-had breakdown's local tier, buy the explanation, Esc back unless a door in it holds the key); `components/study/sentenceLines.js` (`useSentenceKeys`, `currentLine`: the row on the stage an ellipsis until the answer is in); the practice runs on `stores/runTally` (`countReview` at the rating, `countXp` from `usePracticeXp`); `BreakdownSide` sealed then `DeskPane` on the panels, `LineSide` for a passed line; `KeyCap` so a practice control prints no cap on the panels, `ClipPlayer` likewise; comprehension's questions as its lines, its review the open question's card in the middle and the first miss open on arrival, its side sealed while the text is read; the 机 section's `.desk-sentences`, `.desk-pane` and the framed floor; `src/lines.desktop.test.jsx`, the practice, breakdown, composition and comprehension desktop tests re-measured, a block of `deskfree.phone`, a case of `runTally.test` | DONE (2026-09-25) |
+
+Rejected on the way: the verdict tiles with the fare each pays -- the
+card panel's figure translated -- because a price printed beside a
+self-grade invites the learner to inflate the grade (ADR 0013 makes the
+grade theirs; the forecast on a card run does the opposite, a high grade
+putting the card further away). The classes are `.desk-sentences` and
+`.desk-sentence` because `.desk-lines` (the statistics' lines) and
+`.desk-line` (a plate's foot) were taken.
+
+**The asking (問), recorded and not built.** Its place is the run's lines
+panel, the list giving it the lower half; it opens with the breakdown,
+after the grade, because before it a question about the sentence is a
+request for the answer key. Who gains: reading, translation, composition
+most (a follow-up on the tutor, a nuance the rows cannot hold), dictation
+after the reveal, comprehension on its review; the exam never. The
+context it would be handed is what is on the three panels: the sentence,
+the learner's answer, the breakdown, the tutor's review or the point.
+
+Deferred: the lines are kept in the run's state and lost with it (a
+reload, leaving the run); the exam runner on panels (the owner's call,
+for now); the passage phase of comprehension leaves the lines panel
+empty but for the keys; reading's forecast for the word a sentence
+practises (`source_word`, which the rating schedules) is not on any
+panel -- the batch would have to carry the card's `review_preview`.
 
 # Wave 32 — 定期券, the pass at the rail's foot (plan 127, 2026-09-25)
 

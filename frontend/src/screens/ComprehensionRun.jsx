@@ -14,6 +14,11 @@ import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { SideLookup } from '../components/analysis/SideLookup'
 import { SentenceLine } from '../components/analysis/SentenceBreakdown'
+import { DeskPane } from '../components/analysis/BreakdownSide'
+import { SealedPanel } from '../components/study/SessionPanel'
+import { RunLines } from '../components/study/RunLines'
+import { KeyCap } from '../components/chrome/DeskKeys'
+import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
@@ -44,6 +49,16 @@ function Passage({ text, level, t, className, foot = true }) {
       <span className="prose__jp prose__jp--passage" lang="ja">{text}</span>
     </PromptCard>
   )
+}
+
+// The passage cut into its sentences, as the exercise was served.
+// A backend that does not send one yet (the two deploy separately —
+// Vercel and Render) degrades to exactly what the toggle used to
+// open: the whole text over its whole translation, as one entry.
+function breakdownOf(exercise) {
+  return exercise?.breakdown?.length
+    ? exercise.breakdown
+    : [{ jp: exercise?.text ?? '', translation: exercise?.translation ?? '', note: '', analysis: null }]
 }
 
 // Route: /practice/comprehension/:level — the whole exercise on the
@@ -101,6 +116,8 @@ export default function ComprehensionRun({ session }) {
   function startSession(lvl) {
     setStage('loading')
     setError(null)
+    // A new exercise is a new run: its figures start again (plan 129).
+    startTally(`comprehension:${lvl}`)
     setRereading(false)
     setShowBreakdown(false)
     setOpenIndex(0)
@@ -231,7 +248,20 @@ export default function ComprehensionRun({ session }) {
       .then(data => {
         setResults(data)
         setStage('results')
+        // This run's figures (plan 129): each question at the quality
+        // its fare was paid at (reading.py: 4 right, 1 wrong).
+        data.results?.forEach(r => countReview({ quality: r.is_correct ? 4 : 1 }))
         fare.pay(data)
+        // On the desk the review opens on the first miss, its question
+        // in the middle and the sentence it quotes in the breakdown.
+        if (desk) {
+          const first = data.results?.findIndex(r => !r.is_correct) ?? -1
+          const at = first >= 0 ? first : 0
+          setOpenRow(at)
+          const r = data.results?.[at]
+          const k = r ? sentenceFor(breakdownOf(exercise), quotedFragments(r.question)) : -1
+          if (k >= 0) setOpenIndex(k)
+        }
       })
       .catch(() => {
         setError({ message: t.comprehensionSubmitError, retry: true })
@@ -308,13 +338,7 @@ export default function ComprehensionRun({ session }) {
 
   const total = exercise?.questions?.length ?? 0
 
-  // The passage cut into its sentences, as the exercise was served.
-  // A backend that does not send one yet (the two deploy separately —
-  // Vercel and Render) degrades to exactly what the toggle used to
-  // open: the whole text over its whole translation, as one entry.
-  const breakdown = exercise?.breakdown?.length
-    ? exercise.breakdown
-    : [{ jp: exercise?.text ?? '', translation: exercise?.translation ?? '', note: '', analysis: null }]
+  const breakdown = breakdownOf(exercise)
 
   // One frame for the whole exercise, one way out, and a sub that says
   // where in it you are.
@@ -345,24 +369,61 @@ export default function ComprehensionRun({ session }) {
     </>
   )
   const openSentence = breakdown[openIndex]
+  //
+  // On the desk's panels (plan 129) the column is the run's third from
+  // the first frame: sealed while the text is written and while it is
+  // read on the stage -- the breakdown is its translation -- the text
+  // beside the questions, the breakdown on the results. A failed fetch
+  // stands an empty column and no panels (plan 123).
   const side =
     (stage === 'questions' || stage === 'submitting') && exercise ? (
       <Passage text={exercise.text} level={level} t={t} foot={false} />
     ) : stage === 'results' && results ? (
-      <SideLookup
-        lookup={lookup}
-        onExit={closeLookup}
-        session={session}
-        head={openSentence ? (
-          <SentenceLine analysis={openSentence.analysis} text={openSentence.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
-        ) : null}
-      >
-        {breakdownBody}
-      </SideLookup>
-    ) : undefined
+      <DeskPane label={t.deskBreakdownLabel}>
+        <SideLookup
+          lookup={lookup}
+          onExit={closeLookup}
+          session={session}
+          head={openSentence ? (
+            <SentenceLine analysis={openSentence.analysis} text={openSentence.jp} t={t} onTokenClick={w => setLookup(vocabLookup(w))} />
+          ) : null}
+        >
+          {breakdownBody}
+        </SideLookup>
+      </DeskPane>
+    ) : stage === 'error' ? null : (
+      <SealedPanel label={t.deskBreakdownWait} />
+    )
+
+  // The run's lines (plan 129): the questions, as far as they have been
+  // asked -- never ahead of the one on the stage, and none while the
+  // text is read -- and on the results every one with its verdict, each
+  // opening its question in the middle and the sentence it quotes in the
+  // breakdown. A record while they are asked: an answer is committed by
+  // Next and not revisited, as on the paper.
+  const asked = stage === 'questions' || stage === 'submitting'
+  const questionLines = stage === 'results' && results
+    ? results.results.map((r, i) => ({
+      key: i, text: `Q${i + 1} · ${r.question}`, lang,
+      quality: r.is_correct ? 4 : 1, verdict: r.is_correct ? t.correct : t.incorrect,
+    }))
+    : asked && exercise
+      ? exercise.questions.slice(0, answers.length).map((q, i) => ({ key: i, text: `Q${i + 1} · ${q.question}`, lang, answered: true }))
+      : []
+  const currentQuestion = stage === 'questions' && exercise
+    ? { label: `Q${currentQ + 1} · ${exercise.questions[currentQ].question}`, lang, quality: null }
+    : null
+  const deskOpen = stage === 'results' ? openRow : null
 
   // A result row opens its question; on the desk it also opens the
-  // sentence the question quotes, in the breakdown beside it.
+  // sentence the question quotes, in the breakdown beside it. From the
+  // run's lines (plan 129) a row is only ever opened, never folded: the
+  // middle always stands one question.
+  function openLine(i) {
+    const r = results?.results?.[i]
+    if (!r || i === openRow) return
+    openResultRow(i, false, r)
+  }
   function openResultRow(i, isOpen, r) {
     playUi('click-mode-selection')
     setOpenRow(isOpen ? null : i)
@@ -381,10 +442,31 @@ export default function ComprehensionRun({ session }) {
       leaveLabel={t[route.backKey]}
       where={t.comprehensionTitle}
       sub={sub}
-      remaining={stage === 'questions' ? `${currentQ + 1} / ${total}` : undefined}
+      // On the desk the count is the run's lines' (plan 129).
+      remaining={stage === 'questions' && !desk ? `${currentQ + 1} / ${total}` : undefined}
       pass={false}
       toast={fare.toast}
       onToastDone={fare.toastDone}
+      records
+      recordsLabel={t.deskQuestionsRated}
+      panel={(
+        <RunLines
+          label={t.deskQuestionsRated}
+          lines={questionLines}
+          current={currentQuestion}
+          openKey={deskOpen}
+          onOpen={stage === 'results' ? openLine : undefined}
+          keys={stage === 'results' ? [
+            ['↑ ↓', t.deskKeyWalk],
+            [t.keyEscape, t.deskKeyLeave],
+          ] : [
+            ['A–D', t.deskKeyPick],
+            [t.keyEnter, t.deskKeyNext],
+            [t.keyEscape, t.deskKeyLeave],
+          ]}
+          rhythm={[{ label: t.deskAnswered, value: `${answers.length} / ${total}` }]}
+        />
+      )}
       // The level bar steps off while the text is up: the passage band
       // is measured against the whole screen (index.css,
       // .stage--passage) and nothing is graded until the questions.
@@ -436,7 +518,7 @@ export default function ComprehensionRun({ session }) {
           <div className="stage__foot btn-row">
             <button type="button" className="btn-primary" onClick={finishReading} aria-keyshortcuts={desk ? 'Enter' : undefined}>
               {rereading ? t.compBackToQuestions : t.doneReading}
-              {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+              <KeyCap>{t.keyEnter}</KeyCap>
             </button>
           </div>
         </>
@@ -492,14 +574,54 @@ export default function ComprehensionRun({ session }) {
                 aria-keyshortcuts={desk ? 'Enter' : undefined}
               >
                 {currentQ + 1 < total ? t.reviewNext : t.submit}
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+                <KeyCap>{t.keyEnter}</KeyCap>
               </button>
             </div>
           </>
         )
       })()}
 
-      {stage === 'results' && results && (
+      {/* 机 (plan 129): the review as the exam's is on the desk -- the
+          questions in the run's lines, the open one's card here with its
+          options marked, the score in the run's figures. */}
+      {stage === 'results' && results && desk && (() => {
+        const r = results.results[openRow ?? 0]
+        if (!r) return null
+        return (
+          <>
+            <PromptCard className="prompt-card--ask">
+              <QuestionTypeBadge type={r.type} />
+              <span className="prose__en prose__en--lead">{r.question}</span>
+            </PromptCard>
+            <div className="mcq-list" role="group" aria-label={r.question}>
+              {r.options.map((opt, j) => {
+                const cls = [
+                  'mcq-row',
+                  j === r.correct && 'mcq-row--correct',
+                  j === r.user_answer && j !== r.correct && 'mcq-row--wrong',
+                ].filter(Boolean).join(' ')
+                return (
+                  <div key={j} className={cls}>
+                    <span className="mcq-row__accent" aria-hidden="true" />
+                    <span className="mcq-row__index">{letter(j)}</span>
+                    <span className="mcq-row__text mcq-row__text--latin">{opt}</span>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="stage__foot btn-row">
+              <button type="button" className="btn-secondary" onClick={leave}>
+                {t.changeLevel}
+              </button>
+              <button type="button" className="btn-primary" onClick={() => startSession(level)}>
+                {t.tryAgain}
+              </button>
+            </div>
+          </>
+        )
+      })()}
+
+      {stage === 'results' && results && !desk && (
         <>
           <div className="result-lattice">
             <div className="record">

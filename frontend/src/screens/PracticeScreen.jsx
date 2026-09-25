@@ -47,7 +47,7 @@ import { LEVELS } from '../domain/sentenceSource'
 // learner reaches the train in one tap instead of three. The plate's
 // own head still opens the station, where 頻度 and 自分のカード live.
 //
-// ── On the desk, the grades carry the learner's record (plan 129) ──
+// ── On the desk, the grades carry the learner's record (plan 130) ──
 // The chips were a row of five on a plate 600px wide, and six plates
 // of them filled a third of the window. On the desk each grade is a
 // row instead, the plates' rows sharing the window's height, and each
@@ -153,7 +153,7 @@ export default function PracticeScreen() {
 }
 
 /**
- * A platform's grades on the desk (plan 129): a row each, the grade's
+ * A platform's grades on the desk (plan 130): a row each, the grade's
  * code, what the learner has done there and the share of it right, and
  * the chevron of a row that goes somewhere. A grade never practised
  * says so; while the record has not arrived, or if it never will, the

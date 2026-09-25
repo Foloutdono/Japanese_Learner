@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the Practice gate three across (plan 129) ───────────────
+// ── 机 — the Practice gate three across (plan 130) ───────────────
 // The `wide` lane: a laptop's 1440×900. Once three plates hold a French
 // platform name whole, Practice's six stand three across in two rows,
 // and the two rows still take the window: the grades' rows share each
@@ -35,10 +35,17 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 
-const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the plates' staggered arrivals themselves: a plate a
+// fraction of a pixel short of its place is a row out of line.
+const settle = async (ms = 620) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 const box = el => el.getBoundingClientRect()
 
-describe('the Practice gate on a laptop (plan 129)', () => {
+describe('the Practice gate on a laptop (plan 130)', () => {
   it('stands its six plates three across in two rows, filling the window', async () => {
     await render(
       <LangProvider>
@@ -52,9 +59,14 @@ describe('the Practice gate on a laptop (plan 129)', () => {
     await settle()
     const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(box)
     expect(plates).toHaveLength(6)
-    const tops = [...new Set(plates.map(p => Math.round(p.top)))]
-    expect(tops).toHaveLength(2)
-    expect(plates.filter(p => Math.round(p.top) === tops[0])).toHaveLength(3)
+    // Two rows of three, a row's tops within a pixel of each other (the
+    // rows share the window, so a row can start on a half pixel).
+    const first = plates.filter(p => Math.abs(p.top - plates[0].top) <= 1)
+    const second = plates.filter(p => Math.abs(p.top - plates[0].top) > 1)
+    expect(first).toHaveLength(3)
+    expect(second).toHaveLength(3)
+    expect(Math.max(...second.map(p => p.top)) - Math.min(...second.map(p => p.top))).toBeLessThanOrEqual(1)
+    expect(Math.min(...second.map(p => p.top))).toBeGreaterThan(Math.max(...first.map(p => p.bottom)))
     expect(Math.max(...plates.map(p => p.width)) - Math.min(...plates.map(p => p.width))).toBeLessThanOrEqual(1)
     // Three across, and every French name still whole.
     for (const title of document.querySelectorAll('.plate__title')) {

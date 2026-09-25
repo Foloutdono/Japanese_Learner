@@ -1,6 +1,6 @@
 """
 実践の記録 — what a learner has done on each practice platform, by grade
-(plan 129).
+(plan 130).
 
 The Practice gate on the desk hangs each platform's five grades as rows,
 and a row says what the learner has done there: how many sentences,

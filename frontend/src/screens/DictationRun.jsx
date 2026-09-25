@@ -12,9 +12,13 @@ import RatingBar from '../components/study/RatingBar'
 import ClipPlayer from '../components/study/ClipPlayer'
 import { FuriganaParts } from '../components/study/Readings'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
-import { EnterKey } from '../components/chrome/DeskKeys'
+import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
+import { RunLines } from '../components/study/RunLines'
+import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
+import { useRunLines } from '../hooks/useRunLines'
+import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { Loading } from '../components/ui/Loading'
@@ -98,6 +102,8 @@ function Session({ session, level }) {
   // The fare per graded clip, from the result's own response.
   const fare = usePracticeXp()
   const [rated, setRated]       = useState(false)
+  // The grade given, for the run's lines (plan 129); null until rated.
+  const [quality, setQuality]   = useState(null)
   const [error, setError]       = useState(null)
   // 机 (plan 123): on the desk the field is not focused on arrival, so
   // the first Space plays the clip; the listen puts the pen in the
@@ -140,6 +146,8 @@ function Session({ session, level }) {
   // while it is open.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
+  // 机 (plan 129): this run's lines, each reopening its breakdown.
+  const lines = useRunLines(session, { held: Boolean(lookup) })
 
   const queueRef = useRef([])      // clips fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -178,6 +186,7 @@ function Session({ session, level }) {
     setAnswer('')
     setResult(null)
     setRated(false)
+    setQuality(null)
     setAnalysis(null)
     setAnalysisLoading(false)
     setShowBreakdown(false)
@@ -251,11 +260,16 @@ function Session({ session, level }) {
   useEffect(() => {
     if (startedRef.current) return
     startedRef.current = true
+    startTally(`dictation:${level}`)
     load()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   function next() {
+    // The line just graded joins the run's lines (plan 129).
+    if (clip && result && quality != null) {
+      lines.commit({ key: clip.id, jp: result.jp, translation: result.translation, quality, analysis })
+    }
     if (queueRef.current.length) {
       const [head, ...rest] = queueRef.current
       queueRef.current = rest
@@ -319,7 +333,11 @@ function Session({ session, level }) {
   function grade(quality) {
     if (rated) return
     setRated(true)
+    setQuality(quality)
     setScore(s => ({ correct: s.correct + (quality > 2 ? 1 : 0), total: s.total + 1 }))
+    countReview({ quality })
+    lines.close()
+    setLookup(null)
     apiJson('/api/dictation/result', session, {
       method: 'POST',
       body: JSON.stringify({
@@ -337,6 +355,16 @@ function Session({ session, level }) {
   }
 
   const where = `${level} · ${t.stationJlpt}`
+  const keys = useSentenceKeys({ listen: true })
+  // A door in a breakdown -- the line on the stage's, or one reopened
+  // from the run's lines -- opens in the column (plan 115).
+  const doors = {
+    onTokenClick: w => setLookup(vocabLookup(w)),
+    onGrammarOpen: g => setLookup(grammarLookup(g)),
+    lookup,
+    onExitLookup: closeLookup,
+    session,
+  }
 
   return (
     <StudyStage
@@ -345,25 +373,36 @@ function Session({ session, level }) {
       leaveLabel={t.leaveLevels}
       where={t.dictationTitle}
       sub={where}
-      remaining={`${score.correct} / ${score.total}`}
+      // On the desk the score is the run panel's figures (plan 129).
+      remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       toast={fare.toast}
       onToastDone={fare.toastDone}
-      side={(
+      records
+      recordsLabel={t.deskLinesRated}
+      panel={(
+        <RunLines
+          lines={lines.lines}
+          // The line is unknown until the reveal: the row is an
+          // ellipsis while the learner listens.
+          current={clip && stage !== 'error' ? currentLine(stage === 'feedback' ? result?.jp : null, quality) : null}
+          openKey={lines.opened?.key ?? null}
+          onOpen={key => { setLookup(null); lines.open(key) }}
+          onCurrent={() => { setLookup(null); lines.close() }}
+          keys={keys}
+        />
+      )}
+      side={lines.opened ? <LineSide lines={lines} {...doors} /> : (
         <BreakdownSide
           graded={stage === 'feedback' && Boolean(result) && rated}
           analysis={analysis}
           loading={analysisLoading}
           translation={result?.translation}
           sentenceText={result?.jp}
-          onTokenClick={w => setLookup(vocabLookup(w))}
-          onGrammarOpen={g => setLookup(grammarLookup(g))}
           onExplain={explainLine}
           explaining={explaining}
           explainError={explainError}
-          lookup={lookup}
-          onExitLookup={closeLookup}
-          session={session}
+          {...doors}
         />
       )}
       sideLabel={t.deskBreakdownLabel}
@@ -536,7 +575,7 @@ function Session({ session, level }) {
             <div className="stage__foot">
               <button type="button" className="btn-primary" onClick={next} aria-keyshortcuts={desk ? 'Enter' : undefined}>
                 {t.nextPhrase}
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+                <KeyCap>{t.keyEnter}</KeyCap>
               </button>
               {/* 机 (plan 123): Enter takes the next line. */}
               <EnterKey onEnter={next} />

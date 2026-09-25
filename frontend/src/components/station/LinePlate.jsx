@@ -84,7 +84,7 @@ export function StopsFoot({ stops, guide }) {
 }
 
 /**
- * The desk's foot on a Learn line (plan 114; upright since plan 129):
+ * The desk's foot on a Learn line (plan 114; upright since plan 130):
  * the whole line, where the phone's plate had room for three stops.
  * The novice's stop at the top, then one row per level going down —
  * the rail through every row filled as far as the level's leg is
@@ -94,7 +94,7 @@ export function StopsFoot({ stops, guide }) {
  * The row's bar says what the figure cannot: learned in the line's
  * full pigment, met but not yet learned in half of it.
  *
- * It ran across the plate until plan 129, a strip at the foot of a
+ * It ran across the plate until plan 130, a strip at the foot of a
  * plate that stood a third of the way down the window. Upright, the
  * rows share the plate's height, and the plates share the window's —
  * the room goes to the line, not to air around it.

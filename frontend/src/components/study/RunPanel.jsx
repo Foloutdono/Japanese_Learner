@@ -14,12 +14,14 @@ import { DeckLegend } from './QuizComponents'
 //
 // Rendered by StudyStage only where the desk lays a run out on panels;
 // a phone never mounts it. `remaining` is what the run knows of its
-// queue (Today's due count), null where a run counts nothing.
-export function RunPanel({ remaining = null, progress = null, done = false }) {
+// queue (Today's due count), null where a run counts nothing. A
+// practice run (plan 129) has no deck to draw the legend of, and names
+// what it rates (`label`: sentences, questions).
+export function RunPanel({ remaining = null, progress = null, done = false, label = null }) {
   const { t } = useLang()
   return (
     <section className="desk-run__panel desk-session" aria-label={t.deskRunLabel}>
-      <RunRecords done={done} remaining={remaining} />
+      <RunRecords done={done} remaining={remaining} label={label} />
       <LevelBar />
       <DeckLegend stats={progress} />
     </section>

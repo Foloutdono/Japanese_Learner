@@ -92,7 +92,8 @@ describe('comprehension on the desk', () => {
     await toQuestions()
     const side = $('.desk-run__side')
     expect(side).not.toBeNull()
-    expect(side.getBoundingClientRect().width).toBe(360)
+    // The run's third column (plan 129), the text as its one card.
+    expect(side.getBoundingClientRect().width).toBeGreaterThanOrEqual(300)
     const passage = side.querySelector('.prose__jp--passage')
     expect(passage.textContent).toBe(EXERCISE.text)
     const card = side.querySelector('.prompt-card')
@@ -108,7 +109,13 @@ describe('comprehension on the desk', () => {
   it('answers a whole paper from the keyboard', async () => {
     await toQuestions()
     expect($('.mcq-row').getAttribute('aria-keyshortcuts')).toBe('A 1')
-    expect($('.stage__foot .btn-primary .desk-kbd')).not.toBeNull()
+    // The keys are the run's lines' to print on the panels (plan 129),
+    // not the button's.
+    expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
+    expect($('.stage__foot .btn-primary').getAttribute('aria-keyshortcuts')).toBe('Enter')
+    expect($('.desk-sentences .desk-keys').textContent).toMatch(/A–D.*Entrée/)
+    // The question asked so far is the lines' last row, the one lit.
+    expect($('.desk-sentence--lit').textContent).toContain('Where did they wait?')
     press('b')
     await settle(40)
     expect($$('.mcq-row')[1].getAttribute('aria-pressed')).toBe('true')
@@ -129,13 +136,33 @@ describe('comprehension on the desk', () => {
     expect($('.desk-run__side .bkd-passage__item')).not.toBeNull()
     expect($$('.desk-run__side .bkd-passage__item')).toHaveLength(2)
     expect($('.btn-secondary[aria-expanded]')).toBeNull()
-    expect($('.stage > .qrows').getBoundingClientRect().width).toBe(640)
 
-    // The missed question quotes 「電車」: its sentence opens.
-    $$('.qrow')[1].click()
-    await settle()
+    // The review as the exam's (plan 129): the questions are the run's
+    // lines, each with its verdict, and the first miss is open on
+    // arrival -- its card in the middle, its options marked, and the
+    // sentence it quotes (「電車」) open in the breakdown.
+    expect($('.stage > .qrows')).toBeNull()
+    expect($('.stage > .result-lattice')).toBeNull()
+    const rows = $$('.desk-sentences__list button.desk-sentence')
+    expect(rows).toHaveLength(2)
+    expect(rows[0].querySelector('.desk-sentence__dot--q4')).not.toBeNull()
+    expect(rows[1].querySelector('.desk-sentence__dot--q1')).not.toBeNull()
+    expect(rows[1].getAttribute('aria-current')).toBe('true')
+    expect($('.stage .prompt-card--ask').textContent).toContain('電車')
+    expect($('.stage .mcq-row--correct').textContent).toContain('train')
+    expect($('.stage .mcq-row--wrong').textContent).toContain('friend')
     const open = $('.desk-run__side .bkd-passage__item--open')
     expect(open.textContent).toContain('The train was late.')
+    // The figures are the paper's: two questions, one right.
+    expect($('.desk-run__left .desk-figs').textContent).toMatch(/2.*50/)
+
+    // Another question from the lines: its card takes the middle.
+    rows[0].click()
+    await settle()
+    expect($('.stage .prompt-card--ask').textContent).toContain('Where did they wait?')
+    expect(rows[0].getAttribute('aria-current')).toBe('true')
+    rows[1].click()
+    await settle()
 
     // A word in the breakdown opens in the column, not a dialog.
     $('.desk-run__side .bkd-passage__item--open .bkd-tok--door, .desk-run__side .bkd-passage__item--open button.bkd-row').click()

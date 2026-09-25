@@ -1,4 +1,4 @@
-"""実践の記録 — the Practice gate's record by grade (plan 129).
+"""実践の記録 — the Practice gate's record by grade (plan 130).
 
 Each platform's figure is read from its own log, and the tests below
 write rows into all six and read them back: what counts as one done,

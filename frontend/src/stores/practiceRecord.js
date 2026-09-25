@@ -1,6 +1,6 @@
 import { createRemoteStore } from './remote'
 
-// ── 実践の記録 — /api/practice/record, shared (plan 129) ─────────
+// ── 実践の記録 — /api/practice/record, shared (plan 130) ─────────
 // What the learner has done at each grade on each practice platform,
 // read by the Practice gate's rows on the desk (screens/PracticeScreen's
 // GradeRows) and by nothing on a phone, which never mounts them. No TTL:

@@ -27,7 +27,9 @@ import { DeskFigure } from './RunRecords'
 // legibility): the stops, the tiles and the caps name themselves.
 //   - The keys the elements no longer print on the desk (RunPanelsContext):
 //     Space turns the card, C shows the choices, Esc leaves the run. The
-//     digits are on the tiles above.
+//     digits are on the tiles above. The readings drill (`keys="readings"`)
+//     turns nothing: there, a comma or a space adds a reading to the box
+//     and Enter checks (ReadingsInput).
 //   - The rhythm, on a sumi foot: minutes since the run started
 //     (stores/runTally's startedAt), cards a minute, and an estimate of
 //     what the remaining cards will take at that pace.
@@ -45,7 +47,7 @@ function useClock(everyMs) {
   return now
 }
 
-export function CardPanel({ card, remaining = null }) {
+export function CardPanel({ card, remaining = null, keys = 'card' }) {
   const { t, lang } = useLang()
   const scale = useRatingScale()
   const tally = useRunTally()
@@ -87,8 +89,17 @@ export function CardPanel({ card, remaining = null }) {
         })}
       </div>
       <div className="desk-keys" role="list" aria-label={t.deskKeysTitle}>
-        <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyTurn}</span>
-        <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">C</kbd>{t.deskKeyChoices}</span>
+        {keys === 'readings' ? (
+          <>
+            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">,</kbd><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyAddReading}</span>
+            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keyEnter}</kbd>{t.deskKeyCheck}</span>
+          </>
+        ) : (
+          <>
+            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyTurn}</span>
+            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">C</kbd>{t.deskKeyChoices}</span>
+          </>
+        )}
         <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keyEscape}</kbd>{t.deskKeyLeave}</span>
       </div>
       <div className="desk-rhythm" role="group" aria-label={t.deskRhythm}>

@@ -11,7 +11,7 @@ import './index.css'
 // and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
-// The learner's record on the Practice gate (plan 129): reading at N5
+// The learner's record on the Practice gate (plan 130): reading at N5
 // and N4, one text at N5, one paper at N5; nothing anywhere else.
 const RECORD = {
   reading: { N5: { done: 24, right: 20, of: 24 }, N4: { done: 3, right: 2, of: 3 } },
@@ -40,7 +40,7 @@ vi.mock('./lib/audio', async o => ({
 }))
 vi.mock('./stores/boarding', () => ({ board: commit => commit() }))
 vi.mock('./stores/profileSummary', async (o) => ({ ...(await o()), useProfileSummary: () => ({ jlptLevel: 'N4' }) }))
-// The distance on each line (plan 129's upright foot): kana finished,
+// The distance on each line (plan 130's upright foot): kana finished,
 // vocab N5 met but not yet learned.
 const STATS = {
   items: {
@@ -54,7 +54,16 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: PracticeScreen } = await import('./screens/PracticeScreen')
 const { default: LearnScreen } = await import('./screens/LearnScreen')
 
-const settle = (ms = 620) => new Promise(r => setTimeout(r, ms))
+// The plates arrive staggered (index.css's `arrive`); a slow runner can
+// still be finishing the last of them when the timer fires, and a plate
+// a fraction of a pixel short of its place reads as a row out of line.
+// So the wait is for the arrivals themselves, once the timer is up.
+const settle = async (ms = 620) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 
 // The shell's frame without the shell: the content column beside a
 // rail's width of nothing, which is what the desk leaves a screen.
@@ -88,7 +97,10 @@ function lattice(plates, { count, spans }) {
   const whole = plates.getBoundingClientRect()
   expect(boxes).toHaveLength(count)
   for (let i = 0; i + 1 < count; i += 2) {
-    expect(Math.round(boxes[i].top)).toBe(Math.round(boxes[i + 1].top))
+    // Within a pixel rather than rounded apiece: since plan 130 the rows
+    // share the window, so a row can start on a half pixel, and two
+    // rounds of 369.5 measured a hair apart land either side of it.
+    expect(Math.abs(boxes[i].top - boxes[i + 1].top)).toBeLessThanOrEqual(1)
     expect(boxes[i + 1].left).toBeGreaterThan(boxes[i].right)
     expect(Math.abs(boxes[i].width - boxes[i + 1].width)).toBeLessThanOrEqual(1)
     expect(boxes[i].width).toBeLessThan(whole.width / 2)
@@ -134,12 +146,12 @@ describe('the plated gates on the desk', () => {
 // Today's layout on the desk is today.desktop.test.jsx (plan 114), on the
 // real screen.
 
-// ── plan 129 — the gates take the window ────────────────────────
+// ── plan 130 — the gates take the window ────────────────────────
 // The plates stood a third of the way down the window with the rest of
 // it empty. They fill it now, their rows sharing the room, and the room
 // goes to each plate's body: the line upright on Learn, the grades as
 // rows with the learner's record on Practice.
-describe('the gates take the window (plan 129)', () => {
+describe('the gates take the window (plan 130)', () => {
   // The page does not scroll, and the last plate stands a gutter from
   // the window's floor: the plates took the room rather than leaving it.
   function fills(gate) {

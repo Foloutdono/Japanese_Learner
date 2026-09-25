@@ -22,7 +22,7 @@ import { forgetToday } from './today'
 //   the journey   the standing the pass's back judges (five minutes'
 //                 TTL, the longest of them)
 //   the record    what was done at each grade of each practice
-//                 platform (the desk's Practice gate, plan 129)
+//                 platform (the desk's Practice gate, plan 130)
 //   the guide     which gates opened their lesson THIS page load
 //
 // A learner who signs out of one account and boards a new one in the

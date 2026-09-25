@@ -130,7 +130,7 @@ export default function LearnScreen({ session }) {
               guide={i === 0 ? 'learn.plate' : undefined}
               // The phone's plate has room for the stop behind, the one
               // reached and the one ahead; the desk's draws the whole
-              // line (plan 114), upright since plan 129.
+              // line (plan 114), upright since plan 130.
               foot={desk
                 ? <LineFoot stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
                 : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
