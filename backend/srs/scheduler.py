@@ -69,6 +69,43 @@ FAIL = {
     0: Lapse(relearn_step=0, steps_lost=len(LEARNING_STEPS), stability=0.50, difficulty=0.20),
 }
 
+# ── Keeping the pass grades apart ────────────────────────────
+# The desk's card panel prints, on each verdict's tile, when that rating
+# brings the card back (plan 126), and what it printed was mostly pairs:
+# Difficult and Correct gave the same wait on every learning step, and
+# again on a card's first reviews after it graduated, where Correct's 5%
+# of extra growth rounds away. Nothing on screen was wrong -- the two
+# buttons really did the same thing. Three rules keep them apart.
+#
+# In the learning steps, Difficult still climbs a step, since a pass
+# keeps its progress, but it waits halfway between the step it leaves
+# and the one Correct would wait (learning_wait below): 7 minutes where
+# Correct says 10, 35 where Correct says an hour.
+#
+# Leaving the steps, a clean pass waits GRADUATING_DAYS. The last step
+# is already a day, and graduating used to set a day again, so every new
+# card came back after a day twice running. Difficult on that step
+# graduates a day short of it, which is the day the card used to get.
+#
+# After graduation, each pass grade lands at least a day past the one
+# below it (_handle_review). Where the growth rule already separates
+# them, which is every interval past a week or so, this does nothing.
+#
+# Almost and Wrong still match on the first two steps: one step back
+# from there is the first step, and there is nothing before it.
+GRADUATING_DAYS = 2
+
+
+def learning_wait(step: int, quality: int) -> timedelta:
+    """How long a card waits at learning `step`, `quality` having sent
+    it there. Difficult (3) climbed to it from the step below and waits
+    halfway between the two; any other grade waits the step itself."""
+    wait = LEARNING_STEPS[step]
+    if quality == 3 and step > 0:
+        wait = (LEARNING_STEPS[step - 1] + wait) / 2
+    return wait
+
+
 # ── Settling: what stability is for ──────────────────────────
 # Growth is ease x the grade's bonus x this, and this used to be
 # `1 + min(1.5, stability / 20)` — a second ease, stacked on the first,
@@ -170,7 +207,9 @@ class Scheduler:
         if state.learning_step >= len(LEARNING_STEPS):
 
             state.is_learning = False
-            state.interval_days = 1
+            # See GRADUATING_DAYS: Difficult leaves on a day, a clean
+            # pass on two, never a second day after the last step's.
+            state.interval_days = GRADUATING_DAYS - 1 if quality == 3 else GRADUATING_DAYS
             # A floor, not a reset. A new card arrives here with the
             # stability it was created with (0) and leaves with 1.0, as
             # it always did. A card relearning after a lapse arrives
@@ -182,12 +221,12 @@ class Scheduler:
             # known for months regrew from one slip exactly as slowly as
             # a word met last week (2d, 5d, 13d rather than 3d, 9d, 26d).
             state.stability = max(1.0, state.stability)
-            state.next_review = now + timedelta(days=1)
+            state.next_review = now + timedelta(days=state.interval_days)
 
             return state
 
         state.next_review = (
-            now + LEARNING_STEPS[state.learning_step]
+            now + learning_wait(state.learning_step, quality)
         )
 
         return state
@@ -211,16 +250,36 @@ class Scheduler:
             state.next_review = now + LEARNING_STEPS[lapse.relearn_step]
             return state
 
-        bonus, difficulty_delta = PASS[quality]
-        state.difficulty += difficulty_delta
+        # Each pass grade lands at least a day past the one below it
+        # (see GRADUATING_DAYS), so the grades under this one are grown
+        # from the same state first. The day added can take a one-day
+        # interval past MAX_GROWTH; a day is not the jump that cap is for.
+        interval = 0
+        for grade in range(3, quality + 1):
+            grown, difficulty = self._grow(state, grade)
+            interval = max(grown, interval + 1)
 
-        state.difficulty = min(
-            MAX_DIFFICULTY,
-            max(MIN_DIFFICULTY, state.difficulty)
+        state.difficulty = difficulty
+        state.interval_days = min(MAX_INTERVAL_DAYS, interval)
+
+        state.stability = max(1.0, state.stability + quality * 0.25)
+        state.repetitions += 1
+
+        state.next_review = (
+            now + timedelta(days=state.interval_days)
         )
 
-        if state.interval_days == 0:
-            state.interval_days = 1
+        return state
+
+    @staticmethod
+    def _grow(state: CardState, quality: int) -> tuple[int, float]:
+        """The interval and difficulty a pass at `quality` would give
+        `state`, which is left as it is."""
+        bonus, difficulty_delta = PASS[quality]
+        difficulty = min(
+            MAX_DIFFICULTY,
+            max(MIN_DIFFICULTY, state.difficulty + difficulty_delta)
+        )
 
         settling = min(1.0, SETTLING_FLOOR + state.stability / SETTLING_PER)
         # Reflect difficulty around the midpoint of its own range before
@@ -233,19 +292,11 @@ class Scheduler:
         # ease (near MIN_DIFFICULTY) and thus small growth/short interval,
         # while an easy card (difficulty near MIN_DIFFICULTY) yields a
         # large ease and long interval.
-        ease = MIN_DIFFICULTY + MAX_DIFFICULTY - state.difficulty
+        ease = MIN_DIFFICULTY + MAX_DIFFICULTY - difficulty
         growth = min(MAX_GROWTH, max(1.0, ease * bonus * settling))
 
-        state.interval_days = min(
+        interval = min(
             MAX_INTERVAL_DAYS,
-            max(1, round(state.interval_days * growth)),
+            max(1, round(max(1, state.interval_days) * growth)),
         )
-
-        state.stability = max(1.0, state.stability + quality * 0.25)
-        state.repetitions += 1
-
-        state.next_review = (
-            now + timedelta(days=state.interval_days)
-        )
-
-        return state
+        return interval, difficulty

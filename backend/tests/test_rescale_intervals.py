@@ -172,6 +172,15 @@ def test_a_card_left_mid_relearning_waits_a_learning_step_not_an_interval():
     assert rescale.due_after(state, last) == last + LEARNING_STEPS[state.learning_step]
 
 
+def test_a_card_left_on_a_difficult_step_waits_what_the_scheduler_gave_it():
+    # Difficult climbs a step but waits halfway to it: from ten minutes
+    # to the hour, thirty-five minutes.
+    state = rescale.replay([4, 3])
+    assert state.is_learning and state.learning_step == 2
+    last = datetime.now(timezone.utc) - timedelta(days=10)
+    assert rescale.due_after(state, last) == last + timedelta(minutes=35)
+
+
 # ── End to end, against the database ─────────────────────────
 def test_a_card_stuck_in_the_far_future_is_pulled_back(client, tmp_path):
     far = datetime.now(timezone.utc) + timedelta(days=8611)

@@ -1,3 +1,4 @@
+import copy
 import unittest
 from datetime import datetime, timedelta, timezone
 
@@ -109,6 +110,92 @@ class FourButtonScaleTests(unittest.TestCase):
         self.assertEqual(high.last_quality, 5)
 
 
+class GradesApartTests(unittest.TestCase):
+    """The desk's card panel prints, on each verdict's tile, when that
+    rating brings the card back (plan 126), and what it printed was
+    mostly pairs: Difficult and Correct gave the same wait on every
+    learning step and on a card's first reviews after graduating, and a
+    new card came back after a day twice running. The tiles were right;
+    the buttons really did the same thing."""
+
+    STEPS = scheduler_mod.LEARNING_STEPS
+
+    def setUp(self) -> None:
+        self.sched = Scheduler()
+
+    def _waits(self, state: CardState, qualities=(1, 2, 3, 4)) -> dict[int, timedelta]:
+        """What each grade's tile would print: its wait from now."""
+        now = datetime.now(timezone.utc)
+        return {
+            q: self.sched.review(copy.deepcopy(state), q).next_review - now
+            for q in qualities
+        }
+
+    def assertSooner(self, a: timedelta, b: timedelta, msg=None) -> None:
+        # By a minute at least: each dry run reads the clock afresh, so
+        # two identical waits come out microseconds apart.
+        self.assertGreaterEqual(b - a, timedelta(minutes=1), msg)
+
+    def test_difficult_waits_short_of_correct_on_every_learning_step(self) -> None:
+        for step in range(len(self.STEPS) - 1):
+            state = CardState(card_id="c", mode="m", learning_step=step)
+            waits = self._waits(state)
+            self.assertSooner(self.STEPS[step], waits[3], step)
+            self.assertSooner(waits[3], waits[4], step)
+            # Still a pass: it climbs the step, it just comes back sooner.
+            self.assertEqual(self.sched.review(state, 3).learning_step, step + 1)
+
+    def test_a_new_card_never_waits_the_same_day_twice(self) -> None:
+        state = CardState(card_id="c", mode="m")
+        waits = []
+        for _ in range(len(self.STEPS)):
+            waits.append(self._waits(state, (4,))[4])
+            state = self.sched.review(state, 4)
+        self.assertFalse(state.is_learning)
+        for a, b in zip(waits, waits[1:]):
+            self.assertSooner(a, b, waits)
+        self.assertEqual(state.interval_days, scheduler_mod.GRADUATING_DAYS)
+
+    def test_difficult_graduates_a_day_short_of_correct(self) -> None:
+        last = len(self.STEPS) - 1
+        hard = self.sched.review(CardState(card_id="c", mode="m", learning_step=last), 3)
+        good = self.sched.review(CardState(card_id="c", mode="m", learning_step=last), 4)
+        self.assertFalse(hard.is_learning)
+        self.assertEqual(hard.interval_days, scheduler_mod.GRADUATING_DAYS - 1)
+        self.assertEqual(good.interval_days, scheduler_mod.GRADUATING_DAYS)
+
+    def test_the_pass_grades_are_a_day_apart_at_every_interval(self) -> None:
+        # Correct's 5% more growth than Difficult rounded away on every
+        # short interval: 2 days and 2, then 4 and 4.
+        for interval in range(1, 61):
+            for difficulty in (1.5, 2.5, 3.5):
+                for stability in (1.0, 4.0, 40.0):
+                    state = CardState(card_id="c", mode="m", is_learning=False)
+                    state.interval_days = interval
+                    state.difficulty, state.stability = difficulty, stability
+                    out = {q: self.sched.review(copy.deepcopy(state), q).interval_days
+                           for q in (3, 4, 5)}
+                    ctx = (interval, difficulty, stability, out)
+                    self.assertLess(out[3], out[4], ctx)
+                    self.assertLess(out[4], out[5], ctx)
+
+    def test_the_four_tiles_differ_but_where_there_is_no_step_to_fall_back_to(self) -> None:
+        # A new card's whole ladder, answered Correct, with the four
+        # tiles read at every card on it.
+        state = CardState(card_id="c", mode="m")
+        for _ in range(12):
+            waits = self._waits(state)
+            ctx = (state.is_learning, state.learning_step, state.interval_days, waits)
+            self.assertSooner(waits[2], waits[3], ctx)
+            self.assertSooner(waits[3], waits[4], ctx)
+            if state.is_learning and state.learning_step <= 1:
+                # One step back from the first two is the first.
+                self.assertAlmostEqual(waits[1].total_seconds(), waits[2].total_seconds(), delta=1)
+            else:
+                self.assertSooner(waits[1], waits[2], ctx)
+            state = self.sched.review(state, 4)
+
+
 class GrowthTests(unittest.TestCase):
     """Interval growth used to be ease x bonus x an amplifier that itself
     reached 2.5, so one review could multiply an interval by ten and a
@@ -215,7 +302,7 @@ class RelearningTests(unittest.TestCase):
             state = self.sched.review(state, 4)
         self.assertFalse(state.is_learning)
         self.assertEqual(state.stability, 1.0)
-        self.assertEqual(state.interval_days, 1)
+        self.assertEqual(state.interval_days, scheduler_mod.GRADUATING_DAYS)
 
     def test_a_lapse_that_left_less_than_the_floor_graduates_at_it(self) -> None:
         # Blackout on a card that had only just graduated: 1.0 x 0.5.

@@ -85,7 +85,7 @@ import scripts._env  # noqa: F401  -- must precede core.db, which reads
 #                       DATABASE_URL at module scope. See scripts/_env.py.
 from core.db import db_conn
 from srs.models import CardState
-from srs.scheduler import LEARNING_STEPS, Scheduler
+from srs.scheduler import Scheduler, learning_wait
 
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 logger = logging.getLogger("rescale-intervals")
@@ -120,11 +120,12 @@ def due_after(state: CardState, last_reviewed_at: datetime) -> datetime:
 
     Mirrors what the scheduler itself would have set at that moment: a
     graduated card waits interval_days, a card back in the learning
-    steps waits whichever step it is on. A card whose gap has already
-    elapsed comes out in the past, i.e. due now, which is the point.
+    steps waits whichever step it is on (less, if Difficult put it
+    there). A card whose gap has already elapsed comes out in the past,
+    i.e. due now, which is the point.
     """
     gap = (timedelta(days=state.interval_days) if not state.is_learning
-           else LEARNING_STEPS[state.learning_step])
+           else learning_wait(state.learning_step, state.last_quality))
     return last_reviewed_at + gap
 
 

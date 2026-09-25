@@ -10,7 +10,7 @@ from core.auth import get_user_id
 from core.db import db_conn
 from core.srs_instance import srs
 from main import app
-from srs.scheduler import LEARNING_STEPS
+from srs.scheduler import GRADUATING_DAYS, LEARNING_STEPS, learning_wait
 
 USER = "forecast-test-learner"
 MODE = "kanji.flashcard.f2b"
@@ -40,19 +40,26 @@ def clean():
 def test_a_new_card_forecasts_its_learning_steps(clean):
     out = srs.preview_reviews_bulk([CARD], MODE, USER)[CARD]
     assert set(range(6)) == set(out)
-    # A pass climbs one learning step; a fail keeps the first.
-    assert abs(out[3]["due_in"] - LEARNING_STEPS[1].total_seconds()) <= 2
+    # A pass climbs one learning step; a fail keeps the first. Difficult
+    # climbs it too, but comes back halfway to where Correct would.
+    assert abs(out[4]["due_in"] - LEARNING_STEPS[1].total_seconds()) <= 2
+    assert abs(out[3]["due_in"] - learning_wait(1, 3).total_seconds()) <= 2
+    assert out[3]["due_in"] < out[4]["due_in"]
     assert abs(out[1]["due_in"] - LEARNING_STEPS[0].total_seconds()) <= 2
 
 
 def test_a_graduated_card_forecasts_review_and_relearning(clean):
     # Four passes walk the learning steps and graduate the card to a
-    # one-day interval in review.
+    # two-day interval in review.
     for _ in range(4):
         srs.review(CARD, MODE, 4)
     out = srs.preview_reviews_bulk([CARD], MODE, USER)[CARD]
     # A pass stays in review, days away; a fail falls back into the steps.
-    assert out[4]["due_in"] >= 86400 - 2
+    assert out[4]["due_in"] >= GRADUATING_DAYS * 86400 - 2
+    # Each pass grade a day past the one below it, where rounding used
+    # to print the same day on Difficult and Correct.
+    assert out[3]["due_in"] + 86400 - 2 <= out[4]["due_in"]
+    assert out[4]["due_in"] + 86400 - 2 <= out[5]["due_in"]
     assert abs(out[1]["due_in"] - LEARNING_STEPS[0].total_seconds()) <= 2
     assert abs(out[2]["due_in"] - LEARNING_STEPS[1].total_seconds()) <= 2
 
