@@ -7,7 +7,7 @@ import { deckTypeOf } from './deckTypes'
 import { DeckPreview, DeckRoundel } from './GateShelf'
 import { Loading } from '../ui/Loading'
 
-// ── 机 — the library before a deck is opened (plan 131) ──────────────
+// ── 机 — the library before a deck is opened (plan 132) ──────────────
 // Beside the library's list on the desk, where the bare library used to
 // open its first deck for you: three sections from GET
 // /api/decks/library/home.

@@ -1050,7 +1050,7 @@ plated gates take the window.
   two rows. The shelf keeps its own height, having no body. Both feet are
   lists, one tab stop each, walked with ↑/↓. A window too short for the
   plates scrolls rather than squeezing a row below its content.
-- **Learn is the lines beside the shelf** (plan 131, the owner's pick of
+- **Learn is the lines beside the shelf** (plan 132, the owner's pick of
   three drawn layouts). The four lines stand in one column, each drawn
   **across** its plate: the novice's stop, then a column per level — its
   name, its ring on the rail, its learned / total — the stop being ridden
@@ -1064,7 +1064,7 @@ plated gates take the window.
   cards as tiles, its blurb, Follow and the way to all its cards — with
   the way back at its head. The phone keeps its fifth plate. The rail
   gains the library as a station under Learn.
-- **The library before a deck is opened** (plan 131) stands three
+- **The library before a deck is opened** (plan 132) stands three
   sections beside its list, where it used to open the first deck for
   you: **À la une** (the deck with the most new followers this week,
   drawn as the gate's preview), **Abonnements** (the decks you follow,

@@ -700,7 +700,7 @@ def _ensure_deck_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_deck_subscriptions_user
                 ON deck_subscriptions(user_id)
             """)
-            # When the follower last opened the deck (plan 131): the
+            # When the follower last opened the deck (plan 132): the
             # library's Abonnements counts the author's cards added since.
             # NOT NULL with NOW() as the default, so a row older than the
             # column reads as seen at the deploy and reports nothing new
@@ -1077,7 +1077,7 @@ PUBLISHED_WEEKS = 8
 @router.get("/api/decks/library/home")
 def get_library_home(user_id: str = Depends(get_user_id)):
     """
-    The library's three sections beside its list (plan 131).
+    The library's three sections beside its list (plan 132).
 
     `featured` — À la une: of the decks the list itself would show you
     (published, not yours, not followed), the one that gained the most
@@ -1580,7 +1580,7 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
         payload = _deck_payload(conn, access)
         if access.role == "follower":
             # A follower opening the deck has seen what the author added
-            # (plan 131): the library's Abonnements counts from here.
+            # (plan 132): the library's Abonnements counts from here.
             with conn.cursor() as cur:
                 cur.execute("""
                     UPDATE deck_subscriptions SET seen_at = NOW()

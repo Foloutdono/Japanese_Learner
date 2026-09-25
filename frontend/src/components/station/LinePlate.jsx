@@ -106,7 +106,7 @@ export function StopsFoot({ stops, guide }) {
 // walked like every list on the desk (hooks/useListWalk): one tab stop,
 // the ridden leg, and ↑/↓/Home/End along it.
 //
-// `across` (plan 131) turns it on its side for the desk's Learn gate,
+// `across` (plan 132) turns it on its side for the desk's Learn gate,
 // where the four lines stand in one column beside the shelf: the stops
 // side by side, each its name over its ring over its figure, the rail
 // running through the rings, the stop being ridden in the lead rung.

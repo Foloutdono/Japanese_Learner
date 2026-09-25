@@ -1442,7 +1442,7 @@ const decks = {
   libraryTypes:          'Types de decks',
   libraryBy:             name => `par ${name}`,
   // The shelf and the library beside the lines on the desk, and the
-  // library's three sections (plan 131).
+  // library's three sections (plan 132).
   gateShelfEmpty:        'Aucun deck sur ton étagère.',
   gateShelfEmptyHint:    'Crée le tien, ou suis un deck de la bibliothèque : il se révise avec le reste.',
   gateDeckPublished:     'publié',

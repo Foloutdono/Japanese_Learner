@@ -4,7 +4,7 @@ import { MemoryRouter, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 棚 — the shelf and the library beside the lines (plan 131) ──────
+// ── 棚 — the shelf and the library beside the lines (plan 132) ──────
 // The Learn gate on the desk: the learner's decks, each a door with what
 // it is due, over the library's head of list — a row opens the deck's
 // preview in the panel's place (three cards as tiles, Follow, the way

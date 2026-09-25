@@ -7,7 +7,7 @@ import './index.css'
 // ── 机 — the gates laid out for the width (plan 113) ────────────
 // At the desk's tightest (1100, the rail taking 256 of it) Practice
 // hangs its six plates in three rows of two since 作文 (plan 125),
-// Learn its four lines in one column beside the shelf (plan 131) —
+// Learn its four lines in one column beside the shelf (plan 132) —
 // and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
@@ -133,7 +133,7 @@ describe('the plated gates on the desk', () => {
     }
   })
 
-  it("stands Learn's four lines in one column beside the shelf over the library (plan 131)", async () => {
+  it("stands Learn's four lines in one column beside the shelf over the library (plan 132)", async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
     const lines = $$('.learn-desk > .plates > .plate--line').map(box)
@@ -174,7 +174,7 @@ describe('the gates take the window (plan 130)', () => {
     expect(Math.abs(box(plates).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
   }
 
-  it('draws each Learn line across its plate, the four filling the window (plan 131)', async () => {
+  it('draws each Learn line across its plate, the four filling the window (plan 132)', async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
     const gutter = parseFloat(getComputedStyle(document.querySelector('.learn')).paddingBottom)

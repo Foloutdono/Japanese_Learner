@@ -340,7 +340,7 @@ def test_a_follower_cannot_rename_the_deck(client, published):
     assert client.patch(f"/api/decks/{published}", json={"name": "Mine now"}).status_code == 403
 
 
-# ── The library's home: featured, following, published (plan 131) ──
+# ── The library's home: featured, following, published (plan 132) ──
 
 def test_the_featured_deck_is_one_the_list_would_show(client, published):
     featured = client.get("/api/decks/library/home").json()["featured"]

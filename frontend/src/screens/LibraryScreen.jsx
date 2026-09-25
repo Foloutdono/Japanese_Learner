@@ -103,7 +103,7 @@ function LibraryShelf({ session, open }) {
   // for the length of the debounce, and it is the second one the
   // request is keyed on — a fetch per keystroke is what the wait is for.
   // The gate's search field lands here with its term in the URL (plan
-  // 131): the shelf opens already asked.
+  // 132): the shelf opens already asked.
   const [searchParams] = useSearchParams()
   const [query, setQuery]     = useState(() => searchParams.get('q') ?? '')
   const [term, setTerm]       = useState(() => (searchParams.get('q') ?? '').trim())
@@ -272,7 +272,7 @@ function LibraryShelf({ session, open }) {
     // The shelf as a list, the open deck as the page beside it: another
     // deck swaps the page in place (a link replacing the URL, plan 117,
     // so a deck also opens in a tab of its own). The bare library opened
-    // on its first deck until plan 131; it stands its three sections
+    // on its first deck until plan 132; it stands its three sections
     // there now (LibraryHome: À la une, Abonnements, Tes publications).
     const listed = open ? decks.find(d => String(d.id) === String(open)) : null
     return (

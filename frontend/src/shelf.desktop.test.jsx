@@ -27,7 +27,7 @@ const LISTED = [
   { id: 2, name: 'Kanji du métro', type: 'kanji', card_count: 18, author: 'Haruto', followers: 0 },
   { id: 3, name: 'Cuisine', type: 'vocab', card_count: 25, author: 'Aiko', followers: 1 },
 ]
-// The library's three sections beside the list (plan 131).
+// The library's three sections beside the list (plan 132).
 const HOME = {
   featured: LISTED[0],
   following: [
@@ -101,7 +101,7 @@ const shelfCalls = () => apiJson.mock.calls.filter(([u]) => String(u).startsWith
 const openName = () => $('.desk-split__list .lib-card[aria-current="page"] .platform-card__title')?.textContent
 
 describe('the library on the desk', () => {
-  it("stands the bare library's three sections beside the list (plan 131)", async () => {
+  it("stands the bare library's three sections beside the list (plan 132)", async () => {
     await mountLibrary('/learn/decks/library')
     await settle(400)
     // No deck opened for you: the page is the library's own.
@@ -140,7 +140,7 @@ describe('the library on the desk', () => {
     expect($('.desk-shelf-page .card-row__jp').textContent).toBe('駅')
   })
 
-  it("opens already asked when the gate's search sends a term (plan 131)", async () => {
+  it("opens already asked when the gate's search sends a term (plan 132)", async () => {
     await mountLibrary('/learn/decks/library?q=m%C3%A9tro')
     await settle(400)
     expect($('.console input').value).toBe('métro')

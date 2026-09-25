@@ -52,7 +52,7 @@ export default function DecksScreen({ session }) {
 
   const [decks, setDecks]       = useState([])
   const [loading, setLoading]   = useState(true)
-  // The gate's New deck (plan 131) arrives with the form asked for.
+  // The gate's New deck (plan 132) arrives with the form asked for.
   const location = useLocation()
   const [creating, setCreating] = useState(() => Boolean(location.state?.create))
   const [newName, setNewName]   = useState('')

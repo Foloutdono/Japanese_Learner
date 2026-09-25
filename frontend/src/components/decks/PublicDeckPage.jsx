@@ -45,7 +45,7 @@ const REASONS = [
 // is the desk's: the pane draws a deck from its shelf row before its own
 // answer lands, and until then whether you follow it is not known, so
 // Follow waits with it.
-// `samples` is the desk pane's (plan 131): three of the cards as tiles
+// `samples` is the desk pane's (plan 132): three of the cards as tiles
 // under the identity, the way the gate's preview and À la une draw a
 // deck, before the full list.
 export function PublicDeckBody({ deck, deckId, session, onReload, pending = false, samples = false }) {

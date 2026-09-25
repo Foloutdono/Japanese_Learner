@@ -84,7 +84,7 @@ export function DeskRail() {
             const badge = tab.id === 'today' && due > 0
             const stations = on ? getDeskSections(tab.id, t) : []
             // The deepest station the path stands in: the library is
-            // behind 教材's path, and lights its own row (plan 131).
+            // behind 教材's path, and lights its own row (plan 132).
             const here = stations
               .filter(s => inSection(pathname, s.path))
               .sort((a, b) => b.path.length - a.path.length)[0]

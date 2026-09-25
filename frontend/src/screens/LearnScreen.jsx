@@ -72,7 +72,7 @@ export default function LearnScreen({ session }) {
   const riding = linesOrAll(profile?.lines)
   const here = profile?.jlptLevel ?? null
   // The shelf: on the phone its figures under the fifth plate's name,
-  // on the desk every deck in the column beside the lines (plan 131).
+  // on the desk every deck in the column beside the lines (plan 132).
   // `shelfNonce` asks again after a Follow from the library's panel.
   const [decks, setDecks] = useState(null)
   const [shelfNonce, setShelfNonce] = useState(0)
@@ -128,7 +128,7 @@ export default function LearnScreen({ session }) {
         // The phone's plate has room for the stop behind, the one
         // reached and the one ahead; the desk's draws the whole
         // line (plan 114), upright since plan 130, and across the
-        // plate since plan 131, where the four stand in one column.
+        // plate since plan 132, where the four stand in one column.
         foot={desk
           ? <LineFoot across stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
           : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
@@ -143,7 +143,7 @@ export default function LearnScreen({ session }) {
       <h1 className="sr-only">{t.tabLearn}</h1>
       {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
       {desk ? (
-        // 棚 (plan 131, the owner's pick "A"): the lines stacked on the
+        // 棚 (plan 132, the owner's pick "A"): the lines stacked on the
         // left, each drawn across the plate; the shelf over the library
         // in a column at the entry's width on the right.
         <div className="learn-desk">

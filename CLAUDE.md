@@ -451,8 +451,9 @@ runtime purpose. Two consequences worth knowing:
   `src/gates.desktop.test.jsx`, `src/gates.wide.test.jsx`,
   `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk"; `docs/design/desk/README.md`).
-  **131** is 棚, the shelf and the library beside the lines on the desk
-  (wave 36), the owner's pick of three drawn layouts: the Learn gate's
+  **132** is 棚, the shelf and the library beside the lines on the desk
+  (wave 36; numbered 132 because 131 went to the first ride redrawn
+  while it was open), the owner's pick of three drawn layouts: the Learn gate's
   four lines in one column, each drawn across its plate, beside a column
   holding the learner's decks over the library's most followed or newest
   (Follow on each, a search, a row opening the deck's preview in place);
@@ -468,7 +469,7 @@ runtime purpose. Two consequences worth knowing:
   `components/chrome/DeskRail.jsx`, `src/learnShelf.desktop.test.jsx`,
   `src/gates.desktop.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **132** or higher, and check
+  When starting a new wave, begin at **133** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

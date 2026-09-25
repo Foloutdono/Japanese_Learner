@@ -212,7 +212,7 @@ describe('the rail', () => {
     expect(learn.getAttribute('aria-current')).toBe('true')
   })
 
-  it("lights the library's own station, not the shelf's, inside the library (plan 131)", async () => {
+  it("lights the library's own station, not the shelf's, inside the library (plan 132)", async () => {
     await mountShell('/learn/decks/library')
     await settle()
     const lit = stations().filter(s => s.getAttribute('aria-current') === 'page')

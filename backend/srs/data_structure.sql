@@ -438,7 +438,7 @@ CREATE TABLE deck_subscriptions (
     deck_id BIGINT NOT NULL REFERENCES decks(id) ON DELETE CASCADE,
     user_id TEXT NOT NULL,
     subscribed_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    -- When the follower last opened the deck (plan 131): the library's
+    -- When the follower last opened the deck (plan 132): the library's
     -- Abonnements counts the author's cards added since.
     seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     PRIMARY KEY (deck_id, user_id)

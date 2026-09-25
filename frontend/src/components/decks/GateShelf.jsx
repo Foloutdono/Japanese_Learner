@@ -10,7 +10,7 @@ import { DueChip } from '../station/LinePlate'
 import { Loading } from '../ui/Loading'
 import { ChevronIcon, PlusIcon, SearchIcon } from '../ui/Icons'
 
-// ── 棚 — the shelf and the library beside the lines (plan 131) ──────
+// ── 棚 — the shelf and the library beside the lines (plan 132) ──────
 // The owner's pick of three drawn layouts ("A · 本線と棚"): on the desk
 // the Learn gate is the four lines on the left and a column on the right
 // at the dictionary entry's width, holding the learner's decks over the
