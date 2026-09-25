@@ -27,12 +27,12 @@ import { DeskFigure } from './RunRecords'
 // No caption on the panel, as on the card panel (owner's cut, plan 126):
 // the dots and the lines name themselves.
 //
-// The asking (問), when it comes: the owner means to add a desk-only
-// chatbot for short questions with precise answers. This panel is its
-// place -- the list giving up its lower half to it once the sentence on
-// the stage is graded, the moment the breakdown opens and for the same
-// reason: before the grade an answer to "what does this mean?" is the
-// answer key. Not built; recorded in DESIGN.md, "The desk".
+// The asking (問, plan 131): the desk-only chat for short questions
+// with precise answers (components/study/AskPanel.jsx) stands in this
+// panel, the list giving it the lower half, sealed until the sentence
+// on the stage is graded -- the moment the breakdown opens and for the
+// same reason: before the grade an answer to "what does this mean?" is
+// the answer key. The run passes it as `ask`.
 //
 // Rendered by a run as StudyStage's `panel`, which draws it only on the
 // desk's panels; a phone never mounts it.
@@ -53,7 +53,8 @@ import { DeskFigure } from './RunRecords'
 //   keys      [[cap, what it does], …]
 //   rhythm    the figures after the minutes, in place of sentences a
 //             minute
-export function RunLines({ lines = [], current = null, openKey = null, onOpen, onCurrent, keys = [], rhythm, label }) {
+//   ask       the asking's panel, under the list (plan 131)
+export function RunLines({ lines = [], current = null, openKey = null, onOpen, onCurrent, keys = [], rhythm, label, ask = null }) {
   const { t } = useLang()
   const listRef = useRef(null)
   const doors = Boolean(onOpen)
@@ -131,6 +132,7 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
           })}
         </ol>
       )}
+      {ask}
       {keys.length > 0 && (
         <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
           {keys.map(([cap, what]) => (

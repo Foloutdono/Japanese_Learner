@@ -68,8 +68,12 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   useEffect(() => {
     if (!active) return
     const handler = e => {
-      // No input guard: a typed-answer run rates from its field.
+      // No input guard: a typed-answer run rates from its field. A field
+      // that is not the answer's says so (`data-own-keys`): the asking's
+      // (plan 131) is open beside a reopened line while this sentence
+      // still waits for its grade, and "1" typed in a question is text.
       if (e.repeat || e.metaKey || e.ctrlKey || e.altKey || dialogOpen()) return
+      if (e.target?.closest?.('[data-own-keys]')) return
       const idx = e.key in AZERTY_INDEX ? AZERTY_INDEX[e.key] : parseInt(e.key) - 1
       if (idx >= 0 && idx < QUALITY_BTNS.length) handleRate(QUALITY_BTNS[idx].q)
     }

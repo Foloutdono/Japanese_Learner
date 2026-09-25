@@ -19,6 +19,9 @@ import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
+import { useAsk } from '../hooks/useAsk'
+import { AskPanel } from '../components/study/AskPanel'
+import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
@@ -113,6 +116,8 @@ function Session({ session, level }) {
   // 机 (plan 129): this run's sentences -- the learner's own -- each
   // reopening its breakdown in the side.
   const lines = useRunLines(session, { held: Boolean(lookup) })
+  // 問 (plan 131): a question about the sentence, once graded, on the desk.
+  const asking = useAsk(session, 'composition')
 
   const queueRef = useRef([])      // points fetched ahead, never rendered
   const fetchingRef = useRef(false)
@@ -257,11 +262,26 @@ function Session({ session, level }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // What a question about the sentence carries, less its breakdown
+  // (domain/ask's askTarget adds the words): the learner's own
+  // sentence, what the tutor says it means, the point it practises and
+  // the tutor's review of it.
+  function askBase() {
+    if (!point || !sentence) return null
+    return {
+      sentence,
+      level,
+      translation: tutor?.review?.meaning ?? '',
+      point: `${point.pattern} — ${point.meaning}`,
+      review: tutor?.analysis ?? '',
+    }
+  }
+
   function next() {
     // The sentence just graded joins the run's lines (plan 129), with
     // what the tutor said it means as its translation.
     if (point && sentence && quality != null) {
-      lines.commit({ key: point._uiKey, jp: sentence, translation: tutor?.review?.meaning, quality, analysis })
+      lines.commit({ key: point._uiKey, jp: sentence, translation: tutor?.review?.meaning, quality, analysis, ask: askBase() })
     }
     if (queueRef.current.length) {
       const [head, ...rest] = queueRef.current
@@ -347,6 +367,9 @@ function Session({ session, level }) {
     session,
   }
   const keys = useSentenceKeys()
+  // The asking's thread: a reopened line's, else the sentence on the
+  // stage's, open once it is graded (plan 131).
+  const target = askTarget(lines.opened, { key: point?._uiKey, base: askBase(), analysis, open: rated })
   const side = lines.opened
     ? <LineSide lines={lines} {...doors} />
     : rated
@@ -392,6 +415,9 @@ function Session({ session, level }) {
           onOpen={key => { setLookup(null); lines.open(key) }}
           onCurrent={() => { setLookup(null); lines.close() }}
           keys={keys}
+          ask={target.key != null && (
+            <AskPanel key={target.key} ask={asking} askKey={target.key} context={target.context} open={target.open} />
+          )}
         />
       )}
       side={side}

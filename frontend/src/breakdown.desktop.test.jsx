@@ -75,10 +75,11 @@ async function graded() {
     </LangProvider>
   )
   await settle(150)
-  setValue.call($('form input'), 'gakkou wa kuji desu')
-  $('form input').dispatchEvent(new Event('input', { bubbles: true }))
+  // The answer's form: the asking's (plan 131) is another on the desk.
+  setValue.call($('form.stage__foot input'), 'gakkou wa kuji desu')
+  $('form.stage__foot input').dispatchEvent(new Event('input', { bubbles: true }))
   await settle(20)
-  $('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+  $('form.stage__foot').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
   await settle(80)
   const seals = document.querySelectorAll('.rating-bar__btn')
   seals[seals.length - 1].click()

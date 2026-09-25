@@ -19,6 +19,9 @@ import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
 import { RunLines } from '../components/study/RunLines'
 import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
 import { useRunLines } from '../hooks/useRunLines'
+import { useAsk } from '../hooks/useAsk'
+import { AskPanel } from '../components/study/AskPanel'
+import { askTarget } from '../domain/ask'
 import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
@@ -92,6 +95,8 @@ export default function ReadingRun({ session }) {
   // 机 (plan 129): this run's sentences, each reopening its breakdown in
   // the side; Esc closes an open one unless a door in it holds the key.
   const lines = useRunLines(session, { held: Boolean(lookup) })
+  // 問 (plan 131): a question about the sentence, once graded, on the desk.
+  const asking = useAsk(session, 'reading')
 
   const [analysis, setAnalysis] = useState(null)
   const [analysisLoading, setAnalysisLoading] = useState(false)
@@ -155,6 +160,7 @@ export default function ReadingRun({ session }) {
     setStreak(0)
     startTally(`reading:${sourceLabel()}`)
     lines.reset()
+    asking.reset()
     seenRef.current = []
     queueRef.current = []
     setStage('loading')
@@ -251,13 +257,27 @@ export default function ReadingRun({ session }) {
     fetchAnalysis(phraseData.phrase)
   }
 
+  // What a question about the sentence on the stage carries, less its
+  // breakdown (domain/ask's askTarget adds the words): the sentence, its
+  // translation, what the learner typed, the point it was written for.
+  function askBase() {
+    if (!data) return null
+    return {
+      sentence: data.phrase,
+      level: source === 'level' ? level : '',
+      translation: data.translation,
+      answer: answer.trim(),
+      point: data.grammar ?? '',
+    }
+  }
+
   // Pulls the next phrase from the queue (instant — no waiting), and tops
   // the queue back up in the background if it's getting low.
   function next() {
     // The sentence just graded joins the run's lines with whatever
     // breakdown it has by now (plan 129).
     if (data && feedback?.quality != null) {
-      lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis })
+      lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis, ask: askBase() })
     }
     if (queueRef.current.length > 0) {
       const [head, ...rest] = queueRef.current
@@ -451,6 +471,8 @@ export default function ReadingRun({ session }) {
       setLookup={setLookup}
       closeLookup={closeLookup}
       lines={lines}
+      asking={asking}
+      askBase={askBase}
       analysis={analysis}
       analysisLoading={analysisLoading}
       onExplain={explainPhrase}
@@ -487,7 +509,7 @@ function Streak({ streak, t }) {
 // decides there is a session to start at all.
 function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
-  feedback, score, streak, fare, error, lookup, setLookup, closeLookup, lines,
+  feedback, score, streak, fare, error, lookup, setLookup, closeLookup, lines, asking, askBase,
   analysis, analysisLoading, backLabel,
   onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
   gradeAnswer, next, retry, session,
@@ -509,6 +531,10 @@ function SessionView({
 
   const phraseCovered = stage === 'reading' && timeLeft <= 0
   const keys = useSentenceKeys()
+  // The asking's thread: a reopened line's, else the sentence on the
+  // stage's, open once it is graded (plan 131).
+  const graded = stage === 'feedback' && feedback?.correct != null
+  const target = askTarget(lines.opened, { key: data?._uiKey, base: askBase(), analysis, open: graded })
 
   // A door in a breakdown -- the sentence on the stage's, or a line
   // reopened from the run's lines -- opens in the column (plan 115).
@@ -543,6 +569,9 @@ function SessionView({
           onOpen={key => { setLookup(null); lines.open(key) }}
           onCurrent={() => { setLookup(null); lines.close() }}
           keys={keys}
+          ask={target.key != null && (
+            <AskPanel key={target.key} ask={asking} askKey={target.key} context={target.context} open={target.open} />
+          )}
         />
       )}
       side={lines.opened ? <LineSide lines={lines} {...doors} /> : (
