@@ -618,9 +618,12 @@ treatment.
 deepening, **every line pigment but one carries `--text-on-panel`** in both
 themes and both states; the worst of them, 黄丹 safflower, rests at 5.29:1 and
 hovers at 4.53:1. A new pigment has to be measured against that pair before it
-is minted — 常磐 tokiwa, added with 書取, rests at 5.56:1 and hovers at 4.74:1.
+is minted — 常磐 tokiwa, added with 書取, rests at 5.56:1 and hovers at 4.74:1,
+and 紫 murasaki, added with 作文 (plan 125), rests at 7.70:1 and hovers at
+6.84:1 (8.68:1 and 7.99:1 on the light theme's value), measured by the
+contrast guard's own sites rather than by hand.
 
-**山吹色 gold is the twelfth, and it is the exception.** It reaches only 3.90:1
+**山吹色 gold is the one exception among the thirteen.** It reaches only 3.90:1
 resting and 3.24:1 hovering in dark theme, and no deepening within this family
 saves it — a deepened yellow turns olive before it will carry a light ink. Gold
 takes the dark ink, or a deeper mix of its own: the console's gold pill goes to

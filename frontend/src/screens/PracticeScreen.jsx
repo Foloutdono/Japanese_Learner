@@ -11,7 +11,7 @@ import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { LEVELS } from '../domain/sentenceSource'
 
-// ── 実践 — the Practice gate: five platforms (plan 068, plates since 094) ──
+// ── 実践 — the Practice gate: six platforms (plan 068, plates since 094, 作文 since 125) ──
 // Reading practice, reading comprehension, translation, dictation,
 // the mock exam — the sentence-level sections, which schedule words
 // rather than levels and so have no line on the map. One station
@@ -50,6 +50,8 @@ const LEVEL_PATH = {
   // One axis, like comprehension: a dictation line is picked by grade
   // and by nothing else, so the grade IS the run's path.
   '/practice/dictation':     lvl => `/practice/dictation/${lvl}`,
+  // One axis too (plan 125): a 作文 run is picked by grade alone.
+  '/practice/composition':   lvl => `/practice/composition/${lvl}`,
   // The one that is not a run: the exam's grades open that grade's
   // papers (screens/ExamScreen reads the same ?level=), so there is no
   // train to board yet.

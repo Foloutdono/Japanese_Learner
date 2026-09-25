@@ -3419,6 +3419,18 @@
      value below — clear of the 4.5 floor with more room than 黄丹, the
      tightest pigment in this list, which sits at 5.29:1 and 4.53:1. */
   --line-kakitori:  #3f8f63;  /* 常磐色   tokiwa-iro,  evergreen   */
+  /* 紫 murasaki — 作文, the composition platform (plan 125), added when
+     that section was: a thirteenth section, a thirteenth pigment. The
+     stretch between 藤 (262°) and 葡萄 (315°) was the widest left on
+     the wheel; this sits at ~290°, and both neighbours are duller — 藤
+     a pale wisteria at 20% saturation, 葡萄 a dark grape — so at
+     roundel size one reads wisteria, one grape, this one violet.
+     Deepened 30% toward the panel (the .btn-primary recipe) it carries
+     --text-on-panel at 7.70:1 resting and 6.84:1 hovering here, 8.68:1
+     and 7.99:1 for the light theme's value below — clear of the 4.5
+     floor with more room than any pigment in this list; measured by
+     src/contrast.browser.test.jsx's sakubun sites. */
+  --line-sakubun:   #884898;  /* 紫       murasaki,    purple      */
   /* 鶯色 uguisu — no longer a board line (plan 027 merged 動画 into
      解析). Kept, and reserved for exactly one thing: the timestamp
      chips on video Sentences, the only data that exists for that
@@ -3526,6 +3538,7 @@
   --line-decks:     #853d4e;
   --line-exam:      #7a5c40;
   --line-kakitori:  #35784f;
+  --line-sakubun:   #743d82;
   /* Retired as a board line by plan 027 — see the dark-theme value. */
   --line-douga:     #6a7a35;
   --pass-ink:       #4a4452;

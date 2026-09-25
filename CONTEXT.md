@@ -71,6 +71,15 @@ listening and is a different thing.
 rating (`quality`, 0–5, as everywhere else). The two sit side by side and are
 never merged — one is measured, one is an opinion.
 
+**Composition** (作文) — the practice mode where the learner is handed a
+grammar point and writes a sentence that uses it (plan 125). Three opinions
+about the sentence, kept apart in `composition_log`: the server *detects* the
+point (`study/grammar_detect.can_find` decides whether it may say so at all),
+the tutor *reviews* it (`study/tutor_review`, the shape translation's tutor
+answers in, rationed by the day through `core/daily_limit`), and the learner
+*grades* it — `docs/adr/0013`'s split, a third time. Say *composition*, never
+"writing mode": 書取 is writing too.
+
 **Pace** — the learner's chosen number of NEW items per day
 (`user_profiles.daily_new_target`), set at onboarding as a service type
 (各駅停車 5 / 快速 10 / 特急 20) and adjustable from Settings. Today it

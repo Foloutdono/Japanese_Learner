@@ -358,7 +358,23 @@ runtime purpose. Two consequences worth knowing:
   `records`, `components/study/RunRecords.jsx`,
   `components/study/SessionPanel.jsx`, `src/console.desktop.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **125** or higher, and check
+  **125** is 作文, composition (wave 30; numbered 125 because 124 went to
+  the console in a parallel session): a sixth practice platform, where
+  the learner is handed a grammar point and writes a sentence that uses
+  it — the detector's word on whether the point is there
+  (`study/grammar_detect.py`'s `can_find`, trusted only where it finds
+  the point in its own lesson), the tutor's review in the shape
+  translation's tutor answers in, moved to `study/tutor_review.py` and
+  drawn once by `components/study/TutorReview.jsx`, rationed by the day
+  through the first shared daily counter (`core/daily_limit.py`,
+  `daily_usage`), and the learner's own rating as the grade (ADR 0013)
+  (cited in `routes/composition.py`, `core/daily_limit.py`,
+  `study/tutor_review.py`, `study/grammar_detect.py`,
+  `scripts/llm_cost_model.py`, `components/study/TutorReview.jsx`,
+  `screens/CompositionRun.jsx`, `config/tabs.js`, `domain/paywall.js`,
+  `src/composition.desktop.test.jsx` and `index.css`; DESIGN.md, "The
+  primary button"; `docs/llm-commercial-plan.md`).
+  When starting a new wave, begin at **126** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

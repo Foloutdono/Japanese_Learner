@@ -66,6 +66,7 @@ PER_USER = [
     ("reading_log",       200, "", "/api/reading/history caps at 200"),
     ("translation_log",   200, "", "/api/translation/history caps at 200"),
     ("dictation_log",     100, "", "/api/dictation/history caps at 100"),
+    ("composition_log",   100, "", "/api/composition/history caps at 100"),
     ("phrase_history",    200, " AND NOT kept",
      "/api/phrase/history caps at 200; pinned (保存) rows are never touched"),
     ("video_sessions",    100, "", "/api/video/sessions caps at 100; the heaviest rows here"),
@@ -76,6 +77,8 @@ PER_USER = [
 BY_AGE = [
     ("ocr_usage", "day", 30,
      "routes/ocr.py only ever reads CURRENT_DATE's counter"),
+    ("daily_usage", "day", 30,
+     "core/daily_limit.py only ever reads today's counter"),
     ("exam_generation_jobs", "updated_at", 7,
      "a claim lock still standing a week after its last update is a dead run"),
     ("video_session_jobs", "updated_at", 7,

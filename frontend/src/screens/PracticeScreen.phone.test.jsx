@@ -168,8 +168,13 @@ describe('the practice gate at phone width', () => {
     await settle(60)
     expect(here.path).toBe('/practice/dictation/N4')
 
+    // 作文 — one axis too (plan 125).
+    chipAt(4, 'N3').click()
+    await settle(60)
+    expect(here.path).toBe('/practice/composition/N3')
+
     // 模試 — not a run: that grade's papers (ExamScreen reads ?level=).
-    chipAt(4, 'N2').click()
+    chipAt(5, 'N2').click()
     await settle(60)
     expect(here.path).toBe('/practice/exam?level=N2')
   })

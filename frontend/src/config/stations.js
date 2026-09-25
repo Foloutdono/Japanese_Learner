@@ -52,6 +52,7 @@ const STATIONS = {
   '/practice/comprehension': { code: 'RK', kana: 'りかい' },
   '/practice/translation':  { code: 'HY', kana: 'ほんやく' },
   '/practice/dictation':    { code: 'KT', kana: 'かきとり' },
+  '/practice/composition':  { code: 'SB', kana: 'さくぶん' },
   // 解析 — one station, three platforms (文字 / 写真 / 動画). Was two
   // entries, /phrase-analyzer and /video (DG どうが), until plan 027
   // merged them: both produced the same thing, a Passage of Sentences.

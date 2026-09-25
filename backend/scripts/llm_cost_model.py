@@ -73,6 +73,14 @@ FEATURES = {
         "3 reviewed attempts a session, 20 sessions. One call each, uncached "
         "(the learner's own answer is in the prompt, so it cannot be shared).",
     ),
+    "composition_review": (
+        90, 900, 400,
+        "4-5 reviewed sentences a session, 20 sessions (plan 125). One call "
+        "each; the learner's sentence is in the user block, so nothing is "
+        "shared, but the system block is a stable prefix a provider's cache "
+        "serves (~60% of the input). COMPOSITION_DAILY_LIMIT caps it at "
+        "30/day, which bounds the abuse row.",
+    ),
     "phrase_analysis": (
         50, 400, 500,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "

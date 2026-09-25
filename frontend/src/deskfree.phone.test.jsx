@@ -1256,6 +1256,53 @@ describe('the places (plan 123, P16)', () => {
   })
 })
 
+// ── plan 125 — 作文, the composition run a phone keeps ──
+// On the desk the run stands the point's lesson beside the field and
+// the sentence's breakdown once rated (composition.desktop.test). A
+// phone keeps its single column: a door on the card opens the lesson
+// as a sheet, the breakdown is a toggle under the review, and neither
+// a column nor a lesson fetch happens unasked.
+describe('the composition run (plan 125)', () => {
+  it('keeps the phone\'s column, its lesson door and no column', async () => {
+    const { apiJson } = await import('./lib/api')
+    const POINT = { raw_id: 'grammar_N4_〜ながら', level: 'N4', pattern: '〜ながら', structure: 'V-ます + ながら', meaning: 'en faisant', register: null, stage: 'new' }
+    apiJson.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/composition/batch')) return { level: 'N4', points: [POINT] }
+      if (u === '/api/composition/check') return { found: true }
+      if (u.startsWith('/api/grammar/point')) {
+        return { ...POINT, steps: [{ kind: 'rule', text: 'Deux actions en même temps.' }], compare: [], examples: [], status: { status: 'not_started' } }
+      }
+      return {}
+    })
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ review: null, analysis: 'Bien.' }) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: CompositionRun } = await import('./screens/CompositionRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/composition/N4']}>
+          <Routes><Route path="/practice/composition/:level" element={<CompositionRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.desk-run__side')).toBeNull()
+    // The lesson is behind a door on the card, and nothing fetched it.
+    const door = document.querySelector('.stage .prose__breakdown button')
+    expect(door.textContent).toBe('Leçon')
+    expect(apiJson.mock.calls.some(c => String(c[0]).startsWith('/api/grammar/point'))).toBe(false)
+    door.click()
+    await settle(200)
+    expect(document.querySelector('.dict-sheet')).not.toBeNull()
+    expect(apiJson.mock.calls.some(c => String(c[0]).startsWith('/api/grammar/point'))).toBe(true)
+    apiJson.mockReset()
+    apiFetch.mockReset()
+  })
+})
+
 // ── plan 123, P17 — a phone's radio groups are tapped ──
 // On the desk a radio group is one tab stop walked with the arrows; a
 // phone's keeps a stop per radio, no tabindex written, and leaves the

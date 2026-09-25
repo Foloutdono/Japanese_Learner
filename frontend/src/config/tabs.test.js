@@ -62,7 +62,7 @@ describe('the rail', () => {
     ])
     expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
       '/practice/reading', '/practice/comprehension', '/practice/translation',
-      '/practice/dictation', '/practice/exam',
+      '/practice/dictation', '/practice/composition', '/practice/exam',
     ])
     // The queue IS the gate, and the catalogue is the dictionary.
     expect(getDeskSections('today', t)).toEqual([])

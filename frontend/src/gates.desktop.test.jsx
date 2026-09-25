@@ -6,8 +6,9 @@ import './index.css'
 
 // ── 机 — the gates laid out for the width (plan 113) ────────────
 // At the desk's tightest (1100, the rail taking 256 of it) the two
-// plated gates hang their plates two by two, the odd fifth across the
-// row, and Today sets the strip beside the fare gate. The phone's own
+// plated gates hang their plates two by two — Learn's odd fifth across
+// the row, Practice's six in three rows of two since 作文 (plan 125) —
+// and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
 vi.mock('./lib/api', () => ({
@@ -52,32 +53,42 @@ function framed(path, screen) {
   )
 }
 
-function twoByTwo(plates) {
+// Two across: every pair shares a top and a height, and each half is
+// half. An odd last plate takes the row (`spans`); an even count ends
+// on a full pair.
+function lattice(plates, { count, spans }) {
   const boxes = [...plates.children].map(p => p.getBoundingClientRect())
   const whole = plates.getBoundingClientRect()
-  expect(boxes).toHaveLength(5)
-  // Two across, twice: the pairs share a top, and each half is half.
-  expect(Math.round(boxes[0].top)).toBe(Math.round(boxes[1].top))
-  expect(Math.round(boxes[2].top)).toBe(Math.round(boxes[3].top))
-  expect(boxes[1].left).toBeGreaterThan(boxes[0].right)
-  expect(Math.abs(boxes[0].width - boxes[1].width)).toBeLessThanOrEqual(1)
-  expect(boxes[0].width).toBeLessThan(whole.width / 2)
-  // Plates in a row share a height.
-  expect(Math.abs(boxes[0].height - boxes[1].height)).toBeLessThanOrEqual(1)
-  // The fifth takes the row.
-  expect(boxes[4].top).toBeGreaterThan(boxes[2].bottom)
-  expect(Math.abs(boxes[4].width - whole.width)).toBeLessThanOrEqual(1)
+  expect(boxes).toHaveLength(count)
+  for (let i = 0; i + 1 < count; i += 2) {
+    expect(Math.round(boxes[i].top)).toBe(Math.round(boxes[i + 1].top))
+    expect(boxes[i + 1].left).toBeGreaterThan(boxes[i].right)
+    expect(Math.abs(boxes[i].width - boxes[i + 1].width)).toBeLessThanOrEqual(1)
+    expect(boxes[i].width).toBeLessThan(whole.width / 2)
+    expect(Math.abs(boxes[i].height - boxes[i + 1].height)).toBeLessThanOrEqual(1)
+    if (i > 0) expect(boxes[i].top).toBeGreaterThan(boxes[i - 2].bottom)
+  }
+  const last = boxes[count - 1]
+  if (spans) {
+    expect(last.top).toBeGreaterThan(boxes[count - 2].bottom)
+    expect(Math.abs(last.width - whole.width)).toBeLessThanOrEqual(1)
+  } else {
+    expect(last.width).toBeLessThan(whole.width / 2)
+  }
 }
 
 describe('the plated gates on the desk', () => {
-  it('hangs Practice\'s platforms two by two, the exam across the row', async () => {
+  it('hangs Practice\'s six platforms in three rows of two, the exam last beside 作文', async () => {
     await framed('/practice', <PracticeScreen />)
     await settle()
     const plates = document.querySelector('.practice > .plates')
     expect(getComputedStyle(plates).display).toBe('grid')
-    twoByTwo(plates)
-    // The one across the row is the mock exam, last on the gate.
+    // Six divide by two, so the odd-last rule has nothing to span: the
+    // exam keeps its place at the end of the gate and shares the third
+    // row with the platform added before it (plan 125).
+    lattice(plates, { count: 6, spans: false })
     expect(plates.lastElementChild.querySelector('.plate__head').textContent).toMatch(/examen|exam/i)
+    expect(plates.children[4].querySelector('.plate__head').textContent).toMatch(/rédaction|composition/i)
     for (const title of document.querySelectorAll('.plate__title')) {
       expect(title.scrollWidth).toBeLessThanOrEqual(title.clientWidth)
     }
@@ -88,7 +99,7 @@ describe('the plated gates on the desk', () => {
     await settle()
     const plates = document.querySelector('.learn > .plates')
     expect(getComputedStyle(plates).display).toBe('grid')
-    twoByTwo(plates)
+    lattice(plates, { count: 5, spans: true })
     expect(plates.lastElementChild.classList.contains('plate--shelf')).toBe(true)
   })
 })

@@ -153,7 +153,7 @@ function sections(t) {
     { icon: '文法', title: t.grammarTitle,    desc: t.grammarDesc,    path: '/learn/grammar', clip: 'grammar', color: 'var(--line-grammar)', tab: 'learn' },
     { icon: '教材', title: t.decksTitle,      desc: t.decksDesc,      path: '/learn/decks',   clip: 'decks', color: 'var(--line-decks)',   tab: 'learn' },
 
-    // ── 実践 — the five platforms ──
+    // ── 実践 — the six platforms ──
     { icon: '読書', title: t.readingTitle,    desc: t.readingDesc,    path: '/practice/reading',       clip: 'reading', color: 'var(--line-reading)', tab: 'practice' },
     { icon: '理解', title: t.readingComprehensionTitle, desc: t.readingComprehensionDesc, path: '/practice/comprehension', clip: 'reading-comprehension', color: 'var(--line-rikai)', tab: 'practice' },
     // Translation mode: given a phrase in the UI's foreign language,
@@ -170,6 +170,13 @@ function sections(t) {
     // does nothing for a section without it, which is the same silence
     // 統計 and 本日 depart in.
     { icon: '書取', title: t.dictationTitle, desc: t.dictationDesc, path: '/practice/dictation', color: 'var(--line-kakitori)', tab: 'practice' },
+    // 作文 — composition (plan 125): the learner is handed a grammar
+    // point and writes a sentence that uses it; the detector says
+    // whether the point is there, the tutor reads the sentence back,
+    // and the learner grades it — see screens/CompositionRun.jsx. No
+    // `clip`, for dictation's reason: there is no recording to play.
+    // Before 模試 so the exam stays last on the gate.
+    { icon: '作文', title: t.compositionTitle, desc: t.compositionDesc, path: '/practice/composition', color: 'var(--line-sakubun)', tab: 'practice' },
     // Generated mock exams (vocab/grammar/reading/listening, built to
     // the official JLPT blueprint but never copied from a real past
     // paper) — see src/exam/.

@@ -932,6 +932,10 @@ const translationMode = {
   reviewGood:            'Ce qui marche',
   reviewFix:             'À corriger',
   reviewBetter:          'Version corrigée',
+  // Ce que dit la phrase de l'apprenant, dans sa langue : demandé par
+  // 作文 seul, dessiné par components/study/TutorReview.jsx dès qu'un
+  // avis le porte.
+  reviewMeaning:         'Ce que ça dit',
   reviewGrammarUsed:     'utilisé',
   reviewGrammarMissed:   'non utilisé',
   analyzingTranslation:  'Analyse de ta traduction…',
@@ -960,6 +964,30 @@ const dictationMode = {
   dictationPrompt:       'Écris en romaji ce que tu as entendu',
   dictationListen:       'Écouter',
   dictationListensLeft:  n => (n === 1 ? '1 écoute restante' : `${n} écoutes restantes`),
+}
+
+// ── 作文 — la rédaction (plan 125) ──────────────────────────────
+// CompositionRun.jsx réutilise telles quelles les clés partagées
+// (selectLevel, leaveLevels, stationJlpt, submit, retry, yourAnswer,
+// japanesePlaceholder, aiAnalysis, analysisUnavailable, nextPhrase,
+// readingGrammarPoint, glLesson, les clés review*, celles de la
+// décomposition et de l'explication) — seules les clés vraiment
+// nouvelles vivent ici.
+const compositionMode = {
+  compositionTitle:        'Rédaction',
+  compositionDesc:         'Écris une phrase avec le point donné\nUn tuteur te la relit\nDe N5 à N1',
+  compositionFetchError:   "Impossible de charger un point de grammaire. Réessaie.",
+  compositionPrompt:       'Écris une phrase avec',
+  // Le mot du détecteur, sur l'étiquette de la réponse à côté de « Ta
+  // réponse » : un indice pour la note que l'apprenant donne en
+  // dessous, jamais la note — et rien du tout sur un point que le
+  // détecteur ne sait pas voir.
+  compositionFound:        'point repéré',
+  compositionNotFound:     'point non repéré',
+  analyzingComposition:    'Lecture de ta phrase…',
+  // Les avis du jour sont épuisés (routes/composition.py, 429). La
+  // session continue : l'indice s'affiche toujours et la note compte.
+  compositionLimitReached: "Le tuteur a fini sa journée : ton indice et ta note comptent toujours. Reviens demain.",
 }
 
 // ── Dictionary ────────────────────────────────────────────
@@ -1771,7 +1799,7 @@ const guide = {
   guideLearnPlate: 'Une ligne. Touchez la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
   guideLearnStops: 'Où vous en êtes sur la ligne, et les arrêts de part et d\'autre.',
   guideLearnShelf: 'Vos propres decks, et la bibliothèque où les autres publient.',
-  guidePracticePlate: 'Un quai : des phrases à lire, comprendre, traduire ou prendre en dictée — et l\'examen blanc.',
+  guidePracticePlate: 'Un quai : des phrases à lire, comprendre, traduire, prendre en dictée ou rédiger — et l\'examen blanc.',
   guidePracticeDests: 'Les niveaux. Le vôtre est marqué ; touchez-en un autre pour y monter quand même.',
   guidePracticePass: 'Ces quais sont sur l\'abonnement.',
   guideDictConsole: 'Cherchez par mot, lecture ou sens.',
@@ -1952,6 +1980,7 @@ export default welded({
   ...readingComprehension,
   ...translationMode,
   ...dictationMode,
+  ...compositionMode,
   ...profile,
   ...settings,
   ...decks,
