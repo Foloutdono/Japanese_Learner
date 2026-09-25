@@ -66,6 +66,7 @@ def validate_sentence_order_question(question: dict) -> list[str]:
     order = question.get("order") or []
     if set(order) != ids or len(order) != 4:
         errors.append(f"{question.get('id')}: order {order} doesn't match piece ids {ids}")
+        return errors  # the starIndex check below indexes into order
 
     star_index = question.get("starIndex")
     if not isinstance(star_index, int) or not (0 <= star_index < 4):
@@ -115,6 +116,8 @@ def validate_no_duplicate_targets(questions: list[dict]) -> list[str]:
     errors = []
     for q in questions:
         key = q.get("promptJp")
+        if key is None:
+            continue  # no target to compare, not a duplicate of another missing one
         if key in seen:
             errors.append(f"{q.get('id')}: duplicate target {key!r} tested twice in one paper")
         seen.add(key)
@@ -139,7 +142,7 @@ def passage_length_bounds(target_chars: int, tolerance: float | None = None) -> 
     short-target overshoot; this is the safety-net half of that fix, not
     a replacement for prompting the model to actually aim shorter."""
     if tolerance is None:
-        tolerance = max(0.2, 40 / target_chars)
+        tolerance = max(0.2, 40 / target_chars) if target_chars > 0 else 0.2
     return round(target_chars * (1 - tolerance)), round(target_chars * (1 + tolerance))
 
 
