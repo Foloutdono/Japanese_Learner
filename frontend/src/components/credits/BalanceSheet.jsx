@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { Sheet } from '../chrome/Sheet'
 import { useCredits, useBalanceOpen, closeBalance } from '../../stores/credits'
-import { DAILY_REFILL, CAP } from '../../domain/credits'
+import { DAILY_REFILL, CAP, refillClock } from '../../domain/credits'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from './OfferButton'
 
@@ -14,13 +14,6 @@ import { OfferButton } from './OfferButton'
 // HAS_STORE). It sits under the free line, so what a learner already
 // has is stated before what they could buy, and nothing here says
 // "unlimited" to a free learner who has not asked.
-function refillClock(iso, lang) {
-  if (!iso) return null
-  const d = new Date(iso)
-  if (!Number.isFinite(d.getTime())) return null
-  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
-}
-
 export function BalanceSheet() {
   const { t, lang } = useLang()
   const open = useBalanceOpen()
@@ -29,7 +22,7 @@ export function BalanceSheet() {
   const refill = credits?.dailyRefill ?? DAILY_REFILL
   const balance = credits?.unlimited ? null : credits?.balance
   const pct = balance == null ? 100 : Math.round((Math.min(balance, cap) / cap) * 100)
-  const at = refillClock(credits?.refillAt, lang) ?? '00:00'
+  const at = refillClock(credits?.refillAt, lang)
 
   return (
     <Sheet open={open} onClose={closeBalance} jp={t.balanceTitle} cap={t.passLabel} label={t.balanceTitle} initialFocus=".btn-secondary">

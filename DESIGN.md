@@ -955,10 +955,25 @@ answer a keyboard and a pointer one way everywhere.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
-  辻 over TSUJI at its head, the five gates, and the HUD's three
-  instruments at its foot (the same components, so the fare is paid into
-  the same roundel). It is chrome, so it wears no line pigment — the one
-  colour in it is Today's due count, a state's.
+  辻 over TSUJI at its head, the five gates, and the learner's pass at its
+  foot. It is chrome, so it wears no line pigment — the one colour in the
+  rail's own ink is Today's due count, a state's.
+- **The rail's foot is the learner's pass** (定期券, plan 127; the owner's
+  pick of five drawn directions, the canvas "Rail foot directions"). The
+  HUD's three instruments set as the phone draws them were three shapes on
+  three alignments, none on the rail's column; on the desk they are one
+  card, the rail's other bookend — the origin station's plate at its head,
+  your pass at its foot. The profile pass at pocket size: its charcoal
+  sheen and identity corner, gold as its metal. Three doors on the card,
+  each the HUD's own with its guide anchor: the face (the HUD's roundel,
+  the fare still paid into it, and the climb to the next level as the
+  run's level bar draws it), the purse (the balance, captioned with what
+  it counts, or, spent, when it comes back), and the stub (the journey's
+  word and drift under a perforation, lit by a lamp in the state's ink).
+  The card's edge is the balance's, as the pocket pass's was. The pass is
+  the learner's object, not the chrome's, so its gold and its state inks
+  are the pass's materials rather than colour on chrome; the phone keeps
+  the three apart on its HUD.
 - **Every gate is captioned, Today first.** A column has the room the
   phone's row lacked, so the pictogram carries its word; and with no thumb
   to set Today under, it opens the list the way `/` opens on it

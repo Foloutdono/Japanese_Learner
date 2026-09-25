@@ -40,7 +40,11 @@ was verified with.
 | `.desk-gate`, `--on`, `__ico`, `__label`, `__due` | a gate: `GateIcon` plus its word, always captioned. The lit gate has the lozenge's wash and a 2px rule on the rail's edge. Today's due count is warning ink, the rail's only colour | 〃 |
 | `.desk-gate__key` | the `/` cap on the Dictionary gate: the dictionary's search from anywhere the rail is (plan 114) | 〃 |
 | `.desk-rail__stations`, `.desk-sec`, `--on` | the lit gate's stations as stops on a drawn line, the one you stand in filled. `config/tabs.js`'s `getDeskSections` supplies them | 〃 |
-| `.desk-rail__foot` | the HUD's three instruments (`HudInstruments`): level and pass on one line, the status panel under them; each icon-only figure titled (plan 123). On Today the status panel scrolls to and calls the journey beside the gate (`.desk-journey--called`) rather than opening its sheet | `components/chrome/Hud.jsx` |
+| `.desk-rail__foot` | the rail's floor, holding the learner's pass | `components/chrome/DeskRail.jsx` |
+| `.desk-pass` (`--low`, `--out`), `__face` | the learner's pass (plan 127): the HUD's three instruments as one card on the rail's floor, the profile pass's sheen and identity corner, its edge the balance's (warning at ≤5, danger at 0) | `components/chrome/DeskPass.jsx` |
+| `.desk-pass__level`, `__climb`, `__track`, `__fill`, `__gain`, `__xp`, `__unit` | the face, `hud.level`'s door → the pass: the HUD's roundel (`.hud__level`, the fare rising off it) and the climb to the next level in the pass's gold, the run's level bar at pocket size; titled with the level | 〃 |
+| `.desk-pass__purse`, `__fig`, `__note` | the purse, `hud.pass`'s door → the balance sheet: the pocket pass's mark and figure (`.hud__pass-wave`, `.hud__pass-fig`) and what it counts, or when a spent one comes back (`balanceRefillLine`, `domain/credits.js`'s `refillClock`) | 〃 |
+| `.desk-pass__stub` (`--ahead`, `--onTime`, `--slightlyBehind`, `--delayed`, `--suspended`, `--offline`), `__word`, `__drift` | the stub, `hud.status`'s door: the journey's word and drift under a perforation, a lamp in the state's ink. On Today it scrolls to and calls the journey beside the gate (`.desk-journey--called`) rather than opening its sheet (`hudStatus.js`'s `showStatus`, plan 123) | 〃 |
 | `.desk-rail__gates` | the gates scroll alone on a short window; the head and the foot stay whole (plan 123) | `components/chrome/DeskRail.jsx` |
 
 The order is `config/tabs.js`'s `DESK_TAB_IDS` (Today first). `TAB_IDS` is
@@ -112,7 +116,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | File | Lane | What |
 |---|---|---|
 | `src/desk.css.test.js` | node | the section's contract, and the width written once |
-| `src/chrome.desktop.test.jsx` | desktop (1100×800) | the rail: order, captions, stations, due, instruments, geometry, no line pigment, a run without it |
+| `src/chrome.desktop.test.jsx` | desktop (1100×800) | the rail: order, captions, stations, due, the pass at its foot (its three doors, its climb, its balance's edge and caption), geometry, no line pigment, a run without it |
 | `src/chrome.wide.test.jsx` | wide (1440×900) | the column capped at `--board-w` and centred beside the rail |
 | `src/sheet.desktop.test.jsx` | desktop | the centred dialog |
 | `src/gates.desktop.test.jsx`, `src/profile.desktop.test.jsx`, `src/settings.desktop.test.jsx` | desktop | the screens |

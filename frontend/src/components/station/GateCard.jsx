@@ -12,7 +12,7 @@ import { useDesk } from '../../hooks/useDesk'
 import { Loading } from '../ui/Loading'
 import { CheckIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
-import { runFit, isFreeLane, DAILY_REFILL } from '../../domain/credits'
+import { runFit, isFreeLane, DAILY_REFILL, refillClock } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -48,14 +48,6 @@ import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext } from '../../d
 // /today/run, carrying the chosen lanes in the query — omitted when
 // every lane is on, since an empty `lanes` already means the whole
 // queue on the backend and the run's session key must not churn.
-
-/** "00:00" — the next refill, on the learner's clock. */
-function refillClock(iso, lang) {
-  if (!iso) return '00:00'
-  const d = new Date(iso)
-  if (!Number.isFinite(d.getTime())) return '00:00'
-  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
-}
 
 // ── 不足のしらせ — the only thing the gate says about credits ──
 // A fare line ran above this: Fare · n credits ———— Balance · n. The

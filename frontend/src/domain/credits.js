@@ -32,6 +32,18 @@ export const PASS_CARDS = 10000
 export const HAS_STORE = false
 
 /**
+ * "00:00" -- the hour the next refill lands, on the learner's clock and
+ * in their language's format; midnight when the server named none. One
+ * helper for every place that prints it (the gate, the balance sheet, the
+ * pass's balance line and the rail's pass), which had a copy each.
+ */
+export function refillClock(iso, lang) {
+  const d = iso ? new Date(iso) : null
+  if (!d || !Number.isFinite(d.getTime())) return '00:00'
+  return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
+}
+
+/**
  * Whether the cap belongs beside a balance. It bounds the daily refill,
  * not the wallet, so a balance above it — a fresh welcome is, at
  * SIGNUP_BONUS — has no honest denominator: "200/50" reads as a broken

@@ -1496,3 +1496,30 @@ describe('the three panels (plan 126)', () => {
     expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
   })
 })
+
+// ── plan 127 — the pass the rail's foot became, which a phone keeps apart ──
+// On the desk the HUD's three instruments are one card at the rail's
+// foot, the learner's pass (components/chrome/DeskPass.jsx). A phone
+// keeps its HUD as it was: the roundel and the pocket pass across the
+// strip, three objects, no card, no climb, no caption under the balance.
+describe('the rail\'s pass (plan 127)', () => {
+  it('leaves the phone\'s HUD its three instruments, apart', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { Hud } = await import('./components/chrome/Hud')
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <Hud />
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    const inner = document.querySelector('.hud__inner')
+    expect(inner.querySelector(':scope > .hud__level')).not.toBeNull()
+    expect(inner.querySelector(':scope > .hud__pass')).not.toBeNull()
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    // The pointer's names are the desk's alone.
+    expect(inner.querySelector('.hud__level').hasAttribute('title')).toBe(false)
+    expect(inner.querySelector('.hud__pass').hasAttribute('title')).toBe(false)
+  })
+})
