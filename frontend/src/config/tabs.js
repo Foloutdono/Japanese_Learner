@@ -82,6 +82,10 @@ export function getDeskSections(tabId, t) {
     const settings = identityFor('/profile/settings', t)
     rows.push({ path: settings.path, title: settings.title })
   }
+  // The library, a place under 教材 rather than a section of its own,
+  // gets a station of its own on the rail (plan 131): the gate's panel
+  // names it, and two screens down was too far for it.
+  if (tabId === 'learn') rows.push({ path: '/learn/decks/library', title: t.library })
   return rows
 }
 

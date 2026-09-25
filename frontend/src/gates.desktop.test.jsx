@@ -5,9 +5,9 @@ import { LangProvider } from './LangContext'
 import './index.css'
 
 // ── 机 — the gates laid out for the width (plan 113) ────────────
-// At the desk's tightest (1100, the rail taking 256 of it) the two
-// plated gates hang their plates two by two — Learn's odd fifth across
-// the row, Practice's six in three rows of two since 作文 (plan 125) —
+// At the desk's tightest (1100, the rail taking 256 of it) Practice
+// hangs its six plates in three rows of two since 作文 (plan 125),
+// Learn its four lines in one column beside the shelf (plan 131) —
 // and Today sets the strip beside the fare gate. The phone's own
 // column (layout.phone.test, PracticeScreen.phone.test) does not move.
 
@@ -133,13 +133,25 @@ describe('the plated gates on the desk', () => {
     }
   })
 
-  it('hangs Learn\'s lines two by two, the deck shelf across the row', async () => {
+  it("stands Learn's four lines in one column beside the shelf over the library (plan 131)", async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
-    const plates = document.querySelector('.learn > .plates')
-    expect(getComputedStyle(plates).display).toBe('grid')
-    lattice(plates, { count: 5, spans: true })
-    expect(plates.lastElementChild.classList.contains('plate--shelf')).toBe(true)
+    const lines = $$('.learn-desk > .plates > .plate--line').map(box)
+    expect(lines).toHaveLength(4)
+    // One column: the plates share a left edge and a width, stacked.
+    expect(new Set(lines.map(b => Math.round(b.left))).size).toBe(1)
+    expect(new Set(lines.map(b => Math.round(b.width))).size).toBe(1)
+    lines.slice(1).forEach((b, i) => expect(b.top).toBeGreaterThan(lines[i].bottom))
+    // The side at the entry's width, beside them: the shelf over the library.
+    const side = document.querySelector('.learn-desk__side')
+    expect(Math.round(box(side).width)).toBe(440)
+    expect(box(side).left).toBeGreaterThan(lines[0].right)
+    const [shelf, library] = [...side.children]
+    expect(shelf.classList.contains('gate-panel--shelf')).toBe(true)
+    expect(library.classList.contains('gate-panel--library')).toBe(true)
+    expect(box(library).top).toBeGreaterThan(box(shelf).bottom)
+    // The phone's fifth plate is not drawn on the desk.
+    expect(document.querySelector('.plate--shelf')).toBeNull()
   })
 })
 
@@ -161,28 +173,29 @@ describe('the gates take the window (plan 130)', () => {
     expect(Math.abs(box(plates).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
   }
 
-  it('draws each Learn line upright, filling its plate, the shelf at its own height', async () => {
+  it('draws each Learn line across its plate, the four filling the window (plan 131)', async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
-    fills('learn')
-    const lines = $$('.learn > .plates > .plate--line')
-    expect(lines).toHaveLength(4)
-    const shelf = document.querySelector('.plate--shelf')
-    expect(box(shelf).height).toBeLessThan(box(lines[0]).height / 2)
+    const gutter = parseFloat(getComputedStyle(document.querySelector('.learn')).paddingBottom)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+    const column = document.querySelector('.learn-desk > .plates')
+    expect(Math.abs(box(column).bottom - (window.innerHeight - gutter))).toBeLessThanOrEqual(2)
+    const lines = $$('.learn-desk > .plates > .plate--line')
+    const heights = lines.map(p => Math.round(box(p).height))
+    expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1)
     for (const plate of lines) {
-      const rows = $$('.desk-line > *', plate)
-      // The novice's stop and a row per stop, stacked, sharing the body.
-      const heights = rows.map(r => Math.round(box(r).height))
-      expect(Math.max(...heights) - Math.min(...heights)).toBeLessThanOrEqual(1)
-      rows.slice(1).forEach((r, i) => expect(box(r).top).toBeGreaterThanOrEqual(box(rows[i]).bottom - 1))
-      // Every bar starts and ends where the others do.
-      const bars = $$('.desk-line__bar', plate).map(box)
-      expect(new Set(bars.map(b => Math.round(b.left))).size).toBe(1)
-      expect(new Set(bars.map(b => Math.round(b.width))).size).toBe(1)
+      const stops = $$('.desk-line > *', plate).map(box)
+      // The novice's stop and a column per stop, side by side, one width each.
+      stops.slice(1).forEach((b, i) => expect(b.left).toBeGreaterThanOrEqual(stops[i].right - 1))
+      expect(new Set(stops.map(b => Math.round(b.width))).size).toBe(1)
+      // The rings on one rail.
+      const rings = $$('.desk-line__ring', plate).map(r => Math.round(box(r).top + box(r).height / 2))
+      expect(Math.max(...rings) - Math.min(...rings)).toBeLessThanOrEqual(1)
+      expect($$('.desk-line__bar', plate).every(b => getComputedStyle(b).display === 'none')).toBe(true)
     }
   })
 
-  it('reads a Learn row as the level\'s make-up and its figure, the ridden leg the one tab stop', async () => {
+  it('reads a Learn stop as its figure, the ridden leg in the lead rung and the one tab stop', async () => {
     await framed('/learn', <LearnScreen />)
     await settle()
     const vocab = $$('.plate--line').find(p => /vocabulaire/i.test(p.querySelector('.plate__title').textContent))
@@ -190,15 +203,13 @@ describe('the gates take the window (plan 130)', () => {
     expect(n5.getAttribute('aria-current')).toBe('location')
     expect($$('.desk-line__leg', vocab).map(l => l.tabIndex)).toEqual([0, -1, -1, -1, -1])
     expect(n5.querySelector('.desk-line__fig').textContent).toBe('60 / 600')
-    const bar = box(n5.querySelector('.desk-line__bar')).width
-    expect(box(n5.querySelector('.desk-line__learned')).width / bar).toBeCloseTo(0.1, 1)
-    expect(box(n5.querySelector('.desk-line__met')).width / bar).toBeCloseTo(0.3, 1)
-    expect(box(n4.querySelector('.desk-line__learned')).width).toBe(0)
+    const size = el => parseFloat(getComputedStyle(el.querySelector('.desk-line__stop')).fontSize)
+    expect(size(n5)).toBeGreaterThan(size(n4))
     // Kana is finished: every station filled, no leg left to ride.
     const kana = $$('.plate--line').find(p => /kana/i.test(p.querySelector('.plate__title').textContent))
     expect($$('.desk-line__leg--done', kana)).toHaveLength(4)
     expect(kana.querySelector('[aria-current]')).toBeNull()
-    // The legs are a list: ↓ walks it.
+    // The legs are a list: the arrow walks it.
     n5.focus()
     press('ArrowDown')
     expect(document.activeElement).toBe(n4)

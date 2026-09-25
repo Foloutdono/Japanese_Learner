@@ -13,6 +13,7 @@ import { currentKanaSet } from '../domain/kanaSets'
 import { Plate, DueChip, StopsFoot, LineFoot } from '../components/station/LinePlate'
 import { useDesk } from '../hooks/useDesk'
 import { Guide } from '../components/guide/Guide'
+import { DeckShelfPanel, LibraryPanel } from '../components/decks/GateShelf'
 import { useGuide } from '../hooks/useGuide'
 
 // ── 学習 — the Learn gate: the plates (plan 094) ──────────────
@@ -70,19 +71,20 @@ export default function LearnScreen({ session }) {
   const profile = useProfileSummary()
   const riding = linesOrAll(profile?.lines)
   const here = profile?.jlptLevel ?? null
-  const [shelf, setShelf] = useState(null)
+  // The shelf: on the phone its figures under the fifth plate's name,
+  // on the desk every deck in the column beside the lines (plan 131).
+  // `shelfNonce` asks again after a Follow from the library's panel.
+  const [decks, setDecks] = useState(null)
+  const [shelfNonce, setShelfNonce] = useState(0)
+  const shelf = decks && { count: decks.length, cards: decks.reduce((n, d) => n + (d.card_count ?? 0), 0) }
 
   useEffect(() => {
     let live = true
     apiJson('/api/decks', session)
-      .then(data => {
-        if (!live) return
-        const decks = data?.decks ?? []
-        setShelf({ count: decks.length, cards: decks.reduce((n, d) => n + (d.card_count ?? 0), 0) })
-      })
-      .catch(() => {})
+      .then(data => { if (live) setDecks(data?.decks ?? []) })
+      .catch(() => { if (live) setDecks(d => d ?? []) })
     return () => { live = false }
-  }, [session])
+  }, [session, shelfNonce])
 
   // `to` is where the train actually goes; the section is still what
   // the gate wipes in — its pigment, its 漢字, its plate — because a
@@ -109,47 +111,63 @@ export default function LearnScreen({ session }) {
   // once (plan 100).
   const guide = useGuide('learn', true)
 
+  const linePlates = lines.map((section, i) => {
+    const source = TRACKED[section.path]
+    const stops = lineStops(stats, source)
+    const off = !onRoute(section)
+    return (
+      <Plate
+        key={section.path}
+        section={section}
+        className={`plate--line${off ? ' plate--off' : ''}`}
+        meta={off ? t.plateOffRoute : null}
+        aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
+        // The guide (plan 100) points at the first plate and its
+        // foot; the others say the same thing by looking the same.
+        guide={i === 0 ? 'learn.plate' : undefined}
+        // The phone's plate has room for the stop behind, the one
+        // reached and the one ahead; the desk's draws the whole
+        // line (plan 114), upright since plan 130, and across the
+        // plate since plan 131, where the four stand in one column.
+        foot={desk
+          ? <LineFoot across stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
+          : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
+        fill={stopsAround(stops).leg}
+        onClick={() => depart(section, stopPath(section))}
+      />
+    )
+  })
+
   return (
     <main id="main-content" className="learn">
       <h1 className="sr-only">{t.tabLearn}</h1>
       {guide.open && <Guide gate="learn" onEnd={guide.onEnd} />}
-      <div className="plates">
-        {lines.map((section, i) => {
-          const source = TRACKED[section.path]
-          const stops = lineStops(stats, source)
-          const off = !onRoute(section)
-          return (
+      {desk ? (
+        // 棚 (plan 131, the owner's pick "A"): the lines stacked on the
+        // left, each drawn across the plate; the shelf over the library
+        // in a column at the entry's width on the right.
+        <div className="learn-desk">
+          <div className="plates plates--across">{linePlates}</div>
+          <aside className="learn-desk__side" aria-label={t.decksTitle} style={{ '--line-color': 'var(--line-decks)' }}>
+            <DeckShelfPanel decks={decks} today={today} guide="learn.shelf" />
+            <LibraryPanel session={session} onFollowed={() => setShelfNonce(n => n + 1)} />
+          </aside>
+        </div>
+      ) : (
+        <div className="plates">
+          {linePlates}
+          {decksSection && (
             <Plate
-              key={section.path}
-              section={section}
-              className={`plate--line${off ? ' plate--off' : ''}`}
-              meta={off ? t.plateOffRoute : null}
-              aside={<DueChip due={today?.by_source?.[source] ?? 0} />}
-              // The guide (plan 100) points at the first plate and its
-              // foot; the others say the same thing by looking the same.
-              guide={i === 0 ? 'learn.plate' : undefined}
-              // The phone's plate has room for the stop behind, the one
-              // reached and the one ahead; the desk's draws the whole
-              // line (plan 114), upright since plan 130.
-              foot={desk
-                ? <LineFoot stops={stops} stats={stats} source={source} guide={i === 0 ? 'learn.stops' : undefined} onStop={stop => depart(section, `${section.path}/${stop}`)} />
-                : <StopsFoot stops={stops} guide={i === 0 ? 'learn.stops' : undefined} />}
-              fill={stopsAround(stops).leg}
-              onClick={() => depart(section, stopPath(section))}
+              section={decksSection}
+              className="plate--shelf"
+              guide="learn.shelf"
+              meta={shelf?.count > 0 ? t.decksRowMeta(shelf.count, shelf.cards) : null}
+              aside={<DueChip due={today?.by_source?.personal ?? 0} />}
+              onClick={() => depart(decksSection)}
             />
-          )
-        })}
-        {decksSection && (
-          <Plate
-            section={decksSection}
-            className="plate--shelf"
-            guide="learn.shelf"
-            meta={shelf?.count > 0 ? t.decksRowMeta(shelf.count, shelf.cards) : null}
-            aside={<DueChip due={today?.by_source?.personal ?? 0} />}
-            onClick={() => depart(decksSection)}
-          />
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </main>
   )
 }

@@ -83,7 +83,11 @@ export function DeskRail() {
             const on = tab.id === active
             const badge = tab.id === 'today' && due > 0
             const stations = on ? getDeskSections(tab.id, t) : []
-            const here = stations.find(s => inSection(pathname, s.path))
+            // The deepest station the path stands in: the library is
+            // behind 教材's path, and lights its own row (plan 131).
+            const here = stations
+              .filter(s => inSection(pathname, s.path))
+              .sort((a, b) => b.path.length - a.path.length)[0]
             return (
               <li key={tab.id} className="desk-rail__item">
                 <Link
