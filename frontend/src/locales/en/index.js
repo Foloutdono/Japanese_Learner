@@ -1530,6 +1530,23 @@ const decks = {
   // anything had been typed into it.
   libraryTypes:          'Deck types',
   libraryBy:             name => `by ${name}`,
+  // The shelf and the library beside the lines on the desk, and the
+  // library's three sections (plan 132).
+  gateShelfEmpty:        'No decks on your shelf.',
+  gateShelfEmptyHint:    'Make your own, or follow one from the library: it is reviewed with the rest.',
+  gateDeckPublished:     'published',
+  librarySeeCards:       n => `See the ${n} card${n === 1 ? '' : 's'}`,
+  libraryFeatured:       'Featured',
+  libraryFeaturedWhen:   'this week',
+  libraryFollowing:      'Following',
+  libraryFollowingCount: n => `${n} deck${n === 1 ? '' : 's'} followed`,
+  libraryFollowingNone:  'You follow no decks. Follow one: the cards its author adds reach you.',
+  libraryNewCards:       n => `+${n} card${n === 1 ? '' : 's'}`,
+  libraryUpToDate:       'Up to date',
+  libraryMine:           'Your publications',
+  libraryMineCount:      n => `${n} deck${n === 1 ? '' : 's'} published`,
+  libraryMineNone:       'No published decks. Publish one from its page: it appears here with its followers.',
+  libraryWeeksLabel:     list => `New followers a week, over eight weeks: ${list}`,
   libraryFollowers:      n => (n === 1 ? '1 follower' : `${n} followers`),
   libraryAndMore:        n => (n === 1 ? 'and 1 more card' : `and ${n} more cards`),
   libraryEmpty:          'Nothing published yet',

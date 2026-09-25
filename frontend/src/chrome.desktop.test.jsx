@@ -196,7 +196,7 @@ describe('the rail', () => {
     expect(learn.getAttribute('aria-current')).toBe('page')
     expect(gates().filter(g => g.classList.contains('desk-gate--on'))).toHaveLength(1)
     expect(stations().map(s => s.getAttribute('href'))).toEqual([
-      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks',
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks', '/learn/decks/library',
     ])
     // Standing on the gate, no station is lit.
     expect(stations().filter(s => s.getAttribute('aria-current'))).toHaveLength(0)
@@ -210,6 +210,13 @@ describe('the rail', () => {
     expect(lit[0].classList.contains('desk-sec--on')).toBe(true)
     const learn = gates().find(g => g.dataset.tab === 'learn')
     expect(learn.getAttribute('aria-current')).toBe('true')
+  })
+
+  it("lights the library's own station, not the shelf's, inside the library (plan 132)", async () => {
+    await mountShell('/learn/decks/library')
+    await settle()
+    const lit = stations().filter(s => s.getAttribute('aria-current') === 'page')
+    expect(lit.map(s => s.getAttribute('href'))).toEqual(['/learn/decks/library'])
   })
 
   it('lists no stations under a gate that is its own only place', async () => {

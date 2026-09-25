@@ -1001,7 +1001,11 @@ plated gates take the window.
   the window. Scrolling on its own must not cut what it holds: the column
   (and every list that scrolls beside a page) keeps a gutter inside its
   clip edge and gives it back outside, so a row's hover lift, its focus
-  ring and its arrival are drawn whole and no row moves for it.
+  ring and its arrival are drawn whole and no row moves for it. No box
+  prints a scrollbar only while something arrives in it: not the page, a
+  screen rising into a window it fits (the frame clips a movement, never
+  what is laid out), and not a boarding step's body, sized to its answers
+  on the desk (it keeps the rung under them as room).
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
   sheet. The gate's lanes go two across once the gate holds two at a
@@ -1053,6 +1057,28 @@ plated gates take the window.
   two rows. The shelf keeps its own height, having no body. Both feet are
   lists, one tab stop each, walked with ↑/↓. A window too short for the
   plates scrolls rather than squeezing a row below its content.
+- **Learn is the lines beside the shelf** (plan 132, the owner's pick of
+  three drawn layouts). The four lines stand in one column, each drawn
+  **across** its plate: the novice's stop, then a column per level — its
+  name, its ring on the rail, its learned / total — the stop being ridden
+  in the lead rung, every stop a door. Beside them, a column at
+  `--desk-entry-w` (giving down to `--desk-side-w` on the narrowest desk)
+  holds the learner's decks over the library: every deck a row with what
+  it is and what it is due, New deck and See all at its foot; then the
+  library's most followed or newest three, Follow on each row, and a
+  search that opens the library on its answer. A library row opens the
+  deck's **preview** in the panel's place — who wrote it, three of its
+  cards as tiles, its blurb, Follow and the way to all its cards — with
+  the way back at its head. The phone keeps its fifth plate. The rail
+  gains the library as a station under Learn.
+- **The library before a deck is opened** (plan 132) stands three
+  sections beside its list, where it used to open the first deck for
+  you: **À la une** (the deck with the most new followers this week,
+  drawn as the gate's preview), **Abonnements** (the decks you follow,
+  each with the cards its author added since you last opened it) and
+  **Tes publications** (your public decks, their followers and a bar a
+  week for eight weeks). A deck opened from the list shows three of its
+  cards as tiles over the full list.
 - **A station is two panes.** Levels, sets or grades stand upright on the
   left and the chosen stop's platforms on the right, each platform with its
   own figures (due now, and the composition bar the statistics draw); the

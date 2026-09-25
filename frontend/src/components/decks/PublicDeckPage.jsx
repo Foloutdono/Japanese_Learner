@@ -9,6 +9,7 @@ import { Sheet } from '../chrome/Sheet'
 import Empty from '../ui/Empty'
 import { Loading } from '../ui/Loading'
 import { deckTypeOf } from './deckTypes'
+import { DeckSamples } from './GateShelf'
 import { BooksIcon, WarningIcon } from '../ui/Icons'
 
 // ── One published deck, before you commit to it ───────────────
@@ -44,7 +45,10 @@ const REASONS = [
 // is the desk's: the pane draws a deck from its shelf row before its own
 // answer lands, and until then whether you follow it is not known, so
 // Follow waits with it.
-export function PublicDeckBody({ deck, deckId, session, onReload, pending = false }) {
+// `samples` is the desk pane's (plan 132): three of the cards as tiles
+// under the identity, the way the gate's preview and À la une draw a
+// deck, before the full list.
+export function PublicDeckBody({ deck, deckId, session, onReload, pending = false, samples = false }) {
   const navigate = useNavigate()
   const { t } = useLang()
   const [busy, setBusy]         = useState(false)
@@ -116,6 +120,8 @@ export function PublicDeckBody({ deck, deckId, session, onReload, pending = fals
         </button>
       </div>
 
+      {samples && <DeckSamples cards={preview} />}
+
       {deck.description && <p className="lib-blurb">{deck.description}</p>}
 
       {/* The list and the count of what it left out are one block: the
@@ -185,7 +191,7 @@ export function PublicDeckPane({ deckId, listed, session }) {
   return (
     <section className="desk-shelf-page" aria-label={shown.name}
       style={{ '--line-color': deckTypeOf(shown.type, t).color }}>
-      <PublicDeckBody deck={shown} deckId={deckId} session={session} onReload={reload} pending={!deck} />
+      <PublicDeckBody deck={shown} deckId={deckId} session={session} onReload={reload} pending={!deck} samples />
       {!deck && loading && <Loading />}
     </section>
   )
