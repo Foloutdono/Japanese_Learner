@@ -21389,6 +21389,437 @@ a.slip__act { text-decoration: none; }
   }
   .desk-line__fig > b { color: var(--text-primary); }
 
+
+  /* A Learn line across its plate (plan 132, LineFoot's `across`): the
+     four lines stand in one column beside the shelf, so each is a row
+     of stops rather than a column of them — the stop's name, its ring
+     on the rail, its learned / total, one column a stop. The rail is
+     the upright one turned on its side: the left half of a column is
+     the end of its own leg (--up), the right half the start of the
+     next (--down). The stop being ridden takes the lead rung. */
+  .desk-line--across {
+    grid-template-columns: none;
+    grid-template-rows: auto var(--sp-6) auto;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+    align-content: center;
+    row-gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-5) var(--sp-4);
+  }
+  .desk-line--across > .desk-line__origin,
+  .desk-line--across > .desk-line__leg {
+    grid-column: auto;
+    grid-row: 1 / -1;
+    grid-template-columns: none;
+    grid-template-rows: subgrid;
+    justify-items: center;
+    text-align: center;
+  }
+  .desk-line--across .desk-line__origin > :last-child,
+  .desk-line.desk-line--across .desk-line__stop {
+    grid-column: auto;
+    grid-row: 1;
+    align-self: end;
+    white-space: nowrap;
+  }
+  .desk-line--across .desk-line__origin > :last-child {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .desk-line.desk-line--across .desk-line__stop { font-weight: 700; }
+  .desk-line--across .desk-line__leg--here .desk-line__stop { font-size: var(--fs-lead); }
+  .desk-line--across .desk-line__rail {
+    grid-row: 2;
+    justify-self: stretch;
+  }
+  .desk-line.desk-line--across .desk-line__rail::before,
+  .desk-line.desk-line--across .desk-line__rail::after {
+    top: 50%;
+    bottom: auto;
+    width: auto;
+    height: 3px;
+    translate: 0 -50%;
+  }
+  .desk-line.desk-line--across .desk-line__rail::before {
+    left: 0;
+    right: 50%;
+    background: linear-gradient(to right, var(--line-color) calc(var(--up, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line.desk-line--across .desk-line__rail::after {
+    left: 50%;
+    right: 0;
+    background: linear-gradient(to right, var(--line-color) calc(var(--down, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line--across .desk-line__leg--here .desk-line__ring {
+    width: var(--sp-5);
+    height: var(--sp-5);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 30%, transparent);
+  }
+  .desk-line--across .desk-line__bar { display: none; }
+  .desk-line--across .desk-line__fig {
+    grid-row: 3;
+    align-self: start;
+    font-size: var(--fs-caption);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ── 棚 — the Learn gate as the lines and the shelf (plan 132) ──
+     The owner's pick of three drawn layouts: the four line plates in
+     one column, sharing the window's height, and a column at the
+     entry's width beside them holding the learner's decks over the
+     library (components/decks/GateShelf.jsx). The phone keeps its
+     column of five plates. On the narrowest desk the column gives down
+     to a station's side (--desk-side-w), so a line's six stops keep
+     room for their figures. */
+  .learn-desk {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(var(--desk-side-w), 36%, var(--desk-entry-w));
+    gap: var(--sp-6);
+  }
+  .learn-desk > .plates {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 0;
+  }
+  .learn-desk > .plates.plates--across > .plate.plate--line { flex: 1 1 0; min-height: 0; }
+  .learn-desk > .plates.plates--across > .plate.plate--line > .plate__head { flex: none; }
+  .learn-desk__side {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-width: 0;
+    min-height: 0;
+  }
+  .learn-desk__side > .gate-panel--shelf { flex: 1.25 1 0; }
+  .learn-desk__side > .gate-panel--library { flex: 1 1 0; }
+
+  /* A panel of the shelf or the library: the plate's surface and its
+     head, a body of rows that scrolls inside it, a foot of actions. */
+  .gate-panel {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    box-shadow: var(--elev-hang);
+    overflow: hidden;
+  }
+  .gate-panel__head {
+    flex: none;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--sp-4);
+    align-items: center;
+    padding: var(--sp-4) var(--sp-5);
+    border-bottom: 1px solid var(--surface-line);
+  }
+  .gate-panel__body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .gate-panel__foot {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    padding: var(--sp-3) var(--sp-5);
+    border-top: 1px solid var(--surface-line);
+  }
+  .gate-panel__empty {
+    margin: 0;
+    padding: var(--sp-5);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .gate-panel__empty > b { color: var(--text-primary); }
+  .gate-panel > .plate__stripe { flex: none; }
+
+  .gate-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .gate-rows__item + .gate-rows__item { border-top: 1px solid var(--surface-line); }
+  /* A deck as a row: its roundel, its name over what it is, and at the
+     trailing edge what it is due or who follows it. The whole row is
+     the door; a library row keeps Follow beside the door. */
+  .gate-row,
+  .gate-row__open {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--sp-4);
+    align-items: center;
+    min-height: var(--sp-9);
+    padding: var(--sp-3) var(--sp-5);
+    color: inherit;
+    text-decoration: none;
+  }
+  .gate-row--lib {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 0 var(--sp-5) 0 0;
+    min-height: 0;
+  }
+  .gate-row__open {
+    width: 100%;
+    border: 0;
+    border-radius: var(--r-flat);
+    background: none;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .gate-row__roundel { font-size: var(--fs-sm); }
+  .gate-row__names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+  .gate-row__name {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gate-row__sub {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .gate-row__mine { color: var(--accent2); }
+  .gate-row:hover .gate-row__name,
+  .gate-row:focus-visible .gate-row__name,
+  .gate-row__open:hover .gate-row__name,
+  .gate-row__open:focus-visible .gate-row__name {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .gate-row__fig {
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .gate-row__news {
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    color: var(--accent2);
+    white-space: nowrap;
+  }
+
+  .gate-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: var(--sp-8);
+    padding: 0 var(--sp-4);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+  .gate-btn--line {
+    border-color: color-mix(in srgb, var(--line-color) 70%, transparent);
+    color: var(--text-primary);
+  }
+  .gate-btn--sm { min-height: var(--sp-7); padding: 0 var(--sp-3); font-size: var(--fs-caption); }
+  .gate-btn:hover,
+  .gate-btn:focus-visible { border-color: var(--line-color); color: var(--text-primary); }
+  .gate-btn:disabled { opacity: 0.6; cursor: default; }
+  .gate-link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .gate-link:hover,
+  .gate-link:focus-visible { color: var(--text-primary); }
+  .gate-panel__foot > .gate-link { margin-left: auto; }
+  .gate-seg {
+    display: inline-flex;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    overflow: hidden;
+  }
+  .gate-seg > button {
+    min-height: var(--sp-7);
+    padding: 0 var(--sp-3);
+    border: 0;
+    border-radius: var(--r-flat);
+    background: none;
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .gate-seg > button + button { border-left: 1px solid var(--surface-line); }
+  .gate-seg > button[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--text-primary) 9%, transparent);
+    color: var(--text-primary);
+  }
+  /* The library's head carries its ordering: on the narrowest desk the
+     switch goes under the name rather than cutting it. */
+  .gate-panel--library > .gate-panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: var(--sp-3);
+  }
+  .gate-panel--library > .gate-panel__head > .plate__names { flex: 1 0 auto; }
+  .gate-panel--library > .gate-panel__head > .gate-seg { margin-left: auto; }
+  .gate-field {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    min-height: var(--sp-8);
+    padding: 0 var(--sp-4);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    color: var(--text-secondary);
+  }
+  .gate-field:focus-within { border-color: var(--line-color); }
+  .gate-field > input {
+    flex: 1;
+    min-width: 0;
+    border: 0;
+    background: none;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: var(--fs-sm);
+    outline: none;
+  }
+
+  /* One published deck at a glance (DeckPreview): the gate's library
+     panel on a row's click, and the library's À la une. */
+  .deck-preview {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+    padding: var(--sp-4) var(--sp-5) var(--sp-5);
+    overflow-y: auto;
+  }
+  .deck-preview__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3);
+  }
+  .deck-preview__who {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    min-width: 0;
+  }
+  .deck-preview__name {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .deck-preview__blurb {
+    margin: 0;
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+    text-wrap: pretty;
+  }
+  .deck-preview__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    margin-top: auto;
+  }
+  .gate-follow { display: inline-flex; align-items: center; gap: var(--sp-2); text-decoration: none; }
+  /* Three of a deck's cards as tiles: the front, its reading, the back. */
+  .deck-samples {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .deck-sample {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-1);
+    min-width: 0;
+    min-height: var(--sp-9);
+    padding: var(--sp-4) var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    background: var(--bg-card);
+    text-align: center;
+  }
+  .deck-sample__jp {
+    font-size: var(--fs-title);
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .deck-sample__kana { font-size: var(--fs-caption); color: var(--text-secondary); }
+  .deck-sample__back {
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+  .desk-shelf-page > .deck-samples .deck-sample { min-height: calc(2 * var(--sp-9)); }
+  .desk-shelf-page > .deck-samples .deck-sample__jp { font-size: var(--fs-heading); }
+
+  /* The library before a deck is opened (LibraryHome): À la une over
+     Abonnements beside Tes publications. */
+  /* The split's page is as tall as what it holds, so each section is
+     too: the preview's cards and blurb, then two lists side by side. */
+  .lib-home {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+  }
+  .lib-home__pair {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    gap: var(--sp-4);
+  }
+  .lib-weeks {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--sp-1);
+    height: var(--sp-6);
+  }
+  .lib-weeks > i {
+    width: var(--sp-1);
+    border-radius: var(--r-flat);
+    background: color-mix(in srgb, var(--accent2) 70%, transparent);
+  }
+  .gate-row:has(.lib-weeks) { grid-template-columns: auto minmax(0, 1fr) auto auto; }
+
   /* A Practice plate's foot on the desk (plan 130, screens/
      PracticeScreen's GradeRows): the five grades as rows sharing the
      body's height, each its code, what the learner has done there and

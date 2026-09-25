@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { useNavigate, useParams, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { playUi } from '../lib/audio'
@@ -16,6 +16,7 @@ import { useListWalk, useFollowFocus, WALK_KEYS } from '../hooks/useListWalk'
 import { StationSplit } from '../components/selection/StationSplit'
 import { PublicDeckPane } from '../components/decks/PublicDeckPage'
 import PublicDeckScreen from './PublicDeckScreen'
+import { LibraryHome } from '../components/decks/LibraryHome'
 
 // ── The library ───────────────────────────────────────────────
 // Every deck other learners have published. A place under 教材 rather
@@ -101,8 +102,11 @@ function LibraryShelf({ session, open }) {
   // What is typed, and what has actually been asked for. They differ
   // for the length of the debounce, and it is the second one the
   // request is keyed on — a fetch per keystroke is what the wait is for.
-  const [query, setQuery]     = useState('')
-  const [term, setTerm]       = useState('')
+  // The gate's search field lands here with its term in the URL (plan
+  // 132): the shelf opens already asked.
+  const [searchParams] = useSearchParams()
+  const [query, setQuery]     = useState(() => searchParams.get('q') ?? '')
+  const [term, setTerm]       = useState(() => (searchParams.get('q') ?? '').trim())
   const [structure, setStructure] = useState('all')
   const [loading, setLoading] = useState(true)
   const [failed, setFailed]   = useState(false)
@@ -267,17 +271,13 @@ function LibraryShelf({ session, open }) {
   if (desk) {
     // The shelf as a list, the open deck as the page beside it: another
     // deck swaps the page in place (a link replacing the URL, plan 117,
-    // so a deck also opens in a tab of its own), and the bare library
-    // opens on its first deck once the shelf has answered — never while
-    // a narrowing is in flight, which would open a deck the narrowing is
-    // about to take away.
+    // so a deck also opens in a tab of its own). The bare library opened
+    // on its first deck until plan 132; it stands its three sections
+    // there now (LibraryHome: À la une, Abonnements, Tes publications).
     const listed = open ? decks.find(d => String(d.id) === String(open)) : null
     return (
       <main id="main-content" className="learn" style={{ '--line-color': 'var(--line-decks)' }}>
         {chrome}
-        {!open && settled && !failed && decks.length > 0 && (
-          <Navigate replace to={`/learn/decks/library/${decks[0].id}`} />
-        )}
         <StationSplit
           className="desk-split--shelf"
           label={t.library}
@@ -312,7 +312,9 @@ function LibraryShelf({ session, open }) {
             </>
           )}
         >
-          {open && <PublicDeckPane key={open} deckId={open} listed={listed} session={session} />}
+          {open
+            ? <PublicDeckPane key={open} deckId={open} listed={listed} session={session} />
+            : <LibraryHome session={session} />}
         </StationSplit>
       </main>
     )

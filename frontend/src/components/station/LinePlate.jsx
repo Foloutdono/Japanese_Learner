@@ -105,13 +105,20 @@ export function StopsFoot({ stops, guide }) {
 // ridden — marked here as the learner's location. The legs are a list,
 // walked like every list on the desk (hooks/useListWalk): one tab stop,
 // the ridden leg, and ↑/↓/Home/End along it.
-export function LineFoot({ stops, stats, source, guide, onStop }) {
+//
+// `across` (plan 132) turns it on its side for the desk's Learn gate,
+// where the four lines stand in one column beside the shelf: the stops
+// side by side, each its name over its ring over its figure, the rail
+// running through the rings, the stop being ridden in the lead rung.
+// The same rows and the same doors, laid out by the 机 section's
+// .desk-line--across; the bar goes, the figure saying what it said.
+export function LineFoot({ stops, stats, source, guide, onStop, across = false }) {
   const marks = lineMarks(stops)
   const reached = Math.min(stops.length, Math.floor(stopsTravelled(stops)))
   const tabStop = Math.min(reached, stops.length - 1)
   const onWalk = useListWalk(true)
   return (
-    <div className="plate__foot desk-line" data-guide={guide} onKeyDown={onWalk} aria-keyshortcuts={WALK_KEYS}>
+    <div className={`plate__foot desk-line${across ? ' desk-line--across' : ''}`} data-guide={guide} onKeyDown={onWalk} aria-keyshortcuts={WALK_KEYS}>
       <span className="desk-line__origin">
         <Rail down={stops[0]?.score ?? 0} />
         <Mark mark={marks[0]} />

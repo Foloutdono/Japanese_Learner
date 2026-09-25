@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { SplitRow } from '../components/selection/SplitRow'
 import { apiFetch } from '../lib/api'
 import { useLang } from '../LangContext'
@@ -52,7 +52,9 @@ export default function DecksScreen({ session }) {
 
   const [decks, setDecks]       = useState([])
   const [loading, setLoading]   = useState(true)
-  const [creating, setCreating] = useState(false)
+  // The gate's New deck (plan 132) arrives with the form asked for.
+  const location = useLocation()
+  const [creating, setCreating] = useState(() => Boolean(location.state?.create))
   const [newName, setNewName]   = useState('')
   const [newType, setNewType]   = useState('standard')
   const [query, setQuery]       = useState('')

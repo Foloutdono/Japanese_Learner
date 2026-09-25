@@ -700,6 +700,15 @@ def _ensure_deck_schema() -> None:
                 CREATE INDEX IF NOT EXISTS idx_deck_subscriptions_user
                 ON deck_subscriptions(user_id)
             """)
+            # When the follower last opened the deck (plan 132): the
+            # library's Abonnements counts the author's cards added since.
+            # NOT NULL with NOW() as the default, so a row older than the
+            # column reads as seen at the deploy and reports nothing new
+            # rather than every card the deck holds.
+            cur.execute("""
+                ALTER TABLE deck_subscriptions
+                    ADD COLUMN IF NOT EXISTS seen_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+            """)
             # Moderation is a queue, not a mechanism: a report records
             # that someone objected, and nothing is hidden automatically.
             # UNIQUE(deck_id, user_id) makes reporting idempotent —
@@ -1059,6 +1068,124 @@ def get_library(page: int = 0, limit: int = Query(LIBRARY_LIMIT, ge=1, le=100),
         # says which structures exist, not how to arrange them.
         "types":    [t for t in DECK_TYPES if t in present],
     }
+
+
+# How many weeks of new followers a publication's line draws.
+PUBLISHED_WEEKS = 8
+
+
+@router.get("/api/decks/library/home")
+def get_library_home(user_id: str = Depends(get_user_id)):
+    """
+    The library's three sections beside its list (plan 132).
+
+    `featured` — À la une: of the decks the list itself would show you
+    (published, not yours, not followed), the one that gained the most
+    followers over the last seven days, then the most followed, then the
+    newest. A rule rather than a pick, so nobody curates it and it moves
+    as learners follow; None when the library holds nothing for you.
+
+    `following` — the decks you follow, each with `new_cards`: the
+    author's cards added since you last opened it (`seen_at`, stamped by
+    GET /api/decks/{id}), and `updated_at`, its newest card's date.
+
+    `published` — your public decks with their followers, and `weeks`:
+    new followers per week over the last PUBLISHED_WEEKS, oldest first.
+
+    Declared before /api/decks/library/{deck_id}, which would otherwise
+    read "home" as a deck id.
+    """
+    conn = db_conn()
+    try:
+        with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cur:
+            cur.execute("""
+                SELECT d.id, d.name, d.description, d.type, d.published_at,
+                       d.user_id AS owner_id,
+                       COALESCE(c.custom_count, 0) + COALESCE(dc.app_count, 0) AS card_count,
+                       COALESCE(f.followers, 0) AS followers
+                FROM decks d
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS custom_count
+                    FROM custom_cards GROUP BY deck_id
+                ) c  ON c.deck_id = d.id
+                LEFT JOIN (
+                    SELECT deck_id, user_id, COUNT(*) AS app_count
+                    FROM deck_cards GROUP BY deck_id, user_id
+                ) dc ON dc.deck_id = d.id AND dc.user_id = d.user_id
+                LEFT JOIN (
+                    SELECT deck_id, COUNT(*) AS followers,
+                           COUNT(*) FILTER (
+                               WHERE subscribed_at > NOW() - INTERVAL '7 days') AS lately
+                    FROM deck_subscriptions GROUP BY deck_id
+                ) f  ON f.deck_id = d.id
+                WHERE d.visibility = 'public' AND d.withdrawn_at IS NULL
+                  AND d.user_id <> %(me)s
+                  AND NOT EXISTS (
+                      SELECT 1 FROM deck_subscriptions s
+                      WHERE s.deck_id = d.id AND s.user_id = %(me)s
+                  )
+                ORDER BY COALESCE(f.lately, 0) DESC, COALESCE(f.followers, 0) DESC,
+                         d.published_at DESC NULLS LAST, d.id DESC
+                LIMIT 1
+            """, {"me": user_id})
+            row = cur.fetchone()
+            featured = dict(row) if row else None
+
+            cur.execute("""
+                SELECT d.id, d.name, d.type, d.user_id AS owner_id,
+                       (d.withdrawn_at IS NOT NULL) AS withdrawn,
+                       (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
+                     + (SELECT COUNT(*) FROM deck_cards dk
+                         WHERE dk.deck_id = d.id AND dk.user_id = d.user_id) AS card_count,
+                       (SELECT COUNT(*) FROM custom_cards cc
+                         WHERE cc.deck_id = d.id AND cc.created_at > s.seen_at)
+                     + (SELECT COUNT(*) FROM deck_cards dk
+                         WHERE dk.deck_id = d.id AND dk.user_id = d.user_id
+                           AND dk.added_at > s.seen_at) AS new_cards,
+                       GREATEST(
+                         (SELECT MAX(cc.created_at) FROM custom_cards cc WHERE cc.deck_id = d.id),
+                         (SELECT MAX(dk.added_at) FROM deck_cards dk
+                           WHERE dk.deck_id = d.id AND dk.user_id = d.user_id)
+                       ) AS updated_at
+                FROM deck_subscriptions s
+                JOIN decks d ON d.id = s.deck_id
+                WHERE s.user_id = %(me)s
+                ORDER BY new_cards DESC, updated_at DESC NULLS LAST, d.id DESC
+            """, {"me": user_id})
+            following = [dict(r) for r in cur.fetchall()]
+
+            cur.execute("""
+                SELECT d.id, d.name, d.type, d.published_at,
+                       (SELECT COUNT(*) FROM custom_cards cc WHERE cc.deck_id = d.id)
+                     + (SELECT COUNT(*) FROM deck_cards dk
+                         WHERE dk.deck_id = d.id AND dk.user_id = d.user_id) AS card_count,
+                       (SELECT COUNT(*) FROM deck_subscriptions s
+                         WHERE s.deck_id = d.id) AS followers,
+                       ARRAY(
+                         SELECT COUNT(s.deck_id)
+                         FROM generate_series(%(weeks)s - 1, 0, -1) AS w(n)
+                         LEFT JOIN deck_subscriptions s
+                           ON s.deck_id = d.id
+                          AND s.subscribed_at >  NOW() - (w.n + 1) * INTERVAL '7 days'
+                          AND s.subscribed_at <= NOW() - w.n * INTERVAL '7 days'
+                         GROUP BY w.n ORDER BY w.n DESC
+                       ) AS weeks
+                FROM decks d
+                WHERE d.user_id = %(me)s AND d.visibility = 'public'
+                  AND d.withdrawn_at IS NULL
+                ORDER BY followers DESC, d.published_at DESC NULLS LAST, d.id DESC
+            """, {"me": user_id, "weeks": PUBLISHED_WEEKS})
+            published = [dict(r) for r in cur.fetchall()]
+    finally:
+        conn.close()
+
+    authors = usernames_for(
+        ([featured["owner_id"]] if featured else []) + [r["owner_id"] for r in following])
+    if featured:
+        featured["author"] = authors.get(featured.pop("owner_id"))
+    for r in following:
+        r["author"] = authors.get(r.pop("owner_id"))
+    return {"featured": featured, "following": following, "published": published}
 
 
 @router.get("/api/decks/library/{deck_id}")
@@ -1449,7 +1576,18 @@ def get_deck(deck_id: str, user_id: str = Depends(get_user_id)):
     """
     conn = db_conn()
     try:
-        return _deck_payload(conn, deck_access(conn, deck_id, user_id, need=PUBLIC))
+        access = deck_access(conn, deck_id, user_id, need=PUBLIC)
+        payload = _deck_payload(conn, access)
+        if access.role == "follower":
+            # A follower opening the deck has seen what the author added
+            # (plan 132): the library's Abonnements counts from here.
+            with conn.cursor() as cur:
+                cur.execute("""
+                    UPDATE deck_subscriptions SET seen_at = NOW()
+                    WHERE deck_id = %s AND user_id = %s
+                """, (access.deck_id, user_id))
+            conn.commit()
+        return payload
     finally:
         conn.close()
 

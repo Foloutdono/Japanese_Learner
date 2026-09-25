@@ -338,3 +338,56 @@ def test_a_deck_cannot_be_renamed_to_nothing(client, clean_decks):
 def test_a_follower_cannot_rename_the_deck(client, published):
     client.post(f"/api/decks/{published}/subscribe")
     assert client.patch(f"/api/decks/{published}", json={"name": "Mine now"}).status_code == 403
+
+
+# ── The library's home: featured, following, published (plan 132) ──
+
+def test_the_featured_deck_is_one_the_list_would_show(client, published):
+    featured = client.get("/api/decks/library/home").json()["featured"]
+    assert featured["id"] == published
+    assert featured["author"]
+    assert featured["card_count"] == 1
+
+
+def test_a_followed_deck_is_not_featured_any_more(client, published):
+    client.post(f"/api/decks/{published}/subscribe")
+    featured = client.get("/api/decks/library/home").json()["featured"]
+    assert featured is None or featured["id"] != published
+
+
+def test_a_followed_deck_counts_the_cards_added_since_it_was_opened(client, published, other_user):
+    client.post(f"/api/decks/{published}/subscribe")
+    row = lambda: next(d for d in client.get("/api/decks/library/home").json()["following"]
+                       if d["id"] == published)
+    assert row()["new_cards"] == 0
+
+    with acting_as(other_user):
+        client.post(f"/api/decks/{published}/cards", json={"front": "予定", "back": "plan"})
+        client.post(f"/api/decks/{published}/cards", json={"front": "資料", "back": "documents"})
+    assert row()["new_cards"] == 2
+    assert row()["card_count"] == 3
+    assert row()["author"]
+
+    # Opening the deck is seeing what was added.
+    assert client.get(f"/api/decks/{published}").status_code == 200
+    assert row()["new_cards"] == 0
+
+
+def test_your_publications_count_their_followers_by_week(client, other_user, clean_decks):
+    deck_id = _deck_with_a_card(client, "Mine to share")
+    client.post(f"/api/decks/{deck_id}/publish")
+    with acting_as(other_user):
+        assert client.post(f"/api/decks/{deck_id}/subscribe").status_code == 200
+
+    mine = next(d for d in client.get("/api/decks/library/home").json()["published"]
+                if d["id"] == deck_id)
+    assert mine["followers"] == 1
+    assert len(mine["weeks"]) == 8
+    # Oldest first: this week's follower is the last bar.
+    assert mine["weeks"][-1] == 1 and sum(mine["weeks"]) == 1
+
+
+def test_a_private_deck_is_not_a_publication(client, clean_decks):
+    deck_id = _deck_with_a_card(client, "Private")
+    published = client.get("/api/decks/library/home").json()["published"]
+    assert deck_id not in [d["id"] for d in published]

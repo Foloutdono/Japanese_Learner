@@ -27,6 +27,15 @@ const LISTED = [
   { id: 2, name: 'Kanji du métro', type: 'kanji', card_count: 18, author: 'Haruto', followers: 0 },
   { id: 3, name: 'Cuisine', type: 'vocab', card_count: 25, author: 'Aiko', followers: 1 },
 ]
+// The library's three sections beside the list (plan 132).
+const HOME = {
+  featured: LISTED[0],
+  following: [
+    { id: 7, name: 'Genki I', type: 'vocab', card_count: 312, author: 'mika', new_cards: 12 },
+    { id: 8, name: 'Mots de l’anime', type: 'standard', card_count: 64, author: 'kenta', new_cards: 0 },
+  ],
+  published: [{ id: 9, name: 'Kanji de la cuisine', type: 'kanji', card_count: 32, followers: 14, weeks: [0, 1, 1, 2, 2, 3, 2, 3] }],
+}
 const full = d => ({ ...d, followed: false, preview: [{ id: 1, front: '駅', kana: 'えき', back: 'gare' }] })
 let slowDeck = null
 const apiJson = vi.fn()
@@ -48,6 +57,7 @@ beforeEach(() => {
   apiJson.mockImplementation(async url => {
     const u = String(url)
     if (u.startsWith('/api/decks/library?')) return { results: LISTED, total: LISTED.length, has_more: false, types: ['vocab', 'kanji'] }
+    if (u === '/api/decks/library/home') return HOME
     const m = u.match(/^\/api\/decks\/library\/(\d+)$/)
     if (m) {
       if (Number(m[1]) === slowDeck) await wait(600)
@@ -91,17 +101,50 @@ const shelfCalls = () => apiJson.mock.calls.filter(([u]) => String(u).startsWith
 const openName = () => $('.desk-split__list .lib-card[aria-current="page"] .platform-card__title')?.textContent
 
 describe('the library on the desk', () => {
-  it('opens the bare shelf on its first deck, beside it', async () => {
+  it("stands the bare library's three sections beside the list (plan 132)", async () => {
     await mountLibrary('/learn/decks/library')
     await settle(400)
-    expect(where.path).toBe('/learn/decks/library/1')
-    expect(where.type).toBe('REPLACE')
-    expect(openName()).toBe('Voyage au Japon')
+    // No deck opened for you: the page is the library's own.
+    expect(where.path).toBe('/learn/decks/library')
+    expect(openName()).toBeUndefined()
     const list = $('.desk-split--shelf .desk-split__list').getBoundingClientRect()
     const page = $('.desk-split--shelf .desk-split__page').getBoundingClientRect()
     expect(page.left).toBeGreaterThan(list.right)
+    const heads = $$('.lib-home .gate-panel__head .plate__title').map(h => h.textContent)
+    expect(heads).toEqual(['À la une', 'Abonnements', 'Tes publications'])
+    // À la une: the rule's deck at a glance, three of its cards as tiles.
+    expect($('.lib-home__featured .deck-preview__name').textContent).toBe('Voyage au Japon')
+    expect($('.lib-home__featured .deck-sample__jp').textContent).toBe('駅')
+    // Abonnements: what each followed deck's author added since.
+    const follows = $$('.lib-home__pair > :first-child .gate-row')
+    expect(follows.map(r => r.querySelector('.gate-row__news, .gate-row__fig').textContent)).toEqual(['+12 cartes', 'À jour'])
+    expect(follows[0].getAttribute('href')).toBe('/learn/decks/7')
+    // Tes publications: the followers, and a bar a week.
+    const mine = $('.lib-home__pair > :last-child .gate-row')
+    expect(mine.textContent).toContain('14 abonnés')
+    expect(mine.querySelectorAll('.lib-weeks > i')).toHaveLength(8)
+    // Abonnements and publications stand side by side under À la une.
+    const [a, b] = $$('.lib-home__pair > .gate-panel').map(p => p.getBoundingClientRect())
+    expect(Math.abs(a.top - b.top)).toBeLessThanOrEqual(1)
+    expect(b.left).toBeGreaterThan(a.right)
+    expect(a.top).toBeGreaterThan($('.lib-home__featured').getBoundingClientRect().bottom)
+  })
+
+  it("opens a deck from the list in the sections' place, three cards as tiles over the list", async () => {
+    await mountLibrary('/learn/decks/library/1')
+    await settle(400)
+    expect(openName()).toBe('Voyage au Japon')
+    expect($('.lib-home')).toBeNull()
     expect($('.desk-shelf-page .deck-identity__name').textContent).toBe('Voyage au Japon')
+    expect($('.desk-shelf-page .deck-sample__jp').textContent).toBe('駅')
     expect($('.desk-shelf-page .card-row__jp').textContent).toBe('駅')
+  })
+
+  it("opens already asked when the gate's search sends a term (plan 132)", async () => {
+    await mountLibrary('/learn/decks/library?q=m%C3%A9tro')
+    await settle(400)
+    expect($('.console input').value).toBe('métro')
+    expect(apiJson.mock.calls.some(([u]) => String(u).includes('q=m%C3%A9tro'))).toBe(true)
   })
 
   it('swaps the deck in place, the shelf asked for once and its search kept', async () => {

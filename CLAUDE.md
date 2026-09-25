@@ -465,7 +465,25 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RunLines.jsx`, the five `screens/*Run.jsx`,
   `src/ask.desktop.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk"; `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **132** or higher, and check
+  **132** is 棚, the shelf and the library beside the lines on the desk
+  (wave 37; numbered 132 because 131 went to the asking while it was
+  open), the owner's pick of three drawn layouts: the Learn gate's
+  four lines in one column, each drawn across its plate, beside a column
+  holding the learner's decks over the library's most followed or newest
+  (Follow on each, a search, a row opening the deck's preview in place);
+  the library's three sections beside its list — À la une, Abonnements
+  with the cards added since a followed deck was last opened
+  (`deck_subscriptions.seen_at`), and Tes publications with followers by
+  week — from `GET /api/decks/library/home`; and the library as a rail
+  station (cited in `routes/decks.py`, `srs/data_structure.sql`,
+  `tests/test_deck_library.py`, `components/decks/GateShelf.jsx`,
+  `components/decks/LibraryHome.jsx`, `components/decks/PublicDeckPage.jsx`,
+  `components/station/LinePlate.jsx`, `screens/LearnScreen.jsx`,
+  `screens/LibraryScreen.jsx`, `screens/DecksScreen.jsx`, `config/tabs.js`,
+  `components/chrome/DeskRail.jsx`, `src/learnShelf.desktop.test.jsx`,
+  `src/gates.desktop.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
+  section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **133** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
