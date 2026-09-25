@@ -379,8 +379,9 @@ pytest tests/test_scheduler.py::test_name # single test
 Every voice the server makes (exam listening, dictation, the `/api/tts` card
 readings) and the kana deck's clips come from a **self-hosted VOICEVOX Nemo
 engine**, reached over HTTP by `study/voice_engine.py`. On Render it is the
-`voicevox-nemo` private service in `render.yaml`, and the backend's
-`VOICEVOX_URL` is filled from its `hostport`. Locally, run the same image and
+`voicevox-nemo` private service in `render.yaml`, in Frankfurt beside the
+backend, and the backend's `VOICEVOX_URL` is its internal address
+(`host:port`). Locally, run the same image and
 set `VOICEVOX_URL=http://localhost:50121` in `backend/.env`:
 
 ```bash
@@ -505,7 +506,12 @@ content set serves — `content/grammar/renames.py` for grammar points,
 `content/vocab_renames.py` for vocab entries, `content/kanji_renames.py`
 for kanji (plan 112, the 23 characters the deck taught at two levels).
 Each renames the learner's card rows to the new ids, merges on collision,
-and leaves anything it does not recognise in place and reported.
+and leaves anything it does not recognise in place and reported. Vocab
+alone can also **retire** an id that has no card to move to
+(`vocab_renames.RETIRED`, the N5 より、ほう). It drops the schedule
+(`cards`, `card_modes`) and the deck rows, pins and favourites that name
+the card, and keeps `review_log` and `card_first_review`, so no figure
+summed over them moves. Grammar's `RETIRED` only reports.
 
 ```bash
 python -m scripts.migrate_grammar_ids  # report; --yes to apply, --user to scope
@@ -545,7 +551,9 @@ surface field of a deck entry orphans its SRS rows** — and the deck key
 `"{kanji}::{kana}"` that `frequency_overrides.item_key` stores along with
 them. Plan 091 corrected 34 entries and `migrate_vocab_ids.py` is what
 carries the progress across; a future deck correction needs its own entries
-in `vocab_renames.MOVES` for the same reason. **After any deck change, run
+in `vocab_renames.MOVES` for the same reason, or, for residue that was
+never a word and has no card to fold into, one in `vocab_renames.RETIRED`
+with its reason. **After any deck change, run
 `python -m scripts.audit_vocab_deck --write-snapshot`,
 `python -m scripts.placement_report --rebuild-order --write-lists` (two
 runs; each flag is its own) and, for an added
@@ -771,12 +779,13 @@ Frontend calls same-origin `/api/*` FastAPI routes in both dev and prod (Vite pr
 
 ## Deployment
 
-- Backend: Render (`render.yaml`), root `backend/`, persistent disk mounted at `/data` for SRS storage.
+- Backend: Render (`render.yaml`), root `backend/`, persistent disk mounted at `/data` for SRS storage. The running service is the dashboard's `Japanese_Learner`, in Frankfurt, which `render.yaml` did not create (the names differ): a Blueprint made from the file would add a second backend beside it, so the live services are changed in the dashboard and the file is kept saying the same.
 - Voice engine: a second service in `render.yaml`, `voicevox-nemo`, a
   **private** service running the stock `voicevox/voicevox_nemo_engine` image
   pinned by digest. It has no auth, so it must never be made public; only the
-  backend reaches it, through `VOICEVOX_URL` (its `hostport`), over the
-  private network, in the same region. It holds no state. Starter's 512 MB
+  backend reaches it, through `VOICEVOX_URL` (its internal `host:port`),
+  over the private network, in the same region: Frankfurt, pinned in
+  `render.yaml`. It holds no state. Starter's 512 MB
   fits it (343 MB at peak with the three voices) at the cost of slow first
   syntheses; Standard halves them. See ADR 0019.
 - Frontend: Vercel (`frontend/vercel.json`), SPA rewrite to `index.html`, plus

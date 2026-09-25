@@ -28,10 +28,13 @@ renames the learner's rows. KEY_MOVES is the same 34 entries as
 "{kanji}::{kana}" deck keys, which is what frequency_overrides.item_key
 holds for domain='vocab' (see content/frequency_data.py's resolve()).
 
-Nothing is retired: every corrected entry is still served, under its new
-id. A row whose id is in neither the live deck nor MOVES is content drift
-from before this table existed; the migration reports it and leaves it
-exactly as it is, the way migrate_jmdict_card_ids.py does.
+A card that has nowhere to go is RETIRED instead: it leaves the deck, and
+the migration drops its schedule and whatever names it, but not the
+learner's review history (see RETIRED below). That is for residue that
+was never a word. A real word leaving the deck always has a card to move
+to. A row whose id is in none of the live deck, MOVES and RETIRED is
+content drift from before this table existed; the migration reports it
+and leaves it exactly as it is, the way migrate_jmdict_card_ids.py does.
 """
 
 # old raw id -> new raw id
@@ -667,6 +670,17 @@ MOVES: dict[str, str] = {
     "vocab_N3_食事_しょくじ": "vocab_N4_食事_しょくじ",
     "vocab_N4_出席_しゅっせき・する": "vocab_N4_出席_しゅっせき",
     "vocab_N3_出席_しゅっせき": "vocab_N4_出席_しゅっせき",
+    # And the four with no ・, 掃除's own shape: each N5 card reads the
+    # noun and takes the N3 noun card's gloss, and that card folds into
+    # it. furigana.written_reading is the guard now (test_vocab_deck).
+    "vocab_N5_練習_れんしゅうする": "vocab_N5_練習_れんしゅう",
+    "vocab_N3_練習_れんしゅう": "vocab_N5_練習_れんしゅう",
+    "vocab_N5_散歩_さんぽする": "vocab_N5_散歩_さんぽ",
+    "vocab_N3_散歩_さんぽ": "vocab_N5_散歩_さんぽ",
+    "vocab_N5_勉強_べんきょうする": "vocab_N5_勉強_べんきょう",
+    "vocab_N3_勉強_べんきょう": "vocab_N5_勉強_べんきょう",
+    "vocab_N5__コピーする": "vocab_N5__コピー",
+    "vocab_N3__コピー": "vocab_N5__コピー",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -683,6 +697,28 @@ NOT_FOLDED: frozenset[str] = frozenset({
     "vocab_N1_一筋_ひとすき",
     "vocab_N1_真実_さな",
 })
+
+# Ids that left the deck with nowhere to go. MOVES needs a card to carry
+# the rows to, and for these there is none: nothing at or below the
+# card's level teaches what it stood for, and a move UP a level would
+# take the card out of a lower-level learner's deck
+# (test_a_rename_that_changes_the_level_moves_down_never_up).
+#
+# scripts/migrate_vocab_ids.py drops what schedules a retired card (its
+# `cards` row, and its `card_modes` by cascade) and what names it: deck
+# rows, frequency pins, favourites. It keeps the card's review_log and
+# card_first_review rows. XP, the level, the streak, the 番付 standing and
+# the daily-new budget are sums over those two tables, and retiring a
+# card the learner never chose to lose must not change any of them.
+#
+# id -> why it went, printed by the migration's report.
+RETIRED: dict[str, str] = {
+    # The export's residue of the N5 grammar point 〜より〜のほうが,
+    # filed as a vocab card: no word in the reading field, "used for
+    # comparison." for a gloss, and neither より nor ほう on the N5
+    # list for it to fold into. The N5 grammar deck teaches the pattern.
+    "vocab_N5__より、ほう": "the N5 grammar point 〜より〜のほうが, not a word",
+}
 
 
 def _fields_of(raw_id: str) -> tuple[str, str]:
@@ -719,6 +755,20 @@ def key_moves() -> dict[str, str]:
 
 
 KEY_MOVES: dict[str, str] = key_moves()
+
+
+def retired_keys() -> frozenset[str]:
+    """RETIRED as "{kanji}::{kana}" deck keys, for the tables that store
+    the key rather than the id: frequency_overrides.item_key and
+    dictionary_favorites.key. A deck key is level-free, so a retired
+    card's key is only droppable while no served card still carries it;
+    tests/test_vocab_deck.py holds that."""
+    return frozenset(
+        f"{kanji}::{kana}" for kanji, kana in (_fields_of(raw) for raw in RETIRED)
+    )
+
+
+RETIRED_KEYS: frozenset[str] = retired_keys()
 
 
 # The characters that mark a MOVES key's field as export residue rather

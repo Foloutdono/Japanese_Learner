@@ -14,7 +14,8 @@ belongs, or the word duplicated into the kanji column -- and correcting
 them changes their ids. content/vocab_renames.py records each as a MOVE
 (old id -> new id); this script renames the rows so a returning learner
 finds their progress under the corrected entry instead of a "new" card.
-Nothing is retired: every corrected entry is still served.
+A card with no entry left to move to is RETIRED instead (the N5 より、ほう,
+a grammar point exported as a card): its schedule goes, its history stays.
 
 WHAT IT DOES
 ------------
@@ -38,6 +39,14 @@ FK and can outlive a deleted card, so each table is scanned):
                   matters, see migrate_jmdict_card_ids.py)
                d. review_log: UPDATE onto the new id
                e. card_first_review: UPDATE, or keep the earlier first_at
+  in RETIRED -> the schedule dropped, in one transaction per id:
+               card_modes, then the cards row. review_log and
+               card_first_review are KEPT: XP, the level, the streak,
+               the 番付 standing and the daily-new budget are sums over
+               them, and a retirement is not a reset. The queues already
+               skip content that is gone, but a schedule left behind still
+               drives a "next review" countdown and a "—" row in the
+               report, for a card nothing can show
   unknown   -> reported and left exactly as it is (content drift from
                before renames.py existed; never guess)
 
@@ -67,6 +76,10 @@ Then, once per moved id rather than per learner:
                opens an unmoved one -- a folded spelling resolves to its
                card -- but the entry's star reads the card's own key.
 
+And once per retired id: its deck_cards rows are deleted (a deck cannot
+hold a card that no longer exists), and so are the pins and favourites
+on its deck key (vocab_renames.RETIRED_KEYS).
+
 Left alone, and why: xp_ledger.ref and credit_ledger.ref hold card ids
 as receipts -- every reader SUMs the ledger and none joins on ref -- so
 a stale ref changes no figure a learner sees.
@@ -74,7 +87,9 @@ a stale ref changes no figure a learner sees.
 Idempotent by construction: after a run no moved id exists in any scanned
 table, and a MOVES key can never re-enter the deck (tests/test_vocab_deck
 .py's shape tests forbid the field shapes it names), so a second run
-finds nothing to do.
+finds nothing to do. A retired id is still found by a second run, in the
+history it keeps, and the run drops nothing, since no schedule, deck row,
+pin or favourite is left for it to drop.
 
 Deploy the code first, run this once after: between the two a corrected
 entry reads as "new", and nothing is lost.
@@ -86,7 +101,7 @@ import sys
 import scripts._env  # noqa: F401  -- loads backend/.env before core.db reads DATABASE_URL
 
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
-from content.vocab_renames import KEY_MOVES, MOVES
+from content.vocab_renames import KEY_MOVES, MOVES, RETIRED, RETIRED_KEYS
 from core.db import db_conn
 
 logger = logging.getLogger("migrate_vocab_ids")
@@ -137,13 +152,16 @@ def find_card_ids(cur, user: str | None = None) -> list[str]:
 
 
 def classify(card_ids: list[str], served: frozenset[str]) -> dict[str, list[str]]:
-    out = {"served": [], "moved": [], "unknown": []}
+    out = {"served": [], "moved": [], "retired": [], "unknown": []}
     for card_id in card_ids:
         _, raw = _split(card_id)
         if raw in MOVES:
             # Checked before `served`: no MOVES key is served (the
             # rename tests hold that), so the order only documents intent.
             out["moved"].append(card_id)
+        elif raw in RETIRED:
+            # Nor is a RETIRED id, and no id is in both tables.
+            out["retired"].append(card_id)
         elif raw in served:
             out["served"].append(card_id)
         else:
@@ -212,6 +230,67 @@ def rename_card(conn, card_id: str) -> int:
         _move_first_review(cur, card_id, new_id)
     conn.commit()
     return merged
+
+
+def retire_card(conn, card_id: str) -> int:
+    """One learner's schedule for one retired card, in one transaction.
+    Returns the number of card_modes rows dropped.
+
+    card_modes first, then cards: the cascade would take the modes with
+    the card, but saying so costs one statement and does not lean on a
+    constraint this script cannot see. review_log and card_first_review
+    are not touched (the module docstring says why)."""
+    with conn.cursor() as cur:
+        cur.execute("DELETE FROM card_modes WHERE card_id = %s", (card_id,))
+        dropped = cur.rowcount
+        cur.execute("DELETE FROM cards WHERE id = %s", (card_id,))
+    conn.commit()
+    return dropped
+
+
+def retire_side_rows(cur, user: str | None = None) -> tuple[int, int, int]:
+    """The rows that name a retired card, deleted: deck_cards by id, the
+    frequency pins and favourites by deck key. Returns (decks, pins,
+    favorites) -- how many of each went."""
+    scope = " AND user_id = %(user)s" if user else ""
+    params = {"ids": list(RETIRED), "keys": list(RETIRED_KEYS), "user": user}
+    cur.execute(f"DELETE FROM deck_cards WHERE source = 'vocab' AND raw_id = ANY(%(ids)s){scope}", params)
+    decks = cur.rowcount
+    cur.execute(
+        f"DELETE FROM frequency_overrides WHERE domain = 'vocab' AND item_key = ANY(%(keys)s){scope}",
+        params,
+    )
+    pins = cur.rowcount
+    cur.execute(
+        f"DELETE FROM dictionary_favorites WHERE kind = 'vocab' AND key = ANY(%(keys)s){scope}",
+        params,
+    )
+    return decks, pins, cur.rowcount
+
+
+def count_retired_side_rows(cur, user: str | None = None) -> tuple[int, int, int]:
+    """retire_side_rows' counts, read without deleting, for the report."""
+    scope = " AND user_id = %(user)s" if user else ""
+    params = {"ids": list(RETIRED), "keys": list(RETIRED_KEYS), "user": user}
+    counts = []
+    for sql in (
+        "SELECT COUNT(*) FROM deck_cards WHERE source = 'vocab' AND raw_id = ANY(%(ids)s)",
+        "SELECT COUNT(*) FROM frequency_overrides WHERE domain = 'vocab' AND item_key = ANY(%(keys)s)",
+        "SELECT COUNT(*) FROM dictionary_favorites WHERE kind = 'vocab' AND key = ANY(%(keys)s)",
+    ):
+        cur.execute(sql + scope, params)
+        counts.append(cur.fetchone()[0])
+    return tuple(counts)
+
+
+def scheduled(cur, card_ids: list[str]) -> set[str]:
+    """The subset of `card_ids` that still has a cards row, so the report
+    can tell a retired card still due from one whose history alone is
+    left (which a second run finds, and leaves)."""
+    if not card_ids:
+        return set()
+    cur.execute("SELECT id FROM cards WHERE id = ANY(%s)", (card_ids,))
+    return {row[0] for row in cur.fetchall()}
 
 
 def level_of(raw_id: str) -> str:
@@ -340,16 +419,24 @@ def main(argv=None) -> int:
         with conn.cursor() as cur:
             fates = classify(find_card_ids(cur, args.user), served)
             decks, pins, favorites = count_side_table_candidates(cur, args.user)
+            gone_decks, gone_pins, gone_favorites = count_retired_side_rows(cur, args.user)
+            due = scheduled(cur, fates["retired"])
         conn.commit()
 
-        logger.info("vocab card ids: %d served, %d to move, %d unknown (left)",
-                    len(fates["served"]), len(fates["moved"]), len(fates["unknown"]))
+        logger.info("vocab card ids: %d served, %d to move, %d retired (%d still scheduled), %d unknown (left)",
+                    len(fates["served"]), len(fates["moved"]), len(fates["retired"]), len(due),
+                    len(fates["unknown"]))
         for card_id in fates["unknown"]:
             logger.warning("  not in the deck and not in vocab_renames.py, left as is: %s", card_id)
         for card_id in fates["moved"]:
             logger.info("  %s -> %s", card_id, MOVES[_split(card_id)[1]])
+        for card_id in fates["retired"]:
+            logger.info("  %s retired, %s: %s", card_id, RETIRED[_split(card_id)[1]],
+                        "schedule to drop, history kept" if card_id in due else "history only, nothing to drop")
         logger.info("deck_cards rows to move: %d; frequency_overrides rows to move: %d; "
                     "dictionary_favorites rows to move: %d", decks, pins, favorites)
+        logger.info("naming a retired card -- deck_cards rows: %d; frequency_overrides rows: %d; "
+                    "dictionary_favorites rows: %d", gone_decks, gone_pins, gone_favorites)
 
         if not args.yes:
             logger.info("dry run -- nothing written. Re-run with --yes to apply.")
@@ -362,10 +449,19 @@ def main(argv=None) -> int:
             except Exception:
                 conn.rollback()
                 logger.exception("failed renaming %s; rolled back, continuing", card_id)
+        tracks = schedules = 0
+        for card_id in fates["retired"]:
+            try:
+                tracks += retire_card(conn, card_id)
+                schedules += card_id in due
+            except Exception:
+                conn.rollback()
+                logger.exception("failed retiring %s; rolled back, continuing", card_id)
         with conn.cursor() as cur:
             renamed, dropped = rename_deck_cards(cur, args.user)
             pins_renamed, pins_dropped = rename_frequency_overrides(cur, args.user)
             favs_renamed, favs_dropped = rename_favorites(cur, args.user)
+            gone_decks, gone_pins, gone_favorites = retire_side_rows(cur, args.user)
         conn.commit()
         logger.info("moved %d card id(s) (%d card_modes rows merged into an existing track); "
                     "deck_cards: %d moved, %d dropped as duplicates; "
@@ -373,6 +469,9 @@ def main(argv=None) -> int:
                     "dictionary_favorites: %d moved, %d dropped as duplicates",
                     len(fates["moved"]), merged, renamed, dropped, pins_renamed, pins_dropped,
                     favs_renamed, favs_dropped)
+        logger.info("retired: %d schedule(s) dropped (%d card_modes rows), review history kept; "
+                    "deleted %d deck_cards, %d frequency_overrides and %d dictionary_favorites rows",
+                    schedules, tracks, gone_decks, gone_pins, gone_favorites)
         return 0
     finally:
         conn.close()
