@@ -220,6 +220,15 @@ Thirteen waves live in this file:
   by the guard's own sites. Its section is near the bottom of this file,
   before wave 29's. The next wave begins at 126.
 
+- **Wave 32 — 定期券, the pass at the rail's foot** (plan 127, 2026-09-25,
+  DONE). The desk rail's foot held the HUD's three instruments as the
+  phone draws them — a roundel, a pocket pass, a lit panel — three shapes
+  on three alignments. Five directions were drawn on the canvas "Rail
+  foot directions"; the owner picked the pass: the three as one card,
+  the learner's commuter pass, with the HUD's three doors on it. Its
+  section is before wave 31's, near the bottom of this file. The next
+  wave begins at 128.
+
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
@@ -6083,6 +6092,31 @@ not measured by a script.
 | Esc in Browse's search, 12 ticked | the dock closes, the ticks lost | the field blurs; a second Esc closes |
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
+
+# Wave 32 — 定期券, the pass at the rail's foot (plan 127, 2026-09-25)
+
+The owner's complaint, with a screenshot of the rail: the desk rail's
+foot "isn't really a great design". It held the HUD's three instruments
+as the phone draws them across its strip — the level roundel alone at
+the left, the pocket pass at the right in a boxed edge, the status panel
+under both at the rail's width — three shapes on three alignments, none
+on the rail's pictogram column; the level a bare number with no climb,
+and a spent balance a red 0/50 that said neither what it counted nor
+when it came back. Five directions were drawn beside it on the canvas
+"Rail foot directions", each in four states (ahead and spent, on time,
+late and low, offline): A, rows on the gates' grid; B, the pass as one
+card; C, the run's level bar as the rail's floor; D, one lit departure
+board; E, a gauge ring and two lamps. The owner picked B.
+
+| Plan | What | Status |
+|---|---|---|
+| 127 | `DeskPass` at the rail's foot in place of `HudInstruments`: one card, the profile pass at pocket size (its sheen, `--r-identity`, charcoal and gold), its edge the balance's (`--low`, `--out`); the face (`hud.level`, the HUD's roundel with the fare, the climb as `LevelBar` measures it) → the pass; the purse (`hud.pass`, the pocket pass's mark and figure, captioned `creditsUnit` or, spent, `balanceRefillLine`) → the balance sheet; the stub (`hud.status`, the journey's word and drift, a lamp in the state's ink) → `showStatus`. `statusOf` and `showStatus` moved to `components/chrome/hudStatus.js`, `refillClock` to `domain/credits.js` (it had a copy in each of three files); the three HUD stops take a card's corner on the desk (`guides.js`'s `DESK_RADIUS`); `src/chrome.desktop.test.jsx`'s foot tests rewritten, the Today walk and the focus test pointed at the new pass, a block of `deskfree.phone` | DONE (2026-09-25) |
+
+The rail's pigment test lets the pass's metal stand inside the card: the
+gold of the climb and the balance shares its hex with 辞書's pigment, and
+the test is the object, not the hex (DESIGN.md, Colour). ADR 0018's list
+of the rail ("the HUD's three instruments at its foot") is history;
+DESIGN.md's "The desk" is the rule.
 
 # Wave 31 — 三面, the run on three panels (plan 126, 2026-09-25)
 

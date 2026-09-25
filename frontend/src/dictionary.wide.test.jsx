@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import POINTS from './testing/grammarPoints.json'
 import './index.css'
 
-// ── 机 — the grammar page on a laptop's width (plan 127) ─────────────
+// ── 机 — the grammar page on a laptop's width (plan 128) ─────────────
 // At 1440 the grammar page's entry has room for its lesson in two
 // columns, each at least a desk column's least width: the rule and its
 // uses on the left, the sentences and the rivals flowing on to the
@@ -42,7 +42,7 @@ async function mount() {
   await settle()
 }
 
-describe('the grammar page on a wide desk (plan 127)', () => {
+describe('the grammar page on a wide desk (plan 128)', () => {
   it('sets the lesson in two columns, and reads a typical point whole', async () => {
     await mount()
     const dock = document.querySelector('.dict-dock')

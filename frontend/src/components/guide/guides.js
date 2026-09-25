@@ -57,11 +57,24 @@ export const DESK_ORDER = Object.freeze({
   today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
 })
 
-/** A gate's stops in the order the desk walks them. */
+// 机 (plan 127): the corner a stop's spot wears on the desk, where it
+// differs from the phone's. The HUD's three are pills on the phone's
+// strip; on the desk they are the three doors of the rail's pass, the
+// face, the purse and the stub, and a pill drawn round a card's door
+// reads as a stadium over the card.
+export const DESK_RADIUS = Object.freeze({
+  'hud.level': 'card',
+  'hud.status': 'card',
+  'hud.pass': 'card',
+})
+
+/** A gate's stops in the order the desk walks them, in the desk's corners. */
 export function deskStops(gate) {
   const stops = GUIDES[gate] ?? []
   const order = DESK_ORDER[gate]
-  return order ? order.map(anchor => stops.find(s => s.anchor === anchor)).filter(Boolean) : stops
+  const walked = order ? order.map(anchor => stops.find(s => s.anchor === anchor)).filter(Boolean) : stops
+  if (!walked.some(s => DESK_RADIUS[s.anchor])) return walked
+  return walked.map(s => (DESK_RADIUS[s.anchor] ? { ...s, radius: DESK_RADIUS[s.anchor] } : s))
 }
 
 // The owner's original ask, one flag away: when true, the last stop's

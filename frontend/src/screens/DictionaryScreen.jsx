@@ -604,7 +604,7 @@ export default function DictionaryScreen({ session }) {
 	// 案内 — once the first page of the catalogue has painted (plan 100).
 	const guide = useGuide('dictionary', !loading && results.length > 0)
 
-	// 机 (plan 127): the entry's column, stood beside the whole catalogue
+	// 机 (plan 128): the entry's column, stood beside the whole catalogue
 	// rather than inside the results (DeskColumns). Below the desk the
 	// results still carry their own dock, the sheet it becomes there.
 	const dock = desk && selected && !showingRadicalGrid && (
@@ -625,7 +625,7 @@ export default function DictionaryScreen({ session }) {
 			    screen's clipped <h1>. */}
 			<h1 className="sr-only">{t.dictionaryTitle}</h1>
 
-			{/* 机 (plan 127): on the desk the catalogue and its entry are two
+			{/* 机 (plan 128): on the desk the catalogue and its entry are two
 			    columns, the entry standing from the page's top rather than under
 			    the door and the console, where the window cut it off (see
 			    DeskColumns). A phone gets the same children with no wrapper. */}
@@ -985,7 +985,7 @@ function cardFurigana(entry) {
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
 }
 
-// ── 机 — the catalogue and its entry, two columns (plan 127) ──
+// ── 机 — the catalogue and its entry, two columns (plan 128) ──
 // The entry stood under the analyser's door and the console, 270px
 // down, at the side column's 360px: a kanji's plate, stroke sheet,
 // words and record ran some 230px past the window's foot, so the page
@@ -1238,7 +1238,7 @@ function ResultsSection({
 					</div>
 
 					{/* On the desk the screen stands the dock beside the whole
-					    catalogue instead (DeskColumns, plan 127). */}
+					    catalogue instead (DeskColumns, plan 128). */}
 					{selected && !desk && (
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}

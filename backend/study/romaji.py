@@ -79,6 +79,74 @@ def to_romaji(text: str) -> str:
 _SAID_KANA = {"は": "ワ", "へ": "エ", "を": "オ"}
 
 
+# ── Number + counter, where the reading is not the sum of its parts ──
+# UniDic reads a numeral and the counter after it as two morphemes and
+# gives each its citation reading, so 九時 comes back キュウ + ジ where
+# the hour is くじ, and 一分 イチ + フン where the minute is いっぷん.
+# Reading practice shows this string as the reference reading at the
+# reveal (ReadingRun.jsx) and the learner grades themselves against it,
+# so a wrong one is not a cosmetic annoyance: someone who read 九時
+# correctly is told they were wrong.
+#
+# The correction belongs here, in kana, for the same reason _SAID_KANA
+# above does -- pykakasi is turning kana into letters correctly, and it
+# is the kana handed to it that is wrong.
+#
+# Only the two counters whose irregularity is phonological are handled.
+# The app's own hand-written banks are the check on both:
+# content/listening_clips.py writes 九時 くじ, 十分 じゅっぷん and
+# 三十分 さんじゅっぷん.
+#
+# Deliberately NOT handled, because neither is a rule:
+#   * 〜中 is ちゅう (会議中, 午前中) or じゅう (一日中, 世界中) by which
+#     word it attaches to. A guess either way breaks the other side.
+#   * 十分, which UniDic reads as one adverb ジュウブン ("sufficient")
+#     in some contexts and as 十 + 分 in others. Where it splits, the
+#     〜分 rule below already gives じゅっぷん; where it does not, the
+#     word sense is the tokenizer's call, not this module's.
+
+# The hour: 四時 よじ, 七時 しちじ, 九時 くじ -- NHK's 時刻の読み方, and
+# the reading the whole N5 syllabus teaches. Everything else (一, 二,
+# 三, 五, 六, 八, 十, 何) is already right as counted.
+_HOUR_NUMBER = {"ヨン": "ヨ", "シ": "ヨ", "ナナ": "シチ", "キュウ": "ク"}
+
+# The minute: ぷん after a number ending ん (三分 さんぷん, 四分 よんぷん,
+# 何分 なんぷん) and after one that geminates (一 いっ, 六 ろっ, 八 はっ,
+# 十 じゅっ, and any 〜十 -- 三十分 さんじゅっぷん); ふん otherwise (二分,
+# 五分, 七分, 九分). じゅっ rather than じっ because that is what the
+# app's dictation bank writes and what modern speech uses.
+_GEMINATING_TAIL = ("チ", "ク")
+_NUMERAL_CHARS = set("〇一二三四五六七八九十百千万0123456789０１２３４５６７８９")
+
+
+def _is_numeral(surface: str) -> bool:
+    """A written number, or 何, which takes a counter the same way and
+    the same irregularities with it (何分 なんぷん)."""
+    if surface == "何":
+        return True
+    return bool(surface) and all(ch in _NUMERAL_CHARS for ch in surface)
+
+
+def _counter_kana(prev_surface: str, prev_kana: str, surface: str, kana: str):
+    """(number kana, counter kana) for a numeral + irregular counter, or
+    None when this pair is not one. Both halves can move: 〜分 geminates
+    the number as well as voicing the counter."""
+    if not _is_numeral(prev_surface):
+        return None
+    if surface == "時" and kana == "ジ":
+        fixed = _HOUR_NUMBER.get(prev_kana)
+        return (fixed, kana) if fixed else None
+    if surface == "分" and kana == "フン":
+        if prev_kana.endswith("ジュウ"):
+            return prev_kana[:-1] + "ッ", "プン"
+        if prev_kana.endswith(_GEMINATING_TAIL):
+            return prev_kana[:-1] + "ッ", "プン"
+        if prev_kana.endswith("ン"):
+            return prev_kana, "プン"
+        return None
+    return None
+
+
 def sentence_romaji(text: str) -> str:
     """Context-aware Japanese -> Hepburn for a whole sentence, via the
     same morphological tokenizer the furigana/card-lookup code already
@@ -113,7 +181,11 @@ def sentence_romaji(text: str) -> str:
     level cap has swapped 曜 for hiragana): the tokenizer does not treat
     either spelling of a weekday name as one word, so it reads a
     trailing bare 日 standalone (ひ) rather than with the rendaku a real
-    〜曜日 always takes (び).
+    〜曜日 always takes (び). A third corrects a numeral and the counter
+    after it, which UniDic also reads as two words and so gives each its
+    counting reading -- 九時 as キュウ + ジ where the hour is くじ, 一分
+    as イチ + フン where the minute is いっぷん; see _counter_kana above
+    for which counters are handled and which are left to the tokenizer.
 
     Word spacing does not come from pykakasi either -- handed a bare
     kana string it cannot space words at all (see
@@ -155,6 +227,12 @@ def sentence_romaji(text: str) -> str:
             and groups and groups[-1][-1][1].endswith("ヨウ")
         ):
             kana = "ビ"
+        elif groups and groups[-1]:
+            prev_m, prev_kana = groups[-1][-1]
+            fixed = _counter_kana(prev_m.surface, prev_kana, m.surface, kana)
+            if fixed is not None:
+                groups[-1][-1] = (prev_m, fixed[0])
+                kana = fixed[1]
 
         glue = force_glue or (
             bool(groups) and (

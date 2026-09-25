@@ -390,7 +390,20 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RatingBar.jsx`, `components/dictionary/DictionaryDetail.jsx`,
   `domain/forecast.js`, `stores/runTally.js`, `src/panels.desktop.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  **127** is the dictionary as two columns on the desk, the layout the
+  **127** is 定期券, the pass at the rail's foot (wave 32): the desk
+  rail's foot drawn five ways and the owner's pick built — the HUD's
+  three instruments as one card, the learner's commuter pass, with the
+  HUD's three doors on it (the face with the level's climb, the purse
+  with what the balance counts or when it comes back, the stub with the
+  journey's word) and its edge the balance's (cited in
+  `components/chrome/DeskPass.jsx`, `components/chrome/hudStatus.js`,
+  `components/chrome/DeskRail.jsx`, `components/chrome/Hud.jsx`,
+  `components/guide/guides.js`, `src/chrome.desktop.test.jsx`,
+  `src/today.desktop.test.jsx`, `src/focus.desktop.test.jsx`,
+  `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  **128** is the dictionary as two columns on the desk (wave 33; numbered
+  128 because 127 went to 定期券 while it was open), the layout the
   owner chose from four rendered options: the catalogue (the analyser's
   door, the console, the results) in one column and the entry beside all
   of it from the page's top at `--desk-entry-w` (440px), never past the
@@ -405,7 +418,7 @@ runtime purpose. Two consequences worth knowing:
   `src/dictionary.wide.test.jsx`, `src/testing/grammarPoints.json` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **128** or higher, and check
+  When starting a new wave, begin at **129** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

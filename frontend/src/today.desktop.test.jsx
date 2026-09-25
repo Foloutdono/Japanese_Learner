@@ -146,16 +146,18 @@ describe('Today on the desk', () => {
 
 // ── plan 123 — one panel, one word; the finish keeps the strip ──
 describe('Today\'s side, called and finished (plan 123)', () => {
+  // The rail's status is the stub of its pass since plan 127; the walk
+  // is the same one, off the same anchor.
   it('walks the rail\'s status chip to the panel beside the gate, with no dialog', async () => {
     journeyRef.current = BEHIND
-    const { HudInstruments } = await import('./components/chrome/Hud')
+    const { DeskPass } = await import('./components/chrome/DeskPass')
     const { openStatus } = await import('./stores/journey')
     openStatus.mockClear()
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/today']}>
           <div className="phone phone--desk">
-            <aside className="desk-rail"><HudInstruments /></aside>
+            <aside className="desk-rail"><DeskPass /></aside>
             <div className="phone__content"><TodayScreen session={{}} /></div>
           </div>
         </MemoryRouter>

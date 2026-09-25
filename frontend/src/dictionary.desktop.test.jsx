@@ -93,7 +93,7 @@ describe('the dock on the desk', () => {
     expect(headword()).toBe('駅')
     const grid = document.querySelector('.dict-grid').getBoundingClientRect()
     expect(dock.getBoundingClientRect().left).toBeGreaterThan(grid.right - 1)
-    // --desk-entry-w since plan 127, and level with the analyser's door.
+    // --desk-entry-w since plan 128, and level with the analyser's door.
     const width = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desk-entry-w'))
     expect(Math.round(dock.getBoundingClientRect().width)).toBe(width)
     expect(Math.round(dock.getBoundingClientRect().top)).toBe(Math.round(document.querySelector('.anl-door').getBoundingClientRect().top))
@@ -294,7 +294,7 @@ describe('a door in the dock, and back', () => {
 })
 
 
-// ── plan 127 — the catalogue and its entry, two columns ──
+// ── plan 128 — the catalogue and its entry, two columns ──
 // The entry stood in the results, under the analyser's door and the
 // console, at the side column's 360px: its foot hung some 230px below
 // the window, so the page scrolled before the entry could. It stands
@@ -304,7 +304,7 @@ describe('a door in the dock, and back', () => {
 // stacked -- 〜てください, laid across, wrapped its own pattern and set
 // its structure line a character a line. The phone's side is
 // deskfree.phone.
-describe('the catalogue and its entry (plan 127)', () => {
+describe('the catalogue and its entry (plan 128)', () => {
   const word = (kanji, kana, meaning, furigana) => ({ kanji, kana, meaning, level: 'N5', furigana })
   const DO = {
     type: 'kanji', kanji: '土', kana: 'ド・ト・つち', word_reading: 'つち', meaning: 'sol; terre; terrain; Turquie', level: 'N5',
@@ -398,7 +398,7 @@ describe('the catalogue and its entry (plan 127)', () => {
   })
 })
 
-// ── plan 127 — the grammar page ──
+// ── plan 128 — the grammar page ──
 // The grammar collection turns the split round: its points one to a row
 // in the side column, the entry across the rest of the canvas, its
 // plate laid left with the marks beside the pattern (over it, for a
@@ -406,7 +406,7 @@ describe('the catalogue and its entry (plan 127)', () => {
 // learner's record under the stripe, the lesson in one column here and
 // two on a wider desk (dictionary.wide). Points: the catalogue's own
 // payloads for は, 〜てください and 〜なければなりません.
-describe('the grammar page (plan 127)', () => {
+describe('the grammar page (plan 128)', () => {
   const token = name => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
   const serveGrammar = async () => {
     const { default: POINTS } = await import('./testing/grammarPoints.json')
