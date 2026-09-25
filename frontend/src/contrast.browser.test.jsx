@@ -278,28 +278,14 @@ const Fixture = () => (
         <span className="dict-entry-card__meaning dc-meaning">station</span>
       </button>
     </div>
-    {/* AnalyzerScreen.jsx, SentenceBreakdown.jsx, StageCard.jsx,
-        AnalyzerHistory.jsx, DeckPicker.jsx (plan 073) -- the line's
-        particle and the furigana over the focused (tinted) token, the
-        card's reading and its i+1 mark (the success ink mixed), the
-        legend, the stepper count, the history's meta and its Kept mark
-        (the stamp ink mixed), the deck picker's count. */}
+    {/* SubtitleLine.jsx, AnalyzerHistory.jsx, DeckPicker.jsx (plans 073
+        and 134) -- the line's particle and the furigana over the focused
+        (tinted) token, the history's meta and its Kept mark (the stamp
+        ink mixed), the deck picker's count. */}
     <div className="analyzer">
-      <div className="anl-stage">
-        <div className="anl-stepper"><span className="anl-stepper__count an-count">1 / 2 · <i className="anl-stepper__i1">i+1</i></span></div>
-        <div className="tok-line">
-          <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi an-furi">でんしゃ</span><span className="tok__word">電車</span></button>
-          <button type="button" className="tok tok--particle an-particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
-        </div>
-        <div className="token-card token-card--i1">
-          <div className="token-card__head">
-            <span className="token-card__reading an-reading">でんしゃ</span>
-            <span className="type-badge token-card__pos an-pos">noun</span>
-          </div>
-          <span className="token-card__gloss">electric train</span>
-          <span className="token-card__i1 an-i1">One step beyond you</span>
-        </div>
-        <div className="anl-dials"><div className="anl-dial"><span className="cap anl-dial__cap an-cap">Furigana</span></div></div>
+      <div className="tok-line">
+        <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi an-furi">でんしゃ</span><span className="tok__word">電車</span></button>
+        <button type="button" className="tok tok--particle an-particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
       </div>
       <section className="anl-history">
         <div className="head2"><span className="head2__latin">History</span><span className="head2__count an-hcount">2 passages</span></div>
@@ -857,13 +843,8 @@ const SITES = [
   ['.dc-level', 'catalogue card level (level pigment mixed toward the ink)'],
   ['.dc-kana', 'catalogue card furigana'],
   ['.dc-meaning', 'catalogue card meaning'],
-  ['.an-count', 'stepper count'],
   ['.an-furi', 'furigana over the focused token (on its tint)'],
   ['.an-particle', 'particle token'],
-  ['.an-reading', 'token card reading'],
-  ['.an-pos', 'token card part of speech (type badge)'],
-  ['.an-i1', 'token card i+1 mark (success ink mixed)'],
-  ['.an-cap', 'dial caption'],
   ['.an-hcount', 'history head count'],
   ['.an-n', 'history row number'],
   ['.an-meta', 'history row meta'],

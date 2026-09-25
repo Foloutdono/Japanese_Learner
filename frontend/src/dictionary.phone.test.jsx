@@ -243,35 +243,18 @@ describe('the dictionary at phone width', () => {
 })
 
 describe('the analyzer at phone width', () => {
-  it('the line: a 2px rule per state, dashed for a word without a card, none for a particle; the dial governs the furigana; the stepper and the squares are targets', async () => {
+  it('the line: a 2px rule per state, dashed for a word without a card, none for a particle; the furigana setting governs the readings', async () => {
     const screen = await render(
       <main className="dictionary analyzer">
-        <div className="anl-stage" data-furigana="all">
-          <div className="anl-stepper">
-            <button type="button" className="anl-stepper__btn">‹</button>
-            <span className="anl-stops"><i className="anl-stops__dot anl-stops__dot--on" /><i className="anl-stops__dot" /></span>
-            <span className="anl-stepper__count">1 / 2</span>
-            <button type="button" className="anl-stepper__btn">›</button>
+        <section className="anl-m__subs" data-furigana="all">
+          <div className="tok-line anl-subs__line">
+            <button type="button" className="tok tok--mastered"><span className="tok__furi">でんしゃ</span><span className="tok__word">電車</span></button>
+            <button type="button" className="tok tok--particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
+            <button type="button" className="tok tok--learning"><span className="tok__furi">さんばんせん</span><span className="tok__word">三番線</span></button>
+            <button type="button" className="tok tok--unknown"><span className="tok__furi">はっしゃ</span><span className="tok__word">発車</span></button>
+            <button type="button" className="tok tok--offdeck"><span className="tok__furi">たろう</span><span className="tok__word">太郎</span></button>
           </div>
-          <div className="anl-stagebd">
-            <div className="tok-line">
-              <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi">でんしゃ</span><span className="tok__word">電車</span></button>
-              <button type="button" className="tok tok--particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
-              <button type="button" className="tok tok--learning"><span className="tok__furi">さんばんせん</span><span className="tok__word">三番線</span></button>
-              <button type="button" className="tok tok--unknown"><span className="tok__furi">はっしゃ</span><span className="tok__word">発車</span></button>
-              <button type="button" className="tok tok--offdeck"><span className="tok__furi">たろう</span><span className="tok__word">太郎</span></button>
-            </div>
-            <div className="token-card">
-              <div className="token-card__foot">
-                <span className="token-card__kanji">
-                  <button type="button" className="token-card__k">発</button>
-                  <button type="button" className="token-card__k">車</button>
-                </span>
-                <button type="button" className="btn-primary">Add to deck</button>
-              </div>
-            </div>
-          </div>
-        </div>
+        </section>
       </main>
     )
     const resolve = resolver()
@@ -285,42 +268,19 @@ describe('the analyzer at phone width', () => {
     expect(rule(unknown)).toEqual(['2px', 'solid', resolve('color', 'var(--state-new)')])
     expect(rule(offdeck)[1]).toBe('dashed')
     expect(rule(particle)[2]).toBe('rgba(0, 0, 0, 0)')
-    // The tint marks the focused token; nothing else changes on it.
-    expect(getComputedStyle(mastered).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
-    expect(getComputedStyle(mastered).fontWeight).toBe(getComputedStyle(learning).fontWeight)
     // The empty reading slot keeps the particle on the line's baseline.
     expect(particle.getBoundingClientRect().bottom).toBeCloseTo(mastered.getBoundingClientRect().bottom, 0)
 
-    const stage = screen.container.querySelector('.anl-stage')
+    const subs = screen.container.querySelector('.anl-m__subs')
     const furi = tok => getComputedStyle(tok.querySelector('.tok__furi')).visibility
     expect(furi(mastered)).toBe('visible')
-    stage.setAttribute('data-furigana', 'unknown')
+    subs.setAttribute('data-furigana', 'unknown')
     expect(furi(mastered), 'Unknown bares the mastered word').toBe('hidden')
     expect(furi(learning), 'Unknown keeps a learning word\'s reading').toBe('visible')
     expect(furi(unknown)).toBe('visible')
-    stage.setAttribute('data-furigana', 'none')
+    subs.setAttribute('data-furigana', 'none')
     expect(furi(learning)).toBe('hidden')
     expect(furi(unknown)).toBe('hidden')
-
-    for (const b of screen.container.querySelectorAll('.anl-stepper__btn')) {
-      const r = b.getBoundingClientRect()
-      expect(r.width).toBe(44)
-      expect(r.height).toBe(44)
-      expect(getComputedStyle(b).borderTopLeftRadius).toBe('999px')
-    }
-    const dots = screen.container.querySelectorAll('.anl-stops__dot')
-    for (const d of dots) expect(d.getBoundingClientRect().width).toBe(8)
-    expect(getComputedStyle(dots[0]).backgroundColor).not.toBe(getComputedStyle(dots[1]).backgroundColor)
-
-    for (const k of screen.container.querySelectorAll('.token-card__k')) {
-      const r = k.getBoundingClientRect()
-      expect(r.width).toBe(30)
-      expect(r.height).toBe(30)
-    }
-    const action = screen.container.querySelector('.token-card__foot .btn-primary')
-    expect(getComputedStyle(action).backgroundColor).not.toBe('rgba(0, 0, 0, 0)')
-    expect(getComputedStyle(action).color).toBe(resolve('color', 'var(--text-on-panel)'))
-    expect(action.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
   })
 
   it('the sheets: the deck picker rows and the reading chips are targets divided by hairlines', async () => {
@@ -365,60 +325,6 @@ describe('the analyzer at phone width', () => {
       expect(chip.getBoundingClientRect().height).toBeGreaterThanOrEqual(parseFloat(resolve('minHeight', 'var(--sp-6)')))
       expect(getComputedStyle(chip).borderTopLeftRadius).toBe('999px')
     }
-  })
-
-  // The transport bar carries five things now -- play, the scrubber,
-  // the clock, the sound and 追従 -- and a phone has room for about
-  // three. It takes a second line rather than giving the scrubber's
-  // width away: a track free to shrink to nothing never wraps, it just
-  // becomes ungrabbable, and a learner watching a video with their
-  // thumb on the edge of the screen has nothing left to seek with.
-  it('the player: the transport wraps rather than crushing its scrubber, and nothing runs off the edge', async () => {
-    const screen = await render(
-      <main className="dictionary analyzer">
-        <div className="anl-player">
-          <div className="anl-player__bar">
-            <button type="button" className="anl-player__btn">▶</button>
-            <div className="anl-player__track"><span className="anl-player__fill" style={{ width: '30%' }} /></div>
-            <span className="anl-player__time">0:12 / 1:30</span>
-            <div className="anl-player__vol">
-              <button type="button" className="anl-player__btn">S</button>
-              <input type="range" className="dial anl-player__dial" min={0} max={100} defaultValue={70} readOnly />
-            </div>
-            <button type="button" className="anl-follow anl-follow--on">
-              <span className="anl-follow__label">Follow the video</span>
-            </button>
-          </div>
-        </div>
-      </main>
-    )
-    const bar = screen.container.querySelector('.anl-player__bar')
-    const track = screen.container.querySelector('.anl-player__track')
-    const play = screen.container.querySelector('.anl-player__btn')
-    const follow = screen.container.querySelector('.anl-follow')
-    const barBox = bar.getBoundingClientRect()
-
-    // Two rows, not one crushed one.
-    expect(getComputedStyle(bar).flexWrap).toBe('wrap')
-    expect(follow.getBoundingClientRect().top).toBeGreaterThan(play.getBoundingClientRect().top)
-
-    // Still grabbable, and still inside the panel.
-    expect(track.getBoundingClientRect().width).toBeGreaterThanOrEqual(96)
-    for (const el of bar.children) {
-      const r = el.getBoundingClientRect()
-      expect(r.right, el.className).toBeLessThanOrEqual(barBox.right + 0.5)
-      expect(r.left, el.className).toBeGreaterThanOrEqual(barBox.left - 0.5)
-    }
-
-    // The mute and its dial travel together: a wrap must never leave the
-    // speaker on one line and the slider on the next.
-    const vol = screen.container.querySelector('.anl-player__vol')
-    const mute = vol.querySelector('.anl-player__btn')
-    const dial = vol.querySelector('.anl-player__dial')
-    // Centres, not tops: the 18px dial and the 34px button share a row
-    // by sharing its middle.
-    const middle = el => { const r = el.getBoundingClientRect(); return r.top + r.height / 2 }
-    expect(middle(dial)).toBeCloseTo(middle(mute), 0)
   })
 })
 

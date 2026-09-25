@@ -67,9 +67,9 @@ const T = {
   explaining: 'Explaining…',
 }
 
-// CardTransition (used by the stage layout) renders StageMark, which
-// calls useLang() -- so every render needs a real LangProvider ancestor.
-// LangProvider itself fetches /api/translations/{kanji,vocab} on mount
+// The chips' and the rows' glosses read the learner's language through
+// useLang(), so the renders that check them need a real LangProvider
+// ancestor. LangProvider itself fetches /api/translations/{kanji,vocab} on mount
 // (LangContext.jsx's getTranslations, for contentMaps -- unrelated to
 // the `t`/`lang` this suite actually reads), so `fetch` is stubbed
 // module-wide to keep these tests offline, same pattern as
@@ -439,47 +439,6 @@ describe('SentenceBreakdown', () => {
     expect(document.querySelectorAll('.bkd-row')[1].querySelector('.bkd-row__meaning').textContent).toBe('topic marker')
   })
 
-  // ── The stage (plan 095) ───────────────────────────────────────
-  // The analyzer's shape used to be the one breakdown that showed no
-  // grammar: the points were detected, attached to every token and
-  // shipped, then drawn nowhere. Now the constructions are the quiet
-  // chips under the line, and the card of the word on the stage lists
-  // the rules that word is part of -- markers included, because for a
-  // particle the marker it is IS its rule.
-  it('the stage names the constructions under the line, and the card the rules of the word on it', async () => {
-    const onGrammarOpen = vi.fn()
-    const analysis = {
-      available: true, text: '学生は会いました。', unknown_count: 0,
-      grammar: [{ ...WA, start: 2, end: 3 }, { ...MASU, start: 5, end: 7 }],
-      tokens: [
-        tokenFixture(),
-        particleFixture({ grammar: [WA] }),
-        ...runFixture({ glossed: false, spanEnd: false }).map((tok, i) => (i === 1 ? { ...tok, grammar: [MASU] } : tok)),
-      ],
-    }
-    await render(withLang(
-      <SentenceBreakdown
-        analysis={analysis} layout="stage" index={1} setIndex={vi.fn()} t={T}
-        onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={onGrammarOpen}
-      />,
-    ))
-    const stage = document.querySelector('.anl-stagebd')
-    // The line itself holds tokens and nothing else (the canvas rule).
-    expect(stage.querySelector('.tok-line .bkd-points')).toBeNull()
-    // Under it, the constructions and not the markers: は is one
-    // word's rule, not the sentence's.
-    const under = [...stage.children].find(el => el.classList.contains('bkd-points'))
-    expect([...under.querySelectorAll('.bkd-point__pattern')].map(el => el.textContent)).toEqual(['〜ます／〜ません'])
-    // The card is は's: its rule is the marker, as a door.
-    const onCard = document.querySelector('.token-card .analysis-grammar-chips')
-    expect([...onCard.querySelectorAll('.analysis-grammar-chip__pattern')].map(el => el.textContent)).toEqual(['は'])
-    onCard.querySelector('.analysis-grammar-chip__door').click()
-    expect(onGrammarOpen).toHaveBeenCalledTimes(1)
-    expect(onGrammarOpen.mock.calls[0][0].raw_id).toBe('grammar_N5_は')
-    // No rule, no row: the card does not hold an empty strip.
-    expect(document.querySelectorAll('.token-card .analysis-grammar-chips')).toHaveLength(1)
-  })
-
   // ── The light (plan 095) ───────────────────────────────────────
   // Where a point sits on the sentence: the words it is written on
   // light while its chip is hovered or focused, a two-part point
@@ -581,28 +540,6 @@ describe('SentenceBreakdown', () => {
     expect(litSurfaces()).toEqual([])
   })
 
-  it('on the stage the chip lights the words in the token line, and the card\'s chip lights its own word', async () => {
-    const { analysis } = karaMade()
-    await render(withLang(
-      <SentenceBreakdown analysis={analysis} layout="stage" index={1} setIndex={vi.fn()} t={T} onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={vi.fn()} />,
-    ))
-    const litToks = () => [...document.querySelectorAll('.tok-line .tok--lit .tok__word')].map(el => el.textContent)
-    const stage = document.querySelector('.anl-stagebd')
-    const under = [...stage.children].find(el => el.classList.contains('bkd-points'))
-    hover(under.querySelector('.bkd-point'))
-    await settle()
-    expect(litToks()).toEqual(['から', 'まで'])
-    leave(under.querySelector('.bkd-point'))
-    await settle()
-    expect(litToks()).toEqual([])
-    // The card is から's; its chip is the same point, and lights the same words.
-    const onCard = document.querySelector('.token-card .analysis-grammar-chip')
-    hover(onCard)
-    await settle()
-    expect(litToks()).toEqual(['から', 'まで'])
-    expect(onCard.classList.contains('analysis-grammar-chip--lit')).toBe(true)
-  })
-
   // ── The constructions, listed (plan 095) ──────────────────────
   // One row per construction under the word rows: the pattern, its
   // gloss and level, the words it is made of, and -- once bought --
@@ -658,26 +595,6 @@ describe('SentenceBreakdown', () => {
     document.body.innerHTML = ''
     await render(withLang(<SentenceBreakdown analysis={{ ...analysis, grammar: [{ ...point, note: '   ' }] }} layout="rows" t={T} onTokenClick={vi.fn()} onGrammarOpen={vi.fn()} />))
     expect(document.querySelector('.bkd-point__note')).toBeNull()
-  })
-
-  it('on the stage the list rides under the line, before the dials, and lights the token line', async () => {
-    const { analysis, point } = karaMade()
-    const noted = { ...analysis, grammar: [{ ...point, note: 'The two ends.' }] }
-    await render(withLang(
-      <SentenceBreakdown
-        analysis={noted} layout="stage" index={0} setIndex={vi.fn()} t={T} onTokenClick={vi.fn()} onKanjiClick={vi.fn()} onGrammarOpen={vi.fn()}
-        controls={<div className="dials-here" />}
-      />,
-    ))
-    const stage = document.querySelector('.anl-stagebd')
-    const points = stage.querySelector('.bkd-points')
-    expect(points).not.toBeNull()
-    expect(before(stage.querySelector('.tok-line'), points)).toBe(true)
-    expect(before(points, stage.querySelector('.dials-here'))).toBe(true)
-    expect(points.querySelector('.bkd-point__note').textContent).toBe('The two ends.')
-    hover(points.querySelector('.bkd-point'))
-    await settle()
-    expect([...document.querySelectorAll('.tok-line .tok--lit .tok__word')].map(el => el.textContent)).toEqual(['から', 'まで'])
   })
 
   // ── The explanation as an option (plan 095) ───────────────────

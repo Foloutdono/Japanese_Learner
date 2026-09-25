@@ -756,13 +756,7 @@ const phraseAnalyzer = {
   filterHasNew:        'New words',
   stopsShown:          (n, total) => `${n} of ${total} sentences shown`,
   keepAllIPlusOne:     'Keep all i+1',
-  // The stage's two dials: the token view and the smart furigana.
-  viewLabel:           'View',
-  viewStepper:         'One by one',
-  viewTable:           'Table',
-  tableWord:           'Word',
-  tableState:          'State',
-  furiganaLabel:       'Furigana',
+  // The smart furigana's three settings.
   furiganaAll:         'All',
   // "only" is what makes the three exclusive, and being one of three
   // segments already says that. The word cost 60px of a 271px control

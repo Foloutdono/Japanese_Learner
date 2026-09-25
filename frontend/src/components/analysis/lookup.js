@@ -39,7 +39,7 @@ export function vocabLookup(word) {
   return { category: 'vocab', term, kana: entry.kana || undefined }
 }
 
-// A kanji chip on a token card (TokenCard/StageCard): one character,
+// A kanji chip on a token card (TokenCard): one character,
 // which needs no second key -- a kanji entry is unique on it.
 export function kanjiLookup(match) {
   if (!match?.kanji) return null

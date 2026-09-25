@@ -11,7 +11,7 @@ import { useMineAction, INERT_MINING } from './useMineAction'
 // cloze via mining.mineCloze) -- this component only owns picking the
 // target deck and showing the outcome.
 //
-// `className` replaces the default look outright (StageCard prints the
+// `className` replaces the default look outright (FocusCard prints the
 // card's one filled action as `.btn-primary`) — the outcome text and the
 // disabled note keep their own classes either way.
 //
