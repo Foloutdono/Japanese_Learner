@@ -415,12 +415,19 @@ describe('the writing board in the middle column', () => {
     const board = rect('.canvas-board')
     expect(Math.round(board.width)).toBe(Math.round(board.height))
     // On the lane's 800px window, a mouse's worth of board rather than
-    // a thumbnail, and the erase button its width.
+    // a thumbnail.
     expect(board.height).toBeGreaterThanOrEqual(160)
-    expect(rect('.canvas-clear-btn').width).toBeCloseTo(board.width, 0)
-    expect(rect('.canvas-clear-btn').bottom).toBeLessThanOrEqual(rect('.drawing-quiz__card').bottom)
-    expect(rect('.drawing-quiz__card').bottom).toBeLessThanOrEqual(rect('.drawing-quiz__validate').top)
-    expect(rect('.drawing-quiz__validate').bottom).toBeLessThanOrEqual(rect('.rating-bar').top)
+    // The eraser beside Show the answer, small, on one row under the card.
+    const show = rect('.drawing-quiz__validate')
+    const erase = rect('.drawing-quiz__clear')
+    expect(erase.top).toBeCloseTo(show.top, 0)
+    expect(erase.left).toBeGreaterThanOrEqual(show.right)
+    expect(erase.width).toBeLessThan(show.width / 2)
+    expect(rect('.drawing-quiz__card').bottom).toBeLessThanOrEqual(show.top)
+    expect(show.bottom).toBeLessThanOrEqual(rect('.rating-bar').top)
+    // The 田 guide quarters the board.
+    const grid = rect('.canvas-grid')
+    expect(grid.width).toBeCloseTo(board.width, 0)
     expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(rect('.stage').bottom + 1)
   })
 
@@ -447,6 +454,8 @@ describe('the writing board in the middle column', () => {
     const after = rect('.canvas-board')
     expect(after.top).toBeCloseTo(before.top, 0)
     expect(after.height).toBeCloseTo(before.height, 0)
+    // The eraser stays where it was.
+    expect($('.drawing-quiz__clear')).not.toBeNull()
     // Kept, but unseen and out of reach.
     const spent = $('.drawing-quiz__validate')
     expect(getComputedStyle(spent).visibility).toBe('hidden')

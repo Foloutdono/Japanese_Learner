@@ -11556,6 +11556,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: block;
 }
 
+/* 田 — the practice sheet's guide: a dashed cross that quarters the
+   board, the four squares a learner places strokes against. Faint, so
+   the ink stays the reading; over the slab and under the correction. */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  --grid-ink: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+}
+.canvas-grid::before,
+.canvas-grid::after {
+  content: '';
+  position: absolute;
+}
+.canvas-grid::before {
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  border-left: 1px dashed var(--grid-ink);
+}
+.canvas-grid::after {
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  border-top: 1px dashed var(--grid-ink);
+}
+
 /* 朱書き — the correction, over the learner's own line rather than
    beside it (DrawingCanvas.jsx, Ghost). The learner's ink is
    --brush-ink at full strength, so the same ink at a third reads as
@@ -11722,10 +11750,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    is its own: matched to the card above it, so the button reads as
    belonging to the card instead of being a narrower, unrelated bar
    floating under one edge of it. */
-.drawing-quiz__validate {
+/* Show the answer and the eraser on one row under the card, matched to
+   its width: the answer the wide one, the eraser only its word. */
+.drawing-quiz__actions {
+  display: flex;
+  gap: var(--sp-3);
   width: 100%;
   max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
+}
+.drawing-quiz__validate { flex: 1 1 auto; }
+.drawing-quiz__clear {
+  flex: none;
+  width: auto;
+  max-width: none;
+  margin-left: auto;
 }
 /* Pressed, it is gone -- but for the desk's panels, which keep its room
    (the 三面 block). */
@@ -22496,20 +22535,17 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
   }
   /* The square is the smaller of the room's two sides, to the 440px
-     cap: the board and its erase button both read it off the room, so
-     the button stays the board's width. The room is a size container,
-     so it is what the column gives it and never what the board asks
-     for; the button's height is pinned for the sum to close. Under
+     cap. The room is a size container, so it is what the column gives
+     it and never what the board asks for. Under
      160px the board stops shrinking and the column scrolls instead: a
      mouse writes a kanji well enough there (KanjiVG draws at 109), a
      thumbnail is no writing surface. The floor is in the
      sum as well as on the room, because a room held up by its
      min-height reads 0 for 100cqh in Chromium, not its height. */
   .desk-run--panels > .stage > .drawing-quiz .canvas-wrap {
-    --canvas-clear-h: calc(var(--sp-7) + var(--sp-3));
-    --canvas-cap: min(100cqw, 440px, max(160px, calc(100cqh - var(--canvas-clear-h) - var(--sp-3))));
+    --canvas-cap: min(100cqw, 440px, max(160px, 100cqh));
     flex: 1 1 auto;
-    min-height: calc(160px + var(--canvas-clear-h) + var(--sp-3));
+    min-height: 160px;
     container-type: size;
   }
   .desk-run--panels > .stage > .drawing-quiz .canvas-field {
@@ -22519,14 +22555,9 @@ a.slip__act { text-decoration: none; }
   .desk-run--panels > .stage > .drawing-quiz .canvas-holder { max-height: none; }
   /* Pressed, Show the answer keeps its room, so the board does not
      grow under the correction as it lands. */
-  .desk-run--panels > .stage > .drawing-quiz > .drawing-quiz__validate--spent {
+  .desk-run--panels > .stage > .drawing-quiz .drawing-quiz__validate--spent {
     display: block;
     visibility: hidden;
-  }
-  .desk-run--panels > .stage > .drawing-quiz .canvas-clear-btn {
-    flex: none;
-    block-size: var(--canvas-clear-h);
-    padding-block: 0;
   }
   /* Nor over the readings drill's boxes: the kanji never turns, so the
      floor that holds a flashcard still is dead height, and the card
