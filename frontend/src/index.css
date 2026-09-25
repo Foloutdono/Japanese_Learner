@@ -8170,153 +8170,155 @@ textarea:focus-visible {
 .quiz-result--wrong   { color: var(--danger); }
 
 /* ── 読み入力 (kanji.readings) ──────────────────────────────
-   Two labelled groups, each growing a row at a time. The rows sit in a
-   flex row with the tick OUTSIDE the field, so a correct mark never
-   overlaps kana the learner is still reading. Colours come from the
+   One box per kind of reading the card has, each holding the learner's
+   readings as chips and a field for the next (ReadingsInput.jsx). A
+   reading becomes a chip on a separator or the box's +, and on checking
+   the box lays the stored readings out beside them: the ones found
+   ringed in --success, a wrong guess struck, a missed one dashed. It
+   grows sideways, a chip at a time, where the rows it replaced grew
+   down the column 42px a reading and scrolled it. Colours come from the
    line pigment the section handed down, same as every other study
    control -- nothing here picks its own hue. */
-/* Sized to the form, not to the container. Padding tuned for a single
-   big glyph doesn't fit a stack of labelled rows, so this widens it to
-   --sp-7 on every side. max-height/overflow are cleared for the same
-   kind of reason: two groups of several rows each pass 60vh easily,
-   and the base clamp turned the card into an inner scroll area —
-   which cropped the submit button behind the card's own rounded edge
-   and scrolled the answer list out from under the rows it belongs to. */
 /* .prompt-card is compounded in on purpose. The base .prompt-card rule
    (max-height: 60vh; overflow: auto) lives LATER in this file, and two
    single-class selectors of equal specificity are settled by source
    order — so a bare `.readings-input { overflow: visible }` here lost
-   silently and the card stayed an inner scroll area. Same for
-   .drawing-quiz__card below.
+   silently and the card stayed an inner scroll area, cropping Valider
+   behind the card's own rounded edge. Same for .drawing-quiz__card
+   below.
 
-   Plan 049 -- no width override here any more. This used to argue for
-   staying full width: capping it at 520px made this the one mode whose
-   card visibly shrank next to the others sitting above/below it in the
-   same session. That objection was about capping THIS MODE ALONE, not
-   about caps in general -- and a UNIVERSAL cap (every .prompt-card now
-   tracks --card-w, 640px, see index.css:13659) satisfies it exactly,
-   since nothing shrinks relative to anything else any more. The FORM
-   inside still stays comfortably narrow regardless (see
-   .readings-input__group / __submit below), centered in the card
-   rather than stretched edge to edge -- a "kana or romaji" input 640px
-   wide would still be its own kind of ugly. */
+   Plan 049 -- no width override here: the card tracks --card-w like
+   every other, and the FORM inside stays comfortably narrow (the
+   groups and Valider below), centred in the card rather than stretched
+   edge to edge. --sp-7 all round: there are no corner buttons on this
+   card for a taller top to hold. */
 .prompt-card.readings-input {
   text-align: left;
   --card-pad-y: var(--sp-7);
   --card-pad-x: var(--sp-7);
-  /* 44 top, per Study.dc.html -- the extra headroom is what the corner
-     buttons sit in. */
-  --card-pad-top: var(--sp-8);
+  --card-pad-top: var(--sp-7);
   max-height: none;
   overflow: visible;
 }
 
-/* Centered and capped independently of the now full-width card around
-   them — a row of kana/romaji inputs reads as a form, not a banner,
-   only at roughly this width. */
+/* Centered and capped independently of the full-width card around
+   them -- a box of kana reads as a form, not a banner, only at roughly
+   this width. Valider is a block so it takes the groups' axis: a
+   button is inline-block, where auto margins are 0, and it stood at the
+   line's start, 51px left of the fields on the desk. */
 .readings-input__group,
-.readings-input__submit {
+.prompt-card.readings-input > .readings-input__submit {
   max-width: 480px;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline: auto;
 }
-.readings-input__group + .readings-input__group { margin-top: 22px; }
-/* A hairline between 音読み and 訓読み now that both groups share one
-   card — without it the second group's label reads as more of the
-   first group's own content instead of a new section starting. */
-.readings-input__group--sep {
-  padding-top: 22px;
-  border-top: 1px solid var(--border);
+.readings-input__group + .readings-input__group { margin-top: var(--sp-5); }
+.prompt-card.readings-input > .readings-input__submit {
+  display: block;
+  margin-top: var(--sp-6);
 }
-
-/* Sits below a hairline of its own: it is the action for the whole
-   form, not for whichever group happens to be last above it. */
-.readings-input__submit { margin-top: 26px; }
 
 .readings-input__label {
+  display: block;
   font-size: 12px;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 8px;
+  margin-bottom: var(--sp-3);
 }
-.readings-input__row {
+
+/* The box is the field: the well, the edge, the 44px floor, and the
+   focus ring when its own input has the focus. The input in it is bare,
+   and takes what the chips leave of the line, never less than a short
+   reading's room. */
+.readings-input__box {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: var(--sp-2);
+  padding: var(--sp-2);
+  cursor: text;
 }
-.readings-input__row .readings-input__field { margin-bottom: 8px; }
-.readings-input__row svg { flex: none; color: var(--success); }
-
-.readings-input__field--ok   { border-color: var(--success); }
-.readings-input__field--miss { border-color: var(--border); }
-
-/* `--line-color`, not `--line`. Plan 057 established this for the
-   DeckDetail form and reported the three that paint the kanji QUIZ;
-   plan 059 was those three. Two of them styled the Japanese half of a
-   label pair (.readings-input__label and .radical-answer__label) and
-   went with those labels on 2026-09-21, so this is the one left, and
-   it keeps the note. Nothing in the app has ever
-   set `--line`, so `var(--line, var(--accent))` always resolved to
-   the fallback -- 仮名's vermillion, on a card about 漢字, which is a
-   plain "one line, one colour" breach on the section that owns 藤色.
-
-   The fallback here is `--line-kanji` rather than `--accent` because
-   no screen that renders this component injects `--line-color` at all
-   (checked: Kanji, Study and Today all mount it inside a bare
-   `.container.stage`; the eight injectors are the selection/
-   station components and the two Decks screens). Reading
-   `--line-color` first keeps DESIGN.md's "the pigment is injected
-   once" contract for the day a shell does inject one -- a personal
-   deck's kanji card would then correctly wear 蘇芳 -- while the
-   fallback names a real pigment instead of the wrong section's.
-
-   Mixed half-way to --text-primary, not used raw: 057 measured 藤色
-   as small text at 2.9-3.4:1 and DESIGN.md is explicit that a line
-   pigment is "an edge, a ring, or a numeral -- never a fill". Same
-   50% figure and the same reason as .deckdetail-form__addline. */
-.readings-input__add {
-  background: none;
-  border: none;
-  padding: 2px 0 0;
-  font-size: 13px;
-  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
-  cursor: pointer;
+.readings-input__box:has(> .readings-input__field:focus-visible) {
+  outline: 2px solid var(--accent2);
+  outline-offset: 0;
 }
-.readings-input__add:hover { text-decoration: underline; }
-
-.readings-input__answer {
-  margin-top: 6px;
-  font-size: 14px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  align-items: baseline;
+.readings-input__box--checked { cursor: default; }
+.readings-input__box > .readings-input__field {
+  flex: 1 1 8ch;
+  width: auto;
+  min-width: 8ch;
+  min-height: 32px;
+  margin: 0;
+  padding: 0 var(--sp-2);
+  font-size: var(--fs-body);
 }
-.readings-input__answer-label { color: var(--text-secondary); }
-/* A wrapping FLEX row, not a run of inline text. Japanese allows a line
-   break between almost any two characters, so as plain text this list
-   broke mid-reading — のぼ.り split across two lines reads as two
-   different readings, which is the one thing a list of readings must
-   not do. Making each entry a flex item moves the break opportunities
-   to the gaps between entries, where they belong.
-   (`white-space: nowrap` alone did NOT work and is why this is a flex
-   row: the entries are rendered adjacent with no whitespace between
-   them, so suppressing breaks inside each one left the whole list with
-   no break opportunity at all and it ran 1218px off the card.) */
-.readings-input__answer-list {
+.readings-input__box > .readings-input__field:focus-visible { outline: none; }
+
+/* A reading: a pill on the well. Pressed, it goes -- the whole chip is
+   the button, and its × says so. On a touch screen the press reaches
+   6px past its edges, top and bottom, to the family's 44px. */
+.readings-input__chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: 32px;
+  padding: 0 var(--sp-4);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-pill);
+  background: var(--surface);
   font-family: var(--font-jp);
-  font-size: 17px;
+  font-size: var(--fs-body);
+  font-weight: 500;
   color: var(--text-primary);
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  row-gap: 4px;
 }
-.readings-input__answer-list .reading-sep-item { white-space: nowrap; }
+.readings-input__chip-x {
+  font-family: var(--font-display);
+  color: var(--text-secondary);
+}
+.readings-input__chip--ok { border-color: var(--success); }
+.readings-input__chip--ok svg { flex: none; color: var(--success); }
+.readings-input__chip--wrong {
+  background: none;
+  border-color: var(--border);
+  color: var(--text-secondary);
+  text-decoration: line-through;
+}
+/* What was not found: legible, since it is the thing to learn, and
+   dashed, since the learner did not write it. */
+.readings-input__chip--missed {
+  background: none;
+  border-style: dashed;
+}
+
+/* The + that makes a chip of what is typed, there as soon as something
+   is: the phone's way, whose first keyboard page has no comma. */
+.readings-input__add {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  min-width: 32px;
+  min-height: 32px;
+  padding: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  background: var(--surface);
+  font-size: var(--fs-lead);
+  line-height: 1;
+  color: color-mix(in srgb, var(--line-color, var(--line-kanji)) 50%, var(--text-primary));
+}
+@media (pointer: coarse) {
+  button.readings-input__chip::after,
+  .readings-input__add::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
+}
 
 .readings-input__cap {
-  margin-top: 8px;
+  margin-top: var(--sp-3);
   font-size: 12px;
   color: var(--text-secondary);
 }
@@ -11562,6 +11564,34 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: block;
 }
 
+/* 田 — the practice sheet's guide: a dashed cross that quarters the
+   board, the four squares a learner places strokes against. Faint, so
+   the ink stays the reading; over the slab and under the correction. */
+.canvas-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: 10px;
+  --grid-ink: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+}
+.canvas-grid::before,
+.canvas-grid::after {
+  content: '';
+  position: absolute;
+}
+.canvas-grid::before {
+  top: 2px;
+  bottom: 2px;
+  left: 50%;
+  border-left: 1px dashed var(--grid-ink);
+}
+.canvas-grid::after {
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  border-top: 1px dashed var(--grid-ink);
+}
+
 /* 朱書き — the correction, over the learner's own line rather than
    beside it (DrawingCanvas.jsx, Ghost). The learner's ink is
    --brush-ink at full strength, so the same ink at a third reads as
@@ -11728,11 +11758,25 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    is its own: matched to the card above it, so the button reads as
    belonging to the card instead of being a narrower, unrelated bar
    floating under one edge of it. */
-.drawing-quiz__validate {
+/* Show the answer and the eraser on one row under the card, matched to
+   its width: the answer the wide one, the eraser only its word. */
+.drawing-quiz__actions {
+  display: flex;
+  gap: var(--sp-3);
   width: 100%;
   max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
 }
+.drawing-quiz__validate { flex: 1 1 auto; }
+.drawing-quiz__clear {
+  flex: none;
+  width: auto;
+  max-width: none;
+  margin-left: auto;
+}
+/* Pressed, it is gone -- but for the desk's panels, which keep its room
+   (the 三面 block). */
+.drawing-quiz__validate--spent { display: none; }
 
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
 .quiz-subtitle {
@@ -22501,6 +22545,65 @@ a.slip__act { text-decoration: none; }
     flex-direction: column;
     justify-content: center;
   }
+  /* But not over a writing board: there the board grows. Sized off the
+     window alone (52vh, to 440px), it stood the column 70px past a
+     800px window and 200px past the owner's, Show the answer under the
+     fold and the tiles under that. The prompt never changes face, so it
+     takes its content; the board takes what the prompt, its two buttons
+     and the tiles leave. Both cards come in to the phone's rung: 44px
+     over and under three lines of prompt, and 28px round a square, are
+     height the board could have been. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage { flex: 0 0 auto; }
+  .desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage > .drawing-quiz {
+    --drawing-card-pad: var(--sp-5);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--panels > .stage > .drawing-quiz > .prompt-card.drawing-quiz__card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The square is the smaller of the room's two sides, to the 440px
+     cap. The room is a size container, so it is what the column gives
+     it and never what the board asks for. Under
+     160px the board stops shrinking and the column scrolls instead: a
+     mouse writes a kanji well enough there (KanjiVG draws at 109), a
+     thumbnail is no writing surface. The floor is in the
+     sum as well as on the room, because a room held up by its
+     min-height reads 0 for 100cqh in Chromium, not its height. */
+  .desk-run--panels > .stage > .drawing-quiz .canvas-wrap {
+    --canvas-cap: min(100cqw, 440px, max(160px, 100cqh));
+    flex: 1 1 auto;
+    min-height: 160px;
+    container-type: size;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-field {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-holder { max-height: none; }
+  /* Pressed, Show the answer keeps its room, so the board does not
+     grow under the correction as it lands. */
+  .desk-run--panels > .stage > .drawing-quiz .drawing-quiz__validate--spent {
+    display: block;
+    visibility: hidden;
+  }
+  /* Nor over the readings drill's boxes: the kanji never turns, so the
+     floor that holds a flashcard still is dead height, and the card
+     gives down to its glyph at the phone's rung where the boxes, Valider
+     and the tiles need the room -- 56px of scroll on a 800px window --
+     growing back into what they leave on a taller one. */
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.

@@ -307,7 +307,7 @@ export default function KanjiRun({ session }) {
       onToastDone={gates.toastDone}
       records
       progress={progress}
-      panel={card ? <CardPanel card={card} /> : null}
+      panel={card ? <CardPanel card={card} keys={renderer === RENDER.TYPE ? 'readings' : undefined} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
       sideLabel={t.dictionaryTitle}

@@ -119,7 +119,9 @@ function GhostGlyph({ char }) {
 // ── Shared canvas drawing logic ───────────────────────────
 // `ghost` is the character to lay over the board once the answer is
 // out — null while the learner is still answering.
-function Canvas({ canvasRef, onClear, resetKey, ghost }) {
+// `eraser` is the erase button under the board; the quiz passes false
+// and prints its own beside Show the answer.
+function Canvas({ canvasRef, onClear, resetKey, ghost, eraser = true }) {
   const { t } = useLang()
   const drawing = useRef(false)
   const lastPos = useRef(null)
@@ -212,12 +214,19 @@ function Canvas({ canvasRef, onClear, resetKey, ghost }) {
             onPointerDown={startDraw} onPointerMove={draw}
             onPointerUp={stopDraw}    onPointerCancel={stopDraw}
           />
+          {/* 田 -- the practice sheet's dashed cross, four squares to
+              place the strokes against. Over the slab, under the
+              correction, and never in the ink: it is not drawn on the
+              canvas, so an erase keeps it and nothing reads it back. */}
+          <div className="canvas-grid" aria-hidden="true" />
           {ghost && <Ghost char={ghost} />}
         </div>
       </div>
-      <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
-        <UndoIcon size={14} /> {t.eraseBtn}
-      </button>
+      {eraser && (
+        <button onClick={() => { playClick(); clear() }} className="canvas-clear-btn">
+          <UndoIcon size={14} /> {t.eraseBtn}
+        </button>
+      )}
     </div>
   )
 }
@@ -344,6 +353,8 @@ function DrawingQuizCard({ kanji, onValidate, resetKey }) {
   const { t }          = useLang()
   const canvasRef      = useRef(null)
   const [revealed, setRevealed] = useState(false)
+  // Each erase is a new key for the board, which clears on a new one.
+  const [wipes, setWipes] = useState(0)
 
   function handleValidate() {
     playClick()
@@ -364,17 +375,38 @@ function DrawingQuizCard({ kanji, onValidate, resetKey }) {
       <div className="prompt-card drawing-quiz__card">
         <Canvas
           canvasRef={canvasRef}
-          resetKey={resetKey ?? kanji}
+          resetKey={`${resetKey ?? kanji}:${wipes}`}
           ghost={revealed ? kanji : null}
+          eraser={false}
         />
       </div>
 
-      {/* Validate button — only before revealed */}
-      {!revealed && (
-        <button onClick={handleValidate} className="btn-primary drawing-quiz__validate">
+      {/* The card's two actions on one row: Show the answer, and the
+          eraser beside it, small -- the board takes the height the
+          eraser's own row under it used to. */}
+      <div className="drawing-quiz__actions">
+        {/* Validate button — only before revealed. Spent, it stays in
+            the DOM, inert and unseen: on the desk's panels it keeps its
+            room, so the board, which takes what the column leaves, does
+            not grow under the correction the moment it lands. Everywhere
+            else it is display: none, as good as gone (index.css). */}
+        <button
+          onClick={revealed ? undefined : handleValidate}
+          className={`btn-primary drawing-quiz__validate${revealed ? ' drawing-quiz__validate--spent' : ''}`}
+          disabled={revealed}
+          inert={revealed}
+          aria-hidden={revealed || undefined}
+        >
           {t.revealAnswer}
         </button>
-      )}
+        <button
+          type="button"
+          onClick={() => { playClick(); setWipes(w => w + 1) }}
+          className="canvas-clear-btn drawing-quiz__clear"
+        >
+          <UndoIcon size={14} /> {t.eraseBtn}
+        </button>
+      </div>
     </div>
   )
 }
