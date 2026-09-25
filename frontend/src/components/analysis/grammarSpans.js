@@ -26,6 +26,23 @@ export function coversToken(point, token) {
   return spansOf(point).some(([s, e]) => s < token.end && token.start < e)
 }
 
+// The constructions a sentence is built with, in the order the local
+// tier found them: every point but the markers (は, を), which ride the
+// word rows. The phone's stage and the practice rows list these; the
+// desk numbers numberedPointsOf below.
+export function constructionsOf(analysis) {
+  return (analysis?.grammar ?? []).filter(g => g.kind !== 'marker')
+}
+
+// The desk's grammar box (plan 134, owner-directed): every point the
+// sentence uses -- the particles' markers (を, で, は) with the
+// constructions -- in the order they stand in the sentence, so the
+// numbers on the cards and on the subtitle read left to right. One list
+// for GrammarPoints' `numbered`, SubtitleLine and the card in focus.
+export function numberedPointsOf(analysis) {
+  return [...(analysis?.grammar ?? [])].sort((a, b) => (a.start ?? 0) - (b.start ?? 0))
+}
+
 // One point twice in a sentence (〜し、〜し) is two chips and two
 // lights, so the key is the occurrence, not the card.
 export function pointKey(point) {

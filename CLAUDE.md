@@ -228,7 +228,8 @@ runtime purpose. Two consequences worth knowing:
   the library's shelf beside a deck and Browse docked
   (`components/decks/PublicDeckPage.jsx`, `hooks/usePublicDeck.js`,
   `BrowseCardsDock`); the analyser's dock, intake beside history and the
-  dictionary's handoff (`components/analysis/AnalyzerDock.jsx`,
+  dictionary's handoff (`components/analysis/AnalyzerDock.jsx`, since
+  retired by plan 134,
   `lookup.tokenLookup`, `Bar.jsx`'s `DeskCrumb`); a run that fits a laptop and
   its misses at the end (`runTally.tallyMisses`, `SessionPanel`'s `done`); and
   the keys, the gates' last doors and the guide beside its anchor
@@ -499,6 +500,32 @@ runtime purpose. Two consequences worth knowing:
   `components/guide/Callout.jsx`, `components/study/QuizComponents.jsx`,
   `components/study/CardPanel.jsx`, `components/study/RunPanel.jsx`,
   `src/ride.desktop.test.jsx` and `src/ride.phone.test.jsx`).
+  **134** is the analyser's video Passage on three columns on the desk
+  (wave 38), the owner's pick of the drawn options (B, the sentence as
+  the video's subtitle; G2, the grammar numbered; every piece of the
+  player) laid out on the owner's own wireframe: the sentences over the
+  numbered grammar on the left; the video, the subtitle and the bar as
+  one sumi object in the middle, the words list beside the card in
+  focus and Explain under them; the card in focus in the runs' band
+  (plan 126) on the right, the explanation swapped into its
+  description's place -- the desk's rail stepping aside so the three
+  have the window. The bar, one row: the sentence before and after,
+  replay, loop, a stop at each sentence's end, one plain track, speed,
+  mute, follow and fold. Under the desk the result is the owner's second
+  drawing: the way back and keep, the video with a trimmed bar (the
+  sentence before and after, play, the track, replay, loop), the
+  subtitles -- the next sentence over the current one, the previous
+  under it -- the numbered grammar and Explain; a word or a point
+  tapped opens its dictionary card and Explain the explanation, both
+  in the dictionary's sheet (`ExplainSheet`). No colour legend and no
+  printed keys at any width. Resets keyed on the Passage's text, so an
+  explanation arriving no longer moves the word in focus (cited in
+  `screens/AnalyzerScreen.jsx`, `components/analysis/SubtitleLine.jsx`,
+  `PlayerBar.jsx`, `WordsList.jsx`, `FocusCard.jsx`, `ExplainPanel.jsx`,
+  `GrammarPoints.jsx`, `tokens.js`, `useLight.js`, `grammarSpans.js`,
+  `components/video/VideoPlayer.jsx`, `components/ui/Icons.jsx`,
+  `src/analyzer.desktop.test.jsx`, `src/analyzer.wide.test.jsx` and the
+  机 section of `index.css`; DESIGN.md, "The desk").
   **135** is 区間, the fare gate taking the hall on the desk (numbered
   135 because 134 is the analyser's video passage, open on its branch;
   the owner's pick A·2 of the Today canvas): the gate at the window's

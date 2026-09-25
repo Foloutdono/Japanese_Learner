@@ -478,3 +478,71 @@ export function FireIcon({ size = 16, className }) {
     </svg>
   )
 }
+
+// ── The analyser's transport (plan 134) ──
+// The desk's player bar under a video Passage: the sentence before or
+// after (a filled triangle against a bar, PlayIcon's weight), the
+// sentence again, the sentence on a loop, a stop at each sentence's
+// end, and the line following the clock.
+export function SkipIcon({ direction = 'next', size = 16, className }) {
+  const back = direction === 'prev'
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <polygon points={back ? '18 5 9 12 18 19' : '6 5 15 12 6 19'} fill="currentColor" stroke="none" />
+      <line x1={back ? 6 : 18} y1="5" x2={back ? 6 : 18} y2="19" />
+    </svg>
+  )
+}
+
+export function ReplayIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M3 12a9 9 0 1 0 3-6.7" />
+      <polyline points="3 3.5 3 9 8.5 9" />
+    </svg>
+  )
+}
+
+export function LoopIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <polyline points="17 2 21 6 17 10" />
+      <path d="M3 11V9a3 3 0 0 1 3-3h15" />
+      <polyline points="7 22 3 18 7 14" />
+      <path d="M21 13v2a3 3 0 0 1-3 3H3" />
+    </svg>
+  )
+}
+
+// Two pause bars standing on a line's end: "stop when the sentence does".
+export function PauseEachIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <line x1="8" y1="5" x2="8" y2="15" />
+      <line x1="14" y1="5" x2="14" y2="15" />
+      <line x1="3" y1="20" x2="21" y2="20" />
+    </svg>
+  )
+}
+
+export function FollowIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <circle cx="12" cy="12" r="3.5" />
+      <line x1="12" y1="2" x2="12" y2="6" />
+      <line x1="12" y1="18" x2="12" y2="22" />
+      <line x1="2" y1="12" x2="6" y2="12" />
+      <line x1="18" y1="12" x2="22" y2="12" />
+    </svg>
+  )
+}
+
+// The video folded away (plan 134): a frame with a small one in its corner.
+export function FoldVideoIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <rect x="3" y="5" width="18" height="14" rx="2" />
+      <rect x="12" y="11" width="7" height="6" rx="1" />
+    </svg>
+  )
+}

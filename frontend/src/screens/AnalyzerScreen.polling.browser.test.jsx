@@ -91,7 +91,7 @@ async function renderScreen() {
 // fire-and-forget: only the boarded platform's panel is in the DOM,
 // so the subtitle input does not exist until React has re-rendered.
 async function goToPlatform(screen, key) {
-  const leave = screen.container.querySelector('.anl-head .stage__leave, .desk-crumb .stage__leave')
+  const leave = screen.container.querySelector('.anl-m__head .stage__leave, .anl-desk__head .stage__leave')
   if (leave) { leave.click(); await settle(30) }
   const idx = { text: 0, photo: 1, video: 2 }[key]
   screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
@@ -128,8 +128,11 @@ const settle = async (ms = 60) => new Promise(r => setTimeout(r, ms))
 beforeEach(async () => {
   // The lane's iframe is 414px wide by default — a phone, in effect —
   // and since 2026-09-11 the working rail is built at 1100px and up
-  // only (AnalyzerScreen's `wide`). This file's subject is the screen
-  // with its rail, so it declares the width that has one instead of
+  // only (AnalyzerScreen's `wide`), where since plan 134 the result is
+  // the desk's three columns: the rail on the left, the sentence as the
+  // player's subtitle, the card in focus on the right. This file's
+  // subject is the screen with its rail, so it declares the width that
+  // has one instead of
   // inheriting whatever the previous FILE left behind: page.viewport
   // is a browser-level setting and does leak across files. What a
   // handset actually gets is pinned in AnalyzerScreen.phone.test.jsx.
@@ -218,10 +221,8 @@ describe('AnalyzerScreen polling', () => {
     // ...one stop is open, and it is the first...
     expect(screen.container.querySelector('.anl-stop[aria-current="true"]').textContent)
       .toContain('猫が好き')
-    // ...and the stage shows exactly ONE breakdown. (The status legend
-    // that used to be asserted here belongs to the 'list' layout; the
-    // stage steps through Tokens one at a time now, so there is none.)
-    expect(screen.container.querySelectorAll('.anl-stagebd').length).toBe(1)
+    // ...and the desk shows exactly ONE sentence, as the subtitle.
+    expect(screen.container.querySelectorAll('.anl-subs__line').length).toBe(1)
   })
 
   // The frozen-bar bug this pins: the transport is scaled to the
@@ -246,7 +247,7 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const playBtn = screen.container.querySelector('.anl-player__btn')
+    const playBtn = screen.container.querySelector('.anl-player__btn--main')
     expect(playBtn).not.toBeNull()
     playBtn.click()
     await settle(60)
@@ -259,11 +260,10 @@ describe('AnalyzerScreen polling', () => {
       .toBeLessThan(playerSpies.play.mock.invocationCallOrder[0])
   })
 
-  // ── 音量 — the transport bar's sound ──
-  // The dial and the mute are the analyser's, not the iframe's: reaching
-  // YouTube's own slider means hovering the video and waiting for its
-  // controls, over a player the learner is trying to read subtitles off.
-  it('hands the dial’s level to the player and keeps it', async () => {
+  // ── 音量 — the sound ──
+  // The bar's one sound control is the mute (plan 134): the dial went
+  // with the owner's cut, and a phone's own buttons set its volume.
+  it('mutes from the bar, and comes back to something to hear', async () => {
     apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
     apiJson.mockResolvedValue(videoSession())
 
@@ -271,39 +271,12 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const dial = screen.container.querySelector('.anl-player__dial')
-    expect(dial).not.toBeNull()
-    // Full by default -- a player that opens quiet looks broken.
-    expect(playerProps.last.volume).toBe(100)
-    expect(playerProps.last.muted).toBe(false)
-
-    typeInto(dial, '35')
-    await settle(60)
-
-    expect(playerProps.last.volume).toBe(35)
-    // …and it survives the next video, which is the whole point of
-    // saving it (lib/videoVolume).
-    expect(JSON.parse(window.localStorage.getItem('jp-video-sound')).volume).toBe(35)
-  })
-
-  it('mutes from the bar, reads zero while muted, and comes back', async () => {
-    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
-    apiJson.mockResolvedValue(videoSession())
-
-    const screen = await renderScreen()
-    await startFromFile(screen)
-    await settle(2000)
-
-    // The mute is the second control on the bar wearing the play
-    // button's drawing; the play/pause proper is the first.
-    const mute = screen.container.querySelectorAll('.anl-player__btn')[1]
+    const mute = screen.container.querySelector('button[aria-label="Couper le son de la vidéo"]')
     expect(mute).not.toBeNull()
 
     mute.click()
     await settle(60)
     expect(playerProps.last.muted).toBe(true)
-    // A muted player reads zero, whatever level it is holding.
-    expect(screen.container.querySelector('.anl-player__dial').value).toBe('0')
 
     mute.click()
     await settle(60)
@@ -311,24 +284,6 @@ describe('AnalyzerScreen polling', () => {
     // Unmuting a dial at zero has to give the learner something to
     // hear, or the button reads as dead.
     expect(playerProps.last.volume).toBeGreaterThan(0)
-  })
-
-  it('treats dragging the dial to zero as a mute, and off zero as a request to hear it', async () => {
-    apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
-    apiJson.mockResolvedValue(videoSession())
-
-    const screen = await renderScreen()
-    await startFromFile(screen)
-    await settle(2000)
-
-    const dial = screen.container.querySelector('.anl-player__dial')
-    typeInto(dial, '0')
-    await settle(60)
-    expect(playerProps.last.muted).toBe(true)
-
-    typeInto(dial, '20')
-    await settle(60)
-    expect(playerProps.last).toMatchObject({ volume: 20, muted: false })
   })
 
   // ── 字幕取り — the subtitle grab hash ──
@@ -430,7 +385,7 @@ describe('AnalyzerScreen polling', () => {
     await settle(2000)
 
     expect(screen.container.querySelector('main')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-stage')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-desk')).not.toBeNull()
   })
 
   // Switching MODES clears the analyser (owner-directed, 2026-09-01 —
@@ -497,7 +452,7 @@ describe('AnalyzerScreen polling', () => {
 
     expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
 
-    screen.container.querySelector('.anl-explain__btn').click()
+    screen.container.querySelector('.anl-desk__explain').click()
     await settle(500)
 
     expect(screen.container.querySelectorAll('.anl-stop__time').length).toBe(2)
@@ -524,12 +479,13 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const button = screen.container.querySelector('.anl-explain__btn')
-    button.click()
+    screen.container.querySelector('.anl-desk__explain').click()
     await settle(500)
 
-    expect(screen.container.querySelector('.anl-explain__hint--bad')).not.toBeNull()
-    expect(button.disabled).toBe(false)
+    // The failure speaks in the panel the explanation would have filled,
+    // and its button is there to try again.
+    expect(screen.container.querySelector('.anl-explainpanel__error')).not.toBeNull()
+    expect(screen.container.querySelector('.anl-explainpanel__foot button').disabled).toBe(false)
   })
 
   it('says so when the provider is down', async () => {
@@ -553,7 +509,7 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    screen.container.querySelector('.anl-explain__btn').click()
+    screen.container.querySelector('.anl-desk__explain').click()
     await settle(500)
 
     expect(screen.container.textContent).toContain('The AI service is temporarily unavailable.')
@@ -580,22 +536,15 @@ describe('AnalyzerScreen polling', () => {
     await startFromFile(screen)
     await settle(2000)
 
-    const button = screen.container.querySelector('.anl-explain__btn')
-    button.click()
+    screen.container.querySelector('.anl-desk__explain').click()
     await settle(1500)
 
-    // Locale-agnostic: this environment's LangProvider defaults to
-    // French, not English. The control stays present after an
-    // explanation exists (it used to vanish, gated on
-    // `!focused.explanation`), and the row says nothing beside it --
-    // the hint speaks only for an error now.
-    expect(screen.container.querySelector('.anl-explain')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-explain__btn')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-explain__hint--bad')).toBeNull()
-    // Nothing at all beside the button: the row carried a caption in
-    // both states until 2026-09-11 ("…notes for this sentence", then
-    // "Explained"), and the explanation printed above it says the
-    // second better than the word did.
-    expect(screen.container.querySelector('.anl-explain__hint')).toBeNull()
+    // The explanation stands in the right column, with the way to buy
+    // it again under it (it is cached per language, so a learner who
+    // switched the interface's gets it in the new one) and nothing
+    // beside that but an error, when there is one.
+    expect(screen.container.querySelector('.anl-explainpanel__body').textContent).toBe('An introduction.')
+    expect(screen.container.querySelector('.anl-explainpanel__foot button').textContent).toBe('Expliquer à nouveau')
+    expect(screen.container.querySelector('.anl-explainpanel__error')).toBeNull()
   })
 })

@@ -99,8 +99,9 @@ async function analyze(screen) {
 // platform's panel is in the DOM, so the switch has to settle before
 // anything inside the new panel can be queried.
 async function leaveResult(screen) {
-  // Over the head on the desk (plan 115's crumb), in it below the desk.
-  const leave = screen.container.querySelector('.anl-head .stage__leave, .desk-crumb .stage__leave')
+  // In the centre column's head on the desk (plan 134), in the page's
+  // head below it.
+  const leave = screen.container.querySelector('.anl-m__head .stage__leave, .anl-desk__head .stage__leave')
   if (leave) { leave.click(); await settle(30) }
 }
 async function goToPlatform(screen, key) {
@@ -108,16 +109,6 @@ async function goToPlatform(screen, key) {
   const idx = { text: 0, photo: 1, video: 2 }[key]
   screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
   await settle(30)
-}
-
-// The two stage dials are segmented controls in the dials block:
-// furigana first, then the view — structural, so the queries survive
-// both locales.
-function segOptions(screen, which) {
-  const idx = { 'anl-furigana-label': 0, 'anl-view-label': 1 }[which]
-  return screen.container
-    .querySelectorAll('.anl-dial .seg')[idx]
-    .querySelectorAll('.seg__opt')
 }
 
 // Drives the 動画 platform's file input the way IntakeVideo actually
@@ -320,38 +311,21 @@ describe('AnalyzerScreen structure', () => {
     expect(mastered).not.toBeNull()
     expect(getComputedStyle(mastered).visibility).toBe('hidden')
 
-    // 'All' restores the mastered word's reading...
-    segOptions(screen, 'anl-furigana-label')[0].click()
-    await settle(60)
-    expect(getComputedStyle(
-      screen.container.querySelector('.tok--mastered .tok__furi'),
-    ).visibility).toBe('visible')
-
-    // ...and 'none' hides every reading on the line.
-    segOptions(screen, 'anl-furigana-label')[2].click()
+    // The desk's dial is one quiet press through the three (plan 134):
+    // 'none' hides every reading on the line...
+    const dial = screen.container.querySelector('.anl-subs__furi')
+    dial.click()
     await settle(60)
     for (const furi of screen.container.querySelectorAll('.tok__furi')) {
       expect(getComputedStyle(furi).visibility).toBe('hidden')
     }
-  })
 
-  it('switches the stage between the card and the token table', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-    expect(screen.container.querySelector('.token-card')).not.toBeNull()
-
-    // The table replaces the CARD, not the stage: the line and the
-    // dials stay put (canvas behaviour — see the mockup contract suite
-    // for the table's own shape).
-    segOptions(screen, 'anl-view-label')[1].click()
+    // ...and 'all' restores the mastered word's reading.
+    dial.click()
     await settle(60)
-    expect(screen.container.querySelector('.anl-toktable')).not.toBeNull()
-    expect(screen.container.querySelector('.token-card')).toBeNull()
-    expect(screen.container.querySelector('.tok-line')).not.toBeNull()
-
-    segOptions(screen, 'anl-view-label')[0].click()
-    await settle(60)
-    expect(screen.container.querySelector('.token-card')).not.toBeNull()
+    expect(getComputedStyle(
+      screen.container.querySelector('.tok--mastered .tok__furi'),
+    ).visibility).toBe('visible')
   })
 
   // ── The working rail ──
@@ -454,7 +428,7 @@ describe('AnalyzerScreen structure', () => {
 
     // Walk to the second stop first: what gets kept is where you are,
     // not where the Passage starts.
-    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    screen.container.querySelectorAll('.anl-slab__arrow')[1].click()
     await settle(60)
 
     keep().click()
@@ -556,24 +530,6 @@ describe('AnalyzerScreen structure', () => {
     }
   })
 
-  // Plan 032: `useAnalyzerSession.reset()` existed with zero call
-  // sites -- the only way back to an empty analyser was to navigate
-  // away and return.
-  it('clears the Passage', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    expect(screen.container.querySelector('.anl-results')).not.toBeNull()
-
-    screen.container.querySelector('.anl-clear').click()
-    await settle(60)
-
-    expect(screen.container.querySelector('.anl-results')).toBeNull()
-    expect(screen.container.querySelector('.anl-resume')).toBeNull()
-    expect(screen.container.querySelector('textarea').value).toBe('')
-    expect(screen.container.querySelector('[id^="anl-panel-"]')).not.toBeNull()
-  })
-
   // Plan 032 (reviewer follow-up): a WordDetail sheet describes a Token
   // of whichever Passage was on screen when it was opened. Before this
   // fix only the text/photo ingest (analyzeDraft) closed it on a new
@@ -589,7 +545,8 @@ describe('AnalyzerScreen structure', () => {
       const screen = await renderScreen()
       await analyze(screen)
 
-      const tokenEl = screen.container.querySelector('.token-card__surface--door')
+      // A word tapped on the subtitles opens its card (plan 134).
+      const tokenEl = screen.container.querySelector('.anl-m__subs .tok:is(.tok--mastered, .tok--learning, .tok--unknown)')
       expect(tokenEl).not.toBeNull()
       tokenEl.click()
       await settle(60)

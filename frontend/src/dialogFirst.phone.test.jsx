@@ -20,6 +20,9 @@ const tok = (surface, kanji, kana, meaning) => ({
 const PASSAGE = [{
   text: '駅で待つ', grammar: [], unknown_count: 0, available: true, level: 'N5', off_deck_count: 0,
   tokens: [tok('駅', '駅', 'えき', 'station'), tok('で'), tok('待つ', '待つ', 'まつ', 'to wait')],
+}, {
+  text: '電車に乗る', grammar: [], unknown_count: 0, available: true, level: 'N5', off_deck_count: 0,
+  tokens: [tok('電車', '電車', 'でんしゃ', 'train'), tok('に'), tok('乗る', '乗る', 'のる', 'to ride')],
 }]
 const entry = (kanji, kana, meaning) => ({ type: 'vocab', kanji, kana, meaning, level: 'N5', senses: [], examples: [], status: { status: 'new' } })
 const ROWS = [entry('駅', 'えき', 'station'), entry('電車', 'でんしゃ', 'train'), entry('切符', 'きっぷ', 'ticket')]
@@ -109,29 +112,31 @@ describe('the analyser under a dialog', () => {
     Object.getOwnPropertyDescriptor(Object.getPrototypeOf(el), 'value').set.call(el, text)
     el.dispatchEvent(new Event('input', { bubbles: true }))
   }
-  const surface = () => $('.token-card__surface')?.textContent
+  // The sentence on the subtitles' current line (plan 134: the phone's
+  // result has no word in focus, so the arrows that show are ↑/↓).
+  const current = () => $('.anl-m__subs .tok__word')?.textContent
 
-  it('walks no token behind a dialog, nor on a browser chord', async () => {
+  it('walks no sentence behind a dialog, nor on a browser chord', async () => {
     await mount('/dictionary/analyzer')
-    type($('textarea'), '駅で待つ')
+    type($('textarea'), '駅で待つ。電車に乗る。')
     $('.anl-action').click()
     await settle(300)
-    expect(surface()).toBe('駅')
+    expect(current()).toBe('駅')
 
     openDialog()
     press('ArrowRight')
     press('ArrowDown')
     await settle()
-    expect(surface()).toBe('駅')
+    expect(current()).toBe('駅')
     closeDialog()
 
-    const back = press('ArrowRight', { altKey: true })
+    const chord = press('ArrowDown', { altKey: true })
     await settle()
-    expect(back.defaultPrevented).toBe(false)
-    expect(surface()).toBe('駅')
+    expect(chord.defaultPrevented).toBe(false)
+    expect(current()).toBe('駅')
 
-    press('ArrowRight')
+    press('ArrowDown')
     await settle()
-    expect(surface()).toBe('で')
+    expect(current()).toBe('電車')
   })
 })

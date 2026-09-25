@@ -1233,8 +1233,17 @@ plated gates take the window.
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
   click, Esc or ✕ bringing the breakdown back where it was scrolled. The
-  analyser's second column is the dictionary on the token the stage shows
-  (←/→ walk it); a deck's Browse and More open in the deck page's side, a
+  analyser's result is three columns (plan 134, the owner's drawing): the
+  Passage's sentences over the focused one's grammar, numbered; the video,
+  the sentence as its subtitle and the player's bar as one sumi object,
+  with the sentence's words beside the word in focus under it and Explain
+  at their foot; and the card in focus in the runs' band on the right,
+  following the token walked to (←/→) and the doors pressed, Explain
+  standing the explanation in its description's place with a swap on the
+  column's edge. The desk's rail steps aside for this one screen, so the
+  three columns have the window at the drawing's shares (410 | 830 | 541);
+  under the desk the same result is one column, drawn by the owner too.
+  A deck's Browse and More open in the deck page's side, a
   gate lesson's rival in the run's side, the grab's walkthrough beside the
   intake, a kanji's readings in the entry's own place, the iOS install
   steps in the settings page (plan 120). A panel that takes a column's

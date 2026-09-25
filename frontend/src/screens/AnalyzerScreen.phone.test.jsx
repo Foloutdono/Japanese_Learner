@@ -11,7 +11,9 @@ import '../index.css'
 // a Passage the stepper already walks, under a search field, four
 // filter chips and a bulk pin — and it is not built there at all any
 // more. 保存, the one act only the rail could perform, moved onto the
-// stage head, where it acts on the Sentence the stage is showing.
+// result's head, where it acts on the Sentence being shown; since plan
+// 134 the result is the owner's drawing (the subtitles, the numbered
+// grammar, Explain), and the subtitles' two quieter lines walk the stops.
 //
 // This lane is the only honest place to pin that. The browser lane
 // runs at chromium's default width, and a CDP viewport change does not
@@ -146,16 +148,16 @@ describe('the analyser result on a phone', () => {
       expect(screen.container.querySelector(sel), `${sel} is still built`).toBeNull()
     }
 
-    // What replaces it was already there: the stepper walks the stops.
-    expect(screen.container.querySelector('.anl-stepper__count').textContent)
-      .toContain('1 / 2')
+    // What replaces it: the subtitles' next line walks the stops (plan 134).
+    expect(screen.container.querySelector('.anl-m__subs > .anl-m__line').textContent)
+      .toBe('犬も好き')
   })
 
   it('puts 保存 on the head as a real toggle at a thumb-sized target', async () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const keep = screen.container.querySelector('.anl-head .anl-head__keep')
+    const keep = screen.container.querySelector('.anl-m__head .anl-head__keep')
     expect(keep).not.toBeNull()
     expect(keep.tagName).toBe('BUTTON')
     // A toggle, not a link that looks like one: the state is on the
@@ -190,9 +192,12 @@ describe('the analyser result on a phone', () => {
     await analyze(screen)
 
     const keep = () => screen.container.querySelector('.anl-head__keep')
-    // Walk to the second stop first: what gets kept is where you are,
-    // not where the Passage starts.
-    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    // The subtitles' two quieter lines: the next above, the previous
+    // below (plan 134). Walk to the second stop first: what gets kept is
+    // where you are, not where the Passage starts.
+    const next = () => screen.container.querySelectorAll('.anl-m__subs > .anl-m__line')[0]
+    const prev = () => screen.container.querySelectorAll('.anl-m__subs > .anl-m__line')[1]
+    next().click()
     await settle(60)
 
     keep().click()
@@ -210,10 +215,10 @@ describe('the analyser result on a phone', () => {
     // the head reads the same set the history does.
     keep().click()
     await settle(200)
-    screen.container.querySelectorAll('.anl-stepper__btn')[0].click()
+    prev().click()
     await settle(60)
     expect(keep().getAttribute('aria-pressed')).toBe('false')
-    screen.container.querySelectorAll('.anl-stepper__btn')[1].click()
+    next().click()
     await settle(60)
     expect(keep().getAttribute('aria-pressed')).toBe('true')
   })
@@ -222,84 +227,26 @@ describe('the analyser result on a phone', () => {
     const screen = await renderScreen()
     await analyze(screen)
 
-    const head = screen.container.querySelector('.anl-head')
+    const head = screen.container.querySelector('.anl-m__head')
     expect(head.scrollWidth, 'the head overflows its own row')
       .toBeLessThanOrEqual(head.clientWidth + 1)
     expect(document.documentElement.scrollWidth)
       .toBeLessThanOrEqual(window.innerWidth + 1)
   })
 
-  // ── The stage takes the screen (2026-09-11) ──
-  // DESIGN.md, "The study stage on a phone": below 768px the viewport
-  // IS the stage and the card grows into whatever is left under it.
-  // The analyser's result ended 206px short of the bottom of an 844px
-  // handset before this, with its one action floating mid-screen.
-  it('spends the whole screen, with the deck action on the card floor', async () => {
+  // ── The drawing on a phone (plan 134) ──
+  // The stage's growing card and its two dials are gone with it: the
+  // subtitles, the numbered grammar and Explain stand at the column's
+  // width, and nothing is wider than the handset.
+  it('gives the subtitles and Explain the page\'s width, and no colour legend', async () => {
     const screen = await renderScreen()
     await analyze(screen)
-
-    const stage = screen.container.querySelector('.anl-stage')
-    const bottom = stage.getBoundingClientRect().bottom
-    // Within the frame's own bottom inset (--dock-bottom): no pool of
-    // dead page under the result.
-    expect(window.innerHeight - bottom, `${Math.round(window.innerHeight - bottom)}px of dead screen under the stage`)
-      .toBeLessThanOrEqual(48)
-
-    // The card took the slack rather than the page keeping it...
-    const card = screen.container.querySelector('.token-card')
-    const cardBox = card.getBoundingClientRect()
-    expect(cardBox.height).toBeGreaterThan(200)
-    // ...and the one action rides its floor, the full width of it.
-    const mine = screen.container.querySelector('.token-card__foot .btn-primary')
-    const mineBox = mine.getBoundingClientRect()
-    expect(mineBox.width).toBeGreaterThan(cardBox.width * 0.8)
-    expect(cardBox.bottom - mineBox.bottom, 'the action floats above the card floor')
-      .toBeLessThanOrEqual(24)
-  })
-
-  it('keeps the dials at chip size, on one row each, captions aligned', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-
-    // Chip height (36px), not `seg--full`'s 40px bar: stacked twice
-    // and full width, the dials were the heaviest thing on the stage
-    // after the card, and were reported as such.
-    const rows = getComputedStyle(screen.container.querySelector('.anl-dials'))
-      .gridTemplateRows.split(' ').map(parseFloat)
-    expect(rows.length, 'the two dials are not two grid rows').toBe(2)
-    for (const row of rows) {
-      expect(row, `a dial row is ${row}px tall`).toBeLessThanOrEqual(40)
+    const width = screen.container.querySelector('.anl-m').clientWidth
+    for (const sel of ['.anl-m__subs', '.anl-m__explain']) {
+      expect(screen.container.querySelector(sel).getBoundingClientRect().width, sel)
+        .toBeGreaterThan(width * 0.9)
     }
-
-    // Nothing wraps inside a segment — the wrap is what made a row
-    // grow past its chip in the first place, and it is why the
-    // furigana dial's middle option is one word.
-    for (const opt of screen.container.querySelectorAll('.anl-dial .seg__opt')) {
-      expect(opt.getBoundingClientRect().height, `"${opt.textContent}" wraps inside its segment`)
-        .toBeLessThanOrEqual(38)
-    }
-
-    // Both captions share one column, so both controls start at the
-    // same x — FURIGANA is 65px wide and VUE 24, and as two separate
-    // rows their segments began in two different places.
-    const [a, b] = screen.container.querySelectorAll('.anl-dial .seg')
-    expect(a.getBoundingClientRect().left).toBe(b.getBoundingClientRect().left)
-    expect(a.getBoundingClientRect().width).toBe(b.getBoundingClientRect().width)
-  })
-
-  it('gives the page-width controls the page', async () => {
-    const screen = await renderScreen()
-    await analyze(screen)
-    const stageWidth = screen.container.querySelector('.anl-stage').clientWidth
-
-    // Explain is a full-width control under its hint, not a button
-    // pinned to the right of one.
-    const explain = screen.container.querySelector('.anl-explain__btn')
-    expect(explain.getBoundingClientRect().width).toBeGreaterThan(stageWidth * 0.9)
-
-    // Four legend keys, two by two — no row of three and an orphan.
-    const legend = screen.container.querySelector('.anl-legend')
-    expect(getComputedStyle(legend).display).toBe('grid')
-    expect(getComputedStyle(legend).gridTemplateColumns.split(' ').length).toBe(2)
+    expect(screen.container.querySelector('.anl-legend, .anl-dials, .anl-stage')).toBeNull()
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth + 1)
   })
 })

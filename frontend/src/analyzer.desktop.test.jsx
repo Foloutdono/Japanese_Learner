@@ -5,14 +5,16 @@ import { MemoryRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the analyser and the dictionary at a desk (plan 115) ──────
+// ── 机 — the analyser and the dictionary at a desk (plans 115, 134) ──
 // On a phone a word pressed in a breakdown opens a sheet over the
-// stage. On the desk the result's second column is the dictionary: a
-// one-sentence Passage has it open from the start on the token the
-// stage shows, ←/→ walk the sentence and the entry walks with it, and
-// a door pressed on a longer Passage takes the route map's column until
-// Esc gives it back. The way back to the intake is a crumb; the intake
-// stands beside its history; Ctrl+Enter analyses. And the dictionary,
+// stage. On the desk the result takes the window, the rail stepping
+// aside, as three columns (plan 134): the sentences over the numbered
+// grammar, the video with the sentence as its subtitle and the words
+// beside the card in focus, and the card in focus in the runs' band --
+// ←/→ walk the sentence and the entry walks with it, a grammar card
+// puts its point in focus, and Explain stands the explanation in the
+// description's place. The intake stands beside its history;
+// Ctrl+Enter analyses. And the dictionary,
 // finding no entry for a sentence typed into it, offers to take it to
 // the analyser, which analyses it on arrival. The phone's side is
 // deskfree.phone.
@@ -26,9 +28,24 @@ const ONE = [{
   tokens: [tok('駅', '駅', 'えき', 'station'), tok('で'), tok('待つ', '待つ', 'まつ', 'to wait')],
 }]
 const TWO = [ONE[0], { ...ONE[0], text: '電車に乗る', tokens: [tok('電車', '電車', 'でんしゃ', 'train'), tok('に'), tok('乗る', '乗る', 'のる', 'to ride')] }]
+// A sentence built with a particle's marker (を) and a construction:
+// 〜ている written on て and いる -- listed after を, in the sentence's order.
+const GRAMMAR = [{
+  text: '雨を見ている', unknown_count: 0, available: true, level: 'N5', off_deck_count: 0,
+  grammar: [{ kind: 'marker', raw_id: 'grammar_N5_wo', pattern: 'を', level: 'N5', meaning: 'object', start: 1, end: 2, segments: [[1, 2]] }, { kind: 'pattern', raw_id: 'grammar_N5_teiru', pattern: '〜ている', level: 'N5', meaning: 'ongoing', start: 3, end: 6, segments: [[3, 6]] }],
+  tokens: [
+    { ...tok('雨', '雨', 'あめ', 'rain'), start: 0, end: 1 },
+    { ...tok('を'), start: 1, end: 2 },
+    { ...tok('見', '見る', 'みる', 'to see'), start: 2, end: 3 },
+    { ...tok('て'), start: 3, end: 4 },
+    { ...tok('いる'), start: 4, end: 6 },
+  ],
+}]
+const EXPLANATION = 'Devant la gare, j’attends.'
+const TEIRU_ENTRY = { type: 'grammar', raw_id: 'grammar_N5_teiru', pattern: '〜ている', level: 'N5', meaning: 'ongoing', status: { status: 'new' } }
 let passage = ONE
 const entry = (kanji, kana, meaning) => ({ type: 'vocab', kanji, kana, meaning, level: 'N5', senses: [], examples: [], status: { status: 'new' } })
-const ENTRIES = { 駅: entry('駅', 'えき', 'station'), 待つ: entry('待つ', 'まつ', 'to wait'), 電車: entry('電車', 'でんしゃ', 'train') }
+const ENTRIES = { 駅: entry('駅', 'えき', 'station'), 待つ: entry('待つ', 'まつ', 'to wait'), 電車: entry('電車', 'でんしゃ', 'train'), 雨: entry('雨', 'あめ', 'rain') }
 
 const apiJson = vi.fn()
 const apiFetch = vi.fn()
@@ -51,12 +68,16 @@ const ok = body => ({ ok: true, status: 200, json: async () => body })
 beforeEach(() => {
   passage = ONE
   apiJson.mockReset()
-  apiJson.mockImplementation(async () => ({ sentences: passage, truncated: 0 }))
+  apiJson.mockImplementation(async (url, session, init) => (String(init?.body).includes('"deep":true')
+    ? { sentences: [{ ...passage[0], explanation: EXPLANATION }] }
+    : { sentences: passage, truncated: 0 }))
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {
     const u = String(url)
     if (u.startsWith('/api/dictionary?')) {
-      const q = new URLSearchParams(u.split('?')[1]).get('q')
+      const params = new URLSearchParams(u.split('?')[1])
+      if (params.get('id') === 'grammar_N5_teiru') return ok({ results: [TEIRU_ENTRY], total: 1, has_more: false })
+      const q = params.get('q')
       return ok({ results: ENTRIES[q] ? [ENTRIES[q]] : [], total: ENTRIES[q] ? 1 : 0, has_more: false })
     }
     if (u.startsWith('/api/dictionary/radicals')) return ok({ groups: [] })
@@ -107,9 +128,9 @@ async function analyze(text = '駅で待つ') {
   $('.anl-action').click()
   await settle(300)
 }
-const docked = () => $('.desk-anl-dock .desk-entry .dict-plate__word')?.textContent
+const shown = () => $('.anl-desk__entry .dict-plate__word')?.textContent
 
-describe('the analyser on the desk', () => {
+describe('the analyser on the desk (plan 134)', () => {
   it('stands the intake beside its history, and analyses on Ctrl+Enter', async () => {
     await mount()
     const main = $('.desk-intake__main').getBoundingClientRect()
@@ -121,32 +142,62 @@ describe('the analyser on the desk', () => {
     $('textarea').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }))
     await settle(300)
     expect(apiJson).toHaveBeenCalled()
-    expect($('.anl-results')).not.toBeNull()
+    expect($('.anl-desk')).not.toBeNull()
   })
 
-  it('opens a one-sentence Passage beside its dictionary, the entry following ←/→', async () => {
+  it('takes the window: the rail steps aside, the three columns side by side', async () => {
+    passage = [GRAMMAR[0], ONE[0]]
+    await mount()
+    await analyze('雨を見ている。駅で待つ。')
+    expect($('.anl-desk__rail')).not.toBeNull()
+    expect(getComputedStyle($('.phone--desk')).paddingInlineStart).toBe('0px')
+    const head = $('.anl-desk__head').getBoundingClientRect()
+    const points = $('.anl-desk__points').getBoundingClientRect()
+    const work = $('.anl-desk__work').getBoundingClientRect()
+    const right = $('.anl-desk__entry').getBoundingClientRect()
+    expect(points.right).toBeLessThanOrEqual(head.left)
+    expect(head.right).toBeLessThanOrEqual(right.left)
+    // The grammar's box and the words' row share their foot.
+    expect(Math.abs(points.bottom - work.bottom)).toBeLessThan(2)
+    expect(document.scrollingElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
+  })
+
+  it('opens on the card in focus in the runs\' band, the entry following ←/→', async () => {
     await mount()
     await analyze()
-    expect(docked()).toBe('駅')
+    expect(shown()).toBe('駅')
+    expect($('.anl-desk__entry .dict-entry--band')).not.toBeNull()
     expect($('[role="dialog"]')).toBeNull()
-    expect($('.anl-kbd')).toBeNull()
-    expect($('.desk-anl-dock__keys .desk-kbd')).not.toBeNull()
-    // The way back to the intake is a crumb over the head.
-    expect($('.desk-crumb .stage__leave')).not.toBeNull()
-    expect($('.anl-head .stage__leave')).toBeNull()
-    const stage = $('.anl-stage').getBoundingClientRect()
-    const dock = $('.desk-anl-dock').getBoundingClientRect()
-    expect(dock.left).toBeGreaterThan(stage.right - 1)
-    expect(Math.round(dock.width)).toBe(360)
+    // No legend, no printed keys (owner-directed).
+    expect($('.anl-legend, .anl-kbd, .anl-desk .desk-kbd')).toBeNull()
+    // The way back is in the centre column's head, not a crumb over it.
+    expect($('.anl-desk__head .stage__leave')).not.toBeNull()
+    expect($('.desk-crumb')).toBeNull()
+    // The word in focus is lit in the subtitle and in the words list.
+    expect($('.anl-subs .tok--on').textContent).toContain('駅')
+    expect($('.anl-words__row--on').textContent).toContain('駅')
 
     press('ArrowRight')
     await settle()
-    // A particle has no entry, and the dock says so rather than holding 駅.
-    expect(docked()).toBeUndefined()
-    expect($('.desk-anl-dock .hint')).not.toBeNull()
+    // A particle has no entry, and the column says so rather than holding 駅.
+    expect(shown()).toBeUndefined()
+    expect($('.anl-desk__none')).not.toBeNull()
     press('ArrowRight')
     await settle()
-    expect(docked()).toBe('待つ')
+    expect(shown()).toBe('待つ')
+  })
+
+  it('lists the sentence\'s words, and puts one in focus from the list', async () => {
+    await mount()
+    await analyze()
+    // The words, not the particles: those stay on the subtitle.
+    expect($$('.anl-words__row .anl-words__word').map(w => w.textContent)).toEqual(['駅', '待つ'])
+    $$('.anl-words__row').at(-1).click()
+    await settle()
+    expect(shown()).toBe('待つ')
+    expect($('.anl-words__row--on').textContent).toContain('待つ')
+    expect($('.anl-focus .anl-focus__word').textContent).toBe('待つ')
   })
 
   it('draws no ring round the result while the arrows walk it', async () => {
@@ -161,44 +212,88 @@ describe('the analyser on the desk', () => {
     expect(getComputedStyle(results).outlineStyle).toBe('none')
   })
 
-  it('opens a door on a longer Passage in the route map\'s column, and Esc gives it back', async () => {
+  it('walks the sentences with ↓ and the arrows, the entry following', async () => {
     passage = TWO
     await mount()
     await analyze('駅で待つ。電車に乗る。')
-    expect($('.desk-anl-dock')).toBeNull()
-    expect($('.anl-railcol').hidden).toBe(false)
-
-    $('.token-card__surface--door').click()
+    $$('.anl-words__row').at(-1).click()
     await settle()
-    expect($('[role="dialog"]')).toBeNull()
-    expect(docked()).toBe('駅')
-    expect($('.anl-railcol').hidden).toBe(true)
-    expect(getComputedStyle($('.anl-railcol')).display).toBe('none')
-    // The stepper prints the keys that walk the Passage.
-    expect($$('.anl-stepper__btn .desk-kbd').map(k => k.textContent)).toEqual(['↑', '↓'])
+    expect(shown()).toBe('待つ')
 
-    // ↓ walks to the next stop; the dock follows its first token.
+    // ↓ walks to the next sentence; the entry follows its first token.
     press('ArrowDown')
     await settle()
-    expect(docked()).toBe('電車')
+    expect(shown()).toBe('電車')
+    expect($('.anl-subs__count').textContent).toContain('2 / 2')
 
-    press('Escape')
+    // The subtitle's arrows walk back.
+    $$('.anl-slab__arrow')[0].click()
     await settle()
-    expect($('.desk-anl-dock')).toBeNull()
-    expect($('.anl-railcol').hidden).toBe(false)
+    expect($('.anl-subs__count').textContent).toContain('1 / 2')
   })
 
-  it('clears a docked door when a new Passage arrives', async () => {
-    passage = TWO
+  it('stands the explanation in the description\'s place, and swaps back', async () => {
     await mount()
-    await analyze('駅で待つ。電車に乗る。')
-    $('.token-card__surface--door').click()
+    await analyze()
+    expect($('.anl-swap')).toBeNull()
+    expect($('.anl-desk__explain').textContent).toContain('Expliquer la phrase')
+    $('.anl-desk__explain').click()
+    await settle(300)
+    expect(apiJson.mock.calls.some(([, , init]) => String(init?.body).includes('"deep":true'))).toBe(true)
+    expect($('.anl-explainpanel__body').textContent).toBe(EXPLANATION)
+    expect($('.anl-desk__explain').getAttribute('aria-pressed')).toBe('true')
+    // The card's head stays over it; its description gives way.
+    expect(shown()).toBe('駅')
+    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).toBe('none')
+
+    $('.anl-swap').click()
     await settle()
-    expect($('.desk-anl-dock')).not.toBeNull()
-    $('.desk-crumb .stage__leave').click()
+    expect($('.anl-explainpanel')).toBeNull()
+    expect(getComputedStyle($('.anl-desk__entry .dict-entry__body')).display).not.toBe('none')
+    // Bought once: the button goes back to it without a second call.
+    const calls = apiJson.mock.calls.length
+    $('.anl-desk__explain').click()
+    await settle()
+    expect($('.anl-explainpanel')).not.toBeNull()
+    expect(apiJson.mock.calls.length).toBe(calls)
+    press('Escape')
+    await settle()
+    expect($('.anl-explainpanel')).toBeNull()
+  })
+
+  it('numbers every point, the particles too, on its card and on the words it sits on, and puts it in focus', async () => {
+    passage = GRAMMAR
+    await mount()
+    await analyze('雨を見ている')
+    // The particle's marker and the construction, in the sentence's order.
+    expect($$('.anl-desk__points .anl-num').map(n => n.textContent)).toEqual(['1', '2'])
+    expect($$('.anl-desk__points .bkd-point__pattern').map(n => n.textContent)).toEqual(['を', '〜ている'])
+    const frames = $$('.anl-subs__pt')
+    expect(frames.map(f => f.querySelector('.anl-subs__n').textContent)).toEqual(['1', '2'])
+    expect([...frames[0].querySelectorAll('.tok__word')].map(w => w.textContent)).toEqual(['を'])
+    expect([...frames[1].querySelectorAll('.tok__word')].map(w => w.textContent)).toEqual(['て', 'いる'])
+
+    $$('.anl-desk__points .bkd-point')[1].click()
+    await settle()
+    // The point is the card in focus: its words lit on the subtitle, its
+    // card beside the list, its entry on the right.
+    expect($$('.anl-subs .tok--lit').map(tk => tk.querySelector('.tok__word').textContent)).toEqual(['て', 'いる'])
+    expect($('.anl-focus--point .anl-focus__word').textContent).toBe('〜ている')
+    expect($('.anl-words__row--on')).toBeNull()
+    expect(shown()).toBe('〜ている')
+  })
+
+  it('gives the walked word back when a new Passage arrives', async () => {
+    passage = GRAMMAR
+    await mount()
+    await analyze('雨を見ている')
+    $$('.anl-desk__points .bkd-point')[1].click()
+    await settle()
+    expect(shown()).toBe('〜ている')
+    $('.anl-desk__head .stage__leave').click()
     await settle(60)
-    await analyze('駅で待つ。電車に乗る。')
-    expect($('.desk-anl-dock')).toBeNull()
+    await analyze('雨を見ている')
+    expect(shown()).toBe('雨')
   })
 })
 
