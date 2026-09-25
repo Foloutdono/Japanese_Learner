@@ -308,6 +308,20 @@ const quiz = {
   keyEscape:           'Esc',
   deskWayUp:           'Way up',
   deskBreakdownWait:   'The sentence’s breakdown appears here once you have graded your answer.',
+  // An exercise on three panels (plan 129): the run's sentences, each with
+  // the grade it got, and an exercise's keys.
+  deskLinesLabel:      'This run’s sentences',
+  deskLinesNow:        'now',
+  deskLinesRated:      'Sentences',
+  deskQuestionsRated:  'Questions',
+  deskPerMinuteLines:  'Sentences / min',
+  deskAnswered:        'Answered',
+  deskKeyCheckNext:    'checks, then next',
+  deskKeyRate:         'grades your answer',
+  deskKeyListen:       'plays the line',
+  deskKeyPick:         'picks an answer',
+  deskKeyNext:         'next question',
+  deskKeyWalk:         'walks the questions',
 
   // Feedback — the ❌/✅/← glyphs these used to carry inline are now
   // real <Icon/>s rendered by whatever shows the text (see

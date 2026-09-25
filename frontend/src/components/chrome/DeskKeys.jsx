@@ -1,5 +1,6 @@
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { useDesk } from '../../hooks/useDesk'
+import { RunPanelsContext } from '../study/runPanels'
 import { dialogOpen } from '../../lib/dialogOpen'
 import { useDeparture } from '../../stores/departure'
 import { guideHeld } from '../../stores/guide'
@@ -76,4 +77,15 @@ export function LeaveKey({ onLeave }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [desk, onLeave])
   return null
+}
+
+// A key cap printed on the control it presses (plan 113), on the desk
+// only -- and not on a run's panels (plan 126), whose left column lists
+// the keys instead. Rendered inside the run, so it reads the panels'
+// context where the run's own component (outside the stage) cannot.
+export function KeyCap({ children }) {
+  const desk = useDesk()
+  const panels = useContext(RunPanelsContext)
+  if (!desk || panels) return null
+  return <kbd className="desk-kbd" aria-hidden="true">{children}</kbd>
 }

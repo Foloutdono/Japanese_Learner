@@ -99,12 +99,21 @@ export function SessionPanel({ done = false, misses = true }) {
           />
         </section>
       ) : done ? null : panels ? (
-        <section className="desk-sealed" aria-label={t.deskSealed}>
-          <span className="desk-sealed__mark" aria-hidden="true">?</span>
-        </section>
+        <SealedPanel label={t.deskSealed} />
       ) : (
         <p className="desk-run__note">{t.deskEntryWait}</p>
       )}
     </>
+  )
+}
+
+// The details, sealed (plan 126): one panel, a ?, nothing else -- what
+// would stand here is the answer. The practice runs seal their
+// breakdown the same way until the grade (plan 129, BreakdownSide).
+export function SealedPanel({ label }) {
+  return (
+    <section className="desk-sealed" aria-label={label}>
+      <span className="desk-sealed__mark" aria-hidden="true">?</span>
+    </section>
   )
 }

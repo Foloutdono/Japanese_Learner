@@ -22035,6 +22035,9 @@ a.slip__act { text-decoration: none; }
   /* The comprehension text beside its questions (plan 115): whole, at
      the column's width, never the base card's 60vh inner scroll. */
   .desk-run__side > .prompt-card { max-height: none; overflow: visible; }
+  /* On a practice run's panels (plan 129) it is the column's one card,
+     as tall as the column at least, as the pane beside a sentence is. */
+  .desk-run--panels > .desk-run__side > .prompt-card { flex: 1 0 auto; }
   /* ── the mock exam, sat at a desk (plan 115) ──
      screens/ExamRunner: the answer sheet stands in the side — the clock
      at the head of the column, the count, the grid, Finish — and the
@@ -23211,5 +23214,160 @@ a.slip__act { text-decoration: none; }
   }
   /* The record two by two at the side column's width. */
   .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+
+  /* ── 三面 — the practice runs on three panels (plan 129) ──
+     Reading, translation, dictation, composition and comprehension stand
+     on the card runs' three columns (plan 126): this run over the run's
+     lines at the left (RunLines -- every sentence so far with the grade
+     it got, each reopening its breakdown; comprehension's questions),
+     the exercise in the middle -- the card grown to what its floor
+     leaves, the floor one framed row: the field and Check, then the
+     rating tiles, then Next -- and at the right the breakdown, the
+     point's lesson or the text, each one panel, sealed until the grade
+     as a card's details are until the reveal. The owner's pick of
+     three candidates for the left panel; the level strip leaves the
+     floor for the run panel, as on a card run. */
+
+  /* The card grows to what the floor leaves: a page handed straight to
+     the stage (a feedback's registers, dictation's player), as a card
+     through CardTransition already does above. */
+  .desk-run--panels > .stage > .prompt-card--footed {
+    flex: 1 0 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  /* The passage read on the stage is bounded and scrolls in its body
+     (.prompt-card--passage), so it takes the column's leftover height
+     and no more. */
+  .desk-run--panels > .stage > .prompt-card--passage {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+  }
+  /* A page in a grown card is centred by grow-only spacers, the phone's
+     own ruling (.stage > .prompt-card--footed in the phone block): a
+     page taller than its card spills downward only, where the column's
+     scroll can follow it -- or, on the bounded passage, the body's. */
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::after,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::after {
+    content: "";
+    flex: 1 0 0;
+  }
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::before,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::before {
+    margin-bottom: calc(-1 * var(--sp-1));
+  }
+  .desk-run--panels > .stage > .prompt-card--footed > .prompt-card__body--prose::after,
+  .desk-run--panels .card-transition-live > .prompt-card--footed > .prompt-card__body--prose::after {
+    margin-top: calc(-1 * var(--sp-1));
+  }
+  /* The floor: one framed row, as the tiles' is -- the field and Check,
+     then (the rating bar's own frame above) Next, or comprehension's
+     way through. At the column's width and its foot. */
+  .desk-run--panels > .stage > .stage__foot:not(.browse-nav) {
+    position: static;
+    width: auto;
+    max-width: none;
+    margin: auto 0 0;
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+
+  /* The run's lines: the list takes the panel's height and scrolls in
+     it, newest at its foot; the keys and the rhythm keep the panel's
+     floor. The room between the list and the keys is where the asking
+     will stand (RunLines). */
+  .desk-sentences { flex: 1 1 auto; }
+  .desk-sentences__list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: 0 calc(-1 * var(--sp-3));
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    list-style: none;
+  }
+  .desk-sentences__list > li { display: flex; min-width: 0; }
+  .desk-sentence {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    width: 100%;
+    min-width: 0;
+    min-height: 36px;
+    padding: var(--sp-2) var(--sp-3);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-card);
+    color: var(--text-secondary);
+    font: inherit;
+    text-align: left;
+  }
+  button.desk-sentence { cursor: pointer; }
+  button.desk-sentence:hover,
+  button.desk-sentence:focus-visible { background: var(--overlay-hover); color: var(--text-primary); filter: none; }
+  /* The row whose breakdown the right column shows: the split's open
+     row (plan 117), gold edge and wash. */
+  .desk-sentence--lit {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--accent2) 8%, transparent);
+    box-shadow: inset 3px 0 0 var(--accent2);
+  }
+  button.desk-sentence--lit:hover,
+  button.desk-sentence--lit:focus-visible { background: color-mix(in srgb, var(--accent2) 12%, transparent); }
+  .desk-sentence__text {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-body);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-sentence__text:lang(ja) { font-family: var(--font-jp); letter-spacing: var(--tr-term); }
+  /* The grade as a dot in its verdict's ink (the tiles' --rating-color
+     inks); a ring before it, a neutral dot for an answer not graded yet
+     (comprehension's, until the paper is marked). */
+  .desk-sentence__dot {
+    --rating-color: transparent;
+    flex: none;
+    width: 8px;
+    height: 8px;
+    border-radius: var(--r-pill);
+    background: var(--rating-color);
+    border: 1.5px solid color-mix(in srgb, var(--text-secondary) 70%, transparent);
+  }
+  .desk-sentence__dot--answered { --rating-color: var(--text-secondary); border-color: var(--rating-color); }
+  .desk-sentence__dot--q0 { --rating-color: var(--danger); }
+  .desk-sentence__dot--q1 { --rating-color: var(--rating-wrong); }
+  .desk-sentence__dot--q2 { --rating-color: var(--rust); }
+  .desk-sentence__dot--q3 { --rating-color: var(--warning); }
+  .desk-sentence__dot--q4 { --rating-color: var(--teal); }
+  .desk-sentence__dot--q5 { --rating-color: var(--success); }
+  .desk-sentence__dot:is(.desk-sentence__dot--q0, .desk-sentence__dot--q1, .desk-sentence__dot--q2, .desk-sentence__dot--q3, .desk-sentence__dot--q4, .desk-sentence__dot--q5) {
+    border-color: var(--rating-color);
+  }
+  .desk-sentences > .desk-keys { margin-top: auto; }
+
+  /* What stands in the right column, as its one panel: the breakdown,
+     the lesson (DeskPane). At least the column's height, the column
+     scrolling past it -- a door's scroll is the column's (SideLookup). */
+  .desk-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    flex: 1 0 auto;
+    min-width: 0;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

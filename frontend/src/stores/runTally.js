@@ -21,6 +21,12 @@ import { useSyncExternalStore } from 'react'
 // (tallyMisses): a card missed then got right is not a miss.
 // `startedAt` (plan 126): when the run started, for the rhythm the
 // desk's card panel prints -- minutes elapsed, cards a minute.
+//
+// The practice runs count here too since plan 129 (reading,
+// translation, dictation, composition, comprehension), for the same
+// session panel: a sentence at its rating (countReview, with no XP --
+// a practice fare is only known once the result has answered), and the
+// fare when it lands (countXp, from hooks/usePracticeXp).
 const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), startedAt: null })
 
 let tally = EMPTY
@@ -46,6 +52,13 @@ export function countReview({ quality, xp, entry } = {}) {
     // misses are listed in is the order they were last seen.
     cards: id ? [...tally.cards.filter(c => c.id !== id), { id, entry: shape(entry), quality }] : tally.cards,
   }
+  emit()
+}
+
+/** The fare of a practice answer, once its result has answered (plan 129). */
+export function countXp(xp) {
+  if (!Number.isFinite(xp) || xp <= 0) return
+  tally = { ...tally, xp: tally.xp + xp }
   emit()
 }
 

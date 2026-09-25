@@ -128,10 +128,12 @@ describe('a composition run on the desk', () => {
     expect(side.textContent).toContain(EXAMPLE)
     expect($('.stage').textContent).not.toContain(EXAMPLE)
     expect($('.stage .prose__breakdown')).toBeNull()
-    // The run's column, on the right edge, in the run's own pigment.
+    // The run's third column (plan 129), right of the stage, in the
+    // run's own pigment: the lesson as its one panel.
     const box = side.getBoundingClientRect()
-    expect(box.width).toBe(360)
-    expect(Math.abs(box.right - $('.screen').getBoundingClientRect().right)).toBeLessThan(1)
+    expect(box.width).toBeGreaterThanOrEqual(300)
+    expect(box.left).toBeGreaterThan($('.stage').getBoundingClientRect().right)
+    expect(side.querySelector(':scope > .desk-pane .gl')).not.toBeNull()
     // Computed, so the var() is resolved: the side wears the run's pigment.
     const sakubun = getComputedStyle(document.documentElement).getPropertyValue('--line-sakubun').trim()
     expect(sakubun).not.toBe('')

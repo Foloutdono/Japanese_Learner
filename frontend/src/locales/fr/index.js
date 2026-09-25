@@ -290,6 +290,20 @@ const quiz = {
   keyEscape:          'Échap',
   deskWayUp:          'Remonter',
   deskBreakdownWait:  'La décomposition de la phrase s’affiche ici une fois ta réponse notée.',
+  // Un exercice sur trois panneaux (plan 129) : les phrases du trajet, chacune
+  // avec la note qu'elle a reçue, et les touches d'un exercice.
+  deskLinesLabel:     'Les phrases du trajet',
+  deskLinesNow:       'en cours',
+  deskLinesRated:     'Phrases',
+  deskQuestionsRated: 'Questions',
+  deskPerMinuteLines: 'Phrases / min',
+  deskAnswered:       'Répondues',
+  deskKeyCheckNext:   'valide, puis suivante',
+  deskKeyRate:        'note ta réponse',
+  deskKeyListen:      'écoute la phrase',
+  deskKeyPick:        'choisit une réponse',
+  deskKeyNext:        'question suivante',
+  deskKeyWalk:        'parcourt les questions',
 
   // Feedback — les glyphes ❌/✅/← qu'elles portaient autrefois en
   // ligne sont maintenant de vraies <Icon/> rendues par ce qui

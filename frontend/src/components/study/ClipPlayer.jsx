@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { api } from '../../lib/api'
 import { voicedUrl } from '../../lib/audio'
 import { runKey } from '../../lib/keyGuards'
 import { PlayIcon, PauseIcon, SpeakerOffIcon } from '../ui/Icons'
+import { RunPanelsContext } from './runPanels'
 
 // ── 書取 — the clip, played a fixed number of times ───────────
 // Not exam/AudioPlayer with a counter bolted on. That player is built
@@ -42,6 +43,7 @@ import { PlayIcon, PauseIcon, SpeakerOffIcon } from '../ui/Icons'
 // -- it presses the button, so it can do nothing the button cannot.
 export default function ClipPlayer({ src, plays, maxPlays, onPlay, keyHint = false }) {
   const { t } = useLang()
+  const panels = useContext(RunPanelsContext)
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
   const [progress, setProgress] = useState(0)
@@ -169,7 +171,8 @@ export default function ClipPlayer({ src, plays, maxPlays, onPlay, keyHint = fal
             ))}
           </span>
           <span className="clip-player__left" role="status">{t.dictationListensLeft(left)}</span>
-          {keyHint && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
+          {/* Not on a run's panels (plan 129): the run's lines list Space. */}
+          {keyHint && !panels && <kbd className="desk-kbd" aria-hidden="true">{t.keySpace}</kbd>}
         </span>
       </div>
     </div>
