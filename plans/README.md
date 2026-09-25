@@ -236,8 +236,13 @@ Thirteen waves live in this file:
   one per collection: kanji and words keep the catalogue beside an entry
   column from the page's top (A), grammar turns the split round (C), the
   kana show the whole syllabary with each cell's stage (K4). Numbered 128
-  because 127 went to 定期券 while it was open. Its section is at the
-  very bottom of this file. The next wave begins at 129.
+  because 127 went to 定期券 while it was open. Its section is near the
+  bottom of this file, before wave 34's. The next wave begins at 129.
+
+- **Wave 34 — 対照, both scripts in the kana charts** (plan 129,
+  2026-09-25, DONE). The owner's follow-up to wave 33's K4: K2's paired
+  scripts as a toggle on the whole-chart view. Its section is at the very
+  bottom of this file. The next wave begins at 130.
 
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
@@ -6355,4 +6360,30 @@ Fit, measured on the real rows:
 | 1100×800 | whole | scrolls in the column | one column, scrolls | columns wrap | columns wrap |
 
 The page never scrolls to reach an entry at any size.
+
+---
+
+# Wave 34 — 対照, both scripts in the kana charts (plan 129, 2026-09-25)
+
+The owner's follow-up to wave 33: of the four kana layouts drawn there,
+K4 (the whole syllabary, each cell's stage) was built; K2 (each cell
+pairing its kana with the other script's) is now a toggle on it.
+
+| # | Plan | Status |
+|---|------|--------|
+| 129 | 対照: a toggle at the trailing edge of a bare console row on the desk's kana charts (the 部 pattern) prints each kana's twin under it at `--fs-body` in the secondary ink; the romaji goes to a screen reader where there is a twin, and a kana with none (the long vowels, the borrowed sounds, which the other script spells otherwise) keeps it. Remembered in `localStorage` (`jp-kana-pairs`). Desk only. `CellFace`, `lib/kanaPairs.js`; blocks of the dictionary desktop, wide and phone tests | DONE (2026-09-25) |
+
+Where it departs from K2 as drawn: K2 set the twin beside the kana, in
+70px cells. K4's cells are 44–52px so the whole chart fits the window,
+and a pair like きゃ キャ side by side needs about 74, so the twin sits
+under the kana instead and takes the romaji's line. Every line of a cell
+is set solid (the romaji too, which had been at the font's own leading),
+so a row is as tall on any Japanese font.
+
+Fit (the tallest column's foot; the toggle's row costs 48px):
+
+| Window | hiragana | katakana | hiragana, paired | katakana, paired |
+|---|---|---|---|---|
+| 1600×917 | 780 | 850 | 821 | 890 |
+| 1440×900 | 780 | 850 | 821 | 890 |
 

@@ -1029,7 +1029,11 @@ answer a keyboard and a pointer one way everywhere.
   stands — a gold wash and foot mastered, a vermillion foot in progress,
   the kana in the secondary ink not yet met — and the short kana entry at
   `--desk-side-w`. On the narrowest desk the columns wrap rather than
-  shrink the cells. A
+  shrink the cells. Since plan 129 a toggle at the console's trailing
+  edge (as 部 rides the kanji's) prints both scripts: each kana's twin
+  under it in the secondary ink, the romaji then left to a screen reader
+  and the entry; a kana with no twin (the long vowels, the borrowed
+  sounds) keeps its romaji. The choice is remembered in the browser. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
   is a door to its stop.
 - **A station is two panes.** Levels, sets or grades stand upright on the

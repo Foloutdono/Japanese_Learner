@@ -421,7 +421,15 @@ runtime purpose. Two consequences worth knowing:
   `src/testing/grammarPoints.json`, `src/testing/kanaRows.json` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
-  When starting a new wave, begin at **129** or higher, and check
+  **129** is 対照, both scripts in the kana charts on the desk (wave 34,
+  the owner's follow-up to plan 128's K4): a toggle at the console's
+  trailing edge prints each kana's twin under it, the romaji left to a
+  screen reader where there is a twin, remembered in the browser (cited
+  in `screens/DictionaryScreen.jsx`'s `CellFace`, `lib/kanaPairs.js`,
+  the 机 section of `index.css`, `src/dictionary.desktop.test.jsx`,
+  `src/dictionary.wide.test.jsx` and `src/deskfree.phone.test.jsx`;
+  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **130** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

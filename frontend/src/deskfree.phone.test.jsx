@@ -1578,3 +1578,25 @@ describe('the kana charts (plan 128)', () => {
     apiJson.mockReset()
   })
 })
+
+// ── plan 129 — both scripts, a desk toggle ──
+// The kana charts' toggle stands on the desk alone: a phone draws no
+// toggle row and no twin, even with the choice kept from a desk.
+describe('both scripts (plan 129)', () => {
+  it('draws no toggle and no twin on a phone', async () => {
+    localStorage.setItem('jp-kana-pairs', '1')
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    const { default: KANA } = await import('./testing/kanaRows.json')
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: KANA.hiragana, total: KANA.hiragana.length, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary?category=hiragana']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(300)
+    expect(document.querySelector('.console__toggle, .console__index--bare')).toBeNull()
+    expect(document.querySelector('.syllabary-cell__twin')).toBeNull()
+    expect(document.querySelector('.syllabary-cell__romaji.sr-only')).toBeNull()
+    localStorage.removeItem('jp-kana-pairs')
+    apiJson.mockReset()
+  })
+})

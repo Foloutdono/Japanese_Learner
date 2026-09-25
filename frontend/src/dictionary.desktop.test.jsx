@@ -550,4 +550,58 @@ describe('the kana charts (plan 128)', () => {
     expect(main.querySelectorAll('.syllabary-table')[1].textContent).toContain('アー')
     expect(cell('カ').classList.contains('syllabary-cell--learning')).toBe(true)
   })
+
+  // ── plan 129 — both scripts ──
+  // A toggle at the console's trailing edge, as 部 rides the kanji's,
+  // prints each kana's twin in the other script under it; the romaji
+  // goes to a screen reader then, and a kana with no twin (the long
+  // vowels, the borrowed sounds) keeps its own. The choice is
+  // remembered for the next visit.
+  describe('both scripts (plan 129)', () => {
+    const KEY = 'jp-kana-pairs'
+    beforeEach(() => localStorage.removeItem(KEY))
+    const toggle = () => document.querySelector('.console__toggle')
+
+    it('prints each kana\'s twin under it, and remembers the choice', async () => {
+      await serveKana()
+      await mount('/dictionary?category=hiragana')
+      expect(toggle().getAttribute('aria-pressed')).toBe('false')
+      expect(document.querySelector('.syllabary-cell__twin')).toBeNull()
+
+      toggle().click()
+      await settle()
+      expect(toggle().getAttribute('aria-pressed')).toBe('true')
+      const ka = cell('か')
+      const twin = ka.querySelector('.syllabary-cell__twin')
+      expect(twin.textContent).toBe('カ')
+      expect(twin.getBoundingClientRect().top).toBeGreaterThanOrEqual(ka.querySelector('.syllabary-cell__char').getBoundingClientRect().bottom - 1)
+      expect(ka.querySelector('.syllabary-cell__romaji').classList.contains('sr-only')).toBe(true)
+      // A long vowel has no twin: its romaji stays in sight.
+      const aa = cell('ああ')
+      expect(aa.querySelector('.syllabary-cell__twin')).toBeNull()
+      expect(aa.querySelector('.syllabary-cell__romaji').classList.contains('sr-only')).toBe(false)
+      expect(localStorage.getItem(KEY)).toBe('1')
+
+      toggle().click()
+      await settle()
+      expect(document.querySelector('.syllabary-cell__twin')).toBeNull()
+      expect(localStorage.getItem(KEY)).toBe('0')
+    })
+
+    it('opens paired on the next visit, katakana over hiragana', async () => {
+      localStorage.setItem(KEY, '1')
+      await serveKana()
+      await mount('/dictionary?category=katakana')
+      expect(toggle().getAttribute('aria-pressed')).toBe('true')
+      expect(cell('カ').querySelector('.syllabary-cell__twin').textContent).toBe('か')
+      expect(cell('ファ').querySelector('.syllabary-cell__twin')).toBeNull()
+    })
+
+    it('is the kana charts\' alone', async () => {
+      await serveKana()
+      await mount('/dictionary?category=kanji')
+      // The kanji's toggle is 部, and no other.
+      expect([...document.querySelectorAll('.console__toggle')].map(t => t.getAttribute('aria-label'))).toEqual(['Radical'])
+    })
+  })
 })

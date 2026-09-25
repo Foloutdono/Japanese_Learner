@@ -23087,6 +23087,10 @@ a.slip__act { text-decoration: none; }
     font-size: var(--fs-title);
     white-space: nowrap;
   }
+  /* Set solid, as the kana are, so a row is as tall wherever it is read:
+     a line at the font's own leading measured differently on two Japanese
+     fonts, and the chart's fit is counted in rows. */
+  .desk-dict--chart .syllabary-cell__romaji { line-height: 1.2; }
   /* Where the learner stands, as a catalogue tile carries it: its foot
      in the stage's ink -- vermillion in progress, gold mastered, gold's
      wash under a mastered kana -- and a kana not yet met in the
@@ -23108,5 +23112,15 @@ a.slip__act { text-decoration: none; }
   }
   /* The record two by two at the side column's width. */
   .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* Both scripts (plan 129): the twin under its kana in the secondary
+     ink, a rung below it and set solid, so a paired chart of twelve rows
+     still ends above a 900px window's foot. */
+  .desk-dict--chart .syllabary-cell__twin {
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    line-height: 1;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

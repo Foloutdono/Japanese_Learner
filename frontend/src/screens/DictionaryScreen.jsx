@@ -51,6 +51,7 @@ import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
 import { composing } from '../lib/keyGuards'
+import { readKanaPairs, saveKanaPairs } from '../lib/kanaPairs'
 import { dialogOpen } from '../lib/dialogOpen'
 
 const DICTIONARY_COLOR = 'var(--line-jisho)'
@@ -178,6 +179,8 @@ export default function DictionaryScreen({ session }) {
 	// rival was the first door to open this way, plan 090 gave the other
 	// three the same sheet — see openEntry).
 	const [lookup, setLookup]         = useState(null)
+	// 机 (plan 129): the kana charts with each kana's twin under it.
+	const [pairs, setPairs]           = useState(readKanaPairs)
 
 	// Radical browsing
 	const [radicalGroups, setRadicalGroups]     = useState(null)
@@ -446,6 +449,12 @@ export default function DictionaryScreen({ session }) {
 		setPage(0)
 		setHasMore(true)
 		fetchPage(0, query, category, null, lvl)
+	}
+
+	function togglePairs() {
+		playUi('click-mode-selection')
+		setPairs(!pairs)
+		saveKanaPairs(!pairs)
 	}
 
 	function switchToSearchMode() {
@@ -763,6 +772,28 @@ export default function DictionaryScreen({ session }) {
 				    least as often as a box to type in, so the one thing it did
 				    on arrival was hide itself. Both ways in are unchanged — tap
 				    the field, or press "/" (the keyboard effect above). */}
+				{/* The kana charts' one toggle, on the desk (plan 129): each
+				    kana's twin in the other script under it -- a second way
+				    of reading the chart already chosen, so it rides the
+				    row's trailing edge as 部 does, the row holding it alone
+				    since a fixed chart has nothing to type into. */}
+				{isSyllabary && desk && (
+					<ConsoleIndex
+						field={false}
+						toggle={
+							<Chip
+								className="console__toggle"
+								on={pairs}
+								color={DICTIONARY_COLOR}
+								title={t.dictKanaPairs}
+								aria-label={t.dictKanaPairs}
+								onClick={togglePairs}
+							>
+								<span lang="ja" aria-hidden="true">{category === 'katakana' ? 'アあ' : 'あア'}</span>
+							</Chip>
+						}
+					/>
+				)}
 				{!isSyllabary && !isShelf && (
 					<ConsoleIndex
 						field={!showingRadicalGrid}
@@ -867,6 +898,7 @@ export default function DictionaryScreen({ session }) {
 						mining={mining}
 						favorites={shelf}
 						accentColor={TYPE_META[category]?.color}
+						pairs={desk && pairs}
 						t={t}
 					/>
 				) : (
@@ -1309,7 +1341,23 @@ function cellStage(entry, desk) {
 	return stage === 'learning' || stage === 'mastered' ? ` syllabary-cell--${stage}` : ''
 }
 
-function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected, desk = false }) {
+// A cell's face: the kana over its romaji -- or, with both scripts on
+// (plan 129), over its twin in the other script, the romaji then left
+// to a screen reader and the entry beside. A kana with no twin (the
+// long vowels, the borrowed sounds: the other script spells them
+// otherwise) keeps its romaji either way.
+function CellFace({ entry, pairs }) {
+	const twin = pairs && entry.twin
+	return (
+		<>
+			<span className="syllabary-cell__char">{entry.kana}</span>
+			{twin && <span className="syllabary-cell__twin" lang="ja">{entry.twin}</span>}
+			<span className={`syllabary-cell__romaji${twin ? ' sr-only' : ''}`}>{entry.romaji}</span>
+		</>
+	)
+}
+
+function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected, desk = false, pairs = false }) {
 	return (
 		<div className="syllabary-table-wrap">
 			{/* The chart's mark, then the chart. The mark named it in both
@@ -1347,8 +1395,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
 										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}${cellStage(entry, desk)}`}
 									>
-										<span className="syllabary-cell__char">{entry.kana}</span>
-										<span className="syllabary-cell__romaji">{entry.romaji}</span>
+										<CellFace entry={entry} pairs={pairs} />
 									</button>
 								)
 							})}
@@ -1365,8 +1412,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 						onClick={() => setSelected(tail)}
 						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}${cellStage(tail, desk)}`}
 					>
-						<span className="syllabary-cell__char">{tail.kana}</span>
-						<span className="syllabary-cell__romaji">{tail.romaji}</span>
+						<CellFace entry={tail} pairs={pairs} />
 					</button>
 				)}
 			</div>
@@ -1374,7 +1420,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 	)
 }
 
-function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, favorites, accentColor, t }) {
+function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, favorites, accentColor, pairs = false, t }) {
 	const desk = useDesk()
 	const byGroup = useMemo(() => {
 		const map = {}
@@ -1401,7 +1447,7 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 	const table = (rows, cols, title, extra = {}) => (
 		<SyllabaryTable
 			rows={rows} cols={cols} title={title} byGroup={byGroup}
-			selected={selected} setSelected={setSelected} desk={desk} {...extra}
+			selected={selected} setSelected={setSelected} desk={desk} pairs={pairs} {...extra}
 		/>
 	)
 	const charts = {

@@ -84,3 +84,20 @@ describe('the kana charts on a wide desk (plan 128)', () => {
     expect(cells.filter(c => c.querySelector('.syllabary-cell__char').scrollWidth > c.clientWidth)).toEqual([])
   })
 })
+
+// ── plan 129 — both scripts, on the same width ──
+// Each kana's twin under it adds a line to every paired row; the whole
+// of either syllabary still ends above the window's foot.
+describe('both scripts on a wide desk (plan 129)', () => {
+  it.each(['hiragana', 'katakana'])('stands the whole of %s, paired, in the window', async category => {
+    localStorage.setItem('jp-kana-pairs', '1')
+    await mount(category)
+    expect(document.querySelectorAll('.syllabary-cell__twin').length).toBeGreaterThan(90)
+    const cols = [...document.querySelectorAll('.syllabary-col')].map(c => c.getBoundingClientRect())
+    expect(new Set(cols.map(c => Math.round(c.top))).size).toBe(1)
+    expect(Math.max(...cols.map(c => c.bottom))).toBeLessThanOrEqual(innerHeight)
+    const twins = [...document.querySelectorAll('.syllabary-cell__twin')]
+    expect(twins.filter(t => t.scrollWidth > t.parentElement.clientWidth)).toEqual([])
+    localStorage.removeItem('jp-kana-pairs')
+  })
+})

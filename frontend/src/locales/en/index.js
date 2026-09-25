@@ -1101,6 +1101,7 @@ const dictionary = {
   dictBackToRadicals:'Back to radicals',
   dictModeSearch:    'Search',
   dictModeRadical:   'Radical',
+  dictKanaPairs:     'Both scripts',
   dictionaryPlaceholderRadical: 'Filter these results by radical…',
   dictionaryResults: n => `${n} results`,
   dictRadicalNumber: (n) => `radical #${n}`,

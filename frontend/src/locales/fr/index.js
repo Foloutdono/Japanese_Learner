@@ -1075,6 +1075,7 @@ const dictionary = {
   dictBackToRadicals:'Retour aux radicaux',
   dictModeSearch:    'Recherche',
   dictModeRadical:   'Radical',
+  dictKanaPairs:     'Les deux écritures',
   dictionaryPlaceholderRadical: 'Filtrer ces résultats par radical…',
   dictionaryResults: n => `${n} résultats`,
   dictRadicalNumber: (n) => `radical n°\u00A0${n}`,
