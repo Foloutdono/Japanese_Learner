@@ -26,7 +26,7 @@ from pathlib import Path
 import pytest
 
 from core.db import db_conn
-from srs.scheduler import LEARNING_STEPS, Scheduler
+from srs.scheduler import BLACKOUT_WAIT, LEARNING_STEPS, Scheduler
 
 _SPEC = importlib.util.spec_from_file_location(
     "rescale_intervals",
@@ -170,6 +170,22 @@ def test_a_card_left_mid_relearning_waits_a_learning_step_not_an_interval():
     assert state.is_learning
     last = datetime.now(timezone.utc) - timedelta(days=10)
     assert rescale.due_after(state, last) == last + LEARNING_STEPS[state.learning_step]
+
+
+def test_a_card_left_on_a_difficult_step_waits_what_the_scheduler_gave_it():
+    # Difficult climbs a step but waits halfway to it: from ten minutes
+    # to the hour, thirty-five minutes.
+    state = rescale.replay([4, 3])
+    assert state.is_learning and state.learning_step == 2
+    last = datetime.now(timezone.utc) - timedelta(days=10)
+    assert rescale.due_after(state, last) == last + timedelta(minutes=35)
+
+
+def test_a_card_left_on_a_blackout_waits_what_the_scheduler_gave_it():
+    state = rescale.replay([4, 4, 0])
+    assert state.is_learning and state.learning_step == 0
+    last = datetime.now(timezone.utc) - timedelta(days=10)
+    assert rescale.due_after(state, last) == last + BLACKOUT_WAIT
 
 
 # ── End to end, against the database ─────────────────────────
