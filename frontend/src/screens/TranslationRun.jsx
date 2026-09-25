@@ -15,9 +15,13 @@ import { FireIcon } from '../components/ui/Icons'
 // The tutor's review, drawn by the component 作文 shares (plan 125).
 import { TutorReview } from '../components/study/TutorReview'
 import { SentenceBreakdown } from '../components/analysis/SentenceBreakdown'
-import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { BreakdownSide, LineSide } from '../components/analysis/BreakdownSide'
 import { useDesk } from '../hooks/useDesk'
-import { EnterKey } from '../components/chrome/DeskKeys'
+import { EnterKey, KeyCap } from '../components/chrome/DeskKeys'
+import { RunLines } from '../components/study/RunLines'
+import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
+import { useRunLines } from '../hooks/useRunLines'
+import { startTally, countReview } from '../stores/runTally'
 import { DictionaryLookupSheet } from '../components/dictionary/DictionaryDetail'
 import { vocabLookup, grammarLookup, lookupKey } from '../components/analysis/lookup'
 import { tierLabelFor } from '../domain/tiers'
@@ -91,6 +95,9 @@ export default function TranslationRun({ session }) {
   // render while it is open.
   const [lookup, setLookup] = useState(null)
   const closeLookup = useCallback(() => setLookup(null), [])
+  // 机 (plan 128): this run's sentences, each reopening its reference's
+  // breakdown in the side.
+  const lines = useRunLines(session, { held: Boolean(lookup) })
   // Which reference the in-flight breakdown belongs to, so a slow
   // answer for a phrase the learner has already left cannot overwrite
   // the one on screen (ReadingRun's analysisPhraseRef).
@@ -142,6 +149,8 @@ export default function TranslationRun({ session }) {
   function startSession() {
     setScore({ correct: 0, total: 0 })
     setStreak(0)
+    startTally(`translation:${sourceLabel()}`)
+    lines.reset()
     seenRef.current = []
     queueRef.current = []
     setStage('loading')
@@ -227,6 +236,11 @@ export default function TranslationRun({ session }) {
   }
 
   function next() {
+    // The sentence just graded joins the run's lines (plan 128): the
+    // reference, and its breakdown as it stands by now.
+    if (data && feedback?.quality != null) {
+      lines.commit({ key: data._uiKey, jp: data.phrase, translation: data.translation, quality: feedback.quality, analysis: breakdown })
+    }
     if (queueRef.current.length > 0) {
       const [head, ...rest] = queueRef.current
       queueRef.current = rest
@@ -309,9 +323,12 @@ export default function TranslationRun({ session }) {
   function gradeAnswer(isCorrect, quality = null) {
     if (feedback?.correct !== null) return // already graded, ignore repeat clicks
 
-    setFeedback(f => ({ ...f, correct: isCorrect }))
+    setFeedback(f => ({ ...f, correct: isCorrect, quality }))
     setScore(s => ({ correct: s.correct + (isCorrect ? 1 : 0), total: s.total + 1 }))
     setStreak(s => (isCorrect ? s + 1 : 0))
+    countReview({ quality })
+    lines.close()
+    setLookup(null)
     // No playCorrect here any more: RatingBar plays the tap itself, on
     // both sides, and grading is only ever reached through it now --
     // calling it here too doubled the sound on a correct answer.
@@ -396,6 +413,7 @@ export default function TranslationRun({ session }) {
       lookup={lookup}
       setLookup={setLookup}
       closeLookup={closeLookup}
+      lines={lines}
       session={session}
       onBack={leave}
       backLabel={t[backKey]}
@@ -425,7 +443,7 @@ function SessionView({
   t, source, level, domain, tier, tierSize, stage, data, answer, setAnswer,
   feedback, score, streak, fare, error, analysis, analysisLoading, backLabel,
   breakdown, breakdownLoading, onExplain, explaining, explainError,
-  showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup,
+  showBreakdown, setShowBreakdown, lookup, setLookup, closeLookup, lines,
   session, onBack, onStart, submitAnswer, gradeAnswer, next, retry,
 }) {
   const desk = useDesk()
@@ -446,6 +464,17 @@ function SessionView({
   // learner's own alphabet, and a label over it said what the eye
   // already knew (DESIGN.md, "say less").
 
+  const keys = useSentenceKeys()
+  // A door in a breakdown -- the reference on the stage's, or a line
+  // reopened from the run's lines -- opens in the column (plan 115).
+  const doors = {
+    onTokenClick: w => setLookup(vocabLookup(w)),
+    onGrammarOpen: g => setLookup(grammarLookup(g)),
+    lookup,
+    onExitLookup: closeLookup,
+    session,
+  }
+
   return (
     <StudyStage
       color={TRANSLATION_COLOR}
@@ -453,26 +482,37 @@ function SessionView({
       leaveLabel={backLabel}
       where={t.translationTitle}
       sub={where}
-      remaining={`${score.correct} / ${score.total}`}
+      // On the desk the score is the run panel's figures (plan 128).
+      remaining={desk ? undefined : `${score.correct} / ${score.total}`}
       pass={false}
       aside={<Streak streak={streak} t={t} />}
       toast={fare.toast}
       onToastDone={fare.toastDone}
-      side={(
+      records
+      recordsLabel={t.deskLinesRated}
+      panel={(
+        <RunLines
+          lines={lines.lines}
+          // The reference is the answer: the row shows it once the
+          // answer is in, as the card does.
+          current={data && stage !== 'error' ? currentLine(stage === 'feedback' ? data.phrase : null, feedback?.quality ?? null) : null}
+          openKey={lines.opened?.key ?? null}
+          onOpen={key => { setLookup(null); lines.open(key) }}
+          onCurrent={() => { setLookup(null); lines.close() }}
+          keys={keys}
+        />
+      )}
+      side={lines.opened ? <LineSide lines={lines} {...doors} /> : (
         <BreakdownSide
           graded={stage === 'feedback' && feedback?.correct != null}
           analysis={breakdown}
           loading={breakdownLoading}
           translation={data?.translation}
           sentenceText={data?.phrase}
-          onTokenClick={w => setLookup(vocabLookup(w))}
-          onGrammarOpen={g => setLookup(grammarLookup(g))}
           onExplain={onExplain}
           explaining={explaining}
           explainError={explainError}
-          lookup={lookup}
-          onExitLookup={closeLookup}
-          session={session}
+          {...doors}
         />
       )}
       sideLabel={t.deskBreakdownLabel}
@@ -615,7 +655,7 @@ function SessionView({
             <div className="stage__foot">
               <button type="button" onClick={next} className="btn-primary" aria-keyshortcuts={desk ? 'Enter' : undefined}>
                 {t.nextPhrase}
-                {desk && <kbd className="desk-kbd" aria-hidden="true">{t.keyEnter}</kbd>}
+                <KeyCap>{t.keyEnter}</KeyCap>
               </button>
               {/* 机 (plan 123): Enter takes the next sentence, so a run
                   is type, Enter, a digit, Enter -- as comprehension's is. */}

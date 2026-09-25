@@ -1097,9 +1097,48 @@ answer a keyboard and a pointer one way everywhere.
   stand centred past it and give down to 300 | 400 | 300 on a laptop
   without a second width query. The elements print no key caps there
   (`RunPanelsContext`) but the flashcard's "Espace pour révéler". A run with no rating bar (a browse, the
-  practice runs, the rides) keeps its side alone, the level strip on the
+  rides) keeps its side alone, the level strip on the
   floor and the plate's own layout; a run that failed or ended with
   nothing rated shows no figures, and the misses stand at its end.
+- **A practice run stands on the same three panels** (plan 128; the
+  owner asked for the practice modes to be reworked as the learning ones
+  were, and picked the left panel from three drawn candidates). Reading,
+  translation, dictation, composition and comprehension: at the left
+  **this run** — sentences (or questions) rated, good or better, XP
+  earned, the level bar as a row; the head's score pill goes — over **the
+  run's lines**: every sentence so far with the grade it got as a dot in
+  its verdict's ink, the one on the stage last, and any passed sentence a
+  door back to its breakdown in the right column (on a phone, and on the
+  desk before this, a sentence was gone the moment Next was pressed). The
+  row on the stage is an ellipsis until the answer is in — the list
+  stands beside the card, and before the answer the sentence is the
+  card's to show or to cover (reading's clock) and dictation's to
+  withhold; the row whose breakdown the column shows is lit in gold, Esc
+  stepping back to the sentence on the stage. The keys at the panel's
+  foot and the rhythm on its sumi. A sentence has no forecast to print:
+  it does not come back the way a card does, and the tiles' figure — what
+  a verdict pays — was rejected because a price beside a self-grade
+  invites the learner to inflate it. In the middle **the exercise**, the
+  card grown to what its floor leaves and the floor one framed row, as
+  the tiles' is: the field and Check, the tiles, then Next. At the right
+  **the breakdown**, sealed until the grade (the breakdown is the
+  answer), then the column's one panel; composition's lesson and
+  comprehension's text stand there the same way. Comprehension's lines
+  are its questions — asked so far, never ahead of the one on the stage,
+  a record rather than doors — and on its review every one with its
+  verdict: the open one's card in the middle with its options marked,
+  the sentence it quotes in the breakdown, the first miss open on
+  arrival, the score in the figures. The elements print no key caps; the
+  lines list them. The mock exam keeps its paper (below), and has no
+  lines: it is sat, not practised.
+- **The asking (問) has its place and is not built.** The owner means to
+  add a desk-only chatbot for short questions with precise answers. On a
+  practice run it will stand in the run's lines panel, the list giving it
+  the lower half, and it opens when the breakdown does — after the grade,
+  for the breakdown's reason: before it, "what does this mean?" is the
+  answer key. Reading, translation and composition gain most (a follow-up
+  on the tutor's review, a nuance the rows cannot hold), dictation after
+  the reveal, comprehension on its review only; the mock exam never.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one

@@ -1523,3 +1523,53 @@ describe('the rail\'s pass (plan 127)', () => {
     expect(inner.querySelector('.hud__pass').hasAttribute('title')).toBe(false)
   })
 })
+
+// ── plan 128 — the run's lines, which a phone never draws ──
+// On the desk a practice run stands on three panels: this run and its
+// lines at the left, the breakdown sealed at the right until the grade,
+// the keys listed in the lines rather than on the controls. A phone keeps
+// its one column: the score in the head's pill, the level strip on the
+// floor, the breakdown behind its toggle, and no cap anywhere.
+describe('the run\'s lines (plan 128)', () => {
+  it('draws no column, keeps the head\'s score and the breakdown\'s toggle', async () => {
+    const { apiJson } = await import('./lib/api')
+    const PHRASE = { phrase: '山へ行きます。', romaji: 'yama e ikimasu', translation: 'I go to the mountain.', translation_lang: 'en', display_seconds: 30 }
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/reading/batch')) return { ok: true, status: 200, json: async () => ({ phrases: [PHRASE, { ...PHRASE, phrase: '駅で会いました。' }] }) }
+      if (u === '/api/phrase/analyze') {
+        return { ok: true, status: 200, json: async () => ({ text: PHRASE.phrase, available: true, grammar: [], tokens: [{ surface: '山', reading: 'やま', meaning: 'mountain', pos: 'noun', furigana: [{ text: '山', reading: 'やま' }] }] }) }
+      }
+      return { ok: true, status: 200, json: async () => ({ xp_earned: 7 }) }
+    })
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: ReadingRun } = await import('./screens/ReadingRun')
+    document.body.innerHTML = ''
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/practice/reading/level/N5']}>
+          <Routes><Route path="/practice/reading/level/:level" element={<ReadingRun session={null} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(300)
+    const input = document.querySelector('form.stage__foot input')
+    const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
+    setValue.call(input, 'yama')
+    input.dispatchEvent(new Event('input', { bubbles: true }))
+    await settle(20)
+    document.querySelector('form.stage__foot').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(200)
+    const seals = document.querySelectorAll('.rating-bar__btn')
+    seals[seals.length - 1].click()
+    await settle(300)
+    expect(document.querySelector('.screen').className).toBe('screen')
+    expect(document.querySelector('[class*="desk-"]')).toBeNull()
+    expect(document.querySelector('.stage__head .today-remaining').textContent).toBe('1 / 1')
+    expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
+    expect(document.querySelector('.stage .prose__breakdown button')).not.toBeNull()
+    expect(document.querySelector('kbd')).toBeNull()
+    apiJson.mockReset()
+    apiFetch.mockReset()
+  })
+})

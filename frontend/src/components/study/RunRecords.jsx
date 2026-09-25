@@ -27,7 +27,10 @@ import { useRunTally, tallyAccuracy } from '../../stores/runTally'
 // figures. There the figures stand bare, the labels kept for a screen
 // reader (owner's call). Measured rather than set at a width: how long
 // the labels are is the language's and the count's.
-export function RunRecords({ done = false, remaining = null }) {
+//
+// `label` names the first figure where what a run rates is not a card
+// (plan 128): a practice run's sentences, comprehension's questions.
+export function RunRecords({ done = false, remaining = null, label = null }) {
   const { t } = useLang()
   const tally = useRunTally()
   const accuracy = tallyAccuracy(tally)
@@ -35,7 +38,7 @@ export function RunRecords({ done = false, remaining = null }) {
   if (done && tally.reviewed === 0) return null
   return (
     <div ref={rowRef} className="desk-figs" role="group" aria-label={t.deskRunLabel}>
-      <DeskFigure label={t.totalReviews} value={tally.reviewed} bare={bare} />
+      <DeskFigure label={label ?? t.totalReviews} value={tally.reviewed} bare={bare} />
       <DeskFigure label={t.accuracy} value={accuracy ?? '—'} unit={accuracy === null ? null : '%'} bare={bare} />
       <DeskFigure label={t.deskEarned} value={`+${tally.xp}`} unit="XP" bare={bare} />
       {remaining != null && <DeskFigure label={t.deskRemaining} value={remaining} bare={bare} />}

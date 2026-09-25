@@ -109,7 +109,10 @@ async function oneSentence(answer) {
   expect($('.rating-bar')).toBeNull()
   const next = nextButton()
   expect(next, 'Next answers Enter').toBeTruthy()
-  expect(next.querySelector('.desk-kbd')?.textContent).toMatch(/^(Enter|Entrée)$/)
+  // On the run's panels (plan 128) the button prints no cap: the run's
+  // lines list the keys, Enter first.
+  expect(next.querySelector('.desk-kbd')).toBeNull()
+  expect($$('.desk-sentences .desk-keys .desk-kbd').some(k => /^(Enter|Entrée)$/.test(k.textContent))).toBe(true)
   await userEvent.keyboard('{Enter}')
   await settle(300)
   expect(nextButton()).toBeUndefined()
@@ -137,7 +140,8 @@ describe('a sentence run on the desk', () => {
     await settle(300)
     const play = $('.clip-player__play')
     expect(play.getAttribute('aria-keyshortcuts')).toBe('Space')
-    expect($('.clip-player .desk-kbd')?.textContent).toMatch(/^(Space|Espace)$/)
+    expect($('.clip-player .desk-kbd')).toBeNull()
+    expect($('.desk-sentences .desk-keys .desk-kbd')?.textContent).toMatch(/^(Space|Espace)$/)
     // Nothing is focused on arrival, so the first Space is the clip's.
     expect(document.activeElement).not.toBe(field())
     await userEvent.keyboard(' ')

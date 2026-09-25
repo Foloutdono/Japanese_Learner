@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { startTally, countReview, peekTally, tallyAccuracy, tallyMisses } from './runTally'
+import { startTally, countReview, countXp, peekTally, tallyAccuracy, tallyMisses } from './runTally'
 import { publishEntry, withdrawEntry, peekEntry } from './deskEntry'
 
 describe('the run tally', () => {
@@ -17,6 +17,22 @@ describe('the run tally', () => {
 
     startTally('vocab:N5:f2b')
     expect(peekTally()).toMatchObject({ key: 'vocab:N5:f2b', reviewed: 0, good: 0, xp: 0 })
+  })
+})
+
+describe('a practice run\'s tally (plan 128)', () => {
+  it('counts a sentence at its rating and its fare when it lands', () => {
+    startTally('reading:level:N5')
+    countReview({ quality: 4 })
+    expect(peekTally()).toMatchObject({ reviewed: 1, good: 1, xp: 0 })
+    countXp(7)
+    countReview({ quality: 1 })
+    countXp(1)
+    // Nothing paid is nothing counted.
+    countXp(0)
+    countXp(undefined)
+    expect(peekTally()).toMatchObject({ reviewed: 2, good: 1, xp: 8 })
+    expect(tallyAccuracy(peekTally())).toBe(50)
   })
 })
 

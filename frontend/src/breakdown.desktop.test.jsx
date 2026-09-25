@@ -11,6 +11,7 @@ import './index.css'
 // and the learner's answer. It opens IN the column now: the sentence's
 // ruby line stays above the entry, another word is one click, and Esc
 // brings the rows back. The column wears the run's own line colour.
+// Since plan 128 the column is the run's third panel (practice.panels).
 // The phone keeps its sheet (breakdown.phone).
 
 const apiFetch = vi.fn()
@@ -132,15 +133,16 @@ describe('the focus through a door in the column', () => {
     await settle(150)
     const entry = $('.desk-run__side .desk-entry')
     expect(entry.contains(document.activeElement)).toBe(true)
-    // The entry holds Esc, so the run's way out stops printing it.
+    // On the run's panels (plan 128) the way out prints no cap at all --
+    // the run's lines list Esc -- and the entry's Esc is the entry's.
     const leave = () => $('.stage__head .stage__leave')
     expect(leave().querySelector('.desk-kbd')).toBeNull()
-    expect(leave().hasAttribute('aria-keyshortcuts')).toBe(false)
     await userEvent.keyboard('{Escape}')
     await settle(80)
     expect($('.desk-run__side .desk-entry')).toBeNull()
     expect(document.activeElement).toBe(row)
-    expect(leave().querySelector('.desk-kbd')).not.toBeNull()
-    expect(leave().getAttribute('aria-keyshortcuts')).toBe('Escape')
+    expect($('.stage__head')).not.toBeNull()
+    expect(leave().querySelector('.desk-kbd')).toBeNull()
+    expect($('.desk-sentences .desk-keys').textContent).toMatch(/Échap/)
   })
 })
