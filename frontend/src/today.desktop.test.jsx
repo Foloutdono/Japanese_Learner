@@ -99,24 +99,29 @@ describe('Today on the desk', () => {
     expect(document.querySelector('[role="dialog"]')).toBeNull()
   })
 
-  // Plan 116 sets the lanes two across once the gate holds two lanes at
-  // a phone's width (today.wide.test.jsx). At the desk's tightest the
-  // gate is ~430px and holds one: the lanes stay one to a row.
-  it('keeps the lanes one to a row where the gate holds only one', async () => {
+  // Plan 135 draws each line as a band, its switch beside its lanes
+  // (today.wide.test.jsx). At the desk's tightest nothing may leave the
+  // gate: a band that cannot hold both drops its lanes under the switch.
+  it('holds every band inside the gate at the desk\'s tightest', async () => {
     await mount()
     await settle()
-    const box = document.querySelector('.gate-card__lanes')
-    const [a, b] = [...box.querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
-    expect(b.top).toBeGreaterThanOrEqual(a.bottom)
-    expect(Math.round(b.left)).toBe(Math.round(a.left))
-    expect(Math.round(a.width)).toBe(box.clientWidth)
+    const gate = document.querySelector('.gate-card--desk').getBoundingClientRect()
+    for (const el of document.querySelectorAll('.gate-band__line, .gate-band .lane')) {
+      const r = el.getBoundingClientRect()
+      expect(r.left).toBeGreaterThanOrEqual(gate.left)
+      expect(r.right).toBeLessThanOrEqual(gate.right)
+    }
+    for (const band of document.querySelectorAll('.gate-band')) {
+      const line = band.querySelector('.gate-band__line').getBoundingClientRect()
+      const tile = band.querySelector('.lane').getBoundingClientRect()
+      expect(tile.left > line.right || tile.top >= line.bottom).toBe(true)
+    }
   })
 
-  // A laptop's short window (plan 123): the lanes were a phone's 30dvh
-  // box, so 650px showed four of eight switches over empty desk. The
-  // gate is bounded by the window now; the lanes take what is left, and
-  // Depart stays inside it.
-  it('gives the lanes what a short window leaves, Depart still in view', async () => {
+  // A laptop's short window (plan 123, kept by plan 135): the gate is
+  // bounded by the window, the bands scroll inside it, and Depart and
+  // the fare stay in view.
+  it('scrolls the bands in a short window, Depart still in view', async () => {
     const lanes = TODAY.lanes
     TODAY.lanes = ['N5', 'N4', 'N3', 'N2'].flatMap(d => [
       lane('vocab', d, 'vocab.flashcard.f2b', 5), lane('kanji', d, 'kanji.flashcard.f2b', 5),
@@ -127,10 +132,10 @@ describe('Today on the desk', () => {
       await settle()
       const go = document.querySelector('.btn-depart').getBoundingClientRect()
       expect(go.bottom).toBeLessThanOrEqual(window.innerHeight)
-      const box = document.querySelector('.gate-card__lanes')
-      const edge = box.getBoundingClientRect().bottom
-      const seen = [...box.querySelectorAll('.lane')].filter(el => el.getBoundingClientRect().bottom <= edge + 1)
-      expect(seen.length).toBeGreaterThan(5)
+      expect(document.querySelector('.gate-card__fare-parts').getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
+      const box = document.querySelector('.gate-card__bands')
+      expect(getComputedStyle(box).overflowY).toBe('auto')
+      expect(box.getBoundingClientRect().bottom).toBeLessThanOrEqual(go.top)
     } finally {
       TODAY.lanes = lanes
       await page.viewport(1100, 800)

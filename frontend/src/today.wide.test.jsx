@@ -5,12 +5,13 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the gate's lanes two across, on a laptop (plan 116) ───────
-// At 1440 one lane per row ran ~704px, the name at one end and its
-// figure at the other, and the bounded box hid half the day's switches
-// under its cut. Two across, a lane is a phone's width again and the
-// day is in view. The desk's tightest width keeps one lane to a row
-// (today.desktop.test.jsx), and a phone keeps its own box
+// ── 机 — the fare gate takes the hall, on a laptop (plan 135) ──────
+// The owner's pick (A·2 of the Today canvas), replacing plan 116's two
+// lanes across: the gate is the window's height; each line a band, its
+// switch beside its lanes; the run's length (20 / 50 / 100 / all) and
+// its minutes in the head, each lane's share on it and whether it
+// boards; the fare beside Depart. The desk's tightest width is
+// today.desktop.test.jsx's, and a phone keeps its own gate
 // (deskfree.phone.test.jsx).
 
 vi.mock('./lib/api', () => ({
@@ -49,6 +50,11 @@ vi.mock('./stores/today', () => ({
   useTodaySummary: () => ({ data: todayRef.current, failed: false }),
   refreshToday: vi.fn(), seedTodaySummary: vi.fn(),
 }))
+const forecastRef = vi.hoisted(() => ({ current: null }))
+vi.mock('./stores/forecast', () => ({
+  useForecast: () => ({ data: forecastRef.current, failed: false }),
+  forgetForecast: vi.fn(),
+}))
 vi.mock('./stores/journey', () => ({
   useJourneyStatus: () => ({ data: null, failed: false }),
   useVolumes: () => ({ data: null }),
@@ -57,8 +63,9 @@ vi.mock('./stores/journey', () => ({
 vi.mock('./stores/profileSummary', async o => ({ ...(await o()),
   useProfileSummary: () => ({ level: 12, jlptLevel: 'N5', streak: 3, week: [], guided: { today: true } }),
 }))
+const creditsRef = vi.hoisted(() => ({ current: null }))
 vi.mock('./stores/credits', async o => ({ ...(await o()),
-  useCredits: () => ({ balance: 30, cap: 50, unlimited: false }),
+  useCredits: () => creditsRef.current,
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
@@ -68,12 +75,14 @@ const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
 const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, cancelable: true }))
 const $ = s => document.querySelector(s)
 const $$ = s => [...document.querySelectorAll(s)]
-const token = name => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
 
 beforeEach(() => {
   departure.begin.mockReset()
   departure.current = null
   todayRef.current = todayOf(EIGHT)
+  creditsRef.current = { balance: 30, cap: 50, unlimited: false }
+  forecastRef.current = null
+  localStorage.clear()
 })
 
 async function mount(entry = '/today') {
@@ -90,59 +99,145 @@ async function mount(entry = '/today') {
   return screen
 }
 
-describe('the gate\'s lanes on a laptop', () => {
-  it('go two across, in the list\'s own order, each at least as wide as a phone draws it', async () => {
+const text = el => el.textContent.replace(/\s+/g, ' ').trim()
+const figure = el => text(el.querySelector('.lane__due'))
+
+describe('the gate on a laptop', () => {
+  it('takes the window\'s height, its bands between the head and the fare', async () => {
     await mount()
-    const box = $('.gate-card__lanes')
-    expect(getComputedStyle(box).display).toBe('grid')
-    const rows = $$('.lane').map(el => el.getBoundingClientRect())
-    expect(rows).toHaveLength(8)
-    // Left to right, then down: the sorted order is the reading order.
-    expect(Math.round(rows[1].top)).toBe(Math.round(rows[0].top))
-    expect(rows[1].left).toBeGreaterThan(rows[0].right)
-    expect(rows[2].top).toBeGreaterThan(rows[0].bottom)
-    expect(Math.round(rows[2].left)).toBe(Math.round(rows[0].left))
-    // Four rows, two columns: never a third.
-    expect(new Set(rows.map(r => Math.round(r.left))).size).toBe(2)
-    expect(new Set(rows.map(r => Math.round(r.top))).size).toBe(4)
-    // No narrower than a phone draws a lane, no wider than a phone's
-    // whole content: the figure stands a phone's width from its name.
-    const floor = token('--desk-side-w') - 2 * token('--sp-5')
-    for (const r of rows) {
-      expect(r.width).toBeGreaterThanOrEqual(floor)
-      expect(r.width).toBeLessThanOrEqual(token('--desk-side-w'))
+    const gate = $('.gate-card--desk').getBoundingClientRect()
+    expect(gate.height).toBeGreaterThan(window.innerHeight * 0.85)
+    expect(gate.bottom).toBeLessThanOrEqual(window.innerHeight)
+    const go = $('.gate-card__fare .btn-depart').getBoundingClientRect()
+    expect(go.bottom).toBeLessThanOrEqual(gate.bottom)
+    // An eight-lane day whole, with nothing under the cut.
+    const bands = $('.gate-card__bands')
+    expect(bands.scrollHeight).toBeLessThanOrEqual(bands.clientHeight)
+  })
+
+  it('draws a line as a band, its switch beside its lanes, and no chips', async () => {
+    await mount()
+    expect($('.gate-card__lines')).toBeNull()
+    const bands = $$('.gate-band')
+    expect(bands.map(b => text(b.querySelector('.gate-band__name')))).toEqual(['Kana', 'Vocabulaire JLPT', 'Kanji', 'Grammaire'])
+    for (const band of bands) {
+      const line = band.querySelector('.gate-band__line').getBoundingClientRect()
+      for (const tile of band.querySelectorAll('.lane')) {
+        expect(tile.getBoundingClientRect().left).toBeGreaterThan(line.right)
+      }
     }
+    // Every switch as wide as the next, whatever its line's name.
+    const widths = bands.map(b => Math.round(b.querySelector('.gate-band__line').getBoundingClientRect().width))
+    expect(new Set(widths).size).toBe(1)
+    // A·2's measures: the switch column at 230px, the lanes three across.
+    expect(widths[0]).toBe(230)
+    const kanji = [...bands[2].querySelectorAll('.lane')].map(el => Math.round(el.getBoundingClientRect().top))
+    expect(kanji.filter(top => top === kanji[0])).toHaveLength(2)
+    const vocabTops = [...bands[1].querySelectorAll('.lane')].map(el => Math.round(el.getBoundingClientRect().top))
+    expect(new Set(vocabTops).size).toBe(1)
+    // A line's lanes in the list's order, left to right then down.
+    const vocab = [...bands[1].querySelectorAll('.lane')].map(el => el.getBoundingClientRect())
+    expect(vocab[1].top > vocab[0].top || vocab[1].left > vocab[0].right).toBe(true)
+    // The band's switch turns its whole line off.
+    await userEvent.click(bands[1].querySelector('.gate-band__line'))
+    await settle(60)
+    expect([...bands[1].querySelectorAll('.lane')].every(l => l.getAttribute('aria-pressed') === 'false')).toBe(true)
+    expect(text($('.gate-card__count'))).toBe(String(101 - 49))
   })
 
-  it('stand the line chips and Depart across both columns', async () => {
+  it('cuts the run to a length, each lane printing its share as the queue deals', async () => {
     await mount()
-    const rows = $$('.lane').map(el => el.getBoundingClientRect())
-    const left = Math.min(...rows.map(r => r.left))
-    const right = Math.max(...rows.map(r => r.right))
-    for (const sel of ['.gate-card__lines', '.btn-depart']) {
-      const r = $(sel).getBoundingClientRect()
-      expect(r.left, sel).toBeLessThanOrEqual(left + 1)
-      expect(r.right, sel).toBeGreaterThanOrEqual(right - 1)
-    }
+    const options = $$('.gate-card__take .seg__opt').map(text)
+    expect(options).toEqual(['20', '50', '100', 'Tout · 101'])
+    expect($('.gate-card__take [aria-checked="true"]').textContent).toContain('Tout')
+    await userEvent.click($$('.gate-card__take .seg__opt')[0])
+    await settle(60)
+    expect(text($('.gate-card__count'))).toBe('20')
+    expect(text($('.gate-card--desk .gate-card__figure .gate-card__unit'))).toBe('sur 101')
+    // 20 over eight lanes: two rounds, then the first four once more.
+    expect($$('.lane').map(figure)).toEqual(['3 / 18', '3 / 9', '3 / 30', '3 / 12', '2 / 7', '2 / 14', '2 / 6', '2 / 5'])
+    expect(text($$('.gate-band__due')[2])).toBe('4 / 20')
+    // Depart carries the shares.
+    press('Enter')
+    await settle(60)
+    const path = departure.begin.mock.calls[0][0].path
+    expect(path.startsWith('/today/run?quota=')).toBe(true)
+    const quota = decodeURIComponent(path.split('quota=')[1]).split(',')
+    expect(quota).toHaveLength(8)
+    expect(quota).toContain(`${EIGHT[2].id}:3`)
+    // Remembered for the next visit.
+    expect(localStorage.getItem('tsuji.gateTake')).toBe('20')
   })
 
-  it('show an eight-lane day whole, with nothing under the cut', async () => {
+  it('opens on the length chosen last time, and fades a lane the length leaves out', async () => {
+    localStorage.setItem('tsuji.gateTake', '20')
+    const many = Array.from({ length: 12 }, (_, i) => lane('vocab', `N${(i % 5) + 1}`, `vocab.mode${i}`, 2))
+    todayRef.current = todayOf(many)
     await mount()
-    const box = $('.gate-card__lanes')
-    expect(box.scrollHeight).toBeLessThanOrEqual(box.clientHeight)
+    expect($('.gate-card__take [aria-checked="true"]').textContent).toBe('20')
+    expect(text($('.gate-card__count'))).toBe('20')
+    // 20 over twelve lanes of two: the last four get one each, none out.
+    expect($$('.lane--out')).toHaveLength(0)
+    todayRef.current = todayOf(Array.from({ length: 24 }, (_, i) => lane('vocab', 'N5', `vocab.mode${i}`, 1)))
+    await mount()
+    // Twenty-four lanes of one: the last four are on, and ride nothing.
+    const out = $$('.lane--out')
+    expect(out).toHaveLength(4)
+    expect(out.every(l => l.getAttribute('aria-pressed') === 'true')).toBe(true)
   })
 
-  it('keep a single lane the whole row', async () => {
-    todayRef.current = todayOf([EIGHT[2]])
+  it('prints no time before the pace is known', async () => {
     await mount()
-    const box = $('.gate-card__lanes')
-    const style = getComputedStyle(box)
-    const content = box.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight)
-    expect(Math.round($('.lane').getBoundingClientRect().width)).toBe(Math.round(content))
+    expect($('.gate-card__time')).toBeNull()
+  })
+
+  it('prints what the run will take, and what a shorter one will', async () => {
+    todayRef.current = { ...todayOf(EIGHT), seconds_per_review: 12 }
+    await mount()
+    expect($('.gate-card__time').getAttribute('aria-label')).toBe('environ 20 minutes')
+    await userEvent.click($$('.gate-card__take .seg__opt')[1])
+    await settle(60)
+    expect(text($('.gate-card__minutes'))).toBe('≈ 10')
   })
 })
 
-describe('Enter, with the lanes two across', () => {
+describe('the fare beside Depart', () => {
+  it('counts what boards, what waits and until when, and the balance', async () => {
+    await mount()
+    const parts = $$('.gate-card__part').map(p => [...p.children].map(text).join(' '))
+    // 27 kana ride free; 30 of the 74 paid ride on the balance.
+    expect(parts[0]).toBe('57 embarquent')
+    expect(parts[1]).toMatch(/^44 attendent · \+30 à /)
+    expect(parts[2]).toBe('30 / 50 crédits')
+    expect($$('.lane--waits')).toHaveLength(0)
+  })
+
+  it('marks every paid lane as waiting when nothing paid can ride', async () => {
+    creditsRef.current = { balance: 0, cap: 50, unlimited: false }
+    await mount()
+    const waiting = $$('.lane--waits')
+    expect(waiting).toHaveLength(6)
+    expect(waiting.every(l => l.querySelector('.lane__waits'))).toBe(true)
+    const kana = [...$$('.gate-band')[0].querySelectorAll('.lane')]
+    for (const l of kana) {
+      expect(l.classList.contains('lane--waits')).toBe(false)
+      expect(text(l.querySelector('.lane__free'))).toBe('gratuit')
+    }
+    expect(text($$('.gate-card__part-n')[0])).toBe('27')
+  })
+
+  it('prints no fare on a pass, and Depart takes the row', async () => {
+    creditsRef.current = { balance: null, unlimited: true }
+    await mount()
+    expect($('.gate-card__fare-parts')).toBeNull()
+    expect($$('.lane__free')).toHaveLength(0)
+    const foot = $('.gate-card__fare').getBoundingClientRect()
+    const go = $('.gate-card__fare .btn-depart').getBoundingClientRect()
+    expect(go.width).toBeGreaterThan(foot.width * 0.9)
+  })
+})
+
+describe('Enter, on the bands', () => {
   it('departs with the whole day when every lane is on', async () => {
     await mount()
     press('Enter')
@@ -151,27 +246,63 @@ describe('Enter, with the lanes two across', () => {
     expect(departure.begin.mock.calls[0][0].path).toBe('/today/run')
   })
 
-  it('departs with the choice made in the second column', async () => {
+  it('departs with the choice made on a tile', async () => {
     await mount()
-    const second = $$('.lane')[3]
-    expect(second.getBoundingClientRect().left).toBeGreaterThan($$('.lane')[2].getBoundingClientRect().right)
+    const tile = $$('.lane')[3]
     // A real click, which leaves the focus on the lane, as Chrome does.
     // The page's Enter departs from there: a lane pressed by the pointer
-    // does not own the key (plan 123) -- it used to press the lane again
-    // and turn it back on, which the blur this test once made hid.
-    await userEvent.click(second)
+    // does not own the key (plan 123).
+    await userEvent.click(tile)
     await settle(60)
-    expect(second.getAttribute('aria-pressed')).toBe('false')
-    expect(document.activeElement).toBe(second)
+    expect(tile.getAttribute('aria-pressed')).toBe('false')
+    expect(document.activeElement).toBe(tile)
     await userEvent.keyboard('{Enter}')
     await settle(60)
-    expect(second.getAttribute('aria-pressed')).toBe('false')
+    expect(tile.getAttribute('aria-pressed')).toBe('false')
     expect(departure.begin).toHaveBeenCalledTimes(1)
     const path = departure.begin.mock.calls[0][0].path
     const chosen = decodeURIComponent(path.split('lanes=')[1] ?? '').split(',')
     expect(path.startsWith('/today/run?lanes=')).toBe(true)
     expect(chosen).toHaveLength(7)
     expect(chosen).not.toContain(EIGHT[3].id)
+  })
+})
+
+describe('the week ahead, under the journey', () => {
+  const WEEK = ['2026-09-25', '2026-09-26', '2026-09-27', '2026-09-28', '2026-09-29', '2026-09-30', '2026-10-01']
+    .map((date, i) => ({ date, count: [140, 41, 36, 58, 29, 47, 33][i] }))
+
+  it('draws seven days at the side\'s foot, today the gate\'s own total', async () => {
+    forecastRef.current = { days: WEEK }
+    await mount()
+    const days = $$('.desk-side .desk-week__day')
+    expect(days).toHaveLength(7)
+    // Today is what the gate counts, not the forecast's row count.
+    expect(text(days[0].querySelector('.desk-week__n'))).toBe('101')
+    expect(days[0].classList.contains('desk-week__day--today')).toBe(true)
+    expect(days.map(d => text(d.querySelector('.desk-week__d')))).toEqual(['金', '土', '日', '月', '火', '水', '木'])
+    // The tallest bar is today's; the rest in proportion.
+    const h = days.map(d => d.querySelector('.desk-week__bar').getBoundingClientRect().height)
+    expect(h[0]).toBe(Math.max(...h))
+    expect(h[3]).toBeGreaterThan(h[4])
+    // At the column's foot, the column the window's height.
+    const side = $('.desk-side').getBoundingClientRect()
+    expect($('.desk-week').getBoundingClientRect().bottom).toBeGreaterThan(side.bottom - 24)
+    // Nothing is left for tomorrow while the whole day rides.
+    expect($('.desk-week__left')).toBeNull()
+  })
+
+  it('says what a shorter run leaves for tomorrow', async () => {
+    forecastRef.current = { days: WEEK }
+    await mount()
+    await userEvent.click($$('.gate-card__take .seg__opt')[0])
+    await settle(60)
+    expect([...$('.desk-week__left').children].map(text)).toEqual(['Laissées pour demain', '81'])
+  })
+
+  it('stands nothing before the forecast answers', async () => {
+    await mount()
+    expect($('.desk-week')).toBeNull()
   })
 })
 

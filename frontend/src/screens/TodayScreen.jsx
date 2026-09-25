@@ -14,6 +14,7 @@ import { CheckIcon } from '../components/ui/Icons'
 import { useDesk } from '../hooks/useDesk'
 import { DeskSide } from '../components/chrome/DeskSide'
 import { JourneyPanel } from '../components/journey/JourneyPanel'
+import { WeekAhead } from '../components/journey/WeekAhead'
 
 // ── 本日 — the gate (plan 070) ────────────────────────────────
 // The Today tab: the bar, the pass at strip size, and under it the
@@ -111,6 +112,8 @@ export default function TodayScreen({ session }) {
               just inked today's stamp and moved the new-items gauge. */}
           <PassStrip pace={today?.pace} />
           <JourneyPanel session={session} />
+          {/* 七日 (plan 135): the week ahead, at the column's foot. */}
+          {!run && <WeekAhead />}
         </DeskSide>
       )}
     </main>
