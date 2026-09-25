@@ -33,6 +33,27 @@ class AnalyzeLocalTests(unittest.TestCase):
             cursor = t["end"]
         self.assertEqual(cursor, len(sentence))
 
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_token_offsets_count_the_spaces_between_phrases(self) -> None:
+        # A subtitle line is phrases with spaces between them, and MeCab
+        # drops a half-width space rather than making it a token. The
+        # offsets are into the text as written all the same: uncounted,
+        # every one after a space was short, the grammar detector (which
+        # matches the text) lost every particle past the first space,
+        # and a cloze blanked the wrong letters.
+        sentence = "SHAKE 白々しく光る  街の灯りに\t照らされ"
+        r = analyze_local(sentence)
+        for t in r["tokens"]:
+            self.assertEqual(sentence[t["start"]:t["end"]], t["surface"])
+        by_pattern = {g["pattern"]: g for g in r["grammar"]}
+        for pattern, surface in (("の", "の"), ("に", "に"), ("受身形 〜られる", "れ")):
+            with self.subTest(pattern=pattern):
+                self.assertIn(pattern, by_pattern)
+                g = by_pattern[pattern]
+                self.assertEqual(sentence[g["start"]:g["end"]], surface)
+                covering = [t for t in r["tokens"] if pattern in {p["pattern"] for p in t["grammar"]}]
+                self.assertEqual([t["surface"] for t in covering], [surface])
+
     def test_kanji_compound_gets_per_kanji_furigana(self) -> None:
         r = analyze_local("大学に行きます。")
         daigaku = next(t for t in r["tokens"] if t["surface"] == "大学")

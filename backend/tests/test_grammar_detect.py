@@ -66,6 +66,16 @@ class WordBoundaryTests(unittest.TestCase):
         〜せいで, せい|で straddling the two."""
         self.assertNotIn("〜せいで", patterns("わたしはがくせいです。"))
 
+    def test_a_space_between_phrases_moves_no_word(self) -> None:
+        """A subtitle's phrases are set apart by spaces, which the
+        tokenizer drops. The words after one are where they are
+        written: the は past the space is on its particle, and so found."""
+        self.assertIn("は", patterns("はしゃぐ声に ただ僕は見惚れていた"))
+        self.assertIn("の", patterns("SHAKE 果てなき夢の底"))
+        line = "SHAKE 白々しく光る 街の灯りに"
+        spans = {p: line[s:e] for p, _lv, s, e, _k in grammar_detect.detect(line)}
+        self.assertEqual((spans.get("の"), spans.get("に")), ("の", "に"))
+
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class EveryPartTests(unittest.TestCase):
@@ -121,6 +131,19 @@ class ShapeFromTheLessonsTests(unittest.TestCase):
                 for example in point.get("examples", []):
                     with self.subTest(sentence=example["jp"]):
                         self.assertIn(pattern, patterns(example["jp"]))
+
+    def test_two_spellings_of_one_word_attach_to_the_same_words(self) -> None:
+        """です／だ: the lessons show だ once, after しずか, and です after
+        nouns. Read apart, だ followed a na-adjective and nothing else, and
+        a plain sentence ending in a noun had no copula. The past だ of
+        読んだ is た, and still not it."""
+        for sentence in ("明日は雨だ。", "甘くない夜だな", "この店はしずかだ。", "しずかです。"):
+            with self.subTest(sentence=sentence):
+                self.assertIn("です／だ", patterns(sentence))
+        self.assertNotIn("です／だ", patterns("本を読んだ。"))
+        # Spellings that are different kinds of word keep their own
+        # words: 〜くなる grows out of an adjective, 〜になる follows a noun.
+        self.assertNotIn("〜くなる／〜になる", patterns("学校に行く。"))
 
     def test_half_a_word_is_not_a_point_that_stands_on_its_own(self) -> None:
         """〜し lists reasons and stands as its own word in every one of

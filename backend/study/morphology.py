@@ -223,8 +223,15 @@ def tokenize(text: str) -> list[Morpheme] | None:
         cursor = 0
         for w in _tagger(text):
             surface = w.surface
-            start = cursor
-            end = cursor + len(surface)
+            # MeCab drops ASCII whitespace between words and hands it
+            # back as the next word's `white_space`. Uncounted, every
+            # offset after a space was short by it -- and a subtitle
+            # line is usually several phrases with spaces between them:
+            # the grammar detector, which matches the raw text and
+            # anchors on these offsets, lost every particle after the
+            # first space, and a cloze blanked the wrong letters.
+            start = cursor + len(getattr(w, "white_space", "") or "")
+            end = start + len(surface)
             cursor = end
             feat = w.feature
             pron = getattr(feat, "pron", None) or getattr(feat, "kana", None) or ""
