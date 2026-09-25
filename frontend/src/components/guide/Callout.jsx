@@ -38,7 +38,7 @@ function measure(anchor, place) {
   const pos = place === 'above' ? { bottom: Math.max(0, window.innerHeight - r.top + GAP) }
     : place === 'below' ? { top: r.bottom + GAP }
     : { top: r.top + GAP }
-  // 机 (plan 132): on a run's three panels the stage is the middle
+  // 机 (plan 133): on a run's three panels the stage is the middle
   // column, neither the window's middle nor what a lone side leaves, so
   // the note stands on its anchor, at the anchor's width.
   if (el.closest('.desk-run--panels')) return { ...pos, left: r.left + r.width / 2, width: r.width }

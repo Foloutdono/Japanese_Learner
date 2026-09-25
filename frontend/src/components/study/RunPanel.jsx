@@ -21,7 +21,7 @@ import { DeckLegend } from './QuizComponents'
 // The `data-guide` names on it and on the card panel, the run's lines
 // and the side (run.records, run.state, run.verdicts, run.keys,
 // run.rhythm, run.lines, run.side) are the stops of the first ride's
-// walk round the panels (plan 132, screens/RideRun.jsx).
+// walk round the panels (plan 133, screens/RideRun.jsx).
 export function RunPanel({ remaining = null, progress = null, done = false, label = null }) {
   const { t } = useLang()
   return (

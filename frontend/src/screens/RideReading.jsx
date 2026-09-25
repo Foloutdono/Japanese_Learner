@@ -43,7 +43,7 @@ import { useDesk } from '../hooks/useDesk'
 // stamp on "Enter the station" -- or on Skip, the same stamp: a
 // learner who skipped is not asked again.
 //
-// 机 (plan 132): on the desk the ride stands on the practice runs'
+// 机 (plan 133): on the desk the ride stands on the practice runs'
 // three panels (plan 129) -- this run's figures and its lines at the
 // left, the sentence in the middle, the breakdown sealed at the right
 // until the grade -- and walks the learner round them before the clock
@@ -230,7 +230,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       sub={t.readingTitle}
       pass={false}
       className="ride ride--reading"
-      // 机 (plan 132): a practice run's three panels (plan 129). The
+      // 机 (plan 133): a practice run's three panels (plan 129). The
       // one sentence is the lines' current row, an ellipsis until the
       // answer is in; the lines are a record, not doors -- there is no
       // other sentence to reopen.

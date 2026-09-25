@@ -1,4 +1,4 @@
-// ── 試乗 — the first ride's walks round a run on the desk (plan 132) ──
+// ── 試乗 — the first ride's walks round a run on the desk (plan 133) ──
 // The stops the guide (components/guide/Guide.jsx, handed them as
 // `stops`) walks while the ride stands on a run's three panels. The
 // anchors are the panels' own `data-guide` names (RunPanel, CardPanel,
