@@ -681,6 +681,14 @@ MOVES: dict[str, str] = {
     "vocab_N3_勉強_べんきょう": "vocab_N5_勉強_べんきょう",
     "vocab_N5__コピーする": "vocab_N5__コピー",
     "vocab_N3__コピー": "vocab_N5__コピー",
+    # ── A reading the character does not have ───────────────────
+    # The N1 card read 前 as せん, which is 先's on-reading: the
+    # 常用漢字表 and datas/kanji/kanji.sqlite3 both give 前 ゼン and
+    # まえ and nothing else, and no JMdict row pairs 前 with せん
+    # (the pool has 前::さき and 前::ぜん only). The card kept its
+    # gloss, "before", which is JMdict's own third and fourth sense
+    # for 前::ぜん -- a dropped dakuten, not a different word.
+    "vocab_N1_前_せん": "vocab_N1_前_ぜん",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -696,6 +704,7 @@ NOT_FOLDED: frozenset[str] = frozenset({
     "vocab_N1_徐々_そろそろ",
     "vocab_N1_一筋_ひとすき",
     "vocab_N1_真実_さな",
+    "vocab_N1_前_せん",
 })
 
 # Ids that left the deck with nowhere to go. MOVES needs a card to carry
