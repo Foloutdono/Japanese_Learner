@@ -178,6 +178,9 @@ def hold_above(all_lanes, level):
     whose deck key is no level pass through; so does everything when the
     level is unknown (never onboarded), because holding back on a guess
     would hide a review that is genuinely due.
+
+    The caller passes hold_line(level, goal), not the bare level: a stop
+    on the way to the learner's goal is not set aside.
     """
     if level not in LEVELS:
         return all_lanes
@@ -188,6 +191,24 @@ def hold_above(all_lanes, level):
             continue
         kept[key] = ids
     return kept
+
+
+def hold_line(level, goal):
+    """The highest stop whose reviews the day serves: the learner's
+    level, or their goal when it lies further up the line.
+
+    The level alone was the line once, and it hid real work. The Learn
+    gate marks the level as a landmark, never a lock (ADR 0005), so an
+    N5 learner riding to N3 opens N4 kanji on purpose -- and their
+    reviews then came due in the dictionary while Today held them back
+    for as long as the level stayed N5. A stop between the level and
+    the goal is on the learner's own route; only a stop past both is
+    set aside. No goal ("just ride"), or the kana stop, leaves the
+    level as the line.
+    """
+    if goal in LEVELS and level in LEVELS and LEVELS.index(goal) > LEVELS.index(level):
+        return goal
+    return level
 
 
 def label(key: tuple) -> dict:

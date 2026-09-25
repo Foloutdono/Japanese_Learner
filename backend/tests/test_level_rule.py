@@ -254,3 +254,20 @@ def test_the_run_holds_the_stops_above_the_level_back(lclient):
     lclient.patch("/api/profile/learning", json={"jlptLevel": "N3"})
     decks = {lane["deck"] for lane in lclient.get("/api/today").json()["lanes"] if lane["kind"] == "section"}
     assert {"N5", "N3"} <= decks
+
+
+def test_hold_line_rises_to_the_goal_and_never_below_the_level():
+    # N5 riding to N3: N4 and N3 are on the route, so their reviews are served.
+    assert daily_queue.hold_line("N5", "N3") == "N3"
+    # A goal behind the level never lowers the line.
+    assert daily_queue.hold_line("N3", "N5") == "N3"
+    # "Just ride", the kana stop, or no level: the level is the line.
+    assert daily_queue.hold_line("N5", None) == "N5"
+    assert daily_queue.hold_line("N5", "novice") == "N5"
+    assert daily_queue.hold_line(None, "N3") is None
+    lanes = daily_queue.OrderedDict([
+        ((SECTION, "kanji", "N4", "kanji.flashcard.f2b"), ["a"]),
+        ((SECTION, "kanji", "N2", "kanji.flashcard.f2b"), ["b"]),
+    ])
+    kept = daily_queue.hold_above(lanes, daily_queue.hold_line("N5", "N3"))
+    assert list(kept) == [(SECTION, "kanji", "N4", "kanji.flashcard.f2b")]
