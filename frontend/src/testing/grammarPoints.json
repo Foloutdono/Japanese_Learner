@@ -1,0 +1,525 @@
+[
+ {
+  "type": "grammar",
+  "raw_id": "grammar_N5_は",
+  "level": "N5",
+  "pattern": "は",
+  "structure": "topic + は",
+  "meaning": "marque le thème de la phrase",
+  "register": null,
+  "steps": [
+   {
+    "kind": "rule",
+    "text": "**は** marque le thème : ce dont la phrase parle. Tout ce qui suit est un commentaire sur ce thème."
+   },
+   {
+    "kind": "use",
+    "text": "- Pour poser ce dont on parle : わたしは, 今日は, この本は.\n- Pour opposer deux choses : 魚は食べますが、にくは食べません.\n- S'écrit は mais se lit « wa » dans ce rôle."
+   },
+   {
+    "kind": "careful",
+    "text": "は n'est pas « le sujet ». Un mot interrogatif (だれ, 何) ne prend jamais は, car il ne peut pas être une chose déjà connue : sujet, il prend が ; sinon, sa propre particule (何を食べますか)."
+   }
+  ],
+  "compare": [
+   {
+    "pattern": "が",
+    "raw_id": "grammar_N5_が",
+    "level": "N5",
+    "meaning": "marque le sujet grammatical",
+    "text": "は pose ce dont on parle ; が pointe qui ou quoi fait l'action, ou une information nouvelle."
+   },
+   {
+    "pattern": "も",
+    "raw_id": "grammar_N5_も",
+    "level": "N5",
+    "meaning": "aussi, également",
+    "text": "は pose un thème ; も l'ajoute au précédent : « aussi »."
+   }
+  ],
+  "examples": [
+   {
+    "jp": "今日は天気がいいです。",
+    "tr": "Aujourd'hui, il fait beau.",
+    "furigana": [
+     {
+      "text": "今日",
+      "reading": "きょう"
+     },
+     {
+      "text": "は"
+     },
+     {
+      "text": "天",
+      "reading": "てん"
+     },
+     {
+      "text": "気",
+      "reading": "き"
+     },
+     {
+      "text": "がいいです。"
+     }
+    ],
+    "register": "polite"
+   },
+   {
+    "jp": "この本はとてもおもしろいです。",
+    "tr": "Ce livre est très intéressant.",
+    "furigana": [
+     {
+      "text": "この"
+     },
+     {
+      "text": "本",
+      "reading": "ほん"
+     },
+     {
+      "text": "はとてもおもしろいです。"
+     }
+    ],
+    "register": "polite"
+   },
+   {
+    "jp": "わたしは毎あさコーヒーを飲みます。",
+    "tr": "Je bois du café tous les matins.",
+    "furigana": [
+     {
+      "text": "わたしは"
+     },
+     {
+      "text": "毎",
+      "reading": "まい"
+     },
+     {
+      "text": "あさコーヒーを"
+     },
+     {
+      "text": "飲",
+      "reading": "の"
+     },
+     {
+      "text": "みます。"
+     }
+    ],
+    "register": "polite"
+   },
+   {
+    "jp": "魚は食べますが、にくは食べません。",
+    "tr": "Je mange du poisson, mais pas de viande.",
+    "furigana": [
+     {
+      "text": "魚",
+      "reading": "さかな"
+     },
+     {
+      "text": "は"
+     },
+     {
+      "text": "食",
+      "reading": "た"
+     },
+     {
+      "text": "べますが、にくは"
+     },
+     {
+      "text": "食",
+      "reading": "た"
+     },
+     {
+      "text": "べません。"
+     }
+    ],
+    "register": "polite"
+   }
+  ],
+  "status": {
+   "status": "new"
+  },
+  "app_card": {
+   "source": "grammar",
+   "level": "N5",
+   "raw_id": "grammar_N5_は"
+  }
+ },
+ {
+  "type": "grammar",
+  "raw_id": "grammar_N5_〜てください",
+  "level": "N5",
+  "pattern": "〜てください",
+  "structure": "verb て-form + ください",
+  "meaning": "faites..., s'il vous plaît",
+  "register": "polite",
+  "steps": [
+   {
+    "kind": "rule",
+    "text": "**forme en て + ください** demande poliment à quelqu'un de faire quelque chose : 書いてください (écrivez, s'il vous plaît)."
+   },
+   {
+    "kind": "use",
+    "text": "- Consignes et demandes : ここに名前を書いてください.\n- Inviter : どうぞ入ってください.\n- Plus doux avec ちょっと ou すみません devant."
+   },
+   {
+    "kind": "careful",
+    "text": "Cela reste une consigne. Envers un supérieur ou un client, 〜ていただけませんか (N4) est plus sûr. Jamais pour ce que vous voulez faire vous-même : c'est 〜させてください (N4)."
+   }
+  ],
+  "compare": [
+   {
+    "pattern": "〜ないでください",
+    "raw_id": "grammar_N5_〜ないでください",
+    "level": "N5",
+    "meaning": "ne faites pas..., s'il vous plaît",
+    "text": "てください demande de faire ; ないでください demande de ne pas faire."
+   },
+   {
+    "pattern": "〜をください",
+    "raw_id": "grammar_N5_〜をください",
+    "level": "N5",
+    "meaning": "demander qu'on vous donne quelque chose",
+    "text": "てください demande une action ; をください demande une chose."
+   },
+   {
+    "pattern": "〜てもらえませんか",
+    "raw_id": "grammar_N4_〜てもらえませんか",
+    "level": "N4",
+    "meaning": "une demande polie de service",
+    "text": "てください est une demande directe ; てもらえませんか demande s'ils voudraient bien, ce qui est plus doux."
+   }
+  ],
+  "examples": [
+   {
+    "jp": "この本を読んでください。",
+    "tr": "Lisez ce livre, s'il vous plaît.",
+    "furigana": [
+     {
+      "text": "この"
+     },
+     {
+      "text": "本",
+      "reading": "ほん"
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "読",
+      "reading": "よ"
+     },
+     {
+      "text": "ん"
+     },
+     {
+      "text": "でください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "ここに名前を書いてください。",
+    "tr": "Écrivez votre nom ici, s'il vous plaît.",
+    "furigana": [
+     {
+      "text": "ここに"
+     },
+     {
+      "text": "名",
+      "reading": "な"
+     },
+     {
+      "text": "前",
+      "reading": "まえ"
+     },
+     {
+      "text": "を"
+     },
+     {
+      "text": "書",
+      "reading": "か"
+     },
+     {
+      "text": "い"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "ちょっとまってください。",
+    "tr": "Attendez un instant, s'il vous plaît.",
+    "furigana": [
+     {
+      "text": "ちょっとまっ"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "もういちど言ってください。",
+    "tr": "Répétez, s'il vous plaît.",
+    "furigana": [
+     {
+      "text": "もういちど"
+     },
+     {
+      "text": "言",
+      "reading": "い"
+     },
+     {
+      "text": "っ"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite"
+   },
+   {
+    "jp": "どうぞ入ってください。",
+    "tr": "Entrez, je vous en prie.",
+    "furigana": [
+     {
+      "text": "どうぞ"
+     },
+     {
+      "text": "入",
+      "reading": "はい"
+     },
+     {
+      "text": "っ"
+     },
+     {
+      "text": "てください",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite"
+   }
+  ],
+  "status": {
+   "status": "learning",
+   "total_reviews": 12,
+   "correct_reviews": 10,
+   "accuracy": 83,
+   "due": false,
+   "interval_days": 6,
+   "next_review": "2026-09-28T09:00:00+00:00"
+  },
+  "app_card": {
+   "source": "grammar",
+   "level": "N5",
+   "raw_id": "grammar_N5_〜てください"
+  }
+ },
+ {
+  "type": "grammar",
+  "raw_id": "grammar_N5_〜なければなりません",
+  "level": "N5",
+  "pattern": "〜なければなりません",
+  "structure": "verb ない-form (drop い) + ければなりません",
+  "meaning": "devoir, il faut",
+  "register": "polite",
+  "steps": [
+   {
+    "kind": "rule",
+    "text": "**forme en ない sans い + ければなりません** dit qu'on doit faire quelque chose : 行かなければなりません (je dois y aller)."
+   },
+   {
+    "kind": "use",
+    "text": "- Les obligations : 毎日学校へ行かなければなりません.\n- Échéances et règles : 六時に出なければなりません.\n- Forme neutre : 〜なければならない."
+   },
+   {
+    "kind": "careful",
+    "text": "Il s'agit d'une nécessité, pas d'un conseil. « Tu devrais » se dit 〜ほうがいいです. Le contraire, « pas besoin », est une autre tournure : 〜なくてもいいです."
+   }
+  ],
+  "compare": [
+   {
+    "pattern": "〜なくてもいいです",
+    "raw_id": "grammar_N5_〜なくてもいいです",
+    "level": "N5",
+    "meaning": "ne pas être obligé de",
+    "text": "なければなりません : c'est obligatoire ; なくてもいいです : ce n'est pas nécessaire."
+   },
+   {
+    "pattern": "〜ほうがいいです",
+    "raw_id": "grammar_N5_〜ほうがいいです",
+    "level": "N5",
+    "meaning": "il vaut mieux, tu ferais mieux de",
+    "text": "なければなりません est une obligation ; ほうがいいです est un conseil."
+   },
+   {
+    "pattern": "〜なくてはいけない",
+    "raw_id": "grammar_N4_〜なくてはいけない",
+    "level": "N4",
+    "meaning": "être obligé de",
+    "text": "Même sens ; なくてはいけない (N4) est un peu plus parlé, なければなりません un peu plus formel."
+   }
+  ],
+  "examples": [
+   {
+    "jp": "毎日学校へ行かなければなりません。",
+    "tr": "Je dois aller à l'école tous les jours.",
+    "furigana": [
+     {
+      "text": "毎",
+      "reading": "まい"
+     },
+     {
+      "text": "日",
+      "reading": "にち"
+     },
+     {
+      "text": "学",
+      "reading": "がっ"
+     },
+     {
+      "text": "校",
+      "reading": "こう"
+     },
+     {
+      "text": "へ"
+     },
+     {
+      "text": "行",
+      "reading": "い"
+     },
+     {
+      "text": "か"
+     },
+     {
+      "text": "なければなりません",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "六時に出なければなりません。",
+    "tr": "Je dois partir à six heures.",
+    "furigana": [
+     {
+      "text": "六",
+      "reading": "ろく"
+     },
+     {
+      "text": "時",
+      "reading": "じ"
+     },
+     {
+      "text": "に"
+     },
+     {
+      "text": "出",
+      "reading": "で"
+     },
+     {
+      "text": "なければなりません",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "このくすりは毎日飲まなければなりません。",
+    "tr": "Il faut prendre ce médicament tous les jours.",
+    "furigana": [
+     {
+      "text": "このくすりは"
+     },
+     {
+      "text": "毎",
+      "reading": "まい"
+     },
+     {
+      "text": "日",
+      "reading": "にち"
+     },
+     {
+      "text": "飲",
+      "reading": "の"
+     },
+     {
+      "text": "ま"
+     },
+     {
+      "text": "なければなりません",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite",
+    "contrast": true
+   },
+   {
+    "jp": "あしたまでにてがみを書かなければなりません。",
+    "tr": "Je dois écrire la lettre d'ici demain.",
+    "furigana": [
+     {
+      "text": "あしたまでにてがみを"
+     },
+     {
+      "text": "書",
+      "reading": "か"
+     },
+     {
+      "text": "か"
+     },
+     {
+      "text": "なければなりません",
+      "highlight": true
+     },
+     {
+      "text": "。"
+     }
+    ],
+    "register": "polite"
+   }
+  ],
+  "status": {
+   "status": "new"
+  },
+  "app_card": {
+   "source": "grammar",
+   "level": "N5",
+   "raw_id": "grammar_N5_〜なければなりません"
+  }
+ }
+]

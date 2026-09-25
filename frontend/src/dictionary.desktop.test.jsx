@@ -397,3 +397,82 @@ describe('the catalogue and its entry (plan 127)', () => {
       .toBe(Math.round(document.querySelector('.desk-dict').getBoundingClientRect().width))
   })
 })
+
+// ── plan 127 — the grammar page ──
+// The grammar collection turns the split round: its points one to a row
+// in the side column, the entry across the rest of the canvas, its
+// plate laid left with the marks beside the pattern (over it, for a
+// long one, which beside them broke across two lines on this lane), the
+// learner's record under the stripe, the lesson in one column here and
+// two on a wider desk (dictionary.wide). Points: the catalogue's own
+// payloads for は, 〜てください and 〜なければなりません.
+describe('the grammar page (plan 127)', () => {
+  const token = name => parseFloat(getComputedStyle(document.documentElement).getPropertyValue(name))
+  const serveGrammar = async () => {
+    const { default: POINTS } = await import('./testing/grammarPoints.json')
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200, json: async () => ({ results: POINTS, total: POINTS.length, has_more: false }),
+    }))
+  }
+  const open = pattern => [...document.querySelectorAll('.dict-entry-card')]
+    .find(c => c.querySelector('.dict-entry-card__char').textContent.trim() === pattern).click()
+  const plate = () => document.querySelector('.dict-dock .dict-plate')
+  const box = sel => document.querySelector(sel).getBoundingClientRect()
+
+  it('lists the points in the side column and gives the entry the rest', async () => {
+    await serveGrammar()
+    await mount('/dictionary?category=grammar')
+    expect(document.querySelector('.desk-dict--page')).not.toBeNull()
+    // At most the side column, and the entry never narrower than the
+    // kanji's: on this lane, the narrowest desk, the list gives.
+    expect(Math.round(box('.desk-dict__main').width)).toBeLessThanOrEqual(token('--desk-side-w'))
+    expect(Math.round(box('.dict-dock').width)).toBeGreaterThanOrEqual(token('--desk-entry-w'))
+    expect(getComputedStyle(document.querySelector('.dict-grid')).gridTemplateColumns.split(' ')).toHaveLength(1)
+    const dock = box('.dict-dock')
+    expect(dock.left).toBeGreaterThan(box('.desk-dict__main').right)
+    expect(Math.round(dock.right)).toBe(Math.round(box('.desk-dict').right))
+    expect(Math.round(dock.top)).toBe(Math.round(box('.anl-door').top))
+    expect(dock.bottom).toBeLessThanOrEqual(innerHeight)
+    // A row: the pattern over its gloss, the level at the right.
+    const row = document.querySelector('.dict-entry-card')
+    expect(row.querySelector('.dict-entry-card__meaning').getBoundingClientRect().top)
+      .toBeGreaterThanOrEqual(row.querySelector('.dict-entry-card__char').getBoundingClientRect().bottom - 1)
+    expect(row.querySelector('.dict-level-badge').getBoundingClientRect().left)
+      .toBeGreaterThan(row.querySelector('.dict-entry-card__meaning').getBoundingClientRect().right - 1)
+
+    // The kanji keep the entry's column (A).
+    ;[...document.querySelectorAll('.console .chip')].find(c => /kanji/i.test(c.textContent)).click()
+    await settle(300)
+    expect(document.querySelector('.desk-dict--page')).toBeNull()
+  })
+
+  it('lays the plate left, the marks beside a pattern and over a long one', async () => {
+    await serveGrammar()
+    await mount('/dictionary?category=grammar')
+    open('〜てください')
+    await settle()
+    const stack = plate().querySelector('.dict-plate__stack').getBoundingClientRect()
+    expect(plate().querySelector('.dict-plate__row').getBoundingClientRect().left).toBeGreaterThan(stack.right - 1)
+    const word = plate().querySelector('.dict-plate__word')
+    expect(word.getBoundingClientRect().left - plate().getBoundingClientRect().left).toBeLessThan(2 * token('--sp-5'))
+    expect(word.getBoundingClientRect().height).toBeLessThan(2 * parseFloat(getComputedStyle(word).fontSize))
+
+    open('〜なければなりません')
+    await settle()
+    const long = plate().querySelector('.dict-plate__word')
+    expect(plate().querySelector('.dict-plate__row').getBoundingClientRect().bottom)
+      .toBeLessThanOrEqual(long.getBoundingClientRect().top)
+    expect(long.getBoundingClientRect().height).toBeLessThan(2 * parseFloat(getComputedStyle(long).fontSize))
+  })
+
+  it('sets the learner\'s record under the stripe, before the lesson', async () => {
+    await serveGrammar()
+    await mount('/dictionary?category=grammar')
+    open('〜てください')
+    await settle()
+    const record = document.querySelector('.dict-dock .records').getBoundingClientRect()
+    expect(record.top).toBeGreaterThan(plate().querySelector('.dict-plate__stripe').getBoundingClientRect().bottom - 1)
+    expect(record.bottom).toBeLessThanOrEqual(document.querySelector('.dict-dock .gl-body').getBoundingClientRect().top + 1)
+    expect(getComputedStyle(document.querySelector('.dict-dock .records')).gridTemplateColumns.split(' ')).toHaveLength(4)
+  })
+})

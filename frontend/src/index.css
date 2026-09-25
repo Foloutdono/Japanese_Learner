@@ -22662,6 +22662,153 @@ a.slip__act { text-decoration: none; }
     max-height: calc(3 * var(--fs-specimen-glyph));
   }
 
+  /* ── 机 — grammar: the catalogue a list, the entry the page (plan 127) ──
+     The split turned round for the grammar collection (DeskColumns'
+     `page`): its points one to a row in the side column, the entry
+     across the rest of the canvas. Before the entry rules below, whose
+     character plate this page never uses. */
+  /* The entry never narrower than it stands for the other collections:
+     on the narrowest desk the list gives up the difference, where a
+     six-character pattern broke across two lines beside its marks. */
+  .desk-dict--page { grid-template-columns: minmax(0, var(--desk-side-w)) minmax(var(--desk-entry-w), 1fr); }
+  /* The count gives first in a side column, as it does on a phone; the
+     list's foot still says how many. */
+  .desk-dict--page .console__count { display: none; }
+  .desk-dict--page .dict-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+    overflow: hidden;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  /* A point as a row, as a station's stops are: its pattern over its
+     gloss, the star and the level at the right, its stage along the
+     left edge rather than the foot. */
+  .desk-dict--page .dict-entry-card {
+    display: grid;
+    grid-template:
+      "word fav level" auto
+      "meaning fav level" auto
+      / minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-3);
+    padding: var(--sp-3) var(--sp-5);
+    border-width: 0 0 1px;
+    border-radius: 0;
+    text-align: left;
+  }
+  .desk-dict--page .dict-entry-card:last-child { border-bottom-width: 0; }
+  .desk-dict--page .dict-entry-card:is(:hover, :focus-visible, .dict-entry-card--selected) { border-color: var(--surface-line); }
+  .desk-dict--page .dict-entry-card--selected { box-shadow: inset 0 0 0 1px var(--plate); }
+  .desk-dict--page .dict-entry-card::after {
+    inset: 0 auto 0 0;
+    width: 3px;
+    height: auto;
+  }
+  .desk-dict--page .dict-entry-card__char {
+    display: block;
+    grid-area: word;
+    width: auto;
+    min-height: 0;
+    overflow: hidden;
+    font-size: var(--fs-title);
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-dict--page .dict-entry-card__meaning { grid-area: meaning; }
+  .desk-dict--page .dict-entry-card__fav {
+    position: static;
+    grid-area: fav;
+  }
+  .desk-dict--page .dict-entry-card .dict-level-badge {
+    position: static;
+    grid-area: level;
+  }
+  /* The plate laid left, its marks and actions standing at its right
+     rather than over it: the pattern and, beside it on its baseline,
+     how it is formed, the gloss under both. Where the page is too
+     narrow for the pair the formation wraps under the pattern, so no
+     width breaks it -- the pattern laid across a character's way
+     wrapped its own pattern on a narrow desk. */
+  .desk-dict--page .dict-plate {
+    display: grid;
+    grid-template:
+      "stack row" auto
+      "stripe stripe" auto
+      / minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-6);
+  }
+  .desk-dict--page .dict-plate > .dict-plate__stack {
+    flex-flow: row wrap;
+    grid-area: stack;
+    align-items: baseline;
+    gap: var(--sp-1) var(--sp-4);
+    padding-bottom: 0;
+    text-align: left;
+  }
+  .desk-dict--page .dict-plate__word {
+    order: 1;
+    text-indent: 0;
+  }
+  .desk-dict--page .dict-plate__word--glyph {
+    font-size: var(--fs-specimen-word);
+    line-height: 1;
+  }
+  .desk-dict--page .dict-plate__structure { order: 2; }
+  .desk-dict--page .dict-plate__caption {
+    flex-basis: 100%;
+    order: 3;
+    text-indent: 0;
+  }
+  .desk-dict--page .dict-plate > .dict-plate__row {
+    flex-direction: column;
+    grid-area: row;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-dict--page .dict-plate > .dict-plate__stripe {
+    grid-area: stripe;
+    margin-top: var(--sp-4);
+  }
+  /* A long pattern (〜なければなりません) takes the plate's whole width,
+     its marks and actions over it as a phone sets them: beside it, on a
+     narrow desk, it broke across two lines. */
+  .desk-dict--page .dict-plate:has(.dict-plate__word--long) {
+    grid-template:
+      "row" auto
+      "stack" auto
+      "stripe" auto
+      / minmax(0, 1fr);
+  }
+  .desk-dict--page .dict-plate:has(.dict-plate__word--long) > .dict-plate__row {
+    flex-direction: row;
+    align-items: center;
+  }
+  /* The learner's record under the stripe, four across (below), then
+     the lesson in two columns where each holds a desk column's least
+     width, --desk-run-col-min, and one where the page is narrower. A
+     step, a sentence or a rival never breaks between the two. */
+  .desk-dict--page .dict-entry__body > .dict-block:has(> .records) {
+    order: -1;
+    padding: 0;
+    border-bottom: 1px solid var(--surface-line);
+  }
+  /* Flush under the stripe, as the run's band sets it (plan 126). */
+  .desk-dict--page .dict-block > .records {
+    border: 0;
+    border-radius: 0;
+  }
+  .desk-dict--page .dict-block > .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
+  .desk-dict--page .gl-body {
+    display: block;
+    columns: var(--desk-run-col-min) 2;
+    column-gap: 0;
+    column-rule: 1px solid var(--surface-line);
+  }
+  .desk-dict--page .gl-body :is(.gl-step, .dict-ex, .gl-door, .gl-tr-toggle) { break-inside: avoid; }
+
   /* ── 机 — the dictionary's entry in its column (plan 127) ──
      After the run's band (plan 126), whose plate rules these share
      elements with and must come after. */
@@ -22672,8 +22819,11 @@ a.slip__act { text-decoration: none; }
      Only a character's: a word or a grammar point keeps the plate
      stacked, because a pattern or a long word cannot stand beside its
      readings at this width (〜てください, laid across, wrapped its own
-     pattern and set its structure line a character a line). */
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) {
+     pattern and set its structure line a character a line). A point
+     whose pattern is one character (は) is laid across on the shelf,
+     its structure where a kanji's readings stand; the grammar
+     collection's own page lays every point out alike (below). */
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) {
     display: grid;
     /* The readings and the gloss centred beside the glyph as a pair,
        whichever of the two the entry has: a kana has only its romaji, a
@@ -22687,29 +22837,30 @@ a.slip__act { text-decoration: none; }
       / auto minmax(0, 1fr) auto;
     gap: var(--sp-1) var(--sp-6);
   }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stack { display: contents; }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__word {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stack { display: contents; }
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) .dict-plate__word {
     grid-area: word;
     align-self: center;
     font-size: var(--fs-specimen-word);
     line-height: 1;
   }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__readings {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
     grid-area: readings;
     justify-content: flex-start;
+    text-align: left;
   }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__caption {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) .dict-plate__caption {
     grid-area: caption;
     text-align: left;
     text-indent: 0;
   }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__row {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__row {
     grid-area: row;
     flex-direction: column;
     align-items: flex-end;
     gap: var(--sp-3);
   }
-  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stripe {
+  .desk-dict:not(.desk-dict--page) .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stripe {
     grid-area: stripe;
     margin-top: var(--sp-4);
   }

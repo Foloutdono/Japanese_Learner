@@ -1001,7 +1001,13 @@ answer a keyboard and a pointer one way everywhere.
   a grammar point keep the plate stacked — a pattern cannot stand beside
   its readings at that width — and their longer bodies scroll inside the
   column, never the page. The column is held while a page loads; the
-  radical index alone takes the width. A
+  radical index alone takes the width. The grammar collection turns the
+  split round: its points one to a row in the side column (the pattern
+  over its gloss), the entry across the rest and never narrower than
+  `--desk-entry-w`, its plate laid left with the marks beside the pattern
+  (over it, for a pattern of seven characters or more), the record flush
+  under the stripe and the lesson in two columns where each holds
+  `--desk-run-col-min`. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
   is a door to its stop.
 - **A station is two panes.** Levels, sets or grades stand upright on the

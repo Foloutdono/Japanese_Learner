@@ -630,7 +630,7 @@ export default function DictionaryScreen({ session }) {
 			    the door and the console, where the window cut it off (see
 			    DeskColumns). A phone gets the same children with no wrapper. */}
 			<DeskDockContext.Provider value={desk ? deskDock : null}>
-			<DeskColumns desk={desk} bare={showingRadicalGrid} dock={dock}>
+			<DeskColumns desk={desk} bare={showingRadicalGrid} page={category === 'grammar'} dock={dock}>
 			{/* The analyzer, behind its door (canvas Dictionary): one row
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
@@ -997,10 +997,18 @@ function cardFurigana(entry) {
 // and narrow again under a search; only the radical index, which has
 // no entry to show, takes the width alone (`bare`). A phone renders
 // the children as they were, with no wrapper.
-function DeskColumns({ desk, bare, dock, children }) {
+//
+// The grammar collection turns the split round (`page`, the owner's
+// second pick of the four): a point is its lesson, rule, use, rivals
+// and four sentences, which ran on for a page in any column, and its
+// catalogue is a list to read down rather than tiles to scan. So the
+// catalogue is the narrow column, its points one to a row, and the
+// entry takes the rest of the page, its lesson in two columns where
+// they fit.
+function DeskColumns({ desk, bare, page, dock, children }) {
 	if (!desk) return children
 	return (
-		<div className={`desk-dict${bare ? ' desk-dict--bare' : ''}`}>
+		<div className={`desk-dict${bare ? ' desk-dict--bare' : page ? ' desk-dict--page' : ''}`}>
 			<div className="desk-dict__main">{children}</div>
 			{dock}
 		</div>

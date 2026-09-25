@@ -396,11 +396,15 @@ runtime purpose. Two consequences worth knowing:
   of it from the page's top at `--desk-entry-w` (440px), never past the
   window's foot, so a character's entry reads whole with no scroll — its
   plate laid across, the stroke sheet in one row, the record four across
-  — while a word's and a grammar point's plate stay stacked and their
-  bodies scroll in the column (cited in `screens/DictionaryScreen.jsx`'s
-  `DeskColumns`, the 机 section and `:root` of `index.css`,
-  `src/dictionary.desktop.test.jsx` and `src/deskfree.phone.test.jsx`;
-  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  — while a word's plate stays stacked and its senses scroll in the
+  column; and the grammar collection with the split turned round (the
+  owner's second pick), its points a list in the side column and the
+  entry across the page, the lesson in two columns (cited in
+  `screens/DictionaryScreen.jsx`'s `DeskColumns`, the 机 section and
+  `:root` of `index.css`, `src/dictionary.desktop.test.jsx`,
+  `src/dictionary.wide.test.jsx`, `src/testing/grammarPoints.json` and
+  `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
+  `docs/design/desk/README.md`).
   When starting a new wave, begin at **128** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
