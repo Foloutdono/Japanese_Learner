@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
+import { contentBox } from './testing/contentBox'
 import './index.css'
 
 // ── 机 — Today on the desk (plan 114) ────────────────────────────
@@ -76,7 +77,7 @@ describe('Today on the desk', () => {
     const side = main.querySelector(':scope > .desk-side')
     expect(side.querySelector('.pass--strip')).not.toBeNull()
     const gate = main.querySelector(':scope > .gate-card').getBoundingClientRect()
-    const s = side.getBoundingClientRect()
+    const s = contentBox(side)
     expect(Math.round(gate.top)).toBe(Math.round(s.top))
     expect(s.left).toBeGreaterThan(gate.right)
     expect(Math.round(s.width)).toBe(360)

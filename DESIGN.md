@@ -997,7 +997,10 @@ answer a keyboard and a pointer one way everywhere.
   back, a dictionary entry, a sentence's breakdown, a list of platforms) is
   drawn at the width it was designed at. `components/chrome/DeskSide.jsx`
   is the column; it is sticky and scrolls on its own when it is taller than
-  the window.
+  the window. Scrolling on its own must not cut what it holds: the column
+  (and every list that scrolls beside a page) keeps a gutter inside its
+  clip edge and gives it back outside, so a row's hover lift, its focus
+  ring and its arrival are drawn whole and no row moves for it.
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
   sheet. The gate's lanes go two across once the gate holds two at a
