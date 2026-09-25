@@ -122,3 +122,36 @@ describe('TodayRun', () => {
     expect(screen.container.querySelector('.gate-probe')).toBeNull()
   })
 })
+
+// ── 区間 — a run of a chosen length (plan 135) ──────────────────
+// The desk's gate sends each lane's share as `quota`. The run asks the
+// queue for no more than a lane has left, less what it has answered
+// and holds, and ends when every share is served without asking again.
+describe('TodayRun with a quota', () => {
+  it('asks for each lane\'s share, counts it off, and ends without another fetch', async () => {
+    const calls = []
+    apiJson.mockImplementation(async (url) => {
+      if (String(url).startsWith('/api/today/cards')) {
+        calls.push(String(url))
+        return { cards: calls.length === 1 ? [CARD] : [] }
+      }
+      if (String(url) === '/api/today/review') return { credits: { balance: 23 }, xp_earned: 3 }
+      return {}
+    })
+    const screen = await mount(`/today/run?quota=${encodeURIComponent(`${LANE.id}:1`)}`)
+    await settle(300)
+    expect(calls[0]).toContain(`quota=${encodeURIComponent(`${LANE.id}:1`)}`)
+    // The pill counts the run's length, not the lane's whole due.
+    expect(screen.container.querySelector('.today-remaining').textContent).toBe('1')
+    // Holding the one card, the lane has nothing left to ask for.
+    expect(calls.every(u => u === calls[0] || !u.includes('quota='))).toBe(true)
+
+    screen.container.querySelector('.flashcard').click()
+    await settle(80)
+    ;[...screen.container.querySelectorAll('.rating-bar__btn')].find(b => b.textContent.includes('Correct')).click()
+    await settle(1500)
+    expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 1 xp 3')
+    // Answered, the share is spent: the run never asked the queue again.
+    expect(calls).toHaveLength(1)
+  }, 20000)
+})

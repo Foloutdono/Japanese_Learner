@@ -24,7 +24,7 @@ import { RENDER, HINTS, modeLabel } from '../domain/studyModes'
 import { LINE_COLOR } from '../config/tabs'
 import { postReview as sendReview, staleCards } from '../lib/reviews'
 import { useTodaySummary, refreshToday } from '../stores/today'
-import { laneWhere as whereOf, laneTypeOf } from '../domain/lanes'
+import { laneWhere as whereOf, laneTypeOf, parseQuota, quotaParam } from '../domain/lanes'
 import { kanaSetLabel } from '../domain/kanaSets'
 import { useCardSession, sessionKey } from '../hooks/useCardSession'
 import { formatGlossLine } from '../components/study/gloss'
@@ -70,6 +70,21 @@ function stageClassFor(structureKey) {
   return undefined
 }
 
+// 区間 (plan 135): a capped run's answered count per lane, for the tab.
+function readTaken(key) {
+  if (!key) return new Map()
+  try {
+    return new Map(Object.entries(JSON.parse(window.sessionStorage.getItem(key) ?? '{}')))
+  } catch {
+    return new Map()
+  }
+}
+function writeTaken(key, taken) {
+  try {
+    window.sessionStorage.setItem(key, JSON.stringify(Object.fromEntries(taken)))
+  } catch { /* the count lasts the page */ }
+}
+
 export default function TodayRun({ session }) {
   const navigate = useNavigate()
   const leaveToGate = useRunExit('/today')
@@ -87,6 +102,19 @@ export default function TodayRun({ session }) {
   // whole day.
   const only = params.get('only') ?? ''
   const allChosen = laneParam === ''
+  // 区間 (plan 135): a run of a chosen length carries each lane's share
+  // (`?quota=id:n,...`, domain/lanes.splitTake). The run counts what it
+  // has answered and holds per lane and asks only for the rest.
+  const quotaRaw = only ? '' : (params.get('quota') ?? '')
+  const quota = useMemo(() => parseQuota(quotaRaw), [quotaRaw])
+  const capped = quota.size > 0
+  const takenKey = `tsuji.todayTaken:${quotaRaw}`
+  // card key -> lane id, for every card this run has been handed.
+  const laneOfRef = useRef(new Map())
+  // lane id -> cards answered. Kept for the tab, so a reload mid-run
+  // does not serve a lane its share twice.
+  const answeredRef = useRef(null)
+  if (answeredRef.current === null) answeredRef.current = readTaken(capped ? takenKey : null)
   const chosenIds = useMemo(() => new Set(laneParam.split(',').filter(Boolean)), [laneParam])
 
   // The shared summary (the tab badge reads the same one): the run's
@@ -113,6 +141,21 @@ export default function TodayRun({ session }) {
   const cardKey = useCallback(c => `${c.card_id}|${c.mode}`, [])
 
   const fetchBatch = useCallback(async (count, excludeIds, signal) => {
+    let quotaPart = ''
+    if (capped) {
+      // Each lane's share, less what it has answered and what it holds
+      // (a held card is in the exclude list and not yet answered).
+      const left = new Map(quota)
+      for (const [id, n] of answeredRef.current) if (left.has(id)) left.set(id, left.get(id) - n)
+      for (const key of excludeIds) {
+        if (recentlyReviewedRef.current.has(key)) continue
+        const id = laneOfRef.current.get(key)
+        if (id && left.has(id)) left.set(id, left.get(id) - 1)
+      }
+      const rest = quotaParam(left)
+      if (!rest) return []
+      quotaPart = `&quota=${encodeURIComponent(rest)}`
+    }
     const data = await apiJson(
       `/api/today/cards?lang=${lang}&count=${count}`
       + `&exclude=${encodeURIComponent(excludeIds.join(','))}`
@@ -120,12 +163,15 @@ export default function TodayRun({ session }) {
       // Omitted when everything is chosen: an empty `lanes` already
       // means the whole queue on the backend, and sending the full list
       // would make the session key churn as lanes empty out mid-run.
-      + (allChosen ? '' : `&lanes=${encodeURIComponent(laneParam)}`),
+      + (allChosen ? '' : `&lanes=${encodeURIComponent(laneParam)}`)
+      + quotaPart,
       session,
       { signal },
     )
-    return data.cards ?? []
-  }, [lang, session, laneParam, allChosen, only])
+    const cards = data.cards ?? []
+    for (const c of cards) if (c.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
+    return cards
+  }, [lang, session, laneParam, allChosen, only, capped, quota, cardKey])
 
   const extraExcludeIds = useCallback(
     () => Array.from(recentlyReviewedRef.current.keys()),
@@ -134,12 +180,16 @@ export default function TodayRun({ session }) {
 
   // What the saved queue must not replay: cards answered since, here
   // or anywhere else (lib/reviews, staleCards).
-  const checkCached = useCallback((cards, signal) => staleCards(session, cards, signal), [session])
+  const checkCached = useCallback((cards, signal) => {
+    // A resumed queue's cards name their lanes too (plan 135).
+    for (const c of cards ?? []) if (c?.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
+    return staleCards(session, cards, signal)
+  }, [session, cardKey])
   const { current: card, loading, done, error, retry, advance } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
     // would serve cards from lanes the learner just switched off.
-    storageKey: sessionKey('today', only ? `only:${only}` : allChosen ? 'all' : laneParam),
+    storageKey: sessionKey('today', only ? `only:${only}` : capped ? `quota:${quotaRaw}` : allChosen ? 'all' : laneParam),
     fetchBatch,
     batchSize: 10,
     cardKey,
@@ -247,6 +297,11 @@ export default function TodayRun({ session }) {
     // session — excluding the bare id would also suppress the same
     // card's OTHER due mode, which the learner has not answered.
     markReviewed(cardKey(card))
+    if (capped && card.lane?.id) {
+      const id = card.lane.id
+      answeredRef.current.set(id, (answeredRef.current.get(id) ?? 0) + 1)
+      writeTaken(takenKey, answeredRef.current)
+    }
     setCleared(n => n + 1)
     setXpTotal(x => x + (card.review_preview?.[quality]?.xp_earned ?? 0))
 
@@ -264,7 +319,9 @@ export default function TodayRun({ session }) {
 
   // Left in this run: the chosen lanes' due, less what this session
   // cleared. Null (no pill) until the summary is in.
-  const chosenDue = summary
+  const chosenDue = capped
+    ? [...quota.values()].reduce((n, v) => n + v, 0)
+    : summary
     ? (allChosen ? (summary.total ?? 0)
       : (summary.lanes ?? []).filter(l => chosenIds.has(l.id)).reduce((n, l) => n + l.due, 0))
     : null

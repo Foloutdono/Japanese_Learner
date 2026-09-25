@@ -1008,11 +1008,19 @@ plated gates take the window.
   on the desk (it keeps the rung under them as room).
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
-  sheet. The gate's lanes go two across once the gate holds two at a
-  phone's lane width (about 1390px; plan 116), so a lane's figure stands a
-  phone's width from its name and twice the day's switches show above the
-  list's cut; the line chips and Depart run across both, and below that
-  width the lanes stay one to a row. The
+  sheet. Since plan 135 the gate takes the window's height: each line is a
+  band, its switch in a 230px column beside its lanes three across as
+  tiles, so the line chips go, and the screen runs the whole width the
+  rail leaves (the canvas's cap lifted for Today, as A·2 drew it); the head holds the run's length (20 / 50 / 100 / all,
+  a `Seg` drawn square on the paper with its words as written,
+  remembered per browser) and what the run will take in minutes
+  (from the learner's own pace); each lane prints its share of the run —
+  dealt the way the queue deals — and whether it boards (free, or a dashed
+  edge and the refill's hour when nothing paid can ride); the foot counts
+  what boards, what waits and the balance beside Depart; and the side
+  column, the window's height, ends on the week ahead — a bar a day,
+  today's the gate's own total in gold, and what a shorter run leaves for
+  tomorrow. Plan 116's two lanes across is retired with it. The
   dictionary's dock is open from the first frame on the first result, and
   every door in an entry opens inside the dock; ←/→ walk the catalogue.
   Since plan 128 the catalogue (the analyser's door, the console, the

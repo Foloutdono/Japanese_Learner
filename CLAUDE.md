@@ -526,7 +526,25 @@ runtime purpose. Two consequences worth knowing:
   `components/video/VideoPlayer.jsx`, `components/ui/Icons.jsx`,
   `src/analyzer.desktop.test.jsx`, `src/analyzer.wide.test.jsx` and the
   机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **135** or higher, and check
+  **135** is 区間, the fare gate taking the hall on the desk (numbered
+  135 because 134 is the analyser's video passage, open on its branch;
+  the owner's pick A·2 of the Today canvas): the gate at the window's
+  height, a band per line (its switch beside its lanes as tiles, the
+  chips gone), the run's length — 20 / 50 / 100 / all — dealt over the
+  lanes the way the queue deals and handed to the run as `quota`, which
+  the server cuts each lane to (`daily_queue.parse_quota`/`keep_quota`),
+  what the run will take from the learner's pace
+  (`srs.get_review_pace`, `seconds_per_review` on `/api/today`), each
+  lane's share and whether it boards, the fare beside Depart, and the
+  week ahead at the side column's foot (`GET /api/today/forecast`,
+  `components/journey/WeekAhead.jsx`, `stores/forecast.js`,
+  `stores/gateRun.js`); plan 116's two lanes across retired (cited in `routes/today.py`,
+  `srs/srs.py`, `study/daily_queue.py`, `tests/test_today_take.py`,
+  `components/station/GateCard.jsx`'s `DeskGate`, `domain/lanes.js`'s
+  `splitTake`, `screens/TodayRun.jsx`, `src/today.wide.test.jsx`,
+  `src/today.desktop.test.jsx`, `src/domain/lanes.test.js` and the 机
+  section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **136** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

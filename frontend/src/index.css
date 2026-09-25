@@ -22118,6 +22118,8 @@ a.slip__act { text-decoration: none; }
     grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
     align-items: start;
     column-gap: var(--sp-6);
+    /* The width the rail leaves, at A·2's margins (plan 135). */
+    padding-inline: var(--sp-7);
   }
   .today > .gate-card,
   .today > .empty,
@@ -22128,6 +22130,8 @@ a.slip__act { text-decoration: none; }
   .today > .desk-side {
     grid-column: 2;
     grid-row: 1;
+    /* The window's height (plan 135): the week ahead takes its foot. */
+    height: calc(100dvh - 2 * var(--sp-6) + var(--sp-2) + var(--sp-4));
   }
   /* A finished run's slip stands at the card's width, centred in the
      gate's column (plan 123): its three figures and its way back ran
@@ -22137,45 +22141,321 @@ a.slip__act { text-decoration: none; }
     max-width: var(--card-w);
     justify-self: center;
   }
-  /* The gate's lanes two across, once the gate holds two (plan 116).
-     At a laptop's 1440 one lane per row ran ~704px: the name at one
-     end, its figure at the other, ~450px of nothing between — and the
-     box is bounded (the base rule's 30dvh), so the width that bought
-     nothing also hid half the day's switches under the cut. Two across,
-     a lane's figure stands a phone's width from its name again and twice
-     as many of the day's choices are in view; eight lanes need no
-     scroll at 900px tall.
-
-     The floor is a lane as a phone draws it: the side column (a phone's
-     content width) less the gate's own phone padding, 328px. Under two
-     of those — the desk from 1100 to ~1390, where the gate is ~430–720px
-     — the lanes stay one to a row, as below the line. Three would need
-     ~1000px the canvas never gives the gate. auto-fit, so a single lane
-     keeps the whole row rather than half of it beside an empty track.
-
-     The order is the list's own, left to right then down (the lanes are
-     sorted by line, then urgency), and Tab follows the eye. A line with
-     an odd count ends mid-row and the next begins beside it: each lane's
-     pigment names its line, and the chips above name the lines. An odd
-     last lane is not spanned — it is a switch like its siblings, and
-     twice their width would promote it — and this is no hairline
-     lattice, so the short row shows the card, not a seam. The chips,
-     the notice and Depart are the lanes' siblings, so they span both. */
-  .gate-card__lanes {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - 2 * var(--sp-5)), 1fr));
-  }
-  /* The gate is bounded by the window, not its lanes by a phone's 30dvh
-     (plan 123): a 1280×650 window showed four of eight switches in a
-     box with empty desk under it. The lanes take what the head, the
-     chips, the notice and Depart leave, and Depart never leaves the
-     window. */
+  /* ── 机 — the fare gate takes the hall (plan 135) ──
+     The owner's pick, A·2 of the Today canvas, built to the board's
+     measures: the screen runs the whole width the rail leaves (the
+     canvas's --desk-board-w cap lifted for Today alone), the gate beside
+     a --desk-side-w column; in the gate a band per line — its switch in
+     a 230px column, its lanes three across beside it — the head's
+     length picker, count and minutes, and the fare row under the bands
+     (the figures, then Depart at 420px). The chips go: a band's switch
+     is its line's chip. Plan 116's two lanes across is retired.
+     GateCard's DeskGate draws it; a phone keeps its own gate. */
+  .phone--desk .phone__content:has(> main.today) { max-width: none; }
   .today > .gate-card { max-height: calc(100dvh - 2 * var(--sp-6)); }
-  .today .gate-card__lanes {
-    flex: 0 1 auto;
-    min-height: 0;
-    max-height: none;
+  .today > .gate-card--desk {
+    height: calc(100dvh - 2 * var(--sp-6));
+    padding: var(--sp-7);
+    gap: var(--sp-4);
+    border-radius: var(--r-card);
   }
+  .gate-card--desk .gate-card__head { align-items: center; }
+  .gate-card--desk .gate-card__title { font-size: var(--fs-heading); }
+  .gate-card__figs {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-6);
+    min-width: 0;
+  }
+  .gate-card--desk .gate-card__count {
+    font-size: var(--fs-display);
+    color: var(--accent2);
+  }
+  /* The length: a plain segmented instrument on the paper, square at
+     the plate radius, its words as written (no capitals, no tracking). */
+  .gate-card__take {
+    margin-left: 0;
+    border-radius: var(--r-plate);
+    background: var(--bg-main);
+  }
+  .gate-card__take .seg__opt {
+    align-items: center;
+    height: 34px;
+    padding: 0 var(--sp-5);
+  }
+  .gate-card__take .seg__opt-latin {
+    font-size: var(--fs-caption);
+    letter-spacing: 0;
+    text-indent: 0;
+    text-transform: none;
+  }
+  .gate-card__take .seg__opt--on { background: color-mix(in srgb, var(--text-primary) 9%, var(--bg-main)); }
+  .gate-card__time {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    align-self: stretch;
+    padding-left: var(--sp-6);
+    border-left: 1px solid var(--surface-line);
+  }
+  .gate-card__time .gate-card__unit { align-self: baseline; }
+  .gate-card__minutes {
+    align-self: center;
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* The bands take what the head and the fare leave; a day with more
+     lanes than the window holds scrolls here, never past Depart. */
+  .gate-card__bands {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--sp-4);
+    overflow-y: auto;
+  }
+  .gate-band {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: var(--sp-5);
+    padding: var(--sp-4) 0;
+    border-top: 1px solid var(--surface-line);
+  }
+  .gate-band:first-child {
+    padding-top: 0;
+    border-top: none;
+  }
+  .gate-band__line {
+    align-self: start;
+    display: flex;
+    align-items: center;
+    gap: var(--sp-4);
+    height: 52px;
+    padding: 0 var(--sp-4);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+    background: var(--bg-main);
+    box-shadow: inset 3px 0 0 var(--lane-color, var(--accent2));
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease, opacity 0.15s ease;
+  }
+  .gate-band__line:hover,
+  .gate-band__line:focus-visible { border-color: var(--lane-color, var(--accent2)); filter: none; }
+  .gate-band__line:not(.gate-band__line--off) .lane__tick {
+    background: var(--lane-color, var(--accent2));
+    border-color: var(--lane-color, var(--accent2));
+  }
+  .gate-band__line--off { opacity: 0.5; }
+  /* Two lines rather than an ellipsis: "Vocabulaire JLPT" beside a cut
+     run's "4 / 12" does not fit the 230px column on one. */
+  .gate-band__name {
+    flex: 1;
+    min-width: 0;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    overflow: hidden;
+    font-family: var(--font-serif);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .gate-band__due {
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .gate-band__of,
+  .lane__of {
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-secondary);
+  }
+  .gate-band__lanes {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-content: start;
+    gap: var(--sp-3);
+  }
+  /* A lane as a tile: "where · mode" on one line, its tags under them
+     (free, waiting for the refill, new), its share at the right. */
+  .lane--tile {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr) auto;
+    gap: var(--sp-4);
+    min-height: 46px;
+    padding: var(--sp-2) var(--sp-4);
+    border-radius: var(--r-plate);
+    border-color: color-mix(in srgb, var(--lane-color, var(--accent2)) 30%, var(--surface-line));
+    background: color-mix(in srgb, var(--lane-color, var(--accent2)) 9%, var(--bg-main));
+  }
+  .lane--tile .lane__where {
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+  }
+  .lane__tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--sp-1) var(--sp-3);
+  }
+  .lane__tags:empty { display: none; }
+  .lane--tile .lane__due {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-1);
+    margin-left: 0;
+    font-size: var(--fs-lead);
+    line-height: 1;
+  }
+  .lane--tile .lane__free { color: var(--success); }
+  .lane--tile .lane__new { color: var(--line-vocab); }
+  .lane__waits {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-1);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--warning);
+  }
+  /* Waiting for the refill: chosen, and riding nothing until the balance
+     comes back — the edge breaks and the ground clears. */
+  .lane--tile.lane--waits {
+    border-style: dashed;
+    background: var(--bg-main);
+  }
+  .lane--waits .lane__where,
+  .lane--waits .lane__due { color: var(--text-secondary); }
+  /* On, but past the run's length: nothing of it rides this time. */
+  .lane--out { opacity: 0.5; }
+
+  /* The fare under the bands: what boards, what waits and until when,
+     and the balance, then Depart. A pass has no fare, and Depart takes
+     the row. */
+  .gate-card__fare {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 420px;
+    align-items: center;
+    gap: var(--sp-6);
+    padding-top: var(--sp-5);
+    border-top: 1px solid var(--surface-line);
+  }
+  .gate-card__fare-parts {
+    display: flex;
+    gap: var(--sp-7);
+  }
+  .gate-card__part {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+  }
+  .gate-card__part-n {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .gate-card__part-l {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .gate-card__part--rides .gate-card__part-n { color: var(--success); }
+  .gate-card__part--waits .gate-card__part-n { color: var(--warning); }
+  .gate-card__fare .btn-depart {
+    height: 52px;
+    margin: 0;
+    padding: 0 var(--sp-5);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    box-shadow: var(--elev-action);
+  }
+  .gate-card__fare > .btn-depart:only-child { grid-column: 1 / -1; }
+
+  /* 七日 — the week ahead at the side's foot (plan 135, WeekAhead): the
+     side column runs the window's height on Today and the week takes
+     what the pass's strip and the journey leave (the column's height
+     is on `.today > .desk-side` above), its bars standing on its foot. The journey's own sumi and edge, so the column reads as
+     one object; the bars in the panel's soft ink, today's in gold. */
+  .desk-week {
+    flex: 1 0 auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: var(--sp-4);
+    padding: var(--sp-5);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border: 1px solid color-mix(in srgb, var(--pass-ink) 45%, transparent);
+    border-radius: var(--r-identity);
+  }
+  .desk-week__bars {
+    flex: 1;
+    min-height: calc(var(--desk-side-w) / 3);
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: var(--sp-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .desk-week__day {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--sp-2);
+    min-height: 0;
+  }
+  .desk-week__n {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  /* The bar's height is its day's share of the tallest, over what the
+     column leaves above the figure and the weekday. */
+  .desk-week__bar {
+    width: 100%;
+    max-width: var(--sp-7);
+    height: calc(var(--week-share, 0) * (100% - 2 * var(--sp-5)));
+    min-height: var(--sp-1);
+    flex: 0 1 auto;
+    border-radius: var(--r-plate) var(--r-plate) 0 0;
+    background: color-mix(in srgb, var(--text-on-panel) 30%, var(--bg-panel));
+  }
+  .desk-week__day--today .desk-week__bar { background: var(--accent2); }
+  .desk-week__d {
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption-xs);
+    color: var(--text-on-panel-soft);
+  }
+  .desk-week__left {
+    display: flex;
+    justify-content: space-between;
+    margin: 0;
+    font-size: var(--fs-caption);
+    color: var(--text-on-panel-soft);
+  }
+  .desk-week__left b { color: var(--text-on-panel); font-variant-numeric: tabular-nums; }
 
   /* The pass's back, beside the gate (components/journey/JourneyPanel):
      the status sheet's own body on the sheet's own material — sumi, the
@@ -24262,7 +24542,7 @@ a.slip__act { text-decoration: none; }
      Every panel scrolls inside itself; nothing passes the window's foot. */
   .phone--desk:has(.anl-desk) { padding-inline-start: 0; }
   .phone--desk:has(.anl-desk) > .desk-rail { display: none; }
-  .phone--desk .phone__content:has(.anl-desk) { max-width: none; }
+  .phone--desk .phone__content:has(> main.analyzer .anl-desk) { max-width: none; }
   .anl-desk {
     display: grid;
     grid-template:

@@ -641,6 +641,10 @@ describe('the gate\'s lanes (plan 116)', () => {
       expect(Math.round(r.left)).toBe(Math.round(rows[0].left))
     })
     expect(document.querySelector('.gate-card .desk-kbd, .gate-card [aria-keyshortcuts]')).toBeNull()
+    // Plan 135's gate is the desk's: no bands, no run length, no fare
+    // foot, and the line chips stay (today.wide.test.jsx).
+    expect(document.querySelector('.gate-card--desk, .gate-band, .gate-card__take, .gate-card__fare')).toBeNull()
+    expect(document.querySelector('.gate-card__lines')).not.toBeNull()
   })
 })
 
