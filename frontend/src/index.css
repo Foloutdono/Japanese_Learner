@@ -22503,8 +22503,14 @@ a.slip__act { text-decoration: none; }
     display: flex;
     grid-template-columns: none;
   }
-  /* The card grows to what the tiles' row leaves, the phone's own rule. */
+  /* The card grows to what the tiles' row leaves, the phone's own rule.
+     Its stage keeps the card's width, which the beside-rule above takes
+     off everything in a stage with choices or a board: the stage word
+     is pinned to this box's corner, and on a window where the column is
+     wider than a card it stood off the card's edge. */
   .screen.desk-run.desk-run--panels > .stage > .quiz-card-stage {
+    max-width: var(--card-w);
+    margin-inline: auto;
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
