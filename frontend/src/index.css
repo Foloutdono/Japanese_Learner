@@ -21156,21 +21156,40 @@ a.slip__act { text-decoration: none; }
   }
 
   /* ── the gates, laid out for the width ──
-     Learn and Practice hang five plates each. A column of five at the
-     desk's width is five slabs a thousand pixels long, so the plates go
-     two by two — and the fifth, which is the odd one out on both gates
-     (the deck shelf under the four lines; the mock exam after the four
-     platforms), takes the full row. Two columns divide four, and the
-     fifth spans them: a lattice with no short last row (DESIGN.md, "A
-     lattice's column count must divide its content"). */
+     Learn and Practice hang their plates two by two: a column of them
+     at the desk's width was a stack of slabs a thousand pixels long.
+     Learn's fifth, the deck shelf under the four lines, takes the full
+     row, so the lattice has no short last row (DESIGN.md, "A lattice's
+     column count must divide its content").
+
+     And they take the window (plan 129). The plates stood a third of
+     the way down a 950px window with the rest of it empty; now the
+     plates fill the room the page has, their rows sharing it the way
+     the phone's column shares its own, and the room goes to each
+     plate's body — the line drawn upright on Learn, the grades as rows
+     with the learner's record on Practice — never to air in the box
+     (DESIGN.md, the density contract). A row's share never goes below
+     its content: a window too short for the plates scrolls. The shelf
+     keeps its own height, having no body to give the room to. Practice
+     goes three across once three hold a French name whole (about
+     1344px), and its six then stand in two rows. */
   .learn > .plates,
   .practice > .plates {
+    flex: 1;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     width: 100%;
   }
-  .learn > .plates > .plate:last-child:nth-child(odd),
-  .practice > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  .learn > .plates { grid-template-rows: repeat(2, 1fr) auto; }
+  .practice > .plates {
+    grid-template-columns: repeat(auto-fit, minmax(calc(var(--desk-side-w) - var(--sp-5)), 1fr));
+    grid-auto-rows: 1fr;
+  }
+  .learn > .plates > .plate:last-child:nth-child(odd) { grid-column: 1 / -1; }
+  /* A plate with a body keeps its head at the head's own height; the
+     body takes the rest. */
+  .learn > .plates > .plate--line > .plate__head,
+  .practice > .plates > .plate > .plate__head { flex: none; }
 
   /* ── the second column (plan 114) ──
      components/chrome/DeskSide.jsx: whatever stands beside a screen's
@@ -21186,100 +21205,92 @@ a.slip__act { text-decoration: none; }
     max-height: calc(100dvh - 2 * var(--sp-6));
     overflow-y: auto;
   }
-  /* A Learn plate's foot on the desk draws the whole line
-     (components/station/LinePlate's LineFoot): the novice's stop, then a
-     leg per level — a rail filled as far as the level is learned, the
-     level's station at the leg's end, its learned/total under it. The
-     leg being ridden is inked, the finished ones filled. A rail and a
-     ring in the line's own pigment, on the plate that is that line's. */
+  /* A Learn plate's foot on the desk draws the whole line, upright
+     (components/station/LinePlate's LineFoot; across the plate from
+     plan 114, upright since plan 129): the novice's stop at the top,
+     then a row per level — its stretch of the rail filled as far as
+     the level is ridden, its station (a ring) where the leg ends, its
+     name, a bar and its learned/total. The rows share the body's
+     height and one set of columns (a subgrid), so every bar starts
+     and ends where the others do. The bar is the level's make-up:
+     learned in the line's pigment, met but not learned in half of it. */
   .desk-line {
-    grid-template-columns: auto;
-    grid-auto-columns: minmax(0, 1fr);
-    grid-auto-flow: column;
-    align-items: start;
-    column-gap: 0;
-    /* The last station's name and figure hang half their width past
-       the line's end, so the end stands a full rung in from the edge. */
-    padding: var(--sp-3) var(--sp-8) var(--sp-4) var(--sp-6);
-    font-size: var(--fs-caption-xs);
+    flex: 1;
+    display: grid;
+    grid-template-columns: var(--sp-6) var(--sp-8) minmax(0, 1fr) max-content;
+    grid-auto-rows: 1fr;
+    column-gap: var(--sp-4);
+    align-items: stretch;
+    padding: var(--sp-3) var(--sp-6) var(--sp-4) var(--sp-5);
   }
-  /* The origin takes no width of its own: its station stands on the
-     first leg's rail end, and its word hangs under it. */
-  .desk-line__origin {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--sp-1);
-    width: 0;
-    white-space: nowrap;
+  .desk-line__origin,
+  .desk-line__leg {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: subgrid;
+    align-items: center;
   }
-  .desk-line__origin::before {
-    content: '';
-    width: 11px;
-    height: 11px;
-    margin-block: calc(var(--sp-2) - 4px);
-    border-radius: var(--r-pill);
-    background: var(--line-color);
-    transform: translateX(-50%);
-  }
+  .desk-line__origin > :last-child { grid-column: 2 / -1; }
   /* A leg is a button, a door to its station (plan 115): it draws no
      box of its own, and says so on approach by inking its station. */
   .desk-line__leg {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: var(--sp-1);
-    min-width: 0;
     padding: 0;
     border: 0;
+    border-radius: var(--r-flat);
     background: none;
     color: inherit;
     font: inherit;
+    text-align: left;
     cursor: pointer;
   }
-  .desk-line__track {
+  /* The rail: the top half of a row is the end of its own leg, the
+     bottom half the start of the next, each filled to its share of its
+     leg (--up, --down) in the pigment over the pigment at rest. */
+  .desk-line__rail {
     position: relative;
     align-self: stretch;
-    height: 3px;
-    margin: var(--sp-2) 0;
-    border-radius: var(--r-pill);
-    background: color-mix(in srgb, var(--line-color) 25%, transparent);
   }
-  .desk-line__track i {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: var(--line-color);
-  }
-  .desk-line__track::after {
+  .desk-line__rail::before,
+  .desk-line__rail::after {
     content: '';
     position: absolute;
+    left: 50%;
+    width: 3px;
+    translate: -50% 0;
+  }
+  .desk-line__rail::before {
+    top: 0;
+    height: 50%;
+    background: linear-gradient(var(--line-color) calc(var(--up, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line__rail::after {
     top: 50%;
-    right: 0;
+    bottom: 0;
+    background: linear-gradient(var(--line-color) calc(var(--down, 0) * 100%), color-mix(in srgb, var(--line-color) 25%, transparent) 0);
+  }
+  .desk-line__origin > .desk-line__rail::before,
+  .desk-line__leg:last-child > .desk-line__rail::after { content: none; }
+  .desk-line__ring {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    z-index: 1;
     width: 11px;
     height: 11px;
     border: 2px solid color-mix(in srgb, var(--line-color) 55%, var(--surface));
     border-radius: var(--r-pill);
     background: var(--surface);
-    transform: translate(50%, -50%);
+    translate: -50% -50%;
   }
-  /* A station's name and figure stand centred under its ring, which is
-     the leg's end: pulled half their own width past it. */
-  .desk-line__stop {
-    font-size: var(--fs-caption);
-    line-height: 1.2;
-    text-align: center;
-    translate: 50% 0;
-  }
-  .desk-line__fig {
-    font-weight: 600;
-    line-height: 1.2;
-    text-align: center;
-    translate: 50% 0;
-  }
-  .desk-line__leg--done .desk-line__track::after {
+  .desk-line__origin .desk-line__ring,
+  .desk-line__leg--done .desk-line__ring {
     border-color: var(--line-color);
     background: var(--line-color);
+  }
+  .desk-line__leg--here .desk-line__ring { border-color: var(--line-color); }
+  .desk-line__stop {
+    font-size: var(--fs-body);
+    line-height: 1.2;
   }
   .desk-line__leg--here .desk-line__stop { color: var(--text-primary); }
   .desk-line__leg:hover .desk-line__stop,
@@ -21288,6 +21299,83 @@ a.slip__act { text-decoration: none; }
     text-decoration: underline;
     text-underline-offset: 3px;
   }
+  .desk-line__bar {
+    position: relative;
+    height: 6px;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--line-color) 14%, transparent);
+    overflow: hidden;
+  }
+  .desk-line__bar > i {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    border-radius: inherit;
+  }
+  .desk-line__met { background: color-mix(in srgb, var(--line-color) 45%, transparent); }
+  .desk-line__learned { background: var(--line-color); }
+  .desk-line__fig {
+    font-weight: 600;
+    text-align: right;
+  }
+  .desk-line__fig > b { color: var(--text-primary); }
+
+  /* A Practice plate's foot on the desk (plan 129, screens/
+     PracticeScreen's GradeRows): the five grades as rows sharing the
+     body's height, each its code, what the learner has done there and
+     the share of it right, and a chevron. The learner's own grade wears
+     the chip's --here look it had on the chip row. */
+  .desk-grades {
+    flex: 1;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+    align-items: stretch;
+    gap: var(--sp-1);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+  .desk-grade {
+    display: grid;
+    grid-template-columns: var(--sp-8) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-4);
+    padding: 0 var(--sp-4);
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    background: none;
+    color: inherit;
+    font: inherit;
+    line-height: 1.2;
+    text-align: left;
+    cursor: pointer;
+    transition: border-color 0.15s ease;
+  }
+  .desk-grade:hover,
+  .desk-grade:focus-visible {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    background: var(--overlay-hover);
+    filter: none;
+  }
+  .desk-grade--here {
+    border-color: color-mix(in srgb, var(--line-color) 55%, transparent);
+    background: color-mix(in srgb, var(--line-color) 12%, transparent);
+  }
+  .desk-grade__code {
+    font-size: var(--fs-body);
+    letter-spacing: var(--tr-term);
+    color: var(--text-primary);
+  }
+  .desk-grade--here .desk-grade__code { color: color-mix(in srgb, var(--line-color) 60%, var(--text-primary)); }
+  .desk-grade__rec {
+    font-weight: 600;
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .desk-grade__rec--none { color: var(--text-secondary); }
+  .desk-grade__go { font-size: var(--fs-lead); }
+  .desk-grade:hover .desk-grade__go,
+  .desk-grade:focus-visible .desk-grade__go { color: var(--text-primary); }
 
   /* Today (plan 114): the fare gate is the work and takes the width;
      beside it, in the second column, what the work is for — the pass at

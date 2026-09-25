@@ -1842,7 +1842,7 @@ const guide = {
   // Pour un pointeur (plan 123) : les notes qui disaient « touchez ».
   guideHudStatusDesk: 'À l\'heure ou en retard sur votre propre plan. Son train fantôme se tient à côté de la porte.',
   guideLearnPlateDesk: 'Une ligne. Cliquez sur la plaque pour l\'ouvrir ; la puce est ce qu\'elle vous doit aujourd\'hui.',
-  guidePracticeDestsDesk: 'Les niveaux. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
+  guidePracticeDestsDesk: 'Les niveaux, et ce que vous y avez fait. Le vôtre est marqué ; cliquez sur un autre pour y monter quand même.',
   guideDictEntryDesk: 'Une entrée, ouverte à côté du catalogue. ← et → parcourent le catalogue ; l\'étoile la garde sur votre étagère.',
   // Réglages, les deux retours.
   settingsFirstRide: 'Premier essai',
@@ -1893,6 +1893,16 @@ const onboarding = {
   settingsLineOn: 'Sur ton trajet',
   settingsLineOff: 'Hors de ton trajet',
   plateOffRoute: 'Hors de ton trajet',
+  // Le relevé d'un niveau sur un quai de Pratique, au bureau (plan 129) :
+  // ce qui a été fait à ce niveau, puis la part juste. L'espace avant le
+  // % est insécable, comme partout en français.
+  practiceDone: {
+    sentences: n => `${n} phrase${n > 1 ? 's' : ''}`,
+    texts: n => `${n} texte${n > 1 ? 's' : ''}`,
+    papers: n => `${n} épreuve${n > 1 ? 's' : ''}`,
+  },
+  practiceRight: pct => `${pct}\u00a0% justes`,
+  practiceNotYet: 'Pas encore',
   settingsRedoDesc: 'Repasse-le une fois que tu as progressé — ton niveau suit.',
   // ── Quelle barre de notation ────────────────────────────────
   // Deux boutons, quatre ou six. Les trois envoient la même note au

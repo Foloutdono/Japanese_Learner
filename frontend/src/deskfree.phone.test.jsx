@@ -1578,3 +1578,27 @@ describe('the kana charts (plan 128)', () => {
     apiJson.mockReset()
   })
 })
+
+// ── plan 129 — the gates a phone keeps ──
+// On the desk the plates take the window, Learn's line stands upright
+// and Practice's grades are rows carrying the learner's record. A phone
+// keeps its column: the chip row of five on every platform, and no
+// request for a record it has nowhere to print.
+describe('the gates taking the window (plan 129)', () => {
+  it('keeps Practice\'s chip row and never asks for the record', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: PracticeScreen } = await import('./screens/PracticeScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/practice']}><PracticeScreen /></MemoryRouter></LangProvider>)
+    await settle(250)
+    const feet = [...document.querySelectorAll('.plate__foot--dests')]
+    expect(feet).toHaveLength(6)
+    for (const foot of feet) expect(foot.querySelectorAll('.chip')).toHaveLength(5)
+    expect(document.querySelector('.desk-grades, .desk-grade')).toBeNull()
+    expect(apiFetch.mock.calls.some(([path]) => path === '/api/practice/record')).toBe(false)
+    // The column is the phone's, one plate to a row.
+    const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
+    expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
+  })
+})
