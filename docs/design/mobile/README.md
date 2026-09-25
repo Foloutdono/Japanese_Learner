@@ -199,13 +199,9 @@ baseline entries went in the same commit.
 | `.field--page` | a field mounted on the PAGE rather than on something raised — its well steps up to `--surface`, because there is nothing under the page to be a hole through. Seven mounts: both runs' entries, the account page's claim fields, the import dialog's paste box and separator, the browse dialog's search, the analyzer's rail head and video URL. `src/fields.browser.test.jsx` holds every mount to it | `index.css`, the `.field` family |
 | `.intake-pair`, `.intake-btn` | Shoot / Choose | `components/analysis/ImageInput.jsx` |
 | `.head2` (`__latin`, `__count`), `.anl-history`, `.anl-hist-list`, `.anl-hist-row`, `.anl-hist` (`__n`, `__body`, `__jp`, `__meta`, `__count`, `__when`, `__go`, `__delete`), `.anl-kept`, `.anl-undo*` | History | `components/analysis/AnalyzerHistory.jsx` |
-| `.stage__head.anl-head` (`.stage__where-jp`), `.anl-head__keep` (`--on`), `.anl-clear` | the result's head: ‹ Analyzer, the first sentence, the count, 保存 and Clear. The keep was a read-only `.anl-kept` stamp until 2026-09-11; it is the control now — the rail that carried the pin is not built below 1100px — and it wears the rail pin's own `+` / `✓` at `.anl-clear`'s 44px | `AnalyzerScreen.jsx` |
-| `.anl-stepper` (`__btn`, `__count`, `__i1`), `.anl-stops`, `.anl-stops__dot` (`--on`) | the stepper | `AnalyzerScreen.jsx` |
-| `.anl-stagebd` (`__card`), `.tok-line`, `.tok` (`--on`, `--mastered`, `--learning`, `--unknown`, `--offdeck`, `--particle`, `__furi`, `__word`), `.anl-stage[data-furigana]` | the line (its legend retired by plan 134) | `components/analysis/SentenceBreakdown.jsx` (`layout="stage"`) |
+| `.anl-head__keep` (`--on`) | 保存, the result's keep, in the head of the desk's result and of the phone's. It was a read-only `.anl-kept` stamp until 2026-09-11; it is the control now — the rail that carried the pin is not built below 1100px — and it wears the rail pin's own `+` / `✓` in a 44px round target | `AnalyzerScreen.jsx` |
+| `.tok-line`, `.tok` (`--on`, `--lit`, `--mastered`, `--learning`, `--unknown`, `--offdeck`, `--particle`, `__furi`, `__word`), `[data-furigana]` on `.anl-subs` / `.anl-m__subs` | the line (its legend retired by plan 134) | `components/analysis/SubtitleLine.jsx` |
 | `.anl-m` (`__head`, `__player`, `__video`, `__subs`, `__line` (`--none`), `__note`, `__points`, `__explain`), `.anl-pbar--compact`, `.anl-explainsheet` (`__head`, `__jp`) | the analyser's result on a phone since plan 134, the owner's drawing: the way back and keep, the video and its trimmed bar, the subtitles (the next sentence, the current one, the previous one), the numbered grammar, Explain opening the explanation in the dictionary's sheet | `screens/AnalyzerScreen.jsx`, `components/analysis/SubtitleLine.jsx`, `PlayerBar.jsx` (`compact`), `ExplainPanel.jsx` (`ExplainSheet`) |
-| `.token-card` (`--i1`, `__head`, `__surface` (`--door`), `__reading`, `__pos`, `__gloss`, `__i1`, `__foot`, `__kanji`, `__k`) | the token card | `components/analysis/StageCard.jsx` (`MineButton` as the `.btn-primary`) |
-| `.anl-dials`, `.anl-dial` (`__cap`) + `.seg` | the furigana and view dials | `AnalyzerScreen.jsx` |
-| `.anl-explainbox`, `.anl-explain__body`, `.anl-explain` | Explain this sentence | `AnalyzerScreen.jsx` |
 | `.picker`, `.picker-row` (`--current`, `--new`, `--create`, `__roundel`, `__name`, `__count`, `__mark`, `__create`) | the deck picker sheet | `components/analysis/DeckPicker.jsx` on `Sheet` |
 | `.word-detail*` | the word's own sheet (the record and the deck action) | `components/analysis/WordDetail.jsx` on `Sheet` |
 
@@ -216,36 +212,17 @@ filter, the line) stays beside it on a wide screen (`.anl-railcol` moves
 before the stage at ≥1100px). **On a phone there is no rail at all**
 (2026-09-11): below that split it used to stack above the stage as a
 ~170px window, and `AnalyzerScreen`'s `wide` gate (`useMediaQuery`) now
-keeps it out of the document entirely — the stepper walks the Passage
-there and `.anl-head__keep` on the head keeps the stop you are on.
+keeps it out of the document entirely — the subtitles' sentences either
+side and the bar's ‹ › walk the Passage there (plan 134), and
+`.anl-head__keep` on the head keeps the stop you are on.
 `AnalyzerScreen.phone.test.jsx` holds that; the browser lane's iframe is
 414px wide, so the suites that assert the rail declare their own
 desktop viewport.
 
-Below 768px the result is laid out as a **stage**, on the study screens'
-own ruling (`DESIGN.md`, "The study stage on a phone"): the growth chain
-`.anl-results → .anl-stage → .anl-stagebd → .anl-stagebd__card →
-.token-card` hands the slack to the card, whose two auto margins lift
-the word off its ceiling and hold the deck action on its floor — the
-chain reaches through CardTransition's two boxes exactly as
-`.stage > .quiz-card-stage` does, and those compounds live in the
-late-compounds block for the reason written there. With it: the card's
-foot and the explain row become full-width controls under their
-labels, and at ≤560px the legend's four keys go two by two.
-
-`.anl-dials` is one grid rather than two flex rows, so both captions
-share a column and both controls start at the same x, and
-`.anl-dial` is `display: contents` — which makes the two-up band
-between 769 and 1099px (no rail is taking that column) a change of
-column count and nothing else. The dial's segments are chip height
-(36px, `.chip`'s own) rather than `seg--full`'s 40px bar: stacked
-twice at full width they were the heaviest thing on the phone's
-stage after the card. `furiganaUnknown` lost its "only" in the same
-pass — the word cost 60px of a 271px control and wrapped the dial
-onto two lines, and being one of three segments already says it. Held from the canvas: the pass tag on the
-door (plan 069, `HAS_STORE`), the photo frame and the video section (the
-existing intakes keep their cropper and their subtitle grab), and the
-entry as a sheet — `.dict-dock` keeps its split at ≥1100px inside the
+Held from the canvas: the pass tag on the door (plan 069,
+`HAS_STORE`), the photo frame and the video section (the existing
+intakes keep their cropper and their subtitle grab), and the entry as a
+sheet — `.dict-dock` keeps its split at ≥1100px inside the
 shell's column and its modal below.
 
 ## What retired with it
@@ -268,6 +245,20 @@ private `--anl-*` token family. Their baseline entries and their
 design-scale allowlist entries went in the same commit — along with every
 allowlist literal earlier retirements had left behind (the guard's
 `--write` only ever merges, so those had accumulated since plan 068).
+
+Plan 134 retired the phone's stage this wave built, for the owner's
+drawing (the `.anl-m` row above): the stepper (`.anl-stepper*`,
+`.anl-stops*`), the stage and its breakdown box (`.anl-stage`,
+`.anl-stagebd*`, `SentenceBreakdown`'s `layout="stage"`), the token card
+(`.token-card*`, `StageCard.jsx`) and the token table (`.anl-toktable`,
+`.anl-trow*`), the dials (`.anl-dials`, `.anl-dial*`), the Explain box
+(`.anl-explainbox`, `.anl-explain*`), the head's title and Clear
+(`.anl-head`, `.anl-clear`), the old player panel (`.anl-player`, its
+`__bar`, `__track`, `__fill`, `__vol` and `__dial`, `.anl-follow*`) and
+the growth chain below 768px that handed the card the slack. The line
+(`.tok-line`, `.tok*`) and the player's round buttons and clock
+(`.anl-player__btn`, `__time`) stayed, for `SubtitleLine` and
+`PlayerBar`.
 
 ## Profile, statistics and settings (plan 074)
 

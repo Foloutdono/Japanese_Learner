@@ -1014,82 +1014,6 @@
 }
 
 
-/* ── The token table (the mockup's second view) ──
-   Word | Reading | Meaning | State | ＋, one Token per row. The frame
-   clips the rows; a narrow viewport scrolls the grid INSIDE the frame
-   (min-width on the row) instead of growing the page sideways. */
-.anl-toktable {
-  border: 1px solid var(--surface-line);
-  border-radius: var(--surface-radius);
-  overflow: hidden;
-}
-.anl-toktable__scroll { overflow-x: auto; }
-.anl-trow {
-  display: grid;
-  /* The state column sizes to its label — "Pas dans le deck" must not
-     wrap into a two-line badge. */
-  grid-template-columns: minmax(90px, 130px) minmax(90px, 140px) minmax(160px, 1fr) minmax(96px, max-content) 64px;
-  align-items: center;
-  min-width: 540px;
-  background: var(--surface);
-  border-bottom: 1px solid var(--surface-line);
-}
-.anl-toktable .anl-trow:last-child { border-bottom: none; }
-.anl-trow--head { background: transparent; }
-.anl-trow--head > span {
-  padding: var(--sp-3) var(--sp-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.anl-trow > span,
-.anl-trow > button {
-  padding: var(--sp-3) var(--sp-4);
-  text-align: left;
-}
-.anl-trow__surface {
-  background: none;
-  border: none;
-  color: var(--text-primary);
-  font-family: var(--font-jp);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  cursor: pointer;
-  transition: background 0.12s ease;
-}
-.anl-trow__surface:hover { background: var(--overlay-hover); }
-.anl-trow__reading {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-}
-.anl-trow__meaning {
-  font-size: var(--fs-sm);
-  color: var(--text-secondary);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-.anl-trow__state { white-space: nowrap; }
-.anl-trow__mine {
-  justify-self: start;
-  background: none;
-  border: none;
-  color: var(--text-secondary);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  cursor: pointer;
-  transition: color 0.12s ease;
-}
-.anl-trow__mine:hover { color: var(--success); }
-.anl-trow__mine--done { color: var(--success); }
-
-
-
 @media (prefers-reduced-motion: reduce) {
   .anl-ghost,
   .anl-chip,
@@ -1125,35 +1049,10 @@
    with this focus held, so a tablet's keyboard drew the ring on the
    first arrow. An author rule outranks the browser's ring whatever its
    specificity, so it needs no :focus-visible of its own. */
-.anl-stage {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-5);
-  min-width: 0;
-}
-
-/* ── The player, on its own sumi panel ──
-   The video and its transport are ONE object (the mockup's drawing):
-   the iframe above, the bar below, both on the ink ground the writing
-   slip already uses, so the stage's one piece of foreign chrome sits
-   inside something of the app's own. */
-.anl-player {
-  background: var(--bg-panel);
-  border-radius: var(--surface-radius);
-  overflow: hidden;
-}
-/* One row until the room runs out, then two. A phone cannot hold the
-   transport, the sound and 追従 side by side, and the honest answer is
-   a second line rather than a scrubber crushed to a sliver -- air
-   gives way before content does (DESIGN.md, the density contract). */
-.anl-player__bar {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  row-gap: var(--sp-3);
-  padding: var(--sp-3) var(--sp-4);
-}
+/* ── The player's transport (PlayerBar) ──
+   Its round buttons and its clock. The bar they sit in, its track and
+   the buttons' modifiers are plan 134's, in the 解析 block further
+   down. */
 .anl-player__btn {
   flex-shrink: 0;
   display: inline-flex;
@@ -1171,27 +1070,6 @@
   transition: background 0.14s ease;
 }
 .anl-player__btn:hover { background: var(--overlay-hover); }
-/* The playhead runs in 鶯色 — the video source's own colour, already
-   spent on this source's unique data (the timestamp chips) and on
-   nothing else. */
-.anl-player__track {
-  flex: 1;
-  /* A floor, not the usual flex `min-width: 0`: a track free to shrink
-     to nothing never lets the bar wrap -- it just gives its own width
-     away to the controls until there is no scrubber left to grab. */
-  min-width: 96px;
-  height: 4px;
-  border-radius: 2px;
-  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-  overflow: hidden;
-  cursor: pointer;
-}
-.anl-player__fill {
-  display: block;
-  height: 100%;
-  background: var(--line-douga);
-  border-radius: 2px;
-}
 .anl-player__time {
   flex-shrink: 0;
   font-family: var(--font-display);
@@ -1201,58 +1079,7 @@
   color: var(--text-on-panel-soft);
 }
 
-/* ── 音量 — the sound ──
-   The mute and its dial travel as ONE flex item, so a wrap can never
-   leave the speaker on one line and the slider on the next. Both live
-   here rather than in the iframe's own bar, which a learner has to
-   hover the video to reach and which leaves with its controls. */
-.anl-player__vol {
-  display: flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.anl-player__dial.dial {
-  /* Panel inks, and deliberately NOT 鶯色: that pigment is the video
-     source's own, spent on the data only this source has (the
-     timestamp chips, the playhead) and not on chrome every player in
-     the world already has. The compound selector is load bearing for
-     the same reason the exam scrubber's is -- .dial is declared later
-     in this file at equal specificity. */
-  --dial-rail: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
-  --dial-ink: var(--text-on-panel-soft);
-  --dial-ink-hover: var(--text-on-panel);
-  --dial-edge: var(--bg-panel);
-  /* the dial's own box, not a spacing rung -- as .anl-player__btn's
-     34px is the button's */
-  width: 84px;
-  flex: 0 0 auto;
-}
-
-/* 追従 — follow the clock. A toggle, so it states its own state rather
-   than naming the action: pressed means the line is following. Lives
-   in the transport bar, so it wears the panel's inks. */
-.anl-follow {
-  flex-shrink: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-2) var(--sp-4);
-  min-height: 32px;
-  background: transparent;
-  border: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
-  border-radius: var(--surface-radius);
-  color: var(--text-on-panel-soft);
-  transition: color 0.14s ease, border-color 0.14s ease;
-}
-.anl-follow--on {
-  color: var(--text-on-panel);
-  border-color: color-mix(in srgb, var(--line-douga) 80%, transparent);
-}
-.anl-follow__jp { font-family: var(--font-jp); font-size: 0.8rem; white-space: nowrap; }
-.anl-follow__label { font-size: 0.78rem; font-weight: 700; }
-
 @media (prefers-reduced-motion: reduce) {
-  .anl-follow,
   .anl-player__btn { transition: none; }
 }
 
@@ -1424,41 +1251,6 @@
   border-radius: 3px;
   color: var(--text-secondary);
   border: 1px solid var(--surface-line);
-}
-
-/* The Explain control. Replaces .phrase-explain-row, whose
-   `margin: -12px 0 24px` was hand-correcting the box above it — this
-   one sits in .anl-stage, whose parent owns the gap, so there is
-   nothing left for a negative margin to correct. */
-.anl-explainbox {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
-/* The control is alone in this row until something fails, so the row
-   ends at the button rather than starting at it -- `space-between`
-   with one child puts that child at the LEFT, which is where the
-   button jumped when the caption was retired. The error, when there
-   is one, takes the space back with its own auto margin. */
-.anl-explain {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-.anl-explain__hint { margin-right: auto; font-size: 0.82rem; color: var(--text-secondary); }
-.anl-explain__hint--bad { color: var(--danger); }
-/* The bought explanation, above the control that bought it — the
-   mockup's explain__body: body ink, a 3px rule of the station's
-   pigment down its left. */
-.anl-explain__body {
-  margin: 0;
-  padding-left: var(--sp-5);
-  border-left: 3px solid color-mix(in srgb, var(--line-kaiseki) 45%, transparent);
-  font-size: var(--fs-body);
-  line-height: 1.7;
-  color: var(--text-primary);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1789,8 +1581,8 @@
 /* ── 解析 — the analyzer on the canvas (plan 073) ──
    The three intakes on one segmented control over the page, the
    writing slip on the page, history as a head over a surface of rows;
-   the result as the stage's head, the stepper, the line of tokens,
-   the card, the dials. The deck picker and the word detail are bottom
+   the result's line of tokens (its other pieces are plan 134's,
+   further down). The deck picker and the word detail are bottom
    sheets. Tokens only. */
 .analyzer {
   display: flex;
@@ -1803,27 +1595,12 @@
   flex-direction: column;
   gap: var(--sp-3);
 }
-/* The result's head: the first sentence, in the content face. */
-.anl-head { min-height: 0; }
-.anl-clear {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-secondary);
-}
 /* 保存 — the result head's keep toggle (2026-09-11).
    The Kept stamp below is still the history row's read-only mark; on
    the head it became a control, because the rail that carried the pin
-   is gone below 1100px and the stage is where the Sentence is. The
-   same 44px round target as .anl-clear next to it, wearing the rail
-   pin's own + / ✓ — one pin, one pair of glyphs, wherever it sits.
+   is gone below 1100px and the stage is where the Sentence is. A
+   44px round target, wearing the rail pin's own + / ✓ — one pin, one
+   pair of glyphs, wherever it sits.
    Pressed, it spends the seal's ink exactly as the stamp does. */
 .anl-head__keep {
   flex: none;
@@ -2021,67 +1798,10 @@
   height: 18px;
   color: var(--text-secondary);
 }
-/* ── The stepper ── */
-.anl-stepper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-}
-.anl-stepper__btn {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 44px;
-  height: 44px;
-  padding: 0;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
-  background: transparent;
-  color: var(--text-secondary);
-}
-.anl-stepper__count {
-  flex: none;
-  /* The dots and the count say the same thing, so they sit together
-     between the two chevrons rather than one drifting left of centre
-     and the other pinning right. Auto margins, not justify-content:
-     they take the free space BEFORE it is distributed, which centres
-     the pair as one object at every width. */
-  margin-right: auto;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
-  color: var(--text-secondary);
-}
-.anl-stepper__i1 { font-style: normal; text-transform: none; }
-.anl-stops {
-  flex: none;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: var(--sp-1);
-  margin-left: auto;   /* see .anl-stepper__count */
-}
-.anl-stops__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: color-mix(in srgb, var(--line-kaiseki) 40%, transparent);
-}
-.anl-stops__dot--on { background: var(--line-kaiseki); }
 /* ── The line ──
    The sentence as tokens: the reading over each word that needs one,
    the SRS speaking through a 2px rule under the word in the state's
    own ink — never an ink change on the word. */
-.anl-stagebd {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
-}
 .tok-line {
   display: flex;
   flex-wrap: wrap;
@@ -2143,163 +1863,8 @@
 .tok--on .tok__furi { color: var(--text-primary); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
-:is(.anl-stage, .anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
-:is(.anl-stage, .anl-subs, .anl-m__subs)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
-/* ── The token card ── */
-.token-card {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-3);
-  padding: var(--sp-4);
-  background: var(--surface);
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-card);
-  text-align: left;
-}
-.token-card__head {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-}
-.token-card__surface {
-  padding: 0;
-  border: 0;
-  background: none;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-heading);
-  line-height: 1.4;
-  color: var(--text-primary);
-  text-align: left;
-}
-.token-card__surface--door {
-  cursor: pointer;
-  text-decoration: underline dotted;
-  text-decoration-color: var(--surface-line);
-  text-underline-offset: 6px;
-}
-.token-card__reading {
-  font-family: var(--font-jp);
-  font-size: var(--fs-sm);
-  letter-spacing: var(--tr-reading);
-  color: var(--text-secondary);
-}
-.token-card__pos { margin-left: auto; }
-.token-card__gloss { font-size: var(--fs-body); }
-.token-card__i1 {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--success) 60%, var(--text-primary));
-}
-.token-card__foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: var(--sp-3);
-}
-.token-card__kanji {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
-}
-.token-card__k {
-  flex: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  padding: 0;
-  border: 1px solid var(--surface-line);
-  border-radius: var(--r-plate);
-  background: transparent;
-  font-family: var(--font-jp);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-/* The dials: a caption and a segmented control on one row, and the
-   two rows share one grid so the captions line up in a column of
-   their own -- FURIGANA is 65px and VUE is 24, and as two separate
-   flex rows their controls started at two different places.
-   `display: contents` on the dial is what lets one grid hold both
-   rows without a wrapper per column; it also means the two-up band
-   below is a change of column count and nothing else. */
-.anl-dials {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: var(--sp-3) var(--sp-4);
-}
-.anl-dial { display: contents; }
-/* An empty kanji row still takes a gap in a column foot, and a Token
-   with no kanji is the common case (a particle, a kana word). */
-.token-card__kanji:empty { display: none; }
-
-/* ── The result on a phone (2026-09-11) ───────────────────
-   Below 768px the viewport IS the stage, the same ruling the study
-   screens are built on (DESIGN.md, "The study stage on a phone"). The
-   result used to end 200px short of the bottom of a 390×844 handset
-   with every row left-aligned and ragged on the right, which is the
-   density contract's own failure: dead space, not unevenness.
-
-   So the slack goes to the card -- the object carrying the word being
-   studied -- and its two auto margins put the word in the middle of it
-   and the deck action on its floor, where a thumb is. Everything that
-   was a row of a label beside a squeezed control becomes a full-width
-   control under its label. */
-@media (max-width: 768px) {
-  /* The growth chain, one growing child per level, so all of the
-     slack lands on the card. `1 0 auto`, never `1` (= 1 1 0%): the
-     card must not be shrunk below its own content when the Passage
-     is long enough to scroll. */
-  .anl-results,
-  .anl-stage,
-  .anl-stagebd,
-  .anl-stagebd__card,
-  .token-card { flex: 1 0 auto; }
-  /* CardTransition's box: a flex column so the card inside it can
-     take the height. Its own height transition goes quiet here --
-     the box no longer changes height between Tokens, which is the
-     point of the animation, so there is nothing left to animate. */
-  .anl-stagebd__card { display: flex; flex-direction: column; }
-  /* Two auto margins, so the free height falls either side of the
-     word: it sits off the card's ceiling and the action stays on its
-     floor -- the study card's own arrangement (DESIGN.md again). */
-  .token-card__head { margin-top: auto; }
-  /* One action, the width of the card. `align-items: stretch` rather
-     than a width on the button: the button is a flex item here, and
-     the compound that would set its width belongs 14,000 lines away
-     in the overrides block. */
-  .token-card__foot {
-    margin-top: auto;
-    flex-direction: column;
-    align-items: stretch;
-  }
-  .anl-explain {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--sp-3);
-  }
-
-}
-
-
-/* Between the phone and the split there is no rail and the whole
-   1040px column is the stage, so the two dials sit side by side
-   rather than stacking a second near-empty row. Not above 1100: the
-   rail takes its third back and a half-column dial would squeeze the
-   three furigana options again. */
-@media (min-width: 769px) and (max-width: 1099px) {
-  .anl-dials {
-    grid-template-columns: auto minmax(0, 1fr) auto minmax(0, 1fr);
-    column-gap: var(--sp-5);
-  }
-}
+:is(.anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
+:is(.anl-subs, .anl-m__subs)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
 /* ── The deck picker (canvas DeckPickerSheet) ── */
 .picker {
   display: flex;
@@ -8984,9 +8549,8 @@ textarea:focus-visible {
    action under both.
 
    `display: contents` on the names so the h2 and the meta are the
-   grid's own children and can sit in different columns -- the same
-   instrument, for the same reason, as .anl-dial further up. The
-   grid's own row gap replaces the --sp-1 between the two, which is
+   grid's own children and can sit in different columns. The grid's
+   own row gap replaces the --sp-1 between the two, which is
    the right distance when they share a column and too little when
    they no longer do.
 
@@ -8997,8 +8561,7 @@ textarea:focus-visible {
   .deck-identity {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);
-    /* Row then column, the shorthand .anl-dials takes for the same
-       two-column grid. */
+    /* Row then column. */
     gap: var(--sp-3) var(--sp-4);
     align-items: center;
   }
@@ -9364,10 +8927,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 /* The action under it takes a bigger box than the family's default.
    The rule is NOT here: `form.stage__foot > .btn-primary` outranks
-   `.exam-nav .btn-primary` and `.token-card__foot .btn-primary`, both
-   declared further down, so stylelint's no-descending-specificity is
-   right that it has to follow them. It lives in the compound group at
-   the end of the file -- search `form.stage__foot`. */
+   `.exam-nav .btn-primary`, declared further down, so stylelint's
+   no-descending-specificity is right that it has to follow it. It
+   lives in the compound group at the end of the file -- search
+   `form.stage__foot`. */
 
 /* ── The practice sessions (canvas Reading / Comprehension /
    Translation / ComprehensionResult, plan 072) ──
@@ -14168,14 +13731,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 
 .phrase-error-card { padding: 16px; color: var(--danger); margin-bottom: 24px; }
 
-/* The per-Sentence Explain control (plan 016) lived here as
-   .phrase-explain-row until plan 028. Its `margin: -12px 0 24px` was a
-   hard-coded correction for the margin on the box above it, and its
-   only consumer was the per-Sentence map that plan 028 deleted. See
-   .anl-explain in components/analysis/analysis.css, which sits in a
-   parent that owns its own gap. */
-
-
 /* ── Photo input (plan 018) -- pick/shoot an image, OCR it locally.
    Additive only. */
 .analysis-image-input { margin-bottom: 16px; }
@@ -18009,23 +17564,8 @@ html { scrollbar-gutter: stable; }
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 /* Compounds that override a base rule declared above them (the
-   picker's field, the result head's title, the dial's control, the
-   card's action, the form's record) — plan 073. */
+   picker's field, the form's record) — plan 073. */
 .picker-row--create .field { flex: 1; }
-.anl-head .stage__where-jp {
-  font-family: var(--font-jp);
-  font-weight: 600;
-  font-size: var(--fs-lead);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.anl-dial .seg { flex: 1; }
-.token-card__foot .btn-primary {
-  min-height: 44px;
-  padding-inline: var(--sp-4);
-  font-size: var(--fs-sm);
-}
 /* The run's Submit (see "The run's entry", above, for the field it
    sits under). `form.stage__foot` is exactly the three entry feet --
    reading's, translation's and dictation's, each a field with one
@@ -18044,40 +17584,6 @@ form.stage__foot > .btn-primary {
 .dict-form .record { padding: var(--sp-3) var(--sp-4); }
 .record--door:hover .record__chev,
 .record--door:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
-
-/* The analyser's card, taking the room the phone's stage hands it
-   (see "The result on a phone" in the analyzer block). CardTransition
-   puts two boxes between the stage and the card, so the growth has to
-   be passed down through both -- the same chain, for the same reason,
-   as `.stage > .quiz-card-stage` above, and the study stage's own
-   ruling that a card grows into whatever the instrument under it
-   leaves. Declared here because each of these shares its last
-   compound with a rule of CardTransition's own, 6,000 lines below the
-   analyzer's block. */
-/* The dial's control is CHIP size (DESIGN.md, Controls: "a segmented
-   toggle is the rating bar's construction at chip size"), which is
-   .chip's own 36px -- `seg--full`'s 40px bar, full width and stacked
-   twice, was the heaviest thing on the phone's stage after the card.
-   Its options size to their words and share only the slack: at an
-   equal third each "Inconnus seulement" gets 116px on a phone and
-   wraps, and inside a fixed height a wrap is clipped, which is why
-   the height gives way here instead. */
-.anl-dial .seg--full .seg__opt {
-  flex: 1 1 auto;
-  height: auto;
-  min-height: 36px;
-  padding-inline: var(--sp-3);
-}
-
-@media (max-width: 768px) {
-  .anl-stagebd__card > .card-transition,
-  .anl-stagebd__card .card-transition-live {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-  }
-  .anl-stagebd__card .token-card { flex: 1 1 auto; }
-}
 
 @media (max-width: 999px) {
   .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -19635,7 +19141,7 @@ a.slip__act { text-decoration: none; }
    happened to be a key press, though, so answering with Enter drew a
    gold box around the next question and answering with a thumb drew
    nothing -- a ring nobody had asked for and could not explain. The
-   same call as `.anl-stage` above, and the same caveat: restore it if
+   same call as `.anl-results` above, and the same caveat: restore it if
    the question ever becomes reachable by hand. (Its own `outline:
    none` cannot do this: one class loses to two.) */
 .brd .brd__q:focus-visible { outline: none; }
@@ -23496,15 +23002,14 @@ a.slip__act { text-decoration: none; }
   /* Every hover has its focus twin (DESIGN.md, Controls) on the surfaces
      the desk sets in its pages and columns: a keyboard reader was given
      the global ring and none of what the pointer is shown -- the answer
-     sheet's chips in an exam's side, the analyser's stops, chips and
-     table rows, a word's kanji chips, Browse's rows in the deck's side. */
+     sheet's chips in an exam's side, the analyser's stops and chips,
+     a word's kanji chips, Browse's rows in the deck's side. */
   .desk-run__side .exam-sheet__chip:focus-visible {
     border-color: var(--line-color, var(--line-exam));
     color: color-mix(in srgb, var(--line-color, var(--line-exam)) 50%, var(--text-primary));
   }
   .desk-run__side .exam-sheet__chip--answered:focus-visible { color: var(--text-on-panel); }
   :is(.phone--desk, .desk-run__side) .anl-chip:focus-visible { color: var(--text-primary); }
-  :is(.phone--desk, .desk-run__side) .anl-trow__surface:focus-visible { background: var(--overlay-hover); }
   :is(.phone--desk, .desk-run__side) .anl-stop:focus-visible { background: var(--overlay-hover); color: var(--text-primary); }
   :is(.phone--desk, .desk-run__side) .phrase-kanji-chip:has(.phrase-kanji-chip__char:focus-visible) { border-color: var(--border); }
   :is(.phone--desk, .desk-run__side) .phrase-kanji-chip__char:focus-visible {

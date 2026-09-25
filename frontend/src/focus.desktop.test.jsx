@@ -84,8 +84,8 @@ describe('every hover has its focus twin on the desk', () => {
     await twins($('.exam-sheet__chip'))
   })
 
-  it('the analyser\'s stops, chips and table rows', async () => {
-    for (const cls of ['anl-stop', 'anl-chip', 'anl-trow__surface']) {
+  it('the analyser\'s stops and chips', async () => {
+    for (const cls of ['anl-stop', 'anl-chip']) {
       document.body.innerHTML = ''
       await render(<Desk><button type="button" className={cls}>学校</button></Desk>)
       await twins($(`.${cls}`))

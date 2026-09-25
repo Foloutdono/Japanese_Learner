@@ -726,13 +726,7 @@ const phraseAnalyzer = {
   filterHasNew:        'Mots nouveaux',
   stopsShown:          (n, total) => `${n} phrase${n > 1 ? 's' : ''} sur ${total} affichée${n > 1 ? 's' : ''}`,
   keepAllIPlusOne:     'Garder tous les i+1',
-  // Les deux réglages de la scène : la vue des mots et les furigana.
-  viewLabel:           'Vue',
-  viewStepper:         'Un par un',
-  viewTable:           'Tableau',
-  tableWord:           'Mot',
-  tableState:          'État',
-  furiganaLabel:       'Furigana',
+  // Les trois réglages des furigana.
   furiganaAll:         'Tous',
   furiganaUnknown:     'Inconnus',
   furiganaNone:        'Aucun',

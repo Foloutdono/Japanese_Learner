@@ -721,8 +721,8 @@ export default function AnalyzerScreen({ session }) {
     setTokenIndex(i)
   }
   // The token on the stage — the one the desk's right column follows.
-  // Clamped the way the stage clamps it (SentenceBreakdown's 'stage'
-  // layout).
+  // Clamped both ways: a Sentence can legitimately have no tokens, and
+  // that must read as nothing in focus, not a white screen.
   const stageTokens = focused?.tokens ?? focused?.words ?? []
   const stageToken = stageTokens[Math.min(tokenIndex, stageTokens.length - 1)] ?? null
   // A row of the desk's words list puts its word in focus (plan 134).

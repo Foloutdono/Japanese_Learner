@@ -1,7 +1,5 @@
-import { useState } from 'react'
 import { useLang } from '../../LangContext'
 import { Dots } from '../ui/Loading'
-import { CardTransition } from '../study/CardTransition'
 import { FuriganaParts } from '../study/Readings'
 import { STATUS_COLORS, wordColor } from './status'
 import { TokenCard } from './TokenCard'
@@ -9,101 +7,11 @@ import { GrammarChips } from './GrammarChips'
 import { GrammarPoints } from './GrammarPoints'
 import { LevelBadge } from './LevelBadge'
 import { SpeakButton } from './SpeakButton'
-import { StatusBadge } from './StatusBadge'
-import { DeckPicker } from './DeckPicker'
-import { StageCard } from './StageCard'
 import { rowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, pointKey } from './grammarSpans'
-import { isUnknownToken, tokState, tokFurigana } from './tokens'
+import { isUnknownToken, tokState } from './tokens'
 import { useLight } from './useLight'
-
-// ── The token table (the mockup's second view) ────────────
-// Word | Reading | Meaning | State | ＋ — one row per Token, dense on
-// purpose: the table exists for scanning a whole Sentence at once.
-// The mine cell is the mockup's ＋/✓: one press adds the word to the
-// remembered deck (the same act the card's own control performs),
-// opening the picker only when there is no remembered target yet.
-function TableMine({ word, mining, t }) {
-  const [added, setAdded] = useState(false)
-  const [showPicker, setShowPicker] = useState(false)
-
-  if (!mining || !word.vocab_match) return <span />
-
-  async function mine(deckId) {
-    setShowPicker(false)
-    try {
-      await mining.mineApp({
-        deckId, source: 'vocab', level: word.vocab_match.level,
-        rawId: word.vocab_match.raw_id, kind: 'vocab',
-      })
-      setAdded(true)
-    } catch { /* mining.lastOutcome carries the failure to the announcer */ }
-  }
-
-  return (
-    <>
-      <button
-        type="button"
-        className={`anl-trow__mine${added ? ' anl-trow__mine--done' : ''}`}
-        title={t.addToDeck}
-        aria-label={`${t.addToDeck} — ${word.surface}`}
-        onClick={() => {
-          const target = mining.targetFor('vocab')
-          if (target) mine(target.id)
-          else setShowPicker(true)
-        }}
-      >
-        {added ? '✓' : '＋'}
-      </button>
-      {showPicker && (
-        <DeckPicker
-          decks={mining.decksFor('vocab')}
-          currentId={mining.targetFor('vocab')?.id ?? null}
-          t={t}
-          onClose={() => setShowPicker(false)}
-          onSelect={mine}
-          onCreate={async name => { mine((await mining.ensureDeck('vocab', name)).id) }}
-        />
-      )}
-    </>
-  )
-}
-
-function TokenTable({ tokens, t, mining, onJumpToToken }) {
-  return (
-    <div className="anl-toktable">
-      <div className="anl-toktable__scroll">
-        <div className="anl-trow anl-trow--head" aria-hidden="true">
-          <span>{t.tableWord}</span>
-          <span>{t.reading}</span>
-          <span>{t.meaning}</span>
-          <span>{t.tableState}</span>
-          <span />
-        </div>
-        {tokens.map((w, i) => (
-          <div key={i} className="anl-trow">
-            <button
-              type="button"
-              className="anl-trow__surface"
-              lang="ja"
-              onClick={() => onJumpToToken(i)}
-              aria-label={t.jumpToTokenNamed(w.surface)}
-            >
-              {w.surface}
-            </button>
-            <span className="anl-trow__reading" lang="ja">{w.reading}</span>
-            <span className="anl-trow__meaning">{w.meaning}</span>
-            <span className="anl-trow__state">
-              {w.vocab_match && <StatusBadge status={w.vocab_match.stats.status} small t={t} />}
-            </span>
-            <TableMine word={w} mining={mining} t={t} />
-          </div>
-        ))}
-      </div>
-    </div>
-  )
-}
 
 export function Legend({ t }) {
   return (
@@ -265,26 +173,17 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
   )
 }
 
-// The sentence breakdown, in one of three layouts:
+// The sentence breakdown, in one of two layouts:
 //
 //   'list'    — every Token as a scrolling list of cards (the phrase
 //               analyzer's original shape): a colour-coded phrase line
 //               up top, the explanation, a status legend, then one
 //               TokenCard per Token. No screen draws it today; the
-//               analyzer moved to 'stage' (plan 073) and the practice
-//               modes to 'rows' (plan 084), which retired the
-//               one-card-at-a-time 'stepper' the practice modes used
-//               to share.
-//   'stage'   — the analyser's control-room shape (the mockup round):
-//               the sentence as its own surface panel where status is
-//               an UNDERLINE rather than an ink colour, the grammar
-//               the sentence is built with as quiet chips under it
-//               (plan 095), then the caller's `controls` (the
-//               view/furigana dials), then the same carousel with the
-//               card grown to the stage. Lives here beside its
-//               siblings so the three shapes share TokenCard,
-//               FuriganaParts and the badges instead of a fourth
-//               near-copy drifting off on its own.
+//               analyzer moved to a stage of its own (plan 073, drawn
+//               since plan 134 by SubtitleLine, WordsList and
+//               FocusCard) and the practice modes to 'rows' (plan
+//               084), which retired the one-card-at-a-time 'stepper'
+//               the practice modes used to share.
 //   'rows'    — the practice modes' shape (plan 084): the ruby line,
 //               the sentence's `translation`, one row per word, the
 //               grammar spotted (and, once bought, what each rule does
@@ -292,14 +191,6 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
 //               the deep tier's explanation) last and quiet.
 //               `sentenceText` is what prints when there is no
 //               analysis to draw from.
-//
-// `index`/`setIndex` are used by 'stage' and are owned by the caller
-// (AnalyzerScreen) so they can be reset to 0 whenever a new sentence
-// is focused. `controls`, `tokenView` and `onJumpToToken` are only
-// read by 'stage': tokenView chooses between the carousel and the
-// mockup's token table, and onJumpToToken is what a table row's
-// surface does (focus that token AND switch back to the carousel —
-// the mockup's own behaviour).
 //
 // `onGrammarOpen(point)` makes each grammar chip a door to the point's
 // dictionary entry (GrammarChips' onOpen); the screen decides what
@@ -312,14 +203,13 @@ export function WordRows({ analysis, t, onTokenClick, onGrammarOpen, lit = null,
 // analyzer's Explain does. `explaining` and `explainError` are the
 // call's state, the caller's to hold.
 export function SentenceBreakdown({
-  analysis, t, layout = 'list', index = 0, setIndex, onTokenClick, onKanjiClick, mining,
-  speakable = false, controls = null, tokenView = 'stepper', onJumpToToken,
+  analysis, t, layout = 'list', onTokenClick, onKanjiClick, mining, speakable = false,
   translation, note, sentenceText, onGrammarOpen, onExplain, explaining = false, explainError = null,
 }) {
   const tokens = analysis?.tokens ?? analysis?.words ?? []
-  // The light is this component's in the rows and on the stage (the
-  // line and the chips are both drawn here); PassageBreakdown, which
-  // composes the same pieces itself, holds its own.
+  // The light is this component's in the rows (the line and the chips
+  // are both drawn here); PassageBreakdown, which composes the same
+  // pieces itself, holds its own.
   const light = useLight(analysis)
   const openGrammar = light.open(onGrammarOpen)
 
@@ -367,79 +257,6 @@ export function SentenceBreakdown({
     )
   }
 
-  if (layout === 'stage') {
-    // Same both-ways clamp as the stepper below, same reason: a
-    // Sentence can legitimately have no tokens, and that must render
-    // as "nothing to step through", not a white screen.
-    const current = tokens.length ? tokens[Math.min(index, tokens.length - 1)] : null
-
-    return (
-      <div className="anl-stagebd">
-        {/* ── The line (canvas .tok-line) ──
-            The sentence as tokens: the reading over each word that
-            needs one, the SRS speaking through a 2px rule under it
-            (see tokState), the one on the stage tinted. The furigana
-            dial (the caller's `controls`) hides the readings by state
-            through data-furigana on the stage. */}
-        <div className="tok-line" role="group" aria-label={analysis.text}>
-          {tokens.map((w, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => setIndex(i)}
-              className={`tok tok--${tokState(w)}${i === index ? ' tok--on' : ''}${light.lit && coversToken(light.lit, w) ? ' tok--lit' : ''}`}
-              aria-label={t.jumpToTokenNamed(w.surface)}
-              aria-pressed={i === index}
-              lang="ja"
-            >
-              <span className="tok__furi" lang="ja">{tokFurigana(w)}</span>
-              <span className="tok__word">{w.surface}</span>
-            </button>
-          ))}
-        </div>
-        {/* No legend under the line (plan 134, owner-directed): the four
-            rules are learned in a sentence or two, and a key printed on
-            every stop was the stage's loudest line after the sentence. */}
-
-        {/* ── The grammar the sentence is built with (plan 095) ──
-            The constructions the local tier found, each with its
-            gloss, its parts and (once bought) its line, every one a
-            door to its lesson. The stage used to be the one breakdown
-            that showed none of it. The markers (は, を) are not here --
-            they are the rule of one word, and the card below says so
-            about that word. */}
-        <GrammarPoints analysis={analysis} t={t} lit={light.litKey} onLight={light.onLight} onOpen={openGrammar} />
-
-        {controls}
-
-        {tokenView === 'table' ? (
-          <TokenTable
-            tokens={tokens}
-            t={t}
-            mining={mining}
-            onJumpToToken={onJumpToToken ?? setIndex}
-          />
-        ) : (
-          <CardTransition cardKey={index} className="anl-stagebd__card">
-            {current && (
-              <StageCard
-                word={current}
-                t={t}
-                onWordClick={onTokenClick}
-                onKanjiClick={onKanjiClick}
-                onGrammarOpen={openGrammar}
-                lit={light.litKey}
-                onLight={light.onLight}
-                mining={mining}
-                emphasize={analysis.unknown_count === 1 && isUnknownToken(current)}
-              />
-            )}
-          </CardTransition>
-        )}
-      </div>
-    )
-  }
-
   return (
     <>
       <div className="card phrase-result-card">
@@ -478,11 +295,6 @@ export function SentenceBreakdown({
           {analysis.explanation}
         </div>
       </div>
-
-      {/* The same slot the 'stage' layout fills — without it the view
-          dial that SWITCHED here would vanish with the switch, a
-          control that removes itself on use. */}
-      {controls}
 
       <Legend t={t} />
 
