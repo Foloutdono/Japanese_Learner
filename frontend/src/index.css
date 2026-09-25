@@ -24555,12 +24555,18 @@ a.slip__act { text-decoration: none; }
     min-height: 0;
   }
   /* ── The left column ── */
+  /* Sized by its rows, never the other way: the rail spans the two auto
+     rows, and its list's full height (a song is thirty-odd stops) used to
+     be spread over them -- the head and the sumi object swelled and the
+     grammar's row, the flexible one, was left with nothing. Contained,
+     the list adds no height to the rows and scrolls in the panel. */
   .anl-desk__rail {
     display: flex;
     grid-area: rail;
     flex-direction: column;
     gap: var(--sp-4);
     min-height: 0;
+    contain: size;
     padding: var(--sp-4);
     background: var(--surface);
     border: 1px solid var(--surface-line);
@@ -24584,8 +24590,9 @@ a.slip__act { text-decoration: none; }
   }
   /* The one sentence of a typed Passage has no list: the grammar stands
      at the column's top. A sentence with no construction has no box:
-     the list takes the column's height. */
-  .anl-desk--one .anl-desk__points { grid-row: 1 / -1; align-self: start; }
+     the list takes the column's height. Standing at the top, the box is
+     as tall as its points up to the column's foot, then scrolls. */
+  .anl-desk--one .anl-desk__points { grid-row: 1 / -1; align-self: start; max-height: 100%; }
   .anl-desk--bare .anl-desk__rail { grid-row: 1 / -1; }
   /* ── The head ── */
   .anl-desk__head {
