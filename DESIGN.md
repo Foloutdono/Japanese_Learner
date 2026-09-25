@@ -1001,7 +1001,11 @@ plated gates take the window.
   the window. Scrolling on its own must not cut what it holds: the column
   (and every list that scrolls beside a page) keeps a gutter inside its
   clip edge and gives it back outside, so a row's hover lift, its focus
-  ring and its arrival are drawn whole and no row moves for it.
+  ring and its arrival are drawn whole and no row moves for it. No box
+  prints a scrollbar only while something arrives in it: not the page, a
+  screen rising into a window it fits (the frame clips a movement, never
+  what is laid out), and not a boarding step's body, sized to its answers
+  on the desk (it keeps the rung under them as room).
 - **The gates, with their companion beside them.** Today sets the pass's
   strip and its back (the journey) beside the fare gate; the back was a
   sheet. The gate's lanes go two across once the gate holds two at a
