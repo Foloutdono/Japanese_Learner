@@ -23042,5 +23042,71 @@ a.slip__act { text-decoration: none; }
   .desk-dict .dict-form__sheet { grid-row: auto; }
   .desk-dict > .dict-dock .records { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .desk-dict > .dict-dock .records > .record { padding: var(--sp-4); }
+
+  /* ── 机 — the kana charts: the whole syllabary, and where the learner
+     stands (plan 128) ──
+     The owner's pick of four: every chart on one screen, each cell
+     marked with the learner's stage on it -- the charts unmarked, no
+     tally, no summary. A kana's entry is short, so it stands at the side
+     column's width (DeskColumns' `chart`). The charts go three across
+     (SyllabaryGrid's desk columns), each column as wide as its cells
+     share, so a cell is one width everywhere: 5 : 5 : 3, between a tap
+     target (--sp-8) and --sp-9. Past the least the columns wrap under one
+     another, on the narrowest desk, rather than shrink the cells; the
+     kana are set at the title rung, where a pair (きゃ, ファ) still fits
+     the narrowest cell, and a cell stands as tall as its kana need, so a
+     chart of twelve rows ends above the foot of a 900px window. */
+  .desk-dict--chart { grid-template-columns: minmax(0, 1fr) var(--desk-side-w); }
+  .desk-dict--chart .syllabary-chart-group {
+    flex-flow: row wrap;
+    align-items: flex-start;
+    gap: var(--sp-6) var(--sp-7);
+  }
+  .desk-dict--chart .syllabary-col {
+    flex: 5 1 0;
+    gap: var(--sp-6);
+    min-width: calc(5 * var(--sp-8) + 4 * var(--sp-1));
+    max-width: calc(5 * var(--sp-9) + 4 * var(--sp-1));
+  }
+  .desk-dict--chart .syllabary-col:has(> .syllabary-table-wrap > .syllabary-table--narrow) {
+    flex-grow: 3;
+    min-width: calc(3 * var(--sp-8) + 2 * var(--sp-1));
+    max-width: calc(3 * var(--sp-9) + 2 * var(--sp-1));
+  }
+  .desk-dict--chart .syllabary-table {
+    grid-template-columns: repeat(var(--syl-cols, 5), minmax(0, 1fr));
+    gap: var(--sp-1);
+  }
+  .desk-dict--chart .syllabary-cell {
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+    padding: var(--sp-2) 0 var(--sp-1);
+  }
+  .desk-dict--chart .syllabary-cell__char {
+    font-size: var(--fs-title);
+    white-space: nowrap;
+  }
+  /* Where the learner stands, as a catalogue tile carries it: its foot
+     in the stage's ink -- vermillion in progress, gold mastered, gold's
+     wash under a mastered kana -- and a kana not yet met in the
+     secondary ink, so the chart reads as the ground covered. */
+  .desk-dict--chart .syllabary-cell--kana::after {
+    content: '';
+    position: absolute;
+    inset: auto 0 0;
+    height: 3px;
+    background: var(--stage-edge, transparent);
+  }
+  .desk-dict--chart .syllabary-cell--learning { --stage-edge: var(--state-learning); }
+  .desk-dict--chart .syllabary-cell--mastered { --stage-edge: var(--state-mastered); }
+  .desk-dict--chart .syllabary-cell--mastered:not(.syllabary-cell--selected) {
+    background: color-mix(in srgb, var(--state-mastered) 12%, var(--surface));
+  }
+  .desk-dict--chart .syllabary-cell--kana:not(.syllabary-cell--learning, .syllabary-cell--mastered) .syllabary-cell__char {
+    color: var(--text-secondary);
+  }
+  /* The record two by two at the side column's width. */
+  .desk-dict--chart > .dict-dock .records { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

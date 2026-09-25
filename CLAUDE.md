@@ -412,10 +412,13 @@ runtime purpose. Two consequences worth knowing:
   — while a word's plate stays stacked and its senses scroll in the
   column; and the grammar collection with the split turned round (the
   owner's second pick), its points a list in the side column and the
-  entry across the page, the lesson in two columns (cited in
-  `screens/DictionaryScreen.jsx`'s `DeskColumns`, the 机 section and
-  `:root` of `index.css`, `src/dictionary.desktop.test.jsx`,
-  `src/dictionary.wide.test.jsx`, `src/testing/grammarPoints.json` and
+  entry across the page, the lesson in two columns; and the kana charts
+  whole on one screen (the owner's pick of four more), three columns,
+  unmarked, each cell marked with the learner's stage (cited in
+  `screens/DictionaryScreen.jsx`'s `DeskColumns`, `SyllabaryGrid` and
+  `SyllabaryTable`, the 机 section and `:root` of `index.css`,
+  `src/dictionary.desktop.test.jsx`, `src/dictionary.wide.test.jsx`,
+  `src/testing/grammarPoints.json`, `src/testing/kanaRows.json` and
   `src/deskfree.phone.test.jsx`; DESIGN.md, "The desk";
   `docs/design/desk/README.md`).
   When starting a new wave, begin at **129** or higher, and check

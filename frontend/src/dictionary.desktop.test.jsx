@@ -476,3 +476,78 @@ describe('the grammar page (plan 128)', () => {
     expect(getComputedStyle(document.querySelector('.dict-dock .records')).gridTemplateColumns.split(' ')).toHaveLength(4)
   })
 })
+
+// ── plan 128 — the kana charts ──
+// The owner's pick of four: every chart at once, three columns, each
+// cell marked with where the learner stands on its kana -- no chart's
+// mark, no tally, no summary -- and the kana's short entry at the side
+// column's width. On this lane, the narrowest desk, the columns wrap;
+// on a wider one they stand in one row inside the window
+// (dictionary.wide). Rows: the catalogue's own kana, with a learner who
+// has mastered the vowels and か行 and is learning さ行 (katakana: the
+// vowels, and カ行 in progress).
+describe('the kana charts (plan 128)', () => {
+  const token = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim()
+  const serveKana = async () => {
+    const { default: KANA } = await import('./testing/kanaRows.json')
+    apiFetch.mockImplementation(async path => ({
+      ok: true, status: 200,
+      json: async () => {
+        const rows = KANA[new URLSearchParams(String(path).split('?')[1] ?? '').get('category')] ?? []
+        return { results: rows, total: rows.length, has_more: false }
+      },
+    }))
+  }
+  const cell = kana => [...document.querySelectorAll('.syllabary-cell--kana')]
+    .find(c => c.querySelector('.syllabary-cell__char').textContent === kana)
+  const tablesPerColumn = () => [...document.querySelectorAll('.syllabary-col')]
+    .map(c => c.querySelectorAll('.syllabary-table').length)
+  // A token's colour as the browser resolves it.
+  const ink = name => {
+    const probe = document.createElement('span')
+    probe.style.color = `var(${name})`
+    document.body.appendChild(probe)
+    const color = getComputedStyle(probe).color
+    probe.remove()
+    return color
+  }
+
+  it('stands every chart unmarked in three columns, beside a side-width entry', async () => {
+    await serveKana()
+    await mount('/dictionary?category=hiragana')
+    expect(document.querySelector('.desk-dict--chart')).not.toBeNull()
+    expect(Math.round(document.querySelector('.dict-dock').getBoundingClientRect().width)).toBe(parseFloat(token('--desk-side-w')))
+    // 五十音 | 濁音 and 長音 | 拗音.
+    expect(tablesPerColumn()).toEqual([1, 2, 1])
+    expect(document.querySelectorAll('.syllabary-col')[2].querySelector('.syllabary-table--narrow')).not.toBeNull()
+    // No chart's mark on the desk; each grid keeps its name.
+    expect(document.querySelector('.dictionary .dict-mark')).toBeNull()
+    const names = [...document.querySelectorAll('.syllabary-table')].map(t => t.getAttribute('aria-label'))
+    expect(names).toHaveLength(4)
+    expect(names.every(Boolean)).toBe(true)
+  })
+
+  it('marks where the learner stands on each kana', async () => {
+    await serveKana()
+    await mount('/dictionary?category=hiragana')
+    const edge = c => getComputedStyle(c, '::after').backgroundColor
+    expect(cell('か').classList.contains('syllabary-cell--mastered')).toBe(true)
+    expect(edge(cell('か'))).toBe(ink('--state-mastered'))
+    expect(cell('さ').classList.contains('syllabary-cell--learning')).toBe(true)
+    expect(edge(cell('さ'))).toBe(ink('--state-learning'))
+    // A kana not yet met: no stage, and its kana in the secondary ink.
+    const untouched = cell('な')
+    expect(untouched.className).not.toMatch(/syllabary-cell--(learning|mastered)/)
+    expect(getComputedStyle(untouched.querySelector('.syllabary-cell__char')).color).toBe(ink('--text-secondary'))
+    expect(getComputedStyle(cell('か').querySelector('.syllabary-cell__char')).color).toBe(ink('--text-primary'))
+  })
+
+  it('puts katakana\'s long bar under 五十音 and its borrowed sounds under 濁音', async () => {
+    await serveKana()
+    await mount('/dictionary?category=katakana')
+    expect(tablesPerColumn()).toEqual([2, 2, 1])
+    const [main] = document.querySelectorAll('.syllabary-col')
+    expect(main.querySelectorAll('.syllabary-table')[1].textContent).toContain('アー')
+    expect(cell('カ').classList.contains('syllabary-cell--learning')).toBe(true)
+  })
+})

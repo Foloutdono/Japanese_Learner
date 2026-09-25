@@ -1022,7 +1022,14 @@ answer a keyboard and a pointer one way everywhere.
   `--desk-entry-w`, its plate laid left with the marks beside the pattern
   (over it, for a pattern of seven characters or more), the record flush
   under the stripe and the lesson in two columns where each holds
-  `--desk-run-col-min`. A
+  `--desk-run-col-min`. The kana charts show the whole syllabary at once:
+  three columns of charts, unmarked (each grid keeps its name for a
+  screen reader), every cell one width between `--sp-8` and `--sp-9` and
+  its kana at the title rung, each cell marked with where the learner
+  stands — a gold wash and foot mastered, a vermillion foot in progress,
+  the kana in the secondary ink not yet met — and the short kana entry at
+  `--desk-side-w`. On the narrowest desk the columns wrap rather than
+  shrink the cells. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
   is a door to its stop.
 - **A station is two panes.** Levels, sets or grades stand upright on the

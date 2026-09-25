@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import POINTS from './testing/grammarPoints.json'
+import KANA from './testing/kanaRows.json'
 import './index.css'
 
 // ── 机 — the grammar page on a laptop's width (plan 128) ─────────────
@@ -16,7 +17,10 @@ import './index.css'
 
 vi.mock('./lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ results: POINTS, total: POINTS.length, has_more: false }) })),
+  apiFetch: vi.fn(async path => {
+    const rows = KANA[new URLSearchParams(String(path).split('?')[1] ?? '').get('category')] ?? POINTS
+    return { ok: true, status: 200, json: async () => ({ results: rows, total: rows.length, has_more: false }) }
+  }),
   apiJson: vi.fn(async () => ({ decks: [] })),
   apiJsonWithTimeout: vi.fn(), apiUpload: vi.fn(),
   ApiError: class extends Error {},
@@ -27,10 +31,10 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
 const settle = (ms = 250) => new Promise(r => setTimeout(r, ms))
 
-async function mount() {
+async function mount(category = 'grammar') {
   await render(
     <LangProvider>
-      <MemoryRouter initialEntries={['/dictionary?category=grammar']}>
+      <MemoryRouter initialEntries={[`/dictionary?category=${category}`]}>
         <div className="phone phone--desk">
           <div className="phone__content">
             <Routes><Route path="/dictionary" element={<DictionaryScreen session={{}} />} /></Routes>
@@ -59,5 +63,24 @@ describe('the grammar page on a wide desk (plan 128)', () => {
     expect(pieces.every(p => p.right <= middle + 1 || p.left >= middle - 1)).toBe(true)
     expect(dock.scrollHeight).toBeLessThanOrEqual(dock.clientHeight)
     expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual(innerHeight)
+  })
+})
+
+// ── plan 128 — the kana charts on a laptop's width ──
+// At 1440 the three columns stand in one row and the whole of either
+// syllabary -- katakana's twelve rows a column the tallest -- ends above
+// the window's foot, every cell one width, no kana (a pair like きゃ or
+// ファ) wider than its cell.
+describe('the kana charts on a wide desk (plan 128)', () => {
+  it.each(['hiragana', 'katakana'])('stands the whole of %s in the window', async category => {
+    await mount(category)
+    const cols = [...document.querySelectorAll('.syllabary-col')].map(c => c.getBoundingClientRect())
+    expect(cols).toHaveLength(3)
+    expect(new Set(cols.map(c => Math.round(c.top))).size).toBe(1)
+    expect(Math.max(...cols.map(c => c.bottom))).toBeLessThanOrEqual(innerHeight)
+    const cells = [...document.querySelectorAll('.syllabary-cell--kana')]
+    const widths = cells.map(c => c.getBoundingClientRect().width)
+    expect(Math.max(...widths) - Math.min(...widths)).toBeLessThan(1.5)
+    expect(cells.filter(c => c.querySelector('.syllabary-cell__char').scrollWidth > c.clientWidth)).toEqual([])
   })
 })

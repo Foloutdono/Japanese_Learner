@@ -1554,3 +1554,27 @@ describe('the dictionary\'s columns (plan 128)', () => {
     apiJson.mockReset()
   })
 })
+
+// ── plan 128 — the kana charts a phone keeps ──
+// On the desk the charts stand three across, unmarked, each cell marked
+// with the learner's stage. A phone keeps its two columns in teaching
+// order, every chart under its mark, and its cells as they were.
+describe('the kana charts (plan 128)', () => {
+  it('keeps two columns, every chart marked, no stage on a cell', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    const { default: KANA } = await import('./testing/kanaRows.json')
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: KANA.hiragana, total: KANA.hiragana.length, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary?category=hiragana']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(300)
+    const cols = [...document.querySelectorAll('.syllabary-col')]
+    expect(cols).toHaveLength(2)
+    expect(cols.map(c => c.querySelectorAll('.syllabary-table').length)).toEqual([2, 2])
+    expect(document.querySelectorAll('.syllabary-table-wrap > .dict-mark')).toHaveLength(4)
+    expect(document.querySelector('.syllabary-cell--mastered, .syllabary-cell--learning')).toBeNull()
+    expect(document.querySelector('.desk-dict')).toBeNull()
+    apiJson.mockReset()
+  })
+})

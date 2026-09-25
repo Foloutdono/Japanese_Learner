@@ -630,7 +630,7 @@ export default function DictionaryScreen({ session }) {
 			    the door and the console, where the window cut it off (see
 			    DeskColumns). A phone gets the same children with no wrapper. */}
 			<DeskDockContext.Provider value={desk ? deskDock : null}>
-			<DeskColumns desk={desk} bare={showingRadicalGrid} page={category === 'grammar'} dock={dock}>
+			<DeskColumns desk={desk} bare={showingRadicalGrid} page={category === 'grammar'} chart={isSyllabary} dock={dock}>
 			{/* The analyzer, behind its door (canvas Dictionary): one row
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
@@ -1005,10 +1005,16 @@ function cardFurigana(entry) {
 // catalogue is the narrow column, its points one to a row, and the
 // entry takes the rest of the page, its lesson in two columns where
 // they fit.
-function DeskColumns({ desk, bare, page, dock, children }) {
+//
+// The kana charts (`chart`, the owner's pick of four) are the other
+// way about: the whole syllabary is the thing to see, every table at
+// once and each cell marked with where the learner stands on it, and a
+// kana's entry is short, so the entry stands at the side column's width.
+function DeskColumns({ desk, bare, page, chart, dock, children }) {
 	if (!desk) return children
+	const variant = bare ? ' desk-dict--bare' : page ? ' desk-dict--page' : chart ? ' desk-dict--chart' : ''
 	return (
-		<div className={`desk-dict${bare ? ' desk-dict--bare' : page ? ' desk-dict--page' : ''}`}>
+		<div className={`desk-dict${variant}`}>
 			<div className="desk-dict__main">{children}</div>
 			{dock}
 		</div>
@@ -1295,7 +1301,15 @@ function vowelOf(romaji) {
 	return VOWEL_COLS.includes(last) ? last : null
 }
 
-function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected }) {
+// 机 (plan 128): on the desk a cell carries where the learner stands on
+// its kana, as a catalogue tile's edge does -- in progress, or mastered --
+// and nothing for one not yet met. A phone's cells are as they were.
+function cellStage(entry, desk) {
+	const stage = desk ? stageOf(entry.status?.status) : null
+	return stage === 'learning' || stage === 'mastered' ? ` syllabary-cell--${stage}` : ''
+}
+
+function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, selected, setSelected, desk = false }) {
 	return (
 		<div className="syllabary-table-wrap">
 			{/* The chart's mark, then the chart. The mark named it in both
@@ -1303,8 +1317,10 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 			    Japanese half captioned a chart rather than naming a place,
 			    so what is left is the name a learner can act on. The grid
 			    carries the same name for a screen reader, which reads the
-			    group rather than the sign. */}
-			<BlockMark name={title} />
+			    group rather than the sign. On the desk, where every chart
+			    stands at once, the charts go unmarked (plan 128, the
+			    owner's cut): the grid still carries its name. */}
+			{!desk && <BlockMark name={title} />}
 			<div
 				className={`syllabary-table${narrow ? ' syllabary-table--narrow' : ''}`}
 				role="group"
@@ -1329,7 +1345,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 										key={v}
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
-										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}`}
+										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}${cellStage(entry, desk)}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
 										<span className="syllabary-cell__romaji">{entry.romaji}</span>
@@ -1347,7 +1363,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 					<button
 						type="button"
 						onClick={() => setSelected(tail)}
-						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}`}
+						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}${cellStage(tail, desk)}`}
 					>
 						<span className="syllabary-cell__char">{tail.kana}</span>
 						<span className="syllabary-cell__romaji">{tail.romaji}</span>
@@ -1382,6 +1398,30 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 
 	if (loading) return <Loading />
 
+	const table = (rows, cols, title, extra = {}) => (
+		<SyllabaryTable
+			rows={rows} cols={cols} title={title} byGroup={byGroup}
+			selected={selected} setSelected={setSelected} desk={desk} {...extra}
+		/>
+	)
+	const charts = {
+		main: table(MAIN_ROWS, VOWEL_COLS, t.syllabaryMain, { tail: nSolo }),
+		long: hasLong && table(longRows, VOWEL_COLS, t.syllabaryLong),
+		voiced: table(VOICED_ROWS, VOWEL_COLS, t.syllabaryVoiced),
+		yoon: hasYoon && table(YOON_ROWS, YOON_COLS, t.syllabaryYoon, { narrow: true }),
+		foreign: hasForeign && table(FOREIGN_ROWS, VOWEL_COLS, t.syllabaryForeign),
+	}
+	// A phone's two columns keep the teaching order (below). The desk's
+	// three hold every chart on one screen (plan 128): the five-column
+	// charts two by two, the long vowels with whichever column they
+	// balance -- katakana's one bar under 五十音, hiragana's matrix under
+	// 濁音 -- and 拗音's three columns alone.
+	const columns = !desk
+		? [['main', 'long'], ['voiced', 'yoon', 'foreign']]
+		: kataLong
+			? [['main', 'long'], ['voiced', 'foreign'], ['yoon']]
+			: [['main'], ['voiced', 'long'], ['yoon']]
+
 	return (
 		<div className="dict-layout">
 			<div className="dict-results-wrap">
@@ -1403,62 +1443,11 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				    for the stack — and the phone's is the one that has to
 				    be right. */}
 				<div className="syllabary-chart-group" style={{ '--syl-accent': accentColor }}>
-					<div className="syllabary-col">
-						<SyllabaryTable
-							rows={MAIN_ROWS}
-							cols={VOWEL_COLS}
-							title={t.syllabaryMain}
-							byGroup={byGroup}
-							tail={nSolo}
-							selected={selected}
-							setSelected={setSelected}
-						/>
-
-						{hasLong && (
-							<SyllabaryTable
-								rows={longRows}
-								cols={VOWEL_COLS}
-								title={t.syllabaryLong}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-					</div>
-
-					<div className="syllabary-col">
-						<SyllabaryTable
-							rows={VOICED_ROWS}
-							cols={VOWEL_COLS}
-							title={t.syllabaryVoiced}
-							byGroup={byGroup}
-							selected={selected}
-							setSelected={setSelected}
-						/>
-
-						{hasYoon && (
-							<SyllabaryTable
-								rows={YOON_ROWS}
-								cols={YOON_COLS}
-								narrow
-								title={t.syllabaryYoon}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-
-						{hasForeign && (
-							<SyllabaryTable
-								rows={FOREIGN_ROWS}
-								cols={VOWEL_COLS}
-								title={t.syllabaryForeign}
-								byGroup={byGroup}
-								selected={selected}
-								setSelected={setSelected}
-							/>
-						)}
-					</div>
+					{columns.map(names => (
+						<div key={names.join()} className="syllabary-col">
+							{names.map(name => charts[name] && <Fragment key={name}>{charts[name]}</Fragment>)}
+						</div>
+					))}
 				</div>
 			</div>
 
