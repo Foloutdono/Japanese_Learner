@@ -58,7 +58,7 @@ N5 = [
     {"jp": "七時に学校へ行きます。", "en": "I go to school at seven.", "grammar": "に", "focus": "学校"},
     {"jp": "駅で友だちに会います。", "en": "I meet a friend at the station.", "grammar": "で", "focus": "駅"},
     {"jp": "父と母は今、外にいます。", "en": "My father and mother are outside right now.", "grammar": "と", "focus": "外"},
-    {"jp": "わたしも魚を買います。", "en": "I will buy fish too.", "grammar": "も", "focus": "魚"},
+    {"jp": "わたしも魚を買います。", "en": "I, too, will buy fish.", "grammar": "も", "focus": "魚"},
     {"jp": "これはわたしの本です。", "en": "This is my book.", "grammar": "の", "focus": "本"},
     {"jp": "九時から五時まで会社にいます。", "en": "I am at the office from nine to five.", "grammar": "から〜まで", "focus": "会社"},
     {"jp": "今日は学校へ行きません。", "en": "I am not going to school today.", "grammar": "〜ます／〜ません", "focus": "今日"},
