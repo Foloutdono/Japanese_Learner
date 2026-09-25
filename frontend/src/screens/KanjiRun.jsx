@@ -18,6 +18,7 @@ import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { CardPanel } from '../components/study/CardPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 import PromptCard from '../components/study/PromptCard'
@@ -305,9 +306,11 @@ export default function KanjiRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
+      progress={progress}
+      panel={card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
-      sideLabel={t.deskRunLabel}
+      sideLabel={t.dictionaryTitle}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

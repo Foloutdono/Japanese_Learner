@@ -94,24 +94,24 @@ describe('a lesson\'s compare row on the desk', () => {
     const side = $('.desk-run__side')
     expect(side).not.toBeNull()
     expect($('.gl--gate')).not.toBeNull()
-    // The session panel stands in the side (its note, before any reveal);
-    // this run's figures are on the floor since plan 124.
-    expect(side.querySelector('.desk-run__note')).not.toBeNull()
-    expect($('.lvlbar .desk-tally')).not.toBeNull()
+    // The details stand sealed in the side before any reveal; this run's
+    // figures head the left column (plan 126).
+    expect(side.querySelector('.desk-sealed')).not.toBeNull()
+    expect($('.desk-session .desk-figs')).not.toBeNull()
 
     $('.gl--gate .gl-door').click()
     await settle(400)
     expect($('[role="dialog"]')).toBeNull()
     expect(side.querySelector('.desk-entry .dict-plate__word').textContent).toBe('〜ないでください')
     // The session panel steps aside, kept mounted for the way back.
-    expect(side.querySelector('.desk-run__note').closest('[hidden]')).not.toBeNull()
+    expect(side.querySelector('.desk-sealed').closest('[hidden]')).not.toBeNull()
     // The lesson being read stays where it was.
     expect($('.gl--gate .dict-plate__word').textContent).toBe('〜てください')
 
     window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }))
     await settle()
     expect(side.querySelector('.desk-entry')).toBeNull()
-    expect(side.querySelector('.desk-run__note').closest('[hidden]')).toBeNull()
+    expect(side.querySelector('.desk-sealed').closest('[hidden]')).toBeNull()
     expect($('.gl--gate')).not.toBeNull()
     expect($('.platforms-probe')).toBeNull()
   })

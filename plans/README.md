@@ -6084,6 +6084,29 @@ not measured by a script.
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
 
+# Wave 31 — 三面, the run on three panels (plan 126, 2026-09-25)
+
+Plan 124's console, seen running by the owner, was answered with a
+hand-drawn layout: three columns — this run and an open panel on the
+left, the card with its tiles framed under it in the middle, the card's
+details on the right — and the question of what the open panel could
+hold. Drawn three ways with eight candidates for the panel on the canvas
+"Tsuji desk run — three columns"; the owner picked A (the panels), the
+panel as the verdicts' tiles over the keys and a rhythm foot, the
+details with the figures moved up and the stroke sheet growing, and no
+key caps on the elements. Numbered 126 because 125 went to composition
+while the canvas was open.
+
+| Plan | What | Status |
+|---|---|---|
+| 126 | The forecast on every card's `review_preview` (`due_in` per quality; `tests/test_review_forecast.py`); `StudyStage`'s `.desk-run--panels` grid with `panel` and `progress`; `RunPanel` (the figures with the count as the fourth, the level bar as a row, the legend), `CardPanel` (the state line, the verdict tiles with the wait in words off `domain/forecast.js`, the keys, the rhythm off `runTally.startedAt`; no captions and no line under an interval — the owner's cut after the first build); `RunPanelsContext` so the head, the hint switch, the flashcard and the tiles print no caps and the tiles stand unlit before the reveal; `SessionPanel` sealed then the entry in `DictionaryDetail`'s `band` (the plate as a band, the record in the top panel, the form growing last); the misses back to the run's end; three tokens; `src/panels.desktop.test.jsx` replacing `console.desktop.test.jsx`, the runs, laptop and grammar desktop tests re-measured, a case of `deskfree.phone` | DONE (2026-09-25) |
+
+Deferred: the writing drill's board stands under its prompt in the
+middle column (plan 115's board-beside-the-prompt grid does not apply
+on panels); the level board docks at the window's right at the side's
+width rather than over the details column; the remaining count is
+Today's alone, as the other runs count nothing.
+
 # Wave 30 — 作文, composition (plan 125, 2026-09-25)
 
 The owner's request: "Create a new practice mode: the user is given a

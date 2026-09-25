@@ -1047,21 +1047,36 @@ answer a keyboard and a pointer one way everywhere.
   them, and the level bar spans the workspace only. The level board, when
   a level is reached, docks across the side's top instead of standing over
   it.
-- **A card run's floor is the console** (操作盤, plan 124). The level bar
-  was already the floor a run docks on, sumi like the rating bar; on the
-  desk it is one console of two rows across the stage: the rating tiles'
-  row, fixed above the strip and spanning it, and on the strip this run's
-  three figures — rated, good or better, XP earned — at the left in the
-  level's own register, with the fare at the right. The stage reserves the
-  console's height and **the card grows into what it leaves**, the phone's
-  own rule: a lone glyph in the middle of a tall card, never a floor of
-  nothing under the rating bar; beside its choices the card stands as tall
-  as they do. One row — the tiles between the figures and the fare — was
-  drawn first and chosen, and does not fit under about 1,600px; the desk
-  is one media block, so the rows are two everywhere. On a wide window
-  both rows keep to the workspace. A run with no rating bar (a browse, the
-  practice runs, the rides) keeps the strip, and a run that failed or
-  ended with nothing rated shows no figures.
+- **A card run stands on three panels** (三面, plan 126; it replaced the
+  console plan 124 had set on the floor). Three columns of surface
+  panels, the owner's own layout: at the left **this run** — the three
+  figures (rated, good or better, XP earned), the level bar as a row of
+  the panel rather than a strip on the floor, the deck's legend, the
+  remaining count, which leaves the head's pill — over **the card
+  panel**: the card's state on a line with stops (new, learning,
+  learned, the train at the stage it is in), every verdict of the
+  learner's own scale as a tile, two by two, with the digit that presses
+  it and when the card comes back (off the card's own `review_preview`,
+  so nothing waits on a round trip), the keys the elements no longer
+  print, and the rhythm on a sumi foot. **No captions on either panel**
+  and no line under a tile's interval saying what the rating does — the
+  owner cut them for room: the figures, the stops and the tiles name
+  themselves, and the remaining count is a fourth figure. In the
+  middle **the card**, the tiles framed in a surface row under it,
+  **unlit and inert before the reveal** rather than unseen, with no
+  digits in their corners. At the right **the card's details**: before
+  the reveal one sealed panel with a ? and nothing else — the entry is
+  the answer — and after it the entry in its band layout, the top panel
+  the card and your numbers (the glyph at the left, readings and meaning
+  beside it, level, state and the actions at the right, the four figures
+  under the stripe), the bottom the dictionary alone, the stroke sheet
+  growing into what the senses and the words leave. The columns are 480
+  | 640 | 600 at the owner's 1877px and give down to 300 | 360 | 300 on a
+  laptop without a second width query. The elements print no key caps
+  there (`RunPanelsContext`). A run with no rating bar (a browse, the
+  practice runs, the rides) keeps its side alone, the level strip on the
+  floor and the plate's own layout; a run that failed or ended with
+  nothing rated shows no figures, and the misses stand at its end.
 - **A door opens in the column, never over it.** A word, a kanji or a rule
   pressed in a docked breakdown opens its entry in that column
   (`SideLookup`), the sentence's line kept above it so the next word is one
@@ -1119,7 +1134,9 @@ answer a keyboard and a pointer one way everywhere.
   turns the card are drawn where they act — a cap in each rating tile's
   corner (reversed, as the handler reads them: 1 is the best, at the
   right), the choice's index as the digit that answers it, "Espace pour
-  révéler" — because on a desk the hands are on the keys. A whole session
+  révéler" — because on a desk the hands are on the keys; on a card run's
+  panels (plan 126) none of these caps prints, since the card panel lists
+  every key and the digit stands on each verdict's tile. A whole session
   needs no pointer (plan 115): Enter departs from Today's gate and takes a
   finished run's one filled action, Esc leaves a run (never over a dialog,
   never when a docked entry has taken the key), C shows the choices, A–D

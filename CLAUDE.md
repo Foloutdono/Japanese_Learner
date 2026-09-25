@@ -374,7 +374,23 @@ runtime purpose. Two consequences worth knowing:
   `screens/CompositionRun.jsx`, `config/tabs.js`, `domain/paywall.js`,
   `src/composition.desktop.test.jsx` and `index.css`; DESIGN.md, "The
   primary button"; `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **126** or higher, and check
+  **126** is 三面, the run on three panels (wave 31; numbered 126 because
+  125 went to composition while the console's follow-up was drawn): a
+  card run on the desk laid out as the owner drew it — this run and the
+  card panel (the card's state, every verdict as a tile with when it
+  comes back, the keys, the rhythm; no captions, by the owner's cut) on
+  the left, the card with its tiles framed and unlit before the reveal
+  in the middle, the card's details sealed then in their band on the
+  right — replacing plan 124's console, with the forecast on every
+  card's `review_preview` (`due_in` per quality)
+  (cited in `srs/srs.py`, the five routes' `_build_review_preview`,
+  `tests/test_review_forecast.py`, `components/study/StudyStage.jsx`,
+  `components/study/RunPanel.jsx`, `components/study/CardPanel.jsx`,
+  `components/study/SessionPanel.jsx`, `components/study/runPanels.js`,
+  `components/study/RatingBar.jsx`, `components/dictionary/DictionaryDetail.jsx`,
+  `domain/forecast.js`, `stores/runTally.js`, `src/panels.desktop.test.jsx`
+  and the 机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **127** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState } from 'react'
 import { useLang } from '../../LangContext'
 import { playCorrect, playWrong } from '../../lib/audio'
 import { ratingButtons } from '../../domain/ratingScales'
 import { useRatingScale } from '../../stores/ratingScale'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { RunPanelsContext } from './runPanels'
 
 // Keys 1-N map to the bar's buttons. On an AZERTY keyboard the
 // unshifted number row types &é"' rather than 1234, so those are
@@ -29,6 +30,11 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   const { t } = useLang()
   const preferred = useRatingScale()
   const desk = useDesk()
+  // On the run's panels (plan 126) the tiles print no digit -- the card
+  // panel's verdict tiles carry them -- and stand unlit and inert before
+  // the reveal rather than unseen: the console's buttons are drawn, dark,
+  // until there is something to press.
+  const panels = useContext(RunPanelsContext)
   const [pressed, setPressed] = useState(null)
   const pressedTimer = useRef(null)
   useEffect(() => () => clearTimeout(pressedTimer.current), [])
@@ -83,7 +89,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
   // so nothing is reachable before there is a card to rate. The
   // keyboard handler above is separately gated on `active`.
   return (
-    <div className={`rating-bar${active ? '' : ' rating-bar--idle'}`} aria-hidden={!active} data-guide={guide}>
+    <div className={`rating-bar${active ? '' : (panels ? ' rating-bar--unlit' : ' rating-bar--idle')}`} aria-hidden={!active} data-guide={guide}>
       {/* One continuous instrument, worst to best -- see index.css for
           why. `.map()` already returns a new array, so the `.reverse()`
           below sorts that copy and never QUALITY_BTNS itself; DOM order
@@ -101,6 +107,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
           <button
             key={q}
             type="button"
+            disabled={panels && !active}
             onClick={() => handleRate(q)}
             /* The best answer the bar offers is the one tile filled
                gold (index.css, .rating-bar__btn--best): the press most
@@ -120,7 +127,7 @@ export default function RatingBar({ onRate, active, scale, guide }) {
             aria-keyshortcuts={String(digit)}
             title={`${label} (${digit})`}
           >
-            {desk && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
+            {desk && !panels && <kbd className="desk-kbd" aria-hidden="true">{digit}</kbd>}
             {/* The ring is the whole colour story now: unfilled at rest,
                 filled when this rating is the one chosen. Marked hidden
                 because it says nothing the label does not -- it is the

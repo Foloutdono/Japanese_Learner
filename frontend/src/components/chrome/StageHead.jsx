@@ -28,11 +28,13 @@ import { useEscHeld } from '../../stores/escHold'
 // printed on it -- unless a door in the run's side holds the key
 // (stores/escHold, plan 123), when the cap goes: it said "leave" while
 // Esc closed the entry.
-export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside }) {
+// `keys` off (plan 126): the run's panels list the keys, so the way out
+// prints no cap there.
+export function StageHead({ onLeave, leaveLabel, where, sub, remaining, pass = true, onPass, aside, keys = true }) {
   const desk = useDesk()
   const lang = useLang()
   const held = useEscHeld()
-  const esc = desk && !held
+  const esc = desk && !held && keys
   return (
     <div className="stage__head">
       <Leave onClick={onLeave} keys={esc ? 'Escape' : undefined}>

@@ -821,6 +821,7 @@ class SRSEngine:
         """
         qualities = qualities if qualities is not None else [0, 1, 2, 3, 4, 5]
         states = self._load_states_bulk(card_ids, mode)
+        now = datetime.now(timezone.utc)
 
         prior_xp = self.get_lifetime_xp(user_id)
         reviews_today = self.get_reviews_today(user_id)
@@ -843,6 +844,11 @@ class SRSEngine:
                     "leveled_up": new_level != prior_level,
                     "new_level": new_level,
                     "stage": self._classify_stage(updated.total_reviews, updated.interval_days),
+                    # The forecast (plan 126): when this rating brings the
+                    # card back, in seconds from now -- what the desk's card
+                    # panel prints on each verdict's tile before the learner
+                    # presses it.
+                    "due_in": max(0, int((updated.next_review - now).total_seconds())),
                 }
             result[card_id] = per_quality
         return result

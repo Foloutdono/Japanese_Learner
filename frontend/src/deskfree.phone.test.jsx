@@ -1459,3 +1459,40 @@ describe('the console (plan 124)', () => {
     expect(getComputedStyle(document.querySelector('.rating-bar')).position).toBe('sticky')
   })
 })
+
+// ── plan 126 — the three panels a phone does without ──
+// On the desk a card run stands on three panels: this run and the card
+// panel at the left, the card's details sealed at the right, the tiles
+// unlit before the reveal. A phone draws none of it: no left column, no
+// sealed panel, the tap hint under the glyph, the idle bar unseen and
+// its buttons not disabled, the level strip on the floor.
+describe('the three panels (plan 126)', () => {
+  it('draws neither column, keeps the tap hint and the idle bar unseen', async () => {
+    const { MemoryRouter } = await import('react-router-dom')
+    const { StudyStage } = await import('./components/study/StudyStage')
+    const { CardPanel } = await import('./components/study/CardPanel')
+    const { Flashcard } = await import('./components/study/QuizComponents')
+    const { default: RatingBar } = await import('./components/study/RatingBar')
+    const { SessionPanel } = await import('./components/study/SessionPanel')
+    const card = { card_id: 'k', stage: 'learning', review_preview: { 1: { due_in: 180 }, 4: { due_in: 600 } } }
+    await render(
+      <LangProvider>
+        <MemoryRouter>
+          <StudyStage where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false} records side={<SessionPanel />} panel={<CardPanel card={card} />} progress={{ total: 3, new: 1, learning: 1, mastered: 1 }} remaining={3}>
+            <Flashcard t={{ tapToReveal: 'Touche pour révéler' }} resetKey="k" front={<span>駅</span>} back={<span>station</span>} />
+            <RatingBar active={false} onRate={() => {}} />
+          </StudyStage>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(500)
+    expect(document.querySelector('.desk-run--panels, .desk-run__left, .desk-session, .desk-card, .desk-sealed, .desk-run__side')).toBeNull()
+    expect(document.querySelector('.flashcard__hint').textContent).toBe('Touche pour révéler')
+    const bar = document.querySelector('.rating-bar')
+    expect(bar.classList.contains('rating-bar--idle')).toBe(true)
+    expect(bar.classList.contains('rating-bar--unlit')).toBe(false)
+    expect([...document.querySelectorAll('.rating-bar__btn')].some(b => b.disabled)).toBe(false)
+    expect(document.querySelector('.today-remaining')).not.toBeNull()
+    expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
+  })
+})

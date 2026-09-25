@@ -70,19 +70,18 @@ function Run({ card = 'yama' }) {
 }
 
 describe('a card run on the desk', () => {
-  it('stands the session panel on the right edge, the card centred beside it', async () => {
+  // On the panels (plan 126) the card's details are the third column,
+  // this run the first, the card between them.
+  it('stands the card between this run and its details', async () => {
     await render(<Run />)
     await settle()
+    const left = $('.desk-run__left').getBoundingClientRect()
     const side = $('.desk-run__side').getBoundingClientRect()
-    expect(side.width).toBe(360)
-    // Flush with the page's right edge (the stable scrollbar gutter,
-    // where there is one, stays the scrollbar's).
-    expect(Math.abs(side.right - $('.screen').getBoundingClientRect().right)).toBeLessThan(1)
-    expect(side.top).toBe(0)
-    const card = $('.flashcard').getBoundingClientRect()
+    const card = $('.stage').getBoundingClientRect()
+    expect(left.right).toBeLessThanOrEqual(card.left)
     expect(card.right).toBeLessThanOrEqual(side.left)
-    // Centred in what the side leaves.
-    expect(Math.abs((card.left + card.right) / 2 - side.left / 2)).toBeLessThan(12)
+    expect(side.width).toBeGreaterThanOrEqual(300)
+    expect(side.right).toBeLessThanOrEqual($('.screen').getBoundingClientRect().right)
     expect($('.desk-run__side').getAttribute('aria-label')).toBe('This run')
   })
 
@@ -90,7 +89,7 @@ describe('a card run on the desk', () => {
     const screen = await render(<Run />)
     await settle()
     expect($('.desk-entry')).toBeNull()
-    expect($('.desk-run__note')).not.toBeNull()
+    expect($('.desk-sealed')).not.toBeNull()
     expect(apiFetch).not.toHaveBeenCalledWith(expect.stringContaining('/api/dictionary'), expect.anything())
 
     press(' ')
@@ -119,10 +118,10 @@ describe('a card run on the desk', () => {
     expect($('.flashcard').textContent).not.toBe(before)
   })
 
-  it('counts the run: rated, good or better, XP earned — on the floor since plan 124', async () => {
+  it('counts the run: rated, good or better, XP earned — at the head of the session panel since plan 126', async () => {
     await render(<Run />)
     await settle()
-    const values = () => [...document.querySelectorAll('.lvlbar .desk-tally .desk-tally__num')].map(el => el.textContent)
+    const values = () => [...document.querySelectorAll('.desk-session .desk-figs .desk-fig__value')].map(el => el.textContent)
     expect(values()).toEqual(['0', '—', '+0XP'])
     $('.probe-rate').click()
     await settle()

@@ -81,20 +81,21 @@ function McqRun({ answered = false }) {
 }
 
 describe('a run on a laptop', () => {
-  it('stands the choices beside the card, all four in the window', async () => {
+  // On the panels (plan 126) the middle column is the card's alone: the
+  // choices stack under it, all four and the tiles in the window.
+  it('stacks the choices under the card, all four in the window', async () => {
     await render(<McqRun />)
     await settle()
     const card = $('.quiz-card-stage').getBoundingClientRect()
     const list = $('.mcq-list').getBoundingClientRect()
-    expect(list.left).toBeGreaterThanOrEqual(card.right)
-    expect(Math.round(list.top)).toBe(Math.round(card.top))
+    expect(list.top).toBeGreaterThanOrEqual(card.bottom)
+    expect(list.right).toBeLessThanOrEqual($('.stage').getBoundingClientRect().right + 1)
     const rows = $$('.mcq-row')
     expect(rows).toHaveLength(4)
-    const floor = $('.lvlbar').getBoundingClientRect().top
-    expect(rows[3].getBoundingClientRect().bottom).toBeLessThanOrEqual(floor)
+    expect(rows[3].getBoundingClientRect().bottom).toBeLessThanOrEqual($('.rating-bar').getBoundingClientRect().top)
     // The stage starts at the top of the window, not in its middle.
     expect($('.stage__head').getBoundingClientRect().top).toBeLessThan(80)
-    expect($('.rating-bar').getBoundingClientRect().bottom).toBeLessThanOrEqual(floor)
+    expect($('.rating-bar').getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
   it('keeps the rating bar where it was when the answer is picked', async () => {
@@ -121,14 +122,14 @@ describe('a run on a laptop', () => {
       </Stage>
     )
     await settle()
+    // The board under its prompt in the middle column (plan 126; the
+    // board beside the prompt was plan 115's grid, which the panels do
+    // not draw), as wide as it; the stage scrolls when the window is short.
     const prompt = $('.quiz-card-stage').getBoundingClientRect()
     const board = $('.drawing-quiz').getBoundingClientRect()
-    expect(board.left).toBeGreaterThanOrEqual(prompt.right)
-    expect(board.width).toBeGreaterThanOrEqual(prompt.width)
-    const floor = $('.lvlbar').getBoundingClientRect().top
-    expect($('.drawing-quiz__validate').getBoundingClientRect().bottom).toBeLessThanOrEqual(floor)
-    // No floor under a prompt that never changes face.
-    expect(getComputedStyle($('.prompt-card__body')).minHeight).toBe('0px')
+    expect(board.top).toBeGreaterThanOrEqual(prompt.bottom)
+    expect(Math.abs(board.width - prompt.width)).toBeLessThan(2)
+    expect(getComputedStyle($('.stage')).overflowY).toBe('auto')
   })
 
   it('leaves the session panel standing beside the tracing overlay', async () => {
@@ -175,7 +176,7 @@ describe('the session panel at a run\'s end', () => {
     startTally('kanji:N5:f2b')
     await render(<Stage done><p>done</p></Stage>)
     await settle()
-    expect($('.desk-tally')).toBeNull()
+    expect($('.desk-figs')).toBeNull()
     expect($('.desk-run__note')).toBeNull()
   })
 
@@ -186,7 +187,7 @@ describe('the session panel at a run\'s end', () => {
     await settle()
     expect($('.desk-misses')).toBeNull()
     expect($('.desk-run__note')).toBeNull()
-    expect($$('.lvlbar .desk-tally .desk-tally__fig')).toHaveLength(3)
+    expect($$('.desk-session .desk-figs .desk-fig')).toHaveLength(3)
   })
 })
 

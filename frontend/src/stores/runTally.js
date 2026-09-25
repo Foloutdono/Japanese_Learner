@@ -19,7 +19,9 @@ import { useSyncExternalStore } from 'react'
 // entry each was revealed on (stores/deskEntry) and with the rating it
 // got last, so the panel can end a run with the ones that went badly
 // (tallyMisses): a card missed then got right is not a miss.
-const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]) })
+// `startedAt` (plan 126): when the run started, for the rhythm the
+// desk's card panel prints -- minutes elapsed, cards a minute.
+const EMPTY = Object.freeze({ key: null, reviewed: 0, good: 0, xp: 0, cards: Object.freeze([]), startedAt: null })
 
 let tally = EMPTY
 const listeners = new Set()
@@ -28,7 +30,7 @@ const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn) }
 
 /** A new run: the session's identity, and every figure back to zero. */
 export function startTally(key) {
-  tally = { ...EMPTY, key }
+  tally = { ...EMPTY, key, startedAt: Date.now() }
   emit()
 }
 

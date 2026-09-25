@@ -1,4 +1,4 @@
-import { useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react'
+import { Fragment, useState, useEffect, useLayoutEffect, useMemo, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { LEVEL_COLORS } from './levelColors'
 import { shortDate } from '../../lib/formatDate'
@@ -639,7 +639,7 @@ function headwordSize(text) {
 // without `favorites`, no deck row without `mining` and a card — and
 // with neither there is no ＋ at all: a sheet over a quiz files
 // nowhere.
-export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites }) {
+export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKanjiClick, onVocabClick, onGrammarClick, onKanaClick, onReview, mining, favorites, band = false }) {
   const { t, lang, contentMaps } = useLang()
   const map = entry.type === 'vocab' ? contentMaps?.vocab
     : entry.type === 'kanji' ? contentMaps?.kanji
@@ -892,8 +892,57 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
     return <ReadingsInPlace entry={entry} groups={readingGroups} onClose={() => setOpenKey(null)} onVocabClick={onVocabClick} />
   }
 
+  // The learner's own record (plan 089), placed by the layout: last in
+  // the body, or, in the band (plan 126), under the plate in the top
+  // panel -- the card and your numbers over the dictionary alone.
+  const recordBlock = record && (
+          <section className="dict-block" aria-label={t.cardStats}>
+            <div className="records">
+              <Figure
+                value={status.accuracy != null ? status.accuracy : '—'}
+                unit={status.accuracy != null ? '%' : null}
+                label={t.accuracy}
+              />
+              <Figure
+                value={`${status.correct_reviews}/${status.total_reviews}`}
+                label={t.totalReviews}
+              />
+              <Figure
+                value={status.interval_days != null ? status.interval_days : '—'}
+                unit={status.interval_days != null ? t.days : null}
+                label={t.interval}
+              />
+              <Figure
+                value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
+                ink={status.due ? 'due' : undefined}
+                label={t.nextReview}
+              />
+            </div>
+            {/* A ghost, not a filled action: the panel has no primary,
+                and 辞書's gold could not carry one anyway (DESIGN.md,
+                "the primary button"). It boards the one card this entry
+                is — /today/run?only=… — in every mode it owes, which is
+                what clearing it means. */}
+            {status.due && onReview && appCard && (
+              <button
+                type="button"
+                onClick={() => onReview(appCard.raw_id)}
+                className="dict-due"
+              >
+                <BoltIcon size={14} />
+                {t.reviewThisCard}
+                <ChevronIcon direction="right" size={16} className="dict-due__chev" />
+              </button>
+            )}
+          </section>
+        )
+  // The band wraps the plate and the record in a top panel; every
+  // other layout keeps the article's own children, so a phone's DOM
+  // does not change (plan 126).
+  const Top = band ? 'div' : Fragment
   return (
-    <article className="dict-entry">
+    <article className={`dict-entry${band ? ' dict-entry--band' : ''}`}>
+      <Top {...(band ? { className: 'dict-entry__top' } : {})}>
       {/* ── The plate ────────────────────────────────────────
           Sticky at the top of the scrolling shell, so the word stays
           in view while its examples scroll under it — on a phone the
@@ -1072,6 +1121,8 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
         <div className="dict-plate__stripe" aria-hidden="true" />
       </header>
+      {band && recordBlock}
+      </Top>
 
       <div className="dict-entry__body">
 
@@ -1252,47 +1303,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             arithmetic left to the reader. The cell that owns the
             schedule says it, in the due ink, and the block then names
             the one thing to do about it. Plan 089. */}
-        {record && (
-          <section className="dict-block" aria-label={t.cardStats}>
-            <div className="records">
-              <Figure
-                value={status.accuracy != null ? status.accuracy : '—'}
-                unit={status.accuracy != null ? '%' : null}
-                label={t.accuracy}
-              />
-              <Figure
-                value={`${status.correct_reviews}/${status.total_reviews}`}
-                label={t.totalReviews}
-              />
-              <Figure
-                value={status.interval_days != null ? status.interval_days : '—'}
-                unit={status.interval_days != null ? t.days : null}
-                label={t.interval}
-              />
-              <Figure
-                value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
-                ink={status.due ? 'due' : undefined}
-                label={t.nextReview}
-              />
-            </div>
-            {/* A ghost, not a filled action: the panel has no primary,
-                and 辞書's gold could not carry one anyway (DESIGN.md,
-                "the primary button"). It boards the one card this entry
-                is — /today/run?only=… — in every mode it owes, which is
-                what clearing it means. */}
-            {status.due && onReview && appCard && (
-              <button
-                type="button"
-                onClick={() => onReview(appCard.raw_id)}
-                className="dict-due"
-              >
-                <BoltIcon size={14} />
-                {t.reviewThisCard}
-                <ChevronIcon direction="right" size={16} className="dict-due__chev" />
-              </button>
-            )}
-          </section>
-        )}
+        {!band && recordBlock}
 
         {/* A thumb affordance on a phone, where the entry is the whole
             screen and the ✕ is at the far end of it. Hidden everywhere
@@ -1444,7 +1455,7 @@ function useLookupStack(session, { term, kana, category, id }, exact = false) {
 
 // What a lookup shows: the loading line, the "not available" answer, or
 // the entry with its doors opening into the same stack.
-function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favorites }) {
+function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favorites, band = false }) {
   const { t } = useLang()
   const { entry, loading, error, open, openId, back } = look
   return (
@@ -1467,6 +1478,7 @@ function LookupContent({ look, onClose, onRadicalClick, onReview, mining, favori
       {!loading && entry && (
         <DictionaryDetail
           entry={entry}
+          band={band}
           onClose={onClose}
           onBack={back}
           onRadicalClick={onRadicalClick ? n => { onClose(); onRadicalClick(n) } : undefined}
@@ -1520,7 +1532,9 @@ export function DictionaryLookupSheet({ term, kana, category, id, session, minin
 // in view, and ✕ returns the dock to the entry the door was opened
 // from. A run's session panel docks the revealed card's entry the same
 // way. No portal, no scrim, no dialog: it is a column's content.
-export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false }) {
+// `band` (plan 126): the entry in the desk run's band layout -- the plate
+// and the learner's record in a top panel, the dictionary under it.
+export function DictionaryLookupBody({ term, kana, category, id, session, mining, favorites, onExit, onRadicalClick, onReview, exact = false, escBack = false, band = false }) {
   const look = useLookupStack(session, { term, kana, category, id }, exact)
   // `escBack` (plan 123): a host with no way out of its own -- the run's
   // session panel, docked beside the card -- lets Escape step back out
@@ -1554,6 +1568,7 @@ export function DictionaryLookupBody({ term, kana, category, id, session, mining
   return (
     <LookupContent
       look={look}
+      band={band}
       onClose={onExit}
       onRadicalClick={onRadicalClick}
       onReview={onReview}

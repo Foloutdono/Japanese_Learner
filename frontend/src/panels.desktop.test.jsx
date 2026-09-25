@@ -1,0 +1,304 @@
+import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { render } from 'vitest-browser-react'
+import { MemoryRouter } from 'react-router-dom'
+import { LangProvider } from './LangContext'
+import './index.css'
+
+// ── 机 — 三面, the run on three panels (plan 126) ─────────────────────
+// A card run on the desk stands on three columns of surface panels: at
+// the left this run (the figures, the level bar as a row, the deck's
+// legend, the remaining count) over the card panel (the card's state,
+// the verdicts as tiles with what each decides, the keys, the rhythm);
+// the card in the middle with its tiles framed under it, unlit before
+// the reveal; the card's details at the right, sealed before the reveal
+// and the entry in its band after. The elements print no key caps. A
+// run without records keeps the side alone. The phone's side is
+// deskfree.phone.
+
+vi.mock('./lib/audio', async o => ({
+  ...(await o()),
+  playUi: vi.fn(), playClick: vi.fn(), playCorrect: vi.fn(), playWrong: vi.fn(), playArrival: vi.fn(),
+}))
+const apiFetch = vi.hoisted(() => vi.fn())
+vi.mock('./lib/api', () => ({
+  api: p => p,
+  apiFetch,
+  apiJson: vi.fn(async () => ({})),
+  apiJsonWithTimeout: vi.fn(async () => ({})),
+  apiUpload: vi.fn(),
+  ApiError: class extends Error {},
+}))
+globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
+
+const { StudyStage } = await import('./components/study/StudyStage')
+const { SessionPanel } = await import('./components/study/SessionPanel')
+const { CardPanel } = await import('./components/study/CardPanel')
+const { Flashcard, MCQGrid } = await import('./components/study/QuizComponents')
+const { CardTransition } = await import('./components/study/CardTransition')
+const { default: PromptCard } = await import('./components/study/PromptCard')
+const { default: RatingBar } = await import('./components/study/RatingBar')
+const { default: HintBar } = await import('./components/study/HintBar')
+const { startTally, countReview } = await import('./stores/runTally')
+const { seedSummary } = await import('./stores/profileSummary')
+
+const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
+const press = key => window.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true }))
+const $ = s => document.querySelector(s)
+const $$ = s => [...document.querySelectorAll(s)]
+const rect = s => $(s).getBoundingClientRect()
+const CHOICES = ['gare', 'électricité', 'voiture', 'montagne']
+const DAY = 86400
+
+// A learning card as a run serves it: its stage, and per rating when
+// the scheduler would bring it back (srs.py's preview_reviews_bulk).
+const CARD = {
+  card_id: 'kanji_N5_山', stage: 'learning',
+  review_preview: {
+    0: { due_in: 180 }, 1: { due_in: 180 }, 2: { due_in: 600 },
+    3: { due_in: 3 * DAY }, 4: { due_in: 21 * DAY }, 5: { due_in: 40 * DAY },
+  },
+}
+const PROGRESS = { total: 24, new: 20, learning: 3, mastered: 1 }
+
+beforeEach(() => {
+  apiFetch.mockReset()
+  apiFetch.mockImplementation(async url => {
+    const q = new URLSearchParams(String(url).split('?')[1]).get('q')
+    return { ok: true, status: 200, json: async () => ({ results: [{ type: 'kanji', kanji: q, kana: 'x', meaning: `meaning of ${q}`, level: 'N5' }] }) }
+  })
+  seedSummary({ username: 'Aiko', level: 12, xp: 1200, xpPrevLevel: 1000, xpForNext: 1500 })
+  startTally('kanji:N5:f2b')
+})
+
+function Stage({ records = true, side = <SessionPanel />, done = false, panel = <CardPanel card={CARD} remaining={19} />, remaining = 19, children }) {
+  return (
+    <LangProvider>
+      <MemoryRouter>
+        <StudyStage
+          where="Kanji" onLeave={() => {}} leaveLabel="Kanji" pass={false}
+          records={records} done={done} side={side} sideLabel="La fiche"
+          panel={panel} progress={PROGRESS} remaining={remaining}
+        >
+          {children}
+        </StudyStage>
+      </MemoryRouter>
+    </LangProvider>
+  )
+}
+function Card() {
+  return (
+    <CardTransition className="specimen-card-stage" cardKey="k">
+      <PromptCard foot={<span>N5</span>}><span className="probe-kanji">駅</span></PromptCard>
+    </CardTransition>
+  )
+}
+// A card that docks its entry on reveal (Space), as the runs' cards do.
+// A card that docks its entry on reveal (Space), on its card as the runs
+// stage it.
+function Revealing({ card = 'yama' }) {
+  return (
+    <CardTransition className="specimen-card-stage" cardKey={card}>
+      <PromptCard foot={<span>N5</span>}>
+        <Flashcard
+          t={{ keySpace: 'Espace', revealByKey: 'pour révéler', tapToReveal: 'Touche' }}
+          resetKey={card}
+          front={<span className="probe-front">山</span>}
+          back={<span className="probe-back">mountain</span>}
+          dictTerm="山"
+          dictCategory="kanji"
+          session={{ access_token: 't' }}
+        />
+      </PromptCard>
+    </CardTransition>
+  )
+}
+
+describe('the three columns', () => {
+  it('stands this run, the card and its details side by side, centred, on the window', async () => {
+    await render(<Stage><Card /><RatingBar active onRate={() => {}} /></Stage>)
+    await settle(400)
+    expect($('.screen').classList.contains('desk-run--panels')).toBe(true)
+    const left = rect('.desk-run__left')
+    const stage = rect('.stage')
+    const side = rect('.desk-run__side')
+    expect(left.right).toBeLessThanOrEqual(stage.left)
+    expect(stage.right).toBeLessThanOrEqual(side.left)
+    expect(left.width).toBeGreaterThanOrEqual(300)
+    expect(side.width).toBeGreaterThanOrEqual(300)
+    expect(stage.width).toBeGreaterThanOrEqual(300)
+    expect(stage.width).toBeLessThanOrEqual(640)
+    expect(side.right).toBeLessThanOrEqual(window.innerWidth)
+    expect(document.documentElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+    // The columns share the window's height; the side is static, not fixed.
+    expect(getComputedStyle($('.desk-run__side')).position).toBe('static')
+    // No level strip on the floor: the level bar is a row of the session panel.
+    expect($('.screen > .lvlbar')).toBeNull()
+    expect($('.desk-session .lvlbar__track').getAttribute('role')).toBe('progressbar')
+  })
+
+  it('heads the left column with this run: the figures, the count among them, the level and the legend', async () => {
+    await render(<Stage><Card /><RatingBar active onRate={() => {}} /></Stage>)
+    await settle()
+    const panel = $('.desk-run__left > .desk-session')
+    expect($$('.desk-session .desk-figs .desk-fig__value').map(el => el.textContent)).toEqual(['0', '—', '+0XP', '19'])
+    expect($$('.desk-session .desk-figs .desk-fig__label').map(el => el.textContent)).toEqual(['Révisions', 'Précision', 'Gagnés', 'Restantes'])
+    // No caption on the panel.
+    expect(panel.querySelector('.desk-panel__cap')).toBeNull()
+    expect(panel.querySelector('.deck-progress__legend').textContent).toContain('20')
+    // The legend left the hairline in the stage, and the count the head.
+    expect($('.stage__head .today-remaining')).toBeNull()
+    countReview({ quality: 4, xp: 12, entry: { term: '駅', category: 'kanji', session: {} } })
+    await settle()
+    expect($$('.desk-session .desk-figs .desk-fig__value').map(el => el.textContent)).toEqual(['1', '100%', '+12XP', '19'])
+  })
+})
+
+describe('the card panel', () => {
+  it('prints the card\'s state, and each verdict as a tile with its digit and when', async () => {
+    await render(<Stage><Card /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    const panel = $('.desk-run__left > .desk-card')
+    // No caption, no aside, nothing under an interval (the owner's cut).
+    expect(panel.querySelector('.desk-panel__cap')).toBeNull()
+    expect(panel.querySelector('.desk-verdict__lands')).toBeNull()
+    expect(panel.querySelector('.desk-rhythm__cap')).toBeNull()
+    const labels = $$('.desk-stops__labels > span')
+    expect(labels).toHaveLength(3)
+    expect(labels[1].classList.contains('desk-stops__here')).toBe(true)
+    // Four verdicts, worst to best as the bar draws them, each with its digit.
+    const tiles = $$('.desk-verdict')
+    expect(tiles).toHaveLength(4)
+    expect(tiles.map(t => t.querySelector('.desk-kbd').textContent)).toEqual(['4', '3', '2', '1'])
+    // The four-button bar's best is quality 4 (domain/ratingScales).
+    expect(tiles.map(t => t.querySelector('.desk-verdict__when').textContent)).toEqual(['dans 3 min', 'dans 10 min', 'dans 3 j', 'dans 3 sem.'])
+    // The keys the elements no longer print, and the rhythm on its foot.
+    expect($$('.desk-keys .desk-kbd').map(el => el.textContent)).toEqual(expect.arrayContaining(['C']))
+    expect($$('.desk-keys__item')).toHaveLength(3)
+    expect($$('.desk-rhythm .desk-fig__value').map(el => el.textContent)).toEqual(['0min', '—', '—'])
+    // The panel fills the column to its floor.
+    expect(Math.abs(rect('.desk-card').bottom - rect('.desk-run__left').bottom)).toBeLessThan(2)
+  })
+})
+
+describe('the elements print no key caps', () => {
+  it('leaves the head, the hint switch, the card and the tiles bare', async () => {
+    await render(
+      <Stage>
+        <HintBar available={['indice_1']} active={[]} onToggle={() => {}} />
+        <Revealing />
+        <RatingBar active onRate={() => {}} />
+      </Stage>
+    )
+    await settle()
+    expect($('.stage__leave .desk-kbd')).toBeNull()
+    expect($('.stage__leave').getAttribute('aria-keyshortcuts')).toBeNull()
+    expect($('.study-assist__toggle .desk-kbd')).toBeNull()
+    expect($('.study-assist__toggle').getAttribute('aria-keyshortcuts')).toBe('C')
+    expect($('.flashcard__hint').textContent).toBe('')
+    expect($('.rating-bar .desk-kbd')).toBeNull()
+    expect($$('.rating-bar__btn').map(b => b.getAttribute('aria-keyshortcuts'))).toEqual(['4', '3', '2', '1'])
+  })
+})
+
+describe('the tiles under the card', () => {
+  it('stand framed, unlit and inert before the reveal, and lit after it', async () => {
+    await render(<Stage><Revealing /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle(400)
+    const bar = $('.rating-bar')
+    expect(bar.classList.contains('rating-bar--unlit')).toBe(true)
+    expect(getComputedStyle(bar).visibility).toBe('visible')
+    expect(getComputedStyle(bar).position).toBe('static')
+    expect(getComputedStyle(bar).borderTopWidth).toBe('1px')
+    expect($$('.rating-bar__btn').every(b => b.disabled)).toBe(true)
+    expect(parseFloat(getComputedStyle($('.rating-bar__btn--best')).opacity)).toBeLessThan(0.5)
+    // The row stands under the card, inside the stage's column.
+    expect(rect('.rating-bar').top).toBeGreaterThanOrEqual(rect('.prompt-card').bottom)
+    expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(window.innerHeight)
+  })
+
+  it('light up on the reveal, the best one gold', async () => {
+    await render(<Stage><Revealing /><RatingBar active onRate={() => {}} /></Stage>)
+    await settle()
+    expect($('.rating-bar').classList.contains('rating-bar--unlit')).toBe(false)
+    expect($$('.rating-bar__btn').some(b => b.disabled)).toBe(false)
+    expect(getComputedStyle($('.rating-bar__btn--best')).opacity).toBe('1')
+  })
+})
+
+describe('the card\'s details', () => {
+  it('are sealed before the reveal and open in their band after it', async () => {
+    await render(<Stage><Revealing /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    const sealed = $('.desk-run__side > .desk-sealed')
+    expect(sealed).not.toBeNull()
+    expect(sealed.textContent).toBe('?')
+    expect($('.desk-entry')).toBeNull()
+    expect(Math.abs(rect('.desk-sealed').bottom - rect('.desk-run__side').bottom)).toBeLessThan(2)
+    press(' ')
+    await settle(400)
+    expect($('.desk-sealed')).toBeNull()
+    const entry = $('.desk-run__side .desk-entry .dict-entry--band')
+    expect(entry).not.toBeNull()
+    expect(entry.textContent.toLowerCase()).toContain('meaning of 山')
+    const top = rect('.dict-entry__top')
+    const body = rect('.dict-entry--band > .dict-entry__body')
+    expect(top.bottom).toBeLessThanOrEqual(body.top)
+    expect($('.dict-entry__top > .dict-plate')).not.toBeNull()
+    expect(getComputedStyle($('.dict-entry__top')).borderTopWidth).toBe('1px')
+  })
+})
+
+describe('the choices beside the card', () => {
+  it('stack under it in the middle column', async () => {
+    await render(
+      <Stage>
+        <Card />
+        <MCQGrid choices={CHOICES} correct="gare" selected={null} answered={false} onAnswer={() => {}} />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+    await settle(400)
+    expect(rect('.mcq-list').top).toBeGreaterThanOrEqual(rect('.prompt-card').bottom)
+    expect(rect('.mcq-list').right).toBeLessThanOrEqual(rect('.stage').right + 1)
+  })
+})
+
+describe('a run without records', () => {
+  it('keeps the side alone, the strip on the floor and the tiles docked in the stage', async () => {
+    await render(<Stage records={false} panel={null}><Card /><RatingBar active onRate={() => {}} /></Stage>)
+    await settle(400)
+    expect($('.screen').classList.contains('desk-run')).toBe(true)
+    expect($('.desk-run--panels')).toBeNull()
+    expect($('.desk-run__left')).toBeNull()
+    expect(rect('.screen > .lvlbar').height).toBe(36)
+    expect(getComputedStyle($('.rating-bar')).position).toBe('sticky')
+    expect(getComputedStyle($('.desk-run__side')).position).toBe('fixed')
+  })
+})
+
+describe('a run with nothing to count', () => {
+  it('shows no panels beside a failed batch, the side an empty column', async () => {
+    await render(<Stage side={null}><p>error</p></Stage>)
+    await settle()
+    expect($('.desk-run__side')).not.toBeNull()
+    expect($('.desk-run--panels')).toBeNull()
+    expect($('.desk-run__left')).toBeNull()
+  })
+
+  it('keeps no three zeros at the end of a run that rated nothing', async () => {
+    await render(<Stage done><p>done</p></Stage>)
+    await settle()
+    expect($('.desk-figs')).toBeNull()
+  })
+
+  it('lists the misses at the end of a run, each opening its entry', async () => {
+    countReview({ quality: 1, xp: 1, entry: { term: '駅', category: 'kanji', session: {} } })
+    await render(<Stage done side={<SessionPanel done />}><p>done</p></Stage>)
+    await settle()
+    const chips = $$('.desk-run__side .desk-misses .desk-miss')
+    expect(chips.map(c => c.textContent)).toEqual(['駅'])
+    chips[0].click()
+    await settle(250)
+    expect($('.desk-entry').textContent.toLowerCase()).toContain('meaning of 駅')
+  })
+})
