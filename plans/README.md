@@ -6419,3 +6419,20 @@ Fit, measured on the real rows:
 
 The page never scrolls to reach an entry at any size.
 
+
+
+## Plan 131 — the first ride, redrawn for the runs as they are (2026-09-25)
+
+Numbered 131: 001–130 are spent (grep of origin/main and the worktrees
+found nothing at 131 or above). The owner's ask: on a phone, a step where
+the learner has to open the dictionary; on the desk, the ride used the
+old layout of the learning and practice runs — use the new one and
+explain every part of it.
+
+| # | What | Status |
+|---|------|--------|
+| 131 | **Phone**: `known-dict`, between the known card's turn and its grade — the note hangs under the card's 🔍 (`data-guide="card.lookup"`), the bar stays inert, and the grade is let through once the entry's sheet has been opened and closed (`components/study/lookupWatch.js`, a context `RevealActionsPanel` tells). **Desk, cards**: the ride on plan 126's three panels (`records`, `CardPanel keys="ride"`, `SessionPanel` sealed then the entry), the run's tally counting its two grades; the gates' `Guide` handed `stops` (no guide_* events; the ride's own ride_step `tour-front`/`tour-back`) walks `TOUR_FRONT` (figures, state line, verdict tiles, keys, rhythm, card, tiles, sealed details) before the first turn and `TOUR_BACK` (the entry, the forecast) after it; a Skip declines both. The ride's cards carry a new card's forecast (`routes/onboarding.py`'s `_ride_forecast`, the scheduler alone on a fresh `CardState`). **Desk, reading**: plan 129's panels (`RunLines` with the sentence as its current row, `BreakdownSide`), `intro` walking `TOUR_READ` with the clock held and the sentence covered, then `graded` between the grade and the plate: the local-tier breakdown in the side (free, as the reading run's), its doors opening there, `TOUR_GRADED`, Continue/Enter to the plate. Notes on the panels stand on their anchor (`Callout`), notes beside the left column to its right (`Guide`'s `rectOf`). Tests: `ride.desktop.test.jsx` P11/P12 rewritten, `ride.phone.test.jsx`, `RideRun.browser.test.jsx`, `test_ride.py` | DONE (2026-09-25) |
+
+`/dev/ride` keeps its literal cards without a forecast (its tiles print
+dashes): `reviewGates.guard.test.js` flags any screen naming
+`review_preview`, and the workbench is not worth an exception to it.

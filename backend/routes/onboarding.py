@@ -43,6 +43,8 @@ from core.user_level import GOAL_LEVELS, LEVELS, NOVICE_GOAL, note_stored_level,
 from routes.profile import _profile_row, apply_kana_rule, apply_level_rule, ensure_profile_row
 from routes.reading import _display_seconds, phrase_to_romaji
 from routes.vocab import _build_vocab_card
+from srs.models import CardState
+from srs.scheduler import Scheduler
 from study.dictation import measure_forms
 from study.exam_scoring import flatten_questions, score_attempt
 from study.level_rule import KANA_KNOWN
@@ -445,15 +447,36 @@ def _ride_unknown_entry(stored: str, kana_known: str | None) -> tuple[str, dict]
     return level, _RIDE_UNKNOWN_ENTRIES[level]
 
 
+# The forecast a new card's verdicts would give it (plan 131): what the
+# desk's card panel prints on each tile (components/study/CardPanel.jsx,
+# plan 126), which the ride now stands on so its lesson is the run's
+# real layout. `due_in` only: the ride earns no XP and moves no stage,
+# so there is nothing else to preview. A fresh state is every learner's
+# for a card never reviewed, so this reads nothing and writes nothing
+# -- the scheduler alone, not the engine and its database.
+_SCHEDULER = Scheduler()
+
+
+def _ride_forecast(card_id: str, mode: str) -> dict:
+    now = datetime.now(timezone.utc)
+    forecast = {}
+    for quality in range(6):
+        after = _SCHEDULER.review(CardState(card_id=card_id, mode=mode), quality)
+        forecast[str(quality)] = {"due_in": max(0, int((after.next_review - now).total_seconds()))}
+    return forecast
+
+
 def _ride_card(level: str, entry: dict, lang: str, romaji: str | None = None) -> dict:
     # The vocab batch's own assembly (routes/vocab.py), so the card is
     # the shape CardPrompt renders with no ride-specific branch: the
     # gloss in the learner's language, the furigana hint, the choices.
-    # No stage and no preview -- the card was never studied and will
-    # not be: the ride rates locally and posts nothing.
+    # No stage -- the card was never studied and will not be: the ride
+    # rates locally and posts nothing.
     m = resolve_mode(RIDE_MODE)
-    card = _build_vocab_card(vocab_to_id(entry, level), entry, VOCAB_BY_LEVEL[level], m, lang, None)
+    card_id = vocab_to_id(entry, level)
+    card = _build_vocab_card(card_id, entry, VOCAB_BY_LEVEL[level], m, lang, None)
     card["level"] = level
+    card["review_preview"] = _ride_forecast(card_id, RIDE_MODE)
     # What the daily queue attaches to every card it serves
     # (routes/today.py): the frontend reads a card's structure off
     # `source`, and a section run knows its own. This screen is a queue

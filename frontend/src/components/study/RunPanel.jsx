@@ -17,10 +17,15 @@ import { DeckLegend } from './QuizComponents'
 // queue (Today's due count), null where a run counts nothing. A
 // practice run (plan 129) has no deck to draw the legend of, and names
 // what it rates (`label`: sentences, questions).
+//
+// The `data-guide` names on it and on the card panel, the run's lines
+// and the side (run.records, run.state, run.verdicts, run.keys,
+// run.rhythm, run.lines, run.side) are the stops of the first ride's
+// walk round the panels (plan 131, screens/RideRun.jsx).
 export function RunPanel({ remaining = null, progress = null, done = false, label = null }) {
   const { t } = useLang()
   return (
-    <section className="desk-run__panel desk-session" aria-label={t.deskRunLabel}>
+    <section className="desk-run__panel desk-session" aria-label={t.deskRunLabel} data-guide="run.records">
       <RunRecords done={done} remaining={remaining} label={label} />
       <LevelBar />
       <DeckLegend stats={progress} />

@@ -1888,6 +1888,33 @@ const ride = {
   rideReadType: 'Write what you read, in romaji or kana.',
   rideReadMeasure: 'The figure is how much you caught. The grade is yours.',
   rideReadMeasureDesk: 'The figure is how much you caught. The grade is yours: on the bar, or with its number keys.',
+  // Plan 131. On a phone: the known card is not graded until its entry
+  // has been opened from the 🔍 and closed again.
+  rideKnownDict: 'Every card opens its dictionary entry. Tap 🔍 to read this one, then close it.',
+  // On the desk: the walk round a run's three panels, stop by stop
+  // (screens/RideRun.jsx's TOUR_FRONT and TOUR_BACK), read by the guide
+  // as guide<Key>.
+  guideRideRecords: 'This run in figures: the cards you have graded, the share you knew, the XP they earned, what is left. Your level bar is under them.',
+  guideRideState: 'Where the card on the stage stands: new, learning or learned.',
+  guideRideVerdicts: 'Every grade you can give, and when it would bring the card back. The number in the corner is its key.',
+  guideRideKeys: 'The keys: Space turns the card, Esc leaves the run.',
+  guideRideRhythm: 'Your pace: minutes on this run, cards a minute, and about how long the rest will take.',
+  guideRideCard: 'The card, in the middle. The word is on its front.',
+  guideRideRate: 'The grades, under the card. They light once the card is turned.',
+  guideRideSealed: 'The card’s details. Sealed until you turn it: here, they would give the answer away.',
+  guideRideEntry: 'Turned: the details open. The word, your record on it, and its dictionary entry. A word or a kanji in it opens here too.',
+  guideRideForecast: 'Now the grades say when each brings this card back. Wrong is the soonest.',
+  // The reading ride's walk (screens/RideReading.jsx's TOUR_READ and
+  // TOUR_GRADED): the same three panels on a practice run.
+  guideRideReadRecords: 'This run in figures: the sentences you have graded, the share right, the XP they earned.',
+  guideRideReadLines: 'Every sentence of the run, the one on the stage last. Each keeps its grade as a dot, and a click opens its breakdown again.',
+  guideRideReadKeys: 'The keys: Enter checks your answer and takes the next sentence, the numbers grade, Esc leaves.',
+  guideRideReadRhythm: 'Your pace: minutes on this run, and sentences a minute.',
+  guideRideReadSentence: 'The sentence shows here with its clock, and hides when the clock runs out. It starts when you close this.',
+  guideRideReadAnswer: 'Write what you read here, in romaji or kana, and press Enter.',
+  guideRideReadSealed: 'The sentence’s breakdown. Sealed until you grade it: word by word, it is the answer key.',
+  guideRideReadBreakdown: 'Graded: the breakdown opens. Every word and the grammar that holds them. Click a row to open its entry here.',
+  guideRideReadLine: 'The sentence is a line of the run now, with its grade. In a real run, any line opens its breakdown again.',
   ridePlateCap: 'The pass',
   ridePlateBody: 'These platforms ride on the pass.',
   ridePlateOpen: 'They are open to everyone for now.',

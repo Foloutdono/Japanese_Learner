@@ -39,7 +39,8 @@ function rectOf(anchor) {
   // 机 (plan 115): an anchor in the desk's rail has its note to its
   // right, one in a side column to its left — beside the thing it is
   // about, never a screen's width away over the page.
-  const beside = el.closest('.desk-rail') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
+  // A run's left column (plan 131, the ride's tour) is the rail's case.
+  const beside = el.closest('.desk-rail, .desk-run__left') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
   return { el, top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom, beside }
 }
 
@@ -60,7 +61,12 @@ function centredOn(rect) {
   return { left: Math.min(Math.max(centre, from), Math.max(from, to)), width }
 }
 
-export function Guide({ gate, onEnd }) {
+// `stops`, when given, is a tour that is not a gate's (plan 131: the
+// first ride's walk round a run's three panels on the desk): walked
+// the same way, in the same spot and note, but counted by the ride's
+// own ride_step rather than as a gate's guide -- `gate` then only names
+// it on the DOM.
+export function Guide({ gate, stops: given = null, onEnd }) {
   const { t } = useLang()
   const desk = useDesk()
   // Which stops have an anchor on the screen, decided once the guide
@@ -82,7 +88,7 @@ export function Guide({ gate, onEnd }) {
     ended.current = true
     setOver(true)
     const total = stops?.length ?? 0
-    track('guide_done', { gate, skipped, stops: skipped ? index : total, ms: watch.current?.read() ?? 0 })
+    if (!given) track('guide_done', { gate, skipped, stops: skipped ? index : total, ms: watch.current?.read() ?? 0 })
     onEnd?.(skipped, total)
   }
 
@@ -106,7 +112,10 @@ export function Guide({ gate, onEnd }) {
 
   useLayoutEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect -- the anchors are DOM, read once the guide is in it.
-    setStops((desk ? deskStops(gate) : GUIDES[gate] ?? []).filter(s => rectOf(s.anchor)))
+    setStops((given ?? (desk ? deskStops(gate) : GUIDES[gate] ?? [])).filter(s => rectOf(s.anchor)))
+    // `given` is read once, as the gate's registry is: a tour does not
+    // change under the learner.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gate, desk])
 
   // Nothing to point at: over before it begins, and not a skip.
@@ -116,8 +125,8 @@ export function Guide({ gate, onEnd }) {
   }, [stops, stop])
 
   useEffect(() => {
-    if (stop) track('guide_step', { gate, stop: stop.anchor, index })
-  }, [gate, stop, index])
+    if (stop && !given) track('guide_step', { gate, stop: stop.anchor, index })
+  }, [gate, stop, index, given])
 
   // The spot follows the anchor: scrolled into view first, then
   // measured on every frame the layout could have moved it -- a

@@ -65,7 +65,22 @@ describe('the test ride at 390×844', () => {
 
     root.querySelector('.flashcard').click()
     await settle(120)
-    // The bar docks (sticky, on the panel ink) and the second note
+    // Plan 131: turned, the note hangs under the card's 🔍, inside the
+    // viewport, and the 🔍 is a thumb's target. Opening the entry and
+    // closing it again is what lets the grade through.
+    const lookup = root.querySelector('[data-guide="card.lookup"]')
+    note = document.querySelector('.guide-callout')
+    expect(note.dataset.place).toBe('below')
+    expect(rect(note).top).toBeGreaterThanOrEqual(rect(lookup).bottom)
+    expect(rect(note).bottom).toBeLessThanOrEqual(window.innerHeight)
+    expect(rect(note).left).toBeGreaterThanOrEqual(0)
+    expect(rect(note).right).toBeLessThanOrEqual(window.innerWidth)
+    lookup.click()
+    await settle(150)
+    expect(document.querySelector('.dict-sheet')).toBeTruthy()
+    document.querySelector('.dict-sheet__scrim').click()
+    await settle(150)
+    // The bar docks (sticky, on the panel ink) and the next note
     // rests on its top edge, above it, still inside the viewport.
     const bar = root.querySelector('.rating-bar')
     expect(getComputedStyle(bar).position).toBe('sticky')

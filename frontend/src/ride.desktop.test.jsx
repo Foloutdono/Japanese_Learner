@@ -5,11 +5,13 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the first ride at a desk (plan 122) ────────────────────────
+// ── 机 — the first ride at a desk (plans 122, 131) ──────────────────
 // The two cards and the reading ride, from the keys alone: Space turns
 // a card, a digit rates it, and Enter goes on from the ride's end --
-// the key its Continue prints (P8). The phone's side is a block of
-// deskfree.phone.test.jsx.
+// the key its Continue prints (P8). Since plan 131 both rides stand on
+// the runs' three panels and walk the learner round them first (the
+// guide, handed components/guide/rideTours' stops; P11, P12). The
+// phone's side is ride.phone.test.jsx.
 
 const apiJson = vi.hoisted(() => vi.fn())
 const apiFetch = vi.hoisted(() => vi.fn(async () => ({ ok: true, status: 200, json: async () => ({ results: [] }) })))
@@ -40,15 +42,17 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: RideRun } = await import('./screens/RideRun')
 const { default: RideReading } = await import('./screens/RideReading')
 
+// A new card's forecast, as the ride serves it (plan 131).
+const FORECAST = Object.fromEntries([60, 180, 180, 390, 600, 3600].map((due_in, q) => [String(q), { due_in }]))
 const KNOWN = {
   card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
   kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N3', romaji: 'konnichiwa',
-  stage: null, review_preview: null, hints: {},
+  stage: null, review_preview: FORECAST, hints: {},
 }
 const UNKNOWN = {
   card_id: 'vocab_N5_駅_えき', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
   kanji: '駅', kana: 'えき', meaning: 'station', level: 'N5', romaji: 'eki',
-  stage: null, review_preview: null, hints: { indice_3: [{ text: '駅', reading: 'えき' }] },
+  stage: null, review_preview: FORECAST, hints: { indice_3: [{ text: '駅', reading: 'えき' }] },
 }
 const SENTENCE = {
   phrase: '駅で友だちに会います。', romaji: 'eki de tomodachi ni aimasu.',
@@ -68,6 +72,14 @@ const nextCard = () => vi.waitFor(() => {
   expect($('.ride__done') ?? $('.flashcard__hint .desk-kbd')).not.toBeNull()
 }, { timeout: 3000 })
 const posts = () => apiJson.mock.calls.filter(([, , init]) => init?.method === 'POST')
+const ok = body => ({ ok: true, status: 200, json: async () => body })
+const ANALYSIS = {
+  text: '駅で友だちに会います。', level: 'N5', available: true, grammar: [], unknown_count: 0, off_deck_count: 0,
+  tokens: [{
+    surface: '駅', reading: 'えき', meaning: 'station', pos: 'noun', furigana: [{ text: '駅', reading: 'えき' }], kanji_matches: [],
+    vocab_match: { level: 'N5', raw_id: 'vocab_N5_駅_えき', entry: { word: '駅', kanji: '駅', kana: 'えき', meaning: 'station' }, stats: { status: 'new' } },
+  }],
+}
 
 const ENTRIES = {
   こんにちは: { type: 'vocab', kanji: '', kana: 'こんにちは', meaning: 'hello', level: 'N5', senses: [], examples: [] },
@@ -78,8 +90,9 @@ beforeEach(() => {
   apiFetch.mockReset()
   apiFetch.mockImplementation(async url => {
     const q = new URLSearchParams(String(url).split('?')[1] ?? '').get('q')
+    if (String(url) === '/api/phrase/analyze') return ok(ANALYSIS)
     const e = String(url).startsWith('/api/dictionary') && ENTRIES[q]
-    return { ok: true, status: 200, json: async () => ({ results: e ? [e] : [] }) }
+    return ok({ results: e ? [e] : [] })
   })
   apiJson.mockReset()
   apiJson.mockImplementation(async (url, _s, init) => {
@@ -105,6 +118,27 @@ function mount(element, at) {
   )
 }
 
+/** The walk open over the run, if any: its stop's anchor. */
+const walkStop = () => $('.guide')?.dataset.stop ?? null
+const $$ = s => [...document.querySelectorAll(s)]
+/** Walk every stop with →, collecting their anchors. */
+async function walk() {
+  const seen = []
+  await vi.waitFor(() => expect(walkStop()).not.toBeNull(), { timeout: 3000 })
+  for (let i = 0; i < 12 && walkStop(); i++) {
+    seen.push(walkStop())
+    await userEvent.keyboard('{ArrowRight}')
+    await settle(60)
+  }
+  return seen
+}
+/** Decline a walk: Esc is the guide's Skip. */
+async function skipWalk() {
+  await vi.waitFor(() => expect(walkStop()).not.toBeNull(), { timeout: 3000 })
+  await userEvent.keyboard('{Escape}')
+  await settle(80)
+}
+
 /** Both cards turned and rated from the keys: Space, then '1'. */
 async function rideTheCards() {
   for (let i = 0; i < 2; i++) {
@@ -120,6 +154,7 @@ describe('the ride\'s ends on the desk (P8)', () => {
     const onNext = vi.fn()
     await mount(<RideRun session={{ access_token: 'tok' }} onNext={onNext} />, '/ride/cards')
     await settle(250)
+    await skipWalk()
     await rideTheCards()
     const go = $('.ride__done-foot .btn-depart')
     expect(go, 'the ride reached its end').toBeTruthy()
@@ -133,11 +168,17 @@ describe('the ride\'s ends on the desk (P8)', () => {
   it('stamps the lesson from the plate on Enter', async () => {
     const onDone = vi.fn()
     await mount(<RideReading session={{ access_token: 'tok' }} onDone={onDone} />, '/ride/reading-run')
-    await settle(900)
+    await settle(250)
+    await skipWalk()
+    await settle(700)
     $('form.stage__foot input').focus()
     await userEvent.keyboard('eki de tomodachi ni aimasu{Enter}')
     await settle(250)
     await userEvent.keyboard('1')
+    await settle(250)
+    await skipWalk()
+    // Graded: Continue goes on to the plate, on Enter too.
+    await userEvent.keyboard('{Enter}')
     await settle(250)
     const go = $('.ride__plate [data-action="enter"]')
     expect(go, 'the plate is up').toBeTruthy()
@@ -150,32 +191,45 @@ describe('the ride\'s ends on the desk (P8)', () => {
   })
 })
 
-// ── P11 — the ride's side ──
-// The browse's side (plan 119): the flip docks the card's entry beside
-// it, where a phone looks it up from 🔍. Nothing to rate, nothing
-// beside the done room, and the ride's notes stand over the card.
+// ── P11 — the card ride on three panels (plan 131) ──
+// The card run's layout (plan 126): this run's figures and the card
+// panel at the left, the card, the details sealed at the right until
+// the flip docks the card's entry there. The walk points at every part
+// before the first turn, and at the entry and the forecast after it.
 const box = el => el.getBoundingClientRect()
 const plate = () => $('.desk-run__side .desk-entry .dict-plate__word')?.textContent ?? null
+const figure = () => $('.desk-run__left .desk-figs .desk-fig__value')?.firstChild?.textContent ?? null
 
-describe('the ride\'s side on the desk (P11)', () => {
-  it('docks each card\'s entry on the flip, and clears it with the next card', async () => {
+describe('the card ride on the desk\'s panels (P11)', () => {
+  it('stands on the three panels and walks every part of them', async () => {
     await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
     await settle(250)
-    const side = $('.desk-run__side')
-    expect(side).not.toBeNull()
-    expect(Math.round(box(side).width)).toBe(360)
-    expect(side.querySelector('.desk-tally')).toBeNull()
-    expect(side.querySelector('.desk-run__note')).not.toBeNull()
+    expect($('.desk-run--panels')).not.toBeNull()
+    expect($('.desk-run__left .desk-session')).not.toBeNull()
+    expect($('.desk-run__left .desk-card')).not.toBeNull()
+    expect($('.desk-run__side .desk-sealed')).not.toBeNull()
+    // The ride has no choices: no C among the keys.
+    expect($$('.desk-card .desk-keys .desk-kbd').map(k => k.textContent)).not.toContain('C')
+    // The tiles carry the new card's forecast, not dashes.
+    expect($$('.desk-verdict__value').every(v => v.textContent !== '—')).toBe(true)
+    expect(await walk()).toEqual([
+      'run.records', 'run.state', 'run.verdicts', 'run.keys', 'run.rhythm', 'ride.card', 'ride.rate', 'run.side',
+    ])
+    // The walk over, the ride's own note says how to turn the card.
+    expect($('.guide-callout__text').textContent).toMatch(/Space|Espace/)
+
     await userEvent.keyboard(' ')
     await settle(400)
     expect(plate()).toBe('こんにちは')
-    // No 🔍 on the card: the column is where the look-up goes.
-    expect($('.reveal-actions')).not.toBeNull()
-    expect([...document.querySelectorAll('.reveal-action-btn')].some(b => /dictionar|dictionnaire/i.test(b.title))).toBe(false)
+    expect(await walk()).toEqual(['run.side', 'run.verdicts'])
+
     await userEvent.keyboard('1')
     await nextCard()
-    expect(plate()).toBeNull()
-    expect($('.desk-run__side .desk-run__note')).not.toBeNull()
+    // The grade counts in this run's figures; the second card is not walked.
+    expect(figure()).toBe('1')
+    expect($('.desk-run__side .desk-sealed')).not.toBeNull()
+    await settle(200)
+    expect(walkStop()).toBeNull()
     await userEvent.keyboard(' ')
     await settle(400)
     expect(plate()).toBe('駅')
@@ -183,19 +237,20 @@ describe('the ride\'s side on the desk (P11)', () => {
     await nextCard()
     expect($('.ride__done')).not.toBeNull()
     expect($('.desk-run__side')).toBeNull()
+    expect($('.desk-run__left')).toBeNull()
   })
 
-  it('docks 駅 for a learner who reads no hiragana, its reading in Latin letters', async () => {
-    summary.current = { kanaKnown: 'none', dailyNewTarget: 10 }
+  it('declines both walks on the first one\'s Skip', async () => {
     await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
     await settle(250)
+    await skipWalk()
+    expect(walkStop()).toBeNull()
     await userEvent.keyboard(' ')
     await settle(400)
-    await userEvent.keyboard('1')
-    await nextCard()
-    await userEvent.keyboard(' ')
-    await settle(400)
-    expect(plate()).toBe('駅')
+    expect(plate()).toBe('こんにちは')
+    expect(walkStop()).toBeNull()
+    // No 🔍 on the card: the column is where the look-up goes.
+    expect($$('.reveal-action-btn').some(b => /dictionar|dictionnaire/i.test(b.title))).toBe(false)
   })
 
   it('stands the ride\'s notes over the card, not over the window\'s middle', async () => {
@@ -203,6 +258,8 @@ describe('the ride\'s side on the desk (P11)', () => {
     try {
       await mount(<RideRun session={{ access_token: 'tok' }} onNext={() => {}} />, '/ride/cards')
       await settle(300)
+      await skipWalk()
+      await settle(120)
       const note = $('.guide-callout')
       expect(note).not.toBeNull()
       const mid = r => (r.left + r.right) / 2
@@ -211,10 +268,44 @@ describe('the ride\'s side on the desk (P11)', () => {
       delete document.documentElement.dataset.chrome
     }
   })
+})
 
-  it('keeps no side on the reading ride', async () => {
+// ── P12 — the reading ride on three panels (plan 131) ──
+// A practice run's layout (plan 129): the figures and the run's lines
+// at the left, the breakdown sealed at the right until the grade. The
+// walk comes before the clock, and the grade opens the breakdown.
+describe('the reading ride on the desk\'s panels (P12)', () => {
+  it('walks the panels with the clock held, then opens the breakdown at the grade', async () => {
     await mount(<RideReading session={{ access_token: 'tok' }} onDone={() => {}} />, '/ride/reading-run')
-    await settle(300)
-    expect($('.desk-run__side')).toBeNull()
+    await settle(250)
+    expect($('.desk-run--panels')).not.toBeNull()
+    expect($('.desk-run__left .desk-sentences')).not.toBeNull()
+    expect($('.desk-run__side .desk-sealed')).not.toBeNull()
+    // Held: the sentence covered and the clock full while the walk is open.
+    expect($('.sentence--covered')).not.toBeNull()
+    await settle(600)
+    expect($('.timer__label').textContent).toBe(`${SENTENCE.display_seconds.toFixed(1)}s`)
+    expect(await walk()).toEqual([
+      'run.records', 'run.lines', 'run.keys', 'run.rhythm', 'ride.sentence', 'ride.answer', 'run.side',
+    ])
+    // The clock runs now: the sentence shows, then hides.
+    expect($('.sentence').textContent).toBe(SENTENCE.phrase)
+    await settle(700)
+    expect($('.sentence--covered')).not.toBeNull()
+
+    $('form.stage__foot input').focus()
+    await userEvent.keyboard('eki de tomodachi ni aimasu{Enter}')
+    await settle(250)
+    expect($('.desk-run__side .desk-sealed')).not.toBeNull()
+    await userEvent.keyboard('1')
+    await settle(250)
+    expect(await walk()).toEqual(['run.side', 'run.lines'])
+    // Graded: the breakdown in the side, the sentence a line with its grade.
+    expect($('.desk-run__side .desk-sealed')).toBeNull()
+    expect($('.desk-run__side').textContent).toContain('station')
+    expect($('.desk-sentence__text').textContent).toBe(SENTENCE.phrase)
+    expect($('.desk-sentence__dot--q4')).not.toBeNull()  // '1' is the best tile: q4 on the default scale
+    expect(figure()).toBe('1')
+    expect(posts().some(([u]) => u === '/api/onboarding/ride/done')).toBe(false)
   })
 })

@@ -124,8 +124,15 @@ def test_ride_serves_the_known_card_then_the_unknown_one_in_the_vocab_shape(clie
         assert known["mode"] == "vocab.flashcard.f2b"
         assert known["source"] == "vocab"      # the queue's own field, so CardPrompt knows the face
         assert known["direction"] == "f2b"
-        # Never studied and never to be: no stage, no preview.
-        assert known["stage"] is None and known["review_preview"] is None
+        # Never studied and never to be: no stage. The forecast is a new
+        # card's (plan 131), for the desk's verdict tiles, and nothing else:
+        # the ride earns no XP, so there is none to preview.
+        assert known["stage"] is None
+        forecast = known["review_preview"]
+        assert sorted(forecast) == ["0", "1", "2", "3", "4", "5"]
+        assert all(set(f) == {"due_in"} for f in forecast.values())
+        # Wrong brings it back sooner than right: the lesson the ride teaches.
+        assert forecast["0"]["due_in"] <= forecast["5"]["due_in"]
         assert unknown["card_id"] == "vocab_N5_駅_えき"
         assert unknown["level"] == "N5"
         assert unknown["meaning"] == "station"

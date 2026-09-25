@@ -9,6 +9,7 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
+import { LookupWatchContext } from './lookupWatch'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
 import { composing, runKey } from '../../lib/keyGuards'
@@ -640,6 +641,8 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
   // panel remounts per card (`resetKey`), so its cleanup takes the last
   // card's entry down.
   const docked = useContext(EntryDockContext)
+  // The first ride waits on the sheet (plan 131, ./lookupWatch).
+  const watch = useContext(LookupWatchContext)
 
   const speakText = sound ?? dictTerm
   const canLookUp = revealed && (dictTerm || dictId) && dictCategory && session
@@ -661,7 +664,8 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
   const closeDictionary = useCallback((e) => {
     e?.stopPropagation?.()
     setShowDictionary(false)
-  }, [])
+    watch?.(false)
+  }, [watch])
 
   if (!canLookUp && !canPlaySound) return null
 
@@ -669,6 +673,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
     e?.stopPropagation?.()
     playClick()
     setShowDictionary(true)
+    watch?.(true)
   }
 
   function replaySound(e) {
@@ -698,6 +703,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
             className="reveal-action-btn"
             title={t.openDictionary}
             aria-label={t.openDictionary}
+            data-guide="card.lookup"
           >
             {/* No className, deliberately. This glyph used to carry
                 `dict-index-bar__icon`, baked into SearchIcon itself,
