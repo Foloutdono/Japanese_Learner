@@ -142,9 +142,10 @@ describe('the plated gates on the desk', () => {
     expect(new Set(lines.map(b => Math.round(b.left))).size).toBe(1)
     expect(new Set(lines.map(b => Math.round(b.width))).size).toBe(1)
     lines.slice(1).forEach((b, i) => expect(b.top).toBeGreaterThan(lines[i].bottom))
-    // The side at the entry's width, beside them: the shelf over the library.
+    // The side beside them, at a station's side on the tightest desk (it
+    // grows to the entry's width on a wider one): the shelf over the library.
     const side = document.querySelector('.learn-desk__side')
-    expect(Math.round(box(side).width)).toBe(440)
+    expect(Math.round(box(side).width)).toBe(360)
     expect(box(side).left).toBeGreaterThan(lines[0].right)
     const [shelf, library] = [...side.children]
     expect(shelf.classList.contains('gate-panel--shelf')).toBe(true)

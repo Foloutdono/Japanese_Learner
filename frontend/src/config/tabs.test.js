@@ -58,7 +58,7 @@ describe('the rail', () => {
 
   it('lists a gate\'s sections without the gate itself', () => {
     expect(getDeskSections('learn', t).map(s => s.path)).toEqual([
-      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks',
+      '/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar', '/learn/decks', '/learn/decks/library',
     ])
     expect(getDeskSections('practice', t).map(s => s.path)).toEqual([
       '/practice/reading', '/practice/comprehension', '/practice/translation',

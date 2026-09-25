@@ -21446,12 +21446,14 @@ a.slip__act { text-decoration: none; }
      one column, sharing the window's height, and a column at the
      entry's width beside them holding the learner's decks over the
      library (components/decks/GateShelf.jsx). The phone keeps its
-     column of five plates. */
+     column of five plates. On the narrowest desk the column gives down
+     to a station's side (--desk-side-w), so a line's six stops keep
+     room for their figures. */
   .learn-desk {
     flex: 1;
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) var(--desk-entry-w);
+    grid-template-columns: minmax(0, 1fr) clamp(var(--desk-side-w), 36%, var(--desk-entry-w));
     gap: var(--sp-6);
   }
   .learn-desk > .plates {
@@ -21652,6 +21654,15 @@ a.slip__act { text-decoration: none; }
     background: color-mix(in srgb, var(--text-primary) 9%, transparent);
     color: var(--text-primary);
   }
+  /* The library's head carries its ordering: on the narrowest desk the
+     switch goes under the name rather than cutting it. */
+  .gate-panel--library > .gate-panel__head {
+    display: flex;
+    flex-wrap: wrap;
+    row-gap: var(--sp-3);
+  }
+  .gate-panel--library > .gate-panel__head > .plate__names { flex: 1 0 auto; }
+  .gate-panel--library > .gate-panel__head > .gate-seg { margin-left: auto; }
   .gate-field {
     flex: 1;
     display: flex;
@@ -21758,20 +21769,18 @@ a.slip__act { text-decoration: none; }
 
   /* The library before a deck is opened (LibraryHome): À la une over
      Abonnements beside Tes publications. */
+  /* The split's page is as tall as what it holds, so each section is
+     too: the preview's cards and blurb, then two lists side by side. */
   .lib-home {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: var(--sp-4);
-    min-height: 0;
   }
-  .lib-home__featured { flex: 1.35 1 0; }
   .lib-home__pair {
-    flex: 1 1 0;
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
     gap: var(--sp-4);
-    min-height: 0;
   }
   .lib-weeks {
     display: flex;
