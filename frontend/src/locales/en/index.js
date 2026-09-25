@@ -291,6 +291,8 @@ const quiz = {
   forecastWeeks:       n => `${n} wk`,
   forecastMonths:      n => `${n} mo`,
   forecastYears:       n => `${n} yr`,
+  // The wait as a figure, on the tile: the unit beside the number.
+  forecastUnit:        (unit, n) => ({ minute: 'min', hour: 'h', day: n > 1 ? 'days' : 'day', week: 'wk', month: 'mo', year: 'yr' })[unit],
   deskKeysTitle:       'The keys',
   deskKeyTurn:         'turns the card',
   deskKeyChoices:      'shows the choices',

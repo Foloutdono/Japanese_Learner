@@ -36,7 +36,11 @@ const CHECK_WAIT_MS = 2500
 // contrast card `contrast`, every card `raw_id` — and the grammar key
 // gained a language segment (GrammarRun). A v5 grammar queue would
 // hand a renderer reading `tr` an undefined.
-const CACHE_VERSION = 'v6'
+// v7: every rating in a card's review_preview gained `due_in` (plan
+// 126), which the desk's card panel prints on each verdict's tile. A v6
+// queue was served before the field existed, so a resumed one drew "—"
+// on every tile until the learner had answered their way past it.
+const CACHE_VERSION = 'v7'
 
 const KEY_PREFIX = 'jp-session'
 

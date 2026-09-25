@@ -894,7 +894,11 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
 
   // The learner's own record (plan 089), placed by the layout: last in
   // the body, or, in the band (plan 126), under the plate in the top
-  // panel -- the card and your numbers over the dictionary alone.
+  // panel -- the card and your numbers over the dictionary alone. The
+  // band is a run's, where the schedule is the card panel's: each
+  // verdict's tile says when the card comes back, and the card on the
+  // stage is due by being there. So it keeps the two figures about the
+  // learner and drops the interval and the next review (owner's cut).
   const recordBlock = record && (
           <section className="dict-block" aria-label={t.cardStats}>
             <div className="records">
@@ -907,16 +911,20 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
                 value={`${status.correct_reviews}/${status.total_reviews}`}
                 label={t.totalReviews}
               />
-              <Figure
-                value={status.interval_days != null ? status.interval_days : '—'}
-                unit={status.interval_days != null ? t.days : null}
-                label={t.interval}
-              />
-              <Figure
-                value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
-                ink={status.due ? 'due' : undefined}
-                label={t.nextReview}
-              />
+              {!band && (
+                <>
+                  <Figure
+                    value={status.interval_days != null ? status.interval_days : '—'}
+                    unit={status.interval_days != null ? t.days : null}
+                    label={t.interval}
+                  />
+                  <Figure
+                    value={status.due ? t.dueValue : (shortDate(status.next_review, lang) ?? '—')}
+                    ink={status.due ? 'due' : undefined}
+                    label={t.nextReview}
+                  />
+                </>
+              )}
             </div>
             {/* A ghost, not a filled action: the panel has no primary,
                 and 辞書's gold could not carry one anyway (DESIGN.md,

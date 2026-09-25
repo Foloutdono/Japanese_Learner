@@ -58,6 +58,15 @@ const SENTENCE = {
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
+// After a rating: the next card up, turned face down (its Space hint
+// printed), or the done room -- and the rated card gone with its docked
+// entry. It comes after the ride's hold (420ms) and the old card's way
+// out (220ms), so it is waited for, not guessed: a fixed 650ms left a
+// loaded CI runner 10ms, and a Space pressed inside the hold is lost.
+const nextCard = () => vi.waitFor(() => {
+  expect($('.desk-run__side .desk-entry')).toBeNull()
+  expect($('.ride__done') ?? $('.flashcard__hint .desk-kbd')).not.toBeNull()
+}, { timeout: 3000 })
 const posts = () => apiJson.mock.calls.filter(([, , init]) => init?.method === 'POST')
 
 const ENTRIES = {
@@ -102,7 +111,7 @@ async function rideTheCards() {
     await userEvent.keyboard(' ')
     await settle(120)
     await userEvent.keyboard('1')
-    await settle(650)
+    await nextCard()
   }
 }
 
@@ -164,14 +173,14 @@ describe('the ride\'s side on the desk (P11)', () => {
     expect($('.reveal-actions')).not.toBeNull()
     expect([...document.querySelectorAll('.reveal-action-btn')].some(b => /dictionar|dictionnaire/i.test(b.title))).toBe(false)
     await userEvent.keyboard('1')
-    await settle(650)
+    await nextCard()
     expect(plate()).toBeNull()
     expect($('.desk-run__side .desk-run__note')).not.toBeNull()
     await userEvent.keyboard(' ')
     await settle(400)
     expect(plate()).toBe('駅')
     await userEvent.keyboard('1')
-    await settle(650)
+    await nextCard()
     expect($('.ride__done')).not.toBeNull()
     expect($('.desk-run__side')).toBeNull()
   })
@@ -183,7 +192,7 @@ describe('the ride\'s side on the desk (P11)', () => {
     await userEvent.keyboard(' ')
     await settle(400)
     await userEvent.keyboard('1')
-    await settle(650)
+    await nextCard()
     await userEvent.keyboard(' ')
     await settle(400)
     expect(plate()).toBe('駅')

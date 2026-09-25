@@ -1055,25 +1055,33 @@ answer a keyboard and a pointer one way everywhere.
   remaining count, which leaves the head's pill — over **the card
   panel**: the card's state on a line with stops (new, learning,
   learned, the train at the stage it is in), every verdict of the
-  learner's own scale as a tile, two by two, with the digit that presses
-  it and when the card comes back (off the card's own `review_preview`,
-  so nothing waits on a round trip), the keys the elements no longer
-  print, and the rhythm on a sumi foot. **No captions on either panel**
+  learner's own scale as a tile, two by two, each a figure — when the
+  card comes back as the large numeral and its unit (3 min, 1 jour, 3
+  sem.), the verdict's word as its label beneath, the digit that presses
+  it in the corner (off the card's own `review_preview`, so nothing waits
+  on a round trip) — the keys the elements no longer print, and the
+  rhythm on a sumi foot. **No captions on either panel**
   and no line under a tile's interval saying what the rating does — the
   owner cut them for room: the figures, the stops and the tiles name
-  themselves, and the remaining count is a fourth figure. In the
+  themselves, and the remaining count is a fourth figure. Where the
+  column is too narrow for the run's labels (a laptop's 300px), the
+  figures stand bare, the labels kept for a screen reader — measured, not
+  set at a width, since their length is the language's. In the
   middle **the card**, the tiles framed in a surface row under it,
   **unlit and inert before the reveal** rather than unseen, with no
   digits in their corners. At the right **the card's details**: before
   the reveal one sealed panel with a ? and nothing else — the entry is
   the answer — and after it the entry in its band layout, the top panel
   the card and your numbers (the glyph at the left, readings and meaning
-  beside it, level, state and the actions at the right, the four figures
-  under the stripe), the bottom the dictionary alone, the stroke sheet
-  growing into what the senses and the words leave. The columns are 480
-  | 640 | 600 at the owner's 1877px and give down to 300 | 360 | 300 on a
-  laptop without a second width query. The elements print no key caps
-  there (`RunPanelsContext`). A run with no rating bar (a browse, the
+  beside it, level, state and the actions at the right, the accuracy and
+  the reviews under the stripe — the interval and the next review are
+  the tiles' to say), the bottom the dictionary alone, the stroke sheet
+  growing into what the senses and the words leave and never below twice
+  the specimen: short of that the panel scrolls. The columns share
+  `--desk-run-w` 28 | 42 | 30 (482 | 722 | 516 at the owner's 1877px),
+  stand centred past it and give down to 300 | 400 | 300 on a laptop
+  without a second width query. The elements print no key caps there
+  (`RunPanelsContext`) but the flashcard's "Espace pour révéler". A run with no rating bar (a browse, the
   practice runs, the rides) keeps its side alone, the level strip on the
   floor and the plate's own layout; a run that failed or ended with
   nothing rated shows no figures, and the misses stand at its end.
@@ -1135,8 +1143,9 @@ answer a keyboard and a pointer one way everywhere.
   corner (reversed, as the handler reads them: 1 is the best, at the
   right), the choice's index as the digit that answers it, "Espace pour
   révéler" — because on a desk the hands are on the keys; on a card run's
-  panels (plan 126) none of these caps prints, since the card panel lists
-  every key and the digit stands on each verdict's tile. A whole session
+  panels (plan 126) only the card's "Espace pour révéler" prints, since
+  the card panel lists every key and the digit stands on each verdict's
+  tile. A whole session
   needs no pointer (plan 115): Enter departs from Today's gate and takes a
   finished run's one filled action, Esc leaves a run (never over a dialog,
   never when a docked entry has taken the key), C shows the choices, A–D
