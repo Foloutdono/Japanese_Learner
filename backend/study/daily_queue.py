@@ -148,6 +148,41 @@ def keep_lanes(all_lanes, wanted: set):
     return kept
 
 
+# ── 区間 — a run of a chosen length (plan 135) ──────────────────
+# The gate can send a run of 20, 50 or 100 rather than the whole day.
+# It splits the length over the chosen lanes the way interleave() deals
+# (domain/lanes.js's splitTake, round-robin in the queue's order) and
+# the run hands back, per batch, what each lane still owes it:
+# `quota=<lane id>:<n>,...`, less what the run has already answered or
+# holds. The server stays stateless -- it keeps those lanes and cuts
+# each to its figure, so the run ends when the split is served.
+def parse_quota(raw: str) -> dict:
+    """"a:3,b:0" -> {"a": 3, "b": 0}. A malformed part is skipped: a lane
+    id never contains ':', so the figure is what follows the last one."""
+    out = {}
+    for part in raw.split(","):
+        lane, sep, n = part.rpartition(":")
+        if not sep or not lane:
+            continue
+        try:
+            out[lane] = max(0, int(n))
+        except ValueError:
+            continue
+    return out
+
+
+def keep_quota(all_lanes, quota: dict):
+    """Keep the lanes the quota names, each cut to its figure, urgency
+    order kept; a lane at zero drops out, and so does a lane the quota
+    does not name."""
+    kept = OrderedDict()
+    for key, ids in all_lanes.items():
+        n = quota.get(lane_id(key), 0)
+        if n > 0 and ids:
+            kept[key] = ids[:n]
+    return kept
+
+
 def keep_card(all_lanes, raw_id: str):
     """Restrict the queue to ONE card -- every lane it is due in, and
     nothing else.

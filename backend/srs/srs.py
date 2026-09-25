@@ -11,6 +11,31 @@ from . import xp as xp_math
 
 logger = logging.getLogger(__name__)
 
+# ── 所要 — how long a review takes (plan 135) ─────────────────
+# The fare gate prints what a run will take beside what it holds. A gap
+# of PACE_BREAK or more between two reviews is a pause, not a card, and
+# under PACE_MIN_GAPS short gaps the figure would be a guess.
+PACE_DAYS = 14
+PACE_SAMPLE = 400
+PACE_BREAK = 120
+PACE_MIN_GAPS = 20
+
+
+def seconds_per_review(times) -> int | None:
+    """The median gap, in whole seconds, between consecutive reviews
+    under PACE_BREAK apart; None under PACE_MIN_GAPS of them. `times` in
+    any order."""
+    ordered = sorted(times)
+    gaps = sorted(
+        (b - a).total_seconds() for a, b in zip(ordered, ordered[1:])
+        if 0 < (b - a).total_seconds() < PACE_BREAK
+    )
+    if len(gaps) < PACE_MIN_GAPS:
+        return None
+    mid = len(gaps) // 2
+    median = gaps[mid] if len(gaps) % 2 else (gaps[mid - 1] + gaps[mid]) / 2
+    return max(1, round(median))
+
 
 class SRSEngine:
     """Database-backed SRS engine that uses the scheduler and storage helpers."""
@@ -1474,6 +1499,31 @@ class SRSEngine:
             {"date": day.isoformat(), "reviews": int(n), "good": int(good)}
             for day, n, good in rows
         ]
+
+    def get_review_pace(self, user_id: str) -> int | None:
+        """Seconds a review takes this learner, or None before there is
+        enough to say (plan 135).
+
+        review_log keeps no duration, so the pace is read off the gaps
+        between consecutive reviews: the median of the ones short enough
+        to be two cards of one sitting (see seconds_per_review). The
+        last PACE_SAMPLE reviews of the last PACE_DAYS days -- the pace
+        now, not the pace of a first week.
+        """
+        pattern = self._user_prefix_pattern(user_id)
+        with self.storage.connection() as conn:
+            with conn.cursor() as cur:
+                sql = """
+                    SELECT reviewed_at FROM review_log
+                    WHERE card_id LIKE %s
+                      AND reviewed_at >= NOW() - (%s || ' days')::interval
+                    ORDER BY reviewed_at DESC
+                    LIMIT %s
+                """
+                self._log_sql("get_review_pace", sql, (pattern, PACE_DAYS, PACE_SAMPLE))
+                cur.execute(sql, (pattern, PACE_DAYS, PACE_SAMPLE))
+                rows = cur.fetchall()
+        return seconds_per_review([r[0] for r in rows])
 
     def get_interval_histogram(self, user_id: str) -> list[dict[str, int]]:
         """(interval, number of card-modes sitting at it) for every card

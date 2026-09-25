@@ -1,4 +1,5 @@
 import { forgetCredits } from './credits'
+import { forgetForecast } from './forecast'
 import { forgetShown } from './guide'
 import { forgetJourney } from './journey'
 import { forgetPracticeRecord } from './practiceRecord'
@@ -42,5 +43,6 @@ export function forgetAccount() {
   forgetStats()
   forgetJourney()
   forgetPracticeRecord()
+  forgetForecast()
   forgetShown()
 }

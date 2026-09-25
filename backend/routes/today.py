@@ -393,7 +393,15 @@ def get_today(user_id: str = Depends(get_user_id)):
         user_id, len(due_rows), total, len(lanes),
     )
     pace = resolve_pace(user_id)
+    # 所要 (plan 135): what a review takes this learner, so the gate can
+    # print what a run will take. A figure, never a reason to fail.
+    try:
+        spr = srs.get_review_pace(user_id) if total else None
+    except Exception:
+        logger.exception("review pace failed")
+        spr = None
     return {
+        "seconds_per_review": spr,
         # The fare gate prices the run against the balance (plan 069):
         # one credit a paid review, and the balance rides beside it.
         # It used to be `total` outright, back when every review cost
@@ -417,9 +425,22 @@ def get_today(user_id: str = Depends(get_user_id)):
     }
 
 
+@router.get("/api/today/forecast")
+def get_today_forecast(user_id: str = Depends(get_user_id)):
+    """
+    区間 (plan 135): what comes due each of the next seven days, today
+    first -- the bars under the journey beside the desk's fare gate. Its
+    own request rather than a field of /api/today, which the phone and
+    the tab badge read on every visit and neither draws this. Today's
+    bar is the gate's own total on the client, not this figure: the
+    gate counts the lanes the queue can serve, this counts rows.
+    """
+    return {"days": srs.get_due_forecast(user_id, 7)}
+
+
 @router.get("/api/today/cards")
 def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "", lanes: str = "", lang: str = "fr",
-                    only: str = "", user_id: str = Depends(get_user_id)):
+                    only: str = "", quota: str = "", user_id: str = Depends(get_user_id)):
     """
     The queue itself: up to `count` due cards, mixed across sections and
     personal decks, each carrying the mode it must be reviewed under.
@@ -462,6 +483,10 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         )
         chosen = daily_queue.keep_lanes(merged, daily_queue.parse_lane_ids(lanes))
     chosen = daily_queue.drop_seen(chosen, daily_queue.parse_exclude(exclude))
+    if quota and not only:
+        # A run of a chosen length (plan 135): what each lane still owes
+        # it, as the run counts it, and nothing past that.
+        chosen = daily_queue.keep_quota(chosen, daily_queue.parse_quota(quota))
     # Under enforcement a run stops at the balance -- at its worth of
     # PAID cards (plan 069, and _affordable above): the free lanes go
     # on being served, so an empty balance ends the run only once the
