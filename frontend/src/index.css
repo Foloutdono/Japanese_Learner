@@ -4522,8 +4522,17 @@ textarea:focus-visible {
      `clip` rather than `hidden`: hidden makes this a scroll container,
      which would take `position: sticky` off the HUD inside it. The
      tab bar is `position: fixed` with no transformed ancestor, so its
-     containing block is the viewport and no clip here reaches it. */
-  overflow-x: clip;
+     containing block is the viewport and no clip here reaches it.
+
+     And downwards, for the same reason: every screen arrives rising
+     10px (@keyframes arrive). On the desk nothing is docked under the
+     screen (--dock-bottom is the safe inset), so a screen that fits
+     ends on the page's own floor, and for the length of its arrival
+     it stood 10px below it: the window printed a scrollbar on every
+     change of screen. This box grows with what it holds, so nothing
+     laid out in it can reach past it -- only a movement can, and that
+     is all the clip takes. */
+  overflow: clip;
 }
 .phone__content {
   flex: 1;
@@ -22469,6 +22478,19 @@ a.slip__act { text-decoration: none; }
   .desk-brd .brd__car > .brd__body:not(.brd__body--center) {
     flex: 0 1 auto;
     margin-top: auto;
+    /* Sized to what it holds, the body scrolls with no room under its
+       last answer, and every step's last thing arrives rising -- an
+       answer 6px (brd-in), the kana's readings 8px, the pass 40px
+       (brd-up): while it was still low it hung past the body's foot and
+       printed a scrollbar at every step. The room is kept inside the
+       box and given back outside, so the answers and Continue stand
+       where they did. It is the rung Continue keeps under the last
+       answer, the car's gap and the foot's margin (--sp-8), so the clip
+       stops on the foot's edge; on a frame under 740px, where the gap
+       narrows a rung, it reaches 4px under the foot, which is drawn
+       after the body and covers it. */
+    padding-bottom: var(--sp-8);
+    margin-bottom: calc(-1 * var(--sp-8));
   }
   .desk-brd .brd__stage:has(> .brd-field) { max-width: none; }
   /* The plan: the chart 1:1 in a column of its own, the lead and the
