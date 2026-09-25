@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { userEvent } from 'vitest/browser'
+import { parkPointer } from './testing/parkPointer'
 import { LangProvider } from './LangContext'
 import ModeSelector from './components/selection/ModeSelector'
 import { RouteStops } from './components/selection/RouteStops'
@@ -76,12 +76,8 @@ describe('a route that is the whole page', () => {
     await station(<RouteStops stops={stops} here="N4" onSelect={() => {}} />)
     // Under no pointer: the lane's pointer is shared, a file before this
     // one may have left it where a stop now stands, and a hovered stop
-    // lifts a pixel. Parked on a probe in the window's corner.
-    const corner = document.createElement('div')
-    corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
-    document.body.appendChild(corner)
-    await userEvent.hover(corner, { force: true })
-    corner.remove()
+    // lifts a pixel. Parked on a probe in the page's corner.
+    await parkPointer()
     // Past the stops' staggered arrival, which lifts each into place --
     // waited out by the animations themselves, not a guess at their
     // length: a full parallel run was slow enough to measure mid-lift.

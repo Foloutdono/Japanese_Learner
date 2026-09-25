@@ -3,6 +3,7 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
+import { parkPointer } from './testing/parkPointer'
 
 // ── 机 — the statistics as a dashboard (plan 114) ────────────────
 // On a phone the service record is one column read top to bottom, its
@@ -144,10 +145,6 @@ describe('the retention line under a mouse', () => {
     await settle(60)
     expect([asked(), ring()]).toEqual(middle)
     // The lane's pointer is shared: parked, not over the next file's page.
-    const corner = document.createElement('div')
-    corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
-    document.body.appendChild(corner)
-    await userEvent.hover(corner, { force: true })
-    corner.remove()
+    await parkPointer()
   })
 })

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { parkPointer } from './testing/parkPointer'
 import { MemoryRouter, Routes, Route, useLocation, useNavigationType } from 'react-router-dom'
 import { LangProvider, useLang } from './LangContext'
 import './index.css'
@@ -87,15 +88,11 @@ function twin(container) {
   container.after(copy)
   return copy
 }
-// At rest: the pointer parked on a probe in the window's corner, clear
+// At rest: the pointer parked on a probe in the page's corner, clear
 // of every row (a test before this one may have left it over a row),
 // nothing focused, and every transition out of either finished.
 async function rest() {
-  const corner = document.createElement('div')
-  corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
-  document.body.appendChild(corner)
-  await userEvent.hover(corner, { force: true })
-  corner.remove()
+  await parkPointer()
   document.activeElement?.blur()
   // Past a hover's transition out (the halls ease 0.15s).
   await settle(300)

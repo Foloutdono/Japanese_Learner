@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { userEvent } from 'vitest/browser'
+import { parkPointer } from './testing/parkPointer'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -31,11 +32,7 @@ const read = el => Object.fromEntries(PROPS.map(p => [p, getComputedStyle(el).ge
 // The pointer parked clear of everything, nothing focused, and every
 // transition out of either finished.
 async function rest() {
-  const corner = document.createElement('div')
-  corner.style.cssText = 'position: fixed; left: 0; top: 0; width: 4px; height: 4px; z-index: 9999'
-  document.body.appendChild(corner)
-  await userEvent.hover(corner, { force: true })
-  corner.remove()
+  await parkPointer()
   document.activeElement?.blur?.()
   await settle()
 }
