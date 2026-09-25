@@ -17,6 +17,7 @@ import { Loading } from '../components/ui/Loading'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { CardPanel } from '../components/study/CardPanel'
 import { SideLookup } from '../components/analysis/SideLookup'
 import { useDesk } from '../hooks/useDesk'
 import { CardTransition } from '../components/study/CardTransition'
@@ -286,13 +287,15 @@ export default function GrammarRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
+      progress={progress}
+      panel={card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : (
         <SideLookup lookup={comparing} onExit={closeCompared} session={session}>
           <SessionPanel done={done} />
         </SideLookup>
       )}
-      sideLabel={t.deskRunLabel}
+      sideLabel={t.dictionaryTitle}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

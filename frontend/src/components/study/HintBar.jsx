@@ -1,7 +1,8 @@
-import { useEffect } from 'react'
+import { useContext, useEffect } from 'react'
 import { useLang } from '../../LangContext'
 import { useDesk } from '../../hooks/useDesk'
 import { dialogOpen } from '../../lib/dialogOpen'
+import { RunPanelsContext } from './runPanels'
 import { PlusIcon } from '../ui/Icons'
 
 // ── The hint switch ───────────────────────────────────────────
@@ -34,6 +35,8 @@ import { PlusIcon } from '../ui/Icons'
 export default function HintBar({ available = [], active = [], onToggle, disabled = false }) {
   const { t } = useLang()
   const desk = useDesk()
+  // On the run's panels the card panel lists the keys (plan 126).
+  const panels = useContext(RunPanelsContext)
   const choices = desk && !disabled && available.includes('indice_1')
   useEffect(() => {
     if (!choices) return undefined
@@ -81,7 +84,7 @@ export default function HintBar({ available = [], active = [], onToggle, disable
                 register to the card rather than offer a hint. */}
             <PlusIcon size={14} />
             {on ? hideLabel : showLabel}
-            {desk && key === 'indice_1' && <kbd className="desk-kbd" aria-hidden="true">C</kbd>}
+            {desk && !panels && key === 'indice_1' && <kbd className="desk-kbd" aria-hidden="true">C</kbd>}
           </button>
         )
       })}

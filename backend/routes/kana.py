@@ -86,6 +86,8 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
             "new_level":  p["new_level"],
             "stage_up":   _stage_promotion(stage, p["stage"]),
             "stage_down": _stage_demotion(stage, p["stage"]),
+            # When the card comes back after this rating (plan 126).
+            "due_in":     p["due_in"],
         }
         for quality, p in preview.items()
     }

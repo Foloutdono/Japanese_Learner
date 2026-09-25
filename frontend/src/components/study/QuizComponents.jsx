@@ -9,6 +9,7 @@ import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
+import { RunPanelsContext } from './runPanels'
 import { publishEntry, withdrawEntry } from '../../stores/deskEntry'
 import { EnterKey } from '../chrome/DeskKeys'
 import { composing, runKey } from '../../lib/keyGuards'
@@ -364,19 +365,15 @@ export function DoneMessage({ onBack, pace, onExtra }) {
 export { Loading }
 
 // ── Deck progress (à apprendre / en cours / maîtrisé) ─────
-export function DeckProgress({ stats }) {
-  const { t } = useLang()
-  if (!stats || !stats.total) return null
-
-  const { total, new: toLearn, learning, mastered } = stats
-
+function deckSegments(stats, t) {
+  const { new: toLearn, learning, mastered } = stats
   // `color` paints the bar segment and stays at full strength -- it is a
   // fill. `ink` is the same state colour used as the legend's FIGURE, so
   // it follows R4-2 and mixes toward the paper ink where it needs to:
   // --state-learning measures 2.99:1 raw and --state-mastered 4.35:1,
   // both under the floor, while --state-new is already light enough to
   // stand on its own. Per Study.dc.html, which mixes exactly these two.
-  const segments = [
+  return [
     { key: 'new',      value: toLearn,  color: 'var(--state-new)',
       ink: 'var(--state-new)', label: t.progressNew },
     { key: 'learning', value: learning, color: 'var(--state-learning)',
@@ -386,11 +383,17 @@ export function DeckProgress({ stats }) {
       ink: 'color-mix(in srgb, var(--state-mastered) 65%, var(--text-primary))',
       label: t.progressMastered },
   ]
+}
+
+export function DeckProgress({ stats }) {
+  const { t } = useLang()
+  if (!stats || !stats.total) return null
+  const { total } = stats
 
   return (
     <div className="deck-progress">
       <div className="deck-progress__bar">
-        {segments.map(s => (
+        {deckSegments(stats, t).map(s => (
           s.value > 0 && (
             <div
               key={s.key}
@@ -400,18 +403,29 @@ export function DeckProgress({ stats }) {
           )
         ))}
       </div>
-      <div className="deck-progress__legend">
-        {segments.map(s => (
-          // Study.dc.html: the figure carries the colour and the weight,
-          // the word stays in the dim register. No dot -- the coloured
-          // figure IS the key -- and no /total, which repeated the same
-          // denominator three times for no reader who needed it.
-          <span key={s.key} className="deck-progress__legend-item">
-            <span className="deck-progress__legend-figure" style={{ color: s.ink }}>{s.value}</span>
-            {' '}{s.label}
-          </span>
-        ))}
-      </div>
+      <DeckLegend stats={stats} />
+    </div>
+  )
+}
+
+// The legend on its own (plan 126): the desk's session panel prints it
+// beside the run's figures, where the hairline under the head no longer
+// does; the phone's hairline never printed it.
+export function DeckLegend({ stats }) {
+  const { t } = useLang()
+  if (!stats || !stats.total) return null
+  return (
+    <div className="deck-progress__legend">
+      {deckSegments(stats, t).map(s => (
+        // Study.dc.html: the figure carries the colour and the weight,
+        // the word stays in the dim register. No dot -- the coloured
+        // figure IS the key -- and no /total, which repeated the same
+        // denominator three times for no reader who needed it.
+        <span key={s.key} className="deck-progress__legend-item">
+          <span className="deck-progress__legend-figure" style={{ color: s.ink }}>{s.value}</span>
+          {' '}{s.label}
+        </span>
+      ))}
     </div>
   )
 }
@@ -759,6 +773,9 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
 
 function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
   const desk = useDesk()
+  // On the desk's panels the card panel lists the keys, so the face
+  // prints none under the glyph (plan 126).
+  const panels = useContext(RunPanelsContext)
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
   // sound-replay row below and fires `onReveal` (once), same as
@@ -864,9 +881,11 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
       </div>
       <div className="flashcard__hint">
         {/* A phone is tapped; a desk has a keyboard, so there the hint
-            names the key (plan 113). */}
+            names the key (plan 113) -- except on the run's panels, where
+            the card panel names every key and the face keeps its glyph
+            alone (plan 126). */}
         {!revealed && (desk
-          ? <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>
+          ? (panels ? null : <><kbd className="desk-kbd">{t.keySpace}</kbd> {t.revealByKey}</>)
           : t.tapToReveal)}
       </div>
     </div>

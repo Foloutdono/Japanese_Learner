@@ -3113,12 +3113,17 @@
      purpose: nearly everything that goes there was drawn for a phone
      first, and here it is drawn at the width it was designed at. */
   --desk-side-w:    360px;
-  /* The desk's console (plan 124): the height of the rating tiles' row
-     on a card run's floor, fixed above the level bar, which the stage
-     reserves so the card can grow to it — the tile's own 64px
-     (.rating-bar__btn) and the docked strip's --sp-3 either side. Here
-     for the same reason as --desk-rail-w. */
-  --desk-console-h: calc(64px + 2 * var(--sp-3));
+  /* A card run on three panels (plan 126, from the owner's mock drawn at
+     1877px): the run's two left panels at --desk-run-left-w, the card's
+     details at --desk-run-right-w -- the spread's wider entry (plan
+     114's canvas), where the body's blocks stand two across -- with
+     the card's own --card-w between them. On a narrower desk the two
+     side columns give down to --desk-run-col-min and the card gives
+     after them, so the three fit a 1100px laptop with no second width
+     query. Here for the same reason as --desk-rail-w. */
+  --desk-run-left-w:  480px;
+  --desk-run-right-w: 600px;
+  --desk-run-col-min: 300px;
   --dock-bottom:    var(--safe-bottom);
   /* The level board's height when it docks across the top of a phone
      (see .levelup); the study stage slides down by exactly this while
@@ -21664,17 +21669,6 @@ a.slip__act { text-decoration: none; }
     justify-content: flex-start;
     padding-bottom: var(--sp-6);
   }
-  /* The console's floor (plan 124, the block at the section's end): the
-     stage reserves the tiles' row, and the card takes the height left —
-     beside its choices (the grid below) it fills the row instead, as
-     tall as the four of them. Here, before the grid, for the cascade's
-     order; the rest of the chain is with the console. */
-  .desk-run--console > .stage { padding-bottom: calc(var(--desk-console-h) + var(--sp-6)); }
-  .desk-run--console > .stage > .quiz-card-stage {
-    flex: 1 0 auto;
-    display: flex;
-    flex-direction: column;
-  }
   /* The run's action docks on the level bar when the stage runs past
      the window, so it is never below the fold, and otherwise follows
      what it answers at the stage's own gap (plan 123): comprehension's
@@ -22027,6 +22021,10 @@ a.slip__act { text-decoration: none; }
      (plan 122): a cell's top left, clear of its centred tag; a kana
      answer's top right, clear of its label. */
   .desk-brd .brd-kopt { position: relative; }
+  /* The card panel's caps (plan 126): the digit before each verdict's
+     word, and the keys the elements no longer print, in the page's ink. */
+  .desk-verdict__head > .desk-kbd { margin-inline-end: var(--sp-1); }
+  .desk-keys__item > .desk-kbd { color: var(--text-primary); }
   .desk-brd .brd-kopt > .desk-kbd,
   .desk-brd .brd-cell > .desk-kbd {
     position: absolute;
@@ -22213,101 +22211,381 @@ a.slip__act { text-decoration: none; }
     outline-offset: var(--sp-1);
   }
 
-  /* ── 操作盤 — the run's console (plan 124) ──
-     The level bar was the floor a run docks on, sumi like the rating
-     bar it sat under (components/chrome/LevelBar.jsx). On the desk a
-     card run's floor is one console of two rows across the stage: the
-     rating tiles' row, and under it the strip, holding this run's
-     three figures at its left (RunRecords, handed to the level bar by
-     StudyStage's `records`) and the fare at its right. The tiles' row
-     is fixed above the strip rather than sticky in the stage, so it
-     spans the stage's whole width the way the strip does — a sticky
-     bar is its column's width, 1,052px at most — and the stage
-     reserves its height; the card grows into what it leaves, the
-     phone's own rule (the ≤768px block's .quiz-card-stage chain): a
-     lone glyph in the middle of a tall card, never a floor of nothing
-     under the rating bar. One row — the tiles between the figures and
-     the fare — was drawn first and chosen; it does not fit under about
-     1,600px, and the desk is one media block, so the rows are two
-     everywhere. A run without a rating bar (a browse, the practice
-     runs, the rides) passes no `records` and keeps the strip. On a
-     wide window the row keeps to the workspace, as the strip does
-     (--desk-run-inset, plan 123). */
-  .desk-run--console > .stage > .rating-bar {
-    position: fixed;
-    inset: auto calc(var(--desk-side-w) + var(--desk-run-inset)) var(--lvlbar-h) var(--desk-run-inset);
-    display: flex;
-    align-items: center;
-    height: var(--desk-console-h);
-    padding: 0 var(--sp-6);
-    background: var(--bg-panel);
+  /* ── 三面 — the run on three panels (plan 126) ──
+     A card run on the desk (the six runs that pass `records`, with a
+     side) stands on three columns, each a stack of surface panels: at
+     the left this run (RunPanel: the figures, the level bar as a row,
+     the deck's legend, the remaining count) over the card panel
+     (CardPanel: the card's state, the verdicts as tiles with what each
+     decides, the keys, the rhythm on a sumi foot); the card in the
+     middle with its tiles framed under it; the card's details at the
+     right -- sealed before the reveal, the entry in its band layout
+     after. The owner drew it at 1877px (480 | 640 | 600); on a narrower
+     desk the side columns give down to --desk-run-col-min and the card
+     after them, so the three fit a laptop with no second width query.
+     Plan 124's console -- the tiles' row fixed above the level strip --
+     is what this replaces. The elements print no key caps here
+     (RunPanelsContext): the card panel lists them. */
+  :root:has(.desk-run--panels) {
+    --desk-run-inset: max(0px, calc((100% - var(--desk-run-left-w) - var(--card-w) - var(--desk-run-right-w) - 2 * var(--sp-6)) / 2));
   }
-  .desk-run--console > .stage > .rating-bar > .rating-bar__buttons { flex: 1 1 auto; }
-  .desk-run--console > .stage > .rating-bar .rating-bar__btn { background: color-mix(in srgb, var(--text-on-panel) 8%, transparent); }
-  .desk-run--console > .stage > .rating-bar .rating-bar__btn.rating-bar__btn--best { background: var(--accent2); }
-  /* The strip: this run's figures at the left, the fare at the right.
-     The figures never shrink; the track takes what is left, up to a
-     side column's width — at a laptop's 740px stage it is the track
-     that gives, never the words (they ran under the fare when both
-     shrank). */
-  .desk-run--console > .lvlbar { padding-inline: var(--sp-6); }
-  .desk-run--console > .lvlbar > .lvlbar__level { margin-inline-start: auto; }
-  .desk-run--console > .lvlbar > .lvlbar__track {
+  .desk-run--panels {
+    display: grid;
+    grid-template-columns:
+      minmax(var(--desk-run-col-min), var(--desk-run-left-w))
+      minmax(var(--desk-side-w), var(--card-w))
+      minmax(var(--desk-run-col-min), var(--desk-run-right-w));
+    justify-content: center;
+    column-gap: var(--sp-6);
+    height: 100dvh;
+    min-height: 0;
+    padding: var(--sp-8) var(--sp-6);
+  }
+  .desk-run--panels > .desk-run__left,
+  :root .desk-run--panels > .desk-run__side {
+    position: static;
+    inset: auto;
+    width: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-height: 0;
+    min-width: 0;
+    padding: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: none;
+    border: 0;
+    text-align: left;
+  }
+  /* The stage is the middle column, no longer the page: no container
+     width, no padding of its own, and its floor is the framed tiles. */
+  .screen.desk-run.desk-run--panels > .stage {
+    width: auto;
+    max-width: none;
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow-y: auto;
+  }
+  .desk-run--panels > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) {
+    display: flex;
+    grid-template-columns: none;
+  }
+  /* The card grows to what the tiles' row leaves, the phone's own rule. */
+  .screen.desk-run.desk-run--panels > .stage > .quiz-card-stage {
     flex: 1 1 auto;
-    max-width: var(--desk-side-w);
-  }
-  .desk-tally {
-    flex: none;
     display: flex;
-    align-items: center;
-    gap: var(--sp-5);
+    flex-direction: column;
   }
-  /* A figure in the strip: the level's own pair (.lvlbar__level,
-     .lvlbar__level-num, .lvlbar__unit), the number a rung up. */
-  .desk-tally__fig {
-    display: inline-flex;
+  .desk-run--panels > .stage > .quiz-card-stage > .card-transition,
+  .desk-run--panels > .stage > .quiz-card-stage .card-transition-live {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--panels > .stage > .quiz-card-stage .card-transition-live > .prompt-card {
+    flex: 1 1 auto;
+    max-height: none;
+    overflow: visible;
+  }
+  .desk-run--panels > .stage > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  /* The tiles framed in a surface row under the card, and before the
+     reveal drawn unlit and inert -- the console's buttons are there,
+     dark, until there is something to press -- rather than unseen.
+     RatingBar disables them meanwhile, so nothing is reachable. */
+  .desk-run--panels > .stage > .rating-bar {
+    position: static;
+    padding: var(--sp-4) var(--sp-5);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-run--panels > .stage > .rating-bar--unlit { pointer-events: none; }
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn { opacity: 0.38; }
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn--best {
+    background: var(--bg-panel);
+    border-color: color-mix(in srgb, var(--text-on-panel) 12%, transparent);
+    color: var(--text-on-panel);
+  }
+  .desk-run--panels > .stage > .rating-bar--unlit .rating-bar__btn-ring { background: var(--text-on-panel-soft); }
+  /* A panel: the surface, its hairline and corner. No caption: its
+     figures, its stops and its tiles name themselves (owner's cut). */
+  .desk-run__panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    flex: none;
+    min-height: 0;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  /* A panel's figures: the number over its label (RunRecords, the
+     card panel's rhythm). */
+  .desk-figs {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .desk-fig {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-fig__value {
+    display: flex;
     align-items: baseline;
     gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+    white-space: nowrap;
+  }
+  .desk-fig__unit { font-size: var(--fs-sm); font-weight: 600; color: var(--text-secondary); }
+  .desk-fig__label {
     font-family: var(--font-display);
     font-size: var(--fs-caption-xs);
     font-weight: 700;
     letter-spacing: var(--tr-caption);
     text-transform: uppercase;
-    color: var(--text-on-panel-soft);
+    color: var(--text-secondary);
     white-space: nowrap;
   }
-  .desk-tally__num {
-    font-size: var(--fs-lead);
-    letter-spacing: 0;
-    text-transform: none;
-    color: var(--text-on-panel);
-    font-variant-numeric: tabular-nums;
+  /* The session panel: the level bar as a row of it, in the page's
+     inks, and the deck's legend under it. */
+  .desk-session > .lvlbar {
+    position: static;
+    height: auto;
+    padding: 0;
+    background: none;
+    color: var(--text-primary);
   }
-  .desk-tally__unit {
-    margin-inline-start: var(--sp-1);
+  .desk-session > .lvlbar > .lvlbar__level,
+  .desk-session > .lvlbar .lvlbar__unit { color: var(--text-secondary); }
+  .desk-session > .lvlbar .lvlbar__level-num,
+  .desk-session > .lvlbar > .lvlbar__xp { color: var(--text-primary); }
+  .desk-session > .lvlbar > .lvlbar__track { background: color-mix(in srgb, var(--text-primary) 16%, transparent); }
+  .desk-session > .deck-progress__legend { justify-content: flex-start; }
+  .desk-run--panels > .stage .deck-progress__legend { display: none; }
+  /* The card panel grows to the column's floor; the verdicts take the
+     height between the state line and the keys. */
+  .desk-card { flex: 1 1 auto; }
+  .desk-stops { display: flex; flex-direction: column; gap: var(--sp-1); }
+  .desk-stops__line { display: block; width: 100%; height: 30px; color: var(--text-primary); }
+  .desk-stops__labels {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    text-align: center;
+    font-family: var(--font-display);
     font-size: var(--fs-caption-xs);
+    font-weight: 700;
     letter-spacing: var(--tr-caption);
     text-transform: uppercase;
-    color: var(--text-on-panel-soft);
+    color: var(--text-secondary);
   }
-  /* The card grows to the console: the rest of the phone's chain, on
-     the desk (its head, the stage's floor and .quiz-card-stage, stands
-     with the laptop's rules above, before the choices' grid). */
-  .desk-run--console > .stage > .quiz-card-stage > .card-transition,
-  .desk-run--console > .stage > .quiz-card-stage .card-transition-live {
+  .desk-stops__here { color: var(--text-primary); }
+  .desk-verdicts {
     flex: 1 1 auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: minmax(min-content, 1fr);
+    gap: var(--sp-3);
+  }
+  .desk-verdict {
+    --rating-color: var(--text-secondary);
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
+    gap: var(--sp-2);
+    min-width: 0;
+    padding: var(--sp-4);
+    background: color-mix(in srgb, var(--text-primary) 4%, transparent);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
   }
-  .desk-run--console > .stage > .quiz-card-stage .card-transition-live > .prompt-card {
-    flex: 1 1 auto;
-    max-height: none;
-    overflow: visible;
-  }
-  .desk-run--console > .stage > .quiz-card-stage .card-transition-live > .prompt-card:not(.prompt-card--footed) {
+  .desk-verdict--q0 { --rating-color: var(--danger); }
+  .desk-verdict--q1 { --rating-color: var(--rating-wrong); }
+  .desk-verdict--q2 { --rating-color: var(--rust); }
+  .desk-verdict--q3 { --rating-color: var(--warning); }
+  .desk-verdict--q4 { --rating-color: var(--teal); }
+  .desk-verdict--q5 { --rating-color: var(--success); }
+  .desk-verdict__head {
     display: flex;
-    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .desk-verdict__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color); flex: none; }
+  .desk-verdict__when {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-primary);
+  }
+  .desk-keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2) var(--sp-4);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  .desk-keys__item { display: inline-flex; align-items: center; gap: var(--sp-2); white-space: nowrap; }
+  /* The rhythm on a sumi foot: the panel's inks turned to the console's. */
+  .desk-rhythm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-3) var(--sp-4);
+    margin: 0 calc(-1 * var(--sp-6)) calc(-1 * var(--sp-5));
+    padding: var(--sp-4) var(--sp-6);
+    border-radius: 0 0 var(--r-card) var(--r-card);
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+  }
+  .desk-rhythm .desk-fig__value { font-size: var(--fs-lead); color: var(--text-on-panel); }
+  .desk-rhythm .desk-fig__unit,
+  .desk-rhythm .desk-fig__label { color: var(--text-on-panel-soft); }
+  /* The details, sealed: one panel, a ?, nothing else -- the entry is
+     the answer. */
+  .desk-sealed {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    min-height: 0;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .desk-run--panels > .desk-run__side > .desk-sealed { flex: 1 1 auto; }
+  .desk-sealed__mark {
+    font-family: var(--font-display);
+    font-size: var(--fs-specimen-glyph);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--text-secondary);
+    opacity: 0.55;
+  }
+  /* The entry in its band (DictionaryLookupBody's `band`): the article
+     dissolves into the column and its two halves are the column's
+     panels -- the top the card and your numbers, the bottom the
+     dictionary alone. */
+  .desk-run--panels > .desk-run__side > .desk-entry {
+    flex: 1 1 auto;
+    min-height: 0;
+    gap: var(--sp-6);
+  }
+  .dict-entry--band { display: contents; }
+  .dict-entry--band > .dict-entry__top,
+  .dict-entry--band > .dict-entry__body {
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    overflow: hidden;
+  }
+  .dict-entry--band > .dict-entry__top { flex: none; }
+  .dict-entry--band > .dict-entry__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The plate as a band: the word at the left, its readings and
+     meaning beside it, the marks and the actions at the right, the
+     stripe under all three. The stack's children take the grid's
+     areas themselves. */
+  .dict-entry--band .dict-plate {
+    position: static;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "word readings row"
+      "word caption row"
+      "stripe stripe stripe";
+    align-items: center;
+    gap: var(--sp-2) var(--sp-6);
+    padding: var(--sp-5) var(--sp-6) 0;
+    background: transparent;
+  }
+  .dict-entry--band .dict-plate__stack { display: contents; }
+  .dict-entry--band .dict-plate__word { grid-area: word; align-self: center; }
+  .dict-entry--band .dict-plate__word--glyph { font-size: var(--fs-specimen-word); line-height: 1; }
+  .dict-entry--band .dict-plate__readings,
+  .dict-entry--band .dict-plate__reading,
+  .dict-entry--band .dict-plate__structure {
+    grid-area: readings;
+    justify-content: flex-start;
+    align-self: end;
+    text-align: left;
+  }
+  .dict-entry--band .dict-plate__yomi { white-space: nowrap; }
+  .dict-entry--band .dict-plate__caption {
+    grid-area: caption;
+    align-self: start;
+    text-align: left;
+    text-transform: none;
+    text-indent: 0;
+    letter-spacing: 0;
+    font-size: var(--fs-heading);
+    color: var(--text-primary);
+  }
+  .dict-entry--band .dict-plate__row {
+    grid-area: row;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: var(--sp-3);
+    min-height: 0;
+  }
+  .dict-entry--band .dict-plate__stripe {
+    grid-area: stripe;
+    margin: var(--sp-3) calc(-1 * var(--sp-6)) 0;
+  }
+  /* Your numbers under the stripe, four across, flush with the panel. */
+  .dict-entry--band > .dict-entry__top > .dict-block { padding: 0; border: 0; }
+  .dict-entry--band > .dict-entry__top .records {
+    border: 0;
+    border-radius: 0;
+  }
+  .dict-entry--band > .dict-entry__top .record { padding: var(--sp-4) var(--sp-5); }
+  .dict-entry--band > .dict-entry__top .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
+  /* The dictionary: the senses and the words at their height, the
+     stroke sheet growing into what they leave, its kanji large. */
+  .dict-entry--band > .dict-entry__body > .dict-block { flex: none; }
+  .dict-entry--band > .dict-entry__body > .dict-block:has(> .dict-form) {
+    order: 1;
+    flex: 1 1 auto;
+    display: flex;
+    min-height: 0;
+    padding: 0;
+  }
+  .dict-entry--band .dict-form {
+    flex: 1 1 auto;
+    border: 0;
+    border-radius: 0;
+  }
+  .dict-entry--band .dict-form__sheet { min-height: 0; }
+  .dict-entry--band .dict-form__sheet > .dict-form__glyph {
+    width: 100%;
+    height: 100%;
+    max-height: calc(3 * var(--fs-specimen-glyph));
   }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

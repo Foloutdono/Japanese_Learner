@@ -13,6 +13,7 @@ import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { useDesk } from '../hooks/useDesk'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { CardPanel } from '../components/study/CardPanel'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
 // The card faces themselves live beside the other study components now,
@@ -288,9 +289,11 @@ export default function StudyRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
+      progress={progress}
+      panel={card ? <CardPanel card={card} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} />}
-      sideLabel={t.deskRunLabel}
+      sideLabel={t.dictionaryTitle}
     >
         <DeckProgress stats={progress} />
         {loading && <Loading />}

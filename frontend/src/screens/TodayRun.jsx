@@ -5,6 +5,7 @@ import { useLang } from '../LangContext'
 import { StudyStage } from '../components/study/StudyStage'
 import { useRunExit } from '../hooks/useRunExit'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { CardPanel } from '../components/study/CardPanel'
 import { Loading } from '../components/ui/Loading'
 import { CardTransition } from '../components/study/CardTransition'
 import { useReviewGates } from '../hooks/useReviewGates'
@@ -290,9 +291,10 @@ export default function TodayRun({ session }) {
       toast={gates.xpToast}
       onToastDone={gates.toastDone}
       records
+      panel={card ? <CardPanel card={card} remaining={remaining} /> : null}
       done={done}
       side={error && !card ? null : <SessionPanel done={done} misses={false} />}
-      sideLabel={t.deskRunLabel}
+      sideLabel={t.dictionaryTitle}
     >
       {/* The run's own hairline: what this session has cleared of what
           it set out to, in the day's gold. A mixed queue has no
