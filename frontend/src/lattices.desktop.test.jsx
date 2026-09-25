@@ -133,24 +133,5 @@ describe('a run on the desk', () => {
   })
 })
 
-describe('the analyzer on the desk', () => {
-  it('stands its working rail right of the stage, away from the desk\'s own', async () => {
-    await render(
-      <div className="phone phone--desk">
-        <div className="phone__content">
-          <main className="dictionary analyzer">
-            <div className="anl-results">
-              <div className="anl-railcol">rail</div>
-              <div className="anl-stage">stage</div>
-            </div>
-          </main>
-        </div>
-      </div>
-    )
-    await settle()
-    const rail = document.querySelector('.anl-railcol').getBoundingClientRect()
-    const stage = document.querySelector('.anl-stage').getBoundingClientRect()
-    expect(rail.left).toBeGreaterThan(stage.right - 1)
-    expect(Math.round(rail.width)).toBe(360)
-  })
-})
+// The analyser's result on the desk is three columns since plan 134;
+// analyzer.desktop and analyzer.wide measure them.

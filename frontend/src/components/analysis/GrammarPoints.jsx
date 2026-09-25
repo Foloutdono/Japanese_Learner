@@ -1,6 +1,6 @@
 import { useLang } from '../../LangContext'
 import { grammarGloss } from './grammarGloss'
-import { coversToken, pointKey } from './grammarSpans'
+import { constructionsOf, coversToken, numberedPointsOf, pointKey } from './grammarSpans'
 
 // ── The constructions a sentence is built with (plan 095) ────────
 // One row per construction the local tier found (study/grammar_detect's
@@ -21,14 +21,21 @@ import { coversToken, pointKey } from './grammarSpans'
 // block, with the gloss, the parts and the bought line beside it all
 // dead to the touch. The pattern keeps its dotted rule -- it is what
 // says the row opens something -- and the <button> is the row.
-export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
+//
+// `numbered` (plan 134, the desk's analyser): each row leads with its
+// number, the one the subtitle line prints on the words the point sits
+// on, so a card and its place in the sentence are found from either --
+// and the particles' markers are rows too, in the sentence's order.
+export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen, numbered = false }) {
   const lang = useLang()?.lang
   const tokens = analysis?.tokens ?? analysis?.words ?? []
-  const points = (analysis?.grammar ?? []).filter(g => g.kind !== 'marker')
+  // Numbered (the desk), the particles' markers stand with the
+  // constructions, in the sentence's order (plan 134).
+  const points = numbered ? numberedPointsOf(analysis) : constructionsOf(analysis)
   if (!points.length) return null
   return (
     <div className="bkd-points">
-      {points.map(g => {
+      {points.map((g, i) => {
         const key = pointKey(g)
         const gloss = grammarGloss(g, lang)
         const parts = tokens.filter(tok => tok.pos !== 'symbol' && coversToken(g, tok)).map(tok => tok.surface)
@@ -39,7 +46,30 @@ export function GrammarPoints({ analysis, t, lit = null, onLight, onOpen }) {
           onFocus: () => onLight(g),
           onBlur: () => onLight(null),
         } : {}
-        const body = (
+        // The numbered card (G2, the desk's left column): the number, the
+        // pattern and the level on one line, what it does under them, then
+        // the words it is made of as chips -- the owner's drawing.
+        const body = numbered ? (
+          <>
+            <span className="bkd-point__head">
+              <span className="anl-num" aria-hidden="true">{i + 1}</span>
+              <span className="bkd-point__pattern" lang="ja">{g.pattern}</span>
+              {g.level && <span className="anl-words__lvl bkd-point__lvl">{g.level}</span>}
+            </span>
+            {gloss && <span className="bkd-point__gloss">{gloss}</span>}
+            {parts.length > 1 && (
+              <span className="bkd-point__parts" lang="ja">
+                {parts.map((part, k) => (
+                  <span key={k} className="bkd-point__partwrap">
+                    {k > 0 && <span className="bkd-point__plus" aria-hidden="true">+</span>}
+                    <span className="anl-part anl-part--in">{part}</span>
+                  </span>
+                ))}
+              </span>
+            )}
+            {note && <span className="bkd-point__note">{note}</span>}
+          </>
+        ) : (
           <>
             {/* A span, not a div: the row is a <button> when it opens
                 something, and a button holds phrasing content only. */}

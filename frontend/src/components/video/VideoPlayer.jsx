@@ -40,6 +40,9 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
   videoId,
   volume = 100,
   muted = false,
+  // The playback speed (plan 134, the desk's 0.75x for a fast line).
+  // Asked of the player on ready and on every change, like the sound.
+  rate = 1,
   onTimeUpdate,
   onPlayingChange,
   onVolumeChange,
@@ -50,6 +53,7 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
   // What we last ASKED the player for, readable from the poll and from
   // onReady without re-running the effect that builds the iframe.
   const wantRef = useRef({ volume, muted })
+  const rateRef = useRef(rate)
   // What the player last REPORTED. The pair is what makes the read-back
   // below race-free -- see readSound.
   const liveRef = useRef(null)
@@ -108,6 +112,7 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
             // The learner's saved sound, applied before the first frame
             // plays rather than a beat into it.
             applySound(playerRef.current, wantRef.current)
+            playerRef.current?.setPlaybackRate?.(rateRef.current)
             intervalRef.current = setInterval(() => {
               const player = playerRef.current
               if (!player || typeof player.getCurrentTime !== 'function') return
@@ -136,6 +141,11 @@ export const VideoPlayer = forwardRef(function VideoPlayer({
     wantRef.current = { volume, muted }
     applySound(playerRef.current, wantRef.current)
   }, [volume, muted])
+
+  useEffect(() => {
+    rateRef.current = rate
+    playerRef.current?.setPlaybackRate?.(rate)
+  }, [rate])
 
   useImperativeHandle(ref, () => ({
     seekTo(seconds) {

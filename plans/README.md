@@ -6478,3 +6478,46 @@ explain every part of it.
 `/dev/ride` keeps its literal cards without a forecast (its tiles print
 dashes): `reviewGates.guard.test.js` flags any screen naming
 `review_preview`, and the workbench is not worth an exception to it.
+
+## Plan 134 — the analyser's video Passage on three columns (2026-09-25)
+
+Wave 38. Numbered 134 after a grep of origin/main, the open PRs (none)
+and the sibling worktrees found nothing at 134 or above. The owner's
+ask, with screenshots of the video Passage: remove the colour legend and
+the key hints, make the furigana and view dials less prominent, make the
+breakdown the centre of attention, move Explain, rework the grammar
+points and improve the player — options first. Drawn on the canvas
+"Tsuji analyser — video passage" (three directions, a grammar sheet G1–G4,
+a player sheet P1–P6); the owner picked B (the sentence as the video's
+subtitle), G2 (numbered cards) and every P, on a three-column wireframe
+of their own, then asked for no steps on the track, the card's panel as
+the learning modes draw it, and Explain taking the description's place
+with a swap between the two.
+
+| # | What | Status |
+|---|------|--------|
+| 134 | **Desk** (`wide`): the rail steps aside (`.phone--desk:has(.anl-desk)`) and `.anl-desk` is one grid at the drawing's 410 : 830 : 541 — `rail head entry / rail slab entry / points work entry`, so the grammar's box and the words' row share top and foot. Left: the sentences' list (search, filters, the line) over `GrammarPoints numbered` (the number, the pattern and the level, the gloss, the parts as chips). Centre: the way back, the Passage's name, keep; `.anl-slab` — the video at 69dvh with the sentence arrows in its margins, `SubtitleLine` framing each construction with its number, `PlayerBar` on one row (prev/next `SkipIcon`, play, `ReplayIcon`, `LoopIcon` — the focused cue's end seeks its start —, `PauseEachIcon` — a pause where the playing cue ends —, both on playback only (`PLAYBACK_STEP`), one plain track, the speed (1, 0.75, 0.5; `VideoPlayer`'s `rate`), mute, `FollowIcon`, `FoldVideoIcon` with the player kept mounted); then `WordsList` (the words, not the particles) beside `FocusCard` (the word, its reading and level, its gloss, the form written here, Ajouter au deck; or the grammar point pressed) and Explain. Right: `DictionaryLookupBody band` on the walked token or the point, `ExplainPanel` in the description's place (`side`), `.anl-swap` on the edge, Esc one step back. **Everywhere**: no `.anl-legend`, no `.anl-kbd`; `tokens.js` and `useLight.js` out of `SentenceBreakdown`; the Passage's resets keyed on its text (`passageKey`); `AnalyzerDock` deleted. A first build strayed from the drawing (the rail kept, a two-column fallback, the stage card, a three-row bar) and was redone to it at the owner's word. Tests: `analyzer.desktop.test.jsx` rewritten, `analyzer.wide.test.jsx` new, the polling, responsive, mockup, phone, deskfree and contrast suites moved to the new DOM (the dial and the ✕ below the desk) | DONE (2026-09-25) |
+
+Left for later: a thumbnail on the folded player, and remembering the
+speed and the fold across Passages.
+
+**134, the phone (same day).** The owner's second drawing, for every
+width under the desk: the way back and keep (no title, no ✕); the video
+with `PlayerBar compact` — the sentence before and after, play, the
+track, replay, loop (the speed, the stop at each sentence's end, the
+mute, following and the fold are the desk's; play takes 追従 up again);
+the subtitles (`.anl-m__subs`) — the next sentence over the current one
+and the previous under it, smaller, in the secondary ink, never lit,
+each a tap to walk to it, the current one `SubtitleLine` with its
+numbered frames; the numbered grammar (`GrammarPoints numbered`, the
+particles' markers among them); Explain. A word tapped opens its
+dictionary card, a particle its marker, a point its lesson, in the
+dictionary's sheet; Explain opens `ExplainSheet`, the same sheet with the
+sentence at its head. The shared pieces (`.anl-points`, `.anl-num`,
+`.anl-part`, `.anl-subs__pt`, `.anl-pbar`, `.anl-explainbtn`,
+`.anl-explainpanel`) left the 机 section for a block before it. The
+stage it replaced (the token carousel, the table, the two dials, the
+stepper, the volume dial, the ✕) is no longer drawn; its code and CSS
+are left for a cleanup task. Tests: the mockup and phone suites
+rewritten for the drawing, the polling, responsive, deskfree and
+sources suites moved to it.

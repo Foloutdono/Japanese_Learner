@@ -1088,23 +1088,6 @@
 .anl-trow__mine:hover { color: var(--success); }
 .anl-trow__mine--done { color: var(--success); }
 
-/* The keyboard map under the stage. */
-.anl-kbd {
-  display: flex;
-  gap: var(--sp-5);
-  flex-wrap: wrap;
-  font-size: var(--fs-caption);
-  color: var(--text-secondary);
-}
-.anl-kbd kbd {
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  border: 1px solid var(--surface-line);
-  border-radius: 3px;
-  padding: 1px 5px;
-  margin-right: 2px;
-}
 
 
 @media (prefers-reduced-motion: reduce) {
@@ -2160,38 +2143,8 @@
 .tok--on .tok__furi { color: var(--text-primary); }
 /* The furigana dial: readings over everything, only over the words
    the SRS has not mastered, or none. */
-.anl-stage[data-furigana="none"] .tok__furi { visibility: hidden; }
-.anl-stage[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
-.anl-legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-3) var(--sp-4);
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.anl-legend__item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-}
-.anl-legend__ink {
-  width: 14px;
-  height: 3px;
-  border-radius: var(--r-pill);
-  background: var(--text-secondary);
-}
-.anl-legend__ink--mastered { background: var(--state-mastered); }
-.anl-legend__ink--learning { background: var(--state-learning); }
-.anl-legend__ink--unknown { background: var(--state-new); }
-.anl-legend__ink--offdeck {
-  height: 0;
-  background: none;
-  border-top: 2px dashed var(--text-secondary);
-}
+:is(.anl-stage, .anl-subs, .anl-m__subs)[data-furigana="none"] .tok__furi { visibility: hidden; }
+:is(.anl-stage, .anl-subs, .anl-m__subs)[data-furigana="unknown"] .tok--mastered .tok__furi { visibility: hidden; }
 /* ── The token card ── */
 .token-card {
   display: flex;
@@ -2300,8 +2253,6 @@
    was a row of a label beside a squeezed control becomes a full-width
    control under its label. */
 @media (max-width: 768px) {
-  .anl-kbd { display: none; }
-
   /* The growth chain, one growing child per level, so all of the
      slack lands on the card. `1 0 auto`, never `1` (= 1 1 0%): the
      card must not be shrunk below its own content when the Passage
@@ -2337,17 +2288,6 @@
 
 }
 
-/* Four keys, two by two, instead of three on one line and the long
-   one alone under them. Only this narrow: by 600px the four fit on
-   one row, and a two-column grid there would be spending width to
-   make the legend taller. */
-@media (max-width: 560px) {
-  .anl-legend {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--sp-2) var(--sp-3);
-  }
-}
 
 /* Between the phone and the split there is no rail and the whole
    1040px column is the stage, so the two dials sit side by side
@@ -2404,49 +2344,6 @@
 .picker-row--create {
   gap: var(--sp-3);
   padding-block: var(--sp-3);
-}
-
-/* ── The stage and the line, side by side ──
-   ONE one-off breakpoint, per the rule in the Breakpoints block near
-   the top of this file: the component is .anl-results, and the reason
-   is that the route rail plus a readable breakdown need ~1040px of
-   content before they stop fighting for the same column. 1100/1099 is
-   the same complementary integer pair .dict-dock uses, written as
-   integers so both bounds can never match. */
-@media (min-width: 1100px) {
-  .anl-results {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-start;
-    gap: var(--sp-5);
-  }
-
-  /* The sticky slot belongs to the whole working rail — head and line
-     together — so the search and filters stay in reach while the line
-     under them scrolls. The scroll itself lives on the LINE: a sticky
-     column pinned to the viewport with no overflow of its own cannot
-     hold a fifty-stop Passage — that is the mistake .dict-dock's own
-     comment records, and it is the same mistake here. */
-  .anl-railcol {
-    order: -1;
-    flex: 0 0 clamp(260px, 24vw, 340px);
-    position: sticky;
-    top: 24px;
-    max-height: calc(100dvh - 48px);
-  }
-  .anl-line {
-    min-height: 0;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    padding-right: 4px;   /* room for the scrollbar, so no stop sits under it */
-  }
-
-  .anl-stage {
-    flex: 1;
-    /* Without this a long unbroken Japanese line refuses to shrink
-       (a flex item's min-width is auto) and pushes the rail off screen. */
-    min-width: 0;
-  }
 }
 
 /* There is no rule for the rail under 1100px because there is no rail
@@ -20645,6 +20542,364 @@ a.slip__act { text-decoration: none; }
   .guide__spot { transition: none; }
 }
 
+/* ── 解析 — the analyser's result, its pieces at every width (plan 134) ──
+   What the desk's three columns (the 机 section) and the phone's one
+   column both draw: the numbered grammar cards (G2), a construction's
+   frame and number on its words, the player's bar, Explain and the
+   explanation. The desk adds its layout and the sumi's inks. */
+.anl-points .bkd-points {
+  gap: var(--sp-3);
+  margin-top: 0;
+  padding-left: 0;
+  border-left: 0;
+}
+.anl-points .bkd-point {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin-inline-end: 0;
+  padding: var(--sp-4) var(--sp-5);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.anl-points .bkd-point--lit {
+  border-color: var(--line-grammar);
+  box-shadow: inset 0 -3px 0 var(--line-grammar);
+}
+.anl-points .bkd-point__head {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-4);
+}
+.anl-points .bkd-point__pattern {
+  font-family: var(--font-serif);
+  font-size: var(--fs-lead);
+  font-weight: 700;
+  color: var(--text-primary);
+  border: 0;
+}
+.anl-points .bkd-point__lvl { margin-left: auto; }
+.anl-points .bkd-point__gloss,
+.anl-points .bkd-point__parts,
+.anl-points .bkd-point__note { padding-left: var(--sp-7); }
+.anl-points .bkd-point__gloss { font-size: var(--fs-sm); color: var(--text-primary); }
+.anl-points .bkd-point__parts {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.bkd-point__partwrap {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-1);
+}
+.bkd-point__plus { color: var(--text-secondary); }
+/* The number a construction wears on its card, on the card in focus
+   and on its words in the subtitle. */
+.anl-num {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: var(--sp-6);
+  height: var(--sp-6);
+  background: var(--line-grammar);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bg-main);
+}
+.anl-part {
+  padding: 0 var(--sp-2);
+  background: var(--bg-main);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.anl-part--in {
+  background: color-mix(in srgb, var(--line-grammar) 16%, transparent);
+  border-color: var(--line-grammar);
+}
+.anl-points .anl-part { border: 0; }
+.anl-subs__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  text-align: center;
+  color: var(--text-on-panel);
+}
+/* A construction framed on its words, its number at the frame's corner. */
+.anl-subs__pt {
+  position: relative;
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--sp-1);
+  padding: var(--sp-1);
+  border-radius: var(--r-card);
+  box-shadow: inset 0 0 0 2px var(--line-grammar);
+}
+.anl-subs__n {
+  position: absolute;
+  top: calc(-1 * var(--sp-4));
+  right: calc(-1 * var(--sp-3));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--sp-6);
+  height: var(--sp-6);
+  padding: 0 var(--sp-1);
+  background: var(--line-grammar);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  line-height: 1;
+  color: var(--bg-main);
+}
+/* ── The bar: one row ── */
+.anl-pbar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-3) var(--sp-4);
+  border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent);
+}
+.anl-pbar__sep {
+  flex: none;
+  align-self: stretch;
+  width: 1px;
+  background: color-mix(in srgb, var(--text-on-panel) 14%, transparent);
+}
+.anl-pbar__track {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 4px;
+  background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  border-radius: var(--r-pill);
+  cursor: pointer;
+}
+.anl-pbar__fill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  background: var(--accent2);
+  border-radius: var(--r-pill);
+}
+.anl-pbar__knob {
+  position: absolute;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  background: var(--text-on-panel);
+  border-radius: var(--r-pill);
+  transform: translate(-50%, -50%);
+}
+.anl-pbar__rate {
+  flex: none;
+  height: var(--sp-7);
+  padding: 0 var(--sp-4);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+  border-radius: var(--r-pill);
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-on-panel);
+}
+.anl-pbar__rate:hover,
+.anl-pbar__rate:focus-visible { background: var(--overlay-hover); }
+.anl-player__btn:disabled { opacity: 0.35; }
+.anl-player__btn--bare { border-color: transparent; }
+.anl-player__btn--main {
+  width: var(--sp-8);
+  height: var(--sp-8);
+  background: var(--text-on-panel);
+  border-color: var(--text-on-panel);
+  color: var(--bg-panel);
+}
+.anl-player__btn--main:hover { background: var(--text-on-panel-soft); }
+.anl-player__btn--on {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+.anl-words__lvl {
+  flex: none;
+  padding: 0 var(--sp-1);
+  border: 1px solid var(--surface-line);
+  border-radius: 3px;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-term);
+  color: var(--text-secondary);
+}
+.anl-explainbtn {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-3);
+  min-height: var(--sp-8);
+  padding: 0 var(--sp-5);
+  background: transparent;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.anl-explainbtn:hover,
+.anl-explainbtn:focus-visible { background: var(--overlay-hover); }
+.anl-explainbtn--on {
+  border-color: var(--line-kaiseki);
+  color: var(--line-kaiseki);
+}
+.anl-explainpanel {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--sp-5);
+  min-height: 0;
+  padding: var(--sp-6);
+  overflow-y: auto;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.anl-explainpanel__body {
+  margin: 0;
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  white-space: pre-line;
+  text-wrap: pretty;
+}
+.anl-explainpanel__wait {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+  margin: 0;
+  color: var(--text-secondary);
+}
+.anl-explainpanel__error { margin: 0; color: var(--danger); }
+.anl-explainpanel__foot {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+}
+
+/* ── 手 — the analyser's result on a phone (plan 134) ──
+   The owner's drawing, for every width under the desk: the way back and
+   keep; the video with its trimmed bar; the subtitles -- the next
+   sentence, the current one, the previous one; the numbered grammar;
+   Explain, which opens the explanation in the dictionary's sheet. */
+.anl-m {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-4);
+  width: 100%;
+  max-width: var(--card-w);
+  margin-inline: auto;
+}
+.anl-m__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4);
+}
+.anl-m__player {
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-panel);
+  border-radius: var(--r-panel);
+  overflow: hidden;
+}
+.anl-m__video .video-player__frame {
+  margin-bottom: 0;
+  border-radius: var(--r-flat);
+}
+.anl-pbar--compact {
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+}
+.anl-m__subs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+/* The sentences either side: smaller, quieter, never lit -- a tap
+   walks to them. The empty one keeps its line so the current sentence
+   does not jump at the Passage's ends. */
+.anl-m__line {
+  display: block;
+  max-width: 100%;
+  min-height: 1.5em;
+  padding: 0;
+  overflow: hidden;
+  background: transparent;
+  border: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-sm);
+  line-height: 1.5;
+  color: var(--text-secondary);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.anl-m__subs .anl-subs__line {
+  justify-content: center;
+  padding: var(--sp-2) 0;
+  background: transparent;
+  border: 0;
+}
+.anl-m__note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  margin: 0;
+  text-align: center;
+}
+.anl-m__points {
+  padding: var(--sp-4);
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-panel);
+}
+.anl-m__explain { width: 100%; }
+/* The explanation's sheet: the dictionary's card, the sentence at its
+   head beside the round ✕. */
+.anl-explainsheet__head {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: var(--sp-5) var(--sp-5) 0;
+}
+.anl-explainsheet__jp {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-family: var(--font-jp);
+  font-size: var(--fs-lead);
+  font-weight: 600;
+}
+.anl-explainsheet .anl-explainpanel {
+  background: transparent;
+  border: 0;
+}
+
 /* ═══ 机 — the desk (plan 113) ═══════════════════════════════════
    The computer's design, at and above 1100px (hooks/useDesk.js's
    DESK_QUERY). Tsuji has two chromes: the phone's (車内, above), which
@@ -21154,39 +21409,6 @@ a.slip__act { text-decoration: none; }
     /* A wheel at the column's end goes on to the page (plan 123), which
        is the catalogue beside it. */
     overscroll-behavior-y: auto;
-  }
-  /* The analyzer's working rail stood on the stage's LEFT, which on the
-     desk put it against the rail: two columns of navigation side by
-     side and the sentence pushed to the far edge. It stands on the
-     right here, at the second column's width, the way every other
-     screen's companion does. */
-  .phone--desk .anl-railcol {
-    order: 1;
-    flex-basis: var(--desk-side-w);
-  }
-  /* The route map steps aside, kept, while the dock holds its column
-     (plan 115, components/analysis/AnalyzerDock). */
-  .phone--desk .anl-railcol[hidden] { display: none; }
-  .desk-anl-dock {
-    order: 1;
-    position: sticky;
-    top: var(--sp-6);
-    display: flex;
-    flex: 0 0 var(--desk-side-w);
-    flex-direction: column;
-    gap: var(--sp-4);
-    min-width: 0;
-    max-height: calc(100dvh - 2 * var(--sp-6));
-    overflow-y: auto;
-    overscroll-behavior-y: auto;
-  }
-  .desk-anl-dock__keys {
-    display: flex;
-    align-items: center;
-    gap: var(--sp-1);
-    margin: 0;
-    font-size: var(--fs-caption);
-    color: var(--text-secondary);
   }
   /* The intake beside its history (plan 115). */
   .desk-intake {
@@ -24027,5 +24249,389 @@ a.slip__act { text-decoration: none; }
     font-size: var(--fs-caption);
     color: var(--text-secondary);
   }
+  /* ── 解析 — the analyser's result on three columns (plan 134) ──
+     The owner's drawing (the "Choix" boards of the analyser canvas, drawn
+     at 1877 × 930 as 410 | 830 | 541): the desk's rail steps aside for
+     this one screen and the result takes the window. One grid, so the
+     grammar's box and the words' row share their top and their foot:
+
+       rail    head  entry
+       rail    slab  entry
+       points  work  entry
+
+     Every panel scrolls inside itself; nothing passes the window's foot. */
+  .phone--desk:has(.anl-desk) { padding-inline-start: 0; }
+  .phone--desk:has(.anl-desk) > .desk-rail { display: none; }
+  .phone--desk .phone__content:has(.anl-desk) { max-width: none; }
+  .anl-desk {
+    display: grid;
+    grid-template:
+      "rail head entry" auto
+      "rail slab entry" auto
+      "points work entry" minmax(0, 1fr)
+      / minmax(0, 410fr) minmax(0, 830fr) minmax(0, 541fr);
+    gap: var(--sp-4) var(--sp-6);
+    height: calc(100dvh - 2 * var(--sp-6));
+    min-height: 0;
+  }
+  /* ── The left column ── */
+  .anl-desk__rail {
+    display: flex;
+    grid-area: rail;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+    padding: var(--sp-4);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .anl-desk__rail .anl-line {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .anl-desk__points {
+    grid-area: points;
+    min-height: 0;
+    padding: var(--sp-4);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  /* The one sentence of a typed Passage has no list: the grammar stands
+     at the column's top. A sentence with no construction has no box:
+     the list takes the column's height. */
+  .anl-desk--one .anl-desk__points { grid-row: 1 / -1; align-self: start; }
+  .anl-desk--bare .anl-desk__rail { grid-row: 1 / -1; }
+  /* ── The head ── */
+  .anl-desk__head {
+    display: flex;
+    grid-area: head;
+    align-items: center;
+    gap: var(--sp-4);
+    min-height: var(--sp-8);
+  }
+  .anl-desk__title {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  /* ── The sumi object: the video, the subtitle, the bar ── */
+  .anl-slab {
+    display: flex;
+    grid-area: slab;
+    flex-direction: column;
+    padding-top: var(--sp-4);
+    background: var(--bg-panel);
+    border-radius: var(--r-panel);
+    overflow: hidden;
+  }
+  .anl-slab__screen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: 0 var(--sp-6);
+  }
+  /* The picture at the drawing's share of the window: 360 of 930 tall,
+     so 69dvh wide at 16:9; narrower when the column is. */
+  .anl-slab__video {
+    flex: 0 1 auto;
+    width: 69dvh;
+    min-width: 0;
+    margin-inline: auto;
+  }
+  .anl-slab__video .video-player__frame {
+    margin-bottom: 0;
+    border-radius: var(--r-flat);
+  }
+  /* Folded: the player stays mounted and playing, out of sight -- a
+     destroyed iframe could not report its clock. */
+  .anl-slab--folded { padding-top: 0; }
+  .anl-slab--folded .anl-slab__screen {
+    height: 0;
+    overflow: hidden;
+  }
+  .anl-slab__arrow {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-9);
+    height: var(--sp-9);
+    padding: 0;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--text-on-panel) 22%, transparent);
+    border-radius: var(--r-pill);
+    color: var(--text-on-panel);
+  }
+  .anl-slab__arrow:disabled { opacity: 0.35; }
+  .anl-slab__arrow:hover,
+  .anl-slab__arrow:focus-visible { background: var(--overlay-hover); }
+  .anl-subs {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-3) var(--sp-6) var(--sp-4);
+  }
+  .anl-slab__screen + .anl-subs { margin-top: var(--sp-4); border-top: 1px solid color-mix(in srgb, var(--text-on-panel) 10%, transparent); }
+  .anl-subs__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .anl-subs__count {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-on-panel-soft);
+  }
+  .anl-subs__furi {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    height: var(--sp-7);
+    padding: 0 var(--sp-3);
+    background: transparent;
+    border: 0;
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 600;
+    color: var(--text-on-panel-soft);
+  }
+  .anl-subs__furi > [lang="ja"] { font-family: var(--font-jp); }
+  .anl-subs__furi > b { font-weight: 700; color: var(--text-on-panel); }
+  .anl-subs__furi:hover,
+  .anl-subs__furi:focus-visible { background: var(--overlay-hover); }
+  .anl-subs__body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-4);
+  }
+  /* The line on the sumi: the panel's inks, the state rules kept. */
+  .anl-subs__line {
+    justify-content: center;
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+  .anl-subs__line .tok {
+    padding: 0 var(--sp-1);
+    font-size: var(--fs-heading);
+    color: var(--text-on-panel);
+  }
+  .anl-subs__line .tok__furi { font-size: var(--fs-caption); }
+  .anl-subs__line .tok__furi,
+  .anl-subs__line .tok--on .tok__furi,
+  .anl-subs__line .tok--particle { color: var(--text-on-panel-soft); }
+  .anl-subs__line .tok--mastered { --tok: var(--accent2); }
+  .anl-subs__line .tok--unknown { --tok: var(--text-on-panel); }
+  .anl-subs__line .tok--offdeck { border-bottom-color: var(--text-on-panel-soft); }
+  .anl-subs__line .tok--on { background: color-mix(in srgb, var(--text-on-panel) 14%, transparent); }
+  .anl-subs__line .tok--lit { background: color-mix(in srgb, var(--line-grammar) 40%, transparent); }
+  /* ── The words beside the card in focus, Explain under it ── */
+  /* The numbered frames on the sumi, in the panel's inks. */
+  .anl-slab .anl-subs__pt { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel)); }
+  .anl-slab .anl-subs__n {
+    background: color-mix(in srgb, var(--line-grammar) 70%, var(--text-on-panel));
+    color: var(--bg-panel);
+  }
+  .anl-desk__work {
+    display: grid;
+    grid-area: work;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--sp-5);
+    min-height: 0;
+  }
+  .anl-desk__words {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding: var(--sp-3);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .anl-words {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .anl-words__row {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-4);
+    width: 100%;
+    min-height: 38px;
+    padding: 0 var(--sp-3);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--r-card);
+    text-align: left;
+  }
+  .anl-words__row:hover,
+  .anl-words__row:focus-visible { background: var(--overlay-hover); }
+  .anl-words__row--on,
+  .anl-words__row--on:hover {
+    background: var(--bg-main);
+    border-color: var(--surface-line);
+  }
+  .anl-words__cell {
+    flex: none;
+    min-width: 64px;
+  }
+  .anl-words__word {
+    border-bottom: 2px solid var(--tok, transparent);
+    font-family: var(--font-jp);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--text-primary);
+  }
+  .anl-words__word--mastered { --tok: var(--state-mastered); }
+  .anl-words__word--learning { --tok: var(--state-learning); }
+  .anl-words__word--unknown { --tok: var(--state-new); }
+  .anl-words__word--offdeck { border-bottom-style: dashed; --tok: var(--text-secondary); }
+  .anl-words__reading {
+    width: 70px;
+    flex: none;
+    font-family: var(--font-jp);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  .anl-words__gloss {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    font-size: var(--fs-sm);
+    color: var(--text-primary);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .anl-desk__focus {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    min-height: 0;
+  }
+  .anl-focus {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--sp-3);
+    min-height: 0;
+    padding: var(--sp-5) var(--sp-6);
+    overflow-y: auto;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .anl-focus__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-4);
+  }
+  .anl-focus--point .anl-focus__head { align-items: center; }
+  .anl-focus__word {
+    border-bottom: 2px dotted var(--accent2);
+    font-family: var(--font-serif);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .anl-focus__word--point { border-bottom-color: var(--line-grammar); }
+  .anl-focus__reading {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    letter-spacing: var(--tr-reading);
+    color: var(--text-secondary);
+  }
+  .anl-focus__lvl { margin-left: auto; }
+  .anl-focus__gloss { font-size: var(--fs-body); line-height: 1.45; }
+  .anl-focus__parts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--sp-2);
+  }
+  .anl-focus__foot {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    margin-top: auto;
+  }
+  .anl-focus__here {
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .anl-focus__foot > .anl-focus__add { margin-left: auto; }
+  /* ── The card in focus: the band, or the explanation in its place ── */
+  .anl-desk__entry {
+    position: relative;
+    grid-area: entry;
+    flex-direction: column;
+    gap: var(--sp-4);
+    min-height: 0;
+    padding-right: var(--sp-5);
+  }
+  .anl-desk__none {
+    flex: none;
+    margin: 0;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+    color: var(--text-secondary);
+  }
+  /* The entry's wait and its "not available", in a panel of their own
+     rather than loose on the page. */
+  .anl-desk__entry > .quiz-loading,
+  .anl-desk__entry > .dict-sheet__empty {
+    flex: none;
+    padding: var(--sp-5) var(--sp-6);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-panel);
+  }
+  .anl-desk__entry--explain .dict-entry--band > .dict-entry__body { display: none; }
+  /* The swap on the column's edge, as drawn: the card's description and
+     the explanation, one press apart. */
+  .anl-swap {
+    position: absolute;
+    top: 60%;
+    right: 0;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    color: var(--line-kaiseki);
+    box-shadow: var(--elev-action);
+  }
+  .anl-swap:hover,
+  .anl-swap:focus-visible { border-color: var(--line-kaiseki); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */

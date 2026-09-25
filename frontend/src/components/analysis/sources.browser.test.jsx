@@ -37,7 +37,7 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 // finished Passage shows the result instead of the intake; ‹ Analyzer
 // brings the control back.
 async function boardPlatform(screen, key) {
-  const leave = screen.container.querySelector('.anl-head .stage__leave')
+  const leave = screen.container.querySelector('.anl-m__head .stage__leave')
   if (leave) { leave.click(); await settle(30) }
   const idx = SOURCES.findIndex(s => s.key === key)
   screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()

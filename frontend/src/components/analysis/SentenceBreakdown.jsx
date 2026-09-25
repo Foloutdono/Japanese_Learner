@@ -15,65 +15,8 @@ import { StageCard } from './StageCard'
 import { rowsOf } from './rows'
 import { grammarGloss } from './grammarGloss'
 import { coversToken, pointKey } from './grammarSpans'
-
-// Mirrors study/analysis.py's _CONTENT_POS + unknown_count predicate
-// exactly, so "the single unknown Token" identified here for i+1
-// emphasis is provably the same one the backend counted.
-const CONTENT_POS = new Set(['noun', 'verb', 'adjective', 'adverb'])
-function isUnknownToken(tok) {
-  return CONTENT_POS.has(tok.pos)
-    && tok.vocab_match
-    && ['not_started', 'new'].includes(tok.vocab_match.stats?.status)
-}
-
-// The token's state on the line (canvas AnalyzerResult): a word the
-// SRS says the learner has mastered, one being learned (or due back),
-// one never started, one the app has no card for (a proper noun,
-// JMdict-only vocabulary), and a particle or a mark — which carries
-// no rule at all. The state is a 2px rule under the word in the
-// state's own ink, never an ink change on the word itself.
-const PARTICLE_POS = new Set(['particle', 'symbol', 'auxiliary', 'punctuation', 'conjunction', 'suffix', 'prefix', 'copula'])
-const HAS_KANJI = /[一-龯々]/
-function tokState(tok) {
-  const status = tok.vocab_match?.stats?.status
-  if (status === 'mastered') return 'mastered'
-  if (status === 'learning' || status === 'due') return 'learning'
-  if (status) return 'unknown'
-  if (!tok.pos || PARTICLE_POS.has(tok.pos) || !CONTENT_POS.has(tok.pos)) return 'particle'
-  return 'offdeck'
-}
-
-// The reading printed over a token on the line: only over a word
-// with a kanji in it (the rest already spells its own sound).
-function tokFurigana(tok) {
-  if (!tok.reading || !HAS_KANJI.test(tok.surface ?? '')) return ''
-  return tok.reading
-}
-
-// ── The light (plan 095) ─────────────────────────────────────
-// Where a grammar point sits on the sentence: the words it is written
-// on light up while its chip (or the row that opens it) is hovered or
-// focused, and the last point pressed stays lit once its sheet has
-// closed -- on a phone there is no hover, and "where was that" is the
-// question the learner comes back from the sheet with. Two states,
-// because a hover ends when the pointer moves and a pick does not:
-// the hover wins while it lasts. Both are remembered against the
-// analysis they were made on, so a new sentence arrives with nothing
-// lit and no effect has to clear it -- not even a hover a keyboard
-// shortcut left behind on a chip that unmounted under the pointer.
-function useLight(analysis) {
-  const [hover, setHover] = useState(null)
-  const [pick, setPick] = useState(null)
-  const here = held => (held && held.analysis === analysis ? held.point : null)
-  const lit = here(hover) ?? here(pick)
-  return {
-    lit,
-    litKey: pointKey(lit),
-    onLight: point => setHover(point ? { analysis, point } : null),
-    // Wraps a screen's onGrammarOpen: the press lights as it opens.
-    open: onOpen => (onOpen ? point => { setPick({ analysis, point }); onOpen(point) } : undefined),
-  }
-}
+import { isUnknownToken, tokState, tokFurigana } from './tokens'
+import { useLight } from './useLight'
 
 // ── The token table (the mockup's second view) ────────────
 // Word | Reading | Meaning | State | ＋ — one row per Token, dense on
@@ -454,12 +397,9 @@ export function SentenceBreakdown({
             </button>
           ))}
         </div>
-        <div className="anl-legend" aria-hidden="true">
-          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--mastered" />{t.status_mastered}</span>
-          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--learning" />{t.status_learning}</span>
-          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--unknown" />{t.status_new}</span>
-          <span className="anl-legend__item"><i className="anl-legend__ink anl-legend__ink--offdeck" />{t.offDeckKey}</span>
-        </div>
+        {/* No legend under the line (plan 134, owner-directed): the four
+            rules are learned in a sentence or two, and a key printed on
+            every stop was the stage's loudest line after the sentence. */}
 
         {/* ── The grammar the sentence is built with (plan 095) ──
             The constructions the local tier found, each with its

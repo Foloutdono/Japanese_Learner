@@ -291,7 +291,6 @@ const Fixture = () => (
           <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi an-furi">でんしゃ</span><span className="tok__word">電車</span></button>
           <button type="button" className="tok tok--particle an-particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
         </div>
-        <div className="anl-legend"><span className="anl-legend__item an-legend"><i className="anl-legend__ink anl-legend__ink--mastered" />Mastered</span></div>
         <div className="token-card token-card--i1">
           <div className="token-card__head">
             <span className="token-card__reading an-reading">でんしゃ</span>
@@ -861,7 +860,6 @@ const SITES = [
   ['.an-count', 'stepper count'],
   ['.an-furi', 'furigana over the focused token (on its tint)'],
   ['.an-particle', 'particle token'],
-  ['.an-legend', 'line legend'],
   ['.an-reading', 'token card reading'],
   ['.an-pos', 'token card part of speech (type badge)'],
   ['.an-i1', 'token card i+1 mark (success ink mixed)'],

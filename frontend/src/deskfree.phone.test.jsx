@@ -476,7 +476,7 @@ describe('the analyser and the dictionary (plan 115, P6)', () => {
     el.dispatchEvent(new Event('input', { bubbles: true }))
   }
 
-  it('keeps the sheet, the head\'s way back, the legend and the history under the intake', async () => {
+  it('keeps the sheet, the head\'s way back and the history under the intake', async () => {
     const { apiJson } = await import('./lib/api')
     apiJson.mockImplementation(async url => (String(url).startsWith('/api/phrase/analyze') ? { sentences: SENTENCES, truncated: 0 } : {}))
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [{ type: 'vocab', kanji: '駅', kana: 'えき', meaning: 'station', senses: [], examples: [], status: { status: 'new' } }], total: 1 }) }))
@@ -490,10 +490,13 @@ describe('the analyser and the dictionary (plan 115, P6)', () => {
     type(document.querySelector('textarea'), '駅で待つ')
     document.querySelector('.anl-action').click()
     await settle(300)
-    expect(document.querySelector('.anl-head .stage__leave')).not.toBeNull()
-    expect(document.querySelector('.desk-crumb, .desk-anl-dock')).toBeNull()
-    expect(document.querySelector('.anl-kbd')).not.toBeNull()
-    document.querySelector('.token-card__surface--door').click()
+    expect(document.querySelector('.anl-m__head .stage__leave')).not.toBeNull()
+    expect(document.querySelector('.desk-crumb, .anl-desk')).toBeNull()
+    // The phone's drawing (plan 134), with no colour legend and no key
+    // map; a word tapped on the subtitles opens its card in the sheet.
+    expect(document.querySelector('.anl-m .anl-m__subs')).not.toBeNull()
+    expect(document.querySelector('.anl-legend, .anl-kbd, .anl-stage')).toBeNull()
+    document.querySelector('.anl-m__subs .tok').click()
     await settle(250)
     expect(document.querySelector('[role="dialog"]')).not.toBeNull()
     apiJson.mockReset()
