@@ -369,12 +369,20 @@ function DrawingQuizCard({ kanji, onValidate, resetKey }) {
         />
       </div>
 
-      {/* Validate button — only before revealed */}
-      {!revealed && (
-        <button onClick={handleValidate} className="btn-primary drawing-quiz__validate">
-          {t.revealAnswer}
-        </button>
-      )}
+      {/* Validate button — only before revealed. Spent, it stays in
+          the DOM, inert and unseen: on the desk's panels it keeps its
+          room, so the board, which takes what the column leaves, does
+          not grow under the correction the moment it lands. Everywhere
+          else it is display: none, as good as gone (index.css). */}
+      <button
+        onClick={revealed ? undefined : handleValidate}
+        className={`btn-primary drawing-quiz__validate${revealed ? ' drawing-quiz__validate--spent' : ''}`}
+        disabled={revealed}
+        inert={revealed}
+        aria-hidden={revealed || undefined}
+      >
+        {t.revealAnswer}
+      </button>
     </div>
   )
 }

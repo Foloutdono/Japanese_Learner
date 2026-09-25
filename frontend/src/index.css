@@ -11725,6 +11725,9 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   max-width: var(--card-w);
   margin: var(--sp-6) auto 0;
 }
+/* Pressed, it is gone -- but for the desk's panels, which keep its room
+   (the 三面 block). */
+.drawing-quiz__validate--spent { display: none; }
 
 /* ── Kanji/Vocab quiz extras ──────────────────────────────── */
 .quiz-subtitle {
@@ -22465,6 +22468,63 @@ a.slip__act { text-decoration: none; }
     display: flex;
     flex-direction: column;
     justify-content: center;
+  }
+  /* But not over a writing board: there the board grows. Sized off the
+     window alone (52vh, to 440px), it stood the column 70px past a
+     800px window and 200px past the owner's, Show the answer under the
+     fold and the tiles under that. The prompt never changes face, so it
+     takes its content; the board takes what the prompt, its two buttons
+     and the tiles leave. Both cards come in to the phone's rung: 44px
+     over and under three lines of prompt, and 28px round a square, are
+     height the board could have been. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage { flex: 0 0 auto; }
+  .desk-run--panels > .stage:has(> .drawing-quiz) > .quiz-card-stage .card-transition-live > .prompt-card {
+    --card-pad-y: var(--sp-5);
+    --card-pad-top: var(--sp-5);
+  }
+  .desk-run--panels > .stage > .drawing-quiz {
+    --drawing-card-pad: var(--sp-5);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-run--panels > .stage > .drawing-quiz > .prompt-card.drawing-quiz__card {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+  }
+  /* The square is the smaller of the room's two sides, to the 440px
+     cap: the board and its erase button both read it off the room, so
+     the button stays the board's width. The room is a size container,
+     so it is what the column gives it and never what the board asks
+     for; the button's height is pinned for the sum to close. Under
+     160px the board stops shrinking and the column scrolls instead: a
+     mouse writes a kanji well enough there (KanjiVG draws at 109), a
+     thumbnail is no writing surface. The floor is in the
+     sum as well as on the room, because a room held up by its
+     min-height reads 0 for 100cqh in Chromium, not its height. */
+  .desk-run--panels > .stage > .drawing-quiz .canvas-wrap {
+    --canvas-clear-h: calc(var(--sp-7) + var(--sp-3));
+    --canvas-cap: min(100cqw, 440px, max(160px, calc(100cqh - var(--canvas-clear-h) - var(--sp-3))));
+    flex: 1 1 auto;
+    min-height: calc(160px + var(--canvas-clear-h) + var(--sp-3));
+    container-type: size;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-field {
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-holder { max-height: none; }
+  /* Pressed, Show the answer keeps its room, so the board does not
+     grow under the correction as it lands. */
+  .desk-run--panels > .stage > .drawing-quiz > .drawing-quiz__validate--spent {
+    display: block;
+    visibility: hidden;
+  }
+  .desk-run--panels > .stage > .drawing-quiz .canvas-clear-btn {
+    flex: none;
+    block-size: var(--canvas-clear-h);
+    padding-block: 0;
   }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
