@@ -289,6 +289,30 @@ describe('the tiles under the card', () => {
     expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(window.innerHeight)
   })
 
+  // The owner's report: on a wide window the middle column is wider
+  // than a card, and the tiles' frame stood at the column's width, 41px
+  // past the card on each side -- and with the choices or a board open,
+  // the head and the choices with it. Every row stands at the card's.
+  it.each([
+    ['a card', null],
+    ['choices', <MCQGrid key="m" choices={CHOICES} correct="gare" selected={null} answered={false} onAnswer={() => {}} />],
+    ['a writing board', <DrawingQuiz key="d" kanji="急" resetKey="k" onValidate={() => {}} />],
+  ])('stand at the card\'s width under %s, the head over it at the same', async (_, beside) => {
+    for (const width of [1877, 1100]) {
+      const screen = await render(
+        <Frame width={width}><Stage><Card />{beside}<RatingBar active onRate={() => {}} /></Stage></Frame>
+      )
+      await settle(400)
+      const card = rect('.quiz-card-stage .prompt-card')
+      if (width === 1877) expect(rect('.stage').width, 'the column is wider than a card').toBeGreaterThan(card.width + 40)
+      for (const row of ['.rating-bar', '.stage__head', ...(beside ? ['.stage > .mcq-list, .stage > .drawing-quiz'] : [])]) {
+        expect(rect(row).left, `${row} at ${width}`).toBeCloseTo(card.left, 0)
+        expect(rect(row).right, `${row} at ${width}`).toBeCloseTo(card.right, 0)
+      }
+      await screen.unmount()
+    }
+  })
+
   it('light up on the reveal, the best one gold', async () => {
     await render(<Stage><Revealing /><RatingBar active onRate={() => {}} /></Stage>)
     await settle()
