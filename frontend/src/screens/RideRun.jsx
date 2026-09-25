@@ -43,7 +43,7 @@ import { LookupWatchContext } from '../components/study/lookupWatch'
 // (POST /api/onboarding/ride/done), finished or skipped alike, so the
 // index route stops sending the learner here.
 //
-// Plan 131 made it the lesson of the runs as they are drawn now. On a
+// Plan 132 made it the lesson of the runs as they are drawn now. On a
 // phone the known card, once turned, cannot be graded until the
 // learner has opened its dictionary entry from the 🔍 in its corner
 // and closed it again (`known-dict`): every card carries that door, and
@@ -86,7 +86,7 @@ function stepFor(index, answered, lookFirst = false) {
   return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
 }
 
-// The desk's walks round the panels (plan 131, components/guide/rideTours).
+// The desk's walks round the panels (plan 132, components/guide/rideTours).
 const TOURS = { front: TOUR_FRONT, back: TOUR_BACK }
 
 /** The card as CardPrompt wants it, with the romaji riding on it for
@@ -283,7 +283,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       sub={t.rideCap}
       remaining={step === 'done' ? undefined : remaining}
       className="ride"
-      // 机 (plan 131): a card run's three panels (plan 126) -- this
+      // 机 (plan 132): a card run's three panels (plan 126) -- this
       // run's figures and the card panel at the left, the details at
       // the right, sealed until the flip docks the card's entry there,
       // where a phone looks it up from 🔍. Nothing beside the done

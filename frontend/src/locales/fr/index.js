@@ -1835,7 +1835,7 @@ const ride = {
   rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
   rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
   rideReadMeasureDesk: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre : sur la barre, ou avec ses touches chiffrées.',
-  // Plan 131. Sur un téléphone : la carte connue ne se note qu'une fois
+  // Plan 132. Sur un téléphone : la carte connue ne se note qu'une fois
   // sa fiche ouverte depuis la 🔍, puis refermée.
   rideKnownDict: 'Chaque carte ouvre sa fiche du dictionnaire. Touchez 🔍 pour lire celle-ci, puis refermez-la.',
   // Sur le bureau : le tour des trois panneaux d'une séance, arrêt par

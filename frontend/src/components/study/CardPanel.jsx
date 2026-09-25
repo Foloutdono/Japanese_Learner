@@ -30,7 +30,7 @@ import { DeskFigure } from './RunRecords'
 //     digits are on the tiles above. The readings drill (`keys="readings"`)
 //     turns nothing: there, a comma or a space adds a reading to the box
 //     and Enter checks (ReadingsInput). The first ride (`keys="ride"`,
-//     plan 131) has no choices to show, so no C.
+//     plan 132) has no choices to show, so no C.
 //   - The rhythm, on a sumi foot: minutes since the run started
 //     (stores/runTally's startedAt), cards a minute, and an estimate of
 //     what the remaining cards will take at that pace.

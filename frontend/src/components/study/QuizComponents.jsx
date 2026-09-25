@@ -641,7 +641,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
   // panel remounts per card (`resetKey`), so its cleanup takes the last
   // card's entry down.
   const docked = useContext(EntryDockContext)
-  // The first ride waits on the sheet (plan 131, ./lookupWatch).
+  // The first ride waits on the sheet (plan 132, ./lookupWatch).
   const watch = useContext(LookupWatchContext)
 
   const speakText = sound ?? dictTerm

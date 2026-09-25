@@ -447,7 +447,7 @@ def _ride_unknown_entry(stored: str, kana_known: str | None) -> tuple[str, dict]
     return level, _RIDE_UNKNOWN_ENTRIES[level]
 
 
-# The forecast a new card's verdicts would give it (plan 131): what the
+# The forecast a new card's verdicts would give it (plan 132): what the
 # desk's card panel prints on each tile (components/study/CardPanel.jsx,
 # plan 126), which the ride now stands on so its lesson is the run's
 # real layout. `due_in` only: the ride earns no XP and moves no stage,

@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 
-// ── 試乗 — who is told when a card's 🔍 opens its entry (plan 131) ──
+// ── 試乗 — who is told when a card's 🔍 opens its entry (plan 132) ──
 // The first ride on a phone makes the learner open the dictionary from
 // the revealed card before they grade it: the entry is a door every
 // card carries, and a door nobody is shown is a door nobody finds. The

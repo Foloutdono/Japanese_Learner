@@ -65,7 +65,7 @@ describe('the test ride at 390×844', () => {
 
     root.querySelector('.flashcard').click()
     await settle(120)
-    // Plan 131: turned, the note hangs under the card's 🔍, inside the
+    // Plan 132: turned, the note hangs under the card's 🔍, inside the
     // viewport, and the 🔍 is a thumb's target. Opening the entry and
     // closing it again is what lets the grade through.
     const lookup = root.querySelector('[data-guide="card.lookup"]')

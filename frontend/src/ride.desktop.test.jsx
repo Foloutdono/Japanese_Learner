@@ -5,10 +5,10 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — the first ride at a desk (plans 122, 131) ──────────────────
+// ── 机 — the first ride at a desk (plans 122, 132) ──────────────────
 // The two cards and the reading ride, from the keys alone: Space turns
 // a card, a digit rates it, and Enter goes on from the ride's end --
-// the key its Continue prints (P8). Since plan 131 both rides stand on
+// the key its Continue prints (P8). Since plan 132 both rides stand on
 // the runs' three panels and walk the learner round them first (the
 // guide, handed components/guide/rideTours' stops; P11, P12). The
 // phone's side is ride.phone.test.jsx.
@@ -42,7 +42,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: RideRun } = await import('./screens/RideRun')
 const { default: RideReading } = await import('./screens/RideReading')
 
-// A new card's forecast, as the ride serves it (plan 131).
+// A new card's forecast, as the ride serves it (plan 132).
 const FORECAST = Object.fromEntries([60, 180, 180, 390, 600, 3600].map((due_in, q) => [String(q), { due_in }]))
 const KNOWN = {
   card_id: 'vocab_N3__こんにちは', source: 'vocab', mode: 'vocab.flashcard.f2b', direction: 'f2b',
@@ -191,7 +191,7 @@ describe('the ride\'s ends on the desk (P8)', () => {
   })
 })
 
-// ── P11 — the card ride on three panels (plan 131) ──
+// ── P11 — the card ride on three panels (plan 132) ──
 // The card run's layout (plan 126): this run's figures and the card
 // panel at the left, the card, the details sealed at the right until
 // the flip docks the card's entry there. The walk points at every part
@@ -270,7 +270,7 @@ describe('the card ride on the desk\'s panels (P11)', () => {
   })
 })
 
-// ── P12 — the reading ride on three panels (plan 131) ──
+// ── P12 — the reading ride on three panels (plan 132) ──
 // A practice run's layout (plan 129): the figures and the run's lines
 // at the left, the breakdown sealed at the right until the grade. The
 // walk comes before the clock, and the grade opens the breakdown.

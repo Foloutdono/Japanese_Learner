@@ -451,21 +451,7 @@ runtime purpose. Two consequences worth knowing:
   `src/gates.desktop.test.jsx`, `src/gates.wide.test.jsx`,
   `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk"; `docs/design/desk/README.md`).
-  **131** is the first ride redrawn for the runs as they are now: on a
-  phone the known card, once turned, is graded only after its entry has
-  been opened from the 🔍 and closed (`known-dict`, told through
-  `components/study/lookupWatch.js`); on the desk both rides stand on
-  the runs' three panels (plans 126, 129) and the gates' guide, handed
-  its stops (`components/guide/rideTours.js`), walks every panel -- the
-  cards before the first turn and after it, the reading before its
-  clock and after the grade, which opens the sentence's breakdown; the
-  ride's cards carry a new card's forecast for the verdict tiles (cited
-  in `routes/onboarding.py`, `tests/test_ride.py`, `screens/RideRun.jsx`,
-  `screens/RideReading.jsx`, `components/guide/Guide.jsx`,
-  `components/guide/Callout.jsx`, `components/study/QuizComponents.jsx`,
-  `components/study/CardPanel.jsx`, `components/study/RunPanel.jsx`,
-  `src/ride.desktop.test.jsx` and `src/ride.phone.test.jsx`).
-  **132** is 問, the asking (wave 36; numbered 131 because 130 went to
+  **131** is 問, the asking (wave 36; numbered 131 because 130 went to
   the gates while plan 129 was in review): the desk-only chat of the
   practice runs, "limited to small questions and only precise answers" —
   one short question about the exercise just graded, answered in three
@@ -479,7 +465,22 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RunLines.jsx`, the five `screens/*Run.jsx`,
   `src/ask.desktop.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk"; `docs/llm-commercial-plan.md`).
-  When starting a new wave, begin at **132** or higher, and check
+  **132** is the first ride redrawn for the runs as they are now
+  (numbered 132 because 131 went to 問 while it was open): on a
+  phone the known card, once turned, is graded only after its entry has
+  been opened from the 🔍 and closed (`known-dict`, told through
+  `components/study/lookupWatch.js`); on the desk both rides stand on
+  the runs' three panels (plans 126, 129) and the gates' guide, handed
+  its stops (`components/guide/rideTours.js`), walks every panel -- the
+  cards before the first turn and after it, the reading before its
+  clock and after the grade, which opens the sentence's breakdown; the
+  ride's cards carry a new card's forecast for the verdict tiles (cited
+  in `routes/onboarding.py`, `tests/test_ride.py`, `screens/RideRun.jsx`,
+  `screens/RideReading.jsx`, `components/guide/Guide.jsx`,
+  `components/guide/Callout.jsx`, `components/study/QuizComponents.jsx`,
+  `components/study/CardPanel.jsx`, `components/study/RunPanel.jsx`,
+  `src/ride.desktop.test.jsx` and `src/ride.phone.test.jsx`).
+  When starting a new wave, begin at **133** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

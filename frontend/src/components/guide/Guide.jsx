@@ -39,7 +39,7 @@ function rectOf(anchor) {
   // 机 (plan 115): an anchor in the desk's rail has its note to its
   // right, one in a side column to its left — beside the thing it is
   // about, never a screen's width away over the page.
-  // A run's left column (plan 131, the ride's tour) is the rail's case.
+  // A run's left column (plan 132, the ride's tour) is the rail's case.
   const beside = el.closest('.desk-rail, .desk-run__left') ? 'right' : el.closest('.desk-side, .desk-run__side') ? 'left' : null
   return { el, top: r.top, left: r.left, width: r.width, height: r.height, bottom: r.bottom, beside }
 }
@@ -61,7 +61,7 @@ function centredOn(rect) {
   return { left: Math.min(Math.max(centre, from), Math.max(from, to)), width }
 }
 
-// `stops`, when given, is a tour that is not a gate's (plan 131: the
+// `stops`, when given, is a tour that is not a gate's (plan 132: the
 // first ride's walk round a run's three panels on the desk): walked
 // the same way, in the same spot and note, but counted by the ride's
 // own ride_step rather than as a gate's guide -- `gate` then only names

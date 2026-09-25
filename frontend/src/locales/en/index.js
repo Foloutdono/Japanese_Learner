@@ -1903,7 +1903,7 @@ const ride = {
   rideReadType: 'Write what you read, in romaji or kana.',
   rideReadMeasure: 'The figure is how much you caught. The grade is yours.',
   rideReadMeasureDesk: 'The figure is how much you caught. The grade is yours: on the bar, or with its number keys.',
-  // Plan 131. On a phone: the known card is not graded until its entry
+  // Plan 132. On a phone: the known card is not graded until its entry
   // has been opened from the 🔍 and closed again.
   rideKnownDict: 'Every card opens its dictionary entry. Tap 🔍 to read this one, then close it.',
   // On the desk: the walk round a run's three panels, stop by stop

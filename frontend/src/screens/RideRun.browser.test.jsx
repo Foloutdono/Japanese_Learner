@@ -80,7 +80,7 @@ function serve() {
 
 const posts = () => apiJson.mock.calls.filter(([, , init]) => init?.method === 'POST')
 const rateButton = (root, q) => root.querySelector(`.rating-bar__btn--q${q}`)
-// Plan 131: the known card, turned, waits on its dictionary entry --
+// Plan 132: the known card, turned, waits on its dictionary entry --
 // the 🔍 opens it in a sheet, the scrim closes it, and only then does
 // the bar light.
 async function lookUp(root) {
@@ -120,7 +120,7 @@ describe('RideRun', () => {
     root.querySelector('.flashcard').click()
     await settle(80)
     // Turned: the note points at the 🔍, and the bar stays inert until
-    // the entry has been opened and closed (plan 131).
+    // the entry has been opened and closed (plan 132).
     expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownDict)
     expect(document.querySelector('.guide-callout').dataset.place).toBe('below')
     expect(root.querySelector('.rating-bar--idle')).toBeTruthy()
