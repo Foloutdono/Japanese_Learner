@@ -20839,32 +20839,199 @@ a.slip__act { text-decoration: none; }
     background: var(--bg-panel);
   }
   .desk-sec--on::before { background: currentcolor; }
-  /* The HUD's three instruments, set at the foot: the level and the
-     pass on one line, the status panel under them at the rail's width.
-     The same components the HUD draws, so the same rules dress them;
-     only their places are the rail's. */
+  /* The foot: the learner's pass (plan 127, components/chrome/
+     DeskPass.jsx). The HUD's three instruments as one card on the
+     rail's floor -- the profile's pass (.pass) at pocket size: its
+     charcoal sheen, its identity corner, and its edge the balance's, as
+     the pocket pass's was (warning at five or fewer, danger at none).
+     Three doors on the card -- the face, the purse, the stub -- each
+     washed as a gate is under a pointer and ringed as one is under a
+     key. Every value is the HUD's or the level bar's own. */
   .desk-rail__foot {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-areas:
-      "level pass"
-      "status status";
-    align-items: center;
-    gap: var(--sp-4);
     margin-top: auto;
-    padding: var(--sp-5) var(--sp-6);
-    padding-bottom: calc(var(--sp-5) + var(--safe-bottom));
-    border-top: 1px solid var(--chrome-edge);
+    padding: var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
   }
-  .desk-rail__foot .hud__level { grid-area: level; }
-  .desk-rail__foot .hud__pass {
-    grid-area: pass;
-    justify-self: end;
+  .desk-pass {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
+    border-radius: var(--r-identity);
+    background:
+      linear-gradient(155deg,
+        color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
+        var(--bg-panel) 62%);
+    color: var(--text-on-panel);
   }
-  .desk-rail__foot .hud__status {
-    grid-area: status;
+  .desk-pass::after {
+    content: '';
+    position: absolute;
+    inset: -40% 55% -40% -20%;
+    background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.045) 50%, transparent 70%);
+    transform: skewX(-12deg);
+    pointer-events: none;
+  }
+  .desk-pass--low { border-color: color-mix(in srgb, var(--warning) 70%, transparent); }
+  .desk-pass--out { border-color: color-mix(in srgb, var(--danger) 70%, var(--text-on-panel)); }
+  .desk-pass__face {
+    display: flex;
+    align-items: stretch;
+  }
+  .desk-pass__level,
+  .desk-pass__purse,
+  .desk-pass__stub {
+    margin: 0;
+    border-radius: var(--r-flat);
+    text-align: start;
+  }
+  /* The face: the HUD's roundel, and beside it the run's level bar at
+     pocket size (.lvlbar__track) -- the pass's gold climbing to the
+     next level, the figure under it. The fare rises off the roundel
+     over the track, as it rises off the HUD's. */
+  .desk-pass__level {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+  .desk-pass__climb {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .desk-pass__track {
+    position: relative;
+    height: 5px;
+    overflow: hidden;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+  }
+  .desk-pass__fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    border-radius: var(--r-pill);
+    background: var(--accent2);
+    transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+  }
+  .desk-pass__gain {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    border-radius: var(--r-pill);
+    background: color-mix(in srgb, var(--accent2) 55%, var(--text-on-panel));
+    box-shadow: 0 0 6px 1px var(--accent2);
+    animation: lvlbar-gain 1000ms ease both;
+  }
+  .desk-pass__xp {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-pass__unit {
+    margin-left: var(--sp-1);
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+  }
+  /* The purse: the pocket pass's mark and figure (.hud__pass-wave,
+     .hud__pass-fig), and under them what the figure counts -- or, when
+     it is spent, when it comes back. */
+  .desk-pass__purse {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
     justify-content: center;
+    gap: var(--sp-1);
+    padding: var(--sp-4) var(--sp-4) var(--sp-4) var(--sp-3);
   }
+  .desk-pass__fig {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+  }
+  .desk-pass__note {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+    color: var(--text-on-panel-soft);
+  }
+  /* The stub: the journey's word and drift under a perforation, lit by
+     a lamp -- in the HUD panel's inks (.hud__status--*), a state's and
+     never a line's. */
+  .desk-pass__stub {
+    --st-ink: var(--success);
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4);
+    border-top: 1px dashed color-mix(in srgb, var(--text-on-panel) 18%, transparent);
+  }
+  .desk-pass__stub--slightlyBehind { --st-ink: var(--warning); }
+  .desk-pass__stub--delayed,
+  .desk-pass__stub--suspended,
+  .desk-pass__stub--offline { --st-ink: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
+  .desk-pass__stub::before {
+    content: '';
+    flex: none;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--r-pill);
+    background: var(--st-ink);
+    box-shadow: 0 0 8px color-mix(in srgb, var(--st-ink) 45%, transparent);
+  }
+  .desk-pass__word {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--st-ink);
+  }
+  .desk-pass__drift {
+    flex: none;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-pass__level:hover,
+  .desk-pass__purse:hover,
+  .desk-pass__stub:hover {
+    background: color-mix(in srgb, var(--text-on-panel) 6%, transparent);
+    filter: none;
+  }
+  .desk-pass__level:focus-visible,
+  .desk-pass__purse:focus-visible,
+  .desk-pass__stub:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: -2px;
+  }
+  /* The roundel lights with its door, as the HUD's does under a pointer;
+     and a spent purse prints its figure in the danger's ink, as the
+     pocket pass did. */
+  .desk-pass__level:hover .hud__level,
+  .desk-pass__level:focus-visible .hud__level { border-color: var(--text-on-panel); }
+  .desk-pass--out .hud__pass-fig { color: color-mix(in srgb, var(--danger) 55%, var(--text-on-panel)); }
 
   /* ── what the rail moves ──
      The docked note spans the screen, not the rail; the dictionary's

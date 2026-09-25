@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { join, dirname } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { GUIDES, DESK_ORDER, deskStops } from './guides'
+import { GUIDES, DESK_ORDER, DESK_RADIUS, deskStops } from './guides'
 import { TAB_IDS } from '../../config/tabs'
 import en from '../../locales/en/index.js'
 import fr from '../../locales/fr/index.js'
@@ -88,5 +88,20 @@ describe('the guide on the desk', () => {
       expect(deskStops(gate).map(s => s.anchor)).toEqual(order)
     }
     expect(deskStops('learn')).toBe(GUIDES.learn)
+  })
+
+  // Plan 127: the HUD's three are the doors of the rail's pass on the
+  // desk, and their spot takes a card's corner there, a pill's on the
+  // phone. Every anchor it names is a stop somewhere.
+  it('draws the rail pass\'s doors with a card\'s corner, and only on the desk', () => {
+    const anchors = Object.values(GUIDES).flat().map(s => s.anchor)
+    for (const anchor of Object.keys(DESK_RADIUS)) expect(anchors, anchor).toContain(anchor)
+    const desk = Object.fromEntries(deskStops('today').map(s => [s.anchor, s.radius]))
+    const phone = Object.fromEntries(GUIDES.today.map(s => [s.anchor, s.radius]))
+    for (const anchor of ['hud.level', 'hud.status', 'hud.pass']) {
+      expect(desk[anchor], anchor).toBe('card')
+      expect(phone[anchor], anchor).toBe('pill')
+    }
+    expect(desk['today.gate']).toBe(phone['today.gate'])
   })
 })

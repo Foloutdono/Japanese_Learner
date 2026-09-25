@@ -137,7 +137,10 @@ describe('a copy on the desk', () => {
 })
 
 describe('the keys and the names the desk prints', () => {
-  it('names the rail\'s pass and level and the console\'s clear under a pointer', async () => {
+  // The pocket pass is the stage head's since plan 127 gave the rail a
+  // pass of its own (DeskPass, whose level door carries its title:
+  // chrome.desktop.test.jsx).
+  it('names the stage head\'s pass and the console\'s clear under a pointer', async () => {
     const { HudPass } = await import('./components/chrome/Hud')
     const { ConsoleIndex } = await import('./components/chrome/Console')
     await render(

@@ -5,7 +5,7 @@ import { getDeskTabs, getDeskSections, inSection, tabFor, dueBadge } from '../..
 import { useTodaySummary } from '../../stores/today'
 import { playClick } from '../../lib/audio'
 import { GateIcon } from './GateIcon'
-import { HudInstruments } from './Hud'
+import { DeskPass } from './DeskPass'
 import { dialogOpen } from '../../lib/dialogOpen'
 
 // ── 机 — the rail: the desk's chrome (plan 113) ────────────────────
@@ -27,10 +27,12 @@ import { dialogOpen } from '../../lib/dialogOpen'
 //                  metaphor's own drawing, in the panel's inks: the rail
 //                  is chrome, and a section's pigment never goes on
 //                  chrome;
-//   the foot       the HUD's three instruments — the level (the fare is
-//                  paid into it), the status panel, the pass — the same
-//                  components the HUD draws (Hud.jsx's HudInstruments),
-//                  so they carry the same guide anchors.
+//   the foot       the learner's pass (DeskPass, plan 127): the HUD's
+//                  three instruments as one card — the level and its
+//                  climb (the fare is paid into it), the balance, the
+//                  journey's status on its stub — reading the HUD's
+//                  stores, opening its doors and carrying its guide
+//                  anchors. The phone's HUD keeps the three apart.
 //
 // The gates' <nav> keeps the tab bar's label and its guide anchor
 // (`tabbar`), so the Today guide's last stop finds the navigation on
@@ -127,7 +129,7 @@ export function DeskRail() {
       </nav>
 
       <div className="desk-rail__foot">
-        <HudInstruments />
+        <DeskPass />
       </div>
     </header>
   )
