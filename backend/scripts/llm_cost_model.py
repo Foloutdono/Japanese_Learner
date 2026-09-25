@@ -81,6 +81,16 @@ FEATURES = {
         "serves (~60% of the input). COMPOSITION_DAILY_LIMIT caps it at "
         "30/day, which bounds the abuse row.",
     ),
+    "practice_ask": (
+        40, 700, 120,
+        "Two questions a session, 20 sessions (plan 131): a desk-only panel "
+        "in the practice runs, opened after the grade. One short call each: "
+        "a stable system block (~450 tokens, cached) and the exercise in "
+        "the user block -- the sentence, its translation, the answer, the "
+        "breakdown's words. max_tokens 400, answered in three sentences, "
+        "reasoning off. ASK_DAILY_LIMIT caps it at 40/day, which bounds "
+        "the abuse row.",
+    ),
     "phrase_analysis": (
         50, 400, 500,
         "200 breakdowns/mo, ~75% served from phrase_analysis_cache (reading "

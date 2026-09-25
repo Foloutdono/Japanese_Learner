@@ -19,6 +19,9 @@ import { SealedPanel } from '../components/study/SessionPanel'
 import { RunLines } from '../components/study/RunLines'
 import { KeyCap } from '../components/chrome/DeskKeys'
 import { startTally, countReview } from '../stores/runTally'
+import { useAsk } from '../hooks/useAsk'
+import { AskPanel } from '../components/study/AskPanel'
+import { askTarget } from '../domain/ask'
 import { useDesk } from '../hooks/useDesk'
 import { dialogOpen } from '../lib/dialogOpen'
 import { CHOICE_KEY_INDEX, LETTER_KEY_INDEX } from '../domain/choiceKeys'
@@ -113,11 +116,16 @@ export default function ComprehensionRun({ session }) {
 
   const timerRef = useRef(null)
 
+  // 問 (plan 131): a question about a question, on the results, on the
+  // desk -- never while the paper is being answered.
+  const asking = useAsk(session, 'comprehension')
+
   function startSession(lvl) {
     setStage('loading')
     setError(null)
     // A new exercise is a new run: its figures start again (plan 129).
     startTally(`comprehension:${lvl}`)
+    asking.reset()
     setRereading(false)
     setShowBreakdown(false)
     setOpenIndex(0)
@@ -415,6 +423,27 @@ export default function ComprehensionRun({ session }) {
     : null
   const deskOpen = stage === 'results' ? openRow : null
 
+  // The asking's thread is the open question's: the text, its
+  // translation, the question with its options, the right one and the
+  // learner's, and the words of the sentence it quotes. Sealed until
+  // the results (plan 131).
+  const reviewed = stage === 'results' && results ? results.results[openRow ?? 0] : null
+  const target = askTarget(null, reviewed ? {
+    key: `q${openRow ?? 0}`,
+    base: {
+      sentence: exercise?.text,
+      level,
+      translation: exercise?.translation,
+      review: [
+        reviewed.question,
+        ...reviewed.options.map((o, j) => `${letter(j)}. ${o}`),
+        `Right answer: ${letter(reviewed.correct)}. The learner chose: ${reviewed.user_answer == null ? 'nothing' : letter(reviewed.user_answer)}.`,
+      ].join('\n'),
+    },
+    analysis: breakdown[openIndex]?.analysis,
+    open: true,
+  } : { key: 'sealed', open: false })
+
   // A result row opens its question; on the desk it also opens the
   // sentence the question quotes, in the breakdown beside it. From the
   // run's lines (plan 129) a row is only ever opened, never folded: the
@@ -465,6 +494,9 @@ export default function ComprehensionRun({ session }) {
             [t.keyEscape, t.deskKeyLeave],
           ]}
           rhythm={[{ label: t.deskAnswered, value: `${answers.length} / ${total}` }]}
+          ask={(
+            <AskPanel key={target.key} ask={asking} askKey={target.key} context={target.context} open={target.open} text />
+          )}
         />
       )}
       // The level bar steps off while the text is up: the passage band

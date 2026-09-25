@@ -251,6 +251,16 @@ Thirteen waves live in this file:
   not built. Its section is before wave 32's. The next wave begins at
   130.
 
+- **Wave 36 — 問, the asking** (plan 131, 2026-09-25, DONE; numbered 131
+  because wave 35 took 130 for the gates). The owner's request, after
+  plan 129 recorded where it would stand: "now build the chatbot for the
+  practice runs" — desk-only, "limited to small questions and only
+  precise answers". A short question about the exercise just graded,
+  answered in three sentences from what is on the three panels, in the
+  lower half of the run's lines panel; sealed until the grade, a thread
+  per sentence, a question off the exercise declined, forty a day. Its
+  section is before wave 34's. The next wave begins at 132.
+
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
@@ -6114,6 +6124,34 @@ not measured by a script.
 | Esc in Browse's search, 12 ticked | the dock closes, the ticks lost | the field blurs; a second Esc closes |
 | A drag-select on a flashcard | turns the card, the selection lost | the selection stays |
 | Radio groups (Seg on ten screens, the settings' grids) | a tab stop per option, arrows ignored | one stop, arrows move |
+
+# Wave 36 — 問, the asking (plan 131, 2026-09-25)
+
+The owner's request: "now build the chatbot for the practice runs". Plan
+129 had drawn its place and its rule before it existed ("the asking has
+its place and is not built", DESIGN.md): desk-only, in the run's lines
+panel, open when the breakdown opens, "limited to small questions and
+only precise answers". Numbered 131 because wave 35 took 130 for the
+gates while plan 129 was in review.
+
+| Plan | What | Status |
+|---|---|---|
+| 131 | **Backend** `routes/ask.py`, `POST /api/ask`, pass-gated (the five platforms front it: `tests/test_pass_platforms.py`): the exercise and the question in a fenced user block under a stable system block (a cached prefix), the mode saying what the learner did; a question of 200 characters, four earlier exchanges sent back, three sentences answered with `max_tokens` 400 and reasoning off; `OFF_TOPIC` from the model becomes `off_topic: true`; the answer cleaned and cut at 700 characters; `ASK_DAILY_LIMIT` (40) claimed in `daily_usage` before the call, a 429 naming the reset; nothing the learner typed written anywhere (`tests/test_ask.py` scans every text column); `llm_cost_model`'s `practice_ask` row; `.env.example`; `docs/llm-commercial-plan.md`. **Frontend** `domain/ask.js` (`askContext` bounds what a question carries, `askWords` reads the breakdown, `askHistory`, `askResetsAt`, `askTarget` picks the thread: a reopened line's, else the stage's), `hooks/useAsk.js` (a thread per line key, the day's `left` and `spent`), `components/study/AskPanel.jsx` in `RunLines`' new `ask` slot; the five runs pass their context (reading: the sentence, the translation, the romaji, the point; translation: the reference, the prompt, the learner's Japanese, the tutor's text; dictation: the line, its translation, what was heard; composition: the learner's sentence, the tutor's meaning and review, the point; comprehension: the text, its translation, the open question with its options, the right and the chosen letter, the quoted sentence's words); the committed line keeps its `ask` base. The 机 section's `.desk-ask`; locales; `src/ask.desktop.test.jsx`, `src/domain/ask.test.js` | DONE (2026-09-25) |
+
+Decided on the way, none re-litigating the owner's rule: the send is an
+arrow (the word squeezed the field to a clipped placeholder in a
+laptop's 300px column); the placeholder is "Ta question…", the line
+above the field saying what to ask about; the list and the asking take
+a half each rather than the list its content's height, so nothing moves
+as either grows; a declined question costs its slot (claimed before the
+call, like every ceiling here) and is not sent back as history.
+
+Deferred: the thread is the run's state, gone with it; the answer is
+plain text, the Japanese in it not yet a door to its entry; the model
+the answers come from is whichever `llm_shared` walks to first, and a
+cheaper one for this call (`OPENAI_CHEAP_MODEL`) is a measurement away
+in `llm_usage_report`; a desk analytics event for the asking (the
+counter in `daily_usage` answers "how often" for now).
 
 # Wave 34 — 三面・実践, the practice runs on three panels (plan 129, 2026-09-25)
 
