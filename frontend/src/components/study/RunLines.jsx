@@ -89,6 +89,7 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
           aria-label={name}
           aria-keyshortcuts={doors ? WALK_KEYS : undefined}
           onKeyDown={onWalk}
+          data-guide="run.lines"
         >
           {rows.map(r => {
             const lit = r.key === litKey
@@ -133,13 +134,13 @@ export function RunLines({ lines = [], current = null, openKey = null, onOpen, o
       )}
       {ask}
       {keys.length > 0 && (
-        <div className="desk-keys" role="list" aria-label={t.deskKeysTitle}>
+        <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
           {keys.map(([cap, what]) => (
             <span key={cap} role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{cap}</kbd>{what}</span>
           ))}
         </div>
       )}
-      <div className="desk-rhythm" role="group" aria-label={t.deskRhythm}>
+      <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
         {figures.map(f => <DeskFigure key={f.label} label={f.label} value={f.value} unit={f.unit} />)}
       </div>
     </section>

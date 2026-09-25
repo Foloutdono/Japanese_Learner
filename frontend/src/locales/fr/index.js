@@ -1852,6 +1852,33 @@ const ride = {
   rideReadType: 'Écrivez ce que vous avez lu, en romaji ou en kana.',
   rideReadMeasure: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre.',
   rideReadMeasureDesk: 'Le chiffre dit ce que vous avez saisi. La note est la vôtre : sur la barre, ou avec ses touches chiffrées.',
+  // Plan 133. Sur un téléphone : la carte connue ne se note qu'une fois
+  // sa fiche ouverte depuis la 🔍, puis refermée.
+  rideKnownDict: 'Chaque carte ouvre sa fiche du dictionnaire. Touchez 🔍 pour lire celle-ci, puis refermez-la.',
+  // Sur le bureau : le tour des trois panneaux d'une séance, arrêt par
+  // arrêt (TOUR_FRONT et TOUR_BACK de screens/RideRun.jsx), lus par le
+  // guide sous guide<Clé>.
+  guideRideRecords: 'Cette séance en chiffres : les cartes notées, la part sue, l\'XP gagnée, ce qui reste. Votre barre de niveau est dessous.',
+  guideRideState: 'Où en est la carte sur scène : à apprendre, en cours ou maîtrisée.',
+  guideRideVerdicts: 'Chaque note possible, et quand elle ramènerait la carte. Le chiffre dans le coin est sa touche.',
+  guideRideKeys: 'Les touches : Espace retourne la carte, Échap quitte la séance.',
+  guideRideRhythm: 'Votre rythme : les minutes de la séance, les cartes par minute, et à peu près le temps qu\'il reste.',
+  guideRideCard: 'La carte, au milieu. Le mot est devant.',
+  guideRideRate: 'Les notes, sous la carte. Elles s\'allument une fois la carte retournée.',
+  guideRideSealed: 'La fiche de la carte. Scellée tant qu\'elle n\'est pas retournée : ici, elle donnerait la réponse.',
+  guideRideEntry: 'Retournée : la fiche s\'ouvre. Le mot, votre historique dessus, et sa fiche du dictionnaire. Un mot ou un kanji qu\'elle cite s\'ouvre ici aussi.',
+  guideRideForecast: 'Les notes disent maintenant quand chacune ramène la carte. Faux est la plus proche.',
+  // Le tour de l'essai de lecture (TOUR_READ et TOUR_GRADED de
+  // screens/RideReading.jsx) : les mêmes trois panneaux, en pratique.
+  guideRideReadRecords: 'Cette séance en chiffres : les phrases notées, la part juste, l\'XP gagnée.',
+  guideRideReadLines: 'Chaque phrase de la séance, celle sur scène en dernier. Chacune garde sa note en pastille, et un clic rouvre sa décomposition.',
+  guideRideReadKeys: 'Les touches : Entrée vérifie la réponse puis passe à la phrase suivante, les chiffres notent, Échap quitte.',
+  guideRideReadRhythm: 'Votre rythme : les minutes de la séance, et les phrases par minute.',
+  guideRideReadSentence: 'La phrase s\'affiche ici avec son chrono, et se cache quand il s\'épuise. Il part quand vous fermez ceci.',
+  guideRideReadAnswer: 'Écrivez ici ce que vous avez lu, en romaji ou en kana, puis Entrée.',
+  guideRideReadSealed: 'La décomposition de la phrase. Scellée tant que vous n\'avez pas noté : mot à mot, c\'est le corrigé.',
+  guideRideReadBreakdown: 'Notée : la décomposition s\'ouvre. Chaque mot, et la grammaire qui les tient. Cliquez sur une ligne pour ouvrir sa fiche ici.',
+  guideRideReadLine: 'La phrase est maintenant une ligne de la séance, avec sa note. Dans une vraie séance, chaque ligne rouvre sa décomposition.',
   ridePlateCap: 'L\'abonnement',
   ridePlateBody: 'Ces quais sont sur l\'abonnement.',
   ridePlateOpen: 'Ils sont ouverts à tous pour l\'instant.',

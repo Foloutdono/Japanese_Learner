@@ -483,7 +483,23 @@ runtime purpose. Two consequences worth knowing:
   `components/chrome/DeskRail.jsx`, `src/learnShelf.desktop.test.jsx`,
   `src/gates.desktop.test.jsx`, `src/shelf.desktop.test.jsx` and the 机
   section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **133** or higher, and check
+  **133** is the first ride redrawn for the runs as they are now
+  (numbered 133 because 131 went to 問 and 132 to the Learn gate's shelf
+  while it was open): on a
+  phone the known card, once turned, is graded only after its entry has
+  been opened from the 🔍 and closed (`known-dict`, told through
+  `components/study/lookupWatch.js`); on the desk both rides stand on
+  the runs' three panels (plans 126, 129) and the gates' guide, handed
+  its stops (`components/guide/rideTours.js`), walks every panel -- the
+  cards before the first turn and after it, the reading before its
+  clock and after the grade, which opens the sentence's breakdown; the
+  ride's cards carry a new card's forecast for the verdict tiles (cited
+  in `routes/onboarding.py`, `tests/test_ride.py`, `screens/RideRun.jsx`,
+  `screens/RideReading.jsx`, `components/guide/Guide.jsx`,
+  `components/guide/Callout.jsx`, `components/study/QuizComponents.jsx`,
+  `components/study/CardPanel.jsx`, `components/study/RunPanel.jsx`,
+  `src/ride.desktop.test.jsx` and `src/ride.phone.test.jsx`).
+  When starting a new wave, begin at **134** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

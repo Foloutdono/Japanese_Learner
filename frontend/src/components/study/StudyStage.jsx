@@ -102,7 +102,7 @@ export function StudyStage({
 // for a run that is not a StudyStage — the exam runner draws its own.
 export function RunSide({ label, color, children }) {
   return (
-    <aside className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined}>
+    <aside className="desk-run__side" aria-label={label} style={color ? { '--line-color': color } : undefined} data-guide="run.side">
       {children}
     </aside>
   )

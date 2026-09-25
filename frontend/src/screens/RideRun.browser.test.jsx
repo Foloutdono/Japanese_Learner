@@ -80,6 +80,15 @@ function serve() {
 
 const posts = () => apiJson.mock.calls.filter(([, , init]) => init?.method === 'POST')
 const rateButton = (root, q) => root.querySelector(`.rating-bar__btn--q${q}`)
+// Plan 133: the known card, turned, waits on its dictionary entry --
+// the 🔍 opens it in a sheet, the scrim closes it, and only then does
+// the bar light.
+async function lookUp(root) {
+  root.querySelector('[data-guide="card.lookup"]').click()
+  await settle(120)
+  document.querySelector('.dict-sheet__scrim').click()
+  await settle(120)
+}
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -110,6 +119,23 @@ describe('RideRun', () => {
 
     root.querySelector('.flashcard').click()
     await settle(80)
+    // Turned: the note points at the 🔍, and the bar stays inert until
+    // the entry has been opened and closed (plan 133).
+    expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownDict)
+    expect(document.querySelector('.guide-callout').dataset.place).toBe('below')
+    expect(root.querySelector('.rating-bar--idle')).toBeTruthy()
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }))
+    await settle(600)
+    // The key rated nothing: the known card is still on the stage.
+    expect(root.querySelector('.today-remaining').textContent).toBe('2')
+    root.querySelector('[data-guide="card.lookup"]').click()
+    await settle(120)
+    // The sheet is open, and no note stands over it.
+    expect(document.querySelector('.dict-sheet')).toBeTruthy()
+    expect(document.querySelector('.guide-callout')).toBeNull()
+    document.querySelector('.dict-sheet__scrim').click()
+    await settle(120)
+    expect(document.querySelector('.dict-sheet')).toBeNull()
     expect(root.querySelector('.rating-bar--idle')).toBeNull()
     expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideKnownBack)
     expect(document.querySelector('.guide-callout').dataset.place).toBe('above')
@@ -123,6 +149,7 @@ describe('RideRun', () => {
 
     root.querySelector('.flashcard').click()
     await settle(80)
+    // The second card is graded straight away: the door was shown once.
     expect(document.querySelector('.guide-callout__text').textContent).toContain(fr.rideUnknownBack)
     rateButton(root, 1).click()
     await settle(600)
@@ -149,7 +176,7 @@ describe('RideRun', () => {
     // The trail: every transition, the last one onto the reading ride;
     // no ride_done here -- only a skip ends the lesson on this screen.
     const steps = track.mock.calls.filter(([n]) => n === 'ride_step').map(([, p]) => `${p.step}>${p.to}`)
-    expect(steps).toEqual(['known>known-back', 'known-back>unknown', 'unknown>unknown-back', 'unknown-back>done', 'done>reading'])
+    expect(steps).toEqual(['known>known-dict', 'known-dict>known-back', 'known-back>unknown', 'unknown>unknown-back', 'unknown-back>done', 'done>reading'])
     expect(track.mock.calls.find(([n]) => n === 'ride_done')).toBeUndefined()
   })
 
@@ -160,6 +187,7 @@ describe('RideRun', () => {
     const root = screen.container
     root.querySelector('.flashcard').click()
     await settle(80)
+    await lookUp(root)
     // "1" is the best answer on every bar (RatingBar's contract).
     window.dispatchEvent(new KeyboardEvent('keydown', { key: '1' }))
     await settle(600)

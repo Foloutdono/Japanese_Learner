@@ -29,7 +29,8 @@ import { DeskFigure } from './RunRecords'
 //     Space turns the card, C shows the choices, Esc leaves the run. The
 //     digits are on the tiles above. The readings drill (`keys="readings"`)
 //     turns nothing: there, a comma or a space adds a reading to the box
-//     and Enter checks (ReadingsInput).
+//     and Enter checks (ReadingsInput). The first ride (`keys="ride"`,
+//     plan 133) has no choices to show, so no C.
 //   - The rhythm, on a sumi foot: minutes since the run started
 //     (stores/runTally's startedAt), cards a minute, and an estimate of
 //     what the remaining cards will take at that pace.
@@ -68,7 +69,7 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
   return (
     <section className="desk-run__panel desk-card" aria-label={t.deskCardPanel}>
       <StateLine stage={stage} t={t} />
-      <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel}>
+      <div className="desk-verdicts" role="list" aria-label={t.deskCardPanel} data-guide="run.verdicts">
         {verdicts.map(({ q, label, digit }) => {
           const due = preview?.[String(q)]?.due_in
           const figure = dueFigure(due, t)
@@ -88,7 +89,7 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
           )
         })}
       </div>
-      <div className="desk-keys" role="list" aria-label={t.deskKeysTitle}>
+      <div className="desk-keys" role="list" aria-label={t.deskKeysTitle} data-guide="run.keys">
         {keys === 'readings' ? (
           <>
             <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">,</kbd><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyAddReading}</span>
@@ -97,12 +98,12 @@ export function CardPanel({ card, remaining = null, keys = 'card' }) {
         ) : (
           <>
             <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keySpace}</kbd>{t.deskKeyTurn}</span>
-            <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">C</kbd>{t.deskKeyChoices}</span>
+            {keys === 'card' && <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">C</kbd>{t.deskKeyChoices}</span>}
           </>
         )}
         <span role="listitem" className="desk-keys__item"><kbd className="desk-kbd">{t.keyEscape}</kbd>{t.deskKeyLeave}</span>
       </div>
-      <div className="desk-rhythm" role="group" aria-label={t.deskRhythm}>
+      <div className="desk-rhythm" role="group" aria-label={t.deskRhythm} data-guide="run.rhythm">
         <DeskFigure label={t.deskElapsed} value={minutes} unit="min" />
         <DeskFigure label={t.deskPerMinute} value={perMinute == null ? '—' : decimal.format(perMinute)} />
         <DeskFigure label={t.deskToFinish} value={toFinish == null ? '—' : `≈ ${toFinish}`} unit={toFinish == null ? null : 'min'} />
@@ -121,7 +122,7 @@ function StateLine({ stage, t }) {
   const xs = [1 / 6, 1 / 2, 5 / 6].map(f => f * 300)
   const labels = [t.progressNew, t.progressLearning, t.progressMastered]
   return (
-    <div className="desk-stops" role="img" aria-label={`${t.deskCardPanel} · ${labels[at]}`}>
+    <div className="desk-stops" role="img" aria-label={`${t.deskCardPanel} · ${labels[at]}`} data-guide="run.state">
       <svg className="desk-stops__line" viewBox="0 0 300 30" preserveAspectRatio="none" aria-hidden="true">
         <line x1={xs[0]} y1="21" x2={xs[2]} y2="21" stroke="currentColor" strokeOpacity=".25" strokeWidth="2" vectorEffect="non-scaling-stroke" />
         <line x1={xs[0]} y1="21" x2={xs[at]} y2="21" stroke="var(--accent2)" strokeWidth="2" vectorEffect="non-scaling-stroke" />

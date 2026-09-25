@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
-import { apiJson } from '../lib/api'
+import { apiFetch, apiJson } from '../lib/api'
 import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
 import { StudyStage } from '../components/study/StudyStage'
@@ -10,11 +10,18 @@ import RatingBar from '../components/study/RatingBar'
 import { Loading } from '../components/ui/Loading'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
+import { Guide } from '../components/guide/Guide'
+import { TOUR_READ, TOUR_GRADED } from '../components/guide/rideTours'
 import { OfferButton } from '../components/credits/OfferButton'
 import { ReadingTimer, ReadingPrompt, AnswerForm, ReadingRegisters } from '../components/reading/ReadingPieces'
+import { RunLines } from '../components/study/RunLines'
+import { useSentenceKeys, currentLine } from '../components/study/sentenceLines'
+import { BreakdownSide } from '../components/analysis/BreakdownSide'
+import { vocabLookup, grammarLookup } from '../components/analysis/lookup'
 import { PASS_PLATFORMS, SOURCES } from '../domain/paywall'
 import { getAllSections } from '../config/tabs'
 import { useCredits } from '../stores/credits'
+import { startTally, countReview } from '../stores/runTally'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { useDesk } from '../hooks/useDesk'
 
@@ -35,25 +42,46 @@ import { useDesk } from '../hooks/useDesk'
 // than the pass-gated reading router's. The one write is the lesson's
 // stamp on "Enter the station" -- or on Skip, the same stamp: a
 // learner who skipped is not asked again.
+//
+// 机 (plan 133): on the desk the ride stands on the practice runs'
+// three panels (plan 129) -- this run's figures and its lines at the
+// left, the sentence in the middle, the breakdown sealed at the right
+// until the grade -- and walks the learner round them before the clock
+// starts (`intro`, TOUR_READ), then, once graded, opens the sentence's
+// breakdown there (`graded`: the local tier of /api/phrase/analyze,
+// free and cached, never the paid explanation) and points at it and at
+// the line the sentence became (TOUR_GRADED) before the plate. A phone
+// keeps the ride it had.
 const READING_COLOR = 'var(--line-reading)'
-// The steps, as ride_step names them: read, type, measure, pass.
+// The steps, as ride_step names them: read, type, measure, pass; on the
+// desk intro before read and graded between measure and pass.
 
 export default function RideReading({ session, onDone, dryRun = false, sentence: given = null }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
   const credits = useCredits()
   const desk = useDesk()
+  const keys = useSentenceKeys()
 
   const [sentence, setSentence] = useState(given)
   const [failed, setFailed] = useState(false)
-  const [step, setStep] = useState('read')
+  // The desk opens on its walk, with the clock held; a phone on the
+  // sentence. Decided once: the ride does not change chrome under the
+  // learner.
+  const [step, setStep] = useState(() => (desk ? 'intro' : 'read'))
   // null until the sentence is up: a clock that starts at zero would
   // read as already run out, and cover the sentence before it showed.
   const [timeLeft, setTimeLeft] = useState(null)
   const [answer, setAnswer] = useState('')
   const [accuracy, setAccuracy] = useState(null)
   const [correct, setCorrect] = useState(null)
+  const [quality, setQuality] = useState(null)
   const [busy, setBusy] = useState(false)
+  // The desk's breakdown, and a door opened in it.
+  const [analysis, setAnalysis] = useState(null)
+  const [analysisLoading, setAnalysisLoading] = useState(false)
+  const [lookup, setLookup] = useState(null)
+  const closeLookup = useCallback(() => setLookup(null), [])
   const timer = useRef(null)
   const watches = useRef(null)
   const finished = useRef(false)
@@ -67,6 +95,9 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     const w = watches.current
     return () => { w.total.stop(); w.step.stop(); watches.current = null }
   }, [])
+
+  // This run's tally, for the figures the desk's panels print.
+  useEffect(() => { startTally('ride-reading') }, [])
 
   useEffect(() => {
     if (given) return undefined
@@ -104,11 +135,27 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     setStep(next)
   }
 
+  // The breakdown, fetched as the reading run fetches it the moment its
+  // sentence shows: the desk's alone, since a phone draws none.
+  function fetchAnalysis(phrase) {
+    if (dryRun) return
+    setAnalysisLoading(true)
+    apiFetch('/api/phrase/analyze', session, {
+      method: 'POST',
+      body: JSON.stringify({ phrase, save: false, deep: false, lang }),
+    })
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => setAnalysis(d))
+      .catch(() => setAnalysis(null))
+      .finally(() => setAnalysisLoading(false))
+  }
+
   function submit() {
     if (!answer.trim() || (step !== 'read' && step !== 'type')) return
     clearInterval(timer.current)
     timer.current = null
     go('measure')
+    if (desk) fetchAnalysis(sentence.phrase)
     if (!dryRun) {
       apiJson('/api/onboarding/ride/check', session, {
         method: 'POST', body: JSON.stringify({ answer: answer.trim() }),
@@ -121,7 +168,9 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
   function rate(q) {
     if (step !== 'measure' || correct !== null) return
     setCorrect(q >= 3)
-    go('pass')
+    setQuality(q)
+    countReview({ quality: q })
+    go(desk ? 'graded' : 'pass')
   }
 
   function finish(skipped) {
@@ -147,6 +196,17 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     navigate('/today', { replace: true })
   }, [failed, navigate, onDone])
 
+  // The desk's second walk, once: the breakdown the grade opened.
+  const [gradedToured, setGradedToured] = useState(false)
+  const tour = !sentence ? null
+    : step === 'intro' ? TOUR_READ
+    : step === 'graded' && !gradedToured ? TOUR_GRADED
+    : null
+  function endTour() {
+    if (step === 'intro') go('read')
+    else setGradedToured(true)
+  }
+
   const foot = { left: t.rideJp, right: t.readingTitle }
   const platforms = getAllSections(t).filter(s => Object.values(PASS_PLATFORMS).includes(s.path))
   const callouts = {
@@ -155,6 +215,11 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
     measure: { anchor: 'ride.rate',     place: 'above', text: (desk && t.rideReadMeasureDesk) || t.rideReadMeasure },
   }
   const callout = sentence && callouts[step]
+
+  const writing = step === 'intro' || step === 'read' || step === 'type'
+  const graded = step === 'graded'
+  const panels = desk && Boolean(sentence) && step !== 'pass'
+  const measured = step === 'measure' || graded
 
   return (
     <StudyStage
@@ -165,18 +230,44 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       sub={t.readingTitle}
       pass={false}
       className="ride ride--reading"
+      // 机 (plan 133): a practice run's three panels (plan 129). The
+      // one sentence is the lines' current row, an ellipsis until the
+      // answer is in; the lines are a record, not doors -- there is no
+      // other sentence to reopen.
+      records={panels}
+      recordsLabel={t.deskLinesRated}
+      panel={panels ? (
+        <RunLines current={currentLine(measured ? sentence.phrase : null, quality)} keys={keys} />
+      ) : null}
+      side={panels ? (
+        <BreakdownSide
+          graded={graded}
+          analysis={analysis}
+          loading={analysisLoading}
+          translation={sentence.translation}
+          sentenceText={sentence.phrase}
+          onTokenClick={w => setLookup(vocabLookup(w))}
+          onGrammarOpen={g => setLookup(grammarLookup(g))}
+          lookup={lookup}
+          onExitLookup={closeLookup}
+          session={session}
+        />
+      ) : undefined}
+      sideLabel={t.deskBreakdownLabel}
     >
       {!sentence && !failed && <Loading />}
 
-      {sentence && (step === 'read' || step === 'type') && (
+      {sentence && writing && (
         <>
           <ReadingTimer timeLeft={timeLeft ?? sentence.display_seconds} total={sentence.display_seconds} covered={covered} t={t} />
-          <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered} guide="ride.sentence" />
+          {/* Covered while the walk is open: its clock has not started,
+              and a sentence left showing under it is free time. */}
+          <ReadingPrompt cardKey="ride" foot={foot} phrase={sentence.phrase} covered={covered || step === 'intro'} guide="ride.sentence" />
           <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submit} t={t} guide="ride.answer" />
         </>
       )}
 
-      {sentence && step === 'measure' && (
+      {sentence && measured && (
         <>
           <PromptCard prose foot={{ left: t.rideJp, right: <>{t.readingGrammarPoint} · <span lang="ja">{sentence.grammar}</span></> }}>
             <ReadingRegisters
@@ -190,7 +281,14 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
               t={t}
             />
           </PromptCard>
-          <RatingBar active onRate={rate} guide="ride.rate" />
+          {graded ? (
+            <div className="stage__foot">
+              <Continue keys label={t.rideContinue} onClick={() => go('pass')} />
+              <EnterKey onEnter={() => go('pass')} disabled={Boolean(tour)} />
+            </div>
+          ) : (
+            <RatingBar active onRate={rate} guide="ride.rate" />
+          )}
         </>
       )}
 
@@ -218,6 +316,7 @@ export default function RideReading({ session, onDone, dryRun = false, sentence:
       )}
 
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
+      {tour && <Guide key={step} gate="ride" stops={tour} onEnd={endTour} />}
     </StudyStage>
   )
 }

@@ -15,7 +15,7 @@ import { createPortal } from 'react-dom'
 //             bar, which has nothing empty inside).
 //   'below' — under the anchor's bottom edge (a plate on a gate).
 // The vertical is measured; the horizontal is the stage's own centre,
-// which on a phone is the screen's. Re-measured on resize, on scroll
+// which on a phone is the screen's (on the desk's panels, the anchor's). Re-measured on resize, on scroll
 // and whenever the anchor itself changes size (the card grows on the
 // flip), so the note follows the thing it is about.
 //
@@ -35,9 +35,14 @@ function measure(anchor, place) {
   const el = document.querySelector(`[data-guide="${anchor}"]`)
   if (!el) return null
   const r = el.getBoundingClientRect()
-  if (place === 'above') return { bottom: Math.max(0, window.innerHeight - r.top + GAP) }
-  if (place === 'below') return { top: r.bottom + GAP }
-  return { top: r.top + GAP }
+  const pos = place === 'above' ? { bottom: Math.max(0, window.innerHeight - r.top + GAP) }
+    : place === 'below' ? { top: r.bottom + GAP }
+    : { top: r.top + GAP }
+  // 机 (plan 133): on a run's three panels the stage is the middle
+  // column, neither the window's middle nor what a lone side leaves, so
+  // the note stands on its anchor, at the anchor's width.
+  if (el.closest('.desk-run--panels')) return { ...pos, left: r.left + r.width / 2, width: r.width }
+  return pos
 }
 
 export function Callout({ anchor, place = 'top', text, foot, className = '', live = true }) {

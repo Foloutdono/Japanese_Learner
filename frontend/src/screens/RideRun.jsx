@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLang } from '../LangContext'
 import { apiJson } from '../lib/api'
@@ -13,12 +13,17 @@ import { Loading } from '../components/ui/Loading'
 import { Emphasized } from '../components/ui/Emphasized'
 import { Continue } from '../components/boarding/BoardFrame'
 import { Callout } from '../components/guide/Callout'
+import { Guide } from '../components/guide/Guide'
+import { TOUR_FRONT, TOUR_BACK } from '../components/guide/rideTours'
 import { HINTS } from '../domain/studyModes'
 import { normalizeCard, wordForm } from '../domain/cardShape'
 import { useProfileSummary } from '../stores/profileSummary'
+import { startTally, countReview } from '../stores/runTally'
 import { useDesk } from '../hooks/useDesk'
 import { EnterKey } from '../components/chrome/DeskKeys'
 import { SessionPanel } from '../components/study/SessionPanel'
+import { CardPanel } from '../components/study/CardPanel'
+import { LookupWatchContext } from '../components/study/lookupWatch'
 
 // ── 試乗 — the test ride (plan 098) ──────────────────────────────
 // The learner's first two flashcards, on the real stage: the same
@@ -38,6 +43,20 @@ import { SessionPanel } from '../components/study/SessionPanel'
 // (POST /api/onboarding/ride/done), finished or skipped alike, so the
 // index route stops sending the learner here.
 //
+// Plan 133 made it the lesson of the runs as they are drawn now. On a
+// phone the known card, once turned, cannot be graded until the
+// learner has opened its dictionary entry from the 🔍 in its corner
+// and closed it again (`known-dict`): every card carries that door, and
+// a door nobody is shown is one nobody finds. On the desk the ride
+// stands on the three panels every card run stands on (plan 126) --
+// this run's figures and the card panel at the left, the card, the
+// details sealed at the right -- and walks the learner round them with
+// the gates' own guide (components/guide/Guide.jsx, handed its stops):
+// every part before the first card is turned (TOUR_FRONT), the entry
+// and the forecast once it is (TOUR_BACK). The ride counts its two
+// ratings in the run's tally (stores/runTally) so the figures it points
+// at move; the tally is the screen's and is never posted.
+//
 // The way out is the head's ‹, labelled Skip: quiet, never a primary
 // button. A returning learner who has flipped cards for years does
 // not need ninety seconds of this, and whether people skip is the one
@@ -54,15 +73,21 @@ import { SessionPanel } from '../components/study/SessionPanel'
 export const RIDE_NEXT = '/ride/reading'
 
 // The steps, as ride_step names them: known, known-back, unknown,
-// unknown-back, done (stepFor below).
+// unknown-back, done (stepFor below); on a phone known-dict between
+// the known card's turn and its grade, and on the desk tour-front and
+// tour-back while a walk round the panels is open.
 // The rating bar's own pressed-state beat (RatingBar.PRESSED_MS): the
 // seal the learner pressed stays lit while the card moves on.
 const HOLD_MS = 420
 
-function stepFor(index, answered) {
+function stepFor(index, answered, lookFirst = false) {
   if (index >= 2) return 'done'
+  if (index === 0 && answered && lookFirst) return 'known-dict'
   return `${index === 0 ? 'known' : 'unknown'}${answered ? '-back' : ''}`
 }
+
+// The desk's walks round the panels (plan 133, components/guide/rideTours).
+const TOURS = { front: TOUR_FRONT, back: TOUR_BACK }
 
 /** The card as CardPrompt wants it, with the romaji riding on it for
  *  a learner who does not yet read kana: the furigana hint's own
@@ -96,6 +121,14 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
   const [answered, setAnswered] = useState(false)
   const [guessed, setGuessed] = useState(false)
   const [busy, setBusy] = useState(false)
+  // A phone's known-dict step: the 🔍's sheet is open now, and it has
+  // been opened and closed once.
+  const [lookupOpen, setLookupOpen] = useState(false)
+  const [looked, setLooked] = useState(false)
+  // The desk's walks: the one open ('front' | 'back'), and the ones
+  // walked or declined -- a Skip on either declines both.
+  const [tour, setTour] = useState(null)
+  const [toured, setToured] = useState(() => new Set())
   const watches = useRef(null)
   const holdTimer = useRef(null)
   const finished = useRef(false)
@@ -116,6 +149,9 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
 
   useEffect(() => () => clearTimeout(holdTimer.current), [])
 
+  // This run's tally, for the figures the desk's panels print.
+  useEffect(() => { startTally('ride') }, [])
+
   useEffect(() => {
     if (given) return undefined
     let live = true
@@ -125,7 +161,10 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     return () => { live = false }
   }, [session, lang, given])
 
-  const step = stepFor(index, answered)
+  // The desk docks the entry beside the card on the flip, so the 🔍
+  // step is the phone's alone.
+  const lookFirst = !desk && !looked
+  const step = stepFor(index, answered, lookFirst)
 
   function mark(from, to) {
     track('ride_step', { step: from, to, dir: 'fwd', ms: watches.current?.step.lap() ?? 0 })
@@ -172,13 +211,14 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
 
   function reveal() {
     if (answered) return
-    mark(step, stepFor(index, true))
+    mark(step, stepFor(index, true, lookFirst))
     setAnswered(true)
     if (latin && card?.kana) speakJapanese(card.kana)
   }
 
   function rate(q) {
-    if (!answered || busy) return
+    if (!answered || busy || step === 'known-dict') return
+    countReview({ quality: q })
     // The second card is the lesson: a wrong on it is the method, and
     // anything else is a guess the done screen answers gently.
     if (index === 1 && q > 2) setGuessed(true)
@@ -191,15 +231,48 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
     }, HOLD_MS)
   }
 
+  // The 🔍's sheet, told through LookupWatchContext: closing it once is
+  // what lets the known card's grade through.
+  const onLookup = useCallback(open => {
+    setLookupOpen(open)
+    if (!open) setLooked(true)
+  }, [])
+  const lookedOnKnown = looked && index === 0 && answered
+  useEffect(() => {
+    if (lookedOnKnown && !desk) mark('known-dict', 'known-back')
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lookedOnKnown])
+
+  // The desk's walks: the front one once the first card is on the
+  // stage and the cutscene has lifted, the back one once it is turned.
+  const panels = desk && Boolean(cards?.length) && step !== 'done'
+  const due = !panels || covered || !card || index !== 0 || tour ? null
+    : !answered && !toured.has('front') ? 'front'
+    : answered && !toured.has('back') ? 'back'
+    : null
+  useEffect(() => {
+    if (!due) return
+    mark(step, `tour-${due}`)
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- the walk opens once its anchors are painted, which is after this render.
+    setTour(due)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [due])
+  function endTour(skipped) {
+    mark(`tour-${tour}`, step)
+    setToured(prev => new Set([...prev, tour, ...(skipped ? ['front', 'back'] : [])]))
+    setTour(null)
+  }
+
   const remaining = cards ? Math.max(0, cards.length - index) : null
   const foot = { left: t.rideJp, right: t.rideCap }
   const callouts = {
     'known':        { anchor: 'ride.card', place: 'top',   text: (desk && t.rideKnownFrontDesk) || t.rideKnownFront },
+    'known-dict':   { anchor: 'card.lookup', place: 'below', text: t.rideKnownDict },
     'known-back':   { anchor: 'ride.rate', place: 'above', text: (desk && t.rideKnownBackDesk) || t.rideKnownBack },
     'unknown':      { anchor: 'ride.card', place: 'top',   text: (desk && t.rideUnknownFrontDesk) || t.rideUnknownFront },
     'unknown-back': { anchor: 'ride.rate', place: 'above', text: (desk && t.rideUnknownBackDesk) || t.rideUnknownBack },
   }
-  const callout = !covered && card && callouts[step]
+  const callout = !covered && !tour && !lookupOpen && card && callouts[step]
 
   return (
     <StudyStage
@@ -210,13 +283,14 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       sub={t.rideCap}
       remaining={step === 'done' ? undefined : remaining}
       className="ride"
-      // 机 (plan 122): the browse's side (plan 119) -- the flip docks
-      // the card's entry beside it, where a phone looks it up from 🔍.
-      // Nothing to rate there, and nothing beside the done room. No
-      // misses either: the ride keeps no tally of its own (plan 124
-      // lists a run's misses as they happen), so its column is the
-      // entry alone.
-      side={cards?.length > 0 && step !== 'done' ? <SessionPanel misses={false} /> : undefined}
+      // 机 (plan 133): a card run's three panels (plan 126) -- this
+      // run's figures and the card panel at the left, the details at
+      // the right, sealed until the flip docks the card's entry there,
+      // where a phone looks it up from 🔍. Nothing beside the done
+      // room, and no misses: two cards are not a list.
+      records={panels}
+      panel={panels && card ? <CardPanel card={card} remaining={remaining} keys="ride" /> : null}
+      side={panels ? <SessionPanel misses={false} /> : undefined}
       sideLabel={t.dictionaryTitle}
     >
       {!cards && !failed && <Loading />}
@@ -228,15 +302,17 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
               stay DIRECT children of .stage -- the phone dock's
               `.stage > .rating-bar` and the card's floor depend on it. */}
           <CardTransition className="vocab-card-boost" cardKey={card.card_id} guide="ride.card">
-            <CardPrompt
-              card={nc} t={t} session={session}
-              answered={answered} cardNonce={0}
-              activeHints={latin ? [HINTS.FURIGANA] : []}
-              onFlashcardReveal={reveal}
-              foot={foot}
-            />
+            <LookupWatchContext.Provider value={onLookup}>
+              <CardPrompt
+                card={nc} t={t} session={session}
+                answered={answered} cardNonce={0}
+                activeHints={latin ? [HINTS.FURIGANA] : []}
+                onFlashcardReveal={reveal}
+                foot={foot}
+              />
+            </LookupWatchContext.Provider>
           </CardTransition>
-          <RatingBar active={answered && !busy} onRate={rate} guide="ride.rate" />
+          <RatingBar active={answered && !busy && step !== 'known-dict'} onRate={rate} guide="ride.rate" />
         </>
       )}
 
@@ -256,6 +332,7 @@ export default function RideRun({ session, onDone, onNext = null, covered = fals
       )}
 
       {callout && <Callout anchor={callout.anchor} place={callout.place} text={callout.text} />}
+      {tour && <Guide key={tour} gate="ride" stops={TOURS[tour]} onEnd={endTour} />}
     </StudyStage>
   )
 }
