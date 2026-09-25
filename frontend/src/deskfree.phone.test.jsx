@@ -1496,3 +1496,34 @@ describe('the three panels (plan 126)', () => {
     expect(document.querySelector('.screen > .lvlbar')).not.toBeNull()
   })
 })
+
+// ── plan 127 — the dictionary's two columns a phone does without ──
+// On the desk the catalogue is one column and the entry stands beside
+// all of it from the page's top. A phone keeps the catalogue as it was:
+// no columns, nothing opened on arrival, and a tapped tile's entry in
+// the results' own dock, the sheet it has always been.
+describe('the dictionary\'s columns (plan 127)', () => {
+  it('draws no columns, and opens the entry in the results\' own dock', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    const rows = [
+      { type: 'kanji', kanji: '土', kana: 'ド・つち', meaning: 'sol', level: 'N5', status: { status: 'new' } },
+      { type: 'kanji', kanji: '山', kana: 'サン・やま', meaning: 'montagne', level: 'N5', status: { status: 'new' } },
+    ]
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: rows, total: 2, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(document.querySelector('.desk-dict, .desk-dict__main')).toBeNull()
+    expect(document.querySelector('.dict-dock')).toBeNull()
+    document.querySelector('.dict-entry-card').click()
+    await settle(250)
+    const dock = document.querySelector('.dict-dock')
+    expect(dock.parentElement.classList.contains('dict-layout')).toBe(true)
+    expect(getComputedStyle(dock).position).toBe('fixed')
+    // The plate stands stacked, as ever: no desk rule reaches it.
+    expect(getComputedStyle(dock.querySelector('.dict-plate')).display).toBe('flex')
+    apiJson.mockReset()
+  })
+})

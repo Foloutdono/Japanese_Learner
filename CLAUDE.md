@@ -390,7 +390,18 @@ runtime purpose. Two consequences worth knowing:
   `components/study/RatingBar.jsx`, `components/dictionary/DictionaryDetail.jsx`,
   `domain/forecast.js`, `stores/runTally.js`, `src/panels.desktop.test.jsx`
   and the 机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **127** or higher, and check
+  **127** is the dictionary as two columns on the desk, the layout the
+  owner chose from four rendered options: the catalogue (the analyser's
+  door, the console, the results) in one column and the entry beside all
+  of it from the page's top at `--desk-entry-w` (440px), never past the
+  window's foot, so a character's entry reads whole with no scroll — its
+  plate laid across, the stroke sheet in one row, the record four across
+  — while a word's and a grammar point's plate stay stacked and their
+  bodies scroll in the column (cited in `screens/DictionaryScreen.jsx`'s
+  `DeskColumns`, the 机 section and `:root` of `index.css`,
+  `src/dictionary.desktop.test.jsx` and `src/deskfree.phone.test.jsx`;
+  DESIGN.md, "The desk"; `docs/design/desk/README.md`).
+  When starting a new wave, begin at **128** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

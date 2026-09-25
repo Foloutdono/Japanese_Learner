@@ -604,6 +604,19 @@ export default function DictionaryScreen({ session }) {
 	// 案内 — once the first page of the catalogue has painted (plan 100).
 	const guide = useGuide('dictionary', !loading && results.length > 0)
 
+	// 机 (plan 127): the entry's column, stood beside the whole catalogue
+	// rather than inside the results (DeskColumns). Below the desk the
+	// results still carry their own dock, the sheet it becomes there.
+	const dock = desk && selected && !showingRadicalGrid && (
+		<DetailDock
+			entry={selected}
+			onRadicalClick={jumpToRadical} onKanjiClick={char => openEntry(char, 'kanji')}
+			onVocabClick={(k, r) => openEntry(k || r, 'vocab', r)} onGrammarClick={openGrammar}
+			onKanaClick={(k, type) => openEntry(k, type)} onReview={reviewCard}
+			mining={mining} favorites={shelf}
+		/>
+	)
+
 	return (
 		<main id="main-content" className="dictionary" style={{ '--line-color': DICTIONARY_COLOR }}>
 			{guide.open && <Guide gate="dictionary" onEnd={guide.onEnd} />}
@@ -612,6 +625,12 @@ export default function DictionaryScreen({ session }) {
 			    screen's clipped <h1>. */}
 			<h1 className="sr-only">{t.dictionaryTitle}</h1>
 
+			{/* 机 (plan 127): on the desk the catalogue and its entry are two
+			    columns, the entry standing from the page's top rather than under
+			    the door and the console, where the window cut it off (see
+			    DeskColumns). A phone gets the same children with no wrapper. */}
+			<DeskDockContext.Provider value={desk ? deskDock : null}>
+			<DeskColumns desk={desk} bare={showingRadicalGrid} dock={dock}>
 			{/* The analyzer, behind its door (canvas Dictionary): one row
 			    naming the section and its three intakes. The pass tag the
 			    canvas draws on it stays out until a purchase flow exists
@@ -833,7 +852,6 @@ export default function DictionaryScreen({ session }) {
 			)}
 
 			{/* Results (search mode, or a radical's kanji) */}
-			<DeskDockContext.Provider value={desk ? deskDock : null}>
 			{!showingRadicalGrid && (
 				isSyllabary ? (
 					<SyllabaryGrid
@@ -875,6 +893,7 @@ export default function DictionaryScreen({ session }) {
 					/>
 				)
 			)}
+			</DeskColumns>
 			</DeskDockContext.Provider>
 			{/* The entry a door led to, over the catalogue rather than in
 			    place of it (see openEntry). Keyed on what it was opened on,
@@ -964,6 +983,28 @@ function cardFurigana(entry) {
 		return reading ? [{ text: entry.kanji, reading }] : null
 	}
 	return entry.furigana?.some(part => part.reading) ? entry.furigana : null
+}
+
+// ── 机 — the catalogue and its entry, two columns (plan 127) ──
+// The entry stood under the analyser's door and the console, 270px
+// down, at the side column's 360px: a kanji's plate, stroke sheet,
+// words and record ran some 230px past the window's foot, so the page
+// had to scroll before the entry could, and a word's senses or a
+// grammar lesson ran on for a page more. On the desk the catalogue --
+// the door, the console, the results -- is one column and the entry
+// stands beside all of it, from the page's top, at --desk-entry-w. The
+// column is held while a page loads, so the catalogue does not widen
+// and narrow again under a search; only the radical index, which has
+// no entry to show, takes the width alone (`bare`). A phone renders
+// the children as they were, with no wrapper.
+function DeskColumns({ desk, bare, dock, children }) {
+	if (!desk) return children
+	return (
+		<div className={`desk-dict${bare ? ' desk-dict--bare' : ''}`}>
+			<div className="desk-dict__main">{children}</div>
+			{dock}
+		</div>
+	)
 }
 
 // The dock's focusable controls, in order: where a door is found again
@@ -1188,7 +1229,9 @@ function ResultsSection({
 						</div>
 					</div>
 
-					{selected && (
+					{/* On the desk the screen stands the dock beside the whole
+					    catalogue instead (DeskColumns, plan 127). */}
+					{selected && !desk && (
 						<DetailDock
 							entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 							onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}
@@ -1308,6 +1351,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 }
 
 function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick, onKanjiClick, onVocabClick, onKanaClick, onReview, mining, favorites, accentColor, t }) {
+	const desk = useDesk()
 	const byGroup = useMemo(() => {
 		const map = {}
 		results.forEach(e => { (map[e.group] ??= []).push(e) })
@@ -1410,7 +1454,8 @@ function SyllabaryGrid({ results, loading, selected, setSelected, onRadicalClick
 				</div>
 			</div>
 
-			{selected && (
+			{/* Beside the whole catalogue on the desk (DeskColumns). */}
+			{selected && !desk && (
 				<DetailDock
 					entry={selected} onClose={() => { playUi('click-close-menu'); setSelected(null) }}
 					onRadicalClick={onRadicalClick} onKanjiClick={onKanjiClick} onVocabClick={onVocabClick}

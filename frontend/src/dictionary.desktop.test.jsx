@@ -93,7 +93,10 @@ describe('the dock on the desk', () => {
     expect(headword()).toBe('駅')
     const grid = document.querySelector('.dict-grid').getBoundingClientRect()
     expect(dock.getBoundingClientRect().left).toBeGreaterThan(grid.right - 1)
-    expect(Math.round(dock.getBoundingClientRect().width)).toBe(360)
+    // --desk-entry-w since plan 127, and level with the analyser's door.
+    const width = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desk-entry-w'))
+    expect(Math.round(dock.getBoundingClientRect().width)).toBe(width)
+    expect(Math.round(dock.getBoundingClientRect().top)).toBe(Math.round(document.querySelector('.anl-door').getBoundingClientRect().top))
     // A standing companion, not a panel that was opened: nothing closes it.
     const labels = [...dock.querySelectorAll('button')].map(b => b.getAttribute('aria-label'))
     expect(labels.filter(l => /fermer|close/i.test(l ?? ''))).toEqual([])
@@ -287,5 +290,110 @@ describe('a door in the dock, and back', () => {
     expect(headword()).toBe('電車')
     expect(document.activeElement).toBe(dock.querySelector('.dict-word'))
     expect(dock.scrollTop).toBe(read)
+  })
+})
+
+
+// ── plan 127 — the catalogue and its entry, two columns ──
+// The entry stood in the results, under the analyser's door and the
+// console, at the side column's 360px: its foot hung some 230px below
+// the window, so the page scrolled before the entry could. It stands
+// beside the whole catalogue now, from the page's top, at
+// --desk-entry-w; a character's entry reads whole in the window, and
+// its plate is laid across. A word or a grammar point keeps the plate
+// stacked -- 〜てください, laid across, wrapped its own pattern and set
+// its structure line a character a line. The phone's side is
+// deskfree.phone.
+describe('the catalogue and its entry (plan 127)', () => {
+  const word = (kanji, kana, meaning, furigana) => ({ kanji, kana, meaning, level: 'N5', furigana })
+  const DO = {
+    type: 'kanji', kanji: '土', kana: 'ド・ト・つち', word_reading: 'つち', meaning: 'sol; terre; terrain; Turquie', level: 'N5',
+    stroke_count: 3, radical: 32, radical_glyph: '土', radical_name: 'つち', svg_url: '/kanjivg/0571f.svg',
+    status: { status: 'learning', total_reviews: 12, correct_reviews: 10, accuracy: 83, due: false, interval_days: 6, next_review: '2026-09-28T09:00:00+00:00' },
+    app_card: { source: 'kanji', level: 'N5', raw_id: 'kanji_N5_土' },
+    vocab_examples: [
+      word('土曜日', 'どようび', 'samedi', [{ text: '土', reading: 'ど' }, { text: '曜', reading: 'よう' }, { text: '日', reading: 'び' }]),
+      word('土地', 'とち', 'parcelle de terrain', [{ text: '土', reading: 'と' }, { text: '地', reading: 'ち' }]),
+      word('土', 'つち', 'terre, sol', [{ text: '土', reading: 'つち' }]),
+      word('土曜', 'どよう', 'samedi', [{ text: '土', reading: 'ど' }, { text: '曜', reading: 'よう' }]),
+    ],
+    readings: [{ reading: 'ド', words: [] }, { reading: 'ト', words: [] }, { reading: 'つち', words: [] }],
+  }
+  const POINT = {
+    type: 'grammar', raw_id: 'grammar_N5_〜てください', level: 'N5', pattern: '〜てください',
+    structure: 'verb て-form + ください', meaning: 'faites..., s\'il vous plaît', status: { status: 'new' },
+    steps: [], compare: [], examples: [],
+  }
+  const serve = rows => apiFetch.mockImplementation(async path => ({
+    ok: true, status: 200,
+    json: async () => (String(path).startsWith('/api/dictionary/radicals')
+      ? { groups: [{ stroke_count: 1, radicals: [{ number: 1, char: '一', kanji_count: 32 }] }] }
+      : { results: rows, total: rows.length, has_more: false }),
+  }))
+
+  it('stands beside the whole catalogue from the page\'s top, and never past the window', async () => {
+    serve([DO, KANJI])
+    await mount()
+    const dock = document.querySelector('.dict-dock').getBoundingClientRect()
+    for (const part of ['.anl-door', '.console', '.dict-grid']) {
+      expect(document.querySelector(`.desk-dict__main ${part}`).getBoundingClientRect().right).toBeLessThan(dock.left)
+    }
+    expect(dock.bottom).toBeLessThanOrEqual(innerHeight)
+  })
+
+  it('reads a character\'s entry whole: the plate, the sheet, the words and the record', async () => {
+    serve([DO, KANJI])
+    await mount()
+    const dock = document.querySelector('.dict-dock')
+    expect(dock.querySelectorAll('.dict-word')).toHaveLength(4)
+    expect(dock.querySelector('.records')).not.toBeNull()
+    expect(dock.scrollHeight).toBeLessThanOrEqual(dock.clientHeight)
+    expect(dock.getBoundingClientRect().bottom).toBeLessThanOrEqual(innerHeight)
+  })
+
+  it('lays a character\'s plate across, and keeps a word\'s and a grammar point\'s stacked', async () => {
+    serve([DO, VOCAB, POINT])
+    await mount()
+    const plate = () => document.querySelector('.dict-dock .dict-plate')
+    expect(getComputedStyle(plate()).display).toBe('grid')
+    // The glyph at the left, its readings beside it.
+    const glyph = plate().querySelector('.dict-plate__word').getBoundingClientRect()
+    expect(plate().querySelector('.dict-plate__readings').getBoundingClientRect().left).toBeGreaterThan(glyph.right)
+
+    ;[...document.querySelectorAll('.dict-entry-card')].find(c => c.textContent.includes('電車')).click()
+    await settle()
+    expect(getComputedStyle(plate()).display).toBe('flex')
+
+    ;[...document.querySelectorAll('.dict-entry-card')].find(c => c.textContent.includes('てください')).click()
+    await settle()
+    expect(getComputedStyle(plate()).display).toBe('flex')
+    // The pattern on one line, and its structure a line across the plate.
+    const pattern = plate().querySelector('.dict-plate__word')
+    expect(pattern.getBoundingClientRect().height).toBeLessThan(2 * parseFloat(getComputedStyle(pattern).fontSize))
+    expect(plate().querySelector('.dict-plate__structure').getBoundingClientRect().height)
+      .toBeLessThan(2 * parseFloat(getComputedStyle(plate().querySelector('.dict-plate__structure')).lineHeight))
+  })
+
+  it('holds its column under a search, and gives the width up to the radical index', async () => {
+    serve([DO, KANJI])
+    await mount()
+    const columns = () => getComputedStyle(document.querySelector('.desk-dict')).gridTemplateColumns.split(' ').length
+    const input = document.querySelector('.console input')
+    input.focus()
+    await userEvent.fill(input, 'z')
+    // The entry is gone while the page loads; its column is not.
+    expect(document.querySelector('.dict-dock')).toBeNull()
+    expect(columns()).toBe(2)
+    await settle(600)
+    await userEvent.fill(input, '')
+    await settle(600)
+
+    document.querySelector('.console__toggle').click()
+    await settle()
+    expect(document.querySelector('.desk-dict--bare')).not.toBeNull()
+    expect(document.querySelector('.dict-dock')).toBeNull()
+    expect(columns()).toBe(1)
+    expect(Math.round(document.querySelector('.desk-dict__main').getBoundingClientRect().width))
+      .toBe(Math.round(document.querySelector('.desk-dict').getBoundingClientRect().width))
   })
 })

@@ -3113,6 +3113,14 @@
      purpose: nearly everything that goes there was drawn for a phone
      first, and here it is drawn at the width it was designed at. */
   --desk-side-w:    360px;
+  /* The dictionary's entry beside its catalogue (plan 127): the side
+     column's width was a phone's, and a kanji's plate, stroke sheet,
+     words and record ran some 230px past a laptop window's foot at it.
+     This is the width the owner chose from four rendered layouts, where
+     a character's entry reads whole with no scroll; a word's senses or
+     a grammar lesson still scroll inside the column. Here for the same
+     reason as --desk-rail-w. */
+  --desk-entry-w:   440px;
   /* A card run on three panels (plan 126, from the owner's mock drawn at
      1877px): the three columns share --desk-run-w, the width they took
      there, 28 | 42 | 30 by the owner's second round -- the card the
@@ -20890,14 +20898,41 @@ a.slip__act { text-decoration: none; }
     from { opacity: 0; transform: translateY(6px); }
     to   { opacity: 1; transform: none; }
   }
-  .phone--desk .dict-dock {
-    flex-basis: var(--desk-side-w);
+  /* ── 机 — the dictionary: the catalogue and its entry (plan 127) ──
+     The catalogue -- the analyser's door, the console, the results -- is
+     one column, and the entry stands beside all of it from the page's
+     top at --desk-entry-w, sticky at --sp-6 and never taller than the
+     window. It used to stand in the results, under the door and the
+     console: 270px down, so the column's foot hung below the window and
+     the page had to scroll before the entry could. The column is held
+     while a page loads (screens/DictionaryScreen's DeskColumns), and
+     only the radical index, which has no entry to show, takes the width
+     alone. The gap is the one the dock always had beside the grid. */
+  .desk-dict {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) var(--desk-entry-w);
+    align-items: start;
+    gap: var(--sp-7);
+  }
+  .desk-dict--bare { grid-template-columns: minmax(0, 1fr); }
+  .desk-dict__main {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* Two tiles across at the least: the catalogue's own 168px, but never
+     so wide that the narrowest desk (1100px, where the column is some
+     330px) stands its tiles one to a row. */
+  .desk-dict__main .dict-grid {
+    grid-template-columns: repeat(auto-fill, minmax(min(168px, calc((100% - var(--sp-3)) / 2)), 1fr));
+  }
+  .desk-dict > .dict-dock {
+    grid-column: 2;
     top: var(--sp-6);
     max-height: calc(100dvh - 2 * var(--sp-6));
-    /* A wheel at the column's end goes on to the page (plan 123): the
-       column stands at --sp-6 below a page that may be scrolled, and its
-       foot was only ever reached by scrolling the page, which `contain`
-       refused while the pointer was over it. */
+    /* A wheel at the column's end goes on to the page (plan 123), which
+       is the catalogue beside it. */
     overscroll-behavior-y: auto;
   }
   /* The analyzer's working rail stood on the stage's LEFT, which on the
@@ -22626,5 +22661,68 @@ a.slip__act { text-decoration: none; }
     height: 100%;
     max-height: calc(3 * var(--fs-specimen-glyph));
   }
+
+  /* ── 机 — the dictionary's entry in its column (plan 127) ──
+     After the run's band (plan 126), whose plate rules these share
+     elements with and must come after. */
+  /* A character's plate laid across, as the run's band draws it (plan
+     126): the glyph at the left, its readings and its gloss beside it,
+     the marks over the actions at the right, the stripe under all
+     three -- a hundred pixels the stacked plate spent above the word.
+     Only a character's: a word or a grammar point keeps the plate
+     stacked, because a pattern or a long word cannot stand beside its
+     readings at this width (〜てください, laid across, wrapped its own
+     pattern and set its structure line a character a line). */
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) {
+    display: grid;
+    /* The readings and the gloss centred beside the glyph as a pair,
+       whichever of the two the entry has: a kana has only its romaji, a
+       kanji whose body lists its glosses only its readings. */
+    grid-template:
+      "word . row" 1fr
+      "word readings row" auto
+      "word caption row" auto
+      "word . row" 1fr
+      "stripe stripe stripe" auto
+      / auto minmax(0, 1fr) auto;
+    gap: var(--sp-1) var(--sp-6);
+  }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stack { display: contents; }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__word {
+    grid-area: word;
+    align-self: center;
+    font-size: var(--fs-specimen-word);
+    line-height: 1;
+  }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__readings {
+    grid-area: readings;
+    justify-content: flex-start;
+  }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) .dict-plate__caption {
+    grid-area: caption;
+    text-align: left;
+    text-indent: 0;
+  }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__row {
+    grid-area: row;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-3);
+  }
+  .desk-dict .dict-plate:has(.dict-plate__word--glyph) > .dict-plate__stripe {
+    grid-area: stripe;
+    margin-top: var(--sp-4);
+  }
+  /* The stroke sheet and its figures in one row rather than the sheet
+     beside a stack of them, and the record four across: the two blocks
+     the column's width can take side by side. */
+  .desk-dict .dict-form {
+    grid-template: none;
+    grid-auto-columns: minmax(0, 1fr);
+    grid-auto-flow: column;
+  }
+  .desk-dict .dict-form__sheet { grid-row: auto; }
+  .desk-dict > .dict-dock .records { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desk-dict > .dict-dock .records > .record { padding: var(--sp-4); }
 }
 /* ═══ 机 — end of the desk ═══════════════════════════════════════ */
