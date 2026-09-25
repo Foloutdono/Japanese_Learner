@@ -1063,7 +1063,10 @@ answer a keyboard and a pointer one way everywhere.
   rhythm on a sumi foot. **No captions on either panel**
   and no line under a tile's interval saying what the rating does — the
   owner cut them for room: the figures, the stops and the tiles name
-  themselves, and the remaining count is a fourth figure. In the
+  themselves, and the remaining count is a fourth figure. Where the
+  column is too narrow for the run's labels (a laptop's 300px), the
+  figures stand bare, the labels kept for a screen reader — measured, not
+  set at a width, since their length is the language's. In the
   middle **the card**, the tiles framed in a surface row under it,
   **unlit and inert before the reveal** rather than unseen, with no
   digits in their corners. At the right **the card's details**: before

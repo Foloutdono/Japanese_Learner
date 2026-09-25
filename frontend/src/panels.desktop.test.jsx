@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render } from 'vitest-browser-react'
-import { page } from 'vitest/browser'
 import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
@@ -98,6 +97,12 @@ function Stage({ records = true, side = <SessionPanel />, done = false, panel = 
     </LangProvider>
   )
 }
+// A box at a given width for the run to lay itself out in: the grid's
+// columns and its centring answer to the box, while the lane's window
+// (and so the desk's line, and every other file in the lane) stays put.
+function Frame({ width, children }) {
+  return <div data-frame="" style={{ width: `${width}px` }}>{children}</div>
+}
 function Card() {
   return (
     <CardTransition className="specimen-card-stage" cardKey="k">
@@ -150,23 +155,22 @@ describe('the three columns', () => {
   })
 
   it('shares the width 28 | 42 | 30 on the owner\'s window, and stands centred past it', async () => {
-    try {
-      await page.viewport(1877, 900)
-      await render(<Stage><Card /><RatingBar active onRate={() => {}} /></Stage>)
-      await settle(400)
-      const widths = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
-      const sum = widths.reduce((a, b) => a + b, 0)
-      expect(widths.map(w => Math.round((100 * w) / sum))).toEqual([28, 42, 30])
-      // Past --desk-run-w the three keep their widths, centred.
-      await page.viewport(2400, 900)
-      await settle(100)
-      const wide = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
-      wide.forEach((w, i) => expect(w).toBeCloseTo(widths[i], 0))
-      const screen = rect('.screen')
-      expect(Math.abs((rect('.desk-run__left').left - screen.left) - (screen.right - rect('.desk-run__side').right))).toBeLessThan(2)
-    } finally {
-      await page.viewport(1100, 800)
-    }
+    // The run laid out in a box at the owner's width rather than a
+    // resized window: the lane's files share one browser, and a resize
+    // reaches the others running beside this one.
+    await render(<Frame width={1877}><Stage><Card /><RatingBar active onRate={() => {}} /></Stage></Frame>)
+    await settle(400)
+    const widths = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
+    const sum = widths.reduce((a, b) => a + b, 0)
+    expect(widths.map(w => Math.round((100 * w) / sum))).toEqual([28, 42, 30])
+    // Past --desk-run-w the three keep their widths, centred.
+    $('[data-frame]').style.width = '2400px'
+    await settle(100)
+    const wide = ['.desk-run__left', '.stage', '.desk-run__side'].map(s => rect(s).width)
+    wide.forEach((w, i) => expect(w).toBeCloseTo(widths[i], 0))
+    const screen = rect('.screen')
+    expect(screen.width).toBeCloseTo(2400, 0)
+    expect(Math.abs((rect('.desk-run__left').left - screen.left) - (screen.right - rect('.desk-run__side').right))).toBeLessThan(2)
   })
 
   it('heads the left column with this run: the figures, the count among them, the level and the legend', async () => {
@@ -183,6 +187,28 @@ describe('the three columns', () => {
     countReview({ quality: 4, xp: 12, entry: { term: '駅', category: 'kanji', session: {} } })
     await settle()
     expect($$('.desk-session .desk-figs .desk-fig__value').map(el => el.textContent)).toEqual(['1', '100%', '+12XP', '19'])
+  })
+
+  it('stands its figures bare where the column is too narrow for their labels, and labels them where it is not', async () => {
+    const labels = () => $$('.desk-session .desk-figs .desk-fig__label')
+    const clear = () => {
+      const boxes = $$('.desk-session .desk-figs .desk-fig__value').map(el => el.getBoundingClientRect())
+      return boxes.every((b, i) => i === 0 || b.left >= boxes[i - 1].right)
+    }
+    // A laptop: the left column at its 300px, four labels in caps.
+    await render(<Frame width={1100}><Stage><Card /><RatingBar active onRate={() => {}} /></Stage></Frame>)
+    await settle(300)
+    expect(rect('.desk-run__left').width).toBeCloseTo(300, 0)
+    expect(labels().every(l => l.classList.contains('sr-only')), 'bare on a laptop').toBe(true)
+    // Still named for a screen reader, and the figures clear of each other.
+    expect(labels().map(l => l.textContent)).toEqual(['Révisions', 'Précision', 'Gagnés', 'Restantes'])
+    expect(clear()).toBe(true)
+    // The owner's width has the room: the labels come back, whole.
+    $('[data-frame]').style.width = '1877px'
+    await settle(300)
+    expect(labels().some(l => l.classList.contains('sr-only')), 'labelled on a wide window').toBe(false)
+    expect(labels().every(l => l.scrollWidth <= l.clientWidth + 1)).toBe(true)
+    expect(clear()).toBe(true)
   })
 })
 
