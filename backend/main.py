@@ -44,6 +44,7 @@ from routes.phrase           import router as phrase_router
 from routes.reading          import router as reading_router
 from routes.dictation        import router as dictation_router
 from routes.composition      import router as composition_router
+from routes.practice         import router as practice_router
 from routes.profile          import router as profile_router
 from routes.frequency       import router as frequency_router
 from routes.theme_vocab      import router as theme_vocab_router
@@ -181,6 +182,7 @@ app.include_router(phrase_router)
 app.include_router(reading_router)
 app.include_router(dictation_router)
 app.include_router(composition_router)
+app.include_router(practice_router)
 app.include_router(profile_router)
 app.include_router(frequency_router)
 app.include_router(theme_vocab_router)

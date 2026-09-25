@@ -951,7 +951,8 @@ set down on a desk; plan 115 took the remaining second screens and sheets
 into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
-answer a keyboard and a pointer one way everywhere.
+answer a keyboard and a pointer one way everywhere. Plan 130 had the two
+plated gates take the window.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1029,9 +1030,26 @@ answer a keyboard and a pointer one way everywhere.
   stands — a gold wash and foot mastered, a vermillion foot in progress,
   the kana in the secondary ink not yet met — and the short kana entry at
   `--desk-side-w`. On the narrowest desk the columns wrap rather than
-  shrink the cells. A
-  Learn plate's foot draws the whole line, a leg per level, and every leg
-  is a door to its stop.
+  shrink the cells.
+- **The plated gates take the window** (plan 130, the owner's pick of
+  three rendered options). Learn and Practice stood a third of the way
+  down a 950px window with the rest empty; their plates now fill the room
+  the page has, the rows sharing it, and the room goes to each plate's
+  body, never to air in the box (the density contract). A Learn plate's
+  foot draws the whole line **upright**: the novice's stop at the top,
+  then a row per level with its stretch of the rail filled as far as the
+  leg is ridden, its station at the leg's end, a bar of the level's
+  make-up (learned in the line's pigment, met but not learned in half of
+  it) and its learned / total, the bars sharing one column so each starts
+  where the others do. Every row is a door to its stop. A Practice
+  plate's grades are **rows**, each with what the learner has done at
+  that grade (sentences, texts or papers, and the share right, from
+  `/api/practice/record`) or "not yet", the learner's own grade in the
+  chip's --here look; a row departs as its chip does. Practice goes three
+  across once three hold a French name whole, and its six then stand in
+  two rows. The shelf keeps its own height, having no body. Both feet are
+  lists, one tab stop each, walked with ↑/↓. A window too short for the
+  plates scrolls rather than squeezing a row below its content.
 - **A station is two panes.** Levels, sets or grades stand upright on the
   left and the chosen stop's platforms on the right, each platform with its
   own figures (due now, and the composition bar the statistics draw); the
@@ -1303,7 +1321,10 @@ answer a keyboard and a pointer one way everywhere.
   train), and drawn without the reading and the caption the mockup gave
   it — a plate that prints かな over Kana over KANA names one thing three
   times. On a phone the column takes the gate and every plate gets one
-  share, the shelf too.
+  share, the shelf too. On the desk the lattice takes the window the same
+  way, and the plate's foot grows into the room: the whole line upright on
+  Learn, the grades as rows with the learner's record on Practice (plan
+  130, "The desk" above).
 - **A line with stops is how this app draws distance**, and it is one drawing
   shared by two places: the level picker's route diagram and the pass's ghost
   track (the wall map was the third, and went with the plates). Same parts

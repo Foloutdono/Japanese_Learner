@@ -1,6 +1,7 @@
 import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
 import { deckItems, lineMarks, stopsAround, stopsTravelled } from '../../domain/lineProgress'
+import { useListWalk, WALK_KEYS } from '../../hooks/useListWalk'
 
 // ── 駅名標 — a line as its own station plate (plan 094) ──────────
 // The Learn and Practice gates hang one plate per section: the roundel
@@ -83,28 +84,40 @@ export function StopsFoot({ stops, guide }) {
 }
 
 /**
- * The desk's foot on a Learn line (plan 114): the whole line, where the
- * phone's plate had room for three stops. The novice's stop at the
- * origin, then one leg per level — its rail filled as far as the level
- * is learned, its station at the leg's END (a station is a completion,
- * domain/lineProgress), and under it the level's own figure, learned
- * over total, the same one its station page prints. The leg being
- * ridden is inked; the ones finished are filled. On a 400–570px plate
- * that is the distance the profile's ledger and the station page each
- * print one piece of, read at a glance from the gate.
+ * The desk's foot on a Learn line (plan 114; upright since plan 130):
+ * the whole line, where the phone's plate had room for three stops.
+ * The novice's stop at the top, then one row per level going down —
+ * the rail through every row filled as far as the level's leg is
+ * ridden, the level's station (a ring) at the leg's END (a station is
+ * a completion, domain/lineProgress), and beside it the level's own
+ * figure, learned over total, the same one its station page prints.
+ * The row's bar says what the figure cannot: learned in the line's
+ * full pigment, met but not yet learned in half of it.
+ *
+ * It ran across the plate until plan 130, a strip at the foot of a
+ * plate that stood a third of the way down the window. Upright, the
+ * rows share the plate's height, and the plates share the window's —
+ * the room goes to the line, not to air around it.
  */
 //
 // Every leg is a door (plan 115): its station's platforms are one click
 // from the gate, where the plate's head departs to the stop being
-// ridden — marked here as the learner's location.
+// ridden — marked here as the learner's location. The legs are a list,
+// walked like every list on the desk (hooks/useListWalk): one tab stop,
+// the ridden leg, and ↑/↓/Home/End along it.
 export function LineFoot({ stops, stats, source, guide, onStop }) {
   const marks = lineMarks(stops)
   const reached = Math.min(stops.length, Math.floor(stopsTravelled(stops)))
+  const tabStop = Math.min(reached, stops.length - 1)
+  const onWalk = useListWalk(true)
   return (
-    <span className="plate__foot desk-line" data-guide={guide}>
-      <span className="desk-line__origin"><Mark mark={marks[0]} /></span>
+    <div className="plate__foot desk-line" data-guide={guide} onKeyDown={onWalk} aria-keyshortcuts={WALK_KEYS}>
+      <span className="desk-line__origin">
+        <Rail down={stops[0]?.score ?? 0} />
+        <Mark mark={marks[0]} />
+      </span>
       {stops.map((stop, i) => {
-        const { learned, total } = deckItems(stats, source, stop.key)
+        const { learned, started, total } = deckItems(stats, source, stop.key)
         const state = i < reached ? ' desk-line__leg--done' : i === reached ? ' desk-line__leg--here' : ''
         return (
           <button
@@ -112,16 +125,34 @@ export function LineFoot({ stops, stats, source, guide, onStop }) {
             type="button"
             className={`desk-line__leg${state}`}
             aria-current={i === reached ? 'location' : undefined}
+            tabIndex={i === tabStop ? 0 : -1}
             onClick={() => onStop?.(stop.key)}
           >
-            <span className="desk-line__track" aria-hidden="true">
-              <i style={{ width: `${Math.round(Math.min(1, Math.max(0, stop.score)) * 100)}%` }} />
-            </span>
+            <Rail up={stop.score} down={stops[i + 1]?.score ?? 0} />
             <span className="desk-line__stop"><Mark mark={marks[i + 1]} /></span>
-            {total > 0 && <span className="desk-line__fig">{learned}/{total}</span>}
+            <span className="desk-line__bar" aria-hidden="true">
+              <i className="desk-line__met" style={{ width: share(started, total) }} />
+              <i className="desk-line__learned" style={{ width: share(learned, total) }} />
+            </span>
+            {total > 0 && <span className="desk-line__fig"><b>{learned}</b> / {total}</span>}
           </button>
         )
       })}
+    </div>
+  )
+}
+
+// A row's stretch of the rail, and its station. A leg runs from one
+// row's ring to the next row's, so its first half is the bottom of the
+// row above and its second half the top of its own: `up` is this leg's
+// score, `down` the next leg's, and each half fills its share of it.
+function Rail({ up = 0, down = 0 }) {
+  const half = x => Math.min(1, Math.max(0, x))
+  return (
+    <span className="desk-line__rail" style={{ '--up': half(2 * up - 1), '--down': half(2 * down) }} aria-hidden="true">
+      <i className="desk-line__ring" />
     </span>
   )
 }
+
+const share = (n, total) => `${total > 0 ? Math.round(Math.min(1, n / total) * 1000) / 10 : 0}%`

@@ -54,8 +54,9 @@ still the phone's row and the flick's order. The rail has no flick.
 
 | Selector | What | Where |
 |---|---|---|
-| `.learn > .plates`, `.practice > .plates` | two by two; Learn's fifth plate (the shelf) takes the row; Practice's six go three rows of two since 作文 (plan 125), the exam last beside it | `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx` |
-| `.desk-line`, `__origin`, `__leg` (`--done`, `--here`), `__track`, `__stop`, `__fig` | a Learn plate's foot as the whole line: 初, then a leg per level, filled as far as it is learned. Each leg is a button to its stop, the ridden one `aria-current="location"` (plan 115) | `components/station/LinePlate.jsx` (`LineFoot`) |
+| `.learn > .plates`, `.practice > .plates` | two by two; Learn's fifth plate (the shelf) takes the row at its own height; Practice's six go three across in two rows once three hold a French name (about 1344px), three rows of two below. Since plan 130 the plates take the window, their rows sharing it, and a plate's head keeps its own height while its foot takes the rest | `screens/LearnScreen.jsx`, `screens/PracticeScreen.jsx` |
+| `.desk-line`, `__origin`, `__leg` (`--done`, `--here`), `__rail` (`--up`, `--down`), `__ring`, `__stop`, `__bar`, `__met`, `__learned`, `__fig` | a Learn plate's foot as the whole line, upright since plan 130: the novice's stop, then a row per level sharing the foot's height and one set of columns (a subgrid) — the rail filled as far as each leg is ridden, the station's ring at the leg's end, a bar of learned and met, learned / total. Each row is a button to its stop, the ridden one `aria-current="location"` (plan 115) and the list's one tab stop, walked with ↑/↓ | `components/station/LinePlate.jsx` (`LineFoot`) |
+| `.desk-grades`, `.desk-grade` (`--here`), `__code`, `__rec` (`--none`), `__go` | a Practice plate's foot on the desk (plan 130): the five grades as rows sharing the foot, each what the learner has done there and the share right (`/api/practice/record`, `stores/practiceRecord.js`) or "not yet", the learner's grade in the chip's --here look and the list's one tab stop; a row departs as its chip. The phone keeps the chips | `screens/PracticeScreen.jsx` (`GradeRows`) |
 | `.learn > .platform-grid` | two across; an odd last slot takes the row; exactly three go three across | `components/selection/ModeSelector.jsx` and the source pickers |
 | `.learn > .route` | a route that boards directly, drawn across as a line | `components/selection/RouteStops.jsx` |
 | `.today` | the gate on the left; `.desk-side` on the right with the pass's strip and its back. The gate's `.gate-card__lanes` go two across once the gate holds two lanes at a phone's width (~1390px, plan 116) | `screens/TodayScreen.jsx`, `components/station/GateCard.jsx` |
@@ -141,6 +142,7 @@ still the phone's row and the flick's order. The rail has no flick.
 | `src/columns.wide.test.jsx`, `src/runs.wide.test.jsx`, `src/practice.desktop.test.jsx`, `src/guide.desktop.test.jsx`, `src/links.desktop.test.jsx`, `src/radios.desktop.test.jsx`, `src/focus.desktop.test.jsx`; blocks of the session, today, dictionary, keys, shelf, sheet, chrome, settings, stations, laptop, exam, browse, grammar, folds, analyzer, breakdown, stats and runs desktop tests | desktop, wide | plan 123, P1–P19 |
 | `src/composition.desktop.test.jsx`; the six-plate block of `src/gates.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | desktop, phone | plan 125: 作文's side — the lesson while writing, the breakdown once rated, Enter to the next point; Practice's six plates; the phone's door and no column |
 | `src/lines.desktop.test.jsx`; blocks of `src/practice.desktop.test.jsx`, `src/breakdown.desktop.test.jsx`, `src/composition.desktop.test.jsx`, `src/comprehension.desktop.test.jsx`, `src/deskfree.phone.test.jsx`; `src/stores/runTally.test.js` | desktop, phone, node | plan 129: the practice runs on three panels — the columns, the framed floor, the sealed then paned side, the lines (the ellipsis before the answer, a passed sentence reopened, Esc's order, the fetch of a breakdown never had, the walk), the keys in the lines, comprehension's review; the phone's score pill, toggle and no column; the practice tally |
+| `src/gates.wide.test.jsx`; the plan 130 block of `src/gates.desktop.test.jsx`; a block of `src/deskfree.phone.test.jsx` | desktop, wide, phone | plan 130: the gates take the window — the Learn line upright (rows sharing the plate, the bars aligned, the ridden leg the tab stop), Practice's grades as rows with the record, walked and departing, three across at 1440; the phone's chip row and no request for the record |
 | `src/deskfree.phone.test.jsx` | phone (390×844) | plans 114–125's phone side: at 390 every re-laid screen keeps the phone's arrangement, one block a phase |
 | `src/stores/runTally.test.js` | node | the run's tally and the docked entry's tokens |
 | `src/chrome.phone.test.jsx` ("draws no desk"), `RatingBar.browser.test.jsx` ("prints no keys") | phone, browser | nothing of the desk below the line |
@@ -194,8 +196,6 @@ index's lesson (`GrammarLessonBody`), Browse.
 - A ← → caption line where a walk has no control of its own (the grammar
   lesson, the exam's review, the dictionary's dock): the keys are in
   `aria-keyshortcuts`, but printing them reopens plan 114's key-legend cut.
-- A Learn or Practice plate's foot as one tab stop walked with ←/→ (five
-  stops a plate today).
 - The exam review row's hover is the bare button's brightness filter, kept
   to the pixel with the phone's button (plan 117); restyling it is a change
   to both sides.
@@ -209,3 +209,6 @@ index's lesson (`GrammarLessonBody`), Browse.
 (The first ride's 🔍 and Today's status dialog, listed here after plan 120,
 are gone: the ride has a side now (plan 122), and the status panel calls
 the journey standing beside the gate (plan 123).)
+
+(A Learn or Practice plate's foot as one tab stop is done: since plan 130
+both feet are upright lists, walked with ↑/↓ like every list on the desk.)

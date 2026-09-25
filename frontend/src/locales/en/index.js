@@ -1929,7 +1929,7 @@ const guide = {
   // Worded for a pointer (plan 123): the notes that said "tap".
   guideHudStatusDesk: 'On time or behind your own plan. Its ghost train stands beside the gate.',
   guideLearnPlateDesk: 'A line. Click the plate to open it; the chip is what it owes you today.',
-  guidePracticeDestsDesk: 'The levels. Yours is marked; click another to ride it anyway.',
+  guidePracticeDestsDesk: 'The levels, and what you have done at each. Yours is marked; click another to ride it anyway.',
   guideDictEntryDesk: 'An entry, open beside the catalogue. ← and → walk the catalogue; the star keeps it on your shelf.',
   // Settings, the two ways back.
   settingsFirstRide: 'First ride',
@@ -1984,6 +1984,15 @@ const onboarding = {
   settingsLineOn: 'On your route',
   settingsLineOff: 'Off your route',
   plateOffRoute: 'Off your route',
+  // A grade's record on a Practice platform, on the desk (plan 130):
+  // what was done at that grade, then the share of it that went right.
+  practiceDone: {
+    sentences: n => `${n} sentence${n === 1 ? '' : 's'}`,
+    texts: n => `${n} text${n === 1 ? '' : 's'}`,
+    papers: n => `${n} paper${n === 1 ? '' : 's'}`,
+  },
+  practiceRight: pct => `${pct}% right`,
+  practiceNotYet: 'Not yet',
   settingsRedoDesc: 'Take it again once you’ve progressed — your level moves with you.',
   // ── Which rating bar to grade with ──────────────────────────
   // Two buttons, four or six. All three send the same rating to the
