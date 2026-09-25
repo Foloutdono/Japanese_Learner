@@ -132,6 +132,12 @@ export default function TodayRun({ session }) {
   const [cleared, setCleared] = useState(0)
   // What the run paid, for the fare slip at the end (plan 069).
   const [xpTotal, setXpTotal] = useState(0)
+  // What the queue said it holds past the last batch and past the cards
+  // in hand (`beyond`, routes/today.py); null until a batch has said.
+  const [beyond, setBeyond] = useState(null)
+  // The card rated and not yet popped: the gates hold it on screen for
+  // its stamp and toast, and it is no longer left to do.
+  const [ratedKey, setRatedKey] = useState(null)
 
   const recentlyReviewedRef = useRef(new Map())
 
@@ -153,7 +159,10 @@ export default function TodayRun({ session }) {
         if (id && left.has(id)) left.set(id, left.get(id) - 1)
       }
       const rest = quotaParam(left)
-      if (!rest) return []
+      if (!rest) {
+        setBeyond(0)
+        return []
+      }
       quotaPart = `&quota=${encodeURIComponent(rest)}`
     }
     const data = await apiJson(
@@ -170,6 +179,7 @@ export default function TodayRun({ session }) {
     )
     const cards = data.cards ?? []
     for (const c of cards) if (c.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
+    setBeyond(Number.isInteger(data.beyond) ? data.beyond : null)
     return cards
   }, [lang, session, laneParam, allChosen, only, capped, quota, cardKey])
 
@@ -185,7 +195,7 @@ export default function TodayRun({ session }) {
     for (const c of cards ?? []) if (c?.lane?.id) laneOfRef.current.set(cardKey(c), c.lane.id)
     return staleCards(session, cards, signal)
   }, [session, cardKey])
-  const { current: card, loading, done, error, retry, advance } = useCardSession({
+  const { current: card, queueLength, loading, done, error, retry, advance } = useCardSession({
     // The choice is part of the key: picking different lanes is a
     // different session, and resuming the previous one's cached queue
     // would serve cards from lanes the learner just switched off.
@@ -291,6 +301,7 @@ export default function TodayRun({ session }) {
     })) return
 
     setShowRating(false)
+    setRatedKey(transitionKey)
 
     // From here on no refill, even one already in flight, may hand this
     // exact card back. Keyed by (id, mode) like everything else in this
@@ -317,15 +328,23 @@ export default function TodayRun({ session }) {
     }, { cleared: cleared + 1 }).catch(() => {})
   }
 
-  // Left in this run: the chosen lanes' due, less what this session
-  // cleared. Null (no pill) until the summary is in.
+  // Left in this run: the cards in hand not yet rated, and what the
+  // queue said it holds past them at the last batch. Not the gate's
+  // figure counted down: the queue is no snapshot -- a card rated a
+  // miss is due again minutes later and comes back, others fall due as
+  // the run goes on -- and a count taken down from the gate's read 0
+  // with the run still serving. Until a batch has said, the gate's
+  // figure less what was cleared is all there is; null (no pill) until
+  // the summary is in.
   const chosenDue = capped
     ? [...quota.values()].reduce((n, v) => n + v, 0)
     : summary
     ? (allChosen ? (summary.total ?? 0)
       : (summary.lanes ?? []).filter(l => chosenIds.has(l.id)).reduce((n, l) => n + l.due, 0))
     : null
-  const remaining = chosenDue == null ? null : Math.max(0, chosenDue - cleared)
+  const inHand = queueLength - (card && ratedKey === transitionKey ? 1 : 0)
+  const remaining = beyond != null ? inHand + beyond
+    : chosenDue == null ? null : Math.max(0, chosenDue - cleared)
 
   // The stage's words: where the card in hand is from, in the words
   // the gate used, and the mode it is served in. Before a card, the
@@ -335,7 +354,10 @@ export default function TodayRun({ session }) {
   const where = card?.lane ? whereOf(card.lane, t, kanaSetLabel) : t.todayTitle
   const sub = card ? modeLabel(t, card.mode) : undefined
   const color = card?.lane ? LINE_COLOR[laneTypeOf(card.lane)] : undefined
-  const pct = chosenDue ? Math.min(100, Math.round((100 * cleared) / chosenDue)) : 0
+  // The run's length as it stands, cleared and left: a card coming
+  // back lengthens the bar rather than running past its end.
+  const length = remaining == null ? null : cleared + remaining
+  const pct = length ? Math.min(100, Math.round((100 * cleared) / length)) : 0
 
   return (
     <StudyStage
@@ -354,9 +376,9 @@ export default function TodayRun({ session }) {
       sideLabel={t.dictionaryTitle}
     >
       {/* The run's own hairline: what this session has cleared of what
-          it set out to, in the day's gold. A mixed queue has no
+          it has to clear, in the day's gold. A mixed queue has no
           per-deck stage split to draw, so the bar is the run's. */}
-      {chosenDue > 0 && (
+      {length > 0 && (
         <div className="deck-progress" aria-hidden="true">
           <div className="deck-progress__bar">
             <div className="deck-progress__segment" style={{ width: `${pct}%`, background: 'var(--accent2)' }} />
