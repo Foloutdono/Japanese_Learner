@@ -229,6 +229,16 @@ Thirteen waves live in this file:
   section is before wave 31's, near the bottom of this file. The next
   wave begins at 128.
 
+- **Wave 33 — 辞書机, the dictionary on the desk** (plan 128, 2026-09-25,
+  DONE). The dictionary's entry stood under the analyser's door and the
+  console at the side column's width, its foot below the window's. Each
+  collection was drawn four ways on the real screen and the owner picked
+  one per collection: kanji and words keep the catalogue beside an entry
+  column from the page's top (A), grammar turns the split round (C), the
+  kana show the whole syllabary with each cell's stage (K4). Numbered 128
+  because 127 went to 定期券 while it was open. Its section is at the
+  very bottom of this file. The next wave begins at 129.
+
 - **Wave 22 — the vocab deck review** (plans 102–110, planned 2026-09-21;
   102–104, 106, 106b, 107, 109's source and report, 110 and 110b DONE; 105
   and 108 in slices, the first of each done). Opened by one N5 breakdown showing 母 with no card and 日曜日
@@ -6290,3 +6300,59 @@ the hairline under the head draws it and the desk prints its legend.
 The level bar's `progressbar` role moved from the bar to its track, since
 a progressbar's children are presentational and the figures now stand in
 the bar.
+
+---
+
+# Wave 33 — 辞書机, the dictionary on the desk (plan 128, 2026-09-25)
+
+Numbered 128 because 127 went to 定期券 (wave 32) while this was open;
+the next wave begins at 129.
+
+The complaint, from a screenshot at ~1600×917: a kanji's entry could not
+be read without scrolling the page first. It stood in the results at the
+side column's 360px, 270px down under the analyser's door and the
+console, so its foot hung ~230px below the window, and a word's senses or
+a grammar lesson ran on for a page more inside it.
+
+Every option was drawn on the real screen — the real components, the
+catalogue's own rows from `routes/dictionary.py`, only prototype CSS and
+a regrouping of the DOM — and screenshotted at the owner's window size,
+with each entry's overflow measured:
+
+| Collection | Options drawn | Pick |
+|---|---|---|
+| kanji, words (and the shelf, the radicals) | A column from the page's top at 440px · B the entry in two panels · C the entry takes the page · D a dialog over the grid | A |
+| grammar | the same four | C |
+| kana | K1 the whole chart · K2 both scripts per cell · K3 a writing specimen over the chart · K4 the whole chart with each cell's stage | K4, without the per-chart tally, the summary bar or the charts' titles |
+
+| # | Plan | Status |
+|---|------|--------|
+| 128 | 辞書机: the catalogue in one column and the entry beside all of it from the page's top at `--desk-entry-w` (440px), a character's plate laid across, the stroke sheet in one row, the record four across; grammar's points a list in the side column and the entry across the page, its plate laid left, its lesson in two columns of at least `--desk-run-col-min`; the kana charts three across and unmarked, a cell's stage as a tile's, the kana entry at `--desk-side-w`. `DeskColumns` (`bare`, `page`, `chart`), `SyllabaryGrid`'s desk columns; `src/dictionary.desktop.test.jsx`, `src/dictionary.wide.test.jsx` and blocks of `deskfree.phone` | DONE (2026-09-25) |
+
+What the rendered comparison caught that a sketch would not have:
+
+- **A pattern cannot be laid across.** The prototype's grammar plate in A
+  wrapped 〜てください and set its structure line one character to a
+  line. A character's plate is laid across; a word keeps its stacked
+  plate; grammar's page lays its plate left with the marks beside the
+  pattern (over it at seven characters or more), and never lets the entry
+  narrow below 440px, where a six-character pattern broke beside them.
+- **The kana charts had never stood side by side on the desk.** The
+  desk's `flex-wrap: wrap` sat on a group an older rule set to
+  `flex-direction: column`, so the charts stacked and only 五十音 showed
+  above the fold.
+- **The design-scale guard allows the named rungs only.** A kana size
+  fitted to the cell would have been an allowlisted literal; the title
+  rung (20px) fits a pair in the narrowest cell (--sp-8), so the charts
+  use it throughout.
+
+Fit, measured on the real rows:
+
+| Window | 土 | 出す (8 senses) | 〜てください | hiragana | katakana |
+|---|---|---|---|---|---|
+| 1600×917 | whole | scrolls in the column | whole | whole | whole |
+| 1440×900 | whole | scrolls in the column | 40px in the column | whole | whole |
+| 1100×800 | whole | scrolls in the column | one column, scrolls | columns wrap | columns wrap |
+
+The page never scrolls to reach an entry at any size.
+

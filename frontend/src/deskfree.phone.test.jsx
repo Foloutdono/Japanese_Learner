@@ -1523,3 +1523,58 @@ describe('the rail\'s pass (plan 127)', () => {
     expect(inner.querySelector('.hud__pass').hasAttribute('title')).toBe(false)
   })
 })
+
+// ── plan 128 — the dictionary's two columns a phone does without ──
+// On the desk the catalogue is one column and the entry stands beside
+// all of it from the page's top. A phone keeps the catalogue as it was:
+// no columns, nothing opened on arrival, and a tapped tile's entry in
+// the results' own dock, the sheet it has always been.
+describe('the dictionary\'s columns (plan 128)', () => {
+  it('draws no columns, and opens the entry in the results\' own dock', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    const rows = [
+      { type: 'kanji', kanji: '土', kana: 'ド・つち', meaning: 'sol', level: 'N5', status: { status: 'new' } },
+      { type: 'kanji', kanji: '山', kana: 'サン・やま', meaning: 'montagne', level: 'N5', status: { status: 'new' } },
+    ]
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: rows, total: 2, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(250)
+    expect(document.querySelector('.desk-dict, .desk-dict__main')).toBeNull()
+    expect(document.querySelector('.dict-dock')).toBeNull()
+    document.querySelector('.dict-entry-card').click()
+    await settle(250)
+    const dock = document.querySelector('.dict-dock')
+    expect(dock.parentElement.classList.contains('dict-layout')).toBe(true)
+    expect(getComputedStyle(dock).position).toBe('fixed')
+    // The plate stands stacked, as ever: no desk rule reaches it.
+    expect(getComputedStyle(dock.querySelector('.dict-plate')).display).toBe('flex')
+    apiJson.mockReset()
+  })
+})
+
+// ── plan 128 — the kana charts a phone keeps ──
+// On the desk the charts stand three across, unmarked, each cell marked
+// with the learner's stage. A phone keeps its two columns in teaching
+// order, every chart under its mark, and its cells as they were.
+describe('the kana charts (plan 128)', () => {
+  it('keeps two columns, every chart marked, no stage on a cell', async () => {
+    const { apiJson } = await import('./lib/api')
+    apiJson.mockImplementation(async () => ({ decks: [] }))
+    const { default: KANA } = await import('./testing/kanaRows.json')
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: KANA.hiragana, total: KANA.hiragana.length, has_more: false, groups: [] }) }))
+    const { MemoryRouter } = await import('react-router-dom')
+    const { default: DictionaryScreen } = await import('./screens/DictionaryScreen')
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary?category=hiragana']}><DictionaryScreen session={{}} /></MemoryRouter></LangProvider>)
+    await settle(300)
+    const cols = [...document.querySelectorAll('.syllabary-col')]
+    expect(cols).toHaveLength(2)
+    expect(cols.map(c => c.querySelectorAll('.syllabary-table').length)).toEqual([2, 2])
+    expect(document.querySelectorAll('.syllabary-table-wrap > .dict-mark')).toHaveLength(4)
+    expect(document.querySelector('.syllabary-cell--mastered, .syllabary-cell--learning')).toBeNull()
+    expect(document.querySelector('.desk-dict')).toBeNull()
+    apiJson.mockReset()
+  })
+})

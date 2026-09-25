@@ -1006,7 +1006,30 @@ answer a keyboard and a pointer one way everywhere.
   list's cut; the line chips and Depart run across both, and below that
   width the lanes stay one to a row. The
   dictionary's dock is open from the first frame on the first result, and
-  every door in an entry opens inside the dock; ←/→ walk the catalogue. A
+  every door in an entry opens inside the dock; ←/→ walk the catalogue.
+  Since plan 128 the catalogue (the analyser's door, the console, the
+  results) is one column and the entry stands beside all of it from the
+  page's top, at `--desk-entry-w` (440px), never past the window's foot: a
+  character's entry reads whole with no scroll, its plate laid across (the
+  glyph at the left, its readings and gloss centred beside it), the stroke
+  sheet and its figures in one row and the record four across. A word and
+  a grammar point keep the plate stacked — a pattern cannot stand beside
+  its readings at that width — and their longer bodies scroll inside the
+  column, never the page. The column is held while a page loads; the
+  radical index alone takes the width. The grammar collection turns the
+  split round: its points one to a row in the side column (the pattern
+  over its gloss), the entry across the rest and never narrower than
+  `--desk-entry-w`, its plate laid left with the marks beside the pattern
+  (over it, for a pattern of seven characters or more), the record flush
+  under the stripe and the lesson in two columns where each holds
+  `--desk-run-col-min`. The kana charts show the whole syllabary at once:
+  three columns of charts, unmarked (each grid keeps its name for a
+  screen reader), every cell one width between `--sp-8` and `--sp-9` and
+  its kana at the title rung, each cell marked with where the learner
+  stands — a gold wash and foot mastered, a vermillion foot in progress,
+  the kana in the secondary ink not yet met — and the short kana entry at
+  `--desk-side-w`. On the narrowest desk the columns wrap rather than
+  shrink the cells. A
   Learn plate's foot draws the whole line, a leg per level, and every leg
   is a door to its stop.
 - **A station is two panes.** Levels, sets or grades stand upright on the
@@ -1273,8 +1296,9 @@ answer a keyboard and a pointer one way everywhere.
   measured in weeks belongs on the pass's back, where the ghost train already
   measures it, and the day's work belongs at the fare gate.
 - Four column widths — and, on the desk, the rail's `--desk-rail-w`
-  (256px) beside them, the canvas grown to `--desk-board-w` (1240px) and a
-  second column at `--desk-side-w` (360px): `--board-w` (1040px) for the station column,
+  (256px) beside them, the canvas grown to `--desk-board-w` (1240px), a
+  second column at `--desk-side-w` (360px) and the dictionary's entry at
+  `--desk-entry-w` (440px, plan 128): `--board-w` (1040px) for the station column,
   `min(1240px, 100%)` for a plated selection screen, 720px for unplated prose,
   and `--card-w` (640px) for the study card column — the quiz prompt card,
   its progress bar, its MCQ list and its rating bar all share this one
