@@ -22431,6 +22431,15 @@ a.slip__act { text-decoration: none; }
   .desk-deck__study > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   .tier-picker > .platform-grid,
   .theme-picker > .platform-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  /* A line's split, filled (plan 137): the page's grid shares the
+     page's height, each platform a row of it; the foot's grid holds its
+     one door across. */
+  .desk-split--line .platform-grid {
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+  }
+  .desk-split__foot > .platform-grid { grid-template-columns: minmax(0, 1fr); }
   /* ... except a list beside its page (plan 115) — the tiers, the
      library's shelf: one to a row, in the list's column, never as wide
      as a card's content would like. */
@@ -22442,6 +22451,51 @@ a.slip__act { text-decoration: none; }
   .learn > .platform-grid > .platform-slot:last-child:nth-child(odd) { grid-column: 1 / -1; }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .learn > .platform-grid:has(> .platform-slot:nth-child(3):last-child) > .platform-slot:last-child { grid-column: auto; }
+
+  /* ── a line's split, filled (plan 137): the stops ──
+     Before the page-wide route below, whose heavier selectors write the
+     same rows: in a line's split each stop is a grid, its code and name
+     on one line, its sample and its bar under them, its caption and
+     figure at its foot (the rest of the block is with the split). */
+  .desk-split--line .route-stop {
+    flex: 1;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "code name name"
+      "sample sample sample"
+      "bar bar bar"
+      "caption caption fig";
+    align-content: center;
+    align-items: baseline;
+    gap: var(--sp-3) var(--sp-4);
+    padding-block: var(--sp-4);
+  }
+  .desk-split--line .route-stop__names { display: contents; }
+  .desk-split--line .route-stop__code { grid-area: code; }
+  .desk-split--line .route-stop__jp {
+    grid-area: name;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .desk-split--line .route-stop__caption { grid-area: caption; }
+  .desk-split--line .route-stop__fig {
+    grid-area: fig;
+    justify-self: end;
+  }
+  .desk-split--line .route-stop__go { display: none; }
+  .desk-stop__sample {
+    grid-area: sample;
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    word-spacing: var(--sp-2);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: color-mix(in srgb, var(--line-color) 62%, var(--text-secondary));
+  }
+  .desk-stop__bar { grid-area: bar; }
 
   /* A route that is the whole page — the levels a sentence station
      boards from, 理解's and 書取's, a theme's bands — is drawn the way a
@@ -22636,6 +22690,366 @@ a.slip__act { text-decoration: none; }
     text-transform: uppercase;
   }
   .desk-mode-fig__count b { color: var(--text-primary); }
+  /* With nothing due, the cards in progress (plan 137), in the
+     secondary ink: a count of work under way, not a call to act. */
+  .desk-mode-fig__now { color: var(--text-secondary); }
+
+  /* ── 机 — a line's split, filled (plan 137) ──
+     The owner's pick A of the station screens canvas. A line's station
+     (a kana set, a JLPT level of vocab, kanji or grammar) stood a third
+     of the way down the window, its stops wrapping their names in a
+     360px column and its platforms 850px wide with nothing between the
+     description and the figures. Now both columns take the window, the
+     way the gates' plates do (plan 130), and the room goes to what each
+     row has to say:
+
+     - a stop is a grid: its code and name on one line, the first things
+       it teaches under them (/api/station's samples, in the pigment the
+       platform card's own sample wears), the Learn plate's bar of its
+       make-up, then "you are here" and its figure; the stops share the
+       column's height, never below their content;
+     - a platform shares the page's height with the others, and carries
+       the card it will ask in a well between its description and its
+       figures (LinePlatforms' Specimen): the paper the run's card lies
+       on, seen through the platform;
+     - the fast review, which rates nothing, and the grammar level's
+       points, which open rather than board, are doors at the page's
+       foot, side by side, at the height of the one row they fill. */
+  .learn > .desk-split--line {
+    flex: 1;
+    align-items: stretch;
+  }
+  .desk-split--line > .desk-split__list {
+    display: flex;
+    flex-direction: column;
+  }
+  .desk-split--line > .desk-split__list > .route { flex: 1; }
+  .desk-platforms {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+    min-width: 0;
+  }
+  /* With wells, the figures take a column of their own width, so every
+     row's bar starts where the others' do; without (a laptop's narrower
+     page), the aside keeps the width its figures ask for, and the room
+     goes to the description. */
+  .desk-platforms--wells .platform-card__aside { flex-basis: calc(var(--desk-side-w) / 2); }
+  .desk-spec {
+    flex: 0 0 30%;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: var(--sp-4) var(--sp-6) var(--sp-4) 0;
+  }
+  .desk-spec__well {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--sp-4);
+    width: 100%;
+    height: 100%;
+    max-height: calc(3 * var(--sp-8));
+    padding: var(--sp-4) var(--sp-5);
+    overflow: hidden;
+    background: var(--bg-main);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-plate);
+  }
+  .desk-spec__well--sentence,
+  .desk-spec__well--blank,
+  .desk-spec__well--stack {
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .desk-spec__face {
+    min-width: 0;
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-spec__face--jp {
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    font-weight: 500;
+    line-height: 1.2;
+  }
+  .desk-spec__face--answer { color: var(--text-secondary); }
+  .desk-spec__face--answer.desk-spec__face--jp,
+  .desk-spec__face--long.desk-spec__face--jp { font-size: var(--fs-title); }
+  .desk-spec__to {
+    flex: none;
+    color: color-mix(in srgb, var(--text-secondary) 60%, transparent);
+  }
+  .desk-spec__well--stack > .desk-spec__to { transform: rotate(90deg); }
+  .desk-spec__typed {
+    padding-inline: var(--sp-1);
+    border-bottom: 2px solid var(--line-color);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+  }
+  .desk-spec__grid {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--sp-9);
+    height: var(--sp-9);
+    padding-inline: var(--sp-2);
+    border: 1px dashed color-mix(in srgb, var(--text-secondary) 45%, transparent);
+    border-radius: var(--r-plate);
+    background:
+      linear-gradient(color-mix(in srgb, var(--text-secondary) 18%, transparent), color-mix(in srgb, var(--text-secondary) 18%, transparent)) center / 100% 1px no-repeat,
+      linear-gradient(color-mix(in srgb, var(--text-secondary) 18%, transparent), color-mix(in srgb, var(--text-secondary) 18%, transparent)) center / 1px 100% no-repeat;
+    font-family: var(--font-jp);
+    font-size: var(--fs-heading);
+    color: color-mix(in srgb, var(--text-secondary) 35%, transparent);
+  }
+  .desk-spec__sentence {
+    max-width: 100%;
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-spec__gap {
+    display: inline-block;
+    width: var(--sp-7);
+    margin-inline: var(--sp-1);
+    border-bottom: 2px solid var(--text-secondary);
+  }
+  .desk-spec__rule {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-spec__rule > .desk-spec__face--jp { font-size: var(--fs-lead); }
+  .desk-spec__choices {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--sp-2);
+  }
+  .desk-spec__choice {
+    padding-inline: var(--sp-3);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    font-family: var(--font-jp);
+    font-size: var(--fs-sm);
+    color: var(--text-secondary);
+  }
+  .desk-split__foot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-columns: max-content;
+    grid-auto-flow: column;
+    gap: var(--sp-5);
+  }
+  .desk-split__foot .platform-card__lead,
+  .desk-split__foot .platform-card__body { padding-block: var(--sp-4); }
+  .desk-split__foot .platform-card__body {
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: baseline;
+    gap: var(--sp-5);
+  }
+  .desk-split__foot .platform-card__title { white-space: nowrap; }
+  .desk-split__foot .platform-card__desc {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  /* Beside the points' door the review keeps its name and drops its
+     sentence, which a laptop's half row cut to its first letter. */
+  .desk-split__foot:has(> :nth-child(2)) .platform-card__desc { display: none; }
+  .desk-split__foot > .gl-points-door { padding-inline: var(--sp-6) var(--sp-4); }
+  .desk-split__foot .rad-door__body {
+    flex-direction: row-reverse;
+    justify-content: flex-end;
+    align-items: baseline;
+    gap: var(--sp-5);
+  }
+  .desk-split__foot .rad-door__head { flex-direction: row-reverse; }
+  .desk-split__foot .rad-door__label {
+    font-size: var(--fs-title);
+    letter-spacing: normal;
+    text-transform: none;
+    color: var(--text-primary);
+  }
+
+  /* ── 机 — the vocabulary's sources as plates (plan 137) ──
+     The owner's pick S2: /learn/vocab was three cards across the top of
+     an empty window. Each source is now a plate hanging the window's
+     height (the gates' plate, --elev-hang and all) with its whole list
+     on it: JLPT's five levels share the plate as a line, the tiers and
+     the themes scroll inside theirs under their controls. The plates
+     take the room the page has and no more (a basis of nothing, then
+     all of what is left), so a list of fourteen hundred JMdict tiers
+     scrolls in its plate instead of stretching the page; a window too
+     short for them scrolls the page instead of squeezing a plate
+     below eight rows. */
+  .desk-sources {
+    flex: 1 1 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr);
+    gap: var(--sp-6);
+    min-height: calc(8 * var(--sp-8));
+  }
+  .desk-source { min-height: 0; }
+  .desk-source__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--sp-4);
+    padding: var(--sp-6) var(--sp-6) var(--sp-2);
+  }
+  .desk-source__title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+  .desk-source__fig,
+  .desk-source__num {
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    color: var(--text-secondary);
+  }
+  .desk-source__fig b,
+  .desk-source__num b { color: var(--text-primary); }
+  .desk-source__desc {
+    margin: 0;
+    padding: 0 var(--sp-6) var(--sp-4);
+    font-size: var(--fs-sm);
+    line-height: 1.5;
+    color: var(--text-secondary);
+  }
+  .desk-source__tools {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: 0 var(--sp-6) var(--sp-4);
+  }
+  .desk-source__stripe {
+    flex: none;
+    height: var(--sp-1);
+    background: var(--line-color);
+  }
+  .desk-source__rows {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    padding-block: var(--sp-2);
+  }
+  .desk-source__rows--scroll {
+    overflow-y: auto;
+    overscroll-behavior-y: auto;
+  }
+  .desk-source__row {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--sp-8) var(--sp-8) minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: var(--sp-3);
+    min-height: var(--sp-8);
+    padding-inline-end: var(--sp-6);
+    border-bottom: 1px solid color-mix(in srgb, var(--surface-line) 45%, transparent);
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background 0.15s ease;
+  }
+  .desk-source__row:last-child { border-bottom: 0; }
+  .desk-source__row:hover,
+  .desk-source__row:focus-visible { background: var(--bg-card-hover); }
+  .desk-source__row:focus-visible {
+    outline: 2px solid var(--accent2);
+    outline-offset: -2px;
+  }
+  /* The line through the rings, drawn per row so its ends can be capped
+     (RouteStops' rail, on the plate's own paper). */
+  .desk-source__row::before {
+    content: '';
+    position: absolute;
+    inset-block: 0;
+    left: calc(var(--sp-8) / 2);
+    width: 3px;
+    transform: translateX(-50%);
+    background: color-mix(in srgb, var(--line-color) 35%, transparent);
+  }
+  .desk-source__row--first::before { top: 50%; }
+  .desk-source__row--last::before { bottom: 50%; }
+  .desk-source__row--plain {
+    grid-template-columns: minmax(0, 1fr) auto;
+    padding-inline: var(--sp-6);
+  }
+  .desk-source__row--plain::before { content: none; }
+  .desk-source__rows--line > .desk-source__row { flex: 1; }
+  .desk-source__ring {
+    position: relative;
+    justify-self: center;
+    width: 18px;
+    height: 18px;
+    border: 2.5px solid color-mix(in srgb, var(--line-color) 55%, var(--bg-card));
+    border-radius: var(--r-pill);
+    background: var(--surface);
+  }
+  .desk-source__row--here > .desk-source__ring {
+    width: 22px;
+    height: 22px;
+    border-color: var(--line-color);
+    background: var(--line-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--line-color) 25%, transparent);
+  }
+  .desk-source__code {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary));
+  }
+  .desk-source__name {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-source__label {
+    overflow: hidden;
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .desk-source__cap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0 var(--sp-2);
+    white-space: nowrap;
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .desk-source__cap > * + *::before {
+    content: '·';
+    margin-inline-end: var(--sp-2);
+  }
+  .desk-source__here { color: color-mix(in srgb, var(--line-color) 65%, var(--text-primary)); }
 
   /* ── a run's column ──
      A run's card is --card-w; its head row (‹ the way out, where you

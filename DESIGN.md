@@ -1109,6 +1109,39 @@ plated gates take the window.
   radical swaps the page in place; the family's door no longer takes the
   lesson's place but swaps the index for the family, in the list, and
   back. The bare index opens on its page's biggest family.
+- **A line's station takes the window** (plan 137, the owner's pick A of
+  the station screens canvas). A kana set or a JLPT level of vocab, kanji
+  or grammar stood a third of the way down the window, its stops
+  wrapping their names and its platforms 850px wide with nothing between
+  the description and the figures. Both columns now fill the window,
+  the rows sharing it the way the gates' plates do, never below their
+  content. A **stop** is its code and name on one line, the first things
+  it teaches under them (a few kana, the level's commonest words, its
+  first grammar points), the Learn plate's bar of its make-up, then
+  "you are here" and its figure. A **platform** carries, in a well
+  between its description and its figures, **the card it will ask** —
+  何 → quoi on Word → meaning, quoi → 何 on Meaning → word, the sentence
+  and its gap among the rivals on Which one fits — drawn from the open
+  stop's own card, so N1's platforms show an N1 word. The well is the
+  paper the run's card lies on, seen through the platform; it is
+  decorative for a screen reader, the description saying the same. The
+  wells need a platform row a third of which is at least a side column,
+  so they are drawn only where the page is 720px or wider — measured,
+  not set at a window width — and a laptop keeps its descriptions whole
+  instead. The figures add what is in progress when nothing is due (the
+  bar's red sliver, named). The **fast review**, which rates nothing,
+  and the grammar level's **points**, which open rather than board, are
+  doors at the page's foot, one row. The bar names no level: the open
+  stop does.
+- **Vocabulary's sources are three plates** (plan 137, the owner's pick
+  S2). /learn/vocab was three cards across the top of an empty window,
+  each opening a list of its own. Each source now hangs as a plate the
+  window's height (the gates' plate, `--elev-hang`) with its whole list
+  on it — JLPT's five levels as a line sharing the plate, the frequency
+  tiers under their pool and size with the cards met in each, the
+  themes under their filter — and every row is a link that pushes to
+  its stop's platforms. The lists scroll inside their plates, never the
+  page. The phone keeps its three cards.
 - **The statistics are one page.** What holds on the left — the retention
   line drawn 1:1 at its card's own width (a 326-unit drawing magnified is
   a phone's chart), the ladder, the lines with the open one's levels hung

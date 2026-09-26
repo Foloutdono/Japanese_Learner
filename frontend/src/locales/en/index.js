@@ -518,6 +518,9 @@ const stats = {
   fareGate:           'Fare gate',
   dueUnit:            'due',
   newUnit:            'new',
+  learningUnit:       'in progress',
+  sourceTiers:        n => `${n} tiers`,
+  sourceThemes:       n => `${n} themes`,
   // The origin of every Learn line: where you stand before a level is
   // finished (domain/lineProgress.js's ORIGIN_STOP).
   originStop:         'Novice',

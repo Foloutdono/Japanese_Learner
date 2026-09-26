@@ -16,7 +16,8 @@ import { dialogOpen } from '../lib/dialogOpen'
 import { MODES as STUDY_MODES, FAST_REVIEW, modePickerEntries } from '../domain/studyModes'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
-import { ModeFigures } from '../components/selection/ModeFigures'
+import { LinePlatforms } from '../components/selection/LinePlatforms'
+import { useStationSamples } from '../stores/stationSamples'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
@@ -42,6 +43,7 @@ export default function GrammarScreen({ session }) {
   const [sp, setSp] = useSearchParams()
   const [index, setIndex] = useState(null)
   const desk = useDesk()
+  const samples = useStationSamples('grammar', desk && Boolean(level))
 
   const MODES = modePickerEntries(t, 'grammar')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'grammar'
@@ -142,31 +144,41 @@ export default function GrammarScreen({ session }) {
     )
   }
 
+  // Both columns take the window (plan 137, LinePlatforms): each level
+  // with its first points and its bar, each platform with the card it
+  // asks, and the points' door at the foot beside the fast review —
+  // both open something rather than board. The bar prints no sub: the
+  // open stop names the level.
   if (desk) {
-    const figured = offered.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="grammar" deck={level} mode={m.key} /> }))
     return (
       <SelectionScreen
         title={t.grammarTitle}
-        sub={`${level} · ${t[`levelHint${level}`] ?? ''}`}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <StationSplit
+          className="desk-split--line"
           label={t.stationJlpt}
-          list={<LevelSelector source="grammar" selected={level} linkTo={lvl => `/learn/grammar/${lvl}`} />}
+          list={<LevelSelector source="grammar" selected={level} linkTo={lvl => `/learn/grammar/${lvl}`} figured />}
         >
-          {index && index.total > 0 && (
-            <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
-              <span className="rad-door__body">
-                <span className="rad-door__head">
-                  <span className="rad-door__fig"><b>{index.learned}</b>/ {index.total}</span>
-                  {startedNote && <span className="rad-door__started">{startedNote}</span>}
+          <LinePlatforms
+            source="grammar"
+            deck={level}
+            card={samples?.[level]?.card}
+            modes={offered}
+            onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
+            door={index && index.total > 0 && (
+              <button type="button" className="rad-door gl-points-door" onClick={() => { playUi('click-screen-selection'); swap({ index: '1' }) }}>
+                <span className="rad-door__body">
+                  <span className="rad-door__head">
+                    <span className="rad-door__fig"><b>{index.learned}</b>/ {index.total}</span>
+                    {startedNote && <span className="rad-door__started">{startedNote}</span>}
+                  </span>
+                  <span className="rad-door__label">{t.glPoints}</span>
                 </span>
-                <span className="rad-door__label">{t.glPoints}</span>
-              </span>
-              <ChevronIcon direction="right" size={16} className="rad-door__chev" />
-            </button>
-          )}
-          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+                <ChevronIcon direction="right" size={16} className="rad-door__chev" />
+              </button>
+            )}
+          />
         </StationSplit>
       </SelectionScreen>
     )
