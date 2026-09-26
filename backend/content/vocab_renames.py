@@ -689,42 +689,6 @@ MOVES: dict[str, str] = {
     # gloss, "before", which is JMdict's own third and fourth sense
     # for 前::ぜん -- a dropped dakuten, not a different word.
     "vocab_N1_前_せん": "vocab_N1_前_ぜん",
-    # ── Plan 152: what plan 151's word reviewers found ───────────
-    # Readings JMdict does not give the form, each checked against the
-    # JMdict match the deck's senses were built from (term_only, not
-    # exact_reading, in vocab_meanings.json before plan 108) and the
-    # JLPT lists of datas/vocab/sources. 割 read かつ is the character's
-    # on-reading on 割る's senses: the list's word is 〜割 read わり,
-    # "rate, ten percent", the word 〜わりに is made of. 共 read きょう
-    # is the on-reading again, on 共【とも】's senses word for word.
-    # 愛憎 read あいにく is 生憎's reading (JMdict: 愛憎【あいぞう】, "love
-    # and hate"); 音色 read おんいろ and 復旧 read ふくきゅう are no
-    # readings at all (JMdict and the N1 list: ねいろ, ふっきゅう). No
-    # lower card is the word, so each card takes its reading, as 一筋
-    # did above.
-    "vocab_N1_割_かつ": "vocab_N1_割_わり",
-    "vocab_N1_共_きょう": "vocab_N1_共_とも",
-    "vocab_N1_愛憎_あいにく": "vocab_N1_愛憎_あいぞう",
-    "vocab_N1_音色_おんいろ": "vocab_N1_音色_ねいろ",
-    "vocab_N1_復旧_ふくきゅう": "vocab_N1_復旧_ふっきゅう",
-    # Real readings, JMdict's unmarked second ones, on the gloss of the
-    # everyday reading -- 天皇 すめらぎ's case: the N1 list, UniDic and
-    # JMdict's priority tags all give 地形 ちけい, 統治 とうち and 施行
-    # しこう. These stay in FOLDED_FORMS, as すめらぎ does.
-    "vocab_N1_地形_じぎょう": "vocab_N1_地形_ちけい",
-    "vocab_N1_統治_とうじ": "vocab_N1_統治_とうち",
-    "vocab_N1_施行_しぎょう": "vocab_N1_施行_しこう",
-    # 下す read おろす is the irregular okurigana (JMdict tags it so) of
-    # 下ろす, plan 112's 終る: 下す is くだす, "to hand down (a decision)",
-    # which is how UniDic reads it and how the reviewers' sentences used
-    # it. The card keeps its word and takes JMdict's spelling; 降ろす,
-    # the same reading in other kanji, stays a card of its own.
-    "vocab_N3_下す_おろす": "vocab_N3_下ろす_おろす",
-    # 否 read いいえ is plan 112's 此れ at N1 beside これ at N5: the old
-    # level-1 list writing an N5 kana word in kanji. JMdict gives 否 no
-    # reading いいえ (term_only; 否 is いや, いな and ひ), so the pair is
-    # no spelling to fold, and the rows go to the N5 いいえ.
-    "vocab_N1_否_いいえ": "vocab_N5__いいえ",
 }
 
 # MOVES keys that are not a spelling of their target. The move carries
@@ -741,20 +705,15 @@ NOT_FOLDED: frozenset[str] = frozenset({
     "vocab_N1_一筋_ひとすき",
     "vocab_N1_真実_さな",
     "vocab_N1_前_せん",
-    # Plan 152: あいにく is 生憎, and a fold would answer it with 愛憎.
-    "vocab_N1_割_かつ",
-    "vocab_N1_共_きょう",
-    "vocab_N1_愛憎_あいにく",
-    "vocab_N1_音色_おんいろ",
-    "vocab_N1_復旧_ふくきゅう",
-    "vocab_N1_否_いいえ",
 })
 
 # Ids that left the deck with nowhere to go. MOVES needs a card to carry
 # the rows to, and for these there is none: nothing at or below the
 # card's level teaches what it stood for, and a move UP a level would
 # take the card out of a lower-level learner's deck
-# (test_a_rename_that_changes_the_level_moves_down_never_up).
+# (test_a_rename_that_changes_the_level_moves_down_never_up). And, since
+# plan 152, the ids the owner chose to delete rather than move: a card
+# whose reading was put right leaves, and the corrected card starts new.
 #
 # scripts/migrate_vocab_ids.py drops what schedules a retired card (its
 # `cards` row, and its `card_modes` by cascade) and what names it: deck
@@ -770,6 +729,22 @@ RETIRED: dict[str, str] = {
     # comparison." for a gloss, and neither より nor ほう on the N5
     # list for it to fold into. The N5 grammar deck teaches the pattern.
     "vocab_N5__より、ほう": "the N5 grammar point 〜より〜のほうが, not a word",
+    # ── Plan 152: what plan 151's word reviewers found ───────────
+    # Readings put right, each checked against the JMdict match the
+    # deck's senses were built from (term_only or exact_reading in
+    # vocab_meanings.json before plan 108) and the JLPT lists of
+    # datas/vocab/sources. Deleted, not moved (the owner's call): the
+    # corrected card is new to every learner.
+    "vocab_N1_割_かつ": "plan 152: かつ is the on-reading, on 割る's senses; now 割 read わり",
+    "vocab_N1_共_きょう": "plan 152: きょう is the on-reading, on 共【とも】's senses; now 共 read とも",
+    "vocab_N1_愛憎_あいにく": "plan 152: あいにく is 生憎's reading; now 愛憎 read あいぞう",
+    "vocab_N1_音色_おんいろ": "plan 152: おんいろ is no reading of 音色; now 音色 read ねいろ",
+    "vocab_N1_復旧_ふくきゅう": "plan 152: ふくきゅう is no reading of 復旧; now 復旧 read ふっきゅう",
+    "vocab_N1_地形_じぎょう": "plan 152: a rare reading on ちけい's gloss; now 地形 read ちけい",
+    "vocab_N1_統治_とうじ": "plan 152: a rare reading on とうち's gloss; now 統治 read とうち",
+    "vocab_N1_施行_しぎょう": "plan 152: a rare reading on しこう's gloss; now 施行 read しこう",
+    "vocab_N3_下す_おろす": "plan 152: 下す read おろす is 下ろす's irregular okurigana; now 下ろす",
+    "vocab_N1_否_いいえ": "plan 152: JMdict gives 否 no reading いいえ; the N5 いいえ is the word",
 }
 
 
@@ -867,4 +842,13 @@ def folded_forms() -> dict[str, tuple[tuple[str, str], ...]]:
     return {card: tuple(pairs) for card, pairs in out.items()}
 
 
-FOLDED_FORMS: dict[str, tuple[tuple[str, str], ...]] = folded_forms()
+# Spellings a card answers for with no MOVES line behind them: the old
+# card was RETIRED rather than moved (plan 152, the owner's call), and
+# its spelling is still this card's word -- the N3 list writes 下ろす as
+# 下す, JMdict's irregular okurigana for it.
+FOLDED_ONLY: dict[str, tuple[tuple[str, str], ...]] = {
+    "vocab_N3_下ろす_おろす": (("下す", "おろす"),),
+}
+
+
+FOLDED_FORMS: dict[str, tuple[tuple[str, str], ...]] = {**folded_forms(), **FOLDED_ONLY}

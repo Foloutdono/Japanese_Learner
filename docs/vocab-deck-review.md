@@ -764,6 +764,13 @@ card itself was wrong. Each was checked the three ways above, against
 JMdict 2026-07-15 (the `f691b87a` match, and the pool for the pair's
 neighbours).
 
+A reading put right is a new card id, and here the old ids are deleted
+rather than moved: `RETIRED`, the owner's call, so the corrected card
+starts new for every learner. `migrate_vocab_ids --yes` drops the old
+schedules, deck rows, pins and favourites and keeps `review_log`, as it
+does for より、ほう. 下す stays 下ろす's spelling through `FOLDED_ONLY`, a
+fold with no rows behind it, so the N3 list's 下す finds its card.
+
 | Card | Evidence | Decision |
 |---|---|---|
 | N5 半分 はんぶん "half minute" | `exact_reading`: *half*. The gloss is 半分【はんぷん】's | gloss **corrected** |
@@ -778,14 +785,14 @@ neighbours).
 | N3 相手 あいて "companion, partner, company" | sense 1 of 3; the sentences use *the other party* and *opponent* | gloss takes all three |
 | N1 件 くだん "example, precedent, …" | JMdict no longer gives *example, precedent* | gloss **corrected** |
 | N1 疎か おろそか "neglect, negligence, …" | adj-na *negligent, careless*; its French said *négligence* twice | gloss **corrected** |
-| N1 割 かつ, 割る's senses | `term_only`; かつ is the on-reading; the N1 list's word is 〜割 わり | **corrected** to わり, "rate, ten percent". *No word* |
-| N1 共 きょう | `term_only`, on 共【とも】's senses word for word | **corrected** to とも. *No word* |
-| N1 愛憎 あいにく "likes and dislikes" | `term_only`; あいにく is 生憎; JMdict あいぞう *love and hate* | **corrected** to あいぞう. *No word* |
-| N1 音色 おんいろ | `term_only`; JMdict and the N1 list: ねいろ | **corrected**; "synthesizer patch" dropped with it. *No word* |
-| N1 復旧 ふくきゅう | `term_only`; JMdict and the N1 list: ふっきゅう | **corrected**. *No word* |
-| N1 地形 じぎょう, 統治 とうじ, 施行 しぎょう | `exact_reading` but unmarked; ⭐ and the N1 list give ちけい, とうち, しこう | **corrected**, and folded as すめらぎ is |
-| N3 下す おろす | JMdict tags 下す read おろす as irregular okurigana of 下ろす; 下す is くだす | **corrected** to 下ろす, 112's 終る rule; 降ろす stays its own card |
-| N1 否 いいえ "no, nay, yes, well" | `term_only` (否 is いや, いな, ひ); 112's 此れ at N1 beside これ at N5 | **folded** into the N5 いいえ. *No word* |
+| N1 割 かつ, 割る's senses | `term_only`; かつ is the on-reading; the N1 list's word is 〜割 わり | **corrected** to わり, "rate, ten percent" |
+| N1 共 きょう | `term_only`, on 共【とも】's senses word for word | **corrected** to とも |
+| N1 愛憎 あいにく "likes and dislikes" | `term_only`; あいにく is 生憎; JMdict あいぞう *love and hate* | **corrected** to あいぞう |
+| N1 音色 おんいろ | `term_only`; JMdict and the N1 list: ねいろ | **corrected**; "synthesizer patch" dropped with it |
+| N1 復旧 ふくきゅう | `term_only`; JMdict and the N1 list: ふっきゅう | **corrected** |
+| N1 地形 じぎょう, 統治 とうじ, 施行 しぎょう | `exact_reading` but unmarked; ⭐ and the N1 list give ちけい, とうち, しこう | **corrected** |
+| N3 下す おろす | JMdict tags 下す read おろす as irregular okurigana of 下ろす; 下す is くだす | **corrected** to 下ろす, 112's 終る rule, 下す kept as its spelling (`FOLDED_ONLY`); 降ろす stays its own card |
+| N1 否 いいえ "no, nay, yes, well" | `term_only` (否 is いや, いな, ひ); 112's 此れ at N1 beside これ at N5 | **gone**; the N5 いいえ is the word |
 | N3 時 とき, N1 故 こ, N1 件 くだん, N1 社 やしろ, N1 疎か おろそか | each is the word its reading says | **kept**; the sentences read another word |
 
 The rest were words the deck lacked, not wrong ones, and decision 1

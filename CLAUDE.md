@@ -834,12 +834,14 @@ runtime purpose. Two consequences worth knowing:
   目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's, 否 いや's "the noes"
   ひ's, 寒気 かんき's "chill" さむけ's) and four that misled (相手 one
   sense of three, 件 くだん a sense JMdict dropped, 疎か a noun for a
-  na-adjective, 杯 さかずき a wine cup); ten readings through `MOVES` — five
-  no reading of the form (割 かつ → わり, 共 きょう → とも, 愛憎 あいにく
-  → あいぞう, 音色 おんいろ → ねいろ, 復旧 ふくきゅう → ふっきゅう; in
-  `NOT_FOLDED`), three rare ones on the everyday reading's gloss (地形
-  ちけい, 統治 とうち, 施行 しこう) and 下す read おろす, the irregular
-  okurigana of 下ろす, and 否 read いいえ folded into the N5 いいえ;
+  na-adjective, 杯 さかずき a wine cup); ten readings put right, the old
+  ids deleted rather than moved (`RETIRED`, the owner's call: the
+  corrected card starts new) — five no reading of the form (割 かつ →
+  わり, 共 きょう → とも, 愛憎 あいにく → あいぞう, 音色 おんいろ → ねいろ,
+  復旧 ふくきゅう → ふっきゅう), three rare ones on the everyday reading's
+  gloss (地形 ちけい, 統治 とうち, 施行 しこう), 下す read おろす, the
+  irregular okurigana of 下ろす (still its spelling, `FOLDED_ONLY`), and
+  否 read いいえ, whose word is the N5 いいえ;
   eleven words the sentences or the JLPT lists name and the deck lacked
   (時 じ, 年 ねん, 月 がつ, 杯 はい at N5; 寒気 さむけ at N4; 件 けん at
   N3; 下 もと, 社 しゃ at N2; 故 ゆえ, 目下 もっか, 札 ふだ at N1);
