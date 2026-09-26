@@ -52,14 +52,21 @@ def test_a_deck_word_carries_what_the_plus_needs(client):
     assert card_index.entry_for("vocab", row["app_card"]["raw_id"]) is not None
 
 
-def test_a_pool_word_has_a_stage_but_no_app_card(client):
-    # A JMdict-only entry has a raw id (so it can carry SRS state) and no
-    # app card behind it. Inferring the ＋ from raw_id would offer a
-    # write that silently adds nothing.
+def test_a_pool_word_carries_the_card_a_vocab_deck_takes(client):
+    # Plan 144: a JMdict-only word is a card a vocab deck takes -- its
+    # raw id, no level (the pool has none), and `pool`, which keeps
+    # "review this card" off it (the queue serves it only through a deck
+    # it is in). The ref must resolve, or the ＋ would add nothing.
+    from routes.decks import _linked_entry
+
     pool = [e for e in _get(client, q="nostalgia", category="vocab") if e["level"] is None]
     assert pool, "expected at least one pool word"
     for e in pool:
-        assert e["app_card"] is None
+        card = e["app_card"]
+        assert card["source"] == "vocab" and card["level"] is None and card["pool"] is True
+        assert card["raw_id"].startswith("vocab_jmdict_")
+        entry = _linked_entry("vocab", None, card["raw_id"])
+        assert (entry["kanji"], entry["kana"]) == (e["kanji"], e["kana"])
 
 
 def test_a_deck_kanji_names_its_radical(client):

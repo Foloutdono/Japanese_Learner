@@ -11,6 +11,9 @@
 #   * a pool id still in the pool, and one in neither the pool nor the
 #     record, are left exactly as they are; so are another user's rows
 #   * --user scopes everything; without --yes nothing is written
+#   * a deck's link to the pool word (plan 144) moves onto the deck card
+#     and its level, and a deck already holding the deck card keeps that
+#     link while the pool one goes
 #
 # The moves are monkeypatched: the test does not depend on what
 # datas/vocab/pool_moves.json says this week, only on what the script does
@@ -83,8 +86,23 @@ def _seed():
               "ON CONFLICT DO NOTHING", (user, domain, key, tier))
 
 
+def _deck(user, *links):
+    (deck_id,) = _exec("INSERT INTO decks(user_id, name, type) VALUES (%s, 'probe', 'vocab') RETURNING id",
+                       (user,))[0]
+    for level, raw in links:
+        _exec("INSERT INTO deck_cards(deck_id, user_id, source, level, raw_id) VALUES (%s,%s,'vocab',%s,%s)",
+              (deck_id, user, level, raw))
+    return deck_id
+
+
+def _links(deck_id):
+    rows = _exec("SELECT level, raw_id FROM deck_cards WHERE deck_id = %s", (deck_id,))
+    return sorted(rows)
+
+
 def _wipe():
     for user in (USER, OTHER):
+        _exec("DELETE FROM decks WHERE user_id = %s", (user,))
         _exec("DELETE FROM review_log WHERE card_id LIKE %s", (f"{user}:%",))
         _exec("DELETE FROM card_first_review WHERE card_id LIKE %s", (f"{user}:%",))
         _exec("DELETE FROM card_modes WHERE card_id LIKE %s", (f"{user}:%",))
@@ -176,3 +194,19 @@ def test_the_record_names_real_deck_cards():
     for pool_id, entry in moves.items():
         assert entry["card"] in served, entry
         assert jmdict_db.get_by_id(int(pool_id)) is None, pool_id
+
+
+def test_a_deck_s_link_moves_with_the_word():
+    plain = _deck(USER, ("jmdict", POOL_A))
+    both = _deck(USER, ("jmdict", POOL_B), ("N4", DECK_B))
+    live = _deck(USER, ("jmdict", POOL_LIVE))
+    other = _deck(OTHER, ("jmdict", POOL_A))
+
+    assert migrate.main(["--user", USER]) == 0
+    assert _links(plain) == [("jmdict", POOL_A)]
+
+    assert migrate.main(["--yes", "--user", USER]) == 0
+    assert _links(plain) == [("N5", DECK_A)]
+    assert _links(both) == [("N4", DECK_B)]
+    assert _links(live) == [("jmdict", POOL_LIVE)]
+    assert _links(other) == [("jmdict", POOL_A)]

@@ -687,7 +687,19 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  When starting a new wave, begin at **144** or higher, and check
+  **144** is 全語, every word the app holds a card for: the breakdown
+  asks the JMdict pool after the deck (a noun run as one word, 桃源 + 郷
+  as 桃源郷, then each word the deck has no card for), so a word past the
+  course carries its meaning and its `vocab_jmdict_<id>` card; a vocab
+  deck links one under `POOL_LEVEL`, studies it with its frequency
+  neighbours as distractors, and Today asks it in the deck's lane; the
+  dictionary's ＋ adds one (cited in `study/analysis.py`,
+  `study/card_lookup.py`, `content/vocab_jmdict_data.py`,
+  `routes/decks.py`, `routes/today.py`, `routes/dictionary.py`,
+  `scripts/migrate_pool_cards.py`, `components/analysis/tokens.js`,
+  `components/dictionary/DictionaryDetail.jsx`,
+  `tests/test_deck_pool_cards.py` and `tests/test_analysis.py`).
+  When starting a new wave, begin at **145** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

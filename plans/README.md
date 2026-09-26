@@ -6719,3 +6719,29 @@ took a French phone's cell to two lines); the ranking's head still wraps
 under 360px in French, as before. Left for later: at the desk's
 narrowest (1100px) the stops share about a hundred pixels beside
 "Vocabulaire JLPT"; the feature sketches are unbuilt.
+
+## Plan 144 — 全語, every word the app holds a card for (2026-09-26)
+
+The owner's ask, from a screenshot of the analyser's video passage on
+さらば桃源郷真っさらになったんだ: "even if the word isn't in the JLPT decks
+the user should be able to add it to their personal deck, so show their
+meaning; I want every vocabulary card we have to be used". Of the line's
+nine pieces only 郷 and なっ had a card, and both the wrong one; さらば
+(an interjection) and 真っさら (a 形状詞) were not even listed, and 桃源
+showed no meaning. The JMdict pool beside the course (212k words,
+`vocab_jmdict.sqlite3`) held all of them, and every pool word already had
+a card id (`vocab_jmdict_<id>`, studied from the frequency line's JMdict
+tiers) — but the breakdown never asked the pool, and a deck could not
+hold a pool word.
+
+| # | What | Status |
+|---|------|--------|
+| 144 | **The breakdown** (`study/analysis.py`, `study/card_lookup.py`): the deck answers first, the pool after — a noun run the pool holds as one word where the deck has no card for one of its nouns (`resolve_pool_compound`: 桃源 + 郷 as 桃源郷, never 電話 + 番号, never a number, never cutting a deck compound), then each word the deck has no card for (`resolve_pool_morpheme`: nouns, verbs, adjectives, adverbs, 形状詞, interjections, adnominals, conjunctions; never a particle, an auxiliary or a bare affix). A kanji spelling matches its pair, then (a verb's or adjective's lemma only) a row read the page's way sharing a kanji (ぶっ殺す, filed by UniDic under 打ち殺す), then, where the page wrote the kanji, its commonest row; a kana spelling matches a kana-only row and nothing else (the pool is JMdict less the deck: its one row read その is 苑, "garden"), and a kana word must be read as the page spells it (まじか is not 間近). Never a word a grammar point is written on (the しれ of かもしれない). The token's `vocab_match` is the pool's: `level` null, `pool: true`, the entry cut to kanji/kana/meaning. **Counts**: an untaken pool word stays off-deck; taken up, it counts like a deck word. `LOCAL_REV` 2, so stored video sessions are read again. **Decks** (`routes/decks.py`): a vocab deck links a pool word under source `vocab` with `POOL_LEVEL` ("jmdict") in the NOT NULL level column, resolved by id from the pool (`_linked_entry`), listed with no level, studied with its frequency neighbours as distractors (`_level_list`, `jmdict_db.neighbours`) and JMdict's own gloss (never VOCAB_FR, keyed by form); `AppCardRef.level` optional. **Today** (`routes/today._personal_rows`): a deck's pool word is asked in that deck's lane (`build_pool_card`). **Dictionary**: a pool word's `app_card` is `{source: vocab, level: null, raw_id, pool: true}`, so the ＋ adds it; "review this card" stays off it. **Frontend**: `tokens.js` (`isPoolWord`; off-deck until taken up whatever the part of speech; i+1 mirrors the server), `DictionaryDetail`'s review button. **Migration**: `scripts/migrate_pool_cards.py` moves a deck's link to a pruned pool word onto its deck card. Tests: `test_analysis` (the line, the grammar door, the homophones, the numbers, the counts), `test_deck_pool_cards` (added, listed, studied, counted, asked in Today), `test_migrate_pool_cards`, `test_entry_panel`, `test_dictionary_favorites`, `tokens.test.js`, `poolWords.browser`, `DictionaryDetail.browser` | DONE (2026-09-26) |
+
+Left for later, found on the way: a pool word studied only from the
+frequency line's JMdict tiers is never asked by Today (it has no JLPT
+stop and no deck — `daily_queue.lanes` drops it); the deck's Browse picker
+does not search the pool; and the grammar and lookup bugs the same
+screenshot showed (〜になる missed in なった/なって, the plain 〜んだ, the
+N3 為る cards shadowing N5 する/なる, 郷 matched to 号 by sound) are the
+owner's next steps.

@@ -14,6 +14,7 @@ from core.pace import new_card_limit, resolve_pace
 from core.srs_instance import srs
 from srs.batch_cache import key as batch_key, pick_ids
 from content.vocab_data import VOCAB_BY_LEVEL, vocab_to_id
+import content.vocab_jmdict_data as jmdict_db
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from content.kana_data import KANA_SETS, kana_to_id
 from content.grammar_points_data import (
@@ -96,10 +97,10 @@ MAX_BATCH = 25
 #     that lands.
 #   - a real dictionary-backed "vocab" search: today's browse only
 #     searches the JLPT-leveled VOCAB_BY_LEVEL deck, not the full
-#     dictionary. Once the fuller dictionary files are in, either
-#     extend this "vocab" entry's by_level/to_id or add a sibling
-#     source (e.g. "dictionary") reusing _build_vocab_card the same
-#     way.
+#     dictionary. A JMdict pool word can be LINKED since plan 144 --
+#     from the analyser's and the dictionary's ＋, under this same
+#     "vocab" source (see POOL_LEVEL below) -- but browse does not
+#     search the pool yet.
 
 # The section builders take a resolved Mode now rather than a mode
 # string (see _build_kanji_card's docstring for why `format` went away).
@@ -130,6 +131,13 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
     m = resolve_for_source(MODE_VOCAB, mode)
     if m is None:
         raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
+    if jmdict_db.is_pool_id(raw_id):
+        # A pool word (plan 144) and its neighbours, the distractors, in
+        # JMdict's own gloss: VOCAB_FR is the course's, keyed by written
+        # form, and would hand a pool word a deck homograph's French
+        # (routes/theme_vocab._entry_meaning, the same rule).
+        return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview,
+                                 meaning_of=lambda e: e.get("meaning", ""))
     return _build_vocab_card(raw_id, entry, level_list, m, lang, stage, preview)
 
 
@@ -295,14 +303,47 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # of the character, and there is nothing else to translate.
         return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
-    meaning = get_meaning(entry, lang, fr_map)
+    # A JMdict pool word (plan 144, an entry carrying its pool `seq`)
+    # has JMdict's gloss and no line in VOCAB_FR -- see _wrap_vocab.
+    meaning = entry.get("meaning", "") if "seq" in entry else get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 
 
-def _linked_entry(source: str, level: str, raw_id: str) -> dict | None:
+# ── A JMdict pool word in a deck (plan 144) ──────────────────
+# The analyser and the dictionary offer every word the app holds a card
+# for, and 212k of those are the JMdict pool beside the course
+# (content/vocab_jmdict_data.py). A pool word joins a vocab deck as the
+# vocab card it already is -- `vocab_jmdict_<id>`, the id the frequency
+# line's JMdict tiers study it under, so one word keeps one SRS history
+# -- with source "vocab" and this in the level column, which is NOT
+# NULL: the pool has no JLPT level to put there. It is the row's marker
+# for "not a level", never a level a builder is handed (_level_list).
+POOL_LEVEL = "jmdict"
+
+
+def _is_pool(raw_id: str) -> bool:
+    return jmdict_db.is_pool_id(raw_id)
+
+
+def _level_list(source: str, level: str, raw_id: str, entry: dict) -> list[dict]:
+    """The distractor pool a linked card's builder draws wrong answers
+    from: its JLPT level's deck, or, for a pool word, the pool words
+    ranked beside it -- words of comparable frequency, as its own
+    frequency tier would offer."""
+    if source == "vocab" and _is_pool(raw_id):
+        return jmdict_db.neighbours(entry)
+    return SOURCES[source]["by_level"].get(level, [])
+
+
+def _linked_entry(source: str, level: str | None, raw_id: str) -> dict | None:
     """
     The app entry a deck_cards row points at, or None when it no longer
     resolves — a card removed from the content since it was added.
+
+    A JMdict pool word (plan 144) resolves by its id alone, from the
+    pool's own table: it has no level for the check below to hold it
+    to, and no place in card_index's import-time index, which covers
+    the course.
 
     O(1), through study/card_index's import-time (source, raw_id) index,
     rather than the linear scan of the level's entry list this used to be
@@ -319,6 +360,10 @@ def _linked_entry(source: str, level: str, raw_id: str) -> dict | None:
     handed as their distractor pool, so a row naming a level its id does not
     come from must not resolve.
     """
+    if source == "vocab" and _is_pool(raw_id):
+        return jmdict_db.entry_for_raw_id(raw_id)
+    if level is None:
+        return None
     entry = card_index.entry_for(source, raw_id)
     if entry is None:
         return None
@@ -770,7 +815,10 @@ class ReviewPayload(BaseModel):
 
 class AppCardRef(BaseModel):
     source: str
-    level:  str
+    # None for a JMdict pool word, which has no level (plan 144); the row
+    # stores POOL_LEVEL in its place. Any other card without one resolves
+    # to nothing and is skipped.
+    level:  str | None = None
     raw_id: str
 
 
@@ -1753,7 +1801,10 @@ def _listed_cards(conn, access: DeckAccess, lang: str = "fr") -> list[dict]:
             continue
         fields = _meaning_preview(link["source"], entry, lang)
         cards.append({
-            "origin": "app", "source": link["source"], "level": link["level"],
+            "origin": "app", "source": link["source"],
+            # A pool word's row stores POOL_LEVEL, which is not a level:
+            # it is served as none, and the screen draws no badge for it.
+            "level": None if _is_pool(link["raw_id"]) else link["level"],
             "raw_id": link["raw_id"], "added_at": link["added_at"],
             "front": fields["front"], "back": fields["meaning"], "kana": fields["kana"],
         })
@@ -2007,7 +2058,8 @@ def add_app_cards(deck_id: str, payload: AddAppCardsPayload, user_id: str = Depe
                 if (c.source, c.raw_id) in seen:
                     continue
                 seen.add((c.source, c.raw_id))
-                rows.append((access.deck_id, access.owner_id, c.source, c.level, c.raw_id))
+                level = POOL_LEVEL if _is_pool(c.raw_id) else c.level
+                rows.append((access.deck_id, access.owner_id, c.source, level, c.raw_id))
 
             added = 0
             if rows:
@@ -2081,6 +2133,26 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
 
 
 # ── STUDY ─────────────────────────────────────────────────
+
+def build_pool_card(raw_id: str, mode: str, lang: str,
+                    stage: str | None, preview: dict | None) -> dict | None:
+    """One JMdict pool word's payload, as a deck serves it (plan 144),
+    or None where the id no longer names a pool row or the mode is not
+    a vocab one. Public for the daily queue, which serves a deck's pool
+    words in the deck's own lane (routes/today.py) -- one builder, as
+    build_personal_card is one."""
+    entry = jmdict_db.entry_for_raw_id(raw_id)
+    if entry is None:
+        return None
+    try:
+        card = _wrap_vocab(raw_id, entry, POOL_LEVEL, jmdict_db.neighbours(entry),
+                           mode, lang, stage, preview)
+    except HTTPException:
+        return None
+    card["card_id"] = raw_id
+    card["source"] = "vocab"
+    return card
+
 
 def build_personal_card(row: dict, raw_id: str, mode: str,
                         stage: str | None, preview: dict | None) -> dict:
@@ -2403,7 +2475,7 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
             cards.append(build_personal_card(p["entry"], raw_id, mode, stage, preview))
         else:
             cfg = SOURCES[p["source"]]
-            level_list = cfg["by_level"].get(p["level"], [])
+            level_list = _level_list(p["source"], p["level"], raw_id, p["entry"])
             card = cfg["build"](raw_id, p["entry"], p["level"], level_list, mode, lang, stage, preview)
             if card is None:
                 # A builder that cannot make this mode for this card

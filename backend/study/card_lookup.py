@@ -9,6 +9,7 @@ from content.vocab_renames import FOLDED_FORMS
 from content.kanji_data import KANJI_BY_LEVEL, kanji_to_id
 from study.modes import KANA, KANJI, VOCAB, GRAMMAR, STATUS_MODES
 from content import vocab_extras
+import content.vocab_jmdict_data as jmdict_db
 from study import morphology
 # What "do I already know this?" means for the clickable badges.
 #
@@ -886,6 +887,176 @@ def compound_reading(entry: dict, morphemes) -> str:
     if not variants:
         return joined
     return joined if joined in variants else variants[0]
+
+
+# ── The JMdict pool, after the deck (plan 144) ─────────────────
+# The deck is 8k words chosen for the JLPT; a subtitle or a photo of a
+# page is written in the rest of the language as well. Until plan 144 a
+# word the deck does not teach was a rule under a word and nothing else:
+# no meaning, no card, no ＋ -- 桃源郷, 真っさら and さらば in one line of
+# an anime's subtitles, while the pool beside the deck (212k JMdict
+# words, content/vocab_jmdict_data.py) held all three. These resolvers
+# are asked only once the deck's own (resolve_morpheme, resolve_compound)
+# have answered None, so they can never move a word off its deck card.
+#
+# They are the breakdown's alone: level_mix, the reading badges and the
+# audit keep resolve_morpheme's answer, since "off-deck" there means
+# "not in the course", which a pool word still is.
+
+# What a pool word may be. The content classes, plus the ones the deck
+# rarely needs and a breakdown still wants glossed: "other" is UniDic's
+# 形状詞 (真っさら, the stem of a な-adjective, which morphology does not
+# map), an interjection is さらば, an adnominal 大きな. Never a particle,
+# an auxiliary, a mark or a bare affix -- JMdict has entries for は and
+# for さん, and neither is a word of the sentence the way a noun is.
+_POOL_POS = frozenset({
+    "noun", "pronoun", "verb", "adjective", "adverb",
+    "other", "interjection", "adnominal", "conjunction",
+})
+
+
+def _has_kanji(text: str) -> bool:
+    return any(is_kanji(c) for c in text)
+
+
+def _japanese(text: str) -> bool:
+    """Whether a token is written in kana or kanji at all: a number or a
+    Latin word in a subtitle is not something JMdict is asked about."""
+    return any(is_kanji(c) or "ぁ" <= c <= "ヿ" for c in text)
+
+
+_NUMERALS = frozenset("〇一二三四五六七八九十百千万億兆0123456789０１２３４５６７８９")
+
+
+def _numeral(text: str) -> bool:
+    return bool(text) and all(c in _NUMERALS for c in text)
+
+
+def _to_katakana(text: str) -> str:
+    return "".join(chr(ord(c) + 0x60) if "ぁ" <= c <= "ゖ" else c for c in text)
+
+
+def _pool_by_form(written: str, readings: tuple[str, ...], seen_kanji: bool = True,
+                  shared: bool = False) -> dict | None:
+    """The pool row for one written form, given the readings it may
+    have (the dictionary form's, the page's).
+
+    A form with a kanji in it: the pair exactly; else a row read one of
+    those ways that shares a kanji with it -- UniDic files ぶっ殺す under
+    打ち殺す, and the row read ぶっころす is ぶっ殺す, "to kill", where
+    打ち殺す's own row is うちころす, "to beat to death" (a verb's or an
+    adjective's lemma only, `shared`: a noun's spelling IS its word, and
+    二十 read にじゅう shares a kanji and a reading with 二重, "double");
+    else, where the
+    page itself wrote a kanji (`seen_kanji`), that spelling's commonest
+    row, since a kanji spelling names its word far more narrowly than a
+    reading does and UniDic's reading of a lone kanji is not always
+    JMdict's. A page that wrote the word in kana showed no spelling to
+    trust that far: only UniDic's lemma, which can be a spelling nobody
+    uses.
+
+    A form written in kana alone matches a kana-only row and nothing
+    else. Never the one row read that way: the pool is JMdict LESS the
+    deck, so a reading with one row in the pool is not a reading with
+    one word -- その's own entries are the deck's, and the pool's one
+    row read その is 苑, "garden"; あんな's is the Anna era."""
+    if not written:
+        return None
+    readings = tuple(r for r in dict.fromkeys(readings) if r)
+    if _has_kanji(written):
+        for reading in readings:
+            hit = jmdict_db.get_by_key(written, reading)
+            if hit is not None:
+                return hit
+        chars = {c for c in written if is_kanji(c)}
+        for reading in readings if shared else ():
+            for row in jmdict_db.by_kana(reading):
+                if chars & set(row["kanji"]):
+                    return row
+        if not seen_kanji:
+            return None
+        rows = jmdict_db.by_kanji(written, limit=1)
+        return rows[0] if rows else None
+    for kana in dict.fromkeys((written, _to_katakana(written))):
+        hit = jmdict_db.get_by_key("", kana)
+        if hit is not None:
+            return hit
+    return None
+
+
+def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
+    """The JMdict pool entry morphemes[i] is, by its dictionary form
+    first and as written second, or None. Asked only for a token the
+    deck has no card for (see the note above)."""
+    m = morphemes[i]
+    if m.pos not in _POOL_POS or not _japanese(m.surface) or _numeral(m.surface):
+        # A number is the deck's to read (its numeral compounds).
+        return None
+    previous = morphemes[i - 1] if i > 0 else None
+    if m.auxiliary_use and previous is not None and previous.pos == "particle" and previous.conjunctive:
+        # ている, てしまう: the grammar point's, as resolve_morpheme says.
+        return None
+    lemma = m.lemma or m.surface
+    if not _has_kanji(lemma) and len(lemma) < 2:
+        # One kana on its own is a particle mis-tagged or a letter.
+        return None
+    inflects = m.pos in ("verb", "adjective")
+    # The page's reading first: for a word in its dictionary form it is
+    # the word as said (ぶっころす), where UniDic's lemma reading is its
+    # citation (ぶちころす); for an inflected one it matches nothing and
+    # the lemma's reading answers.
+    hit = _pool_by_form(lemma, (m.reading, m.lemma_reading), _has_kanji(m.surface), shared=inflects)
+    if hit is None and m.surface != lemma and not inflects:
+        # A word UniDic files under another spelling than the page's
+        # (a loanword's lemma, a variant kanji): the page's own form. A
+        # verb's surface is inflected and names no headword.
+        hit = _pool_by_form(m.surface, (m.reading,))
+    if hit is not None and not inflects and not _has_kanji(m.surface):
+        # Written in kana and not inflected, the page spells the word's
+        # reading outright, and a row read otherwise is UniDic's guess
+        # at a word it does not know: まじか (slang, "seriously?") comes
+        # back as 間近, read まぢか, "near".
+        spelled = morphology.kata_to_hira(m.surface)
+        if morphology.kata_to_hira(hit["kana"]) != spelled:
+            return None
+    return hit
+
+
+def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _COMPOUND_MAX):
+    """(entry, n) for the JMdict pool word a run of `n` >= 2 morphemes
+    starting at `i` spells as one, longest first, or None.
+
+    UniDic cuts 桃源郷 into 桃源 + 郷, and each half alone is another
+    word (郷 read ごう is "countryside"). The run is folded only where the
+    deck has no card for at least one of its nouns (`deck_hits`, the
+    caller's resolve_morpheme answers): 電話 + 番号 stays two N5 words
+    the learner can study rather than becoming one pool word, and お +
+    茶 is the deck's own fold (resolve_compound), asked first. Same run
+    rule as resolve_compound -- nouns and the affixes on them, never
+    across a particle -- and a key must hold a kanji, since a run of
+    kana joined is a guess at a word boundary. Never a run with a number
+    in it: 二 + 十 is the deck's to read (_resolve_numeral_compound's
+    business), and a numeral joined to a noun is a count, not a word."""
+    longest = min(max_len, len(morphemes) - i)
+    for n in range(longest, 1, -1):
+        run = morphemes[i:i + n]
+        if any(m.pos not in _COMPOUND_POS or m.auxiliary_use or _numeral(m.surface) for m in run):
+            continue
+        if all(deck_hits[i + k] for k, m in enumerate(run) if m.pos == "noun"):
+            continue
+        if any(resolve_compound(morphemes, j) and j + resolve_compound(morphemes, j)[3] > i + n
+               for j in range(i + 1, i + n)):
+            # A deck compound starts inside this run and reaches past it
+            # (…日曜 + 日): the deck's word is not cut in half for ours.
+            continue
+        reading = "".join(m.reading for m in run)
+        for key in dict.fromkeys(("".join(m.surface for m in run), "".join(m.lemma for m in run))):
+            if not _has_kanji(key):
+                continue
+            hit = _pool_by_form(key, (reading,))
+            if hit is not None:
+                return hit, n
+    return None
 
 
 def _find_segments_morphological(text: str):

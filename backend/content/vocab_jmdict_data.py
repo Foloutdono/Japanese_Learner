@@ -168,6 +168,66 @@ def get_by_key(kanji: str, kana: str) -> dict | None:
     return _row_to_entry(row) if row else None
 
 
+# ── A pool word as a card (plan 144) ──────────────────────────
+# A pool word has always had a card id (vocab_jmdict_to_id), studied
+# from the frequency line's JMdict tiers. Plan 144 lets a learner put
+# one in a deck of their own, from the analyser or the dictionary, so
+# the id now travels on its own -- in deck_cards, in a breakdown's
+# token -- and has to be read back into its entry.
+POOL_ID_PREFIX = "vocab_jmdict_"
+
+
+def is_pool_id(raw_id: str | None) -> bool:
+    return bool(raw_id) and raw_id.startswith(POOL_ID_PREFIX)
+
+
+def entry_for_raw_id(raw_id: str) -> dict | None:
+    """The pool entry a `vocab_jmdict_<id>` card id names, or None when
+    it names none -- a malformed id, or a row a rebuild of the pool no
+    longer holds. Round-tripped through vocab_jmdict_to_id, so an id
+    this module would not have issued never resolves."""
+    if not is_pool_id(raw_id):
+        return None
+    suffix = raw_id[len(POOL_ID_PREFIX):]
+    if not suffix.isdigit():
+        return None
+    entry = get_by_id(int(suffix))
+    if entry is None or vocab_jmdict_to_id(entry) != raw_id:
+        return None
+    return entry
+
+
+def neighbours(entry: dict, count: int = 40) -> list[dict]:
+    """Up to `count` pool words ranked either side of `entry`, itself
+    among them -- the distractor pool a card of it draws wrong answers
+    from, as the frequency line's JMdict tiers draw theirs: words of
+    comparable frequency. One indexed range read."""
+    rank = int(entry.get("freq_rank") or 0)
+    half = max(1, count // 2)
+    return get_by_rank_range(max(0, rank - half), rank + half)
+
+
+def by_kanji(kanji: str, limit: int = 8) -> list[dict]:
+    """Every pool row written `kanji`, commonest first."""
+    rows = _conn().execute(
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
+        "WHERE kanji = ? ORDER BY freq_rank LIMIT ?",
+        (kanji, limit),
+    ).fetchall()
+    return [_row_to_entry(r) for r in rows]
+
+
+def by_kana(kana: str, limit: int = 8) -> list[dict]:
+    """Every pool row read `kana` (written with kanji or without),
+    commonest first."""
+    rows = _conn().execute(
+        "SELECT id, seq, kanji, kana, meaning, freq_rank, has_examples FROM entries "
+        "WHERE kana = ? ORDER BY freq_rank LIMIT ?",
+        (kana, limit),
+    ).fetchall()
+    return [_row_to_entry(r) for r in rows]
+
+
 def get_by_rank_range(start_rank: int, end_rank_inclusive: int) -> list[dict]:
     """Entries whose freq_rank falls in [start_rank, end_rank_inclusive]
     (0-indexed) — the DB-backed equivalent of slicing the old in-memory
