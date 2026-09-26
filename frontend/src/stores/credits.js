@@ -75,8 +75,10 @@ export function useBalanceOpen() {
 // ── 定期券 — the offer (the paywall) ────────────────────────────
 // Module state for the same reason the balance sheet is: it opens from
 // five unrelated places — the last boarding screen, the balance sheet,
-// the profile, the settings list, and a run that hit zero — and three
-// of those are outside any screen that could hold the state.
+// the settings list, a run that hit zero and the reading ride's pass
+// plate — and three of those are outside any screen that could hold
+// the state. (The profile was a sixth until plan 140; its pass's footer
+// opens the balance sheet now.)
 //
 // The funnel is recorded HERE rather than in the sheet, on purpose.
 // Every open must produce exactly one `offer_view` and exactly one of

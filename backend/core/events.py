@@ -97,9 +97,11 @@ EVENTS: dict[str, frozenset[str]] = {
     # ── 定期券 — the offer ───────────────────────────────────────
     # No longer dormant: the pass is SHOWN from five doors and sold from
     # none (frontend/src/domain/paywall.js's HAS_PAYWALL, which is
-    # deliberately not HAS_STORE). `where` is which of the six doors
-    # (frontend/src/domain/paywall.js's SOURCES -- the five, and the
-    # reading ride's pass plate since plan 097).
+    # deliberately not HAS_STORE). `where` is which of the five doors
+    # (frontend/src/domain/paywall.js's SOURCES -- the reading ride's
+    # pass plate among them since plan 097; the profile, a door until
+    # plan 140, reaches the offer through the balance sheet now, and
+    # older rows still say `profile`).
     #
     # The three verbs are the whole point: a paywall nobody opens and a
     # paywall opened and refused are indistinguishable from

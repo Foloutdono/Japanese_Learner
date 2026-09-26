@@ -1,36 +1,39 @@
+import { useLang } from '../../LangContext'
 import { EditableUsername } from './EditableUsername'
 
-// The holder half of the pass: the level ring with the initial struck
-// in it, and the name — editable in place, because changing it is a
-// one-field change and does not deserve a page of its own.
+// The holder half of the pass: the initial, the name (editable in
+// place, because changing it is a one-field change and does not
+// deserve a page of its own), and the month the pass was issued.
 //
-// The ring is the XP arc and nothing else: the level itself is printed
-// large on the pass where a pass prints its class.
-export function PassHolder({ profile, session, onUsernameChange, t }) {
-  const span = Math.max(1, profile.xpForNext - profile.xpPrevLevel)
-  const into = Math.min(span, Math.max(0, profile.xp - profile.xpPrevLevel))
-  const pct = Math.round((into / span) * 100)
+// The initial wore the XP arc as a gold ring until plan 140: the bar on
+// the balance row below measures the same climb with its figure beside
+// it, so the ring said it a second time. The level is printed large on
+// the pass where a pass prints its class.
+//
+// "Since" is the boarding's date (/api/profile's onboardedAt), month
+// and year in the learner's language; an account that never boarded
+// prints nothing there rather than a guess.
+function sinceMonth(iso, lang) {
+  if (!iso) return null
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return null
+  return new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' }).format(d)
+}
 
-  const r = 42
-  const circumference = 2 * Math.PI * r
-  const dashoffset = circumference * (1 - pct / 100)
+export function PassHolder({ profile, session, onUsernameChange, t }) {
+  const { lang } = useLang()
+  const since = sinceMonth(profile.onboardedAt, lang)
 
   return (
     <div className="pass__holder">
       <div className="pass__avatar-wrap">
-        <svg className="pass__ring" viewBox="0 0 96 96" aria-hidden="true">
-          <circle className="pass__ring-track" cx="48" cy="48" r={r} />
-          <circle
-            className="pass__ring-fill"
-            cx="48" cy="48" r={r}
-            strokeDasharray={circumference}
-            strokeDashoffset={dashoffset}
-          />
-        </svg>
         <div className="pass__avatar">{profile.username.charAt(0).toUpperCase()}</div>
       </div>
 
-      <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
+      <div className="pass__holder-names">
+        <EditableUsername username={profile.username} session={session} onChange={onUsernameChange} t={t} />
+        {since && <span className="pass__since">{t.passSince(since)}</span>}
+      </div>
     </div>
   )
 }

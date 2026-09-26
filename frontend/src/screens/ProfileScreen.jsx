@@ -3,34 +3,41 @@ import { useNavigate } from 'react-router-dom'
 import { apiFetch, apiJson } from '../lib/api'
 import { useLang } from '../LangContext'
 import { Loading } from '../components/ui/Loading'
-import { WarningIcon } from '../components/ui/Icons'
+import { ChevronIcon, WarningIcon } from '../components/ui/Icons'
 import { CommuterPass } from '../components/profile/CommuterPass'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
 import { useDesk } from '../hooks/useDesk'
 import { PassHolder } from '../components/profile/PassHolder'
 import { BalanceLine } from '../components/credits/BalanceLine'
-import { OfferButton } from '../components/credits/OfferButton'
-import { SOURCES } from '../domain/paywall'
-import { StampBook, Records } from '../components/profile/ProfileBlocks'
+import { openBalance } from '../stores/credits'
+import { StampBook, Records, ProfileDoors } from '../components/profile/ProfileBlocks'
 import { Banzuke } from '../components/profile/Banzuke'
 import { LineLedger } from '../components/profile/LineLedger'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
-// behind it in the holder: the stamp book, the records with the two
-// doors (Statistics, Settings), the ride ledger, the ranking. No bar
+// behind it in the holder: the stamp book, the records, the ride
+// ledger, the two doors (Statistics, Settings), the ranking. No bar
 // and no headings — the pass names the screen, and every insert names
 // itself. The pass's back — the ghost train and the status — is the
 // status sheet off the HUD's station panel now (plan 074); the pass
 // itself prints the balance on its footer.
+//
+// Plan 140 (the owner's pick A of the profile canvas) tightened the
+// holder rather than refilling it: the same inserts, a third of the
+// phone's height gone. The footer is the door to the balance sheet,
+// which carries the offer, so the "See the pass" button that stood
+// alone between the pass and the stamps went with it; the records
+// print three figures three across; the lines are rows; the ranking
+// shows five.
 
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
 // hiccup degrades to a believable screen instead of a blank one.
 // Still a function, not a constant: the calendar below is relative to
 // today and would otherwise freeze at module load.
-const LEADERBOARD_LIMIT = 6
+const LEADERBOARD_LIMIT = 5
 
 function buildMockProfile() {
   const counts = [24, 31, 18, 40, 12, 0, 22, 27, 35, 19, 0, 41, 26, 0, 0, 33, 0, 21, 29, 38, 17, 25, 30, 44, 12, 36, 28, 24, 9, 31, 18, 40, 12, 7]
@@ -54,6 +61,7 @@ function buildMockProfile() {
     totalReviews: 842,
     bestQualityStreak: 12,
     retention: 0.91,
+    onboardedAt: new Date(now.getFullYear(), now.getMonth() - 6, 3).toISOString(),
     week: calendar.slice(-7),
     calendar,
   }
@@ -67,7 +75,6 @@ const MOCK_LEADERBOARD = {
     { rank: 3, username: 'Sora',   level: 19, xp: 3740 },
     { rank: 4, username: 'Aiko',   level: 12, xp: 3420 },
     { rank: 5, username: 'Kenji',  level: 11, xp: 3100 },
-    { rank: 6, username: 'Yui',    level: 9,  xp: 2400 },
   ],
   me: { rank: 4, username: 'Aiko', level: 12, xp: 3420 },
 }
@@ -78,7 +85,6 @@ const MOCK_WEEK_LEADERBOARD = {
     { rank: 3, username: 'Aiko',   level: 12, xp: 960 },
     { rank: 4, username: 'Sora',   level: 19, xp: 720 },
     { rank: 5, username: 'Kenji',  level: 11, xp: 610 },
-    { rank: 6, username: 'Yui',    level: 9,  xp: 300 },
   ],
   me: { rank: 3, username: 'Aiko', level: 12, xp: 960 },
 }
@@ -133,9 +139,20 @@ export default function ProfileScreen({ session }) {
       </p>
     ),
     // The pass, the balance on its footer (plan 069's figure, printed
-    // where the canvas prints it).
+    // where the canvas prints it) — and since plan 140 the footer is a
+    // door: it opens the balance sheet the HUD's pass opens, which is
+    // where the offer lives.
     pass: (
-      <CommuterPass profile={profile} t={t} footer={<BalanceLine />}>
+      <CommuterPass
+        profile={profile}
+        t={t}
+        footer={(
+          <button type="button" className="pass__door" aria-haspopup="dialog" onClick={openBalance}>
+            <BalanceLine />
+            <ChevronIcon direction="right" size={14} className="pass__door-chev" />
+          </button>
+        )}
+      >
         <PassHolder
           profile={profile}
           session={session}
@@ -144,7 +161,6 @@ export default function ProfileScreen({ session }) {
         />
       </CommuterPass>
     ),
-    offer: <OfferButton source={SOURCES.PROFILE} className="btn-secondary profile__offer" />,
     stamps: (
       <StampBook
         calendar={profile.calendar ?? profile.week}
@@ -154,9 +170,12 @@ export default function ProfileScreen({ session }) {
         lang={lang}
       />
     ),
-    // Two figures and the two doors — Statistics, Settings.
-    records: <Records profile={profile} t={t} navigate={navigate} />,
+    // Three figures: the reviews, the retention, the best perfect run.
+    records: <Records profile={profile} t={t} />,
     ledger: stats && <LineLedger stats={stats} t={t} navigate={navigate} />,
+    // Statistics and Settings — the phone's; the desk's rail hangs both
+    // under the lit gate.
+    doors: <ProfileDoors t={t} navigate={navigate} />,
     board: <Banzuke all={leaderboard} week={weekBoard} t={t} both={desk} />,
   }
 
@@ -171,13 +190,13 @@ export default function ProfileScreen({ session }) {
         // 115 (--desk-side-w), the record taking the rest on the right. The same
         // inserts in the same order, split after the stamps — so a
         // screen reader, the Tab key and the guide walk them exactly as
-        // they walk the phone's column.
+        // they walk the phone's column — less the two doors, which the
+        // rail already holds (plan 140).
         <>
           {inserts.stale}
           <div className="desk-profile">
             <div className="desk-profile__col">
               {inserts.pass}
-              {inserts.offer}
               {inserts.stamps}
             </div>
             <div className="desk-profile__col">
@@ -191,10 +210,10 @@ export default function ProfileScreen({ session }) {
         <>
           {inserts.stale}
           {inserts.pass}
-          {inserts.offer}
           {inserts.stamps}
           {inserts.records}
           {inserts.ledger}
+          {inserts.doors}
           {inserts.board}
         </>
       ))}

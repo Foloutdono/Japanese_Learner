@@ -4637,7 +4637,6 @@ textarea:focus-visible {
 }
 .pw-open--quiet:hover,
 .pw-open--quiet:focus-visible { color: var(--accent2); }
-.profile__offer { width: 100%; }
 
 /* ── The fare slip, at the end of a run (plan 069) ── */
 .fare-slip {
@@ -5900,13 +5899,13 @@ textarea:focus-visible {
 }
 .pass__holder .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
 .pass__holder .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
-.pass__avatar-wrap { position: relative; width: 76px; height: 76px; flex-shrink: 0; }
-/* Turned a quarter back so the arc climbs from twelve o'clock, the way
-   every ring gauge is read; the SVG's own zero is at three. */
-.pass__ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); }
+/* The initial, with no ring round it since plan 140: the gold arc it
+   wore measured the climb the balance row's bar already measures, with
+   its figure beside it. */
+.pass__avatar-wrap { position: relative; width: var(--sp-9); height: var(--sp-9); flex-shrink: 0; }
 .pass__avatar {
   position: absolute;
-  inset: 9px;
+  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5916,6 +5915,18 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: 1.7rem;
   color: var(--text-on-panel);
+}
+
+/* The name over the month the pass was issued (plan 140): the date a
+   real pass prints as 発行日, in the card's small print. */
+.pass__holder-names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
+.pass__since {
+  font-family: var(--font-display);
+  font-size: var(--fs-caption-xs);
+  font-weight: 700;
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+  color: var(--text-on-panel-soft);
 }
 
 /* The balance row: the bar climbing toward the next class on the
@@ -5971,8 +5982,7 @@ textarea:focus-visible {
   .pass { padding: 20px 18px 18px; gap: 18px; }
   .pass__level-num { font-size: 1.9rem; }
   .pass__body { gap: 16px; }
-  .pass__avatar-wrap { width: 64px; height: 64px; }
-  .pass__avatar { font-size: 1.4rem; inset: 8px; }
+  .pass__avatar { font-size: 1.4rem; }
   /* A long username on a 390px card: a rung down. It no longer breaks —
      it ellipsises (.profile-card__name), so the card keeps its height. */
   .pass__holder .profile-card__name { font-size: var(--fs-title); }
@@ -17361,19 +17371,23 @@ html { scrollbar-gutter: stable; }
 }
 
 /* ── 乗車記録 — the ride ledger ────────────────────────────────
-   A hairline lattice of the four SRS lines (DESIGN.md: a grid of bare
-   figures takes the lattice). 220px cells: four across on the profile
-   column, two on a tablet, one on a phone. The roundel and the rail
-   wear the line's pigment; the figures do not. The roundel's ink is
-   the pigment mixed 60/40 toward the ambient ink — 5.3:1 dark and
-   7.8:1 light for 藍, the coolest of the four. Hover tints the roundel
+   The four SRS lines, a row each, divided by hairlines (DESIGN.md: the
+   lattice's construction, one column). The roundel and the rail wear
+   the line's pigment; the figures do not. The roundel's ink is the
+   pigment mixed 60/40 toward the ambient ink — 5.3:1 dark and 7.8:1
+   light for 藍, the coolest of the four. Hover tints the roundel
    rather than filling it: a filled 松葉 would not carry either ink at
-   10px. */
+   10px.
+
+   A row a line since plan 140. It was a lattice of cells, four across,
+   two, one, and a half-width cell wrapped "Vocabulary JLPT" and set its
+   figure a line below its neighbour's. Every row now shares the
+   ledger's three columns (a subgrid): the roundel; the name over its
+   rail; the figure. So each rail starts and ends where the others do,
+   however long a name or a figure. */
 .pf-ledger {
   display: grid;
-  /* Four, two or one — never three: a lattice with a short last row
-     shows its background as a bare slab (see the breakpoints below). */
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: auto minmax(0, 1fr) auto;
   gap: 1px;
   background: var(--surface-line);
   border: 1px solid var(--surface-line);
@@ -17381,11 +17395,15 @@ html { scrollbar-gutter: stable; }
   overflow: hidden;
 }
 .pf-line {
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-4);
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: subgrid;
+  align-items: center;
+  /* The subgrid's own gap between its columns, over the ledger's
+     hairline: the name over its rail, the rail beside its figure. */
+  gap: var(--sp-3) var(--sp-4);
   min-width: 0;
-  padding: var(--sp-5) var(--sp-5) var(--sp-4);
+  padding: var(--sp-4) var(--sp-5);
   background: var(--surface);
   border: 0;
   border-radius: 0;
@@ -17398,6 +17416,7 @@ html { scrollbar-gutter: stable; }
 .pf-line:hover,
 .pf-line:focus-visible { background: var(--bg-card-hover); filter: none; }
 .pf-line__id { display: flex; align-items: center; gap: var(--sp-3); }
+
 .pf-line__roundel {
   flex-shrink: 0;
   display: inline-flex;
@@ -17426,7 +17445,7 @@ html { scrollbar-gutter: stable; }
   gap: var(--sp-2);
   font-family: var(--font-display);
   font-weight: 700;
-  font-size: var(--fs-title);
+  font-size: var(--fs-lead);
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
@@ -17438,18 +17457,27 @@ html { scrollbar-gutter: stable; }
   overflow: hidden;
 }
 .pf-line__done { display: block; height: 100%; background: var(--line-color, var(--accent2)); transition: width 0.6s ease; }
+/* In a ledger row the mark's two parts are cells of the row's grid:
+   the roundel down the first column across both lines, the name over
+   the rail in the second, the figure down the third. (A record's door
+   keeps the mark whole — it is only unpacked here.) */
+.pf-line > .pf-line__id { display: contents; }
+.pf-line > .pf-line__id > .pf-line__roundel { grid-column: 1; grid-row: 1 / span 2; }
+.pf-line > .pf-line__id > .pf-line__names { grid-column: 2; grid-row: 1; }
+.pf-line > .pf-line__track { grid-column: 2; grid-row: 2; }
+.pf-line > .pf-line__fig { grid-column: 3; grid-row: 1 / span 2; justify-content: flex-end; }
 
-/* ── 記録 — the records, and the door to the room that keeps them ──
-   Reviews, retention and the best perfect run, in the same flush
-   hairline lattice as the ledger above — and the fourth cell is 統計
-   itself, the one hall the profile still opens onto, drawn as the
-   ledger draws a line (roundel, name, caption) with a ▶ where the
-   figure would be, so a doorway and a record read as one kind of cell.
-   Two by two, so the count always divides its content (DESIGN.md,
-   Surfaces). Beside the stamp book the lattice is stretched to the
-   sheet's height, and each cell centres its figure in the room it is
-   given rather than pooling the slack under a top-aligned number (the
-   density contract). */
+/* ── 記録 — the records, and the doors to the halls behind the pass ──
+   A flush hairline lattice of bare figures, two across by default (the
+   dictionary's entry prints the reader's four this way). The profile's
+   are three — reviews, retention, the best perfect run — three across
+   (.records--three, plan 140); its doors, 統計 and Settings, are a
+   lattice of two of their own, each drawn as the ledger draws a line
+   (roundel, name) with a ▶ where the figure would be, so a doorway and
+   a record read as one kind of cell. The count always divides its
+   content (DESIGN.md, Surfaces). A stretched lattice centres each
+   figure in the room it is given rather than pooling the slack under a
+   top-aligned number (the density contract). */
 .records {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -17460,6 +17488,7 @@ html { scrollbar-gutter: stable; }
   border-radius: var(--r-card);
   overflow: hidden;
 }
+.records--three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .record {
   display: flex;
   flex-direction: column;
@@ -17555,9 +17584,6 @@ form.stage__foot > .btn-primary {
 .record--door:hover .record__chev,
 .record--door:focus-visible .record__chev { opacity: 1; transform: translateX(0); }
 
-@media (max-width: 999px) {
-  .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
 @media (max-width: 560px) {
   .pf-line,
   .record { padding: var(--sp-4); }
@@ -17597,9 +17623,7 @@ form.stage__foot > .btn-primary {
 .profile__stale { display: flex; align-items: center; gap: var(--sp-2); margin: 0; }
 .profile__stale-glyph { flex: none; color: var(--warning); }
 
-/* ── The pass's ring, and the balance on its footer ── */
-.pass__ring-track { fill: none; stroke: rgba(255, 255, 255, 0.12); stroke-width: 5; }
-.pass__ring-fill { fill: none; stroke: var(--accent2); stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.6s ease; }
+/* ── The balance on the pass's footer ── */
 /* The footer wants to be one line — the word, the gold figure, and the
    refill out at the right edge — and below ~350px it cannot be. It used
    to push the refill over with `margin-left: auto`, which survives the
@@ -17633,6 +17657,42 @@ form.stage__foot > .btn-primary {
    ink and drops the uppercase. Two classes deep to outrank the cap rule
    above, which is where the size and the ink come from. */
 .balance-line .balance-line__refill { letter-spacing: var(--tr-term); text-transform: none; }
+/* The footer is a door (plan 140): the balance sheet the HUD's pass
+   opens, which is where the offer lives — so the profile no longer
+   stands a "See the pass" button of its own between the pass and the
+   stamps. A button the width of the card, its ▶ sliding in from -4px
+   the way a record's does (DESIGN.md, Motion), and at least a thumb
+   tall. On the pass's sumi, so the panel inks, inherited from .pass. */
+.pass__door {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  width: 100%;
+  min-height: var(--sp-8);
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.pass__door > .balance-line { flex: 1; min-width: 0; }
+.pass__door-chev {
+  flex: none;
+  color: var(--text-on-panel-soft);
+  opacity: 0.7;
+  transform: translateX(-4px);
+  transition: transform 0.15s ease, opacity 0.15s ease;
+}
+.pass__door:hover,
+.pass__door:focus-visible { filter: none; }
+.pass__door:hover .pass__door-chev,
+.pass__door:focus-visible .pass__door-chev { opacity: 1; transform: translateX(0); }
+@media (prefers-reduced-motion: reduce) {
+  .pass__door-chev { transition: none; }
+}
 
 /* ── The stamp book (canvas Profile) ──
    Five whole weeks, a stamp a day: inked in the eki stamp's lacquer,
@@ -17710,11 +17770,12 @@ form.stage__foot > .btn-primary {
   background: color-mix(in srgb, var(--stamp-ink) 22%, transparent);
 }
 .sbook__side { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
+/* One row of three, whatever the width (plan 140): the third figure
+   used to wrap onto a row of its own at a phone's width. */
 .sbook__figs {
-  display: flex;
-  flex-flow: row wrap;
-  justify-content: space-between;
-  gap: var(--sp-4) var(--sp-5);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-4);
 }
 .fig { display: flex; flex-direction: column; gap: var(--sp-2); min-width: 0; }
 .fig__v {
@@ -20596,6 +20657,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .guide__spot--flat { border-radius: var(--r-flat); }
 .guide__spot--plate { border-radius: var(--r-plate); }
 .guide__spot--identity { border-radius: var(--r-identity); }
+/* A rail station's lozenge (the profile's Settings stop on the desk,
+   plan 140). */
+.guide__spot--panel { border-radius: var(--r-panel); }
 .guide-callout--live .guide-callout__foot {
   align-items: center;
   gap: var(--sp-3);
@@ -22783,7 +22847,46 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     gap: var(--sp-5);
     min-width: 0;
   }
-  .desk-profile .pf-ledger { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* The lines drawn with their stops (plan 140): a row a line, the
+     mark whole again at the head of the row, then a rail per stop (a
+     kana set, a JLPT level) filled with that stop's own learned / total
+     and named under it, the stop being ridden in full ink, then the
+     figure. The same three columns the phone's rows share, now one line
+     tall; the name's column is as wide as the longest name. */
+  .desk-profile .pf-line { column-gap: var(--sp-6); }
+  .desk-profile .pf-line > .pf-line__id { display: flex; grid-column: 1; grid-row: 1; }
+  .desk-profile .pf-line > .pf-line__fig { grid-row: 1; }
+  .pf-line__stops {
+    grid-column: 2;
+    grid-row: 1;
+    display: flex;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .pf-line__stop {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
+  .pf-line__stop-name {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--text-secondary);
+  }
+  /* A kana set is named by its specimen, which is Japanese: no
+     tracking, no case, the reading face (DESIGN.md, Type). */
+  .pf-line__stop-name--jp {
+    font-family: var(--font-jp);
+    letter-spacing: 0;
+    text-transform: none;
+  }
+  .pf-line__stop--here .pf-line__stop-name { color: var(--text-primary); }
   /* The two rankings at once (Banzuke's `both`): side by side once the
      column holds two at the side column's width, stacked below that. */
   .desk-banzuke {

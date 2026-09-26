@@ -103,5 +103,10 @@ describe('the guide on the desk', () => {
       expect(phone[anchor], anchor).toBe('pill')
     }
     expect(desk['today.gate']).toBe(phone['today.gate'])
+    // Plan 140: the profile's Settings stop is the rail's station on the
+    // desk, a lozenge; on the phone it is a flush lattice cell.
+    const profile = Object.fromEntries(deskStops('profile').map(s => [s.anchor, s.radius]))
+    expect(profile['profile.settings']).toBe('panel')
+    expect(GUIDES.profile.find(s => s.anchor === 'profile.settings').radius).toBe('flat')
   })
 })

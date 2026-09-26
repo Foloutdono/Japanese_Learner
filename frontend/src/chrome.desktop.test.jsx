@@ -230,6 +230,10 @@ describe('the rail', () => {
     await settle()
     expect(stations().map(s => s.getAttribute('href'))).toEqual(['/profile/stats', '/profile/settings'])
     expect(stations()[1].getAttribute('aria-current')).toBe('page')
+    // The profile draws no Settings door on the desk (plan 140): the
+    // guide's Settings stop stands on this station instead, the only one
+    // carrying a stop.
+    expect(stations().map(s => s.dataset.guide)).toEqual([undefined, 'profile.settings'])
   })
 
   it('prints a French station name whole', async () => {

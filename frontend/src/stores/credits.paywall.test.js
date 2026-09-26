@@ -32,7 +32,7 @@ describe('the paywall funnel', () => {
     const first = track.mock.calls.at(-1)[1].ms
 
     track.mockClear()
-    openPaywall('profile')
+    openPaywall('ride')
     closePaywall()
     const second = track.mock.calls.at(-1)[1].ms
 
@@ -69,7 +69,7 @@ describe('the paywall funnel', () => {
   })
 
   it('does not count a close after an intent as a dismissal', () => {
-    openPaywall('profile')
+    openPaywall('ride')
     takePaywall()
     track.mockClear()
     closePaywall()
@@ -83,16 +83,16 @@ describe('the paywall funnel', () => {
   })
 
   it('keeps each door separate across successive opens', () => {
-    for (const source of ['onboarding', 'balance', 'profile', 'settings', 'runout']) {
+    for (const source of ['onboarding', 'balance', 'settings', 'runout', 'ride']) {
       openPaywall(source)
       closePaywall()
     }
     expect(track.mock.calls.map(([name, props]) => `${name}:${props.where}`)).toEqual([
       'offer_view:onboarding', 'offer_dismiss:onboarding',
       'offer_view:balance', 'offer_dismiss:balance',
-      'offer_view:profile', 'offer_dismiss:profile',
       'offer_view:settings', 'offer_dismiss:settings',
       'offer_view:runout', 'offer_dismiss:runout',
+      'offer_view:ride', 'offer_dismiss:ride',
     ])
   })
 })

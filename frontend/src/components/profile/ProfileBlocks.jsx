@@ -10,7 +10,12 @@ import { useDesk } from '../../hooks/useDesk'
 // sheet — five whole weeks, Monday to Sunday, ending on the current
 // one, every day ridden inked in the eki stamp's lacquer, a missed day
 // dashed, today pressed harder, the days ahead faint. Under it, the
-// three figures: the streak, the longest, the days stamped.
+// three figures in one row of three: the streak, the longest, the
+// days stamped.
+//
+// The sheet names itself by its month (plan 140): the month is the
+// title and the year sits in the margin, where "Stamp book" over
+// "September 2026" said the name of the object a second time.
 //
 // Built from /api/profile's `calendar` (35 days of counts, days with
 // nothing simply absent), so the seven-by-five grid is generated here
@@ -56,7 +61,9 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   const elapsed = cells.filter(c => !c.future).length
   const stamped = cells.filter(c => c.stamped).length
 
-  const monthFmt = new Intl.DateTimeFormat(lang, { month: 'long', year: 'numeric' })
+  // A title, so capitalised: French writes its months in lower case.
+  const month = new Intl.DateTimeFormat(lang, { month: 'long' }).format(today)
+  const title = month.charAt(0).toLocaleUpperCase(lang) + month.slice(1)
   const dowFmt = new Intl.DateTimeFormat(lang, { weekday: 'narrow' })
   const dows = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(A_MONDAY)
@@ -67,8 +74,8 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
   return (
     <section className="sbook" aria-label={`${t.currentStreak}: ${streak ?? 0}`} data-guide="profile.stamps">
       <div className="sbook__month">
-        <span className="sbook__title">{t.stampBook}</span>
-        <span className="fig__l">{monthFmt.format(today)}</span>
+        <span className="sbook__title">{title}</span>
+        <span className="fig__l">{today.getFullYear()}</span>
       </div>
       <div className="sbook__dows" aria-hidden="true">
         {dows.map((d, i) => <span key={i} className="sbook__dow">{d}</span>)}
@@ -92,7 +99,7 @@ export function StampBook({ calendar, streak, longest, t, lang = 'en' }) {
 
       <div className="sbook__side">
         <div className="sbook__figs">
-          <Figure value={streak ?? 0} unit={t.daysUnit} label={t.currentStreak} />
+          <Figure value={streak ?? 0} unit={t.daysUnit} label={t.streak} />
           <Figure value={longest ?? 0} unit={t.daysUnit} label={t.longestStreak} />
           <Figure value={stamped} unit={`/ ${elapsed}`} label={t.daysStamped} />
         </div>
@@ -114,19 +121,16 @@ function Figure({ value, unit, label }) {
   )
 }
 
-// ── The records, and the two doors (canvas ProfileInserts) ────
-// Reviews and retention — what no other object on the screen already
-// says (the streak rides the stamp book, the lines their ledger) — in
-// the flush hairline lattice, two by two, with the two doors behind
-// the pass closing the second row: Statistics, drawn as the ledger
-// draws a line (roundel, name) with a chevron where a figure would be,
-// and Settings with the gear in its roundel. Four cells always: a
-// figure with nothing to count yet prints a dash rather than leaving
-// the lattice a bare slab.
-// The halls and Settings are places: on the desk (plan 123) they are
-// links, so they open in a new tab too; the phone keeps its buttons.
-export function Records({ profile, t, navigate }) {
-  const desk = useDesk()
+// ── The records (canvas ProfileInserts, plan 140) ─────────────
+// What no other object on the screen already says (the streak rides
+// the stamp book, the lines their ledger): every review, the share
+// kept, and the best perfect run -- the longest unbroken run of good
+// or better answers, which /api/profile has always counted and the
+// screen never printed. Three figures in the flush hairline lattice,
+// three across, so the count divides its content at every width
+// (DESIGN.md, Surfaces). A figure with nothing to count yet prints a
+// dash rather than leaving the lattice a bare slab.
+export function Records({ profile, t }) {
   const figures = [
     { key: 'reviews',   value: profile.totalReviews, label: t.totalReviews },
     {
@@ -135,10 +139,13 @@ export function Records({ profile, t, navigate }) {
       unit: '%',
       label: t.retention,
     },
+    // No unit: "d'affilée" under its figure took a French phone's cell
+    // to two lines while its neighbours kept one.
+    { key: 'run', value: profile.bestQualityStreak, label: t.perfectRun },
   ]
 
   return (
-    <div className="records" data-guide="profile.records">
+    <div className="records records--three" data-guide="profile.records">
       {figures.map(f => (
         <div key={f.key} className="record">
           <span className="record__value">
@@ -148,6 +155,24 @@ export function Records({ profile, t, navigate }) {
           <span className="record__label">{f.label}</span>
         </div>
       ))}
+    </div>
+  )
+}
+
+// ── The two doors behind the pass ─────────────────────────────
+// Statistics, drawn as the ledger draws a line (roundel, name) with a
+// chevron where a figure would be, and Settings with the gear in its
+// roundel: two cells, two across. They closed the records' lattice
+// until plan 140 gave the records a third figure; they are their own
+// lattice now, under the lines. The phone's alone -- on the desk both
+// halls hang under the lit gate on the rail, so the page drew the same
+// two doors a second time (ProfileScreen.jsx leaves them out there).
+// The halls and Settings are places: on the desk (plan 123) they are
+// links, so they open in a new tab too; the phone keeps its buttons.
+export function ProfileDoors({ t, navigate }) {
+  const desk = useDesk()
+  return (
+    <div className="records">
       {getProfileHalls(t).map(hall => (
         <SplitRow
           key={hall.path}

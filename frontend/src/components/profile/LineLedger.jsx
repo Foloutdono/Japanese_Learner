@@ -1,6 +1,6 @@
 import { getSections } from '../../config/tabs'
 import { stationFor } from '../../config/stations'
-import { TRACKED_LINES, lineTotals } from '../../domain/lineProgress'
+import { TRACKED_LINES, lineTotals, lineStops, deckItems } from '../../domain/lineProgress'
 import { SplitRow } from '../selection/SplitRow'
 import { useDesk } from '../../hooks/useDesk'
 
@@ -22,6 +22,19 @@ import { useDesk } from '../../hooks/useDesk'
 // says which station you are at, this says how much of the content you
 // know. Neither prints the other's number, so there is nothing for them
 // to disagree about.
+//
+// A row a line since plan 140 (the owner's pick A of the profile
+// canvas): the roundel, the name over its rail, the figure at the end.
+// It was a lattice of cells, four across, two, one, where "Vocabulary
+// JLPT" wrapped in a half-width cell and dropped its figure a line below
+// its neighbour's. The rows share one set of columns (a subgrid in
+// index.css), so every rail starts and ends where the others do.
+//
+// On the desk the row has the width to say where on the line the
+// learning is: the one rail becomes a rail per stop (a kana set, a JLPT
+// level), each filled with that stop's own learned / total and named
+// under it, the stop being ridden in full ink. Same arithmetic as the
+// figure, cut by stop (deckItems), so the stops add up to the figure.
 
 // ── The mark a cell names itself with ─────────────────────────
 // The roundel in the section's pigment and the name in the learner's
@@ -37,6 +50,17 @@ export function LineMark({ section }) {
       </span>
     </span>
   )
+}
+
+// Each stop of a line with what has been learned of it, and the one
+// being ridden: the first the learner has not finished.
+function stopsOf(stats, source) {
+  const stops = lineStops(stats, source).map(stop => {
+    const { learned, total } = deckItems(stats, source, stop.key)
+    return { ...stop, pct: total ? Math.round((learned / total) * 100) : 0, done: total > 0 && learned >= total }
+  })
+  const riding = stops.find(stop => !stop.done)
+  return stops.map(stop => ({ ...stop, here: stop === riding }))
 }
 
 // A line is a place: on the desk (plan 123) its row is a link.
@@ -61,12 +85,23 @@ export function LineLedger({ stats, t, navigate }) {
             onClick={() => { if (!desk) navigate(s.path) }}
           >
             <LineMark section={s} />
+            {desk ? (
+              <span className="pf-line__stops" aria-hidden="true">
+                {stopsOf(stats, source).map(stop => (
+                  <span key={stop.key} className={`pf-line__stop${stop.here ? ' pf-line__stop--here' : ''}`}>
+                    <span className="pf-line__track"><span className="pf-line__done" style={{ width: `${stop.pct}%` }} /></span>
+                    <span className={`pf-line__stop-name${stop.jp ? ' pf-line__stop-name--jp' : ''}`} lang={stop.jp ? 'ja' : undefined}>{stop.label}</span>
+                  </span>
+                ))}
+              </span>
+            ) : (
+              <span className="pf-line__track" aria-hidden="true">
+                <span className="pf-line__done" style={{ width: `${pct}%` }} />
+              </span>
+            )}
             <span className="pf-line__fig" aria-label={`${learned.toLocaleString()} ${t.mastered}`}>
               {learned.toLocaleString()}
               <span className="pf-line__of">/ {total.toLocaleString()}</span>
-            </span>
-            <span className="pf-line__track" aria-hidden="true">
-              <span className="pf-line__done" style={{ width: `${pct}%` }} />
             </span>
           </SplitRow>
         )

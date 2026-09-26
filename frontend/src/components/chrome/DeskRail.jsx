@@ -117,6 +117,7 @@ export function DeskRail() {
                             to={s.path}
                             className={`desk-sec${lit ? ' desk-sec--on' : ''}`}
                             aria-current={lit ? 'page' : undefined}
+                            data-guide={s.guide}
                             onClick={() => playClick()}
                           >
                             {s.title}

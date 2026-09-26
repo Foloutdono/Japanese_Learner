@@ -66,6 +66,9 @@ export const DESK_RADIUS = Object.freeze({
   'hud.level': 'card',
   'hud.status': 'card',
   'hud.pass': 'card',
+  // Plan 140: the profile's Settings door is the rail's station there,
+  // a lozenge at the panel's corner rather than a flush lattice cell.
+  'profile.settings': 'panel',
 })
 
 /** A gate's stops in the order the desk walks them, in the desk's corners. */

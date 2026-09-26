@@ -10,11 +10,11 @@ import './index.css'
 const columns = el => getComputedStyle(el).gridTemplateColumns.split(' ').length
 
 describe('the profile at phone width', () => {
-  it('the stamp book is seven across, the inserts two across, the ranking rows are targets', async () => {
+  it('the stamp book is seven across over three figures, the records three across, the lines rows, the doors two, the ranking rows targets', async () => {
     const screen = await render(
       <main className="profile">
         <section className="sbook">
-          <div className="sbook__month"><span className="sbook__title">Stamp book</span><span className="fig__l">September 2026</span></div>
+          <div className="sbook__month"><span className="sbook__title">Septembre</span><span className="fig__l">2026</span></div>
           <div className="sbook__dows">{['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((d, i) => <span key={i} className="sbook__dow">{d}</span>)}</div>
           <div className="sbook__grid">
             {Array.from({ length: 35 }, (_, i) => (
@@ -22,25 +22,28 @@ describe('the profile at phone width', () => {
             ))}
           </div>
           <div className="sbook__side"><div className="sbook__figs">
-            <div className="fig"><span className="fig__v">3<span className="fig__u">days</span></span><span className="fig__l">Current streak</span></div>
-            <div className="fig"><span className="fig__v">21<span className="fig__u">days</span></span><span className="fig__l">Longest</span></div>
-            <div className="fig"><span className="fig__v">32<span className="fig__u">/ 34</span></span><span className="fig__l">Stamped</span></div>
+            <div className="fig"><span className="fig__v">14<span className="fig__u">jours</span></span><span className="fig__l">Série</span></div>
+            <div className="fig"><span className="fig__v">21<span className="fig__u">jours</span></span><span className="fig__l">Record</span></div>
+            <div className="fig"><span className="fig__v">32<span className="fig__u">/ 34</span></span><span className="fig__l">Tamponnés</span></div>
           </div></div>
         </section>
-        <div className="records">
-          <div className="record"><span className="record__value">842</span><span className="record__label">Reviews</span></div>
-          <div className="record"><span className="record__value">91<span className="record__unit">%</span></span><span className="record__label">Retention</span></div>
-          <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }}><span className="pf-line__id"><span className="pf-line__roundel">TO</span><span className="pf-line__names"><span className="pf-line__jp">Statistics</span></span></span></button>
-          <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }}><span className="pf-line__id"><span className="pf-line__roundel">S</span><span className="pf-line__names"><span className="pf-line__jp">Settings</span></span></span></button>
+        <div className="records records--three">
+          <div className="record"><span className="record__value">8 420</span><span className="record__label">Révisions</span></div>
+          <div className="record"><span className="record__value">91<span className="record__unit">%</span></span><span className="record__label">Rétention</span></div>
+          <div className="record"><span className="record__value">12</span><span className="record__label">Sans faute</span></div>
         </div>
         <div className="pf-ledger">
-          {['KN', 'TG', 'KJ', 'BP'].map(code => (
+          {[['KN', 'Kana', '123', '/ 158'], ['TG', 'Vocabulaire JLPT', '730', '/ 7 924'], ['KJ', 'Kanji', '170', '/ 2 185'], ['BP', 'Grammaire', '43', '/ 497']].map(([code, name, n, of]) => (
             <button key={code} type="button" className="pf-line" style={{ '--line-color': 'var(--line-kana)' }}>
-              <span className="pf-line__id"><span className="pf-line__roundel">{code}</span><span className="pf-line__names"><span className="pf-line__jp">Kana</span></span></span>
-              <span className="pf-line__fig">104<span className="pf-line__of">/ 104</span></span>
-              <span className="pf-line__track"><span className="pf-line__done" style={{ width: '100%' }} /></span>
+              <span className="pf-line__id"><span className="pf-line__roundel">{code}</span><span className="pf-line__names"><span className="pf-line__jp">{name}</span></span></span>
+              <span className="pf-line__track"><span className="pf-line__done" style={{ width: '40%' }} /></span>
+              <span className="pf-line__fig">{n}<span className="pf-line__of">{of}</span></span>
             </button>
           ))}
+        </div>
+        <div className="records">
+          <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }}><span className="pf-line__id"><span className="pf-line__roundel">TO</span><span className="pf-line__names"><span className="pf-line__jp">Statistiques</span></span></span></button>
+          <button type="button" className="record record--door" style={{ '--line-color': 'var(--pass-ink)' }}><span className="pf-line__id"><span className="pf-line__roundel">S</span><span className="pf-line__names"><span className="pf-line__jp">Réglages</span></span></span></button>
         </div>
         <section className="banzuke">
           <div className="bz__head"><span className="bz__mark"><span className="bz__jp">Ranking</span></span><div className="seg bz__seg"><button type="button" className="seg__opt seg__opt--on"><span className="seg__opt-latin">This week</span></button><button type="button" className="seg__opt"><span className="seg__opt-latin">All time</span></button></div></div>
@@ -50,28 +53,56 @@ describe('the profile at phone width', () => {
         </section>
       </main>
     )
-    expect(columns(screen.container.querySelector('.sbook__grid'))).toBe(7)
-    const stamps = screen.container.querySelectorAll('.sbook__stamp')
+    const $ = sel => screen.container.querySelector(sel)
+    const $$ = sel => [...screen.container.querySelectorAll(sel)]
+    expect(columns($('.sbook__grid'))).toBe(7)
+    const stamps = $$('.sbook__stamp')
     const r = stamps[0].getBoundingClientRect()
     expect(Math.abs(r.width - r.height)).toBeLessThan(1)
     expect(getComputedStyle(stamps[0]).borderTopLeftRadius).toBe('999px')
     expect(getComputedStyle(stamps[20]).borderTopStyle).toBe('dashed')
     expect(getComputedStyle(stamps[33]).borderTopWidth).toBe('2px')
-    expect(columns(screen.container.querySelector('.records'))).toBe(2)
-    expect(columns(screen.container.querySelector('.pf-ledger'))).toBe(2)
-    for (const row of screen.container.querySelectorAll('.leaderboard-row')) {
+    // The three figures under the sheet share ONE row (plan 140): the
+    // third used to wrap onto a row of its own at this width.
+    const figs = $$('.sbook__figs > .fig').map(f => f.getBoundingClientRect())
+    expect(figs).toHaveLength(3)
+    for (const f of figs) expect(f.top).toBeCloseTo(figs[0].top, 0)
+    // The records: three figures, three across, one row.
+    expect(columns($('.records--three'))).toBe(3)
+    const cells = $$('.records--three > .record').map(c => c.getBoundingClientRect())
+    for (const c of cells) expect(c.top).toBeCloseTo(cells[0].top, 0)
+    // The lines are rows, and every row's rail starts and ends where the
+    // others do however long its name or figure (the subgrid) -- a name
+    // no longer wraps and drops its figure below its neighbour's.
+    const rows = $$('.pf-line').map(row => row.getBoundingClientRect())
+    for (const [i, row] of rows.entries()) {
+      expect(row.left, `row ${i}`).toBeCloseTo(rows[0].left, 0)
+      expect(row.width, `row ${i}`).toBeCloseTo(rows[0].width, 0)
+      if (i) expect(row.top).toBeGreaterThan(rows[i - 1].bottom - 1)
+    }
+    const rails = $$('.pf-line__track').map(t => t.getBoundingClientRect())
+    for (const rail of rails) {
+      expect(rail.left).toBeCloseTo(rails[0].left, 0)
+      expect(rail.right).toBeCloseTo(rails[0].right, 0)
+      expect(rail.width).toBeGreaterThan(100)
+    }
+    const names = $$('.pf-line__jp').map(n => n.getBoundingClientRect())
+    for (const n of names) expect(n.height).toBeLessThan(26)
+    // The two doors, two across.
+    expect(columns($('.record--door').parentElement)).toBe(2)
+    for (const row of $$('.leaderboard-row')) {
       expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
     }
-    const rank = screen.container.querySelector('.leaderboard-row__rank')
+    const rank = $('.leaderboard-row__rank')
     expect(rank.getBoundingClientRect().width).toBe(30)
     expect(getComputedStyle(rank).borderTopLeftRadius).toBe('999px')
     // The board's toggle sits on the head's right edge — and on the
     // title's OWN line, not a second one under it: at 390px the head
     // used to wrap, which put the only control in the card on a line
     // of its own (index.css, "The head holds ONE row").
-    const mark = screen.container.querySelector('.bz__mark').getBoundingClientRect()
-    const head = screen.container.querySelector('.bz__head').getBoundingClientRect()
-    const seg = screen.container.querySelector('.bz__seg').getBoundingClientRect()
+    const mark = $('.bz__mark').getBoundingClientRect()
+    const head = $('.bz__head').getBoundingClientRect()
+    const seg = $('.bz__seg').getBoundingClientRect()
     expect(head.right - seg.right).toBeLessThan(head.width / 2)
     expect(seg.top).toBeLessThan(mark.bottom)
   })
