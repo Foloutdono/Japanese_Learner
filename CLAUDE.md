@@ -699,7 +699,21 @@ runtime purpose. Two consequences worth knowing:
   `scripts/migrate_pool_cards.py`, `components/analysis/tokens.js`,
   `components/dictionary/DictionaryDetail.jsx`,
   `tests/test_deck_pool_cards.py` and `tests/test_analysis.py`).
-  When starting a new wave, begin at **145** or higher, and check
+  **145** is every key a sentence holds, the grammar detector made
+  robust against real text (measured on 4,000 of JMdict's example
+  sentences: 71% of the particles and auxiliaries covered by a point,
+  96% now; the catalogue's own examples 83% to 98%, lesson recall 92%
+  to 94%): what a point attaches to read by kind of word, a pattern's
+  final word conjugated instead of cut (〜になる in なった, no more
+  ことは for 〜ことはない), rules by what the tokenizer names (the
+  copula's forms, 〜んだ, 〜に行きます with 来る, a lone linking て,
+  から and まで alone, な-adjectives, the spoken short forms), senses
+  the lessons show apart taught (しずかに, 雨だが), and two N5 form
+  points added to the catalogue, た形 〜た and ない形 〜ない (cited in
+  `study/grammar_detect.py`, `study/analysis.py`,
+  `content/grammar/N5.json`, `tests/test_grammar_detect.py`'s
+  `EveryKeyTests` and `tests/test_analysis.py`).
+  When starting a new wave, begin at **146** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

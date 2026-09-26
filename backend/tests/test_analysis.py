@@ -157,6 +157,24 @@ class AnalyzeLocalTests(unittest.TestCase):
         self.assertEqual("".join(t["surface"] for t in r["tokens"]), r["text"])
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_every_grammatical_word_of_a_subtitle_has_its_key(self) -> None:
+        """Plan 145, on the two lines the owner showed: the に of 真っさらに
+        and the なっ of なった are 〜になる, the た the plain past, the ん
+        and だ the explanatory のだ; 会いにきて is 〜に行きます (its lesson
+        names 来ます), and the て of 辿って links the two clauses."""
+        r = analyze_local("さらば桃源郷真っさらになったんだ")
+        by_pattern = {g["pattern"]: r["text"][g["start"]:g["end"]] for g in r["grammar"]}
+        self.assertEqual(by_pattern["〜くなる／〜になる"], "になっ")
+        self.assertEqual(by_pattern["た形 〜た"], "た")
+        self.assertEqual(by_pattern["〜んです／〜のです"], "んだ")
+        r = analyze_local("足跡を辿って会いにきて")
+        by_pattern = {g["pattern"]: r["text"][g["start"]:g["end"]] for g in r["grammar"]}
+        self.assertEqual(by_pattern["〜に行きます"], "にき")
+        self.assertIn("〜て、〜て", by_pattern)
+        ni = next(t for t in r["tokens"] if t["surface"] == "に")
+        self.assertIn("〜に行きます", [g["pattern"] for g in ni["grammar"]])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_the_pool_is_never_asked_for_a_word_a_point_is_written_on(self) -> None:
         # The しれ of かもしれません is 知れる in the pool; a row with no
         # word in it opens its grammar point, and a gloss would take that

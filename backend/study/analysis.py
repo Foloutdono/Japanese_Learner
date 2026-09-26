@@ -291,7 +291,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # space was lost) and the plain copula after a noun (2026-09-25).
 # 2: the JMdict pool after the deck -- a word the course does not teach
 # carries its meaning and its card (plan 144).
-LOCAL_REV = 2
+# 3: the grammar detector reads what a point attaches to by kind of
+# word, the copula's and a pattern's final word's forms, and the plain
+# past and negative (plan 145).
+LOCAL_REV = 3
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

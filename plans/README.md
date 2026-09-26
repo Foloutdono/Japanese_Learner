@@ -6745,3 +6745,28 @@ does not search the pool; and the grammar and lookup bugs the same
 screenshot showed (〜になる missed in なった/なって, the plain 〜んだ, the
 N3 為る cards shadowing N5 する/なる, 郷 matched to 号 by sound) are the
 owner's next steps.
+
+## Plan 145 — 鍵, every key a sentence holds (2026-09-26)
+
+The owner's ask, from a screenshot of the analyser on 足跡を辿って会いにきて
+(only を and one て lit): "make the grammar detection more robust; the goal
+is to give the user the maximum of keys to understand". Measured first,
+with a probe counting, for every particle and auxiliary of a sentence,
+whether a detected point is written on it — over the catalogue's 2,169
+examples, the reading and dictation banks, and 4,000 of JMdict's example
+sentences (Tatoeba-derived, real Japanese). Before: 83.1% of the
+catalogue's grammatical words covered, 71.1% of JMdict's. The misses,
+ranked: the plain past た and plain negative ない (no point at all, ~3,100),
+particles after a pronoun, a suffix or another particle (~1,900: a lesson's
+four examples had taught は that it follows a noun), the copula's forms
+(だった, ではない, the な of しずかな, the に of しずかに, ~600), then
+〜になる in なった, plain 〜んだ, a lone linking て, 〜に行きます with 来る.
+
+| # | What | Status |
+|---|------|--------|
+| 145 | **Attachment by kind of word** (`_attaches`): a lesson showing a noun admits a pronoun, a suffix and a 形状詞, and for a point that is itself a particle a case-particle phrase (彼は, 私たちは, では); a lesson showing a verb admits an auxiliary, never the reverse (〜ことがある after た); adjectives stay exact (近いところ is not 〜ところだ); a comma in front excuses only a particle (…だ、と言った); a sentence-final particle may follow a plain form or another particle (いいよ, よね); a lesson showing nothing in front holds a conjunction to a clause start (ところで) but not a pronoun (何か). A sense point (full-width parenthesis) keeps exact attachment. **The final word's conjugations** (`_conjugations`, `_polite_negative`): a pattern ending in a verb or adjective is looked for in every form of it by its tokenizer class, behind a stand-in when the piece begins mid-word (くなる), with the polite negative for ない (はずがありません, いけません, さしつかえありません); the cuts `grammar_match.stems` makes of ない/なる/ある/する/いる are dropped in the detector (`_drops_meaning`; the content gate keeps its stems). **Rules by what the tokenizer names**: です／だ in だった, でした, じゃない, ではない/ではありません, である and after an い-adjective; 〜んです／〜のです as の/ん + the copula in any finite form (んだ, なのです, のである, んでしょう; not ので); 〜に行きます as stem + に + 行く/来る/帰る/戻る/出かける; a lone linking て for 〜て、〜て; から and まで alone after a noun for から〜まで; い形容詞／な形容詞 on しずかな + noun, 高くない, 高かった (read in part, so `can_find` stays False: `_PARTIAL`); the spoken short forms てる, ちゃう, とく; a single たり; a dictionary-form tail in the imperative or volitional (やめてくれ, 見てみよう) unless a point is written in exactly that form on the same words. **Senses**: `_shadowed` hides a sense point only where its lessons show it the same as its plain sibling (〜を（移動）, 〜で（理由）, 〜て（理由）); `_joins` learns from the lessons whether a particle point is conjunctive or a case particle, so 〜が（逆接） (雨だが) and 〜く／〜に（副詞形） (しずかに) are taught. **Guards**: a multi-part point stays in one clause (`_one_clause`), a hit ending on である's で is refused, a question word's か is "some" (`_indefinite_ka`), and the letters of a word filed whole (何か, だから) or of a particle-only construction (でも) are its own. **Catalogue**: た形 〜た and ない形 〜ない added to N5 after 〜ました／〜ませんでした, full bilingual lessons, clean under `check_grammar`, read by their rules alone (`_RULE_ONLY`). `analysis.LOCAL_REV` 3. **After**: catalogue 98.2%, reading 98.6%, dictation 96.4%, JMdict 96.0%; lesson recall 94.0% (2,046/2,177), 525 of 543 points seen, 524 trusted. Tests: `test_grammar_detect.EveryKeyTests` (a key and its counter-example per rule), ratchets raised (0.93, 0.96, 520), `test_analysis` on both subtitle lines | DONE (2026-09-26) |
+
+Left: sentence-final て as a casual request has no point (会いにきて's last
+て); the particle に that UniDic tags as the copula after a noun
+(平和に役立つ); 〜ずに-less ず; ambiguities only meaning can settle (とは as
+"with" + topic vs the definition 〜とは, 誰でも vs ここでも).
