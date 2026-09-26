@@ -4,8 +4,11 @@ from study.structures import (
     ALL_KEYS,
     STRUCTURES,
     describe,
+    decode_pairs,
+    grammar_lesson,
     missing_required,
     normalise,
+    sentence_pairs,
     structure_for,
     usable_sentences,
 )
@@ -66,11 +69,35 @@ class NormaliseTests(unittest.TestCase):
     def test_text_is_trimmed(self) -> None:
         self.assertEqual(normalise("standard", {"front": "  a  ", "back": "b"})["front"], "a")
 
-    def test_lines_accept_a_list_or_a_single_value(self) -> None:
+    def test_pairs_accept_rows_or_the_old_bare_strings(self) -> None:
         spec = {"rule": "x", "meaning": "y"}
-        self.assertEqual(normalise("grammar", {**spec, "sentences": ["a", " ", "b"]})["sentences"], ["a", "b"])
-        self.assertEqual(normalise("grammar", {**spec, "sentences": "a"})["sentences"], ["a"])
+        rows = normalise("grammar", {**spec, "sentences": [
+            {"jp": " a ", "tr": " A "}, {"jp": " ", "tr": "lost"}, "b",
+        ]})["sentences"]
+        # A row with no sentence is dropped; a bare string -- how a card
+        # stored its sentences before they carried translations -- is a
+        # sentence with no translation.
+        self.assertEqual(rows, [{"jp": "a", "tr": "A"}, {"jp": "b", "tr": ""}])
+        self.assertEqual(normalise("grammar", {**spec, "sentences": "a"})["sentences"], [{"jp": "a", "tr": ""}])
         self.assertEqual(normalise("grammar", spec)["sentences"], [])
+
+    def test_pairs_are_capped(self) -> None:
+        spec = {"rule": "x", "meaning": "y", "sentences": [f"s{i}" for i in range(50)]}
+        self.assertEqual(len(normalise("grammar", spec)["sentences"]), 20)
+
+    def test_a_choice_outside_its_options_is_dropped(self) -> None:
+        spec = {"rule": "x", "meaning": "y"}
+        self.assertEqual(normalise("grammar", {**spec, "register": "polite"})["register"], "polite")
+        self.assertEqual(normalise("grammar", {**spec, "register": "posh"})["register"], "")
+
+    def test_a_grammar_card_keeps_its_whole_lesson(self) -> None:
+        raw = {
+            "rule": "〜てください", "meaning": "please do", "structure": "verb て-form + ください",
+            "register": "polite", "explanation": "Asks politely.", "usage": "- Requests",
+            "careful": "Still an order.", "sentences": [{"jp": "読んでください。", "tr": "Please read."}],
+            "compare": [{"pattern": "〜ないでください", "text": "asks not to"}],
+        }
+        self.assertEqual(normalise("grammar", raw), raw)
 
     def test_a_number_that_is_not_one_becomes_none(self) -> None:
         # Rather than raising: missing_required reports it as missing,
@@ -141,6 +168,12 @@ class UsableSentenceTests(unittest.TestCase):
         # already draws that line.
         self.assertEqual(usable_sentences({"rule": "を", "sentences": ["パンを食べます。"]}), [])
 
+    def test_a_sentence_with_its_translation_is_read_the_same(self) -> None:
+        self.assertEqual(
+            usable_sentences({"rule": "〜せいで", "sentences": [{"jp": "雨のせいで中止になった。", "tr": "…"}]}),
+            ["雨のせいで中止になった。"],
+        )
+
     def test_no_sentences_is_not_an_error(self) -> None:
         self.assertEqual(usable_sentences({"rule": "〜せいで"}), [])
 
@@ -160,8 +193,44 @@ class DescribeTests(unittest.TestCase):
         for s in describe():
             for f in s["fields"]:
                 self.assertIn("key", f)
-                self.assertIn(f["kind"], ("text", "number", "lines", "readings"), f)
+                self.assertIn(f["kind"], ("text", "long", "choice", "number", "lines", "pairs", "readings"), f)
                 self.assertIsInstance(f["required"], bool)
+                if f["kind"] == "choice":
+                    self.assertTrue(f["options"], f)
+                if f["kind"] == "pairs":
+                    self.assertEqual(len(f["parts"]), 2, f)
+
+
+class GrammarLessonTests(unittest.TestCase):
+    """A written grammar card's lesson, in the shape GrammarLesson draws
+    a catalogue point in."""
+
+    def test_the_steps_come_in_the_catalogues_order_and_only_when_written(self) -> None:
+        lesson = grammar_lesson({"rule": "〜せいで", "meaning": "because of",
+                                 "careful": "Blame.", "explanation": "Cause."})
+        self.assertEqual(lesson["steps"], [{"kind": "rule", "text": "Cause."}, {"kind": "careful", "text": "Blame."}])
+        self.assertEqual((lesson["pattern"], lesson["meaning"], lesson["register"]), ("〜せいで", "because of", None))
+
+    def test_a_sentence_carries_its_translation_and_the_rule_marked(self) -> None:
+        lesson = grammar_lesson({"rule": "〜せいで", "meaning": "m",
+                                 "sentences": [{"jp": "雨のせいで中止になった。", "tr": "Rain."}, "今日は暑い。"]})
+        first, second = lesson["examples"]
+        self.assertEqual((first["jp"], first["tr"]), ("雨のせいで中止になった。", "Rain."))
+        self.assertTrue(any(p.get("highlight") for p in first["furigana"]))
+        # An old bare sentence, and one the rule cannot be found in: no
+        # translation, nothing marked, still printed.
+        self.assertEqual(second["tr"], "")
+        self.assertFalse(any(p.get("highlight") for p in second["furigana"]))
+
+    def test_a_rival_is_not_a_door(self) -> None:
+        lesson = grammar_lesson({"rule": "x", "meaning": "y",
+                                 "compare": [{"pattern": "z", "text": "t"}, {"pattern": "", "text": "lost"}]})
+        self.assertEqual(lesson["compare"], [{"pattern": "z", "text": "t"}])
+
+    def test_pairs_read_both_shapes(self) -> None:
+        self.assertEqual(sentence_pairs({"sentences": ["a", {"jp": "b", "tr": "B"}]}),
+                         [{"jp": "a", "tr": ""}, {"jp": "b", "tr": "B"}])
+        self.assertEqual(decode_pairs(None, ("jp", "tr")), [])
 
 
 if __name__ == "__main__":

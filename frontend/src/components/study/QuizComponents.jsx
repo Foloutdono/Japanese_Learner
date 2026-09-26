@@ -5,7 +5,8 @@ import { Readings, ReadingGroup } from './Readings'
 import { glossParts } from './gloss'
 import { Loading } from '../ui/Loading'
 import { DictionaryLookupSheet, SpeakIcon, speakJapanese } from '../dictionary/DictionaryDetail'
-import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon } from '../ui/Icons'
+import { CheckIcon, CheckCircleIcon, XCircleIcon, ChevronIcon, SearchIcon, BooksIcon } from '../ui/Icons'
+import { GrammarLessonSheet } from './GrammarLesson'
 import { CHOICE_KEY_INDEX } from '../../domain/choiceKeys'
 import { useDesk } from '../../hooks/useDesk'
 import { EntryDockContext } from './entryDock'
@@ -610,7 +611,7 @@ export function InlineReveal({ main, kana, t, gap = 24, revealed = true, isLarge
 // in index.css) — the caller is expected to render this as a child of
 // a `position: relative` card (PromptCard/.flashcard), not out in the
 // surrounding page flow.
-export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
+export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
   // Same as Flashcard's own reset — a caller reusing this across cards
   // (passing the card's id as resetKey) shouldn't carry a dictionary
   // sheet left open from the previous card into the next. Handled by
@@ -629,11 +630,12 @@ export function RevealActions({ t, revealed, resetKey, dictTerm, dictKana, dictC
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
+      lesson={lesson}
     />
   )
 }
 
-function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
+function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
   const [showDictionary, setShowDictionary] = useState(false)
   // On the desk, inside a run with a side column (plan 114), the entry
   // is docked beside the card the moment the card is revealed, and the
@@ -667,7 +669,13 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
     watch?.(false)
   }, [watch])
 
-  if (!canLookUp && !canPlaySound) return null
+  // A written grammar card's lesson (decks.py's `lesson`): it names no
+  // catalogue point, so there is no entry to look up or dock -- the
+  // door opens the lesson itself, in the sheet a point's lesson opens
+  // in, on the desk too.
+  const canLesson = revealed && Boolean(lesson)
+
+  if (!canLookUp && !canPlaySound && !canLesson) return null
 
   function openDictionary(e) {
     e?.stopPropagation?.()
@@ -696,6 +704,17 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
             <SpeakIcon />
           </button>
         )}
+        {canLesson && (
+          <button
+            type="button"
+            onClick={openDictionary}
+            className="reveal-action-btn"
+            title={t.glLesson}
+            aria-label={t.glLesson}
+          >
+            <BooksIcon />
+          </button>
+        )}
         {canLookUp && !docked && (
           <button
             type="button"
@@ -719,7 +738,10 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
         )}
       </div>
 
-      {showDictionary && (
+      {showDictionary && lesson && (
+        <GrammarLessonSheet id={lesson.raw_id} initial={lesson} session={session} onClose={closeDictionary} />
+      )}
+      {showDictionary && !lesson && (
         <DictionaryLookupSheet
           term={dictTerm}
           kana={dictKana}
@@ -750,7 +772,7 @@ function RevealActionsPanel({ t, revealed, dictTerm, dictKana, dictCategory, dic
 //
 // dictTerm/dictCategory/session/sound/onReplaySound are all opt-in —
 // see RevealActions above — and pass straight through to it.
-export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
+export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
   // When the caller moves on to a new card (e.g. passes the card's id
   // as resetKey), snap back to the unrevealed front instead of
   // carrying over the previous card's flip state — done by remounting
@@ -772,11 +794,12 @@ export function Flashcard({ front, back, onReveal, t, resetKey, dictTerm, dictKa
       session={session}
       sound={sound}
       onReplaySound={onReplaySound}
+      lesson={lesson}
     />
   )
 }
 
-function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound }) {
+function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana, dictCategory, dictId, dictLabel, session, sound, onReplaySound , lesson}) {
   const desk = useDesk()
   // `revealed` — has this card been shown at least once. Permanent
   // for the card's lifetime: it's what unlocks the dictionary lookup/
@@ -875,6 +898,7 @@ function FlashcardFace({ front, back, onReveal, t, resetKey, dictTerm, dictKana,
         session={session}
         sound={sound}
         onReplaySound={onReplaySound}
+        lesson={lesson}
       />
       {/* Keyed on the flip count so each turn mounts a fresh element and
           the face animation actually replays — see `flips` above. */}

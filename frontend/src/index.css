@@ -8166,6 +8166,27 @@ textarea:focus-visible {
   margin-bottom: 6px;
 }
 .readings-field__row .deckdetail-form__input { flex: 1; margin: 0; }
+
+/* ── A written grammar card's lesson fields ─────────────────
+   The paragraphs (the rule explained, its uses, its trap), the register
+   as chips, and a sentence over its translation as one row with its
+   remove button beside the pair (components/decks/CardFormFields.jsx). */
+.deckdetail-form__long { min-height: 5rem; }
+.deckdetail-form__choice { display: flex; flex-wrap: wrap; gap: var(--sp-2); }
+.pairs-field__row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.pairs-field__parts {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+}
+.pairs-field__second { color: var(--text-secondary); }
+.pairs-field__row + .pairs-field__row { margin-top: var(--sp-2); }
 /* 44px, not 30px -- it is a destructive button in a form, and it was
    the smallest tap target on the screen. */
 .readings-field__remove {
@@ -14455,6 +14476,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   padding: 8px 14px;
   display: flex;
   gap: 16px;
+  flex-wrap: wrap;
   font-size: 13px;
 }
 .import-preview-row__front { color: var(--text-primary); min-width: 100px; }
@@ -14476,6 +14498,21 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   vertical-align: -1px;
 }
 .import-preview__more { color: var(--text-secondary); font-size: 12px; padding: 4px 14px; }
+
+/* The deck's columns, named over the paste box, with the example that
+   fills it; and what the preview read (headers, columns it left out). */
+.import-columns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-1);
+  margin-bottom: var(--sp-3);
+  font-size: var(--fs-sm);
+}
+.import-columns__label { font-weight: 700; margin-inline-end: var(--sp-2); }
+.import-columns__hint { color: var(--text-secondary); font-size: var(--fs-caption); }
+.import-preview__note { color: var(--text-secondary); font-size: var(--fs-caption); margin-bottom: var(--sp-2); }
+.import-preview-row__meta { color: var(--text-secondary); font-size: var(--fs-caption); margin-inline-start: auto; }
+.import-preview-row--skipped { opacity: 0.6; }
 
 .import-footer { display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px; }
 .import-footer__cancel { background: var(--bg-panel); color: var(--text-on-panel-soft); font-size: 14px; }

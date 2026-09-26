@@ -298,6 +298,10 @@ export default function CardPrompt({
     // card names no catalogue point, so it has no entry to open and
     // RevealActions renders nothing for it.
     const pointId = c.source === 'custom' ? null : (c.raw_id ?? c.card_id)
+    // What it opens instead: the lesson the card was written with, when
+    // there is more of it than the card's own two faces -- a formation,
+    // a step, a sentence or a rival (decks.py's build_personal_card).
+    const lesson = c.source === 'custom' ? writtenLesson(c) : null
     return (
       <PromptCard className="grammar-prompt" foot={foot}>
         {/* Every mode here is the same card with a different front: a
@@ -313,7 +317,7 @@ export default function CardPrompt({
             {answered && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
-              dictCategory="grammar" dictId={pointId} session={session} />
+              dictCategory="grammar" dictId={pointId} session={session} lesson={lesson} />
           </>
         ) : !choicesOn ? (
           <Flashcard
@@ -349,7 +353,7 @@ export default function CardPrompt({
                     </>
                   )
             }
-            dictCategory="grammar" dictId={pointId} session={session}
+            dictCategory="grammar" dictId={pointId} session={session} lesson={lesson}
           />
         ) : (
           /* Choices on — the prompt does NOT swap: the answer is
@@ -371,7 +375,7 @@ export default function CardPrompt({
             {isFill && answered && <GrammarAnswer card={c} size={36} divided />}
             <RevealActions
               t={t} revealed={answered} resetKey={resetKey}
-              dictCategory="grammar" dictId={pointId} session={session} />
+              dictCategory="grammar" dictId={pointId} session={session} lesson={lesson} />
           </>
         )}
       </PromptCard>
@@ -397,4 +401,14 @@ export default function CardPrompt({
       />
     </PromptCard>
   )
+}
+
+// A written grammar card's lesson as GrammarLessonSheet opens it: keyed
+// by the card, so the sheet's stack takes it without a fetch. Null when
+// the card was written with nothing past its rule and meaning.
+function writtenLesson(c) {
+  const l = c.lesson
+  if (!l) return null
+  const more = l.structure || l.steps?.length || l.examples?.length || l.compare?.length
+  return more ? { ...l, raw_id: `custom:${c.card_id}` } : null
 }

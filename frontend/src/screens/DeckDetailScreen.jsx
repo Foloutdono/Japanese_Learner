@@ -17,6 +17,8 @@ import { dueByDeck } from '../domain/lanes'
 import Empty from '../components/ui/Empty'
 import { Loading } from '../components/ui/Loading'
 import ImportCardsMenu from '../components/decks/ImportCardsMenu'
+import { ChoiceField, LongField, PairsField } from '../components/decks/CardFormFields'
+import { pairRows } from '../components/decks/importCards'
 import BrowseCardsMenu, { BrowseCardsDock } from '../components/decks/BrowseCardsMenu'
 import { deckTypeOf } from '../components/decks/deckTypes'
 import { StrokeRail } from '../components/dictionary/RadicalIndex'
@@ -160,6 +162,9 @@ function RadicalField({ label, value, onChange, session }) {
 // form itself stops offering "+" before a save would silently trim the
 // overflow instead.
 const MAX_READINGS = 15
+
+// The import's rows per request: under the batch route's MAX_BATCH.
+const IMPORT_SLICE = 200
 
 // ── The readings field (personal kanji cards) ─────────────────
 // Two groups the learner grows one row at a time, mirroring
@@ -483,6 +488,7 @@ export default function DeckDetailScreen({ session }) {
     const out = {}
     for (const f of spec?.fields ?? []) {
       if (f.kind === 'lines') out[f.key] = ['']
+      else if (f.kind === 'pairs') out[f.key] = [{ [f.parts[0]]: '', [f.parts[1]]: '' }]
       else if (f.kind === 'readings') out[f.key] = { on: [''], kun: [''] }
       else out[f.key] = ''
     }
@@ -508,6 +514,7 @@ export default function DeckDetailScreen({ session }) {
       if (f.kind === 'readings') {
         return (v?.on ?? []).some(x => x.trim()) || (v?.kun ?? []).some(x => x.trim())
       }
+      if (f.kind === 'pairs') return (v ?? []).some(r => String(r[f.parts[0]] ?? '').trim())
       return Array.isArray(v) ? v.some(x => x.trim()) : String(v ?? '').trim()
     })
   }
@@ -555,7 +562,15 @@ export default function DeckDetailScreen({ session }) {
   }, [arrivedToAdd, loading])
 
   function startEdit(card) {
-    setForm({ ...blankForm(structure), ...(card.fields ?? {}) })
+    const fields = { ...(card.fields ?? {}) }
+    for (const f of structure?.fields ?? []) {
+      if (f.kind === 'pairs') {
+        const rows = pairRows(fields[f.key], f.parts)
+        fields[f.key] = rows.length ? rows : undefined
+      }
+    }
+    const blank = blankForm(structure)
+    setForm(Object.fromEntries(Object.keys({ ...blank, ...fields }).map(k => [k, fields[k] ?? blank[k]])))
     setNotes(card.notes || '')
     setEditing(card.id)
     setAdding(true)
@@ -579,25 +594,30 @@ export default function DeckDetailScreen({ session }) {
   function saveCard() {
     if (!formComplete()) return
     const body = JSON.stringify({ fields: form, notes })
+    // A refused save (a 400 names what is missing) used to be read as
+    // the card itself and put in the list, as a row of nothing.
+    const ok = r => (r.ok ? r.json() : Promise.reject(r))
     if (editing) {
       apiFetch(`/api/decks/${deck_id}/cards/${editing}`, session, {
         method: 'PUT',
         body,
       })
-        .then(r => r.json())
+        .then(ok)
         .then(updated => {
           setCards(prev => prev.map(c => (c.origin === 'custom' && c.id === editing) ? { ...updated, origin: 'custom' } : c))
           setAdding(false)
           setEditing(null)
           resetForm()
         })
+        .catch(() => {})
     } else {
       apiFetch(`/api/decks/${deck_id}/cards`, session, {
         method: 'POST',
         body,
       })
-        .then(r => r.json())
+        .then(ok)
         .then(card => { setCards(prev => [...prev, card]); resetForm() })
+        .catch(() => {})
     }
   }
 
@@ -642,14 +662,29 @@ export default function DeckDetailScreen({ session }) {
     exitSelectMode()
   }
 
-  async function handleImport(cards) {
-    for (const card of cards) {
-      await apiFetch(`/api/decks/${deck_id}/cards`, session, {
-        method: 'POST',
-        body: JSON.stringify({ front: card.front, back: card.back, hint: card.hint || '', notes: '' }),
-      })
+  // The dialog's whole rows, already in this deck's fields
+  // (components/decks/importCards.js), in slices of the batch route's
+  // size. What the dialog left out (`skipped`) and what the server
+  // refused are both counted, so the banner says what landed.
+  async function handleImport(rows, skipped = 0) {
+    let inserted = 0
+    let refused = 0
+    for (let i = 0; i < rows.length; i += IMPORT_SLICE) {
+      const slice = rows.slice(i, i + IMPORT_SLICE)
+      try {
+        const r = await apiFetch(`/api/decks/${deck_id}/cards/batch`, session, {
+          method: 'POST',
+          body: JSON.stringify({ cards: slice }),
+        })
+        if (!r.ok) { refused += slice.length; continue }
+        const body = await r.json()
+        inserted += body.inserted ?? 0
+        refused += (body.errors ?? []).length
+      } catch {
+        refused += slice.length
+      }
     }
-    setImportResult({ inserted: cards.length })
+    setImportResult({ inserted, skipped: skipped + refused })
     setShowImport(false)
     fetchCards()
   }
@@ -689,6 +724,15 @@ export default function DeckDetailScreen({ session }) {
               </div>
             )
           }
+          if (f.kind === 'pairs') {
+            return <PairsField key={f.key} field={f} value={form[f.key]} onChange={v => setField(f.key, v)} />
+          }
+          if (f.kind === 'long') {
+            return <LongField key={f.key} field={f} value={form[f.key]} onChange={v => setField(f.key, v)} />
+          }
+          if (f.kind === 'choice') {
+            return <ChoiceField key={f.key} field={f} value={form[f.key]} onChange={v => setField(f.key, v)} />
+          }
           if (f.picker === 'radical') {
             return (
               <RadicalField key={f.key} label={label} session={session}
@@ -704,7 +748,8 @@ export default function DeckDetailScreen({ session }) {
           return (
             <input key={f.key} value={form[f.key] ?? ''}
               onChange={e => setField(f.key, e.target.value)}
-              placeholder={f.required ? `${label} *` : label}
+              placeholder={t[`fieldHint_${f.key}`] ?? (f.required ? `${label} *` : label)}
+              aria-label={label}
               className="field deckdetail-form__input" />
           )
         })}
@@ -918,6 +963,7 @@ export default function DeckDetailScreen({ session }) {
         <div className="deckdetail-import-banner">
           <div className="deckdetail-import-banner__text">
             <CheckCircleIcon size={15} /> {importResult.inserted} {t.cards}
+            {importResult.skipped > 0 && ` · ${t.importSkipped.replace('{n}', importResult.skipped)}`}
           </div>
           <button onClick={() => setImportResult(null)} className="deckdetail-import-banner__close" aria-label={t.close}>
             <CrossIcon size={14} />
@@ -1152,7 +1198,7 @@ export default function DeckDetailScreen({ session }) {
       </Sheet>
 
       {showImport && (
-        <ImportCardsMenu onImport={handleImport} onClose={closeImport} />
+        <ImportCardsMenu structure={structure} onImport={handleImport} onClose={closeImport} />
       )}
 
       {showBrowse && !desk && (

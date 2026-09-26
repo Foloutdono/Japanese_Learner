@@ -23,17 +23,31 @@ from dataclasses import dataclass, field
 @dataclass(frozen=True)
 class Field:
     key: str
-    # 'text' | 'number' | 'lines' | 'readings' -- what the generated form
-    # renders. 'lines' is a repeatable text row (grammar's sentences).
-    # 'readings' is TWO repeatable groups, on'yomi and kun'yomi -- the
-    # same shape kanji.readings itself asks the learner to produce, so a
-    # personal kanji card can be studied that way too. See ReadingsField
-    # (DeckDetailScreen.jsx) for the editable form and ReadingsInput
-    # (components/study/ReadingsInput.jsx) for the quiz that consumes it.
+    # What the generated form renders:
+    #   'text'     one line
+    #   'long'     a paragraph (a textarea): a grammar card's lesson steps,
+    #              where "- " lines make a list, as in the catalogue's own
+    #   'choice'   one of `options`, or nothing
+    #   'number'   an integer, through `picker`
+    #   'lines'    a repeatable text row
+    #   'pairs'    a repeatable row of two named `parts` -- a grammar
+    #              card's sentence over its translation, or a rival rule
+    #              beside what tells it apart
+    #   'readings' TWO repeatable groups, on'yomi and kun'yomi -- the
+    #              same shape kanji.readings itself asks the learner to
+    #              produce, so a personal kanji card can be studied that
+    #              way too. See ReadingsField (DeckDetailScreen.jsx) for
+    #              the editable form and ReadingsInput
+    #              (components/study/ReadingsInput.jsx) for the quiz that
+    #              consumes it.
     kind: str = "text"
     required: bool = False
     # For 'number': the picker to open instead of a bare input.
     picker: str | None = None
+    # For 'choice': the keys it may hold.
+    options: tuple[str, ...] = ()
+    # For 'pairs': the two keys of a row, the first the one it needs.
+    parts: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -49,6 +63,10 @@ class Structure:
     front_key: str = ""
     back_key: str = ""
 
+
+# The catalogue's registers (content/grammar/README.md), the same keys
+# the lesson's tags are localised from (t.glRegister).
+REGISTERS = ("neutral", "polite", "casual", "formal", "written")
 
 STRUCTURES: dict[str, Structure] = {
     "standard": Structure(
@@ -89,15 +107,30 @@ STRUCTURES: dict[str, Structure] = {
             Field("reading"),
         ),
     ),
+    # The catalogue's own shape (content/grammar/*.json), so a point a
+    # learner writes is taught the way the app's are: the rule and its
+    # gloss, the formation over it, the register it belongs to, the
+    # lesson's three steps (the rule, its uses, its trap), sentences with
+    # their translations and the rivals it is confused with. Only the
+    # rule and the meaning are asked for; the rest is the lesson behind
+    # the card's door (grammar_lesson below), printed by the same
+    # GrammarLesson the catalogue's points are.
     "grammar": Structure(
         key="grammar", source="grammar", front_key="rule", back_key="meaning",
         fields=(
             Field("rule", required=True),
             Field("meaning", required=True),
-            # Optional, and repeatable. A sentence that does not contain
-            # the rule is kept but excluded from fill_in -- see
-            # usable_sentences.
-            Field("sentences", kind="lines"),
+            Field("structure"),
+            Field("register", kind="choice", options=REGISTERS),
+            Field("explanation", kind="long"),
+            Field("usage", kind="long"),
+            Field("careful", kind="long"),
+            # Repeatable. A sentence that does not contain the rule is
+            # kept but excluded from fill_in -- see usable_sentences. A
+            # card written before sentences had translations holds bare
+            # strings; sentence_pairs reads both.
+            Field("sentences", kind="pairs", parts=("jp", "tr")),
+            Field("compare", kind="pairs", parts=("pattern", "text")),
         ),
     ),
 }
@@ -109,6 +142,11 @@ ALL_KEYS = tuple(STRUCTURES)
 # form growing without bound. Applied on save so it holds regardless of
 # which client wrote the card.
 MAX_READINGS = 15
+
+# The same kind of stop for a repeatable row: twenty sentences is already
+# more than any lesson in the catalogue prints, and an import pasting a
+# column of a thousand into one card is a mistake, not a lesson.
+MAX_ROWS = 20
 
 
 def structure_for(key: str) -> Structure:
@@ -139,6 +177,34 @@ def decode_readings(value) -> dict:
     return {"on": [], "kun": []}
 
 
+def decode_pairs(value, parts: tuple[str, ...]) -> list[dict]:
+    """
+    A 'pairs' field as a list of {parts[0]: str, parts[1]: str}, from
+    whatever shape is stored or sent.
+
+    A row is kept only when its first part is there -- a translation with
+    no sentence is nothing to show. A bare string is a row whose second
+    part is empty: that is how a grammar card's sentences were stored
+    before they carried translations, so those cards read on unchanged.
+    """
+    first, second = parts
+    items = value if isinstance(value, list) else ([value] if value else [])
+    out = []
+    for item in items:
+        if isinstance(item, dict):
+            a, b = str(item.get(first) or "").strip(), str(item.get(second) or "").strip()
+        else:
+            a, b = str(item or "").strip(), ""
+        if a:
+            out.append({first: a, second: b})
+    return out
+
+
+def sentence_pairs(fields: dict) -> list[dict]:
+    """A grammar card's sentences as [{jp, tr}], old and new cards alike."""
+    return decode_pairs(fields.get("sentences"), ("jp", "tr"))
+
+
 def normalise(key: str, raw: dict) -> dict:
     """
     The submitted fields, trimmed and restricted to the structure's own.
@@ -153,7 +219,12 @@ def normalise(key: str, raw: dict) -> dict:
         value = raw.get(f.key)
         if f.kind == "lines":
             items = value if isinstance(value, list) else ([value] if value else [])
-            out[f.key] = [str(v).strip() for v in items if str(v).strip()]
+            out[f.key] = [str(v).strip() for v in items if str(v).strip()][:MAX_ROWS]
+        elif f.kind == "pairs":
+            out[f.key] = decode_pairs(value, f.parts)[:MAX_ROWS]
+        elif f.kind == "choice":
+            text = str(value or "").strip()
+            out[f.key] = text if text in f.options else ""
         elif f.kind == "readings":
             readings = decode_readings(value)
             # The cap is on the COMBINED count, same as the quiz form --
@@ -208,10 +279,49 @@ def usable_sentences(fields: dict) -> list[str]:
     from study.grammar_match import contains_pattern, verifiable
 
     rule = fields.get("rule") or ""
-    sentences = fields.get("sentences") or []
     if not verifiable(rule):
         return []
-    return [s for s in sentences if contains_pattern(s, rule)]
+    return [p["jp"] for p in sentence_pairs(fields) if contains_pattern(p["jp"], rule)]
+
+
+def grammar_lesson(fields: dict) -> dict:
+    """
+    A personal grammar card's lesson, in the shape GrammarLesson draws a
+    catalogue point in (study/grammar_lesson.lesson_payload): the card's
+    formation, gloss and register, its steps in the catalogue's order
+    (rule, use, careful), its rivals and its sentences, each with the
+    rule marked in it where it can be found honestly.
+
+    Already in the learner's language, because the learner wrote it:
+    there is nothing to localise, and no `raw_id` on a rival -- it names
+    no catalogue point, so its row is not a door.
+    """
+    from study.grammar_examples import highlight_span, parts_with_span
+
+    rule = fields.get("rule") or ""
+    steps = [
+        {"kind": kind, "text": fields.get(key)}
+        for kind, key in (("rule", "explanation"), ("use", "usage"), ("careful", "careful"))
+        if fields.get(key)
+    ]
+    compare = [
+        {"pattern": p["pattern"], "text": p["text"]}
+        for p in decode_pairs(fields.get("compare"), ("pattern", "text"))
+    ]
+    examples = [
+        {"jp": p["jp"], "tr": p["tr"],
+         "furigana": parts_with_span(p["jp"], highlight_span(p["jp"], rule), "highlight")}
+        for p in sentence_pairs(fields)
+    ]
+    return {
+        "pattern": rule,
+        "structure": fields.get("structure") or "",
+        "meaning": fields.get("meaning") or "",
+        "register": fields.get("register") or None,
+        "steps": steps,
+        "compare": compare,
+        "examples": examples,
+    }
 
 
 def describe() -> list[dict]:
@@ -223,7 +333,9 @@ def describe() -> list[dict]:
             "front_key": s.front_key,
             "back_key": s.back_key,
             "fields": [
-                {"key": f.key, "kind": f.kind, "required": f.required, "picker": f.picker}
+                {"key": f.key, "kind": f.kind, "required": f.required, "picker": f.picker,
+                 **({"options": list(f.options)} if f.options else {}),
+                 **({"parts": list(f.parts)} if f.parts else {})}
                 for f in s.fields
             ],
         }
