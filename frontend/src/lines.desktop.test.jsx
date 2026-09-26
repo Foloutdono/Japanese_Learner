@@ -108,9 +108,12 @@ function Run({ at, path, element }) {
 }
 const reading = () => render(<Run at="/practice/reading/level/N5" path="/practice/reading/level/:level" element={<ReadingRun session={null} />} />)
 
-// Type, Enter, a digit: the sentence on the stage, graded ('1' is the
-// best on either scale).
+// Play, type, Enter, a digit: the sentence on the stage, graded ('1' is
+// the best on either scale). Play by its button: the field takes the
+// focus as the sentence shows.
 async function grade(answer, digit = '1') {
+  $('.clip-player__play').click()
+  await settle(20)
   await userEvent.keyboard(answer)
   await userEvent.keyboard('{Enter}')
   await settle(250)
@@ -161,7 +164,8 @@ describe('a practice run on three panels', () => {
     expect($('.stage__foot .btn-primary .desk-kbd')).toBeNull()
     expect($('.stage__head .desk-kbd')).toBeNull()
     const caps = $$('.desk-sentences .desk-keys .desk-kbd').map(k => k.textContent)
-    expect(caps).toEqual(['Entrée', '1–4', 'Échap'])
+    // Space first: it shows the sentence the run's play button holds.
+    expect(caps).toEqual(['Espace', 'Entrée', '1–4', 'Échap'])
   })
 
   it('opens the breakdown as the column\'s panel once graded, and counts the sentence', async () => {

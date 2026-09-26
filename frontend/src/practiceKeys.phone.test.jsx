@@ -93,6 +93,8 @@ describe('the practice runs on a phone', () => {
   it('prints no key on a graded sentence\'s Next, and Enter does not take it', async () => {
     await render(<Run at="/practice/reading/level/N5" path="/practice/reading/level/:level" element={<ReadingRun session={null} />} />)
     await settle(300)
+    $('.clip-player__play').click()
+    await settle(20)
     const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
     const input = $('form.stage__foot input')
     setValue.call(input, 'gakkou')

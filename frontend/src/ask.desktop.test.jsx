@@ -89,6 +89,9 @@ function Run({ at, path, element }) {
 const reading = () => render(<Run at="/practice/reading/level/N5" path="/practice/reading/level/:level" element={<ReadingRun session={null} />} />)
 
 async function grade(answer, digit = '1') {
+  // The sentence arrives behind its play button.
+  $('.clip-player__play').click()
+  await settle(20)
   $('form.stage__foot input').focus()
   await userEvent.keyboard(answer)
   await userEvent.keyboard('{Enter}')
@@ -272,6 +275,8 @@ describe('the asking beside a sentence still to grade', () => {
     await userEvent.keyboard('{Enter}')
     await settle(300)
     // The second sentence answered, its rating bar up, not yet graded.
+    $('.clip-player__play').click()
+    await settle(20)
     $('form.stage__foot input').focus()
     await userEvent.keyboard('yama{Enter}')
     await settle(250)

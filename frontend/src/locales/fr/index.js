@@ -314,6 +314,7 @@ const quiz = {
   deskKeyCheckNext:   'valide, puis suivante',
   deskKeyRate:        'note ta réponse',
   deskKeyListen:      'écoute la phrase',
+  deskKeyReveal:      'affiche la phrase',
   deskKeyPick:        'choisit une réponse',
   deskKeyNext:        'question suivante',
   deskKeyWalk:        'parcourt les questions',
@@ -962,6 +963,8 @@ const reading = {
   readingFetchError:    "Impossible de charger une phrase. Réessaie.",
   writeWhatYouSaw:      'Écris ce que tu as vu, en romaji',
   romajiPlaceholder:    'ex. konnichiwa',
+  // Le bouton lecture derrière lequel arrive une phrase (PlayButton de ReadingPieces).
+  readingPlay:          'Afficher la phrase et lancer le chrono',
   correct:              'Correct !',
   incorrect:            'Pas tout à fait',
   correctRomaji:        'Romaji attendu',

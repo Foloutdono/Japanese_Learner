@@ -9226,7 +9226,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    "The primary button"). So this is .station-sign__roundel's exact
    construction at the size of something a thumb presses, and it fills
    only while the clip is actually running — the active service lit up,
-   which is what the board already does with the same drawing. */
+   which is what the board already does with the same drawing.
+   Reading's play button is this ring too (components/reading/
+   ReadingPieces.jsx, PlayButton): it shows the sentence where this
+   plays the line, over the same docked field. */
 .clip-player__play {
   flex-shrink: 0;
   display: inline-flex;
