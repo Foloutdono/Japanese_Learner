@@ -114,6 +114,35 @@ describe('the guide on the desk', () => {
     expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'])
   })
 
+  // The tour completed (2026-09-26): the run's length and its fare
+  // after the gate, then the side column top to bottom -- the strip, the
+  // journey, the week ahead -- each with its own sentence.
+  it('walks the rest of Today on the desk: the length, the fare, the journey and the week', async () => {
+    await render(
+      <LangProvider>
+        <div className="phone phone--desk">
+          <div className="phone__content">
+            {['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.take', 'today.fare', 'today.strip', 'today.journey', 'today.week'].map(a => (
+              <div key={a} data-guide={a} style={{ height: 40 }}>{a}</div>
+            ))}
+          </div>
+        </div>
+        <Guide gate="today" onEnd={() => {}} />
+      </LangProvider>
+    )
+    await settle()
+    const walked = []
+    const said = new Set()
+    for (let i = 0; i < 10; i++) {
+      walked.push(stopOf())
+      said.add($('.guide-callout__text').textContent)
+      await userEvent.keyboard('{ArrowRight}')
+      await settle(120)
+    }
+    expect(walked).toEqual(['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.take', 'today.fare', 'today.strip', 'today.journey', 'today.week'])
+    expect(said.size).toBe(10)
+  })
+
   // The owner's report: the fare gate takes the window's height on the
   // desk (plan 135), so neither over it nor under it has room, and the
   // note was drawn under the window's floor with only its top showing.

@@ -14,7 +14,6 @@ vi.mock('../../lib/audio', async (o) => ({ ...(await o()), playClick: vi.fn() })
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 
 const { Guide } = await import('./Guide')
-const { GUIDES } = await import('./guides')
 const { default: fr } = await import('../../locales/fr/index.js')
 
 const settle = (ms = 80) => new Promise(r => setTimeout(r, ms))
@@ -57,7 +56,9 @@ describe('Guide', () => {
     expect(rect(spot).top).toBeLessThanOrEqual(rect(plate).top)
     expect(rect(spot).bottom).toBeGreaterThanOrEqual(rect(plate).bottom)
     expect(note.querySelector('.guide-callout__text').textContent).toBe(fr.guideLearnPlate)
-    expect(note.querySelector('.guide-callout__count').textContent).toBe(`1/${GUIDES.learn.length}`)
+    // Counted over the stops on the screen: the library's panel is the
+    // desk's, and this gate draws the phone's three.
+    expect(note.querySelector('.guide-callout__count').textContent).toBe('1/3')
     expect(note.querySelector('[data-action="guide-next"]').textContent).toBe(fr.guideNext)
 
     note.querySelector('[data-action="guide-next"]').click()

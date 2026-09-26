@@ -77,7 +77,9 @@ export function getDeskSections(tabId, t) {
   const root = `/${tabId}`
   const rows = getSections(tabId, t)
     .filter(s => s.path !== root)
-    .map(s => ({ path: s.path, title: s.title }))
+    // The profile's Statistics is the rail's station on the desk, as
+    // Settings is: the guide's stop points at it there.
+    .map(s => ({ path: s.path, title: s.title, ...(s.path === '/profile/stats' ? { guide: 'profile.stats' } : {}) }))
   if (tabId === 'profile') {
     const settings = identityFor('/profile/settings', t)
     // The guide's Settings stop (plan 143): the profile draws no door to

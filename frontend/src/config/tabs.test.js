@@ -79,7 +79,7 @@ describe('the rail', () => {
         expect(Object.keys(row).filter(k => k !== 'guide').sort()).toEqual(['path', 'title'])
       }
     }
-    expect(getDeskSections('profile', t).map(s => s.guide)).toEqual([undefined, 'profile.settings'])
+    expect(getDeskSections('profile', t).map(s => s.guide)).toEqual(['profile.stats', 'profile.settings'])
   })
 
   it('lights a section from anywhere behind it, and only there', () => {

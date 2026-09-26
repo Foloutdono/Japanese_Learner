@@ -117,7 +117,9 @@ export default function PracticeScreen() {
             key={section.path}
             section={section}
             className="plate--platform"
-            guide={i === 0 ? 'practice.plate' : undefined}
+            // The mock exam is a platform unlike the others (plan 100's
+            // guide, completed): a paper, not sentences.
+            guide={i === 0 ? 'practice.plate' : section.path === '/practice/exam' ? 'practice.exam' : undefined}
             onClick={() => depart(section)}
             foot={desk ? (
               <GradeRows
