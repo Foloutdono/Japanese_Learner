@@ -288,6 +288,7 @@ export default function GateCard({ today, failed }) {
       <button
         type="button"
         className="btn-depart"
+        data-guide="today.fare"
         onClick={depart}
         aria-label={t.todayDue(due)}
         aria-keyshortcuts={desk ? 'Enter' : undefined}
@@ -372,7 +373,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
     <div className="gate-card gate-card--desk" data-guide="today.gate">
       <div className="gate-card__head">
         <span className="gate-card__title">{t.fareGate}</span>
-        <span className="gate-card__figs">
+        <span className="gate-card__figs" data-guide="today.take">
           {steps.length > 0 && (
             <Seg
               className="gate-card__take"
@@ -456,7 +457,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
         })}
       </div>
 
-      <div className="gate-card__fare">
+      <div className="gate-card__fare" data-guide="today.fare">
         {metered && (
           <div className="gate-card__fare-parts">
             <span className="gate-card__part gate-card__part--rides">

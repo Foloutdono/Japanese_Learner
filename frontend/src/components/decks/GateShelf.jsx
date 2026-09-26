@@ -144,7 +144,7 @@ export function LibraryPanel({ session, onFollowed }) {
   }
 
   return (
-    <section className="gate-panel gate-panel--library" aria-labelledby="gate-library-title">
+    <section className="gate-panel gate-panel--library" aria-labelledby="gate-library-title" data-guide="learn.library">
       <header className="gate-panel__head">
         <span className="pf-line__roundel plate__roundel" lang="ja" aria-hidden="true">書</span>
         <span className="plate__names">

@@ -7,20 +7,28 @@
 // has no lane to point at, and the guide must not strand on a rect it
 // cannot find.
 //
-// Six a gate at most, and a stop earns its place only if the layout
-// does not already say it (DESIGN.md, "Say less"). `today` is the first
-// gate a learner sees, so it carries the HUD and the tab bar; the other
-// four never repeat them. The keys are config/tabs.js's TAB_IDS in its
-// order (the chain, when on, walks them in it), and a node test says so.
+// Ten a gate at most, and a stop earns its place only if the layout
+// does not already say it (DESIGN.md, "Say less"). It was six until the
+// owner asked for the tours to be completed (2026-09-26): the gates had
+// grown -- the run's length and its fare, the journey and the week
+// ahead beside the gate, the library, the mock exam, the entry's
+// actions, the ranking, the statistics -- and nothing said what any of
+// them was. A stop whose part a width does not draw is skipped there.
+// `today` is the first gate a learner sees, so it carries the HUD and
+// the tab bar; the other four never repeat them. The keys are
+// config/tabs.js's TAB_IDS in its order (the chain, when on, walks them
+// in it), and a node test says so.
 export const GUIDES = Object.freeze({
   learn: [
     { anchor: 'learn.plate',  key: 'LearnPlate',  radius: 'plate' },
     { anchor: 'learn.stops',  key: 'LearnStops',  radius: 'flat' },
     { anchor: 'learn.shelf',  key: 'LearnShelf',  radius: 'plate' },
+    { anchor: 'learn.library', key: 'LearnLibrary', radius: 'plate' },
   ],
   practice: [
     { anchor: 'practice.plate', key: 'PracticePlate', radius: 'plate' },
     { anchor: 'practice.dests', key: 'PracticeDests', radius: 'flat' },
+    { anchor: 'practice.exam',  key: 'PracticeExam',  radius: 'plate' },
     { anchor: 'practice.pass',  key: 'PracticePass',  radius: 'pill' },
   ],
   today: [
@@ -29,22 +37,29 @@ export const GUIDES = Object.freeze({
     { anchor: 'hud.pass',     key: 'HudPass',     radius: 'pill' },
     { anchor: 'today.strip',  key: 'TodayStrip',  radius: 'card' },
     { anchor: 'today.gate',   key: 'TodayGate',   radius: 'card' },
+    { anchor: 'today.take',   key: 'TodayTake',   radius: 'card' },
+    { anchor: 'today.fare',   key: 'TodayFare',   radius: 'card' },
+    { anchor: 'today.journey', key: 'TodayJourney', radius: 'panel' },
+    { anchor: 'today.week',   key: 'TodayWeek',   radius: 'panel' },
     { anchor: 'tabbar',       key: 'TabBar',      radius: 'flat', place: 'above' },
   ],
   dictionary: [
     { anchor: 'dict.console',  key: 'DictConsole',  radius: 'card' },
     { anchor: 'dict.chips',    key: 'DictChips',    radius: 'flat' },
     { anchor: 'dict.entry',    key: 'DictEntry',    radius: 'card' },
+    { anchor: 'dict.actions',  key: 'DictActions',  radius: 'card' },
     { anchor: 'dict.analyzer', key: 'DictAnalyzer', radius: 'card' },
   ],
   // The phone's order is the screen's, top to bottom: the Settings door
   // stands straight under the pass since plan 143.
   profile: [
     { anchor: 'profile.pass',     key: 'ProfilePass',     radius: 'identity' },
+    { anchor: 'profile.stats',    key: 'ProfileStats',    radius: 'flat' },
     { anchor: 'profile.settings', key: 'ProfileSettings', radius: 'flat' },
     { anchor: 'profile.stamps',   key: 'ProfileStamps',   radius: 'card' },
     { anchor: 'profile.records',  key: 'ProfileRecords',  radius: 'card' },
     { anchor: 'profile.ledger',   key: 'ProfileLedger',   radius: 'card' },
+    { anchor: 'profile.board',    key: 'ProfileBoard',    radius: 'card' },
   ],
 })
 
@@ -57,10 +72,12 @@ export const GUIDES = Object.freeze({
 // gate, the strip beside it.
 // The profile's Settings stop is the rail's station on the desk (plan
 // 143), not a door under the pass, so there it closes the walk: the
-// page first, then the way out.
+// page first, then the way out -- Statistics, the rail's other station,
+// just before it. Today's added stops follow the gate they belong to
+// (its length, its fare) and the side column top to bottom.
 export const DESK_ORDER = Object.freeze({
-  today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
-  profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.settings'],
+  today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.take', 'today.fare', 'today.strip', 'today.journey', 'today.week'],
+  profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.board', 'profile.stats', 'profile.settings'],
 })
 
 // 机 (plan 127): the corner a stop's spot wears on the desk, where it
@@ -75,6 +92,7 @@ export const DESK_RADIUS = Object.freeze({
   // Plan 143: the profile's Settings door is the rail's station there,
   // a lozenge at the panel's corner rather than a flush lattice cell.
   'profile.settings': 'panel',
+  'profile.stats': 'panel',
 })
 
 /** A gate's stops in the order the desk walks them, in the desk's corners. */

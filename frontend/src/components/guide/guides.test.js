@@ -14,30 +14,40 @@ import fr from '../../locales/fr/index.js'
 // both languages.
 const SRC = join(dirname(fileURLToPath(import.meta.url)), '..', '..')
 
+// The guide's own folder is left out: the registry names every anchor,
+// so reading it as a source found every anchor written, including one
+// no element carries.
+const GUIDE_DIR = dirname(fileURLToPath(import.meta.url))
 function walk(dir, out = []) {
   for (const name of readdirSync(dir)) {
     const p = join(dir, name)
+    if (p === GUIDE_DIR) continue
     if (statSync(p).isDirectory()) walk(p, out)
     else if (/\.jsx?$/.test(name) && !name.includes('.test.')) out.push(readFileSync(p, 'utf8'))
   }
   return out
 }
 const sources = walk(SRC).join('\n')
+// Stops no element carries yet, on purpose: the practice gate's pass
+// tag is drawn once something is for sale (plan 122), and the guide
+// skips it until then.
+const UNDRAWN = new Set(['practice.pass'])
 
 describe('the guide registry', () => {
   it('has exactly the tab bar\'s gates, in its order', () => {
     expect(Object.keys(GUIDES)).toEqual(TAB_IDS)
   })
 
-  it('names at most six stops a gate', () => {
+  it('names at most ten stops a gate', () => {
     for (const [gate, stops] of Object.entries(GUIDES)) {
-      expect(stops.length, gate).toBeLessThanOrEqual(6)
+      expect(stops.length, gate).toBeLessThanOrEqual(10)
     }
   })
 
   it('every anchor is written on an element somewhere in the source', () => {
     for (const stops of Object.values(GUIDES)) {
       for (const stop of stops) {
+        if (UNDRAWN.has(stop.anchor)) continue
         // `data-guide="x"` or a `guide="x"` / `'x'` prop that a component
         // prints as data-guide.
         const written = sources.includes(`"${stop.anchor}"`) || sources.includes(`'${stop.anchor}'`)
@@ -110,7 +120,7 @@ describe('the guide on the desk', () => {
     expect(GUIDES.profile.find(s => s.anchor === 'profile.settings').radius).toBe('flat')
     // The phone walks the screen top to bottom, the door under the pass;
     // the desk walks the page first and ends on the rail's station.
-    expect(GUIDES.profile.map(s => s.anchor).slice(0, 2)).toEqual(['profile.pass', 'profile.settings'])
-    expect(deskStops('profile').map(s => s.anchor).at(-1)).toBe('profile.settings')
+    expect(GUIDES.profile.map(s => s.anchor).slice(0, 3)).toEqual(['profile.pass', 'profile.stats', 'profile.settings'])
+    expect(deskStops('profile').map(s => s.anchor).slice(-2)).toEqual(['profile.stats', 'profile.settings'])
   })
 })

@@ -977,7 +977,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
             <StageMark stage={stage} inline />
             {jlpt && <span className="dict-plate__level">{jlpt}</span>}
           </div>
-          <div className="dict-plate__actions">
+          <div className="dict-plate__actions" data-guide="dict.actions">
             {!isGrammar && (
               <button
                 type="button"

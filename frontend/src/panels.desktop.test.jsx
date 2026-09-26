@@ -60,6 +60,7 @@ function probe(prop, expr) {
   el.remove()
   return v
 }
+const LONG = ['Fabriquer · produire · construire · préparer', 'Exercice', 'Test · essai · tentative · expérience · épreuve', 'Résider · vivre · habiter']
 const CHOICES = ['gare', 'électricité', 'voiture', 'montagne']
 const DAY = 86400
 
@@ -115,7 +116,7 @@ function Card() {
 // A card that docks its entry on reveal (Space), as the runs' cards do.
 // A card that docks its entry on reveal (Space), on its card as the runs
 // stage it.
-function Revealing({ card = 'yama' }) {
+function Revealing({ card = 'yama', term = '山', category = 'kanji', id }) {
   return (
     <CardTransition className="specimen-card-stage" cardKey={card}>
       <PromptCard foot={<span>N5</span>}>
@@ -124,8 +125,9 @@ function Revealing({ card = 'yama' }) {
           resetKey={card}
           front={<span className="probe-front">山</span>}
           back={<span className="probe-back">mountain</span>}
-          dictTerm="山"
-          dictCategory="kanji"
+          dictTerm={term}
+          dictCategory={category}
+          dictId={id}
           session={{ access_token: 't' }}
         />
       </PromptCard>
@@ -403,9 +405,55 @@ describe('the card\'s details', () => {
     await settle(50)
     expect(sheet.getBoundingClientRect().bottom).toBeLessThanOrEqual(body.getBoundingClientRect().bottom + 1)
   })
+  // A grammar point's pattern is a phrase, not a glyph: beside its
+  // formation and gloss it took the band's width and left them a word
+  // a line. It stacks, each register the plate's whole width.
+  it('stack a long grammar pattern over its gloss rather than beside it', async () => {
+    apiFetch.mockImplementation(async () => ({
+      ok: true, status: 200,
+      json: async () => ({ results: [{
+        type: 'grammar', raw_id: 'N5_naidekudasai', pattern: '〜ないでください', structure: 'verb ない-form + でください',
+        meaning: 'ne faites pas..., s’il vous plaît', level: 'N5',
+      }] }),
+    }))
+    await render(<Stage><Revealing card="nai" term={null} category="grammar" id="N5_naidekudasai" /><RatingBar active={false} onRate={() => {}} /></Stage>)
+    await settle()
+    press(' ')
+    await settle(400)
+    const word = rect('.dict-entry--band .dict-plate__word')
+    const structure = rect('.dict-entry--band .dict-plate__structure')
+    const caption = rect('.dict-entry--band .dict-plate__caption')
+    const row = rect('.dict-entry--band .dict-plate__row')
+    expect(structure.bottom).toBeLessThanOrEqual(word.top + 1)
+    expect(caption.top).toBeGreaterThanOrEqual(word.bottom - 1)
+    expect(row.bottom).toBeLessThanOrEqual(structure.top + 1)
+    // The gloss reads in a line or two, not a word a line.
+    const lineHeight = parseFloat(getComputedStyle($('.dict-entry--band .dict-plate__caption')).lineHeight)
+    expect(caption.height).toBeLessThanOrEqual(2 * lineHeight + 1)
+  })
 })
 
 describe('the choices beside the card', () => {
+  // The owner's report: a kanji's four glosses, each a list of
+  // synonyms, with the choices shown, stood the tiles under a laptop's
+  // floor and the middle column scrolled.
+  it('fit the column with the card and the tiles, with no scroll', async () => {
+    await render(
+      <Stage>
+        <HintBar available={['indice_1']} active={['indice_1']} onToggle={() => {}} />
+        <Card />
+        <MCQGrid choices={LONG} correct="Exercice" selected={null} answered={false} onAnswer={() => {}} />
+        <RatingBar active={false} onRate={() => {}} />
+      </Stage>
+    )
+    await settle(400)
+    const stage = $('.stage')
+    expect(stage.scrollHeight).toBeLessThanOrEqual(stage.clientHeight + 1)
+    expect(rect('.rating-bar').bottom).toBeLessThanOrEqual(window.innerHeight)
+    // The kanji still reads as a specimen on the card.
+    expect(rect('.probe-kanji').bottom).toBeLessThanOrEqual(rect('.prompt-card').bottom)
+    expect(rect('.prompt-card').height).toBeGreaterThan(140)
+  })
   it('stack under it in the middle column', async () => {
     await render(
       <Stage>

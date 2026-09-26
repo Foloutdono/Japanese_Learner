@@ -17431,6 +17431,9 @@ html { scrollbar-gutter: stable; }
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
 }
+/* Left behind once the train is under way: the run's pigment, as the
+   legs it has covered. */
+.jour-track__siding--done { background: var(--jour-st, var(--success)); }
 /* One leg per level, stop to stop, each stopping 2px short of the stop
    on either side (GhostTrack's CUT): the cut IS the stop. */
 .jour-track__leg {
@@ -21106,6 +21109,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* The desk prints the key beside the word (Échap, Entrée): a cap
+     set flush against the label read as one smudge. */
+  gap: var(--sp-3);
   box-sizing: border-box;
   min-height: 44px;
   padding-block: 0;
@@ -25411,6 +25417,22 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     --card-pad-top: var(--sp-5);
   }
   .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  /* Nor over the choices: four glosses of a kanji, each a list of
+     synonyms, stood the tiles 58px under a 800px window's floor. The
+     card gives down to what the choices and the tiles leave (it still
+     fills that room, so it keeps one height through the answer), and
+     the rows come in to the phone's rhythm: 8px over and under, 8px
+     between. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition-live,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card { min-height: 0; }
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  .desk-run--panels > .stage > .mcq-list { flex: none; }
+  .desk-run--panels > .stage > .mcq-list .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row.mcq-row--filler { padding-block: var(--sp-3); }
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-3); }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.
@@ -25886,6 +25908,38 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-dict--page .dict-plate:has(.dict-plate__word--long) > .dict-plate__row {
     flex-direction: row;
     align-items: center;
+  }
+  /* A grammar point, or any long headword, stacked rather than
+     beside: the pattern's auto column took the band's width and left
+     its formation and gloss a word a line (〜ないでください). The marks
+     and actions ride one line over it, as a phone sets them; how it is
+     formed over the pattern, the gloss under it, each the plate's
+     whole width -- the order the desk's dictionary page keeps, above. */
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "row"
+      "readings"
+      "word"
+      "caption"
+      "stripe";
+    gap: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__word {
+    justify-self: start;
+    text-indent: 0;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+    align-self: start;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__caption {
+    font-size: var(--fs-title);
   }
   /* The learner's record under the stripe, four across (below), then
      the lesson in two columns where each holds a desk column's least

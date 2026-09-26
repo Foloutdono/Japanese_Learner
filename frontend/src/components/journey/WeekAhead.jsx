@@ -24,7 +24,7 @@ export function WeekAhead() {
   const top = Math.max(1, ...counts)
 
   return (
-    <section className="desk-week" aria-label={t.weekAhead}>
+    <section className="desk-week" aria-label={t.weekAhead} data-guide="today.week">
       <ol className="desk-week__bars">
         {days.map((d, i) => (
           <li key={d.date} className={`desk-week__day${i === 0 ? ' desk-week__day--today' : ''}`}>

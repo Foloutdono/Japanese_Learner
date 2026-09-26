@@ -38,7 +38,7 @@ export function Banzuke({ all, week, t, both = false }) {
 
   if (both && week && all) {
     return (
-      <div className="desk-banzuke">
+      <div className="desk-banzuke" data-guide="profile.board">
         {[['week', week, t.periodWeek], ['all', all, t.periodAll]].map(([key, b, period]) => (
           <Board key={key} board={b}>
             <span className="bz__mark"><span className="bz__jp">{t.ranking}</span></span>
@@ -52,7 +52,7 @@ export function Banzuke({ all, week, t, both = false }) {
   const board = scope === 'week' && week ? week : all
   if (!board) return null
   return (
-    <Board board={board}>
+    <Board board={board} guide="profile.board">
       <span className="bz__mark"><span className="bz__jp">{t.ranking}</span></span>
       {week && (
         <Seg
@@ -71,13 +71,13 @@ export function Banzuke({ all, week, t, both = false }) {
 }
 
 // One board: its head (the caller's), then the rows.
-function Board({ board, children }) {
+function Board({ board, guide, children }) {
   const { entries, me } = board
   const meInList = me && entries.some(e => e.username === me.username)
   const rows = meInList || !me ? [...entries] : [...entries, { ...me, elided: true }]
 
   return (
-    <section className="banzuke">
+    <section className="banzuke" data-guide={guide}>
       <div className="bz__head">{children}</div>
       {/* Fragments, not wrappers: the rows stay direct children of the
           board so .leaderboard-row:last-child drops only the last

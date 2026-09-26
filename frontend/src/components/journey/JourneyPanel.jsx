@@ -31,6 +31,7 @@ export function JourneyPanel({ session }) {
   return (
     <section
       className={`desk-journey jour-st--${model.status}`}
+      data-guide="today.journey"
       aria-labelledby="desk-journey-head"
       // The rail's status chip walks here on Today (Hud's showStatus).
       tabIndex={-1}
