@@ -321,3 +321,18 @@ def test_unkeep_404s_for_another_users_row(client):
 def test_keep_rejects_a_blank_sentence(client):
     response = client.post("/api/phrase/keep", json={"sentence": "   "})
     assert response.status_code == 400
+
+
+def test_deep_tier_refuses_json_that_is_not_an_object_and_caches_nothing(client, monkeypatch):
+    # The cache is permanent: a list stored there would fail every later
+    # deep read of the phrase, so it is refused before it is stored.
+    phrase = f"リストの答え{uuid.uuid4().hex[:6]}です。"
+    monkeypatch.setattr(phrase_module, "chat", lambda *_a, **_k: '[{"surface": "私"}]')
+    response = client.post("/api/phrase/analyze", json={"phrase": phrase, "deep": True, "save": False})
+    assert response.status_code == 502
+    assert phrase_module._cached_analysis(phrase, "en") is None
+
+
+def test_analyze_rejects_an_unknown_source(client):
+    response = client.post("/api/phrase/analyze", json={"phrase": "出所の分からない文です。", "source": "pasted"})
+    assert response.status_code == 422
