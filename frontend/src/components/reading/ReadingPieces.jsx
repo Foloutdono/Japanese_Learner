@@ -1,5 +1,6 @@
 import { CardTransition } from '../study/CardTransition'
 import PromptCard from '../study/PromptCard'
+import { SpeakButton } from '../analysis/SpeakButton'
 import { EyeOffIcon } from '../ui/Icons'
 
 // ── 読書 — the reading stage's pieces (plan 099) ─────────────────
@@ -81,11 +82,20 @@ export function AnswerForm({ answer, setAnswer, onSubmit, t, guide }) {
  *  書取: a hint for the learner grading below, not the grade. Absent
  *  until it lands, and absent for good if it never does — the label is
  *  the same label either way rather than a row that jumps when a
- *  number arrives in it. */
+ *  number arrives in it.
+ *
+ *  The sentence carries the analyser's play button, so the learner
+ *  can hear what they just read. Here and not on the prompt: the
+ *  answer is the romaji, and hearing the sentence while it is still up
+ *  would read the answer out. The device's own voice (docs/adr/0006),
+ *  so where there is none the button is not drawn at all. */
 export function ReadingRegisters({ phrase, romaji, translation, translationLang, answer, accuracy, correct, t }) {
   return (
     <>
-      <span className="prose__jp" lang="ja">{phrase}</span>
+      <span className="prose__said">
+        <span className="prose__jp" lang="ja">{phrase}</span>
+        <SpeakButton text={phrase} label={t.hearSentence} t={t} />
+      </span>
       <span className="prose__romaji">{romaji}</span>
       {translation && (
         <>

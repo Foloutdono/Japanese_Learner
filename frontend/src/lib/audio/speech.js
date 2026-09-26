@@ -167,14 +167,17 @@ function playServerClip(text) {
     })
 }
 
-function speakOnDevice(text) {
+// `onRefused` is what a device that takes the utterance and says
+// nothing is answered with: the server's clip for a word, nothing for a
+// sentence (speakSentence).
+function speakOnDevice(text, onRefused = playServerClip) {
   const synth = synthOf()
   if (!synth) return false
   const voice = japaneseVoice()
   if (!voice) return false
 
   try {
-    return startUtterance(synth, voice, text)
+    return startUtterance(synth, voice, text, onRefused)
   } catch {
     // A speech API that throws while being set up is one to stop
     // asking: a WebView can expose `speechSynthesis` with nothing
@@ -185,7 +188,7 @@ function speakOnDevice(text) {
   }
 }
 
-function startUtterance(synth, voice, text) {
+function startUtterance(synth, voice, text, onRefused) {
   // Cancel only when there is something to cancel. cancel() followed
   // by speak() in the same tick is a documented way to get silence out
   // of Safari, and this used to do it before every single utterance.
@@ -206,7 +209,7 @@ function startUtterance(synth, voice, text) {
     settled = true
     deviceSpeechBroken = true
     try { synth.cancel() } catch { /* nothing to stop */ }
-    playServerClip(text)
+    onRefused(text)
   }
   // Neither `start` nor `error` inside the window: the browser took the
   // utterance and did nothing with it, which is how iOS says no. Take
@@ -227,6 +230,25 @@ export function speakJapanese(text) {
   if (!spoken || isMuted()) return
   if (!isLoneKana(spoken) && !deviceSpeechBroken && speakOnDevice(spoken)) return
   playServerClip(spoken)
+}
+
+/**
+ * A whole sentence, said as written. Not through spokenForm: its
+ * separators are a card's, and 、 -- between two readings in a card's
+ * reading field -- is only a pause in a sentence. Handed to
+ * speakJapanese, a sentence was said as far as its first comma, and
+ * more than half the reading bank has one.
+ *
+ * The device only. /api/tts says the readings this app ships and
+ * nothing else (docs/adr/0006, 0009), so a sentence has no clip to fall
+ * back to, and SpeakButton is not drawn where there is no Japanese
+ * voice to begin with. Tried even after the device has refused a word:
+ * the press that asks for a sentence is the user gesture iOS wanted.
+ */
+export function speakSentence(text) {
+  const spoken = typeof text === 'string' ? text.trim() : ''
+  if (!spoken || isMuted()) return
+  speakOnDevice(spoken, () => {})
 }
 
 export function stopSpeaking() {

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider } from '../LangContext'
@@ -361,5 +361,68 @@ describe('ReadingRun — the measurement', () => {
     expect(posted).toHaveLength(2)
     expect(posted[1].accuracy).toBe(null)
     expect(posted[1].quality).toBe(posted[0].quality)
+  })
+})
+
+// ── 読解 — hearing the sentence ──────────────────────────────
+// The play button rides on the sentence once the answer is revealed,
+// and never before: the answer IS the romaji, so hearing the sentence
+// while it is still up would be reading the answer out. It says the
+// sentence on the device (docs/adr/0006), so the device is stubbed
+// here with a Japanese voice and a speak() that records.
+describe('ReadingRun — the play button', () => {
+  const realSynth = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
+  const realUtterance = Object.getOwnPropertyDescriptor(window, 'SpeechSynthesisUtterance')
+  let speak
+
+  beforeEach(() => {
+    speak = vi.fn(u => u.onstart?.())
+    Object.defineProperty(window, 'speechSynthesis', {
+      configurable: true,
+      value: {
+        speaking: false,
+        pending: false,
+        getVoices: () => [{ name: 'Kyoko', lang: 'ja-JP', localService: true }],
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        cancel: () => {},
+        speak,
+      },
+    })
+    Object.defineProperty(window, 'SpeechSynthesisUtterance', {
+      configurable: true,
+      value: class { constructor(text) { this.text = text } },
+    })
+  })
+
+  afterEach(() => {
+    if (realSynth) Object.defineProperty(window, 'speechSynthesis', realSynth)
+    if (realUtterance) Object.defineProperty(window, 'SpeechSynthesisUtterance', realUtterance)
+  })
+
+  const play = root => root.querySelector(`button[aria-label="${translations.fr.hearSentence}"]`)
+  // What the device was asked to say, less the silent warm-up speech.js
+  // spends on the first gesture (primeDeviceSpeech).
+  const said = () => speak.mock.calls.map(c => c[0].text).filter(text => text.trim())
+
+  it('is not on the prompt, where it would read the answer out', async () => {
+    const root = await run()
+    expect(root.querySelector('input')).toBeTruthy()
+    expect(play(root)).toBeNull()
+  })
+
+  it('says the sentence once the answer is revealed', async () => {
+    const root = await run()
+    type(root.querySelector('input'), ANSWER)
+    await settle(20)
+    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(80)
+
+    // Beside the sentence, on the reveal, before any rating.
+    expect(play(root).closest('.prose__said').querySelector('.prose__jp').textContent).toBe(PHRASE.phrase)
+    expect(root.querySelector('.rating-bar__btn')).toBeTruthy()
+
+    play(root).click()
+    expect(said()).toEqual([PHRASE.phrase])
   })
 })

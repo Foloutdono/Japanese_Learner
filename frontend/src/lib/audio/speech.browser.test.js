@@ -189,6 +189,45 @@ describe('speakJapanese', () => {
   })
 })
 
+// ── A sentence ───────────────────────────────────────────────────
+// SpeakButton's path (the reading run's reveal). A card's separators
+// are not a sentence's: 、 in a sentence is a pause, and the word path
+// cut every sentence that had one at its first clause.
+
+describe('speakSentence', () => {
+  it('says the whole sentence, commas and all', async () => {
+    const spoken = []
+    stubSynth({ voices: [JA_VOICE], onSpeak: u => { spoken.push(u); u.onstart?.() } })
+    const { speakSentence } = await loadSpeech()
+
+    speakSentence('雨が降ったら、家にいます。')
+
+    expect(spoken.at(-1).text).toBe('雨が降ったら、家にいます。')
+    expect(spoken.at(-1).voice).toBe(JA_VOICE)
+  })
+
+  it('asks the server for nothing when the device stays silent', async () => {
+    // /api/tts says the readings the app ships, never a sentence: a
+    // request for one is a 404 at best.
+    const synth = stubSynth({ voices: [JA_VOICE] })
+    const { speakSentence } = await loadSpeech()
+
+    speakSentence('学校は九時からです。')
+
+    await vi.waitFor(() => expect(synth.cancel).toHaveBeenCalled())
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+
+  it('asks the server for nothing when there is no Japanese voice', async () => {
+    Object.defineProperty(window, 'speechSynthesis', { value: undefined, configurable: true })
+    const { speakSentence } = await loadSpeech()
+
+    speakSentence('学校は九時からです。')
+
+    expect(mocks.getBuffer).not.toHaveBeenCalled()
+  })
+})
+
 // ── A lone kana (plan 121) ───────────────────────────────────────
 // Read as text by a device voice, a lone は is the topic particle, "wa",
 // and へ is "e". The server names the syllable instead, so a lone kana

@@ -34,7 +34,7 @@ export {
   playArrival, playPlatformChime,
 } from './chimes'
 export { startAmbiance, stopAmbiance } from './ambiance'
-export { speakJapanese, voicedUrl } from './speech'
+export { speakJapanese, speakSentence, voicedUrl } from './speech'
 // The palette itself is not part of the app's own surface — nothing
 // but the /dev/sounds screen picks a voice, and it imports voices.js
 // directly. Only `playVoice` is exported here, for a caller that
