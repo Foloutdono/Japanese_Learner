@@ -1,4 +1,4 @@
-import { speakSentence } from '../../lib/audio'
+import { speakJapanese } from '../../lib/audio'
 import { useJapaneseVoice } from '../../hooks/useJapaneseVoice'
 
 // ── 音声 — hear it ────────────────────────────────────────
@@ -13,12 +13,6 @@ import { useJapaneseVoice } from '../../hooks/useJapaneseVoice'
 // disable itself rather than failing silently." Hidden, not disabled --
 // a permanently greyed control on a platform that will never have a
 // voice is a promise the app cannot keep.
-//
-// It says a SENTENCE (lib/audio/speech.js's speakSentence), whole: the
-// word path cuts a card's packed readings at 、, which in a sentence is
-// only a pause. It is drawn beside a sentence: SentenceBreakdown's,
-// where `speakable` asks for it, and the reading registers at the reveal
-// (components/reading/ReadingPieces.jsx).
 //
 // It does not track "speaking" state. SpeechSynthesis cancels the
 // previous utterance on every call (see lib/audio/speech.js), so
@@ -57,7 +51,7 @@ export function SpeakButton({ text, label, size = 'md', t }) {
       aria-label={label ?? t.hearThis}
       onClick={e => {
         e.stopPropagation()
-        speakSentence(text)
+        speakJapanese(text)
       }}
     >
       <SpeakerIcon />

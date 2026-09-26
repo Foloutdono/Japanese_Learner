@@ -1,12 +1,10 @@
-import { describe, it, expect, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { render } from 'vitest-browser-react'
 // Stylesheet contracts for the practice sessions and the exam at 390px
 // (plan 072), on fixture markup — the same trick as stage.phone.test.jsx.
 // The objects the canvas draws for Reading, Comprehension, Translation
 // and the mock exam, pinned by their real classes.
 import './index.css'
-import { ReadingRegisters } from './components/reading/ReadingPieces'
-import { translations } from './i18n'
 
 describe('the practice sessions at phone width', () => {
   it('the timer is a hairline over the sentence, the field and the action fill the foot', async () => {
@@ -112,63 +110,6 @@ describe('the practice sessions at phone width', () => {
     const badge = screen.container.querySelector('.type-badge')
     expect(badge.getBoundingClientRect().width).toBeLessThan(ask.getBoundingClientRect().width / 2)
     expect(badge.getBoundingClientRect().height).toBe(20)
-  })
-
-  // The reading reveal's play button (components/reading/ReadingPieces.jsx),
-  // drawn only where the device has a Japanese voice -- so one is
-  // stubbed here, and put back after.
-  describe('the play button beside the revealed sentence', () => {
-    const realSynth = Object.getOwnPropertyDescriptor(window, 'speechSynthesis')
-    afterEach(() => {
-      if (realSynth) Object.defineProperty(window, 'speechSynthesis', realSynth)
-    })
-
-    it('shows its speaker, and keeps to the card beside a sentence that wraps', async () => {
-      Object.defineProperty(window, 'speechSynthesis', {
-        configurable: true,
-        value: {
-          getVoices: () => [{ name: 'Kyoko', lang: 'ja-JP', localService: true }],
-          addEventListener: () => {},
-          removeEventListener: () => {},
-          cancel: () => {},
-          speak: () => {},
-        },
-      })
-      const screen = await render(
-        <main className="container stage">
-          <div className="prompt-card prompt-card--footed">
-            <div className="prompt-card__body prompt-card__body--prose prose">
-              <ReadingRegisters
-                phrase="雨が降ったら、家で本を読んだり音楽を聞いたりします。"
-                romaji="ame ga futtara, ie de hon wo yondari ongaku wo kiitari shimasu"
-                answer="ame ga futtara"
-                accuracy={null}
-                correct={null}
-                t={translations.fr}
-              />
-            </div>
-            <div className="prompt-card__foot"><span>N5</span><span /></div>
-          </div>
-        </main>
-      )
-      const button = screen.container.querySelector('.anl-speak')
-      const ring = button.getBoundingClientRect()
-      // The sheet's own button padding once left the 34px ring no room
-      // for its icon: the ring drew and the speaker in it was 0px wide.
-      const icon = button.querySelector('svg').getBoundingClientRect()
-      expect(icon.width).toBe(16)
-      expect(icon.left).toBeGreaterThan(ring.left)
-      expect(icon.right).toBeLessThan(ring.right)
-
-      // The sentence wraps beside it rather than pushing it off the card,
-      // and the button stays on the sentence's first line.
-      const line = screen.container.querySelector('.prose__jp').getBoundingClientRect()
-      const body = screen.container.querySelector('.prompt-card__body').getBoundingClientRect()
-      expect(ring.right).toBeLessThanOrEqual(body.right)
-      expect(line.right).toBeLessThanOrEqual(ring.left)
-      expect(line.height).toBeGreaterThan(ring.height)
-      expect(ring.top).toBeCloseTo(line.top, 0)
-    })
   })
 
   // The three practice runs hand their page straight to the stage —

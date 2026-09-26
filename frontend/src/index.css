@@ -2101,9 +2101,6 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  /* The sheet's button padding (8px 16px) left a 34px circle 0px of
-     room for its icon: the ring drew, the speaker inside it did not. */
-  padding: 0;
   background: transparent;
   border: 1px solid var(--surface-line);
   border-radius: 50%;
@@ -9143,15 +9140,6 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   font-weight: 500;
   line-height: 1.75;
   white-space: pre-line;
-}
-/* A sentence with its play button (the reading registers): the button
-   right after a sentence that fits one line, and at the right edge once
-   it wraps. Top-aligned, so a wrapped sentence keeps the button beside
-   its first line rather than centred on the whole paragraph. */
-.prose__said {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--sp-3);
 }
 .prose__romaji {
   font-family: var(--font-display);
