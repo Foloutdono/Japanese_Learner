@@ -121,8 +121,9 @@ def test_highlight_never_splits_a_ruby_part():
     assert "".join(p["text"] for p in parts) == jp
     for p in parts:
         if p.get("reading") is not None:
-            # a ruby part is marked whole or not at all
-            assert set(p) <= {"text", "reading", "highlight"}
+            # a ruby part is marked whole or not at all; `word` says
+            # which word it belongs to (furigana.align_sentence)
+            assert set(p) <= {"text", "reading", "highlight", "word"}
     marked = "".join(p["text"] for p in parts if p.get("highlight"))
     assert "ください" in marked
     # 〜に違いない carries a kanji of its own: the mark reaches it.

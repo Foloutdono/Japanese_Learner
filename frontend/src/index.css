@@ -11963,7 +11963,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    as two strokes from 13.1px up, so こ and ご looked alike. Room is
    not the constraint here: two kana at this rung (26px) still sit
    inside one --fs-display kanji (40px). */
-.dict-plate__word ruby { ruby-position: over; }
+/* Centred over its kanji rather than spread across it: the default
+   (space-around) set お母さん's かあ as か   あ, two kana far enough
+   apart to read as two readings. */
+.dict-plate__word ruby { ruby-position: over; ruby-align: center; }
 .dict-plate__word rt {
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
@@ -12221,12 +12224,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-block;
   white-space: nowrap;
 }
-/* A word's reading over the word, centred, and free to overhang the
-   kana either side by half a reading character, as a printed book sets
-   it (plan 146): the reading's own width no longer sets the ruby's, so
-   学生 under がくせい stays one word rather than 学 生. ExampleSentence
-   joins a word's kanji into one ruby, so a reading never meets another
-   one at the side. */
+/* A word's reading over the word, centred (plan 146). ExampleSentence
+   joins ONE word's kanji into one ruby, 学生 under がくせい, so the
+   word stays one word rather than 学 生 -- and never two words'
+   readings, which is how まいとしかるいざわ came to sit over 毎年軽井沢.
+   Where the ruby has kana on both sides (.dict-ex__ruby--over, which
+   ExampleSentence decides), its reading may overhang each by half a
+   reading character, as a printed book sets it: two such overhangs
+   into one kana are one --fs-caption character, narrower than the
+   --fs-lead kana they share, so two readings never meet. Beside a
+   kanji, another reading or the line's edge it overhangs nothing, and
+   the base widens to the reading instead. */
 .dict-ex__jp ruby { white-space: nowrap; ruby-align: center; }
 /* One rung up from --fs-caption-xs, and medium: at 9.9px ご's dakuten
    were one smudge, and ご read as こ (see .dict-plate__word rt). The
@@ -12235,12 +12243,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    cannot afford it. A two-kana reading at this rung (23px) already
    widens the 18px kanji under it by a few pixels. */
 .dict-ex__jp rt {
-  margin-inline: -0.5em;
   font-size: var(--fs-caption);
   font-weight: 500;
   color: var(--text-secondary);
   user-select: none;
 }
+.dict-ex__ruby--over rt { margin-inline: -0.5em; }
+/* Another word's ruby straight after: a space at the reading's end, so
+   two words' readings never run on as one (毎年軽井沢, まいとし かるいざわ).
+   On the reading, not the ruby, so it only widens the line where the
+   readings are what meet. */
+.dict-ex__ruby--abuts rt { padding-inline-end: var(--sp-1); }
 /* The headword itself, picked out of the sentence: no box, the
    entry's own ink, bold. */
 .dict-ex__hl {

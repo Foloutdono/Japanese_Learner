@@ -149,7 +149,7 @@ describe('the grammar lesson', () => {
     ],
     examples: [
       { jp: 'わたしは学生です。', tr: 'I am a student.', register: 'polite',
-        furigana: [{ text: 'わたしは' }, { text: '学', reading: 'がく' }, { text: '生', reading: 'せい' }, { text: 'です', highlight: true }, { text: '。' }] },
+        furigana: [{ text: 'わたしは' }, { text: '学', reading: 'がく', word: 1 }, { text: '生', reading: 'せい', word: 1 }, { text: 'です', highlight: true }, { text: '。' }] },
       { jp: 'この店はしずかだ。', tr: 'This shop is quiet.', register: 'casual',
         furigana: [{ text: 'この' }, { text: '店', reading: 'みせ' }, { text: 'はしずかだ。' }] },
     ],

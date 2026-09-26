@@ -62,7 +62,10 @@ Public surface:
         - surface: literal text of this token as it appears
         - start/end: character offsets into the ORIGINAL text
         - lemma: dictionary (base) form, e.g. "上る" for surface "上れ"
-        - reading: hiragana reading of `surface` AS INFLECTED (のぼれ)
+        - reading: hiragana reading of `surface` AS INFLECTED (のぼれ),
+          spelled rather than pronounced where it has a kanji (大きい
+          おおきい, not おうきい) and put right in context (お母さん's
+          母 かあ, 一本 いっぽん; study/reading_context.py)
         - lemma_reading: hiragana reading of `lemma`, i.e. of the
           DICTIONARY form (のぼる) — this is what should be compared
           against a deck entry's own kana field, since that field is
@@ -210,6 +213,64 @@ def _clean_lemma(raw: str, fallback: str) -> str:
     return raw.split("-", 1)[0] or fallback
 
 
+def _is_kanji(c: str) -> bool:
+    return "\u4e00" <= c <= "\u9fff" or c == "\u3005"  # 々
+
+
+def _reading_of(surface: str, kana: str, pron: str) -> str:
+    """A morpheme's reading in hiragana, AS SPELLED where the surface
+    carries a kanji.
+
+    UniDic's `pron` is the sound, and the sound is not the spelling:
+    大きい is pronounced オーキー, 通り トーリ, 続く ツズク, and
+    kata_to_hira turns the first two into おうきい and とうり -- which
+    was the furigana over every sentence (study/furigana.align_sentence)
+    until it was measured against the dictation bank's hand-written kana.
+    `kana` is the spelling (オオキイ, トオリ, ツヅク), so a word written
+    with a kanji takes its reading from that, shifted to hiragana with
+    no ー resolution (a kanji word spells its long vowels out). A word
+    written in kana keeps the old reading, which card matching and the
+    grammar detector were written against. A reading that still holds
+    a kanji (an unknown word UniDic echoes back) is no reading at all.
+    """
+    if any(_is_kanji(c) for c in surface):
+        spelled = "".join(
+            chr(ord(c) - 0x60) if "\u30a1" <= c <= "\u30f6" else c for c in kana
+        )
+        if spelled and not any(_is_kanji(c) for c in spelled):
+            return spelled
+        sound = kata_to_hira(pron)
+        if sound and not any(_is_kanji(c) for c in sound):
+            return sound
+        return ""
+    return kata_to_hira(pron) or surface
+
+
+def _in_context(morphemes: list[Morpheme], tags: list[tuple]) -> list[Morpheme]:
+    """The readings a word only takes beside its neighbours -- お母さん's
+    かあ, 一本's いっぽん -- put right (study/reading_context.py).
+    `tags` are UniDic's pos1-3 per morpheme, which the rules read and
+    Morpheme does not carry."""
+    from dataclasses import replace
+
+    from study.reading_context import correct_readings
+
+    try:
+        fixed = correct_readings([
+            {"surface": m.surface, "reading": m.reading, "pos": m.pos,
+             "lemma": m.lemma, "tags": tag}
+            for m, tag in zip(morphemes, tags)
+        ])
+    except Exception:  # pragma: no cover - defensive only
+        # A rule that breaks costs its corrections, never the sentence.
+        logger.warning("reading_context failed; readings left as UniDic's", exc_info=True)
+        return morphemes
+    return [
+        m if r == m.reading else replace(m, reading=r)
+        for m, r in zip(morphemes, fixed)
+    ]
+
+
 def tokenize(text: str) -> list[Morpheme] | None:
     """Full-sentence tokenization, or None if the analyzer isn't
     available (see MORPHOLOGY_AVAILABLE) or this specific call failed.
@@ -220,6 +281,7 @@ def tokenize(text: str) -> list[Morpheme] | None:
         return None
     try:
         morphemes = []
+        tags = []
         cursor = 0
         for w in _tagger(text):
             surface = w.surface
@@ -235,16 +297,18 @@ def tokenize(text: str) -> list[Morpheme] | None:
             cursor = end
             feat = w.feature
             pron = getattr(feat, "pron", None) or getattr(feat, "kana", None) or ""
+            kana = getattr(feat, "kana", None) or ""
             lform = getattr(feat, "lForm", None) or pron
             lemma = _clean_lemma(getattr(feat, "lemma", None), surface)
             pos1 = getattr(feat, "pos1", None)
             pos2 = getattr(feat, "pos2", None)
+            tags.append((pos1 or "", pos2 or "", getattr(feat, "pos3", None) or ""))
             morphemes.append(Morpheme(
                 surface=surface,
                 start=start,
                 end=end,
                 lemma=lemma,
-                reading=kata_to_hira(pron) or surface,
+                reading=_reading_of(surface, kana, pron),
                 lemma_reading=kata_to_hira(lform) or lemma,
                 kana=getattr(feat, "kana", None) or surface,
                 pos=_POS_MAP.get(pos1, "other"),
@@ -253,7 +317,7 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 ctype=_conjugation(getattr(feat, "cType", None)),
                 cform=_conjugation(getattr(feat, "cForm", None)),
             ))
-        return morphemes
+        return _in_context(morphemes, tags)
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)
         return None
