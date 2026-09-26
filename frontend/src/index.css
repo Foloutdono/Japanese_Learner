@@ -23085,13 +23085,22 @@ a.slip__act { text-decoration: none; }
     text-align: left;
   }
   /* The stage is the middle column, no longer the page: no container
-     width, no padding of its own, and its floor is the framed tiles. */
+     width, and its floor is the framed tiles. What it holds stands at
+     the card's width, centred: the column is wider than a card on a
+     wide window (722px on the owner's 1877), and a row at the column's
+     width stood 41px past the card on each side -- the tiles' frame
+     under every card, and with the choices or a board open the head,
+     the progress line and the choices too, which the beside-rule
+     above leaves uncapped. Its inline padding is what the column has
+     past a card, so every row takes the card's width without a rule
+     of its own. */
   .screen.desk-run.desk-run--panels > .stage {
     width: auto;
     max-width: none;
     min-height: 0;
     margin: 0;
     padding: 0;
+    padding-inline: max(0px, calc((100% - var(--card-w)) / 2));
     overflow-y: auto;
   }
   .desk-run--panels > .stage:has(> .quiz-card-stage + :is(.mcq-list, .grammar-examples, .drawing-quiz)) {
@@ -23843,7 +23852,7 @@ a.slip__act { text-decoration: none; }
   }
   /* The floor: one framed row, as the tiles' is -- the field and Check,
      then (the rating bar's own frame above) Next, or comprehension's
-     way through. At the column's width and its foot. */
+     way through. At the card's width (the stage's, above) and its foot. */
   .desk-run--panels > .stage > .stage__foot:not(.browse-nav) {
     position: static;
     width: auto;

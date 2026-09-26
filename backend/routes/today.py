@@ -494,7 +494,16 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
     # in shadow mode the queue is untouched.
     picked = _affordable(user_id, daily_queue.interleave(chosen, count))
     if not picked:
-        return {"cards": []}
+        return {"cards": [], "beyond": 0}
+    # 残り — what the queue still holds past this batch and past what
+    # the client already has in hand, as the queue would serve it (the
+    # balance's cut included). The run's "left" count is this plus the
+    # cards it holds unanswered, measured afresh at every batch: the
+    # gate's total less what was cleared is a snapshot, and it read 0
+    # while the queue went on serving -- a card rated a miss is due
+    # again minutes later, and others fall due as the run goes on.
+    owed = sum(len(ids) for ids in chosen.values())
+    beyond = len(_affordable(user_id, daily_queue.interleave(chosen, owed))) - len(picked)
 
     # One bulk lookup per mode for just the handful being served, exactly
     # as the section endpoints do -- so every card arrives carrying its
@@ -544,7 +553,7 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         "today queue user_id=%s lanes=%d chosen=%s requested=%d served=%d",
         user_id, len(chosen), only or lanes or "all", count, len(cards),
     )
-    return {"cards": cards}
+    return {"cards": cards, "beyond": beyond}
 
 
 class TodayReviewPayload(BaseModel):
