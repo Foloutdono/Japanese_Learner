@@ -6521,3 +6521,22 @@ stepper, the volume dial, the ✕) is no longer drawn; its code and CSS
 are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
+
+## Plan 136 — 帳, the analyser's passages first (2026-09-26)
+
+Numbered 136 after a grep of origin/main found nothing at 136 or above
+(134 was the analyser's video Passage, 135 the fare gate). The owner's
+ask, with a screenshot of the video intake on the desk: rework the
+screen's layout for the phone and the desk, options first. Drawn on the
+canvas "Tsuji analyser — the intake" (the screen as it was, and three
+directions: A one entry, B two steps, C the passages first), each at
+1440×900 and on a 390px phone; the owner picked C.
+
+| # | What | Status |
+|---|------|--------|
+| 136 | **Desk**: `.desk-intake` turned round — the passages in `__main` (`PassageShelf`: the one console, the kinds held as chips (drawn from two up, `passages.shelfChips`), Kept, a search and the count; a card each in `.anl-shelf__grid`, auto-filled from 200px, walked as a grid by `useGridWalk`'s new `tiles` selector, one tab stop; a video's card its still (`VideoStill`, i.ytimg.com's `mqdefault`, the video glyph when it cannot load), its sentence count and its first sentence (`firstLine`, `sentences->0->>'text'` on `GET /api/video/sessions`); a text's or a photo's its platform and four lines; a passage's ✕) and the intake in the column (`DeskSide`, `__side`), the three sources on `Seg` with their glyphs, the panel's lead line gone. The video intake is a column: the link, the still, ONE filled action — `Get the subtitles` where the proxy is, else `Set up the bookmark` until it has been used (a session named `<id>.ja.vtt`, or `tsuji.grabUsed` in the browser, set by the grab's arrival), else `Open on YouTube` — the file (`.anl-file`), and a quiet line (the bookmark, DownSub, Section as a toggle); the paragraph, the copy button (the walkthrough's alone now) and the drop zone went. The walkthrough takes the column over the intake, which stays mounted hidden (its link, its section, the focus's way back). A file dropped anywhere on the page is taken: subtitles by the video intake (cut to its section through `dropRef`), a picture by the photo one (`ImageInput`'s `incoming`), the column dashed and captioned while one is carried. A YouTube link typed where Japanese goes boards the video with it. **Under the desk**: `EntryLine`, one line over the passages (the camera, a subtitle file), opening into the slip with Japanese in it; a link pasted goes to the video sheet, the camera to the photo sheet (`Sheet`, `.anl-sheet`, the station's pigment set again on the portalled panel), the walkthrough a dialog from the video sheet that gives it back; `?intake=` opens the sheet it names; the passages a chip row over a row each, the lead a still or the glyph in a ring. `AnalyzerHistory` retired, with `.head2`, `.anl-history`, `.anl-hist*`, `.anl-grab*`, `.anl-drop` and `.anl-window-set`. privacy.html says the stills come from YouTube to the browser. Tests: `analyzer.desktop` (the shelf, the chips and the search, the walk, the link, the door, both drops, the walkthrough over the intake), `PassageShelf.browser`, `passages` (node), `IntakeVideo.browser` (the one filled action, the section), the responsive, mockup, polling, sources, deskfree, contrast and fields suites moved to it, `test_video.py`'s first line | DONE (2026-09-26) |
+
+Left for later: whether the first screen of a learner with no passages
+should show the three ways in rather than one line of copy (the canvas
+note left it open); remembering a filter across visits.
+

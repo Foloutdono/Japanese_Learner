@@ -4,7 +4,7 @@ import { render } from 'vitest-browser-react'
 // the stylesheet directly rather than mounting TodayScreen (which
 // would need LangProvider, a fetch stub and a dozen props none of
 // which this is about). Same import trick as
-// AnalyzerHistory.browser.test.jsx: the rules only exist if the sheet
+// PassageShelf.browser.test.jsx: the rules only exist if the sheet
 // is really loaded.
 //
 // A first test here pinned .next-service's --ns-ink indirection; that

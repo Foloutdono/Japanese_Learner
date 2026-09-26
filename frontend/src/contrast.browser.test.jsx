@@ -278,24 +278,25 @@ const Fixture = () => (
         <span className="dict-entry-card__meaning dc-meaning">station</span>
       </button>
     </div>
-    {/* SubtitleLine.jsx, AnalyzerHistory.jsx, DeckPicker.jsx (plans 073
-        and 134) -- the line's particle and the furigana over the focused
-        (tinted) token, the history's meta and its Kept mark (the stamp
-        ink mixed), the deck picker's count. */}
+    {/* SubtitleLine.jsx, PassageShelf.jsx, DeckPicker.jsx (plans 073,
+        134 and 136) -- the line's particle and the furigana over the
+        focused (tinted) token, the shelf's chip count, a row's glyph,
+        its meta and its Kept mark (the stamp ink mixed), the deck
+        picker's count. */}
     <div className="analyzer">
       <div className="tok-line">
         <button type="button" className="tok tok--mastered tok--on"><span className="tok__furi an-furi">でんしゃ</span><span className="tok__word">電車</span></button>
         <button type="button" className="tok tok--particle an-particle"><span className="tok__furi" /><span className="tok__word">は</span></button>
       </div>
-      <section className="anl-history">
-        <div className="head2"><span className="head2__latin">History</span><span className="head2__count an-hcount">2 passages</span></div>
-        <div className="surface anl-hist-list">
-          <div className="anl-hist-row">
-            <button type="button" className="anl-hist">
-              <span className="anl-hist__n an-n">1</span>
-              <span className="anl-hist__body">
-                <span className="anl-hist__jp">駅前の掲示板。</span>
-                <span className="anl-hist__meta an-meta"><span className="anl-kept an-kept">Kept</span><span className="anl-hist__count">3 sentences</span></span>
+      <section className="anl-shelf">
+        <div className="anl-shelf__chips"><button type="button" className="chip">All<span className="chip__n an-hcount">2</span></button></div>
+        <div className="anl-shelf__rows">
+          <div className="anl-row">
+            <button type="button" className="anl-row__open">
+              <span className="anl-row__lead"><span className="anl-row__glyph an-n">T</span></span>
+              <span className="anl-row__body">
+                <span className="anl-row__jp">駅前の掲示板。</span>
+                <span className="anl-row__meta an-meta"><span className="anl-kept an-kept">Kept</span><span>3 sentences</span></span>
               </span>
             </button>
           </div>
@@ -845,10 +846,10 @@ const SITES = [
   ['.dc-meaning', 'catalogue card meaning'],
   ['.an-furi', 'furigana over the focused token (on its tint)'],
   ['.an-particle', 'particle token'],
-  ['.an-hcount', 'history head count'],
-  ['.an-n', 'history row number'],
-  ['.an-meta', 'history row meta'],
-  ['.an-kept', 'history Kept mark (stamp ink mixed)'],
+  ['.an-hcount', 'shelf chip count'],
+  ['.an-n', 'shelf row glyph'],
+  ['.an-meta', 'shelf row meta'],
+  ['.an-kept', 'shelf Kept mark (stamp ink mixed)'],
   ['.an-pcount', 'deck picker card count'],
   // Placeholders are text and carry the same floor. Measured through
   // getComputedStyle's pseudo-element argument, since ::placeholder has a

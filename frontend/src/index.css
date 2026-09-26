@@ -1271,63 +1271,76 @@
 }
 
 
-/* 動画 — 字幕取り, the grab block. The ingest tabs it replaces died
-   with the transcript-paste path (2026-09-01): one primary road (the
-   bookmarklet) and one fallback (the file drop) need no tablist. */
-/* ── The link, where the server can fetch one ──
-   Appears only when /api/video/capabilities reports the residential
-   proxy configured (docs/adr/0003, 2026-09-10), so the button cannot
-   promise what a deployment is not paying for. The grab block and the
-   drop zone below it are unchanged and unconditional: this is the fast
-   path, never the only one. */
+/* 動画 — the video intake as a column (plan 136, the owner's pick C).
+   The link, the video's still once the link names one, ONE filled
+   action -- the link's own fetch where the server has the proxy
+   (docs/adr/0003), else setting up the bookmark until it has been used,
+   else opening the video where the bookmark is tapped -- the file, and
+   the rest on one quiet line. The paragraph that explained the bookmark
+   on every visit, and the drop zone, went with the column: the desk's
+   whole page takes a dropped file. */
 .anl-link {
   display: flex;
-  align-items: center;
-  gap: var(--sp-3);
-  flex-wrap: wrap;
-  margin-bottom: var(--sp-5);
-}
-
-.anl-grab {
-  display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-5);
+  align-items: stretch;
+  gap: var(--sp-2);
 }
-.anl-grab__head {
-  display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
-}
-.anl-grab__title {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: var(--fs-body);
-  letter-spacing: 0.02em;
-}
-.anl-grab__lead {
+.anl-link__say {
   margin: 0;
+  font-size: var(--fs-caption);
+  line-height: 1.5;
   color: var(--text-secondary);
-  font-size: var(--fs-sm);
-  line-height: 1.6;
+  text-align: center;
+  text-wrap: balance;
 }
-.anl-grab__row {
+/* The still: the video's own frame, at the column's width, 16:9. */
+.anl-still {
+  display: block;
+  aspect-ratio: 16 / 9;
+  border-radius: var(--r-card);
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+.anl-still__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The link's filled action is a link when it opens YouTube: the
+   button's face, not a link's underline. */
+.anl-link > a.btn-primary { text-decoration: none; }
+.anl-file { width: 100%; }
+.anl-vlinks {
+  margin: 0;
   display: flex;
-  align-items: center;
-  gap: var(--sp-3);
   flex-wrap: wrap;
-  margin-top: var(--sp-2);
+  justify-content: center;
+  gap: 0 var(--sp-5);
+  padding-top: var(--sp-2);
+  border-top: 1px solid var(--surface-line);
 }
-/* The ghost dress on real <a> links: same plate, no underline.
-   Keyed by the links' own classes, not `.anl-grab__row .anl-ghost` —
-   that compound shares .anl-ghost as its specificity key and would
-   ratchet as descending against the ghost's own :hover rule. */
-.anl-grab__open,
-.anl-grab__downsub {
+/* A quiet door: a link's ink and underline, at a target a thumb can take. */
+.anl-vlink {
   display: inline-flex;
   align-items: center;
-  text-decoration: none;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
+  font-family: var(--font-display);
+  font-size: var(--fs-sm);
+  font-weight: 600;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
+.anl-vlink:hover,
+.anl-vlink:focus-visible { color: var(--text-primary); filter: none; }
+.anl-vlink[aria-expanded="true"] { text-decoration-style: dotted; }
 
 /* ── The 字幕取り walkthrough (GrabTutorial.jsx) ──
    Sheet chrome comes from .detail-sheet; this block only lays out
@@ -1409,49 +1422,15 @@
   gap: var(--sp-3);
 }
 
-/* The dock's drop target — a real one, replacing the raw
-   <input type="file"> that was the only piece of OS chrome on a
-   screen that draws its own station plates. */
-.anl-drop {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  padding: var(--sp-7) var(--sp-5);
-  border: 1px dashed color-mix(in srgb, var(--line-kaiseki) 50%, var(--surface-line));
-  border-radius: var(--surface-radius);
-  background: var(--surface);
-  text-align: center;
-  cursor: pointer;
-  transition: background 0.16s ease, border-color 0.16s ease;
-}
-.anl-drop--over {
-  background: var(--bg-card-hover);
-  border-color: var(--line-kaiseki);
-  border-style: solid;
-}
-/* The lead is the drop zone's own line now: 字幕 stood over it at
-   1.15rem until the ornamental labels went (2026-09-21), and a dashed
-   box the size of this one cannot be led by a 0.88rem caption. */
-.anl-drop__lead {
-  font-size: var(--fs-lead);
-  font-weight: 600;
-  color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
-}
-.anl-drop__note { font-size: 0.74rem; color: var(--text-secondary); }
-/* Clipped, not display:none — the latter takes it out of the
-   accessibility tree. Same pattern as .analysis-image-input__file. */
+/* The file inputs (the video intake's, the phone line's): clipped, not
+   display:none — the latter takes them out of the accessibility tree.
+   Same pattern as .analysis-image-input__file. A button presses each. */
 .anl-drop__input {
   position: absolute;
   width: 1px;
   height: 1px;
   overflow: hidden;
   opacity: 0;
-}
-.anl-drop:focus-within {
-  outline: 2px solid var(--line-kaiseki);
-  outline-offset: 2px;
 }
 
 /* A real single-line field. Was .phrase-textarea — an 18px textarea
@@ -1470,7 +1449,6 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
-  margin-top: var(--sp-5);
 }
 
 /* 区間 — the window. Two time fields and a readout, not two number
@@ -1480,7 +1458,6 @@
   align-items: flex-end;
   gap: var(--sp-5);
   flex-wrap: wrap;
-  margin-top: var(--sp-5);
 }
 .anl-window__field { display: flex; flex-direction: column; gap: 4px; min-width: 92px; }
 .anl-window__label {
@@ -1559,9 +1536,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .anl-tile,
-  .anl-drop,
-  .anl-action,
-  .anl-grab__copy { transition: none; }
+  .anl-action { transition: none; }
 }
 
 /* ── 車内案内 — the responsive layout (plan 030) ────────────
@@ -1593,7 +1568,7 @@
 .anl-panel {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  gap: var(--sp-4);
 }
 /* 保存 — the result head's keep toggle (2026-09-11).
    The Kept stamp below is still the history row's read-only mark; on
@@ -1643,50 +1618,63 @@
   text-indent: var(--tr-caption);
   text-transform: uppercase;
 }
-/* A section's head, outside its surface: the word, the count. */
-.head2 {
+/* ── 帳 — the passages (plan 136, the owner's pick C) ──
+   The history is the page now: under the desk a row of chips (the kinds
+   the shelf holds, and Kept) over a row per passage, its lead the
+   video's still or the platform's glyph in a ring; on the desk the
+   console over cards (the 机 section). A session has no ✕. */
+.anl-shelf {
   display: flex;
-  align-items: baseline;
-  gap: var(--sp-3);
+  flex-direction: column;
+  gap: var(--sp-4);
+  min-width: 0;
 }
-.head2__latin {
+/* Nothing yet: what the shelf waits for, where the cards would stand. */
+.anl-shelf__empty {
   margin: 0;
-  font-family: var(--font-serif);
-  font-weight: 700;
-  font-size: var(--fs-lead);
+  padding: var(--sp-7) var(--sp-5);
+  border: 1px dashed var(--surface-line);
+  border-radius: var(--r-card);
+  color: var(--text-secondary);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  text-align: center;
+  text-wrap: balance;
 }
-.head2__count {
-  margin-left: auto;
+/* The chips ride one line and scroll sideways rather than wrap: the
+   rows under them are what the phone's height is for. */
+.anl-shelf__chips {
+  display: flex;
+  gap: var(--sp-2);
+  overflow-x: auto;
+}
+/* A chip's count: the console's own count register, beside its word. */
+.chip__n {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   color: var(--text-secondary);
 }
-/* ── History ── */
-.anl-history {
+.anl-shelf__rows {
   display: flex;
   flex-direction: column;
-  gap: var(--sp-3);
+  border-top: 1px solid var(--surface-line);
 }
-.anl-hist-list {
-  display: flex;
-  flex-direction: column;
-}
-.anl-hist-row {
+.anl-row {
   display: flex;
   align-items: stretch;
+  border-bottom: 1px solid var(--surface-line);
 }
-.anl-hist-row + .anl-hist-row { border-top: 1px solid var(--surface-line); }
-.anl-hist {
+.anl-row__open {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
   gap: var(--sp-4);
-  min-height: 52px;
-  padding: var(--sp-3) var(--sp-4);
+  min-height: 56px;
+  padding: var(--sp-3) 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -1694,22 +1682,39 @@
   font: inherit;
   text-align: left;
 }
-.anl-hist__n {
+.anl-row__lead {
   flex: none;
-  width: 18px;
-  font-family: var(--font-display);
-  font-size: var(--fs-caption-xs);
-  font-weight: 700;
+  width: 64px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.anl-row__lead--still {
+  position: relative;
+  border-radius: var(--r-plate);
+  overflow: hidden;
+  background: var(--bg-panel);
+  color: var(--text-on-panel-soft);
+}
+.anl-row__glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: 1.5px solid var(--surface-line);
+  border-radius: var(--r-pill);
   color: var(--text-secondary);
 }
-.anl-hist__body {
+.anl-row__body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 2px;
 }
-.anl-hist__jp {
+.anl-row__jp {
   font-family: var(--font-jp);
   font-weight: 600;
   font-size: var(--fs-body);
@@ -1717,7 +1722,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.anl-hist__meta {
+.anl-row__meta {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
@@ -1725,12 +1730,12 @@
   font-size: var(--fs-caption);
   color: var(--text-secondary);
 }
-.anl-hist__go {
+.anl-row__go {
   flex: none;
   font-size: var(--fs-caption-xs);
   color: color-mix(in srgb, var(--line-kaiseki) 60%, var(--text-primary));
 }
-.anl-hist__delete {
+.anl-row__delete {
   flex: none;
   display: inline-flex;
   align-items: center;
@@ -1738,11 +1743,79 @@
   width: 44px;
   padding: 0;
   border: 0;
-  border-left: 1px solid var(--surface-line);
   border-radius: 0;
   background: transparent;
   color: var(--text-secondary);
 }
+/* A still, in a row or on a card: the frame YouTube serves, cropped to
+   its box. */
+.anl-card__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ── The phone's way in (plan 136) ──
+   One line over the passages: the field, the camera, a subtitle file.
+   Japanese in it (or the focus) opens it into the writing slip, the
+   count and Analyse under a hairline; empty and left, it folds back. */
+.anl-entry {
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-card);
+}
+.anl-entry__row {
+  display: flex;
+  align-items: flex-start;
+}
+.anl-entry__field {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+  max-height: 40vh;
+  box-sizing: border-box;
+  padding: var(--sp-3) var(--sp-4);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: var(--font-jp);
+  font-size: var(--fs-body);
+  line-height: 1.6;
+  resize: none;
+  overflow-y: auto;
+}
+.anl-entry__field:focus { outline: none; }
+.anl-entry__field::placeholder { color: var(--text-secondary); opacity: 1; font-family: var(--font-display); }
+.anl-entry:focus-within { border-color: color-mix(in srgb, var(--line-kaiseki) 55%, var(--surface-line)); }
+.anl-entry--open .anl-entry__field { min-height: 120px; }
+.anl-entry__tool {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-card);
+  background: transparent;
+  color: var(--text-secondary);
+}
+.anl-entry__tool:hover,
+.anl-entry__tool:focus-visible { color: var(--text-primary); filter: none; }
+.anl-entry__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-2) var(--sp-3) var(--sp-3) var(--sp-4);
+  border-top: 1px solid var(--surface-line);
+}
+.anl-entry__foot .anl-action { margin-left: auto; }
+
 /* ── The writing slip and the intakes ── */
 .textarea {
   display: block;
@@ -1965,16 +2038,6 @@
   color: var(--text-secondary);
 }
 
-/* The 区間 disclosure — optional, and blank means the whole Track. */
-.anl-window-set > summary {
-  font-family: var(--font-display);
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-}
-.anl-window-set .anl-window { margin-top: 12px; }
 
 @media (prefers-reduced-motion: reduce) {
   .anl-mine__options { transition: none; }
@@ -3717,6 +3780,10 @@ textarea:focus-visible {
 .field--page {
   --field-well: var(--surface);
 }
+/* The analyser's video intake in a phone's sheet (plan 136): the same
+   field the desk's column mounts on the page, in something raised, so it
+   steps back down to the base well. */
+.anl-sheet .field--page { --field-well: var(--bg-main); }
 
 /* A field that sits INSIDE something which already draws the box -- the
    console's search line, the analyzer's writing slip. Giving those a well
@@ -5986,6 +6053,8 @@ textarea:focus-visible {
 .seg--full { width: 100%; margin-left: 0; }
 .seg--full .seg__opt { flex: 1; justify-content: center; align-items: center; height: 40px; }
 .seg--kaiseki .seg__opt--on { background: color-mix(in srgb, var(--line-kaiseki) 14%, transparent); }
+/* A glyph before the word (the analyser's three sources, plan 136). */
+.seg__opt-icon { flex: none; align-self: center; }
 
 @media (max-width: 560px) {
   /* The head holds ONE row for as long as it can, the way it reads
@@ -20916,7 +20985,9 @@ a.slip__act { text-decoration: none; }
        is the catalogue beside it. */
     overscroll-behavior-y: auto;
   }
-  /* The intake beside its history (plan 115). */
+  /* 帳 (plan 136, the owner's pick C): the passages are the page, the
+     intake the column beside them at a phone's width -- the history had
+     been the column beside the intake since plan 115. */
   .desk-intake {
     display: grid;
     grid-template-columns: minmax(0, 1fr) var(--desk-side-w);
@@ -20929,6 +21000,161 @@ a.slip__act { text-decoration: none; }
     gap: var(--sp-5);
     min-width: 0;
   }
+  /* A file carried over the page: the column it will land in says so,
+     dashed in the station's pigment, its words over the intake. */
+  .desk-intake__side { position: relative; }
+  .desk-intake__dock {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-5);
+  }
+  .desk-intake__dock[hidden] { display: none; }
+  .desk-intake--drop .desk-intake__side {
+    outline: 1px dashed var(--line-kaiseki);
+    outline-offset: calc(-1 * var(--sp-1));
+    border-radius: var(--r-card);
+  }
+  .desk-intake__drop {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--sp-5);
+    border-radius: var(--r-card);
+    background: color-mix(in srgb, var(--bg-main) 88%, var(--line-kaiseki));
+    color: color-mix(in srgb, var(--line-kaiseki) 65%, var(--text-primary));
+    font-size: var(--fs-lead);
+    font-weight: 600;
+    text-align: center;
+    text-wrap: balance;
+    pointer-events: none;
+  }
+  /* The shelf's cards: the window's width in columns of 200px and up, a
+     row's cards sharing its height -- the grid is ragged content, not a
+     lattice, so its last row may be short. A video wears its still and
+     its sentence count; a text or a photo its platform and first lines. */
+  .anl-shelf__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(200px, 100%), 1fr));
+    gap: var(--sp-4);
+  }
+  .anl-card {
+    position: relative;
+    display: flex;
+    min-width: 0;
+  }
+  .anl-card__open {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-primary);
+    font: inherit;
+    text-align: left;
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+  .anl-card__open:hover,
+  .anl-card__open:focus-visible {
+    transform: translateY(-1px);
+    border-color: var(--line-kaiseki);
+    filter: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .anl-card__open { transition: none; }
+    .anl-card__open:hover,
+    .anl-card__open:focus-visible { transform: none; }
+  }
+  .anl-card__still {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 16 / 9;
+    background: var(--bg-panel);
+    color: var(--text-on-panel-soft);
+  }
+  .anl-card__count {
+    position: absolute;
+    right: var(--sp-2);
+    bottom: var(--sp-2);
+    padding: 0 var(--sp-2);
+    border-radius: var(--r-plate);
+    background: color-mix(in srgb, var(--bg-panel) 85%, transparent);
+    color: var(--text-on-panel);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.8;
+  }
+  .anl-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-4);
+  }
+  .anl-card__src {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--sp-2);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+  .anl-card__jp {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    overflow: hidden;
+    font-family: var(--font-jp);
+    font-size: var(--fs-body);
+    font-weight: 600;
+    line-height: 1.6;
+  }
+  .anl-card__jp--short {
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+  }
+  .anl-card__meta {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--sp-3);
+    font-size: var(--fs-caption);
+    color: var(--text-secondary);
+  }
+  /* The ✕ in the card's corner (a passage's; a session has none). */
+  .anl-card__delete {
+    position: absolute;
+    top: var(--sp-2);
+    right: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--surface);
+    color: var(--text-secondary);
+  }
+  .anl-card__delete:hover,
+  .anl-card__delete:focus-visible { color: var(--text-primary); border-color: var(--text-secondary); filter: none; }
   /* The kana charts wrap to a second row rather than scroll sideways in
      the dictionary's column beside its dock. */
   .syllabary-chart-group {

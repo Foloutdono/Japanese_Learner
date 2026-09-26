@@ -131,12 +131,15 @@ async function analyze(text = '駅で待つ') {
 const shown = () => $('.anl-desk__entry .dict-plate__word')?.textContent
 
 describe('the analyser on the desk (plan 134)', () => {
-  it('stands the intake beside its history, and analyses on Ctrl+Enter', async () => {
+  it('stands the intake beside the passages, and analyses on Ctrl+Enter', async () => {
     await mount()
     const main = $('.desk-intake__main').getBoundingClientRect()
     const side = $('.desk-intake > .desk-side').getBoundingClientRect()
     expect(side.left).toBeGreaterThan(main.right)
-    expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
+    // Plan 136 turned the page round: the passages are the page, the
+    // intake the column beside them.
+    expect($('.desk-intake__main .anl-shelf')).not.toBeNull()
+    expect($('.desk-intake > .desk-side #anl-panel-text')).not.toBeNull()
     expect($('.anl-action .desk-kbd')).not.toBeNull()
     type($('textarea'), '駅で待つ')
     $('textarea').dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', ctrlKey: true, bubbles: true, cancelable: true }))
@@ -297,7 +300,7 @@ describe('the analyser on the desk (plan 134)', () => {
   })
 })
 
-describe('the analyser\'s notices beside a long history (plan 123)', () => {
+describe('the analyser\'s notices beside a long shelf (plans 123, 136)', () => {
   it('stand under the intake, in view, with the one live region after the grid', async () => {
     const rows = Array.from({ length: 20 }, (_, i) => ({ id: i + 1, phrase: `文${i + 1}`, source: 'text', created_at: '2026-09-20T10:00:00Z', kept: false }))
     apiFetch.mockImplementation(async url => {
@@ -308,10 +311,10 @@ describe('the analyser\'s notices beside a long history (plan 123)', () => {
     apiJson.mockImplementation(async () => { throw new Error('boom') })
     await mount()
     await settle(200)
-    expect($$('.desk-intake .anl-hist, .desk-intake [class*="anl-hist__"]').length).toBeGreaterThan(0)
+    expect($$('.desk-intake__main .anl-card').length).toBe(20)
     await analyze()
     await settle(200)
-    const line = $('.desk-intake__main .anl-notice-line--bad')
+    const line = $('.desk-intake__side .anl-notice-line--bad')
     expect(line).not.toBeNull()
     expect(line.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
     // One live region, after the grid, where it stands in every state.
@@ -354,17 +357,25 @@ describe('the dictionary, on a sentence it has no entry for', () => {
 // ── plan 120 — the grab's walkthrough beside the intake ──
 // The walkthrough is read while it is followed (copy, make the
 // bookmark, come back), so on the desk it opens in the intake's column
-// rather than over the field it explains: the history steps aside until
-// ✕ or Esc, and the two copy buttons, both on screen, confirm together.
-// A phone keeps it a dialog (AnalyzerScreen.responsive.browser, and
-// deskfree.phone).
+// rather than over it: since plan 136 it takes the intake's place, the
+// intake -- its link kept -- coming back on ✕ or Esc. The copy lives in
+// the walkthrough alone. A phone keeps it a dialog, from the video
+// sheet (AnalyzerScreen.responsive.browser, and deskfree.phone).
 describe('the grab\'s walkthrough on the desk', () => {
-  it('opens in the intake\'s column in place of the history, and Esc gives it back', async () => {
-    Object.defineProperty(navigator, 'clipboard', { value: { writeText: vi.fn(async () => {}) }, configurable: true })
+  async function video() {
     await mount()
     $$('.anl-sources .seg__opt')[2].click()
     await settle()
-    const door = $('.anl-grab__tutorial')
+  }
+
+  it('opens in the intake\'s column in place of the intake, and Esc gives it back', async () => {
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText: vi.fn(async () => {}) }, configurable: true })
+    await video()
+    type($('.anl-field'), 'https://youtu.be/dQw4w9WgXcQ')
+    await settle(60)
+    // Never used: setting the bookmark up is the filled action.
+    const door = $('.anl-link .anl-grab__tutorial')
+    expect(door.classList.contains('btn-primary')).toBe(true)
     expect(door.hasAttribute('aria-haspopup')).toBe(false)
     door.click()
     await settle()
@@ -372,7 +383,10 @@ describe('the grab\'s walkthrough on the desk', () => {
     const dock = $('.desk-intake > .desk-side .desk-tut')
     expect(dock).not.toBeNull()
     expect($('.desk-intake > .desk-side').getAttribute('aria-label')).toBe(dock.querySelector('h2').textContent)
-    expect($('.anl-history')).toBeNull()
+    // The intake waits under it, hidden, its link kept.
+    expect($('#anl-panel-video').closest('[hidden]')).not.toBeNull()
+    // The passages stay beside it.
+    expect($('.desk-intake__main .anl-shelf')).not.toBeNull()
     expect(dock.querySelectorAll('.anl-tut__step').length).toBeGreaterThanOrEqual(3)
 
     // The device switch still switches.
@@ -382,27 +396,25 @@ describe('the grab\'s walkthrough on the desk', () => {
     await settle(60)
     expect(dock.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
 
-    // One copy, both buttons confirm it.
-    const panelCopy = $('.anl-grab__copy')
-    const idle = panelCopy.textContent
-    dock.querySelector('.anl-tut__copy').click()
+    // The copy is the walkthrough's, and says so.
+    const copy = dock.querySelector('.anl-tut__copy')
+    const idle = copy.textContent
+    copy.click()
     await settle(60)
     expect(navigator.clipboard.writeText).toHaveBeenCalledTimes(1)
-    expect(panelCopy.textContent).not.toBe(idle)
-    expect(panelCopy.textContent).toBe(dock.querySelector('.anl-tut__copy').textContent)
+    expect(copy.textContent).not.toBe(idle)
 
     press('Escape')
     await settle()
     expect($('.desk-tut')).toBeNull()
-    expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
+    expect($('.desk-intake > .desk-side #anl-panel-video .anl-field').value).toBe('https://youtu.be/dQw4w9WgXcQ')
+    expect($('#anl-panel-video').closest('[hidden]')).toBeNull()
   })
 
   // Plan 123, P18: in on the dock's caption, out to the opener, closed by
   // the column's own roundel.
   it('takes the focus to its caption and gives it back to its door', async () => {
-    await mount()
-    $$('.anl-sources .seg__opt')[2].click()
-    await settle()
+    await video()
     const door = $('.anl-grab__tutorial')
     door.focus()
     door.click()
@@ -411,22 +423,165 @@ describe('the grab\'s walkthrough on the desk', () => {
     expect($('.desk-tut .desk-dock__head .dict-plate__btn')).not.toBeNull()
     press('Escape')
     await settle()
-    expect(document.activeElement).toBe(door)
+    expect(document.activeElement).toBe($('.anl-grab__tutorial'))
   })
 
-  it('closes when the intake leaves the video platform', async () => {
-    await mount()
-    $$('.anl-sources .seg__opt')[2].click()
-    await settle()
+  it('gives the video intake back on its ✕', async () => {
+    await video()
     $('.anl-grab__tutorial').click()
     await settle()
     expect($('.desk-tut')).not.toBeNull()
-    $$('.anl-sources .seg__opt')[0].click()
-    await settle()
-    $$('.anl-sources .seg__opt')[2].click()
+    $('.desk-tut .desk-dock__head .dict-plate__btn').click()
     await settle()
     expect($('.desk-tut')).toBeNull()
-    expect($('.desk-intake > .desk-side .anl-history')).not.toBeNull()
+    expect($('.desk-intake > .desk-side #anl-panel-video')).not.toBeNull()
+    expect($('.anl-sources .seg__opt--on').textContent).toBe('Vidéo')
+  })
+})
+
+// ── plan 136 — the passages first ──
+// The owner's pick C: the passages are the page -- the one console over
+// them, a card each -- and the intake the column beside them. A link
+// pasted where Japanese goes is taken by the video intake, a file
+// dropped anywhere on the page by the intake that reads it, and the
+// dictionary's door stands the platform it names in the column.
+describe('the passages first on the desk (plan 136)', () => {
+  const day = n => new Date(Date.now() - n * 86400000).toISOString()
+  const PASSAGES = [
+    { id: 1, phrase: '大手町ビル', source: 'image', created_at: day(2), kept: false },
+    { id: 2, phrase: '本日は臨時休業です。', source: 'image', created_at: day(3), kept: true },
+    { id: 3, phrase: '猫が窓の外を見ている。', source: 'text', created_at: day(5), kept: false },
+  ]
+  const SESSIONS = [
+    { id: 7, source: 'upload', sourceRef: 'dQw4w9WgXcQ.ja.vtt', videoId: 'dQw4w9WgXcQ', sentenceCount: 36, firstLine: '駅の前で雨を眺めていた', createdAt: day(1) },
+  ]
+  function withHistory(passages = PASSAGES, sessions = SESSIONS) {
+    apiFetch.mockImplementation(async url => {
+      const u = String(url)
+      if (u.startsWith('/api/phrase/history')) return ok(passages)
+      if (u.startsWith('/api/video/sessions')) return ok(sessions)
+      return ok([])
+    })
+  }
+  const chips = () => $$('.anl-shelf .console__chips .chip').map(c => c.firstChild.textContent)
+  const cards = () => $$('.anl-shelf__grid .anl-card')
+
+  it('lays the passages out as cards under the one console', async () => {
+    withHistory()
+    await mount()
+    await settle(150)
+    expect(chips()).toEqual(['Tous', 'Vidéo', 'Texte', 'Photo', 'Gardés'])
+    expect($('.anl-shelf .console__count').textContent).toBe('4 passages')
+    expect(cards()).toHaveLength(4)
+    // Newest first; a session prints its first sentence, its still and
+    // its count, never the file the grab named after its id.
+    const video = cards()[0]
+    expect(video.classList.contains('anl-card--video')).toBe(true)
+    expect(video.querySelector('.anl-card__jp').textContent).toBe('駅の前で雨を眺めていた')
+    expect(video.querySelector('.anl-card__img').getAttribute('src')).toBe('https://i.ytimg.com/vi/dQw4w9WgXcQ/mqdefault.jpg')
+    expect(video.querySelector('.anl-card__count').textContent).toBe('36 phrases')
+    expect(video.querySelector('.anl-card__delete')).toBeNull()
+    // A passage names its platform and can be deleted.
+    expect(cards()[1].querySelector('.anl-card__src').textContent).toBe('Photo')
+    expect(cards()[1].querySelector('.anl-card__delete')).not.toBeNull()
+    // The cards stand side by side, a row sharing its height.
+    const [a, b] = cards().map(c => c.getBoundingClientRect())
+    expect(b.left).toBeGreaterThan(a.right)
+    expect(Math.round(b.height)).toBe(Math.round(a.height))
+  })
+
+  it('narrows the shelf by its chips and its search', async () => {
+    withHistory()
+    await mount()
+    await settle(150)
+    $$('.anl-shelf .console__chips .chip')[3].click()
+    await settle(60)
+    expect(cards()).toHaveLength(2)
+    expect($('.anl-shelf .console__count').textContent).toBe('2 passages')
+    $$('.anl-shelf .console__chips .chip')[4].click()
+    await settle(60)
+    expect(cards().map(c => c.querySelector('.anl-card__jp').textContent)).toEqual(['本日は臨時休業です。'])
+    $$('.anl-shelf .console__chips .chip')[0].click()
+    await settle(60)
+    type($('.anl-shelf .console__field'), '猫')
+    await settle(60)
+    expect(cards().map(c => c.querySelector('.anl-card__jp').textContent)).toEqual(['猫が窓の外を見ている。'])
+  })
+
+  it('draws no chips for a shelf of one kind, and says what it waits for when empty', async () => {
+    withHistory([PASSAGES[2]], [])
+    await mount()
+    await settle(150)
+    expect($('.anl-shelf .console__chips')).toBeNull()
+    expect(cards()).toHaveLength(1)
+    document.body.innerHTML = ''
+    withHistory([], [])
+    await mount()
+    await settle(150)
+    expect($('.anl-shelf .console')).toBeNull()
+    expect($('.anl-shelf__empty')).not.toBeNull()
+  })
+
+  it('walks the cards with the arrows, one tab stop, and opens one', async () => {
+    withHistory()
+    await mount()
+    await settle(150)
+    const doors = () => $$('.anl-card__open')
+    expect(doors().filter(d => d.tabIndex === 0)).toHaveLength(1)
+    doors()[0].focus()
+    doors()[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))
+    await settle(30)
+    expect(document.activeElement).toBe(doors()[1])
+    expect(doors().filter(d => d.tabIndex === 0)).toEqual([doors()[1]])
+    apiJson.mockClear()
+    doors()[1].click()
+    await settle(300)
+    // A photo passage reopens where it came from.
+    expect(apiJson.mock.calls.some(([u]) => String(u).startsWith('/api/phrase/history/1'))).toBe(true)
+  })
+
+  it('takes a YouTube link typed where Japanese goes to the video intake', async () => {
+    await mount()
+    type($('#anl-panel-text textarea'), 'https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    await settle(60)
+    expect($('#anl-panel-text')).toBeNull()
+    expect($('#anl-panel-video .anl-field').value).toBe('https://www.youtube.com/watch?v=dQw4w9WgXcQ')
+    expect($('.anl-sources .seg__opt--on').textContent).toBe('Vidéo')
+  })
+
+  it('stands the platform the dictionary\'s door names in the column', async () => {
+    await mount('/dictionary/analyzer?intake=photo')
+    expect($('.desk-intake__side #anl-panel-photo')).not.toBeNull()
+    expect($('[role="dialog"]')).toBeNull()
+  })
+
+  it('takes a subtitle file dropped anywhere on the page', async () => {
+    const { apiUpload } = await import('./lib/api')
+    apiUpload.mockClear()
+    await mount()
+    const data = new DataTransfer()
+    data.items.add(new File(['1\n00:00:01,000 --> 00:00:02,000\n駅\n'], 'x.srt', { type: 'text/plain' }))
+    const shelf = $('.desk-intake__main')
+    const over = new DragEvent('dragover', { dataTransfer: data, bubbles: true, cancelable: true })
+    shelf.dispatchEvent(over)
+    expect(over.defaultPrevented).toBe(true)
+    await settle(30)
+    // The column it will land in says so.
+    expect($('.desk-intake--drop .desk-intake__drop')).not.toBeNull()
+    shelf.dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true }))
+    await settle(60)
+    expect($('.desk-intake__drop')).toBeNull()
+    expect(apiUpload).toHaveBeenCalledTimes(1)
+  })
+
+  it('takes a picture dropped on the shelf to the photo intake\'s cropper', async () => {
+    await mount()
+    const data = new DataTransfer()
+    data.items.add(new File([new Uint8Array([137, 80, 78, 71])], 'shot.png', { type: 'image/png' }))
+    $('.desk-intake__main').dispatchEvent(new DragEvent('drop', { dataTransfer: data, bubbles: true, cancelable: true }))
+    await settle()
+    expect($('#anl-panel-photo')).not.toBeNull()
+    expect($('.analysis-cropper')).not.toBeNull()
   })
 })
 

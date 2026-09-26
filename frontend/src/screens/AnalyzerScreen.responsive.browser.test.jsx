@@ -107,7 +107,10 @@ async function leaveResult(screen) {
 async function goToPlatform(screen, key) {
   await leaveResult(screen)
   const idx = { text: 0, photo: 1, video: 2 }[key]
-  screen.container.querySelectorAll('.anl-sources .seg__opt')[idx].click()
+  // The control is the desk's; under it the page is the passages and
+  // the line over them (plan 136), whose own file input takes a file.
+  const opts = screen.container.querySelectorAll('.anl-sources .seg__opt')
+  if (opts.length) opts[idx].click()
   await settle(30)
 }
 
@@ -220,9 +223,11 @@ describe('AnalyzerScreen structure', () => {
   // transcript panel hands out English translations and is hard to
   // find), and the primary acquisition is the 字幕取り bookmarklet the
   // app mints — see lib/captionGrab.js for the measurements that make
-  // it the one free route left. The file drop stays as the fallback,
-  // with an accept list mobile pickers can actually satisfy.
-  it('offers the grab and the file drop on 動画 — and no paste ingest', async () => {
+  // it the one free route left. The file stays as the fallback, with an
+  // accept list mobile pickers can actually satisfy. Since plan 136 the
+  // intake is a column with ONE filled action: setting up the bookmark
+  // until it has brought a passage, then opening the video on YouTube.
+  it('offers the bookmark, a file and DownSub on 動画 — and no paste ingest', async () => {
     const screen = await renderScreen()
     await goToPlatform(screen, 'video')
 
@@ -230,24 +235,51 @@ describe('AnalyzerScreen structure', () => {
     expect(screen.container.querySelector('.anl-ingest')).toBeNull()
     expect(screen.container.querySelector('textarea')).toBeNull()
 
-    // The grab block: a copyable bookmarklet…
-    expect(screen.container.querySelector('.anl-grab')).not.toBeNull()
-    expect(screen.container.querySelector('.anl-grab__copy')).not.toBeNull()
+    // Never used: setting the bookmark up is the one filled action, and
+    // the walkthrough holds the copy -- the panel prints no paragraph.
+    const lead = screen.container.querySelector('.anl-link .btn-primary')
+    expect(lead.classList.contains('anl-grab__tutorial')).toBe(true)
+    expect(screen.container.querySelectorAll('.btn-primary')).toHaveLength(1)
+    expect(screen.container.querySelector('.anl-grab, .anl-grab__copy, .anl-drop')).toBeNull()
 
-    // …a DownSub handoff that carries the pasted link…
+    // …a DownSub handoff that carries the pasted link, and the video's
+    // still once the link names one…
     typeInto(screen.container.querySelector('.anl-field'), 'https://youtu.be/dQw4w9WgXcQ')
     await settle(60)
     const downsub = screen.container.querySelector('.anl-grab__downsub')
     expect(downsub).not.toBeNull()
     expect(downsub.getAttribute('href')).toContain('downsub.com')
     expect(downsub.getAttribute('href')).toContain('dQw4w9WgXcQ')
+    expect(screen.container.querySelector('.anl-still img').getAttribute('src')).toContain('dQw4w9WgXcQ')
 
-    // …and the drop zone, whose accept list includes MIME types —
+    // …and the file, whose accept list includes MIME types —
     // extension-only filters grey out every file on Android pickers.
     const input = screen.container.querySelector('input[type="file"]')
     expect(input).not.toBeNull()
     expect(input.getAttribute('accept')).toContain('.vtt')
     expect(input.getAttribute('accept')).toContain('text/')
+    expect(screen.container.querySelector('.anl-file')).not.toBeNull()
+  })
+
+  it('opens the video on YouTube once the bookmark has brought a passage', async () => {
+    // A session the grab made is named after its video (the arrival's
+    // own file name): the bookmark is installed.
+    apiFetch.mockImplementation(async path => ({
+      ok: true, status: 200,
+      json: async () => (String(path).includes('/video/sessions')
+        ? [{ id: 9, source: 'upload', sourceRef: 'dQw4w9WgXcQ.ja.vtt', videoId: 'dQw4w9WgXcQ', sentenceCount: 3, firstLine: '雨', createdAt: '2026-09-20T10:00:00Z' }]
+        : []),
+    }))
+    const screen = await renderScreen()
+    await settle(60)
+    await goToPlatform(screen, 'video')
+    typeInto(screen.container.querySelector('.anl-field'), 'https://youtu.be/0Gyeavg_mhM')
+    await settle(60)
+    const lead = screen.container.querySelector('.anl-link .btn-primary')
+    expect(lead.tagName).toBe('A')
+    expect(lead.getAttribute('href')).toBe('https://www.youtube.com/watch?v=0Gyeavg_mhM')
+    // The setup stays one quiet door away: a second device needs it.
+    expect(screen.container.querySelector('.anl-vlinks .anl-grab__tutorial')).not.toBeNull()
   })
 
   // ── The grab tutorial ──
@@ -259,15 +291,19 @@ describe('AnalyzerScreen structure', () => {
   // fallback section. Owner-directed (2026-09-01, "add a real
   // tutorial").
   it('opens a step-by-step tutorial with per-device instructions', async () => {
-    // The dialog is the phone chrome's: on the desk the walkthrough
-    // opens in the intake's column instead (plan 120; analyzer.desktop's
-    // own case).
+    // The dialog is the phone chrome's, opened from the video sheet (a
+    // link pasted in the line lands there, plan 136): on the desk the
+    // walkthrough opens in the intake's column instead (plan 120;
+    // analyzer.desktop's own case).
     await page.viewport(1099, 900)
     try {
       const screen = await renderScreen()
-      await goToPlatform(screen, 'video')
+      typeInto(screen.container.querySelector('.anl-entry textarea'), 'https://youtu.be/dQw4w9WgXcQ')
+      await settle(60)
+      expect(document.querySelector('[role="dialog"] #anl-panel-video')).not.toBeNull()
+      expect(document.querySelector('#anl-panel-video .anl-field').value).toBe('https://youtu.be/dQw4w9WgXcQ')
 
-      screen.container.querySelector('.anl-grab__tutorial').click()
+      document.querySelector('#anl-panel-video .anl-grab__tutorial').click()
       await settle(60)
 
       const dialog = document.querySelector('[role="dialog"].anl-tut')
@@ -287,11 +323,13 @@ describe('AnalyzerScreen structure', () => {
       expect(devices[2].getAttribute('aria-pressed')).toBe('true')
       expect(dialog.querySelector('.anl-tut__devicesteps').textContent).not.toBe(before)
 
-      // Esc-able real dialog (useDialog), and the trigger survives.
+      // Esc-able real dialog (useDialog), and closing it gives the video
+      // sheet back with its link, the trigger in it.
       dialog.querySelector('.detail-close-btn').click()
       await settle(60)
       expect(document.querySelector('[role="dialog"].anl-tut')).toBeNull()
-      expect(screen.container.querySelector('.anl-grab__tutorial')).not.toBeNull()
+      expect(document.querySelector('#anl-panel-video .anl-grab__tutorial')).not.toBeNull()
+      expect(document.querySelector('#anl-panel-video .anl-field').value).toBe('https://youtu.be/dQw4w9WgXcQ')
     } finally {
       // The viewport leaks across files: hand back this file's width.
       await page.viewport(1280, 900)

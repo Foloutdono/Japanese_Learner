@@ -545,7 +545,22 @@ runtime purpose. Two consequences worth knowing:
   `splitTake`, `screens/TodayRun.jsx`, `src/today.wide.test.jsx`,
   `src/today.desktop.test.jsx`, `src/domain/lanes.test.js` and the 机
   section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **136** or higher, and check
+  **136** is 帳, the analyser's passages first (the owner's pick C of
+  three directions drawn on the canvas "Tsuji analyser — the intake"):
+  the history became the page — on the desk the one console (the kinds
+  held as chips, Kept, a search) over a card per passage, a video's still
+  and first sentence (`firstLine` on `GET /api/video/sessions`), and the
+  intake the column beside it, the video's a column with one filled
+  action (the fetch, else the bookmark's setup until it has been used,
+  else the video on YouTube) and a file dropped anywhere on the page
+  taken; under the desk one line over a row per passage, a YouTube link
+  pasted there going to the video sheet, the photo intake a sheet too
+  (cited in `routes/video.py`, `tests/test_video.py`,
+  `screens/AnalyzerScreen.jsx`, `components/analysis/PassageShelf.jsx`,
+  `passages.js`, `EntryLine.jsx`, `IntakeVideo.jsx`, `VideoStill.jsx`,
+  `lib/youtube.js`, `hooks/useGridWalk.js`, `public/privacy.html`,
+  `src/analyzer.desktop.test.jsx` and `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **137** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

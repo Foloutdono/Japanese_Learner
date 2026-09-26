@@ -33,7 +33,7 @@ vi.mock('../../lib/audio', async importOriginal => ({
 
 // LangProvider fetches /api/translations/{kanji,vocab} on mount -- stub
 // fetch so this test stays offline. Same pattern as
-// components/analysis/AnalyzerHistory.browser.test.jsx.
+// components/analysis/PassageShelf.browser.test.jsx.
 globalThis.fetch = vi.fn().mockResolvedValue({
   ok: true,
   status: 200,
