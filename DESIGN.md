@@ -1389,6 +1389,13 @@ plated gates take the window.
   every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
+  The pass's track draws those parts its own way since the 区間・新幹線
+  round (2026-09-25, the owner's pick of drawn options): the rail is cut
+  into legs, one per level, and a stop is the cut at the end of its leg
+  with its name under the line, passed in the state's ink, the next in
+  full ink; your train is a Shinkansen in profile standing on the legs,
+  its nose at your position, waiting on a siding before 発 until the
+  first item is done (`components/journey/GhostTrack.jsx`).
   **A stop stands at the END of the leg it names, and the line opens at
   初, the novice's stop** — so reaching a stop is finishing the thing it is
   named for, never starting it, and a learner who has done nothing is drawn
