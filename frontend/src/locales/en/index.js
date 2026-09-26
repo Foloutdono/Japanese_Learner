@@ -77,6 +77,7 @@ const nav = {
   // 補充 — what the refill landed while the app was closed (plan 139)
   claimTitle:        'While you were away',
   claimButton:       'Claim',
+  claimBookLabel:    (n, cap) => `${n} credits of ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,

@@ -9,10 +9,15 @@ import { playFareTick } from '../../lib/audio'
 // ── 補充 — while you were away (plan 139) ─────────────────────
 // The refill lands a credit every 48 minutes whether the app is open or
 // not; what landed while it was not waits here, on arrival. The figure
-// in the pass's gold, the balance it takes them from and to, the track
-// with the new part lit beside the old, and the one button. Every way
-// out of the sheet claims -- a credit left behind is nobody's gain --
-// so the scrim and Escape are the button too.
+// in the pass's gold, the balance it takes them from and to, the 回数券
+// book -- the cap as a stub a credit, ten to a row: the ones already
+// held in a pale metal, the ones that landed in full gold, filling in
+// one after another, the room left as dashed outlines (the owner's pick
+// C of four drawn directions) -- and the one button. Every way out of
+// the sheet claims -- a credit left behind is nobody's gain -- so the
+// scrim and Escape are the button too. On the desk it is a dialog in
+// the window's middle, not beside the rail's pass like the balance
+// sheet: nothing on the rail opened it.
 //
 // Mounted once beside <Routes/> (App.jsx), like the balance sheet; it
 // also carries the hook that decides when to open it and when a credit
@@ -29,7 +34,8 @@ export function ClaimSheet({ hold = false }) {
   const cap = credits?.cap ?? CAP
   const from = offer.from
   const to = from + offer.amount
-  const pct = n => Math.round((Math.min(Math.max(n, 0), cap) / cap) * 100)
+  const held = Math.min(Math.max(from, 0), cap)
+  const filled = Math.min(to, cap)
 
   function claim() {
     playFareTick()
@@ -37,7 +43,7 @@ export function ClaimSheet({ hold = false }) {
   }
 
   return (
-    <Sheet open onClose={claim} jp={t.claimTitle} label={t.claimTitle} initialFocus=".btn-depart">
+    <Sheet open className="claim-sheet" onClose={claim} jp={t.claimTitle} label={t.claimTitle} initialFocus=".btn-depart">
       <div className="balance">
         <span className="balance__fig">
           +{offer.amount}
@@ -48,9 +54,17 @@ export function ClaimSheet({ hold = false }) {
           <span className="balance__of-wait">{t.balanceOf(cap)}</span>
         </span>
       </div>
-      <div className="balance__track balance__track--split" aria-hidden="true">
-        <span className="balance__fill" style={{ width: `${pct(from)}%` }} />
-        <span className="balance__fill balance__fill--gain" style={{ width: `${pct(to) - pct(from)}%` }} />
+      <div className="claim-book" role="img" aria-label={t.claimBookLabel(filled, cap)}>
+        {Array.from({ length: cap }, (_, i) => {
+          const kind = i < held ? 'held' : i < filled ? 'new' : 'room'
+          return (
+            <span
+              key={i}
+              className={`claim-book__stub claim-book__stub--${kind}`}
+              style={kind === 'new' ? { '--i': i - held } : undefined}
+            />
+          )
+        })}
       </div>
       <button type="button" className="btn-depart" onClick={claim}>
         <span className="btn-depart__jp">{t.claimButton}</span>

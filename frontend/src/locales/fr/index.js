@@ -78,6 +78,7 @@ const nav = {
   // 補充 — ce que la recharge a versé, app fermée (plan 139)
   claimTitle:        'Pendant ton absence',
   claimButton:       'Récupérer',
+  claimBookLabel:    (n, cap) => `${n} crédits sur ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'gratuit',
   laneNew:           n => `${n} nouv.`,

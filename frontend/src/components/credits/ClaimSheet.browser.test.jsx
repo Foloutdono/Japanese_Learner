@@ -80,11 +80,19 @@ describe('ClaimSheet — on arrival', () => {
     expect(sheet.getAttribute('aria-label')).toBe('Pendant ton absence')
     expect(sheet.querySelector('.balance__fig').textContent).toContain('+12')
     expect(sheet.querySelector('.balance__of').textContent).toContain('20 → 32')
-    // The track: what was held, and the new part beside it.
-    const fills = sheet.querySelectorAll('.balance__fill')
-    expect(fills).toHaveLength(2)
-    expect(fills[0].style.width).toBe('40%')
-    expect(fills[1].style.width).toBe('24%')
+    // The 回数券 book: a stub a credit up to the cap -- the twenty held,
+    // the twelve that landed, the room left -- read out as one figure.
+    const book = sheet.querySelector('.claim-book')
+    expect(book.getAttribute('aria-label')).toBe('32 crédits sur 50')
+    expect(book.querySelectorAll('.claim-book__stub')).toHaveLength(50)
+    expect(book.querySelectorAll('.claim-book__stub--held')).toHaveLength(20)
+    expect(book.querySelectorAll('.claim-book__stub--new')).toHaveLength(12)
+    expect(book.querySelectorAll('.claim-book__stub--room')).toHaveLength(18)
+    // Ten to a row, and the new ones in the pass's full metal.
+    const stubs = [...book.children].map(el => el.getBoundingClientRect())
+    expect(stubs.filter(r => r.top === stubs[0].top)).toHaveLength(10)
+    const gold = getComputedStyle(book.querySelector('.claim-book__stub--new')).backgroundColor
+    expect(gold).not.toBe(getComputedStyle(book.querySelector('.claim-book__stub--held')).backgroundColor)
     // Nothing is claimed by being shown.
     expect(server.posts).toBe(0)
 

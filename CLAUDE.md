@@ -599,13 +599,17 @@ runtime purpose. Two consequences worth knowing:
   /api/credits/claim`, one `refill` row), and a fare claims it first so
   it is never a refusal; the app opens a "while you were away" sheet on
   arrival -- boot, or back in front after `AWAY_MS` out of sight -- with
-  the credits and a Claim button, and claims quietly as each credit
-  lands while it is open (cited in `core/credits.py`,
+  the credits, the 回数券 book (the cap as a stub a credit: held, landed,
+  room; the owner's pick C of four drawn directions) and a Claim
+  button, centred on the desk at a column's width rather than at the
+  rail's foot, and claims quietly as each credit lands while it is
+  open (cited in `core/credits.py`,
   `routes/credits.py`, `routes/profile.py`, `srs/data_structure.sql`,
   `tests/test_credits.py`, `stores/credits.js`, `hooks/useRefill.js`,
   `components/credits/ClaimSheet.jsx`, `domain/credits.js`, the balance
   sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
-  `PassStep.jsx`, `App.jsx` and `index.css`).
+  `PassStep.jsx`, `App.jsx`, `index.css`, `src/claim.desktop.test.jsx`
+  and `docs/design/desk/README.md`).
   When starting a new wave, begin at **140** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
