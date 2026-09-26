@@ -583,6 +583,8 @@ def get_today_cards(count: int = Query(10, ge=1, le=MAX_BATCH), exclude: str = "
         "today queue user_id=%s lanes=%d chosen=%s requested=%d served=%d",
         user_id, len(chosen), only or lanes or "all", count, len(cards),
     )
+    # Each card's bar, new to mastered (plan 147).
+    srs.attach_progress(cards, user_id)
     return {"cards": cards, "beyond": beyond}
 
 

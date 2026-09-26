@@ -281,6 +281,8 @@ def _build_review_preview(stage: str | None, preview: dict[int, dict] | None) ->
             "stage_down": _stage_demotion(stage, p["stage"]),
             # When the card comes back after this rating (plan 126).
             "due_in":     p["due_in"],
+            # Where it leaves the card's bar (plan 147).
+            "progress":   p.get("progress"),
         }
         for quality, p in preview.items()
     }
@@ -2498,6 +2500,8 @@ def get_deck_study_cards(deck_id: str, mode: str = "standard.flashcard.f2b", lan
         "deck study request deck_id=%s role=%s mode=%s user_id=%s pool=%d due=%d picked=%d",
         access.deck_id, access.role, mode, user_id, len(pool), len(due), len(cards),
     )
+    # Each card's bar, new to mastered (plan 147).
+    srs.attach_progress(cards, user_id)
     return {"cards": cards, "pace": pace.payload() if pace else None}
 
 

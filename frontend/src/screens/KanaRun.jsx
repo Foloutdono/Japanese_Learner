@@ -301,7 +301,7 @@ export default function KanaRun({ session }) {
             />
             <CardTransition
               className="specimen-card-stage"
-              cardKey={card.card_id} stamp={gates.stamp} stage={card.stage}
+              cardKey={card.card_id} stamp={gates.stamp} stage={card.stage} progress={card.progress ?? null}
               onStampDone={gates.stampDone}>
               {/* Flashcard, either direction — one face is the kana, the
                   other is its romaji, same as Kanji's card shows the

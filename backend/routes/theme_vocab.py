@@ -137,6 +137,8 @@ def _select_theme_cards(theme: str, level: str | None, m: Mode, lang: str, count
         "theme study request theme=%s level=%s mode=%s user_id=%s requested=%d due_count=%d picked=%d",
         theme, level or "all", mode, user_id, count, len(due), len(cards),
     )
+    # Each card's bar, new to mastered (plan 147).
+    srs.attach_progress(cards, user_id)
     return pool, cards
 
 

@@ -101,7 +101,10 @@ def _kata_to_hira(s: str) -> str:
 def _strip_okurigana(reading: str) -> str:
     # KANJIDIC2 kun-readings mark the okurigana boundary with a dot
     # (つ.ぐ) — the part before the dot is the kanji's own reading.
-    return _kata_to_hira(reading.split(".")[0])
+    # They also mark a prefix or suffix use with a hyphen (-うえ, うわ-),
+    # which is notation, not kana: left on, it reached a paper as a
+    # choice nobody could mistake for a reading.
+    return _kata_to_hira(reading.split(".")[0].strip("-"))
 
 
 # ── Mora-level phonetic perturbation ────────────────────────────
@@ -154,7 +157,9 @@ def _voicing_flip_candidates(reading: str) -> list[str]:
 # a trailing "long ー" is spelled with in real hiragana orthography
 # (しゅう, とう). Good enough to reproduce the pattern this generator
 # is built around; not a full model of Japanese vowel length.
-_U_O_VOWEL_ENDINGS = set("うくすつぬふむゆるぐずぶぷおこそとのほもよろごぞどぼぽ")
+# A contracted mora (しゅ, きょ) ends in its small kana, so ゅ/ょ are
+# here too: せんしゅ -> せんしゅう is the pair this generator is named for.
+_U_O_VOWEL_ENDINGS = set("うくすつぬふむゆるぐずぶぷおこそとのほもよろごぞどぼぽゅょ")
 
 
 def _toggle_long_vowel(reading: str) -> list[str]:
@@ -162,8 +167,10 @@ def _toggle_long_vowel(reading: str) -> list[str]:
     # Only drop a trailing う if at least 2 moras remain — otherwise a
     # 2-mora word like かう (飼う) degenerates to the single mora "か",
     # which isn't a plausible near-miss, just a fragment.
-    if reading.endswith("う") and len(moras) >= 3:
-        return [reading[:-1]]
+    if reading.endswith("う"):
+        # A short word ending in う is not lengthened either: あう -> あうう
+        # is no more a near-miss than the fragment would be.
+        return [reading[:-1]] if len(moras) >= 3 else []
     if moras and moras[-1][-1] in _U_O_VOWEL_ENDINGS:
         return [reading + "う"]
     return []

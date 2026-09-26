@@ -736,9 +736,25 @@ runtime purpose. Two consequences worth knowing:
   `src/dictionary.wide.test.jsx` and `src/dictionary.desktop.test.jsx`;
   DESIGN.md, "The entry plate, and a body that names itself" and "The
   desk").
-  **147** is 全語, every word the app holds a card for (numbered 147
-  because 144–146 went to the cutscenes, Settings' pages and the grammar
-  lesson while it was open; its first commit's message says 144): the breakdown
+  **147** is the card's progress (the owner's picks D, M2 and P2 of the
+  drawn options): every served card carries `progress`, 0 (new) to 1
+  (mastered) -- the four learning steps the first half, a graduated
+  card's interval the second on a log scale to 21 days
+  (`srs._progress`, `get_bulk_progress`, `attach_progress`), and each
+  rating's `review_preview` where it leaves the card; a band along the
+  card's foot in the stage's pigment (`CardBand` in `StageMark.jsx`,
+  moved by the stamp as a rating presses), and the desk card panel's
+  line redrawn as a fare strip of three stretches (`CardPanel`'s
+  `StateLine`, `domain/cardProgress.js`'s `stripFills`) (cited in
+  `srs/srs.py`, the eight card routes, `tests/test_card_progress.py`,
+  `components/study/StageMark.jsx`, `CardTransition.jsx`,
+  `CardPanel.jsx`, `hooks/useReviewGates.js`, `hooks/useCardSession.js`'s
+  v8, `src/cardBand.phone.test.jsx`, `src/panels.desktop.test.jsx` and
+  `index.css`).
+  **148** is 全語, every word the app holds a card for (numbered 148
+  because 144–147 went to the cutscenes, Settings' pages, the grammar
+  lesson and the card's progress while it was open; its first commit's
+  message says 144, and a later one 147): the breakdown
   asks the JMdict pool after the deck (a noun run as one word, 桃源 + 郷
   as 桃源郷, then each word the deck has no card for), so a word past the
   course carries its meaning and its `vocab_jmdict_<id>` card; a vocab
@@ -750,8 +766,8 @@ runtime purpose. Two consequences worth knowing:
   `scripts/migrate_pool_cards.py`, `components/analysis/tokens.js`,
   `components/dictionary/DictionaryDetail.jsx`,
   `tests/test_deck_pool_cards.py` and `tests/test_analysis.py`).
-  **148** is every key a sentence holds (its first commit's message
-  says 145), the grammar detector made
+  **149** is every key a sentence holds (its first commit's message
+  says 145, a later one 148), the grammar detector made
   robust against real text (measured on 4,000 of JMdict's example
   sentences: 71% of the particles and auxiliaries covered by a point,
   96% now; the catalogue's own examples 83% to 98%, lesson recall 92%
@@ -765,7 +781,30 @@ runtime purpose. Two consequences worth knowing:
   `study/grammar_detect.py`, `study/analysis.py`,
   `content/grammar/N5.json`, `tests/test_grammar_detect.py`'s
   `EveryKeyTests` and `tests/test_analysis.py`).
-  When starting a new wave, begin at **149** or higher, and check
+  **150** is no false key and no false meaning (its first two commits'
+  messages say 149): every key and card the breakdown hands out held to the word
+  the sentence uses, read one by one over 6,900 sentences -- 355 false
+  grammar hits removed and 121 spans moved with coverage unchanged, and
+  hundreds of homophone cards gone. The detector: a hit that stops
+  inside a word ends on the kind of word its lessons end on (the でも of
+  学校でもらった); でも, とは and とか held to the shapes their lessons
+  teach (`_REFUSALS`: 誰でも is the new N4 point 何でも／誰でも／いつでも
+  ／どこでも, 彼とは is "with him", 何とか a word); the casual request
+  〜て／〜ないで（依頼） added to N4; a multi-part point on its tightest
+  parts, each a word of its own; the plain 〜そうだ of looks told from
+  hearsay by the stem; a construction takes in its own ない. The lookups:
+  a reading never joins a kanji spelling to a card of other kanji or a
+  katakana card, nor a loanword (UniDic's 語種, now `Morpheme.goshu`) to a
+  native card; a spelling UniDic files under another word's kanji (推す
+  under 押す) is looked up as the page writes it; the N5 する, なる and いい
+  and 68 other kana cards stand beside their higher-level twins, the
+  lowest level winning (cited in `study/grammar_detect.py`,
+  `study/grammar_match.py`, `study/card_lookup.py`, `study/morphology.py`,
+  `study/analysis.py`'s `LOCAL_REV` 4, `content/grammar/N4.json`,
+  `content/grammar/N5.json`, `tests/test_grammar_precision.py`,
+  `tests/test_lookup_precision.py`, `tests/test_grammar_detect.py`,
+  `tests/test_audit_vocab_deck.py` and `tests/test_deck_pool_cards.py`).
+  When starting a new wave, begin at **151** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

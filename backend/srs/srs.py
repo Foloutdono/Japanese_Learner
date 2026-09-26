@@ -1,11 +1,12 @@
 import copy
 import logging
+import math
 from datetime import datetime, timedelta, timezone
 from psycopg2.extras import execute_values
 from typing import Any
 
 from .models import CardState
-from .scheduler import Scheduler, clamp_quality
+from .scheduler import LEARNING_STEPS, Scheduler, clamp_quality
 from .storage import Storage
 from . import xp as xp_math
 
@@ -19,6 +20,10 @@ PACE_DAYS = 14
 PACE_SAMPLE = 400
 PACE_BREAK = 120
 PACE_MIN_GAPS = 20
+
+# The interval, in days, at which a card counts as mastered. The SQL
+# counts below spell the same 21 out inline.
+MASTERED_DAYS = 21
 
 
 def seconds_per_review(times) -> int | None:
@@ -509,9 +514,55 @@ class SRSEngine:
         never drift apart."""
         if total_reviews == 0:
             return "new"
-        if interval_days >= 21:
+        if interval_days >= MASTERED_DAYS:
             return "mastered"
         return "learning"
+
+    @staticmethod
+    def _progress(total_reviews: int, interval_days: int,
+                  is_learning: bool, learning_step: int) -> float:
+        """How far a card is from new (0.0) to mastered (1.0), for the
+        bar on a study card (plan 147). The learning steps fill the
+        first half, a step each; a graduated card's interval fills the
+        second, on a log scale from one day to MASTERED_DAYS, so a card
+        going 2 -> 5 -> 13 days keeps visibly moving instead of
+        crawling along a linear bar. Classified off the same two fields
+        as _classify_stage first, so a mastered card relearning a lapse
+        (its interval survives the lapse) still reads full."""
+        stage = SRSEngine._classify_stage(total_reviews, interval_days)
+        if stage == "new":
+            return 0.0
+        if stage == "mastered":
+            return 1.0
+        steps = len(LEARNING_STEPS)
+        if is_learning:
+            return round(0.5 * min(max(learning_step, 0), steps) / steps, 3)
+        days = max(1, interval_days)
+        return round(0.5 + 0.5 * math.log(days) / math.log(MASTERED_DAYS), 3)
+
+    def get_bulk_progress(self, card_ids: list[str], mode: str) -> dict[str, float]:
+        """_progress for each of `card_ids` in `mode`, 0.0 for a card
+        with no row yet. Same shape and scope as get_bulk_stats, for the
+        handful of cards a study batch serves."""
+        if not card_ids:
+            return {}
+        with self.storage.cursor() as cur:
+            sql = """
+                SELECT card_id, total_reviews, interval_days, is_learning, learning_step
+                FROM card_modes
+                WHERE mode = %s AND card_id = ANY(%s)
+            """
+            self._log_sql("get_bulk_progress", sql, (mode, card_ids))
+            cur.execute(sql, (mode, card_ids))
+            rows = {row['card_id']: row for row in cur.fetchall()}
+        result: dict[str, float] = {}
+        for card_id in card_ids:
+            row = rows.get(card_id)
+            result[card_id] = 0.0 if not row else self._progress(
+                int(row['total_reviews'] or 0), int(row['interval_days'] or 0),
+                bool(row['is_learning']), int(row['learning_step'] or 0),
+            )
+        return result
 
     def _log_review(self, card_id: str, mode: str, quality: int) -> dict[str, Any]:
         # card_id is always "{user_id}:{raw_id}" (see auth.prefixed) and
@@ -785,6 +836,23 @@ class SRSEngine:
                 result[card_id] = self._classify_stage(row[1], row[2])
         return result
 
+    def attach_progress(self, cards: list[dict], user_id: str) -> list[dict]:
+        """Set `progress` on each served card payload in place (plan 147),
+        one get_bulk_progress per mode among them -- so the Today queue's
+        mixed batch costs a query per mode, like its stages do. A card
+        payload names itself by its raw `card_id` and its `mode`; one
+        without both is left as it is."""
+        by_mode: dict[str, list[dict]] = {}
+        for card in cards:
+            if card.get("card_id") and card.get("mode"):
+                by_mode.setdefault(card["mode"], []).append(card)
+        for mode, group in by_mode.items():
+            ids = [f"{user_id}:{c['card_id']}" for c in group]
+            found = self.get_bulk_progress(ids, mode)
+            for card, card_id in zip(group, ids):
+                card["progress"] = found.get(card_id, 0.0)
+        return cards
+
     def _load_states_bulk(self, card_ids: list[str], mode: str) -> dict[str, CardState]:
         """Like _load_state, but for many cards in one query. An id with no
         row yet falls back to the same default CardState _load_state itself
@@ -869,6 +937,10 @@ class SRSEngine:
                     "leveled_up": new_level != prior_level,
                     "new_level": new_level,
                     "stage": self._classify_stage(updated.total_reviews, updated.interval_days),
+                    # Where this rating leaves the card's bar (plan 147),
+                    # so the band moves the moment a rating presses.
+                    "progress": self._progress(updated.total_reviews, updated.interval_days,
+                                               updated.is_learning, updated.learning_step),
                     # The forecast (plan 126): when this rating brings the
                     # card back, in seconds from now -- what the desk's card
                     # panel prints on each verdict's tile before the learner

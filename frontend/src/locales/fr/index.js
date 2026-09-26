@@ -1204,6 +1204,7 @@ const progress = {
   progressNew:       'À apprendre',
   progressLearning:  'En cours',
   progressMastered:  'Maîtrisé',
+  cardProgress:      'Progression de la carte',
 }
 
 const misc = {

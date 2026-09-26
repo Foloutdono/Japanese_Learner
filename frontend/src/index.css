@@ -10534,6 +10534,39 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 .stage-mark--learning { --stage-ink: var(--state-learning); }
 .stage-mark--mastered { --stage-ink: var(--state-mastered); }
 .stage-mark--pressed { opacity: 0; }
+
+/* ── The card's bar (plan 147) ─────────────────────────────
+   A band along the card's foot, inside its border, filled from new to
+   mastered (CardBand in StageMark.jsx): how far through learning a card
+   in progress is. Its track is the ambient ink at a whisper, its fill
+   the stage's own pigment -- vermilion while learning, gold once
+   mastered. It moves when a rating presses (the stamp carries where the
+   rating leaves the card) and never between two cards, since it is
+   keyed on the card. */
+.card-band {
+  --band-ink: var(--state-learning);
+  position: absolute;
+  inset-inline: 1px;
+  bottom: 1px;
+  z-index: 3;
+  height: var(--sp-1);
+  border-radius: 0 0 var(--r-panel) var(--r-panel);
+  background: color-mix(in srgb, var(--text-primary) 10%, transparent);
+  overflow: hidden;
+  pointer-events: none;
+}
+.card-band--new { --band-ink: var(--state-new); }
+.card-band--mastered { --band-ink: var(--state-mastered); }
+.card-band__fill {
+  display: block;
+  height: 100%;
+  width: calc(var(--card-band, 0) * 100%);
+  background: var(--band-ink);
+  transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .card-band__fill { transition: none; }
+}
 /* In flow rather than pinned to a corner: the dictionary plate's marks
    row (see StageMark.jsx). The word is the same. */
 .stage-mark--inline { position: static; }
@@ -25453,10 +25486,34 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      height between the state line and the keys. */
   .desk-card { flex: 1 1 auto; }
   .desk-stops { display: flex; flex-direction: column; gap: var(--sp-1); }
-  .desk-stops__line { display: block; width: 100%; height: 30px; color: var(--text-primary); }
+  /* The fare strip (plan 147): three stretches on the labels' own three
+     columns, each filled to its share in its stage's pigment. */
+  .desk-stops__strip {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-1);
+  }
+  .desk-stops__leg {
+    display: block;
+    height: var(--sp-3);
+    border-radius: var(--r-plate);
+    background: color-mix(in srgb, var(--text-primary) 12%, transparent);
+    overflow: hidden;
+  }
+  .desk-stops__fill {
+    display: block;
+    height: 100%;
+    width: calc(var(--leg, 0) * 100%);
+    background: var(--leg-ink);
+    transition: width 0.4s cubic-bezier(0.22, 0.68, 0.32, 1);
+  }
+  .desk-stops__leg--new { --leg-ink: var(--state-new); }
+  .desk-stops__leg--learning { --leg-ink: var(--state-learning); }
+  .desk-stops__leg--mastered { --leg-ink: var(--state-mastered); }
   .desk-stops__labels {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
+    column-gap: var(--sp-1);
     text-align: center;
     font-family: var(--font-display);
     font-size: var(--fs-caption-xs);

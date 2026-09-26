@@ -171,7 +171,7 @@ export function useReviewGates({ advance, sessionKey }) {
           const to = preview.stage_up ?? preview.stage_down
           if (to) {
             gates.add('stamp')
-            setStamp({ id: Date.now(), to, demoted: !preview.stage_up, cardKey })
+            setStamp({ id: Date.now(), to, demoted: !preview.stage_up, cardKey, progress: preview.progress })
           }
         }
       } catch (err) {

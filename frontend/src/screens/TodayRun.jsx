@@ -415,6 +415,7 @@ export default function TodayRun({ session }) {
               cardKey={transitionKey}
               stamp={gates.stamp}
               stage={card.stage}
+              progress={card.progress ?? null}
               onStampDone={gates.stampDone}
             >
               <CardPrompt
