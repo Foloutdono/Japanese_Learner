@@ -868,7 +868,7 @@ export default function DeckDetailScreen({ session }) {
       {/* The chip row: what you can do to the deck. Select swaps it
           for the selection's own console (below). */}
       {!selectMode && isFollower && (
-        <div className="chip-row">
+        <div className="chip-row deckdetail-acts">
           <Chip onClick={() => { playUi('click-mode-selection'); setConfirmingMine(true) }}
             aria-haspopup="dialog" disabled={busy}>
             <PlusIcon size={14} />{t.libraryMakeMine}
@@ -886,7 +886,7 @@ export default function DeckDetailScreen({ session }) {
       )}
 
       {!selectMode && !isFollower && (
-        <div className="chip-row">
+        <div className="chip-row deckdetail-acts">
           {/* On the desk Add and Browse are each pressed while their
               panel holds the page's side. */}
           {allowCustom && (

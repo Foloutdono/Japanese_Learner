@@ -6042,11 +6042,15 @@ textarea:focus-visible {
   font-weight: 700;
   font-size: var(--fs-lead);
 }
+/* Square-cornered, at the plate's radius, as the library's order switch
+   (.gate-seg) is: the owner's call of 2026-09-26, over the pill it was --
+   a switch is one instrument, and its ends read as a box's, not a
+   capsule's. */
 .seg {
   margin-left: auto;
   display: inline-flex;
   border: 1px solid var(--surface-line);
-  border-radius: var(--r-pill);
+  border-radius: var(--r-plate);
   overflow: hidden;
 }
 .seg__opt {
@@ -6063,7 +6067,7 @@ textarea:focus-visible {
      selected one printed as a rounded rectangle inside the pill, and
      what should read as a straight division read as a pair of curves
      turning away from each other on either side of the hairline. The
-     ends are the container's own: `.seg` is the pill, and it clips. */
+     ends are the container's own: `.seg` is the box, and it clips. */
   border-radius: 0;
   color: var(--text-secondary);
   font: inherit;
@@ -9002,6 +9006,42 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    say, so neither of these selectors descends below one it follows. */
 .chip-row > .chip:not(:only-child),
 .chip-row > .btn-primary { flex: 1 1 auto; justify-content: center; }
+
+/* A deck's actions (Add · Browse · Select · More) as one joined control,
+   the library's order switch at the row's width (2026-09-26, the owner's
+   call): one box at the plate's radius, the actions divided by
+   hairlines, the lit one washed -- rather than a row of pills. One line,
+   always: the actions share it, and a long label is cut, never wrapped
+   into a second row of a box that is one object. */
+.chip-row.deckdetail-acts {
+  flex-wrap: nowrap;
+  gap: 0;
+  border: 1px solid var(--surface-line);
+  border-radius: var(--r-plate);
+  overflow: hidden;
+}
+.chip-row.deckdetail-acts > .chip {
+  flex: 1 1 auto;
+  min-width: 0;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--r-flat);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.chip-row.deckdetail-acts > .chip + .chip { border-left: 1px solid var(--surface-line); }
+/* On a phone the four words take the row's width between them, so the
+   glyphs in front of them go: the words are the actions, and with the
+   glyphs Sélectionner was cut. */
+@media (max-width: 560px) {
+  .chip-row.deckdetail-acts > .chip { padding-inline: var(--sp-2); }
+  .chip-row.deckdetail-acts > .chip > :is(svg, .chip__dots) { display: none; }
+}
+.chip-row.deckdetail-acts > .chip:not(.chip--on):hover,
+.chip-row.deckdetail-acts > .chip:not(.chip--on):focus-visible {
+  background: color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
 
 /* The stage's foot (canvas): the column's last row, pushed to the
    bottom edge of the stage. The stage's own inset pads under it. */
