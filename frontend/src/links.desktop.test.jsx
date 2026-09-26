@@ -36,7 +36,7 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 const { default: SettingsScreen } = await import('./screens/SettingsScreen')
 const { default: DecksScreen } = await import('./screens/DecksScreen')
 const { Bar, Leave } = await import('./components/chrome/Bar')
-const { Records } = await import('./components/profile/ProfileBlocks')
+const { ProfileDoors } = await import('./components/profile/ProfileBlocks')
 const { LineLedger } = await import('./components/profile/LineLedger')
 const { RadicalTile } = await import('./components/dictionary/RadicalIndex')
 
@@ -208,7 +208,7 @@ describe('the way up, the halls and the lines on the desk', () => {
       <main className="profile">
         <Bar title="Thèmes" aside={<Leave to="/learn/vocab/themes">Thèmes</Leave>} />
         <span className="bar__aside"><Leave to="/learn/kana">Syllabaires</Leave></span>
-        <Records profile={{ totalReviews: 3 }} t={t} navigate={() => {}} />
+        <ProfileDoors t={t} navigate={() => {}} />
         <LineLedger stats={null} t={t} navigate={() => {}} />
       </main>
     )

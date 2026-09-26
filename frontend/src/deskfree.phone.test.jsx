@@ -1250,13 +1250,13 @@ describe('the places (plan 123, P16)', () => {
 
   it('keeps the way up, the halls and the lines buttons', async () => {
     const { Bar, Leave } = await import('./components/chrome/Bar')
-    const { Records } = await import('./components/profile/ProfileBlocks')
+    const { ProfileDoors } = await import('./components/profile/ProfileBlocks')
     const { LineLedger } = await import('./components/profile/LineLedger')
     const { default: fr } = await import('./locales/fr/index.js')
     await mount('/profile', (
       <main className="profile">
         <Bar title="Thèmes" aside={<Leave to="/learn/vocab/themes">Thèmes</Leave>} />
-        <Records profile={{ totalReviews: 3 }} t={fr} navigate={() => {}} />
+        <ProfileDoors t={fr} navigate={() => {}} />
         <LineLedger stats={null} t={fr} navigate={() => {}} />
       </main>
     ))

@@ -154,13 +154,15 @@ pigment rather than borrowing one.
 ### The pass has two materials, and neither is a line
 
 Charcoal (`--pass-ink`) is the card. **Gold (`--accent2`) is its metal** — the
-balance bar, the 有効期限 printed on the back, and the XP ring.
+balance bar and the 有効期限 printed on the back.
 
-The ring was `--accent9` until the profile round, and `--accent9` is 瑠璃,
-which in dark theme is the same value as `--line-honyaku`: the one object on
-the screen that means *you* was wearing a section's pigment. The same
-reasoning had already retired the top bar's XP arc; the profile's ring was the
-last one holding out. `--accent9` itself is a leftover from when /profile was
+It was the XP ring's too, round the holder's initial, until plan 143 took
+the ring off: the balance row's bar measures the same climb with its figure
+beside it, so the ring said it a second time. The ring had been `--accent9`
+until the profile round, and `--accent9` is 瑠璃, which in dark theme is the
+same value as `--line-honyaku`: the one object on the screen that means *you*
+was wearing a section's pigment. The same reasoning had already retired the
+top bar's XP arc. `--accent9` itself is a leftover from when /profile was
 modelled as a station with a pigment of its own, before `config/identity.js`
 ruled that a pass is not a place.
 
@@ -369,7 +371,9 @@ next to it.
 - **Hairline lattice** — a grid of bare figures. `display: grid; gap: 1px` on a
   `--surface-line` background, with a 1px outer border. The hairline *is* the
   gap; there are no inner padding boxes. Use for records, headline stats, and
-  the profile's ledger of lines.
+  the profile's ledger of lines (one column of rows since plan 143, the rows
+  sharing their columns through a subgrid so every rail starts where the
+  others do).
 - **Surface panel** — anything with a progress bar or prose. The standard card
   above.
 
@@ -382,8 +386,10 @@ the one in between — the ledger of four lines did exactly that at three
 columns, and the three halls did it again between 560 and 1000px. Content that
 is genuinely ragged, like a collection that is partly empty, does not belong
 in a lattice at all. A lattice with one cell to spare fills it with something
-real rather than leaving it bare — the profile's records are three figures and
-the door to 統計, four cells, two by two.
+real rather than leaving it bare — the profile's records were two figures and
+two doors, four cells two by two, until plan 143 printed the best perfect run
+the API had always counted: three figures three across, and the doors a
+lattice of two of their own.
 
 ### Radii are assigned by weight
 
@@ -690,10 +696,9 @@ So:
   card cannot fill the shared height with something real, the whole row is too
   tall: tighten it. Dead space is the failure, not unevenness. Where a card
   really is stretched by its neighbour, hand the slack to the content's own
-  spacing rather than to the box: the profile's records are a lattice
-  stretched to the stamp book's height, and each cell centres its figure, so
-  a taller neighbour opens the room around the number instead of pooling
-  emptiness under it.
+  spacing rather than to the box: a records lattice stretched to a taller
+  neighbour centres each cell's figure, so the neighbour opens the room
+  around the number instead of pooling emptiness under it.
 - A card wider than ~440px must **earn** its width with a right-hand column
   (meta, a figure, a status). If it has nothing to put there, it should be
   narrower or the grid should have more columns.
@@ -1005,7 +1010,9 @@ as the rail it arrives at.
   decoration found to fill it. The plates go two by two with the odd fifth
   across the row (a lattice with no short last row); the profile opens the
   holder flat, the pass and its stamps at the side column's width beside the
-  record, both rankings at once; Settings sets its column (the pass and the
+  record — its lines drawn with a rail per stop, both rankings at once, and
+  no door to Statistics or Settings, which hang under the lit gate on the
+  rail (plan 143); Settings sets its column (the pass and the
   list, plan 139) beside the open page, neither printing a title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
   was always allowed, and a second column is **`--desk-side-w` (360px)** —
@@ -1464,9 +1471,9 @@ as the rail it arrives at.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the
   pass is the `<h1>`, and every block beneath it is an object that names
-  itself — a stamp sheet with 九月 in its margin, a lattice of records with
-  the door to 統計 set into it, a ledger whose cells carry their own roundels,
-  a 番付. It printed six `SectionHeader`s over six self-evident
+  itself — the doors to 統計 and Settings straight under it, a stamp sheet
+  titled with its month, a lattice of records, a ledger whose rows carry
+  their own roundels, a 番付. It printed six `SectionHeader`s over six self-evident
   objects, which is the second rule's exact failure: a caption for a figure
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell

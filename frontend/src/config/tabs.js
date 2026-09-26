@@ -80,7 +80,9 @@ export function getDeskSections(tabId, t) {
     .map(s => ({ path: s.path, title: s.title }))
   if (tabId === 'profile') {
     const settings = identityFor('/profile/settings', t)
-    rows.push({ path: settings.path, title: settings.title })
+    // The guide's Settings stop (plan 143): the profile draws no door to
+    // Settings on the desk, the rail being one, so the stop points here.
+    rows.push({ path: settings.path, title: settings.title, guide: 'profile.settings' })
   }
   // The library, a place under 教材 rather than a section of its own,
   // gets a station of its own on the rail (plan 132): the gate's panel

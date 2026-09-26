@@ -6687,3 +6687,35 @@ drawn (it names the credit balance on the real pass); the bite moved
 from 40% to 66% of the width; the new figure stays gold rather than
 cooling to ink, measured above 3:1 in both themes. Left for later:
 `/dev/rewards` has no run column, so the desk's dock is seen on a run.
+
+## Plan 143 — 定期入れ, the profile tightened (2026-09-26)
+
+Numbered 143 because 140 went to the desk's first contact (PR #209), 141
+to the refill (PR #210) and 142 to the level-up (PR #211), merged to main
+while this was open under 140; renumbered in the merge, so no source
+cites 140 for it (its first three commits' messages still do). The
+owner's ask: improve the profile's design and layout on the phone and the
+desk, options to choose from, and new feature ideas. Drawn on the canvas
+"Tsuji profile — options" (the screen as shipped at 390px and at 1440×900,
+and three directions each for the phone and the desk: A the holder
+tightened, B the record book, C one screen; four feature sketches:
+personal bests, what you can read, when you ride, the week's ticket); the
+owner picked **A for both**, then asked for the doors above the stamp book.
+
+What the screenshots showed wrong: the phone's profile was 2.7 screens
+tall; the XP was drawn twice on the pass (the ring round the initial and
+the bar); "See the pass" stood alone between the pass and the stamps; the
+stamp book's third figure wrapped onto a row of its own; "Vocabulary JLPT"
+wrapped in a half-width ledger cell and set its figure a line below its
+neighbour's; on the desk the records' doors repeated the rail's stations
+and the record column's cells were wide and empty.
+
+| # | What | Status |
+|---|------|--------|
+| 143 | **The pass**: the holder's initial without the XP ring (`PassHolder`, and the boarding's printed pass), the month it was issued under the name (`onboardedAt`, `passSince`); the footer a button opening the balance sheet (`openBalance`), which carries the offer, so the profile's `OfferButton` and `SOURCES.PROFILE` are retired (old `offer_view` rows still say `profile`). **The doors** (`ProfileDoors`): Statistics and Settings a lattice of two straight under the pass, the phone's only. **The stamp book**: titled with its month, the year in its margin, its three figures one row of three (`Streak`, `Longest`, `Stamped`). **The records**: three across (`.records--three`) — reviews, retention and the best perfect run (`bestQualityStreak`, never printed before). **The lines** (`LineLedger`): a row each on one subgrid of three columns, so every rail starts and ends together; on the desk a rail per stop (a kana set, a JLPT level) filled to that stop's learned / total, named under it, the stop being ridden in full ink (`.pf-line__stops`, the 机 section). **The ranking**: five rows. **The desk**: no door the rail already holds; the guide's Settings stop on the rail's station (`getDeskSections`' `guide`, `DeskRail`, `DESK_ORDER.profile`, `.guide__spot--panel`); the phone's guide walks the door second. Tests: `profileScreen.phone` new, `profile.phone`, `profile.desktop`, `ProfileBlocks.browser`, `chrome.desktop`, `links.desktop`, `deskfree.phone`, `tabs`, `guides` and `credits.paywall` moved | DONE (2026-09-26) |
+
+Deviations from the drawing: the best run prints no unit ("d'affilée"
+took a French phone's cell to two lines); the ranking's head still wraps
+under 360px in French, as before. Left for later: at the desk's
+narrowest (1100px) the stops share about a hundred pixels beside
+"Vocabulaire JLPT"; the feature sketches are unbuilt.

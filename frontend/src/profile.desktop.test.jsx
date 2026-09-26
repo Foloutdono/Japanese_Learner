@@ -62,6 +62,85 @@ describe('the profile on the desk', () => {
     expect(document.querySelector('.profile > .profile__stale')).not.toBeNull()
   })
 
+  it('draws no door the rail already holds, and no offer of its own (plan 143)', async () => {
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/profile']}>
+          <div className="phone phone--desk">
+            <div className="phone__content"><ProfileScreen session={{ access_token: 'tok' }} /></div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle()
+    // Statistics and Settings hang under the lit gate on the rail.
+    expect(document.querySelector('.record--door')).toBeNull()
+    expect(document.querySelector('main .pw-open')).toBeNull()
+    // The records, three across at the head of the record column.
+    const right = document.querySelectorAll('.desk-profile > .desk-profile__col')[1]
+    const cells = [...right.querySelectorAll('.records--three > .record')].map(c => c.getBoundingClientRect())
+    expect(cells).toHaveLength(3)
+    for (const c of cells) expect(c.top).toBeCloseTo(cells[0].top, 0)
+    // The pass's footer is the door to the balance sheet.
+    expect(document.querySelector('.pass__footer > button.pass__door')).not.toBeNull()
+  })
+
+  it('draws each line with a rail per stop, the stops sharing one column (plan 143)', async () => {
+    const lv = (learned, total) => ({ learned, total, started: learned, score: total ? learned / total : 0 })
+    const stats = { items: {
+      kana: { hiragana_basic: lv(46, 46), hiragana_combos: lv(33, 33), katakana_basic: lv(40, 46), katakana_combos: lv(4, 33) },
+      vocab: { N5: lv(610, 684), N4: lv(120, 640), N3: lv(0, 1800), N2: lv(0, 1800), N1: lv(0, 3000) },
+      kanji: { N5: lv(79, 79), N4: lv(88, 166) },
+      grammar: { N5: lv(40, 82) },
+    } }
+    const { LineLedger } = await import('./components/profile/LineLedger')
+    const { default: fr } = await import('./locales/fr/index.js')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/profile']}>
+          <div className="phone phone--desk">
+            <div className="phone__content">
+              <main className="profile"><div className="desk-profile"><div />
+                <div className="desk-profile__col"><LineLedger stats={stats} t={fr} navigate={() => {}} /></div>
+              </div></main>
+            </div>
+          </div>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(200)
+    const rows = [...document.querySelectorAll('.pf-line')]
+    expect(rows).toHaveLength(4)
+    // A line is a place: its row is a link on the desk.
+    expect(rows.map(r => r.getAttribute('href'))).toEqual(['/learn/kana', '/learn/vocab', '/learn/kanji', '/learn/grammar'])
+    const kana = rows[0].querySelectorAll('.pf-line__stop')
+    const vocab = rows[1].querySelectorAll('.pf-line__stop')
+    expect(kana).toHaveLength(4)
+    expect(vocab).toHaveLength(5)
+    // A kana set is named by its specimen, in Japanese; a level by its code.
+    expect(kana[0].querySelector('.pf-line__stop-name').getAttribute('lang')).toBe('ja')
+    expect([...vocab].map(v => v.textContent)).toEqual(['N5', 'N4', 'N3', 'N2', 'N1'])
+    // The stop being ridden is the first not finished, and only it.
+    expect([...kana].map(k => k.classList.contains('pf-line__stop--here'))).toEqual([false, false, true, false])
+    expect([...vocab].map(v => v.classList.contains('pf-line__stop--here'))).toEqual([true, false, false, false, false])
+    // Each stop's rail is filled to that stop's own learned / total.
+    const fill = stop => {
+      const track = stop.querySelector('.pf-line__track').getBoundingClientRect()
+      return stop.querySelector('.pf-line__done').getBoundingClientRect().width / track.width
+    }
+    expect(fill(vocab[0])).toBeCloseTo(610 / 684, 2)
+    expect(fill(vocab[1])).toBeCloseTo(120 / 640, 2)
+    expect(fill(vocab[2])).toBe(0)
+    // One line tall, and every row's stops start and end together.
+    const stops = rows.map(r => r.querySelector('.pf-line__stops').getBoundingClientRect())
+    for (const box of stops) {
+      expect(box.left).toBeCloseTo(stops[0].left, 0)
+      expect(box.right).toBeCloseTo(stops[0].right, 0)
+    }
+    const name = rows[1].querySelector('.pf-line__jp').getBoundingClientRect()
+    expect(stops[1].top).toBeLessThan(name.bottom)
+  })
+
   it('keeps the phone\'s reading order', async () => {
     await render(
       <LangProvider>

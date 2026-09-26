@@ -37,12 +37,14 @@ export const GUIDES = Object.freeze({
     { anchor: 'dict.entry',    key: 'DictEntry',    radius: 'card' },
     { anchor: 'dict.analyzer', key: 'DictAnalyzer', radius: 'card' },
   ],
+  // The phone's order is the screen's, top to bottom: the Settings door
+  // stands straight under the pass since plan 143.
   profile: [
     { anchor: 'profile.pass',     key: 'ProfilePass',     radius: 'identity' },
+    { anchor: 'profile.settings', key: 'ProfileSettings', radius: 'flat' },
     { anchor: 'profile.stamps',   key: 'ProfileStamps',   radius: 'card' },
     { anchor: 'profile.records',  key: 'ProfileRecords',  radius: 'card' },
     { anchor: 'profile.ledger',   key: 'ProfileLedger',   radius: 'card' },
-    { anchor: 'profile.settings', key: 'ProfileSettings', radius: 'flat' },
   ],
 })
 
@@ -53,8 +55,12 @@ export const GUIDES = Object.freeze({
 // top right, the gate, and the rail's top left. Down the rail instead,
 // then across the page: the gates, the level, the status, the pass, the
 // gate, the strip beside it.
+// The profile's Settings stop is the rail's station on the desk (plan
+// 143), not a door under the pass, so there it closes the walk: the
+// page first, then the way out.
 export const DESK_ORDER = Object.freeze({
   today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
+  profile: ['profile.pass', 'profile.stamps', 'profile.records', 'profile.ledger', 'profile.settings'],
 })
 
 // 机 (plan 127): the corner a stop's spot wears on the desk, where it
@@ -66,6 +72,9 @@ export const DESK_RADIUS = Object.freeze({
   'hud.level': 'card',
   'hud.status': 'card',
   'hud.pass': 'card',
+  // Plan 143: the profile's Settings door is the rail's station there,
+  // a lozenge at the panel's corner rather than a flush lattice cell.
+  'profile.settings': 'panel',
 })
 
 /** A gate's stops in the order the desk walks them, in the desk's corners. */

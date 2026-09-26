@@ -24,16 +24,12 @@ import { useCountUp, stillPreferred } from './countUp'
 // screen where the balance is explained, which is the only place the
 // pass means anything yet.
 
+// The profile's holder as printed: the initial with no ring, since plan
+// 143 took the XP arc off the pass (the balance row's bar is the climb).
 function PrintedHolder({ name }) {
-  const r = 42
-  const circumference = 2 * Math.PI * r
   return (
     <div className="pass__holder">
       <div className="pass__avatar-wrap">
-        <svg className="pass__ring" viewBox="0 0 96 96" aria-hidden="true">
-          <circle className="pass__ring-track" cx="48" cy="48" r={r} />
-          <circle className="pass__ring-fill" cx="48" cy="48" r={r} strokeDasharray={circumference} strokeDashoffset={circumference} />
-        </svg>
         <div className="pass__avatar">{name.charAt(0).toUpperCase()}</div>
       </div>
       <span className="profile-card__name">{name}</span>

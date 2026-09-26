@@ -73,8 +73,13 @@ describe('the rail', () => {
 
   it('carries no pigment: the rail is chrome', () => {
     for (const id of DESK_TAB_IDS) {
-      for (const row of getDeskSections(id, t)) expect(Object.keys(row).sort()).toEqual(['path', 'title'])
+      // A guide anchor is not a colour: the profile's Settings station
+      // carries the stop the page's door carried (plan 143).
+      for (const row of getDeskSections(id, t)) {
+        expect(Object.keys(row).filter(k => k !== 'guide').sort()).toEqual(['path', 'title'])
+      }
     }
+    expect(getDeskSections('profile', t).map(s => s.guide)).toEqual([undefined, 'profile.settings'])
   })
 
   it('lights a section from anywhere behind it, and only there', () => {

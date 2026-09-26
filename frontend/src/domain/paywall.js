@@ -27,11 +27,13 @@ export const HAS_PAYWALL = true
 // Where an offer can be opened from. The backend's note beside
 // offer_view (backend/core/events.py) must name exactly these — every
 // funnel query slices on this, so a door added on one side only is a
-// silently-missing column in the dashboard.
+// silently-missing column in the dashboard. The profile was a door of
+// its own until plan 143 made its pass's footer the door to the
+// balance sheet, which is where the offer is reached from there now;
+// rows recorded before that still carry `where: 'profile'`.
 export const SOURCES = Object.freeze({
   ONBOARDING: 'onboarding',   // the last boarding screen, under the pass
   BALANCE: 'balance',         // the balance sheet, off the HUD
-  PROFILE: 'profile',         // the profile, under the commuter pass
   SETTINGS: 'settings',       // the settings list
   RUNOUT: 'runout',           // the run stopped at a zero balance
   RIDE: 'ride',               // the reading ride's pass plate (plan 097)
