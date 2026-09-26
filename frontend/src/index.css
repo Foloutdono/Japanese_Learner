@@ -16647,6 +16647,8 @@ html { scrollbar-gutter: stable; }
    balance's here: on the pass that edge is the credit balance, which
    is not what turned over. */
 .levelup__pass {
+  /* No bite until the cut; the animation grows it (@property above). */
+  --levelup-bite: 0;
   position: relative;
   display: flex;
   align-items: center;
