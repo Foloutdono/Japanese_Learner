@@ -165,11 +165,12 @@ function dictionaryTile(r) {
 //
 // `to` is the desk's too (plan 123): the radical's URL, which makes the
 // tile a link (SplitRow) like every other row of a split.
-export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick, to }) {
+export function RadicalTile({ glyph, count, sub, learned, title, started, current, onPick, to, push = false }) {
   const done = learned != null && count > 0 ? Math.min(1, learned / count) : null
   return (
     <SplitRow
       to={to}
+      push={push}
       onClick={onPick}
       title={title}
       aria-current={current ? 'page' : undefined}
@@ -234,7 +235,7 @@ const columns = (n, labelled) => Math.min(labelled ? 3 : 4, Math.max(1, Math.cei
  *              is kept in view in the list's own scroll.
  *   t        — the string table
  */
-export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index', selected, linkTo = null }) {
+export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile, stroke: strokeProp, onStroke, order = 'index', selected, linkTo = null, push = false }) {
   const [ownStroke, setOwnStroke] = useState(null)
   const page = useRef(null)
   const stroke = strokeProp ?? ownStroke
@@ -285,7 +286,7 @@ export function RadicalGrid({ groups, loading, onPick, t, tile = dictionaryTile,
         aria-label={strokes(group.stroke_count, t)}
       >
         <div className={`radical-page__grid${labelled ? ' radical-page__grid--labelled' : ''}`}>
-          {rows.map(r => <RadicalTile key={r.number} {...r} current={selected != null && r.number === selected} onPick={() => onPick(r.number)} to={linkTo?.(r.number)} />)}
+          {rows.map(r => <RadicalTile key={r.number} {...r} current={selected != null && r.number === selected} onPick={() => onPick(r.number)} to={linkTo?.(r.number)} push={push} />)}
         </div>
       </section>
     </div>

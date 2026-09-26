@@ -24142,6 +24142,24 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     min-height: calc(8 * var(--sp-8));
   }
   .desk-source { min-height: 0; }
+  /* The kanji's (the owner's pick B): the two lines in one column, JLPT
+     at its own height over the tiers, which take the rest; the radicals'
+     tiles on the wider plate beside them, scrolling in it. */
+  .desk-sources--kanji { grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); }
+  .desk-sources__col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    min-height: 0;
+  }
+  .desk-sources__col > .desk-source { flex: 1 1 0; }
+  .desk-sources__col > .desk-source--compact { flex: none; }
+  .desk-source__tiles {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--sp-4) var(--sp-6);
+  }
   .desk-source__head {
     display: flex;
     align-items: baseline;

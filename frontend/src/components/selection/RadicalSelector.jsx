@@ -37,8 +37,11 @@ import { firstRadical } from '../../domain/radicals'
  *               tile a link (SplitRow), as every split's rows are.
  *   selected  — the desk's (plan 118): the radical whose lesson stands
  *               beside the index, marked, its page the one opened
+ *   push      — a tile's link pushes rather than replaces: the kanji
+ *               sources' plate, where a radical is a place left for
+ *               and Back comes back (SplitRow's `push`)
  */
-export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected, linkTo = null }) {
+export default function RadicalSelector({ session, onSelect, stroke, onStroke, selected, linkTo = null, push = false }) {
   const { t } = useLang()
   const { groups, failed } = useRadicalGroups(session)
 
@@ -62,6 +65,7 @@ export default function RadicalSelector({ session, onSelect, stroke, onStroke, s
       onStroke={onStroke}
       selected={selected}
       linkTo={linkTo}
+      push={push}
       t={t}
     />
   )
