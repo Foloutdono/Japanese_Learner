@@ -53,7 +53,14 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { default: VocabScreen } = await import('./screens/VocabScreen')
 
-const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the plates' staggered arrivals themselves: a plate a
+// fraction of a pixel short of its place is a row out of line.
+const settle = async (ms = 300) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 const where = { path: null, search: null, type: null }
 function Probe() {
   const loc = useLocation()

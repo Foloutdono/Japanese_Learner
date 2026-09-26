@@ -74,7 +74,14 @@ const { default: VocabScreen } = await import('./screens/VocabScreen')
 const { default: GrammarScreen } = await import('./screens/GrammarScreen')
 const { default: KanaScreen } = await import('./screens/KanaScreen')
 
-const settle = (ms = 300) => new Promise(r => setTimeout(r, ms))
+// Past the timer, the cards' staggered arrivals themselves: a card a
+// fraction of a pixel short of its place is a door out of line.
+const settle = async (ms = 300) => {
+  await new Promise(r => setTimeout(r, ms))
+  await Promise.all(document.getAnimations()
+    .filter(a => a.effect?.getComputedTiming().iterations !== Infinity)
+    .map(a => a.finished.catch(() => {})))
+}
 
 function mount(entry, route) {
   return render(
