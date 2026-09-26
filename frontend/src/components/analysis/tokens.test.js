@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { tokState, isUnknownToken, isPoolWord } from './tokens'
 
-// ── A word past the course (plan 147) ────────────────────────────
+// ── A word past the course (plan 148) ────────────────────────────
 // The breakdown's words the JLPT deck does not teach now carry the
 // JMdict pool's card (study/analysis.py's _pool_match): a meaning, an
 // id, no level, and `pool`. On the line such a word keeps the off-deck

@@ -1,4 +1,4 @@
-"""No false meaning (plan 149).
+"""No false meaning (plan 150).
 
 A word row in the breakdown carries a card: a meaning, a level, a way
 into a deck. A card for another word read the same way is a meaning the
@@ -173,6 +173,45 @@ class TheLowerTwinTests(unittest.TestCase):
                 self.assertTrue(readings)
                 # Never the only card under its key: it stands BESIDE one.
                 self.assertGreater(len(card_lookup._VOCAB_BY_LEMMA[lemma]), 1)
+
+
+class EdgeInputTests(unittest.TestCase):
+    """Whatever a learner pastes into the analyser: the tokens rebuild the
+    text, and nothing that is not a Japanese word carries a card."""
+
+    CASES = ("", " ", "\n", "hello world", "12345", "１２３", "😀🎌", "。。。", "え？",
+             "iPhoneを買った。", "ズンドコベロンチョが来た。", "行って\n来ます。", "さらば！")
+
+    def test_never_raises_and_the_tokens_are_the_text(self) -> None:
+        for text in self.CASES:
+            with self.subTest(text=text):
+                tokens = analysis.analyze_local(text)["tokens"]
+                for t in tokens:
+                    self.assertEqual(text[t["start"]:t["end"]], t["surface"])
+                for a, b in zip(tokens, tokens[1:]):
+                    self.assertLessEqual(a["end"], b["start"])
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_no_card_for_what_is_not_a_word(self) -> None:
+        for text in ("hello world", "12345", "１２３", "😀🎌", "。。。", "え？"):
+            with self.subTest(text=text):
+                self.assertFalse(any(t.get("vocab_match") for t in analysis.analyze_local(text)["tokens"]))
+        found = matches("iPhoneを買った。")
+        self.assertNotIn("iPhone", found)
+        # A word JMdict does not hold is no word of anyone's.
+        self.assertNotIn("ズンドコベロンチョ", matches("ズンドコベロンチョが来た。"))
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_a_pool_word_at_either_edge(self) -> None:
+        for text in ("桃源郷", "桃源郷だ。", "ここは桃源郷"):
+            with self.subTest(text=text):
+                self.assertTrue(matches(text)["桃源郷"].get("pool"))
+        self.assertTrue(matches("さらば！")["さらば"].get("pool"))
+
+    @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+    def test_a_word_in_kana_is_not_a_row_read_otherwise(self) -> None:
+        # まじか ("seriously?") comes back from UniDic as 間近, read まぢか.
+        self.assertNotIn("まじか", matches("まじか"))
 
 
 def _corpus() -> list[str]:

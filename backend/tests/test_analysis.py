@@ -136,7 +136,7 @@ class AnalyzeLocalTests(unittest.TestCase):
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_a_word_past_the_course_carries_its_pool_card(self) -> None:
-        """Plan 147. A subtitle's words the deck does not teach: さらば
+        """Plan 148. A subtitle's words the deck does not teach: さらば
         (an interjection), 真っさら (a 形状詞) and 桃源郷, which UniDic
         cuts into 桃源 + 郷 and the pool holds as one word. Each carries
         its meaning and its pool card, with no level, and the deck still
@@ -158,7 +158,7 @@ class AnalyzeLocalTests(unittest.TestCase):
 
     @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
     def test_every_grammatical_word_of_a_subtitle_has_its_key(self) -> None:
-        """Plan 148, on the two lines the owner showed: the に of 真っさらに
+        """Plan 149, on the two lines the owner showed: the に of 真っさらに
         and the なっ of なった are 〜になる, the た the plain past, the ん
         and だ the explanatory のだ; 会いにきて is 〜に行きます (its lesson
         names 来ます), and the て of 辿って links the two clauses."""
@@ -362,7 +362,7 @@ class AttachUserStateTests(unittest.TestCase):
     def test_off_deck_content_word_counts_as_off_deck_not_unknown(self) -> None:
         # ピカチュウ is a noun no deck card and no kanji card is behind --
         # not something the course teaches, so it must never inflate
-        # unknown_count. JMdict has it (plan 147), so it carries the pool
+        # unknown_count. JMdict has it (plan 148), so it carries the pool
         # card a learner may take up; untaken, it is off-deck as before.
         r = analyze_local("ピカチュウがいます。")
         pikachu = next(t for t in r["tokens"] if t["surface"] == "ピカチュウ")

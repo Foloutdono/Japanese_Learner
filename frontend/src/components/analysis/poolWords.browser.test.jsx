@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import { WordsList } from './WordsList'
 import { FocusCard } from './FocusCard'
 
-// ── Every word the app holds a card for (plan 147) ───────────────
+// ── Every word the app holds a card for (plan 148) ───────────────
 // さらば桃源郷真っさらになったんだ: three words the JLPT deck does not
 // teach, which the breakdown used to show with no meaning and no way
 // into a deck -- 真っさら and さらば not even listed. The JMdict pool

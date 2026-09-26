@@ -1,4 +1,4 @@
-# ── A JMdict pool word in a deck (plan 147) ───────────────────────
+# ── A JMdict pool word in a deck (plan 148) ───────────────────────
 # The analyser and the dictionary offer every word the app holds a card
 # for, the 212k JMdict words past the course included, and a vocab deck
 # takes one as the vocab card it already is: `vocab_jmdict_<id>`, with
@@ -167,3 +167,87 @@ def test_a_pool_word_in_no_deck_is_not_asked_by_the_queue(pclient):
     _make_due(PUID, TOUGENKYOU, "vocab.flashcard.f2b")
     cards = pclient.get("/api/today/cards", params={"count": 20}).json()["cards"]
     assert TOUGENKYOU not in {c["card_id"] for c in cards}
+
+
+# ── Edge cases (plan 150) ─────────────────────────────────────────
+
+SARABA = _pool_id("", "さらば")          # a pool word written in kana alone
+
+
+def test_a_pool_word_leaves_its_deck_and_the_queue(pclient):
+    deck_id = _deck(pclient, "Anime")
+    _add(pclient, deck_id, {"source": "vocab", "raw_id": TOUGENKYOU})
+    _make_due(PUID, TOUGENKYOU, "vocab.flashcard.f2b")
+
+    r = pclient.delete(f"/api/decks/{deck_id}/cards/app", params={"source": "vocab", "raw_id": TOUGENKYOU})
+    assert r.status_code == 200, r.text
+    # Once: a second removal finds nothing.
+    r = pclient.delete(f"/api/decks/{deck_id}/cards/app", params={"source": "vocab", "raw_id": TOUGENKYOU})
+    assert r.status_code == 404
+    assert pclient.get(f"/api/decks/{deck_id}/cards").json()["cards"] == []
+    # In no deck, the queue has nothing to ask it through.
+    cards = pclient.get("/api/today/cards", params={"count": 20}).json()["cards"]
+    assert TOUGENKYOU not in {c["card_id"] for c in cards}
+
+
+def test_a_pool_word_is_exported_with_its_gloss(pclient):
+    deck_id = _deck(pclient, "Anime")
+    _add(pclient, deck_id, {"source": "vocab", "raw_id": TOUGENKYOU})
+    r = pclient.get(f"/api/decks/{deck_id}/export")
+    assert r.status_code == 200
+    rows = r.content.decode("utf-8-sig").splitlines()
+    assert rows == ["front,back", "桃源郷,earthly paradise"]
+
+
+def test_a_pool_word_in_two_decks_is_asked_once(pclient):
+    first, second = _deck(pclient, "Anime"), _deck(pclient, "Songs")
+    _add(pclient, first, {"source": "vocab", "raw_id": TOUGENKYOU})
+    _add(pclient, second, {"source": "vocab", "raw_id": TOUGENKYOU})
+    _make_due(PUID, TOUGENKYOU, "vocab.flashcard.f2b")
+    cards = pclient.get("/api/today/cards", params={"count": 20}).json()["cards"]
+    assert [c["card_id"] for c in cards].count(TOUGENKYOU) == 1
+
+
+def test_a_kana_only_pool_word_is_never_asked_its_reading(pclient):
+    """word_reading shows the word and asks how it is read: さらば would
+    print its own answer. The flashcards still ask it."""
+    deck_id = _deck(pclient, "Anime")
+    _add(pclient, deck_id, {"source": "vocab", "raw_id": SARABA}, {"source": "vocab", "raw_id": TOUGENKYOU})
+
+    def total(mode):
+        return pclient.get(f"/api/decks/{deck_id}/stats", params={"mode": mode}).json()["total"]
+
+    assert total("vocab.flashcard.f2b") == 2
+    assert total("vocab.flashcard.b2f") == 2
+    assert total("vocab.word_reading") == 1
+    served = pclient.get(f"/api/decks/{deck_id}/study",
+                         params={"mode": "vocab.word_reading", "count": 5}).json()["cards"]
+    assert [c["card_id"] for c in served] == [TOUGENKYOU]
+
+
+def test_a_followed_deck_hands_its_pool_word_to_the_follower(pclient, other_user):
+    from tests.conftest import acting_as
+
+    with acting_as(other_user):
+        deck_id = _deck(pclient, "Someone's anime words")
+        _add(pclient, deck_id, {"source": "vocab", "raw_id": TOUGENKYOU})
+        assert pclient.post(f"/api/decks/{deck_id}/publish").status_code == 200
+
+    assert pclient.post(f"/api/decks/{deck_id}/subscribe").status_code == 200
+    listed = pclient.get(f"/api/decks/{deck_id}/cards").json()["cards"]
+    assert [(c["front"], c["level"], c["back"]) for c in listed] == [("桃源郷", None, "earthly paradise")]
+    served = pclient.get(f"/api/decks/{deck_id}/study",
+                         params={"mode": "vocab.flashcard.f2b", "count": 5}).json()["cards"]
+    assert [c["card_id"] for c in served] == [TOUGENKYOU]
+
+    # "Make it mine": the copy holds the same pool card, still levelless.
+    copied = pclient.post(f"/api/decks/{deck_id}/detach")
+    assert copied.status_code == 200, copied.text
+    mine = copied.json().get("id") or copied.json().get("deck_id")
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT raw_id, level FROM deck_cards WHERE deck_id = %s", (mine,))
+            assert cur.fetchall() == [(TOUGENKYOU, POOL_LEVEL)]
+    finally:
+        conn.close()

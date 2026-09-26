@@ -674,7 +674,7 @@ export function DictionaryDetail({ entry, onClose, onBack, onRadicalClick, onKan
   // what "review this card" boards. Served whole rather than assembled
   // here, because only the server knows which entries have one
   // (routes/dictionary.py's _app_card). A JMdict pool word's carries
-  // `pool` (plan 147): a deck takes it, but the day's queue asks it only
+  // `pool` (plan 148): a deck takes it, but the day's queue asks it only
   // through a deck it is in, so "review this card" is not offered on it.
   const appCard = entry.app_card ?? null
 

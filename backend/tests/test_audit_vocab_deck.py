@@ -157,7 +157,7 @@ class CorpusMeasurementTests(unittest.TestCase):
         # にじゅう had badged はたち and is a numeral (unmatched +1); 如何
         # read いかん had badged いかが and is IGNORED_LEMMAS' now.
         #
-        # Raised again (plan 149), the same way: a reading no longer joins
+        # Raised again (plan 150), the same way: a reading no longer joins
         # a token written in kanji to a card spelled with other kanji, nor
         # a loanword to a native card, so nine homophones stopped counting
         # as matches and are the gaps they always were -- 前回 had badged

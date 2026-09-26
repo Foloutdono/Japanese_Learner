@@ -53,7 +53,7 @@ def test_a_deck_word_carries_what_the_plus_needs(client):
 
 
 def test_a_pool_word_carries_the_card_a_vocab_deck_takes(client):
-    # Plan 147: a JMdict-only word is a card a vocab deck takes -- its
+    # Plan 148: a JMdict-only word is a card a vocab deck takes -- its
     # raw id, no level (the pool has none), and `pool`, which keeps
     # "review this card" off it (the queue serves it only through a deck
     # it is in). The ref must resolve, or the ＋ would add nothing.

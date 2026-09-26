@@ -156,7 +156,7 @@ def _pick_best_candidate(candidates: list, reading: str = None):
     Priority:
       1. An entry whose reading matches the one we were given (exact
          signal — e.g. from the phrase analyzer's LLM segmentation) --
-         the lowest-level one when several do (plan 149: する matched
+         the lowest-level one when several do (plan 150: する matched
          the N3 為る read する before the N5 する, in 1,600 of the
          app's sentences, because the N3 card came first in the list).
       2. Otherwise, the entry from the lowest (most common) JLPT level,
@@ -645,7 +645,7 @@ _KANA_BESIDE: dict[tuple[str, str], frozenset[str]] = {}
 
 
 def _stand_kana_cards_beside(index) -> None:
-    """The lemma index's fifth pass (plan 149): a card written in kana
+    """The lemma index's fifth pass (plan 150): a card written in kana
     alone, beside the same word's kanji card at a higher level. する is
     為る to the tokenizer, なる is 成る, いい is 良い, and under those keys
     stood only the N3 為る, the N3 為る read なる, the N1 好い -- so every
@@ -855,7 +855,7 @@ def resolve_kana(reading: str, pos: str, auxiliary_use: bool, after_conjunctive:
     to True so a caller without the context keeps the old gate;
     resolve_morpheme computes it.
 
-    Two refusals, plan 149, for the caller that hands in the token as
+    Two refusals, plan 150, for the caller that hands in the token as
     written (`surface`) and where it comes from (`goshu`, UniDic's 語種):
     a reading is a sound, and a sound is shared by words that have
     nothing else in common.
@@ -955,7 +955,7 @@ def _page_form(m) -> str:
 def _another_word(m, entry: dict) -> dict | None:
     """The pool row for a token written in kanji the card is not spelled
     with, when JMdict holds the page's spelling as a word whose gloss
-    shares nothing with the card's (plan 149) -- the card is then another
+    shares nothing with the card's (plan 150) -- the card is then another
     word read the same way, not this one in another spelling. 推す is
     "to recommend", not 押す "to push"; 冒す "to brave", not 犯す "to
     commit"; 酔い "drunkenness", not the いい／よい card; 層 "layer", not
@@ -1048,9 +1048,9 @@ def compound_reading(entry: dict, morphemes) -> str:
     return joined if joined in variants else variants[0]
 
 
-# ── The JMdict pool, after the deck (plan 147) ─────────────────
+# ── The JMdict pool, after the deck (plan 148) ─────────────────
 # The deck is 8k words chosen for the JLPT; a subtitle or a photo of a
-# page is written in the rest of the language as well. Until plan 147 a
+# page is written in the rest of the language as well. Until plan 148 a
 # word the deck does not teach was a rule under a word and nothing else:
 # no meaning, no card, no ＋ -- 桃源郷, 真っさら and さらば in one line of
 # an anime's subtitles, while the pool beside the deck (212k JMdict
@@ -1164,7 +1164,7 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     if written and not written <= set(lemma):
         # The page's own spelling first, where UniDic files the word
         # under other kanji (推し under 押す): the row for 推す is the
-        # word on the page (plan 149).
+        # word on the page (plan 150).
         form = _page_form(m)
         hit = _pool_by_form(form, (m.reading, m.lemma_reading), seen_kanji=False) if form else None
         if hit is not None:

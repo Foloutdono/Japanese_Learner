@@ -1,9 +1,9 @@
-"""No false key (plan 149).
+"""No false key (plan 150).
 
 A breakdown is read by someone who cannot check it. A rule it misses is
 a rule left untaught, which the learner can still look up; a rule it
 invents is a lesson about something that is not in the sentence, and
-they will learn it. Plan 148 went after the misses. This file holds the
+they will learn it. Plan 149 went after the misses. This file holds the
 other half: every key the detector lights must be the one the sentence
 uses.
 
@@ -49,7 +49,7 @@ REQUEST = "〜て／〜ないで（依頼）"
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class QuestionWordDemoTests(unittest.TestCase):
-    """でも after a question word is "any-" (the N4 point plan 149
+    """でも after a question word is "any-" (the N4 point plan 150
     added); after a noun, an example offered or "even" (〜でも)."""
 
     def test_a_question_word_and_demo_is_any(self) -> None:
@@ -481,7 +481,7 @@ class InvariantTests(unittest.TestCase):
                 self.assertEqual(grammar_detect.hits(sentence, tokens), hits)
 
     def test_no_refused_shape_anywhere(self) -> None:
-        """The plan-149 refusals, restated as properties of the whole
+        """The plan-150 refusals, restated as properties of the whole
         corpus rather than of the sentences they were written for."""
         for sentence, tokens, hits in self.read:
             by_start = {t.start: i for i, t in enumerate(tokens)}
