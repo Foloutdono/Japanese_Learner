@@ -31,7 +31,7 @@ const settle = (ms = 60) => new Promise(r => setTimeout(r, ms))
 
 async function lineFor(balance, { unlimited = false } = {}) {
   credits.seedCredits({
-    balance, cap: CAP, dailyRefill: 30, refillAt: null,
+    balance, cap: CAP, dailyRefill: 30, nextCreditAt: null,
     plan: unlimited ? 'pass' : 'free', unlimited, enforced: false,
   })
   const screen = await render(<LangProvider><BalanceLine /></LangProvider>)

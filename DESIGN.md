@@ -1017,7 +1017,7 @@ as the rail it arrives at.
   remembered per browser) and what the run will take in minutes
   (from the learner's own pace); each lane prints its share of the run —
   dealt the way the queue deals — and whether it boards (free, or a dashed
-  edge and the refill's hour when nothing paid can ride); the foot counts
+  edge and the next credit's hour when nothing paid can ride); the foot counts
   what boards, what waits and the balance beside Depart; and the side
   column, the window's height, ends on the week ahead — a bar a day,
   today's the gate's own total in gold, and what a shorter run leaves for

@@ -197,11 +197,15 @@ CREATE TABLE user_profiles (
     -- frontend/src/domain/ratingScales.js.
     rating_scale TEXT,
     -- The credits (plan 069, core/credits.py): the local day the last
-    -- refill or the seed was taken (the idempotence lock), the
-    -- entitlement ('free' | 'pass', with an optional expiry -- set by
-    -- hand until a purchase flow exists) and the device's UTC offset in
-    -- minutes east, so the refill day is the learner's.
+    -- lump refill or the seed was taken under the midnight rule (read
+    -- only to start a clock that has never run, plan 141), the
+    -- refill's clock -- the instant the next credit is counted from,
+    -- and the lock on paying it out --, the entitlement ('free' |
+    -- 'pass', with an optional expiry -- set by hand until a purchase
+    -- flow exists) and the device's UTC offset in minutes east, so the
+    -- learner's day is theirs.
     credits_refilled_on DATE,
+    credits_accrued_at TIMESTAMPTZ,
     plan TEXT DEFAULT 'free',
     plan_until TIMESTAMPTZ,
     tz_offset_min INTEGER,

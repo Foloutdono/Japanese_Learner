@@ -19,7 +19,7 @@ vi.mock('../../lib/audio', async o => ({
 }))
 vi.mock('../../stores/credits', () => ({
   useCredits: () => ({
-    balance: 50, cap: 200, dailyRefill: 50, refillAt: null,
+    balance: 50, cap: 200, dailyRefill: 50, nextCreditAt: null,
     unlimited: false, enforced: false,
   }),
 }))

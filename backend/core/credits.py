@@ -3,13 +3,14 @@
 
 1 credit = 1 review, except on a line that rides free -- see
 FREE_SOURCES below, which today is 仮名 and nothing else. A new account
-is welcomed with SIGNUP_BONUS. After that a free pass refills by
-DAILY_REFILL at the learner's local midnight and tops up to at most CAP
--- a balance still above CAP (a fresh welcome is) simply takes nothing
-until it has been spent down; the subscription pass is unlimited. The
-fare gate prices a run against the balance before departure, and a run
-longer than the balance stops at the balance -- at the balance's worth
-of PAID reviews, that is: the free ones ride on past it.
+is welcomed with SIGNUP_BONUS. After that a free pass fills itself
+through the day (plan 141): DAILY_REFILL a day, one credit every
+REFILL_EVERY, up to at most CAP -- a balance still above CAP (a fresh
+welcome is) simply takes nothing until it has been spent down; the
+subscription pass is unlimited. The fare gate prices a run against the
+balance before departure, and a run longer than the balance stops at
+the balance -- at the balance's worth of PAID reviews, that is: the
+free ones ride on past it.
 
 -- The balance is a SUM, never a column ----------------------
 credit_ledger is append-only, modelled on xp_ledger: every refill, every
@@ -18,6 +19,29 @@ the learner's rows. A balance column that could drift from its own
 history is exactly the bug a ledger exists to make impossible. The sum
 is cached per worker for a minute (the HUD asks often) and evicted on
 every write from this process.
+
+-- 補充 — the refill fills, and waits to be claimed (plan 141) ----
+It used to land in one go, DAILY_REFILL at the learner's local
+midnight. It lands as the day goes now: one credit every REFILL_EVERY
+(48 minutes, the day's thirty spread over it), counted from
+user_profiles.credits_accrued_at -- the refill's clock. What has landed
+since the clock is PENDING: owed, not yet in the ledger. Reading the
+balance never moves it; claiming it (POST /api/credits/claim, the
+"while you were away" sheet the app opens on arrival) writes it as one
+`refill` row and moves the clock on by exactly the credits it paid,
+so the minutes towards the next one are kept.
+
+The tank holds CAP. Pending stops growing at the room under it, and a
+tank that fills is full: the minutes past the last credit are not
+banked, and while the balance sits at or above CAP the clock does not
+run at all. It starts again, from that moment, on the fare that takes
+the balance back under CAP -- the energy bar every idle game has, and
+the only rule under which a learner who was away a week comes back to
+the same full tank as one who was away a day.
+
+Nothing waits on the claim to be spendable: a fare claims what is
+pending first (spend below), so an unclaimed credit is never a refusal,
+and balance() -- what the queue trims a batch to -- counts it.
 
 -- Shadow mode ----------------------------------------------
 The ledger runs and the HUD prints the balance, but nothing is blocked
@@ -28,18 +52,20 @@ announcement (plans/README.md, wave 14); the 402 shapes below are what
 the client already knows how to read.
 
 -- What a pass entitles ---------------------------------------
-Free: the whole kana line at no fare at all, the daily refill, the
-learning modes, the dictionary without the analyzer, today's run, the
-full profile, FREE_DECKS decks and FREE_CARDS cards. Pass: unlimited
-credits, the practice modes, the analyzer, PASS_DECKS and PASS_CARDS.
-Practice never spends credits.
+Free: the whole kana line at no fare at all, the refill through the
+day, the learning modes, the dictionary without the analyzer, today's
+run, the full profile, FREE_DECKS decks and FREE_CARDS cards. Pass:
+unlimited credits, the practice modes, the analyzer, PASS_DECKS and
+PASS_CARDS. Practice never spends credits.
 There is no purchase flow yet (HAS_STORE in the frontend's
 domain/credits.js), so `plan` is only ever set by hand.
 
 -- Local midnight --------------------------------------------
-The refill day is the learner's, not UTC's: user_profiles.tz_offset_min
-is the device's offset (minutes EAST of UTC, PATCHed on boot by the
-app), and the day boundary is computed from it. Without it, UTC.
+The refill no longer waits for one, but the rest of the app's daily
+allowances do (the OCR limit, the comprehension ceiling, the asking):
+user_profiles.tz_offset_min is the device's offset (minutes EAST of
+UTC, PATCHed on boot by the app), and resets_at below computes the
+learner's day boundary from it. Without it, UTC.
 """
 import logging
 import os
@@ -53,6 +79,10 @@ from core.auth import get_user_id
 logger = logging.getLogger(__name__)
 
 DAILY_REFILL = 30
+# One credit at a time, the day's DAILY_REFILL spread evenly over it:
+# 48 minutes. Derived rather than written, so the rate and the daily
+# figure the copy prints cannot disagree.
+REFILL_EVERY = timedelta(days=1) / DAILY_REFILL
 CAP = 50
 # 開通祝い — what a new account is handed on its first read, once, ever.
 # Deliberately well above CAP: the cap is a ceiling on the DAILY REFILL,
@@ -96,11 +126,12 @@ REASONS = ("refill", "review", "grant", "adjust")
 
 
 class OutOfCredits(Exception):
-    """A fare the balance cannot cover, under enforcement — 402."""
-    def __init__(self, balance: int, refill_at: str):
+    """A fare the balance cannot cover, under enforcement — 402.
+    `next_credit_at` is when the refill lands its next credit."""
+    def __init__(self, balance: int, next_credit_at: str | None):
         super().__init__("out_of_credits")
         self.balance = balance
-        self.refill_at = refill_at
+        self.next_credit_at = next_credit_at
 
 
 class PassRequired(Exception):
@@ -122,23 +153,28 @@ def local_today(tz_offset_min: int | None, now: datetime | None = None) -> date:
     return (now + timedelta(minutes=tz_offset_min or 0)).date()
 
 
-def next_refill_at(tz_offset_min: int | None, now: datetime | None = None) -> datetime:
+def _midnight_starting(day: date, tz_offset_min: int | None) -> datetime:
+    """The local midnight that opens `day`, as a UTC instant."""
+    offset = timedelta(minutes=tz_offset_min or 0)
+    return (datetime.combine(day, datetime.min.time()) - offset).replace(tzinfo=timezone.utc)
+
+
+def next_midnight(tz_offset_min: int | None, now: datetime | None = None) -> datetime:
     """The next local midnight, as a UTC instant."""
     now = now or datetime.now(timezone.utc)
-    offset = timedelta(minutes=tz_offset_min or 0)
-    local_midnight = datetime.combine(local_today(tz_offset_min, now) + timedelta(days=1), datetime.min.time())
-    return (local_midnight - offset).replace(tzinfo=timezone.utc)
+    return _midnight_starting(local_today(tz_offset_min, now) + timedelta(days=1), tz_offset_min)
 
 
 def resets_at(user_id: str) -> datetime:
     """When this learner's day rolls over, as a UTC instant.
 
-    The same boundary the refill above uses, looked up by user id --
-    which is what a daily cap somewhere else in the app (the OCR limit,
-    the comprehension ceiling) needs in order to say WHEN an allowance
-    comes back. Lives here rather than in either route because both
-    would otherwise carry the same four lines, and because the offset
-    and the day rule are this module's business.
+    The learner's midnight, looked up by user id -- which is what a
+    daily cap somewhere else in the app (the OCR limit, the
+    comprehension ceiling) needs in order to say WHEN an allowance
+    comes back. The credits' own refill used to land on the same
+    boundary and no longer does (plan 141), but the offset and the day
+    rule are still this module's business, and every one of those caps
+    would otherwise carry the same four lines.
 
     Falls back to UTC for a learner with no profile row or no reported
     offset, exactly as local_today does."""
@@ -152,9 +188,45 @@ def resets_at(user_id: str) -> datetime:
                 (user_id,),
             )
             row = cur.fetchone()
-        return next_refill_at(row[0] if row else None)
+        return next_midnight(row[0] if row else None)
     finally:
         conn.close()
+
+
+# ── 補充 — the refill's clock (plan 141) ───────────────────────
+# Pure arithmetic, apart from the rows: what has landed by `now` on a
+# clock, and when the next credit and a full tank come. Kept free of
+# the database so the rule the module docstring states is the whole of
+# what these do, and so the tests can put a clock anywhere.
+
+def accrual(balance: int, clock: datetime, now: datetime) -> tuple[int, datetime]:
+    """(credits landed, the clock after taking them).
+
+    One credit per whole REFILL_EVERY since `clock`, at most the room
+    under CAP. While the balance holds CAP or more nothing lands and
+    the clock is not read at all -- spend() restarts it when a fare
+    takes the balance back under. A tank the credits fill is full: its
+    clock moves to `now`, and the minutes past the last credit that
+    fitted are dropped rather than banked. Otherwise the clock moves on
+    by exactly the credits taken, keeping the minutes towards the next.
+    """
+    room = CAP - balance
+    if room <= 0 or clock >= now:
+        return 0, clock
+    landed = (now - clock) // REFILL_EVERY
+    if landed >= room:
+        return room, now
+    return landed, clock + landed * REFILL_EVERY
+
+
+def schedule(balance: int, pending: int, clock: datetime) -> tuple[datetime | None, datetime | None]:
+    """(the next credit, the tank full) as instants -- both None when
+    nothing more is coming. `clock` is the one after `pending` was
+    taken off it (accrual's second value)."""
+    room = CAP - balance - pending
+    if room <= 0:
+        return None, None
+    return clock + REFILL_EVERY, clock + room * REFILL_EVERY
 
 
 # ── The cache ─────────────────────────────────────────────────
@@ -194,14 +266,20 @@ def forget(user_id: str) -> None:
 
 def _profile_bits(cur, user_id: str) -> dict:
     cur.execute(
-        "SELECT plan, plan_until, credits_refilled_on, tz_offset_min "
+        "SELECT plan, plan_until, credits_accrued_at, credits_refilled_on, tz_offset_min "
         "FROM user_profiles WHERE user_id = %s",
         (user_id,),
     )
     row = cur.fetchone()
     if row is None:
-        return {"plan": "free", "plan_until": None, "refilled_on": None, "tz": None, "exists": False}
-    return {"plan": row[0] or "free", "plan_until": row[1], "refilled_on": row[2], "tz": row[3], "exists": True}
+        return {"plan": "free", "plan_until": None, "clock": None, "refilled_on": None,
+                "tz": None, "exists": False}
+    # In UTC whatever the connection's TimeZone: the instants built on
+    # it go out as ISO strings, and the client reads them as the same
+    # moment either way, but one zone keeps them comparable at a glance.
+    clock = row[2].astimezone(timezone.utc) if row[2] else None
+    return {"plan": row[0] or "free", "plan_until": row[1], "clock": clock,
+            "refilled_on": row[3], "tz": row[4], "exists": True}
 
 
 def _ledger_sum(cur, user_id: str) -> int | None:
@@ -218,16 +296,36 @@ def _is_pass(bits: dict, now: datetime) -> bool:
     return until is None or until > now
 
 
-def _claim_day(cur, user_id: str, today: date) -> bool:
-    """Mark today's refill as taken, once: the conditional UPDATE is the
-    lock, so two workers refilling the same learner at once cannot both
-    insert. True for the one that won."""
+def _move_clock(cur, user_id: str, seen: datetime | None, to: datetime) -> bool:
+    """Move the refill's clock from where this transaction SAW it to
+    `to`, once: the conditional UPDATE is the lock, so two workers
+    settling the same learner at once cannot both pay out the same
+    credits (or both welcome the same account). A loser's UPDATE waits
+    on the winner's row lock, then finds the clock moved and matches
+    nothing. True for the one that won."""
     cur.execute(
-        "UPDATE user_profiles SET credits_refilled_on = %s "
-        "WHERE user_id = %s AND (credits_refilled_on IS NULL OR credits_refilled_on < %s)",
-        (today, user_id, today),
+        "UPDATE user_profiles SET credits_accrued_at = %s "
+        "WHERE user_id = %s AND credits_accrued_at IS NOT DISTINCT FROM %s",
+        (to, user_id, seen),
     )
     return cur.rowcount == 1
+
+
+def _clock_start(bits: dict, now: datetime) -> datetime:
+    """Where a clock that has never run starts.
+
+    An account from before the refill filled through the day took its
+    last one in one go, on the local day credits_refilled_on records.
+    Its clock starts at the midnight after that day -- when the next
+    lump would have landed -- so a learner away since is owed what the
+    old rule would have paid them, landed the new way (and capped the
+    same). Never later than now: a learner refilled this very day
+    starts filling from the deploy rather than waiting out a midnight
+    that no longer means anything. Everyone else starts now."""
+    day = bits["refilled_on"]
+    if day is None:
+        return now
+    return min(_midnight_starting(day + timedelta(days=1), bits["tz"]), now)
 
 
 def _insert(cur, user_id: str, delta: int, reason: str, ref: str | None) -> None:
@@ -238,45 +336,75 @@ def _insert(cur, user_id: str, delta: int, reason: str, ref: str | None) -> None
     )
 
 
-def _settle(cur, user_id: str, now: datetime) -> dict:
-    """Read the learner's state, seeding a new account and taking the
-    day's refill if it is due. Returns {balance, unlimited, plan, tz,
-    refilled_on}; the caller commits."""
+def _settle(cur, user_id: str, now: datetime, claim: bool = False) -> dict:
+    """Read the learner's state, seeding a new account and starting a
+    clock that has never run. With `claim`, what the refill has landed
+    is written to the ledger as well; without it, it is only counted.
+    Returns {balance, pending, claimed, clock, unlimited, plan, tz};
+    `clock` is the one after `pending` was taken off it, so schedule()
+    reads the next credit off it either way. The caller commits."""
     bits = _profile_bits(cur, user_id)
     if not bits["exists"]:
         # A first read before any profile row (a brand-new sign-in that
         # has not reached the onboarding yet): the row is the seat the
-        # refill day sits on, so it is made here, the same way
+        # refill's clock sits on, so it is made here, the same way
         # routes/profile.py makes it lazily for every other reader.
         from routes.profile import ensure_profile_row
         ensure_profile_row(user_id)
         bits = _profile_bits(cur, user_id)
 
     unlimited = _is_pass(bits, now)
-    total = _ledger_sum(cur, user_id)
-    today = local_today(bits["tz"], now)
+    claimed = 0
+    # Twice at most: a race lost on the clock is re-read once, and the
+    # second read finds the winner's rows committed (READ COMMITTED --
+    # the lost UPDATE waited for them).
+    for _attempt in range(2):
+        total = _ledger_sum(cur, user_id)
+        clock = bits["clock"]
+        if total is None:
+            # A new account is welcomed with SIGNUP_BONUS, and its clock
+            # starts with it -- idle while the welcome holds the balance
+            # over CAP. `total is None` means an empty ledger, so this
+            # is once per account; the clock's lock keeps two workers
+            # racing a first read from welcoming the same learner twice.
+            if _move_clock(cur, user_id, clock, now):
+                _insert(cur, user_id, SIGNUP_BONUS, "grant", "welcome")
+                total, clock = SIGNUP_BONUS, now
+            else:
+                bits = _profile_bits(cur, user_id)
+                continue
+        elif clock is None:
+            start = _clock_start(bits, now)
+            if not _move_clock(cur, user_id, None, start):
+                bits = _profile_bits(cur, user_id)
+                continue
+            clock = start
 
-    if total is None:
-        # A new account is welcomed with SIGNUP_BONUS, and that grant IS
-        # today's refill: the day is claimed alongside it, so the first
-        # day does not also pay out DAILY_REFILL on the next read.
-        # `total is None` means an empty ledger, so this is once per
-        # account; _claim_day is the lock that keeps two workers racing
-        # a first read from welcoming the same learner twice.
-        if _claim_day(cur, user_id, today):
-            _insert(cur, user_id, SIGNUP_BONUS, "grant", "welcome")
-            bits["refilled_on"] = today
+        pending, after = (0, clock) if unlimited else accrual(total, clock, now)
+        if claim and pending > 0:
+            if not _move_clock(cur, user_id, clock, after):
+                bits = _profile_bits(cur, user_id)
+                continue
+            _insert(cur, user_id, pending, "refill", None)
+            total += pending
+            claimed, pending = pending, 0
+        break
+    else:
+        # Lost twice in a row: someone else is settling this learner
+        # right now. Their rows are the truth; count, and claim nothing.
         total = _ledger_sum(cur, user_id) or 0
-    elif not unlimited and (bits["refilled_on"] is None or bits["refilled_on"] < today):
-        added = max(0, min(DAILY_REFILL, CAP - total))
-        if _claim_day(cur, user_id, today):
-            bits["refilled_on"] = today
-            if added > 0:
-                _insert(cur, user_id, added, "refill", today.isoformat())
-                total += added
+        pending, after = 0, bits["clock"] or now
 
-    return {"balance": total, "unlimited": unlimited, "plan": "pass" if unlimited else "free",
-            "tz": bits["tz"], "refilled_on": bits["refilled_on"]}
+    return {"balance": total, "pending": pending, "claimed": claimed, "clock": after,
+            "unlimited": unlimited, "plan": "pass" if unlimited else "free", "tz": bits["tz"]}
+
+
+def _restart_if_under_cap(cur, user_id: str, s: dict, after: int, now: datetime) -> None:
+    """A balance that held CAP or more has just gone under it: the
+    refill's clock starts now, not from whenever it last moved -- the
+    hours the tank sat full are not owed to anybody."""
+    if s["balance"] >= CAP > after:
+        _move_clock(cur, user_id, s["clock"], now)
 
 
 def _state(user_id: str, fresh: bool = False) -> dict:
@@ -329,15 +457,23 @@ def cost_of(source_or_mode: str | None) -> int:
 
 # ── The public surface ────────────────────────────────────────
 
-def summary(user_id: str) -> dict:
-    """GET /api/credits — and what /api/today prints beside the fare."""
-    s = _state(user_id)
+def _iso(at: datetime | None) -> str | None:
+    return at.isoformat() if at else None
+
+
+def _summary_of(s: dict) -> dict:
+    next_at, full_at = (None, None) if s["unlimited"] else schedule(s["balance"], s["pending"], s["clock"])
     return {
         "balance": None if s["unlimited"] else s["balance"],
+        # 補充 — landed since the last claim and not yet in the balance
+        # (plan 141): what the "while you were away" sheet offers.
+        "pending": 0 if s["unlimited"] else s["pending"],
         "cap": CAP,
         "dailyRefill": DAILY_REFILL,
+        "refillEvery": int(REFILL_EVERY.total_seconds()),
+        "nextCreditAt": _iso(next_at),
+        "fullAt": _iso(full_at),
         "signupBonus": SIGNUP_BONUS,
-        "refillAt": next_refill_at(s["tz"]).isoformat(),
         "plan": s["plan"],
         "unlimited": s["unlimited"],
         "enforced": ENFORCE,
@@ -349,18 +485,45 @@ def summary(user_id: str) -> dict:
     }
 
 
+def summary(user_id: str) -> dict:
+    """GET /api/credits — and what /api/today prints beside the fare.
+    Counts what the refill has landed without claiming it."""
+    return _summary_of(_state(user_id))
+
+
+def claim(user_id: str) -> dict:
+    """POST /api/credits/claim — what the refill has landed, written to
+    the ledger: the summary after it, and `claimed`, the credits this
+    call moved (0 when another worker, or a fare, got there first)."""
+    from core.db import db_conn
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            s = _settle(cur, user_id, datetime.now(timezone.utc), claim=True)
+        conn.commit()
+    except Exception:
+        conn.rollback()
+        raise
+    finally:
+        conn.close()
+    forget(user_id)
+    return {**_summary_of(s), "claimed": s["claimed"]}
+
+
 def entitlement(user_id: str) -> str:
     return _state(user_id)["plan"]
 
 
 def balance(user_id: str) -> int | None:
-    """The balance, or None on a pass (nothing to count)."""
+    """What a fare can draw on, or None on a pass (nothing to count):
+    the balance AND what the refill has landed unclaimed, because
+    spend() claims that before it charges."""
     s = _state(user_id)
-    return None if s["unlimited"] else s["balance"]
+    return None if s["unlimited"] else s["balance"] + s["pending"]
 
 
-def refill_if_due(user_id: str) -> dict:
-    """Settle now, bypassing the cache — the boot-time call and the tests."""
+def read_fresh(user_id: str) -> dict:
+    """The state, bypassing the cache — the tests. Claims nothing."""
     return _state(user_id, fresh=True)
 
 
@@ -368,9 +531,11 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     """Charge n credits for a review the scheduler has already accepted.
 
     Never called before srs.review() returns: a rejected review is not a
-    fare. On a pass, nothing is written. In shadow mode a fare the
-    balance cannot cover records what there is (never below zero) and
-    logs it; under enforcement it raises OutOfCredits and writes nothing.
+    fare. What the refill has landed is claimed first, so a credit
+    waiting on the "while you were away" sheet is never a refusal. On a
+    pass, nothing is written. In shadow mode a fare the balance cannot
+    cover records what there is (never below zero) and logs it; under
+    enforcement it raises OutOfCredits and writes nothing.
     Returns {balance, unlimited} for the response.
     """
     if n <= 0:
@@ -381,7 +546,7 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
     try:
         with conn.cursor() as cur:
             now = datetime.now(timezone.utc)
-            s = _settle(cur, user_id, now)
+            s = _settle(cur, user_id, now, claim=True)
             if s["unlimited"]:
                 conn.commit()
                 forget(user_id)
@@ -391,7 +556,8 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
                 if ENFORCE:
                     conn.rollback()
                     forget(user_id)
-                    raise OutOfCredits(have, next_refill_at(s["tz"], now).isoformat())
+                    next_at, _full = schedule(have, 0, s["clock"])
+                    raise OutOfCredits(have, _iso(next_at))
                 logger.info("credits: would have blocked user_id=%s balance=%d fare=%d ref=%s",
                             user_id, have, n, ref)
                 # ...and again where it can be counted. That log line
@@ -410,6 +576,7 @@ def spend(user_id: str, n: int = COST_PER_REVIEW, ref: str | None = None) -> dic
             if charge > 0:
                 _insert(cur, user_id, -charge, "review", ref)
             new_balance = have - charge
+            _restart_if_under_cap(cur, user_id, s, new_balance, now)
         conn.commit()
     except Exception:
         conn.rollback()
@@ -427,9 +594,11 @@ def grant(user_id: str, n: int, ref: str | None = None) -> int:
     conn = db_conn()
     try:
         with conn.cursor() as cur:
-            _settle(cur, user_id, datetime.now(timezone.utc))
+            now = datetime.now(timezone.utc)
+            s = _settle(cur, user_id, now, claim=True)
             _insert(cur, user_id, n, "grant", ref)
             total = _ledger_sum(cur, user_id) or 0
+            _restart_if_under_cap(cur, user_id, s, total, now)
         conn.commit()
     except Exception:
         conn.rollback()

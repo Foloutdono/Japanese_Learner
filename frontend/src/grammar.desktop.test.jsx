@@ -18,7 +18,7 @@ vi.mock('./lib/audio', async o => ({
 }))
 vi.mock('./stores/credits', async o => ({
   ...(await o()),
-  useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+  useCredits: () => ({ balance: 24, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
 vi.mock('./lib/reviews', () => ({ postReview: vi.fn(async () => ({})), staleCards: vi.fn(async () => []) }))
 const apiFetch = vi.hoisted(() => vi.fn())

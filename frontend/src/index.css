@@ -4489,6 +4489,31 @@ textarea:focus-visible {
   overflow: hidden;
 }
 .balance__fill { display: block; height: 100%; background: var(--accent2); }
+/* 補充 — the claim sheet's 回数券 book (plan 141, the owner's pick C):
+   the cap as a stub a credit, ten to a row. What the balance already
+   held in a pale metal, what the refill landed while the app was closed
+   in the pass's full gold, the room still to fill as dashed outlines.
+   The new stubs fill in one after another, as the list stagger does
+   (DESIGN.md, Motion): 30ms apart, capped at the eighth. Opacity only,
+   which is already the reduced-motion answer. components/credits/
+   ClaimSheet.jsx. */
+.claim-book {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--sp-1);
+}
+.claim-book__stub {
+  height: var(--sp-6);
+  box-sizing: border-box;
+  border-radius: var(--r-plate);
+}
+.claim-book__stub--held { background: color-mix(in srgb, var(--accent2) 30%, var(--surface)); }
+.claim-book__stub--new {
+  background: var(--accent2);
+  animation: arrive-soft 0.3s ease both;
+  animation-delay: calc(min(var(--i, 0), 8) * 30ms);
+}
+.claim-book__stub--room { border: 1px dashed var(--surface-line); }
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -23935,9 +23960,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      the desk draws the pass's objects everywhere else, instead of 640px
      in the window's middle a long reach from the pass that opened them.
      Still modal; only placed. Opened from a run's pass, where there is
-     no rail, they stay centred. */
+     no rail, they stay centred. The claim sheet (plan 141) carries the
+     balance too but nothing on the rail opened it -- it arrives on its
+     own, over whatever screen the learner came back to -- so it is not
+     one of the pass's doors, and keeps the middle (below). */
   :root[data-chrome="shell"] .status-sheet,
-  :root[data-chrome="shell"] .sheet:has(> .balance) {
+  :root[data-chrome="shell"] .sheet:has(> .balance):not(.claim-sheet) {
     inset: auto auto var(--sp-5) calc(var(--desk-rail-w) + var(--sp-3));
     width: var(--desk-side-w);
     margin: 0;
@@ -23945,6 +23973,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* At a column's width a row of two actions wraps their labels: they
      stack, as they do at a phone's, which this width is. */
   :root[data-chrome="shell"] .sheet:has(> .balance) > :is(.btn-primary, .btn-secondary, .btn-depart) { flex-basis: 100%; }
+  /* 補充 — the claim sheet in the window's middle, at a column's width:
+     the 回数券 book is drawn for a phone's (a stub is a thumb's width
+     across), and at the dialog's full --card-w it spread into fifty
+     flat bars with the figure a long way from its button. */
+  .claim-sheet { width: var(--desk-side-w); }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,
      scrim and arrival. Centred by auto margins, which fall to nothing

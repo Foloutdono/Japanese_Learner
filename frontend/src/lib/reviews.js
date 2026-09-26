@@ -28,7 +28,7 @@ export async function postReview(path, session, body, { cleared = 0 } = {}) {
     return res
   } catch (e) {
     if (e instanceof ApiError && e.code === 'out_of_credits') {
-      markRunOut({ balance: e.body?.balance ?? 0, refillAt: e.body?.refillAt ?? null, cleared })
+      markRunOut({ balance: e.body?.balance ?? 0, nextCreditAt: e.body?.nextCreditAt ?? null, cleared })
     }
     throw e
   }

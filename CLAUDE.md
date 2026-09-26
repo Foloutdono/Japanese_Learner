@@ -626,7 +626,27 @@ runtime purpose. Two consequences worth knowing:
   `PassStep.jsx`, `countUp.js`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
   `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
   机 section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **141** or higher, and check
+  **141** is 補充, the refill filling through the day (numbered 141
+  because 139 went to Settings and 140 to the desk's first contact while
+  it was open): the free pass's thirty credits a day no longer land in
+  one go at the learner's midnight but one every 48 minutes (`REFILL_EVERY`), counted from
+  `user_profiles.credits_accrued_at`, never past the cap, a full tank
+  banking nothing; what has landed is `pending` until claimed (`POST
+  /api/credits/claim`, one `refill` row), and a fare claims it first so
+  it is never a refusal; the app opens a "while you were away" sheet on
+  arrival -- boot, or back in front after `AWAY_MS` out of sight -- with
+  the credits, the 回数券 book (the cap as a stub a credit: held, landed,
+  room; the owner's pick C of four drawn directions) and a Claim
+  button, centred on the desk at a column's width rather than at the
+  rail's foot, and claims quietly as each credit lands while it is
+  open (cited in `core/credits.py`,
+  `routes/credits.py`, `routes/profile.py`, `srs/data_structure.sql`,
+  `tests/test_credits.py`, `stores/credits.js`, `hooks/useRefill.js`,
+  `components/credits/ClaimSheet.jsx`, `domain/credits.js`, the balance
+  sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
+  `PassStep.jsx`, `App.jsx`, `index.css`, `src/claim.desktop.test.jsx`
+  and `docs/design/desk/README.md`).
+  When starting a new wave, begin at **142** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

@@ -208,7 +208,7 @@ app.include_router(station_router)
 @app.exception_handler(OutOfCredits)
 async def _out_of_credits(request, exc: OutOfCredits):
     return JSONResponse(status_code=402, content={
-        "detail": "out_of_credits", "balance": exc.balance, "refillAt": exc.refill_at,
+        "detail": "out_of_credits", "balance": exc.balance, "nextCreditAt": exc.next_credit_at,
     })
 
 

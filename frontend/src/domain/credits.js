@@ -1,8 +1,13 @@
 // ── 回数券 — the economy, as the client knows it (plan 069) ────
 // The figures mirror backend/core/credits.py so copy can print them
-// before the API has answered ("+30 at 00:00", "7 decks"); the server
-// is the truth for the balance itself.
+// before the API has answered ("+1 every 48 min", "7 decks"); the
+// server is the truth for the balance itself.
 export const DAILY_REFILL = 30
+// 補充 — the refill fills through the day (plan 141): one credit every
+// 48 minutes, the day's thirty spread over it, up to CAP. What has
+// landed waits to be claimed (`pending`); see stores/credits.js and
+// components/credits/ClaimSheet.jsx.
+export const REFILL_EVERY_MIN = (24 * 60) / DAILY_REFILL
 export const CAP = 50
 // 開通祝い — what a new account is handed on its first read, once. Well
 // above CAP on purpose: the cap bounds the daily REFILL, not what a
@@ -32,15 +37,33 @@ export const PASS_CARDS = 10000
 export const HAS_STORE = false
 
 /**
- * "00:00" -- the hour the next refill lands, on the learner's clock and
- * in their language's format; midnight when the server named none. One
- * helper for every place that prints it (the gate, the balance sheet, the
- * pass's balance line and the rail's pass), which had a copy each.
+ * "00:00" -- an instant the server named, as an hour on the learner's
+ * clock in their language's format; midnight when it named none. One
+ * helper for every place that prints one (the gate, the balance sheet,
+ * the pass's balance line, the rail's pass, the asking's allowance),
+ * which had a copy each.
  */
 export function refillClock(iso, lang) {
   const d = iso ? new Date(iso) : null
   if (!d || !Number.isFinite(d.getTime())) return '00:00'
   return new Intl.DateTimeFormat(lang, { hour: '2-digit', minute: '2-digit' }).format(d)
+}
+
+/** Minutes between two credits: the server's figure, the constant until it has answered. */
+export function refillMinutes(credits) {
+  const s = credits?.refillEvery
+  return Number.isFinite(s) && s > 0 ? Math.round(s / 60) : REFILL_EVERY_MIN
+}
+
+/**
+ * The hour the next credit lands, or null when none is coming -- a
+ * pass, a full tank, a welcome still over the cap. The places that
+ * used to print "+30 at 00:00" print "+1 at 14:32" from this, and
+ * nothing at all rather than an hour that is not true.
+ */
+export function nextCreditClock(credits, lang) {
+  if (!credits || credits.unlimited || !credits.nextCreditAt) return null
+  return refillClock(credits.nextCreditAt, lang)
 }
 
 /**
