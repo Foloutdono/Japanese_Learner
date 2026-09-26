@@ -815,7 +815,7 @@ const Fixture = () => (
         </div>
       </article>
     </aside>
-    {/* ── 文法 — the lesson in its sheet (plan 144) ──
+    {/* ── 文法 — the lesson in its sheet (plan 145) ──
         Its own shell, under 文法's pine: the Japanese picked out of the
         prose and a use's forms in the lesson's ink (--dict-ink, named on
         .gl too), a form's gloss and a paradigm's label in the secondary

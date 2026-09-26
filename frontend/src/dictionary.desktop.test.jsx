@@ -476,7 +476,7 @@ describe('the grammar page (plan 128)', () => {
     expect(getComputedStyle(document.querySelector('.dict-dock .records')).gridTemplateColumns.split(' ')).toHaveLength(4)
   })
 
-  // Plan 144: two columns where two fit (dictionary.wide), and here,
+  // Plan 145: two columns where two fit (dictionary.wide), and here,
   // where they do not, the one the phone reads -- the steps, then the
   // sentences under their hairline, then the rivals, each the body's
   // width. The rule that divides the two columns is clipped at the

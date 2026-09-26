@@ -7,7 +7,7 @@ import { useDialog } from '../../hooks/useDialog'
 import { ChevronIcon } from '../ui/Icons'
 import { ExampleSentence } from '../dictionary/ExampleSentence'
 import { StageMark } from './StageMark'
-import { inline, useLine, SHORT_RUN } from './lessonText'
+import { inline, readUse, SHORT_RUN } from './lessonText'
 
 // ── 文法 — a grammar point, taught (plan 087) ───────────────────
 // One lesson, printed in three places: before a NEW card in a run
@@ -43,7 +43,7 @@ const STEP_KEY = { rule: 'glRule', use: 'glUse', careful: 'glCareful' }
 // delimiter (**…**) for emphasis -- the same, and the only, markup the
 // locale tables carry -- and the Japanese in the prose set as Japanese
 // and never cut (lessonText.inline). A use that names its forms prints
-// them under it (plan 144): "Pour poser ce dont on parle : わたしは,
+// them under it (plan 145): "Pour poser ce dont on parle : わたしは,
 // 今日は" is the description over the two forms, whole, in the lesson's
 // ink; a paradigm (Négatif : …. Passé : ….) is its labels beside its
 // forms. A line that reads neither way is printed as it came.
@@ -90,7 +90,7 @@ function Forms({ forms }) {
 }
 
 function UseItem({ text }) {
-  const shape = useLine(text)
+  const shape = readUse(text)
   if (shape?.table) {
     return (
       <li className="gl-use">

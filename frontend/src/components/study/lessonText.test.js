@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest'
 import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
-import { inline, useLine, prepare } from './lessonText'
+import { inline, readUse, prepare } from './lessonText'
 
-// ── 文法 — a lesson's text, read for its shape (plan 144) ───────────
+// ── 文法 — a lesson's text, read for its shape (plan 145) ───────────
 // What a reader meets: the Japanese in the prose marked (and a formula
 // kept whole), French punctuation and a sentence's opening term welded
 // to their words, a use line as its saying over its forms, a paradigm
@@ -36,28 +36,28 @@ describe('inline', () => {
   })
 })
 
-describe('useLine', () => {
+describe('readUse', () => {
   it('reads "saying : forms" in either language', () => {
-    expect(useLine('Pour poser ce dont on parle : わたしは, 今日は, この本は.')).toEqual({
+    expect(readUse('Pour poser ce dont on parle : わたしは, 今日は, この本は.')).toEqual({
       say: 'Pour poser ce dont on parle',
       forms: [{ ja: 'わたしは', gloss: null }, { ja: '今日は', gloss: null }, { ja: 'この本は', gloss: null }],
     })
-    expect(useLine('Company: 父と行きます (with my father).')).toEqual({
+    expect(readUse('Company: 父と行きます (with my father).')).toEqual({
       say: 'Company', forms: [{ ja: '父と行きます', gloss: 'with my father' }],
     })
   })
 
   it('keeps a comma inside a gloss, and reads "ou" and a slash as separators', () => {
-    expect(useLine('Others of the family: いただく (eat, receive), うかがう (visit, ask).').forms).toEqual([
+    expect(readUse('Others of the family: いただく (eat, receive), うかがう (visit, ask).').forms).toEqual([
       { ja: 'いただく', gloss: 'eat, receive' }, { ja: 'うかがう', gloss: 'visit, ask' },
     ])
-    expect(useLine('Équivalent parlé : か, ou それか／それとも.').forms.map(f => f.ja)).toEqual(['か', 'それか／それとも'])
-    expect(useLine('Negative: 大きくないです / きれいではありません.').forms.map(f => f.ja))
+    expect(readUse('Équivalent parlé : か, ou それか／それとも.').forms.map(f => f.ja)).toEqual(['か', 'それか／それとも'])
+    expect(readUse('Negative: 大きくないです / きれいではありません.').forms.map(f => f.ja))
       .toEqual(['大きくないです', 'きれいではありません'])
   })
 
   it('reads a paradigm as labels beside forms', () => {
-    expect(useLine("Négatif : ではありません (à l'oral じゃありません). Passé : でした. Passé négatif : ではありませんでした.")).toEqual({
+    expect(readUse("Négatif : ではありません (à l'oral じゃありません). Passé : でした. Passé négatif : ではありませんでした.")).toEqual({
       table: [
         { label: 'Négatif', forms: [{ ja: 'ではありません', gloss: "à l'oral じゃありません" }] },
         { label: 'Passé', forms: [{ ja: 'でした', gloss: null }] },
@@ -67,15 +67,15 @@ describe('useLine', () => {
   })
 
   it('never splits at a colon inside a gloss', () => {
-    expect(useLine('Negative: ではありません (spoken: じゃありません). Past: でした.').table.map(r => r.label))
+    expect(readUse('Negative: ではありません (spoken: じゃありません). Past: でした.').table.map(r => r.label))
       .toEqual(['Negative', 'Past'])
   })
 
   it('leaves a line that reads neither way as prose', () => {
-    expect(useLine('Essais.')).toBeNull()
-    expect(useLine('Often with どうも, やや, 少し.')).toBeNull()
-    expect(useLine('食べる, 飲む, 読む : la chose mangée, bue, lue… prend を.')).toBeNull()
-    expect(useLine('Négatif : ce que dit la phrase.')).toBeNull()
+    expect(readUse('Essais.')).toBeNull()
+    expect(readUse('Often with どうも, やや, 少し.')).toBeNull()
+    expect(readUse('食べる, 飲む, 読む : la chose mangée, bue, lue… prend を.')).toBeNull()
+    expect(readUse('Négatif : ce que dit la phrase.')).toBeNull()
   })
 })
 
@@ -98,7 +98,7 @@ describe('the catalogue', () => {
     let shaped = 0
     const lost = []
     for (const line of lines) {
-      const shape = useLine(line)
+      const shape = readUse(line)
       if (!shape) continue
       shaped++
       const rows = shape.table ?? [{ label: shape.say, forms: shape.forms }]

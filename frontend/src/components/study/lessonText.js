@@ -1,4 +1,4 @@
-// ── 文法 — a lesson's text, read for its shape (plan 144) ───────────
+// ── 文法 — a lesson's text, read for its shape (plan 145) ───────────
 // The catalogue writes a lesson as French or English prose with the
 // Japanese inline (content/grammar/*.json): "Pour poser ce dont on
 // parle : わたしは, 今日は, この本は." Printed as it comes, the browser
@@ -12,10 +12,10 @@
 //   locale tables also use, and Japanese runs, marked so the screen
 //   can set them as Japanese and never cut a word. A run takes a
 //   placeholder beside it along (A は B です is one formula).
-// - a use (`useLine`): nine use lines in ten are a description, a
+// - a use (`readUse`): nine use lines in ten are a description, a
 //   colon, and the forms that illustrate it. That becomes the
 //   description over the forms, each form whole, its gloss beside it.
-// - a paradigm (`useLine`'s `table`): a line made of "Label : form."
+// - a paradigm (`readUse`'s `table`): a line made of "Label : form."
 //   sentences (Négatif : …. Passé : ….) becomes label beside form.
 //
 // Anything that does not parse cleanly is printed as prose: a line is
@@ -109,7 +109,7 @@ function splitAtLastColon(line) {
  * for a paradigm of two or more "Label : forms." sentences, or null to
  * print the line as prose.
  */
-export function useLine(line) {
+export function readUse(line) {
   const text = String(line ?? '').trim()
   const sentences = text.split(/(?<=\.)\s+(?=\S)/)
   if (sentences.length > 1) {

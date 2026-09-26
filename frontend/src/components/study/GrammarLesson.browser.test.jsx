@@ -135,7 +135,7 @@ describe('the grammar lesson', () => {
     expect(plate.querySelector('[aria-label="Close"]')).toBeTruthy()
   })
 
-  // Plan 144, the owner's pick B: the lesson read for its shape
+  // Plan 145, the owner's pick B: the lesson read for its shape
   // (lessonText). A use that names its forms prints them under it, in
   // Japanese and whole; a paradigm is its labels beside its forms; the
   // sentences are numbered, and one in another register than a

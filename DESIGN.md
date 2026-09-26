@@ -542,7 +542,7 @@ where the door leads. Each block carries its name as an
 row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
 ink, because raw 山吹 reads 2.9:1 on light paper.
 
-**A grammar lesson reads for its shape** (plan 144, the owner's pick B
+**A grammar lesson reads for its shape** (plan 145, the owner's pick B
 of three drawn directions). The lesson prints in four places (the
 dictionary's plate body, the sheet behind a card, the gate before a new
 card, the grammar station on the desk) and is one component in all of
@@ -1097,7 +1097,7 @@ as the rail it arrives at.
   `--desk-entry-w`, its plate laid left with the marks beside the pattern
   (over it, for a pattern of seven characters or more), the record flush
   under the stripe and the lesson in two columns where each holds
-  `--desk-run-col-min`, each column its own (plan 144): the rule, its
+  `--desk-run-col-min`, each column its own (plan 145): the rule, its
   uses and its trap down the left, the sentences over the rivals down
   the right — never one flow balanced across the two, which opened the
   sentences at the left column's foot. The kana charts show the whole syllabary at once:
