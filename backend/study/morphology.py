@@ -214,6 +214,21 @@ def _clean_lemma(raw: str, fallback: str) -> str:
     return raw.split("-", 1)[0] or fallback
 
 
+_DEMONSTRATIVES = frozenset({"この", "その", "あの", "どの"})
+
+
+def _demonstratives(morphemes: list[Morpheme]) -> None:
+    """UniDic tags a sentence's first あの as the interjection "um"
+    even before a noun: あの店に行った, あの人はだれですか, あの高い山.
+    Before a noun, or an adjective on one, it is the demonstrative,
+    whatever opens the sentence -- the "um" is set off (あの、すみません)
+    or goes before a verb (あのすみません) (plan 151)."""
+    for m, nxt in zip(morphemes, morphemes[1:]):
+        if (m.pos == "interjection" and m.surface in _DEMONSTRATIVES
+                and nxt.pos in ("noun", "pronoun", "prefix", "suffix", "other", "adjective", "adnominal")):
+            m.pos = "adnominal"
+
+
 def tokenize(text: str) -> list[Morpheme] | None:
     """Full-sentence tokenization, or None if the analyzer isn't
     available (see MORPHOLOGY_AVAILABLE) or this specific call failed.
@@ -258,6 +273,7 @@ def tokenize(text: str) -> list[Morpheme] | None:
                 cform=_conjugation(getattr(feat, "cForm", None)),
                 goshu=_conjugation(getattr(feat, "goshu", None)),
             ))
+        _demonstratives(morphemes)
         return morphemes
     except Exception:  # pragma: no cover - defensive only
         logger.warning("morphology.tokenize failed on input; caller should fall back", exc_info=True)

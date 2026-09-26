@@ -134,10 +134,93 @@ class ThePagesSpellingTests(unittest.TestCase):
         for sentence, word, expected in (
             ("眼が痛い。", "眼", "vocab_N5_目_め"),
             ("競り合ったお陰で、彼が勝った。", "お陰", "vocab_N1_お蔭_おかげ"),
-            ("私は頭に一滴の雨を感じた。", "滴", "vocab_N1_雫_しずく"),
         ):
             with self.subTest(word=word):
                 self.assertEqual(matches(sentence)[word]["raw_id"], expected)
+        # 一滴 is read いってき: the 滴 of a count, not 雫, "a drop" (plan 151).
+        self.assertIn("counter", matches("私は頭に一滴の雨を感じた。")["滴"]["entry"]["meaning"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class ReadOtherwiseTests(unittest.TestCase):
+    """Plan 151. A card whose reading is not the page's: 彼ら's ら took 等,
+    "et cetera"; 入るなり's なり took 哉, "question mark"; 一社's 社 took
+    社 read やしろ, "Shinto shrine". A reading is the word, so a token read
+    otherwise has no card from it -- unless it is the same reading voiced
+    (箱 in ゴミ箱 is はこ said ばこ), or a number read its own way."""
+
+    def test_no_card_for_a_token_read_otherwise(self) -> None:
+        for sentence, word, false_id in (
+            ("悪い天気のもとで、彼らは働き続けた。", "ら", "vocab_N1_等_とう"),
+            ("彼は部屋に入るなり、窓を大きく開けた。", "なり", "vocab_N1_哉_や"),
+            ("花を三本ずつ買いました。", "ずつ", "vocab_N1_宛_あて"),
+            ("問題は一社にとどまらず、業界全体のものだ。", "社", "vocab_N1_社_やしろ"),
+            ("この漢字はおぼえにくいです。", "にくい", "vocab_N1_難い_かたい"),
+            ("冬は病気になりがちだ。", "がち", "vocab_N3_勝ち_かち"),
+            ("彼は悲しげな顔で立っていた。", "げ", "vocab_N4_気_き"),
+        ):
+            with self.subTest(word=word):
+                found = matches(sentence).get(word)
+                self.assertTrue(found is None or found["raw_id"] != false_id)
+        self.assertIn("company", matches("問題は一社にとどまらず、業界全体のものだ。")["社"]["entry"]["meaning"])
+
+    def test_the_same_reading_voiced_keeps_its_card(self) -> None:
+        self.assertEqual(matches("本棚に本がある。")["本棚"]["raw_id"], "vocab_N5_本棚_ほんだな")
+        self.assertEqual(matches("二人で行きました。")["二人"]["raw_id"], "vocab_N5_二人_ふたり")
+
+    def test_a_counter_the_counters_point_lights_is_no_noun(self) -> None:
+        """三本's 本 is no "book": the counters' point lights it. A card
+        that is the counter itself (冊) stays."""
+        self.assertNotIn("本", matches("花を三本ずつ買いました。"))
+        self.assertEqual(matches("本を読む。")["本"]["raw_id"], "vocab_N5_本_ほん")
+        self.assertIn("counter", matches("本を二冊買った。")["冊"]["entry"]["meaning"])
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class AffixTests(unittest.TestCase):
+    """Plan 151. A suffix read as the page reads it is no longer glossed
+    as the noun it is spelled like: 者 read しゃ is not 者 read もの."""
+
+    def test_a_word_forming_suffix_folds_into_its_word(self) -> None:
+        for sentence, word, meaning in (
+            ("参加者は十人にすぎなかった。", "参加者", "participant"),
+            ("その政治家は批判を口にしてはばからない。", "政治家", "politician"),
+            ("彼女は化粧水をつけている。", "化粧水", "lotion"),
+            ("伝染病が発生した。", "伝染病", "disease"),
+            ("あなたの血液型は何ですか。", "血液型", "blood type"),
+        ):
+            with self.subTest(word=word):
+                found = matches(sentence)[word]
+                self.assertTrue(found["pool"])
+                self.assertIn(meaning, found["entry"]["meaning"])
+
+    def test_a_suffix_on_any_noun_folds_nothing(self) -> None:
+        """人 + たち is 人 said of several: the N5 card stays."""
+        self.assertEqual(matches("その人たちは崇高な心をもつべきだ。")["人"]["raw_id"], "vocab_N5_人_ひと")
+        found = matches("この停戦が世界平和に役立つことを私達はみな望んでいる。")
+        self.assertEqual(found["私"]["raw_id"], "vocab_N5_私_わたくし")
+        self.assertIn("plural", found["達"]["entry"]["meaning"])
+
+    def test_an_affix_carries_its_affix_sense_or_none(self) -> None:
+        self.assertIn("assistant", matches("社長は来ないで代わりに副社長をよこした。")["副"]["entry"]["meaning"])
+        # 一軒家's 家 follows a counter, read や: no "-ist" guessed at it.
+        self.assertNotIn("家", matches("森の近くに一軒家がある。"))
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class PoolLineTests(unittest.TestCase):
+    """Plan 151. A pool word's line is the first gloss of its first
+    senses, so the sense the sentence uses is on it: あだ is "foe" first
+    and "harm" in せっかくの苦労もあだになった."""
+
+    def test_the_first_senses(self) -> None:
+        meaning = matches("せっかくの苦労もあだになった。")["あだ"]["entry"]["meaning"]
+        self.assertIn("foe", meaning)
+        self.assertIn("harm", meaning)
+        self.assertLessEqual(len(meaning), card_lookup._POOL_GLOSS_MAX)
+
+    def test_an_affix_keeps_the_one_sense_it_was_chosen_for(self) -> None:
+        self.assertEqual(card_lookup.pool_gloss({"affix": True, "meaning": "-ist, -er"}), "-ist, -er")
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")

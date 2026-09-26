@@ -23,7 +23,7 @@ from study import morphology
 from content.vocab_jmdict_data import vocab_jmdict_to_id
 from study.card_lookup import (
     resolve_morpheme, resolve_compound, compound_reading,
-    resolve_pool_morpheme, resolve_pool_compound,
+    resolve_pool_morpheme, resolve_pool_compound, pool_gloss,
     find_kanji_matches, card_stats, serializable_entry,
     VOCAB_STATUS_MODES, KANJI_STATUS_MODES, GRAMMAR_STATUS_MODES,
 )
@@ -145,7 +145,7 @@ def _pool_match(entry: dict) -> dict:
         "level": None,
         "raw_id": vocab_jmdict_to_id(entry),
         "entry": {"kanji": entry.get("kanji", ""), "kana": entry.get("kana", ""),
-                  "meaning": entry.get("meaning", "")},
+                  "meaning": pool_gloss(entry)},
         "pool": True,
     }
 
@@ -229,6 +229,9 @@ def _in_grammar(morphemes: list, grammar: list[dict]) -> set[int]:
     }
 
 
+_COUNTERS = "助数詞 〜つ／〜人／〜枚"
+
+
 def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     """The morphemes as tokens, a deck compound folded into one.
 
@@ -253,6 +256,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     """
     deck_hits = [resolve_morpheme(morphemes, j) for j in range(len(morphemes))]
     ruled = _in_grammar(morphemes, grammar or [])
+    # A counter the counters' point lights is that point's to explain:
+    # 三本's 本 is no "book" (plan 151). A card that is itself the
+    # counter (冊, 匹) stays, and so does a word (二人, "two people").
+    counted = _in_grammar(morphemes, [g for g in grammar or [] if g.get("pattern") == _COUNTERS])
+    deck_hits = [None if (j in counted and hit and morphemes[j].pos == "suffix"
+                          and "counter" not in (hit[1].get("meaning") or "")) else hit
+                 for j, hit in enumerate(deck_hits)]
     # A pool run may not take in a morpheme a point is written on; a
     # deck hit stands in for "has a card" there, which is all
     # resolve_pool_compound asks of it.
@@ -299,7 +309,13 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # tightest reading, 何でも／誰でも as its own point; and no card for a
 # word that only sounds like the token (郷 is not 号, センス not 扇子),
 # the N5 する／なる／いい over their N3 and N1 twins.
-LOCAL_REV = 4
+# 5: what eight reviewers found (plan 151) -- each point's homographs
+# refused (obligation is no prohibition, the volitional of 〜ようとする
+# no "let's", a compound particle's に no moment), 〜も（強調） and the
+# mixed "must" halves found, a counter after a number; no card read
+# otherwise than the token (彼ら's ら is not 等), a suffix folded into
+# its word (参加者) or given its affix sense, a pool word's first senses.
+LOCAL_REV = 5
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

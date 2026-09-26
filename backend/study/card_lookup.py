@@ -927,9 +927,51 @@ def resolve_morpheme(morphemes, i: int):
     hit = resolve_lemma(m.lemma, m.lemma_reading, m.surface) or resolve_kana(
         m.lemma_reading, m.pos, m.auxiliary_use, after_conjunctive, m.surface, m.goshu,
     )
-    if hit is not None and _another_word(m, hit[1]) is not None:
-        return None
+    if hit is not None and (_another_word(m, hit[1]) is not None or _read_otherwise(m, hit[1])):
+        # The lemma's card in the page's spelling is read otherwise; the
+        # same lemma may have a card read as the token is: 良い read よい
+        # is the N5 いい／よい, not the N1 良い read いい (plan 151).
+        again = resolve_lemma(m.lemma, m.lemma_reading)
+        if again is None or again[2] == hit[2] or _another_word(m, again[1]) is not None \
+                or _read_otherwise(m, again[1]):
+            return None
+        return again
     return hit
+
+
+_VOICED = str.maketrans("かきくけこさしすせそたちつてとはひふへほ", "がぎぐげござじずぜぞだぢづでどばびぶべぼ")
+
+
+def _zuru(reading: str) -> str:
+    """通ずる is 通じる, 感ずる 感じる: the literary ずる verb and its じる
+    form are one word, which JMdict lists twice."""
+    return reading[:-2] + "じる" if reading.endswith("ずる") else reading
+
+
+def _read_otherwise(m, entry: dict) -> bool:
+    """Whether the token is read as none of the card's readings and
+    JMdict holds the page's spelling read that way as a word of its own
+    (plan 151): 殺人罪's 罪 is ざい, not the つみ card; 研究所's 所 is しょ,
+    not ところ; ３年's 年 is ねん, not とし; 取り分 is とりぶん, not とりわけ
+    "especially". The pool's row for the pair answers instead. A reading
+    the pool has no row for is the tokenizer's own slip more often than
+    a word (下品 read げぼん, 皆 read かい), and the card stands.
+
+    A card may be read voiced where the token is not, as a compound
+    voices its second half (沿い read そい, the card ぞい), never the
+    other way round: がち is not the かち card."""
+    if _numeral(m.surface):
+        return False
+    card = {_zuru(morphology.kata_to_hira(r)) for r in _reading_variants(entry.get("kana") or "")}
+    if not card:
+        return False
+    token = {_zuru(morphology.kata_to_hira(r)) for r in (m.lemma_reading, m.reading) if r}
+    if token & card or {t.translate(_VOICED) for t in token if t} & card:
+        return False
+    form = _page_form(m) or m.lemma
+    if not _has_kanji(form):
+        return True                     # written in kana, read otherwise: another word
+    return _pool_by_form(form, tuple(token), seen_kanji=False) is not None
 
 
 def _kanji_head(text: str) -> str:
@@ -1143,11 +1185,74 @@ def _pool_by_form(written: str, readings: tuple[str, ...], seen_kanji: bool = Tr
     return None
 
 
+# The senses an affix is used in, by the part of speech UniDic gives it.
+_AFFIX_TAGS = {"suffix": frozenset({"suf", "n-suf", "ctr"}), "prefix": frozenset({"pref", "n-pref"})}
+
+
+def _pool_affix(m, before=None, after=None) -> dict | None:
+    """The pool row for a suffix or a prefix written in kanji, read as
+    the page reads it -- 三人's 人 read にん, "counter for people"; 政治家's
+    家 read か, "-ist" -- with the meaning of the sense JMdict tags as an
+    affix, or None where it tags none (plan 151). An affix is a sense of
+    a word, never the word's first sense by right: 水 read すい is
+    "Wednesday" first, and no gloss is better than that under 化粧水."""
+    if not _has_kanji(m.surface) or _numeral(m.surface):
+        return None
+    # An affix goes on a word: a suffix after a noun (a counter after a
+    # number), a prefix before one. 一軒家's 家 after the counter 軒 is
+    # read や, and "-ist" would be a guess at the tokenizer's reading.
+    if m.pos == "suffix":
+        counted = before is not None and (_numeral(before.surface) or before.lemma in ("何", "数", "幾"))
+        tags = _AFFIX_TAGS["suffix"] if counted else _AFFIX_TAGS["suffix"] - {"ctr"}
+        if before is None or not (counted or before.pos in ("noun", "pronoun")):
+            return None
+    else:
+        tags = _AFFIX_TAGS["prefix"]
+        if after is None or after.pos not in ("noun", "suffix"):
+            return None
+    for reading in dict.fromkeys(r for r in (m.reading, m.lemma_reading) if r):
+        row = jmdict_db.get_by_key(m.surface, morphology.kata_to_hira(reading))
+        if row is None:
+            continue
+        for sense in jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or []:
+            if tags & set(sense.get("tags") or ()) and sense.get("glossary"):
+                return {**row, "meaning": ", ".join(sense["glossary"][:2]), "affix": True}
+        return None
+    return None
+
+
+def pool_gloss(row: dict, senses: int = 3) -> str:
+    """A pool word's line in the breakdown: the first gloss of each of
+    its first senses, not the first sense alone -- 盛り read もり is
+    "serving (of food)" first and "pile, heap" after, 物 read ぶつ
+    "stock" first and "goods" after, and the sentence may use either
+    (plan 151). An affix row keeps the one sense it was chosen for."""
+    if row.get("affix"):
+        return row.get("meaning", "")
+    glosses = []
+    for sense in (jmdict_db.get_senses(row.get("kanji", ""), row.get("kana", "")) or [])[:senses]:
+        first = next(iter(sense.get("glossary") or ()), "")
+        if not first or first in glosses:
+            continue
+        if glosses and len("; ".join(glosses + [first])) > _POOL_GLOSS_MAX:
+            break
+        glosses.append(first)
+    return "; ".join(glosses) or row.get("meaning", "")
+
+
+# A breakdown row is one line: past this, a later sense waits for the
+# entry, which lists them all.
+_POOL_GLOSS_MAX = 60
+
+
 def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     """The JMdict pool entry morphemes[i] is, by its dictionary form
     first and as written second, or None. Asked only for a token the
     deck has no card for (see the note above)."""
     m = morphemes[i]
+    if m.pos in _AFFIX_TAGS:
+        return _pool_affix(m, morphemes[i - 1] if i > 0 else None,
+                           morphemes[i + 1] if i + 1 < len(morphemes) else None)
     if m.pos not in _POOL_POS or not _japanese(m.surface) or _numeral(m.surface):
         # A number is the deck's to read (its numeral compounds).
         return None
@@ -1190,6 +1295,18 @@ def resolve_pool_morpheme(morphemes, i: int) -> dict | None:
     return hit
 
 
+# The suffixes that go on any noun and make no new word of it: 人 + 達
+# is 人 said of several, and folding it would take 人's N5 card away.
+_PRODUCTIVE_SUFFIXES = frozenset("達等共方様君殿氏")
+
+
+def _word_forming(m) -> bool:
+    """A suffix in kanji that makes a word of the noun before it (者,
+    家, 所, 書), as opposed to one that goes on any noun (達, 様)."""
+    return (m.pos == "suffix" and _has_kanji(m.surface)
+            and not any(c in _PRODUCTIVE_SUFFIXES for c in m.surface))
+
+
 def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _COMPOUND_MAX):
     """(entry, n) for the JMdict pool word a run of `n` >= 2 morphemes
     starting at `i` spells as one, longest first, or None.
@@ -1210,7 +1327,10 @@ def resolve_pool_compound(morphemes, i: int, deck_hits: list, max_len: int = _CO
         run = morphemes[i:i + n]
         if any(m.pos not in _COMPOUND_POS or m.auxiliary_use or _numeral(m.surface) for m in run):
             continue
-        if all(deck_hits[i + k] for k, m in enumerate(run) if m.pos == "noun"):
+        if all(deck_hits[i + k] for k, m in enumerate(run) if m.pos == "noun" or _word_forming(m)):
+            # (A suffix with no card of its own counts too (plan 151):
+            # 参加 + 者 read しゃ is 参加者, "participant", where 者's card
+            # is もの and was a wrong reading on it.)
             continue
         if any(resolve_compound(morphemes, j) and j + resolve_compound(morphemes, j)[3] > i + n
                for j in range(i + 1, i + n)):

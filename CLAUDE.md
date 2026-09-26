@@ -804,7 +804,31 @@ runtime purpose. Two consequences worth knowing:
   `content/grammar/N5.json`, `tests/test_grammar_precision.py`,
   `tests/test_lookup_precision.py`, `tests/test_grammar_detect.py`,
   `tests/test_audit_vocab_deck.py` and `tests/test_deck_pool_cards.py`).
-  When starting a new wave, begin at **151** or higher, and check
+  **151** is what eight reviewers found: 1,837 of the detector's hits,
+  sampled over every point it lights, read against each point's own
+  lesson, and 213 flagged; every class they found refused by what stands
+  around it and pinned with its counter-case (`ReviewedTests`), and the
+  lookups read the same way. The detector: a voiced ending only after a
+  verb, a noun + だ point with its copula, a hit ending where its
+  lessons end, a part another construction owns (the さえ of 〜さえ〜ば);
+  obligation told from prohibition (なくてはならない is no 〜てはならない),
+  the volitional of 〜ようとする, a concession or 〜ようものなら no
+  "let's", a compound particle's に no moment, 二度と's と no "and", a
+  refused reading taking its shorter ones with it (てはならな); 〜も（強調）
+  found at last (十時間も), the "must" halves the lesson names
+  (なくてはならない, なければいけない, after a passive or the copula),
+  the counters the lesson names after a number (三本's 本 is no "book"),
+  a point that opens a sentence opening a clause after a comma, and the
+  tagger's あの before a noun read as the demonstrative. The lookups: no
+  card read otherwise than the token (彼ら's ら is not 等 "et cetera",
+  入るなり's なり not 哉), a suffix with no card folded into its word
+  (参加 + 者 is 参加者, "participant") or given its affix sense
+  (副社長's 副, "assistant"), and a pool word's line the first gloss of
+  its first senses (cited in `study/grammar_detect.py`,
+  `study/card_lookup.py`, `study/morphology.py`, `study/analysis.py`'s
+  `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
+  `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
+  When starting a new wave, begin at **152** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

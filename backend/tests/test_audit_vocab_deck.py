@@ -166,6 +166,18 @@ class CorpusMeasurementTests(unittest.TestCase):
         # ジム 事務 ("office work"). The ninth, 日差し, had reached 陽射 --
         # the same word spelled otherwise, which the pool now glosses
         # (absent +9, unmatched +9).
+        #
+        # And again (plan 151): a card read otherwise than the token no
+        # longer counts, and seventeen words the cards had hidden are the
+        # gaps they were -- 時 read じ ("o'clock") had badged 時 read とき,
+        # 年 read ねん とし, 月 read がつ つき, 件 read けん くだん, 社 read
+        # しゃ やしろ ("Shinto shrine"), 米 read べい ("America") こめ
+        # ("rice"), 割 read わり かつ, 共 read とも きょう, 下 read もと した,
+        # 故 read ゆえ こ ("the late"), 否 read いな いや, 疎か read おろか
+        # おろそか, 寒気 read さむけ かんき, 杯 read はい さかずき; three are
+        # the tokenizer's slips the card had papered over (りゅうがく cut
+        # into 顎, しゅくだい into 宿, 上手 read かみて) (absent +17,
+        # unmatched +17).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 163)
-        self.assertLessEqual(c["unmatched_lemmas"], 177)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 180)
+        self.assertLessEqual(c["unmatched_lemmas"], 194)
