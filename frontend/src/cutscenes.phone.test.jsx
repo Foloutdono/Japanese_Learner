@@ -57,6 +57,73 @@ const SCENES = {
   },
 }
 
+// ── The door opens before it leaves (plan 144) ─────────────────────
+// The shipped door landed over the menu on the tap's own frame, and
+// faded its whole scene out from 882ms with the leaves still 85% of
+// the way across, so the doors dissolved rather than opened. Now it
+// fades in, the leaves finish their travel, the header and the sill
+// step off the screen after them, and the scene unmounts with nothing
+// of it left to fade. Read off the animations themselves, so the test
+// holds the order of the beats rather than a wall-clock guess at them.
+describe('the door opens before it leaves (plan 144)', () => {
+  const ends = anims => anims.map(a => a.effect.getComputedTiming().endTime)
+
+  it('arrives by fading in, and never fades out', async () => {
+    await SCENES.door()
+    await settle(20)
+    const names = document.querySelector('.door').getAnimations().map(a => a.animationName)
+    expect(names).toContain('door-in')
+    expect(names).not.toContain('door-leave')
+  })
+
+  it('the leaves are open before the frame has left, and the frame has left before the scene ends', async () => {
+    await SCENES.door()
+    const start = performance.now()
+    await settle(20)
+    const door = document.querySelector('.door')
+    const all = door.getAnimations({ subtree: true })
+    const leaves = ends(all.filter(a => a.animationName.startsWith('door-part-')))
+    const frame = ends(all.filter(a => ['door-head-out', 'door-sill-out'].includes(a.animationName)))
+    expect(leaves).toHaveLength(2)
+    expect(frame).toHaveLength(2)
+    expect(Math.max(...leaves)).toBeLessThanOrEqual(Math.min(...frame))
+    await vi.waitFor(() => expect(document.querySelector('.door')).toBeNull(), { timeout: 3000, interval: 10 })
+    // The scene came down no earlier than its frame's last frame.
+    expect(performance.now() - start + 20).toBeGreaterThanOrEqual(Math.max(...frame))
+  })
+})
+
+// ── The gate stands whole on a phone (plan 144) ─────────────────────
+// Its motion kept, its look redrawn. Two of the fixes are faults
+// rather than taste, so they are held here: at 110vw the rig was
+// squeezed back to the screen's width and ran edge to edge, each
+// cabinet's outer side on the glass; and both lamps sat on their
+// pillars' OUTER edges, where the comment over them had always put
+// them inside, by the lane.
+describe('the gate stands whole on a phone (plan 144)', () => {
+  it('both cabinets stand clear of the edges of the screen', async () => {
+    await SCENES.gate()
+    await settle()
+    // Measured against the scene's own box, which is the screen less
+    // any scrollbar gutter the browser keeps (index.css reserves one).
+    const box = document.querySelector('.gate').getBoundingClientRect()
+    const rig = document.querySelector('.gate__rig').getBoundingClientRect()
+    expect(rig.left - box.left).toBeGreaterThanOrEqual(4)
+    expect(box.right - rig.right).toBeGreaterThanOrEqual(4)
+  })
+
+  it('each lamp runs down its pillar on the lane side', async () => {
+    await SCENES.gate()
+    await settle()
+    const lane = document.querySelector('.gate__lane').getBoundingClientRect()
+    const [left, right] = [...document.querySelectorAll('.gate__lamp')].map(l => l.getBoundingClientRect())
+    const [pl, pr] = [...document.querySelectorAll('.gate__pillar')].map(p => p.getBoundingClientRect())
+    // Each nearer the lane than its pillar's outer edge.
+    expect(lane.left - left.right).toBeLessThan(left.left - pl.left)
+    expect(right.left - lane.right).toBeLessThan(pr.right - right.right)
+  })
+})
+
 describe('a cutscene spends the key that skips it', () => {
   for (const [name, mount] of Object.entries(SCENES)) {
     it(`the ${name}: Space skips it and never reaches the screen under it`, async () => {

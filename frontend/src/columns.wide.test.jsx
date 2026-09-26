@@ -11,7 +11,7 @@ import './index.css'
 //   - A settings page's actions stand at a half's width: seven
 //     one-word buttons ran ~770px wide. The page takes the width beside
 //     its column since plan 139, and its cards the page's since plan
-//     144: two to a row, or one across it with its action in the right
+//     145: two to a row, or one across it with its action in the right
 //     half.
 //   - The sentence stations' tier toggles stand at a column's width.
 //   - A shelf with nothing to open is one card across, not half a page

@@ -51,7 +51,7 @@ export function SettingsPage({ title, children, back = '/profile/settings', back
 // A slip: a labelled block of controls. `cap` is the caption on the
 // label's right (You are here, New items a day, Optional). `across` is
 // a slip of one action that stands the page's width on the desk (plan
-// 144): its words on the left and its action on the right, at the width
+// 145): its words on the left and its action on the right, at the width
 // of the actions in the column beside it, rather than a button ~700px
 // wide for one word.
 export function Slip({ label = null, cap = null, children, className = '', across = false }) {
@@ -68,7 +68,7 @@ export function Slip({ label = null, cap = null, children, className = '', acros
   )
 }
 
-// A row of slips (plan 144; two columns of them since plan 139). A
+// A row of slips (plan 145; two columns of them since plan 139). A
 // phone stacks them; a desk page wide enough for two stands a row's
 // slips side by side at the height of the taller, so a page is read as
 // a grid of cards that ends level, not two columns that stop wherever

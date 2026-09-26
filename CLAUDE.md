@@ -687,7 +687,25 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  **144** is Settings' pages using the width on the desk: the slips in
+  **144** is the two cutscenes, from the canvas "Tsuji — gate & door
+  cutscenes". 扉, the train door unlocked and parted (the owner's pick A
+  of three directions drawn beside the shipped door): the door fades in
+  over the menu while the view settles onto it, a lamp over the seam
+  blinks in the line's pigment with the chime, the leaves crack apart
+  before they slide and finish their travel, and the header and the
+  sill step off the screen last, so nothing fades over the run; 920ms
+  where it was 1092. 改札, the ticket gate's look (the owner kept its
+  motion over six drawn alternatives and asked only for a better look;
+  every beat unchanged): the rig with a margin on a phone, the pillars
+  as cabinets with their lamps on the lane side, a sumi reader that
+  rings, flaps with a lit leading edge, a glow with no visible rim over
+  a floor and a horizon, and the pass in its own material with its
+  mark and balance (cited in
+  `components/station/TrainDoor.jsx`, `components/station/TicketGate.jsx`,
+  `src/cutscenes.phone.test.jsx` and the 扉 and 改札 blocks of
+  `index.css`).
+  **145** is Settings' pages using the width on the desk (numbered 145
+  because 144 went to the two cutscenes while it was open): the slips in
   rows of two that end level instead of two free columns (`SlipRow`,
   `.stg-pair`), every card to the page's edge, a card of one action
   across the page with its action in the right half (`Slip`'s `across`),
@@ -698,7 +716,7 @@ runtime purpose. Two consequences worth knowing:
   `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
   `src/columns.wide.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **145** or higher, and check
+  When starting a new wave, begin at **146** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

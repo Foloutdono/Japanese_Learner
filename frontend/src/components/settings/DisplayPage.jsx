@@ -40,7 +40,7 @@ export function DisplayPage() {
           for two (plan 139): three screens across half a page stand at
           a thumbnail's height rather than a phone's, and the two
           languages stand one over the other at the screens' height
-          (plan 144). */}
+          (plan 145). */}
       <SlipRow>
         <Slip label={t.theme}>
           <div className="theme-picks" role="radiogroup" aria-label={t.theme} onKeyDown={onWalk}>

@@ -101,6 +101,13 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
 
   const holder = summary?.username ?? '—'
   const level = summary?.level
+  // The balance, as the pass prints it: how far into this level the
+  // learner's XP has climbed (the LevelBar's and DeskPass's figure).
+  // No bar at all where the summary cannot say (not loaded, or the top
+  // of the curve, where there is no next level to climb to).
+  const span = summary?.xpForNext != null ? Math.max(1, summary.xpForNext - summary.xpPrevLevel) : NaN
+  const into = Math.min(span, Math.max(0, summary?.xp - summary?.xpPrevLevel))
+  const balance = Number.isFinite(into / span) ? Math.round((into / span) * 100) : null
 
   return createPortal(
     <div
@@ -136,11 +143,20 @@ export function TicketGate({ section, station, onNavigate, onDone }) {
           <span className="gate__lamp" />
         </div>
 
-        {/* The pass, flying in to meet the reader. */}
+        {/* The pass, flying in to meet the reader: the learner's own,
+            with the mark it taps with and the balance under the name. */}
         <div className="gate__card">
-          <span className="gate__card-brand" lang="ja">定期券</span>
+          <span className="gate__card-top">
+            <span className="gate__card-brand" lang="ja">定期券</span>
+            <PassWave className="pass__wave gate__card-wave" />
+          </span>
           <span className="gate__card-name">{holder}</span>
-          {level != null && <span className="gate__card-level">{level}</span>}
+          {level != null && (
+            <span className="gate__card-bal">
+              <span className="gate__card-level">{level}</span>
+              {balance != null && <span className="gate__card-bar"><i style={{ width: `${balance}%` }} /></span>}
+            </span>
+          )}
         </div>
       </div>
 

@@ -28,7 +28,7 @@ export function SoundPage() {
   return (
     <SettingsPage title={t.sound}>
       {/* The presets over the mixer they set, each a card's width on
-          the desk (plan 144): beside it, at half a page, three presets
+          the desk (plan 145): beside it, at half a page, three presets
           wrapped their names onto three lines and the mixer's tracks
           were cut to a thumb's length. */}
       <Slip label={t.soundPresets}>

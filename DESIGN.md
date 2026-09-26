@@ -1188,7 +1188,7 @@ as the rail it arrives at.
   and bounded; the open page takes the rest of the width, its slips
   cards running to its edge. Where the page holds two at 310px each
   (measured on the page, not set at a window width) they stand in rows
-  of two (plan 144): a row's cards at the taller's height with their
+  of two (plan 145): a row's cards at the taller's height with their
   actions at its foot, so a page ends level rather than in two columns
   of different lengths, and a page pairs what belongs together. A card
   of one action that takes the width lies across it, its words in the

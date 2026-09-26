@@ -155,7 +155,7 @@ describe('settings on the desk', () => {
 
   // A wide window: the page takes the width beside the column (it
   // stopped at the card's), and its slips stand in rows of two (plan
-  // 144): a row's two cards share their top and their height, with their
+  // 145): a row's two cards share their top and their height, with their
   // actions at its foot, so the page ends level rather than in two
   // columns of different lengths. Every card runs to the page's edge --
   // a page of one card stopped at the card's, its right third empty --
@@ -203,7 +203,7 @@ describe('settings on the desk', () => {
   })
 
   // A card of one action that takes the page's width lies across it
-  // (plan 144): its words in the left half and its action in the right,
+  // (plan 145): its words in the left half and its action in the right,
   // under the row's actions at their width, rather than a button the
   // page's width for one word. The Google offer (this pass has none),
   // the placement test and, with no destination, the way to one.
@@ -236,7 +236,7 @@ describe('settings on the desk', () => {
     }
   })
 
-  // A guest's claim is two ways in (plan 144): Google in the left half,
+  // A guest's claim is two ways in (plan 145): Google in the left half,
   // the address and its button in the right, under the one name -- not a
   // form and two buttons the page's width.
   it('sets a guest\'s two ways in side by side', async () => {
@@ -261,7 +261,7 @@ describe('settings on the desk', () => {
     }
   })
 
-  // The level's line on the desk names every stop (plan 144), as the
+  // The level's line on the desk names every stop (plan 145), as the
   // destination's does, while the page holds two columns; in one, five
   // names across it are too narrow, and only the stop you stand at
   // prints its name, as on the phone.
@@ -284,7 +284,7 @@ describe('settings on the desk', () => {
     }
   })
 
-  // The presets over the mixer, each at the page's width (plan 144):
+  // The presets over the mixer, each at the page's width (plan 145):
   // beside it, at half a page, the presets wrapped onto three lines and
   // the tracks were cut to a thumb's length. The mixer's names stand in
   // one column as wide as the longest, each on one line, and every track
@@ -315,7 +315,7 @@ describe('settings on the desk', () => {
   })
 
   // The themes beside the language (plan 139), the two languages one
-  // over the other down the screens' height (plan 144): the row's two
+  // over the other down the screens' height (plan 145): the row's two
   // cards end level, and neither holds a short pair of cards at its top.
   it('stands the languages down the theme screens\' height', async () => {
     await page.viewport(1440, 900)

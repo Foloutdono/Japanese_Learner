@@ -75,7 +75,7 @@ export function DataSlips({ session }) {
     }
   }
 
-  // Two rows on a desk page wide enough (plan 144): what the learner can
+  // Two rows on a desk page wide enough (plan 145): what the learner can
   // take -- the trail's consent beside the export -- then the two
   // erasures side by side, both in the danger's ink.
   return (

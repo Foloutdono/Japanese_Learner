@@ -71,7 +71,7 @@ export function LevelPage({ session }) {
     <SettingsPage title={t.settingsJlptLevel}>
       {/* No label: the page is the level, and the stop you stand at
           prints its own name. On the desk every stop prints its name
-          (plan 144), as the destination's line does: a page the pane's
+          (plan 145), as the destination's line does: a page the pane's
           width has the room, and a stop is chosen by what it is. The
           ones you do not stand at are dropped again while the pane
           holds one column (index.css, the 机 section). */}
@@ -101,7 +101,7 @@ export function LevelPage({ session }) {
       {/* The level's consequences are said on the confirm sheet, at the
           moment they apply, and nowhere else — a page of settings is
           controls, not a manual. */}
-      {/* Across a desk page while it is a button (plan 144); the test,
+      {/* Across a desk page while it is a button (plan 145); the test,
           once running, takes the card as it does on the phone. */}
       <Slip label={t.settingsRedo} across={!testing}>
         {!testing && (

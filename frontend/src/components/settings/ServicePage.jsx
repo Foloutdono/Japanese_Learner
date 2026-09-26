@@ -184,7 +184,7 @@ export function ServicePage({ session }) {
       ) : (
         // Without a destination there is no line to draw: the way to
         // one, rather than three rails ending nowhere. A slip of its own
-        // (plan 144), saying why: a bare button under the card ran the
+        // (plan 145), saying why: a bare button under the card ran the
         // pane's width on the desk, past the card's edge.
         <Slip label={t.settingsGoal} across>
           <span className="slip__hint">{t.settingsGoalNoneDesc}</span>

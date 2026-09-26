@@ -37,7 +37,7 @@ function ClaimSlip() {
   const refused = authRedirectError()
   // The two ways in, each in a `.slip__way`: nothing on the phone, which
   // reads them one under the other; side by side on a desk page wide
-  // enough (plan 144), so that the form and its button stand at half the
+  // enough (plan 145), so that the form and its button stand at half the
   // page rather than across all of it.
   return (
     <Slip label={t.guestLabel} cap={t.guestCap} className="slip--ways">
@@ -134,7 +134,7 @@ export function AccountPage({ session }) {
   // Two halves (plan 139): whose card this is, and what it holds — the
   // data page's slips, which were a row of their own. Sign out is here
   // alone: the column's foot printed a second one. On a desk page wide
-  // enough the slips stand in rows of two (plan 144), in the phone's
+  // enough the slips stand in rows of two (plan 145), in the phone's
   // order: the address across the page, then the policy beside the
   // sign-out, and the data's rows (DataSlips) under them.
   return (
