@@ -74,7 +74,7 @@ describe('the rail', () => {
   it('carries no pigment: the rail is chrome', () => {
     for (const id of DESK_TAB_IDS) {
       // A guide anchor is not a colour: the profile's Settings station
-      // carries the stop the page's door carried (plan 140).
+      // carries the stop the page's door carried (plan 143).
       for (const row of getDeskSections(id, t)) {
         expect(Object.keys(row).filter(k => k !== 'guide').sort()).toEqual(['path', 'title'])
       }

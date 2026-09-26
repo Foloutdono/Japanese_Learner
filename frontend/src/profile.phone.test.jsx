@@ -62,7 +62,7 @@ describe('the profile at phone width', () => {
     expect(getComputedStyle(stamps[0]).borderTopLeftRadius).toBe('999px')
     expect(getComputedStyle(stamps[20]).borderTopStyle).toBe('dashed')
     expect(getComputedStyle(stamps[33]).borderTopWidth).toBe('2px')
-    // The three figures under the sheet share ONE row (plan 140): the
+    // The three figures under the sheet share ONE row (plan 143): the
     // third used to wrap onto a row of its own at this width.
     const figs = $$('.sbook__figs > .fig').map(f => f.getBoundingClientRect())
     expect(figs).toHaveLength(3)

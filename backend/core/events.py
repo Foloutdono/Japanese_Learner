@@ -100,7 +100,7 @@ EVENTS: dict[str, frozenset[str]] = {
     # deliberately not HAS_STORE). `where` is which of the five doors
     # (frontend/src/domain/paywall.js's SOURCES -- the reading ride's
     # pass plate among them since plan 097; the profile, a door until
-    # plan 140, reaches the offer through the balance sheet now, and
+    # plan 143, reaches the offer through the balance sheet now, and
     # older rows still say `profile`).
     #
     # The three verbs are the whole point: a paywall nobody opens and a

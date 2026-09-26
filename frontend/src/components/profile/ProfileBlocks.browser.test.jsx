@@ -7,7 +7,7 @@ import '../../index.css'
 // ── The records and the doors each divide their lattice ────────
 // DESIGN.md, Surfaces: a lattice's column count must divide its
 // content, because the seams are the background showing through and
-// a short last row is a bare slab. Since plan 140 the records are
+// a short last row is a bare slab. Since plan 143 the records are
 // three figures three across -- the reviews, the retention and the
 // best perfect run -- and the two doors behind the pass (plan 074) a
 // lattice of two of their own, so each block holds its cells whatever

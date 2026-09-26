@@ -24,7 +24,7 @@ import { LineLedger } from '../components/profile/LineLedger'
 // status sheet off the HUD's station panel now (plan 074); the pass
 // itself prints the balance on its footer.
 //
-// Plan 140 (the owner's pick A of the profile canvas) tightened the
+// Plan 143 (the owner's pick A of the profile canvas) tightened the
 // holder rather than refilling it: the same inserts, a third of the
 // phone's height gone. The footer is the door to the balance sheet,
 // which carries the offer, so the "See the pass" button that stood
@@ -141,7 +141,7 @@ export default function ProfileScreen({ session }) {
       </p>
     ),
     // The pass, the balance on its footer (plan 069's figure, printed
-    // where the canvas prints it) — and since plan 140 the footer is a
+    // where the canvas prints it) — and since plan 143 the footer is a
     // door: it opens the balance sheet the HUD's pass opens, which is
     // where the offer lives.
     pass: (
@@ -193,7 +193,7 @@ export default function ProfileScreen({ session }) {
         // inserts in the same order, split after the stamps — so a
         // screen reader, the Tab key and the guide walk them exactly as
         // they walk the phone's column — less the two doors, which the
-        // rail already holds (plan 140).
+        // rail already holds (plan 143).
         <>
           {inserts.stale}
           <div className="desk-profile">

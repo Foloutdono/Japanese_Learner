@@ -42,14 +42,13 @@ export function playToggle() { playVoice('toggle') }
  * Mechanical rather than tonal, which is the rule that matters here:
  * a tone would collide with the gate chime, which is a tone and means
  * something else. The default is a coin into the fare box — two short
- * resonant noise pings. `one-flap` in the palette is the alternative
- * that ties it to the level clatter instead, as one drum of the same
- * board.
+ * resonant noise pings. `one-flap` in the palette is the alternative:
+ * one drum of a departure board.
  */
 export function playFareTick() { playVoice('fare-tick') }
 
-/** 進級 — the board turning your level over. */
-export function playFlapClatter() { playVoice('flap-clatter') }
+/** 改札鋏 — the gate's punch clipping the pass as the level turns over (plan 142). */
+export function playPassClip() { playVoice('pass-clip') }
 
 /** 押印 — a card's seal pressed into its corner as it climbs a stage. */
 export function playStamp() { playVoice('card-stamp') }

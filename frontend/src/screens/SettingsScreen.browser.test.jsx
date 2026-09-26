@@ -176,17 +176,19 @@ describe('SettingsScreen — the pass and the list', () => {
     expect(rows[2].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
     expect(rows[0].querySelector('.stg-swatch')).not.toBeNull()
 
+    // A door navigates, and React Router renders a navigation as a
+    // transition: the page arrives when React gets to it, not after a
+    // fixed pause, so each arrival is waited for rather than timed (a
+    // 30ms settle lost that race on a loaded CI runner).
+    const title = () => screen.container.querySelector('h1.bar__title')?.textContent
     rows[4].click()
-    await settle(30)
-    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.account)
+    await vi.waitFor(() => expect(title()).toBe(T.account))
     // ‹ Settings brings the column back.
     screen.container.querySelector('.stage__leave').click()
-    await settle(30)
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    await vi.waitFor(() => expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7))
 
     screen.container.querySelector('.stg-pass .stg-door[data-page="service"]').click()
-    await settle(30)
-    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.destService)
+    await vi.waitFor(() => expect(title()).toBe(T.destService))
   })
 
   it('prints the destination and its validity when the pass has one', async () => {

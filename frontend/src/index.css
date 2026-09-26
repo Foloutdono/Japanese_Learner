@@ -2657,10 +2657,10 @@
   --desk-run-w:       1720px;
   --desk-run-col-min: 300px;
   --dock-bottom:    var(--safe-bottom);
-  /* The level board's height when it docks across the top of a phone
-     (see .levelup); the study stage slides down by exactly this while
-     the board is up, so the card keeps its head clear. */
-  --levelup-h:      68px;
+  /* The level-up pass's height (see .levelup, plan 142): the stage on a
+     phone and a run's column on the desk step down by this, and a gap,
+     while it stands, so the card keeps its head clear. */
+  --levelup-h:      84px;
   /* The phone's own insets, named once. Every rule that clears a home
      bar or a notch reads these; the fallback lives here and nowhere
      else. */
@@ -4489,6 +4489,31 @@ textarea:focus-visible {
   overflow: hidden;
 }
 .balance__fill { display: block; height: 100%; background: var(--accent2); }
+/* 補充 — the claim sheet's 回数券 book (plan 141, the owner's pick C):
+   the cap as a stub a credit, ten to a row. What the balance already
+   held in a pale metal, what the refill landed while the app was closed
+   in the pass's full gold, the room still to fill as dashed outlines.
+   The new stubs fill in one after another, as the list stagger does
+   (DESIGN.md, Motion): 30ms apart, capped at the eighth. Opacity only,
+   which is already the reduced-motion answer. components/credits/
+   ClaimSheet.jsx. */
+.claim-book {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  gap: var(--sp-1);
+}
+.claim-book__stub {
+  height: var(--sp-6);
+  box-sizing: border-box;
+  border-radius: var(--r-plate);
+}
+.claim-book__stub--held { background: color-mix(in srgb, var(--accent2) 30%, var(--surface)); }
+.claim-book__stub--new {
+  background: var(--accent2);
+  animation: arrive-soft 0.3s ease both;
+  animation-delay: calc(min(var(--i, 0), 8) * 30ms);
+}
+.claim-book__stub--room { border: 1px dashed var(--surface-line); }
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -5899,7 +5924,7 @@ textarea:focus-visible {
 }
 .pass__holder .profile-card__name .profile-card__edit-glyph { opacity: 0.45; }
 .pass__holder .profile-card__name:hover .profile-card__edit-glyph { opacity: 1; }
-/* The initial, with no ring round it since plan 140: the gold arc it
+/* The initial, with no ring round it since plan 143: the gold arc it
    wore measured the climb the balance row's bar already measures, with
    its figure beside it. */
 .pass__avatar-wrap { position: relative; width: var(--sp-9); height: var(--sp-9); flex-shrink: 0; }
@@ -5917,7 +5942,7 @@ textarea:focus-visible {
   color: var(--text-on-panel);
 }
 
-/* The name over the month the pass was issued (plan 140): the date a
+/* The name over the month the pass was issued (plan 143): the date a
    real pass prints as 発行日, in the card's small print. */
 .pass__holder-names { display: flex; flex-direction: column; gap: var(--sp-1); min-width: 0; }
 .pass__since {
@@ -14614,7 +14639,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     padding-top: calc(var(--safe-top) + var(--sp-3));
     padding-inline: var(--sp-5);
     padding-bottom: var(--dock-bottom);
-    /* Matched to .levelup's slide, so the page moves with the board. */
+    /* Matched to .levelup's drop, so the page moves with the pass. */
     transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   /* On the stage frame the foot is the level bar itself: it sits under
@@ -14861,11 +14886,12 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
     border-radius: 0;
     padding-bottom: calc(var(--sp-3) + var(--safe-bottom));
   }
-  /* While the level board is docked across the top (see XpToast.jsx),
-     the stage slides down under it: a panel takes its place, the card
-     keeps its head clear, and everything slides back as it leaves. */
+  /* While the level-up's pass hangs across the top (see XpToast.jsx,
+     plan 142), the stage slides down under it: the pass takes the top,
+     the card keeps its head clear, and everything slides back as it
+     leaves. */
   :root[data-levelup] .stage {
-    padding-top: calc(var(--levelup-h) + var(--safe-top) + var(--sp-4));
+    padding-top: calc(var(--safe-top) + var(--sp-3) + var(--levelup-h) + var(--sp-4));
   }
 
   /* The figures come off; the rule stays. A 4px three-colour line at
@@ -16598,234 +16624,247 @@ html { scrollbar-gutter: stable; }
   .door { display: none; }
 }
 
-/* ══ パタパタ — the split-flap display ═══════════════════════
-   See components/rewards/SplitFlap for the mechanism. Four layers per
-   drum and a hard seam across the middle; the seam is what makes the
-   eye read a flap rather than a rotation. */
-.split-flap {
-  display: inline-flex;
-  gap: 2px;
-  perspective: 340px;
-}
-/* A drum is a moulded plastic card, not a cut-out of the board: it
-   sits a shade lighter than the sumi behind it, with a hairline of
-   its own edge, a sheen across its top half, and a seam that reads as
-   a real gap. The digits sit close enough to read as one number. */
-.flap {
-  --flap-h: var(--flap-size, 40px);
-  --flap-w: calc(var(--flap-h) * 0.7);
-  --flap-ms: 340ms;
-  --flap-face: color-mix(in srgb, var(--text-on-panel) 9%, var(--bg-panel));
-  --flap-sheen: color-mix(in srgb, var(--text-on-panel) 16%, var(--bg-panel));
-  position: relative;
-  display: inline-block;
-  width: var(--flap-w);
-  height: var(--flap-h);
-  border-radius: var(--r-plate);
-  background: var(--flap-face);
-  color: var(--text-on-panel);
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: calc(var(--flap-h) * 0.62);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-  box-shadow:
-    inset 0 0 0 1px color-mix(in srgb, var(--text-on-panel) 10%, transparent),
-    0 2px 5px rgba(0, 0, 0, 0.34);
-  overflow: hidden;
-}
+/* ══ 改札鋏 — the level, clipped on the pass (plan 142) ═══════════
+   The level turned over, and the object it is printed on says so. The
+   learner's pass comes down -- the 定期券 itself, in its own material
+   (the charcoal-into-sumi ground, the hairline and the sheen of .pass
+   and the desk's pass at the rail's foot) -- the gate's punch clips a
+   bite out of its top edge, the old figure is struck and the new one
+   printed in the pass's gold, and the balance empties to the new
+   level's start. The owner's pick of four directions drawn side by
+   side (the split-flap board as shipped and retimed, a hanging station
+   plate, the in-car route, this one). The board it replaces turned its
+   drums while it was still sliding in, so the one moment it existed
+   for was half missed; here the pass lands, the old figure is read for
+   a beat, and only then is it cut.
 
-/* Every layer is a half-height window onto a full-height glyph: the
-   top halves pin it to the top, the bottom halves to the bottom, so
-   the two reassemble into one character across the seam.
+   On a clock, never gating: it leaves by itself while the next card is
+   already in hand (XpToast). On a phone it hangs at the top inside the
+   stage's gutters and the stage steps down under it
+   (:root[data-levelup] .stage, in the stage's phone block); wider, it
+   floats at the screen's right; on the desk it docks at the top of a
+   run's column (the 机 section).
 
-   This first tried to offset the glyph with `.flap__static--top > *`,
-   which matched nothing at all — the halves held bare text nodes, and
-   a text node has no box to transform. Every digit rendered as its top
-   half over an empty black bottom. */
-.flap__half,
-.flap__leaf {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 50%;
-  overflow: hidden;
-  background: var(--flap-face);
+   One clock: every piece of the cut is timed from --levelup-cut, the
+   drop and the beat the old figure is read in. The bite is a real hole
+   (a mask on the card, grown through a registered length), so whatever
+   the pass hangs over shows through it; the shadow stays on the outer
+   box, which the mask does not reach. The chip is the piece the punch
+   took, falling away. */
+@property --levelup-bite {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0;
 }
-/* The top halves catch the light. */
-.flap__half--top,
-.flap__leaf--falling {
-  top: 0;
-  background: linear-gradient(to bottom, var(--flap-sheen), var(--flap-face));
-}
-.flap__half--bottom,
-.flap__leaf--rising { bottom: 0; }
-
-.flap__glyph {
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: var(--flap-h);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.flap__half--top .flap__glyph,
-.flap__leaf--falling .flap__glyph { top: 0; }
-.flap__half--bottom .flap__glyph,
-.flap__leaf--rising .flap__glyph { bottom: 0; }
-
-/* The two moving leaves, hinged on the seam: one falling away, one
-   arriving behind it. */
-.flap__leaf { backface-visibility: hidden; z-index: 2; }
-.flap__leaf--falling {
-  transform-origin: bottom center;
-  transform: rotateX(0deg);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
-}
-.flap__leaf--rising {
-  transform-origin: top center;
-  transform: rotateX(90deg);
-}
-.flap--turned .flap__leaf--falling {
-  transform: rotateX(-90deg);
-  transition: transform var(--flap-ms) cubic-bezier(0.5, 0, 0.9, 0.5);
-}
-.flap--turned .flap__leaf--rising {
-  transform: rotateX(0deg);
-  transition: transform var(--flap-ms) cubic-bezier(0.2, 0.6, 0.4, 1) var(--flap-ms);
-}
-
-/* The seam. A real board has a physical gap here and it is the single
-   most recognisable thing about the display. */
-.flap__seam {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  height: 2px;
-  margin-top: -1px;
-  background: rgba(0, 0, 0, 0.6);
-  box-shadow: 0 1px 0 color-mix(in srgb, var(--text-on-panel) 8%, transparent);
-  z-index: 3;
-  pointer-events: none;
-}
-
-/* ══ 進級 — the level board ═════════════════════════════════
-   The number turned over. It is an announcement on the in-car display
-   now: a sumi board docked across the top of a phone (the top bar is
-   hidden while studying, so the edge is free and the docked rating
-   bar at the bottom stays usable), and a panel under the top bar at
-   the roundel's side on a desktop. On a clock, never gating: it
-   leaves by itself while the next card is already in hand. The fare
-   it used to sit beside is drawn by the level HUD itself — see
-   .hud-fare. */
 .levelup {
+  /* Matched to the stage's padding-top transition, so the page moves
+     with the pass. */
+  --levelup-drop: 320ms;
+  --levelup-cut: 550ms;
+  --levelup-clip-x: 66%;
+  /* Clear of the screen's top edge, its notch and the shadow's reach. */
+  --levelup-away: calc(-100% - var(--sp-3) - var(--safe-top) - var(--sp-8));
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
+  top: calc(var(--safe-top) + var(--sp-3));
+  left: var(--sp-5);
+  right: var(--sp-5);
   z-index: 250;
-  display: flex;
-  justify-content: center;
-  /* The sumi runs up under a notch; the board's own box starts below it. */
-  padding-top: var(--safe-top);
-  background: var(--bg-panel);
+  height: var(--levelup-h);
+  border-radius: var(--r-identity);
+  box-shadow: var(--elev-hang);
   pointer-events: none;
-  animation: levelup-in 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
+  animation: levelup-in var(--levelup-drop) cubic-bezier(0.22, 0.68, 0.32, 1);
 }
-.levelup--leaving { animation: levelup-out 320ms cubic-bezier(0.4, 0, 1, 1) forwards; }
-@keyframes levelup-in  { from { transform: translateY(-100%); } }
-@keyframes levelup-out { to   { transform: translateY(-100%); } }
+.levelup--leaving { animation: levelup-out var(--levelup-drop) cubic-bezier(0.4, 0, 1, 1) forwards; }
+@keyframes levelup-in  { from { transform: translateY(var(--levelup-away)); } }
+@keyframes levelup-out { to   { transform: translateY(var(--levelup-away)); } }
 
-.levelup__board {
-  --flap-size: var(--fs-display);
-  box-sizing: border-box;
+/* The card: the pass's own ground, hairline and sheen (.pass,
+   .desk-pass), so this is the same possession the learner carries
+   everywhere else, not a toast dressed as one. Its edge is not the
+   balance's here: on the pass that edge is the credit balance, which
+   is not what turned over. */
+.levelup__pass {
+  /* No bite until the cut; the animation grows it (@property above). */
+  --levelup-bite: 0;
+  position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-5);
-  width: 100%;
-  height: var(--levelup-h);
+  gap: var(--sp-6);
+  height: 100%;
   padding-inline: var(--sp-6);
-  background: var(--bg-panel);
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
+  border-radius: inherit;
+  background:
+    linear-gradient(155deg,
+      color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
+      var(--bg-panel) 62%);
   color: var(--text-on-panel);
-  border-bottom: 3px solid var(--accent2);
-  box-shadow: var(--elev-hang);
+  mask-image: radial-gradient(circle at var(--levelup-clip-x) var(--sp-1), transparent var(--levelup-bite), #000 calc(var(--levelup-bite) + 0.5px));
+  animation:
+    levelup-bite 60ms ease-in var(--levelup-cut) forwards,
+    levelup-jolt 140ms ease-out var(--levelup-cut);
 }
-.levelup__mark {
+.levelup__pass::after {
+  content: '';
+  position: absolute;
+  inset: -40% 55% -40% -20%;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.045) 50%, transparent 70%);
+  transform: skewX(-12deg);
+  pointer-events: none;
+}
+/* XpToast sounds the punch on this animation's start: the name is
+   read there. */
+@keyframes levelup-bite { to { --levelup-bite: var(--sp-3); } }
+@keyframes levelup-jolt { 30% { transform: translateY(var(--sp-1)); } }
+
+/* The figure and its label, a fixed pair: caps label over the figure. */
+.levelup__level {
   display: flex;
   flex-direction: column;
   gap: var(--sp-1);
-  min-width: 0;
+  flex: none;
 }
-/* The mark on the board. It was 進級 at --fs-lead in gold with this
-   line as its caption under it; the Japanese went with the ornamental
-   labels on 2026-09-21 and the announcement would otherwise have been
-   the quietest ink on a board hung across the screen — so the name
-   takes the rung and the metal the term wore. The unit under the
-   drums stays a caption: it labels a figure (DESIGN.md, Figures). */
-.levelup__latin {
-  font-family: var(--font-display);
-  font-size: var(--fs-lead);
-  font-weight: 700;
-  letter-spacing: var(--tr-caption);
-  text-transform: uppercase;
-  white-space: nowrap;
-  color: var(--accent2);
-}
-/* A tracked line on a centred axis cancels the trailing letter's
-   tracking with an equal indent (DESIGN.md, Tracking). */
-.levelup__unit {
+.levelup__cap {
   font-family: var(--font-display);
   font-size: var(--fs-caption-xs);
   font-weight: 700;
+  line-height: 1;
   letter-spacing: var(--tr-caption);
-  text-indent: var(--tr-caption);
   text-transform: uppercase;
+  color: var(--text-on-panel-soft);
+}
+.levelup__num {
+  display: grid;
+  font-family: var(--font-display);
+  font-size: var(--fs-display);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.levelup__num > * { grid-area: 1 / 1; }
+/* Struck, then printed: the old figure drops out as the punch closes,
+   the new one lands in the pass's gold (5.7:1 on the card's tinted
+   corner in dark, 3.7:1 in light -- a 40px bold figure needs 3). */
+.levelup__was { animation: levelup-struck 120ms ease-in var(--levelup-cut) forwards; }
+.levelup__now {
+  color: var(--accent2);
+  transform-origin: 0 50%;
+  animation: levelup-printed 220ms cubic-bezier(0.2, 0.7, 0.3, 1) calc(var(--levelup-cut) + 80ms) both;
+}
+@keyframes levelup-struck  { to   { opacity: 0; transform: translateY(var(--sp-2)); } }
+@keyframes levelup-printed { from { opacity: 0; transform: scale(1.18); } }
+
+/* The balance: the pass's track and metal (.lvlbar__track), full as
+   the pass lands, emptied as the cut is made, then climbing to what
+   the new level already holds (--levelup-to, from the profile store). */
+.levelup__balance {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  flex: 1;
+  min-width: 0;
+}
+.levelup__track {
+  position: relative;
+  height: 5px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+  overflow: hidden;
+}
+.levelup__fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--levelup-to, 0%);
+  background: var(--accent2);
+  border-radius: var(--r-pill);
+  animation: levelup-balance 450ms calc(var(--levelup-cut) + 150ms) both;
+}
+@keyframes levelup-balance {
+  0%   { width: 100%; animation-timing-function: cubic-bezier(0.5, 0, 0.75, 0); }
+  66%  { width: 0%;   animation-timing-function: cubic-bezier(0.22, 0.68, 0.32, 1); }
+  100% { width: var(--levelup-to, 0%); }
+}
+.levelup__xp {
+  display: grid;
+  justify-items: end;
+  font-family: var(--font-display);
+  font-size: var(--fs-caption);
+  font-weight: 700;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
   white-space: nowrap;
   color: var(--text-on-panel-soft);
 }
-/* The figure and its label, a fixed pair: drums, caps label beneath. */
-.levelup__flaps {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--sp-1);
-  flex-shrink: 0;
+.levelup__xp > * { grid-area: 1 / 1; }
+.levelup__unit {
+  margin-left: var(--sp-1);
+  font-size: var(--fs-caption-xs);
+  letter-spacing: var(--tr-caption);
+  text-transform: uppercase;
+}
+.levelup__xp-was { animation: levelup-gone 120ms ease calc(var(--levelup-cut) + 450ms) forwards; }
+.levelup__xp-now {
+  opacity: 0;
+  animation: levelup-shown 120ms ease calc(var(--levelup-cut) + 450ms) forwards;
+}
+@keyframes levelup-gone  { to { opacity: 0; } }
+@keyframes levelup-shown { to { opacity: 1; } }
+
+/* The chip: what the punch took, in the card's own ground, falling
+   away past the pass's foot. */
+.levelup__chip {
+  position: absolute;
+  top: 0;
+  left: calc(var(--levelup-clip-x) - var(--sp-3));
+  width: calc(2 * var(--sp-3));
+  height: calc(var(--sp-3) + var(--sp-1));
+  border-radius: 0 0 var(--r-pill) var(--r-pill);
+  background: color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel));
+  opacity: 0;
+  animation: levelup-chip 650ms cubic-bezier(0.5, 0, 0.9, 0.6) var(--levelup-cut) forwards;
+}
+@keyframes levelup-chip {
+  from { opacity: 1; }
+  to   { opacity: 0; transform: translate(var(--sp-4), calc(var(--levelup-h) + var(--sp-8))) rotate(210deg); }
 }
 
+/* Wider than a phone the pass floats at the screen's right, at the
+   width it was drawn at: a phone's content width, which is what
+   --desk-side-w names (see :root). The desk docks it in a run's column
+   instead (the 机 section). */
 @media (min-width: 769px) {
   .levelup {
     top: calc(var(--sp-9) + var(--sp-4));
     left: auto;
     right: var(--sp-5);
-    padding-top: 0;
-    background: transparent;
-    animation-name: levelup-in-panel;
+    width: var(--desk-side-w);
+    animation-name: levelup-in-float;
   }
-  .levelup--leaving { animation-name: levelup-out-panel; }
-  @keyframes levelup-in-panel  { from { opacity: 0; transform: translateY(-12px); } }
-  @keyframes levelup-out-panel { to   { opacity: 0; transform: translateY(-12px); } }
-  .levelup__board {
-    --flap-size: calc(var(--fs-display) * 1.35);
-    width: auto;
-    height: auto;
-    gap: var(--sp-7);
-    padding: var(--sp-4) var(--sp-6);
-    border-radius: var(--r-panel);
-    border-bottom: none;
-    border-top: 3px solid var(--accent2);
-  }
+  .levelup--leaving { animation-name: levelup-out-float; }
+  @keyframes levelup-in-float  { from { opacity: 0; transform: translateY(calc(-1 * var(--sp-4))); } }
+  @keyframes levelup-out-float { to   { opacity: 0; transform: translateY(calc(-1 * var(--sp-4))); } }
 }
 
-/* The flaps still turn — that is the content, not decoration — but
-   nothing slides or scales around them. */
+/* The cut is the content, so it still happens -- the bite opens, the
+   figure changes, the balance resets -- but nothing drops, jolts,
+   scales or falls: the pass fades in and out, the figures cross, and
+   the chip is not drawn. */
 @media (prefers-reduced-motion: reduce) {
   .stage { transition: none; }
-  .levelup {
-    animation-duration: 1ms;
+  .levelup { animation-name: levelup-in-still; }
+  .levelup--leaving { animation-name: levelup-out-still; }
+  .levelup__pass { animation: levelup-bite 60ms ease-in var(--levelup-cut) forwards; }
+  .levelup__was { animation-name: levelup-gone; }
+  .levelup__now {
+    opacity: 0;
+    animation: levelup-shown 160ms ease calc(var(--levelup-cut) + 80ms) forwards;
   }
+  .levelup__fill { animation-duration: 1ms; }
+  .levelup__chip { display: none; }
+  @keyframes levelup-in-still  { from { opacity: 0; } }
+  @keyframes levelup-out-still { to   { opacity: 0; } }
 }
 
 /* ══ Reward preview (development only) ══════════════════════
@@ -17379,7 +17418,7 @@ html { scrollbar-gutter: stable; }
    rather than filling it: a filled 松葉 would not carry either ink at
    10px.
 
-   A row a line since plan 140. It was a lattice of cells, four across,
+   A row a line since plan 143. It was a lattice of cells, four across,
    two, one, and a half-width cell wrapped "Vocabulary JLPT" and set its
    figure a line below its neighbour's. Every row now shares the
    ledger's three columns (a subgrid): the roundel; the name over its
@@ -17471,7 +17510,7 @@ html { scrollbar-gutter: stable; }
    A flush hairline lattice of bare figures, two across by default (the
    dictionary's entry prints the reader's four this way). The profile's
    are three — reviews, retention, the best perfect run — three across
-   (.records--three, plan 140); its doors, 統計 and Settings, are a
+   (.records--three, plan 143); its doors, 統計 and Settings, are a
    lattice of two of their own, each drawn as the ledger draws a line
    (roundel, name) with a ▶ where the figure would be, so a doorway and
    a record read as one kind of cell. The count always divides its
@@ -17657,7 +17696,7 @@ form.stage__foot > .btn-primary {
    ink and drops the uppercase. Two classes deep to outrank the cap rule
    above, which is where the size and the ink come from. */
 .balance-line .balance-line__refill { letter-spacing: var(--tr-term); text-transform: none; }
-/* The footer is a door (plan 140): the balance sheet the HUD's pass
+/* The footer is a door (plan 143): the balance sheet the HUD's pass
    opens, which is where the offer lives — so the profile no longer
    stands a "See the pass" button of its own between the pass and the
    stamps. A button the width of the card, its ▶ sliding in from -4px
@@ -17770,7 +17809,7 @@ form.stage__foot > .btn-primary {
   background: color-mix(in srgb, var(--stamp-ink) 22%, transparent);
 }
 .sbook__side { padding-top: var(--sp-4); border-top: 1px solid var(--surface-line); }
-/* One row of three, whatever the width (plan 140): the third figure
+/* One row of three, whatever the width (plan 143): the third figure
    used to wrap onto a row of its own at a phone's width. */
 .sbook__figs {
   display: grid;
@@ -19500,8 +19539,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .brd-board__cap { font-family: var(--font-display); font-size: var(--fs-caption); font-weight: 700; letter-spacing: var(--tr-caption); text-transform: uppercase; color: var(--text-on-panel-soft); }
 .brd-board__flaps { display: flex; align-items: center; gap: var(--sp-1); perspective: 400px; }
 .brd-board__colon { padding: 0 var(--sp-1); font-family: var(--font-display); font-weight: 700; font-size: var(--fs-heading); color: var(--text-on-panel-soft); }
-/* The board's own tile: a split-flap face at rest (the rewards'
-   .flap is the animated instrument; this one only turns its last digit once). */
+/* The board's own tile: a split-flap face at rest (the level-up's
+   board was the animated instrument until plan 142 made it a pass;
+   this one only turns its last digit once). */
 .brd-flap {
   display: inline-flex;
   align-items: center;
@@ -20658,7 +20698,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .guide__spot--plate { border-radius: var(--r-plate); }
 .guide__spot--identity { border-radius: var(--r-identity); }
 /* A rail station's lozenge (the profile's Settings stop on the desk,
-   plan 140). */
+   plan 143). */
 .guide__spot--panel { border-radius: var(--r-panel); }
 .guide-callout--live .guide-callout__foot {
   align-items: center;
@@ -22847,7 +22887,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     gap: var(--sp-5);
     min-width: 0;
   }
-  /* The lines drawn with their stops (plan 140): a row a line, the
+  /* The lines drawn with their stops (plan 143): a row a line, the
      mark whole again at the head of the row, then a rail per stop (a
      kana set, a JLPT level) filled with that stop's own learned / total
      and named under it, the stop being ridden in full ink, then the
@@ -23826,9 +23866,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     left: var(--desk-run-inset);
     right: calc(var(--desk-side-w) + var(--desk-run-inset));
   }
-  .desk-run__side,
-  .desk-brd__side,
-  .desk-door__side {
+  .desk-run__side {
     position: fixed;
     inset: 0 var(--desk-run-inset) 0 auto;
     width: var(--desk-side-w);
@@ -23840,43 +23878,64 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     overscroll-behavior: contain;
     background: var(--bg-main);
     border-inline-start: 1px solid var(--surface-line);
-    /* Matched to the level board's slide (below), as a phone's stage is. */
-    transition: padding-top 320ms cubic-bezier(0.22, 0.68, 0.32, 1);
   }
   /* A door opened in a docked breakdown (components/analysis/SideLookup,
      plan 115): the wrapper adds no box, so the breakdown, the sentence
      line and the entry stand in the side's own column rhythm. */
   .desk-lookup { display: contents; }
-  /* ── the level board over a run's side (plan 123) ──
-     Above a phone's width the board is a panel under the top bar at the
-     screen's right -- and on a run with a side, that is over the side:
-     ~280×95px of the column's entry or tally hidden for 2.4s. It docks
-     across the side's top at a phone's geometry instead (the phone's
-     board is this width), and the column steps down under it while it
-     stands, as a phone's stage does under its own. The board is
-     portalled to the body, so it is found by the run it stands over. */
-  :root[data-chrome="stage"]:has(.desk-run) .levelup {
+  /* ── 改札鋏 — the level-up in a run's column (plans 123, 142) ──
+     Above a phone's width the pass floats at the screen's right -- and
+     on a run with a column, that is over the column: its entry, its
+     tally or its lines hidden for 2.4s (plan 123 docked the old board
+     across the side's top for that reason). The pass docks in the
+     column instead: StudyStage portals it into the run's left column on
+     three panels -- this run's panel, whose level bar row it just
+     topped off -- and into the side where a run stands the side alone.
+     It comes out of the column's top edge and the column steps down
+     under it, as a phone's stage does under its own, by one pass and
+     the column's gap (the margin below). Sticky, so a column scrolled
+     down still shows it; no shadow, because it is docked, not hanging
+     (the station plate's --sm rule). Portalled last, so `order` puts
+     it first. */
+  .desk-run__left > .levelup,
+  .desk-run__side > .levelup {
+    --levelup-gap: var(--sp-6);
+    --levelup-away: calc(-100% - var(--levelup-gap));
+    position: sticky;
     top: 0;
     left: auto;
-    right: var(--desk-run-inset);
-    width: var(--desk-side-w);
-    background: var(--bg-panel);
-    animation-name: levelup-in;
+    right: auto;
+    z-index: 2;
+    order: -1;
+    flex: none;
+    width: auto;
+    box-shadow: none;
+    animation-name: desk-levelup-in;
+    animation-timing-function: cubic-bezier(0.22, 0.68, 0.32, 1);
   }
-  :root[data-chrome="stage"]:has(.desk-run) .levelup--leaving { animation-name: levelup-out; }
-  :root[data-chrome="stage"]:has(.desk-run) .levelup__board {
-    --flap-size: var(--fs-display);
-    width: 100%;
-    height: var(--levelup-h);
-    gap: var(--sp-5);
-    padding: 0 var(--sp-5);
-    border-radius: 0;
-    border-top: none;
-    border-bottom: 3px solid var(--accent2);
+  .desk-run__side > .levelup { --levelup-gap: var(--sp-5); }
+  .desk-run__left > .levelup--leaving,
+  .desk-run__side > .levelup--leaving {
+    animation-name: desk-levelup-out;
+    animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
   }
-  :root[data-levelup] .desk-run__side { padding-top: calc(var(--levelup-h) + var(--sp-6)); }
+  @keyframes desk-levelup-in {
+    from {
+      margin-bottom: calc(-1 * (var(--levelup-h) + var(--levelup-gap)));
+      transform: translateY(var(--levelup-away));
+    }
+  }
+  @keyframes desk-levelup-out {
+    to {
+      margin-bottom: calc(-1 * (var(--levelup-h) + var(--levelup-gap)));
+      transform: translateY(var(--levelup-away));
+    }
+  }
   @media (prefers-reduced-motion: reduce) {
-    .desk-run__side { transition: none; }
+    .desk-run__left > .levelup,
+    .desk-run__side > .levelup { animation-name: levelup-in-still; }
+    .desk-run__left > .levelup--leaving,
+    .desk-run__side > .levelup--leaving { animation-name: levelup-out-still; }
   }
   /* The comprehension text beside its questions (plan 115): whole, at
      the column's width, never the base card's 60vh inner scroll. */
@@ -24040,9 +24099,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      the desk draws the pass's objects everywhere else, instead of 640px
      in the window's middle a long reach from the pass that opened them.
      Still modal; only placed. Opened from a run's pass, where there is
-     no rail, they stay centred. */
+     no rail, they stay centred. The claim sheet (plan 141) carries the
+     balance too but nothing on the rail opened it -- it arrives on its
+     own, over whatever screen the learner came back to -- so it is not
+     one of the pass's doors, and keeps the middle (below). */
   :root[data-chrome="shell"] .status-sheet,
-  :root[data-chrome="shell"] .sheet:has(> .balance) {
+  :root[data-chrome="shell"] .sheet:has(> .balance):not(.claim-sheet) {
     inset: auto auto var(--sp-5) calc(var(--desk-rail-w) + var(--sp-3));
     width: var(--desk-side-w);
     margin: 0;
@@ -24050,6 +24112,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   /* At a column's width a row of two actions wraps their labels: they
      stack, as they do at a phone's, which this width is. */
   :root[data-chrome="shell"] .sheet:has(> .balance) > :is(.btn-primary, .btn-secondary, .btn-depart) { flex-basis: 100%; }
+  /* 補充 — the claim sheet in the window's middle, at a column's width:
+     the 回数券 book is drawn for a phone's (a stub is a thumb's width
+     across), and at the dialog's full --card-w it spread into fifty
+     flat bars with the figure a long way from its button. */
+  .claim-sheet { width: var(--desk-side-w); }
   /* The CSV import (components/decks/ImportCardsMenu) is its own
      overlay, not a sheet; it takes the desk dialog's width, material,
      scrim and arrival. Centred by auto margins, which fall to nothing
@@ -24131,66 +24198,269 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     right: var(--sp-2);
   }
 
-  /* ── 正面口 — first contact (plan 122) ──
+  /* ── 路線 — first contact as the rail being laid (plans 122, 140) ──
      From the Welcome to the first card a computer drew a phone: a 640px
-     column in an empty window, its answers a card wide, Continue on the
-     window's floor. On the desk the boarding draws a run's frame: the
-     questions centred in what a column on the right edge leaves, the
-     column holding the journey the answers build (screens/BoardingFlow,
-     BuildSteps). The arrival screens -- the plan, the account, the pass
-     -- have the window to themselves at their own widths. No rail
-     until Today. Every rule here is scoped under .desk-brd, and writes
-     no (element, property) pair the boarding's short step writes
-     (@container brd (max-height: 739px); held by src/desk.css.test.js),
-     so a laptop's short window still gets the short step. */
+     column in an empty window. Plan 122 drew a run's frame, the journey
+     in a column at the window's right edge; plan 140 is the owner's pick
+     A of three directions drawn after it (the canvas "Desktop onboarding
+     — options"). The desk's chrome is the rail, so first contact lays it
+     before it has any gates: a sumi column at --desk-side-w down the
+     LEFT edge, the rail's masthead at its head (.desk-rail__mast, the
+     same markup), and under it the sign-in on the Welcome, then the
+     boarding's line -- a named stop per question, its answer printed
+     once given (components/boarding/DeskLine). The head's track and the
+     right-hand journey were the same line drawn twice; the column is
+     the one. The paper holds the question, its answers laid for the
+     width, and the floor: Back beside Continue (BoardFrame's
+     BoardBack). No rail until Today. Every rule here is scoped under
+     .desk-brd or .desk-door, and writes no (element, property) pair the
+     boarding's short step writes (@container brd (max-height: 739px);
+     held by src/desk.css.test.js), so a laptop's short window still
+     gets the short step. */
   .desk-brd {
     --fs-display-fluid: var(--fs-display);
-  }
-  /* The side is a run's (above), on the right edge whatever the width:
-     the questions are centred in what it leaves, not in a workspace. */
-  .desk-brd__side,
-  .desk-door__side { inset: 0 0 0 auto; }
-  .desk-brd--side {
     max-width: none;
-    padding-inline:
-      max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5)))
-      calc(var(--desk-side-w) + max(var(--sp-5), calc((100% - var(--desk-side-w) - var(--card-w)) / 2 + var(--sp-5))));
+    padding-inline: calc(var(--desk-side-w) + var(--sp-7)) var(--sp-7);
   }
-  /* What the column holds, on its centre line, between grow-only air. */
-  .desk-brd__side::before,
-  .desk-brd__side::after,
-  .desk-door__side::before,
-  .desk-door__side::after {
+  /* The column: the rail's material -- its sumi, its lit edge and the
+     shadow it throws, turned to face the screen (.desk-rail) -- at a
+     second column's width, so the phone-born sign-in stands in it at
+     the width it was drawn at. It scrolls on its own on a short window;
+     its foot stays under what it holds. */
+  .desk-brd__side,
+  .desk-door__side {
+    --chrome-edge: color-mix(in srgb, var(--text-on-panel) 22%, var(--burger-menu-border));
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-6);
+    width: var(--desk-side-w);
+    padding-top: calc(var(--safe-top) + var(--sp-6));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-panel);
+    color: var(--text-on-panel);
+    border-right: 1px solid var(--chrome-edge);
+    box-shadow: 10px 0 24px -12px rgba(0, 0, 0, 0.75);
+  }
+  /* The line: a stop per question, each a row of the column -- its dot
+     on the line down the dots' column, its name over its answer. The
+     line is drawn a half a row at a time (above the dot, below it), so
+     the stretch already ridden is lit to the stop being asked and a row
+     that wraps two lines keeps its dot on the line. */
+  .desk-brd__stops {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    margin: 0;
+    padding: 0 var(--sp-4);
+    list-style: none;
+  }
+  .desk-brd__stop { position: relative; }
+  .desk-brd__stop::before,
+  .desk-brd__stop::after {
     content: "";
-    flex: 1 0 0;
+    position: absolute;
+    left: calc(var(--sp-3) + var(--sp-6) / 2);
+    width: 2px;
+    margin-left: -1px;
+    background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
   }
-  /* A row in two registers: the mark, then the label over its value. A
-     side is too narrow for the phone's label | value on one line --
-     "Kana · Vocabulaire · Kanji · Grammaire" needs ~285px of its 256. */
-  .desk-brd__side .brd-step {
+  .desk-brd__stop::before { top: calc(-1 * var(--sp-1)); bottom: 50%; }
+  .desk-brd__stop::after { top: 50%; bottom: 0; }
+  .desk-brd__stop:first-child::before,
+  .desk-brd__stop:last-child::after { content: none; }
+  .desk-brd__stop--done::before,
+  .desk-brd__stop--done::after,
+  .desk-brd__stop--now::before { background: var(--text-on-panel-soft); }
+  .desk-brd__door {
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr);
-    gap: var(--sp-1) var(--sp-4);
-    align-content: center;
+    grid-template-columns: var(--sp-6) minmax(0, 1fr) auto;
     align-items: center;
-    padding-block: var(--sp-3);
+    column-gap: var(--sp-4);
+    width: 100%;
+    min-height: var(--sp-9);
+    padding: var(--sp-2) var(--sp-3);
+    background: none;
+    border: 0;
+    border-radius: var(--r-panel);
+    color: inherit;
+    font: inherit;
+    text-align: start;
   }
-  .desk-brd__side .brd-step__mark { grid-row: span 2; }
-  .desk-brd__side .brd-step__val {
-    margin-left: 0;
-    text-align: left;
+  button.desk-brd__door { cursor: pointer; }
+  .desk-brd__door > .svg {
+    width: 16px;
+    height: 16px;
+    color: var(--text-on-panel-soft);
   }
-  /* The projection is priced, never answered: full ink, mark empty. */
-  .desk-brd__side .brd-step--next:has(> .brd-step__val) { opacity: 1; }
-  /* The answers and the way on at a column's width, centred under the
-     question, which keeps the car's: the width a desk run's choices
-     stand at. The name's field keeps the car's, for a name at the
-     display size. */
+  .desk-brd__dot {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 12px;
+    height: 12px;
+    border: 2px solid color-mix(in srgb, var(--text-on-panel) 40%, transparent);
+    border-radius: var(--r-pill);
+    background: var(--bg-panel);
+  }
+  .desk-brd__txt {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-1);
+    min-width: 0;
+  }
+  .desk-brd__lab {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: var(--text-on-panel-soft);
+  }
+  .desk-brd__val {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-on-panel);
+    overflow-wrap: anywhere;
+  }
+  .desk-brd__stop--done .desk-brd__dot {
+    border-color: var(--text-on-panel-soft);
+    background: var(--text-on-panel-soft);
+  }
+  /* The stop being asked: the lit gate's wash, a ring in the pass's
+     gold (the ring alone -- colour is an edge, a ring or a numeral),
+     its name in full ink and the pick as it stands in gold, mixed
+     toward the panel's ink as the fare is. */
+  .desk-brd__stop--now .desk-brd__door { background: color-mix(in srgb, var(--text-on-panel) 12%, transparent); }
+  .desk-brd__stop--now .desk-brd__dot {
+    width: 18px;
+    height: 18px;
+    border: 3px solid var(--accent2);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 25%, transparent);
+  }
+  .desk-brd__stop--now .desk-brd__lab { color: var(--text-on-panel); }
+  .desk-brd__stop--now .desk-brd__val { color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel)); }
+  /* The foot, where the rail's will be: the projection while the
+     questions run, the pass once the plan is built. */
+  .desk-brd__foot {
+    margin-top: auto;
+    padding: 0 var(--sp-4);
+    padding-bottom: calc(var(--sp-4) + var(--safe-bottom));
+  }
+  .desk-brd__proj {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+    padding: var(--sp-4) var(--sp-5);
+    border: 1px solid color-mix(in srgb, var(--text-on-panel) 16%, transparent);
+    border-radius: var(--r-identity);
+  }
+  .desk-brd__fig {
+    font-family: var(--font-display);
+    font-size: var(--fs-heading);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--text-on-panel);
+  }
+  /* The pass, issued: the rail's pocket pass (.desk-pass) in its
+     material, with nothing on it to press yet. It rises into the foot
+     as the pass step's pass rose onto its screen. */
+  .desk-brd__pass {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    padding: var(--sp-4);
+    overflow: hidden;
+    border: 1px solid color-mix(in srgb, var(--pass-ink) 70%, transparent);
+    border-radius: var(--r-identity);
+    background:
+      linear-gradient(155deg,
+        color-mix(in srgb, var(--pass-ink) 38%, var(--bg-panel)) 0%,
+        var(--bg-panel) 62%);
+    animation: desk-brd-issue 480ms cubic-bezier(0.22, 0.68, 0.32, 1) 200ms backwards;
+  }
+  .desk-brd__holder {
+    font-family: var(--font-serif);
+    font-size: var(--fs-lead);
+    font-weight: 700;
+    color: var(--text-on-panel);
+  }
+  .desk-brd__face {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-3);
+  }
+  .desk-brd__lvl {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 2px solid color-mix(in srgb, var(--pass-ink) 70%, var(--text-on-panel));
+    border-radius: var(--r-pill);
+    font-family: var(--font-display);
+    font-size: var(--fs-caption);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    /* A roundel centres its line box, not its ink (.hud__level). */
+    line-height: normal;
+  }
+  .desk-brd__climb {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: var(--sp-2);
+    min-width: 0;
+  }
+  .desk-brd__purse {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--sp-1);
+  }
+  .desk-brd__bal {
+    font-family: var(--font-display);
+    font-size: var(--fs-title);
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .desk-brd__gift {
+    font-family: var(--font-display);
+    font-size: var(--fs-caption-xs);
+    font-weight: 700;
+    letter-spacing: var(--tr-caption);
+    text-transform: uppercase;
+    color: color-mix(in srgb, var(--accent2) 70%, var(--text-on-panel));
+  }
+  @keyframes desk-brd-issue {
+    from { opacity: 0; transform: translateY(var(--sp-5)); }
+  }
+  /* A step's width, set on its car so a leaving car keeps its own while
+     it pulls away: a column's for most questions, the card's for the
+     name, the kana and the rhythm (four tiles to a row), three of a
+     run's columns for the six reasons, the canvas for the line of
+     stations, and two columns for the plan. The answers and the floor
+     stand at it, centred under the question, which keeps the car's. */
+  .desk-brd .brd__car { --desk-brd-w: var(--desk-side-w); }
+  .desk-brd .brd__car:is([data-car="name"], [data-car="kana"], [data-car="reveal"], [data-car="rhythm"]) { --desk-brd-w: var(--card-w); }
+  .desk-brd .brd__car[data-car="why"] { --desk-brd-w: calc(3 * var(--desk-run-col-min) + 2 * var(--sp-3)); }
+  .desk-brd .brd__car:is([data-car="level"], [data-car="goal"]) { --desk-brd-w: var(--desk-board-w); }
+  .desk-brd .brd__car[data-car="plan"] { --desk-brd-w: calc(2 * var(--desk-side-w) + var(--sp-6)); }
   .desk-brd .brd__stage,
   .desk-brd .brd__foot,
   .desk-door .brd__foot {
     width: 100%;
-    max-width: var(--desk-side-w);
+    max-width: var(--desk-brd-w, var(--desk-side-w));
     margin-inline: auto;
   }
   /* The question, its answers and the way on stand as one block on the
@@ -24200,68 +24470,264 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      top and the body scrolls. */
   .desk-brd .brd__car > :last-child { margin-bottom: auto; }
   .desk-brd .brd__foot { margin-top: var(--sp-7); }
+  /* The plan's one action stands under it at a ticket's width. */
+  .desk-brd .brd__car[data-car="plan"] .brd__foot { max-width: var(--desk-side-w); }
   .desk-brd .brd__car > .brd__body:not(.brd__body--center) {
     flex: 0 1 auto;
     margin-top: auto;
     /* Sized to what it holds, the body scrolls with no room under its
        last answer, and every step's last thing arrives rising -- an
-       answer 6px (brd-in), the kana's readings 8px, the pass 40px
-       (brd-up): while it was still low it hung past the body's foot and
-       printed a scrollbar at every step. The room is kept inside the
-       box and given back outside, so the answers and Continue stand
-       where they did. It is the rung Continue keeps under the last
-       answer, the car's gap and the foot's margin (--sp-8), so the clip
-       stops on the foot's edge; on a frame under 740px, where the gap
-       narrows a rung, it reaches 4px under the foot, which is drawn
-       after the body and covers it. */
+       answer 6px (brd-in), the kana's readings 8px: while it was still
+       low it hung past the body's foot and printed a scrollbar at every
+       step. The room is kept inside the box and given back outside, so
+       the answers and Continue stand where they did. It is the rung
+       Continue keeps under the last answer, the car's gap and the
+       foot's margin (--sp-8), so the clip stops on the foot's edge; on
+       a frame under 740px, where the gap narrows a rung, it reaches 4px
+       under the foot, which is drawn after the body and covers it. */
     padding-bottom: var(--sp-8);
     margin-bottom: calc(-1 * var(--sp-8));
   }
-  .desk-brd .brd__stage:has(> .brd-field) { max-width: none; }
+  /* A question with no floor -- the kana's, whose answers go on by
+     themselves, when there is no way back to stand there either --
+     stands on the centre line too: the room given back above is the
+     auto margin under it, not the rung it lent the foot (the kana's
+     four answers sat on the window's floor). */
+  .desk-brd .brd__car > .brd__body:not(.brd__body--center):last-child { margin-bottom: auto; }
+  /* The floor: the way back beside the way on, the two ways off a
+     question (plan 140). Back keeps its label's width and the ghost's
+     clothes; Continue keeps a ticket's width at the floor's far end,
+     sharing the room on a question a column wide. */
+  .desk-brd__floor {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--sp-4);
+  }
+  .desk-brd__floor > .btn-depart:last-child { flex: 0 1 var(--desk-side-w); }
+  .desk-brd__back {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--sp-2);
+    /* Beside Continue it is stretched to its height; alone (the kana's
+       floor) it keeps a floor's own, the short step's Continue. */
+    min-height: var(--sp-9);
+    padding: 0 var(--sp-5) 0 var(--sp-4);
+    background: none;
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+    color: var(--text-secondary);
+    font: inherit;
+    font-size: var(--fs-body);
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .desk-brd__back > .svg { width: 18px; height: 18px; }
+  /* The six reasons, three to a row where three run columns fit (two
+     under that): a stack of six full-width rows is a phone's list. */
+  .desk-brd .brd__car[data-car="why"] .brd__opts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--desk-run-col-min)), 1fr));
+  }
+  /* The kana's four answers and the four rhythms, one row of tiles. */
+  .desk-brd .brd__car:is([data-car="kana"], [data-car="rhythm"]) .brd-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  /* ── the stops as a line of stations (components/boarding/LevelStep)
+     The level and the goal lists drawn as what they name: a station per
+     stop on a rail, its code in its ring and the stop's card under it,
+     every stop in one row where each holds half a run's column, two
+     rows under that (StationLine counts). The rail is drawn a half a
+     station at a time, each half reaching half the gap, and lit in the
+     pass's gold up to the pick -- the ride. */
+  .desk-brd__line {
+    display: grid;
+    grid-template-columns: repeat(var(--stations, 6), minmax(0, var(--desk-run-col-min)));
+    justify-content: center;
+    gap: var(--sp-6) var(--sp-3);
+  }
+  .desk-brd__stn {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-3);
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    color: var(--text-primary);
+    text-align: center;
+    cursor: pointer;
+  }
+  .desk-brd__stn::before,
+  .desk-brd__stn::after {
+    content: "";
+    position: absolute;
+    top: calc(var(--sp-8) / 2);
+    height: 3px;
+    margin-top: -1.5px;
+    background: color-mix(in srgb, var(--text-secondary) 40%, transparent);
+  }
+  .desk-brd__stn::before { left: calc(-1 * var(--sp-3) / 2); right: 50%; }
+  .desk-brd__stn::after { left: 50%; right: calc(-1 * var(--sp-3) / 2); }
+  .desk-brd__stn--head::before,
+  .desk-brd__stn--tail::after { content: none; }
+  .desk-brd__stn--ride::before,
+  .desk-brd__stn--ride::after,
+  .desk-brd__stn--on::before { background: var(--accent2); }
+  .desk-brd__rnd {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-8);
+    height: var(--sp-8);
+    border: 2px solid var(--surface-line);
+    border-radius: var(--r-pill);
+    background: var(--bg-main);
+    font-family: var(--font-display);
+    font-size: var(--fs-sm);
+    font-weight: 700;
+    letter-spacing: var(--tr-term);
+    text-indent: var(--tr-term);
+    /* Centred on its line box, not on its ink (.brd-opt__code). */
+    line-height: normal;
+    color: var(--text-secondary);
+  }
+  .desk-brd__stn--ride .desk-brd__rnd {
+    border-color: var(--accent2);
+    color: var(--text-primary);
+  }
+  .desk-brd__stn--on .desk-brd__rnd {
+    border: 3px solid var(--accent2);
+    color: var(--text-primary);
+    box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent2) 22%, transparent);
+  }
+  .desk-brd__tile {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    align-self: stretch;
+    gap: var(--sp-1);
+    padding: var(--sp-4) var(--sp-3) var(--sp-3);
+    background: var(--surface);
+    border: 1px solid var(--surface-line);
+    border-radius: var(--r-card);
+  }
+  .desk-brd__stn--on .desk-brd__tile {
+    border-color: var(--accent2);
+    background: color-mix(in srgb, var(--accent2) 14%, var(--surface));
+  }
+  .desk-brd__tile > .brd-tag { margin-bottom: var(--sp-1); }
+  .desk-brd__name {
+    font-family: var(--font-display);
+    font-size: var(--fs-body);
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .desk-brd__desc {
+    display: flex;
+    flex-direction: column;
+    font-size: var(--fs-sm);
+    line-height: 1.4;
+    text-wrap: balance;
+    color: var(--text-secondary);
+  }
+  /* On the gold wash the soft ink drops under the floor (.brd-opt--on). */
+  .desk-brd__stn--on .desk-brd__desc { color: var(--text-primary); }
+  .desk-brd__stn .desk-brd__tile > .desk-kbd {
+    margin-top: auto;
+    opacity: 0.7;
+  }
+  .desk-brd__chk {
+    position: absolute;
+    top: calc(var(--sp-8) + var(--sp-3) + var(--sp-2));
+    right: var(--sp-2);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--sp-6);
+    height: var(--sp-6);
+    border: 1.5px solid var(--accent2);
+    border-radius: var(--r-pill);
+    color: var(--accent2);
+  }
+  .desk-brd__chk > .svg { width: 12px; height: 12px; stroke-width: 3; }
   /* The plan: the chart 1:1 in a column of its own, the lead and the
      promises beside it, the way on under them -- the chart was drawn
      at 1.76x, and the promise ran past the fold at 1100x800. */
-  .desk-brd[data-step="plan"] { max-width: var(--board-w); }
   .desk-brd .brd__stage:has(> .brd-chart) {
-    max-width: none;
     display: grid;
     grid-template-columns: var(--desk-side-w) minmax(0, 1fr);
     grid-template-rows: auto 1fr;
     align-items: start;
   }
   .desk-brd .brd__stage:has(> .brd-chart) > .brd-chart { grid-row: span 2; }
-  .desk-brd[data-step="plan"] .brd__foot { margin-inline: calc(var(--desk-side-w) + var(--sp-6)) auto; }
-  /* The Welcome (components/boarding/Welcome): the sign and the rolling
-     stock across what the sign-in's column leaves, Board at a ticket's
-     width, the sign-in beside it (App no longer swaps to a second
-     screen on the desk). The heading steps down to the section rung
-     under the 辻, which is the mark. The column's Log in wears the
+  /* The Welcome (components/boarding/Welcome's DeskWelcome): the
+     column's masthead is the mark, so the paper's heading takes the
+     display rung; the heading, the tagline and Board as one block over
+     the rolling stock, run across the paper, the whole centred between
+     grow-only air (the density contract). The column's Log in wears the
      provider button's ghost clothes, so Board is the page's one filled
-     action. */
+     action; the sign-in card is the paper's own, set in the sumi. */
   .desk-door {
-    --fs-display-fluid: var(--fs-heading);
+    --fs-display-fluid: var(--fs-display);
     max-width: none;
-    padding-inline-end: calc(var(--desk-side-w) + var(--sp-5));
+    padding-inline: var(--desk-side-w) 0;
   }
+  .desk-door__work {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--sp-8);
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .desk-door__work::before,
+  .desk-door__work::after {
+    content: "";
+    flex: 1 0 0;
+  }
+  .desk-door__work::before { margin-bottom: calc(-1 * var(--sp-8)); }
+  .desk-door__work::after { margin-top: calc(-1 * var(--sp-8)); }
+  .desk-door__auth {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-4);
+    margin-block: auto;
+    padding: 0 var(--sp-5);
+    padding-bottom: calc(var(--sp-6) + var(--safe-bottom));
+  }
+  .desk-door__side .desk-deck__cap,
+  .desk-door__side .auth-foot { color: var(--text-on-panel-soft); }
   .desk-door__side .auth-submit {
     background: transparent;
     border: 1px solid var(--surface-line);
     color: var(--text-primary);
   }
-  /* The band runs across the area, capped at the canvas and faded at
+  /* The band runs across the paper, capped at the canvas and faded at
      its ends -- a clip mid-window read as a broken card, not a train
      leaving. Four copies a lane (Welcome's Lane) move twice as far per
      loop, so the loop takes twice as long: the cards pass at a phone's
      speed. A pointer resting on the band stops it. */
   .desk-door .brd-roll {
-    width: calc(100% + 2 * var(--sp-5));
+    flex: none;
+    width: 100%;
     max-width: var(--desk-board-w);
     margin-inline: 0;
-    align-self: center;
     mask-image: linear-gradient(to right, transparent, currentcolor var(--sp-9), currentcolor calc(100% - var(--sp-9)), transparent);
   }
   .desk-door .brd-roll__lane { animation-duration: 52s; }
   .desk-door .brd-roll__lane--back { animation-duration: 68s; }
+  @media (prefers-reduced-motion: reduce) {
+    .desk-brd__pass { animation: none; }
+  }
   /* A pointer's answer to "is this one I can pick": the edge warms
      toward the gold a pick fills, with no lift; the focus ring's twin. */
   @media (pointer: fine) {
@@ -24270,12 +24736,28 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     .desk-brd .brd-kopt:not(.brd-kopt--on):hover,
     .desk-brd .brd-kopt:not(.brd-kopt--on):focus-visible,
     .desk-brd .brd-cell:not(.brd-cell--on):hover,
-    .desk-brd .brd-cell:not(.brd-cell--on):focus-visible {
+    .desk-brd .brd-cell:not(.brd-cell--on):focus-visible,
+    .desk-brd__stn:not(.desk-brd__stn--on):hover > .desk-brd__tile,
+    .desk-brd__stn:not(.desk-brd__stn--on):focus-visible > .desk-brd__tile {
       border-color: color-mix(in srgb, var(--accent2) 45%, var(--surface-line));
     }
-    .desk-brd .brd__back:hover { color: var(--text-primary); }
+    .desk-brd__back:hover,
+    .desk-brd__back:focus-visible {
+      color: var(--text-primary);
+      border-color: var(--text-secondary);
+    }
+    button.desk-brd__door:hover,
+    button.desk-brd__door:focus-visible { background: color-mix(in srgb, var(--text-on-panel) 6%, transparent); }
+    button.desk-brd__door:hover > .svg,
+    button.desk-brd__door:focus-visible > .svg { color: var(--text-on-panel); }
     .desk-brd .brd-day { cursor: pointer; }
     .desk-door .brd-roll:hover .brd-roll__lane { animation-play-state: paused; }
+  }
+  /* A door on the line takes the rail's ring when a key reaches it: the
+     column is sumi, and the paper's ring would not read on it. */
+  button.desk-brd__door:focus-visible {
+    outline: 2px solid var(--text-on-panel);
+    outline-offset: -2px;
   }
 
   /* ── copied, focused (plan 123) ──
@@ -24336,8 +24818,8 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      (RunPanelsContext) but the flashcard's hint: the card panel lists
      them.
 
-     The inset is the distance from the window's edge to the columns'
-     (the level board docks against it), never less than the gutter. */
+     The inset is the distance from the window's edge to the columns',
+     never less than the gutter. */
   :root:has(.desk-run--panels) {
     --desk-run-inset: max(var(--sp-6), calc((100% - var(--desk-run-w) - 2 * var(--sp-6)) / 2));
   }

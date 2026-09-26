@@ -80,7 +80,7 @@ export function getDeskSections(tabId, t) {
     .map(s => ({ path: s.path, title: s.title }))
   if (tabId === 'profile') {
     const settings = identityFor('/profile/settings', t)
-    // The guide's Settings stop (plan 140): the profile draws no door to
+    // The guide's Settings stop (plan 143): the profile draws no door to
     // Settings on the desk, the rail being one, so the stop points here.
     rows.push({ path: settings.path, title: settings.title, guide: 'profile.settings' })
   }

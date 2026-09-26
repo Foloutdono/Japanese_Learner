@@ -13,7 +13,7 @@ import { useDesk } from '../../hooks/useDesk'
 // three figures in one row of three: the streak, the longest, the
 // days stamped.
 //
-// The sheet names itself by its month (plan 140): the month is the
+// The sheet names itself by its month (plan 143): the month is the
 // title and the year sits in the margin, where "Stamp book" over
 // "September 2026" said the name of the object a second time.
 //
@@ -121,7 +121,7 @@ function Figure({ value, unit, label }) {
   )
 }
 
-// ── The records (canvas ProfileInserts, plan 140) ─────────────
+// ── The records (canvas ProfileInserts, plan 143) ─────────────
 // What no other object on the screen already says (the streak rides
 // the stamp book, the lines their ledger): every review, the share
 // kept, and the best perfect run -- the longest unbroken run of good
@@ -163,7 +163,7 @@ export function Records({ profile, t }) {
 // Statistics, drawn as the ledger draws a line (roundel, name) with a
 // chevron where a figure would be, and Settings with the gear in its
 // roundel: two cells, two across. They closed the records' lattice
-// until plan 140 gave the records a third figure; they are their own
+// until plan 143 gave the records a third figure; they are their own
 // lattice now, straight under the pass. The phone's alone -- on the desk both
 // halls hang under the lit gate on the rail, so the page drew the same
 // two doors a second time (ProfileScreen.jsx leaves them out there).

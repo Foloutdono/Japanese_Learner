@@ -19,7 +19,7 @@ const { ApiError } = await import('./api')
 const credits = await import('../stores/credits')
 const { postReview } = await import('./reviews')
 
-const FREE = { balance: 10, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: true }
+const FREE = { balance: 10, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: true }
 
 beforeEach(() => {
   apiJson.mockReset()
@@ -59,9 +59,9 @@ describe('postReview', () => {
   })
 
   it('raises the run-out sheet on a 402 out_of_credits and still rejects', async () => {
-    apiJson.mockRejectedValue(new ApiError(402, { detail: 'out_of_credits', balance: 0, refillAt: '2026-09-07T00:00:00+00:00' }, '/api/today/review'))
+    apiJson.mockRejectedValue(new ApiError(402, { detail: 'out_of_credits', balance: 0, nextCreditAt: '2026-09-07T00:48:00+00:00' }, '/api/today/review'))
     await expect(postReview('/api/today/review', {}, {}, { cleared: 12 })).rejects.toBeInstanceOf(ApiError)
-    expect(credits.peekRunOut()).toEqual({ balance: 0, refillAt: '2026-09-07T00:00:00+00:00', cleared: 12 })
+    expect(credits.peekRunOut()).toEqual({ balance: 0, nextCreditAt: '2026-09-07T00:48:00+00:00', cleared: 12 })
     expect(credits.peekBalance()).toBe(0)
   })
 

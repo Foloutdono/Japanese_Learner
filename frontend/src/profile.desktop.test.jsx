@@ -62,7 +62,7 @@ describe('the profile on the desk', () => {
     expect(document.querySelector('.profile > .profile__stale')).not.toBeNull()
   })
 
-  it('draws no door the rail already holds, and no offer of its own (plan 140)', async () => {
+  it('draws no door the rail already holds, and no offer of its own (plan 143)', async () => {
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/profile']}>
@@ -85,7 +85,7 @@ describe('the profile on the desk', () => {
     expect(document.querySelector('.pass__footer > button.pass__door')).not.toBeNull()
   })
 
-  it('draws each line with a rail per stop, the stops sharing one column (plan 140)', async () => {
+  it('draws each line with a rail per stop, the stops sharing one column (plan 143)', async () => {
     const lv = (learned, total) => ({ learned, total, started: learned, score: total ? learned / total : 0 })
     const stats = { items: {
       kana: { hiragana_basic: lv(46, 46), hiragana_combos: lv(33, 33), katakana_basic: lv(40, 46), katakana_combos: lv(4, 33) },

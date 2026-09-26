@@ -18,7 +18,7 @@ describe('rewardTier', () => {
     expect(rewardTier(null)).toBe('fare')
   })
 
-  it('calls every level-up a level board, whatever the number', () => {
+  it('calls every level-up a level, whatever the number', () => {
     // There is no third tier. Levels used to sit in bands with a title
     // each (見習い … 免許皆伝), and crossing one promoted the reward to
     // a full-screen pass re-issue; now a level is a level.
@@ -31,7 +31,7 @@ describe('rewardTier', () => {
     // The regression this guards is silent: re-adding a
     // `gates.add('toast')` puts a 2.2s delay back on every review and
     // nothing fails. Nothing may open that gate now — the fare rides
-    // the level HUD and the level board plays over the next card.
+    // the level HUD and the level-up's pass plays over the next card.
     const here = dirname(fileURLToPath(import.meta.url))
     const offenders = []
     for (const dir of [join(here, '..', 'screens'), join(here, '..', 'hooks')]) {

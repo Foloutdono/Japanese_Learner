@@ -28,7 +28,7 @@ export const HAS_PAYWALL = true
 // offer_view (backend/core/events.py) must name exactly these — every
 // funnel query slices on this, so a door added on one side only is a
 // silently-missing column in the dashboard. The profile was a door of
-// its own until plan 140 made its pass's footer the door to the
+// its own until plan 143 made its pass's footer the door to the
 // balance sheet, which is where the offer is reached from there now;
 // rows recorded before that still carry `where: 'profile'`.
 export const SOURCES = Object.freeze({

@@ -42,7 +42,7 @@ const apiJson = vi.fn(async () => ({}))
 const apiJsonWithTimeout = vi.fn(async () => ({}))
 const apiFetch = vi.fn(async (path, _session, opts) => {
   if (path === '/api/credits') {
-    return { ok: true, status: 200, json: async () => ({ balance: 30, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false }) }
+    return { ok: true, status: 200, json: async () => ({ balance: 30, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false }) }
   }
   if (path === '/api/profile' && opts?.method === 'PATCH') {
     return { ok: true, status: 200, json: async () => JSON.parse(opts.body) }

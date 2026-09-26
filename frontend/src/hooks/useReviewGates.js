@@ -155,11 +155,12 @@ export function useReviewGates({ advance, sessionKey }) {
           // answered earlier in that same batch.
           const { leveledUp, newLevel } = applyXpGain({ amount })
           // No reward holds the queue. The fare rides the level HUD and
-          // the level board is an announcement on the in-car display:
-          // both play over the next card, because a learner who has
-          // just rated one card is already looking for the next, and
-          // the redesign's whole point is that nothing between two
-          // cards waits on an animation. Gating the level board cost
+          // a level is clipped on the pass (plan 142; a board on the
+          // in-car display before it): both play over the next card,
+          // because a learner who has just rated one card is already
+          // looking for the next, and the redesign's whole point is
+          // that nothing between two cards waits on an animation.
+          // Gating the level board it replaced cost
           // 2.9s measured per level, on top of the 2.2s the fare tick
           // used to cost per review. The one reward that did wait to be
           // dismissed by hand was the rank re-issue, and the ranks are

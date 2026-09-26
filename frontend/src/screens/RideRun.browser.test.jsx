@@ -28,7 +28,7 @@ vi.mock('../stores/profileSummary', async (o) => ({
 }))
 vi.mock('../stores/credits', async (o) => ({
   ...(await o()),
-  useCredits: () => ({ balance: 200, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+  useCredits: () => ({ balance: 200, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
 const speakJapanese = vi.fn()
 vi.mock('../lib/audio', async (o) => ({

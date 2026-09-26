@@ -608,9 +608,68 @@ runtime purpose. Two consequences worth knowing:
   `components/profile/CommuterPass.jsx`'s `PassHead`,
   `src/settings.phone.test.jsx`, `src/settings.desktop.test.jsx` and
   `index.css`; DESIGN.md, "The desk" and Structure).
-  **140** is 定期入れ, the profile tightened (the owner's pick A of three
-  directions drawn on the canvas "Tsuji profile — options", for the phone
-  and the desk alike): the same inserts in a third less of the phone's
+  **140** is 路線, first contact on the desk as the rail being laid
+  (numbered 140 because 139 went to Settings while it was open; the
+  owner's pick A of three directions drawn on the canvas "Desktop
+  onboarding — options"): a sumi column on the left with the rail's
+  masthead, the sign-in in it on the Welcome and, through the boarding,
+  the line itself — a named stop per question printing its answer, the
+  one asked lit with the pick as it stands, a stop behind a door back to
+  its question, the projection at its foot and then the pass; the head's
+  track and the right-hand journey retired; Back on the floor beside
+  Continue; the answers laid for the width (the reasons three across,
+  the kana and the rhythm four, the level and the goal as a line of
+  stations with the ride lit to the pick); and the pass's screen folded
+  into the plan, which enters the station (cited in
+  `components/boarding/DeskLine.jsx`, `boardBack.js`, `BoardFrame.jsx`,
+  `LevelStep.jsx`, `KanaStep.jsx`, `PlanStep.jsx`, `AccountStep.jsx`,
+  `PassStep.jsx`, `countUp.js`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
+  `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
+  机 section of `index.css`; DESIGN.md, "The desk").
+  **141** is 補充, the refill filling through the day (numbered 141
+  because 139 went to Settings and 140 to the desk's first contact while
+  it was open): the free pass's thirty credits a day no longer land in
+  one go at the learner's midnight but one every 48 minutes (`REFILL_EVERY`), counted from
+  `user_profiles.credits_accrued_at`, never past the cap, a full tank
+  banking nothing; what has landed is `pending` until claimed (`POST
+  /api/credits/claim`, one `refill` row), and a fare claims it first so
+  it is never a refusal; the app opens a "while you were away" sheet on
+  arrival -- boot, or back in front after `AWAY_MS` out of sight -- with
+  the credits, the 回数券 book (the cap as a stub a credit: held, landed,
+  room; the owner's pick C of four drawn directions) and a Claim
+  button, centred on the desk at a column's width rather than at the
+  rail's foot, and claims quietly as each credit lands while it is
+  open (cited in `core/credits.py`,
+  `routes/credits.py`, `routes/profile.py`, `srs/data_structure.sql`,
+  `tests/test_credits.py`, `stores/credits.js`, `hooks/useRefill.js`,
+  `components/credits/ClaimSheet.jsx`, `domain/credits.js`, the balance
+  sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
+  `PassStep.jsx`, `App.jsx`, `index.css`, `src/claim.desktop.test.jsx`
+  and `docs/design/desk/README.md`).
+  **142** is 改札鋏, the level-up clipped on the pass (numbered 142
+  because 139 went to Settings, 140 to the desk's first contact and 141
+  to the refill while it was open; the owner's pick D of four directions
+  drawn on the canvas "Tsuji — the level-up": the board retimed, a
+  station plate, the in-car route, the pass): the learner's 定期券 comes
+  down in its own material, the gate's punch bites its top edge (a mask
+  grown through a registered length, the chip falling away), the old
+  figure is struck and the new one printed in gold, and the balance
+  empties to the new level's start; on a phone it hangs across the top
+  and the stage steps down, wider it floats at the right, and on the
+  desk StudyStage portals it into the top of a run's column -- the left
+  one on three panels -- which steps down under it; the split-flap board
+  and `SplitFlap.jsx` retired, the board's clatter replaced by the
+  punch's voice (`pass-clip`) (cited in `components/rewards/XpToast.jsx`,
+  `components/study/StudyStage.jsx`, `domain/rewardTier.js`,
+  `hooks/useReviewGates.js`, `lib/audio/voices.js`, `lib/audio/chimes.js`,
+  `lib/audio/settings.js`, `screens/RewardsPreview.jsx`,
+  `src/runs.wide.test.jsx`, `src/deskfree.phone.test.jsx`, `index.css`
+  and its 机 section; DESIGN.md, "Rewards" and "The desk").
+  **143** is 定期入れ, the profile tightened (numbered 143 because 140
+  went to the desk's first contact, 141 to the refill and 142 to the
+  level-up while it was open; the owner's pick A of three directions
+  drawn on the canvas "Tsuji profile — options", for the phone and the
+  desk alike): the same inserts in a third less of the phone's
   height — the XP ring gone from the holder's initial (the balance row's
   bar is the climb) and the month the pass was issued under the name
   (`onboardedAt`), the footer the door to the balance sheet and the
@@ -618,8 +677,9 @@ runtime purpose. Two consequences worth knowing:
   titled with its month over three figures in one row, the records three
   across with the best perfect run, the lines a row each on one subgrid,
   the doors to Statistics and Settings a lattice of their own straight
-  under the pass (the owner's follow-up), five on the ranking; on the desk each line drawn with a rail per stop and no door the
-  rail already holds, the guide's Settings stop on the rail's station
+  under the pass (the owner's follow-up), five on the ranking; on the
+  desk each line drawn with a rail per stop and no door the rail already
+  holds, the guide's Settings stop on the rail's station
   (cited in `screens/ProfileScreen.jsx`, `components/profile/PassHolder.jsx`,
   `ProfileBlocks.jsx`, `LineLedger.jsx`, `components/boarding/PassStep.jsx`,
   `config/tabs.js`, `components/chrome/DeskRail.jsx`,
@@ -627,7 +687,7 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  When starting a new wave, begin at **141** or higher, and check
+  When starting a new wave, begin at **144** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

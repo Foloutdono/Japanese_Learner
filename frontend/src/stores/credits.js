@@ -2,12 +2,16 @@ import { useSyncExternalStore } from 'react'
 import { createRemoteStore } from './remote'
 import { track } from '../lib/track'
 import { stopwatch } from '../lib/dwell'
+import { supabase } from '../lib/supabase'
+import { apiFetch } from '../lib/api'
 
 // ── 回数券 — the balance, as the chrome sees it (plan 069) ────
 // One cached answer from GET /api/credits, printed on the HUD's pass
 // and the gate card; the pass shows its mark and no figure until it
-// arrives. Shape: { balance, cap, dailyRefill, refillAt, plan,
-// unlimited, enforced } — `balance` null on a pass, never "zero".
+// arrives. Shape: { balance, pending, cap, dailyRefill, refillEvery,
+// nextCreditAt, fullAt, plan, unlimited, enforced } — `balance` null
+// on a pass, never "zero"; `pending` what the refill has landed and
+// nobody has claimed yet (plan 141, below).
 //
 // A review moves it twice: an optimistic decrement the moment the
 // rating lands (the HUD figure must not lag the tap), then the
@@ -31,6 +35,16 @@ export function seedCredits(data) {
 /** The learner this balance belongs to has signed out (stores/account). */
 export function forgetCredits() {
   store.forget()
+  // A claim asked for the last learner must not seed the next one's
+  // balance, and their "while you were away" is not the next one's.
+  claimGeneration += 1
+  claimOffer = null
+  emit()
+}
+
+/** The last answer whole, outside React (hooks/useRefill.js). */
+export function peekCredits() {
+  return store.peek()
 }
 
 /** The last known balance, outside React (tests, the review helper). */
@@ -61,7 +75,7 @@ export function reconcileCredits(fare) {
 // screen) and the run-out sheet is raised by a review the screen fired
 // and forgot. Both mount beside <Routes/> in App.jsx.
 let balanceOpen = false
-let runOut = null   // { balance, refillAt, cleared } or null
+let runOut = null   // { balance, nextCreditAt, cleared } or null
 const listeners = new Set()
 function emit() { listeners.forEach(fn => fn()) }
 const subscribe = fn => { listeners.add(fn); return () => listeners.delete(fn) }
@@ -77,7 +91,7 @@ export function useBalanceOpen() {
 // five unrelated places — the last boarding screen, the balance sheet,
 // the settings list, a run that hit zero and the reading ride's pass
 // plate — and three of those are outside any screen that could hold
-// the state. (The profile was a sixth until plan 140; its pass's footer
+// the state. (The profile was a sixth until plan 143; its pass's footer
 // opens the balance sheet now.)
 //
 // The funnel is recorded HERE rather than in the sheet, on purpose.
@@ -157,4 +171,64 @@ export function clearRunOut() { runOut = null; emit() }
 export function peekRunOut() { return runOut }
 export function useRunOut() {
   return useSyncExternalStore(subscribe, () => runOut, () => null)
+}
+
+// ── 補充 — the refill, claimed (plan 141) ────────────────────
+// The refill lands a credit every 48 minutes and the server keeps what
+// has landed as `pending` until it is claimed (core/credits.py). Two
+// ways it is: the "while you were away" sheet the app opens on arrival
+// (components/credits/ClaimSheet.jsx, its button), and quietly, as
+// each credit lands while the app is open in front of the learner
+// (hooks/useRefill.js) -- the balance filling itself, in the HUD. A
+// fare claims it too, server-side, so nothing here is ever the thing
+// standing between a learner and a review.
+let claimOffer = null   // { amount, from } or null -- the sheet
+let claimGeneration = 0
+
+/** Open the sheet on `amount` credits landed over a balance of `from`. */
+export function offerClaim(amount, from) {
+  if (!(amount > 0)) return
+  claimOffer = { amount, from: from ?? 0 }
+  emit()
+}
+export function peekClaimOffer() { return claimOffer }
+export function useClaimOffer() {
+  return useSyncExternalStore(subscribe, () => claimOffer, () => null)
+}
+
+/**
+ * POST /api/credits/claim: what has landed, into the balance. Seeds the
+ * store with the server's answer and resolves to the credits it moved
+ * (0 when a fare or another tab got there first). Rejects on a failed
+ * request, leaving the store as it was.
+ */
+export async function claimCredits() {
+  const gen = claimGeneration
+  const { data } = await supabase.auth.getSession()
+  const session = data?.session
+  if (!session) throw new Error('no session')
+  const r = await apiFetch('/api/credits/claim', session, { method: 'POST' })
+  if (!r.ok) throw new Error(`claim ${r.status}`)
+  const { claimed = 0, ...summary } = await r.json()
+  if (gen === claimGeneration) store.seed(summary)
+  return claimed
+}
+
+/**
+ * The sheet's button (and its scrim, and Escape: there is no reason to
+ * leave a credit behind, so every way out of the sheet takes them).
+ * Closes at once with the balance already moved -- the answer is the
+ * one the sheet printed -- and lets the server's figure win when it
+ * arrives, or puts the store back to the server's word on a failure.
+ */
+export function takeClaim() {
+  const offer = claimOffer
+  if (!offer) return Promise.resolve(0)
+  claimOffer = null
+  const cur = store.peek()
+  if (cur && !cur.unlimited && cur.balance != null) {
+    store.seed({ ...cur, balance: cur.balance + offer.amount, pending: 0 })
+  }
+  emit()
+  return claimCredits().catch(() => { refreshCredits(); return 0 })
 }

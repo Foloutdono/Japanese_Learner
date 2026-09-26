@@ -1,6 +1,9 @@
 """GET /api/credits — the balance the HUD's pass prints (plan 069).
-Reading it settles the day: a new account is seeded, a due refill is
-taken. See core/credits.py."""
+Reading it settles the account (a new one is seeded, a clock that has
+never run is started) and counts what the refill has landed without
+claiming it: POST /api/credits/claim is what writes that to the ledger
+-- the "while you were away" sheet's button, and the app's quiet claim
+as each credit lands while it is open (plan 141). See core/credits.py."""
 from fastapi import APIRouter, Depends
 
 from core import credits
@@ -12,3 +15,8 @@ router = APIRouter()
 @router.get("/api/credits")
 def get_credits(user_id: str = Depends(get_user_id)):
     return credits.summary(user_id)
+
+
+@router.post("/api/credits/claim")
+def claim_credits(user_id: str = Depends(get_user_id)):
+    return credits.claim(user_id)

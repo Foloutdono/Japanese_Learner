@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 定期入れ, tightened (plan 140) ──────────────────────────────
+// ── 定期入れ, tightened (plan 143) ──────────────────────────────
 // The owner's pick A of the profile canvas: the same inserts, a third
 // of the phone's height gone. The real screen at 390px, the backend
 // down on purpose so the screen's own fallback (a believable pass,
@@ -56,7 +56,7 @@ async function mount() {
 const $ = sel => document.querySelector(sel)
 const $$ = sel => [...document.querySelectorAll(sel)]
 
-describe('the profile at phone width (plan 140)', () => {
+describe('the profile at phone width (plan 143)', () => {
   it('prints the XP once: an initial with no ring, the bar on the balance row', async () => {
     await mount()
     expect($('.pass__avatar')).not.toBeNull()
@@ -97,7 +97,7 @@ describe('the profile at phone width (plan 140)', () => {
   it('lays the inserts out in order: the pass, the doors, the stamps, the records, five on the board', async () => {
     await mount()
     // The doors stand straight under the pass (the owner's call after
-    // the first round of plan 140), above the stamp book.
+    // the first round of plan 143), above the stamp book.
     const order = ['.pass', '.record--door', '.sbook', '.records--three', '.banzuke']
       .map(sel => $(sel).getBoundingClientRect().top)
     expect([...order].sort((a, b) => a - b)).toEqual(order)

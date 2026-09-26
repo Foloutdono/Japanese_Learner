@@ -5,7 +5,7 @@ import { EditableUsername } from './EditableUsername'
 // place, because changing it is a one-field change and does not
 // deserve a page of its own), and the month the pass was issued.
 //
-// The initial wore the XP arc as a gold ring until plan 140: the bar on
+// The initial wore the XP arc as a gold ring until plan 143: the bar on
 // the balance row below measures the same climb with its figure beside
 // it, so the ring said it a second time. The level is printed large on
 // the pass where a pass prints its class.

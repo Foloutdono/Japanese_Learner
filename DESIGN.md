@@ -156,7 +156,7 @@ pigment rather than borrowing one.
 Charcoal (`--pass-ink`) is the card. **Gold (`--accent2`) is its metal** — the
 balance bar and the 有効期限 printed on the back.
 
-It was the XP ring's too, round the holder's initial, until plan 140 took
+It was the XP ring's too, round the holder's initial, until plan 143 took
 the ring off: the balance row's bar measures the same climb with its figure
 beside it, so the ring said it a second time. The ring had been `--accent9`
 until the profile round, and `--accent9` is 瑠璃, which in dark theme is the
@@ -371,7 +371,7 @@ next to it.
 - **Hairline lattice** — a grid of bare figures. `display: grid; gap: 1px` on a
   `--surface-line` background, with a 1px outer border. The hairline *is* the
   gap; there are no inner padding boxes. Use for records, headline stats, and
-  the profile's ledger of lines (one column of rows since plan 140, the rows
+  the profile's ledger of lines (one column of rows since plan 143, the rows
   sharing their columns through a subgrid so every rail starts where the
   others do).
 - **Surface panel** — anything with a progress bar or prose. The standard card
@@ -387,7 +387,7 @@ columns, and the three halls did it again between 560 and 1000px. Content that
 is genuinely ragged, like a collection that is partly empty, does not belong
 in a lattice at all. A lattice with one cell to spare fills it with something
 real rather than leaving it bare — the profile's records were two figures and
-two doors, four cells two by two, until plan 140 printed the best perfect run
+two doors, four cells two by two, until plan 143 printed the best perfect run
 the API had always counted: three figures three across, and the doors a
 lattice of two of their own.
 
@@ -840,12 +840,26 @@ objects, and not one of them waits to be dismissed:
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant:
   the wash, the kumadori, the brush and the petals are gone.
-- **The level** (進級) turns over on the **in-car display**: a sumi board
-  docked across the top of a phone (the top bar is hidden while studying, so
-  the edge is free and the docked rating bar stays usable) or a panel in the
-  top-right corner on a wider screen, the number on split-flap drums. On a
-  clock, never gating — it leaves by itself while the next card is already
-  in hand.
+- **The level** (進級) is **clipped on the pass** (改札鋏, plan 142): the
+  learner's 定期券 comes down, in its own material (the charcoal-into-sumi
+  ground, hairline and sheen of `.pass`), the old figure is read for a
+  beat, then the gate's punch bites its top edge — a real hole the ground
+  shows through, the chip falling away, the punch's snip on the frame the
+  bite opens — the old figure is struck, the new one printed in the pass's
+  gold, and the balance empties to what the new level already holds. It is
+  the People family throughout: no line pigment, no board. On a phone it
+  hangs across the top inside the stage's gutters (the top bar is hidden
+  while studying, so the edge is free and the docked rating bar stays
+  usable) and the stage steps down under it by `--levelup-h`; wider, it
+  floats at the screen's right at a phone's content width; on the desk it
+  docks in a run's column (see *The desk*). On a clock, never gating — it
+  leaves by itself while the next card is already in hand. It replaced a
+  sumi board whose split-flap drums turned while it was still sliding in,
+  so the one moment it existed for was half missed; the owner's pick of
+  four directions drawn side by side (the board retimed, a hanging station
+  plate, the in-car route, this). Under reduced motion the cut still
+  happens — the bite, the figures, the balance — but nothing drops, jolts,
+  scales or falls.
 
 There was a fourth, **the rank** (再発行): the level bands each carried a
 title (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued the
@@ -957,7 +971,8 @@ into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
-plated gates take the window.
+plated gates take the window; plan 140 laid first contact down the left
+as the rail it arrives at.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -997,7 +1012,7 @@ plated gates take the window.
   holder flat, the pass and its stamps at the side column's width beside the
   record — its lines drawn with a rail per stop, both rankings at once, and
   no door to Statistics or Settings, which hang under the lit gate on the
-  rail (plan 140); Settings sets its column (the pass and the
+  rail (plan 143); Settings sets its column (the pass and the
   list, plan 139) beside the open page, neither printing a title.
 - **The canvas is `--desk-board-w` (1240px)**, the width a plated screen
   was always allowed, and a second column is **`--desk-side-w` (360px)** —
@@ -1023,7 +1038,7 @@ plated gates take the window.
   remembered per browser) and what the run will take in minutes
   (from the learner's own pace); each lane prints its share of the run —
   dealt the way the queue deals — and whether it boards (free, or a dashed
-  edge and the refill's hour when nothing paid can ride); the foot counts
+  edge and the next credit's hour when nothing paid can ride); the foot counts
   what boards, what waits and the balance beside Depart; and the side
   column, the window's height, ends on the week ahead — a bar a day,
   today's the gate's own total in gold, and what a shorter run leaves for
@@ -1202,9 +1217,15 @@ plated gates take the window.
 - **Above about 1460px the workspace is centred** (plan 123): the card and
   the run's side stand together, the window's spare width shared equally
   either side of the pair (`--desk-run-inset`) rather than poured between
-  them, and the level bar spans the workspace only. The level board, when
-  a level is reached, docks across the side's top instead of standing over
-  it.
+  them, and the level bar spans the workspace only.
+- **A level docks in the run's column** (plan 142): the level-up's pass
+  comes out of the top edge of the run's left column on three panels —
+  this run's panel, whose level bar it just topped off — or of the side
+  where a run has the side alone, and the column steps down under it by
+  the pass and its gap, as a phone's stage does. Sticky, so a scrolled
+  column still shows it; no shadow, being docked rather than hung. It
+  never stands over the card's details (plan 123 had docked the board it
+  replaced across the side's top for the same reason).
 - **A card run stands on three panels** (三面, plan 126; it replaced the
   console plan 124 had set on the floor). Three columns of surface
   panels, the owner's own layout: at the left **this run** — the three
@@ -1383,7 +1404,7 @@ plated gates take the window.
   `aria-keyshortcuts`.
 - **Esc belongs to the innermost thing that holds it** (plan 123): a list
   open in an entry, a door opened inside a docked entry, a dock or a
-  lookup in a column, the level board — and only then the run. A field
+  lookup in a column, the level-up's pass — and only then the run. A field
   with text in it spends the first Esc leaving the field. The run's head
   stops printing its Esc while a door holds the key, since the cap would
   say "leave" while Esc closed the door.
@@ -1409,17 +1430,35 @@ plated gates take the window.
   notes that teach a key or point at something say so on the desk (the
   `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
   stops walk down the rail first (plan 123).
-- **First contact is a run's frame** (plan 122). From the Welcome to the
-  first card there is no rail yet: the work is centred and a column at
-  `--desk-side-w` stands at the right edge, its job changing — on the
-  Welcome the sign-in, standing beside Board as its ghost twin (no second
-  screen); beside the boarding's questions the journey being built, priced
-  on every answer; on the first ride the card's entry, docked by the flip.
-  Building, a phone's pause for effect, is skipped. The plan's chart is
-  drawn 1:1. Every answer has a key: Enter goes on from any step, the
-  digits pick (a level answers to its own number, N5 to 5 and the kana stop
-  to 0), and Esc does nothing — the way out of the boarding signs the guest
-  out.
+- **First contact lays the rail** (plans 122, 140; the owner's pick A of
+  three directions drawn on the canvas "Desktop onboarding — options").
+  The desk's chrome is the rail, so from the Welcome to the plan a sumi
+  column at `--desk-side-w` stands on the LEFT edge in the rail's own
+  material, the rail's masthead at its head (辻 over TSUJI — the paper
+  keeps no second mark) — the rail before it has any gates. Its job
+  changes: on the Welcome the sign-in (the paper card, standing in the
+  sumi; no second screen), with the heading, the tagline and Board as
+  one block on the paper over the rolling stock; during the boarding the
+  line itself, a stop per question (the kana's reveal is the kana's own
+  stop), each named and printing its answer once given, the one being
+  asked lit with the pick as it stands, and a stop behind a door back to
+  its question until the plan is built; at its foot the projection,
+  priced on every answer, then the learner's pass. The head's track and
+  the right-hand journey were that line drawn twice, so neither is drawn.
+  The answers are laid for the width: the name, the kana and the rhythm
+  at the card's width (four tiles to a row), the six reasons three to a
+  row where three run columns fit, the level and the goal as a line of
+  stations — the ride lit in gold up to the pick, one row where each
+  holds half a run's column and two rows under that, a row's ends drawing
+  no rail past them. Back stands on the floor beside Continue (the kana,
+  with no Continue, has a floor of Back alone). Building is skipped, and
+  the pass's own screen folds away: the plan is the last screen and
+  enters the station, unless a guest is offered the account first, which
+  then enters. The plan's chart is drawn 1:1. Every answer has a key:
+  Enter goes on from any step, the digits pick (a level answers to its
+  own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
+  way out of the boarding signs the guest out. On the first ride the
+  column is the card's entry, docked by the flip (plan 122).
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

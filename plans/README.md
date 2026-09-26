@@ -6621,3 +6621,101 @@ phone's track; the axis prints years once the span passes one (two
 language, since three screens across a whole page drew them at a phone's
 height; the bare column opens on the destination rather than on the
 first row.
+
+## Plan 140 — 路線, first contact as the rail being laid (2026-09-26)
+
+Numbered 140 because 139 went to Settings (PR #208), merged to main
+while this was open under 139; renumbered before this merged, so no
+source cites 139 for it. The owner's ask: rework the design and layout of the onboarding for the
+desktop, with options to choose from. Drawn on the canvas "Desktop
+onboarding — options" (the flow as it rendered at 1440×900, and three
+directions, each as a Welcome, the goal question and the end: A the
+line laid down the left, B the pass issued as you answer, C the whole
+boarding on one sheet); the owner picked A.
+
+What the screenshots showed wrong: each question was a 360px phone
+column in the middle of the window (a third of it at 1440, under a
+quarter at 1920), six answers stacked as full-width rows; the journey
+hung at the window's right edge, ~700px from the answer that filled it,
+four grey rows centred in empty sumi; the track at the head and the
+journey at the side were the same thing drawn twice, the track's eight
+stops unnamed; Back was a circle in the top-left corner, away from
+Continue; on the Welcome, Board stood on the window's floor ~640px under
+the heading it answers; the plan and the pass were two more centred
+phone screens, the journey gone just as its projection was priced, and
+Continue under the plan's right half.
+
+| # | What | Status |
+|---|------|--------|
+| 140 | **Welcome** (`DeskWelcome`): the sign-in in a sumi column at `--desk-side-w` on the LEFT, the rail's masthead (`.desk-rail__mast`) at its head, the paper card in the sumi; the paper holds the heading at the display rung, the tagline and Board as one block over the roll, run across the paper. **The line** (`components/boarding/DeskLine.jsx`): the same column through the boarding, a stop per question from `trackStops` (the reveal is the kana's stop), each named (`brdStop`, both locales), printing its answer once given, the one asked lit and printing the pick as it stands (the goal from `boardingDraft`), a stop behind a door back to its question while there is history (`jumpTo`, one pull, answers kept, the browser guard and the funnel's `boarding_step` as Back's); the projection at its foot, then the pass (`ColumnPass`: the holder, level and climb, the balance counted up with the gift note, `countUp.js` lifted out of `PassStep`). `BoardHead` and the right-hand `BuildSteps` are no longer drawn on the desk. **The floor**: Back beside Continue through `BoardBack` (`boardBack.js`), which `Continue` reads; `FloorBack` for the kana, which has no Continue. **Widths**: `--desk-brd-w` set per car (`data-car`), so a leaving car keeps its own: the card's for the name, the kana, the reveal and the rhythm (four tiles a row), three run columns for the reasons (three across where they fit, two under), the canvas for the level and the goal, two columns for the plan (its action at a ticket's width). **Stations** (`LevelStep.jsx`'s `StationLine`, desk only): the level and goal lists as a line, each stop a ring on the rail over its card (what it is over what it holds, a line each), the ride in gold up to the pick, one row where each holds half a run's column (read off `--desk-run-col-min`) else two, a row's ends drawing no rail past them; the rows' contract kept (data attributes, `aria-pressed`, the digit). **The end**: the pass's screen folds away on the desk — the plan is the last screen and enters the station (`PlanStep`'s `last`, the office's refusal said over its button through `PassError`), or, for a guest, the account step, whose keep and skip enter; a return from Google lands on the plan. Also fixed on the way: the kana question sat on the window's floor on the desk (its body's lent rung beat the auto margin). Tests: `frontdoor.desktop` P9 and P10 rewritten (the column, the stops' states, values and doors, the projection, the pass, the floor, the widths, the stations, the plan and the account entering, the refusal), `frontdoor.wide` (the paper's centre, the reasons in two rows, six stations in one, the plan at two columns); the phone lanes unchanged | DONE (2026-09-26) |
+
+Deviations from the drawing: the question stays centred over its
+answers, as every first-contact screen was since plan 122, rather than
+set left; a station's card holds its tag in its flow rather than on its
+edge (the tag met the ring); the passed stops stop being doors once the
+plan is built, as Back always did. Left for later: entering the station
+could narrow the column to the rail's width and hang the gates in it
+before the gate cutscene; the cutscene covers the change today.
+
+## Plan 142 — 改札鋏, the level-up clipped on the pass (2026-09-26)
+
+Numbered 142 because 139 went to Settings (PR #208), 140 to the desk's
+first contact (PR #209) and 141 to the refill (PR #210), merged to main
+while this was open under 139; renumbered in the merge, so no source
+cites 139 for it (its first two commits' messages still do). The owner's
+ask: improve the level-up's design and animation, options to choose
+from, then "D, adapted for the desktop too". Drawn on the canvas "Tsuji
+— the level-up" (the board as shipped, and four directions as looping
+phone boards with theme, speed and level tweaks: A the board retimed, B
+a hanging station plate, C the in-car route, D the pass clipped); the
+owner picked **D**.
+
+What the shipped board got wrong: its drums began turning on mount,
+while the board was still sliding in, so half the one moment it existed
+for happened in motion; nothing on it said the balance had filled and
+started again; at tablet widths its exit never reported its end (the
+handler matched `levelup-out`, the panel's animation was
+`levelup-out-panel`); and on the desk's three panels its fixed dock
+over the side no longer lined up with the column.
+
+| # | What | Status |
+|---|------|--------|
+| 142 | **The pass** (`XpToast`'s level scene): the 定期券 in its own material (`.pass`'s charcoal-into-sumi ground, hairline and sheen; no gold edge, which on the pass is the credit balance), `LEVEL` over the old figure beside the balance track and its figure. **The clock**, from `--levelup-cut` (550ms: the 320ms drop, matched to the stage's padding transition, and a beat): the bite (`mask-image` over `--levelup-bite`, a registered `<length>` grown 0 → `--sp-3`, at `--levelup-clip-x` 66% — at 40% it read as a phone's camera notch), a `--sp-1` jolt, the chip falling past the foot, the old figure struck, the new printed in `--accent2` (5.7:1 dark, 3.7:1 light on the card's tinted corner, a 40px bold figure), the balance emptied to `--levelup-to` (the new level's share, from the profile store; the old span from `xpThreshold`), its figure swapped. Leaves on `LEVEL_MS` as before; the exit is matched by name (`levelup-out*`). **Sound**: `pass-clip` replaces `flap-clatter` (punch, snip, gate press), played on the bite's own `animationstart`; trimmed 2.70 to 0.36 peak, measured against the coin's 0.26 and the stamp's 0.17. **Phone**: hung across the top inside the gutters, the stage stepping down by `--levelup-h` (now 84px) and `--sp-4`. **Wider**: floating at the right at `--desk-side-w`. **Desk**: `StudyStage` portals it (`dock`) into the run's left column on three panels, else the side (`RunSide`'s `ref`); there it is sticky, `order: -1`, unshadowed, out of the column's top edge, the column stepping down by the pass and its gap (`desk-levelup-in/out`); plan 123's fixed dock and the side's padding step retired. **Reduced motion**: the bite, the figures and the balance still change; nothing drops, jolts, scales or falls. `SplitFlap.jsx` and the `.split-flap`/`.flap` rules deleted. Tests: `runs.wide` (the pass in the side, and in the left column over this run's panel), `deskfree.phone` (inside the gutters, the stage stepped), `escape.desktop`, `voices.test` and the mocks moved to `playPassClip`; `design-system.browser`'s contract satisfied by the card declaring the bite's resting value | DONE (2026-09-26) |
+
+Deviations from the drawing: the gold edge down the pass's right is not
+drawn (it names the credit balance on the real pass); the bite moved
+from 40% to 66% of the width; the new figure stays gold rather than
+cooling to ink, measured above 3:1 in both themes. Left for later:
+`/dev/rewards` has no run column, so the desk's dock is seen on a run.
+
+## Plan 143 — 定期入れ, the profile tightened (2026-09-26)
+
+Numbered 143 because 140 went to the desk's first contact (PR #209), 141
+to the refill (PR #210) and 142 to the level-up (PR #211), merged to main
+while this was open under 140; renumbered in the merge, so no source
+cites 140 for it (its first three commits' messages still do). The
+owner's ask: improve the profile's design and layout on the phone and the
+desk, options to choose from, and new feature ideas. Drawn on the canvas
+"Tsuji profile — options" (the screen as shipped at 390px and at 1440×900,
+and three directions each for the phone and the desk: A the holder
+tightened, B the record book, C one screen; four feature sketches:
+personal bests, what you can read, when you ride, the week's ticket); the
+owner picked **A for both**, then asked for the doors above the stamp book.
+
+What the screenshots showed wrong: the phone's profile was 2.7 screens
+tall; the XP was drawn twice on the pass (the ring round the initial and
+the bar); "See the pass" stood alone between the pass and the stamps; the
+stamp book's third figure wrapped onto a row of its own; "Vocabulary JLPT"
+wrapped in a half-width ledger cell and set its figure a line below its
+neighbour's; on the desk the records' doors repeated the rail's stations
+and the record column's cells were wide and empty.
+
+| # | What | Status |
+|---|------|--------|
+| 143 | **The pass**: the holder's initial without the XP ring (`PassHolder`, and the boarding's printed pass), the month it was issued under the name (`onboardedAt`, `passSince`); the footer a button opening the balance sheet (`openBalance`), which carries the offer, so the profile's `OfferButton` and `SOURCES.PROFILE` are retired (old `offer_view` rows still say `profile`). **The doors** (`ProfileDoors`): Statistics and Settings a lattice of two straight under the pass, the phone's only. **The stamp book**: titled with its month, the year in its margin, its three figures one row of three (`Streak`, `Longest`, `Stamped`). **The records**: three across (`.records--three`) — reviews, retention and the best perfect run (`bestQualityStreak`, never printed before). **The lines** (`LineLedger`): a row each on one subgrid of three columns, so every rail starts and ends together; on the desk a rail per stop (a kana set, a JLPT level) filled to that stop's learned / total, named under it, the stop being ridden in full ink (`.pf-line__stops`, the 机 section). **The ranking**: five rows. **The desk**: no door the rail already holds; the guide's Settings stop on the rail's station (`getDeskSections`' `guide`, `DeskRail`, `DESK_ORDER.profile`, `.guide__spot--panel`); the phone's guide walks the door second. Tests: `profileScreen.phone` new, `profile.phone`, `profile.desktop`, `ProfileBlocks.browser`, `chrome.desktop`, `links.desktop`, `deskfree.phone`, `tabs`, `guides` and `credits.paywall` moved | DONE (2026-09-26) |
+
+Deviations from the drawing: the best run prints no unit ("d'affilée"
+took a French phone's cell to two lines); the ranking's head still wraps
+under 360px in French, as before. Left for later: at the desk's
+narrowest (1100px) the stops share about a hundred pixels beside
+"Vocabulaire JLPT"; the feature sketches are unbuilt.

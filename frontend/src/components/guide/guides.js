@@ -38,7 +38,7 @@ export const GUIDES = Object.freeze({
     { anchor: 'dict.analyzer', key: 'DictAnalyzer', radius: 'card' },
   ],
   // The phone's order is the screen's, top to bottom: the Settings door
-  // stands straight under the pass since plan 140.
+  // stands straight under the pass since plan 143.
   profile: [
     { anchor: 'profile.pass',     key: 'ProfilePass',     radius: 'identity' },
     { anchor: 'profile.settings', key: 'ProfileSettings', radius: 'flat' },
@@ -56,7 +56,7 @@ export const GUIDES = Object.freeze({
 // then across the page: the gates, the level, the status, the pass, the
 // gate, the strip beside it.
 // The profile's Settings stop is the rail's station on the desk (plan
-// 140), not a door under the pass, so there it closes the walk: the
+// 143), not a door under the pass, so there it closes the walk: the
 // page first, then the way out.
 export const DESK_ORDER = Object.freeze({
   today: ['tabbar', 'hud.level', 'hud.status', 'hud.pass', 'today.gate', 'today.strip'],
@@ -72,7 +72,7 @@ export const DESK_RADIUS = Object.freeze({
   'hud.level': 'card',
   'hud.status': 'card',
   'hud.pass': 'card',
-  // Plan 140: the profile's Settings door is the rail's station there,
+  // Plan 143: the profile's Settings door is the rail's station there,
   // a lozenge at the panel's corner rather than a flush lattice cell.
   'profile.settings': 'panel',
 })

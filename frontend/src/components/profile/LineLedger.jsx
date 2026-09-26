@@ -23,7 +23,7 @@ import { useDesk } from '../../hooks/useDesk'
 // know. Neither prints the other's number, so there is nothing for them
 // to disagree about.
 //
-// A row a line since plan 140 (the owner's pick A of the profile
+// A row a line since plan 143 (the owner's pick A of the profile
 // canvas): the roundel, the name over its rail, the figure at the end.
 // It was a lattice of cells, four across, two, one, where "Vocabulary
 // JLPT" wrapped in a half-width cell and dropped its figure a line below

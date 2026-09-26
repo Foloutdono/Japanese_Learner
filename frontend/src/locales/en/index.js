@@ -64,16 +64,20 @@ const nav = {
   balanceLabel:      'Balance',
   balanceTitle:      'Balance',
   balanceOf:         (cap) => `of ${cap}`,
-  balanceRefillAt:   (at) => `a day, at ${at}`,
+  balanceRefillEvery: (min) => `every ${min} min`,
+  balanceNext:       (at) => `next at ${at}`,
   balanceHolds:      (cap) => `holds up to ${cap}`,
   balanceKanaFree:   'Kana reviews cost nothing',
   gateShort:         (rides, due) => `Only ${rides} of the ${due} can board`,
-  gateNoCredits:     (refill, at) => `No credits left — +${refill} at ${at}`,
+  gateNoCredits:     (at) => (at ? `No credits left — +1 at ${at}` : 'No credits left'),
   runOutTitle:       'Out of credits',
   runOutCleared:     (n) => `${n} cleared`,
-  runOutWaiting:     (n) => `${n} wait until tomorrow`,
-  runOutRefill:      'at midnight',
-  runOutTomorrow:    'tomorrow',
+  runOutWaiting:     (n) => `${n} wait for the refill`,
+  runOutWaits:       'waiting',
+  // 補充 — what the refill landed while the app was closed (plan 141)
+  claimTitle:        'While you were away',
+  claimButton:       'Claim',
+  claimBookLabel:    (n, cap) => `${n} credits of ${cap}`,
   // 無料 — a lane that costs nothing (domain/credits.js).
   freeFare:          'free',
   laneNew:           n => `${n} new`,
@@ -84,7 +88,7 @@ const nav = {
   gateMinutes:       'min',
   gateMinutesLabel:  n => `about ${n} minutes`,
   gateRides:         'board',
-  gateWaits:         (refill, at) => `wait · +${refill} at ${at}`,
+  gateWaits:         (at) => (at ? `wait · +1 at ${at}` : 'wait'),
   gateBalance:       'credits',
   laneWaits:         at => `waits ${at}`,
   weekAhead:         'The next seven days',
@@ -609,7 +613,8 @@ const stats = {
   startedNote:     n => `${n} started`,
   reportError:        'The record could not be read',
   daysUnit:           'days',
-  balanceRefillLine:  (n, at) => `+${n} at ${at}`,
+  balanceRefillLine:  (at) => `+1 at ${at}`,
+  balanceRefillRate:  (min) => `+1 every ${min} min`,
   perDayUnit:         '/ day',
   // ── The status sheet's head and its two comparison rows ──
   // The four-figure lattice (Last 14 days / Promised / At this pace /
@@ -1896,6 +1901,9 @@ const boarding = {
   brdBuildLines: 'Your lines',
   brdBuildRide: 'Your daily ride',
   brdBuildProjection: 'Your projection',
+  // 机 (plan 140): the stops on the desk's column, one per question --
+  // the part of the boarding each answers, as the line prints it.
+  brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
   brdArrivalTitle: 'Your plan',
   brdPlanQ: (name) => `Your plan is ready, **${name}**.`,
   brdChartTitle: 'Your projection',
@@ -2011,7 +2019,7 @@ const guide = {
   guideSkip: 'Skip',
   guideHudLevel: 'Your level. Every card you rate pays into it.',
   guideHudStatus: 'On time or behind your own plan. Tap it for the ghost train.',
-  guideHudPass: 'Your balance. Reviews cost one each; it refills at midnight.',
+  guideHudPass: 'Your balance. Reviews cost one each; it refills through the day, one every 48 minutes.',
   guideTodayStrip: 'The week, the streak, and today\'s new items against your pace.',
   guideTodayGate: 'What is due today, line by line. Switch a line off to leave it for later, then depart.',
   guideTabBar: 'The five gates: Learn, Practice, Today, Dictionary, your pass.',
@@ -2122,7 +2130,7 @@ const onboarding = {
   settingsData: 'Data',
   settingsRedo: 'Placement test',
   settingsCredits: 'Credits',
-  // The pass's contract and the rows under it (plan 139).
+  // The pass's contract and the rows under it (plan 140).
   passFieldHour: 'Daily ride',
   passFieldLines: 'Lines',
   settingsRatingShort: 'Rating',
