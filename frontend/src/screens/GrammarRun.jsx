@@ -324,6 +324,7 @@ export default function GrammarRun({ session }) {
               cardKey={`${card.card_id}:${card.lesson_seen ? 1 : 0}`}
               stamp={gates.stamp}
               stage={card.stage}
+              progress={card.progress ?? null}
               onStampDone={gates.stampDone}
             >
               <PromptCard className="grammar-prompt" foot={cardFoot}>

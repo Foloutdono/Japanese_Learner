@@ -40,7 +40,10 @@ const CHECK_WAIT_MS = 2500
 // 126), which the desk's card panel prints on each verdict's tile. A v6
 // queue was served before the field existed, so a resumed one drew "—"
 // on every tile until the learner had answered their way past it.
-const CACHE_VERSION = 'v7'
+// v8: every card gained `progress` and every rating in its review_preview
+// its own (plan 147), the band along the card's foot. A v7 queue would
+// draw no band on a card still learning until it had been answered past.
+const CACHE_VERSION = 'v8'
 
 const KEY_PREFIX = 'jp-session'
 

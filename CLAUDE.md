@@ -736,7 +736,22 @@ runtime purpose. Two consequences worth knowing:
   `src/dictionary.wide.test.jsx` and `src/dictionary.desktop.test.jsx`;
   DESIGN.md, "The entry plate, and a body that names itself" and "The
   desk").
-  When starting a new wave, begin at **147** or higher, and check
+  **147** is the card's progress (the owner's picks D, M2 and P2 of the
+  drawn options): every served card carries `progress`, 0 (new) to 1
+  (mastered) -- the four learning steps the first half, a graduated
+  card's interval the second on a log scale to 21 days
+  (`srs._progress`, `get_bulk_progress`, `attach_progress`), and each
+  rating's `review_preview` where it leaves the card; a band along the
+  card's foot in the stage's pigment (`CardBand` in `StageMark.jsx`,
+  moved by the stamp as a rating presses), and the desk card panel's
+  line redrawn as a fare strip of three stretches (`CardPanel`'s
+  `StateLine`, `domain/cardProgress.js`'s `stripFills`) (cited in
+  `srs/srs.py`, the eight card routes, `tests/test_card_progress.py`,
+  `components/study/StageMark.jsx`, `CardTransition.jsx`,
+  `CardPanel.jsx`, `hooks/useReviewGates.js`, `hooks/useCardSession.js`'s
+  v8, `src/cardBand.phone.test.jsx`, `src/panels.desktop.test.jsx` and
+  `index.css`).
+  When starting a new wave, begin at **148** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
