@@ -167,7 +167,7 @@ export default function BoardingFlow({
   // offer; the same predicate the forward path uses (`plan` → account
   // or pass).
   //
-  // On the desk the pass's screen folds into the plan (plan 139), so the
+  // On the desk the pass's screen folds into the plan (plan 140), so the
   // same return lands on the plan, which then carries Enter the station.
   const [step, setStep] = useState(() => {
     const at = resumed?.step ?? 'name'
@@ -275,7 +275,7 @@ export default function BoardingFlow({
     setStep(prev)
   }
 
-  // 机 (plan 139): a stop already passed on the column's line is a door
+  // 机 (plan 140): a stop already passed on the column's line is a door
   // straight back to its question -- Back pressed as many times as it
   // takes, in one pull. Every answer is kept, as Back keeps them.
   function jumpTo(target) {
@@ -562,7 +562,7 @@ export default function BoardingFlow({
           />
         )
       case 'plan':
-        // 机 (plan 139): on the desk the pass is issued at the column's
+        // 机 (plan 140): on the desk the pass is issued at the column's
         // foot while the plan is read, so the plan is the last screen
         // and enters the station -- unless there is an account to offer
         // first. The funnel reads plan → boarding_done there. The car
@@ -601,7 +601,7 @@ export default function BoardingFlow({
     }
   }
 
-  // ── 机 — the line down the column (plans 122, 139) ────────────
+  // ── 机 — the line down the column (plans 122, 140) ────────────
   // On the desk the questions stand beside the line they lay: a stop per
   // question (the reveal is the kana's own, not a stop), each named and
   // printing its answer once given, the one being asked lit and printing

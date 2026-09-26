@@ -4,11 +4,11 @@ import { userEvent } from 'vitest/browser'
 import { LangProvider } from './LangContext'
 import './index.css'
 
-// ── 机 — first contact on a wide window (plans 122, 139) ───────────
+// ── 机 — first contact on a wide window (plans 122, 140) ───────────
 // At 1440 the Welcome's band ran four cards a lane and was clipped mid
 // window; the boarding's column stood in the middle of an empty one.
 // The band spans the paper the sign-in's column leaves, faded at its
-// ends, and its loop never shows a seam. Since plan 139 that column is
+// ends, and its loop never shows a seam. Since plan 140 that column is
 // on the left and holds the boarding's line; the questions are centred
 // in the paper beside it, the level list is one line of six stations,
 // and the plan stands at two columns' width.

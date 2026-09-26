@@ -597,10 +597,22 @@ const Fixture = () => (
     <section className="sbook"><div className="sbook__dows"><span className="sbook__dow sb-dow">M</span></div></section>
     <div className="stg-list">
       <button type="button" className="stg-row">
-        <span className="stg-row__names"><span className="stg-row__jp st-row">Learning</span></span>
-        <span className="stg-row__value st-value">N4 · 10 / day</span>
+        <span className="stg-row__names"><span className="stg-row__jp st-row">Sound</span></span>
+        <span className="stg-row__value st-value"><span className="stg-meter" /><span className="stg-row__text">Busy station</span></span>
       </button>
     </div>
+    {/* Plan 139 — the pass printed with its contract: panel inks on the
+        card's sumi, the open field on its gold wash, the validity in
+        the pass's metal. */}
+    <section className="pass stg-pass" style={{ background: 'var(--bg-panel)' }}>
+      <div className="stg-pass__route">
+        <button type="button" className="stg-pass__stop"><span className="stg-pass__code sp-code">N4</span><span className="stg-pass__name sp-name">Elementary</span></button>
+      </div>
+      <div className="stg-pass__fields">
+        <button type="button" className="stg-pass__field"><span className="stg-pass__key sp-key">Service</span><span className="stg-pass__value sp-value">Rapid · 10 / day</span></button>
+        <div className="stg-pass__field stg-pass__field--valid"><span className="stg-pass__key">Valid until</span><span className="stg-pass__value sp-valid">12 Mar 2027</span></div>
+      </div>
+    </section>
     <div className="slip">
       <div className="slip__label"><b className="slip__name st-slip-name">JLPT level</b><span className="cap st-slip-cap">You are here</span></div>
       <span className="slip__hint st-slip-hint">A hint.</span>
@@ -615,15 +627,38 @@ const Fixture = () => (
       <button type="button" className="svc svc--on">
         <span className="svc__jp sv-on-jp">Rapid</span>
         <span className="svc__pace sv-on-pace">10 / day</span>
-        <span className="svc__words sv-on-words">Wrong · Correct</span>
+        <span className="svc__words sv-on-words">≈ 20 min</span>
       </button>
     </div>
-    <div className="dest-grid">
-      <button type="button" className="dest dest--on"><span className="dest__code ds-code">N3</span><span className="dest__load ds-load">Intermediate</span></button>
+    <div className="svc-chart">
+      <button type="button" className="svc-row svc-row--on">
+        <span className="svc-row__names"><span className="svc-row__name">Rapid</span><span className="svc-row__pace sr-on-pace">10 / day · ≈ 20 min</span><span className="svc-row__tag sr-on-tag">On the pass</span></span>
+        <span className="svc-row__track"><span className="svc-row__when sr-when">7 Aug 2027</span></span>
+      </button>
+      <button type="button" className="svc-row">
+        <span className="svc-row__names"><span className="svc-row__name">Express</span><span className="svc-row__pace sr-pace">20 / day · ≈ 35 min</span></span>
+        <span className="svc-row__track"><span className="svc-row__end sr-end">N3</span></span>
+      </button>
     </div>
-    <div className="jour-line dest-line">
-      <span className="jour-line__validity"><span className="jour-cap ds-cap">Valid until</span><b className="dest-line__date ds-date">14 Mar 2027</b></span>
-      <span className="jour-cap dest-line__note ds-note">moves to 23 Mar</span>
+    <div className="dest-stops">
+      <div className="dest-here"><span className="dest__dot" /><span className="dest__names"><span className="dest__code">N4</span><span className="dest__load ds-here-load">Elementary</span></span><span className="dest__when dest__when--here ds-here">You are here</span></div>
+      <div className="dest-grid">
+        <button type="button" className="dest dest--on"><span className="dest__dot" /><span className="dest__names"><span className="dest__code ds-code">N3</span><span className="dest__load ds-load">Intermediate</span></span><span className="dest__when ds-when">7 Aug 2027<span className="dest__tag ds-tag">On the pass</span></span></button>
+      </div>
+    </div>
+    <div className="stg-foot">
+      <div className="stg-foot__line dest-line"><span className="cap ds-cap">Valid until</span><b className="dest-line__date ds-date">14 Mar 2027</b><span className="stg-foot__was ds-note">instead of 23 Mar</span></div>
+    </div>
+    <div className="theme-picks">
+      <button type="button" className="theme-pick theme-pick--on"><span className="theme-pick__name tp-on">System</span></button>
+      <button type="button" className="theme-pick"><span className="theme-pick__name tp-name">Dark</span></button>
+    </div>
+    <div className="lang-picks">
+      <button type="button" className="lang-pick lang-pick--on"><span className="lang-pick__name">Français</span><span className="lang-pick__sample lp-on-sample">Aujourd’hui · Dictionnaire</span></button>
+      <button type="button" className="lang-pick"><span className="lang-pick__name">English</span><span className="lang-pick__sample lp-sample">Today · Dictionary</span></button>
+    </div>
+    <div className="grades">
+      <button type="button" className="grade grade--on"><span className="grade__name gr-on">4 levels</span></button>
     </div>
     <div className="lvl-sheet__figs"><div className="lvl-sheet__fig"><b className="lvl-sheet__fig-v ls-v">1,318</b><span className="lvl-sheet__fig-l ls-l">Marked known</span></div></div>
     <p className="lvl-sheet__body ls-body">The stops are marked <strong className="lvl-sheet__strong ls-strong">known</strong>.</p>
@@ -1014,14 +1049,33 @@ const SITES = [
   ['.lv-strong', 'level note emphasis'],
   ['.sv-jp', 'service card name'],
   ['.sv-pace', 'service card pace'],
-  ['.sv-on-jp', 'chosen service card name (on the pass-ink wash)'],
-  ['.sv-on-pace', 'chosen service card pace (on the pass-ink wash)'],
-  ['.sv-on-words', 'chosen grade card words (on the pass-ink wash)'],
-  ['.ds-code', 'chosen destination code (on the pass-ink wash)'],
-  ['.ds-load', 'chosen destination name (on the pass-ink wash)'],
+  ['.sv-on-jp', 'chosen service card name (on the gold wash)'],
+  ['.sv-on-pace', 'chosen service card pace (on the gold wash)'],
+  ['.sv-on-words', 'chosen service card minutes (on the gold wash)'],
+  ['.sp-code', 'settings pass stop code (sumi)'],
+  ['.sp-name', 'settings pass stop name (sumi)'],
+  ['.sp-key', 'settings pass field key (sumi)'],
+  ['.sp-value', 'settings pass field value (sumi)'],
+  ['.sp-valid', 'settings pass validity in gold (sumi)'],
+  ['.sr-on-pace', 'chosen service line pace (on the gold wash)'],
+  ['.sr-on-tag', 'chosen service line tag (on the gold wash)'],
+  ['.sr-when', 'service line arrival'],
+  ['.sr-pace', 'service line pace'],
+  ['.sr-end', 'service line stop roundel'],
+  ['.ds-here', 'destination, you are here'],
+  ['.ds-here-load', 'destination, the stop you stand at'],
+  ['.ds-code', 'chosen destination code (on the gold wash)'],
+  ['.ds-load', 'chosen destination name (on the gold wash)'],
+  ['.ds-when', 'chosen destination arrival (on the gold wash)'],
+  ['.ds-tag', 'chosen destination tag (on the gold wash)'],
   ['.ds-cap', 'pass line cap on paper'],
   ['.ds-date', 'pass line date on paper'],
-  ['.ds-note', 'pass line drift note on paper'],
+  ['.ds-note', 'pass line former date on paper'],
+  ['.tp-on', 'chosen theme name (on the gold wash)'],
+  ['.tp-name', 'theme name'],
+  ['.lp-on-sample', 'chosen language sample (on the gold wash)'],
+  ['.lp-sample', 'language sample'],
+  ['.gr-on', 'chosen rating bar name (on the gold wash)'],
   ['.ls-v', 'level sheet figure'],
   ['.ls-l', 'level sheet figure label'],
   ['.ls-body', 'level sheet body'],

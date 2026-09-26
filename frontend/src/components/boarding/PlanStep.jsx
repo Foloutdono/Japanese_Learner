@@ -71,7 +71,7 @@ function Chart({ top, label, aria, from, to, minutes, lang, t }) {
   )
 }
 
-// `last` is the desk's (plan 139): there the pass is issued at the
+// `last` is the desk's (plan 140): there the pass is issued at the
 // column's foot while the plan is read, so the pass's own screen folds
 // away and the plan carries its button -- "Enter the station", with
 // the office's answer over it (PassError) and no second press while it

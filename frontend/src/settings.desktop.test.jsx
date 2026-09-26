@@ -6,15 +6,19 @@ import { LangProvider } from './LangContext'
 import { contentBox } from './testing/contentBox'
 import './index.css'
 
-// ── 机 — the settings list beside the open page (plan 113) ──────
-// On the desk the list and a page share the screen under the list's
-// one heading: the page is a pane (an <h2>, no ‹ Settings — the list is
-// right there), its row is marked, and the URLs are the phone's. The
-// bare list opens on its first page rather than beside an empty pane.
+// ── 机 — the settings column beside the open page (plan 113) ────
+// On the desk the column (the pass printed with its contract, over the
+// list) and a page share the screen under the column's one heading: the
+// page is a pane (an <h2>, no ‹ Settings — the column is right there),
+// its door is marked, and the URLs are the phone's. The bare column
+// opens on its first page rather than beside an empty pane. Neither
+// prints a title (plan 139): the rail's station and the lit door name
+// them, and both headings are clipped for a screen reader.
 
 vi.mock('./lib/api', () => ({
   api: p => p,
-  apiFetch: vi.fn(async () => ({ ok: true, status: 200, json: async () => ({}) })),
+  // A learner at N4, so the destination has a stop to stand at.
+  apiFetch: vi.fn(async p => ({ ok: true, status: 200, json: async () => (String(p).startsWith('/api/profile') ? { jlptLevel: 'N4', dailyNewTarget: 10 } : {}) })),
   apiJson: vi.fn(async () => ({})),
   apiJsonWithTimeout: vi.fn(async () => ({})),
   apiUpload: vi.fn(),
@@ -68,10 +72,10 @@ function mount(path) {
 }
 
 describe('settings on the desk', () => {
-  it('opens the bare list on its first page', async () => {
+  it('opens the bare column on the destination', async () => {
     await mount('/profile/settings')
     await settle()
-    expect(here.path).toBe('/profile/settings/display')
+    expect(here.path).toBe('/profile/settings/destination')
     expect(document.querySelector('.desk-settings__page')).not.toBeNull()
   })
 
@@ -109,22 +113,78 @@ describe('settings on the desk', () => {
     expect(document.querySelector('.stg-row[aria-current="page"]').dataset.page).toBe('sound')
   })
 
-  it('prints one Sign out beside the account page, not two (plan 115)', async () => {
+  it('prints no title over the column or the page (plan 139)', async () => {
+    await mount('/profile/settings/sound')
+    await settle()
+    expect(document.querySelector('.desk-settings .bar')).toBeNull()
+    const h1 = document.querySelector('.desk-settings__list h1')
+    const h2 = document.querySelector('.desk-settings__page h2')
+    for (const h of [h1, h2]) {
+      expect(h.classList.contains('sr-only')).toBe(true)
+      expect(h.getBoundingClientRect().width).toBeLessThanOrEqual(1)
+    }
+  })
+
+  it('marks the pass\'s field whose page is open', async () => {
+    await mount('/profile/settings/service')
+    await settle()
+    const on = [...document.querySelectorAll('.desk-settings__list [aria-current="page"]')]
+    expect(on.map(d => d.dataset.page)).toEqual(['service'])
+    expect(on[0].classList.contains('stg-pass__field--on')).toBe(true)
+    expect(on[0].tagName).toBe('A')
+    document.querySelector('.stg-door[data-page="level"]').click()
+    await settle()
+    expect(here.path).toBe('/profile/settings/level')
+    expect(document.querySelector('.stg-door[data-page="level"]').classList.contains('stg-pass__stop--on')).toBe(true)
+  })
+
+  it('prints Sign out once, on the account page, and nowhere else (plan 139)', async () => {
+    const outs = () => [...document.querySelectorAll('button')].filter(b => /^(déconnexion|sign out)$/i.test(b.textContent.trim()))
     await mount('/profile/settings/account')
     await settle()
-    const outs = [...document.querySelectorAll('button')].filter(b => /^(déconnexion|sign out)$/i.test(b.textContent.trim()))
-    expect(outs).toHaveLength(1)
-    expect(document.querySelector('.desk-settings__list .stg-signout')).toBeNull()
+    expect(outs()).toHaveLength(1)
+    expect(document.querySelector('.desk-settings__page').contains(outs()[0])).toBe(true)
 
     document.querySelector('.stg-row[data-page="sound"]').click()
     await settle()
-    expect(document.querySelector('.desk-settings__list .stg-signout')).not.toBeNull()
+    expect(outs()).toHaveLength(0)
   })
 
-  // A laptop's short window (plan 123): the list is sticky, and taller
-  // than 600px it had Sign out under the window's floor, beyond any
-  // scroll. It is bounded by the window now, and scrolls on its own.
-  it('keeps Sign out within reach on a short window', async () => {
+  // A wide window: the page takes the width beside the column (it
+  // stopped at the card's), and a page of two halves stands them side by
+  // side; a card of the page's own width still stops at the card's.
+  it('lays a wide page in two columns of cards', async () => {
+    await page.viewport(1440, 900)
+    try {
+      await mount('/profile/settings/account')
+      await settle()
+      const pane = document.querySelector('.desk-settings__page')
+      const cardW = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-w'))
+      expect(pane.getBoundingClientRect().width).toBeGreaterThan(cardW)
+      const [a, b] = [...pane.querySelectorAll('.stg-col')].map(c => c.getBoundingClientRect())
+      expect(Math.round(a.top)).toBe(Math.round(b.top))
+      expect(b.left).toBeGreaterThan(a.right)
+      expect(getComputedStyle(pane.querySelector('.slip')).borderTopStyle).toBe('solid')
+      for (const act of pane.querySelectorAll('.slip__act')) expect(act.getBoundingClientRect().width).toBeLessThanOrEqual(cardW)
+
+      document.querySelector('.stg-door[data-page="destination"]').click()
+      await settle()
+      const slip = document.querySelector('.desk-settings__page > .slip')
+      expect(slip.getBoundingClientRect().width).toBeLessThanOrEqual(cardW)
+      // On a card the hollow stops take the card's ground; the stop you
+      // stand at stays filled in the ink.
+      const ink = getComputedStyle(document.querySelector('.dest-here .dest__code')).color
+      expect(getComputedStyle(document.querySelector('.dest-here .dest__dot')).backgroundColor).toBe(ink)
+    } finally {
+      await page.viewport(1100, 800)
+    }
+  })
+
+  // A laptop's short window (plan 123): the column is sticky, and
+  // taller than the window it had its foot under the window's floor,
+  // beyond any scroll. It is bounded by the window now, and scrolls on
+  // its own to its last door.
+  it('keeps the column\'s last door within reach on a short window', async () => {
     await page.viewport(1100, 600)
     try {
       await mount('/profile/settings/sound')
@@ -133,9 +193,10 @@ describe('settings on the desk', () => {
       expect(list.getBoundingClientRect().bottom).toBeLessThanOrEqual(window.innerHeight)
       list.scrollTop = list.scrollHeight
       await settle(60)
-      const out = list.querySelector('.stg-signout').getBoundingClientRect()
-      expect(out.bottom).toBeLessThanOrEqual(window.innerHeight)
-      expect(out.top).toBeGreaterThanOrEqual(0)
+      const doors = list.querySelectorAll('.stg-door')
+      const last = doors[doors.length - 1].getBoundingClientRect()
+      expect(last.bottom).toBeLessThanOrEqual(window.innerHeight)
+      expect(last.top).toBeGreaterThanOrEqual(0)
     } finally {
       await page.viewport(1100, 800)
     }

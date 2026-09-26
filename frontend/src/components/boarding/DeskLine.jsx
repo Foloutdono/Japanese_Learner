@@ -4,7 +4,7 @@ import { SIGNUP_BONUS } from '../../domain/credits'
 import { BackChevron } from './icons'
 import { useCountUp, stillPreferred } from './countUp'
 
-// ── 路線 — the line laid down the left (plan 139) ────────────────
+// ── 路線 — the line laid down the left (plan 140) ────────────────
 // The owner's pick A of three directions drawn on the canvas "Desktop
 // onboarding — options". The desk's chrome is the rail, and first
 // contact lays it before it has any gates: a sumi column at

@@ -10,13 +10,15 @@ import { ratingButtons } from '../../domain/ratingScales'
 // The keys of a sentence run, as its lines print them: Enter checks the
 // answer and then takes the next sentence (plan 123's type, Enter, a
 // digit, Enter), the digits grade -- as many as the learner's own scale
-// has -- Esc leaves; a dictation line is played on Space first.
-export function useSentenceKeys({ listen = false } = {}) {
+// has -- Esc leaves; a dictation line is played, and a reading
+// sentence shown, on Space first.
+export function useSentenceKeys({ listen = false, reveal = false } = {}) {
   const { t } = useLang()
   const scale = useRatingScale()
   const n = ratingButtons(scale, t).length
   return [
     ...(listen ? [[t.keySpace, t.deskKeyListen]] : []),
+    ...(reveal ? [[t.keySpace, t.deskKeyReveal]] : []),
     [t.keyEnter, t.deskKeyCheckNext],
     [`1–${n}`, t.deskKeyRate],
     [t.keyEscape, t.deskKeyLeave],

@@ -64,6 +64,12 @@ export default function ReadingRun({ session }) {
   const [stage, setStage]   = useState('loading')
   const [data, setData]     = useState(null)   // current phrase item from the batch
   const [timeLeft, setTimeLeft] = useState(0)
+  // Whether the learner has pressed play on the phrase. Each phrase
+  // arrives with the sentence held back behind the play button, the
+  // clock still and the field shut; the press shows the sentence and
+  // starts the clock, so the reading begins when the learner is ready
+  // rather than the instant the phrase loads.
+  const [started, setStarted] = useState(false)
   const [answer, setAnswer] = useState('')
   const [feedback, setFeedback] = useState(null) // { correct, romaji, accuracy }
   const [score, setScore]   = useState({ correct: 0, total: 0 })
@@ -253,9 +259,13 @@ export default function ReadingRun({ session }) {
     setExplaining(false)
     setExplainError(null)
     setStage('reading')
+    setStarted(false)
     setTimeLeft(phraseData.display_seconds)
     fetchAnalysis(phraseData.phrase)
   }
+
+  // The play button: the sentence onto the card and the clock running.
+  const startReading = useCallback(() => setStarted(true), [])
 
   // What a question about the sentence on the stage carries, less its
   // breakdown (domain/ask's askTarget adds the words): the sentence, its
@@ -306,13 +316,13 @@ export default function ReadingRun({ session }) {
     })
   }
 
-  // Countdown while the phrase is up. Reaching zero no longer changes
-  // `stage` — writing is available from the moment the phrase appears
-  // (see the 'reading' stage's render below) — it just covers the
-  // phrase text so recall keeps mattering for anyone who didn't finish
-  // writing before the timer ran out.
+  // Countdown while the phrase is up, from the press of play. Reaching
+  // zero no longer changes `stage` — writing is available from the
+  // moment the phrase appears (see the 'reading' stage's render below)
+  // — it just covers the phrase text so recall keeps mattering for
+  // anyone who didn't finish writing before the timer ran out.
   useEffect(() => {
-    if (stage !== 'reading') return
+    if (stage !== 'reading' || !started) return
 
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -322,7 +332,7 @@ export default function ReadingRun({ session }) {
     }, 100)
 
     return clearTimer
-  }, [stage])
+  }, [stage, started])
 
   function clearTimer() {
     if (timerRef.current) {
@@ -332,7 +342,7 @@ export default function ReadingRun({ session }) {
   }
 
   function submitAnswer() {
-    if (!answer.trim() || stage !== 'reading') return
+    if (!answer.trim() || stage !== 'reading' || !started) return
     clearTimer()
     // No correctness check here anymore — auto-comparing romaji proved too
     // brittle. Reveal the answer and let the user judge for themselves.
@@ -460,6 +470,8 @@ export default function ReadingRun({ session }) {
       stage={stage}
       data={data}
       timeLeft={timeLeft}
+      started={started}
+      onPlay={startReading}
       answer={answer}
       setAnswer={setAnswer}
       feedback={feedback}
@@ -508,7 +520,7 @@ function Streak({ streak, t }) {
 // IS the start: the run above it is the route, and the route is what
 // decides there is a session to start at all.
 function SessionView({
-  t, source, level, domain, tier, tierSize, stage, data, timeLeft, answer, setAnswer,
+  t, source, level, domain, tier, tierSize, stage, data, timeLeft, started, onPlay, answer, setAnswer,
   feedback, score, streak, fare, error, lookup, setLookup, closeLookup, lines, asking, askBase,
   analysis, analysisLoading, backLabel,
   onExplain, explaining, explainError, showBreakdown, setShowBreakdown, onBack, onStart, submitAnswer,
@@ -530,7 +542,7 @@ function SessionView({
     t.byMastery
 
   const phraseCovered = stage === 'reading' && timeLeft <= 0
-  const keys = useSentenceKeys()
+  const keys = useSentenceKeys({ reveal: true })
   // The asking's thread: a reopened line's, else the sentence on the
   // stage's, open once it is graded (plan 131).
   const graded = stage === 'feedback' && feedback?.correct != null
@@ -608,8 +620,11 @@ function SessionView({
             foot={{ left: where, right: t.readingTitle }}
             phrase={data.phrase}
             covered={phraseCovered}
+            onPlay={started ? undefined : onPlay}
+            playLabel={t.readingPlay}
+            keyHint={desk}
           />
-          <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submitAnswer} t={t} />
+          <AnswerForm answer={answer} setAnswer={setAnswer} onSubmit={submitAnswer} t={t} disabled={!started} />
         </>
       )}
 

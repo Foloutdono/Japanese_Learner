@@ -204,8 +204,8 @@ describe('the Welcome\'s Enter (P8)', () => {
   })
 })
 
-// ── P9 — the boarding frame (plans 122, 139) ──
-// Plan 139, the owner's pick A of three drawn directions: the line laid
+// ── P9 — the boarding frame (plans 122, 140) ──
+// Plan 140, the owner's pick A of three drawn directions: the line laid
 // down the left. A sumi column at the side's width on the LEFT edge,
 // the rail's masthead at its head and a named stop per question under
 // it, each printing its answer once given and the one being asked lit
@@ -251,7 +251,7 @@ async function toTime() {
 }
 const fits = el => el.scrollHeight <= el.clientHeight + 1
 
-describe('the boarding frame on the desk (P9, plan 139)', () => {
+describe('the boarding frame on the desk (P9, plan 140)', () => {
   it('lays the line in a column on the left edge, a stop per question, and keeps it to the plan', async () => {
     const onComplete = vi.fn()
     await board({ onComplete })
@@ -529,9 +529,9 @@ describe('the boarding frame on the desk (P9, plan 139)', () => {
   })
 })
 
-// ── P10 — the front door (plans 122, 139) ──
+// ── P10 — the front door (plans 122, 140) ──
 // The Welcome with the sign-in beside it: a returning learner signs in
-// with no second screen. Since plan 139 the sign-in stands in the sumi
+// with no second screen. Since plan 140 the sign-in stands in the sumi
 // column on the left under the rail's masthead, and the paper holds the
 // heading, the tagline and Board as one block over the band, which runs
 // across the paper faded at its ends.
@@ -540,7 +540,7 @@ function Door({ authMode = null, onBoard = () => {}, boarding = false }) {
 }
 const inSide = s => $('.desk-door__side')?.querySelector(s)
 
-describe('the front door on the desk (P10, plan 139)', () => {
+describe('the front door on the desk (P10, plan 140)', () => {
   it('stands the sign-in in the column on the left, and Board as the one filled action', async () => {
     await render(<Door />)
     await settle(150)

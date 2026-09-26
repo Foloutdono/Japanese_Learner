@@ -332,6 +332,7 @@ const quiz = {
   deskKeyCheckNext:    'checks, then next',
   deskKeyRate:         'grades your answer',
   deskKeyListen:       'plays the line',
+  deskKeyReveal:       'shows the sentence',
   deskKeyPick:         'picks an answer',
   deskKeyNext:         'next question',
   deskKeyWalk:         'walks the questions',
@@ -1000,6 +1001,8 @@ const reading = {
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
+  // The play button a phrase arrives behind (ReadingPieces' PlayButton).
+  readingPlay:          'Show the sentence and start the timer',
   correct:              'Correct!',
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',
@@ -1894,7 +1897,7 @@ const boarding = {
   brdBuildLines: 'Your lines',
   brdBuildRide: 'Your daily ride',
   brdBuildProjection: 'Your projection',
-  // 机 (plan 139): the stops on the desk's column, one per question --
+  // 机 (plan 140): the stops on the desk's column, one per question --
   // the part of the boarding each answers, as the line prints it.
   brdStop: { name: 'Name', why: 'Why', kana: 'Kana', level: 'Level', goal: 'Goal', lines: 'Lines', rhythm: 'Rhythm', time: 'Departure', nudge: 'Reminder' },
   brdArrivalTitle: 'Your plan',
@@ -2123,6 +2126,17 @@ const onboarding = {
   settingsData: 'Data',
   settingsRedo: 'Placement test',
   settingsCredits: 'Credits',
+  // The pass's contract and the rows under it (plan 140).
+  passFieldHour: 'Daily ride',
+  passFieldLines: 'Lines',
+  settingsRatingShort: 'Rating',
+  settingsHelp: 'Help',
+  settingsHelpValue: 'Ride · Guide',
+  settingsCreditsCount: n => `${n} sources`,
+  settingsPaceMinutes: m => `≈ ${m} min`,
+  settingsYourPace: 'Your pace',
+  settingsYourPaceSub: n => `${n} / day · last 14 days`,
+  settingsInsteadOf: d => `instead of ${d}`,
   creditsWhat: { dictionary: 'Dictionary', kanji: 'Kanji', strokes: 'Stroke order', sentences: 'Example sentences', voice: 'Station voice', speech: 'Japanese speech', kana: 'Kana voice', type: 'Typefaces' },
   themeDark: 'Dark',
   themeLight: 'Light',

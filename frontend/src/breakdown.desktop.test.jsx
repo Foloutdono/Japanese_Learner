@@ -75,6 +75,10 @@ async function graded() {
     </LangProvider>
   )
   await settle(150)
+  // The sentence arrives behind its play button; the press shows it
+  // and opens the field.
+  $('.clip-player__play').click()
+  await settle(20)
   // The answer's form: the asking's (plan 131) is another on the desk.
   setValue.call($('form.stage__foot input'), 'gakkou wa kuji desu')
   $('form.stage__foot input').dispatchEvent(new Event('input', { bubbles: true }))

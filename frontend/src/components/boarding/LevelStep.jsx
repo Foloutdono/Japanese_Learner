@@ -27,7 +27,7 @@ function kanjiFigure(volumes, level, lang) {
 // call): N5 on 5 ... N1 on 1, the novice -- before N5 -- on 0.
 const levelDigit = level => (level === 'novice' ? 0 : Number(level.slice(1)))
 
-// ── 机 — the stops as a line of stations (plan 139) ─────────────
+// ── 机 — the stops as a line of stations (plan 140) ─────────────
 // On the desk the list is drawn as what it names: stations on a line,
 // the novice's stop first, each on the rail with its code in its ring
 // and the stop's card under it. The ride is drawn in gold along the

@@ -124,7 +124,7 @@ export default function Welcome({ onBoard, onSignIn, boarding = false, authMode 
   )
 }
 
-// ── 路線 — the front door on the desk (plan 139) ─────────────────
+// ── 路線 — the front door on the desk (plan 140) ─────────────────
 // The owner's pick A of three drawn directions (the canvas "Desktop
 // onboarding — options"): the rail is the desk's chrome, so first
 // contact lays it before it has any gates. A sumi column at

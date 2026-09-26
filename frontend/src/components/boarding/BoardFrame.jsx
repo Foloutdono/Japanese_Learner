@@ -106,7 +106,7 @@ function FloorBackButton({ onClick, label }) {
 
 /** A floor with the way back alone, for the one question with no
     Continue -- the kana's, whose answers go on by themselves. On the
-    desk, where the head's ‹ is not drawn (plan 139); nothing on a
+    desk, where the head's ‹ is not drawn (plan 140); nothing on a
     phone, which keeps its head. */
 export function FloorBack() {
   const { t } = useLang()

@@ -82,7 +82,7 @@ function PrintedBalance() {
 
 // Why "Enter the station" did not go through, over the button that
 // posts the contract: here, and on the desk wherever that button went
-// once this screen folded away (the plan, the account; plan 139).
+// once this screen folded away (the plan, the account; plan 140).
 // 'refused' is the office answering and turning the contract down -- a
 // wrong thing to blame on the connection, and the one case where trying
 // again unchanged earns the same answer. 'network' is the line the app

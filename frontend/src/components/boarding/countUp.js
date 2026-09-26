@@ -13,7 +13,7 @@ import { useEffect, useState } from 'react'
 // account already holds something else sees THAT number climbed to,
 // never a promised one. Shared by the pass step (PassStep) and, on the
 // desk where that screen folds into the plan, by the pass at the
-// column's foot (DeskLine, plan 139).
+// column's foot (DeskLine, plan 140).
 const COUNT_MS = 900
 const COUNT_FROM_MS = 520
 

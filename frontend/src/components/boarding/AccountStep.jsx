@@ -20,7 +20,7 @@ import { PassError } from './PassStep'
 // without either. The skip is the point of the screen — an account
 // asked for at the end and refusable is a different promise from one
 // demanded at the door.
-// `error` is the desk's (plan 139): there the pass is already at the
+// `error` is the desk's (plan 140): there the pass is already at the
 // column's foot, so keeping the progress, or riding on without an
 // account, enters the station from here -- and the office's answer to
 // that is said here, over the button.
