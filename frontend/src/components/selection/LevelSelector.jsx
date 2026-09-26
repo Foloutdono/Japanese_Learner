@@ -2,6 +2,7 @@ import { useLang } from '../../LangContext'
 import { useProfileSummary } from '../../stores/profileSummary'
 import { useStats } from '../../stores/stats'
 import { deckItems } from '../../domain/lineProgress'
+import { useStationSamples } from '../../stores/stationSamples'
 import { RouteStops } from './RouteStops'
 
 /**
@@ -32,13 +33,17 @@ import { RouteStops } from './RouteStops'
  *   levels — array of level strings (default: N5…N1)
  *   selected, linkTo — the desk's split (plans 114, 117); passed to
  *            RouteStops, where a stop with `linkTo` is a link.
+ *   figured — the desk's line split (plan 136): each stop prints its
+ *            first few items (/api/station/{source}/samples) and its
+ *            bar. Only the desk passes it, so a phone never asks.
  */
 
 const DEFAULT_LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 
-export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null }) {
+export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVELS, selected = null, linkTo = null, figured = false }) {
   const { t } = useLang()
   const stats = useStats().data
+  const samples = useStationSamples(source, figured)
   const here = useProfileSummary()?.jlptLevel ?? null
   const HINTS = { N5: t.levelHintN5, N4: t.levelHintN4, N3: t.levelHintN3, N2: t.levelHintN2, N1: t.levelHintN1 }
 
@@ -55,8 +60,9 @@ export default function LevelSelector({ onSelect, source, levels = DEFAULT_LEVEL
       total,
       started,
       startedLabel: t.startedNote(started),
+      sample: samples?.[level]?.sample?.join(' '),
     }
   })
 
-  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} linkTo={linkTo} />
+  return <RouteStops stops={stops} here={here} selected={selected} onSelect={onSelect} linkTo={linkTo} figured={figured} />
 }

@@ -6521,3 +6521,23 @@ stepper, the volume dial, the ✕) is no longer drawn; its code and CSS
 are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
+
+## Plan 136 — the stations filled, and Vocabulary's sources as plates (2026-09-26)
+
+Numbered 136 because 135 went to the fare gate (cited in the source,
+recorded in CLAUDE.md) and a grep of origin/main found nothing at 136
+or above. The owner's ask, with screenshots of the Kana, Vocabulary
+(sources and N5) and Grammar stations on the desk: rework their layout,
+options first. Drawn on the canvas "Station screens — layout options"
+(four layouts on the three stations — A the split filled, B the line
+across with tiles, C three panels with the stop's contents, D a
+departure board — and two for the sources, S1 folded into the station
+and S2 three plates); the owner picked **A and S2**.
+
+| # | What | Status |
+|---|------|--------|
+| 136 | **Backend** `routes/station.py`, `GET /api/station/{source}/samples` (kana, kanji, vocab, grammar; static, cached per language): per stop the first things it teaches — kana in chart order, vocab and kanji in the frequency order the tiers walk (at their native level), grammar in the catalogue's order — and one card for the platforms' specimens (the vocab word is the first with a kanji, so the reading platform can ask it; the grammar point is the first with a sentence and a contrast example, its blank the contrast card's own under a fixed seed and its choices the rivals the lesson names, so the specimen is the same on every process). `GET /api/frequency/{domain}/tiers/started`: the cards met in each tier, the way /api/stats counts a level (reviewed in any mode, once), one walk of the order under `tier_keys`' override rule; the JMdict pool answers an empty map. **Frontend, A** (`desk-split--line`): the stops share the list's height, each a grid of code and name, its sample (`RouteStops`' and `LevelSelector`'s `figured`, `stores/stationSamples.js`), the Learn plate's bar and its caption and figure; `LinePlatforms` gives the page the platforms sharing its height, each with its specimen in a well (`domain/specimen.js` by the mode's shape in the registry: pair, type, draw, sentence, blank; a long pair stacked) where the box is 720px or wider (`useBoxWidth`), the figures' column its own width then; the fast review and grammar's points door at the foot; the figures name the cards in progress when nothing is due (`learningUnit`); the bar prints no sub on the four line splits (Kana, Vocabulary, Kanji, Grammar). **Frontend, S2**: `VocabSources`, three plates at the window's height — JLPT as a line (learned / total, the learner's own ringed with what they have met), the tiers under their pool and size (in the page's URL, carried into every link) with the met counts, the themes under the console filter — each row a pushing link walked with ↑/↓. Tests: `lineSplit.wide`, `lineSplit.desktop`, `vocabSources.desktop`, `domain/specimen`, a block of `deskfree.phone`, `backend/tests/test_station_samples.py` | DONE (2026-09-26) |
+
+Left for later: Kanji's own sources page (JLPT, frequency, radicals) is
+still the three cards; it would take the same plates, the radicals one
+holding the index by stroke count.

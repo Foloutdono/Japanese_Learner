@@ -1659,3 +1659,60 @@ describe('the gates taking the window (plan 130)', () => {
     expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
   })
 })
+
+// ── plan 136 — the stations a phone keeps ──
+// On the desk a line's split fills the window (its stops with their
+// samples and bars, its platforms with their wells, the fast review at
+// the foot) and Vocabulary's sources hang as three plates. A phone
+// keeps its screens: the three source cards, then a level's platforms
+// one under another with the fast review among them, the bar naming
+// the level, and no request for the tiers' figures.
+describe('the stations filled (plan 136)', () => {
+  it('keeps the three source cards, and asks for no tier figures', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabScreen } = await import('./screens/VocabScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab']}>
+          <Routes><Route path="/learn/vocab" element={<VocabScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(3)
+    expect(document.querySelector('.desk-sources, .desk-source')).toBeNull()
+    expect(apiFetch.mock.calls.some(([path]) => String(path).includes('/tiers'))).toBe(false)
+  })
+
+  it('keeps a level\'s platforms one under another, the fast review among them and no wells', async () => {
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabScreen } = await import('./screens/VocabScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N5']}>
+          <Routes><Route path="/learn/vocab/:level" element={<VocabScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    const cards = [...document.querySelectorAll('.learn > .platform-grid .platform-card')]
+    expect(cards.length).toBe(4)
+    expect(cards.at(-1).textContent).toContain('Révision rapide')
+    expect(document.querySelector('.bar__sub').textContent).toMatch(/^N5/)
+    expect(document.querySelector('.desk-platforms, .desk-spec, .desk-split__foot, .desk-stop__sample, .desk-stop__bar')).toBeNull()
+  })
+
+  it('keeps a route\'s rows as they were, whatever samples a stop carries', async () => {
+    const stops = ['N5', 'N4'].map(k => ({ key: k, code: k, name: k, total: 10, learned: 1, started: 3, sample: '何 私' }))
+    await render(
+      <LangProvider>
+        <main className="learn"><RouteStops stops={stops} here="N5" onSelect={() => {}} /></main>
+      </LangProvider>
+    )
+    await settle()
+    expect(document.querySelector('.desk-stop__sample, .desk-stop__bar')).toBeNull()
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(2)
+  })
+})

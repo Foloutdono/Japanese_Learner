@@ -545,7 +545,23 @@ runtime purpose. Two consequences worth knowing:
   `splitTake`, `screens/TodayRun.jsx`, `src/today.wide.test.jsx`,
   `src/today.desktop.test.jsx`, `src/domain/lanes.test.js` and the 机
   section of `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **136** or higher, and check
+  **136** is the stations filled and Vocabulary's sources as plates, the
+  owner's picks A and S2 of the station screens canvas: a line's station
+  on the desk (a kana set, a JLPT level of vocab, kanji or grammar) takes
+  the window — each stop with the first things it teaches and its bar,
+  each platform with the card it asks in a well where the page is wide
+  enough (`domain/specimen.js`), the fast review and grammar's points at
+  the foot, no sub in the bar — and /learn/vocab on the desk is three
+  plates, JLPT, frequency and themes, each with its whole list (cited in
+  `routes/station.py`, `routes/frequency.py`'s `tiers/started`,
+  `tests/test_station_samples.py`, `stores/stationSamples.js`,
+  `components/selection/LinePlatforms.jsx`, `VocabSources.jsx`,
+  `RouteStops.jsx`, `LevelSelector.jsx`, `ModeSelector.jsx`,
+  `ModeFigures.jsx`, the four line screens, `src/lineSplit.wide.test.jsx`,
+  `src/lineSplit.desktop.test.jsx`, `src/vocabSources.desktop.test.jsx`,
+  `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **137** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
@@ -937,7 +953,7 @@ Set `DEV_USER_ID` in `backend/.env` and every request is treated as that user wi
 
 ### Backend layout
 - `main.py` — FastAPI app setup: loads `backend/.env`, mounts routers, CORS (deployed frontend origin + `CORS_ORIGINS` env list), static mounts for `kanjivg` (stroke-order diagrams) and `datas/exam_audio` (generated TTS).
-- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
+- `routes/` — one file per feature area (kana, vocab, kanji, grammar, phrase, reading, translation, dictation, composition, practice, dictionary, decks, exams, today, stats, profile, frequency, theme_vocab, translations, onboarding, journey, tts, station). Thin FastAPI routers; business logic lives in `srs/` and `study/`.
 - `core/` — cross-cutting singletons: `auth.py` (identity), `db.py` (raw psycopg2 connections), `srs_instance.py` / `frequency_store_instance.py` (module-level singletons constructed once at import time from `DATABASE_URL`, imported by routes needing SRS/frequency state).
 - `srs/` — the spaced-repetition engine (`srs.py` is the large one — scheduling, review submission, card state), `scheduler.py` (interval/difficulty math), `storage.py` (DB access), `models.py` (`CardState`/`ReviewResult` dataclasses), `xp.py` (XP curve), `batch_cache.py`, `frequency_store.py`.
 - `study/` — content-generation and evaluation logic that sits above the SRS layer: exam generation (`exam_blueprint.py`, `exam_*_gen.py` per section — vocab/kanji/grammar/reading/listening — `exam_validation.py`, `exam_scoring.py`, `exam_tts.py`), card selection/lookup (`card_index.py`, `card_lookup.py`, `daily_queue.py` for the "Today" queue), difficulty modeling (`difficulty.py`), grammar detection (`grammar_detect.py` — which catalogue points a sentence actually uses, over the tokenizer and the catalogue's own example sentences; `difficulty.points_in` is its name to the rest of the app), Japanese text processing (`furigana.py`, `morphology.py`, `grammar_match.py`, `sound.py`, `romaji.py` — Hepburn conversion and the fold two romanizations are compared under), dictation (`dictation.py` — clip identity and the transcription measure), speech (`voice_engine.py` — the only client of the VOICEVOX Nemo engine; `exam_tts.py` — the clip store, content keys, the voice epoch and dialogue assembly; `word_tts.py` — the `/api/tts` card-reading clips), and study `modes.py`/`structures.py` defining the review-mode taxonomy per content type.

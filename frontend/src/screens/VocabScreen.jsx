@@ -14,7 +14,10 @@ import { tierLabelFor, tierAtSize } from '../domain/tiers'
 import { THEME_LEVELS, themeLabelFor, themeLevelLabel, isThemeLevel } from '../domain/themes'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, LevelRedirect } from '../components/selection/StationSplit'
-import { ModeFigures, ScopeFigures } from '../components/selection/ModeFigures'
+import { ScopeFigures } from '../components/selection/ModeFigures'
+import { LinePlatforms } from '../components/selection/LinePlatforms'
+import VocabSources from '../components/selection/VocabSources'
+import { useStationSamples } from '../stores/stationSamples'
 
 const LEVELS = ['N5', 'N4', 'N3', 'N2', 'N1']
 const BASE = '/learn/vocab'
@@ -51,6 +54,7 @@ export default function VocabScreen({ session }) {
   const { level, tier, theme, themeLevel } = useParams()
   const [sp, setSp] = useSearchParams()
   const desk = useDesk()
+  const lineSamples = useStationSamples('vocab', desk && Boolean(level))
 
   const MODES = modePickerEntries(t, 'vocab')
   const validMode = m => m === FAST_REVIEW || STUDY_MODES[m]?.source === 'vocab'
@@ -77,6 +81,15 @@ export default function VocabScreen({ session }) {
     const qMode = sp.get('mode')
     if (qLevel && qMode && LEVELS.includes(qLevel) && validMode(qMode)) {
       return <Navigate replace to={`${BASE}/${qLevel}/${qMode}`} />
+    }
+    // 机 (plan 136): the three sources as plates, each with its whole
+    // list, so a stop of any of them is one click from its platforms.
+    if (desk) {
+      return (
+        <SelectionScreen title={t.vocabulary} aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}>
+          <VocabSources session={session} />
+        </SelectionScreen>
+      )
     }
     const SOURCES = [
       { key: 'levels', label: t.byLevel,     desc: t.byLevelDesc },
@@ -184,19 +197,28 @@ export default function VocabScreen({ session }) {
   const modes = level ? MODES : MODES.filter(m => m.key !== FAST_REVIEW)
   const run = m => navigate(`${pathname}/${m}${search}`)
 
-  // ── 机 — the line beside its platforms (plan 114) ──
+  // ── 机 — the line beside its platforms (plans 114, 136) ──
   // On the desk a level's platforms stand beside the JLPT line itself
-  // (StationSplit): another stop swaps the platforms in place, and each
-  // platform carries its own figures. The way out is the sources.
+  // (StationSplit): another stop swaps the platforms in place. Both
+  // columns take the window (plan 136, LinePlatforms): each stop with
+  // its first words and its bar, each platform with the card it asks
+  // and its figures, the fast review a door at the foot. The bar prints
+  // no sub: the open stop names the level. The way out is the sources.
   if (desk && level) {
-    const figured = modes.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="vocab" deck={level} mode={m.key} /> }))
     return (
-      <SelectionScreen title={t.vocabulary} sub={sub} aside={leaveSources}>
+      <SelectionScreen title={t.vocabulary} aside={leaveSources}>
         <StationSplit
+          className="desk-split--line"
           label={t.stationJlpt}
-          list={<LevelSelector source="vocab" selected={level} linkTo={lvl => `${BASE}/${lvl}`} />}
+          list={<LevelSelector source="vocab" selected={level} linkTo={lvl => `${BASE}/${lvl}`} figured />}
         >
-          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+          <LinePlatforms
+            source="vocab"
+            deck={level}
+            card={lineSamples?.[level]?.card}
+            modes={modes}
+            onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
+          />
         </StationSplit>
       </SelectionScreen>
     )

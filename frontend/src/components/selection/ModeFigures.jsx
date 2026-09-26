@@ -40,6 +40,9 @@ export function ScopeFigures({ url, session }) {
   return <Figures row={got?.url === url ? got.row : null} />
 }
 
+// With nothing due, the cards in progress say what the bar's red sliver
+// is (plan 136): a fortnight of first passes leaves "0 / 674" mastered
+// on every platform, and this is the figure that moves meanwhile.
 function Figures({ row }) {
   const { t } = useLang()
   if (!row || row.total === 0) return null
@@ -47,6 +50,9 @@ function Figures({ row }) {
     <span className="desk-mode-fig">
       {row.due > 0 && (
         <span className="desk-mode-fig__due">{row.due}<span className="desk-mode-fig__unit">{t.dueUnit}</span></span>
+      )}
+      {row.due === 0 && row.learning > 0 && (
+        <span className="desk-mode-fig__now">{row.learning}<span className="desk-mode-fig__unit">{t.learningUnit}</span></span>
       )}
       <Composition row={row} />
       <span className="desk-mode-fig__count">
