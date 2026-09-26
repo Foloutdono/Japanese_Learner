@@ -43,13 +43,32 @@ import { ChevronIcon } from '../ui/Icons'
 // one of those (onDeskRail) is dropped — it would be a second door to
 // the place the rail's lit link already opens. Any other Leave (‹
 // Themes, ‹ Levels, a way back that is a state rather than a path)
-// becomes the way up: a small crumb above the title, where a desk's
+// becomes the way up: a small crumb above the page, where a desk's
 // eye looks for "where this sits".
+//
+// And the desk prints no title (2026-09-26, the owner's call, as plan
+// 139 did for Settings' pages): the rail beside the screen lights the
+// gate and the station you are on, so the roundel, the name, its
+// caption and the pigment rule over the page named the place a second
+// time. The name stays as the <h1>, clipped, for a screen reader; what
+// is left drawn is the crumb and the aside, and a bar with neither is
+// no box at all, so the page starts at its top.
 export function Bar({ code, title, sub, aside, color, register = false, as: Title = 'h1', className = '' }) {
   const desk = useDesk()
   const leave = desk && isValidElement(aside) && aside.type === Leave ? aside : null
   const up = leave && !(leave.props.to !== undefined && onDeskRail(leave.props.to)) ? leave : null
   const shown = leave ? null : aside
+  if (desk) {
+    const name = <Title className="sr-only">{title}</Title>
+    if (!up && !shown) return name
+    return (
+      <div className={['bar', 'bar--desk', className].filter(Boolean).join(' ')} style={color ? { '--line-color': color } : undefined}>
+        {up && <DeskCrumb leave={up} />}
+        {name}
+        {shown && <div className="bar__row"><span className="bar__aside">{shown}</span></div>}
+      </div>
+    )
+  }
   const classes = ['bar', register ? 'bar--register' : '', className].filter(Boolean).join(' ')
   const names = ['bar__names', sub && shown ? 'bar__names--stacked' : ''].filter(Boolean).join(' ')
   return (

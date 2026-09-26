@@ -24496,6 +24496,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
      register, where a computer's eye looks for what a page sits under.
      One that the rail already opens is not drawn at all. */
   .desk-crumb { display: flex; }
+  /* The desk's bar prints no title (Bar.jsx): what stays is the crumb
+     and an aside that is not a way out, which keeps the row's far end. */
+  .bar--desk .bar__row { justify-content: flex-end; }
   .desk-crumb__up {
     height: auto;
     padding: var(--sp-1) 0;
