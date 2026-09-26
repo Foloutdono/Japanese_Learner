@@ -244,6 +244,19 @@ export function TextLinesIcon({ size = 18, className }) {
   )
 }
 
+// A subtitle file (plan 136): a page with its corner turned and two
+// lines of text on it -- the analyser's file door beside the camera.
+export function SubtitleFileIcon({ size = 18, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+      <path d="M14 3v5h5" />
+      <line x1="8.5" y1="13" x2="15.5" y2="13" />
+      <line x1="8.5" y1="17" x2="13" y2="17" />
+    </svg>
+  )
+}
+
 export function CameraIcon({ size = 18, className }) {
   return (
     <svg {...base} width={size} height={size} className={className}>

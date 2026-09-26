@@ -629,7 +629,10 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
     can run to hundreds of entries, and a listing that pulled it would
     ship the whole corpus of every session the learner has ever made to
     render twenty rows. The count comes from jsonb_array_length instead,
-    computed server-side over the stored value.
+    computed server-side over the stored value, and the card's line
+    (plan 136) from the first element's text the same way: a session
+    the grab made is named `<video id>.ja.vtt`, which says nothing, and
+    its first sentence says what the video is.
 
     Only `ready` sessions are listed. A 'generating' one has nothing to
     reopen yet and a 'failed' one has nothing to reopen at all; both are
@@ -641,7 +644,8 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
             cur.execute(
                 """
                 SELECT id, source, source_ref, video_id, truncated, created_at,
-                       COALESCE(jsonb_array_length(sentences), 0) AS sentence_count
+                       COALESCE(jsonb_array_length(sentences), 0) AS sentence_count,
+                       sentences->0->>'text' AS first_line
                   FROM video_sessions
                  WHERE user_id = %s AND status = 'ready'
                  ORDER BY created_at DESC
@@ -660,10 +664,11 @@ def list_video_sessions(user_id: str = Depends(get_user_id),
             "sourceRef": source_ref,
             "videoId": video_id,
             "sentenceCount": sentence_count,
+            "firstLine": first_line,
             "truncated": truncated,
             "createdAt": created_at.isoformat(),
         }
-        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count in rows
+        for row_id, source, source_ref, video_id, truncated, created_at, sentence_count, first_line in rows
     ]
 
 

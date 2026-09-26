@@ -195,6 +195,48 @@ def get_tiers(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE):
     return {"domain": domain, "tier_size": tier_size, "total_items": total, "tiers": tiers}
 
 
+@router.get("/api/frequency/{domain}/tiers/started")
+def get_tiers_started(domain: str, tier_size: int = freq.DEFAULT_TIER_SIZE,
+                      user_id: str = Depends(get_user_id)):
+    """
+    How many of each tier's cards the learner has met (plan 137): the
+    figure the desk's vocabulary sources print beside each tier, the
+    same `started` /api/stats counts per JLPT level -- a card with a
+    review behind it in any mode, counted once. /tiers stays the
+    learner-free list it was; this is the one answer that needs the
+    learner, so it is a route of its own.
+
+    The deck's two domains only. The JMdict pool is 292k words in 1,464
+    tiers of 200, and walking it per request to count a handful of met
+    cards is the cost vocab_jmdict_data exists to avoid: it answers an
+    empty map, and its rows print no figure. A tier nobody has met is
+    absent rather than 0.
+    """
+    _require_domain(domain)
+    if tier_size < 1:
+        raise HTTPException(status_code=422, detail="tier_size must be a positive integer")
+    started: dict[str, int] = {}
+    if domain != "vocab_jmdict":
+        prefix_len = len(user_id) + 1
+        met = {
+            card_id[prefix_len:]
+            for (card_id, _mode), item in srs.get_user_states(user_id).items()
+            if item["total_reviews"] > 0
+        }
+        if met:
+            # One walk of the order rather than a tier_keys() per tier
+            # (each of which walks it whole), under tier_keys' own rule:
+            # an override puts a key in its target tier and nowhere else,
+            # every other key sits in the tier its rank falls in.
+            overrides = frequency_store.get_overrides(user_id, domain)
+            for rank, key in enumerate(freq.standard_order(domain)):
+                if freq.to_id(domain, key) not in met:
+                    continue
+                tier = str(overrides.get(key) or rank // tier_size + 1)
+                started[tier] = started.get(tier, 0) + 1
+    return {"domain": domain, "tier_size": tier_size, "started": started}
+
+
 @router.get("/api/frequency/{domain}/tier/{tier}/items")
 def get_tier_items(domain: str, tier: int, lang: str = "fr", tier_size: int = freq.DEFAULT_TIER_SIZE,
                    user_id: str = Depends(get_user_id)):

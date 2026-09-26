@@ -6,7 +6,7 @@ import './index.css'
 import { parkPointer } from './testing/parkPointer'
 import { STATS, REPORT, LONG_REPORT } from './testing/statsRecord'
 
-// ── 路線別 — the statistics as the four lines (plan 136) ─────────
+// ── 路線別 — the statistics as the four lines (plan 138) ─────────
 // On the desk the record is a strip of four figures over the four
 // lines' plates, two by two, each row as tall as its taller plate and
 // no taller (a plate has no body to give the window's height to, and a

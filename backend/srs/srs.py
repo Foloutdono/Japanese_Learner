@@ -1343,7 +1343,7 @@ class SRSEngine:
         return int(row[0]) if row else 0
 
     def get_weakest_by_source(self, user_id: str, per_source: int = 8) -> list[dict[str, Any]]:
-        """The cards each line keeps missing (plan 136): up to
+        """The cards each line keeps missing (plan 138): up to
         `per_source` per source -- the raw id's first segment, kana_,
         vocab_, kanji_, grammar_ -- lapses first, then accuracy.
 

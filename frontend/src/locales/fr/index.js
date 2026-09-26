@@ -499,6 +499,9 @@ const stats = {
   fareGate:           'Portique',
   dueUnit:            'à réviser',
   newUnit:            'nouveaux',
+  learningUnit:       'en cours',
+  sourceTiers:        n => `${n} paliers`,
+  sourceThemes:       n => `${n} thèmes`,
   originStop:         'Débutant',
   stageGate:          'Portique',
   nothingGraded:      'Rien n’est noté',
@@ -560,7 +563,7 @@ const stats = {
   reportRungs:        ['<1 j', '1 sem', '1 mois', '3 mois', '3 mois+'],
   reportStrengthSummary: n => `${n} cartes selon leur avance`,
   reportMisses:       (n, d) => `${n === 1 ? 'raté' : 'ratés'} · ${d} j`,
-  // ── 路線別, les lignes du relevé (plan 136) ──
+  // ── 路線別, les lignes du relevé (plan 138) ──
   reportWeekStart:    d => `sem. du ${d}`,
   reportReviewsCap:   'révisions',
   reportPointOf:      (when, n) => `${when} · ${n} ${n === 1 ? 'révision' : 'révisions'}`,
@@ -705,7 +708,6 @@ const phraseAnalyzer = {
   shootPhoto:          'Photographier',
   pickPhoto:           'Choisir',
   charCount:           n => `${n} caractères`,
-  dropSubtitles:       'Dépose un fichier .srt, .vtt ou .ass ici, ou choisis-en un',
   // Doit correspondre à routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 Mo).
   subtitleAccepted:    'SRT, VTT et ASS · jusqu\'à 1 Mo',
   windowLabel:         'Extrait',
@@ -785,7 +787,19 @@ const phraseAnalyzer = {
   analyze:             'Analyser',
   showHistory:         'Historique',
   hideHistory:         'Masquer l\'historique',
-  noHistory:           'Aucune phrase analysée pour le moment.',
+  // ── 帳 — les passages d'abord (plan 136) ──
+  shelfAll:            'Tous',
+  shelfKept:           'Gardés',
+  // Le tampon d'une carte : un passage gardé.
+  passageKept:         'Gardé',
+  shelfFilter:         'Montrer',
+  shelfSearch:         'Chercher dans tes passages…',
+  shelfEmpty:          'Aucun passage pour le moment : ce que tu analyses à droite s’affichera ici.',
+  shelfNoMatch:        'Aucun passage ne correspond.',
+  shelfEmptyPhone:     'Tes passages s’afficheront ici : colle du japonais ou un lien YouTube au-dessus, ou prends une photo.',
+  newPassage:          'Nouveau passage',
+  entryPlaceholder:    'Colle du japonais ou un lien…',
+  dropHere:            'Dépose-le ici : des sous-titres ou une image',
   phraseAnalyzeError:  "Impossible d'analyser cette phrase. Réessaie.",
   clickForDetails:     'Clique pour voir la définition et les statistiques',
   inThisPhrase:        'Dans cette phrase',
@@ -809,7 +823,6 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — épingler une phrase dans la banque.
   keepSentence:        'Garder cette phrase',
   unkeepSentence:      'Ne plus garder cette phrase',
-  keptTitle:           'Gardées',
   grammarSpotted:      'Grammaire repérée',
   explainSentence:     'Expliquer',
   explainAgain:        'Expliquer à nouveau',
@@ -856,16 +869,19 @@ const video = {
   videoTitle:          'Vidéo',
   videoDesc:           "Étudie les sous-titres japonais d'une vidéo\nEn direct, colorés selon ce que tu sais déjà\nUne photo du monde avec une bande-son",
   videoUrlOptional:    'Lien de la vidéo',
-  videoUrlOptionalHint: 'Affiche la vidéo à côté des sous-titres, ouvre la bonne page pour le favori et préremplit DownSub.',
   // Affiché seulement là où le serveur sait récupérer un lien seul.
   analyzeThisLink:     'Récupérer les sous-titres',
-  grabTitle:           'Les sous-titres en un geste',
-  grabLead:            'Un favori spécial à installer une seule fois (une minute) : ensuite, sur n\'importe quelle vidéo YouTube, tu l\'ouvres et les sous-titres japonais arrivent ici tout seuls — téléphone compris.',
-  grabTutorialBtn:     'Tutoriel pas à pas',
+  // ── L'entrée vidéo en colonne (plan 136) ──
+  // Une seule action remplie : installer le favori tant qu'il n'a jamais
+  // servi, puis ouvrir la vidéo sur YouTube, où on le touche.
+  grabInstall:         'Installer le favori 字幕取り',
+  grabInstallSay:      'Une minute, une seule fois : ensuite, sur n’importe quelle vidéo YouTube, il rapporte les sous-titres ici.',
+  grabThenSay:         'Puis touche ton favori 字幕取り : les sous-titres arrivent ici.',
+  grabInstallLink:     'Installer le favori',
+  chooseSubtitles:     'Choisir un fichier de sous-titres',
   copyBookmarklet:     'Copier le favori 字幕取り',
   bookmarkletCopied:   'Copié ! Passe à l\'étape 2',
-  downsubAlt:          'ou via DownSub',
-  downsubHint:         'Télécharge un fichier .vtt à déposer ci-dessous — utile hors YouTube.',
+  downsubHint:         'Télécharge un fichier .vtt à choisir ici — utile quand le favori ne passe pas.',
   grabEmpty:           'Les sous-titres rapportés étaient vides — réessaie depuis la page de la vidéo.',
   // ── Le tutoriel du favori ──
   tutTitle:            'Installer le favori 字幕取り',

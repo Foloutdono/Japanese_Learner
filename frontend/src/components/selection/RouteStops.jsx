@@ -40,9 +40,16 @@ import { SplitRow } from './SplitRow'
 //           called. Only the desk passes it; without it a stop is the
 //           button it always was.
 //
+//   figured — the desk's line split (plan 137): each stop also prints
+//           its `sample` (the first things it teaches, joined) and a bar
+//           of its make-up — learned in the line's pigment, met but not
+//           learned in half of it, the Learn plate's own bar — so the
+//           stops can share the column's height with something to say.
+//           Only the desk passes it.
+//
 // In the split the route is also walked by key (hooks/useListWalk,
 // plan 115): one tab stop, the open one, and ↑/↓/Home/End along it.
-export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null }) {
+export function RouteStops({ stops, here = null, selected = null, onSelect, linkTo = null, figured = false }) {
   const hereIndex = stops.findIndex(s => s.key === here)
   const walked = selected != null
   const onWalk = useListWalk(walked)
@@ -98,6 +105,15 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
                 </span>
               )}
             </span>
+            {figured && stop.sample && (
+              <span className="desk-stop__sample" lang="ja" aria-hidden="true">{stop.sample}</span>
+            )}
+            {figured && stop.total > 0 && (
+              <span className="desk-line__bar desk-stop__bar" aria-hidden="true">
+                <i className="desk-line__met" style={{ width: share(stop.started ?? 0, stop.total) }} />
+                <i className="desk-line__learned" style={{ width: share(stop.learned ?? 0, stop.total) }} />
+              </span>
+            )}
             {stop.total > 0 && (
               <span className="route-stop__fig"><b>{stop.learned ?? 0}</b>/ {stop.total}</span>
             )}
@@ -108,3 +124,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
     </div>
   )
 }
+
+// components/station/LinePlate.jsx's own measure: a share of the whole,
+// to a tenth of a percent, never past it.
+const share = (n, total) => `${total > 0 ? Math.round(Math.min(1, n / total) * 1000) / 10 : 0}%`

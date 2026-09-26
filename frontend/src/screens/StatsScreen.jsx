@@ -21,10 +21,10 @@ const STATION = stationFor('/profile/stats')
 
 const MISS_WINDOW = 30
 
-// ── 路線別 — the record, line by line (plans 085, 136) ────────
+// ── 路線別 — the record, line by line (plans 085, 138) ────────
 // One question, which the profile (what I did) and the fare gate (what
 // now) do not ask: is the learning holding, and where is it leaking?
-// Since plan 136 (the owner's pick B of four drawn directions) the
+// Since plan 138 (the owner's pick B of four drawn directions) the
 // screen answers it per line, because that is where a leak is:
 //
 //   the strip   retention with its line, the reviews behind the asked

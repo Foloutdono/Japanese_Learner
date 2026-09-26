@@ -81,7 +81,7 @@ describe('strengthRungs', () => {
   })
 })
 
-// ── Plan 136: the days while the weeks are few ──
+// ── Plan 138: the days while the weeks are few ──
 describe('retentionSeries', () => {
   it('a learner one week in gets a stop per day, the rest of the week ahead', () => {
     // TODAY is Wednesday 16 Sept; ridden Monday and Tuesday.

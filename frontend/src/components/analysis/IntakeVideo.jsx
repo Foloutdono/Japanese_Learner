@@ -1,6 +1,7 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { parseTimecode, formatTimecode } from '../../lib/timecode'
 import { parseVideoId } from '../../lib/youtube'
+import { VideoStill } from './VideoStill'
 import { useBookmarkletCopy, watchUrlFor } from './useBookmarkletCopy'
 import { isNative } from '../../lib/platform'
 import { GrabTutorial } from './GrabTutorial'
@@ -24,33 +25,43 @@ import { composing } from '../../lib/keyGuards'
 //      Japanese track and comes back here through the URL hash.
 //      Works on phones: a bookmark is the one programmable thing a
 //      mobile browser allows.
-//   2. A subtitle file, dropped or picked. The accept list carries
-//      MIME types alongside extensions on purpose: Android's picker
-//      matches by MIME, and `.srt`/`.vtt` map to none, so the
-//      extension-only list greyed out every file on mobile — the
-//      "they don't let you use these types of files" report.
+//   2. A subtitle file, picked here or dropped anywhere on the desk's
+//      page (AnalyzerScreen). The accept list carries MIME types
+//      alongside extensions on purpose: Android's picker matches by
+//      MIME, and `.srt`/`.vtt` map to none, so the extension-only list
+//      greyed out every file on mobile — the "they don't let you use
+//      these types of files" report.
 //
 // 1 and 2 never move: they cost nothing, cannot be blocked, and are
 // what 0 degrades TO. Nothing here is gated behind the paid path.
 //
-// The transcript-paste ingest is GONE (owner-directed, 2026-09-01):
-// YouTube's transcript panel hands out a translation by default —
-// learners kept getting English for Japanese videos — and the panel
-// is genuinely hard to find. The yt-dlp instructions went with it;
-// DownSub, pre-filled with the pasted link, is the no-install
-// fallback for anything the bookmarklet cannot reach.
-
-// `grab` and `onTutorial` are the desk's (plan 120): the copy state the
-// screen shares with a walkthrough it opens in its own column, and the
-// door to that column. Without them the walkthrough is this panel's
-// dialog, as it is on a phone.
-export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch, grab, onTutorial }) {
+// The column (plan 136, the owner's pick C): the link, the video's
+// still once the link names one, ONE filled action, the file, and a
+// quiet line of the rest. The paragraph that explained the bookmark on
+// every visit is gone; which action is filled says it instead:
+//
+//   the server can fetch the link   ->  Get the subtitles
+//   the bookmark has never been used ->  Set up the bookmark (the
+//                                        walkthrough, where the copy is)
+//   otherwise                        ->  Open on YouTube, then the
+//                                        bookmark there
+//
+// `grabUsed` is the screen's (a passage has arrived by the bookmark).
+// `onTutorial` opens the walkthrough where the screen keeps it -- the
+// desk's column, or a dialog on a phone; without it (a bare mount) the
+// walkthrough is this panel's own dialog. `grab` is the copy state the
+// screen shares with that walkthrough, and `tutorialPopup` says what
+// the screen's opens ('dialog' on a phone, nothing in the desk's column).
+// `dropRef` is the screen's hold
+// on this panel's file ingest, for a file dropped anywhere on the desk's
+// page: it is cut to the window set here, as one chosen here is.
+export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromLink, linkFetch, grab, onTutorial, tutorialPopup, grabUsed = false, dropRef }) {
   // The Window is OPTIONAL and blank by default -- the whole Track is
   // the sensible thing to study, and MAX_SENTENCES already bounds the
   // work. See docs/adr/0003's 2026-08-27 amendment.
   const [from, setFrom] = useState('')
   const [to, setTo] = useState('')
-  const [dragging, setDragging] = useState(false)
+  const [windowOpen, setWindowOpen] = useState(false)
   const own = useBookmarkletCopy()
   const { copied, copy: copyBookmarklet } = grab ?? own
   const [showTutorial, setShowTutorial] = useState(false)
@@ -73,11 +84,17 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
     ? formatTimecode(endSec - startSec)
     : null
   const windowOpts = { url, start: startSec, end: endSec }
+  useEffect(() => {
+    if (!dropRef) return undefined
+    dropRef.current = file => onStartFromFile(file, { url, start: startSec, end: endSec })
+    return () => { dropRef.current = null }
+  })
   // 机 (plan 123): Enter in the link field analyses the link, as the
   // text platform's Ctrl/⌘+Enter does -- only where the button it
   // presses is drawn.
   const desk = useDesk()
   const canFetch = Boolean(linkFetch && parsedVideoId)
+  const grabbable = !isNative()
   const startLink = () => onStartFromLink(url, { start: startSec, end: endSec })
   const onUrlKey = desk && canFetch
     ? e => {
@@ -86,20 +103,30 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
       startLink()
     }
     : undefined
+  const openTutorial = () => (onTutorial ? onTutorial() : setShowTutorial(true))
+  const popup = onTutorial ? tutorialPopup : 'dialog'
 
-  function handleDrop(e) {
-    e.preventDefault()
-    setDragging(false)
-    const file = e.dataTransfer?.files?.[0]
-    if (file) onStartFromFile(file, windowOpts)
-  }
+  // Which of the three is the one filled action (see the head).
+  const lead = canFetch ? 'fetch' : !grabbable ? 'file' : grabUsed ? 'open' : 'install'
+
+  const openLink = (className, children) => (
+    <a className={className} href={watchUrl ?? 'https://www.youtube.com/'} target="_blank" rel="noopener noreferrer">
+      {children}
+    </a>
+  )
+  const installDoor = (className, children) => (
+    <button type="button" className={className} onClick={openTutorial} aria-haspopup={popup}>
+      {children}
+    </button>
+  )
 
   return (
     <>
       {/* The link leads: it names the video for the player, opens the
-          right page for the bookmarklet, and pre-fills DownSub. */}
+          right page for the bookmark, and pre-fills DownSub. Its
+          placeholder is a link, which is its label on screen; the name
+          is for a reader. */}
       <label className="anl-field-row">
-        <span className="anl-window__label">{t.videoUrlOptional}</span>
         <input
           type="text"
           className="field field--page anl-field"
@@ -107,15 +134,13 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           onChange={e => onUrlChange(e.target.value)}
           onKeyDown={onUrlKey}
           placeholder="https://youtu.be/…"
+          aria-label={t.videoUrlOptional}
         />
-        <span className="anl-window__readout">{t.videoUrlOptionalHint}</span>
       </label>
 
-      {/* The one filled action on this platform, and only where the
-          server said it can be honoured. No heading and no caption
-          above it: the link sits in the field directly above, and the
-          button says what it does — DESIGN.md, "Say less". */}
-      {canFetch && (
+      <VideoStill videoId={parsedVideoId} frame="anl-still" className="anl-still__img" />
+
+      {lead === 'fetch' && (
         <div className="anl-link">
           <button
             type="button"
@@ -128,54 +153,56 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
           </button>
         </div>
       )}
-
-      {/* ── 字幕取り — the grab ──
-          Web only: a bookmarklet needs a browser's bookmarks bar, which
-          the shell's WebView has no way to offer (plan 076); there the
-          link names the video and the file path stays. */}
-      {!isNative() && <div className="anl-grab">
-        <div className="anl-grab__head">
-          <span className="anl-grab__title">{t.grabTitle}</span>
+      {lead === 'install' && (
+        <div className="anl-link">
+          {installDoor('btn-primary anl-grab__tutorial', t.grabInstall)}
+          <p className="anl-link__say">{t.grabInstallSay}</p>
         </div>
-        <p className="anl-grab__lead">{t.grabLead}</p>
-        <div className="anl-grab__row">
-          <button type="button" className="btn-secondary anl-grab__copy" onClick={copyBookmarklet}>
-            {copied ? t.bookmarkletCopied : t.copyBookmarklet}
-          </button>
-          {/* The real walkthrough — what a bookmarklet is, and how to
-              save one on THIS device — lives in a dialog, because the
-              honest version is too long to sit in an intake panel. */}
-          <button
-            type="button"
-            className="anl-ghost anl-grab__tutorial"
-            onClick={() => (onTutorial ? onTutorial() : setShowTutorial(true))}
-            aria-haspopup={onTutorial ? undefined : 'dialog'}
-          >
-            {t.grabTutorialBtn}
-          </button>
-          {watchUrl && (
-            <a
-              className="anl-ghost anl-grab__open"
-              href={watchUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              {t.openOnYoutube}
-            </a>
-          )}
-          <a
-            className="anl-ghost anl-grab__downsub"
-            href={downsubHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            title={t.downsubHint}
-          >
-            {t.downsubAlt}
-          </a>
+      )}
+      {lead === 'open' && (
+        <div className="anl-link">
+          {openLink('btn-primary anl-grab__open', t.openOnYoutube)}
+          <p className="anl-link__say">{t.grabThenSay}</p>
         </div>
-      </div>}
+      )}
 
-      {showTutorial && (
+      {/* A real file input, clipped rather than display:none (which
+          would take it out of the accessibility tree), pressed by the
+          button: the one control that reads the same on a phone and on
+          a desk, where the page takes a dropped file too. */}
+      <button
+        type="button"
+        className={`${lead === 'file' ? 'btn-primary' : 'btn-secondary'} anl-file`}
+        onClick={() => fileRef.current?.click()}
+        title={t.subtitleAccepted}
+      >
+        {t.chooseSubtitles}
+      </button>
+      <input
+        ref={fileRef}
+        type="file"
+        accept=".srt,.vtt,.ass,.ssa,text/vtt,text/plain,text/*,application/octet-stream"
+        className="anl-drop__input"
+        tabIndex={-1}
+        aria-hidden="true"
+        onChange={e => onStartFromFile(e.target.files?.[0], windowOpts)}
+      />
+
+      {/* The rest, quiet, on one line. The bookmark's door stays here
+          once it is no longer the filled action: a second device needs
+          it again. */}
+      <p className="anl-vlinks">
+        {grabbable && lead !== 'install' && installDoor('anl-vlink anl-grab__tutorial', t.grabInstallLink)}
+        {grabbable && lead === 'install' && openLink('anl-vlink anl-grab__open', t.openOnYoutube)}
+        <a className="anl-vlink anl-grab__downsub" href={downsubHref} target="_blank" rel="noopener noreferrer" title={t.downsubHint}>
+          DownSub
+        </a>
+        <button type="button" className="anl-vlink anl-window-toggle" aria-expanded={windowOpen} onClick={() => setWindowOpen(o => !o)}>
+          {t.windowLabel}
+        </button>
+      </p>
+
+      {grabbable && showTutorial && (
         <GrabTutorial
           t={t}
           onClose={() => setShowTutorial(false)}
@@ -185,42 +212,17 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
         />
       )}
 
-      {/* A real drop target. preventDefault on BOTH dragover and drop
-          -- without it the browser navigates away to the dropped
-          file, which loses whatever the learner had typed. */}
-      <div
-        className={`anl-drop${dragging ? ' anl-drop--over' : ''}`}
-        onDragOver={e => { e.preventDefault(); setDragging(true) }}
-        onDragLeave={() => setDragging(false)}
-        onDrop={handleDrop}
-        onClick={() => fileRef.current?.click()}
-      >
-        <span className="anl-drop__lead">{t.dropSubtitles}</span>
-        <span className="anl-drop__note">{t.subtitleAccepted}</span>
-        {/* Visually hidden rather than display:none, which would take
-            it out of the accessibility tree -- same clip pattern as
-            .analysis-image-input__file. */}
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".srt,.vtt,.ass,.ssa,text/vtt,text/plain,text/*,application/octet-stream"
-          className="anl-drop__input"
-          onChange={e => onStartFromFile(e.target.files?.[0], windowOpts)}
-        />
-      </div>
-
       {/* 区間 — optional. Blank means the whole Track, which is what
           almost everybody wants; MAX_SENTENCES bounds the work either
           way. */}
-      <details className="anl-notice anl-window-set">
-        <summary>{t.windowLabel}</summary>
+      {windowOpen && (
         <div className="anl-window">
           <label className="anl-window__field">
             <span className="anl-window__label">{t.windowFrom}</span>
             <input
               type="text"
               inputMode="numeric"
-              className={`field anl-field${startBad ? ' anl-field--bad' : ''}`}
+              className={`field field--page anl-field${startBad ? ' anl-field--bad' : ''}`}
               value={from}
               onChange={e => setFrom(e.target.value)}
               placeholder={t.windowWhole}
@@ -231,7 +233,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
             <input
               type="text"
               inputMode="numeric"
-              className={`field anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
+              className={`field field--page anl-field${endBad || backwards ? ' anl-field--bad' : ''}`}
               value={to}
               onChange={e => setTo(e.target.value)}
               placeholder={t.windowWhole}
@@ -241,7 +243,7 @@ export function IntakeVideo({ t, url, onUrlChange, onStartFromFile, onStartFromL
             {backwards ? t.windowBackwards : (span ? t.windowSpan(span) : t.windowFormatHint)}
           </span>
         </div>
-      </details>
+      )}
     </>
   )
 }

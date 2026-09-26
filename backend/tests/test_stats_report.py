@@ -11,7 +11,7 @@
 #     the sparse rows into weeks and zero-fills there)
 #   * the window is REPORT_DAYS of history; a review older than that
 #     is not on the chart
-#   * the weakest cards are ranked per line (plan 136), lapses first,
+#   * the weakest cards are ranked per line (plan 138), lapses first,
 #     then accuracy, at most WEAKEST_PER_LINE a line, and only cards
 #     that have been missed
 import uuid
@@ -173,7 +173,7 @@ def test_the_weakest_are_lapses_first_then_accuracy_within_a_line(client):
         assert keys == sorted(keys)
 
 
-# ── plan 136: a plate per line, its own weakest cards ────────────
+# ── plan 138: a plate per line, its own weakest cards ────────────
 KANJI_N4 = card_index.item_ids("kanji", "N4")
 VOCAB_N5 = card_index.item_ids("vocab", "N5")
 KANA = card_index.item_ids("kana", "hiragana_basic")

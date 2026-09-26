@@ -3,7 +3,7 @@ import { render } from 'vitest-browser-react'
 import CardPrompt from './CardPrompt'
 import { normalizeCard } from '../../domain/cardShape'
 // Same stylesheet-import trick as RatingBar's neighbours
-// (index.tokens.browser.test.jsx, AnalyzerHistory.browser.test.jsx): the
+// (index.tokens.browser.test.jsx, PassageShelf.browser.test.jsx): the
 // rule this test is pinning only exists once the real sheet is loaded, so
 // .char-display's computed font-size is meaningless without it.
 import '../../index.css'

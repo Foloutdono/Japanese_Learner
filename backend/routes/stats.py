@@ -231,7 +231,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
 #   days      reviews and good-or-better ratings per day, twelve weeks —
 #             the retention line is a fold over these on the client
 #   strength  how far ahead the scheduler has pushed each card
-#   weakest   each line's most-missed cards, lapses first (plan 136)
+#   weakest   each line's most-missed cards, lapses first (plan 138)
 #
 # The screen's per-line retention, and its grid of exercise by level,
 # come from /api/stats itself, which it fetches anyway. What retired
@@ -240,7 +240,7 @@ def get_stats(user_id: str = Depends(get_user_id)):
 # drawn).
 REPORT_DAYS = 84
 
-# Per line, since plan 136 draws a plate per line with its own weakest
+# Per line, since plan 138 draws a plate per line with its own weakest
 # cards: two rows of four tiles on the desk's plate. The query asks for
 # twice that so a card no deck holds any more (content removed since it
 # was reviewed) cannot leave a line short.

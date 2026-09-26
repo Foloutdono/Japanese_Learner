@@ -1,4 +1,4 @@
-// ── The stats model (plans 085, 136) ──────────────────────
+// ── The stats model (plans 085, 138) ──────────────────────
 // The statistics screen asks one question the profile and the fare
 // gate do not: is the learning holding, and where is it leaking?
 // Everything here is a pure function over two payloads —
@@ -23,7 +23,7 @@ export function groupLabel(t, key) {
   return kanaSetLabel(t, key)
 }
 
-// The deck as a grid's column head writes it (plan 136): a JLPT level
+// The deck as a grid's column head writes it (plan 138): a JLPT level
 // is already short (N5), a kana set is its first glyph (あ, きゃ, ア,
 // キャ) — the sign its stop is written on, so the column reads as the
 // line's stops do. The full name stays in the cell's accessible name.
@@ -116,7 +116,7 @@ export function weeklyRetention(days, { weeks = REPORT_WEEKS, today = new Date()
   return { weeks: rows, current, currentIndex: lastIdx, firstIndex: firstIdx, delta }
 }
 
-// ── Retention, drawn in days while the weeks are few (plan 136) ──
+// ── Retention, drawn in days while the weeks are few (plan 138) ──
 // A learner one week in had a chart of one stop — a dot and a dashed
 // rail across a card. While the line would draw DAILY_WEEKS weeks or
 // fewer it draws their days instead: a stop per day from the first
@@ -258,7 +258,7 @@ export function bucketRow(b) {
   return { ...sumBuckets([b]), due: Math.max(0, Number(b.due_now) || 0) }
 }
 
-// ── A line's grid (plan 136) ──────────────────────────────
+// ── A line's grid (plan 138) ──────────────────────────────
 // Each line's plate draws its retention by exercise and by deck: a row
 // per exercise the learner has ridden (the registry's order, the order
 // a station lists its platforms), a column per deck they have ridden in
@@ -328,7 +328,7 @@ export function lineGrids(stats) {
   return { grids, average: average === null ? null : Math.round(average * 100) }
 }
 
-// ── The weakest, by line (plan 136) ───────────────────────
+// ── The weakest, by line (plan 138) ───────────────────────
 // /api/stats/report sends each line's most-missed cards in one list,
 // the lines in order; a plate reads its own.
 export function weakestByLine(weakest) {

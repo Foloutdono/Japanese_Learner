@@ -11,7 +11,8 @@ import { kanaSets, currentKanaSet } from '../domain/kanaSets'
 import { deckItems } from '../domain/lineProgress'
 import { useDesk } from '../hooks/useDesk'
 import { StationSplit, KanaSetRedirect } from '../components/selection/StationSplit'
-import { ModeFigures } from '../components/selection/ModeFigures'
+import { LinePlatforms } from '../components/selection/LinePlatforms'
+import { useStationSamples } from '../stores/stationSamples'
 
 // ── かな — the station and the platforms (plan 071) ──────────
 // /learn/kana lists the sets as the stops of the kana line, with
@@ -35,6 +36,7 @@ export default function KanaScreen() {
   const [sp] = useSearchParams()
   const stats = useStats().data
   const desk = useDesk()
+  const samples = useStationSamples('kana', desk && Boolean(set))
 
   const SETS = kanaSets(t)
   const MODES = modePickerEntries(t, 'kana')
@@ -62,6 +64,7 @@ export default function KanaScreen() {
         total,
         started,
         startedLabel: t.startedNote(started),
+        sample: samples?.[s.slug]?.sample?.join(' '),
       }
     })
   const here = currentKanaSet(stats?.items?.kana)
@@ -86,20 +89,28 @@ export default function KanaScreen() {
   // ── The platforms: the set's modes ──
   const run = m => navigate(`/learn/kana/${set}/${m}`)
 
-  // ── 机 — the sets beside a set's platforms (plan 114) ──
+  // ── 机 — the sets beside a set's platforms (plans 114, 137) ──
+  // Both columns take the window (LinePlatforms): each set with its
+  // first kana and its bar, each platform with the card it asks. The
+  // bar prints no sub: the open set names itself.
   if (desk) {
-    const figured = MODES.map(m => (m.key === FAST_REVIEW ? m : { ...m, aside: <ModeFigures source="kana" deck={set} mode={m.key} /> }))
     return (
       <SelectionScreen
         title={t.kanaTitle}
-        sub={selectedSet.label}
         aside={<Leave to={'/learn'}>{t.tabLearn}</Leave>}
       >
         <StationSplit
+          className="desk-split--line"
           label={t.stationSets}
-          list={<RouteStops stops={setStops()} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} />}
+          list={<RouteStops stops={setStops()} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} figured />}
         >
-          <ModeSelector modes={figured} onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))} />
+          <LinePlatforms
+            source="kana"
+            deck={set}
+            card={samples?.[set]?.card}
+            modes={MODES}
+            onSelect={m => (m === FAST_REVIEW ? run(m) : board(() => run(m)))}
+          />
         </StationSplit>
       </SelectionScreen>
     )

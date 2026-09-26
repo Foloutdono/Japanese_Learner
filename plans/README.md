@@ -6522,10 +6522,50 @@ are left for a cleanup task. Tests: the mockup and phone suites
 rewritten for the drawing, the polling, responsive, deskfree and
 sources suites moved to it.
 
-## Plan 136 — 路線別, the statistics as the four lines (2026-09-26)
+## Plan 136 — 帳, the analyser's passages first (2026-09-26)
 
-Numbered 136 after a grep of the source for `plan 13[6-9]` found
-nothing, 135 having gone to the fare gate. The owner's ask, with a
+Numbered 136 after a grep of origin/main found nothing at 136 or above
+(134 was the analyser's video Passage, 135 the fare gate). The owner's
+ask, with a screenshot of the video intake on the desk: rework the
+screen's layout for the phone and the desk, options first. Drawn on the
+canvas "Tsuji analyser — the intake" (the screen as it was, and three
+directions: A one entry, B two steps, C the passages first), each at
+1440×900 and on a 390px phone; the owner picked C.
+
+| # | What | Status |
+|---|------|--------|
+| 136 | **Desk**: `.desk-intake` turned round — the passages in `__main` (`PassageShelf`: the one console, the kinds held as chips (drawn from two up, `passages.shelfChips`), Kept, a search and the count; a card each in `.anl-shelf__grid`, auto-filled from 200px, walked as a grid by `useGridWalk`'s new `tiles` selector, one tab stop; a video's card its still (`VideoStill`, i.ytimg.com's `mqdefault`, the video glyph when it cannot load), its sentence count and its first sentence (`firstLine`, `sentences->0->>'text'` on `GET /api/video/sessions`); a text's or a photo's its platform and four lines; a passage's ✕) and the intake in the column (`DeskSide`, `__side`), the three sources on `Seg` with their glyphs, the panel's lead line gone. The video intake is a column: the link, the still, ONE filled action — `Get the subtitles` where the proxy is, else `Set up the bookmark` until it has been used (a session named `<id>.ja.vtt`, or `tsuji.grabUsed` in the browser, set by the grab's arrival), else `Open on YouTube` — the file (`.anl-file`), and a quiet line (the bookmark, DownSub, Section as a toggle); the paragraph, the copy button (the walkthrough's alone now) and the drop zone went. The walkthrough takes the column over the intake, which stays mounted hidden (its link, its section, the focus's way back). A file dropped anywhere on the page is taken: subtitles by the video intake (cut to its section through `dropRef`), a picture by the photo one (`ImageInput`'s `incoming`), the column dashed and captioned while one is carried. A YouTube link typed where Japanese goes boards the video with it. **Under the desk**: `EntryLine`, one line over the passages (the camera, a subtitle file), opening into the slip with Japanese in it; a link pasted goes to the video sheet, the camera to the photo sheet (`Sheet`, `.anl-sheet`, the station's pigment set again on the portalled panel), the walkthrough a dialog from the video sheet that gives it back; `?intake=` opens the sheet it names; the passages a chip row over a row each, the lead a still or the glyph in a ring. `AnalyzerHistory` retired, with `.head2`, `.anl-history`, `.anl-hist*`, `.anl-grab*`, `.anl-drop` and `.anl-window-set`. privacy.html says the stills come from YouTube to the browser. Tests: `analyzer.desktop` (the shelf, the chips and the search, the walk, the link, the door, both drops, the walkthrough over the intake), `PassageShelf.browser`, `passages` (node), `IntakeVideo.browser` (the one filled action, the section), the responsive, mockup, polling, sources, deskfree, contrast and fields suites moved to it, `test_video.py`'s first line | DONE (2026-09-26) |
+
+Left for later: whether the first screen of a learner with no passages
+should show the three ways in rather than one line of copy (the canvas
+note left it open); remembering a filter across visits.
+
+## Plan 137 — the stations filled, and Vocabulary's sources as plates (2026-09-26)
+
+Numbered 137 because 136 went to the analyser's passages (PR #204),
+merged to main while this was open under the same number; renumbered
+before this merged, so no source cites 136 for it. The owner's ask, with screenshots of the Kana, Vocabulary
+(sources and N5) and Grammar stations on the desk: rework their layout,
+options first. Drawn on the canvas "Station screens — layout options"
+(four layouts on the three stations — A the split filled, B the line
+across with tiles, C three panels with the stop's contents, D a
+departure board — and two for the sources, S1 folded into the station
+and S2 three plates); the owner picked **A and S2**.
+
+| # | What | Status |
+|---|------|--------|
+| 137 | **Backend** `routes/station.py`, `GET /api/station/{source}/samples` (kana, kanji, vocab, grammar; static, cached per language): per stop the first things it teaches — kana in chart order, vocab and kanji in the frequency order the tiers walk (at their native level), grammar in the catalogue's order — and one card for the platforms' specimens (the vocab word is the first with a kanji, so the reading platform can ask it; the grammar point is the first with a sentence and a contrast example, its blank the contrast card's own under a fixed seed and its choices the rivals the lesson names, so the specimen is the same on every process). `GET /api/frequency/{domain}/tiers/started`: the cards met in each tier, the way /api/stats counts a level (reviewed in any mode, once), one walk of the order under `tier_keys`' override rule; the JMdict pool answers an empty map. **Frontend, A** (`desk-split--line`): the stops share the list's height, each a grid of code and name, its sample (`RouteStops`' and `LevelSelector`'s `figured`, `stores/stationSamples.js`), the Learn plate's bar and its caption and figure; `LinePlatforms` gives the page the platforms sharing its height, each with its specimen in a well (`domain/specimen.js` by the mode's shape in the registry: pair, type, draw, sentence, blank; a long pair stacked) where the box is 720px or wider (`useBoxWidth`), the figures' column its own width then; the fast review and grammar's points door at the foot; the figures name the cards in progress when nothing is due (`learningUnit`); the bar prints no sub on the four line splits (Kana, Vocabulary, Kanji, Grammar). **Frontend, S2**: `VocabSources`, three plates at the window's height — JLPT as a line (learned / total, the learner's own ringed with what they have met), the tiers under their pool and size (in the page's URL, carried into every link) with the met counts, the themes under the console filter — each row a pushing link walked with ↑/↓. Tests: `lineSplit.wide`, `lineSplit.desktop`, `vocabSources.desktop`, `domain/specimen`, a block of `deskfree.phone`, `backend/tests/test_station_samples.py` | DONE (2026-09-26) |
+
+Left for later: Kanji's own sources page (JLPT, frequency, radicals) is
+still the three cards; it would take the same plates, the radicals one
+holding the index by stroke count.
+
+## Plan 138 — 路線別, the statistics as the four lines (2026-09-26)
+
+Numbered 138 because 136 went to the analyser's passages (PR #204) and
+137 to the stations (PR #205), both merged to main while this was open
+under 136; renumbered before this merged, so no source cites 136 for
+it. The owner's ask, with a
 screenshot of the desk's statistics: rework and rethink the screen on
 the desk and the phone, options first. Drawn on the canvas "Statistics
 rework — options" (the screenshot as the reference and four directions,
@@ -6542,7 +6582,7 @@ their captions cut; and the desk left a third of the window empty.
 
 | # | What | Status |
 |---|------|--------|
-| 136 | **Backend**: `srs.get_weakest_by_source` ranks the missed cards per source (the raw id's first segment), lapses first then accuracy, only cards missed at least once, the servable filter kept; `/api/stats/report`'s `weakest` is up to `WEAKEST_PER_LINE` (8) per line, placed by `card_index.locate` (a card no deck holds is dropped), the lines in the screen's order; `get_weakest_cards` retired. **Model** (`domain/statsModel.js`): `retentionSeries` (days from the first ridden day to this week's Sunday while the line would draw three weeks or fewer, weeks after), `lineGrid`/`lineGrids` (retention by exercise × deck, lifetime, the one cell per line furthest under the learner's own average with `LEAK_MIN_REVIEWS` behind it marked `leak`), `weakestByLine`, `cardHeadword` (moved from `TroubleList`), `deckCode` (a kana set as its first glyph); `lineRows` and `categoryLabel` retired. **Screen**: `ReportStrip` (a lattice: retention with its line at `height` 64, `axis={false}`, the asked stop's reviews, the misses of 30 days, the ladder) over `LineReport` plates (roundel and name with the line's reviews, its retention; a `<table>` grid whose cells open `/learn/{line}/{deck}/{exercise}`; the weakest as tiles opening their run, or "Aucun raté" under the grid). `RetentionLine` takes `points`, `height`, `axis`, `describe`, and draws the rail ahead from the last stop whenever the axis runs past it. `StrengthLadder` is five steps, each never narrower than its caption. `LineRows` and `TroubleList` deleted; `Composition` moved to its own file for `ModeFigures`. **Desk**: the strip on one row (`3fr` line, figures at their captions, `2fr` ladder), the plates two by two, a row as tall as its taller plate — not the window's height: stretched, a plate held its grid over half a card of air (checked on screenshots at 1100 and 1440). **Phone**: the strip two across, the plates in one column, no sheet. Tests: `stats.desktop` rewritten, `stats.wide` and `stats.phone` new (the phone fixture in `profile.phone` retired for the real screen), `deskfree` P4, `contrast`, `RetentionLine` and `statsModel` moved to the new DOM and model; backend `test_stats_report` per line, `test_servable_modes` on the new query | DONE (2026-09-26) |
+| 138 | **Backend**: `srs.get_weakest_by_source` ranks the missed cards per source (the raw id's first segment), lapses first then accuracy, only cards missed at least once, the servable filter kept; `/api/stats/report`'s `weakest` is up to `WEAKEST_PER_LINE` (8) per line, placed by `card_index.locate` (a card no deck holds is dropped), the lines in the screen's order; `get_weakest_cards` retired. **Model** (`domain/statsModel.js`): `retentionSeries` (days from the first ridden day to this week's Sunday while the line would draw three weeks or fewer, weeks after), `lineGrid`/`lineGrids` (retention by exercise × deck, lifetime, the one cell per line furthest under the learner's own average with `LEAK_MIN_REVIEWS` behind it marked `leak`), `weakestByLine`, `cardHeadword` (moved from `TroubleList`), `deckCode` (a kana set as its first glyph); `lineRows` and `categoryLabel` retired. **Screen**: `ReportStrip` (a lattice: retention with its line at `height` 64, `axis={false}`, the asked stop's reviews, the misses of 30 days, the ladder) over `LineReport` plates (roundel and name with the line's reviews, its retention; a `<table>` grid whose cells open `/learn/{line}/{deck}/{exercise}`; the weakest as tiles opening their run, or "Aucun raté" under the grid). `RetentionLine` takes `points`, `height`, `axis`, `describe`, and draws the rail ahead from the last stop whenever the axis runs past it. `StrengthLadder` is five steps, each never narrower than its caption. `LineRows` and `TroubleList` deleted; `Composition` moved to its own file for `ModeFigures`. **Desk**: the strip on one row (`3fr` line, figures at their captions, `2fr` ladder), the plates two by two, a row as tall as its taller plate — not the window's height: stretched, a plate held its grid over half a card of air (checked on screenshots at 1100 and 1440). **Phone**: the strip two across, the plates in one column, no sheet. Tests: `stats.desktop` rewritten, `stats.wide` and `stats.phone` new (the phone fixture in `profile.phone` retired for the real screen), `deskfree` P4, `contrast`, `RetentionLine` and `statsModel` moved to the new DOM and model; backend `test_stats_report` per line, `test_servable_modes` on the new query | DONE (2026-09-26) |
 
 Deviations from the drawing, each for a reason found in the build: the
 grid is turned round (a row per exercise, a column per deck — five kanji

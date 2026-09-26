@@ -473,7 +473,7 @@ describe('the analyser and the dictionary (plan 115, P6)', () => {
     el.dispatchEvent(new Event('input', { bubbles: true }))
   }
 
-  it('keeps the sheet, the head\'s way back and the history under the intake', async () => {
+  it('keeps the sheet, the head\'s way back and the passages under the line', async () => {
     const { apiJson } = await import('./lib/api')
     apiJson.mockImplementation(async url => (String(url).startsWith('/api/phrase/analyze') ? { sentences: SENTENCES, truncated: 0 } : {}))
     apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({ results: [{ type: 'vocab', kanji: '駅', kana: 'えき', meaning: 'station', senses: [], examples: [], status: { status: 'new' } }], total: 1 }) }))
@@ -482,7 +482,11 @@ describe('the analyser and the dictionary (plan 115, P6)', () => {
     await render(<LangProvider><MemoryRouter initialEntries={['/dictionary/analyzer']}><AnalyzerScreen session={{}} /></MemoryRouter></LangProvider>)
     await settle(100)
     expect(document.querySelector('.desk-intake, .desk-side')).toBeNull()
-    expect(document.querySelector('main > .anl-history')).not.toBeNull()
+    // Plan 136: the line over the passages, rows rather than the desk's
+    // cards, no console to search, no segmented control.
+    expect(document.querySelector('main > .anl-entry')).not.toBeNull()
+    expect(document.querySelector('main > .anl-shelf')).not.toBeNull()
+    expect(document.querySelector('.anl-card, .anl-shelf__grid, .anl-shelf .console, .anl-sources')).toBeNull()
     expect(document.querySelector('.anl-action .desk-kbd, [aria-keyshortcuts]')).toBeNull()
     type(document.querySelector('textarea'), '駅で待つ')
     document.querySelector('.anl-action').click()
@@ -997,16 +1001,16 @@ describe('the doors (plan 120)', () => {
     apiJson.mockReset()
   })
 
-  it('keeps the grab\'s walkthrough a dialog over the intake', async () => {
+  it('keeps the grab\'s walkthrough a dialog, from the video sheet', async () => {
     const { apiJson } = await import('./lib/api')
     apiJson.mockImplementation(async () => ({}))
     const { MemoryRouter } = await import('react-router-dom')
     const { default: AnalyzerScreen } = await import('./screens/AnalyzerScreen')
-    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary/analyzer']}><AnalyzerScreen session={{}} /></MemoryRouter></LangProvider>)
+    await render(<LangProvider><MemoryRouter initialEntries={['/dictionary/analyzer?intake=video']}><AnalyzerScreen session={{}} /></MemoryRouter></LangProvider>)
     await settle(100)
-    document.querySelectorAll('.anl-sources .seg__opt')[2].click()
-    await settle()
-    const door = document.querySelector('.anl-grab__tutorial')
+    // The door's video: a sheet over the passages (plan 136).
+    expect(document.querySelector('.sheet[role="dialog"] #anl-panel-video')).not.toBeNull()
+    const door = document.querySelector('#anl-panel-video .anl-grab__tutorial')
     expect(door.getAttribute('aria-haspopup')).toBe('dialog')
     door.click()
     await settle()
@@ -1654,5 +1658,62 @@ describe('the gates taking the window (plan 130)', () => {
     // The column is the phone's, one plate to a row.
     const plates = [...document.querySelectorAll('.practice > .plates > .plate')].map(p => p.getBoundingClientRect())
     expect(new Set(plates.map(p => Math.round(p.left))).size).toBe(1)
+  })
+})
+
+// ── plan 137 — the stations a phone keeps ──
+// On the desk a line's split fills the window (its stops with their
+// samples and bars, its platforms with their wells, the fast review at
+// the foot) and Vocabulary's sources hang as three plates. A phone
+// keeps its screens: the three source cards, then a level's platforms
+// one under another with the fast review among them, the bar naming
+// the level, and no request for the tiers' figures.
+describe('the stations filled (plan 137)', () => {
+  it('keeps the three source cards, and asks for no tier figures', async () => {
+    apiFetch.mockReset()
+    apiFetch.mockImplementation(async () => ({ ok: true, status: 200, json: async () => ({}) }))
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabScreen } = await import('./screens/VocabScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab']}>
+          <Routes><Route path="/learn/vocab" element={<VocabScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    expect(document.querySelectorAll('.learn > .platform-grid .platform-card')).toHaveLength(3)
+    expect(document.querySelector('.desk-sources, .desk-source')).toBeNull()
+    expect(apiFetch.mock.calls.some(([path]) => String(path).includes('/tiers'))).toBe(false)
+  })
+
+  it('keeps a level\'s platforms one under another, the fast review among them and no wells', async () => {
+    const { MemoryRouter, Routes, Route } = await import('react-router-dom')
+    const { default: VocabScreen } = await import('./screens/VocabScreen')
+    await render(
+      <LangProvider>
+        <MemoryRouter initialEntries={['/learn/vocab/N5']}>
+          <Routes><Route path="/learn/vocab/:level" element={<VocabScreen session={{}} />} /></Routes>
+        </MemoryRouter>
+      </LangProvider>
+    )
+    await settle(250)
+    const cards = [...document.querySelectorAll('.learn > .platform-grid .platform-card')]
+    expect(cards.length).toBe(4)
+    expect(cards.at(-1).textContent).toContain('Révision rapide')
+    expect(document.querySelector('.bar__sub').textContent).toMatch(/^N5/)
+    expect(document.querySelector('.desk-platforms, .desk-spec, .desk-split__foot, .desk-stop__sample, .desk-stop__bar')).toBeNull()
+  })
+
+  it('keeps a route\'s rows as they were, whatever samples a stop carries', async () => {
+    const stops = ['N5', 'N4'].map(k => ({ key: k, code: k, name: k, total: 10, learned: 1, started: 3, sample: '何 私' }))
+    await render(
+      <LangProvider>
+        <main className="learn"><RouteStops stops={stops} here="N5" onSelect={() => {}} /></main>
+      </LangProvider>
+    )
+    await settle()
+    expect(document.querySelector('.desk-stop__sample, .desk-stop__bar')).toBeNull()
+    expect(document.querySelectorAll('.route-stop')).toHaveLength(2)
   })
 })

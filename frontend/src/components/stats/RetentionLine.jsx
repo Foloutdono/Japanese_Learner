@@ -22,7 +22,7 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // The latest week's stop is pressed in the stamp's lacquer; the
 // selected week wears a ring in the same ink.
 //
-// Since plan 136 the stops can be days (retentionSeries, `unit`): while
+// Since plan 138 the stops can be days (retentionSeries, `unit`): while
 // the weeks drawn are three or fewer, a stop per day from the first
 // ridden day, and the days left in this week are the rail ahead —
 // dashed from the last stop to the right edge. The same rail follows a
@@ -40,7 +40,7 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // pins one. A press-and-sweep and the arrow keys are as they were.
 //
 // `height` sets the fitted drawing's height (the statistics' strip, plan
-// 136, draws it low beside its figure), `axis={false}` leaves the two
+// 138, draws it low beside its figure), `axis={false}` leaves the two
 // labels under it off (they count weeks: a caller drawing days turns
 // them off), and `describe(point)` names a stop for a screen
 // reader — the screen knows whether it is a day or a week.

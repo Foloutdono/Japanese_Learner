@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { RetentionLine } from './RetentionLine'
 import { StrengthLadder } from './StrengthLadder'
 
-// ── 実績 — the record's strip (plan 136) ──────────────────
+// ── 実績 — the record's strip (plan 138) ──────────────────
 // The four figures over the lines, as a hairline lattice: retention
 // with its line beside it, the reviews behind the stop the line is
 // asked about, the misses of the last MISS window, and the strength

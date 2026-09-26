@@ -8,7 +8,7 @@ import { useLang } from '../../LangContext'
 // first two rungs is one being relearned forever. The count and the
 // rung's reach sit under it; the bar itself carries no text.
 //
-// Each rung and its caption are one step (plan 136): a step is never
+// Each rung and its caption are one step (plan 138): a step is never
 // narrower than its caption, so in the strip's narrower cell a short
 // rung's "3 mois+" no longer runs into its neighbour's — the rungs give
 // way instead, and the caption stays under its own rung.

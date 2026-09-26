@@ -61,6 +61,10 @@ import { playUi } from '../../lib/audio'
  *       ~440px must EARN its width with a right-hand column (meta, a
  *       figure, a status) — this is that column. The analyser puts
  *       the learner's own record on each platform there.
+ *     specimen — optional node drawn between the body and the aside:
+ *       the card the platform will ask, small (the desk's line split,
+ *       plan 137; components/selection/LinePlatforms.jsx). Only the
+ *       desk passes it.
  */
 export default function ModeSelector({ modes, onSelect }) {
   const { t } = useLang()
@@ -109,6 +113,8 @@ export default function ModeSelector({ modes, onSelect }) {
                 <span className="platform-card__sample" lang="ja" aria-hidden="true">{m.sample}</span>
               )}
             </span>
+
+            {m.specimen}
 
             {m.aside && <span className="platform-card__aside">{m.aside}</span>}
 

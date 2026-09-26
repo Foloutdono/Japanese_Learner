@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import './index.css'
 import { STATS, REPORT } from './testing/statsRecord'
 
-// ── 路線別 on a laptop (plan 136) ────────────────────────────────
+// ── 路線別 on a laptop (plan 138) ────────────────────────────────
 // At 1440 a plate has the width to stand its most-missed cards beside
 // its grid, as the owner's drawing did; at 1100 (stats.desktop) they go
 // under it. The rows of plates are as tall as their taller plate, and

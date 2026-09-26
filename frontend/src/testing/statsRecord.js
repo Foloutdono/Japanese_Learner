@@ -1,5 +1,5 @@
-// ── A learner's record, for the statistics' lane tests (plan 136) ──
-// Modelled on the owner's screen the day plan 136 was drawn: a first
+// ── A learner's record, for the statistics' lane tests (plan 138) ──
+// Modelled on the owner's screen the day plan 138 was drawn: a first
 // week of reviews, kana all held, vocabulary at 81%, kanji at 93% with
 // N4's drawing the leak, grammar at 33% over twelve reviews, and each
 // line's most-missed cards. The days are this week's, up to today, so

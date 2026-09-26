@@ -100,7 +100,7 @@ describe('the retention line', () => {
   })
 })
 
-// ── Plan 136: the days while the weeks are few ──
+// ── Plan 138: the days while the weeks are few ──
 describe('the retention line in days', () => {
   it('draws a stop a day and the rest of the week ahead, without an axis', async () => {
     const r = retentionSeries([

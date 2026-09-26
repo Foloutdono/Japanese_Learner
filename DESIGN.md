@@ -1109,7 +1109,40 @@ plated gates take the window.
   radical swaps the page in place; the family's door no longer takes the
   lesson's place but swaps the index for the family, in the list, and
   back. The bare index opens on its page's biggest family.
-- **The statistics are the four lines** (plan 136, the owner's pick B of
+- **A line's station takes the window** (plan 137, the owner's pick A of
+  the station screens canvas). A kana set or a JLPT level of vocab, kanji
+  or grammar stood a third of the way down the window, its stops
+  wrapping their names and its platforms 850px wide with nothing between
+  the description and the figures. Both columns now fill the window,
+  the rows sharing it the way the gates' plates do, never below their
+  content. A **stop** is its code and name on one line, the first things
+  it teaches under them (a few kana, the level's commonest words, its
+  first grammar points), the Learn plate's bar of its make-up, then
+  "you are here" and its figure. A **platform** carries, in a well
+  between its description and its figures, **the card it will ask** —
+  何 → quoi on Word → meaning, quoi → 何 on Meaning → word, the sentence
+  and its gap among the rivals on Which one fits — drawn from the open
+  stop's own card, so N1's platforms show an N1 word. The well is the
+  paper the run's card lies on, seen through the platform; it is
+  decorative for a screen reader, the description saying the same. The
+  wells need a platform row a third of which is at least a side column,
+  so they are drawn only where the page is 720px or wider — measured,
+  not set at a window width — and a laptop keeps its descriptions whole
+  instead. The figures add what is in progress when nothing is due (the
+  bar's red sliver, named). The **fast review**, which rates nothing,
+  and the grammar level's **points**, which open rather than board, are
+  doors at the page's foot, one row. The bar names no level: the open
+  stop does.
+- **Vocabulary's sources are three plates** (plan 137, the owner's pick
+  S2). /learn/vocab was three cards across the top of an empty window,
+  each opening a list of its own. Each source now hangs as a plate the
+  window's height (the gates' plate, `--elev-hang`) with its whole list
+  on it — JLPT's five levels as a line sharing the plate, the frequency
+  tiers under their pool and size with the cards met in each, the
+  themes under their filter — and every row is a link that pushes to
+  its stop's platforms. The lists scroll inside their plates, never the
+  page. The phone keeps its three cards.
+- **The statistics are the four lines** (plan 138, the owner's pick B of
   four drawn directions, the canvas "Statistics rework — options"). A
   strip of four figures across the top — retention with its line beside
   it, the reviews behind the stop the line is asked about, the misses of
@@ -1255,9 +1288,18 @@ plated gates take the window.
   column's edge. The desk's rail steps aside for this one screen, so the
   three columns have the window at the drawing's shares (410 | 830 | 541);
   under the desk the same result is one column, drawn by the owner too.
+  Before a Passage, the analyser is the learner's passages (plan 136, the
+  owner's pick C of three drawn directions): the one console over a card
+  each, and the intake the column beside them at a phone's width -- the
+  three sources on one control, the video's a column with one filled
+  action (the fetch where the server can, else the bookmark's setup until
+  it has been used, else the video on YouTube). A file dropped anywhere
+  on the page is taken by the intake that reads it. Under the desk it is
+  one line to paste into over a row per passage, the video and photo
+  intakes opening as sheets.
   A deck's Browse and More open in the deck page's side, a
-  gate lesson's rival in the run's side, the grab's walkthrough beside the
-  intake, a kanji's readings in the entry's own place, the iOS install
+  gate lesson's rival in the run's side, the grab's walkthrough in the
+  intake's place, a kanji's readings in the entry's own place, the iOS install
   steps in the settings page (plan 120). A panel that takes a column's
   place (Browse, More, the walkthrough, a deck's card form) wears
   `DeskDock`'s caption and the entry's own roundel ✕ over the phone's own
@@ -1401,6 +1443,13 @@ plated gates take the window.
   every time — a rail, a filled run behind you, stops with labels, your
   train between two of them. Reach for it over a bar whenever the axis has
   named waypoints; keep the bar for a span that is only a percentage.
+  The pass's track draws those parts its own way since the 区間・新幹線
+  round (2026-09-25, the owner's pick of drawn options): the rail is cut
+  into legs, one per level, and a stop is the cut at the end of its leg
+  with its name under the line, passed in the state's ink, the next in
+  full ink; your train is a Shinkansen in profile standing on the legs,
+  its nose at your position, waiting on a siding before 発 until the
+  first item is done (`components/journey/GhostTrack.jsx`).
   **A stop stands at the END of the leg it names, and the line opens at
   初, the novice's stop** — so reaching a stop is finishing the thing it is
   named for, never starting it, and a learner who has done nothing is drawn

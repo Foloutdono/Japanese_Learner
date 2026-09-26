@@ -8,16 +8,21 @@
 // the ring and the open entry never disagree. Kept from the page under
 // it: the page's own ←/→ walk the catalogue only when the focus is
 // elsewhere. The grid's keydown handler, or nothing (a phone).
+//
+// `tiles` (plan 136) is for a grid whose tiles are not its children: the
+// analyser's shelf wraps each card's door with its ✕, so it names the
+// doors, one to a cell.
 const KEYS = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End']
+const TILES = ':scope > :is(a[href], button)'
 
-export function useGridWalk(active, onMove) {
-  return active ? e => walk(e, onMove) : undefined
+export function useGridWalk(active, onMove, tiles = TILES) {
+  return active ? e => walk(e, onMove, tiles) : undefined
 }
 
-function walk(e, onMove) {
+function walk(e, onMove, selector) {
   if (!KEYS.includes(e.key) || e.metaKey || e.ctrlKey || e.altKey || e.shiftKey) return
   const grid = e.currentTarget
-  const tiles = [...grid.querySelectorAll(':scope > :is(a[href], button)')]
+  const tiles = [...grid.querySelectorAll(selector)]
   const at = tiles.indexOf(document.activeElement)
   if (at < 0) return
   const columns = Math.max(1, getComputedStyle(grid).gridTemplateColumns.split(' ').filter(Boolean).length)

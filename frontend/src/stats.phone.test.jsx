@@ -5,7 +5,7 @@ import { LangProvider } from './LangContext'
 import './index.css'
 import { STATS, REPORT } from './testing/statsRecord'
 
-// ── 路線別 on a phone (plan 136) ─────────────────────────────────
+// ── 路線別 on a phone (plan 138) ─────────────────────────────────
 // The strip two across — retention with its line and the ladder the
 // row's whole width — over the four lines' plates in one column, every
 // grid cell and every tile a thumb's target, nothing wider than the

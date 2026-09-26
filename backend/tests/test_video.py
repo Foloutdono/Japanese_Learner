@@ -672,6 +672,24 @@ def test_list_sessions_does_not_return_sentences(client):
     assert row["sentenceCount"] == 2
 
 
+def test_list_sessions_names_a_session_by_its_first_line(client):
+    # Plan 136: the shelf's card prints what the video says, not the
+    # file it came in (the grab names its own after the video's id).
+    created = client.post(
+        "/api/video/session",
+        files={"file": ("abcdefghijk.srt", _SRT, "text/plain")},
+        data={"start": "0", "end": "30"},
+    )
+    session_id = created.json()["sessionId"]
+    _poll_until_settled(client, session_id)
+
+    rows = client.get("/api/video/sessions").json()
+    row = next(r for r in rows if r["id"] == session_id)
+    first = client.get(f"/api/video/session/{session_id}").json()["sentences"][0]["text"]
+    assert row["firstLine"] == first == "私は学生です。"
+    assert row["sourceRef"] == "abcdefghijk.srt"
+
+
 def test_list_sessions_is_scoped_to_the_user(client):
     created = client.post(
         "/api/video/session",

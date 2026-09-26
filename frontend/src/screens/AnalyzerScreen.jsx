@@ -6,6 +6,7 @@ import { Bar, Leave } from '../components/chrome/Bar'
 import { DeskSide } from '../components/chrome/DeskSide'
 import { dialogOpen } from '../lib/dialogOpen'
 import { Seg } from '../components/chrome/Console'
+import { Sheet } from '../components/chrome/Sheet'
 import { stationFor } from '../config/stations'
 import { WordsList } from '../components/analysis/WordsList'
 import { FocusCard } from '../components/analysis/FocusCard'
@@ -23,21 +24,46 @@ import { useAnalyzerSession } from '../components/analysis/useAnalyzerSession'
 import { IntakeText } from '../components/analysis/IntakeText'
 import { IntakePhoto } from '../components/analysis/IntakePhoto'
 import { IntakeVideo } from '../components/analysis/IntakeVideo'
-import { GrabTutorialDock } from '../components/analysis/GrabTutorial'
+import { GrabTutorial, GrabTutorialDock } from '../components/analysis/GrabTutorial'
 import { useBookmarkletCopy, watchUrlFor } from '../components/analysis/useBookmarkletCopy'
 import { PassageLine } from '../components/analysis/PassageLine'
 import { Notices } from '../components/analysis/Notices'
-import { AnalyzerHistory } from '../components/analysis/AnalyzerHistory'
+import { PassageShelf } from '../components/analysis/PassageShelf'
+import { EntryLine } from '../components/analysis/EntryLine'
 import { sourceFor, SOURCES, DEFAULT_SOURCE } from '../components/analysis/sources'
 import { parseVideoId } from '../lib/youtube'
 import { apiJson } from '../lib/api'
 import { VideoPlayer } from '../components/video/VideoPlayer'
 import { formatTimecode } from '../lib/timecode'
 import { decodeGrabHash, transcriptXmlToVtt } from '../lib/captionGrab'
-import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon } from '../components/ui/Icons'
+import { ChevronIcon, PlusIcon, CheckIcon, OpenBookIcon, TextLinesIcon, CameraIcon, VideoIcon } from '../components/ui/Icons'
 import { readVideoSound, saveVideoSound, DEFAULT_VIDEO_SOUND } from '../lib/videoVolume'
 
 const KAISEKI = 'var(--line-kaiseki)'
+// The three platforms' glyphs, the dictionary door's (plan 136).
+const SOURCE_GLYPHS = { text: TextLinesIcon, photo: CameraIcon, video: VideoIcon }
+// A link pasted where Japanese goes (plan 136): the whole field is one
+// YouTube URL. The video intake takes it, since a link is not text to
+// analyse.
+function videoLinkIn(text) {
+  const s = text.trim()
+  return /^https?:\/\/\S+$/.test(s) && parseVideoId(s) ? s : null
+}
+// A subtitle file, by its name or its type: what a drop on the desk's
+// page hands the video intake rather than the photo one. Anything else
+// dropped is refused quietly (the browser would open it over the page).
+const SUBTITLE_FILE = /\.(srt|vtt|ass|ssa)$/i
+// The grab has been used on this browser (plan 136) -- a bookmark lives
+// in a browser, so the browser is what remembers it. The history says
+// so too, by the name the arrival gives its file (see the grab arrival).
+const GRAB_USED_KEY = 'tsuji.grabUsed'
+function readGrabUsed() {
+  try { return window.localStorage.getItem(GRAB_USED_KEY) === '1' } catch { return false }
+}
+function rememberGrabUsed() {
+  try { window.localStorage.setItem(GRAB_USED_KEY, '1') } catch { /* private mode: the history still says so */ }
+}
+const grabbedSession = h => h.kind === 'session' && Boolean(h.videoId) && h.label === `${h.videoId}.ja.vtt`
 // 速度 (plan 134): the desk bar's speed, one press through the three.
 const RATES = [1, 0.75, 0.5]
 // A poll that jumps further than this was a seek, not playback: the
@@ -192,6 +218,18 @@ export default function AnalyzerScreen({ session }) {
   // plan 113): the width index.css draws the two-column layout at, and
   // the width the app's second chrome starts at — one line, not three.
   const wide = useDesk()
+  // 帳 (plan 136): under the desk the page is the passages and the way in
+  // is one line over them; the video and photo intakes open as sheets
+  // over it, and the grab's walkthrough as a dialog from the video one.
+  // The dictionary's door (?intake=) opens the sheet it names.
+  const [sheet, setSheet] = useState(() => (!wide && source !== 'text' ? source : null))
+  // On the desk a file dropped anywhere on the page is taken (plan 136):
+  // subtitles by the video intake, a picture by the photo one.
+  const [dragging, setDragging] = useState(false)
+  const [incomingImage, setIncomingImage] = useState(null)
+  // The video intake's own drop: it holds the window a file is cut to.
+  const videoDropRef = useRef(null)
+  const [grabFlag, setGrabFlag] = useState(readGrabUsed)
   // ふりがな -- which readings the phrase line shows. 'unknown' is the
   // default on purpose: readings exactly where the SRS says the
   // learner still needs them, bare everywhere they've earned it.
@@ -298,6 +336,8 @@ export default function AnalyzerScreen({ session }) {
         return
       }
       const url = `https://youtu.be/${grab.videoId}`
+      rememberGrabUsed()
+      setGrabFlag(true)
       boardPlatform('video')
       setVideoUrl(url)
       clearFocus()
@@ -467,13 +507,70 @@ export default function AnalyzerScreen({ session }) {
   }, [wide, ready, side])
 
   function editDraft(text) {
+    const link = videoLinkIn(text)
+    if (link) { takeLink(link); return }
     setDraft(text)
     setFromImage(false)
   }
 
+  // A YouTube link pasted where Japanese goes (plan 136): the video
+  // intake, with the link in its field -- the desk's platform, a phone's
+  // sheet.
+  function takeLink(link) {
+    setDraft('')
+    setFromImage(false)
+    if (wide) boardPlatform('video')
+    else openSheet('video')
+    setVideoUrl(link)
+  }
+
   function analyzeDraft() {
     clearFocus()
+    setSheet(null)
+    // The phone's line is the text platform, its photo sheet the photo
+    // one: what the busy line names.
+    if (!wide) setSource(fromImage ? 'photo' : 'text')
     analyzer.analyzeText(draft, { source: fromImage ? 'image' : 'typed' })
+  }
+
+  // A phone's sheet stands on its platform without clearing anything: it
+  // is a door opened over the passages, not a switch of the page.
+  function openSheet(kind) {
+    lastBoardedRef.current = kind
+    setSource(kind)
+    setSheet(kind)
+  }
+  const closeSheet = useCallback(() => setSheet(null), [])
+
+  // The desk's page takes a dropped file (plan 136). A drop the photo
+  // tiles already took is theirs.
+  const grabUsed = grabFlag || analyzer.history.some(grabbedSession)
+  const showTutorial = tutorial && source === 'video'
+  function onPageDragOver(e) {
+    if (![...(e.dataTransfer?.types ?? [])].includes('Files')) return
+    e.preventDefault()
+    setDragging(true)
+  }
+  function onPageDragLeave(e) {
+    if (e.currentTarget.contains(e.relatedTarget)) return
+    setDragging(false)
+  }
+  function onPageDrop(e) {
+    setDragging(false)
+    if (e.defaultPrevented) return
+    const file = e.dataTransfer?.files?.[0]
+    if (!file) return
+    e.preventDefault()
+    if (file.type.startsWith('image/')) {
+      boardPlatform('photo')
+      setIncomingImage(file)
+    } else if (SUBTITLE_FILE.test(file.name) || file.type === 'text/vtt') {
+      if (source === 'video' && videoDropRef.current) videoDropRef.current(file)
+      else {
+        boardPlatform('video')
+        startVideoFromFile(file, { url: '' })
+      }
+    }
   }
 
   // Every route into a new Passage closes the open sheet, not just
@@ -485,12 +582,15 @@ export default function AnalyzerScreen({ session }) {
   // below moves focus to the result -- stealing focus out of a live
   // dialog and silently defeating useDialog's Tab-wrap trap.
   function startVideoFromFile(file, opts) {
+    if (!file) return
     clearFocus()
+    setSheet(null)
     analyzer.startVideoFromFile(file, opts)
   }
 
   function startVideoFromLink(url, opts) {
     clearFocus()
+    setSheet(null)
     analyzer.startVideoFromLink(url, opts)
   }
 
@@ -525,6 +625,7 @@ export default function AnalyzerScreen({ session }) {
     lastBoardedRef.current = key
     setSource(key)
     setTutorial(false)
+    setIncomingImage(null)
     setIntakeOpen(true)
     // A fresh player mounts paused; the destroyed one can no longer
     // report its own state, so this is the one boolean reset by hand.
@@ -763,9 +864,36 @@ export default function AnalyzerScreen({ session }) {
   const isI1 = !!focused && !focused.foreign && focused.unknown_count === 1
   const isKept = !!focused && analyzer.kept.has(focused.text)
 
-  // The intake — the three platforms and the one standing on — and the
-  // history of Passages: one after the other on a phone, side by side
-  // on the desk (plan 115).
+  // The video intake, in the desk's column or a phone's sheet. The
+  // walkthrough opens where the screen keeps it: in the column on the
+  // desk (plan 120), as a dialog from the sheet on a phone.
+  const videoIntake = (
+    <IntakeVideo
+      t={t}
+      url={videoUrl}
+      onUrlChange={setVideoUrl}
+      onStartFromFile={startVideoFromFile}
+      onStartFromLink={startVideoFromLink}
+      linkFetch={linkFetch}
+      grab={grab}
+      onTutorial={() => (wide ? setTutorial(true) : setSheet('tutorial'))}
+      tutorialPopup={wide ? undefined : 'dialog'}
+      grabUsed={grabUsed}
+      dropRef={videoDropRef}
+    />
+  )
+  // A finished Passage waits behind the intake while you are here; this
+  // is the way back to it without analysing again.
+  const resume = ready && (
+    <button type="button" className="btn-secondary anl-resume" onClick={() => setIntakeOpen(false)}>
+      {t.analysisResult} · {t.sentencesCount(sentences.length)}
+    </button>
+  )
+  // The intake — the three platforms and the one standing on — beside
+  // the learner's passages on the desk (plan 136, the owner's pick C:
+  // the passages are the page, the intake the column beside them). A
+  // phone has the line over the passages instead, and the video and
+  // photo intakes as sheets (below).
   const intake = (
     <>
       {/* ── The three platforms, on one control (canvas Analyzer) ──
@@ -791,27 +919,23 @@ export default function AnalyzerScreen({ session }) {
         label={t.changeSource}
         value={source}
         onChange={boardPlatform}
-        options={SOURCES.map(s => ({ key: s.key, label: t[s.label] }))}
+        options={SOURCES.map(s => {
+          const Glyph = SOURCE_GLYPHS[s.key]
+          return { key: s.key, label: t[s.label], icon: <Glyph size={16} className="seg__opt-icon" /> }
+        })}
       />
 
-      {/* A finished Passage waits behind the intake while you are
-          here; this is the way back to it without analysing again. */}
-      {ready && (
-        <button type="button" className="btn-secondary anl-resume" onClick={() => setIntakeOpen(false)}>
-          {t.analysisResult} · {t.sentencesCount(sentences.length)}
-        </button>
-      )}
+      {resume}
 
       <div
         id={`anl-panel-${source}`}
         tabIndex={-1}
         className="anl-panel"
       >
-        {/* The intakes are only their own bodies; the panel and its
-            opening line come from the registry, so a fourth source
-            is one entry there. */}
-        <p className="hint anl-panel__lead">{t[platform.lead]}</p>
-
+        {/* The intakes are only their own bodies; the panel comes from
+            the registry, so a fourth source is one entry there. Its
+            opening line went with the column (plan 136): the field's
+            placeholder and the one filled action say it. */}
         {source === 'text' && (
           <IntakeText
             t={t}
@@ -831,25 +955,15 @@ export default function AnalyzerScreen({ session }) {
             onAnalyze={analyzeDraft}
             busy={busy}
             fromImage={fromImage}
+            incoming={incomingImage}
           />
         )}
-        {source === 'video' && (
-          <IntakeVideo
-            t={t}
-            url={videoUrl}
-            onUrlChange={setVideoUrl}
-            onStartFromFile={startVideoFromFile}
-            onStartFromLink={startVideoFromLink}
-            linkFetch={linkFetch}
-            grab={wide ? grab : undefined}
-            onTutorial={wide ? () => setTutorial(true) : undefined}
-          />
-        )}
+        {source === 'video' && videoIntake}
       </div>
     </>
   )
-  const history = (
-    <AnalyzerHistory
+  const shelf = (
+    <PassageShelf
       t={t}
       entries={analyzer.history}
       onOpen={openHistoryFromRow}
@@ -1282,32 +1396,91 @@ export default function AnalyzerScreen({ session }) {
       )}
 
       {!showResult && (wide ? (
-        /* 机 (plan 115): the intake beside its history — a recent
-           Passage is one click from the field it would be typed in
-           again, in the column every desk screen keeps its companion. */
-        <div className="desk-intake">
-          {/* The notices stand under the intake, not after the grid,
-              where a long history column pushed "Analysis failed" below
-              the fold (plan 123). The live region stays below. */}
-          <div className="desk-intake__main">{intake}<Notices notices={notices} region={false} /></div>
+        /* 帳 (plan 136, the owner's pick C): the passages are the page and
+           the intake stands in the column beside them, drawn at the
+           width a phone draws it. A file dropped anywhere on the page is
+           taken: subtitles by the video intake, a picture by the photo
+           one. */
+        <div
+          className={`desk-intake${dragging ? ' desk-intake--drop' : ''}`}
+          onDragOver={onPageDragOver}
+          onDragLeave={onPageDragLeave}
+          onDrop={onPageDrop}
+        >
+          <div className="desk-intake__main">{shelf}</div>
           {/* The grab's walkthrough takes the column while it is open
-              (plan 120), the history back on its ✕ or Esc. */}
-          {tutorial && source === 'video' ? (
-            <DeskSide label={t.tutTitle}>
+              (plan 120), the intake back on its ✕ or Esc. The intake
+              stays mounted under it, hidden: its link and its section
+              are still there, and so is the door the focus goes back
+              to. */}
+          <DeskSide label={showTutorial ? t.tutTitle : t.newPassage} className="desk-intake__side">
+            {showTutorial && (
               <GrabTutorialDock t={t} onClose={closeTutorial} onCopy={grab.copy}
                 copied={grab.copied} watchUrl={watchUrlFor(videoUrl)} />
-            </DeskSide>
-          ) : (
-            <DeskSide label={t.historyTitle}>{history}</DeskSide>
-          )}
+            )}
+            <div className="desk-intake__dock" hidden={showTutorial}>
+              {intake}
+              {/* The notices stand under the intake they are about, in
+                  view (plan 123). The live region stays below. */}
+              <Notices notices={notices} region={false} />
+            </div>
+            {dragging && !showTutorial && <p className="desk-intake__drop" aria-hidden="true">{t.dropHere}</p>}
+          </DeskSide>
         </div>
-      ) : intake)}
+      ) : (
+        /* Under the desk: the way back to a finished Passage, then one
+           line to paste into over the passages (plan 136). */
+        <>
+          {resume}
+          <EntryLine
+            t={t}
+            value={draft}
+            onChange={editDraft}
+            onAnalyze={analyzeDraft}
+            busy={busy}
+            onPhoto={() => openSheet('photo')}
+            onFile={file => startVideoFromFile(file, { url: videoUrl })}
+          />
+        </>
+      ))}
 
       <Notices notices={notices} announcement={announcement} t={t} lines={!(wide && !showResult)} />
 
-      {/* History, under the intake: a recent Passage is one tap from the
-          field, and a row reopens it on the platform it came from. */}
-      {!showResult && !wide && history}
+      {/* The passages, under the line: a row reopens its Passage on the
+          platform it came from. */}
+      {!showResult && !wide && shelf}
+
+      {/* A phone's intakes that are not a line of text, as sheets over
+          the passages: the video's (a link pasted in the line lands
+          here), the photo's, and the grab's walkthrough from the
+          video's, which gives the video's back when it closes. */}
+      {!showResult && !wide && (
+        <>
+          {/* A sheet is portalled to the body, out of <main>: the
+              station's pigment is set again on what it holds. */}
+          <Sheet open={sheet === 'video'} onClose={closeSheet} jp={t.sourceVideo} className="anl-sheet">
+            <div id="anl-panel-video" className="anl-panel" style={{ '--line-color': KAISEKI }}>{videoIntake}</div>
+          </Sheet>
+          <Sheet open={sheet === 'photo'} onClose={closeSheet} jp={t.sourcePhoto} className="anl-sheet">
+            <div id="anl-panel-photo" className="anl-panel" style={{ '--line-color': KAISEKI }}>
+              <IntakePhoto
+                t={t}
+                session={session}
+                value={draft}
+                onChange={editDraft}
+                onTextRecognized={text => { setDraft(text); setFromImage(true) }}
+                onAnalyze={analyzeDraft}
+                busy={busy}
+                fromImage={fromImage}
+              />
+            </div>
+          </Sheet>
+          {sheet === 'tutorial' && (
+            <GrabTutorial t={t} onClose={() => setSheet('video')} onCopy={grab.copy}
+              copied={grab.copied} watchUrl={watchUrlFor(videoUrl)} />
+          )}
+        </>
+      )}
 
       {/* ── The result (canvas AnalyzerResult) ──
           The stepper walks the stops, the line shows the sentence as

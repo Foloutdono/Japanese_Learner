@@ -2,7 +2,7 @@ import { useLang } from '../../LangContext'
 import { stationFor } from '../../config/stations'
 import { modeLabel, groupLabel, deckCode, cardHeadword } from '../../domain/statsModel'
 
-// ── 路線別 — a line's plate (plan 136) ─────────────────────
+// ── 路線別 — a line's plate (plan 138) ─────────────────────
 // The statistics are the four lines, one plate each (the owner's pick B
 // of four drawn directions). A plate answers, for its own line, the
 // question the screen asks — is it holding, and where is it leaking:
