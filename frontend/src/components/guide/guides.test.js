@@ -108,5 +108,9 @@ describe('the guide on the desk', () => {
     const profile = Object.fromEntries(deskStops('profile').map(s => [s.anchor, s.radius]))
     expect(profile['profile.settings']).toBe('panel')
     expect(GUIDES.profile.find(s => s.anchor === 'profile.settings').radius).toBe('flat')
+    // The phone walks the screen top to bottom, the door under the pass;
+    // the desk walks the page first and ends on the rail's station.
+    expect(GUIDES.profile.map(s => s.anchor).slice(0, 2)).toEqual(['profile.pass', 'profile.settings'])
+    expect(deskStops('profile').map(s => s.anchor).at(-1)).toBe('profile.settings')
   })
 })

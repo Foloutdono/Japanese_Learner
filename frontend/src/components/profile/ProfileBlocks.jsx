@@ -164,7 +164,7 @@ export function Records({ profile, t }) {
 // chevron where a figure would be, and Settings with the gear in its
 // roundel: two cells, two across. They closed the records' lattice
 // until plan 140 gave the records a third figure; they are their own
-// lattice now, under the lines. The phone's alone -- on the desk both
+// lattice now, straight under the pass. The phone's alone -- on the desk both
 // halls hang under the lit gate on the rail, so the page drew the same
 // two doors a second time (ProfileScreen.jsx leaves them out there).
 // The halls and Settings are places: on the desk (plan 123) they are

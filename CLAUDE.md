@@ -617,8 +617,8 @@ runtime purpose. Two consequences worth knowing:
   profile's own offer button and paywall source retired, the stamp book
   titled with its month over three figures in one row, the records three
   across with the best perfect run, the lines a row each on one subgrid,
-  the doors to Statistics and Settings a lattice of their own, five on the
-  ranking; on the desk each line drawn with a rail per stop and no door the
+  the doors to Statistics and Settings a lattice of their own straight
+  under the pass (the owner's follow-up), five on the ranking; on the desk each line drawn with a rail per stop and no door the
   rail already holds, the guide's Settings stop on the rail's station
   (cited in `screens/ProfileScreen.jsx`, `components/profile/PassHolder.jsx`,
   `ProfileBlocks.jsx`, `LineLedger.jsx`, `components/boarding/PassStep.jsx`,

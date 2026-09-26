@@ -17,8 +17,8 @@ import { LineLedger } from '../components/profile/LineLedger'
 
 // ── 定期入れ — the pass holder (canvas Profile + ProfileInserts) ──
 // The profile is the pass, and everything under it is an insert tucked
-// behind it in the holder: the stamp book, the records, the ride
-// ledger, the two doors (Statistics, Settings), the ranking. No bar
+// behind it in the holder: the two doors (Statistics, Settings), the
+// stamp book, the records, the ride ledger, the ranking. No bar
 // and no headings — the pass names the screen, and every insert names
 // itself. The pass's back — the ghost train and the status — is the
 // status sheet off the HUD's station panel now (plan 074); the pass
@@ -30,7 +30,9 @@ import { LineLedger } from '../components/profile/LineLedger'
 // which carries the offer, so the "See the pass" button that stood
 // alone between the pass and the stamps went with it; the records
 // print three figures three across; the lines are rows; the ranking
-// shows five.
+// shows five. The doors stand straight under the pass (the owner's
+// call after the first round): they are the ways out of the holder,
+// and at the foot of the lines they were a scroll away.
 
 // ── Mock fallback ─────────────────────────────────────────
 // Kept in sync with profile.py's real response shape so a backend
@@ -210,10 +212,10 @@ export default function ProfileScreen({ session }) {
         <>
           {inserts.stale}
           {inserts.pass}
+          {inserts.doors}
           {inserts.stamps}
           {inserts.records}
           {inserts.ledger}
-          {inserts.doors}
           {inserts.board}
         </>
       ))}

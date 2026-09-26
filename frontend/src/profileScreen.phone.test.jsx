@@ -94,9 +94,11 @@ describe('the profile at phone width (plan 140)', () => {
     expect($('.sbook__month .fig__l').textContent).toBe(String(new Date().getFullYear()))
   })
 
-  it('lays the inserts out in the canvas order: the pass, the stamps, the records, the doors, five on the board', async () => {
+  it('lays the inserts out in order: the pass, the doors, the stamps, the records, five on the board', async () => {
     await mount()
-    const order = ['.pass', '.sbook', '.records--three', '.record--door', '.banzuke']
+    // The doors stand straight under the pass (the owner's call after
+    // the first round of plan 140), above the stamp book.
+    const order = ['.pass', '.record--door', '.sbook', '.records--three', '.banzuke']
       .map(sel => $(sel).getBoundingClientRect().top)
     expect([...order].sort((a, b) => a - b)).toEqual(order)
     const figures = $$('.records--three > .record')

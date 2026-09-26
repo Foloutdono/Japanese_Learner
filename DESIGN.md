@@ -1432,9 +1432,9 @@ plated gates take the window.
 - **A screen may be composed of inserts instead of sections, and then it
   prints no `SectionHeader` at all.** The profile is the worked example: the
   pass is the `<h1>`, and every block beneath it is an object that names
-  itself — a stamp sheet titled with its month, a lattice of records, a
-  ledger whose rows carry their own roundels, the doors to 統計 and Settings,
-  a 番付. It printed six `SectionHeader`s over six self-evident
+  itself — the doors to 統計 and Settings straight under it, a stamp sheet
+  titled with its month, a lattice of records, a ledger whose rows carry
+  their own roundels, a 番付. It printed six `SectionHeader`s over six self-evident
   objects, which is the second rule's exact failure: a caption for a figure
   the layout already explains. **A block that needs a heading to be legible is
   not finished** — give it the mark that names it, the way each ledger cell
