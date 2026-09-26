@@ -5345,7 +5345,19 @@ textarea:focus-visible {
    level): the rows already stack — each Chips takes the full width —
    so this is the hairline between them, and the air the hairline
    needs. */
-.console__top > .dict-levels {
+/* The search's two option groups (how strictly, where) share one row:
+   each takes what it needs and they wrap onto two lines when the
+   console is too narrow to hold six chips. */
+.dict-search-opts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-3);
+  flex: 1 1 100%;
+  min-width: 0;
+}
+.dict-search-opts > .console__chips { flex: 1 1 auto; }
+.console__top > .dict-levels,
+.console__top > .dict-search-opts {
   padding-top: var(--sp-3);
   border-top: 1px solid var(--surface-line);
 }
@@ -5427,6 +5439,9 @@ textarea:focus-visible {
      the line box must be the em (see .chip__glyph). */
   line-height: 1;
 }
+/* Two toggles (the search options, then 部): the first rides the
+   trailing edge, the second sits beside it. */
+.console__toggle + .console__toggle { margin-inline-start: 0; }
 /* A narrow row gives up the figure before it gives up the control. The
    count is meta and the toggle is a way through, and the two of them
    either side of a 390px field left it about a word wide — the

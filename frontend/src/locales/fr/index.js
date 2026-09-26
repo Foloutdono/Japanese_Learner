@@ -1127,6 +1127,12 @@ const dictionary = {
   dictGrammar:       'Grammaire',
   dictLevels:        'Niveaux',
   dictLevelAll:      'Tous',
+  // Comment la recherche lit la requête : à quel point, et où.
+  dictMatch:         'Correspondance',
+  dictMatchOptions:  { word: 'Mot entier', start: 'Début', any: 'Partout' },
+  dictSearchOptions: 'Options de recherche',
+  dictField:         'Chercher dans',
+  dictFieldOptions:  { all: 'Tout', japanese: 'Japonais', meaning: 'Sens' },
   // Voir en/index.js : une constatation, pas une question.
   dictCorrectedFor:  'Résultats pour',
   dictionaryPlaceholderGrammar: 'Rechercher un point, une structure ou un sens…',
@@ -1963,6 +1969,7 @@ const guide = {
   guidePracticeDests: 'Les niveaux. Le vôtre est marqué ; touchez-en un autre pour y monter quand même.',
   guidePracticePass: 'Ces quais sont sur l\'abonnement.',
   guideDictConsole: 'Cherchez par mot, lecture ou sens.',
+  guideDictOptions: 'Réglez la recherche : le mot entier, son début ou n’importe où, dans le japonais, le sens ou les deux.',
   guideDictChips: 'Les collections, et vos entrées gardées au bout.',
   guideDictEntry: 'Une entrée. Touchez pour l\'ouvrir ; son ＋ la garde sur votre étagère ou l\'ajoute à l\'un de vos decks.',
   guideDictAnalyzer: 'L\'analyseur : collez, photographiez ou filmez une phrase et décomposez-la.',

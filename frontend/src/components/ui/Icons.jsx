@@ -321,6 +321,19 @@ export function GearIcon({ size = 18, className }) {
   )
 }
 
+// Three sliders: the dictionary's search options (how strictly, where),
+// the toggle beside 部 in the field.
+export function SlidersIcon({ size = 16, className }) {
+  return (
+    <svg {...base} width={size} height={size} className={className}>
+      <path d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h12M20 18h0" />
+      <circle cx="16" cy="6" r="2" />
+      <circle cx="8" cy="12" r="2" />
+      <circle cx="18" cy="18" r="2" />
+    </svg>
+  )
+}
+
 export function CheckIcon({ size = 14, className }) {
   return (
     <svg {...base} width={size} height={size} className={className} strokeWidth={2.5}>

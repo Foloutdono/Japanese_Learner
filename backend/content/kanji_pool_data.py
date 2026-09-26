@@ -28,6 +28,8 @@ import os
 import sqlite3
 import threading
 
+from study import search_match
+
 _BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 _DB_PATH = os.path.join(_BASE_DIR, "datas", "kanji", "kanji.sqlite3")
 
@@ -49,6 +51,7 @@ def _conn() -> sqlite3.Connection:
     if conn is None:
         # uri=True + mode=ro: never accidentally write to the shipped DB.
         conn = sqlite3.connect(f"file:{_DB_PATH}?mode=ro", uri=True)
+        search_match.register_sql(conn)
         _local.conn = conn
     return conn
 
@@ -99,23 +102,69 @@ _MEANINGS = "(meaning_en LIKE ? OR meaning_fr LIKE ?)"
 _JAPANESE = "(char = ? OR readings LIKE ?)"
 
 
-def _match(q: str, kana_forms: tuple[str, ...] = ()) -> tuple[str, tuple]:
-    """(SQL predicate, parameters) for one query in all its forms."""
+def _match(q: str, kana_forms: tuple[str, ...] = (), match: str = "any",
+           field: str = "all") -> tuple[str, tuple]:
+    """(SQL predicate, parameters) for one query in all its forms.
+
+    `match` and `field` as vocab_jmdict_data._match takes them: "any" is
+    the plain LIKE, "word" and "start" keep it as the prefilter and ask
+    study/search_match the real question of the rows it finds — a whole
+    word of a meaning, a whole reading of the readings (みず, and た.べる
+    read as たべる). "" is the browse, "0" nowhere to look.
+    """
     clauses, params = [], []
     if q:
         if q.isascii():
-            clauses.append(_MEANINGS)
-            params += [f"%{q}%", f"%{q}%"]
-        else:
-            clauses.append(_JAPANESE)
-            params += [q, f"%{q}%"]
-    for form in kana_forms:
-        clauses.append(_JAPANESE)
-        params += [form, f"%{form}%"]
+            if field != "japanese":
+                if match == "any":
+                    clauses.append(_MEANINGS)
+                    params += [f"%{q}%", f"%{q}%"]
+                else:
+                    clauses.append(
+                        "((meaning_en LIKE ? AND sm_text(meaning_en, ?, ?))"
+                        " OR (meaning_fr LIKE ? AND sm_text(meaning_fr, ?, ?)))")
+                    params += [f"%{q}%", q, match, f"%{q}%", q, match]
+        elif field != "meaning":
+            if match == "start":
+                # Typed as Japanese, a character is itself, and a
+                # reading may start with it.
+                clauses.append("(char = ? OR (readings LIKE ? AND sm_read(readings, ?, 'start')))")
+                params += [q, f"%{q}%", q]
+            else:
+                clauses.append(_JAPANESE)
+                params += [q, f"%{q}%"]
+    if field != "meaning":
+        for form in kana_forms:
+            if match == "any":
+                clauses.append(_JAPANESE)
+                params += [form, f"%{form}%"]
+            else:
+                clauses.append("(char = ? OR (readings LIKE ? AND sm_read(readings, ?, ?)))")
+                params += [form, f"%{form}%", form, match]
+    if not clauses:
+        return ("0" if q else ""), ()
     return " OR ".join(clauses), tuple(params)
 
 
-def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = ()) -> int:
+def _order(q: str, kana_forms: tuple[str, ...], then: str = "sort_rank") -> tuple[str, tuple]:
+    """What the query names exactly first — the character, a whole
+    reading, a whole sense — then `then`. 10,896 rows at most, so the
+    callbacks are affordable here where the vocabulary pool's are not."""
+    if not q:
+        return then, ()
+    exact = ["char = ?"]
+    params: list = [q]
+    for form in (q, *kana_forms):
+        exact.append("sm_read(readings, ?, 'word')")
+        params.append(form)
+    if q.isascii():
+        exact += ["sm_sense(meaning_en, ?)", "sm_sense(meaning_fr, ?)"]
+        params += [q, q]
+    return f"CASE WHEN {' OR '.join(exact)} THEN 0 ELSE 1 END, {then}", tuple(params)
+
+
+def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = (),
+                   match: str = "any", field: str = "all") -> int:
     """How many POOL characters match, without paying for a page.
 
     The dictionary needs the pool's total on every request (it is most of
@@ -123,7 +172,7 @@ def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = ()) -
     the deck. `lang` is accepted and ignored — both languages are searched
     now — and kept so the call sites read the same either way.
     """
-    where, params = _match(q, kana_forms)
+    where, params = _match(q, kana_forms, match, field)
     if not where:
         return _conn().execute(
             "SELECT COUNT(*) FROM kanji WHERE in_deck = 0").fetchone()[0]
@@ -133,7 +182,8 @@ def count_matching(q: str, lang: str = "en", kana_forms: tuple[str, ...] = ()) -
 
 
 def search(q: str, limit: int, offset: int, lang: str = "en",
-           kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
+           kana_forms: tuple[str, ...] = (), match: str = "any",
+           field: str = "all") -> tuple[list[dict], int]:
     """One page of the pool, ordered by sort_rank. Returns (rows, total).
 
     sort_rank is computed offline (see build_kanji_db.py's _sort_key): the
@@ -142,30 +192,33 @@ def search(q: str, limit: int, offset: int, lang: str = "en",
     than computed so idx_kanji_pool_sort covers the ORDER BY and paging
     never sorts.
     """
-    return (page(q, limit, offset, kana_forms),
-            count_matching(q, lang, kana_forms))
+    return (page(q, limit, offset, kana_forms, match, field),
+            count_matching(q, lang, kana_forms, match, field))
 
 
 def page(q: str, limit: int, offset: int,
-         kana_forms: tuple[str, ...] = ()) -> list[dict]:
+         kana_forms: tuple[str, ...] = (), match: str = "any",
+         field: str = "all") -> list[dict]:
     """search()'s rows without its count — see vocab_jmdict_data.page."""
-    where, params = _match(q, kana_forms)
+    where, params = _match(q, kana_forms, match, field)
     if not where:
         rows = _conn().execute(
             f"{_SELECT} WHERE in_deck = 0 ORDER BY sort_rank LIMIT ? OFFSET ?",
             (limit, offset),
         ).fetchall()
     else:
+        order, order_params = _order(q, kana_forms)
         rows = _conn().execute(
-            f"{_SELECT} WHERE in_deck = 0 AND ({where}) ORDER BY sort_rank LIMIT ? OFFSET ?",
-            (*params, limit, offset),
+            f"{_SELECT} WHERE in_deck = 0 AND ({where}) ORDER BY {order} LIMIT ? OFFSET ?",
+            (*params, *order_params, limit, offset),
         ).fetchall()
     return [_row(r) for r in rows]
 
 
 def by_radical(radical: int, q: str, limit: int, offset: int,
                lang: str = "en",
-               kana_forms: tuple[str, ...] = ()) -> tuple[list[dict], int]:
+               kana_forms: tuple[str, ...] = (), match: str = "any",
+               field: str = "all") -> tuple[list[dict], int]:
     """One page of EVERY character filed under `radical`, deck and pool
     together, in stroke order — the order a paper 漢和辞典 uses.
 
@@ -177,9 +230,9 @@ def by_radical(radical: int, q: str, limit: int, offset: int,
     """
     where = "radical = ?"
     params: tuple = (radical,)
-    match, match_params = _match(q, kana_forms)
-    if match:
-        where += f" AND ({match})"
+    predicate, match_params = _match(q, kana_forms, match, field)
+    if predicate:
+        where += f" AND ({predicate})"
         params += match_params
     total = _conn().execute(
         f"SELECT COUNT(*) FROM kanji WHERE {where}", params).fetchone()[0]

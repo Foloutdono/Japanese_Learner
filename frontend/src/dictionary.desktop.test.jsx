@@ -388,7 +388,7 @@ describe('the catalogue and its entry (plan 128)', () => {
     await userEvent.fill(input, '')
     await settle(600)
 
-    document.querySelector('.console__toggle').click()
+    document.querySelector('.dict-radical-toggle').click()
     await settle()
     expect(document.querySelector('.desk-dict--bare')).not.toBeNull()
     expect(document.querySelector('.dict-dock')).toBeNull()

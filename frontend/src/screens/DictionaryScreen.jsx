@@ -57,7 +57,7 @@ import { useGridWalk } from '../hooks/useGridWalk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
-import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon } from '../components/ui/Icons'
+import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon, SlidersIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
@@ -123,6 +123,34 @@ const LEVELLED = ['kanji', 'vocab', 'grammar']
 // row shape, so the grid under it is the same grid.
 const FAVORITES = 'favorites'
 
+// How strictly a query means itself, and where it is looked for
+// (routes/dictionary.py's `match` and `field`; study/search_match.py).
+// Every term used to be a substring of everything, so "sun" found
+// Sunday, misunderstanding and 寸法 (すんぽう, whose reading starts with
+// the romaji すん). The defaults are the strict reading — a whole word
+// of a gloss, a whole reading for romaji — and are never sent, so a
+// request that says nothing is the backend's default too.
+const MATCHES = ['word', 'start', 'any']
+const FIELDS  = ['all', 'japanese', 'meaning']
+const SEARCH_DEFAULTS = { match: 'word', field: 'all' }
+// A per-viewer convenience, so wrapped: a private window or blocked
+// storage is the default and nothing worse.
+const SEARCH_KEY = 'dict.search'
+function loadSearchOpts() {
+	try {
+		const saved = JSON.parse(localStorage.getItem(SEARCH_KEY) || '{}')
+		return {
+			match: MATCHES.includes(saved.match) ? saved.match : SEARCH_DEFAULTS.match,
+			field: FIELDS.includes(saved.field) ? saved.field : SEARCH_DEFAULTS.field,
+		}
+	} catch {
+		return { ...SEARCH_DEFAULTS }
+	}
+}
+function saveSearchOpts(opts) {
+	try { localStorage.setItem(SEARCH_KEY, JSON.stringify(opts)) } catch { /* the default next time */ }
+}
+
 // Route: /dictionary — under the shell (plan 073: the canvas's
 // Dictionary). The bar, the analyzer's door, the console with the
 // collections and the field, then the catalogue: a grid of entry
@@ -179,6 +207,15 @@ export default function DictionaryScreen({ session }) {
 	// The spelling the answer is actually for, when a query that found
 	// nothing was retried against the nearest word the catalogue holds.
 	const [corrected, setCorrected]   = useState(null)
+	// The search's strictness and field. Mirrored in a ref because
+	// fetchPage is called in the same breath as the setter, before the
+	// state can be read (the level has the same problem and an argument).
+	const [searchOpts, setSearchOpts] = useState(loadSearchOpts)
+	const searchOptsRef = useRef(searchOpts)
+	// The options row is folded behind a toggle in the field: four rows
+	// of chips over the catalogue was too much on a phone for a setting
+	// most searches never touch. Closed on arrival.
+	const [optsOpen, setOptsOpen]     = useState(false)
 	const [selected, setSelected]     = useState(null)
 	// The entry a door inside the open panel leads to: a word from a
 	// kanji's ledger, a kanji from a word's, a kana's twin, a grammar
@@ -340,6 +377,13 @@ export default function DictionaryScreen({ session }) {
 		// point is that it is the complete one. The chips are hidden in
 		// that mode for the same reason.
 		if (LEVELLED.includes(cat) && lvl && rad == null) params.set('level', lvl)
+		// Only what differs from the default, and only with a query: the
+		// browse has nothing to be strict about.
+		if (q) {
+			const { match, field } = searchOptsRef.current
+			if (match !== SEARCH_DEFAULTS.match) params.set('match', match)
+			if (field !== SEARCH_DEFAULTS.field) params.set('field', field)
+		}
 
 		// The shelf is its own endpoint, answering in the same shape: a
 		// page of rows, newest first, no query and no level to send.
@@ -457,6 +501,25 @@ export default function DictionaryScreen({ session }) {
 		setPage(0)
 		setHasMore(true)
 		fetchPage(0, query, category, null, lvl)
+	}
+
+	// The options row under the field: the query stays, the answer is
+	// asked again under the new rule.
+	function switchSearchOpt(key, value) {
+		if (searchOptsRef.current[key] === value) return
+		playUi('click-mode-selection')
+		const next = { ...searchOptsRef.current, [key]: value }
+		searchOptsRef.current = next
+		setSearchOpts(next)
+		saveSearchOpts(next)
+		setSelected(null)
+		setPage(0)
+		setHasMore(true)
+		if (mode === 'radical') {
+			if (selectedRadical != null) fetchPage(0, query, 'kanji', selectedRadical)
+		} else {
+			fetchPage(0, query, category, null)
+		}
 	}
 
 	function switchToSearchMode() {
@@ -611,6 +674,9 @@ export default function DictionaryScreen({ session }) {
 	// and a search box over a 71-symbol table adds little.
 	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
 	const isShelf = category === FAVORITES
+	// The search options exist wherever there is a field to type into.
+	const hasSearchOpts = !isSyllabary && !isShelf && !showingRadicalGrid
+	const searchOptsSet = searchOpts.match !== SEARCH_DEFAULTS.match || searchOpts.field !== SEARCH_DEFAULTS.field
 
 	// 案内 — once the first page of the catalogue has painted (plan 100).
 	const guide = useGuide('dictionary', !loading && results.length > 0)
@@ -747,6 +813,29 @@ export default function DictionaryScreen({ session }) {
 							))}
 						</Chips>
 					)}
+					{/* How the query is read: how strictly (a whole word, the
+					    start of one, anywhere) and where (everything, the
+					    Japanese alone, the meaning alone). Two groups on one row
+					    under the same hairline as the levels, opened from the
+					    toggle in the field (searchToggle below). */}
+					{optsOpen && hasSearchOpts && (
+						<div className="dict-search-opts">
+							<Chips label={t.dictMatch}>
+								{MATCHES.map(key => (
+									<Chip key={key} on={searchOpts.match === key} color={DICTIONARY_COLOR} onClick={() => switchSearchOpt('match', key)}>
+										{t.dictMatchOptions[key]}
+									</Chip>
+								))}
+							</Chips>
+							<Chips label={t.dictField}>
+								{FIELDS.map(key => (
+									<Chip key={key} on={searchOpts.field === key} color={DICTIONARY_COLOR} onClick={() => switchSearchOpt('field', key)}>
+										{t.dictFieldOptions[key]}
+									</Chip>
+								))}
+							</Chips>
+						</div>
+					)}
 				</ConsoleTop>
 				{/* The FIELD is hidden while browsing the plain radical grid
 				    (there is nothing to type at an index of 214 glyphs, and
@@ -786,7 +875,26 @@ export default function DictionaryScreen({ session }) {
 							: t.dictionaryPlaceholder}
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
-						toggle={category === 'kanji' ? (
+						toggle={<>
+							{/* The search options' door. Lit while the row is
+							    open, and while a setting is not the default even
+							    with the row folded, so a stricter or looser
+							    search never hides behind a closed toggle. */}
+							{hasSearchOpts && (
+								<Chip
+									className="console__toggle dict-opts-toggle"
+									on={optsOpen || searchOptsSet}
+									aria-expanded={optsOpen}
+									color={DICTIONARY_COLOR}
+									title={t.dictSearchOptions}
+									aria-label={t.dictSearchOptions}
+									data-guide="dict.options"
+									onClick={() => { playUi('click-mode-selection'); setOptsOpen(open => !open) }}
+								>
+									<SlidersIcon size={16} />
+								</Chip>
+							)}
+							{category === 'kanji' && (
 							/* The glyph alone. 部 is the name of the thing —
 							   DESIGN.md, "a body that names itself" — and the
 							   word beside it bought nothing a learner reading a
@@ -796,7 +904,7 @@ export default function DictionaryScreen({ session }) {
 							   for a screen reader (aria-label), which are the
 							   two readers the glyph does not serve. */
 							<Chip
-								className="console__toggle"
+								className="console__toggle dict-radical-toggle"
 								on={mode === 'radical'}
 								color={DICTIONARY_COLOR}
 								title={t.dictModeRadical}
@@ -805,7 +913,8 @@ export default function DictionaryScreen({ session }) {
 							>
 								<span lang="ja" aria-hidden="true">部</span>
 							</Chip>
-						) : null}
+							)}
+						</>}
 					/>
 				)}
 			</Console>

@@ -45,6 +45,7 @@ export const GUIDES = Object.freeze({
   ],
   dictionary: [
     { anchor: 'dict.console',  key: 'DictConsole',  radius: 'card' },
+    { anchor: 'dict.options',  key: 'DictOptions',  radius: 'pill' },
     { anchor: 'dict.chips',    key: 'DictChips',    radius: 'flat' },
     { anchor: 'dict.entry',    key: 'DictEntry',    radius: 'card' },
     { anchor: 'dict.actions',  key: 'DictActions',  radius: 'card' },
