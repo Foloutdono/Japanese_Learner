@@ -1,6 +1,7 @@
 # Plain pytest-style functions with the `client`/`monkeypatch` fixtures
 # -- same reason test_http_smoke.py and test_phrase_api.py deviate from
 # this suite's usual unittest.TestCase style.
+import json
 import time
 
 import pytest
@@ -734,3 +735,47 @@ def test_list_sessions_respects_the_limit(client):
 
     assert client.get("/api/video/sessions?limit=0").status_code == 422
     assert client.get("/api/video/sessions?limit=101").status_code == 422
+
+
+def test_a_session_built_by_an_older_analysis_is_read_again(client):
+    # A session stores the analysis of every line it was built with.
+    # Built before the tokenizer counted the spaces between a subtitle's
+    # phrases, a line kept losing every particle past its first space,
+    # however the detector improved. Opened under a newer LOCAL_REV, it
+    # is analysed again -- cue times kept -- and stored that way.
+    srt = "1\n00:00:01,000 --> 00:00:04,000\nSHAKE 白々しく光る 街の灯りに 照らされ\n".encode("utf-8")
+    session_id = client.post(
+        "/api/video/session",
+        files={"file": ("rev.srt", srt, "text/plain")},
+        data={"start": "0", "end": "30"},
+    ).json()["sessionId"]
+    fresh = _poll_until_settled(client, session_id).json()["sentences"][0]
+    assert {"の", "に"} <= {g["pattern"] for g in fresh["grammar"]}
+
+    # The same line as an older build stored it: no stamp, no grammar.
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT sentences FROM video_sessions WHERE id = %s", (session_id,))
+            (stored,) = cur.fetchone()
+            stale = {k: v for k, v in stored[0].items() if k != "local_rev"}
+            stale = {**stale, "grammar": [], "tokens": [{**t, "grammar": []} for t in stale["tokens"]]}
+            cur.execute("UPDATE video_sessions SET sentences = %s WHERE id = %s",
+                        (json.dumps([stale], ensure_ascii=False), session_id))
+        conn.commit()
+    finally:
+        conn.close()
+
+    line = client.get(f"/api/video/session/{session_id}").json()["sentences"][0]
+    assert {"の", "に"} <= {g["pattern"] for g in line["grammar"]}
+    assert (line["cue_start"], line["cue_end"]) == (1.0, 4.0)
+
+    conn = db_conn()
+    try:
+        with conn.cursor() as cur:
+            cur.execute("SELECT sentences FROM video_sessions WHERE id = %s", (session_id,))
+            (stored,) = cur.fetchone()
+    finally:
+        conn.close()
+    assert stored[0]["local_rev"] == video_module.LOCAL_REV
+    assert stored[0]["grammar"]

@@ -205,6 +205,19 @@ def _tokens(morphemes: list) -> list[dict]:
     return tokens
 
 
+# The local tier's revision. Its answer is made again on every request,
+# except where a caller keeps one: a video session stores the analysis
+# of every line it was built with (routes/video.py), and would go on
+# showing a line as it was first read for as long as the session is
+# kept. Bump this when a change makes the local tier answer differently
+# for a sentence it has already answered -- the tokenizer, the grammar
+# detector, the lookups -- and a stored session analysed under another
+# revision (or before there was one) is analysed again when next opened.
+# 1: offsets past a space (every particle after a subtitle's first
+# space was lost) and the plain copula after a noun (2026-09-25).
+LOCAL_REV = 1
+
+
 def analyze_local(text: str, level: str | None = None) -> dict:
     """Everything about a Sentence that needs no language model. Pure and
     user-independent, therefore cacheable and shareable across learners.

@@ -64,6 +64,16 @@ const SESSION = {
     },
   ],
 }
+// A song's worth of lines: the list of sentences far taller than the
+// head and the sumi object beside it.
+const LONG = {
+  ...SESSION,
+  sentences: [
+    SESSION.sentences[0],
+    ...Array.from({ length: 35 }, (_, i) => ({ ...SESSION.sentences[1], text: `駅で待つ${i}`, cue_start: 44 + 4 * i, cue_end: 48 + 4 * i })),
+  ],
+}
+let session = SESSION
 const entry = (kanji, kana, meaning) => ({ type: 'vocab', kanji, kana, meaning, level: 'N5', senses: [], examples: [], status: { status: 'learning' } })
 const ENTRIES = { 雨: entry('雨', 'あめ', 'rain'), 駅: entry('駅', 'えき', 'station') }
 const ok = body => ({ ok: true, status: 200, json: async () => body })
@@ -73,7 +83,8 @@ const { __playerSpies: spies, __playerProps: player } = await import('./componen
 
 beforeEach(() => {
   apiJson.mockReset()
-  apiJson.mockImplementation(async () => SESSION)
+  session = SESSION
+  apiJson.mockImplementation(async () => session)
   apiUpload.mockReset()
   apiUpload.mockResolvedValue({ sessionId: 1, status: 'generating' })
   apiFetch.mockReset()
@@ -148,6 +159,27 @@ describe('the analyser\'s video Passage on three columns (plan 134)', () => {
     // Nothing past the window: each column scrolls in itself.
     expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
     expect(document.scrollingElement.scrollWidth).toBeLessThanOrEqual(window.innerWidth)
+  })
+
+  it('keeps the rows to the head and the sumi object when the list of sentences is long', async () => {
+    session = LONG
+    await openVideo()
+    const rail = box('.anl-desk__rail')
+    const slab = box('.anl-slab')
+    // The list scrolls in its panel; it does not stretch the rows beside it.
+    expect(box('.anl-desk__head').height).toBeLessThan(80)
+    const gap = parseFloat(getComputedStyle($('.anl-desk')).rowGap)
+    expect(Math.abs(slab.top - (box('.anl-desk__head').bottom + gap))).toBeLessThan(2)
+    expect(Math.abs(rail.bottom - slab.bottom)).toBeLessThan(2)
+    // The sumi object whole: its subtitle and its bar inside it.
+    expect(box('.anl-pbar').bottom).toBeLessThanOrEqual(slab.bottom + 1)
+    // The grammar and the words have the rest of the window.
+    expect(box('.anl-desk__points').height).toBeGreaterThan(150)
+    expect(box('.anl-desk__work').height).toBeGreaterThan(150)
+    expect(Math.abs(box('.anl-desk__points').top - box('.anl-desk__work').top)).toBeLessThan(2)
+    const line = $('.anl-desk__rail .anl-line')
+    expect(line.scrollHeight).toBeGreaterThan(line.clientHeight)
+    expect(document.scrollingElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1)
   })
 
   it('draws the bar on one row: one plain track, no step per sentence, no printed keys', async () => {

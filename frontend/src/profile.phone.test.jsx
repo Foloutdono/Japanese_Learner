@@ -86,14 +86,16 @@ describe('the profile at phone width', () => {
         </div>
         <div className="jour-track">
           <span className="jour-track__span">
-            <span className="jour-track__rail" />
-            <span className="jour-track__done" style={{ width: '43.5%' }} />
+            <span className="jour-track__siding" />
+            <span className="jour-track__leg jour-track__leg--now" style={{ left: 'calc(0% + 2px)', width: 'calc(46% - 4px)' }} />
+            <span className="jour-track__done" style={{ left: 'calc(0% + 2px)', width: 'max(0px, calc(43.5% - 2px))' }} />
+            <span className="jour-track__leg" style={{ left: 'calc(46% + 2px)', width: 'calc(54% - 2px)' }} />
             <span className="jour-track__owed" style={{ left: '43.5%', width: '11.3%' }} />
-            <span className="jour-track__station" style={{ left: '0%' }}>
-              <i /><span className="jour-track__station-name">発</span>
+            <span className="jour-track__station jour-track__station--passed" style={{ left: '0%' }}>
+              <span className="jour-track__station-name jour-track__station-name--jp">発</span>
             </span>
-            <span className="jour-track__station" style={{ left: '46%' }}>
-              <i /><span className="jour-track__station-name">N4</span>
+            <span className="jour-track__station jour-track__station--next" style={{ left: '46%' }}>
+              <span className="jour-track__station-name">N4</span>
             </span>
             <span className="jour-track__plan" style={{ left: '54.8%' }} />
             <span className="jour-track__you" style={{ left: '43.5%' }} />
@@ -131,7 +133,9 @@ describe('the profile at phone width', () => {
     // The drawing costs 52px of a phone, not 132. It was 44 until the
     // rail moved 8px down the box to put air between the train and the
     // line it rides: at a 2px gap the car read as a lozenge stuck to
-    // the rail rather than a train standing above it.
+    // the rail rather than a train standing above it. The 区間・新幹線
+    // round redrew it inside the same 52: the train stands on the line
+    // now, and the names sit under it where the dots were.
     expect(screen.container.querySelector('.jour-track').getBoundingClientRect().height).toBe(52)
     // Each row: value and delta on one line, the promise under them.
     const rows = [...screen.container.querySelectorAll('.jour-cmp')].map(r => r.getBoundingClientRect())

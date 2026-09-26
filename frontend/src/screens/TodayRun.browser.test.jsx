@@ -67,6 +67,7 @@ function mount(entry = '/today/run') {
 beforeEach(() => {
   apiJson.mockReset()
   localStorage.clear()
+  sessionStorage.clear()
   summaryRef.current = { total: 1, lanes: [LANE], next_due: null }
 })
 
@@ -113,6 +114,45 @@ describe('TodayRun', () => {
     expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 1 xp 3')
   }, 20000)
 
+  it('counts what the queue holds, not the gate\'s figure run down', async () => {
+    // The gate counted one card; one more fell due before the run
+    // reached it (a miss comes back minutes later). The pill was the
+    // gate's figure less what was cleared, so it read 0 with that card
+    // on screen. It counts the cards in hand and what the queue said
+    // it holds past them.
+    const NE = { ...CARD, card_id: 'kana_ne', kana: 'ね', romaji: 'ne' }
+    let batch = 0
+    apiJson.mockImplementation(async (url) => {
+      if (String(url).startsWith('/api/today/cards')) {
+        batch += 1
+        if (batch === 1) return { cards: [CARD], beyond: 1 }
+        if (batch === 2) return { cards: [NE], beyond: 0 }
+        return { cards: [], beyond: 0 }
+      }
+      if (String(url) === '/api/today/review') return { credits: { balance: 23 }, xp_earned: 3 }
+      return {}
+    })
+
+    const screen = await mount()
+    await settle(300)
+    const pill = () => screen.container.querySelector('.today-remaining')?.textContent
+    expect(pill()).toBe('2')
+
+    const rate = async () => {
+      screen.container.querySelector('.flashcard').click()
+      await settle(80)
+      ;[...screen.container.querySelectorAll('.rating-bar__btn')].find(b => b.textContent.includes('Correct')).click()
+      await settle(1500)
+    }
+    await rate()
+    // The second card, past the gate's one: one left, not zero.
+    expect(screen.container.querySelector('.prompt-card')?.textContent).toContain('ね')
+    expect(pill()).toBe('1')
+
+    await rate()
+    expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 2 xp 6')
+  }, 20000)
+
   it('a failed first fetch stays on the stage with the retry, never a finish', async () => {
     apiJson.mockImplementation(async () => { throw new Error('down') })
     const screen = await mount()
@@ -154,4 +194,28 @@ describe('TodayRun with a quota', () => {
     // Answered, the share is spent: the run never asked the queue again.
     expect(calls).toHaveLength(1)
   }, 20000)
+
+  it('a second run of the same length starts from nothing answered', async () => {
+    // The run keeps its count in the tab for a reload mid-run. Kept past
+    // the end, the next run dealt the same way -- the same key -- read
+    // every share as spent, served nothing and went straight back.
+    apiJson.mockImplementation(async (url) => {
+      if (String(url).startsWith('/api/today/cards')) return { cards: [CARD], beyond: 0 }
+      if (String(url) === '/api/today/review') return { credits: { balance: 23 }, xp_earned: 3 }
+      return {}
+    })
+    const entry = `/today/run?quota=${encodeURIComponent(`${LANE.id}:1`)}`
+    for (const run of [1, 2]) {
+      const screen = await mount(entry)
+      await settle(300)
+      const flashcard = screen.container.querySelector('.flashcard')
+      expect(flashcard, `run ${run} served nothing`).toBeTruthy()
+      flashcard.click()
+      await settle(80)
+      ;[...screen.container.querySelectorAll('.rating-bar__btn')].find(b => b.textContent.includes('Correct')).click()
+      await settle(1500)
+      expect(screen.container.querySelector('.gate-probe')?.textContent).toBe('cleared 1 xp 3')
+      await screen.unmount()
+    }
+  }, 30000)
 })

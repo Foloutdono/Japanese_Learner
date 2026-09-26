@@ -303,7 +303,11 @@ describe('the route line (the working rail, and the widths it answers for)', () 
     // head, at the size a thumb needs.
     const keep = screen.container.querySelector('.anl-head__keep')
     expect(keep).not.toBeNull()
-    expect(keep.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
+    // Its laid-out height, not its box on screen: the result is still
+    // sliding in (`arrive`, 0.28s) when this runs, and a box read
+    // mid-slide is 44 give or take a float's rounding (43.999996 on
+    // some frames).
+    expect(parseFloat(getComputedStyle(keep).height)).toBeGreaterThanOrEqual(44)
   })
 })
 
