@@ -2,6 +2,7 @@ import { describe, it, expect, afterEach } from 'vitest'
 import { render, cleanup } from 'vitest-browser-react'
 import { page } from 'vitest/browser'
 // The ruby rules under test live in the one stylesheet.
+import '@fontsource/noto-sans-jp/400.css'
 import '../../index.css'
 import { ExampleSentence } from './ExampleSentence'
 
@@ -66,9 +67,12 @@ const SENTENCES = {
 afterEach(() => cleanup())
 
 // CI's fallback face sets kana at roughly 0.6em, where a Japanese face
-// sets them a full em: the narrow lane squeezes every plain kana that
-// much, so an overhang that only fits a full-em kana shows up here too.
-const NARROW_KANA = '.dict-ex__jp .dict-ex__seg:not(:has(ruby)) { letter-spacing: -0.4em }'
+// sets them a full em: the narrow lane sets every plain kana at exactly
+// 0.6em, so an overhang that only fits a full-em kana shows up on every
+// machine. Exactly, because the squeeze is taken off the bundled Noto
+// Sans JP, whose kana are a full em everywhere -- off the fallback face
+// it would compound with CI's own narrowness.
+const NARROW_KANA = '.dict-ex__jp .dict-ex__seg:not(:has(ruby)) { font-family: "Noto Sans JP"; letter-spacing: -0.4em }'
 
 async function lay(segments, width, { narrow = false } = {}) {
   await page.viewport(width, 900)
@@ -78,6 +82,9 @@ async function lay(segments, width, { narrow = false } = {}) {
       <ExampleSentence ex={{ jp: segments.map(s => s.text).join(''), segments }} showTr={false} />
     </div>,
   )
+  // The face loads on first use, a subset at a time: ask for the kana
+  // now, or the lane measures the fallback it is meant to replace.
+  if (narrow) await document.fonts.load('16px "Noto Sans JP"', 'はにでのをみかさんえしてよるく、。')
   await document.fonts.ready
   return screen.container.querySelector('.dict-ex__jp')
 }
