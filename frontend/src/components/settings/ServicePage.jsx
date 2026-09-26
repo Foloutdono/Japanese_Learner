@@ -183,15 +183,20 @@ export function ServicePage({ session }) {
         </div>
       ) : (
         // Without a destination there is no line to draw: the way to
-        // one, rather than three rails ending nowhere.
-        <button
-          type="button"
-          className="btn-secondary slip__act"
-          data-action="goal-set"
-          onClick={() => { playClick(); navigate('/profile/settings/destination', { replace: desk }) }}
-        >
-          {t.settingsGoalSet}
-        </button>
+        // one, rather than three rails ending nowhere. A slip of its own
+        // (plan 144), saying why: a bare button under the card ran the
+        // pane's width on the desk, past the card's edge.
+        <Slip label={t.settingsGoal} across>
+          <span className="slip__hint">{t.settingsGoalNoneDesc}</span>
+          <button
+            type="button"
+            className="btn-secondary slip__act"
+            data-action="goal-set"
+            onClick={() => { playClick(); navigate('/profile/settings/destination', { replace: desk }) }}
+          >
+            {t.settingsGoalSet}
+          </button>
+        </Slip>
       )}
 
       {done && <p className="hint" role="status">{t.settingsGoalIssued}</p>}

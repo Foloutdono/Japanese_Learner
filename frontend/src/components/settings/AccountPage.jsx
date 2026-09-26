@@ -9,7 +9,7 @@ import { hasProvider } from '../../lib/oauth'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
-import { SettingsPage, Slip, SlipColumns, SlipColumn } from './SettingsPage'
+import { SettingsPage, Slip, SlipRow } from './SettingsPage'
 import { DataSlips } from './DataSlips'
 
 // ── Account ───────────────────────────────────────────────────
@@ -35,33 +35,41 @@ function ClaimSlip() {
   // comes back to the row they pressed. No fall-back to a plain
   // sign-in is offered, for the reason the comment below gives.
   const refused = authRedirectError()
+  // The two ways in, each in a `.slip__way`: nothing on the phone, which
+  // reads them one under the other; side by side on a desk page wide
+  // enough (plan 144), so that the form and its button stand at half the
+  // page rather than across all of it.
   return (
-    <Slip label={t.guestLabel} cap={t.guestCap}>
-      <p className="slip__hint">{t.guestClaimDesc}</p>
-      {/* `link`, and never a fall-back to a plain sign-in: this learner
-          has real progress on this account, and signing in as a Google
-          user instead would walk away from it without saying so. If
-          manual linking is off on the project the error says so and
-          nothing is lost. */}
-      <ProviderButton link onError={claim.setError} />
-      {/* Only until the fields below have news of their own: a URL
-          refusal lasts the whole page load, and stacking it over the
-          claim's own answer reads as two faults where there is one. */}
-      {refused && !claim.error && !claim.done && (
-        <p className="auth-message auth-message--error" role="alert">{authRedirectMessage(refused, t)}</p>
-      )}
-      <p className="auth-or">{t.orWithEmail}</p>
-      <ClaimFields claim={claim} />
-      {!claim.done && (
-        <button
-          type="button"
-          className="btn-secondary slip__act"
-          onClick={claim.submit}
-          disabled={!claim.filled || claim.busy}
-        >
-          {claim.busy ? t.loading : t.brdAccountCreate}
-        </button>
-      )}
+    <Slip label={t.guestLabel} cap={t.guestCap} className="slip--ways">
+      <div className="slip__way">
+        <p className="slip__hint">{t.guestClaimDesc}</p>
+        {/* `link`, and never a fall-back to a plain sign-in: this learner
+            has real progress on this account, and signing in as a Google
+            user instead would walk away from it without saying so. If
+            manual linking is off on the project the error says so and
+            nothing is lost. */}
+        <ProviderButton link onError={claim.setError} />
+        {/* Only until the fields below have news of their own: a URL
+            refusal lasts the whole page load, and stacking it over the
+            claim's own answer reads as two faults where there is one. */}
+        {refused && !claim.error && !claim.done && (
+          <p className="auth-message auth-message--error" role="alert">{authRedirectMessage(refused, t)}</p>
+        )}
+      </div>
+      <div className="slip__way">
+        <p className="auth-or">{t.orWithEmail}</p>
+        <ClaimFields claim={claim} />
+        {!claim.done && (
+          <button
+            type="button"
+            className="btn-secondary slip__act"
+            onClick={claim.submit}
+            disabled={!claim.filled || claim.busy}
+          >
+            {claim.busy ? t.loading : t.brdAccountCreate}
+          </button>
+        )}
+      </div>
     </Slip>
   )
 }
@@ -96,7 +104,7 @@ function LinkGoogleSlip() {
   // until the button has news of its own.
   const refused = authRedirectError()
   return (
-    <Slip label={t.linkGoogleLabel} cap={t.linkGoogleCap}>
+    <Slip label={t.linkGoogleLabel} cap={t.linkGoogleCap} across>
       <p className="slip__hint">{t.linkGoogleDesc}</p>
       {/* On the web this never resolves — the page has left for
           Google and comes back as a new load, where the slip is
@@ -124,46 +132,44 @@ export function AccountPage({ session }) {
   // anyone else is offered only the identity they are missing.
   const offerGoogle = !guest && !!session && !hasProvider(session, 'google')
   // Two halves (plan 139): whose card this is, and what it holds — the
-  // data page's slips, which were a row of their own. A phone reads the
-  // account first; a desk page wide enough sets the two side by side.
-  // Sign out is here alone: the column's foot printed a second one.
+  // data page's slips, which were a row of their own. Sign out is here
+  // alone: the column's foot printed a second one. On a desk page wide
+  // enough the slips stand in rows of two (plan 144), in the phone's
+  // order: the address across the page, then the policy beside the
+  // sign-out, and the data's rows (DataSlips) under them.
   return (
     <SettingsPage title={t.account}>
-      <SlipColumns>
-        <SlipColumn>
-          {guest && <ClaimSlip />}
-          {session?.user?.email && (
-            <Slip label={t.settingsIssuedTo}>
-              <span className="slip__value">{session.user.email}</span>
-            </Slip>
-          )}
-          {/* Under the address, because it is about that address: this is
-              the second key to the same pass, not a second pass. */}
-          {offerGoogle && <LinkGoogleSlip />}
-          <Slip label={t.privacyPolicy}>
-            {/* In the shell the policy opens in the system browser at the web
-                origin (plan 076): the bundled copy would open inside the
-                WebView with no way back. */}
-            <a
-              className="btn-secondary slip__act"
-              href="/privacy.html"
-              target="_blank"
-              rel="noreferrer"
-              onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
-            >
-              {t.privacyPolicy}
-            </a>
-          </Slip>
-          <Slip label={guest ? t.signOutGuestDesc : t.signOutDesc}>
-            <button type="button" className="btn-secondary slip__act" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-              {t.signOut}
-            </button>
-          </Slip>
-        </SlipColumn>
-        <SlipColumn>
-          <DataSlips session={session} />
-        </SlipColumn>
-      </SlipColumns>
+      {guest && <ClaimSlip />}
+      {session?.user?.email && (
+        <Slip label={t.settingsIssuedTo}>
+          <span className="slip__value">{session.user.email}</span>
+        </Slip>
+      )}
+      {/* Under the address, because it is about that address: this is
+          the second key to the same pass, not a second pass. */}
+      {offerGoogle && <LinkGoogleSlip />}
+      <SlipRow>
+        <Slip label={t.privacyPolicy}>
+          {/* In the shell the policy opens in the system browser at the web
+              origin (plan 076): the bundled copy would open inside the
+              WebView with no way back. */}
+          <a
+            className="btn-secondary slip__act"
+            href="/privacy.html"
+            target="_blank"
+            rel="noreferrer"
+            onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
+          >
+            {t.privacyPolicy}
+          </a>
+        </Slip>
+        <Slip label={guest ? t.signOutGuestDesc : t.signOutDesc}>
+          <button type="button" className="btn-secondary slip__act" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
+            {t.signOut}
+          </button>
+        </Slip>
+      </SlipRow>
+      <DataSlips session={session} />
     </SettingsPage>
   )
 }

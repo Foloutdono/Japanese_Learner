@@ -70,7 +70,11 @@ export function LevelPage({ session }) {
   return (
     <SettingsPage title={t.settingsJlptLevel}>
       {/* No label: the page is the level, and the stop you stand at
-          prints its own name. */}
+          prints its own name. On the desk every stop prints its name
+          (plan 144), as the destination's line does: a page the pane's
+          width has the room, and a stop is chosen by what it is. The
+          ones you do not stand at are dropped again while the pane
+          holds one column (index.css, the 机 section). */}
       <Slip>
         <div className="lvlstrip" role="radiogroup" aria-label={t.settingsJlptLevel} onKeyDown={onWalk}>
           {LEVELS.map((level, i) => (
@@ -86,7 +90,9 @@ export function LevelPage({ session }) {
             >
               <span className="lvlstrip__dot" aria-hidden="true" />
               <span className="lvlstrip__code">{level}</span>
-              {current === level && <span className="lvlstrip__jp">{t.levelName[level]}</span>}
+              {(desk || current === level) && (
+                <span className={`lvlstrip__jp${current === level ? '' : ' lvlstrip__jp--away'}`}>{t.levelName[level]}</span>
+              )}
             </button>
           ))}
         </div>
@@ -95,7 +101,9 @@ export function LevelPage({ session }) {
       {/* The level's consequences are said on the confirm sheet, at the
           moment they apply, and nowhere else — a page of settings is
           controls, not a manual. */}
-      <Slip label={t.settingsRedo}>
+      {/* Across a desk page while it is a button (plan 144); the test,
+          once running, takes the card as it does on the phone. */}
+      <Slip label={t.settingsRedo} across={!testing}>
         {!testing && (
           <button
             type="button"

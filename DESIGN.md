@@ -1186,10 +1186,15 @@ as the rail it arrives at.
   options", with the titles off on the desk). The column is the pass at
   `--desk-entry-w` (giving down to `--desk-side-w`) over the list, sticky
   and bounded; the open page takes the rest of the width, its slips
-  cards, two columns of them where the page holds two at 310px each
-  (measured on the page, not set at a window width), a card of the
-  page's own width stopping at `--card-w` so an action never runs past
-  it. **No title on
+  cards running to its edge. Where the page holds two at 310px each
+  (measured on the page, not set at a window width) they stand in rows
+  of two (plan 144): a row's cards at the taller's height with their
+  actions at its foot, so a page ends level rather than in two columns
+  of different lengths, and a page pairs what belongs together. A card
+  of one action that takes the width lies across it, its words in the
+  left half and its action in the right, under the row's actions at
+  their width, so no action runs past `--card-w`; the guest's claim sets
+  its two ways in side by side the same way. **No title on
   either**: the rail's lit station names the screen and the lit door --
   a field of the pass in its gold wash and rail, a stop in its gold ring,
   a row in the list's gold rail -- names the page; both headings stay,

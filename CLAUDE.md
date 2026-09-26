@@ -687,7 +687,18 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  When starting a new wave, begin at **144** or higher, and check
+  **144** is Settings' pages using the width on the desk: the slips in
+  rows of two that end level instead of two free columns (`SlipRow`,
+  `.stg-pair`), every card to the page's edge, a card of one action
+  across the page with its action in the right half (`Slip`'s `across`),
+  the guest's claim as two ways side by side, the presets over a mixer
+  on one subgrid, and the level's stops named (cited in
+  `components/settings/SettingsPage.jsx`, `AccountPage.jsx`,
+  `DataSlips.jsx`, `DisplayPage.jsx`, `SoundPage.jsx`, `LevelPage.jsx`,
+  `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
+  `src/columns.wide.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **145** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
