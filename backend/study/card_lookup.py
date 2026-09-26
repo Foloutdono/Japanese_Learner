@@ -207,6 +207,8 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
       next_review     the EARLIEST, which is when this card next wants
                       attention -- the opposite end from interval_days,
                       and correct for the same reason `due` is an any.
+      progress        the furthest, 0 (new) to 1 (mastered), matching
+                      `status` (plan 147: the bar a catalogue tile fills)
     """
     if isinstance(modes, str):
         modes = (modes,)
@@ -225,6 +227,7 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
             "due": False,
             "interval_days": None,
             "next_review": None,
+            "progress": 0.0,
         }
 
     total = sum(i["total_reviews"] for i in items)
@@ -240,6 +243,7 @@ def card_stats(states: dict, user_id: str, raw_id: str, modes) -> dict:
         "due": any(i["due"] for i in items),
         "interval_days": max(intervals) if intervals else None,
         "next_review": min(next_reviews) if next_reviews else None,
+        "progress": max(i.get("progress", 0.0) for i in items),
     }
 
 

@@ -35,9 +35,20 @@ function stageOf(status) {
 	if (status === 'new') return 'new'
 	return null
 }
+
+// How far along its stage's edge a tile fills (plan 147): the card's
+// progress from new to mastered (domain/cardProgress), as the study
+// card's band draws it. A card in progress with no figure keeps the
+// whole edge it always had.
+function bandStyle(entry) {
+	const stage = stageOf(entry.status?.status)
+	const value = stage ? cardProgress(stage, entry.status?.progress) : null
+	return value == null ? undefined : { '--card-band': value }
+}
 import { LEVEL_COLORS } from '../components/dictionary/levelColors'
 import { FuriganaParts } from '../components/study/Readings'
 import { pickPlateReadings } from '../domain/readingPick'
+import { cardProgress } from '../domain/cardProgress'
 import { Leave, DeskCrumb } from '../components/chrome/Bar'
 import { Guide } from '../components/guide/Guide'
 import { useGuide } from '../hooks/useGuide'
@@ -1188,6 +1199,7 @@ function ResultsSection({
 										style={{
 											'--level-color': LEVEL_COLORS[entry.level] ?? 'var(--text-secondary)',
 											'--len': isGrammar ? Math.min([...headword].length, 8) : [...headword].length,
+											...bandStyle(entry),
 										}}
 										className={[
 											'dict-entry-card',
@@ -1345,6 +1357,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 										key={v}
 										type="button"
 										onClick={() => { playUi('click-menu'); setSelected(entry) }}
+										style={desk ? bandStyle(entry) : undefined}
 										className={`syllabary-cell syllabary-cell--kana${isSelected ? ' syllabary-cell--selected' : ''}${cellStage(entry, desk)}`}
 									>
 										<span className="syllabary-cell__char">{entry.kana}</span>
@@ -1363,6 +1376,7 @@ function SyllabaryTable({ rows, cols, title, byGroup, narrow = false, tail, sele
 					<button
 						type="button"
 						onClick={() => setSelected(tail)}
+						style={desk ? bandStyle(tail) : undefined}
 						className={`syllabary-cell syllabary-cell--kana${selected && entryKey(selected) === entryKey(tail) ? ' syllabary-cell--selected' : ''}${cellStage(tail, desk)}`}
 					>
 						<span className="syllabary-cell__char">{tail.kana}</span>

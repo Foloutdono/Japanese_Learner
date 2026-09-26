@@ -745,7 +745,11 @@ runtime purpose. Two consequences worth knowing:
   card's foot in the stage's pigment (`CardBand` in `StageMark.jsx`,
   moved by the stamp as a rating presses), and the desk card panel's
   line redrawn as a fare strip of three stretches (`CardPanel`'s
-  `StateLine`, `domain/cardProgress.js`'s `stripFills`) (cited in
+  `StateLine`, `domain/cardProgress.js`'s `stripFills`); and the
+  dictionary's catalogue tiles and the desk's kana chart filling their
+  stage edge to the same figure (`get_user_states`' `progress`,
+  `card_lookup.card_stats`' furthest across modes,
+  `DictionaryScreen.jsx`'s `bandStyle`) (cited in
   `srs/srs.py`, the eight card routes, `tests/test_card_progress.py`,
   `components/study/StageMark.jsx`, `CardTransition.jsx`,
   `CardPanel.jsx`, `hooks/useReviewGates.js`, `hooks/useCardSession.js`'s

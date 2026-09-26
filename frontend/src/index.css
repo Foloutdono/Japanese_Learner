@@ -15537,8 +15537,15 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   bottom: 0;
   height: 3px;
   /* No stage known (a word the schedule has never seen) reads as the
-     card's own hairline, thickened: an empty gauge, not a state. */
-  background: var(--stage-edge, var(--surface-line));
+     card's own hairline, thickened: an empty gauge, not a state. The
+     stage's ink fills as far as the card has come from new to mastered
+     (--card-band, plan 147, the study card's band), the hairline the
+     rest; a card with no figure keeps its whole edge. */
+  background: linear-gradient(
+    to right,
+    var(--stage-edge, var(--surface-line)) calc(var(--card-band, 1) * 100%),
+    var(--surface-line) 0
+  );
   opacity: 0.85;
 }
 /* --state-new is the wash a not-started token wears (#1a1812 in the
@@ -25827,6 +25834,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     inset: 0 auto 0 0;
     width: 3px;
     height: auto;
+    /* The edge stands upright on a row: it fills from the foot up. */
+    background: linear-gradient(
+      to top,
+      var(--stage-edge, var(--surface-line)) calc(var(--card-band, 1) * 100%),
+      var(--surface-line) 0
+    );
   }
   .desk-dict--page .dict-entry-card__char {
     display: block;
@@ -26104,7 +26117,12 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     position: absolute;
     inset: auto 0 0;
     height: 3px;
-    background: var(--stage-edge, transparent);
+    /* Filled as far as the kana has come (plan 147), the rest bare. */
+    background: linear-gradient(
+      to right,
+      var(--stage-edge, transparent) calc(var(--card-band, 1) * 100%),
+      transparent 0
+    );
   }
   .desk-dict--chart .syllabary-cell--learning { --stage-edge: var(--state-learning); }
   .desk-dict--chart .syllabary-cell--mastered { --stage-edge: var(--state-mastered); }

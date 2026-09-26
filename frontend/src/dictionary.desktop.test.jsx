@@ -553,7 +553,9 @@ describe('the kana charts (plan 128)', () => {
   it('marks where the learner stands on each kana', async () => {
     await serveKana()
     await mount('/dictionary?category=hiragana')
-    const edge = c => getComputedStyle(c, '::after').backgroundColor
+    // The edge is a gauge now (plan 147): the stage's ink from its start,
+    // filled as far as the card has come. Its ink is the gradient's first.
+    const edge = c => getComputedStyle(c, '::after').backgroundImage.match(/(?:rgba?|color)\([^)]*\)/)?.[0]
     expect(cell('か').classList.contains('syllabary-cell--mastered')).toBe(true)
     expect(edge(cell('か'))).toBe(ink('--state-mastered'))
     expect(cell('さ').classList.contains('syllabary-cell--learning')).toBe(true)
