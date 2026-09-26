@@ -952,7 +952,8 @@ into the page and gave a session its keys; plan 120 went through every
 dialog left and moved the ones that do not interrupt into their columns;
 plan 122 drew first contact for a desk, and plan 123 made the workspace
 answer a keyboard and a pointer one way everywhere. Plan 130 had the two
-plated gates take the window.
+plated gates take the window; plan 140 laid first contact down the left
+as the rail it arrives at.
 
 - **The rail is the chrome.** One sumi column down the left edge,
   `--desk-rail-w`, with the HUD's own lit edge turned to face the screen:
@@ -1402,17 +1403,35 @@ plated gates take the window.
   notes that teach a key or point at something say so on the desk (the
   `…Desk` copy — no "tap" is printed there). → and Enter go on; Today's
   stops walk down the rail first (plan 123).
-- **First contact is a run's frame** (plan 122). From the Welcome to the
-  first card there is no rail yet: the work is centred and a column at
-  `--desk-side-w` stands at the right edge, its job changing — on the
-  Welcome the sign-in, standing beside Board as its ghost twin (no second
-  screen); beside the boarding's questions the journey being built, priced
-  on every answer; on the first ride the card's entry, docked by the flip.
-  Building, a phone's pause for effect, is skipped. The plan's chart is
-  drawn 1:1. Every answer has a key: Enter goes on from any step, the
-  digits pick (a level answers to its own number, N5 to 5 and the kana stop
-  to 0), and Esc does nothing — the way out of the boarding signs the guest
-  out.
+- **First contact lays the rail** (plans 122, 140; the owner's pick A of
+  three directions drawn on the canvas "Desktop onboarding — options").
+  The desk's chrome is the rail, so from the Welcome to the plan a sumi
+  column at `--desk-side-w` stands on the LEFT edge in the rail's own
+  material, the rail's masthead at its head (辻 over TSUJI — the paper
+  keeps no second mark) — the rail before it has any gates. Its job
+  changes: on the Welcome the sign-in (the paper card, standing in the
+  sumi; no second screen), with the heading, the tagline and Board as
+  one block on the paper over the rolling stock; during the boarding the
+  line itself, a stop per question (the kana's reveal is the kana's own
+  stop), each named and printing its answer once given, the one being
+  asked lit with the pick as it stands, and a stop behind a door back to
+  its question until the plan is built; at its foot the projection,
+  priced on every answer, then the learner's pass. The head's track and
+  the right-hand journey were that line drawn twice, so neither is drawn.
+  The answers are laid for the width: the name, the kana and the rhythm
+  at the card's width (four tiles to a row), the six reasons three to a
+  row where three run columns fit, the level and the goal as a line of
+  stations — the ride lit in gold up to the pick, one row where each
+  holds half a run's column and two rows under that, a row's ends drawing
+  no rail past them. Back stands on the floor beside Continue (the kana,
+  with no Continue, has a floor of Back alone). Building is skipped, and
+  the pass's own screen folds away: the plan is the last screen and
+  enters the station, unless a guest is offered the account first, which
+  then enters. The plan's chart is drawn 1:1. Every answer has a key:
+  Enter goes on from any step, the digits pick (a level answers to its
+  own number, N5 to 5 and the kana stop to 0), and Esc does nothing — the
+  way out of the boarding signs the guest out. On the first ride the
+  column is the card's entry, docked by the flip (plan 122).
 - **Every desk rule is in one place.** The last section of `index.css`,
   one media block, names written nowhere else; `src/desk.css.test.js`
   holds it. Never write a desk rule anywhere else, and never let a phone

@@ -608,7 +608,25 @@ runtime purpose. Two consequences worth knowing:
   `components/profile/CommuterPass.jsx`'s `PassHead`,
   `src/settings.phone.test.jsx`, `src/settings.desktop.test.jsx` and
   `index.css`; DESIGN.md, "The desk" and Structure).
-  When starting a new wave, begin at **140** or higher, and check
+  **140** is 路線, first contact on the desk as the rail being laid
+  (numbered 140 because 139 went to Settings while it was open; the
+  owner's pick A of three directions drawn on the canvas "Desktop
+  onboarding — options"): a sumi column on the left with the rail's
+  masthead, the sign-in in it on the Welcome and, through the boarding,
+  the line itself — a named stop per question printing its answer, the
+  one asked lit with the pick as it stands, a stop behind a door back to
+  its question, the projection at its foot and then the pass; the head's
+  track and the right-hand journey retired; Back on the floor beside
+  Continue; the answers laid for the width (the reasons three across,
+  the kana and the rhythm four, the level and the goal as a line of
+  stations with the ride lit to the pick); and the pass's screen folded
+  into the plan, which enters the station (cited in
+  `components/boarding/DeskLine.jsx`, `boardBack.js`, `BoardFrame.jsx`,
+  `LevelStep.jsx`, `KanaStep.jsx`, `PlanStep.jsx`, `AccountStep.jsx`,
+  `PassStep.jsx`, `countUp.js`, `Welcome.jsx`, `screens/BoardingFlow.jsx`,
+  `src/frontdoor.desktop.test.jsx`, `src/frontdoor.wide.test.jsx` and the
+  机 section of `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **141** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

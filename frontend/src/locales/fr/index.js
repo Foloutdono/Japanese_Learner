@@ -1830,6 +1830,8 @@ const boarding = {
   brdBuildLines: 'Tes lignes',
   brdBuildRide: 'Ton trajet quotidien',
   brdBuildProjection: 'Ta projection',
+  // 机 (plan 140) : les arrêts de la colonne du bureau, un par question.
+  brdStop: { name: 'Nom', why: 'Pourquoi', kana: 'Kana', level: 'Niveau', goal: 'Objectif', lines: 'Lignes', rhythm: 'Rythme', time: 'Départ', nudge: 'Rappel' },
   brdArrivalTitle: 'Ton plan',
   brdPlanQ: (name) => `Ton plan est prêt, **${name}**.`,
   brdChartTitle: 'Ta projection',
@@ -2054,7 +2056,7 @@ const onboarding = {
   settingsData: 'Données',
   settingsRedo: 'Test de placement',
   settingsCredits: 'Crédits',
-  // The pass's contract and the rows under it (plan 139).
+  // The pass's contract and the rows under it (plan 140).
   passFieldHour: 'Trajet',
   passFieldLines: 'Lignes',
   settingsRatingShort: 'Notation',
