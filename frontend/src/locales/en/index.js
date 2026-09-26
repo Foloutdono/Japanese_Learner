@@ -727,7 +727,6 @@ const phraseAnalyzer = {
   shootPhoto:          'Shoot',
   pickPhoto:           'Choose',
   charCount:           n => `${n} characters`,
-  dropSubtitles:       'Drop a .srt, .vtt or .ass file here, or choose one',
   // Must agree with routes/video.py:50 (_MAX_UPLOAD_BYTES = 1 MB).
   subtitleAccepted:    'SRT, VTT and ASS · up to 1 MB',
   windowLabel:         'Section',
@@ -811,7 +810,18 @@ const phraseAnalyzer = {
   analyze:             'Analyze',
   showHistory:         'History',
   hideHistory:         'Hide history',
-  noHistory:           'No phrases analyzed yet.',
+  // ── 帳 — the passages first (plan 136) ──
+  shelfAll:            'All',
+  shelfKept:           'Kept',
+  passageKept:         'Kept',
+  shelfFilter:         'Show',
+  shelfSearch:         'Search your passages…',
+  shelfEmpty:          'No passages yet: what you analyze on the right will show here.',
+  shelfNoMatch:        'No passage matches.',
+  shelfEmptyPhone:     'Your passages will show here: paste Japanese or a YouTube link above, or take a photo.',
+  newPassage:          'New passage',
+  entryPlaceholder:    'Paste Japanese or a link…',
+  dropHere:            'Drop it here: subtitles or a picture',
   phraseAnalyzeError:  "Couldn't analyze this phrase. Try again.",
   clickForDetails:     'Click for the definition and stats',
   inThisPhrase:        'In this phrase',
@@ -835,7 +845,6 @@ const phraseAnalyzer = {
   // 保存 (plan 039) — pinning a Sentence into the bank.
   keepSentence:        'Keep this sentence',
   unkeepSentence:      'Stop keeping this sentence',
-  keptTitle:           'Kept',
   grammarSpotted:      'Grammar spotted',
   explainSentence:     'Explain',
   explainAgain:        'Explain again',
@@ -886,18 +895,21 @@ const video = {
   videoTitle:          'Video',
   videoDesc:           "Study a video's Japanese subtitles\nLive, colour-coded by what you already know\nA photo of the world with a soundtrack",
   videoUrlOptional:    'Video link',
-  videoUrlOptionalHint: 'Shows the video next to the subtitles, opens the right page for the bookmark, and pre-fills DownSub.',
   // Shown only where the server can fetch a link itself. It names the
   // subtitles rather than the mechanism -- the learner does not need to
   // know a proxy is involved, only what they get.
   analyzeThisLink:     'Get the subtitles',
-  grabTitle:           'Subtitles in one tap',
-  grabLead:            'A special bookmark you set up once (about a minute): after that, open it on any YouTube video and the Japanese subtitles arrive here on their own — phones included.',
-  grabTutorialBtn:     'Step-by-step tutorial',
+  // ── The video intake as a column (plan 136) ──
+  // One filled action: set up the bookmark until it has been used, then
+  // open the video on YouTube, where it is tapped.
+  grabInstall:         'Set up the 字幕取り bookmark',
+  grabInstallSay:      'One minute, once: after that it brings the subtitles of any YouTube video here.',
+  grabThenSay:         'Then tap your 字幕取り bookmark: the subtitles arrive here.',
+  grabInstallLink:     'Set up the bookmark',
+  chooseSubtitles:     'Choose a subtitle file',
   copyBookmarklet:     'Copy the 字幕取り bookmark',
   bookmarkletCopied:   'Copied! Now do step 2',
-  downsubAlt:          'or via DownSub',
-  downsubHint:         'Downloads a .vtt file to drop below — useful outside YouTube.',
+  downsubHint:         'Downloads a .vtt file to choose here — useful when the bookmark will not work.',
   grabEmpty:           'The grabbed subtitles were empty — try again from the video page.',
   // ── The bookmark tutorial ──
   tutTitle:            'Set up the 字幕取り bookmark',

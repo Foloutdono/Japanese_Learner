@@ -11,11 +11,11 @@ import { WritingSlip } from './WritingSlip'
 // Sentence bank), and it survives a correction made here but not a full
 // retype — which is the honest reading of "did this come from a photo".
 export function IntakePhoto({
-  t, session, value, onChange, onTextRecognized, onAnalyze, busy, fromImage,
+  t, session, value, onChange, onTextRecognized, onAnalyze, busy, fromImage, incoming,
 }) {
   return (
     <>
-      <ImageInput t={t} session={session} onTextReady={onTextRecognized} />
+      <ImageInput t={t} session={session} onTextReady={onTextRecognized} incoming={incoming} />
 
       <WritingSlip
         t={t}

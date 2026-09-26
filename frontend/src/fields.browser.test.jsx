@@ -87,10 +87,20 @@ const CASES = [
       <input className="field field--page anl-field" placeholder="https://youtu.be/" />
     </label></div>],
 
-  ['IntakeVideo — the window fields, inside a notice',
-    <div className="anl-panel"><div className="anl-notice"><div className="anl-window">
-      <div className="anl-window__field"><input className="field anl-field" placeholder="0:00" /></div>
+  ['IntakeVideo — the window fields, on the page under Section',
+    <div className="anl-panel"><div className="anl-window">
+      <div className="anl-window__field"><input className="field field--page anl-field" placeholder="0:00" /></div>
+    </div></div>],
+
+  ['IntakeVideo — the window fields in a phone\'s sheet (plan 136)',
+    <div className="sheet anl-sheet"><div className="anl-panel"><div className="anl-window">
+      <div className="anl-window__field"><input className="field field--page anl-field" placeholder="0:00" /></div>
     </div></div></div>],
+
+  ['IntakeVideo — the video URL in a phone\'s sheet (plan 136), a raised ground',
+    <div className="sheet anl-sheet"><div className="anl-panel"><label className="anl-field-row">
+      <input className="field field--page anl-field" placeholder="https://youtu.be/" />
+    </label></div></div>],
 
   ['WritingSlip — .textarea, which draws its own edge instead',
     <div className="anl-panel"><div className="anl-slip">

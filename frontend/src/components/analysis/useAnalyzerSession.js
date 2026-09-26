@@ -101,6 +101,9 @@ export function useAnalyzerSession(session) {
           createdAt: s.createdAt,
           sentenceCount: s.sentenceCount,
           videoId: s.videoId,
+          // The first sentence (plan 136), what a card prints in place
+          // of the file name the grab gave the session.
+          firstLine: s.firstLine ?? null,
         })),
       ]
       merged.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))

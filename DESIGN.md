@@ -1243,9 +1243,18 @@ plated gates take the window.
   column's edge. The desk's rail steps aside for this one screen, so the
   three columns have the window at the drawing's shares (410 | 830 | 541);
   under the desk the same result is one column, drawn by the owner too.
+  Before a Passage, the analyser is the learner's passages (plan 136, the
+  owner's pick C of three drawn directions): the one console over a card
+  each, and the intake the column beside them at a phone's width -- the
+  three sources on one control, the video's a column with one filled
+  action (the fetch where the server can, else the bookmark's setup until
+  it has been used, else the video on YouTube). A file dropped anywhere
+  on the page is taken by the intake that reads it. Under the desk it is
+  one line to paste into over a row per passage, the video and photo
+  intakes opening as sheets.
   A deck's Browse and More open in the deck page's side, a
-  gate lesson's rival in the run's side, the grab's walkthrough beside the
-  intake, a kanji's readings in the entry's own place, the iOS install
+  gate lesson's rival in the run's side, the grab's walkthrough in the
+  intake's place, a kanji's readings in the entry's own place, the iOS install
   steps in the settings page (plan 120). A panel that takes a column's
   place (Browse, More, the walkthrough, a deck's card form) wears
   `DeskDock`'s caption and the entry's own roundel ✕ over the phone's own

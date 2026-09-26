@@ -163,8 +163,9 @@ export function ConsoleIndex({ value, onChange, onClear, placeholder, count, inp
 // Two to four options in a pill, one of them on. `full` stretches it
 // across the row (the analyzer's Text / Photo / Video). Options carry
 // `jp` for a Japanese word and `label` for the plain one; either or
-// both. On the desk (plan 123) it is one tab stop and its arrows move
-// and check, as a radio group's do (hooks/useRadioWalk).
+// both, and `icon` a glyph before the word (the analyser's three
+// sources, plan 136). On the desk (plan 123) it is one tab stop and its
+// arrows move and check, as a radio group's do (hooks/useRadioWalk).
 export function Seg({ options, value, onChange, full = false, className = '', label }) {
   const desk = useDesk()
   const onWalk = useRadioWalk(desk)
@@ -183,6 +184,7 @@ export function Seg({ options, value, onChange, full = false, className = '', la
             className={`seg__opt${on ? ' seg__opt--on' : ''}`}
             onClick={() => { if (!on) onChange(opt.key) }}
           >
+            {opt.icon}
             {opt.label && <span className="seg__opt-latin">{opt.label}</span>}
           </button>
         )
