@@ -577,7 +577,21 @@ runtime purpose. Two consequences worth knowing:
   `src/lineSplit.desktop.test.jsx`, `src/vocabSources.desktop.test.jsx`,
   `src/deskfree.phone.test.jsx` and the 机 section of `index.css`;
   DESIGN.md, "The desk").
-  When starting a new wave, begin at **138** or higher, and check
+  **138** is 路線別, the statistics as the four lines (numbered 138
+  because 136 went to the analyser's passages and 137 to the stations
+  while it was open), the owner's pick B of four drawn directions: a
+  strip of four figures — retention with its line, drawn in days while
+  there are three weeks or fewer (`retentionSeries`), the reviews behind
+  the asked stop, the misses, the ladder — over a plate per line with
+  its retention, its grid of exercise by deck with the leak in red
+  (`lineGrids`) and its most-missed cards, which `/api/stats/report` now
+  ranks per line (`srs.get_weakest_by_source`, `WEAKEST_PER_LINE`)
+  (cited in `routes/stats.py`, `srs/srs.py`,
+  `tests/test_stats_report.py`, `domain/statsModel.js`,
+  `components/stats/`, `screens/StatsScreen.jsx`,
+  `src/testing/statsRecord.js`, the `stats` desktop, wide and phone
+  tests and `index.css`; DESIGN.md, "The desk").
+  When starting a new wave, begin at **139** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

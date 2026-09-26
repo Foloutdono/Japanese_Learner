@@ -563,7 +563,17 @@ const stats = {
   reportRungs:        ['<1 j', '1 sem', '1 mois', '3 mois', '3 mois+'],
   reportStrengthSummary: n => `${n} cartes selon leur avance`,
   reportMisses:       (n, d) => `${n === 1 ? 'raté' : 'ratés'} · ${d} j`,
-  reportMore:         n => `Plus · ${n}`,
+  // ── 路線別, les lignes du relevé (plan 138) ──
+  reportWeekStart:    d => `sem. du ${d}`,
+  reportReviewsCap:   'révisions',
+  reportPointOf:      (when, n) => `${when} · ${n} ${n === 1 ? 'révision' : 'révisions'}`,
+  reportLineReviews:  n => `${n} rév.`,
+  reportToReview:     'À revoir',
+  reportNoMiss:       'Aucun raté',
+  reportLineEmpty:    'Pas encore de révision',
+  reportCell:         (mode, deck, pct, n) => `${mode} · ${deck} · ${pct} % · ${n} ${n === 1 ? 'révision' : 'révisions'}`,
+  reportCellNone:     (mode, deck) => `${mode} · ${deck} · pas encore révisé`,
+  reportTile:         (head, deck, mode, pct, lapses) => `${head} · ${deck} · ${mode} · ${pct} % · ${lapses} ${lapses === 1 ? 'raté' : 'ratés'}`,
   reportEmpty:        'Aucune révision encore',
   reportEmptyHint:    'La première semaine de révisions trace la ligne.',
   startedNote:     n => `${n} commencées`,
@@ -651,9 +661,6 @@ const stats = {
   longestStreak:      'Meilleure série',
   accuracy:           'Précision',
   dueToday:           'À réviser aujourd\'hui',
-  weakestItems:       'Besoin de pratique',
-  lapses:             'Ratés',
-  lapsesShort:        'R',
 
   // ── Bandeau de tête ─────────────────────────────────────
 

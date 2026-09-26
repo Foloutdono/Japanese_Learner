@@ -1,5 +1,8 @@
 import { describe, it, expect } from 'vitest'
-import { weeklyRetention, missesSince, strengthRungs, lineRows, modeRow, bucketRow } from './statsModel'
+import {
+  weeklyRetention, retentionSeries, missesSince, strengthRungs, modeRow, bucketRow,
+  lineGrid, lineGrids, weakestByLine, cardHeadword, deckCode,
+} from './statsModel'
 
 // A Wednesday, so "this week" started two days earlier.
 const TODAY = new Date(2026, 8, 16, 12) // 2026-09-16
@@ -78,37 +81,125 @@ describe('strengthRungs', () => {
   })
 })
 
-describe('lineRows', () => {
+// ── Plan 138: the days while the weeks are few ──
+describe('retentionSeries', () => {
+  it('a learner one week in gets a stop per day, the rest of the week ahead', () => {
+    // TODAY is Wednesday 16 Sept; ridden Monday and Tuesday.
+    const r = retentionSeries([
+      { date: '2026-09-14', reviews: 10, good: 9 },
+      { date: '2026-09-15', reviews: 20, good: 15 },
+    ], { today: TODAY })
+    expect(r.unit).toBe('day')
+    expect(r.points.map(p => p.start)).toEqual([
+      '2026-09-14', '2026-09-15', '2026-09-16', '2026-09-17', '2026-09-18', '2026-09-19', '2026-09-20',
+    ])
+    expect(r.points.map(p => p.pct)).toEqual([90, 75, null, null, null, null, null])
+    expect(r.currentIndex).toBe(1)
+    expect(r.firstIndex).toBe(0)
+    expect(r.current).toBe(75)
+    expect(r.delta).toBeNull()
+  })
+
+  it('starts on the first ridden day, not on its Monday', () => {
+    const r = retentionSeries([{ date: '2026-09-16', reviews: 4, good: 4 }], { today: TODAY })
+    expect(r.points[0].start).toBe('2026-09-16')
+    expect(r.points).toHaveLength(5)
+  })
+
+  it('draws weeks from the fourth week on', () => {
+    const three = retentionSeries([{ date: '2026-09-01', reviews: 4, good: 3 }], { today: TODAY })
+    expect(three.unit).toBe('day')
+    const four = retentionSeries([{ date: '2026-08-26', reviews: 4, good: 3 }], { today: TODAY })
+    expect(four.unit).toBe('week')
+    expect(four.points).toHaveLength(12)
+    expect(four.firstIndex).toBe(8)
+  })
+
+  it('nothing ridden is the weekly shape with nothing in it', () => {
+    const r = retentionSeries([], { today: TODAY })
+    expect(r.unit).toBe('week')
+    expect(r.currentIndex).toBeNull()
+  })
+})
+
+describe('lineGrid', () => {
+  const b = (reviews, correct) => ({ total: 50, new: 10, learning: 20, mastered: 20, reviews, correct })
   const stats = {
-    kana:  { hiragana_basic: { 'kana.flashcard': { total: 10, new: 0, learning: 2, mastered: 8, reviews: 40, correct: 38 } } },
-    vocab: {
-      N5: { 'vocab.flashcard.f2b': { total: 100, new: 50, learning: 30, mastered: 20, reviews: 200, correct: 150 },
-            'vocab.word_reading':  { total: 100, new: 100, learning: 0, mastered: 0, reviews: 0, correct: 0 } },
-      N4: { 'vocab.flashcard.f2b': { total: 100, new: 100, learning: 0, mastered: 0, reviews: 0, correct: 0 } },
+    kanji: {
+      N5: { 'kanji.flashcard.f2b': b(100, 98), 'kanji.write_kanji': b(40, 39), 'kanji.radical': b(0, 0) },
+      N4: { 'kanji.flashcard.f2b': b(50, 43), 'kanji.write_kanji': b(20, 16), 'kanji.radical': b(0, 0) },
+      N3: { 'kanji.flashcard.f2b': b(0, 0) },
     },
     items: { ignored: true },
   }
 
-  it('sums every level and mode into one row per line, in the fixed order', () => {
-    const rows = lineRows(stats)
-    expect(rows.map(r => r.category)).toEqual(['kana', 'vocab', 'kanji', 'grammar'])
-    const vocab = rows[1]
-    expect(vocab.total).toBe(300)
-    expect(vocab.mastered).toBe(20)
-    expect(vocab.retention).toBe(75)
-    expect(vocab.masteredPct).toBeCloseTo(6.67, 1)
+  it('a row per exercise ridden, in the registry\'s order; a column per deck ridden', () => {
+    const g = lineGrid(stats, 'kanji')
+    expect(g.rows.map(r => r.mode)).toEqual(['kanji.flashcard.f2b', 'kanji.write_kanji'])
+    expect(g.decks).toEqual(['N5', 'N4'])
+    expect(g.rows[1].cells.map(c => c.pct)).toEqual([98, 80])
+    expect(g.reviews).toBe(210)
+    expect(g.retention).toBe(93)
   })
 
-  it('a level nobody has reviewed has null retention; a section absent has nothing', () => {
-    const rows = lineRows(stats)
-    const n4 = rows[1].levels.find(l => l.key === 'N4')
-    expect(n4.retention).toBeNull()
-    expect(rows[2].total).toBe(0)
-    expect(rows[2].levels).toEqual([])
+  it('a cell nobody has reviewed is null; a line absent is empty', () => {
+    const g = lineGrid({ vocab: { N5: { 'vocab.flashcard.f2b': b(10, 9), 'vocab.word_reading': b(0, 0) }, N4: { 'vocab.word_reading': b(5, 5) } } }, 'vocab')
+    expect(g.rows.map(r => r.mode)).toEqual(['vocab.flashcard.f2b', 'vocab.word_reading'])
+    expect(g.rows[0].cells.map(c => c.pct)).toEqual([90, null])
+    const none = lineGrid(stats, 'grammar')
+    expect(none.rows).toEqual([])
+    expect(none.retention).toBeNull()
+  })
+})
+
+describe('lineGrids', () => {
+  const b = (reviews, correct) => ({ total: 50, reviews, correct })
+  it('marks each line\'s lowest cell under the learner\'s own average, once', () => {
+    const { grids, average } = lineGrids({
+      kana: { hiragana_basic: { 'kana.flashcard.f2b': b(100, 100) } },
+      kanji: { N5: { 'kanji.flashcard.f2b': b(100, 97) }, N4: { 'kanji.flashcard.f2b': b(50, 42), 'kanji.write_kanji': b(40, 30) } },
+      grammar: { N5: { 'grammar.flashcard.f2b': b(3, 0) } },
+    })
+    expect(average).toBe(92)
+    const leaks = grids.map(g => g.rows.flatMap(r => r.cells).filter(c => c.leak).map(c => `${c.deck} ${c.mode}`))
+    // Kana holds; kanji leaks at N4's drawing (75%, under 84% for its
+    // sense); grammar's three reviews are too few to call.
+    expect(leaks).toEqual([[], [], ['N4 kanji.write_kanji'], []])
   })
 
-  it('no payload is no rows', () => {
-    expect(lineRows(null)).toEqual([])
+  it('no reviews anywhere is no average and no red', () => {
+    const { grids, average } = lineGrids({})
+    expect(average).toBeNull()
+    expect(grids.every(g => g.rows.length === 0)).toBe(true)
+  })
+})
+
+describe('weakestByLine', () => {
+  it('reads each line\'s own cards off the one list', () => {
+    const lines = weakestByLine([
+      { category: 'vocab', raw_id: 'vocab_N5_靴下_くつした' },
+      { category: 'kanji', raw_id: 'kanji_N4_急' },
+      { category: 'kanji', raw_id: 'kanji_N4_仕' },
+    ])
+    expect(lines.kana).toEqual([])
+    expect(lines.kanji.map(w => w.raw_id)).toEqual(['kanji_N4_急', 'kanji_N4_仕'])
+  })
+})
+
+describe('cardHeadword', () => {
+  it('peels the id down to the thing studied', () => {
+    expect(cardHeadword('kanji_N4_急', 'kanji', 'N4')).toBe('急')
+    expect(cardHeadword('vocab_N5_靴下_くつした', 'vocab', 'N5')).toBe('靴下')
+    expect(cardHeadword('vocab_N5__コート', 'vocab', 'N5')).toBe('コート')
+    expect(cardHeadword('kana_きゃ', 'kana', 'hiragana_combos')).toBe('きゃ')
+    expect(cardHeadword('')).toBe('？')
+  })
+})
+
+describe('deckCode', () => {
+  it('writes a kana set as its first glyph and a level as itself', () => {
+    expect(deckCode('katakana_combos')).toBe('キャ')
+    expect(deckCode('N4')).toBe('N4')
   })
 })
 

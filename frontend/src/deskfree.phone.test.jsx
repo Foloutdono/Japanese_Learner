@@ -126,7 +126,7 @@ describe('the stations (P3)', () => {
 })
 
 describe('the statistics (P4)', () => {
-  it('keeps the phone\'s column, its scaled chart and its two sheets', async () => {
+  it('keeps the phone\'s column: the plates stacked, no desk class, no sheet', async () => {
     const { MemoryRouter } = await import('react-router-dom')
     const { default: StatsScreen } = await import('./screens/StatsScreen')
     await render(
@@ -138,14 +138,11 @@ describe('the statistics (P4)', () => {
     )
     await settle(250)
     expect(document.querySelector('[class*="desk-"]')).toBeNull()
-    expect(document.querySelector('.rep-line__svg').getAttribute('viewBox')).toBe('0 0 326 96')
-    expect(document.querySelectorAll('.trouble__row')).toHaveLength(6)
-    expect(document.querySelector('.trouble__more')).not.toBeNull()
-    expect(document.querySelector('[aria-expanded]')).toBeNull()
-
-    document.querySelector('.rep-line-row').click()
-    await settle()
-    expect(document.querySelector('[role="dialog"] .rep-lines--sheet')).not.toBeNull()
+    expect(getComputedStyle(document.querySelector('.rep-plates')).display).toBe('flex')
+    const [a, b] = [...document.querySelectorAll('.rep-plate')].map(p => p.getBoundingClientRect())
+    expect(b.top).toBeGreaterThan(a.bottom)
+    expect(getComputedStyle(document.querySelector('.rep-strip')).gridTemplateColumns.split(' ')).toHaveLength(2)
+    expect(document.querySelector('[role="dialog"]')).toBeNull()
   })
 })
 

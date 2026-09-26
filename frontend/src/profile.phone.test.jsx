@@ -161,67 +161,6 @@ describe('the profile at phone width', () => {
   })
 })
 
-describe('the statistics at phone width', () => {
-  it('the retention line fills its card, the ladder is five rungs on one row, every row is a 44px target', async () => {
-    const screen = await render(
-      <main className="stats">
-        <section className="rep-card">
-          <div className="rep-head"><span className="rep-fig">87<span className="rep-fig__u">%</span></span><span className="rep-delta">+4 · 12 wk</span></div>
-          <div className="rep-caps"><span className="rep-cap">Rétention</span><span className="rep-cap">sem. du 14 sept. · 142 révisions</span></div>
-          <div className="rep-line">
-            <svg className="rep-line__svg" viewBox="0 0 326 96"><polyline className="rep-line__path" points="6,60 100,40 320,20" /><circle className="rep-line__now" cx="320" cy="20" r="4" /></svg>
-            <div className="rep-axis"><span>12 wk ago</span><span>this week</span></div>
-          </div>
-        </section>
-        <section className="rep-card">
-          <div className="rep-ladder">
-            <div className="rep-ladder__bar">{[42, 118, 231, 184, 96].map((n, i) => <span key={i} className="rep-ladder__rung" style={{ '--n': n, '--tint': `${20 * (i + 1)}%` }} />)}</div>
-            <div className="rep-ladder__caps">{[['42', '<1 d'], ['118', '1 w'], ['231', '1 m'], ['184', '3 m'], ['96', '3 m+']].map(([n, l]) => <span key={l} className="rep-ladder__cap" style={{ '--n': n }}><b>{n}</b><span>{l}</span></span>)}</div>
-          </div>
-        </section>
-        <section className="rep-card rep-card--rows">
-          <div className="rep-lines">
-            {['Kana', 'Vocabulaire', 'Kanji', 'Grammaire'].map(n => (
-              <button type="button" key={n} className="rep-line-row"><span className="pf-line__roundel">KA</span><span className="rep-line-row__name">{n}</span><span className="composition"><span className="composition__seg composition__seg--mastered" style={{ width: '30%' }} /></span><span className="rep-line-row__pct">91%</span></button>
-            ))}
-          </div>
-        </section>
-        <div className="trouble">
-          <button type="button" className="trouble__row trouble__row--open"><span className="trouble__glyph">遠慮</span><span className="trouble__meta"><span className="trouble__where">Vocabulaire · N3 · Flashcard</span><span className="trouble__accuracy-track"><span className="trouble__accuracy-fill" style={{ width: '45%' }} /></span></span><span className="trouble__accuracy-value">45%</span><span className="trouble__lapses">3<span className="trouble__lapses-unit">L</span></span></button>
-          <button type="button" className="trouble__more">Plus · 12</button>
-        </div>
-      </main>
-    )
-    const card = screen.container.querySelector('.rep-card')
-    const svg = screen.container.querySelector('.rep-line__svg').getBoundingClientRect()
-    const inner = card.getBoundingClientRect().width - 2 * 16 - 2
-    expect(Math.abs(svg.width - inner)).toBeLessThan(2)
-    // The two caps share one line; the week's cap ends inside the card.
-    const capRow = [...screen.container.querySelectorAll('.rep-caps .rep-cap')].map(c => c.getBoundingClientRect())
-    expect(capRow[1].top).toBeCloseTo(capRow[0].top, 0)
-    expect(capRow[1].right).toBeLessThanOrEqual(card.getBoundingClientRect().right - 16 + 1)
-    // The ladder: five rungs side by side, widest in the middle, none
-    // narrower than a thumb, the caps under their rungs.
-    const rungs = [...screen.container.querySelectorAll('.rep-ladder__rung')].map(r => r.getBoundingClientRect())
-    expect(rungs).toHaveLength(5)
-    for (let i = 1; i < 5; i++) expect(rungs[i].left).toBeGreaterThan(rungs[i - 1].right - 1)
-    expect(rungs[2].width).toBeGreaterThan(rungs[0].width)
-    for (const r of rungs) expect(r.width).toBeGreaterThanOrEqual(44)
-    const caps = [...screen.container.querySelectorAll('.rep-ladder__cap')].map(r => r.getBoundingClientRect())
-    for (let i = 0; i < 5; i++) expect(Math.abs(caps[i].left - rungs[i].left)).toBeLessThan(1)
-    for (const cap of screen.container.querySelectorAll('.rep-ladder__cap span')) {
-      expect(cap.scrollWidth, cap.textContent).toBeLessThanOrEqual(cap.clientWidth + 1)
-    }
-    // Every row a target, the longest French name not squeezing the bar away.
-    for (const row of screen.container.querySelectorAll('.rep-line-row, .trouble__row, .trouble__more')) {
-      expect(row.getBoundingClientRect().height).toBeGreaterThanOrEqual(44)
-    }
-    for (const bar of screen.container.querySelectorAll('.composition')) {
-      expect(bar.getBoundingClientRect().width).toBeGreaterThanOrEqual(52)
-    }
-  })
-})
-
 describe('the settings at phone width', () => {
   it('the list rows are 60px targets divided by hairlines; the services three across, the stops five, the destinations four', async () => {
     const screen = await render(

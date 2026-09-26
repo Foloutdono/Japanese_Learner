@@ -593,7 +593,17 @@ const stats = {
   reportRungs:        ['<1 d', '1 w', '1 m', '3 m', '3 m+'],
   reportStrengthSummary: n => `${n} cards by how far ahead they sit`,
   reportMisses:       (n, d) => `${n === 1 ? 'miss' : 'misses'} · ${d} d`,
-  reportMore:         n => `More · ${n}`,
+  // ── 路線別, the record's lines (plan 138) ──
+  reportWeekStart:    d => `week of ${d}`,
+  reportReviewsCap:   'reviews',
+  reportPointOf:      (when, n) => `${when} · ${n} ${n === 1 ? 'review' : 'reviews'}`,
+  reportLineReviews:  n => `${n} rev.`,
+  reportToReview:     'To review',
+  reportNoMiss:       'Nothing missed',
+  reportLineEmpty:    'No reviews yet',
+  reportCell:         (mode, deck, pct, n) => `${mode} · ${deck} · ${pct}% · ${n} ${n === 1 ? 'review' : 'reviews'}`,
+  reportCellNone:     (mode, deck) => `${mode} · ${deck} · not reviewed yet`,
+  reportTile:         (head, deck, mode, pct, lapses) => `${head} · ${deck} · ${mode} · ${pct}% · ${lapses} ${lapses === 1 ? 'lapse' : 'lapses'}`,
   reportEmpty:        'No reviews yet',
   reportEmptyHint:    'The first week of reviews draws the line.',
   startedNote:     n => `${n} started`,
@@ -685,9 +695,6 @@ const stats = {
   longestStreak:   'Best streak',
   accuracy:        'Accuracy',
   dueToday:        'Due today',
-  weakestItems:    'Needs practice',
-  lapses:          'lapses',
-  lapsesShort:     'L',
 
 
 

@@ -231,38 +231,50 @@ def get_stats(user_id: str = Depends(get_user_id)):
 #   days      reviews and good-or-better ratings per day, twelve weeks —
 #             the retention line is a fold over these on the client
 #   strength  how far ahead the scheduler has pushed each card
-#   weakest   the cards with the worst accuracy, lapses first
+#   weakest   each line's most-missed cards, lapses first (plan 138)
 #
-# The screen's per-line composition and retention come from /api/stats
-# itself, which it fetches anyway. What retired with /api/stats/extra:
-# the streak (the stamp book), the trend (same), the forecast (the fare
-# gate) and the hour-of-day histogram (never drawn).
+# The screen's per-line retention, and its grid of exercise by level,
+# come from /api/stats itself, which it fetches anyway. What retired
+# with /api/stats/extra: the streak (the stamp book), the trend (same),
+# the forecast (the fare gate) and the hour-of-day histogram (never
+# drawn).
 REPORT_DAYS = 84
-WEAKEST_LIMIT = 12
+
+# Per line, since plan 138 draws a plate per line with its own weakest
+# cards: two rows of four tiles on the desk's plate. The query asks for
+# twice that so a card no deck holds any more (content removed since it
+# was reviewed) cannot leave a line short.
+WEAKEST_PER_LINE = 8
 
 
 @router.get("/api/stats/report")
 def get_report(user_id: str = Depends(get_user_id)):
     logger.info("Computing stats report for user_id=%s", user_id)
 
-    weakest_raw = srs.get_weakest_cards(user_id, limit=WEAKEST_LIMIT)
-    # Lapses first, then accuracy: a card that keeps falling out of the
-    # schedule is a leak whatever its lifetime ratio says, and a card
-    # missed once in two tries is a coin, not a weakness.
-    weakest_raw.sort(key=lambda w: (-w["lapses"], w["accuracy"]))
+    # Lapses first, then accuracy, within each line: a card that keeps
+    # falling out of the schedule is a leak whatever its lifetime ratio
+    # says, and a card missed once in two tries is a coin, not a
+    # weakness.
+    ranked = srs.get_weakest_by_source(user_id, per_source=WEAKEST_PER_LINE * 2)
 
     prefix_len = len(user_id) + 1
-    weakest = []
-    for entry in weakest_raw:
+    by_line: dict[str, list[dict]] = {source: [] for source in SECTIONS}
+    for entry in ranked:
         raw_id = entry["card_id"][prefix_len:]
         loc = card_index.locate(raw_id, entry["mode"])
-        category, key = loc if loc else (None, None)
-        weakest.append({
-            **entry,
-            "raw_id": raw_id,
-            "category": category,
-            "key": key,
-        })
+        if loc is None:
+            # A card no deck holds: it belongs to no line's plate, and
+            # there is no run it could open.
+            continue
+        category, key = loc
+        line = by_line.get(category)
+        if line is None or len(line) >= WEAKEST_PER_LINE:
+            continue
+        line.append({**entry, "raw_id": raw_id, "category": category, "key": key})
+
+    # One list, the lines in the screen's order (SECTIONS), each line's
+    # cards in their rank; the client groups by `category`.
+    weakest = [entry for source in SECTIONS for entry in by_line[source]]
 
     return {
         "days": srs.get_daily_quality(user_id, days=REPORT_DAYS),

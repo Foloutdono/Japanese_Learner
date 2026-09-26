@@ -22,6 +22,13 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // The latest week's stop is pressed in the stamp's lacquer; the
 // selected week wears a ring in the same ink.
 //
+// Since plan 138 the stops can be days (retentionSeries, `unit`): while
+// the weeks drawn are three or fewer, a stop per day from the first
+// ridden day, and the days left in this week are the rail ahead —
+// dashed from the last stop to the right edge. The same rail follows a
+// week not yet ridden: on a Monday morning the line ends one stop short
+// and the dash says where it is going.
+//
 // On the phone the drawing is 326 units wide and scales to its card.
 // With `fit` (the desk, plan 114) the viewBox is the box's own width in
 // pixels and a taller H, so the strokes and stops are drawn 1:1 however
@@ -31,6 +38,12 @@ import { useBoxWidth } from '../../hooks/useBoxWidth'
 // the week under it without a press -- the head and the ring follow the
 // pointer, the pressed week comes back when it leaves, and a click still
 // pins one. A press-and-sweep and the arrow keys are as they were.
+//
+// `height` sets the fitted drawing's height (the statistics' strip, plan
+// 138, draws it low beside its figure), `axis={false}` leaves the two
+// labels under it off (they count weeks: a caller drawing days turns
+// them off), and `describe(point)` names a stop for a screen
+// reader — the screen knows whether it is a day or a week.
 const PHONE_W = 326
 const PHONE_H = 96
 const FIT_H = 160
@@ -40,7 +53,10 @@ const RING = 8
 const PAD = RING + 2
 const FOOT = 4
 
-export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSelect, onPreview, fit = false }) {
+export function RetentionLine({
+  points, currentIndex, firstIndex, selected, onSelect, onPreview,
+  fit = false, height = FIT_H, axis = true, describe,
+}) {
   const { t } = useLang()
   const svgRef = useRef(null)
   const [boxRef, boxWidth] = useBoxWidth(fit)
@@ -48,10 +64,10 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
   if (currentIndex === null || firstIndex === null) return null
 
   const W = boxWidth ?? PHONE_W
-  const H = boxWidth ? FIT_H : PHONE_H
+  const H = boxWidth ? height : PHONE_H
 
-  // The weeks on the axis: from the first ridden to this week.
-  const shown = weeks.slice(firstIndex)
+  // The stops on the axis: from the first ridden to the last point.
+  const shown = points.slice(firstIndex)
   const n = shown.length
   const pcts = shown.map(w => w.pct).filter(p => p !== null)
   // The floor follows the learner's own worst week so a line that
@@ -96,6 +112,12 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
     if (week !== null) onPreview(week)
   }
 
+  // The rail ahead: from the last stop ridden to the end of the axis,
+  // or across the drawing when there is one stop and nothing after it.
+  const aheadTo = n === 1 ? W - PAD : x(n - 1)
+  const nowY = y(shown[nowShown].pct)
+  const ahead = n === 1 || nowShown < n - 1
+
   function onKey(e) {
     const at = ridden.indexOf(selShown)
     if (e.key === 'ArrowLeft' && at > 0) { e.preventDefault(); onSelect?.(ridden[at - 1] + firstIndex) }
@@ -113,14 +135,14 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
         aria-label={t.reportRetention}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-valuenow={weeks[sel].pct ?? undefined}
-        aria-valuetext={t.reportWeekOf(weeks[sel].start, weeks[sel].reviews)}
+        aria-valuenow={points[sel].pct ?? undefined}
+        aria-valuetext={describe ? describe(points[sel]) : t.reportWeekOf(points[sel].start, points[sel].reviews)}
         onPointerDown={e => { e.currentTarget.setPointerCapture?.(e.pointerId); pick(e.clientX) }}
         onPointerMove={onMove}
         onPointerLeave={onPreview ? () => onPreview(null) : undefined}
         onKeyDown={onKey}
       >
-        {n === 1 && <line className="rep-line__ahead" x1={x(0)} y1={y(shown[0].pct)} x2={W - PAD} y2={y(shown[0].pct)} />}
+        {ahead && <line className="rep-line__ahead" x1={x(nowShown)} y1={nowY} x2={aheadTo} y2={nowY} />}
         {segments.map(s => (
           <polyline
             key={s.from}
@@ -141,10 +163,12 @@ export function RetentionLine({ weeks, currentIndex, firstIndex, selected, onSel
           <circle className="rep-line__sel" cx={x(selShown).toFixed(1)} cy={y(shown[selShown].pct).toFixed(1)} r={RING} />
         )}
       </svg>
-      <div className="rep-axis" aria-hidden="true">
-        <span>{n === 1 ? t.reportThisWeek : t.reportWeeksAgo(n - 1)}</span>
-        {n > 1 && <span>{t.reportThisWeek}</span>}
-      </div>
+      {axis && (
+        <div className="rep-axis" aria-hidden="true">
+          <span>{n === 1 ? t.reportThisWeek : t.reportWeeksAgo(n - 1)}</span>
+          {n > 1 && <span>{t.reportThisWeek}</span>}
+        </div>
+      )}
     </div>
   )
 }

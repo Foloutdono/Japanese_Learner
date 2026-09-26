@@ -585,13 +585,14 @@ const Fixture = () => (
     {/* Plan 074 -- the statistics' notes and caps, the settings' rows,
         the service cards (on the pass-ink wash when chosen), the level
         strip, the destination chips and the pass line on paper. */}
-    <section className="rep-card">
+    <section className="rep-plate">
       <div className="rep-head"><span className="rep-fig">87<span className="rep-fig__u st-unit">%</span></span><span className="rep-delta st-delta">+4 · 12 wk</span></div>
       <span className="rep-cap st-cap">Retention</span>
       <div className="rep-axis"><span className="st-axis">12 wk ago</span></div>
-      <div className="rep-ladder__caps"><span className="rep-ladder__cap"><b className="st-rung-n">231</b><span className="st-rung-cap">1 m</span></span></div>
-      <div className="rep-lines"><button type="button" className="rep-line-row"><span className="rep-line-row__pct rep-line-row__pct--none st-pct-none">—</span></button></div>
-      <div className="trouble"><button type="button" className="trouble__more st-more">More · 12</button></div>
+      <div className="rep-ladder"><span className="rep-ladder__step"><b className="rep-ladder__n st-rung-n">231</b><span className="rep-ladder__reach st-rung-cap">1 m</span></span></div>
+      <table className="rep-grid"><thead><tr><th className="rep-grid__deck st-deck">N5</th></tr></thead><tbody><tr><td><span className="rep-cell rep-cell--none st-pct-none">—</span></td></tr></tbody></table>
+      <button type="button" className="rep-tile"><span className="rep-tile__pct st-tile-pct">40%</span></button>
+      <p className="rep-plate__none st-none">Nothing missed</p>
     </section>
     <section className="sbook"><div className="sbook__dows"><span className="sbook__dow sb-dow">M</span></div></section>
     <div className="stg-list">
@@ -996,8 +997,10 @@ const SITES = [
   ['.st-axis', 'retention axis caption'],
   ['.st-rung-n', 'ladder rung count'],
   ['.st-rung-cap', 'ladder rung reach'],
-  ['.st-pct-none', 'line retention, none yet'],
-  ['.st-more', 'trouble list foot'],
+  ['.st-pct-none', 'grid cell, none yet'],
+  ['.st-deck', 'grid deck head'],
+  ['.st-tile-pct', 'weak tile accuracy'],
+  ['.st-none', 'line plate note'],
   ['.sb-dow', 'stamp book weekday'],
   ['.st-row', 'settings row'],
   ['.st-value', 'settings row value'],

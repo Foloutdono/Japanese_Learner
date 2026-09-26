@@ -1,25 +1,18 @@
-// ── The stats model (plan 085) ────────────────────────────
+// ── The stats model (plans 085, 138) ──────────────────────
 // The statistics screen asks one question the profile and the fare
 // gate do not: is the learning holding, and where is it leaking?
 // Everything here is a pure function over two payloads —
 // /api/stats (category → level → mode → counts) and /api/stats/report
-// (days, strength, weakest) — so every number on the screen is derived
-// in one place and the components are views and nothing else.
+// (days, strength, each line's weakest cards) — so every number on the
+// screen is derived in one place and the components are views and
+// nothing else.
 
-import { modeLabel as registryLabel } from './studyModes'
-import { kanaSetLabel } from './kanaSets'
+import { modeLabel as registryLabel, MODES_FOR_SOURCE } from './studyModes'
+import { kanaSetLabel, kanaSets } from './kanaSets'
 
 export const CATEGORIES = ['kana', 'vocab', 'kanji', 'grammar']
 
 // ── Labels ────────────────────────────────────────────────
-export function categoryLabel(t, category) {
-  return {
-    kana: t.kana,
-    vocab: t.jlptVocab,
-    kanji: t.kanji,
-    grammar: t.grammarTitle,
-  }[category] ?? category
-}
 
 // The deck a row sits in, as a person would name it. Most keys are
 // already the display string — 'N5' is what that level is called — but
@@ -28,6 +21,14 @@ export function categoryLabel(t, category) {
 // is named one way everywhere.
 export function groupLabel(t, key) {
   return kanaSetLabel(t, key)
+}
+
+// The deck as a grid's column head writes it (plan 138): a JLPT level
+// is already short (N5), a kana set is its first glyph (あ, きゃ, ア,
+// キャ) — the sign its stop is written on, so the column reads as the
+// line's stops do. The full name stays in the cell's accessible name.
+export function deckCode(key) {
+  return kanaSets({}).find(s => s.slug === key)?.code ?? key
 }
 
 // The mode label. The `category` argument is retained because the
@@ -115,6 +116,56 @@ export function weeklyRetention(days, { weeks = REPORT_WEEKS, today = new Date()
   return { weeks: rows, current, currentIndex: lastIdx, firstIndex: firstIdx, delta }
 }
 
+// ── Retention, drawn in days while the weeks are few (plan 138) ──
+// A learner one week in had a chart of one stop — a dot and a dashed
+// rail across a card. While the line would draw DAILY_WEEKS weeks or
+// fewer it draws their days instead: a stop per day from the first
+// ridden day, and the days left in this week ahead of it. From the
+// fourth week the weeks are enough to be a line and it draws weeks.
+//
+// Both shapes carry the same fields — `points` ({ start, reviews,
+// good, pct }), `currentIndex` (the last point ridden), `firstIndex`
+// (where the drawing starts) — and `unit`, which the screen reads to
+// name a point. A day's delta is noise, so days carry none.
+export const DAILY_WEEKS = 3
+
+export function retentionSeries(days, { today = new Date() } = {}) {
+  const weekly = weeklyRetention(days, { today })
+  const drawn = weekly.firstIndex === null ? 0 : weekly.weeks.length - weekly.firstIndex
+  if (drawn === 0 || drawn > DAILY_WEEKS) {
+    return {
+      unit: 'week',
+      points: weekly.weeks,
+      current: weekly.current,
+      currentIndex: weekly.currentIndex,
+      firstIndex: weekly.firstIndex,
+      delta: weekly.delta,
+    }
+  }
+
+  const from = dayOf(weekly.weeks[weekly.firstIndex].start)
+  const byDate = new Map()
+  for (const { date, reviews, good } of days ?? []) {
+    if (!(reviews > 0) || dayOf(date) < from) continue
+    const row = byDate.get(date) ?? { reviews: 0, good: 0 }
+    row.reviews += reviews
+    row.good += good ?? 0
+    byDate.set(date, row)
+  }
+  const first = [...byDate.keys()].sort()[0]
+  const sunday = mondayOf(today)
+  sunday.setDate(sunday.getDate() + 6)
+
+  const points = []
+  for (const d = dayOf(first); d <= sunday; d.setDate(d.getDate() + 1)) {
+    const start = toISO(d)
+    const { reviews = 0, good = 0 } = byDate.get(start) ?? {}
+    points.push({ start, reviews, good, pct: reviews > 0 ? Math.round((good / reviews) * 100) : null })
+  }
+  const currentIndex = points.findLastIndex(p => p.pct !== null)
+  return { unit: 'day', points, current: points[currentIndex].pct, currentIndex, firstIndex: 0, delta: null }
+}
+
 // Good-or-better is the retention definition (quality ≥ 3, the same
 // line the scheduler graduates on); what falls under it is a miss.
 export function missesSince(days, { window = 30, today = new Date() } = {}) {
@@ -155,11 +206,10 @@ export function strengthRungs(strength) {
   return { rungs, total }
 }
 
-// ── By line ───────────────────────────────────────────────
-// One row per section, and under it one per level, each with its
-// composition (new / learning / mastered, in drills — the unit the
-// buckets are counted in) and its retention: correct over reviews,
-// null where nothing has been reviewed.
+// ── Buckets ───────────────────────────────────────────────
+// /api/stats counts in drills, per deck per mode: composition (new /
+// learning / mastered) and retention, correct over reviews, null where
+// nothing has been reviewed.
 const ZERO = { total: 0, new: 0, learning: 0, mastered: 0, reviews: 0, correct: 0 }
 
 function sumBuckets(buckets) {
@@ -208,18 +258,100 @@ export function bucketRow(b) {
   return { ...sumBuckets([b]), due: Math.max(0, Number(b.due_now) || 0) }
 }
 
-export function lineRows(stats) {
-  if (!stats) return []
-  return CATEGORIES.map(category => {
-    const section = stats[category] ?? {}
-    const levels = Object.entries(section).map(([key, modes]) => ({
-      key,
-      ...sumBuckets(Object.values(modes ?? {})),
-    }))
-    return {
-      category,
-      levels,
-      ...sumBuckets(levels),
+// ── A line's grid (plan 138) ──────────────────────────────
+// Each line's plate draws its retention by exercise and by deck: a row
+// per exercise the learner has ridden (the registry's order, the order
+// a station lists its platforms), a column per deck they have ridden in
+// (the line's own order), each cell correct over reviews, lifetime, as
+// the line's own figure is. A cell nobody has reviewed is null; an
+// exercise or a deck with no reviews anywhere is not drawn at all, so a
+// learner who only reads kanji sees one row, not five with four empty.
+export function lineGrid(stats, category) {
+  const section = stats?.[category] ?? {}
+  const decks = Object.keys(section)
+  const registry = MODES_FOR_SOURCE[category] ?? []
+  const seen = new Set(decks.flatMap(d => Object.keys(section[d] ?? {})))
+  const order = [...registry.filter(m => seen.has(m)), ...[...seen].filter(m => !registry.includes(m))]
+  const reviewed = (deck, mode) => Number(section[deck]?.[mode]?.reviews) > 0
+
+  const modes = order.filter(m => decks.some(d => reviewed(d, m)))
+  const cols = decks.filter(d => modes.some(m => reviewed(d, m)))
+  const rows = modes.map(mode => ({
+    mode,
+    cells: cols.map(deck => gridCell(section[deck]?.[mode], deck, mode)),
+  }))
+
+  const { reviews, correct } = sumBuckets(decks.flatMap(d => Object.values(section[d] ?? {})))
+  return {
+    category,
+    decks: cols,
+    rows,
+    reviews,
+    correct,
+    retention: reviews > 0 ? Math.round((correct / reviews) * 100) : null,
+  }
+}
+
+function gridCell(bucket, deck, mode) {
+  const reviews = Math.max(0, Number(bucket?.reviews) || 0)
+  const correct = Math.max(0, Number(bucket?.correct) || 0)
+  return { deck, mode, reviews, correct, pct: reviews > 0 ? Math.round((correct / reviews) * 100) : null, leak: false }
+}
+
+// A cell needs this many reviews before it can be called a leak: two
+// misses in three tries is a coin, not a weakness.
+export const LEAK_MIN_REVIEWS = 5
+
+/**
+ * The four lines' grids, and the learner's own average across all of
+ * them — the line every cell is read against. In each grid the one
+ * cell furthest under that average (with LEAK_MIN_REVIEWS behind it)
+ * is marked `leak`: the plate's red, the one place in the line to look.
+ * A line with nothing under the average has no red.
+ */
+export function lineGrids(stats) {
+  const grids = CATEGORIES.map(category => lineGrid(stats, category))
+  const reviews = grids.reduce((n, g) => n + g.reviews, 0)
+  const correct = grids.reduce((n, g) => n + g.correct, 0)
+  const average = reviews > 0 ? correct / reviews : null
+  if (average !== null) {
+    for (const grid of grids) {
+      let low = null
+      for (const cell of grid.rows.flatMap(r => r.cells)) {
+        if (cell.reviews < LEAK_MIN_REVIEWS) continue
+        const ratio = cell.correct / cell.reviews
+        if (ratio < average && (low === null || ratio < low.correct / low.reviews)) low = cell
+      }
+      if (low) low.leak = true
     }
-  })
+  }
+  return { grids, average: average === null ? null : Math.round(average * 100) }
+}
+
+// ── The weakest, by line (plan 138) ───────────────────────
+// /api/stats/report sends each line's most-missed cards in one list,
+// the lines in order; a plate reads its own.
+export function weakestByLine(weakest) {
+  const lines = Object.fromEntries(CATEGORIES.map(c => [c, []]))
+  for (const w of weakest ?? []) lines[w.category]?.push(w)
+  return lines
+}
+
+// A card's headword, off its id. Ids are `<category>_<level>_<thing>` —
+// with kana having no level (`kana_あ`) and vocab carrying both writings
+// (`vocab_N5_山_やま`). Peeling the known prefixes off is exact where the
+// reverse index resolved the card, and the trailing segment is a decent
+// guess where it didn't. A vocabulary word with no kanji form leaves
+// that field empty (`vocab_N5__やま`), so fall through to the kana.
+export function cardHeadword(rawId = '', category, level) {
+  if (!rawId) return '？'
+
+  let rest = rawId
+  if (category && rest.startsWith(`${category}_`)) rest = rest.slice(category.length + 1)
+  else rest = rest.replace(/^(kana|vocab|kanji|grammar)_/, '')
+  if (level && rest.startsWith(`${level}_`)) rest = rest.slice(level.length + 1)
+
+  const parts = rest.split('_')
+  const head = parts[0] || parts[1] || rest
+  return head.length > 10 ? `${head.slice(0, 10)}…` : head
 }

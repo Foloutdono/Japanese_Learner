@@ -4,13 +4,13 @@ import { apiJsonWithTimeout } from '../lib/api'
 import { useLang } from '../LangContext'
 import { Bar, Leave } from '../components/chrome/Bar'
 import { stationFor } from '../config/stations'
+import { getSections } from '../config/tabs'
+import { TRACKED_LINES } from '../domain/lineProgress'
 import { Loading } from '../components/ui/Loading'
 import Empty from '../components/ui/Empty'
-import { weeklyRetention, missesSince, strengthRungs, lineRows } from '../domain/statsModel'
-import { RetentionLine } from '../components/stats/RetentionLine'
-import { StrengthLadder } from '../components/stats/StrengthLadder'
-import { LineRows } from '../components/stats/LineRows'
-import { TroubleList } from '../components/stats/TroubleList'
+import { retentionSeries, missesSince, strengthRungs, lineGrids, weakestByLine } from '../domain/statsModel'
+import { ReportStrip } from '../components/stats/ReportStrip'
+import { LineReport } from '../components/stats/LineReport'
 import { useDesk } from '../hooks/useDesk'
 
 // 統計 wears the plate the profile's door to it already draws (TO, in
@@ -21,23 +21,26 @@ const STATION = stationFor('/profile/stats')
 
 const MISS_WINDOW = 30
 
-// ── 運行実績 — the service record (plan 085) ───────────────
+// ── 路線別 — the record, line by line (plans 085, 138) ────────
 // One question, which the profile (what I did) and the fare gate (what
 // now) do not ask: is the learning holding, and where is it leaking?
-// Read top to bottom as one sentence:
+// Since plan 138 (the owner's pick B of four drawn directions) the
+// screen answers it per line, because that is where a leak is:
 //
-//   it holds        retention by week, the one chart
-//   this well       the strength ladder
-//   on these lines  by line, composition and retention
-//   except here     the misses, then the cards behind them
+//   the strip   retention with its line, the reviews behind the asked
+//               stop, the misses of the last month, the strength ladder
+//   the plates  one per line — its retention, its grid of exercise by
+//               deck with the leak in red, its most-missed cards
 //
-// No block carries a heading; each names itself with its mark. Two
-// fetches: /api/stats, which the profile reads too, and the report.
+// It replaced one retention card, one ladder card, a list of lines
+// whose bar and figure measured two different things, and twelve
+// trouble cards that were eight of one line's and none of another's.
 //
-// On the desk (plan 114) the sentence is read in two columns: what
-// holds on the left — the line drawn 1:1, the ladder, the lines with
-// their levels open in place — and where it leaks on the right, every
-// trouble card under the misses, at the phone's own width. No sheet.
+// On the phone the plates stand in one column; on the desk they go two
+// by two and take the window's height, the way the gates' plates do
+// (plan 130). No sheet at either width: every drill-down is on its
+// plate. Two fetches: /api/stats, which the profile reads too, and the
+// report.
 export default function StatsScreen({ session }) {
   const navigate = useNavigate()
   const { t, lang } = useLang()
@@ -46,10 +49,11 @@ export default function StatsScreen({ session }) {
   const [report, setReport] = useState(null)
   const [failed, setFailed] = useState(false)
   const [attempt, setAttempt] = useState(0)
-  // The week the retention line is being asked about; null is the
-  // latest ridden week. Reset with the report, never carried over.
-  const [week, setWeek] = useState(null)
-  // The week under the mouse on the desk, null off the line (plan 123).
+  // The stop the retention line is being asked about — a day or a week,
+  // as the series draws them; null is the last one ridden. Reset with
+  // the report, never carried over.
+  const [point, setPoint] = useState(null)
+  // The stop under the mouse on the desk, null off the line (plan 123).
   const [preview, setPreview] = useState(null)
 
   useEffect(() => {
@@ -58,16 +62,17 @@ export default function StatsScreen({ session }) {
       apiJsonWithTimeout('/api/stats', session),
       apiJsonWithTimeout('/api/stats/report', session),
     ])
-      .then(([s, r]) => { if (live) { setStats(s); setReport(r); setWeek(null); setPreview(null) } })
+      .then(([s, r]) => { if (live) { setStats(s); setReport(r); setPoint(null); setPreview(null) } })
       .catch(() => { if (live) setFailed(true) })
     return () => { live = false }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [attempt])
 
-  const retention = useMemo(() => weeklyRetention(report?.days), [report])
-  const misses    = useMemo(() => missesSince(report?.days, { window: MISS_WINDOW }), [report])
-  const strength  = useMemo(() => strengthRungs(report?.strength), [report])
-  const lines     = useMemo(() => lineRows(stats), [stats])
+  const series   = useMemo(() => retentionSeries(report?.days), [report])
+  const misses   = useMemo(() => missesSince(report?.days, { window: MISS_WINDOW }), [report])
+  const strength = useMemo(() => strengthRungs(report?.strength), [report])
+  const { grids } = useMemo(() => lineGrids(stats), [stats])
+  const weakest  = useMemo(() => weakestByLine(report?.weakest), [report])
 
   // There's no dedicated "review" screen — due cards are prioritised
   // inside a normal session, so this drops the user into the right
@@ -77,74 +82,27 @@ export default function StatsScreen({ session }) {
   }
 
   const loaded = stats && report
-  const nothingYet = loaded && retention.current === null && strength.total === 0
+  const nothingYet = loaded && series.current === null && strength.total === 0
 
-  // The head prints the asked week — this week unless a stop was
-  // pressed, or on the desk the one under the mouse (plan 123) — and the
-  // delta stays what it is: the whole line's drift.
-  const askedIndex = preview ?? week ?? retention.currentIndex
-  const asked = askedIndex === null ? null : retention.weeks[askedIndex]
+  // The strip prints the asked stop — the last one ridden unless one
+  // was pressed, or on the desk the one under the mouse (plan 123).
+  const askedIndex = preview ?? point ?? series.currentIndex
+  const asked = askedIndex === null ? null : series.points[askedIndex]
+  const dayFmt = new Intl.DateTimeFormat(lang, { weekday: 'short', day: 'numeric', month: 'short' })
   const weekFmt = new Intl.DateTimeFormat(lang, { day: 'numeric', month: 'short' })
-  const weekLabel = asked ? weekFmt.format(new Date(`${asked.start}T12:00:00`)) : ''
+  const pointLabel = p => {
+    const date = new Date(`${p.start}T12:00:00`)
+    return series.unit === 'day' ? dayFmt.format(date) : t.reportWeekStart(weekFmt.format(date))
+  }
 
-  // it holds, this well, on these lines
-  const holds = loaded && !nothingYet && (
-    <>
-      <section className="rep-card" aria-label={t.reportRetention}>
-        <div className="rep-head">
-          <span className="rep-fig">
-            {asked?.pct == null ? '—' : asked.pct}
-            {asked?.pct != null && <span className="rep-fig__u">%</span>}
-          </span>
-          {retention.delta !== null && (
-            <span className="rep-delta">
-              {/* Over the span the line draws — first ridden week
-                  to this one — never the twelve the payload holds. */}
-              {t.reportDelta(retention.delta, retention.weeks.length - retention.firstIndex - 1)}
-            </span>
-          )}
-        </div>
-        <div className="rep-caps">
-          <span className="rep-cap">{t.reportRetention}</span>
-          {asked && <span className="rep-cap">{t.reportWeekOf(weekLabel, asked.reviews)}</span>}
-        </div>
-        <RetentionLine
-          weeks={retention.weeks}
-          currentIndex={retention.currentIndex}
-          firstIndex={retention.firstIndex}
-          selected={preview ?? week}
-          onSelect={setWeek}
-          onPreview={desk ? setPreview : undefined}
-          fit={desk}
-        />
-      </section>
-
-      {strength.total > 0 && (
-        <section className="rep-card">
-          <StrengthLadder rungs={strength.rungs} total={strength.total} />
-        </section>
-      )}
-
-      {lines.some(l => l.total > 0) && (
-        <section className="rep-card rep-card--rows">
-          <LineRows rows={lines} inline={desk} />
-        </section>
-      )}
-    </>
-  )
-
-  // except here
-  const leaks = loaded && report.weakest?.length > 0 && (
-    <>
-      <div className="rep-head">
-        <span className="rep-fig rep-fig--title">
-          {misses.toLocaleString()}
-          <span className="rep-fig__u">{t.reportMisses(misses, MISS_WINDOW)}</span>
-        </span>
-      </div>
-      <TroubleList weakest={report.weakest} onStartReview={startReview} all={desk} />
-    </>
-  )
+  // The four lines, in the Learn gate's order, each with its section's
+  // name, roundel and pigment.
+  const lines = getSections('learn', t)
+    .filter(s => TRACKED_LINES[s.path])
+    .map(section => {
+      const category = TRACKED_LINES[section.path]
+      return { section, grid: grids.find(g => g.category === category), weakest: weakest[category] ?? [] }
+    })
 
   return (
     <main id="main-content" className={`stats${desk ? ' desk-stats' : ''}`} style={{ '--line-color': 'var(--pass-ink)' }}>
@@ -167,17 +125,27 @@ export default function StatsScreen({ session }) {
 
       {nothingYet && <Empty message={t.reportEmpty} hint={t.reportEmptyHint} />}
 
-      {loaded && !nothingYet && (desk ? (
+      {loaded && !nothingYet && (
         <>
-          <div className="desk-stats__holds">{holds}</div>
-          {leaks && <section className="desk-stats__leaks" aria-label={t.weakestItems}>{leaks}</section>}
+          <ReportStrip
+            series={series}
+            asked={asked}
+            askedLabel={asked ? pointLabel(asked) : ''}
+            describe={p => t.reportPointOf(pointLabel(p), p.reviews)}
+            selected={preview ?? point}
+            onSelect={setPoint}
+            onPreview={desk ? setPreview : undefined}
+            misses={misses}
+            missWindow={MISS_WINDOW}
+            strength={strength}
+          />
+          <div className="rep-plates">
+            {lines.map(({ section, grid, weakest: cards }) => (
+              <LineReport key={section.path} section={section} grid={grid} weakest={cards} onStartReview={startReview} />
+            ))}
+          </div>
         </>
-      ) : (
-        <>
-          {holds}
-          {leaks}
-        </>
-      ))}
+      )}
     </main>
   )
 }

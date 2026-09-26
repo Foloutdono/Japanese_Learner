@@ -28,7 +28,6 @@
   "no-descending-specificity::Expected selector \".gate__wave span\" to come before selector \".pass__wave span:nth-child(1)\", at line N": 1,
   "no-descending-specificity::Expected selector \".door__leaf--l\" to come before selector \".door--open .door__leaf--l\", at line N": 1,
   "no-descending-specificity::Expected selector \".door__leaf--r\" to come before selector \".door--open .door__leaf--r\", at line N": 1,
-  "no-descending-specificity::Expected selector \".rep-ladder__cap span\" to come before selector \".pass__wave span:nth-child(1)\", at line N": 1,
   "no-duplicate-selectors::Duplicate selector \"body\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \".ember\", first used at line N": 1,
   "no-duplicate-selectors::Duplicate selector \":root\", first used at line N": 1,

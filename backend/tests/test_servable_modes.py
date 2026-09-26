@@ -123,8 +123,8 @@ def test_the_trouble_list_ignores_it(unservable_row, unfiltered):
     """It used to arrive with category and key null and render as an
     unclickable dash, taking one of the twelve slots from a card the
     learner could actually go and study."""
-    assert any(w["mode"] == UNSERVABLE for w in unfiltered.get_weakest_cards(USER, limit=50))
-    assert not any(w["mode"] == UNSERVABLE for w in srs.get_weakest_cards(USER, limit=50))
+    assert any(w["mode"] == UNSERVABLE for w in unfiltered.get_weakest_by_source(USER, per_source=50))
+    assert not any(w["mode"] == UNSERVABLE for w in srs.get_weakest_by_source(USER, per_source=50))
 
 
 def test_the_due_forecast_ignores_it(unservable_row, unfiltered):
