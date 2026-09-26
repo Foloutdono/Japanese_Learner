@@ -1616,6 +1616,8 @@ describe('the run\'s lines (plan 129)', () => {
       </LangProvider>
     )
     await settle(300)
+    document.querySelector('.clip-player__play').click()
+    await settle(20)
     const input = document.querySelector('form.stage__foot input')
     const setValue = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set
     setValue.call(input, 'yama')

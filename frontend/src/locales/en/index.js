@@ -332,6 +332,7 @@ const quiz = {
   deskKeyCheckNext:    'checks, then next',
   deskKeyRate:         'grades your answer',
   deskKeyListen:       'plays the line',
+  deskKeyReveal:       'shows the sentence',
   deskKeyPick:         'picks an answer',
   deskKeyNext:         'next question',
   deskKeyWalk:         'walks the questions',
@@ -1000,6 +1001,8 @@ const reading = {
   readingFetchError:    "Couldn't load a phrase. Try again.",
   writeWhatYouSaw:      'Write what you saw, in romaji',
   romajiPlaceholder:    'e.g. konnichiwa',
+  // The play button a phrase arrives behind (ReadingPieces' PlayButton).
+  readingPlay:          'Show the sentence and start the timer',
   correct:              'Correct!',
   incorrect:            'Not quite',
   correctRomaji:        'Correct romaji',

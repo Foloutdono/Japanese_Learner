@@ -114,6 +114,7 @@ async function run(level = 'N5') {
  */
 async function graded() {
   const root = await run()
+  await play(root)
   type(root.querySelector('input'), ANSWER)
   await settle(20)
   root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
@@ -123,6 +124,13 @@ async function graded() {
   seals[seals.length - 1].click()
   await settle(80)
   return root
+}
+
+/** The play button a phrase arrives behind, pressed: the sentence on
+ *  the card, the clock running, the field open. */
+async function play(root) {
+  root.querySelector('.clip-player__play').click()
+  await settle(20)
 }
 
 const toggle = root => root.querySelector('.prose__breakdown button')
@@ -231,6 +239,7 @@ describe('ReadingRun — the measurement', () => {
 
   /** A phrase read, answered and revealed — no rating. */
   async function answered(root, given = ANSWER) {
+    await play(root)
     type(root.querySelector('input'), given)
     await settle(20)
     root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
@@ -361,5 +370,52 @@ describe('ReadingRun — the measurement', () => {
     expect(posted).toHaveLength(2)
     expect(posted[1].accuracy).toBe(null)
     expect(posted[1].quality).toBe(posted[0].quality)
+  })
+})
+
+// ── 読解 — the play button ───────────────────────────────────
+// A phrase arrives with its sentence held back behind a play button,
+// the clock still and the field shut, so the reading begins when the
+// learner is ready rather than the instant the phrase loads. Pressing
+// it shows the sentence and starts the clock.
+describe('ReadingRun — the play button', () => {
+  const button = root => root.querySelector('.clip-player__play')
+  const clock = root => root.querySelector('.timer__label').textContent
+
+  it('holds the sentence and the clock until it is pressed', async () => {
+    const root = await run()
+
+    expect(button(root).getAttribute('aria-label')).toBe(translations.fr.readingPlay)
+    expect(root.textContent).not.toContain(PHRASE.phrase)
+    expect(root.querySelector('input').disabled).toBe(true)
+    expect(clock(root)).toBe('30.0s')
+    await settle(300)
+    expect(clock(root)).toBe('30.0s')
+
+    // Nothing is taken before the press, not even a forced submit.
+    root.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }))
+    await settle(60)
+    expect(root.querySelector('.rating-bar__btn')).toBeNull()
+
+    await play(root)
+
+    expect(button(root)).toBeNull()
+    expect(root.querySelector('.sentence').textContent).toBe(PHRASE.phrase)
+    const field = root.querySelector('input')
+    expect(field.disabled).toBe(false)
+    expect(document.activeElement).toBe(field)
+    await settle(300)
+    expect(parseFloat(clock(root))).toBeLessThan(30)
+  })
+
+  it('holds the next phrase back too', async () => {
+    const root = await graded()
+    root.querySelector('.stage__foot button').click()
+    await settle(80)
+
+    expect(button(root)).toBeTruthy()
+    expect(root.querySelector('.sentence')).toBeNull()
+    expect(root.querySelector('input').disabled).toBe(true)
+    expect(clock(root)).toBe('30.0s')
   })
 })
