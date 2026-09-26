@@ -24180,6 +24180,13 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     gap: var(--sp-3);
     padding: 0 var(--sp-6) var(--sp-4);
   }
+  /* Named over the switch rather than beside it: a third of the window
+     holds the four sizes or their name, not both on one line. */
+  .desk-source__size {
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-2);
+  }
   .desk-source__stripe {
     flex: none;
     height: var(--sp-1);

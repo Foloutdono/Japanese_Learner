@@ -165,12 +165,19 @@ function FrequencyPlate({ t, session }) {
               { key: 'jmdict', label: t.freqDomainJmdict },
             ]}
           />
-          <Seg
-            label={t.tierSizeLabel}
-            value={size}
-            onChange={n => choose(jmdict, n)}
-            options={TIER_SIZE_OPTIONS.map(n => ({ key: n, label: String(n) }))}
-          />
+          {/* The size under the pool, at its width and height and named,
+              as the tiers' own page draws it (TierSelector), rather than
+              a small pill tucked in the plate's corner. */}
+          <div className="desk-source__size">
+            <span className="cap" aria-hidden="true">{t.tierSizeLabel}</span>
+            <Seg
+              full
+              label={t.tierSizeLabel}
+              value={size}
+              onChange={n => choose(jmdict, n)}
+              options={TIER_SIZE_OPTIONS.map(n => ({ key: n, label: String(n) }))}
+            />
+          </div>
         </>
       )}
     >

@@ -147,13 +147,19 @@ describe('the vocabulary\'s sources on the desk (plan 137)', () => {
     expect(list.scrollHeight).toBeGreaterThan(list.clientHeight)
     // Another pool is another line; another size re-cuts it. Both ride
     // in the page's URL and in every row's link.
-    const pool = [...freq.querySelectorAll('.seg--full [role="radio"]')]
+    const pool = [...freq.querySelectorAll('.desk-source__tools > .seg [role="radio"]')]
     pool[1].click()
     await settle()
     expect(where.search).toBe('?domain=jmdict')
     expect(rows(plates()[1])).toHaveLength(60)
     expect(rows(plates()[1])[0].getAttribute('href')).toBe('/learn/vocab/tier/1?size=200&domain=jmdict')
-    const size = [...plates()[1].querySelectorAll('.seg:not(.seg--full) [role="radio"]')].find(r => r.textContent === '500')
+    // The size under the pool, named and as wide as it (square since
+    // 2026-09-26, like every switch).
+    const sizeRow = plates()[1].querySelector('.desk-source__size')
+    expect(sizeRow.querySelector('.cap').textContent).toBeTruthy()
+    expect(Math.round(sizeRow.querySelector('.seg').getBoundingClientRect().width))
+      .toBe(Math.round(plates()[1].querySelector('.desk-source__tools > .seg').getBoundingClientRect().width))
+    const size = [...sizeRow.querySelectorAll('.seg [role="radio"]')].find(r => r.textContent === '500')
     size.click()
     await settle()
     expect(where.search).toBe('?size=500&domain=jmdict')
