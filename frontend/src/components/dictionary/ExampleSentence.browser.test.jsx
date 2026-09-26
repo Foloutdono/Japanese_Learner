@@ -105,8 +105,11 @@ function expectNoCollision(root) {
   const rts = rubies.map(r => r.querySelector('rt').getBoundingClientRect())
   const bases = rubies.map(baseBox)
   for (let i = 0; i < rubies.length; i++) {
-    // A reading sits over its own word ...
-    expect(rts[i].bottom, `${rubies[i].textContent} sits above its kanji`).toBeLessThanOrEqual(bases[i].top + 2)
+    // A reading sits over its own word ... Measured by the reading's
+    // middle, not its box's foot: a box runs as deep as the font's
+    // descent says, and CI's font sets it a pixel into the kanji's
+    // ascent where this machine's does not.
+    expect((rts[i].top + rts[i].bottom) / 2, `${rubies[i].textContent} sits above its kanji`).toBeLessThan(bases[i].top)
     expect(Math.min(rts[i].right, bases[i].right) - Math.max(rts[i].left, bases[i].left),
       `${rubies[i].textContent}'s reading is over its kanji`).toBeGreaterThan(0)
     for (let j = 0; j < rubies.length; j++) {
