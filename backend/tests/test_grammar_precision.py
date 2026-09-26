@@ -480,6 +480,203 @@ class ReviewedTests(unittest.TestCase):
         self.assertIn("〜ていく／〜てくる", found_in("鳥が飛んでいった。"))
 
 
+# Plan 152: what the detector could not see. Each point beside the
+# sentence where it must stay unlit.
+HEARSAY = [
+    ("友だちの話では、あの店はおいしいそうです。", "〜そうだ（伝聞）", True),
+    ("明日は一日中雨だそうです。", "〜そうだ（伝聞）", True),
+    ("あの先生はとてもきびしいそうです。", "〜そうだ（伝聞）", True),
+    ("田中さんは来月、国へ帰るそうだ。", "〜そうだ（伝聞）", True),
+    ("行ったそうです。", "〜そうだ（伝聞）", True),
+    ("行かないそうです。", "〜そうだ（伝聞）", True),
+    ("静かだそうです。", "〜そうだ（伝聞）", True),
+    ("行くそうでした。", "〜そうだ（伝聞）", True),
+    ("できるそうです。", "〜そうだ（伝聞）", True),
+    ("できるそうです。", "〜そうです", False),
+    ("雨が降りそうです。", "〜そうだ（伝聞）", False),
+    ("雨が降りそうです。", "〜そうです", True),
+    ("この料理はおいしそうです。", "〜そうだ（伝聞）", False),
+    ("おいしそうなケーキ。", "〜そうです", True),
+    ("そうですね。", "〜そうだ（伝聞）", False),
+    ("そうですね。", "〜そうです", False),
+    ("そうだ、いい考えがある。", "〜そうだ（伝聞）", False),
+    ("彼もそう思う。", "〜そうだ（伝聞）", False),
+]
+
+EMBEDDED = [
+    ("先生がいつ来るか知っていますか。", "〜か（間接疑問）", True),
+    ("何を買うか、まだ分かりません。", "〜か（間接疑問）", True),
+    ("駅がどこにあるか教えてください。", "〜か（間接疑問）", True),
+    ("だれがこのえをかいたか分かりますか。", "〜か（間接疑問）", True),
+    ("何をしているのか分からない。", "〜か（間接疑問）", True),
+    ("いつ来るかが問題だ。", "〜か（間接疑問）", True),
+    ("どうなるか心配だ。", "〜か（間接疑問）", True),
+    ("犯人は誰か分からない。", "〜か（間接疑問）", True),
+    ("犯人は誰か分からない。", "何か／誰か／どこか", False),
+    ("どちらがいいか決めてください。", "〜か（間接疑問）", True),
+    ("先生がいつ来るか知っていますか。", "か", True),
+    ("いつ来るか。", "〜か（間接疑問）", False),
+    ("何か食べたい。", "〜か（間接疑問）", False),
+    ("誰かが来た。", "〜か（間接疑問）", False),
+    ("いつか行きたい。", "〜か（間接疑問）", False),
+    ("どうかお願いします。", "〜か（間接疑問）", False),
+    ("行くかどうか分からない。", "〜か（間接疑問）", False),
+    ("行くかどうか分からない。", "〜かどうか", True),
+    ("いつ来ますか知っていますか。", "〜か（間接疑問）", False),
+    ("何が起こるかもしれない。", "〜か（間接疑問）", False),
+    ("なんというか、変な人だ。", "〜か（間接疑問）", False),
+    ("誰か知っていますか。", "〜か（間接疑問）", False),
+    ("誰か知っていますか。", "何か／誰か／どこか", True),
+    ("彼が来るか聞いた。", "〜か（間接疑問）", False),
+    ("何だか変だ。", "か", False),
+]
+
+# A point in the other spelling (grammar_detect._SPELLINGS), and the
+# same letters where they are another word: を持って is "holding", に渡って
+# "crossing to", 時 read じ, 駅に止まらず a train not stopping.
+SPELLED = [
+    ("係員の指示に従って、外へ出てください。", "〜にしたがって", True),
+    ("会議は三日間に渡って開かれた。", "〜にわたって", True),
+    ("工事は長期に亘って続いた。", "〜にわたって", True),
+    ("彼は若い頃アメリカに渡って暮らした。", "〜にわたって", False),
+    ("開会に当たって、館長が挨拶をした。", "〜にあたって", True),
+    ("ボールが頭に当たって、痛かった。", "〜にあたって", False),
+    ("雨に当たって、風邪をひいた。", "〜にあたって", False),
+    ("遺産を巡って、兄弟が争った。", "〜をめぐって", True),
+    ("各地の名所を巡って、写真を撮った。", "〜をめぐって", False),
+    ("本日を以て閉店いたします。", "〜をもって", True),
+    ("カバンを持って出かけた。", "〜をもって", False),
+    ("ファンの期待に応えて、彼は勝った。", "〜にこたえて", True),
+    ("心を込めて手紙を書いた。", "〜をこめて", True),
+    ("年齢に関わらず、だれでも参加できます。", "〜にかかわらず", True),
+    ("雨にも関わらず、試合は行われた。", "〜にもかかわらず", True),
+    ("被害は国内に留まらず、海外にも広がった。", "〜にとどまらず", True),
+    ("兄が働き者なのに引き換え、弟は怠け者だ。", "〜にひきかえ", True),
+    ("その光景は見るに堪えない。", "〜にたえない", True),
+    ("年を取るに連れて、体力が落ちた。", "〜につれて", True),
+    ("子供を公園に連れて行った。", "〜につれて", False),
+    ("子供と雖も、規則は守らなければならない。", "〜といえども", True),
+    ("日本語が話せると言っても、少しだけです。", "〜といっても", True),
+    ("その暑さと言ったらない。", "〜といったらない", True),
+    ("日本語を話す事が出来ます。", "〜ことができます", True),
+    ("母はフランス語が出来ます。", "〜ができます", True),
+    ("ここに名前を書いて下さい。", "〜てください", True),
+    ("水を下さい。", "〜をください", True),
+    ("こちらでお待ち下さい。", "お〜ください", True),
+    ("彼が知らない訳がない。", "〜わけがない", True),
+    ("彼はもう着いている筈です。", "〜はずです", True),
+    ("健康の為に、毎日歩いている。", "〜ために", True),
+    ("先生のお陰で、合格できました。", "〜おかげで", True),
+    ("新しい車が欲しいです。", "〜がほしいです", True),
+    ("もっと勉強して欲しい。", "〜てほしい", True),
+    ("昨日は食べ過ぎた。", "〜すぎる", True),
+    ("約束の時間が過ぎた。", "〜すぎる", False),
+    ("それは言い訳に過ぎない。", "〜にすぎない", True),
+    ("事実にそくして判断する。", "〜に即して", True),
+    ("前回の反省をふまえて、計画を立てた。", "〜を踏まえて", True),
+    ("早く行くにこしたことはない。", "〜に越したことはない", True),
+    ("急いでいる時にかぎって、電車が遅れる。", "〜に限って", True),
+    ("この問題は日本にかぎらず、世界中で起きている。", "〜に限らず", True),
+    ("高いものがいいとはかぎらない。", "〜とは限らない", True),
+    ("人口の増加にともなって、住宅が足りなくなった。", "〜に伴って", True),
+    ("調査にもとづいて、計画を立て直した。", "〜に基づいて", True),
+    ("年齢をとわず、だれでも応募できる。", "〜を問わず", True),
+    ("収入におうじて、税金が決まる。", "〜に応じて", True),
+    ("雨にくわえて、風も強くなった。", "〜に加えて", True),
+    ("タバコを口にくわえて歩いていた。", "〜に加えて", False),
+    ("開会にさきだって、選手の紹介があった。", "〜に先立って", True),
+    ("予想にはんして、試合は負けた。", "〜に反して", True),
+    ("友人をつうじて、その会社を知った。", "〜を通じて", True),
+    ("出発にさいして、荷物を確認した。", "〜に際して", True),
+    ("川にそって、道が続いている。", "〜に沿って", True),
+    ("そんなのうそにきまっている。", "〜に決まっている", True),
+    ("先生にたいして失礼なことを言った。", "〜に対して", True),
+    ("この問題にかんして、意見を聞きたい。", "〜に関して", True),
+    ("去年にくらべて、今年は暑い。", "〜に比べて", True),
+    ("彼は年より若くみえる。", "〜に見える", False),
+    ("彼女は学生にみえる。", "〜に見える", True),
+    ("窓から山がみえる。", "〜が見える／〜が聞こえる", True),
+    ("鳥の声がきこえる。", "〜が見える／〜が聞こえる", True),
+    ("明日は雨だとおもいます。", "〜と思います", True),
+    ("この本はとてもおもしろい。", "〜と思います", False),
+    ("友だちと映画を見にいきます。", "〜に行きます", True),
+    ("いきなり雨が降ってきた。", "〜に行きます", False),
+    ("成功するかどうかは君の努力しだいだ。", "〜次第だ", True),
+    ("予定どおりに出発した。", "〜通りに", True),
+    ("子供の時、よく川で泳いだ。", "〜とき", True),
+    ("七時に起きた。", "〜とき", False),
+    ("時は金なり。", "〜とき", False),
+    ("ちょうど出かける所だ。", "〜ところだ", True),
+    ("この研究所で働いている。", "〜ところだ", False),
+    ("ここは静かな所だ。", "〜ところだ", False),
+    ("先生のお蔭で、合格できました。", "〜おかげで", True),
+    ("心を籠めて手紙を書いた。", "〜をこめて", True),
+    ("年齢に拘わらず、だれでも参加できます。", "〜にかかわらず", True),
+    ("雨にも拘わらず、試合は行われた。", "〜にもかかわらず", True),
+    ("その光景は見るに耐えない。", "〜にたえない", True),
+    ("兄に引きかえ、弟は怠け者だ。", "〜にひきかえ", True),
+    ("本日を以って閉店いたします。", "〜をもって", True),
+    ("言われたとおりにした。", "〜通りに", True),
+    ("この電車は小さな駅に止まらず、終点まで行く。", "〜にとどまらず", False),
+]
+
+
+def _kana(text: str) -> str:
+    """A sentence's reading, blind to what spelling and speech disagree
+    on: voicing (予定通り's どおり), づ／ず, and a long vowel written う or お."""
+    reading = "".join(morphology.kata_to_hira(t.reading) for t in morphology.tokenize(text))
+    reading = reading.translate(str.maketrans("づぢ", "ずじ"))
+    reading = reading.translate(str.maketrans("がぎぐげござじずぜぞだぢづでどばびぶべぼぱぴぷぺぽ",
+                                              "かきくけこさしすせそたちつてとはひふへほはひふへほ"))
+    for a in "おこそとのほもよろ":
+        reading = reading.replace(a + "う", a + "お")
+    return reading
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class UnseenTests(unittest.TestCase):
+
+    def test_hearsay_in_every_register(self) -> None:
+        for sentence, pattern, lit in HEARSAY:
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(pattern in found_in(sentence), lit)
+
+    def test_the_embedded_question(self) -> None:
+        self.assertTrue(grammar_detect.can_find("〜か（間接疑問）"))
+        for sentence, pattern, lit in EMBEDDED:
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(pattern in found_in(sentence), lit)
+        # It is the か that closes the clause, and the last one still asks.
+        hits = [h for h in grammar_detect.hits("先生がいつ来るか知っていますか。") if h["pattern"] in ("か", "〜か（間接疑問）")]
+        self.assertEqual([(h["pattern"], h["start"]) for h in hits], [("〜か（間接疑問）", 7), ("か", 14)])
+
+    def test_the_other_spelling(self) -> None:
+        for sentence, pattern, lit in SPELLED:
+            with self.subTest(sentence=sentence, pattern=pattern):
+                self.assertEqual(pattern in found_in(sentence), lit)
+
+    def test_every_spelling_reads_as_the_one_it_stands_for(self) -> None:
+        """A spelling in the table is the same word read the same way:
+        each is found in SPELLED, and the sentence read with the other
+        spelling in its place reads alike."""
+        pairs = {(segment, alt) for segment, alts in (*grammar_detect._SPELLINGS,
+                                                      *(x for v in grammar_detect._POINT_SPELLINGS.values() for x in v))
+                 for alt in alts}
+        covered = set()
+        for sentence, pattern, lit in SPELLED:
+            hit = next((h for h in grammar_detect.hits(sentence) if h["pattern"] == pattern), None)
+            if not lit or hit is None:
+                continue
+            text = sentence[hit["start"]:hit["end"]]
+            for segment, alt in pairs:
+                if alt in text and segment not in text:
+                    covered.add((segment, alt))
+                    other = sentence[:hit["start"]] + text.replace(alt, segment) + sentence[hit["end"]:]
+                    with self.subTest(segment=segment, alt=alt):
+                        self.assertEqual(_kana(sentence), _kana(other))
+        self.assertEqual(pairs - covered, set())
+
+
 # Read one key at a time and held exactly: a key added or lost fails.
 GOLD = {
     "足跡を辿って会いにきて": {("を", "を"), ("〜て、〜て", "て"), (REQUEST, "て"), ("〜に行きます", "にき")},
@@ -515,7 +712,7 @@ GOLD = {
     "学校でもらった本です。": {("で", "で"), ("た形 〜た", "た"), ("です／だ", "です")},
     "ここでも同じだ。": {("で", "で"), ("も", "も"), ("です／だ", "だ")},
     "彼とは十年来の知り合いだ。": {("と", "と"), ("は", "は"), ("の", "の"), ("です／だ", "だ")},
-    "友情とは、困った時に助け合うことだ。": {("〜とは", "とは"), ("た形 〜た", "た"), ("に", "に"),
+    "友情とは、困った時に助け合うことだ。": {("〜とは", "とは"), ("た形 〜た", "た"), ("〜とき", "時"), ("に", "に"),
                                              ("〜ことだ", "ことだ"), ("です／だ", "だ")},
     "まさか彼が犯人だとは。": {("が", "が"), ("です／だ", "だ"), ("〜とは", "とは")},
     "何とか間に合った。": {("た形 〜た", "た")},

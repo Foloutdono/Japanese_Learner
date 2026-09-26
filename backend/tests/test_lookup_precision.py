@@ -224,6 +224,32 @@ class PoolLineTests(unittest.TestCase):
 
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
+class CompoundParticleTests(unittest.TestCase):
+    """Plan 152. The verb of a compound particle is the point's: について's
+    つい took 着く, "to arrive at"; において's おい 置く, "to put"; にとって's
+    とっ 取る, "to take"; にたいして, which the tokenizer reads as 大して,
+    "(not) very". No card, so the row opens the point."""
+
+    def test_no_card_for_the_verb_of_a_compound_particle(self) -> None:
+        for sentence, word in (
+            ("日本の文化について研究しています。", "つい"),
+            ("会議は本社において行われます。", "おい"),
+            ("この写真は私にとって大切な思い出です。", "とっ"),
+            ("先生にたいして失礼なことを言った。", "たいして"),
+            ("彼は医者として働いている。", "し"),
+            ("本日を以て閉店いたします。", "以"),
+        ):
+            with self.subTest(word=word):
+                self.assertNotIn(word, matches(sentence))
+
+    def test_the_same_verb_as_a_verb_keeps_its_card(self) -> None:
+        self.assertEqual(matches("手に取って見てください。")["取っ"]["raw_id"], "vocab_N5_取る_とる")
+        self.assertEqual(matches("駅に着いてから電話する。")["着い"]["raw_id"], "vocab_N5_着く_つく")
+        # A verb that is its point's predicate means itself (〜と思います).
+        self.assertEqual(matches("明日は雨だと思います。")["思い"]["raw_id"], "vocab_N4_思う_おもう")
+
+
+@unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheLowerTwinTests(unittest.TestCase):
 
     def test_suru_naru_ii_are_the_n5_cards_in_every_form(self) -> None:
