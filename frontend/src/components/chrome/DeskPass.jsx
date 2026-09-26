@@ -8,7 +8,7 @@ import { useXpGain } from './useXpGain'
 import { FareFigure } from './Hud'
 import { statusOf, showStatus } from './hudStatus'
 import { journeyModel } from '../../domain/goalMath'
-import { DAILY_REFILL, CAP, showsCap, refillClock } from '../../domain/credits'
+import { CAP, showsCap, nextCreditClock } from '../../domain/credits'
 import { playClick } from '../../lib/audio'
 
 // ── 定期券 — the pass in the pocket, at the rail's foot (plan 127) ──
@@ -54,9 +54,9 @@ export function DeskPass() {
   const cap = credits?.cap ?? CAP
   const low = balance != null && balance > 0 && balance <= 5
   const out = balance === 0
-  const note = out
-    ? t.balanceRefillLine(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
-    : balance != null ? t.creditsUnit : null
+  // Spent, it says when the refill lands the next credit (plan 139).
+  const next = out ? nextCreditClock(credits, lang) : null
+  const note = next ? t.balanceRefillLine(next) : balance != null ? t.creditsUnit : null
   const figure = credits?.unlimited ? '∞'
     : balance != null ? `${balance}${showsCap(balance, cap) ? ` / ${cap}` : ''}` : ''
 

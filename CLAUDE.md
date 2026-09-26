@@ -591,7 +591,22 @@ runtime purpose. Two consequences worth knowing:
   `components/stats/`, `screens/StatsScreen.jsx`,
   `src/testing/statsRecord.js`, the `stats` desktop, wide and phone
   tests and `index.css`; DESIGN.md, "The desk").
-  When starting a new wave, begin at **139** or higher, and check
+  **139** is 補充, the refill filling through the day: the free pass's
+  thirty credits a day no longer land in one go at the learner's
+  midnight but one every 48 minutes (`REFILL_EVERY`), counted from
+  `user_profiles.credits_accrued_at`, never past the cap, a full tank
+  banking nothing; what has landed is `pending` until claimed (`POST
+  /api/credits/claim`, one `refill` row), and a fare claims it first so
+  it is never a refusal; the app opens a "while you were away" sheet on
+  arrival -- boot, or back in front after `AWAY_MS` out of sight -- with
+  the credits and a Claim button, and claims quietly as each credit
+  lands while it is open (cited in `core/credits.py`,
+  `routes/credits.py`, `routes/profile.py`, `srs/data_structure.sql`,
+  `tests/test_credits.py`, `stores/credits.js`, `hooks/useRefill.js`,
+  `components/credits/ClaimSheet.jsx`, `domain/credits.js`, the balance
+  sheet, line and run-out sheet, `GateCard.jsx`, `DeskPass.jsx`,
+  `PassStep.jsx`, `App.jsx` and `index.css`).
+  When starting a new wave, begin at **140** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

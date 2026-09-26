@@ -78,12 +78,18 @@ def _init_db() -> None:
             # switch without their own history changing meaning.
             #
             # The credits columns (plan 069, core/credits.py):
-            # credits_refilled_on is the local day the last refill (or the
-            # seed) was taken — the idempotence lock; plan/plan_until are
-            # the entitlement ('free' | 'pass', with an optional expiry —
-            # set by hand until a purchase flow exists); tz_offset_min is
-            # the device's offset east of UTC, PATCHed on boot, so the
-            # refill day is the learner's rather than the server's.
+            # credits_accrued_at is the refill's clock (plan 139) — the
+            # instant the next credit is counted from, moved on by each
+            # claim and doubling as the lock that keeps two workers from
+            # paying the same credits out twice; credits_refilled_on is
+            # the local day the last lump refill (or the seed) was taken
+            # under the midnight rule it replaced, written no more and
+            # read once, to start a clock that has never run where the
+            # old rule left off; plan/plan_until are the entitlement
+            # ('free' | 'pass', with an optional expiry — set by hand
+            # until a purchase flow exists); tz_offset_min is the
+            # device's offset east of UTC, PATCHed on boot, so the
+            # learner's day is theirs rather than the server's.
             #
             # The boarding's own answers (plan 075, routes/onboarding.py):
             # motive is why the learner is here (the plan screen's two
@@ -106,6 +112,7 @@ def _init_db() -> None:
                 ("daily_departure", "TEXT"),
                 ("rating_scale", "TEXT"),
                 ("credits_refilled_on", "DATE"),
+                ("credits_accrued_at", "TIMESTAMPTZ"),
                 ("plan", "TEXT DEFAULT 'free'"),
                 ("plan_until", "TIMESTAMPTZ"),
                 ("tz_offset_min", "INTEGER"),
@@ -279,8 +286,8 @@ class LearningPayload(BaseModel):
     dailyNewTarget: int | None = None
     ratingScale: str | None = None
     # The device's UTC offset in minutes, east positive (the app sends
-    # -Date.getTimezoneOffset()), so the credits refill at the
-    # learner's midnight (core/credits.py). Sent on every boot.
+    # -Date.getTimezoneOffset()), so the daily allowances reset at the
+    # learner's midnight (core/credits.resets_at). Sent on every boot.
     tzOffsetMin: int | None = None
     # The lines to ride from now on (core/lines.py): a non-empty subset
     # of vocab / kanji / grammar. Settings › Learning's toggles.
@@ -583,8 +590,8 @@ def update_learning(payload: LearningPayload, user_id: str = Depends(get_user_id
         # level immediately rather than after its TTL.
         note_stored_level(user_id, payload.jlptLevel)
     if payload.tzOffsetMin is not None:
-        # The refill day moved with the clock; the cached state must not
-        # outlive it.
+        # The learner's day moved with the clock; the cached state must
+        # not outlive it.
         credits.forget(user_id)
     level_rule_result = (
         apply_level_rule(user_id, previous_level, payload.jlptLevel)

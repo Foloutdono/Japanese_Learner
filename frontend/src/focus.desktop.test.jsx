@@ -20,7 +20,7 @@ import './index.css'
 vi.mock('./lib/audio', async o => ({ ...(await o()), playUi: vi.fn(), playClick: vi.fn() }))
 vi.mock('./stores/credits', async o => ({
   ...(await o()),
-  useCredits: () => ({ balance: 20, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+  useCredits: () => ({ balance: 20, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
 globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({}) })
 

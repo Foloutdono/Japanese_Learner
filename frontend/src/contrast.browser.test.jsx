@@ -579,7 +579,7 @@ const Fixture = () => (
           <span className="jour-line__status"><b className="bl-word">Balance</b></span>
           <span className="jour-line__validity"><b className="bl-fig">30</b><span className="jour-cap bl-cap">/ 50 credits</span></span>
         </span>
-        <span className="jour-cap balance-line__refill bl-refill">+30 at 00:00</span>
+        <span className="jour-cap balance-line__refill bl-refill">+1 at 14:48</span>
       </div>
     </div>
     {/* Plan 074 -- the statistics' notes and caps, the settings' rows,

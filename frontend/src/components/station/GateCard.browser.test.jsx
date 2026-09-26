@@ -29,7 +29,7 @@ const LANES = [
 // the balance is asked to cover.
 const KANA_LANE = { id: 's~kana~hiragana_base~kana.flashcard.f2b', kind: 'section', source: 'kana', deck: 'hiragana_base', mode: 'kana.flashcard.f2b', due: 12, free: true }
 const TODAY = { total: 24, lanes: LANES, next_due: null }
-const FREE = { balance: 30, cap: 50, dailyRefill: 30, refillAt: '2026-09-07T22:00:00+00:00', plan: 'free', unlimited: false, enforced: false }
+const FREE = { balance: 30, pending: 0, cap: 50, dailyRefill: 30, refillEvery: 2880, nextCreditAt: '2026-09-07T22:48:00+00:00', plan: 'free', unlimited: false, enforced: false }
 
 function mount(today = TODAY) {
   return render(
@@ -77,10 +77,12 @@ describe('GateCard — the fare', () => {
 
   // One render per test: vitest-browser-react cleans up between
   // tests, and a manual unmount() mid-test detaches the next render.
-  it('at zero names the refill and keeps the gate open in shadow mode', async () => {
+  // The refill lands a credit at a time now (plan 139): the notice
+  // names the next one, not a lump at midnight.
+  it('at zero names the next credit and keeps the gate open in shadow mode', async () => {
     creditsRef.current = { ...FREE, balance: 0 }
     const screen = await mount()
-    expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+30')
+    expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+1')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 
@@ -143,7 +145,7 @@ describe('GateCard — the fare', () => {
     // left" over a train that is about to leave.
     const short = screen.container.querySelector('.gate-card__short')
     expect(short.textContent).toContain('12')
-    expect(short.textContent).not.toContain('+30')
+    expect(short.textContent).not.toContain('+1')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(false)
   })
 
@@ -153,7 +155,7 @@ describe('GateCard — the fare', () => {
     const kana = [...screen.container.querySelectorAll('.lane')].find(l => l.querySelector('.lane__free'))
     kana.click()
     await new Promise(r => setTimeout(r, 60))
-    expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+30')
+    expect(screen.container.querySelector('.gate-card__short').textContent).toContain('+1')
     expect(screen.container.querySelector('.btn-depart').disabled).toBe(true)
   })
 

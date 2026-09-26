@@ -35,7 +35,7 @@ vi.mock('../lib/supabase', () => ({
 vi.mock('../lib/track', () => ({ track: vi.fn(), flush: vi.fn() }))
 vi.mock('../stores/credits', async (o) => ({
   ...(await o()),
-  useCredits: () => ({ balance: 30, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }),
+  useCredits: () => ({ balance: 30, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }),
 }))
 vi.mock('../stores/departure', () => ({ beginDeparture: vi.fn(), useDeparture: () => null }))
 vi.mock('../lib/audio', async (o) => ({ ...(await o()), playAnnouncement: vi.fn() }))

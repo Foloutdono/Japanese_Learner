@@ -32,7 +32,7 @@ function Where() {
 
 describe('RunOutSheet', () => {
   it('rises on a refusal, prints the figures, and leaves for the station', async () => {
-    credits.seedCredits({ balance: 3, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: true })
+    credits.seedCredits({ balance: 3, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: true })
     await render(
       <LangProvider>
         <MemoryRouter initialEntries={['/learn/kana']}>
@@ -45,7 +45,7 @@ describe('RunOutSheet', () => {
     )
     expect(document.querySelector('.sheet')).toBeNull()
 
-    credits.markRunOut({ balance: 0, refillAt: null, cleared: 12 })
+    credits.markRunOut({ balance: 0, nextCreditAt: null, cleared: 12 })
     await settle()
     const sheet = document.querySelector('.sheet')
     expect(sheet).toBeTruthy()

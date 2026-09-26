@@ -3,7 +3,7 @@ import { useLang } from '../../LangContext'
 import { Emphasized } from '../ui/Emphasized'
 import { CommuterPass } from '../profile/CommuterPass'
 import { useCredits } from '../../stores/credits'
-import { DAILY_REFILL, CAP, SIGNUP_BONUS, showsCap } from '../../domain/credits'
+import { CAP, SIGNUP_BONUS, showsCap, refillMinutes } from '../../domain/credits'
 import { BoardAir, Continue } from './BoardFrame'
 import { SOURCES } from '../../domain/paywall'
 import { OfferButton } from '../credits/OfferButton'
@@ -92,7 +92,6 @@ function PrintedBalance() {
   const { t } = useLang()
   const credits = useCredits()
   const cap = credits?.cap ?? CAP
-  const refill = credits?.dailyRefill ?? DAILY_REFILL
   const balance = credits?.unlimited ? null : (credits?.balance ?? SIGNUP_BONUS)
   const counting = balance != null && !stillPreferred()
   const shown = useCountUp(balance, counting)
@@ -117,7 +116,10 @@ function PrintedBalance() {
           )}
         </span>
       </span>
-      {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillLine(refill, '00:00')}</span>}
+      {/* The rhythm rather than an hour: a welcome over the cap has no
+          next credit to name yet, and the rhythm is what it will be
+          (plan 139). */}
+      {balance != null && <span className="jour-cap balance-line__refill">{t.balanceRefillRate(refillMinutes(credits))}</span>}
       {gift && <span className="brd-gift" aria-live="polite">{t.brdCreditsGift(balance)}</span>}
     </div>
   )

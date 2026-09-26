@@ -5,6 +5,7 @@ import { TicketGate } from './components/station/TicketGate'
 import { UpdateToast, OfflineNote } from './components/ui/UpdateToast'
 import { BalanceSheet } from './components/credits/BalanceSheet'
 import { RunOutSheet } from './components/credits/RunOutSheet'
+import { ClaimSheet } from './components/credits/ClaimSheet'
 import { PaywallSheet } from './components/credits/PaywallSheet'
 import { StatusSheet } from './components/journey/StatusSheet'
 import { sectionFor, HOME_STATION } from './config/stations'
@@ -333,9 +334,9 @@ export default function App() {
     // 8 s gate that fails open showed a blank hall to everyone who
     // arrived while the server was still waking. The wait itself is
     // drawn honestly by AppLoading.
-    // The device's clock, on the profile, so the credits refill at the
-    // learner's midnight (plan 069). Fire-and-forget: a boot that could
-    // not say so refills on UTC's day until the next one that can.
+    // The device's clock, on the profile, so the daily allowances reset
+    // at the learner's midnight (plan 069). Fire-and-forget: a boot that
+    // could not say so counts UTC's day until the next one that can.
     if (gateAttempt === 0) {
       apiJson('/api/profile/learning', session, {
         method: 'PATCH',
@@ -708,6 +709,11 @@ export default function App() {
         <BalanceSheet />
         <RunOutSheet />
         <PaywallSheet />
+        {/* 補充 — what the refill landed while the app was closed, on
+            arrival (plan 139). Held through the 改札 cutscene and the
+            first ride, which have the learner's whole attention, and
+            opened once either lets go. */}
+        <ClaimSheet hold={onboarding === 'finishing'} />
         {/* 運行状況 — the status sheet off the HUD's station panel
             (plan 074): the pass's back, the ghost train and the two
             honest moves. */}

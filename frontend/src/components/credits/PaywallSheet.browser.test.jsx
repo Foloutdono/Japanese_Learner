@@ -26,7 +26,7 @@ const mount = () => render(<LangProvider><PaywallSheet /></LangProvider>)
 
 beforeEach(() => {
   credits.closePaywall()
-  credits.seedCredits({ balance: 12, cap: 50, dailyRefill: DAILY_REFILL, refillAt: null,
+  credits.seedCredits({ balance: 12, cap: 50, dailyRefill: DAILY_REFILL, nextCreditAt: null,
                         plan: 'free', unlimited: false, enforced: true })
   track.mockClear()
 })

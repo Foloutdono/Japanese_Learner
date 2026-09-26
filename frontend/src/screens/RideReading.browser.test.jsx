@@ -41,7 +41,7 @@ const SENTENCE = {
   translation: 'I meet a friend at the station.', translation_lang: 'en',
   display_seconds: 0.4, grammar: 'で',
 }
-const FREE = { balance: 200, cap: 50, dailyRefill: 30, refillAt: null, plan: 'free', unlimited: false, enforced: false }
+const FREE = { balance: 200, cap: 50, dailyRefill: 30, nextCreditAt: null, plan: 'free', unlimited: false, enforced: false }
 const settle = (ms = 120) => new Promise(r => setTimeout(r, ms))
 // A controlled input: React listens to its own value tracker, so the
 // prototype's setter is what makes a programmatic value an onChange.

@@ -13,7 +13,7 @@ import { Loading } from '../ui/Loading'
 import { CheckIcon, HourglassIcon } from '../ui/Icons'
 import { useCredits } from '../../stores/credits'
 import { publishLeft } from '../../stores/gateRun'
-import { runFit, isFreeLane, DAILY_REFILL, refillClock, showsCap, CAP } from '../../domain/credits'
+import { runFit, isFreeLane, nextCreditClock, showsCap, CAP } from '../../domain/credits'
 import { laneTypeOf, laneWhere as whereOf, runPathFor, untilNext, splitTake, laneCount, TAKE_STEPS } from '../../domain/lanes'
 
 // ── 改札 — the fare gate ─────────────────────────────────────
@@ -75,7 +75,7 @@ function Shortfall({ due, free, credits, t, lang }) {
             wrong sentence. The two figures are the right one whenever
             anything at all is riding. */}
         {rides === 0
-          ? t.gateNoCredits(credits.dailyRefill ?? DAILY_REFILL, refillClock(credits.refillAt, lang))
+          ? t.gateNoCredits(nextCreditClock(credits, lang))
           : t.gateShort(rides, due)}
       </span>
     </div>
@@ -344,8 +344,9 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
   const { rides, waits } = runFit(taken, balance, free)
   // Nothing paid rides: every paid lane waits for the refill, and says so.
   const paidWait = metered && waits > 0 && rides <= free
-  const clock = refillClock(credits?.refillAt, lang)
-  const refill = credits?.dailyRefill ?? DAILY_REFILL
+  // When the refill lands its next credit (plan 139) -- what a paid
+  // lane that cannot board is waiting for.
+  const clock = nextCreditClock(credits, lang)
   const cap = credits?.cap ?? CAP
   const spr = today.seconds_per_review
   const minutes = spr && taken > 0 ? Math.max(1, Math.round((taken * spr) / 60)) : null
@@ -437,7 +438,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
                         <span className="lane__tags">
                           {isFree && <span className="lane__free">{t.freeFare}</span>}
                           {waitsHere && (
-                            <span className="lane__waits"><HourglassIcon size={12} /><span className="sr-only">{t.laneWaits('')}</span>{clock}</span>
+                            <span className="lane__waits"><HourglassIcon size={12} /><span className="sr-only">{t.laneWaits('')}</span>{clock ?? ''}</span>
                           )}
                           {lane.new > 0 && <span className="lane__new">+{t.laneNew(lane.new)}</span>}
                         </span>
@@ -465,7 +466,7 @@ function DeskGate({ today, lines, isOn, off, toggle, toggleLine, take, setTake, 
             {waits > 0 && (
               <span className="gate-card__part gate-card__part--waits">
                 <span className="gate-card__part-n">{waits}</span>
-                <span className="gate-card__part-l">{t.gateWaits(refill, clock)}</span>
+                <span className="gate-card__part-l">{t.gateWaits(clock)}</span>
               </span>
             )}
             <span className="gate-card__part">

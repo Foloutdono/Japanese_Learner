@@ -268,7 +268,7 @@ describe('the rail', () => {
       goalLevel: 'N4', goalTargetDate: '2027-03-14', goalSetAt: '2026-09-01T00:00:00Z',
       plannedPerDay: 10, itemsTotal: 1000, itemsDone: 100, actual14: 14, days14: 14,
     }
-    creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, refillAt: null, unlimited: false }
+    creditsRef.current = { balance: 34, cap: 50, dailyRefill: 30, nextCreditAt: null, unlimited: false }
     await mountShell()
     await settle()
     const foot = rail().querySelector('.desk-rail__foot')
@@ -334,8 +334,8 @@ describe('the rail', () => {
   const LOW_EDGE = 'color-mix(in srgb, var(--warning) 70%, transparent)'
   const OUT_EDGE = 'color-mix(in srgb, var(--danger) 70%, var(--text-on-panel))'
   const METAL = 'rgb(201, 154, 62)'
-  const purseAt = async (balance) => {
-    creditsRef.current = { balance, cap: 50, dailyRefill: 30, refillAt: null, unlimited: false }
+  const purseAt = async (balance, nextCreditAt = null) => {
+    creditsRef.current = { balance, cap: 50, dailyRefill: 30, nextCreditAt, unlimited: false }
     await mountShell()
     await settle()
   }
@@ -356,14 +356,18 @@ describe('the rail', () => {
     expect(getComputedStyle(fig()).color).toBe(METAL)
   })
 
+  // Spent, it names the hour the refill lands its next credit (plan
+  // 139) -- on the learner's clock, so the expectation is read off it.
   it('says when a spent balance comes back, edge and figure in the danger\'s ink', async () => {
-    await purseAt(0)
+    const at = '2026-09-07T14:48:00+00:00'
+    await purseAt(0, at)
+    const clock = new Intl.DateTimeFormat('fr', { hour: '2-digit', minute: '2-digit' }).format(new Date(at))
     const pass = rail().querySelector('.desk-pass')
     expect(pass.classList.contains('desk-pass--out')).toBe(true)
     expect(edge()).toBe(resolved(OUT_EDGE))
     expect(getComputedStyle(fig()).color).not.toBe(METAL)
-    expect(note().textContent).toBe('+30 à 00:00')
-    expect(pass.querySelector('[data-guide="hud.pass"]').getAttribute('aria-label')).toContain('+30 à 00:00')
+    expect(note().textContent).toBe(`+1 à ${clock}`)
+    expect(pass.querySelector('[data-guide="hud.pass"]').getAttribute('aria-label')).toContain(`+1 à ${clock}`)
   })
 
   it('prints no figure and no caption before the balance arrives, nor a stub with no contract', async () => {

@@ -4489,6 +4489,11 @@ textarea:focus-visible {
   overflow: hidden;
 }
 .balance__fill { display: block; height: 100%; background: var(--accent2); }
+/* 補充 — the claim sheet's track (plan 139): what the balance held, and
+   beside it, a lighter gold, what the refill landed while the app was
+   closed. components/credits/ClaimSheet.jsx. */
+.balance__track--split { display: flex; }
+.balance__fill--gain { background: color-mix(in srgb, var(--accent2) 50%, transparent); }
 .balance__rows {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
