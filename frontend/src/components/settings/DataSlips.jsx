@@ -8,7 +8,7 @@ import { refreshSummary } from '../../stores/profileSummary'
 import { useOptedOut, setOptedOut } from '../../stores/analyticsOptOut'
 import { forgetOnboarded } from '../../stores/onboarded'
 import { Seg } from '../chrome/Console'
-import { Slip } from './SettingsPage'
+import { Slip, SlipRow } from './SettingsPage'
 
 // ── Data — the learner's data, theirs to take or erase ────────
 // The account page's second half since plan 139 (AccountPage.jsx): it
@@ -75,82 +75,89 @@ export function DataSlips({ session }) {
     }
   }
 
+  // Two rows on a desk page wide enough (plan 145): what the learner can
+  // take -- the trail's consent beside the export -- then the two
+  // erasures side by side, both in the danger's ink.
   return (
     <>
-      {/* 足跡 — the trail, and the way out of it. First in the list
-          because it is the only thing on this page the learner did not
-          already choose: the export and the reset are theirs to run,
-          this one runs on its own until they say otherwise. Nothing
-          here is new CSS -- .slip__hint and .slip__act are the same
-          two the three panels below use. */}
-      <Slip label={t.settingsTrail}>
-        <span className="slip__hint">{t.settingsTrailHint}</span>
-        {/* One of two, so the rating bar's construction at chip size
-            (DESIGN.md, Controls) rather than a button whose label has
-            to say which way it will flip. */}
-        <Seg
-          full
-          label={t.settingsTrail}
-          value={optedOut ? 'off' : 'on'}
-          onChange={key => { playClick(); setOptedOut(key === 'off') }}
-          options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
-        />
-      </Slip>
+      <SlipRow>
+        {/* 足跡 — the trail, and the way out of it. First in the list
+            because it is the only thing on this page the learner did not
+            already choose: the export and the reset are theirs to run,
+            this one runs on its own until they say otherwise. Nothing
+            here is new CSS -- .slip__hint and .slip__act are the same
+            two the three panels below use. */}
+        <Slip label={t.settingsTrail}>
+          <span className="slip__hint">{t.settingsTrailHint}</span>
+          {/* One of two, so the rating bar's construction at chip size
+              (DESIGN.md, Controls) rather than a button whose label has
+              to say which way it will flip. */}
+          <Seg
+            full
+            label={t.settingsTrail}
+            value={optedOut ? 'off' : 'on'}
+            onChange={key => { playClick(); setOptedOut(key === 'off') }}
+            options={[{ key: 'on', label: t.settingsTrailOn }, { key: 'off', label: t.settingsTrailOff }]}
+          />
+        </Slip>
 
-      <Slip label={t.settingsExport}>
-        <span className="slip__hint">{t.settingsExportHint}</span>
-        <button type="button" className="btn-secondary slip__act" disabled={exporting} onClick={() => { playClick(); exportCsv() }}>
-          {exporting ? '…' : t.settingsExportBtn}
-        </button>
-        {exportFailed && <span className="hint" role="alert">{t.onbPassError}</span>}
-      </Slip>
-
-      <Slip label={t.settingsReset}>
-        <span className="slip__hint">{t.settingsResetHint}</span>
-        {!arming && (
-          <button type="button" className="btn-secondary btn-secondary--danger slip__act" data-action="reset" onClick={() => { playClick(); setArming(true) }}>
-            {t.settingsResetBtn}
+        <Slip label={t.settingsExport}>
+          <span className="slip__hint">{t.settingsExportHint}</span>
+          <button type="button" className="btn-secondary slip__act" disabled={exporting} onClick={() => { playClick(); exportCsv() }}>
+            {exporting ? '…' : t.settingsExportBtn}
           </button>
-        )}
-        {arming && (
-          <div className="slip__confirm">
-            <span className="hint" role="alert">{t.settingsResetConfirmQ}</span>
-            <div className="form__row">
-              <button type="button" className="btn-secondary btn-secondary--danger" data-action="reset-confirm" disabled={resetting} onClick={reset}>
-                {resetting ? '…' : t.settingsResetYes}
-              </button>
-              <button type="button" className="btn-secondary" disabled={resetting} onClick={() => setArming(false)}>
-                {t.cancel}
-              </button>
-            </div>
-          </div>
-        )}
-        {resetState === 'done' && <span className="hint" role="status">{t.settingsResetDone}</span>}
-        {resetState === 'failed' && <span className="hint" role="alert">{t.onbPassError}</span>}
-      </Slip>
+          {exportFailed && <span className="hint" role="alert">{t.onbPassError}</span>}
+        </Slip>
+      </SlipRow>
 
-      <Slip label={t.settingsDeleteAccount}>
-        <span className="slip__hint">{t.settingsDeleteAccountHint}</span>
-        {!armingDelete && (
-          <button type="button" className="btn-secondary btn-secondary--danger slip__act" data-action="delete-account" onClick={() => { playClick(); setArmingDelete(true) }}>
-            {t.settingsDeleteAccountBtn}
-          </button>
-        )}
-        {armingDelete && (
-          <div className="slip__confirm">
-            <span className="hint" role="alert">{t.settingsDeleteAccountConfirmQ}</span>
-            <div className="form__row">
-              <button type="button" className="btn-secondary btn-secondary--danger" data-action="delete-account-confirm" disabled={deleting} onClick={deleteAccount}>
-                {deleting ? '…' : t.settingsDeleteAccountYes}
-              </button>
-              <button type="button" className="btn-secondary" disabled={deleting} onClick={() => setArmingDelete(false)}>
-                {t.cancel}
-              </button>
+      <SlipRow>
+        <Slip label={t.settingsReset}>
+          <span className="slip__hint">{t.settingsResetHint}</span>
+          {!arming && (
+            <button type="button" className="btn-secondary btn-secondary--danger slip__act" data-action="reset" onClick={() => { playClick(); setArming(true) }}>
+              {t.settingsResetBtn}
+            </button>
+          )}
+          {arming && (
+            <div className="slip__confirm">
+              <span className="hint" role="alert">{t.settingsResetConfirmQ}</span>
+              <div className="form__row">
+                <button type="button" className="btn-secondary btn-secondary--danger" data-action="reset-confirm" disabled={resetting} onClick={reset}>
+                  {resetting ? '…' : t.settingsResetYes}
+                </button>
+                <button type="button" className="btn-secondary" disabled={resetting} onClick={() => setArming(false)}>
+                  {t.cancel}
+                </button>
+              </div>
             </div>
-          </div>
-        )}
-        {deleteFailed && <span className="hint" role="alert">{t.settingsDeleteAccountFailed}</span>}
-      </Slip>
+          )}
+          {resetState === 'done' && <span className="hint" role="status">{t.settingsResetDone}</span>}
+          {resetState === 'failed' && <span className="hint" role="alert">{t.onbPassError}</span>}
+        </Slip>
+
+        <Slip label={t.settingsDeleteAccount}>
+          <span className="slip__hint">{t.settingsDeleteAccountHint}</span>
+          {!armingDelete && (
+            <button type="button" className="btn-secondary btn-secondary--danger slip__act" data-action="delete-account" onClick={() => { playClick(); setArmingDelete(true) }}>
+              {t.settingsDeleteAccountBtn}
+            </button>
+          )}
+          {armingDelete && (
+            <div className="slip__confirm">
+              <span className="hint" role="alert">{t.settingsDeleteAccountConfirmQ}</span>
+              <div className="form__row">
+                <button type="button" className="btn-secondary btn-secondary--danger" data-action="delete-account-confirm" disabled={deleting} onClick={deleteAccount}>
+                  {deleting ? '…' : t.settingsDeleteAccountYes}
+                </button>
+                <button type="button" className="btn-secondary" disabled={deleting} onClick={() => setArmingDelete(false)}>
+                  {t.cancel}
+                </button>
+              </div>
+            </div>
+          )}
+          {deleteFailed && <span className="hint" role="alert">{t.settingsDeleteAccountFailed}</span>}
+        </Slip>
+      </SlipRow>
     </>
   )
 }

@@ -5,8 +5,8 @@ import { GearIcon } from '../ui/Icons'
 import { SettingsPaneContext } from './pane'
 import { useBoxWidth } from '../../hooks/useBoxWidth'
 
-// Two columns of slips need room for two at a phone's content width
-// (plan 139): measured on the pane, not set at a window width, since the
+// A row's two slips need room for two at a phone's content width (plan
+// 139): measured on the pane, not set at a window width, since the
 // column beside it takes what the window leaves.
 const TWO_COLUMNS = 620
 
@@ -49,10 +49,14 @@ export function SettingsPage({ title, children, back = '/profile/settings', back
 }
 
 // A slip: a labelled block of controls. `cap` is the caption on the
-// label's right (You are here, New items a day, Optional).
-export function Slip({ label = null, cap = null, children, className = '' }) {
+// label's right (You are here, New items a day, Optional). `across` is
+// a slip of one action that stands the page's width on the desk (plan
+// 145): its words on the left and its action on the right, at the width
+// of the actions in the column beside it, rather than a button ~700px
+// wide for one word.
+export function Slip({ label = null, cap = null, children, className = '', across = false }) {
   return (
-    <div className={`slip${className ? ` ${className}` : ''}`}>
+    <div className={`slip${across ? ' slip--across' : ''}${className ? ` ${className}` : ''}`}>
       {label && (
         <div className="slip__label">
           <b className="slip__name">{label}</b>
@@ -64,14 +68,13 @@ export function Slip({ label = null, cap = null, children, className = '' }) {
   )
 }
 
-// Two columns of slips (plan 139). A phone stacks them, first column
-// first; a desk page wide enough for two stands them side by side, so
-// a page with two halves (the account and its data, the presets and the
-// mixer) is read across rather than down a column 640px wide.
-export function SlipColumns({ children }) {
-  return <div className="stg-cols">{children}</div>
-}
-
-export function SlipColumn({ children }) {
-  return <div className="stg-col">{children}</div>
+// A row of slips (plan 145; two columns of them since plan 139). A
+// phone stacks them; a desk page wide enough for two stands a row's
+// slips side by side at the height of the taller, so a page is read as
+// a grid of cards that ends level, not two columns that stop wherever
+// their last card does. A row holding one slip takes the page's width.
+// The page pairs what belongs together (the address and the sign-out,
+// the two erasures), which two free columns could not.
+export function SlipRow({ children }) {
+  return <div className="stg-pair">{children}</div>
 }

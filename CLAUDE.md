@@ -704,7 +704,19 @@ runtime purpose. Two consequences worth knowing:
   `components/station/TrainDoor.jsx`, `components/station/TicketGate.jsx`,
   `src/cutscenes.phone.test.jsx` and the 扉 and 改札 blocks of
   `index.css`).
-  When starting a new wave, begin at **145** or higher, and check
+  **145** is Settings' pages using the width on the desk (numbered 145
+  because 144 went to the two cutscenes while it was open): the slips in
+  rows of two that end level instead of two free columns (`SlipRow`,
+  `.stg-pair`), every card to the page's edge, a card of one action
+  across the page with its action in the right half (`Slip`'s `across`),
+  the guest's claim as two ways side by side, the presets over a mixer
+  on one subgrid, and the level's stops named (cited in
+  `components/settings/SettingsPage.jsx`, `AccountPage.jsx`,
+  `DataSlips.jsx`, `DisplayPage.jsx`, `SoundPage.jsx`, `LevelPage.jsx`,
+  `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
+  `src/columns.wide.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  When starting a new wave, begin at **146** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
