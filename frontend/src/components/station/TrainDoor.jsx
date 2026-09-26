@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useLocation } from 'react-router-dom'
 import { useBoarding, endBoarding } from '../../stores/boarding'
@@ -20,19 +20,29 @@ import { spendKey } from '../../lib/keyGuards'
 // Same rules as the gate, for the same reason — this fires every time
 // a session starts: one dial for the pace, skippable by any input, and
 // not mounted at all under prefers-reduced-motion.
-const SPEED = 1.4
+//
+// Unlock and part (plan 144, the owner's pick A of three drawn beside
+// the shipped door on the canvas "Tsuji — gate & door cutscenes"). The
+// door fades in over the menu rather than landing on it in one frame,
+// while the view settles onto it. The lamp over the seam lights with
+// the chime; the leaves crack a few pixels apart, the destination
+// showing through the slit, and only then slide. They finish their
+// travel before anything else leaves — the shipped door faded out with
+// its leaves 85% open — and the frame goes last, the header up and the
+// sill down, so nothing fades over the run. Every figure here is the
+// one that plays; the base figures were 1.4× slower before.
+const SPEED = 1
 
-const CHIME_MS  = 120 * SPEED   // ピンポーン, just before they move
-const COMMIT_MS = 190 * SPEED   // swap the screen behind the shut doors
-const OPEN_MS   = 250 * SPEED   // panels begin to part
-const DONE_MS   = 780 * SPEED   // door leaves
+const COMMIT_MS = 200 * SPEED   // swap the screen behind the shut doors
+const CHIME_MS  = 260 * SPEED   // ピンポーン, and the lamp over the seam lights
+const OPEN_MS   = 300 * SPEED   // the leaves unlock, then part
+const DONE_MS   = 920 * SPEED   // the frame has left; door leaves
 
 function prefersReducedMotion() {
   return window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
 }
 
 function DoorScene({ commit, color, code }) {
-  const [phase, setPhase] = useState('shut')
   const timers = useRef([])
   const committed = useRef(false)
   const cb = useRef(commit)
@@ -55,13 +65,16 @@ function DoorScene({ commit, color, code }) {
       return
     }
 
+    // The leaves, the lamp and the frame run on their own CSS delays
+    // (the 扉 block of index.css, every one scaled by --door-x), so the
+    // timers here only carry what CSS cannot: the sounds, the commit
+    // and the unmount.
     const at = (ms, fn) => timers.current.push(setTimeout(fn, ms))
+    at(COMMIT_MS, commitOnce)
     at(CHIME_MS, playDoorChime)
     // Under the leaves for the whole of their travel — the chime only
     // announces the move, and the move itself was silent.
     at(OPEN_MS, playDoorSlide)
-    at(COMMIT_MS, commitOnce)
-    at(OPEN_MS, () => setPhase('open'))
     at(DONE_MS, () => { commitOnce(); endBoarding() })
 
     const skip = () => {
@@ -91,7 +104,7 @@ function DoorScene({ commit, color, code }) {
   const style = { '--door-x': SPEED, ...(color ? { '--line-color': color } : {}) }
 
   return createPortal(
-    <div className={`door door--${phase}`} style={style} aria-hidden="true">
+    <div className="door" style={style} aria-hidden="true">
       {/* Two leaves meeting on the seam — which each leaf carries half
           of, so it travels with them. The windows are cut out
           rather than painted, so the screen behind shows through them
@@ -110,6 +123,10 @@ function DoorScene({ commit, color, code }) {
           {code && <span className="door__plate">{code}</span>}
         </div>
       ))}
+      {/* The header the leaves hang from, and the lamp over the seam
+          that blinks while they move. An element rather than the
+          doorway's ::before, because the lamp rides it out. */}
+      <span className="door__head"><span className="door__lamp" /></span>
     </div>,
     document.body,
   )

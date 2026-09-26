@@ -6719,3 +6719,44 @@ took a French phone's cell to two lines); the ranking's head still wraps
 under 360px in French, as before. Left for later: at the desk's
 narrowest (1100px) the stops share about a hundred pixels beside
 "Vocabulaire JLPT"; the feature sketches are unbuilt.
+
+## Plan 144 — 扉 and 改札, the cutscenes: the door unlocked and parted, the gate redrawn (2026-09-26)
+
+The owner's ask: improve the gate and door animations, options to
+choose from. Drawn on the canvas "Tsuji — gate & door cutscenes" (the
+ticket gate and the train door as shipped, looping at 390×844 with
+theme, line and slow-motion tweaks, and three directions for each: for
+the gate A walk through, B the reader, C from above; for the door A
+unlock and part, B the train pulls in, C platform doors); the owner
+picked **door A**. On the gate, "B isn't bad but the current one is
+better, keep trying": a second round keeps the shipped gate's look and
+tries three endings (D retimed, the flood grown from the lane and
+lifted like a shutter; E into the lane, no flood, the name carried to
+the station's plate; F flood to stripe, the colour gathered into the
+plate's stripe). The owner's answer: "forget it, keep the current one,
+just improve its look" — so the gate keeps every beat (SPEED, the
+delays, the keyframes, the flood) and only its objects are redrawn.
+
+What the shipped gate looked like on a phone: at 110vw the rig was
+squeezed by its flex row back to the screen's width and ran edge to
+edge, each cabinet's outer side on the glass; both lamps sat on their
+pillars' outer edges, though the comment over them put them by the
+lane; the pillars and the flaps were the same flat grey, four
+rectangles; the reader was a faint translucent square, mostly under a
+small plain card; and the glow beyond the flaps ended in a visible oval
+on the sumi, in the light theme most of all.
+
+What the shipped door got wrong: it landed over the menu in full on the
+tap's own frame, a hard cut; its scene began fading out at 882ms with
+the leaves still 85% of the way across, so the doors dissolved rather
+than opened, and the header and the sill faded with them over the run;
+and the leaves slid from rest with nothing before the move but the
+chime.
+
+| # | What | Status |
+|---|------|--------|
+| 144 | **The timeline** (`TrainDoor.jsx`, `SPEED` 1, the figures as they play): commit 200ms, chime 260, the leaves unlock at 300, done 920 (was 1092). The leaves, the lamp and the frame run on CSS delays scaled by `--door-x`; the `door--open` phase class and its state are gone, the timers carry only the sounds, the commit and the unmount. **The way in**: `.door` fades in over 110ms (`door-in`) while the view settles from 1.045 (`door-settle`). **The leaves**: `door-part-l/r`, a crack of `--sp-1` each way over the first 14%, the destination showing down the slit, then the travel on its own ease to the crack's width past the edge (no sliver of a leaf left on it), open at 880. **The lamp** (`.door__lamp`): dark on the header, lit in the line's pigment with the chime, blinking while the leaves run. **The frame**: the header an element (`.door__head`, `--door-head`) so the lamp rides it out; header up and sill down from 720, gone at 920; `door-leave` retired, so nothing fades. Sheen retimed to cross while the leaves move. Tests: `cutscenes.phone` (the door fades in and never fades out; the leaves end before the frame, the frame before the unmount), both failing on the shipped door; stylelint baseline down two (`.door--open` retired) | DONE (2026-09-26) |
+| 144 | **The gate's look** (`TicketGate.jsx`, the 改札 block; no timing touched): the rig at 94vw, isolated, with a floor shadow; the pillars as cabinets (a lit top face over a hairline, a plinth, the door's brushed grain, the outer side shaded, `--r-panel`); the lamps on the lane side in a dark channel; the reader a sumi pad (`--bg-panel`, bevel) whose wave takes the pass's kinari back, lit and ringed (`gate-ring`) at contact; the lane recessed (inset shadows); the glow falling off to nothing over a floor and a horizon (`.gate__beyond::after`), the name lit by it (no reading over it: a plate that prints かな over あ over KANA names one thing three times, the owner's call on the plates in plan 094); the flaps with a sheen, the grain, a leading edge in the line's pigment over a dark lip, rounded at the seam, and a shadow into the lane; the pass at a card's proportions in `.pass`'s material and sheen, with its mark (`PassWave`) and its balance in gold (`xp` into `xpPrevLevel`…`xpForNext`, no bar where the summary cannot say). Tests: `cutscenes.phone` (the rig clear of the scene's edges, each lamp on the lane side), both failing on the shipped gate | DONE (2026-09-26) |
+
+Left for later: nothing on the canvas's gate options; they stay drawn
+there as the record of what was tried.
