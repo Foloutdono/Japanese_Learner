@@ -5,6 +5,8 @@ import re
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from core.credits import require_pass
+from typing import Literal
+
 from pydantic import BaseModel
 
 from core.db import db_conn
@@ -296,8 +298,9 @@ class PhraseRequest(BaseModel):
     # default and matches phrase_history.source's own column default, so
     # a caller that never mentions this (ReadingScreen.jsx, most direct
     # analyzer use) writes exactly what it always wrote. Plan 018 (photo
-    # input) sends 'image'; plan 019 (video) will send 'video'.
-    source: str = "typed"
+    # input) sends 'image'; plan 019 (video) will send 'video'. Anything
+    # else is a 422, not a row the history shelf cannot classify.
+    source: Literal["typed", "image", "video"] = "typed"
 
 
 def _call_llm(phrase: str, lang: str, points: list[dict] | None = None) -> dict:
@@ -335,10 +338,17 @@ def _parse_llm_json(content: str) -> dict:
     # Models sometimes wrap JSON in ```json fences despite instructions — strip those.
     cleaned = re.sub(r"^```(?:json)?|```$", "", content.strip(), flags=re.MULTILINE).strip()
     try:
-        return json.loads(cleaned)
+        parsed = json.loads(cleaned)
     except json.JSONDecodeError:
         logger.error("Failed to parse LLM response as JSON: %r", content)
         raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
+    # Valid JSON that is not an object (a bare list of words, say) must be
+    # refused here, before _store_analysis: the cache is permanent, and a
+    # cached list would fail every later deep read of the phrase on .get.
+    if not isinstance(parsed, dict):
+        logger.error("LLM response was JSON but not an object: %r", content)
+        raise HTTPException(status_code=502, detail="LLM returned an unparseable response")
+    return parsed
 
 
 # Some models translate the JSON KEY itself into the target language
