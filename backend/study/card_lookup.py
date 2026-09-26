@@ -889,9 +889,9 @@ def compound_reading(entry: dict, morphemes) -> str:
     return joined if joined in variants else variants[0]
 
 
-# ── The JMdict pool, after the deck (plan 144) ─────────────────
+# ── The JMdict pool, after the deck (plan 147) ─────────────────
 # The deck is 8k words chosen for the JLPT; a subtitle or a photo of a
-# page is written in the rest of the language as well. Until plan 144 a
+# page is written in the rest of the language as well. Until plan 147 a
 # word the deck does not teach was a rule under a word and nothing else:
 # no meaning, no card, no ＋ -- 桃源郷, 真っさら and さらば in one line of
 # an anime's subtitles, while the pool beside the deck (212k JMdict

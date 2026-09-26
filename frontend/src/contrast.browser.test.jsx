@@ -815,6 +815,50 @@ const Fixture = () => (
         </div>
       </article>
     </aside>
+    {/* ── 文法 — the lesson in its sheet (plan 146) ──
+        Its own shell, under 文法's pine: the Japanese picked out of the
+        prose and a use's forms in the lesson's ink (--dict-ink, named on
+        .gl too), a form's gloss and a paradigm's label in the secondary
+        register, and a sentence's numeral and register tag. */}
+    <div className="dict-sheet gl-sheet" style={{ position: 'static' }}>
+      <article className="gl gl--sheet">
+        <div className="dict-entry__body gl-body">
+          <section className="dict-block gl-block gl-block--steps">
+            <ol className="gl-steps">
+              <li className="gl-step gl-step--use">
+                <div className="gl-step__body">
+                  <p className="gl-step__p"><span className="gl-ja dj-gl-ja" lang="ja">です</span> relie</p>
+                  <ul className="gl-step__list">
+                    <li className="gl-use">
+                      <span className="gl-use__say">Pour dire ce qu'une chose est</span>
+                      <span className="gl-forms"><span className="gl-form">
+                        <span className="gl-form__ja dj-gl-form" lang="ja">学生です</span>
+                        <span className="gl-form__gloss dj-gl-gloss">je suis étudiant</span>
+                      </span></span>
+                    </li>
+                    <li className="gl-use">
+                      <dl className="gl-paradigm"><div className="gl-paradigm__row">
+                        <dt className="gl-paradigm__label dj-gl-label">Passé</dt>
+                        <dd className="gl-paradigm__forms">でした</dd>
+                      </div></dl>
+                    </li>
+                  </ul>
+                </div>
+              </li>
+            </ol>
+          </section>
+          <section className="dict-block gl-block gl-block--examples">
+            <div className="dict-examples">
+              <div className="dict-ex">
+                <span className="dict-sense__n dict-ex__n dj-gl-n">5</span>
+                <div className="dict-ex__jp" lang="ja">この店はしずかだ。</div>
+                <span className="dict-ex__tag dj-gl-tag">Familier</span>
+              </div>
+            </div>
+          </section>
+        </div>
+      </article>
+    </div>
     <span className="dict-tag__tip dj-tip" style={{ position: 'static' }}>Ichidan verb</span>
     {/* The catalogue card wears the same word, faded to marginalia. */}
     <div className="dict-results-grid">
@@ -1098,6 +1142,12 @@ const SITES = [
   ['.dj-fallback', 'stroke sheet fallback (fixed ink on washi)'],
   ['.dj-word-gloss', 'word row gloss'],
   ['.dj-hit', 'word row: the kanji picked out (辞書 pigment mixed toward the ink)'],
+  ['.dj-gl-ja', 'lesson: Japanese in the prose (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-form', 'lesson: a use\'s form (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-gloss', 'lesson: a form\'s gloss'],
+  ['.dj-gl-label', 'lesson: a paradigm\'s label'],
+  ['.dj-gl-n', 'lesson: a sentence\'s numeral (文法 pigment mixed toward the ink)'],
+  ['.dj-gl-tag', 'lesson: a sentence\'s register tag (文法 pigment mixed toward the ink)'],
   ['.dj-hit-rt', 'word row: its furigana, in the same ink'],
   ['.dj-due', 'record cell: a card that is due (due ink mixed toward the ink)'],
   ['.dj-due-action', 'the review action under the record (same ink, ghost ground)'],

@@ -245,7 +245,7 @@ def _personal_rows(user_id: str) -> dict:
                 {"me": user_id},
             )
             rows = [dict(r) for r in cur.fetchall()]
-            # A JMdict pool word linked into a deck (plan 144) comes back
+            # A JMdict pool word linked into a deck (plan 147) comes back
             # in that deck's lane too: the course's cards have their JLPT
             # stop's lane (card_index.locate), and a pool word has none,
             # so without this it would be learnt in a deck and never

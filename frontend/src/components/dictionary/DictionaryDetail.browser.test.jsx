@@ -158,7 +158,7 @@ const KANA = {
 // A JMdict-pool word: no level, kana-only headword, no alignment.
 const JMDICT = {
   type: 'vocab', kanji: '', kana: 'お疲れ様でした', meaning: 'thank you for your hard work', level: null,
-  // A pool row's card (plan 144): a vocab deck takes it, with no level,
+  // A pool row's card (plan 147): a vocab deck takes it, with no level,
   // and `pool` keeps "review this card" off it.
   app_card: { source: 'vocab', level: null, raw_id: 'vocab_jmdict_4242', pool: true }, kanji_parts: [],
   furigana: [], senses: [{ number: 1, glossary: 'thank you for your hard work', tags: [{ code: 'exp', label: 'exp', tooltip: 'expression' }] }],
@@ -671,7 +671,7 @@ describe('the ＋ — this entry into one of your decks', () => {
     await screen.unmount()
   })
 
-  it('adds a pool word to a vocab deck, with no level (plan 144)', async () => {
+  it('adds a pool word to a vocab deck, with no level (plan 147)', async () => {
     const mining = MINE()
     const { root, screen } = await renderEntry(JMDICT, { ...NAV(), mining })
     const actions = [...root.querySelectorAll('.dict-plate__actions .dict-plate__btn')]
@@ -733,7 +733,7 @@ describe('the shelf row — this entry on your shelf', () => {
     expect(rows(root).map(r => r.textContent)).toEqual(['Keep in favourites'])
   })
 
-  it('offers both rows for a pool word, which a vocab deck takes (plan 144)', async () => {
+  it('offers both rows for a pool word, which a vocab deck takes (plan 147)', async () => {
     const { root } = await renderEntry(JMDICT, { ...NAV(), favorites: SHELF(false), mining: { targetFor: () => null, decksFor: () => [], ensureDeck: vi.fn(), mineApp: vi.fn() } })
     plus(root).click()
     await settle(30)

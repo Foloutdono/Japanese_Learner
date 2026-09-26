@@ -8,9 +8,11 @@ import './index.css'
 // the real ones, and what is measured is what the 机 block does to them.
 //   - A state card (nothing yet, something failed) stands at the card's
 //     width: an empty shelf was a 1152px card round two lines.
-//   - A settings page's cards stand at the card's width: seven
-//     one-word buttons ran ~770px wide. The page itself takes the width
-//     beside its column since plan 139, for its two columns of cards.
+//   - A settings page's actions stand at a half's width: seven
+//     one-word buttons ran ~770px wide. The page takes the width beside
+//     its column since plan 139, and its cards the page's since plan
+//     145: two to a row, or one across it with its action in the right
+//     half.
 //   - The sentence stations' tier toggles stand at a column's width.
 //   - A shelf with nothing to open is one card across, not half a page
 //     beside a blank half.
@@ -51,14 +53,25 @@ describe('the desk at 1440', () => {
       <Canvas>
         <div className="settings desk-settings">
           <nav className="desk-settings__list"><button type="button" className="stg-row">Display</button></nav>
-          <section className="desk-settings__page">
-            <div className="slip"><button type="button" className="btn-secondary slip__act">Export</button></div>
+          <section className="desk-settings__page desk-settings__page--two">
+            <div className="stg-pair">
+              <div className="slip"><button type="button" className="btn-secondary slip__act">Policy</button></div>
+              <div className="slip"><button type="button" className="btn-secondary slip__act">Sign out</button></div>
+            </div>
+            <div className="slip slip--across">
+              <div className="slip__label"><b className="slip__name">Export</b></div>
+              <button type="button" className="btn-secondary slip__act">Export</button>
+            </div>
           </section>
         </div>
       </Canvas>
     )
-    expect(box(screen.container.querySelector('.desk-settings__page > .slip')).width).toBeLessThanOrEqual(cardW())
-    expect(box(screen.container.querySelector('.slip__act')).width).toBeLessThanOrEqual(cardW())
+    const page = box(screen.container.querySelector('.desk-settings__page'))
+    expect(page.width).toBeGreaterThan(cardW())
+    expect(Math.round(box(screen.container.querySelector('.slip--across')).width)).toBe(Math.round(page.width))
+    const acts = [...screen.container.querySelectorAll('.slip__act')].map(box)
+    for (const act of acts) expect(act.width).toBeLessThanOrEqual(cardW())
+    expect(Math.round(acts[2].left)).toBe(Math.round(acts[1].left))
   })
 
   it('keeps the tier page\'s two toggles at a column\'s width', async () => {

@@ -11,7 +11,7 @@
 #   * a pool id still in the pool, and one in neither the pool nor the
 #     record, are left exactly as they are; so are another user's rows
 #   * --user scopes everything; without --yes nothing is written
-#   * a deck's link to the pool word (plan 144) moves onto the deck card
+#   * a deck's link to the pool word (plan 147) moves onto the deck card
 #     and its level, and a deck already holding the deck card keeps that
 #     link while the pool one goes
 #

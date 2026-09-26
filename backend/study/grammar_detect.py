@@ -84,7 +84,7 @@ sentence was written for is found in 92% of them (90% before the second
 pass, 78% for the substring matcher before that), and 517 of the 541
 points are found in at least one of their own lessons (510 before).
 
-Plan 145: every key a sentence holds
+Plan 148: every key a sentence holds
 ------------------------------------
 Measured on 4,000 of JMdict's example sentences -- real Japanese, not
 the catalogue's own -- only 71% of the particles and auxiliaries were
@@ -102,7 +102,7 @@ covered by any point. Now 96%, and the catalogue's own examples 98%
   ではない, 高いです), 〜んだ in every register, 〜に行きます with 来る
   and 帰る, a lone linking て, から and まで alone, な-adjectives and an
   い-adjective's forms, the spoken short forms (てる, ちゃう, とく), and
-  the two points plan 145 added to N5: た形 〜た and ない形 〜ない.
+  the two points plan 148 added to N5: た形 〜た and ない形 〜ない.
 - **Senses the lessons show apart are taught** (_shadowed, _joins): the
   に of しずかに is the adverbial form, the が of 雨だが the "but" --
   told by part of speech and by whether the particle is conjunctive.
@@ -213,7 +213,7 @@ _RENYOKEI = {"う": "い", "く": "き", "ぐ": "ぎ", "す": "し", "つ": "ち
              "ぬ": "に", "ぶ": "び", "む": "み", "る": "り"}
 
 
-# ── The final word's own conjugations (plan 145) ────────────────
+# ── The final word's own conjugations (plan 148) ────────────────
 # stems() finds a conjugated pattern by cutting its letters: the final
 # う-row mora (ことになる -> ことにな) and whole trailing words it takes
 # for politeness (ます, です). It also cuts ない, なる, ある, する and いる
@@ -285,7 +285,7 @@ def _polite_negative(tokens, head: str, ctype: str) -> list[str]:
     noun or a particle is ありません (〜はずがありません, 〜に違いありません),
     and after a verb it is the verb's 連用形 + ません (〜ないといけません is
     いけ + ません, 〜てはならない なり + ません). The cut that used to find
-    these took the ない off, and with it the negation (plan 145)."""
+    these took the ない off, and with it the negation (plan 148)."""
     if not head:
         # ない as a part on its own (〜しか〜ない's second half): after a
         # noun ありません, after a verb ません (水しか飲みません).
@@ -348,14 +348,14 @@ def _catalogue() -> tuple[tuple[str, str, tuple, tuple], ...]:
     point's own sentences can teach the matcher what it looks like.
 
     A sense-qualified point written with a plainer point's surface
-    (〜を（移動） and を are both を) is kept since plan 145, and yields
+    (〜を（移動） and を are both を) is kept since plan 148, and yields
     to the plain one wherever both land on the same span (_shadowed):
     nothing in the text says which を is meant, and claiming both puts
     two chips on one particle, one of them a guess. Where the lessons
     show the two apart -- the に of しずかに is the copula's adverbial
     form and the plain に a particle after a noun; the "but" が follows a
     clause and the subject が a noun -- only one of them can match, and
-    the sense the sentence shows is taught. Until plan 145 the
+    the sense the sentence shows is taught. Until plan 148 the
     qualified point was dropped outright, and しずかに had no rule."""
     entries = []
     for level in LEVELS:
@@ -411,7 +411,7 @@ def _shadowed() -> frozenset[str]:
     """The sense-qualified points written with a plainer point's surface
     whose lessons do not show them apart from it (see _catalogue): 〜を
     （移動） and を, 〜で（理由） and で, 〜て（理由） and 〜て、〜て. Each
-    is never reported, as before plan 145. A qualified point its lessons
+    is never reported, as before plan 148. A qualified point its lessons
     DO show apart (〜く／〜に（副詞形）, 〜が（逆接）) is kept, and yields
     only on a span a plain point holds too."""
     entries = _catalogue()
@@ -557,7 +557,7 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
 @lru_cache(maxsize=4096)
 def _joins(level: str, pattern: str) -> tuple[str, ...]:
     """Per spelling, what kind of particle the point is when its lessons
-    show it as one (plan 145): "conj" where every lesson has it as a
+    show it as one (plan 148): "conj" where every lesson has it as a
     conjunctive particle (接続助詞: the "but" が of 雨だが, the
     conditional と, the "because" から), "case" where none does (the
     subject が, "and" と, "from" から), "" where it is no particle or the
@@ -680,9 +680,9 @@ def _before(start: int, tokens) -> str:
     return token.pos if token is not None else ""
 
 
-# ── What a point attaches to, by kind of word (plan 145) ─────────
+# ── What a point attaches to, by kind of word (plan 148) ─────────
 # A lesson's four or five sentences name the parts of speech a point
-# was SEEN after, and until plan 145 that list was the whole of what it
+# was SEEN after, and until plan 148 that list was the whole of what it
 # could attach to: は had been seen after a noun, so 彼は (a pronoun),
 # 私たちは (たち is a suffix) and では (a particle) had no は. Measured
 # over 4,000 of JMdict's example sentences, the basic particles lost
@@ -898,7 +898,7 @@ def _one_clause(sentence: str, segments, pattern: str) -> bool:
     separates (弟は今、漢字が読めます; 海もあれば、山もある). もう〜ない
     does not reach from もう始まっている。 to the next sentence's
     観られない, nor 〜に〜回 from に、 across the clause after it
-    (plan 145)."""
+    (plan 148)."""
     commas_ok = "、" in pattern or all(
         len(piece) <= 2 and all("\u3041" <= c <= "\u309f" for c in piece)
         for alt in alternatives(pattern) for piece in alt.split("〜") if piece
@@ -1165,7 +1165,7 @@ def _imperative_spans(tokens):
     return out
 
 
-# ── Rules by what the tokenizer names (plan 145) ────────────────
+# ── Rules by what the tokenizer names (plan 148) ────────────────
 # Each reads words, never letters, and each is held to its point's own
 # lessons like every rule here (_confirmed).
 
@@ -1391,7 +1391,7 @@ def _single_tari_spans(tokens):
             and tokens[i - 1].pos in ("verb", "adjective", "auxiliary")]
 
 
-# Points a rule reads only IN PART (plan 145): い形容詞／な形容詞 is lit
+# Points a rule reads only IN PART (plan 148): い形容詞／な形容詞 is lit
 # where its lesson's forms are written (しずかな, 高くない, 高かった) and
 # not on every adjective in its dictionary form, which is a word rather
 # than something to point at. A breakdown gains the key; 作文 must not
@@ -1457,7 +1457,7 @@ def _form_hits(tokens, confirm: bool = True) -> list[tuple[str, str, int, int]]:
     out = []
     index = _form_rules()
     # A tail in its dictionary form also stands in the imperative and the
-    # volitional (plan 145): やめてくれ is 〜てくれる told, 見てみよう is
+    # volitional (plan 148): やめてくれ is 〜てくれる told, 見てみよう is
     # 〜てみる proposed. Except where a point is written in exactly that
     # form and claims the same words -- 書いてください is 〜てください and
     # not the honorific くださる behind 〜てくださる.
@@ -1657,7 +1657,7 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
     found = [h for h in found
              if h[0] not in shadowed and not (_sense(h[0]) and (h[2], h[3]) in plain_spans)]
     # The で of ではない is the copula, not the particle of place or
-    # means it is spelled like (plan 145).
+    # means it is spelled like (plan 148).
     copula_de = {h[2] for h in found if h[0] == "です／だ" and sentence[h[2]:h[2] + 1] == "で" and h[3] - h[2] > 1}
     found = [h for h in found if not (h[0] == "で" and h[2] in copula_de)]
     found.sort(key=lambda h: (h[2], -(h[3] - h[2])))
@@ -1690,7 +1690,7 @@ def _detect(sentence: str, tokens) -> list[tuple[str, str, int, int, str, tuple[
     # Except inside a WORD the catalogue files as a point of its own --
     # one written without 〜, 何か／誰か／どこか, だから, それから -- whose
     # letters are that word's: the か of 何か is not the question's か
-    # (plan 145).
+    # (plan 148).
     #
     # And inside a construction made of particles alone (〜でも is で + も):
     # 誰でも's で is no particle of place, its も no "also".

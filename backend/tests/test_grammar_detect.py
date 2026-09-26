@@ -426,7 +426,7 @@ class WithoutMorphologyTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class EveryKeyTests(unittest.TestCase):
-    """Plan 145: the keys a real sentence holds. On JMdict's example
+    """Plan 148: the keys a real sentence holds. On JMdict's example
     sentences 71% of the particles and auxiliaries were covered by a
     point; 96% now. Each case pairs a key with the sentence that must
     NOT have it, since a false key is a lesson about something absent."""
@@ -559,7 +559,7 @@ class TheCatalogueIsTheMeasureTests(unittest.TestCase):
     should find that point in it.
 
     A ratchet, not a target. The floors are below what the module scores
-    today (94.0% of sentences, 525 of 543 points, after plan 145) so
+    today (94.0% of sentences, 525 of 543 points, after plan 148) so
     that ordinary catalogue edits do not fail the build, and far above
     what the substring matcher scored (77.6%) so that a regression to it
     does.
@@ -622,7 +622,7 @@ class CanFindTests(unittest.TestCase):
 
     def test_a_point_read_only_in_part_is_not(self) -> None:
         """い形容詞／な形容詞 is lit where its lesson's forms are written
-        (plan 145), not on 大きいです, which uses the point all the same:
+        (plan 148), not on 大きいです, which uses the point all the same:
         作文 must not hear "not found" from it."""
         self.assertIn("い形容詞／な形容詞", found_in("しずかな店です。"))
         self.assertFalse(grammar_detect.can_find("い形容詞／な形容詞"))
@@ -636,7 +636,7 @@ class CanFindTests(unittest.TestCase):
             for points in GRAMMAR_POINTS_BY_LEVEL.values()
             for point in points
         )
-        # A ratchet: 517 of 541 when written, 524 of 543 after plan 145.
+        # A ratchet: 517 of 541 when written, 524 of 543 after plan 148.
         # Lower it only when a plan lowers the figure, never to make a
         # build pass.
         self.assertGreaterEqual(trusted, 520, f"{trusted} points trusted")

@@ -687,7 +687,58 @@ runtime purpose. Two consequences worth knowing:
   `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
   `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
   `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
-  **144** is 全語, every word the app holds a card for: the breakdown
+  **144** is the two cutscenes, from the canvas "Tsuji — gate & door
+  cutscenes". 扉, the train door unlocked and parted (the owner's pick A
+  of three directions drawn beside the shipped door): the door fades in
+  over the menu while the view settles onto it, a lamp over the seam
+  blinks in the line's pigment with the chime, the leaves crack apart
+  before they slide and finish their travel, and the header and the
+  sill step off the screen last, so nothing fades over the run; 920ms
+  where it was 1092. 改札, the ticket gate's look (the owner kept its
+  motion over six drawn alternatives and asked only for a better look;
+  every beat unchanged): the rig with a margin on a phone, the pillars
+  as cabinets with their lamps on the lane side, a sumi reader that
+  rings, flaps with a lit leading edge, a glow with no visible rim over
+  a floor and a horizon, and the pass in its own material with its
+  mark and balance (cited in
+  `components/station/TrainDoor.jsx`, `components/station/TicketGate.jsx`,
+  `src/cutscenes.phone.test.jsx` and the 扉 and 改札 blocks of
+  `index.css`).
+  **145** is Settings' pages using the width on the desk (numbered 145
+  because 144 went to the two cutscenes while it was open): the slips in
+  rows of two that end level instead of two free columns (`SlipRow`,
+  `.stg-pair`), every card to the page's edge, a card of one action
+  across the page with its action in the right half (`Slip`'s `across`),
+  the guest's claim as two ways side by side, the presets over a mixer
+  on one subgrid, and the level's stops named (cited in
+  `components/settings/SettingsPage.jsx`, `AccountPage.jsx`,
+  `DataSlips.jsx`, `DisplayPage.jsx`, `SoundPage.jsx`, `LevelPage.jsx`,
+  `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
+  `src/columns.wide.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  **146** is the grammar lesson made readable (numbered 146 because 144
+  went to the gate and door cutscenes, PR #213, and 145 to Settings'
+  pages on the desk, PR #214, while it was open):
+  first its two columns on the desk each its own (the dictionary's
+  grammar page set the lesson as one flow in CSS columns, balanced
+  wherever the heights fell, and now sets it as a grid — the rule, its
+  uses and its trap on the left, the sentences over the rivals on the
+  right, one column on the narrow desk), then the owner's pick B of three drawn directions, at every
+  width: the rule as the lead, a hairline between steps, the Japanese
+  in the prose set as Japanese and never cut, a use as its saying over
+  its forms and a paradigm as labels beside forms (read by
+  `components/study/lessonText.js`), the sentences numbered with a
+  register tag where one departs from its point, and furigana over the
+  word (cited in `components/study/GrammarLesson.jsx`,
+  `components/study/lessonText.js`, `components/dictionary/ExampleSentence.jsx`,
+  `index.css` and its 机 section, `src/components/study/lessonText.test.js`,
+  `GrammarLesson.browser.test.jsx`, `src/contrast.browser.test.jsx`,
+  `src/dictionary.wide.test.jsx` and `src/dictionary.desktop.test.jsx`;
+  DESIGN.md, "The entry plate, and a body that names itself" and "The
+  desk").
+  **147** is 全語, every word the app holds a card for (numbered 147
+  because 144–146 went to the cutscenes, Settings' pages and the grammar
+  lesson while it was open; its first commit's message says 144): the breakdown
   asks the JMdict pool after the deck (a noun run as one word, 桃源 + 郷
   as 桃源郷, then each word the deck has no card for), so a word past the
   course carries its meaning and its `vocab_jmdict_<id>` card; a vocab
@@ -699,7 +750,8 @@ runtime purpose. Two consequences worth knowing:
   `scripts/migrate_pool_cards.py`, `components/analysis/tokens.js`,
   `components/dictionary/DictionaryDetail.jsx`,
   `tests/test_deck_pool_cards.py` and `tests/test_analysis.py`).
-  **145** is every key a sentence holds, the grammar detector made
+  **148** is every key a sentence holds (its first commit's message
+  says 145), the grammar detector made
   robust against real text (measured on 4,000 of JMdict's example
   sentences: 71% of the particles and auxiliaries covered by a point,
   96% now; the catalogue's own examples 83% to 98%, lesson recall 92%
@@ -713,7 +765,7 @@ runtime purpose. Two consequences worth knowing:
   `study/grammar_detect.py`, `study/analysis.py`,
   `content/grammar/N5.json`, `tests/test_grammar_detect.py`'s
   `EveryKeyTests` and `tests/test_analysis.py`).
-  When starting a new wave, begin at **146** or higher, and check
+  When starting a new wave, begin at **149** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

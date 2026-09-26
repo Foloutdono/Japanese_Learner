@@ -1,7 +1,7 @@
 import { useLang } from '../../LangContext'
 import { useMuted, toggleMute, useVolumes, setVolume, playToggle, DEFAULT_VOLUMES } from '../../lib/audio'
 import { SoundMixer } from '../ui/NavControls'
-import { SettingsPage, Slip, SlipColumns, SlipColumn } from './SettingsPage'
+import { SettingsPage, Slip } from './SettingsPage'
 
 // The station-theatre channels — what the quiet preset silences and
 // the full one restores. The study channels (kana, voice, effects,
@@ -27,51 +27,47 @@ export function SoundPage() {
 
   return (
     <SettingsPage title={t.sound}>
-      {/* The presets beside the mixer they set, where the page is wide
-          enough for two (plan 139). */}
-      <SlipColumns>
-        <SlipColumn>
-          <Slip label={t.soundPresets}>
-            <div className="svc-grid">
-              <button
-                type="button"
-                className={`svc${quiet ? ' svc--on' : ''}`}
-                aria-pressed={quiet}
-                data-preset="quiet"
-                onClick={() => applyPreset({ ambiance: 0, jingle: 0, announcement: 0 })}
-              >
-                <span className="svc__jp">{t.soundValueQuiet}</span>
-                <span className="svc__pace">{t.soundQuietHint}</span>
-              </button>
-              <button
-                type="button"
-                className={`svc${full ? ' svc--on' : ''}`}
-                aria-pressed={full}
-                data-preset="full"
-                onClick={() => applyPreset(DEFAULT_VOLUMES)}
-              >
-                <span className="svc__jp">{t.soundValueFull}</span>
-                <span className="svc__pace">{t.soundFullHint}</span>
-              </button>
-              <button
-                type="button"
-                className={`svc${muted ? ' svc--on' : ''}`}
-                aria-pressed={muted}
-                data-preset="mute"
-                onClick={() => { toggleMute(); playToggle() }}
-              >
-                <span className="svc__jp">{muted ? t.unmute : t.mute}</span>
-                <span className="svc__pace">{t.soundMuteHint}</span>
-              </button>
-            </div>
-          </Slip>
-        </SlipColumn>
-        <SlipColumn>
-          <Slip label={t.soundMixer}>
-            <SoundMixer />
-          </Slip>
-        </SlipColumn>
-      </SlipColumns>
+      {/* The presets over the mixer they set, each a card's width on
+          the desk (plan 145): beside it, at half a page, three presets
+          wrapped their names onto three lines and the mixer's tracks
+          were cut to a thumb's length. */}
+      <Slip label={t.soundPresets}>
+        <div className="svc-grid">
+          <button
+            type="button"
+            className={`svc${quiet ? ' svc--on' : ''}`}
+            aria-pressed={quiet}
+            data-preset="quiet"
+            onClick={() => applyPreset({ ambiance: 0, jingle: 0, announcement: 0 })}
+          >
+            <span className="svc__jp">{t.soundValueQuiet}</span>
+            <span className="svc__pace">{t.soundQuietHint}</span>
+          </button>
+          <button
+            type="button"
+            className={`svc${full ? ' svc--on' : ''}`}
+            aria-pressed={full}
+            data-preset="full"
+            onClick={() => applyPreset(DEFAULT_VOLUMES)}
+          >
+            <span className="svc__jp">{t.soundValueFull}</span>
+            <span className="svc__pace">{t.soundFullHint}</span>
+          </button>
+          <button
+            type="button"
+            className={`svc${muted ? ' svc--on' : ''}`}
+            aria-pressed={muted}
+            data-preset="mute"
+            onClick={() => { toggleMute(); playToggle() }}
+          >
+            <span className="svc__jp">{muted ? t.unmute : t.mute}</span>
+            <span className="svc__pace">{t.soundMuteHint}</span>
+          </button>
+        </div>
+      </Slip>
+      <Slip label={t.soundMixer}>
+        <SoundMixer />
+      </Slip>
     </SettingsPage>
   )
 }

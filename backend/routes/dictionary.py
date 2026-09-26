@@ -194,7 +194,7 @@ def _app_card(source: str, level: str | None, raw_id: str | None) -> dict | None
     it out from what was already served: the ＋ writes the card into one
     of the learner's decks, and "review this card" boards it.
 
-    A JMdict pool word is a card too since plan 144 -- a vocab deck
+    A JMdict pool word is a card too since plan 147 -- a vocab deck
     takes it (routes/decks.POOL_LEVEL) -- so it answers with its id, no
     level, and `pool`, which is what keeps "review this card" off it:
     the daily queue serves a pool word only through a deck it is in
@@ -586,7 +586,7 @@ def _vocab_result(entry: dict, level: str | None, meaning: str, lang: str,
         # not a bare tile (see _word_kanji).
         "kanji_parts": _word_kanji(entry.get("kanji", ""), furigana, lang, pool),
         "status":   card_stats(states, user_id, raw_id, VOCAB_STATUS_MODES),
-        # A JMdict pool word's carries `pool` and no level (plan 144).
+        # A JMdict pool word's carries `pool` and no level (plan 147).
         "app_card": _app_card("vocab", level, raw_id),
     }
 

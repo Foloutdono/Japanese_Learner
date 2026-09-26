@@ -1,4 +1,4 @@
-# ── A JMdict pool word in a deck (plan 144) ───────────────────────
+# ── A JMdict pool word in a deck (plan 147) ───────────────────────
 # The analyser and the dictionary offer every word the app holds a card
 # for, the 212k JMdict words past the course included, and a vocab deck
 # takes one as the vocab card it already is: `vocab_jmdict_<id>`, with

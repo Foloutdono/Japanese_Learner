@@ -97,7 +97,7 @@ MAX_BATCH = 25
 #     that lands.
 #   - a real dictionary-backed "vocab" search: today's browse only
 #     searches the JLPT-leveled VOCAB_BY_LEVEL deck, not the full
-#     dictionary. A JMdict pool word can be LINKED since plan 144 --
+#     dictionary. A JMdict pool word can be LINKED since plan 147 --
 #     from the analyser's and the dictionary's ＋, under this same
 #     "vocab" source (see POOL_LEVEL below) -- but browse does not
 #     search the pool yet.
@@ -132,7 +132,7 @@ def _wrap_vocab(raw_id, entry, level, level_list, mode, lang, stage, preview):
     if m is None:
         raise HTTPException(status_code=400, detail=f"Invalid vocab mode: {mode!r}")
     if jmdict_db.is_pool_id(raw_id):
-        # A pool word (plan 144) and its neighbours, the distractors, in
+        # A pool word (plan 147) and its neighbours, the distractors, in
         # JMdict's own gloss: VOCAB_FR is the course's, keyed by written
         # form, and would hand a pool word a deck homograph's French
         # (routes/theme_vocab._entry_meaning, the same rule).
@@ -303,13 +303,13 @@ def _meaning_preview(source: str, entry: dict, lang: str) -> dict:
         # of the character, and there is nothing else to translate.
         return {"front": entry["kana"], "kana": entry["kana"], "meaning": entry["romaji"]}
     fr_map  = KANJI_FR if source == "kanji" else VOCAB_FR
-    # A JMdict pool word (plan 144, an entry carrying its pool `seq`)
+    # A JMdict pool word (plan 147, an entry carrying its pool `seq`)
     # has JMdict's gloss and no line in VOCAB_FR -- see _wrap_vocab.
     meaning = entry.get("meaning", "") if "seq" in entry else get_meaning(entry, lang, fr_map)
     return {"front": entry.get("kanji") or entry.get("kana", ""), "kana": entry.get("kana", ""), "meaning": meaning}
 
 
-# ── A JMdict pool word in a deck (plan 144) ──────────────────
+# ── A JMdict pool word in a deck (plan 147) ──────────────────
 # The analyser and the dictionary offer every word the app holds a card
 # for, and 212k of those are the JMdict pool beside the course
 # (content/vocab_jmdict_data.py). A pool word joins a vocab deck as the
@@ -340,7 +340,7 @@ def _linked_entry(source: str, level: str | None, raw_id: str) -> dict | None:
     The app entry a deck_cards row points at, or None when it no longer
     resolves — a card removed from the content since it was added.
 
-    A JMdict pool word (plan 144) resolves by its id alone, from the
+    A JMdict pool word (plan 147) resolves by its id alone, from the
     pool's own table: it has no level for the check below to hold it
     to, and no place in card_index's import-time index, which covers
     the course.
@@ -815,7 +815,7 @@ class ReviewPayload(BaseModel):
 
 class AppCardRef(BaseModel):
     source: str
-    # None for a JMdict pool word, which has no level (plan 144); the row
+    # None for a JMdict pool word, which has no level (plan 147); the row
     # stores POOL_LEVEL in its place. Any other card without one resolves
     # to nothing and is skipped.
     level:  str | None = None
@@ -2136,7 +2136,7 @@ def get_deck_modes(deck_id: str, user_id: str = Depends(get_user_id)):
 
 def build_pool_card(raw_id: str, mode: str, lang: str,
                     stage: str | None, preview: dict | None) -> dict | None:
-    """One JMdict pool word's payload, as a deck serves it (plan 144),
+    """One JMdict pool word's payload, as a deck serves it (plan 147),
     or None where the id no longer names a pool row or the mode is not
     a vocab one. Public for the daily queue, which serves a deck's pool
     words in the deck's own lane (routes/today.py) -- one builder, as

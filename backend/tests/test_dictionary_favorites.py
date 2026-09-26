@@ -144,7 +144,7 @@ def test_every_kind_round_trips_as_the_catalogue_row(client):
 
     # The pool halves are served as the catalogue serves them: a pool
     # character has no card behind it, and a pool word has the one a
-    # vocab deck takes since plan 144 -- its id, no level, `pool`.
+    # vocab deck takes since plan 147 -- its id, no level, `pool`.
     pool_rows = {r["type"]: r for r in body["results"] if r["level"] is None}
     assert set(pool_rows) == {"kanji", "vocab"}
     assert pool_rows["kanji"]["app_card"] is None

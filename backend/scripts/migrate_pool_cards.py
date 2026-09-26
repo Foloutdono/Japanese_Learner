@@ -35,7 +35,7 @@ Then, once per moved key: frequency_overrides rows pinned under
 domain='vocab_jmdict' with the pool key move to domain='vocab' under the
 deck's key; a learner who already pinned the deck key keeps that pin.
 
-And the deck links (plan 144): a vocab deck takes a pool word since the
+And the deck links (plan 147): a vocab deck takes a pool word since the
 analyser and the dictionary offer every word the app holds, so a
 deck_cards row can name `vocab_jmdict_{id}` under routes/decks.POOL_LEVEL.
 It moves to the deck card and the level that card's id carries; a deck
@@ -186,7 +186,7 @@ def _linked_pool_ids(cur, moves: dict[str, dict], user: str | None = None) -> li
 
 def rename_deck_links(cur, moves: dict[str, dict], user: str | None = None) -> tuple[int, int]:
     """A deck's link to a pruned pool word moves onto the deck card
-    (plan 144); a deck already holding the deck card keeps that link and
+    (plan 147); a deck already holding the deck card keeps that link and
     the pool one is dropped. `user` scopes to the decks one account
     owns -- deck_cards.user_id is the owner, and a follower reads the
     owner's rows. Returns (moved, dropped as duplicates)."""

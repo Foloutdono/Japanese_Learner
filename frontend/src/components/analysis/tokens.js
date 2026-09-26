@@ -11,12 +11,12 @@ export function isUnknownToken(tok) {
   return CONTENT_POS.has(tok.pos)
     && Boolean(tok.vocab_match)
     && ['not_started', 'new'].includes(status)
-    // A JMdict pool word (plan 144) the learner never took up counts as
+    // A JMdict pool word (plan 147) the learner never took up counts as
     // off-deck on the server, not unknown: the course does not teach it.
     && !(isPoolWord(tok) && status === 'not_started')
 }
 
-// A word past the course: the JMdict pool's card (plan 144), with no
+// A word past the course: the JMdict pool's card (plan 147), with no
 // JLPT level. It has a meaning and can go in a deck, like a deck word.
 export function isPoolWord(tok) {
   return Boolean(tok?.vocab_match?.pool)
@@ -29,7 +29,7 @@ export function isPoolWord(tok) {
 // no rule at all. The state is a 2px rule under the word in the
 // state's own ink, never an ink change on the word itself.
 //
-// A JMdict pool word (plan 144) keeps the off-deck rule until the
+// A JMdict pool word (plan 147) keeps the off-deck rule until the
 // learner takes it up, whatever its part of speech: 真っさら (a
 // な-adjective's stem, which the tokenizer leaves unnamed) and さらば (an
 // interjection) are words with a meaning and a card, not scaffolding.

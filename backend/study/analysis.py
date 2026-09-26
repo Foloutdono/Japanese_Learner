@@ -134,7 +134,7 @@ def _attach_grammar(tokens: list[dict], grammar: list[dict]) -> None:
 
 
 def _pool_match(entry: dict) -> dict:
-    """A JMdict pool word as a token's vocab_match (plan 144): the same
+    """A JMdict pool word as a token's vocab_match (plan 147): the same
     shape as a deck word's, so every screen that glosses a word, opens
     its entry or adds it to a deck reads it where it already reads one,
     with `level` null -- the pool has no JLPT level, and a null level is
@@ -205,7 +205,7 @@ def _compound_dict(run: list, level: str, entry: dict, raw_id: str) -> dict:
 
 def _pool_compound_dict(run: list, entry: dict) -> dict:
     """_compound_dict for a run the JMdict pool holds as one word
-    (card_lookup.resolve_pool_compound, plan 144): 桃源 + 郷 as 桃源郷."""
+    (card_lookup.resolve_pool_compound, plan 147): 桃源 + 郷 as 桃源郷."""
     surface = "".join(m.surface for m in run)
     reading = entry.get("kana") or "".join(m.reading for m in run)
     return {
@@ -239,7 +239,7 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
     has merged such runs since it was written; the breakdown never
     did. Longest run first, so お母さん is one word and not お + 母さん.
 
-    The deck answers first, the JMdict pool after (plan 144): a run the
+    The deck answers first, the JMdict pool after (plan 147): a run the
     pool holds as one word where the deck has no card for one of its
     nouns (桃源 + 郷), then each word the deck has no card for, looked
     up alone. So every word the app holds a card for -- in the course or
@@ -290,10 +290,10 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # 1: offsets past a space (every particle after a subtitle's first
 # space was lost) and the plain copula after a noun (2026-09-25).
 # 2: the JMdict pool after the deck -- a word the course does not teach
-# carries its meaning and its card (plan 144).
+# carries its meaning and its card (plan 147).
 # 3: the grammar detector reads what a point attaches to by kind of
 # word, the copula's and a pattern's final word's forms, and the plain
-# past and negative (plan 145).
+# past and negative (plan 148).
 LOCAL_REV = 3
 
 
@@ -369,7 +369,7 @@ def attach_user_state(analysis: dict, states: dict, user_id: str) -> dict:
         # i+1 signal (exactly one unknown word) permanently false on
         # exactly the input this feature exists to handle.
         #
-        # A JMdict pool word (plan 144) the learner has never taken up
+        # A JMdict pool word (plan 147) the learner has never taken up
         # is still off-deck in that sense -- the course does not teach
         # it, the learner simply CAN now -- so it counts where it always
         # did. Once it is in the learner's SRS it is a word of theirs

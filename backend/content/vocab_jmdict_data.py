@@ -168,9 +168,9 @@ def get_by_key(kanji: str, kana: str) -> dict | None:
     return _row_to_entry(row) if row else None
 
 
-# ── A pool word as a card (plan 144) ──────────────────────────
+# ── A pool word as a card (plan 147) ──────────────────────────
 # A pool word has always had a card id (vocab_jmdict_to_id), studied
-# from the frequency line's JMdict tiers. Plan 144 lets a learner put
+# from the frequency line's JMdict tiers. Plan 147 lets a learner put
 # one in a deck of their own, from the analyser or the dictionary, so
 # the id now travels on its own -- in deck_cards, in a breakdown's
 # token -- and has to be read back into its entry.

@@ -6720,7 +6720,75 @@ under 360px in French, as before. Left for later: at the desk's
 narrowest (1100px) the stops share about a hundred pixels beside
 "Vocabulaire JLPT"; the feature sketches are unbuilt.
 
-## Plan 144 — 全語, every word the app holds a card for (2026-09-26)
+## Plan 144 — 扉 and 改札, the cutscenes: the door unlocked and parted, the gate redrawn (2026-09-26)
+
+The owner's ask: improve the gate and door animations, options to
+choose from. Drawn on the canvas "Tsuji — gate & door cutscenes" (the
+ticket gate and the train door as shipped, looping at 390×844 with
+theme, line and slow-motion tweaks, and three directions for each: for
+the gate A walk through, B the reader, C from above; for the door A
+unlock and part, B the train pulls in, C platform doors); the owner
+picked **door A**. On the gate, "B isn't bad but the current one is
+better, keep trying": a second round keeps the shipped gate's look and
+tries three endings (D retimed, the flood grown from the lane and
+lifted like a shutter; E into the lane, no flood, the name carried to
+the station's plate; F flood to stripe, the colour gathered into the
+plate's stripe). The owner's answer: "forget it, keep the current one,
+just improve its look" — so the gate keeps every beat (SPEED, the
+delays, the keyframes, the flood) and only its objects are redrawn.
+
+What the shipped gate looked like on a phone: at 110vw the rig was
+squeezed by its flex row back to the screen's width and ran edge to
+edge, each cabinet's outer side on the glass; both lamps sat on their
+pillars' outer edges, though the comment over them put them by the
+lane; the pillars and the flaps were the same flat grey, four
+rectangles; the reader was a faint translucent square, mostly under a
+small plain card; and the glow beyond the flaps ended in a visible oval
+on the sumi, in the light theme most of all.
+
+What the shipped door got wrong: it landed over the menu in full on the
+tap's own frame, a hard cut; its scene began fading out at 882ms with
+the leaves still 85% of the way across, so the doors dissolved rather
+than opened, and the header and the sill faded with them over the run;
+and the leaves slid from rest with nothing before the move but the
+chime.
+
+| # | What | Status |
+|---|------|--------|
+| 144 | **The timeline** (`TrainDoor.jsx`, `SPEED` 1, the figures as they play): commit 200ms, chime 260, the leaves unlock at 300, done 920 (was 1092). The leaves, the lamp and the frame run on CSS delays scaled by `--door-x`; the `door--open` phase class and its state are gone, the timers carry only the sounds, the commit and the unmount. **The way in**: `.door` fades in over 110ms (`door-in`) while the view settles from 1.045 (`door-settle`). **The leaves**: `door-part-l/r`, a crack of `--sp-1` each way over the first 14%, the destination showing down the slit, then the travel on its own ease to the crack's width past the edge (no sliver of a leaf left on it), open at 880. **The lamp** (`.door__lamp`): dark on the header, lit in the line's pigment with the chime, blinking while the leaves run. **The frame**: the header an element (`.door__head`, `--door-head`) so the lamp rides it out; header up and sill down from 720, gone at 920; `door-leave` retired, so nothing fades. Sheen retimed to cross while the leaves move. Tests: `cutscenes.phone` (the door fades in and never fades out; the leaves end before the frame, the frame before the unmount), both failing on the shipped door; stylelint baseline down two (`.door--open` retired) | DONE (2026-09-26) |
+| 144 | **The gate's look** (`TicketGate.jsx`, the 改札 block; no timing touched): the rig at 94vw, isolated, with a floor shadow; the pillars as cabinets (a lit top face over a hairline, a plinth, the door's brushed grain, the outer side shaded, `--r-panel`); the lamps on the lane side in a dark channel; the reader a sumi pad (`--bg-panel`, bevel) whose wave takes the pass's kinari back, lit and ringed (`gate-ring`) at contact; the lane recessed (inset shadows); the glow falling off to nothing over a floor and a horizon (`.gate__beyond::after`), the name lit by it (no reading over it: a plate that prints かな over あ over KANA names one thing three times, the owner's call on the plates in plan 094); the flaps with a sheen, the grain, a leading edge in the line's pigment over a dark lip, rounded at the seam, and a shadow into the lane; the pass at a card's proportions in `.pass`'s material and sheen, with its mark (`PassWave`) and its balance in gold (`xp` into `xpPrevLevel`…`xpForNext`, no bar where the summary cannot say). Tests: `cutscenes.phone` (the rig clear of the scene's edges, each lamp on the lane side), both failing on the shipped gate | DONE (2026-09-26) |
+
+Left for later: nothing on the canvas's gate options; they stay drawn
+there as the record of what was tried.
+## Plan 145 — 設定・紙面, Settings' pages using the width (2026-09-26)
+
+Numbered 145 because 144 went to the two cutscenes (PR #213), merged to
+main while this was open under 144; renumbered in the merge. The owner's
+ask, with four screenshots of Settings on the desk (Account, Display,
+Sound, Level): improve the layout of the sections, use more of the space
+available. What the screenshots showed wrong: a page of two halves stood
+them as two free columns, so the shorter one stopped half a page above
+the other (the account's three cards beside four; the sound presets
+beside a mixer twice their height, their names wrapped onto three
+lines); a page of one card stopped at `--card-w`, leaving the pane's
+right third empty on a wide window (the level); the service page's way
+to a destination was a bare button under its card, running past the
+card's edge; and the level named only the stop it stood at.
+
+| # | What | Status |
+|---|------|--------|
+| 145 | **Rows, not columns** (`SlipRow`, `.stg-pair`, replacing `SlipColumns`/`SlipColumn` and `.stg-cols`/`.stg-col`): stacked on the phone at the page's own gap, so its DOM order and look are unchanged; on the desk, where the pane holds two (`desk-settings__page--two`), a row's two cards at the taller's height with their actions and toggles at its foot, a row of one taking the width. **Every card to the page's edge**: plan 123's `--card-w` cap on a page-wide card retired; the action is kept at a half's width instead. **Across** (`Slip`'s `across`, `.slip--across`): a card of one action that takes the page's width lays its words in the left half and its action in the right, the gap the rows' gap plus the padding and hairlines it spans, so the action stands under the row's at their width — the Google offer, the install row, the placement test (while it is a button) and the service page's way to a destination, now a slip of its own with `settingsGoalNoneDesc`. **Account**: the address, the Google offer, then policy and sign-out, trail and export, reset and delete, in rows (the phone's order); the guest's claim as two ways side by side (`.slip--ways`, `.slip__way`: `display: contents` on the phone). **Display**: the languages one over the other down the theme screens' height. **Sound**: the presets over the mixer, each at the page's width, the mixer's rows on one subgrid (names on one line as wide as the longest, every track aligned). **Level**: every stop named on the desk while the pane holds two (`lvlstrip__jp--away`), codes at the lead's rung. Tests: `settings.desktop` (rows ending level, across, the guest's two ways, the level's names, the sound, the display), `columns.wide` moved to the new contract | DONE (2026-09-26) |
+
+Left for later: pages of one row (Display) still end high on a tall
+window — the page is as long as what it sets; nothing was stretched to
+fill it.
+
+## Plan 147 — 全語, every word the app holds a card for (2026-09-26)
+
+Numbered 147 because 144 went to the cutscenes (PR #213), 145 to
+Settings' pages on the desk (PR #214) and 146 to the grammar lesson
+(PR #215) while it was open; renumbered in the merge, so its first
+commit's message still says 144 and the source cites no 144 for it.
 
 The owner's ask, from a screenshot of the analyser's video passage on
 さらば桃源郷真っさらになったんだ: "even if the word isn't in the JLPT decks
@@ -6736,7 +6804,7 @@ hold a pool word.
 
 | # | What | Status |
 |---|------|--------|
-| 144 | **The breakdown** (`study/analysis.py`, `study/card_lookup.py`): the deck answers first, the pool after — a noun run the pool holds as one word where the deck has no card for one of its nouns (`resolve_pool_compound`: 桃源 + 郷 as 桃源郷, never 電話 + 番号, never a number, never cutting a deck compound), then each word the deck has no card for (`resolve_pool_morpheme`: nouns, verbs, adjectives, adverbs, 形状詞, interjections, adnominals, conjunctions; never a particle, an auxiliary or a bare affix). A kanji spelling matches its pair, then (a verb's or adjective's lemma only) a row read the page's way sharing a kanji (ぶっ殺す, filed by UniDic under 打ち殺す), then, where the page wrote the kanji, its commonest row; a kana spelling matches a kana-only row and nothing else (the pool is JMdict less the deck: its one row read その is 苑, "garden"), and a kana word must be read as the page spells it (まじか is not 間近). Never a word a grammar point is written on (the しれ of かもしれない). The token's `vocab_match` is the pool's: `level` null, `pool: true`, the entry cut to kanji/kana/meaning. **Counts**: an untaken pool word stays off-deck; taken up, it counts like a deck word. `LOCAL_REV` 2, so stored video sessions are read again. **Decks** (`routes/decks.py`): a vocab deck links a pool word under source `vocab` with `POOL_LEVEL` ("jmdict") in the NOT NULL level column, resolved by id from the pool (`_linked_entry`), listed with no level, studied with its frequency neighbours as distractors (`_level_list`, `jmdict_db.neighbours`) and JMdict's own gloss (never VOCAB_FR, keyed by form); `AppCardRef.level` optional. **Today** (`routes/today._personal_rows`): a deck's pool word is asked in that deck's lane (`build_pool_card`). **Dictionary**: a pool word's `app_card` is `{source: vocab, level: null, raw_id, pool: true}`, so the ＋ adds it; "review this card" stays off it. **Frontend**: `tokens.js` (`isPoolWord`; off-deck until taken up whatever the part of speech; i+1 mirrors the server), `DictionaryDetail`'s review button. **Migration**: `scripts/migrate_pool_cards.py` moves a deck's link to a pruned pool word onto its deck card. Tests: `test_analysis` (the line, the grammar door, the homophones, the numbers, the counts), `test_deck_pool_cards` (added, listed, studied, counted, asked in Today), `test_migrate_pool_cards`, `test_entry_panel`, `test_dictionary_favorites`, `tokens.test.js`, `poolWords.browser`, `DictionaryDetail.browser` | DONE (2026-09-26) |
+| 147 | **The breakdown** (`study/analysis.py`, `study/card_lookup.py`): the deck answers first, the pool after — a noun run the pool holds as one word where the deck has no card for one of its nouns (`resolve_pool_compound`: 桃源 + 郷 as 桃源郷, never 電話 + 番号, never a number, never cutting a deck compound), then each word the deck has no card for (`resolve_pool_morpheme`: nouns, verbs, adjectives, adverbs, 形状詞, interjections, adnominals, conjunctions; never a particle, an auxiliary or a bare affix). A kanji spelling matches its pair, then (a verb's or adjective's lemma only) a row read the page's way sharing a kanji (ぶっ殺す, filed by UniDic under 打ち殺す), then, where the page wrote the kanji, its commonest row; a kana spelling matches a kana-only row and nothing else (the pool is JMdict less the deck: its one row read その is 苑, "garden"), and a kana word must be read as the page spells it (まじか is not 間近). Never a word a grammar point is written on (the しれ of かもしれない). The token's `vocab_match` is the pool's: `level` null, `pool: true`, the entry cut to kanji/kana/meaning. **Counts**: an untaken pool word stays off-deck; taken up, it counts like a deck word. `LOCAL_REV` 2, so stored video sessions are read again. **Decks** (`routes/decks.py`): a vocab deck links a pool word under source `vocab` with `POOL_LEVEL` ("jmdict") in the NOT NULL level column, resolved by id from the pool (`_linked_entry`), listed with no level, studied with its frequency neighbours as distractors (`_level_list`, `jmdict_db.neighbours`) and JMdict's own gloss (never VOCAB_FR, keyed by form); `AppCardRef.level` optional. **Today** (`routes/today._personal_rows`): a deck's pool word is asked in that deck's lane (`build_pool_card`). **Dictionary**: a pool word's `app_card` is `{source: vocab, level: null, raw_id, pool: true}`, so the ＋ adds it; "review this card" stays off it. **Frontend**: `tokens.js` (`isPoolWord`; off-deck until taken up whatever the part of speech; i+1 mirrors the server), `DictionaryDetail`'s review button. **Migration**: `scripts/migrate_pool_cards.py` moves a deck's link to a pruned pool word onto its deck card. Tests: `test_analysis` (the line, the grammar door, the homophones, the numbers, the counts), `test_deck_pool_cards` (added, listed, studied, counted, asked in Today), `test_migrate_pool_cards`, `test_entry_panel`, `test_dictionary_favorites`, `tokens.test.js`, `poolWords.browser`, `DictionaryDetail.browser` | DONE (2026-09-26) |
 
 Left for later, found on the way: a pool word studied only from the
 frequency line's JMdict tiers is never asked by Today (it has no JLPT
@@ -6746,7 +6814,9 @@ screenshot showed (〜になる missed in なった/なって, the plain 〜ん�
 N3 為る cards shadowing N5 する/なる, 郷 matched to 号 by sound) are the
 owner's next steps.
 
-## Plan 145 — 鍵, every key a sentence holds (2026-09-26)
+## Plan 148 — 鍵, every key a sentence holds (2026-09-26)
+
+Numbered 148 for the same reason (its first commit's message says 145).
 
 The owner's ask, from a screenshot of the analyser on 足跡を辿って会いにきて
 (only を and one て lit): "make the grammar detection more robust; the goal
@@ -6764,7 +6834,7 @@ four examples had taught は that it follows a noun), the copula's forms
 
 | # | What | Status |
 |---|------|--------|
-| 145 | **Attachment by kind of word** (`_attaches`): a lesson showing a noun admits a pronoun, a suffix and a 形状詞, and for a point that is itself a particle a case-particle phrase (彼は, 私たちは, では); a lesson showing a verb admits an auxiliary, never the reverse (〜ことがある after た); adjectives stay exact (近いところ is not 〜ところだ); a comma in front excuses only a particle (…だ、と言った); a sentence-final particle may follow a plain form or another particle (いいよ, よね); a lesson showing nothing in front holds a conjunction to a clause start (ところで) but not a pronoun (何か). A sense point (full-width parenthesis) keeps exact attachment. **The final word's conjugations** (`_conjugations`, `_polite_negative`): a pattern ending in a verb or adjective is looked for in every form of it by its tokenizer class, behind a stand-in when the piece begins mid-word (くなる), with the polite negative for ない (はずがありません, いけません, さしつかえありません); the cuts `grammar_match.stems` makes of ない/なる/ある/する/いる are dropped in the detector (`_drops_meaning`; the content gate keeps its stems). **Rules by what the tokenizer names**: です／だ in だった, でした, じゃない, ではない/ではありません, である and after an い-adjective; 〜んです／〜のです as の/ん + the copula in any finite form (んだ, なのです, のである, んでしょう; not ので); 〜に行きます as stem + に + 行く/来る/帰る/戻る/出かける; a lone linking て for 〜て、〜て; から and まで alone after a noun for から〜まで; い形容詞／な形容詞 on しずかな + noun, 高くない, 高かった (read in part, so `can_find` stays False: `_PARTIAL`); the spoken short forms てる, ちゃう, とく; a single たり; a dictionary-form tail in the imperative or volitional (やめてくれ, 見てみよう) unless a point is written in exactly that form on the same words. **Senses**: `_shadowed` hides a sense point only where its lessons show it the same as its plain sibling (〜を（移動）, 〜で（理由）, 〜て（理由）); `_joins` learns from the lessons whether a particle point is conjunctive or a case particle, so 〜が（逆接） (雨だが) and 〜く／〜に（副詞形） (しずかに) are taught. **Guards**: a multi-part point stays in one clause (`_one_clause`), a hit ending on である's で is refused, a question word's か is "some" (`_indefinite_ka`), and the letters of a word filed whole (何か, だから) or of a particle-only construction (でも) are its own. **Catalogue**: た形 〜た and ない形 〜ない added to N5 after 〜ました／〜ませんでした, full bilingual lessons, clean under `check_grammar`, read by their rules alone (`_RULE_ONLY`). `analysis.LOCAL_REV` 3. **After**: catalogue 98.2%, reading 98.6%, dictation 96.4%, JMdict 96.0%; lesson recall 94.0% (2,046/2,177), 525 of 543 points seen, 524 trusted. Tests: `test_grammar_detect.EveryKeyTests` (a key and its counter-example per rule), ratchets raised (0.93, 0.96, 520), `test_analysis` on both subtitle lines | DONE (2026-09-26) |
+| 148 | **Attachment by kind of word** (`_attaches`): a lesson showing a noun admits a pronoun, a suffix and a 形状詞, and for a point that is itself a particle a case-particle phrase (彼は, 私たちは, では); a lesson showing a verb admits an auxiliary, never the reverse (〜ことがある after た); adjectives stay exact (近いところ is not 〜ところだ); a comma in front excuses only a particle (…だ、と言った); a sentence-final particle may follow a plain form or another particle (いいよ, よね); a lesson showing nothing in front holds a conjunction to a clause start (ところで) but not a pronoun (何か). A sense point (full-width parenthesis) keeps exact attachment. **The final word's conjugations** (`_conjugations`, `_polite_negative`): a pattern ending in a verb or adjective is looked for in every form of it by its tokenizer class, behind a stand-in when the piece begins mid-word (くなる), with the polite negative for ない (はずがありません, いけません, さしつかえありません); the cuts `grammar_match.stems` makes of ない/なる/ある/する/いる are dropped in the detector (`_drops_meaning`; the content gate keeps its stems). **Rules by what the tokenizer names**: です／だ in だった, でした, じゃない, ではない/ではありません, である and after an い-adjective; 〜んです／〜のです as の/ん + the copula in any finite form (んだ, なのです, のである, んでしょう; not ので); 〜に行きます as stem + に + 行く/来る/帰る/戻る/出かける; a lone linking て for 〜て、〜て; から and まで alone after a noun for から〜まで; い形容詞／な形容詞 on しずかな + noun, 高くない, 高かった (read in part, so `can_find` stays False: `_PARTIAL`); the spoken short forms てる, ちゃう, とく; a single たり; a dictionary-form tail in the imperative or volitional (やめてくれ, 見てみよう) unless a point is written in exactly that form on the same words. **Senses**: `_shadowed` hides a sense point only where its lessons show it the same as its plain sibling (〜を（移動）, 〜で（理由）, 〜て（理由）); `_joins` learns from the lessons whether a particle point is conjunctive or a case particle, so 〜が（逆接） (雨だが) and 〜く／〜に（副詞形） (しずかに) are taught. **Guards**: a multi-part point stays in one clause (`_one_clause`), a hit ending on である's で is refused, a question word's か is "some" (`_indefinite_ka`), and the letters of a word filed whole (何か, だから) or of a particle-only construction (でも) are its own. **Catalogue**: た形 〜た and ない形 〜ない added to N5 after 〜ました／〜ませんでした, full bilingual lessons, clean under `check_grammar`, read by their rules alone (`_RULE_ONLY`). `analysis.LOCAL_REV` 3. **After**: catalogue 98.2%, reading 98.6%, dictation 96.4%, JMdict 96.0%; lesson recall 94.0% (2,046/2,177), 525 of 543 points seen, 524 trusted. Tests: `test_grammar_detect.EveryKeyTests` (a key and its counter-example per rule), ratchets raised (0.93, 0.96, 520), `test_analysis` on both subtitle lines | DONE (2026-09-26) |
 
 Left: sentence-final て as a casual request has no point (会いにきて's last
 て); the particle に that UniDic tags as the copula after a noun

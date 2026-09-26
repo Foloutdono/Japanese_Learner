@@ -9,7 +9,7 @@ import { isNative } from '../../lib/platform'
 import { InstallSheet, InstallSteps } from '../ui/InstallSheet'
 import { useDesk } from '../../hooks/useDesk'
 import { useRadioWalk, radioTab } from '../../hooks/useRadioWalk'
-import { SettingsPage, Slip, SlipColumns, SlipColumn } from './SettingsPage'
+import { SettingsPage, Slip, SlipRow } from './SettingsPage'
 
 // ── Display & language ────────────────────────────────────────
 // The theme as three screens drawn small (the device's, dark, light:
@@ -38,61 +38,59 @@ export function DisplayPage() {
     <SettingsPage title={t.settingsEnvShort}>
       {/* The themes beside the language, where the page is wide enough
           for two (plan 139): three screens across half a page stand at
-          a thumbnail's height rather than a phone's. */}
-      <SlipColumns>
-        <SlipColumn>
-          <Slip label={t.theme}>
-            <div className="theme-picks" role="radiogroup" aria-label={t.theme} onKeyDown={onWalk}>
-              {THEMES.map((opt, i) => (
+          a thumbnail's height rather than a phone's, and the two
+          languages stand one over the other at the screens' height
+          (plan 145). */}
+      <SlipRow>
+        <Slip label={t.theme}>
+          <div className="theme-picks" role="radiogroup" aria-label={t.theme} onKeyDown={onWalk}>
+            {THEMES.map((opt, i) => (
+              <button
+                key={opt.key}
+                type="button"
+                role="radio"
+                aria-checked={choice === opt.key}
+                tabIndex={radioTab(desk, i, THEMES.findIndex(o => o.key === choice))}
+                className={`theme-pick${choice === opt.key ? ' theme-pick--on' : ''}`}
+                data-theme-pick={opt.key}
+                title={opt.hint}
+                onClick={() => { if (choice !== opt.key) { setChoice(opt.key); playToggle() } }}
+              >
+                <span className="theme-mini" aria-hidden="true">
+                  {opt.key === 'auto'
+                    ? <><MiniScreen tone="light" /><MiniScreen tone="dark" cut /></>
+                    : <MiniScreen tone={opt.key} />}
+                </span>
+                <span className="theme-pick__name">{opt.label}</span>
+              </button>
+            ))}
+          </div>
+        </Slip>
+        <Slip label={t.language}>
+          <div className="lang-picks" role="radiogroup" aria-label={t.language} onKeyDown={onWalk}>
+            {LANGUAGES.map((l, i) => {
+              const own = translations[l.code] ?? {}
+              return (
                 <button
-                  key={opt.key}
+                  key={l.code}
                   type="button"
                   role="radio"
-                  aria-checked={choice === opt.key}
-                  tabIndex={radioTab(desk, i, THEMES.findIndex(o => o.key === choice))}
-                  className={`theme-pick${choice === opt.key ? ' theme-pick--on' : ''}`}
-                  data-theme-pick={opt.key}
-                  title={opt.hint}
-                  onClick={() => { if (choice !== opt.key) { setChoice(opt.key); playToggle() } }}
+                  aria-checked={lang === l.code}
+                  tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === lang))}
+                  lang={l.code}
+                  className={`lang-pick${lang === l.code ? ' lang-pick--on' : ''}`}
+                  onClick={() => { if (lang !== l.code) { switchLang(l.code); playClick() } }}
                 >
-                  <span className="theme-mini" aria-hidden="true">
-                    {opt.key === 'auto'
-                      ? <><MiniScreen tone="light" /><MiniScreen tone="dark" cut /></>
-                      : <MiniScreen tone={opt.key} />}
-                  </span>
-                  <span className="theme-pick__name">{opt.label}</span>
+                  <span className="lang-pick__name">{l.label}</span>
+                  <span className="lang-pick__sample">{own.tabToday} · {own.tabDictionary}</span>
                 </button>
-              ))}
-            </div>
-          </Slip>
-        </SlipColumn>
-        <SlipColumn>
-          <Slip label={t.language}>
-            <div className="lang-picks" role="radiogroup" aria-label={t.language} onKeyDown={onWalk}>
-              {LANGUAGES.map((l, i) => {
-                const own = translations[l.code] ?? {}
-                return (
-                  <button
-                    key={l.code}
-                    type="button"
-                    role="radio"
-                    aria-checked={lang === l.code}
-                    tabIndex={radioTab(desk, i, LANGUAGES.findIndex(o => o.code === lang))}
-                    lang={l.code}
-                    className={`lang-pick${lang === l.code ? ' lang-pick--on' : ''}`}
-                    onClick={() => { if (lang !== l.code) { switchLang(l.code); playClick() } }}
-                  >
-                    <span className="lang-pick__name">{l.label}</span>
-                    <span className="lang-pick__sample">{own.tabToday} · {own.tabDictionary}</span>
-                  </button>
-                )
-              })}
-            </div>
-          </Slip>
+              )
+            })}
+          </div>
+        </Slip>
+      </SlipRow>
 
-          <InstallSlip t={t} />
-        </SlipColumn>
-      </SlipColumns>
+      <InstallSlip t={t} />
     </SettingsPage>
   )
 }
@@ -126,7 +124,7 @@ function InstallSlip({ t }) {
   // The store app is already installed (plan 076).
   if (isNative() || standalone || (!promptable && !ios)) return null
   return (
-    <Slip label={t.installApp}>
+    <Slip label={t.installApp} across>
       <span className="slip__hint">{t.installAppHint}</span>
       <button
         type="button"
