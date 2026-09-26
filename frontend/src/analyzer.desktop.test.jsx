@@ -283,6 +283,20 @@ describe('the analyser on the desk (plan 134)', () => {
     expect(shown()).toBe('〜ている')
   })
 
+  it('keeps a long sentence\'s grammar inside the window, scrolling in its box', async () => {
+    const [wo, teiru] = GRAMMAR[0].grammar
+    const more = Array.from({ length: 12 }, (_, i) => ({ ...teiru, raw_id: `grammar_N5_x${i}`, pattern: `〜ている${i}`, meaning: 'an action going on, and a gloss long enough to take two lines' }))
+    passage = [{ ...GRAMMAR[0], grammar: [wo, teiru, ...more] }]
+    await mount()
+    await analyze('雨を見ている')
+    // One sentence: no list, the grammar at the column's top.
+    expect($('.anl-desk__rail')).toBeNull()
+    const points = $('.anl-desk__points')
+    expect(Math.abs(points.getBoundingClientRect().top - $('.anl-desk__head').getBoundingClientRect().top)).toBeLessThan(2)
+    expect(points.getBoundingClientRect().bottom).toBeLessThanOrEqual($('.anl-desk').getBoundingClientRect().bottom + 1)
+    expect(points.scrollHeight).toBeGreaterThan(points.clientHeight)
+  })
+
   it('gives the walked word back when a new Passage arrives', async () => {
     passage = GRAMMAR
     await mount()

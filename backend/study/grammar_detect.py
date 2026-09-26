@@ -354,7 +354,28 @@ def _shape(level: str, pattern: str) -> tuple[tuple[frozenset[str], frozenset[st
             # which is 〜てくださる's lesson and not this one's.
             frozenset(ending for _s, _h, _b, ending, _i in kept),
         ))
-    return tuple(out)
+    return tuple(_pooled(out))
+
+
+def _pooled(shapes):
+    """Each spelling's shape, with the words it may attach to shared
+    among the spellings that are the same kind of word.
+
+    です／だ is one point in two registers, and its lessons show the
+    polite spelling four times and the plain one once -- after しずか.
+    Read apart, だ learned that it follows a na-adjective and nothing
+    else, and 夜だ, 学生だ, every plain sentence ending in a noun, had no
+    copula. Where two spellings are realized by the same parts of speech
+    and stand the same way, they are the same word written two ways, and
+    what one attaches to the other may too. Spellings that are different
+    kinds of word keep their own: 〜になる stands on its own に after a
+    noun, while 〜くなる grows out of the adjective in front of it.
+    """
+    return [
+        (heads, befores.union(*(b for h, b, s, _e in shapes if h == heads and s == stands))
+         if heads else befores, stands, endings)
+        for heads, befores, stands, endings in shapes
+    ]
 
 
 def _without_coincidences(kept) -> frozenset[str]:
