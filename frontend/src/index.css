@@ -25874,6 +25874,38 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     flex-direction: row;
     align-items: center;
   }
+  /* A grammar point, or any long headword, stacked rather than
+     beside: the pattern's auto column took the band's width and left
+     its formation and gloss a word a line (〜ないでください). The marks
+     and actions ride one line over it, as a phone sets them; how it is
+     formed over the pattern, the gloss under it, each the plate's
+     whole width -- the order the desk's dictionary page keeps, above. */
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "row"
+      "readings"
+      "word"
+      "caption"
+      "stripe";
+    gap: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__word {
+    justify-self: start;
+    text-indent: 0;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+    align-self: start;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__caption {
+    font-size: var(--fs-title);
+  }
   /* The learner's record under the stripe, four across (below), then
      the lesson in two columns where each holds a desk column's least
      width, --desk-run-col-min, and one where the page is narrower. */
