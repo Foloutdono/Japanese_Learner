@@ -57,7 +57,7 @@ import { useGridWalk } from '../hooks/useGridWalk'
 import { Console, ConsoleTop, Chips, Chip, ConsoleIndex } from '../components/chrome/Console'
 import { stationFor } from '../config/stations'
 import { SOURCES } from '../components/analysis/sources'
-import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon } from '../components/ui/Icons'
+import { TextLinesIcon, CameraIcon, VideoIcon, StarIcon, SlidersIcon } from '../components/ui/Icons'
 import { Loading } from '../components/ui/Loading'
 import { RadicalGrid, BlockMark } from '../components/dictionary/RadicalIndex'
 import Empty from '../components/ui/Empty'
@@ -212,6 +212,10 @@ export default function DictionaryScreen({ session }) {
 	// state can be read (the level has the same problem and an argument).
 	const [searchOpts, setSearchOpts] = useState(loadSearchOpts)
 	const searchOptsRef = useRef(searchOpts)
+	// The options row is folded behind a toggle in the field: four rows
+	// of chips over the catalogue was too much on a phone for a setting
+	// most searches never touch. Closed on arrival.
+	const [optsOpen, setOptsOpen]     = useState(false)
 	const [selected, setSelected]     = useState(null)
 	// The entry a door inside the open panel leads to: a word from a
 	// kanji's ledger, a kanji from a word's, a kana's twin, a grammar
@@ -670,6 +674,9 @@ export default function DictionaryScreen({ session }) {
 	// and a search box over a 71-symbol table adds little.
 	const isSyllabary = mode === 'search' && (category === 'hiragana' || category === 'katakana')
 	const isShelf = category === FAVORITES
+	// The search options exist wherever there is a field to type into.
+	const hasSearchOpts = !isSyllabary && !isShelf && !showingRadicalGrid
+	const searchOptsSet = searchOpts.match !== SEARCH_DEFAULTS.match || searchOpts.field !== SEARCH_DEFAULTS.field
 
 	// 案内 — once the first page of the catalogue has painted (plan 100).
 	const guide = useGuide('dictionary', !loading && results.length > 0)
@@ -806,13 +813,12 @@ export default function DictionaryScreen({ session }) {
 							))}
 						</Chips>
 					)}
-					{/* How the query is read, once there is one: how strictly
-					    (a whole word, the start of one, anywhere) and where
-					    (everything, the Japanese alone, the meaning alone). Two
-					    groups on one row under the same hairline as the levels;
-					    shown only while a query is typed, since the browse has
-					    nothing to be strict about. */}
-					{query.trim() && !isSyllabary && !isShelf && !showingRadicalGrid && (
+					{/* How the query is read: how strictly (a whole word, the
+					    start of one, anywhere) and where (everything, the
+					    Japanese alone, the meaning alone). Two groups on one row
+					    under the same hairline as the levels, opened from the
+					    toggle in the field (searchToggle below). */}
+					{optsOpen && hasSearchOpts && (
 						<div className="dict-search-opts">
 							<Chips label={t.dictMatch}>
 								{MATCHES.map(key => (
@@ -869,7 +875,26 @@ export default function DictionaryScreen({ session }) {
 							: t.dictionaryPlaceholder}
 						clearLabel={t.close}
 						count={loading ? null : t.dictionaryResults(total)}
-						toggle={category === 'kanji' ? (
+						toggle={<>
+							{/* The search options' door. Lit while the row is
+							    open, and while a setting is not the default even
+							    with the row folded, so a stricter or looser
+							    search never hides behind a closed toggle. */}
+							{hasSearchOpts && (
+								<Chip
+									className="console__toggle dict-opts-toggle"
+									on={optsOpen || searchOptsSet}
+									aria-expanded={optsOpen}
+									color={DICTIONARY_COLOR}
+									title={t.dictSearchOptions}
+									aria-label={t.dictSearchOptions}
+									data-guide="dict.options"
+									onClick={() => { playUi('click-mode-selection'); setOptsOpen(open => !open) }}
+								>
+									<SlidersIcon size={16} />
+								</Chip>
+							)}
+							{category === 'kanji' && (
 							/* The glyph alone. 部 is the name of the thing —
 							   DESIGN.md, "a body that names itself" — and the
 							   word beside it bought nothing a learner reading a
@@ -879,7 +904,7 @@ export default function DictionaryScreen({ session }) {
 							   for a screen reader (aria-label), which are the
 							   two readers the glyph does not serve. */
 							<Chip
-								className="console__toggle"
+								className="console__toggle dict-radical-toggle"
 								on={mode === 'radical'}
 								color={DICTIONARY_COLOR}
 								title={t.dictModeRadical}
@@ -888,7 +913,8 @@ export default function DictionaryScreen({ session }) {
 							>
 								<span lang="ja" aria-hidden="true">部</span>
 							</Chip>
-						) : null}
+							)}
+						</>}
 					/>
 				)}
 			</Console>

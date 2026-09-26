@@ -1161,6 +1161,7 @@ const dictionary = {
   // How the search reads the query: how strictly, and where.
   dictMatch:         'Match',
   dictMatchOptions:  { word: 'Whole word', start: 'Starts with', any: 'Anywhere' },
+  dictSearchOptions: 'Search options',
   dictField:         'Search in',
   dictFieldOptions:  { all: 'All', japanese: 'Japanese', meaning: 'Meaning' },
   // The search was retried against a word the catalogue holds, because
@@ -2036,6 +2037,7 @@ const guide = {
   guidePracticeDests: 'The levels. Yours is marked; tap another to ride it anyway.',
   guidePracticePass: 'These platforms ride on the pass.',
   guideDictConsole: 'Search by word, reading or meaning.',
+  guideDictOptions: 'Tune the search: the whole word, its start or anywhere, in the Japanese, the meaning or both.',
   guideDictChips: 'The collections, and your shelf of kept entries at the end.',
   guideDictEntry: 'An entry. Tap it to open; its ＋ keeps it on your shelf or adds it to one of your decks.',
   guideDictAnalyzer: 'The analyzer: paste, photograph or film a sentence and take it apart.',

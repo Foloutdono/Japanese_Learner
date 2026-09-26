@@ -5439,6 +5439,9 @@ textarea:focus-visible {
      the line box must be the em (see .chip__glyph). */
   line-height: 1;
 }
+/* Two toggles (the search options, then 部): the first rides the
+   trailing edge, the second sits beside it. */
+.console__toggle + .console__toggle { margin-inline-start: 0; }
 /* A narrow row gives up the figure before it gives up the control. The
    count is meta and the toggle is a way through, and the two of them
    either side of a 390px field left it about a word wide — the
