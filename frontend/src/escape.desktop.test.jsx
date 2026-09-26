@@ -14,12 +14,12 @@ import './index.css'
 //   - A clicked control kept the focus, so the page's Enter pressed it
 //     again -- a lane clicked off came back on instead of departing.
 //   - Esc during the 改札 over the first ride declined the ride.
-//   - The level board held Esc for 2.4s; now it retires the board.
+//   - The level board held Esc for 2.4s; now it retires the level-up's pass.
 //   - Esc typed in a dock's search closed the dock and its ticks.
 
 vi.mock('./lib/audio', async o => ({
   ...(await o()),
-  playUi: vi.fn(), playClick: vi.fn(), playFlapClatter: vi.fn(), playFareTick: vi.fn(), speakJapanese: vi.fn(),
+  playUi: vi.fn(), playClick: vi.fn(), playPassClip: vi.fn(), playFareTick: vi.fn(), speakJapanese: vi.fn(),
 }))
 const apiFetch = vi.hoisted(() => vi.fn())
 vi.mock('./lib/api', () => ({
@@ -171,7 +171,7 @@ describe('Esc while something else holds the screen', () => {
     expect(onLeave).toHaveBeenCalledTimes(1)
   })
 
-  it('retires the level board first, and leaves on the second', async () => {
+  it('retires the level-up\'s pass first, and leaves on the second', async () => {
     const onLeave = vi.fn()
     await render(
       <LangProvider>

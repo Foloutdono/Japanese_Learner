@@ -348,10 +348,11 @@ const EVENTS = [
     variants: [
       // Still mechanical rather than tonal — resonant filtered noise,
       // not an oscillator — so it does not collide with the chimes.
-      // It does step away from the level clatter, which is the one
+      // It stepped away from the level's clatter, which is the one
       // relationship this sound used to carry: a fare and a level are
-      // now two objects (a coin, a board) rather than one machine at
-      // two sizes. That is a deliberate choice, not an oversight.
+      // two objects (a coin, and since plan 139 the pass's punch)
+      // rather than one machine at two sizes. Deliberate, not an
+      // oversight.
       // The peaks look wrong and are not. `peak` in noiseTicks is the
       // envelope BEFORE the bandpass, and a Q of 14 passes a narrow
       // enough sliver of the noise to cost about 21dB, where the
@@ -365,22 +366,36 @@ const EVENTS = [
           { at: 0, freq: 3200, peak: 1.95, q: 14, dur: 0.045 },
           { at: 0.028, freq: 4300, peak: 1.22, q: 14, dur: 0.035 },
         ]) },
-      { key: 'one-flap', label: 'One flap', note: 'A single drum turning. The same machine as the level clatter, smaller.',
+      { key: 'one-flap', label: 'One flap', note: 'A single drum of a departure board turning.',
         play: (c, b) => clatter(c, b, 1) },
       { key: 'soft-tick', label: 'Soft tick', note: 'Duller and quieter, for when the board is not the point.',
         play: (c, b) => noiseTicks(c, b, [{ freq: 1700, peak: 0.20, q: 3, dur: 0.035 }]) },
     ],
   },
   {
-    key: 'flap-clatter', category: 'ui', family: 'rewards',
-    label: 'Level up', jp: '進級', where: 'The board turning your level over',
+    // Plan 139: the level is clipped on the pass rather than turned
+    // over on a board, so its voice is the gate's punch (改札鋏), not
+    // the board's drums. Played on the cut itself -- XpToast starts it
+    // from the bite's own animationstart -- so it lands on the frame
+    // the notch opens, never on a timer guessing at the CSS.
+    key: 'pass-clip', category: 'ui', family: 'rewards',
+    label: 'Level up', jp: '改札鋏', where: 'The gate\'s punch clipping your pass as the level turns over',
     variants: [
-      { key: 'board-run', label: 'Full run', note: 'Eight drums, bunching up and losing energy as they settle.',
-        play: (c, b) => clatter(c, b, 8) },
-      { key: 'short-run', label: 'Short run', note: 'The first four only. Over before you look up.',
-        play: (c, b) => clatter(c, b, 4) },
-      { key: 'heavy-board', label: 'Heavy board', note: 'Bigger drums, lower, landing on a stop.',
-        play: (c, b) => { clatter(c, b, 8, 0.72); thump(c, b, { at: 0.26, from: 120, to: 70, dur: 0.16, peak: 0.13 }) } },
+      { key: 'punch', label: 'Punch', note: 'Steel jaws through card: a bright snip on a short knock.',
+        play: (c, b) => {
+          noiseTicks(c, b, [
+            { freq: 3600, peak: 0.70, q: 7, dur: 0.022 },
+            { at: 0.006, freq: 1250, peak: 0.38, q: 4, dur: 0.03 },
+          ])
+          thump(c, b, { at: 0.004, from: 190, to: 120, dur: 0.07, peak: 0.16 })
+        } },
+      { key: 'snip', label: 'Snip', note: 'The snip alone, no knock. Lighter; over before you look up.',
+        play: (c, b) => noiseTicks(c, b, [{ freq: 3200, peak: 0.70, q: 6, dur: 0.024 }]) },
+      { key: 'press', label: 'Gate press', note: 'Lower and fuller: the ticket stamp\'s knock with more weight behind it.',
+        play: (c, b) => {
+          noiseTicks(c, b, [{ freq: 1100, peak: 0.30, q: 4, dur: 0.03 }])
+          thump(c, b, { at: 0.004, from: 150, to: 90, dur: 0.12, peak: 0.14 })
+        } },
     ],
   },
   {

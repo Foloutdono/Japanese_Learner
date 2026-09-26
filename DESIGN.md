@@ -835,12 +835,26 @@ objects, and not one of them waits to be dismissed:
   the next card for under a second (`CardStamp.browser.test` pins every
   hold and the faintness), because the moment is the press, not a pageant:
   the wash, the kumadori, the brush and the petals are gone.
-- **The level** (進級) turns over on the **in-car display**: a sumi board
-  docked across the top of a phone (the top bar is hidden while studying, so
-  the edge is free and the docked rating bar stays usable) or a panel in the
-  top-right corner on a wider screen, the number on split-flap drums. On a
-  clock, never gating — it leaves by itself while the next card is already
-  in hand.
+- **The level** (進級) is **clipped on the pass** (改札鋏, plan 139): the
+  learner's 定期券 comes down, in its own material (the charcoal-into-sumi
+  ground, hairline and sheen of `.pass`), the old figure is read for a
+  beat, then the gate's punch bites its top edge — a real hole the ground
+  shows through, the chip falling away, the punch's snip on the frame the
+  bite opens — the old figure is struck, the new one printed in the pass's
+  gold, and the balance empties to what the new level already holds. It is
+  the People family throughout: no line pigment, no board. On a phone it
+  hangs across the top inside the stage's gutters (the top bar is hidden
+  while studying, so the edge is free and the docked rating bar stays
+  usable) and the stage steps down under it by `--levelup-h`; wider, it
+  floats at the screen's right at a phone's content width; on the desk it
+  docks in a run's column (see *The desk*). On a clock, never gating — it
+  leaves by itself while the next card is already in hand. It replaced a
+  sumi board whose split-flap drums turned while it was still sliding in,
+  so the one moment it existed for was half missed; the owner's pick of
+  four directions drawn side by side (the board retimed, a hanging station
+  plate, the in-car route, this). Under reduced motion the cut still
+  happens — the bite, the figures, the balance — but nothing drops, jolts,
+  scales or falls.
 
 There was a fourth, **the rank** (再発行): the level bands each carried a
 title (見習い → 浪人 → 侍 → 師範 → 免許皆伝), and crossing one re-issued the
@@ -1182,9 +1196,15 @@ plated gates take the window.
 - **Above about 1460px the workspace is centred** (plan 123): the card and
   the run's side stand together, the window's spare width shared equally
   either side of the pair (`--desk-run-inset`) rather than poured between
-  them, and the level bar spans the workspace only. The level board, when
-  a level is reached, docks across the side's top instead of standing over
-  it.
+  them, and the level bar spans the workspace only.
+- **A level docks in the run's column** (plan 139): the level-up's pass
+  comes out of the top edge of the run's left column on three panels —
+  this run's panel, whose level bar it just topped off — or of the side
+  where a run has the side alone, and the column steps down under it by
+  the pass and its gap, as a phone's stage does. Sticky, so a scrolled
+  column still shows it; no shadow, being docked rather than hung. It
+  never stands over the card's details (plan 123 had docked the board it
+  replaced across the side's top for the same reason).
 - **A card run stands on three panels** (三面, plan 126; it replaced the
   console plan 124 had set on the floor). Three columns of surface
   panels, the owner's own layout: at the left **this run** — the three
@@ -1363,7 +1383,7 @@ plated gates take the window.
   `aria-keyshortcuts`.
 - **Esc belongs to the innermost thing that holds it** (plan 123): a list
   open in an entry, a door opened inside a docked entry, a dock or a
-  lookup in a column, the level board — and only then the run. A field
+  lookup in a column, the level-up's pass — and only then the run. A field
   with text in it spends the first Esc leaving the field. The run's head
   stops printing its Esc while a door holds the key, since the cap would
   say "leave" while Esc closed the door.

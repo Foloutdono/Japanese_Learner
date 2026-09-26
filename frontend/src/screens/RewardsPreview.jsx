@@ -11,7 +11,7 @@ import { seedSummary, applyXpGain } from '../stores/profileSummary'
 // ── 試写 — the reward preview ──────────────────────────────
 // Every reward in the app is gated behind actually earning it, which
 // makes the rarer ones effectively unreviewable: checking whether a
-// level board looks right at three digits, or whether a demotion
+// level-up looks right at three digits, or whether a demotion
 // stamp reads as a lapse, meant grinding a real account there — or
 // trusting it, which is how a thing nobody has ever seen ships broken.
 //
@@ -128,11 +128,16 @@ export default function RewardsPreview() {
           ))}
         </div>
 
-        <SectionHeader jp="進級" title="Level board" />
+        <SectionHeader jp="進級" title="Level up" />
         <p className="preview-note">
-          The level number turned over. An announcement on the in-car
-          display — docked at the top of a phone, under the top bar on a
-          desktop. Self-dismissing, and it never holds the next card.
+          The level number turned over, clipped on the pass (改札鋏,
+          plan 139): the pass comes down, the gate&apos;s punch bites its top
+          edge, the old figure is struck and the new one printed in gold,
+          and the balance empties to the new level&apos;s start. Hung at
+          the top of a phone, floating at the right of a wider screen; on
+          the desk a run docks it at the top of its column, which this
+          workbench has none of. Self-dismissing, and it never holds the
+          next card.
         </p>
         <div className="preview-rows">
           {[3, 9, 10, 25].map(lv => (
@@ -140,7 +145,7 @@ export default function RewardsPreview() {
               key={lv}
               tier="level"
               label={`Level ${lv - 1} → ${lv}`}
-              note={lv === 10 ? 'single digit to double — the drum count grows' : null}
+              note={lv === 10 ? 'single digit to double — the figure widens' : null}
               onClick={() => fire({ amount: 24, leveledUp: true, newLevel: lv, quality: 5 })}
             />
           ))}

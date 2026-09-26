@@ -53,8 +53,8 @@ export const BASE_GAIN = {
   //          XP landing a beat later is not masked by the answer
   //   0.044  the fare tick, the reward `correct` must not bury
   //   0.045  a screen change, a shade above an option pick
-  //   0.047  the level-up board -- above the fare tick at last,
-  //          having been a third of it
+  //   0.047  the level-up (the pass's punch) -- above the fare tick,
+  //          which the board's clatter it replaced took a round to be
   //   0.060  doors running open
   //   0.070  the gate -- every departure, so it comes DOWN 38%
   //   0.075  the door chime
@@ -83,10 +83,14 @@ export const BASE_GAIN = {
     // transient badly -- chasing the RMS target drove the fare tick
     // to a 0.36 peak and the clatter to 0.62, two to five times
     // hotter than any chime, while both still *read* quiet. Matched
-    // instead to the tonal peak range, with the clatter above the
-    // tick so a level still lands bigger than a fare.
+    // instead to the tonal peak range, with the level above the
+    // tick so a level still lands bigger than a fare. The level's
+    // voice is the pass's punch now (plan 139), not the board's
+    // clatter: measured at 0.36 peak after this trim, over the coin's
+    // 0.26 and the stamp's 0.17, under the clatter's 0.47 -- one cut is
+    // a shorter sound than eight drums, and needs less to be heard.
     'fare-tick':              1.70,
-    'flap-clatter':           3.60,
+    'pass-clip':              2.70,
     // The seal's press: the same knock the mode picker's 'stamp'
     // voice makes, levelled with the fare tick it lands beside.
     'card-stamp':             1.70,
@@ -166,9 +170,9 @@ export function setVolume(category, value) {
 // is no such reference: a recipe's absolute output is an accident of
 // how many oscillators it happens to stack and how hard its filter
 // bites, so the level has to be free to move in both directions. The
-// split-flap clatter needs +3.5 to sit where a level-up belongs, and
-// under clamp01 the only way to grant it was to pull the whole app
-// down to meet it.
+// split-flap clatter the level-up played until plan 139 needed +3.5 to
+// sit where a level-up belongs, and under clamp01 the only way to grant
+// it was to pull the whole app down to meet it.
 //
 // The ceiling is a guard, not a target: nothing in the palette asks
 // for more than 3.5, and every shipped sound was measured after

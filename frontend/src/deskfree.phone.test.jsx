@@ -1059,10 +1059,10 @@ describe('the doors (plan 120)', () => {
 // ── plan 123, P1 — the keys that misfired on the desk ──
 // Every fix is a listener that only the desk installs: the docked
 // entry's Esc lives in the run's side, which a phone never mounts; the
-// level board takes Esc only at a desk; the pointer tracker behind the
+// level-up's pass takes Esc only at a desk; the pointer tracker behind the
 // page's Enter is installed by EnterKey, which listens only on the desk.
 describe('the desk\'s key fixes (plan 123, P1)', () => {
-  it('leave the level board to its clock on a phone', async () => {
+  it('leave the level-up\'s pass to its clock on a phone', async () => {
     const { XpToast } = await import('./components/rewards/XpToast')
     await render(
       <LangProvider>
@@ -1109,21 +1109,31 @@ describe('the stage and the columns (plan 123, P3–P5)', () => {
     expect(getComputedStyle(screen.container.querySelector('.empty')).maxWidth).toBe('none')
   })
 
-  // P5: the workspace's inset and the board docked over a run's side
-  // key on .desk-run, which a phone never renders.
-  it('hangs the level board across the whole top of a run', async () => {
+  // P5: the workspace's inset and the level-up docked in a run's column
+  // (plan 139) key on .desk-run, which a phone never renders: the pass
+  // hangs across the top inside the stage's gutters, and the stage steps
+  // down under it by the pass and a gap.
+  it('hangs the level-up\'s pass across the top of a run, the stage stepping down', async () => {
     const { XpToast } = await import('./components/rewards/XpToast')
     document.documentElement.dataset.chrome = 'stage'
     try {
-      await render(
+      const screen = await render(
         <LangProvider>
-          <div className="screen"><XpToast toast={{ id: 'p5', amount: 20, leveledUp: true, newLevel: 13 }} /></div>
+          <div className="screen">
+            <main className="stage"><p>card</p></main>
+            <XpToast toast={{ id: 'p5', amount: 20, leveledUp: true, newLevel: 13 }} />
+          </div>
         </LangProvider>
       )
       await new Promise(r => setTimeout(r, 400))
-      const board = document.querySelector('.levelup').getBoundingClientRect()
-      expect(board.left).toBe(0)
-      expect(Math.round(board.width)).toBe(Math.round(document.body.getBoundingClientRect().width))
+      const root = getComputedStyle(document.documentElement)
+      const px = name => parseFloat(root.getPropertyValue(name))
+      const pass = document.querySelector('.levelup').getBoundingClientRect()
+      expect(pass.left).toBe(px('--sp-5'))
+      expect(Math.round(pass.width)).toBe(Math.round(document.body.getBoundingClientRect().width - 2 * px('--sp-5')))
+      expect(Math.round(pass.height)).toBe(px('--levelup-h'))
+      expect(parseFloat(getComputedStyle(screen.container.querySelector('.stage')).paddingTop))
+        .toBe(px('--sp-3') + px('--levelup-h') + px('--sp-4'))
     } finally {
       delete document.documentElement.dataset.chrome
     }

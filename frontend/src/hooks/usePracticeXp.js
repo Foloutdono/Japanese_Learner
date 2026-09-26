@@ -10,7 +10,7 @@ import { countXp } from '../stores/runTally'
 // shape, and this hook is the half of useReviewGates that turns that
 // into what a card run shows: the level bar moving (applyXpGain, the
 // one running total every level bar reads) and XpToast's tick and
-// announcement — or the level board, when the gain crosses a line.
+// announcement — or the level-up's pass, when the gain crosses a line.
 //
 // `leveledUp` comes from applyXpGain's running total, not from the
 // response, for the same reason useReviewGates ignores the preview's:

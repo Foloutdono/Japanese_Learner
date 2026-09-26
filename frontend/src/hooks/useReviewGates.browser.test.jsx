@@ -77,7 +77,7 @@ describe('useReviewGates', () => {
   }, 20000)
 
   it('lets a level-up play over the next card', async () => {
-    // The board turns over on the in-car display while the next card
+    // The level-up's pass is clipped (plan 139) while the next card
     // is already in hand. Holding the queue for it was 2.9s of dead
     // time per level, and no reward holds it now: the rank re-issue,
     // the one that waited to be claimed, went with the rank titles.
