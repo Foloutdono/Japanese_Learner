@@ -763,6 +763,137 @@
     ]
   },
   {
+    "pattern": "〜ない",
+    "structure": "verb ない-form ／ い-adj (drop い) + くない ／ noun or な-adj + じゃない",
+    "meaning": {
+      "en": "plain negative: does not, is not",
+      "fr": "négatif neutre : ne… pas"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**ない** is the plain negative, the casual counterpart of ません. Verbs take their ない-form (食べない, 行かない, しない, こない), い-adjectives turn い into くない (高くない), nouns and な-adjectives add じゃない (学生じゃない, ではない in writing).",
+        "fr": "**ない** est le négatif neutre, l'équivalent familier de ません. Les verbes prennent leur forme en ない (食べない, 行かない, しない, こない), les adjectifs en い changent い en くない (高くない), les noms et les adjectifs en な ajoutent じゃない (学生じゃない, ではない à l'écrit)."
+      },
+      {
+        "kind": "use",
+        "en": "- With friends and family, where ません would sound distant: あしたは行かない.\n- Before a noun, even in a polite sentence: 食べない人.\n- Its past is なかった: 行かなかった, 高くなかった.",
+        "fr": "- Entre amis et en famille, où ません paraîtrait distant : あしたは行かない.\n- Devant un nom, même dans une phrase polie : 食べない人.\n- Son passé est なかった : 行かなかった, 高くなかった."
+      },
+      {
+        "kind": "careful",
+        "en": "ある has no あらない: its negative is simply ない, an adjective of its own. So お金がない (there is no money) has no verb in it. And いい becomes よくない.",
+        "fr": "ある n'a pas de forme あらない : son négatif est simplement ない, un adjectif à part entière. お金がない (il n'y a pas d'argent) ne contient donc aucun verbe. Et いい devient よくない."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ます／〜ません",
+        "en": "ない is the plain negative, among friends and inside a sentence; ません is the polite one that ends a sentence.",
+        "fr": "ない est le négatif neutre, entre proches et à l'intérieur d'une phrase ; ません est le négatif poli qui termine la phrase."
+      },
+      {
+        "pattern": "〜ないでください",
+        "en": "ない says it does not happen; ないでください asks someone not to do it.",
+        "fr": "ない dit que cela ne se fait pas ; ないでください demande à quelqu'un de ne pas le faire."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "あしたは学校に行かない。",
+        "en": "I'm not going to school tomorrow.",
+        "fr": "Demain, je ne vais pas à l'école.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "今日は天気がよくないね。",
+        "en": "The weather isn't great today, is it?",
+        "fr": "Il ne fait pas très beau aujourd'hui, hein ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "それはわたしのかさじゃないよ。",
+        "en": "That's not my umbrella.",
+        "fr": "Ce n'est pas mon parapluie.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "あさごはんを食べない人は多いです。",
+        "en": "Many people don't eat breakfast.",
+        "fr": "Beaucoup de gens ne prennent pas de petit-déjeuner.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜た／〜だ",
+    "structure": "verb た-form (〜た・〜だ) ／ い-adj (drop い) + かった ／ noun or な-adj + だった",
+    "meaning": {
+      "en": "plain past: did, was",
+      "fr": "passé neutre : a fait, était"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**た** is the plain past, the casual counterpart of ました. A verb swaps the て or で of its て-form for た or だ (食べて → 食べた, 読んで → 読んだ); an い-adjective takes かった (高かった), a noun or な-adjective だった (学生だった).",
+        "fr": "**た** est le passé neutre, l'équivalent familier de ました. Un verbe remplace le て ou le で de sa forme en て par た ou だ (食べて → 食べた, 読んで → 読んだ) ; un adjectif en い prend かった (高かった), un nom ou un adjectif en な, だった (学生だった)."
+      },
+      {
+        "kind": "use",
+        "en": "- Telling a friend what happened: きのう、えいがを見た.\n- Before a noun, even in a polite sentence: きのう買った本.\n- The negative past is なかった: 行かなかった, 高くなかった.",
+        "fr": "- Raconter à un ami ce qui s'est passé : きのう、えいがを見た.\n- Devant un nom, même dans une phrase polie : きのう買った本.\n- Le passé négatif est なかった : 行かなかった, 高くなかった."
+      },
+      {
+        "kind": "careful",
+        "en": "An い-adjective carries its own past: the polite form is 高かったです, never 高いでした. And いい becomes よかった.",
+        "fr": "Un adjectif en い porte lui-même son passé : la forme polie est 高かったです, jamais 高いでした. Et いい devient よかった."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ました／〜ませんでした",
+        "en": "た is the plain past, among friends and before a noun; ました, which is ます with this same た on its end, is the polite one.",
+        "fr": "た est le passé neutre, entre proches et devant un nom ; ました, qui est ます suivi de ce même た, est le passé poli."
+      },
+      {
+        "pattern": "〜ない",
+        "en": "た puts it in the past; ない makes it negative. Both at once: なかった.",
+        "fr": "た met au passé ; ない met à la forme négative. Les deux à la fois : なかった."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "これはきのう買ったかばんです。",
+        "en": "This is the bag I bought yesterday.",
+        "fr": "C'est le sac que j'ai acheté hier.",
+        "register": "polite"
+      },
+      {
+        "jp": "日よう日は、うちで本を読んだ。",
+        "en": "On Sunday I read a book at home.",
+        "fr": "Dimanche, j'ai lu un livre à la maison.",
+        "register": "casual"
+      },
+      {
+        "jp": "けさはとてもさむかった。",
+        "en": "It was very cold this morning.",
+        "fr": "Ce matin, il faisait très froid.",
+        "register": "casual"
+      },
+      {
+        "jp": "子どものとき、魚がきらいだった。",
+        "en": "As a child, I hated fish.",
+        "fr": "Enfant, je détestais le poisson.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
     "pattern": "〜たいです",
     "structure": "verb stem + たいです",
     "meaning": {
@@ -904,6 +1035,75 @@
         "en": "Please come in.",
         "fr": "Entrez, je vous en prie.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜て（依頼）",
+    "structure": "request as て（依頼）: verb て-form at the end of the sentence",
+    "meaning": {
+      "en": "casual request: do it, will you",
+      "fr": "demande familière : fais-le"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "A **て-form** that ends the sentence is a casual request: ちょっとまって (wait a moment). It is 〜てください with ください dropped, for the people close to you.",
+        "fr": "Une **forme en て** qui termine la phrase est une demande familière : ちょっとまって (attends un peu). C'est 〜てください sans ください, pour les gens proches."
+      },
+      {
+        "kind": "use",
+        "en": "- Everyday requests at home or among friends: これ、見て.\n- Softer with ね at the end: あとで電話してね.\n- Said warmly, it also encourages: がんばって (go for it).",
+        "fr": "- Les demandes de tous les jours, à la maison ou entre amis : これ、見て.\n- Plus doux avec ね à la fin : あとで電話してね.\n- Dit avec chaleur, c'est aussi un encouragement : がんばって (courage)."
+      },
+      {
+        "kind": "careful",
+        "en": "Only for friends, family and people younger than you: to a teacher, a customer or a stranger, keep 〜てください. Said sharply, it sounds like an order.",
+        "fr": "Seulement avec les amis, la famille et les plus jeunes : envers un professeur, un client ou un inconnu, gardez 〜てください. Dit sèchement, cela sonne comme un ordre."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜てください",
+        "en": "て alone is the casual request among friends; てください is the polite one, for anyone else.",
+        "fr": "て seul est la demande familière entre proches ; てください est la demande polie, pour tous les autres."
+      },
+      {
+        "pattern": "〜ないでください",
+        "en": "て asks someone to do it; ないでください asks them not to, and among friends drops ください too: 見ないで.",
+        "fr": "て demande de faire ; ないでください demande de ne pas faire, et entre proches laisse aussi tomber ください : 見ないで."
+      },
+      {
+        "pattern": "〜て、〜て",
+        "en": "A て that ends the sentence asks; a て in the middle joins two actions, and the sentence goes on.",
+        "fr": "Un て qui termine la phrase demande ; un て au milieu relie deux actions, et la phrase continue."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "ごめん、ちょっとまって。",
+        "en": "Sorry, wait a second.",
+        "fr": "Pardon, attends une seconde.",
+        "register": "casual"
+      },
+      {
+        "jp": "ねえ、見て！空がきれいだよ。",
+        "en": "Hey, look! The sky is beautiful.",
+        "fr": "Regarde ! Le ciel est magnifique.",
+        "register": "casual"
+      },
+      {
+        "jp": "あした、七時におこして。",
+        "en": "Wake me up at seven tomorrow.",
+        "fr": "Réveille-moi à sept heures demain.",
+        "register": "casual"
+      },
+      {
+        "jp": "あとで電話してね。",
+        "en": "Call me later, OK?",
+        "fr": "Appelle-moi plus tard, d'accord ?",
+        "register": "casual"
       }
     ]
   },
@@ -3906,6 +4106,73 @@
     ]
   },
   {
+    "pattern": "あげる／くれる／もらう",
+    "structure": "person + に + thing + を + あげる・くれる・もらう",
+    "meaning": {
+      "en": "giving and receiving things",
+      "fr": "donner et recevoir des choses"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "Three verbs for giving, chosen by direction: **あげる**, I (or my side) give to someone; **くれる**, someone gives to me (or my side); **もらう**, I receive from someone, who takes に or から.",
+        "fr": "Trois verbes pour donner, choisis selon le sens du don : **あげる**, je (ou mon entourage) donne à quelqu'un ; **くれる**, quelqu'un me donne (ou donne à mon entourage) ; **もらう**, je reçois de quelqu'un, marqué par に ou から."
+      },
+      {
+        "kind": "use",
+        "en": "- A present you give: 友だちに花をあげる.\n- One you got, told two ways: 田中さんがくれた (Tanaka gave it to me), 田中さんにもらった (I got it from Tanaka).\n- With a superior, the polite forms are さしあげる, くださる and いただく.",
+        "fr": "- Un cadeau qu'on offre : 友だちに花をあげる.\n- Un cadeau reçu, dit de deux façons : 田中さんがくれた (Tanaka me l'a donné), 田中さんにもらった (je l'ai reçu de Tanaka).\n- Avec un supérieur, les formes polies sont さしあげる, くださる et いただく."
+      },
+      {
+        "kind": "careful",
+        "en": "くれる always points toward me or someone on my side (my family, my friend). Between two other people, it is あげる: 田中さんが山田さんにあげました.",
+        "fr": "くれる va toujours vers moi ou vers quelqu'un de mon entourage (ma famille, un ami). Entre deux autres personnes, c'est あげる : 田中さんが山田さんにあげました."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜てあげる／てくれる／てもらう",
+        "en": "These three give and receive things; after a て-form, the same verbs give and receive a favour: 教えてくれた.",
+        "fr": "Ces trois verbes donnent et reçoivent des choses ; après une forme en て, les mêmes verbes donnent et reçoivent un service : 教えてくれた."
+      },
+      {
+        "pattern": "〜をください",
+        "en": "くれる reports that someone gives me something; をください asks for it, here and now.",
+        "fr": "くれる rapporte qu'on me donne quelque chose ; をください le demande, ici et maintenant."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "もう読んだから、この本は友だちにあげる。",
+        "en": "I've already read it, so I'm giving this book to a friend.",
+        "fr": "Je l'ai déjà lu, alors je donne ce livre à un ami.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "母の日に、母にあげる花を買いました。",
+        "en": "I bought flowers to give my mother on Mother's Day.",
+        "fr": "J'ai acheté des fleurs à offrir à ma mère pour la fête des Mères.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "母はいつもおいしいおかしをくれる。",
+        "en": "My mum always gives me tasty sweets.",
+        "fr": "Ma mère me donne toujours de bonnes friandises.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "たんじょう日に、父から新しいかばんをもらいました。",
+        "en": "For my birthday I got a new bag from my father.",
+        "fr": "Pour mon anniversaire, j'ai reçu un nouveau sac de mon père.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
     "pattern": "〜が分かります",
     "structure": "Noun + が分かります",
     "meaning": {
@@ -4374,6 +4641,72 @@
         "jp": "この本は高いです。しかし、とてもいいです。",
         "en": "This book is expensive. But it is very good.",
         "fr": "Ce livre est cher. Mais il est très bon.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "でも（接続詞）",
+    "structure": "sentence + 。 でも（接続詞） + sentence",
+    "meaning": {
+      "en": "but, however (spoken, at the head of a sentence)",
+      "fr": "mais, pourtant (à l'oral, en tête de phrase)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**でも** at the head of a sentence means « but »: what follows goes against what was just said. It is the everyday spoken word, in casual and polite speech alike.",
+        "fr": "**でも** en tête de phrase signifie « mais » : ce qui suit va contre ce qui vient d'être dit. C'est le mot courant de l'oral, en langue familière comme polie."
+      },
+      {
+        "kind": "use",
+        "en": "- Setting a good side against a bad one: 高いね。でも、おいしい.\n- A polite refusal: すみません。でも、今日は時間がありません.\n- Answering back: でも、先生はいいと言いました.",
+        "fr": "- Opposer un bon côté à un mauvais : 高いね。でも、おいしい.\n- Un refus poli : すみません。でも、今日は時間がありません.\n- Objecter : でも、先生はいいと言いました."
+      },
+      {
+        "kind": "careful",
+        "en": "After a noun, でも is another word: おちゃでも (tea or something), 子どもでも (even a child). And in an essay or a report, write しかし: でも is too conversational there.",
+        "fr": "Après un nom, でも est un autre mot : おちゃでも (du thé ou autre chose), 子どもでも (même un enfant). Et dans une dissertation ou un rapport, on écrit しかし : でも y est trop parlé."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "しかし",
+        "en": "でも is the everyday word, casual or polite; しかし belongs to writing and formal speech.",
+        "fr": "でも est le mot de tous les jours, familier ou poli ; しかし relève de l'écrit et du discours formel."
+      },
+      {
+        "pattern": "〜けど",
+        "en": "でも opens a new sentence; けど joins the two halves inside one: 高いけど、おいしい.",
+        "fr": "でも ouvre une nouvelle phrase ; けど relie les deux moitiés dans une seule : 高いけど、おいしい."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "毎日れんしゅうしました。でも、まだ上手じゃありません。",
+        "en": "I practised every day. But I'm still not good at it.",
+        "fr": "Je me suis entraîné tous les jours. Mais je ne suis toujours pas doué.",
+        "register": "polite"
+      },
+      {
+        "jp": "うん、分かった。でも、あしたはだめだよ。",
+        "en": "OK, got it. But tomorrow's no good.",
+        "fr": "D'accord, compris. Mais demain, ça ne va pas.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "このケーキ、高いね。でも、おいしい！",
+        "en": "This cake is pricey, isn't it? But it's delicious!",
+        "fr": "Ce gâteau est cher, hein ? Mais il est délicieux !",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "すみません。でも、その日はちょっといそがしいです。",
+        "en": "I'm sorry. But I'm a little busy that day.",
+        "fr": "Désolé. Mais ce jour-là, je suis un peu occupé.",
         "register": "polite"
       }
     ]

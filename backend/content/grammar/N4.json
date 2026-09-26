@@ -353,6 +353,67 @@
     ]
   },
   {
+    "pattern": "〜のに（用途）",
+    "structure": "verb dictionary form + のに（用途） + 使う／いい／べんりだ／ひつようだ／かかる",
+    "meaning": {
+      "en": "for (doing): a use, a need, a cost",
+      "fr": "pour (faire) : un usage, un besoin, un coût"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**dictionary form + のに** names what something is for, and a word of use, need or cost follows: 紙を切るのに使う (used for cutting paper).",
+        "fr": "**forme du dictionnaire + のに** dit à quoi sert une chose, et un mot d'usage, de besoin ou de coût suit : 紙を切るのに使う (sert à couper le papier)."
+      },
+      {
+        "kind": "use",
+        "en": "- What a thing is used for, or how handy it is: このかばんは旅行に行くのにべんりだ.\n- Whether it suits: 漢字をおぼえるのにいい.\n- What it takes, in time or money: 駅まで歩くのに二十分かかる.",
+        "fr": "- À quoi sert une chose, ou si elle est pratique : このかばんは旅行に行くのにべんりだ.\n- Si elle convient : 漢字をおぼえるのにいい.\n- Ce qu'il faut, en temps ou en argent : 駅まで歩くのに二十分かかる."
+      },
+      {
+        "kind": "careful",
+        "en": "Not the のに of « although »: this one follows a dictionary form and comes before 使う, いい, べんり, ひつよう or かかる. After a noun there is no の: 旅行に使う.",
+        "fr": "Ce n'est pas le のに de « bien que » : celui-ci suit une forme du dictionnaire et précède 使う, いい, べんり, ひつよう ou かかる. Après un nom, pas de の : 旅行に使う."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ために",
+        "en": "ために leads to what you do for the goal; のに to how useful, needed or costly something is for it: 車を買うためにお金をためる, 車を買うのにお金がかかる.",
+        "fr": "ために mène à ce qu'on fait pour le but ; のに, à ce qu'une chose a d'utile, de nécessaire ou de coûteux pour lui : 車を買うためにお金をためる, 車を買うのにお金がかかる."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "このはさみは、紙を切るのに使います。",
+        "en": "These scissors are used for cutting paper.",
+        "fr": "Ces ciseaux servent à couper le papier.",
+        "register": "polite"
+      },
+      {
+        "jp": "駅まで歩くのに二十分かかります。",
+        "en": "It takes twenty minutes to walk to the station.",
+        "fr": "Il faut vingt minutes pour aller à pied à la gare.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "この本は、漢字をおぼえるのにいいよ。",
+        "en": "This book is good for learning kanji.",
+        "fr": "Ce livre est bien pour retenir les kanji.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "家を建てるのには、お金がたくさんひつようだ。",
+        "en": "Building a house takes a lot of money.",
+        "fr": "Pour faire construire une maison, il faut beaucoup d'argent.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜てあげる／てくれる／てもらう",
     "structure": "verb て-form + あげる・くれる・もらう",
     "meaning": {
@@ -1167,6 +1228,76 @@
         "en": "I heard that Tanaka isn't coming.",
         "fr": "J'ai entendu dire que Tanaka ne viendrait pas.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜って",
+    "structure": "plain form ／ noun + って",
+    "meaning": {
+      "en": "casual quotation (they say…) and casual topic",
+      "fr": "citation familière (il paraît que…) et thème familier"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**って** is the casual と of quotation: 田中さんは休むって (Tanaka says he's off). After a noun it also marks a topic you ask about or explain: 田中さんって、だれ？ (who's this Tanaka?).",
+        "fr": "**って** est le と familier de la citation : 田中さんは休むって (Tanaka dit qu'il ne vient pas). Après un nom, il marque aussi un thème sur lequel on s'interroge ou qu'on explique : 田中さんって、だれ？ (c'est qui, ce Tanaka ?)."
+      },
+      {
+        "kind": "use",
+        "en": "- Passing news on, the verb left out: あした雨がふるって (they say it'll rain tomorrow).\n- In place of と before 言う or 聞く: 休むって聞いた.\n- « Called », the casual という: さくらって店.",
+        "fr": "- Transmettre une nouvelle, sans le verbe : あした雨がふるって (il paraît qu'il va pleuvoir demain).\n- À la place de と devant 言う ou 聞く : 休むって聞いた.\n- « Appelé », le という familier : さくらって店."
+      },
+      {
+        "kind": "careful",
+        "en": "って is spoken and casual: in polite speech say と言っていました, in writing と or という. A quoted noun takes だ: あしたは休みだって is « they say tomorrow is a day off », while 休みって opens a topic.",
+        "fr": "って est oral et familier : en langue polie, on dit と言っていました, à l'écrit と ou という. Un nom cité prend だ : あしたは休みだって, c'est « il paraît que demain c'est congé », alors que 休みって ouvre un thème."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜という",
+        "en": "って is the spoken shortcut; という is the neutral form, the one you write: さくらという店.",
+        "fr": "って est le raccourci de l'oral ; という est la forme neutre, celle qu'on écrit : さくらという店."
+      },
+      {
+        "pattern": "〜と言います",
+        "en": "って passes words on casually, often with the verb dropped; と言います reports them politely, verb and all.",
+        "fr": "って transmet des paroles familièrement, souvent sans le verbe ; と言います les rapporte poliment, verbe compris."
+      },
+      {
+        "pattern": "は",
+        "en": "は marks any topic; って picks out one you are asking about or defining: これって何？",
+        "fr": "は marque n'importe quel thème ; って en isole un sur lequel on s'interroge ou qu'on définit : これって何？"
+      }
+    ],
+    "examples": [
+      {
+        "jp": "田中さんは、あした休むって。",
+        "en": "Tanaka says he's taking tomorrow off.",
+        "fr": "Tanaka dit qu'il ne vient pas demain.",
+        "register": "casual"
+      },
+      {
+        "jp": "山田さんって、どんな人ですか。",
+        "en": "What is Yamada like?",
+        "fr": "Yamada, c'est quel genre de personne ?",
+        "register": "polite"
+      },
+      {
+        "jp": "駅の前に新しい店ができたって聞きました。",
+        "en": "I heard a new shop has opened in front of the station.",
+        "fr": "J'ai entendu dire qu'un nouveau magasin avait ouvert devant la gare.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "さくらって店、行ったことある？",
+        "en": "Have you ever been to a shop called Sakura?",
+        "fr": "Tu es déjà allé dans un magasin qui s'appelle Sakura ?",
+        "register": "casual"
       }
     ]
   },
@@ -2663,6 +2794,73 @@
     ]
   },
   {
+    "pattern": "〜ほど〜ない",
+    "structure": "A は + B + ほど + negative predicate (〜ない)",
+    "meaning": {
+      "en": "not as … as",
+      "fr": "pas aussi… que"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**B ほど〜ない** says something does not reach B's degree: « not as … as B ». ほど follows the thing you measure against, and the sentence ends in a negative.",
+        "fr": "**B ほど〜ない** dit qu'une chose n'atteint pas le degré de B : « pas aussi… que B ». ほど suit l'élément de comparaison, et la phrase se termine par un négatif."
+      },
+      {
+        "kind": "use",
+        "en": "- Comparing two things: わたしの町は東京ほど大きくない.\n- Against what you expected: 思ったほどむずかしくない (not as hard as I thought).\n- With a verb too: 兄ほどはやく走れない.",
+        "fr": "- Comparer deux choses : わたしの町は東京ほど大きくない.\n- Par rapport à ce qu'on attendait : 思ったほどむずかしくない (moins difficile que prévu).\n- Aussi avec un verbe : 兄ほどはやく走れない."
+      },
+      {
+        "kind": "careful",
+        "en": "In this sense ほど needs the negative. To say that B is more, use より: 去年よりあつい, not 去年ほどあつい.",
+        "fr": "Dans ce sens, ほど exige le négatif. Pour dire que B est plus, on emploie より : 去年よりあつい, et non 去年ほどあつい."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜より〜のほうが",
+        "en": "ほど〜ない says A falls short of B; より〜のほうが says B is more than A: 東京ほど大きくない, 東京のほうが大きい.",
+        "fr": "ほど〜ない dit que A n'atteint pas B ; より〜のほうが dit que B est plus que A : 東京ほど大きくない, 東京のほうが大きい."
+      },
+      {
+        "pattern": "〜と〜とどちらが",
+        "en": "と〜とどちらが asks which of two is more; ほど〜ない answers that one falls short of the other.",
+        "fr": "と〜とどちらが demande lequel des deux l'emporte ; ほど〜ない répond que l'un n'atteint pas l'autre."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今年の夏は、去年ほどあつくない。",
+        "en": "This summer isn't as hot as last year.",
+        "fr": "Cet été, il ne fait pas aussi chaud que l'an dernier.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "わたしの町は、東京ほど大きくないです。",
+        "en": "My town isn't as big as Tokyo.",
+        "fr": "Ma ville n'est pas aussi grande que Tokyo.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "日本語は、思ったほどむずかしくない。",
+        "en": "Japanese isn't as hard as I thought.",
+        "fr": "Le japonais n'est pas aussi difficile que je le pensais.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "ぼくは兄ほどはやく走れない。",
+        "en": "I can't run as fast as my big brother.",
+        "fr": "Je ne cours pas aussi vite que mon grand frère.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
     "pattern": "〜ても",
     "structure": "verb て-form + も / adjective + ても",
     "meaning": {
@@ -2867,6 +3065,70 @@
         "en": "I'm lost; where is the station?",
         "fr": "Je suis perdu, où est la gare ?",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜の（質問）",
+    "structure": "plain form ／ noun or な-adj + な + の（質問）？",
+    "meaning": {
+      "en": "casual question, often asking for an explanation",
+      "fr": "question familière, qui demande souvent une explication"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "A plain form + **の**, said with a rising tone, is the casual question: どこに行くの？ (where are you going?). A noun or な-adjective takes なの: ひまなの？",
+        "fr": "Une forme neutre + **の**, dite avec une intonation montante, est la question familière : どこに行くの？ (tu vas où ?). Un nom ou un adjectif en な prend なの : ひまなの？"
+      },
+      {
+        "kind": "use",
+        "en": "- Asking a friend about what you see: 何を読んでいるの？\n- Asking why: どうして来なかったの？\n- Checking something that surprises you: あの人、先生なの？",
+        "fr": "- Interroger un ami sur ce qu'on voit : 何を読んでいるの？\n- Demander pourquoi : どうして来なかったの？\n- Vérifier ce qui surprend : あの人、先生なの？"
+      },
+      {
+        "kind": "careful",
+        "en": "Said with a falling tone, the same の explains instead of asking: あした休みなの (I'm off tomorrow, you see). And a plain form + か, like 行くか？, sounds blunt in conversation: の, or a rising tone alone, is the usual casual question.",
+        "fr": "Dite avec une intonation descendante, la même phrase en の explique au lieu de demander : あした休みなの (c'est que je suis en congé demain). Et une forme neutre + か, comme 行くか？, sonne abrupt en conversation : の, ou la seule intonation montante, est la question familière habituelle."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜んです／〜のです",
+        "en": "の？ is the casual question; んですか is the same question, polite: どこに行くんですか.",
+        "fr": "の？ est la question familière ; んですか est la même question, polie : どこに行くんですか."
+      },
+      {
+        "pattern": "か",
+        "en": "か asks plainly and is polite after ます or です; の？ asks casually, looking for an explanation.",
+        "fr": "か pose une question simple, polie après ます ou です ; の？ interroge familièrement, en attendant une explication."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "日曜日、どこに行くの？",
+        "en": "Where are you going on Sunday?",
+        "fr": "Tu vas où, dimanche ?",
+        "register": "casual"
+      },
+      {
+        "jp": "さっきから何を読んでいるの？",
+        "en": "What have you been reading all this time?",
+        "fr": "Qu'est-ce que tu lis depuis tout à l'heure ?",
+        "register": "casual"
+      },
+      {
+        "jp": "え、あの人、先生なの？",
+        "en": "What, that person is a teacher?",
+        "fr": "Quoi, cette personne est professeur ?",
+        "register": "casual"
+      },
+      {
+        "jp": "どうして、きのう来なかったの？",
+        "en": "Why didn't you come yesterday?",
+        "fr": "Pourquoi tu n'es pas venu hier ?",
+        "register": "casual"
       }
     ]
   },
@@ -5923,6 +6185,75 @@
     ]
   },
   {
+    "pattern": "〜な（詠嘆）",
+    "structure": "い-adj ／ noun or な-adj + だ ／ た-form ／ 〜たい + な（詠嘆）",
+    "meaning": {
+      "en": "a feeling voiced, often to oneself: how…!",
+      "fr": "un sentiment exprimé, souvent pour soi : que… !"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**な** at the end of a plain sentence voices a feeling, often to yourself: さむいな (it's cold), きれいだな (how pretty). Drawn out as なあ, the feeling is stronger.",
+        "fr": "**な** à la fin d'une phrase neutre exprime un sentiment, souvent pour soi : さむいな (qu'il fait froid), きれいだな (que c'est joli). Allongé en なあ, le sentiment est plus fort."
+      },
+      {
+        "kind": "use",
+        "en": "- Talking to yourself: 今日はさむいな.\n- Sharing a feeling with a friend: いい天気だな.\n- A wish, or envy, after たい or いい: 行きたいな, いいなあ (lucky you).",
+        "fr": "- Se parler à soi-même : 今日はさむいな.\n- Partager un sentiment avec un ami : いい天気だな.\n- Un souhait, ou de l'envie, après たい ou いい : 行きたいな, いいなあ (quelle chance)."
+      },
+      {
+        "kind": "careful",
+        "en": "After a verb's dictionary form, な can be the prohibition instead: 行くな is « don't go ». To voice a wish, say 行きたいな. A noun or な-adjective needs だ first: きれいだな.",
+        "fr": "Après la forme du dictionnaire d'un verbe, な peut au contraire être l'interdiction : 行くな, c'est « n'y va pas ». Pour un souhait, on dit 行きたいな. Un nom ou un adjectif en な demande d'abord だ : きれいだな."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜な（禁止）",
+        "en": "The prohibition な follows a verb's dictionary form and gives an order; this な voices a feeling and needs no listener.",
+        "fr": "Le な d'interdiction suit la forme du dictionnaire et donne un ordre ; ce な exprime un sentiment et n'a pas besoin d'interlocuteur."
+      },
+      {
+        "pattern": "ね",
+        "en": "ね reaches out to the listener for agreement; な is more a feeling voiced for yourself.",
+        "fr": "ね cherche l'accord de l'autre ; な exprime plutôt un sentiment pour soi."
+      },
+      {
+        "pattern": "〜かな",
+        "en": "な states the feeling; かな wonders, unsure.",
+        "fr": "な affirme le sentiment ; かな s'interroge, sans certitude."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今日はいい天気だな。",
+        "en": "What nice weather today.",
+        "fr": "Quel beau temps aujourd'hui.",
+        "register": "casual"
+      },
+      {
+        "jp": "このおかし、おいしいな。",
+        "en": "These sweets are really good.",
+        "fr": "Qu'elles sont bonnes, ces friandises.",
+        "register": "casual"
+      },
+      {
+        "jp": "いつか日本に行きたいな。",
+        "en": "I'd love to go to Japan someday.",
+        "fr": "J'aimerais bien aller au Japon un jour.",
+        "register": "casual"
+      },
+      {
+        "jp": "きのうのパーティー、楽しかったな。",
+        "en": "Yesterday's party was so much fun.",
+        "fr": "Qu'est-ce qu'elle était bien, la fête d'hier.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
     "pattern": "命令形 〜ろ／〜え",
     "structure": "verb imperative: る-verb stem + ろ ／ う-verb final え-row (書け, 待て)",
     "meaning": {
@@ -6939,6 +7270,73 @@
         "en": "Please pay in cash or by card.",
         "fr": "Le paiement se fait en espèces ou par carte.",
         "register": "formal"
+      }
+    ]
+  },
+  {
+    "pattern": "それとも",
+    "structure": "question か、 + それとも + question か",
+    "meaning": {
+      "en": "or, between two alternatives in a question",
+      "fr": "ou bien, entre deux possibilités dans une question"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**それとも** joins two questions into a choice: « …, or …? ». Each side is a question of its own, with か or a rising tone.",
+        "fr": "**それとも** réunit deux questions en un choix : « …, ou bien… ? ». Chaque côté est une question à part entière, avec か ou une intonation montante."
+      },
+      {
+        "kind": "use",
+        "en": "- Offering a choice: バスで行きますか、それとも歩きますか.\n- Casually, as two short questions: 赤がいい？それとも青？\n- Wondering, inside a sentence: 春に行くか、それとも秋に行くか、まだ分からない.",
+        "fr": "- Proposer un choix : バスで行きますか、それとも歩きますか.\n- Familièrement, en deux questions courtes : 赤がいい？それとも青？\n- S'interroger, à l'intérieur d'une phrase : 春に行くか、それとも秋に行くか、まだ分からない."
+      },
+      {
+        "kind": "careful",
+        "en": "それとも only works in questions. In a statement, « A or B » is か or または: 電車かバスで行きます, never 電車それともバス.",
+        "fr": "それとも ne s'emploie que dans une question. Dans une affirmation, « A ou B » se dit か ou または : 電車かバスで行きます, jamais 電車それともバス."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "または",
+        "en": "それとも puts a choice to the listener in a question; または joins options in a statement, mostly in writing.",
+        "fr": "それとも soumet un choix à l'autre dans une question ; または relie des options dans une affirmation, surtout à l'écrit."
+      },
+      {
+        "pattern": "〜か〜か",
+        "en": "か〜か names the options inside one sentence; それとも links two whole questions.",
+        "fr": "か〜か nomme les options dans une seule phrase ; それとも relie deux questions entières."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "駅までバスで行きますか。それとも、歩きますか。",
+        "en": "Will you take the bus to the station, or walk?",
+        "fr": "Vous allez à la gare en bus, ou bien à pied ?",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "今夜はうちで食べる？それとも、外で食べる？",
+        "en": "Shall we eat at home tonight, or eat out?",
+        "fr": "Ce soir, on mange à la maison, ou bien dehors ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "この服、赤がいい？それとも青？",
+        "en": "This top: would you like it in red? Or in blue?",
+        "fr": "Ce haut, tu le préfères en rouge ? Ou bien en bleu ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "春に行くか、それとも秋に行くか、まだ分からない。",
+        "en": "I don't know yet whether to go in spring or in autumn.",
+        "fr": "Je ne sais pas encore si j'irai au printemps ou en automne.",
+        "register": "neutral"
       }
     ]
   },

@@ -123,9 +123,19 @@ LEVELS = ("N5", "N4", "N3", "N2", "N1")
 # 別に〜ない reduces to 別に which 特別に contains. The distinction is
 # semantic, so it is not drawn rather than drawn wrongly. difficulty.py
 # imports this list for its own gate -- one list, not two.
+#
+# The catalogue's second wave (2026-09) adds six of the same kind, each
+# one tried on everyday sentences and found teaching the wrong lesson:
+# 〜ほど is also 〜ば〜ほど's ほど, the "about" of 十分ほど and the
+# comparison of 〜ほど〜ない; 〜限りだ reduces to 限り, which 事情がない
+# 限り ("unless") contains; 〜からある is 昔からある ("has always been
+# there"); 〜を控えて is 塩分を控えて ("cut down on salt"); 〜も〜なら〜も
+# is every 兄も行くなら私も行く; 〜に限る is also a notice's "limited to"
+# (会員に限る). Their lessons teach them; the analyser does not guess.
 AMBIGUOUS: frozenset[str] = frozenset({
     "〜にして", "〜あまり", "〜上で", "〜出す", "〜直す", "〜にあって",
     "〜上に", "〜ものを", "別に〜ない",
+    "〜ほど", "〜限りだ", "〜からある", "〜を控えて", "〜も〜なら〜も", "〜に限る",
 })
 
 # A pattern attaches to a word that conjugates, so a hit may begin

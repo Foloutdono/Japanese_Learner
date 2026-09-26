@@ -215,7 +215,10 @@ def _tokens(morphemes: list) -> list[dict]:
 # revision (or before there was one) is analysed again when next opened.
 # 1: offsets past a space (every particle after a subtitle's first
 # space was lost) and the plain copula after a noun (2026-09-25).
-LOCAL_REV = 1
+# 2: the grammar catalogue's second wave -- the plain negative and past,
+# the sentence-final particles, the conjunctions -- which the detector
+# reads from their lessons (2026-09-26).
+LOCAL_REV = 2
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

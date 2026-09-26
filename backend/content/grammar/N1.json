@@ -335,6 +335,73 @@
     ]
   },
   {
+    "pattern": "〜限りだ",
+    "structure": "い-adjective / な-adjective + な + 限りだ",
+    "meaning": {
+      "en": "as (glad, sad…) as can be; nothing could be more",
+      "fr": "on ne peut plus (heureux, triste…), au plus haut point"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**い-adjective / な-adjective + な + 限りだ (かぎりだ)** says the speaker's own feeling is at its height. うれしい限りだ (I couldn't be happier), 心細い限りだ (I feel utterly lost).",
+        "fr": "**adjectif en い / adjectif en な + な + 限りだ (かぎりだ)** dit que le sentiment de celui qui parle est à son comble. うれしい限りだ (je ne pourrais être plus heureux), 心細い限りだ (je me sens complètement perdu)."
+      },
+      {
+        "kind": "use",
+        "en": "- Thanks in a speech: 皆様に来ていただき、うれしい限りです.\n- Apologies: お恥ずかしい限りです.\n- Admiration or envy: 頼もしい限りだ, うらやましい限りだ.",
+        "fr": "- Remerciements dans un discours : 皆様に来ていただき、うれしい限りです.\n- Excuses : お恥ずかしい限りです.\n- Admiration ou envie : 頼もしい限りだ, うらやましい限りだ."
+      },
+      {
+        "kind": "careful",
+        "en": "Only adjectives of feeling (うれしい, 心細い, 恥ずかしい, 残念な), and the feeling is the speaker's. Not the N3 限り « as long as »: 限りだ closes the sentence.",
+        "fr": "Seulement des adjectifs de sentiment (うれしい, 心細い, 恥ずかしい, 残念な), et le sentiment est celui de qui parle. Rien à voir avec 限り (N3) « tant que » : 限りだ termine la phrase."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜てたまらない",
+        "en": "限りだ: a feeling stated with composure, polite or formal; てたまらない: a feeling you can hardly bear, spoken.",
+        "fr": "限りだ : un sentiment dit avec retenue, poli ou formel ; てたまらない : un sentiment qu'on ne supporte plus, à l'oral."
+      },
+      {
+        "pattern": "〜極まりない",
+        "en": "限りだ: my own feeling at its height; 極まりない: a harsh verdict on someone's conduct or a thing (失礼, 危険).",
+        "fr": "限りだ : mon propre sentiment à son comble ; 極まりない : un jugement sévère sur une conduite ou une chose (失礼, 危険)."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "遠くから大勢の方に来ていただき、うれしい限りです。",
+        "en": "So many of you have come from far away; I couldn't be happier.",
+        "fr": "Vous êtes venus si nombreux et de si loin : je ne pourrais être plus heureux.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "知らない町で道に迷い、心細い限りだった。",
+        "en": "Lost in a town I didn't know, I felt utterly helpless.",
+        "fr": "Perdu dans une ville inconnue, je me sentais complètement démuni.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "若い社員たちが次々に活躍していて、頼もしい限りだ。",
+        "en": "The young staff are doing great things one after another; it's hugely reassuring.",
+        "fr": "Les jeunes employés brillent les uns après les autres : c'est on ne peut plus rassurant.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "毎年家族で海外旅行なんて、うらやましい限りだよ。",
+        "en": "A trip abroad with the family every year? I'm green with envy.",
+        "fr": "Un voyage à l'étranger en famille chaque année ? Je t'envie au plus haut point.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
     "pattern": "〜きらいがある",
     "structure": "verb dictionary form/noun + の + きらいがある",
     "meaning": {
@@ -531,6 +598,73 @@
         "jp": "私が尊敬してやまない先生が、亡くなった。",
         "en": "The teacher I so deeply respected has passed away.",
         "fr": "Le professeur que je respectais tant est décédé.",
+        "register": "written"
+      }
+    ]
+  },
+  {
+    "pattern": "〜てはかなわない",
+    "structure": "verb / adjective て-form + はかなわない",
+    "meaning": {
+      "en": "cannot stand it, it is too much (if this goes on)",
+      "fr": "c'est insupportable, on n'en peut plus (si ça continue)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**て-form + はかなわない** means « if it's like this, I can't stand it »: a complaint about a situation someone or something puts you in. こう暑くてはかなわない (I can't take this heat).",
+        "fr": "**forme en て + はかなわない** signifie « si c'est comme ça, c'est insupportable » : on se plaint d'une situation que quelqu'un ou quelque chose nous impose. こう暑くてはかなわない (cette chaleur, je n'en peux plus)."
+      },
+      {
+        "kind": "use",
+        "en": "- Weather and conditions: 毎日こう雨が続いてはかなわない.\n- What others do to you, in the passive: 夜中に騒がれてはかなわない.\n- Spoken, as ちゃかなわない: こう忙しくちゃかなわない.",
+        "fr": "- Météo et conditions : 毎日こう雨が続いてはかなわない.\n- Ce que les autres nous font, au passif : 夜中に騒がれてはかなわない.\n- À l'oral, en ちゃかなわない : こう忙しくちゃかなわない."
+      },
+      {
+        "kind": "careful",
+        "en": "The ては is a condition, « if it is (or goes on) like this », so the complaint is aimed at a situation, often with こう or こんなに. Polite: てはかないません.",
+        "fr": "Le ては est une condition, « si c'est (ou si ça continue) comme ça » : la plainte vise une situation, souvent avec こう ou こんなに. Poli : てはかないません."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜てたまらない",
+        "en": "てはかなわない complains about a situation you have to put up with; てたまらない says a sensation or a wish is intense (会いたくてたまらない).",
+        "fr": "てはかなわない se plaint d'une situation qu'on doit subir ; てたまらない dit qu'une sensation ou un désir est intense (会いたくてたまらない)."
+      },
+      {
+        "pattern": "〜てはいられない",
+        "en": "てはかなわない: I can't bear what is done to me; てはいられない: I can't afford to go on doing this myself.",
+        "fr": "てはかなわない : je ne supporte pas ce qu'on m'impose ; てはいられない : je ne peux pas me permettre de continuer ainsi."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "毎日こう雨が続いてはかなわない。",
+        "en": "I can't stand it raining like this day after day.",
+        "fr": "Qu'il pleuve comme ça tous les jours, c'est insupportable.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "夜中に隣の部屋でこんなに騒がれてはかなわない。",
+        "en": "I can't put up with the room next door being this noisy in the middle of the night.",
+        "fr": "Tout ce bruit dans la chambre voisine en pleine nuit, je ne le supporte pas.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "休みの日まで仕事の電話をかけられてはかなわないよ。",
+        "en": "Getting work calls even on my days off is too much.",
+        "fr": "Recevoir des appels du travail même pendant mes jours de congé, c'en est trop.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "こう物価が高くてはかなわないと、多くの人がこぼしている。",
+        "en": "Many people grumble that they cannot cope with prices this high.",
+        "fr": "Beaucoup se plaignent que des prix aussi élevés, c'est insupportable.",
         "register": "written"
       }
     ]
@@ -871,6 +1005,72 @@
     ]
   },
   {
+    "pattern": "〜いかんで",
+    "structure": "noun + (の) + いかんで／いかんでは",
+    "meaning": {
+      "en": "depending on (how something turns out)",
+      "fr": "selon, en fonction de (la tournure que prend quelque chose)"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + (の) + いかんで** means « depending on (how X turns out) »: what follows is decided by X. 結果いかんで (depending on the results). いかんでは／いかんによっては point to one possible outcome: « depending on X, it may even… ».",
+        "fr": "**nom + (の) + いかんで** signifie « selon (la tournure que prend X) » : la suite est décidée par X. 結果いかんで (selon les résultats). いかんでは／いかんによっては visent une issue possible : « selon X, il se peut même que… »."
+      },
+      {
+        "kind": "use",
+        "en": "- Decisions: 試験の結果いかんで、進学先が決まる.\n- One possible outcome: 交渉のいかんでは、計画を中止することもある.\n- As a predicate: 成功するかどうかは、準備いかんだ.",
+        "fr": "- Décisions : 試験の結果いかんで、進学先が決まる.\n- Une issue possible : 交渉のいかんでは、計画を中止することもある.\n- En prédicat : 成功するかどうかは、準備いかんだ."
+      },
+      {
+        "kind": "careful",
+        "en": "Formal: notices, business, the news. In conversation, noun + 次第で says the same. いかんによらず／いかんにかかわらず mean the opposite: « regardless of ».",
+        "fr": "Formel : avis, affaires, informations. Dans la conversation, nom + 次第で dit la même chose. いかんによらず／いかんにかかわらず disent l'inverse : « quel que soit »."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜いかんによらず",
+        "en": "いかんで: the outcome turns on X; いかんによらず: X changes nothing.",
+        "fr": "いかんで : tout dépend de X ; いかんによらず : X ne change rien."
+      },
+      {
+        "pattern": "〜次第だ",
+        "en": "Same « depending on »; noun + 次第で is everyday, いかんで formal. Only いかん can take の: 結果のいかんで.",
+        "fr": "Même « selon » ; nom + 次第で est courant, いかんで formel. Seul いかん peut prendre の : 結果のいかんで."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "交渉のいかんでは、計画そのものを見直すことになる。",
+        "en": "Depending on how the negotiations go, the plan itself may have to be rethought.",
+        "fr": "Selon la tournure des négociations, c'est le projet lui-même qu'il faudra revoir.",
+        "register": "formal",
+        "contrast": true
+      },
+      {
+        "jp": "参加者数のいかんで、会場を変更することもあります。",
+        "en": "Depending on the number of participants, we may change the venue.",
+        "fr": "Selon le nombre de participants, il se peut que nous changions de salle.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "面接の結果いかんで、採用するかどうかを決めます。",
+        "en": "We will decide whether to hire you depending on how the interview goes.",
+        "fr": "Nous déciderons de votre embauche en fonction du résultat de l'entretien.",
+        "register": "polite"
+      },
+      {
+        "jp": "調査の結果いかんでは、工場の閉鎖もありうる。",
+        "en": "Depending on the findings of the inquiry, the factory could even be closed.",
+        "fr": "Selon les conclusions de l'enquête, l'usine pourrait même fermer.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜をおいて",
     "structure": "noun + をおいて",
     "meaning": {
@@ -1000,6 +1200,73 @@
         "jp": "一人たりとも、ここを通すわけにはいかない。",
         "en": "Not a single person may pass through here.",
         "fr": "Pas une seule personne ne passera par ici.",
+        "register": "written"
+      }
+    ]
+  },
+  {
+    "pattern": "〜なりとも",
+    "structure": "noun (a small amount) + なりとも",
+    "meaning": {
+      "en": "at least, even if only a little",
+      "fr": "ne serait-ce qu'un peu, au moins"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**small amount + なりとも** means « if only a little, at least that much »: 少しなりとも (even a little), 一目なりとも (if only for a glance). It goes with a wish or a positive statement.",
+        "fr": "**petite quantité + なりとも** signifie « ne serait-ce qu'un peu, au moins cela » : 少しなりとも (si peu que ce soit), 一目なりとも (ne serait-ce qu'un instant). Il accompagne un souhait ou une affirmation."
+      },
+      {
+        "kind": "use",
+        "en": "- Offering help, humbly: 少しなりとも力になりたい.\n- Longing: 一目なりとも会いたい.\n- 多少なりとも, « to some degree at least »: 多少なりとも影響がある.",
+        "fr": "- Proposer son aide, humblement : 少しなりとも力になりたい.\n- Désir : 一目なりとも会いたい.\n- 多少なりとも, « au moins dans une certaine mesure » : 多少なりとも影響がある."
+      },
+      {
+        "kind": "careful",
+        "en": "Formal and written. In conversation, the same idea is でも: 少しでも, 一目でも.",
+        "fr": "Soutenu et écrit. Dans la conversation, la même idée se dit avec でも : 少しでも, 一目でも."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜たりとも",
+        "en": "なりとも: at least a little, with a wish; たりとも: not even one, with a negative.",
+        "fr": "なりとも : au moins un peu, avec un souhait ; たりとも : pas même un, avec une négation."
+      },
+      {
+        "pattern": "〜すら",
+        "en": "なりとも asks for a small amount; すら picks an extreme example, mostly with a negative.",
+        "fr": "なりとも demande un peu ; すら choisit un exemple extrême, le plus souvent avec une négation."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "わずかなりとも、困っている人たちの力になりたい。",
+        "en": "I want to help people in need, even if only a little.",
+        "fr": "Je veux aider les gens en difficulté, ne serait-ce qu'un peu.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "多少なりとも経験のある方を探しています。",
+        "en": "We are looking for someone with at least some experience.",
+        "fr": "Nous cherchons une personne qui ait au moins un peu d'expérience.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "少しなりとも、お役に立てれば幸いです。",
+        "en": "I would be glad to be of use to you, even if only a little.",
+        "fr": "Ce serait un plaisir de vous être utile, ne serait-ce qu'un peu.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "一目なりとも、故郷の母に会いたい。",
+        "en": "I long to see my mother back home, if only for a moment.",
+        "fr": "Je voudrais voir ma mère restée au pays, ne serait-ce qu'un instant.",
         "register": "written"
       }
     ]
@@ -1742,6 +2009,138 @@
     ]
   },
   {
+    "pattern": "〜じみた",
+    "structure": "noun + じみた + noun",
+    "meaning": {
+      "en": "smacking of, -ish (as a fault)",
+      "fr": "qui sent le…, qui fait (péjoratif)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + じみた + noun** means « smacking of, -ish », and it is rarely kind: 子どもじみた (childish), 芝居じみた (theatrical). The verb is じみる; as a predicate, じみている.",
+        "fr": "**nom + じみた + nom** signifie « qui sent le…, qui fait… », et c'est rarement aimable : 子どもじみた (puéril), 芝居じみた (théâtral). Le verbe est じみる ; en fin de phrase, じみている."
+      },
+      {
+        "kind": "use",
+        "en": "- Behaviour: 子どもじみたまねはやめて.\n- Tone: 説教じみた話, 言い訳じみた返事 (preachy, sounding like an excuse).\n- Look: 所帯じみた格好, 年寄りじみた服.",
+        "fr": "- Comportement : 子どもじみたまねはやめて.\n- Ton : 説教じみた話, 言い訳じみた返事 (moralisateur, qui sonne comme une excuse).\n- Allure : 所帯じみた格好, 年寄りじみた服."
+      },
+      {
+        "kind": "careful",
+        "en": "A fault, nearly always: 子どもじみた is childish, never childlike (that is 子どもらしい). In casual speech, 子どもっぽい says much the same, more lightly.",
+        "fr": "Un défaut, presque toujours : 子どもじみた veut dire puéril, jamais enfantin au bon sens (cela, c'est 子どもらしい). À l'oral familier, 子どもっぽい dit à peu près la même chose, plus légèrement."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜めく",
+        "en": "じみた finds fault with a likeness; めく says something is taking on an air, often without blame (春めく).",
+        "fr": "じみた reproche une ressemblance ; めく dit qu'une chose prend un air, souvent sans blâme (春めく)."
+      },
+      {
+        "pattern": "〜らしい（典型）",
+        "en": "じみた: has the bad side of the type; らしい: lives up to the type, as praise.",
+        "fr": "じみた : a le mauvais côté du genre ; らしい : est à la hauteur de son genre, en éloge."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "子どもじみたまねはやめてよ。",
+        "en": "Stop acting so childish.",
+        "fr": "Arrête de faire le gamin.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "彼の謝り方には、どこか芝居じみたところがあった。",
+        "en": "There was something theatrical about the way he apologised.",
+        "fr": "Sa façon de s'excuser avait quelque chose de théâtral.",
+        "register": "written"
+      },
+      {
+        "jp": "命令じみた言い方をされて、いやな気持ちになった。",
+        "en": "I was spoken to in a tone that sounded like an order, and it upset me.",
+        "fr": "On m'a parlé sur un ton qui sonnait comme un ordre, et ça m'a déplu.",
+        "register": "written"
+      },
+      {
+        "jp": "言い訳じみた話は、もう聞きたくないです。",
+        "en": "I don't want to hear any more talk that sounds like excuses.",
+        "fr": "Je ne veux plus entendre de discours qui ressemblent à des excuses.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ぶる",
+    "structure": "noun / adjective stem + ぶる",
+    "meaning": {
+      "en": "put on airs of, act as if one were",
+      "fr": "jouer les…, se donner des airs de"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun or adjective stem + ぶる** means « act as if one were, put on the airs of »: 偉ぶる (act important), 学者ぶる (play the scholar). A godan verb (ぶって, ぶった), said with disapproval.",
+        "fr": "**nom ou radical d'adjectif + ぶる** signifie « jouer les…, se donner des airs de » : 偉ぶる (faire l'important), 学者ぶる (jouer les savants). Verbe godan (ぶって, ぶった), dit avec désapprobation."
+      },
+      {
+        "kind": "use",
+        "en": "- Showing off: 少し出世しただけで、すぐ偉ぶる.\n- Playing a part: 親の前でだけ、いい子ぶる.\n- Before a noun: 先輩ぶった言い方, 上品ぶった態度.",
+        "fr": "- Frimer : 少し出世しただけで、すぐ偉ぶる.\n- Jouer un rôle : 親の前でだけ、いい子ぶる.\n- Devant un nom : 先輩ぶった言い方, 上品ぶった態度."
+      },
+      {
+        "kind": "careful",
+        "en": "It is a criticism: the speaker finds the act false or overdone. It attaches to a role or a quality (大人, 先輩, 上品, 偉い) straight, with no の.",
+        "fr": "C'est une critique : celui qui parle trouve l'attitude fausse ou exagérée. Il se colle directement à un rôle ou une qualité (大人, 先輩, 上品, 偉い), sans の."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ふりをする",
+        "en": "ぶる: puts on airs, with the speaker's scorn; ふりをする: pretends, neutrally, after の (寝ているふりをする, 先生のふりをする).",
+        "fr": "ぶる : se donne des airs, avec le mépris de qui parle ; ふりをする : fait semblant, sans jugement, après の (寝ているふりをする, 先生のふりをする)."
+      },
+      {
+        "pattern": "〜めく",
+        "en": "ぶる: a person's affected act; めく: a thing takes on an air by itself (春めく).",
+        "fr": "ぶる : l'attitude affectée d'une personne ; めく : une chose prend un air d'elle-même (春めく)."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "学者ぶる話し方はやめて、分かりやすく説明してよ。",
+        "en": "Drop the learned-scholar act and explain it so I can understand.",
+        "fr": "Arrête de jouer les savants et explique-le simplement.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "彼は少し出世しただけで、すぐ偉ぶる。",
+        "en": "He got a small promotion and now he acts all important.",
+        "fr": "Il a eu une petite promotion et il fait déjà l'important.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "妹は親の前でだけ、いい子ぶる。",
+        "en": "My little sister only plays the good girl in front of our parents.",
+        "fr": "Ma petite sœur ne joue les enfants sages que devant nos parents.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "先輩ぶる態度は、後輩たちにすぐ分かってしまう。",
+        "en": "Juniors see through someone putting on senior airs right away.",
+        "fr": "Les plus jeunes percent vite à jour les airs de grand ancien.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜まじき",
     "structure": "verb dictionary form + まじき + noun",
     "meaning": {
@@ -2479,6 +2878,73 @@
     ]
   },
   {
+    "pattern": "〜を境に",
+    "structure": "noun + を境に",
+    "meaning": {
+      "en": "from that point on, with that as the dividing line",
+      "fr": "à partir de ce moment, avec cela pour ligne de partage"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + を境に** means « from that point on »: X is a dividing line, and things differ on either side of it. その日を境に (from that day on). Also を境にして, and を境として in writing.",
+        "fr": "**nom + を境に** signifie « à partir de là » : X est une ligne de partage, et les choses diffèrent de part et d'autre. その日を境に (à partir de ce jour-là). Aussi を境にして, et を境として à l'écrit."
+      },
+      {
+        "kind": "use",
+        "en": "- A turning point in a life: 結婚を境に、生活が大きく変わった.\n- A date or an age: 四月を境に、料金が上がる.\n- A place, the word's first sense (境 is a border): 川を境に、町が二つに分かれている.",
+        "fr": "- Un tournant dans une vie : 結婚を境に、生活が大きく変わった.\n- Une date ou un âge : 四月を境に、料金が上がる.\n- Un lieu, le sens premier (境 est une frontière) : 川を境に、町が二つに分かれている."
+      },
+      {
+        "kind": "careful",
+        "en": "What follows is a before and after: a change that lasts, not a single event. X only marks the line; it need not be the cause.",
+        "fr": "La suite décrit un avant et un après : un changement qui dure, pas un événement isolé. X ne fait que marquer la ligne ; il n'en est pas forcément la cause."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜をきっかけに",
+        "en": "を境に marks where before turns into after; をきっかけに names what set the change off.",
+        "fr": "を境に marque le point où l'avant bascule dans l'après ; をきっかけに nomme ce qui a déclenché le changement."
+      },
+      {
+        "pattern": "〜を皮切りに",
+        "en": "を境に divides a before from an after; を皮切りに opens a series of similar events.",
+        "fr": "を境に sépare un avant d'un après ; を皮切りに ouvre une série d'événements semblables."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "四月を境に、電車の料金が上がります。",
+        "en": "From April on, train fares are going up.",
+        "fr": "À partir d'avril, les tarifs du train augmentent.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "三十歳を境に、急に疲れやすくなったよ。",
+        "en": "Since I turned thirty, I suddenly get tired much more easily.",
+        "fr": "Depuis mes trente ans, je me fatigue d'un coup beaucoup plus vite.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "この川を境に、町の名前が変わる。",
+        "en": "The town's name changes at this river.",
+        "fr": "Passé cette rivière, la ville change de nom.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "父の入院を境に、家族の生活は大きく変わった。",
+        "en": "After my father went into hospital, our family's life was never the same.",
+        "fr": "L'hospitalisation de mon père a marqué un tournant : la vie de la famille a profondément changé.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜に至る",
     "structure": "verb dictionary form / noun + に至る",
     "meaning": {
@@ -3208,6 +3674,73 @@
     ]
   },
   {
+    "pattern": "〜べくして",
+    "structure": "verb dictionary form + べくして + the same verb in the past",
+    "meaning": {
+      "en": "as it was bound to, inevitably",
+      "fr": "comme cela devait arriver, inévitablement"
+    },
+    "register": "written",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**dictionary form + べくして + the same verb in the past** says something happened because everything pointed to it: 起こるべくして起こった (it happened, as it was bound to). する → すべくして.",
+        "fr": "**forme du dictionnaire + べくして + le même verbe au passé** dit qu'une chose est arrivée parce que tout y menait : 起こるべくして起こった (c'est arrivé, comme cela devait arriver). する → すべくして."
+      },
+      {
+        "kind": "use",
+        "en": "- Accidents with an obvious cause: あの事故は起こるべくして起こった.\n- Results that were earned: あのチームは勝つべくして勝った.\n- Meetings that feel meant: 二人は出会うべくして出会った.",
+        "fr": "- Accidents à la cause évidente : あの事故は起こるべくして起こった.\n- Résultats mérités : あのチームは勝つべくして勝った.\n- Rencontres qui semblent écrites : 二人は出会うべくして出会った."
+      },
+      {
+        "kind": "careful",
+        "en": "Not べく (in order to): 勝つべく練習した is a purpose, 勝つべくして勝った a verdict on the result. The verb is said twice.",
+        "fr": "Ne pas confondre avec べく (afin de) : 勝つべく練習した exprime un but, 勝つべくして勝った un jugement sur le résultat. Le verbe est dit deux fois."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜はずです",
+        "en": "べくして: it happened, and it was always going to; はずです: it should be so, judging from the facts.",
+        "fr": "べくして : c'est arrivé, et cela devait arriver ; はずです : cela devrait être ainsi, d'après les faits."
+      },
+      {
+        "pattern": "〜べくもない",
+        "en": "べくして: bound to happen, and it did; べくもない: it cannot possibly happen.",
+        "fr": "べくして : cela devait arriver, et c'est arrivé ; べくもない : cela ne peut en aucun cas arriver."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "点検をしていなかったのだから、あの事故は起こるべくして起こった。",
+        "en": "No inspections had been done, so that accident was bound to happen.",
+        "fr": "Aucune inspection n'avait été faite : cet accident devait arriver.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "あれだけ練習したんだから、勝つべくして勝ったんだよ。",
+        "en": "After all that practice, they were bound to win, and they did.",
+        "fr": "Avec tout cet entraînement, leur victoire était écrite d'avance.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "準備もせずに始めた計画は、失敗すべくして失敗した。",
+        "en": "The plan, started with no preparation, failed as it was bound to.",
+        "fr": "Lancé sans aucune préparation, le projet a échoué, comme il fallait s'y attendre.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "二人は出会うべくして出会ったのだと思います。",
+        "en": "I think the two of them were meant to meet.",
+        "fr": "Je pense que ces deux-là étaient faits pour se rencontrer.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
     "pattern": "〜すべがない",
     "structure": "verb dictionary form + すべがない",
     "meaning": {
@@ -3543,6 +4076,73 @@
     ]
   },
   {
+    "pattern": "〜ともあろう",
+    "structure": "noun + ともあろう + 者／人 + が",
+    "meaning": {
+      "en": "someone no less than a …, who should know better",
+      "fr": "rien de moins qu'un…, qui devrait pourtant savoir"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + ともあろう + 者／人 + が** means « someone no less than a … » and sets up a reproach: a person of that standing did what they should not. 医者ともあろう人が (a doctor, of all people).",
+        "fr": "**nom + ともあろう + 者／人 + が** signifie « rien de moins qu'un… » et annonce un reproche : quelqu'un de ce rang a fait ce qu'il n'aurait pas dû. 医者ともあろう人が (un médecin, entre tous)."
+      },
+      {
+        "kind": "use",
+        "en": "- Professions: 医者ともあろう人が、たばこをやめられないなんて.\n- Public figures: 大臣ともあろう者が、約束を破るとは.\n- The sentence often closes on とは, なんて or 信じられない.",
+        "fr": "- Professions : 医者ともあろう人が、たばこをやめられないなんて.\n- Personnalités : 大臣ともあろう者が、約束を破るとは.\n- La phrase se termine souvent par とは, なんて ou 信じられない."
+      },
+      {
+        "kind": "careful",
+        "en": "Always blame or disbelief, never praise: « just what you'd expect of a doctor » is さすが. A noun (者, 人, 方) always follows ともあろう.",
+        "fr": "Toujours un blâme ou de l'incrédulité, jamais un éloge : « bien digne d'un médecin » se dit さすが. Un nom (者, 人, 方) suit toujours ともあろう."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜たるもの",
+        "en": "ともあろう: someone of that rank did wrong (a reproach); たるもの: someone of that rank ought to (a duty).",
+        "fr": "ともあろう : quelqu'un de ce rang a mal agi (reproche) ; たるもの : quelqu'un de ce rang se doit de (devoir)."
+      },
+      {
+        "pattern": "〜まじき",
+        "en": "ともあろう points at the person, then says what they did; まじき brands the act itself as unbecoming.",
+        "fr": "ともあろう désigne la personne, puis dit ce qu'elle a fait ; まじき qualifie l'acte lui-même d'indigne."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "医者ともあろう人が、たばこをやめられないなんて。",
+        "en": "A doctor, of all people, unable to give up smoking!",
+        "fr": "Un médecin, entre tous, incapable d'arrêter de fumer !",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "大臣ともあろう者が、そんな発言をするとは信じられない。",
+        "en": "It is hard to believe that a minister, no less, would say such a thing.",
+        "fr": "Qu'un ministre, rien de moins, tienne de tels propos, c'est à peine croyable.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "警察官ともあろう者が、交通ルールを守らないとは何事だ。",
+        "en": "A police officer, of all people, ignoring the traffic rules: what is this?",
+        "fr": "Un policier, entre tous, qui ne respecte pas le code de la route : qu'est-ce que c'est que ça ?",
+        "register": "formal",
+        "contrast": true
+      },
+      {
+        "jp": "先生ともあろう方が、こんな簡単なミスをなさるなんて。",
+        "en": "Fancy someone like you, a teacher, making such a simple mistake.",
+        "fr": "Vous, un professeur, faire une erreur aussi simple : qui l'eût cru ?",
+        "register": "polite"
+      }
+    ]
+  },
+  {
     "pattern": "〜にして",
     "structure": "noun + にして",
     "meaning": {
@@ -3739,6 +4339,77 @@
         "jp": "大人たちの心配をよそに、子どもたちは川で遊んだ。",
         "en": "Heedless of the adults' worry, the children played in the river.",
         "fr": "Indifférents à l'inquiétude des adultes, les enfants jouaient dans la rivière.",
+        "register": "written"
+      }
+    ]
+  },
+  {
+    "pattern": "〜にかまけて",
+    "structure": "noun + にかまけて",
+    "meaning": {
+      "en": "so taken up with (something) that other things are neglected",
+      "fr": "trop pris par (quelque chose) pour s'occuper du reste"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + にかまけて** means « so taken up with X that something else is neglected ». What follows is the neglect: 仕事にかまけて、家のことを何もしない.",
+        "fr": "**nom + にかまけて** signifie « tellement pris par X qu'on néglige autre chose ». La suite dit ce qui est négligé : 仕事にかまけて、家のことを何もしない."
+      },
+      {
+        "kind": "use",
+        "en": "- Apologising for a long silence: 忙しさにかまけて、ごぶさたしております.\n- Regret: 仕事にかまけて、子どもと遊んでやれなかった.\n- Reproach: ゲームにかまけて、宿題をしない.",
+        "fr": "- S'excuser d'un long silence : 忙しさにかまけて、ごぶさたしております.\n- Regret : 仕事にかまけて、子どもと遊んでやれなかった.\n- Reproche : ゲームにかまけて、宿題をしない."
+      },
+      {
+        "kind": "careful",
+        "en": "An admission or a reproach, never praise for being dedicated: X may be worthy (work, children), but the sentence is about what was let slide.",
+        "fr": "Un aveu ou un reproche, jamais un éloge du dévouement : X peut être louable (le travail, les enfants), mais la phrase parle de ce qu'on a laissé filer."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜をよそに",
+        "en": "にかまけて: busy with X, one neglects something else; をよそに: one ignores X itself (a worry, an objection).",
+        "fr": "にかまけて : pris par X, on néglige autre chose ; をよそに : on ignore X lui-même (une inquiétude, une objection)."
+      },
+      {
+        "pattern": "〜ばかり",
+        "en": "にかまけて says what got neglected because of X; ばかり only says X crowds out everything else.",
+        "fr": "にかまけて dit ce qui a été négligé à cause de X ; ばかり dit seulement que X prend toute la place."
+      },
+      {
+        "pattern": "〜にかこつけて",
+        "en": "にかまけて: X really takes up one's time; にかこつけて: X is only the excuse given.",
+        "fr": "にかまけて : X occupe vraiment tout le temps ; にかこつけて : X n'est que l'excuse avancée."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "忙しさにかまけて、もう長い間両親に会っていません。",
+        "en": "Caught up in being busy, I haven't seen my parents in a long time.",
+        "fr": "Accaparé par mes occupations, je n'ai pas vu mes parents depuis longtemps.",
+        "register": "polite"
+      },
+      {
+        "jp": "ゲームにかまけて、宿題のことをすっかり忘れていた。",
+        "en": "I was so wrapped up in my game that I completely forgot my homework.",
+        "fr": "À force de jouer aux jeux vidéo, j'ai complètement oublié mes devoirs.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "夫は趣味にかまけて、家のことは何もしない。",
+        "en": "My husband is so taken up with his hobbies that he does nothing around the house.",
+        "fr": "Mon mari est tellement pris par ses loisirs qu'il ne fait rien à la maison.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "仕事にかまけて、子どもの話をちゃんと聞いてやれなかった。",
+        "en": "Wrapped up in work, I never really listened to my children.",
+        "fr": "Trop pris par le travail, je n'ai jamais vraiment écouté mes enfants.",
         "register": "written"
       }
     ]
@@ -4816,6 +5487,73 @@
     ]
   },
   {
+    "pattern": "ただ〜のみ",
+    "structure": "ただ + verb dictionary form / noun + のみ",
+    "meaning": {
+      "en": "only, nothing but (formal)",
+      "fr": "seulement, rien d'autre que (formel)"
+    },
+    "register": "written",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**ただ + verb dictionary form or noun + のみ** means « only, nothing but »: ただ opens what のみ closes, and weighs it. ただ祈るのみだ (all one can do is pray).",
+        "fr": "**ただ + verbe forme du dictionnaire ou nom + のみ** signifie « seulement, rien d'autre que » : ただ ouvre ce que のみ ferme, et lui donne du poids. ただ祈るのみだ (il ne reste qu'à prier)."
+      },
+      {
+        "kind": "use",
+        "en": "- Nothing left to do: あとはただ結果を待つのみだ.\n- Resolve, with あるのみ: ただ前進あるのみ (onward, nothing else).\n- Describing: 彼はただ頭を下げるのみだった.",
+        "fr": "- Plus rien à faire : あとはただ結果を待つのみだ.\n- Résolution, avec あるのみ : ただ前進あるのみ (aller de l'avant, rien d'autre).\n- Description : 彼はただ頭を下げるのみだった."
+      },
+      {
+        "kind": "careful",
+        "en": "のみ alone (N2) already means « only »; ただ adds weight, a tone of resolve or helplessness. Speeches and writing; in speech ただ〜だけ says the same.",
+        "fr": "のみ seul (N2) veut déjà dire « seulement » ; ただ y ajoute du poids, un ton de résolution ou d'impuissance. Discours et écrit ; à l'oral, ただ〜だけ dit la même chose."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜だけ",
+        "en": "Same « only »; だけ is everyday (ただ〜だけ in speech), ただ〜のみ formal and solemn. あるのみ has no だけ version.",
+        "fr": "Même « seulement » ; だけ est courant (ただ〜だけ à l'oral), ただ〜のみ formel et solennel. あるのみ n'a pas de version en だけ."
+      },
+      {
+        "pattern": "〜しか〜ない",
+        "en": "Close in sense: 祈るしかない (there is no other choice) is everyday; ただ祈るのみ is formal and solemn.",
+        "fr": "Sens proche : 祈るしかない (pas d'autre choix) est courant ; ただ祈るのみ est formel et solennel."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今はただ、けがをした人たちの回復を祈るのみです。",
+        "en": "All we can do now is pray that the injured recover.",
+        "fr": "Pour l'instant, il ne nous reste qu'à prier pour le rétablissement des blessés.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "優勝するためには、ただ練習あるのみだ。",
+        "en": "To win the title, there is nothing for it but practice.",
+        "fr": "Pour gagner le titre, il n'y a qu'une chose à faire : s'entraîner.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "何を聞かれても、彼はただ頭を下げるのみだった。",
+        "en": "Whatever he was asked, he did nothing but bow his head.",
+        "fr": "Quoi qu'on lui demande, il se contentait de baisser la tête.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "準備はすべて終わった。あとはただ試合の日を待つのみだ。",
+        "en": "All the preparation is done. Now there's nothing left but to wait for the day of the match.",
+        "fr": "Tous les préparatifs sont terminés. Il ne reste plus qu'à attendre le jour du match.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜といい〜といい",
     "structure": "noun + といい + noun + といい",
     "meaning": {
@@ -4879,6 +5617,73 @@
         "en": "This house, its size, its location, is beyond reproach.",
         "fr": "Cette maison, tant par sa taille que par son emplacement, est irréprochable.",
         "register": "neutral"
+      }
+    ]
+  },
+  {
+    "pattern": "〜も〜なら〜も",
+    "structure": "A + も + A + なら + B + も + B (だ)",
+    "meaning": {
+      "en": "one is as bad as the other; both are to blame",
+      "fr": "l'un ne vaut pas mieux que l'autre ; les deux sont en faute"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**A + も + A + なら + B + も + B + だ**, each word said twice, means « A is bad, and B is just as bad »: both sides are to blame. 親も親なら子も子だ (the parents are at fault, and so are the children).",
+        "fr": "**A + も + A + なら + B + も + B + だ**, chaque mot répété, signifie « A a tort, et B tout autant » : les deux sont en faute. 親も親なら子も子だ (les parents sont fautifs, les enfants aussi)."
+      },
+      {
+        "kind": "use",
+        "en": "- Blaming both sides: 店も店なら客も客だ.\n- A couple: 夫も夫なら妻も妻だ.\n- With 方 (the one who…): 言う方も言う方なら、聞く方も聞く方だ.",
+        "fr": "- Renvoyer dos à dos : 店も店なら客も客だ.\n- Un couple : 夫も夫なら妻も妻だ.\n- Avec 方 (celui qui…) : 言う方も言う方なら、聞く方も聞く方だ."
+      },
+      {
+        "kind": "careful",
+        "en": "A criticism, and each word comes back twice; what is wrong is left unsaid. It is not a neutral « both A and B » (that is も〜も).",
+        "fr": "Une critique, et chaque mot revient deux fois ; le reproche lui-même reste sous-entendu. Ce n'est pas un simple « A et B » (c'est も〜も)."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜も〜ば〜も",
+        "en": "も〜なら〜も blames both sides; も〜ば〜も lists two matching facts (海もあれば山もある).",
+        "fr": "も〜なら〜も blâme les deux côtés ; も〜ば〜も énumère deux faits assortis (海もあれば山もある)."
+      },
+      {
+        "pattern": "〜といい〜といい",
+        "en": "といい〜といい picks two features of one thing to judge it; も〜なら〜も blames two parties equally.",
+        "fr": "といい〜といい prend deux traits d'une même chose pour la juger ; も〜なら〜も blâme deux parties à égalité."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "約束を破る兄も兄なら、それを許す母も母だよ。",
+        "en": "My brother is bad for breaking his promises, and Mum is no better for letting him.",
+        "fr": "Mon frère a tort de ne pas tenir parole, et maman aussi de le laisser faire.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "夫も夫なら妻も妻で、二人とも家事をしようとしない。",
+        "en": "The husband is as bad as the wife: neither of them will do any housework.",
+        "fr": "Le mari ne vaut pas mieux que la femme : aucun des deux ne veut faire le ménage.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "店も店なら客も客で、お互いに相手の話を聞こうとしなかった。",
+        "en": "The shop was as much to blame as the customer: neither would listen to the other.",
+        "fr": "Le magasin et le client se valaient : aucun ne voulait écouter l'autre.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "うそをつく方もつく方なら、それを信じる方も信じる方です。",
+        "en": "The one who lies is at fault, and so is the one who believes it.",
+        "fr": "Celui qui ment a tort, et celui qui le croit tout autant.",
+        "register": "polite"
       }
     ]
   },
@@ -5348,6 +6153,72 @@
         "en": "We judged fairly, in accordance with the rules.",
         "fr": "Nous avons jugé équitablement, conformément au règlement.",
         "register": "formal"
+      }
+    ]
+  },
+  {
+    "pattern": "〜に照らして",
+    "structure": "noun + に照らして",
+    "meaning": {
+      "en": "in the light of, measured against (a law, a rule, the facts)",
+      "fr": "à la lumière de, au regard de (une loi, une règle, les faits)"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + に照らして (にてらして)** means « measured against, in the light of »: a case is held up to a standard in order to judge it. 法律に照らして (in the light of the law). Also に照らすと, に照らせば.",
+        "fr": "**nom + に照らして (にてらして)** signifie « au regard de, à la lumière de » : on confronte un cas à une norme pour le juger. 法律に照らして (au regard de la loi). Aussi に照らすと, に照らせば."
+      },
+      {
+        "kind": "use",
+        "en": "- Law and rules: 校則に照らして、処分を決める.\n- Past cases: 前例に照らして、今回の判断を見直す.\n- One's own experience: 自分の経験に照らして考える.",
+        "fr": "- Lois et règlements : 校則に照らして、処分を決める.\n- Précédents : 前例に照らして、今回の判断を見直す.\n- Sa propre expérience : 自分の経験に照らして考える."
+      },
+      {
+        "kind": "careful",
+        "en": "The standard is a yardstick for a verdict, so a word of judging usually follows (判断する, 考える, 明らかだ). 照らす on its own means « to shine a light on ».",
+        "fr": "La norme sert d'étalon pour un verdict : un mot de jugement suit en général (判断する, 考える, 明らかだ). 照らす seul veut dire « éclairer »."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜に即して",
+        "en": "に照らして: holds a case up to the standard to judge it; に即して: acts in keeping with it.",
+        "fr": "に照らして : confronte un cas à la norme pour le juger ; に即して : agit en conformité avec elle."
+      },
+      {
+        "pattern": "〜に基づいて",
+        "en": "に照らして: the standard as a yardstick; に基づいて: facts or rules as the ground a plan or a decision is built on.",
+        "fr": "に照らして : la norme comme étalon ; に基づいて : faits ou règles comme fondement d'un projet ou d'une décision."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "過去の例に照らしてみると、今回の処分は重すぎる。",
+        "en": "Measured against past cases, this penalty is far too heavy.",
+        "fr": "Au regard des cas passés, cette sanction est bien trop lourde.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "彼のしたことが許されないのは、規則に照らして明らかだ。",
+        "en": "Measured against the rules, it is clear that what he did cannot be allowed.",
+        "fr": "Au regard du règlement, il est clair que ce qu'il a fait est inadmissible.",
+        "register": "formal",
+        "contrast": true
+      },
+      {
+        "jp": "自分の経験に照らして考えると、その計画は甘すぎる。",
+        "en": "Judging by my own experience, that plan is far too optimistic.",
+        "fr": "À la lumière de ma propre expérience, ce projet est bien trop optimiste.",
+        "register": "neutral"
+      },
+      {
+        "jp": "会社の規則に照らして、公平に判断いたします。",
+        "en": "We will judge fairly, measured against the company's rules.",
+        "fr": "Nous jugerons en toute équité, au regard du règlement de l'entreprise.",
+        "register": "polite"
       }
     ]
   },
@@ -5888,6 +6759,72 @@
     ]
   },
   {
+    "pattern": "〜を控えて",
+    "structure": "noun (an event) + を控えて",
+    "meaning": {
+      "en": "with (an event) close at hand",
+      "fr": "à l'approche de, avec (un événement) tout proche"
+    },
+    "register": "formal",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**event noun + を控えて (をひかえて)** means « with X close at hand »: the event is near and weighs on the present. 試験を控えて (with the exam coming up). A date can sit in the middle: 試験を明日に控えて.",
+        "fr": "**nom d'événement + を控えて (をひかえて)** signifie « avec X tout proche » : l'événement approche et pèse sur le présent. 試験を控えて (à l'approche de l'examen). Une date peut s'intercaler : 試験を明日に控えて."
+      },
+      {
+        "kind": "use",
+        "en": "- Nerves: 発表を控えて、落ち着かない.\n- Preparations: 引っ越しを来週に控えて、荷物をまとめている.\n- Before a noun: 結婚式を控えた二人.",
+        "fr": "- Le trac : 発表を控えて、落ち着かない.\n- Les préparatifs : 引っ越しを来週に控えて、荷物をまとめている.\n- Devant un nom : 結婚式を控えた二人."
+      },
+      {
+        "kind": "careful",
+        "en": "控える also means « to cut down on, hold back »: 塩分を控えてください (please cut down on salt). The « close at hand » sense takes an event: an exam, a match, a wedding, a move.",
+        "fr": "控える veut aussi dire « modérer, s'abstenir de » : 塩分を控えてください (limitez le sel). Le sens « tout proche » prend un événement : examen, match, mariage, déménagement."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜に先立って",
+        "en": "を控えて: the event is near and colours the present; に先立って: something done ahead of it, formally.",
+        "fr": "を控えて : l'événement est proche et pèse sur le présent ; に先立って : ce qu'on fait avant lui, formellement."
+      },
+      {
+        "pattern": "〜にあたって",
+        "en": "を控えて describes the state before an event; にあたって introduces what one does on taking it on.",
+        "fr": "を控えて décrit l'état avant un événement ; にあたって introduit ce qu'on fait en l'abordant."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "大事な発表を控えて、朝から落ち着かない。",
+        "en": "With a big presentation coming up, I've been on edge since the morning.",
+        "fr": "Avec une présentation importante qui approche, je ne tiens pas en place depuis ce matin.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "決勝戦を控えて、選手たちの表情はかたい。",
+        "en": "With the final close at hand, the players' faces are tense.",
+        "fr": "À l'approche de la finale, les visages des joueurs sont crispés.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "引っ越しを控えて、部屋の中は段ボールだらけです。",
+        "en": "With the move coming up, the flat is full of cardboard boxes.",
+        "fr": "À l'approche du déménagement, l'appartement est plein de cartons.",
+        "register": "polite"
+      },
+      {
+        "jp": "入学試験を控えて、息子は毎晩十二時まで勉強している。",
+        "en": "With his entrance exams close at hand, my son studies until midnight every night.",
+        "fr": "Ses examens d'entrée approchant, mon fils travaille jusqu'à minuit tous les soirs.",
+        "register": "neutral"
+      }
+    ]
+  },
+  {
     "pattern": "〜を踏まえて",
     "structure": "noun + を踏まえて",
     "meaning": {
@@ -6085,6 +7022,73 @@
         "en": "My Japanese is about good enough for daily conversation.",
         "fr": "Mon japonais suffit à peu près pour la conversation courante.",
         "register": "neutral"
+      }
+    ]
+  },
+  {
+    "pattern": "〜からある",
+    "structure": "number + counter + からある",
+    "meaning": {
+      "en": "as much as, no less than (a large amount)",
+      "fr": "pas moins de, au bas mot (une grande quantité)"
+    },
+    "register": "written",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**number + counter + からある** stresses that a weight, size or distance is large: « no less than, a good… ». 百キロからある荷物 (a load of a hundred kilos or more). Also からの before a noun (五千人からの人), and からする for a price.",
+        "fr": "**nombre + compteur + からある** souligne qu'un poids, une taille ou une distance est grand : « pas moins de, au bas mot ». 百キロからある荷物 (un chargement d'au moins cent kilos). Aussi からの devant un nom (五千人からの人), et からする pour un prix."
+      },
+      {
+        "kind": "use",
+        "en": "- Weight and size: 三十キロからある石, 三メートルからある波.\n- Crowds, with からの: 五千人からの人が集まった.\n- Prices, with からする: 百万円からする時計.",
+        "fr": "- Poids et taille : 三十キロからある石, 三メートルからある波.\n- Foules, avec からの : 五千人からの人が集まった.\n- Prix, avec からする : 百万円からする時計."
+      },
+      {
+        "kind": "careful",
+        "en": "The number is the point: it is large, and it may be more. In speech, number + もある says the same more plainly: 百キロもある荷物.",
+        "fr": "Le nombre est l'essentiel : il est grand, et peut-être plus encore. À l'oral, nombre + もある dit la même chose plus simplement : 百キロもある荷物."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜も（強調）",
+        "en": "からある: at least that much, formal; number + も: that much, and it surprises me, everyday.",
+        "fr": "からある : au moins autant, registre soutenu ; nombre + も : autant, et ça m'étonne, au quotidien."
+      },
+      {
+        "pattern": "〜くらい／〜ぐらい",
+        "en": "からある stresses that the amount is large; くらい only rounds it (« about »).",
+        "fr": "からある insiste sur une grande quantité ; くらい ne fait que l'arrondir (« environ »)."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "重さ三十キロからある石を、彼は一人で持ち上げた。",
+        "en": "He lifted a stone weighing a good thirty kilos all by himself.",
+        "fr": "Il a soulevé tout seul une pierre de trente kilos au bas mot.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "高さ三メートルからある波で、船が大きくゆれた。",
+        "en": "Waves a good three metres high set the boat rocking violently.",
+        "fr": "Des vagues de trois mètres au bas mot faisaient violemment tanguer le bateau.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "片道十キロからある道を、毎日自転車で通勤している。",
+        "en": "Every day I cycle to work, a good ten kilometres each way.",
+        "fr": "Chaque jour, je vais au travail à vélo : dix bons kilomètres dans chaque sens.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "兄が一メートルからある魚を釣ったんだって。",
+        "en": "Apparently my brother caught a fish no less than a metre long.",
+        "fr": "Il paraît que mon frère a pêché un poisson d'au moins un mètre.",
+        "register": "casual"
       }
     ]
   },
@@ -6960,6 +7964,72 @@
     ]
   },
   {
+    "pattern": "〜にかこつけて",
+    "structure": "noun + にかこつけて",
+    "meaning": {
+      "en": "using (something) as a pretext",
+      "fr": "sous prétexte de, en prenant prétexte de"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + にかこつけて** means « using X as a pretext »: X is the reason given, but what follows is what the person really wanted. 出張にかこつけて (on the pretext of a business trip).",
+        "fr": "**nom + にかこつけて** signifie « en prenant prétexte de X » : X est la raison affichée, mais la suite est ce que la personne voulait vraiment. 出張にかこつけて (sous prétexte d'un voyage d'affaires)."
+      },
+      {
+        "kind": "use",
+        "en": "- Work as cover: 出張にかこつけて、温泉に寄ってきた.\n- An occasion as an excuse: お礼にかこつけて、食事に誘う.\n- Seeing through someone: 相談にかこつけて、会いに来ただけだろう.",
+        "fr": "- Le travail comme couverture : 出張にかこつけて、温泉に寄ってきた.\n- Une occasion comme excuse : お礼にかこつけて、食事に誘う.\n- Percer quelqu'un à jour : 相談にかこつけて、会いに来ただけだろう."
+      },
+      {
+        "kind": "careful",
+        "en": "The pretext is usually real (there is a trip); it is just not the true motive. The tone is knowing, or a little critical.",
+        "fr": "Le prétexte est en général bien réel (le voyage existe) ; ce n'est simplement pas le vrai motif. Le ton est entendu, ou un peu critique."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜をいいことに",
+        "en": "にかこつけて: X is the excuse one gives; をいいことに: X is a situation one exploits (no one watching, someone's kindness).",
+        "fr": "にかこつけて : X est l'excuse qu'on avance ; をいいことに : X est une situation qu'on exploite (personne ne regarde, la gentillesse d'autrui)."
+      },
+      {
+        "pattern": "〜にかまけて",
+        "en": "にかこつけて: X is an excuse for doing something; にかまけて: X takes up so much time that something else is neglected.",
+        "fr": "にかこつけて : X sert d'excuse pour faire quelque chose ; にかまけて : X prend tant de place qu'on néglige autre chose."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "この前のお礼にかこつけて、彼女を食事に誘った。",
+        "en": "On the pretext of thanking her for the other day, I asked her out to dinner.",
+        "fr": "Sous prétexte de la remercier pour l'autre jour, je l'ai invitée à dîner.",
+        "register": "neutral",
+        "contrast": true
+      },
+      {
+        "jp": "あいつ、相談にかこつけて、毎晩のように電話してくるんだ。",
+        "en": "That guy calls me almost every night, on the pretext of asking for advice.",
+        "fr": "Ce type m'appelle presque tous les soirs, sous prétexte de me demander conseil.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "子どもの誕生日にかこつけて、自分の好きなケーキを買いました。",
+        "en": "Using my child's birthday as an excuse, I bought the cake I like.",
+        "fr": "Sous prétexte de l'anniversaire de mon enfant, j'ai acheté le gâteau que j'aime.",
+        "register": "polite"
+      },
+      {
+        "jp": "視察にかこつけて、議員たちは海外旅行を楽しんだ。",
+        "en": "On the pretext of a fact-finding tour, the members of parliament enjoyed a trip abroad.",
+        "fr": "Sous couvert d'une mission d'étude, les députés se sont offert un voyage à l'étranger.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜たが最後",
     "structure": "verb た-form + が最後／ら最後 (〜たが最後／〜たら最後)",
     "meaning": {
@@ -7492,6 +8562,73 @@
         "en": "Without a word, she left the room.",
         "fr": "Sans un mot, elle a quitté la pièce.",
         "register": "written"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ずとも",
+    "structure": "verb ない-stem + ずとも",
+    "meaning": {
+      "en": "even without doing, need not",
+      "fr": "même sans (faire), inutile de"
+    },
+    "register": "written",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**ない-stem + ずとも** means « even without doing »: the outcome is the same whether you do it or not. 言わずとも分かる (it is understood without being said). する → せずとも.",
+        "fr": "**radical négatif + ずとも** signifie « même sans faire » : le résultat est le même, qu'on le fasse ou non. 言わずとも分かる (on comprend sans qu'il soit besoin de le dire). する → せずとも."
+      },
+      {
+        "kind": "use",
+        "en": "- What goes without saying: 彼の気持ちは、聞かずとも分かる.\n- Reassuring, in a formal style: そんなに急がずとも間に合います.\n- ずともよい, « need not »: 返事はせずともよい.",
+        "fr": "- Ce qui va sans dire : 彼の気持ちは、聞かずとも分かる.\n- Rassurer, dans un style soutenu : そんなに急がずとも間に合います.\n- ずともよい, « inutile de » : 返事はせずともよい."
+      },
+      {
+        "kind": "careful",
+        "en": "Written and a little old-fashioned; everyday speech says なくても, though set phrases like 言わずとも分かる live on. Not ずして (N1), « without »: 戦わずして勝つ is winning by not fighting.",
+        "fr": "Écrit et un peu vieilli ; l'oral courant dit なくても, même si des tournures figées comme 言わずとも分かる restent vivantes. Différent de ずして (N1), « sans » : 戦わずして勝つ, c'est vaincre sans combattre."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜なくてもいいです",
+        "en": "ずともよい: need not, in writing; なくてもいいです: the everyday, polite « you don't have to ».",
+        "fr": "ずともよい : inutile de, à l'écrit ; なくてもいいです : le « pas besoin de » poli de tous les jours."
+      },
+      {
+        "pattern": "〜ても",
+        "en": "ずとも is ても on a negative, in written style: 言わずとも = 言わなくても.",
+        "fr": "ずとも, c'est ても sur un négatif, en style écrit : 言わずとも = 言わなくても."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "君の言いたいことは、言わずとも分かるよ。",
+        "en": "I know what you want to say without you having to say it.",
+        "fr": "Je sais ce que tu veux dire, pas besoin de le dire.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "そんなに急がずとも、電車には間に合います。",
+        "en": "Even without rushing like that, you'll make the train.",
+        "fr": "Inutile de vous presser autant, vous aurez votre train.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "説明を読まずとも、使い方はすぐ分かるはずだ。",
+        "en": "Even without reading the instructions, you should see how to use it at once.",
+        "fr": "Même sans lire les explications, on devrait comprendre tout de suite comment s'en servir.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "この件については、返事をせずともよい。",
+        "en": "There is no need to reply on this matter.",
+        "fr": "Il n'est pas nécessaire de répondre à ce sujet.",
+        "register": "formal"
       }
     ]
   },

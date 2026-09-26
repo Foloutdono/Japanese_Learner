@@ -2395,6 +2395,136 @@
     ]
   },
   {
+    "pattern": "〜ほど",
+    "structure": "verb plain form ／ adjective + ほど",
+    "meaning": {
+      "en": "to the point of, so … that",
+      "fr": "au point de, tellement… que"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form + ほど** measures how far something goes by what it leads to: おなかが痛くなるほど笑った (laughed until my stomach hurt). Before a noun it is ほどの, and it can close the sentence as ほどだ.",
+        "fr": "**forme neutre + ほど** mesure jusqu'où va une chose par ce qu'elle entraîne : おなかが痛くなるほど笑った (rire à en avoir mal au ventre). Devant un nom, on dit ほどの, et il peut clore la phrase en ほどだ."
+      },
+      {
+        "kind": "use",
+        "en": "- Strong feelings: とび上がるほどうれしかった.\n- Before a noun, ほどの: 言葉にできないほどの美しさ.\n- As the predicate, ほどだ: 歩けないほどだった.",
+        "fr": "- Sentiments forts : とび上がるほどうれしかった.\n- Devant un nom, ほどの : 言葉にできないほどの美しさ.\n- En prédicat, ほどだ : 歩けないほどだった."
+      },
+      {
+        "kind": "careful",
+        "en": "With a negative, ほど compares instead: 去年ほど暑くない is 〜ほど〜ない (N4). After a number it only means « about », a formal くらい: 十分ほど. In speech, くらい also gives a degree: 死ぬくらい.",
+        "fr": "Au négatif, ほど compare : 去年ほど暑くない, c'est 〜ほど〜ない (N4). Après un nombre, il veut seulement dire « environ », un くらい soutenu : 十分ほど. À l'oral, くらい exprime aussi un degré : 死ぬくらい."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "から〜まで",
+        "en": "まで marks where something stops (死ぬまで働く, until one dies); ほど measures how far it goes (死ぬほど働く, work like mad).",
+        "fr": "まで marque où une chose s'arrête (死ぬまで働く, jusqu'à la mort) ; ほど mesure jusqu'où elle va (死ぬほど働く, travailler comme un fou)."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "その映画は、笑いが止まらないほどおもしろかった。",
+        "en": "That film was so funny I couldn't stop laughing.",
+        "fr": "Ce film était tellement drôle que je n'arrivais plus à m'arrêter de rire.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "山の上から見た景色は、言葉にできないほどの美しさだった。",
+        "en": "The view from the top of the mountain was more beautiful than words can say.",
+        "fr": "Du sommet de la montagne, la vue était d'une beauté impossible à décrire.",
+        "register": "written"
+      },
+      {
+        "jp": "足が痛くて、もう一歩も歩けないほどだった。",
+        "en": "My feet hurt so much I couldn't take another step.",
+        "fr": "J'avais si mal aux pieds que je ne pouvais plus faire un pas.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "合格の知らせを聞いて、とび上がるほどうれしかったです。",
+        "en": "When I heard I had passed, I was so happy I could have jumped for joy.",
+        "fr": "Quand j'ai appris que j'étais reçu, j'étais si heureux que j'en aurais sauté de joie.",
+        "register": "polite",
+        "contrast": true
+      }
+    ]
+  },
+  {
+    "pattern": "〜ほど〜はない",
+    "structure": "noun + ほど + adjective + noun + はない",
+    "meaning": {
+      "en": "nothing is as … as",
+      "fr": "rien n'est aussi… que"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + ほど + adjective + noun + はない** says that nothing is as … as the first noun, which is therefore the best, or the worst: 母の料理ほどおいしいものはない (nothing tastes as good as Mum's cooking).",
+        "fr": "**nom + ほど + adjectif + nom + はない** dit que rien n'est aussi… que le premier nom, qui est donc le meilleur, ou le pire : 母の料理ほどおいしいものはない (rien n'est aussi bon que la cuisine de maman)."
+      },
+      {
+        "kind": "use",
+        "en": "- Praise: 母の料理ほどおいしいものはない.\n- Complaints: 満員電車ほどいやなものはない.\n- An activity takes こと: 旅行するほど楽しいことはない.",
+        "fr": "- Éloge : 母の料理ほどおいしいものはない.\n- Plainte : 満員電車ほどいやなものはない.\n- Une activité prend こと : 旅行するほど楽しいことはない."
+      },
+      {
+        "kind": "careful",
+        "en": "For people, the verb is いる: 母ほどやさしい人はいない. Polite: はありません. くらい can stand in for ほど here: 友だちくらい大切なものはない.",
+        "fr": "Pour une personne, le verbe est いる : 母ほどやさしい人はいない. Poli : はありません. くらい peut remplacer ほど ici : 友だちくらい大切なものはない."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜で〜がいちばん",
+        "en": "Both name the top. で〜がいちばん states it within a group; ほど〜はない says nothing else comes close, with more feeling.",
+        "fr": "Les deux désignent le premier. で〜がいちばん le constate dans un groupe ; ほど〜はない dit que rien n'en approche, avec plus d'émotion."
+      },
+      {
+        "pattern": "〜より〜のほうが",
+        "en": "より〜のほうが ranks two things; ほど〜はない puts one above everything.",
+        "fr": "より〜のほうが classe deux choses ; ほど〜はない en place une au-dessus de tout."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "満員電車ほどいやなものはない。",
+        "en": "Nothing is as unpleasant as a packed train.",
+        "fr": "Rien n'est aussi désagréable qu'un train bondé.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "寒い朝に飲むあたたかいスープほどおいしいものはない。",
+        "en": "Nothing tastes as good as hot soup on a cold morning.",
+        "fr": "Rien n'est aussi bon qu'une soupe chaude par un matin froid.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "子どもにとって、夏休みほど楽しみなものはないでしょう。",
+        "en": "For children, there is surely nothing they look forward to as much as the summer holidays.",
+        "fr": "Pour les enfants, rien n'est sans doute aussi attendu que les vacances d'été.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "一人で過ごす静かな夜ほど、落ち着く時間はない。",
+        "en": "No time is as calming as a quiet evening spent alone.",
+        "fr": "Aucun moment n'apaise autant qu'une soirée tranquille passée seul.",
+        "register": "written",
+        "contrast": true
+      }
+    ]
+  },
+  {
     "pattern": "〜さえ",
     "structure": "noun + さえ",
     "meaning": {
@@ -2463,6 +2593,71 @@
         "en": "I haven't even told my parents about it.",
         "fr": "Je n'en ai même pas parlé à mes parents.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜まで（強調）",
+    "structure": "noun (+ particle) + まで（強調）",
+    "meaning": {
+      "en": "even, one more beyond what was expected",
+      "fr": "même, jusqu'à (un cas de plus, inattendu)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + まで** adds one more to a list, beyond what anyone expected: « even ». 子どもまで (even the children). が and を drop out; に and で stay: 先生にまで.",
+        "fr": "**nom + まで** ajoute un élément de plus, au-delà de ce qu'on attendait : « même, jusqu'à ». 子どもまで (même les enfants). が et を disparaissent ; に et で restent : 先生にまで."
+      },
+      {
+        "kind": "use",
+        "en": "- On top of it all: 道に迷ったうえに、雨まで降ってきた.\n- Surprise at a kindness: おみやげまでもらった.\n- How far something reaches: 外国にまで知られている.",
+        "fr": "- Pour couronner le tout : 道に迷ったうえに、雨まで降ってきた.\n- Surprise devant une gentillesse : おみやげまでもらった.\n- Jusqu'où va une chose : 外国にまで知られている."
+      },
+      {
+        "kind": "careful",
+        "en": "Not the まで of a limit (駅まで, 五時まで), which marks where or when something stops. With a negative, « not even » is さえ or も: 名前さえ知らない; まで there usually means « not as far as »: 名前までは知らない.",
+        "fr": "Ce n'est pas le まで d'une limite (駅まで, 五時まで), qui marque où ou quand une chose s'arrête. Au négatif, « même pas » se dit さえ ou も : 名前さえ知らない ; まで y veut plutôt dire « pas jusque-là » : 名前までは知らない."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜さえ",
+        "en": "まで adds one more on top of the rest, often with surprise; さえ holds up the extreme case, often in a negative.",
+        "fr": "まで ajoute un élément de plus, souvent avec surprise ; さえ cite le cas extrême, souvent au négatif."
+      },
+      {
+        "pattern": "〜も（強調）",
+        "en": "も after a number stresses a large amount (十時間も); まで after a person or a thing means « even ».",
+        "fr": "も après un nombre souligne une grande quantité (十時間も) ; まで après une personne ou une chose veut dire « même »."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "晩ごはんをごちそうになって、おみやげまでもらった。",
+        "en": "They treated me to dinner and even gave me a present to take home.",
+        "fr": "On m'a offert le dîner, et même un petit cadeau à rapporter.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "道に迷ったうえに、雨まで降ってきました。",
+        "en": "I got lost, and on top of that it even started to rain.",
+        "fr": "Je me suis perdu, et en plus il s'est même mis à pleuvoir.",
+        "register": "polite"
+      },
+      {
+        "jp": "この歌は、小さな子どもまで知っている。",
+        "en": "Even little children know this song.",
+        "fr": "Même les petits enfants connaissent cette chanson.",
+        "register": "casual"
+      },
+      {
+        "jp": "その店の名前は、今では外国にまで知られている。",
+        "en": "The shop's name is now known even abroad.",
+        "fr": "Le nom de cette boutique est désormais connu jusqu'à l'étranger.",
+        "register": "written"
       }
     ]
   },
@@ -3307,6 +3502,71 @@
         "en": "Precisely because you're busy, rest matters.",
         "fr": "C'est justement parce qu'on est occupé que le repos compte.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "〜んだから／〜のだから",
+    "structure": "plain form + んだから・のだから",
+    "meaning": {
+      "en": "since, after all (a reason both sides already know)",
+      "fr": "puisque, après tout (une raison que chacun connaît déjà)"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form + んだから／のだから** gives a reason the listener already knows, and presses it: « since…, after all ». A noun or a な-adjective takes な: 大人なんだから.",
+        "fr": "**forme neutre + んだから／のだから** avance une raison que l'interlocuteur connaît déjà, et insiste dessus : « puisque…, après tout ». Un nom ou un adjectif en な prend な : 大人なんだから."
+      },
+      {
+        "kind": "use",
+        "en": "- Advice or orders: もう大人なんだから、自分で決めなさい.\n- Reassurance: 初めてなんだから、気にしなくていい.\n- Alone at the end, a complaint: まったく、いつも忘れるんだから.",
+        "fr": "- Conseils ou ordres : もう大人なんだから、自分で決めなさい.\n- Rassurer : 初めてなんだから、気にしなくていい.\n- Seul en fin de phrase, un reproche : まったく、いつも忘れるんだから."
+      },
+      {
+        "kind": "careful",
+        "en": "Plain から only gives a reason; のだから presents it as one the listener cannot deny, so it can sound pushy to a superior. んだから is spoken, のだから written; polite: んですから.",
+        "fr": "から tout court donne une raison ; のだから la présente comme incontestable, ce qui peut paraître insistant envers un supérieur. んだから est oral, のだから écrit ; poli : んですから."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ので",
+        "en": "ので gives a reason as plain, polite information; んだから presses a reason both sides know, often toward advice or blame.",
+        "fr": "ので donne une raison comme simple information, poliment ; んだから insiste sur une raison connue de tous, souvent pour conseiller ou reprocher."
+      },
+      {
+        "pattern": "〜ものだから",
+        "en": "ものだから excuses what happened; んだから presses a known fact on someone, often with an order.",
+        "fr": "ものだから excuse ce qui est arrivé ; んだから oppose un fait connu à quelqu'un, souvent avec un ordre."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "もう大人なんだから、自分のことは自分で決めなさい。",
+        "en": "You're an adult now, so make your own decisions.",
+        "fr": "Tu es adulte maintenant, alors décide toi-même de ce qui te regarde.",
+        "register": "casual"
+      },
+      {
+        "jp": "初めてなんだから、失敗しても気にしなくていいですよ。",
+        "en": "It's your first time, so don't worry if you make mistakes.",
+        "fr": "C'est la première fois, alors ne vous en faites pas si vous vous trompez.",
+        "register": "polite"
+      },
+      {
+        "jp": "まったく、兄はいつも約束を忘れるんだから。",
+        "en": "Honestly, my brother always forgets what he promised.",
+        "fr": "Franchement, mon frère oublie toujours ce qu'il a promis.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "自分で選んだ道なのだから、人のせいにしてはいけない。",
+        "en": "It is a path you chose yourself, so you must not blame others.",
+        "fr": "C'est une voie qu'on a choisie soi-même : on ne doit pas en rejeter la faute sur les autres.",
+        "register": "written"
       }
     ]
   },
@@ -4736,6 +4996,72 @@
     ]
   },
   {
+    "pattern": "〜てみせる",
+    "structure": "verb て-form + みせる",
+    "meaning": {
+      "en": "show someone by doing it; I'll do it, you'll see",
+      "fr": "faire devant quelqu'un pour lui montrer ; j'y arriverai, tu verras"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**て-form + みせる** does something for others to see: やってみせる (show how it's done). As a vow, it means « I'll do it, just watch »: 勝ってみせる.",
+        "fr": "**forme en て + みせる**, c'est faire quelque chose sous les yeux des autres : やってみせる (montrer comment on fait). Comme promesse, cela veut dire « j'y arriverai, tu verras » : 勝ってみせる."
+      },
+      {
+        "kind": "use",
+        "en": "- Teaching: 先生が問題をといてみせた.\n- Determination: 次は、ぜったい勝ってみせる.\n- Answering doubt: できないと言われたから、やってみせる.",
+        "fr": "- Enseigner : 先生が問題をといてみせた.\n- Détermination : 次は、ぜったい勝ってみせる.\n- Répondre au doute : できないと言われたから、やってみせる."
+      },
+      {
+        "kind": "careful",
+        "en": "Not てみる (try and see): 食べてみる is a trial for yourself; 食べてみせる is for someone watching. As a vow, it is only ever about your own action.",
+        "fr": "Ce n'est pas てみる (essayer pour voir) : 食べてみる est un essai pour soi ; 食べてみせる se fait pour quelqu'un qui regarde. Comme promesse, il ne porte que sur ce que l'on fait soi-même."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ようとする",
+        "en": "ようとする: tries to, or is about to; てみせる: does it before others, or vows it will be done.",
+        "fr": "ようとする : essayer de, ou être sur le point de ; てみせる : faire devant les autres, ou promettre d'y arriver."
+      },
+      {
+        "pattern": "〜てあげる／てくれる／てもらう",
+        "en": "てあげる does something for someone's sake; てみせる does it so they can watch and learn.",
+        "fr": "てあげる fait quelque chose pour rendre service ; てみせる le fait pour qu'on regarde et qu'on apprenne."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今度の試合は、ぜったい勝ってみせる。",
+        "en": "I'm going to win the next match, just watch.",
+        "fr": "Le prochain match, je vais le gagner, tu vas voir.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "次のテストでは、もっといい点を取ってみせます。",
+        "en": "On the next test I'll get a better score, you'll see.",
+        "fr": "Au prochain contrôle, j'aurai une meilleure note, vous verrez.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "先生は、まず自分で問題をといてみせた。",
+        "en": "The teacher first solved the problem herself to show us how.",
+        "fr": "Le professeur a d'abord résolu le problème lui-même pour nous montrer.",
+        "register": "casual"
+      },
+      {
+        "jp": "店の人は、そばの作り方を客の前でやってみせた。",
+        "en": "At the shop, they showed the customers how soba is made, right in front of them.",
+        "fr": "À la boutique, on a montré aux clients, sous leurs yeux, comment on fait les soba.",
+        "register": "written"
+      }
+    ]
+  },
+  {
     "pattern": "〜てはじめて",
     "structure": "verb て-form + はじめて",
     "meaning": {
@@ -4943,6 +5269,77 @@
         "en": "Once you've started, you mustn't give up halfway.",
         "fr": "Une fois commencé, il ne faut pas abandonner en cours de route.",
         "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ついでに",
+    "structure": "verb dictionary／た-form, noun + の + ついでに",
+    "meaning": {
+      "en": "while doing it anyway, taking the chance to",
+      "fr": "en profitant de l'occasion pour, tant qu'on y est"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**dictionary or た-form, or noun + の, + ついでに** means « while doing X anyway »: X is the main errand, and Y is added because the chance is there. 散歩のついでに (while out for a walk).",
+        "fr": "**forme du dictionnaire ou en た, ou nom + の, + ついでに** signifie « en profitant de X » : X est l'affaire principale, et on y ajoute Y parce que l'occasion se présente. 散歩のついでに (en profitant de la promenade)."
+      },
+      {
+        "kind": "use",
+        "en": "- Asking a favour: 駅に行くついでに、手紙を出してくれる？\n- Trips: 京都へ行ったついでに、友だちに会った.\n- Alone, « while you're at it »: ついでに、牛乳も買ってきて.",
+        "fr": "- Demander un service : 駅に行くついでに、手紙を出してくれる？\n- Voyages : 京都へ行ったついでに、友だちに会った.\n- Seul, « tant que tu y es » : ついでに、牛乳も買ってきて."
+      },
+      {
+        "kind": "careful",
+        "en": "The main action comes first and the extra second, never the other way round. With a た-form, the main action is already done: 行ったついでに (once I was there).",
+        "fr": "L'action principale vient d'abord, l'à-côté ensuite, jamais l'inverse. Avec une forme en た, l'action principale est déjà faite : 行ったついでに (une fois sur place)."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ながら",
+        "en": "ながら: two actions at the same moment; ついでに: a second errand added because the first gives the chance.",
+        "fr": "ながら : deux actions au même moment ; ついでに : une seconde affaire ajoutée parce que la première en donne l'occasion."
+      },
+      {
+        "pattern": "〜うちに",
+        "en": "うちに: act before a state ends; ついでに: act because you are already doing something else.",
+        "fr": "うちに : agir avant qu'un état ne cesse ; ついでに : agir parce qu'on fait déjà autre chose."
+      },
+      {
+        "pattern": "〜途中で",
+        "en": "途中で places an action on the way; ついでに makes it an extra that the main errand gave you the chance for.",
+        "fr": "途中で situe une action en chemin ; ついでに en fait un à-côté dont l'affaire principale donne l'occasion."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "駅に行くついでに、この手紙を出してくれる？",
+        "en": "Since you're going to the station anyway, could you post this letter?",
+        "fr": "Puisque tu vas à la gare, tu pourrais poster cette lettre ?",
+        "register": "casual"
+      },
+      {
+        "jp": "京都へ行ったついでに、古い友だちに会ってきました。",
+        "en": "While I was in Kyoto, I took the chance to see an old friend.",
+        "fr": "Comme j'étais à Kyoto, j'en ai profité pour revoir un vieil ami.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "散歩のついでに、コンビニでパンを買った。",
+        "en": "I picked up some bread at the convenience store while out for a walk.",
+        "fr": "J'ai profité de ma promenade pour acheter du pain à la supérette.",
+        "register": "casual"
+      },
+      {
+        "jp": "仕事で東京に来たついでに、昔住んでいた町を歩いた。",
+        "en": "Having come to Tokyo for work, I took the chance to walk around the town where I used to live.",
+        "fr": "Venu à Tokyo pour le travail, j'en ai profité pour me promener dans le quartier où j'habitais autrefois.",
+        "register": "written",
+        "contrast": true
       }
     ]
   },
@@ -5223,6 +5620,74 @@
         "en": "It's important to live true to yourself.",
         "fr": "Il est important de vivre en accord avec soi-même.",
         "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "まるで〜ようだ",
+    "structure": "まるで + noun + の／plain form + ようだ",
+    "meaning": {
+      "en": "just like, exactly as if",
+      "fr": "exactement comme, on dirait vraiment"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**まるで + noun + の／plain form + ようだ** says a thing is just like something it is not: まるで夏のようだ (it's just like summer). Before a noun ような, before a verb or an adjective ように.",
+        "fr": "**まるで + nom + の／forme neutre + ようだ** dit qu'une chose ressemble tout à fait à ce qu'elle n'est pas : まるで夏のようだ (on se croirait en été). Devant un nom : ような ; devant un verbe ou un adjectif : ように."
+      },
+      {
+        "kind": "use",
+        "en": "- A striking likeness: まるでプロのようだ.\n- Feelings: まるで夢のようだ (it's like a dream).\n- How someone acts: まるで子どものように話す.",
+        "fr": "- Une ressemblance frappante : まるでプロのようだ.\n- Les sentiments : まるで夢のようだ (c'est comme un rêve).\n- Une façon d'agir : まるで子どものように話す."
+      },
+      {
+        "kind": "careful",
+        "en": "まるで makes ようだ a likeness, never a guess: 雨のようだ alone can mean « it seems to be raining », まるで雨のようだ cannot. In speech, みたいだ often replaces ようだ.",
+        "fr": "まるで fait de ようだ une ressemblance, jamais une supposition : 雨のようだ seul peut vouloir dire « il semble pleuvoir », まるで雨のようだ, non. À l'oral, みたいだ remplace souvent ようだ."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜みたいだ",
+        "en": "Same likeness with まるで; まるで〜みたいだ is the spoken form, まるで〜ようだ the neutral or written one.",
+        "fr": "Même ressemblance avec まるで ; まるで〜みたいだ est la forme parlée, まるで〜ようだ la forme neutre ou écrite."
+      },
+      {
+        "pattern": "〜かのようだ",
+        "en": "かのようだ (N2) insists that it is not so, in writing; まるで often goes with it: まるで何も知らないかのようだ.",
+        "fr": "かのようだ (N2) insiste sur le fait que ce n'est pas vrai, à l'écrit ; まるで l'accompagne souvent : まるで何も知らないかのようだ."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "三月なのに、今日はまるで夏のようだ。",
+        "en": "It's March, but today it's just like summer.",
+        "fr": "On est en mars, mais aujourd'hui on se croirait en été.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "彼は料理が上手で、まるでプロのようだ。",
+        "en": "He cooks so well, he's just like a professional.",
+        "fr": "Il cuisine si bien qu'on dirait un professionnel.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "この町は、まるで絵のようだとよく言われます。",
+        "en": "People often say this town is just like a painting.",
+        "fr": "On dit souvent que cette ville est belle comme un tableau.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "窓から見える夜の町は、まるで光の海のようだった。",
+        "en": "Seen from the window, the town at night was like a sea of lights.",
+        "fr": "Vue de la fenêtre, la ville la nuit était comme une mer de lumières.",
+        "register": "written",
+        "contrast": true
       }
     ]
   },
@@ -5649,6 +6114,73 @@
     ]
   },
   {
+    "pattern": "〜といえば／〜というと",
+    "structure": "noun + といえば・というと",
+    "meaning": {
+      "en": "speaking of, when it comes to",
+      "fr": "en parlant de, quand on pense à"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**noun + といえば／というと** takes up a topic and names what it first brings to mind: 夏といえば花火だ (summer means fireworks). Here the two forms mean the same.",
+        "fr": "**nom + といえば／というと** reprend un sujet et dit ce qu'il évoque en premier : 夏といえば花火だ (l'été, c'est les feux d'artifice). Ici, les deux formes se valent."
+      },
+      {
+        "kind": "use",
+        "en": "- What a place or a season is known for: 北海道というと、雪だ.\n- Picking up a name someone just said: 田中さんといえば、最近会っていないな.\n- Small talk and quizzes: 日本の料理といえば？",
+        "fr": "- Ce qui fait la réputation d'un lieu ou d'une saison : 北海道というと、雪だ.\n- Rebondir sur un nom qu'on vient d'entendre : 田中さんといえば、最近会っていないな.\n- Conversation et devinettes : 日本の料理といえば？"
+      },
+      {
+        "kind": "careful",
+        "en": "This is the meaning after a noun taken as a topic. After a clause, といえば is often just « if one says »: 行かないといえば、母がおこる.",
+        "fr": "C'est le sens après un nom pris comme sujet. Après une proposition, といえば veut souvent dire « si l'on dit » : 行かないといえば、母がおこる."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜について",
+        "en": "について: the subject you talk or ask about; といえば: what a topic calls to mind.",
+        "fr": "について : le sujet dont on parle ; といえば : ce qu'un sujet évoque."
+      },
+      {
+        "pattern": "〜というのは",
+        "en": "というのは explains what a word means; といえば says what it brings to mind.",
+        "fr": "というのは explique ce qu'un mot veut dire ; といえば dit ce qu'il évoque."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "夏といえば、やっぱり海だよね。",
+        "en": "When it comes to summer, it has to be the beach, right?",
+        "fr": "L'été, c'est forcément la mer, non ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "北海道というと、やっぱり雪ですね。",
+        "en": "Hokkaido makes you think of snow, doesn't it?",
+        "fr": "Quand on pense à Hokkaido, on pense à la neige, n'est-ce pas ?",
+        "register": "polite"
+      },
+      {
+        "jp": "田中さんといえば、最近ぜんぜん会っていないな。",
+        "en": "Speaking of Tanaka, I haven't seen him at all lately.",
+        "fr": "En parlant de Tanaka, je ne l'ai pas vu du tout ces derniers temps.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "日本の冬というと、雪とおんせんを思い出す人が多いだろう。",
+        "en": "When it comes to winter in Japan, many people probably think of snow and hot springs.",
+        "fr": "L'hiver au Japon évoque sans doute pour beaucoup la neige et les sources chaudes.",
+        "register": "written",
+        "contrast": true
+      }
+    ]
+  },
+  {
     "pattern": "から〜にかけて",
     "structure": "A + から + B + にかけて",
     "meaning": {
@@ -5860,6 +6392,209 @@
     ]
   },
   {
+    "pattern": "すると",
+    "structure": "sentence。すると + what happened next",
+    "meaning": {
+      "en": "thereupon, and then (what happened next); in that case",
+      "fr": "alors, là-dessus (ce qui s'est passé ensuite) ; dans ce cas"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**すると** opens a sentence with « thereupon, and then »: right after the first action, something happened or was found. ボタンをおした。すると、ドアが開いた.",
+        "fr": "**すると** ouvre une phrase par « alors, là-dessus » : juste après la première action, quelque chose s'est produit ou a été découvert. ボタンをおした。すると、ドアが開いた."
+      },
+      {
+        "kind": "use",
+        "en": "- Telling what happened, in a story or an account: 声をかけた。すると、彼がふり返った.\n- A discovery: 箱を開けた。すると、中は空だった.\n- In conversation, drawing a conclusion from what was said, « so then »: すると、明日は休みですね.",
+        "fr": "- Raconter ce qui s'est passé, dans un récit : 声をかけた。すると、彼がふり返った.\n- Une découverte : 箱を開けた。すると、中は空だった.\n- En conversation, tirer une conclusion de ce qui a été dit, « donc » : すると、明日は休みですね."
+      },
+      {
+        "kind": "careful",
+        "en": "What follows すると is what happened next or what you found, not a choice of your own: no request, invitation or plan after it. At the head of a sentence it is one word, not the する + 〜と of 勉強すると.",
+        "fr": "Ce qui suit すると est ce qui s'est produit ou ce qu'on a découvert, pas un choix personnel : ni demande, ni invitation, ni projet derrière. En tête de phrase, c'est un seul mot, pas le する + 〜と de 勉強すると."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "それから",
+        "en": "すると: then, as a result or to your surprise, something happened; それから: next, one step after another.",
+        "fr": "すると : alors, par suite ou à la surprise, quelque chose s'est produit ; それから : ensuite, une étape après l'autre."
+      },
+      {
+        "pattern": "〜と",
+        "en": "すると opens a new sentence; と says the same « when I did it, this happened » inside one: ドアを開けると、….",
+        "fr": "すると ouvre une nouvelle phrase ; と dit le même « quand je l'ai fait, ceci s'est produit » dans une seule : ドアを開けると、…."
+      },
+      {
+        "pattern": "そして",
+        "en": "すると ties what followed to the first event; そして just adds the next thing.",
+        "fr": "すると rattache ce qui a suivi au premier événement ; そして ajoute seulement la suite."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "窓を開けた。すると、冷たい風が入ってきた。",
+        "en": "I opened the window. At once, a cold wind blew in.",
+        "fr": "J'ai ouvert la fenêtre. Aussitôt, un vent froid est entré.",
+        "register": "written"
+      },
+      {
+        "jp": "箱を開けた。すると、中には古い手紙が入っていた。",
+        "en": "I opened the box. Inside, there was an old letter.",
+        "fr": "J'ai ouvert la boîte. À l'intérieur, il y avait une vieille lettre.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "友だちに声をかけました。すると、こちらを見てにっこり笑いました。",
+        "en": "I called out to my friend. She looked my way and gave me a big smile.",
+        "fr": "J'ai interpellé mon amie. Elle s'est tournée vers moi avec un grand sourire.",
+        "register": "polite"
+      },
+      {
+        "jp": "すると、田中さんは明日来ないんですね。",
+        "en": "So, in that case, Tanaka isn't coming tomorrow?",
+        "fr": "Donc, dans ce cas, Tanaka ne vient pas demain ?",
+        "register": "polite",
+        "contrast": true
+      }
+    ]
+  },
+  {
+    "pattern": "それでも",
+    "structure": "sentence。それでも + what still holds",
+    "meaning": {
+      "en": "even so, still, nevertheless",
+      "fr": "malgré tout, pourtant, quand même"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**それでも** opens a sentence with « even so, still »: what was just said should have changed things, but what follows holds anyway. 雨がふっていた。それでも、試合は続いた.",
+        "fr": "**それでも** ouvre une phrase par « malgré tout, pourtant » : ce qui vient d'être dit aurait dû tout changer, mais la suite tient quand même. 雨がふっていた。それでも、試合は続いた."
+      },
+      {
+        "kind": "use",
+        "en": "- Holding on through a hardship: 足が痛かった。それでも、最後まで走った.\n- A wish that stands against the facts: 高いのは分かっている。それでも、ほしい.\n- Asking about someone's resolve: それでも行くの？ (you're still going?)",
+        "fr": "- Tenir bon malgré une difficulté : 足が痛かった。それでも、最後まで走った.\n- Un désir qui tient malgré les faits : 高いのは分かっている。それでも、ほしい.\n- Interroger la détermination de l'autre : それでも行くの？ (tu y vas quand même ?)"
+      },
+      {
+        "kind": "careful",
+        "en": "それでも grants the first sentence in full and still holds to the second, which makes it stronger than a plain « but ». Inside one sentence, the same idea is 〜ても: 足が痛くても、最後まで走った.",
+        "fr": "それでも admet entièrement la première phrase et maintient pourtant la seconde, ce qui le rend plus fort qu'un simple « mais ». Dans une seule phrase, la même idée passe par 〜ても : 足が痛くても、最後まで走った."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "しかし",
+        "en": "しかし: but, a plain contrast between two facts; それでも: even so, despite everything just said.",
+        "fr": "しかし : mais, simple opposition entre deux faits ; それでも : malgré tout, en dépit de ce qui vient d'être dit."
+      },
+      {
+        "pattern": "ところが",
+        "en": "ところが: but then, to my surprise; それでも: even so, something holds against the odds.",
+        "fr": "ところが : or, contre toute attente ; それでも : malgré tout, quelque chose tient bon contre vents et marées."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "足がとても痛かった。それでも、最後まで走った。",
+        "en": "My legs hurt badly. Even so, I ran to the finish.",
+        "fr": "J'avais très mal aux jambes. Malgré tout, j'ai couru jusqu'au bout.",
+        "register": "written"
+      },
+      {
+        "jp": "高いのは分かっている。それでも、あのカメラがほしい。",
+        "en": "I know it's expensive. Still, I want that camera.",
+        "fr": "Je sais que c'est cher. Pourtant, je veux cet appareil photo.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "外はひどい雨だよ。それでも行くの？",
+        "en": "It's pouring outside. Are you still going?",
+        "fr": "Il pleut à verse. Tu y vas quand même ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "父は反対しました。それでも、わたしは留学を決めました。",
+        "en": "My father was against it. Even so, I decided to study abroad.",
+        "fr": "Mon père s'y est opposé. Malgré tout, j'ai décidé de partir étudier à l'étranger.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "そのうえ",
+    "structure": "sentence。そのうえ + one more point",
+    "meaning": {
+      "en": "moreover, on top of that",
+      "fr": "de plus, en outre, par-dessus le marché"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**そのうえ** (also written その上) opens a sentence with « moreover, on top of that »: it piles one more point, leaning the same way, onto what was just said. この部屋は明るい。そのうえ、駅から近い.",
+        "fr": "**そのうえ** (qui s'écrit aussi その上) ouvre une phrase par « de plus, par-dessus le marché » : on ajoute un point de plus, dans le même sens, à ce qui vient d'être dit. この部屋は明るい。そのうえ、駅から近い."
+      },
+      {
+        "kind": "use",
+        "en": "- Adding one more merit: 料理がおいしい。そのうえ、ねだんも安い.\n- Piling up troubles: 電車がおくれた。そのうえ、かさを忘れた.\n- The second sentence often carries も or まで.",
+        "fr": "- Ajouter un avantage : 料理がおいしい。そのうえ、ねだんも安い.\n- Accumuler les ennuis : 電車がおくれた。そのうえ、かさを忘れた.\n- La seconde phrase porte souvent も ou まで."
+      },
+      {
+        "kind": "careful",
+        "en": "Both points must lean the same way: a plus and a minus take しかし. Do not confuse it with そのうえで, « and then, on that basis »: 話を聞いて、そのうえで決める.",
+        "fr": "Les deux points doivent aller dans le même sens : un plus et un moins prennent しかし. À ne pas confondre avec そのうえで, « ensuite, sur cette base » : 話を聞いて、そのうえで決める."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "それに",
+        "en": "Both add a point leaning the same way; それに is the everyday word, そのうえ a little more formal and weightier, « on top of that ».",
+        "fr": "Tous deux ajoutent un point dans le même sens ; それに est le mot de tous les jours, そのうえ un peu plus soutenu et plus appuyé, « par-dessus le marché »."
+      },
+      {
+        "pattern": "〜上に",
+        "en": "上に piles the second point on inside one sentence; そのうえ starts a new sentence with it.",
+        "fr": "上に ajoute le second point dans la même phrase ; そのうえ ouvre une nouvelle phrase pour lui."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "このホテルは駅から近い。そのうえ、朝ごはんもおいしい。",
+        "en": "This hotel is close to the station. On top of that, the breakfast is good.",
+        "fr": "Cet hôtel est près de la gare. En plus, le petit déjeuner est bon.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "今日は電車がおくれた。そのうえ、かさを電車に忘れてしまった。",
+        "en": "My train was late today. On top of that, I left my umbrella on it.",
+        "fr": "Aujourd'hui, mon train avait du retard. Par-dessus le marché, j'y ai oublié mon parapluie.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "山田さんは仕事が速い。そのうえ、だれにでも親切だ。",
+        "en": "Yamada works fast. What's more, he is kind to everyone.",
+        "fr": "Yamada travaille vite. En outre, il est aimable avec tout le monde.",
+        "register": "written"
+      },
+      {
+        "jp": "このパソコンはかるいです。そのうえ、ねだんも安いです。",
+        "en": "This computer is light. What's more, it's cheap.",
+        "fr": "Cet ordinateur est léger. En plus, il n'est pas cher.",
+        "register": "polite"
+      }
+    ]
+  },
+  {
     "pattern": "つまり",
     "structure": "sentence。つまり + restatement",
     "meaning": {
@@ -5928,6 +6663,71 @@
         "en": "Three minutes' walk from the station, in other words very close.",
         "fr": "Trois minutes à pied de la gare, autrement dit tout près.",
         "register": "polite"
+      }
+    ]
+  },
+  {
+    "pattern": "なぜなら",
+    "structure": "sentence。なぜなら + reason + からだ",
+    "meaning": {
+      "en": "because, the reason is (opening the sentence that gives the reason)",
+      "fr": "car, en effet (en tête de la phrase qui donne la raison)"
+    },
+    "register": "written",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**なぜなら** opens a second sentence that gives the reason for the first: « the reason is… ». That sentence usually closes on **からだ**: 今日は休む。なぜなら、熱があるからだ.",
+        "fr": "**なぜなら** ouvre une seconde phrase qui donne la raison de la première : « car…, en effet… ». Cette phrase se termine d'ordinaire par **からだ** : 今日は休む。なぜなら、熱があるからだ."
+      },
+      {
+        "kind": "use",
+        "en": "- Essays and reports: a claim first, then its reason.\n- Speeches and debates that want to sound logical.\n- In writing, the reason may also close on ためだ or のだ.",
+        "fr": "- Dissertations et rapports : d'abord l'affirmation, puis sa raison.\n- Discours et débats qui veulent paraître logiques.\n- À l'écrit, la raison peut aussi se terminer par ためだ ou のだ."
+      },
+      {
+        "kind": "careful",
+        "en": "It sounds formal and bookish; in everyday talk a plain から or んです gives the reason. Do not leave the sentence open: after なぜなら, close it on からだ (からです) or an equivalent.",
+        "fr": "Il sonne formel et livresque ; au quotidien, un simple から ou んです donne la raison. Ne laissez pas la phrase en suspens : après なぜなら, fermez-la par からだ (からです) ou un équivalent."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "だから",
+        "en": "だから: the reason first, then « so » and the result; なぜなら: the result first, then « because » and the reason.",
+        "fr": "だから : la raison d'abord, puis « donc » et la conséquence ; なぜなら : la conséquence d'abord, puis « car » et la raison."
+      },
+      {
+        "pattern": "〜から",
+        "en": "から joins the reason inside one sentence; なぜなら gives it a sentence of its own, formally, closed by からだ.",
+        "fr": "から relie la raison dans la même phrase ; なぜなら lui donne une phrase à part, sur un ton formel, fermée par からだ."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "今年の夏はやさいが高い。なぜなら、雨が少なかったためだ。",
+        "en": "Vegetables are expensive this summer. This is because there was little rain.",
+        "fr": "Les légumes sont chers cet été. En effet, il a peu plu.",
+        "register": "written",
+        "contrast": true
+      },
+      {
+        "jp": "私はこの町が好きだ。なぜなら、人がみんなやさしいからだ。",
+        "en": "I love this town. The reason is that everyone here is kind.",
+        "fr": "J'aime cette ville. Car les gens y sont tous gentils.",
+        "register": "written"
+      },
+      {
+        "jp": "明日の会議には出られません。なぜなら、ほかの仕事があるからです。",
+        "en": "I cannot attend tomorrow's meeting, because I have other work.",
+        "fr": "Je ne pourrai pas assister à la réunion de demain, car j'ai un autre travail.",
+        "register": "formal"
+      },
+      {
+        "jp": "朝ごはんは毎日食べたほうがいい。なぜなら、頭がよく働くからだ。",
+        "en": "You should eat breakfast every day, because it helps your brain work well.",
+        "fr": "Il vaut mieux prendre un petit déjeuner chaque jour, car le cerveau fonctionne mieux.",
+        "register": "written"
       }
     ]
   },
@@ -6913,6 +7713,407 @@
     ]
   },
   {
+    "pattern": "〜わ",
+    "structure": "plain form + わ (+ よ／ね)",
+    "meaning": {
+      "en": "sentence-final: a soft emphasis on one's own feeling or decision",
+      "fr": "en fin de phrase : insistance douce sur un sentiment ou une décision personnels"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form + わ** ends a sentence with a light, personal emphasis: what you say is presented as your own feeling or decision. 先に帰るわ (I'll head home first).",
+        "fr": "**forme neutre + わ** clôt une phrase sur une insistance légère et personnelle : on présente ce qu'on dit comme son propre sentiment ou sa décision. 先に帰るわ (je rentre avant vous)."
+      },
+      {
+        "kind": "use",
+        "en": "- A decision or a feeling, said with a falling tone: もう寝るわ, これはむりだわ.\n- A remark to yourself: あ、かさを忘れたわ.\n- With よ or ね, in traditionally feminine speech: 知らないわよ, すてきだわね.",
+        "fr": "- Une décision ou un sentiment, la voix descendante : もう寝るわ, これはむりだわ.\n- Une remarque pour soi : あ、かさを忘れたわ.\n- Avec よ ou ね, dans le parler traditionnellement féminin : 知らないわよ, すてきだわね."
+      },
+      {
+        "kind": "careful",
+        "en": "Two uses, told apart by the tone. The rising わ, often in わよ and わね, is traditionally feminine in Tokyo speech and is now heard more in fiction than in daily talk; the falling わ is a mild assertion used by men and women alike, especially in western Japan.",
+        "fr": "Deux emplois, que l'intonation distingue. Le わ montant, souvent dans わよ et わね, est traditionnellement féminin dans le parler de Tokyo et s'entend aujourd'hui plus dans la fiction qu'au quotidien ; le わ descendant est une affirmation douce, employée par les hommes comme par les femmes, surtout dans l'ouest du Japon."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "よ",
+        "en": "わ colours what you say with your own feeling; よ tells the listener something they may not know. Together: わよ.",
+        "fr": "わ teinte l'énoncé de son propre sentiment ; よ apprend à l'autre ce qu'il ignore peut-être. Ensemble : わよ."
+      },
+      {
+        "pattern": "ね",
+        "en": "わ stays with your own view; ね turns to the listener for agreement. わね does both at once.",
+        "fr": "わ reste dans son propre point de vue ; ね se tourne vers l'autre pour chercher son accord. わね fait les deux à la fois."
+      },
+      {
+        "pattern": "〜ぞ／〜ぜ",
+        "en": "The falling わ is a soft remark anyone makes; ぞ and ぜ are rough, emphatic and mostly male.",
+        "fr": "Le わ descendant est une remarque douce que chacun peut faire ; ぞ et ぜ sont rudes, appuyés et surtout masculins."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "じゃあ、先に帰るわ。また明日。",
+        "en": "Right, I'll head home first. See you tomorrow.",
+        "fr": "Bon, je rentre avant vous. À demain.",
+        "register": "casual"
+      },
+      {
+        "jp": "あ、さいふを家に忘れてきたわ。",
+        "en": "Oh, I've left my wallet at home.",
+        "fr": "Ah, j'ai oublié mon portefeuille à la maison.",
+        "register": "casual"
+      },
+      {
+        "jp": "そんなこと、だれにも言ってないわよ。",
+        "en": "I haven't told anyone about that, you know!",
+        "fr": "Je n'en ai parlé à personne, moi !",
+        "register": "casual"
+      },
+      {
+        "jp": "このケーキ、本当においしいわね。",
+        "en": "This cake is really good, isn't it?",
+        "fr": "Ce gâteau est vraiment délicieux, tu ne trouves pas ?",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜ぞ／〜ぜ",
+    "structure": "plain form + ぞ ／ ぜ",
+    "meaning": {
+      "en": "rough, emphatic sentence endings: I'm telling you, come on (mostly male)",
+      "fr": "finales rudes et appuyées : je te le dis, allez (surtout masculines)"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form + ぞ** or **ぜ** ends a sentence with a strong, rough push. ぞ asserts, to the listener or to yourself (行くぞ, here we go); ぜ asserts or invites with easy familiarity (行こうぜ, come on, let's go).",
+        "fr": "**forme neutre + ぞ** ou **ぜ** clôt une phrase sur une poussée forte et rude. ぞ affirme, à l'autre ou à soi-même (行くぞ, on y va) ; ぜ affirme ou invite avec une familiarité décontractée (行こうぜ, allez, on y va)."
+      },
+      {
+        "kind": "use",
+        "en": "- Spurring yourself on: よし、やるぞ.\n- A warning: 早くしないと、おくれるぞ.\n- Between friends, an invitation after the volitional: 飲みに行こうぜ.",
+        "fr": "- Se donner du courage : よし、やるぞ.\n- Un avertissement : 早くしないと、おくれるぞ.\n- Entre amis, une invitation après la forme volitive : 飲みに行こうぜ."
+      },
+      {
+        "kind": "careful",
+        "en": "Both are casual and mostly male, used among friends or to someone younger; to a superior they are rude. ぜ always speaks to someone, while ぞ can also be said to yourself, and in that use (よし、がんばるぞ) women say it too.",
+        "fr": "Tous deux sont familiers et surtout masculins, entre amis ou envers un cadet ; à un supérieur, ils sont impolis. ぜ s'adresse toujours à quelqu'un, alors que ぞ peut aussi se dire à soi-même, et dans cet emploi (よし、がんばるぞ) les femmes le disent aussi."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "よ",
+        "en": "ぞ and ぜ push much harder than よ and sound rough; よ is the plain « I'm telling you » anyone can use.",
+        "fr": "ぞ et ぜ appuient bien plus fort que よ et sonnent rudes ; よ est le simple « je te le dis » que tout le monde peut employer."
+      },
+      {
+        "pattern": "〜わ",
+        "en": "ぞ and ぜ are rough and mostly male; the falling わ is a soft, personal remark anyone makes.",
+        "fr": "ぞ et ぜ sont rudes et surtout masculins ; le わ descendant est une remarque douce et personnelle, à la portée de tous."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "よし、今日こそ勝つぞ！",
+        "en": "Right, today I'm going to win!",
+        "fr": "Allez, aujourd'hui, je vais gagner !",
+        "register": "casual"
+      },
+      {
+        "jp": "早くしないと、電車に間に合わないぞ。",
+        "en": "If you don't hurry, you'll miss the train.",
+        "fr": "Si tu ne te dépêches pas, tu vas rater le train.",
+        "register": "casual"
+      },
+      {
+        "jp": "今夜、みんなで飲みに行こうぜ。",
+        "en": "Come on, let's all go for a drink tonight.",
+        "fr": "Allez, ce soir, on va tous boire un verre.",
+        "register": "casual"
+      },
+      {
+        "jp": "この店のカレー、けっこううまいぜ。",
+        "en": "The curry here is pretty good, I'm telling you.",
+        "fr": "Le curry d'ici est plutôt bon, je te le dis.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜じゃん",
+    "structure": "plain form ／ noun + じゃん",
+    "meaning": {
+      "en": "casual: isn't it?, you see (pointing something out or seeking agreement)",
+      "fr": "familier : non ?, tu vois (faire remarquer une chose ou chercher l'accord)"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form or noun + じゃん** is the short, spoken form of じゃないか: it points something out or asks the listener to agree. いいじゃん (that's nice, isn't it?).",
+        "fr": "**forme neutre ou nom + じゃん** est la forme courte et parlée de じゃないか : on fait remarquer une chose ou on cherche l'accord de l'autre. いいじゃん (c'est bien, non ?)."
+      },
+      {
+        "kind": "use",
+        "en": "- Approving: そのシャツ、いいじゃん.\n- Noticing something: あれ、雨やんでるじゃん.\n- A mild reproach: だから言ったじゃん (I told you).",
+        "fr": "- Approuver : そのシャツ、いいじゃん.\n- Remarquer une chose : あれ、雨やんでるじゃん.\n- Un léger reproche : だから言ったじゃん (je te l'avais dit)."
+      },
+      {
+        "kind": "careful",
+        "en": "It looks negative but is not: いいじゃん means « it's good », not « it isn't good ». Very casual and spoken, among friends; the polite counterpart is じゃないですか.",
+        "fr": "Il a l'air négatif mais ne l'est pas : いいじゃん veut dire « c'est bien », pas « ce n'est pas bien ». Très familier et oral, entre amis ; l'équivalent poli est じゃないですか."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜じゃないか",
+        "en": "Same meaning: じゃん is the short, everyday form among friends; じゃないか is fuller and sounds more forceful.",
+        "fr": "Même sens : じゃん est la forme courte de tous les jours entre amis ; じゃないか, la forme pleine, sonne plus appuyé."
+      },
+      {
+        "pattern": "ね",
+        "en": "じゃん presents the point as plain to see; ね just asks, gently, for agreement.",
+        "fr": "じゃん présente la chose comme évidente ; ね demande seulement l'accord, en douceur."
+      },
+      {
+        "pattern": "〜でしょう",
+        "en": "じゃん points at what is right there; でしょう guesses, or checks softly (« right? »).",
+        "fr": "じゃん montre ce qui est là, sous les yeux ; でしょう suppose, ou vérifie doucement (« pas vrai ? »)."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "なんだ、けっこう上手じゃん！",
+        "en": "Hey, you're actually pretty good!",
+        "fr": "Eh ben, tu te débrouilles plutôt bien !",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "あれ、まだ三時じゃん。",
+        "en": "Huh, it's only three o'clock.",
+        "fr": "Tiens, il n'est que trois heures.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "すごいじゃん！やればできるじゃん。",
+        "en": "That's great! See, you can do it when you try.",
+        "fr": "Génial ! Tu vois, quand tu veux, tu peux.",
+        "register": "casual"
+      },
+      {
+        "jp": "だから、あの店は高いって言ったじゃん。",
+        "en": "See, I told you that shop was expensive.",
+        "fr": "Tu vois, je t'avais dit que ce magasin était cher.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜かい／〜だい",
+    "structure": "plain form ／ noun + かい ／ question word … + だい",
+    "meaning": {
+      "en": "a casual question with a warm, familiar, slightly old-fashioned tone",
+      "fr": "une question familière, au ton chaleureux et un peu vieillot"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form or noun + かい** asks a yes/no question in a warm, familiar tone: 元気かい？ (are you well?). With a question word, the ending is **だい**: 何だい？, どこへ行くんだい？",
+        "fr": "**forme neutre ou nom + かい** pose une question fermée sur un ton chaleureux et familier : 元気かい？ (tu vas bien ?). Avec un mot interrogatif, la finale devient **だい** : 何だい？, どこへ行くんだい？"
+      },
+      {
+        "kind": "use",
+        "en": "- An older person to a child or to someone younger: 学校は楽しいかい？\n- A friendly offer: お茶でも飲むかい？\n- A question word, often after ん: どうしたんだい？ (what's the matter?)",
+        "fr": "- Un aîné à un enfant ou à un plus jeune : 学校は楽しいかい？\n- Une offre amicale : お茶でも飲むかい？\n- Un mot interrogatif, souvent après ん : どうしたんだい？ (qu'est-ce qui ne va pas ?)"
+      },
+      {
+        "kind": "careful",
+        "en": "It sounds warm but a little old-fashioned, and is heard mostly from men and older speakers; never to a superior. Keep the two apart: かい without a question word, だい with one.",
+        "fr": "Il sonne chaleureux mais un peu vieillot, et s'entend surtout chez les hommes et les personnes âgées ; jamais envers un supérieur. On ne les mélange pas : かい sans mot interrogatif, だい avec."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "か",
+        "en": "か is the plain question marker, and bare at the end of a casual question it can sound blunt; かい asks the same thing more warmly.",
+        "fr": "か est la marque neutre de la question, et seul en fin de question familière il peut sonner sec ; かい demande la même chose plus chaleureusement."
+      },
+      {
+        "pattern": "〜かな",
+        "en": "かい asks someone and expects an answer; かな wonders, to yourself or softly.",
+        "fr": "かい interroge quelqu'un et attend une réponse ; かな s'interroge, pour soi ou en douceur."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "元気かい？学校は楽しいかい？友だちはできたかい？",
+        "en": "Are you well? Are you enjoying school? Have you made friends?",
+        "fr": "Tu vas bien ? Tu te plais à l'école ? Tu t'es fait des amis ?",
+        "register": "casual"
+      },
+      {
+        "jp": "もう帰るのかい？お茶でも飲んでいくかい？",
+        "en": "Leaving already? Won't you stay for a cup of tea?",
+        "fr": "Tu pars déjà ? Tu ne veux pas boire un thé avant ?",
+        "register": "casual"
+      },
+      {
+        "jp": "そんな顔をして、どうしたんだい？",
+        "en": "Why the long face? What's the matter?",
+        "fr": "Pourquoi cette tête ? Qu'est-ce qui ne va pas ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "君の好きな食べ物は何だい？",
+        "en": "What's your favourite food?",
+        "fr": "C'est quoi, ton plat préféré ?",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜もの／〜もん",
+    "structure": "plain form + もの ／ もん, ending the sentence",
+    "meaning": {
+      "en": "because… (a personal reason, often childish or defensive, ending the sentence)",
+      "fr": "parce que… (une raison personnelle, souvent enfantine ou défensive, en fin de phrase)"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form + もの** (spoken: **もん**) ends a sentence on a reason that is pleaded rather than explained: « because…, that's why ». 行きたくないもん (I don't want to go, that's why!).",
+        "fr": "**forme neutre + もの** (à l'oral : **もん**) termine la phrase sur une raison qu'on plaide plus qu'on ne l'explique : « parce que…, voilà ». 行きたくないもん (j'ai pas envie d'y aller, voilà !)."
+      },
+      {
+        "kind": "use",
+        "en": "- Defending yourself, often after だって: だって、眠かったんだもん.\n- A sulky refusal: もう食べないもん.\n- A noun or な-adjective takes だ: まだ子どもだもの.",
+        "fr": "- Se justifier, souvent après だって : だって、眠かったんだもん.\n- Un refus boudeur : もう食べないもん.\n- Un nom ou un adjectif en な prend だ : まだ子どもだもの."
+      },
+      {
+        "kind": "careful",
+        "en": "It sounds pleading or a little childish: fine with family and close friends, out of place in polite speech. It always ends the sentence, and this もの is not the noun « thing ».",
+        "fr": "Il sonne suppliant ou un peu enfantin : bien en famille et entre proches, déplacé en langue polie. Il termine toujours la phrase, et ce もの n'est pas le nom « chose »."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜から",
+        "en": "から gives a reason and can lead on to the result; もの stops on the reason itself, as a plea.",
+        "fr": "から donne une raison et peut enchaîner sur la conséquence ; もの s'arrête sur la raison elle-même, comme un plaidoyer."
+      },
+      {
+        "pattern": "〜ものだから",
+        "en": "Both excuse: ものだから ties the reason to what happened because of it; もの ends the sentence on the reason.",
+        "fr": "Tous deux excusent : ものだから rattache la raison à ce qui en a découlé ; もの termine la phrase sur la raison."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "だって、だれも教えてくれなかったもん。",
+        "en": "But nobody told me!",
+        "fr": "Mais personne ne me l'a dit, moi !",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "まだ八時だよ。ぜんぜん眠くないもん。",
+        "en": "It's only eight o'clock. I'm not sleepy at all!",
+        "fr": "Il n'est que huit heures. J'ai pas du tout sommeil, moi !",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "やさいはきらい。おいしくないもん。",
+        "en": "I don't like vegetables. They don't taste nice!",
+        "fr": "J'aime pas les légumes. C'est pas bon !",
+        "register": "casual"
+      },
+      {
+        "jp": "ゆるしてあげて。まだ子どもだもの。",
+        "en": "Go easy on him. He's only a child, after all.",
+        "fr": "Pardonne-lui. Ce n'est encore qu'un enfant, après tout.",
+        "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜かしら",
+    "structure": "plain form ／ noun + かしら",
+    "meaning": {
+      "en": "I wonder… (soft, traditionally feminine)",
+      "fr": "je me demande… (doux, traditionnellement féminin)"
+    },
+    "register": "casual",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**plain form or noun + かしら** wonders aloud, like かな but softer: 雨がふるかしら (I wonder if it'll rain). A noun or な-adjective takes no だ: 本当かしら.",
+        "fr": "**forme neutre ou nom + かしら** s'interroge à voix haute, comme かな mais plus doucement : 雨がふるかしら (je me demande s'il va pleuvoir). Un nom ou un adjectif en な ne prend pas だ : 本当かしら."
+      },
+      {
+        "kind": "use",
+        "en": "- Wondering to yourself: 山田さん、もう着いたかしら.\n- A soft question to someone: これ、だれのかしら.\n- With ない, a gentle request: ちょっと手伝ってくれないかしら.",
+        "fr": "- S'interroger pour soi : 山田さん、もう着いたかしら.\n- Une question douce à quelqu'un : これ、だれのかしら.\n- Avec ない, une demande délicate : ちょっと手伝ってくれないかしら."
+      },
+      {
+        "kind": "careful",
+        "en": "かしら is traditionally feminine and sounds soft and a little old-fashioned. In everyday speech today, かな, which everyone uses, is far more common.",
+        "fr": "かしら est traditionnellement féminin et sonne doux, un peu vieillot. Dans la conversation d'aujourd'hui, かな, qu'emploie tout le monde, est bien plus courant."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜かな",
+        "en": "The same wondering: かしら is softer and traditionally feminine; かな is used by everyone.",
+        "fr": "Le même questionnement : かしら est plus doux et traditionnellement féminin ; かな est employé par tous."
+      },
+      {
+        "pattern": "〜でしょうか",
+        "en": "かしら muses casually; でしょうか asks politely, of a stranger or a superior.",
+        "fr": "かしら s'interroge familièrement ; でしょうか interroge poliment, un inconnu ou un supérieur."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "あら、外は雨がふってきたかしら。",
+        "en": "Oh, has it started raining outside?",
+        "fr": "Tiens, il s'est mis à pleuvoir dehors ?",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "田中さんの話、本当かしら。",
+        "en": "I wonder if what Tanaka said is true.",
+        "fr": "Je me demande si ce que dit Tanaka est vrai.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "明日は寒いかしら。コートを着ていこうかしら。",
+        "en": "I wonder if it'll be cold tomorrow. Maybe I'll wear a coat.",
+        "fr": "Je me demande s'il fera froid demain. Je vais peut-être mettre un manteau.",
+        "register": "casual"
+      },
+      {
+        "jp": "こんなに買って、本当にいいのかしら。",
+        "en": "I've bought so much. I wonder if that's really all right.",
+        "fr": "J'en ai acheté autant… est-ce bien raisonnable ?",
+        "register": "casual"
+      }
+    ]
+  },
+  {
     "pattern": "〜気がする",
     "structure": "plain form + 気がする ／ noun + の + 気がする",
     "meaning": {
@@ -7264,6 +8465,67 @@
         "en": "I pretended not to hear and didn't answer.",
         "fr": "J'ai fait semblant de ne pas entendre et je n'ai pas répondu.",
         "register": "casual"
+      }
+    ]
+  },
+  {
+    "pattern": "〜たつもり",
+    "structure": "verb た-form + つもり",
+    "meaning": {
+      "en": "believing one has done it (often wrongly); as if one had",
+      "fr": "croire avoir fait (souvent à tort) ; comme si on avait fait"
+    },
+    "register": "neutral",
+    "steps": [
+      {
+        "kind": "rule",
+        "en": "**た-form + つもり** is what one believes one did: 電気を消したつもりだった (I thought I had turned the light off, and I hadn't). With で, it is acting as if: 行ったつもりで (as if one had gone).",
+        "fr": "**forme en た + つもり**, c'est ce qu'on croit avoir fait : 電気を消したつもりだった (je croyais avoir éteint la lumière, et non). Avec で, c'est faire comme si : 行ったつもりで (comme si on y était allé)."
+      },
+      {
+        "kind": "use",
+        "en": "- A slip: 電気を消したつもりだったのに、ついていた.\n- Defending oneself: ちゃんと説明したつもりです (as far as I know, I explained it).\n- Acting as if, with で: 買ったつもりで、お金をためる.",
+        "fr": "- Une étourderie : 電気を消したつもりだったのに、ついていた.\n- Se défendre : ちゃんと説明したつもりです (pour ma part, j'ai bien expliqué).\n- Faire comme si, avec で : 買ったつもりで、お金をためる."
+      },
+      {
+        "kind": "careful",
+        "en": "Not つもりです (N4), which is a plan: 行くつもり (I mean to go). After a た-form, つもり looks back, and the belief may well be wrong.",
+        "fr": "Ce n'est pas つもりです (N4), qui est un projet : 行くつもり (j'ai l'intention d'y aller). Après une forme en た, つもり regarde en arrière, et la conviction peut très bien être fausse."
+      }
+    ],
+    "compare": [
+      {
+        "pattern": "〜ふりをする",
+        "en": "ふりをする: an act put on for others; たつもり: a belief in one's own head.",
+        "fr": "ふりをする : une comédie jouée pour les autres ; たつもり : une conviction dans sa propre tête."
+      }
+    ],
+    "examples": [
+      {
+        "jp": "メールを送ったつもりだったのに、まだ下書きに残っていた。",
+        "en": "I thought I had sent the email, but it was still sitting in my drafts.",
+        "fr": "Je croyais avoir envoyé le mail, mais il était encore dans les brouillons.",
+        "register": "casual",
+        "contrast": true
+      },
+      {
+        "jp": "わたしは、ていねいに説明したつもりです。",
+        "en": "As far as I am concerned, I explained it carefully.",
+        "fr": "Pour ma part, je pense avoir tout expliqué avec soin.",
+        "register": "polite",
+        "contrast": true
+      },
+      {
+        "jp": "コーヒーを買ったつもりで、毎日百円ずつためている。",
+        "en": "Every day I put aside a hundred yen, as if I had bought a coffee.",
+        "fr": "Chaque jour, je mets cent yens de côté, comme si j'avais acheté un café.",
+        "register": "casual"
+      },
+      {
+        "jp": "彼は全部分かったつもりでいるが、実はまだ半分も分かっていない。",
+        "en": "He believes he has understood everything, but in fact he hasn't understood even half of it.",
+        "fr": "Il croit avoir tout compris, mais en réalité il n'en a pas compris la moitié.",
+        "register": "written"
       }
     ]
   },
