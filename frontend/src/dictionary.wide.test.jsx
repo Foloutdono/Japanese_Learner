@@ -10,7 +10,7 @@ import './index.css'
 // At 1440 the grammar page's entry has room for its lesson in two
 // columns, each at least a desk column's least width: the rule, its
 // uses and its trap down the left, the sentences over the rivals down
-// the right, each column opening under the stripe (plan 145; they were
+// the right, each column opening under the stripe (plan 146; they were
 // one flow balanced across CSS columns, which opened the sentences at
 // the left column's foot). A typical point (は: three steps, four
 // sentences, two rivals) reads whole with no scroll. On the narrow desk

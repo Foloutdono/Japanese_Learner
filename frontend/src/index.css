@@ -11700,7 +11700,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    here so the sense numerals and the highlighted headword in an
    example read the same pair; the stripe, the rail and the hover
    rings stay raw, because an edge is not text. A grammar lesson names
-   it too (plan 145): the sheet and the gate are not an entry, and
+   it too (plan 146): the sheet and the gate are not an entry, and
    their numerals, forms and picked-out pattern had no ink to read. */
 :is(.dict-entry, .gl) {
   --dict-ink: color-mix(in srgb, var(--line-color, var(--accent2)) 60%, var(--text-primary));
@@ -12190,7 +12190,7 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
 }
 /* A word's reading over the word, centred, and free to overhang the
    kana either side by half a reading character, as a printed book sets
-   it (plan 145): the reading's own width no longer sets the ruby's, so
+   it (plan 146): the reading's own width no longer sets the ruby's, so
    学生 under がくせい stays one word rather than 学 生. ExampleSentence
    joins a word's kanji into one ruby, so a reading never meets another
    one at the side. */
@@ -18541,6 +18541,9 @@ a.slip__act { text-decoration: none; }
 .slip__act { align-self: stretch; }
 .slip__value { font-size: var(--fs-body); color: var(--text-primary); overflow-wrap: anywhere; }
 .slip__confirm { display: flex; flex-direction: column; gap: var(--sp-3); }
+/* One of a slip's two ways in (the guest's claim): no box of its own
+   here, its children the slip's; the desk stands the two side by side. */
+.slip__way { display: contents; }
 .lvlstrip {
   position: relative;
   display: grid;
@@ -18860,10 +18863,10 @@ a.slip__act { text-decoration: none; }
 .stg-dots__dot { width: 6px; height: 6px; border-radius: var(--r-pill); background: var(--rating-color, var(--text-secondary)); }
 .stg-dots__dot--best { background: var(--accent2); }
 
-/* Two columns of slips (SettingsPage's SlipColumns): stacked here; the
-   desk stands them side by side where the page is wide enough. */
-.stg-cols,
-.stg-col { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
+/* A row of slips (SettingsPage's SlipRow): stacked here, at the page's
+   own gap; the desk stands a row's two side by side where the page is
+   wide enough. */
+.stg-pair { display: flex; flex-direction: column; gap: var(--sp-5); min-width: 0; }
 
 /* ── Service: each pace a line to the destination (plan 139) ──
    One time axis for the three services and the learner's own pace, the
@@ -20512,7 +20515,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   text-transform: uppercase;
   color: var(--text-secondary);
 }
-/* ── The steps ── (plan 145, the owner's pick B of three)
+/* ── The steps ── (plan 146, the owner's pick B of three)
    RULE, USE, CAREFUL: each opens on its mark at the caption rung, and
    one hairline divides a step from the next -- the rule under every
    mark drew three lines where two divide. An ordered list, because the
@@ -20692,7 +20695,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
 .grammar-contrast .dict-ex { align-items: center; }
 .grammar-contrast .dict-ex__jp { justify-content: center; font-size: inherit; }
 .grammar-contrast .dict-ex__tr { font-family: var(--font-display); font-size: var(--fs-caption); }
-/* ── The sentences ── (plan 145)
+/* ── The sentences ── (plan 146)
    A row each, numbered in the ink at the gutter and hairline-divided,
    the translation under the sentence. A sentence in another register
    than its point says so at the right (GrammarLesson's registerTag):
@@ -23405,19 +23408,86 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border: 1px solid var(--surface-line);
     border-radius: var(--r-card);
   }
-  /* A card the page's own width stops at the card's (plan 123): an
-     action spans its card, and seven of them -- Export, Delete account,
-     Sign out -- ran ~770px wide for a one-word label. Two columns stand
-     under it already. */
-  .desk-settings__page > :is(.slip, .stg-foot) { max-width: var(--card-w); }
-  /* Two columns where the pane holds two at a phone's content width --
+  /* Every card runs to the page's edge (plan 145). A card the page's own
+     width stopped at the card's (plan 123), so that an action never ran
+     ~770px wide for a one-word label -- and a page of one card, the level
+     or a service, left the pane's right third empty on a wide window. The
+     action is kept to its width another way: a card of one action lies
+     across the page (below), and a card of the page's width holds its
+     buttons in a row. */
+  /* Rows of two where the pane holds two at a phone's content width --
      measured on the pane (components/settings/SettingsPage.jsx), since
-     the column beside it takes what the window leaves. */
-  .desk-settings__page--two .stg-cols {
+     the column beside it takes what the window leaves. A row's two cards
+     stand at the taller's height with their actions at its foot (plan
+     145), so a page is a grid of cards that ends level: as two free
+     columns (plan 139) the shorter stopped half a page above the other,
+     and the account's column ended beside empty paper. A row of one
+     takes the width. */
+  .desk-settings__page--two .stg-pair {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .desk-settings__page--two .stg-pair > :only-child { grid-column: 1 / -1; }
+  .desk-settings__page--two .stg-pair > .slip > :is(.slip__act, .slip__confirm, .seg) { margin-top: auto; }
+  /* A slip across the page (Slip's `across`, plan 145): a card of one
+     action that takes the page's width lays its words in the left half
+     and its action in the right, the halves of the rows around it, so
+     the action stands under the row's actions at their width. The gap
+     between the halves is the rows' gap plus what it spans of the two
+     cards either side: their padding and their 1px hairlines. Whatever
+     else the card holds (a refusal, the install's steps) runs under
+     both. */
+  .desk-settings__page--two > .slip--across,
+  .desk-settings__page--two .stg-pair > .slip--across:only-child {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: calc(3 * var(--sp-5) + 2px);
+    align-items: center;
+  }
+  .desk-settings__page--two .slip--across > * { grid-column: 1 / -1; }
+  .desk-settings__page--two .slip--across > :is(.slip__label, .slip__hint) { grid-column: 1; }
+  .desk-settings__page--two .slip--across > :is(.slip__act, .slip__confirm, .auth-provider) { grid-column: 2; grid-row: 1; }
+  .desk-settings__page--two .slip--across:has(> .slip__hint) > :is(.slip__act, .slip__confirm, .auth-provider) { grid-row: 1 / span 2; }
+  /* A slip of two ways in (the guest's claim, plan 145): its name over
+     both, Google in the left half and the address and its button in the
+     right, in the halves a slip across the page uses. */
+  .desk-settings__page--two > .slip--ways {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: calc(3 * var(--sp-5) + 2px);
     align-items: start;
   }
+  .desk-settings__page--two .slip--ways > .slip__label { grid-column: 1 / -1; }
+  .desk-settings__page--two .slip--ways > .slip__way { display: flex; flex-direction: column; gap: var(--sp-3); }
+  /* What a row's taller card lends the shorter (plan 145): the two
+     languages stand one over the other down the theme screens' height,
+     each an equal share of it, rather than two short cards at the top
+     of a card twice their height. */
+  .desk-settings__page--two .lang-picks {
+    flex: 1;
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: 1fr;
+  }
+  .desk-settings__page--two .lang-pick { justify-content: center; }
+  /* The mixer across the page (SoundPage, plan 145): its names in one
+     column as wide as the longest, each on one line -- the phone's 132px
+     broke VOLUME PRINCIPAL in two -- and every track starting where the
+     others do, the rows sharing the bank's three tracks (a subgrid, as
+     the service chart's rows). */
+  .desk-settings__page--two .sound-mixer {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr) max-content;
+  }
+  .desk-settings__page--two .category-volume-row {
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+  }
+  /* The level's stops, named on the desk (LevelPage): each prints its
+     name while the pane holds two columns -- five across one column are
+     too narrow for Intermédiaire -- and the codes stand at the lead's
+     rung, the line being the page. */
+  .desk-settings__page:not(.desk-settings__page--two) .lvlstrip__jp--away { display: none; }
+  .desk-settings__page--two .lvlstrip__code { font-size: var(--fs-lead); }
   /* On a card the page's ground under a hollow stop is the card's. */
   .desk-settings__page :is(.dest:not(.dest--on) .dest__dot, .svc-row__end) { background: var(--surface); }
   .desk-settings__page .dest--on .dest__dot { box-shadow: 0 0 0 3px var(--surface), 0 0 0 4px var(--text-primary); }
@@ -25761,7 +25831,7 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     border-radius: 0;
   }
   .desk-dict--page .dict-block > .dict-due { margin: var(--sp-3) var(--sp-5) var(--sp-4); }
-  /* Each column its own (plan 145): the rule, its uses and its trap
+  /* Each column its own (plan 146): the rule, its uses and its trap
      down the left, the sentences over the rivals down the right. The
      two used to be one flow poured into CSS columns, which balanced it
      wherever the heights fell -- the sentences' block opened at the

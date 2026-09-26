@@ -3,7 +3,7 @@ import { readFileSync } from 'fs'
 import { fileURLToPath } from 'url'
 import { inline, readUse, prepare } from './lessonText'
 
-// ── 文法 — a lesson's text, read for its shape (plan 145) ───────────
+// ── 文法 — a lesson's text, read for its shape (plan 146) ───────────
 // What a reader meets: the Japanese in the prose marked (and a formula
 // kept whole), French punctuation and a sentence's opening term welded
 // to their words, a use line as its saying over its forms, a paradigm

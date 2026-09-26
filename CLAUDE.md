@@ -704,8 +704,21 @@ runtime purpose. Two consequences worth knowing:
   `components/station/TrainDoor.jsx`, `components/station/TicketGate.jsx`,
   `src/cutscenes.phone.test.jsx` and the 扉 and 改札 blocks of
   `index.css`).
-  **145** is the grammar lesson made readable (numbered 145 because 144
-  went to the gate and door cutscenes, PR #213, while it was open):
+  **145** is Settings' pages using the width on the desk (numbered 145
+  because 144 went to the two cutscenes while it was open): the slips in
+  rows of two that end level instead of two free columns (`SlipRow`,
+  `.stg-pair`), every card to the page's edge, a card of one action
+  across the page with its action in the right half (`Slip`'s `across`),
+  the guest's claim as two ways side by side, the presets over a mixer
+  on one subgrid, and the level's stops named (cited in
+  `components/settings/SettingsPage.jsx`, `AccountPage.jsx`,
+  `DataSlips.jsx`, `DisplayPage.jsx`, `SoundPage.jsx`, `LevelPage.jsx`,
+  `ServicePage.jsx`, `src/settings.desktop.test.jsx`,
+  `src/columns.wide.test.jsx` and the 机 section of `index.css`;
+  DESIGN.md, "The desk").
+  **146** is the grammar lesson made readable (numbered 146 because 144
+  went to the gate and door cutscenes, PR #213, and 145 to Settings'
+  pages on the desk, PR #214, while it was open):
   first its two columns on the desk each its own (the dictionary's
   grammar page set the lesson as one flow in CSS columns, balanced
   wherever the heights fell, and now sets it as a grid — the rule, its
@@ -723,7 +736,7 @@ runtime purpose. Two consequences worth knowing:
   `src/dictionary.wide.test.jsx` and `src/dictionary.desktop.test.jsx`;
   DESIGN.md, "The entry plate, and a body that names itself" and "The
   desk").
-  When starting a new wave, begin at **146** or higher, and check
+  When starting a new wave, begin at **147** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

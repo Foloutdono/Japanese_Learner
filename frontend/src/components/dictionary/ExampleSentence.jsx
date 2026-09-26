@@ -15,7 +15,7 @@
 // だけ). The translation is `tr`, in the learner's language; `en` is
 // read for the word examples that still say so. `tag` is a word set
 // beside the sentence: the lesson's register, where a sentence departs
-// from its point's (plan 145).
+// from its point's (plan 146).
 //
 // The backend's parts are one kanji each (vocab_extras._expand_furigana),
 // and a reading is wider than its kanji: がく over 学 and せい over 生

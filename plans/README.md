@@ -6760,3 +6760,25 @@ chime.
 
 Left for later: nothing on the canvas's gate options; they stay drawn
 there as the record of what was tried.
+## Plan 145 — 設定・紙面, Settings' pages using the width (2026-09-26)
+
+Numbered 145 because 144 went to the two cutscenes (PR #213), merged to
+main while this was open under 144; renumbered in the merge. The owner's
+ask, with four screenshots of Settings on the desk (Account, Display,
+Sound, Level): improve the layout of the sections, use more of the space
+available. What the screenshots showed wrong: a page of two halves stood
+them as two free columns, so the shorter one stopped half a page above
+the other (the account's three cards beside four; the sound presets
+beside a mixer twice their height, their names wrapped onto three
+lines); a page of one card stopped at `--card-w`, leaving the pane's
+right third empty on a wide window (the level); the service page's way
+to a destination was a bare button under its card, running past the
+card's edge; and the level named only the stop it stood at.
+
+| # | What | Status |
+|---|------|--------|
+| 145 | **Rows, not columns** (`SlipRow`, `.stg-pair`, replacing `SlipColumns`/`SlipColumn` and `.stg-cols`/`.stg-col`): stacked on the phone at the page's own gap, so its DOM order and look are unchanged; on the desk, where the pane holds two (`desk-settings__page--two`), a row's two cards at the taller's height with their actions and toggles at its foot, a row of one taking the width. **Every card to the page's edge**: plan 123's `--card-w` cap on a page-wide card retired; the action is kept at a half's width instead. **Across** (`Slip`'s `across`, `.slip--across`): a card of one action that takes the page's width lays its words in the left half and its action in the right, the gap the rows' gap plus the padding and hairlines it spans, so the action stands under the row's at their width — the Google offer, the install row, the placement test (while it is a button) and the service page's way to a destination, now a slip of its own with `settingsGoalNoneDesc`. **Account**: the address, the Google offer, then policy and sign-out, trail and export, reset and delete, in rows (the phone's order); the guest's claim as two ways side by side (`.slip--ways`, `.slip__way`: `display: contents` on the phone). **Display**: the languages one over the other down the theme screens' height. **Sound**: the presets over the mixer, each at the page's width, the mixer's rows on one subgrid (names on one line as wide as the longest, every track aligned). **Level**: every stop named on the desk while the pane holds two (`lvlstrip__jp--away`), codes at the lead's rung. Tests: `settings.desktop` (rows ending level, across, the guest's two ways, the level's names, the sound, the display), `columns.wide` moved to the new contract | DONE (2026-09-26) |
+
+Left for later: pages of one row (Display) still end high on a tall
+window — the page is as long as what it sets; nothing was stretched to
+fill it.

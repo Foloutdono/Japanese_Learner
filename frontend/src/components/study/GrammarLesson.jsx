@@ -43,7 +43,7 @@ const STEP_KEY = { rule: 'glRule', use: 'glUse', careful: 'glCareful' }
 // delimiter (**…**) for emphasis -- the same, and the only, markup the
 // locale tables carry -- and the Japanese in the prose set as Japanese
 // and never cut (lessonText.inline). A use that names its forms prints
-// them under it (plan 145): "Pour poser ce dont on parle : わたしは,
+// them under it (plan 146): "Pour poser ce dont on parle : わたしは,
 // 今日は" is the description over the two forms, whole, in the lesson's
 // ink; a paradigm (Négatif : …. Passé : ….) is its labels beside its
 // forms. A line that reads neither way is printed as it came.

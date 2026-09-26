@@ -476,7 +476,7 @@ describe('the grammar page (plan 128)', () => {
     expect(getComputedStyle(document.querySelector('.dict-dock .records')).gridTemplateColumns.split(' ')).toHaveLength(4)
   })
 
-  // Plan 145: two columns where two fit (dictionary.wide), and here,
+  // Plan 146: two columns where two fit (dictionary.wide), and here,
   // where they do not, the one the phone reads -- the steps, then the
   // sentences under their hairline, then the rivals, each the body's
   // width. The rule that divides the two columns is clipped at the
@@ -491,7 +491,9 @@ describe('the grammar page (plan 128)', () => {
       expect(Math.round(b.left)).toBe(Math.round(body.left))
       expect(b.right).toBeGreaterThanOrEqual(body.right - 1)
     }
-    expect(sentences.top).toBeGreaterThanOrEqual(steps.bottom - 1)
+    // Under the steps, its top hairline on their last pixel (the
+    // margin-top: -1px that clips it away in two columns).
+    expect(sentences.top).toBeCloseTo(steps.bottom - 1, 1)
     expect(sentences.top).toBeGreaterThan(body.top)
     expect(rivals.top).toBeGreaterThanOrEqual(sentences.bottom - 1)
     expect(getComputedStyle(document.querySelector('.dict-dock .gl-block--examples')).borderTopWidth).toBe('1px')

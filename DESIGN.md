@@ -542,7 +542,7 @@ where the door leads. Each block carries its name as an
 row, a ring on hover, and the sense numerals — mixed 60% toward the ambient
 ink, because raw 山吹 reads 2.9:1 on light paper.
 
-**A grammar lesson reads for its shape** (plan 145, the owner's pick B
+**A grammar lesson reads for its shape** (plan 146, the owner's pick B
 of three drawn directions). The lesson prints in four places (the
 dictionary's plate body, the sheet behind a card, the gate before a new
 card, the grammar station on the desk) and is one component in all of
@@ -1097,7 +1097,7 @@ as the rail it arrives at.
   `--desk-entry-w`, its plate laid left with the marks beside the pattern
   (over it, for a pattern of seven characters or more), the record flush
   under the stripe and the lesson in two columns where each holds
-  `--desk-run-col-min`, each column its own (plan 145): the rule, its
+  `--desk-run-col-min`, each column its own (plan 146): the rule, its
   uses and its trap down the left, the sentences over the rivals down
   the right — never one flow balanced across the two, which opened the
   sentences at the left column's foot. The kana charts show the whole syllabary at once:
@@ -1226,10 +1226,15 @@ as the rail it arrives at.
   options", with the titles off on the desk). The column is the pass at
   `--desk-entry-w` (giving down to `--desk-side-w`) over the list, sticky
   and bounded; the open page takes the rest of the width, its slips
-  cards, two columns of them where the page holds two at 310px each
-  (measured on the page, not set at a window width), a card of the
-  page's own width stopping at `--card-w` so an action never runs past
-  it. **No title on
+  cards running to its edge. Where the page holds two at 310px each
+  (measured on the page, not set at a window width) they stand in rows
+  of two (plan 145): a row's cards at the taller's height with their
+  actions at its foot, so a page ends level rather than in two columns
+  of different lengths, and a page pairs what belongs together. A card
+  of one action that takes the width lies across it, its words in the
+  left half and its action in the right, under the row's actions at
+  their width, so no action runs past `--card-w`; the guest's claim sets
+  its two ways in side by side the same way. **No title on
   either**: the rail's lit station names the screen and the lit door --
   a field of the pass in its gold wash and rail, a stop in its gold ring,
   a row in the list's gold rail -- names the page; both headings stay,

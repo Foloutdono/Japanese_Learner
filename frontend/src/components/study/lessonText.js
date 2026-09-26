@@ -1,4 +1,4 @@
-// ── 文法 — a lesson's text, read for its shape (plan 145) ───────────
+// ── 文法 — a lesson's text, read for its shape (plan 146) ───────────
 // The catalogue writes a lesson as French or English prose with the
 // Japanese inline (content/grammar/*.json): "Pour poser ce dont on
 // parle : わたしは, 今日は, この本は." Printed as it comes, the browser
