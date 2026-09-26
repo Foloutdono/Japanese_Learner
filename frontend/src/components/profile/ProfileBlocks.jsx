@@ -180,6 +180,7 @@ export function ProfileDoors({ t, navigate }) {
           push
           className="record record--door"
           style={{ '--line-color': 'var(--pass-ink)' }}
+          data-guide={hall.path === '/profile/stats' ? 'profile.stats' : undefined}
           onClick={() => { if (!desk) navigate(hall.path) }}
         >
           <LineMark section={hall} />

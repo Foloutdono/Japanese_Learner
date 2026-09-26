@@ -177,7 +177,10 @@ class CorpusMeasurementTests(unittest.TestCase):
         # おろそか, 寒気 read さむけ かんき, 杯 read はい さかずき; three are
         # the tokenizer's slips the card had papered over (りゅうがく cut
         # into 顎, しゅくだい into 宿, 上手 read かみて) (absent +17,
-        # unmatched +17).
+        # unmatched +17). The readings put right in context on main
+        # (study/reading_context.py) then took two back: 上手 is じょうず
+        # again, and 米 before をはじめとする is read こめ (absent -2,
+        # unmatched -2).
         c = self.corpus
-        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 180)
-        self.assertLessEqual(c["unmatched_lemmas"], 194)
+        self.assertLessEqual(c["kinds"]["absent"]["lemmas"], 178)
+        self.assertLessEqual(c["unmatched_lemmas"], 192)

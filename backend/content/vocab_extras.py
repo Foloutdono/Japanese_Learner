@@ -1036,8 +1036,14 @@ def _target_span(sentence: str, kanji: str, kana: str):
     return None
 
 
-def _expand_furigana(text: str, reading: str | None, highlight: bool) -> list:
-    """One segment -> one-or-more {text, reading, highlight}.
+def _expand_furigana(text: str, reading: str | None, highlight: bool, word: int = 0) -> list:
+    """One segment -> one-or-more {text, reading, highlight}, each part
+    that carries a reading also carrying `word`: the word it belongs
+    to, the same for every part of one word and different for the
+    next, so the example's renderer can set a word's readings as one
+    ruby without ever running two words' readings together
+    (ExampleSentence.jsx) -- 毎年 and 軽井沢 are two words side by side,
+    and まいとしかるいざわ over both is two readings colliding.
 
     _tokenize_furigana hands back one reading per morpheme/run, so a
     multi-kanji core (心配 -> しんぱい) would render as a single <ruby>
@@ -1049,20 +1055,114 @@ def _expand_furigana(text: str, reading: str | None, highlight: bool) -> list:
     single block when it can't divide, same as align_deck always does.
     """
     if not reading or len(text) < 2:
-        return [{"text": text, "reading": reading, "highlight": highlight}]
-    parts = align_deck(text, reading)
-    if len(parts) < 2:
-        return [{"text": text, "reading": reading, "highlight": highlight}]
-    return [{"text": p["text"], "reading": p.get("reading"), "highlight": highlight} for p in parts]
+        parts = [{"text": text, "reading": reading}]
+    else:
+        parts = align_deck(text, reading)
+        if len(parts) < 2:
+            parts = [{"text": text, "reading": reading}]
+    return [
+        {"text": p["text"], "reading": p.get("reading"), "highlight": highlight,
+         **({"word": word} if p.get("reading") else {})}
+        for p in parts
+    ]
+
+
+# The `word` the headword's parts share: never a segment's index.
+_HEADWORD = -1
+
+# What turns a word into another one around it: お母さん is not 母,
+# and its 母 is not read はは.
+_HONORIFIC_BEFORE = ("お", "ご", "御")
+_HONORIFIC_AFTER = ("さん", "さま", "様", "ちゃん", "くん", "君")
+
+
+def _read_as_headword(sentence: str, span, kanji: str, kana: str, segments: list) -> list:
+    """`segments` with the headword's kanji read the way the entry reads
+    them.
+
+    An example sentence is on the entry BECAUSE it uses this word, so
+    the entry's own reading is the one ground truth there is for the
+    headword's span, and the tokenizer's (UniDic's) is a guess that can
+    be wrong: お母さん's 母 came back はは. So where the two disagree
+    over the headword's kanji, the entry wins -- split per kanji by the
+    same align_deck the entry's plate uses, so the example and the
+    plate divide the word alike.
+
+    Left as the tokenizer read it: a span that does not start with the
+    headword's own kanji (a kana spelling, an Arabic numeral), a
+    boundary that falls inside a kanji run the tokenizer read as one
+    (the word is part of a longer one there), a headword wrapped in an
+    honorific it does not carry (the entry 母 in お母さん), and any
+    reading the tokenizer already agrees with, under any of the entry's
+    readings (毎月 まいげつ/まいつき).
+    """
+    if not span or not kanji:
+        return segments
+    kanji_at = [i for i, c in enumerate(kanji) if _is_kanji(c)]
+    if not kanji_at:
+        return segments
+    stem = kanji[:kanji_at[-1] + 1]
+    start, end = span[0], span[0] + len(stem)
+    if sentence[start:end] != stem:
+        return segments
+    rest = kanji[len(stem):]
+    if not kanji.startswith(_HONORIFIC_BEFORE) and sentence[:start].endswith(_HONORIFIC_BEFORE):
+        return segments
+    if not rest.startswith(_HONORIFIC_AFTER) and sentence[end:].startswith(_HONORIFIC_AFTER):
+        return segments
+
+    variants = []
+    for reading in _readings(kana):
+        taken, length = [], 0
+        for part in align_deck(kanji, reading):
+            if length >= len(stem):
+                break
+            taken.append(part)
+            length += len(part["text"])
+        if length == len(stem):
+            variants.append(taken)
+    if not variants:
+        return segments
+
+    # Cut the tokenizer's kana runs at the stem's edges; a reading that
+    # straddles one means the headword is part of a longer word here.
+    pieces = []
+    for seg in segments:
+        cuts = [c for c in (start, end) if seg["start"] < c < seg["end"]]
+        if cuts and seg["reading"] is not None:
+            return segments
+        at = seg["start"]
+        for c in cuts + [seg["end"]]:
+            pieces.append({"text": sentence[at:c], "reading": None if cuts else seg["reading"],
+                           "start": at, "end": c})
+            at = c
+    region = [p for p in pieces if start <= p["start"] and p["end"] <= end]
+    said = "".join(p["reading"] or p["text"] for p in region)
+    if any("".join(p.get("reading") or p["text"] for p in v) == said for v in variants):
+        return segments
+
+    out = [p for p in pieces if p["end"] <= start]
+    at = start
+    for part in variants[0]:
+        out.append({"text": part["text"], "reading": part.get("reading"),
+                    "start": at, "end": at + len(part["text"]), "word": _HEADWORD})
+        at += len(part["text"])
+    out.extend(p for p in pieces if p["start"] >= end)
+    return out
 
 
 def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     span = _target_span(sentence, kanji, kana)
-    segments = _tokenize_furigana(sentence)
+    segments = _read_as_headword(sentence, span, kanji, kana, _tokenize_furigana(sentence))
+    # A word per segment -- the tokenizer's, one morpheme each -- except
+    # the headword's kanji, which _read_as_headword hands back one part
+    # a kanji and are one word.
+    for i, seg in enumerate(segments):
+        seg.setdefault("word", i)
     if not span:
         out = []
         for seg in segments:
-            out.extend(_expand_furigana(seg["text"], seg["reading"], False))
+            out.extend(_expand_furigana(seg["text"], seg["reading"], False, seg["word"]))
         return out
 
     span_start, span_end = span
@@ -1070,7 +1170,7 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
     for seg in segments:
         s_start, s_end = seg["start"], seg["end"]
         if s_end <= span_start or s_start >= span_end:
-            out.extend(_expand_furigana(seg["text"], seg["reading"], False))
+            out.extend(_expand_furigana(seg["text"], seg["reading"], False, seg["word"]))
             continue
         if seg["reading"] is not None:
             # Kanji run carrying its own furigana — splitting it mid-way
@@ -1080,7 +1180,7 @@ def _annotate_sentence(sentence: str, kanji: str, kana: str) -> list:
             # so it's either fully inside the span or not overlapping at
             # all; keep it whole either way. _expand_furigana still
             # divides it per-kanji — just never at the span's own edge.
-            out.extend(_expand_furigana(seg["text"], seg["reading"], True))
+            out.extend(_expand_furigana(seg["text"], seg["reading"], True, seg["word"]))
             continue
         # Plain kana run: _tokenize_furigana merges every consecutive
         # non-kanji character into one segment regardless of word

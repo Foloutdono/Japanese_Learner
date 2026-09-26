@@ -30,6 +30,9 @@ import { useDesk } from '../../hooks/useDesk'
 const GAP = 8
 const PAD = 6
 const MOVE_MS = 260
+// The note's height before it has been measured: a sentence and the
+// 44px controls. Only the first frame of a stop reads it.
+const NOTE_H = 150
 
 function rectOf(anchor) {
   const el = document.querySelector(`[data-guide="${anchor}"]`)
@@ -79,6 +82,9 @@ export function Guide({ gate, stops: given = null, onEnd }) {
   // Over: nothing is drawn from the moment it ends, whether or not the
   // screen that mounted it has let go yet.
   const [over, setOver] = useState(false)
+  // The note's own height, measured once it is drawn: where it goes
+  // depends on whether it fits beside the spot.
+  const [noteH, setNoteH] = useState(NOTE_H)
   const watch = useRef(null)
   const ended = useRef(false)
   const stop = stops?.[index] ?? null
@@ -192,6 +198,13 @@ export function Guide({ gate, stops: given = null, onEnd }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [desk, stop, index, stops, over])
 
+  // Re-read whenever the note may have changed height: the sentence
+  // changes with the stop, and its width with the spot's.
+  useLayoutEffect(() => {
+    const h = ref.current?.offsetHeight
+    if (h && Math.abs(h - noteH) > 1) setNoteH(h)
+  }, [stop, rect, noteH, ref])
+
   if (over || !stop || !rect) return null
 
   const last = index === stops.length - 1
@@ -203,17 +216,29 @@ export function Guide({ gate, stops: given = null, onEnd }) {
   const lower = (stop.place === 'above' && rect.top > window.innerHeight / 2)
     || rect.top + rect.height / 2 > window.innerHeight / 2
   const beside = desk ? rect.beside : null
+  // Whether the note fits over or under the spot. An anchor as tall as
+  // the window -- the desk's fare gate, which takes the hall's height
+  // since plan 135 -- leaves room on neither side, and the note was
+  // drawn under the window's floor; it then stands inside the spot, in
+  // its middle, over the anchor's own empty room.
+  const fitsAbove = rect.top - PAD - GAP - noteH >= GAP
+  const fitsBelow = rect.bottom + PAD + GAP + noteH <= window.innerHeight - GAP
+  const side = lower ? (fitsAbove ? 'above' : fitsBelow ? 'below' : 'over')
+    : (fitsBelow ? 'below' : fitsAbove ? 'above' : 'over')
+  const maxTop = Math.max(GAP, window.innerHeight - noteH - GAP)
   const pos = beside
     ? {
-      ...(lower ? { bottom: Math.max(0, window.innerHeight - rect.bottom - PAD) } : { top: rect.top - PAD }),
+      // Beside a rail or side anchor, level with its top (or its foot,
+      // in the lower half), and never past the window's edge.
+      top: Math.min(Math.max(GAP, lower ? rect.bottom + PAD - noteH : rect.top - PAD), maxTop),
       ...(beside === 'right'
         ? { left: rect.left + rect.width + PAD + GAP }
         : { left: 'auto', right: window.innerWidth - rect.left + PAD + GAP }),
     }
     : {
-      ...(lower
-        ? { bottom: Math.max(0, window.innerHeight - rect.top + PAD + GAP) }
-        : { top: rect.bottom + PAD + GAP }),
+      ...(side === 'above' ? { bottom: window.innerHeight - rect.top + PAD + GAP }
+        : side === 'below' ? { top: rect.bottom + PAD + GAP }
+        : { top: Math.min(Math.max(GAP, rect.top + (rect.height - noteH) / 2), maxTop) }),
       ...(desk ? centredOn(rect) : {}),
     }
   // The desk's own wording where a note teaches a key (plan 115).
@@ -244,7 +269,7 @@ export function Guide({ gate, stops: given = null, onEnd }) {
         className="guide-callout guide-callout--live"
         tabIndex={-1}
         style={pos}
-        data-place={beside ?? (lower ? 'above' : 'below')}
+        data-place={beside ?? side}
       >
         <p className="guide-callout__text">{text}</p>
         <div className="guide-callout__foot">

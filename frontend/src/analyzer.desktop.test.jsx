@@ -220,19 +220,18 @@ describe('the analyser on the desk (plan 134)', () => {
     await mount()
     await analyze('駅で待つ。電車に乗る。')
     $$('.anl-words__row').at(-1).click()
-    await settle()
-    expect(shown()).toBe('待つ')
+    // The entry is fetched: waited for rather than read after a fixed
+    // pause, which a slow CI runner outlasted (the plate still empty).
+    await expect.poll(shown).toBe('待つ')
 
     // ↓ walks to the next sentence; the entry follows its first token.
     press('ArrowDown')
-    await settle()
-    expect(shown()).toBe('電車')
+    await expect.poll(shown).toBe('電車')
     expect($('.anl-subs__count').textContent).toContain('2 / 2')
 
     // The subtitle's arrows walk back.
     $$('.anl-slab__arrow')[0].click()
-    await settle()
-    expect($('.anl-subs__count').textContent).toContain('1 / 2')
+    await expect.poll(() => $('.anl-subs__count').textContent).toContain('1 / 2')
   })
 
   it('stands the explanation in the description\'s place, and swaps back', async () => {

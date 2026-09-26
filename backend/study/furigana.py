@@ -371,6 +371,10 @@ def align(text: str, reading: str, lookup) -> list[dict]:
         return []
     if not reading or not any(_in_kanji_run(c) for c in text):
         return [{"text": text}]
+    if any(_in_kanji_run(c) for c in reading):
+        # Not a reading: a kanji over a kanji teaches nothing, and the
+        # walk below would divide it as though it were kana.
+        return [{"text": text}]
 
     reading = written_reading(text, reading)
     parts = _walk(_split_runs(text), reading, lookup)
@@ -428,6 +432,15 @@ def align_sentence(text: str) -> list[dict]:
     kana and punctuation is one text node rather than five, and breaks
     where the browser would break it anyway.
 
+    A part with a reading carries `word`, the index of the morpheme it
+    came from: 学 and 生 share one, 毎年 and 軽井沢 do not. The example
+    renderer joins a word's readings into one ruby and never two
+    words' (components/dictionary/ExampleSentence.jsx), so the parts
+    have to say where one word ends.
+
+    A reading the tokenizer could not give (an unknown word it echoes
+    back in kanji) is no furigana rather than the kanji over itself.
+
     Degrades to a single unreadinged part when the tokenizer is not
     installed (morphology.py's GRACEFUL DEGRADATION), which renders as
     the bare sentence -- what every caller showed before furigana.
@@ -444,12 +457,15 @@ def align_sentence(text: str) -> list[dict]:
         return [{"text": text}]
 
     parts: list[dict] = []
-    for m in morphemes:
+    for word, m in enumerate(morphemes):
         for part in align_deck(m.surface, m.reading):
-            if part.get("reading") is None and parts and parts[-1].get("reading") is None:
-                parts[-1] = {"text": parts[-1]["text"] + part["text"]}
+            if part.get("reading") is None:
+                if parts and parts[-1].get("reading") is None:
+                    parts[-1] = {"text": parts[-1]["text"] + part["text"]}
+                else:
+                    parts.append(part)
             else:
-                parts.append(part)
+                parts.append({**part, "word": word})
     return parts
 
 

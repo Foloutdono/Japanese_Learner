@@ -315,7 +315,11 @@ def _tokens(morphemes: list, grammar: list[dict] | None = None) -> list[dict]:
 # mixed "must" halves found, a counter after a number; no card read
 # otherwise than the token (彼ら's ら is not 等), a suffix folded into
 # its word (参加者) or given its affix sense, a pool word's first senses.
-LOCAL_REV = 5
+# 6: readings spelled rather than pronounced (大きい おおきい, not
+# おうきい) and put right in context (お母さん's 母 かあ, 一本 いっぽん;
+# study/reading_context.py), which is every row's reading and furigana
+# -- 2 on main while plans 148-151 were open on their branch.
+LOCAL_REV = 6
 
 
 def analyze_local(text: str, level: str | None = None) -> dict:

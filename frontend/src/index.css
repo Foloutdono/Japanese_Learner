@@ -11963,7 +11963,10 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    as two strokes from 13.1px up, so こ and ご looked alike. Room is
    not the constraint here: two kana at this rung (26px) still sit
    inside one --fs-display kanji (40px). */
-.dict-plate__word ruby { ruby-position: over; }
+/* Centred over its kanji rather than spread across it: the default
+   (space-around) set お母さん's かあ as か   あ, two kana far enough
+   apart to read as two readings. */
+.dict-plate__word ruby { ruby-position: over; ruby-align: center; }
 .dict-plate__word rt {
   font-family: var(--font-jp);
   font-size: var(--fs-sm);
@@ -12221,12 +12224,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
   display: inline-block;
   white-space: nowrap;
 }
-/* A word's reading over the word, centred, and free to overhang the
-   kana either side by half a reading character, as a printed book sets
-   it (plan 146): the reading's own width no longer sets the ruby's, so
-   学生 under がくせい stays one word rather than 学 生. ExampleSentence
-   joins a word's kanji into one ruby, so a reading never meets another
-   one at the side. */
+/* A word's reading over the word, centred (plan 146). ExampleSentence
+   joins ONE word's kanji into one ruby, 学生 under がくせい, so the
+   word stays one word rather than 学 生 -- and never two words'
+   readings, which is how まいとしかるいざわ came to sit over 毎年軽井沢.
+   Where the ruby has kana on both sides (.dict-ex__ruby--over, which
+   ExampleSentence decides), its reading may overhang each by half a
+   reading character, as a printed book sets it: two such overhangs
+   into one kana are one --fs-caption character, narrower than the
+   --fs-lead kana they share, so two readings never meet. Beside a
+   kanji, another reading or the line's edge it overhangs nothing, and
+   the base widens to the reading instead. */
 .dict-ex__jp ruby { white-space: nowrap; ruby-align: center; }
 /* One rung up from --fs-caption-xs, and medium: at 9.9px ご's dakuten
    were one smudge, and ご read as こ (see .dict-plate__word rt). The
@@ -12235,12 +12243,17 @@ button.card-row__body:focus-visible { background: var(--bg-card-hover); filter: 
    cannot afford it. A two-kana reading at this rung (23px) already
    widens the 18px kanji under it by a few pixels. */
 .dict-ex__jp rt {
-  margin-inline: -0.5em;
   font-size: var(--fs-caption);
   font-weight: 500;
   color: var(--text-secondary);
   user-select: none;
 }
+.dict-ex__ruby--over rt { margin-inline: -0.5em; }
+/* Another word's ruby straight after: a space at the reading's end, so
+   two words' readings never run on as one (毎年軽井沢, まいとし かるいざわ).
+   On the reading, not the ruby, so it only widens the line where the
+   readings are what meet. */
+.dict-ex__ruby--abuts rt { padding-inline-end: var(--sp-1); }
 /* The headword itself, picked out of the sentence: no box, the
    entry's own ink, bold. */
 .dict-ex__hl {
@@ -17418,6 +17431,9 @@ html { scrollbar-gutter: stable; }
   border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--text-on-panel) 18%, transparent);
 }
+/* Left behind once the train is under way: the run's pigment, as the
+   legs it has covered. */
+.jour-track__siding--done { background: var(--jour-st, var(--success)); }
 /* One leg per level, stop to stop, each stopping 2px short of the stop
    on either side (GhostTrack's CUT): the cut IS the stop. */
 .jour-track__leg {
@@ -21093,6 +21109,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  /* The desk prints the key beside the word (Échap, Entrée): a cap
+     set flush against the label read as one smudge. */
+  gap: var(--sp-3);
   box-sizing: border-box;
   min-height: 44px;
   padding-block: 0;
@@ -25398,6 +25417,22 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     --card-pad-top: var(--sp-5);
   }
   .desk-run--panels > .stage:has(> .readings-input) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  /* Nor over the choices: four glosses of a kanji, each a list of
+     synonyms, stood the tiles 58px under a 800px window's floor. The
+     card gives down to what the choices and the tiles leave (it still
+     fills that room, so it keeps one height through the answer), and
+     the rows come in to the phone's rhythm: 8px over and under, 8px
+     between. */
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .card-transition-live,
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card { min-height: 0; }
+  .screen.desk-run.desk-run--panels > .stage:has(> .quiz-card-stage + .mcq-list) > .quiz-card-stage .prompt-card--footed .prompt-card__body { min-height: 0; }
+  .desk-run--panels > .stage > .mcq-list { flex: none; }
+  .desk-run--panels > .stage > .mcq-list .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row.mcq-row--filler { padding-block: var(--sp-3); }
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row,
+  .desk-run--panels > .stage > .mcq-list .mcq-row + .mcq-row.mcq-row--filler { margin-top: var(--sp-3); }
   /* The tiles framed in a surface row under the card, and before the
      reveal drawn unlit and inert -- the console's buttons are there,
      dark, until there is something to press -- rather than unseen.
@@ -25873,6 +25908,38 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
   .desk-dict--page .dict-plate:has(.dict-plate__word--long) > .dict-plate__row {
     flex-direction: row;
     align-items: center;
+  }
+  /* A grammar point, or any long headword, stacked rather than
+     beside: the pattern's auto column took the band's width and left
+     its formation and gloss a word a line (〜ないでください). The marks
+     and actions ride one line over it, as a phone sets them; how it is
+     formed over the pattern, the gloss under it, each the plate's
+     whole width -- the order the desk's dictionary page keeps, above. */
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      "row"
+      "readings"
+      "word"
+      "caption"
+      "stripe";
+    gap: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--sp-2);
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__word {
+    justify-self: start;
+    text-indent: 0;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) :is(.dict-plate__readings, .dict-plate__reading, .dict-plate__structure) {
+    align-self: start;
+  }
+  .dict-entry--band .dict-plate:is(:has(.dict-plate__structure), :has(.dict-plate__word--long)) .dict-plate__caption {
+    font-size: var(--fs-title);
   }
   /* The learner's record under the stripe, four across (below), then
      the lesson in two columns where each holds a desk column's least

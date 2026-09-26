@@ -19,29 +19,75 @@
 //
 // The backend's parts are one kanji each (vocab_extras._expand_furigana),
 // and a reading is wider than its kanji: がく over 学 and せい over 生
-// spread 学生 into 学 生, a word printed as two. Neighbouring parts that
-// both carry a reading, and are marked alike, are set as one ruby here
-// -- 学生 under がくせい -- and the reading may overhang the kana either
-// side (index.css, .dict-ex__jp rt), as a printed book sets it.
+// spread 学生 into 学 生, a word printed as two. Neighbouring parts of
+// ONE word -- the backend says which with `word` -- that are marked
+// alike are set as one ruby here: 学生 under がくせい. Two words never
+// are, even side by side: 毎年 and 軽井沢 joined put まいとしかるいざわ
+// over five kanji, a reading no one could divide, and a part without
+// `word` stays on its own.
+//
+// A reading may overhang the kana either side (index.css,
+// .dict-ex__ruby--over), as a printed book sets it -- only where there
+// IS kana on both sides (`over`), and a lone kana for one reading only:
+// overhanging a kanji, or another word's reading, is two readings
+// colliding, and overhanging one side only would pull the reading off
+// its word's centre.
+//
+// Two words' rubies side by side (`abuts`) keep a space between their
+// readings (.dict-ex__ruby--abuts), so まいとし and かるいざわ read as
+// two.
 //
 // A part that is only closing punctuation rides on the part before it
 // (`tail`): 。 alone on a line is a line opening on a full stop, which
 // Japanese never sets, and the backend cuts it off where the pattern's
 // highlight ends.
 const CLOSING = /^[、。，．！？」』）〕】]+$/
+// Kana, the long-vowel mark and full-width punctuation: what a reading
+// may overhang. Not a kanji, and not Latin, whose letters are narrower.
+const OVERHANGABLE = /^[\u3000-\u303f\u3041-\u30ff\uff01-\uff0f\uff1a-\uff20\uff5b-\uff65]$/u
+
 function wordRuby(segments) {
   const out = []
   for (const seg of segments ?? []) {
     const prev = out[out.length - 1]
     if (prev && !prev.blank && !seg.blank && !seg.reading && !seg.highlight && CLOSING.test(seg.text)) {
       out[out.length - 1] = { ...prev, tail: (prev.tail ?? '') + seg.text }
-    } else if (prev && prev.reading && seg.reading && !prev.tail && !prev.blank && !seg.blank && !!prev.highlight === !!seg.highlight) {
+    } else if (
+      prev && prev.reading && seg.reading && !prev.tail && !prev.blank && !seg.blank
+      && prev.word != null && prev.word === seg.word
+      && !!prev.highlight === !!seg.highlight
+    ) {
       out[out.length - 1] = { ...prev, text: prev.text + seg.text, reading: prev.reading + seg.reading }
     } else {
       out.push(seg)
     }
   }
-  return out
+  // A lone kana between two rubies is overhung by the first only: two
+  // half-readings into one kana fit only when the font sets that kana a
+  // full em wide, and a proportional or fallback face sets it narrower
+  // (the で of 喫茶店で新聞, where きっさてん met しんぶん).
+  let claimed = -1
+  return out.map((seg, i) => {
+    if (!seg.reading) return seg
+    const over = overhangs(out[i - 1], seg, out[i + 1]) && claimed !== i - 1
+    if (over && !seg.tail && [...out[i + 1].text].length === 1) claimed = i + 1
+    return { ...seg, over, abuts: abuts(seg, out[i + 1]) }
+  })
+}
+
+// Whether the ruby `seg` is followed straight away by another word's
+// ruby: 毎年軽井沢, two words whose readings would otherwise run on as
+// まいとしかるいざわ with nothing to say where one ends.
+function abuts(seg, after) {
+  return !seg.tail && !!after && !after.blank && !!after.reading
+}
+
+// Whether the ruby `seg` has kana against it on both sides.
+function overhangs(before, seg, after) {
+  const plain = s => s && !s.blank && !s.reading
+  const left = plain(before) ? [...before.text].at(-1) : null
+  const right = seg.tail ? seg.tail[0] : plain(after) ? [...after.text][0] : null
+  return !!left && !!right && OVERHANGABLE.test(left) && OVERHANGABLE.test(right)
 }
 
 export function SenseNumeral({ number, className = '' }) {
@@ -73,7 +119,7 @@ export function ExampleSentence({ ex, senseNumber, showTr = true, revealed = fal
                   : <span key={j} className="dict-ex__seg gl-blank" aria-label={blankLabel}>{seg.text}</span>
               }
               const content = seg.reading
-                ? <ruby>{seg.text}<rt>{seg.reading}</rt></ruby>
+                ? <ruby className={[seg.over && 'dict-ex__ruby--over', seg.abuts && 'dict-ex__ruby--abuts'].filter(Boolean).join(' ') || undefined}>{seg.text}<rt>{seg.reading}</rt></ruby>
                 : seg.text
               if (seg.tail) {
                 return (

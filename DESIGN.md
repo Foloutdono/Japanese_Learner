@@ -574,10 +574,16 @@ them:
   under the polite です／だ). Under a neutral point nothing is tagged:
   every sentence is polite or casual by nature there.
 - **Furigana sit over the word.** A word's kanji share one reading,
-  centred and free to overhang the kana either side by half a reading
-  character, so 学生 is not printed 学 生; closing punctuation rides on
-  the part before it, so no line opens on 。. This is `ExampleSentence`,
-  so it holds wherever an example sentence is printed.
+  centred, so 学生 is not printed 学 生 -- one word's, never two
+  words' side by side (the parts carry the `word` they came from), so
+  毎年軽井沢 reads まいとし and かるいざわ, with a space between them.
+  A reading may overhang the kana on either side by half a reading
+  character only where there is kana on both sides, and a lone kana
+  for one reading only: never over a kanji or another reading, so two
+  readings never meet, whatever width the face sets a kana. Closing
+  punctuation rides on the part before it, so no line opens on 。.
+  This is `ExampleSentence`, so it holds wherever an example sentence
+  is printed.
 
 ### The console, one everywhere
 
