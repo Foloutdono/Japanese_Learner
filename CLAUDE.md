@@ -608,7 +608,26 @@ runtime purpose. Two consequences worth knowing:
   `components/profile/CommuterPass.jsx`'s `PassHead`,
   `src/settings.phone.test.jsx`, `src/settings.desktop.test.jsx` and
   `index.css`; DESIGN.md, "The desk" and Structure).
-  When starting a new wave, begin at **140** or higher, and check
+  **140** is 定期入れ, the profile tightened (the owner's pick A of three
+  directions drawn on the canvas "Tsuji profile — options", for the phone
+  and the desk alike): the same inserts in a third less of the phone's
+  height — the XP ring gone from the holder's initial (the balance row's
+  bar is the climb) and the month the pass was issued under the name
+  (`onboardedAt`), the footer the door to the balance sheet and the
+  profile's own offer button and paywall source retired, the stamp book
+  titled with its month over three figures in one row, the records three
+  across with the best perfect run, the lines a row each on one subgrid,
+  the doors to Statistics and Settings a lattice of their own, five on the
+  ranking; on the desk each line drawn with a rail per stop and no door the
+  rail already holds, the guide's Settings stop on the rail's station
+  (cited in `screens/ProfileScreen.jsx`, `components/profile/PassHolder.jsx`,
+  `ProfileBlocks.jsx`, `LineLedger.jsx`, `components/boarding/PassStep.jsx`,
+  `config/tabs.js`, `components/chrome/DeskRail.jsx`,
+  `components/guide/guides.js`, `domain/paywall.js`, `stores/credits.js`,
+  `backend/core/events.py`, `src/profileScreen.phone.test.jsx`,
+  `src/profile.phone.test.jsx`, `src/profile.desktop.test.jsx` and
+  `index.css`; DESIGN.md, Colour, Surfaces and "The desk").
+  When starting a new wave, begin at **141** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 
