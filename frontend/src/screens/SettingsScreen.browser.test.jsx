@@ -3,19 +3,23 @@ import { render } from 'vitest-browser-react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { LangProvider, useLang } from '../LangContext'
 import * as credits from '../stores/credits'
+import { ATTRIBUTIONS } from '../domain/attributions'
 import '../index.css'
 
-// ── Settings (plan 074) ───────────────────────────────────────────
-// The list, its seven pages, and the pass row that opens the offer.
-// Pinned here: the parts that fail quietly —
-//   1. every row is reachable and prints its value;
+// ── Settings (plan 074; the pass's contract, plan 139) ────────────
+// The pass printed with its contract, the list under it, and the pages
+// they open. Pinned here: the parts that fail quietly —
+//   1. every door is reachable and prints its value, the pass's fields
+//      included, and the addresses of the pages that were split land
+//      where their content went;
 //   2. the level strip WRITES — through the confirm sheet, whose
 //      figures come from the preview — and Stay writes nothing;
-//   3. the grade cards write, and name the bar's own words;
+//   3. the rating bars write, and name the bar's own words;
 //   4. the reset and the deletion are genuinely two-step;
-//   5. Destination WRITES the three things it claims to — a
-//      destination issued, a destination handed back, an hour
-//      reprinted.
+//   5. Destination and Service WRITE the things they claim to — a
+//      destination issued, a destination handed back, a service
+//      reprinted — and each prices its choices before one is made;
+//      the hour reprints on its own page.
 
 const apiJson = vi.fn()
 const signOut = vi.fn(async () => {})
@@ -143,32 +147,78 @@ beforeEach(async () => {
   await Promise.all([refreshSummary(), refreshJourney()])
 })
 
-describe('SettingsScreen — the list', () => {
-  it('prints seven page rows plus the pass, each printing its value', async () => {
+describe('SettingsScreen — the pass and the list', () => {
+  it('prints the pass\'s contract and six rows plus the pass, each printing its value', async () => {
     const screen = await mount()
     await settle()
-    const rows = [...screen.container.querySelectorAll('.stg-row')]
+    const root = screen.container
+
+    // The contract: the boarding level and the destination, then the
+    // service, the hour and the lines, each a door to its own page.
+    const fields = [...root.querySelectorAll('.stg-pass .stg-door')]
+    expect(fields.map(f => f.dataset.page)).toEqual(['level', 'destination', 'service', 'hour', 'lines'])
+    expect(fields[0].textContent).toContain('N5')
+    expect(fields[1].textContent).toContain(T.settingsGoalNoneShort)
+    expect(fields[2].textContent).toContain(`${T.paceName.rapid} · 10`)
+    expect(fields[3].textContent).toContain(T.destFlexible)
+    // No destination, so no date to be valid until.
+    expect(root.querySelector('.stg-pass__field--valid')).toBeNull()
+
     // Six doors to pages, then the pass — which opens the offer sheet
     // rather than navigating, so it is last and is not one of PAGES.
-    expect(rows).toHaveLength(8)
-    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'learning', 'destination', 'data', 'account', 'credits', 'pass'])
-    expect(rows[2].querySelector('.stg-row__value').textContent).toContain('N5 · 10')
-    expect(rows[3].querySelector('.stg-row__value').textContent).toBe(T.settingsGoalNoneShort)
-    expect(rows[5].querySelector('.stg-row__value').textContent).toBe('dev@…')
+    const rows = [...root.querySelectorAll('.stg-row')]
+    expect(rows.map(r => r.dataset.page)).toEqual(['display', 'sound', 'rating', 'help', 'account', 'credits', 'pass'])
+    const value = i => rows[i].querySelector('.stg-row__value').textContent
+    expect(value(2)).toBe(T.settingsRatingScaleOption.simple)
+    expect(value(4)).toBe('dev@…')
+    expect(value(5)).toBe(T.settingsCreditsCount(ATTRIBUTIONS.length))
+    // What can be seen is drawn beside the words: the served bar's dots.
+    expect(rows[2].querySelectorAll('.stg-dots__dot')).toHaveLength(4)
+    expect(rows[0].querySelector('.stg-swatch')).not.toBeNull()
 
     rows[4].click()
     await settle(30)
-    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.settingsData)
-    // ‹ Settings brings the list back.
+    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.account)
+    // ‹ Settings brings the column back.
     screen.container.querySelector('.stage__leave').click()
     await settle(30)
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+
+    screen.container.querySelector('.stg-pass .stg-door[data-page="service"]').click()
+    await settle(30)
+    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.destService)
+  })
+
+  it('prints the destination and its validity when the pass has one', async () => {
+    journey = WITH_GOAL
+    seedJourneyStatus(WITH_GOAL)
+    await refreshJourney()
+    const screen = await mount()
+    await settle()
+    const root = screen.container
+    expect(root.querySelector('.stg-door[data-page="destination"]').textContent).toContain('N3')
+    expect(root.querySelector('.stg-pass__field--valid').textContent).toMatch(/2031/)
   })
 
   it('an unknown page falls back to the list', async () => {
     const screen = await mount('/profile/settings/nothing')
     await settle()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(8)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+  })
+
+  // Learning went to the pass's fields and Data into the account page
+  // (plan 139): an address kept from before lands where it went.
+  it('lands the old Learning address on the level', async () => {
+    const screen = await mount('/profile/settings/learning')
+    await settle()
+    expect(screen.container.querySelector('.lvlstrip')).not.toBeNull()
+  })
+
+  it('lands the old Data address on the account, whose second half it is', async () => {
+    const screen = await mount('/profile/settings/data')
+    await settle()
+    expect(screen.container.querySelector('[data-action="reset"]')).not.toBeNull()
+    expect(screen.container.querySelector('h1.bar__title').textContent).toBe(T.account)
   })
 
   // ── The pass row (the paywall's settings door) ──────────────────
@@ -194,7 +244,7 @@ describe('SettingsScreen — the list', () => {
     const screen = await mount()
     await settle()
     expect(screen.container.querySelector('.stg-row[data-page="pass"]')).toBeNull()
-    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(7)
+    expect(screen.container.querySelectorAll('.stg-row')).toHaveLength(6)
 
     // The credits store is module state: leave it as the rest of this
     // file expects to find it, or the pass row vanishes from every
@@ -203,14 +253,14 @@ describe('SettingsScreen — the list', () => {
   })
 })
 
-describe('SettingsScreen — Learning', () => {
+describe('SettingsScreen — the level, the bar and the service', () => {
   it('marks the profile level, previews a move and writes it from the sheet', async () => {
     apiJson.mockImplementation(async path => (
       String(path).startsWith('/api/profile/learning/preview')
         ? { direction: 'up', markedKnown: 1318, spreadWeeks: 6 }
         : {}
     ))
-    const screen = await mount('/profile/settings/learning')
+    const screen = await mount('/profile/settings/level')
     await settle()
     const root = screen.container
 
@@ -244,7 +294,7 @@ describe('SettingsScreen — Learning', () => {
     ))
     profile = { ...PROFILE, jlptLevel: 'N4' }
     await refreshSummary()
-    const screen = await mount('/profile/settings/learning')
+    const screen = await mount('/profile/settings/level')
     await settle()
     const stops = [...screen.container.querySelectorAll('.lvlstrip__stop')]
     stops.find(s => s.textContent.startsWith('N5')).click()
@@ -257,24 +307,27 @@ describe('SettingsScreen — Learning', () => {
     expect(apiJson.mock.calls.some(c => c[0] === '/api/profile/learning')).toBe(false)
   })
 
-  it('the grade cards write, and name the bar they are offering', async () => {
-    const screen = await mount('/profile/settings/learning')
+  it('the bars write, and are the bars they offer', async () => {
+    const screen = await mount('/profile/settings/rating')
     await settle()
     const root = screen.container
 
-    // 2 / 4 / 6 grades, shortest first, with the served one marked.
-    const cards = [...root.querySelectorAll('.grades .svc')]
+    // 2 / 4 / 6 buttons, shortest first, with the served one marked.
+    const cards = [...root.querySelectorAll('.grades .grade')]
     expect(cards).toHaveLength(3)
     expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
+    // Each is the rating bar itself, drawn: two, four and six tiles.
+    expect(cards.map(c => c.querySelectorAll('.rating-bar__btn').length)).toEqual([2, 4, 6])
+    expect(cards[0].querySelector('button')).toBeNull()
 
     // The words of the served scale, worst-first, exactly as the bar
-    // draws them. In French, which is what LangProvider defaults to —
-    // spelled out rather than rebuilt from the locale table, because a
-    // caption assembled from the same source it is being checked
-    // against would pass however wrong the assembly was.
-    expect(cards[1].querySelector('.svc__words').textContent)
-      .toBe('Raté · Presque · Difficile · Correct')
-    expect(cards[0].querySelector('.svc__words').textContent).toBe('Raté · Correct')
+    // draws them — named on the radio, since the drawing is hidden from
+    // a screen reader. In French, which is what LangProvider defaults to
+    // — spelled out rather than rebuilt from the locale table, because a
+    // caption assembled from the same source it is being checked against
+    // would pass however wrong the assembly was.
+    expect(cards[1].getAttribute('aria-label')).toContain('Raté · Presque · Difficile · Correct')
+    expect(cards[0].getAttribute('aria-label')).toContain('Raté · Correct')
 
     cards[2].click()
     await settle(30)
@@ -287,17 +340,21 @@ describe('SettingsScreen — Learning', () => {
   it('marks the two-button bar when that is what is served', async () => {
     profile = { ...PROFILE, ratingScale: 'binary' }
     await refreshSummary()
-    const screen = await mount('/profile/settings/learning')
+    const screen = await mount('/profile/settings/rating')
     await settle()
-    const cards = [...screen.container.querySelectorAll('.grades .svc')]
+    const cards = [...screen.container.querySelectorAll('.grades .grade')]
     expect(cards[0].getAttribute('aria-checked')).toBe('true')
   })
 
-  it('the pace cards write the service picked', async () => {
-    const screen = await mount('/profile/settings/learning')
+  it('without a destination, a service is saved on the spot', async () => {
+    const screen = await mount('/profile/settings/service')
     await settle()
-    // The first grid is the pace's; the lines' toggles are the second.
-    const cards = [...screen.container.querySelectorAll('.svc-grid')[0].querySelectorAll('.svc')]
+    const root = screen.container
+    // No stop to ride to, so no lines — the three cards, and the way to
+    // choose a destination.
+    expect(root.querySelector('.svc-chart')).toBeNull()
+    expect(root.querySelector('[data-action="goal-set"]')).not.toBeNull()
+    const cards = [...root.querySelectorAll('.svc-grid .svc')]
     expect(cards.map(c => c.getAttribute('aria-checked'))).toEqual(['false', 'true', 'false'])
     cards[2].click()
     await settle(30)
@@ -306,11 +363,11 @@ describe('SettingsScreen — Learning', () => {
   })
 })
 
-describe('SettingsScreen — Learning, the lines', () => {
+describe('SettingsScreen — the lines', () => {
   it('toggles a line through the learning PATCH, and never the last one out', async () => {
     profile = { ...PROFILE, lines: ['vocab', 'kanji'] }
     await refreshSummary()
-    const screen = await mount('/profile/settings/learning')
+    const screen = await mount('/profile/settings/lines')
     await settle()
     const toggles = [...screen.container.querySelectorAll('[data-line]')]
     expect(toggles.map(b => b.getAttribute('aria-checked'))).toEqual(['true', 'true', 'false'])
@@ -324,7 +381,7 @@ describe('SettingsScreen — Learning, the lines', () => {
   it('the last line on cannot be switched off', async () => {
     profile = { ...PROFILE, lines: ['grammar'] }
     await refreshSummary()
-    const screen = await mount('/profile/settings/learning')
+    const screen = await mount('/profile/settings/lines')
     await settle()
     const toggles = [...screen.container.querySelectorAll('[data-line]')]
     expect(toggles.map(b => b.getAttribute('aria-checked'))).toEqual(['false', 'false', 'true'])
@@ -337,7 +394,7 @@ describe('SettingsScreen — Learning, the lines', () => {
 
 describe('SettingsScreen — Data', () => {
   it('reset fires only after the second, explicit press', async () => {
-    const screen = await mount('/profile/settings/data')
+    const screen = await mount('/profile/settings/account')
     await settle()
     const root = screen.container
 
@@ -354,7 +411,7 @@ describe('SettingsScreen — Data', () => {
   })
 
   it('deleting the account is two-step too, then signs this device out locally', async () => {
-    const screen = await mount('/profile/settings/data')
+    const screen = await mount('/profile/settings/account')
     await settle()
     const root = screen.container
 
@@ -395,7 +452,7 @@ describe('SettingsScreen — Sound', () => {
 })
 
 describe('SettingsScreen — Destination', () => {
-  it('issues a destination onto a pass that has none', async () => {
+  it('issues a destination onto a pass that has none, each stop priced', async () => {
     const screen = await mount('/profile/settings/destination')
     await settle()
     const root = screen.container
@@ -404,12 +461,19 @@ describe('SettingsScreen — Destination', () => {
     expect(chips.map(c => c.querySelector('.dest__code').textContent)).toEqual(['N4', 'N3', 'N2', 'N1'])
     expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(true)
     expect(root.querySelector('[data-action="goal-drop"]').disabled).toBe(true)
+    // Every stop says when the pass's service reaches it, before one is
+    // chosen, and a further stop is reached later.
+    const dates = chips.map(c => c.querySelector('.dest__when').textContent)
+    expect(dates.every(d => /\d{4}/.test(d))).toBe(true)
+    expect(new Set(dates).size).toBe(4)
 
     chips[1].click() // N3
     await settle(30)
     expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(false)
     // The line the pass will print, from this service's own arithmetic.
     expect(root.querySelector('.dest-line__date')).not.toBeNull()
+    // The line is inked as far as the stop chosen.
+    expect(chips.map(c => c.classList.contains('dest--ridden'))).toEqual([true, true, false, false])
 
     root.querySelector('[data-action="goal-reprint"]').click()
     await settle(30)
@@ -464,6 +528,7 @@ describe('SettingsScreen — Destination', () => {
     // promise than the one the pass carries.
     const on = root.querySelector('.dest--on')
     expect(on.querySelector('.dest__code').textContent).toBe('N3')
+    expect(on.querySelector('.dest__tag').textContent).toBe(T.destOnPass)
     expect(root.querySelector('.dest-line__date').textContent).toMatch(/2031/)
     expect(root.querySelector('[data-action="goal-reprint"]').disabled).toBe(true)
 
@@ -472,17 +537,44 @@ describe('SettingsScreen — Destination', () => {
     const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/goal' && c[2]?.method === 'DELETE')
     expect(call, 'Hand it back IS the 払戻').toBeTruthy()
   })
+})
 
-  it('a changed service on the same stop is a reprint, not a new contract', async () => {
+describe('SettingsScreen — Service', () => {
+  it('draws each service as a line to the destination, the learner\'s own pace dashed', async () => {
     journey = WITH_GOAL
     seedJourneyStatus(WITH_GOAL)
     await refreshJourney()
-    const screen = await mount('/profile/settings/destination')
+    const screen = await mount('/profile/settings/service')
     await settle()
     const root = screen.container
-    root.querySelectorAll('.svc-grid .svc')[2].click() // Express
+    const rows = [...root.querySelectorAll('.svc-row[data-pace]')]
+    expect(rows.map(r => r.dataset.pace)).toEqual(['5', '10', '20'])
+    // The faster the service, the shorter its line to the stop.
+    const reach = rows.map(r => parseFloat(r.querySelector('.svc-row__rail').style.width))
+    expect(reach[0]).toBeGreaterThan(reach[1])
+    expect(reach[1]).toBeGreaterThan(reach[2])
+    rows.forEach(r => expect(r.querySelector('.svc-row__when').textContent).toMatch(/\d{4}/))
+    // The service on the pass says so, and is the one checked.
+    expect(rows[1].getAttribute('aria-checked')).toBe('true')
+    expect(rows[1].querySelector('.svc-row__tag').textContent).toBe(T.destOnPass)
+    // The last fortnight's own pace, a line and not a choice.
+    const yours = root.querySelector('.svc-row--yours')
+    expect(yours.querySelector('.svc-row__rail--dashed')).not.toBeNull()
+    expect(yours.getAttribute('role')).toBeNull()
+    expect(root.querySelector('[data-action="pace-reprint"]').disabled).toBe(true)
+  })
+
+  it('a changed service is a reprint of the same stop, not a new contract', async () => {
+    journey = WITH_GOAL
+    seedJourneyStatus(WITH_GOAL)
+    await refreshJourney()
+    const screen = await mount('/profile/settings/service')
+    await settle()
+    const root = screen.container
+    root.querySelector('.svc-row[data-pace="20"]').click() // Express
     await settle(30)
-    root.querySelector('[data-action="goal-reprint"]').click()
+    expect(apiJson.mock.calls.some(c => c[0] === '/api/journey/reprint')).toBe(false)
+    root.querySelector('[data-action="pace-reprint"]').click()
     await settle(30)
     const call = apiJson.mock.calls.find(c => c[0] === '/api/journey/reprint')
     expect(call).toBeTruthy()
@@ -491,9 +583,11 @@ describe('SettingsScreen — Destination', () => {
     expect(body.goalLevel).toBeUndefined()
     expect(new Date(body.goalTargetDate).getTime()).toBeGreaterThan(Date.now())
   })
+})
 
+describe('SettingsScreen — the daily ride', () => {
   it('reprints the pass when the daily hour changes', async () => {
-    const screen = await mount('/profile/settings/destination')
+    const screen = await mount('/profile/settings/hour')
     await settle()
     screen.container.querySelector('[data-hour="am"]').click()
     await settle(30)

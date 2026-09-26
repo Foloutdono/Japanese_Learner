@@ -42,8 +42,10 @@ globalThis.fetch = vi.fn().mockResolvedValue({ ok: true, status: 200, json: asyn
 
 const { Seg, ConsoleBand } = await import('./components/chrome/Console')
 const { DisplayPage } = await import('./components/settings/DisplayPage')
-const { LearningPage } = await import('./components/settings/LearningPage')
+const { LevelPage } = await import('./components/settings/LevelPage')
+const { ServicePage } = await import('./components/settings/ServicePage')
 const { DestinationPage } = await import('./components/settings/DestinationPage')
+const { HourPage } = await import('./components/settings/HourPage')
 
 const settle = (ms = 150) => new Promise(r => setTimeout(r, ms))
 const $ = s => document.querySelector(s)
@@ -134,8 +136,8 @@ describe('the settings\' grids on the desk', () => {
     expect(document.activeElement.getAttribute('aria-checked')).toBe('true')
   })
 
-  it('walks the level and the pace without asking or saving; Space chooses', async () => {
-    await render(<Page><LearningPage session={{ access_token: 't' }} /></Page>)
+  it('walks the level without asking; Space asks', async () => {
+    await render(<Page><LevelPage session={{ access_token: 't' }} /></Page>)
     await settle()
     const level = $('.lvlstrip')
     expect(stops(level)).toEqual([-1, 0, -1, -1, -1])
@@ -143,10 +145,6 @@ describe('the settings\' grids on the desk', () => {
     await userEvent.keyboard('{ArrowRight}{ArrowRight}')
     expect(document.activeElement.textContent).toContain('N2')
     expect(checked(level)).toContain('N4')
-    expect(apiJson).not.toHaveBeenCalled()
-    const pace = $('.svc-grid[role="radiogroup"]')
-    pace.querySelector('[aria-checked="true"]').focus()
-    await userEvent.keyboard('{ArrowRight}')
     expect(apiJson).not.toHaveBeenCalled()
     // Space on a walked-to level is the click: it asks.
     level.querySelector('[aria-checked="true"]').focus()
@@ -156,7 +154,7 @@ describe('the settings\' grids on the desk', () => {
     expect(apiJson.mock.calls.map(([u]) => u)).toEqual(['/api/profile/learning/preview?jlptLevel=N5'])
   })
 
-  it('walks and checks the destination; walks the hour without saving', async () => {
+  it('walks and checks the destination', async () => {
     await render(<Page><DestinationPage /></Page>)
     await settle()
     const dest = $('.dest-grid')
@@ -164,11 +162,28 @@ describe('the settings\' grids on the desk', () => {
     dest.querySelector('[aria-checked="true"]').focus()
     await userEvent.keyboard('{ArrowRight}')
     expect(checked(dest)).toContain('N1')
+    expect(apiJson).not.toHaveBeenCalled()
+  })
+
+  it('walks the hour without saving', async () => {
+    await render(<Page><HourPage /></Page>)
+    await settle()
     const hours = $('.hour-grid')
     expect(stops(hours)).toEqual([-1, 0, -1, -1])
     hours.querySelector('[aria-checked="true"]').focus()
     await userEvent.keyboard('{ArrowRight}')
     expect(document.activeElement.dataset.hour).toBe('pm')
+    expect(apiJson).not.toHaveBeenCalled()
+  })
+
+  it('walks the services one stop, checking them when a date is dialled', async () => {
+    await render(<Page><ServicePage session={{ access_token: 't' }} /></Page>)
+    await settle()
+    const services = $('.svc-chart[role="radiogroup"], .svc-grid[role="radiogroup"]')
+    expect(stops(services).filter(n => n === 0)).toHaveLength(1)
+    services.querySelector('[aria-checked="true"]').focus()
+    await userEvent.keyboard('{ArrowRight}')
+    // A dialled service is not a save: Reprint is.
     expect(apiJson).not.toHaveBeenCalled()
   })
 })

@@ -9,7 +9,8 @@ import { hasProvider } from '../../lib/oauth'
 import { useClaim } from '../../hooks/useClaim'
 import { ClaimFields } from '../account/ClaimAccount'
 import { ProviderButton } from '../account/ProviderButton'
-import { SettingsPage, Slip } from './SettingsPage'
+import { SettingsPage, Slip, SlipColumns, SlipColumn } from './SettingsPage'
+import { DataSlips } from './DataSlips'
 
 // ── Account ───────────────────────────────────────────────────
 // Who the card is issued to, the privacy policy (plan 066), and the
@@ -122,36 +123,47 @@ export function AccountPage({ session }) {
   // A guest is offered the whole account (ClaimSlip, Google included);
   // anyone else is offered only the identity they are missing.
   const offerGoogle = !guest && !!session && !hasProvider(session, 'google')
+  // Two halves (plan 139): whose card this is, and what it holds — the
+  // data page's slips, which were a row of their own. A phone reads the
+  // account first; a desk page wide enough sets the two side by side.
+  // Sign out is here alone: the column's foot printed a second one.
   return (
     <SettingsPage title={t.account}>
-      {guest && <ClaimSlip />}
-      {session?.user?.email && (
-        <Slip label={t.settingsIssuedTo}>
-          <span className="slip__value">{session.user.email}</span>
-        </Slip>
-      )}
-      {/* Under the address, because it is about that address: this is
-          the second key to the same pass, not a second pass. */}
-      {offerGoogle && <LinkGoogleSlip />}
-      <Slip label={t.privacyPolicy}>
-        {/* In the shell the policy opens in the system browser at the web
-            origin (plan 076): the bundled copy would open inside the
-            WebView with no way back. */}
-        <a
-          className="btn-secondary slip__act"
-          href="/privacy.html"
-          target="_blank"
-          rel="noreferrer"
-          onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
-        >
-          {t.privacyPolicy}
-        </a>
-      </Slip>
-      <Slip label={guest ? t.signOutGuestDesc : t.signOutDesc}>
-        <button type="button" className="btn-secondary slip__act" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
-          {t.signOut}
-        </button>
-      </Slip>
+      <SlipColumns>
+        <SlipColumn>
+          {guest && <ClaimSlip />}
+          {session?.user?.email && (
+            <Slip label={t.settingsIssuedTo}>
+              <span className="slip__value">{session.user.email}</span>
+            </Slip>
+          )}
+          {/* Under the address, because it is about that address: this is
+              the second key to the same pass, not a second pass. */}
+          {offerGoogle && <LinkGoogleSlip />}
+          <Slip label={t.privacyPolicy}>
+            {/* In the shell the policy opens in the system browser at the web
+                origin (plan 076): the bundled copy would open inside the
+                WebView with no way back. */}
+            <a
+              className="btn-secondary slip__act"
+              href="/privacy.html"
+              target="_blank"
+              rel="noreferrer"
+              onClick={e => { if (isNative()) { e.preventDefault(); openExternal(`${API_ORIGIN}/privacy.html`) } }}
+            >
+              {t.privacyPolicy}
+            </a>
+          </Slip>
+          <Slip label={guest ? t.signOutGuestDesc : t.signOutDesc}>
+            <button type="button" className="btn-secondary slip__act" onClick={() => supabase.auth.signOut({ scope: 'local' })}>
+              {t.signOut}
+            </button>
+          </Slip>
+        </SlipColumn>
+        <SlipColumn>
+          <DataSlips session={session} />
+        </SlipColumn>
+      </SlipColumns>
     </SettingsPage>
   )
 }

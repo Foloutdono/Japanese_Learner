@@ -8,8 +8,9 @@ import './index.css'
 // the real ones, and what is measured is what the 机 block does to them.
 //   - A state card (nothing yet, something failed) stands at the card's
 //     width: an empty shelf was a 1152px card round two lines.
-//   - A settings page's controls stand at the card's width: seven
-//     one-word buttons ran ~770px wide.
+//   - A settings page's cards stand at the card's width: seven
+//     one-word buttons ran ~770px wide. The page itself takes the width
+//     beside its column since plan 139, for its two columns of cards.
 //   - The sentence stations' tier toggles stand at a column's width.
 //   - A shelf with nothing to open is one card across, not half a page
 //     beside a blank half.
@@ -56,7 +57,7 @@ describe('the desk at 1440', () => {
         </div>
       </Canvas>
     )
-    expect(box(screen.container.querySelector('.desk-settings__page')).width).toBeLessThanOrEqual(cardW())
+    expect(box(screen.container.querySelector('.desk-settings__page > .slip')).width).toBeLessThanOrEqual(cardW())
     expect(box(screen.container.querySelector('.slip__act')).width).toBeLessThanOrEqual(cardW())
   })
 
