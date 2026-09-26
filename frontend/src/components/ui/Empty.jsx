@@ -15,10 +15,10 @@ import { InboxIcon } from './Icons'
 //   hint    — the sentence under it (optional)
 //   action  — { label, onClick } (optional; at most one)
 //   tone    — 'error' for the danger register
-export default function Empty({ icon = <InboxIcon size={28} />, message, hint, action, tone }) {
+export default function Empty({ icon = <InboxIcon size={28} />, message, hint, action, tone, className = '' }) {
   const error = tone === 'error'
   return (
-    <div className={`empty${error ? ' empty--error' : ''}`} role={error ? 'alert' : undefined}>
+    <div className={`empty${error ? ' empty--error' : ''}${className ? ` ${className}` : ''}`} role={error ? 'alert' : undefined}>
       {icon && <span className="empty__icon" aria-hidden="true">{icon}</span>}
       <span className="empty__msg">{message}</span>
       {hint && <span className="empty__hint">{hint}</span>}

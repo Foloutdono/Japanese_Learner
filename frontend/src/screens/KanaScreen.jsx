@@ -52,11 +52,15 @@ export default function KanaScreen() {
 
   // The sets as a route: the station page on a phone, and on the desk
   // the list beside a set's platforms (plan 114).
-  const setStops = () => SETS.map(s => {
+  // On the desk a set's stop prints its sample (あ い う え お …), so the
+  // code in front of its name (あ, きゃ) said the first of them twice
+  // and is left off (2026-09-26, the owner's call); the phone's route
+  // has no sample, and keeps it.
+  const setStops = (coded = true) => SETS.map(s => {
       const { learned, total, started } = deckItems(stats, 'kana', s.slug)
       return {
         key: s.slug,
-        code: s.code,
+        code: coded ? s.code : null,
         codeLang: 'ja',
         name: s.label,
         hereLabel: t.levelCurrentMark,
@@ -102,7 +106,7 @@ export default function KanaScreen() {
         <StationSplit
           className="desk-split--line"
           label={t.stationSets}
-          list={<RouteStops stops={setStops()} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} figured />}
+          list={<RouteStops stops={setStops(false)} here={here} selected={set} linkTo={slug => `/learn/kana/${slug}`} figured />}
         >
           <LinePlatforms
             source="kana"

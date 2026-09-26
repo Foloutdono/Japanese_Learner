@@ -991,7 +991,7 @@ export default function DeckDetailScreen({ session }) {
         {loading && <Loading />}
 
         {!loading && cards.length === 0 && !adding && (
-          <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} />
+          <Empty icon={<CardIcon size={40} />} message={t.noCards} hint={t.addFirstCard} className="deckdetail-empty" />
         )}
 
         {/* The cards as rows: the entry at the size the app shows

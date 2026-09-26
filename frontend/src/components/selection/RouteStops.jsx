@@ -88,7 +88,7 @@ export function RouteStops({ stops, here = null, selected = null, onSelect, link
                 as "there is more up there". */}
             <span className="route-stop__rail" aria-hidden="true" />
             <span className="route-stop__marker" aria-hidden="true" />
-            <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>
+            {stop.code && <span className="route-stop__code" lang={stop.codeLang}>{stop.code}</span>}
             <span className="route-stop__names">
               <span className="route-stop__jp">{stop.name}</span>
               {(caption || started) && (

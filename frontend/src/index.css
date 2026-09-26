@@ -21624,6 +21624,11 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     max-width: var(--card-w);
     margin-inline: auto;
   }
+  /* ... except an empty deck's (2026-09-26, the owner's call): it
+     stands where the deck's card list will, under the identity and the
+     three chips, and is drawn at their width rather than centred
+     narrower between them. */
+  .empty.deckdetail-empty { max-width: none; }
   /* The sentence stations' tier page keeps its two toggles at a
      column's width, as Learn's tiers do in their list (plan 123): two
      options of ~575px each across the canvas at 1440. */
@@ -21747,15 +21752,23 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     flex-direction: column;
     padding: var(--sp-1) 0 var(--sp-2);
   }
-  .desk-rail__stations::before {
+  /* The line, drawn per station and capped at the first and the last
+     stop's centre -- as .route-stop__rail is -- rather than one line
+     inset by a guess at the rows' height, which ran past the last stop
+     (and the first) by the difference. */
+  .desk-rail__stations > li { position: relative; }
+  .desk-rail__stations > li::before {
     content: '';
     position: absolute;
-    inset-block: var(--sp-3) calc(var(--sp-2) + var(--sp-4));
+    inset-block: 0;
     left: calc(var(--sp-3) + var(--sp-6) / 2);
     width: 2px;
     margin-left: -1px;
     background: color-mix(in srgb, var(--text-on-panel) 22%, transparent);
   }
+  .desk-rail__stations > li:first-child::before { top: 50%; }
+  .desk-rail__stations > li:last-child::before { bottom: 50%; }
+  .desk-rail__stations > li:only-child::before { display: none; }
   .desk-sec {
     position: relative;
     display: flex;
@@ -23662,6 +23675,9 @@ button.svc-row:focus-visible { filter: none; border-color: var(--surface-line); 
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+  /* A stop with no code (a kana set, whose sample under it says it):
+     the name takes the code's column too. */
+  .desk-split--line .route-stop:not(:has(> .route-stop__code)) .route-stop__jp { grid-column: 1 / -1; }
   .desk-split--line .route-stop__caption { grid-area: caption; }
   .desk-split--line .route-stop__fig {
     grid-area: fig;

@@ -210,6 +210,8 @@ describe('the grammar and the kana lines (plan 137)', () => {
     expect(document.querySelector('.desk-spec__typed').textContent).toBe('kya')
     const open = document.querySelector('.desk-split__list .route-stop[aria-current="page"]')
     expect(open.querySelector('.desk-stop__sample').textContent).toBe('キャ キュ')
+    // The sample says the set's first kana; no code in front of its name says it twice.
+    expect(open.querySelector('.route-stop__code')).toBeNull()
     expect(open.querySelector('.desk-line__learned').style.width).toBe('50%')
   })
 })
