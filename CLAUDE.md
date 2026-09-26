@@ -828,7 +828,9 @@ runtime purpose. Two consequences worth knowing:
   `study/card_lookup.py`, `study/morphology.py`, `study/analysis.py`'s
   `LOCAL_REV` 5, `tests/test_grammar_precision.py`,
   `tests/test_lookup_precision.py` and `tests/test_analysis.py`).
-  **152** is the cards plan 151's word reviewers found wrong, each
+  **153** is the cards plan 151's word reviewers found wrong (numbered
+  153 because 152 went to what the detector could not see while it was
+  open), each
   checked against JMdict and the JLPT lists: eight glosses that were
   another reading's (半分 "half minute" was はんぷん's, 盛り もり's,
   目下 もっか's, 札 ふだ's, 人気 ひとけ's, 羽 わ's, 否 いや's "the noes"
@@ -857,7 +859,7 @@ runtime purpose. Two consequences worth knowing:
   `tests/test_lookup_precision.py`, `tests/test_furigana_context.py`,
   `tests/test_placement_report.py` and `tests/test_onboarding_profile.py`;
   `docs/vocab-deck-review.md`).
-  When starting a new wave, begin at **153** or higher, and check
+  When starting a new wave, begin at **154** or higher, and check
   `plans/README.md`. Its wave index is the authority, but it has been behind
   reality before: grep the source for `plan 0NN` before claiming a number.
 

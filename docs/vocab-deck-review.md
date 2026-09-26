@@ -756,7 +756,7 @@ gone, and the placement lists come out unchanged. "、" leaves
 `test_the_reading_field_is_written_in_kana`'s alphabet with it.
 8,050 → 8,049 cards.
 
-### 152 — the cards plan 151's word reviewers found (2026-09-27)
+### 153 — the cards plan 151's word reviewers found (2026-09-27)
 
 Plan 151's reviewers read the breakdown's cards against the sentences
 they stand in, and after its lookup fixes a list remained where the

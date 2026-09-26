@@ -61,7 +61,7 @@ class RankingTests(unittest.TestCase):
                 self.assertIn(key, self.rank)
 
     def test_a_stem_the_subtitles_cut_off_credits_its_own_word(self) -> None:
-        """Plan 152: the subtitles cut ください and もらう before their
+        """Plan 153: the subtitles cut ください and もらう before their
         endings, and くださ, 下さ and もら alone are 下す and 盛る to
         UniDic -- every "please" ranked 下す "to hand down a verdict"
         92nd, and a frequent word the deck lacked. FRAGMENTS credits

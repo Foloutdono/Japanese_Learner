@@ -522,7 +522,7 @@ def correct_readings(tokens: list[dict], word_reading=deck_word_reading) -> list
         # いい); it is さかり, the peak, where the sentence says so: 〜が
         # 盛りだ, 今を盛りと, 盛りを過ぎる, 盛りがつく, and the season or the
         # life before の. UniDic reads its compounds right itself (花盛り,
-        # 働き盛り, 真っ盛り, 大盛り). Plan 152.
+        # 働き盛り, 真っ盛り, 大盛り). Plan 153.
         if s == "盛り" and r == "もり":
             after2 = surf[i + 2] if i + 2 < n else ""
             before2 = surf[i - 2] if i > 1 else ""

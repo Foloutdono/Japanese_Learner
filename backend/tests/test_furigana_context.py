@@ -165,7 +165,7 @@ class ContextRuleTests(unittest.TestCase):
 
     def test_sakari_the_peak(self) -> None:
         """盛り alone is もり to UniDic, a serving; the peak where the
-        sentence says so (plan 152)."""
+        sentence says so (plan 153)."""
         mori = lambda: _tok("盛り", "もり")
         cop = _tok("だ", "だ", "助動詞", "*", "*", "auxiliary")
         self.assertEqual(_read(_particle("が"), mori(), cop)[1], "さかり")

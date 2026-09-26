@@ -51,7 +51,7 @@ card the subtitles never write carries its group's rank. The one stem
 put right is the one that cost a card: the subtitles cut ください and
 もらう before their endings, and くださ, 下さ and もら alone are 下す and
 盛る to UniDic, so every "please" ranked 下す "to hand down" 92nd
-(FRAGMENTS, plan 152).
+(FRAGMENTS, plan 153).
 """
 import argparse
 import collections

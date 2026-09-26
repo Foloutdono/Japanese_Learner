@@ -178,7 +178,7 @@ class ReadOtherwiseTests(unittest.TestCase):
 
 @unittest.skipUnless(morphology.MORPHOLOGY_AVAILABLE, "needs a tokenizer")
 class TheCardsPutRightTests(unittest.TestCase):
-    """Plan 152. What plan 151's word reviewers found wrong in the cards
+    """Plan 153. What plan 151's word reviewers found wrong in the cards
     themselves, pinned in a sentence that uses each word: a card read as
     the page reads it, and the gloss the sentence means."""
 

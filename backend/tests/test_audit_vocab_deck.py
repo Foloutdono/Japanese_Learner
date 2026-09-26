@@ -148,7 +148,7 @@ class CorpusMeasurementTests(unittest.TestCase):
         self.assertIsNone(self._kind_of("母"))
         self.assertIsNone(self._kind_of("父"))
 
-    def test_the_words_plan_152_put_right_are_no_longer_gaps(self) -> None:
+    def test_the_words_plan_153_put_right_are_no_longer_gaps(self) -> None:
         """時 read じ, 年 ねん, 月 がつ, 杯 はい, 件 けん, 故 ゆえ, 寒気 さむけ,
         下 もと and 社 しゃ are cards now; 割 and 共 are read わり and とも,
         the words their cards always glossed; 〜はおろか's おろか and
@@ -194,7 +194,7 @@ class CorpusMeasurementTests(unittest.TestCase):
         # again, and 米 before をはじめとする is read こめ (absent -2,
         # unmatched -2).
         #
-        # Lowered by plan 152: 時 read じ, 年 ねん, 月 がつ, 杯 はい, 件
+        # Lowered by plan 153: 時 read じ, 年 ねん, 月 がつ, 杯 はい, 件
         # けん, 故 ゆえ, 寒気 さむけ, 下 もと and 社 しゃ are cards; 割 and 共
         # are read わり and とも, as their cards always glossed them;
         # 〜はおろか's おろか and 〜や否や's いな are IGNORED_LEMMAS'; and
